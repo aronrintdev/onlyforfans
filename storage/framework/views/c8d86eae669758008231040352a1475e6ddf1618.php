@@ -37,49 +37,55 @@
 			<div class="row">
 
                 <div class="col-md-7 col-lg-8">
-			   		@if (Session::has('message'))
-				        <div class="alert alert-{{ Session::get('status') }}" role="alert">
-				            {!! Session::get('message') !!}
-				        </div>
-				    @endif
+			   		<?php if(Session::has('message')): ?>
+				        <div class="alert alert-<?php echo e(Session::get('status')); ?>" role="alert">
+				            <?php echo Session::get('message'); ?>
 
-					@if(isset($active_announcement))
+				        </div>
+				    <?php endif; ?>
+
+					<?php if(isset($active_announcement)): ?>
 						<div class="announcement alert alert-info">
 							<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-							<h3>{{ $active_announcement->title }}</h3>
-							<p>{{ $active_announcement->description }}</p>
+							<h3><?php echo e($active_announcement->title); ?></h3>
+							<p><?php echo e($active_announcement->description); ?></p>
 						</div>
-					@endif
+					<?php endif; ?>
 
-					@if($mode != "eventlist")
-						{!! Theme::partial('create-post',compact('timeline','user_post')) !!}
+					<?php if($mode != "eventlist"): ?>
+						<?php echo Theme::partial('create-post',compact('timeline','user_post')); ?>
+
 
 						<div class="timeline-posts timeline-default">
-							@if($posts->count() > 0)
-								@foreach($posts as $post)
-									{!! Theme::partial('post',compact('post','timeline','next_page_url')) !!}
-								@endforeach
-							@else
-								<div class="no-posts alert alert-warning">{{ trans('common.no_posts') }}</div>
-							@endif
+							<?php if($posts->count() > 0): ?>
+								<?php $__currentLoopData = $posts; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $post): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+									<?php echo Theme::partial('post',compact('post','timeline','next_page_url')); ?>
+
+								<?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+							<?php else: ?>
+								<div class="no-posts alert alert-warning"><?php echo e(trans('common.no_posts')); ?></div>
+							<?php endif; ?>
 						</div>
                         
 						<div class="timeline-posts timeline-condensed-column row" style="display: none">
-							@if($posts->count() > 0)
-                                @foreach($posts as $post)
-                                            {!! Theme::partial('post_condensed_column',compact('post','timeline','next_page_url')) !!}
-								@endforeach
-                            @else
-								<div class="no-posts alert alert-warning">{{ trans('common.no_posts') }}</div>
-							@endif
+							<?php if($posts->count() > 0): ?>
+                                <?php $__currentLoopData = $posts; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $post): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                            <?php echo Theme::partial('post_condensed_column',compact('post','timeline','next_page_url')); ?>
+
+								<?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                            <?php else: ?>
+								<div class="no-posts alert alert-warning"><?php echo e(trans('common.no_posts')); ?></div>
+							<?php endif; ?>
 						</div>
-					@else
-						{!! Theme::partial('eventslist',compact('user_events','username')) !!}
-					@endif
+					<?php else: ?>
+						<?php echo Theme::partial('eventslist',compact('user_events','username')); ?>
+
+					<?php endif; ?>
 				</div><!-- /col-md-6 -->
 
 				<div class="col-md-5 col-lg-4">
-					{!! Theme::partial('home-rightbar',compact('suggested_users', 'suggested_groups', 'suggested_pages')) !!}
+					<?php echo Theme::partial('home-rightbar',compact('suggested_users', 'suggested_groups', 'suggested_pages')); ?>
+
 				</div>
 			</div>
 		</div>

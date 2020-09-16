@@ -1,4 +1,5 @@
 document_title = document.title;
+let condensedLayout;
 $(function () {
   
     $('.chat-list').css('display', 'none');
@@ -444,7 +445,10 @@ $(function () {
 
                return false;
            }
-         
+
+           if (condensedLayout) {
+               formData.push({name:'condensed_layout', value: true})   
+           }            
         },
         beforeSend: function() {
             create_post_form = $('.create-post-form');

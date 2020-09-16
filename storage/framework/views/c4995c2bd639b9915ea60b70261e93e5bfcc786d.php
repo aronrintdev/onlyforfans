@@ -28,20 +28,23 @@
 <div class="container profile-posts">
 	<div class="row">
 		<div class="col-md-12">
-			{!! Theme::partial('user-header',compact('timeline', 'liked_post', 'liked_pages','user','joined_groups','followRequests','following_count',
-			'followers_count','follow_confirm','user_post','joined_groups_count','guest_events', 'user_lists')) !!}
+			<?php echo Theme::partial('user-header',compact('timeline', 'liked_post', 'liked_pages','user','joined_groups','followRequests','following_count',
+			'followers_count','follow_confirm','user_post','joined_groups_count','guest_events', 'user_lists')); ?>
+
 
 			<div class="row">
 				<div class=" timeline">
 
 					<div class="col-md-4">
 						
-						{!! Theme::partial('user-leftbar',compact('timeline','user','follow_user_status','own_groups','own_pages','user_events')) !!}
+						<?php echo Theme::partial('user-leftbar',compact('timeline','user','follow_user_status','own_groups','own_pages','user_events')); ?>
+
 					</div>
 					<div class="col-md-8">
-						@if($timeline->type == "user" && $timeline_post == true && $user->id == Auth::user()->id)
-							{!! Theme::partial('create-post',compact('timeline','user_post')) !!}
-						@endif
+						<?php if($timeline->type == "user" && $timeline_post == true && $user->id == Auth::user()->id): ?>
+							<?php echo Theme::partial('create-post',compact('timeline','user_post')); ?>
+
+						<?php endif; ?>
 
 						<div class="lists-dropdown-menu">
 								<ul class="list-inline text-right no-margin">
@@ -57,25 +60,25 @@
 											<li class="main-link">
 
 												<div class="form-check">
-													<input class="red-checkbox" type="radio" name="period-post" id="periodAllTime" value="all" {{$period == 'all' ? "checked" : ""}}>
+													<input class="red-checkbox" type="radio" name="period-post" id="periodAllTime" value="all" <?php echo e($period == 'all' ? "checked" : ""); ?>>
 													<label class="red-list-label" for="periodAllTime">
 														All time
 													</label>
 												</div>
 												<div class="form-check">
-													<input class="red-checkbox" type="radio" name="period-post" id="periodLastThreeM" value="3m" {{$period == '3m' ? "checked" : ""}}>
+													<input class="red-checkbox" type="radio" name="period-post" id="periodLastThreeM" value="3m" <?php echo e($period == '3m' ? "checked" : ""); ?>>
 													<label class="red-list-label" for="periodLastThreeM">
 														Last three months
 													</label>
 												</div>
 												<div class="form-check">
-													<input class="red-checkbox" type="radio" name="period-post" id="periodLastOneM" value="1m" {{$period == '1m' ? "checked" : ""}}>
+													<input class="red-checkbox" type="radio" name="period-post" id="periodLastOneM" value="1m" <?php echo e($period == '1m' ? "checked" : ""); ?>>
 													<label class="red-list-label" for="periodLastOneM">
 														Last month
 													</label>
 												</div>
 												<div class="form-check">
-													<input class="red-checkbox" type="radio" name="period-post" id="periodLastW" value="1w" {{$period == '1w' ? "checked" : ""}}>
+													<input class="red-checkbox" type="radio" name="period-post" id="periodLastW" value="1w" <?php echo e($period == '1w' ? "checked" : ""); ?>>
 													<label class="red-list-label" for="periodLastW">
 														Last week
 													</label>
@@ -87,13 +90,13 @@
 											<li class="main-link">
 
 												<div class="form-check">
-													<input class="red-checkbox" type="radio" name="sort-profile-post" id="sortByLatest" value="latest" {{$sort_by == 'latest' ? "checked" : ""}}>
+													<input class="red-checkbox" type="radio" name="sort-profile-post" id="sortByLatest" value="latest" <?php echo e($sort_by == 'latest' ? "checked" : ""); ?>>
 													<label class="red-list-label" for="sortByLatest">
 														Latest Posts
 													</label>
 												</div>
 												<div class="form-check">
-													<input class="red-checkbox" type="radio" name="sort-profile-post" id="soryByLiked" value="liked" {{$sort_by == 'liked' ? "checked" : ""}}>
+													<input class="red-checkbox" type="radio" name="sort-profile-post" id="soryByLiked" value="liked" <?php echo e($sort_by == 'liked' ? "checked" : ""); ?>>
 													<label class="red-list-label" for="soryByLiked">
 														Most liked
 													</label>
@@ -105,13 +108,13 @@
 											<li class="main-link">
 
 												<div class="form-check">
-													<input class="red-checkbox" type="radio" name="order-profile-post" id="orderByASC" value="asc" {{$order_by == 'asc' ? "checked" : ""}}>
+													<input class="red-checkbox" type="radio" name="order-profile-post" id="orderByASC" value="asc" <?php echo e($order_by == 'asc' ? "checked" : ""); ?>>
 													<label class="red-list-label" for="orderByASC">
 														Ascending
 													</label>
 												</div>
 												<div class="form-check">
-													<input class="red-checkbox" type="radio" name="order-profile-post" id="orderByDESC" value="desc" {{$order_by == 'desc' ? "checked" : ""}}>
+													<input class="red-checkbox" type="radio" name="order-profile-post" id="orderByDESC" value="desc" <?php echo e($order_by == 'desc' ? "checked" : ""); ?>>
 													<label class="red-list-label" for="orderByDESC">
 														Descending
 													</label>
@@ -120,41 +123,43 @@
 										</ul>
 									</li>
                                     <li class="switch-wrapper">
-                                        <a href="#" class="switch-layout three-column"><img src="{{ asset('images/3-column.png') }}"></a>
+                                        <a href="#" class="switch-layout three-column"><img src="<?php echo e(asset('images/3-column.png')); ?>"></a>
                                     </li>
                                     <li class="switch-wrapper" style="display: none">
-                                        <a href="#" class="switch-layout one-column"><img src="{{ asset('images/1-column.png') }}"></a>    
+                                        <a href="#" class="switch-layout one-column"><img src="<?php echo e(asset('images/1-column.png')); ?>"></a>    
                                     </li>                                    
 								</ul>
 							</div>
 
 						<div class="timeline-posts timeline-default">
-							@if(count($posts) > 0)
-								@foreach($posts as $post)
-									{!! Theme::partial('post',compact('post','timeline','next_page_url', 'user')) !!}
-								@endforeach
-							@else
-								<p class="no-posts">{{ trans('messages.no_posts') }}</p>
-							@endif
+							<?php if(count($posts) > 0): ?>
+								<?php $__currentLoopData = $posts; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $post): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+									<?php echo Theme::partial('post',compact('post','timeline','next_page_url', 'user')); ?>
+
+								<?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+							<?php else: ?>
+								<p class="no-posts"><?php echo e(trans('messages.no_posts')); ?></p>
+							<?php endif; ?>
 						</div>
                             
 						<div class="timeline-posts timeline-condensed-column row" style="display: none">
-							@if(count($posts) > 0)
-								@foreach($posts as $post)
-									{!! Theme::partial('post_condensed_column',compact('post','timeline','next_page_url', 'user')) !!}
-								@endforeach
-							@else
-								<p class="no-posts">{{ trans('messages.no_posts') }}</p>
-							@endif
+							<?php if(count($posts) > 0): ?>
+								<?php $__currentLoopData = $posts; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $post): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+									<?php echo Theme::partial('post_condensed_column',compact('post','timeline','next_page_url', 'user')); ?>
+
+								<?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+							<?php else: ?>
+								<p class="no-posts"><?php echo e(trans('messages.no_posts')); ?></p>
+							<?php endif; ?>
 						</div>
 					</div><!-- /col-md-8 -->
 				</div><!-- /main-content -->
 			</div><!-- /row -->
 		</div><!-- /col-md-10 -->
 
-{{--		<div class="col-md-2">--}}
-{{--			{!! Theme::partial('timeline-rightbar') !!}--}}
-{{--		</div>--}}
+
+
+
 
 	</div>
 </div><!-- /container -->

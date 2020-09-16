@@ -1,22 +1,25 @@
-<form action="{{ url('') }}" method="post" class="create-post-form">
-  {{ csrf_field() }}
+<form action="<?php echo e(url('')); ?>" method="post" class="create-post-form">
+  <?php echo e(csrf_field()); ?>
 
-    @if ($message = Session::get('error'))
+
+    <?php if($message = Session::get('error')): ?>
         <div class="alert alert-success">
-            <p>{{ $message }}</p>
+            <p><?php echo e($message); ?></p>
         </div>
-    @endif
+    <?php endif; ?>
     <div class="panel panel-default panel-create"> <!-- panel-create -->
         <div class="panel-heading">
             <div class="heading-text">
-                {{ trans('messages.whats-going-on') }}
+                <?php echo e(trans('messages.whats-going-on')); ?>
+
             </div>
         </div>
         <div class="panel-body">        
-            <textarea name="description" class="form-control createpost-form comment" cols="30" rows="3" id="createPost" cols="30" rows="2" placeholder="{{ trans('messages.post-placeholder') }}"></textarea>
+            <textarea name="description" class="form-control createpost-form comment" cols="30" rows="3" id="createPost" cols="30" rows="2" placeholder="<?php echo e(trans('messages.post-placeholder')); ?>"></textarea>
                
                 <div class="user-tags-added" style="display:none">
-                    &nbsp; -- {{ trans('common.with') }}
+                    &nbsp; -- <?php echo e(trans('common.with')); ?>
+
                     <div class="user-tag-names">
                         
                     </div>
@@ -24,7 +27,7 @@
                 <div class="user-tags-addon post-addon" style="display: none">
                     <span class="post-addon-icon"><i class="fa fa-user-plus"></i></span>
                     <div class="form-group">
-                        <input type="text" id="userTags" class="form-control user-tags youtube-text" placeholder="{{ trans('messages.who_are_you_with') }}" autocomplete="off" value="" >
+                        <input type="text" id="userTags" class="form-control user-tags youtube-text" placeholder="<?php echo e(trans('messages.who_are_you_with')); ?>" autocomplete="off" value="" >
                         <div class="clearfix"></div>
                     </div>
                 </div>
@@ -34,38 +37,39 @@
                 <div class="video-addon post-addon" style="display: none">
                     <span class="post-addon-icon"><i class="fa fa-film"></i></span>
                     <div class="form-group">
-                        <input type="text" name="youtubeText" id="youtubeText" class="form-control youtube-text" placeholder="{{ trans('messages.what_are_you_watching') }}"  value="" >
+                        <input type="text" name="youtubeText" id="youtubeText" class="form-control youtube-text" placeholder="<?php echo e(trans('messages.what_are_you_watching')); ?>"  value="" >
                         <div class="clearfix"></div>
                     </div>
                 </div>
-              @if((env('SOUNDCLOUD_CLIENT_ID') != "" || (env('SOUNDCLOUD_CLIENT_ID') != null)))
+              <?php if((env('SOUNDCLOUD_CLIENT_ID') != "" || (env('SOUNDCLOUD_CLIENT_ID') != null))): ?>
                 <div class="music-addon post-addon" style="display: none">
                     <span class="post-addon-icon"><i class="fa fa-music" aria-hidden="true"></i></span>
                    <div class="form-group">
-                      <input type="text" name="soundCloudText" autocomplete="off" id ="soundCloudText" class="form-control youtube-text" placeholder="{{ trans('messages.what_are_you_listening_to') }}"  value="" >
+                      <input type="text" name="soundCloudText" autocomplete="off" id ="soundCloudText" class="form-control youtube-text" placeholder="<?php echo e(trans('messages.what_are_you_listening_to')); ?>"  value="" >
                       <div class="clearfix"></div>
                    </div>
                 </div>
                 <div class="soundcloud-results-wrapper"></div>
-              @endif
+              <?php endif; ?>
               
             <div class="location-addon post-addon" style="display: none">
                   <span class="post-addon-icon"><i class="fa fa-map-marker" aria-hidden="true"></i></span>
                  <div class="form-group">
-                    <input type="text" name="location" id="pac-input" class="form-control" placeholder="{{ trans('messages.where_are_you') }}"  autocomplete="off" value="" onKeyPress="return initMap(event)"><div class="clearfix"></div>
+                    <input type="text" name="location" id="pac-input" class="form-control" placeholder="<?php echo e(trans('messages.where_are_you')); ?>"  autocomplete="off" value="" onKeyPress="return initMap(event)"><div class="clearfix"></div>
                  </div>                 
             </div>
               <div class="emoticons-wrapper  post-addon" style="display:none">
                   
               </div>
               <div class="images-selected post-images-selected" style="display:none">
-                  <span>3</span> {{ trans('common.photo_s_selected') }}
+                  <span>3</span> <?php echo e(trans('common.photo_s_selected')); ?>
+
               </div>
-{{--              <div class="images-selected post-video-selected" style="display:none">--}}
-{{--                  <span>3</span>--}}
-{{--              </div>--}}
+
+
+
               <!-- Hidden elements  -->
-              <input type="hidden" name="timeline_id" value="{{ $timeline->id }}">
+              <input type="hidden" name="timeline_id" value="<?php echo e($timeline->id); ?>">
               <input type="hidden" name="youtube_title" value="">
               <input type="hidden" name="youtube_video_id" value="">
               <input type="hidden" name="locatio" value="">
@@ -82,33 +86,34 @@
             <ul class="list-inline left-list">
                 <li><a href="#" id="imageUpload"><i class="fa fa-camera-retro"></i></a></li>
                  <li><a href="#" id="selfVideoUpload"><i class="fa fa-film"></i></a></li>
-                @if((env('SOUNDCLOUD_CLIENT_ID') != "" || (env('SOUNDCLOUD_CLIENT_ID') != null)))
+                <?php if((env('SOUNDCLOUD_CLIENT_ID') != "" || (env('SOUNDCLOUD_CLIENT_ID') != null))): ?>
                   <li><a href="#" id="musicUpload"><i class="fa fa-music"></i></a></li>
-                @endif
+                <?php endif; ?>
                 <li><a href="#" id="locationUpload"><i class="fa fa-map-marker"></i></a></li>
                 <li><a href="#" id="emoticons"><i class="fa fa-smile-o"></i></a></li>
             </ul>
             <ul class="list-inline right-list">
-                @if($user_post == 'group' && Auth::user()->is_groupAdmin(Auth::user()->id, $timeline->groups->id) || $user_post == 'group' && $timeline->groups->event_privacy == 'members' && Auth::user()->is_groupMember(Auth::user()->id, $timeline->groups->id))                 
-                  <li><a href="{!! url($username.'/groupevent/'.$timeline->groups->id) !!}" class="btn btn-default">{{ trans('common.create_event') }}</a></li>
-                @endif
+                <?php if($user_post == 'group' && Auth::user()->is_groupAdmin(Auth::user()->id, $timeline->groups->id) || $user_post == 'group' && $timeline->groups->event_privacy == 'members' && Auth::user()->is_groupMember(Auth::user()->id, $timeline->groups->id)): ?>                 
+                  <li><a href="<?php echo url($username.'/groupevent/'.$timeline->groups->id); ?>" class="btn btn-default"><?php echo e(trans('common.create_event')); ?></a></li>
+                <?php endif; ?>
 
-                <li><button type="submit" class="btn btn-submit btn-success">{{ trans('common.post') }}</button></li>
+                <li><button type="submit" class="btn btn-submit btn-success"><?php echo e(trans('common.post')); ?></button></li>
             </ul>
 
             <div class="clearfix"></div>
         </div>
     </div>
-    <a href="#" class="change-layout three-column"><img src="{{ asset('images/3-column.png') }}"></a>
-    <a href="#" class="change-layout one-column"><img src="{{ asset('images/1-column.png') }}"></a>
+    <a href="#" class="change-layout three-column"><img src="<?php echo e(asset('images/3-column.png')); ?>"></a>
+    <a href="#" class="change-layout one-column"><img src="<?php echo e(asset('images/1-column.png')); ?>"></a>
 </form>
 
 
-@if(Setting::get('postcontent_ad') != NULL)
+<?php if(Setting::get('postcontent_ad') != NULL): ?>
     <div id="link_other" class="page-image">
-        {!! htmlspecialchars_decode(Setting::get('postcontent_ad')) !!}
+        <?php echo htmlspecialchars_decode(Setting::get('postcontent_ad')); ?>
+
     </div>
-@endif
+<?php endif; ?>
 
 
 <!--<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD_vuWi_hzMDDeenNYwaNAj0PHzzS2GAx8&libraries=places&callback=initMap"-->
@@ -121,7 +126,7 @@ function initMap(event)
     var map = new google.maps.Map(document.getElementById('pac-input'), {
     });
 
-    var input = /** @type {!HTMLInputElement} */(
+    var input = /** @type  {!HTMLInputElement} */(
         document.getElementById('pac-input'));        
 
     if(window.event)

@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use Alaouy\Youtube\Facades\Youtube;
 use App\Album;
 use App\Announcement;
-use App\Category;
 use App\Comment;
 use App\Event;
 use App\Group;
@@ -22,32 +21,26 @@ use App\Setting;
 use App\Subscription;
 use App\Timeline;
 use App\User;
-use App\Wallpaper;
 use App\UserList;
 use App\UserListType;
+use App\Wallpaper;
 use Carbon\Carbon;
-use Cassandra\Time;
 use DB;
-use Dotenv\Exception\ValidationException;
 use Flash;
 use Flavy;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Redirect;
-use Illuminate\Support\Facades\URL;
 use Intervention\Image\Facades\Image;
 use LinkPreview\LinkPreview;
-use mysql_xdevapi\Exception;
 use Prettus\Repository\Criteria\RequestCriteria;
 use Response;
 use Storage;
-use Stripe\Stripe;
 use Teepluss\Theme\Facades\Theme;
 use Validator;
-use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\Schema;
 
 
 class TimelineController extends AppBaseController
@@ -342,8 +335,12 @@ class TimelineController extends AppBaseController
         $isSubscribed = $user->followers()->where('follower_id', Auth::user()->id)->where('leader_id', $user->id)->get()->count() > 1 ? true : false;
 
         $responseHtml = '';
+        $layout = 'post';
+        if ($request->get('column')) {
+            $layout = 'post_condensed_column';
+        }
         foreach ($posts as $post) {
-            $responseHtml .= $theme->partial('post', ['isSubscribed' => $isSubscribed, 'post' => $post, 'timeline' => $timeline, 'next_page_url' => $next_page_url]);
+            $responseHtml .= $theme->partial($layout, ['isSubscribed' => $isSubscribed, 'post' => $post, 'timeline' => $timeline, 'next_page_url' => $next_page_url]);
         }
 
         return $responseHtml;
@@ -385,9 +382,13 @@ class TimelineController extends AppBaseController
         }
 
         if ($request->ajax) {
+            $layout = 'post';
+            if ($request->get('column')) {
+                $layout = 'post_condensed_column';
+            }
             $responseHtml = '';
             foreach ($posts as $post) {
-                $responseHtml .= $theme->partial('post', ['post' => $post, 'timeline' => $timeline, 'next_page_url' => $posts->appends(['ajax' => true, 'hashtag' => $request->hashtag])->nextPageUrl()]);
+                $responseHtml .= $theme->partial($layout, ['post' => $post, 'timeline' => $timeline, 'next_page_url' => $posts->appends(['ajax' => true, 'hashtag' => $request->hashtag])->nextPageUrl()]);
             }
 
             return $responseHtml;
@@ -696,7 +697,10 @@ class TimelineController extends AppBaseController
         // $post->users_tagged = $post->users_tagged();
         $theme = Theme::uses(Setting::get('current_theme', 'default'))->layout('ajax');
         $postHtml = $theme->scope('timeline/post', compact('post', 'timeline'))->render();
-        
+
+        if ($request->get('condensed_layout')) {
+            $postHtml = $theme->scope('timeline/post_condensed', compact('post', 'timeline'))->render();
+        }
         return response()->json(['status' => '200', 'data' => $postHtml]);
     }
 
