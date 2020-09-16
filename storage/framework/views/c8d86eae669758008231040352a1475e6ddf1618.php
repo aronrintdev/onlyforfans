@@ -10,12 +10,16 @@
         margin-right: 5px;
     }
 
-    .create-post-form .change-layout img{
+    .create-post-form .change-layout img {
         width: 100%;
     }
     
     .change-layout.one-column {
         display: none;
+    }
+
+    .create-post-form .change-layout i {
+        font-size: 25px;
     }
     
     .timeline-condensed-column .panel-body, .jscroll-added .panel-body, .timeline-condensed-column > .col-lg-4 .panel-body {

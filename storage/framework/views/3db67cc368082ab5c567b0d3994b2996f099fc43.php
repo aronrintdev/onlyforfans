@@ -103,8 +103,12 @@
             <div class="clearfix"></div>
         </div>
     </div>
-    <a href="#" class="change-layout three-column"><img src="<?php echo e(asset('images/3-column.png')); ?>"></a>
-    <a href="#" class="change-layout one-column"><img src="<?php echo e(asset('images/1-column.png')); ?>"></a>
+    <a href="javascript:;" class="change-layout three-column">
+        <i class="fa fa-th"></i>
+    </a>
+    <a href="javascript:;" class="change-layout one-column">
+        <i class="fa fa-align-justify"></i>
+    </a>
 </form>
 
 

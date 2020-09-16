@@ -12,6 +12,10 @@
         margin-right: 5px;
     }
 
+	.switch-wrapper i {
+		font-size: 25px;
+	}
+
     .timeline-condensed-column .panel-body, .jscroll-added .panel-body, .timeline-condensed-column > .col-lg-4 .panel-body {
         height: 200px;
         overflow: auto;
@@ -123,10 +127,14 @@
 										</ul>
 									</li>
                                     <li class="switch-wrapper">
-                                        <a href="#" class="switch-layout three-column"><img src="<?php echo e(asset('images/3-column.png')); ?>"></a>
+                                        <a href="javascript:;" class="switch-layout three-column">
+											<i class="fa fa-th"></i>
+										</a>
                                     </li>
                                     <li class="switch-wrapper" style="display: none">
-                                        <a href="#" class="switch-layout one-column"><img src="<?php echo e(asset('images/1-column.png')); ?>"></a>    
+                                        <a href="javascript:;" class="switch-layout one-column">
+											<i class="fa fa-align-justify"></i>
+										</a>
                                     </li>                                    
 								</ul>
 							</div>
