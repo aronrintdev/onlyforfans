@@ -560,17 +560,15 @@
 
         </div>
     </div>
-
-
-
-
-  <!-- Modal Ends here -->
-  @if(isset($next_page_url))
-  <a class="jscroll-next hidden" href="{{ $next_page_url }}&column=true">{{ trans('messages.get_more_posts') }}</a>
-  @endif
-
-  {!! Theme::asset()->container('footer')->usePath()->add('lightbox', 'js/lightbox.min.js') !!}
 </div>
+
+<!-- Modal Ends here -->
+@if(isset($next_page_url))
+    <a class="jscroll-next hidden" href="{{ $next_page_url }}&column=true">{{ trans('messages.get_more_posts') }}</a>
+@endif
+
+{!! Theme::asset()->container('footer')->usePath()->add('lightbox', 'js/lightbox.min.js') !!}
+
 
 <!--<script src="../js/popcorn.min.js"></script>-->
 <!--<script src="../js/popcorn.capture.js"></script>-->

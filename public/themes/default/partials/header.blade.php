@@ -95,6 +95,9 @@
                                             <li class="">
                                                 <a href="{{ url('/') }}"><i class="fa fa-home" aria-hidden="true"></i><span class="small-screen">Home</span></a>
                                             </li>
+                                            <li class="">
+                                                <a href="{{ route('explore-posts') }}"><i class="fa fa-th-large" aria-hidden="true"></i><span class="small-screen">All Posts</span></a>
+                                            </li>
                                             <li class="dropdown message notification">
                                                 <a href="#" data-toggle="dropdown" @click.prevent="showNotifications" class="dropdown-toggle" role="button" aria-haspopup="true" aria-expanded="false">
                                                     <i class="fa fa-bell" aria-hidden="true">

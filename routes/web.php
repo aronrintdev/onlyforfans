@@ -1,8 +1,7 @@
 <?php
 
-use Cmgmyr\Messenger\Models\Message;
-use Intervention\Image\Facades\Image;
 use Illuminate\Support\Facades\Auth;
+use Intervention\Image\Facades\Image;
 
 /*
 |--------------------------------------------------------------------------
@@ -112,6 +111,8 @@ Route::get('email/verify', 'Auth\RegisterController@verifyEmail');
 Route::group(['middleware' => ['auth']], function () {
     Route::get('/', 'TimelineController@showFeed');
     Route::get('/browse', 'TimelineController@showGlobalFeed');
+    Route::get('explore', 'TimelineController@showExplorePosts')->name('explore-posts');
+    Route::get('post/{id}', 'TimelineController@showPost')->name('post.show');
 });
 
 //main project register
@@ -462,6 +463,8 @@ Route::group(['prefix' => 'ajax', 'middleware' => ['auth']], function () {
     Route::get('get-more-posts', 'TimelineController@getMorePosts');
     Route::get('get-more-feed', 'TimelineController@showFeed');
     Route::get('get-global-feed', 'TimelineController@showGlobalFeed');
+    Route::get('get-explore-posts', 'TimelineController@showExplorePosts');
+    Route::get('search-explore-posts', 'TimelineController@searchExplorePosts')->name('post.search');
     // Route::post('add-memberGroup', 'UserController@addingMembersGroup');
     Route::post('get-users', 'UserController@getUsersJoin');
     Route::get('get-users-mentions', 'UserController@getUsersMentions');

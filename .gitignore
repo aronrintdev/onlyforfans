@@ -50,3 +50,5 @@ Thumbs.db
 .env
 composer.lock
 vendor/
+storage/framework/views
+storage/uploads/users/gallery

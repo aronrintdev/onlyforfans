@@ -28,6 +28,7 @@ use Carbon\Carbon;
 use DB;
 use Flash;
 use Flavy;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
@@ -474,6 +475,117 @@ class TimelineController extends AppBaseController
         ->render();
     }
 
+    public function showExplorePosts(Request $request)
+    {
+        $mode = 'exploreposts';
+        $theme = Theme::uses(Setting::get('current_theme', 'default'))->layout('default');
+
+        $timeline = Timeline::where('username', Auth::user()->username)->first();
+
+        $id = Auth::id();
+
+        $trending_tags = trendingTags();
+        $suggested_users = suggestedUsers();
+        $suggested_groups = suggestedGroups();
+        $suggested_pages = suggestedPages();
+
+        $posts = Post::withCount('users_liked')->with('images')
+            ->orderBy('users_liked_count', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->where('active', 1)
+            ->paginate(Setting::get('items_page'));
+
+        if ($request->ajax) {
+            $responseHtml = '';
+            foreach ($posts as $post) {
+                $responseHtml .= $theme->partial('explore_posts', ['post' => $post, 'timeline' => $timeline, 'next_page_url' => $posts->appends(['ajax' => true, 'hashtag' => $request->hashtag])->nextPageUrl()]);
+            }
+
+            return $responseHtml;
+        }
+
+        $announcement = Announcement::find(Setting::get('announcement'));
+        if ($announcement != null) {
+            $chk_isExpire = $announcement->chkAnnouncementExpire($announcement->id);
+
+            if ($chk_isExpire == 'notexpired') {
+                $active_announcement = $announcement;
+                if (!$announcement->users->contains(Auth::user()->id)) {
+                    $announcement->users()->attach(Auth::user()->id);
+                }
+            }
+        }
+
+        $next_page_url = url('ajax/get-explore-posts?page=2&ajax=true&hashtag='.$request->hashtag.'&username='.Auth::user()->username);
+
+        $theme->setTitle($timeline->name.' '.Setting::get('title_seperator').' '.Setting::get('site_title').' '.Setting::get('title_seperator').' '.Setting::get('site_tagline'));
+
+        return $theme->scope('explore', compact('timeline', 'posts', 'next_page_url', 'trending_tags', 'suggested_users', 'announcement', 'suggested_groups', 'suggested_pages', 'mode'))
+            ->render();
+    }
+
+    public function showPost($postId)
+    {
+        $theme = Theme::uses(Setting::get('current_theme', 'default'))->layout('default');
+
+        $timeline = Timeline::where('username', Auth::user()->username)->first();
+
+        $id = Auth::id();
+
+        $trending_tags = trendingTags();
+        $suggested_users = suggestedUsers();
+        $suggested_groups = suggestedGroups();
+        $suggested_pages = suggestedPages();
+
+        $announcement = Announcement::find(Setting::get('announcement'));
+        if ($announcement != null) {
+            $chk_isExpire = $announcement->chkAnnouncementExpire($announcement->id);
+
+            if ($chk_isExpire == 'notexpired') {
+                $active_announcement = $announcement;
+                if (!$announcement->users->contains(Auth::user()->id)) {
+                    $announcement->users()->attach(Auth::user()->id);
+                }
+            }
+        }
+        $post = Post::findOrFail($postId);
+
+        return $theme->scope('post_details', compact('timeline', 'post', 'suggested_users', 'announcement', 'suggested_groups', 'suggested_pages'))
+            ->render();
+    }
+
+    public function searchExplorePosts(Request $request)
+    {
+        $search = $request->get('search');
+
+        $theme = Theme::uses(Setting::get('current_theme', 'default'))->layout('default');
+
+        $timeline = Timeline::where('username', Auth::user()->username)->first();
+
+        $posts = Post::with('user.timeline')->withCount('users_liked')->with('images');
+        $posts = $posts->when(isset($search) && $search != '', function (Builder $q) use ($search) {
+            $q->whereHas('user.timeline', function (Builder $user) use ($search) {
+                $user->where('name', 'like', "%{$search}%");
+            })->orWhere('description', 'like', "%{$search}%")
+                ->orWhere('location', 'like', "%{$search}%");
+        })->orderBy('users_liked_count', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->where('active', 1)
+            ->paginate(Setting::get('items_page'));
+
+//        $posts->paginate(Setting::get('items_page'));
+
+        $responseHtml = '';
+        foreach ($posts as $post) {
+            $responseHtml .= $theme->partial('explore_posts', ['post' => $post, 'timeline' => $timeline, 'next_page_url' => $posts->appends(['ajax' => true, 'hashtag' => $request->hashtag])->nextPageUrl()]);
+        }
+
+        return Response::json([
+        'success' => true,
+        'data'    => $responseHtml,
+    ]);
+    }
+    
     public function changeAvatar(Request $request)
     {
         if (Config::get('app.env') == 'demo' && Auth::user()->username == 'bootstrapguru') {
