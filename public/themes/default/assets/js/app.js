@@ -1261,6 +1261,9 @@ $(function () {
     $('body').on('click','.delete-post',function(e){
       e.preventDefault();
       postPanel = $(this).closest('.panel-post');
+      if (condensedLayout) {
+          postPanel = postPanel.closest('.col-lg-4');
+      }
       post_id = $(this).data('post-id');
       $.confirm({
         title: 'Confirm!',
@@ -1276,6 +1279,8 @@ $(function () {
             postPanel.addClass('fadeOut');
             setTimeout(function(){
                 postPanel.remove();
+                $('.post-wrapper-' + post_id).closest('.col-lg-4').remove();
+                $('.post-wrapper-' + post_id).remove();
             },800);
             notify('You have successfully deleted the post','warning');
          }

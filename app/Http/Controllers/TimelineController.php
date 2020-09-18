@@ -482,14 +482,19 @@ class TimelineController extends AppBaseController
 
         $timeline = Timeline::where('username', Auth::user()->username)->first();
 
-        $id = Auth::id();
-
+        $user = Auth::user();
+        $id = $user->id;        
+        
         $trending_tags = trendingTags();
         $suggested_users = suggestedUsers();
         $suggested_groups = suggestedGroups();
         $suggested_pages = suggestedPages();
-
+        
+        $following = $user->followers()->pluck('follower_id')->toArray();
+        $following[] = $id;
+        
         $posts = Post::withCount('users_liked')->with('images')
+            ->whereNotIn('user_id', $following)
             ->orderBy('users_liked_count', 'desc')
             ->orderBy('created_at', 'desc')
             ->where('active', 1)

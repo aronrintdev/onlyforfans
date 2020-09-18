@@ -322,6 +322,36 @@ var vue = new Vue({
                    });
                }
            });
+        },
+        searchUsers : function() {
+            let search = $('#searchUserInput').val();
+            let dateJoined = $('#dateJoined').is(":checked");
+            let location = $('#location').is(":checked");
+            let nameOrUsername = $('#nameOrUsername').is(":checked");
+            let data = {
+                'date_joined': dateJoined,
+                'location': location,
+                'name_username': nameOrUsername,
+                'search': search,
+            }
+            this.$http.post( base_url + 'ajax/get-messages', data).then( function(response) {
+                this.conversations = JSON.parse(response.body).data;
+                this.showConversation(this.conversations.data[0]);
+            });
+           
         }
     }    
 });
+
+// function debounce(func, wait, immediate) {
+//     var timeout;
+//     return function() {
+//         var context = this, args = arguments;
+//         clearTimeout(timeout);
+//         timeout = setTimeout(function() {
+//             timeout = null;
+//             if (!immediate) func.apply(context, args);
+//         }, wait);
+//         if (immediate && !timeout) func.apply(context, args);
+//     };
+// }

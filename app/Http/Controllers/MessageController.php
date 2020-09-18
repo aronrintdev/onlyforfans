@@ -11,6 +11,7 @@ use Cmgmyr\Messenger\Models\Message;
 use Cmgmyr\Messenger\Models\Participant;
 use Cmgmyr\Messenger\Models\Thread;
 use Event;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -273,13 +274,51 @@ class MessageController extends Controller
 
     // Custom classes for Vuejs
 
-    public function getMessages()
+    public function getMessages(Request $request)
     {
+        $input = $request->all();
         $currentUserId = Auth::user()->id;
 
             // All threads that user is participating in
-            $threads = Thread::forUser($currentUserId)->latest('updated_at')->paginate(30);
+        $threads = Thread::with('users.timeline')->forUser($currentUserId)->latest('updated_at');
 
+        $threads->when(isset($input['date_joined']) && $input['date_joined'] == 'true' && $input['search'] != '', function (Builder $q) use ($input) {
+
+            $validator = Validator::make($input, [
+                'search' => 'date_format:Y-m-d',
+            ]);
+            
+            if ($validator->fails()) {
+                return;
+            }
+            
+            $date = Carbon::createFromFormat('Y-m-d', $input['search']);
+            $q->whereHas('users', function (Builder $q) use ($date){
+                $q->whereDate('users.created_at', '=' , $date);
+            });
+        });
+        
+        $threads->when(isset($input['location']) && $input['location'] == 'true' && $input['search'] != '', function (Builder $q) use ($input) {
+            $q->whereHas('participants.user', function (Builder $q) use ($input){
+                $q->where('users.city', 'like', "%{$input['search']}%");
+            });
+        });
+        
+        $threads->when(isset($input['name_username']) && $input['name_username'] == 'true' && $input['search'] != '', function (Builder $q) use ($input) {
+            $q->whereHas('participants', function (Builder $q) use ($input){
+                $q->where('user_id', '!=', Auth::id());
+            });
+            $q->whereHas('participants.user.timeline', function (Builder $q) use ($input){
+                $q->where('username', 'like', "%{$input['search']}%");
+                $q->where('username', 'like', "%{$input['search']}%");
+//                $q->whereHas('timeline', function (Builder $q) use ($input){
+//                    $q->orWhere('name', 'like', "%{$input['search']}%");
+//                });
+            });
+        });
+
+        $threads = $threads->paginate(30);
+        
         foreach ($threads as $key => $thread) {
             $thread->unread = $thread->isUnread($currentUserId);
 

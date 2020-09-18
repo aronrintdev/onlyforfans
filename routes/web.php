@@ -477,7 +477,7 @@ Route::group(['prefix' => 'ajax', 'middleware' => ['auth']], function () {
     Route::post('page-report', 'TimelineController@pageReport');
     Route::post('get-notifications', 'UserController@getNotifications');
     Route::post('get-unread-notifications', 'UserController@getUnreadNotifications');
-    Route::post('get-messages', 'MessageController@getMessages');
+    Route::post('get-messages', 'MessageController@getMessages')->name('conversation.get-messages');
     Route::post('get-message/{id}', 'MessageController@getMessage');
     Route::post('get-conversation/{id}', 'MessageController@show');
     Route::post('get-private-conversation/{userId}', 'MessageController@getPrivateConversation');

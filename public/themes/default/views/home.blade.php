@@ -27,7 +27,7 @@
         overflow: auto;
     }
 
-    .timeline-condensed-column .panel-heading li:last-child, .jscroll-added .panel-heading li:last-child, .timeline-condensed-column > .col-lg-4 .panel-heading li:last-child {
+    .timeline-condensed-column .panel-heading .user-post-details li:last-child, .jscroll-added .panel-heading .user-post-details li:last-child, .timeline-condensed-column > .col-lg-4 .panel-heading .user-post-details li:last-child {
         max-width: 100px;
         text-overflow: ellipsis;
         white-space: nowrap;

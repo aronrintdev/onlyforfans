@@ -1,3 +1,20 @@
+<style>
+    .user-search-bar {
+        display: flex;
+        justify-content: space-between;
+        padding-top: 15px;
+        padding-bottom: 15px;
+        align-items: center;
+        border-bottom: 1px solid #DFE3E9 !important
+    }
+
+    .messages-page .panel-body .message-col-4 .user-search-bar .input-group {
+        width: 80%;
+        padding: 0 !important;
+        border-bottom: none !important;
+        margin-right: 15px;
+    }
+</style>
 <!-- <div class="main-content">-->  
 <div class="container">
 
@@ -24,12 +41,55 @@
                         {{-- messagebox --}}
                         <div class="row message-box">
                             <div class="col-md-4 col-sm-4 col-xs-4 message-col-4">
-                                <div class="input-group">
-                                    <input type="text" class="form-control" placeholder="{{ trans('common.search') }}">
-                                    <span class="input-group-btn">
+                                <div class="user-search-bar">
+                                    <ul class="list-inline no-margin">
+                                        <li class="dropdown">
+                                            <a href="#" class="dropdown-togle" data-toggle="dropdown"
+                                               role="button" aria-haspopup="true"
+                                               aria-expanded="false">
+                                                <svg class="sort-icon has-tooltip" aria-hidden="true" data-original-title="null">
+                                                    <use xlink:href="#icon-sort" href="#icon-sort">
+                                                        <svg id="icon-sort" viewBox="0 0 24 24"> <path d="M4 19h4a1 1 0 0 0 1-1 1 1 0 0 0-1-1H4a1 1 0 0 0-1 1 1 1 0 0 0 1 1zM3 6a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1 1 1 0 0 0-1-1H4a1 1 0 0 0-1 1zm1 7h10a1 1 0 0 0 1-1 1 1 0 0 0-1-1H4a1 1 0 0 0-1 1 1 1 0 0 0 1 1z"></path> </svg>
+                                                    </use>
+                                                </svg>
+                                            </a>
+                                            <ul class="dropdown-menu user-filter-dropdown">
+                                                <li class="main-link">
+                                                    <a href="#">
+                                                        <div>
+                                                            <input id="dateJoined" type="radio" name="filter_type">
+                                                            <label for="dateJoined">Search by Date Joined (Y-m-d)</label>
+                                                        </div>
+                                                    </a>
+                                                    <a href="#">
+                                                        <div>
+                                                            <input id="location" type="radio" name="filter_type">
+                                                            <label for="location">Search by Location</label>
+                                                        </div>
+                                                    </a>
+                                                    <a href="#">
+                                                        <div>
+                                                            <input id="" type="radio" name="filter_type">
+                                                            <label for="">Search followers by specific word and then be able to add those to a list/group</label>
+                                                        </div>
+                                                    </a>
+                                                    <a href="#">
+                                                        <div>
+                                                            <input id="nameOrUsername" type="radio" name="filter_type" checked>
+                                                            <label for="nameOrUsername">Search by Name or Username.</label>
+                                                        </div>
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="searchUserInput" v-on:keyup="searchUsers()" placeholder="{{ trans('common.search') }}">
+                                        <span class="input-group-btn">
                                         <button class="btn btn-default" type="button"><i class="fa fa-search"></i></button>
                                     </span>
-                                </div><!-- /input-group -->    
+                                    </div><!-- /input-group -->
+                                </div>
                                 <ul class="list-unstyled coversations-list scrollable" @wait-for="getConversations" data-type="threads">
                                     <li class="message-holder" v-bind:class="[ conversation.unread ? 'unseen-message' : '', (conversation.id==currentConversation.id) ? 'active' : '',  ]" v-for="conversation in conversations.data">
                                         <a href="#" class="show-conversation" @click.prevent="showConversation(conversation)">

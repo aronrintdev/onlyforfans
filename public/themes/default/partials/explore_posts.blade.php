@@ -2,11 +2,12 @@
     <div class="col-lg-4 col-md-6 col-sm-6 col-12">
         <div class="post-image-holder grid-item @if(count($post->images()->get()) == 1) single-image @else multiple-images @endif">
                 @if($post->images->first()->type=='image')
-                    <a href="{{ route('post.show', $post->id) }}">
+                    <a href="#" data-toggle="modal" data-target="#postDetail{{ $post->id }}">
                         <img src="{{ url('user/gallery/'.$post->images->first()->source) }}"  title="{{ $post->user->name }}" alt="{{ $post->user->name }}">
                     </a>
                 @endif
         </div>
+        {!! Theme::partial('explore_posts_detail',compact('post','timeline','next_page_url')) !!}
     </div>
 @endif
 
@@ -16,14 +17,17 @@
         @foreach($post->images as $postImage)
             @if($postImage->type=='video')
                 <div id="unmoved-fixture">
-                    <video width="100%" height="auto" id="video-target" controls class="video-video-playe">
-                        <source src="{{ url('user/gallery/video/'.$postImage->source) }}"></source>
-                    </video>
+                    <a href="#" data-toggle="modal" data-target="#postDetail{{ $post->id }}">
+                        <video width="100%" height="auto" id="video-target" controls class="video-video-playe">
+                            <source src="{{ url('user/gallery/video/'.$postImage->source) }}"></source>
+                        </video>
+                    </a>
                 </div>
     
             @endif
         @endforeach
     </div>
+    {!! Theme::partial('explore_posts_detail',compact('post','timeline','next_page_url')) !!}
 </div>
 @endif
 

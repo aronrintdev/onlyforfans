@@ -5,7 +5,7 @@
   ?>
 @endif
 
- <div class="panel panel-default panel-post animated" id="post{{ $post->id }}">
+ <div class="panel panel-default panel-post animated post-wrapper-{{ $post->id }}" id="post{{ $post->id }}">
   <div class="panel-heading no-bg">
     <div class="post-author">
 

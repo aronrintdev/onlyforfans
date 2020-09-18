@@ -58,6 +58,19 @@
         z-index: 99;
     }
     
+    .post-detail-modal .modal-body {
+        padding: 0;
+    }
+    
+    .post-detail-modal .modal-body .panel {
+        margin-bottom: 0;
+        box-shadow: none;
+    }
+
+    .post-detail-modal .modal-body .panel .panel-body {
+        padding: 0;
+    }
+    
     @media screen and (max-width: 992px) {
         .grid-item {
             height: 250px !important;
