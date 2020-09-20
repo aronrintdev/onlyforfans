@@ -14,6 +14,10 @@
         border-bottom: none !important;
         margin-right: 15px;
     }
+    
+    .user-filter-dropdown label {
+        cursor: pointer;
+    }
 </style>
 <!-- <div class="main-content">-->  
 <div class="container">

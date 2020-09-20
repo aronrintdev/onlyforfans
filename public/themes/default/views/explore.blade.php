@@ -69,6 +69,7 @@
 
     .post-detail-modal .modal-body .panel .panel-body {
         padding: 0;
+        padding-bottom: 8px;
     }
     
     @media screen and (max-width: 992px) {

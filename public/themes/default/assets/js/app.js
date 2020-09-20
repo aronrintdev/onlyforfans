@@ -364,7 +364,7 @@ $(function () {
 
         $.post(SP_source() + 'ajax/get-users-modal',{user_ids: $(this).data('users'), heading: $(this).data('heading')}, function(responseText) {
            if(responseText.status == 200) { 
-               $('.modal-content').html(responseText.responseHtml);
+               $('#usersModal .modal-content').html(responseText.responseHtml);
            }
          });
 
