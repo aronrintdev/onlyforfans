@@ -808,6 +808,9 @@ $(function () {
                     }
                     follow_btn.find('.unfollow').closest('.holder').slideToggle();
                 }
+                if (data.status == 422) {
+                    notify(data.message, 'error');
+                }
             });
         }
         else {

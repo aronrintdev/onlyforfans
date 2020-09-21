@@ -531,6 +531,10 @@ return [
     'following-1' => 'Following',
     'no_users_found' => 'No Users found!',
     'create_new_list' => 'Create New LIst',
-    'send_tip' => 'Send Tip'
-
+    'send_tip' => 'Send Tip',
+    'blocked_profiles' => 'Blocked Profiles',
+    'ip_address' => 'IP Address',
+    'action' => 'Action',
+    'add_profile' => 'Add Profile',
+    'edit_blocked_profile' => 'Edit Blocked Profile',
 ];

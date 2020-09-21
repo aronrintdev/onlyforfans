@@ -465,4 +465,9 @@ return [
     'home_feature_ten_icon_text'  => 'Feature 10 Icon code',
     'home_feature_ten'           => 'Feature 10 Text',
     'home_feature_ten_text'      => 'Enter text for Feature 10',
+    'blocked_profiles' => 'Blocked Profiles',
+    'ip_address' => 'IP Address',
+    'action' => 'Action',
+    'add_profile' => 'Add Profile',
+    'edit_blocked_profile' => 'Edit Blocked Profile',
 ];

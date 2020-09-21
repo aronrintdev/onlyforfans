@@ -1255,6 +1255,10 @@ class TimelineController extends AppBaseController
         $timeline_id = $request->timeline_id;
         $follow = User::where('timeline_id', '=', $timeline_id)->first();
         $timeline = Timeline::where('id', $timeline_id)->first();
+        
+        if(! checkBlockedProfiles($timeline->username)){
+            return response()->json(['status' => '422', 'message' => 'User blocked your profile. you can not subscribe.']);
+        }
 
         if (!$follow->followers->contains(Auth::user()->id)) {
             $follow->followers()->attach(Auth::user()->id, ['status' => 'approved']);
@@ -1435,7 +1439,10 @@ class TimelineController extends AppBaseController
 
     public function posts($username)
     {
-
+        if(! checkBlockedProfiles($username)){
+            return view('errors.404');
+        }
+        
         $period = 'all';
         $sort_by = 'latest';
         $order_by = 'asc';

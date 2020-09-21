@@ -344,6 +344,11 @@ Route::group(['prefix' => '/{username}/settings', 'middleware' => ['auth', 'edit
 
     Route::get('/privacy', 'UserController@userPrivacySettings');
     Route::post('/privacy', 'UserController@SaveUserPrivacySettings');
+    
+    Route::post('/block-profile', 'UserController@blockProfile')->name('block-profile');
+    Route::post('/update-block-profile', 'UserController@updateBlockProfile')->name('update-block-profile');
+    Route::get('edit-block-profile/{id}', 'UserController@editBlockProfile')->where('id', '[0-9]+');
+    Route::delete('delete-block-profile/{id}', 'UserController@deleteBlockProfile')->where('id', '[0-9]+');
 
     Route::get('/wallpaper', 'UserController@wallpaperSettings');
     Route::post('/wallpaper', 'TimelineController@saveWallpaperSettings');

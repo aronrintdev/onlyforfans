@@ -292,15 +292,16 @@ class MessageController extends Controller
                 return;
             }
             
-            $date = Carbon::createFromFormat('Y-m-d', $input['search']);
+            $date = Carbon::createFromFormat('Y-m-d', $input['search'])->toDateString();
             $q->whereHas('users', function (Builder $q) use ($date){
-                $q->whereDate('users.created_at', '=' , $date);
+                $q->whereRaw('date(users.created_at) = ?', $date);
             });
         });
         
         $threads->when(isset($input['location']) && $input['location'] == 'true' && $input['search'] != '', function (Builder $q) use ($input) {
             $q->whereHas('participants.user', function (Builder $q) use ($input){
                 $q->where('users.city', 'like', "%{$input['search']}%");
+                $q->orWhere('users.country', 'like', "%{$input['search']}%");
             });
         });
         
@@ -309,8 +310,8 @@ class MessageController extends Controller
                 $q->where('user_id', '!=', Auth::id());
             });
             $q->whereHas('participants.user.timeline', function (Builder $q) use ($input){
-                $q->where('username', 'like', "%{$input['search']}%");
-                $q->where('username', 'like', "%{$input['search']}%");
+                $q->where('name', 'like', "%{$input['search']}%");
+                $q->orWhere('username', 'like', "%{$input['search']}%");
 //                $q->whereHas('timeline', function (Builder $q) use ($input){
 //                    $q->orWhere('name', 'like', "%{$input['search']}%");
 //                });

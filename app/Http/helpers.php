@@ -1,5 +1,9 @@
 <?php
 
+use App\Timeline;
+use App\User;
+use Illuminate\Support\Facades\Auth;
+
 function trendingTags()
 {
     $trending_tags = App\Hashtag::orderBy('count', 'desc')->get();
@@ -195,3 +199,27 @@ function get_client_ip()
     return $ipaddress;
 }
 
+function test_null($var)
+{
+    if ($var != "") {
+        return ($var);
+    }
+}
+
+function checkBlockedProfiles($username)
+{
+    $timeline = Timeline::where('username', $username)->first();
+    $user = User::with('blockedProfiles')->where('timeline_id', $timeline['id'])->first();
+    if ($user->blockedProfiles->count()) {
+        $countries = array_filter($user->blockedProfiles->pluck('country')->toArray(), 'test_null');
+        $ipAddresses = array_filter($user->blockedProfiles->pluck('ip_address')->toArray(), 'test_null');
+
+        $authUser = Auth::user();
+        $clientIp = get_client_ip();
+        if (in_array(strtolower($authUser->country), array_map('strtolower', $countries)) || in_array($clientIp, $ipAddresses)) {
+            return false;
+        }
+    }
+
+    return true;
+}

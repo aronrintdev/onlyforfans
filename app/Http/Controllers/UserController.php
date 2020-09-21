@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\BlockedProfile;
 use App\Comment;
 use App\Event;
 use App\Group;
 use App\Hashtag;
-use App\Http\Requests;
+use App\Http\Requests\BlockedProfileRequest;
 use App\Http\Requests\CreateUserRequest;
 use App\Http\Requests\UpdateUserRequest;
 use App\LoginSession;
@@ -22,6 +23,7 @@ use App\User;
 use App\Wallpaper;
 use Auth;
 use Carbon\Carbon;
+use Exception;
 use Flash;
 use Hash;
 use Illuminate\Http\Request;
@@ -30,6 +32,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redirect;
 use Prettus\Repository\Criteria\RequestCriteria;
 use Response;
+use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 use Teepluss\Theme\Facades\Theme;
 use Validator;
 
@@ -234,13 +237,16 @@ class UserController extends AppBaseController
         if ($timeline == null) {
             return Redirect::to('/');
         }
+        
+        $blockedProfiles = BlockedProfile::where('blocked_by',Auth::user()->id)
+            ->paginate(Setting::get('items_page', 10));
 
         $settings = DB::table('user_settings')->where('user_id', $timeline->user->id)->first();
 
         $theme = Theme::uses(Setting::get('current_theme', 'default'))->layout('default');
         $theme->setTitle(trans('common.privacy_settings').' '.Setting::get('title_seperator').' '.Setting::get('site_title').' '.Setting::get('title_seperator').' '.Setting::get('site_tagline'));
 
-        return $theme->scope('users/settings/privacy', compact('settings'))->render();
+        return $theme->scope('users/settings/privacy', compact('settings', 'blockedProfiles'))->render();
     }
 
     public function userPasswordSettings($username)
@@ -626,12 +632,13 @@ class UserController extends AppBaseController
         $messages = [
             'no_admin' => 'The name admin is restricted for :attribute'
         ];
+
         return Validator::make($data, [
-            'username' => 'required|max:16|min:5|alpha_num|no_admin|unique:timelines,username,'.Auth::user()->timeline->id,
-            'name'     => 'required',
-            'email'    => 'unique:users,email,'.Auth::id(),
-            'subscribe_price'   => 'between:0.01,999.99',
-        ],$messages);
+            'username'        => 'required|max:16|min:5|alpha_num|no_admin|unique:timelines,username,'.Auth::user()->timeline->id,
+            'name'            => 'required',
+            'email'           => 'unique:users,email,'.Auth::id(),
+            'subscribe_price' => 'between:0.01,999.99',
+        ], $messages);
 
     }
 
@@ -1496,5 +1503,62 @@ class UserController extends AppBaseController
         return $theme->scope('users/saved', compact('event_timelines','group_timelines','page_timelines','trending_tags','suggested_pages','suggested_groups','suggested_users','posts','user'))->render();
     }
 
+    /**
+     * @param  BlockedProfileRequest  $request
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function blockProfile(BlockedProfileRequest $request)
+    {
+        try {
+            $data = $request->all();
+            $data['blocked_by'] = Auth::user()->id;
 
+            BlockedProfile::create($data);
+            
+            return response()->json('Profile successfully added in blocked list.');
+        }catch(Exception $e){
+            throw new UnprocessableEntityHttpException($e->getMessage());
+        }
+    }
+
+    /**
+     * @param int $id
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function editBlockProfile($name, $id)
+    {
+        $blockedProfile = BlockedProfile::findOrFail($id);
+        
+        return response()->json(['blockedProfile' => $blockedProfile]);
+    }
+
+    /**
+     * @param  BlockedProfileRequest  $request
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function updateBlockProfile(BlockedProfileRequest $request)
+    {
+        $data = $request->all();
+        
+        $blockedProfile = BlockedProfile::find($data['id']);
+        $blockedProfile->update($data);
+
+        return response()->json('Data Updated Successfully.');
+    }
+
+    /**
+     * @param int $id
+     * 
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function deleteBlockProfile($name, $id)
+    {
+        $blockedProfile = BlockedProfile::find($id);
+        $blockedProfile->delete();
+
+        return response()->json('Data deleted Successfully.');
+    }
 }

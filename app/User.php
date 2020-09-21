@@ -2,14 +2,15 @@
 
 namespace App;
 
-use Illuminate\Notifications\Notifiable;
 use Auth;
 use Cmgmyr\Messenger\Traits\Messagable;
 use DB;
-//use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 use Zizaco\Entrust\Traits\EntrustUserTrait;
 
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class User extends Authenticatable
 {
@@ -549,5 +550,13 @@ class User extends Authenticatable
                         ->where('group_user.status', 'approved')
                         ->get();
         return $joined_groups ? $joined_groups : 0;
+    }
+
+    /**
+     * @return HasMany
+     */
+    public function blockedProfiles()
+    {
+        return $this->hasMany(BlockedProfile::class, 'blocked_by');
     }
 }

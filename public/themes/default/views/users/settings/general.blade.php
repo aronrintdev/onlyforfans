@@ -48,11 +48,11 @@
 									</div>
 								</div>
 
-								<div class="row" style="margin-bottom: 10px">
+								<div class="row">
 									<div class="col-md-2">
 										{{ Form::label('language', trans('common.language')) }}
 									</div>
-									<div class="dropdown col-md-6">
+									<div class="dropdown col-md-4">
 										<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
 										<span class="user-name">
 											@if(Auth::user()->language != null)
@@ -88,8 +88,19 @@
 											@endforeach
 										</ul>
 									</div>
+                                    <div class="col-md-6">
+                                        <fieldset class="form-group required {{ $errors->has('country') ? ' has-error' : '' }}">
+                                            {{ Form::label('country', trans('common.country')) }}
+                                            {{ Form::text('country', Auth::user()->country, ['class' => 'form-control', 'placeholder' => trans('common.country')]) }}
+                                            @if ($errors->has('country'))
+                                                <span class="help-block">
+												{{ $errors->first('country') }}
+											</span>
+                                            @endif
+                                        </fieldset>
+                                    </div>
 								</div>
-
+                                
 								<div class="row">
 									<div class="col-md-6">
 										<fieldset class="form-group required {{ $errors->has('email') ? ' has-error' : '' }}">

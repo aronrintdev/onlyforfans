@@ -62,7 +62,7 @@
                                                     <a href="#">
                                                         <div>
                                                             <input id="dateJoined" type="radio" name="filter_type">
-                                                            <label for="dateJoined">Search by Date Joined (Y-m-d)</label>
+                                                            <label for="dateJoined">Search by Date Joined (YYYY-MM-DD)</label>
                                                         </div>
                                                     </a>
                                                     <a href="#">
