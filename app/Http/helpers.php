@@ -208,9 +208,9 @@ function test_null($var)
 
 function checkBlockedProfiles($username)
 {
-    $timeline = Timeline::where('username', $username)->first();
+    $timeline = Timeline::where('username', $username)->first(); 
     $user = User::with('blockedProfiles')->where('timeline_id', $timeline['id'])->first();
-    if ($user->blockedProfiles->count()) {
+    if (Auth::user()->id != $user->id && $user->blockedProfiles->count()) {  
         $countries = array_filter($user->blockedProfiles->pluck('country')->toArray(), 'test_null');
         $ipAddresses = array_filter($user->blockedProfiles->pluck('ip_address')->toArray(), 'test_null');
 

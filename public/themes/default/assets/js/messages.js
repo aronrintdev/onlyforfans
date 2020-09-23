@@ -327,10 +327,12 @@ var vue = new Vue({
             let search = $('#searchUserInput').val();
             let dateJoined = $('#dateJoined').is(":checked");
             let location = $('#location').is(":checked");
+            let favouriteUser = $('#favouriteUser').is(":checked");
             let nameOrUsername = $('#nameOrUsername').is(":checked");
             let data = {
                 'date_joined': dateJoined,
                 'location': location,
+                'favourite_users': favouriteUser,
                 'name_username': nameOrUsername,
                 'search': search,
             }
@@ -339,6 +341,11 @@ var vue = new Vue({
                 this.showConversation(this.conversations.data[0]);
             });
            
+        },
+        favouriteUser: function (favouriteUserId) {
+            this.$http.post( base_url + 'ajax/favourite-user', { favourite_user_id: favouriteUserId }).then( function(response) {
+                this.searchUsers();
+            });
         }
     }    
 });

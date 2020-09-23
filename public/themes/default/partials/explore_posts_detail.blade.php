@@ -470,7 +470,9 @@
                                     <li class="hidden"><a href="#" class="like-post like-{{ $post->id }}" data-post-id="{{ $post->id }}"><i class="fa fa-thumbs-o-up"></i>{{ trans('common.like') }}</a></li>
                                     <li><a href="#" class="like-post unlike-{{ $post->id }}" data-post-id="{{ $post->id }}"><i class="fa fa-thumbs-o-down"></i></i>{{ trans('common.unlike') }}</a></li>
                                 @endif
+                                @if($post->comments->count() > 0 || $post->user_id == Auth::user()->id || $display_comment == "everyone")
                                 <li><a href="#" class="show-comments"><i class="fa fa-comment-o"></i>{{ trans('common.comment') }}</a></li>
+                                @endif
 
                                 @if(Auth::user()->id != $post->user_id)
                                     @if(!$post->users_shared->contains(Auth::user()->id))

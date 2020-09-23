@@ -2,15 +2,20 @@
 
 namespace App;
 
+use Auth;
 use Carbon\Carbon;
 use DB;
 use Illuminate\Database\Eloquent\Model;
+
 //use Illuminate\Database\Eloquent\SoftDeletes;
-use Auth;
 
 
 class Post extends Model
 {
+    const PRICE_TYPE = 'price';
+    const FREE_TYPE = 'free';
+    const PAID_TYPE = 'paid';
+    
     //use SoftDeletes;
 
     /**
@@ -26,7 +31,7 @@ class Post extends Model
    *
    * @var array
    */
-    protected $fillable = ['timeline_id', 'description', 'user_id', 'youtube_title', 'youtube_video_id', 'location', 'soundcloud_id', 'soundcloud_title', 'shared_post_id'];
+    protected $fillable = ['timeline_id', 'description', 'user_id', 'youtube_title', 'youtube_video_id', 'location', 'soundcloud_id', 'soundcloud_title', 'shared_post_id', 'type', 'price'];
 
     public function user()
     {

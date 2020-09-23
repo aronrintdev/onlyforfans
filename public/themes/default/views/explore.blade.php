@@ -10,6 +10,10 @@
         object-fit: cover;
     }
 
+    .jscroll-inner {
+        overflow: hidden !important;
+    }
+    
     .post-modal .modal-header {
         display: flex;
         align-items: center;
@@ -25,7 +29,7 @@
         border-radius: 50%;
     }
     
-    .post-modal .modal-body {
+    .post-modal .modal-body { 
         padding: 0;
     }
 
@@ -71,6 +75,22 @@
         padding: 0;
         padding-bottom: 8px;
     }
+
+    .locked-content {
+        font-size: 80px;
+        color: #fff;
+        text-align: center;
+        background: rgba(0, 0, 0, 0.8);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+    }
+
+    .locked-content .locked-content-wrapper {
+        display: flex;
+        flex-direction: column;
+    }
     
     @media screen and (max-width: 992px) {
         .grid-item {
@@ -112,7 +132,9 @@
                         @if($posts->count() > 0)
                             <div class="row">
                                 @foreach($posts as $post)
+                                    @if($post->type != \App\Post::PAID_TYPE)
                                     {!! Theme::partial('explore_posts',compact('post','timeline','next_page_url')) !!}
+                                    @endif
                                 @endforeach
                             </div>
                             <div class="no-posts alert alert-warning" style="display: none">{{ trans('common.no_posts') }}</div>

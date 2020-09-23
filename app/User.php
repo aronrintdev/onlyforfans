@@ -5,12 +5,11 @@ namespace App;
 use Auth;
 use Cmgmyr\Messenger\Traits\Messagable;
 use DB;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Zizaco\Entrust\Traits\EntrustUserTrait;
-
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 class User extends Authenticatable
 {
@@ -553,10 +552,28 @@ class User extends Authenticatable
     }
 
     /**
+     * @return BelongsToMany
+     */
+    public function paidSubscribers()
+    {
+        $followers = $this->followers();
+        
+        return $followers->wherePivot('subscription_id', '!=', null);
+    }
+
+    /**
      * @return HasMany
      */
     public function blockedProfiles()
     {
         return $this->hasMany(BlockedProfile::class, 'blocked_by');
+    }
+
+    /**
+     * @return BelongsToMany
+     */
+    public function favouriteUsers()
+    {
+        return $this->belongsToMany('App\User', 'favourite_users', 'user_id', 'favourite_user_id')->withPivot('favourite_user_id');
     }
 }

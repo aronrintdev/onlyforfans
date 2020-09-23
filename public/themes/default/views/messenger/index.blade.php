@@ -18,6 +18,18 @@
     .user-filter-dropdown label {
         cursor: pointer;
     }
+    
+    .fav-user {
+        position: absolute;
+        right: 15px;
+        font-size: 18px;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+    
+    .is-not-fav {
+        display: none;
+    }
 </style>
 <!-- <div class="main-content">-->  
 <div class="container">
@@ -73,8 +85,8 @@
                                                     </a>
                                                     <a href="#">
                                                         <div>
-                                                            <input id="" type="radio" name="filter_type">
-                                                            <label for="">Search followers by specific word and then be able to add those to a list/group</label>
+                                                            <input id="favouriteUser" type="radio" name="filter_type">
+                                                            <label for="favouriteUser">Search followers by specific word and then be able to add those to a list/group</label>
                                                         </div>
                                                     </a>
                                                     <a href="#">
@@ -110,6 +122,12 @@
                                                         @{{ conversation.lastMessage.body }}
                                                     </div>
                                                 </div>
+                                                <a href="#" class="fav-user is-fav" title="Add to favourite" v-if="conversation.user.is_favourite" v-on:click="favouriteUser(conversation.user.id)">
+                                                    <i class="fa fa-star" aria-hidden="true"></i>
+                                                </a>
+                                                <a href="#" class="fav-user is-not-fav" title="Add to favourite" v-if="!conversation.user.is_favourite" v-on:click="favouriteUser(conversation.user.id)">
+                                                    <i class="fa fa-star-o" aria-hidden="true"></i>
+                                                </a>
                                             </div>
                                         </a>
                                     </li>
@@ -178,5 +196,19 @@
 
 </div>
 <!-- </div> -->
-
+<script>
+    $(document).ready(function () {
+        $('input[type="radio"]').change(function () {
+           vue.searchUsers();            
+        });
+    })
+    
+    $(document).on('mouseenter', '.post-list', function () {
+        $(this).find('.is-not-fav').show();
+    });
+    
+    $(document).on('mouseleave', '.post-list', function () {
+        $(this).find('.is-not-fav').hide();
+    });
+</script>
 {!! Theme::asset()->container('footer')->usePath()->add('messages-js', 'js/messages.js') !!}

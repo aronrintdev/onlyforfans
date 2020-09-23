@@ -223,98 +223,109 @@
         </div>
       </div>
     </div>
-    <div class="panel-body">
-      <div class="text-wrapper">
+    @if($post->type == \App\Post::PRICE_TYPE)
+        @if($post->user->id != Auth::user()->id)
+            <div class="panel-body locked-panel-body">
+                <div class="locked-content">
+                    <div class="locked-content-wrapper">
+                        <i class="fa fa-lock" aria-hidden="true"></i>
+                        <button class="btn btn-success">Buy</button>
+                    </div>
+                </div>
+            </div>
+        @else
+            <div class="panel-body">
+                <div class="text-wrapper">
 
-          <div id="statisticsModal{{ $post->id }}" class="modal fade" role="dialog" tabindex='-1'>
-              <div class="modal-dialog">
+                    <div id="statisticsModal{{ $post->id }}" class="modal fade" role="dialog" tabindex='-1'>
+                        <div class="modal-dialog">
 
-                  <div class="modal-content">
-                      <div class="modal-body">
-                          <div class="modal-header">
-                              <button type="button" class="close" data-dismiss="modal">&times;</button>
-                              <h3 class="modal-title">{{ trans('common.post_statistics') }}</h3>
-                          </div>
+                            <div class="modal-content">
+                                <div class="modal-body">
+                                    <div class="modal-header">
+                                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                        <h3 class="modal-title">{{ trans('common.post_statistics') }}</h3>
+                                    </div>
 
-                          <div class="b-stats-row__content">
-                              <div class="b-stats-row__label m-border-line m-purchases m-current">
-                                  <span class="b-stats-row__name m-dots"> {{ trans('common.purchases') }} </span><span class="b-stats-row__val"> $0.00 </span>
-                              </div>
-                              <div class="b-stats-row__label m-border-line m-viewers m-current">
-                                  <span class="b-stats-row__name m-dots"> {{ trans('common.viewers') }} </span><span class="b-stats-row__val"> 0 </span>
-                              </div>
-                              <div class="b-stats-row__label m-border-line m-likes m-current">
-                                  <span class="b-stats-row__name m-dots"> {{ trans('common.likes') }} </span><span class="b-stats-row__val"> {{ $post->users_liked->count() }} </span>
-                              </div>
-                              <div class="b-stats-row__label m-border-line m-comments m-current">
-                                  <span class="b-stats-row__name m-dots"> {{ trans('common.comments') }} </span><span class="b-stats-row__val"> {{ $post->comments->count() }} </span>
-                              </div>
-                              <div class="b-stats-row__label m-border-line m-tips m-current">
-                                  <span class="b-stats-row__name m-dots"> {{ trans('common.tips') }} </span><span class="b-stats-row__val"> $0.00 <!----></span>
-                              </div>
-                          </div>
-                      </div>
-                      <div class="modal-footer">
-                          <button type="button" class="btn btn-default" data-dismiss="modal">{{ trans('common.close') }}</button>
-                      </div>
-                  </div>
+                                    <div class="b-stats-row__content">
+                                        <div class="b-stats-row__label m-border-line m-purchases m-current">
+                                            <span class="b-stats-row__name m-dots"> {{ trans('common.purchases') }} </span><span class="b-stats-row__val"> $0.00 </span>
+                                        </div>
+                                        <div class="b-stats-row__label m-border-line m-viewers m-current">
+                                            <span class="b-stats-row__name m-dots"> {{ trans('common.viewers') }} </span><span class="b-stats-row__val"> 0 </span>
+                                        </div>
+                                        <div class="b-stats-row__label m-border-line m-likes m-current">
+                                            <span class="b-stats-row__name m-dots"> {{ trans('common.likes') }} </span><span class="b-stats-row__val"> {{ $post->users_liked->count() }} </span>
+                                        </div>
+                                        <div class="b-stats-row__label m-border-line m-comments m-current">
+                                            <span class="b-stats-row__name m-dots"> {{ trans('common.comments') }} </span><span class="b-stats-row__val"> {{ $post->comments->count() }} </span>
+                                        </div>
+                                        <div class="b-stats-row__label m-border-line m-tips m-current">
+                                            <span class="b-stats-row__name m-dots"> {{ trans('common.tips') }} </span><span class="b-stats-row__val"> $0.00 <!----></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">{{ trans('common.close') }}</button>
+                                </div>
+                            </div>
 
-              </div>
-          </div>
+                        </div>
+                    </div>
 
-          <div id="shareModal{{ $post->id }}" class="modal fade" role="dialog" tabindex='-1'>
-              <div class="modal-dialog">
+                    <div id="shareModal{{ $post->id }}" class="modal fade" role="dialog" tabindex='-1'>
+                        <div class="modal-dialog">
 
-                  <div class="modal-content">
-                      <div class="modal-body">
-                          <div class="modal-header">
-                              <button type="button" class="close" data-dismiss="modal">&times;</button>
-                              <h3 class="modal-title">{{ trans('common.copy_embed_post') }}</h3>
-                          </div>
-                          <textarea class="form-control" rows="3">
+                            <div class="modal-content">
+                                <div class="modal-body">
+                                    <div class="modal-header">
+                                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                        <h3 class="modal-title">{{ trans('common.copy_embed_post') }}</h3>
+                                    </div>
+                                    <textarea class="form-control" rows="3">
           <iframe src="{{ url('/share-post/'.$post->id) }}" width="600px" height="420px" frameborder="0"></iframe>
           </textarea>
-                      </div>
-                      <div class="modal-footer">
-                          <button type="button" class="btn btn-default" data-dismiss="modal">{{ trans('common.close') }}</button>
-                      </div>
-                  </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">{{ trans('common.close') }}</button>
+                                </div>
+                            </div>
 
-              </div>
-          </div>
+                        </div>
+                    </div>
 
-          <div id="copyLinkModal{{ $post->id }}" class="modal fade" role="dialog" tabindex='-1'>
-              <div class="modal-dialog">
+                    <div id="copyLinkModal{{ $post->id }}" class="modal fade" role="dialog" tabindex='-1'>
+                        <div class="modal-dialog">
 
-                  <div class="modal-content">
-                      <div class="modal-body">
-                          <div class="modal-header">
-                              <button type="button" class="close" data-dismiss="modal">&times;</button>
-                              <h3 class="modal-title">{{ trans('common.copy_link_post') }}</h3>
-                          </div>
-                          {{--          <div id="copy-link-content">{{ url('/share-post/'.$post->id) }}</div>--}}
-                          <a href="{{ url('/post/'.$post->id) }}">{{ url('/post/'.$post->id) }}</a>
-                      </div>
-                      <div class="modal-footer">
-                          <button type="button" class="btn btn-default" data-dismiss="modal">{{ trans('common.close') }}</button>
-                      </div>
-                  </div>
+                            <div class="modal-content">
+                                <div class="modal-body">
+                                    <div class="modal-header">
+                                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                        <h3 class="modal-title">{{ trans('common.copy_link_post') }}</h3>
+                                    </div>
+                                    {{--          <div id="copy-link-content">{{ url('/share-post/'.$post->id) }}</div>--}}
+                                    <a href="{{ url('/post/'.$post->id) }}">{{ url('/post/'.$post->id) }}</a>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">{{ trans('common.close') }}</button>
+                                </div>
+                            </div>
 
-              </div>
-          </div>
+                        </div>
+                    </div>
 
 
-        <?php
-              $links = preg_match_all("/(?i)\b((?:[a-z][\w-]+:(?:\/{1,3}|[a-z0-9%])|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}\/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'\".,<>?«»“”‘’]))/", $post->description, $matches);
+                    <?php
+                    $links = preg_match_all("/(?i)\b((?:[a-z][\w-]+:(?:\/{1,3}|[a-z0-9%])|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}\/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'\".,<>?«»“”‘’]))/", $post->description, $matches);
 
-              $main_description = $post->description;
-              ?>
-              @foreach($matches[0] as $link)
-                <?php $linkPreview = new LinkPreview(/*$link*/ "www.google.com");
-                  $parsed = $linkPreview->getParsed();
-                  $data = $link;
-                  foreach ($parsed as $parserName => $main_link) {
-                    $data = '<div class="row link-preview">
+                    $main_description = $post->description;
+                    ?>
+                    @foreach($matches[0] as $link)
+                        <?php $linkPreview = new LinkPreview(/*$link*/ "www.google.com");
+                        $parsed = $linkPreview->getParsed();
+                        $data = $link;
+                        foreach ($parsed as $parserName => $main_link) {
+                            $data = '<div class="row link-preview">
                               <div class="col-md-3">
                                 <a target="_blank" href="'.$link.'"><img src="'.$main_link->getImage().'"></a>
                               </div>
@@ -322,119 +333,335 @@
                                 <a target="_blank" href="'.$link.'">'.$main_link->getTitle().'</a><br>'.substr($main_link->getDescription(), 0, 500). '...'.'
                               </div>
                             </div>';
-                    //echo substr($main_link->getDescription(), 0, 500);
-                  }
-                 $main_description = str_replace($link, $data, $main_description);
-                  ?>
-              @endforeach
+                            //echo substr($main_link->getDescription(), 0, 500);
+                        }
+                        $main_description = str_replace($link, $data, $main_description);
+                        ?>
+                    @endforeach
 
-        {{--            Check if subscribed--}}
-{{--        @if(isset($user) == false || $user->followers->contains(Auth::user()->id) || $user->id == Auth::user()->id || $user->payment == NULL|| ($user->payment != NULL && $user->payment->price == 0))--}}
-        @if(isset($user) == false || $user->followers->contains(Auth::user()->id) || $user->id == Auth::user()->id || $user->price == 0)
-            <p class="post-description">
-              {!! clean($main_description) !!}
-            </p>
+                    {{--            Check if subscribed--}}
+                    {{--        @if(isset($user) == false || $user->followers->contains(Auth::user()->id) || $user->id == Auth::user()->id || $user->payment == NULL|| ($user->payment != NULL && $user->payment->price == 0))--}}
+                    @if(isset($user) == false || $user->followers->contains(Auth::user()->id) || $user->id == Auth::user()->id || $user->price == 0)
+                        <p class="post-description">
+                            {!! clean($main_description) !!}
+                        </p>
+                    @endif
+
+                    {{--            Check if subscribed--}}
+
+                    {{--        @if(isset($user) && !$user->followers->contains(Auth::user()->id) && $user->id != Auth::user()->id && $user->payment != NULL && $user->payment->price > 0 )--}}
+                    @if(isset($user) && !$user->followers->contains(Auth::user()->id) && $user->id != Auth::user()->id && $user->price > 0 )
+                        <div class="post-image-holder post-locked  single-image">
+                            {{--                <a><img src="{{ url('user/gallery/locked.jpg') }}"  title="{{ $post->user->name }}" alt="{{ $post->user->name }}" onclick="$('#myModal').modal('show')"></a>--}}
+                            <a><img src="{{ url('user/gallery/locked.png') }}"  title="{{ $post->user->name }}" alt="{{ $post->user->name }}"></a>
+
+                            <!-- Modal -->
+                            <div class="modal fade" id="myModal" role="dialog">
+                                <div class="modal-dialog">
+
+                                    <!-- Modal content-->
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                            <h4 class="modal-title">Subscribe {{$post->user->name}}'s posts</h4>
+                                        </div>
+                                        <div class="modal-body">
+                                            <img src="{{ url('user/gallery/locked.png') }}"  title="{{ $post->user->name }}" alt="{{ $post->user->name }}" style="display: block; margin-left: auto; margin-right: auto">
+                                            <p  style="margin-left: auto; margin-right: auto">Monthly Subscribe {{$post->user->price}} US$</p>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-default" data-dismiss="modal">Subscribe</button>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    @else
+
+                        <div class="post-image-holder  @if(count($post->images()->get()) == 1) single-image @endif">
+
+                            @foreach($post->images()->get() as $postImage)
+                                @if($postImage->type=='image')
+                                    <a href="{{ url('user/gallery/'.$postImage->source) }}" data-lightbox="imageGallery.{{ $post->id }}" ><img src="{{ url('user/gallery/'.$postImage->source) }}"  title="{{ $post->user->name }}" alt="{{ $post->user->name }}"></a>
+                                @endif
+                            @endforeach
+                        </div>
+
+                        <div class="post-v-holder">
+                            @foreach($post->images()->get() as $postImage)
+                                @if($postImage->type=='video')
+                                    <div id="unmoved-fixture">
+                                        <video width="100%" height="auto" id="video-target" controls class="video-video-playe">
+                                            <source src="{{ url('user/gallery/video/'.$postImage->source) }}"></source>
+                                        </video>
+                                    </div>
+
+                                @endif
+                            @endforeach
+                        </div>
+
+                    @endif
+
+                </div>
+            <!--@if($post->youtube_video_id)-->
+            <!--<iframe  src="https://www.youtube.com/embed/{{ $post->youtube_video_id }}" frameborder="0" allowfullscreen></iframe>-->
+                <!--@endif-->
+            <!--@if($post->soundcloud_id)-->
+                <!--<div class="soundcloud-wrapper">-->
+            <!--  <iframe width="100%" height="166" scrolling="no" frameborder="no" src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/{{ $post->soundcloud_id }}&amp;color=ff5500&amp;auto_play=false&amp;hide_related=false&amp;show_comments=true&amp;show_user=true&amp;show_reposts=false"></iframe>-->
+                <!--</div>-->
+                <!--@endif-->
+
+                @if(isset($user) == false || $user->followers->contains(Auth::user()->id) || $user->id == Auth::user()->id || $user->price == 0)
+                    <ul class="actions-count list-inline">
+
+                        <li>
+                            @if($post->users_liked()->count() > 0)
+                                <?php
+                                $liked_ids = $post->users_liked->pluck('id')->toArray();
+                                $liked_names = $post->users_liked->pluck('name')->toArray();
+                                ?>
+                                <a href="#" class="show-users-modal tag-like-{{$post->id}}" data-html="true" data-heading="{{ trans('common.likes') }}"  data-users="{{ implode(',', $liked_ids) }}" data-original-title="{{ implode('<br />', $liked_names) }}"><span class="count-circle"><i class="fa fa-thumbs-up"></i></span> <span class="circle-like-count circle-like-count-{{$post->id}}">{{ $post->users_liked->count() }}</span> {{ trans('common.likes') }}</a>
+                            @else
+                                <a href="#" class="show-users-modal tag-like-{{$post->id}} hidden" data-html="true" data-heading="{{ trans('common.likes') }}" data-original-title=""><span class="count-circle"><i class="fa fa-thumbs-up"></i></span> <span class="circle-like-count circle-like-count-{{$post->id}}"></span> {{ trans('common.likes') }}</a>
+                            @endif
+                        </li>
+
+                        @if($post->comments->count() > 0)
+                            <li>
+                                <a href="#" class="show-all-comments"><span class="count-circle"><i class="fa fa-comment"></i></span>{{ $post->comments->count() }} {{ trans('common.comments') }}</a>
+                            </li>
+                        @endif
+
+                        @if($post->shares->count() > 0)
+                            <?php
+                            $shared_ids = $post->shares->pluck('id')->toArray();
+                            $shared_names = $post->shares->pluck('name')->toArray(); ?>
+                            <li>
+                                <a href="#" class="show-users-modal" data-html="true" data-heading="{{ trans('common.shares') }}"  data-users="{{ implode(',', $shared_ids) }}" data-original-title="{{ implode('<br />', $shared_names) }}"><span class="count-circle"><i class="fa fa-share"></i></span> {{ $post->shares->count() }} {{ trans('common.shares') }}</a>
+                            </li>
+                        @endif
+
+                    </ul>
+                @endif
+            </div>                
         @endif
+      
+    @else
+        <div class="panel-body">
+            <div class="text-wrapper">
 
-        {{--            Check if subscribed--}}
-
-{{--        @if(isset($user) && !$user->followers->contains(Auth::user()->id) && $user->id != Auth::user()->id && $user->payment != NULL && $user->payment->price > 0 )--}}
-        @if(isset($user) && !$user->followers->contains(Auth::user()->id) && $user->id != Auth::user()->id && $user->price > 0 )
-            <div class="post-image-holder post-locked  single-image">
-{{--                <a><img src="{{ url('user/gallery/locked.jpg') }}"  title="{{ $post->user->name }}" alt="{{ $post->user->name }}" onclick="$('#myModal').modal('show')"></a>--}}
-                <a><img src="{{ url('user/gallery/locked.png') }}"  title="{{ $post->user->name }}" alt="{{ $post->user->name }}"></a>
-
-                <!-- Modal -->
-                <div class="modal fade" id="myModal" role="dialog">
+                <div id="statisticsModal{{ $post->id }}" class="modal fade" role="dialog" tabindex='-1'>
                     <div class="modal-dialog">
 
-                        <!-- Modal content-->
                         <div class="modal-content">
-                            <div class="modal-header">
-                                <button type="button" class="close" data-dismiss="modal">&times;</button>
-                                <h4 class="modal-title">Subscribe {{$post->user->name}}'s posts</h4>
-                            </div>
                             <div class="modal-body">
-                                    <img src="{{ url('user/gallery/locked.png') }}"  title="{{ $post->user->name }}" alt="{{ $post->user->name }}" style="display: block; margin-left: auto; margin-right: auto">
-                                    <p  style="margin-left: auto; margin-right: auto">Monthly Subscribe {{$post->user->price}} US$</p>
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                    <h3 class="modal-title">{{ trans('common.post_statistics') }}</h3>
+                                </div>
+
+                                <div class="b-stats-row__content">
+                                    <div class="b-stats-row__label m-border-line m-purchases m-current">
+                                        <span class="b-stats-row__name m-dots"> {{ trans('common.purchases') }} </span><span class="b-stats-row__val"> $0.00 </span>
+                                    </div>
+                                    <div class="b-stats-row__label m-border-line m-viewers m-current">
+                                        <span class="b-stats-row__name m-dots"> {{ trans('common.viewers') }} </span><span class="b-stats-row__val"> 0 </span>
+                                    </div>
+                                    <div class="b-stats-row__label m-border-line m-likes m-current">
+                                        <span class="b-stats-row__name m-dots"> {{ trans('common.likes') }} </span><span class="b-stats-row__val"> {{ $post->users_liked->count() }} </span>
+                                    </div>
+                                    <div class="b-stats-row__label m-border-line m-comments m-current">
+                                        <span class="b-stats-row__name m-dots"> {{ trans('common.comments') }} </span><span class="b-stats-row__val"> {{ $post->comments->count() }} </span>
+                                    </div>
+                                    <div class="b-stats-row__label m-border-line m-tips m-current">
+                                        <span class="b-stats-row__name m-dots"> {{ trans('common.tips') }} </span><span class="b-stats-row__val"> $0.00 <!----></span>
+                                    </div>
+                                </div>
                             </div>
                             <div class="modal-footer">
-                                <button type="button" class="btn btn-default" data-dismiss="modal">Subscribe</button>
+                                <button type="button" class="btn btn-default" data-dismiss="modal">{{ trans('common.close') }}</button>
                             </div>
                         </div>
 
                     </div>
                 </div>
+
+                <div id="shareModal{{ $post->id }}" class="modal fade" role="dialog" tabindex='-1'>
+                    <div class="modal-dialog">
+
+                        <div class="modal-content">
+                            <div class="modal-body">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                    <h3 class="modal-title">{{ trans('common.copy_embed_post') }}</h3>
+                                </div>
+                                <textarea class="form-control" rows="3">
+          <iframe src="{{ url('/share-post/'.$post->id) }}" width="600px" height="420px" frameborder="0"></iframe>
+          </textarea>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">{{ trans('common.close') }}</button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div id="copyLinkModal{{ $post->id }}" class="modal fade" role="dialog" tabindex='-1'>
+                    <div class="modal-dialog">
+
+                        <div class="modal-content">
+                            <div class="modal-body">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                    <h3 class="modal-title">{{ trans('common.copy_link_post') }}</h3>
+                                </div>
+                                {{--          <div id="copy-link-content">{{ url('/share-post/'.$post->id) }}</div>--}}
+                                <a href="{{ url('/post/'.$post->id) }}">{{ url('/post/'.$post->id) }}</a>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">{{ trans('common.close') }}</button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+
+                <?php
+                $links = preg_match_all("/(?i)\b((?:[a-z][\w-]+:(?:\/{1,3}|[a-z0-9%])|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}\/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'\".,<>?«»“”‘’]))/", $post->description, $matches);
+
+                $main_description = $post->description;
+                ?>
+                @foreach($matches[0] as $link)
+                    <?php $linkPreview = new LinkPreview(/*$link*/ "www.google.com");
+                    $parsed = $linkPreview->getParsed();
+                    $data = $link;
+                    foreach ($parsed as $parserName => $main_link) {
+                        $data = '<div class="row link-preview">
+                              <div class="col-md-3">
+                                <a target="_blank" href="'.$link.'"><img src="'.$main_link->getImage().'"></a>
+                              </div>
+                              <div class="col-md-9">
+                                <a target="_blank" href="'.$link.'">'.$main_link->getTitle().'</a><br>'.substr($main_link->getDescription(), 0, 500). '...'.'
+                              </div>
+                            </div>';
+                        //echo substr($main_link->getDescription(), 0, 500);
+                    }
+                    $main_description = str_replace($link, $data, $main_description);
+                    ?>
+                @endforeach
+
+                {{--            Check if subscribed--}}
+                {{--        @if(isset($user) == false || $user->followers->contains(Auth::user()->id) || $user->id == Auth::user()->id || $user->payment == NULL|| ($user->payment != NULL && $user->payment->price == 0))--}}
+                @if(isset($user) == false || $user->followers->contains(Auth::user()->id) || $user->id == Auth::user()->id || $user->price == 0)
+                    <p class="post-description">
+                        {!! clean($main_description) !!}
+                    </p>
+                @endif
+
+                {{--            Check if subscribed--}}
+
+                {{--        @if(isset($user) && !$user->followers->contains(Auth::user()->id) && $user->id != Auth::user()->id && $user->payment != NULL && $user->payment->price > 0 )--}}
+                @if(isset($user) && !$user->followers->contains(Auth::user()->id) && $user->id != Auth::user()->id && $user->price > 0 )
+                    <div class="post-image-holder post-locked  single-image">
+                        {{--                <a><img src="{{ url('user/gallery/locked.jpg') }}"  title="{{ $post->user->name }}" alt="{{ $post->user->name }}" onclick="$('#myModal').modal('show')"></a>--}}
+                        <a><img src="{{ url('user/gallery/locked.png') }}"  title="{{ $post->user->name }}" alt="{{ $post->user->name }}"></a>
+
+                        <!-- Modal -->
+                        <div class="modal fade" id="myModal" role="dialog">
+                            <div class="modal-dialog">
+
+                                <!-- Modal content-->
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                        <h4 class="modal-title">Subscribe {{$post->user->name}}'s posts</h4>
+                                    </div>
+                                    <div class="modal-body">
+                                        <img src="{{ url('user/gallery/locked.png') }}"  title="{{ $post->user->name }}" alt="{{ $post->user->name }}" style="display: block; margin-left: auto; margin-right: auto">
+                                        <p  style="margin-left: auto; margin-right: auto">Monthly Subscribe {{$post->user->price}} US$</p>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-default" data-dismiss="modal">Subscribe</button>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                @else
+
+                    <div class="post-image-holder  @if(count($post->images()->get()) == 1) single-image @endif">
+
+                        @foreach($post->images()->get() as $postImage)
+                            @if($postImage->type=='image')
+                                <a href="{{ url('user/gallery/'.$postImage->source) }}" data-lightbox="imageGallery.{{ $post->id }}" ><img src="{{ url('user/gallery/'.$postImage->source) }}"  title="{{ $post->user->name }}" alt="{{ $post->user->name }}"></a>
+                            @endif
+                        @endforeach
+                    </div>
+
+                    <div class="post-v-holder">
+                        @foreach($post->images()->get() as $postImage)
+                            @if($postImage->type=='video')
+                                <div id="unmoved-fixture">
+                                    <video width="100%" height="auto" id="video-target" controls class="video-video-playe">
+                                        <source src="{{ url('user/gallery/video/'.$postImage->source) }}"></source>
+                                    </video>
+                                </div>
+
+                            @endif
+                        @endforeach
+                    </div>
+
+                @endif
+
             </div>
-        @else
+        <!--@if($post->youtube_video_id)-->
+        <!--<iframe  src="https://www.youtube.com/embed/{{ $post->youtube_video_id }}" frameborder="0" allowfullscreen></iframe>-->
+            <!--@endif-->
+        <!--@if($post->soundcloud_id)-->
+            <!--<div class="soundcloud-wrapper">-->
+        <!--  <iframe width="100%" height="166" scrolling="no" frameborder="no" src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/{{ $post->soundcloud_id }}&amp;color=ff5500&amp;auto_play=false&amp;hide_related=false&amp;show_comments=true&amp;show_user=true&amp;show_reposts=false"></iframe>-->
+            <!--</div>-->
+            <!--@endif-->
 
-        <div class="post-image-holder  @if(count($post->images()->get()) == 1) single-image @endif">
+            @if(isset($user) == false || $user->followers->contains(Auth::user()->id) || $user->id == Auth::user()->id || $user->price == 0)
+                <ul class="actions-count list-inline">
 
-          @foreach($post->images()->get() as $postImage)
-          @if($postImage->type=='image')
-            <a href="{{ url('user/gallery/'.$postImage->source) }}" data-lightbox="imageGallery.{{ $post->id }}" ><img src="{{ url('user/gallery/'.$postImage->source) }}"  title="{{ $post->user->name }}" alt="{{ $post->user->name }}"></a>
-          @endif
-          @endforeach
-        </div>
+                    <li>
+                        @if($post->users_liked()->count() > 0)
+                            <?php
+                            $liked_ids = $post->users_liked->pluck('id')->toArray();
+                            $liked_names = $post->users_liked->pluck('name')->toArray();
+                            ?>
+                            <a href="#" class="show-users-modal tag-like-{{$post->id}}" data-html="true" data-heading="{{ trans('common.likes') }}"  data-users="{{ implode(',', $liked_ids) }}" data-original-title="{{ implode('<br />', $liked_names) }}"><span class="count-circle"><i class="fa fa-thumbs-up"></i></span> <span class="circle-like-count circle-like-count-{{$post->id}}">{{ $post->users_liked->count() }}</span> {{ trans('common.likes') }}</a>
+                        @else
+                            <a href="#" class="show-users-modal tag-like-{{$post->id}} hidden" data-html="true" data-heading="{{ trans('common.likes') }}" data-original-title=""><span class="count-circle"><i class="fa fa-thumbs-up"></i></span> <span class="circle-like-count circle-like-count-{{$post->id}}"></span> {{ trans('common.likes') }}</a>
+                        @endif
+                    </li>
 
-        <div class="post-v-holder">
-          @foreach($post->images()->get() as $postImage)
-          @if($postImage->type=='video')
-              <div id="unmoved-fixture">
-                    <video width="100%" height="auto" id="video-target" controls class="video-video-playe">
-                    <source src="{{ url('user/gallery/video/'.$postImage->source) }}"></source>
-                    </video>
-              </div>
+                    @if($post->comments->count() > 0)
+                        <li>
+                            <a href="#" class="show-all-comments"><span class="count-circle"><i class="fa fa-comment"></i></span>{{ $post->comments->count() }} {{ trans('common.comments') }}</a>
+                        </li>
+                    @endif
 
-          @endif
-          @endforeach
-        </div>
+                    @if($post->shares->count() > 0)
+                        <?php
+                        $shared_ids = $post->shares->pluck('id')->toArray();
+                        $shared_names = $post->shares->pluck('name')->toArray(); ?>
+                        <li>
+                            <a href="#" class="show-users-modal" data-html="true" data-heading="{{ trans('common.shares') }}"  data-users="{{ implode(',', $shared_ids) }}" data-original-title="{{ implode('<br />', $shared_names) }}"><span class="count-circle"><i class="fa fa-share"></i></span> {{ $post->shares->count() }} {{ trans('common.shares') }}</a>
+                        </li>
+                    @endif
 
-        @endif
-
-      </div>
-      <!--@if($post->youtube_video_id)-->
-      <!--<iframe  src="https://www.youtube.com/embed/{{ $post->youtube_video_id }}" frameborder="0" allowfullscreen></iframe>-->
-      <!--@endif-->
-      <!--@if($post->soundcloud_id)-->
-      <!--<div class="soundcloud-wrapper">-->
-      <!--  <iframe width="100%" height="166" scrolling="no" frameborder="no" src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/{{ $post->soundcloud_id }}&amp;color=ff5500&amp;auto_play=false&amp;hide_related=false&amp;show_comments=true&amp;show_user=true&amp;show_reposts=false"></iframe>-->
-      <!--</div>-->
-      <!--@endif-->
-
-    @if(isset($user) == false || $user->followers->contains(Auth::user()->id) || $user->id == Auth::user()->id || $user->price == 0)
-      <ul class="actions-count list-inline">
-
-        <li>
-            @if($post->users_liked()->count() > 0)
-            <?php
-                $liked_ids = $post->users_liked->pluck('id')->toArray();
-                $liked_names = $post->users_liked->pluck('name')->toArray();
-            ?>
-              <a href="#" class="show-users-modal tag-like-{{$post->id}}" data-html="true" data-heading="{{ trans('common.likes') }}"  data-users="{{ implode(',', $liked_ids) }}" data-original-title="{{ implode('<br />', $liked_names) }}"><span class="count-circle"><i class="fa fa-thumbs-up"></i></span> <span class="circle-like-count circle-like-count-{{$post->id}}">{{ $post->users_liked->count() }}</span> {{ trans('common.likes') }}</a>
-           @else
-                <a href="#" class="show-users-modal tag-like-{{$post->id}} hidden" data-html="true" data-heading="{{ trans('common.likes') }}" data-original-title=""><span class="count-circle"><i class="fa fa-thumbs-up"></i></span> <span class="circle-like-count circle-like-count-{{$post->id}}"></span> {{ trans('common.likes') }}</a>
+                </ul>
             @endif
-        </li>
-
-        @if($post->comments->count() > 0)
-        <li>
-          <a href="#" class="show-all-comments"><span class="count-circle"><i class="fa fa-comment"></i></span>{{ $post->comments->count() }} {{ trans('common.comments') }}</a>
-        </li>
-        @endif
-
-        @if($post->shares->count() > 0)
-        <?php
-        $shared_ids = $post->shares->pluck('id')->toArray();
-        $shared_names = $post->shares->pluck('name')->toArray(); ?>
-        <li>
-          <a href="#" class="show-users-modal" data-html="true" data-heading="{{ trans('common.shares') }}"  data-users="{{ implode(',', $shared_ids) }}" data-original-title="{{ implode('<br />', $shared_names) }}"><span class="count-circle"><i class="fa fa-share"></i></span> {{ $post->shares->count() }} {{ trans('common.shares') }}</a>
-        </li>
-        @endif
-
-      </ul>
+        </div>
     @endif
-    </div>
 
     <?php
     $display_comment ="";
@@ -462,36 +689,82 @@
      {{--            Check if subscribed--}}
 {{--     @if(isset($user) == false || $user->followers->contains(Auth::user()->id) || $user->id == Auth::user()->id  || $user->payment == NULL|| ($user->payment != NULL && $user->payment->price == 0))--}}
      @if(isset($user) == false || $user->followers->contains(Auth::user()->id) || $user->id == Auth::user()->id  || $user->price == 0)
-    <div class="panel-footer fans">
-      <ul class="list-inline footer-list">
-        @if(!$post->users_liked->contains(Auth::user()->id))
+    @if($post->type == \App\Post::PRICE_TYPE)
+        @if($post->user->id == Auth::user()->id)
+             <div class="panel-footer fans">
+                     <ul class="list-inline footer-list">
+                         @if(!$post->users_liked->contains(Auth::user()->id))
 
-          <li><a href="#" class="like-post like-{{ $post->id }}" data-post-id="{{ $post->id }}"><i class="fa fa-thumbs-o-up"></i>{{ trans('common.like') }}</a></li>
+                             <li><a href="#" class="like-post like-{{ $post->id }}" data-post-id="{{ $post->id }}"><i class="fa fa-thumbs-o-up"></i>{{ trans('common.like') }}</a></li>
 
-          <li class="hidden"><a href="#" class="like-post unlike-{{ $post->id }}" data-post-id="{{ $post->id }}"><i class="fa fa-thumbs-o-down"></i>{{ trans('common.unlike') }}</a></li>
-        @else
-          <li class="hidden"><a href="#" class="like-post like-{{ $post->id }}" data-post-id="{{ $post->id }}"><i class="fa fa-thumbs-o-up"></i>{{ trans('common.like') }}</a></li>
-          <li><a href="#" class="like-post unlike-{{ $post->id }}" data-post-id="{{ $post->id }}"><i class="fa fa-thumbs-o-down"></i></i>{{ trans('common.unlike') }}</a></li>
+                             <li class="hidden"><a href="#" class="like-post unlike-{{ $post->id }}" data-post-id="{{ $post->id }}"><i class="fa fa-thumbs-o-down"></i>{{ trans('common.unlike') }}</a></li>
+                         @else
+                             <li class="hidden"><a href="#" class="like-post like-{{ $post->id }}" data-post-id="{{ $post->id }}"><i class="fa fa-thumbs-o-up"></i>{{ trans('common.like') }}</a></li>
+                             <li><a href="#" class="like-post unlike-{{ $post->id }}" data-post-id="{{ $post->id }}"><i class="fa fa-thumbs-o-down"></i></i>{{ trans('common.unlike') }}</a></li>
+                         @endif
+                         <li><a href="#" class="show-comments"><i class="fa fa-comment-o"></i>{{ trans('common.comment') }}</a></li>
+
+                         @if(Auth::user()->id != $post->user_id)
+                             @if(!$post->users_shared->contains(Auth::user()->id))
+                                 <li><a href="#" class="share-post share" data-post-id="{{ $post->id }}"><i class="fa fa-share-square-o"></i>{{ trans('common.share') }}</a></li>
+                                 <li class="hidden"><a href="#" class="share-post shared" data-post-id="{{ $post->id }}"><i class="fa fa fa-share-square-o"></i>{{ trans('common.unshare') }}</a></li>
+                             @else
+                                 <li class="hidden"><a href="#" class="share-post share" data-post-id="{{ $post->id }}"><i class="fa fa-share-square-o"></i>{{ trans('common.share') }}</a></li>
+                                 <li><a href="#" class="share-post shared" data-post-id="{{ $post->id }}"><i class="fa fa fa-share-square-o"></i>{{ trans('common.unshare') }}</a></li>
+                             @endif
+
+                             <li>
+                                 <a href="#" class="send-tip-post" data-toggle="modal" data-target="#sendTipModal"><i class="fa fa-dollar"></i>{{ trans('common.send_tip') }}</a>
+                             </li>
+
+                         @endif
+
+                     </ul>
+                 </div>       
         @endif
-        <li><a href="#" class="show-comments"><i class="fa fa-comment-o"></i>{{ trans('common.comment') }}</a></li>
+    @else
+     <div class="panel-footer fans">
+         <ul class="list-inline footer-list">
+             @if(!$post->users_liked->contains(Auth::user()->id))
 
-        @if(Auth::user()->id != $post->user_id)
-          @if(!$post->users_shared->contains(Auth::user()->id))
-            <li><a href="#" class="share-post share" data-post-id="{{ $post->id }}"><i class="fa fa-share-square-o"></i>{{ trans('common.share') }}</a></li>
-            <li class="hidden"><a href="#" class="share-post shared" data-post-id="{{ $post->id }}"><i class="fa fa fa-share-square-o"></i>{{ trans('common.unshare') }}</a></li>
-          @else
-            <li class="hidden"><a href="#" class="share-post share" data-post-id="{{ $post->id }}"><i class="fa fa-share-square-o"></i>{{ trans('common.share') }}</a></li>
-            <li><a href="#" class="share-post shared" data-post-id="{{ $post->id }}"><i class="fa fa fa-share-square-o"></i>{{ trans('common.unshare') }}</a></li>
-          @endif
+                 <li><a href="#" class="like-post like-{{ $post->id }}" data-post-id="{{ $post->id }}"><i
+                                 class="fa fa-thumbs-o-up"></i>{{ trans('common.like') }}</a></li>
 
-          <li>
-              <a href="#" class="send-tip-post" data-toggle="modal" data-target="#sendTipModal"><i class="fa fa-dollar"></i>{{ trans('common.send_tip') }}</a>
-          </li>
+                 <li class="hidden"><a href="#" class="like-post unlike-{{ $post->id }}"
+                                       data-post-id="{{ $post->id }}"><i
+                                 class="fa fa-thumbs-o-down"></i>{{ trans('common.unlike') }}</a></li>
+             @else
+                 <li class="hidden"><a href="#" class="like-post like-{{ $post->id }}"
+                                       data-post-id="{{ $post->id }}"><i
+                                 class="fa fa-thumbs-o-up"></i>{{ trans('common.like') }}</a></li>
+                 <li><a href="#" class="like-post unlike-{{ $post->id }}" data-post-id="{{ $post->id }}"><i
+                                 class="fa fa-thumbs-o-down"></i></i>{{ trans('common.unlike') }}</a></li>
+             @endif
+             <li><a href="#" class="show-comments"><i class="fa fa-comment-o"></i>{{ trans('common.comment') }}
+                 </a></li>
 
-        @endif
+             @if(Auth::user()->id != $post->user_id)
+                 @if(!$post->users_shared->contains(Auth::user()->id))
+                     <li><a href="#" class="share-post share" data-post-id="{{ $post->id }}"><i
+                                     class="fa fa-share-square-o"></i>{{ trans('common.share') }}</a></li>
+                     <li class="hidden"><a href="#" class="share-post shared" data-post-id="{{ $post->id }}"><i
+                                     class="fa fa fa-share-square-o"></i>{{ trans('common.unshare') }}</a></li>
+                 @else
+                     <li class="hidden"><a href="#" class="share-post share" data-post-id="{{ $post->id }}"><i
+                                     class="fa fa-share-square-o"></i>{{ trans('common.share') }}</a></li>
+                     <li><a href="#" class="share-post shared" data-post-id="{{ $post->id }}"><i
+                                     class="fa fa fa-share-square-o"></i>{{ trans('common.unshare') }}</a></li>
+                 @endif
 
-      </ul>
-    </div>
+                 <li>
+                     <a href="#" class="send-tip-post" data-toggle="modal" data-target="#sendTipModal"><i
+                                 class="fa fa-dollar"></i>{{ trans('common.send_tip') }}</a>
+                 </li>
+
+             @endif
+         </ul>
+     </div>
+    @endif
 
     @if($post->comments->count() > 0 || $post->user_id == Auth::user()->id || $display_comment == "everyone")
       <div class="comments-section all_comments" style="display:none">
@@ -614,5 +887,23 @@
   {
     width: 100%;
     height: auto;
+  }
+  
+  .locked-content {
+      font-size: 120px;
+      color: #fff;
+      text-align: center;
+      height: 300px;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: -15px;
+      margin-bottom: -7px;
+  }
+
+  .locked-content .locked-content-wrapper {
+      display: flex;
+      flex-direction: column;
   }
 </style>

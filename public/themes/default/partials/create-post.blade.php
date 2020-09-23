@@ -1,3 +1,32 @@
+<style>
+    .panel-create .panel-heading {
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+    }
+
+    .panel-create .panel-heading .post-type {
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    .panel-create .panel-heading .post-type>div {
+        margin-left: 5px;
+    }
+
+    .panel-create .panel-heading .post-type>div label {
+        cursor: pointer;
+    }
+    
+    #postPriceModal .modal-dialog {
+        width: 400px;
+    }
+
+    #postPriceModal .modal-dialog input {
+        width: 100%;
+    }
+</style>
+
 <form action="{{ url('') }}" method="post" class="create-post-form">
   {{ csrf_field() }}
 
@@ -10,6 +39,33 @@
         <div class="panel-heading">
             <div class="heading-text">
                 {{ trans('messages.whats-going-on') }}
+            </div>
+            <div class="post-type">
+                <div>
+                    <input type="radio" value="free" id="free" name="type" checked class="post-type-item">
+                    <label for="free">Content is free</label>
+                </div>
+                <div>
+                    <input type="radio" value="paid" id="paid" name="type" class="post-type-item">
+                    <label for="paid">For paid subscribers</label>
+                </div>
+                <div>
+                    <input type="radio" value="price" id="price" name="type" class="post-type-item">
+                    <label for="price">Price</label>
+                </div>
+                <div class="modal fade" id="postPriceModal" role="dialog">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-body">
+                                <input type="text" name="price" class="post-price-input">
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Ok</button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
             </div>
         </div>
         <div class="panel-body">        
@@ -151,6 +207,21 @@ function initMap(event)
     return true; 
     } 
 }
+
+let postType;
+$(document).on('keyup', '.post-price-input', function () {
+    $(this).val($(this).val().replace(/,/g, '').replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1'));
+});
+
+$(document).on('change', '.post-type-item', function () {
+    $('.post-price-input').val('');
+    postType = parseInt($(this).val());
+    console.log($(this).val());
+    if ($(this).val() === "price") {
+        console.log($(this).val());
+        $('#postPriceModal').modal('show');
+    }
+});
 </script>
 
 

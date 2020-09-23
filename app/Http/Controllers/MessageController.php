@@ -305,6 +305,19 @@ class MessageController extends Controller
             });
         });
         
+        $threads->when(isset($input['favourite_users']) && $input['favourite_users'], function (Builder $q) use ($input) {
+            $favouriteUsers = Auth::user()->favouriteUsers()->pluck('favourite_user_id')->toArray();
+            $q->whereHas('participants', function (Builder $q) use ($input, $favouriteUsers){
+                $q->whereIn('user_id', $favouriteUsers);
+                $q->where('user_id', '!=', Auth::id());
+            });
+            
+            $q->whereHas('participants.user.timeline', function (Builder $q) use ($input){
+                $q->where('name', 'like', "%{$input['search']}%");
+                $q->orWhere('username', 'like', "%{$input['search']}%");
+            });
+        });
+        
         $threads->when(isset($input['name_username']) && $input['name_username'] == 'true' && $input['search'] != '', function (Builder $q) use ($input) {
             $q->whereHas('participants', function (Builder $q) use ($input){
                 $q->where('user_id', '!=', Auth::id());
@@ -330,6 +343,7 @@ class MessageController extends Controller
             foreach ($participants as $key => $participant) {
                 if ($participant->user->id != Auth::user()->id) {
                     $thread->user = $participant->user;
+                    $thread->user->is_favourite = Auth::user()->favouriteUsers->contains($participant->user->id) ? true : false;
                     break;
                 }
             }
@@ -422,5 +436,21 @@ class MessageController extends Controller
         }
 
         return response()->json(['status' => '200', 'data' => $thread]);
+    }
+    
+    public function favouriteUser(Request $request)
+    {
+        $favUserId = $request->get('favourite_user_id');
+        $currentUser = Auth::user();
+        
+        if ($currentUser->favouriteUsers->contains($favUserId)) {
+            $currentUser->favouriteUsers()->detach($favUserId);
+
+            return response()->json(['status' => '200', 'Add to favourites' => true, 'message' => 'successfully added to favourite list']);
+        } else {
+            $currentUser->favouriteUsers()->attach($favUserId);
+
+            return response()->json(['status' => '200', 'Remove from favourites' => true, 'message' => 'successfully removed from favourite list']);
+        }
     }
 }

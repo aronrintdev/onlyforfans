@@ -139,7 +139,13 @@
 						<div class="timeline-posts timeline-default">
 							@if(count($posts) > 0)
 								@foreach($posts as $post)
-									{!! Theme::partial('post',compact('post','timeline','next_page_url', 'user')) !!}
+                                    @if($post->type == \App\Post::PAID_TYPE)
+                                        @if($post->user->paidSubscribers->contains(Auth::user()->id)  || $post->user->id == Auth::user()->id)
+                                            {!! Theme::partial('post',compact('post','timeline','next_page_url', 'user')) !!}
+                                        @endif
+                                    @else
+                                        {!! Theme::partial('post',compact('post','timeline','next_page_url', 'user')) !!}
+                                    @endif
 								@endforeach
 							@else
 								<p class="no-posts">{{ trans('messages.no_posts') }}</p>
@@ -149,7 +155,13 @@
 						<div class="timeline-posts timeline-condensed-column row" style="display: none">
 							@if(count($posts) > 0)
 								@foreach($posts as $post)
-									{!! Theme::partial('post_condensed_column',compact('post','timeline','next_page_url', 'user')) !!}
+                                    @if($post->type == \App\Post::PAID_TYPE)
+                                        @if($post->user->paidSubscribers->contains(Auth::user()->id)  || $post->user->id == Auth::user()->id)
+                                            {!! Theme::partial('post_condensed_column',compact('post','timeline','next_page_url', 'user')) !!}
+                                        @endif
+                                    @else
+                                        {!! Theme::partial('post_condensed_column',compact('post','timeline','next_page_url', 'user')) !!}
+                                    @endif
 								@endforeach
 							@else
 								<p class="no-posts">{{ trans('messages.no_posts') }}</p>
