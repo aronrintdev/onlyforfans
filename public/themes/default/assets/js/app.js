@@ -2760,6 +2760,11 @@ $(document).on('click','.unjoin-page-timeline',function(e){
 
 $(document).on('click', '.purchase-post', function () {
     const postId = $(this).data('post-id');
+    const btn = $(this);
+    $(this).attr('disabled', true).append(' <i class="fa fa-spinner fa-pulse "></i>');
+    setTimeout(function () {
+        btn.attr('disabled', false).html('Buy');
+    }, 2500);
     $.post(
         SP_source() + 'checkout/create-post-checkout-session/' + postId,
         function (data) {

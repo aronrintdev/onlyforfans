@@ -108,15 +108,15 @@
 			<div class="row">
                 <div class="col-md-7 col-lg-8">
 
-                    <div style="display: flex; margin-bottom: 10px; justify-content: space-between">
-                        <div class="input-group explore-search-bar" style="display: none; margin-bottom: 0; margin-right: 10px; width: calc(100% - 150px)">
-                            <span class="input-group-btn">
-                                <button class="btn btn-default" type="button"><i class="fa fa-search"></i></button>
-                            </span>
+                    <div style="display: flex; justify-content: space-between">
+                        <div class="input-group explore-search-bar" style="display: none; margin-bottom: 10px; width: calc(100% - 200px)">
+                        <span class="input-group-btn">
+                            <button class="btn btn-default" type="button"><i class="fa fa-search"></i></button>
+                        </span>
                             <input type="text" id="explorePosts" class="form-control" placeholder="{{ trans('messages.search_placeholder') }}">
                         </div><!-- /input-group -->
-                        <a style="display: none" href="{{ route('purchased-posts') }}" class="btn btn-success purchased-posts">Show Purchased</a>
-                    </div>
+                        <h2 style="margin: 0; display: none" class="purchased-posts-title">Purchased Posts</h2>
+                    </div>                        
 			   		@if (Session::has('message'))
 				        <div class="alert alert-{{ Session::get('status') }}" role="alert">
 				            {!! Session::get('message') !!}
@@ -141,6 +141,8 @@
                                 @endforeach
                             </div>
                             <div class="no-posts alert alert-warning" style="display: none">{{ trans('common.no_posts') }}</div>
+                        @else
+                            <div class="no-posts alert alert-warning">{{ trans('common.no_posts') }}</div>
                         @endif
                     </div>
 				</div><!-- /col-md-6 -->
@@ -155,7 +157,7 @@
 
 <script type="text/javascript">
     window.onload = function () {
-        $('.explore-search-bar, .purchased-posts').fadeIn();
+        $('.explore-search-bar, .purchased-posts-title').fadeIn();
         
         $('.explore-posts .row').jscroll({
             // loadingHtml: '<img src="loading.gif" alt="Loading" /> Loading...',
@@ -171,7 +173,7 @@
         const ajaxCall = function () {
             let search = $('#explorePosts').val();
             $.ajax({
-                url: "{{ route('post.search') }}",
+                url: "{{ route('purchased-post.search') }}",
                 type: 'get',
                 dataType: 'json',
                 data: { 'search': search },

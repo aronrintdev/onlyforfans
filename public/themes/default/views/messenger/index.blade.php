@@ -85,14 +85,14 @@
                                                     </a>
                                                     <a href="#">
                                                         <div>
-                                                            <input id="favouriteUser" type="radio" name="filter_type">
-                                                            <label for="favouriteUser">Search followers by specific word and then be able to add those to a list/group</label>
+                                                            <input id="nameOrUsername" type="radio" name="filter_type" checked>
+                                                            <label for="nameOrUsername">Search by Name or Username.</label>
                                                         </div>
                                                     </a>
                                                     <a href="#">
                                                         <div>
-                                                            <input id="nameOrUsername" type="radio" name="filter_type" checked>
-                                                            <label for="nameOrUsername">Search by Name or Username.</label>
+                                                            <input id="favouriteUser" type="radio" name="filter_type">
+                                                            <label for="favouriteUser">Favourite Users</label>
                                                         </div>
                                                     </a>
                                                 </li>

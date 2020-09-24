@@ -469,8 +469,8 @@ class CheckoutController extends Controller
         ];
 
         $purchasedPost = PurchasedPost::create($purchasedPostData);
-        
-        return redirect('/');
+
+        return redirect()->route('purchased-posts');
     }
 
 }

@@ -538,6 +538,65 @@ class TimelineController extends AppBaseController
             ->render();
     }
 
+    public function showPurchasedPosts(Request $request)
+    {
+        $mode = 'exploreposts';
+        $theme = Theme::uses(Setting::get('current_theme', 'default'))->layout('default');
+
+        $timeline = Timeline::where('username', Auth::user()->username)->first();
+
+        $user = Auth::user();
+        $id = $user->id;        
+        
+        $trending_tags = trendingTags();
+        $suggested_users = suggestedUsers();
+        $suggested_groups = suggestedGroups();
+        $suggested_pages = suggestedPages();
+        
+        $purchasedPosts = $user->PurchasedPostsArr->toArray();
+        
+        $clientIp = get_client_ip();
+        $blockedUsers = BlockedProfile::where('country', '=', $user->country)
+            ->orWhere('ip_address', '=', $clientIp)
+            ->pluck('blocked_by')->toArray();
+
+        $posts = Post::withCount('users_liked')->with('images')
+            ->whereNotIn('user_id', $blockedUsers)
+            ->whereIn('id', $purchasedPosts)
+            ->orderBy('users_liked_count', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->where('active', 1)
+            ->paginate(Setting::get('items_page'));
+
+        if ($request->ajax) {
+            $responseHtml = '';
+            foreach ($posts as $post) {
+                $responseHtml .= $theme->partial('explore_posts', ['post' => $post, 'timeline' => $timeline, 'next_page_url' => $posts->appends(['ajax' => true, 'hashtag' => $request->hashtag])->nextPageUrl()]);
+            }
+
+            return $responseHtml;
+        }
+
+        $announcement = Announcement::find(Setting::get('announcement'));
+        if ($announcement != null) {
+            $chk_isExpire = $announcement->chkAnnouncementExpire($announcement->id);
+
+            if ($chk_isExpire == 'notexpired') {
+                $active_announcement = $announcement;
+                if (!$announcement->users->contains(Auth::user()->id)) {
+                    $announcement->users()->attach(Auth::user()->id);
+                }
+            }
+        }
+
+        $next_page_url = url('ajax/get-purchased-posts?page=2&ajax=true&hashtag='.$request->hashtag.'&username='.Auth::user()->username);
+
+        $theme->setTitle($timeline->name.' '.Setting::get('title_seperator').' '.Setting::get('site_title').' '.Setting::get('title_seperator').' '.Setting::get('site_tagline'));
+
+        return $theme->scope('purchased_posts', compact('timeline', 'posts', 'next_page_url', 'trending_tags', 'suggested_users', 'announcement', 'suggested_groups', 'suggested_pages', 'mode'))
+            ->render();
+    }
+
     public function showPost($postId)
     {
         $theme = Theme::uses(Setting::get('current_theme', 'default'))->layout('default');
@@ -598,6 +657,49 @@ class TimelineController extends AppBaseController
         'success' => true,
         'data'    => $responseHtml,
     ]);
+    }
+
+    public function searchPurchasedPosts(Request $request)
+    {
+        $search = $request->get('search');
+
+        $user = Auth::user();
+        $theme = Theme::uses(Setting::get('current_theme', 'default'))->layout('default');
+
+        $timeline = Timeline::where('username', Auth::user()->username)->first();
+        $purchasedPosts = $user->PurchasedPostsArr->toArray();
+
+        $clientIp = get_client_ip();
+
+        $blockedUsers = BlockedProfile::where('country', '=', $user->country)
+            ->orWhere('ip_address', '=', $clientIp)
+            ->pluck('blocked_by')->toArray();
+        $posts = Post::with('user.timeline')->whereIn('id', $purchasedPosts)->withCount('users_liked')->with('images');
+        $posts = $posts->when(isset($search) && $search != '', function (Builder $q) use ($search) {
+            $q->where(function (Builder $post) use ($search) {
+                $post->whereHas('user.timeline', function (Builder $user) use ($search) {
+                    $user->where('name', 'like', "%{$search}%");
+                })->orWhere('description', 'like', "%{$search}%")
+                    ->orWhere('location', 'like', "%{$search}%");    
+            });            
+        })->withCount('users_liked')
+            ->whereNotIn('user_id', $blockedUsers)
+            ->orderBy('users_liked_count', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->where('active', 1)
+            ->paginate(Setting::get('items_page'));
+
+//        $posts->paginate(Setting::get('items_page'));
+
+        $responseHtml = '';
+        foreach ($posts as $post) {
+            $responseHtml .= $theme->partial('explore_posts', ['post' => $post, 'timeline' => $timeline, 'next_page_url' => $posts->appends(['ajax' => true, 'hashtag' => $request->hashtag])->nextPageUrl()]);
+        }
+
+        return Response::json([
+            'success' => true,
+            'data'    => $responseHtml,
+        ]);
     }
     
     public function changeAvatar(Request $request)

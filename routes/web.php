@@ -115,6 +115,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('/', 'TimelineController@showFeed');
     Route::get('/browse', 'TimelineController@showGlobalFeed');
     Route::get('explore', 'TimelineController@showExplorePosts')->name('explore-posts');
+    Route::get('purchased-posts', 'TimelineController@showPurchasedPosts')->name('purchased-posts');
     Route::get('post/{id}', 'TimelineController@showPost')->name('post.show');
 });
 
@@ -472,7 +473,9 @@ Route::group(['prefix' => 'ajax', 'middleware' => ['auth']], function () {
     Route::get('get-more-feed', 'TimelineController@showFeed');
     Route::get('get-global-feed', 'TimelineController@showGlobalFeed');
     Route::get('get-explore-posts', 'TimelineController@showExplorePosts');
+    Route::get('get-purchased-posts', 'TimelineController@showPurchasedPosts');
     Route::get('search-explore-posts', 'TimelineController@searchExplorePosts')->name('post.search');
+    Route::get('search-purchased-posts', 'TimelineController@searchPurchasedPosts')->name('purchased-post.search');
     // Route::post('add-memberGroup', 'UserController@addingMembersGroup');
     Route::post('get-users', 'UserController@getUsersJoin');
     Route::get('get-users-mentions', 'UserController@getUsersMentions');
