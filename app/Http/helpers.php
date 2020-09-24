@@ -210,7 +210,7 @@ function test_null($var)
 function checkBlockedProfiles($username)
 {
     $timeline = Timeline::where('username', $username)->first();
-    if($timeline) {
+    if($timeline && Auth::check()) {
         $user = User::with('blockedProfiles')->where('timeline_id', $timeline['id'])->first();
         if (Auth::user()->id != $user->id && $user->blockedProfiles->count()) {
             $countries = array_filter($user->blockedProfiles->pluck('country')->toArray(), 'test_null');
