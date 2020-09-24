@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\API;
 
+use App\BlockedProfile;
 use App\Http\Controllers\AppBaseController;
 use App\Http\Requests\API\CreateTimelineAPIRequest;
 use App\Http\Requests\API\UpdateTimelineAPIRequest;
@@ -9,6 +10,7 @@ use App\Repositories\TimelineRepository;
 use App\Timeline;
 use App\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use InfyOm\Generator\Criteria\LimitOffsetCriteria;
 use InfyOm\Generator\Utils\ResponseUtil;
 use Prettus\Repository\Criteria\RequestCriteria;
@@ -322,9 +324,13 @@ class TimelineAPIController extends AppBaseController
         $this->timelineRepository->pushCriteria(new RequestCriteria($request));
         $this->timelineRepository->pushCriteria(new LimitOffsetCriteria($request));
         $timelines = $this->timelineRepository->all();
-        $followingIds = filterByBlockedFollowings();
-        $timelineIds = User::whereIn('id', $followingIds)->pluck('timeline_id')->toArray();
-        $filterTimeline = $timelines->whereIn('id',$timelineIds);
+        $user = Auth::user();
+        $clientIp = get_client_ip();
+        $blockedProfiles = BlockedProfile::where('country', '=', $user->country)
+            ->orWhere('ip_address', '=', $clientIp)
+            ->pluck('blocked_by')->toArray();
+        $timelineIds = User::whereIn('id', $blockedProfiles)->pluck('timeline_id')->toArray();
+        $filterTimeline = $timelines->whereNotIn('id',$timelineIds);
 
         return $this->sendResponse($filterTimeline->toArray(), 'Timelines retrieved successfully');
     }
