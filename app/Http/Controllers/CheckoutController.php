@@ -4,23 +4,20 @@ namespace App\Http\Controllers;
 
 use App\Notification;
 use App\Payment;
+use App\Post;
+use App\PurchasedPost;
 use App\Setting;
 use App\Subscription;
 use App\Timeline;
 use App\User;
-use Cassandra\Date;
-use Cassandra\Time;
-use http\Env\Response;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\Validator;
-use Laracasts\Flash\Flash;
+use Exception;
 use Illuminate\Http\Request;
-use Stripe\Stripe;
-use Teepluss\Theme\Facades\Theme;
-use Log;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Log;
+use Teepluss\Theme\Facades\Theme;
 
-// require_once('../vendor/stripe/init.php');
+//require_once('../vendor/stripe/init.php');
 require_once('/home/fansplatformmjmd/fan/vendor/stripe/init.php');
 
 class CheckoutController extends Controller
@@ -417,6 +414,63 @@ class CheckoutController extends Controller
             
             // app('App\Http\Controllers\TimelineController')->posts($username);
         }
+    }
+    
+    public function createPostCheckoutSession($post_id)
+    {
+        \Stripe\Stripe::setApiKey($this->secret_key);
+        $post = Post::with('user')->where('id', '=', $post_id)->first();
+        $user = $post->user()->first();
+        $domain_url = url('/');
+
+        $checkout_session = \Stripe\Checkout\Session::create([
+            'payment_method_types' => ['card'],
+            'customer_email'       => $user->email,
+            'line_items'           => [
+                [
+                    'price_data'  => [
+                        'product_data' => [
+                            'name' => 'POST OF #' . $user->id,
+                        ],
+                        'unit_amount' => $post->price * 100,
+                        'currency' => 'USD',
+                    ],
+                    'quantity'    => 1,
+                    'description' => 'POST OF #' . $user->id,
+                ],
+            ],
+            'client_reference_id'  => $post->id,
+            'mode'                 => 'payment',
+            'success_url'          => url('checkout/payment-success').'?session_id={CHECKOUT_SESSION_ID}',
+            'cancel_url'           => url('failed-payment?error=payment_cancelled'),
+        ]);
+        return response()->json(['status' => '200', 'sessionId' => $checkout_session['id'], 'publicKey' => $this->publishable_key, 'message' => $checkout_session]);
+    }
+    
+    public function paymentSuccess(Request $request)
+    {
+        \Stripe\Stripe::setApiKey($this->secret_key);
+        $sessionId = $request->get('session_id');
+        $sessionData = \Stripe\Checkout\Session::retrieve($sessionId);
+
+        $stripeID = $sessionData->id;
+        $paymentStatus = $sessionData->payment_status;
+        $amount = $sessionData->amount_total / 100;
+        $postId = $sessionData->client_reference_id;
+        $userId = Auth::id();
+
+        $purchasedPostData = [
+            'stripe_id'      => $stripeID,
+            'amount'         => $amount,
+            'purchased_by'   => $userId,
+            'post_id'        => $postId,
+            'payment_status' => $paymentStatus,
+            'meta'           => $sessionData->toArray(),
+        ];
+
+        $purchasedPost = PurchasedPost::create($purchasedPostData);
+        
+        return redirect('/');
     }
 
 }

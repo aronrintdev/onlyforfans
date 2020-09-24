@@ -131,6 +131,7 @@
                                 </h3>
                             </div>
                             {{ Form::open(['id' => 'addBlockProfile']) }}
+                            <div class="alert alert-info">{{ trans('common.add_atleast_one_field') }}</div>
 
                             {{ csrf_field() }}
                             <div class="b-stats-row__content form-group" style="margin:15px 20px !important;">
@@ -163,6 +164,7 @@
                                 </h3>
                             </div>
                             {{ Form::open(['id' => 'editBlockProfile']) }}
+                            <div class="alert alert-info">{{ trans('common.add_atleast_one_field') }}</div>
 
                             {{ csrf_field() }}
                             <input type="hidden" name="id" id="blockProfileId">
@@ -294,5 +296,9 @@
 
             },
         });
+    });
+
+    $('#blockProfileModal').on('hidden.bs.modal', function () {
+        $('#addBlockProfile')[0].reset();
     });
 </script>

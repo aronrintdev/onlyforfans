@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Collection;
 use Zizaco\Entrust\Traits\EntrustUserTrait;
 
 class User extends Authenticatable
@@ -160,12 +161,12 @@ class User extends Authenticatable
 
     public function followers()
     {
-        return $this->belongsToMany('App\User', 'followers', 'leader_id', 'follower_id')->withPivot('status');
+        return $this->belongsToMany('App\User', 'followers', 'leader_id', 'follower_id')->withPivot('status', 'referral');
     }
 
     public function following()
     {
-        return $this->belongsToMany('App\User', 'followers', 'follower_id', 'leader_id');
+        return $this->belongsToMany('App\User', 'followers', 'follower_id', 'leader_id')->withPivot('referral');
     }
 
     public function pages()
@@ -569,6 +570,22 @@ class User extends Authenticatable
         return $this->hasMany(BlockedProfile::class, 'blocked_by');
     }
 
+    /**
+     * @return HasMany
+     */
+    public function purchasedPosts()
+    {
+        return $this->hasMany(PurchasedPost::class, 'purchased_by');
+    }
+
+    /**
+     * @return Collection
+     */
+    public function getPurchasedPostsArrAttribute()
+    {
+        return $this->purchasedPosts()->pluck('post_id');
+    }
+    
     /**
      * @return BelongsToMany
      */

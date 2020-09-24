@@ -1,5 +1,6 @@
 <?php
 
+use App\BlockedProfile;
 use App\Timeline;
 use App\User;
 use Illuminate\Support\Facades\Auth;
@@ -208,18 +209,38 @@ function test_null($var)
 
 function checkBlockedProfiles($username)
 {
-    $timeline = Timeline::where('username', $username)->first(); 
-    $user = User::with('blockedProfiles')->where('timeline_id', $timeline['id'])->first();
-    if (Auth::user()->id != $user->id && $user->blockedProfiles->count()) {  
-        $countries = array_filter($user->blockedProfiles->pluck('country')->toArray(), 'test_null');
-        $ipAddresses = array_filter($user->blockedProfiles->pluck('ip_address')->toArray(), 'test_null');
+    $timeline = Timeline::where('username', $username)->first();
+    if($timeline) {
+        $user = User::with('blockedProfiles')->where('timeline_id', $timeline['id'])->first();
+        if (Auth::user()->id != $user->id && $user->blockedProfiles->count()) {
+            $countries = array_filter($user->blockedProfiles->pluck('country')->toArray(), 'test_null');
+            $ipAddresses = array_filter($user->blockedProfiles->pluck('ip_address')->toArray(), 'test_null');
 
-        $authUser = Auth::user();
-        $clientIp = get_client_ip();
-        if (in_array(strtolower($authUser->country), array_map('strtolower', $countries)) || in_array($clientIp, $ipAddresses)) {
-            return false;
+            $authUser = Auth::user();
+            $clientIp = get_client_ip();
+            if (in_array(strtolower($authUser->country), array_map('strtolower', $countries)) || in_array($clientIp,
+                    $ipAddresses)) {
+                return false;
+            }
         }
     }
 
     return true;
+}
+
+/**
+ * @return array
+ */
+function filterByBlockedFollowings()
+{
+    $id = Auth::id();
+    $user = User::with('following')->find($id);
+    $followings = $user->following()->pluck('leader_id')->toArray();
+    $clientIp = get_client_ip();
+    $blockedProfiles = BlockedProfile::where('country', '=', $user->country)
+        ->orWhere('ip_address', '=', $clientIp)
+        ->pluck('blocked_by')->toArray();
+    $followingIds = array_diff($followings, $blockedProfiles);
+
+    return $followingIds;
 }

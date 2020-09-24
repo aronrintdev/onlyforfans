@@ -225,7 +225,7 @@
             </div>
         </div>
             @if($post->type == \App\Post::PRICE_TYPE)
-                @if($post->user->id != Auth::user()->id)
+                @if($post->user->id != Auth::user()->id && !Auth::user()->PurchasedPostsArr->contains($post->id))
                     <div class="panel-body locked-panel-body">
                         <div class="locked-content">
                             <div class="locked-content-wrapper">
@@ -690,7 +690,7 @@
         {{--     @if(isset($user) == false || $user->followers->contains(Auth::user()->id) || $user->id == Auth::user()->id  || $user->payment == NULL|| ($user->payment != NULL && $user->payment->price == 0))--}}
         @if(isset($user) == false || $user->followers->contains(Auth::user()->id) || $user->id == Auth::user()->id  || $user->price == 0)
             @if($post->type == \App\Post::PRICE_TYPE)
-                @if($post->user->id == Auth::user()->id)
+                @if($post->user->id == Auth::user()->id || Auth::user()->PurchasedPostsArr->contains($post->id))
                     <div class="panel-footer fans">
                         <ul class="list-inline footer-list">
                             @if(!$post->users_liked->contains(Auth::user()->id))
@@ -714,7 +714,7 @@
                                 @endif
 
                                 <li>
-                                    <a href="#" class="send-tip-post" data-toggle="modal" data-target="#sendTipModal"><i class="fa fa-dollar"></i>{{ trans('common.send_tip') }}</a>
+                                    <a href="#" class="send-tip-post" data-toggle="modal" data-target="#sendTipModalOnCondensed{{ $post->id }}"><i class="fa fa-dollar"></i>{{ trans('common.send_tip') }}</a>
                                 </li>
 
                             @endif
@@ -746,7 +746,7 @@
                             @endif
 
                             <li>
-                                <a href="#" class="send-tip-post" data-toggle="modal" data-target="#sendTipModal"><i class="fa fa-dollar"></i>{{ trans('common.send_tip') }}</a>
+                                <a href="#" class="send-tip-post" data-toggle="modal" data-target="#sendTipModalOnCondensed{{ $post->id }}"><i class="fa fa-dollar"></i>{{ trans('common.send_tip') }}</a>
                             </li>
 
                         @endif
@@ -794,7 +794,7 @@
         @endif
     </div>
 
-    <div id="sendTipModal" class="tip-modal modal fade" role="dialog" tabindex='1'>
+    <div id="sendTipModalOnCondensed{{ $post->id }}" class="tip-modal modal fade" role="dialog" tabindex='1'>
 
         <input type="hidden" value="{{$post->id}}" id="post-id">
 
@@ -809,12 +809,12 @@
                     </div>
 
                     <div class="b-stats-row__content">
-                        <input type="number" id="etTipAmount" class="form-control" placeholder="Tip amount" step="0.1">
+                        <input type="number" id="etTipAmount" class="form-control etTipAmount" placeholder="Tip amount" step="0.1">
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" id="cancelSendTip" class="btn btn-default" data-dismiss="modal">{{ trans('common.cancel') }}</button>
-                    <button type="button" id="sendTip" class="btn btn-primary" disabled>{{ trans('common.send_tip') }}</button>
+                    <button type="button" id="sendTip" class="btn btn-primary sendTip" disabled>{{ trans('common.send_tip') }}</button>
                     <a href="{{url(Auth::user()->username).'/settings/addpayment' }}" id="addPayment" class="btn btn-warning">{{ trans('common.add_payment') }}</a>
                 </div>
             </div>

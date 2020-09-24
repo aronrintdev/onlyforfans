@@ -25,7 +25,8 @@ class BlockedProfile extends Model
     ];
 
     public static $rules = [
-        'ip_address' => 'required',
+        'ip_address' => 'required_without_all:country',
+        'country'    => 'required_without_all:ip_address',
     ];
 
     /**

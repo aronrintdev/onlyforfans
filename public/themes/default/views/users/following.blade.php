@@ -36,6 +36,11 @@
 									                    <i class="fa fa-check"></i>
 									                </span>
 									            @endif
+                                                @if($follow->pivot->referral)
+                                                    <span class="btn btn-to-follow btn-default">
+									                        {{ $follow->pivot->referral }}
+                                                    </span>
+                                                @endif
 											</div>
 											@if($timeline->id == Auth::user()->timeline_id)
 												<div class="side-right follow-links">

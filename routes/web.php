@@ -79,8 +79,11 @@ Route::get('account/linkedin', 'Auth\RegisterController@linkedin');
 Route::group(['prefix' => 'checkout', 'middleware' => ['auth']], function() {
     Route::post('create-checkout-session/{timeline_id}', 'CheckoutController@createCheckoutSession');
     Route::get('create-checkout-session/{timeline_id}', 'CheckoutController@createCheckoutSession');
+    Route::post('create-post-checkout-session/{post_id}', 'CheckoutController@createPostCheckoutSession');
+    Route::get('create-post-checkout-session/{post_id}', 'CheckoutController@createPostCheckoutSession');
     Route::get('checkout-session', 'CheckoutController@checkoutSession');
     Route::post('config/{timeline_id}', 'CheckoutController@getConfig');
+    Route::get('payment-success', 'CheckoutController@paymentSuccess')->name('payment-success');
 
     // connected account
     Route::post('get-oauth-link', 'CheckoutController@getOAuthLink');

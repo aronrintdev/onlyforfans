@@ -37,7 +37,7 @@
     <a class="jscroll-next hidden" href="{{ $next_page_url }}">{{ trans('messages.get_more_posts') }}</a>
 @endif
 
-@elseif($post->user->id == Auth::user()->id)
+@elseif($post->user->id == Auth::user()->id || Auth::user()->PurchasedPostsArr->contains($post->id))
     @if(!$post->images->isEmpty() && $post->images->first()->type == 'image')
         <div class="col-lg-4 col-md-6 col-sm-6 col-12">
             <div class="post-image-holder grid-item @if(count($post->images()->get()) == 1) single-image @else multiple-images @endif">
@@ -81,7 +81,7 @@
             <div class="locked-content">
                 <div class="locked-content-wrapper">
                     <i class="fa fa-lock" aria-hidden="true"></i>
-                    <button class="btn btn-success">Buy</button>
+                    <button class="btn btn-success purchase-post" data-post-id="{{ $post->id }}">Buy</button>
                 </div>
             </div>
         </div>

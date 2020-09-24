@@ -556,12 +556,12 @@
                 </div>
 
                 <div class="b-stats-row__content">
-                    <input type="number" id="etTipAmount" class="form-control" placeholder="Tip amount" step="0.1">
+                    <input type="number" id="etTipAmount" class="form-control etTipAmount" placeholder="Tip amount" step="0.1">
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" id="cancelSendTip" class="btn btn-default" data-dismiss="modal">{{ trans('common.cancel') }}</button>
-                <button type="button" id="sendTip" class="btn btn-primary" disabled>{{ trans('common.send_tip') }}</button>
+                <button type="button" id="cancelSendTip" class="btn btn-default " data-dismiss="modal">{{ trans('common.cancel') }}</button>
+                <button type="button" id="sendTip" class="btn btn-primary sendTip" disabled>{{ trans('common.send_tip') }}</button>
                 <a href="{{url(Auth::user()->username).'/settings/addpayment' }}" id="addPayment" class="btn btn-warning">{{ trans('common.add_payment') }}</a>
             </div>
         </div>

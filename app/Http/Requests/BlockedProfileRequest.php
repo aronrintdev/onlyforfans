@@ -29,4 +29,11 @@ class BlockedProfileRequest extends FormRequest
     {
         return BlockedProfile::$rules;
     }
+    
+    public function messages()
+    {
+        return [
+            'ip_address.*' => 'Please enter either IP Address or Country.'
+        ];
+    }
 }

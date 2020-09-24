@@ -24,7 +24,7 @@
 					<span class="input-group-btn">
 						<button class="btn btn-default" type="button"><i class="fa fa-search"></i></button>
 					</span>
-                                    <input type="text" id="navbar-search" data-url="{{ URL::to('api/v1/timelines') }}" class="form-control" placeholder="{{ trans('messages.search_placeholder') }}">
+                                    <input type="text" id="navbar-search" data-url="{{ URL::to('api/v1/search') }}" class="form-control" placeholder="{{ trans('messages.search_placeholder') }}">   
                                 </div><!-- /input-group -->
                             </form>
                             <!-- Collect the nav links, forms, and other content for toggling -->

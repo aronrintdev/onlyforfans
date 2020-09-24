@@ -52,3 +52,4 @@ composer.lock
 vendor/
 storage/framework/views
 storage/uploads/users/gallery
+storage/app/purifier

@@ -7,6 +7,7 @@ use App\Http\Requests\API\CreateTimelineAPIRequest;
 use App\Http\Requests\API\UpdateTimelineAPIRequest;
 use App\Repositories\TimelineRepository;
 use App\Timeline;
+use App\User;
 use Illuminate\Http\Request;
 use InfyOm\Generator\Criteria\LimitOffsetCriteria;
 use InfyOm\Generator\Utils\ResponseUtil;
@@ -281,5 +282,50 @@ class TimelineAPIController extends AppBaseController
         $timeline->delete();
 
         return $this->sendResponse($id, 'Timeline deleted successfully');
+    }
+
+    /**
+     * @param Request $request
+     *
+     * @return Response
+     *
+     * @SWG\Get(
+     *      path="/timelines",
+     *      summary="Get a listing of the Timelines.",
+     *      tags={"Timeline"},
+     *      description="Get all Timelines",
+     *      produces={"application/json"},
+     *      @SWG\Response(
+     *          response=200,
+     *          description="successful operation",
+     *          @SWG\Schema(
+     *              type="object",
+     *              @SWG\Property(
+     *                  property="success",
+     *                  type="boolean"
+     *              ),
+     *              @SWG\Property(
+     *                  property="data",
+     *                  type="array",
+     *                  @SWG\Items(ref="#/definitions/Timeline")
+     *              ),
+     *              @SWG\Property(
+     *                  property="message",
+     *                  type="string"
+     *              )
+     *          )
+     *      )
+     * )
+     */
+    public function search(Request $request)
+    {
+        $this->timelineRepository->pushCriteria(new RequestCriteria($request));
+        $this->timelineRepository->pushCriteria(new LimitOffsetCriteria($request));
+        $timelines = $this->timelineRepository->all();
+        $followingIds = filterByBlockedFollowings();
+        $timelineIds = User::whereIn('id', $followingIds)->pluck('timeline_id')->toArray();
+        $filterTimeline = $timelines->whereIn('id',$timelineIds);
+
+        return $this->sendResponse($filterTimeline->toArray(), 'Timelines retrieved successfully');
     }
 }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Alaouy\Youtube\Facades\Youtube;
 use App\Album;
 use App\Announcement;
+use App\BlockedProfile;
 use App\Comment;
 use App\Event;
 use App\Group;
@@ -357,6 +358,8 @@ class TimelineController extends AppBaseController
 
         $id = Auth::id();
 
+        $followingIds = filterByBlockedFollowings();
+
         $trending_tags = trendingTags();
         $suggested_users = suggestedUsers();
         $suggested_groups = suggestedGroups();
@@ -366,13 +369,14 @@ class TimelineController extends AppBaseController
         if ($request->hashtag) {
             $hashtag = '#'.$request->hashtag;
 
-            $posts = Post::where('description', 'like', "%{$hashtag}%")->where('active', 1)->whereIn('timeline_id', DB::table('followers')->where('follower_id', $id)->pluck('leader_id'))->latest()->paginate(Setting::get('items_page'));
+            $posts = Post::where('description', 'like', "%{$hashtag}%")->where('active', 1)->whereIn('timeline_id', DB::table('followers')->where('follower_id', $id)->whereIn('leader_id', $followingIds)->pluck('leader_id'))->latest()->paginate(Setting::get('items_page'));
         } // else show the normal feed
         else {
-            $posts = Post::whereIn('user_id', function ($query) use ($id) {
+            $posts = Post::whereIn('user_id', function ($query) use ($id, $followingIds) {
                 $query->select('leader_id')
                     ->from('followers')
-                    ->where('follower_id', $id);
+                    ->where('follower_id', $id)
+                    ->whereIn('leader_id', $followingIds);
 //            })->orWhere('user_id', $id)->where('active', 1)->limit(10);
             })->orWhereIn('id', function ($query1) use ($id) {
                 $query1->select('post_id')
@@ -492,9 +496,14 @@ class TimelineController extends AppBaseController
         
         $following = $user->followers()->pluck('follower_id')->toArray();
         $following[] = $id;
+        $clientIp = get_client_ip();
+        $blockedUsers = BlockedProfile::where('country', '=', $user->country)
+            ->orWhere('ip_address', '=', $clientIp)
+            ->pluck('blocked_by')->toArray();
+        $userIds = array_merge($following, $blockedUsers);        
         
         $posts = Post::withCount('users_liked')->with('images')
-            ->whereNotIn('user_id', $following)
+            ->whereNotIn('user_id', $userIds)
             ->orderBy('users_liked_count', 'desc')
             ->orderBy('created_at', 'desc')
             ->where('active', 1)
@@ -1440,7 +1449,7 @@ class TimelineController extends AppBaseController
     public function posts($username)
     {
         if(! checkBlockedProfiles($username)){
-            return view('errors.404');
+            return view('errors.blocked_profile');
         }
         
         $period = 'all';
