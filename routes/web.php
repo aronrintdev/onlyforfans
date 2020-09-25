@@ -381,6 +381,8 @@ Route::group(['prefix' => '/{username}/settings', 'middleware' => ['auth', 'edit
 
     Route::get('/save-bank-details', 'UserController@saveUserBankDetails');
     Route::post('/save-bank-details', 'UserController@saveUserBankDetails');
+    
+    Route::post('/save-watermark-settings', 'UserController@saveWaterMarkSetting');
 
 });
 

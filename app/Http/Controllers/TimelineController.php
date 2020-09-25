@@ -37,6 +37,9 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Redirect;
 use Intervention\Image\Facades\Image;
+use Intervention\Image\File;
+use Intervention\Image\Gd\Font;
+use Intervention\Image\ImageManager;
 use LinkPreview\LinkPreview;
 use Prettus\Repository\Criteria\RequestCriteria;
 use Response;
@@ -837,7 +840,28 @@ class TimelineController extends AppBaseController
                     $photoName = date('Y-m-d-H-i-s') . $strippedName;
 
                     try {
+                        /** @var File $avatar */
                         $avatar = Image::make($postImage->getRealPath());
+                        
+                        if(Auth::user()->settings()->watermark == 1){
+                            $text = Auth::user()->settings()->watermark_text;
+
+                            $font = new Font(urldecode($text));
+                            $font->valign('top');
+                            $font->color('#4285F4');
+                            $font->file(public_path('fonts/PTSerif-Bold.ttf'));
+                            $font->size(28);
+                            $size = $font->getBoxSize();
+
+                            $gdmanager = new ImageManager(array('driver' => 'gd'));
+
+                            $image_text = $gdmanager->canvas( $size['width'], $size['height']);
+
+                            $font->applyToImage($image_text);
+
+                            $text_watermark = $gdmanager->make($image_text->encode('data-url'));
+                            $avatar->insert( $text_watermark,'bottom', 10, 10);
+                        }
                         $avatar->save(storage_path() . '/uploads/users/gallery/' . $photoName, 60);
 
                     } catch (NotReadableException $e) {

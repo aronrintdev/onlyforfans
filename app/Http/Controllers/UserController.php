@@ -1561,4 +1561,17 @@ class UserController extends AppBaseController
 
         return response()->json('Data deleted Successfully.');
     }
+
+    public function saveWaterMarkSetting(Request $request)
+    {
+        $data = $request->all();
+        $waterMarkSettings = [
+          'watermark' => isset($data['watermark']) ? $data['watermark'] : 0,  
+          'watermark_text' => $data['watermark_text'],  
+        ];
+
+        DB::table('user_settings')->where('user_id', Auth::user()->id)->update($waterMarkSettings);
+
+        return redirect(Auth::user()->username.'/settings/general');
+    }
 }

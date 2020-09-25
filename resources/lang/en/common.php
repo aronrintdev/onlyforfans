@@ -418,7 +418,7 @@ return [
     'accepted_join_request'    => 'accepted your join request',
     'rejected_join_request'    => 'rejected your join request',
     'deleted_your_comment'     => 'deleted your comment',
-    'reported_your_post'       => 'reported your post',
+    'reported_your_post'       => 'reported your post', 
     'mentioned_you_in_post'    => 'mentioned you in their post',
     'commented_on_your_post'   => 'commented on your post',
     'liked_your_comment'       => 'liked your comment',
@@ -537,4 +537,7 @@ return [
     'action' => 'Action',
     'add_profile' => 'Add Profile',
     'edit_blocked_profile' => 'Edit Blocked Profile',
+    'add_atleast_one_field' => 'Please enter either IP Address or Country.',
+    'water_mark_settings' => 'Water Mark Settings',
+    'watermark_text' => 'Water Mark Text',
 ];
