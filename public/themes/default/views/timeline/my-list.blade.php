@@ -1,3 +1,93 @@
+<style>
+    .total-spent, .total-tipped, .subscribed-over, .inactive-over {
+        position: relative;
+        padding-left: 25px;
+    }
+
+    .filter-input {
+        border: 0;
+        outline: none;
+    }
+
+    #subscriberFilterModal ul li span {
+        font-size: 24px;
+        color: #298ad3;
+        position: absolute;
+        height: 100%;
+        width: 20px;
+        top: 0;
+        vertical-align: middle;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        user-select: none;
+    }
+
+    #subscriberFilterModal ul li span.decrement {        
+        left: 0;
+    }
+
+    #subscriberFilterModal ul li span.increment {        
+        right: 0;
+    }
+    
+    .panel-heading {
+        display: flex;
+        justify-content: space-between;
+    }
+    
+    input.filter-input::-webkit-outer-spin-button,
+    input.filter-input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+    
+    .filter-wrapper > div {
+        margin-left: 10px;
+    }
+
+    .filter-button {
+        float: right;
+        margin-top: 10px;
+        margin-right: 10px;
+        color: #298ad3;
+        vertical-align: middle;
+        font-size: 21px;
+    }
+    
+    .filter-modal-btn {
+        margin-left: 10px;
+        font-weight: bold;
+    }
+    
+    #subscriberFilterModal ul {
+        list-style: none;
+        padding: 0 25px;
+    }
+
+    #subscriberFilterModal ul li {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 0;
+    }
+
+    #subscriberFilterModal ul label {
+        vertical-align: middle;
+        font-size: 12px;
+        text-transform: uppercase;
+        cursor: pointer;
+    }
+
+    #resetFilter {
+        color: #ccc;
+    }
+    
+    .reset-filter {
+        color: #00AEEF !important;
+    }
+</style>
 <!-- main-section -->
 	<!-- <div class="main-content"> -->
 		<div class="container">
@@ -62,6 +152,76 @@
 												</use>
 											</svg> BLOCKED
 										</button>
+                                        @if ($list_type_id == 'followers')
+                                        <a href="#" data-toggle="modal" data-target="#subscriberFilterModal" class="filter-button">
+                                            <i class="fa fa-sliders" aria-hidden="true"></i>
+                                        </a>
+                                        @endif
+                                        <div class="modal fade" id="subscriberFilterModal" role="dialog">
+                                            <div class="modal-dialog">
+
+                                                <!-- Modal content-->
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h4 class="modal-title">Filter Subscribers</h4>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <ul>
+                                                            <li>
+                                                                <div>
+                                                                    <input type="radio" id="totalSpent" name="subscriber_filter">
+                                                                    <label for="totalSpent">Total Spent (USD)</label>
+                                                                </div>
+                                                                <div class="total-spent">
+                                                                    <span class="decrement">-</span>
+                                                                    <span class="increment">+</span>
+                                                                    <input type="number" min="0" value="0" name="total_spent" class="filter-input total-spent-input">
+                                                                </div>
+                                                            </li>
+                                                            <li>
+                                                                <div>
+                                                                    <input type="radio" id="tippedOver" name="subscriber_filter">
+                                                                    <label for="tippedOver">Tipped over (USD)</label>
+                                                                </div>
+                                                                <div class="total-tipped">
+                                                                    <span class="decrement">-</span>
+                                                                    <span class="increment">+</span>
+                                                                    <input type="number" min="0" value="0" name="total_tipped" class="filter-input total-tipped-input">
+                                                                </div>
+                                                            </li>
+                                                            <li>
+                                                                <div>
+                                                                    <input type="radio" id="subscribedOver" name="subscriber_filter">
+                                                                    <label for="subscribedOver">Subscribed over (Day)</label>
+                                                                </div>
+                                                                <div class="subscribed-over">
+                                                                    <span class="decrement">-</span>
+                                                                    <span class="increment">+</span>
+                                                                    <input type="number" min="0" value="0" name="subscribed_length" class="filter-input subscribed-length-input">
+                                                                </div>
+                                                            </li>
+                                                            <li>
+                                                                <div>
+                                                                    <input type="radio" id="inactiveOver" name="subscriber_filter">
+                                                                    <label for="inactiveOver">Inactive over (Day)</label>    
+                                                                </div>
+                                                                <div class="inactive-over">
+                                                                    <span class="decrement">-</span>
+                                                                    <span class="increment">+</span>
+                                                                    <input type="number" min="0" value="0" name="subscriber_inactive_length" class="filter-input subscriber-inactive-input">
+                                                                </div>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <a href="#" class="filter-modal-btn" data-dismiss="modal">Cancel</a>
+                                                        <a href="#" class="filter-modal-btn" id="resetFilter">Reset</a>
+                                                        <a href="#" class="filter-modal-btn" id="applyFilter">Apply</a>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                        </div>
 									</div>
 
 									<div id="All" class="tabcontent">
@@ -187,4 +347,66 @@
 		document.getElementById(cityName).style.display = "block";
 		evt.currentTarget.className += " active";
 	}
+    
+    $('span.decrement').click(function () {
+        let input = $(this).siblings('input.filter-input');
+        let val = input.val() != '' ? parseFloat(input.val()) : 0;
+        
+        if (val != NaN) {
+            input.val((val - 1) < 0 ? 0 : (val - 1)).trigger('keyup');
+        }
+    });
+    
+    $('span.increment').click(function () {
+        let input = $(this).siblings('input.filter-input');
+        let val = input.val() != '' ? parseFloat(input.val()) : 0;
+        if (val != NaN) {
+            input.val(val + 1).trigger('keyup');    
+        }        
+    });
+    
+    $(document).on('click', '#applyFilter', function () {
+        const modal = $('#subscriberFilterModal');
+        let isTotalSpent = modal.find('#totalSpent').is(':checked'); 
+        let isTippedOver = modal.find('#tippedOver').is(':checked'); 
+        let isSubscribedOver = modal.find('#subscribedOver').is(':checked'); 
+        let isInactiveOver = modal.find('#inactiveOver').is(':checked');
+        
+        let totalTipped = $('.total-tipped-input').val();
+        let totalSpent = $('.total-spent-input').val();
+        let subscribedLength = $('.subscribed-length-input').val();
+        let subscribeInactiveLength = $('.subscriber-inactive-input').val();
+        $.ajax({
+            url: "{{ url('/mylist/followers') }}",
+            type: 'get',
+            data: {
+                total_tipped: isTippedOver ? totalTipped : 0,
+                total_spent: isTotalSpent ? totalSpent : 0,
+                subscribed_length: isSubscribedOver ? subscribedLength : 0,
+                subscriber_inactive_length: isInactiveOver ? subscribeInactiveLength : 0,
+            },
+            success: function (result) {
+                modal.modal('hide');
+                console.log(result.data);
+                $('#All').html(result.data)
+            },
+            error: function (result) {
+                console.log(result);
+            }
+        });
+    });
+    
+    $('input[type="radio"]').change(function () {
+        console.log('changes');
+        if ($('input[type="radio"]').is(':checked')) {
+            $('#resetFilter').addClass('reset-filter');
+        } else {
+            $('#resetFilter').removeClass('reset-filter');
+        }
+    });
+    
+    $(document).on('click', '.reset-filter', function () {
+        $('input[type="radio"]').attr('checked', false);
+        $('.filter-input').val(0);
+    });
 </script>

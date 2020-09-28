@@ -33,6 +33,6 @@ class NotificationPublished extends Event implements ShouldBroadcast
      */
     public function broadcastOn()
     {
-        return [$this->username->username.'-notification-created'];
+        return [$this->username->id.'-notification-created'];
     }
 }

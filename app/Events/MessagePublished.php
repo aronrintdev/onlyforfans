@@ -33,6 +33,6 @@ class MessagePublished extends Event implements ShouldBroadcast
      */
     public function broadcastOn()
     {
-        return [$this->receiver->username.'-message-created'];
+        return [$this->receiver->id.'-message-created'];
     }
 }

@@ -6,7 +6,7 @@ var chatBoxes = new Vue({
         conversations : []
     },
     created : function() {
-        this.subscribeToPrivateMessageChannel(current_username);
+        this.subscribeToPrivateMessageChannel(currentUserId);
         this.getConversations();
 
         $('.chat-conversation-list').bind('scroll',this.chk_scroll);
@@ -53,7 +53,7 @@ var chatBoxes = new Vue({
         {
             $(element).animate({scrollTop: $(element)[0].scrollHeight + 600 }, 2000);
         },
-        subscribeToPrivateMessageChannel: function(receiverUsername)
+        subscribeToPrivateMessageChannel: function(currentUserId)
         {
 
             var vm = this;
@@ -70,7 +70,7 @@ var chatBoxes = new Vue({
                 }
             });
 
-            this.MessageChannel = this.pusher.subscribe(receiverUsername + '-message-created');
+            this.MessageChannel = this.pusher.subscribe(currentUserId + '-message-created');
             this.MessageChannel.bind('App\\Events\\MessagePublished', function(data) {
                 
                 indexes = $.map(vm.chatBoxes, function(thread, key) {

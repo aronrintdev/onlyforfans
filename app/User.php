@@ -161,7 +161,7 @@ class User extends Authenticatable
 
     public function followers()
     {
-        return $this->belongsToMany('App\User', 'followers', 'leader_id', 'follower_id')->withPivot('status', 'referral');
+        return $this->belongsToMany('App\User', 'followers', 'leader_id', 'follower_id')->withPivot('status', 'referral', 'subscription_id');
     }
 
     public function following()
@@ -557,9 +557,25 @@ class User extends Authenticatable
      */
     public function paidSubscribers()
     {
-        $followers = $this->followers();
-        
-        return $followers->wherePivot('subscription_id', '!=', null);
+        $followers = $this->followers()->pluck('follower_id')->toArray();
+
+        $activeFollowers = Subscription::whereIn('follower_id', $followers)
+            ->where('leader_id', $this->id)
+            ->pluck('follower_id')->toArray();
+
+        return $this->followers()->whereIn('follower_id', $activeFollowers);
+    }
+    
+    public function activeSubscribers()
+    {
+        $followers = $this->followers()->pluck('follower_id')->toArray();
+
+        $activeFollowers = Subscription::whereIn('follower_id', $followers)
+            ->where('leader_id', $this->id)
+            ->where('cancel_at', '=', null)
+            ->pluck('follower_id')->toArray();
+
+        return $this->followers()->whereIn('follower_id', $activeFollowers);
     }
 
     /**
@@ -592,5 +608,13 @@ class User extends Authenticatable
     public function favouriteUsers()
     {
         return $this->belongsToMany('App\User', 'favourite_users', 'user_id', 'favourite_user_id')->withPivot('favourite_user_id');
+    }
+
+    /**
+     * @return HasMany
+     */
+    public function tips()
+    {
+        return $this->hasMany('App\PostTip', 'user_id');
     }
 }

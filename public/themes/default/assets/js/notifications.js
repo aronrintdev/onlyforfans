@@ -58,7 +58,7 @@ var notifications = new Vue({
             //     jQuery("time.timeago").timeago();
             // })
 
-            this.NotificationChannel = this.pusher.subscribe(current_username + '-notification-created');
+            this.NotificationChannel = this.pusher.subscribe(currentUserId + '-notification-created');
             this.NotificationChannel.bind('App\\Events\\NotificationPublished', function(data) {
                 vm.unreadNotifications = vm.unreadNotifications + 1;
                 data.notification.notified_from = data.notified_from
@@ -88,7 +88,7 @@ var notifications = new Vue({
                 }
             });
 
-            this.MessageChannel = this.pusher.subscribe(current_username + '-message-created');
+            this.MessageChannel = this.pusher.subscribe(currentUserId + '-message-created');
             this.MessageChannel.bind('App\\Events\\MessagePublished', function(data) {
                 vm.unreadConversations = vm.unreadConversations + 1;
                 if(vm.conversationsLoaded)

@@ -44,6 +44,7 @@
         var base_url = "{{ url('/') }}/";
         var theme_url = "{!! Theme::asset()->url('') !!}";
         var current_username = "{{ Auth::user()->username }}";
+        var currentUserId = "{{ Auth::id() }}";
         </script>
         {!! Theme::asset()->scripts() !!}
         @if(Setting::get('google_analytics') != NULL)

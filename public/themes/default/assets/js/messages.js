@@ -11,7 +11,7 @@ var vue = new Vue({
         messageBody : ''
     },
     created : function() {
-        this.subscribeToPrivateMessageChannel(current_username);
+        this.subscribeToPrivateMessageChannel(currentUserId);
         this.getConversations();
 
         $('.coversations-thread').bind('scroll',this.chk_scroll);
@@ -54,7 +54,7 @@ var vue = new Vue({
             jQuery("time.microtime").timeago();
 
         },
-        subscribeToPrivateMessageChannel: function(receiverUsername)
+        subscribeToPrivateMessageChannel: function(currentUserId)
         {
 
             var vm = this;
@@ -71,7 +71,7 @@ var vue = new Vue({
                 }
             });
 
-            this.MessageChannel = this.pusher.subscribe(receiverUsername + '-message-created');
+            this.MessageChannel = this.pusher.subscribe(currentUserId + '-message-created');
             this.MessageChannel.bind('App\\Events\\MessagePublished', function(data) {
                 
                 data.message.user = data.sender;
@@ -137,7 +137,9 @@ var vue = new Vue({
         },
         postMessage : function(conversation)
         {
-            
+            if (this.newConversation) {
+                return this.postNewConversation();
+            }
             messageBody = this.messageBody;
             this.messageBody = '';
             console.log(conversation);

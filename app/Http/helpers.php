@@ -1,6 +1,7 @@
 <?php
 
 use App\BlockedProfile;
+use App\Setting;
 use App\Timeline;
 use App\User;
 use Illuminate\Support\Facades\Auth;
@@ -28,12 +29,26 @@ function suggestedUsers()
         $admin_users = DB::table('role_user')->where('role_id', $admin_role->id)->get();
     }
 
+    $blockProfiles = BlockedProfile::where('blocked_by', Auth::id())->get();
+    $blockCountry = $blockProfiles->pluck('country')->toArray();
+    $blockedUsers = User::whereIn('country', $blockCountry)->pluck('id')->toArray();
+
     $suggested_users = '';
+    $userIds = Auth::user()->following()->get()->pluck('id')->toArray();
+
     if ($admin_users != NULL) {
-        $suggested_users = App\User::whereNotIn('id', Auth::user()->following()->get()->pluck('id'))->where('id', '!=', $admin_users->pluck('user_id'))->where('id', '!=', Auth::user()->id)->get();
+        $blockedUsers = array_merge($blockedUsers, $admin_users->pluck('user_id')->toArray());
+        $blockedUsers[] =Auth::id();
+
+        $suggested_users = App\User::whereNotIn('id', $userIds)
+            ->whereNotIn('id', $blockedUsers)
+            ->get();
     }
     else {
-        $suggested_users = App\User::whereNotIn('id', Auth::user()->following()->get()->pluck('id'))->where('id', '!=', Auth::user()->id)->get();
+        $blockedUsers = array_merge($blockedUsers,$userIds);
+        $blockedUsers[] =Auth::id();
+
+        $suggested_users = App\User::whereNotIn('id', $blockedUsers)->get();
     }
 
     if (count($suggested_users) > 0) {
@@ -226,6 +241,27 @@ function checkBlockedProfiles($username)
     }
 
     return true;
+}
+
+function isBlockByMe($username)
+{
+    $timeline = Timeline::where('username', $username)->first();
+    $user = Auth::user();
+    if($timeline && Auth::check()) {
+        $timelineUser = User::with('blockedProfiles')->where('timeline_id', $timeline['id'])->first();
+        if (Auth::user()->id != $timelineUser->id && $user->blockedProfiles->count()) {
+            $countries = array_filter($user->blockedProfiles->pluck('country')->toArray(), 'test_null');
+            $ipAddresses = array_filter($user->blockedProfiles->pluck('ip_address')->toArray(), 'test_null');
+
+            $clientIp = get_client_ip();
+            if (in_array(strtolower($timelineUser->country), array_map('strtolower', $countries)) || in_array($clientIp,
+                    $ipAddresses)) {
+                return true;
+            }
+        }
+    }
+
+    return false;
 }
 
 /**

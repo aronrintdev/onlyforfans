@@ -9,6 +9,9 @@ use Intervention\Image\Facades\Image;
 |--------------------------------------------------------------------------
 */
 
+Route::get('check-php', function () {
+    return phpinfo();
+});
 Route::post('ajax/switch-language', 'TimelineController@switchLanguage');
 
 // Webhooks

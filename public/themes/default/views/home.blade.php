@@ -62,7 +62,7 @@
 							@if($posts->count() > 0)
 								@foreach($posts as $post)
                                     @if($post->type == \App\Post::PAID_TYPE)
-                                        @if($post->user->paidSubscribers->contains(Auth::user()->id) || $post->user->id == Auth::user()->id)
+                                        @if($post->user->activeSubscribers->contains(Auth::user()->id) || $post->user->id == Auth::user()->id)
 									    {!! Theme::partial('post',compact('post','timeline','next_page_url')) !!}
                                         @endif
                                     @else
@@ -78,7 +78,7 @@
 							@if($posts->count() > 0)
                                 @foreach($posts as $post)                                    
                                     @if($post->type == \App\Post::PAID_TYPE)
-                                        @if($post->user->paidSubscribers->contains(Auth::user()->id)  || $post->user->id == Auth::user()->id)
+                                        @if($post->user->activeSubscribers->contains(Auth::user()->id)  || $post->user->id == Auth::user()->id)
                                             {!! Theme::partial('post_condensed_column',compact('post','timeline','next_page_url')) !!}
                                         @endif
                                     @else

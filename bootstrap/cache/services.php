@@ -44,6 +44,7 @@
     40 => 'Vijaytupakula\\Transvel\\TransvelServiceProvider',
     41 => 'RachidLaasri\\LaravelInstaller\\Providers\\LaravelInstallerServiceProvider',
     42 => 'Mews\\Purifier\\PurifierServiceProvider',
+    43 => 'Spatie\\Referer\\RefererServiceProvider',
   ),
   'eager' => 
   array (
@@ -75,6 +76,7 @@
     25 => 'Cviebrock\\EloquentSluggable\\ServiceProvider',
     26 => 'Vijaytupakula\\Transvel\\TransvelServiceProvider',
     27 => 'RachidLaasri\\LaravelInstaller\\Providers\\LaravelInstallerServiceProvider',
+    28 => 'Spatie\\Referer\\RefererServiceProvider',
   ),
   'deferred' => 
   array (

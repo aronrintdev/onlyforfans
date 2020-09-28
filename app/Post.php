@@ -50,7 +50,7 @@ class Post extends Model
 
     public function tip()
     {
-        return $this->belongsToMany('App\User', 'post_tips', 'post_id', 'user_id');
+        return $this->belongsToMany('App\User', 'post_tips', 'post_id', 'user_id')->withPivot('amount');
     }
 
     public function shares()

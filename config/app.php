@@ -190,7 +190,7 @@ return [
         Vijaytupakula\Transvel\TransvelServiceProvider::class,
         RachidLaasri\LaravelInstaller\Providers\LaravelInstallerServiceProvider::class,
         Mews\Purifier\PurifierServiceProvider::class,
-
+        Spatie\Referer\RefererServiceProvider::class,
     ],
 
     /*

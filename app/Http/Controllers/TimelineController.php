@@ -43,6 +43,7 @@ use Intervention\Image\ImageManager;
 use LinkPreview\LinkPreview;
 use Prettus\Repository\Criteria\RequestCriteria;
 use Response;
+use Spatie\Referer\Referer;
 use Storage;
 use Teepluss\Theme\Facades\Theme;
 use Validator;
@@ -1356,9 +1357,15 @@ class TimelineController extends AppBaseController
         $timeline_id = $request->timeline_id;
         $follow = User::where('timeline_id', '=', $timeline_id)->first();
         $timeline = Timeline::where('id', $timeline_id)->first();
+        
+        if(! checkBlockedProfiles($timeline->username)){
+            return response()->json(['status' => '422', 'message' => 'User blocked your profile. you can not subscribe.']);
+        }
 
         if (!$follow->followers->contains(Auth::user()->id)) {
-            $follow->followers()->attach(Auth::user()->id, ['status' => 'approved']);
+            $referer = app(Referer::class)->get();
+
+            $follow->followers()->attach(Auth::user()->id, ['status' => 'approved', 'referral' => $referer]);
 
             $user = User::find(Auth::user()->id);
 
@@ -1396,7 +1403,9 @@ class TimelineController extends AppBaseController
         }
 
         if (!$follow->followers->contains(Auth::user()->id)) {
-            $follow->followers()->attach(Auth::user()->id, ['status' => 'approved']);
+            $referer = app(Referer::class)->get();
+
+            $follow->followers()->attach(Auth::user()->id, ['status' => 'approved', 'referral' => $referer]);
 
             $user = User::find(Auth::user()->id);
 
@@ -1435,7 +1444,9 @@ class TimelineController extends AppBaseController
         $timeline = Timeline::where('id', $request->timeline_id)->first();
 
         if (!$follow->followers->contains(Auth::user()->id)) {
-            $follow->followers()->attach(Auth::user()->id, ['status' => 'approved']);
+            $referer = app(Referer::class)->get();
+
+            $follow->followers()->attach(Auth::user()->id, ['status' => 'approved', 'referral' => $referer]);
 
             $user = User::find(Auth::user()->id);
 
@@ -1522,7 +1533,10 @@ class TimelineController extends AppBaseController
     
     public function publicPosts($username)
     {
-
+        if(! checkBlockedProfiles($username)){
+            return view('errors.404');
+        }
+        
         $admin_role_id = Role::where('name', '=', 'admin')->first();
         $timeline = Timeline::where('username', $username)->first();
         $user = User::where('timeline_id', $timeline['id'])->first();
@@ -1576,6 +1590,9 @@ class TimelineController extends AppBaseController
     {
         if(! checkBlockedProfiles($username)){
             return view('errors.blocked_profile');
+        } elseif (isBlockByMe($username)) {
+            $customMessage = 'You have blocked this user.';
+            return view('errors.blocked_profile', compact('customMessage'));
         }
         
         $period = 'all';
@@ -2925,7 +2942,7 @@ class TimelineController extends AppBaseController
         }
     }
 
-    public function showSpecificList($list_type_id) {
+    public function showSpecificList(Request $request, $list_type_id) {
 
         $following_count = Auth::user()->following()->where('status', '=', 'approved')->get()->count();
         $followers_count = Auth::user()->followers()->where('status', '=', 'approved')->get()->count();
@@ -2939,14 +2956,139 @@ class TimelineController extends AppBaseController
             $list_type_name = "Fans";
 
             $theme = Theme::uses('default')->layout('default');
+
+            if ($request->ajax()) {
+                $input = $request->all();
+                $totalSpentInput = isset($input['total_spent']) ? floatval($input['total_spent']) : 0;
+                $totalTippedInput = isset($input['total_tipped']) ? floatval($input['total_tipped']) : 0;
+                $subscribedLength = isset($input['subscribed_length']) ? intval($input['subscribed_length']) : 0;
+                $subscribeInactiveLength = isset($input['subscriber_inactive_length']) ? intval($input['subscriber_inactive_length']) : 0;
+                $saved_users = Auth::user()->followers()->where('status', '=', 'approved')->with('tips')->get();
+                $currentUser = Auth::user();
+                if ($totalSpentInput > 0 || $totalTippedInput > 0) {                    
+                    $posts = $currentUser->posts;
+                    $usersArr = [];
+                    if ($totalTippedInput > 0) {
+                        foreach ($saved_users as $user) {
+                            $totalTip = 0;
+                            $userId = $user->id;
+                            $tips = $user->tips;
+                            foreach ($tips as $tip) {
+                                if ($posts->contains($tip->post_id)) {
+                                    $totalTip += $tip->amount;
+                                }
+                            }
+                            
+                            if ($totalTip > 0 && $totalTip <= $totalTippedInput) {
+                                $usersArr[$userId] = $totalTip;
+                            }
+                        }
+                    }
+
+                    if ($totalSpentInput > 0) {
+                        foreach ($saved_users as $user) {
+                            $userId = $user->id;
+                            $totalPurchasedPostAmount = 0;
+                            $subscriptionAmount = 0;
+                            $totalSpent = 0;
+                            $totalTip = 0;
+                            $posts = $currentUser->posts;
+                            $purchasedPosts = $currentUser->posts->whereIn('id', $user->PurchasedPostsArr);
+                            $paidSubscribers = $currentUser->paidSubscribers;
+                            foreach ($purchasedPosts as $post) {
+                                $totalPurchasedPostAmount += $post->price;
+                            }
+
+                            $tips = $user->tips;
+                            foreach ($tips as $tip) {
+                                if ($posts->contains($tip->post_id)) {
+                                    $totalTip += $tip->amount;
+                                }
+                            }
+                            
+                            $subscribeUser = $paidSubscribers->where('id', $user->id)->first();
+                            $subscriptionId = $subscribeUser ? $subscribeUser->pivot->subscription_id : null;
+                            if ($subscriptionId && Subscription::where('subscription_id', $subscriptionId)->exists())
+                            {
+                                $subscriptionAmount = $currentUser->price;
+                            }
+
+                            $totalSpent = $totalPurchasedPostAmount + $subscriptionAmount + $totalTip;
+
+                            if (array_key_exists($userId, $usersArr)) {
+                                if ($usersArr[$userId] + $totalSpent > 0 && $usersArr[$userId] + $totalSpent <= $totalSpentInput) {
+                                    $usersArr[$userId] += $totalPurchasedPostAmount;
+                                }
+                            } else {
+                                if ($totalSpent > 0 && $totalSpent <= $totalSpentInput) {
+                                    $usersArr[$userId] = $totalPurchasedPostAmount;
+                                }
+                            }
+                        }
+                    }
+
+                    $usersArr = array_keys($usersArr);
+                    $saved_users = Auth::user()->followers()->whereIn('follower_id', $usersArr)->where('status', '=', 'approved')->get();
+                    $responseHtml = '';
+                    $responseHtml .= $theme->partial('my-list', compact(  'following_count', 'followers_count', 'saved_users', 'list_type_id', 'list_type_name'));
+
+                    return response()->json(['data' => $responseHtml]);
+                } elseif ($subscribedLength > 0) {
+                    $usersArr = [];
+                    $paidSubscribers = $currentUser->paidSubscribers;
+                    foreach ($paidSubscribers as $subscriber) {
+                        $subscription = Subscription::where('subscription_id', $subscriber->pivot->subscription_id)->where('start_at', '!=', null)->first();
+                        $startDate = Carbon::parse($subscription->start_at);
+                        $todayDate = Carbon::today();
+                        $diff = $startDate->diffInDays($todayDate);
+                        if ($diff <= $subscribedLength) {
+                            $usersArr[] = $subscriber->id;
+                        }
+                    }
+
+                    $saved_users = Auth::user()->followers()->whereIn('follower_id', $usersArr)->where('status', '=', 'approved')->get();
+                    $responseHtml = '';
+                    $responseHtml .= $theme->partial('my-list', compact(  'following_count', 'followers_count', 'saved_users', 'list_type_id', 'list_type_name'));
+                    
+                    return response()->json(['data' => $responseHtml]);
+                } elseif ($subscribeInactiveLength > 0) {
+                    $usersArr = [];
+                    $paidSubscribers = $currentUser->paidSubscribers;
+                    foreach ($paidSubscribers as $subscriber) {
+                        $subscription = Subscription::where('subscription_id', $subscriber->pivot->subscription_id)->where('cancel_at', '!=', null)->first();
+                        if ($subscription) {
+                            $cancelDate = Carbon::parse($subscription->cancel_at);
+                            $todayDate = Carbon::today();
+                            $diff = $cancelDate->diffInDays($todayDate);
+                            if ($diff <= $subscribeInactiveLength) {
+                                $usersArr[] = $subscriber->id;
+                            }
+                        }
+                    }
+
+                    $saved_users = Auth::user()->followers()->whereIn('follower_id', $usersArr)->where('status', '=', 'approved')->get();
+                    $responseHtml = '';
+                    $responseHtml .= $theme->partial('my-list', compact(  'following_count', 'followers_count', 'saved_users', 'list_type_id', 'list_type_name'));
+
+                    return response()->json(['data' => $responseHtml]);
+                } else {
+                    $responseHtml = '';
+
+                    $responseHtml .= $theme->partial('my-list', compact(  'following_count', 'followers_count', 'saved_users', 'list_type_id', 'list_type_name'));
+
+                    return response()->json(['data' => $responseHtml]);
+                }
+            }
+            
             $theme->setTitle(trans('common.followers-1').' '.Setting::get('title_seperator').' '.Setting::get('site_title').' '.Setting::get('title_seperator').' '.Setting::get('site_tagline'));
 
         } else if ($list_type_id == 'following') {
-
-            $saved_users = Auth::user()->following()->where('status', '=', 'approved')->get();
-            $list_type_name = "Following";
-
             $theme = Theme::uses('default')->layout('default');
+
+            $list_type_name = "Following";
+            
+            $saved_users = Auth::user()->following()->where('status', '=', 'approved')->get();
+            
             $theme->setTitle(trans('common.following').' '.Setting::get('title_seperator').' '.Setting::get('site_title').' '.Setting::get('title_seperator').' '.Setting::get('site_tagline'));
 
         } else {
@@ -2965,7 +3107,7 @@ class TimelineController extends AppBaseController
 
         }
 
-        return $theme->scope('timeline/my-list', compact( 'suggested_users', 'trending_tags', 'suggested_groups', 'suggested_pages', 'user_lists', 'following_count', 'followers_count', 'saved_users', 'list_type_id', 'list_type_name'))->render();
+        return $theme->scope('timeline/my-list', compact(  'following_count', 'followers_count', 'saved_users', 'list_type_id', 'list_type_name'))->render();
     }
 
     public function sendTipPost(Request $request)

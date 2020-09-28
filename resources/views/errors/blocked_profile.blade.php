@@ -40,7 +40,7 @@
 <body>
 <div class="container">
     <div class="content">
-        <div class="title">User has blocked you.</div>
+        <div class="title">{{ isset($customMessage) ? $customMessage : 'User has blocked you.' }}</div>
     </div>
 </div>
 </body>
