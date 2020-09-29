@@ -334,7 +334,7 @@ class CheckoutController extends Controller
 
     public function webhook(Request $request) {
 
-        $webhook_secret = 'whsec_Q7L23oi0augJo69ilxWFusbKhN75oDzW';
+        $webhook_secret = config('checkout.webhook');
         $payload = $request->getContent();
         $sig_header = $request->header('stripe-signature');
 

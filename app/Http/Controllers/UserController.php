@@ -10,6 +10,7 @@ use App\Hashtag;
 use App\Http\Requests\BlockedProfileRequest;
 use App\Http\Requests\CreateUserRequest;
 use App\Http\Requests\UpdateUserRequest;
+use App\Http\Requests\WaterMarkRequest;
 use App\LoginSession;
 use App\Media;
 use App\Notification;
@@ -26,15 +27,20 @@ use Carbon\Carbon;
 use Exception;
 use Flash;
 use Hash;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Redirector;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 use Prettus\Repository\Criteria\RequestCriteria;
 use Response;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 use Teepluss\Theme\Facades\Theme;
-use Validator;
 
 class UserController extends AppBaseController
 {
@@ -216,10 +222,16 @@ class UserController extends AppBaseController
 
     public function userGeneralSettings($username)
     {
+        $waterMarkUrl = null;
+        if (isset(Auth::user()->settings()->watermark_file_id)) {
+            $media = Media::find(Auth::user()->settings()->watermark_file_id);
+
+            $waterMarkUrl =  asset('uploads\watermark-fonts\\'.$media->source);
+        }
         $theme = Theme::uses(Setting::get('current_theme', 'default'))->layout('default');
         $theme->setTitle(trans('common.general_settings').' '.Setting::get('title_seperator').' '.Setting::get('site_title').' '.Setting::get('title_seperator').' '.Setting::get('site_tagline'));
 
-        return $theme->scope('users/settings/general', compact('username'))->render();
+        return $theme->scope('users/settings/general', compact('username', 'waterMarkUrl'))->render();
     }
 
     public function userEditProfile($username)
@@ -1506,7 +1518,7 @@ class UserController extends AppBaseController
     /**
      * @param  BlockedProfileRequest  $request
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function blockProfile(BlockedProfileRequest $request)
     {
@@ -1525,7 +1537,7 @@ class UserController extends AppBaseController
     /**
      * @param int $id
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function editBlockProfile($name, $id)
     {
@@ -1537,7 +1549,7 @@ class UserController extends AppBaseController
     /**
      * @param  BlockedProfileRequest  $request
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function updateBlockProfile(BlockedProfileRequest $request)
     {
@@ -1562,12 +1574,57 @@ class UserController extends AppBaseController
         return response()->json('Data deleted Successfully.');
     }
 
+    /**
+     * @param  WaterMarkRequest  $request
+     *
+     * @return RedirectResponse|Redirector
+     */
     public function saveWaterMarkSetting(Request $request)
     {
         $data = $request->all();
+        if ($request->hasFile('watermark_file')) {
+            $validator = Validator::make(
+                [
+                    'watermark_file' => strtolower($request->watermark_file->getClientOriginalExtension()),
+                ],
+                [
+                    'watermark_file' => 'in:ttf',
+                ]
+            );
+            if ($validator->fails()) {
+                return redirect()->back()->withInput()->withErrors($validator->messages()->all());
+            }
+            if(isset(Auth::user()->settings()->watermark_file_id)){
+                $media = Media::find(Auth::user()->settings()->watermark_file_id);
+
+                Storage::disk('settings')->delete('watermark-fonts\\'.$media->source);
+            }
+
+            $uploadedFile = $request->file('watermark_file');
+
+            $s3 = Storage::disk('settings');
+
+            $timestamp = date('Y-m-d-H-i-s');
+
+            $strippedName = $timestamp.str_replace(' ', '', $uploadedFile->getClientOriginalName());
+
+            $s3->put('watermark-fonts/'.$strippedName, file_get_contents($uploadedFile));
+
+            $basename = $timestamp.basename($request->file('watermark_file')->getClientOriginalName(), '.'.$request->file('watermark_file')->getClientOriginalExtension());
+
+            $media = Media::create([
+                'title'  => $basename,
+                'type'   => 'text',
+                'source' => $strippedName,
+            ]);
+        }
         $waterMarkSettings = [
-          'watermark' => isset($data['watermark']) ? $data['watermark'] : 0,  
-          'watermark_text' => $data['watermark_text'],  
+            'watermark' => isset($data['watermark']) ? $data['watermark'] : 0,
+            'watermark_text' => $data['watermark_text'],
+            'watermark_file_id' => isset($media) ? $media->id : null,
+            'watermark_font_color' => $data['watermark_font_color'],
+            'watermark_font_size' => $data['watermark_font_size'],
+            'watermark_position' => $data['watermark_position'],
         ];
 
         DB::table('user_settings')->where('user_id', Auth::user()->id)->update($waterMarkSettings);

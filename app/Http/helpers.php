@@ -280,3 +280,21 @@ function filterByBlockedFollowings()
 
     return $followingIds;
 }
+
+/**
+ * @return array
+ */
+function get_image_insert_location()
+{
+    return [
+        'top-left' => trans('common.top-left'),
+        'top' => trans('common.top'),
+        'top-right' => trans('common.top-right'),
+        'left' => trans('common.left'),
+        'center' => trans('common.center'),
+        'right' => trans('common.right'),
+        'bottom-left' => trans('common.bottom-left'),
+        'bottom' => trans('common.bottom'),
+        'bottom-right' => trans('common.bottom-right'),
+    ];
+}

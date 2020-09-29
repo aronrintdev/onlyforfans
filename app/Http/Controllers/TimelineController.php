@@ -846,12 +846,22 @@ class TimelineController extends AppBaseController
                         
                         if(Auth::user()->settings()->watermark == 1){
                             $text = Auth::user()->settings()->watermark_text;
+                            $color = Auth::user()->settings()->watermark_font_color != "" ? Auth::user()->settings()->watermark_font_color : '#4285F4';
+                            $position = isset(Auth::user()->settings()->watermark_position) ? Auth::user()->settings()->watermark_position : 'bottom';
+                            $file = public_path('fonts/PTSerif-Bold.ttf');
+                            $size = isset(Auth::user()->settings()->watermark_font_size) ? Auth::user()->settings()->watermark_font_size : 28;
+
+                            if(isset(Auth::user()->settings()->watermark_file_id)){
+                                $media = Media::find(Auth::user()->settings()->watermark_file_id);
+                                $fileName = $media->source;
+                                $file = public_path("uploads/watermark-fonts/".$fileName);
+                            }
 
                             $font = new Font(urldecode($text));
                             $font->valign('top');
-                            $font->color('#4285F4');
-                            $font->file(public_path('fonts/PTSerif-Bold.ttf'));
-                            $font->size(28);
+                            $font->color($color);
+                            $font->file($file);
+                            $font->size($size);
                             $size = $font->getBoxSize();
 
                             $gdmanager = new ImageManager(array('driver' => 'gd'));
@@ -861,7 +871,7 @@ class TimelineController extends AppBaseController
                             $font->applyToImage($image_text);
 
                             $text_watermark = $gdmanager->make($image_text->encode('data-url'));
-                            $avatar->insert( $text_watermark,'bottom', 10, 10);
+                            $avatar->insert( $text_watermark,$position, 10, 10);
                         }
                         $avatar->save(storage_path() . '/uploads/users/gallery/' . $photoName, 60);
 

@@ -297,28 +297,88 @@
                     </div>
                     <div class="panel-body nopadding">
                         <div class="fans-form">
-                            <form method="POST" action="{{ url('/'.Auth::user()->username.'/settings/save-watermark-settings') }}">
+                            <form method="POST" action="{{ url('/'.Auth::user()->username.'/settings/save-watermark-settings') }}" enctype="multipart/form-data">
                                 {{ csrf_field() }}
                                         
                                 <div class="row">
-                                    <div class="col-md-6">
+                                    <div class="col-md-12">
                                         <fieldset class="form-group toggle {{ $errors->has('watermark_text') ? ' has-error' : '' }}">
                                         <input type="checkbox" id="watermark" name="watermark" class="form-control"
                                                {{ \Illuminate\Support\Facades\Auth::user()->settings()->watermark == 1 ? 'checked' : '' }} value="{{ \Illuminate\Support\Facades\Auth::user()->settings()->watermark == 1 ? 1 : 0 }}"/><label for="watermark">watermark</label>
                                         </fieldset>
                                     </div>
-                                    <div class="col-md-6">
-                                        <fieldset class="form-group watermark_text {{ $errors->has('watermark_text') ? ' has-error' : '' }}">
-                                            {{ Form::label('watermark_text', trans('common.watermark_text')) }}
-                                            <input type="text" class="form-control" id="watermark_text" name="watermark_text" placeholder= "{{ trans('common.watermark_text') }}" value="{{ \Illuminate\Support\Facades\Auth::user()->settings()->watermark_text }}">
+									<div class="watermark_settings">
+										<div class="col-md-6">
+											<fieldset class="form-group watermark_text {{ $errors->has('watermark_text') ? ' has-error' : '' }}">
+												{{ Form::label('watermark_text', trans('common.watermark_text')) }}
+												<input type="text" class="form-control" id="watermark_text" name="watermark_text" placeholder= "{{ trans('common.watermark_text') }}" value="{{ \Illuminate\Support\Facades\Auth::user()->settings()->watermark_text }}">
 
-                                            @if ($errors->has('watermark_text'))
-                                                <span class="help-block">
-													{{ $errors->first('watermark_text') }}
-												</span>
-                                            @endif
-                                        </fieldset>
-                                    </div>
+												@if ($errors->has('watermark_text'))
+													<span class="help-block">
+														{{ $errors->first('watermark_text') }}
+													</span>
+												@endif
+											</fieldset>
+										</div>
+										<div class="col-md-6">
+											<fieldset class="form-group watermark_file {{ $errors->has('watermark_file') ? ' has-error' : '' }}">
+												{{ Form::label('watermark_file', trans('common.watermark_file')) }}
+												@if(isset(Auth::user()->settings()->watermark_file_id))
+													<a href="{{ $waterMarkUrl }}" download="{{\Illuminate\Support\Facades\Auth::user()->watermark_file_id}}">
+														{{ trans('common.existing_file') }}</a>
+												@endif
+												<input type="file" class="form-control" id="watermark_file" name="watermark_file" placeholder= "{{ trans('common.watermark_file') }}">
+
+												@if ($errors->has('watermark_file'))
+													<span class="help-block">
+														{{ $errors->first('watermark_file') }}
+													</span>
+												@endif
+												@if ($errors->any())
+													<span class="help-block" style="color: red;">
+													@foreach ($errors->all(':message') as $input_error)
+															{{ $input_error }}
+														@endforeach
+													</span>
+												@endif
+											</fieldset>
+										</div>
+										<div class="col-md-6">
+											<fieldset class="form-group {{ $errors->has('watermark_font_size') ? ' has-error' : '' }}">
+												{{ Form::label('watermark_font_size', trans('common.watermark_font_size')) }}
+												<input type="number" class="form-control" id="watermark_font_size" min="1" name="watermark_font_size" value="{{ \Illuminate\Support\Facades\Auth::user()->settings()->watermark_font_size }}" placeholder= "{{ trans('common.watermark_font_size') }}">
+
+												@if ($errors->has('watermark_font_size'))
+													<span class="help-block">
+														{{ $errors->first('watermark_font_size') }}
+													</span>
+												@endif
+											</fieldset>
+										</div>
+										<div class="col-md-6">
+											<fieldset class="form-group {{ $errors->has('watermark_position') ? ' has-error' : '' }}">
+												{{ Form::label('watermark_position', trans('common.watermark_position')) }}
+												{{ Form::select('watermark_position', get_image_insert_location(), Auth::user()->settings()->watermark_position, array('class' => 'form-control')) }}
+												@if ($errors->has('watermark_position'))
+													<span class="help-block">
+														{{ $errors->first('watermark_position') }}
+													</span>
+												@endif
+											</fieldset>
+										</div>
+										<div class="col-md-6">
+											<fieldset class="form-group {{ $errors->has('watermark_font_color') ? ' has-error' : '' }}">
+												{{ Form::label('watermark_font_color', trans('common.watermark_font_color')) }}
+												<input type="text" class="form-control" id="watermark_font_color" name="watermark_font_color" value="{{ \Illuminate\Support\Facades\Auth::user()->settings()->watermark_font_color }}" placeholder= "{{ '#'.trans('common.color_code') }}">
+
+												@if ($errors->has('watermark_font_color'))
+													<span class="help-block">
+														{{ $errors->first('watermark_font_color') }}
+													</span>
+												@endif
+											</fieldset>
+										</div>
+									</div>
                                 </div>
 
                                 <div class="pull-right">
@@ -338,10 +398,10 @@
     window.checkCheckboxStatus = function () {
         if ($('#watermark').is(':checked') == true) {
             $('#watermark').val(1);
-            $('.watermark_text').css('display', '');
+            $('.watermark_settings').css('display', '');
         } else {
             $('#watermark').val(0);
-            $('.watermark_text').css('display', 'none');
+            $('.watermark_settings').css('display', 'none');
         }
     };
     $(document).ready(function () {
