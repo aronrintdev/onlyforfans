@@ -158,4 +158,4 @@
 </div>
 <!-- </div> -->
 
-{!! Theme::asset()->container('footer')->usePath()->add('messages-js', 'js/messages-new.js') !!}
+{!! Theme::asset()->container('footer')->usePath()->add('messages-js', 'js/messages.js') !!}
