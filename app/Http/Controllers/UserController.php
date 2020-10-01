@@ -27,7 +27,6 @@ use Carbon\Carbon;
 use Exception;
 use Flash;
 use Hash;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -718,6 +717,7 @@ class UserController extends AppBaseController
         ]);
 
         $user_details = $request->except('username', 'name', 'price');
+        $user_details['price'] = $user_details['subscribe_price'];
         $user->update($user_details);
 
         // Save price

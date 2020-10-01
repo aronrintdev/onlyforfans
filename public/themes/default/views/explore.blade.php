@@ -1,15 +1,26 @@
-<style>    
-    .grid-item, .grid-item a {
-        height: 180px !important;
-        margin-bottom: 30px;        
+<style>
+    .grid {
+        min-height: 70vh;
     }
-
+    
     .grid-item a img {
         height: 100% !important;
         width: 100% !important;
         object-fit: cover;
     }
 
+    .grid-item a {
+        margin-bottom: 0;
+    }
+    
+    .grid-sizer,
+    .grid-item {
+        width: 32%;
+        float: left;
+        overflow: hidden;
+        margin-bottom: 10px;
+    }
+    
     .jscroll-inner {
         overflow: hidden !important;
     }
@@ -37,6 +48,68 @@
         width: 100%;
         height: auto;
     }
+
+    .page-load-status {
+        display: none; /* hidden by default */
+        padding-top: 20px;
+        border-top: 1px solid #DDD;
+        text-align: center;
+        color: #777;
+    }
+
+    .grid.are-images-unloaded {
+        opacity: 0;
+    }
+
+    .loader-ellips {
+        font-size: 20px; /* change size here */
+        position: relative;
+        width: 4em;
+        height: 1em;
+        margin: 10px auto;
+    }
+
+    .loader-ellips__dot {
+        display: block;
+        width: 1em;
+        height: 1em;
+        border-radius: 0.5em;
+        background: #555; /* change color here */
+        position: absolute;
+        animation-duration: 0.4s;
+        animation-timing-function: ease;
+        animation-iteration-count: infinite;
+    }
+
+    .loader-ellips__dot:nth-child(1),
+    .loader-ellips__dot:nth-child(2) {
+        left: 0;
+    }
+    .loader-ellips__dot:nth-child(3) { left: 1.5em; }
+    .loader-ellips__dot:nth-child(4) { left: 3em; }
+
+    @keyframes reveal {
+        from { transform: scale(0.001); }
+        to { transform: scale(1); }
+    }
+
+    @keyframes slide {
+        to { transform: translateX(1.5em) }
+    }
+
+    .loader-ellips__dot:nth-child(1) {
+        animation-name: reveal;
+    }
+
+    .loader-ellips__dot:nth-child(2),
+    .loader-ellips__dot:nth-child(3) {
+        animation-name: slide;
+    }
+
+    .loader-ellips__dot:nth-child(4) {
+        animation-name: reveal;
+        animation-direction: reverse;
+    }
     
     .grid-item #unmoved-fixture, .grid-item #unmoved-fixture video {
         height: 100%;
@@ -47,7 +120,7 @@
         min-height: 180px;
         width: 100% !important;
     }
-
+    
     .grid-item.multiple-images:before, .video-item:before {
         content: "\f24d ";
         font: normal normal normal 18px/1 FontAwesome;
@@ -84,7 +157,9 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        height: 100%;
+        height: 250px;
+        width: 250px;
+        max-width: 100%;
     }
 
     .locked-content .locked-content-wrapper {
@@ -92,13 +167,14 @@
         flex-direction: column;
     }
     
-    @media screen and (max-width: 992px) {
+    .more-height {
+        min-height: 80vh !important;
+    }
+    
+    @media screen and (max-width: 768px) {
+        .grid-sizer,
         .grid-item {
-            height: 250px !important;
-        }
-
-        .grid-item a {
-            min-height: 250px !important;
+            width: 31.5%;
         }
     }
 </style>
@@ -131,17 +207,26 @@
 						</div>
 					@endif
 
-                    <div class="explore-posts">
+                    <div class="explore-posts grid are-images-unloaded">
                         @if($posts->count() > 0)
-                            <div class="row">
+                            <div class="grid-sizer"></div>
                                 @foreach($posts as $post)
                                     @if($post->type != \App\Post::PAID_TYPE)
-                                    {!! Theme::partial('explore_posts',compact('post','timeline','next_page_url')) !!}
+                                            {!! Theme::partial('explore_posts',compact('post','timeline','next_page_url')) !!}
                                     @endif
                                 @endforeach
-                            </div>
                             <div class="no-posts alert alert-warning" style="display: none">{{ trans('common.no_posts') }}</div>
                         @endif
+                    </div>
+                    <div class="page-load-status">
+                        <div class="loader-ellips infinite-scroll-request">
+                            <span class="loader-ellips__dot"></span>
+                            <span class="loader-ellips__dot"></span>
+                            <span class="loader-ellips__dot"></span>
+                            <span class="loader-ellips__dot"></span>
+                        </div>
+                        <p class="infinite-scroll-last">End of content</p>
+                        <p class="infinite-scroll-error">No more pages to load</p>
                     </div>
 				</div><!-- /col-md-6 -->
 
@@ -153,20 +238,26 @@
 	<!-- </div> -->
 <!-- /main-section -->
 
+<script src="https://unpkg.com/infinite-scroll@3/dist/infinite-scroll.pkgd.min.js"></script>
+{{--<script src="https://unpkg.com/isotope-layout@3/dist/isotope.pkgd.js"></script>--}}
+<script src='https://unpkg.com/masonry-layout@4/dist/masonry.pkgd.js'></script>
 <script type="text/javascript">
+    let nextUrl = $('a.jscroll-next:last-child').attr('href');
     window.onload = function () {
-        $('.explore-search-bar, .purchased-posts').fadeIn();
         
-        $('.explore-posts .row').jscroll({
-            // loadingHtml: '<img src="loading.gif" alt="Loading" /> Loading...',
-            nextSelector: 'a.jscroll-next:last',
-            callback : function()
-            {
-                emojify.run();
-                $('.post-description').linkify()
-                jQuery("time.timeago").timeago();
-            }
-        });
+        $('.explore-search-bar, .purchased-posts').fadeIn();
+
+        
+        // $('.explore-posts').jscroll({
+        //     // loadingHtml: '<img src="loading.gif" alt="Loading" /> Loading...',
+        //     nextSelector: 'a.jscroll-next:last',
+        //     callback : function()
+        //     {
+        //         emojify.run();
+        //         $('.post-description').linkify()
+        //         jQuery("time.timeago").timeago();
+        //     }
+        // });
 
         const ajaxCall = function () {
             let search = $('#explorePosts').val();
@@ -209,5 +300,49 @@
         
         document.getElementById('explorePosts').onkeypress = debounce(ajaxCall, 1500);
         document.getElementById('explorePosts').onkeydown = debounce(ajaxCall, 1500);
+
+        var $grid = $('.grid').masonry({
+            // options
+            itemSelector: '.none',
+            percentPosition: true,
+            columnWidth: '.grid-sizer',
+            gutter: 10,
+            visibleStyle: { transform: 'translateY(0) scale(1)', opacity: 1 },
+            hiddenStyle: { transform: 'translateY(100px) scale(.8)', opacity: 0 },
+        });
+
+        var msnry = $grid.data('masonry');
+
+        // initial items reveal
+        $grid.imagesLoaded( function() {
+            $grid.removeClass('are-images-unloaded');
+            $grid.masonry( 'option', { itemSelector: '.grid-item' });
+            var $items = $grid.find('.grid-item');
+            $grid.masonry( 'appended', $items );
+        });
+                
+        $('.explore-posts').infiniteScroll({
+            // options
+            path: '.next-link',
+            append: '.grid-item',
+            outlayer: msnry,
+            status: '.page-load-status',
+            history: false
+        });
+
+        function gridWrapperHeight()
+        {
+            if (screen.height > 1200) {
+                $('.grid').addClass('more-height')
+            } else {
+                $('.grid').removeClass('more-height')
+            }
+        }
+
+        gridWrapperHeight();
+        
+        $( window ).resize(function () {
+            gridWrapperHeight();
+        })        
     };
 </script>
