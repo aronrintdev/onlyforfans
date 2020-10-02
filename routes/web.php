@@ -77,7 +77,7 @@ Route::get('linkedin', 'Auth\RegisterController@linkedinRedirect');
 // Get back to redirect url
 Route::get('account/linkedin', 'Auth\RegisterController@linkedin');
 
-
+Route::get('failed-payment', 'CheckoutController@handleFailedPayment')->name('failed-payment');
 // Stripe
 Route::group(['prefix' => 'checkout', 'middleware' => ['auth']], function() {
     Route::post('create-checkout-session/{timeline_id}', 'CheckoutController@createCheckoutSession');

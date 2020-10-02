@@ -313,8 +313,9 @@ class MessageController extends Controller
             });
             
             $q->whereHas('participants.user.timeline', function (Builder $q) use ($input){
-                $q->where('name', 'like', "%{$input['search']}%");
-                $q->orWhere('username', 'like', "%{$input['search']}%");
+                $search = strtolower($input['search']);
+                $q->whereRaw('lower(name) like ? ', "%{$search}%");
+                $q->orWhereRaw('lower(username) like  ?', "%{$search}%");
             });
         });
         
@@ -323,29 +324,61 @@ class MessageController extends Controller
                 $q->where('user_id', '!=', Auth::id());
             });
             $q->whereHas('participants.user.timeline', function (Builder $q) use ($input){
-                $q->where('name', 'like', "%{$input['search']}%");
-                $q->orWhere('username', 'like', "%{$input['search']}%");
-//                $q->whereHas('timeline', function (Builder $q) use ($input){
-//                    $q->orWhere('name', 'like', "%{$input['search']}%");
-//                });
+                $search = strtolower($input['search']);
+                $q->whereRaw('lower(name) like ? ', "%{$search}%");
+                $q->orWhereRaw('lower(username) like  ?', "%{$search}%");
             });
         });
 
         $threads = $threads->paginate(30);
         
-        foreach ($threads as $key => $thread) {
+        foreach ($threads as $index => $thread) {
             $thread->unread = $thread->isUnread($currentUserId);
 
             $thread->lastMessage = $thread->latestMessage;
 
             $participants = $thread->participants()->get();
 
+            if (isset($input['location']) && $input['location'] && !empty($input['search'])) {
+                $participants = $thread->participants()->whereHas('user', function (Builder $q) use($input) {
+                    $q->where('users.city', 'like', "%{$input['search']}%");
+                    $q->orWhere('users.country', 'like', "%{$input['search']}%");
+                })->get();
+            }
+            if (isset($input['name_username']) && $input['name_username'] == 'true' && $input['search'] != '') {
+                $participants = $thread->participants()
+                    ->whereHas('user.timeline', function (Builder $q) use ($input){
+                    $search = strtolower($input['search']);
+                    $q->whereRaw('lower(name) like ? ', "%{$search}%");
+                    $q->orWhereRaw('lower(username) like  ?', "%{$search}%");
+                })->get();
+            }
+
+            if (isset($input['favourite_users']) && $input['favourite_users'] && $input['search'] != '') {
+                $participants = $thread->participants()
+                    ->whereHas('user.timeline', function (Builder $q) use ($input){
+                        $search = strtolower($input['search']);
+                        $q->whereRaw('lower(name) like ? ', "%{$search}%");
+                        $q->orWhereRaw('lower(username) like  ?', "%{$search}%");
+                    })->get();
+            }
+            
+            if (empty($participants)) {
+                unset($threads[$index]);
+            }
+
+            $matched = false;
             foreach ($participants as $key => $participant) {
                 if ($participant->user->id != Auth::user()->id) {
                     $thread->user = $participant->user;
                     $thread->user->is_favourite = Auth::user()->favouriteUsers->contains($participant->user->id) ? true : false;
+                    $matched = true;
                     break;
                 }
+            }
+            
+            if (!$matched) {
+                unset($threads[$index]);
             }
         }
             // dd($threads);

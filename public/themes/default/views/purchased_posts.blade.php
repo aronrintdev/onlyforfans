@@ -206,7 +206,7 @@
 							<p>{{ $active_announcement->description }}</p>
 						</div>
 					@endif
-
+                    <div class="no-posts alert alert-warning" style="display: none">{{ trans('common.no_posts') }}</div>
                     <div class="explore-posts grid are-images-unloaded">
                         @if($posts->count() > 0)
                             <div class="grid-sizer"></div>
@@ -215,7 +215,6 @@
                                 {!! Theme::partial('explore_posts',compact('post','timeline','next_page_url')) !!}
                                 @endif
                             @endforeach
-                            <div class="no-posts alert alert-warning" style="display: none">{{ trans('common.no_posts') }}</div>
                         @else
                             <div class="no-posts alert alert-warning">{{ trans('common.no_posts') }}</div>
                         @endif
@@ -242,6 +241,7 @@
 <script src="https://unpkg.com/infinite-scroll@3/dist/infinite-scroll.pkgd.min.js"></script>
 <script src='https://unpkg.com/masonry-layout@4/dist/masonry.pkgd.js'></script>
 <script type="text/javascript">
+    let $grid;
     window.onload = function () {
         $('.explore-search-bar, .purchased-posts-title').fadeIn();
         
@@ -253,11 +253,42 @@
                 dataType: 'json',
                 data: { 'search': search },
                 success: function (result) {
-                    $('.explore-posts .no-posts').hide();
+                    let $ajaxGrid;
+                    $('.no-posts').hide();
+                    $('.explore-posts').removeClass('lesser-hight');
                     if (result.data == '') {
-                        $('.explore-posts .no-posts').show();
+                        $('.no-posts').show();
+                        $('.explore-posts').addClass('lesser-hight');
                     }
-                    $('.explore-posts .jscroll-inner').html(result.data);
+                    $('.grid').addClass('are-images-unloaded');
+                    $('.explore-posts').html(result.data);
+                    $('.explore-posts').prepend('<div class="grid-sizer"></div>');
+                    $ajaxGrid = $('.grid').masonry({
+                        // options
+                        itemSelector: '.none',
+                        percentPosition: true,
+                        columnWidth: '.grid-sizer',
+                        gutter: 10
+                    });
+
+                    var msnry = $ajaxGrid.data('masonry');
+
+                    // initial items reveal
+                    $ajaxGrid.imagesLoaded( function() {
+                        $ajaxGrid.removeClass('are-images-unloaded');
+                        $ajaxGrid.masonry( 'option', { itemSelector: '.grid-item' });
+                        var $items = $ajaxGrid.find('.grid-item');
+                        $ajaxGrid.masonry( 'appended', $items );
+                    });
+
+                    $('.explore-posts').infiniteScroll({
+                        // options
+                        path: '.next-link',
+                        append: '.grid-item',
+                        outlayer: msnry,
+                        status: '.page-load-status',
+                        history: false
+                    });
                 },
                 error: function (result) {
                     console.log(result);
@@ -287,7 +318,7 @@
         document.getElementById('explorePosts').onkeypress = debounce(ajaxCall, 1500);
         document.getElementById('explorePosts').onkeydown = debounce(ajaxCall, 1500);
         
-        var $grid = $('.grid').masonry({
+        $grid = $('.grid').masonry({
             // options
             itemSelector: '.none',
             percentPosition: true,

@@ -638,14 +638,24 @@ class TimelineController extends AppBaseController
         $theme = Theme::uses(Setting::get('current_theme', 'default'))->layout('default');
 
         $timeline = Timeline::where('username', Auth::user()->username)->first();
-
-        $posts = Post::with('user.timeline')->withCount('users_liked')->with('images');
+        $user = Auth::user();
+        $clientIp = get_client_ip();
+        $blockedUsers = BlockedProfile::where('country', '=', $user->country)
+            ->orWhere('ip_address', '=', $clientIp)
+            ->pluck('blocked_by')->toArray();
+        
+        $posts = Post::with('user.timeline', 'user.blockedProfiles')->withCount('users_liked')->with('images')
+            ->whereDoesntHave('user.blockedProfiles', function (Builder $q) {
+                $q->where('country', 'like', '%'.Auth::user()->country.'%');
+            });
         $posts = $posts->when(isset($search) && $search != '', function (Builder $q) use ($search) {
             $q->whereHas('user.timeline', function (Builder $user) use ($search) {
                 $user->where('name', 'like', "%{$search}%");
-            })->orWhere('description', 'like', "%{$search}%")
-                ->orWhere('location', 'like', "%{$search}%");
-        })->orderBy('users_liked_count', 'desc')
+            })->orWhere('location', 'like', "%{$search}%")
+                ->orWhere('description', 'like', "%{$search}%");
+        })
+            ->whereNotIn('user_id', $blockedUsers)
+            ->orderBy('users_liked_count', 'desc')
             ->orderBy('created_at', 'desc')
             ->where('active', 1)
             ->paginate(Setting::get('items_page'));
@@ -3046,14 +3056,18 @@ class TimelineController extends AppBaseController
                 } elseif ($subscribedLength > 0) {
                     $usersArr = [];
                     $paidSubscribers = $currentUser->paidSubscribers;
-                    foreach ($paidSubscribers as $subscriber) {
-                        $subscription = Subscription::where('subscription_id', $subscriber->pivot->subscription_id)->where('start_at', '!=', null)->first();
-                        $startDate = Carbon::parse($subscription->start_at);
-                        $todayDate = Carbon::today();
-                        $diff = $startDate->diffInDays($todayDate);
-                        if ($diff <= $subscribedLength) {
-                            $usersArr[] = $subscriber->id;
-                        }
+                    if (count($paidSubscribers) > 0) {
+                        foreach ($paidSubscribers as $subscriber) {
+                            $subscription = Subscription::where('subscription_id', $subscriber->pivot->subscription_id)->where('start_at', '!=', null)->first();
+                            if ($subscription) {
+                                $startDate = Carbon::parse($subscription->start_at);
+                                $todayDate = Carbon::today();
+                                $diff = $startDate->diffInDays($todayDate);
+                                if ($diff <= $subscribedLength) {
+                                    $usersArr[] = $subscriber->id;
+                                }   
+                            }
+                        }   
                     }
 
                     $saved_users = Auth::user()->followers()->whereIn('follower_id', $usersArr)->where('status', '=', 'approved')->get();

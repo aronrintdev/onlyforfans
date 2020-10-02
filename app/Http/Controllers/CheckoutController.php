@@ -473,4 +473,13 @@ class CheckoutController extends Controller
         return redirect()->route('purchased-posts');
     }
 
+    /**
+     * @return mixed
+     */
+    public function handleFailedPayment()
+    {
+        $theme = Theme::uses(Setting::get('current_theme', 'default'))->layout('default');
+        
+        return $theme->scope('payment_failed')->render();
+    }
 }

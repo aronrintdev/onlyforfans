@@ -4,6 +4,7 @@ use App\BlockedProfile;
 use App\Setting;
 use App\Timeline;
 use App\User;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 
 function trendingTags()
@@ -40,7 +41,11 @@ function suggestedUsers()
         $blockedUsers = array_merge($blockedUsers, $admin_users->pluck('user_id')->toArray());
         $blockedUsers[] =Auth::id();
 
-        $suggested_users = App\User::whereNotIn('id', $userIds)
+        $suggested_users = App\User::with('blockedProfiles')
+            ->whereDoesntHave('blockedProfiles', function (Builder $q) {
+                $q->where('country', 'like', '%'.Auth::user()->country.'%');
+            })
+            ->whereNotIn('id', $userIds)
             ->whereNotIn('id', $blockedUsers)
             ->get();
     }
@@ -48,7 +53,10 @@ function suggestedUsers()
         $blockedUsers = array_merge($blockedUsers,$userIds);
         $blockedUsers[] =Auth::id();
 
-        $suggested_users = App\User::whereNotIn('id', $blockedUsers)->get();
+        $suggested_users = App\User::whereNotIn('id', $blockedUsers)
+            ->whereDoesntHave('blockedProfiles', function (Builder $q) {
+                $q->where('country', 'like', '%'.Auth::user()->country.'%');
+            })->get();
     }
 
     if (count($suggested_users) > 0) {
