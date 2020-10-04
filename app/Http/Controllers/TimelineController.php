@@ -1455,8 +1455,19 @@ class TimelineController extends AppBaseController
 
         $subscription = Subscription::where('follower_id', Auth::user()->id)->where('leader_id', $request->timeline_id)->where('cancel_at', NULL)->first();
         session(['previous_url' => redirect()->back()->getTargetUrl()]);
-        app('App\Http\Controllers\CheckoutController')->deleteSubscription($subscription);
+        if ($subscription) {
+            app('App\Http\Controllers\CheckoutController')->deleteSubscription($subscription);
+        } else {
+            $follow = User::where('timeline_id', '=', $request->timeline_id)->first();
+            $follow->followers()->detach([Auth::user()->id]);
+            try{
+                //Notify the user for follow
+                Notification::create(['user_id' => $follow->id, 'timeline_id' => $request->timeline_id, 'notified_by' => Auth::user()->id, 'description' => Auth::user()->name.' '.trans('common.is_unfollowing_you'), 'type' => 'unfollow']);
+            }catch(\Exception $e){
+            }
 
+            return response()->json(['status' => '200', 'followed' => false, 'message' => 'successfully unFollowed']);
+        }
     }
 
     public function unfollowFreeUser(Request $request) {
