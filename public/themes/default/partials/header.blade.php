@@ -93,10 +93,10 @@
 
                                         <ul class="list-inline notification-list">
                                             <li class="">
-                                                <a href="{{ url('/') }}"><i class="fa fa-home" aria-hidden="true"></i><span class="small-screen">Home</span></a>
+                                                <a href="{{ url('/') }}"><i class="fas fa-stream" aria-hidden="true"></i><span class="small-screen">My Feed</span></a>
                                             </li>
                                             <li class="">
-                                                <a href="{{ route('explore-posts') }}"><i class="fa fa-th-large" aria-hidden="true"></i><span class="small-screen">All Posts</span></a>
+                                                <a href="{{ route('explore-posts') }}"><i class="fa fa-th-list" aria-hidden="true"></i><span class="small-screen">Explore</span></a>
                                             </li>
                                             <li class="dropdown message notification">
                                                 <a href="#" data-toggle="dropdown" @click.prevent="showNotifications" class="dropdown-toggle" role="button" aria-haspopup="true" aria-expanded="false">
@@ -197,17 +197,17 @@
                                                     </div>
                                                 </div>
                                             </li>
-                                            <!--<li class="smallscreen-message">-->
-                                            <!--    <a href="{{ url('messages') }}">-->
-                                            <!--        <i class="fa fa-comments" aria-hidden="true">-->
-                                            <!--            <span class="count" v-if="unreadConversations" >@{{ unreadConversations }}</span>-->
-                                            <!--        </i>-->
-                                            <!--        <span class="small-screen">{{ trans('common.messages') }}</span>-->
-                                            <!--    </a>-->
-                                            <!--</li>-->
-                                            <!--<li class="chat-list-toggle">-->
-                                            <!--    <a href="#"><i class="fa fa-users" aria-hidden="true"></i><span class="small-screen">chat-list</span></a>-->
-                                            <!--</li>-->
+                                            <li class="smallscreen-message">
+                                                <a href="{{ url('messages') }}">
+                                                    <i class="fa fa-comments" aria-hidden="true">
+                                                        <span class="count" v-if="unreadConversations" >@{{ unreadConversations }}</span>
+                                                    </i>
+                                                    <span class="small-screen">{{ trans('common.messages') }}</span>
+                                                </a>
+                                            </li>
+                                            <li class="chat-list-toggle">
+                                                <a href="#"><i class="fa fa-users" aria-hidden="true"></i><span class="small-screen">chat-list</span></a>
+                                            </li>
                                         </ul>
                                     </li>
 

@@ -4,7 +4,7 @@
     }
 
     .failed-text i {
-        color: red;
+        color: #dc3545;
     }
     
     .text-wrapper {
@@ -19,7 +19,7 @@
                     <div class="col-12 alert bg-rgba-danger">
                         <div class="d-flex align-items-center failed-text text-center">
                             <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
-                            <span >Sorry! Payment is failed, Try again after some time.</span>
+                            <span>Payment did not complete.</span><br><span style="font-size:18px;">Please try again or <a href="{{url('support')}}">contact support</a>.</span>
                         </div>
                     </div>
                 </div>

@@ -10,14 +10,14 @@
 	<div class="footer-description">
 		<div class="row" style="margin-bottom: 60px; text-align:center">
 			<span class="col-sm-2 col-2 col-lg-2"></span>
-			<a href="{{url('/faq')}}" class="col-sm-2 col-2 col-lg-2 col-xs-12" style="margin-bottom:5px"><b>{{ trans('common.faq') }}</b></a>
-			<a href="{{url('support')}}" class="col-sm-2 col-2 col-lg-2 col-xs-12" style="margin-bottom:5px"><b>{{ trans('common.support') }}</b></a>
-			<a href="{{url('terms-of-use')}}" class="col-sm-2 col-2 col-lg-2 col-xs-12" style="margin-bottom:5px"><b>{{ trans('common.term_of_use') }}</b></a>
-			<a href="{{url('privacy-policy')}}" class="col-sm-2 col-2 col-lg-2 col-xs-12" style="margin-bottom:5px"><b>{{ trans('common.privacy_policy') }}</b></a>
+			<a href="{{url('/faq')}}" class="col-sm-2 col-2 col-lg-2 col-xs-12" style="margin-bottom:5px">{{ trans('common.faq') }}</a>
+			<a href="{{url('support')}}" class="col-sm-2 col-2 col-lg-2 col-xs-12" style="margin-bottom:5px">{{ trans('common.support') }}</a>
+			<a href="{{url('terms-of-use')}}" class="col-sm-2 col-2 col-lg-2 col-xs-12" style="margin-bottom:5px">{{ trans('common.term_of_use') }}</a>
+			<a href="{{url('privacy-policy')}}" class="col-sm-2 col-2 col-lg-2 col-xs-12" style="margin-bottom:5px">{{ trans('common.privacy_policy') }}</a>
 			<span class="col-sm-2 col-2 col-lg-2"></span>
 		</div>
 		<div class="fans-terms text-center" >
-		    Copyright &copy; 2020 {{ Setting::get('site_title') }}. All rights reserved.
+		    Copyright &copy; 2020 <a href="{{ url('/') }}">{{ Setting::get('site_title') }}</a>. All rights reserved.
 
 			<span class="dropup"  style="margin-left: 20px">
 			<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="true">

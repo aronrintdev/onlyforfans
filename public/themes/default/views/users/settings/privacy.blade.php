@@ -127,7 +127,7 @@
                             <div class="modal-header lists-modal">
                                 <button type="button" class="close" data-dismiss="modal">&times;</button>
                                 <h3 class="modal-title lists-modal-title">
-                                    {{ trans("common.add_profile") }}
+                                    {{ trans('common.blocked_profiles') }}
                                 </h3>
                             </div>
                             {{ Form::open(['id' => 'addBlockProfile']) }}

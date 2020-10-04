@@ -27,7 +27,7 @@ return [
     'timeline_post_privacy'            => 'Timeline post privacy',
     'timeline_post_privacy_text'       => 'Who can post on group\'s timeline',
     'timeline_post_privacy_page_text'  => 'Who can post on page\'s timeline',
-    'id'                               => 'Id',
+    'id'                               => 'ID',
     'options'                          => 'options',
     'group_name_placeholder'           => 'Enter group name',
     'username_placeholder'             => 'Enter Username',

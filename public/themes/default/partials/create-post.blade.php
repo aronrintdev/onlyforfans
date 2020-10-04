@@ -43,24 +43,24 @@
             <div class="post-type">
                 <div>
                     <input type="radio" value="free" id="free" name="type" checked class="post-type-item">
-                    <label for="free">Content is free</label>
+                    <label for="free">Free</label>
                 </div>
                 <div>
                     <input type="radio" value="paid" id="paid" name="type" class="post-type-item">
-                    <label for="paid">For paid subscribers</label>
+                    <label for="paid">For Subscribers</label>
                 </div>
                 <div>
                     <input type="radio" value="price" id="price" name="type" class="post-type-item">
-                    <label for="price">Price</label>
+                    <label for="price">Set Price</label>
                 </div>
                 <div class="modal fade" id="postPriceModal" role="dialog">
                     <div class="modal-dialog">
                         <div class="modal-content">
                             <div class="modal-body">
-                                <input type="text" name="price" class="post-price-input">
+                                <input type="text" name="price" class="post-price-input" placeholder="$0.00">
                             </div>
                             <div class="modal-footer">
-                                <button type="button" class="btn btn-default" data-dismiss="modal">Ok</button>
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Set</button>
                             </div>
                         </div>
 

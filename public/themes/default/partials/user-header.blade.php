@@ -71,6 +71,11 @@
 					</a>
 					<ul class="dropdown-menu profile-dropdown-menu-content">
 						<li class="main-link">
+							@if($timeline->id == Auth::user()->timeline_id)
+								<a href="{{ url('/'.Auth::user()->username.'/settings/profile') }}">
+									{{ trans('common.edit_profile') }}
+								</a>
+							@endif
 
 							<input type="hidden" id="profile-url" value="{{ url($timeline->username) }}">
 
@@ -98,7 +103,7 @@
 			<!-- <div class="cover-bottom">
 		</div> -->
 		<div class="user-timeline-name">
-			<a href="{{ url($timeline->username) }}">{{ $timeline->name }}</a><br><a class="user-timeline-username" href="{{ url($timeline->username) }}">{{ $timeline->username }}</a>
+			<a href="{{ url($timeline->username) }}">{{ $timeline->name }}</a><br><a class="user-timeline-username" href="{{ url($timeline->username) }}"><span>@</span>{{ $timeline->username }}</a>
 				{!! verifiedBadge($timeline) !!}
 		</div>
 		</div>
@@ -107,6 +112,7 @@
 			<div class="status-button">
 					<a href="#" class="btn btn-status">Subscription Packages</a>
 			</div>
+			
 			<div class="timeline-user-avtar">
 
 				<img src="{{ $timeline->user->avatar }}" alt="{{ $timeline->name }}" title="{{ $timeline->name }}">

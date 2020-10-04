@@ -99,7 +99,7 @@
 												<div class="form-check">
 													<input class="red-checkbox" type="radio" name="sort-profile-post" id="soryByLiked" value="liked" {{$sort_by == 'liked' ? "checked" : ""}}>
 													<label class="red-list-label" for="soryByLiked">
-														Most liked
+														Most Liked
 													</label>
 												</div>
 											</li>

@@ -45,7 +45,7 @@
 							<td>{{ $user->os }}</td>
 							<td>{{ $user->machine_name }}</td>
 							<!--<td>{{ $user->location }}</td>-->
-							<td>{{ $user->created_at }}+00:00</td>
+							<td>{{ $user->created_at }}</td>
 							<td>&nbsp;</td>
 						</tr>
 					@endforeach

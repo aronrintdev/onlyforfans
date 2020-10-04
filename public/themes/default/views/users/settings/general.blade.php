@@ -10,8 +10,8 @@
     .toggle > label {
         cursor: pointer;
         text-indent: -9999px;
-        width: 60px !important;
-        height: 33px !important;;
+        width: 50px !important;
+        height: 25px !important;;
         background: grey;
         display: block;
         border-radius: 100px;
@@ -23,15 +23,15 @@
         position: absolute;
         top: 5px;
         left: 5px;
-        width: 23px !important;
-        height: 23px !important;
+        width: 15px !important;
+        height: 15px !important;
         background: #fff;
         border-radius: 90px;
         transition: 0.3s;
     }
 
     input:checked +  label {
-        background: #bada55;
+        background: #38a169;
     }
 
     input:checked +  label:after {
@@ -302,6 +302,7 @@
                                         
                                 <div class="row">
                                     <div class="col-md-12">
+                                        {{ Form::label('watermark_text', trans('Enable/Disable Watermark')) }}
                                         <fieldset class="form-group toggle {{ $errors->has('watermark_text') ? ' has-error' : '' }}">
                                         <input type="checkbox" id="watermark" name="watermark" class="form-control"
                                                {{ \Illuminate\Support\Facades\Auth::user()->settings()->watermark == 1 ? 'checked' : '' }} value="{{ \Illuminate\Support\Facades\Auth::user()->settings()->watermark == 1 ? 1 : 0 }}"/><label for="watermark">watermark</label>

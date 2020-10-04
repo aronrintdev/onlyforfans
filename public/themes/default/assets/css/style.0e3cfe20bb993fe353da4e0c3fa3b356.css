@@ -21012,7 +21012,7 @@ body:not(.lg-from-hash) .lg-outer.lg-start-zoom .lg-item.lg-complete .lg-object 
 }
 .wrapper .left-sidebar .seperator {
     /* Divider: */
-    background: #354052;
+    background: #4a5568;
     height: 1px;
     margin-top: 16px;
     margin-bottom: 26px;
@@ -21051,7 +21051,7 @@ body {
     background: #fff;
     font-family: 'Open Sans', sans-serif;
     font-size: 14px;
-    color: #354052;
+    color: #4a5568;
     letter-spacing: 0.1px;
 }
 h1 {
@@ -21087,7 +21087,7 @@ p {
     margin: 0px !important;
 }
 a {
-    color: #00AEEF;
+    color: #298ad3;
 }
 .form-group {
     margin-bottom: 18px;
@@ -21100,7 +21100,7 @@ label,
     font-family: 'Open Sans', sans-serif;
     font-size: 12px;
     letter-spacing: 0.3px;
-    color: #7F8FA4;
+    color: #4a5568;
     font-weight: 600;
     text-transform: uppercase;
     margin-bottom: 6px;
@@ -21149,7 +21149,7 @@ textarea {
 textarea:focus {
     border-color: #8D98A9;
     outline: 0;
-    color: #354052;
+    color: #4a5568;
     box-shadow: none !important;
 }
 .form-control::-webkit-input-placeholder,
@@ -21172,7 +21172,7 @@ textarea:-ms-input-placeholder {
 }
 .has-success .form-control {
     border-color: #1BB934;
-    color: #354052;
+    color: #4a5568;
     background: url(/images/check.png?bb99d09b9dec3b0ec29833000ac60079);
     background-repeat: no-repeat;
     background-position: right 12px center;
@@ -21180,11 +21180,11 @@ textarea:-ms-input-placeholder {
 }
 .has-success .form-control:focus {
     border-color: #1BB934;
-    color: #354052;
+    color: #4a5568;
 }
 .has-error .form-control {
     border-color: #ED1C24;
-    color: #354052;
+    color: #4a5568;
     background: url(/images/cross.png?86b04cebfe7ac52b062a145dcc73cd1e);
     background-repeat: no-repeat;
     background-position: right 12px center;
@@ -21192,11 +21192,11 @@ textarea:-ms-input-placeholder {
 }
 .has-error .form-control:focus {
     border-color: #ED1C24;
-    color: #354052;
+    color: #4a5568;
 }
 .has-warning .form-control {
     border-color: #FECF39;
-    color: #354052;
+    color: #4a5568;
     background: url(/images/warning.png?578f8da58688d8aee62f97786c450f32);
     background-repeat: no-repeat;
     background-position: right 12px center;
@@ -21204,7 +21204,7 @@ textarea:-ms-input-placeholder {
 }
 .has-warning .form-control:focus {
     border-color: #FECF39;
-    color: #354052;
+    color: #4a5568;
 }
 select.form-control {
     -webkit-appearance: none;
@@ -21434,7 +21434,7 @@ textarea.form-control {
     font-family: 'Open Sans', sans-serif;
     font-weight: 600;
     font-size: 18px;
-    color: #354052;
+    color: #4a5568;
     text-transform: capitalize;
     margin-top: 15px;
 }
@@ -21579,13 +21579,13 @@ textarea.form-control {
     background: #FFFFFF;
     border: 1px solid #E6EAEE;
     border-radius: 4px;
-    box-shadow: 5px 10px 10px #e3e3e3;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 .panel-default .panel-heading {
     background-image: linear-gradient(-1deg, #F2F4F7 2%, #FFFFFF 98%);
     border-radius: 4px 4px 0px 0px !important;
     height: 50px;
-    color: #354052;
+    color: #4a5568;
     border: 1px solid #E6EAEE;
     border-radius: 0px 0px 4px 4px;
 }
@@ -21593,7 +21593,7 @@ textarea.form-control {
     font-size: 16px;
     line-height: 28px;
     text-transform: capitalize;
-    color: #354052;
+    color: #4a5568;
     font-weight: 600;
 }
 .panel-default .panel-heading .panel-title a {
@@ -21628,7 +21628,7 @@ textarea.form-control {
     border-radius: 6px;
     border-bottom-left-radius: 0px;
     border-bottom-right-radius: 0px;
-    color: #354052;
+    color: #4a5568;
     font-size: 14px;
     margin-bottom: -1px;
     text-transform: capitalize;
@@ -21649,7 +21649,7 @@ textarea.form-control {
     border-right: 1px solid #E6EAEE !important;
     background-image: none;
     line-height: 26px;
-    color: #354052;
+    color: #4a5568;
     margin-top: -5px;
 }
 .tab-content {
@@ -21681,7 +21681,7 @@ textarea.form-control {
     padding-left: 20px;
 }
 .table > tbody > tr > td {
-    color: #354052;
+    color: #4a5568;
     font-weight: 600;
     vertical-align: middle;
     border-bottom: 1px solid #E6EAEE;
@@ -21695,7 +21695,7 @@ textarea.form-control {
 .table-heading {
     font-family: 'Open Sans', sans-serif;
     font-size: 24px;
-    color: #354052;
+    color: #4a5568;
 }
 .table-heading .sub-text {
     color: #7F8FA4;
@@ -21705,7 +21705,7 @@ textarea.form-control {
     padding-left: 8px;
 }
 .modal-content {
-    margin-top: 170px;
+    /* margin-top: 170px; */
 }
 .modal-backdrop {
     background-color: #131820;
@@ -21722,7 +21722,7 @@ textarea.form-control {
 }
 .modal-body label,
 .modal-body select {
-    color: #354052;
+    color: #4a5568;
     text-transform: capitalize;
 }
 .modal-body .seperator {
@@ -21786,7 +21786,7 @@ textarea.form-control {
 }
 .user-successfully-added .modal-body .user-message .user-message-description {
     font-size: 14px;
-    color: #354052;
+    color: #4a5568;
     line-height: 20px;
     font-weight: 300;
 }
@@ -21874,7 +21874,7 @@ textarea.form-control {
 }
 .feedback-modal .modal-body .feedback-form textarea {
     font-size: 14px;
-    color: #354052;
+    color: #4a5568;
     letter-spacing: 0.3px;
     font-weight: 600;
     line-height: 19px;
@@ -21984,7 +21984,7 @@ textarea.form-control {
 }
 .billing-modal .modal-body .billing-content .subscription-cancel .subject {
     font-size: 14px;
-    color: #354052;
+    color: #4a5568;
     line-height: 19px;
     font-weight: 600;
 }
@@ -22071,7 +22071,7 @@ textarea.form-control {
     padding: 16px 30px;
     cursor: pointer;
     font-size: 14px;
-    color: #354052;
+    color: #4a5568;
     border-left: 0px;
     border-right: 0px;
 }
@@ -22079,7 +22079,7 @@ textarea.form-control {
     opacity: 0.6;
 }
 .setting-modal .modal-body .list-group .list-group-item:hover {
-    color: #354052 !important;
+    color: #4a5568 !important;
 }
 .setting-modal .settings-footer {
     padding: 12px 30px;
@@ -22313,7 +22313,7 @@ input.cmn-toggle-yes-no:checked + label:after {
 .assign-modal .modal-body .team-members-table tbody .members-progress .user-image .user-name {
     font-size: 14px;
     font-family: 'Open Sans', sans-serif;
-    color: #354052;
+    color: #4a5568;
     font-weight: 400;
     margin-left: 10px;
 }
@@ -22348,7 +22348,7 @@ input.cmn-toggle-yes-no:checked + label:after {
 .assign-modal .modal-body .team-members-table tbody .members-progress span {
     font-size: 14px;
     font-family: 'Open Sans', sans-serif;
-    color: #354052;
+    color: #4a5568;
     font-weight: 400;
 }
 .assign-modal .modal-body .team-members-table tbody .members-progress span a {
@@ -22411,7 +22411,7 @@ input.cmn-toggle-yes-no:checked + label:after {
     padding-left: 20px;
 }
 .achievement-modal .modal-body .achievements-table .achievements-list .medal-title .text-muted {
-    color: #354052;
+    color: #4a5568;
     font-size: 14px;
     font-family: 'Open Sans', sans-serif;
     font-weight: 400;
@@ -22529,7 +22529,7 @@ input.cmn-toggle-yes-no:checked + label:after {
     border: 0px solid transparent;
 }
 .onboarding-modal .modal-body .app-structure .app-heading {
-    color: #354052;
+    color: #4a5568;
     font-size: 18px;
     font-weight: 400;
     font-family: 'Open Sans', sans-serif;
@@ -22693,7 +22693,7 @@ input.cmn-toggle-yes-no:checked + label:after {
     border: 1px solid #DFE3E9;
     border-radius: 4px;
     font-size: 14px;
-    color: #354052;
+    color: #4a5568;
 }
 .connectnewservice-modal .modal-body .authentication .connect-through .btn-payment {
     border-top-right-radius: 0px;
@@ -22797,7 +22797,7 @@ input.cmn-toggle-yes-no:checked + label:after {
     border: 1px solid #F2F3F5;
     padding: 19px 30px;
     font-size: 14px;
-    color: #354052;
+    color: #4a5568;
     border-left: 0px;
     border-right: 0px;
 }
@@ -23312,7 +23312,7 @@ placeholder .darksharing-modal .modal-body .sharing-details .control-group .sele
     background-image: linear-gradient(0deg, #F2F4F7 0%, #FFFFFF 100%);
     border: 1px solid #CED0DA;
     border-radius: 4px;
-    color: #354052;
+    color: #4a5568;
     height: 36px;
     font-size: 14px;
 }
@@ -23682,7 +23682,7 @@ placeholder .darksharing-modal .modal-body .sharing-details .control-group .sele
     border-right: 0px;
     box-shadow: none;
     font-size: 16px;
-    color: #354052;
+    color: #4a5568;
     background: #FFFFFF;
     border-top-right-radius: 0px;
     border-bottom-right-radius: 0px;
@@ -23698,7 +23698,7 @@ placeholder .darksharing-modal .modal-body .sharing-details .control-group .sele
     border-left: 0px;
     box-shadow: none;
     font-size: 14px;
-    color: #354052;
+    color: #4a5568;
     background: #FFFFFF;
     border-top-left-radius: 0px;
     border-bottom-left-radius: 0px;
@@ -23711,7 +23711,7 @@ placeholder .darksharing-modal .modal-body .sharing-details .control-group .sele
     border-left: 0px;
     box-shadow: none;
     font-size: 14px;
-    color: #354052;
+    color: #4a5568;
     border-right: 0px;
     background: #FFFFFF;
     border-radius: 0px;
@@ -23763,12 +23763,12 @@ placeholder .darksharing-modal .modal-body .sharing-details .control-group .sele
     margin-top: -8px;
     height: 13px;
     font-size: 14px;
-    color: #354052;
+    color: #4a5568;
     background-color: #FFFFFF;
 }
 .paymentwindow-modal .modal-body .payment-section .alternate .divide a {
     opacity: 0.5;
-    color: #354052;
+    color: #4a5568;
     text-decoration: none;
 }
 .paymentwindow-modal .modal-body .payment-section .alternate-payment {
@@ -23838,7 +23838,7 @@ placeholder .darksharing-modal .modal-body .sharing-details .control-group .sele
     margin-top: -3px;
     font-size: 20px;
     font-weight: 400;
-    color: #354052;
+    color: #4a5568;
 }
 .profile-modal .modal-body .user-activities .activity-header {
     font-size: 12px;
@@ -23851,7 +23851,7 @@ placeholder .darksharing-modal .modal-body .sharing-details .control-group .sele
 }
 .profile-modal .modal-body .user-activities .activity-comments {
     font-size: 14px;
-    color: #354052;
+    color: #4a5568;
     font-weight: 400;
     margin-top: -5px;
 }
@@ -23867,17 +23867,17 @@ placeholder .darksharing-modal .modal-body .sharing-details .control-group .sele
     font-size: 12px;
     font-weight: 400;
     text-transform: capitalize;
-    color: #354052;
+    color: #4a5568;
 }
 .profile-modal .modal-body .user-activities .help-text {
     font-size: 14px;
     font-weight: 400;
     text-transform: capitalize;
-    color: #354052;
+    color: #4a5568;
 }
 .profile-modal .modal-body .user-activities .add-user {
     font-size: 14px;
-    color: #354052;
+    color: #4a5568;
     font-weight: 400;
 }
 .profile-modal .modal-body .user-activities .select-activity {
@@ -23899,7 +23899,7 @@ placeholder .darksharing-modal .modal-body .sharing-details .control-group .sele
 }
 .profile-modal .modal-body .user-activities .well .protected-user {
     margin: 0px;
-    color: #354052;
+    color: #4a5568;
     font-weight: 400;
     letter-spacing: 0.4px;
 }
@@ -24450,7 +24450,7 @@ placeholder .darksharing-modal .modal-body .sharing-details .control-group .sele
     height: 62px;
 }
 .filemanager-modal .manage-data .manage-section .manage-table .file-manage-table .manage-file td .media .media-body .media-heading {
-    color: #354052;
+    color: #4a5568;
     font-size: 14px;
     font-weight: 400;
     margin-bottom: 0px;
@@ -24589,7 +24589,7 @@ placeholder .darksharing-modal .modal-body .sharing-details .control-group .sele
 }
 .activityprofile-modal .user-activities .user-overview .activities-section .user-activity-panel .panel-heading {
     font-size: 14px;
-    color: #354052;
+    color: #4a5568;
     font-weight: 400;
     padding: 15px 20px;
     background-image: linear-gradient(0deg, #F4F7FA 0%, #FFFFFF 100%);
@@ -24603,7 +24603,7 @@ placeholder .darksharing-modal .modal-body .sharing-details .control-group .sele
     text-decoration: none;
 }
 .activityprofile-modal .user-activities .user-overview .activities-section .user-activity-panel .panel-heading .follow li.active a {
-    color: #354052;
+    color: #4a5568;
 }
 .activityprofile-modal .user-activities .user-overview .activities-section .user-activity-panel .activity-content {
     padding: 0px;
@@ -24635,7 +24635,7 @@ placeholder .darksharing-modal .modal-body .sharing-details .control-group .sele
 }
 .activityprofile-modal .user-activities .user-overview .activities-section .user-activity-panel .panel-posts-list .panel-group-item .media .media-body .media-heading {
     font-size: 14px;
-    color: #354052;
+    color: #4a5568;
     font-weight: 400;
     margin-bottom: 15px;
 }
@@ -24655,7 +24655,7 @@ placeholder .darksharing-modal .modal-body .sharing-details .control-group .sele
 }
 .activityprofile-modal .user-activities .user-overview .activities-section .user-activity-panel .panel-posts-list .panel-group-item .panel-icon {
     font-size: 14px;
-    color: #354052;
+    color: #4a5568;
     font-weight: 400;
     text-decoration: none;
 }
@@ -24695,7 +24695,7 @@ placeholder .darksharing-modal .modal-body .sharing-details .control-group .sele
 .activityprofile-modal .user-activities .user-overview .activities-section .user-activity-panel .panel-posts-list .checkbox .appear {
     font-size: 14px;
     font-weight: 400;
-    color: #354052;
+    color: #4a5568;
     font-family: 'Open Sans', sans-serif;
 }
 .teamcommunication-modal .team-panel {
@@ -24775,7 +24775,7 @@ placeholder .darksharing-modal .modal-body .sharing-details .control-group .sele
     font-weight: 400;
 }
 .teamcommunication-modal .team-data .communication-body .left-communicate .left-communicate-panel .team-posts-list .team-group-item .media .media-body .media-heading {
-    color: #354052;
+    color: #4a5568;
     text-transform: capitalize;
 }
 .teamcommunication-modal .team-data .communication-body .left-communicate .left-communicate-panel .team-posts-list .team-group-item .media .media-body .media-heading .time {
@@ -24874,7 +24874,7 @@ placeholder .darksharing-modal .modal-body .sharing-details .control-group .sele
     padding-top: 10px;
 }
 .teamcommunication-modal .team-data .communication-body .right-team .right-team-list .right-group-list .media .media-body .media-heading {
-    color: #354052;
+    color: #4a5568;
     font-size: 14px;
     font-weight: 400;
 }
@@ -24994,7 +24994,7 @@ placeholder .darksharing-modal .modal-body .sharing-details .control-group .sele
 }
 .list-group-navigation .list-group-item .list-text {
     margin-left: 60px;
-    color: #354052;
+    color: #4a5568;
     font-weight: 600;
 }
 .list-group-navigation .list-group-item .list-text .text-muted {
@@ -25157,7 +25157,7 @@ placeholder .darksharing-modal .modal-body .sharing-details .control-group .sele
     position: relative;
 }
 .revenue-block .monthly-revenue .revenue-head {
-    color: #354052;
+    color: #4a5568;
     font-size: 24px;
     font-family: 'Open Sans', sans-serif;
     font-weight: 400;
@@ -25174,7 +25174,7 @@ placeholder .darksharing-modal .modal-body .sharing-details .control-group .sele
     padding: 6px 8px 7px 16px;
     font-weight: 400;
     margin-right: 3px;
-    color: #354052;
+    color: #4a5568;
 }
 .revenue-block .monthly-revenue .btn-month span {
     margin-left: 8px;
@@ -25199,7 +25199,7 @@ placeholder .darksharing-modal .modal-body .sharing-details .control-group .sele
 .revenue-block .revenue-spending .revenue .income {
     font-size: 18px;
     font-family: 'Open Sans', sans-serif;
-    color: #354052;
+    color: #4a5568;
     font-weight: 400;
     display: block;
 }
@@ -25228,7 +25228,7 @@ placeholder .darksharing-modal .modal-body .sharing-details .control-group .sele
 .revenue-block .budget-spending .budget .income {
     font-size: 18px;
     display: block;
-    color: #354052;
+    color: #4a5568;
     font-weight: 400;
     font-family: 'Open Sans', sans-serif;
 }
@@ -25271,7 +25271,7 @@ placeholder .darksharing-modal .modal-body .sharing-details .control-group .sele
 }
 .previous-month-details .previous-month-income .month_income {
     font-size: 14px;
-    color: #354052;
+    color: #4a5568;
     text-transform: capitalize;
     letter-spacing: 0.6px;
     font-family: 'Open Sans', sans-serif;
@@ -25315,7 +25315,7 @@ placeholder .darksharing-modal .modal-body .sharing-details .control-group .sele
     border-top: 3px solid #1A91EB;
 }
 .product-sales-panel .product-sales .sales-header {
-    color: #354052;
+    color: #4a5568;
     font-size: 24px;
     font-family: 'Open Sans', sans-serif;
     font-weight: 300;
@@ -25339,7 +25339,7 @@ placeholder .darksharing-modal .modal-body .sharing-details .control-group .sele
     text-transform: capitalize;
     font-family: 'Open Sans', sans-serif;
     margin-bottom: 7px;
-    color: #354052;
+    color: #4a5568;
 }
 .product-sales-panel .product-sales .product-sales-list .product-name .circle-primary {
     height: 10px;
@@ -25417,7 +25417,7 @@ placeholder .darksharing-modal .modal-body .sharing-details .control-group .sele
 }
 .product-sales-panel .product-sales .sales-range li {
     text-align: justify;
-    color: #354052;
+    color: #4a5568;
     font-size: 12px;
     font-family: 'Open Sans', sans-serif;
     font-weight: 400;
@@ -25432,7 +25432,7 @@ placeholder .darksharing-modal .modal-body .sharing-details .control-group .sele
 }
 .customer-section .customers-panel .customer-block .customer-head {
     font-size: 20px;
-    color: #354052;
+    color: #4a5568;
     font-weight: 400;
     margin-top: -9px;
     font-family: 'Open Sans', sans-serif;
@@ -25441,7 +25441,7 @@ placeholder .darksharing-modal .modal-body .sharing-details .control-group .sele
 .customer-section .customers-panel .customer-block .customers-count {
     font-size: 30px;
     font-family: 'Open Sans', sans-serif;
-    color: #354052;
+    color: #4a5568;
     font-weight: 400;
     margin-top: -13px;
 }
@@ -25497,7 +25497,7 @@ placeholder .darksharing-modal .modal-body .sharing-details .control-group .sele
 .customer-section .customers-panel .customer-block .customers-list li span {
     font-size: 14px;
     font-weight: 600;
-    color: #354052;
+    color: #4a5568;
 }
 .customer-referrals {
     background-color: #FAFBFC;
@@ -25508,7 +25508,7 @@ placeholder .darksharing-modal .modal-body .sharing-details .control-group .sele
     margin-top: 0px;
     font-weight: 400;
     font-family: 'Open Sans', sans-serif;
-    color: #354052;
+    color: #4a5568;
 }
 .customer-referrals .status {
     color: #7F8FA4;
@@ -25538,7 +25538,7 @@ placeholder .darksharing-modal .modal-body .sharing-details .control-group .sele
 }
 .spending-panel .spending-block .spending-head {
     font-size: 24px;
-    color: #354052;
+    color: #4a5568;
     font-weight: 400;
     margin-top: -6px;
     font-family: 'Open Sans', sans-serif;
@@ -25560,7 +25560,7 @@ placeholder .darksharing-modal .modal-body .sharing-details .control-group .sele
 }
 .spending-panel .spending-block .spending-progress-table .spend-for {
     font-size: 16px;
-    color: #354052;
+    color: #4a5568;
     font-weight: 600;
     padding-top: 7px;
     font-family: 'Open Sans', sans-serif;
@@ -25639,7 +25639,7 @@ placeholder .darksharing-modal .modal-body .sharing-details .control-group .sele
 }
 .daily-sales-section .sales-panel .sales-block .sales-head {
     font-size: 20px;
-    color: #354052;
+    color: #4a5568;
     font-weight: 400;
     margin-top: -9px;
     font-family: 'Open Sans', sans-serif;
@@ -25648,7 +25648,7 @@ placeholder .darksharing-modal .modal-body .sharing-details .control-group .sele
 .daily-sales-section .sales-panel .sales-block .sales-count {
     font-size: 30px;
     font-family: 'Open Sans', sans-serif;
-    color: #354052;
+    color: #4a5568;
     font-weight: 400;
     margin-top: -13px;
 }
@@ -25709,7 +25709,7 @@ placeholder .darksharing-modal .modal-body .sharing-details .control-group .sele
 .related-box .productivity-text p {
     font-family: 'Open Sans', sans-serif;
     font-size: 14px;
-    color: #354052;
+    color: #4a5568;
     margin-bottom: 13px;
 }
 .related-box .btn-buy-class {
@@ -25747,7 +25747,7 @@ placeholder .darksharing-modal .modal-body .sharing-details .control-group .sele
     font-size: 16px;
     font-family: 'Open Sans', sans-serif;
     font-weight: 600;
-    color: #354052;
+    color: #4a5568;
 }
 .mini-card .media-body .designation {
     font-size: 12px;
@@ -25806,7 +25806,7 @@ placeholder .darksharing-modal .modal-body .sharing-details .control-group .sele
 .list-group-item.skill .left-side span {
     display: block;
     font-size: 18px;
-    color: #354052;
+    color: #4a5568;
     margin-top: -5px;
 }
 .list-group-item.skill .right-side {
@@ -25863,7 +25863,7 @@ placeholder .darksharing-modal .modal-body .sharing-details .control-group .sele
     padding: 10px 0px;
     font-size: 14px;
     font-weight: 600;
-    color: #354052;
+    color: #4a5568;
 }
 .skills-list .list-group-item span {
     float: right;
@@ -25907,7 +25907,7 @@ placeholder .darksharing-modal .modal-body .sharing-details .control-group .sele
     margin-bottom: 0px;
 }
 .media.post-list .media-body .media-heading a {
-    color: #354052;
+    color: #4a5568;
     font-size: 16px;
     font-family: 'Open Sans', sans-serif;
     font-weight: 600;
@@ -25924,7 +25924,7 @@ placeholder .darksharing-modal .modal-body .sharing-details .control-group .sele
 }
 .media.post-list .media-body .post-text {
     font-size: 14px;
-    color: #354052;
+    color: #4a5568;
     font-weight: 400;
     font-family: 'Open Sans', sans-serif;
 }
@@ -26027,7 +26027,7 @@ placeholder .darksharing-modal .modal-body .sharing-details .control-group .sele
     font-family: 'Open Sans', sans-serif;
     font-weight: 600;
     font-size: 24px;
-    color: #354052;
+    color: #4a5568;
     text-decoration: none;
 }
 .cover-section .user-name .user-details-list {
@@ -26065,7 +26065,7 @@ placeholder .darksharing-modal .modal-body .sharing-details .control-group .sele
     font-family: 'Open Sans', sans-serif;
     font-weight: 600;
     font-size: 16px;
-    color: #354052;
+    color: #4a5568;
     line-height: 19px;
     margin-bottom: 8px;
     margin-top: 1px;
@@ -26074,7 +26074,7 @@ placeholder .darksharing-modal .modal-body .sharing-details .control-group .sele
     font-family: 'Open Sans', sans-serif;
     font-weight: 400;
     font-size: 14px;
-    color: #354052;
+    color: #4a5568;
     line-height: 19px;
     margin-bottom: 15px;
     margin-top: 5px;
@@ -26097,7 +26097,7 @@ placeholder .darksharing-modal .modal-body .sharing-details .control-group .sele
     float: right;
     margin-top: -28px;
     font-size: 14px;
-    color: #354052;
+    color: #4a5568;
     font-family: 'Open Sans', sans-serif;
     font-weight: 600;
 }
@@ -26154,7 +26154,7 @@ placeholder .darksharing-modal .modal-body .sharing-details .control-group .sele
     padding-bottom: 17px !important;
 }
 .products-table tr td a {
-    color: #354052;
+    color: #4a5568;
     text-decoration: none;
 }
 .products-table tr td span {
@@ -26168,7 +26168,7 @@ placeholder .darksharing-modal .modal-body .sharing-details .control-group .sele
 }
 .products-table tr td .count {
     float: right;
-    color: #354052;
+    color: #4a5568;
     font-weight: 600;
 }
 .products-table tr td .progress {
@@ -26214,7 +26214,7 @@ placeholder .darksharing-modal .modal-body .sharing-details .control-group .sele
 }
 .heading-list li.active a,
 .heading-list li:hover a {
-    color: #354052 !important;
+    color: #4a5568 !important;
 }
 .messages-page .panel-heading.user-pages {
     border-bottom-width: 0px !important;
@@ -26273,7 +26273,7 @@ placeholder .darksharing-modal .modal-body .sharing-details .control-group .sele
     font-weight: 600;
     text-transform: capitalize;
     font-size: 18px;
-    color: #354052;
+    color: #4a5568;
     padding-top: 21px;
     padding-left: 20px;
 }
@@ -26343,7 +26343,7 @@ placeholder .darksharing-modal .modal-body .sharing-details .control-group .sele
     font-family: 'Open Sans', sans-serif;
     font-weight: 400;
     font-size: 14px;
-    color: #354052;
+    color: #4a5568;
     line-height: 19px;
 }
 .messages-page .panel-body .message-conversation:first-child {
@@ -26462,7 +26462,7 @@ placeholder .darksharing-modal .modal-body .sharing-details .control-group .sele
     padding-left: 0px;
     font-family: 'Open Sans', sans-serif;
     font-size: 13px;
-    color: #354052;
+    color: #4a5568;
     font-weight: 400;
     max-height: 42px;
     overflow: hidden;
@@ -26621,7 +26621,7 @@ placeholder .darksharing-modal .modal-body .sharing-details .control-group .sele
     padding-left: 30px;
 }
 .table.course-table tbody tr td a {
-    color: #354052;
+    color: #4a5568;
     text-decoration: none;
 }
 .table.course-table tbody tr td .percent {
@@ -26849,7 +26849,7 @@ placeholder .darksharing-modal .modal-body .sharing-details .control-group .sele
     border-bottom: 3px solid #1A91EB;
 }
 .navbar-tabs .mid-list li.active a {
-    color: #354052;
+    color: #4a5568;
 }
 .navbar-tabs .btn-newproject {
     margin-top: 15px;
@@ -26936,7 +26936,7 @@ placeholder .darksharing-modal .modal-body .sharing-details .control-group .sele
 }
 .video-detail .post-list li.active a,
 .video-detail .post-list li:hover a {
-    color: #354052;
+    color: #4a5568;
 }
 .video-detail .video-details {
     border-top: 1px solid #E6EAEE;
@@ -26953,7 +26953,7 @@ placeholder .darksharing-modal .modal-body .sharing-details .control-group .sele
     font-family: 'Open Sans', sans-serif;
     font-weight: 400;
     font-size: 14px;
-    color: #354052;
+    color: #4a5568;
 }
 .video-detail .video-details .right-col .btn-success {
     padding: 7px 19px;
@@ -26970,7 +26970,7 @@ placeholder .darksharing-modal .modal-body .sharing-details .control-group .sele
     font-family: 'Open Sans', sans-serif;
     font-weight: 600;
     font-size: 14px;
-    color: #354052;
+    color: #4a5568;
 }
 .video-detail .video-details .source-list {
     margin-bottom: 23px;
@@ -26979,7 +26979,7 @@ placeholder .darksharing-modal .modal-body .sharing-details .control-group .sele
     font-family: 'Open Sans', sans-serif;
     font-weight: 400;
     font-size: 14px;
-    color: #354052;
+    color: #4a5568;
     line-height: 26px;
 }
 .video-detail .video-details .source-list li:first-child {
@@ -27058,7 +27058,7 @@ placeholder .darksharing-modal .modal-body .sharing-details .control-group .sele
     font-weight: 600;
     text-transform: capitalize;
     font-size: 16px;
-    color: #354052;
+    color: #4a5568;
 }
 .panel-body.video-panel .query-details .query-list li a {
     font-family: 'Open Sans', sans-serif;
@@ -27069,7 +27069,7 @@ placeholder .darksharing-modal .modal-body .sharing-details .control-group .sele
     border-radius: 0px;
 }
 .panel-body.video-panel .query-details .query-list li.active a {
-    color: #354052;
+    color: #4a5568;
     border-bottom: 3px solid #1A91EB;
 }
 .panel-body.video-panel .divider {
@@ -27141,7 +27141,7 @@ placeholder .darksharing-modal .modal-body .sharing-details .control-group .sele
     font-weight: 600;
     font-size: 14px;
     line-height: 17px;
-    color: #354052;
+    color: #4a5568;
     cursor: default;
 }
 .adding-product {
@@ -27242,7 +27242,7 @@ placeholder .darksharing-modal .modal-body .sharing-details .control-group .sele
     font-family: 'Open Sans', sans-serif;
     font-weight: 400;
     font-size: 14px;
-    color: #354052;
+    color: #4a5568;
     margin-bottom: 5px;
 }
 .help-block a {
@@ -27270,7 +27270,7 @@ placeholder .darksharing-modal .modal-body .sharing-details .control-group .sele
     font-family: 'Open Sans', sans-serif;
     font-weight: 600;
     font-size: 14px;
-    color: #354052;
+    color: #4a5568;
     text-transform: capitalize;
 }
 .news-block .news-holder .news-heading .left img {
@@ -27403,7 +27403,7 @@ placeholder .darksharing-modal .modal-body .sharing-details .control-group .sele
     font-family: 'Open Sans', sans-serif;
     font-weight: 400;
     font-size: 14px;
-    color: #354052;
+    color: #4a5568;
 }
 .place-detail-section img {
     width: 257px;
@@ -27550,14 +27550,14 @@ placeholder .darksharing-modal .modal-body .sharing-details .control-group .sele
     text-transform: capitalize;
 }
 .teamlead-info .user-details .user-name a {
-    color: #354052;
+    color: #4a5568;
     text-decoration: none;
 }
 .teamlead-info .user-details .user-role {
     font-family: 'Open Sans', sans-serif;
     font-weight: 600;
     text-transform: capitalize;
-    font-size: #354052;
+    font-size: #4a5568;
     color: #7F8FA4;
 }
 .teamlead-statisctics {
@@ -27580,7 +27580,7 @@ placeholder .darksharing-modal .modal-body .sharing-details .control-group .sele
     font-family: 'Open Sans', sans-serif;
     font-weight: 600;
     font-size: 16px;
-    color: #354052;
+    color: #4a5568;
     padding-left: 24px;
     padding-right: 24px;
 }
@@ -27657,7 +27657,7 @@ placeholder .darksharing-modal .modal-body .sharing-details .control-group .sele
     font-family: 'Open Sans', sans-serif;
     font-weight: 600;
     font-size: 16px;
-    color: #354052;
+    color: #4a5568;
 }
 .timeline .timeline-panel .panel-heading .media.main .media-body .media-heading .text-muted {
     display: block;
@@ -27723,7 +27723,7 @@ placeholder .darksharing-modal .modal-body .sharing-details .control-group .sele
     font-family: 'Open Sans', sans-serif;
     font-weight: 400;
     font-size: 14px;
-    color: #354052;
+    color: #4a5568;
     text-transform: none;
 }
 .timeline .event-panel .panel-form .fa {
@@ -27809,7 +27809,7 @@ placeholder .darksharing-modal .modal-body .sharing-details .control-group .sele
     font-family: 'Open Sans', sans-serif;
     font-weight: 600;
     font-size: 14px;
-    color: #354052;
+    color: #4a5568;
 }
 .timeline .event img {
     margin-right: 13px;
@@ -27842,7 +27842,7 @@ placeholder .darksharing-modal .modal-body .sharing-details .control-group .sele
     margin: 0px auto;
     /*position: relative;*/
     /*top: 50%;*/
-    padding-top: 150px;
+    padding-top: 50px;
 }
 @media (max-width: 500px) {
     .login-block {
@@ -27852,11 +27852,11 @@ placeholder .darksharing-modal .modal-body .sharing-details .control-group .sele
         padding-right: 6px;
         padding-left: 6px;
     }
-    .login-block .social-connect li .btn-social {
+    /* .login-block .social-connect li .btn-social {
         height: 50px;
         width: 50px;
         padding: 0px;
-    }
+    } */
     .login-block .social-connect li .btn-social .social-circle {
         width: 28px;
         height: 28px;
@@ -27886,8 +27886,8 @@ placeholder .darksharing-modal .modal-body .sharing-details .control-group .sele
 .login-head {
     font-family: 'Open Sans', sans-serif;
     font-weight: 400;
-    font-size: 24px;
-    color: #354052;
+    font-size: 34px;
+    color: #4a5568;
     text-align: center;
     background: #F8FAFC;
     border: 1px solid #E6EAEE;
@@ -28270,7 +28270,7 @@ html {
     position: absolute;
     border-radius: 50%;
     top: -10px;
-    color: #354052;
+    color: #4a5568;
     font-size: 18px;
     right: 2px;
 }
@@ -28318,7 +28318,7 @@ html {
     padding-bottom: 21px;
 }
 .panel-heading.user-pages.navbars .performance-list li.active a {
-    color: #354052;
+    color: #4a5568;
     border-bottom: 3px solid #2EA2F8;
     border-radius: 0px;
 }
@@ -28688,11 +28688,11 @@ html {
     border-radius: 4px;
 }
 .table.existing-products-table tbody tr td p {
-    color: #354052;
+    color: #4a5568;
     line-height: 20px;
 }
 .table.existing-products-table tbody tr td a {
-    color: #354052;
+    color: #4a5568;
     text-decoration: none;
 }
 .table.existing-products-table tbody tr td ul {
@@ -28738,7 +28738,7 @@ html {
 }
 .table.panel-table tbody tr td .btn-default {
     border: 1px solid #CED0DA;
-    color: #354052;
+    color: #4a5568;
     padding: 7px 14px;
 }
 .table.panel-table tbody tr td .btn-default i {
@@ -28760,7 +28760,7 @@ html {
     position: relative;
 }
 .table.projects-table tbody tr td a {
-    color: #354052;
+    color: #4a5568;
     text-decoration: none;
 }
 .table.projects-table tbody tr td:first-child {
@@ -28795,7 +28795,7 @@ html {
 .table.projects-table tbody tr td .btn-default {
     box-shadow: none;
     font-weight: 600;
-    color: #354052;
+    color: #4a5568;
     position: relative;
     padding: 7px 13px 8px 12px;
 }
@@ -28857,7 +28857,7 @@ html {
     font-size: 16px;
 }
 .table.apps-table tbody td .app-details .app-name a {
-    color: #354052;
+    color: #4a5568;
     text-decoration: none;
 }
 .table.apps-table tbody td .text-secondary {
@@ -28960,7 +28960,7 @@ html {
     font-weight: 400;
     font-size: 24px;
     text-transform: capitalize;
-    color: #354052;
+    color: #4a5568;
 }
 #mce_0_ifr {
     height: 82px !important;
@@ -29055,7 +29055,7 @@ html {
     margin: 0px;
 }
 .mini-profile .avatar-profile .avatar-details .avatar-name a {
-    color: #354052;
+    color: #4a5568;
     font-size: 16px;
     text-decoration: none;
     text-transform: capitalize;
@@ -29081,7 +29081,7 @@ html {
 .mini-profile .address ul li {
     line-height: 25px;
     font-size: 14px;
-    color: #354052;
+    color: #4a5568;
 }
 .mini-profile .address ul li i {
     padding-right: 12px;
@@ -29118,7 +29118,7 @@ html {
     padding-bottom: 5px;
     text-align: left;
     font-size: 22px;
-    color: #354052;
+    color: #4a5568;
     padding-top: 0px;
     font-weight: 600;
 }
@@ -29309,7 +29309,7 @@ html {
     padding-left: 15px;
     padding-bottom: 3px;
     font-size: 16px;
-    color: #354052;
+    color: #4a5568;
     font-weight: 600;
 }
 .widget-jobs .job-process {
@@ -29320,7 +29320,7 @@ html {
 }
 .widget-jobs .job-process .avilable-jobs {
     font-size: 14px;
-    color: #354052;
+    color: #4a5568;
     padding-top: 15px;
     font-weight: 600;
 }
@@ -29334,7 +29334,7 @@ html {
     padding: 11px 0px;
     box-shadow: none;
     font-size: 14px;
-    color: #354052;
+    color: #4a5568;
     font-weight: 600;
     border: 1px solid #E7E9ED;
 }
@@ -29349,7 +29349,7 @@ html {
 }
 .widget-jobs .job-checking .question {
     font-size: 14px;
-    color: #354052;
+    color: #4a5568;
     line-height: 19px;
     font-weight: 600;
 }
@@ -29357,7 +29357,7 @@ html {
     padding-left: 14px;
     padding-right: 44px;
     font-size: 14px;
-    color: #354052;
+    color: #4a5568;
     line-height: 19px;
     letter-spacing: 0.2px;
     font-weight: 600;
@@ -29377,7 +29377,7 @@ html {
 .widget-recently .table tr td a {
     text-decoration: none;
     font-size: 16px;
-    color: #354052;
+    color: #4a5568;
 }
 .widget-recently .table tr td a i {
     padding-right: 7px;
@@ -29411,7 +29411,7 @@ html {
 }
 .widget-pictures .picture {
     font-size: 16px;
-    color: #354052;
+    color: #4a5568;
     font-weight: 600;
     padding-bottom: 11px;
     padding-left: 17px;
@@ -29453,13 +29453,13 @@ html {
 }
 .panel-default .widget-frequently .question-tips {
     font-size: 16px;
-    color: #354052;
+    color: #4a5568;
     font-weight: 600;
     padding-bottom: 11px;
     padding-top: 11px;
 }
 .panel-default .widget-frequently .question-tips i {
-    color: #354052;
+    color: #4a5568;
     padding-right: 8px;
 }
 .panel-default .widget-frequently .question-passage {
@@ -29499,7 +29499,7 @@ html {
 }
 .widget-card .widget-card-project .bridge-text a {
     font-size: 16px;
-    color: #354052;
+    color: #4a5568;
     font-weight: 600;
     text-transform: capitalize;
     text-decoration: none;
@@ -29542,7 +29542,7 @@ html {
     background: #E8EAF1;
     font-family: 'Open Sans', sans-serif;
     font-size: 14px;
-    color: #354052;
+    color: #4a5568;
 }
 .widget-card .widget-card-project .add-images ul li .btn-plus.btn-num:hover {
     background-image: linear-gradient(-180deg, #37AC48 0%, #3EB74F 100%);
@@ -29584,7 +29584,7 @@ html {
 }
 .widget-featured .featured-design .us-design .design-heading a {
     font-size: 16px;
-    color: #354052;
+    color: #4a5568;
     font-weight: 600;
     text-decoration: none;
 }
@@ -29638,7 +29638,7 @@ html {
     display: inline-block;
     vertical-align: middle;
     font-size: 12px;
-    color: #354052;
+    color: #4a5568;
     font-weight: 600;
 }
 .widget-card.widget-card-dark .bridge-text a {
@@ -29734,7 +29734,7 @@ html {
 .icon-boxes .app-files {
     padding-top: 16px;
     font-size: 16px;
-    color: #354052;
+    color: #4a5568;
     line-height: 22px;
     font-weight: 600;
 }
@@ -29752,7 +29752,7 @@ html {
 }
 .panel-heading.panel-calendar {
     padding: 15px 19px;
-    color: #354052;
+    color: #4a5568;
     font-weight: 400;
 }
 .widget-calendar {
@@ -29796,7 +29796,7 @@ html {
 .widget-calendar .calendar-todo-list ul li a {
     text-decoration: none;
     font-size: 14px;
-    color: #354052;
+    color: #4a5568;
     font-weight: 400;
 }
 .widget-calendar .import-head {
@@ -29843,7 +29843,7 @@ html {
 }
 .widget-searched .search-list li a {
     font-size: 14px;
-    color: #354052;
+    color: #4a5568;
     font-weight: 400;
     text-decoration: none;
 }
@@ -29853,7 +29853,7 @@ html {
 }
 .calendar-visible .public-calendar {
     font-size: 14px;
-    color: #354052;
+    color: #4a5568;
     font-weight: 400;
     text-transform: capitalize;
     padding-left: 27px;
@@ -29889,7 +29889,7 @@ html {
     box-shadow: none;
     border-radius: 4px;
     font-size: 14px;
-    color: #354052;
+    color: #4a5568;
     font-weight: 600;
     text-transform: capitalize;
     text-align: left;
@@ -29955,7 +29955,7 @@ html {
     font-size: 10px;
 }
 .widget-left-panel .categotry-list li a {
-    color: #354052;
+    color: #4a5568;
     font-size: 14px;
     font-weight: 600;
     text-transform: capitalize;
@@ -30007,7 +30007,7 @@ html {
 }
 .widget-mountain .image-details .image-name {
     font-size: 16px;
-    color: #354052;
+    color: #4a5568;
     font-weight: 600;
     text-transform: capitalize;
     letter-spacing: 0.3px;
@@ -30084,7 +30084,7 @@ html {
 }
 .widget-account .profile-info {
     font-size: 16px;
-    color: #354052;
+    color: #4a5568;
     font-weight: 600;
     padding-bottom: 6px;
 }
@@ -30100,14 +30100,14 @@ html {
     text-align: left;
     padding-left: 2px;
     font-size: 14px;
-    color: #354052;
+    color: #4a5568;
     text-transform: capitalize;
     font-weight: 600;
     padding-top: 12px;
 }
 .widget-account .form-horizontal .form-group .form-control-static {
     font-size: 14px;
-    color: #354052;
+    color: #4a5568;
     font-weight: 600;
 }
 .widget-account .form-horizontal .form-group .avatar-image {
@@ -30115,7 +30115,7 @@ html {
 }
 .widget-account .form-horizontal .form-group .avatar-image .avatar-name {
     font-size: 14px;
-    color: #354052;
+    color: #4a5568;
     text-transform: capitalize;
     font-weight: 600;
     margin: 0px;
@@ -30177,7 +30177,7 @@ html {
     border-radius: 4px;
 }
 .widget-pagination-horizantal .pagination li.active a {
-    color: #354052;
+    color: #4a5568;
     border: 1px solid #ddd;
     cursor: pointer;
     background-color: transparent;
@@ -30190,7 +30190,7 @@ html {
     font-family: 'Open Sans', sans-serif;
 }
 .widget-pagination-horizantal .pagination li a:hover {
-    color: #354052;
+    color: #4a5568;
 }
 .widget-pagination .pagination li a {
     border-radius: 4px;
@@ -30385,7 +30385,7 @@ html {
 }
 .sales-block .sales-update .update-heading {
     font-size: 16px;
-    color: #354052;
+    color: #4a5568;
     font-family: 'Open Sans', sans-serif;
     font-weight: 400;
 }
@@ -30449,7 +30449,7 @@ html {
 .sales-block .sales-profit .sales-currency {
     float: left;
     font-size: 24px;
-    color: #354052;
+    color: #4a5568;
     font-family: 'Open Sans', sans-serif;
     font-weight: 400;
 }
@@ -30502,7 +30502,7 @@ html {
 .sales-block .sales-table .table tr td:last-child {
     padding-right: 84px;
     font-size: 14px;
-    color: #354052;
+    color: #4a5568;
     font-weight: 400;
     font-family: 'Open Sans', sans-serif;
 }
@@ -30569,7 +30569,7 @@ html {
 .widget-faq .faq-heading {
     font-family: 'Open Sans', sans-serif;
     font-size: 16px;
-    color: #354052;
+    color: #4a5568;
     font-weight: 400;
     padding-bottom: 6px;
     text-transform: uppercase;
@@ -30580,7 +30580,7 @@ html {
 .widget-faq .faq-passage p {
     font-family: 'Open Sans', sans-serif;
     font-size: 14px;
-    color: #354052;
+    color: #4a5568;
     font-weight: 400;
     line-height: 28px;
     margin-bottom: 0px;
@@ -30607,7 +30607,7 @@ html {
 .widget-notifications .note-heading {
     font-family: 'Open Sans', sans-serif;
     font-size: 16px;
-    color: #354052;
+    color: #4a5568;
     font-weight: 400;
     padding-top: 25px;
     padding-bottom: 12px;
@@ -30621,7 +30621,7 @@ html {
 .widget-notifications .notification .notification-text {
     font-family: 'Open Sans', sans-serif;
     font-size: 14px;
-    color: #354052;
+    color: #4a5568;
     font-weight: 400;
 }
 .widget-notifications .notification .calendar-switch.notfication-switch {
@@ -30650,7 +30650,7 @@ html {
 .widget-connect .connect-list .connect-link a {
     font-family: 'Open Sans', sans-serif;
     font-size: 14px;
-    color: #354052;
+    color: #4a5568;
     font-weight: 400;
     text-decoration: none;
 }
@@ -30763,7 +30763,7 @@ html {
 .widget-bank-account .account-details .account-header {
     font-family: 'Open Sans', sans-serif;
     font-size: 18px;
-    color: #354052;
+    color: #4a5568;
     font-weight: 400;
     text-transform: capitalize;
     padding-bottom: 15px;
@@ -30777,7 +30777,7 @@ html {
     letter-spacing: 0.5px;
 }
 .widget-bank-account .account-details .user-num span {
-    color: #354052;
+    color: #4a5568;
 }
 .widget-lesson.related-lesson .purchased-friends {
     padding-top: 4px;
@@ -30795,7 +30795,7 @@ html {
 .widget-new-lesson .light-room {
     font-family: 'Open Sans', sans-serif;
     font-size: 16px;
-    color: #354052;
+    color: #4a5568;
     font-weight: 400;
     letter-spacing: 0.8px;
     text-transform: capitalize;
@@ -30819,7 +30819,7 @@ html {
     margin-right: 11px;
     font-family: 'Open Sans', sans-serif;
     font-size: 12px;
-    color: #354052;
+    color: #4a5568;
     font-weight: 400;
     padding: 8.5px 15px;
 }
@@ -30892,7 +30892,7 @@ html {
 }
 .widget-sales .no-of-sales {
     font-size: 30px;
-    color: #354052;
+    color: #4a5568;
     font-weight: 400;
     padding-bottom: 6px;
 }
@@ -30922,7 +30922,7 @@ html {
 }
 .tab-left-col .account-avatar .edit-text a {
     font-size: 14px;
-    color: #354052;
+    color: #4a5568;
     font-weight: 600;
 }
 .tab-right-col {
@@ -31216,12 +31216,12 @@ html {
     display: inline-block;
     white-space: nowrap;
     text-overflow: ellipsis;
-    color: #354052;
+    color: #4a5568;
 }
 .chat-list .left-sidebar.fans .following-group .group-heading {
     padding: 15px 15px;
     padding-top: 26px;
-    color: #354052;
+    color: #4a5568;
     display: none;
 }
 .chat-list .left-sidebar.fans .following-group .group-heading a {
@@ -31292,7 +31292,7 @@ html {
     border-radius: 50%;
 }
 .chat-box .chat-conversation .message-conversation .media .media-body .post-text {
-    color: #354052;
+    color: #4a5568;
     font-size: 12px;
     font-family: 'Open Sans', sans-serif;
     font-weight: 400;
@@ -31422,7 +31422,6 @@ html {
     color: #249AF2;
     text-transform: capitalize;
     font-weight: 400;
-    vertical-align: middle;
 }
 @media (max-width: 440px) {
     .footer-description .fans-terms a {
@@ -31474,6 +31473,7 @@ html {
     font-family: 'Open Sans', sans-serif;
     font-size: 24px;
     font-weight: 400;
+    letter-spacing: 0px;
 }
 .fans-form {
     padding-left: 32px;
@@ -31493,7 +31493,7 @@ html {
 }
 .fans-form .avatar-details .avatar-pic .avatar-name {
     font-size: 14px;
-    color: #354052;
+    color: #4a5568;
     text-transform: capitalize;
     font-weight: 600;
     margin: 0px;
@@ -31510,7 +31510,7 @@ html {
 .fans-form .form-group .input-group.gender-select .form-control {
     font-family: 'Open Sans', sans-serif;
     font-size: 14px;
-    color: #354052;
+    color: #4a5568;
     border-radius: 4px;
 }
 .fans-form .form-group .input-group.datepicker {
@@ -31540,7 +31540,7 @@ html {
 .affiliate-settings .affiliate-link .link-heading {
     font-family: 'Open Sans', sans-serif;
     /* font-size: 'Open Sans', sans-serif; */
-    color: #354052;
+    color: #4a5568;
     font-weight: 400;
     margin: 0px;
     padding-bottom: 7px;
@@ -31556,7 +31556,7 @@ html {
 }
 .affiliate-settings .affiliate-link .affiliate-buttons .btn-default {
     padding: 6px 15px;
-    color: #354052;
+    color: #4a5568;
     margin-right: 17px;
 }
 .affiliate-settings .affiliate-link .affiliate-buttons .btn-default i {
@@ -31580,7 +31580,7 @@ html {
 .affiliate-settings .affliate-followers .list-group-item .connect-link a {
     font-family: 'Open Sans', sans-serif;
     font-size: 14px;
-    color: #354052;
+    color: #4a5568;
     font-weight: 400;
 }
 .affiliate-settings .affliate-followers .list-group-item .connect-link a img {
@@ -31612,7 +31612,7 @@ html {
 .startpeep-services .list-group-item .connect-list .connect-link a {
     font-family: 'Open Sans', sans-serif;
     font-size: 14px;
-    color: #354052;
+    color: #4a5568;
     font-weight: 400;
     text-decoration: none;
     letter-spacing: 0.5px;
@@ -31682,7 +31682,7 @@ html {
     right: 0px;
     font-family: 'Open Sans', sans-serif;
     font-size: 16px;
-    color: #354052;
+    color: #4a5568;
     font-weight: 400;
 }
 .delete-btn {
@@ -31707,7 +31707,7 @@ html {
 .list-group.page-likes .list-group-item .connect-link a {
     font-family: 'Open Sans', sans-serif;
     font-size: 14px;
-    color: #354052;
+    color: #4a5568;
     font-weight: 400;
     text-decoration: none;
     letter-spacing: 0.5px;
@@ -31768,17 +31768,17 @@ html {
     padding-top: 100px;
 }
 .footer-description .fans-terms a {
-    color: #354052;
+    color: #4a5568;
     text-decoration: none;
 }
 .footer-description .fans-terms a:hover {
     color: #1991EB;
 }
 .footer-description .fans-languages span {
-    color: #354052;
+    color: #4a5568;
 }
 .footer-description .fans-languages a {
-    color: #354052;
+    color: #4a5568;
     text-decoration: none;
 }
 .footer-description .fans-languages a:hover {
@@ -31868,7 +31868,7 @@ html {
 .theme-block .theme-picture .theme-header .theme-heading {
     font-family: 'Open Sans', sans-serif;
     font-size: 14px;
-    color: #354052;
+    color: #4a5568;
     font-weight: 400;
     margin-bottom: 0px;
 }
@@ -31888,7 +31888,7 @@ html {
 .theme-passage p {
     font-family: 'Open Sans', sans-serif;
     font-size: 14px;
-    color: #354052;
+    color: #4a5568;
     font-weight: 400;
     margin-bottom: 0px;
 }
@@ -32139,17 +32139,17 @@ html {
     padding: 16px 30px;
     cursor: pointer;
     font-size: 14px;
-    color: #354052;
+    color: #4a5568;
     border-left: 0px;
     border-right: 0px;
 }
 .list-group .list-group-item .text-toggle {
     opacity: 0.6;
-    color: #354052;
+    color: #4a5568;
 }
 .list-group .list-group-item .text-selected {
     opacity: 1;
-    color: #354052;
+    color: #4a5568;
 }
 .settings-footer {
     padding: 12px 30px;
@@ -32261,7 +32261,7 @@ html {
     font-family: 'Open Sans', sans-serif;
     font-weight: 400;
     font-size: 14px;
-    color: #354052;
+    color: #4a5568;
     letter-spacing: 0px;
     padding-left: 15px;
     padding-top: 10px;
@@ -32283,7 +32283,7 @@ html {
 .form-left .form-control .selectize-dropdown .selectize-dropdown-content .optgroup .big-search-dropdown .media-body .media-heading {
     font-family: 'Open Sans', sans-serif;
     font-size: 14px;
-    color: #354052;
+    color: #4a5568;
     letter-spacing: 0px;
     margin-bottom: 0px;
     line-height: 19px;
@@ -32338,7 +32338,7 @@ html {
 }
 .notification-list > li > a i {
     font-size: 20px;
-    color: #7F8FA4;
+    color: #4a5568;
     letter-spacing: 0.46px;
     position: relative;
 }
@@ -32362,7 +32362,7 @@ html {
     display: none;
     margin-left: 10px;
     text-transform: capitalize;
-    color: #354052;
+    color: #4a5568;
     font-size: 16px;
     font-family: 'Open Sans', sans-serif;
 }
@@ -32407,7 +32407,7 @@ html {
     border-bottom: 1px solid #E6EAEE;
 }
 .dropdown.message .dropdown-menu .dropdown-menu-header .side-left {
-    color: #354052;
+    color: #4a5568;
     text-transform: capitalize;
     padding-top: 7px;
     padding-bottom: 9px;
@@ -32486,7 +32486,7 @@ html {
     font-family: 'Open Sans', sans-serif;
     font-size: 14px;
     font-weight: 600;
-    color: #354052;
+    color: #4a5568;
     letter-spacing: 0px;
     text-transform: capitalize;
     text-decoration: none;
@@ -32538,7 +32538,7 @@ html {
     text-decoration: none;
 }
 .dropdown.message .dropdown-menu li.inbox-message > a .media-heading {
-    color: #354052;
+    color: #4a5568;
     font-weight: 600;
 }
 .dropdown.message .dropdown-menu li.inbox-message:hover {
@@ -32601,11 +32601,11 @@ html {
     margin-left: 7px;
     font-family: 'Open Sans', sans-serif;
     font-size: 16px;
-    color: #354052;
+    color: #4a5568;
     letter-spacing: 0.26px;
 }
 .user-image.dropdown.fans > a i {
-    color: #354052;
+    color: #4a5568;
     font-size: 16px;
     border-radius: 83px;
     margin-left: 10px;
@@ -32643,7 +32643,7 @@ html {
     font-family: 'Open Sans', sans-serif;
     font-weight: 400;
     font-size: 14px;
-    color: #354052;
+    color: #4a5568;
     letter-spacing: 0px;
     text-transform: capitalize;
 }
@@ -32744,19 +32744,19 @@ html {
 }
 .logout {
     font-size: 18px;
-    color: #354052;
+    color: #4a5568;
     padding-left: 10px;
     padding-bottom: 1px;
     margin-top: 7px;
 }
 .logout a {
-    color: #354052 !important;
+    color: #4a5568 !important;
     padding-top: 13px !important;
     padding-bottom: 13px !important;
 }
 .main-content,
 .page-wrapper {
-    padding-top: 80px;
+    padding-top: 75px;
 }
 .panel-create .panel-heading {
     background: #FAFBFC;
@@ -32889,7 +32889,7 @@ html {
     background-color: #FAFBFC;
 }
 .panel-post .panel-heading .post-author .post-options .dropdown-menu li a {
-    color: #354052;
+    color: #4a5568;
     font-size: 14px;
     font-family: 'Open Sans', sans-serif;
 }
@@ -32958,7 +32958,7 @@ html {
     text-transform: capitalize;
 }
 .panel-post .panel-heading .post-author .user-post-details li .post-time {
-    color: #354052;
+    color: #4a5568;
     font-size: 12px;
     letter-spacing: 0px;
     margin-right: 3px;
@@ -33297,7 +33297,7 @@ html {
 .timeline-cover-section .timeline-cover img {
     height: auto;
     width: 100%;
-    opacity: 0.7;
+    /* opacity: 0.7; */
 }
 @media (max-width: 660px) {
     .timeline-cover-section .timeline-cover img {
@@ -33306,14 +33306,14 @@ html {
     }
 }
 .timeline-cover-section .timeline-cover .btn-camera-cover {
-    width: 198px;
+    width: 175px;
     height: 50px;
     background: rgba(0, 0, 0, 0.7);
     border-radius: 0px;
     text-align: left;
     position: absolute;
     top: 8px;
-    left: 20px;
+    left: 900px;
     display: none;
 }
 @media (max-width: 560px) {
@@ -33584,7 +33584,7 @@ html {
     font-family: 'Open Sans', sans-serif;
     font-weight: 600;
     font-size: 14px;
-    color: #354052;
+    color: #4a5568;
     text-decoration: none;
     text-transform: capitalize;
     background: #fff;
@@ -33602,7 +33602,7 @@ html {
 }
 .timeline-list > ul > li .dropdown-menu li a {
     text-align: center;
-    color: #354052;
+    color: #4a5568;
 }
 .timeline-list > ul > li .dropdown-menu li a i {
     margin-right: 10px;
@@ -33613,7 +33613,7 @@ html {
 }
 .timeline-list > ul .dropdown.open:hover > a {
     background: #fff;
-    color: #354052;
+    color: #4a5568;
 }
 .timeline-list > ul li.active a {
     color: #FFFFFF;
@@ -33710,7 +33710,7 @@ html {
     font-family: 'Open Sans', sans-serif;
     font-weight: 600;
     font-size: 14px;
-    color: #354052;
+    color: #4a5568;
 }
 @media (max-width: 991px) {
     .user-profile-buttons .btn-profile {
@@ -33719,7 +33719,7 @@ html {
 }
 .user-profile-buttons .btn-profile i.fa {
     font-size: 14px;
-    color: #354052;
+    color: #4a5568;
     letter-spacing: 0px;
     margin-right: 10px;
 }
@@ -33738,7 +33738,7 @@ html {
     padding-left: 80px;
 }
 .mini-profile.fans .activity-name {
-    color: #354052;
+    color: #4a5568;
 }
 .mini-profile.fans .activity-count {
     color: #7F8FA4;
@@ -33752,7 +33752,7 @@ html {
 }
 .users-results-wrapper .user-results .user-result-item.list-group-item {
     background-color: #fff;
-    color: #354052;
+    color: #4a5568;
     border-radius: 0px;
     border-width: 0px;
     font-family: 'Open Sans', sans-serif;
@@ -33801,7 +33801,7 @@ html {
     float: left;
 }
 .typeahead.dropdown-menu li a .mention_name {
-    color: #354052;
+    color: #4a5568;
     font-family: 'Open Sans', sans-serif;
     font-weight: 600;
     margin-left: 5px;
@@ -33850,7 +33850,7 @@ select.form-control {
 .group-suggested-users .holder .follower span,
 .page-suggested-users .holder .follower span,
 .event-suggested-users .holder .follower span {
-    color: #354052;
+    color: #4a5568;
     font-family: 'Open Sans', sans-serif;
     margin-left: 4px;
 }
@@ -33900,7 +33900,7 @@ select.form-control {
     border-width: 0px;
     border-top: 1px solid #E6EAEE;
     padding: 10px;
-    color: #354052;
+    color: #4a5568;
     font-size: 14px;
 }
 .soundcloud-results-wrapper .soundcloud-results .list-group-item img {
@@ -33943,7 +33943,7 @@ select.form-control {
 .new-conversation .selectize-dropdown .selectize-dropdown-content .big-search-dropdown .media-body .media-heading {
     font-family: 'Open Sans', sans-serif;
     font-size: 14px;
-    color: #354052;
+    color: #4a5568;
     letter-spacing: 0px;
     margin-bottom: 0px;
     line-height: 19px;
@@ -34009,7 +34009,7 @@ select.form-control {
 .announcement-title {
     padding-left: 13px;
     font-size: 14px;
-    color: #354052;
+    color: #4a5568;
     font-family: 'Open Sans', sans-serif;
     font-weight: 600;
 }
@@ -34031,7 +34031,7 @@ select.form-control {
 .announcement-actions .view-by {
     display: block;
     padding-bottom: 10px;
-    color: #354052;
+    color: #4a5568;
     text-decoration: none;
     font-size: 12px;
 }
@@ -35115,7 +35115,7 @@ body.direction-rtl .fans-form .facebook-input-group .form-control {
     border-bottom-right-radius: 0px;
 }
 body.direction-rtl .fans-form .facebook-input-group .form-control:focus {
-    border-left-color: #354052;
+    border-left-color: #4a5568;
 }
 body.direction-rtl .panel-heading.panel-settings {
     padding-right: 27px;
@@ -35308,7 +35308,7 @@ body.direction-rtl .manage-table table tbody td ul {
     border-bottom: 1px solid #E6EAEE;
 }
 .create-body .select-option .radio-header {
-    color: #354052;
+    color: #4a5568;
     font-size: 14px;
     text-transform: none;
 }
@@ -35341,7 +35341,7 @@ body.direction-rtl .manage-table table tbody td ul {
 .right-panel .privacy-question .right-list-group .list-group-item .right-side-label {
     font-size: 14px;
     text-transform: none;
-    color: #354052;
+    color: #4a5568;
     font-weight: 400;
 }
 .right-panel .privacy-question .right-list-group .list-group-item .page-description {
@@ -35351,17 +35351,17 @@ body.direction-rtl .manage-table table tbody td ul {
 }
 .user-bio-block {
     background: #FFFFFF;
-    margin-top: 20px;
+    /* margin-top: 20px; */
     margin-bottom: 20px;
     border: 1px solid #E6EAEE;
     border-radius: 4px 4px 0px 0px;
     padding: 18px 21px;
     font-size: 14px;
-    box-shadow: 5px 10px 10px #eee;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 .user-bio-block .bio-header {
-    color: #354052;
-    font-weight: 600;
+    color: #4a5568;
+    font-size: 16px;
 }
 .user-bio-block .privacy-type {
     font-weight: 600;
@@ -35370,13 +35370,13 @@ body.direction-rtl .manage-table table tbody td ul {
     border-bottom: 1px solid #E6EAEE;
 }
 .user-bio-block .privacy-type .fa {
-    color: #354052;
+    color: #4a5568;
     margin-right: 5px;
     margin-left: 5px;
 }
 .user-bio-block .bio-description {
     padding: 13px 0px;
-    color: #354052;
+    color: #4a5568;
 }
 .user-bio-block .bio-list {
     margin-bottom: 0px;
@@ -35394,7 +35394,7 @@ body.direction-rtl .manage-table table tbody td ul {
     margin-right: 5px;
 }
 .user-bio-block .bio-list li span {
-    color: #354052;
+    color: #4a5568;
     font-weight: 600;
 }
 .widget-best-pictures {
@@ -35469,21 +35469,21 @@ body.direction-rtl .manage-table table tbody td ul {
     font-size: 14px;
     margin-left: 0px;
     border-bottom: 2px solid transparent;
-    color: #354052;
+    color: #4a5568;
     border-radius: 0px;
     padding-bottom: 5px;
     padding-left: 0px;
     padding-right: 0px;
 }
 .smiley-list li a .fa {
-    color: #354052;
+    color: #4a5568;
     border-right: 0px;
 }
 .smiley-list li.active {
     border-bottom: 2px solid #2EA2F8;
 }
 .smiley-list li.active a {
-    color: #354052!important;
+    color: #4a5568!important;
 }
 .smiley-pics-content {
     border: 0px;
@@ -35524,7 +35524,7 @@ body.direction-rtl .manage-table table tbody td ul {
 }
 .modal-likes .people-like-list .list-group-item .media .media-body .media-heading .user {
     text-decoration: none;
-    color: #354052;
+    color: #4a5568;
 }
 .modal-likes .people-like-list .list-group-item .media .media-body .username {
     text-decoration: none;
@@ -35623,7 +35623,7 @@ body.direction-rtl .manage-table table tbody td ul {
 }
 .album-modal .album-body .album-box .inner-box .inner-box-header {
     font-size: 16px;
-    color: #354052;
+    color: #4a5568;
     margin: 0px;
 }
 .album-modal .album-body .album-box .inner-box i {
@@ -35690,7 +35690,7 @@ body.direction-rtl .manage-table table tbody td ul {
     margin-left: 10px;
 }
 .independent-themes .independent-block .theme-sale .theme-details .theme-name {
-    color: #354052;
+    color: #4a5568;
     font-size: 14px;
 }
 .independent-themes .independent-block .theme-sale .theme-details .theme-author {
@@ -35787,7 +35787,7 @@ body.direction-rtl .manage-table table tbody td ul {
     padding-right: 10px;
     padding-bottom: 2px;
     font-size: 13px;
-    color: #354052;
+    color: #4a5568;
     font-weight: 400;
 }
 .post-addon .form-group {
@@ -35805,7 +35805,7 @@ body.direction-rtl .manage-table table tbody td ul {
     outline: none;
     float: right;
     padding-left: 8px;
-    color: #354052;
+    color: #4a5568;
     font-size: 13px;
     font-weight: 400;
 }
@@ -35820,7 +35820,7 @@ body.direction-rtl .manage-table table tbody td ul {
     padding-bottom: 0px;
 }
 .post-addon .form-group .selectize-control .selectize-input input {
-    color: #354052;
+    color: #4a5568;
 }
 .post-addon .form-group .selectize-control .selectize-input input::-webkit-input-placeholder {
     color: #c3c6cb;
@@ -35858,7 +35858,7 @@ body.direction-rtl .manage-table table tbody td ul {
 }
 .post-addon .form-group .selectize-control .selectize-dropdown .big-search-dropdown .media-body .media-heading {
     margin-bottom: 0px;
-    color: #354052;
+    color: #4a5568;
     font-size: 14px;
     font-family: 'Open Sans', sans-serif;
     font-weight: 600;
@@ -36026,7 +36026,7 @@ a:focus {
     text-decoration: none;
 }
 .media-heading a {
-    color: #354052;
+    color: #4a5568;
 }
 .text-white {
     color: #FFFFFF !important;

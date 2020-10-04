@@ -1,0 +1,5 @@
+[27-Sep-2020 06:47:38 UTC] PHP Fatal error:  Uncaught PharException: phar "/opt/cpanel/composer/bin/composer" has a broken signature in /opt/cpanel/composer/bin/composer:23
+Stack trace:
+#0 /opt/cpanel/composer/bin/composer(23): Phar::mapPhar('composer.phar')
+#1 {main}
+  thrown in /opt/cpanel/composer/bin/composer on line 23

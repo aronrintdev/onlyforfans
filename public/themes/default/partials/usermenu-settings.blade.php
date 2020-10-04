@@ -1,4 +1,4 @@
-<div class="panel panel-default">
+<!-- <div class="panel panel-default">
 	<div class="panel-body nopadding">
 		<div class="mini-profile">
 			<div class="background">
@@ -18,10 +18,11 @@
 		            	</a>
 		            </h4>
 		        </div>
-		    </div><!-- /avatar-profile -->
+		    </div>
 		</div>
-	</div><!-- /panel-body -->
-</div><!-- /panel -->
+	</div>
+</div>
+-->
 <div class="list-group list-group-navigation fans-group">
 	<a href="{{ url('/'.Auth::user()->username.'/settings/general') }}" class="list-group-item">
 		<div class="list-icon fans-icon {{ Request::segment(3) == 'general' ? 'active' : '' }}">
@@ -31,6 +32,18 @@
 			{{ trans('common.general_settings') }}
 			<div class="text-muted">
 				{{ trans('messages.menu_message_general') }}
+			</div>
+		</div>
+		<div class="clearfix"></div>
+	</a>
+	<a href="{{ url('/'.Auth::user()->username.'/settings/profile') }}" class="list-group-item">
+		<div class="list-icon fans-icon {{ Request::segment(3) == 'profile' ? 'active' : '' }}">
+			<i class="fa fa-pencil-square"></i>
+		</div>
+		<div class="list-text">
+			{{ trans('common.edit_profile') }}
+			<div class="text-muted">
+				{{ trans('messages.menu_message_profile') }}
 			</div>
 		</div>
 		<div class="clearfix"></div>

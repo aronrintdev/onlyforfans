@@ -5,10 +5,14 @@
 			<div class="mini-profile fans">
 				<div class="background">
 					<div class="widget-bg">
-						<img src=" @if(Auth::user()->cover) {{ url('user/cover/'.Auth::user()->cover) }} @else {{ url('user/cover/default-cover-user.png') }} @endif" alt="{{ Auth::user()->name }}" title="{{ Auth::user()->name }}">
+					    <a href="{{ url(Auth::user()->username) }}">
+						    <img src=" @if(Auth::user()->cover) {{ url('user/cover/'.Auth::user()->cover) }} @else {{ url('user/cover/default-cover-user.png') }} @endif" alt="{{ Auth::user()->name }}" title="{{ Auth::user()->name }}">
+					    </a>
 					</div>
 					<div class="avatar-img">
-						<img src="{{ Auth::user()->avatar }}" alt="{{ Auth::user()->name }}" title="{{ Auth::user()->name }}">
+					    <a href="{{ url(Auth::user()->username) }}">	
+						    <img src="{{ Auth::user()->avatar }}" alt="{{ Auth::user()->name }}" title="{{ Auth::user()->name }}">
+					    </a>
 					</div>
 				</div>
 				<div class="avatar-profile">
@@ -70,12 +74,39 @@
 		<div class="panel-body">
 			<!-- widget holder starts here -->
 			<div class="user-follow fans">
-				<!-- Each user is represented with media block -->
 				@if($suggested_users != "")
-
 				@foreach($suggested_users as $suggested_user)
-
 				<div class="media">
+				
+				<div class="mini-profile fans">
+    				<div class="background">
+    					<div class="widget-bg">
+    					    <a href="{{ url($suggested_user->username) }}">
+    						    <img src=" @if($suggested_user->cover) {{ url('user/cover/'.$suggested_user->cover) }} @else {{ url('user/cover/default-cover-user.png') }} @endif" alt="{{ $suggested_user->name }}" title="{{ $suggested_user->name }}">
+    						</a>
+    					</div>
+    					<div class="avatar-img">
+    						<a href="{{ url($suggested_user->username) }}">
+    						    <img src="{{ $suggested_user->avatar }}" alt="{{ $suggested_user->name }}" title="{{ $suggested_user->name }}">
+    						</a>
+    					</div>
+    				</div>
+    				<div class="avatar-profile">
+    					<div class="avatar-details">
+    						<h2 class="avatar-name">
+    							<a href="{{ url($suggested_user->username) }}">
+    								{{ $suggested_user->name }}
+    							</a>
+    						</h2>
+    						<h4 class="avatar-mail">
+    							<a href="{{ url($suggested_user->username) }}">
+    								{{ '@'.$suggested_user->username }}
+    							</a>
+    						</h4>
+    					</div>      
+    				</div>
+    			</div>
+    			<!--	
 					<div class="media-left badge-verification">
 						<a href="{{ url($suggested_user->username) }}">
 							<img src="{{ $suggested_user->avatar }}" class="img-icon" alt="{{ $suggested_user->name }}" title="{{ $suggested_user->name }}">
@@ -100,7 +131,7 @@
 							</div>
 						@endif
 						</div>
-
+                    -->
 					</div>
 					@endforeach
 					@else
