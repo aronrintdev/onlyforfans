@@ -23,7 +23,7 @@
 	</div>
 </div>
 -->
-<div class="list-group list-group-navigation fans-group">
+<div class="panel-default list-group list-group-navigation fans-group">
 	<a href="{{ url('/'.Auth::user()->username.'/settings/general') }}" class="list-group-item">
 		<div class="list-icon fans-icon {{ Request::segment(3) == 'general' ? 'active' : '' }}">
 			<i class="fa fa-user"></i>

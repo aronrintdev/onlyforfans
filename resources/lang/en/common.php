@@ -47,8 +47,15 @@ return [
     'saved_items' => 'Saved Items',
 
     'faq' => 'FAQ',
+    'support_footer' => 'Support',
+    'term_of_use_footer' => 'Terms',
     'term_of_use' => 'Terms of Service',
+    'privacy_policy_footer' => 'Privacy',
     'privacy_policy' => 'Privacy Policy',
+    'dmca' => 'DMCA',
+    'usc2257' => 'USC 2257',
+    'legal' => 'Legal',
+    'blog' => 'Blog',
 
     //Register
     'create_account' => 'Create Account',

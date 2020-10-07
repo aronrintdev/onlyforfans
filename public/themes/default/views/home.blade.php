@@ -2,41 +2,32 @@
     .timeline-posts {
         margin-top: 50px;
     }
-    
     .create-post-form .change-layout {
         display: inline-block;
         float: right;
         width: 30px;
         margin-right: 5px;
     }
-
     .create-post-form .change-layout img {
         width: 100%;
     }
-    
     .change-layout.one-column {
         display: none;
     }
-
     .create-post-form .change-layout i {
         font-size: 25px;
     }
-    
     .timeline-condensed-column .panel-body, .jscroll-added .panel-body, .timeline-condensed-column > .col-lg-4 .panel-body {
         height: 200px;
         overflow: auto;
     }
-
     .timeline-condensed-column .panel-heading .user-post-details li:last-child, .jscroll-added .panel-heading .user-post-details li:last-child, .timeline-condensed-column > .col-lg-4 .panel-heading .user-post-details li:last-child {
         max-width: 100px;
         text-overflow: ellipsis;
         white-space: nowrap;
         overflow: hidden;
     }
-    
 </style>
-<!-- main-section -->
-	<!-- <div class="main-content"> -->
 		<div class="container">
 			<div class="row">
 
@@ -92,15 +83,13 @@
 					@else
 						{!! Theme::partial('eventslist',compact('user_events','username')) !!}
 					@endif
-				</div><!-- /col-md-6 -->
+				</div>
 
 				<div class="col-md-5 col-lg-4">
 					{!! Theme::partial('home-rightbar',compact('suggested_users', 'suggested_groups', 'suggested_pages')) !!}
 				</div>
 			</div>
 		</div>
-	<!-- </div> -->
-<!-- /main-section -->
 
 <script type="text/javascript">
     $('.change-layout').click(function () {

@@ -5,14 +5,69 @@
                 <nav class="navbar fans navbar-default no-bg">
                     <div class="container-fluid">
                     @endif
-                    <!-- Brand and toggle get grouped for better mobile display -->
                         <div class="navbar-header">
-                            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-4" aria-expanded="false">
+                            <!-- <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-4" aria-expanded="false">
                                 <span class="sr-only">Toggle navigation</span>
                                 <span class="icon-bar"></span>
                                 <span class="icon-bar"></span>
                                 <span class="icon-bar"></span>
-                            </button>
+                            </button> -->
+                            <div class="navbar-toggle">
+                                <ul class="list-inline notification-list">
+                                    <li class="" style="display: inline-block;">
+                                        <a href="{{ url('/') }}"><i class="fa fa-home" aria-hidden="true"></i><span class="small-screen"></span></a>
+                                    </li>
+                                    <li class="" style="display: inline-block;">
+                                        <a href="{{ route('explore-posts') }}"><i class="fa fa-th-large" aria-hidden="true"></i><span class="small-screen"></span></a>
+                                    </li>
+                                    <li class="notification" style="display: inline-block;">
+                                        <a href="{{ url('allnotifications') }}" data-toggle="dropdown" @click.prevent="showNotifications" class="dropdown-toggle" role="button" aria-haspopup="true" aria-expanded="false">
+                                            <i class="fa fa-bell" aria-hidden="true">
+                                                @if(Auth::user()->notifications()->where('seen',0)->count() > 0)
+                                                    <span class="count hidden">{{ Auth::user()->notifications()->where('seen',0)->count() }}</span>
+                                                    <span class="count" v-if="unreadNotifications > 0" >@{{ unreadNotifications }}</span>
+                                                @endif
+                                            </i>
+                                            <span class="small-screen"></span>
+                                        </a>
+                                    </li>
+                                    <li class="message" style="display: inline-block;">
+                                        <a href="{{ url('messages') }}" data-toggle="dropdown" @click="showConversations" class="dropdown-toggle" role="button" aria-haspopup="true" aria-expanded="false">
+                                            <i class="fa fa-comments" aria-hidden="true">
+                                                
+                                            </i>
+                                        </a>
+                                    </li>
+                                    <li class="dropdown user-image fans" style="display: inline-block;">
+                                        <a href="{{ url(Auth::user()->username) }}" class="dropdown-toggle no-padding" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                                            <img src="{{ Auth::user()->avatar }}" alt="{{ Auth::user()->name }}" class="img-radius img-30" title="{{ Auth::user()->name }}">
+                                        </a>
+                                            <ul class="dropdown-menu">
+                                                @if(Auth::user()->hasRole('admin'))
+                                                    <li class="{{ Request::segment(1) == 'admin' ? 'active' : '' }}"><a href="{{ url('admin') }}"><i class="fa fa-user-secret" aria-hidden="true"></i>{{ trans('common.admin') }}</a></li>
+                                                @endif
+                                                <li class="{{ (Request::segment(1) == Auth::user()->username && Request::segment(2) == '') ? 'active' : '' }}"><a href="{{ url(Auth::user()->username) }}"><i class="fa fa-user" aria-hidden="true"></i>{{ trans('common.my_profile') }}</a></li>
+                                                <li class="{{ Request::segment(3) == 'general' ? 'active' : '' }}"><a href="{{ url('/'.Auth::user()->username.'/settings/general') }}"><i class="fa fa-cog" aria-hidden="true"></i>{{ trans('common.settings') }}</a></li>
+                                                <li class=""><a href="{{ url('/mylists') }}"><i class="fa fa-list" aria-hidden="true"></i>{{ trans('common.lists') }}</a></li>
+                                                <li class=""><a href="{{ url('/'.Auth::user()->username.'/saved') }}"><i class="fa fa-bookmark" aria-hidden="true"></i>{{ trans('common.saved_post') }}</a></li>
+                                                <li class=""><a href="{{ url(Auth::user()->username.'/settings/addbank') }}"><i class="fa fa-university" aria-hidden="true"></i>{{ trans('common.add_bank') }}</a></li>
+                                                <li class=""><a href="{{ url(Auth::user()->username.'/settings/addpayment') }}"><i class="fa fa-credit-card" aria-hidden="true"></i>{{ trans('common.add_payment') }}</a></li>
+                                                @if (Auth::user()->is_bank_set)
+                                                    <li class=""><a href="{{ url(Auth::user()->payment->dashboard_url) }}"><i class="fa fa-credit-card" aria-hidden="true"></i>{{ trans('common.dashboard') }}</a></li>
+                                                @endif
+                                                <li class=""><a href="{{ url('/'.Auth::user()->username.'/settings/affliates') }}"><i class="fa fa-retweet" aria-hidden="true"></i>{{ trans('common.referrals') }}</a></li>
+                                                <li class=""><a href="{{ url('/faq') }}"><i class="fa fa-question" aria-hidden="true"></i>{{ trans('common.help_faq') }}</a></li>
+                                                <li class=""><a href="{{ url('/support') }}"><i class="fa fa-envelope" aria-hidden="true"></i>{{ trans('common.support') }}</a></li>
+                                                <li>
+                                                    <form action="{{ url('/logout') }}" method="post">
+                                                        {!! csrf_field() !!}
+                                                        <button type="submit" class="btn-logout" style="margin-bottom: 0px;"><i class="fa fa-sign-out" aria-hidden="true"></i>{{ trans('common.logout') }}</button>
+                                                    </form>
+                                                </li>
+                                            </ul>
+                                    </li>
+                                </ul>
+                            </div>
                             <a class="navbar-brand fans" href="{{ url('/') }}" style="padding-top:20px;">
                                 {{ Setting::get('site_title') }}
                                 {{--<img class="fans-logo" src="{{ asset('images/logo.png') }}" alt="{{ Setting::get('site_name') }}" title="{{ Setting::get('site_name') }}">--}}
@@ -21,13 +76,12 @@
                         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-4">
                             <form class="navbar-form navbar-left form-left" role="search">
                                 <div class="input-group no-margin">
-					<span class="input-group-btn">
-						<button class="btn btn-default" type="button"><i class="fa fa-search"></i></button>
-					</span>
+            					<span class="input-group-btn">
+            						<button class="btn btn-default" type="button"><i class="fa fa-search"></i></button>
+            					</span>
                                     <input type="text" id="navbar-search" data-url="{{ URL::to('api/v1/search') }}" class="form-control" placeholder="{{ trans('messages.search_placeholder') }}">   
-                                </div><!-- /input-group -->
+                                </div>
                             </form>
-                            <!-- Collect the nav links, forms, and other content for toggling -->
 
                             @if (Auth::guest())
                                 <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
@@ -45,6 +99,8 @@
                                 </div>
                             @else
                                 <ul class="nav navbar-nav navbar-right" id="navbar-right" v-cloak>
+                                    
+                                    
 {{--                                <li class="dropdown">--}}
 {{--					<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">--}}
 {{--					<span class="user-name">--}}
@@ -62,7 +118,6 @@
 {{--@else--}}
 {{--                                    <span class="flag-icon flag-icon-{{ $key }}"></span>--}}
 {{--						@endif--}}
-
 {{--                                        </span> <i class="fa fa-angle-down" aria-hidden="true"></i></a>--}}
 {{--                                        <ul class="dropdown-menu">--}}
 {{--@foreach( Config::get('app.locales') as $key => $value)--}}
@@ -76,7 +131,6 @@
 {{--@else--}}
 {{--                                        <span class="flag-icon flag-icon-{{ $key }}"></span>--}}
 {{--								@endif--}}
-
 {{--                                    {{ $value }}</a></li>--}}
 {{--						@endforeach--}}
 {{--                                        </ul>--}}
@@ -84,13 +138,11 @@
 
 
                                 <!-- <li class="{!! (Request::segment(1)=='' ? 'active' : '') !!}"><a href="{{ url('/') }}">Home</a></li>-->
-
                                 @if(Setting::get('enable_browse') == 'on')
                                     <!--<li class="{!! (Request::segment(1)=='browse' ? 'active' : '') !!}"><a href="{{ url('/browse') }}" style="margin-right:30px;">Explore</a></li>-->
                                     @endif
 
                                     <li>
-
                                         <ul class="list-inline notification-list">
                                             <li class="">
                                                 <a href="{{ url('/') }}"><i class="fa fa-home" aria-hidden="true"></i><span class="small-screen">Feed</span></a>
@@ -114,23 +166,23 @@
                                                         <a v-if="unreadNotifications > 0" class="side-right" href="#" @click.prevent="markNotificationsRead" >{{ trans('messages.mark_all_read') }}</a>
                                                         <div class="clearfix"></div>
                                                     </div>
-                                                    @if(Auth::user()->notifications()->count() > 0)
-                                                        <ul class="list-unstyled dropdown-messages-list scrollable" data-type="notifications">
-                                                            <li class="inbox-message"  v-bind:class="[ !notification.seen ? 'active' : '' ]" v-for="notification in notifications.data">
-                                                                <a href="{{ url(Auth::user()->username.'/notification/') }}/@{{ notification.id }}">
-                                                                    <div class="media">
-                                                                        <div class="media-left">
-                                                                            <img class="media-object img-icon" v-bind:src="notification.notified_from.avatar" alt="images">
-                                                                        </div>
-                                                                        <div class="media-body">
-                                                                            <h4 class="media-heading">
-                                                                                <span class="notification-text"> @{{ notification.description }} </span>
-                                                                                <span class="message-time">
-															<span class="notification-type"><i class="fa fa-user" aria-hidden="true"></i></span>
-															<time class="timeago" datetime="@{{ notification.created_at }}+00:00" title="@{{ notification.created_at }}">
-																@{{ notification.created_at }}
-															</time>
-														</span>
+                                                        @if(Auth::user()->notifications()->count() > 0)
+                                                            <ul class="list-unstyled dropdown-messages-list scrollable" data-type="notifications">
+                                                                <li class="inbox-message"  v-bind:class="[ !notification.seen ? 'active' : '' ]" v-for="notification in notifications.data">
+                                                                    <a href="{{ url(Auth::user()->username.'/notification/') }}/@{{ notification.id }}">
+                                                                        <div class="media">
+                                                                            <div class="media-left">
+                                                                                <img class="media-object img-icon" v-bind:src="notification.notified_from.avatar" alt="images">
+                                                                            </div>
+                                                                            <div class="media-body">
+                                                                                <h4 class="media-heading">
+                                                                                    <span class="notification-text"> @{{ notification.description }} </span>
+                                                                                    <span class="message-time">
+    															<span class="notification-type"><i class="fa fa-user" aria-hidden="true"></i></span>
+    															<time class="timeago" datetime="@{{ notification.created_at }}+00:00" title="@{{ notification.created_at }}">
+    																@{{ notification.created_at }}
+    															</time>
+    														</span>
                                                                             </h4>
                                                                         </div>
                                                                     </div>
@@ -258,10 +310,9 @@
 	                </li> -->
                                 </ul>
                             @endif
-                        </div><!-- /.navbar-collapse -->
-                    </div><!-- /.container-fluid -->
+                        </div>
+                    </div>
                 </nav>
 
-
     {!! Theme::asset()->container('footer')->usePath()->add('notifications', 'js/notifications.js') !!}
-
+    

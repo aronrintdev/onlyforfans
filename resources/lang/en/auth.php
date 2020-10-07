@@ -35,7 +35,5 @@ return  [
   'subject'                   => 'Subject',
   'submit'                    => 'Submit',
   'email_verify'              => 'Please verify your Email before logging in',
-
-    //Liang
-    'subscribe_price'        => 'Subscription Price'
+  'subscribe_price'        => 'Subscription Price'
 ];

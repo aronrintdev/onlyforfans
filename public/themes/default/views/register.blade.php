@@ -5,7 +5,7 @@
     <div class="panel panel-default">
       <div class="panel-body nopadding">
         <div class="login-head">{{ trans('common.create_account') }}
-        <div class="login-text" style="font-size:14px; text-align:center;">Communicate and generate income from your fans.</a></div>
+        <div class="login-text" style="font-size:16px; text-align:center;">Already have an account? <a href="{{ url('/') }}">Sign in</a></div>
         </div>
         
         <div class="login-bottom">
@@ -35,9 +35,8 @@
         </div>
 
             <div class="row">
-              <div class="col-md-12">
+              <div class="col-md-12 register-form-row">
                 <fieldset class="form-group required {{ $errors->has('email') ? ' has-error' : '' }}">
-                  
                   {{ Form::text('email', NULL, ['class' => 'form-control', 'id' => 'email', 'placeholder'=> trans('auth.email_address')]) }}
                   <ul class="signup-email-error text-danger list-unstyled">
                   </ul>
@@ -46,11 +45,9 @@
             </div>
 
             <div class="row">
-              <div class="col-md-12">
+              <div class="col-md-12 register-form-row">
                 <fieldset class="form-group required {{ $errors->has('name') ? ' has-error' : '' }}">
-                   
                   {{ Form::text('name', NULL, ['class' => 'form-control', 'id' => 'name', 'placeholder'=> trans('auth.name')]) }}
-
                   <ul class="signup-name-error text-danger list-unstyled">
                   </ul>
                 </fieldset>
@@ -72,26 +69,29 @@
 {{--            </div>--}}
 
             <div class="row">
-              <div class="col-md-12">
+              <div class="col-md-12 register-form-row">
                 <fieldset class="form-group required {{ $errors->has('username') ? ' has-error' : '' }}">
-                  
                   {{ Form::text('username', NULL, ['class' => 'form-control', 'id' => 'username', 'placeholder'=> trans('common.username')]) }}
-
                   <!-- <ul class="signup-username-error text-danger list-unstyled">
                   </ul> -->
-                <small class="text-muted"><a href="{{ url('/') }}">{{ url('/') }}/username</a></small>
+                <!-- <small class="text-muted"><a href="{{ url('/') }}">{{ url('/') }}/username</a></small> -->
                 </fieldset>
               </div>
             </div>
             
             <div class="row">
-              <div class="col-md-12">
+              <div class="col-md-12 register-form-row">
                 <fieldset class="form-group required {{ $errors->has('password') ? ' has-error' : '' }}">
-                  
                   {{ Form::password('password', ['class' => 'form-control', 'id' => 'password', 'placeholder'=> trans('auth.password')]) }}
                   <ul class="signup-password-error text-danger list-unstyled">
                   </ul>
                 </fieldset>
+              </div>
+            </div>
+            
+            <div class="row">
+              <div class="col-md-12" class="register-form-row" style="margin-bottom:20px;">
+                  <input type="checkbox" name="tos" id="tos"><label for="tos" style="cursor:pointer;">&nbsp;I agree to the <a href="{{ trans('common.term_of_use') }}">Terms of Service</a>.</label>
               </div>
             </div>
 
@@ -155,8 +155,8 @@
 {{-- <li><a href="{{ url('twitter') }}" class="btn btn-social tw"><span class="social-circle"><i class="fa fa-twitter" aria-hidden="true"></i></span></a></li>--}}
 {{-- <li><a href="{{ url('facebook') }}" class="btn btn-social fb"><span class="social-circle"><i class="fa fa-facebook" aria-hidden="true"></i></span></a></li>--}}
 
-                    <li style="margin-bottom: 5px"><a href="{{ url('twitter') }}" class="btn btn-social tw" style="text-transform:none;"><span style="margin-top:8px; margin-right:10px; display:inline-block;"><i class="fa fa-twitter" style="color:#fff;" aria-hidden="true"></i></span><span style="color: #fff;">Sign up with Twitter</span></a></li>
-                    <li><a href="{{ url('facebook') }}" class="btn btn-social fb" style="text-transform:none;"><span style="margin-top:10px; margin-right:8px; display:inline-block;"><i class="fa fa-facebook" style="color:#fff;" aria-hidden="true"></i></span><span style="color: #fff;">Sign up with Facebook</span></a></li>
+            <li style="margin-bottom: 10px"><a href="{{ url('twitter') }}" class="btn btn-social tw" style="text-transform:none;"><span style="margin-top:8px; margin-right:10px; display:inline-block;"><i class="fa fa-twitter" style="color:#fff;" aria-hidden="true"></i></span><span style="color: #fff;">Sign up with Twitter</span></a></li>
+            <li><a href="{{ url('facebook') }}" class="btn btn-social fb" style="text-transform:none;"><span style="margin-top:10px; margin-right:8px; display:inline-block;"><i class="fa fa-facebook" style="color:#fff;" aria-hidden="true"></i></span><span style="color: #fff;">Sign up with Facebook</span></a></li>
           </ul>
         </div>
       </div><!-- /panel -->
