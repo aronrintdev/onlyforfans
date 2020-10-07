@@ -260,6 +260,19 @@ class UserController extends AppBaseController
         return $theme->scope('users/settings/privacy', compact('settings', 'blockedProfiles'))->render();
     }
 
+    public function userSecuritySettings($username)
+    {
+        $timeline = Timeline::where('username', $username)->first();
+
+        if ($timeline == null) {
+            return Redirect::to('/');
+        }
+
+        $theme = Theme::uses(Setting::get('current_theme', 'default'))->layout('default');
+
+        return $theme->scope('users/settings/security', compact('username'))->render();
+    }
+
     public function userPasswordSettings($username)
     {
         $timeline = Timeline::where('username', $username)
@@ -717,14 +730,59 @@ class UserController extends AppBaseController
         ]);
 
         $user_details = $request->except('username', 'name', 'price');
-        $user_details['price'] = $user_details['subscribe_price'];
         $user->update($user_details);
 
+        Flash::success(trans('messages.general_settings_updated_success'));
+
+        return redirect($request->new_username.'/settings/general');
+    }
+
+    /**
+     * @param Request $request
+     *
+     * @return mixed
+     */
+    public function saveUserLocalizationSettings (Request $request)
+    {
+        if (Config::get('app.env') == 'demo' && $request->username == 'bootstrapguru') {
+            Flash::error(trans('common.disabled_on_demo'));
+
+            return Redirect::back();
+        }
+
+        $user = User::find(Auth::user()->id);
+        $input = $request->all();
+        $user->update($input);
+
+        Flash::success(trans('messages.general_settings_updated_success'));
+
+        return redirect()->back();
+    }
+    
+    /**
+     * @param Request $request
+     *
+     * @return mixed
+     */
+    public function saveUserSubscriptionSettings (Request $request)
+    {
+        if (Config::get('app.env') == 'demo' && $request->username == 'bootstrapguru') {
+            Flash::error(trans('common.disabled_on_demo'));
+
+            return Redirect::back();
+        }
+
+        $input = $request->all();
+        
+        $user = User::find(Auth::user()->id);
+        $user->update([
+            'is_follow_for_free' => isset($input['is_follow_for_free']),
+        ]);
         // Save price
         $payment = $user->payment;
         $stripe_price_id = null;
         $stripe_customer_id = null;
-        $price = $request->input('subscribe_price');
+        $price = $input['subscribe_price'];
         if ($payment != NULL) {
 
             if ($price > 0) {
@@ -751,17 +809,15 @@ class UserController extends AppBaseController
             ]);
 
             $user->update([
-                'price' => $data['subscribe_price'],
+                'price' => $price
             ]);
 
-
+            Flash::success(trans('messages.general_settings_updated_success'));
         } else {
-            Flash::error('messages.general_settings_price_error');
+            Flash::error(trans('common.general_settings_price_error'));
         }
-
-        Flash::success(trans('messages.general_settings_updated_success'));
-
-        return redirect($request->new_username.'/settings/general');
+        
+        return redirect()->back();
     }
 
     protected function paymentDetailsValidator(array $data) {

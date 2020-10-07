@@ -21,6 +21,11 @@
 							<a href="{{ url(Auth::user()->username) }}">
 								{{ Auth::user()->name }}
 							</a>
+                            @if(Auth::user()->verified)
+                                <span class="verified-badge bg-success">
+                                    <i class="fa fa-check"></i>
+                                </span>
+                            @endif
 						</h2>
 						<h4 class="avatar-mail">
 							<a href="{{ url(Auth::user()->username) }}">
@@ -97,6 +102,11 @@
     							<a href="{{ url($suggested_user->username) }}">
     								{{ $suggested_user->name }}
     							</a>
+                                @if($suggested_user->verified)
+                                    <span class="verified-badge bg-success">
+                                        <i class="fa fa-check"></i>
+                                    </span>
+                                @endif
     						</h2>
     						<h4 class="avatar-mail">
     							<a href="{{ url($suggested_user->username) }}">

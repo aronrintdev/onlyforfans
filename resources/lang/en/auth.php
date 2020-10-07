@@ -35,5 +35,6 @@ return  [
   'subject'                   => 'Subject',
   'submit'                    => 'Submit',
   'email_verify'              => 'Please verify your Email before logging in',
-  'subscribe_price'        => 'Subscription Price'
+  'subscribe_price'           => 'Subscription Price',
+  'follow_for_free'           => 'Follow For Free'
 ];

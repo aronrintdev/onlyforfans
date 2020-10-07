@@ -345,12 +345,18 @@ Route::group(['prefix' => '/{username}', 'middleware' => ['auth', 'editown']], f
 Route::group(['prefix' => '/{username}/settings', 'middleware' => ['auth', 'editown']], function ($username) {
     Route::get('/general', 'UserController@userGeneralSettings');
     Route::post('/general', 'UserController@saveUserGeneralSettings');
-
+    
+    Route::post('/localization', 'UserController@saveUserLocalizationSettings');
+    Route::post('/subscription', 'UserController@saveUserSubscriptionSettings');
+    
     Route::get('/profile', 'UserController@userEditProfile');
     Route::post('/profile', 'UserController@saveProfile');
 
     Route::get('/privacy', 'UserController@userPrivacySettings');
     Route::post('/privacy', 'UserController@SaveUserPrivacySettings');
+    
+    Route::get('/security', 'UserController@userSecuritySettings');
+    Route::post('/security', 'UserController@SaveUserSecuritySettings');
     
     Route::post('/block-profile', 'UserController@blockProfile')->name('block-profile');
     Route::post('/update-block-profile', 'UserController@updateBlockProfile')->name('update-block-profile');

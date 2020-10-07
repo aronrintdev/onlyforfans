@@ -43,6 +43,12 @@
     								</div>
     								
 									<div class="row">
+                                        <div class="col-md-6">
+                                            <fieldset class="form-group required">
+                                                {{ Form::label('gender', trans('common.gender')) }}
+                                                {{ Form::select('gender', array('male' => trans('common.male'), 'female' => trans('common.female'), 'other' => trans('common.none')), Auth::user()->gender, array('class' => 'form-control')) }}
+                                            </fieldset>
+                                        </div>
 										<div class="col-md-6">
 											<fieldset class="form-group">
 												{{ Form::label('birthday', trans('common.birthday')) }}
@@ -63,9 +69,6 @@
 												{{ Form::text('wishlist', Auth::user()->wishlist, ['class' => 'form-control', 'placeholder' => trans('common.your_qualification')]) }}
 											</fieldset>
 										</div>
-									</div>
-
-									<div class="row">
 										<div class="col-md-6">
 
 											<fieldset class="form-group">

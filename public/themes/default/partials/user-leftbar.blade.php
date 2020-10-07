@@ -19,6 +19,7 @@
 	    </div>
     </div>
 
+    @if($user->is_follow_for_free)
     <div class="follow">
         <div class="bio-header">Follow</div>
 	    <div class="bio-description">
@@ -27,6 +28,7 @@
     		</a>
 	    </div>
     </div>
+    @endif
     
     <div class="subscribe">
         <div class="bio-header">Subscribe</div>

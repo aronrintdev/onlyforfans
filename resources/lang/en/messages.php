@@ -97,6 +97,7 @@ return [
     'private_posts'               => 'This is a private event and you are not authorized to view any information about this event',
     'no_guests'                   => 'No guests yet!',
     'no_guest_events'             => 'Not guest events yet!',
+    'menu_message_security'        => 'Control your security settings.',
 
     /****** Album form ******/
     'create_a_new_album'       => 'Create a new Album',

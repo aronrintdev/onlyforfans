@@ -562,4 +562,8 @@ return [
     'bottom-right' => 'Bottom Right',
     'color_code' => 'Color Code',
     'existing_file' => 'Existing File',
+    
+    'localization' => 'Localization',
+    'subscriptions' => 'Subscriptions',
+    'security_settings' => 'Security'
 ];

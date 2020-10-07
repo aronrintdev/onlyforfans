@@ -60,6 +60,18 @@
 		</div>
 		<div class="clearfix"></div>
 	</a>
+	<a href="{{ url('/'.Auth::user()->username.'/settings/security') }}" class="list-group-item">
+		<div class="list-icon fans-icon {{ Request::segment(3) == 'security' ? 'active' : '' }}">
+			<i class="fa fa-lock"></i>
+		</div>
+		<div class="list-text">
+			{{ trans('common.security_settings') }}
+			<div class="text-muted">
+				{{ trans('messages.menu_message_security') }}
+			</div>
+		</div>
+		<div class="clearfix"></div>
+	</a>
 	<a href="{{ url('/'.Auth::user()->username.'/settings/addbank') }}" class="list-group-item">
 		<div class="list-icon fans-icon {{ Request::segment(3) == 'addbank' ? 'active' : '' }}">
 			<i class="fa fa-university"></i>

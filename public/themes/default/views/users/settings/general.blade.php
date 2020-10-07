@@ -90,59 +90,6 @@
 										</fieldset>
 									</div>
 								</div>
-
-								<div class="row">
-									<div class="col-md-2">
-										{{ Form::label('language', trans('common.language')) }}
-									</div>
-									<div class="dropdown col-md-4">
-										<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-										<span class="user-name">
-											@if(Auth::user()->language != null)
-												<?php $key = Auth::user()->language; ?>
-											@else
-												<?php $key = App\Setting::get('language'); ?>
-											@endif
-											@if($key == 'gr')
-												<span class="flag-icon flag-icon-gr"></span>
-											@elseif($key == 'en')
-												<span class="flag-icon flag-icon-us"></span>
-											@elseif($key == 'zh')
-												<span class="flag-icon flag-icon-cn"></span>
-											@else
-												<span class="flag-icon flag-icon-{{ $key }}"></span>
-											@endif
-
-                                        </span> <i class="fa fa-angle-down" aria-hidden="true"></i></a>
-										<ul class="dropdown-menu">
-											@foreach( Config::get('app.locales') as $key => $value)
-												<li class=""><a href="#" class="switch-language" data-language="{{ $key }}">
-														@if($key == 'gr')
-															<span class="flag-icon flag-icon-gr"></span>
-														@elseif($key == 'en')
-															<span class="flag-icon flag-icon-us"></span>
-														@elseif($key == 'zh')
-															<span class="flag-icon flag-icon-cn"></span>
-														@else
-															<span class="flag-icon flag-icon-{{ $key }}"></span>
-														@endif
-
-														{{ $value }}</a></li>
-											@endforeach
-										</ul>
-									</div>
-                                    <div class="col-md-6">
-                                        <fieldset class="form-group {{ $errors->has('country') ? ' has-error' : '' }}">
-                                            {{ Form::label('country', trans('common.country')) }}
-                                            {{ Form::text('country', Auth::user()->country, ['class' => 'form-control', 'placeholder' => trans('common.country')]) }}
-                                            @if ($errors->has('country'))
-                                                <span class="help-block">
-												{{ $errors->first('country') }}
-											</span>
-                                            @endif
-                                        </fieldset>
-                                    </div>
-								</div>
                                 
 								<div class="row">
 									<div class="col-md-6">
@@ -156,33 +103,12 @@
 											@endif
 										</fieldset>
 									</div>
-									<div class="col-md-6">
-										<fieldset class="form-group required">
-											{{ Form::label('gender', trans('common.gender')) }}
-											{{ Form::select('gender', array('male' => trans('common.male'), 'female' => trans('common.female'), 'other' => trans('common.none')), Auth::user()->gender, array('class' => 'form-control')) }}
-										</fieldset>
-									</div>
 {{--									<div class="col-md-6">--}}
 {{--										<fieldset class="form-group required {{ $errors->has('password') ? ' has-error' : '' }}">--}}
 {{--											{{ Form::label('password', trans('auth.password')) }}--}}
 {{--											{{ Form::password('password', ['class' => 'form-control', 'id' => 'password', 'placeholder'=> trans('auth.password')]) }}--}}
 {{--										</fieldset>--}}
 {{--									</div>--}}
-								</div>
-
-								{{--Subscribe price--}}
-								<div class="row">
-									<div class="col-md-6">
-										<fieldset class="form-group {{ $errors->has('subscribe_price') ? ' has-error' : '' }}">
-											{{ Form::label('subscribe_price', trans('auth.subscribe_price')) }}
-											{{ Form::text('subscribe_price', Auth::user()->price, ['class' => 'form-control', 'placeholder' => trans('auth.subscribe_price')]) }}
-											@if ($errors->has('subscribe_price'))
-												<span class="help-block">
-												{{ $errors->first('subscribe_price') }}
-											</span>
-											@endif
-										</fieldset>
-									</div>
 								</div>
 								{{--End of Subscribe price--}}
 
@@ -244,43 +170,69 @@
 					<div class="panel panel-default">
 						<div class="panel-heading no-bg panel-settings">
 							<h3 class="panel-title">
-								{{ trans('common.update_password') }}
+								{{ trans('common.localization') }}
 							</h3>
 						</div>
 						<div class="panel-body nopadding">
 							<div class="fans-form">
-								<form method="POST" action="{{ url('/'.Auth::user()->username.'/settings/password/') }}">
+								<form method="POST" action="{{ url('/'.Auth::user()->username.'/settings/localization/') }}">
 									{{ csrf_field() }}
 
-									<div class="row">
-										<div class="col-md-6">
-											<fieldset class="form-group {{ $errors->has('current_password') ? ' has-error' : '' }}">
-												{{ Form::label('current_password', trans('common.current_password')) }}
-												<input type="password" class="form-control" id="current_password" name="current_password" value="{{ old('current_password') }}" placeholder= "{{ trans('messages.enter_old_password') }}">
+                                    <div class="row">
+                                        <div class="col-md-2">
+                                            {{ Form::label('language', trans('common.language')) }}
+                                        </div>
+                                        <div class="dropdown col-md-4">
+                                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+										<span class="user-name">
+											@if(Auth::user()->language != null)
+                                                <?php $key = Auth::user()->language; ?>
+                                            @else
+                                                <?php $key = App\Setting::get('language'); ?>
+                                            @endif
+                                            @if($key == 'gr')
+                                                <span class="flag-icon flag-icon-gr"></span>
+                                            @elseif($key == 'en')
+                                                <span class="flag-icon flag-icon-us"></span>
+                                            @elseif($key == 'zh')
+                                                <span class="flag-icon flag-icon-cn"></span>
+                                            @else
+                                                <span class="flag-icon flag-icon-{{ $key }}"></span>
+                                            @endif
 
-												@if ($errors->has('current_password'))
-												<span class="help-block">
-													{{ $errors->first('current_password') }}
-												</span>
-												@endif
-											</fieldset>
-										</div>
-										<div class="col-md-6">
-											<fieldset class="form-group {{ $errors->has('new_password') ? ' has-error' : '' }}">
-												{{ Form::label('new_password', trans('common.new_password')) }}
-												<input type="password" class="form-control" id="new_password" name="new_password" value="{{ old('new_password') }}" placeholder="{{ trans('messages.enter_new_password') }}">
+                                        </span> <i class="fa fa-angle-down" aria-hidden="true"></i></a>
+                                            <ul class="dropdown-menu">
+                                                @foreach( Config::get('app.locales') as $key => $value)
+                                                    <li class=""><a href="#" class="switch-language" data-language="{{ $key }}">
+                                                            @if($key == 'gr')
+                                                                <span class="flag-icon flag-icon-gr"></span>
+                                                            @elseif($key == 'en')
+                                                                <span class="flag-icon flag-icon-us"></span>
+                                                            @elseif($key == 'zh')
+                                                                <span class="flag-icon flag-icon-cn"></span>
+                                                            @else
+                                                                <span class="flag-icon flag-icon-{{ $key }}"></span>
+                                                            @endif
 
-												@if($errors->has('new_password'))
-												<span class="help-block">
-													{{ $errors->first('new_password') }}
-												</span>
-												@endif
-											</fieldset>
-										</div>
-									</div>
+                                                            {{ $value }}</a></li>
+                                                @endforeach
+                                            </ul>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <fieldset class="form-group {{ $errors->has('country') ? ' has-error' : '' }}">
+                                                {{ Form::label('country', trans('common.country')) }}
+                                                {{ Form::text('country', Auth::user()->country, ['class' => 'form-control', 'placeholder' => trans('common.country')]) }}
+                                                @if ($errors->has('country'))
+                                                    <span class="help-block">
+												{{ $errors->first('country') }}
+											</span>
+                                                @endif
+                                            </fieldset>
+                                        </div>
+                                    </div>
 
 									<div class="pull-right">
-										{{ Form::submit(trans('common.save_password'), ['class' => 'btn btn-success']) }}
+										{{ Form::submit(trans('common.save_changes'), ['class' => 'btn btn-success']) }}
 									</div>
 									<div class="clearfix"></div>
 								</form>
@@ -288,108 +240,51 @@
 						</div>
 					</div>
 					<!-- End of second panel -->
+                
+					<div class="panel panel-default">
+						<div class="panel-heading no-bg panel-settings">
+							<h3 class="panel-title">
+								{{ trans('common.subscriptions') }}
+							</h3>
+						</div>
+						<div class="panel-body nopadding">
+							<div class="fans-form">
+								<form method="POST" action="{{ url('/'.Auth::user()->username.'/settings/subscription/') }}">
+									{{ csrf_field() }}
 
-                <div class="panel panel-default">
-                    <div class="panel-heading no-bg panel-settings">
-                        <h3 class="panel-title">
-                            {{ trans('common.water_mark_settings') }}
-                        </h3>
-                    </div>
-                    <div class="panel-body nopadding">
-                        <div class="fans-form">
-                            <form method="POST" action="{{ url('/'.Auth::user()->username.'/settings/save-watermark-settings') }}" enctype="multipart/form-data">
-                                {{ csrf_field() }}
-                                        
-                                <div class="row">
-                                    <div class="col-md-12">
-                                        {{ Form::label('watermark_text', trans('Enable/Disable Watermark')) }}
-                                        <fieldset class="form-group toggle {{ $errors->has('watermark_text') ? ' has-error' : '' }}">
-                                        <input type="checkbox" id="watermark" name="watermark" class="form-control"
-                                               {{ \Illuminate\Support\Facades\Auth::user()->settings()->watermark == 1 ? 'checked' : '' }} value="{{ \Illuminate\Support\Facades\Auth::user()->settings()->watermark == 1 ? 1 : 0 }}"/><label for="watermark">watermark</label>
-                                        </fieldset>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <fieldset class="form-group {{ $errors->has('subscribe_price') ? ' has-error' : '' }}">
+                                                {{ Form::label('subscribe_price', trans('auth.subscribe_price')) }}
+                                                {{ Form::text('subscribe_price', Auth::user()->price, ['class' => 'form-control', 'placeholder' => trans('auth.subscribe_price')]) }}
+                                                @if ($errors->has('subscribe_price'))
+                                                    <span class="help-block">
+												{{ $errors->first('subscribe_price') }}
+											</span>
+                                                @endif
+                                            </fieldset>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <fieldset class="form-group">
+                                                {{ Form::label('follow_for_free', trans('auth.follow_for_free')) }}
+                                                <div class="toggle">
+                                                    <input type="checkbox" {{ \Illuminate\Support\Facades\Auth::user()->is_follow_for_free ? 'checked' : ''  }} id="followForFree" name="is_follow_for_free" class="form-control"/><label for="followForFree">follow for free</label>
+                                                </div>
+                                            </fieldset>
+                                        </div>
                                     </div>
-									<div class="watermark_settings">
-										<div class="col-md-6">
-											<fieldset class="form-group watermark_text {{ $errors->has('watermark_text') ? ' has-error' : '' }}">
-												{{ Form::label('watermark_text', trans('common.watermark_text')) }}
-												<input type="text" class="form-control" id="watermark_text" name="watermark_text" placeholder= "{{ trans('common.watermark_text') }}" value="{{ \Illuminate\Support\Facades\Auth::user()->settings()->watermark_text }}">
 
-												@if ($errors->has('watermark_text'))
-													<span class="help-block">
-														{{ $errors->first('watermark_text') }}
-													</span>
-												@endif
-											</fieldset>
-										</div>
-										<div class="col-md-6">
-											<fieldset class="form-group watermark_file {{ $errors->has('watermark_file') ? ' has-error' : '' }}">
-												{{ Form::label('watermark_file', trans('common.watermark_file')) }}
-												@if(isset(Auth::user()->settings()->watermark_file_id))
-													<a href="{{ $waterMarkUrl }}" download="{{\Illuminate\Support\Facades\Auth::user()->watermark_file_id}}">
-														{{ trans('common.existing_file') }}</a>
-												@endif
-												<input type="file" class="form-control" id="watermark_file" name="watermark_file" placeholder= "{{ trans('common.watermark_file') }}">
-
-												@if ($errors->has('watermark_file'))
-													<span class="help-block">
-														{{ $errors->first('watermark_file') }}
-													</span>
-												@endif
-												@if ($errors->any())
-													<span class="help-block" style="color: red;">
-													@foreach ($errors->all(':message') as $input_error)
-															{{ $input_error }}
-														@endforeach
-													</span>
-												@endif
-											</fieldset>
-										</div>
-										<div class="col-md-6">
-											<fieldset class="form-group {{ $errors->has('watermark_font_size') ? ' has-error' : '' }}">
-												{{ Form::label('watermark_font_size', trans('common.watermark_font_size')) }}
-												<input type="number" class="form-control" id="watermark_font_size" min="1" name="watermark_font_size" value="{{ \Illuminate\Support\Facades\Auth::user()->settings()->watermark_font_size }}" placeholder= "{{ trans('common.watermark_font_size') }}">
-
-												@if ($errors->has('watermark_font_size'))
-													<span class="help-block">
-														{{ $errors->first('watermark_font_size') }}
-													</span>
-												@endif
-											</fieldset>
-										</div>
-										<div class="col-md-6">
-											<fieldset class="form-group {{ $errors->has('watermark_position') ? ' has-error' : '' }}">
-												{{ Form::label('watermark_position', trans('common.watermark_position')) }}
-												{{ Form::select('watermark_position', get_image_insert_location(), Auth::user()->settings()->watermark_position, array('class' => 'form-control')) }}
-												@if ($errors->has('watermark_position'))
-													<span class="help-block">
-														{{ $errors->first('watermark_position') }}
-													</span>
-												@endif
-											</fieldset>
-										</div>
-										<div class="col-md-6">
-											<fieldset class="form-group {{ $errors->has('watermark_font_color') ? ' has-error' : '' }}">
-												{{ Form::label('watermark_font_color', trans('common.watermark_font_color')) }}
-												<input type="text" class="form-control" id="watermark_font_color" name="watermark_font_color" value="{{ \Illuminate\Support\Facades\Auth::user()->settings()->watermark_font_color }}" placeholder= "{{ '#'.trans('common.color_code') }}">
-
-												@if ($errors->has('watermark_font_color'))
-													<span class="help-block">
-														{{ $errors->first('watermark_font_color') }}
-													</span>
-												@endif
-											</fieldset>
-										</div>
+									<div class="pull-right">
+										{{ Form::submit(trans('common.save_changes'), ['class' => 'btn btn-success']) }}
 									</div>
-                                </div>
-
-                                <div class="pull-right">
-                                    {{ Form::submit(trans('common.save_changes'), ['class' => 'btn btn-success']) }}
-                                </div>
-                                <div class="clearfix"></div>
-                            </form>
-                        </div><!-- /fans-form -->
-                    </div>
-                </div>
+									<div class="clearfix"></div>
+								</form>
+							</div><!-- /fans-form -->
+						</div>
+					</div>
+					<!-- End of second panel -->
+                
+                
 
             </div>
 			</div><!-- /row -->

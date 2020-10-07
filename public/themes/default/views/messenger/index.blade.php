@@ -117,6 +117,9 @@
                                                    
                                                     <h4 class="media-heading">
                                                         @{{ conversation.user.name }}
+                                                        <span class="verified-badge bg-success" v-if="conversation.user.verified">
+                                                            <i class="fa fa-check"></i>
+                                                        </span>
                                                     </h4>
                                                     <div class="post-text">
                                                         @{{ conversation.lastMessage.body }}

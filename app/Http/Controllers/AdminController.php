@@ -22,13 +22,13 @@ use DB;
 use Exception;
 use File;
 use Flash;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\Redirect;
 use Intervention\Image\Facades\Image;
 use Session;
 use Teepluss\Theme\Facades\Theme;
@@ -1660,5 +1660,43 @@ class AdminController extends Controller
         Setting::set($settings);
         Flash::success(trans('messages.homepage_settings_success'));
         return redirect()->back();
+    }
+
+    /**
+     * @param $user_id
+     *
+     * @return RedirectResponse
+     */
+    public function deleteUser($user_id)
+    {
+        try {
+            DB::beginTransaction();
+
+            $timeline = Timeline::where('username', $user_id)->first();
+            $user = $timeline->user;
+            $followers = $user->followers();
+            $timeline->notifications()->delete();            
+            $timeline->delete();
+            $user->followers()->detach();
+            $user->following()->detach();
+            $user->comments()->delete();
+            $user->userEvents()->delete();
+            $user->blockedProfiles()->delete();
+            $user->timelineReports()->detach();
+            $user->notifications()->delete();
+            $user->notifiedBy()->delete();
+            $user->delete();
+            
+            DB::commit();
+
+            Flash::success(trans('messages.user_deleted_success'));
+
+            return redirect()->back();
+        } catch (Exception $e) {
+            DB::rollBack();
+            Flash::error($e->getMessage());
+
+            return redirect()->back();
+        }
     }
 }

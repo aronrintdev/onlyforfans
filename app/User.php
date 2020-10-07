@@ -52,7 +52,7 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'timeline_id', 'email', 'verification_code', 'email_verified', 'remember_token', 'password', 'birthday', 'city', 'gender', 'last_logged', 'timezone', 'affiliate_id', 'language', 'country', 'active', 'verified', 'facebook_link', 'twitter_link', 'dribbble_link', 'instagram_link', 'youtube_link', 'linkedin_link', 'wishlist', 'website', 'instagram','custom_option1', 'custom_option2', 'custom_option3', 'custom_option4'
-        , 'bank_account', 'price', 'is_payment_set', 'is_bank_set'
+        , 'bank_account', 'price', 'is_payment_set', 'is_bank_set', 'is_follow_for_free'
     ];
 
     /**
