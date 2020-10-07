@@ -17,7 +17,6 @@
 <body id="app-layout">
     <nav class="navbar fans navbar-default no-bg" style="position: relative;">
     <div class="container-fluid">
-        <!-- Brand and toggle get grouped for better mobile display -->
         <div class="navbar-header">
             <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-4" aria-expanded="false">
                 <span class="sr-only">Toggle navigation</span>
@@ -67,19 +66,15 @@
                                 <li><a href="{{ url('/logout') }}"><i class="fa fa-unlock" aria-hidden="true"></i>{{ trans('common.logout') }}</a></li>
                             </ul>
                         </li>
-                   <!--  <li class="logout">
-                        <a href="{{ url('/logout') }}"><i class="fa fa-sign-out" aria-hidden="true"></i></a>
-                    </li> -->
                 </ul>
                 @endif
-            </div><!-- /.navbar-collapse -->
-        </div><!-- /.container-fluid -->
+            </div>
+        </div>
     </nav>
 
 
     @yield('content')
 
-    <!-- Modal starts here-->
 <div class="modal fade" id="usersModal" tabindex="-1" role="dialog" aria-labelledby="usersModalLabel">
     <div class="modal-dialog modal-likes" role="document">
         <div class="modal-content">
@@ -112,10 +107,6 @@
         <!--        @endforeach-->
         <!--    </div>-->
         <!--@endif-->
-        
-        
-        
-<!-- Modal starts here-->
 <div class="modal fade" id="usersModal" tabindex="-1" role="dialog" aria-labelledby="usersModalLabel">
     <div class="modal-dialog modal-likes" role="document">
         <div class="modal-content">

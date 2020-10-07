@@ -28688,7 +28688,6 @@ html {
     padding-right: 18px;
 }
 .table.existing-products-table tbody tr td {
-    text-transform: capitalize;
     font-family: 'Open Sans', sans-serif;
     font-size: 14px;
 }
@@ -32643,10 +32642,10 @@ html {
     margin-right: 13px;
 }
 
-@media (max-width:540px) {
+@media (max-width:1010px) {
     .user-image.dropdown.fans .dropdown-menu {
-            width: 230px;
-            left: -150px;
+            width: 230px !important;
+            left: -130px;
     }
 }
 

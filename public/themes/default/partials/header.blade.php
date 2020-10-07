@@ -288,7 +288,7 @@
                                             <li class=""><a href="{{ url(Auth::user()->username.'/settings/addpayment') }}"><i class="fa fa-credit-card" aria-hidden="true"></i>{{ trans('common.add_payment') }}</a></li>
 
                                             @if (Auth::user()->is_bank_set)
-                                                <li class=""><a href="{{ Auth::user()->payment ? url(Auth::user()->payment->dashboard_url) : '#' }}"><i class="fa fa-credit-card" aria-hidden="true"></i>{{ trans('common.dashboard') }}</a></li>
+                                                <li class=""><a href="{{ url(Auth::user()->payment->dashboard_url) }}"><i class="fa fa-credit-card" aria-hidden="true"></i>{{ trans('common.dashboard') }}</a></li>
                                             @endif
 
                                             <li class=""><a href="{{ url('/'.Auth::user()->username.'/settings/affliates') }}"><i class="fa fa-retweet" aria-hidden="true"></i>{{ trans('common.referrals') }}</a></li>
