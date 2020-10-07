@@ -151,16 +151,18 @@
 								<p class="no-posts">{{ trans('messages.no_posts') }}</p>
 							@endif
 						</div>
-                            
+                        <?php
+                             $twoColumn = true;   
+                        ?>
 						<div class="timeline-posts timeline-condensed-column row" style="display: none">
 							@if(count($posts) > 0)
 								@foreach($posts as $post)
                                     @if($post->type == \App\Post::PAID_TYPE)
                                         @if($post->user->activeSubscribers->contains(Auth::user()->id)  || $post->user->id == Auth::user()->id)
-                                            {!! Theme::partial('post_condensed_column',compact('post','timeline','next_page_url', 'user')) !!}
+                                            {!! Theme::partial('post_condensed_column',compact('post','timeline','next_page_url', 'user','twoColumn')) !!}
                                         @endif
                                     @else
-                                        {!! Theme::partial('post_condensed_column',compact('post','timeline','next_page_url', 'user')) !!}
+                                        {!! Theme::partial('post_condensed_column',compact('post','timeline','next_page_url', 'user','twoColumn')) !!}
                                     @endif
 								@endforeach
 							@else
@@ -182,12 +184,13 @@
     $('.switch-layout').click(function () {
         $('.timeline-default, .timeline-condensed-column').toggle();
         condensedLayout = !condensedLayout;
+        twoColumn = !twoColumn;
         $.each($(".timeline-condensed-column>.panel"), function (i) {
-            $(this).wrap('<div class="col-lg-4"></div>');
+            $(this).wrap('<div class="col-lg-6"></div>');
         });
         $('.switch-layout.three-column, .switch-layout.one-column').parent().toggle();
         if (!condensedLayout) {
-            $.each($(".timeline-default>.col-lg-4 .panel"), function (i) {
+            $.each($(".timeline-default>.col-lg-6 .panel"), function (i) {
                 $(this).unwrap();
             });
         }

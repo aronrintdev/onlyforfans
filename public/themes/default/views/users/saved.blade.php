@@ -7,11 +7,12 @@
 		<div class="col-md-7 col-lg-8">
 
 			<div class="panel panel-default">
-				<div class="panel-heading no-bg panel-settings">
+				<div class="panel-heading no-bg panel-settings" style="display: flex; justify-content: space-between; flex-wrap: wrap;">
 
 					<h3 class="panel-title">
 						{{ trans('common.saved_items') }}
 					</h3>
+                    <a href="{{ route('purchased-posts') }}" class="btn btn-success purchased-posts">Show Purchased</a>
 				</div>
 				<div class="panel-body nopadding">
 					<ul class="nav nav-pills heading-list">

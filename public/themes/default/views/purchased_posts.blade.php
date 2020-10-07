@@ -182,7 +182,7 @@
 	<!-- <div class="main-content"> -->
 		<div class="container">
 			<div class="row">
-                <div class="col-md-7 col-lg-8">
+                <div class="col-lg-12">
 
                     <div style="display: flex; justify-content: space-between">
                         <div class="input-group explore-search-bar" style="display: none; margin-bottom: 10px; width: calc(100% - 200px)">
@@ -229,10 +229,6 @@
                         <p class="infinite-scroll-last">End of content</p>
                         <p class="infinite-scroll-error">No more pages to load</p>
                     </div>
-				</div><!-- /col-md-6 -->
-
-				<div class="col-md-5 col-lg-4">
-					{!! Theme::partial('home-rightbar',compact('suggested_users', 'suggested_groups', 'suggested_pages')) !!}
 				</div>
 			</div>
 		</div>

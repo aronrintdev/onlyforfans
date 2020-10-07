@@ -1,6 +1,7 @@
 
 document_title = document.title;
 let condensedLayout;
+let twoColumn = false;
 $(function () {
 
     $('.chat-list').css('display', 'none');
@@ -449,6 +450,9 @@ $(function () {
 
             if (condensedLayout) {
                 formData.push({name:'condensed_layout', value: true})
+            }
+            if (twoColumn) {
+                formData.push({name:'two_column', value: true})
             }
         },
         beforeSend: function() {

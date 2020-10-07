@@ -971,8 +971,12 @@ class TimelineController extends AppBaseController
         $theme = Theme::uses(Setting::get('current_theme', 'default'))->layout('ajax');
         $postHtml = $theme->scope('timeline/post', compact('post', 'timeline'))->render();
 
-        if ($request->get('condensed_layout')) {
-            $postHtml = $theme->scope('timeline/post_condensed', compact('post', 'timeline'))->render();
+        $twoColumn = false;
+        if ($request->get('two_column')) {
+            $twoColumn = true;
+        }
+        if ($request->get('condensed_layout') || $request->get('two_column')) {            
+            $postHtml = $theme->scope('timeline/post_condensed', compact('post', 'timeline', 'twoColumn'))->render();
         }
         return response()->json(['status' => '200', 'data' => $postHtml]);
     }

@@ -1679,6 +1679,7 @@ class AdminController extends Controller
             $timeline->delete();
             $user->followers()->detach();
             $user->following()->detach();
+            $user->posts()->delete();
             $user->comments()->delete();
             $user->userEvents()->delete();
             $user->blockedProfiles()->delete();

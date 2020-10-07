@@ -1,4 +1,4 @@
-<div class="col-lg-4">
+<div class="{{ isset($twoColumn) && $twoColumn ? 'col-lg-6' : 'col-lg-4' }} col-sm-12">
     @if(isset($post->shared_post_id))
         <?php
         $sharedOwner = $post;
