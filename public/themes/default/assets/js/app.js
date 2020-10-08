@@ -800,18 +800,18 @@ $(function () {
     $('body').on('click','.follow-user',function(e){
         e.preventDefault();
 
-        if ($(this).data('price') == "0.00") {
+        if ($(this).data('price') == "0.00" || $(this).data('follow') == 1) {
             follow_btn = $(this).closest('.follow-links');
             $.post(SP_source() + 'ajax/follow-post-free', {timeline_id: $(this).data('timeline-id')}, function(data) {
                 if (data.status == 200) {
                     if (data.followed == true) {
-                        follow_btn.find('.follow').parent().addClass('hidden');
-                        follow_btn.find('.unfollow').parent().removeClass('hidden');
+                        follow_btn.find('a.follow').parent().addClass('hidden');
+                        follow_btn.find('a.unfollow').parent().removeClass('hidden');
                     } else {
-                        follow_btn.find('.follow').parent().removeClass('hidden');
-                        follow_btn.find('.unfollow').parent().addClass('hidden');
+                        follow_btn.find('a.follow').parent().removeClass('hidden');
+                        follow_btn.find('a.unfollow').parent().addClass('hidden');
                     }
-                    follow_btn.find('.unfollow').closest('.holder').slideToggle();
+                    follow_btn.find('a.unfollow').closest('.holder').slideToggle();
                 }
                 if (data.status == 422) {
                     notify(data.message, 'error');
@@ -837,13 +837,13 @@ $(function () {
                         $.post(SP_source() + 'ajax/follow-post', {timeline_id: timeline_id.data('timeline-id')}, function(data) {
                             if (data.status == 200) {
                                 if (data.followed == true) {
-                                    follow_btn.find('.follow').parent().addClass('hidden');
-                                    follow_btn.find('.unfollow').parent().removeClass('hidden');
+                                    follow_btn.find('a.follow').parent().addClass('hidden');
+                                    follow_btn.find('a.unfollow').parent().removeClass('hidden');
                                 } else {
-                                    follow_btn.find('.follow').parent().removeClass('hidden');
-                                    follow_btn.find('.unfollow').parent().addClass('hidden');
+                                    follow_btn.find('a.follow').parent().removeClass('hidden');
+                                    follow_btn.find('a.unfollow').parent().addClass('hidden');
                                 }
-                                follow_btn.find('.unfollow').closest('.holder').slideToggle();
+                                follow_btn.find('a.unfollow').closest('.holder').slideToggle();
                             }
                         });
                     });
@@ -2778,3 +2778,95 @@ $(document).on('click', '.purchase-post', function () {
         });
     });
 });
+
+// window.Echo = new Echo({
+//     broadcaster: 'pusher',
+//     key: pusherKey,
+//     cluster: pusherCluster,
+//     encrypted: true,
+//     auth: {
+//         headers: {
+//             'X-CSRF-TOKEN': $('meta[name="csrf_token"]').attr('content'),
+//         },
+//     },
+// });
+
+// Echo.join(`user-status`).here((users) => {
+//     setTimeout(function () {
+//         $.each(users, function (index, user) {
+//             updateUserStatus(user, 1);
+//         });
+//     }, 1000);
+// }).joining((user) => {
+//     updateUserStatus(user, 1);
+// }).leaving((user) => {
+//     updateUserStatus(user, 0);
+// });
+
+window.setLastSeenOfUser = function (status) {
+    $.ajax({
+        type: 'post',
+        url: setLastSeenURL,
+        data: { status: status },
+        success: function (data) {
+        },
+    });
+};
+
+//set user status online
+setLastSeenOfUser(1);
+
+// window.onbeforeunload = function () {
+//     Echo.leave('user-status');
+//     console.log('sdfsdfj');
+//     setLastSeenOfUser(0);
+//     //return undefined; to prevent dialog while window.onbeforeunload
+//     return undefined;
+// };
+//
+// Echo.join(`user-status`);
+//
+// Echo.join(`user-status`).here((users) => {
+//     setTimeout(function () {
+//         $.each(users, function (index, user) {
+//             updateUserStatus(user, 1);
+//         });
+//     }, 1000);
+// }).joining((user) => {
+//     updateUserStatus(user, 1);
+// }).leaving((user) => {
+//     updateUserStatus(user, 0);
+// });
+
+$(window).load(function () {
+    setLastSeenOfUser(1);
+    return undefined;
+});
+
+$(window).blur(function () {
+    setTimeout(function () {        
+        setLastSeenOfUser(0);
+        return undefined;
+    }, 5000)
+});
+
+$(window).focus(function () {
+    setLastSeenOfUser(1);
+    return undefined;
+});
+
+document.addEventListener("visibilitychange", function() {
+    setTimeout(function () {
+        if (!document.hidden) {
+            setLastSeenOfUser(1);
+        } else {
+            setLastSeenOfUser(0);
+        }
+    }, 5000)
+});
+
+window.onbeforeunload = function () {
+    setLastSeenOfUser(0);
+    //return undefined; to prevent dialog while window.onbeforeunload
+    return undefined;
+};

@@ -1687,4 +1687,20 @@ class UserController extends AppBaseController
 
         return redirect(Auth::user()->username.'/settings/general');
     }
+
+    /**
+     * @param Request $request
+     *
+     * @return JsonResponse
+     */
+    public function updateLastSeen(Request $request)
+    {
+        $user = Auth::user();
+
+        $lastSeen = ($request->has('status') && $request->get('status') > 0) ? null : Carbon::now();
+
+        $user->update(['last_logged' => $lastSeen, 'is_online' => $request->get('status')]);
+        
+        return response()->json(['status' => '200', 'message' => 'Status changed']);
+    }
 }

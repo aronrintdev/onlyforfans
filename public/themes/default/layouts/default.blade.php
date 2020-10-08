@@ -75,7 +75,9 @@
        </script>
         <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.5.0/socket.io.min.js"></script>
         <script type="text/javascript" src="https://js.stripe.com/v3/"></script>
-
+        <script>
+            let setLastSeenURL = "{{ route('update-user-status') }}";
+        </script>
         {!! Theme::asset()->container('footer')->scripts() !!}
 
     </body>

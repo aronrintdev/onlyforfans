@@ -154,7 +154,7 @@
 							<td>{{ $post_report->id }}</td>
 							<td><a href="#"><img src="@if($post->getAvatar($post_report->reporter_id)) {{ url('user/avatar/'.$post->getAvatar($post_report->reporter_id)) }} @else {{ url('user/avatar/default-'.$post->getGender($post_report->reporter_id).'-avatar.png') }} @endif" alt="images"></a><a href="{{ url($post->getUserName($post_report->reporter_id)) }}"> {{ $post->getUserName($post_report->reporter_id) }}</a></td>
 
-							<td><a href="#">{{ trans('admin.show_post') }}</a</td> 
+							<td><a href="#">{{ trans('admin.show_post') }}</a></td> 
 							<td>{{ $post_report->status }}</td>
 							<td>
 								<a href="{{ url('admin/mark-safe/'.$post_report->id) }}" class="btn btn-success"><i class="fa fa-thumbs-up"></i>{{ trans('admin.mark_safe') }}</a>
@@ -171,3 +171,4 @@
 			@endif
 		</div>
 	</div>
+</div>

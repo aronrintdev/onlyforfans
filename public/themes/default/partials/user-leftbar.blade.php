@@ -7,12 +7,16 @@
         )
 @endif
 
-<div class="user-bio-block">
+<div class="user-bio-block follow-links">
     
     <div class="online">
         <div class="bio-header">Status</div>
 	    <div class="bio-description">
-		    Last seen __ hours ago &bullet; <span style="color: #38a169;">Online now</span>
+            @if($user->is_online)
+		    <span style="color: #38a169;">Online Now</span>
+            @elseif(isset($user->last_logged))
+            Last seen {{ \Carbon\Carbon::parse($user->last_logged)->diffForHumans() }}    
+            @endif
     			<a style="margin-top:10px;" href="#" class="btn btn-options btn-block btn-default" onClick="chatBoxes.sendMessage({{ $timeline->user->id }})">
     				<i class="fa fa-inbox"></i> {{ trans('common.message') }}
     			</a>
@@ -23,9 +27,29 @@
     <div class="follow">
         <div class="bio-header">Follow</div>
 	    <div class="bio-description">
-    	    <a href="javascript:void(0);" class="btn btn-options btn-block follow-user btn-default follow" data-price="{{ $user->price }}"  data-timeline-id="{{ $timeline->id }}">
-    			Follow for Free
-    		</a>
+            @if(!$user->followers->contains(Auth::user()->id))
+            <div class="follow-btn">
+                <a href="javascript:void(0);" class="btn btn-options btn-block follow-user btn-default follow" data-price="{{ $user->price }}" data-follow="1"  data-timeline-id="{{ $timeline->id }}">
+                    Follow for Free
+                </a>
+            </div>
+            <div class="unfollow-btn hidden">
+                <a href="javascript:void(0);" class="btn btn-options btn-block btn-success unfollow" data-price="{{ $user->price }}" data-follow="1"  data-timeline-id="{{ $timeline->id }}">
+                    Follow for Free
+                </a>
+            </div>
+            @else
+                <div class="follow-btn hidden">
+                    <a href="javascript:void(0);" class="btn btn-options btn-block follow-user btn-default follow" data-price="{{ $user->price }}" data-follow="1"  data-timeline-id="{{ $timeline->id }}">
+                        Follow for Free
+                    </a>
+                </div>
+                <div class="unfollow-btn">
+                    <a href="javascript:void(0);" class="btn btn-options btn-block btn-success unfollow" data-price="{{ $user->price }}" data-follow="1"  data-timeline-id="{{ $timeline->id }}">
+                        Unfollow
+                    </a>
+                </div>
+            @endif
 	    </div>
     </div>
     @endif

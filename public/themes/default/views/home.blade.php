@@ -105,4 +105,9 @@
             });
         }
     });
+    {{--var module = { };--}}
+    {{--let pusherKey = '{{ config('broadcasting.connections.pusher.key') }}';--}}
+    {{--let pusherCluster = '{{ config('broadcasting.connections.pusher.options.cluster') }}';--}}
 </script>
+{{--{!! Theme::asset()->container('footer')->usePath()->add('echo', 'js/echo.iife.js') !!}--}}
+{{--{!! Theme::asset()->container('footer')->usePath()->add('pusher', 'js/pusher.js') !!}--}}

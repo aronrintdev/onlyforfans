@@ -50,12 +50,8 @@
 						<div class="lists-dropdown-menu">
 								<ul class="list-inline text-right no-margin">
 									<li class="dropdown">
-										<a href="#" class="dropdown-togle lists-dropdown-icon" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-											<svg class="sort-icon has-tooltip" aria-hidden="true" data-original-title="null">
-												<use xlink:href="#icon-sort" href="#icon-sort">
-													<svg id="icon-sort" viewBox="0 0 24 24"> <path d="M4 19h4a1 1 0 0 0 1-1 1 1 0 0 0-1-1H4a1 1 0 0 0-1 1 1 1 0 0 0 1 1zM3 6a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1 1 1 0 0 0-1-1H4a1 1 0 0 0-1 1zm1 7h10a1 1 0 0 0 1-1 1 1 0 0 0-1-1H4a1 1 0 0 0-1 1 1 1 0 0 0 1 1z"></path> </svg>
-												</use>
-											</svg>
+										<a href="#" class="dropdown-togle lists-dropdown-icon" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" style="color: #298ad3; display: inline-flex">
+                                            <i class="fa fa-filter" aria-hidden="true"></i>
 										</a>
 										<ul class="post-dropdown-menu dropdown-menu profile-dropdown-menu-content">
 											<li class="main-link">

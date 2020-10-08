@@ -1267,8 +1267,9 @@ class AdminController extends Controller
 
         $post_reports = DB::table('post_reports')->get();
         $timeline_reports = DB::table('timeline_reports')->get();
-
+        $timeline = null;
         foreach ($timeline_reports as $timeline_report) {
+            $timeline = null;
             $timeline = Timeline::find($timeline_report->timeline_id);
             if ($timeline != null) {
                 if ($timeline->type == 'page') {

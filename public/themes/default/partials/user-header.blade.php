@@ -1,4 +1,8 @@
-
+<style>
+    .smallscreen-report, a.page-report.report {
+        display: block !important;
+    }
+</style>
 <div class="timeline-cover-section">
 	<div class="timeline-cover">
 		<ul class="list-inline pagelike-links">
@@ -29,34 +33,34 @@
 
 			@if(Auth::user()->username != $timeline->username)
 				@if(!$timeline->reports->contains(Auth::user()->id))
-					<li class="pull-right">
+					<li class="timeline-cover-status pull-right">
 						<a href="#" class="page-report report" data-timeline-id="{{ $timeline->id }}"> <i class="fa fa-flag" aria-hidden="true"></i> {{ trans('common.report') }}
 						</a>
 					</li>
-					<li class="hidden pull-right">
+					<li class="timeline-cover-status hidden pull-right">
 						<a href="#" class="page-report reported" data-timeline-id="{{ $timeline->id }}"> <i class="fa fa-flag" aria-hidden="true"></i>	{{ trans('common.reported') }}
 						</a>
 					</li>
 				@else
-					<li class="hidden pull-right">
+					<li class="timeline-cover-status hidden pull-right">
 						<a href="#" class="page-report report" data-timeline-id="{{ $timeline->id }}"> <i class="fa fa-flag" aria-hidden="true"></i> {{ trans('common.report') }}
 						</a>
 					</li>
-					<li class="pull-right">
+					<li class="timeline-cover-status pull-right">
 						<a href="#" class="page-report reported" data-timeline-id="{{ $timeline->id }}"> <i class="fa fa-flag" aria-hidden="true"></i>	{{ trans('common.reported') }}
 						</a>
 					</li>
 				@endif
 			@endif
-			@if(Auth::user()->username != $timeline->username)
-				@if(!$timeline->reports->contains(Auth::user()->id))
-					<li class="smallscreen-report"><a href="#" class="page-report report" data-timeline-id="{{ $timeline->id }}">{{ trans('common.report') }}</a></li>
-					<li class="hidden smallscreen-report"><a href="#" class="page-report reported" data-timeline-id="{{ $timeline->id }}">{{ trans('common.reported') }}</a></li>
-				@else
-					<li class="hidden smallscreen-report"><a href="#" class="page-report report" data-timeline-id="{{ $timeline->id }}">{{ trans('common.report') }}</a></li>
-					<li class="smallscreen-report"><a href="#" class="page-report reported" data-timeline-id="{{ $timeline->id }}">{{ trans('common.reported') }}</a></li>
-				@endif
-			@endif
+{{--			@if(Auth::user()->username != $timeline->username)--}}
+{{--				@if(!$timeline->reports->contains(Auth::user()->id))--}}
+{{--					<li class="smallscreen-report"><a href="#" class="page-report report" data-timeline-id="{{ $timeline->id }}">{{ trans('common.report') }}</a></li>--}}
+{{--					<li class="hidden smallscreen-report"><a href="#" class="page-report reported" data-timeline-id="{{ $timeline->id }}">{{ trans('common.reported') }}</a></li>--}}
+{{--				@else--}}
+{{--					<li class="hidden smallscreen-report"><a href="#" class="page-report report" data-timeline-id="{{ $timeline->id }}">{{ trans('common.report') }}</a></li>--}}
+{{--					<li class="smallscreen-report"><a href="#" class="page-report reported" data-timeline-id="{{ $timeline->id }}">{{ trans('common.reported') }}</a></li>--}}
+{{--				@endif--}}
+{{--			@endif--}}
 		</ul>
 
 		<div class="profile-dropdown-menu">

@@ -820,7 +820,7 @@
                 </div>
 
                 <div class="b-stats-row__content">
-                    <input type="number" id="etTipAmount" class="form-control etTipAmount" placeholder="Tip amount" step="0.1">
+                    <input type="number" id="etTipAmount" class="form-control etTipAmount" placeholder="$0.00" step="0.1">
                 </div>
             </div>
             <div class="modal-footer">
@@ -905,5 +905,11 @@
   .locked-content .locked-content-wrapper {
       display: flex;
       flex-direction: column;
+  }
+
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
   }
 </style>
