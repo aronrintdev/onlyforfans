@@ -55,7 +55,7 @@
 							</fieldset>
 						</div>
 						<div class="col-md-3">
-							<img id="favicon" class="fans-favicon" src="{{ url('setting/'.Setting::get('favicon')) }}" alt="fans favicon" title="fans favicon" height="50" />
+							<img id="favicon" class="fans-favicon" src="{{ url('images/'.Setting::get('favicon')) }}" alt="fans favicon" title="fans favicon" height="50" />
 						</div>
 					</div>
 					<div class="row">
@@ -281,13 +281,6 @@
 							</fieldset>
 						</div>
 						<div class="col-md-6">
-							<fieldset class="form-group">
-								{{ Form::label('dribbble_link', trans('admin.dribbble_link')) }}
-								<div class="input-group dribbble-input-group">
-									<div class="input-group-addon dribbble-btn"><i class="fa fa-dribbble"></i></div>
-									{{ Form::text('dribbble_link', Setting::get('dribbble_link'), array('class' => 'form-control', 'placeholder' => trans('admin.dribbble_link'))) }}
-								</div>
-							</fieldset>
 						</div>
 					</div>
 

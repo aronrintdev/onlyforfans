@@ -32,7 +32,7 @@ return [
     'no_suggested_pages'        => 'No suggested pages found!',
     'search_people_placeholder' => 'Search for people',
     /*'search_placeholder'        => 'Search for people, trends, pages and groups',*/
-    'search_placeholder'        => 'Search',
+    'search_placeholder'        => 'Search for creators',
     /*'post-placeholder'          => '#hashtags, @mentions, photos, videos',*/
     'post-placeholder'          => '',
     'view-previous-messages'    => 'View previous messages',

@@ -32249,11 +32249,11 @@ html {
     min-height: 30px;
     max-width: 360px;
     border-color: #E6EAEE;
-    border-radius: 0px 25px 25px 0px;
+    border-radius: 0px 10px 10px 0px;
     border-left-width: 0px;
     padding-top: 5px;
     padding-left: 8px;
-    background-color: #fff;
+    background-color: #edf0f5;
 }
 .form-left .form-control .selectize-input:focus {
     outline: none;
@@ -32328,7 +32328,7 @@ html {
 .form-left .input-group-btn .btn {
     border-left-width: 1px !important;
     border-right-width: 0px;
-    background: #fff !important;
+    background: #edf0f5 !important;
     height: 30px !important;
     padding-top: 4px;
     padding-right: 6px;
