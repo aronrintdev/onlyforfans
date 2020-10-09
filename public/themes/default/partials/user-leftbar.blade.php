@@ -9,6 +9,7 @@
 
 <div class="user-bio-block follow-links">
     
+    @if($user->id != Auth::user()->id)
     <div class="online">
         <div class="bio-header">Status</div>
 	    <div class="bio-description">
@@ -22,6 +23,7 @@
     			</a>
 	    </div>
     </div>
+    @endif
 
     @if($user->is_follow_for_free)
     <div class="follow">

@@ -16,9 +16,11 @@
 		font-size: 25px;
 	}
 
-    .timeline-condensed-column .panel-body, .jscroll-added .panel-body, .timeline-condensed-column > .col-lg-4 .panel-body {
-        height: 200px;
-        overflow: auto;
+    @media screen and (min-width: 1200px) {
+        .timeline-condensed-column .panel-body, .jscroll-added .panel-body, .timeline-condensed-column > .col-lg-4 .panel-body {
+            height: 200px;
+            overflow: auto;
+        }   
     }
     
     .timeline-condensed-column .panel-heading .user-post-details li:last-child, .jscroll-added .panel-heading .user-post-details li:last-child, .timeline-condensed-column > .col-lg-4 .panel-heading .user-post-details li:last-child {

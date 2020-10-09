@@ -1,27 +1,49 @@
 <style>
     .total-spent, .total-tipped, .subscribed-over, .inactive-over {
         position: relative;
-        padding-left: 25px;
     }
 
     .filter-input {
         border: 0;
         outline: none;
+        text-align: center;
+        font-weight: bold;
+        color: #fff;
     }
 
     #subscriberFilterModal ul li span {
-        font-size: 24px;
         color: #298ad3;
         position: absolute;
-        height: 100%;
-        width: 20px;
-        top: 0;
+        height: 25px;
+        border-radius: 50%;
+        width: 25px;
+        /*top: 0;*/
         vertical-align: middle;
         display: flex;
         align-items: center;
         justify-content: center;
         cursor: pointer;
         user-select: none;
+        transition: .3s;
+    }
+    
+    .text-wrapper {
+        top: 0;
+        left: 50%;
+        position: absolute;
+        transform: translateX(-50%);
+        bottom: 0;
+        font-weight: bold;
+        display: block;
+        max-width: 100%;
+    }
+
+    #subscriberFilterModal ul li span:hover {
+        background: #e7f3ff;
+    }
+
+    #subscriberFilterModal ul li span:active {
+        background: #9dd5ff;
     }
 
     #subscriberFilterModal ul li span.decrement {        
@@ -66,6 +88,16 @@
         padding: 0 25px;
     }
 
+    @media screen and (max-width: 576px) {
+        #subscriberFilterModal ul {
+            padding: 0;
+        }
+
+        .filter-input {
+            width: 130px;
+        }
+    }
+
     #subscriberFilterModal ul li {
         display: flex;
         justify-content: space-between;
@@ -75,7 +107,7 @@
 
     #subscriberFilterModal ul label {
         vertical-align: middle;
-        font-size: 12px;
+        font-size: 14px;
         text-transform: uppercase;
         cursor: pointer;
     }
@@ -170,45 +202,49 @@
                                                             <li>
                                                                 <div>
                                                                     <input type="radio" id="totalSpent" name="subscriber_filter">
-                                                                    <label for="totalSpent">Total Spent (USD)</label>
+                                                                    <label for="totalSpent">Total Spent</label>
                                                                 </div>
                                                                 <div class="total-spent">
-                                                                    <span class="decrement">-</span>
-                                                                    <span class="increment">+</span>
-                                                                    <input type="number" min="0" value="0" name="total_spent" class="filter-input total-spent-input">
+                                                                    <span class="decrement"><i class="fa fa-minus" aria-hidden="true"></i></span>
+                                                                    <span class="increment"><i class="fa fa-plus" aria-hidden="true"></i></span>
+                                                                    <input type="number" min="0" value="100" data-id="1" name="total_spent" class="filter-input total-spent-input">
+                                                                    <div class="text-wrapper"></div>
                                                                 </div>
                                                             </li>
                                                             <li>
                                                                 <div>
                                                                     <input type="radio" id="tippedOver" name="subscriber_filter">
-                                                                    <label for="tippedOver">Tipped over (USD)</label>
+                                                                    <label for="tippedOver">Tipped over</label>
                                                                 </div>
                                                                 <div class="total-tipped">
-                                                                    <span class="decrement">-</span>
-                                                                    <span class="increment">+</span>
-                                                                    <input type="number" min="0" value="0" name="total_tipped" class="filter-input total-tipped-input">
+                                                                    <span class="decrement"><i class="fa fa-minus" aria-hidden="true"></i></span>
+                                                                    <span class="increment"><i class="fa fa-plus" aria-hidden="true"></i></span>
+                                                                    <input type="number" min="0" value="10" data-id="2"  name="total_tipped" class="filter-input total-tipped-input">
+                                                                    <div class="text-wrapper"></div>
                                                                 </div>
                                                             </li>
                                                             <li>
                                                                 <div>
                                                                     <input type="radio" id="subscribedOver" name="subscriber_filter">
-                                                                    <label for="subscribedOver">Subscribed over (Day)</label>
+                                                                    <label for="subscribedOver">Subscribed over</label>
                                                                 </div>
                                                                 <div class="subscribed-over">
-                                                                    <span class="decrement">-</span>
-                                                                    <span class="increment">+</span>
-                                                                    <input type="number" min="0" value="0" name="subscribed_length" class="filter-input subscribed-length-input">
+                                                                    <span class="decrement"><i class="fa fa-minus" aria-hidden="true"></i></span>
+                                                                    <span class="increment"><i class="fa fa-plus" aria-hidden="true"></i></span>
+                                                                    <input type="number" min="0" value="1" data-id="3" name="subscribed_length" class="filter-input subscribed-length-input">
+                                                                    <div class="text-wrapper"></div>
                                                                 </div>
                                                             </li>
                                                             <li>
                                                                 <div>
                                                                     <input type="radio" id="inactiveOver" name="subscriber_filter">
-                                                                    <label for="inactiveOver">Inactive over (Day)</label>    
+                                                                    <label for="inactiveOver">Inactive over</label>    
                                                                 </div>
                                                                 <div class="inactive-over">
-                                                                    <span class="decrement">-</span>
-                                                                    <span class="increment">+</span>
-                                                                    <input type="number" min="0" value="0" name="subscriber_inactive_length" class="filter-input subscriber-inactive-input">
+                                                                    <span class="decrement"><i class="fa fa-minus" aria-hidden="true"></i></span>
+                                                                    <span class="increment"><i class="fa fa-plus" aria-hidden="true"></i></span>
+                                                                    <input type="number" min="0" value="1" data-id="4" name="subscriber_inactive_length" class="filter-input subscriber-inactive-input">
+                                                                    <div class="text-wrapper"></div>
                                                                 </div>
                                                             </li>
                                                         </ul>
@@ -353,7 +389,14 @@
         let val = input.val() != '' ? parseFloat(input.val()) : 0;
         
         if (val != NaN) {
-            input.val((val - 1) < 0 ? 0 : (val - 1)).trigger('keyup');
+            if (input.data('id') == 1) {
+                input.val((val - 100) < 0 ? 0 : (val - 100)).trigger('keyup');
+            } else if(input.data('id') == 2) {
+                input.val((val - 10) < 0 ? 0 : (val - 10)).trigger('keyup');
+            } else {
+                input.val((val - 1) < 0 ? 0 : (val - 1)).trigger('keyup');
+            }
+            
         }
     });
     
@@ -361,7 +404,15 @@
         let input = $(this).siblings('input.filter-input');
         let val = input.val() != '' ? parseFloat(input.val()) : 0;
         if (val != NaN) {
-            input.val(val + 1).trigger('keyup');    
+            if (input.data('id') == 1) {
+                input.val(val + 100).trigger('keyup');    
+            } else if(input.data('id') == 2) {
+                input.val(val + 10).trigger('keyup');
+            } else if(input.data('id') == 3) {
+                input.val((val + 1) > 12 ? val : (val + 1)).trigger('keyup');
+            } else if(input.data('id') == 4) {
+                input.val((val + 1) > 30 ? val : (val + 1)).trigger('keyup');
+            }                
         }        
     });
     
@@ -408,5 +459,32 @@
     $(document).on('click', '.reset-filter', function () {
         $('input[type="radio"]').attr('checked', false);
         $('.filter-input').val(0);
+    });
+    let lastActiveFilter;
+    $('#subscriberFilterModal').on('show.bs.modal', function () {
+        lastActiveFilter = $('input[type="radio"]:checked');
+        $('.filter-input').trigger('keyup');
+    });    
+    
+    $('#subscriberFilterModal').on('show.bs.modal', function () {
+        lastActiveFilter.prop('checked', true);
+    });    
+    
+    $(document).on('keyup', '.filter-input', function () {
+       let activeFilter = $(this).closest('li').find('input[type="radio"]');
+        activeFilter.prop('checked', true);
+        let val = $(this).val() != '' ? parseFloat($(this).val()) : 0;
+        if($(this).data('id') == 1) {
+            $(this).next('.text-wrapper').text($(this).val() + ' USD');
+        }else if($(this).data('id') == 2) {
+            $(this).val(val > 200 ? 200 : val);
+            $(this).next('.text-wrapper').text($(this).val() + ' USD');
+        }else if($(this).data('id') == 3) {
+            $(this).val(val > 12 ? 12 : val);
+            $(this).next('.text-wrapper').text($(this).val() + ' Month');
+        } else if($(this).data('id') == 4) {
+            $(this).val(val > 30 ? 30 : val);
+            $(this).next('.text-wrapper').text($(this).val() + ' Day');
+        }
     });
 </script>

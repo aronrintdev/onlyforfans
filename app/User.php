@@ -618,4 +618,14 @@ class User extends Authenticatable
     {
         return $this->hasMany('App\PostTip', 'user_id');
     }
+    
+    public function usersSentTips()
+    {
+        return $this->belongsToMany('App\User', 'users_tips', 'tip_from', 'tip_to')->withPivot('amount');
+    }
+    
+    public function usersReceivedTips()
+    {
+        return $this->belongsToMany('App\User', 'users_tips', 'tip_to', 'tip_from')->withPivot('amount');
+    }
 }

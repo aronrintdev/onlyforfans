@@ -814,8 +814,11 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" id="cancelSendTip" class="btn btn-default" data-dismiss="modal">{{ trans('common.cancel') }}</button>
-                    <button type="button" id="sendTip" class="btn btn-primary sendTip" disabled>{{ trans('common.send_tip') }}</button>
-                    <a href="{{url(Auth::user()->username).'/settings/addpayment' }}" id="addPayment" class="btn btn-warning">{{ trans('common.add_payment') }}</a>
+                    @if(Auth::user()->is_payment_set)
+                        <button type="button" id="sendTip" class="btn btn-primary sendTip" disabled>{{ trans('common.send_tip') }}</button>
+                    @else
+                        <a href="{{url(Auth::user()->username).'/settings/addpayment' }}" id="addPayment" class="btn btn-warning">{{ trans('common.add_payment') }}</a>
+                    @endif
                 </div>
             </div>
 
@@ -825,7 +828,7 @@
 
 <!-- Modal Ends here -->
 @if(isset($next_page_url))
-    <a class="jscroll-next hidden" href="{{ $next_page_url }}&column=true">{{ trans('messages.get_more_posts') }}</a>
+    <a class="jscroll-next hidden" href="{{ $next_page_url }}&column=true&two_column=true">{{ trans('messages.get_more_posts') }}</a>
 @endif
 
 {!! Theme::asset()->container('footer')->usePath()->add('lightbox', 'js/lightbox.min.js') !!}

@@ -30,6 +30,7 @@ use DB;
 use Flash;
 use Flavy;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
@@ -342,11 +343,16 @@ class TimelineController extends AppBaseController
 
         $responseHtml = '';
         $layout = 'post';
+
+        $twoColumn = false;
+        if ($request->get('two_column')) {
+            $twoColumn = true;
+        }
         if ($request->get('column')) {
             $layout = 'post_condensed_column';
         }
         foreach ($posts as $post) {
-            $responseHtml .= $theme->partial($layout, ['isSubscribed' => $isSubscribed, 'post' => $post, 'timeline' => $timeline, 'next_page_url' => $next_page_url]);
+            $responseHtml .= $theme->partial($layout, ['isSubscribed' => $isSubscribed, 'post' => $post, 'timeline' => $timeline, 'next_page_url' => $next_page_url, 'twoColumn' => $twoColumn]);
         }
 
         return $responseHtml;
@@ -3031,7 +3037,9 @@ class TimelineController extends AppBaseController
                             $purchasedPosts = $currentUser->posts->whereIn('id', $user->PurchasedPostsArr);
                             $paidSubscribers = $currentUser->paidSubscribers;
                             foreach ($purchasedPosts as $post) {
-                                $totalPurchasedPostAmount += $post->price;
+                                if (!empty($post->price)) {
+                                    $totalPurchasedPostAmount += $post->price;    
+                                }                                
                             }
 
                             $tips = $user->tips;
@@ -3073,12 +3081,12 @@ class TimelineController extends AppBaseController
                     $paidSubscribers = $currentUser->paidSubscribers;
                     if (count($paidSubscribers) > 0) {
                         foreach ($paidSubscribers as $subscriber) {
-                            $subscription = Subscription::where('subscription_id', $subscriber->pivot->subscription_id)->where('start_at', '!=', null)->first();
+                            $subscription = Subscription::where('follower_id', $subscriber->pivot->follower_id)->where('leader_id', $currentUser->id)->where('start_at', '!=', null)->first();
                             if ($subscription) {
                                 $startDate = Carbon::parse($subscription->start_at);
                                 $todayDate = Carbon::today();
-                                $diff = $startDate->diffInDays($todayDate);
-                                if ($diff <= $subscribedLength) {
+                                $diff = $startDate->diffInMonths($todayDate);
+                                if ($diff < $subscribedLength) {
                                     $usersArr[] = $subscriber->id;
                                 }   
                             }
@@ -3094,7 +3102,7 @@ class TimelineController extends AppBaseController
                     $usersArr = [];
                     $paidSubscribers = $currentUser->paidSubscribers;
                     foreach ($paidSubscribers as $subscriber) {
-                        $subscription = Subscription::where('subscription_id', $subscriber->pivot->subscription_id)->where('cancel_at', '!=', null)->first();
+                        $subscription = Subscription::where('follower_id', $subscriber->pivot->follower_id)->where('leader_id', $currentUser->id)->where('cancel_at', '!=', null)->first();
                         if ($subscription) {
                             $cancelDate = Carbon::parse($subscription->cancel_at);
                             $todayDate = Carbon::today();
@@ -3170,6 +3178,28 @@ class TimelineController extends AppBaseController
         return response()->json(['status' => '200', 'message' => $status_message]);
     }
 
+    /**
+     * @param Request $request
+     *
+     * @return JsonResponse
+     */
+    public function sendTipUser (Request $request)
+    {
+        $user = User::findOrFail($request->user_id);
+
+        Auth::user()->usersSentTips()->attach(Auth::user()->id, ['amount' => $request->amount,'tip_to' => $request->user_id, 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()]);
+
+        //Notify the user for post like
+        $notify_message = 'sent tip for you';
+        $notify_type = 'tip_post';
+        $status_message = 'success';
+
+        if ($user->id != Auth::user()->id) {
+            Notification::create(['user_id' => $user->id, 'notified_by' => Auth::user()->id, 'description' => Auth::user()->name.' '.$notify_message, 'type' => $notify_type]);
+        }
+
+        return response()->json(['status' => '200', 'message' => $status_message]);
+    }
 
     public function switchLanguage(Request $request)
     {

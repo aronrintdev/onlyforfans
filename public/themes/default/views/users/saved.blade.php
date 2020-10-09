@@ -28,7 +28,7 @@
 							@include('flash::message')
 							@if(count($posts) > 0)
 								@foreach($posts as $post)
-				                    {!! Theme::partial('post',compact('post','timeline','next_page_url','user')) !!}
+				                    {!! Theme::partial('post',compact('post','user')) !!}
 				                @endforeach
 							@else
 				                <div class="alert alert-warning tmargin-10">{{ trans('messages.no_saved_posts') }}</div>

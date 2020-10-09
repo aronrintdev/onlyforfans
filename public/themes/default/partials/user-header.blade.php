@@ -30,23 +30,29 @@
 				<a href="{{ url($timeline->username.'/following') }}" ><span class="top-list">{{ $following_count }}  {{ trans('common.following') }}</span>
 				</a>
 			</li>
+            @if($user->id != Auth::user()->id)
+			<li class="timeline-cover-status {{ Request::segment(2) == 'followers' ? 'active' : '' }}">
+				<a href="#" data-toggle="modal" data-target="#sendTipModal" ><span class="top-list"><i class="fa fa-dollar"></i>{{ trans('common.send_tip') }}</span>
+				</a>
+			</li>
+            @endif
 
 			@if(Auth::user()->username != $timeline->username)
 				@if(!$timeline->reports->contains(Auth::user()->id))
-					<li class="timeline-cover-status pull-right">
+					<li class="timeline-cover-status">
 						<a href="#" class="page-report report" data-timeline-id="{{ $timeline->id }}"> <i class="fa fa-flag" aria-hidden="true"></i> {{ trans('common.report') }}
 						</a>
 					</li>
-					<li class="timeline-cover-status hidden pull-right">
+					<li class="timeline-cover-status hidden">
 						<a href="#" class="page-report reported" data-timeline-id="{{ $timeline->id }}"> <i class="fa fa-flag" aria-hidden="true"></i>	{{ trans('common.reported') }}
 						</a>
 					</li>
 				@else
-					<li class="timeline-cover-status hidden pull-right">
+					<li class="timeline-cover-status hidden">
 						<a href="#" class="page-report report" data-timeline-id="{{ $timeline->id }}"> <i class="fa fa-flag" aria-hidden="true"></i> {{ trans('common.report') }}
 						</a>
 					</li>
-					<li class="timeline-cover-status pull-right">
+					<li class="timeline-cover-status">
 						<a href="#" class="page-report reported" data-timeline-id="{{ $timeline->id }}"> <i class="fa fa-flag" aria-hidden="true"></i>	{{ trans('common.reported') }}
 						</a>
 					</li>
@@ -206,6 +212,37 @@
 		</div>
 
 	</div>
+</div>
+
+<div id="sendTipModal" class="tip-modal modal fade" role="dialog" tabindex='1'>
+
+    <input type="hidden" value="{{$user->id}}" id="user-id">
+
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="modal-header lists-modal">
+                    {{--						<button type="button" class="close" data-dismiss="modal">&times;</button>--}}
+                    <h3 class="modal-title lists-modal-title">
+                        {{ trans("common.send_tip") }}
+                    </h3>
+                </div>
+
+                <div class="b-stats-row__content">
+                    <input type="number" id="etTipAmount" class="form-control etTipAmount" placeholder="$0.00" step="0.1">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="cancelSendTip" class="btn btn-default" data-dismiss="modal">{{ trans('common.cancel') }}</button>
+                @if(Auth::user()->is_payment_set)
+                    <button type="button" id="sendTip" class="btn btn-primary sendUserTip" disabled>{{ trans('common.send_tip') }}</button>
+                @else
+                    <a href="{{url(Auth::user()->username).'/settings/addpayment' }}" id="addPayment" class="btn btn-warning">{{ trans('common.add_payment') }}</a>
+                @endif
+            </div>
+        </div>
+
+    </div>
 </div>
 
 <script type="text/javascript">

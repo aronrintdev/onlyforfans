@@ -473,6 +473,7 @@ Route::group(['prefix' => 'ajax', 'middleware' => ['auth']], function () {
     Route::post('page-delete', 'TimelineController@deletePage');
     Route::post('share-post', 'TimelineController@sharePost');
     Route::post('send-tip-post', 'TimelineController@sendTipPost');
+    Route::post('send-tip-user', 'TimelineController@sendTipUser');
     Route::post('page-liked', 'TimelineController@pageLiked');
     // Route::post('get-soundcloud-results', 'TimelineController@getSoundCloudResults');
     // Route::post('join-group', 'TimelineController@joiningGroup');

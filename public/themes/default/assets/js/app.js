@@ -250,6 +250,23 @@ $(function () {
         });
     });
 
+    $(document).on('click', ".sendUserTip", function () {
+        let modal = $(this).closest('.tip-modal');
+
+        $.post(SP_source() + 'ajax/send-tip-user', {user_id: modal.find("#user-id").val(), amount: modal.find("#etTipAmount").val()}, function(data) {
+
+            if (data.status == 200) {
+
+                notify(data.message,'success');
+                modal.modal("hide");
+                // location.reload(); TODO: Not needed
+            }
+            else {
+
+            }
+        });
+    });
+
     $("input[name = 'sort-lists']").change(function() {
 
         $.post(SP_source() + 'ajax/get-lists-sort-by', {sort_by: $("input[name = 'sort-lists']:checked").val(), order_by: $("input[name = 'order-lists']:checked").val()}, function(data) {
