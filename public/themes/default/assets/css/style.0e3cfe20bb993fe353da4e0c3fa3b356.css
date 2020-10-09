@@ -32352,6 +32352,7 @@ html {
     padding-bottom: 19px;
     display: block;
     text-decoration: none;
+    position: relative;
 }
 @media (max-width: 1010px) {
     .notification-list > li > a {
@@ -32374,9 +32375,9 @@ html {
     border-radius: 50%;
     position: absolute;
     text-align: center;
-    top: 5px;
+    top: 10px;
     line-height: 18px;
-    right: -3px;
+    right: -15px;
     font-size: 12px;
     color: #FFFFFF;
     letter-spacing: 0.17px;
@@ -32384,7 +32385,13 @@ html {
 @media (max-width: 460px) {
   .notification-list > li > a .count {
     top: -10px;
-    right: -5px;
+    right: -10px;
+  }
+}
+@media (max-height: 460px) {
+  .notification-list > li > a .count {
+    top: -10px;
+    right: -10px;
   }
 }
 .notification-list > li .small-screen {
