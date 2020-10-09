@@ -8616,7 +8616,8 @@ ol ol {
 }
 .list-inline.pagelike-links {
     position: absolute;
-    z-index: 999;
+    padding-right: 77px;
+    /* z-index: 999; */
 }
 .list-inline > li {
     display: inline-block;
@@ -10596,7 +10597,7 @@ tbody.collapse.in {
     z-index: 1000;
     display: none;
     float: left;
-    min-width: 160px;
+    min-width: 180px;
     padding: 5px 0;
     margin: 2px 0 0;
     list-style: none;
@@ -32373,12 +32374,18 @@ html {
     border-radius: 50%;
     position: absolute;
     text-align: center;
-    top: -10px;
+    top: 5px;
     line-height: 18px;
     right: -3px;
     font-size: 12px;
     color: #FFFFFF;
     letter-spacing: 0.17px;
+}
+@media (max-width: 460px) {
+  .notification-list > li > a .count {
+    top: -10px;
+    right: -5px;
+  }
 }
 .notification-list > li .small-screen {
     display: none;
@@ -32736,11 +32743,14 @@ html {
     .notification-list {
         border-right-width: 0px;
     }
-    .notification-list li {
+    .notification-list > li {
         display: block;
         padding-left: 20px;
     }
-    .notification-list li:first-child {
+    .notification-list li > form {
+      padding-left: 10px;
+    }
+    .notification-list > li:first-child {
         padding-left: 35px;
     }
     .navbar-collapse.collapse.in {
@@ -33043,8 +33053,13 @@ html {
     height: 273px;
 }
 .panel-post .panel-body .actions-count {
-    margin-top: 10px;
-    margin-bottom: 0px;
+    margin: 10px 0 0 0;
+}
+.panel-post .panel-body .actions-count li {
+  padding-left: 0;
+}
+.panel-post .panel-body .actions-count li:first-child a {
+  margin-right: 5px;
 }
 .panel-post .panel-body .actions-count li a {
     text-decoration: none;
@@ -33112,8 +33127,9 @@ html {
     margin-bottom: 0px;
 }
 .panel-post .panel-footer.fans .footer-list li {
-    padding-left: 14px;
+    padding-left: 5px;
     padding-right: 14px;
+    margin-bottom: 5px;
 }
 @media (max-width: 350px) {
     .panel-post .panel-footer.fans .footer-list li {
