@@ -2796,6 +2796,12 @@ $(document).on('click', '.purchase-post', function () {
     });
 });
 
+$.ajaxSetup({
+    headers: {
+        'X-CSRF-TOKEN': $('meta[name="csrf_token"]').attr('content'),
+    },
+});
+
 // window.Echo = new Echo({
 //     broadcaster: 'pusher',
 //     key: pusherKey,

@@ -224,9 +224,13 @@
                         @if($posts->count() > 0)
                             <div class="grid-sizer"></div>
                                 @foreach($posts as $post)
-                                    @if($post->type != \App\Post::PAID_TYPE)
-                                            {!! Theme::partial('explore_posts',compact('post','timeline','next_page_url')) !!}
-                                    @endif
+                                    @if(Auth::user()->PurchasedPostsArr->contains($post->id) && canUserSeePost(Auth::id(), $post->user->id))
+                                        {!! Theme::partial('explore_posts',compact('post','timeline','next_page_url')) !!}
+                                    @else
+                                        @if(isset($next_page_url))
+                                            <a class="jscroll-next next-link hidden" href="{{ $next_page_url }}">{{ trans('messages.get_more_posts') }}</a>
+                                        @endif
+                                @endif
                                 @endforeach
                         @endif
                     </div>
@@ -308,13 +312,14 @@
                         $ajaxGrid.masonry( 'appended', $items );
                     });
 
-                    $('.explore-posts').infiniteScroll({
+                    $iScroll = $('.explore-posts').infiniteScroll({
                         // options
                         path: '.next-link',
                         append: '.grid-item',
                         outlayer: msnry,
                         status: '.page-load-status',
-                        history: false
+                        history: false,
+                        prefill: true
                     });
                 },
                 error: function (result) {
@@ -365,15 +370,24 @@
             $grid.masonry( 'appended', $items );
         });
                 
-        $('.explore-posts').infiniteScroll({
+        $iScroll = $('.explore-posts').infiniteScroll({
             // options
             path: '.next-link',
             append: '.grid-item',
             outlayer: msnry,
             status: '.page-load-status',
-            history: false
+            history: false,
+            prefill: true,
         });
 
+        $iScroll.on( 'load.infiniteScroll', function( event, response, path ) {
+            if($('.grid-item').length > 0) {
+                $('.no-posts').hide();
+            } else {
+                $('.no-posts').show();
+            }
+        });
+        
         function gridWrapperHeight()
         {
             if (screen.height > 1200) {

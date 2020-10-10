@@ -664,22 +664,22 @@
     @endif
 
     <?php
-    $display_comment ="";
+    $display_comment = false;
     $user_follower = $post->chkUserFollower(Auth::user()->id,$post->user_id);
     $user_setting = $post->chkUserSettings($post->user_id);
 
     if($user_follower != NULL)
     {
       if($user_follower == "only_follow") {
-        $display_comment = "only_follow";
+        $display_comment = true;
       }elseif ($user_follower == "everyone") {
-        $display_comment = "everyone";
+        $display_comment = true;
       }
     }
     else{
       if($user_setting){
         if($user_setting == "everyone"){
-          $display_comment = "everyone";
+          $display_comment = true;
         }
       }
     }
@@ -702,7 +702,9 @@
                              <li class="hidden"><a href="#" class="like-post like-{{ $post->id }}" data-post-id="{{ $post->id }}"><i class="fa fa-thumbs-o-up"></i>{{ trans('common.like') }}</a></li>
                              <li><a href="#" class="like-post unlike-{{ $post->id }}" data-post-id="{{ $post->id }}"><i class="fa fa-thumbs-o-down"></i></i>{{ trans('common.unlike') }}</a></li>
                          @endif
+                         @if($display_comment)
                          <li><a href="#" class="show-comments"><i class="fa fa-comment-o"></i>{{ trans('common.comment') }}</a></li>
+                         @endif
 
                          @if(Auth::user()->id != $post->user_id)
                              @if(!$post->users_shared->contains(Auth::user()->id))
@@ -740,8 +742,10 @@
                  <li><a href="#" class="like-post unlike-{{ $post->id }}" data-post-id="{{ $post->id }}"><i
                                  class="fa fa-thumbs-o-down"></i></i>{{ trans('common.unlike') }}</a></li>
              @endif
+             @if($display_comment)
              <li><a href="#" class="show-comments"><i class="fa fa-comment-o"></i>{{ trans('common.comment') }}
                  </a></li>
+             @endif
 
              @if(Auth::user()->id != $post->user_id)
                  @if(!$post->users_shared->contains(Auth::user()->id))
@@ -766,7 +770,7 @@
      </div>
     @endif
 
-    @if($post->comments->count() > 0 || $post->user_id == Auth::user()->id || $display_comment == "everyone")
+    @if($post->comments->count() > 0 || $post->user_id == Auth::user()->id || $display_comment == "everyone" || $display_comment == true)
       <div class="comments-section all_comments" style="display:none">
         <div class="comments-wrapper">
           <div class="to-comment">  <!-- to-comment -->
@@ -812,11 +816,14 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-body">
-                <div class="modal-header lists-modal">
+                <div class="modal-header lists-modal" style="display: flex; justify-content: space-between">
                     {{--						<button type="button" class="close" data-dismiss="modal">&times;</button>--}}
                     <h3 class="modal-title lists-modal-title">
                         {{ trans("common.send_tip") }}
                     </h3>
+                    @if(!Auth::user()->is_payment_set)
+                        <em class="text-danger">Please add Payment card.</em>
+                    @endif
                 </div>
 
                 <div class="b-stats-row__content">

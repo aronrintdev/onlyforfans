@@ -306,3 +306,42 @@ function get_image_insert_location()
         'bottom-right' => trans('common.bottom-right'),
     ];
 }
+
+/**
+ * @param $login_id
+ * @param $post_user_id
+ *
+ * @return bool
+ */
+function canUserSeePost($login_id, $post_user_id)
+{
+    $user = User::findOrFail($post_user_id);
+    $userSettings = DB::table('user_settings')->where('user_id', $user->id)->first();
+    $result = ($userSettings && !empty($userSettings->post_privacy)) ? $userSettings->post_privacy : 'everyone';
+    $followingThisUser = $user->following->contains($login_id);
+    $canSee = false;
+    if ($result == 'only_follow' && $followingThisUser) {
+        $canSee = true;
+    } elseif ($result == 'everyone') {
+        $canSee = true;
+    }
+
+    if ($login_id == $post_user_id) {
+        $canSee = true;
+    }
+    
+    return $canSee;
+}
+
+function canMessageToUser($loginUser, $user)
+{
+    $settings = $user->getUserSettings($user->id);
+    $canMessage = false;
+    if ($settings->message_privacy == 'everyone' || $settings->message_privacy == '') {
+        $canMessage = true;
+    } else if ($settings->message_privacy == 'only_follow') {
+        $canMessage = $loginUser->followers->contains($user->id);
+    }
+    
+    return $canMessage;
+}

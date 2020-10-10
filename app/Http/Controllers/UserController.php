@@ -701,9 +701,9 @@ class UserController extends AppBaseController
         $input = $request->except('_token');
 
         $user_settings = [
-            'confirm_follow'        => $input['confirm_follow'],
+//            'confirm_follow'        => $input['confirm_follow'],
             'comment_privacy'       => $input['comment_privacy'],
-            'follow_privacy'        => $input['follow_privacy'],
+//            'follow_privacy'        => $input['follow_privacy'],
             'post_privacy'          => $input['post_privacy'],
             'timeline_post_privacy' => $input['timeline_post_privacy'],
             'message_privacy'       => $input['message_privacy'], ];

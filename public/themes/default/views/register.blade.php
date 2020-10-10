@@ -91,7 +91,7 @@
             
             <div class="row">
               <div class="col-md-12" class="register-form-row" style="margin-bottom:20px;">
-                  <input type="checkbox" name="tos" id="tos"><label for="tos" style="cursor:pointer;">&nbsp;I agree to the <a href="{{ trans('common.term_of_use') }}">Terms of Service</a>.</label>
+                  <input type="checkbox" name="tos" id="tos"><label for="tos" style="cursor:pointer;">&nbsp;I agree to the <a href="javascript:void(0)">Terms of Service</a>.</label>
               </div>
             </div>
 

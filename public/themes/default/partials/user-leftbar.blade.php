@@ -18,14 +18,16 @@
             @elseif(isset($user->last_logged))
             Last seen {{ \Carbon\Carbon::parse($user->last_logged)->diffForHumans() }}    
             @endif
+            @if(canMessageToUser(Auth::user(), $user))
     			<a style="margin-top:10px;" href="#" class="btn btn-options btn-block btn-default" onClick="chatBoxes.sendMessage({{ $timeline->user->id }})">
     				<i class="fa fa-inbox"></i> {{ trans('common.message') }}
     			</a>
+            @endif
 	    </div>
     </div>
     @endif
 
-    @if($user->is_follow_for_free)
+    @if($user->is_follow_for_free && $user->id != Auth::user()->id)
     <div class="follow">
         <div class="bio-header">Follow</div>
 	    <div class="bio-description">
@@ -56,6 +58,7 @@
     </div>
     @endif
     
+        @if($user->id != Auth::user()->id)
     <div class="subscribe">
         <div class="bio-header">Subscribe</div>
 	    <div class="bio-description">
@@ -84,6 +87,20 @@
 			@endif
 	    </div>
     </div>
+@endif
+
+        @if($user->id != Auth::user()->id)
+            <div class="subscribe">
+                <div class="bio-header"> {{ trans('common.send_tip') }}</div>
+                <div class="bio-description">
+                    <div class="left-col">
+                        <a href="#" class="btn btn-options btn-block btn-default" data-toggle="modal" data-target="#sendTipModal">
+                            <i class="fa fa-dollar"></i> {{ trans('common.send_tip') }}
+                        </a>
+                    </div>
+                </div>
+            </div>
+        @endif
     
 	<!--<div class="bio-header">{{ trans('common.bio') }}</div>-->
 	<div class="bio-description">

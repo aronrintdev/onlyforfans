@@ -434,22 +434,22 @@
                     </div>
 
                     <?php
-                    $display_comment ="";
+                    $display_comment = false;
                     $user_follower = $post->chkUserFollower(Auth::user()->id,$post->user_id);
                     $user_setting = $post->chkUserSettings($post->user_id);
 
                     if($user_follower != NULL)
                     {
                         if($user_follower == "only_follow") {
-                            $display_comment = "only_follow";
+                            $display_comment = true;
                         }elseif ($user_follower == "everyone") {
-                            $display_comment = "everyone";
+                            $display_comment = true;
                         }
                     }
                     else{
                         if($user_setting){
                             if($user_setting == "everyone"){
-                                $display_comment = "everyone";
+                                $display_comment = true;
                             }
                         }
                     }
@@ -548,11 +548,14 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-body">
-                <div class="modal-header lists-modal">
+                <div class="modal-header lists-modal" style="display: flex; justify-content: space-between">
                     {{--						<button type="button" class="close" data-dismiss="modal">&times;</button>--}}
                     <h3 class="modal-title lists-modal-title">
                         {{ trans("common.send_tip") }}
                     </h3>
+                    @if(!Auth::user()->is_payment_set)
+                        <em class="text-danger">Please add Payment card.</em>
+                    @endif
                 </div>
 
                 <div class="b-stats-row__content">

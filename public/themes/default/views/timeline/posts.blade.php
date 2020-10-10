@@ -142,7 +142,9 @@
                                             {!! Theme::partial('post',compact('post','timeline','next_page_url', 'user')) !!}
                                         @endif
                                     @else
+                                        @if(canUserSeePost(Auth::id(), $post->user->id) || $post->type == \App\Post::PRICE_TYPE)
                                         {!! Theme::partial('post',compact('post','timeline','next_page_url', 'user')) !!}
+                                        @endif
                                     @endif
 								@endforeach
 							@else
@@ -160,7 +162,9 @@
                                             {!! Theme::partial('post_condensed_column',compact('post','timeline','next_page_url', 'user','twoColumn')) !!}
                                         @endif
                                     @else
+                                        @if(canUserSeePost(Auth::id(), $post->user->id) || $post->type == \App\Post::PRICE_TYPE)
                                         {!! Theme::partial('post_condensed_column',compact('post','timeline','next_page_url', 'user','twoColumn')) !!}
+                                        @endif
                                     @endif
 								@endforeach
 							@else

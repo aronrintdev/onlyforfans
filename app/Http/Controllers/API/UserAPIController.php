@@ -8,6 +8,7 @@ use App\Http\Requests\API\UpdateUserAPIRequest;
 use App\Repositories\UserRepository;
 use App\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use InfyOm\Generator\Criteria\LimitOffsetCriteria;
 use InfyOm\Generator\Utils\ResponseUtil;
 use Prettus\Repository\Criteria\RequestCriteria;
@@ -64,8 +65,24 @@ class UserAPIController extends AppBaseController
         $this->userRepository->pushCriteria(new RequestCriteria($request));
         $this->userRepository->pushCriteria(new LimitOffsetCriteria($request));
         $users = $this->userRepository->all();
+        
+        $usersArr = [];
+        $authUser = Auth::user();
+        $authUser->followers;
+        foreach ($users as $user) {
+            $setting = $user->getUserSettings($user->id);
+            if ($setting->message_privacy == 'everyone' || $setting->message_privacy == '') {
+                $usersArr[] = $user;
+                continue;
+            }
+            
+            if ($setting->message_privacy == 'only_follow' && $authUser->followers->contains($user->id)){
+                $usersArr[] = $user;
+                continue;
+            }
+        }
 
-        return $this->sendResponse($users->toArray(), 'Users retrieved successfully');
+        return $this->sendResponse($usersArr, 'Users retrieved successfully');
     }
 
     /**

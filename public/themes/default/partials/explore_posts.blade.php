@@ -1,3 +1,4 @@
+@if(canUserSeePost(Auth::id(), $post->user->id))
 @if($post->type != \App\Post::PRICE_TYPE)
     @if(!$post->images->isEmpty() && $post->images->first()->type == 'image')
         <div class="grid-item">
@@ -44,7 +45,7 @@
 
 <!-- Modal Ends here -->
     @if(isset($next_page_url))
-        <a class="jscroll-next hidden" href="{{ $next_page_url }}">{{ trans('messages.get_more_posts') }}</a>
+        <a class="jscroll-next next-link hidden" href="{{ $next_page_url }}">{{ trans('messages.get_more_posts') }}</a>
     @endif
 
 @elseif($post->user->id == Auth::user()->id || Auth::user()->PurchasedPostsArr->contains($post->id))
@@ -108,3 +109,4 @@
 @endif    
 
 <?php echo Theme::asset()->container('footer')->usePath()->add('lightbox', 'js/lightbox.min.js'); ?>
+@endif
