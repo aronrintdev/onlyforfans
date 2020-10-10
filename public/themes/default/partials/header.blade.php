@@ -15,27 +15,81 @@
                             <div class="navbar-toggle">
                                 <ul class="list-inline notification-list">
                                     <li class="" style="display: inline-block;">
-                                        <a href="{{ url('/') }}"><i class="fa fa-home" aria-hidden="true"></i><span class="small-screen"></span></a>
+                                        <a href="{{ url('/') }}">
+                                            <svg viewBox="0 0 16 16" class="bi bi-house-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg" width="1.5em" height="1.5em">
+                                                          <path fill-rule="evenodd" d="M8 3.293l6 6V13.5a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 2 13.5V9.293l6-6zm5-.793V6l-2-2V2.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5z"></path>
+                                                          <path fill-rule="evenodd" d="M7.293 1.5a1 1 0 0 1 1.414 0l6.647 6.646a.5.5 0 0 1-.708.708L8 2.207 1.354 8.854a.5.5 0 1 1-.708-.708L7.293 1.5z"></path>
+                                            </svg>
+                                        </a>
                                     </li>
                                     <li class="" style="display: inline-block;">
-                                        <a href="{{ route('explore-posts') }}"><i class="fa fa-th-large" aria-hidden="true"></i><span class="small-screen"></span></a>
+                                        <a href="{{ route('explore-posts') }}">
+                                        <svg viewBox="0 0 16 16" class="bi bi-person-bounding-box" fill="currentColor" xmlns="http://www.w3.org/2000/svg" width="1.5em" height="1.5em">
+                                                      <path fill-rule="evenodd" d="M1.5 1a.5.5 0 0 0-.5.5v3a.5.5 0 0 1-1 0v-3A1.5 1.5 0 0 1 1.5 0h3a.5.5 0 0 1 0 1h-3zM11 .5a.5.5 0 0 1 .5-.5h3A1.5 1.5 0 0 1 16 1.5v3a.5.5 0 0 1-1 0v-3a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 1-.5-.5zM.5 11a.5.5 0 0 1 .5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 1 0 1h-3A1.5 1.5 0 0 1 0 14.5v-3a.5.5 0 0 1 .5-.5zm15 0a.5.5 0 0 1 .5.5v3a1.5 1.5 0 0 1-1.5 1.5h-3a.5.5 0 0 1 0-1h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 1 .5-.5z"></path>
+                                                      <path fill-rule="evenodd" d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"></path>
+                                        </svg>
+                                        </a>
                                     </li>
                                     <li class="notification" style="display: inline-block;">
                                         <a href="{{ url('allnotifications') }}" data-toggle="dropdown" @click.prevent="showNotifications" class="dropdown-toggle" role="button" aria-haspopup="true" aria-expanded="false">
-                                            <i class="fa fa-bell" aria-hidden="true">
+                                            <svg viewBox="0 0 16 16" class="bi bi-app-indicator" fill="currentColor" xmlns="http://www.w3.org/2000/svg" width="1.5em" height="1.5em">
+                                              <path fill-rule="evenodd" d="M5.5 2A3.5 3.5 0 0 0 2 5.5v5A3.5 3.5 0 0 0 5.5 14h5a3.5 3.5 0 0 0 3.5-3.5V8a.5.5 0 0 1 1 0v2.5a4.5 4.5 0 0 1-4.5 4.5h-5A4.5 4.5 0 0 1 1 10.5v-5A4.5 4.5 0 0 1 5.5 1H8a.5.5 0 0 1 0 1H5.5z"></path>
+                                              <path d="M16 3a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"></path>
+                                            </svg>
                                                 @if(Auth::user()->notifications()->where('seen',0)->count() > 0)
                                                     <span class="count hidden">{{ Auth::user()->notifications()->where('seen',0)->count() }}</span>
                                                     <span class="count" v-if="unreadNotifications > 0" >@{{ unreadNotifications }}</span>
                                                 @endif
-                                            </i>
-                                            <span class="small-screen"></span>
                                         </a>
+                                        <!-- <div class="dropdown-menu">
+                                            <div class="dropdown-menu-header">
+                                                <span class="side-left">{{ trans('common.notifications') }}</span>
+                                                <a v-if="unreadNotifications > 0" class="side-right" href="#" @click.prevent="markNotificationsRead" >{{ trans('messages.mark_all_read') }}</a>
+                                                <div class="clearfix"></div>
+                                            </div>
+                                                @if(Auth::user()->notifications()->count() > 0)
+                                                    <ul class="list-unstyled dropdown-messages-list scrollable" data-type="notifications">
+                                                        <li class="inbox-message"  v-bind:class="[ !notification.seen ? 'active' : '' ]" v-for="notification in notifications.data">
+                                                            <a href="{{ url(Auth::user()->username.'/notification/') }}/@{{ notification.id }}">
+                                                                <div class="media">
+                                                                    <div class="media-left">
+                                                                        <img class="media-object img-icon" v-bind:src="notification.notified_from.avatar" alt="images">
+                                                                    </div>
+                                                                    <div class="media-body">
+                                                                        <h4 class="media-heading">
+                                                                            <span class="notification-text"> @{{ notification.description }} </span>
+                                                                            <span class="message-time">
+                															<span class="notification-type"><i class="fa fa-user" aria-hidden="true"></i></span>
+                															<time class="timeago" datetime="@{{ notification.created_at }}+00:00" title="@{{ notification.created_at }}">
+                																@{{ notification.created_at }}
+                															</time>
+                														</span>
+                                                                    </h4>
+                                                                </div>
+                                                            </div>
+                                                        </a>
+                                                    </li>
+                                                    <li v-if="notificationsLoading" class="dropdown-loading">
+                                                        <i class="fa fa-spin fa-spinner"></i>
+                                                    </li>
+                                                </ul>
+                                            @else
+                                                <div class="no-messages">
+                                                    <i class="fa fa-bell-slash-o" aria-hidden="true"></i>
+                                                    <p>{{ trans('messages.no_notifications') }}</p>
+                                                </div>
+                                            @endif
+                                            <div class="dropdown-menu-footer"><br>
+                                                <a href="{{ url('allnotifications') }}">{{ trans('common.see_all') }}</a>
+                                            </div>
+                                        </div> -->
                                     </li>
                                     <li class="message" style="display: inline-block;">
                                         <a href="{{ url('messages') }}" data-toggle="dropdown" @click="showConversations" class="dropdown-toggle" role="button" aria-haspopup="true" aria-expanded="false">
-                                            <i class="fa fa-comments" aria-hidden="true">
-                                                
-                                            </i>
+                                            <svg viewBox="0 0 16 16" class="bi bi-chat-dots-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg" width="1.5em" height="1.5em">
+                                              <path fill-rule="evenodd" d="M16 8c0 3.866-3.582 7-8 7a9.06 9.06 0 0 1-2.347-.306c-.584.296-1.925.864-4.181 1.234-.2.032-.352-.176-.273-.362.354-.836.674-1.95.77-2.966C.744 11.37 0 9.76 0 8c0-3.866 3.582-7 8-7s8 3.134 8 7zM5 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm4 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 1a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"></path>
+                                            </svg>
+                                                <span class="count" v-if="unreadConversations" >@{{ unreadConversations }}</span>
                                         </a>
                                     </li>
                                     <li class="dropdown user-image fans" style="display: inline-block;">
@@ -157,7 +211,8 @@
                                                     <svg viewBox="0 0 16 16" class="bi bi-person-bounding-box" fill="currentColor" xmlns="http://www.w3.org/2000/svg" width="1.5em" height="1.5em">
                                                       <path fill-rule="evenodd" d="M1.5 1a.5.5 0 0 0-.5.5v3a.5.5 0 0 1-1 0v-3A1.5 1.5 0 0 1 1.5 0h3a.5.5 0 0 1 0 1h-3zM11 .5a.5.5 0 0 1 .5-.5h3A1.5 1.5 0 0 1 16 1.5v3a.5.5 0 0 1-1 0v-3a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 1-.5-.5zM.5 11a.5.5 0 0 1 .5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 1 0 1h-3A1.5 1.5 0 0 1 0 14.5v-3a.5.5 0 0 1 .5-.5zm15 0a.5.5 0 0 1 .5.5v3a1.5 1.5 0 0 1-1.5 1.5h-3a.5.5 0 0 1 0-1h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 1 .5-.5z"></path>
                                                       <path fill-rule="evenodd" d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"></path>
-                                                    </svg></a>
+                                                    </svg>
+                                                </a>
                                             </li>
                                             <li class="dropdown message notification">
                                                 <a href="#" data-toggle="dropdown" @click.prevent="showNotifications" class="dropdown-toggle" role="button" aria-haspopup="true" aria-expanded="false">

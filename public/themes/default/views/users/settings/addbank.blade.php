@@ -12,11 +12,14 @@
 				
 					<div class="panel-heading no-bg panel-settings">
 					@include('flash::message')
+						<h3 class="panel-title">
+							{{ trans('common.add_bank') }}
+						</h3>
 					</div>
 					<div class="panel-body nopadding">
                         <div class="tab">
                             <button class="tablinks active" onclick="openCity(event, 'All')">
-                                {{ trans('common.add_bank') }}
+                                Banking Details
                             </button>
                             <button class="tablinks" onclick="openCity(event, 'Active')">
                                 Earnings
@@ -95,8 +98,8 @@
                                     <div class="row">
                                         <div class="col-md-6">
                                             <fieldset class="form-group required {{ $errors->has('address') ? ' has-error' : '' }}">
-                                                {{ Form::label('address', trans('street_address')) }}
-                                                {{ Form::text('address', Auth::user()->payment != NULL ? Auth::user()->payment->address : '', ['class' => 'form-control', 'placeholder' => trans('street_address_placeholder')]) }}
+                                                {{ Form::label('address', trans('common.street_address')) }}
+                                                {{ Form::text('address', Auth::user()->payment != NULL ? Auth::user()->payment->address : '', ['class' => 'form-control', 'placeholder' => trans('common.street_address_placeholder')]) }}
                                             </fieldset>
                                             @if ($errors->has('address'))
                                                 <span class="help-block">
@@ -142,32 +145,32 @@
                                         </div>
                                     </div>
 
-                                    {{--								<div class="row">--}}
-                                    {{--									<div class="col-md-6">--}}
-                                    {{--										<fieldset class="form-group">--}}
-                                    {{--											{{ Form::label('document', trans('Document Type')) }}--}}
-                                    {{--											{{ Form::select('document', array('Select' => 'Select One...', 'Passport' => 'Passport', 'Drivers License' => 'Drivers License', 'ID Card' => 'ID Card'), 'Select') }}--}}
-                                    {{--										</fieldset>--}}
-                                    {{--									</div>--}}
-                                    {{--								</div>--}}
-                                    {{--								--}}
-                                    {{--								<div class="row">--}}
-                                    {{--									<div class="col-md-6">--}}
-                                    {{--										<fieldset class="form-group">--}}
-                                    {{--											{{ Form::label('photoID', trans('Photo of Your ID')) }}--}}
-                                    {{--											{{ Form::file('image') }}--}}
-                                    {{--										</fieldset>--}}
-                                    {{--									</div>--}}
-                                    {{--								</div>--}}
-                                    {{--								<div class="row">--}}
-                                    {{--									<div class="col-md-6">--}}
-                                    {{--										<fieldset class="form-group">--}}
-                                    {{--											{{ Form::label('photoholdingID', trans('Photo of You Holding ID')) }}--}}
-                                    {{--											{{ Form::file('image') }}--}}
-                                    {{--										</fieldset>--}}
-                                    {{--									</div>--}}
-                                    {{--								</div>--}}
-                                    {{--								--}}
+                                    <div class="row">
+                                    	<div class="col-md-6">
+                                    		<fieldset class="form-group">
+                                    			{{ Form::label('document', trans('Document Type')) }}
+                                    			{{ Form::select('document', array('Select' => 'Select One...', 'Passport' => 'Passport', 'Drivers License' => 'Drivers License', 'ID Card' => 'ID Card'), 'Select') }}
+                                    		</fieldset>
+                                    	</div>
+                                    </div>
+                                    
+                                    <div class="row">
+                                    	<div class="col-md-6">
+                                    		<fieldset class="form-group">
+                                    			{{ Form::label('photoID', trans('Photo of Your ID')) }}
+                                    			{{ Form::file('image') }}
+                                    		</fieldset>
+                                    	</div>
+                                    </div>
+                                    <div class="row">
+                                    	<div class="col-md-6">
+                                    		<fieldset class="form-group">
+                                    			{{ Form::label('photoholdingID', trans('Photo of You Holding ID')) }}
+                                    			{{ Form::file('image') }}
+                                    		</fieldset>
+                                    	</div>
+                                    </div>
+                                    
                                     <div class="row">
                                         <div class="col-md-10">
                                             <fieldset class="form-group {{ $errors->has('sell_content_confirm') ? ' has-error' : '' }}">
@@ -235,28 +238,32 @@
                             </div>
                         </div>
                         <div id="Active" class="tabcontent">
-                            <table>
-                                <tr>
-                                    <td style="padding: 5px"><label>Total Tips </label></td>
-                                    <td style="padding: 5px">${{ number_format($totalTip, 2) }} <em>(Received)</em></td>
-                                </tr>
-                                <tr>
-                                    <td style="padding: 5px"><label>Total Subscriptions </label></td>
-                                    <td style="padding: 5px">${{ number_format($subscriptionAmount, 2) }} <em>(Received)</em></td>
-                                </tr>
-                            </table>
+                            <div class="fans-form">
+                                <table>
+                                    <tr>
+                                        <td style="padding: 5px"><label>Gross Tips: </label></td>
+                                        <td style="padding: 5px">${{ number_format($totalTip, 2) }} <em>(Received)</em></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 5px"><label>Gross Subscriptions: </label></td>
+                                        <td style="padding: 5px">${{ number_format($subscriptionAmount, 2) }} <em>(Received)</em></td>
+                                    </tr>
+                                </table>
+                            </div>
                         </div>
                         <div id="Expired" class="tabcontent">
-                            <table>
-                                <tr>
-                                    <td style="padding: 5px"><label>Total Tips </label></td>
-                                    <td style="padding: 5px">${{ number_format($totalTipsPayout, 2) }} <em>(Paid Out)</em></td>
-                                </tr>
-                                <tr>
-                                    <td style="padding: 5px"><label>Total Subscriptions </label></td>
-                                    <td style="padding: 5px">${{ number_format($totalSubscriptionPayout, 2) }} <em>(Paid Out)</em></td>
-                                </tr>
-                            </table>
+                            <div class="fans-form">
+                                <table>
+                                    <tr>
+                                        <td style="padding: 5px"><label>Net Tips: </label></td>
+                                        <td style="padding: 5px">${{ number_format($totalTipsPayout, 2) }} <em>(Paid Out)</em></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 5px"><label>Net Subscriptions: </label></td>
+                                        <td style="padding: 5px">${{ number_format($totalSubscriptionPayout, 2) }} <em>(Paid Out)</em></td>
+                                    </tr>
+                                </table>
+                            </div>
                         </div>
 					</div>
 					<!-- End of first panel -->
