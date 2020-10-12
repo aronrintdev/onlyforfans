@@ -45,7 +45,7 @@
 						{!! Theme::partial('user-leftbar',compact('timeline','user','follow_user_status','own_groups','own_pages','user_events')) !!}
 					</div>
 					<div class="col-md-8">
-						@if($timeline->type == "user" && $timeline_post == true && $user->id == Auth::user()->id)
+						@if($timeline->type == "user" && ($user->id == Auth::user()->id || canCreatePost(Auth::user(), $user)))
 							{!! Theme::partial('create-post',compact('timeline','user_post')) !!}
 						@endif
 
@@ -142,7 +142,7 @@
                                             {!! Theme::partial('post',compact('post','timeline','next_page_url', 'user')) !!}
                                         @endif
                                     @else
-                                        @if(canUserSeePost(Auth::id(), $post->user->id) || $post->type == \App\Post::PRICE_TYPE)
+                                        @if(canUserSeePost(Auth::id(), $post->user->id, $user->timeline->id) || $post->type == \App\Post::PRICE_TYPE)
                                         {!! Theme::partial('post',compact('post','timeline','next_page_url', 'user')) !!}
                                         @endif
                                     @endif
@@ -162,7 +162,7 @@
                                             {!! Theme::partial('post_condensed_column',compact('post','timeline','next_page_url', 'user','twoColumn')) !!}
                                         @endif
                                     @else
-                                        @if(canUserSeePost(Auth::id(), $post->user->id) || $post->type == \App\Post::PRICE_TYPE)
+                                        @if(canUserSeePost(Auth::id(), $post->user->id, $user->timeline->id) || $post->type == \App\Post::PRICE_TYPE)
                                         {!! Theme::partial('post_condensed_column',compact('post','timeline','next_page_url', 'user','twoColumn')) !!}
                                         @endif
                                     @endif

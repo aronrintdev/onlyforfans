@@ -1,4 +1,4 @@
-@if(canUserSeePost(Auth::id(), $post->user->id))
+@if(canUserSeePost(Auth::id(), $post->user->id) || Auth::user()->PurchasedPostsArr->contains($post->id))
 @if($post->type != \App\Post::PRICE_TYPE)
     @if(!$post->images->isEmpty() && $post->images->first()->type == 'image')
         <div class="grid-item">

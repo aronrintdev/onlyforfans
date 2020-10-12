@@ -379,13 +379,14 @@
             history: false,
             prefill: true,
         });
-
-        $iScroll.on( 'load.infiniteScroll', function( event, response, path ) {
-            if($('.grid-item').length > 0) {
-                $('.no-posts').hide();
-            } else {
-                $('.no-posts').show();
-            }
+        $iScroll.on( 'append.infiniteScroll', function( event, response, path ) {
+            setTimeout(function () {
+                if($('.grid-item').length > 0) {
+                    $('.no-posts').hide();
+                } else {
+                    $('.no-posts').show();
+                }
+            }, 5000);
         });
         
         function gridWrapperHeight()

@@ -12,6 +12,13 @@
             right: -15px;
         }
     }
+    
+    @media screen and (max-width: 576px) {
+        .user-image.fans {
+            padding-right: 0 !important;
+            padding-left: 0;
+        }
+    }
 </style>
 @if(Auth::guest())
     <nav class="navbar fans navbar-default no-bg guest-nav">

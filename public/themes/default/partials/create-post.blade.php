@@ -40,6 +40,7 @@
             <div class="heading-text">
                 {{ trans('messages.whats-going-on') }}
             </div>
+            @if(Auth::id() == $timeline->user->id)
             <div class="post-type">
                 <div>
                     <input type="radio" value="free" id="free" name="type" checked class="post-type-item">
@@ -67,6 +68,7 @@
                     </div>
                 </div>
             </div>
+            @endif
         </div>
         <div class="panel-body">        
             <textarea name="description" class="form-control createpost-form comment" cols="30" rows="3" id="createPost" cols="30" rows="2" placeholder="{{ trans('messages.post-placeholder') }}"></textarea>

@@ -184,6 +184,18 @@
                                 @endforeach
 
                             @endif
+                                @if($post->timeline_id != $post->user_id)
+                                    <em>
+                                        <small>(From
+                                            @if(Auth::id() == $post->timeline_id)
+                                                your
+                                            @else
+                                                {{ $post->timeline->user->name }}'s
+                                            @endif
+                                            timline)
+                                        </small>
+                                    </em>
+                                @endif
                             <div class="small-text">
                                 @if(isset($timeline))
                                     @if($timeline->type != 'event' && $timeline->type != 'page' && $timeline->type != 'group')
