@@ -60,7 +60,7 @@
     }
 
     .page-load-status {
-        display: none; /* hidden by default */
+        /*display: none; !* hidden by default *!*/
         padding-top: 20px;
         border-top: 1px solid #DDD;
         text-align: center;
@@ -319,7 +319,7 @@
                         outlayer: msnry,
                         status: '.page-load-status',
                         history: false,
-                        prefill: true
+                        prefill: true,
                     });
                 },
                 error: function (result) {
@@ -378,15 +378,6 @@
             status: '.page-load-status',
             history: false,
             prefill: true,
-        });
-        $iScroll.on( 'append.infiniteScroll', function( event, response, path ) {
-            setTimeout(function () {
-                if($('.grid-item').length > 0) {
-                    $('.no-posts').hide();
-                } else {
-                    $('.no-posts').show();
-                }
-            }, 5000);
         });
         
         function gridWrapperHeight()

@@ -188,7 +188,6 @@
                                             @endforeach
 
                                         @endif
-                                            {{$post->user->id}} {{$post->user_id}} {{$post->timeline_id}} {{$post->timeline->user->id}}
                                             @if($post->timeline_id != $post->user_id)
                                                 <em>
                                                     <small>(From
