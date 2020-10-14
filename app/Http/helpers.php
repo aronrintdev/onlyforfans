@@ -12,8 +12,9 @@ function trendingTags()
     $trending_tags = App\Hashtag::orderBy('count', 'desc')->get();
 
     if (count($trending_tags) > 0) {
-        if (count($trending_tags) > (int) Setting::get('min_items_page', 3)) {
-            $trending_tags = $trending_tags->random((int) Setting::get('min_items_page', 3));
+        $min_item_page = Setting::get('min_items_page', 3);
+        if (count($trending_tags) > (int) $min_item_page) {
+            $trending_tags = $trending_tags->random((int) $min_item_page);
         }
     } else {
         $trending_tags = '';
@@ -24,26 +25,27 @@ function trendingTags()
 
 function suggestedUsers()
 {
+    $user = Auth::user();
     $admin_role = App\Role::where('name', 'admin')->get()->first();
     $admin_users = NULL;
     if ($admin_role != NULL) {
         $admin_users = DB::table('role_user')->where('role_id', $admin_role->id)->get();
     }
 
-    $blockProfiles = BlockedProfile::where('blocked_by', Auth::id())->get();
+    $blockProfiles = BlockedProfile::where('blocked_by', $user->id)->get();
     $blockCountry = $blockProfiles->pluck('country')->toArray();
     $blockedUsers = User::whereIn('country', $blockCountry)->pluck('id')->toArray();
 
     $suggested_users = '';
-    $userIds = Auth::user()->following()->get()->pluck('id')->toArray();
+    $userIds = $user->following()->get()->pluck('id')->toArray();
 
     if ($admin_users != NULL) {
         $blockedUsers = array_merge($blockedUsers, $admin_users->pluck('user_id')->toArray());
-        $blockedUsers[] =Auth::id();
+        $blockedUsers[] = $user->id;
 
         $suggested_users = App\User::with('blockedProfiles')
-            ->whereDoesntHave('blockedProfiles', function (Builder $q) {
-                $q->where('country', 'like', '%'.Auth::user()->country.'%');
+            ->whereDoesntHave('blockedProfiles', function (Builder $q) use ($user) {
+                $q->where('country', 'like', '%'.$user->country.'%');
             })
             ->whereNotIn('id', $userIds)
             ->whereNotIn('id', $blockedUsers)
@@ -51,17 +53,18 @@ function suggestedUsers()
     }
     else {
         $blockedUsers = array_merge($blockedUsers,$userIds);
-        $blockedUsers[] =Auth::id();
+        $blockedUsers[] = $user->id;
 
         $suggested_users = App\User::whereNotIn('id', $blockedUsers)
-            ->whereDoesntHave('blockedProfiles', function (Builder $q) {
-                $q->where('country', 'like', '%'.Auth::user()->country.'%');
+            ->whereDoesntHave('blockedProfiles', function (Builder $q) use ($user) {
+                $q->where('country', 'like', '%'.$user->country.'%');
             })->get();
     }
 
     if (count($suggested_users) > 0) {
-        if (count($suggested_users) > (int) Setting::get('min_items_page', 3)) {
-            $suggested_users = $suggested_users->random((int) Setting::get('min_items_page', 3));
+        $min_item_page = Setting::get('min_items_page', 3);
+        if (count($suggested_users) > (int) $min_item_page) {
+            $suggested_users = $suggested_users->random((int) $min_item_page);
         }
     } else {
         $suggested_users = '';
@@ -76,8 +79,9 @@ function suggestedGroups()
     $suggested_groups = App\Group::whereNotIn('id', Auth::user()->groups()->pluck('group_id'))->where('type', 'open')->get();
 
     if (count($suggested_groups) > 0) {
-        if (count($suggested_groups) > (int) Setting::get('min_items_page', 3)) {
-            $suggested_groups = $suggested_groups->random((int) Setting::get('min_items_page', 3));
+        $min_item_page = Setting::get('min_items_page', 3);
+        if (count($suggested_groups) > (int) $min_item_page) {
+            $suggested_groups = $suggested_groups->random((int) $min_item_page);
         }
     } else {
         $suggested_groups = '';
@@ -92,8 +96,9 @@ function suggestedPages()
     $suggested_pages = App\Page::whereNotIn('id', Auth::user()->pageLikes()->pluck('page_id'))->whereNotIn('id', Auth::user()->pages()->pluck('page_id'))->get();
 
     if (count($suggested_pages) > 0) {
-        if (count($suggested_pages) > (int) Setting::get('min_items_page', 3)) {
-            $suggested_pages = $suggested_pages->random((int) Setting::get('min_items_page', 3));
+        $min_item_page = Setting::get('min_items_page', 3);
+        if (count($suggested_pages) > (int) $min_item_page) {
+            $suggested_pages = $suggested_pages->random((int) $min_item_page);
         }
     } else {
         $suggested_pages = '';
@@ -311,7 +316,7 @@ function get_image_insert_location()
  * @param $login_id
  * @param $post_user_id
  * @param $timeline_id
- * 
+ *
  * @return bool
  */
 function canUserSeePost($login_id, $post_user_id, $timeline_id = null)

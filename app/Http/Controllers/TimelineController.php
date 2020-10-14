@@ -494,9 +494,8 @@ class TimelineController extends AppBaseController
         $mode = 'exploreposts';
         $theme = Theme::uses(Setting::get('current_theme', 'default'))->layout('default');
 
-        $timeline = Timeline::where('username', Auth::user()->username)->first();
-
         $user = Auth::user();
+        $timeline = Timeline::where('username', $user->username)->first();
         $id = $user->id;        
         
         $trending_tags = trendingTags();

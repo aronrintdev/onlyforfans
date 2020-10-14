@@ -702,11 +702,11 @@ class UserController extends AppBaseController
 
         $user_settings = [
 //            'confirm_follow'        => $input['confirm_follow'],
-            'comment_privacy'       => $input['comment_privacy'],
+'comment_privacy'       => $input['comment_privacy'],
 //            'follow_privacy'        => $input['follow_privacy'],
-            'post_privacy'          => $input['post_privacy'],
-            'timeline_post_privacy' => $input['timeline_post_privacy'],
-            'message_privacy'       => $input['message_privacy'], ];
+'post_privacy'          => $input['post_privacy'],
+'timeline_post_privacy' => $input['timeline_post_privacy'],
+'message_privacy'       => $input['message_privacy'], ];
 
         $privacy = DB::table('user_settings')->where('user_id', $user->id)
             ->update($user_settings);
@@ -845,7 +845,7 @@ class UserController extends AppBaseController
         }
 
         $input = $request->all();
-        
+
         $user = User::find(Auth::user()->id);
         $user->update([
             'is_follow_for_free' => isset($input['is_follow_for_free']),
@@ -855,13 +855,15 @@ class UserController extends AppBaseController
         $stripe_price_id = null;
         $stripe_customer_id = null;
         $price = $input['subscribe_price'];
+
+        $username = $user->timeline->username;
         if ($payment != NULL) {
 
             if ($price > 0) {
                 // check stripe connected account before save price
                 if ($payment->stripe_id == NULL || $payment->is_active == 0) {
                     Flash::error(trans('You must add bank details before set price.'));
-                    return redirect($request->new_username.'/settings/general');
+                    return redirect($username.'/settings/general');
                 }
 
                 $stripe_response = app('App\Http\Controllers\CheckoutController')->createPrice($price);
@@ -888,8 +890,8 @@ class UserController extends AppBaseController
         } else {
             Flash::error(trans('common.general_settings_price_error'));
         }
-        
-        return redirect()->back();
+
+        return redirect($username.'/settings/general');
     }
 
     protected function paymentDetailsValidator(array $data) {
