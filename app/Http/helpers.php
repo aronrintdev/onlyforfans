@@ -310,10 +310,11 @@ function get_image_insert_location()
 /**
  * @param $login_id
  * @param $post_user_id
- *
+ * @param $timeline_id
+ * 
  * @return bool
  */
-function canUserSeePost($login_id, $post_user_id)
+function canUserSeePost($login_id, $post_user_id, $timeline_id = null)
 {
     $user = User::findOrFail($post_user_id);
     $userSettings = DB::table('user_settings')->where('user_id', $user->id)->first();
@@ -324,9 +325,11 @@ function canUserSeePost($login_id, $post_user_id)
         $canSee = true;
     } elseif ($result == 'everyone') {
         $canSee = true;
+    } elseif ($result == 'only_follow' && !$followingThisUser && $login_id != $timeline_id) {
+        $canSee = false;
     }
 
-    if ($login_id == $post_user_id) {
+    if ($login_id == $post_user_id || $login_id == $timeline_id) {
         $canSee = true;
     }
     
@@ -343,5 +346,20 @@ function canMessageToUser($loginUser, $user)
         $canMessage = $loginUser->followers->contains($user->id);
     }
     
-    return $canMessage;
+    return $canMessage; 
+}
+
+function canCreatePost ($loginUser, $user)
+{
+    $settings = $user->getUserSettings($user->id);
+    $canCreatePost = true;
+    if ($settings->timeline_post_privacy == 'everyone' || $settings->timeline_post_privacy == '') {
+        $canCreatePost = true;
+    } else if ($settings->timeline_post_privacy == 'only_follow') {
+        $canCreatePost = $loginUser->followers->contains($user->id);
+    } else if ($settings->timeline_post_privacy == 'nobody')  {
+        $canCreatePost = false;
+    }
+    
+    return $canCreatePost;
 }

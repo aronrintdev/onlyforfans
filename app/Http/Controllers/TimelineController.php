@@ -393,7 +393,7 @@ class TimelineController extends AppBaseController
                     ->from('pinned_posts')
                     ->where('user_id', $id)
                     ->where('active', 1);
-            })->orWhere('user_id', $id)->where('active', 1)->latest()->paginate(Setting::get('items_page'));
+            })->orWhere('user_id', $id)->orWhere('timeline_id', $timeline->id)->where('active', 1)->latest()->paginate(Setting::get('items_page'));
         }
 
         if ($request->ajax) {
@@ -1691,7 +1691,7 @@ class TimelineController extends AppBaseController
 //                        ->where('active', 1);
 //                })->orWhere('user_id', $id)->where('active', 1)->latest()->paginate(Setting::get('items_page'));
 //            } else {
-                $posts = Post::Where('user_id', $id)->whereDate('created_at', '>=', $startDate)->where('active', 1)->orderBy('created_at', $order_by == 'desc' ? 'asc' : 'desc')->paginate(Setting::get('items_page'));
+                $posts = Post::Where('user_id', Auth::id())->Where('timeline_id', $timeline->id)->whereDate('created_at', '>=', $startDate)->where('active', 1)->orderBy('created_at', $order_by == 'desc' ? 'asc' : 'desc')->paginate(Setting::get('items_page'));
 
 //            }
 
@@ -1776,9 +1776,15 @@ class TimelineController extends AppBaseController
                         ->where('user_id', $id)
                         ->whereDate('created_at', '>=', $startDate)
                         ->where('active', 1);
-                })->orWhere('user_id', $id)->whereDate('created_at', '>=', $startDate)->where('active', 1))->orderBy('created_at', $order_by == 'desc' ? 'asc' : 'desc')->paginate(Setting::get('items_page'));
+                })->orWhere(function ($query) use ($timeline, $id){
+                    $query->where('timeline_id', $timeline->id)
+                    ->orWhere('user_id', $id);
+                })->whereDate('created_at', '>=', $startDate)->where('active', 1))->orderBy('created_at', $order_by == 'desc' ? 'asc' : 'desc')->paginate(Setting::get('items_page'));
             } else {
-                $posts = Post::Where('user_id', $id)->whereDate('created_at', '>=', $startDate)->where('active', 1)->orderBy('created_at', $order_by == 'desc' ? 'asc' : 'desc')->paginate(Setting::get('items_page'));
+                $posts = Post::Where('user_id', $id)->orWhere(function ($query) use ($timeline){
+                    $query->where('timeline_id', $timeline->id)
+                        ->orWhere('user_id', Auth::id());
+                })->whereDate('created_at', '>=', $startDate)->where('active', 1)->orderBy('created_at', $order_by == 'desc' ? 'asc' : 'desc')->paginate(Setting::get('items_page'));
             }
 
             $user_lists = UserListType::where(['user_id' => Auth::user()->id])->with('lists')->get();
@@ -1975,7 +1981,7 @@ class TimelineController extends AppBaseController
     {
         $post = Post::find($request->post_id);
         
-        if ($post->user->id == Auth::user()->id) {
+        if ($post->user->id == Auth::user()->id || $post->timeline->id == Auth::user()->id) {
             $post->deleteMe();
         }
         return response()->json(['status' => '200', 'deleted' => true, 'message' => 'Post successfully deleted']);
