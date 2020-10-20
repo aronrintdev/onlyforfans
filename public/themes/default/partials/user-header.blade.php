@@ -25,12 +25,10 @@
 				<a href="#" ><span class="top-list"><span class="liked-post">{{count($liked_post)}}</span> {{ trans('common.likes') }}</span>
 				</a>
 			</li>
-
 			<li class="timeline-cover-status {{ Request::segment(2) == 'followers' ? 'active' : '' }}">
 				<a href="{{ url($timeline->username.'/following') }}" ><span class="top-list">{{ $following_count }}  {{ trans('common.following') }}</span>
 				</a>
 			</li>
-
 			@if(Auth::user()->username != $timeline->username)
 				@if(!$timeline->reports->contains(Auth::user()->id))
 					<li class="timeline-cover-status">
@@ -62,16 +60,13 @@
 {{--				@endif--}}
 {{--			@endif--}}
 		</ul>
-
 		<div class="profile-dropdown-menu">
 			<ul class="list-inline no-margin">
 				<li class="dropdown">
 					<a href="#" class="dropdown-togle profile-dropdown-icon" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-						<svg class="g-icon has-tooltip" aria-hidden="true" data-original-title="null">
-							<use xlink:href="#icon-more" href="#icon-more">
-								<svg id="icon-more" viewBox="0 0 24 24"> <path d="M6 10a2 2 0 1 0 2 2 2 2 0 0 0-2-2zm12 0a2 2 0 1 0 2 2 2 2 0 0 0-2-2zm-6 0a2 2 0 1 0 2 2 2 2 0 0 0-2-2z"></path> </svg>
-							</use>
-						</svg>
+						<svg style="margin-right:15px;" width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-three-dots-vertical" fill="#fff" xmlns="http://www.w3.org/2000/svg">
+                          <path fill-rule="evenodd" d="M9.5 13a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
+                        </svg>
 					</a>
 					<ul class="dropdown-menu profile-dropdown-menu-content">
 						<li class="main-link">
@@ -80,9 +75,7 @@
 									{{ trans('common.edit_profile') }}
 								</a>
 							@endif
-
 							<input type="hidden" id="profile-url" value="{{ url($timeline->username) }}">
-
 							<a href="#" onclick="getProfileUrl(); return false;">
 								{{ trans('common.copy_link_to_profile') }}
 							</a>
@@ -96,13 +89,16 @@
 				</li>
 			</ul>
 		</div>
-
 		<img src=" @if($timeline->cover_id) {{ url('user/cover/'.$timeline->cover->source) }} @else {{ url('user/cover/default-cover-user.png') }} @endif" alt="{{ $timeline->name }}" title="{{ $timeline->name }}">
 		@if($timeline->id == Auth::user()->timeline_id)
-			<a href="#" class="btn btn-camera-cover change-cover"><i class="fa fa-camera" aria-hidden="true"></i><span class="change-cover-text">{{ trans('common.change_cover') }}</span></a>
+			<a href="#" class="btn btn-camera-cover change-cover">
+    			<svg width="1.5em" height="1.5em" viewBox="0 0 16 16" class="bi bi-camera-fill" fill="#fff" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M10.5 8.5a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/>
+                  <path fill-rule="evenodd" d="M2 4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-1.172a2 2 0 0 1-1.414-.586l-.828-.828A2 2 0 0 0 9.172 2H6.828a2 2 0 0 0-1.414.586l-.828.828A2 2 0 0 1 3.172 4H2zm.5 2a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1zm9 2.5a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0z"/>
+                </svg><span class="change-cover-text">{{ trans('common.change_cover') }}</span></a>
 		@endif
 		<div class="user-cover-progress hidden">
-
+		    
 		</div>
 			<!-- <div class="cover-bottom">
 		</div> -->
@@ -112,13 +108,7 @@
 		</div>
 		</div>
 	<div class="timeline-list">
-
-			<div class="status-button">
-					<a href="#" class="btn btn-status">Subscription Packages</a>
-			</div>
-			
 			<div class="timeline-user-avtar">
-
 				<img src="{{ $timeline->user->avatar }}" alt="{{ $timeline->name }}" title="{{ $timeline->name }}">
 				@if($timeline->id == Auth::user()->timeline_id)
 					<div class="chang-user-avatar">
@@ -127,15 +117,11 @@
 				@endif			
 				<div class="user-avatar-progress hidden">
 				</div>
-			</div><!-- /timeline-user-avatar -->
-
-		</div><!-- /timeline-list -->
-	</div><!-- timeline-cover-section -->
-
-
+			</div>
+		</div>
+	</div>
 	<div id="listsModal" class="modal fade" role="dialog" tabindex='-1'>
 		<div class="modal-dialog">
-
 			<div class="modal-content">
 				<div class="modal-body">
 					<div class="modal-header lists-modal">
@@ -149,9 +135,7 @@
 							{{ trans("common.save_to") }}
 						</h3>
 					</div>
-
 					<div class="b-stats-row__content">
-
 						<input hidden id="saved-user-id" name="saved-user-id" value="{{$timeline->user->id}}">
 						@if (!empty($user_lists))
 							@foreach ($user_lists as $user_list)
@@ -174,13 +158,10 @@
 					<button type="button" class="btn btn-default" data-dismiss="modal">{{ trans('common.close') }}</button>
 				</div>
 			</div>
-
 		</div>
 	</div>
-
 <div id="newListModal" class="modal fade" role="dialog" tabindex='1'>
 	<div class="modal-dialog">
-
 		<div class="modal-content">
 			<div class="modal-body">
 				<div class="modal-header lists-modal">
@@ -194,7 +175,6 @@
 						{{ trans("common.create_new_list") }}
 					</h3>
 				</div>
-
 				<div class="b-stats-row__content">
 					<input type="text" id="etNewListName" class="form-control" placeholder="Enter list name">
 				</div>
@@ -207,11 +187,8 @@
 
 	</div>
 </div>
-
 <div id="sendTipModal" class="tip-modal modal fade" role="dialog" tabindex='1'>
-
     <input type="hidden" value="{{$user->id}}" id="user-id">
-
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-body">
@@ -224,7 +201,6 @@
                         <em class="text-danger">Please add Payment card.</em>
                     @endif
                 </div>
-
                 <div class="b-stats-row__content">
                     <input type="number" id="etTipAmount" class="form-control etTipAmount" placeholder="$0.00" step="0.1">
                 </div>
@@ -238,23 +214,17 @@
                 @endif
             </div>
         </div>
-
     </div>
 </div>
 
 <script type="text/javascript">
-
 	$( document ).ready(function() {
-
-
 	});
-
 	@if($timeline->background_id != NULL)
 		$('body')
 			.css('background-image', "url({{ url('/wallpaper/'.$timeline->wallpaper->source) }})")
 			.css('background-attachment', 'fixed');
 	@endif
-
 	// var clipboard = new Clipboard('.btn-copy', {
 	// 			text: function() {
 	// 				return document.querySelector('input[type=hidden]').value;
@@ -271,21 +241,13 @@
 	//
 	// 	});
 	// }
-
 	function getProfileUrl(e) {
-
 		/* Get the text field */
 		// var copyText = document.getElementById('profile-url');
-
 		navigator.clipboard.writeText($("#profile-url").val());
 	}
-
 	// $(".modal-list-item .red-checkbox").on("change", function() {
 	//
 	// 	console.log($("#" + this.id).is(":checked"));
 	// });
-
-
-
-
 </script>

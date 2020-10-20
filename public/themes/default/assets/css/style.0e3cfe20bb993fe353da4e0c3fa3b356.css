@@ -21607,7 +21607,7 @@ textarea.form-control {
 }
 .panel-default .panel-heading .panel-title a {
     color: #00AEEF;
-    font-weight: 600;
+    font-weight: 500;
     font-size: 12px;
     text-decoration: none !important;
 }
@@ -28043,7 +28043,10 @@ placeholder .darksharing-modal .modal-body .sharing-details .control-group .sele
     background: linear-gradient(-1deg, #00AAFF 3%, #4CC3FF 100%);
 }
 .social-connect li .btn-social.google-plus {
-    background-image: linear-gradient(-180deg, #F45438 0%, #D53E23 97%);
+    background-image: linear-gradient(-180deg, #ff0000 0%, #D53E23 97%);
+}
+.social-connect li .btn-social.apple {
+    background-image: linear-gradient(-180deg, #000 0%, #111 97%);
 }
 .social-connect li .btn-social.linkedin {
     background-color: #0077B5;
@@ -29029,6 +29032,7 @@ html {
 }
 .mini-profile {
     padding: 10px;
+    margin-bottom: 18px;
 }
 .mini-profile .background {
     position: relative;
@@ -29117,8 +29121,8 @@ html {
     padding: 0px 10px;
 }
 .mini-profile .activity-list li {
-    padding-left: 15px;
-    padding-right: 15px;
+    padding-left: 10px;
+    padding-right: 10px;
 }
 @media (max-width: 350px) {
     .mini-profile .activity-list li {
@@ -31471,10 +31475,10 @@ html {
     color: #FFFFFF;
 }
 .list-group.fans-group .list-icon.fans-icon {
-    background: #E8EAF1;
+    background: #edf0f5;
 }
 .list-group.fans-group .list-icon.fans-icon i {
-    color: #8D909F;
+    color: #298ad3;
 }
 .list-group.fans-group .list-icon.fans-icon:hover {
     background: #269BF3;
@@ -31595,6 +31599,7 @@ html {
     font-size: 20px;
 }
 .affiliate-settings .affliate-followers .list-group-item {
+    border-top: none;
     border-left: none;
     border-right: none;
     border-radius: 0px;
@@ -32704,7 +32709,7 @@ html {
 }
 .user-image.dropdown.fans .dropdown-menu li i {
     font-size: 18px;
-    color: #7F8FA4;
+    color: #298ad3;
     vertical-align: middle;
     margin-left: 8px;
     margin-right: 20px;
@@ -33365,8 +33370,8 @@ html {
     }
 }
 .timeline-cover-section .timeline-cover .btn-camera-cover {
-    width: 175px;
-    height: 50px;
+    width: 150px;
+    height: 35px;
     background: rgba(0, 0, 0, 0.7);
     border-radius: 0px;
     text-align: left;
@@ -33397,12 +33402,11 @@ html {
 }
 .timeline-cover-section .timeline-cover .btn-camera-cover .change-cover-text {
     font-family: 'Open Sans', sans-serif;
-    font-weight: 400;
     text-transform: none;
-    font-size: 16px;
-    color: #FFFFFF;
-    letter-spacing: 0.37px;
-    vertical-align: text-bottom;
+    font-size: 14px;
+    color: #fff;
+    position: absolute;
+    margin-left: 10px;
 }
 @media (max-width: 560px) {
     .timeline-cover-section .timeline-cover .btn-camera-cover .change-cover-text {

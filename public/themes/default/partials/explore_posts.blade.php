@@ -11,7 +11,6 @@
             </div>
             {!! Theme::partial('explore_posts_detail',compact('post','timeline','next_page_url')) !!}
 
-        <!-- Modal Ends here -->
             @if(isset($next_page_url))
                 <a class="jscroll-next next-link hidden" href="{{ $next_page_url }}">{{ trans('messages.get_more_posts') }}</a>
             @endif
@@ -36,14 +35,13 @@
             </div>
             {!! Theme::partial('explore_posts_detail',compact('post','timeline','next_page_url')) !!}
 
-        <!-- Modal Ends here -->
+        
             @if(isset($next_page_url))
                 <a class="jscroll-next next-link hidden" href="{{ $next_page_url }}">{{ trans('messages.get_more_posts') }}</a>
             @endif
         </div>
     @endif
 
-<!-- Modal Ends here -->
     @if(isset($next_page_url))
         <a class="jscroll-next next-link hidden" href="{{ $next_page_url }}">{{ trans('messages.get_more_posts') }}</a>
     @endif

@@ -196,7 +196,7 @@
 	<!-- <div class="main-content"> -->
 		<div class="container">
 			<div class="row">
-                <div class="col-md-7 col-lg-8">
+                <div class="col-sm-12 col-md-12 col-lg-12">
 
                     <div style="display: flex; margin-bottom: 10px; justify-content: space-between">
                         <div class="input-group explore-search-bar" style="display: none; margin-bottom: 0; margin-right: 10px; width: 100%">
@@ -204,7 +204,7 @@
                                 <button class="btn btn-default" type="button"><i class="fa fa-search"></i></button>
                             </span>
                             <input type="text" id="explorePosts" class="form-control" placeholder="{{ trans('messages.search_placeholder') }}">
-                        </div><!-- /input-group -->
+                        </div>
                     </div>
 			   		@if (Session::has('message'))
 				        <div class="alert alert-{{ Session::get('status') }}" role="alert">
@@ -241,14 +241,14 @@
                             <span class="loader-ellips__dot"></span>
                             <span class="loader-ellips__dot"></span>
                         </div>
-                        <p class="infinite-scroll-last">End of content</p>
-                        <p class="infinite-scroll-error">No more pages to load</p>
+                        <!-- <p class="infinite-scroll-last">End of content</p>
+                        <p class="infinite-scroll-error">No more pages to load</p> -->
                     </div>
 				</div><!-- /col-md-6 -->
 
-				<div class="col-md-5 col-lg-4">
-					{!! Theme::partial('home-rightbar',compact('suggested_users', 'suggested_groups', 'suggested_pages')) !!}
-				</div>
+				<!-- <div class="col-md-5 col-lg-4">
+				{{--	{!! Theme::partial('home-rightbar',compact('suggested_users', 'suggested_groups', 'suggested_pages')) !!}  --}}
+				</div> -->
 			</div>
 		</div>
 	<!-- </div> -->

@@ -4,20 +4,17 @@
       {{ trans('common.lists') }}
     </h3>
   </div>
-
     <div class="lists-dropdown-menu">
         <ul class="list-inline text-right no-margin">
             <li class="dropdown">
                 <a href="#" class="dropdown-togle lists-dropdown-icon" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                    <svg class="sort-icon has-tooltip" aria-hidden="true" data-original-title="null">
-                        <use xlink:href="#icon-sort" href="#icon-sort">
-                            <svg id="icon-sort" viewBox="0 0 24 24"> <path d="M4 19h4a1 1 0 0 0 1-1 1 1 0 0 0-1-1H4a1 1 0 0 0-1 1 1 1 0 0 0 1 1zM3 6a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1 1 1 0 0 0-1-1H4a1 1 0 0 0-1 1zm1 7h10a1 1 0 0 0 1-1 1 1 0 0 0-1-1H4a1 1 0 0 0-1 1 1 1 0 0 0 1 1z"></path> </svg>
-                        </use>
+                    <svg style="margin-right:15px;" width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-filter-circle" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                      <path fill-rule="evenodd" d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                      <path fill-rule="evenodd" d="M7 11.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5z"/>
                     </svg>
                 </a>
                 <ul class="dropdown-menu profile-dropdown-menu-content">
                     <li class="main-link">
-
                         <div class="form-check">
                             <input class="red-checkbox" type="radio" name="sort-lists" id="sortByName" value="name" checked>
                             <label class="red-list-label" for="sortByName">
@@ -37,11 +34,8 @@
                             </label>
                         </div>
                     </li>
-                    <div class="divider">
-
-                    </div>
+                    <hr>
                     <li class="main-link">
-
                         <div class="form-check">
                             <input class="red-checkbox" type="radio" name="order-lists" id="orderByASC" value="asc" checked>
                             <label class="red-list-label" for="orderByASC">

@@ -371,8 +371,7 @@
 .red-list-label {
     padding-left: 14px;
     margin-bottom: 0px;
-    font-size: 15px;
-    font-weight: bolder;
+    font-size: 14px;
     width: 100%;
     text-transform: unset;
     cursor: pointer;
@@ -383,7 +382,6 @@
     padding-left: 5px;
     margin-bottom: 0px;
     font-size: 16px;
-    font-weight: bolder;
     width: 100%;
     cursor: pointer;
 }

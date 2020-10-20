@@ -124,14 +124,11 @@
 	<!-- <div class="main-content"> -->
 		<div class="container">
 			<div class="row">
-
                 <div class="col-12">
 					<div class="timeline-posts">
-
 						<div class="panel panel-default">
 							<div class="panel-heading no-bg panel-settings bottom-border">
 								<h3 class="panel-title">
-
 									<a href="{{url('/mylists')}}" class="btn-back">
 										<svg class="g-icon" aria-hidden="true">
 											<use xlink:href="#icon-back" href="#icon-back">
@@ -139,60 +136,47 @@
 											</use>
 										</svg>
 									</a>
-
 									{{ $list_type_name }}
 								</h3>
 							</div>
-
-
 							<div class="panel-body timeline">
-
 								@if ($list_type_id == 'followers')
 									<div class="tab">
 										<button class="tablinks active" onclick="openCity(event, 'All')">
-											<svg class="g-icon" aria-hidden="true" style="">
-												<use xlink:href="#icon-all" href="#icon-all">
-													<svg id="icon-all" viewBox="0 0 24 24"> <path d="M15 6H5a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V9a3 3 0 0 0-3-3zm1 13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1zm3-17H8a1 1 0 0 0 0 2h11a1 1 0 0 1 1 1v11a1 1 0 0 0 2 0V5a3 3 0 0 0-3-3zm-6 9a1 1 0 0 0-.71.29L9 14.59l-1.29-1.3A1 1 0 0 0 7 13a1 1 0 0 0-1 1 1 1 0 0 0 .29.71l2 2a1 1 0 0 0 1.42 0l4-4A1 1 0 0 0 14 12a1 1 0 0 0-1-1z"></path> </svg>
-												</use>
-											</svg> ALL
+											<svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-check-all" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                              <path fill-rule="evenodd" d="M8.97 4.97a.75.75 0 0 1 1.071 1.05l-3.992 4.99a.75.75 0 0 1-1.08.02L2.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093L8.95 4.992a.252.252 0 0 1 .02-.022zm-.92 5.14l.92.92a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 1 0-1.091-1.028L9.477 9.417l-.485-.486-.943 1.179z"/>
+                                            </svg> <span style="line-height: 1em;margin-left: 5px;">All</span>
 										</button>
 										<button class="tablinks" onclick="openCity(event, 'Active')">
-											<svg class="g-icon" aria-hidden="true" style="">
-												<use xlink:href="#icon-active" href="#icon-active">
-													<svg id="icon-active" viewBox="0 0 24 24"> <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8zm4.42-11.42a1 1 0 0 0-.71.3l-5.21 5.21-2.21-2.21a1 1 0 0 0-.71-.3 1 1 0 0 0-1 1 1 1 0 0 0 .3.71l3.62 3.62 6.62-6.62a1 1 0 0 0 .3-.71 1 1 0 0 0-1-1z"></path> </svg>
-												</use>
-											</svg> ACTIVE
+											<svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-calendar2-check-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                              <path fill-rule="evenodd" d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM2 3.5c0-.276.244-.5.545-.5h10.91c.3 0 .545.224.545.5v1c0 .276-.244.5-.546.5H2.545C2.245 5 2 4.776 2 4.5v-1zm8.854 5.354a.5.5 0 0 0-.708-.708L7.5 10.793 6.354 9.646a.5.5 0 1 0-.708.708l1.5 1.5a.5.5 0 0 0 .708 0l3-3z"/>
+                                            </svg> <span style="line-height: 1em;margin-left: 5px;">Active</span>
 										</button>
 										<button class="tablinks" onclick="openCity(event, 'Expired')">
-											<svg class="g-icon" aria-hidden="true" style="">
-												<use xlink:href="#icon-expired" href="#icon-expired">
-													<svg id="icon-expired" viewBox="0 0 24 24"> <path d="M22.56 18.34A2.63 2.63 0 0 0 22.2 17L14.3 3.33a2.65 2.65 0 0 0-4.6 0L1.8 17a2.63 2.63 0 0 0-.36 1.33A2.66 2.66 0 0 0 4.1 21h15.8a2.66 2.66 0 0 0 2.66-2.66zm-2 0a.66.66 0 0 1-.66.66H4.1a.66.66 0 0 1-.66-.66.63.63 0 0 1 .09-.34l7.9-13.68a.68.68 0 0 1 1.14 0L20.47 18a.63.63 0 0 1 .09.34zM12 13.5a1 1 0 0 0 1-1v-4a1 1 0 0 0-2 0v4a1 1 0 0 0 1 1zm0 1.1a1.4 1.4 0 1 0 1.4 1.4 1.4 1.4 0 0 0-1.4-1.4z"></path> </svg>
-												</use>
-											</svg> EXPIRED
+											<svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-calendar-x-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                              <path fill-rule="evenodd" d="M4 .5a.5.5 0 0 0-1 0V1H2a2 2 0 0 0-2 2v1h16V3a2 2 0 0 0-2-2h-1V.5a.5.5 0 0 0-1 0V1H4V.5zM16 14V5H0v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2zM6.854 8.146a.5.5 0 1 0-.708.708L7.293 10l-1.147 1.146a.5.5 0 0 0 .708.708L8 10.707l1.146 1.147a.5.5 0 0 0 .708-.708L8.707 10l1.147-1.146a.5.5 0 0 0-.708-.708L8 9.293 6.854 8.146z"/>
+                                            </svg> <span style="line-height: 1em;margin-left: 5px;">Expired</span>
 										</button>
 										<button class="tablinks" onclick="openCity(event, 'Restricted')">
-											<svg class="g-icon" aria-hidden="true" style="">
-												<use xlink:href="#icon-restricted" href="#icon-restricted">
-													<svg id="icon-restricted" viewBox="0 0 24 24"> <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zM4 12a8 8 0 0 1 8-8 7.92 7.92 0 0 1 4.9 1.69L5.69 16.9A7.92 7.92 0 0 1 4 12zm8 8a7.92 7.92 0 0 1-4.9-1.69L18.31 7.1A7.92 7.92 0 0 1 20 12a8 8 0 0 1-8 8z"></path> </svg>
-												</use>
-											</svg> RESTRICTED
+											<svg width="1.0625em" height="1em" viewBox="0 0 17 16" class="bi bi-exclamation-triangle" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                              <path fill-rule="evenodd" d="M7.938 2.016a.146.146 0 0 0-.054.057L1.027 13.74a.176.176 0 0 0-.002.183c.016.03.037.05.054.06.015.01.034.017.066.017h13.713a.12.12 0 0 0 .066-.017.163.163 0 0 0 .055-.06.176.176 0 0 0-.003-.183L8.12 2.073a.146.146 0 0 0-.054-.057A.13.13 0 0 0 8.002 2a.13.13 0 0 0-.064.016zm1.044-.45a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566z"/>
+                                              <path d="M7.002 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 5.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995z"/>
+                                            </svg> <span style="line-height: 1em;margin-left: 5px;">Restricted</span>
 										</button>
 										<button class="tablinks" onclick="openCity(event, 'Blocked')">
-											<svg class="g-icon" aria-hidden="true" style="">
-												<use xlink:href="#icon-blocked" href="#icon-blocked">
-													<svg id="icon-blocked" viewBox="0 0 24 24"> <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm4.9 3.69l-4.9 4.9-4.9-4.9a7.95 7.95 0 0 1 9.8 0zM4 12a7.92 7.92 0 0 1 1.69-4.9l4.9 4.9-4.9 4.9A7.92 7.92 0 0 1 4 12zm3.1 6.31l4.9-4.9 4.9 4.9a7.95 7.95 0 0 1-9.8 0zm11.21-1.41l-4.9-4.9 4.9-4.9a7.95 7.95 0 0 1 0 9.8z"></path> </svg>
-												</use>
-											</svg> BLOCKED
+											<svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-dash-circle-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                              <path fill-rule="evenodd" d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM4.5 7.5a.5.5 0 0 0 0 1h7a.5.5 0 0 0 0-1h-7z"/>
+                                            </svg> <span style="line-height: 1em;margin-left: 5px;">Blocked</span>
 										</button>
                                         @if ($list_type_id == 'followers')
                                         <a href="#" data-toggle="modal" data-target="#subscriberFilterModal" class="filter-button">
-                                            <i class="fa fa-sliders" aria-hidden="true"></i>
+                                            <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-gear-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                              <path fill-rule="evenodd" d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872l-.1-.34zM8 10.93a2.929 2.929 0 1 0 0-5.86 2.929 2.929 0 0 0 0 5.858z"/>
+                                            </svg>
                                         </a>
                                         @endif
                                         <div class="modal fade" id="subscriberFilterModal" role="dialog">
                                             <div class="modal-dialog">
-
-                                                <!-- Modal content-->
                                                 <div class="modal-content">
                                                     <div class="modal-header">
                                                         <h4 class="modal-title">Filter Subscribers</h4>
@@ -207,7 +191,7 @@
                                                                 <div class="total-spent">
                                                                     <span class="decrement"><i class="fa fa-minus" aria-hidden="true"></i></span>
                                                                     <span class="increment"><i class="fa fa-plus" aria-hidden="true"></i></span>
-                                                                    <input type="number" min="0" value="100" data-id="1" name="total_spent" class="filter-input total-spent-input">
+                                                                    <input min="0" value="100" data-id="1" name="total_spent" class="filter-input total-spent-input">
                                                                     <div class="text-wrapper"></div>
                                                                 </div>
                                                             </li>
@@ -219,31 +203,31 @@
                                                                 <div class="total-tipped">
                                                                     <span class="decrement"><i class="fa fa-minus" aria-hidden="true"></i></span>
                                                                     <span class="increment"><i class="fa fa-plus" aria-hidden="true"></i></span>
-                                                                    <input type="number" min="0" value="10" data-id="2"  name="total_tipped" class="filter-input total-tipped-input">
+                                                                    <input min="0" value="10" data-id="2"  name="total_tipped" class="filter-input total-tipped-input">
                                                                     <div class="text-wrapper"></div>
                                                                 </div>
                                                             </li>
                                                             <li>
                                                                 <div>
                                                                     <input type="radio" id="subscribedOver" name="subscriber_filter">
-                                                                    <label for="subscribedOver">Subscribed over</label>
+                                                                    <label for="subscribedOver">Subscribed for over</label>
                                                                 </div>
                                                                 <div class="subscribed-over">
                                                                     <span class="decrement"><i class="fa fa-minus" aria-hidden="true"></i></span>
                                                                     <span class="increment"><i class="fa fa-plus" aria-hidden="true"></i></span>
-                                                                    <input type="number" min="0" value="1" data-id="3" name="subscribed_length" class="filter-input subscribed-length-input">
+                                                                    <input min="0" value="1" data-id="3" name="subscribed_length" class="filter-input subscribed-length-input">
                                                                     <div class="text-wrapper"></div>
                                                                 </div>
                                                             </li>
                                                             <li>
                                                                 <div>
                                                                     <input type="radio" id="inactiveOver" name="subscriber_filter">
-                                                                    <label for="inactiveOver">Inactive over</label>    
+                                                                    <label for="inactiveOver">Inactive for over</label>    
                                                                 </div>
                                                                 <div class="inactive-over">
                                                                     <span class="decrement"><i class="fa fa-minus" aria-hidden="true"></i></span>
                                                                     <span class="increment"><i class="fa fa-plus" aria-hidden="true"></i></span>
-                                                                    <input type="number" min="0" value="1" data-id="4" name="subscriber_inactive_length" class="filter-input subscriber-inactive-input">
+                                                                    <input min="0" value="1" data-id="4" name="subscriber_inactive_length" class="filter-input subscriber-inactive-input">
                                                                     <div class="text-wrapper"></div>
                                                                 </div>
                                                             </li>
@@ -251,15 +235,14 @@
                                                     </div>
                                                     <div class="modal-footer">
                                                         <a href="#" class="filter-modal-btn" data-dismiss="modal">Cancel</a>
-                                                        <a href="#" class="filter-modal-btn" id="resetFilter">Reset</a>
-                                                        <a href="#" class="filter-modal-btn" id="applyFilter">Apply</a>
+                                                        <!-- <a href="#" class="filter-modal-btn" id="resetFilter">Reset</a> -->
+                                                        <a href="#" class="btn filter-modal-btn btn-success" id="applyFilter">Apply</a>
                                                     </div>
                                                 </div>
 
                                             </div>
                                         </div>
 									</div>
-
 									<div id="All" class="tabcontent">
 										@if (count($saved_users) > 0)
 											{!! Theme::partial('my-list',compact('saved_users')) !!}
@@ -293,31 +276,24 @@
 											{{ trans('common.no_users_found') }}
 										</div>
 									</div>
-								@elseif ($list_type_id == 'following')
+								    @elseif ($list_type_id == 'following')
 									<div class="tab">
 										<button class="tablinks active" onclick="openCity(event, 'All')">
-											<svg class="g-icon" aria-hidden="true" style="">
-												<use xlink:href="#icon-f-all" href="#icon-f-all">
-													<svg id="icon-f-all" viewBox="0 0 24 24"> <path d="M15 6H5a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V9a3 3 0 0 0-3-3zm1 13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1zm3-17H8a1 1 0 0 0 0 2h11a1 1 0 0 1 1 1v11a1 1 0 0 0 2 0V5a3 3 0 0 0-3-3zm-6 9a1 1 0 0 0-.71.29L9 14.59l-1.29-1.3A1 1 0 0 0 7 13a1 1 0 0 0-1 1 1 1 0 0 0 .29.71l2 2a1 1 0 0 0 1.42 0l4-4A1 1 0 0 0 14 12a1 1 0 0 0-1-1z"></path> </svg>
-												</use>
-											</svg> ALL
+											<svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-check-all" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                              <path fill-rule="evenodd" d="M8.97 4.97a.75.75 0 0 1 1.071 1.05l-3.992 4.99a.75.75 0 0 1-1.08.02L2.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093L8.95 4.992a.252.252 0 0 1 .02-.022zm-.92 5.14l.92.92a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 1 0-1.091-1.028L9.477 9.417l-.485-.486-.943 1.179z"/>
+                                            </svg> <span style="line-height: 1em;margin-left: 5px;">All</span>
 										</button>
 										<button class="tablinks" onclick="openCity(event, 'Active')">
-											<svg class="g-icon" aria-hidden="true" style="">
-												<use xlink:href="#icon-f-active" href="#icon-f-active">
-													<svg id="icon-f-active" viewBox="0 0 24 24"> <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8zm4.42-11.42a1 1 0 0 0-.71.3l-5.21 5.21-2.21-2.21a1 1 0 0 0-.71-.3 1 1 0 0 0-1 1 1 1 0 0 0 .3.71l3.62 3.62 6.62-6.62a1 1 0 0 0 .3-.71 1 1 0 0 0-1-1z"></path> </svg>
-												</use>
-											</svg> ACTIVE
+											<svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-calendar2-check-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                              <path fill-rule="evenodd" d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM2 3.5c0-.276.244-.5.545-.5h10.91c.3 0 .545.224.545.5v1c0 .276-.244.5-.546.5H2.545C2.245 5 2 4.776 2 4.5v-1zm8.854 5.354a.5.5 0 0 0-.708-.708L7.5 10.793 6.354 9.646a.5.5 0 1 0-.708.708l1.5 1.5a.5.5 0 0 0 .708 0l3-3z"/>
+                                            </svg> <span style="line-height: 1em;margin-left: 5px;">Active</span>
 										</button>
 										<button class="tablinks" onclick="openCity(event, 'Expired')">
-											<svg class="g-icon" aria-hidden="true" style="">
-												<use xlink:href="#icon-f-expired" href="#icon-f-expired">
-													<svg id="icon-f-expired" viewBox="0 0 24 24"> <path d="M22.56 18.34A2.63 2.63 0 0 0 22.2 17L14.3 3.33a2.65 2.65 0 0 0-4.6 0L1.8 17a2.63 2.63 0 0 0-.36 1.33A2.66 2.66 0 0 0 4.1 21h15.8a2.66 2.66 0 0 0 2.66-2.66zm-2 0a.66.66 0 0 1-.66.66H4.1a.66.66 0 0 1-.66-.66.63.63 0 0 1 .09-.34l7.9-13.68a.68.68 0 0 1 1.14 0L20.47 18a.63.63 0 0 1 .09.34zM12 13.5a1 1 0 0 0 1-1v-4a1 1 0 0 0-2 0v4a1 1 0 0 0 1 1zm0 1.1a1.4 1.4 0 1 0 1.4 1.4 1.4 1.4 0 0 0-1.4-1.4z"></path> </svg>
-												</use>
-											</svg> EXPIRED
+											<svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-calendar-x-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                              <path fill-rule="evenodd" d="M4 .5a.5.5 0 0 0-1 0V1H2a2 2 0 0 0-2 2v1h16V3a2 2 0 0 0-2-2h-1V.5a.5.5 0 0 0-1 0V1H4V.5zM16 14V5H0v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2zM6.854 8.146a.5.5 0 1 0-.708.708L7.293 10l-1.147 1.146a.5.5 0 0 0 .708.708L8 10.707l1.146 1.147a.5.5 0 0 0 .708-.708L8.707 10l1.147-1.146a.5.5 0 0 0-.708-.708L8 9.293 6.854 8.146z"/>
+                                            </svg> <span style="line-height: 1em;margin-left: 5px;">Expired</span>
 										</button>
 									</div>
-
 									<div id="All" class="tabcontent">
 										@if (count($saved_users) > 0)
 											{!! Theme::partial('my-list',compact('saved_users')) !!}
@@ -341,7 +317,7 @@
 											{{ trans('common.no_users_found') }}
 										</div>
 									</div>
-								@else
+								    @else
 									@if (count($saved_users) > 0)
 										{!! Theme::partial('my-list',compact('saved_users')) !!}
 									@else
@@ -354,11 +330,9 @@
 						</div>
 					</div>
 				</div>
-			</div><!-- /col-md-6 --></div>
+			</div>
+			</div>
 		</div>
-	<!-- </div> -->
-<!-- /main-section -->
-
 <script>
 
 	$("#All").show();

@@ -9,7 +9,6 @@
 			</div>
 			<div class="col-md-8">
 				<div class="panel panel-default">
-				
 					<div class="panel-heading no-bg panel-settings">
 					@include('flash::message')
 						<h3 class="panel-title">
@@ -28,12 +27,10 @@
                                 Payouts
                             </button>
                         </div>
-
                         <div id="All" class="tabcontent">
                             <div class="fans-form">
                                 <form  method="POST" action="{{ url('/'.$username.'/settings/save-bank-details') }}" class=".bank-details">
                                     {{ csrf_field() }}
-
                                     <div class="row">
                                         <div class="col-md-6">
                                             <fieldset class="form-group required {{ $errors->has('name') ? ' has-error' : '' }}">
@@ -47,8 +44,7 @@
                                             </fieldset>
                                         </div>
                                     </div>
-
-                                    <div class="row">
+                                    <!-- <div class="row">
                                         <div class="col-md-6">
                                             <fieldset class="form-group required {{ $errors->has('gender') ? ' has-error' : '' }}">
                                                 {{ Form::label('gender', trans('common.gender')) }}
@@ -79,8 +75,7 @@
 											</span>
                                             @endif
                                         </div>
-                                    </div>
-
+                                    </div> -->
                                     <div class="row">
                                         <div class="col-md-6">
                                             <fieldset class="form-group required {{ $errors->has('country') ? ' has-error' : '' }}">
@@ -94,7 +89,6 @@
                                             @endif
                                         </div>
                                     </div>
-
                                     <div class="row">
                                         <div class="col-md-6">
                                             <fieldset class="form-group required {{ $errors->has('address') ? ' has-error' : '' }}">
@@ -119,7 +113,6 @@
                                             @endif
                                         </div>
                                     </div>
-
                                     <div class="row">
                                         <div class="col-md-6">
                                             <fieldset class="form-group required {{ $errors->has('state') ? ' has-error' : '' }}">
@@ -144,8 +137,33 @@
                                             @endif
                                         </div>
                                     </div>
-
+                                    <hr>
                                     <div class="row">
+                                    	<div class="col-md-6">
+                                    		<fieldset class="form-group">
+                                    			<label for="bank-name">Bank Name</label>
+                                    			<input type="text" name="bank-name" id="bank-name" class="form-control" value="Bank Name">
+                                    		</fieldset>
+                                    	</div>
+                                    </div>
+                                    <div class="row">
+                                    	<div class="col-md-6">
+                                    		<fieldset class="form-group">
+                                    			<label for="routing">Routing Number</label>
+                                    			<input type="text" name="routing" id="routing" class="form-control" value="Routing #">
+                                    		</fieldset>
+                                    	</div>
+                                    </div>
+                                    <div class="row">
+                                    	<div class="col-md-6">
+                                    		<fieldset class="form-group">
+                                    			<label for="account">Account Number</label>
+                                    			<input type="text" name="account" id="account" class="form-control" value="Account #">
+                                    		</fieldset>
+                                    	</div>
+                                    </div>
+
+                                    <!-- <div class="row">
                                     	<div class="col-md-6">
                                     		<fieldset class="form-group">
                                     			{{ Form::label('document', trans('Document Type')) }}
@@ -183,7 +201,7 @@
 											</span>
                                             @endif
                                         </div>
-                                    </div>
+                                    </div> -->
 
                                     @if(Setting::get('custom_option1') != NULL || Setting::get('custom_option2') != NULL)
                                         <div class="row">

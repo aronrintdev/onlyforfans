@@ -14,9 +14,10 @@ return [
     */
 
     /* new */
-    'menu_message_login_session'    => 'List of Login Sessions',
-    'menu_message_add_bank'         => 'Add banking details to earn on the platform.',
-    'menu_message_add_payment'      => 'Add payment method to subscribe to users.',
+    'menu_message_login_session'    => 'List of your logged in sessions',
+    'menu_message_add_bank'         => 'Add banking details to earn on the platform',
+    'menu_message_earnings'         => 'View earnings, chargebacks and statistics',
+    'menu_message_add_payment'      => 'Add payment method to subscribe to users',
     'no_saved_posts'                => 'You haven\'t saved any posts yet.',
     'adult_content_confirm'         => 'YES, MY ACCOUNT WILL CONTAIN EXPLICIT OR ADULT CONTENT',
     'transaction_confirm'           => 'YES, I AM AT LEAST 18 YEARS OLD AND CONFIRM USE OF MY CARD FOR TRANSACTIONS',
@@ -97,7 +98,7 @@ return [
     'private_posts'               => 'This is a private event and you are not authorized to view any information about this event',
     'no_guests'                   => 'No guests yet!',
     'no_guest_events'             => 'Not guest events yet!',
-    'menu_message_security'        => 'Control your security settings.',
+    'menu_message_security'        => 'Control your security settings',
 
     /****** Album form ******/
     'create_a_new_album'       => 'Create a new Album',

@@ -28,12 +28,6 @@
                     <div class="container-fluid">
                         @endif
                         <div class="navbar-header">
-                            {{--                                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-4" aria-expanded="false"> --}}
-                            {{--                                 <span class="sr-only">Toggle navigation</span> --}}
-                            {{--                                 <span class="icon-bar"></span> --}}
-                            {{--                                 <span class="icon-bar"></span> --}}
-                            {{--                                 <span class="icon-bar"></span> --}}
-                            {{--                               </button> --}}
                             <div class="navbar-toggle navbar-mobile">
                                 <ul class="list-inline notification-list">
                                     <li class="" style="display: inline-block;">
@@ -209,44 +203,6 @@
                                 </div>
                             @else
                                 <ul class="nav navbar-nav navbar-right" id="navbar-right" v-cloak>
-
-
-                                    {{--                                <li class="dropdown">--}}
-                                    {{--					<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">--}}
-                                    {{--					<span class="user-name">--}}
-                                    {{--						@if(Auth::user()->language != null)--}}
-                                    {{--                                    <?php $key = Auth::user()->language; ?>--}}
-                                    {{--                                @else--}}
-                                    {{--                                    <?php $key = App\Setting::get('language'); ?>--}}
-                                    {{--                                @endif--}}
-                                    {{--                                @if($key == 'gr')--}}
-                                    {{--                                    <span class="flag-icon flag-icon-gr"></span>--}}
-                                    {{--@elseif($key == 'en')--}}
-                                    {{--                                    <span class="flag-icon flag-icon-us"></span>--}}
-                                    {{--@elseif($key == 'zh')--}}
-                                    {{--                                    <span class="flag-icon flag-icon-cn"></span>--}}
-                                    {{--@else--}}
-                                    {{--                                    <span class="flag-icon flag-icon-{{ $key }}"></span>--}}
-                                    {{--						@endif--}}
-                                    {{--                                        </span> <i class="fa fa-angle-down" aria-hidden="true"></i></a>--}}
-                                    {{--                                        <ul class="dropdown-menu">--}}
-                                    {{--@foreach( Config::get('app.locales') as $key => $value)--}}
-                                    {{--                                    <li class=""><a href="#" class="switch-language" data-language="{{ $key }}">--}}
-                                    {{--								@if($key == 'gr')--}}
-                                    {{--                                        <span class="flag-icon flag-icon-gr"></span>--}}
-                                    {{--@elseif($key == 'en')--}}
-                                    {{--                                        <span class="flag-icon flag-icon-us"></span>--}}
-                                    {{--@elseif($key == 'zh')--}}
-                                    {{--                                        <span class="flag-icon flag-icon-cn"></span>--}}
-                                    {{--@else--}}
-                                    {{--                                        <span class="flag-icon flag-icon-{{ $key }}"></span>--}}
-                                    {{--								@endif--}}
-                                    {{--                                    {{ $value }}</a></li>--}}
-                                    {{--						@endforeach--}}
-                                    {{--                                        </ul>--}}
-                                    {{--                                    </li>--}}
-
-
                                     {{--                                <li class="{!! (Request::segment(1)=='' ? 'active' : '') !!}"><a href="{{ url('/') }}">Home</a></li>--}}
                                     @if(Setting::get('enable_browse') == 'on')
                                         {{--                                <li class="{!! (Request::segment(1)=='browse' ? 'active' : '') !!}"><a href="{{ url('/browse') }}" style="margin-right:30px;">Explore</a></li>--}}
@@ -382,7 +338,6 @@
                                             {{--                                           </li>--}}
                                         </ul>
                                     </li>
-                                    {{--user image menu--}}
                                     <li class="dropdown user-image fans">
                                         <a href="{{ url(Auth::user()->username) }}" class="dropdown-toggle no-padding" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
                                             <img src="{{ Auth::user()->avatar }}" alt="{{ Auth::user()->name }}" class="img-radius img-30" title="{{ Auth::user()->name }}">
@@ -391,7 +346,6 @@
                                             @if(Auth::user()->hasRole('admin'))
                                                 <li class="{{ Request::segment(1) == 'admin' ? 'active' : '' }}"><a href="{{ url('admin') }}"><i class="fa fa-user-secret" aria-hidden="true"></i>{{ trans('common.admin') }}</a></li>
                                             @endif
-
                                             <li class="{{ (Request::segment(1) == Auth::user()->username && Request::segment(2) == '') ? 'active' : '' }}">
                                                 <a href="{{ url(Auth::user()->username) }}"><i class="fa fa-user" aria-hidden="true"></i>{{ trans('common.my_profile') }}</a>
                                             </li>

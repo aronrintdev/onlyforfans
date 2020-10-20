@@ -30,7 +30,7 @@
     								<div class="row">
     									<div class="col-md-6">
     										<fieldset class="form-group">
-    											{{ Form::label('country', trans('common.country')) }}
+    											{{ Form::label('country', trans('common.from')) }}
     											{{ Form::text('country', Auth::user()->country, array('class' => 'form-control', 'placeholder' => trans('common.country'))) }}
     										</fieldset>
     									</div>
@@ -73,13 +73,13 @@
 
 											<fieldset class="form-group">
 												{{ Form::label('website', trans('common.hobbies')) }}
-												{{ Form::text('website', Auth::user()->website, ['class' => 'add_selectize', 'placeholder' => trans('common.mention_your_hobbies')]) }}
+												{{ Form::text('website', Auth::user()->website, ['class' => 'form-control', 'placeholder' => trans('common.mention_your_hobbies')]) }}
 											</fieldset>
 										</div>
 										<div class="col-md-6">
 											<fieldset class="form-group">
 												{{ Form::label('instagram', trans('common.interests')) }}
-												{{ Form::text('instagram', Auth::user()->instagram, ['class' => 'add_selectize', 'placeholder' => trans('common.add_your_interests')]) }}
+												{{ Form::text('instagram', Auth::user()->instagram, ['class' => 'form-control', 'placeholder' => trans('common.add_your_interests')]) }}
 											</fieldset>
 										</div>
 									</div>

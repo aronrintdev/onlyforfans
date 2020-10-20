@@ -4,11 +4,9 @@
 		<!-- <div class="visible-lg col-lg-2">
 			{!! Theme::partial('home-leftbar',compact('trending_tags')) !!}
 		</div> -->
-		<div class="col-md-7 col-lg-8">
-
+		<div class="col-md-12 col-lg-12">
 			<div class="panel panel-default">
 				<div class="panel-heading no-bg panel-settings" style="display: flex; justify-content: space-between; flex-wrap: wrap;">
-
 					<h3 class="panel-title">
 						{{ trans('common.saved_items') }}
 					</h3>
@@ -21,8 +19,6 @@
 					</ul>
 				</div>
 				<div class="tab-content nopadding" style="margin-top:15px;">
-
-					<!--Start Posts tab-->
 					<div id="posts" class="tab-pane fade active in">
 						<ul class="list-group page-likes">
 							@include('flash::message')
@@ -35,9 +31,6 @@
 				            @endif       
 						</ul>
 					</div>
-					<!-- End of posts tab-->
-
-					<!-- Start Pages tab-->
 					<div id="pages" class="tab-pane fade">
 						<ul class="list-group page-likes">
 							@include('flash::message')
@@ -67,9 +60,6 @@
 				            @endif       
 						</ul>
 					</div>
-					<!-- End of pages tab-->
-
-					<!-- Start Groups tab-->
 					<div id="groups" class="tab-pane fade">
 						<ul class="list-group page-likes">
 							@include('flash::message')
@@ -99,9 +89,6 @@
 				            @endif       
 						</ul>
 					</div>
-					<!-- End of groups tab-->
-
-					<!-- Start events tab-->
 					<div id="events" class="tab-pane fade">
 						<ul class="list-group page-likes">
 							@include('flash::message')
@@ -131,15 +118,14 @@
 				            @endif       
 						</ul>
 					</div>
-					<!-- End of events tab-->
 				</div>
 			</div>
 		</div>
 
-		<div class="col-md-5 col-lg-4">
-			{!! Theme::partial('home-rightbar',compact('suggested_users', 'suggested_groups', 'suggested_pages')) !!}
-		</div>
+		<!-- <div class="col-md-5 col-lg-4">
+			{{-- {!! Theme::partial('home-rightbar',compact('suggested_users', 'suggested_groups', 'suggested_pages')) !!} --}}
+		</div> -->
 
-		</div><!-- /row -->
+		</div>
 	</div>
 <!-- </div> --><!-- /main-content -->

@@ -38,7 +38,7 @@
         <div class="col-md-2 visible-lg">
             {!! Theme::partial('home-leftbar',compact('trending_tags')) !!}
         </div>
-        <div class="col-lg-10 col-md-12">
+        <div class="col-md-12 col-lg-12">
             <div class="messages-page" id="messages-page" v-cloak>
                 <div class="panel panel-default">
                     <div class="panel-heading no-bg user-pages">
@@ -86,13 +86,13 @@
                                                     <a href="#">
                                                         <div>
                                                             <input id="nameOrUsername" type="radio" name="filter_type" checked>
-                                                            <label for="nameOrUsername">Search by Name or Username.</label>
+                                                            <label for="nameOrUsername">Search by Name or Username</label>
                                                         </div>
                                                     </a>
                                                     <a href="#">
                                                         <div>
                                                             <input id="favouriteUser" type="radio" name="filter_type">
-                                                            <label for="favouriteUser">Favourite Users</label>
+                                                            <label for="favouriteUser">Favorite Users</label>
                                                         </div>
                                                     </a>
                                                 </li>

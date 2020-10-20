@@ -23,6 +23,8 @@ return [
     'city_placeholder' => 'CITY',
     'state_province_placeholder' => 'STATE/PROVINCe',
     'zip_postal_code_placeholder' => 'ZIP/POSTAL CODE',
+    
+    'earnings' => 'Earnings',
 
     'add_payment' => 'Payment Method',
     'name_on_card' => 'NAME ON CARD',
@@ -34,7 +36,7 @@ return [
 
     'login_session' => 'Login Sessions',
     'id' => 'ID',
-    'name' => 'Name',
+    'name' => 'Username',
     'browser' => 'Browser',
     'os' => 'OS',
     'machine_name' => 'Machine Name',
@@ -43,7 +45,7 @@ return [
     'help_faq' => 'FAQ',
     'referrals' => 'Referrals',
     'support' => 'Contact Support',
-    'saved_post' => 'Saved Posts',
+    'saved_post' => 'Saved & Purchased',
     'saved_items' => 'Saved Items',
 
     'faq' => 'FAQ',
@@ -155,7 +157,7 @@ return [
     'male'                              => 'Male',
     'female'                            => 'Female',
     'none'                              => 'None',
-    'current_city'                      => 'Current city',
+    'current_city'                      => 'Currently in',
     'country'                           => 'Country',
     'timezone'                          => 'Timezone',
     'save_changes'                      => 'Save changes',
@@ -209,8 +211,8 @@ return [
     'update_profile'                    => 'update profile',
     'picture'                           => 'picture',
     'requested'                         => 'requested',
-    'lives_in'                          => 'Lives in',
-    'from'                              => 'From',
+    'lives_in'                          => 'Currently in',
+    'from'                              => 'I\'m from',
     'born_on'                           => 'Born on',
     'with'                              => 'with',
     'and'                               => 'and',

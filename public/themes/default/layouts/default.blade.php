@@ -28,6 +28,7 @@
         <link href="{{ url('css/extra.css') }}" rel="stylesheet">
         <!--videojs-->
         <link href="//vjs.zencdn.net/7.8.2/video-js.min.css" rel="stylesheet">
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" rel="stylesheet">
 
         {!! Theme::asset()->styles() !!}
 
@@ -51,7 +52,7 @@
             {!! Setting::get('google_analytics') !!}
         @endif
         <script src="{!! Theme::asset()->url('js/lightgallery.js') !!}"></script>
-        <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&display=swap" rel="stylesheet"> 
+        <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
     </head>
     <body @if(Setting::get('enable_rtl') == 'on') class="direction-rtl" @endif>
         {!! Theme::partial('header') !!}

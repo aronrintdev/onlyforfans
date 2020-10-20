@@ -150,14 +150,12 @@
             <div class="divider-text"> {{ trans('auth.login_via_social_networks') }}</div>
           </div>
           @endif
-          <ul class="list-unstyled social-connect">
-
-{{-- <li><a href="{{ url('twitter') }}" class="btn btn-social tw"><span class="social-circle"><i class="fa fa-twitter" aria-hidden="true"></i></span></a></li>--}}
-{{-- <li><a href="{{ url('facebook') }}" class="btn btn-social fb"><span class="social-circle"><i class="fa fa-facebook" aria-hidden="true"></i></span></a></li>--}}
-
+        <ul class="list-unstyled social-connect">
             <li style="margin-bottom: 10px"><a href="{{ url('twitter') }}" class="btn btn-social tw" style="text-transform:none;"><span style="margin-top:8px; margin-right:10px; display:inline-block;"><i class="fa fa-twitter" style="color:#fff;" aria-hidden="true"></i></span><span style="color: #fff;">Sign up with Twitter</span></a></li>
-            <li><a href="{{ url('facebook') }}" class="btn btn-social fb" style="text-transform:none;"><span style="margin-top:10px; margin-right:8px; display:inline-block;"><i class="fa fa-facebook" style="color:#fff;" aria-hidden="true"></i></span><span style="color: #fff;">Sign up with Facebook</span></a></li>
-          </ul>
+            <li style="margin-bottom: 10px"><a href="{{ url('google') }}" class="btn btn-social google-plus" style="text-transform:none;"><span style="margin-top:8px; margin-right:10px; display:inline-block;"><i class="fa fa-google" style="color:#fff;" aria-hidden="true"></i></span><span style="color: #fff;">Sign up with Google</span></a></li>
+            <li style="margin-bottom: 10px"><a href="{{ url('facebook') }}" class="btn btn-social fb" style="text-transform:none;"><span style="margin-top:10px; margin-right:8px; display:inline-block;"><i class="fa fa-facebook" style="color:#fff;" aria-hidden="true"></i></span><span style="color: #fff;">Sign up with Facebook</span></a></li>
+            <li><a href="{{ url('apple') }}" class="btn btn-social apple" style="text-transform:none;"><span style="margin-top:10px; margin-right:8px; display:inline-block;"><i class="fa fa-apple" style="color:#fff;" aria-hidden="true"></i></span><span style="color: #fff;">Sign up with Apple</span></a></li>                
+        </ul>
         </div>
       </div><!-- /panel -->
     </div>
