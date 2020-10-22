@@ -61,7 +61,7 @@
                     </div>
                 </div>-->
                 <div>
-                    <i class="fa fa-dollar" data-toggle="tooltip" title="Set a price"></i>
+                    <i class="fa fa-dollar" data-toggle="tooltip" title="Set a price" style="color:#859ab5;"></i>
                     <!-- <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-three-dots-vertical" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                       <path fill-rule="evenodd" d="M9.5 13a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
                     </svg> -->
@@ -74,7 +74,6 @@
                 <div class="user-tags-added" style="display:none">
                     &nbsp; -- {{ trans('common.with') }}
                     <div class="user-tag-names">
-                        
                     </div>
                 </div>
                 <div class="user-tags-addon post-addon" style="display: none">
@@ -188,10 +187,14 @@
         </div>
     </div>
     <a href="javascript:;" class="change-layout three-column">
-        <i class="fa fa-th"></i>
+        <svg data-toggle="tooltip" title="" width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrows-angle-expand" fill="currentColor" xmlns="http://www.w3.org/2000/svg" data-original-title="Expand layout">
+          <path fill-rule="evenodd" d="M5.828 10.172a.5.5 0 0 0-.707 0l-4.096 4.096V11.5a.5.5 0 0 0-1 0v3.975a.5.5 0 0 0 .5.5H4.5a.5.5 0 0 0 0-1H1.732l4.096-4.096a.5.5 0 0 0 0-.707zm4.344-4.344a.5.5 0 0 0 .707 0l4.096-4.096V4.5a.5.5 0 1 0 1 0V.525a.5.5 0 0 0-.5-.5H11.5a.5.5 0 0 0 0 1h2.768l-4.096 4.096a.5.5 0 0 0 0 .707z"></path>
+        </svg>
     </a>
     <a href="javascript:;" class="change-layout one-column">
-        <i class="fa fa-align-justify"></i>
+        <svg data-toggle="tooltip" title="" width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrows-angle-contract" fill="currentColor" xmlns="http://www.w3.org/2000/svg" data-original-title="Contract layout">
+          <path fill-rule="evenodd" d="M.172 15.828a.5.5 0 0 0 .707 0l4.096-4.096V14.5a.5.5 0 1 0 1 0v-3.975a.5.5 0 0 0-.5-.5H1.5a.5.5 0 0 0 0 1h2.768L.172 15.121a.5.5 0 0 0 0 .707zM15.828.172a.5.5 0 0 0-.707 0l-4.096 4.096V1.5a.5.5 0 1 0-1 0v3.975a.5.5 0 0 0 .5.5H14.5a.5.5 0 0 0 0-1h-2.768L15.828.879a.5.5 0 0 0 0-.707z"></path>
+        </svg>
     </a>
 </form>
 @if(Setting::get('postcontent_ad') != NULL)

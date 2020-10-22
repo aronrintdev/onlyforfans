@@ -193,7 +193,7 @@
                                         <div class="col-md-6">
                                             <fieldset class="form-group">
                                                 <label>Subscription Bundles</label>
-                                                <p><input type="button" class="btn btn-success" value="Add a bundle"></p>
+                                                <p><input style="text-transform: unset !important;" type="button" class="btn btn-success" value="Add a Bundle"></p>
                                             </fieldset>
                                         </div>
                                     </div>

@@ -12,4 +12,4 @@
 {{--			<li><a href="{{ url('/'.Auth::user()->username.'/settings/general') }}" class="btn menu-btn"><i class="fa fa-cog" aria-hidden="true"></i>{{ trans('common.settings') }}</a></li>   --}}
 {{--		</ul>--}}
 {{--	</div>--}}
-{{--</div><!-- /widget-events -->--}}
+{{--</div>--}}

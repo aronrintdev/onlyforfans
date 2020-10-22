@@ -1,5 +1,3 @@
-<!-- main-section -->
-
 	<div class="container section-container @if($timeline->hide_cover) no-cover @endif">
 		<div class="row">
 			<div class="col-md-12">
@@ -16,7 +14,6 @@
 		</div>
 		<div class="row">
 			<div class="col-md-10">
-
 				<div class="row">
 					<div class="timeline">
 						<div class="col-md-4">
@@ -30,31 +27,24 @@
 								{!! Theme::partial('event-leftbar',compact('event','timeline')) !!}
 							@endif
 						</div>
-
-						<!-- Post box on timeline,page,group -->
 {{--						<div class="col-md-8">--}}
-
 {{--							@if($timeline->type == "user" && $timeline_post == true)--}}
 {{--								{!! Theme::partial('create-post',compact('timeline','user_post')) !!}--}}
-
 {{--							@elseif($timeline->type == "page")--}}
 {{--								@if(($page->timeline_post_privacy == "only_admins" && $page->is_admin(Auth::user()->id)) || ($page->timeline_post_privacy == "everyone"))--}}
 {{--									{!! Theme::partial('create-post',compact('timeline','user_post')) !!}--}}
 {{--								@elseif($page->timeline_post_privacy == "everyone")--}}
 {{--									{!! Theme::partial('create-post',compact('timeline','user_post')) !!}--}}
 {{--								@endif--}}
-
 {{--							@elseif($timeline->type == "group")--}}
 {{--								@if(($group->post_privacy == "only_admins" && $group->is_admin(Auth::user()->id))|| ($group->post_privacy == "members" && Auth::user()->get_group($group->id) == 'approved') || $group->post_privacy == "everyone")--}}
 {{--									{!! Theme::partial('create-post',compact('timeline','user_post','username')) !!}--}}
 {{--								@endif--}}
-
 {{--							@elseif($timeline->type == "event")--}}
 {{--								@if(($event->timeline_post_privacy == 'only_admins' && $event->is_eventadmin(Auth::user()->id, $event->id)) || ($event->timeline_post_privacy == 'only_guests' && Auth::user()->get_eventuser($event->id)))--}}
 {{--									{!! Theme::partial('create-post',compact('timeline','user_post')) !!}--}}
 {{--								@endif--}}
 {{--							@endif--}}
-
 {{--							<div class="timeline-posts">--}}
 {{--								@if($user_post == "user" || $user_post == "page" || $user_post == "group")--}}
 {{--									@if(count($posts) > 0)--}}
@@ -66,7 +56,6 @@
 {{-- 										<div class="no-posts alert alert-warning">{{ trans('messages.no_posts') }}</div>--}}
 {{-- 									@endif--}}
 {{-- 								@endif--}}
-
 {{-- 								@if($user_post == "event")--}}
 {{-- 									@if($event->type == 'private' && Auth::user()->get_eventuser($event->id) || $event->type == 'public')--}}
 {{-- 										@if(count($posts) > 0)--}}
@@ -83,12 +72,10 @@
 {{--							</div>--}}
 {{--						</div>--}}
 					</div>
-				</div><!-- /row -->
-			</div><!-- /col-md-10 -->
-
+				</div>
+			</div>
 			<div class="col-md-2">
 				{!! Theme::partial('timeline-rightbar') !!}
 			</div>
-
-		</div><!-- /row -->
+		</div>
 	</div>
