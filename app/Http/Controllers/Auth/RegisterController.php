@@ -212,8 +212,12 @@ class RegisterController extends Controller
             $validator = $this->validator($request->all());
         }
 
-        if ($validator->fails()) {                
-            return response()->json(['status' => '201', 'err_result' => $validator->errors()->toArray()]);
+        if ($validator->fails()) {    
+            if ($request->ajax()) {
+                return response()->json(['status' => '201', 'err_result' => $validator->errors()->toArray()]);
+            }
+            
+            return false;
         }
 
         if ($request->affiliate) {
@@ -316,16 +320,19 @@ class RegisterController extends Controller
         }
     }
 
-    public function facebookRedirect()
+    public function facebookRedirect(Request $request)
     {
-        return Socialite::with('facebook')->redirect();
+        return Socialite::driver('facebook')->redirect();
     }
 
     // to get authenticate user data
-    public function facebook()
+    public function facebook(Request $request)
     {
-        $facebook_user = fans::with('facebook')->user();
-
+//        $accessToken = $request->get('code');
+        $facebook_user = Socialite::driver('facebook')->user();
+//        $token = $driver->getAccessTokenResponse($accessToken);
+//
+//        $facebook_user = $driver->getUserByToken($token['access_token']);
         $email = $facebook_user->email;
 
         if ($email == null) {
@@ -378,32 +385,32 @@ class RegisterController extends Controller
         }
     }
 
-    public function googleRedirect()
+    public function googleRedirect(Request $request)
     {
-        return fans::with('google')->redirect();
+        return Socialite::driver('google')->redirect();
     }
 
     // to get authenticate user data
-    public function google()
+    public function google(Request $request)
     {
-        $google_user = fans::with('google')->user();
+        $google_user = Socialite::driver('google')->user();
         if (isset($google_user->user['gender'])) {
             $user_gender = $google_user->user['gender'];
         } else {
             $user_gender = 'other';
         }
-        $user = User::firstOrNew(['email' => $google_user->email]);
+        $user = User::firstOrNew(['email' => $google_user->user['email']]);
         if (!$user->id) {
-            $request = new Request(['username' => $google_user->id,
-              'name'                           => $google_user->name,
-              'email'                          => $google_user->email,
+            $request = new Request(['username' => $google_user->user['id'],
+              'name'                           => $google_user->user['name'],
+              'email'                          => $google_user->user['email'],
               'password'                       => bcrypt(str_random(8)),
               'gender'                         => $user_gender,
             ]);
             $timeline = $this->registerUser($request, true);
 
             //  Prepare the image for user avatar
-            $avatar = Image::make($google_user->avatar);
+            $avatar = Image::make($google_user->avatar_original);
             $photoName = date('Y-m-d-H-i-s').str_random(8).'.png';
             $avatar->save(storage_path().'/uploads/users/avatars/'.$photoName, 60);
 
@@ -428,7 +435,7 @@ class RegisterController extends Controller
 
     public function twitterRedirect()
     {
-        return Socialite::with('twitter')->redirect();
+        return Socialite::driver('twitter')->redirect();
     }
 
   // to get authenticate user data
@@ -445,6 +452,10 @@ class RegisterController extends Controller
               'gender'                         => 'other',
             ]);
             $timeline = $this->registerUser($request, true);
+            
+            if($timeline == false) {
+                return \redirect('login');
+            }
               //  Prepare the image for user avatar
             $avatar = Image::make($twitter_user->avatar_original);
             $photoName = date('Y-m-d-H-i-s').str_random(8).'.png';
