@@ -2,13 +2,12 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Comment;
 use App\Http\Controllers\Controller;
 use App\Media;
-use File;
 use App\Setting;
 use App\Timeline;
 use App\User;
+use File;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -63,16 +62,18 @@ class RegisterController extends Controller
     protected function validator(array $data, $captcha = null)
     {
         $messages = [
-            'no_admin' => 'The name admin is restricted for :attribute'
+            'no_admin' => 'The name admin is restricted for :attribute',
+            'tos.required' => 'You must agree to our Terms & Conditions.'
         ];
         $rules = [
-            'name'      => 'required|max:255',
             'email'     => 'required|email|max:255|unique:users',
-            'password'  => 'required|min:6',
+            'name'      => 'required|max:255',
             // 'gender'    => 'required',
-            'name'  => 'required|max:25|min:5|unique:timelines|no_admin',
+            'name'  => 'required|max:25|min:2|unique:timelines|no_admin',
             'username'  => 'required|max:25|min:5|unique:timelines|no_admin',
+            'password'  => 'required|min:6',
             'affiliate' => 'exists:timelines,username',
+            'tos'       => 'required'
         ];
 
         if ($captcha) {

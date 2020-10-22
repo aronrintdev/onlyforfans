@@ -78,6 +78,9 @@
         <script type="text/javascript" src="https://js.stripe.com/v3/"></script>
         <script>
             let setLastSeenURL = "{{ route('update-user-status') }}";
+            $('.search-btn').on('click', function () {
+                $('.mobile-search').toggle();
+            });
         </script>
         {!! Theme::asset()->container('footer')->scripts() !!}
 

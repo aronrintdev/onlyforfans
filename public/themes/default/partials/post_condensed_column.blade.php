@@ -5,6 +5,10 @@
         $post = App\Post::where('id', $post->shared_post_id)->with('comments')->first();
         ?>
     @endif
+    
+        <?php
+        $main_description = $post->description;
+        ?>
 
     <div class="panel panel-default panel-post animated post-wrapper-{{ $post->id }}" id="post{{ $post->id }}">
         <div class="panel-heading no-bg">
@@ -247,7 +251,7 @@
                         </div>
                     </div>
                 @else
-                    <div class="panel-body">
+                    <div class="panel-body {{ $post->images()->get()->count() == 1 && clean($main_description) == '' ? 'single-image-panel' : '' }}">
                     <div class="text-wrapper">
 
                         <div id="statisticsModal{{ $post->id }}" class="modal fade" role="dialog" tabindex='-1'>
@@ -396,7 +400,7 @@
 
                                 @foreach($post->images()->get() as $postImage)
                                     @if($postImage->type=='image')
-                                        <a href="{{ url('user/gallery/'.$postImage->source) }}" data-lightbox="imageGallery.{{ $post->id }}" ><img src="{{ url('user/gallery/'.$postImage->source) }}"  title="{{ $post->user->name }}" alt="{{ $post->user->name }}"></a>
+                                        <a href="{{ url('user/gallery/'.$postImage->source) }}" data-fancybox="galleryCondensed.{{$post->id}}"  ><img src="{{ url('user/gallery/'.$postImage->source) }}"  title="{{ $post->user->name }}" alt="{{ $post->user->name }}"></a>
                                     @endif
                                 @endforeach
                             </div>
@@ -461,7 +465,7 @@
                     </div>
                 @endif
             @else
-                <div class="panel-body">
+                <div class="panel-body {{ $post->images()->get()->count() == 1 && clean($main_description) == '' ? 'single-image-panel' : '' }}">
                 <div class="text-wrapper">
 
                     <div id="statisticsModal{{ $post->id }}" class="modal fade" role="dialog" tabindex='-1'>
@@ -610,7 +614,7 @@
 
                             @foreach($post->images()->get() as $postImage)
                                 @if($postImage->type=='image')
-                                    <a href="{{ url('user/gallery/'.$postImage->source) }}" data-lightbox="imageGallery.{{ $post->id }}" ><img src="{{ url('user/gallery/'.$postImage->source) }}"  title="{{ $post->user->name }}" alt="{{ $post->user->name }}"></a>
+                                    <a href="{{ url('user/gallery/'.$postImage->source) }}" data-fancybox="galleryCondensed.{{$post->id}}" ><img src="{{ url('user/gallery/'.$postImage->source) }}"  title="{{ $post->user->name }}" alt="{{ $post->user->name }}"></a>
                                 @endif
                             @endforeach
                         </div>
@@ -846,9 +850,10 @@
     <a class="jscroll-next hidden" href="{{ $next_page_url }}&column=true&two_column=true">{{ trans('messages.get_more_posts') }}</a>
 @endif
 
-{!! Theme::asset()->container('footer')->usePath()->add('lightbox', 'js/lightbox.min.js') !!}
+{{--{!! Theme::asset()->container('footer')->usePath()->add('lightbox', 'js/lightbox.min.js') !!}--}}
 
-
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" />
+<script src="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js"></script>
 <!--<script src="../js/popcorn.min.js"></script>-->
 <!--<script src="../js/popcorn.capture.js"></script>-->
 

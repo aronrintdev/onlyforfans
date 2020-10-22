@@ -4,17 +4,15 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\LoginSession;
-use Cassandra\Date;
-use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use App\Setting;
 use App\Timeline;
+use DB;
+use Illuminate\Foundation\Auth\AuthenticatesUsers;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Teepluss\Theme\Facades\Theme;
 use Validator;
-use DB;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Redirect;
 
 class LoginController extends Controller
 {
@@ -178,6 +176,14 @@ class LoginController extends Controller
             'email'    => 'required',
             'password' => 'required',
         ]);
+
+        if ($validate->fails()) {
+            if ($request->ajax()) {
+                return response()->json(['status' => '201', 'err_result' => $validate->errors()->toArray()]);
+            }
+            $messages = $validate->messages()->all();
+            return \redirect()->back()->withInput()->withErrors($validate);
+        }
 
         if (!$validate->passes()) {
 //            return response()->json(['status' => '201', 'message' => trans('auth.login_failed')]);

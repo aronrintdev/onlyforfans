@@ -29,6 +29,21 @@
         white-space: nowrap;
         overflow: hidden;
     }
+
+    .panel-post .single-image-panel {
+        padding: 0;
+    }
+    .single-image-panel .single-image {
+        margin: 0 !important;
+    }
+
+    .single-image-panel img{
+        margin: 0 !important;
+    }
+
+    .single-image-panel a {
+        margin: 0!important;
+    }
 </style>
 <div class="container profile-posts">
 	<div class="row">

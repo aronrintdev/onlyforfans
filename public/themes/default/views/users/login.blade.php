@@ -7,6 +7,15 @@
                 <div class="header-circle login-progress hidden"><i class="fa fa-spinner fa-spin" aria-hidden="true"></i></div>
             </div>
             <div class="login-bottom">
+                @if ($errors->any())
+                    <div class="alert alert-danger">
+                        <ul class="mb-0 list-unstyled">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
                 <div class="login-errors text-danger"></div>
                 @if (Config::get('app.env') == 'demo')
                     <div class="alert alert-success">

@@ -381,7 +381,7 @@
 
                                     @foreach($post->images()->get() as $postImage)
                                         @if($postImage->type=='image')
-                                            <a href="{{ url('user/gallery/'.$postImage->source) }}" data-lightbox="imageGallery.{{ $post->id }}" ><img src="{{ url('user/gallery/'.$postImage->source) }}"  title="{{ $post->user->name }}" alt="{{ $post->user->name }}"></a>
+                                            <a href="{{ url('user/gallery/'.$postImage->source) }}" data-fancybox="gallery{{$post->id}}" ><img src="{{ url('user/gallery/'.$postImage->source) }}"  title="{{ $post->user->name }}" alt="{{ $post->user->name }}"></a>
                                         @endif
                                     @endforeach
                                 </div>

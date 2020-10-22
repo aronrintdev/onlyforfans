@@ -71,7 +71,7 @@
 								Earnings
 							</div>
 							<div class="activity-count">
-								$1,500
+                               ${{ number_format($totalTip + $subscriptionAmount) }}
 							</div>
 						</a>
 					</li>

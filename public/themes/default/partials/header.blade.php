@@ -13,10 +13,64 @@
         }
     }
     
+    .mobile-search {
+        display: none;
+    }
+    
+    @media screen and (max-width: 1024px) {
+        .mobile-search {
+            position: absolute;
+            top: 50px;
+            left: 50%;
+            display: none;
+            transform: translateX(-50%);
+            border-radius: 22px;
+            padding: 0 5px;
+            background: #fff;
+            box-shadow: 8px 6px 15px rgba(0, 0, 0, .5);
+            transition: 0.3s;
+            max-width: 100%;
+        }
+
+        .mobile-search .form-left .selectize-control {
+            max-width: 300px;
+        }
+
+        .mobile-search .form-left .selectize-dropdown {
+            min-width: 300px;
+        }
+
+        .mobile-search .form-left .selectize-input {
+            max-width: 100%;
+            width: calc(100% - 10px);
+        }
+
+        .mobile-search .form-left .selectize-dropdown-content {
+            max-width: 100% !important;
+        }
+
+        .mobile-search form {
+            margin: 0;
+            padding: 10px;
+        }
+    }
+    
     @media screen and (max-width: 576px) {
         .user-image.fans {
             padding-right: 0 !important;
             padding-left: 0;
+        }
+
+        .notification-list > li {
+            padding-left: 10px;
+        }
+
+        .notification-list > li:first-child {
+            padding-left: 22px;
+        }
+
+        .dropdown.message {
+            padding-right: 15px;
         }
     }
 </style>
@@ -169,6 +223,24 @@
                                                 </form>
                                             </li>
                                         </ul>
+                                    </li>
+                                    <li class="" style="display: inline-block;">
+                                        <a href="#" class="search-btn">
+                                            <svg width="1.5em" height="1.5em" viewBox="0 0 16 16" class="bi bi-search" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                                <path fill-rule="evenodd" d="M10.442 10.442a1 1 0 0 1 1.415 0l3.85 3.85a1 1 0 0 1-1.414 1.415l-3.85-3.85a1 1 0 0 1 0-1.415z"/>
+                                                <path fill-rule="evenodd" d="M6.5 12a5.5 5.5 0 1 0 0-11 5.5 5.5 0 0 0 0 11zM13 6.5a6.5 6.5 0 1 1-13 0 6.5 6.5 0 0 1 13 0z"/>
+                                            </svg>
+                                            <span class="small-screen"></span></a>
+                                        <div class="mobile-search">
+                                            <form class="navbar-form navbar-left form-left" role="search">
+                                                <div class="input-group no-margin">
+            					<span class="input-group-btn">
+            						<button class="btn btn-default" type="button"><i style="color:#848f96;" class="fa fa-search"></i></button>
+            					</span>
+                                                    <input type="text" id="mobile-navbar-search" data-url="{{ URL::to('api/v1/search') }}" class="form-control" placeholder="{{ trans('messages.search_placeholder') }}">
+                                                </div>
+                                            </form>
+                                        </div>
                                     </li>
                                 </ul>
                             </div>

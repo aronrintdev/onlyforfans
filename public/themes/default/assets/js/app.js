@@ -1982,9 +1982,9 @@ $(function () {
 
 
     //  Navbar Search suggestions
-    var bigSearchUrl = $('#navbar-search').data('url');
+    var bigSearchUrl = $('#mobile-navbar-search, #navbar-search').data('url');
 
-    $('#navbar-search').selectize({
+    $('#mobile-navbar-search, #navbar-search').selectize({
         valueField: 'username',
         labelField: 'name',
         optgroupField: 'type',
@@ -2079,7 +2079,7 @@ $(function () {
     });
 
     //  Create post user tags
-    var bigSearchUrl = $('#navbar-search').data('url');
+    var bigSearchUrl = $('#mobile-navbar-search, #navbar-search').data('url');
 
     var selectizeUsers = $('#userTags').selectize({
         valueField: 'id',

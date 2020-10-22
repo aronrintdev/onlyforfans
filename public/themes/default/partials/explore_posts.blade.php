@@ -106,5 +106,4 @@
     </div>        
 @endif    
 
-<?php echo Theme::asset()->container('footer')->usePath()->add('lightbox', 'js/lightbox.min.js'); ?>
 @endif

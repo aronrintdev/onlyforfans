@@ -91,9 +91,32 @@
             
             <div class="row">
               <div class="col-md-12" class="register-form-row" style="margin-bottom:20px;">
-                  <input type="checkbox" name="tos" id="tos"><label for="tos" style="cursor:pointer;">&nbsp;I agree to the <a href="javascript:void(0)">Terms of Service</a>.</label>
+                  <input type="checkbox" required name="tos" id="tos"><label for="tos" style="cursor:pointer;">&nbsp;I agree to the <a href="#" data-toggle="modal" data-target="#termsConditionsModal">Terms of Service</a>.</label>
               </div>
             </div>
+
+              <div class="modal fade" id="termsConditionsModal" role="dialog">
+                  <div class="modal-dialog">
+
+                      <!-- Modal content-->
+                      <div class="modal-content">
+                          <div class="modal-header">
+                              <button type="button" class="close" data-dismiss="modal">&times;</button>
+                              <h4 class="modal-title">Terms & Conditions</h4>
+                          </div>
+                          <div class="modal-body">
+                              <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
+                              </p>
+                              <p>
+                                  It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using 'Content here, content here', making it look like readable English. Many desktop publishing packages and web page editors now use Lorem Ipsum as their default model text, and a search for 'lorem ipsum' will uncover many web sites still in their infancy. Various versions have evolved over the years, sometimes by accident, sometimes on purpose (injected humour and the like).</p>
+                          </div>
+                          <div class="modal-footer">
+                              <label class="btn btn-default agree-btn" for="tos">I Agree</label>
+                          </div>
+                      </div>
+
+                  </div>
+              </div>
 
             <div class="row">
 {{--              @if(Setting::get('birthday') == "on")--}}
@@ -162,4 +185,18 @@
     
   </div><!-- /row -->
 </div><!-- /container -->
+<script>
+    $('#tos').change(function () {
+        $('#termsConditionsModal').modal('hide');
+    });
+
+    $('#termsConditionsModal').on('show.bs.modal', function () {
+        let isChecked = $('#tos').is(':checked');
+        if(isChecked) {
+            $('.agree-btn').text('Disagree');
+        } else {
+            $('.agree-btn').text('I Agree');
+        }
+    });
+</script>
 {!! Theme::asset()->container('footer')->usePath()->add('app', 'js/app.js') !!}

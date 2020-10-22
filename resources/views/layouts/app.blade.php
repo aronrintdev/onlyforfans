@@ -9,14 +9,14 @@
         
     <link href="{{ url('/').mix('themes/default/assets/css/style.css', '') }}" rel="stylesheet"/>
     <link href="{{ url('/').mix('themes/default/assets/css/flag-icon.css', '') }}" rel="stylesheet"/>
-    
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
         <title>Fans Platform</title>
 
 
 </head>
 <body id="app-layout">
-    <nav class="navbar fans navbar-default no-bg" style="position: relative;">
-    <div class="container-fluid">
+    <nav class="navbar fans navbar-default no-bg guest-nav" style="position: relative; height: 72px">
+    <div class="container">
         <div class="navbar-header">
             <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-4" aria-expanded="false">
                 <span class="sr-only">Toggle navigation</span>

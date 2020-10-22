@@ -36,18 +36,18 @@
             </div>
             @if(Auth::id() == $timeline->user->id)
             <div class="post-type">
-                <!-- <div>
-                    <input type="radio" value="free" id="free" name="type" checked class="post-type-item">
-                    <label for="free">Free</label>
-                </div>
-                <div>
-                    <input type="radio" value="paid" id="paid" name="type" class="post-type-item">
-                    <label for="paid">For Subscribers</label>
-                </div>
-                <div>
-                    <input type="radio" value="price" id="price" name="type" class="post-type-item">
-                    <label for="price">Set Price</label>
-                </div>
+{{--                <div>--}}
+{{--                    <input type="radio" value="free" id="free" name="type" checked class="post-type-item">--}}
+{{--                    <label for="free">Free</label>--}}
+{{--                </div>--}}
+{{--                <div>--}}
+{{--                    <input type="radio" value="paid" id="paid" name="type" class="post-type-item">--}}
+{{--                    <label for="paid">For Subscribers</label>--}}
+{{--                </div>--}}
+{{--                <div>--}}
+{{--                    <input type="radio" value="price" id="price" name="type" class="post-type-item">--}}
+{{--                    <label for="price">Set Price</label>--}}
+{{--                </div>--}}
                 <div class="modal fade" id="postPriceModal" role="dialog">
                     <div class="modal-dialog">
                         <div class="modal-content">
@@ -59,12 +59,36 @@
                             </div>
                         </div>
                     </div>
-                </div>-->
-                <div>
-                    <i class="fa fa-dollar" data-toggle="tooltip" title="Set a price" style="color:#859ab5;"></i>
-                    <!-- <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-three-dots-vertical" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                      <path fill-rule="evenodd" d="M9.5 13a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
-                    </svg> -->
+                </div>
+                <div class="dropdown">
+{{--                    <i class="fa fa-dollar" data-toggle="tooltip" title="Set a price" style="color:#859ab5;"></i>--}}
+                    <div class="dropdown-toggle" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="cursor: pointer">
+                        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-three-dots-vertical" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                            <path fill-rule="evenodd" d="M9.5 13a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
+                        </svg>
+                    </div>
+                    <ul class="dropdown-menu">
+                        <li class="main-link">
+                            <a href="#">
+                                <div>
+                                    <input type="radio" value="free" id="free" name="type" checked class="post-type-item">
+                                    <label for="free">Free</label>
+                                </div>
+                            </a>
+                            <a href="#">
+                                    <div>
+                                        <input type="radio" value="paid" id="paid" name="type" class="post-type-item">
+                                        <label for="paid">For Subscribers</label>
+                                    </div>
+                            </a>
+                            <a href="#">
+                                <div>
+                                    <input type="radio" value="price" id="price" name="type" class="post-type-item">
+                                    <label for="price">Set Price</label>
+                                </div>
+                            </a>
+                        </li>
+                    </ul>
                 </div>
             </div>
             @endif
