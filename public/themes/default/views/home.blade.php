@@ -36,6 +36,9 @@
     .single-image-panel .single-image {
         margin: 0 !important;
     }
+	.single-image-panel .actions-count {
+		padding: 7px 15px;
+	}
     
     .single-image-panel img{
         margin: 0 !important;
