@@ -191,12 +191,13 @@
     });
 
     $('#termsConditionsModal').on('show.bs.modal', function () {
-        let isChecked = $('#tos').is(':checked');
-        if(isChecked) {
-            $('.agree-btn').text('Disagree');
-        } else {
-            $('.agree-btn').text('I Agree');
-        }
+        $('.agree-btn').text('I Agree');
+        // let isChecked = $('#tos').is(':checked');
+        // if(isChecked) {
+        //     $('.agree-btn').text('Disagree');
+        // } else {
+        //     $('.agree-btn').text('I Agree');
+        // }
     });
 </script>
 {!! Theme::asset()->container('footer')->usePath()->add('app', 'js/app.js') !!}
