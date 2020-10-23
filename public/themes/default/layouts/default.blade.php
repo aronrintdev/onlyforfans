@@ -20,7 +20,6 @@
         <meta content="{{ Setting::get('site_name') }}" property="og:site_name" />
 
 
-        <title>Fans Platform</title>
         <title>{{ Setting::get('site_title') }}</title>
 
         <link href="{{ Theme::asset()->url('css/flag-icon.css') }}" rel="stylesheet">

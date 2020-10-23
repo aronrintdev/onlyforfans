@@ -10,7 +10,7 @@
     <link href="{{ url('/').mix('themes/default/assets/css/style.css', '') }}" rel="stylesheet"/>
     <link href="{{ url('/').mix('themes/default/assets/css/flag-icon.css', '') }}" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
-        <title>Fans Platform</title>
+    <title>{{ Setting::get('site_title') }}</title>
 
 
 </head>
