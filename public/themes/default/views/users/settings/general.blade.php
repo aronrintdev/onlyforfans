@@ -172,7 +172,7 @@
                                         <div class="col-md-6">
                                             <fieldset class="form-group {{ $errors->has('subscribe_price') ? ' has-error' : '' }}">
                                                 {{ Form::label('subscribe_price', trans('auth.subscribe_price')) }}
-                                                {{ Form::text('subscribe_price', Auth::user()->price, ['class' => 'form-control', 'placeholder' => trans('auth.subscribe_price')]) }}
+                                                {{ Form::text('subscribe_price', Auth::user()->price, ['class' => 'form-control', 'placeholder' => '$0.00']) }}
                                                 @if ($errors->has('subscribe_price'))
                                                     <span class="help-block">
 												{{ $errors->first('subscribe_price') }}

@@ -66,6 +66,11 @@
         text-align: center;
         color: #777;
     }
+    
+    .page-load-status p {
+        display: none;
+        display: none;
+    }
 
     .grid.are-images-unloaded {
         opacity: 0;
@@ -168,7 +173,7 @@
         justify-content: center;
         align-items: center;
         height: 250px;
-        width: 250px;
+        width: 100%;
         max-width: 100%;
     }
 
@@ -191,6 +196,12 @@
             width: 31.5%;
         }
     }
+    
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
 </style>
 <!-- main-section -->
 	<!-- <div class="main-content"> -->
@@ -203,7 +214,7 @@
                             <span class="input-group-btn">
                                 <button class="btn btn-default" type="button"><i class="fa fa-search"></i></button>
                             </span>
-                            <input type="text" id="explorePosts" class="form-control" placeholder="{{ trans('messages.search_placeholder') }}">
+                            <input type="text" id="explorePosts" class="form-control" placeholder="{{ trans('messages.search_post_placeholder') }}">
                         </div>
                     </div>
 			   		@if (Session::has('message'))
@@ -241,8 +252,8 @@
                             <span class="loader-ellips__dot"></span>
                             <span class="loader-ellips__dot"></span>
                         </div>
-                        <!-- <p class="infinite-scroll-last">End of content</p>
-                        <p class="infinite-scroll-error">No more pages to load</p> -->
+                        <p class="infinite-scroll-last">End of content</p>
+                        <p class="infinite-scroll-error">No more pages to load</p>
                     </div>
 				</div><!-- /col-md-6 -->
 

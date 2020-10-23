@@ -158,7 +158,7 @@
         justify-content: center;
         align-items: center;
         height: 250px;
-        width: 250px;
+        width: 100%;
         max-width: 100%;
     }
 
@@ -189,7 +189,7 @@
                         <span class="input-group-btn">
                             <button class="btn btn-default" type="button"><i class="fa fa-search"></i></button>
                         </span>
-                            <input type="text" id="explorePosts" class="form-control" placeholder="{{ trans('messages.search_placeholder') }}">
+                            <input type="text" id="explorePosts" class="form-control" placeholder="{{ trans('messages.search_post_placeholder') }}">
                         </div><!-- /input-group -->
                         <h2 style="margin: 0; display: none" class="purchased-posts-title">Purchased Posts</h2>
                     </div>                        
@@ -235,6 +235,9 @@
 	<!-- </div> -->
 <!-- /main-section -->
 <script src="https://unpkg.com/infinite-scroll@3/dist/infinite-scroll.pkgd.min.js"></script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" />
+<script src="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js"></script>
 <script src='https://unpkg.com/masonry-layout@4/dist/masonry.pkgd.js'></script>
 <script type="text/javascript">
     let $grid;

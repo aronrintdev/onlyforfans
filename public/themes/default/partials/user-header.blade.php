@@ -2,6 +2,12 @@
     .smallscreen-report, a.page-report.report {
         display: block !important;
     }
+    
+    @media screen and (max-width: 767px) {
+        .user-image.dropdown.fans .dropdown-menu {
+            left: -190px;
+        }
+    }
 </style>
 <div class="timeline-cover-section">
 	<div class="timeline-cover">
@@ -192,14 +198,14 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-body">
-                <div class="modal-header lists-modal" style="display: flex; justify-content: space-between">
-                    {{--						<button type="button" class="close" data-dismiss="modal">&times;</button>--}}
+                <div class="modal-header lists-modal" style="display: flex; justify-content: space-between">                    						
                     <h3 class="modal-title lists-modal-title">
                         {{ trans("common.send_tip") }}
                     </h3>
                     @if(!Auth::user()->is_payment_set)
                         <em class="text-danger">Please add Payment card.</em>
                     @endif
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
                 </div>
                 <div class="b-stats-row__content">
                     <input type="number" id="etTipAmount" class="form-control etTipAmount" placeholder="$0.00" step="0.1">
@@ -217,6 +223,13 @@
     </div>
 </div>
 
+<style>
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+</style>
 <script type="text/javascript">
 	$( document ).ready(function() {
 	});

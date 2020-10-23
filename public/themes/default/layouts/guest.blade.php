@@ -14,8 +14,6 @@
         <meta name="description" content="{{ Setting::get('meta_description') }}">
         <link rel="icon" type="image/x-icon" href="{{asset('images/favicon.ico')}}">
 
-
-        <!--<title>Fans Platform</title>-->
         <title>{{ Setting::get('site_title') }}</title>
         
         <link href="{{ Theme::asset()->url('css/flag-icon.css') }}" rel="stylesheet">
@@ -23,8 +21,6 @@
         
         {!! Theme::asset()->styles() !!}
 
-        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
-        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
         <!--[if lt IE 9]>
             <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.2/html5shiv.min.js"></script>
             <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>

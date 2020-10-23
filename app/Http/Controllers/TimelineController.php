@@ -1853,8 +1853,8 @@ class TimelineController extends AppBaseController
                 })->whereDate('created_at', '>=', $startDate)->where('active', 1))->orderBy('created_at', $order_by == 'desc' ? 'asc' : 'desc')->paginate(Setting::get('items_page'));
             } else {
                 $posts = Post::Where('user_id', $id)->orWhere(function ($query) use ($timeline){
-                    $query->where('timeline_id', $timeline->id)
-                        ->orWhere('user_id', Auth::id());
+                    $query->where('timeline_id', $timeline->id);
+//                        ->orWhere('user_id', Auth::id());
                 })->whereDate('created_at', '>=', $startDate)->where('active', 1)->orderBy('created_at', $order_by == 'desc' ? 'asc' : 'desc')->paginate(Setting::get('items_page'));
             }
 

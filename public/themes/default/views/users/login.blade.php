@@ -7,7 +7,7 @@
                 <div class="header-circle login-progress hidden"><i class="fa fa-spinner fa-spin" aria-hidden="true"></i></div>
             </div>
             <div class="login-bottom">
-                @if ($errors->any())
+                @if ($errors->has('invalid') || $errors->has('failed'))
                     <div class="alert alert-danger">
                         <ul class="mb-0 list-unstyled">
                             @foreach ($errors->all() as $error)
@@ -38,9 +38,17 @@
                     {{ csrf_field() }}
                     <fieldset class="form-group{{ $errors->has('email') ? ' has-error' : '' }}">
                         {{ Form::text('email', NULL, ['class' => 'form-control', 'id' => 'email', 'placeholder'=> trans('auth.enter_email_or_username')]) }}
+
+                        @if($errors->has('email'))
+                            <span class="text-danger">The email field is required. </span>
+                        @endif
                     </fieldset>
                     <fieldset class="form-group{{ $errors->has('password') ? ' has-error' : '' }}" style="margin-bottom:0px;">
                         {{ Form::password('password', ['class' => 'form-control', 'id' => 'password', 'placeholder'=> trans('auth.password')]) }}
+
+                        @if($errors->has('password'))
+                            <span class="text-danger">The password field is required. </span>
+                        @endif
                     </fieldset>
                     <div class="pull-right" style="margin-bottom:18px;">
                         <a class="forgot-password-link" href="{{ url('/password/reset') }}">{{ trans('auth.forgot_password').'?' }}</a>

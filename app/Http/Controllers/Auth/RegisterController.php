@@ -477,7 +477,7 @@ class RegisterController extends Controller
         if (Auth::loginUsingId($user->id)) {
             return redirect('/')->with(['message' => trans('messages.change_username_twitter').' <b>'.$user->email.'</b>', 'status' => 'warning']);
         } else {
-            return redirect('login')->with(['message' => trans('messages.user_login_failed'), 'status' => 'error']);
+            return redirect('login')->withInput()->withErrors(['message' => trans('messages.user_login_failed'), 'status' => 'error']);
         }
     }
 

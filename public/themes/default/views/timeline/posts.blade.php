@@ -44,6 +44,26 @@
     .single-image-panel a {
         margin: 0!important;
     }
+    
+    .favourite-grid {
+        margin: 0 -7px;
+    }
+    
+    .favourite-grid .img {
+        background: #ccc;
+        height: 100px;        
+        margin-bottom: 14px;
+    }
+    
+    @media screen and (max-width: 1024px) {
+        .favourite-grid .img {
+            height: 200px;
+        }
+    }
+    
+    .favourite-grid > div {
+        padding: 0 7px;
+    }
 </style>
 <div class="container profile-posts">
 	<div class="row">
@@ -52,10 +72,10 @@
 			'followers_count','follow_confirm','user_post','joined_groups_count','guest_events', 'user_lists')) !!}
 			<div class="row">
 				<div class=" timeline">
-					<div class="col-md-4">
+					<div class="col-md-4 sidebar-wrapper">
 						{!! Theme::partial('user-leftbar',compact('timeline','user','follow_user_status','own_groups','own_pages','user_events')) !!}
 					</div>
-					<div class="col-md-8">
+					<div class="col-md-8 content-wrapper">
 						@if($timeline->type == "user" && ($user->id == Auth::user()->id || canCreatePost(Auth::user(), $user)))
 							{!! Theme::partial('create-post',compact('timeline','user_post')) !!}
 						@endif
@@ -191,7 +211,8 @@
 </div><!-- /container -->
 <script type="text/javascript">
     $('.switch-layout').click(function () {
-        $('.timeline-default, .timeline-condensed-column').toggle();
+        $('.timeline-default, .timeline-condensed-column, .sidebar-wrapper').toggle();
+        $('.content-wrapper').toggleClass('col-lg-12');
         condensedLayout = !condensedLayout;
         twoColumn = !twoColumn;
         $.each($(".timeline-condensed-column>.panel"), function (i) {

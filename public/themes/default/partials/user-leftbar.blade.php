@@ -1,4 +1,4 @@
-@if (        
+    @if (        
         ($timeline->type == 'user' && $timeline->id == Auth::user()->timeline_id) ||
         ($timeline->type == 'page' && $timeline->page->is_admin(Auth::user()->id) == true) ||
         ($timeline->type == 'group' && $timeline->groups->is_admin(Auth::user()->id) == true)
@@ -197,3 +197,24 @@
 		{!! htmlspecialchars_decode(Setting::get('timeline_ad')) !!} 
 	</div>	
 	@endif
+
+<div class="favourite-grid row">
+    <div class="col-sm-4 col-6">
+        <div class="img"></div>
+    </div>
+    <div class="col-sm-4 col-6">
+        <div class="img"></div>
+    </div>
+    <div class="col-sm-4 col-6">
+        <div class="img"></div>
+    </div>
+    <div class="col-sm-4 col-6">
+        <div class="img"></div>
+    </div>
+    <div class="col-sm-4 col-6">
+        <div class="img"></div>
+    </div>
+    <div class="col-sm-4 col-6">
+        <div class="img"></div>
+    </div>
+</div>

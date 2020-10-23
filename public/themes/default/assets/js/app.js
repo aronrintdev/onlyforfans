@@ -2437,7 +2437,7 @@ $(function () {
 
     //date-picker
     $( "#datepicker" ).datepicker();
-    $( "#datepicker1" ).datepicker();
+    $( "#datepicker1" ).datepicker({format: "yyyy-mm-dd"});
     $( "#datepicker2" ).datepicker();
 
     // focus fix for input

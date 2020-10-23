@@ -34,6 +34,7 @@ return [
     'search_people_placeholder' => 'Search for people',
     /*'search_placeholder'        => 'Search for people, trends, pages and groups',*/
     'search_placeholder'        => 'Search for creators',
+    'search_post_placeholder'   => 'Search for posts',
     /*'post-placeholder'          => '#hashtags, @mentions, photos, videos',*/
     'post-placeholder'          => '',
     'view-previous-messages'    => 'View previous messages',

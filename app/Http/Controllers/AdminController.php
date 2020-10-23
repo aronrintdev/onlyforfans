@@ -1677,9 +1677,15 @@ class AdminController extends Controller
             $user = $timeline->user;
             $followers = $user->followers();
             $timeline->notifications()->delete();            
+            $user->usersSentTips()->detach();            
+            $user->usersReceivedTips()->detach();            
             $timeline->delete();
             $user->followers()->detach();
             $user->following()->detach();
+            $postNotifications = $user->posts()->with('notifications')->get();
+            foreach ($postNotifications as $post) {
+                $post->deleteMe();
+            }
             $user->posts()->delete();
             $user->comments()->delete();
             $user->userEvents()->delete();

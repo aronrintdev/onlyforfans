@@ -560,14 +560,14 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-body">
-                <div class="modal-header lists-modal" style="display: flex; justify-content: space-between">
-                    {{--						<button type="button" class="close" data-dismiss="modal">&times;</button>--}}
+                <div class="modal-header lists-modal" style="display: flex; justify-content: space-between">                    						
                     <h3 class="modal-title lists-modal-title">
                         {{ trans("common.send_tip") }}
                     </h3>
                     @if(!Auth::user()->is_payment_set)
                         <em class="text-danger">Please add Payment card.</em>
                     @endif
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
                 </div>
 
                 <div class="b-stats-row__content">

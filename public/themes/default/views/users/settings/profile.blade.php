@@ -66,20 +66,20 @@
 										<div class="col-md-6">
 											<fieldset class="form-group">
 												{{ Form::label('wishlist', trans('common.designation')) }}
-												{{ Form::text('wishlist', Auth::user()->wishlist, ['class' => 'form-control', 'placeholder' => trans('common.your_qualification')]) }}
+												{{ Form::url('wishlist', Auth::user()->wishlist, ['class' => 'form-control', 'placeholder' => trans('common.your_qualification')]) }}
 											</fieldset>
 										</div>
 										<div class="col-md-6">
 
 											<fieldset class="form-group">
 												{{ Form::label('website', trans('common.hobbies')) }}
-												{{ Form::text('website', Auth::user()->website, ['class' => 'form-control', 'placeholder' => trans('common.mention_your_hobbies')]) }}
+												{{ Form::url('website', Auth::user()->website, ['class' => 'form-control', 'placeholder' => trans('common.mention_your_hobbies')]) }}
 											</fieldset>
 										</div>
 										<div class="col-md-6">
 											<fieldset class="form-group">
 												{{ Form::label('instagram', trans('common.interests')) }}
-												{{ Form::text('instagram', Auth::user()->instagram, ['class' => 'form-control', 'placeholder' => trans('common.add_your_interests')]) }}
+												{{ Form::url('instagram', Auth::user()->instagram, ['class' => 'form-control', 'placeholder' => trans('common.add_your_interests')]) }}
 											</fieldset>
 										</div>
 									</div>

@@ -60,6 +60,7 @@
                         </div>
                     </div>
                 </div>
+                <span class="current-post-type">Free</span>&nbsp; <a href="#" class="post-amount" data-toggle="modal" data-target="#postPriceModal"></a>
                 <div class="dropdown">
 {{--                    <i class="fa fa-dollar" data-toggle="tooltip" title="Set a price" style="color:#859ab5;"></i>--}}
                     <div class="dropdown-toggle" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="cursor: pointer">
@@ -263,17 +264,26 @@ function initMap(event)
 }
 
 let postType;
+let postAmount = 0;
 $(document).on('keyup', '.post-price-input', function () {
     $(this).val($(this).val().replace(/,/g, '').replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1'));
+    
+    postAmount = $(this).val();
+});
+
+$('#postPriceModal').on('hidden.bs.modal', function () {
+    postAmount = postAmount != '' ? postAmount : 0;
+    $('.post-amount').text('$'+postAmount);
 });
 
 $(document).on('change', '.post-type-item', function () {
     $('.post-price-input').val('');
     postType = parseInt($(this).val());
-    console.log($(this).val());
+    $('.post-amount').text('').hide();
+    $('.current-post-type').text($(this).next().text());
     if ($(this).val() === "price") {
-        console.log($(this).val());
         $('#postPriceModal').modal('show');
+        $('.post-amount').show();
     }
 });
 </script>

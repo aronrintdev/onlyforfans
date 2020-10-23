@@ -47,7 +47,7 @@
 </style>
 		<div class="container">
 			<div class="row">
-                <div class="col-md-7 col-lg-8">
+                <div class="col-md-7 col-lg-8 content-wrapper">
 			   		@if (Session::has('message'))
 				        <div class="alert alert-{{ Session::get('status') }}" role="alert">
 				            {!! Session::get('message') !!}
@@ -101,7 +101,7 @@
 					@endif
 				</div>
 
-				<div class="col-md-5 col-lg-4">
+				<div class="col-md-5 col-lg-4 sidebar-wrapper">
 					{!! Theme::partial('home-rightbar',compact('suggested_users', 'suggested_groups', 'suggested_pages', 'totalTip', 'subscriptionAmount')) !!}
 				</div>
 			</div>
@@ -109,7 +109,8 @@
 
 <script type="text/javascript">
     $('.change-layout').click(function () {
-        $('.timeline-default, .timeline-condensed-column').toggle();
+        $('.timeline-default, .timeline-condensed-column, .sidebar-wrapper').toggle();
+        $('.content-wrapper').toggleClass('col-lg-12 col-lg-8');
         condensedLayout = !condensedLayout;
         $.each($(".timeline-condensed-column>.panel"), function (i) {
             $(this).wrap('<div class="col-lg-4"></div>');

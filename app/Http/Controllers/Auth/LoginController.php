@@ -246,7 +246,9 @@ class LoginController extends Controller
             return redirect('/');
         } else {
             // return response()->json(['status' => '201', 'message' => trans('auth.login_failed')]);
-            return redirect()->back();
+            return redirect()->back()->withInput()->withErrors([
+                'invalid' => 'These credentials do not match our records.',
+            ]);
         }
     }
 }
