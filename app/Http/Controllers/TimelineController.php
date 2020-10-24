@@ -426,7 +426,7 @@ class TimelineController extends AppBaseController
         $totalTip = 0;
         $totalPurchasedPostAmount = 0;
         $subscriptionAmount = 0;
-        $posts = $currentUser->posts;
+        $currentUserPosts = $currentUser->posts;
         $totalTipsPayout = 0;
         $totalSubscriptionPayout = 0;
         $tipsPayouts = $currentUser->tips;
@@ -476,7 +476,7 @@ class TimelineController extends AppBaseController
                 $userId = $user->id;
                 $tips = $user->tips;
 
-                $posts = $currentUser->posts;
+                $currentUserPosts = $currentUser->posts;
                 $purchasedPosts = $currentUser->posts->whereIn('id', $user->PurchasedPostsArr);
                 $paidSubscribers = $currentUser->paidSubscribers;
                 foreach ($purchasedPosts as $post) {
@@ -1706,7 +1706,8 @@ class TimelineController extends AppBaseController
             $customMessage = 'You have blocked this user.';
             return view('errors.blocked_profile', compact('customMessage'));
         }
-        
+
+        $favouritePosts = [];
         $period = 'all';
         $sort_by = 'latest';
         $order_by = 'asc';
@@ -1851,6 +1852,12 @@ class TimelineController extends AppBaseController
                     $query->where('timeline_id', $timeline->id)
                     ->orWhere('user_id', $id);
                 })->whereDate('created_at', '>=', $startDate)->where('active', 1))->orderBy('created_at', $order_by == 'desc' ? 'asc' : 'desc')->paginate(Setting::get('items_page'));
+
+                $favouritePosts = Post::with('images')->has('images')
+                    ->where('user_id', Auth::id())
+                    ->orderBy('created_at', 'desc')
+                    ->where('active', 1)
+                    ->get();
             } else {
                 $posts = Post::Where('user_id', $id)->orWhere(function ($query) use ($timeline){
                     $query->where('timeline_id', $timeline->id);
@@ -1914,7 +1921,7 @@ class TimelineController extends AppBaseController
             return $theme->scope('timeline/posts',
                 compact('timeline', 'liked_post', 'user', 'posts', 'liked_pages', 'followRequests', 'joined_groups', 'own_pages',
                     'own_groups', 'follow_user_status', 'following_count', 'followers_count', 'follow_confirm', 'user_post', 'timeline_post',
-                    'joined_groups_count', 'next_page_url', 'user_events', 'guest_events', 'user_lists', 'period', 'sort_by', 'order_by'))->render();
+                    'joined_groups_count', 'next_page_url', 'user_events', 'guest_events', 'user_lists', 'period', 'sort_by', 'order_by', 'favouritePosts'))->render();
         
         }
     }

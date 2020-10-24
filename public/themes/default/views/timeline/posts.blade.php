@@ -36,9 +36,6 @@
     .single-image-panel .single-image {
         margin: 0 !important;
     }
-	.single-image-panel .actions-count {
-		padding: 7px 15px;
-	}
 
     .single-image-panel img{
         margin: 0 !important;
@@ -56,6 +53,26 @@
         background: #ccc;
         height: 100px;        
         margin-bottom: 14px;
+    }
+
+    .post-detail-modal .modal-body {
+        padding: 0;
+    }
+
+    .post-detail-modal .modal-body .panel {
+        margin-bottom: 0;
+        box-shadow: none;
+    }
+
+    .post-detail-modal .modal-body .panel .panel-body {
+        padding: 0;
+        padding-bottom: 8px;
+    }
+
+    .favourite-grid .img .grid-item, .favourite-grid .img .post-image-holder, .favourite-grid .img .grid-item a, .favourite-grid .img .grid-item>.post-image-holder>a>img{
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
     }
     
     @media screen and (max-width: 1024px) {
@@ -76,7 +93,7 @@
 			<div class="row">
 				<div class=" timeline">
 					<div class="col-md-4 sidebar-wrapper">
-						{!! Theme::partial('user-leftbar',compact('timeline','user','follow_user_status','own_groups','own_pages','user_events')) !!}
+						{!! Theme::partial('user-leftbar',compact('timeline','user','follow_user_status','own_groups','own_pages','user_events', 'favouritePosts', 'next_page_url')) !!}
 					</div>
 					<div class="col-md-8 content-wrapper">
 						@if($timeline->type == "user" && ($user->id == Auth::user()->id || canCreatePost(Auth::user(), $user)))
@@ -212,6 +229,9 @@
 {{--		</div>--}}
 	</div>
 </div><!-- /container -->
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" />
+<script src="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js"></script>
 <script type="text/javascript">
     $('.switch-layout').click(function () {
         $('.timeline-default, .timeline-condensed-column, .sidebar-wrapper').toggle();

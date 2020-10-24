@@ -850,13 +850,6 @@
     <a class="jscroll-next hidden" href="{{ $next_page_url }}&column=true&two_column=true">{{ trans('messages.get_more_posts') }}</a>
 @endif
 
-{{--{!! Theme::asset()->container('footer')->usePath()->add('lightbox', 'js/lightbox.min.js') !!}--}}
-
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" />
-<script src="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js"></script>
-<!--<script src="../js/popcorn.min.js"></script>-->
-<!--<script src="../js/popcorn.capture.js"></script>-->
-
 <script type="text/javascript">
 
     // function getPoster() {

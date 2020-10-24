@@ -1,3 +1,12 @@
+<style>
+    .register-form-row {
+        height: auto;
+    }
+    
+    .list-unstyled {
+        margin: 0;
+    }
+</style>
 <div class="container">
 
 <div class="row tpadding-20">
@@ -39,6 +48,11 @@
                 <fieldset class="form-group required {{ $errors->has('email') ? ' has-error' : '' }}">
                   {{ Form::text('email', NULL, ['class' => 'form-control', 'id' => 'email', 'placeholder'=> trans('auth.email_address')]) }}
                   <ul class="signup-email-error text-danger list-unstyled">
+                      @if ($errors->has('email'))
+                          <span class="help-block">
+                    {{ $errors->first('email') }}
+                  </span>
+                      @endif
                   </ul>
                 </fieldset>
               </div>
@@ -72,8 +86,8 @@
               <div class="col-md-12 register-form-row">
                 <fieldset class="form-group required {{ $errors->has('username') ? ' has-error' : '' }}">
                   {{ Form::text('username', NULL, ['class' => 'form-control', 'id' => 'username', 'placeholder'=> trans('common.username')]) }}
-                  <!-- <ul class="signup-username-error text-danger list-unstyled">
-                  </ul> -->
+                  <ul class="signup-username-error text-danger list-unstyled">
+                  </ul>
                 <!-- <small class="text-muted"><a href="{{ url('/') }}">{{ url('/') }}/username</a></small> -->
                 </fieldset>
               </div>
@@ -92,6 +106,8 @@
             <div class="row">
               <div class="col-md-12" class="register-form-row" style="margin-bottom:20px;">
                   <input type="checkbox" required name="tos" id="tos"><label for="tos" style="cursor:pointer;">&nbsp;I agree to the <a href="#" data-toggle="modal" data-target="#termsConditionsModal">Terms of Service</a>.</label>
+                  <ul class="signup-tos-error text-danger list-unstyled">
+                  </ul>
               </div>
             </div>
 
@@ -192,12 +208,12 @@
 
     $('#termsConditionsModal').on('show.bs.modal', function () {
         $('.agree-btn').text('I Agree');
-        // let isChecked = $('#tos').is(':checked');
-        // if(isChecked) {
-        //     $('.agree-btn').text('Disagree');
-        // } else {
-        //     $('.agree-btn').text('I Agree');
-        // }
+        let isChecked = $('#tos').is(':checked');
+        if(isChecked) {
+            $('.agree-btn').closest('.modal-footer').addClass('hidden');
+        } else {
+            $('.agree-btn').closest('.modal-footer').removeClass('hidden');
+        }
     });
 </script>
 {!! Theme::asset()->container('footer')->usePath()->add('app', 'js/app.js') !!}

@@ -198,23 +198,17 @@
 	</div>	
 	@endif
 
-<div class="favourite-grid row">
-    <div class="col-sm-4 col-6">
-        <div class="img"></div>
-    </div>
-    <div class="col-sm-4 col-6">
-        <div class="img"></div>
-    </div>
-    <div class="col-sm-4 col-6">
-        <div class="img"></div>
-    </div>
-    <div class="col-sm-4 col-6">
-        <div class="img"></div>
-    </div>
-    <div class="col-sm-4 col-6">
-        <div class="img"></div>
-    </div>
-    <div class="col-sm-4 col-6">
-        <div class="img"></div>
-    </div>
-</div>
+    @if(isset($favouritePosts))
+        <div class="favourite-grid row">
+        @foreach($favouritePosts as $index => $post)
+            <div class="col-sm-4 col-6">
+                <div class="img">
+                        {!! Theme::partial('explore_posts',compact('post','timeline','next_page_url')) !!}
+                </div>
+            </div>
+            @if($index > 4)
+                @break
+            @endif
+        @endforeach
+        </div>
+    @endif

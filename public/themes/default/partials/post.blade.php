@@ -13,8 +13,6 @@ $main_description = $post->description;
   <div class="panel-heading no-bg">
     <div class="post-author">
 
-        {{--            Check if subscribed--}}
-{{--    @if(isset($user) == false || $user->followers->contains(Auth::user()->id) || $user->id == Auth::user()->id || $user->payment == NULL|| ($user->payment != NULL && $user->payment->price == 0))--}}
     @if(isset($user) == false || $user->followers->contains(Auth::user()->id) || $user->id == Auth::user()->id || $user->price == 0)
       <div class="post-options">
         <ul class="list-inline no-margin">
@@ -865,14 +863,6 @@ $main_description = $post->description;
   @if(isset($next_page_url))
   <a class="jscroll-next hidden" href="{{ $next_page_url }}">{{ trans('messages.get_more_posts') }}</a>
   @endif
-
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" />
-<script src="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js"></script>
-
-{{--  {!! Theme::asset()->container('footer')->usePath()->add('lightbox', 'js/lightbox.min.js') !!}--}}
-
-<!--<script src="../js/popcorn.min.js"></script>-->
-<!--<script src="../js/popcorn.capture.js"></script>-->
 
 <script type="text/javascript">
 

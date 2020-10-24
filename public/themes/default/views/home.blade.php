@@ -110,6 +110,8 @@
 			</div>
 		</div>
 
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" />
+<script src="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js"></script>
 <script type="text/javascript">
     $('.change-layout').click(function () {
         $('.timeline-default, .timeline-condensed-column, .sidebar-wrapper').toggle();

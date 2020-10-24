@@ -55,11 +55,14 @@ class RegisterController extends Controller
     /**
      * Get a validator for an incoming registration request.
      *
-     * @param array $data
+     * @param  array  $data
      *
+     * @param null $captcha
+     * @param bool $socialLogin
+     * 
      * @return \Illuminate\Contracts\Validation\Validator
      */
-    protected function validator(array $data, $captcha = null)
+    protected function validator(array $data, $captcha = null, $socialLogin = false)
     {
         $messages = [
             'no_admin' => 'The name admin is restricted for :attribute',
@@ -73,8 +76,13 @@ class RegisterController extends Controller
             'username'  => 'required|max:25|min:5|unique:timelines|no_admin',
             'password'  => 'required|min:6',
             'affiliate' => 'exists:timelines,username',
-            'tos'       => 'required'
         ];
+        
+        if (!$socialLogin) {
+            $rules = array_merge($rules, [
+                'tos'       => 'required',
+            ]);
+        }
 
         if ($captcha) {
             $messages = ['g-recaptcha-response.required' => trans('messages.captcha_required')];
@@ -208,9 +216,9 @@ class RegisterController extends Controller
     protected function registerUser(Request $request, $socialLogin = false)
     {
         if (Setting::get('captcha') == 'on' && !$socialLogin) {
-            $validator = $this->validator($request->all(), true);
+            $validator = $this->validator($request->all(), true, $socialLogin);
         } else {
-            $validator = $this->validator($request->all());
+            $validator = $this->validator($request->all(), null, $socialLogin);
         }
 
         if ($validator->fails()) {    

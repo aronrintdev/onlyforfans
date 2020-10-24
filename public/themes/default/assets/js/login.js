@@ -66,8 +66,9 @@ $(function () {
             } else {
 
                 $('.signup-errors').html('');
+                $('.signup-form ul[class^=signup-]').html('');
                 $.each(responseText.err_result, function(key, value) {
-                    $('.signup-errors').append('<li>'+ value[0] + '</li>');
+                    $('.signup-'+ key +'-error').html('<li>'+ value[0] + '</li>');
                 });
 
             }
