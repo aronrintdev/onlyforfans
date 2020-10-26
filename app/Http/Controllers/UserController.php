@@ -32,6 +32,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Redirector;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redirect;
@@ -585,6 +586,7 @@ class UserController extends AppBaseController
 
         $saved_users = Auth::user()->followers()->where('status', '=', 'approved')->with('tips')->get();
         $currentUser = Auth::user();
+        $bankAccountDetails = $currentUser->bankAccountDetails;
         $totalTip = 0;
         $totalPurchasedPostAmount = 0;
         $subscriptionAmount = 0;
@@ -654,7 +656,7 @@ class UserController extends AppBaseController
                 }
             }
         }
-        return $theme->scope('users/settings/addbank', compact('username', 'totalTip', 'totalPurchasedPostAmount', 'subscriptionAmount', 'totalSubscriptionPayout', 'totalTipsPayout'))->render();
+        return $theme->scope('users/settings/addbank', compact('username', 'totalTip', 'totalPurchasedPostAmount', 'subscriptionAmount', 'totalSubscriptionPayout', 'totalTipsPayout', 'bankAccountDetails'))->render();
     }
     
     public function earnings($username)
@@ -977,6 +979,14 @@ class UserController extends AppBaseController
         ], $messages);
     }
 
+    protected function bankAccountDetailsValidator(array $data) {
+        return \Illuminate\Support\Facades\Validator::make($data, [
+            'bank_name' => 'required',
+            'routing' => 'required',
+            'account' => 'required',
+        ]);
+    }
+
     public function saveUserBankDetails(Request $request) {
 
         $data = $request->all();
@@ -1002,6 +1012,37 @@ class UserController extends AppBaseController
         $payment_info->update($data);
 
         return redirect('/checkout/get-oauth-link');
+    }
+
+    /**
+     * @param Request $request
+     *
+     * @return RedirectResponse
+     */
+    public function saveBankAccountDetails(Request $request) {
+
+        $data = $request->all();
+        $validator = $this->bankAccountDetailsValidator($data);
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withInput($request->all())
+                ->withErrors($validator->errors());
+        }
+
+        $user = \Illuminate\Support\Facades\Auth::user();
+
+        //update user with bank details
+        $data = $request->all();
+
+        $bankAccountDetails = $user->bankAccountDetails;
+        
+        if ($bankAccountDetails) {
+            $bankAccountDetails->update(Arr::except($data, '_token')); 
+        } else {
+            $user->bankAccountDetails()->create(Arr::except($data, '_token')); 
+        }
+
+        return redirect()->back();
     }
 
     /**

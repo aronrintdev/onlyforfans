@@ -1763,8 +1763,10 @@ class TimelineController extends AppBaseController
 //                        ->where('active', 1);
 //                })->orWhere('user_id', $id)->where('active', 1)->latest()->paginate(Setting::get('items_page'));
 //            } else {
-                $posts = Post::Where('user_id', Auth::id())->Where('timeline_id', $timeline->id)->whereDate('created_at', '>=', $startDate)->where('active', 1)->orderBy('created_at', $order_by == 'desc' ? 'asc' : 'desc')->paginate(Setting::get('items_page'));
+                $posts = Post::Where('user_id', Auth::id())->Where('timeline_id', $timeline->id)->whereDate('created_at', '>=', $startDate)->where('active', 1)->orderBy('created_at', $order_by == 'desc' ? 'asc' : 'desc');
 
+                $postMedia = $posts->get();
+                $posts = $posts->paginate(Setting::get('items_page'));
 //            }
 
 //            $user_lists = UserListType::where(['user_id' => Auth::user()->id])->with('lists')->get();
@@ -1823,7 +1825,7 @@ class TimelineController extends AppBaseController
             return $theme->scope('timeline/public-posts',
                 compact('timeline', 'liked_post', 'user', 'posts', 'liked_pages', 'followRequests', 'joined_groups',
                     'own_pages', 'own_groups', 'follow_user_status', 'following_count', 'followers_count', 'follow_confirm', 'user_post',
-                    'timeline_post', 'joined_groups_count', 'next_page_url', 'user_events', 'guest_events', 'period', 'sort_by', 'order_by'))->render();
+                    'timeline_post', 'joined_groups_count', 'next_page_url', 'user_events', 'guest_events', 'period', 'sort_by', 'order_by', 'postMedia'))->render();
 
         }
         else {
@@ -1851,7 +1853,7 @@ class TimelineController extends AppBaseController
                 })->orWhere(function ($query) use ($timeline, $id){
                     $query->where('timeline_id', $timeline->id)
                     ->orWhere('user_id', $id);
-                })->whereDate('created_at', '>=', $startDate)->where('active', 1))->orderBy('created_at', $order_by == 'desc' ? 'asc' : 'desc')->paginate(Setting::get('items_page'));
+                })->whereDate('created_at', '>=', $startDate)->where('active', 1))->orderBy('created_at', $order_by == 'desc' ? 'asc' : 'desc');
 
                 $favouritePosts = Post::with('images')->has('images')
                     ->where('user_id', Auth::id())
@@ -1862,9 +1864,11 @@ class TimelineController extends AppBaseController
                 $posts = Post::Where('user_id', $id)->orWhere(function ($query) use ($timeline){
                     $query->where('timeline_id', $timeline->id);
 //                        ->orWhere('user_id', Auth::id());
-                })->whereDate('created_at', '>=', $startDate)->where('active', 1)->orderBy('created_at', $order_by == 'desc' ? 'asc' : 'desc')->paginate(Setting::get('items_page'));
+                })->whereDate('created_at', '>=', $startDate)->where('active', 1)->orderBy('created_at', $order_by == 'desc' ? 'asc' : 'desc');
             }
 
+            $postMedia = $posts->get();
+            $posts = $posts->paginate(Setting::get('items_page'));
             $user_lists = UserListType::where(['user_id' => Auth::user()->id])->with('lists')->get();
 
             if (!empty($user_lists)) {
@@ -1921,7 +1925,7 @@ class TimelineController extends AppBaseController
             return $theme->scope('timeline/posts',
                 compact('timeline', 'liked_post', 'user', 'posts', 'liked_pages', 'followRequests', 'joined_groups', 'own_pages',
                     'own_groups', 'follow_user_status', 'following_count', 'followers_count', 'follow_confirm', 'user_post', 'timeline_post',
-                    'joined_groups_count', 'next_page_url', 'user_events', 'guest_events', 'user_lists', 'period', 'sort_by', 'order_by', 'favouritePosts'))->render();
+                    'joined_groups_count', 'next_page_url', 'user_events', 'guest_events', 'user_lists', 'period', 'sort_by', 'order_by', 'favouritePosts', 'postMedia'))->render();
         
         }
     }

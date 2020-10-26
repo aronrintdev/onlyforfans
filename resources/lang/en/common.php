@@ -15,6 +15,7 @@ return [
 
     /* new */
     'add_bank' => 'Banking',
+    'bank_details' => 'Bank Account Details',
     'street_address' => 'STREET ADDRESS',
     'city' => 'CITY',
     'state_province' => 'STATE/PROVINCE',

@@ -21,6 +21,7 @@ return [
     'no_saved_posts'                => 'You haven\'t saved any posts yet.',
     'adult_content_confirm'         => 'YES, MY ACCOUNT WILL CONTAIN EXPLICIT OR ADULT CONTENT',
     'transaction_confirm'           => 'YES, I AM AT LEAST 18 YEARS OLD AND CONFIRM USE OF MY CARD FOR TRANSACTIONS',
+    'menu_message_bank_details'     => 'Add bank account details',
     /* end of new */
 
     'no_followers'              => 'No followers yet.',

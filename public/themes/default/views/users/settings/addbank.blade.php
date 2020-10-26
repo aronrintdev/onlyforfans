@@ -1,3 +1,12 @@
+<style>
+    #routing::-webkit-outer-spin-button,
+    #routing::-webkit-inner-spin-button,
+    #account::-webkit-outer-spin-button,
+    #account::-webkit-inner-spin-button{
+        -webkit-appearance: none;
+        margin: 0;
+    }
+</style>
 	<div class="container">
 		<div class="row">
 			<div class="col-md-4">
@@ -27,31 +36,40 @@
                         </div>
                         <div id="Details" class="tabcontent">
                             <div class="fans-form">
-                                <form  method="POST" action="{{ url('/'.$username.'/settings/save-bank-details') }}" class="bank-details">
+                                <form  method="POST" action="{{ url('/'.$username.'/settings/bankdetails') }}" class="bank-details">
                                     {{ csrf_field() }}
 
                                     <div class="row">
                                     	<div class="col-md-6">
-                                    		<fieldset class="form-group">
-                                    			<label for="bank-name">Bank Name</label>
-                                    			<input type="text" name="bank-name" id="bank-name" class="form-control" value="Bank Name">
-                                    		</fieldset>
+                                            <fieldset class="form-group required">
+                                                <label for="bank-name">Bank Name</label>
+                                                <input type="text" name="bank_name" id="bank-name" class="form-control" value="{{ $bankAccountDetails ? $bankAccountDetails->bank_name : '' }}" placeholder="Bank Name" required>
+                                                @if($errors->has('bank_name'))
+                                                    <label for="" class="text-danger">{{ $errors->first('bank_name') }}</label>
+                                                @endif
+                                            </fieldset>
                                     	</div>
                                     </div>
                                     <div class="row">
                                     	<div class="col-md-6">
-                                    		<fieldset class="form-group">
-                                    			<label for="routing">Routing Number</label>
-                                    			<input type="text" name="routing" id="routing" class="form-control" value="Routing #">
-                                    		</fieldset>
+                                            <fieldset class="form-group required">
+                                                <label for="routing">Routing Number</label>
+                                                <input type="number" name="routing" id="routing" class="form-control" value="{{ $bankAccountDetails ? $bankAccountDetails->routing : '' }}" placeholder="Routing Number" required>
+                                                @if($errors->has('routing'))
+                                                    <label for="" class="text-danger">{{ $errors->first('routing') }}</label>
+                                                @endif
+                                            </fieldset>
                                     	</div>
                                     </div>
                                     <div class="row">
                                     	<div class="col-md-6">
-                                    		<fieldset class="form-group">
-                                    			<label for="account">Account Number</label>
-                                    			<input type="text" name="account" id="account" class="form-control" value="Account #">
-                                    		</fieldset>
+                                            <fieldset class="form-group required">
+                                                <label for="account">Account Number</label>
+                                                <input type="number" name="account" id="account" class="form-control" value="{{ $bankAccountDetails ? $bankAccountDetails->account : '' }}" placeholder="Account Number" required>
+                                                @if($errors->has('account'))
+                                                    <label for="" class="text-danger">{{ $errors->first('account') }}</label>
+                                                @endif
+                                            </fieldset>
                                     	</div>
                                     </div>
                                     @if(Setting::get('custom_option1') != NULL || Setting::get('custom_option2') != NULL)

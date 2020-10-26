@@ -34,12 +34,12 @@
 
             @if (Auth::guest())
             <ul class="nav navbar-nav navbar-right">
-                <li class="logout">
-                    <a href="{{ url('/register') }}"><i class="fa fa-sign-in" aria-hidden="true"></i> {{ trans('common.join') }}</a>
-                </li>
-                <li class="logout">
-                    <a href="{{ url('/login') }}"><i class="fa fa-unlock" aria-hidden="true"></i> {{ trans('common.signin') }}</a>
-                </li>
+{{--                <li class="logout">--}}
+{{--                    <a href="{{ url('/register') }}"><i class="fa fa-sign-in" aria-hidden="true"></i> {{ trans('common.join') }}</a>--}}
+{{--                </li>--}}
+{{--                <li class="logout">--}}
+{{--                    <a href="{{ url('/login') }}"><i class="fa fa-unlock" aria-hidden="true"></i> {{ trans('common.signin') }}</a>--}}
+{{--                </li>--}}
                 @if (Config::get('app.env') == 'demo')
                     <li class="logout">
                         <a href="http://fans-rtl.laravelguru.com" target="_blank">{{ trans('common.rtl_version') }}</a>

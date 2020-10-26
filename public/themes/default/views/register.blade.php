@@ -3,14 +3,22 @@
         height: auto;
     }
     
-    .list-unstyled {
+    form .list-unstyled {
         margin: 0;
+    }
+    
+    .form-wrapper {
+        margin: auto;
+    }
+    
+    .d-flex {
+        display: flex;
     }
 </style>
 <div class="container">
 
-<div class="row tpadding-20">
-  <div class="col-md-6">
+<div class="row tpadding-20 d-flex">
+  <div class="col-md-6 col-sm-12 form-wrapper">
     <div class="panel panel-default">
       <div class="panel-body nopadding">
         <div class="login-head">{{ trans('common.create_account') }}

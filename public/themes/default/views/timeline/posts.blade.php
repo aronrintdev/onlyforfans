@@ -84,6 +84,67 @@
     .favourite-grid > div {
         padding: 0 7px;
     }
+    
+    .profile-posts .active {
+        animation: slideDown 0.5s forwards;
+        transform-origin: top center;
+    }
+    
+    @keyframes slideDown {
+        0% {
+            transform: scale(.9);
+            opacity: 0;
+        }
+        50% {
+            transform: scale(1.1);
+        }
+        100% {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
+    
+    .tabcontent .post-image-holder, .tabcontent .post-v-holder {
+        margin-bottom: 30px;
+    }
+    
+    .tabcontent .post-image-holder a, .tabcontent .post-v-holder a{
+        display: block;
+        height: 180px !important;
+        margin: 0;
+        max-height: 350px;
+        width: 100% !important;
+    }
+
+    .tabcontent .post-image-holder a img, .tabcontent .post-v-holder a source{
+        object-fit: cover !important;
+        height: 100% !important;
+        width: 100% !important;
+    }
+
+    .favourite-grid .post-v-holder a {
+        height: 100px !important;
+        display: block;
+        background: #000;
+        position: relative;
+    }
+
+    .favourite-grid .post-v-holder a:after {
+        content: "\f144";
+        display: inline-block;
+        font: normal normal normal 14px/1 FontAwesome;
+        font-size: 35px;
+        color: #fff;
+        text-rendering: auto;
+        position: absolute;
+        transform: translate(50%, -50%);
+        right: 50%;
+        top: 50%;
+    }
+    
+    .favourite-grid .post-v-holder a video {
+        display: none;
+    }
 </style>
 <div class="container profile-posts">
 	<div class="row">
@@ -183,43 +244,97 @@
                                     </li>                                    
 								</ul>
 							</div>
-						<div class="timeline-posts timeline-default">
-							@if(count($posts) > 0)
-								@foreach($posts as $post)
-                                    @if($post->type == \App\Post::PAID_TYPE)
-                                        @if($post->user->activeSubscribers->contains(Auth::user()->id)  || $post->user->id == Auth::user()->id)
-                                            {!! Theme::partial('post',compact('post','timeline','next_page_url', 'user')) !!}
+                            <div class="panel-body nopadding">
+                                <div class="tab">
+                                    <button class="tablinks active" onclick="openCity(event, 'All')">
+                                        Posts
+                                    </button>
+                                    <button class="tablinks" onclick="openCity(event, 'Active')">
+                                        Photos
+                                    </button>
+                                    <button class="tablinks" onclick="openCity(event, 'Expired')">
+                                        Video
+                                    </button>
+                                </div>
+                                <div id="All" class="tabcontent">
+                                    <div class="timeline-posts timeline-default">
+                                        @if(count($posts) > 0)
+                                            @foreach($posts as $post)
+                                                @if($post->type == \App\Post::PAID_TYPE)
+                                                    @if($post->user->activeSubscribers->contains(Auth::user()->id)  || $post->user->id == Auth::user()->id)
+                                                        {!! Theme::partial('post',compact('post','timeline','next_page_url', 'user')) !!}
+                                                    @endif
+                                                @else
+                                                    @if(canUserSeePost(Auth::id(), $post->user->id, $user->timeline->id) || $post->type == \App\Post::PRICE_TYPE)
+                                                        {!! Theme::partial('post',compact('post','timeline','next_page_url', 'user')) !!}
+                                                    @endif
+                                                @endif
+                                            @endforeach
+                                        @else
+                                            <p class="no-posts">{{ trans('messages.no_posts') }}</p>
                                         @endif
-                                    @else
-                                        @if(canUserSeePost(Auth::id(), $post->user->id, $user->timeline->id) || $post->type == \App\Post::PRICE_TYPE)
-                                        {!! Theme::partial('post',compact('post','timeline','next_page_url', 'user')) !!}
+                                    </div>
+                                    <?php
+                                    $twoColumn = true;
+                                    ?>
+                                    <div class="timeline-posts timeline-condensed-column row" style="display: none">
+                                        @if(count($posts) > 0)
+                                            @foreach($posts as $post)
+                                                @if($post->type == \App\Post::PAID_TYPE)
+                                                    @if($post->user->activeSubscribers->contains(Auth::user()->id)  || $post->user->id == Auth::user()->id)
+                                                        {!! Theme::partial('post_condensed_column',compact('post','timeline','next_page_url', 'user','twoColumn')) !!}
+                                                    @endif
+                                                @else
+                                                    @if(canUserSeePost(Auth::id(), $post->user->id, $user->timeline->id) || $post->type == \App\Post::PRICE_TYPE)
+                                                        {!! Theme::partial('post_condensed_column',compact('post','timeline','next_page_url', 'user','twoColumn')) !!}
+                                                    @endif
+                                                @endif
+                                            @endforeach
+                                        @else
+                                            <p class="no-posts">{{ trans('messages.no_posts') }}</p>
                                         @endif
+                                    </div>
+                                </div>
+                                <div id="Active" class="tabcontent">
+                                    @if(count($postMedia) > 0)
+                                        @foreach($postMedia as $post)
+                                            @if(count($post->images()->get()) > 0 && $post->images()->get()->first()->type=='image') 
+                                                <div class="timeline-photos">
+                                                    @if($post->type == \App\Post::PAID_TYPE)
+                                                        @if($post->user->activeSubscribers->contains(Auth::user()->id)  || $post->user->id == Auth::user()->id)
+                                                            {!! Theme::partial('post_media',compact('post','timeline','next_page_url', 'user')) !!}
+                                                        @endif
+                                                    @else
+                                                        @if(canUserSeePost(Auth::id(), $post->user->id, $user->timeline->id) || $post->type == \App\Post::PRICE_TYPE)
+                                                            {!! Theme::partial('post_media',compact('post','timeline','next_page_url', 'user')) !!}
+                                                        @endif
+                                                    @endif
+                                                </div>
+                                            @endif
+                                        @endforeach
                                     @endif
-								@endforeach
-							@else
-								<p class="no-posts">{{ trans('messages.no_posts') }}</p>
-							@endif
-						</div>
-                        <?php
-                             $twoColumn = true;   
-                        ?>
-						<div class="timeline-posts timeline-condensed-column row" style="display: none">
-							@if(count($posts) > 0)
-								@foreach($posts as $post)
-                                    @if($post->type == \App\Post::PAID_TYPE)
-                                        @if($post->user->activeSubscribers->contains(Auth::user()->id)  || $post->user->id == Auth::user()->id)
-                                            {!! Theme::partial('post_condensed_column',compact('post','timeline','next_page_url', 'user','twoColumn')) !!}
-                                        @endif
+                                </div>
+                                <div id="Expired" class="tabcontent">
+                                    @if(count($postMedia) > 0)
+                                        @foreach($postMedia as $post)
+                                            @if(count($post->images()->get()) > 0 && $post->images()->get()->first()->type=='video')
+                                            @if($post->type == \App\Post::PAID_TYPE)
+                                                @if($post->user->activeSubscribers->contains(Auth::user()->id)  || $post->user->id == Auth::user()->id)
+                                                    {!! Theme::partial('post_media',compact('post','timeline','next_page_url', 'user')) !!}
+                                                @endif
+                                            @else
+                                                @if(canUserSeePost(Auth::id(), $post->user->id, $user->timeline->id) || $post->type == \App\Post::PRICE_TYPE)
+                                                    {!! Theme::partial('post_media',compact('post','timeline','next_page_url', 'user')) !!}
+                                                @endif
+                                            @endif
+                                            @endif
+                                        @endforeach
                                     @else
-                                        @if(canUserSeePost(Auth::id(), $post->user->id, $user->timeline->id) || $post->type == \App\Post::PRICE_TYPE)
-                                        {!! Theme::partial('post_condensed_column',compact('post','timeline','next_page_url', 'user','twoColumn')) !!}
-                                        @endif
+                                        <p class="no-posts">{{ trans('messages.no_posts') }}</p>
                                     @endif
-								@endforeach
-							@else
-								<p class="no-posts">{{ trans('messages.no_posts') }}</p>
-							@endif
-						</div>
+                                </div>
+                            </div>
+						
 					</div><!-- /col-md-8 -->
 				</div><!-- /main-content -->
 			</div><!-- /row -->
@@ -248,4 +363,29 @@
             });
         }
     });
+
+    $("#All").slideDown();
+
+    function openCity(evt, cityName) {
+        // Declare all variables
+        var i, tabcontent, tablinks;
+
+        // Get all elements with class="tabcontent" and hide them
+        tabcontent = document.getElementsByClassName("tabcontent");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+            tabcontent[i].classList.remove('active');
+        }
+
+        // Get all elements with class="tablinks" and remove the class "active"
+        tablinks = document.getElementsByClassName("tablinks");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" active", "");
+        }
+
+        // Show the current tab, and add an "active" class to the button that opened the tab
+        document.getElementById(cityName).style.display = "block";
+        document.getElementById(cityName).classList.add('active');
+        evt.currentTarget.className += " active";
+    }
 </script>

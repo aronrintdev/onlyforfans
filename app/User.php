@@ -7,6 +7,7 @@ use Cmgmyr\Messenger\Traits\Messagable;
 use DB;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Collection;
@@ -627,5 +628,13 @@ class User extends Authenticatable
     public function usersReceivedTips()
     {
         return $this->belongsToMany('App\User', 'users_tips', 'tip_to', 'tip_from')->withPivot('amount');
+    }
+
+    /**
+     * @return HasOne
+     */
+    public function bankAccountDetails()
+    {
+        return $this->hasOne('App\BankAccountDetails', 'user_id');
     }
 }
