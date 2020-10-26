@@ -35,6 +35,9 @@ return  [
   'subject'                   => 'Subject',
   'submit'                    => 'Submit',
   'email_verify'              => 'Please verify your Email before logging in',
-  'subscribe_price'           => 'Subscription Price',
+  'subscribe_price_month'     => 'Subscription Price (per month)',
+  'subscribe_price_3_month'     => 'Subscription Price (per 3 months)',
+  'subscribe_price_6_month'     => 'Subscription Price (per 6 months)',
+  'subscribe_price_year'     => 'Subscription Price (per year)',
   'follow_for_free'           => 'Follow For Free'
 ];

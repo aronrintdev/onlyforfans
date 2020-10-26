@@ -1,28 +1,3 @@
-<!-- <div class="panel panel-default">
-	<div class="panel-body nopadding">
-		<div class="mini-profile">
-			<div class="background">
-		        <div class="widget-bg">
-		            <img src=" @if(Auth::user()->cover) {{ url('user/cover/'.Auth::user()->cover) }} @else {{ url('user/cover/default-cover-user.png') }} @endif" alt="{{ Auth::user()->name }}" title="{{ Auth::user()->name }}">
-		        </div>
-				<div class="avatar-img">
-					<img src="{{ Auth::user()->avatar }}" alt="{{ Auth::user()->name }}" title="{{ Auth::user()->name }}">
-				</div>
-			</div>
-		    <div class="avatar-profile">
-		        <div class="avatar-details">
-		            <h2 class="avatar-name"><a href="{{ url(Auth::user()->username) }}">{{ Auth::user()->name }}</h2></a>
-		            <h4 class="avatar-mail">
-		            	<a href="{{ url(Auth::user()->username) }}" >
-		            		{{ '@'.Auth::user()->username }}
-		            	</a>
-		            </h4>
-		        </div>
-		    </div>
-		</div>
-	</div>
-</div>
--->
 <div class="panel-default list-group list-group-navigation fans-group">
 	<a href="{{ url('/'.Auth::user()->username.'/settings/general') }}" class="list-group-item">
 		<div class="list-icon fans-icon {{ Request::segment(3) == 'general' ? 'active' : '' }}">
@@ -84,8 +59,8 @@
 		</div>
 		<div class="clearfix"></div>
 	</a>
-	<a href="{{ url('/'.Auth::user()->username.'/settings/addbank') }}" class="list-group-item">
-		<div class="list-icon fans-icon {{ Request::segment(3) == 'addbank' ? 'active' : '' }}">
+	<a href="{{ url('/'.Auth::user()->username.'/settings/earnings') }}" class="list-group-item">
+		<div class="list-icon fans-icon {{ Request::segment(3) == 'earnings' ? 'active' : '' }}">
 			<i class="fa fa-dollar"></i>
 		</div>
 		<div class="list-text">
@@ -108,18 +83,6 @@
 		</div>
 		<div class="clearfix"></div>
 	</a>
-{{--	<a href="{{ url('/'.Auth::user()->username.'/settings/wallpaper') }}" class="list-group-item">--}}
-{{--		<div class="list-icon fans-icon {{ Request::segment(3) == 'wallpaper' ? 'active' : '' }}">--}}
-{{--			<i class="fa fa-image"></i>--}}
-{{--		</div>--}}
-{{--		<div class="list-text">--}}
-{{--			{{ trans('common.wallpaper_settings') }}--}}
-{{--			<div class="text-muted">--}}
-{{--				{{ trans('messages.menu_message_wallpaper') }}--}}
-{{--			</div>--}}
-{{--		</div>--}}
-{{--		<div class="clearfix"></div>--}}
-{{--	</a>--}}
 	<a href="{{ url('/'.Auth::user()->username.'/settings/login_sessions') }}" class="list-group-item">
 		<div class="list-icon fans-icon {{ Request::segment(3) == 'login_sessions' ? 'active' : '' }}">
 			<i class="fa fa-user-plus"></i>
@@ -146,7 +109,7 @@
 		<div class="clearfix"></div>
 	</a>
 	<a href="{{ url('/'.Auth::user()->username.'/settings/deactivate') }}" class="list-group-item">
-		<div class="list-icon fans-icon {{ Request::segment(3) == 'deactive' ? 'active' : '' }}">
+		<div class="list-icon fans-icon {{ Request::segment(3) == 'deactivate' ? 'active' : '' }}">
 			<i class="fa fa-trash"></i>
 		</div>
 		<div class="list-text">

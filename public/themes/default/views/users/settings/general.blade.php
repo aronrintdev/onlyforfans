@@ -170,12 +170,12 @@
 
                                     <div class="row">
                                         <div class="col-md-6">
-                                            <fieldset class="form-group {{ $errors->has('subscribe_price') ? ' has-error' : '' }}">
-                                                {{ Form::label('subscribe_price', trans('auth.subscribe_price')) }}
-                                                {{ Form::text('subscribe_price', Auth::user()->price, ['class' => 'form-control', 'placeholder' => '$0.00']) }}
-                                                @if ($errors->has('subscribe_price'))
+                                            <fieldset class="form-group {{ $errors->has('subscribe_price_month') ? ' has-error' : '' }}">
+                                                {{ Form::label('subscribe_price_month', trans('auth.subscribe_price_month')) }}
+                                                {{ Form::text('subscribe_price_month', Auth::user()->price, ['class' => 'form-control', 'placeholder' => '$0.00']) }}
+                                                @if ($errors->has('subscribe_price_month'))
                                                     <span class="help-block">
-												{{ $errors->first('subscribe_price') }}
+												{{ $errors->first('subscribe_price_month') }}
 											</span>
                                                 @endif
                                             </fieldset>
@@ -191,9 +191,40 @@
                                     </div>
                                     <div class="row">
                                         <div class="col-md-6">
-                                            <fieldset class="form-group">
-                                                <label>Subscription Bundles</label>
-                                                <p><input style="text-transform: unset !important;" type="button" class="btn btn-success" value="Add a Bundle"></p>
+                                            <fieldset class="form-group {{ $errors->has('subscribe_price_3_month') ? ' has-error' : '' }}">
+                                                {{ Form::label('subscribe_price_3_month', trans('auth.subscribe_price_3_month')) }}
+                                                {{ Form::text('subscribe_price_3_month', Auth::user()->price, ['class' => 'form-control', 'placeholder' => '$0.00']) }}
+                                                @if ($errors->has('subscribe_price_3_month'))
+                                                    <span class="help-block">
+												{{ $errors->first('subscribe_price_3_month') }}
+											</span>
+                                                @endif
+                                            </fieldset>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <fieldset class="form-group {{ $errors->has('subscribe_price_6_month') ? ' has-error' : '' }}">
+                                                {{ Form::label('subscribe_price_6_month', trans('auth.subscribe_price_6_month')) }}
+                                                {{ Form::text('subscribe_price_6_month', Auth::user()->price, ['class' => 'form-control', 'placeholder' => '$0.00']) }}
+                                                @if ($errors->has('subscribe_price_6_month'))
+                                                    <span class="help-block">
+												{{ $errors->first('subscribe_price_6_month') }}
+											</span>
+                                                @endif
+                                            </fieldset>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <fieldset class="form-group {{ $errors->has('subscribe_price_year') ? ' has-error' : '' }}">
+                                                {{ Form::label('subscribe_price_year', trans('auth.subscribe_price_year')) }}
+                                                {{ Form::text('subscribe_price_year', Auth::user()->price, ['class' => 'form-control', 'placeholder' => '$0.00']) }}
+                                                @if ($errors->has('subscribe_price_year'))
+                                                    <span class="help-block">
+												{{ $errors->first('subscribe_price_year') }}
+											</span>
+                                                @endif
                                             </fieldset>
                                         </div>
                                     </div>

@@ -25,47 +25,50 @@
 							</div>
 						</div>
 						
-					<div class="row">
-						<div class="col-md-6">
-						    <span>User:</span>
-						</div>
-						<div class="col-md-6">
-						    <span>Earnings:</span>
-						</div>
-					</div>
-							<ul class="list-group affliate-followers">
-								@if(count($referrals) > 0)
-								@foreach($referrals as $referral)
-								<li class="list-group-item">
-									<div class="col-md-6 connect-link pull-left">
-										<a href="{{ url('/'.$referral->username) }}">
-											<img src="{{ $referral->avatar }}" alt="{{ $referral->name }}" title="{{ $referral->name }}">
-											<span class="name">{{ $referral->name }}</span>
-										</a>
-									</div>
-									<div class="col-md-6">
-									    <span class="dollar-amount">$0.00</span>
-									</div>
-									<!--@if(!Auth::user()->following->contains($referral->id))-->
-									<!--<div class="pull-right"><a href="#" class="btn btn-to-follow btn-default follow-user follow" data-timeline-id="{{ $referral->timeline_id }}"><i class="fa fa-heart"></i> {{ trans('common.follow') }} </a></div>-->
-
-									<!--<div class="pull-right hidden"><a href="#" class="btn follow-user btn-success unfollow " data-timeline-id="{{ $referral->timeline_id }}"><i class="fa fa-check"></i> {{ trans('common.following') }}</a></div>-->
-									<!--@else-->
-									<!--<div class="pull-right hidden"><a href="#" class="btn btn-to-follow follow-user btn-default follow " data-timeline-id="{{ $referral->timeline_id }}"><i class="fa fa-heart"></i> {{ trans('common.follow') }}</a></div>-->
-									<!--<div class="pull-right"><a href="#" class="btn follow-user btn-success unfollow" data-timeline-id="{{ $referral->timeline_id }}"><i class="fa fa-check"></i> {{ trans('common.following') }}</a></div>-->
-									<!--@endif-->
-									<div class="clearfix"></div>
-								</li>
-								@endforeach
-								@else
-								<div class="alert alert-warning">{{ trans('messages.no_affliates') }}</div>
-								@endif
-								<div class="pagination">
-									@if($referrals != NULL)
-									{{ $referrals->render() }}
-									@endif	
-								</div>
-							</ul>
+					<div class="panel-body">
+					    <div class="table-responsive manage-table">
+					        <table class="table apps-table fans">
+                                <thead>
+                                    <tr>
+                                        <th>User:</th>
+                                        <th>Earnings:</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+        								@if(count($referrals) > 0)
+        								@foreach($referrals as $referral)
+        								<td style="padding: 5px">
+        									<div class="connect-link pull-left">
+        										<a href="{{ url('/'.$referral->username) }}">
+        											<img src="{{ $referral->avatar }}" alt="{{ $referral->name }}" title="{{ $referral->name }}">
+        											<span class="name">{{ $referral->name }}</span>
+        										</a>
+        									</div>
+        								</td>
+        								<td style="padding: 5px">
+    								        <span class="dollar-amount">$0.00</span>
+        								</td>
+    									<!--@if(!Auth::user()->following->contains($referral->id))-->
+    									<!--<div class="pull-right"><a href="#" class="btn btn-to-follow btn-default follow-user follow" data-timeline-id="{{ $referral->timeline_id }}"><i class="fa fa-heart"></i> {{ trans('common.follow') }} </a></div>-->
+    
+    									<!--<div class="pull-right hidden"><a href="#" class="btn follow-user btn-success unfollow " data-timeline-id="{{ $referral->timeline_id }}"><i class="fa fa-check"></i> {{ trans('common.following') }}</a></div>-->
+    									<!--@else-->
+    									<!--<div class="pull-right hidden"><a href="#" class="btn btn-to-follow follow-user btn-default follow " data-timeline-id="{{ $referral->timeline_id }}"><i class="fa fa-heart"></i> {{ trans('common.follow') }}</a></div>-->
+    									<!--<div class="pull-right"><a href="#" class="btn follow-user btn-success unfollow" data-timeline-id="{{ $referral->timeline_id }}"><i class="fa fa-check"></i> {{ trans('common.following') }}</a></div>-->
+    									<!--@endif-->
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+						@endforeach
+						@else
+						<div class="alert alert-warning">{{ trans('messages.no_affliates') }}</div>
+						@endif
+						<div class="pagination">
+							@if($referrals != NULL)
+							{{ $referrals->render() }}
+							@endif	
 						</div>
 					</div>
 				</div>

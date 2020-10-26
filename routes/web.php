@@ -383,6 +383,9 @@ Route::group(['prefix' => '/{username}/settings', 'middleware' => ['auth', 'edit
     Route::get('/addbank', 'UserController@addBank');
     Route::post('/addbank', 'UserController@addBank');
     
+    Route::get('/earnings', 'UserController@earnings');
+    Route::post('/earnings', 'UserController@earnings');
+    
     Route::get('/addpayment', 'UserController@addPayment');
     Route::post('/addpayment', 'UserController@addPayment');
 

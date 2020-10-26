@@ -21,10 +21,9 @@
 		{{--		@if(count($timelines) > 0)--}}
 		@if(count($users) > 0)
 			<div class="table-responsive manage-table">
-				<table class="table existing-products-table fans">
+				<table class="table fans">
 					<thead>
 					<tr>
-						<th>&nbsp;</th>
 						<th>{{ trans('admin.id') }}</th>
 						<th>{{ trans('common.name') }}</th>
 						<th>{{ trans('common.browser') }}</th>
@@ -32,22 +31,19 @@
 						<th>{{ trans('common.machine_name') }}</th>
 						<!--<th>Location</th>-->
 						<th>{{ trans('common.date') }}</th>
-						<th>&nbsp;</th>
 					</tr>
 					</thead>
 					<tbody>
 					@foreach($users as $user)
-						<tr>
-							<td>&nbsp;</td>
-							<td>{{ $user->id }}</td>
-							<td>{{ $user->user_name}}</td>
-							<td>{{ $user->browser }}</td>
-							<td>{{ $user->os }}</td>
-							<td>{{ $user->machine_name }}</td>
-							<!--<td>{{ $user->location }}</td>-->
-							<td>{{ $user->created_at }}</td>
-							<td>&nbsp;</td>
-						</tr>
+					<tr>
+						<td>{{ $user->id }}</td>
+						<td>{{ $user->user_name}}</td>
+						<td>{{ $user->browser }}</td>
+						<td>{{ $user->os }}</td>
+						<td>{{ $user->machine_name }}</td>
+						<!--<td>{{ $user->location }}</td>-->
+						<td>{{ $user->created_at }}</td>
+					</tr>
 					@endforeach
 					</tbody>
 				</table>

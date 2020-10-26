@@ -1,5 +1,3 @@
-<!-- main-section -->
-		<!-- <div class="main-content"> -->
 			<div class="container">
 				<div class="row">
 					<div class="col-md-4">
@@ -16,7 +14,7 @@
 								</h3>
 							</div>
 							<div class="panel-body no-padding">
-								<div class="accout-deactivate">
+								<div class="panel-body accout-deactivate">
 									<img src="{{  Theme::asset()->url('images/delete-img.png') }}" alt="images">
 									<div class="delete-text">
 										{{ trans('messages.confirm_deactivate_question') }}
@@ -28,11 +26,7 @@
 									</form>
 								</div>
 							</div>
-						<!--ending first panel-->
-						
-						
 						</div>
 					</div>
 				</div>
 			</div>
-		<!-- </div> -->

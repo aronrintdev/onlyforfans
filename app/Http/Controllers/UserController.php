@@ -656,6 +656,14 @@ class UserController extends AppBaseController
         }
         return $theme->scope('users/settings/addbank', compact('username', 'totalTip', 'totalPurchasedPostAmount', 'subscriptionAmount', 'totalSubscriptionPayout', 'totalTipsPayout'))->render();
     }
+    
+    public function earnings($username)
+    {
+        $theme = Theme::uses(Setting::get('current_theme', 'default'))->layout('default');
+        $theme->setTitle(trans('common.general_settings').' '.Setting::get('title_seperator').' '.Setting::get('site_title').' '.Setting::get('title_seperator').' '.Setting::get('site_tagline'));
+
+        return $theme->scope('users/settings/earnings', compact('username'))->render();
+    }
 
     public function addPayment($username)
     {

@@ -10593,7 +10593,7 @@ tbody.collapse.in {
 .dropdown-menu {
     position: absolute;
     top: 100%;
-    left: 0;
+    left: -150px;
     z-index: 1000;
     display: none;
     float: left;
@@ -12227,10 +12227,10 @@ a.thumbnail.active {
     background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent);
 }
 .media {
-    margin-top: 15px;
+    margin-top: -10px;
 }
 .media:first-child {
-    margin-top: 0;
+    margin-top: -15px;
 }
 .media,
 .media-body {
@@ -21686,21 +21686,21 @@ textarea.form-control {
     float: right;
     margin-right: 10px;
 }
-.table > thead > tr > th:first-child {
+/* .table > thead > tr > th:first-child {
     padding-left: 20px;
-}
+} */
 .table > tbody > tr > td {
     color: #4a5568;
-    font-weight: 600;
+    /* font-weight: 600; */
     vertical-align: middle;
     border-bottom: 1px solid #E6EAEE;
 }
 .table > tbody > tr > td .text-muted {
     font-weight: 400;
 }
-.table > tbody > tr > td:first-child {
+/* .table > tbody > tr > td:first-child {
     padding-left: 20px;
-}
+} */
 .table-heading {
     font-family: 'Open Sans', sans-serif;
     font-size: 24px;
@@ -27846,6 +27846,10 @@ placeholder .darksharing-modal .modal-body .sharing-details .control-group .sele
     font-size: 16px;
     color: #7F8FA4;
 }
+.locked-content {
+    background: url('https://fansplatform.mjmdesign.co/user/gallery/locked.png') center center no-repeat;
+    background-size: cover;
+}
 .login-block {
     width: 450px;
     margin: 0px auto;
@@ -28859,15 +28863,15 @@ html {
 .table.apps-table {
     margin-bottom: 0px;
 }
-.table.apps-table thead tr th:first-child,
+/*.table.apps-table thead tr th:first-child,
 .table.apps-table tbody tr th:first-child,
 .table.apps-table thead tr td:first-child,
 .table.apps-table tbody tr td:first-child {
     padding-left: 30px;
-}
-.table.apps-table tbody td {
+}*/
+/* .table.apps-table tbody td {
     text-transform: capitalize;
-}
+} */
 .table.apps-table tbody td img {
     width: 58px;
     height: 58px;
@@ -31698,6 +31702,7 @@ html {
 .accout-deactivate {
     position: relative;
     text-align: center;
+    margin: 30px;
 }
 .accout-deactivate i {
     color: rgba(231, 104, 118, 0.07);
@@ -32255,7 +32260,7 @@ html {
     min-height: 30px;
     max-width: 360px;
     border-color: #E6EAEE;
-    border-radius: 0px 10px 10px 0px;
+    border-radius: 0px 25px 25px 0px;
     border-left-width: 0px;
     padding-top: 5px;
     padding-left: 8px;
@@ -33068,7 +33073,8 @@ html {
     margin: 10px 0 0 0;
 }
 .panel-post .panel-body .actions-count li {
-  padding-left: 0;
+  padding-left: 15px;
+  padding-bottom: 15px;
 }
 .panel-post .panel-body .actions-count li:first-child a {
   margin-right: 5px;
@@ -33161,6 +33167,14 @@ html {
     font-size: 14px;
     color: #859AB5;
     text-transform: capitalize;
+}
+@media (max-width: 390px) {
+    .panel-post .panel-footer.fans .footer-list li a {
+        font-size: 10px;
+    }
+    .panel-post .panel-footer.fans .footer-list li a i {
+        font-size: 14px;
+    }
 }
 .panel-post .panel-footer.fans .footer-list li a i {
     font-size: 16px;

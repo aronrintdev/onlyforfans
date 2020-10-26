@@ -1,5 +1,3 @@
-<!-- main-section -->
-<!-- <div class="main-content"> -->
 	<div class="container">
 		<div class="row">
 			<div class="col-md-4">
@@ -17,17 +15,109 @@
 					</div>
 					<div class="panel-body nopadding">
                         <div class="tab">
-                            <button class="tablinks active" onclick="openCity(event, 'All')">
-                                Banking Details
+                            <button class="tablinks active" onclick="openCity(event, 'Details')">
+                                Account Details
                             </button>
-                            <button class="tablinks" onclick="openCity(event, 'Active')">
-                                Earnings
-                            </button>
-                            <button class="tablinks" onclick="openCity(event, 'Expired')">
+                            <button class="tablinks" onclick="openCity(event, 'Payouts')">
                                 Payouts
                             </button>
+                            <button class="tablinks" onclick="openCity(event, 'Verified')">
+                                Get Verified
+                            </button>
                         </div>
-                        <div id="All" class="tabcontent">
+                        <div id="Details" class="tabcontent">
+                            <div class="fans-form">
+                                <form  method="POST" action="{{ url('/'.$username.'/settings/save-bank-details') }}" class="bank-details">
+                                    {{ csrf_field() }}
+
+                                    <div class="row">
+                                    	<div class="col-md-6">
+                                    		<fieldset class="form-group">
+                                    			<label for="bank-name">Bank Name</label>
+                                    			<input type="text" name="bank-name" id="bank-name" class="form-control" value="Bank Name">
+                                    		</fieldset>
+                                    	</div>
+                                    </div>
+                                    <div class="row">
+                                    	<div class="col-md-6">
+                                    		<fieldset class="form-group">
+                                    			<label for="routing">Routing Number</label>
+                                    			<input type="text" name="routing" id="routing" class="form-control" value="Routing #">
+                                    		</fieldset>
+                                    	</div>
+                                    </div>
+                                    <div class="row">
+                                    	<div class="col-md-6">
+                                    		<fieldset class="form-group">
+                                    			<label for="account">Account Number</label>
+                                    			<input type="text" name="account" id="account" class="form-control" value="Account #">
+                                    		</fieldset>
+                                    	</div>
+                                    </div>
+                                    @if(Setting::get('custom_option1') != NULL || Setting::get('custom_option2') != NULL)
+                                        <div class="row">
+                                            @if(Setting::get('custom_option1') != NULL)
+                                                <div class="col-md-6">
+                                                    <fieldset class="form-group">
+                                                        {{ Form::label('custom_option1', Setting::get('custom_option1')) }}
+                                                        {{ Form::text('custom_option1', Auth::user()->custom_option1, ['class' => 'form-control']) }}
+                                                    </fieldset>
+                                                </div>
+                                            @endif
+
+                                            @if(Setting::get('custom_option2') != NULL)
+                                                <div class="col-md-6">
+                                                    <fieldset class="form-group">
+                                                        {{ Form::label('custom_option2', Setting::get('custom_option2')) }}
+                                                        {{ Form::text('custom_option2', Auth::user()->custom_option2, ['class' => 'form-control']) }}
+                                                    </fieldset>
+                                                </div>
+                                            @endif
+                                        </div>
+                                    @endif
+                                    @if(Setting::get('custom_option3') != NULL || Setting::get('custom_option4') != NULL)
+                                        <div class="row">
+                                            @if(Setting::get('custom_option3') != NULL)
+                                                <div class="col-md-6">
+                                                    <fieldset class="form-group">
+                                                        {{ Form::label('custom_option3', Setting::get('custom_option3')) }}
+                                                        {{ Form::text('custom_option3', Auth::user()->custom_option3, ['class' => 'form-control']) }}
+                                                    </fieldset>
+                                                </div>
+                                            @endif
+
+                                            @if(Setting::get('custom_option4') != NULL)
+                                                <div class="col-md-6">
+                                                    <fieldset class="form-group">
+                                                        {{ Form::label('custom_option4', Setting::get('custom_option4')) }}
+                                                        {{ Form::text('custom_option4', Auth::user()->custom_option4, ['class' => 'form-control']) }}
+                                                    </fieldset>
+                                                </div>
+                                            @endif
+                                        </div>
+                                    @endif
+                                    <div class="pull-right">
+                                        {{ Form::submit(trans('common.save_changes'), ['class' => 'btn btn-success oauth-link']) }}
+                                    </div>
+                                    <div class="clearfix"></div>
+                                </form>
+                            </div>
+                        </div>
+                        <div id="Payouts" class="tabcontent">
+                            <div class="fans-form">
+                                <table class="table apps-table fans">
+                                    <tr>
+                                        <td style="padding: 5px"><label>Gross Tips: </label></td>
+                                        <td style="padding: 5px">${{ number_format($totalTip, 2) }} <em>(Received)</em></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 5px"><label>Gross Subscriptions: </label></td>
+                                        <td style="padding: 5px">${{ number_format($subscriptionAmount, 2) }} <em>(Received)</em></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                        <div id="Verified" class="tabcontent">
                             <div class="fans-form">
                                 <form  method="POST" action="{{ url('/'.$username.'/settings/save-bank-details') }}" class=".bank-details">
                                     {{ csrf_field() }}
@@ -44,38 +134,6 @@
                                             </fieldset>
                                         </div>
                                     </div>
-                                    <!-- <div class="row">
-                                        <div class="col-md-6">
-                                            <fieldset class="form-group required {{ $errors->has('gender') ? ' has-error' : '' }}">
-                                                {{ Form::label('gender', trans('common.gender')) }}
-                                                {{ Form::select('gender', array('male' => trans('common.male'), 'female' => trans('common.female'), 'other' => trans('common.none')), Auth::user()->gender, array('class' => 'form-control')) }}
-                                            </fieldset>
-                                            @if ($errors->has('gender'))
-                                                <span class="help-block">
-												{{ $errors->first('gender') }}
-											</span>
-                                            @endif
-                                        </div>
-                                        <div class="col-md-6">
-                                            <fieldset class="form-group required {{ $errors->has('birthday') ? ' has-error' : '' }}">
-                                                {{ Form::label('birthday', trans('common.birthday')) }}
-                                                <div class="input-group date datepicker">
-												<span class="input-group-addon addon-left calendar-addon">
-													<span class="fa fa-calendar"></span>
-												</span>
-                                                    {{ Form::text('birthday', Auth::user()->birthday, ['class' => 'form-control', 'id' => 'datepicker1']) }}
-                                                    <span class="input-group-addon addon-right angle-addon">
-													<span class="fa fa-angle-down"></span>
-												</span>
-                                                </div>
-                                            </fieldset>
-                                            @if ($errors->has('birthday'))
-                                                <span class="help-block">
-												{{ $errors->first('birthday') }}
-											</span>
-                                            @endif
-                                        </div>
-                                    </div> -->
                                     <div class="row">
                                         <div class="col-md-6">
                                             <fieldset class="form-group required {{ $errors->has('country') ? ' has-error' : '' }}">
@@ -138,32 +196,8 @@
                                         </div>
                                     </div>
                                     <hr>
-                                    <div class="row">
-                                    	<div class="col-md-6">
-                                    		<fieldset class="form-group">
-                                    			<label for="bank-name">Bank Name</label>
-                                    			<input type="text" name="bank-name" id="bank-name" class="form-control" value="Bank Name">
-                                    		</fieldset>
-                                    	</div>
-                                    </div>
-                                    <div class="row">
-                                    	<div class="col-md-6">
-                                    		<fieldset class="form-group">
-                                    			<label for="routing">Routing Number</label>
-                                    			<input type="text" name="routing" id="routing" class="form-control" value="Routing #">
-                                    		</fieldset>
-                                    	</div>
-                                    </div>
-                                    <div class="row">
-                                    	<div class="col-md-6">
-                                    		<fieldset class="form-group">
-                                    			<label for="account">Account Number</label>
-                                    			<input type="text" name="account" id="account" class="form-control" value="Account #">
-                                    		</fieldset>
-                                    	</div>
-                                    </div>
 
-                                    <!-- <div class="row">
+                                    <div class="row">
                                     	<div class="col-md-6">
                                     		<fieldset class="form-group">
                                     			{{ Form::label('document', trans('Document Type')) }}
@@ -171,7 +205,6 @@
                                     		</fieldset>
                                     	</div>
                                     </div>
-                                    
                                     <div class="row">
                                     	<div class="col-md-6">
                                     		<fieldset class="form-group">
@@ -188,7 +221,6 @@
                                     		</fieldset>
                                     	</div>
                                     </div>
-                                    
                                     <div class="row">
                                         <div class="col-md-10">
                                             <fieldset class="form-group {{ $errors->has('sell_content_confirm') ? ' has-error' : '' }}">
@@ -201,53 +233,7 @@
 											</span>
                                             @endif
                                         </div>
-                                    </div> -->
-
-                                    @if(Setting::get('custom_option1') != NULL || Setting::get('custom_option2') != NULL)
-                                        <div class="row">
-                                            @if(Setting::get('custom_option1') != NULL)
-                                                <div class="col-md-6">
-                                                    <fieldset class="form-group">
-                                                        {{ Form::label('custom_option1', Setting::get('custom_option1')) }}
-                                                        {{ Form::text('custom_option1', Auth::user()->custom_option1, ['class' => 'form-control']) }}
-                                                    </fieldset>
-                                                </div>
-                                            @endif
-
-                                            @if(Setting::get('custom_option2') != NULL)
-                                                <div class="col-md-6">
-                                                    <fieldset class="form-group">
-                                                        {{ Form::label('custom_option2', Setting::get('custom_option2')) }}
-                                                        {{ Form::text('custom_option2', Auth::user()->custom_option2, ['class' => 'form-control']) }}
-                                                    </fieldset>
-                                                </div>
-                                            @endif
-                                        </div>
-                                    @endif
-
-                                    @if(Setting::get('custom_option3') != NULL || Setting::get('custom_option4') != NULL)
-                                        <div class="row">
-                                            @if(Setting::get('custom_option3') != NULL)
-                                                <div class="col-md-6">
-                                                    <fieldset class="form-group">
-                                                        {{ Form::label('custom_option3', Setting::get('custom_option3')) }}
-                                                        {{ Form::text('custom_option3', Auth::user()->custom_option3, ['class' => 'form-control']) }}
-                                                    </fieldset>
-                                                </div>
-                                            @endif
-
-                                            @if(Setting::get('custom_option4') != NULL)
-                                                <div class="col-md-6">
-                                                    <fieldset class="form-group">
-                                                        {{ Form::label('custom_option4', Setting::get('custom_option4')) }}
-                                                        {{ Form::text('custom_option4', Auth::user()->custom_option4, ['class' => 'form-control']) }}
-                                                    </fieldset>
-                                                </div>
-                                            @endif
-                                        </div>
-                                    @endif
-
-
+                                    </div>
                                     <div class="pull-right">
                                         {{ Form::submit(trans('common.save_changes'), ['class' => 'btn btn-success oauth-link']) }}
                                     </div>
@@ -255,45 +241,13 @@
                                 </form>
                             </div>
                         </div>
-                        <div id="Active" class="tabcontent">
-                            <div class="fans-form">
-                                <table>
-                                    <tr>
-                                        <td style="padding: 5px"><label>Gross Tips: </label></td>
-                                        <td style="padding: 5px">${{ number_format($totalTip, 2) }} <em>(Received)</em></td>
-                                    </tr>
-                                    <tr>
-                                        <td style="padding: 5px"><label>Gross Subscriptions: </label></td>
-                                        <td style="padding: 5px">${{ number_format($subscriptionAmount, 2) }} <em>(Received)</em></td>
-                                    </tr>
-                                </table>
-                            </div>
-                        </div>
-                        <div id="Expired" class="tabcontent">
-                            <div class="fans-form">
-                                <table>
-                                    <tr>
-                                        <td style="padding: 5px"><label>Net Tips: </label></td>
-                                        <td style="padding: 5px">${{ number_format($totalTipsPayout, 2) }} <em>(Paid Out)</em></td>
-                                    </tr>
-                                    <tr>
-                                        <td style="padding: 5px"><label>Net Subscriptions: </label></td>
-                                        <td style="padding: 5px">${{ number_format($totalSubscriptionPayout, 2) }} <em>(Paid Out)</em></td>
-                                    </tr>
-                                </table>
-                            </div>
-                        </div>
 					</div>
-					<!-- End of first panel -->
-
-
 				</div>
-			</div><!-- /row -->
+			</div>
 		</div>
     </div>
-	<!-- </div> --><!-- /main-content -->
         <script>
-            $("#All").slideDown();
+            $("#Details").slideDown();
 
             function openCity(evt, cityName) {
                 // Declare all variables

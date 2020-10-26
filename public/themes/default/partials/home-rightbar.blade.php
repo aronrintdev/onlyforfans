@@ -1,5 +1,4 @@
 <div class="right-side-section">
-
 	<div class="panel panel-default">
 		<div class="panel-body nopadding">
 			<div class="mini-profile fans">
@@ -66,7 +65,7 @@
 						</a>
 					</li>
 					<li>
-						<a href="{{ url(Auth::user()->username.'/settings/addbank') }}">
+						<a href="{{ url(Auth::user()->username.'/settings/earnings') }}">
 							<div class="activity-name">
 								Earnings
 							</div>
@@ -76,10 +75,9 @@
 						</a>
 					</li>
 				</ul>
-			</div><!-- /mini-profile -->							
+			</div>							
 		</div>
-	</div><!-- /panel -->
-	
+	</div>
 	<div class="panel panel-default">
 		<div class="panel-heading no-bg">
 			<h3 class="panel-title">
@@ -87,13 +85,11 @@
 			</h3>
 		</div>
 		<div class="panel-body">
-			<!-- widget holder starts here -->
 			<div class="user-follow fans">
 				@if($suggested_users != "")
 				@foreach($suggested_users as $suggested_user)
 				<div class="media">
-				
-				<div class="mini-profile fans">
+				<div class="mini-profile fans user-list-item">
     				<div class="background">
     					<div class="widget-bg">
     					    <a href="{{ url($suggested_user->username) }}">
@@ -159,9 +155,7 @@
 						{{ trans('messages.no_suggested_users') }}
 					</div>
 					@endif
-
 				</div>
-				<!-- widget holder ends here -->
 			</div>
 		</div>
 		</div>

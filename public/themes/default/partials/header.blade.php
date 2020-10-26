@@ -209,6 +209,7 @@
                                             <li class=""><a href="{{ url('/mylists') }}"><i class="fa fa-list" aria-hidden="true"></i>{{ trans('common.lists') }}</a></li>
                                             <li class=""><a href="{{ url('/'.Auth::user()->username.'/saved') }}"><i class="fa fa-bookmark" aria-hidden="true"></i>{{ trans('common.saved_post') }}</a></li>
                                             <li class=""><a href="{{ url(Auth::user()->username.'/settings/addbank') }}"><i class="fa fa-university" aria-hidden="true"></i>{{ trans('common.add_bank') }}</a></li>
+                                            <li class=""><a href="{{ url(Auth::user()->username.'/settings/earnings') }}"><i class="fa fa-dollar" aria-hidden="true"></i>{{ trans('common.earnings') }}</a></li>
                                             <li class=""><a href="{{ url(Auth::user()->username.'/settings/addpayment') }}"><i class="fa fa-credit-card" aria-hidden="true"></i>{{ trans('common.add_payment') }}</a></li>
                                             @if (Auth::user()->is_bank_set)
                                                 <li class=""><a href="{{ url(Auth::user()->payment->dashboard_url) }}"><i class="fa fa-credit-card" aria-hidden="true"></i>{{ trans('common.dashboard') }}</a></li>
@@ -432,6 +433,9 @@
                                             </li>
                                             <li class="">
                                                 <a href="{{ url(Auth::user()->username.'/settings/addbank') }}"><i class="fa fa-university" aria-hidden="true"></i>{{ trans('common.add_bank') }}</a>
+                                            </li>
+                                            <li class="">
+                                                <a href="{{ url(Auth::user()->username.'/settings/earnings') }}"><i class="fa fa-dollar" aria-hidden="true"></i>{{ trans('common.earnings') }}</a>
                                             </li>
                                             <li class="">
                                                 <a href="{{ url(Auth::user()->username.'/settings/addpayment') }}"><i class="fa fa-credit-card" aria-hidden="true"></i>{{ trans('common.add_payment') }}</a>
