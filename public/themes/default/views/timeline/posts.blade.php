@@ -104,6 +104,10 @@
         }
     }
     
+    .tabcontent {
+        padding: 15px 0;
+    }
+    
     .tabcontent .post-image-holder, .tabcontent .post-v-holder {
         margin-bottom: 30px;
     }
@@ -145,6 +149,22 @@
     .favourite-grid .post-v-holder a video {
         display: none;
     }
+    
+    @media screen and (min-width: 992px) {
+        .tabs-wrapper {
+            margin-top: -85px;
+        }
+
+        .wide-tab {
+            display: flex;
+            justify-content: center;
+        }
+    }
+    
+    .locked-content.media-locked {
+        margin: 0;
+        height: 180px;
+    }       
 </style>
 <div class="container profile-posts">
 	<div class="row">
@@ -156,95 +176,8 @@
 					<div class="col-md-4 sidebar-wrapper">
 						{!! Theme::partial('user-leftbar',compact('timeline','user','follow_user_status','own_groups','own_pages','user_events', 'favouritePosts', 'next_page_url')) !!}
 					</div>
-					<div class="col-md-8 content-wrapper">
-						@if($timeline->type == "user" && ($user->id == Auth::user()->id || canCreatePost(Auth::user(), $user)))
-							{!! Theme::partial('create-post',compact('timeline','user_post')) !!}
-						@endif
-						<div class="lists-dropdown-menu">
-								<ul class="list-inline text-right no-margin">
-									<li class="dropdown">
-										<a href="#" class="dropdown-togle lists-dropdown-icon" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" style="color: #298ad3; display: inline-flex">
-                                            <svg data-toggle="tooltip" title="Sort" width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-filter-circle" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                              <path fill-rule="evenodd" d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
-                                              <path fill-rule="evenodd" d="M7 11.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5z"/>
-                                            </svg>
-										</a>
-										<ul class="post-dropdown-menu dropdown-menu profile-dropdown-menu-content">
-											<li class="main-link">
-												<div class="form-check">
-													<input class="red-checkbox" type="radio" name="period-post" id="periodAllTime" value="all" {{$period == 'all' ? "checked" : ""}}>
-													<label class="red-list-label" for="periodAllTime">
-														All time
-													</label>
-												</div>
-												<div class="form-check">
-													<input class="red-checkbox" type="radio" name="period-post" id="periodLastThreeM" value="3m" {{$period == '3m' ? "checked" : ""}}>
-													<label class="red-list-label" for="periodLastThreeM">
-														Last three months
-													</label>
-												</div>
-												<div class="form-check">
-													<input class="red-checkbox" type="radio" name="period-post" id="periodLastOneM" value="1m" {{$period == '1m' ? "checked" : ""}}>
-													<label class="red-list-label" for="periodLastOneM">
-														Last month
-													</label>
-												</div>
-												<div class="form-check">
-													<input class="red-checkbox" type="radio" name="period-post" id="periodLastW" value="1w" {{$period == '1w' ? "checked" : ""}}>
-													<label class="red-list-label" for="periodLastW">
-														Last week
-													</label>
-												</div>
-											</li>
-											<hr>
-											<li class="main-link">
-												<div class="form-check">
-													<input class="red-checkbox" type="radio" name="sort-profile-post" id="sortByLatest" value="latest" {{$sort_by == 'latest' ? "checked" : ""}}>
-													<label class="red-list-label" for="sortByLatest">
-														Latest Posts
-													</label>
-												</div>
-												<div class="form-check">
-													<input class="red-checkbox" type="radio" name="sort-profile-post" id="soryByLiked" value="liked" {{$sort_by == 'liked' ? "checked" : ""}}>
-													<label class="red-list-label" for="soryByLiked">
-														Most Liked
-													</label>
-												</div>
-											</li>
-											<hr>
-											<li class="main-link">
-												<div class="form-check">
-													<input class="red-checkbox" type="radio" name="order-profile-post" id="orderByASC" value="asc" {{$order_by == 'asc' ? "checked" : ""}}>
-													<label class="red-list-label" for="orderByASC">
-														Ascending
-													</label>
-												</div>
-												<div class="form-check">
-													<input class="red-checkbox" type="radio" name="order-profile-post" id="orderByDESC" value="desc" {{$order_by == 'desc' ? "checked" : ""}}>
-													<label class="red-list-label" for="orderByDESC">
-														Descending
-													</label>
-												</div>
-											</li>
-										</ul>
-									</li>
-                                    <li class="switch-wrapper">
-                                        <a href="javascript:;" class="switch-layout three-column">
-											<svg data-toggle="tooltip" title="Expand layout" width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrows-angle-expand" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                              <path fill-rule="evenodd" d="M5.828 10.172a.5.5 0 0 0-.707 0l-4.096 4.096V11.5a.5.5 0 0 0-1 0v3.975a.5.5 0 0 0 .5.5H4.5a.5.5 0 0 0 0-1H1.732l4.096-4.096a.5.5 0 0 0 0-.707zm4.344-4.344a.5.5 0 0 0 .707 0l4.096-4.096V4.5a.5.5 0 1 0 1 0V.525a.5.5 0 0 0-.5-.5H11.5a.5.5 0 0 0 0 1h2.768l-4.096 4.096a.5.5 0 0 0 0 .707z"/>
-                                            </svg>
-										</a>
-                                    </li>
-                                    <li class="switch-wrapper" style="display: none">
-                                        <a href="javascript:;" class="switch-layout one-column">
-											<svg data-toggle="tooltip" title="Contract layout" width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrows-angle-contract" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                              <path fill-rule="evenodd" d="M.172 15.828a.5.5 0 0 0 .707 0l4.096-4.096V14.5a.5.5 0 1 0 1 0v-3.975a.5.5 0 0 0-.5-.5H1.5a.5.5 0 0 0 0 1h2.768L.172 15.121a.5.5 0 0 0 0 .707zM15.828.172a.5.5 0 0 0-.707 0l-4.096 4.096V1.5a.5.5 0 1 0-1 0v3.975a.5.5 0 0 0 .5.5H14.5a.5.5 0 0 0 0-1h-2.768L15.828.879a.5.5 0 0 0 0-.707z"/>
-                                            </svg>
-										</a>
-                                    </li>                                    
-								</ul>
-							</div>
-                            <div class="panel-body nopadding">
+					<div class="col-md-8 content-wrapper">						
+                            <div class="panel-body row tabs-wrapper nopadding">
                                 <div class="tab">
                                     <button class="tablinks active" onclick="openCity(event, 'All')">
                                         Posts
@@ -255,8 +188,100 @@
                                     <button class="tablinks" onclick="openCity(event, 'Expired')">
                                         Video
                                     </button>
+                                    @if($user->id != Auth::user()->id)
+                                    <button class="tablinks" data-toggle="modal" data-target="#sendTipModal">
+                                        Send Tip
+                                    </button>
+                                    @endif
                                 </div>
                                 <div id="All" class="tabcontent">
+                                    @if($timeline->type == "user" && ($user->id == Auth::user()->id || canCreatePost(Auth::user(), $user)))
+                                        {!! Theme::partial('create-post',compact('timeline','user_post')) !!}
+                                    @endif
+                                    <div class="lists-dropdown-menu">
+                                        <ul class="list-inline text-right no-margin">
+                                            <li class="dropdown">
+                                                <a href="#" class="dropdown-togle lists-dropdown-icon" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" style="color: #298ad3; display: inline-flex">
+                                                    <svg data-toggle="tooltip" title="Sort" width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-filter-circle" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                                        <path fill-rule="evenodd" d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                                                        <path fill-rule="evenodd" d="M7 11.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5z"/>
+                                                    </svg>
+                                                </a>
+                                                <ul class="post-dropdown-menu dropdown-menu profile-dropdown-menu-content">
+                                                    <li class="main-link">
+                                                        <div class="form-check">
+                                                            <input class="red-checkbox" type="radio" name="period-post" id="periodAllTime" value="all" {{$period == 'all' ? "checked" : ""}}>
+                                                            <label class="red-list-label" for="periodAllTime">
+                                                                All time
+                                                            </label>
+                                                        </div>
+                                                        <div class="form-check">
+                                                            <input class="red-checkbox" type="radio" name="period-post" id="periodLastThreeM" value="3m" {{$period == '3m' ? "checked" : ""}}>
+                                                            <label class="red-list-label" for="periodLastThreeM">
+                                                                Last three months
+                                                            </label>
+                                                        </div>
+                                                        <div class="form-check">
+                                                            <input class="red-checkbox" type="radio" name="period-post" id="periodLastOneM" value="1m" {{$period == '1m' ? "checked" : ""}}>
+                                                            <label class="red-list-label" for="periodLastOneM">
+                                                                Last month
+                                                            </label>
+                                                        </div>
+                                                        <div class="form-check">
+                                                            <input class="red-checkbox" type="radio" name="period-post" id="periodLastW" value="1w" {{$period == '1w' ? "checked" : ""}}>
+                                                            <label class="red-list-label" for="periodLastW">
+                                                                Last week
+                                                            </label>
+                                                        </div>
+                                                    </li>
+                                                    <hr>
+                                                    <li class="main-link">
+                                                        <div class="form-check">
+                                                            <input class="red-checkbox" type="radio" name="sort-profile-post" id="sortByLatest" value="latest" {{$sort_by == 'latest' ? "checked" : ""}}>
+                                                            <label class="red-list-label" for="sortByLatest">
+                                                                Latest Posts
+                                                            </label>
+                                                        </div>
+                                                        <div class="form-check">
+                                                            <input class="red-checkbox" type="radio" name="sort-profile-post" id="soryByLiked" value="liked" {{$sort_by == 'liked' ? "checked" : ""}}>
+                                                            <label class="red-list-label" for="soryByLiked">
+                                                                Most Liked
+                                                            </label>
+                                                        </div>
+                                                    </li>
+                                                    <hr>
+                                                    <li class="main-link">
+                                                        <div class="form-check">
+                                                            <input class="red-checkbox" type="radio" name="order-profile-post" id="orderByASC" value="asc" {{$order_by == 'asc' ? "checked" : ""}}>
+                                                            <label class="red-list-label" for="orderByASC">
+                                                                Ascending
+                                                            </label>
+                                                        </div>
+                                                        <div class="form-check">
+                                                            <input class="red-checkbox" type="radio" name="order-profile-post" id="orderByDESC" value="desc" {{$order_by == 'desc' ? "checked" : ""}}>
+                                                            <label class="red-list-label" for="orderByDESC">
+                                                                Descending
+                                                            </label>
+                                                        </div>
+                                                    </li>
+                                                </ul>
+                                            </li>
+                                            <li class="switch-wrapper">
+                                                <a href="javascript:;" class="switch-layout three-column">
+                                                    <svg data-toggle="tooltip" title="Expand layout" width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrows-angle-expand" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                                        <path fill-rule="evenodd" d="M5.828 10.172a.5.5 0 0 0-.707 0l-4.096 4.096V11.5a.5.5 0 0 0-1 0v3.975a.5.5 0 0 0 .5.5H4.5a.5.5 0 0 0 0-1H1.732l4.096-4.096a.5.5 0 0 0 0-.707zm4.344-4.344a.5.5 0 0 0 .707 0l4.096-4.096V4.5a.5.5 0 1 0 1 0V.525a.5.5 0 0 0-.5-.5H11.5a.5.5 0 0 0 0 1h2.768l-4.096 4.096a.5.5 0 0 0 0 .707z"/>
+                                                    </svg>
+                                                </a>
+                                            </li>
+                                            <li class="switch-wrapper" style="display: none">
+                                                <a href="javascript:;" class="switch-layout one-column">
+                                                    <svg data-toggle="tooltip" title="Contract layout" width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrows-angle-contract" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                                        <path fill-rule="evenodd" d="M.172 15.828a.5.5 0 0 0 .707 0l4.096-4.096V14.5a.5.5 0 1 0 1 0v-3.975a.5.5 0 0 0-.5-.5H1.5a.5.5 0 0 0 0 1h2.768L.172 15.121a.5.5 0 0 0 0 .707zM15.828.172a.5.5 0 0 0-.707 0l-4.096 4.096V1.5a.5.5 0 1 0-1 0v3.975a.5.5 0 0 0 .5.5H14.5a.5.5 0 0 0 0-1h-2.768L15.828.879a.5.5 0 0 0 0-.707z"/>
+                                                    </svg>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
                                     <div class="timeline-posts timeline-default">
                                         @if(count($posts) > 0)
                                             @foreach($posts as $post)
@@ -297,9 +322,30 @@
                                 </div>
                                 <div id="Active" class="tabcontent">
                                     @if(count($postMedia) > 0)
-                                        @foreach($postMedia as $post)
-                                            @if(count($post->images()->get()) > 0 && $post->images()->get()->first()->type=='image') 
-                                                <div class="timeline-photos">
+                                        <div class="row">
+                                            @foreach($postMedia as $post)
+                                                @if(count($post->images()->get()) > 0 && $post->images()->get()->first()->type=='image')
+                                                    <div class="timeline-photos">
+                                                        @if($post->type == \App\Post::PAID_TYPE)
+                                                            @if($post->user->activeSubscribers->contains(Auth::user()->id)  || $post->user->id == Auth::user()->id)
+                                                                {!! Theme::partial('post_media',compact('post','timeline','next_page_url', 'user')) !!}
+                                                            @endif
+                                                        @else
+                                                            @if(canUserSeePost(Auth::id(), $post->user->id, $user->timeline->id) || $post->type == \App\Post::PRICE_TYPE)
+                                                                {!! Theme::partial('post_media',compact('post','timeline','next_page_url', 'user')) !!}
+                                                            @endif
+                                                        @endif
+                                                    </div>
+                                                @endif
+                                            @endforeach                                            
+                                        </div>
+                                    @endif
+                                </div>
+                                <div id="Expired" class="tabcontent">
+                                    @if(count($postMedia) > 0)
+                                        <div class="row">
+                                            @foreach($postMedia as $post)
+                                                @if(count($post->images()->get()) > 0 && $post->images()->get()->first()->type=='video')
                                                     @if($post->type == \App\Post::PAID_TYPE)
                                                         @if($post->user->activeSubscribers->contains(Auth::user()->id)  || $post->user->id == Auth::user()->id)
                                                             {!! Theme::partial('post_media',compact('post','timeline','next_page_url', 'user')) !!}
@@ -309,26 +355,9 @@
                                                             {!! Theme::partial('post_media',compact('post','timeline','next_page_url', 'user')) !!}
                                                         @endif
                                                     @endif
-                                                </div>
-                                            @endif
-                                        @endforeach
-                                    @endif
-                                </div>
-                                <div id="Expired" class="tabcontent">
-                                    @if(count($postMedia) > 0)
-                                        @foreach($postMedia as $post)
-                                            @if(count($post->images()->get()) > 0 && $post->images()->get()->first()->type=='video')
-                                            @if($post->type == \App\Post::PAID_TYPE)
-                                                @if($post->user->activeSubscribers->contains(Auth::user()->id)  || $post->user->id == Auth::user()->id)
-                                                    {!! Theme::partial('post_media',compact('post','timeline','next_page_url', 'user')) !!}
                                                 @endif
-                                            @else
-                                                @if(canUserSeePost(Auth::id(), $post->user->id, $user->timeline->id) || $post->type == \App\Post::PRICE_TYPE)
-                                                    {!! Theme::partial('post_media',compact('post','timeline','next_page_url', 'user')) !!}
-                                                @endif
-                                            @endif
-                                            @endif
-                                        @endforeach
+                                            @endforeach                                            
+                                        </div>
                                     @else
                                         <p class="no-posts">{{ trans('messages.no_posts') }}</p>
                                     @endif
@@ -350,7 +379,8 @@
 <script type="text/javascript">
     $('.switch-layout').click(function () {
         $('.timeline-default, .timeline-condensed-column, .sidebar-wrapper').toggle();
-        $('.content-wrapper').toggleClass('col-lg-12');
+        $('.content-wrapper').toggleClass('col-lg-12 col-md-8');
+        $('.content-wrapper .tabs-wrapper .tab').toggleClass('wide-tab');
         condensedLayout = !condensedLayout;
         twoColumn = !twoColumn;
         $.each($(".timeline-condensed-column>.panel"), function (i) {

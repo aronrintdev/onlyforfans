@@ -382,18 +382,25 @@ class TimelineController extends AppBaseController
             $posts = Post::where('description', 'like', "%{$hashtag}%")->where('active', 1)->whereIn('timeline_id', DB::table('followers')->where('follower_id', $id)->whereIn('leader_id', $followingIds)->pluck('leader_id'))->latest()->paginate(Setting::get('items_page'));
         } // else show the normal feed
         else {
-            $posts = Post::whereIn('user_id', function ($query) use ($id, $followingIds) {
+            $query = Post::whereIn('user_id', function ($query) use ($id, $followingIds, $timeline) {
                 $query->select('leader_id')
                     ->from('followers')
                     ->where('follower_id', $id)
                     ->whereIn('leader_id', $followingIds);
-//            })->orWhere('user_id', $id)->where('active', 1)->limit(10);
-            })->orWhereIn('id', function ($query1) use ($id) {
-                $query1->select('post_id')
-                    ->from('pinned_posts')
-                    ->where('user_id', $id)
-                    ->where('active', 1);
-            })->orWhere('user_id', $id)->orWhere('timeline_id', $timeline->id)->where('active', 1)->latest()->paginate(Setting::get('items_page'));
+            })
+//            })->orWhere('user_id', $id)->where('active', 1)->limit(10);+
+                ->orWhere(function (Builder $query) use ($id, $timeline) {
+                    $query->whereIn('id', function ($query1) use ($id, $timeline) {
+                        $query1->select('post_id')
+                            ->from('pinned_posts')
+                            ->where('user_id', $id);
+//                    ->where('active', 1);
+                    })
+                        ->orWhere('user_id', $id)
+                        ->orWhere('timeline_id', $timeline->id);
+                });
+                
+               $posts = $query->where('active', 1)->latest()->paginate(Setting::get('items_page'));
         }
 
         if ($request->ajax) {
@@ -721,7 +728,7 @@ class TimelineController extends AppBaseController
             ->orWhere('ip_address', '=', $clientIp)
             ->pluck('blocked_by')->toArray();
         
-        $posts = Post::with('user.timeline', 'user.blockedProfiles')->withCount('users_liked')->with('images')
+        $posts = Post::with('user.timeline', 'user.blockedProfiles')->where('active', 1)->withCount('users_liked')->with('images')
             ->whereDoesntHave('user.blockedProfiles', function (Builder $q) {
                 $q->where('country', 'like', '%'.Auth::user()->country.'%');
             });
@@ -734,7 +741,6 @@ class TimelineController extends AppBaseController
             ->whereNotIn('user_id', $blockedUsers)
             ->orderBy('users_liked_count', 'desc')
             ->orderBy('created_at', 'desc')
-            ->where('active', 1)
             ->paginate(Setting::get('items_page'));
 
 //        $posts->paginate(Setting::get('items_page'));
@@ -889,7 +895,13 @@ class TimelineController extends AppBaseController
         $input = $request->all();
         
         $input['user_id'] = Auth::user()->id;
-        
+        if (!empty($input['publish_date']) && !empty($input['publish_time'])) {
+            $input['publish_date'] = Carbon::createFromFormat('m/d/Y', $input['publish_date']);
+            $input['publish_time'] = Carbon::createFromFormat('H:i A', $input['publish_time']);   
+            $input['active'] = false;   
+        } else {
+            $input['active'] = true;
+        }
         $post = Post::create($input);
         $post->notifications_user()->sync([Auth::user()->id], true);
 
@@ -1055,6 +1067,7 @@ class TimelineController extends AppBaseController
         if ($request->get('condensed_layout') || $request->get('two_column')) {            
             $postHtml = $theme->scope('timeline/post_condensed', compact('post', 'timeline', 'twoColumn'))->render();
         }
+        $postHtml = $post->active == 1 ? $postHtml : '';
         return response()->json(['status' => '200', 'data' => $postHtml]);
     }
 
@@ -1861,7 +1874,7 @@ class TimelineController extends AppBaseController
                     ->where('active', 1)
                     ->get();
             } else {
-                $posts = Post::Where('user_id', $id)->orWhere(function ($query) use ($timeline){
+                $posts = Post::Where('user_id', $id)->where('active', 1)->orWhere(function ($query) use ($timeline){
                     $query->where('timeline_id', $timeline->id);
 //                        ->orWhere('user_id', Auth::id());
                 })->whereDate('created_at', '>=', $startDate)->where('active', 1)->orderBy('created_at', $order_by == 'desc' ? 'asc' : 'desc');

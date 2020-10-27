@@ -60,13 +60,15 @@
     @endif
 
 @else
-    <div class="grid-item">
-        <div class="locked-content">
-            <div class="locked-content-wrapper">
-                <i class="fa fa-lock" aria-hidden="true"></i>
-                <button class="btn btn-success purchase-post" data-post-id="{{ $post->id }}">Buy</button>
+    <div class="col-xl-3 col-lg-4 col-md-6">
+        <div class="grid-item">
+            <div class="locked-content media-locked">
+                <div class="locked-content-wrapper">
+                    <i class="fa fa-lock" aria-hidden="true"></i>
+                    <button class="btn btn-success purchase-post" data-post-id="{{ $post->id }}">Buy</button>
+                </div>
             </div>
-        </div>
+        </div>        
     </div>        
 @endif
 

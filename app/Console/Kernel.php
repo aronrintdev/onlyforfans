@@ -2,6 +2,7 @@
 
 namespace App\Console;
 
+use App\Console\Commands\PublishPostCommand;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
@@ -13,7 +14,7 @@ class Kernel extends ConsoleKernel
      * @var array
      */
     protected $commands = [
-
+        PublishPostCommand::class
     ];
 
     /**
@@ -25,8 +26,8 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')
-        //          ->hourly();
+         $schedule->command('publish:posts')
+                  ->everyMinute();
     }
     /**
      * Register the Closure based commands for the application.

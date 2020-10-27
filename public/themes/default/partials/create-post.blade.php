@@ -60,6 +60,34 @@
                         </div>
                     </div>
                 </div>
+                <div class="modal fade" id="schedulePost" role="dialog">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header" style="border: 0">
+                                <button type="button" class="close m-3" data-dismiss="modal">&times;</button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="row">
+                                    <div class='col-sm-6'>
+                                        <div class="form-group">
+                                            <label for="datetimepicker4">Date</label>
+                                            <input type='text' name="publish_date" class="form-control" id='datetimepicker4' />
+                                        </div>
+                                    </div>
+                                    <div class='col-sm-6'>
+                                        <div class="form-group">
+                                            <label for="datetimepicker3">Time</label>
+                                            <input type='text' name="publish_time" class="form-control" id='datetimepicker3'/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Set</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <span class="current-post-type">Free</span>&nbsp; <a href="#" class="post-amount" data-toggle="modal" data-target="#postPriceModal"></a>
                 <div class="dropdown">
 {{--                    <i class="fa fa-dollar" data-toggle="tooltip" title="Set a price" style="color:#859ab5;"></i>--}}
@@ -193,7 +221,7 @@
                         </svg>
                     </a>
                 </li>
-                <li><a href="#" id="emoticons">
+                <li><a href="#" id="emoticons" data-toggle="modal" data-target="#schedulePost">
                         <svg data-toggle="tooltip" title="Schedule this post" width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-calendar-date" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                           <path fill-rule="evenodd" d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z"/>
                           <path d="M6.445 11.688V6.354h-.633A12.6 12.6 0 0 0 4.5 7.16v.695c.375-.257.969-.62 1.258-.777h.012v4.61h.675zm1.188-1.305c.047.64.594 1.406 1.703 1.406 1.258 0 2-1.066 2-2.871 0-1.934-.781-2.668-1.953-2.668-.926 0-1.797.672-1.797 1.809 0 1.16.824 1.77 1.676 1.77.746 0 1.23-.376 1.383-.79h.027c-.004 1.316-.461 2.164-1.305 2.164-.664 0-1.008-.45-1.05-.82h-.684zm2.953-2.317c0 .696-.559 1.18-1.184 1.18-.601 0-1.144-.383-1.144-1.2 0-.823.582-1.21 1.168-1.21.633 0 1.16.398 1.16 1.23z"/>
@@ -229,7 +257,9 @@
 @endif
 <!--<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD_vuWi_hzMDDeenNYwaNAj0PHzzS2GAx8&libraries=places&callback=initMap"-->
 <!--        async defer></script>-->
-<script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/js/bootstrap-datetimepicker.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/css/bootstrap-datetimepicker.css" />
+<script>    
 function initMap(event) 
 {    
     var key;  
@@ -285,5 +315,17 @@ $(document).on('change', '.post-type-item', function () {
         $('#postPriceModal').modal('show');
         $('.post-amount').show();
     }
+});
+
+$(function () {
+    $('#datetimepicker3').datetimepicker({
+        format: 'LT'
+    });
+});
+
+$(function () {
+    $('#datetimepicker4').datetimepicker({
+        format: 'L'
+    });
 });
 </script>

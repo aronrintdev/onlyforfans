@@ -513,7 +513,12 @@ $(function () {
                 $('.post-description').linkify()
                 $('[data-toggle="tooltip"]').tooltip();
                 $('[name="description"]').focus();
-                notify('Your post has been successfully published');
+                if (responseText.data != '') {
+                    notify('Your post has been successfully published');    
+                } else {
+                    notify('Your post has been successfully scheduled.');
+                }
+                
             }
             else
             {
