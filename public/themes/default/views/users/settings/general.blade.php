@@ -35,6 +35,15 @@
      label:active:after {
         width: 130px;
     }
+    
+    .hidden-timezone-id {
+        height: 0;
+        max-height: 0;
+        width: 0;
+        border: 0;
+        outline: 0;
+        position: absolute;
+    }
 </style>
 	<div class="container">
 		<div class="row">
@@ -172,7 +181,7 @@
                                         <div class="col-md-6">
                                             <fieldset class="form-group {{ $errors->has('subscribe_price_month') ? ' has-error' : '' }}">
                                                 {{ Form::label('subscribe_price_month', trans('auth.subscribe_price_month')) }}
-                                                {{ Form::text('subscribe_price_month', Auth::user()->price, ['class' => 'form-control', 'placeholder' => '$0.00']) }}
+                                                {{ Form::text('subscribe_price_month', Auth::user()->price, ['class' => 'form-control subscription-price-input', 'placeholder' => '$0.00']) }}
                                                 @if ($errors->has('subscribe_price_month'))
                                                     <span class="help-block">
 												{{ $errors->first('subscribe_price_month') }}
@@ -193,7 +202,7 @@
                                         <div class="col-md-6">
                                             <fieldset class="form-group {{ $errors->has('subscribe_price_3_month') ? ' has-error' : '' }}">
                                                 {{ Form::label('subscribe_price_3_month', trans('auth.subscribe_price_3_month')) }}
-                                                {{ Form::text('subscribe_price_3_month', Auth::user()->price, ['class' => 'form-control', 'placeholder' => '$0.00']) }}
+                                                {{ Form::text('subscribe_price_3_month', Auth::user()->price, ['class' => 'form-control subscription-price-input', 'placeholder' => '$0.00']) }}
                                                 @if ($errors->has('subscribe_price_3_month'))
                                                     <span class="help-block">
 												{{ $errors->first('subscribe_price_3_month') }}
@@ -206,7 +215,7 @@
                                         <div class="col-md-6">
                                             <fieldset class="form-group {{ $errors->has('subscribe_price_6_month') ? ' has-error' : '' }}">
                                                 {{ Form::label('subscribe_price_6_month', trans('auth.subscribe_price_6_month')) }}
-                                                {{ Form::text('subscribe_price_6_month', Auth::user()->price, ['class' => 'form-control', 'placeholder' => '$0.00']) }}
+                                                {{ Form::text('subscribe_price_6_month', Auth::user()->price, ['class' => 'form-control subscription-price-input', 'placeholder' => '$0.00']) }}
                                                 @if ($errors->has('subscribe_price_6_month'))
                                                     <span class="help-block">
 												{{ $errors->first('subscribe_price_6_month') }}
@@ -219,7 +228,7 @@
                                         <div class="col-md-6">
                                             <fieldset class="form-group {{ $errors->has('subscribe_price_year') ? ' has-error' : '' }}">
                                                 {{ Form::label('subscribe_price_year', trans('auth.subscribe_price_year')) }}
-                                                {{ Form::text('subscribe_price_year', Auth::user()->price, ['class' => 'form-control', 'placeholder' => '$0.00']) }}
+                                                {{ Form::text('subscribe_price_year', Auth::user()->price, ['class' => 'form-control subscription-price-input', 'placeholder' => '$0.00']) }}
                                                 @if ($errors->has('subscribe_price_year'))
                                                     <span class="help-block">
 												{{ $errors->first('subscribe_price_year') }}
@@ -258,7 +267,7 @@
 							<div class="fans-form">
 								<form method="POST" action="{{ url('/'.Auth::user()->username.'/settings/localization/') }}">
 									{{ csrf_field() }}
-
+                                    <input type="text" name="timezone_id" class="hidden-timezone-id">
                                     <div class="row">
                                         <div class="col-md-6">
                                             <p>{{ Form::label('language', trans('common.language')) }}</p>
@@ -498,8 +507,11 @@
             </div>
 			</div>
 		</div>
-		
+
+<script src="https://unpkg.com/autonumeric"></script>
 <script>
+    let anElement = new AutoNumeric.multiple('.subscription-price-input');
+    
     window.checkCheckboxStatus = function () {
         if ($('#watermark').is(':checked') == true) {
             $('#watermark').val(1);
@@ -515,4 +527,17 @@
             checkCheckboxStatus();
         });
     });
+
+    let userDetails = JSON.parse(JSON.stringify({!! Auth::user() !!}));
+    $(document).ready(function() {
+        setTimeout(function () {
+            $('#timezone option[timeZoneId='+userDetails.timezone_id+']').attr('selected', true);
+        }, 500)
+    });
+    
+    $(document).on('change', '#timezone', function () {
+        let timezoneId = $('#timezone option:selected').attr('timeZoneId');
+        $('.hidden-timezone-id').val(timezoneId);
+    });
+    
 </script>

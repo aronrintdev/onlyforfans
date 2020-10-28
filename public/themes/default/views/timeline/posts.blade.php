@@ -107,12 +107,12 @@
     .tabcontent {
         padding: 15px 0;
     }
-    
-    .tabcontent .post-image-holder, .tabcontent .post-v-holder {
+
+    #Active.tabcontent .post-image-holder, #Expired.tabcontent .post-v-holder {
         margin-bottom: 30px;
     }
     
-    .tabcontent .post-image-holder a, .tabcontent .post-v-holder a{
+    #Active.tabcontent .post-image-holder a, #Expired.tabcontent .post-v-holder a{
         display: block;
         height: 180px !important;
         margin: 0;
@@ -120,7 +120,7 @@
         width: 100% !important;
     }
 
-    .tabcontent .post-image-holder a img, .tabcontent .post-v-holder a source{
+    #Active.tabcontent .post-image-holder a img, #Expired.tabcontent .post-v-holder a source{
         object-fit: cover !important;
         height: 100% !important;
         width: 100% !important;

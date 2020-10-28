@@ -27,7 +27,7 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
          $schedule->command('publish:posts')
-                  ->everyMinute();
+                  ->everyMinute()->appendOutputTo(storage_path('logs/publish_posts.log'));
     }
     /**
      * Register the Closure based commands for the application.
