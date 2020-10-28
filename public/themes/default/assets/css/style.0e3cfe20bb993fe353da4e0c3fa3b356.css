@@ -35455,6 +35455,10 @@ body.direction-rtl .manage-table table tbody td ul {
     padding: 13px 0px;
     color: #4a5568;
 }
+.user-bio-block > a {
+  word-break: break-all;
+  width: 100%;
+}
 .user-bio-block .bio-list {
     margin-bottom: 0px;
 }
