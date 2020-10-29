@@ -20,6 +20,28 @@
     #postPriceModal .modal-dialog input {
         width: 100%;
     }
+    
+    audio {
+        outline: none;
+        margin-right: 10px;
+        width: 80%;
+    }
+    
+    @media screen and (max-width: 576px) {
+        audio {
+            width: 100%;
+        }
+    }
+    
+    #recordingsList{
+        padding: 0;
+    }
+    
+    #recordingsList li {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+    }
 </style>
 
 <form action="{{ url('') }}" method="post" class="create-post-form">
@@ -53,6 +75,29 @@
                         <div class="modal-content">
                             <div class="modal-body">
                                 <input type="text" name="price" class="post-price-input" placeholder="$0.00">
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Set</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal fade" id="voiceRecordModal" role="dialog">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header" style="border: 0; display: flex; justify-content: space-between; align-items: start">
+                                <div id="controls">
+                                    <button class="btn btn-success" id="recordButton">Record</button>
+                                    <button class="btn btn-info" id="pauseRecordingButton" disabled>Pause</button>
+                                    <button class="btn btn-danger" id="stopButton" disabled>Stop</button>
+                                </div>
+                                <button type="button" class="close m-3 discard-recording" data-dismiss="modal">&times;</button>
+                            </div>
+                            <div class="modal-body">
+                                
+                                <div id="formats" class="hidden">Format: start recording to see sample rate</div>
+                                <p><strong>Recordings:</strong></p>
+                                <ol id="recordingsList"></ol>
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-default" data-dismiss="modal">Set</button>
@@ -199,6 +244,14 @@
                 @if((env('SOUNDCLOUD_CLIENT_ID') != "" || (env('SOUNDCLOUD_CLIENT_ID') != null)))
                   <li><a href="#" id="musicUpload"><i class="fa fa-music"></i></a></li>
                 @endif
+                <li>
+                    <a href="#" id="voiceRecord" data-toggle="modal" data-target="#voiceRecordModal">
+                        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-mic-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M5 3a3 3 0 0 1 6 0v5a3 3 0 0 1-6 0V3z"/>
+                            <path fill-rule="evenodd" d="M3.5 6.5A.5.5 0 0 1 4 7v1a4 4 0 0 0 8 0V7a.5.5 0 0 1 1 0v1a5 5 0 0 1-4.5 4.975V15h3a.5.5 0 0 1 0 1h-7a.5.5 0 0 1 0-1h3v-2.025A5 5 0 0 1 3 8V7a.5.5 0 0 1 .5-.5z"/>
+                        </svg>
+                    </a>
+                </li>
                 <li><a href="#" id="locationUpload">
                         <svg data-toggle="tooltip" title="Set your location" width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-geo-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                           <path fill-rule="evenodd" d="M4 4a4 4 0 1 1 4.5 3.969V13.5a.5.5 0 0 1-1 0V7.97A4 4 0 0 1 4 3.999zm2.493 8.574a.5.5 0 0 1-.411.575c-.712.118-1.28.295-1.655.493a1.319 1.319 0 0 0-.37.265.301.301 0 0 0-.057.09V14l.002.008a.147.147 0 0 0 .016.033.617.617 0 0 0 .145.15c.165.13.435.27.813.395.751.25 1.82.414 3.024.414s2.273-.163 3.024-.414c.378-.126.648-.265.813-.395a.619.619 0 0 0 .146-.15.148.148 0 0 0 .015-.033L12 14v-.004a.301.301 0 0 0-.057-.09 1.318 1.318 0 0 0-.37-.264c-.376-.198-.943-.375-1.655-.493a.5.5 0 1 1 .164-.986c.77.127 1.452.328 1.957.594C12.5 13 13 13.4 13 14c0 .426-.26.752-.544.977-.29.228-.68.413-1.116.558-.878.293-2.059.465-3.34.465-1.281 0-2.462-.172-3.34-.465-.436-.145-.826-.33-1.116-.558C3.26 14.752 3 14.426 3 14c0-.599.5-1 .961-1.243.505-.266 1.187-.467 1.957-.594a.5.5 0 0 1 .575.411z"/>
@@ -259,6 +312,7 @@
 <!--        async defer></script>-->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/js/bootstrap-datetimepicker.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/css/bootstrap-datetimepicker.css" />
+<script src="https://cdn.rawgit.com/mattdiamond/Recorderjs/08e7abd9/dist/recorder.js"></script>
 <script>    
 function initMap(event) 
 {    
@@ -319,7 +373,8 @@ $(document).on('change', '.post-type-item', function () {
 
 $(function () {
     $('#datetimepicker3').datetimepicker({
-        format: 'LT'
+        format: 'LT',
+        minDate: moment().millisecond(0).second(0).minute(0).hour(0)
     });
 });
 
@@ -327,5 +382,203 @@ $(function () {
     $('#datetimepicker4').datetimepicker({
         format: 'L'
     });
+});
+
+let latestAudioBlob;
+let latestAudioFileName;
+let baseAudio;
+let base64Audio;
+// Voice Record JS
+//webkitURL is deprecated but nevertheless
+URL = window.URL || window.webkitURL;
+
+var gumStream; 						//stream from getUserMedia()
+var rec; 							//Recorder.js object
+var input; 							//MediaStreamAudioSourceNode we'll be recording
+
+// shim for AudioContext when it's not avb. 
+var AudioContext = window.AudioContext || window.webkitAudioContext;
+var audioContext //audio context to help us record
+
+var recordButton = document.getElementById("recordButton");
+var stopButton = document.getElementById("stopButton");
+var pauseButton = document.getElementById("pauseRecordingButton");
+
+//add events to those 2 buttons
+recordButton.addEventListener("click", startRecording);
+stopButton.addEventListener("click", stopRecording);
+pauseButton.addEventListener("click", pauseRecording);
+
+function startRecording() {
+    console.log("recordButton clicked");
+
+    /*
+        Simple constraints object, for more advanced audio features see
+        https://addpipe.com/blog/audio-constraints-getusermedia/
+    */
+
+    var constraints = { audio: true, video:false }
+
+    /*
+       Disable the record button until we get a success or fail from getUserMedia() 
+   */
+
+    recordButton.disabled = true;
+    stopButton.disabled = false;
+    pauseButton.disabled = false
+
+    /*
+        We're using the standard promise based getUserMedia() 
+        https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia
+    */
+    navigator.getUserMedia = navigator.getUserMedia ||
+        navigator.webkitGetUserMedia ||
+        navigator.mozGetUserMedia;
+
+    navigator.mediaDevices.getUserMedia(constraints).then(function(stream) {
+        console.log("getUserMedia() success, stream created, initializing Recorder.js ...");
+
+        /*
+            create an audio context after getUserMedia is called
+            sampleRate might change after getUserMedia is called, like it does on macOS when recording through AirPods
+            the sampleRate defaults to the one set in your OS for your playback device
+
+        */
+        audioContext = new AudioContext();
+
+        //update the format 
+        document.getElementById("formats").innerHTML="Format: 1 channel pcm @ "+audioContext.sampleRate/1000+"kHz"
+
+        /*  assign to gumStream for later use  */
+        gumStream = stream;
+
+        /* use the stream */
+        input = audioContext.createMediaStreamSource(stream);
+
+        /* 
+            Create the Recorder object and configure to record mono sound (1 channel)
+            Recording 2 channels  will double the file size
+        */
+        rec = new Recorder(input,{numChannels:1})
+
+        //start the recording process
+        rec.record()
+
+        console.log("Recording started");
+
+    }).catch(function(err) {
+        //enable the record button if getUserMedia() fails
+        recordButton.disabled = false;
+        stopButton.disabled = true;
+        pauseButton.disabled = true
+    });
+}
+
+function pauseRecording(e){
+    e.preventDefault();
+    console.log("pauseButton clicked rec.recording=",rec.recording );
+    if (rec.recording){
+        //pause
+        rec.stop();
+        pauseButton.innerHTML="Resume";
+    }else{
+        //resume
+        rec.record()
+        pauseButton.innerHTML="Pause";
+
+    }
+}
+
+function stopRecording() {
+    console.log("stopButton clicked");
+
+    //disable the stop button, enable the record too allow for new recordings
+    stopButton.disabled = true;
+    recordButton.disabled = false;
+    pauseButton.disabled = true;
+
+    //reset button just in case the recording is stopped while paused
+    pauseButton.innerHTML="Pause";
+
+    //tell the recorder to stop the recording
+    rec.stop();
+
+    //stop microphone access
+    gumStream.getAudioTracks()[0].stop();
+
+    //create the wav blob and pass it on to createDownloadLink
+    rec.exportWAV(createDownloadLink);
+}
+
+function createDownloadLink(blob) {
+
+    latestAudioBlob = blob;
+
+    blob2base(latestAudioBlob);
+    console.log(baseAudio);
+    
+    var url = URL.createObjectURL(blob);
+    var au = document.createElement('audio');
+    var li = document.createElement('li');
+    var link = document.createElement('a');
+
+    //name of .wav file to use during upload and download (without extendion)
+    var filename = new Date().toISOString();
+    latestAudioFileName = filename;
+    //add controls to the <audio> element
+    au.controls = true;
+    au.src = url;
+    au.name = 'audio';
+
+    //save to disk link
+    link.href = url;
+    link.download = filename+".wav"; //download forces the browser to donwload the file using the  filename
+    link.innerHTML = "Download";
+
+    //add the new audio element to li
+    li.appendChild(au);
+
+    //add the filename to the li
+    // li.appendChild(document.createTextNode(filename+".wav "))
+
+    //add the save to disk link to li
+    li.appendChild(link);
+
+    //upload link
+    var upload = document.createElement('a');
+    upload.href="#";
+    upload.innerHTML = "Upload";
+    upload.addEventListener("click", function(event){
+        var xhr=new XMLHttpRequest();
+        xhr.onload=function(e) {
+            if(this.readyState === 4) {
+                console.log("Server returned: ",e.target.responseText);
+            }
+        };
+        var fd=new FormData();
+        fd.append("audio_data",blob, filename);
+        xhr.open("POST","upload.php",true);
+        xhr.send(fd);
+    })
+    li.appendChild(document.createTextNode (" "))//add a space in between
+    // li.appendChild(upload)//add the upload link to li
+
+    //add the li element to the ol
+    recordingsList.innerHTML = '';
+    recordingsList.appendChild(li);
+}
+
+
+function blob2base(blob){
+    baseAudio = new FileReader();
+    baseAudio.readAsDataURL(blob);
+    baseAudio.onloadend = function(reader) {
+        base64Audio = reader.target.result;
+        return reader
+    }
+}
+
+$('.discard-recording').click(function () {
+    $('#recordingsList').html('');
 });
 </script>

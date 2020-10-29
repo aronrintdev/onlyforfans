@@ -457,6 +457,17 @@ $(function () {
                     formData.push({name:'post_images_upload_modified[]', value: file})
                 }
             }
+            
+            let isAudio = $('#recordingsList audio').attr('src');
+            if (typeof isAudio != 'undefined' && isAudio != '') {
+
+                let fileObject = new File([base64Audio], latestAudioFileName, {
+                    type: 'audio/wav'
+                });
+
+                formData.push({name:'image1', value: base64Audio})                
+            }
+            
             validFiles = []; // making array empty           
 
             if (!hasFile && !$('.post-video-upload').val() && !form.description.value && !form.youtube_video_id.value && !form.location.value && !form.soundcloud_id.value) {

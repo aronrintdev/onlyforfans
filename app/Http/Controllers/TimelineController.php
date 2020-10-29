@@ -904,6 +904,9 @@ class TimelineController extends AppBaseController
         }
         $post = Post::create($input);
         $post->notifications_user()->sync([Auth::user()->id], true);
+        $s3 = Storage::disk('uploads');
+
+        $timestamp = date('Y-m-d-H-i-s');
 
 //        if ($request->hasFile('post_video_upload')) {
 //            $uploadedFile = $request->file('post_video_upload');
@@ -913,23 +916,18 @@ class TimelineController extends AppBaseController
 //
 //            $timestamp = date('Y-m-d-H-i-s');
 //
-//            $strippedName = $timestamp.str_replace(' ', '', $uploadedFile->getClientOriginalName());
-//
-//            $s3->put('users/gallery/'.$strippedName, file_get_contents($uploadedFile));
-//
-//            $basename = $timestamp.basename($request->file('post_video_upload')->getClientOriginalName(), '.'.$request->file('post_video_upload')->getClientOriginalExtension());
-//
-//            //Flavy::thumbnail(storage_path().'/uploads/users/gallery/'.$strippedName, storage_path().'/uploads/users/gallery/'.$basename.'.jpg', 1); //returns array with file info
-//
-//            $media = Media::create([
-//                'title'  => $basename,
-//                'type'   => 'video',
-//                'source' => $strippedName,
-//            ]);
-//
-//            $post->images()->attach($media);
-//        }
-//
+        if (isset($input['image1'])) {
+            $fileBase64 = str_replace('data:audio/wav;base64,', '',  $request->get('image1'));
+            $s3->put('users/gallery/'.$timestamp.'.wav', base64_decode($fileBase64));
+
+            $media = Media::create([
+                'title'  => $timestamp,
+                'type'   => 'audio',
+                'source' => $timestamp.'.wav',
+            ]);
+            $post->images()->attach($media);   
+        }
+        
         if ($request->file('post_images_upload_modified')) {
             foreach ($request->file('post_images_upload_modified') as $postImage) {
                 if ($postImage->getSize() > 524288000) {

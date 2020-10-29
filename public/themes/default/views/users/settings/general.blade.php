@@ -327,7 +327,7 @@
                                                 	<option timeZoneId="2" value="GMT-11:00" useDaylightTime="0" adjustment="-11">(GMT-11:00) Midway Island, Samoa</option>
                                                 	<option timeZoneId="3" value="GMT-10:00" useDaylightTime="0" adjustment="-10">(GMT-10:00) Hawaii</option>
                                                 	<option timeZoneId="4" value="GMT-09:00" useDaylightTime="1" adjustment="-9">(GMT-09:00) Alaska</option>
-                                                	<option timeZoneId="5" value="GMT-08:00" useDaylightTime="1" adjustment="-8" selected>(GMT-08:00) Pacific Time (US & Canada)</option>
+                                                	<option timeZoneId="5" value="GMT-08:00" useDaylightTime="1" adjustment="-8">(GMT-08:00) Pacific Time (US & Canada)</option>
                                                 	<option timeZoneId="6" value="GMT-08:00" useDaylightTime="1" adjustment="-8">(GMT-08:00) Tijuana, Baja California</option>
                                                 	<option timeZoneId="7" value="GMT-07:00" useDaylightTime="0" adjustment="-7">(GMT-07:00) Arizona</option>
                                                 	<option timeZoneId="8" value="GMT-07:00" useDaylightTime="1" adjustment="-7">(GMT-07:00) Chihuahua, La Paz, Mazatlan</option>
@@ -531,7 +531,7 @@
     let userDetails = JSON.parse(JSON.stringify({!! Auth::user() !!}));
     $(document).ready(function() {
         setTimeout(function () {
-            $('#timezone option[timeZoneId='+userDetails.timezone_id+']').attr('selected', true);
+            $('#timezone option[timeZoneId='+userDetails.timezone_id+']').attr('selected', 'selected').trigger('change');
         }, 500)
     });
     

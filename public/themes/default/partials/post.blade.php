@@ -415,6 +415,19 @@ $main_description = $post->description;
                             @endforeach
                         </div>
 
+                        <div class="post-v-holder">
+                            @foreach($post->images()->get() as $postImage)
+                                @if($postImage->type=='video')
+                                    <div id="unmoved-fixture">
+                                        <video width="100%" height="auto" id="video-target" controls class="video-video-playe">
+                                            <source src="{{ url('user/gallery/video/'.$postImage->source) }}"></source>
+                                        </video>
+                                    </div>
+
+                                @endif
+                            @endforeach
+                        </div>
+
                     @endif
 
                 </div>
@@ -629,7 +642,16 @@ $main_description = $post->description;
                             @endif
                         @endforeach
                     </div>
-
+                
+                    <div class="post-audio-holder">
+                        @foreach($post->images()->get() as $postImage)
+                            @if($postImage->type=='audio')
+                                <audio controls src="{{ url('user/gallery/video/'.$postImage->source) }}">
+                                    <source src="{{ url('user/gallery/video/'.$postImage->source) }}"></source>
+                                </audio>
+                            @endif
+                        @endforeach
+                    </div>
                 @endif
 
             </div>

@@ -47,6 +47,11 @@
     .single-image-panel a {
         margin: 0!important;
     }
+    
+    .post-audio-holder audio {
+        outline: none;
+        width: 100%;
+    }
 </style>
 		<div class="container">
 			<div class="row">

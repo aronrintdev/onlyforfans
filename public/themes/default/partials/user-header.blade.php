@@ -35,27 +35,6 @@
 				<a href="{{ url($timeline->username.'/following') }}" ><span class="top-list">{{ $following_count }}  {{ trans('common.following') }}</span>
 				</a>
 			</li>
-			@if(Auth::user()->username != $timeline->username)
-				@if(!$timeline->reports->contains(Auth::user()->id))
-					<li class="timeline-cover-status">
-						<a href="#" class="page-report report" data-timeline-id="{{ $timeline->id }}"> <i class="fa fa-flag" aria-hidden="true"></i> {{ trans('common.report') }}
-						</a>
-					</li>
-					<li class="timeline-cover-status hidden">
-						<a href="#" class="page-report reported" data-timeline-id="{{ $timeline->id }}"> <i class="fa fa-flag" aria-hidden="true"></i>	{{ trans('common.reported') }}
-						</a>
-					</li>
-				@else
-					<li class="timeline-cover-status hidden">
-						<a href="#" class="page-report report" data-timeline-id="{{ $timeline->id }}"> <i class="fa fa-flag" aria-hidden="true"></i> {{ trans('common.report') }}
-						</a>
-					</li>
-					<li class="timeline-cover-status">
-						<a href="#" class="page-report reported" data-timeline-id="{{ $timeline->id }}"> <i class="fa fa-flag" aria-hidden="true"></i>	{{ trans('common.reported') }}
-						</a>
-					</li>
-				@endif
-			@endif
 {{--			@if(Auth::user()->username != $timeline->username)--}}
 {{--				@if(!$timeline->reports->contains(Auth::user()->id))--}}
 {{--					<li class="smallscreen-report"><a href="#" class="page-report report" data-timeline-id="{{ $timeline->id }}">{{ trans('common.report') }}</a></li>--}}
@@ -74,7 +53,7 @@
                           <path fill-rule="evenodd" d="M9.5 13a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
                         </svg>
 					</a>
-					<ul class="dropdown-menu profile-dropdown-menu-content">
+					<ul class="dropdown-menu profile-dropdown-menu-content pagelike-links">
 						<li class="main-link">
 							@if($timeline->id == Auth::user()->timeline_id)
 								<a href="{{ url('/'.Auth::user()->username.'/settings/profile') }}">
@@ -90,6 +69,27 @@
 									{{ trans('common.add_to_remove_from_lists') }}
 								</a>
 							@endif
+                        @if(Auth::user()->username != $timeline->username)
+                            @if(!$timeline->reports->contains(Auth::user()->id))
+                                <li class="timeline-cover-status">
+                                    <a href="#" class="page-report report" data-timeline-id="{{ $timeline->id }}"> <b>{{ trans('common.report') }}</b>
+                                    </a>
+                                </li>
+                                <li class="timeline-cover-status hidden">
+                                    <a href="#" class="page-report reported" data-timeline-id="{{ $timeline->id }}"> <b>{{ trans('common.reported') }}</b>
+                                    </a>
+                                </li>
+                            @else
+                                <li class="timeline-cover-status hidden">
+                                    <a href="#" class="page-report report" data-timeline-id="{{ $timeline->id }}"> <b> {{ trans('common.report') }}</b>
+                                    </a>
+                                </li>
+                                <li class="timeline-cover-status">
+                                    <a href="#" class="page-report reported" data-timeline-id="{{ $timeline->id }}"><b>{{ trans('common.reported') }}</b>
+                                    </a>
+                                </li>
+                                @endif
+                            @endif
 						</li>
 					</ul>
 				</li>
