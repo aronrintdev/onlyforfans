@@ -38,7 +38,7 @@
 				<!--@if(Auth::check() || !$user->followers->contains($user->id))-->
 
 						<div class="col-md-6 col-sm-6 col-xs-6 left-col">
-							<a href="{{ url('/login') }}" class="btn btn-options btn-block btn-default follow" data-price="{{ $user->price }}"  data-timeline-id="{{ $timeline->id }}">
+							<a href="{{ url('/login') }}" class="btn btn-options btn-block btn-success follow" data-price="{{ $user->price }}"  data-timeline-id="{{ $timeline->id }}">
 								<i class="fa fa-heart"></i> {{ trans('common.follow') }}
 							</a>
 						</div>
@@ -51,7 +51,7 @@
 				<!--@else-->
 
 					<div class="col-md-6 col-sm-6 col-xs-6 hidden">
-						<a href="#" class="btn btn-options btn-block btn-default follow " data-price="{{ $user->price }}" data-timeline-id="{{ $timeline->id }}">
+						<a href="#" class="btn btn-options btn-block btn-success follow " data-price="{{ $user->price }}" data-timeline-id="{{ $timeline->id }}">
 							<i class="fa fa-heart"></i> {{ trans('common.follow') }}
 						</a>
 					</div>
@@ -64,7 +64,7 @@
 
 			<!--@endif	<!-- End of [if-3]-->
 				<!--<div class="col-md-6 col-sm-6 col-xs-6 right-col">-->
-				<!--	<a href="#" class="btn btn-options btn-block btn-default" onClick="chatBoxes.sendMessage({{ $timeline->user->id }})">-->
+				<!--	<a href="#" class="btn btn-options btn-block btn-success" onClick="chatBoxes.sendMessage({{ $timeline->user->id }})">-->
 				<!--		<i class="fa fa-inbox"></i> {{ trans('common.message') }}-->
 				<!--	</a>-->
 				<!--</div>-->
@@ -79,8 +79,9 @@
         )
 @endif
 
+@if($user->about != NULL)
 <div class="user-bio-block">
-	<div class="bio-header">{{ trans('common.bio') }}</div>
+	<!--<div class="bio-header">{{ trans('common.bio') }}</div>-->
 	<div class="bio-description">
 		{{ ($user->about != NULL) ? $user->about : trans('messages.no_description') }}
 	</div>
@@ -162,6 +163,7 @@
 		@endif
 	</ul>
 </div>
+@endif
 
 
 <!-- /Albums Widget -->

@@ -31,7 +31,7 @@
                                 Payouts
                             </button>
                             <button class="tablinks" onclick="openCity(event, 'Verified')">
-                                Get Verified
+                                Verify ID
                             </button>
                         </div>
                         <div id="Details" class="tabcontent">
