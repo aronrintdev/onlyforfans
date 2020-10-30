@@ -12230,7 +12230,7 @@ a.thumbnail.active {
     margin-top: -10px;
 }
 .media:first-child {
-    margin-top: -15px;
+    margin-top: 0px;
 }
 .media,
 .media-body {
@@ -27847,8 +27847,8 @@ placeholder .darksharing-modal .modal-body .sharing-details .control-group .sele
     color: #7F8FA4;
 }
 .locked-content {
-    background: url('https://fansplatform.mjmdesign.co/user/gallery/locked.png') center center no-repeat;
-    background-size: cover;
+    background: url('https://fansplatform.mjmdesign.co/user/gallery/locked.png') center center no-repeat !important;
+    background-size: cover !important;
 }
 .login-block {
     width: 450px;
@@ -32933,6 +32933,9 @@ html {
     padding: 14px 15px;
     height: auto;
     border: 1px solid #E6EAEE !important;
+}
+.modal-body .post-author {
+    height: 40px;
 }
 .panel-post .panel-heading .post-author .post-options {
     float: right;
