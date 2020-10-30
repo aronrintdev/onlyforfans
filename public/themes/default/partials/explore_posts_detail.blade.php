@@ -399,6 +399,16 @@
                                     @endforeach
                                 </div>
 
+                                <div class="post-audio-holder">
+                                    @foreach($post->images()->get() as $postImage)
+                                        @if($postImage->type=='audio')
+                                            <audio controls src="{{ url('user/gallery/video/'.$postImage->source) }}">
+                                                <source src="{{ url('user/gallery/video/'.$postImage->source) }}"></source>
+                                            </audio>
+                                        @endif
+                                    @endforeach
+                                </div>
+
                             @endif
 
                         </div>

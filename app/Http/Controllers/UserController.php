@@ -776,7 +776,7 @@ class UserController extends AppBaseController
 
         $user = User::find(Auth::user()->id);
         $user_details = $request->all();
-        $user_details['birthday'] = date('Y-m-d', strtotime($request->birthday));
+        $user_details['birthday'] = Carbon::createFromFormat('m/d/Y', $user_details['birthday']);
         $user->update($user_details);
         $user->timeline->about = $request->about;
         $user->timeline->save();

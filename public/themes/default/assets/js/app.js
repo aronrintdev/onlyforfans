@@ -529,7 +529,7 @@ $(function () {
                 } else {
                     notify('Your post has been successfully scheduled.');
                 }
-                
+                $('#recordingsList').html('');                
             }
             else
             {
@@ -2453,7 +2453,7 @@ $(function () {
 
     //date-picker
     $( "#datepicker" ).datepicker();
-    $( "#datepicker1" ).datepicker({format: "yyyy-mm-dd"});
+    $( "#datepicker1" ).datepicker({format: "mm/dd/yyyy"});
     $( "#datepicker2" ).datepicker();
 
     // focus fix for input

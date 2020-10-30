@@ -31,7 +31,7 @@ class Post extends Model
    *
    * @var array
    */
-    protected $fillable = ['timeline_id', 'description', 'user_id', 'youtube_title', 'youtube_video_id', 'location', 'soundcloud_id', 'soundcloud_title', 'shared_post_id', 'type', 'price', 'active', 'publish_date', 'publish_time'];
+    protected $fillable = ['timeline_id', 'description', 'user_id', 'youtube_title', 'youtube_video_id', 'location', 'soundcloud_id', 'soundcloud_title', 'shared_post_id', 'type', 'price', 'active', 'publish_date', 'publish_time', 'expiration_date', 'expiration_time'];
 
     public function user()
     {

@@ -146,7 +146,7 @@
         top: 50%;
     }
     
-    .favourite-grid .post-v-holder a video {
+    .favourite-grid .post-v-holder a video, .favourite-grid .post-v-holder a audio {
         display: none;
     }
     

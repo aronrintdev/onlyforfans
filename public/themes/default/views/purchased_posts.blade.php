@@ -171,11 +171,22 @@
         min-height: 80vh !important;
     }
 
+
+    .post-image-holder.multiple-images a {
+        width: 100%;
+    }
+    
     @media screen and (max-width: 768px) {
         .grid-sizer,
         .grid-item {
             width: 31.5%;
         }
+    }
+    
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
     }
 </style>
 <!-- main-section -->
@@ -218,16 +229,6 @@
                         @else
                             <div class="no-posts alert alert-warning">{{ trans('common.no_posts') }}</div>
                         @endif
-                    </div>
-                    <div class="page-load-status">
-                        <div class="loader-ellips infinite-scroll-request">
-                            <span class="loader-ellips__dot"></span>
-                            <span class="loader-ellips__dot"></span>
-                            <span class="loader-ellips__dot"></span>
-                            <span class="loader-ellips__dot"></span>
-                        </div>
-                        <p class="infinite-scroll-last">End of content</p>
-                        <p class="infinite-scroll-error">No more pages to load</p>
                     </div>
 				</div>
 			</div>
@@ -285,7 +286,6 @@
                         path: '.next-link',
                         append: '.grid-item',
                         outlayer: msnry,
-                        status: '.page-load-status',
                         history: false
                     });
                 },
@@ -342,7 +342,6 @@
             path: '.next-link',
             append: '.grid-item',
             outlayer: msnry,
-            status: '.page-load-status',
             history: false
         });
 

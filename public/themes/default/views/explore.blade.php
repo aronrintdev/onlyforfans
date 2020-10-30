@@ -196,6 +196,10 @@
             width: 31.5%;
         }
     }
+
+    .post-image-holder.multiple-images a {
+        width: 100%;
+    }
     
     input[type="number"]::-webkit-outer-spin-button,
     input[type="number"]::-webkit-inner-spin-button {
@@ -244,16 +248,6 @@
                                 @endif
                                 @endforeach
                         @endif
-                    </div>
-                    <div class="page-load-status">
-                        <div class="loader-ellips infinite-scroll-request">
-                            <span class="loader-ellips__dot"></span>
-                            <span class="loader-ellips__dot"></span>
-                            <span class="loader-ellips__dot"></span>
-                            <span class="loader-ellips__dot"></span>
-                        </div>
-                        <p class="infinite-scroll-last">End of content</p>
-                        <p class="infinite-scroll-error">No more pages to load</p>
                     </div>
 				</div><!-- /col-md-6 -->
 
@@ -331,7 +325,6 @@
                         path: '.next-link',
                         append: '.grid-item',
                         outlayer: msnry,
-                        status: '.page-load-status',
                         history: false,
                         prefill: true,
                     });
@@ -389,7 +382,6 @@
             path: '.next-link',
             append: '.grid-item',
             outlayer: msnry,
-            status: '.page-load-status',
             history: false,
             prefill: true,
         });

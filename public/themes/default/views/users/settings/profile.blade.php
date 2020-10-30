@@ -56,7 +56,7 @@
 													<span class="input-group-addon addon-left calendar-addon">
 														<span class="fa fa-calendar"></span>
 													</span>
-													{{ Form::text('birthday', Auth::user()->birthday, ['class' => 'form-control', 'id' => 'datepicker1']) }}
+													{{ Form::text('birthday', Auth::user()->birthday ? \Carbon\Carbon::parse(Auth::user()->birthday)->format('m/d/Y') : '', ['class' => 'form-control', 'id' => 'datepicker1']) }}
 													<span class="input-group-addon addon-right angle-addon">
 														<span class="fa fa-angle-down"></span>
 													</span>

@@ -5,6 +5,13 @@
     #account::-webkit-inner-spin-button{
         -webkit-appearance: none;
         margin: 0;
+        appearance: none !important;
+        -moz-appearance: textfield;
+    }
+
+    #account, #routing {
+        appearance: none;
+        -moz-appearance: textfield !important;
     }
 </style>
 	<div class="container">

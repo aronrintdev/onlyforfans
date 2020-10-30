@@ -902,6 +902,13 @@ class TimelineController extends AppBaseController
         } else {
             $input['active'] = true;
         }
+        if (!empty($input['expiration_date']) && !empty($input['expiration_time'])) {
+            $input['expiration_date'] = Carbon::createFromFormat('m/d/Y', $input['expiration_date']);
+            $input['expiration_time'] = Carbon::createFromFormat('H:i A', $input['expiration_time']);
+        } else {
+            $input['expiration_date'] = null;
+            $input['expiration_time'] = null;
+        }
         $post = Post::create($input);
         $post->notifications_user()->sync([Auth::user()->id], true);
         $s3 = Storage::disk('uploads');
@@ -1865,12 +1872,7 @@ class TimelineController extends AppBaseController
                     $query->where('timeline_id', $timeline->id)
                     ->orWhere('user_id', $id);
                 })->whereDate('created_at', '>=', $startDate)->where('active', 1))->orderBy('created_at', $order_by == 'desc' ? 'asc' : 'desc');
-
-                $favouritePosts = Post::with('images')->has('images')
-                    ->where('user_id', Auth::id())
-                    ->orderBy('created_at', 'desc')
-                    ->where('active', 1)
-                    ->get();
+                
             } else {
                 $posts = Post::Where('user_id', $id)->where('active', 1)->orWhere(function ($query) use ($timeline){
                     $query->where('timeline_id', $timeline->id);
@@ -1878,6 +1880,14 @@ class TimelineController extends AppBaseController
                 })->whereDate('created_at', '>=', $startDate)->where('active', 1)->orderBy('created_at', $order_by == 'desc' ? 'asc' : 'desc');
             }
 
+            if ($user->paidSubscribers->where('id', Auth::id())->first() || Auth::id() == $user->id) {
+                $favouritePosts = Post::with('images')->has('images')
+                    ->where('user_id', $user->id)
+                    ->orderBy('created_at', 'desc')
+                    ->where('active', 1)
+                    ->get();
+            }
+            
             $postMedia = $posts->get();
             $posts = $posts->paginate(Setting::get('items_page'));
             $user_lists = UserListType::where(['user_id' => Auth::user()->id])->with('lists')->get();

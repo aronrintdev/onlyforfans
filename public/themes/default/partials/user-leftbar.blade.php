@@ -198,12 +198,16 @@
 	</div>	
 	@endif
 
-    @if(isset($favouritePosts))
+	<?php
+	$audio = true;
+	?>
+	
+    @if(isset($favouritePosts) && count($favouritePosts) > 0)
         <div class="favourite-grid row">
         @foreach($favouritePosts as $index => $post)
             <div class="col-sm-4 col-6">
                 <div class="img">
-                        {!! Theme::partial('explore_posts',compact('post','timeline','next_page_url')) !!}
+					{!! Theme::partial('explore_posts',compact('post','timeline','next_page_url', 'audio')) !!}
                 </div>
             </div>
             @if($index > 4)
@@ -211,4 +215,25 @@
             @endif
         @endforeach
         </div>
-    @endif
+	@else
+		<div class="favourite-grid row">
+			<div class="col-sm-4 col-6">
+				<div class="img"></div>
+			</div>
+			<div class="col-sm-4 col-6">
+				<div class="img"></div>
+			</div>
+			<div class="col-sm-4 col-6">
+				<div class="img"></div>
+			</div>
+			<div class="col-sm-4 col-6">
+				<div class="img"></div>
+			</div>
+			<div class="col-sm-4 col-6">
+				<div class="img"></div>
+			</div>
+			<div class="col-sm-4 col-6">
+				<div class="img"></div>
+			</div>
+		</div>
+	@endif
