@@ -150,6 +150,20 @@
         display: none;
     }
     
+    .favourite-grid .locked-content {
+        height: 100%;
+        width: 100%;
+        margin: 0;
+        font-size: 25px;
+    }
+
+    .favourite-grid .locked-content .btn {
+        background-color: transparent;
+        background-image: none;
+        border-color: transparent;
+        outline: none;
+    }
+    
     @media screen and (min-width: 992px) {
         .tabs-wrapper {
             margin-top: -85px;

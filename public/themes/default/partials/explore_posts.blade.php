@@ -170,5 +170,22 @@
     .post-image-holder a {
         max-height: inherit;
     }
+
+    .modal-body .post-image-holder:not(.single-image)>a {
+        width: 50%;
+        height: 250px;
+        float: left;
+        display: inline-block;
+        padding: 0 15px;
+    }
+
+    .modal-body .post-image-holder:not(.single-image)>a img {
+        width: 100%;
+        object-fit: cover;
+    }
+
+    .modal-body .post-image-holder:not(.single-image) {
+        overflow: auto !important;
+    }
     
 </style>

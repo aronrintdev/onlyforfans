@@ -864,7 +864,7 @@ class UserController extends AppBaseController
         $payment = $user->payment;
         $stripe_price_id = null;
         $stripe_customer_id = null;
-        $price = $input['subscribe_price'];
+        $price = isset($input['subscribe_price']) ? $input['subscribe_price'] : 0;
 
         $username = $user->timeline->username;
         if ($payment != NULL) {

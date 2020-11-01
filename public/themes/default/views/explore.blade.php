@@ -131,8 +131,9 @@
         object-fit: cover;
     }
     
-    .grid-item.multiple-images a {
+    .grid-item .post-image-holder.multiple-images a {
         min-height: 180px;
+        max-height: inherit;
         width: 100% !important;
     }
     
@@ -213,14 +214,14 @@
 			<div class="row">
                 <div class="col-sm-12 col-md-12 col-lg-12">
 
-                    <div style="display: flex; margin-bottom: 10px; justify-content: space-between">
-                        <div class="input-group explore-search-bar" style="display: none; margin-bottom: 0; margin-right: 10px; width: 100%">
-                            <span class="input-group-btn">
-                                <button class="btn btn-default" type="button"><i class="fa fa-search"></i></button>
-                            </span>
-                            <input type="text" id="explorePosts" class="form-control" placeholder="{{ trans('messages.search_post_placeholder') }}">
-                        </div>
-                    </div>
+{{--                    <div style="display: flex; margin-bottom: 10px; justify-content: space-between">--}}
+{{--                        <div class="input-group explore-search-bar" style="display: none; margin-bottom: 0; margin-right: 10px; width: 100%">--}}
+{{--                            <span class="input-group-btn">--}}
+{{--                                <button class="btn btn-default" type="button"><i class="fa fa-search"></i></button>--}}
+{{--                            </span>--}}
+{{--                            <input type="text" id="explorePosts" class="form-control" placeholder="{{ trans('messages.search_post_placeholder') }}">--}}
+{{--                        </div>--}}
+{{--                    </div>--}}
 			   		@if (Session::has('message'))
 				        <div class="alert alert-{{ Session::get('status') }}" role="alert">
 				            {!! Session::get('message') !!}
@@ -354,8 +355,8 @@
             };
         };
         
-        document.getElementById('explorePosts').onkeypress = debounce(ajaxCall, 1500);
-        document.getElementById('explorePosts').onkeydown = debounce(ajaxCall, 1500);
+        // document.getElementById('explorePosts').onkeypress = debounce(ajaxCall, 1500);
+        // document.getElementById('explorePosts').onkeydown = debounce(ajaxCall, 1500);
 
         $grid = $('.grid').masonry({
             // options

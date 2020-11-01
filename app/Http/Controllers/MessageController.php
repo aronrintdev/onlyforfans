@@ -368,12 +368,14 @@ class MessageController extends Controller
             }
 
             $matched = false;
-            foreach ($participants as $key => $participant) {
-                if ($participant->user->id != Auth::user()->id) {
-                    $thread->user = $participant->user;
-                    $thread->user->is_favourite = Auth::user()->favouriteUsers->contains($participant->user->id) ? true : false;
-                    $matched = true;
-                    break;
+            if (count($participants) > 0) {
+                foreach ($participants as $key => $participant) {
+                    if ($participant && $participant->user->id != Auth::user()->id && $participant->user) {
+                        $thread->user = $participant->user;
+                        $thread->user->is_favourite = Auth::user()->favouriteUsers->contains($participant->user->id) ? true : false;
+                        $matched = true;
+                        break;
+                    }
                 }
             }
             
