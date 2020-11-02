@@ -57,6 +57,7 @@
         {!! Theme::partial('right-sidebar') !!}
 
         {!! Theme::partial('footer') !!}
+        {{  Request::path()}}
 
         <script>
           @if(Config::get('app.debug'))
@@ -64,8 +65,11 @@
           @endif
             var pusherConfig = {
                 token: "{{ csrf_token() }}",
-                PUSHER_KEY: "{{ config('broadcasting.connections.pusher.key') }}"
+                PUSHER_KEY: "{{ config('broadcasting.connections.pusher.key') }}",
+                CLUSTER:  "{{ config('broadcasting.connections.pusher.options.cluster') }}"
             };
+          let pusherKey = '{{ config('broadcasting.connections.pusher.key') }}';
+          let pusherCluster = '{{ config('broadcasting.connections.pusher.options.cluster') }}';
        </script>
         <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.5.0/socket.io.min.js"></script>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" />
@@ -79,5 +83,6 @@
         </script>
         {!! Theme::asset()->container('footer')->scripts() !!}
 
-    </body>
+    </body>   
+
 </html>

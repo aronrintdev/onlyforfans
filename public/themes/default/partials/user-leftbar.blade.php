@@ -9,11 +9,7 @@
     <div class="online">
         <div class="bio-header">Status</div>
 	    <div class="bio-description">
-            @if($user->is_online)
-		    <span style="color: #38a169;">Online Now</span>
-            @elseif(isset($user->last_logged))
-            Last seen {{ \Carbon\Carbon::parse($user->last_logged)->diffForHumans() }}    
-            @endif
+		    <span class="status-holder-{{ $user->id }} {{ $user->last_logged ? '' : 'text-success' }}">{{ $user->last_logged ? 'Last seen at: '.\Carbon\Carbon::parse($user->last_logged)->timezone(Auth::user()->timezone)->toDayDateTimeString() : 'Online Now' }}</span>
             @if(canMessageToUser(Auth::user(), $user))
     			<a href="#" class="btn btn-submit btn-success" style="display:block; margin-top:10px;" onClick="chatBoxes.sendMessage({{ $timeline->user->id }})">
     				<i class="fa fa-inbox"></i> {{ trans('common.message') }}

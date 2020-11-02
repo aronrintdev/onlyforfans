@@ -48,6 +48,7 @@ return [
     'support' => 'Contact Support',
     'saved_post' => 'Saved & Purchased',
     'saved_items' => 'Saved Items',
+    'purchased_items' => 'Purchased Items',
 
     'faq' => 'FAQ',
     'support_footer' => 'Support',

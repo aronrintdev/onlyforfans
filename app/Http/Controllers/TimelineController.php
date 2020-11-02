@@ -382,7 +382,7 @@ class TimelineController extends AppBaseController
             $posts = Post::where('description', 'like', "%{$hashtag}%")->where('active', 1)->whereIn('timeline_id', DB::table('followers')->where('follower_id', $id)->whereIn('leader_id', $followingIds)->pluck('leader_id'))->latest()->paginate(Setting::get('items_page'));
         } // else show the normal feed
         else {
-            $query = Post::whereIn('user_id', function ($query) use ($id, $followingIds, $timeline) {
+            $query = Post::where('active', 1)->whereIn('user_id', function ($query) use ($id, $followingIds, $timeline) {
                 $query->select('leader_id')
                     ->from('followers')
                     ->where('follower_id', $id)
@@ -659,7 +659,7 @@ class TimelineController extends AppBaseController
         if ($request->ajax) {
             $responseHtml = '';
             foreach ($posts as $post) {
-                $responseHtml .= $theme->partial('explore_posts', ['post' => $post, 'timeline' => $timeline, 'next_page_url' => $posts->appends(['ajax' => true, 'hashtag' => $request->hashtag])->nextPageUrl()]);
+                $responseHtml .= $theme->partial('post', ['post' => $post, 'timeline' => $timeline, 'next_page_url' => $posts->appends(['ajax' => true, 'hashtag' => $request->hashtag])->nextPageUrl()]);
             }
 
             return $responseHtml;
@@ -790,7 +790,7 @@ class TimelineController extends AppBaseController
 
         $responseHtml = '';
         foreach ($posts as $post) {
-            $responseHtml .= $theme->partial('explore_posts', ['post' => $post, 'timeline' => $timeline, 'next_page_url' => $posts->appends(['ajax' => true, 'hashtag' => $request->hashtag])->nextPageUrl()]);
+            $responseHtml .= $theme->partial('post', ['post' => $post, 'timeline' => $timeline, 'next_page_url' => $posts->appends(['ajax' => true, 'hashtag' => $request->hashtag])->nextPageUrl()]);
         }
 
         return Response::json([
@@ -1781,7 +1781,7 @@ class TimelineController extends AppBaseController
 //                        ->where('active', 1);
 //                })->orWhere('user_id', $id)->where('active', 1)->latest()->paginate(Setting::get('items_page'));
 //            } else {
-                $posts = Post::Where('user_id', Auth::id())->Where('timeline_id', $timeline->id)->whereDate('created_at', '>=', $startDate)->where('active', 1)->orderBy('created_at', $order_by == 'desc' ? 'asc' : 'desc');
+                $posts = Post::Where('user_id', $user->id)->Where('timeline_id', $timeline->id)->whereDate('created_at', '>=', $startDate)->where('active', 1)->orderBy('created_at', $order_by == 'desc' ? 'asc' : 'desc');
 
                 $postMedia = $posts->get();
                 $posts = $posts->paginate(Setting::get('items_page'));

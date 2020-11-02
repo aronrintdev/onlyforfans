@@ -2842,18 +2842,18 @@ $.ajaxSetup({
 //     updateUserStatus(user, 0);
 // });
 
-window.setLastSeenOfUser = function (status) {
-    $.ajax({
-        type: 'post',
-        url: setLastSeenURL,
-        data: { status: status },
-        success: function (data) {
-        },
-    });
-};
+// window.setLastSeenOfUser = function (status) {
+//     $.ajax({
+//         type: 'post',
+//         url: setLastSeenURL,
+//         data: { status: status },
+//         success: function (data) {
+//         },
+//     });
+// };
 
 //set user status online
-setLastSeenOfUser(1);
+// setLastSeenOfUser(1);
 
 // window.onbeforeunload = function () {
 //     Echo.leave('user-status');
@@ -2877,35 +2877,137 @@ setLastSeenOfUser(1);
 //     updateUserStatus(user, 0);
 // });
 
-$(window).load(function () {
-    setLastSeenOfUser(1);
-    return undefined;
-});
+// $(window).load(function () {
+//     setLastSeenOfUser(1);
+//     return undefined;
+// });
+//
+// $(window).blur(function () {
+//     setTimeout(function () {        
+//         setLastSeenOfUser(0);
+//         return undefined;
+//     }, 5000)
+// });
+//
+// $(window).focus(function () {
+//     setLastSeenOfUser(1);
+//     return undefined;
+// });
+//
+// document.addEventListener("visibilitychange", function() {
+//     setTimeout(function () {
+//         if (!document.hidden) {
+//             setLastSeenOfUser(1);
+//         } else {
+//             setLastSeenOfUser(0);
+//         }
+//     }, 5000)
+// });
+//
+// window.onbeforeunload = function () {
+//     setLastSeenOfUser(0);
+//     //return undefined; to prevent dialog while window.onbeforeunload
+//     return undefined;
+// };
 
-$(window).blur(function () {
-    setTimeout(function () {        
-        setLastSeenOfUser(0);
-        return undefined;
-    }, 5000)
-});
+// import Echo from 'laravel-echo';
+//
+// window.Echo = new Echo({
+//     broadcaster: 'pusher',
+//     key: pusherKey,
+//     cluster: pusherCluster,
+//     encrypted: true,
+//     auth: {
+//         headers: {
+//             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+//         },
+//     },
+// });
+//
+// console.log('loaded');
 
-$(window).focus(function () {
-    setLastSeenOfUser(1);
-    return undefined;
-});
+window.setLastSeenOfUser = function (status) {
+    $.ajax({
+        type: 'post',
+        url: setLastSeenURL,
+        data: { status: status },
+        success: function (data) {
+        },
+    });
+};
 
-document.addEventListener("visibilitychange", function() {
-    setTimeout(function () {
-        if (!document.hidden) {
-            setLastSeenOfUser(1);
-        } else {
-            setLastSeenOfUser(0);
-        }
-    }, 5000)
-});
+//set user status online
+setLastSeenOfUser(1);
+
+window.getCalenderFormatForLastSeen = function (
+    dateTime, format = 'hh:mma', needToConvertLocalDate = 1) {
+    let date = (needToConvertLocalDate) ? moment(dateTime).
+    utc(dateTime).
+    local() : moment(dateTime);
+    return date.calendar(null, {
+        sameDay: '[Today], ' + format,
+        lastDay: '[Yesterday], ' + format,
+        lastWeek: 'dddd, ' + format,
+        sameElse: function () {
+            if (moment().year() === moment(dateTime).year()) {
+                return 'MMM D, ' + format;
+            } else {
+                return 'MMM D YYYY, ' + format;
+            }
+        },
+    });
+};
+
+window.updateUserStatus = function (userId, status) {
+    let statusHolder = $(".status-holder-"+ userId);
+
+    if (status == 1) {
+        statusHolder.html('Online Now').addClass('text-success');        
+    } else {
+        setTimeout(function () {            
+            let last_seen = 'Last seen at: ' +
+                getCalenderFormatForLastSeen(Date(), 'hh:mma', 0);
+            statusHolder.html(last_seen).removeClass('text-success');  
+        }, 3000)
+    }
+};
+
+// LaravelEcho.join(`user-status`).here((users) => {
+//     setTimeout(function () {
+//         $.each(users, function (index, user) {
+//             updateUserStatus(user, 1);
+//         });
+//     }, 1000);
+// }).joining((user) => {
+//     updateUserStatus(user, 1);
+// }).leaving((user) => {
+//     updateUserStatus(user, 0);
+// });
 
 window.onbeforeunload = function () {
+    // LaravelEcho.leave('user-status');
+    // updateUserStatus(1, 0);
     setLastSeenOfUser(0);
     //return undefined; to prevent dialog while window.onbeforeunload
     return undefined;
 };
+
+// LaravelEcho.join(`user-status`);
+setLastSeenOfUser(1);
+
+let pusherObj;
+pusherObj = new Pusher(pusherConfig.PUSHER_KEY, {
+    encrypted: true,
+    auth: {
+        headers: {
+            'X-CSRF-Token': pusherConfig.token
+        },
+        params: {
+            username: "vijay"
+        }
+    }
+});
+
+pusherObj.subscribe('user-status-updates').bind('App\\Events\\UserStatusUpdates', function(data) {
+    updateUserStatus(data.userId, data.status);
+});

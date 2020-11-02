@@ -37,29 +37,29 @@
 
 				<!--@if(Auth::check() || !$user->followers->contains($user->id))-->
 
-						<div class="col-md-6 col-sm-6 col-xs-6 left-col">
-							<a href="{{ url('/login') }}" class="btn btn-options btn-block btn-success follow" data-price="{{ $user->price }}"  data-timeline-id="{{ $timeline->id }}">
-								<i class="fa fa-heart"></i> {{ trans('common.follow') }}
-							</a>
-						</div>
+{{--						<div class="col-md-6 col-sm-6 col-xs-6 left-col">--}}
+{{--							<a href="{{ url('/login') }}" class="btn btn-options btn-block btn-default follow" data-price="{{ $user->price }}"  data-timeline-id="{{ $timeline->id }}">--}}
+{{--								<i class="fa fa-heart"></i> {{ trans('common.follow') }}--}}
+{{--							</a>--}}
+{{--						</div>--}}
 
-						<div class="col-md-6 col-sm-6 col-xs-6 hidden">
-							<a href="#" class="btn btn-options btn-block btn-success unfollow" data-price="{{ $user->price }}"  data-timeline-id="{{ $timeline->id }}">
-								<i class="fa fa-check"></i> {{ trans('common.following') }}
-							</a>
-						</div>
-				<!--@else-->
+{{--						<div class="col-md-6 col-sm-6 col-xs-6 hidden">--}}
+{{--							<a href="#" class="btn btn-options btn-block btn-success unfollow" data-price="{{ $user->price }}"  data-timeline-id="{{ $timeline->id }}">--}}
+{{--								<i class="fa fa-check"></i> {{ trans('common.following') }}--}}
+{{--							</a>--}}
+{{--						</div>--}}
+{{--				<!--@else-->--}}
 
-					<div class="col-md-6 col-sm-6 col-xs-6 hidden">
-						<a href="#" class="btn btn-options btn-block btn-success follow " data-price="{{ $user->price }}" data-timeline-id="{{ $timeline->id }}">
-							<i class="fa fa-heart"></i> {{ trans('common.follow') }}
-						</a>
-					</div>
+{{--					<div class="col-md-6 col-sm-6 col-xs-6 hidden">--}}
+{{--						<a href="#" class="btn btn-options btn-block btn-success follow " data-price="{{ $user->price }}" data-timeline-id="{{ $timeline->id }}">--}}
+{{--							<i class="fa fa-heart"></i> {{ trans('common.follow') }}--}}
+{{--						</a>--}}
+{{--					</div>--}}
 
-					<div class="col-md-6 col-sm-6 col-xs-6 left-col">
-						<a href="#" class="btn btn-options btn-block btn-success unfollow" data-price="{{ $user->price }}"  data-timeline-id="{{ $timeline->id }}">	<i class="fa fa-check"></i> {{ trans('common.following') }}
-						</a>
-					</div>
+{{--					<div class="col-md-6 col-sm-6 col-xs-6 left-col">--}}
+{{--						<a href="#" class="btn btn-options btn-block btn-success unfollow" data-price="{{ $user->price }}"  data-timeline-id="{{ $timeline->id }}">	<i class="fa fa-check"></i> {{ trans('common.following') }}--}}
+{{--						</a>--}}
+{{--					</div>--}}
 				<!--@endif-->
 
 			<!--@endif	<!-- End of [if-3]-->
@@ -80,14 +80,31 @@
 @endif
 
 @if($user->about != NULL)
-<div class="user-bio-block">
+<div class="user-bio-block follow-links">
 	<!--<div class="bio-header">{{ trans('common.bio') }}</div>-->
 	<div class="bio-description">
 		{{ ($user->about != NULL) ? $user->about : trans('messages.no_description') }}
 	</div>
+	@if($user->wishlist)
 	<a target="_blank" href="{{ $user->wishlist }}">{{ $user->wishlist }}</a><br>
+	@endif
+	@if($user->website)
 	<a target="_blank" href="{{ $user->website }}">{{ $user->website }}</a><br>
+	@endif
+	@if($user->instagram)
 	<a target="_blank" href="{{ $user->instagram }}">{{ $user->instagram }}</a><br>
+	@endif
+
+	<div class="subscribe">
+		<div class="bio-header">Subscribe</div>
+		<div class="bio-description">
+			<div class="left-col">
+				<a href="javascript:void(0);" class="btn btn-submit btn-default" style="display:block;" data-price="{{ $user->price }}"  data-timeline-id="{{ $timeline->id }}">
+					<i class="fa fa-heart"></i> {{ trans('common.follow') }}
+				</a>
+			</div>
+		</div>
+	</div>
 	
 	<ul class="list-unstyled list-details">
 		@if($user->hobbies != NULL)

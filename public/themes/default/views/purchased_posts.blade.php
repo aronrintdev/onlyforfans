@@ -193,44 +193,56 @@
 	<!-- <div class="main-content"> -->
 		<div class="container">
 			<div class="row">
-                <div class="col-lg-12">
-
-                    <div style="display: flex; justify-content: space-between">
-                        <div class="input-group explore-search-bar" style="display: none; margin-bottom: 10px; width: calc(100% - 200px)">
+                <div class="col-md-12 col-lg-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading no-bg panel-settings" style="display: flex; justify-content: space-between; flex-wrap: wrap;">
+                            <h3 class="panel-title">
+                                {{ trans('common.purchased_items') }}
+                            </h3>
+                        </div>
+                        <div class="panel-body nopadding">
+                            <ul class="nav nav-pills heading-list">
+                                <li class="active"><a href="#posts" data-toggle="pill" class="text">{{ trans('common.posts') }}<span></span></a></li>
+                                <!-- <li class="divider">&nbsp;</li> -->
+                            </ul>
+                        </div>
+                        <div class="tab-content" style="margin-top:15px;">
+                            <div id="posts" class="tab-pane fade active in">
+                                <div style="display: flex; justify-content: space-between">
+                                    <div class="input-group explore-search-bar" style="display: none; margin-bottom: 10px; width: 100%;">
                         <span class="input-group-btn">
                             <button class="btn btn-default" type="button"><i class="fa fa-search"></i></button>
                         </span>
-                            <input type="text" id="explorePosts" class="form-control" placeholder="{{ trans('messages.search_post_placeholder') }}">
-                        </div><!-- /input-group -->
-                        <h2 style="margin: 0; display: none" class="purchased-posts-title">Purchased Posts</h2>
-                    </div>                        
-			   		@if (Session::has('message'))
-				        <div class="alert alert-{{ Session::get('status') }}" role="alert">
-				            {!! Session::get('message') !!}
-				        </div>
-				    @endif
-
-					@if(isset($active_announcement))
-						<div class="announcement alert alert-info">
-							<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-							<h3>{{ $active_announcement->title }}</h3>
-							<p>{{ $active_announcement->description }}</p>
-						</div>
-					@endif
-                    <div class="no-posts alert alert-warning" style="display: none">{{ trans('common.no_posts') }}</div>
-                    <div class="explore-posts grid are-images-unloaded">
-                        @if($posts->count() > 0)
-                            <div class="grid-sizer"></div>
-                            @foreach($posts as $post)
-                                @if($post->type != \App\Post::PAID_TYPE)
-                                {!! Theme::partial('explore_posts',compact('post','timeline','next_page_url')) !!}
+                                        <input type="text" id="explorePosts" class="form-control" placeholder="{{ trans('messages.search_post_placeholder') }}">
+                                    </div><!-- /input-group -->
+                                </div>
+                                @if (Session::has('message'))
+                                    <div class="alert alert-{{ Session::get('status') }}" role="alert">
+                                        {!! Session::get('message') !!}
+                                    </div>
                                 @endif
-                            @endforeach
-                        @else
-                            <div class="no-posts alert alert-warning">{{ trans('common.no_posts') }}</div>
-                        @endif
+
+                                @if(isset($active_announcement))
+                                    <div class="announcement alert alert-info">
+                                        <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                                        <h3>{{ $active_announcement->title }}</h3>
+                                        <p>{{ $active_announcement->description }}</p>
+                                    </div>
+                                @endif
+                                <div class="no-posts alert alert-warning" style="display: none">{{ trans('common.no_posts') }}</div>
+                                <div class="timeline-posts timeline-default">
+                                    @if(count($posts) > 0)
+                                        @foreach($posts as $post)
+                                            {!! Theme::partial('post',compact('post','timeline','next_page_url')) !!}
+                                        @endforeach
+                                    @else
+                                        <p class="no-posts">{{ trans('messages.no_posts') }}</p>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
                     </div>
-				</div>
+                </div>
 			</div>
 		</div>
 	<!-- </div> -->
@@ -255,39 +267,12 @@
                 success: function (result) {
                     let $ajaxGrid;
                     $('.no-posts').hide();
-                    $('.explore-posts').removeClass('lesser-hight');
+                    $('.timeline-posts').removeClass('lesser-hight');
                     if (result.data == '') {
                         $('.no-posts').show();
-                        $('.explore-posts').addClass('lesser-hight');
+                        $('.timeline-posts').addClass('lesser-hight');
                     }
-                    $('.grid').addClass('are-images-unloaded');
-                    $('.explore-posts').html(result.data);
-                    $('.explore-posts').prepend('<div class="grid-sizer"></div>');
-                    $ajaxGrid = $('.grid').masonry({
-                        // options
-                        itemSelector: '.none',
-                        percentPosition: true,
-                        columnWidth: '.grid-sizer',
-                        gutter: 10
-                    });
-
-                    var msnry = $ajaxGrid.data('masonry');
-
-                    // initial items reveal
-                    $ajaxGrid.imagesLoaded( function() {
-                        $ajaxGrid.removeClass('are-images-unloaded');
-                        $ajaxGrid.masonry( 'option', { itemSelector: '.grid-item' });
-                        var $items = $ajaxGrid.find('.grid-item');
-                        $ajaxGrid.masonry( 'appended', $items );
-                    });
-
-                    $('.explore-posts').infiniteScroll({
-                        // options
-                        path: '.next-link',
-                        append: '.grid-item',
-                        outlayer: msnry,
-                        history: false
-                    });
+                    $('.timeline-posts').html(result.data);
                 },
                 error: function (result) {
                     console.log(result);
@@ -316,48 +301,5 @@
         
         document.getElementById('explorePosts').onkeypress = debounce(ajaxCall, 1500);
         document.getElementById('explorePosts').onkeydown = debounce(ajaxCall, 1500);
-        
-        $grid = $('.grid').masonry({
-            // options
-            itemSelector: '.none',
-            percentPosition: true,
-            columnWidth: '.grid-sizer',
-            gutter: 10,
-            visibleStyle: { transform: 'translateY(0) scale(1)', opacity: 1 },
-            hiddenStyle: { transform: 'translateY(100px) scale(.8)', opacity: 0 },
-        });
-
-        var msnry = $grid.data('masonry');
-
-        // initial items reveal
-        $grid.imagesLoaded( function() {
-            $grid.removeClass('are-images-unloaded');
-            $grid.masonry( 'option', { itemSelector: '.grid-item' });
-            var $items = $grid.find('.grid-item');
-            $grid.masonry( 'appended', $items );
-        });
-
-        $('.explore-posts').infiniteScroll({
-            // options
-            path: '.next-link',
-            append: '.grid-item',
-            outlayer: msnry,
-            history: false
-        });
-
-        function gridWrapperHeight()
-        {
-            if (screen.height > 1200) {
-                $('.grid').addClass('more-height')
-            } else {
-                $('.grid').removeClass('more-height')
-            }
-        }
-
-        gridWrapperHeight();
-
-        $( window ).resize(function () {
-            gridWrapperHeight();
-        })
     };
 </script>

@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\BlockedProfile;
 use App\Comment;
 use App\Event;
+use Event as PusherEvent;
+use App\Events\NotificationPublished;
+use App\Events\UserStatusUpdates;
 use App\Group;
 use App\Hashtag;
 use App\Http\Requests\BlockedProfileRequest;
@@ -1818,12 +1821,13 @@ class UserController extends AppBaseController
      */
     public function updateLastSeen(Request $request)
     {
-        $user = Auth::user();
+        $user = $request->user();
 
-        $lastSeen = ($request->has('status') && $request->get('status') > 0) ? null : Carbon::now();
+        $lastSeen = ($request->has('status') && $request->get('status') > 0) ? null : Carbon::now('UTC');
 
         $user->update(['last_logged' => $lastSeen, 'is_online' => $request->get('status')]);
-        
-        return response()->json(['status' => '200', 'message' => 'Status changed']);
+        PusherEvent::fire(new UserStatusUpdates($user->id, $request->get('status')));
+
+        return $this->sendResponse(['user' => $user], 'Last seen updated successfully.');
     }
 }

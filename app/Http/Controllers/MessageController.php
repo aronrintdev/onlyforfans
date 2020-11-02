@@ -370,7 +370,7 @@ class MessageController extends Controller
             $matched = false;
             if (count($participants) > 0) {
                 foreach ($participants as $key => $participant) {
-                    if ($participant && $participant->user->id != Auth::user()->id && $participant->user) {
+                    if ($participant && $participant->user && $participant->user->id != Auth::user()->id) {
                         $thread->user = $participant->user;
                         $thread->user->is_favourite = Auth::user()->favouriteUsers->contains($participant->user->id) ? true : false;
                         $matched = true;
