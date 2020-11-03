@@ -24,7 +24,20 @@
         .grid-sizer,
         .grid-item {
             width: 31% !important;
-        }    
+        }
+        
+        .close-post-modal {
+            height: 20px;
+            display: block !important;
+            width: 20px;
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.5);
+            background: #fff !important;
+            opacity: 1;
+            border-radius: 50%;
+        }
     }
     
     .grid-item {
@@ -240,12 +253,14 @@
                         @if($posts->count() > 0)
                             <div class="grid-sizer"></div>
                                 @foreach($posts as $post)
-                                    @if(Auth::user()->PurchasedPostsArr->contains($post->id) && canUserSeePost(Auth::id(), $post->user->id))
+                                    @if(!Auth::user()->PurchasedPostsArr->contains($post->id))
+                                    @if(canUserSeePost(Auth::id(), $post->user->id))
                                         {!! Theme::partial('explore_posts',compact('post','timeline','next_page_url')) !!}
                                     @else
                                         @if(isset($next_page_url))
                                             <a class="jscroll-next next-link hidden" href="{{ $next_page_url }}">{{ trans('messages.get_more_posts') }}</a>
                                         @endif
+                                    @endif
                                 @endif
                                 @endforeach
                         @endif
@@ -370,6 +385,20 @@
 
         var msnry = $grid.data('masonry');
 
+        $grid.on('append.infiniteScroll', function () {
+            setTimeout(function () {
+                $grid.masonry();
+            }, 500)
+        })
+        $grid.on('request.infiniteScroll', function () {
+            $grid.masonry();
+        })
+        $grid.on('load.infiniteScroll', function () {
+            setTimeout(function () {
+                $grid.masonry();
+            }, 500)
+        })
+        
         // initial items reveal
         $grid.imagesLoaded( function() {
             $grid.removeClass('are-images-unloaded');

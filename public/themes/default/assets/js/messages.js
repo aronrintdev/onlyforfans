@@ -77,7 +77,7 @@ var vue = new Vue({
                 data.message.user = data.sender;
                 if(vm.currentConversation.id ==  data.message.thread_id)
                 {
-                    vm.currentConversation.conversationMessages.push(data.message);    
+                    vm.currentConversation.conversationMessages.data.push(data.message);    
                     setTimeout(function(){
                         vm.timeago();
                         vm.autoScroll('.coversations-thread');

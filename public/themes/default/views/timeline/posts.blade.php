@@ -178,7 +178,15 @@
     .locked-content.media-locked {
         margin: 0;
         height: 180px;
-    }       
+    }
+    
+    .fancybox-button--play {
+        display: none !important;
+    }
+    
+    .fancybox-button--thumbs {
+        display: none !important;
+    }
 </style>
 <div class="container profile-posts">
 	<div class="row">

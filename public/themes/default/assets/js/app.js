@@ -2965,9 +2965,9 @@ window.updateUserStatus = function (userId, status) {
         statusHolder.html('Online Now').addClass('text-success');        
     } else {
         setTimeout(function () {            
-            let last_seen = 'Last seen at: ' +
+            let last_seen = 'Last seen ' +
                 getCalenderFormatForLastSeen(Date(), 'hh:mma', 0);
-            statusHolder.html(last_seen).removeClass('text-success');  
+            statusHolder.html('Last seen less than a minute ago').removeClass('text-success');  
         }, 3000)
     }
 };

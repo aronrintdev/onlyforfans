@@ -12,6 +12,7 @@
 
                 <div class="panel panel-default panel-post animated" id="post{{ $post->id }}">
                     <div class="panel-heading no-bg">
+                        <button type="button" style="display: none;" class="close close-post-modal" data-dismiss="modal">&times;</button>
                         <div class="post-author">
 
                             {{--            Check if subscribed--}}
