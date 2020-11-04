@@ -33,7 +33,6 @@
         position: absolute;
         transform: translateX(-50%);
         bottom: 0;
-        font-weight: bold;
         display: block;
         max-width: 100%;
     }
@@ -80,7 +79,6 @@
     
     .filter-modal-btn {
         margin-left: 10px;
-        font-weight: bold;
     }
     
     #subscriberFilterModal ul {
@@ -106,7 +104,7 @@
     }
 
     #subscriberFilterModal ul label {
-        vertical-align: middle;
+        /* vertical-align: middle; */
         font-size: 14px;
         text-transform: uppercase;
         cursor: pointer;
@@ -179,7 +177,7 @@
                                             <div class="modal-dialog">
                                                 <div class="modal-content">
                                                     <div class="modal-header">
-                                                        <h4 class="modal-title">Filter Subscribers</h4>
+                                                        <h3 class="modal-title">Filter Subscribers</h3>
                                                     </div>
                                                     <div class="modal-body">
                                                         <ul>

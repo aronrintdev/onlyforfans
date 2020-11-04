@@ -161,8 +161,8 @@
                                         </a>
                                         @if($post->user->verified)
                                             <span class="verified-badge bg-success">
-                    <i class="fa fa-check"></i>
-                </span>
+                                                <i class="fa fa-check"></i>
+                                            </span>
                                         @endif
 
                                         @if(isset($sharedOwner))
@@ -476,10 +476,8 @@
                             }
                         }
                     }
-
                     ?>
-
-                    {{--            Check if subscribed--}}
+                    {{--     Check if subscribed--}}
                     {{--     @if(isset($user) == false || $user->followers->contains(Auth::user()->id) || $user->id == Auth::user()->id  || $user->payment == NULL|| ($user->payment != NULL && $user->payment->price == 0))--}}
                     @if(isset($user) == false || $user->followers->contains(Auth::user()->id) || $user->id == Auth::user()->id  || $user->price == 0)
                         <div class="panel-footer fans">
@@ -487,7 +485,6 @@
                                 @if(!$post->users_liked->contains(Auth::user()->id))
 
                                     <li><a href="#" class="like-post like-{{ $post->id }}" data-post-id="{{ $post->id }}"><i class="fa fa-thumbs-o-up"></i>{{ trans('common.like') }}</a></li>
-
                                     <li class="hidden"><a href="#" class="like-post unlike-{{ $post->id }}" data-post-id="{{ $post->id }}"><i class="fa fa-thumbs-o-down"></i>{{ trans('common.unlike') }}</a></li>
                                 @else
                                     <li class="hidden"><a href="#" class="like-post like-{{ $post->id }}" data-post-id="{{ $post->id }}"><i class="fa fa-thumbs-o-up"></i>{{ trans('common.like') }}</a></li>
@@ -496,7 +493,6 @@
                                 @if($post->comments->count() > 0 || $post->user_id == Auth::user()->id || $display_comment == "everyone")
                                 <li><a href="#" class="show-comments"><i class="fa fa-comment-o"></i>{{ trans('common.comment') }}</a></li>
                                 @endif
-
                                 @if(Auth::user()->id != $post->user_id)
                                     @if(!$post->users_shared->contains(Auth::user()->id))
                                         <li><a href="#" class="share-post share" data-post-id="{{ $post->id }}"><i class="fa fa-share-square-o"></i>{{ trans('common.share') }}</a></li>
@@ -508,20 +504,16 @@
                                         <li class="hidden"><a href="#" class="share-post share" data-post-id="{{ $post->id }}"><i class="fa fa-share-square-o"></i>{{ trans('common.share') }}</a></li>
                                         <li><a href="#" class="share-post shared" data-post-id="{{ $post->id }}"><i class="fa fa fa-share-square-o"></i>{{ trans('common.unshare') }}</a></li>
                                     @endif
-
                                     <li>
                                         <a href="#" class="send-tip-post" data-toggle="modal" data-target="#sendTipModal{{ $post->id }}"><i class="fa fa-dollar"></i>{{ trans('common.send_tip') }}</a>
                                     </li>
-
                                 @endif
-
                             </ul>
                         </div>
-
                         @if($post->comments->count() > 0 || $post->user_id == Auth::user()->id || $display_comment == "everyone")
                             <div class="comments-section all_comments" style="display:none">
                                 <div class="comments-wrapper">
-                                    <div class="to-comment">  <!-- to-comment -->
+                                    <div class="to-comment">
                                         @if($display_comment == "only_follow" || $display_comment == "everyone" || $user_setting == "everyone" || $post->user_id == Auth::user()->id)
                                             <div class="commenter-avatar">
                                                 <a href="#"><img src="{{ Auth::user()->avatar }}" alt="{{ Auth::user()->name }}" title="{{ Auth::user()->name }}"></a>
@@ -530,7 +522,6 @@
                                                 <form action="#" class="comment-form" method="post" files="true" enctype="multipart/form-data" id="comment-form">
                                                     <div class="comment-holder">{{-- commentholder --}}
                                                         <input class="form-control post-comment" autocomplete="off" data-post-id="{{ $post->id }}" name="post_comment" placeholder="{{ trans('messages.comment_placeholder') }}" >
-
                                                         <input type="file" class="comment-images-upload hidden" accept="image/jpeg,image/png,image/gif" name="comment_images_upload">
                                                         <ul class="list-inline meme-reply hidden">
                                                             <li><a href="#" id="imageComment"><i class="fa fa-camera" aria-hidden="true"></i></a></li>
@@ -542,58 +533,51 @@
                                             </div>
                                             <div class="clearfix"></div>
                                         @endif
-                                    </div><!-- to-comment -->
-
-                                    <div class="comments post-comments-list"> <!-- comments/main-comment  -->
+                                    </div>
+                                    <div class="comments post-comments-list">
                                         @if($post->comments->count() > 0)
                                             @foreach($post->comments as $comment)
                                                 {!! Theme::partial('comment',compact('comment','post')) !!}
                                             @endforeach
                                         @endif
-                                    </div><!-- comments/main-comment  -->
+                                    </div>
                                 </div>
-                            </div><!-- /comments-section -->
+                            </div>
                         @endif
                     @endif
                 </div>
-
-
             </div>
         </div>
-
     </div>
 </div>
-
 <div id="sendTipModal{{ $post->id }}" class="tip-modal modal fade" role="dialog" tabindex='1'>
-
     <input type="hidden" value="{{$post->id}}" id="post-id">
-
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-body">
                 <div class="modal-header lists-modal" style="display: flex; justify-content: space-between">                    						
-                    <h3 class="modal-title lists-modal-title">
+                    <h3 class="modal-title">
                         {{ trans("common.send_tip") }}
                     </h3>
                     @if(!Auth::user()->is_payment_set)
-                        <em class="text-danger">Please add Payment card.</em>
+                        <em class="text-danger">Please add Payment Method.</em>
                     @endif
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
                 </div>
-
                 <div class="b-stats-row__content">
-                    <input type="number" id="etTipAmount" class="form-control etTipAmount" placeholder="Tip amount" step="0.1">
+                    <input id="etTipAmount" class="form-control etTipAmount" placeholder="Tip amount" step="0.1">
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" id="cancelSendTip" class="btn btn-default " data-dismiss="modal">{{ trans('common.cancel') }}</button>
+                <!-- <button type="button" id="cancelSendTip" class="btn btn-default " data-dismiss="modal">{{ trans('common.cancel') }}</button> -->
+                <a href="#" class="filter-modal-btn" data-dismiss="modal">Cancel</a>
                 @if(Auth::user()->is_payment_set)
-                <button type="button" id="sendTip" class="btn btn-primary sendTip" disabled>{{ trans('common.send_tip') }}</button>
+                <!-- <button type="button" id="sendTip" class="btn btn-primary sendTip" disabled>{{ trans('common.send_tip') }}</button> -->
+                <a href="#" class="btn filter-modal-btn btn-success" id="applyFilter">{{ trans('common.send_tip') }}</a>
                 @else
                 <a href="{{url(Auth::user()->username).'/settings/addpayment' }}" id="addPayment" class="btn btn-warning">{{ trans('common.add_payment') }}</a>
                 @endif
             </div>
         </div>
-
     </div>
 </div>
