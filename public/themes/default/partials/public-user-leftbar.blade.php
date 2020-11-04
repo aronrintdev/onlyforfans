@@ -95,12 +95,37 @@
 	<a target="_blank" href="{{ $user->instagram }}">{{ $user->instagram }}</a><br>
 	@endif
 
+	<div class="bio-description">
+		<a href="{{ url('login') }}" class="btn btn-submit btn-success" style="display:block; margin-top:10px;">
+			<i class="fa fa-inbox"></i> {{ trans('common.message') }}
+		</a>
+	</div>
+	<div class="follow">
+		<div class="bio-header">Follow</div>
+		<div class="bio-description">
+			<div class="follow-btn">
+				<a href="{{ url('login') }}" class="btn btn-submit btn-default" style="display:block;" data-price="{{ $user->price }}" data-follow="1"  data-timeline-id="{{ $timeline->id }}">
+					Follow for Free
+				</a>
+			</div>
+		</div>
+	</div>
 	<div class="subscribe">
 		<div class="bio-header">Subscribe</div>
 		<div class="bio-description">
 			<div class="left-col">
-				<a href="javascript:void(0);" class="btn btn-submit btn-default" style="display:block;" data-price="{{ $user->price }}"  data-timeline-id="{{ $timeline->id }}">
+				<a href="{{ url('login') }}" class="btn btn-submit btn-default" style="display:block;" data-price="{{ $user->price }}"  data-timeline-id="{{ $timeline->id }}">
 					<i class="fa fa-heart"></i> {{ trans('common.follow') }}
+				</a>
+			</div>
+		</div>
+	</div>
+	<div class="subscribe">
+		<div class="bio-header"> {{ trans('common.send_tip') }}</div>
+		<div class="bio-description">
+			<div class="left-col">
+				<a href="{{ url('login') }}" class="btn btn-submit btn-success" style="display:block;">
+					<i class="fa fa-dollar"></i> {{ trans('common.send_tip') }}
 				</a>
 			</div>
 		</div>

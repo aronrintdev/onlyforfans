@@ -30,3 +30,6 @@
 
 	</div>
 </div><!-- /container -->
+
+{{ \Illuminate\Support\Facades\Session::put('users.profile', Request::path()) }}
+

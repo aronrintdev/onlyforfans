@@ -57,7 +57,7 @@
         {!! Theme::partial('right-sidebar') !!}
 
         {!! Theme::partial('footer') !!}
-        {{  Request::path()}}
+{{--        {{  Request::path()}}--}}
 
         <script>
           @if(Config::get('app.debug'))

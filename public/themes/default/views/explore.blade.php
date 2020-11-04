@@ -253,7 +253,7 @@
                         @if($posts->count() > 0)
                             <div class="grid-sizer"></div>
                                 @foreach($posts as $post)
-                                    @if(!Auth::user()->PurchasedPostsArr->contains($post->id))
+                                    @if(!Auth::user()->PurchasedPostsArr->contains($post->id) && $post->type != \App\Post::PRICE_TYPE)
                                     @if(canUserSeePost(Auth::id(), $post->user->id))
                                         {!! Theme::partial('explore_posts',compact('post','timeline','next_page_url')) !!}
                                     @else

@@ -11,6 +11,9 @@ use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\URL;
 use Teepluss\Theme\Facades\Theme;
 use Validator;
 
@@ -48,6 +51,12 @@ class LoginController extends Controller
 
     public function getLogin()
     {
+       $routeName =  app('router')->getRoutes()->match(app('request')->create(Session::get('users.profile')))->getName();
+       
+       if ($routeName == 'users.profile') {
+           Session::put('users.profile', Session::get('users.profile'));
+       }
+
         //echo "kkk";
         if(isset($_GET['email']))
         {
@@ -171,6 +180,8 @@ class LoginController extends Controller
     //
     public function mainProjectLogin(Request $request)
     {
+        $session = Session::get('users.profile');
+        
         $data = $request->all();
         $validate = Validator::make($data, [
             'email'    => 'required',
@@ -243,7 +254,14 @@ class LoginController extends Controller
 //            $login_session->location = $region." ".$city;
             $login_session->date = date("Y-m-d");
             $login_session->save();
-            return redirect('/');
+            $session = $request->session()->get('profileUrl');
+            
+            
+            if (!empty($session)) {
+                return redirect($session);
+            } else {
+                return redirect('/');
+            }
         } else {
             // return response()->json(['status' => '201', 'message' => trans('auth.login_failed')]);
             return redirect()->back()->withInput()->withErrors([

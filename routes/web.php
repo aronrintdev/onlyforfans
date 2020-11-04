@@ -252,7 +252,7 @@ Route::group(['prefix' => '/admin', 'middleware' => ['auth', 'role:admin']], fun
 // Publicly user profile view
 
 Route::group(['prefix' => '/{username}'], function ($username) {
-    Route::get('/', 'TimelineController@posts');
+    Route::get('/', 'TimelineController@posts')->name('users.profile');
     Route::post('/', 'TimelineController@posts');
 });
 

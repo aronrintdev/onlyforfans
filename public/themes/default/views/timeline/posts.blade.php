@@ -175,6 +175,21 @@
         }
     }
     
+    @media screen and (max-width: 768px) {
+        .close-post-modal {
+            height: 20px;
+            display: block !important;
+            width: 20px;
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.5);
+            background: #fff !important;
+            opacity: 1;
+            border-radius: 50%;
+        }
+    }
+    
     .locked-content.media-locked {
         margin: 0;
         height: 180px;

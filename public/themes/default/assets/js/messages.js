@@ -122,6 +122,7 @@ var vue = new Vue({
                 if(conversation.id != this.currentConversation.id)
                 {
                     conversation.unread = false;
+                    notifications.unreadConversations = 0;
                     this.$http.post(base_url + 'ajax/get-conversation/' + conversation.id).then( function(response) {
                         this.currentConversation = JSON.parse(response.body).data;
                         this.currentConversation.user = conversation.user;
