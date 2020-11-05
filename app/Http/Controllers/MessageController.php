@@ -103,7 +103,7 @@ class MessageController extends Controller
         $thread->markAsRead($userId);
 
         $messages = [];
-        $thread->conversationMessages = $thread->messages()->orderBy('created_at', 'ASC')->latest()->with('user')->paginate(10);
+        $thread->conversationMessages = $thread->messages()->orderBy('id', 'DESC')->latest()->with('user')->paginate(10);
 
         // $thread->conversationMessages->sortBy('created_at', 'desc');
 

@@ -8,6 +8,81 @@
             left: -190px;
         }
     }
+	.total-spent, .total-tipped, .subscribed-over, .inactive-over {
+		position: relative;
+	}
+
+	.filter-input {
+		border: 0;
+		outline: none;
+		text-align: center;
+		font-weight: bold;
+		color: #fff;
+	}
+
+	.subscriberFilterModal ul li span {
+		color: #298ad3;
+		position: absolute;
+		height: 25px;
+		border-radius: 50%;
+		width: 25px;
+		/*top: 0;*/
+		vertical-align: middle;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		cursor: pointer;
+		user-select: none;
+		transition: .3s;
+	}
+
+	.subscriberFilterModal .text-wrapper {
+		top: 0;
+		left: 50%;
+		position: absolute;
+		transform: translateX(-50%);
+		bottom: 0;
+		display: block;
+		max-width: 100%;
+		width: 80%;
+	}
+
+	.subscriberFilterModal ul li span:hover {
+		background: #e7f3ff;
+	}
+
+	.subscriberFilterModal ul li span:active {
+		background: #9dd5ff;
+	}
+
+	.subscriberFilterModal ul li span.decrement {
+		left: 0;
+	}
+
+	.subscriberFilterModal ul li span.increment {
+		right: 0;
+	}
+
+	.subscriberFilterModal ul {
+		list-style: none;
+		padding: 0 25px;
+	}
+	
+	.subscriberFilterModal .panel-body ul li {
+		width: 250px;
+		margin: auto;
+		text-align: center;
+	}
+
+	.subscriberFilterModal .panel-body ul li p{
+		font-weight: bold;
+	}
+
+	@media (min-width: 768px) {
+		.modal-dialog {
+			width: 330px;
+		}
+	}
 </style>
 <div class="timeline-cover-section">
 	<div class="timeline-cover">
@@ -193,36 +268,79 @@
 
 	</div>
 </div>
-<div id="sendTipModal" class="tip-modal modal fade" role="dialog" tabindex='1'>
+<div id="sendTipModal" class="tip-modal modal fade subscriberFilterModal" role="dialog" tabindex='1'>
     <input type="hidden" value="{{$user->id}}" id="user-id">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-body">
-                <div class="modal-header lists-modal" style="display: flex; justify-content: space-between">                    						
-                    <h3 class="modal-title lists-modal-title">
-                        {{ trans("common.send_tip") }}
-                    </h3>
-                    @if(!Auth::user()->is_payment_set)
-                        <em class="text-danger">Please add Payment card.</em>
-                    @endif
-                    <button type="button" class="close" data-dismiss="modal">&times;</button>
-                </div>
-                <div class="b-stats-row__content">
-                    <input type="number" id="etTipAmount" class="form-control etTipAmount" placeholder="$0.00" step="0.1">
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" id="cancelSendTip" class="btn btn-default" data-dismiss="modal">{{ trans('common.cancel') }}</button>
-                @if(Auth::user()->is_payment_set)
-                    <button type="button" id="sendTip" class="btn btn-primary sendUserTip" disabled>{{ trans('common.send_tip') }}</button>
-                @else
-                    <a href="{{url(Auth::user()->username).'/settings/addpayment' }}" id="addPayment" class="btn btn-warning">{{ trans('common.add_payment') }}</a>
-                @endif
+            <div class="modal-body no-padding">
+{{--                <div class="modal-header lists-modal" style="display: flex; justify-content: space-between">                    						--}}
+{{--                    <h3 class="modal-title lists-modal-title">--}}
+{{--                        {{ trans("common.send_tip") }}--}}
+{{--                    </h3>--}}
+{{--                    @if(!Auth::user()->is_payment_set)--}}
+{{--                        <em class="text-danger">Please add Payment card.</em>--}}
+{{--                    @endif--}}
+{{--                    <button type="button" class="close" data-dismiss="modal">&times;</button>--}}
+{{--                </div>--}}
+{{--                <div class="b-stats-row__content">--}}
+{{--                    <input type="number" id="etTipAmount" class="form-control etTipAmount" placeholder="$0.00" step="0.1">--}}
+{{--                </div>--}}
+
+				<div class="panel panel-default panel-post animated" style="margin-bottom: 0">
+					<div class="panel-heading no-bg">
+						<h3 style="margin-top: 0; margin-bottom: 15px">Send Tip</h3>
+						<button type="button" style="display: none;" class="close close-post-modal" data-dismiss="modal">&times;</button>
+						<div class="post-author">
+							<div class="user-avatar">
+								<a href="{{ url($user->username) }}"><img src="{{ $user->avatar }}" alt="{{ $user->name }}" title="{{ $user->name }}"></a>
+							</div>
+							<div class="user-post-details">
+								<ul class="list-unstyled no-margin">
+									<li>
+										<a href="{{ url($user->username) }}" title="{{ '@'.$user->username }}" data-toggle="tooltip" data-placement="top" class="user-name user">
+											{{ $user->name }}
+										</a>
+										@if($user->verified)
+											<span class="verified-badge bg-success">
+                                                <i class="fa fa-check"></i>
+                                            </span>
+										@endif
+									</li>
+									<li>
+										{{ '@'.$user->username }}
+									</li>
+								</ul>
+							</div>
+						</div>
+					</div>
+					<div class="panel-body">
+						<ul>
+							<li>
+								<p>Tip Amount:</p>
+								<div class="total-tipped">
+									<span class="decrement"><i class="fa fa-minus" aria-hidden="true"></i></span>
+									<span class="increment"><i class="fa fa-plus" aria-hidden="true"></i></span>
+									<input min="0" type="number" id="etTipAmount" value="10" data-id="2"  name="total_tipped" class="filter-input total-tipped-input  form-control etTipAmount">
+									<div class="text-wrapper"></div>
+								</div>	
+							</li>
+						</ul>
+						<textarea name="tip_note" id="tipNote" cols="60" rows="5" style="width: 100%" placeholder="Write a message..."></textarea>
+					</div>
+					<div class="panel-footer">
+						<button type="button" id="cancelSendTip" class="btn btn-default" data-dismiss="modal">{{ trans('common.cancel') }}</button>
+						@if(Auth::user()->is_payment_set)
+							<button type="button" id="sendTip" class="btn btn-primary sendUserTip" disabled>{{ trans('common.send_tip') }}</button>
+						@else
+							<a href="{{url(Auth::user()->username).'/settings/addpayment' }}" id="addPayment" class="btn btn-warning">{{ trans('common.add_payment') }}</a>
+						@endif
+					</div>
+				</div>
             </div>
         </div>
     </div>
 </div>
-
+{!! Theme::asset()->container('footer')->usePath()->add('currency', 'js/currency.min.js') !!}
 <style>
     input[type="number"]::-webkit-outer-spin-button,
     input[type="number"]::-webkit-inner-spin-button {
@@ -263,4 +381,71 @@
 	//
 	// 	console.log($("#" + this.id).is(":checked"));
 	// });
+
+
+	$('span.decrement').click(function () {
+		let input = $(this).siblings('input.filter-input');
+		let val = input.val() != '' ? parseFloat(input.val()) : 0;
+
+		if (val != NaN) {
+			if (input.data('id') == 1) {
+				input.val((val - 100) < 0 ? 0 : (val - 100)).trigger('keyup');
+			} else if(input.data('id') == 2) {
+				input.val((val - 10) < 0 ? 0 : (val - 10)).trigger('keyup');
+			} else {
+				input.val((val - 1) < 0 ? 0 : (val - 1)).trigger('keyup');
+			}
+
+		}
+	});
+
+	$('span.increment').click(function () {
+		let input = $(this).siblings('input.filter-input');
+		let val = input.val() != '' ? parseFloat(input.val()) : 0;
+		if (val != NaN) {
+			if (input.data('id') == 1) {
+				input.val(val + 100).trigger('keyup');
+			} else if(input.data('id') == 2) {
+				input.val(val + 10).trigger('keyup');
+			} else if(input.data('id') == 3) {
+				input.val((val + 1) > 12 ? val : (val + 1)).trigger('keyup');
+			} else if(input.data('id') == 4) {
+				input.val((val + 1) > 30 ? val : (val + 1)).trigger('keyup');
+			}
+		}
+	});
+	
+	let lastActiveFilter;
+	$('.subscriberFilterModal').on('show.bs.modal', function () {
+		lastActiveFilter = $('input[type="radio"]:checked');
+		$('.filter-input').trigger('keyup');
+	});
+
+	$('.subscriberFilterModal').on('show.bs.modal', function () {
+		lastActiveFilter.prop('checked', true);
+	});
+
+	$('.subscriberFilterModal').on('hidden.bs.modal', function () {
+		$('.subscriberFilterModal').find('.text-wrapper').text('');
+		$('.subscriberFilterModal').find('.etTipAmount').val('');
+		$('.subscriberFilterModal').find('#tipNote').val('');
+	});
+
+	$(document).on('keyup', '.filter-input', function () {
+		let activeFilter = $(this).closest('li').find('input[type="radio"]');
+		activeFilter.prop('checked', true);
+		let val = $(this).val() != '' ? parseFloat($(this).val()) : 0;
+		if($(this).data('id') == 1) {
+			$(this).next('.text-wrapper').text($(this).val() + ' USD');
+		}else if($(this).data('id') == 2) {
+			$(this).val(val > 200 ? val : val);
+			$(this).next('.text-wrapper').text(currency($(this).val()).format() + ' USD');
+		}else if($(this).data('id') == 3) {
+			$(this).val(val > 12 ? 12 : val);
+			$(this).next('.text-wrapper').text($(this).val() + ' Month');
+		} else if($(this).data('id') == 4) {
+			$(this).val(val > 30 ? 30 : val);
+			$(this).next('.text-wrapper').text($(this).val() + ' Day');
+		}
+	});
 </script>

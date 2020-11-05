@@ -253,7 +253,7 @@ $(function () {
     $(document).on('click', ".sendUserTip", function () {
         let modal = $(this).closest('.tip-modal');
 
-        $.post(SP_source() + 'ajax/send-tip-user', {user_id: modal.find("#user-id").val(), amount: modal.find("#etTipAmount").val()}, function(data) {
+        $.post(SP_source() + 'ajax/send-tip-user', {user_id: modal.find("#user-id").val(), amount: modal.find("#etTipAmount").val(), note: modal.find('#tipNote').val()}, function(data) {
 
             if (data.status == 200) {
 

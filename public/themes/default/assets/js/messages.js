@@ -125,6 +125,7 @@ var vue = new Vue({
                     notifications.unreadConversations = 0;
                     this.$http.post(base_url + 'ajax/get-conversation/' + conversation.id).then( function(response) {
                         this.currentConversation = JSON.parse(response.body).data;
+                        this.currentConversation.conversationMessages.data = this.currentConversation.conversationMessages.data.reverse();
                         this.currentConversation.user = conversation.user;
                         vm = this;
                         setTimeout(function(){

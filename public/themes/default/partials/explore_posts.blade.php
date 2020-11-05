@@ -140,7 +140,7 @@
             @endif
         </div>
     @endif
-@else
+@elseif($post->type == \App\Post::PRICE_TYPE)
     <div class="grid-item">
         <div class="locked-content">
             <div class="locked-content-wrapper">

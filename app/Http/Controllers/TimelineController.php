@@ -595,7 +595,7 @@ class TimelineController extends AppBaseController
             ->orderBy('users_liked_count', 'desc')
             ->orderBy('created_at', 'desc')
             ->where('active', 1)
-            ->paginate(Setting::get('items_page'));
+            ->paginate(20);
 
         if ($request->ajax) {
             $responseHtml = '';
@@ -3296,7 +3296,7 @@ class TimelineController extends AppBaseController
     {
         $user = User::findOrFail($request->user_id);
 
-        Auth::user()->usersSentTips()->attach(Auth::user()->id, ['amount' => $request->amount,'tip_to' => $request->user_id, 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()]);
+        Auth::user()->usersSentTips()->attach(Auth::user()->id, ['amount' => $request->amount,'note' => $request->note,'tip_to' => $request->user_id, 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()]);
 
         //Notify the user for post like
         $notify_message = 'sent tip for you';

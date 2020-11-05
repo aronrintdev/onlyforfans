@@ -30,6 +30,11 @@
     .is-not-fav {
         display: none;
     }
+
+    .messages-page .panel-body .coversations-thread {
+        padding-bottom: 0;
+        margin-bottom: 100px;
+    }
 </style>
 <!-- <div class="main-content">-->  
 <div class="container-fluid">

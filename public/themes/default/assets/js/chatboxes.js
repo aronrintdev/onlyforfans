@@ -160,6 +160,7 @@ var chatBoxes = new Vue({
                     if(response.status)
                     {
                         var chatBox = JSON.parse(response.body).data;
+                        chatBox.conversationMessages.data = chatBox.conversationMessages.data.reverse();
                         chatBox.newMessage = "";
                         chatBox.user = conversation.user;
                         chatBox.minimised = false;
