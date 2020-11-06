@@ -20,7 +20,7 @@
 		color: #fff;
 	}
 
-	.subscriberFilterModal ul li span {
+	.subscriberFilterModal .panel-body ul li span {
 		color: #298ad3;
 		position: absolute;
 		height: 25px;
@@ -79,8 +79,8 @@
 	}
 
 	@media (min-width: 768px) {
-		.modal-dialog {
-			width: 330px;
+		.subscriberFilterModal .modal-dialog {
+			width: 450px;
 		}
 	}
 </style>
@@ -273,19 +273,6 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-body no-padding">
-{{--                <div class="modal-header lists-modal" style="display: flex; justify-content: space-between">                    						--}}
-{{--                    <h3 class="modal-title lists-modal-title">--}}
-{{--                        {{ trans("common.send_tip") }}--}}
-{{--                    </h3>--}}
-{{--                    @if(!Auth::user()->is_payment_set)--}}
-{{--                        <em class="text-danger">Please add Payment card.</em>--}}
-{{--                    @endif--}}
-{{--                    <button type="button" class="close" data-dismiss="modal">&times;</button>--}}
-{{--                </div>--}}
-{{--                <div class="b-stats-row__content">--}}
-{{--                    <input type="number" id="etTipAmount" class="form-control etTipAmount" placeholder="$0.00" step="0.1">--}}
-{{--                </div>--}}
-
 				<div class="panel panel-default panel-post animated" style="margin-bottom: 0">
 					<div class="panel-heading no-bg">
 						<h3 style="margin-top: 0; margin-bottom: 15px">Send Tip</h3>
@@ -426,9 +413,9 @@
 	});
 
 	$('.subscriberFilterModal').on('hidden.bs.modal', function () {
-		$('.subscriberFilterModal').find('.text-wrapper').text('');
-		$('.subscriberFilterModal').find('.etTipAmount').val('');
-		$('.subscriberFilterModal').find('#tipNote').val('');
+		$(this).find('.text-wrapper').text('');
+		$(this).find('.etTipAmount').val('');
+		$(this).find('#tipNote').val('');
 	});
 
 	$(document).on('keyup', '.filter-input', function () {

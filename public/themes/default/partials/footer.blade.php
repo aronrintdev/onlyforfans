@@ -13,10 +13,10 @@
 			<a href="{{url('support')}}" class="col-sm-2 col-2 col-lg-1 col-xs-12" style="margin-bottom:5px">{{ trans('common.support_footer') }}</a>
 			<a href="{{url('terms-of-use')}}" class="col-sm-2 col-2 col-lg-1 col-xs-12" style="margin-bottom:5px">{{ trans('common.term_of_use_footer') }}</a>
 			<a href="{{url('privacy-policy')}}" class="col-sm-2 col-2 col-lg-1 col-xs-12" style="margin-bottom:5px">{{ trans('common.privacy_policy_footer') }}</a>
-			<a href="{{url('privacy-policy')}}" class="col-sm-2 col-2 col-lg-1 col-xs-12" style="margin-bottom:5px">{{ trans('common.dmca') }}</a>
-			<a href="{{url('privacy-policy')}}" class="col-sm-2 col-2 col-lg-1 col-xs-12" style="margin-bottom:5px">{{ trans('common.usc2257') }}</a>
-			<a href="{{url('privacy-policy')}}" class="col-sm-2 col-2 col-lg-1 col-xs-12" style="margin-bottom:5px">{{ trans('common.legal') }}</a>
-			<a href="{{url('privacy-policy')}}" class="col-sm-2 col-2 col-lg-1 col-xs-12" style="margin-bottom:5px">{{ trans('common.blog') }}</a>
+			<a href="{{url('dmca')}}" class="col-sm-2 col-2 col-lg-1 col-xs-12" style="margin-bottom:5px">{{ trans('common.dmca') }}</a>
+			<a href="{{url('usc2257')}}" class="col-sm-2 col-2 col-lg-1 col-xs-12" style="margin-bottom:5px">{{ trans('common.usc2257') }}</a>
+			<a href="{{url('legal')}}" class="col-sm-2 col-2 col-lg-1 col-xs-12" style="margin-bottom:5px">{{ trans('common.legal') }}</a>
+			<a href="{{url('blog')}}" class="col-sm-2 col-2 col-lg-1 col-xs-12" style="margin-bottom:5px">{{ trans('common.blog') }}</a>
 		</div>
 		<div class="fans-terms text-center" >
 		    Copyright &copy; 2020 <a href="{{ url('/') }}">{{ Setting::get('site_title') }}</a>. All rights reserved.

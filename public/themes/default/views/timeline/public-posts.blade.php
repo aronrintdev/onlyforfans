@@ -1,3 +1,52 @@
+<style>
+
+	.favourite-grid {
+		margin: 0 -7px;
+	}
+
+	.favourite-grid .img {
+		background: #ccc;
+		height: 100px;
+		margin-bottom: 14px;
+	}
+	
+	.favourite-grid .locked-content {
+		height: 100%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 24px;
+		color: #fff;
+	}
+	
+	@media screen and (max-width: 1024px) {
+		.favourite-grid .img {
+			height: 200px;
+		}
+	}
+
+	.favourite-grid > div {
+		padding: 0 7px;
+	}
+
+	.timeline-posts .post-image-holder a {
+		position: relative;
+	}
+	
+	.timeline-posts .post-image-holder a:after {
+		content: "\f023";
+		position: absolute;
+		top: 50%;
+		transform: translate(-50%, -50%);
+		left: 50%;
+		color: #fff;
+		display: inline-block;
+		font: normal normal normal 24px/1 FontAwesome;
+		font-size: 50px;
+		text-rendering: auto;
+		-webkit-font-smoothing: antialiased;
+	}
+</style>
 <!-- main-section -->
 <div class="container">
 	<div class="row">

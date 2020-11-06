@@ -60,7 +60,7 @@
     @endif
 
 @else
-    <div class="col-xl-3 col-lg-4 col-md-6">
+    <div class="col-xl-3 col-lg-4 col-md-6 locked-holder">
         <div class="grid-item">
             <div class="locked-content media-locked">
                 <div class="locked-content-wrapper">

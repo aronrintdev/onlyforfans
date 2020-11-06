@@ -20,7 +20,7 @@
       <div class="text-wrapper">
 
             <div class="post-image-holder post-locked  single-image">
-                <a><img src="{{ url('user/gallery/locked.png') }}"  title="{{ $post->user->name }}" alt="{{ $post->user->name }}"></a>
+                <a><img src="https://fansplatform.mjmdesign.co/user/gallery/locked.png"  title="{{ $post->user->name }}" alt="{{ $post->user->name }}"></a>
 
                 <!-- Modal -->
                 <div class="modal fade" id="myModal" role="dialog">

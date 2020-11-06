@@ -236,12 +236,12 @@ $(function () {
     $(document).on('click', ".sendTip", function () {
         let modal = $(this).closest('.tip-modal');
 
-        $.post(SP_source() + 'ajax/send-tip-post', {post_id: modal.find("#post-id").val(), amount: modal.find("#etTipAmount").val()}, function(data) {
+        $.post(SP_source() + 'ajax/send-tip-post', {post_id: modal.find("#post-id").val(), amount: modal.find("#etTipAmount").val(), note: modal.find('#tipNote').val()}, function(data) {
 
             if (data.status == 200) {
 
                 notify(data.message,'success');
-                $("#sendTipModal"+modal.find("#post-id").val()).modal("hide");
+                modal.modal("hide");
                 // location.reload(); TODO: Not needed
             }
             else {

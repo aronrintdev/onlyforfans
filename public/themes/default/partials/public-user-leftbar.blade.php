@@ -82,39 +82,29 @@
 @if($user->about != NULL)
 <div class="user-bio-block follow-links">
 	<!--<div class="bio-header">{{ trans('common.bio') }}</div>-->
-	<div class="bio-description">
-		{{ ($user->about != NULL) ? $user->about : trans('messages.no_description') }}
-	</div>
-	@if($user->wishlist)
-	<a target="_blank" href="{{ $user->wishlist }}">{{ $user->wishlist }}</a><br>
-	@endif
-	@if($user->website)
-	<a target="_blank" href="{{ $user->website }}">{{ $user->website }}</a><br>
-	@endif
-	@if($user->instagram)
-	<a target="_blank" href="{{ $user->instagram }}">{{ $user->instagram }}</a><br>
-	@endif
-
+	
 	<div class="bio-description">
 		<a href="{{ url('login') }}" class="btn btn-submit btn-success" style="display:block; margin-top:10px;">
 			<i class="fa fa-inbox"></i> {{ trans('common.message') }}
 		</a>
 	</div>
+	@if($user->is_follow_for_free)
 	<div class="follow">
 		<div class="bio-header">Follow</div>
 		<div class="bio-description">
 			<div class="follow-btn">
-				<a href="{{ url('login') }}" class="btn btn-submit btn-default" style="display:block;" data-price="{{ $user->price }}" data-follow="1"  data-timeline-id="{{ $timeline->id }}">
+				<a href="{{ url('login') }}" class="btn btn-submit btn-success" style="display:block;">
 					Follow for Free
 				</a>
 			</div>
 		</div>
 	</div>
+	@endif
 	<div class="subscribe">
 		<div class="bio-header">Subscribe</div>
 		<div class="bio-description">
 			<div class="left-col">
-				<a href="{{ url('login') }}" class="btn btn-submit btn-default" style="display:block;" data-price="{{ $user->price }}"  data-timeline-id="{{ $timeline->id }}">
+				<a href="{{ url('login') }}" class="btn btn-submit btn-success" style="display:block;">
 					<i class="fa fa-heart"></i> {{ trans('common.follow') }}
 				</a>
 			</div>
@@ -130,8 +120,21 @@
 			</div>
 		</div>
 	</div>
-	
-	<ul class="list-unstyled list-details">
+
+	<div class="bio-description">
+		{{ ($user->about != NULL) ? $user->about : trans('messages.no_description') }}
+	</div>
+	@if($user->wishlist)
+		<a target="_blank" href="{{ $user->wishlist }}">{{ $user->wishlist }}</a><br>
+	@endif
+	@if($user->website)
+		<a target="_blank" href="{{ $user->website }}">{{ $user->website }}</a><br>
+	@endif
+	@if($user->instagram)
+		<a target="_blank" href="{{ $user->instagram }}">{{ $user->instagram }}</a><br>
+	@endif
+
+		<ul class="list-unstyled list-details">
 		@if($user->hobbies != NULL)
 			<li><i class="fa fa-chain" aria-hidden="true"></i> {{ $user->hobbies }}</li>
 		@endif
@@ -230,7 +233,50 @@
 		{!! htmlspecialchars_decode(Setting::get('timeline_ad')) !!} 
 	</div>	
 	@endif
-
+	<div class="favourite-grid row">
+		<div class="col-sm-4 col-6">
+			<div class="img">
+				<div class="locked-content">
+					<i class="fa fa-lock" aria-hidden="true"></i>
+				</div>
+			</div>
+		</div>
+		<div class="col-sm-4 col-6">
+			<div class="img">
+				<div class="locked-content">
+					<i class="fa fa-lock" aria-hidden="true"></i>
+				</div>
+			</div>
+		</div>
+		<div class="col-sm-4 col-6">
+			<div class="img">
+				<div class="locked-content">
+					<i class="fa fa-lock" aria-hidden="true"></i>
+				</div>
+			</div>
+		</div>
+		<div class="col-sm-4 col-6">
+			<div class="img">
+				<div class="locked-content">
+					<i class="fa fa-lock" aria-hidden="true"></i>
+				</div>
+			</div>
+		</div>
+		<div class="col-sm-4 col-6">
+			<div class="img">
+				<div class="locked-content">
+					<i class="fa fa-lock" aria-hidden="true"></i>
+				</div>
+			</div>
+		</div>
+		<div class="col-sm-4 col-6">
+			<div class="img">
+				<div class="locked-content">
+					<i class="fa fa-lock" aria-hidden="true"></i>
+				</div>
+			</div>
+		</div>
+	</div>
 
 
 

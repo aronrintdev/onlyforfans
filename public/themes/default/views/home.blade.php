@@ -52,6 +52,87 @@
         outline: none;
         width: 100%;
     }
+
+	.total-spent, .total-tipped, .subscribed-over, .inactive-over {
+		position: relative;
+	}
+
+	.filter-input {
+		border: 0;
+		outline: none;
+		text-align: center;
+		font-weight: bold;
+		color: #fff;
+	}
+
+	.subscriberFilterModal .panel-body ul li span {
+		color: #298ad3;
+		position: absolute;
+		height: 25px;
+		border-radius: 50%;
+		width: 25px;
+		/*top: 0;*/
+		vertical-align: middle;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		cursor: pointer;
+		user-select: none;
+		transition: .3s;
+	}
+
+	.subscriberFilterModal .text-wrapper {
+		top: 0;
+		left: 50%;
+		position: absolute;
+		transform: translateX(-50%);
+		bottom: 0;
+		display: block;
+		max-width: 100%;
+		width: 80%;
+	}
+
+	.subscriberFilterModal ul li span:hover {
+		background: #e7f3ff;
+	}
+
+	.subscriberFilterModal ul li span:active {
+		background: #9dd5ff;
+	}
+
+	.subscriberFilterModal ul li span.decrement {
+		left: 0;
+	}
+
+	.subscriberFilterModal ul li span.increment {
+		right: 0;
+	}
+
+	.subscriberFilterModal ul {
+		list-style: none;
+		padding: 0 25px;
+	}
+
+	.subscriberFilterModal .panel-body ul li {
+		width: 250px;
+		margin: auto;
+		text-align: center;
+	}
+
+	.subscriberFilterModal .panel-body ul li p{
+		font-weight: bold;
+	}
+
+	@media (min-width: 768px) {
+		.subscriberFilterModal .modal-dialog {
+			width: 450px;
+		}
+	}
+	
+	input[type="number"] {
+		appearance: none;
+		-moz-appearance: textfield !important;
+	}
 </style>
 		<div class="container">
 			<div class="row">
@@ -117,6 +198,7 @@
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" />
 <script src="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js"></script>
+{!! Theme::asset()->container('footer')->usePath()->add('currency', 'js/currency.min.js') !!}
 <script type="text/javascript">
     $('.change-layout').click(function () {
         $('.timeline-default, .timeline-condensed-column, .sidebar-wrapper').toggle();
@@ -135,6 +217,67 @@
     {{--var module = { };--}}
     {{--let pusherKey = '{{ config('broadcasting.connections.pusher.key') }}';--}}
     {{--let pusherCluster = '{{ config('broadcasting.connections.pusher.options.cluster') }}';--}}
+
+
+	$(document).on('click', 'span.decrement', function () {
+		let input = $(this).siblings('input.filter-input');
+		let val = input.val() != '' ? parseFloat(input.val()) : 0;
+
+		if (val != NaN) {
+			if (input.data('id') == 1) {
+				input.val((val - 100) < 0 ? 0 : (val - 100)).trigger('keyup');
+			} else if(input.data('id') == 2) {
+				input.val((val - 10) < 0 ? 0 : (val - 10)).trigger('keyup');
+			} else {
+				input.val((val - 1) < 0 ? 0 : (val - 1)).trigger('keyup');
+			}
+
+		}
+	});
+
+	$(document).on('click', 'span.increment', function () {
+		let input = $(this).siblings('input.filter-input');
+		let val = input.val() != '' ? parseFloat(input.val()) : 0;
+		if (val != NaN) {
+			if (input.data('id') == 1) {
+				input.val(val + 100).trigger('keyup');
+			} else if(input.data('id') == 2) {
+				input.val(val + 10).trigger('keyup');
+			} else if(input.data('id') == 3) {
+				input.val((val + 1) > 12 ? val : (val + 1)).trigger('keyup');
+			} else if(input.data('id') == 4) {
+				input.val((val + 1) > 30 ? val : (val + 1)).trigger('keyup');
+			}
+		}
+	});
+
+	$('.subscriberFilterModal').on('show.bs.modal', function () {
+		$('.filter-input').trigger('keyup');
+	});
+
+	$('.subscriberFilterModal').on('hidden.bs.modal', function () {
+		$(this).find('.text-wrapper').text('');
+		$(this).find('.etTipAmount').val('');
+		$(this).find('#tipNote').val('');
+	});
+
+	$(document).on('keyup', '.filter-input', function () {
+		let activeFilter = $(this).closest('li').find('input[type="radio"]');
+		activeFilter.prop('checked', true);
+		let val = $(this).val() != '' ? parseFloat($(this).val()) : 0;
+		if($(this).data('id') == 1) {
+			$(this).next('.text-wrapper').text($(this).val() + ' USD');
+		}else if($(this).data('id') == 2) {
+			$(this).val(val > 200 ? val : val);
+			$(this).next('.text-wrapper').text(currency($(this).val()).format() + ' USD');
+		}else if($(this).data('id') == 3) {
+			$(this).val(val > 12 ? 12 : val);
+			$(this).next('.text-wrapper').text($(this).val() + ' Month');
+		} else if($(this).data('id') == 4) {
+			$(this).val(val > 30 ? 30 : val);
+			$(this).next('.text-wrapper').text($(this).val() + ' Day');
+		}
+	});
 </script>
 {{--{!! Theme::asset()->container('footer')->usePath()->add('echo', 'js/echo.iife.js') !!}--}}
 {{--{!! Theme::asset()->container('footer')->usePath()->add('pusher', 'js/pusher.js') !!}--}}

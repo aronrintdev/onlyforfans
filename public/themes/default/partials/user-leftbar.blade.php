@@ -24,23 +24,23 @@
 	    <div class="bio-description">
             @if(!$user->followers->contains(Auth::user()->id))
             <div class="follow-btn">
-                <a href="javascript:void(0);" class="btn btn-submit btn-success" style="display:block;" data-price="{{ $user->price }}" data-follow="1"  data-timeline-id="{{ $timeline->id }}">
+                <a href="javascript:void(0);" class="btn btn-submit btn-success follow-user follow" style="display:block;" data-price="{{ $user->price }}" data-follow="1"  data-timeline-id="{{ $timeline->id }}">
                     Follow for Free
                 </a>
             </div>
             <div class="unfollow-btn hidden">
-                <a href="javascript:void(0);" class="btn btn-submit btn-success" style="display:block;" data-price="{{ $user->price }}" data-follow="1"  data-timeline-id="{{ $timeline->id }}">
-                    Follow for Free
+                <a href="javascript:void(0);" class="btn btn-submit btn-success unfollow" style="display:block;" data-price="{{ $user->price }}" data-follow="1"  data-timeline-id="{{ $timeline->id }}">
+					Unfollow
                 </a>
             </div>
             @else
                 <div class="follow-btn hidden">
-                    <a href="javascript:void(0);" class="btn btn-submit btn-success" style="display:block;" data-price="{{ $user->price }}" data-follow="1"  data-timeline-id="{{ $timeline->id }}">
+                    <a href="javascript:void(0);" class="btn btn-submit btn-success follow-user follow" style="display:block;" data-price="{{ $user->price }}" data-follow="1"  data-timeline-id="{{ $timeline->id }}">
                         Follow for Free
                     </a>
                 </div>
                 <div class="unfollow-btn">
-                    <a href="javascript:void(0);" class="btn btn-submit btn-success" style="display:block;" data-price="{{ $user->price }}" data-follow="1"  data-timeline-id="{{ $timeline->id }}">
+                    <a href="javascript:void(0);" class="btn btn-submit btn-success unfollow" style="display:block;" data-price="{{ $user->price }}" data-follow="1"  data-timeline-id="{{ $timeline->id }}">
                         Unfollow
                     </a>
                 </div>
@@ -54,23 +54,23 @@
 	    <div class="bio-description">
 			@if(!$user->followers->contains(Auth::user()->id))
 				<div class="left-col">
-					<a href="javascript:void(0);" class="btn btn-submit btn-success" style="display:block;" data-price="{{ $user->price }}"  data-timeline-id="{{ $timeline->id }}">
+					<a href="javascript:void(0);" class="btn btn-submit btn-success follow-user follow" style="display:block;" data-price="{{ $user->price }}"  data-timeline-id="{{ $timeline->id }}">
 						<i class="fa fa-heart"></i> {{ trans('common.follow') }}
 					</a>
 				</div>
 				<div class="hidden">
-					<a href="#" class="btn btn-submit btn-success" style="display:block;" data-price="{{ $user->price }}"  data-timeline-id="{{ $timeline->id }}">
+					<a href="#" class="btn btn-submit btn-success unfollow" style="display:block;" data-price="{{ $user->price }}"  data-timeline-id="{{ $timeline->id }}">
 						<i class="fa fa-check"></i> {{ trans('common.following') }}
 					</a>
 				</div>
 			@else
 				<div class="hidden">
-					<a href="#" class="btn btn-submit btn-success" style="display:block;" data-price="{{ $user->price }}" data-timeline-id="{{ $timeline->id }}">
+					<a href="#" class="btn btn-submit btn-success follow-user follow" style="display:block;" data-price="{{ $user->price }}" data-timeline-id="{{ $timeline->id }}">
 						<i class="fa fa-heart"></i> {{ trans('common.follow') }}
 					</a>
 				</div>
 				<div class="left-col">
-					<a href="#" class="btn btn-submit btn-success" style="display:block;" data-price="{{ $user->price }}"  data-timeline-id="{{ $timeline->id }}">	
+					<a href="#" class="btn btn-submit btn-success unfollow" style="display:block;" data-price="{{ $user->price }}"  data-timeline-id="{{ $timeline->id }}">	
 					    <i class="fa fa-check"></i> {{ trans('common.following') }}
 					</a>
 				</div>

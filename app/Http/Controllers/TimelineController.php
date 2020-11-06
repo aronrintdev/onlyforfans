@@ -575,12 +575,13 @@ class TimelineController extends AppBaseController
 
         $user = Auth::user();
         $timeline = Timeline::where('username', $user->username)->first();
-        $id = $user->id;        
+        $id = $user->id;
         
         $trending_tags = trendingTags();
         $suggested_users = suggestedUsers();
         $suggested_groups = suggestedGroups();
         $suggested_pages = suggestedPages();
+        $hideLocked = true;
         
         $following = $user->followers()->pluck('follower_id')->toArray();
         $following[] = $id;
@@ -600,7 +601,7 @@ class TimelineController extends AppBaseController
         if ($request->ajax) {
             $responseHtml = '';
             foreach ($posts as $post) {
-                $responseHtml .= $theme->partial('explore_posts', ['post' => $post, 'timeline' => $timeline, 'next_page_url' => $posts->appends(['ajax' => true, 'hashtag' => $request->hashtag])->nextPageUrl()]);
+                $responseHtml .= $theme->partial('explore_posts', ['post' => $post, 'hideLocked' => $hideLocked, 'timeline' => $timeline, 'next_page_url' => $posts->appends(['ajax' => true, 'hashtag' => $request->hashtag])->nextPageUrl()]);
             }
 
             return $responseHtml;
@@ -3271,7 +3272,7 @@ class TimelineController extends AppBaseController
         $post = Post::findOrFail($request->post_id);
         $posted_user = $post->user;
 
-        $post->tip()->attach(Auth::user()->id, ['amount' => $request->amount, 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()]);
+        $post->tip()->attach(Auth::user()->id, ['amount' => $request->amount, 'note' => $request->note, 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()]);
         $post->notifications_user()->attach(Auth::user()->id);
 
         $user = User::find(Auth::user()->id);

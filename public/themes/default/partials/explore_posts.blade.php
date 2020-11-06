@@ -140,7 +140,7 @@
             @endif
         </div>
     @endif
-@elseif($post->type == \App\Post::PRICE_TYPE)
+@elseif($post->type == \App\Post::PRICE_TYPE && !isset($hideLocked))
     <div class="grid-item">
         <div class="locked-content">
             <div class="locked-content-wrapper">
