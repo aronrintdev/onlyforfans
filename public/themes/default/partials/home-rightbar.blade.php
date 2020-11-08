@@ -15,7 +15,7 @@
 					</div>
 				</div>
 				<div class="avatar-profile">
-					<div class="avatar-details">
+					<div class="avatar-details" style="width:290px;display:inline-block;">
 						<h2 class="avatar-name">
 							<a href="{{ url(Auth::user()->username) }}">
 								{{ Auth::user()->name }}
@@ -31,7 +31,12 @@
 								{{ '@'.Auth::user()->username }}
 							</a>
 						</h4>
-					</div>      
+					</div>
+					<div class="go-live" style="width:30px;display:inline-block;">
+					    <a href="#"><svg data-toggle="tooltip" data-placement="top" title="Go Live" width="2em" height="2em" viewBox="0 0 16 16" class="bi bi-broadcast-pin" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                          <path fill-rule="evenodd" d="M3.05 3.05a7 7 0 0 0 0 9.9.5.5 0 0 1-.707.707 8 8 0 0 1 0-11.314.5.5 0 0 1 .707.707zm2.122 2.122a4 4 0 0 0 0 5.656.5.5 0 0 1-.708.708 5 5 0 0 1 0-7.072.5.5 0 0 1 .708.708zm5.656-.708a.5.5 0 0 1 .708 0 5 5 0 0 1 0 7.072.5.5 0 1 1-.708-.708 4 4 0 0 0 0-5.656.5.5 0 0 1 0-.708zm2.122-2.12a.5.5 0 0 1 .707 0 8 8 0 0 1 0 11.313.5.5 0 0 1-.707-.707 7 7 0 0 0 0-9.9.5.5 0 0 1 0-.707zM6 8a2 2 0 1 1 2.5 1.937V15.5a.5.5 0 0 1-1 0V9.937A2 2 0 0 1 6 8z"/>
+                        </svg></a>
+					</div>
 				</div>
 				<ul class="activity-list list-inline">
 					<li>
@@ -84,7 +89,7 @@
 				{{ trans('common.suggested_people') }}
 			</h3>
 		</div>
-		<div class="panel-body">
+		<div class="panel-body" style="margin-top:-30px;">
 			<div class="user-follow fans">
 				@if($suggested_users != "")
 				@foreach($suggested_users as $suggested_user)

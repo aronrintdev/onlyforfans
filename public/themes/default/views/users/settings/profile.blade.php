@@ -30,7 +30,7 @@
     									</div>
     									<div class="col-md-6">
     										<fieldset class="form-group">
-    											{{ Form::label('city', trans('common.current_city')) }}
+    											{{ Form::label('city', trans('common.currently_in')) }}
     											{{ Form::text('city', Auth::user()->city, ['class' => 'form-control', 'placeholder' => trans('common.current_city')]) }}
     										</fieldset>
     									</div>

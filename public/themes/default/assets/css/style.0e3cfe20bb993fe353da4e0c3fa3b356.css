@@ -21089,7 +21089,8 @@ h4 {
 p {
     font-family: 'Open Sans', sans-serif;
     font-size: 14px;
-    color: #71787E;
+    /* color: #71787E; */
+    color: #4a5568;
     line-height: 24px;
 }
 .striked {
@@ -29039,7 +29040,6 @@ html {
 }
 .mini-profile {
     padding: 10px;
-    margin-bottom: 18px;
 }
 .mini-profile .background {
     position: relative;

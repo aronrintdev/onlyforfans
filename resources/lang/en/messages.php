@@ -75,7 +75,7 @@ return [
     'radio_closed_group'          => 'Anyone can see and request to join the group. Requests can be accepted or declined by admins.',
     'radio_secret_group'          => 'Only members can access the group.',
     'learn_more_about_groups'     => 'Learn more about Groups',
-    'about_user_placeholder'      => 'Enter description about you',
+    'about_user_placeholder'      => 'Enter a descriptive bio about yourself',
     'enter_old_password'          => 'Enter old password',
     'enter_new_password'          => 'Enter new password',
     'confirm_deactivate_question' => 'Are you sure you want to deactivate your account? All of your data will be permanently removed and deleted. This action cannot be undone.',
