@@ -146,22 +146,30 @@
 							@endif
                         @if(Auth::user()->username != $timeline->username)
                             @if(!$timeline->reports->contains(Auth::user()->id))
-                                <li class="timeline-cover-status">
-                                    <a href="#" class="page-report report" data-timeline-id="{{ $timeline->id }}"> <b>{{ trans('common.report') }}</b>
-                                    </a>
+                                <li class="timeline-cover-status main-link">
+                                    <a href="#" class="page-report report" data-timeline-id="{{ $timeline->id }}">{{ trans('common.report') }}</a>
                                 </li>
-                                <li class="timeline-cover-status hidden">
-                                    <a href="#" class="page-report reported" data-timeline-id="{{ $timeline->id }}"> <b>{{ trans('common.reported') }}</b>
-                                    </a>
+                                <li class="timeline-cover-status main-link hidden">
+                                    <a href="#" class="page-report reported" data-timeline-id="{{ $timeline->id }}">{{ trans('common.reported') }}</a>
+                                </li>
+                                <li class="timeline-cover-status main-link">
+                                    <a href="#" class="page-report report" data-timeline-id="{{ $timeline->id }}">{{ trans('common.block') }}</a>
+                                </li>
+                                <li class="timeline-cover-status main-link hidden">
+                                    <a href="#" class="page-report reported" data-timeline-id="{{ $timeline->id }}">{{ trans('common.blocked') }}</a>
                                 </li>
                             @else
-                                <li class="timeline-cover-status hidden">
-                                    <a href="#" class="page-report report" data-timeline-id="{{ $timeline->id }}"> <b> {{ trans('common.report') }}</b>
-                                    </a>
+                                <li class="timeline-cover-status main-link hidden">
+                                    <a href="#" class="page-report report" data-timeline-id="{{ $timeline->id }}">{{ trans('common.report') }}</a>
                                 </li>
-                                <li class="timeline-cover-status">
-                                    <a href="#" class="page-report reported" data-timeline-id="{{ $timeline->id }}"><b>{{ trans('common.reported') }}</b>
-                                    </a>
+                                <li class="timeline-cover-status main-link">
+                                    <a href="#" class="page-report reported" data-timeline-id="{{ $timeline->id }}">{{ trans('common.reported') }}</a>
+                                </li>
+                                <li class="timeline-cover-status main-link hidden">
+                                    <a href="#" class="page-report report" data-timeline-id="{{ $timeline->id }}">{{ trans('common.block') }}</a>
+                                </li>
+                                <li class="timeline-cover-status main-link">
+                                    <a href="#" class="page-report reported" data-timeline-id="{{ $timeline->id }}">{{ trans('common.blocked') }}</a>
                                 </li>
                                 @endif
                             @endif
@@ -312,7 +320,7 @@
 								</div>	
 							</li>
 						</ul>
-						<textarea name="tip_note" id="tipNote" cols="60" rows="5" style="width: 100%" placeholder="Write a message..."></textarea>
+						<textarea name="tip_note" id="tipNote" cols="60" rows="5" style="width: 100%" placeholder="Include a message"></textarea>
 					</div>
 					<div class="panel-footer">
 						<button type="button" id="cancelSendTip" class="btn btn-default" data-dismiss="modal">{{ trans('common.cancel') }}</button>

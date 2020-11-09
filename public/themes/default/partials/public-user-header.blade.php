@@ -1,7 +1,5 @@
-
 <div class="timeline-cover-section">
 	<div class="timeline-cover">
-	    
 		<ul class="list-inline pagelike-links">							
 			@if(!$user->timeline->albums->isEmpty())
 				<li class=""><a href="" > {{ trans('common.photos') }}</span></a></li>
@@ -14,12 +12,10 @@
 				<a href="#" ><span class="top-list"><span class="liked-post">{{count($liked_post)}}</span> {{ trans('common.likes') }}</span>
 				</a>
 			</li>
-
 			<li class="timeline-cover-status {{ Request::segment(2) == 'followers' ? 'active' : '' }}">
 				<a href="" ><span class="top-list">{{ $following_count }}  {{ trans('common.following') }}</span>
 				</a>
 			</li>
-
 			@if($user->username != $timeline->username)
 				@if(!$timeline->reports->contains($user->id))
 				<li class="pull-right">
@@ -59,7 +55,7 @@
 		<div class="user-cover-progress hidden">
 
 		</div>
-			<!-- <div class="cover-bottom">
+		<!-- <div class="cover-bottom">
 		</div> -->
 		<div class="user-timeline-name">
 			<a href="">{{ $timeline->name }}</a><br><a class="user-timeline-username" href="{{ url($timeline->username) }}">{{ $timeline->username }}</a>
@@ -67,12 +63,10 @@
 		</div>
 		</div>
 	<div class="timeline-list">
-
-			<div class="status-button">
+			<!-- <div class="status-button">
 					<a href="#" class="btn btn-status">Subscription Packages</a>
-			</div>
+			</div> -->
 			<div class="timeline-user-avtar">
-
 				<img src="{{ $timeline->user->avatar }}" alt="{{ $timeline->name }}" title="{{ $timeline->name }}">
 {{--				@if($timeline->id == $user->timeline_id)--}}
 {{--					<div class="chang-user-avatar">--}}
@@ -81,10 +75,9 @@
 {{--				@endif			--}}
 				<div class="user-avatar-progress hidden">
 				</div>
-			</div><!-- /timeline-user-avatar -->
-
-		</div><!-- /timeline-list -->
-	</div><!-- timeline-cover-section -->
+			</div>
+		</div>
+	</div>
 <script type="text/javascript">
 	@if($timeline->background_id != NULL)
 		$('body')

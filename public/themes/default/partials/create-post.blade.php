@@ -74,9 +74,10 @@
                 <div class="dropdown">
 {{--                    <i class="fa fa-dollar" data-toggle="tooltip" title="Set a price" style="color:#859ab5;"></i>--}}
                     <div class="dropdown-toggle" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="cursor: pointer">
-                        <svg data-toggle="tooltip" title="Set a price" width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-three-dots-vertical" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                        <i data-toggle="tooltip" title="Set a price" class="fa fa-angle-down"></i>
+                        <!--<svg data-toggle="tooltip" title="Set a price" width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-three-dots-vertical" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                             <path fill-rule="evenodd" d="M9.5 13a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
-                        </svg>
+                        </svg>-->
                     </div>
                     <ul class="dropdown-menu">
                         <li class="main-link">
@@ -142,19 +143,20 @@
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header" style="border: 0">
+                            <h3 class="modal-title lists-modal-title">Schedule Post</h3>
                             <button type="button" class="close m-3" data-dismiss="modal">&times;</button>
                         </div>
                         <div class="modal-body">
                             <div class="row">
                                 <div class='col-sm-6'>
                                     <div class="form-group">
-                                        <label for="datetimepicker4">Date</label>
+                                        <label for="datetimepicker4">Date:</label>
                                         <input type='text' name="publish_date" class="form-control" id='datetimepicker4' />
                                     </div>
                                 </div>
                                 <div class='col-sm-6'>
                                     <div class="form-group">
-                                        <label for="datetimepicker3">Time</label>
+                                        <label for="datetimepicker3">Time:</label>
                                         <input type='text' name="publish_time" class="form-control" id='datetimepicker3'/>
                                     </div>
                                 </div>
@@ -170,19 +172,20 @@
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header" style="border: 0">
+                            <h3 class="modal-title lists-modal-title">Set Expiration</h3>
                             <button type="button" class="close m-3" data-dismiss="modal">&times;</button>
                         </div>
                         <div class="modal-body">
                             <div class="row">
                                 <div class='col-sm-6'>
                                     <div class="form-group">
-                                        <label for="datetimepicker5">Date</label>
+                                        <label for="datetimepicker5">Date:</label>
                                         <input type='text' name="expiration_date" class="form-control" id='datetimepicker5' />
                                     </div>
                                 </div>
                                 <div class='col-sm-6'>
                                     <div class="form-group">
-                                        <label for="datetimepicker6">Time</label>
+                                        <label for="datetimepicker6">Time:</label>
                                         <input type='text' name="expiration_time" class="form-control" id='datetimepicker6'/>
                                     </div>
                                 </div>

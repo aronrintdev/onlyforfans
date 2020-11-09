@@ -21145,8 +21145,7 @@ label,
     border-color: #2EA1F8;
     color: white;
 }
-.form-control,
-textarea {
+.form-control {
     border: 1px solid #DFE3E9;
     border-radius: 4px;
     background: #FFFFFF;
@@ -21157,6 +21156,17 @@ textarea {
     box-shadow: none !important;
     padding-left: 12px;
     padding-right: 12px;
+}
+textarea {
+    border: 1px solid #DFE3E9;
+    border-radius: 4px;
+    background: #FFFFFF;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 14px;
+    color: #9A9FA8;
+    line-height: 19px;
+    box-shadow: none !important;
+    padding: 12px;
 }
 .form-control:focus,
 textarea:focus {
@@ -21178,6 +21188,7 @@ textarea:-moz-placeholder {
 textarea::-moz-placeholder {
     /* Firefox 19+ */
     color: #c3c6cb;
+    padding: 10px;
 }
 .form-control:-ms-input-placeholder,
 textarea:-ms-input-placeholder {
@@ -32358,7 +32369,7 @@ html {
     padding-left: 0px;
 }
 .notification-list > li:last-child {
-    padding-right: 26px;
+    padding-right: 25px;
 }
 .notification-list > li > a {
     padding-top: 19px;
@@ -33176,10 +33187,13 @@ html {
 }
 @media (max-width: 390px) {
     .panel-post .panel-footer.fans .footer-list li a {
-        font-size: 10px;
+        font-size: 12px;
     }
     .panel-post .panel-footer.fans .footer-list li a i {
         font-size: 14px;
+    }
+    .notification-list > li:last-child {
+        padding-right: 0px;
     }
 }
 .panel-post .panel-footer.fans .footer-list li a i {

@@ -15,7 +15,7 @@
 					</div>
 				</div>
 				<div class="avatar-profile">
-					<div class="avatar-details" style="width:290px;display:inline-block;">
+					<div class="avatar-details" style="width:280px;display:inline-block;">
 						<h2 class="avatar-name">
 							<a href="{{ url(Auth::user()->username) }}">
 								{{ Auth::user()->name }}
