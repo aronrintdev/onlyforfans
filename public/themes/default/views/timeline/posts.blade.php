@@ -232,7 +232,7 @@
                                     @endif
                                 </div>
                                 <div id="All" class="tabcontent">
-                                    @if($timeline->type == "user" && ($user->id == Auth::user()->id || canCreatePost(Auth::user(), $user)))
+                                    @if($timeline->type == "user" && $user->id == Auth::user()->id)
                                         {!! Theme::partial('create-post',compact('timeline','user_post')) !!}
                                     @endif
                                     <div class="lists-dropdown-menu">

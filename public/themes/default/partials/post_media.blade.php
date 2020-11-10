@@ -20,7 +20,7 @@
                     <div id="unmoved-fixture">
                         <video width="100%" height="auto" id="video-target" controls
                                class="video-video-playe">
-                            <source src="{{ url('user/gallery/video/'.$postImage->source) }}"></source>
+                            <source src="{{ url('uploads/user/video/'.$postImage->source) }}"></source>
                         </video>
                     </div>
                 </div>
@@ -50,7 +50,7 @@
                         <div id="unmoved-fixture">
                             <video width="100%" height="auto" id="video-target" controls
                                    class="video-video-playe">
-                                <source src="{{ url('user/gallery/video/'.$postImage->source) }}"></source>
+                                <source src="{{ url('uploads/user/video/'.$postImage->source) }}"></source>
                             </video>
                         </div>
                     </div>

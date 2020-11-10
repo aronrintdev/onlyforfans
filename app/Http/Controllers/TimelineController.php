@@ -925,8 +925,9 @@ class TimelineController extends AppBaseController
 //            $timestamp = date('Y-m-d-H-i-s');
 //
         if (isset($input['image1'])) {
+            $s3audio = Storage::disk('settings');
             $fileBase64 = str_replace('data:audio/wav;base64,', '',  $request->get('image1'));
-            $s3->put('users/gallery/'.$timestamp.'.wav', base64_decode($fileBase64));
+            $s3audio->put('user/audio/'.$timestamp.'.wav', base64_decode($fileBase64));
 
             $media = Media::create([
                 'title'  => $timestamp,
@@ -995,13 +996,13 @@ class TimelineController extends AppBaseController
                     $strippedName = str_replace(' ', '', $postImage->getClientOriginalName());
                     $photoName = date('Y-m-d-H-i-s') . $strippedName;
 
-                    $s3 = Storage::disk('uploads');
+                    $s3video = Storage::disk('settings');
 
                     $timestamp = date('Y-m-d-H-i-s');
 
                     $strippedName = $timestamp.str_replace(' ', '', $postImage->getClientOriginalName());
 
-                    $s3->put('users/gallery/'.$strippedName, file_get_contents($postImage));
+                    $s3video->put('user/video/'.$strippedName, file_get_contents($postImage));
 
                     $basename = $timestamp.basename($request->file('post_video_upload')->getClientOriginalName(), '.'.$request->file('post_video_upload')->getClientOriginalExtension());
 

@@ -226,16 +226,10 @@ class UserController extends AppBaseController
 
     public function userGeneralSettings($username)
     {
-        $waterMarkUrl = null;
-        if (isset(Auth::user()->settings()->watermark_file_id)) {
-            $media = Media::find(Auth::user()->settings()->watermark_file_id);
-
-            $waterMarkUrl =  asset('uploads\watermark-fonts\\'.$media->source);
-        }
         $theme = Theme::uses(Setting::get('current_theme', 'default'))->layout('default');
         $theme->setTitle(trans('common.general_settings').' '.Setting::get('title_seperator').' '.Setting::get('site_title').' '.Setting::get('title_seperator').' '.Setting::get('site_tagline'));
 
-        return $theme->scope('users/settings/general', compact('username', 'waterMarkUrl'))->render();
+        return $theme->scope('users/settings/general', compact('username'))->render();
     }
 
     public function userEditProfile($username)
@@ -248,6 +242,13 @@ class UserController extends AppBaseController
 
     public function userPrivacySettings($username)
     {
+        $waterMarkUrl = null;
+        if (isset(Auth::user()->settings()->watermark_file_id)) {
+            $media = Media::find(Auth::user()->settings()->watermark_file_id);
+
+            $waterMarkUrl =  asset('uploads\watermark-fonts\\'.$media->source);
+        }
+        
         $timeline = Timeline::where('username', $username)->first();
 
         if ($timeline == null) {
@@ -262,7 +263,7 @@ class UserController extends AppBaseController
         $theme = Theme::uses(Setting::get('current_theme', 'default'))->layout('default');
         $theme->setTitle(trans('common.privacy_settings').' '.Setting::get('title_seperator').' '.Setting::get('site_title').' '.Setting::get('title_seperator').' '.Setting::get('site_tagline'));
 
-        return $theme->scope('users/settings/privacy', compact('settings', 'blockedProfiles'))->render();
+        return $theme->scope('users/settings/privacy', compact('settings', 'blockedProfiles', 'waterMarkUrl'))->render();
     }
 
     public function userSecuritySettings($username)

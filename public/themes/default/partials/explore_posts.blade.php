@@ -25,7 +25,7 @@
                         <div id="unmoved-fixture">
                             <a href="#" data-toggle="modal" data-target="#postDetail{{ $post->id }}">
                                 <video width="100%" height="auto" id="video-target" controls class="video-video-playe">
-                                    <source src="{{ url('user/gallery/video/'.$postImage->source) }}"></source>
+                                    <source src="{{ url('uploads/user/video/'.$postImage->source) }}"></source>
                                 </video>
                             </a>
                         </div>
@@ -49,8 +49,8 @@
                     @if($postImage->type=='audio')
                         <div id="unmoved-fixture">
                             <a href="#" data-toggle="modal" data-target="#postDetail{{ $post->id }}">
-                                <audio width="100%" height="auto" id="video-target" controls class="video-video-playe" src="{{ url('user/gallery/'.$postImage->source) }}">
-                                    <source src="{{ url('user/gallery/'.$postImage->source) }}"></source>
+                                <audio width="100%" height="auto" id="video-target" controls class="video-video-playe" src="{{ url('uploads/user/audio/'.$postImage->source) }}">
+                                    <source src="{{ url('uploads/user/audio/'.$postImage->source) }}"></source>
                                 </audio>
                             </a>
                         </div>
@@ -98,7 +98,7 @@
                         <div id="unmoved-fixture">
                             <a href="#" data-toggle="modal" data-target="#postDetail{{ $post->id }}">
                                 <video width="100%" height="auto" id="video-target" controls class="video-video-playe">
-                                    <source src="{{ url('user/gallery/video/'.$postImage->source) }}"></source>
+                                    <source src="{{ url('uploads/user/video/'.$postImage->source) }}"></source>
                                 </video>
                             </a>
                         </div>
@@ -123,8 +123,8 @@
                     @if($postImage->type=='audio')
                         <div id="unmoved-fixture">
                             <a href="#" data-toggle="modal" data-target="#postDetail{{ $post->id }}">
-                                <audio width="100%" height="auto" id="video-target" controls class="video-video-playe" src="{{ url('user/gallery/'.$postImage->source) }}">
-                                    <source src="{{ url('user/gallery/'.$postImage->source) }}"></source>
+                                <audio width="100%" height="auto" id="video-target" controls class="video-video-playe" src="{{ url('uploads/user/audio/'.$postImage->source) }}">
+                                    <source src="{{ url('uploads/user/audio/'.$postImage->source) }}"></source>
                                 </audio>
                             </a>
                         </div>

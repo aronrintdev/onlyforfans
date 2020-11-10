@@ -407,7 +407,7 @@ $main_description = $post->description;
                                 @if($postImage->type=='video')
                                     <div id="unmoved-fixture">
                                         <video width="100%" height="auto" id="video-target" controls class="video-video-playe">
-                                            <source src="{{ url('user/gallery/video/'.$postImage->source) }}"></source>
+                                            <source src="{{ url('uploads/user/video/'.$postImage->source) }}"></source>
                                         </video>
                                     </div>
 
@@ -418,8 +418,8 @@ $main_description = $post->description;
                         <div class="post-audio-holder">
                             @foreach($post->images()->get() as $postImage)
                                 @if($postImage->type=='audio')
-                                    <audio controls src="{{ url('user/gallery/video/'.$postImage->source) }}">
-                                        <source src="{{ url('user/gallery/video/'.$postImage->source) }}"></source>
+                                    <audio controls src="{{ url('uploads/user/audio/'.$postImage->source) }}">
+                                        <source src="{{ url('uploads/user/audio/'.$postImage->source) }}"></source>
                                     </audio>
                                 @endif
                             @endforeach
@@ -631,7 +631,7 @@ $main_description = $post->description;
                             @if($postImage->type=='video')
                                 <div id="unmoved-fixture">
                                     <video width="100%" height="auto" id="video-target" controls class="video-video-playe">
-                                        <source src="{{ url('user/gallery/video/'.$postImage->source) }}"></source>
+                                        <source src="{{ url('uploads/user/video/'.$postImage->source) }}"></source>
                                     </video>
                                 </div>
 
@@ -642,8 +642,8 @@ $main_description = $post->description;
                     <div class="post-audio-holder">
                         @foreach($post->images()->get() as $postImage)
                             @if($postImage->type=='audio')
-                                <audio controls src="{{ url('user/gallery/video/'.$postImage->source) }}">
-                                    <source src="{{ url('user/gallery/video/'.$postImage->source) }}"></source>
+                                <audio controls src="{{ url('uploads/user/audio/'.$postImage->source) }}">
+                                    <source src="{{ url('uploads/user/audio/'.$postImage->source) }}"></source>
                                 </audio>
                             @endif
                         @endforeach
@@ -982,5 +982,10 @@ $main_description = $post->description;
   input[type="number"] {
       appearance: none;
       -moz-appearance: textfield !important;
+  }
+
+  .panel-post .panel-body {
+     max-height: 500px;
+     overflow-x: auto;
   }
 </style>

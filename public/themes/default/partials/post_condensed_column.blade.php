@@ -251,7 +251,7 @@
                         </div>
                     </div>
                 @else
-                    <div class="panel-body {{ $post->images()->get()->count() == 1 && clean($main_description) == '' ? 'single-image-panel' : '' }}">
+                    <div class="panel-body {{ isset($sharedOwner) ? 'shared-post' : '' }} {{ $post->images()->get()->count() == 1 && clean($main_description) == '' ? 'single-image-panel' : '' }}">
                     <div class="text-wrapper">
 
                         <div id="statisticsModal{{ $post->id }}" class="modal fade" role="dialog" tabindex='-1'>
@@ -410,7 +410,7 @@
                                     @if($postImage->type=='video')
                                         <div id="unmoved-fixture">
                                             <video width="100%" height="auto" id="video-target" controls class="video-video-playe">
-                                                <source src="{{ url('user/gallery/video/'.$postImage->source) }}"></source>
+                                                <source src="{{ url('uploads/user/video/'.$postImage->source) }}"></source>
                                             </video>
                                         </div>
 
@@ -421,8 +421,8 @@
                             <div class="post-audio-holder">
                                 @foreach($post->images()->get() as $postImage)
                                     @if($postImage->type=='audio')
-                                        <audio controls src="{{ url('user/gallery/video/'.$postImage->source) }}">
-                                            <source src="{{ url('user/gallery/video/'.$postImage->source) }}"></source>
+                                        <audio controls >
+                                            <source src="{{ url('uploads/user/audio/'.$postImage->source) }}"></source>
                                         </audio>
                                     @endif
                                 @endforeach
@@ -474,7 +474,7 @@
                     </div>
                 @endif
             @else
-                <div class="panel-body {{ $post->images()->get()->count() == 1 && clean($main_description) == '' ? 'single-image-panel' : '' }}">
+                <div class="panel-body {{ isset($sharedOwner) ? 'shared-post' : '' }} {{ $post->images()->get()->count() == 1 && clean($main_description) == '' ? 'single-image-panel' : '' }}">
                 <div class="text-wrapper">
 
                     <div id="statisticsModal{{ $post->id }}" class="modal fade" role="dialog" tabindex='-1'>
@@ -633,7 +633,7 @@
                                 @if($postImage->type=='video')
                                     <div id="unmoved-fixture">
                                         <video width="100%" height="auto" id="video-target" controls class="video-video-playe">
-                                            <source src="{{ url('user/gallery/video/'.$postImage->source) }}"></source>
+                                            <source src="{{ url('uploads/user/video/'.$postImage->source) }}"></source>
                                         </video>
                                     </div>
 
@@ -645,8 +645,8 @@
                             @foreach($post->images()->get() as $postImage)
                                 @if($postImage->type=='audio')
                                     <div id="unmoved-fixture">
-                                        <audio width="100%" height="auto" id="video-target" controls class="video-video-playe">
-                                            <source src="{{ url('user/gallery/video/'.$postImage->source) }}"></source>
+                                        <audio controls>
+                                            <source src="{{ url('uploads/user/audio/'.$postImage->source) }}"></source>
                                         </audio>
                                     </div>
 
@@ -946,10 +946,10 @@
   }
   
   .timeline-condensed-column .locked-panel-body {
-      height: 251px;
+      height: 256px;
       padding: 0;
   }
-
+  
   .timeline-condensed-column .locked-content {
       height: 100%;
       margin: 0;
