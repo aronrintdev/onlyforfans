@@ -2,11 +2,6 @@
   <div class="panel-heading no-bg panel-settings">  
     <h3 class="panel-title">
       {{ trans('common.allnotifications') }} 
-      @if(count($notifications) > 0)
-        <span class="side-right">
-          <a href="{{ url('allnotifications/delete') }}" class="btn btn-danger text-white allnotifications-delete">{{ trans('common.delete_all') }}</a>
-        </span>
-      @endif
     </h3>
   </div>
 
@@ -31,23 +26,28 @@
         </div>
 
         <div id="All" class="tabcontent">
+          @if(count($notifications) > 0)
+            <span class="side-right" style="margin-top: 10px;">
+              <a href="{{ url('allnotifications/delete') }}" class="btn btn-success text-white allnotifications-delete">{{ trans('common.delete_all') }}</a>
+            </span>
+          @endif
             <h3>All</h3>
             <div class="table-responsive">
                 <table class="table apps-table fans">
                     @if(count($notifications) > 0)
                         <thead>
-                        <th></th>
-                        <th>{{ trans('common.notification') }}</th>
-                        <th>{{ trans('admin.action') }}</th>
+                            <th style="width:20%;">User</th>
+                            <th>{{ trans('common.notification') }}</th>
+                            <th style="text-align:center; width:10%;">{{ trans('admin.action') }}</th>
                         </thead>
                         <tbody>
                         @foreach($notifications as $notification)
                             <tr>
-                                <td><a href="{{ url('/'.$notification->notified_from->timeline->username) }}">
-                                        <img src="{{ $notification->notified_from->avatar }}" alt="{{$notification->notified_from->username}}" title="{{$notification->notified_from->name}}"></a><a href="{{ url($notification->notified_from->username) }}"></a>
+                                <td><a style="vertical-align:top;" href="{{ url('/'.$notification->notified_from->timeline->username) }}">
+                                        <img src="{{ $notification->notified_from->avatar }}" alt="{{$notification->notified_from->username}}" title="{{$notification->notified_from->name}}"></a><a href="{{ url($notification->notified_from->username) }}" style="display:inline-block;">{{$notification->notified_from->name}}<br><span>@</span>{{$notification->notified_from->username}}</a>
                                 </td>
                                 <td>{{ str_limit($notification->description,50) }}</td>
-                                <td><a href="#" data-notification-id="{{ $notification->id }}" class="notification-delete"><span class="trash-icon bg-danger">
+                                <td style="text-align:center;"><a href="#" data-notification-id="{{ $notification->id }}" class="notification-delete"><span class="trash-icon bg-danger">
                                         <svg data-toggle="tooltip" title="Delete" width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-trash" xmlns="http://www.w3.org/2000/svg" fill="#fff" style="margin-top: 5px;">
                                           <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"></path>
                                           <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4L4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"></path>
@@ -72,19 +72,19 @@
                 <table class="table apps-table fans">
                     @if(count($notifications) > 0)
                         <thead>
-                        <th></th>
-                        <th>{{ trans('common.notification') }}</th>
-                        <th>{{ trans('admin.action') }}</th>
+                            <th style="width:20%;">User</th>
+                            <th>{{ trans('common.notification') }}</th>
+                            <th style="text-align:center; width:10%;">{{ trans('admin.action') }}</th>
                         </thead>
                         <tbody>
                         @foreach($notifications as $notification)
                             @if ($notification->type == "like_post" || $notification->type == "unlike_post")
                                 <tr>
-                                    <td><a href="{{ url('/'.$notification->notified_from->timeline->username) }}">
-                                            <img src="{{ $notification->notified_from->avatar }}" alt="{{$notification->notified_from->username}}" title="{{$notification->notified_from->name}}"></a><a href="{{ url($notification->notified_from->username) }}"></a>
+                                    <td><a style="vertical-align:top;" href="{{ url('/'.$notification->notified_from->timeline->username) }}">
+                                            <img src="{{ $notification->notified_from->avatar }}" alt="{{$notification->notified_from->username}}" title="{{$notification->notified_from->name}}"></a><a href="{{ url($notification->notified_from->username) }}" style="display:inline-block;">{{$notification->notified_from->name}}<br><span>@</span>{{$notification->notified_from->username}}</a>
                                     </td>
                                     <td>{{ str_limit($notification->description,50) }}</td>
-                                    <td><a href="#" data-notification-id="{{ $notification->id }}" class="notification-delete"><span class="trash-icon bg-danger">
+                                    <td style="text-align:center;"><a href="#" data-notification-id="{{ $notification->id }}" class="notification-delete"><span class="trash-icon bg-danger">
                                         <svg data-toggle="tooltip" title="Delete" width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-trash" xmlns="http://www.w3.org/2000/svg" fill="#fff" style="margin-top: 5px;">
                                           <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"></path>
                                           <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4L4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"></path>
@@ -110,19 +110,19 @@
                 <table class="table apps-table fans">
                     @if(count($notifications) > 0)
                         <thead>
-                        <th></th>
-                        <th>{{ trans('common.notification') }}</th>
-                        <th>{{ trans('admin.action') }}</th>
+                            <th style="width:20%;">User</th>
+                            <th>{{ trans('common.notification') }}</th>
+                            <th style="text-align:center; width:10%;">{{ trans('admin.action') }}</th>
                         </thead>
                         <tbody>
                         @foreach($notifications as $notification)
                             @if ($notification->type == "follow" || $notification->type == "unfollow")
                                 <tr>
-                                    <td><a href="{{ url('/'.$notification->notified_from->timeline->username) }}">
-                                            <img src="{{ $notification->notified_from->avatar }}" alt="{{$notification->notified_from->username}}" title="{{$notification->notified_from->name}}"></a><a href="{{ url($notification->notified_from->username) }}"></a>
+                                    <td><a style="vertical-align:top;" href="{{ url('/'.$notification->notified_from->timeline->username) }}">
+                                            <img src="{{ $notification->notified_from->avatar }}" alt="{{$notification->notified_from->username}}" title="{{$notification->notified_from->name}}"></a><a href="{{ url($notification->notified_from->username) }}" style="display:inline-block;">{{$notification->notified_from->name}}<br><span>@</span>{{$notification->notified_from->username}}</a>
                                     </td>
                                     <td>{{ str_limit($notification->description,50) }}</td>
-                                    <td><a href="#" data-notification-id="{{ $notification->id }}" class="notification-delete"><span class="trash-icon bg-danger">
+                                    <td style="text-align:center;"><a href="#" data-notification-id="{{ $notification->id }}" class="notification-delete"><span class="trash-icon bg-danger">
                                         <svg data-toggle="tooltip" title="Delete" width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-trash" xmlns="http://www.w3.org/2000/svg" fill="#fff" style="margin-top: 5px;">
                                           <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"></path>
                                           <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4L4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"></path>

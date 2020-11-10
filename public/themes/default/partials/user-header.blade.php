@@ -86,40 +86,6 @@
 </style>
 <div class="timeline-cover-section">
 	<div class="timeline-cover">
-		<ul class="list-inline pagelike-links">
-			{{--			@if($user_post == true)--}}
-			<li class="timeline-cover-status {{ Request::segment(2) == 'posts' ? 'active' : '' }}"><a href="{{ url($timeline->username.'/posts') }}" ><span class="top-list">{{ count($timeline->posts()->where('active', 1)->get()) }} {{ trans('common.posts') }}</span></a></li>
-			{{--			@else--}}
-			{{--				<li class="timeline-cover-status {{ Request::segment(2) == 'posts' ? 'active' : '' }}"><a href="#"><span class="top-list">{{ count($timeline->posts()->where('active', 1)->get()) }} {{ trans('common.posts') }}</span></a></li>--}}
-			{{--			@endif--}}
-		<!-- <li class="{{ Request::segment(2) == 'following' ? 'active' : '' }} smallscreen-report"><a href="{{ url($timeline->username.'/following') }}" ><span class="top-list">{{ $following_count }} {{ trans('common.following') }}</span></a></li>
-		<li class="{{ Request::segment(2) == 'followers' ? 'active' : '' }} smallscreen-report"><a href="{{ url($timeline->username.'/followers') }}" ><span class="top-list">{{ $followers_count }}  {{ trans('common.followers') }}</span></a></li>-->
-
-			@if(!$user->timeline->albums->isEmpty())
-				<li class=""><a href="{{ url($timeline->username.'/albums') }}" > {{ trans('common.photos') }}</span></a></li>
-			@endif
-			<li class="timeline-cover-status {{ Request::segment(2) == 'followers' ? 'active' : '' }}">
-				<a href="{{ url($timeline->username.'/followers') }}" ><span class="top-list">{{ $followers_count }}  {{ trans('common.followers') }}</span>
-				</a>
-			</li>
-			<li class="timeline-cover-status {{ Request::segment(2) == 'followers' ? 'active' : '' }}">
-				<a href="#" ><span class="top-list"><span class="liked-post">{{count($liked_post)}}</span> {{ trans('common.likes') }}</span>
-				</a>
-			</li>
-			<li class="timeline-cover-status {{ Request::segment(2) == 'followers' ? 'active' : '' }}">
-				<a href="{{ url($timeline->username.'/following') }}" ><span class="top-list">{{ $following_count }}  {{ trans('common.following') }}</span>
-				</a>
-			</li>
-{{--			@if(Auth::user()->username != $timeline->username)--}}
-{{--				@if(!$timeline->reports->contains(Auth::user()->id))--}}
-{{--					<li class="smallscreen-report"><a href="#" class="page-report report" data-timeline-id="{{ $timeline->id }}">{{ trans('common.report') }}</a></li>--}}
-{{--					<li class="hidden smallscreen-report"><a href="#" class="page-report reported" data-timeline-id="{{ $timeline->id }}">{{ trans('common.reported') }}</a></li>--}}
-{{--				@else--}}
-{{--					<li class="hidden smallscreen-report"><a href="#" class="page-report report" data-timeline-id="{{ $timeline->id }}">{{ trans('common.report') }}</a></li>--}}
-{{--					<li class="smallscreen-report"><a href="#" class="page-report reported" data-timeline-id="{{ $timeline->id }}">{{ trans('common.reported') }}</a></li>--}}
-{{--				@endif--}}
-{{--			@endif--}}
-		</ul>
 		<div class="profile-dropdown-menu">
 			<ul class="list-inline no-margin">
 				<li class="dropdown">
@@ -191,12 +157,47 @@
 		</div>
 			<!-- <div class="cover-bottom">
 		</div> -->
+		</div>
+	<div class="timeline-list">
 		<div class="user-timeline-name">
 			<a href="{{ url($timeline->username) }}">{{ $timeline->name }}</a><br><a class="user-timeline-username" href="{{ url($timeline->username) }}"><span>@</span>{{ $timeline->username }}</a>
 				{!! verifiedBadge($timeline) !!}
 		</div>
-		</div>
-	<div class="timeline-list">
+		<span class="status status-holder-{{ $user->id }} {{ $user->last_logged ? '' : 'text-success' }}">{{ $user->last_logged ? 'Last seen '.\Carbon\Carbon::parse($user->last_logged)->timezone(Auth::user()->timezone)->diffForHumans() : 'Online Now' }}</span>
+		<ul class="list-inline pagelike-links">
+			{{--			@if($user_post == true)--}}
+			<li class="timeline-cover-status {{ Request::segment(2) == 'posts' ? 'active' : '' }}"><a href="{{ url($timeline->username.'/posts') }}" ><span class="top-list">{{ count($timeline->posts()->where('active', 1)->get()) }} {{ trans('common.posts') }}</span></a></li>
+			{{--			@else--}}
+			{{--				<li class="timeline-cover-status {{ Request::segment(2) == 'posts' ? 'active' : '' }}"><a href="#"><span class="top-list">{{ count($timeline->posts()->where('active', 1)->get()) }} {{ trans('common.posts') }}</span></a></li>--}}
+			{{--			@endif--}}
+		<!-- <li class="{{ Request::segment(2) == 'following' ? 'active' : '' }} smallscreen-report"><a href="{{ url($timeline->username.'/following') }}" ><span class="top-list">{{ $following_count }} {{ trans('common.following') }}</span></a></li>
+		<li class="{{ Request::segment(2) == 'followers' ? 'active' : '' }} smallscreen-report"><a href="{{ url($timeline->username.'/followers') }}" ><span class="top-list">{{ $followers_count }}  {{ trans('common.followers') }}</span></a></li>-->
+
+			@if(!$user->timeline->albums->isEmpty())
+				<li class=""><a href="{{ url($timeline->username.'/albums') }}" > {{ trans('common.photos') }}</span></a></li>
+			@endif
+			<li class="timeline-cover-status {{ Request::segment(2) == 'followers' ? 'active' : '' }}">
+				<a href="{{ url($timeline->username.'/followers') }}" ><span class="top-list">{{ $followers_count }}  {{ trans('common.followers') }}</span>
+				</a>
+			</li>
+			<li class="timeline-cover-status {{ Request::segment(2) == 'followers' ? 'active' : '' }}">
+				<a href="#" ><span class="top-list"><span class="liked-post">{{count($liked_post)}}</span> {{ trans('common.likes') }}</span>
+				</a>
+			</li>
+			<li class="timeline-cover-status {{ Request::segment(2) == 'followers' ? 'active' : '' }}">
+				<a href="{{ url($timeline->username.'/following') }}" ><span class="top-list">{{ $following_count }}  {{ trans('common.following') }}</span>
+				</a>
+			</li>
+{{--			@if(Auth::user()->username != $timeline->username)--}}
+{{--				@if(!$timeline->reports->contains(Auth::user()->id))--}}
+{{--					<li class="smallscreen-report"><a href="#" class="page-report report" data-timeline-id="{{ $timeline->id }}">{{ trans('common.report') }}</a></li>--}}
+{{--					<li class="hidden smallscreen-report"><a href="#" class="page-report reported" data-timeline-id="{{ $timeline->id }}">{{ trans('common.reported') }}</a></li>--}}
+{{--				@else--}}
+{{--					<li class="hidden smallscreen-report"><a href="#" class="page-report report" data-timeline-id="{{ $timeline->id }}">{{ trans('common.report') }}</a></li>--}}
+{{--					<li class="smallscreen-report"><a href="#" class="page-report reported" data-timeline-id="{{ $timeline->id }}">{{ trans('common.reported') }}</a></li>--}}
+{{--				@endif--}}
+{{--			@endif--}}
+		</ul>
 			<div class="timeline-user-avtar">
 				<img src="{{ $timeline->user->avatar }}" alt="{{ $timeline->name }}" title="{{ $timeline->name }}">
 				@if($timeline->id == Auth::user()->timeline_id)

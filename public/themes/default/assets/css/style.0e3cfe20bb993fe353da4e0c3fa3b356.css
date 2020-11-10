@@ -8616,8 +8616,9 @@ ol ol {
 }
 .list-inline.pagelike-links {
     position: absolute;
-    padding-right: 77px;
+   /*  padding-right: 77px; */
     /* z-index: 999; */
+    left: 600px;
 }
 .list-inline > li {
     display: inline-block;
@@ -21064,7 +21065,6 @@ body {
     font-family: 'Open Sans', sans-serif;
     font-size: 14px;
     color: #4a5568;
-    letter-spacing: 0.1px;
 }
 h1 {
     font-size: 32px;
@@ -31284,7 +31284,7 @@ html {
     background-color: #fff;
     z-index: 9;
     bottom: 0px;
-    right: 255px;
+    right: 10px;
     border-radius: 4px 4px 0px 0px;
     box-shadow: 0 10px 16px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
@@ -32683,7 +32683,7 @@ html {
 @media (max-width:1010px) {
     .user-image.dropdown.fans .dropdown-menu {
             width: 230px !important;
-            left: -130px;
+            left: -190px;
     }
 }
 
@@ -32812,7 +32812,7 @@ html {
 @media (max-width: 1010px) and (max-width: 768px) {
     .navbar-form {
         margin-left: 0px;
-        width: 100%;
+        max-width: 200px;
     }
     .navbar-form .selectize-control {
         width: 100%;
@@ -32865,6 +32865,7 @@ html {
 }
 .panel-create .panel-footer .left-list {
     float: left;
+    margin-top: 5px;
 }
 .panel-create .panel-footer .left-list li {
     padding-left: 9px;
@@ -33374,18 +33375,18 @@ html {
 }
 @media (max-width: 1200px) {
     .timeline-cover-section {
-        margin-bottom: 70px;
+        margin-bottom: 90px;
     }
 }
 .timeline-cover-section .timeline-cover {
-    max-height: 300px;
+    height: 375px;
     width: 100%;
     overflow: hidden;
     position: relative;
 }
 @media (max-width: 660px) {
     .timeline-cover-section .timeline-cover {
-        min-height: 185px;
+        height: 200px;
         width: auto;
     }
 }
@@ -33400,7 +33401,7 @@ html {
 @media (max-width: 660px) {
     .timeline-cover-section .timeline-cover img {
         min-height: 185px;
-        width: auto;
+        /* width: auto; */
     }
 }
 .timeline-cover-section .timeline-cover .btn-camera-cover {
@@ -33456,7 +33457,7 @@ html {
     width: 150px;
     height: 150px;
     position: absolute;
-    top: -120px;
+    top: -70px;
     left: 20px;
     padding: 7px;
     background-color: #fff;
@@ -33467,7 +33468,7 @@ html {
     .timeline-user-avtar {
         width: 120px;
         height: 120px;
-        top: -90px;
+        top: -60px;
     }
 }
 @media (max-width: 350px) {
@@ -33577,24 +33578,34 @@ html {
 }
 .user-timeline-name {
     position: absolute;
-    bottom: 22px;
-    left: 193px;
+    bottom: 40px;
+    left: 190px;
+    width: 300px;
 }
 .user-timeline-name a {
     font-family: 'Open Sans', sans-serif;
     font-weight: 400;
-    font-size: 24px;
-    color: #FFFFFF;
+    font-size: 20px;
+    color: #555;
     text-decoration: none;
-    letter-spacing: 0.56px;
 }
 .user-timeline-username {
-    font-size: 18px !important;
+    font-size: 14px !important;
+}
+.status {
+    position: absolute;
+    left: 190px;
+    top: 65px;
 }
 @media (max-width: 560px) {
     .user-timeline-name {
-        bottom: 16px;
-        left: 162px;
+        bottom: 50px;
+        left: 150px;
+        width: auto;
+    }
+    .status {
+        left: 150px;
+        top: 50px;
     }
 }
 @media (max-width: 350px) {
@@ -33654,7 +33665,7 @@ html {
 }
 .timeline-list {
     background-color: #fff;
-    height: 50px;
+    height: 100px;
     position: relative;
 }
 .timeline-list > ul {
@@ -33741,7 +33752,7 @@ html {
 }
 @media (max-width: 1200px) {
     .timeline-list {
-        height: auto;
+        height: 100px;
         background-color: #EFF3F6;
     }
     .timeline-list > ul {
@@ -35459,6 +35470,7 @@ body.direction-rtl .manage-table table tbody td ul {
 .user-bio-block .bio-header {
     color: #4a5568;
     font-size: 16px;
+    display: none;
 }
 .user-bio-block .privacy-type {
     font-weight: 600;

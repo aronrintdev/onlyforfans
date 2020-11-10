@@ -4,18 +4,6 @@
 			@if(!$user->timeline->albums->isEmpty())
 				<li class=""><a href="" > {{ trans('common.photos') }}</span></a></li>
 			@endif
-			<li class="timeline-cover-status {{ Request::segment(2) == 'followers' ? 'active' : '' }}">
-				<a href="" ><span class="top-list">{{ $followers_count }}  {{ trans('common.followers') }}</span>
-				</a>
-			</li>
-			<li class="timeline-cover-status {{ Request::segment(2) == 'followers' ? 'active' : '' }}">
-				<a href="#" ><span class="top-list"><span class="liked-post">{{count($liked_post)}}</span> {{ trans('common.likes') }}</span>
-				</a>
-			</li>
-			<li class="timeline-cover-status {{ Request::segment(2) == 'followers' ? 'active' : '' }}">
-				<a href="" ><span class="top-list">{{ $following_count }}  {{ trans('common.following') }}</span>
-				</a>
-			</li>
 			@if($user->username != $timeline->username)
 				@if(!$timeline->reports->contains($user->id))
 				<li class="pull-right">
@@ -53,31 +41,45 @@
 {{--			<a href="#" class="btn btn-camera-cover change-cover"><i class="fa fa-camera" aria-hidden="true"></i><span class="change-cover-text">{{ trans('common.change_cover') }}</span></a>--}}
 {{--		@endif--}}
 		<div class="user-cover-progress hidden">
-
+		    
 		</div>
-		<!-- <div class="cover-bottom">
-		</div> -->
-		<div class="user-timeline-name">
-			<a href="">{{ $timeline->name }}</a><br><a class="user-timeline-username" href="{{ url($timeline->username) }}">{{ $timeline->username }}</a>
-				{!! verifiedBadge($timeline) !!}
-		</div>
-		</div>
+		<!-- <div class="cover-bottom"></div> -->
+	</div>
 	<div class="timeline-list">
 			<!-- <div class="status-button">
 					<a href="#" class="btn btn-status">Subscription Packages</a>
 			</div> -->
-			<div class="timeline-user-avtar">
-				<img src="{{ $timeline->user->avatar }}" alt="{{ $timeline->name }}" title="{{ $timeline->name }}">
+		<div class="user-timeline-name">
+			<a href="">{{ $timeline->name }}</a><br><a class="user-timeline-username" href="{{ url($timeline->username) }}">{{ $timeline->username }}</a>
+				{!! verifiedBadge($timeline) !!}
+		</div>
+		<span class="status status-holder-{{ $user->id }} {{ $user->last_logged ? '' : 'text-success' }}">{{ $user->last_logged ? 'Last seen '.\Carbon\Carbon::parse($user->last_logged)->timezone(Auth::user()->timezone)->diffForHumans() : 'Online Now' }}</span>
+		<ul class="list-inline pagelike-links">							
+			<li class="timeline-cover-status {{ Request::segment(2) == 'followers' ? 'active' : '' }}">
+				<a href="" ><span class="top-list">{{ $followers_count }}  {{ trans('common.followers') }}</span>
+				</a>
+			</li>
+			<li class="timeline-cover-status {{ Request::segment(2) == 'followers' ? 'active' : '' }}">
+				<a href="#" ><span class="top-list"><span class="liked-post">{{count($liked_post)}}</span> {{ trans('common.likes') }}</span>
+				</a>
+			</li>
+			<li class="timeline-cover-status {{ Request::segment(2) == 'followers' ? 'active' : '' }}">
+				<a href="" ><span class="top-list">{{ $following_count }}  {{ trans('common.following') }}</span>
+				</a>
+			</li>
+		</ul>
+		<div class="timeline-user-avtar">
+			<img src="{{ $timeline->user->avatar }}" alt="{{ $timeline->name }}" title="{{ $timeline->name }}">
 {{--				@if($timeline->id == $user->timeline_id)--}}
 {{--					<div class="chang-user-avatar">--}}
 {{--						<a href="#" class="btn btn-camera change-avatar"><i class="fa fa-camera" aria-hidden="true"></i><span class="avatar-text">{{ trans('common.update_profile') }}<span>{{ trans('common.picture') }}</span></span></a>--}}
 {{--					</div>--}}
 {{--				@endif			--}}
-				<div class="user-avatar-progress hidden">
-				</div>
+			<div class="user-avatar-progress hidden">
 			</div>
 		</div>
 	</div>
+</div>
 <script type="text/javascript">
 	@if($timeline->background_id != NULL)
 		$('body')

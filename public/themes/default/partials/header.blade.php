@@ -57,7 +57,7 @@
     
     @media screen and (max-width: 576px) {
         .user-image.fans {
-            padding-right: 0 !important;
+            padding-right: 5px !important;
             padding-left: 0;
         }
 
