@@ -1,3 +1,60 @@
+<style>
+
+	.default-post.panel-post .image-with-blur .single-image {
+		height: 440px;
+		position: relative;
+	}
+
+	@media screen and (max-width: 576px) {
+		.default-post.panel-post .image-with-blur .single-image {
+			height: 250px
+		}
+	}
+
+	.default-post.panel-post .image-with-blur .single-image a img {
+		height: auto;
+		width: auto;
+		max-height: 100% !important;
+		max-width: 100% !important;
+	}
+
+	.default-post.panel-post .image-with-blur .single-image a {
+		position: absolute;
+		text-align: center;
+		height: 100%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.default-post.panel-post .image-with-blur .single-image .first-image {
+		z-index: 950 !important;
+	}
+
+	.default-post.panel-post .with-text {
+		display: flex;
+		max-height: inherit !important;
+	}
+
+	.default-post.panel-post .with-text a {
+		flex-grow: 1;
+		height: 100%;
+		max-height: 100%;
+	}
+
+	.default-post.panel-post .with-text img {
+		width: 100%;
+		height: 400px;
+		object-fit: cover;
+		max-height: 100% !important;
+	}
+
+	@media screen and (max-width: 576px) {
+		.default-post.panel-post .with-text img {
+			height: 250px
+		}
+	}
+</style>
 <!-- <div class="main-content"> -->
 <div class="container">
 	<div class="row">

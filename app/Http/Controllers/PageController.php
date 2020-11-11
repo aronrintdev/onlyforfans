@@ -117,4 +117,60 @@ class PageController extends Controller
 
         return $theme->scope('share-post', compact('post'))->render();
     }
+
+    public function faq(Request $request)
+    {
+        $theme = Theme::uses(Setting::get('current_theme', 'default'))->layout('guest');
+        $theme->setTitle(Setting::get('site_title').' '.Setting::get('title_seperator').' '.Setting::get('site_tagline'));
+        return $theme->scope('faq')->render();
+    }
+
+    public function dmca(Request $request)
+    {
+        $theme = Theme::uses(Setting::get('current_theme', 'default'))->layout('guest');
+        $theme->setTitle(Setting::get('site_title').' '.Setting::get('title_seperator').' '.Setting::get('site_tagline'));
+        return $theme->scope('dmca')->render();
+    }
+
+    public function usc2257(Request $request)
+    {
+        $theme = Theme::uses(Setting::get('current_theme', 'default'))->layout('guest');
+        $theme->setTitle(Setting::get('site_title').' '.Setting::get('title_seperator').' '.Setting::get('site_tagline'));
+        return $theme->scope('usc2257')->render();
+    }
+
+    public function legal(Request $request)
+    {
+        $theme = Theme::uses(Setting::get('current_theme', 'default'))->layout('guest');
+        $theme->setTitle(Setting::get('site_title').' '.Setting::get('title_seperator').' '.Setting::get('site_tagline'));
+        return $theme->scope('legal')->render();
+    }
+
+    public function blog(Request $request)
+    {
+        $theme = Theme::uses(Setting::get('current_theme', 'default'))->layout('guest');
+        $theme->setTitle(Setting::get('site_title').' '.Setting::get('title_seperator').' '.Setting::get('site_tagline'));
+        return $theme->scope('blog')->render();
+    }
+
+    public function support(Request $request)
+    {
+        $theme = Theme::uses(Setting::get('current_theme', 'default'))->layout('guest');
+        $theme->setTitle(Setting::get('site_title').' '.Setting::get('title_seperator').' '.Setting::get('site_tagline'));
+        return $theme->scope('support')->render();
+    }
+
+    public function termsOfUse()
+    {
+        $theme = Theme::uses(Setting::get('current_theme', 'default'))->layout('guest');
+        $theme->setTitle(Setting::get('site_title').' '.Setting::get('title_seperator').' '.Setting::get('site_tagline'));
+        return $theme->scope('termsOfUse')->render();
+    }
+
+    public function privacyPolicy()
+    {
+        $theme = Theme::uses(Setting::get('current_theme', 'default'))->layout('guest');
+        $theme->setTitle(Setting::get('site_title').' '.Setting::get('title_seperator').' '.Setting::get('site_tagline'));
+        return $theme->scope('privacyPolicy')->render();
+    }
 }

@@ -97,14 +97,14 @@ Route::group(['prefix' => 'checkout', 'middleware' => ['auth']], function() {
 });
 
 // User support
-Route::get('faq', 'HomeController@faq');
-Route::get('support', 'HomeController@support');
-Route::get('terms-of-use', 'HomeController@termsOfUse');
-Route::get('privacy-policy', 'HomeController@privacyPolicy');
-Route::get('dmca', 'HomeController@dmca');
-Route::get('usc2257', 'HomeController@usc2257');
-Route::get('legal', 'HomeController@legal');
-Route::get('blog', 'HomeController@blog');
+Route::get('faq', 'PageController@faq');
+Route::get('support', 'PageController@support');
+Route::get('terms-of-use', 'PageController@termsOfUse');
+Route::get('privacy-policy', 'PageController@privacyPolicy');
+Route::get('dmca', 'PageController@dmca');
+Route::get('usc2257', 'PageController@usc2257');
+Route::get('legal', 'PageController@legal');
+Route::get('blog', 'PageController@blog');
 
 // Login
 Route::get('/login', 'Auth\LoginController@getLogin');

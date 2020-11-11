@@ -9,7 +9,7 @@
 $main_description = $post->description;
 ?>
     
- <div class="panel panel-default panel-post animated post-wrapper-{{ $post->id }}" id="post{{ $post->id }}">
+ <div class="panel panel-default default-post panel-post animated post-wrapper-{{ $post->id }}" id="post{{ $post->id }}">
   <div class="panel-heading no-bg">
     <div class="post-author">
 
@@ -248,7 +248,7 @@ $main_description = $post->description;
                 </div>
             </div>
         @else
-            <div class="panel-body {{ $post->images()->get()->count() == 1 && clean($main_description) == ''  ? 'single-image-panel' : '' }}">
+            <div class="panel-body image-with-blur {{ clean($main_description) == ''  ? 'single-image-panel' : '' }}">
                 <div class="text-wrapper">
 
                     <div id="statisticsModal{{ $post->id }}" class="modal fade" role="dialog" tabindex='-1'>
@@ -393,19 +393,20 @@ $main_description = $post->description;
                         </div>
                     @else
 
-                        <div class="post-image-holder  @if(count($post->images()->get()) == 1) single-image @endif">
+                        <div class="post-image-holder {{ $post->images()->get()->first()->type == 'image' ? 'single-image' : ''}}">
 
-                            @foreach($post->images()->get() as $postImage)
+                            @foreach($post->images()->get() as $index => $postImage)
                                 @if($postImage->type=='image')
-                                    <a href="{{ url('user/gallery/'.$postImage->source) }}" data-fancybox="gallery.{{$post->id}}" ><img src="{{ url('user/gallery/'.$postImage->source) }}"  title="{{ $post->user->name }}" alt="{{ $post->user->name }}"></a>
+                                    <span class="{{ $index == 0 ? 'first-image' : 'hidden' }}" style="background-image: url({{ url('user/gallery/'.$post->images()->get()->first()->source) }}); height: 100%; width: 100%; position: absolute; filter: blur(4px); background-size: cover; z-index: 0; background-position: center;"></span>
+                                    <a href="{{ url('user/gallery/'.$postImage->source) }}" class="{{ $index == 0 ? 'first-image' : 'hidden' }}" data-fancybox="gallery.{{$post->id}}"><img src="{{ url('user/gallery/'.$postImage->source) }}"  title="{{ $post->user->name }}" alt="{{ $post->user->name }}"></a>
                                 @endif
                             @endforeach
                         </div>
 
                         <div class="post-v-holder">
-                            @foreach($post->images()->get() as $postImage)
+                            @foreach($post->images()->get() as $index => $postImage)
                                 @if($postImage->type=='video')
-                                    <div id="unmoved-fixture">
+                                    <div id="unmoved-fixture" class="{{ $index == 0 && clean($main_description) == '' ? 'first-image' : 'hidden' }}">
                                         <video width="100%" height="auto" id="video-target" controls class="video-video-playe">
                                             <source src="{{ url('uploads/user/video/'.$postImage->source) }}"></source>
                                         </video>
@@ -472,7 +473,7 @@ $main_description = $post->description;
         @endif
       
     @else
-        <div class="panel-body {{ $post->images()->get()->count() == 1 && clean($main_description) == '' ? 'single-image-panel' : '' }}">
+        <div class="panel-body image-with-blur {{ clean($main_description) == '' ? 'single-image-panel' : '' }}">
             <div class="text-wrapper">
 
                 <div id="statisticsModal{{ $post->id }}" class="modal fade" role="dialog" tabindex='-1'>
@@ -617,19 +618,20 @@ $main_description = $post->description;
                     </div>
                 @else
 
-                    <div class="post-image-holder  @if(count($post->images()->get()) == 1) single-image @endif">
+                    <div class="post-image-holder {{ $post->images()->get()->first()->type == 'image' ? 'single-image' : ''}}">
 
-                        @foreach($post->images()->get() as $postImage)
+                        @foreach($post->images()->get() as $index => $postImage)
                             @if($postImage->type=='image')
-                                <a href="{{ url('user/gallery/'.$postImage->source) }}" data-fancybox="gallery.{{$post->id}}"><img src="{{ url('user/gallery/'.$postImage->source) }}"  title="{{ $post->user->name }}" alt="{{ $post->user->name }}"></a>
+                                <span class="{{ $index == 0 ? 'first-image' : 'hidden' }}" style="background-image: url({{ url('user/gallery/'.$post->images()->get()->first()->source) }}); height: 100%; width: 100%; position: absolute; filter: blur(4px); background-size: cover; z-index: 0; background-position: center;"></span>
+                                <a href="{{ url('user/gallery/'.$postImage->source) }}" class="{{ $index == 0 ? 'first-image' : 'hidden' }}" data-fancybox="gallery.{{$post->id}}"><img src="{{ url('user/gallery/'.$postImage->source) }}"  title="{{ $post->user->name }}" alt="{{ $post->user->name }}"></a>
                             @endif
                         @endforeach
                     </div>
 
                     <div class="post-v-holder">
-                        @foreach($post->images()->get() as $postImage)
+                        @foreach($post->images()->get() as $index => $postImage)
                             @if($postImage->type=='video')
-                                <div id="unmoved-fixture">
+                                <div id="unmoved-fixture" class="{{ $index == 0 && clean($main_description) == '' ? 'first-image' : 'hidden' }}">
                                     <video width="100%" height="auto" id="video-target" controls class="video-video-playe">
                                         <source src="{{ url('uploads/user/video/'.$postImage->source) }}"></source>
                                     </video>
@@ -982,10 +984,5 @@ $main_description = $post->description;
   input[type="number"] {
       appearance: none;
       -moz-appearance: textfield !important;
-  }
-
-  .panel-post .panel-body {
-     max-height: 500px;
-     overflow-x: auto;
   }
 </style>

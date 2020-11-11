@@ -336,7 +336,7 @@
 								</div>	
 							</li>
 						</ul>
-						<textarea name="tip_note" id="tipNote" cols="60" rows="5" style="width: 100%" placeholder="Include a message"></textarea>
+						<textarea name="tip_note" id="tipNote" cols="60" rows="5" style="width: 100%" placeholder="Write a message"></textarea>
 					</div>
 					<div class="panel-footer">
 						<button type="button" id="cancelSendTip" class="btn btn-default" data-dismiss="modal">{{ trans('common.cancel') }}</button>
