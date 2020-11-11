@@ -393,7 +393,7 @@ $main_description = $post->description;
                         </div>
                     @else
 
-                        <div class="post-image-holder {{ $post->images()->get()->first()->type == 'image' ? 'single-image' : ''}}">
+                        <div class="post-image-holder {{ $post->images()->first() && $post->images()->first()->type == 'image' ? 'single-image' : ''}}">
 
                             @foreach($post->images()->get() as $index => $postImage)
                                 @if($postImage->type=='image')
@@ -618,7 +618,7 @@ $main_description = $post->description;
                     </div>
                 @else
 
-                    <div class="post-image-holder {{ $post->images()->get()->first()->type == 'image' ? 'single-image' : ''}}">
+                    <div class="post-image-holder {{  $post->images()->first() && $post->images()->first()->type == 'image' ? 'single-image' : ''}}">
 
                         @foreach($post->images()->get() as $index => $postImage)
                             @if($postImage->type=='image')
@@ -630,7 +630,7 @@ $main_description = $post->description;
 
                     <div class="post-v-holder">
                         @foreach($post->images()->get() as $index => $postImage)
-                            @if($postImage->type=='video')
+                            @if(isset($postImage->type) && $postImage->type=='video')
                                 <div id="unmoved-fixture" class="{{ $index == 0 && clean($main_description) == '' ? 'first-image' : 'hidden' }}">
                                     <video width="100%" height="auto" id="video-target" controls class="video-video-playe">
                                         <source src="{{ url('uploads/user/video/'.$postImage->source) }}"></source>
@@ -643,7 +643,7 @@ $main_description = $post->description;
                 
                     <div class="post-audio-holder">
                         @foreach($post->images()->get() as $postImage)
-                            @if($postImage->type=='audio')
+                            @if(isset($postImage->type) && $postImage->type=='audio')
                                 <audio controls src="{{ url('uploads/user/audio/'.$postImage->source) }}">
                                     <source src="{{ url('uploads/user/audio/'.$postImage->source) }}"></source>
                                 </audio>

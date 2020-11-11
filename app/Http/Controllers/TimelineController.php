@@ -29,6 +29,7 @@ use Carbon\Carbon;
 use DB;
 use Flash;
 use Flavy;
+use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -892,7 +893,8 @@ class TimelineController extends AppBaseController
             //       ->withErrors($validator->errors());
             return response()->json(['status' => '400', 'message' => 'File size is too large. Upload below 100MB']);
         }
-
+        try {
+        DB::beginTransaction();
         $input = $request->all();
         
         $input['user_id'] = Auth::user()->id;
@@ -1075,7 +1077,12 @@ class TimelineController extends AppBaseController
             $postHtml = $theme->scope('timeline/post_condensed', compact('post', 'timeline', 'twoColumn'))->render();
         }
         $postHtml = $post->active == 1 ? $postHtml : '';
+        DB::commit();
         return response()->json(['status' => '200', 'data' => $postHtml]);
+        } catch (Exception $e) {
+            DB::rollBack();
+            throw new Exception($e->getMessage(), $e->getCode());
+        }
     }
 
     public function editPost(Request $request)
