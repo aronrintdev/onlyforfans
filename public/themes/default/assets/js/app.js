@@ -23,7 +23,7 @@ $(function () {
         window.location = SP_source() + 'admin/pages?sort=' + this.value;
     });
 
-    //Admin panel group sortingb
+    //Admin panel group sorting
     $('.groupsort').on('change', function() {
         window.location = SP_source() + 'admin/groups?sort=' + this.value;
     });
@@ -103,15 +103,15 @@ $(function () {
     $(document).on('click','.fans-logo',function(e){
         e.preventDefault();
         $.confirm({
-            title: 'Confirm!',
-            content: 'Do you want to leave this fans site?',
+            title: 'Confirm',
+            content: 'Do you want to leave this site?',
             confirmButton: 'Yes',
             cancelButton: 'No',
-            confirmButtonClass: 'btn-primary',
+            confirmButtonClass: 'btn-success',
             cancelButtonClass: 'btn-danger',
 
             confirm: function(){
-                $(location).attr('href', 'https://diaskedazwdiscounts.com');
+                $(location).attr('href', 'https://www.allfans.com');
             },
             cancel: function(){
                 $(location).attr('href', '/');
@@ -405,7 +405,7 @@ $(function () {
     });
 
     $('body').on('click','.btn-delete-user',function(){
-        if(confirm('are you sure to delete?'))
+        if(confirm('Are you sure?'))
         {
             window.location = base_url  + current_username + '/settings/deleteme';
         }
@@ -419,7 +419,7 @@ $(function () {
     jQuery("time.timeago").timeago();
     $('time.timeago').show();
 
-    // 2020/07/1
+    // Add payment form validation
     $('#addPaymentForm').ajaxForm({
         url: SP_source() + $('#username').data('username') + '/settings/save-payment-details',
         beforeSubmit: function validate(formData, jqForm, options) {
@@ -431,7 +431,7 @@ $(function () {
                 error_message += "Invalid CVC\n";
             }
             if (!$.payform.validateCardExpiry($('input[name="expiry"]').val())) {
-                error_message += "Invalid Expire Date\n";
+                error_message += "Invalid Expiration Date\n";
             }
             if (error_message != '') {
                 alert(error_message);
@@ -439,8 +439,6 @@ $(function () {
             }
         },
     });
-
-
 
     $('.create-post-form').ajaxForm({
         url: SP_source() + 'ajax/create-post',
@@ -557,8 +555,6 @@ $(function () {
 
     });
 
-
-
     // Toggle music input in create post form
     $('#musicUpload').on('click',function(e){
         e.preventDefault();
@@ -567,11 +563,13 @@ $(function () {
             $(".video-addon").slideUp(300);
         }
     });
+    
     // Toggle location input in create post form
     $('#locationUpload').on('click',function(e){
         e.preventDefault();
         $('.location-addon').slideToggle();
     });
+    
     // Toggle emoticons input in create post form
     $('#emoticons').on('click',function(e){
         e.preventDefault();
@@ -609,7 +607,6 @@ $(function () {
     //             });
     //     });
     // });
-
 
     // Fetch the youtube title and id when keyup
     $('#youtubeText').on('keyup',function(){
@@ -671,8 +668,6 @@ $(function () {
         });
     });
 
-
-
     // Like/Unlike the post by user
     $(document).on('click','.soundcloud-result-item',function(e){
         e.preventDefault();
@@ -698,10 +693,7 @@ $(function () {
         {
             $('.user-tags-added').find('.user-tag-names').append(', <a href="#">' + $(this).data('user-name')  + '</a>');
         }
-
-
     });
-
 
     // Like/Unlike the post by user
     $(document).on('click','.like-post',function(e){
@@ -803,7 +795,6 @@ $(function () {
         });
     });
 
-
     // Join group/Joined the timeline user  by  logged user
     $('.join-close-group').on('click',function(e){
         e.preventDefault();
@@ -824,9 +815,8 @@ $(function () {
         });
     });
 
-
     /**
-     * Begining of the Stripe checkout
+     * Beginning of Stripe checkout
      */
     let stripe;
     // Follow/UnFollow the timeline user  by  logged user
@@ -971,7 +961,6 @@ $(function () {
      * End of Stripe checkout
      */
 
-
     // Beginning of Jin's code
     /**
      * This will copy the innerHTML of an element to the clipboard
@@ -1003,7 +992,6 @@ $(function () {
         alert('copy link');
         copyToClipboard(document.getElementById('copy-link-content'));
     })
-
     //End of Jin's code
 
     //Accept user request through join request tab in close group
@@ -1023,8 +1011,7 @@ $(function () {
         });
     });
 
-
-//Accept follow request through join request tab in close group
+    //Accept follow request through join request tab in close group
     $('.accept-follow').on('click',function(e){
         e.preventDefault();
 
@@ -1037,7 +1024,6 @@ $(function () {
             }
         });
     });
-
 
     //Reject follow user request through join request tab in close group
     $('.reject-follow').on('click',function(e){
@@ -1052,10 +1038,6 @@ $(function () {
             }
         });
     });
-
-
-
-
 
     //Adding follower through add members tab in close group
     $(document).on('click','.add-member',function(e){
@@ -1146,7 +1128,7 @@ $(function () {
 
     });
 
-    // smiley's on posts
+    // Emojis on posts
     $(document).on('click','.smiley-post',function(e){
         e.preventDefault();
         textbox = $("#createPost");
@@ -1154,8 +1136,7 @@ $(function () {
         textbox.focus();
     });
 
-
-    // Page Like/Liked the timeline user  by  logged user
+    // Page Like/Liked the timeline user by logged user
     $('.page-like').on('click',function(e){
         e.preventDefault();
         pagelike_btn = $(this).closest('.pagelike-links');
@@ -1172,7 +1153,7 @@ $(function () {
         });
     });
 
-    // Page Report/Reported the timeline user  by  logged user
+    // Page Report/Reported the timeline user by logged user
     $('.page-report').on('click',function(e){
         e.preventDefault();
         pagereport_btn = $(this).closest('.pagelike-links');
@@ -1215,7 +1196,7 @@ $(function () {
         });
     });
 
-    // Post Share/shared the timeline user  by  logged user
+    // Post Share/shared the timeline user by logged user
     $('body').on('click','.share-post',function(e){
         e.preventDefault();
         post_id = $(this).data('post-id');
@@ -1239,7 +1220,7 @@ $(function () {
         });
     });
 
-    // Timeline Page Liked/Unliked the timeline user  by  logged user
+    // Timeline Page Liked/Unliked the timeline user by logged user
     $(document).on('click','.page-liked',function(e){
         e.preventDefault();
         pagelike_btn = $(this).closest('.page-links');
@@ -1254,17 +1235,17 @@ $(function () {
         });
     });
 
-    // Timeline Group Join/Joined the timeline user  by  logged user
+    // Timeline Group Join/Joined the timeline user by logged user
     $(document).on('click','.group-join',function(e){
         e.preventDefault();
         pagelike_btn = $(this).closest('.page-links');
         timeline_id = $(this).data('timeline-id');
         $.confirm({
-            title: 'Confirm!',
+            title: 'Confirm',
             content: 'Do you want to unjoin this group?',
             confirmButton: 'Yes',
             cancelButton: 'No',
-            confirmButtonClass: 'btn-primary',
+            confirmButtonClass: 'btn-success',
             cancelButtonClass: 'btn-danger',
 
             confirm: function(){
@@ -1286,7 +1267,7 @@ $(function () {
 
     });
 
-    //DeleteComment  the timeline user  by  logged user
+    //Delete comment on the timeline user by logged user
     $('body').on('click','.delete-comment',function(e){
         e.preventDefault();
         commentdelete_btn = $(this).closest('.delete_comment_list');
@@ -1300,7 +1281,7 @@ $(function () {
         });
     });
 
-    //DeleteComment  the timeline user  by  logged user
+    //Delete Comment on the timeline user by logged user
     $('body').on('click','.delete-post',function(e){
         e.preventDefault();
         postPanel = $(this).closest('.panel-post');
@@ -1309,11 +1290,11 @@ $(function () {
         }
         post_id = $(this).data('post-id');
         $.confirm({
-            title: 'Confirm!',
-            content: 'Are you sure to delete the post?',
+            title: 'Confirm',
+            content: 'Are you sure to delete this post?',
             confirmButton: 'Yes',
             cancelButton: 'No',
-            confirmButtonClass: 'btn-primary',
+            confirmButtonClass: 'btn-success',
             cancelButtonClass: 'btn-danger',
 
             confirm: function(){
@@ -1335,17 +1316,17 @@ $(function () {
         });
     });
 
-    //Hide notification  the timeline user  by  logged user
+    //Hide notification on the timeline user by logged user
     $('body').on('click','.hide-post',function(e){
         e.preventDefault();
         postPanel = $(this).closest('.panel-post');
         post_id = $(this).data('post-id');
         $.confirm({
-            title: 'Confirm!',
+            title: 'Confirm',
             content: 'Are you sure to hide the post?',
             confirmButton: 'Yes',
             cancelButton: 'No',
-            confirmButtonClass: 'btn-primary',
+            confirmButtonClass: 'btn-success',
             cancelButtonClass: 'btn-danger',
 
             confirm: function(){
@@ -1381,11 +1362,11 @@ $(function () {
         commentdelete_btn = $(this).closest('.follow-links');
 
         $.confirm({
-            title: 'Confirm!',
+            title: 'Confirm',
             content: 'Do you want to delete member?',
             confirmButton: 'Yes',
             cancelButton: 'No',
-            confirmButtonClass: 'btn-primary',
+            confirmButtonClass: 'btn-success',
             cancelButtonClass: 'btn-danger',
 
             confirm: function(){
@@ -1416,11 +1397,11 @@ $(function () {
         commentdelete_btn = $(this).closest('.follow-links');
 
         $.confirm({
-            title: 'Confirm!',
-            content: 'Do you want to delete member?',
+            title: 'Confirm',
+            content: 'Do you want to delete this member?',
             confirmButton: 'Yes',
             cancelButton: 'No',
-            confirmButtonClass: 'btn-primary',
+            confirmButtonClass: 'btn-success',
             cancelButtonClass: 'btn-danger',
 
             confirm: function(){
@@ -1449,11 +1430,11 @@ $(function () {
         pagedelete_btn = $(this).closest('.deletepage');
         page_id = $(this).data('pagedelete-id');
         $.confirm({
-            title: 'Confirm!',
-            content: 'Do you want to delete page?',
+            title: 'Confirm',
+            content: 'Do you want to delete this page?',
             confirmButton: 'Yes',
             cancelButton: 'No',
-            confirmButtonClass: 'btn-primary',
+            confirmButtonClass: 'btn-success',
             cancelButtonClass: 'btn-danger',
 
             confirm: function(){
@@ -1478,11 +1459,11 @@ $(function () {
         eventdelete_btn = $(this).closest('.deleteevent');
         event_id = $(this).data('eventdelete-id');
         $.confirm({
-            title: 'Confirm!',
-            content: 'Do you want to delete event?',
+            title: 'Confirm',
+            content: 'Do you want to delete this event?',
             confirmButton: 'Yes',
             cancelButton: 'No',
-            confirmButtonClass: 'btn-primary',
+            confirmButtonClass: 'btn-success',
             cancelButtonClass: 'btn-danger',
 
             confirm: function(){
@@ -1506,11 +1487,11 @@ $(function () {
         notification_btn = $(this).closest('.notification-delete');
         notification_id = $(this).data('notification-id');
         $.confirm({
-            title: 'Confirm!',
-            content: 'Do you want to delete notification?',
+            title: 'Confirm',
+            content: 'Do you want to delete this notification?',
             confirmButton: 'Yes',
             cancelButton: 'No',
-            confirmButtonClass: 'btn-primary',
+            confirmButtonClass: 'btn-success',
             cancelButtonClass: 'btn-danger',
 
             confirm: function(){
@@ -1538,11 +1519,11 @@ $(function () {
         event_id = input_ids[0];
         username = input_ids[1];
         $.confirm({
-            title: 'Confirm!',
-            content: 'Do you want to delete event?',
+            title: 'Confirm',
+            content: 'Do you want to delete this event?',
             confirmButton: 'Yes',
             cancelButton: 'No',
-            confirmButtonClass: 'btn-primary',
+            confirmButtonClass: 'btn-success',
             cancelButtonClass: 'btn-danger',
 
             confirm: function(){
@@ -1812,7 +1793,8 @@ $(function () {
         }
     });
 
-    //Image upload trigger on create post    // Change cover button click event
+    // Image upload trigger on create post    
+    // Change cover button click event
     $(document).on('click','#imageUpload',function(e){
         e.preventDefault();
         $('.post-images-upload').trigger('click');
@@ -2186,7 +2168,7 @@ $(function () {
 
 
 
-// Adding members to the group
+    // Adding members to the group
     $('#add-members-group').on('keyup',function(){
         $('.group-suggested-users').empty();
         if($('#add-members-group').val() != null && $('#add-members-group').val() != "")
@@ -2332,8 +2314,7 @@ $(function () {
     });
 
 
-//Adding members to the page
-
+    //Adding members to the page
     $('#add-members-page').on('keyup',function(){
         $('.page-suggested-users').empty();
         if($('#add-members-page').val() != null && $('#add-members-page').val() != "")
@@ -2441,7 +2422,6 @@ $(function () {
 
 
     //smooth scroll intialization
-
     $(".smooth-scroll").mCustomScrollbar("scrollTo","bottom",{
         autoHideScrollbar:true,
         theme:"rounded",
@@ -2507,7 +2487,7 @@ $(function () {
         alert('vj');
     });
 
-//WYSIWYG EDITOR(TinyMCE)
+    //WYSIWYG Editor (TinyMCE)
     tinymce.init({
         selector: '.mytextarea',
         theme: 'modern',
@@ -2538,16 +2518,16 @@ $(function () {
         }
     });
 
-    //Delete notification by logged user
+    // Delete notification by logged user
     $('.allnotifications-delete').on('click',function(e){
         e.preventDefault();
         notification_btn = $(this).closest('.allnotifications-delete');
         $.confirm({
-            title: 'Confirm!',
+            title: 'Confirm',
             content: 'Do you want to delete all notifications?',
             confirmButton: 'Yes',
             cancelButton: 'No',
-            confirmButtonClass: 'btn-primary',
+            confirmButtonClass: 'btn-success',
             cancelButtonClass: 'btn-danger',
 
             confirm: function(){
@@ -2684,11 +2664,11 @@ $(document).on('click','.delete-group',function(e){
     groupdelete_btn = $(this).closest('.deletegroup');
     group_id = $(this).data('groupdelete-id');
     $.confirm({
-        title: 'Confirm!',
+        title: 'Confirm',
         content: 'Are you sure to delete group?',
         confirmButton: 'Yes',
         cancelButton: 'No',
-        confirmButtonClass: 'btn-primary',
+        confirmButtonClass: 'btn-success',
         cancelButtonClass: 'btn-danger',
 
         confirm: function(){
@@ -2728,6 +2708,7 @@ $('.checkbox-panel').on('click',function(){
         $(this).find('.input-label').removeClass('extra-space')
     }
 })
+
 // user profile page unjoin the timeline user  by  logged user
 $(document).on('click','.unjoin-page',function(e){
     e.preventDefault();
@@ -2735,11 +2716,11 @@ $(document).on('click','.unjoin-page',function(e){
     pagelike_btn = $(this).closest('.page-unjoin');
 
     $.confirm({
-        title: 'Confirm!',
+        title: 'Confirm',
         content: 'Are you sure to unjoin this page?',
         confirmButton: 'Yes',
         cancelButton: 'No',
-        confirmButtonClass: 'btn-primary',
+        confirmButtonClass: 'btn-success',
         cancelButtonClass: 'btn-danger',
 
         confirm: function(){
@@ -2769,11 +2750,11 @@ $(document).on('click','.unjoin-page-timeline',function(e){
     pagelike_btn = $(this).closest('.page-unjoin');
 
     $.confirm({
-        title: 'Confirm!',
+        title: 'Confirm',
         content: 'Are you sure to unjoin this page?',
         confirmButton: 'Yes',
         cancelButton: 'No',
-        confirmButtonClass: 'btn-primary',
+        confirmButtonClass: 'btn-success',
         cancelButtonClass: 'btn-danger',
 
         confirm: function(){

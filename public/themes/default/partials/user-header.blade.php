@@ -155,9 +155,8 @@
 		<div class="user-cover-progress hidden">
 		    
 		</div>
-			<!-- <div class="cover-bottom">
-		</div> -->
-		</div>
+			<!-- <div class="cover-bottom">	</div> -->
+	</div>
 	<div class="timeline-list">
 		<div class="user-timeline-name">
 			<a href="{{ url($timeline->username) }}">{{ $timeline->name }}</a><br><a class="user-timeline-username" href="{{ url($timeline->username) }}"><span>@</span>{{ $timeline->username }}</a>
@@ -166,26 +165,39 @@
 		<span class="status status-holder-{{ $user->id }} {{ $user->last_logged ? '' : 'text-success' }}">{{ $user->last_logged ? 'Last seen '.\Carbon\Carbon::parse($user->last_logged)->timezone(Auth::user()->timezone)->diffForHumans() : 'Online Now' }}</span>
 		<ul class="list-inline pagelike-links">
 			{{--			@if($user_post == true)--}}
-			<li class="timeline-cover-status {{ Request::segment(2) == 'posts' ? 'active' : '' }}"><a href="{{ url($timeline->username.'/posts') }}" ><span class="top-list">{{ count($timeline->posts()->where('active', 1)->get()) }} {{ trans('common.posts') }}</span></a></li>
-			{{--			@else--}}
-			{{--				<li class="timeline-cover-status {{ Request::segment(2) == 'posts' ? 'active' : '' }}"><a href="#"><span class="top-list">{{ count($timeline->posts()->where('active', 1)->get()) }} {{ trans('common.posts') }}</span></a></li>--}}
-			{{--			@endif--}}
+			<li class="timeline-cover-status {{ Request::segment(2) == 'posts' ? 'active' : '' }}">
+			    <a href="{{ url($timeline->username.'/posts') }}" ><span class="top-list">{{ count($timeline->posts()->where('active', 1)->get()) }} <svg data-toggle="tooltip" data-placement="bottom" data-original-title="Posts" width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-bookmarks-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                  <path fill-rule="evenodd" d="M2 4a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v11.5a.5.5 0 0 1-.777.416L7 13.101l-4.223 2.815A.5.5 0 0 1 2 15.5V4z"/>
+                  <path fill-rule="evenodd" d="M4.268 1H12a1 1 0 0 1 1 1v11.768l.223.148A.5.5 0 0 0 14 13.5V2a2 2 0 0 0-2-2H6a2 2 0 0 0-1.732 1z"/>
+                </svg></span></a>
+            </li>
+
+		{{--			@else--}}
+		{{--				<li class="timeline-cover-status {{ Request::segment(2) == 'posts' ? 'active' : '' }}"><a href="#"><span class="top-list">{{ count($timeline->posts()->where('active', 1)->get()) }} {{ trans('common.posts') }}</span></a></li>--}}
+		{{--			@endif--}}
 		<!-- <li class="{{ Request::segment(2) == 'following' ? 'active' : '' }} smallscreen-report"><a href="{{ url($timeline->username.'/following') }}" ><span class="top-list">{{ $following_count }} {{ trans('common.following') }}</span></a></li>
 		<li class="{{ Request::segment(2) == 'followers' ? 'active' : '' }} smallscreen-report"><a href="{{ url($timeline->username.'/followers') }}" ><span class="top-list">{{ $followers_count }}  {{ trans('common.followers') }}</span></a></li>-->
 
 			@if(!$user->timeline->albums->isEmpty())
 				<li class=""><a href="{{ url($timeline->username.'/albums') }}" > {{ trans('common.photos') }}</span></a></li>
 			@endif
+			
 			<li class="timeline-cover-status {{ Request::segment(2) == 'followers' ? 'active' : '' }}">
-				<a href="{{ url($timeline->username.'/followers') }}" ><span class="top-list">{{ $followers_count }}  {{ trans('common.followers') }}</span>
+				<a href="{{ url($timeline->username.'/followers') }}" ><span class="top-list">{{ $followers_count }}  <svg data-toggle="tooltip" data-placement="bottom" data-original-title="Fans" width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-people-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                      <path fill-rule="evenodd" d="M7 14s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1H7zm4-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm-5.784 6A2.238 2.238 0 0 1 5 13c0-1.355.68-2.75 1.936-3.72A6.325 6.325 0 0 0 5 9c-4 0-5 3-5 4s1 1 1 1h4.216zM4.5 8a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"/>
+                    </svg></span>
 				</a>
 			</li>
-			<li class="timeline-cover-status {{ Request::segment(2) == 'followers' ? 'active' : '' }}">
-				<a href="#" ><span class="top-list"><span class="liked-post">{{count($liked_post)}}</span> {{ trans('common.likes') }}</span>
+			<li class="timeline-cover-status {{ Request::segment(2) == 'liked' ? 'active' : '' }}">
+				<a href="#" ><span class="top-list"><span class="liked-post">{{count($liked_post)}}</span> <svg data-toggle="tooltip" data-placement="bottom" data-original-title="Likes" width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-suit-heart-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M4 1c2.21 0 4 1.755 4 3.92C8 2.755 9.79 1 12 1s4 1.755 4 3.92c0 3.263-3.234 4.414-7.608 9.608a.513.513 0 0 1-.784 0C3.234 9.334 0 8.183 0 4.92 0 2.755 1.79 1 4 1z"/>
+                    </svg></span>
 				</a>
 			</li>
-			<li class="timeline-cover-status {{ Request::segment(2) == 'followers' ? 'active' : '' }}">
-				<a href="{{ url($timeline->username.'/following') }}" ><span class="top-list">{{ $following_count }}  {{ trans('common.following') }}</span>
+			<li class="timeline-cover-status {{ Request::segment(2) == 'following' ? 'active' : '' }}">
+				<a href="{{ url($timeline->username.'/following') }}" ><span class="top-list">{{ $following_count }}  <svg data-toggle="tooltip" data-placement="bottom" data-original-title="Following" width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-person-check-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                      <path fill-rule="evenodd" d="M1 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm9.854-2.854a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 0 1 .708-.708L12.5 7.793l2.646-2.647a.5.5 0 0 1 .708 0z"/>
+                    </svg></span>
 				</a>
 			</li>
 {{--			@if(Auth::user()->username != $timeline->username)--}}
@@ -198,58 +210,60 @@
 {{--				@endif--}}
 {{--			@endif--}}
 		</ul>
-			<div class="timeline-user-avtar">
-				<img src="{{ $timeline->user->avatar }}" alt="{{ $timeline->name }}" title="{{ $timeline->name }}">
-				@if($timeline->id == Auth::user()->timeline_id)
-					<div class="chang-user-avatar">
-						<a href="#" class="btn btn-camera change-avatar"><i class="fa fa-camera" aria-hidden="true"></i><span class="avatar-text">{{ trans('common.update_profile') }}<span>{{ trans('common.picture') }}</span></span></a>
-					</div>
-				@endif			
-				<div class="user-avatar-progress hidden">
+		<div class="timeline-user-avtar">
+			<img src="{{ $timeline->user->avatar }}" alt="{{ $timeline->name }}" title="{{ $timeline->name }}">
+			@if($timeline->id == Auth::user()->timeline_id)
+				<div class="chang-user-avatar">
+					<a href="#" class="btn btn-camera change-avatar"><i class="fa fa-camera" aria-hidden="true"></i><span class="avatar-text">{{ trans('common.update_profile') }}<span>{{ trans('common.picture') }}</span></span></a>
 				</div>
+			@endif			
+			<div class="user-avatar-progress hidden">
 			</div>
 		</div>
 	</div>
-	<div id="listsModal" class="modal fade" role="dialog" tabindex='-1'>
-		<div class="modal-dialog">
-			<div class="modal-content">
-				<div class="modal-body">
-					<div class="modal-header lists-modal">
-{{--						<button type="button" class="close" data-dismiss="modal">&times;</button>--}}
-						<h3 class="modal-title lists-modal-title">
-							<svg class="g-icon" aria-hidden="true">
-								<use xlink:href="#icon-lists" href="#icon-lists">
-									<svg id="icon-lists" viewBox="0 0 24 24"> <path d="M6.69 5H5.24L4.8 3.64a.31.31 0 00-.6 0L3.76 5H2.31a.31.31 0 00-.18.56l1.17.85-.45 1.39a.28.28 0 000 .09.31.31 0 00.31.32.3.3 0 00.18-.06L4.5 7.3l1.17.85a.3.3 0 00.18.06.31.31 0 00.31-.32.28.28 0 000-.09L5.7 6.42l1.17-.85A.31.31 0 006.69 5zm0 6H5.24L4.8 9.64a.31.31 0 00-.6 0L3.76 11H2.31a.31.31 0 00-.18.56l1.17.85-.45 1.39a.28.28 0 000 .09.31.31 0 00.31.32.3.3 0 00.18-.06l1.16-.85 1.17.85a.3.3 0 00.18.06.31.31 0 00.31-.32.28.28 0 000-.09l-.46-1.38 1.17-.85a.31.31 0 00-.18-.57zm0 6H5.24l-.44-1.36a.31.31 0 00-.6 0L3.76 17H2.31a.31.31 0 00-.18.56l1.17.85-.45 1.39a.28.28 0 000 .09.31.31 0 00.31.32.3.3 0 00.18-.06l1.16-.85 1.17.85a.3.3 0 00.18.06.31.31 0 00.31-.32.28.28 0 000-.09l-.46-1.38 1.17-.85a.31.31 0 00-.18-.57zM10 7h10a1 1 0 000-2H10a1 1 0 000 2zm10 4H10a1 1 0 000 2h10a1 1 0 000-2zm0 6H10a1 1 0 000 2h10a1 1 0 000-2z"></path> </svg>
-								</use>
-							</svg>
-							{{ trans("common.save_to") }}
-						</h3>
-					</div>
-					<div class="b-stats-row__content">
-						<input hidden id="saved-user-id" name="saved-user-id" value="{{$timeline->user->id}}">
-						@if (!empty($user_lists))
-							@foreach ($user_lists as $user_list)
-								<div class="modal-list-item">
-									<input type="checkbox" class="red-checkbox" id="list-type-{{$user_list->id}}" name="list-type-{{$user_list->id}}" {{$user_list->state == 1 ? "checked" : ""}}>
-									<label class="red-list-label" for="list-type-{{$user_list->id}}">{{$user_list->list_type}}</label>
-								</div>
-							@endforeach
-						@endif
-						<button type="button" class="g-btn" id="add-new-list"  data-toggle="modal" data-target="#newListModal">
-							<svg class="g-icon" aria-hidden="true">
-								<use xlink:href="#icon-add" href="#icon-add">
-									<svg id="icon-add" viewBox="0 0 24 24"> <path d="M4.5 13H11v6.5a1 1 0 0 0 2 0V13h6.5a1 1 0 0 0 0-2H13V4.5a1 1 0 0 0-2 0V11H4.5a1 1 0 0 0 0 2z"></path> </svg>
-								</use>
-							</svg> New list
-						</button>
-					</div>
+</div>
+
+<div id="listsModal" class="modal fade" role="dialog" tabindex='-1'>
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-body">
+				<div class="modal-header lists-modal">
+{{--				<button type="button" class="close" data-dismiss="modal">&times;</button>--}}
+					<h3 class="modal-title lists-modal-title">
+						<svg class="g-icon" aria-hidden="true">
+							<use xlink:href="#icon-lists" href="#icon-lists">
+								<svg id="icon-lists" viewBox="0 0 24 24"> <path d="M6.69 5H5.24L4.8 3.64a.31.31 0 00-.6 0L3.76 5H2.31a.31.31 0 00-.18.56l1.17.85-.45 1.39a.28.28 0 000 .09.31.31 0 00.31.32.3.3 0 00.18-.06L4.5 7.3l1.17.85a.3.3 0 00.18.06.31.31 0 00.31-.32.28.28 0 000-.09L5.7 6.42l1.17-.85A.31.31 0 006.69 5zm0 6H5.24L4.8 9.64a.31.31 0 00-.6 0L3.76 11H2.31a.31.31 0 00-.18.56l1.17.85-.45 1.39a.28.28 0 000 .09.31.31 0 00.31.32.3.3 0 00.18-.06l1.16-.85 1.17.85a.3.3 0 00.18.06.31.31 0 00.31-.32.28.28 0 000-.09l-.46-1.38 1.17-.85a.31.31 0 00-.18-.57zm0 6H5.24l-.44-1.36a.31.31 0 00-.6 0L3.76 17H2.31a.31.31 0 00-.18.56l1.17.85-.45 1.39a.28.28 0 000 .09.31.31 0 00.31.32.3.3 0 00.18-.06l1.16-.85 1.17.85a.3.3 0 00.18.06.31.31 0 00.31-.32.28.28 0 000-.09l-.46-1.38 1.17-.85a.31.31 0 00-.18-.57zM10 7h10a1 1 0 000-2H10a1 1 0 000 2zm10 4H10a1 1 0 000 2h10a1 1 0 000-2zm0 6H10a1 1 0 000 2h10a1 1 0 000-2z"></path> </svg>
+							</use>
+						</svg>
+						{{ trans("common.save_to") }}
+					</h3>
 				</div>
-				<div class="modal-footer">
-					<button type="button" class="btn btn-default" data-dismiss="modal">{{ trans('common.close') }}</button>
+				<div class="b-stats-row__content">
+					<input hidden id="saved-user-id" name="saved-user-id" value="{{$timeline->user->id}}">
+					@if (!empty($user_lists))
+						@foreach ($user_lists as $user_list)
+							<div class="modal-list-item">
+								<input type="checkbox" class="red-checkbox" id="list-type-{{$user_list->id}}" name="list-type-{{$user_list->id}}" {{$user_list->state == 1 ? "checked" : ""}}>
+								<label class="red-list-label" for="list-type-{{$user_list->id}}">{{$user_list->list_type}}</label>
+							</div>
+						@endforeach
+					@endif
+					<button type="button" class="g-btn" id="add-new-list"  data-toggle="modal" data-target="#newListModal">
+						<svg class="g-icon" aria-hidden="true">
+							<use xlink:href="#icon-add" href="#icon-add">
+								<svg id="icon-add" viewBox="0 0 24 24"> <path d="M4.5 13H11v6.5a1 1 0 0 0 2 0V13h6.5a1 1 0 0 0 0-2H13V4.5a1 1 0 0 0-2 0V11H4.5a1 1 0 0 0 0 2z"></path> </svg>
+							</use>
+						</svg> New list
+					</button>
 				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">{{ trans('common.close') }}</button>
 			</div>
 		</div>
 	</div>
+</div>
+
 <div id="newListModal" class="modal fade" role="dialog" tabindex='1'>
 	<div class="modal-dialog">
 		<div class="modal-content">
@@ -277,6 +291,7 @@
 
 	</div>
 </div>
+
 <div id="sendTipModal" class="tip-modal modal fade subscriberFilterModal" role="dialog" tabindex='1'>
     <input type="hidden" value="{{$user->id}}" id="user-id">
     <div class="modal-dialog">
@@ -336,6 +351,7 @@
         </div>
     </div>
 </div>
+
 {!! Theme::asset()->container('footer')->usePath()->add('currency', 'js/currency.min.js') !!}
 <style>
     input[type="number"]::-webkit-outer-spin-button,

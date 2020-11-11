@@ -201,6 +201,24 @@
                                             </div>
                                         </div>
                                     </li>
+                                    <li class="" style="display: inline-block;">
+                                        <a href="#" class="search-btn">
+                                            <svg width="1.5em" height="1.5em" viewBox="0 0 16 16" class="bi bi-search" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                                <path fill-rule="evenodd" d="M10.442 10.442a1 1 0 0 1 1.415 0l3.85 3.85a1 1 0 0 1-1.414 1.415l-3.85-3.85a1 1 0 0 1 0-1.415z"/>
+                                                <path fill-rule="evenodd" d="M6.5 12a5.5 5.5 0 1 0 0-11 5.5 5.5 0 0 0 0 11zM13 6.5a6.5 6.5 0 1 1-13 0 6.5 6.5 0 0 1 13 0z"/>
+                                            </svg>
+                                            <span class="small-screen"></span></a>
+                                        <div class="mobile-search">
+                                            <form class="navbar-form navbar-left form-left" role="search">
+                                                <div class="input-group no-margin">
+                                					<span class="input-group-btn">
+                                						<button class="btn btn-default" type="button"><i style="color:#848f96;" class="fa fa-search"></i></button>
+                                					</span>
+                                                    <input type="text" id="mobile-navbar-search" data-url="{{ URL::to('api/v1/search') }}" class="form-control" placeholder="{{ trans('messages.search_placeholder') }}">
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </li>
                                     <li class="dropdown user-image fans" style="display: inline-block;">
                                         <a href="{{ url(Auth::user()->username) }}" class="dropdown-toggle no-padding" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
                                             <img src="{{ Auth::user()->avatar }}" alt="{{ Auth::user()->name }}" class="img-radius img-30" title="{{ Auth::user()->name }}">
@@ -229,24 +247,6 @@
                                                 </form>
                                             </li>
                                         </ul>
-                                    </li>
-                                    <li class="" style="display: inline-block;">
-                                        <a href="#" class="search-btn">
-                                            <svg width="1.5em" height="1.5em" viewBox="0 0 16 16" class="bi bi-search" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                                <path fill-rule="evenodd" d="M10.442 10.442a1 1 0 0 1 1.415 0l3.85 3.85a1 1 0 0 1-1.414 1.415l-3.85-3.85a1 1 0 0 1 0-1.415z"/>
-                                                <path fill-rule="evenodd" d="M6.5 12a5.5 5.5 0 1 0 0-11 5.5 5.5 0 0 0 0 11zM13 6.5a6.5 6.5 0 1 1-13 0 6.5 6.5 0 0 1 13 0z"/>
-                                            </svg>
-                                            <span class="small-screen"></span></a>
-                                        <div class="mobile-search">
-                                            <form class="navbar-form navbar-left form-left" role="search">
-                                                <div class="input-group no-margin">
-                                					<span class="input-group-btn">
-                                						<button class="btn btn-default" type="button"><i style="color:#848f96;" class="fa fa-search"></i></button>
-                                					</span>
-                                                    <input type="text" id="mobile-navbar-search" data-url="{{ URL::to('api/v1/search') }}" class="form-control" placeholder="{{ trans('messages.search_placeholder') }}">
-                                                </div>
-                                            </form>
-                                        </div>
                                     </li>
                                 </ul>
                             </div>

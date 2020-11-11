@@ -70,7 +70,7 @@
 {{--                    <input type="radio" value="price" id="price" name="type" class="post-type-item">--}}
 {{--                    <label for="price">Set Price</label>--}}
 {{--                </div>--}}
-                <span class="current-post-type">Free</span>&nbsp; <a href="#" class="post-amount" data-toggle="modal" data-target="#postPriceModal"></a>
+                <span class="current-post-type" style="font-size: 12px;text-transform: uppercase;font-weight: 600;">Free</span>&nbsp; <a href="#" class="post-amount" data-toggle="modal" data-target="#postPriceModal"></a>
                 <div class="dropdown">
 {{--                    <i class="fa fa-dollar" data-toggle="tooltip" title="Set a price" style="color:#859ab5;"></i>--}}
                     <div class="dropdown-toggle" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="cursor: pointer">
