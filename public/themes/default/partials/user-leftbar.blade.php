@@ -94,9 +94,15 @@
 		{{ ($user->about != NULL) ? $user->about : trans('messages.no_description') }}
 	</div>
 	
-	<a target="_blank" href="{{ $user->wishlist }}">{{ $user->wishlist }}</a><br>
-	<a target="_blank" href="{{ $user->website }}">{{ $user->website }}</a><br>
-	<a target="_blank" href="{{ $user->instagram }}">{{ $user->instagram }}</a>
+	@if($user->wishlist)
+    	<a id="wishlist" target="_blank" href="{{ $user->wishlist }}">{{ $user->wishlist }}</a><br>
+	@endif
+	@if($user->website)
+	    <a id="website" target="_blank" href="{{ $user->website }}">{{ $user->website }}</a><br>
+	@endif
+	@if($user->instagram)
+	    <a id="instagram" target="_blank" href="{{ $user->instagram }}">{{ $user->instagram }}</a><br>
+	@endif
 	
 	<ul class="list-unstyled list-details">
 		@if($user->hobbies != NULL)
@@ -138,11 +144,6 @@
             <span>{{ $user->country }}</span>
         </li>
 		@endif
-{{--		@if($user->birthday != '1970-01-01')--}}
-{{--		<li><i class="fa fa-calendar"></i><span>--}}
-{{--			{{ trans('common.born_on').' '.date('F d', strtotime($user->birthday)) }}--}}
-{{--		</span></li>--}}
-{{--		@endif--}}
 	</ul>
 	<ul class="list-inline list-unstyled social-links-list">
 		@if($user->facebook_link != NULL)

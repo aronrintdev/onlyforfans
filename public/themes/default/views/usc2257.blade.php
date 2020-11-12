@@ -8,7 +8,7 @@
                       USC 2257
                     </h3>
                 </div>
-                <div class="panel-body">
+                <div class="panel-body" style="padding-left: 27px;">
                     <p><strong>18 U.S.C. Section 2257 Compliance Notice</strong></p>
                     <p>All persons that appear in any visual portrayal of actual sexually explicit conduct appearing or otherwise contained within AllFans.com were over the age of eighteen (18) years at the time the visual image was created.</p>
                     <p><strong>Exemption Statement - Content Produced by Third Parties:</strong>&nbsp;</p>

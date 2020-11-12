@@ -26690,18 +26690,21 @@ placeholder .darksharing-modal .modal-body .sharing-details .control-group .sele
     height: 46px;
     background: #F8FAFC;
 }
+.login-bottom .form-group .form-control::placeholder {
+    color: #4a5568;
+}
 .login-bottom .btn-success {
     width: 100%;
     text-transform: none;
     font-family: 'Open Sans', sans-serif;
     font-weight: 600;
     font-size: 16px;
-    background-image: linear-gradient(-180deg, #48bb78 0%, #38A169 98%);
-    border: 1px solid #249533;
+    /* background-image: linear-gradient(-180deg, #48bb78 0%, #38A169 98%);
+    border: 1px solid #249533; */
     color: #FFFFFF;
     margin-top: -10px;
     margin-bottom: 10px;
-    border-radius: 10px;
+    border-radius: 25px;
     padding: 12px 12px;
 }
 .register-form-row {
@@ -34940,6 +34943,11 @@ body.direction-rtl .manage-table table tbody td ul {
 }
 .fans-logo {
     height: 46px;
+}
+.blog-date {
+    display: inline-block;
+    font-weight: 600;
+    width: 160px;
 }
 a:hover {
     text-decoration: none;

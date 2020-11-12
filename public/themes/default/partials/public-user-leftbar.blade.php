@@ -93,7 +93,7 @@
 		<div class="bio-description">
 			<div class="follow-btn">
 				<a href="{{ url('login') }}" class="btn btn-submit btn-success" style="display:block;">
-					Follow for Free
+					<i class="fa fa-user"></i> Follow
 				</a>
 			</div>
 		</div>
@@ -124,16 +124,16 @@
 		{{ ($user->about != NULL) ? $user->about : trans('messages.no_description') }}
 	</div>
 	@if($user->wishlist)
-		<a target="_blank" href="{{ $user->wishlist }}">{{ $user->wishlist }}</a><br>
+    	<a id="wishlist" target="_blank" href="{{ $user->wishlist }}">{{ $user->wishlist }}</a><br>
 	@endif
 	@if($user->website)
-		<a target="_blank" href="{{ $user->website }}">{{ $user->website }}</a><br>
+	    <a id="website" target="_blank" href="{{ $user->website }}">{{ $user->website }}</a><br>
 	@endif
 	@if($user->instagram)
-		<a target="_blank" href="{{ $user->instagram }}">{{ $user->instagram }}</a><br>
+	    <a id="instagram" target="_blank" href="{{ $user->instagram }}">{{ $user->instagram }}</a><br>
 	@endif
 
-		<ul class="list-unstyled list-details">
+	<ul class="list-unstyled list-details">
 		@if($user->hobbies != NULL)
 			<li><i class="fa fa-chain" aria-hidden="true"></i> {{ $user->hobbies }}</li>
 		@endif
@@ -153,7 +153,6 @@
 			<li>{!! '<b>'.Setting::get('custom_option4').': </b>'!!} {{ $user->custom_option4 }}</li>
 		@endif
 	</ul>
-	
 	<ul class="list-unstyled list-details">
 		@if($user->designation != NULL)
 			<li><i class="fa fa-thumb-tack"></i> <span>{{ $user->designation }}</span></li>
@@ -174,12 +173,6 @@
             <span>{{ $user->country }}</span>
         </li>
 		@endif
-
-{{--		@if($user->birthday != '1970-01-01')--}}
-{{--		<li><i class="fa fa-calendar"></i><span>--}}
-{{--			{{ trans('common.born_on').' '.date('F d', strtotime($user->birthday)) }}--}}
-{{--		</span></li>--}}
-{{--		@endif--}}
 	</ul>
 	<ul class="list-inline list-unstyled social-links-list">
 		@if($user->facebook_link != NULL)

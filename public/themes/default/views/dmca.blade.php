@@ -8,7 +8,7 @@
                       DMCA
                     </h3>
                 </div>
-                <div class="panel-body">
+                <div class="panel-body" style="padding-left: 27px;">
                     <p>To comply with the U.S. Digital Millennium Copyright Act (Title 17, United States Code) ("DMCA"), we will respond to proper notifications of claimed copyright infringement and will take appropriate action including removing or disabling access to the allegedly infringing User Content and, if deemed appropriate by <strong>AllFans</strong>, terminating the account of the User who published the content.</p>
                     <p>To notify us of claimed copyright infringement, please contact our customer support team by email at <strong>support@allfans.com</strong></p>
                     

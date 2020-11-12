@@ -8,7 +8,7 @@
                       Frequently Asked Questions
                     </h3>
                 </div>
-                <div class="panel-body">
+                <div class="panel-body" style="padding-left: 27px;">
                 <p><strong>Where is your company located?</strong></p>
                 <p>Our mailing address is 1027 S. Rainbow Blvd. #119, Las Vegas, NV 89145</p>
                 <p><strong>What is your company phone number if I need support?</strong></p>
@@ -18,7 +18,7 @@
                 <p><strong>Can I cancel a subscription?</strong></p>
                 <p>Yes, you are entitled to cancel any subscription, for any reason and at any time, thereby ensuring that you will not be billed again for that subscription.</p>
                 <p><strong>What is the chargeback policy?</strong></p>
-                <p>Any purchase made on AllFans resulting in a chargeback will cause the User’s account to be flagged for immediate review and permanently excluded from AllFans. Additionally, the chargeback amount, plus a $35.00 USD per incident chargeback fee, will be removed from the earning Creator's balance.</p>
+                <p>Any purchase made on AllFans resulting in a chargeback will cause the infringing User’s account to be flagged for manual review and permanently excluded from AllFans. Additionally, the chargeback amount, plus a per incident chargeback fee, will be removed from the earning Creator's balance.</p>
                 </div>
             </div>
         </div>

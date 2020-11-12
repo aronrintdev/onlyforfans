@@ -8,7 +8,7 @@
                       Support
                     </h3>
                 </div>
-                <div class="panel-body">
+                <div class="panel-body" style="padding-left: 27px;">
                 <p>Please see our <a href="{{url('faq')}}">Frequently Asked Questions</a> section for more information.</p>
                 </div>
             </div>
