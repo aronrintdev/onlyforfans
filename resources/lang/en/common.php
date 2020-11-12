@@ -546,6 +546,7 @@ return [
     'no_users_found' => 'No users found.',
     'create_new_list' => 'Create New List',
     'send_tip' => 'Send Tip',
+    'apply' => 'Apply',
     'blocked_profiles' => 'Blocked Profiles',
     'ip_address' => 'IP Address',
     'action' => 'Action',

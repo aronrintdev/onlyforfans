@@ -1874,7 +1874,7 @@ $(function () {
         var extn = imgPath.substring(imgPath.lastIndexOf('.') + 1).toLowerCase();
         var image_holder = $("#post-video-holder");
         image_holder.empty();
-        if (extn == "mp4")
+        if (extn == "mp4" || extn == "mov")
         {
             if (typeof(FileReader) != "undefined")
             {
@@ -1886,7 +1886,7 @@ $(function () {
                     reader.onload = function(e) {
                         var file = e.target;
                         $("<span class=\"pip\">" +
-                            "<video width='60px' height='60px' class=\"thumb-image video-video-playe\" src=\"" + e.target.result + "\" title=\"" + file.name + "\"/><source src=\" + e.target.result + \"  type=\"video/mp4\"></video>"+
+                            "<video width='60px' height='60px' class=\"thumb-image video-video-playe\" src=\"" + e.target.result + "\" title=\"" + file.name + "\"/><source src=\"" + e.target.result + "\"  type=\"video/mp4\"></video>"+
                             "<a data-id=" + (key) + " class='remove-thumb'><i class='fa fa-times'></i></a>" +
                             "</span>").appendTo(image_holder);
                     }
@@ -2979,6 +2979,7 @@ setLastSeenOfUser(1);
 let pusherObj;
 pusherObj = new Pusher(pusherConfig.PUSHER_KEY, {
     encrypted: true,
+    cluster: pusherConfig.CLUSTER,
     auth: {
         headers: {
             'X-CSRF-Token': pusherConfig.token

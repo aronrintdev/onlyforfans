@@ -217,7 +217,7 @@
     }
 
     .default-post.panel-post .image-with-blur .single-image .first-image {
-        z-index: 950 !important;
+        z-index: 9 !important;
     }
 
     .default-post.panel-post .with-text {

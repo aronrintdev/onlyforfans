@@ -20,6 +20,22 @@
 		color: #fff;
 	}
 
+	.subscriberFilterModal .panel-footer {
+		text-align: right;
+	}
+	
+	.subscriberFilterModal .panel-heading {
+		border-bottom: none !important;
+	}
+
+	.subscriberFilterModal .panel-heading .post-author {
+		padding: 0 20px;
+	}
+
+	.subscriberFilterModal .panel-heading .user-post-details ul {
+		padding-right: 0 !important;
+	}
+	
 	.subscriberFilterModal .panel-body ul li span {
 		color: #298ad3;
 		position: absolute;
@@ -69,7 +85,7 @@
 	}
 	
 	.subscriberFilterModal .panel-body ul li {
-		width: 250px;
+		width: 180px;
 		margin: auto;
 		text-align: center;
 	}
@@ -77,11 +93,15 @@
 	.subscriberFilterModal .panel-body ul li p{
 		font-weight: bold;
 	}
+	.subscriberFilterModal .modal-dialog-centered {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		min-height: 93%;
+	}
 
-	@media (min-width: 768px) {
-		.subscriberFilterModal .modal-dialog {
-			width: 450px;
-		}
+	.subscriberFilterModal .modal-content {
+		width: 270px;
 	}
 </style>
 <div class="timeline-cover-section">
@@ -294,13 +314,15 @@
 
 <div id="sendTipModal" class="tip-modal modal fade subscriberFilterModal" role="dialog" tabindex='1'>
     <input type="hidden" value="{{$user->id}}" id="user-id">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
+			<div class="modal-header">
+				<h3 style="margin: 0;">Send a Tip</h3>
+				<button type="button" style="display: none;" class="close close-post-modal" data-dismiss="modal">&times;</button>
+			</div>
             <div class="modal-body no-padding">
 				<div class="panel panel-default panel-post animated" style="margin-bottom: 0">
 					<div class="panel-heading no-bg">
-						<h3 style="margin-top: 0; margin-bottom: 15px">Send Tip</h3>
-						<button type="button" style="display: none;" class="close close-post-modal" data-dismiss="modal">&times;</button>
 						<div class="post-author">
 							<div class="user-avatar">
 								<a href="{{ url($user->username) }}"><img src="{{ $user->avatar }}" alt="{{ $user->name }}" title="{{ $user->name }}"></a>
@@ -339,9 +361,9 @@
 						<textarea name="tip_note" id="tipNote" cols="60" rows="5" style="width: 100%" placeholder="Write a message"></textarea>
 					</div>
 					<div class="panel-footer">
-						<button type="button" id="cancelSendTip" class="btn btn-default" data-dismiss="modal">{{ trans('common.cancel') }}</button>
+						<a href="#" id="cancelSendTip" class="text-primary btn" data-dismiss="modal">{{ trans('common.cancel') }}</a>
 						@if(Auth::user()->is_payment_set)
-							<button type="button" id="sendTip" class="btn btn-primary sendUserTip" disabled>{{ trans('common.send_tip') }}</button>
+							<button type="button" id="sendTip" class="btn btn-primary sendTip" disabled>{{ trans('common.apply') }}</button>
 						@else
 							<a href="{{url(Auth::user()->username).'/settings/addpayment' }}" id="addPayment" class="btn btn-warning">{{ trans('common.add_payment') }}</a>
 						@endif

@@ -944,7 +944,7 @@ class TimelineController extends AppBaseController
                 if ($postImage->getSize() > 524288000) {
                     return response()->json(['status' => '400', 'message' => 'File size is too large. Upload below 100MB']);
                 }
-                if ($postImage->getClientOriginalExtension() != 'mp4') {
+                if ($postImage->getClientOriginalExtension() != 'mp4' && $postImage->getClientOriginalExtension() != 'mov') {
                     $strippedName = str_replace(' ', '', $postImage->getClientOriginalName());
                     $photoName = date('Y-m-d-H-i-s') . $strippedName;
 

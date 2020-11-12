@@ -847,13 +847,15 @@ $main_description = $post->description;
 
     <input type="hidden" value="{{$post->id}}" id="post-id">
 
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
+            <div class="modal-header">
+                <h3 style="margin: 0;">Send a Tip</h3>
+                <button type="button" style="display: none;" class="close close-post-modal" data-dismiss="modal">&times;</button>
+            </div>
             <div class="modal-body no-padding">
                 <div class="panel panel-default panel-post animated" style="margin-bottom: 0">
                     <div class="panel-heading no-bg">
-                        <h3 style="margin-top: 0; margin-bottom: 15px">Send Tip</h3>
-                        <button type="button" style="display: none;" class="close close-post-modal" data-dismiss="modal">&times;</button>
                         <div class="post-author">
                             <div class="user-avatar">
                                 <a href="{{ url($post->user->username) }}"><img src="{{ $post->user->avatar }}" alt="{{ $post->user->name }}" title="{{ $post->user->name }}"></a>
@@ -892,9 +894,9 @@ $main_description = $post->description;
                         <textarea name="tip_note" id="tipNote" cols="60" rows="5" style="width: 100%" placeholder="Write a message..."></textarea>
                     </div>
                     <div class="panel-footer">
-                        <button type="button" id="cancelSendTip" class="btn btn-default" data-dismiss="modal">{{ trans('common.cancel') }}</button>
+                        <a href="#" id="cancelSendTip" class="text-primary btn" data-dismiss="modal">{{ trans('common.cancel') }}</a>
                         @if(Auth::user()->is_payment_set)
-                            <button type="button" id="sendTip" class="btn btn-primary sendTip" disabled>{{ trans('common.send_tip') }}</button>
+                            <button type="button" id="sendTip" class="btn btn-primary sendTip" disabled>{{ trans('common.apply') }}</button>
                         @else
                             <a href="{{url(Auth::user()->username).'/settings/addpayment' }}" style="width: auto" id="addPayment" class="btn btn-warning">{{ trans('common.add_payment') }}</a>
                         @endif

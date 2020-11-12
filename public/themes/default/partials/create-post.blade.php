@@ -483,7 +483,6 @@ function startRecording() {
 
     navigator.mediaDevices.getUserMedia(constraints).then(function(stream) {
         console.log("getUserMedia() success, stream created, initializing Recorder.js ...");
-
         /*
             create an audio context after getUserMedia is called
             sampleRate might change after getUserMedia is called, like it does on macOS when recording through AirPods

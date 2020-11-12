@@ -234,6 +234,22 @@
         color: #fff;
     }
 
+    .subscriberFilterModal .panel-footer {
+        text-align: right;
+    }
+
+    .subscriberFilterModal .panel-heading {
+        border-bottom: none !important;
+    }
+    
+    .subscriberFilterModal .panel-heading .post-author {
+        padding: 0 20px;
+    }
+    
+    .subscriberFilterModal .panel-heading .user-post-details ul {
+        padding-right: 0 !important;
+    }
+    
     .subscriberFilterModal .panel-body ul li span {
         color: #298ad3;
         position: absolute;
@@ -283,7 +299,7 @@
     }
 
     .subscriberFilterModal .panel-body ul li {
-        width: 250px;
+        width: 180px;
         margin: auto;
         text-align: center;
     }
@@ -292,15 +308,51 @@
         font-weight: bold;
     }
 
-    @media (min-width: 768px) {
-        .subscriberFilterModal .modal-dialog {
-            width: 450px;
-        }
+    .subscriberFilterModal .modal-dialog-centered {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 93%;
+    }
+    
+    .subscriberFilterModal .modal-content {
+        width: 270px;
     }
 
     input[type="number"] {
         appearance: none;
         -moz-appearance: textfield !important;
+    }
+
+    .explore-post .single-image {
+        max-height: inherit !important;
+        height: 400px;
+        overflow: hidden;
+    }
+
+    .explore-post.panel-post .image-with-blur .single-image .first-image {
+        z-index: 9;
+    }
+
+    .explore-post.panel-post .image-with-blur .single-image {
+        height: 440px;
+        position: relative;
+    }
+
+    .explore-post.panel-post .image-with-blur .single-image a {
+        position: absolute;
+        text-align: center;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .explore-post.panel-post .image-with-blur .single-image img {
+        height: auto !important;
+        width: auto !important;
+        max-height: 100% !important;
+        max-width: 100% !important;
     }
 </style>
 <!-- main-section -->

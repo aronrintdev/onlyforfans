@@ -231,7 +231,7 @@
     }
 
     .default-post.panel-post .image-with-blur .single-image .first-image {
-        z-index: 950 !important;
+        z-index: 9 !important;
     }
 
     .default-post.panel-post .with-text {
@@ -257,6 +257,37 @@
             height: 250px
         }
     }
+
+    .explore-post .single-image {
+        max-height: inherit !important;
+        height: 400px;
+        overflow: hidden;
+    }
+
+    .explore-post.panel-post .image-with-blur .single-image .first-image {
+        z-index: 9;
+    }
+
+    .explore-post.panel-post .image-with-blur .single-image {
+        height: 440px;
+        position: relative;
+    }
+
+    .explore-post.panel-post .image-with-blur .single-image a {
+        position: absolute;
+        text-align: center;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .explore-post.panel-post .image-with-blur .single-image img {
+        height: auto !important;
+        width: auto !important;
+        max-height: 100% !important;
+        max-width: 100% !important;
+    }s
 </style>
 <div class="container profile-posts">
 	<div class="row">
