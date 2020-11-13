@@ -35,6 +35,7 @@ var notifications = new Vue({
             // pusher configuration
             this.pusher = new Pusher(pusherConfig.PUSHER_KEY, {
                 encrypted: true,
+                cluster: pusherConfig.CLUSTER,
                 auth: {
                     headers: {
                         'X-CSRF-Token': pusherConfig.token
@@ -78,6 +79,7 @@ var notifications = new Vue({
             // pusher configuration
             this.pusher = new Pusher(pusherConfig.PUSHER_KEY, {
                 encrypted: true,
+                cluster: pusherConfig.CLUSTER,
                 auth: {
                     headers: {
                         'X-CSRF-Token': pusherConfig.token

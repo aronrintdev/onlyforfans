@@ -263,14 +263,16 @@
                         </div>
                         <div class="tab-content" style="margin-top:15px;">
                             <div id="posts" class="tab-pane fade active in">
-                                <div style="display: flex; justify-content: space-between">
-                                    <div class="input-group explore-search-bar" style="display: none; margin-bottom: 10px; width: 100%;">
-                        <span class="input-group-btn">
-                            <button class="btn btn-default" type="button"><i class="fa fa-search"></i></button>
-                        </span>
-                                        <input type="text" id="explorePosts" class="form-control" placeholder="{{ trans('messages.search_post_placeholder') }}">
-                                    </div><!-- /input-group -->
-                                </div>
+{{--                                <div style="display: flex; justify-content: space-between">--}}
+{{--                                    <div class="input-group explore-search-bar"--}}
+{{--                                         style="display: none; margin-bottom: 10px; width: 100%;">--}}
+{{--                        <span class="input-group-btn">--}}
+{{--                            <button class="btn btn-default" type="button"><i class="fa fa-search"></i></button>--}}
+{{--                        </span>--}}
+{{--                                        <input type="text" id="explorePosts" class="form-control"--}}
+{{--                                               placeholder="{{ trans('messages.search_post_placeholder') }}">--}}
+{{--                                    </div><!-- /input-group -->--}}
+{{--                                </div>--}}
                                 @if (Session::has('message'))
                                     <div class="alert alert-{{ Session::get('status') }}" role="alert">
                                         {!! Session::get('message') !!}
@@ -354,7 +356,7 @@
             };
         };
         
-        document.getElementById('explorePosts').onkeypress = debounce(ajaxCall, 1500);
-        document.getElementById('explorePosts').onkeydown = debounce(ajaxCall, 1500);
+        // document.getElementById('explorePosts').onkeypress = debounce(ajaxCall, 1500);
+        // document.getElementById('explorePosts').onkeydown = debounce(ajaxCall, 1500);
     };
 </script>
