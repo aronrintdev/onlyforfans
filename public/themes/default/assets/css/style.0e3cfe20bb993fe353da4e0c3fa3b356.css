@@ -31823,6 +31823,7 @@ html {
 }
 .panel-post .panel-body .actions-count {
     margin: 10px 0 0 0;
+    display: none;
 }
 .panel-post .panel-body .actions-count li {
   padding-left: 15px;
@@ -32137,7 +32138,7 @@ html {
     }
 }
 .timeline-cover-section .timeline-cover {
-    height: 375px;
+    height: 355px;
     width: 100%;
     overflow: hidden;
     position: relative;
