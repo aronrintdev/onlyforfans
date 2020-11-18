@@ -542,17 +542,18 @@
         evt.currentTarget.className += " active";
     }
 
+    // span decrement 1
     $('span.decrement').click(function () {
         let input = $(this).siblings('input.filter-input');
         let val = input.val() != '' ? parseFloat(input.val()) : 0;
 
         if (val != NaN) {
             if (input.data('id') == 1) {
-                input.val((val - 100) < 0 ? 0 : (val - 100)).trigger('keyup');
+                input.val((val - 100) < 3 ? 3 : (val - 100)).trigger('keyup');
             } else if(input.data('id') == 2) {
-                input.val((val - 10) < 0 ? 0 : (val - 10)).trigger('keyup');
+                input.val((val - 10) < 3 ? 3 : (val - 10)).trigger('keyup');
             } else {
-                input.val((val - 1) < 0 ? 0 : (val - 1)).trigger('keyup');
+                input.val((val - 1) < 3 ? 3 : (val - 1)).trigger('keyup');
             }
 
         }
@@ -561,6 +562,9 @@
     $('span.increment').click(function () {
         let input = $(this).siblings('input.filter-input');
         let val = input.val() != '' ? parseFloat(input.val()) : 0;
+        if ( val < 10 ) {
+          val = 0; // %PSG: take care of case where val is 3 so next up is 10
+        }
         if (val != NaN) {
             if (input.data('id') == 1) {
                 input.val(val + 100).trigger('keyup');

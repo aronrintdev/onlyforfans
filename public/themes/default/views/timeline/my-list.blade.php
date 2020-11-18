@@ -356,6 +356,7 @@
 		evt.currentTarget.className += " active";
 	}
     
+    // span decrement 2
     $('span.decrement').click(function () {
         let input = $(this).siblings('input.filter-input');
         let val = input.val() != '' ? parseFloat(input.val()) : 0;

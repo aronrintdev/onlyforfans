@@ -299,6 +299,7 @@
     {{--let pusherCluster = '{{ config('broadcasting.connections.pusher.options.cluster') }}';--}}
 
 
+  // span decrement 3
 	$(document).on('click', 'span.decrement', function () {
 		let input = $(this).siblings('input.filter-input');
 		let val = input.val() != '' ? parseFloat(input.val()) : 0;
