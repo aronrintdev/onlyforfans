@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+    <!-- %VIEW: public/themes/default/layout/default.blade.php -->
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -29,7 +30,8 @@
         <link href="//vjs.zencdn.net/7.8.2/video-js.min.css" rel="stylesheet">
         <link href="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" rel="stylesheet">
 
-        {!! Theme::asset()->styles() !!}
+        {{-- {!! Theme::asset()->styles() !!} --}}
+        <link href="/themes/default/assets/css/style.0e3cfe20bb993fe353da4e0c3fa3b356.css" rel="stylesheet">
 
         <script type="text/javascript">
         function SP_source() {
