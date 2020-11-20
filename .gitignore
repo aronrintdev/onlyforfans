@@ -54,3 +54,10 @@ storage/framework/views
 storage/uploads/users/gallery
 storage/app/purifier
 bootstrap/cache/services.php
+
+dot-env.txt
+.*.swp
+*.vim
+CMD.txt
+
+storage/debugbar

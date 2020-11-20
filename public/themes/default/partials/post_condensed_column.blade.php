@@ -10,6 +10,7 @@
         $main_description = $post->description;
         ?>
 
+    <!-- %VIEW: themes/default/paritals/post_condensed_column --> 
     <div class="panel panel-default panel-post animated post-wrapper-{{ $post->id }}" id="post{{ $post->id }}">
         <div class="panel-heading no-bg">
             <div class="post-author">

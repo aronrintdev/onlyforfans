@@ -1,3 +1,4 @@
+<!-- %VIEW: themes/default/paritals/explore_posts_detail --> 
 <div id="postDetail{{ $post->id }}" class="modal fade post-detail-modal" role="dialog" tabindex='-1'>
     <div class="modal-dialog">
 

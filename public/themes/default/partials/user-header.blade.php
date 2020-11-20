@@ -1,4 +1,6 @@
 <style>
+/* %PSG %FIXME DRY -- moving this to a css file... */
+/*
     .smallscreen-report, a.page-report.report {
         display: block !important;
     }
@@ -42,7 +44,6 @@
 		height: 25px;
 		border-radius: 50%;
 		width: 25px;
-		/*top: 0;*/
 		vertical-align: middle;
 		display: flex;
 		align-items: center;
@@ -103,7 +104,10 @@
 	.subscriberFilterModal .modal-content {
 		width: 270px;
 	}
+*/
 </style>
+
+<!-- %VIEW: themes/default/paritals/user-header --> 
 <div class="timeline-cover-section">
 	<div class="timeline-cover">
 		<div class="profile-dropdown-menu">
