@@ -356,38 +356,6 @@
 		evt.currentTarget.className += " active";
 	}
     
-    // span decrement 2
-    $('span.decrement').click(function () {
-        let input = $(this).siblings('input.filter-input');
-        let val = input.val() != '' ? parseFloat(input.val()) : 0;
-        
-        if (val != NaN) {
-            if (input.data('id') == 1) {
-                input.val((val - 100) < 0 ? 0 : (val - 100)).trigger('keyup');
-            } else if(input.data('id') == 2) {
-                input.val((val - 10) < 0 ? 0 : (val - 10)).trigger('keyup');
-            } else {
-                input.val((val - 1) < 0 ? 0 : (val - 1)).trigger('keyup');
-            }
-            
-        }
-    });
-    
-    $('span.increment').click(function () {
-        let input = $(this).siblings('input.filter-input');
-        let val = input.val() != '' ? parseFloat(input.val()) : 0;
-        if (val != NaN) {
-            if (input.data('id') == 1) {
-                input.val(val + 100).trigger('keyup');    
-            } else if(input.data('id') == 2) {
-                input.val(val + 10).trigger('keyup');
-            } else if(input.data('id') == 3) {
-                input.val((val + 1) > 12 ? val : (val + 1)).trigger('keyup');
-            } else if(input.data('id') == 4) {
-                input.val((val + 1) > 30 ? val : (val + 1)).trigger('keyup');
-            }                
-        }        
-    });
     
     $(document).on('click', '#applyFilter', function () {
         const modal = $('#subscriberFilterModal');
