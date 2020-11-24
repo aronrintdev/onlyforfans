@@ -225,47 +225,6 @@ $(function () {
         });
     });
 
-    $(document).on("input", "#etTipAmount, .etTipAmount", function() {
-        var myLength = $(this).val().length;
-        if (myLength > 0)
-            $(this).closest(".tip-modal").find('#sendTip').removeAttr("disabled");
-        else
-            $(this).closest(".tip-modal").find('#sendTip').attr("disabled", "disabled");
-    });
-
-    $(document).on('click', ".sendTip", function () {
-        let modal = $(this).closest('.tip-modal');
-
-        $.post(SP_source() + 'ajax/send-tip-post', {post_id: modal.find("#post-id").val(), amount: modal.find("#etTipAmount").val(), note: modal.find('#tipNote').val()}, function(data) {
-
-            if (data.status == 200) {
-
-                notify(data.message,'success');
-                modal.modal("hide");
-                // location.reload(); TODO: Not needed
-            }
-            else {
-
-            }
-        });
-    });
-
-    $(document).on('click', ".sendUserTip", function () {
-        let modal = $(this).closest('.tip-modal');
-
-        $.post(SP_source() + 'ajax/send-tip-user', {user_id: modal.find("#user-id").val(), amount: modal.find("#etTipAmount").val(), note: modal.find('#tipNote').val()}, function(data) {
-
-            if (data.status == 200) {
-
-                notify(data.message,'success');
-                modal.modal("hide");
-                // location.reload(); TODO: Not needed
-            }
-            else {
-
-            }
-        });
-    });
 
     $("input[name = 'sort-lists']").change(function() {
 

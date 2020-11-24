@@ -309,23 +309,6 @@
 		$(this).find('#tipNote').val('');
 	});
 
-	$(document).on('keyup', '.filter-input', function () {
-		let activeFilter = $(this).closest('li').find('input[type="radio"]');
-		activeFilter.prop('checked', true);
-		let val = $(this).val() != '' ? parseFloat($(this).val()) : 0;
-		if($(this).data('id') == 1) {
-			$(this).next('.text-wrapper').text($(this).val() + ' USD');
-		}else if($(this).data('id') == 2) {
-			$(this).val(val > 200 ? val : val);
-			$(this).next('.text-wrapper').text(currency($(this).val()).format() + ' USD');
-		}else if($(this).data('id') == 3) {
-			$(this).val(val > 12 ? 12 : val);
-			$(this).next('.text-wrapper').text($(this).val() + ' Month');
-		} else if($(this).data('id') == 4) {
-			$(this).val(val > 30 ? 30 : val);
-			$(this).next('.text-wrapper').text($(this).val() + ' Day');
-		}
-	});
 </script>
 {{--{!! Theme::asset()->container('footer')->usePath()->add('echo', 'js/echo.iife.js') !!}--}}
 {{--{!! Theme::asset()->container('footer')->usePath()->add('pusher', 'js/pusher.js') !!}--}}

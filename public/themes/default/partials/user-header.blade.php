@@ -366,7 +366,7 @@
 					</div>
 					<div class="panel-footer">
 						@if(Auth::user()->is_payment_set)
-							<button type="button" id="sendTip" class="btn btn-primary sendTip" disabled>{{ trans('common.apply') }}</button>
+							<button type="button" id="sendTip" class="btn btn-primary sendTip">{{ trans('common.apply') }}</button>
 						@else
 							<a href="{{url(Auth::user()->username).'/settings/addpayment' }}" id="addPayment" class="btn btn-warning">{{ trans('common.add_payment') }}</a>
 						@endif
@@ -436,6 +436,7 @@
 		$(this).find('#tipNote').val('');
 	});
 
+  /* %TODO DEPRECATE
 	$(document).on('keyup', '.filter-input', function () {
 		let activeFilter = $(this).closest('li').find('input[type="radio"]');
 		activeFilter.prop('checked', true);
@@ -453,4 +454,5 @@
 			$(this).next('.text-wrapper').text($(this).val() + ' Day');
 		}
 	});
+  */
 </script>

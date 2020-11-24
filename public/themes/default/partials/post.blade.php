@@ -882,7 +882,7 @@ $main_description = $post->description;
                     <div class="panel-footer">
                       {{-- <a href="#" id="cancelSendTip" class="text-primary btn" data-dismiss="modal">{{ trans('common.cancel') }}</a> --}}
                         @if(Auth::user()->is_payment_set)
-                            <button type="button" id="sendTip" class="btn btn-primary sendTip" disabled>{{ trans('common.send_tip') }}</button>
+                            <button type="button" id="sendTip" class="btn btn-primary sendTip" >{{ trans('common.send_tip') }}</button>
                         @else
                             <a href="{{url(Auth::user()->username).'/settings/addpayment' }}" style="width: auto" id="addPayment" class="btn btn-warning">{{ trans('common.add_payment') }}</a>
                         @endif
