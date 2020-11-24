@@ -322,7 +322,7 @@
         <div class="modal-content">
 			<div class="modal-header">
 				<h3 style="margin: 0;">Send a Tip</h3>
-				<button type="button" style="display: none;" class="close close-post-modal" data-dismiss="modal">&times;</button>
+				<button type="button" style="" class="close close-post-modal" data-dismiss="modal">&times;</button>
 			</div>
             <div class="modal-body no-padding">
 				<div class="panel panel-default panel-post animated" style="margin-bottom: 0">
@@ -365,7 +365,6 @@
 						<textarea name="tip_note" id="tipNote" cols="60" rows="5" style="width: 100%" placeholder="Write a message"></textarea>
 					</div>
 					<div class="panel-footer">
-						<a href="#" id="cancelSendTip" class="text-primary btn" data-dismiss="modal">{{ trans('common.cancel') }}</a>
 						@if(Auth::user()->is_payment_set)
 							<button type="button" id="sendTip" class="btn btn-primary sendTip" disabled>{{ trans('common.apply') }}</button>
 						@else
@@ -421,38 +420,6 @@
 	// });
 
 
-	$('span.decrement').click(function () {
-		let input = $(this).siblings('input.filter-input');
-		let val = input.val() != '' ? parseFloat(input.val()) : 0;
-
-		if (val != NaN) {
-			if (input.data('id') == 1) {
-				input.val((val - 100) < 0 ? 0 : (val - 100)).trigger('keyup');
-			} else if(input.data('id') == 2) {
-				input.val((val - 10) < 0 ? 0 : (val - 10)).trigger('keyup');
-			} else {
-				input.val((val - 1) < 0 ? 0 : (val - 1)).trigger('keyup');
-			}
-
-		}
-	});
-
-	$('span.increment').click(function () {
-		let input = $(this).siblings('input.filter-input');
-		let val = input.val() != '' ? parseFloat(input.val()) : 0;
-		if (val != NaN) {
-			if (input.data('id') == 1) {
-				input.val(val + 100).trigger('keyup');
-			} else if(input.data('id') == 2) {
-				input.val(val + 10).trigger('keyup');
-			} else if(input.data('id') == 3) {
-				input.val((val + 1) > 12 ? val : (val + 1)).trigger('keyup');
-			} else if(input.data('id') == 4) {
-				input.val((val + 1) > 30 ? val : (val + 1)).trigger('keyup');
-			}
-		}
-	});
-	
 	let lastActiveFilter;
 	$('.subscriberFilterModal').on('show.bs.modal', function () {
 		lastActiveFilter = $('input[type="radio"]:checked');
