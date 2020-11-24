@@ -1,26 +1,29 @@
+<!-- %VIEW: themes/default/partials/user-leftbar -->
     @if (        
         ($timeline->type == 'user' && $timeline->id == Auth::user()->timeline_id) ||
         ($timeline->type == 'page' && $timeline->page->is_admin(Auth::user()->id) == true) ||
         ($timeline->type == 'group' && $timeline->groups->is_admin(Auth::user()->id) == true)
         )
 @endif
+
+@if( $user->isBioSet() )
 <div class="user-bio-block follow-links">
     @if($user->id != Auth::user()->id)
     <div class="online">
         <div class="bio-header">Message</div>
-	    <div class="bio-description">
+        <div class="bio-description">
             @if(canMessageToUser(Auth::user(), $user))
-    			<a href="#" class="btn btn-submit btn-success" style="display:block; margin-top:10px;" onClick="chatBoxes.sendMessage({{ $timeline->user->id }})">
+    			  <a href="#" class="btn btn-submit btn-success" style="display:block; margin-top:10px;" onClick="chatBoxes.sendMessage({{ $timeline->user->id }})">
     				<i class="fa fa-inbox"></i> {{ trans('common.message') }}
-    			</a>
+    			  </a>
             @endif
-	    </div>
+        </div>
     </div>
     @endif
     @if($user->is_follow_for_free && $user->id != Auth::user()->id)
     <div class="follow">
         <div class="bio-header">Follow</div>
-	    <div class="bio-description">
+        <div class="bio-description">
             @if(!$user->followers->contains(Auth::user()->id))
             <div class="follow-btn">
                 <a href="javascript:void(0);" class="btn btn-submit btn-success follow-user follow" style="display:block;" data-price="{{ $user->price }}" data-follow="1"  data-timeline-id="{{ $timeline->id }}">
@@ -178,6 +181,9 @@
 		@endif
 	</ul>
 </div>
+
+@endif
+
 <form class="change-avatar-form hidden" action="{{ url('ajax/change-avatar') }}" method="post" enctype="multipart/form-data">
 	<input name="timeline_id" value="{{ $timeline->id }}" type="hidden">
 	<input name="timeline_type" value="{{ $timeline->type }}" type="hidden">
@@ -194,9 +200,7 @@
 	</div>	
 	@endif
 
-	<?php
-	$audio = true;
-	?>
+	<?php $audio = true; ?>
 	
     @if(isset($favouritePosts) && count($favouritePosts) > 0)
         <div class="favourite-grid row">

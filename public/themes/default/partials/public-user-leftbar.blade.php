@@ -1,3 +1,4 @@
+<!-- %VIEW: themes/default/partials/public-user-leftbar -->
 <div class="user-profile-buttons">
 	<div class="row follow-links pagelike-links">
 		<!-- This [if-1] is for checking current user timeline or diff user timeline -->	
@@ -79,7 +80,8 @@
         )
 @endif
 
-@if($user->about != NULL)
+<h1>IS BIO SET {{ $user->isBioSet() }}</h1>
+@if( $user->isBioSet() )
 <div class="user-bio-block follow-links">
 
 	<div class="bio-description">

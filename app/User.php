@@ -637,4 +637,15 @@ class User extends Authenticatable
     {
         return $this->hasOne('App\BankAccountDetails', 'user_id');
     }
+
+    // --- %%Extra --- 
+
+
+    public function isBioSet() {
+        return ( !empty($this->timeline) && !empty($this->timeline->about) )
+        || !empty($this->city)
+        || !empty($this->country);
+    }
+
+
 }
