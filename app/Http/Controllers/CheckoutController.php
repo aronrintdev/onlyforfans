@@ -17,8 +17,8 @@ use Illuminate\Support\Facades\DB;
 use Log;
 use Teepluss\Theme\Facades\Theme;
 
-//require_once('../vendor/stripe/init.php');
-require_once('/home/fansplatformmjmd/fan/vendor/stripe/init.php');
+require_once(base_path().'/vendor/stripe/init.php');
+//require_once('/home/fansplatformmjmd/fan/vendor/stripe/init.php');
 
 class CheckoutController extends Controller
 {

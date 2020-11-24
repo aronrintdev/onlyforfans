@@ -88,7 +88,7 @@
 {{--
 --}}
 <script src="/themes/default/assets/js/currency.min.js"></script>
-<script src="/js/app/tippingUtils.js"></script>
+<script src="{{ asset('js/app/tippingUtils.js') }}"></script>
 
 
     </body>   

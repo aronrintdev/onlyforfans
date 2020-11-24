@@ -116,7 +116,7 @@ $( document ).ready(function() {
       let modal = $(this).closest('.tip-modal');
       $.post(SP_source() + 'ajax/send-tip-post', {post_id: modal.find("#post-id").val(), amount: modal.find("#etTipAmount").val(), note: modal.find('#tipNote').val()}, function(data) {
         if (data.status == 200) {
-          notify(data.message,'success');
+          notify(data.message,'Tip Sent!');
           modal.modal("hide");
           // location.reload(); TODO: Not needed
         }
@@ -127,11 +127,28 @@ $( document ).ready(function() {
       let modal = $(this).closest('.tip-modal');
       $.post(SP_source() + 'ajax/send-tip-user', {user_id: modal.find("#user-id").val(), amount: modal.find("#etTipAmount").val(), note: modal.find('#tipNote').val()}, function(data) {
         if (data.status == 200) {
-          notify(data.message,'success');
+          notify(data.message,'Tip Sent!');
           modal.modal("hide");
           // location.reload(); TODO: Not needed
         }
       });
     });
+
+    function notify(message,type,layout)
+    {
+        var n = noty({
+            text: message,
+            layout: 'bottomLeft',
+            type : type ? type : 'success',
+            theme : 'relax',
+            timeout:5000,
+            animation: {
+                open: 'animated fadeIn', // Animate.css class names
+                close: 'animated fadeOut', // Animate.css class names
+                easing: 'swing', // unavailable - no need
+                speed: 500 // unavailable - no need
+            }
+        });
+    };
   }
 });
