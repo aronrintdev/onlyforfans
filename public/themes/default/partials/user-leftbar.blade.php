@@ -6,7 +6,6 @@
         )
 @endif
 
-@if( $user->isBioSet() )
 <div class="user-bio-block follow-links">
     @if($user->id != Auth::user()->id)
     <div class="online">
@@ -93,9 +92,11 @@
         </div>
     @endif
 
+@if( $user->isAboutSet() )
 	<div class="bio-description">
 		{{ ($user->about != NULL) ? $user->about : trans('messages.no_description') }}
 	</div>
+@endif
 	
 	@if($user->wishlist)
     	<a id="wishlist" target="_blank" href="{{ $user->wishlist }}">{{ $user->wishlist }}</a><br>
@@ -182,7 +183,6 @@
 	</ul>
 </div>
 
-@endif
 
 <form class="change-avatar-form hidden" action="{{ url('ajax/change-avatar') }}" method="post" enctype="multipart/form-data">
 	<input name="timeline_id" value="{{ $timeline->id }}" type="hidden">

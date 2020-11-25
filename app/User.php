@@ -641,10 +641,8 @@ class User extends Authenticatable
     // --- %%Extra --- 
 
 
-    public function isBioSet() {
-        return ( !empty($this->timeline) && !empty($this->timeline->about) )
-        || !empty($this->city)
-        || !empty($this->country);
+    public function isAboutSet() {
+        return ( !empty($this->timeline) && !empty($this->timeline->about) );
     }
 
 
