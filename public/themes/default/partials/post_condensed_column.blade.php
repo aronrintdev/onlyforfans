@@ -232,10 +232,9 @@
 
                             @if($post->location != NULL && !isset($sharedOwner))
                                 {{ trans('common.at') }} <span class="post-place">
-              <a target="_blank" href="{{ url('/get-location/'.$post->location) }}">
-                <i class="fa fa-map-marker"></i> {{ $post->location }}
-              </a>
-              </span></li>
+                                  <a target="_blank" href="{{ url('/get-location/'.$post->location) }}"><i class="fa fa-map-marker"></i> {{ $post->location }}</a>
+                                </span>
+                        </li>
                         @endif
                     </ul>
                 </div>
