@@ -269,7 +269,7 @@
 					</div>
 					<div class="panel-footer">
 						@if(Auth::user()->is_payment_set)
-							<button type="button" id="sendTip" class="btn btn-primary sendTip">{{ trans('common.apply') }}</button>
+							<button type="button" id="sendTip" class="btn btn-primary sendTip">{{ trans('common.send_tip') }}</button>
 						@else
 							<a href="{{url(Auth::user()->username).'/settings/addpayment' }}" id="addPayment" class="btn btn-warning">{{ trans('common.add_payment') }}</a>
 						@endif

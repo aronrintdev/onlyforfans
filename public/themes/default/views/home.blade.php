@@ -216,6 +216,8 @@
 		}
 	}
 </style>
+
+<!-- %VIEW: public/themes/views/home -->
 		<div class="container">
 			<div class="row">
                 <div class="col-md-7 col-lg-8 content-wrapper">

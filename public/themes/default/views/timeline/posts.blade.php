@@ -24,7 +24,9 @@
     }
     
     .timeline-condensed-column .panel-heading .user-post-details li:last-child, .jscroll-added .panel-heading .user-post-details li:last-child, .timeline-condensed-column > .col-lg-4 .panel-heading .user-post-details li:last-child {
+      /*
         max-width: 100px;
+        */
         text-overflow: ellipsis;
         white-space: nowrap;
         overflow: hidden;
@@ -289,6 +291,8 @@
         max-width: 100% !important;
     }s
 </style>
+
+<!-- %VIEW: public/themes/default/views/timeline/posts -->
 <div class="container profile-posts">
 	<div class="row">
 		<div class="col-md-12">

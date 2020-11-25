@@ -1,3 +1,4 @@
+<!-- %VIEW: themes/default/paritals/post_condensed_column --> 
 <div class="{{ isset($twoColumn) && $twoColumn ? 'col-lg-6' : 'col-lg-4' }} col-sm-12">
     @if(isset($post->shared_post_id))
         <?php
@@ -10,7 +11,6 @@
         $main_description = $post->description;
         ?>
 
-    <!-- %VIEW: themes/default/paritals/post_condensed_column --> 
     <div class="panel panel-default panel-post animated post-wrapper-{{ $post->id }}" id="post{{ $post->id }}">
         <div class="panel-heading no-bg">
             <div class="post-author">
@@ -840,7 +840,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h3 style="margin: 0;">Send a Tip</h3>
-                    <button type="button" style="display: none;" class="close close-post-modal" data-dismiss="modal">&times;</button>
+                    <button type="button" style="" class="close close-post-modal" data-dismiss="modal">&times;</button>
                 </div>
                 <div class="modal-body no-padding">
                     <div class="panel panel-default panel-post animated" style="margin-bottom: 0">
@@ -883,9 +883,8 @@
                             <textarea name="tip_note" id="tipNote" cols="60" rows="5" style="width: 100%" placeholder="Write a message..."></textarea>
                         </div>
                         <div class="panel-footer">
-                            <a href="#" id="cancelSendTip" class="text-primary btn" data-dismiss="modal">{{ trans('common.cancel') }}</a>
                             @if(Auth::user()->is_payment_set)
-                                <button type="button" id="sendTip" class="btn btn-primary sendTip" disabled>{{ trans('common.apply') }}</button>
+                                <button type="button" id="sendTip" class="btn btn-primary sendTip" >{{ trans('common.send_tip') }}</button>
                             @else
                                 <a href="{{url(Auth::user()->username).'/settings/addpayment' }}" style="width: auto" id="addPayment" class="btn btn-warning">{{ trans('common.add_payment') }}</a>
                             @endif
