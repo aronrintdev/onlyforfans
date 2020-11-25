@@ -113,7 +113,7 @@ body .tip-modal .panel-footer > * {
 }
 
 /* from user-header.blade.php */
-.smallscreen-report, a.page-report.report {
+body .smallscreen-report, a.page-report.report {
   display: block !important;
 }
 

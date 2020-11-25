@@ -32530,9 +32530,11 @@ html {
 .timeline-list > ul li.largescreen-report {
     border-right: 1px solid transparent;
 }
+/*
 .smallscreen-report, a.page-report.report {
     display: none!important;
 }
+*/
 @media (max-width: 1200px) {
     .timeline-list > ul li.largescreen-report {
         display: none;
