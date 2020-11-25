@@ -61,3 +61,7 @@ dot-env.txt
 CMD.txt
 
 storage/debugbar
+__MACOSX
+
+*.txt
+*.tgz

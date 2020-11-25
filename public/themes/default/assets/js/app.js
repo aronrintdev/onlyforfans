@@ -1131,6 +1131,28 @@ $(function () {
         });
     });
 
+    // %PSG: block a user
+    $(document).on('click', '.user-block', function(e){
+      e.preventDefault();
+      const context = $(this).closest('.pagelike-links');
+      const sessionUser = context.data('session_user');
+      const payload = {
+        blockee_id: $(this).data('blockee_id'),
+      };
+      // 'ajax' is just filler for the {username} param, which is unused for this op
+      const url = SP_source() + `${sessionUser}/settings/block-profile`;
+      $.post(url, payload, function(data) {
+        if (data.is_blocked) {
+          context.find('.block').parent().addClass('hidden');
+          context.find('.blocked').parent().removeClass('hidden');
+        } else {
+          context.find('.block').parent().removeClass('hidden');
+          context.find('.blocked').parent().addClass('hidden');
+        }
+        notify(data.message);
+      });
+    });
+
     // Comment Like/Liked the timeline user  by  logged user
     $(document).on('click','.like-comment',function(e){
         e.preventDefault();

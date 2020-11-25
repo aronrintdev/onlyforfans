@@ -1,110 +1,4 @@
 <style>
-/* %PSG %FIXME DRY -- moving this to a css file... */
-/*
-    .smallscreen-report, a.page-report.report {
-        display: block !important;
-    }
-    
-    @media screen and (max-width: 767px) {
-        .user-image.dropdown.fans .dropdown-menu {
-            left: -190px;
-        }
-    }
-	.total-spent, .total-tipped, .subscribed-over, .inactive-over {
-		position: relative;
-	}
-
-	.filter-input {
-		border: 0;
-		outline: none;
-		text-align: center;
-		font-weight: bold;
-		color: #fff;
-	}
-
-	.subscriberFilterModal .panel-footer {
-		text-align: right;
-	}
-	
-	.subscriberFilterModal .panel-heading {
-		border-bottom: none !important;
-	}
-
-	.subscriberFilterModal .panel-heading .post-author {
-		padding: 0 20px;
-	}
-
-	.subscriberFilterModal .panel-heading .user-post-details ul {
-		padding-right: 0 !important;
-	}
-	
-	.subscriberFilterModal .panel-body ul li span {
-		color: #298ad3;
-		position: absolute;
-		height: 25px;
-		border-radius: 50%;
-		width: 25px;
-		vertical-align: middle;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		cursor: pointer;
-		user-select: none;
-		transition: .3s;
-	}
-
-	.subscriberFilterModal .text-wrapper {
-		top: 0;
-		left: 50%;
-		position: absolute;
-		transform: translateX(-50%);
-		bottom: 0;
-		display: block;
-		max-width: 100%;
-		width: 80%;
-	}
-
-	.subscriberFilterModal ul li span:hover {
-		background: #e7f3ff;
-	}
-
-	.subscriberFilterModal ul li span:active {
-		background: #9dd5ff;
-	}
-
-	.subscriberFilterModal ul li span.decrement {
-		left: 0;
-	}
-
-	.subscriberFilterModal ul li span.increment {
-		right: 0;
-	}
-
-	.subscriberFilterModal ul {
-		list-style: none;
-		padding: 0 25px;
-	}
-	
-	.subscriberFilterModal .panel-body ul li {
-		width: 180px;
-		margin: auto;
-		text-align: center;
-	}
-
-	.subscriberFilterModal .panel-body ul li p{
-		font-weight: bold;
-	}
-	.subscriberFilterModal .modal-dialog-centered {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		min-height: 93%;
-	}
-
-	.subscriberFilterModal .modal-content {
-		width: 270px;
-	}
-*/
 </style>
 
 <!-- %VIEW: themes/default/paritals/user-header --> 
@@ -118,7 +12,10 @@
                           <path fill-rule="evenodd" d="M9.5 13a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
                         </svg>
 					</a>
-					<ul class="dropdown-menu profile-dropdown-menu-content pagelike-links">
+          @php
+            $sessionUser = Auth::user();
+          @endphp
+          <ul class="dropdown-menu profile-dropdown-menu-content pagelike-links" data-session_user="{{$sessionUser->username}}" >
 						<li class="main-link">
 							@if($timeline->id == Auth::user()->timeline_id)
 								<a href="{{ url('/'.Auth::user()->username.'/settings/profile') }}">
@@ -135,18 +32,13 @@
 								</a>
 							@endif
                         @if(Auth::user()->username != $timeline->username)
+                            {{-- Reporting posts --}}
                             @if(!$timeline->reports->contains(Auth::user()->id))
                                 <li class="timeline-cover-status main-link">
                                     <a href="#" class="page-report report" data-timeline-id="{{ $timeline->id }}">{{ trans('common.report') }}</a>
                                 </li>
                                 <li class="timeline-cover-status main-link hidden">
                                     <a href="#" class="page-report reported" data-timeline-id="{{ $timeline->id }}">{{ trans('common.reported') }}</a>
-                                </li>
-                                <li class="timeline-cover-status main-link">
-                                    <a href="#" class="page-report report" data-timeline-id="{{ $timeline->id }}">{{ trans('common.block') }}</a>
-                                </li>
-                                <li class="timeline-cover-status main-link hidden">
-                                    <a href="#" class="page-report reported" data-timeline-id="{{ $timeline->id }}">{{ trans('common.blocked') }}</a>
                                 </li>
                             @else
                                 <li class="timeline-cover-status main-link hidden">
@@ -155,14 +47,25 @@
                                 <li class="timeline-cover-status main-link">
                                     <a href="#" class="page-report reported" data-timeline-id="{{ $timeline->id }}">{{ trans('common.reported') }}</a>
                                 </li>
+                            @endif
+
+                            {{-- Blocking users --}}
+                            @if ( !isBlockByMe($timeline->username) )
+                                <li class="timeline-cover-status main-link">
+                                  <a href="#" class="user-block block" data-blockee_id="{{ $timeline->user->id }}">{{ trans('common.block') }}</a>
+                                </li>
                                 <li class="timeline-cover-status main-link hidden">
-                                    <a href="#" class="page-report report" data-timeline-id="{{ $timeline->id }}">{{ trans('common.block') }}</a>
+                                  <a href="#" class="user-block blocked" data-blockee_id="{{ $timeline->user->id }}">{{ trans('common.unblock') }}</a>
+                                </li>
+                            @else
+                                <li class="timeline-cover-status main-link hidden">
+                                  <a href="#" class="user-block block" data-blockee_id="{{ $timeline->user->id }}">{{ trans('common.block') }}</a>
                                 </li>
                                 <li class="timeline-cover-status main-link">
-                                    <a href="#" class="page-report reported" data-timeline-id="{{ $timeline->id }}">{{ trans('common.blocked') }}</a>
+                                  <a href="#" class="user-block blocked" data-blockee_id="{{ $timeline->user->id }}">{{ trans('common.unblock') }}</a>
                                 </li>
-                                @endif
                             @endif
+                          @endif
 						</li>
 					</ul>
 				</li>
@@ -436,23 +339,4 @@
 		$(this).find('#tipNote').val('');
 	});
 
-  /* %TODO DEPRECATE
-	$(document).on('keyup', '.filter-input', function () {
-		let activeFilter = $(this).closest('li').find('input[type="radio"]');
-		activeFilter.prop('checked', true);
-		let val = $(this).val() != '' ? parseFloat($(this).val()) : 0;
-		if($(this).data('id') == 1) {
-			$(this).next('.text-wrapper').text($(this).val() + ' USD');
-		}else if($(this).data('id') == 2) {
-			$(this).val(val > 200 ? val : val);
-			$(this).next('.text-wrapper').text(currency($(this).val()).format() + ' USD');
-		}else if($(this).data('id') == 3) {
-			$(this).val(val > 12 ? 12 : val);
-			$(this).next('.text-wrapper').text($(this).val() + ' Month');
-		} else if($(this).data('id') == 4) {
-			$(this).val(val > 30 ? 30 : val);
-			$(this).next('.text-wrapper').text($(this).val() + ' Day');
-		}
-	});
-  */
 </script>
