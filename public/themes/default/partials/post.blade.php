@@ -365,7 +365,7 @@ $main_description = $post->description;
                     @if(isset($user) && !$user->followers->contains(Auth::user()->id) && $user->id != Auth::user()->id && $user->price > 0 )
                         <div class="post-image-holder post-locked  single-image">
                             {{--                <a><img src="{{ url('user/gallery/locked.jpg') }}"  title="{{ $post->user->name }}" alt="{{ $post->user->name }}" onclick="$('#myModal').modal('show')"></a>--}}
-                            <a><img src="{{ url('user/gallery/locked.png') }}"  title="{{ $post->user->name }}" alt="{{ $post->user->name }}"></a>
+                            <a><img src="{{ url('user/gallery/locked.png') }}"  title="{{ $post->user->name }}" alt=""></a>
 
                             <div class="modal fade" id="myModal" role="dialog">
                                 <div class="modal-dialog">
@@ -393,7 +393,7 @@ $main_description = $post->description;
                             @foreach($post->images()->get() as $index => $postImage)
                                 @if($postImage->type=='image')
                                     <span class="{{ $index == 0 ? 'first-image' : 'hidden' }}" style="background-image: url({{ url('user/gallery/'.$post->images()->get()->first()->source) }}); height: 100%; width: 100%; position: absolute; filter: blur(4px); background-size: cover; z-index: 0; background-position: center;"></span>
-                                    <a href="{{ url('user/gallery/'.$postImage->source) }}" class="{{ $index == 0 ? 'first-image' : 'hidden' }}" data-fancybox="gallery.{{$post->id}}"><img src="{{ url('user/gallery/'.$postImage->source) }}"  title="{{ $post->user->name }}" alt="{{ $post->user->name }}"></a>
+                                    <a href="{{ url('user/gallery/'.$postImage->source) }}" class="{{ $index == 0 ? 'first-image' : 'hidden' }}" data-fancybox="gallery.{{$post->id}}"><img src="{{ url('user/gallery/'.$postImage->source) }}"  title="{{ $post->user->name }}" alt=""></a>
                                 @endif
                             @endforeach
                         </div>
@@ -612,7 +612,7 @@ $main_description = $post->description;
                         @foreach($post->images()->get() as $index => $postImage)
                             @if($postImage->type=='image')
                                 <span class="{{ $index == 0 ? 'first-image' : 'hidden' }}" style="background-image: url({{ url('user/gallery/'.$post->images()->get()->first()->source) }}); height: 100%; width: 100%; position: absolute; filter: blur(4px); background-size: cover; z-index: 0; background-position: center;"></span>
-                                <a href="{{ url('user/gallery/'.$postImage->source) }}" class="{{ $index == 0 ? 'first-image' : 'hidden' }}" data-fancybox="gallery.{{$post->id}}"><img src="{{ url('user/gallery/'.$postImage->source) }}"  title="{{ $post->user->name }}" alt="{{ $post->user->name }}"></a>
+                                <a href="{{ url('user/gallery/'.$postImage->source) }}" class="{{ $index == 0 ? 'first-image' : 'hidden' }}" data-fancybox="gallery.{{$post->id}}"><img src="{{ url('user/gallery/'.$postImage->source) }}"  title="{{ $post->user->name }}" alt=""></a>
                             @endif
                         @endforeach
                     </div>

@@ -370,7 +370,7 @@
                         @if(isset($user) && !$user->followers->contains(Auth::user()->id) && $user->id != Auth::user()->id && $user->price > 0 )
                             <div class="post-image-holder post-locked  single-image">
                                 {{--                <a><img src="{{ url('user/gallery/locked.jpg') }}"  title="{{ $post->user->name }}" alt="{{ $post->user->name }}" onclick="$('#myModal').modal('show')"></a>--}}
-                                <a><img src="{{ url('user/gallery/locked.png') }}"  title="{{ $post->user->name }}" alt="{{ $post->user->name }}"></a>
+                                <a><img src="{{ url('user/gallery/locked.png') }}"  title="{{ $post->user->name }}" alt=""></a>
 
                                 <!-- Modal -->
                                 <div class="modal fade" id="myModal" role="dialog">
@@ -400,7 +400,7 @@
 
                                 @foreach($post->images()->get() as $postImage)
                                     @if($postImage->type=='image')
-                                        <a href="{{ url('user/gallery/'.$postImage->source) }}" data-fancybox="galleryCondensed.{{$post->id}}"  ><img src="{{ url('user/gallery/'.$postImage->source) }}"  title="{{ $post->user->name }}" alt="{{ $post->user->name }}"></a>
+                                        <a href="{{ url('user/gallery/'.$postImage->source) }}" data-fancybox="galleryCondensed.{{$post->id}}"  ><img src="{{ url('user/gallery/'.$postImage->source) }}"  title="{{ $post->user->name }}" alt=""></a>
                                     @endif
                                 @endforeach
                             </div>
@@ -593,7 +593,7 @@
                     @if(isset($user) && !$user->followers->contains(Auth::user()->id) && $user->id != Auth::user()->id && $user->price > 0 )
                         <div class="post-image-holder post-locked  single-image">
                             {{--                <a><img src="{{ url('user/gallery/locked.jpg') }}"  title="{{ $post->user->name }}" alt="{{ $post->user->name }}" onclick="$('#myModal').modal('show')"></a>--}}
-                            <a><img src="{{ url('user/gallery/locked.png') }}"  title="{{ $post->user->name }}" alt="{{ $post->user->name }}"></a>
+                            <a><img src="{{ url('user/gallery/locked.png') }}"  title="{{ $post->user->name }}" alt=""></a>
 
                             <!-- Modal -->
                             <div class="modal fade" id="myModal" role="dialog">
@@ -623,7 +623,7 @@
 
                             @foreach($post->images()->get() as $postImage)
                                 @if($postImage->type=='image')
-                                    <a href="{{ url('user/gallery/'.$postImage->source) }}" data-fancybox="galleryCondensed.{{$post->id}}" ><img src="{{ url('user/gallery/'.$postImage->source) }}"  title="{{ $post->user->name }}" alt="{{ $post->user->name }}"></a>
+                                    <a href="{{ url('user/gallery/'.$postImage->source) }}" data-fancybox="galleryCondensed.{{$post->id}}" ><img src="{{ url('user/gallery/'.$postImage->source) }}"  title="{{ $post->user->name }}" alt=""></a>
                                 @endif
                             @endforeach
                         </div>

@@ -1,4 +1,4 @@
-@if(canUserSeePost(Auth::id(), $post->user->id) || Auth::user()->PurchasedPostsArr->contains($post->id))
+@applyif(canUserSeePost(Auth::id(), $post->user->id) || Auth::user()->PurchasedPostsArr->contains($post->id))
 @if($post->type != \App\Post::PRICE_TYPE)
     @if(!$post->images->isEmpty() && $post->images->first()->type == 'image')
         <div class="grid-item">
@@ -77,7 +77,7 @@
             <div class="post-image-holder @if(count($post->images()->get()) == 1) single-image @else multiple-images @endif">
                 @if($post->images->first()->type=='image')
                     <a href="#" data-toggle="modal" data-target="#postDetail{{ $post->id }}">
-                        <img src="{{ url('user/gallery/'.$post->images->first()->source) }}"  title="{{ $post->user->name }}" alt="{{ $post->user->name }}">
+                      <img src="{{ url('user/gallery/'.$post->images->first()->source) }}"  title="{{ $post->user->name }}" alt="">
                     </a>
                 @endif
             </div>
