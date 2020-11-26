@@ -85,8 +85,35 @@
         </script>
         {!! Theme::asset()->container('footer')->scripts() !!}
 
+        <div id="global-modal-placeholder" class="modal fade" tabindex="1" role="dialog"></div> <!-- MODAL -->
+
 {{--
 --}}
+<script type="application/javascript">
+$(document).ready(function () {
+
+  // Site-wide generic handler for opening a modal
+  $(document).on('click', '.tag-clickme_to_open_modal.tag-global_modal', function (e) {
+    e.preventDefault();
+    var context = $(this);
+    var url = context.attr('href');
+    var payload = {};
+    $.getJSON(url, payload, function(response) {
+      $('#global-modal-placeholder').html(response.html);
+      $('#global-modal-placeholder').modal('toggle');
+      /*
+      if ( response.hasOwnProperty('cb_func') ) {
+      }
+      */
+    });
+    return false;
+  });
+
+  $('body .follow-user').click(); // DEBUG
+
+});
+</script>
+
 <script src="/themes/default/assets/js/currency.min.js"></script>
 <script src="{{ asset('js/app/tippingUtils.js') }}"></script>
 

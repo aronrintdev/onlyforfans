@@ -799,9 +799,18 @@ $(function () {
                     notify(data.message, 'error');
                 }
             });
-        }
-        else {
-            let timeline_id = $(this);
+        } else {
+          let timeline_id = $(this);
+          // (1) show new modal (only if follow to on?)
+          const url = SP_source() + `ajax/timeline-render-modal?template=_subscribe_confirm`;
+          $.getJSON(url, function(response) {
+            $('#global-modal-placeholder').html(response.html);
+            $('#global-modal-placeholder').modal('toggle');
+          });
+          // (2) toggle follow
+            
+
+          /* %PSG: remove, Stripe-related
             $.post(SP_source() + 'checkout/config/' + $(this).data('timeline-id'), {}, function(data) {
                 stripe = Stripe(data.publicKey, {
                     stripeAccount: data.stripe_id
@@ -827,13 +836,14 @@ $(function () {
                                 }
                                 follow_btn.find('a.unfollow').closest('.holder').slideToggle();
                             }
-                        });
-                    });
-                });
+                        }); // $.post (3)
+                    }); // .then
+                }); // $.post (2)
+            }); // $.post (1)
+            */
+        } // if-else
 
-
-            });
-        }
+        return false;
     });
 
     $('body').on('click','.unfollow',function(e){

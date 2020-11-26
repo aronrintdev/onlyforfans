@@ -466,9 +466,12 @@ Route::group(['prefix' => '/{username}/event-settings', 'middleware' => ['auth',
 Route::group(['prefix' => 'ajax', 'middleware' => ['auth']], function () {
     Route::post('create-post', 'TimelineController@createPost');
 
+    Route::get('timeline-render-modal', 'TimelineController@renderModal'); // %PSG
+
     Route::post('get-youtube-video', 'TimelineController@getYoutubeVideo');
     Route::post('like-post', 'TimelineController@likePost');
     Route::post('follow-post-free', 'TimelineController@followFreeUser');
+    Route::post('follow-post', 'TimelineController@follow'); // %PSG
     Route::post('unfollow-post-free', 'TimelineController@unfollowFreeUser');
     Route::post('unfollow-post/', 'TimelineController@unfollow');
     Route::post('notify-user', 'TimelineController@getNotifications');

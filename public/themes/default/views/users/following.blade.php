@@ -1,5 +1,6 @@
 <!-- main-section -->
 
+<!-- %VIEW: themes/default/views/users/following -->
 <div class="container">
 	<div class="row">
 		<div class="col-md-12">
@@ -46,7 +47,6 @@
 												<div class="side-right follow-links">
 													@if(!$user->following->contains($follow->id))
 													<div class="left-col"><a href="#" class="btn btn-to-follow btn-default follow-user follow" data-price="{{ $follow->price }}"  data-timeline-id="{{ $follow->timeline_id }}"><i class="fa fa-heart"></i> {{ trans('common.follow') }} </a></div>
-
 													<div class="left-col hidden"><a href="#" class="btn btn-success unfollow " data-price="{{ $follow->price }}" data-timeline-id="{{ $follow->timeline_id }}"><i class="fa fa-check"></i>{{ trans('common.following') }}</a></div>
 													@else
 													<div class="left-col hidden"><a href="#" class="btn btn-to-follow btn-default follow-user follow " data-price="{{ $follow->price }}"  data-timeline-id="{{ $follow->timeline_id }}"><i class="fa fa-heart"></i> {{ trans('common.follow') }}</a></div>
