@@ -1,9 +1,9 @@
 <!-- %VIEW: themes/default/partials/user-leftbar -->
-    @if (        
+@if (        
         ($timeline->type == 'user' && $timeline->id == Auth::user()->timeline_id) ||
         ($timeline->type == 'page' && $timeline->page->is_admin(Auth::user()->id) == true) ||
         ($timeline->type == 'group' && $timeline->groups->is_admin(Auth::user()->id) == true)
-        )
+)
 @endif
 
 <div class="user-bio-block follow-links">
@@ -206,9 +206,7 @@
         <div class="favourite-grid row">
         @foreach($favouritePosts as $index => $post)
             <div class="col-sm-4 col-6">
-                <div class="img">
-					{!! Theme::partial('explore_posts',compact('post','timeline','next_page_url', 'audio')) !!}
-                </div>
+                <div class="img"> {!! Theme::partial('explore_posts',compact('post','timeline','next_page_url', 'audio')) !!}</div>
             </div>
             @if($index > 4)
                 @break
