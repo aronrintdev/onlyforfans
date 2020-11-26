@@ -51,8 +51,14 @@ Thumbs.db
 composer.lock
 vendor/
 storage/framework/views
-storage/uploads/users/gallery
+storage/uploads
+storage/uploads/
+storage/uploads/*
 storage/app/purifier
+storage/app/public
+storage/logs
+storage/debugbar
+
 bootstrap/cache/services.php
 
 dot-env.txt
@@ -60,7 +66,6 @@ dot-env.txt
 *.vim
 CMD.txt
 
-storage/debugbar
 __MACOSX
 
 *.txt
