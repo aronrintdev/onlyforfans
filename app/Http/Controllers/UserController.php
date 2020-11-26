@@ -868,7 +868,13 @@ class UserController extends AppBaseController
         $payment = $user->payment;
         $stripe_price_id = null;
         $stripe_customer_id = null;
-        $price = isset($input['subscribe_price']) ? $input['subscribe_price'] : 0;
+        if ( array_key_exists('subcribe_price', $input) ) {
+            $price = $input['subscribe_price'];
+        } else if ( array_key_exists('subscribe_price_month', $input) ) {
+            $price = $input['subscribe_price_month']; // %PSG workaround
+        } else {
+            $price = 0; // default
+        }
 
         $username = $user->timeline->username;
         if ($payment != NULL) {
