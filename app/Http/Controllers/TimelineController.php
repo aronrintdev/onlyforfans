@@ -3330,4 +3330,38 @@ class TimelineController extends AppBaseController
         App::setLocale($request->language);
         return response()->json(['status' => '200', 'message' => 'Switched language to '.$request->language, 'url' => redirect()->back()->getTargetUrl()]);
     }
+
+
+    // ---
+
+    public function renderModal(Request $request)
+    {
+        //return response()->json(['status' => '200', 'message' => 'Switched language to '.$request->language, 'url' => redirect()->back()->getTargetUrl()]);
+        if ( !\Request::ajax() ) {
+            \App::abort(400, 'Requires AJAX');
+        }
+        /*
+        $obj = Project::where('guid',$guid)->first();
+        if ( empty($obj) ) {
+            throw new ModelNotFoundException('Could not find Project with guid '.$guid);
+        }
+         */
+
+        switch ($request->template) {
+            case '_subscribe_confirm':
+                $timelineId = $request->timeline_id;
+                $timeline = Timeline::find($timelineId);
+                $html = \View::make('timelines._subscribe_confirm', [
+                    'timeline' => $timeline,
+                ])->render();
+                break;
+            default:
+                throw new \Exception('Unrecognized template: '.$request->template);
+        }
+        return \Response::json([
+            'html' => $html,
+        ]);
+    }
+
+
 }

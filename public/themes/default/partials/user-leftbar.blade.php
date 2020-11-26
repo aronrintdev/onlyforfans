@@ -1,26 +1,28 @@
-    @if (        
+<!-- %VIEW: themes/default/partials/user-leftbar -->
+@if (        
         ($timeline->type == 'user' && $timeline->id == Auth::user()->timeline_id) ||
         ($timeline->type == 'page' && $timeline->page->is_admin(Auth::user()->id) == true) ||
         ($timeline->type == 'group' && $timeline->groups->is_admin(Auth::user()->id) == true)
-        )
+)
 @endif
+
 <div class="user-bio-block follow-links">
     @if($user->id != Auth::user()->id)
     <div class="online">
         <div class="bio-header">Message</div>
-	    <div class="bio-description">
+        <div class="bio-description">
             @if(canMessageToUser(Auth::user(), $user))
-    			<a href="#" class="btn btn-submit btn-success" style="display:block; margin-top:10px;" onClick="chatBoxes.sendMessage({{ $timeline->user->id }})">
+    			  <a href="#" class="btn btn-submit btn-success" style="display:block; margin-top:10px;" onClick="chatBoxes.sendMessage({{ $timeline->user->id }})">
     				<i class="fa fa-inbox"></i> {{ trans('common.message') }}
-    			</a>
+    			  </a>
             @endif
-	    </div>
+        </div>
     </div>
     @endif
     @if($user->is_follow_for_free && $user->id != Auth::user()->id)
     <div class="follow">
         <div class="bio-header">Follow</div>
-	    <div class="bio-description">
+        <div class="bio-description">
             @if(!$user->followers->contains(Auth::user()->id))
             <div class="follow-btn">
                 <a href="javascript:void(0);" class="btn btn-submit btn-success follow-user follow" style="display:block;" data-price="{{ $user->price }}" data-follow="1"  data-timeline-id="{{ $timeline->id }}">
@@ -53,7 +55,7 @@
 	    <div class="bio-description">
 			@if(!$user->followers->contains(Auth::user()->id))
 				<div class="left-col">
-					<a href="javascript:void(0);" class="btn btn-submit btn-success follow-user follow" style="display:block;" data-price="{{ $user->price }}"  data-timeline-id="{{ $timeline->id }}">
+					<a href="javascript:void(0);" class="btn btn-submit btn-success OFF-follow-user follow clickme_to-show_follow_confirm" style="display:block;" data-price="{{ $user->price }}"  data-timeline-id="{{ $timeline->id }}">
 						<i class="fa fa-heart"></i> {{ trans('common.follow') }}
 					</a>
 				</div>
@@ -90,9 +92,11 @@
         </div>
     @endif
 
+@if( $user->isAboutSet() )
 	<div class="bio-description">
 		{{ ($user->about != NULL) ? $user->about : trans('messages.no_description') }}
 	</div>
+@endif
 	
 	@if($user->wishlist)
     	<a id="wishlist" target="_blank" href="{{ $user->wishlist }}">{{ $user->wishlist }}</a><br>
@@ -178,6 +182,8 @@
 		@endif
 	</ul>
 </div>
+
+
 <form class="change-avatar-form hidden" action="{{ url('ajax/change-avatar') }}" method="post" enctype="multipart/form-data">
 	<input name="timeline_id" value="{{ $timeline->id }}" type="hidden">
 	<input name="timeline_type" value="{{ $timeline->type }}" type="hidden">
@@ -194,17 +200,13 @@
 	</div>	
 	@endif
 
-	<?php
-	$audio = true;
-	?>
+	<?php $audio = true; ?>
 	
     @if(isset($favouritePosts) && count($favouritePosts) > 0)
         <div class="favourite-grid row">
         @foreach($favouritePosts as $index => $post)
             <div class="col-sm-4 col-6">
-                <div class="img">
-					{!! Theme::partial('explore_posts',compact('post','timeline','next_page_url', 'audio')) !!}
-                </div>
+                <div class="img"> {!! Theme::partial('explore_posts',compact('post','timeline','next_page_url', 'audio')) !!}</div>
             </div>
             @if($index > 4)
                 @break

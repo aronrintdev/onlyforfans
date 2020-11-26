@@ -1,3 +1,4 @@
+<!-- %VIEW: themes/default/partials/create-post -->
 <style>
     .panel-create .panel-heading {
         display: flex;
@@ -82,16 +83,16 @@
                     <ul class="dropdown-menu">
                         <li class="main-link">
                             <a href="#">
-                                <div>
-                                    <input type="radio" value="free" id="free" name="type" checked class="post-type-item">
-                                    <label for="free">Free</label>
-                                </div>
-                            </a>
-                            <a href="#">
                                     <div>
-                                        <input type="radio" value="paid" id="paid" name="type" class="post-type-item">
+                                        <input type="radio" value="paid" id="paid" name="type" checked class="post-type-item">
                                         <label for="paid">For Subscribers</label>
                                     </div>
+                            </a>
+                            <a href="#">
+                                <div>
+                                    <input type="radio" value="free" id="free" name="type" class="post-type-item">
+                                    <label for="free">Free</label>
+                                </div>
                             </a>
                             <a href="#">
                                 <div>

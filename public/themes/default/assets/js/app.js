@@ -225,47 +225,6 @@ $(function () {
         });
     });
 
-    $(document).on("input", "#etTipAmount, .etTipAmount", function() {
-        var myLength = $(this).val().length;
-        if (myLength > 0)
-            $(this).closest(".tip-modal").find('#sendTip').removeAttr("disabled");
-        else
-            $(this).closest(".tip-modal").find('#sendTip').attr("disabled", "disabled");
-    });
-
-    $(document).on('click', ".sendTip", function () {
-        let modal = $(this).closest('.tip-modal');
-
-        $.post(SP_source() + 'ajax/send-tip-post', {post_id: modal.find("#post-id").val(), amount: modal.find("#etTipAmount").val(), note: modal.find('#tipNote').val()}, function(data) {
-
-            if (data.status == 200) {
-
-                notify(data.message,'success');
-                modal.modal("hide");
-                // location.reload(); TODO: Not needed
-            }
-            else {
-
-            }
-        });
-    });
-
-    $(document).on('click', ".sendUserTip", function () {
-        let modal = $(this).closest('.tip-modal');
-
-        $.post(SP_source() + 'ajax/send-tip-user', {user_id: modal.find("#user-id").val(), amount: modal.find("#etTipAmount").val(), note: modal.find('#tipNote').val()}, function(data) {
-
-            if (data.status == 200) {
-
-                notify(data.message,'success');
-                modal.modal("hide");
-                // location.reload(); TODO: Not needed
-            }
-            else {
-
-            }
-        });
-    });
 
     $("input[name = 'sort-lists']").change(function() {
 
@@ -820,13 +779,26 @@ $(function () {
      */
     let stripe;
     // Follow/UnFollow the timeline user  by  logged user
-    $('body').on('click','.follow-user',function(e){
+    $(document).on('click','body .clickme_to-show_follow_confirm',function(e){
         e.preventDefault();
+        var timelineId = $(this).data('timeline-id');
+        // show new modal (only if follow to on?)
+        const url = SP_source() + `ajax/timeline-render-modal?template=_subscribe_confirm&timeline_id=${timelineId}`;
+        $.getJSON(url, function(response) {
+          $('#global-modal-placeholder').html(response.html);
+          $('#global-modal-placeholder').modal('toggle');
+        });
+    });
 
-        if ($(this).data('price') == "0.00" || $(this).data('follow') == 1) {
+    $(document).on('click','body .follow-user',function(e){
+        e.preventDefault();
+        var timelineId = $(this).data('timeline-id');
+
+        if (true || $(this).data('price') == "0.00" || $(this).data('follow') == 1) { // %PSG just do free follow for now
             follow_btn = $(this).closest('.follow-links');
             $.post(SP_source() + 'ajax/follow-post-free', {timeline_id: $(this).data('timeline-id')}, function(data) {
                 if (data.status == 200) {
+                  /*
                     if (data.followed == true) {
                         follow_btn.find('a.follow').parent().addClass('hidden');
                         follow_btn.find('a.unfollow').parent().removeClass('hidden');
@@ -835,14 +807,27 @@ $(function () {
                         follow_btn.find('a.unfollow').parent().addClass('hidden');
                     }
                     follow_btn.find('a.unfollow').closest('.holder').slideToggle();
+                    */
+                    window.location.reload(false); 
                 }
                 if (data.status == 422) {
                     notify(data.message, 'error');
                 }
             });
-        }
-        else {
-            let timeline_id = $(this);
+        } else {
+          let timeline_id = $(this);
+          /*
+          // (1) show new modal (only if follow to on?)
+          const url = SP_source() + `ajax/timeline-render-modal?template=_subscribe_confirm&timeline_id=${timelineId}`;
+          $.getJSON(url, function(response) {
+            $('#global-modal-placeholder').html(response.html);
+            $('#global-modal-placeholder').modal('toggle');
+          });
+          // (2) toggle follow
+          */
+            
+
+          /* %PSG: remove, Stripe-related
             $.post(SP_source() + 'checkout/config/' + $(this).data('timeline-id'), {}, function(data) {
                 stripe = Stripe(data.publicKey, {
                     stripeAccount: data.stripe_id
@@ -868,13 +853,14 @@ $(function () {
                                 }
                                 follow_btn.find('a.unfollow').closest('.holder').slideToggle();
                             }
-                        });
-                    });
-                });
+                        }); // $.post (3)
+                    }); // .then
+                }); // $.post (2)
+            }); // $.post (1)
+            */
+        } // if-else
 
-
-            });
-        }
+        return false;
     });
 
     $('body').on('click','.unfollow',function(e){
@@ -886,6 +872,7 @@ $(function () {
             $.post(SP_source() + 'ajax/unfollow-post-free', {timeline_id: $(this).data('timeline-id')}, function(data) {
                 $('.unfollow').css('opacity','1').attr('disabled', false);
                 if (data.status == 200) {
+                  /*
                     if (data.followed == true) {
                         follow_btn.find('.follow').parent().addClass('hidden');
                         follow_btn.find('.unfollow').parent().removeClass('hidden');
@@ -894,6 +881,8 @@ $(function () {
                         follow_btn.find('.unfollow').parent().addClass('hidden');
                     }
                     follow_btn.find('.unfollow').closest('.holder').slideToggle();
+                    */
+                    window.location.reload(false); 
                 }
             });
         }
@@ -901,6 +890,7 @@ $(function () {
             follow_btn = $(this).closest('.follow-links');
             $.post(SP_source() + 'ajax/unfollow-post', {timeline_id: $(this).data('timeline-id')}, function(data) {
                 if (data.status == 200) {
+                  /*
                     if (data.followed == true) {
                         follow_btn.find('.follow').parent().addClass('hidden');
                         follow_btn.find('.unfollow').parent().removeClass('hidden');
@@ -909,6 +899,8 @@ $(function () {
                         follow_btn.find('.unfollow').parent().addClass('hidden');
                     }
                     follow_btn.find('.unfollow').closest('.holder').slideToggle();
+                    */
+                    window.location.reload(false); 
                 }
             });
         }
@@ -1170,6 +1162,28 @@ $(function () {
                 }
             }
         });
+    });
+
+    // %PSG: block a user
+    $(document).on('click', '.user-block', function(e){
+      e.preventDefault();
+      const context = $(this).closest('.pagelike-links');
+      const sessionUser = context.data('session_user');
+      const payload = {
+        blockee_id: $(this).data('blockee_id'),
+      };
+      // 'ajax' is just filler for the {username} param, which is unused for this op
+      const url = SP_source() + `${sessionUser}/settings/block-profile`;
+      $.post(url, payload, function(data) {
+        if (data.is_blocked) {
+          context.find('.block').parent().addClass('hidden');
+          context.find('.blocked').parent().removeClass('hidden');
+        } else {
+          context.find('.block').parent().removeClass('hidden');
+          context.find('.blocked').parent().addClass('hidden');
+        }
+        notify(data.message);
+      });
     });
 
     // Comment Like/Liked the timeline user  by  logged user

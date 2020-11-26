@@ -226,6 +226,7 @@ return [
     'report'                            => 'Report',
     'reported'                          => 'Reported',
     'block'                             => 'Block',
+    'unblock'                           => 'Unblock',
     'blocked'                           => 'Blocked',
     'page_likes'                        => 'Page Likes',
     'name_of_your_page'                 => 'Name of your page',

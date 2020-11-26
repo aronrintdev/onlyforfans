@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+    <!-- %VIEW: public/themes/default/layout/default.blade.php -->
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -29,7 +30,8 @@
         <link href="//vjs.zencdn.net/7.8.2/video-js.min.css" rel="stylesheet">
         <link href="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" rel="stylesheet">
 
-        {!! Theme::asset()->styles() !!}
+        {{-- {!! Theme::asset()->styles() !!} --}}
+        <link href="/themes/default/assets/css/style.0e3cfe20bb993fe353da4e0c3fa3b356.css" rel="stylesheet">
 
         <script type="text/javascript">
         function SP_source() {
@@ -82,6 +84,39 @@
             });
         </script>
         {!! Theme::asset()->container('footer')->scripts() !!}
+
+        <div id="global-modal-placeholder" class="modal fade" tabindex="1" role="dialog"></div> <!-- MODAL -->
+
+{{--
+--}}
+<script type="application/javascript">
+$(document).ready(function () {
+
+  // Site-wide generic handler for opening a modal
+  $(document).on('click', '.tag-clickme_to_open_modal.tag-global_modal', function (e) {
+    e.preventDefault();
+    var context = $(this);
+    var url = context.attr('href');
+    var payload = {};
+    $.getJSON(url, payload, function(response) {
+      $('#global-modal-placeholder').html(response.html);
+      $('#global-modal-placeholder').modal('toggle');
+      /*
+      if ( response.hasOwnProperty('cb_func') ) {
+      }
+      */
+    });
+    return false;
+  });
+
+  //$('body .follow-user').click(); // DEBUG
+
+});
+</script>
+
+<script src="/themes/default/assets/js/currency.min.js"></script>
+<script src="{{ asset('js/app/tippingUtils.js') }}"></script>
+
 
     </body>   
 

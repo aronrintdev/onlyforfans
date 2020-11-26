@@ -43,6 +43,8 @@
         width: 130px;
     }
 </style>
+
+<!-- %VIEW: public/themes/default/views/users/settings/privacy -->
 <div class="container">
     <div class="row">
         <div class="col-md-4">

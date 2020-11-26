@@ -120,7 +120,7 @@ class RegisterController extends Controller
             'username' => $_GET['username'],
             'name'     => $_GET['fullname'],
             'type'     => 'user',
-            'about'    => 'No information about this user yet.'
+            'about'    => '',
         ]);
 
         $user = User::create([
@@ -241,7 +241,7 @@ class RegisterController extends Controller
             'username' => $request->username,
             'name'     => $request->name,
             'type'     => 'user',
-            'about'    => 'No information about this user yet.'
+            'about'    => '',
             ]);
         if(Setting::get('mail_verification') == 'off')
         {

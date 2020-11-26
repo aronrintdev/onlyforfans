@@ -1,3 +1,4 @@
+<!-- %VIEW: themes/default/paritals/explore_posts_detail --> 
 <div id="postDetail{{ $post->id }}" class="modal fade post-detail-modal" role="dialog" tabindex='-1'>
     <div class="modal-dialog">
 
@@ -604,7 +605,7 @@
                     <div class="panel-footer">
                         <a href="#" id="cancelSendTip" class="text-primary btn" data-dismiss="modal">{{ trans('common.cancel') }}</a>
                         @if(Auth::user()->is_payment_set)
-                            <button type="button" id="sendTip" class="btn btn-primary sendTip" disabled>{{ trans('common.apply') }}</button>
+                            <button type="button" id="sendTip" class="btn btn-primary sendTip" disabled>{{ trans('common.send_tip') }}</button>
                         @else
                             <a href="{{url(Auth::user()->username).'/settings/addpayment' }}" id="addPayment" style="width: auto" class="btn btn-warning">{{ trans('common.add_payment') }}</a>
                         @endif

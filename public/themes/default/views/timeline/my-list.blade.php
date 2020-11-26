@@ -356,37 +356,6 @@
 		evt.currentTarget.className += " active";
 	}
     
-    $('span.decrement').click(function () {
-        let input = $(this).siblings('input.filter-input');
-        let val = input.val() != '' ? parseFloat(input.val()) : 0;
-        
-        if (val != NaN) {
-            if (input.data('id') == 1) {
-                input.val((val - 100) < 0 ? 0 : (val - 100)).trigger('keyup');
-            } else if(input.data('id') == 2) {
-                input.val((val - 10) < 0 ? 0 : (val - 10)).trigger('keyup');
-            } else {
-                input.val((val - 1) < 0 ? 0 : (val - 1)).trigger('keyup');
-            }
-            
-        }
-    });
-    
-    $('span.increment').click(function () {
-        let input = $(this).siblings('input.filter-input');
-        let val = input.val() != '' ? parseFloat(input.val()) : 0;
-        if (val != NaN) {
-            if (input.data('id') == 1) {
-                input.val(val + 100).trigger('keyup');    
-            } else if(input.data('id') == 2) {
-                input.val(val + 10).trigger('keyup');
-            } else if(input.data('id') == 3) {
-                input.val((val + 1) > 12 ? val : (val + 1)).trigger('keyup');
-            } else if(input.data('id') == 4) {
-                input.val((val + 1) > 30 ? val : (val + 1)).trigger('keyup');
-            }                
-        }        
-    });
     
     $(document).on('click', '#applyFilter', function () {
         const modal = $('#subscriberFilterModal');
@@ -442,21 +411,4 @@
         lastActiveFilter.prop('checked', true);
     });    
     
-    $(document).on('keyup', '.filter-input', function () {
-       let activeFilter = $(this).closest('li').find('input[type="radio"]');
-        activeFilter.prop('checked', true);
-        let val = $(this).val() != '' ? parseFloat($(this).val()) : 0;
-        if($(this).data('id') == 1) {
-            $(this).next('.text-wrapper').text($(this).val() + ' USD');
-        }else if($(this).data('id') == 2) {
-            $(this).val(val > 200 ? 200 : val);
-            $(this).next('.text-wrapper').text($(this).val() + ' USD');
-        }else if($(this).data('id') == 3) {
-            $(this).val(val > 12 ? 12 : val);
-            $(this).next('.text-wrapper').text($(this).val() + ' Month');
-        } else if($(this).data('id') == 4) {
-            $(this).val(val > 30 ? 30 : val);
-            $(this).next('.text-wrapper').text($(this).val() + ' Day');
-        }
-    });
 </script>

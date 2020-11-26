@@ -246,8 +246,11 @@ function checkBlockedProfiles($username)
 
             $authUser = Auth::user();
             $clientIp = get_client_ip();
-            if (in_array(strtolower($authUser->country), array_map('strtolower', $countries)) || in_array($clientIp,
-                    $ipAddresses)) {
+            if ( 
+                 in_array(strtolower($authUser->country), array_map('strtolower', $countries)) 
+                 || in_array($clientIp, $ipAddresses)
+               ) 
+            {
                 return false;
             }
         }
@@ -259,22 +262,32 @@ function checkBlockedProfiles($username)
 function isBlockByMe($username)
 {
     $timeline = Timeline::where('username', $username)->first();
-    $user = Auth::user();
+    $sessionUser = Auth::user();
+
     if($timeline && Auth::check()) {
         $timelineUser = User::with('blockedProfiles')->where('timeline_id', $timeline['id'])->first();
-        if (Auth::user()->id != $timelineUser->id && $user->blockedProfiles->count()) {
-            $countries = array_filter($user->blockedProfiles->pluck('country')->toArray(), 'test_null');
-            $ipAddresses = array_filter($user->blockedProfiles->pluck('ip_address')->toArray(), 'test_null');
-
+        if (Auth::user()->id != $timelineUser->id && $sessionUser->blockedProfiles->count()) {
+            $countries = array_filter($sessionUser->blockedProfiles->pluck('country')->toArray(), 'test_null');
+            $ipAddresses = array_filter($sessionUser->blockedProfiles->pluck('ip_address')->toArray(), 'test_null');
             $clientIp = get_client_ip();
-            if (in_array(strtolower($timelineUser->country), array_map('strtolower', $countries)) || in_array($clientIp,
-                    $ipAddresses)) {
+            if (in_array(strtolower($timelineUser->country), array_map('strtolower', $countries)) || in_array($clientIp, $ipAddresses)) {
                 return true;
             }
         }
     }
 
-    return false;
+    // %PSG: if the above if false (not blocked), test for direct block...
+    $userToTest = $timeline->user;
+    if ($userToTest) {
+        $exists = BlockedProfile::where('blocked_by', $sessionUser->id)
+                    ->where('blockee_id', $userToTest->id)
+                    ->first();
+        if ($exists) {
+            return true; // blocked
+        }
+    }
+
+    return false; // not blocked
 }
 
 /**

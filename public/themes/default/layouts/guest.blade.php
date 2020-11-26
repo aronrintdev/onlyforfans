@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+    <!-- %VIEW: public/themes/default/layout/guest.blade.php -->
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -19,7 +20,8 @@
         <link href="{{ Theme::asset()->url('css/flag-icon.css') }}" rel="stylesheet">
         <link href="{{ Theme::asset()->url('css/custom.css') }}" rel="stylesheet">
         
-        {!! Theme::asset()->styles() !!}
+        {{-- {!! Theme::asset()->styles() !!} --}}
+        <link href="/themes/default/assets/css/style.0e3cfe20bb993fe353da4e0c3fa3b356.css" rel="stylesheet">
 
         <!--[if lt IE 9]>
             <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.2/html5shiv.min.js"></script>

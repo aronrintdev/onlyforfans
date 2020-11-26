@@ -868,7 +868,13 @@ class UserController extends AppBaseController
         $payment = $user->payment;
         $stripe_price_id = null;
         $stripe_customer_id = null;
-        $price = isset($input['subscribe_price']) ? $input['subscribe_price'] : 0;
+        if ( array_key_exists('subcribe_price', $input) ) {
+            $price = $input['subscribe_price'];
+        } else if ( array_key_exists('subscribe_price_month', $input) ) {
+            $price = $input['subscribe_price_month']; // %PSG workaround
+        } else {
+            $price = 0; // default
+        }
 
         $username = $user->timeline->username;
         if ($payment != NULL) {
@@ -1703,16 +1709,34 @@ class UserController extends AppBaseController
      *
      * @return JsonResponse
      */
-    public function blockProfile(BlockedProfileRequest $request)
+    public function blockProfile(BlockedProfileRequest $request, $username)
     {
-        try {
-            $data = $request->all();
-            $data['blocked_by'] = Auth::user()->id;
+        $sessionUser = Auth::user();
+        $data = $request->all();
+        $data['blocked_by'] = $sessionUser->id; // aka 'blocker'
+        $msg = 'Profile successfully added to blocked list.'; // default
+        $isBlocked = true; // default
+        //dd('block', $request->all());
 
-            BlockedProfile::create($data);
-            
-            return response()->json('Profile successfully added in blocked list.');
-        }catch(Exception $e){
+        try {
+            if ( $request->has('blockee_id') ) { // block specific user_id (new functionality), not IP address
+                $exists = BlockedProfile::where('blocked_by', $sessionUser->id)
+                            ->where('blockee_id', $request->blockee_id)
+                            ->first();
+                // Impl toggle
+                if ( $exists ) {  // unblock
+                    $exists->delete();
+                    $isBlocked = false;
+                    $msg = 'Profile successfully removed from blocked list.';
+                } else { // block
+                    BlockedProfile::create($data);
+                }
+            }
+            return response()->json([
+                'is_blocked' => $isBlocked,
+                'message' => $msg,
+            ]);
+        } catch (Exception $e) {
             throw new UnprocessableEntityHttpException($e->getMessage());
         }
     }

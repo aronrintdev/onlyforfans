@@ -9,6 +9,7 @@
 $main_description = $post->description;
 ?>
     
+<!-- %VIEW: themes/default/paritals/post --> 
 <div class="panel panel-default default-post panel-post animated post-wrapper-{{ $post->id }}" id="post{{ $post->id }}">
   <div class="panel-heading no-bg">
     <div class="post-author">
@@ -364,7 +365,7 @@ $main_description = $post->description;
                     @if(isset($user) && !$user->followers->contains(Auth::user()->id) && $user->id != Auth::user()->id && $user->price > 0 )
                         <div class="post-image-holder post-locked  single-image">
                             {{--                <a><img src="{{ url('user/gallery/locked.jpg') }}"  title="{{ $post->user->name }}" alt="{{ $post->user->name }}" onclick="$('#myModal').modal('show')"></a>--}}
-                            <a><img src="{{ url('user/gallery/locked.png') }}"  title="{{ $post->user->name }}" alt="{{ $post->user->name }}"></a>
+                            <a><img src="{{ url('user/gallery/locked.png') }}"  title="{{ $post->user->name }}" alt=""></a>
 
                             <div class="modal fade" id="myModal" role="dialog">
                                 <div class="modal-dialog">
@@ -392,7 +393,7 @@ $main_description = $post->description;
                             @foreach($post->images()->get() as $index => $postImage)
                                 @if($postImage->type=='image')
                                     <span class="{{ $index == 0 ? 'first-image' : 'hidden' }}" style="background-image: url({{ url('user/gallery/'.$post->images()->get()->first()->source) }}); height: 100%; width: 100%; position: absolute; filter: blur(4px); background-size: cover; z-index: 0; background-position: center;"></span>
-                                    <a href="{{ url('user/gallery/'.$postImage->source) }}" class="{{ $index == 0 ? 'first-image' : 'hidden' }}" data-fancybox="gallery.{{$post->id}}"><img src="{{ url('user/gallery/'.$postImage->source) }}"  title="{{ $post->user->name }}" alt="{{ $post->user->name }}"></a>
+                                    <a href="{{ url('user/gallery/'.$postImage->source) }}" class="{{ $index == 0 ? 'first-image' : 'hidden' }}" data-fancybox="gallery.{{$post->id}}"><img src="{{ url('user/gallery/'.$postImage->source) }}"  title="{{ $post->user->name }}" alt=""></a>
                                 @endif
                             @endforeach
                         </div>
@@ -611,7 +612,7 @@ $main_description = $post->description;
                         @foreach($post->images()->get() as $index => $postImage)
                             @if($postImage->type=='image')
                                 <span class="{{ $index == 0 ? 'first-image' : 'hidden' }}" style="background-image: url({{ url('user/gallery/'.$post->images()->get()->first()->source) }}); height: 100%; width: 100%; position: absolute; filter: blur(4px); background-size: cover; z-index: 0; background-position: center;"></span>
-                                <a href="{{ url('user/gallery/'.$postImage->source) }}" class="{{ $index == 0 ? 'first-image' : 'hidden' }}" data-fancybox="gallery.{{$post->id}}"><img src="{{ url('user/gallery/'.$postImage->source) }}"  title="{{ $post->user->name }}" alt="{{ $post->user->name }}"></a>
+                                <a href="{{ url('user/gallery/'.$postImage->source) }}" class="{{ $index == 0 ? 'first-image' : 'hidden' }}" data-fancybox="gallery.{{$post->id}}"><img src="{{ url('user/gallery/'.$postImage->source) }}"  title="{{ $post->user->name }}" alt=""></a>
                             @endif
                         @endforeach
                     </div>
@@ -836,7 +837,7 @@ $main_description = $post->description;
         <div class="modal-content">
             <div class="modal-header">
                 <h3 style="margin: 0;">Send a Tip</h3>
-                <button type="button" style="display: none;" class="close close-post-modal" data-dismiss="modal">&times;</button>
+                <button type="button" style="" class="close close-post-modal" data-dismiss="modal">&times;</button>
             </div>
             <div class="modal-body no-padding">
                 <div class="panel panel-default panel-post animated" style="margin-bottom: 0">
@@ -879,9 +880,9 @@ $main_description = $post->description;
                         <textarea name="tip_note" id="tipNote" cols="60" rows="5" style="width: 100%" placeholder="Write a message..."></textarea>
                     </div>
                     <div class="panel-footer">
-                        <a href="#" id="cancelSendTip" class="text-primary btn" data-dismiss="modal">{{ trans('common.cancel') }}</a>
+                      {{-- <a href="#" id="cancelSendTip" class="text-primary btn" data-dismiss="modal">{{ trans('common.cancel') }}</a> --}}
                         @if(Auth::user()->is_payment_set)
-                            <button type="button" id="sendTip" class="btn btn-primary sendTip" disabled>{{ trans('common.apply') }}</button>
+                            <button type="button" id="sendTip" class="btn btn-primary sendTip" >{{ trans('common.send_tip') }}</button>
                         @else
                             <a href="{{url(Auth::user()->username).'/settings/addpayment' }}" style="width: auto" id="addPayment" class="btn btn-warning">{{ trans('common.add_payment') }}</a>
                         @endif

@@ -1,3 +1,4 @@
+<!-- %VIEW: themes/default/paritals/post_condensed_column --> 
 <div class="{{ isset($twoColumn) && $twoColumn ? 'col-lg-6' : 'col-lg-4' }} col-sm-12">
     @if(isset($post->shared_post_id))
         <?php
@@ -231,10 +232,9 @@
 
                             @if($post->location != NULL && !isset($sharedOwner))
                                 {{ trans('common.at') }} <span class="post-place">
-              <a target="_blank" href="{{ url('/get-location/'.$post->location) }}">
-                <i class="fa fa-map-marker"></i> {{ $post->location }}
-              </a>
-              </span></li>
+                                  <a target="_blank" href="{{ url('/get-location/'.$post->location) }}"><i class="fa fa-map-marker"></i> {{ $post->location }}</a>
+                                </span>
+                        </li>
                         @endif
                     </ul>
                 </div>
@@ -370,7 +370,7 @@
                         @if(isset($user) && !$user->followers->contains(Auth::user()->id) && $user->id != Auth::user()->id && $user->price > 0 )
                             <div class="post-image-holder post-locked  single-image">
                                 {{--                <a><img src="{{ url('user/gallery/locked.jpg') }}"  title="{{ $post->user->name }}" alt="{{ $post->user->name }}" onclick="$('#myModal').modal('show')"></a>--}}
-                                <a><img src="{{ url('user/gallery/locked.png') }}"  title="{{ $post->user->name }}" alt="{{ $post->user->name }}"></a>
+                                <a><img src="{{ url('user/gallery/locked.png') }}"  title="{{ $post->user->name }}" alt=""></a>
 
                                 <!-- Modal -->
                                 <div class="modal fade" id="myModal" role="dialog">
@@ -400,7 +400,7 @@
 
                                 @foreach($post->images()->get() as $postImage)
                                     @if($postImage->type=='image')
-                                        <a href="{{ url('user/gallery/'.$postImage->source) }}" data-fancybox="galleryCondensed.{{$post->id}}"  ><img src="{{ url('user/gallery/'.$postImage->source) }}"  title="{{ $post->user->name }}" alt="{{ $post->user->name }}"></a>
+                                        <a href="{{ url('user/gallery/'.$postImage->source) }}" data-fancybox="galleryCondensed.{{$post->id}}"  ><img src="{{ url('user/gallery/'.$postImage->source) }}"  title="{{ $post->user->name }}" alt=""></a>
                                     @endif
                                 @endforeach
                             </div>
@@ -593,7 +593,7 @@
                     @if(isset($user) && !$user->followers->contains(Auth::user()->id) && $user->id != Auth::user()->id && $user->price > 0 )
                         <div class="post-image-holder post-locked  single-image">
                             {{--                <a><img src="{{ url('user/gallery/locked.jpg') }}"  title="{{ $post->user->name }}" alt="{{ $post->user->name }}" onclick="$('#myModal').modal('show')"></a>--}}
-                            <a><img src="{{ url('user/gallery/locked.png') }}"  title="{{ $post->user->name }}" alt="{{ $post->user->name }}"></a>
+                            <a><img src="{{ url('user/gallery/locked.png') }}"  title="{{ $post->user->name }}" alt=""></a>
 
                             <!-- Modal -->
                             <div class="modal fade" id="myModal" role="dialog">
@@ -623,7 +623,7 @@
 
                             @foreach($post->images()->get() as $postImage)
                                 @if($postImage->type=='image')
-                                    <a href="{{ url('user/gallery/'.$postImage->source) }}" data-fancybox="galleryCondensed.{{$post->id}}" ><img src="{{ url('user/gallery/'.$postImage->source) }}"  title="{{ $post->user->name }}" alt="{{ $post->user->name }}"></a>
+                                    <a href="{{ url('user/gallery/'.$postImage->source) }}" data-fancybox="galleryCondensed.{{$post->id}}" ><img src="{{ url('user/gallery/'.$postImage->source) }}"  title="{{ $post->user->name }}" alt=""></a>
                                 @endif
                             @endforeach
                         </div>
@@ -840,7 +840,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h3 style="margin: 0;">Send a Tip</h3>
-                    <button type="button" style="display: none;" class="close close-post-modal" data-dismiss="modal">&times;</button>
+                    <button type="button" style="" class="close close-post-modal" data-dismiss="modal">&times;</button>
                 </div>
                 <div class="modal-body no-padding">
                     <div class="panel panel-default panel-post animated" style="margin-bottom: 0">
@@ -883,9 +883,8 @@
                             <textarea name="tip_note" id="tipNote" cols="60" rows="5" style="width: 100%" placeholder="Write a message..."></textarea>
                         </div>
                         <div class="panel-footer">
-                            <a href="#" id="cancelSendTip" class="text-primary btn" data-dismiss="modal">{{ trans('common.cancel') }}</a>
                             @if(Auth::user()->is_payment_set)
-                                <button type="button" id="sendTip" class="btn btn-primary sendTip" disabled>{{ trans('common.apply') }}</button>
+                                <button type="button" id="sendTip" class="btn btn-primary sendTip" >{{ trans('common.send_tip') }}</button>
                             @else
                                 <a href="{{url(Auth::user()->username).'/settings/addpayment' }}" style="width: auto" id="addPayment" class="btn btn-warning">{{ trans('common.add_payment') }}</a>
                             @endif
