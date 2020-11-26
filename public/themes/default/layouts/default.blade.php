@@ -109,7 +109,7 @@ $(document).ready(function () {
     return false;
   });
 
-  $('body .follow-user').click(); // DEBUG
+  //$('body .follow-user').click(); // DEBUG
 
 });
 </script>

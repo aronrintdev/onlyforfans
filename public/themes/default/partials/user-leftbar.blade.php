@@ -55,7 +55,7 @@
 	    <div class="bio-description">
 			@if(!$user->followers->contains(Auth::user()->id))
 				<div class="left-col">
-					<a href="javascript:void(0);" class="btn btn-submit btn-success follow-user follow" style="display:block;" data-price="{{ $user->price }}"  data-timeline-id="{{ $timeline->id }}">
+					<a href="javascript:void(0);" class="btn btn-submit btn-success OFF-follow-user follow clickme_to-show_follow_confirm" style="display:block;" data-price="{{ $user->price }}"  data-timeline-id="{{ $timeline->id }}">
 						<i class="fa fa-heart"></i> {{ trans('common.follow') }}
 					</a>
 				</div>

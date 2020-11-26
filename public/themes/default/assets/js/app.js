@@ -779,13 +779,26 @@ $(function () {
      */
     let stripe;
     // Follow/UnFollow the timeline user  by  logged user
-    $('body').on('click','.follow-user',function(e){
+    $(document).on('click','body .clickme_to-show_follow_confirm',function(e){
         e.preventDefault();
+        var timelineId = $(this).data('timeline-id');
+        // show new modal (only if follow to on?)
+        const url = SP_source() + `ajax/timeline-render-modal?template=_subscribe_confirm&timeline_id=${timelineId}`;
+        $.getJSON(url, function(response) {
+          $('#global-modal-placeholder').html(response.html);
+          $('#global-modal-placeholder').modal('toggle');
+        });
+    });
 
-        if ($(this).data('price') == "0.00" || $(this).data('follow') == 1) {
+    $(document).on('click','body .follow-user',function(e){
+        e.preventDefault();
+        var timelineId = $(this).data('timeline-id');
+
+        if (true || $(this).data('price') == "0.00" || $(this).data('follow') == 1) { // %PSG just do free follow for now
             follow_btn = $(this).closest('.follow-links');
             $.post(SP_source() + 'ajax/follow-post-free', {timeline_id: $(this).data('timeline-id')}, function(data) {
                 if (data.status == 200) {
+                  /*
                     if (data.followed == true) {
                         follow_btn.find('a.follow').parent().addClass('hidden');
                         follow_btn.find('a.unfollow').parent().removeClass('hidden');
@@ -794,6 +807,8 @@ $(function () {
                         follow_btn.find('a.unfollow').parent().addClass('hidden');
                     }
                     follow_btn.find('a.unfollow').closest('.holder').slideToggle();
+                    */
+                    window.location.reload(false); 
                 }
                 if (data.status == 422) {
                     notify(data.message, 'error');
@@ -801,13 +816,15 @@ $(function () {
             });
         } else {
           let timeline_id = $(this);
+          /*
           // (1) show new modal (only if follow to on?)
-          const url = SP_source() + `ajax/timeline-render-modal?template=_subscribe_confirm`;
+          const url = SP_source() + `ajax/timeline-render-modal?template=_subscribe_confirm&timeline_id=${timelineId}`;
           $.getJSON(url, function(response) {
             $('#global-modal-placeholder').html(response.html);
             $('#global-modal-placeholder').modal('toggle');
           });
           // (2) toggle follow
+          */
             
 
           /* %PSG: remove, Stripe-related
@@ -855,6 +872,7 @@ $(function () {
             $.post(SP_source() + 'ajax/unfollow-post-free', {timeline_id: $(this).data('timeline-id')}, function(data) {
                 $('.unfollow').css('opacity','1').attr('disabled', false);
                 if (data.status == 200) {
+                  /*
                     if (data.followed == true) {
                         follow_btn.find('.follow').parent().addClass('hidden');
                         follow_btn.find('.unfollow').parent().removeClass('hidden');
@@ -863,6 +881,8 @@ $(function () {
                         follow_btn.find('.unfollow').parent().addClass('hidden');
                     }
                     follow_btn.find('.unfollow').closest('.holder').slideToggle();
+                    */
+                    window.location.reload(false); 
                 }
             });
         }
@@ -870,6 +890,7 @@ $(function () {
             follow_btn = $(this).closest('.follow-links');
             $.post(SP_source() + 'ajax/unfollow-post', {timeline_id: $(this).data('timeline-id')}, function(data) {
                 if (data.status == 200) {
+                  /*
                     if (data.followed == true) {
                         follow_btn.find('.follow').parent().addClass('hidden');
                         follow_btn.find('.unfollow').parent().removeClass('hidden');
@@ -878,6 +899,8 @@ $(function () {
                         follow_btn.find('.unfollow').parent().addClass('hidden');
                     }
                     follow_btn.find('.unfollow').closest('.holder').slideToggle();
+                    */
+                    window.location.reload(false); 
                 }
             });
         }

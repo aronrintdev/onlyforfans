@@ -3349,8 +3349,10 @@ class TimelineController extends AppBaseController
 
         switch ($request->template) {
             case '_subscribe_confirm':
+                $timelineId = $request->timeline_id;
+                $timeline = Timeline::find($timelineId);
                 $html = \View::make('timelines._subscribe_confirm', [
-                    'obj' => null, //$obj,
+                    'timeline' => $timeline,
                 ])->render();
                 break;
             default:

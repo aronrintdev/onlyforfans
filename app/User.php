@@ -640,10 +640,32 @@ class User extends Authenticatable
 
     // --- %%Extra --- 
 
-
     public function isAboutSet() {
         return ( !empty($this->timeline) && !empty($this->timeline->about) );
     }
 
+    public function renderLocation() {
+        $a = [];
+        if ( $this->city ) {
+            $a[] = $this->city;
+        }
+        if ( $this->country ) {
+            $a[] = $this->country;
+        }
+        return implode(', ', $a);
+    }
+
+    public function renderPostCount() {
+        return $this->posts()->where('active', 1)->count();
+    }
+    public function renderFollowersCount() {
+        return $this->followers()->count();
+    }
+    public function renderLikesCount() {
+        return $this->pageLikes()->count();
+    }
+    public function renderFansCount() {
+        return $this->pageLikes()->count();
+    }
 
 }
