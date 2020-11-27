@@ -55,7 +55,7 @@ return [
         // this event should call to assign some assets,
         // breadcrumb template.
         'beforeRenderTheme' => function ($theme) {
-            $theme->asset()->add('style', mix('themes/default/assets/js/main.js', ''));
+            $theme->asset()->add('script', mix('themes/default/assets/js/main.js', ''));
         },
 
         // Listen on event before render a layout,

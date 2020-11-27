@@ -71,3 +71,9 @@ __MACOSX
 *.txt
 *.tgz
 .swp
+
+public/themes/default/assets/css/style.*.css
+public/themes/default/assets/css/main.*.css
+public/themes/default/assets/js/main.*.js
+public/themes/default/assets/css/style.css
+public/mix.*.js

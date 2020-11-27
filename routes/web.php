@@ -577,7 +577,12 @@ Route::get('user/gallery/video/{filename}', function ($filename) {
 });
 
 Route::get('user/gallery/{filename}', function ($filename) {
-    return Image::make(storage_path().'/uploads/users/gallery/'.$filename)->response();
+    try {
+        return Image::make(storage_path().'/uploads/users/gallery/'.$filename)->response();
+    } catch (\Exception $e) {
+        $defaultFN = 'default-cover-user.png';
+        return Image::make(storage_path().'/uploads/users/covers/'.$defaultFN)->response();
+    }
 });
 
 
