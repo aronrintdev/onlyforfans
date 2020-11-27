@@ -243,7 +243,7 @@ Route::group(['prefix' => '/admin', 'middleware' => ['auth', 'role:admin']], fun
 |--------------------------------------------------------------------------
 */
 
-    Route::get('messages/{username?}', 'MessageController@index');
+Route::get('messages/{username?}', 'MessageController@index');
 
 
 
@@ -338,6 +338,9 @@ Route::group(['prefix' => '/{username}', 'middleware' => ['auth', 'editown']], f
     // Route::get('/pages', 'UserController@pages');
     // Route::get('/groups', 'UserController@groups');
     Route::get('/saved', 'UserController@savedItems');
+
+    // %PSG
+    Route::get('/stories/create', 'StoriesController@create');
 
 });
 
