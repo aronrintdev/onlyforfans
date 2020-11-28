@@ -1,8 +1,8 @@
 {
-  "/mix.js": "/mix.7ff72a1d442a8c58970a.js",
-  "/themes/default/assets/css/bootstrap.css": "/themes/default/assets/css/bootstrap.a5017011b5b51ac0d32aa44891f0737c.css",
-  "/themes/default/assets/css/main.css": "/themes/default/assets/css/main.5cf13f553afcc74805e6707caa448578.css",
-  "/themes/default/assets/css/style.css": "/themes/default/assets/css/style.aa88e2542ec26951c10801d8694968a3.css",
-  "/themes/default/assets/css/flag-icon.css": "/themes/default/assets/css/flag-icon.css",
-  "/themes/default/assets/js/main.js": "/themes/default/assets/js/main.44dfdeebda2e14320a1d309baa88be01.js"
+    "/js/app2.js": "/js/app2.js?id=49cdd5f7dcd79c86a6a3",
+    "/themes/default/assets/css/bootstrap.css": "/themes/default/assets/css/bootstrap.css?id=df5a0b32ce7b20f3fdac",
+    "/themes/default/assets/css/main.css": "/themes/default/assets/css/main.css?id=e88ea0892f474c71b477",
+    "/css/app2.js": "/css/app2.js?id=d41d8cd98f00b204e980",
+    "/themes/default/assets/css/style.css": "/themes/default/assets/css/style.css?id=e87515e56a5b589d031d",
+    "/themes/default/assets/js/main.js": "/themes/default/assets/js/main.js?id=193f4628ceb66c375717"
 }
