@@ -1,9 +1,9 @@
 @extends('layouts.app2')
 
 @section('content')
-    <div class="row">
+    <div class="row mt-5">
         <div class="col-sm-12">
-            <h1 class="">Create Story</h1>
+          <h1 class="">Create Story for {{ $timeline->username }}</h1>
         </div>
     </div>
 
@@ -13,9 +13,7 @@
 
     <div class="row">
         <div class="col-sm-12">
-          <example></example>
+          <create-story username="{{$timeline->username}}"></create-story>
         </div>
-        {!! Form::open(['route' => 'timelines.store']) !!}
-        {!! Form::close() !!}
     </div>
 @endsection

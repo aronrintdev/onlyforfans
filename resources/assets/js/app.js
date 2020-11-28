@@ -6,6 +6,8 @@
  */
 
 //require('./bootstrap');
+window.axios = require('axios');
+//import axios from 'axios'
 
 window.Vue = require('vue');
 
@@ -15,7 +17,9 @@ window.Vue = require('vue');
  * or customize the JavaScript scaffolding to fit your unique needs.
  */
 
-Vue.component('example', require('./components/Example.vue'));
+
+//Vue.component('example', require('./components/Example.vue'));
+Vue.component('create-story', require('./components/CreateStory.vue'));
 
 const app = new Vue({
     el: '#app'
