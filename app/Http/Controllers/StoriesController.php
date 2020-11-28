@@ -1,21 +1,36 @@
 <?php
 namespace App\Http\Controllers;
 
+use Auth;
+use Illuminate\Http\Request;
 use App\Setting;
-//use Teepluss\Theme\Facades\Theme;
+use App\Story;
 
 class StoriesController extends AppBaseController
 {
-    protected function create()
+    public function create(Request $request, $username)
     {
-        /*
-        $create = 'foo';
-        $theme = Theme::uses(Setting::get('current_theme', 'default'))->layout('default');
-        $theme->setTitle('Create Story');
-        return $theme->scope('stories', compact('create'))
-                     ->render();
-         */
-        return view('stories.create');
+        $sessionUser = Auth::user();
+        return view('stories.create', [
+            'session_user' => $sessionUser,
+            'timeline' => $sessionUser->timeline,
+        ]);
+    }
+
+    public function store(Request $request, $username)
+    {
+        $sessionUser = Auth::user();
+        $obj = Story::create([
+            'timeline_id' => $sessionUser->timeline_id,
+            'content' => $request->content,
+            'cattrs' => [
+                'background-color' => $request->bgcolor ?? '#fff',
+            ],
+            'stype' => $request->stype,
+        ]);
+        return response()->json([
+            'data' => $obj,
+        ]);
     }
 
 }
