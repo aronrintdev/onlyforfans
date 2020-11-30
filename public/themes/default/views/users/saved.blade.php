@@ -1,3 +1,4 @@
+<!-- %VIEW themes/default/views/users/saved -->
 <style>
 
 	.default-post.panel-post .image-with-blur .single-image {
@@ -67,33 +68,45 @@
 					<h3 class="panel-title">
 						{{ trans('common.saved_items') }}
 					</h3>
-                    <a href="{{ route('purchased-posts') }}" class="btn btn-success purchased-posts">Show Purchased</a>
 				</div>
 				<div class="panel-body nopadding">
 					<ul class="nav nav-pills heading-list">
 						<li class="active"><a href="#posts" data-toggle="pill" class="text">{{ trans('common.posts') }}<span></span></a></li>
+						<li class=""><a href="#purchased" data-toggle="pill" class="text">{{ trans('common.purchased') }}<span></span></a></li>
 						<!-- <li class="divider">&nbsp;</li> -->
 					</ul>
 				</div>
 				<div class="tab-content nopadding" style="margin-top:15px;">
-					<div id="posts" class="tab-pane fade active in">
+					<section id="posts" class="tab-pane fade active in">
 						<ul class="list-group page-likes">
 							@include('flash::message')
 							@if(count($posts) > 0)
 								@foreach($posts as $post)
-				                    {!! Theme::partial('post',compact('post','user')) !!}
-				                @endforeach
+				        {!! Theme::partial('post',compact('post','user')) !!}
+				        @endforeach
 							@else
-				                <div class="alert alert-warning tmargin-10">{{ trans('messages.no_saved_posts') }}</div>
-				            @endif       
+				      <div class="alert alert-warning tmargin-10">{{ trans('messages.no_saved_posts') }}</div>
+				      @endif       
 						</ul>
-					</div>
-					<div id="pages" class="tab-pane fade">
+					</section>
+					<section id="purchased" class="tab-pane fade">
+						<ul class="list-group page-likes">
+							@include('flash::message')
+							@if(count($purchased) > 0)
+								@foreach($purchased as $post)
+				        {!! Theme::partial('post',compact('post','user')) !!}
+				        @endforeach
+							@else
+				      <div class="alert alert-warning tmargin-10">{{ trans('messages.no_saved_posts') }}</div>
+				      @endif       
+						</ul>
+					</section>
+					<section id="pages" class="tab-pane fade">
 						<ul class="list-group page-likes">
 							@include('flash::message')
 							@if(count($page_timelines) > 0)
 								@foreach($page_timelines as $timeline)
-				                    <li class="list-group-item holder">
+				        <li class="list-group-item holder">
 										<div class="connect-list">
 											<div class="connect-link side-left">
 					                            <a href="{{ url($timeline->username) }}">
@@ -116,8 +129,8 @@
 				                <div class="alert alert-warning">{{ trans('messages.no_saved_pages') }}</div>
 				            @endif       
 						</ul>
-					</div>
-					<div id="groups" class="tab-pane fade">
+					</section>
+					<section id="groups" class="tab-pane fade">
 						<ul class="list-group page-likes">
 							@include('flash::message')
 							@if(count($group_timelines) > 0)
@@ -145,8 +158,8 @@
 				                <div class="alert alert-warning">{{ trans('messages.no_saved_groups') }}</div>
 				            @endif       
 						</ul>
-					</div>
-					<div id="events" class="tab-pane fade">
+					</section>
+					<section id="events" class="tab-pane fade">
 						<ul class="list-group page-likes">
 							@include('flash::message')
 							@if(count($event_timelines) > 0)
@@ -174,7 +187,7 @@
 				                <div class="alert alert-warning">{{ trans('messages.no_saved_posts') }}</div>
 				            @endif       
 						</ul>
-					</div>
+					</section>
 				</div>
 			</div>
 		</div>

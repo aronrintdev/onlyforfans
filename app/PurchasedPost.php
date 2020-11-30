@@ -34,4 +34,9 @@ class PurchasedPost extends Model
         'meta'           => 'array',
         'payment_status' => 'string',
     ];
+
+    public function post()
+    {
+        return $this->belongsTo('App\Post');
+    }
 }
