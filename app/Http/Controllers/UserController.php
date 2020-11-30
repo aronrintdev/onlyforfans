@@ -1687,21 +1687,27 @@ class UserController extends AppBaseController
 
     public function savedItems($username)
     {
+        $sessionUser = Auth::user();
+
         $trending_tags = trendingTags();
         $suggested_users = suggestedUsers();
         $suggested_groups = suggestedGroups();
         $suggested_pages = suggestedPages();
 
-        $page_timelines = Auth::user()->timelinesSaved()->where('saved_timelines.type','page')->get();
-        $group_timelines = Auth::user()->timelinesSaved()->where('saved_timelines.type','group')->get();
-        $event_timelines = Auth::user()->timelinesSaved()->where('saved_timelines.type','event')->get();
-        $posts = Auth::user()->postsSaved()->get();
-        $user = Auth::user();
+        $page_timelines = $sessionUser->timelinesSaved()->where('saved_timelines.type','page')->get();
+        $group_timelines = $sessionUser->timelinesSaved()->where('saved_timelines.type','group')->get();
+        $event_timelines = $sessionUser->timelinesSaved()->where('saved_timelines.type','event')->get();
+        $posts = $sessionUser->postsSaved()->get();
+        //$purchased = $sessionUser->PurchasedPostsArr->toArray();
+        $purchased = $sessionUser->purchasedPosts->map( function($item, $key) {
+            return $item->post;
+        });
+        $user = $sessionUser; // needed for 'compact' below
 
         $theme = Theme::uses(Setting::get('current_theme', 'default'))->layout('default');
         $theme->setTitle(trans('common.saved_items').' '.Setting::get('title_seperator').' '.Setting::get('site_title').' '.Setting::get('title_seperator').' '.Setting::get('site_tagline'));
 
-        return $theme->scope('users/saved', compact('event_timelines','group_timelines','page_timelines','trending_tags','suggested_pages','suggested_groups','suggested_users','posts','user'))->render();
+        return $theme->scope('users/saved', compact('event_timelines','group_timelines','page_timelines','trending_tags','suggested_pages','suggested_groups','suggested_users','posts','purchased','user'))->render();
     }
 
     /**

@@ -110,6 +110,7 @@ return [
     'change_cover'       => 'Change cover',
     'reposition_cover'   => 'Reposition cover',
     'posts'              => 'Posts',
+    'purchased'          => 'Purchased',
     'likes'              => 'Likes',
     'groups'             => 'Groups',
     'group'              => 'Group',
