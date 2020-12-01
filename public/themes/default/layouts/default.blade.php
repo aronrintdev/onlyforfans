@@ -90,6 +90,9 @@
 {{--
 --}}
 <script type="application/javascript">
+
+const g_php2jsVars = <?php echo json_encode($g_php2jsVars ?? []); ?>;
+
 $(document).ready(function () {
 
   // Site-wide generic handler for opening a modal
