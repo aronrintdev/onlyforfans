@@ -511,9 +511,16 @@ class TimelineController extends AppBaseController
 
 //        echo($posts);
 
+        $sessionUser = Auth::user();
+        $this->_php2jsVars['session'] = [
+            'username' => $sessionUser->username,
+        ];
+        \View::share('g_php2jsVars',$this->_php2jsVars);
+
         return $theme->scope('home', compact('timeline', 'posts', 'next_page_url', 'trending_tags', 'suggested_users', 'announcement', 'suggested_groups', 'suggested_pages', 'mode', 'user_post', 'subscriptionAmount', 'totalTip'))
             ->render();
-    }
+
+    } // showFeed()
 
     public function showGlobalFeed(Request $request)
     {

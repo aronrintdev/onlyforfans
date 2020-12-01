@@ -8,6 +8,21 @@ use App\Story;
 
 class StoriesController extends AppBaseController
 {
+    public function index(Request $request, $username)
+    {
+        $sessionUser = Auth::user();
+
+        $stories = Story::where('timeline_id', $sessionUser->timeline->id)->get();
+
+        $html = view('stories._index', [
+            'stories' => $stories,
+        ])->render();
+
+        return response()->json([
+            'html' => $html,
+        ]);
+    }
+
     public function create(Request $request, $username)
     {
         $sessionUser = Auth::user();
