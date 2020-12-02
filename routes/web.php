@@ -125,6 +125,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('purchased-posts', 'TimelineController@showPurchasedPosts')->name('purchased-posts');
     Route::get('post/{id}', 'TimelineController@showPost')->name('post.show');
     Route::post('update-last-seen', 'UserController@updateLastSeen')->name('update-user-status');
+    Route::resource('mediafiles', 'MediafilesController', []);
 });
 
 //main project register
