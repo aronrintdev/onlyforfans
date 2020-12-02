@@ -10,3 +10,6 @@ $ tar xvzf vendor-stripe.tgz
 %%% Composer
 COMPOSER_MEMORY_LIMIT=-1 composer require ramsey/uuid
 COMPOSER_MEMORY_LIMIT=-1 composer update
+
+%%% Migrations
+php artisan migrate --env=testing
