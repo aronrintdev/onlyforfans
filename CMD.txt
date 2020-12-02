@@ -1,0 +1,12 @@
+
+%%% Need to unzip js dist folder (!)
+$ pushd public/js
+$ unzip dist.zip
+
+%%% Need to pull down vendor/stripe folder (??)
+$ scp mjmfans:/home/fansplatformmjmd/fan/vendor-stripe.tgz .
+$ tar xvzf vendor-stripe.tgz
+
+%%% Composer
+COMPOSER_MEMORY_LIMIT=-1 composer require ramsey/uuid
+COMPOSER_MEMORY_LIMIT=-1 composer update
