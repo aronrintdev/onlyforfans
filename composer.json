@@ -38,7 +38,8 @@
         "rachidlaasri/laravel-installer": "^2.1",
         "mews/purifier": "~2.0",
         "doctrine/dbal": "^2.5",
-        "spatie/laravel-referer": "^1.3"
+        "spatie/laravel-referer": "^1.3",
+        "ramsey/uuid": "~3.0"
     },
     "require-dev": {
         "mockery/mockery": "0.9.*",
