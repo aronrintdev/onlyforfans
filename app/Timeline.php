@@ -132,6 +132,10 @@ class Timeline extends Model
         return $this->hasMany('App\Post');
     }
 
+    public function stories() {
+        return $this->hasMany('App\Story');
+    }
+
     public function user()
     {
         return $this->hasOne('App\User');
