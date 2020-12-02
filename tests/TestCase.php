@@ -15,4 +15,8 @@ abstract class TestCase extends BaseTestCase
 
         return $app;
     }
+
+     public function ajaxJSON($method, $uri, array $data=[]) {
+         return $this->json($method,$uri,$data,['HTTP_X-Requested-With'=>'XMLHttpRequest']);
+     }
 }

@@ -1,11 +1,12 @@
 <?php
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-
 use DB;
 use Auth;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Http\File;
+//use Illuminate\Http\UploadedFile;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\User;
 use App\Mediafile;
@@ -17,12 +18,14 @@ class MediafilesController extends AppBaseController
     public function store(Request $request)
     {
         try {
+            /*
             $request->validate([
                 'mediafile' => 'required',
                 'resource_id' => 'required',
                 'resource_type' => 'required',
                 'mftype' => 'required',
             ]);
+             */
         } catch (\Exception $e) {
             if ( $request->ajax() ) {
                 return \Response::json(['message'=> $e->getMessage()],422);
@@ -32,6 +35,7 @@ class MediafilesController extends AppBaseController
         }
 
         $file = $request->file('mediafile');
+        //dd($file); // lluminate\Http\Testing\File
 
         try {
 
@@ -39,20 +43,29 @@ class MediafilesController extends AppBaseController
 
             switch ($request->mftype) {
                 default:
+                    //$newFilename = Storage::putFile('s3', new File($file->), 'public');
+                    //$newFilename = Storage::disk('s3')->putFile('./', $file, 'public');
+                    //$newFilename = Storage::putFile('s3', new File('/fans/stories'), 'public');
+                    //$newFilename = $file->store('/fans/stories'.
                     $mediafile = Mediafile::create([
-                        'resource_id'=>$request->resource_id,
-                        'resource_type'=>$request->resource_type,
+                        'resource_id' => $request->resource_id,
+                        'resource_type' => $request->resource_type,
+                        //'filename' => $newFilename,
                         'mftype' => $request->mftype,
                         'meta' => $request->input('meta') ?? null,
                         'mimetype' => $file->getMimeType(),
                         'orig_filename' => $file->getClientOriginalName(),
-                        'ext' => $file->getClientOriginalExtension(),
+                        'orig_ext' => $file->getClientOriginalExtension(),
                     ]);
+
+                    $newFilename = Storage::disk('s3')->put('fans-platform/'.$mediafile->guid, file_get_contents($file));
         
-                    $newFilename = $mediafile->guid.'.'.$mediafile->ext;
-                    $storeTo = STORAGE_SUBPATH_GENERAL;
-                    $path = $file->storeAs($storeTo, $newFilename);
+                    //$newFilename = $mediafile->guid.'.'.$mediafile->ext;
+                    //$storeTo = STORAGE_SUBPATH_GENERAL;
+                    //$path = $file->storeAs($storeTo, $newFilename);
+                    //Storage::disk('s3')->put('avatars/1', $fileContents);
                     //$fullpath = Storage::path($path);
+                    break;
             }
 
             DB::commit();
@@ -62,7 +75,7 @@ class MediafilesController extends AppBaseController
             throw $e; // %FIXME: report error to user via browser message
         }
         if (\Request::ajax()) {
-            return response->json([ 'obj' => $mediafile ]);
+            return response()->json([ 'obj' => $mediafile ]);
         } else {
             return back()->withInput();
         }

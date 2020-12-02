@@ -8,6 +8,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 //use Storage;
 use DB;
+use Ramsey\Uuid\Uuid;
 use App\Mediafile;
 use App\Enums\MediafileTypeEnum;
 //use App\Models\Image;
@@ -49,7 +50,7 @@ class MediafileModelTest extends TestCase
     }
 
     /**
-     * @group mfdev
+     * @group OFF-mfdev
      */
     public function test_should_upload_to_s3()
     {
@@ -60,6 +61,7 @@ class MediafileModelTest extends TestCase
         $mediafile = Mediafile::create([
             'resource_id'=>$story->id,
             'resource_type'=>'stories',
+            'filename'=>(string) Uuid::uuid4(),
             'mftype' => MediafileTypeEnum::STORY,
             'mimetype' => $file->getMimeType(),
             'orig_filename' => $file->getClientOriginalName(),
