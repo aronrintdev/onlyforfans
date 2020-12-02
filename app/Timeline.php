@@ -1,62 +1,10 @@
 <?php
-
 namespace App;
 
 use Eloquent as Model;
 use Intervention\Image\Facades\Image;
 
 
-//use Illuminate\Database\Eloquent\SoftDeletes;
-
-/**
- * @SWG\Definition(
- *      definition="Timeline",
- *      required={},
- *      @SWG\Property(
- *          property="id",
- *          description="id",
- *          type="integer",
- *          format="int32"
- *      ),
- *      @SWG\Property(
- *          property="username",
- *          description="username",
- *          type="string"
- *      ),
- *      @SWG\Property(
- *          property="name",
- *          description="name",
- *          type="string"
- *      ),
- *      @SWG\Property(
- *          property="about",
- *          description="about",
- *          type="string"
- *      ),
- *      @SWG\Property(
- *          property="avatar_id",
- *          description="avatar_id",
- *          type="integer",
- *          format="int32"
- *      ),
- *      @SWG\Property(
- *          property="cover_id",
- *          description="cover_id",
- *          type="integer",
- *          format="int32"
- *      ),
- *      @SWG\Property(
- *          property="cover_position",
- *          description="cover_position",
- *          type="string"
- *      ),
- *      @SWG\Property(
- *          property="type",
- *          description="type",
- *          type="string"
- *      )
- * )
- */
 class Timeline extends Model
 {
     //use SoftDeletes;
@@ -66,28 +14,8 @@ class Timeline extends Model
     const CREATED_AT = 'created_at';
     const UPDATED_AT = 'updated_at';
 
+    protected $guarded = ['id','created_at','updated_at'];
 
-    //protected $dates = ['deleted_at'];
-
-
-    public $fillable = [
-        'username',
-        'name',
-        'about',
-        'avatar_id',
-        'cover_id',
-        'cover_position',
-        'type',
-        'hide_cover',
-        'background_id',
-        'deleted_at',
-    ];
-
-    /**
-     * The attributes that should be casted to native types.
-     *
-     * @var array
-     */
     protected $casts = [
         'id'             => 'integer',
         'username'       => 'string',
@@ -100,13 +28,7 @@ class Timeline extends Model
         'deleted_at'     => 'datetime',
     ];
 
-    /**
-     * Validation rules.
-     *
-     * @var array
-     */
     public static $rules = [
-
     ];
 
     public function toArray()
@@ -127,17 +49,14 @@ class Timeline extends Model
         return $array;
     }
 
-    public function posts()
-    {
+    public function posts() {
         return $this->hasMany('App\Post');
     }
 
-    public function stories() {
-        return $this->hasMany('App\Story');
+    public function stories() { return $this->hasMany('App\Story');
     }
 
-    public function user()
-    {
+    public function user() {
         return $this->hasOne('App\User');
     }
 
@@ -240,3 +159,53 @@ class Timeline extends Model
         
     }
 }
+
+/**
+ * @SWG\Definition(
+ *      definition="Timeline",
+ *      required={},
+ *      @SWG\Property(
+ *          property="id",
+ *          description="id",
+ *          type="integer",
+ *          format="int32"
+ *      ),
+ *      @SWG\Property(
+ *          property="username",
+ *          description="username",
+ *          type="string"
+ *      ),
+ *      @SWG\Property(
+ *          property="name",
+ *          description="name",
+ *          type="string"
+ *      ),
+ *      @SWG\Property(
+ *          property="about",
+ *          description="about",
+ *          type="string"
+ *      ),
+ *      @SWG\Property(
+ *          property="avatar_id",
+ *          description="avatar_id",
+ *          type="integer",
+ *          format="int32"
+ *      ),
+ *      @SWG\Property(
+ *          property="cover_id",
+ *          description="cover_id",
+ *          type="integer",
+ *          format="int32"
+ *      ),
+ *      @SWG\Property(
+ *          property="cover_position",
+ *          description="cover_position",
+ *          type="string"
+ *      ),
+ *      @SWG\Property(
+ *          property="type",
+ *          description="type",
+ *          type="string"
+ *      )
+ * )
+ */

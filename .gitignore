@@ -51,6 +51,7 @@ Thumbs.db
 .env.testing
 composer.lock
 vendor/
+storage/app/s3
 storage/framework/views
 storage/uploads
 storage/uploads/

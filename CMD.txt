@@ -13,3 +13,6 @@ COMPOSER_MEMORY_LIMIT=-1 composer update
 
 %%% Migrations
 php artisan migrate --env=testing
+
+%%% Testing
+vendor/bin/phpunit --group mfdev

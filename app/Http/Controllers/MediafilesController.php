@@ -3,6 +3,7 @@ namespace App\Http\Controllers;
 
 use DB;
 use Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\File;
@@ -18,15 +19,18 @@ class MediafilesController extends AppBaseController
     public function store(Request $request)
     {
         try {
-            /*
-            $request->validate([
+            $this->validate($request, [
                 'mediafile' => 'required',
                 'resource_id' => 'required',
                 'resource_type' => 'required',
                 'mftype' => 'required',
             ]);
-             */
         } catch (\Exception $e) {
+            Log::warning(json_encode([
+                'verror' => $e->getMessage(),
+                //'e' => $e,
+                //'error_bag' => $e->getMessage(),
+            ]));
             if ( $request->ajax() ) {
                 return \Response::json(['message'=> $e->getMessage()],422);
             } else {
@@ -38,48 +42,29 @@ class MediafilesController extends AppBaseController
         //dd($file); // lluminate\Http\Testing\File
 
         try {
-
-            DB::beginTransaction();
-
-            switch ($request->mftype) {
-                default:
-                    //$newFilename = Storage::putFile('s3', new File($file->), 'public');
-                    //$newFilename = Storage::disk('s3')->putFile('./', $file, 'public');
-                    //$newFilename = Storage::putFile('s3', new File('/fans/stories'), 'public');
-                    //$newFilename = $file->store('/fans/stories'.
-                    $mediafile = Mediafile::create([
-                        'resource_id' => $request->resource_id,
-                        'resource_type' => $request->resource_type,
-                        //'filename' => $newFilename,
-                        'mftype' => $request->mftype,
-                        'meta' => $request->input('meta') ?? null,
-                        'mimetype' => $file->getMimeType(),
-                        'orig_filename' => $file->getClientOriginalName(),
-                        'orig_ext' => $file->getClientOriginalExtension(),
-                    ]);
-
-                    $newFilename = Storage::disk('s3')->put('fans-platform/'.$mediafile->guid, file_get_contents($file));
-        
-                    //$newFilename = $mediafile->guid.'.'.$mediafile->ext;
-                    //$storeTo = STORAGE_SUBPATH_GENERAL;
-                    //$path = $file->storeAs($storeTo, $newFilename);
-                    //Storage::disk('s3')->put('avatars/1', $fileContents);
-                    //$fullpath = Storage::path($path);
-                    break;
-            }
-
-            DB::commit();
-
+            $mediafile = DB::transaction(function () use(&$file, &$request) {
+                $newFilename = $file->store('fans-platform/stories', 's3');
+                $mediafile = Mediafile::create([
+                    'resource_id' => $request->resource_id,
+                    'resource_type' => $request->resource_type,
+                    'filename' => $newFilename,
+                    'mftype' => $request->mftype,
+                    'meta' => $request->input('meta') ?? null,
+                    'mimetype' => $file->getMimeType(),
+                    'orig_filename' => $file->getClientOriginalName(),
+                    'orig_ext' => $file->getClientOriginalExtension(),
+                ]);
+                return $mediafile;
+            });
         } catch (\Exception $e) {
-            DB::rollback();
             throw $e; // %FIXME: report error to user via browser message
         }
+
         if (\Request::ajax()) {
             return response()->json([ 'obj' => $mediafile ]);
         } else {
             return back()->withInput();
         }
-
     }
 
     public function update(Request $request, $pkid)
@@ -87,12 +72,12 @@ class MediafilesController extends AppBaseController
         $this->validate($request, Mediafile::$vrules);
 
         try {
-    
+
             $obj = Mediafile::find($pkid);
             if ( empty($obj) ) {
                 throw new ModelNotFoundException('Could not find Mediafile with pkid '.$pkid);
             }
-    
+
             $obj = DB::transaction(function () use ($request, $obj) {
                 $obj->fill($request->all());
                 $obj->save();
