@@ -16,12 +16,14 @@
         </div>
       </div>
       <button @click="doCancel()" class="btn btn-default">Cancel</button>
-      <button @click="shareToStory()" type="submit" class="btn btn-primary">Share to Story</button>
+      <button @click="shareStory()" type="submit" class="btn btn-primary">Share to Story</button>
     </form>
   </div>
 </template>
 
 <script>
+import { eventBus } from '../../app';
+
 export default {
   mounted() {
   },
@@ -37,11 +39,11 @@ export default {
     setColor(color) {
       this.$emit('set-color', color)
     },
-    shareToStory() {
-      this.$emit('share-to-story')
-    },
     doCancel() {
       this.$emit('do-cancel')
+    },
+    shareStory() {
+      eventBus.$emit('share-story')
     },
   },
 

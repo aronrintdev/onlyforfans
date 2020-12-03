@@ -11,12 +11,11 @@
 
         <div v-if="step===steps.EDIT" class="step-edit">
           <text-story-form 
-            v-if="stype==='text'" 
-            v-bind:attrs="textAttrs"
-            v-on:set-color="setColor($event)"
-            v-on:share-to-story="shareToStory($event)"
-            v-on:doCancel="step=steps.SELECT_STYPE"
-          ></text-story-form>
+                                      v-if="stype==='text'" 
+                                      v-bind:attrs="textAttrs"
+                                      v-on:set-color="setColor($event)"
+                                      v-on:do-cancel="step=steps.SELECT_STYPE"
+                                      ></text-story-form>
         </div>
 
       </aside>
@@ -35,11 +34,11 @@
 
         <div v-if="step===steps.EDIT" class="step-edit">
           <text-story-preview 
-              v-if="stype==='text'" 
-              v-bind:attrs="textAttrs" 
-              username="username"
-          ></text-story-preview>
-          <photo-story-form v-if="stype==='photo'"></photo-story-form>
+                                      v-if="stype==='text'" 
+                                      v-bind:attrs="textAttrs" 
+                                      username="username"
+                                      ></text-story-preview>
+          <photo-story-form v-if="stype==='image'"></photo-story-form>
         </div>
 
       </main>
@@ -49,6 +48,7 @@
 </template>
 
 <script>
+import { eventBus } from '../../app';
 import TextStoryForm from './TextStoryForm.vue';
 import PhotoStoryForm from './PhotoStoryForm.vue';
 import TextStoryPreview from './TextStoryPreview.vue';
@@ -60,6 +60,15 @@ export default {
     this.step = this.steps.SELECT_STYPE;
   },
 
+  created() {
+    eventBus.$on('select-mediafile', (mediafile) => {
+      this.mediafile = mediafile;
+    });
+    eventBus.$on('share-story', () => {
+      this.shareStory();
+    });
+  },
+
   props: ['username'],
 
   data: () => ({
@@ -68,6 +77,7 @@ export default {
       contents: '',
       color: '#fff',
     },
+    mediafile: null, // the photo
 
     stype: 'text',
 
@@ -81,7 +91,7 @@ export default {
   }),
 
   methods: {
-    async shareToStory($event, attrs) {
+    async shareStory() {
       console.log(`Sending stype ${this.stype}...`);
       const url = `/${this.username}/stories`;
       let payload;
@@ -96,18 +106,26 @@ export default {
           break;
         case 'image':
           payload = new FormData();
-          payload.append('photo', this.photo);
+          payload.append('mediafile', this.mediafile);
           const json = JSON.stringify({
-              stype: 'image',
-              bgcolor: this.textAttrs.color,
-              content: this.textAttrs.contents,
+            stype: 'image',
+            bgcolor: this.textAttrs.color,
+            content: this.textAttrs.contents,
+            foo: 'bar',
           });
           payload.append('attrs', json);
           break;
       } 
+      console.log('shareStory().post', {payload});
 
-      const response = await axios.post(url, payload);
-      console.log('shareToStory()', {response});
+      const response = await axios.post(url, payload, {
+        headers: {
+          // Overwrite Axios's automatically set Content-Type
+          //'Content-Type': 'application/json'
+          'Content-Type': 'multipart/form-data',
+        }
+      });
+      console.log('shareStory().response', {response});
     },
 
     setColor(color) {
@@ -122,31 +140,10 @@ export default {
     },
 
     createPhotoStory(event) {
-      this.stype = 'photo';
+      this.stype = 'image';
       this.step = this.steps.EDIT;
     },
 
-    selectFile(event) {
-      // `files` is always an array because the file input may be in multiple mode
-      this.photo = event.target.files[0];
-    }
-    /*
-    async shareToStory(color) {
-      console.log(`Setting color: ${color}`);
-      const url = `/${this.username}/stories`;
-      const payload = {
-        stype: 'text',
-        bgcolor: this.color,
-        content: this.contents,
-      };
-      const response = await axios.post(url, payload);
-      console.log('shareToStory()', {response});
-    },
-    setColor(color) {
-      console.log(`Setting color: ${color}`);
-      this.color = color;
-    },
-     */
   },
   components: {
     textStoryForm: TextStoryForm,

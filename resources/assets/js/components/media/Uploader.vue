@@ -2,55 +2,39 @@
   <div>
     <div>
       <h2>Uploader</h2>
-      <input type="file" @change="selectFile">
+      <input type="file" @change="selectMediafile">
     </div>
     <div>
-      <button @click="shareToStory()">Share Image</button>
+      <button @click="shareStory()">Share Image</button>
     </div>
   </div>
 </template>
 
 <script>
 
+import { eventBus } from '../../app';
+
 export default {
   mounted() {
-    console.log('Uploader component mounted.')
   },
   props: ['username'],
 
   data: () => ({
-    photo: null,
-    description: '',
+    mediafile: null,
   }),
 
   methods: {
     // https://dev.to/diogoko/file-upload-using-laravel-and-vue-js-the-right-way-1775
-    selectFile(event) {
+    selectMediafile(event) {
       // `files` is always an array because the file input may be in multiple mode
-      this.photo = event.target.files[0];
+      const mediafile = event.target.files[0];
+      this.mediafile = mediafile; // %FIXME DEBUG
+      eventBus.$emit('select-mediafile', mediafile );
     },
-    shareToStory(event) {
-      this.$emit('share-to-story', {
-        photo: this.photo,
-      });
+
+    async shareStory(event) {
+      eventBus.$emit('share-story', 'dummy'); // 'submit'
     },
-    /*
-    async shareToStory(color) {
-      console.log(`Setting color: ${color}`);
-      const url = `/${this.username}/stories/store`;
-      const payload = {
-        stype: 'text',
-        bgcolor: this.color,
-        content: this.contents,
-      };
-      const response = await axios.post(url, payload);
-      console.log('shareToStory()', {response});
-    },
-    setColor(color) {
-      console.log(`Setting color: ${color}`);
-      this.color = color;
-    },
-     */
   }
 }
 </script>
