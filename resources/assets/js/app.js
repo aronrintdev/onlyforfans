@@ -23,6 +23,19 @@ window.Vue = require('vue');
 Vue.component('create-story', require('./components/stories/Wizard.vue'));
 //Vue.component('uploader', require('./components/media/Uploader.vue'));
 
+export const eventBus = new Vue({
+/*
+    methods: {
+        switchDetails: function(obj) {
+            this.$emit('detailsWasSwitched', obj);
+        },
+        fixStatus: function(index) {
+            this.$emit('statusWasFixed', index);
+        },
+    }
+*/
+});
+
 const app = new Vue({
     el: '#app'
 });

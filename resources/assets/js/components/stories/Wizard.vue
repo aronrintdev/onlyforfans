@@ -14,6 +14,8 @@
             v-if="stype==='text'" 
             v-bind:attrs="textAttrs"
             v-on:set-color="setColor($event)"
+            v-on:share-to-story="shareToStory($event)"
+            v-on:doCancel="step=steps.SELECT_STYPE"
           ></text-story-form>
         </div>
 
@@ -79,14 +81,31 @@ export default {
   }),
 
   methods: {
-    async shareToStory(color) {
-      console.log(`Sending...`);
-      const url = `/${this.username}/stories/store`;
-      const payload = {
-        stype: 'text',
-        bgcolor: this.color,
-        content: this.contents,
-      };
+    async shareToStory($event, attrs) {
+      console.log(`Sending stype ${this.stype}...`);
+      const url = `/${this.username}/stories`;
+      let payload;
+
+      switch ( this.stype ) {
+        case 'text':
+          payload = {
+            stype: 'text',
+            bgcolor: this.textAttrs.color,
+            content: this.textAttrs.contents,
+          };
+          break;
+        case 'image':
+          payload = new FormData();
+          payload.append('photo', this.photo);
+          const json = JSON.stringify({
+              stype: 'image',
+              bgcolor: this.textAttrs.color,
+              content: this.textAttrs.contents,
+          });
+          payload.append('attrs', json);
+          break;
+      } 
+
       const response = await axios.post(url, payload);
       console.log('shareToStory()', {response});
     },
@@ -114,7 +133,7 @@ export default {
     /*
     async shareToStory(color) {
       console.log(`Setting color: ${color}`);
-      const url = `/${this.username}/stories/store`;
+      const url = `/${this.username}/stories`;
       const payload = {
         stype: 'text',
         bgcolor: this.color,

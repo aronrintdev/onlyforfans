@@ -5,6 +5,7 @@
 </template>
 
 <script>
+import { eventBus } from '../../app';
 import Uploader from '../media/Uploader.vue';
 
 export default {

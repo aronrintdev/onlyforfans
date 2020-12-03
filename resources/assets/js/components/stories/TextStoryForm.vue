@@ -15,7 +15,7 @@
           </div>
         </div>
       </div>
-      <button class="btn btn-default">Cancel</button>
+      <button @click="doCancel()" class="btn btn-default">Cancel</button>
       <button @click="shareToStory()" type="submit" class="btn btn-primary">Share to Story</button>
     </form>
   </div>
@@ -36,6 +36,12 @@ export default {
   methods: {
     setColor(color) {
       this.$emit('set-color', color)
+    },
+    shareToStory() {
+      this.$emit('share-to-story')
+    },
+    doCancel() {
+      this.$emit('do-cancel')
     },
   },
 
