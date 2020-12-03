@@ -531,6 +531,16 @@
   padding-bottom: 2rem !important;
 }
 
+.p-0 {
+  padding: 0;
+}
+.p-3 {
+  padding: 1rem !important;
+}
+.p-5 {
+  padding: 2rem !important;
+}
+
 .ml-3, .mx-3 {
   margin-left: 1rem !important;
 }
@@ -654,4 +664,36 @@ list-style: none;
   width: 40px;
   height: 40px;
   border-radius: 50%;
+}
+
+/* Vertical centering, from https://stackoverflow.com/questions/396145/how-to-vertically-center-a-div-for-all-browsers */
+body .v-wrap{
+    height: 100%;
+    text-align: center;
+    white-space: nowrap;
+}
+body .v-wrap:before{
+    content: "";
+    display: inline-block;
+    vertical-align: middle;
+    width: 0;
+    margin-right: -1.20em; 
+    /*might want to tweak this. .25em for extra white space */
+    height: 100%;
+}
+body .v-box{
+    display: inline-block;
+    vertical-align: middle;
+    white-space: normal;
+    /*
+    background: #EEE;
+    */
+}
+
+body .supercrate-stories .tag-ctrl {
+  border: solid 1px blue;
+}
+
+body .supercrate-stories .clickme_to-create_story i {
+  font-size: 20px;
 }

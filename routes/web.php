@@ -341,9 +341,14 @@ Route::group(['prefix' => '/{username}', 'middleware' => ['auth', 'editown']], f
     Route::get('/saved', 'UserController@savedItems');
 
     // %PSG
+    /*
     Route::get('/stories/create', 'StoriesController@create');
     Route::post('/stories/store', 'StoriesController@store');
     Route::get('/stories', 'StoriesController@index');
+     */
+    Route::resource('stories', 'StoriesController', [
+        'only' => ['index', 'store', 'create',],
+    ]);
 
 });
 

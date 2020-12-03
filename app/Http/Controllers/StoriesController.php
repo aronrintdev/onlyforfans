@@ -14,9 +14,13 @@ class StoriesController extends AppBaseController
 
         $stories = Story::where('timeline_id', $sessionUser->timeline->id)->get();
 
+        //$html = view('stories._index', compact('sessionUser', 'stories'))->render();
         $html = view('stories._index', [
+            'sessionUser' => $sessionUser,
             'stories' => $stories,
         ])->render();
+        /*
+         */
 
         return response()->json([
             'html' => $html,

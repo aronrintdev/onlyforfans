@@ -19,7 +19,9 @@ window.Vue = require('vue');
 
 
 //Vue.component('example', require('./components/Example.vue'));
-Vue.component('create-story', require('./components/CreateStory.vue'));
+//Vue.component('create-story', require('./components/CreateStory.vue'));
+Vue.component('create-story', require('./components/stories/Wizard.vue'));
+//Vue.component('uploader', require('./components/media/Uploader.vue'));
 
 const app = new Vue({
     el: '#app'
