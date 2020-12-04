@@ -48,12 +48,12 @@ class Mediafile extends BaseModel implements Guidable, Sluggable
     public function setCattrsAttribute($value) {
         $this->attributes['cattrs'] = !empty($value) ? json_encode($value) : null;
     }
-
-    public function getFilenameAttribute()
-    {
+/*
+    public function getFilenameAttribute() {
         // like "3a889b0d-5194-5105-7c0b-5c789342dc53.png"
         return $this->guid.'.'.$this->orig_ext;
     }
+ */
 
     //--------------------------------------------
     // Methods

@@ -6,6 +6,7 @@ use Auth;
 use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use App\Setting;
 use App\Story;
 use App\Mediafile;
@@ -13,10 +14,35 @@ use App\Enums\MediafileTypeEnum;
 
 class StoriesController extends AppBaseController
 {
+    public function player(Request $request, $username)
+    {
+        $sessionUser = Auth::user();
+        $stories = Story::where('timeline_id', $sessionUser->timeline->id)->get();
+        $storiesA = $stories->map( function($item, $iter) {
+            $a = $item->toArray();
+            if ( count($item->mediafiles) ) {
+                $fn = $item->mediafiles[0]->filename;
+                $a['mf_filename'] = $fn;
+                $a['mf_url'] = Storage::disk('s3')->url($fn);
+            }
+            return $a;
+        });
+
+        $this->_php2jsVars['session'] = [
+            'username' => $sessionUser->username,
+        ];
+        \View::share('g_php2jsVars',$this->_php2jsVars);
+
+        return view('stories.player', [
+            'sessionUser' => $sessionUser,
+            'stories' => $storiesA,
+            'timeline' => $sessionUser->timeline,
+        ]);
+    }
+
     public function index(Request $request, $username)
     {
         $sessionUser = Auth::user();
-
         $stories = Story::where('timeline_id', $sessionUser->timeline->id)->get();
 
         //$html = view('stories._index', compact('sessionUser', 'stories'))->render();

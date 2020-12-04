@@ -5,8 +5,6 @@ use Tests\TestCase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
-//use Storage;
 use DB;
 use Ramsey\Uuid\Uuid;
 use App\Mediafile;

@@ -29,7 +29,7 @@ class MediafileTest extends TestCase
     private $sessionUser = null;
 
     /**
-     *  @group mfdev
+     *  @group OFF_mfdev
      */
     public function test_can_upload_image_file()
     {

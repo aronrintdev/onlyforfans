@@ -15,6 +15,10 @@ class Story extends Model
         return $this->belongsTo('App\Timeline');
     }
 
+    public function mediafiles() {
+        return $this->morphMany('App\Mediafile', 'resource');
+    }
+
     //--------------------------------------------
     // Accessors/Mutators
     //--------------------------------------------

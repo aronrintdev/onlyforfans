@@ -111,7 +111,7 @@ export default {
             stype: 'image',
             bgcolor: this.textAttrs.color,
             content: this.textAttrs.contents,
-            foo: 'bar',
+            foo: ['bar'],
           });
           payload.append('attrs', json);
           break;
@@ -121,8 +121,9 @@ export default {
       const response = await axios.post(url, payload, {
         headers: {
           // Overwrite Axios's automatically set Content-Type
-          //'Content-Type': 'application/json'
-          'Content-Type': 'multipart/form-data',
+          'Content-Type': 'application/json',
+          //'Accept': 'application/json',
+          //'Content-Type': 'multipart/form-data',
         }
       });
       console.log('shareStory().response', {response});
