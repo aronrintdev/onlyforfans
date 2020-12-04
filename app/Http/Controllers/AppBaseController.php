@@ -19,6 +19,8 @@ use Response;
 class AppBaseController extends Controller
 {
     
+    protected $_php2jsVars = [];
+
     public function sendResponse($result, $message)
     {
         return Response::json(ResponseUtil::makeResponse($message, $result));

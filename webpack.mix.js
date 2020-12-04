@@ -54,5 +54,9 @@ mix.less('./node_modules/bootstrap-less/bootstrap/bootstrap.less', './public/the
 		'./public/themes/default/assets/js/tinymce/tinymce.min.js',
 		'./public/themes/default/assets/js/linkify.min.js',
 		'./public/themes/default/assets/js/linkify-jquery.min.js',
+    //'./resources/assets/js/app.js',
 		], 'public/themes/default/assets/js/main.js')
 	.version();
+
+mix.js('resources/assets/js/app.js', 'public/js/app2.js')
+   .sass('resources/assets/sass/app.scss', 'public/css/app2.css');

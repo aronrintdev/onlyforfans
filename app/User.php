@@ -155,8 +155,7 @@ class User extends Authenticatable
         return $array;
     }
 
-    public function timeline()
-    {
+    public function timeline() {
         return $this->belongsTo('App\Timeline');
     }
 

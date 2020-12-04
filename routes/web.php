@@ -125,6 +125,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('purchased-posts', 'TimelineController@showPurchasedPosts')->name('purchased-posts');
     Route::get('post/{id}', 'TimelineController@showPost')->name('post.show');
     Route::post('update-last-seen', 'UserController@updateLastSeen')->name('update-user-status');
+    Route::resource('mediafiles', 'MediafilesController', []);
 });
 
 //main project register
@@ -243,7 +244,7 @@ Route::group(['prefix' => '/admin', 'middleware' => ['auth', 'role:admin']], fun
 |--------------------------------------------------------------------------
 */
 
-    Route::get('messages/{username?}', 'MessageController@index');
+Route::get('messages/{username?}', 'MessageController@index');
 
 
 
@@ -338,6 +339,12 @@ Route::group(['prefix' => '/{username}', 'middleware' => ['auth', 'editown']], f
     // Route::get('/pages', 'UserController@pages');
     // Route::get('/groups', 'UserController@groups');
     Route::get('/saved', 'UserController@savedItems');
+
+    // %PSG
+    Route::get('/stories/player', ['as'=>'stories.player', 'uses' => 'StoriesController@player']);
+    Route::resource('stories', 'StoriesController', [
+        'only' => ['index', 'store', 'create',],
+    ]);
 
 });
 
@@ -574,7 +581,12 @@ Route::get('user/gallery/video/{filename}', function ($filename) {
 });
 
 Route::get('user/gallery/{filename}', function ($filename) {
-    return Image::make(storage_path().'/uploads/users/gallery/'.$filename)->response();
+    try {
+        return Image::make(storage_path().'/uploads/users/gallery/'.$filename)->response();
+    } catch (\Exception $e) {
+        $defaultFN = 'default-cover-user.png';
+        return Image::make(storage_path().'/uploads/users/covers/'.$defaultFN)->response();
+    }
 });
 
 

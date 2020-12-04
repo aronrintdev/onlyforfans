@@ -1,5 +1,8 @@
 <?php
 
+use Illuminate\Http\UploadedFile;
+use Ramsey\Uuid\Uuid;
+
 /*
 |--------------------------------------------------------------------------
 | Model Factories
@@ -104,6 +107,53 @@ $factory->define(App\Album::class, function (Faker\Generator $faker) {
         'name'          => $faker->streetName,
         'about'         => $faker->text($maxNbChars = 80),
         'active'        => 1,
-        'privacy'       => $faker->randomElement($array = ['private', 'public']),
+        'privacy'       => $faker->randomElement(['private', 'public']),
+    ];
+});
+
+$factory->define(App\Mediafile::class, function (Faker\Generator $faker) {
+    $file = UploadedFile::fake()->image('avatar.jpg');
+    return [
+        'filename'=>(string) Uuid::uuid4(),
+        'mimetype' => $file->getMimeType(),
+        'orig_filename' => $file->getClientOriginalName(),
+        'orig_ext' => $file->getClientOriginalExtension(),
+        /*
+        'timeline_id' => function () {
+            $user = factory(App\User::class)->create();
+            return $user->timeline->id;
+        },
+         */
+    ];
+});
+
+$factory->define(App\Story::class, function (Faker\Generator $faker) {
+    return [
+        'content'     => $faker->text,
+        'stype'       => $faker->randomElement(['text']),
+        'timeline_id' => function () {
+            $user = factory(App\User::class)->create();
+            return $user->timeline->id;
+        },
+    ];
+});
+
+$factory->define(App\User::class, function (Faker\Generator $faker) {
+    static $password;
+
+    return [
+        'email' => $faker->unique()->safeEmail,
+        'password' => $password ?: $password = bcrypt('secret'),
+        'remember_token' => str_random(10),
+        'timeline_id' => function () {
+            return factory(App\Timeline::class)->create()->id;
+        },
+        'city' => $faker->city,
+        'country' => $faker->country,
+        'website' => $faker->url,
+        'instagram' => $faker->url,
+        'gender' => $faker->randomElement(['male','female']),
+        'active' => 1,
+        //'city' => $faker->city,
     ];
 });

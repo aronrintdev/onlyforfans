@@ -74,6 +74,7 @@
         }
     }
 </style>
+<!-- %VIEW themes/default/partials/header -->
 @if(Auth::guest())
     <nav class="navbar fans navbar-default no-bg guest-nav">
         <div class="container">

@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Validator;
 
 
@@ -54,6 +55,10 @@ class AppServiceProvider extends ServiceProvider
             // Config::set('app.timezone', Setting::get('timezone', 'UTC'));
             Config::set('app.timezone', date_default_timezone_get());
         }
+
+        Relation::morphMap([
+            'stories' => 'App\Story',
+        ]);
     }
 
     /**
