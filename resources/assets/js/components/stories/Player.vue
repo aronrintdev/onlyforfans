@@ -20,6 +20,10 @@
           <img class="img-responsive" src="{{ }}" />
           -->
         </section>
+        <section class="my-3 d-flex justify-content-between">
+          <button @click="doNav('previous')" class="">Previous</button>
+          <button @click="doNav('next')" class="">Next</button>
+        </section>
       </main>
 
     </section>
@@ -51,12 +55,24 @@ export default {
 
   data() {
     return {
-      index: 4,
+      index: 0,
     }
   },
 
   methods: {
+    doNav(dir) {
+      switch (dir) {
+        case 'previous':
+          this.index = Math.max(this.index-1, 0);
+          break;
+        case 'next':
+          this.index = Math.min(this.index+1, this.stories.length-1);
+          break;
+      }
+      console.log(`index: ${this.index}`);
+    }
   },
+
   components: {
     //textStoryForm: TextStoryForm,
   },
