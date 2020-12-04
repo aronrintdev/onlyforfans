@@ -94,26 +94,19 @@ export default {
     async shareStory() {
       console.log(`Sending stype ${this.stype}...`);
       const url = `/${this.username}/stories`;
-      let payload;
+      let payload = new FormData();
+      const json = JSON.stringify({
+        stype: this.stype,
+        bgcolor: this.textAttrs.color,
+        content: this.textAttrs.contents,
+      });
+      payload.append('attrs', json);
 
       switch ( this.stype ) {
         case 'text':
-          payload = {
-            stype: 'text',
-            bgcolor: this.textAttrs.color,
-            content: this.textAttrs.contents,
-          };
           break;
         case 'image':
-          payload = new FormData();
           payload.append('mediafile', this.mediafile);
-          const json = JSON.stringify({
-            stype: 'image',
-            bgcolor: this.textAttrs.color,
-            content: this.textAttrs.contents,
-            foo: ['bar'],
-          });
-          payload.append('attrs', json);
           break;
       } 
       console.log('shareStory().post', {payload});

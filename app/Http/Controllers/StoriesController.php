@@ -73,38 +73,40 @@ class StoriesController extends AppBaseController
         
         $sessionUser = Auth::user();
         $this->validate($request, [
-            'mediafile' => 'required|file',
             'attrs' => 'required',
             'attrs.stype' => 'required',
+            'mediafile' => 'required_if:attrs.stype,image|file',
         ]);
 
-        $file = $request->file('mediafile');
 
         try {
-            $mediafile = DB::transaction(function () use(&$sessionUser, &$request, &$file) {
+            $obj = DB::transaction(function () use(&$sessionUser, &$request) {
 
                 $story = Story::create([
                     'timeline_id' => $sessionUser->timeline_id,
                     'content' => $request->attrs['content'] ?? null,
                     'cattrs' => [
-                        'background-color' => $request->bgcolor ?? '#fff',
+                        'background-color' => array_key_exists('bgcolor', $request->attrs) ? $request->attrs['bgcolor'] : '#fff',
                     ],
                     'stype' => $request->attrs['stype'],
                 ]);
 
-                $newFilename = $file->store('fans-platform/stories', 's3'); // %FIXME: hardcoded
-                $mediafile = Mediafile::create([
-                    'resource_id' => $story->id,
-                    'resource_type' => 'stories',
-                    'filename' => $newFilename,
-                    'mftype' => MediafileTypeEnum::STORY,
-                    'meta' => $request->input('attrs.foo') ?? null,
-                    'cattrs' => $request->input('attrs.bar') ?? null,
-                    'mimetype' => $file->getMimeType(),
-                    'orig_filename' => $file->getClientOriginalName(),
-                    'orig_ext' => $file->getClientOriginalExtension(),
-                ]);
-                return $mediafile;
+                if ( $request->attrs['stype'] === 'image' ) {
+                    $file = $request->file('mediafile');
+                    $newFilename = $file->store('fans-platform/stories', 's3'); // %FIXME: hardcoded
+                    $mediafile = Mediafile::create([
+                        'resource_id' => $story->id,
+                        'resource_type' => 'stories',
+                        'filename' => $newFilename,
+                        'mftype' => MediafileTypeEnum::STORY,
+                        'meta' => $request->input('attrs.foo') ?? null,
+                        'cattrs' => $request->input('attrs.bar') ?? null,
+                        'mimetype' => $file->getMimeType(),
+                        'orig_filename' => $file->getClientOriginalName(),
+                        'orig_ext' => $file->getClientOriginalExtension(),
+                    ]);
+                }
+                return $story;
             });
         } catch (Exception $e) {
             // %TODO: delete file on s3 if it got uploaded
@@ -116,7 +118,7 @@ class StoriesController extends AppBaseController
         }
 
         if ( $request->ajax() ) {
-            return response()->json([ 'obj' => $mediafile ]);
+            return response()->json([ 'obj' => $obj ]);
         } else {
             return back()->withInput();
         }
