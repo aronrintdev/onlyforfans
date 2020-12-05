@@ -22,6 +22,7 @@
     "vue": "^2.1.10"
   },
   "dependencies": {
+    "animejs": "^3.2.1",
     "bootstrap-vue": "^2.20.1"
   }
 }

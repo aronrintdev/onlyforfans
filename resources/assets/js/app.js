@@ -21,7 +21,8 @@ Vue.use(BootstrapVue) // Telling Vue to use this in whole application
  */
 
 Vue.component('create-story', require('./components/stories/Wizard.vue'));
-Vue.component('story-player', require('./components/stories/Player.vue'));
+//Vue.component('story-player', require('./components/stories/Player.vue'));
+Vue.component('story-player', require('./components/stories/AutoPlayer.vue'));
 
 export const eventBus = new Vue({
 /*
