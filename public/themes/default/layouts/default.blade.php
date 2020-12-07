@@ -31,7 +31,7 @@
         <link href="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" rel="stylesheet">
 
         {{-- {!! Theme::asset()->styles() !!} --}}
-        <link href="/themes/default/assets/css/style.0e3cfe20bb993fe353da4e0c3fa3b356.css" rel="stylesheet">
+        <link href="{{ asset('/themes/default/assets/css/style.0e3cfe20bb993fe353da4e0c3fa3b356.css') }}" rel="stylesheet">
 
         <script type="text/javascript">
         function SP_source() {
