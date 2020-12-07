@@ -9,6 +9,8 @@
 
         <hr />
 
+        <b-alert v-model="show" class="mt-3" > Hello Peter </b-alert>
+
         <div v-if="step===steps.EDIT" class="step-edit">
           <text-story-form 
                                       v-if="stype==='text'" 
@@ -82,6 +84,8 @@ export default {
   props: ['username'],
 
   data: () => ({
+
+    show: true,
 
     textAttrs: {
       contents: '',

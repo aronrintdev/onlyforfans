@@ -190,7 +190,7 @@ return [
         Zizaco\Entrust\EntrustServiceProvider::class,
         Cviebrock\EloquentSluggable\ServiceProvider::class,
         Vijaytupakula\Transvel\TransvelServiceProvider::class,
-        RachidLaasri\LaravelInstaller\Providers\LaravelInstallerServiceProvider::class,
+        //RachidLaasri\LaravelInstaller\Providers\LaravelInstallerServiceProvider::class,
         Mews\Purifier\PurifierServiceProvider::class,
         Spatie\Referer\RefererServiceProvider::class,
     ],
