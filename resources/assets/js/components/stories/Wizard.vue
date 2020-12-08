@@ -107,7 +107,8 @@ export default {
   methods: {
     async shareStory() {
       console.log(`Sending stype ${this.stype}...`);
-      const url = `/${this.username}/stories`;
+      const url = `${this.username}/stories`;
+      //const url = `/${this.username}/stories`;
       let payload = new FormData();
       const json = JSON.stringify({
         stype: this.stype,
