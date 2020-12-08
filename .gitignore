@@ -62,6 +62,7 @@ storage/logs
 storage/debugbar
 
 bootstrap/cache/services.php
+bootstrap/cache/*
 
 dot-env.txt
 .*.swp
