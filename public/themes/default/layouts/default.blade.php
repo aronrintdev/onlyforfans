@@ -28,7 +28,9 @@
         <link href="{{ url('css/extra.css') }}" rel="stylesheet">
         <!--videojs-->
         <link href="//vjs.zencdn.net/7.8.2/video-js.min.css" rel="stylesheet">
+        {{--
         <link href="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" rel="stylesheet">
+        --}}
 
         {{-- {!! Theme::asset()->styles() !!} --}}
         <link href="{{ asset('/themes/default/assets/css/style.0e3cfe20bb993fe353da4e0c3fa3b356.css') }}" rel="stylesheet">
@@ -60,6 +62,8 @@
 
         {!! Theme::partial('footer') !!}
 {{--        {{  Request::path()}}--}}
+
+          <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
 
         <script>
           @if(Config::get('app.debug'))
@@ -117,7 +121,7 @@ $(document).ready(function () {
 });
 </script>
 
-<script src="/themes/default/assets/js/currency.min.js"></script>
+<script src="{{ asset('themes/default/assets/js/currency.min.js') }}"></script>
 <script src="{{ asset('js/app/tippingUtils.js') }}"></script>
 
 
