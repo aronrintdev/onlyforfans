@@ -90,3 +90,6 @@ public/themes/default/assets/js/main.js
 public/css/app2.css
 public/themes/default/assets/css/bootstrap.css
 public/themes/default/assets/css/main.css
+
+composer.json-current
+composer.json-save
