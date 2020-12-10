@@ -94,3 +94,4 @@ public/fonts/*.svg
 
 composer.json-current
 composer.json-save
+public/mix-manifest.json
