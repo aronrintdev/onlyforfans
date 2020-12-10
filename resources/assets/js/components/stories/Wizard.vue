@@ -5,7 +5,7 @@
 
       <aside class="col-md-3 OFF-tag-debug">
 
-        <h2>My Story</h2>
+        <h2 class="my-3">My Story</h2>
 
         <article>
             <b-media no-body>
@@ -20,22 +20,25 @@
 
         <hr />
 
-        <div v-if="step===steps.EDIT" class="step-edit">
+        <div v-if="step===steps.EDIT || step===steps.PREVIEW" class="step-edit">
           <text-story-form v-if="stype==='text'" 
-                           v-bind:attrs="textAttrs"
+                           v-bind:attrs="storyAttrs"
                            v-on:set-color="setColor($event)"
                            v-on:do-cancel="step=steps.SELECT_STYPE"
            ></text-story-form>
-          <photo-story-form v-if="stype==='image'"
-          ></photo-story-form>
+          <photo-story-form v-if="stype==='image'" 
+                           v-bind:attrs="storyAttrs"
+                           v-on:do-cancel="step=steps.SELECT_STYPE"
+           ></photo-story-form>
         </div>
 
       </aside>
 
-      <main class="col-md-9 bg-gray-light OFF-tag-debug d-flex align-items-center">
+      <main class="col-md-9 OFF-bg-gray-light OFF-tag-debug d-flex align-items-center">
         <div v-if="step===steps.SELECT_STYPE" class="step-select_stype mx-auto">
           <section class="row">
             <article class="col-md-6">
+              <input ref="fileUpload" type="file" @change="selectMediafile" hidden>
               <div @click="createPhotoStory()" class="clickme_to-create tag-bg-cyan text-center d-flex">
                 <div class="align-self-center">
                    <b-icon icon="camera" font-scale="4"></b-icon>
@@ -54,17 +57,17 @@
           </section>
         </div>
 
-        <div v-if="step===steps.EDIT" class="step-edit">
+        <div v-if="step===steps.EDIT" class="step-edit w-100">
           <text-story-preview 
                                       v-if="stype==='text'" 
-                                      v-bind:attrs="textAttrs" 
+                                      v-bind:attrs="storyAttrs" 
                                       username="dtoUser.username"
                                       ></text-story-preview>
         </div>
 
-        <div v-if="step===steps.PREVIEW" class="step-preview">
+        <div v-if="step===steps.PREVIEW" class="step-preview mx-auto">
           <div id="preview">
-            <img v-if="imgPreviewUrl" :src="imgPreviewUrl" />
+            <img v-if="imgPreviewUrl" :src="imgPreviewUrl" class="img-fluid" />
           </div>
         </div>
 
@@ -77,9 +80,9 @@
 <script>
 import { eventBus } from '../../app';
 import TextStoryForm from './TextStoryForm.vue';
-import PhotoStoryForm from './PhotoStoryForm.vue';
 import TextStoryPreview from './TextStoryPreview.vue';
-import PhotoStoryPreview from './PhotoStoryPreview.vue';
+import PhotoStoryForm from './PhotoStoryForm.vue';
+//import PhotoStoryPreview from './PhotoStoryPreview.vue';
 
 export default {
 
@@ -94,7 +97,7 @@ export default {
 
     show: true,
 
-    textAttrs: {
+    storyAttrs: {
       contents: '',
       color: '#fff',
     },
@@ -119,11 +122,6 @@ export default {
   },
 
   created() {
-    eventBus.$on('select-mediafile', (mediafile) => {
-      this.mediafile = mediafile;
-      this.imgPreviewUrl = URL.createObjectURL(mediafile);
-      this.step = this.steps.PREVIEW;
-    });
     eventBus.$on('share-story', () => {
       this.shareStory();
     });
@@ -132,13 +130,12 @@ export default {
 
   methods: {
     async shareStory() {
-      console.log(`Sending stype ${this.stype}...`);
       const url = `/${this.dtoUser.username}/stories`;
       let payload = new FormData();
       const json = JSON.stringify({
         stype: this.stype,
-        bgcolor: this.textAttrs.color,
-        content: this.textAttrs.contents,
+        bgcolor: this.storyAttrs.color || null,
+        content: this.storyAttrs.contents,
       });
       payload.append('attrs', json);
 
@@ -149,23 +146,19 @@ export default {
           payload.append('mediafile', this.mediafile);
           break;
       } 
-      console.log('shareStory().post', {payload});
 
       const response = await axios.post(url, payload, {
         headers: {
-          // Overwrite Axios's automatically set Content-Type
           'Content-Type': 'application/json',
-          //'Accept': 'application/json',
-          //'Content-Type': 'multipart/form-data',
         }
       });
-      console.log('shareStory().response', {response});
+      this.step = this.steps.SELECT_STYPE;
+      // %TODO: handle error case / catch
     },
 
     setColor(color) {
-      //$emit('enlarge-text', 0.1)
       console.log(`Setting color: ${color}`);
-      this.textAttrs.color = color;
+      this.storyAttrs.color = color;
     },
 
     createTextStory(e) {
@@ -175,22 +168,26 @@ export default {
 
     createPhotoStory(e) {
       this.stype = 'image';
-      this.step = this.steps.EDIT;
+      //this.step = this.steps.EDIT;
+      //document.getElementById("fileUpload").click()
+      this.$refs.fileUpload.click()
     },
 
-    /*
-    setImagePreview(e) {
-      const file = e.target.files[0];
-      this.imgPreviewUrl = URL.createObjectURL(file);
+    // https://dev.to/diogoko/file-upload-using-laravel-and-vue-js-the-right-way-1775
+    selectMediafile(event) {
+      // `files` is always an array because the file input may be in multiple mode
+      const mediafile = event.target.files[0];
+      this.mediafile = mediafile;
+      this.imgPreviewUrl = URL.createObjectURL(mediafile);
+      this.step = this.steps.PREVIEW;
     },
-    */
 
   },
   components: {
     textStoryForm: TextStoryForm,
     textStoryPreview: TextStoryPreview,
     photoStoryForm: PhotoStoryForm,
-    photoStoryPreview: PhotoStoryPreview,
+    //photoStoryPreview: PhotoStoryPreview,
   },
 }
 </script>
@@ -242,6 +239,13 @@ main.tag-debug {
 #preview img {
   max-width: 100%;
   max-height: 500px;
+}
+
+/* Small devices (landscape phones, 576px and up) */
+@media (min-width: 576px) { 
+  main {
+    background-color: #f3f3f3 !important;
+  }
 }
 
 </style>
