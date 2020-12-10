@@ -64,18 +64,6 @@ form .superbox-ctrl .btn {
     width: 45%;
   }
 }
-.tag-bg-cyan {
-  background-color: cyan;
-}
-.tag-bg-gold {
-  background-color: gold;
-}
-.tag-bg-gray {
-  background-color: gray;
-}
-.tag-bg-pink {
-  background-color: pink;
-}
 body textarea#story-contents {
   resize: none;
   border: solid #e5e5e5 2px;

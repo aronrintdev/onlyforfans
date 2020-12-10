@@ -50,8 +50,6 @@ class StoriesController extends AppBaseController
             'sessionUser' => $sessionUser,
             'stories' => $stories,
         ])->render();
-        /*
-         */
 
         return response()->json([
             'html' => $html,
@@ -67,9 +65,20 @@ class StoriesController extends AppBaseController
             $sessionUser->timeline->toArray()
         );
          */
+        $stories = $sessionUser->timeline->stories;
+        $storiesA = $stories->map( function($item, $iter) {
+            $a = $item->toArray();
+            if ( count($item->mediafiles) ) {
+                $fn = $item->mediafiles[0]->filename;
+                $a['mf_filename'] = $fn;
+                $a['mf_url'] = Storage::disk('s3')->url($fn);
+            }
+            return $a;
+        });
         return view('stories.create', [
             'session_user' => $sessionUser,
             'timeline' => $sessionUser->timeline,
+            'stories' => $storiesA,
             'dtoUser' => [
                 'avatar_url' => $sessionUser->avatar,
                 'fullname' => $sessionUser->timeline->name,

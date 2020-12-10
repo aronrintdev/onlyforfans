@@ -7,7 +7,7 @@
 
     <div class="row">
         <div class="col-sm-12">
-          <create-story :dto-user="{{ json_encode($dtoUser) }}"></create-story>
+          <create-story :dto-user="{{ json_encode($dtoUser) }}" :stories="{{ json_encode($stories) }}"></create-story>
         </div>
     </div>
 @endsection
