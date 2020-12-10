@@ -1,3 +1,7 @@
+body textarea {
+  resize: vertical;
+}
+
 /* From BS4 */
 .pl-3, .px-3 {
   padding-left: 1rem !important;

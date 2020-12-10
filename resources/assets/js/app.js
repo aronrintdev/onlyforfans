@@ -11,8 +11,10 @@ window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 window.Vue = require('vue');
 
 
-import BootstrapVue from 'bootstrap-vue' //Importing
+//import BootstrapVue from 'bootstrap-vue' //Importing
+import { BootstrapVue, BootstrapVueIcons } from 'bootstrap-vue'
 Vue.use(BootstrapVue) // Telling Vue to use this in whole application
+Vue.use(BootstrapVueIcons)
 
 /**
  * Next, we will create a fresh Vue application instance and attach it to

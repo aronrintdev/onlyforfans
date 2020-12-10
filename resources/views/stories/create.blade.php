@@ -7,7 +7,7 @@
 
     <div class="row mt-5">
         <div class="col-sm-12">
-          <create-story username="{{$timeline->username}}"></create-story>
+          <create-story :dto-user="{{ json_encode($dtoUser) }}"></create-story>
         </div>
     </div>
 @endsection

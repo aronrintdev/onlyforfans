@@ -61,9 +61,20 @@ class StoriesController extends AppBaseController
     public function create(Request $request, $username)
     {
         $sessionUser = Auth::user();
+        /*
+        dd( 
+            $sessionUser->avatar,
+            $sessionUser->timeline->toArray()
+        );
+         */
         return view('stories.create', [
             'session_user' => $sessionUser,
             'timeline' => $sessionUser->timeline,
+            'dtoUser' => [
+                'avatar_url' => $sessionUser->avatar,
+                'fullname' => $sessionUser->timeline->name,
+                'username' => $sessionUser->timeline->username,
+            ],
         ]);
     }
 

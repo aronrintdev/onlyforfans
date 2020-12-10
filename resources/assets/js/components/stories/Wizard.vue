@@ -1,44 +1,54 @@
 <template>
-  <div class="container-fluid">
+  <div class="container-fluid wizard-container">
 
-    <section class="row">
+    <section class="row h-100">
 
-      <aside class="col-md-3 tag-debug">
+      <aside class="col-md-3 OFF-tag-debug">
 
         <h2>My Story</h2>
 
+        <article>
+            <b-media no-body>
+              <b-media-aside>
+                <b-img :src="dtoUser.avatar_url" rounded="circle" width="64" alt="avatar"></b-img>
+              </b-media-aside>
+              <b-media-body>
+                <h5 class="mt-3">{{ dtoUser.fullname }}</h5>
+              </b-media-body>
+            </b-media>
+        </article>
+
         <hr />
 
-        <b-alert v-model="show" class="mt-3" > Hello Peter </b-alert>
-
         <div v-if="step===steps.EDIT" class="step-edit">
-          <text-story-form 
-                                      v-if="stype==='text'" 
-                                      v-bind:attrs="textAttrs"
-                                      v-on:set-color="setColor($event)"
-                                      v-on:do-cancel="step=steps.SELECT_STYPE"
-                                      ></text-story-form>
+          <text-story-form v-if="stype==='text'" 
+                           v-bind:attrs="textAttrs"
+                           v-on:set-color="setColor($event)"
+                           v-on:do-cancel="step=steps.SELECT_STYPE"
+           ></text-story-form>
+          <photo-story-form v-if="stype==='image'"
+          ></photo-story-form>
         </div>
 
       </aside>
 
-      <main class="col-md-9 tag-debug">
-        <div v-if="step===steps.SELECT_STYPE" class="step-select_stype">
+      <main class="col-md-9 bg-gray-light OFF-tag-debug d-flex align-items-center">
+        <div v-if="step===steps.SELECT_STYPE" class="step-select_stype mx-auto">
           <section class="row">
             <article class="col-md-6">
-              <div @click="createPhotoStory()" class="clickme_to-create tag-bg-cyan text-center">
-                <div class="">
-                  <svg width="2.12em" height="2em" viewBox="0 0 17 16" class="bi bi-image" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M14.002 2h-12a1 1 0 0 0-1 1v9l2.646-2.354a.5.5 0 0 1 .63-.062l2.66 1.773 3.71-3.71a.5.5 0 0 1 .577-.094L15.002 9.5V3a1 1 0 0 0-1-1zm-12-1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm4 4.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/></svg>
+              <div @click="createPhotoStory()" class="clickme_to-create tag-bg-cyan text-center d-flex">
+                <div class="align-self-center">
+                   <b-icon icon="camera" font-scale="4"></b-icon>
+                  <h6 class="mt-1">Create a Photo Story</h6>
                 </div>
-                <h6 class="mt-1">Create a Photo Story</h6>
               </div>
             </article>
             <article class="col-md-6">
-              <div @click="createTextStory()" class="clickme_to-create tag-bg-pink text-center">
-                <svg width="2em" height="2em" viewBox="0 0 16 16" class="bi bi-type" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M2.244 13.081l.943-2.803H6.66l.944 2.803H8.86L5.54 3.75H4.322L1 13.081h1.244zm2.7-7.923L6.34 9.314H3.51l1.4-4.156h.034zm9.146 7.027h.035v.896h1.128V8.125c0-1.51-1.114-2.345-2.646-2.345-1.736 0-2.59.916-2.666 2.174h1.108c.068-.718.595-1.19 1.517-1.19.971 0 1.518.52 1.518 1.464v.731H12.19c-1.647.007-2.522.8-2.522 2.058 0 1.319.957 2.18 2.345 2.18 1.06 0 1.716-.43 2.078-1.011zm-1.763.035c-.752 0-1.456-.397-1.456-1.244 0-.65.424-1.115 1.408-1.115h1.805v.834c0 .896-.752 1.525-1.757 1.525z"/>
-                </svg>
-                <h6>Create a Text Story</h6>
+              <div @click="createTextStory()" class="clickme_to-create tag-bg-pink text-center d-flex">
+                <div class="align-self-center">
+                   <b-icon icon="type" font-scale="4"></b-icon>
+                  <h6>Create a Text Story</h6>
+                </div>
               </div>
             </article>
           </section>
@@ -48,9 +58,14 @@
           <text-story-preview 
                                       v-if="stype==='text'" 
                                       v-bind:attrs="textAttrs" 
-                                      username="username"
+                                      username="dtoUser.username"
                                       ></text-story-preview>
-          <photo-story-form v-if="stype==='image'"></photo-story-form>
+        </div>
+
+        <div v-if="step===steps.PREVIEW" class="step-preview">
+          <div id="preview">
+            <img v-if="imgPreviewUrl" :src="imgPreviewUrl" />
+          </div>
         </div>
 
       </main>
@@ -68,20 +83,12 @@ import PhotoStoryPreview from './PhotoStoryPreview.vue';
 
 export default {
 
-  mounted() {
-    this.step = this.steps.SELECT_STYPE;
+  props: {
+    dtoUser: {
+      type: Object,
+      required: true
+    }
   },
-
-  created() {
-    eventBus.$on('select-mediafile', (mediafile) => {
-      this.mediafile = mediafile;
-    });
-    eventBus.$on('share-story', () => {
-      this.shareStory();
-    });
-  },
-
-  props: ['username'],
 
   data: () => ({
 
@@ -98,16 +105,35 @@ export default {
     steps : {
       SELECT_STYPE: 'select-stype',
       EDIT: 'edit',
+      PREVIEW: 'preview',
     },
 
     step: null,
+    
+   imgPreviewUrl: null,
 
   }),
+
+  mounted() {
+    this.step = this.steps.SELECT_STYPE;
+  },
+
+  created() {
+    eventBus.$on('select-mediafile', (mediafile) => {
+      this.mediafile = mediafile;
+      this.imgPreviewUrl = URL.createObjectURL(mediafile);
+      this.step = this.steps.PREVIEW;
+    });
+    eventBus.$on('share-story', () => {
+      this.shareStory();
+    });
+  },
+
 
   methods: {
     async shareStory() {
       console.log(`Sending stype ${this.stype}...`);
-      const url = `/${this.username}/stories`;
+      const url = `/${this.dtoUser.username}/stories`;
       let payload = new FormData();
       const json = JSON.stringify({
         stype: this.stype,
@@ -142,15 +168,22 @@ export default {
       this.textAttrs.color = color;
     },
 
-    createTextStory(event) {
+    createTextStory(e) {
       this.stype = 'text';
       this.step = this.steps.EDIT;
     },
 
-    createPhotoStory(event) {
+    createPhotoStory(e) {
       this.stype = 'image';
       this.step = this.steps.EDIT;
     },
+
+    /*
+    setImagePreview(e) {
+      const file = e.target.files[0];
+      this.imgPreviewUrl = URL.createObjectURL(file);
+    },
+    */
 
   },
   components: {
@@ -163,6 +196,10 @@ export default {
 </script>
 
 <style scoped>
+
+.wizard-container {
+  height: 80vh !important;
+}
 
 aside.tag-debug {
   border: solid 2px pink;
@@ -194,6 +231,17 @@ main.tag-debug {
 }
 .tag-bg-pink {
   background: linear-gradient(#0869a4, #e6ce25);
+}
+
+#preview {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#preview img {
+  max-width: 100%;
+  max-height: 500px;
 }
 
 </style>

@@ -1,7 +1,7 @@
 <template>
   <div>
     <form v-on:submit.prevent>
-      <textarea v-model="attrs.contents" id="story-contents" name="story-contents" rows="4"></textarea>
+      <textarea v-model="attrs.contents" id="story-contents" name="story-contents" rows="4" class="w-100"></textarea>
       <div>
         <div class="card card-default">
           <div class="card-header">Backgrounds</div>
