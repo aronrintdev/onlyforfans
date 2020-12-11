@@ -1,6 +1,6 @@
 <template>
   <div class="card card-default">
-    <div class="card-header">Preview ({{ username }})</div>
+    <div class="card-header">Preview</div>
     <div v-bind:style="{ backgroundColor: attrs.color }" class="card-body">
       {{ attrs.contents }}
     </div>
@@ -30,4 +30,8 @@ export default {
 </script>
 
 <style scoped>
+body main .card {
+  height: 70vh;
+  max-height: 350px;
+}
 </style>

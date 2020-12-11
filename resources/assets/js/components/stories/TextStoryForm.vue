@@ -1,22 +1,22 @@
 <template>
   <div>
     <form v-on:submit.prevent>
-      <textarea v-model="attrs.contents" id="story-contents" name="story-contents" rows="4"></textarea>
-      <div>
-        <div class="card card-default">
-          <div class="card-header">Backgrounds</div>
-          <div class="card-body">
-            <div class="row list-of-bgcolors">
-              <div><a role="button" tabindex="0" @click="setColor('cyan')" class="btn btn-sm col-md-1 tag-bg-cyan">&nbsp;</a></div>
-              <div><a role="button" tabindex="0" @click="setColor('gold')" class="btn btn-sm col-md-1 tag-bg-gold">&nbsp;</a></div>
-              <div><a role="button" tabindex="0" @click="setColor('gray')" class="btn btn-sm col-md-1 tag-bg-gray">&nbsp;</a></div>
-              <div><a role="button" tabindex="0" @click="setColor('pink')" class="btn btn-sm col-md-1 tag-bg-pink">&nbsp;</a></div>
-            </div>
+      <textarea v-model="attrs.contents" id="story-contents" name="story-contents" rows="8" class="w-100"></textarea>
+      <div class="card card-default mt-3">
+        <div class="card-header">Backgrounds</div>
+        <div class="card-body">
+          <div class="d-flex list-of-bgcolors">
+            <div><a role="button" tabindex="0" @click="setColor('cyan')" class="btn btn-sm tag-bg-cyan">&nbsp;</a></div>
+            <div><a role="button" tabindex="0" @click="setColor('gold')" class="btn btn-sm tag-bg-gold">&nbsp;</a></div>
+            <div><a role="button" tabindex="0" @click="setColor('gray')" class="btn btn-sm tag-bg-gray">&nbsp;</a></div>
+            <div><a role="button" tabindex="0" @click="setColor('pink')" class="btn btn-sm tag-bg-pink">&nbsp;</a></div>
           </div>
         </div>
       </div>
-      <button @click="doCancel()" class="btn btn-default">Cancel</button>
-      <button @click="shareStory()" type="submit" class="btn btn-primary">Share to Story</button>
+      <div class="superbox-ctrl d-sm-flex justify-content-around mt-3 mb-3 mb-sm-0">
+        <button @click="shareStory()" type="submit" class="btn btn-primary mb-1 mb-sm-0">Share to Story</button>
+        <button @click="doCancel()" class="btn btn-secondary">Cancel</button>
+      </div>
     </form>
   </div>
 </template>
@@ -54,16 +54,26 @@ export default {
 
 <style scoped>
 /* %FIXME %DRY */
-.tag-bg-cyan {
-  background-color: cyan;
+
+form .superbox-ctrl .btn {
+  width: 100%;
 }
-.tag-bg-gold {
-  background-color: gold;
+/* Small devices (landscape phones, 576px and up) */
+@media (min-width: 576px) { 
+  form .superbox-ctrl .btn {
+    width: 45%;
+  }
 }
-.tag-bg-gray {
-  background-color: gray;
+body textarea#story-contents {
+  resize: none;
+  border: solid #e5e5e5 2px;
+  border-radius: 5px;
 }
-.tag-bg-pink {
-  background-color: pink;
+body .list-of-bgcolors .btn {
+  width: 1.7rem;
+  height: 1.7rem;
+  padding: 0; /* 0.7rem; */
+  border-radius: 50%;
+  margin-right: 0.3rem;
 }
 </style>

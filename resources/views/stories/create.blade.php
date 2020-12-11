@@ -5,9 +5,9 @@
     @include('core-templates::common.errors')
     --}}
 
-    <div class="row mt-5">
+    <div class="row">
         <div class="col-sm-12">
-          <create-story username="{{$timeline->username}}"></create-story>
+          <create-story :dto-user="{{ json_encode($dtoUser) }}" :stories="{{ json_encode($stories) }}"></create-story>
         </div>
     </div>
 @endsection
