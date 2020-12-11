@@ -19,3 +19,7 @@ vendor/bin/phpunit --group mfdev
 
 %%%
 cp app/Patches/ThemeServiceProvider.php vendor/teepluss/theme/src/ThemeServiceProvider.php
+
+# https://stackoverflow.com/questions/56605551/laravel-5-8-env-testing-file-is-not-working
+$ php artisan config:cache --env=testing
+$ php artisan config:cache --env=local

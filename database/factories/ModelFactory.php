@@ -157,3 +157,14 @@ $factory->define(App\User::class, function (Faker\Generator $faker) {
         //'city' => $faker->city,
     ];
 });
+
+$factory->define(App\Vault::class, function (Faker\Generator $faker) {
+    return [
+        'vname' => $faker->catchPhrase,
+    ];
+});
+$factory->define(App\Vaultfolder::class, function (Faker\Generator $faker) {
+    return [
+        'vfname' => $faker->bs,
+    ];
+});
