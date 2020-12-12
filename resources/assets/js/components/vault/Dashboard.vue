@@ -10,7 +10,12 @@
       </aside>
 
       <main class="col-md-9 d-flex align-items-center">
-        <vue-dropzone ref="myVueDropzone" id="dropzone" :options="dropzoneOptions"></vue-dropzone>
+        <vue-dropzone 
+          ref="myVueDropzone" 
+          id="dropzone" 
+          :options="dropzoneOptions"
+          v-on:vdropzone-sending="sendingEvent"
+          ></vue-dropzone>
       </main>
 
     </section>
@@ -49,10 +54,16 @@ export default {
     },
 
     dropzoneOptions: {
-        url: 'https://httpbin.org/post',
+        url: '/mediafiles',
+        paramName: 'mediafile',
+        //url: 'https://httpbin.org/post',
         thumbnailWidth: 150,
         maxFilesize: 3.9,
-        headers: { "My-Awesome-Header": "header value" }
+        headers: { 
+          'X-Requested-With': 'XMLHttpRequest', 
+          //'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': document.head.querySelector('[name=csrf-token]').content,
+        },
     }
   }),
 
@@ -69,6 +80,11 @@ export default {
 
 
   methods: {
+    sendingEvent (file, xhr, formData) {
+      formData.append('resource_id', 1); // %FIXME hardcoded
+      formData.append('resource_type', 'vaultfolders');
+      formData.append('mftype', 'vault');
+    },
     /*
     async shareStory() {
       const url = `/${this.dtoUser.username}/stories`;
