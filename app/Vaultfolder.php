@@ -37,8 +37,8 @@ class Vaultfolder extends BaseModel implements Guidable, Sluggable
     //--------------------------------------------
 
     protected $casts = [
-        'meta' => 'array',
         'cattrs' => 'array',
+        'meta' => 'array',
     ];
 
     /*

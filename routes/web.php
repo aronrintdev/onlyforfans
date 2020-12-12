@@ -316,6 +316,7 @@ Route::group(['prefix' => '/{username}', 'middleware' => 'auth'], function ($use
 
 });
 
+
 Route::group(['prefix' => '/{username}', 'middleware' => ['auth', 'editown']], function ($username) {
 
     Route::get('/messages', 'UserController@messages');
@@ -345,6 +346,8 @@ Route::group(['prefix' => '/{username}', 'middleware' => ['auth', 'editown']], f
     Route::resource('stories', 'StoriesController', [
         'only' => ['index', 'store', 'create',],
     ]);
+
+    Route::get('/my-vault', ['as'=>'vault.dashboard', 'uses' => 'VaultController@dashboard']);
 
 });
 

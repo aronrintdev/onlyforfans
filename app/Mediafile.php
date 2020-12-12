@@ -22,32 +22,20 @@ class Mediafile extends BaseModel implements Guidable, Sluggable
     ];
 
     //--------------------------------------------
-    // Polymorhpic Relationships
-    //      ~ Organization, Vendor, User
+    // Relationships
     //--------------------------------------------
     public function resource() {
         return $this->morphTo();
     }
 
     //--------------------------------------------
-    // Accessors/Mutators
+    // Accessors/Mutators | Casts
     //--------------------------------------------
 
-    public function getMetaAttribute($value) {
-        return !empty($value) ? json_decode($value,true) : [];
-    }
-
-    public function setMetaAttribute($value) {
-        $this->attributes['meta'] = !empty($value) ? json_encode($value) : null;
-    }
-
-    public function getCattrsAttribute($value) {
-        return !empty($value) ? json_decode($value,true) : [];
-    }
-
-    public function setCattrsAttribute($value) {
-        $this->attributes['cattrs'] = !empty($value) ? json_encode($value) : null;
-    }
+    protected $casts = [
+        'cattrs' => 'array',
+        'meta' => 'array',
+    ];
 /*
     public function getFilenameAttribute() {
         // like "3a889b0d-5194-5105-7c0b-5c789342dc53.png"

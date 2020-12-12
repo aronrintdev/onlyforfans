@@ -48,6 +48,7 @@ class Handler extends ExceptionHandler
     {        
         if($this->isHttpException($e))
         {
+            //dd($e);
             switch ($e->getStatusCode()) 
                 {
                 // not found

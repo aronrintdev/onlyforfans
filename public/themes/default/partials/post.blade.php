@@ -247,7 +247,7 @@ $main_description = $post->description;
                 </div>
             </div>
         @else
-            <div class="panel-body image-with-blur {{ clean($main_description) == ''  ? 'single-image-panel' : '' }}">
+              <div data-post_id="{{ $post->id }}" class="panel-body image-with-blur {{ clean($main_description) == ''  ? 'single-image-panel' : '' }}">
                 <div class="text-wrapper">
 
                     <div id="statisticsModal{{ $post->id }}" class="modal fade" role="dialog" tabindex='-1'>
@@ -467,7 +467,7 @@ $main_description = $post->description;
         @endif
       
     @else
-        <div class="panel-body image-with-blur {{ clean($main_description) == '' ? 'single-image-panel' : '' }}">
+        <div data-post_id="{{ $post->id }}" class="panel-body image-with-blur {{ clean($main_description) == '' ? 'single-image-panel' : '' }}">
             <div class="text-wrapper">
 
                 <div id="statisticsModal{{ $post->id }}" class="modal fade" role="dialog" tabindex='-1'>

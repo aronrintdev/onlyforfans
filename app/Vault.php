@@ -27,12 +27,12 @@ class Vault extends BaseModel implements Guidable, Sluggable
     }
 
     //--------------------------------------------
-    // Accessors/Mutators
+    // Accessors/Mutators | Casts
     //--------------------------------------------
 
     protected $casts = [
-        'meta' => 'array',
         'cattrs' => 'array',
+        'meta' => 'array',
     ];
 
     /*
