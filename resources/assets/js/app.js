@@ -23,8 +23,8 @@ Vue.use(BootstrapVueIcons)
  */
 
 Vue.component('create-story', require('./components/stories/Wizard.vue'));
-//Vue.component('story-player', require('./components/stories/Player.vue'));
 Vue.component('story-player', require('./components/stories/AutoPlayer.vue'));
+Vue.component('my-vault', require('./components/vault/Dashboard.vue'));
 
 export const eventBus = new Vue({
 /*
