@@ -7,6 +7,20 @@
 
         <h2 class="my-3">My Vault</h2>
 
+        <ul>
+          <li v-for="f in children" :id="f.id">
+            {{ f.slug }}
+          </li>
+        </ul>
+
+        <hr />
+
+        <ul>
+          <li v-for="mf in mediafiles" :id="mf.id">
+            {{ mf.slug }}
+          </li>
+        </ul>
+
       </aside>
 
       <main class="col-md-9 d-flex align-items-center">
@@ -32,16 +46,22 @@ import { eventBus } from '../../app';
 export default {
 
   props: {
-    /*
-    dtoUser: {
-      type: Object,
-      required: true
-    },
-    stories: {
+    mediafiles: {
       type: Array,
       required: true
     },
-    */
+    children: {
+      type: Array,
+      required: true
+    },
+    parent: {
+      type: Object,
+      required: true
+    },
+    cwf: {
+      type: Object,
+      required: true
+    },
   },
 
   data: () => ({
@@ -54,20 +74,22 @@ export default {
     },
 
     dropzoneOptions: {
-        url: '/mediafiles',
-        paramName: 'mediafile',
-        //url: 'https://httpbin.org/post',
-        thumbnailWidth: 150,
-        maxFilesize: 3.9,
-        headers: { 
-          'X-Requested-With': 'XMLHttpRequest', 
-          //'Content-Type': 'application/json',
-          'X-CSRF-TOKEN': document.head.querySelector('[name=csrf-token]').content,
-        },
+      //previewTemplate: '<h2>foo</h2>', // %TODO: https://www.dropzonejs.com/#config-previewTemplate, https://github.com/rowanwins/vue-dropzone/blob/master/docs/src/pages/customPreviewDemo.vue
+      url: '/mediafiles',
+      paramName: 'mediafile',
+      //url: 'https://httpbin.org/post',
+      thumbnailHeight: 128,
+      maxFilesize: 3.9,
+      headers: { 
+        'X-Requested-With': 'XMLHttpRequest', 
+        //'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': document.head.querySelector('[name=csrf-token]').content,
+      },
     }
   }),
 
   mounted() {
+    this.preloadFolder();
   },
 
   created() {
@@ -80,11 +102,26 @@ export default {
 
 
   methods: {
-    sendingEvent (file, xhr, formData) {
+    sendingEvent(file, xhr, formData) {
       formData.append('resource_id', 1); // %FIXME hardcoded
       formData.append('resource_type', 'vaultfolders');
       formData.append('mftype', 'vault');
     },
+
+    // Preload the mediafiles in the current folder (pwd)
+    preloadFolder() {
+      for ( let mf of this.mediafiles ) {
+        var file = { 
+          size: 1024, 
+          name: mf.slug,
+          type: mf.mimetype, // "image/png"
+        };
+        //var url = mf.filename;
+        var url = mf.mf_url;
+        this.$refs.myVueDropzone.manuallyAddFile(file, url);
+      }
+    },
+
     /*
     async shareStory() {
       const url = `/${this.dtoUser.username}/stories`;

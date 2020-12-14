@@ -4,9 +4,15 @@
   //dd($stories);
 @endphp
 @section('content')
-    <div class="row mt-5">
-        <div class="col-sm-12">
-          <my-vault username="{{ $sessionUser->username }}"></my-vault>
-        </div>
+  <div class="row mt-5">
+    <div class="col-sm-12">
+      <my-vault 
+         username="{{ $sessionUser->username }}" 
+         :mediafiles="{{ json_encode($mediafiles) }}" 
+         :cwf="{{ $cwf }}" 
+         :children="{{ json_encode($children) }}"
+         :parent="{{ json_encode($parent) }}"
+         ></my-vault>
     </div>
+  </div>
 @endsection

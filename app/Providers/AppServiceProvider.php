@@ -58,6 +58,7 @@ class AppServiceProvider extends ServiceProvider
 
         Relation::morphMap([
             'stories' => 'App\Story',
+            'vaultfolders' => 'App\Vaultfolder',
         ]);
     }
 

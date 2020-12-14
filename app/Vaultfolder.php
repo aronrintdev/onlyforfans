@@ -41,22 +41,6 @@ class Vaultfolder extends BaseModel implements Guidable, Sluggable
         'meta' => 'array',
     ];
 
-    /*
-    public function getMetaAttribute($value) {
-        return !empty($value) ? json_decode($value,true) : [];
-    }
-    public function setMetaAttribute($value) {
-        $this->attributes['meta'] = !empty($value) ? json_encode($value) : null;
-    }
-
-    public function getCattrsAttribute($value) {
-        return !empty($value) ? json_decode($value,true) : [];
-    }
-    public function setCattrsAttribute($value) {
-        $this->attributes['cattrs'] = !empty($value) ? json_encode($value) : null;
-    }
-     */
-
     //--------------------------------------------
     // Methods
     //--------------------------------------------

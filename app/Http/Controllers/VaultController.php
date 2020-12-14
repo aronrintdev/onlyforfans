@@ -22,8 +22,35 @@ class VaultController extends AppBaseController
         ];
         \View::share('g_php2jsVars',$this->_php2jsVars);
 
+        $myVault = $sessionUser->vaults()->first(); // %FIXME
+        $cwf = $myVault->getRootFolder(); // 'current working folder'
+        $parent = $cwf->vfparent;
+        $children = $cwf->vfchildren;
+        $cwfMediafiles = $cwf->mediafiles;
+
+        /*
+        dd( 
+            $cwf->toArray(), 
+            //$parent->toArray(), 
+            $children->toArray() 
+        );
+         */
+        //dd( 'myVault', $sessionUser->vaults[0]->vaultfolders);
+        //dd( 'myVault', $myVault->vaultfolders);
+        //dd( 'cwf', $cwf, $cwf->mediafiles->toArray() );
+        //dd( 'my_vaultfiles', $cwf->mediafiles->toArray() );
+
         return view('vault.dashboard', [
             'sessionUser' => $sessionUser,
+            'cwf' => $cwf,
+            'parent' => $parent,
+            'children' => $children,
+            //'my_vaultfiles' => $cwf->mediafiles,
+            'mediafiles' => $cwfMediafiles->map( function($item, $iter) {
+                $a = $item->toArray();
+                $a['mf_url'] = Storage::disk('s3')->url($item->filename);
+                return $a;
+            }),
             //'stories' => $storiesA,
             //'timeline' => $sessionUser->timeline,
         ]);
@@ -66,7 +93,7 @@ class VaultController extends AppBaseController
     {
         /*
         $request['attrs'] = json_decode($request['attrs'], true); // decode 'complex' data
-        
+
         $sessionUser = Auth::user();
         $this->validate($request, [
             'attrs' => 'required',

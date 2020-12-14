@@ -23,7 +23,11 @@ class Vault extends BaseModel implements Guidable, Sluggable
         return $this->belongsTo('App\User');
     }
     public function vaultfolders() {
-        return $this->belongsTo('App\Vaultfolder');
+        return $this->hasMany('App\Vaultfolder');
+    }
+
+    public function getRootFolder() {
+        return $this->vaultfolders()->whereNull('parent_id')->first();
     }
 
     //--------------------------------------------
