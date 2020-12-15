@@ -1,20 +1,22 @@
 @extends('layouts.app2')
 
 @php
-  //dd($stories);
+  //dd($myVault->id);
 @endphp
 @section('content')
   <div class="row mt-5">
     <div class="col-sm-12">
       <my-vault 
-         username="{{ $sessionUser->username }}" 
-         :mediafiles="{{ json_encode($mediafiles) }}" 
-         :cwf="{{ $cwf }}" 
-         :parent="{{ json_encode($parent) }}"
-         ></my-vault>
+        :vault_pkid="{{ $myVault->id }}"
+        :vaultfolder_pkid="{{ $vaultRootFolder->id }}"
+        ></my-vault>
     </div>
   </div>
 {{--
          :children="{{ json_encode($children) }}"
+         :mediafiles="{{ json_encode($mediafiles) }}" 
+         :cwf="{{ $cwf }}" 
+         :parent="{{ json_encode($parent) }}"
+         username="{{ $sessionUser->username }}" 
 --}}
 @endsection

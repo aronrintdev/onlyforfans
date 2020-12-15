@@ -256,14 +256,11 @@ Route::get('messages/{username?}', 'MessageController@index');
 
 Route::group(['middleware' => ['auth']], function ($username) {
     Route::resource('vaultfolders', 'VaultfoldersController', [
-        'only' => [
-            'index', 
-            'show', 
-            //'store', 
-            //'create',
-        ],
+        'only' => [ 'index', 'show' ],
     ]);
-
+    Route::resource('vaults', 'VaultsController', [
+        'only' => [ 'index', 'show' ],
+    ]);
 });
 
 
@@ -360,7 +357,7 @@ Route::group(['prefix' => '/{username}', 'middleware' => ['auth', 'editown']], f
         'only' => ['index', 'store', 'create',],
     ]);
 
-    Route::get('/my-vault', ['as'=>'vault.dashboard', 'uses' => 'VaultController@dashboard']);
+    Route::get('/my-vault', ['as'=>'vault.dashboard', 'uses' => 'VaultsController@dashboard']);
 
 });
 

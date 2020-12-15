@@ -2,28 +2,24 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 import axios from 'axios';
 
-/*
-https://wookie.codesubmit.io/movies
-https://wookie.codesubmit.io/movies?q=<search_term>
-  ~ For authentication pass the "Authorization: Bearer Wookie2019" header
-  */
-
 Vue.use(Vuex);
-
-//axios.defaults.baseURL = '/';
-//axios.defaults.headers.common['Authorization'] = 'Bearer Wookie2019';
-//axios.defaults.headers.get['Accepts'] = 'application/json';
 
 export default new Vuex.Store({
 
     state: {
-        children: [],
+        vault: { },
+        vaultfolder: { },
+        //children: [],
+        //mediafiles: [],
         is_loading: true
     },
 
     mutations: {
-        UPDATE_CHILDREN (state, payload) {
-            state.children = payload.hasOwnProperty('children') ? payload.children : [];
+        UPDATE_VAULT (state, payload) {
+            state.vault = payload.hasOwnProperty('vault') ? payload.vault : [];
+        },
+        UPDATE_VAULTFOLDER (state, payload) {
+            state.vaultfolder = payload.hasOwnProperty('vaultfolder') ? payload.vaultfolder : [];
         },
         UPDATE_LOADING(state, payload) {
             state.is_loading = payload;
@@ -31,27 +27,34 @@ export default new Vuex.Store({
     },
 
     actions: {
-        getChildren({ commit }, vfId='root') {
-            const url = `/vaultfolders?vf_id=${vfId}`;
+        getVault({ commit }, pkid) {
+            const url = `/vaults/${pkid}`;
             axios.get(url).then( (response) => {
-                commit('UPDATE_CHILDREN', response.data);
+                commit('UPDATE_VAULT', response.data);
                 commit('UPDATE_LOADING', false);
             });
         },
-      /*
-        getSearch({ commit }, querystr) {
-            axios.get('/movies?q='+querystr).then( (response) => {
-                commit('UPDATE_CHILDREN', response.data);
+        getVaultfolder({ commit }, pkid) {
+            const url = `/vaultfolders/${pkid}`;
+            axios.get(url).then( (response) => {
+                commit('UPDATE_VAULTFOLDER', response.data);
                 commit('UPDATE_LOADING', false);
             });
         },
-        */
     },
 
     getters: {
         is_loading: state => state.is_loading, // indicates if Vuex has loaded data or not
+        vault: state => state.vault,
+        vaultfolder: state => state.vaultfolder,
+        //children: state => state.vault.children, // Flat list
+        //mediafiles: state => state.vault.mediafiles, // Flat list
 
-        children: state => state.children, // Flat list
+        //children: state => state.children, // Flat list
+        //mediafiles: state => state.mediafiles, // Flat list
+
+    }
+});
 
       /*
         // Find a specific movie by slug
@@ -75,7 +78,4 @@ export default new Vuex.Store({
             return result;
         },
         */
-
-    }
-});
 

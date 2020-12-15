@@ -6,7 +6,6 @@
       <aside class="col-md-3">
 
         <h2 class="my-3">My Vault</h2>
-
         <h3 class="my-3">Vault
           > Root
         </h3>
@@ -20,9 +19,7 @@
         <hr />
 
         <ul>
-          <li v-for="mf in mediafiles" :id="mf.id">
-            {{ mf.slug }}
-          </li>
+          <li v-for="mf in mediafiles" :id="mf.id"> {{ mf.slug }} </li>
         </ul>
 
       </aside>
@@ -45,28 +42,43 @@ import Vuex from 'vuex';
 import vue2Dropzone from 'vue2-dropzone';
 import 'vue2-dropzone/dist/vue2Dropzone.min.css';
 
-import { eventBus } from '../../app';
+//import { eventBus } from '../../app';
 
 export default {
 
   props: {
-    mediafiles: {
-      type: Array,
+    vault_pkid: {
       required: true,
+      type: Number,
     },
-    parent: {
+    vaultfolder_pkid: {
       required: true,
-      validator: prop => typeof prop === 'Object' || prop === null
-    },
-    cwf: {
-      type: Object,
-      required: true,
+      type: Number,
     },
   },
 
   computed: {
-    ...Vuex.mapState(['children']),
+    ...Vuex.mapState(['vault']),
+    ...Vuex.mapState(['vaultfolder']),
+
+    mediafiles() {
+      return this.vaultfolder.mediafiles;
+    },
+    parent() {
+      return this.vaultfolder.vfparent;
+    },
+    children() {
+      return this.vaultfolder.vfchildren;
+    },
   },
+
+  watch: {
+    mediafiles (newVal, oldVal) {
+      console.log(newVal);
+      this.loadDropzone(newVal);
+    }
+  },
+
 
   data: () => ({
 
@@ -87,12 +99,12 @@ export default {
 
   mounted() {
     //console.log('mounted', { cwf: this.cwf, // use prop });
-    this.preloadFolder();
   },
 
   created() {
-    this.$store.dispatch('getChildren');
-    //this.$store.dispatch('getMediafiles');
+    //this.$store.dispatch('getChildren');
+    this.$store.dispatch('getVault', this.vault_pkid);
+    this.$store.dispatch('getVaultfolder', this.vaultfolder_pkid);
   },
 
   methods: {
@@ -104,8 +116,8 @@ export default {
     },
 
     // Preload the mediafiles in the current folder (pwd)
-    preloadFolder() {
-      for ( let mf of this.mediafiles ) { // use prop
+    loadDropzone(files) {
+      for ( let mf of files ) { // use prop
         this.$refs.myVueDropzone.manuallyAddFile({
           size: 1024, 
           name: mf.slug,
@@ -115,7 +127,9 @@ export default {
     },
 
     async doNav(e, vfId) {
-      this.$store.dispatch('getChildren', vfId);
+      this.$store.dispatch('getVault', id); // %TODO: cobmine?
+      //this.$store.dispatch('getChildren', vfId); // %TODO: cobmine?
+      //this.$store.dispatch('getMediafiles', vfId);
     },
   },
 
