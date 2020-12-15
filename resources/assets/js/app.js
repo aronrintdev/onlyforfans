@@ -4,9 +4,12 @@
  * building robust, powerful web applications using Vue and Laravel.
  */
 
+import store from './store';
+
 //require('./bootstrap');
 window.axios = require('axios');
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+//axios.defaults.baseURL = '/';
 
 window.Vue = require('vue');
 
@@ -40,6 +43,14 @@ export const eventBus = new Vue({
 });
 
 const app = new Vue({
-    el: '#app'
+    store,
+    el: '#app',
 });
 
+/*
+const app = new Vue({
+    //router,
+    store,
+    render: h => h(App),
+}).$mount('#app');
+*/
