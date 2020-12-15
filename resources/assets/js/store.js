@@ -9,8 +9,6 @@ export default new Vuex.Store({
     state: {
         vault: { },
         vaultfolder: { },
-        //children: [],
-        //mediafiles: [],
         is_loading: true
     },
 
@@ -49,11 +47,7 @@ export default new Vuex.Store({
         vaultfolder: state => state.vaultfolder,
         //children: state => state.vault.children, // Flat list
         //mediafiles: state => state.vault.mediafiles, // Flat list
-
-        //children: state => state.children, // Flat list
-        //mediafiles: state => state.mediafiles, // Flat list
-
-    }
+    },
 });
 
       /*

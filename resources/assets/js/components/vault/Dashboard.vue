@@ -51,7 +51,7 @@ export default {
       required: true,
       type: Number,
     },
-    vaultfolder_pkid: {
+    vaultfolder_pkid: { // init value
       required: true,
       type: Number,
     },
@@ -87,6 +87,8 @@ export default {
 
     show: true,
 
+    currentVaultFolderPKID: null,
+
     dropzoneOptions: {
       //previewTemplate: '<h2>foo</h2>', // %TODO: https://www.dropzonejs.com/#config-previewTemplate, https://github.com/rowanwins/vue-dropzone/blob/master/docs/src/pages/customPreviewDemo.vue
       url: '/mediafiles',
@@ -105,7 +107,7 @@ export default {
   },
 
   created() {
-    //this.$store.dispatch('getChildren');
+    this.currentVaultFolderPKID = this.vaultfolder_pkid;
     this.$store.dispatch('getVault', this.vault_pkid);
     this.$store.dispatch('getVaultfolder', this.vaultfolder_pkid);
   },
@@ -113,7 +115,7 @@ export default {
   methods: {
 
     sendingEvent(file, xhr, formData) {
-      formData.append('resource_id', 1); // %FIXME hardcoded
+      formData.append('resource_id', this.currentVaultFolderPKID);
       formData.append('resource_type', 'vaultfolders');
       formData.append('mftype', 'vault');
     },
@@ -131,9 +133,8 @@ export default {
     },
 
     async doNav(e, vaultFolderPKID) {
+      this.currentVaultFolderPKID = vaultFolderPKID;
       this.$store.dispatch('getVaultfolder', vaultFolderPKID); // %TODO: cobmine?
-      //this.$store.dispatch('getChildren', vfId); // %TODO: cobmine?
-      //this.$store.dispatch('getMediafiles', vfId);
     },
   },
 
