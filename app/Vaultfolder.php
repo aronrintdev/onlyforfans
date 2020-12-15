@@ -1,6 +1,7 @@
 <?php
 namespace App;
 
+use Exception;
 use App\SluggableTraits;
 use App\Interfaces\Guidable;
 //use App\Interfaces\Nameable;
@@ -40,6 +41,26 @@ class Vaultfolder extends BaseModel implements Guidable, Sluggable
         'cattrs' => 'array',
         'meta' => 'array',
     ];
+    
+    public function getBreadcrumb() : array {
+        $MAX_DEPTH = 15;
+        $iter = 0;
+
+        $breadcrumb = [];
+        $vf = Vaultfolder::find($this->id);
+        while ( !empty($vf) ) {
+            if ($iter++ > $MAX_DEPTH) {
+                throw new Exception('Exceeded max sub-folder depth');
+            }
+            array_unshift($breadcrumb, [
+                'pkid' => $vf->id,
+                'vfname' => $vf->vfname,
+                'slug' => $vf->slug,
+            ]);
+            $vf = !empty($vf->parent_id) ? Vaultfolder::find($vf->parent_id) : null;
+        }
+        return $breadcrumb;
+    }
 
     //--------------------------------------------
     // Methods

@@ -7,8 +7,9 @@ Vue.use(Vuex);
 export default new Vuex.Store({
 
     state: {
-        vault: { },
-        vaultfolder: { },
+        vault: {},
+        vaultfolder: {},
+        breadcrumb: [],
         is_loading: true
     },
 
@@ -18,6 +19,9 @@ export default new Vuex.Store({
         },
         UPDATE_VAULTFOLDER (state, payload) {
             state.vaultfolder = payload.hasOwnProperty('vaultfolder') ? payload.vaultfolder : [];
+        },
+        UPDATE_BREADCRUMB (state, payload) {
+            state.breadcrumb = payload.hasOwnProperty('breadcrumb') ? payload.breadcrumb : [];
         },
         UPDATE_LOADING(state, payload) {
             state.is_loading = payload;
@@ -36,6 +40,7 @@ export default new Vuex.Store({
             const url = `/vaultfolders/${pkid}`;
             axios.get(url).then( (response) => {
                 commit('UPDATE_VAULTFOLDER', response.data);
+                commit('UPDATE_BREADCRUMB', response.data);
                 commit('UPDATE_LOADING', false);
             });
         },
@@ -45,6 +50,7 @@ export default new Vuex.Store({
         is_loading: state => state.is_loading, // indicates if Vuex has loaded data or not
         vault: state => state.vault,
         vaultfolder: state => state.vaultfolder,
+        breadcrumb: state => state.breadcrumb,
         //children: state => state.vault.children, // Flat list
         //mediafiles: state => state.vault.mediafiles, // Flat list
     },

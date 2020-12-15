@@ -43,10 +43,12 @@ class VaultfoldersController extends AppBaseController
     {
         $sessionUser = Auth::user();
         $vaultfolder = Vaultfolder::where('id', $pkid)->with('vfchildren', 'vfparent', 'mediafiles')->first();
+        $breadcrumb = $vaultfolder->getBreadcrumb();
 
         return response()->json([
             'sessionUser' => $sessionUser,
             'vaultfolder' => $vaultfolder,
+            'breadcrumb' => $breadcrumb,
         ]);
     }
 

@@ -6,13 +6,13 @@
       <aside class="col-md-3">
 
         <h2 class="my-3">My Vault</h2>
-        <h3 class="my-3">Vault
-          > Root
-        </h3>
+        <b-breadcrumb>
+          <b-breadcrumb-item v-for="(item, index) in breadcrumbNav" :key="item.pkid" @click="doNav($event, item.pkid)" :active="item.active">{{ item.text }}</b-breadcrumb-item>
+        </b-breadcrumb>
 
         <b-list-group>
           <b-list-group-item v-for="(vaultFolder, index) in children" :key="vaultFolder.guid" role="button" @click="doNav($event, vaultFolder.id)">
-            {{ vaultFolder.slug }}
+            {{ vaultFolder.vfname }}
           </b-list-group-item>
         </b-list-group>
 
@@ -60,6 +60,7 @@ export default {
   computed: {
     ...Vuex.mapState(['vault']),
     ...Vuex.mapState(['vaultfolder']),
+    ...Vuex.mapState(['breadcrumb']),
 
     mediafiles() {
       return this.vaultfolder.mediafiles;
@@ -70,18 +71,25 @@ export default {
     children() {
       return this.vaultfolder.vfchildren;
     },
+    breadcrumbNav() {
+      const result = [];
+      for ( let b of this.breadcrumb ) {
+        const isActive = b.pkid === this.currentVaultFolderPKID;
+        result.push({
+          pkid: b.pkid,
+          text: b.vfname,
+          active: isActive,
+        });
+      }
+      return result;
+    },
   },
 
   watch: {
     mediafiles (newVal, oldVal) {
-      console.log('watch-mediafiles', {
-        oldVal,
-        newVal,
-      });
       this.loadDropzone(newVal);
-    }
+    },
   },
-
 
   data: () => ({
 
@@ -134,7 +142,7 @@ export default {
 
     async doNav(e, vaultFolderPKID) {
       this.currentVaultFolderPKID = vaultFolderPKID;
-      this.$store.dispatch('getVaultfolder', vaultFolderPKID); // %TODO: cobmine?
+      this.$store.dispatch('getVaultfolder', vaultFolderPKID);
     },
   },
 
