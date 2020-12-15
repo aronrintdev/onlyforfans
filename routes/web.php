@@ -254,6 +254,19 @@ Route::get('messages/{username?}', 'MessageController@index');
 |--------------------------------------------------------------------------
 */
 
+Route::group(['middleware' => ['auth']], function ($username) {
+    Route::resource('vaultfolders', 'VaultfoldersController', [
+        'only' => [
+            'index', 
+            'show', 
+            //'store', 
+            //'create',
+        ],
+    ]);
+
+});
+
+
 // Publicly user profile view
 
 Route::group(['prefix' => '/{username}'], function ($username) {

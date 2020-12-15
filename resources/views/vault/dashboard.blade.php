@@ -10,9 +10,11 @@
          username="{{ $sessionUser->username }}" 
          :mediafiles="{{ json_encode($mediafiles) }}" 
          :cwf="{{ $cwf }}" 
-         :children="{{ json_encode($children) }}"
          :parent="{{ json_encode($parent) }}"
          ></my-vault>
     </div>
   </div>
+{{--
+         :children="{{ json_encode($children) }}"
+--}}
 @endsection

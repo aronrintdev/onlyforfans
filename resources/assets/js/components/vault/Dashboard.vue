@@ -7,16 +7,20 @@
 
         <h2 class="my-3">My Vault</h2>
 
-        <ul>
-          <li v-for="f in children" :id="f.id">
+        <h3 class="my-3">Vault
+          > Root > {{ foo }}
+        </h3>
+
+        <b-list-group :children.sync="children">
+          <b-list-group-item v-for="(f,idx) in children" :key="f.guid" role="button" @click="doNav($event, f.id)">
             {{ f.slug }}
-          </li>
-        </ul>
+          </b-list-group-item>
+        </b-list-group>
 
         <hr />
 
         <ul>
-          <li v-for="mf in mediafiles" :id="mf.id">
+          <li v-for="mf in attrs.mediafiles" :id="mf.id">
             {{ mf.slug }}
           </li>
         </ul>
@@ -25,11 +29,11 @@
 
       <main class="col-md-9 d-flex align-items-center">
         <vue-dropzone 
-          ref="myVueDropzone" 
-          id="dropzone" 
-          :options="dropzoneOptions"
-          v-on:vdropzone-sending="sendingEvent"
-          ></vue-dropzone>
+            ref="myVueDropzone" 
+            id="dropzone" 
+            :options="dropzoneOptions"
+            v-on:vdropzone-sending="sendingEvent"
+            ></vue-dropzone>
       </main>
 
     </section>
@@ -37,6 +41,7 @@
 </template>
 
 <script>
+import Vuex from 'vuex';
 import vue2Dropzone from 'vue2-dropzone';
 import 'vue2-dropzone/dist/vue2Dropzone.min.css';
 
@@ -48,29 +53,37 @@ export default {
   props: {
     mediafiles: {
       type: Array,
-      required: true
-    },
-    children: {
-      type: Array,
-      required: true
+      required: true,
     },
     parent: {
-      type: Object,
-      required: true
+      //type: Object,
+      required: true,
+      validator: prop => typeof prop === 'Object' || prop === null
     },
     cwf: {
       type: Object,
-      required: true
+      required: true,
     },
+  },
+
+  computed: {
+        ...Vuex.mapState(['children']),
   },
 
   data: () => ({
 
     show: true,
+    
+    foo: 'bar baz',
 
-    storyAttrs: {
-      contents: '',
-      color: '#fff',
+    //m_mediafiles: [ ...this.mediafiles ],
+    //m_children: [ ...this.children ],
+
+    attrs: {
+      //mediafiles: this.mediafiles,
+      //children: this.children,
+      parent: this.parent,
+      cwf: this.cwf,
     },
 
     dropzoneOptions: {
@@ -89,19 +102,32 @@ export default {
   }),
 
   mounted() {
+    console.log('mounted', {
+      cwf: this.cwf, // use prop
+    });
     this.preloadFolder();
   },
 
   created() {
+    this.$store.dispatch('getChildren');
     /*
     eventBus.$on('share-story', () => {
       this.shareStory();
     });
-    */
+     */
   },
 
 
   methods: {
+
+    doNav(e, vfId) {
+      console.log('doNav', {
+        event: e,
+        val: vfId,
+      });
+      this.changeFolder(vfId);
+    },
+
     sendingEvent(file, xhr, formData) {
       formData.append('resource_id', 1); // %FIXME hardcoded
       formData.append('resource_type', 'vaultfolders');
@@ -110,7 +136,7 @@ export default {
 
     // Preload the mediafiles in the current folder (pwd)
     preloadFolder() {
-      for ( let mf of this.mediafiles ) {
+      for ( let mf of this.mediafiles ) { // use prop
         var file = { 
           size: 1024, 
           name: mf.slug,
@@ -122,33 +148,21 @@ export default {
       }
     },
 
-    /*
-    async shareStory() {
-      const url = `/${this.dtoUser.username}/stories`;
-      let payload = new FormData();
-      const json = JSON.stringify({
-        stype: this.stype,
-        bgcolor: this.storyAttrs.color || null,
-        content: this.storyAttrs.contents,
-      });
-      payload.append('attrs', json);
+    async changeFolder(vfId) {
+      const url = `/vaultfolders/${vfId}`;
 
-      switch ( this.stype ) {
-        case 'text':
-          break;
-        case 'image':
-          payload.append('mediafile', this.mediafile);
-          break;
-      } 
-
-      const response = await axios.post(url, payload, {
+      const response = await axios.get(url, {
         headers: {
           'Content-Type': 'application/json',
         }
       });
-      this.step = this.steps.SELECT_STYPE;
+      //this.attrs.cwf = response.cwf;
+      //this.attrs.parent = response.parent;
+      this.m_children = response.children;
+      this.foo = "here 123";
+      //this.$emit('update:children', this.children)
+      //this.attrs.mediafiles = response.mediafiles;
     },
-      */
   },
 
   components: {
