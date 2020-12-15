@@ -23,6 +23,24 @@ class VaultsController extends AppBaseController
         \View::share('g_php2jsVars',$this->_php2jsVars);
 
         $myVault = $sessionUser->vaults()->first(); // %FIXME
+
+        // If it doesn't exist, create one
+        if ( empty($myVault) ) {
+            $myVault = DB::transaction(function () use($sessionUser) {
+                $v = Vault::create([
+                    'vname' => 'My Home Vault',
+                    'user_id' => $sessionUser->id,
+                ]);
+                $vf = Vaultfolder::create([
+                    'parent_id' => null,
+                    'vault_id' => $v->id,
+                    'vfname' => 'Root',
+                ]);
+                $v->refresh();
+                return $v;
+            });
+        }
+
         $vaultRootFolder = $myVault->getRootFolder();
 
         return view('vault.dashboard', [
