@@ -11,8 +11,8 @@
         </h3>
 
         <b-list-group>
-          <b-list-group-item v-for="(f,idx) in children" :key="f.guid" role="button" @click="doNav($event, f.id)">
-            {{ f.slug }}
+          <b-list-group-item v-for="(vaultFolder, index) in children" :key="vaultFolder.guid" role="button" @click="doNav($event, vaultFolder.id)">
+            {{ vaultFolder.slug }}
           </b-list-group-item>
         </b-list-group>
 
@@ -74,7 +74,10 @@ export default {
 
   watch: {
     mediafiles (newVal, oldVal) {
-      console.log(newVal);
+      console.log('watch-mediafiles', {
+        oldVal,
+        newVal,
+      });
       this.loadDropzone(newVal);
     }
   },
@@ -117,17 +120,18 @@ export default {
 
     // Preload the mediafiles in the current folder (pwd)
     loadDropzone(files) {
+      this.$refs.myVueDropzone.removeAllFiles(true);
       for ( let mf of files ) { // use prop
         this.$refs.myVueDropzone.manuallyAddFile({
           size: 1024, 
           name: mf.slug,
           type: mf.mimetype, // "image/png"
-        }, mf.mf_url);
+        }, mf.filepath);
       }
     },
 
-    async doNav(e, vfId) {
-      this.$store.dispatch('getVault', id); // %TODO: cobmine?
+    async doNav(e, vaultFolderPKID) {
+      this.$store.dispatch('getVaultfolder', vaultFolderPKID); // %TODO: cobmine?
       //this.$store.dispatch('getChildren', vfId); // %TODO: cobmine?
       //this.$store.dispatch('getMediafiles', vfId);
     },

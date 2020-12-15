@@ -42,13 +42,7 @@ class VaultfoldersController extends AppBaseController
     public function show(Request $request, $pkid)
     {
         $sessionUser = Auth::user();
-        $vaultfolder = Vaultfolder::where('id', $pkid)->with('vfchildren','vfparent')->first();
-        $mediafiles = $vaultfolder->mediafiles->map( function($item, $iter) {
-            $a = $item->toArray();
-            $a['mf_url'] = Storage::disk('s3')->url($item->filename);
-            return $a;
-        });
-        $vaultfolder->mediafiles = $mediafiles;
+        $vaultfolder = Vaultfolder::where('id', $pkid)->with('vfchildren', 'vfparent', 'mediafiles')->first();
 
         return response()->json([
             'sessionUser' => $sessionUser,

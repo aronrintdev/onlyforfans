@@ -2,7 +2,7 @@
 namespace App;
 
 //use Illuminate\Support\Facades\Auth;
-//use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Storage;
 //use Storage;
 //use App\Libs\Utils\ViewHelpers;
 //use App\Libs\Image;
@@ -17,6 +17,7 @@ class Mediafile extends BaseModel implements Guidable, Sluggable
     use SluggableTraits;
 
     protected $guarded = ['id','created_at','updated_at'];
+    protected $appends = ['filepath'];
 
     public static $vrules = [
     ];
@@ -36,12 +37,10 @@ class Mediafile extends BaseModel implements Guidable, Sluggable
         'cattrs' => 'array',
         'meta' => 'array',
     ];
-/*
-    public function getFilenameAttribute() {
-        // like "3a889b0d-5194-5105-7c0b-5c789342dc53.png"
-        return $this->guid.'.'.$this->orig_ext;
+
+    public function getFilepathAttribute($value) {
+        return !empty($this->filename) ? Storage::disk('s3')->url($this->filename) : null;
     }
- */
 
     //--------------------------------------------
     // Methods
