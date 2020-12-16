@@ -247,7 +247,6 @@ Route::group(['prefix' => '/admin', 'middleware' => ['auth', 'role:admin']], fun
 Route::get('messages/{username?}', 'MessageController@index');
 
 
-
 /*
 |--------------------------------------------------------------------------
 | User routes
@@ -256,7 +255,7 @@ Route::get('messages/{username?}', 'MessageController@index');
 
 Route::group(['middleware' => ['auth']], function ($username) {
     Route::resource('vaultfolders', 'VaultfoldersController', [
-        'only' => [ 'index', 'show' ],
+        'only' => [ 'index', 'show', 'store' ],
     ]);
     Route::resource('vaults', 'VaultsController', [
         'only' => [ 'index', 'show' ],

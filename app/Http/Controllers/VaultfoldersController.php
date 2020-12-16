@@ -52,4 +52,20 @@ class VaultfoldersController extends AppBaseController
         ]);
     }
 
+    public function store(Request $request)
+    {
+        $request->validate([
+            'parent_id' => 'required|integer|min:1',
+            'vault_id' => 'required|integer|min:1',
+            'vfname' => 'required|string',
+        ]);
+
+        $sessionUser = Auth::user();
+        $vaultfolder = Vaultfolder::create( $request->only('parent_id', 'vault_id', 'vfname') );
+
+        return response()->json([
+            'vaultfolder' => $vaultfolder,
+        ]);
+    }
+
 }

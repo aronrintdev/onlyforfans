@@ -6,6 +6,9 @@
       <aside class="col-md-3">
 
         <h2 class="my-3">My Vault</h2>
+
+        <hr />
+
         <b-breadcrumb>
           <b-breadcrumb-item v-for="(item, index) in breadcrumbNav" :key="item.pkid" @click="doNav($event, item.pkid)" :active="item.active">{{ item.text }}</b-breadcrumb-item>
         </b-breadcrumb>
@@ -18,9 +21,31 @@
 
         <hr />
 
-        <ul>
-          <li v-for="mf in mediafiles" :id="mf.id"> {{ mf.slug }} </li>
+        <ul v-if="!showCreateForm" class="list-unstyled ctrl">
+          <li><b-button @click="showCreateForm=true" variant="link">New Folder</b-button></li>
         </ul>
+
+        <b-form @submit="storeFolder" v-if="showCreateForm">
+          <b-form-group>
+            <b-form-input
+              id="folder-name"
+              v-model="createForm.vfname"
+              type="text"
+              placeholder="Enter new folder name"
+              required
+              ></b-form-input>
+          </b-form-group>
+          <b-button type="submit" variant="primary">Create Folder</b-button>
+          <b-button @click="cancelCreateFolder" type="cancel" variant="secondary">Cancel</b-button>
+        </b-form>
+
+        <!--
+          <hr />
+
+          <ul>
+          <li v-for="mf in mediafiles" :id="mf.id"> {{ mf.slug }} </li>
+          </ul>
+        -->
 
       </aside>
 
@@ -74,7 +99,7 @@ export default {
     breadcrumbNav() {
       const result = [];
       for ( let b of this.breadcrumb ) {
-        const isActive = b.pkid === this.currentVaultFolderPKID;
+        const isActive = b.pkid === this.currentFolderPKID;
         result.push({
           pkid: b.pkid,
           text: b.vfname,
@@ -85,17 +110,18 @@ export default {
     },
   },
 
-  watch: {
-    mediafiles (newVal, oldVal) {
-      this.loadDropzone(newVal);
-    },
-  },
-
   data: () => ({
 
     show: true,
 
-    currentVaultFolderPKID: null,
+    showCreateForm: false,
+    createForm: {
+      vfname: '',
+      //vault_id: this.vault_pkid,
+      //parent_id: this.currentFolderPKID,
+    },
+
+    currentFolderPKID: null,
 
     dropzoneOptions: {
       //previewTemplate: '<h2>foo</h2>', // %TODO: https://www.dropzonejs.com/#config-previewTemplate, https://github.com/rowanwins/vue-dropzone/blob/master/docs/src/pages/customPreviewDemo.vue
@@ -115,22 +141,41 @@ export default {
   },
 
   created() {
-    this.currentVaultFolderPKID = this.vaultfolder_pkid;
+    this.currentFolderPKID = this.vaultfolder_pkid;
     this.$store.dispatch('getVault', this.vault_pkid);
     this.$store.dispatch('getVaultfolder', this.vaultfolder_pkid);
   },
 
   methods: {
 
+    storeFolder(e) {
+      e.preventDefault()
+      const payload = {
+        vault_id: this.vault_pkid,
+        parent_id: this.currentFolderPKID,
+        vfname: this.createForm.vfname,
+      };
+      axios.post('/vaultfolders', payload).then( (response) => {
+        console.log('response', { response });
+        this.$store.dispatch('getVaultfolder', this.currentFolderPKID);
+        this.cancelCreateFolder();
+      });
+    },
+
+    cancelCreateFolder() {
+      this.showCreateForm = false;
+      this.createForm.vfname = '';
+    },
+
     sendingEvent(file, xhr, formData) {
-      formData.append('resource_id', this.currentVaultFolderPKID);
+      formData.append('resource_id', this.currentFolderPKID);
       formData.append('resource_type', 'vaultfolders');
       formData.append('mftype', 'vault');
     },
 
     // Preload the mediafiles in the current folder (pwd)
     loadDropzone(files) {
-      this.$refs.myVueDropzone.removeAllFiles(true);
+      this.$refs.myVueDropzone.removeAllFiles();
       for ( let mf of files ) { // use prop
         this.$refs.myVueDropzone.manuallyAddFile({
           size: 1024, 
@@ -141,8 +186,14 @@ export default {
     },
 
     async doNav(e, vaultFolderPKID) {
-      this.currentVaultFolderPKID = vaultFolderPKID;
+      this.currentFolderPKID = vaultFolderPKID;
       this.$store.dispatch('getVaultfolder', vaultFolderPKID);
+    },
+  },
+
+  watch: {
+    mediafiles (newVal, oldVal) {
+      this.loadDropzone(newVal);
     },
   },
 
