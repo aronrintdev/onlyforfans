@@ -113,7 +113,8 @@ class StoriesController extends AppBaseController
 
                 if ( $request->attrs['stype'] === 'image' ) {
                     $file = $request->file('mediafile');
-                    $newFilename = $file->store('fans-platform/stories', 's3'); // %FIXME: hardcoded
+                    $subFolder = 'stories';
+                    $newFilename = $file->store('fans-platform/'.$subFolder, 's3'); // %FIXME: hardcoded
                     $mediafile = Mediafile::create([
                         'resource_id' => $story->id,
                         'resource_type' => 'stories',

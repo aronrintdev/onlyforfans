@@ -43,7 +43,17 @@ class MediafilesController extends AppBaseController
 
         try {
             $mediafile = DB::transaction(function () use(&$file, &$request) {
-                $newFilename = $file->store('fans-platform/stories', 's3');
+                switch ($request->mftype) {
+                    case 'vault':
+                        $subFolder = 'vaultfolders';
+                        break;
+                    case 'story':
+                        $subFolder = 'stories';
+                        break;
+                    default:
+                        $subFolder = 'default';
+                }
+                $newFilename = $file->store('fans-platform/'.$subFolder, 's3');
                 $mediafile = Mediafile::create([
                     'resource_id' => $request->resource_id,
                     'resource_type' => $request->resource_type,
