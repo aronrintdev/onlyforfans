@@ -12,6 +12,7 @@ COMPOSER_MEMORY_LIMIT=-1 composer require ramsey/uuid
 COMPOSER_MEMORY_LIMIT=-1 composer update
 
 %%% Migrations
+php artisan make:migration create_shareditems --create="shareditems"
 php artisan migrate --env=testing
 
 %%% Testing
