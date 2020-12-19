@@ -77,6 +77,22 @@ class MediafilesController extends AppBaseController
         }
     }
 
+    public function show(Request $request, $pkid)
+    {
+        $mediafile = Mediafile::find($pkid);
+
+        // Create sharable link
+        //   ~ https://laravel.com/docs/5.5/filesystem#retrieving-files
+        $url = Storage::disk('s3')->temporaryUrl(
+            $mediafile->filename,
+            now()->addMinutes(5) // %FIXME: hardcoded
+        );
+        return response()->json([ 
+            'mediafile' => $mediafile,
+            'url' => $url,
+        ]);
+    }
+
     public function update(Request $request, $pkid)
     {
         $this->validate($request, Mediafile::$vrules);
