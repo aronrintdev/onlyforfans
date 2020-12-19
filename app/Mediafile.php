@@ -31,7 +31,8 @@ class Mediafile extends BaseModel implements Guidable, Sluggable
     }
 
     public function sharees() {
-        return $this->morphedToMany('App\User', 'shareable');
+        //return $this->morphToMany('App\User', 'shareable');
+        return $this->morphToMany('App\User', 'shareable', 'shareables', 'shareable_id', 'sharee_id');
     }
 
     //--------------------------------------------

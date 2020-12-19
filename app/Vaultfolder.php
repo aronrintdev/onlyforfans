@@ -17,7 +17,7 @@ class Vaultfolder extends BaseModel implements Guidable, Sluggable
     ];
 
     //--------------------------------------------
-    // Relationships
+    // %%% Relationships
     //--------------------------------------------
 
     public function vault() {
@@ -33,8 +33,12 @@ class Vaultfolder extends BaseModel implements Guidable, Sluggable
         return $this->hasMany('App\Vaultfolder', 'parent_id');
     }
 
+    public function sharees() {
+        return $this->morphToMany('App\User', 'shareable', 'shareables', 'sharee_id');
+    }
+
     //--------------------------------------------
-    // Accessors/Mutators
+    // %%% Accessors/Mutators
     //--------------------------------------------
 
     protected $casts = [

@@ -64,10 +64,8 @@ class User extends Authenticatable
     // %%% Relationships
     //--------------------------------------------
 
-    public function mediafiles() {
-        //return $this->morphedByMany('App\Mediafile', 'shareable');
+    public function sharedmediafiles() {
         return $this->morphedByMany('App\Mediafile', 'shareable', 'shareables', 'sharee_id')->withTimestamps();
-        //return $this->morphedByMany('App\Mediafile', 'shareable', 'mediafiles', 'user_id');
     }
 
     public function timeline() {

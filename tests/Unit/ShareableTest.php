@@ -3,7 +3,6 @@ namespace Tests\Unit;
 
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\WithFaker;
-//use Faker\Factory as Faker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -20,22 +19,7 @@ class ShareableTest extends TestCase
     use WithFaker;
 
     private $_deleteList;
-    private static $_persist = true;
-
-    /*
-    public function test_debug()
-    {
-        $mediafile = Mediafile::find(4);
-        //$f = $s->mediafiles->first()->filename;
-        $f = $mediafile->filename;
-        //dd($f);
-        //$s = Storage::disk('s3')->get($f);
-        $s = Storage::disk('s3')->url($f);
-        //$s = Storage::disk('s3')->get($s->mediafiles->first()->filename);
-        dd($s);
-        dd($mediafile->toArray());
-    }
-     */
+    private static $_persist = false;
 
     /**
      * @group sdev
@@ -62,18 +46,29 @@ class ShareableTest extends TestCase
             'orig_ext' => $file->getClientOriginalExtension(),
         ]);
         $mediafile->refresh();
+        $this->_deleteList->push($mediafile);
 
-
-        $user->mediafiles()->attach($mediafile->id);
+        $user->sharedmediafiles()->attach($mediafile->id);
 
         // --
 
-        dump($mediafile);
+        //dump($mediafile);
 
         $this->assertNotNull($user);
         $this->assertGreaterThan(0, $user->id);
         $this->assertNotNull($vault);
         $this->assertGreaterThan(0, $vault->id);
+        $this->assertNotNull($mediafile);
+        $this->assertGreaterThan(0, $mediafile->id);
+
+        $this->assertGreaterThan(0, $user->sharedmediafiles->count());
+        $this->assertNotNull($user->sharedmediafiles[0]);
+        $this->assertSame($mediafile->guid, $user->sharedmediafiles[0]->guid);
+
+        $this->assertGreaterThan(0, $mediafile->sharees()->count());
+        $this->assertNotNull($mediafile->sharees[0]);
+        $this->assertInstanceOf(\App\User::class, $mediafile->sharees[0]);
+        $this->assertSame($user->id, $mediafile->sharees[0]->id);
     }
 
     protected function setUp() : void {
@@ -88,6 +83,14 @@ class ShareableTest extends TestCase
                 if ( $obj instanceof Vault ) {
                      $obj->vaultfolders()->delete();
                 }
+                if ( $obj instanceof Mediafile ) {
+                     $obj->sharees()->detach();
+                }
+                /*
+                if ( $obj instanceof User ) {
+                     $obj->sharedmediafiles()->detach();
+                }
+                 */
                 $obj->delete();
             }
         }
