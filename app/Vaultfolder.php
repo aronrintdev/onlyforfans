@@ -34,7 +34,7 @@ class Vaultfolder extends BaseModel implements Guidable, Sluggable
     }
 
     public function sharees() {
-        return $this->morphToMany('App\User', 'shareable', 'shareables', 'sharee_id');
+        return $this->morphToMany('App\User', 'shareable', 'shareables', 'shareable_id', 'sharee_id');
     }
 
     //--------------------------------------------

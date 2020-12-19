@@ -22,7 +22,7 @@ class ShareableTest extends TestCase
     private static $_persist = false;
 
     /**
-     * @group sdev
+     * @group OFF-sdev
      */
     public function test_can_share_mediafile()
     {
@@ -48,11 +48,9 @@ class ShareableTest extends TestCase
         $mediafile->refresh();
         $this->_deleteList->push($mediafile);
 
-        $user->sharedmediafiles()->attach($mediafile->id);
+        $user->sharedmediafiles()->attach($mediafile->id); // do share
 
         // --
-
-        //dump($mediafile);
 
         $this->assertNotNull($user);
         $this->assertGreaterThan(0, $user->id);
@@ -69,6 +67,44 @@ class ShareableTest extends TestCase
         $this->assertNotNull($mediafile->sharees[0]);
         $this->assertInstanceOf(\App\User::class, $mediafile->sharees[0]);
         $this->assertSame($user->id, $mediafile->sharees[0]->id);
+    }
+
+    /**
+     * @group sdev
+     */
+    public function test_can_share_vaultfolder()
+    {
+        $user = factory(\App\User::class)->create();
+        $user->refresh();
+        $this->_deleteList[] = $user;
+
+        $vault = Vault::doCreate($this->faker->bs, $user);
+        $rootVF = $vault->getRootFolder();
+        $vault->refresh();
+        $this->_deleteList->push($vault);
+
+        $vaultfolder = $rootVF;
+        $vaultfolder->refresh();
+
+        $user->sharedvaultfolders()->attach($vaultfolder->id); // do share
+
+        // --
+
+        $this->assertNotNull($user);
+        $this->assertGreaterThan(0, $user->id);
+        $this->assertNotNull($vault);
+        $this->assertGreaterThan(0, $vault->id);
+        $this->assertNotNull($vaultfolder);
+        $this->assertGreaterThan(0, $vaultfolder->id);
+
+        $this->assertGreaterThan(0, $user->sharedvaultfolders->count());
+        $this->assertNotNull($user->sharedvaultfolders[0]);
+        $this->assertSame($vaultfolder->guid, $user->sharedvaultfolders[0]->guid);
+
+        $this->assertGreaterThan(0, $vaultfolder->sharees()->count());
+        $this->assertNotNull($vaultfolder->sharees[0]);
+        $this->assertInstanceOf(\App\User::class, $vaultfolder->sharees[0]);
+        $this->assertSame($user->id, $vaultfolder->sharees[0]->id);
     }
 
     protected function setUp() : void {
