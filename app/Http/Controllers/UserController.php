@@ -1685,6 +1685,7 @@ class UserController extends AppBaseController
         return $theme->scope('users/settings/wallpaper', compact('wallpapers'))->render();
     }
 
+    // %TODO: DEPRECATE, use SaveditemsController
     public function savedItems($username)
     {
         $sessionUser = Auth::user();

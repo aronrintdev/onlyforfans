@@ -42,20 +42,33 @@
         <!--
           <hr />
 
-          <ul>
-          <li v-for="mf in mediafiles" :id="mf.id"> {{ mf.slug }} </li>
-          </ul>
         -->
 
       </aside>
 
-      <main class="col-md-9 d-flex align-items-center">
-        <vue-dropzone 
-            ref="myVueDropzone" 
-            id="dropzone" 
-            :options="dropzoneOptions"
-            v-on:vdropzone-sending="sendingEvent"
-            ></vue-dropzone>
+      <main class="col-md-9 OFF-d-flex OFF-align-items-center">
+
+        <section class="row">
+          <div class="col-sm-12">
+            <vue-dropzone 
+               ref="myVueDropzone" 
+               id="dropzone" 
+               :options="dropzoneOptions"
+               v-on:vdropzone-sending="sendingEvent"
+               ></vue-dropzone>
+          </div>
+        </section>
+
+        <section class="row mt-5">
+          <div class="col-sm-12">
+            <b-list-group>
+              <b-list-group-item v-for="(mf) in mediafiles" :key="mf.guid" role="button" @click="getLink($event, mf.id)">
+                {{ mf.orig_filename }}
+              </b-list-group-item>
+          </b-list-group>
+          </div>
+        </section>
+
       </main>
 
     </section>
@@ -165,6 +178,14 @@ export default {
     cancelCreateFolder() {
       this.showCreateForm = false;
       this.createForm.vfname = '';
+    },
+
+    getLink(e, mediafilePKID) {
+      axios.get(`/mediafiles/${mediafilePKID}`).then( (response) => {
+        console.log('response', { response });
+        //this.$store.dispatch('getVaultfolder', this.currentFolderPKID);
+        //this.cancelCreateFolder();
+      });
     },
 
     sendingEvent(file, xhr, formData) {

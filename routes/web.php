@@ -125,7 +125,21 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('purchased-posts', 'TimelineController@showPurchasedPosts')->name('purchased-posts');
     Route::get('post/{id}', 'TimelineController@showPost')->name('post.show');
     Route::post('update-last-seen', 'UserController@updateLastSeen')->name('update-user-status');
-    Route::resource('mediafiles', 'MediafilesController', []);
+
+    Route::resource('mediafiles', 'MediafilesController', [
+    ]);
+
+    Route::resource('vaultfolders', 'VaultfoldersController', [
+        'only' => [ 'index', 'show', 'store' ],
+    ]);
+    Route::resource('vaults', 'VaultsController', [
+        'only' => [ 'index', 'show' ],
+    ]);
+
+    Route::get('/saved/dashboard', ['as'=>'saved.dashboard', 'uses' => 'SaveditemsController@dashboard']);
+    Route::resource('saved', 'SaveditemsController', [
+        'only' => [ 'index', 'show', 'store' ],
+    ]);
 });
 
 //main project register
@@ -253,16 +267,6 @@ Route::get('messages/{username?}', 'MessageController@index');
 |--------------------------------------------------------------------------
 */
 
-Route::group(['middleware' => ['auth']], function ($username) {
-    Route::resource('vaultfolders', 'VaultfoldersController', [
-        'only' => [ 'index', 'show', 'store' ],
-    ]);
-    Route::resource('vaults', 'VaultsController', [
-        'only' => [ 'index', 'show' ],
-    ]);
-});
-
-
 // Publicly user profile view
 
 Route::group(['prefix' => '/{username}'], function ($username) {
@@ -348,7 +352,7 @@ Route::group(['prefix' => '/{username}', 'middleware' => ['auth', 'editown']], f
 
     // Route::get('/pages', 'UserController@pages');
     // Route::get('/groups', 'UserController@groups');
-    Route::get('/saved', 'UserController@savedItems');
+    Route::get('/saved', 'UserController@savedItems'); // %FIXME %DEPRECATE, use new resource route for this
 
     // %PSG
     Route::get('/stories/player', ['as'=>'stories.player', 'uses' => 'StoriesController@player']);

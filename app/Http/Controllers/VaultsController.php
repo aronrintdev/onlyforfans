@@ -26,7 +26,7 @@ class VaultsController extends AppBaseController
 
         // If it doesn't exist, create one
         if ( empty($myVault) ) {
-            $myVault = DB::transaction(function () use($sessionUser) {
+            $myVault = DB::transaction(function () use(&$sessionUser) {
                 $v = Vault::create([
                     'vname' => 'My Home Vault',
                     'user_id' => $sessionUser->id,

@@ -1,8 +1,5 @@
 @extends('layouts.app2')
 
-@php
-  //dd($myVault->id);
-@endphp
 @section('content')
   <div class="row mt-5">
     <div class="col-sm-12">
