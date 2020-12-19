@@ -21,8 +21,9 @@
 
         <hr />
 
-        <ul v-if="!showCreateForm" class="list-unstyled ctrl">
-          <li><b-button @click="showCreateForm=true" variant="link">New Folder</b-button></li>
+        <ul class="list-unstyled ctrl">
+          <li v-if="!showCreateForm"><b-button @click="showCreateForm=true" variant="link">New Folder</b-button></li>
+          <li v-if="!isShareMode"><b-button @click="isShareMode=true" variant="link">Share Files</b-button></li>
         </ul>
 
         <b-form @submit="storeFolder" v-if="showCreateForm">
@@ -39,15 +40,47 @@
           <b-button @click="cancelCreateFolder" type="cancel" variant="secondary">Cancel</b-button>
         </b-form>
 
-        <!--
-          <hr />
+        <b-form @submit="shareFiles" v-if="isShareMode">
+          <b-form-group>
+            <b-form-input
+              id="sharee"
+              v-model="shareForm.sharee"
+              type="text"
+              placeholder="Enter user to share with"
+              required
+              ></b-form-input>
+          </b-form-group>
 
-        -->
+          <section class="demo">
+            <div v-if="selected" style="padding-top:10px; width: 100%;">
+              You have selected <code>{{selected.name}}, the {{selected.race}}</code>
+            </div>
+            <div class="autosuggest-container">
+              <vue-autosuggest
+                v-model="query"
+                :suggestions="filteredOptions"
+                @focus="focusMe"
+                @click="clickHandler"
+                @input="onInputChange"
+                @selected="onSelected"
+                :get-suggestion-value="getSuggestionValue"
+                :input-props="{id:'autosuggest__input', placeholder:'Do you feel lucky, punk?'}">
+                <div slot-scope="{suggestion}" style="display: flex; align-items: center;">
+                  <img :style="{ display: 'flex', width: '25px', height: '25px', borderRadius: '15px', marginRight: '10px'}" :src="suggestion.item.avatar" />
+                  <div style="{ display: 'flex', color: 'navyblue'}">{{suggestion.item.name}}</div>
+                </div>
+              </vue-autosuggest>
+            </div>
+          </section>
+          <b-button type="submit" variant="primary">Share Selected</b-button>
+          <b-button @click="cancelShareFiles" type="cancel" variant="secondary">Cancel</b-button>
+        </b-form>
 
       </aside>
 
       <main class="col-md-9 OFF-d-flex OFF-align-items-center">
 
+        <!-- +++ File Thumbnails +++ -->
         <section class="row">
           <div class="col-sm-12">
             <vue-dropzone 
@@ -59,13 +92,15 @@
           </div>
         </section>
 
+        <!-- +++ File List +++ -->
         <section class="row mt-5">
           <div class="col-sm-12">
             <b-list-group>
               <b-list-group-item v-for="(mf) in mediafiles" :key="mf.guid" role="button" @click="getLink($event, mf.id)">
-                {{ mf.orig_filename }}
+                <span>{{ mf.orig_filename }}</span>
+                <span v-if="isShareMode"><button type="button" class="btn btn-link ml-3">Share</button></span>
               </b-list-group-item>
-          </b-list-group>
+            </b-list-group>
           </div>
         </section>
 
@@ -78,6 +113,7 @@
 <script>
 import Vuex from 'vuex';
 import vue2Dropzone from 'vue2-dropzone';
+import { VueAutosuggest } from 'vue-autosuggest'; // https://github.com/darrenjennings/vue-autosuggest#examples
 import 'vue2-dropzone/dist/vue2Dropzone.min.css';
 
 //import { eventBus } from '../../app';
@@ -121,17 +157,31 @@ export default {
       }
       return result;
     },
+
+    filteredOptions() {
+      return [
+        { 
+          data: this.suggestions[0].data.filter(option => {
+            return option.name.toLowerCase().indexOf(this.query.toLowerCase()) > -1;
+          })
+        }
+      ];
+    },
   },
 
   data: () => ({
 
-    show: true,
-
     showCreateForm: false,
+
+    isShareMode: false,
+
     createForm: {
       vfname: '',
       //vault_id: this.vault_pkid,
       //parent_id: this.currentFolderPKID,
+    },
+    shareForm: {
+      sharee: '',
     },
 
     currentFolderPKID: null,
@@ -146,7 +196,20 @@ export default {
         'X-Requested-With': 'XMLHttpRequest', 
         'X-CSRF-TOKEN': document.head.querySelector('[name=csrf-token]').content,
       },
-    }
+    },
+
+    // ---
+
+    query: "",
+    selected: "",
+    suggestions: [{
+      data: [
+        { id: 1, name: "Frodo", race: "Hobbit", avatar: "https://upload.wikimedia.org/wikipedia/en/thumb/4/4e/Elijah_Wood_as_Frodo_Baggins.png/220px-Elijah_Wood_as_Frodo_Baggins.png" },
+        { id: 2, name: "Samwise", race: "Hobbit", avatar: "https://upload.wikimedia.org/wikipedia/en/thumb/7/7b/Sean_Astin_as_Samwise_Gamgee.png/200px-Sean_Astin_as_Samwise_Gamgee.png" },
+        { id: 3, name: "Gandalf", race: "Maia", avatar: "https://upload.wikimedia.org/wikipedia/en/thumb/e/e9/Gandalf600ppx.jpg/220px-Gandalf600ppx.jpg" },
+        { id: 4, name: "Aragorn", race: "Human", avatar: "https://upload.wikimedia.org/wikipedia/en/thumb/3/35/Aragorn300ppx.png/150px-Aragorn300ppx.png" }
+      ],
+    }]
   }),
 
   mounted() {
@@ -160,6 +223,9 @@ export default {
   },
 
   methods: {
+
+    shareFiles(e) {
+    },
 
     storeFolder(e) {
       e.preventDefault()
@@ -178,6 +244,10 @@ export default {
     cancelCreateFolder() {
       this.showCreateForm = false;
       this.createForm.vfname = '';
+    },
+    cancelShareFiles() {
+      this.isShareMode = false;
+      this.shareForm.sharee = '';
     },
 
     getLink(e, mediafilePKID) {
@@ -210,6 +280,31 @@ export default {
       this.currentFolderPKID = vaultFolderPKID;
       this.$store.dispatch('getVaultfolder', vaultFolderPKID);
     },
+
+
+    // ---
+
+    clickHandler(item) {
+      // event fired when clicking on the input
+    },
+    onSelected(item) {
+      console.log('onSelected', {
+        item
+      });
+      this.selected = item.item;
+    },
+    onInputChange(text) {
+      // event fired when the input changes
+      console.log(text)
+    },
+    // This is what the <input/> value is set to when you are selecting a suggestion.
+    getSuggestionValue(suggestion) {
+      return suggestion.item.name;
+    },
+    focusMe(e) {
+      console.log(e) // FocusEvent
+    },
+
   },
 
   watch: {
@@ -220,10 +315,50 @@ export default {
 
   components: {
     vueDropzone: vue2Dropzone,
+    VueAutosuggest,
   },
 }
 </script>
 
 <style scoped>
+/* --- */
+
+.demo { 
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+input {
+  width: 260px;
+  padding: 0.5rem;
+}
+
+ul {
+  width: 100%;
+  color: rgba(30, 39, 46,1.0);
+  list-style: none;
+  margin: 0;
+  padding: 0.5rem 0 .5rem 0;
+}
+li {
+  margin: 0 0 0 0;
+  border-radius: 5px;
+  padding: 0.75rem 0 0.75rem 0.75rem;
+  display: flex;
+  align-items: center;
+}
+li:hover {
+  cursor: pointer;
+}
+
+.autosuggest-container {
+  display: flex;
+  justify-content: center;
+  width: 280px;
+}
+
+#autosuggest { width: 100%; display: block;}
+.autosuggest__results-item--highlighted {
+  background-color: rgba(51, 217, 178,0.2);
+}
 </style>
 
