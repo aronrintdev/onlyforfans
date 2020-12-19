@@ -23,14 +23,19 @@ class Mediafile extends BaseModel implements Guidable, Sluggable
     ];
 
     //--------------------------------------------
-    // Relationships
+    // %%% Relationships
     //--------------------------------------------
+
     public function resource() {
         return $this->morphTo();
     }
 
+    public function sharees() {
+        return $this->morphedToMany('App\User', 'shareable');
+    }
+
     //--------------------------------------------
-    // Accessors/Mutators | Casts
+    // %%% Accessors/Mutators | Casts
     //--------------------------------------------
 
     protected $casts = [
@@ -40,10 +45,11 @@ class Mediafile extends BaseModel implements Guidable, Sluggable
 
     public function getFilepathAttribute($value) {
         return !empty($this->filename) ? Storage::disk('s3')->url($this->filename) : null;
+        //return !empty($this->filename) ? Storage::disk('s3')->temporaryUrl( $this->filename, now()->addMinutes(5) ) : null;
     }
 
     //--------------------------------------------
-    // Methods
+    // %%% Methods
     //--------------------------------------------
 
     // %%% --- Implement Sluggable Interface ---

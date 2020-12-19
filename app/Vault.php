@@ -1,6 +1,7 @@
 <?php
 namespace App;
 
+use DB;
 use App\SluggableTraits;
 use App\Interfaces\Guidable;
 //use App\Interfaces\Nameable;
@@ -71,8 +72,8 @@ class Vault extends BaseModel implements Guidable, Sluggable
     {
         $key = trim($key);
         switch ($key) {
-            default:
-                $key =  parent::_renderFieldKey($key);
+        default:
+        $key =  parent::_renderFieldKey($key);
         }
         return $key;
     }
@@ -86,8 +87,8 @@ class Vault extends BaseModel implements Guidable, Sluggable
             case 'cattrs':
                 return json_encode($this->{$key});
              */
-            default:
-                return parent::renderField($field);
+        default:
+        return parent::renderField($field);
         }
     }
 
@@ -98,5 +99,23 @@ class Vault extends BaseModel implements Guidable, Sluggable
     }
 
     // %%% --- Other ---
+
+    // %FIXME: move to observer/boot 'create'
+    public static function doCreate(string $vname, User $owner) : Vault {
+        $vault = DB::transaction(function () use($vname, &$owner) {
+            $v = Vault::create([
+                'vname' => $vname,
+                'user_id' => $owner->id,
+            ]);
+            $vf = Vaultfolder::create([
+                'parent_id' => null,
+                'vault_id' => $v->id,
+                'vfname' => 'Root',
+            ]);
+            $v->refresh();
+            return $v;
+        });
+        return $vault;
+    }
 
 }

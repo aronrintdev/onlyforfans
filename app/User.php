@@ -43,30 +43,6 @@ class User extends Authenticatable
         'password', 'remember_token', 'verification_code', 'email', 'timeline',
     ];
 
-    public function getNameAttribute($value) {
-        return $this->timeline->name;
-    }
-
-    public function getUsernameAttribute($value) {
-        return $this->timeline->username;
-    }
-
-    public function getAvatarAttribute($value) {
-        return $this->timeline->avatar ? url('user/avatar/'.$this->timeline->avatar->source) : url('user/avatar/default-'.$this->gender.'-avatar.png');
-    }
-
-    public function getCoverAttribute($value) {
-        return $this->timeline->cover ? $this->timeline->cover->source : null;
-    }
-
-    public function getAboutAttribute($value) {
-        return $this->timeline->about ? $this->timeline->about : null;
-    }
-
-    //this method is for displaying user avatar and default avatar from group in events feature
-    public function getPictureAttribute($value) {
-        return $this->timeline->avatar ? url('user/avatar/'.$this->timeline->avatar->source) : url('group/avatar/default-group-avatar.png');
-    }
 
     public function toArray() {
         $array = parent::toArray();
@@ -82,6 +58,16 @@ class User extends Authenticatable
         $array['avatar'] = $this->avatar;
 
         return $array;
+    }
+
+    //--------------------------------------------
+    // %%% Relationships
+    //--------------------------------------------
+
+    public function mediafiles() {
+        //return $this->morphedByMany('App\Mediafile', 'shareable');
+        return $this->morphedByMany('App\Mediafile', 'shareable', 'shareables', 'sharee_id')->withTimestamps();
+        //return $this->morphedByMany('App\Mediafile', 'shareable', 'mediafiles', 'user_id');
     }
 
     public function timeline() {
@@ -173,6 +159,35 @@ class User extends Authenticatable
 
     public function vaultfolders() {
         return $this->hasMany('App\Vaultfolder');
+    }
+
+    //--------------------------------------------
+    // %%% Accessors/Mutators | Casts
+    //--------------------------------------------
+
+    public function getNameAttribute($value) {
+        return $this->timeline->name;
+    }
+
+    public function getUsernameAttribute($value) {
+        return $this->timeline->username;
+    }
+
+    public function getAvatarAttribute($value) {
+        return $this->timeline->avatar ? url('user/avatar/'.$this->timeline->avatar->source) : url('user/avatar/default-'.$this->gender.'-avatar.png');
+    }
+
+    public function getCoverAttribute($value) {
+        return $this->timeline->cover ? $this->timeline->cover->source : null;
+    }
+
+    public function getAboutAttribute($value) {
+        return $this->timeline->about ? $this->timeline->about : null;
+    }
+
+    //this method is for displaying user avatar and default avatar from group in events feature
+    public function getPictureAttribute($value) {
+        return $this->timeline->avatar ? url('user/avatar/'.$this->timeline->avatar->source) : url('group/avatar/default-group-avatar.png');
     }
 
     // ---
