@@ -14,8 +14,9 @@
         </b-breadcrumb>
 
         <b-list-group>
-          <b-list-group-item v-for="(vaultFolder, index) in children" :key="vaultFolder.guid" role="button" @click="doNav($event, vaultFolder.id)">
-            {{ vaultFolder.vfname }}
+          <b-list-group-item v-for="(vf, index) in children" :key="vf.guid" role="button" @click="!isShareMode ? doNav($event, vf.id) : null">
+            {{ vf.vfname }}
+            <span v-if="isShareMode"><button @click="toggleMarkShared($event, 'vaultfolders', vf.id)" type="button" class="btn btn-link ml-3">Share</button></span>
           </b-list-group-item>
         </b-list-group>
 
@@ -96,9 +97,13 @@
         <section class="row mt-5">
           <div class="col-sm-12">
             <b-list-group>
-              <b-list-group-item v-for="(mf) in mediafiles" :key="mf.guid" role="button" @click="getLink($event, mf.id)">
+              <b-list-group-item v-for="(mf) in mediafiles" :key="mf.guid" 
+                @click="false ? getLink($event, mf.id) : null"
+                role="button" 
+                v-bind:class="{ 'tag-shared': isShareMode && isMarkShared({shareable_type: 'mediafiles', shareable_id: mf.id}) }"
+                >
                 <span>{{ mf.orig_filename }}</span>
-                <span v-if="isShareMode"><button type="button" class="btn btn-link ml-3">Share</button></span>
+                <span v-if="isShareMode"><button @click="toggleMarkShared($event, 'mediafiles', mf.id)" type="button" class="btn btn-link ml-3">Share</button></span>
               </b-list-group-item>
             </b-list-group>
           </div>
@@ -175,6 +180,8 @@ export default {
 
     isShareMode: false,
 
+    markShared: [],
+
     createForm: {
       vfname: '',
       //vault_id: this.vault_pkid,
@@ -223,6 +230,20 @@ export default {
   },
 
   methods: {
+
+    isMarkShared({shareable_type, shareable_id}) {
+      return this.markShared.some( o => o.shareable_type === shareable_type && o.shareable_id === shareable_id );
+    },
+
+    toggleMarkShared(e, shareable_type, shareable_id) {
+      // toggle adding/removing this resource from the shared list
+      const index = this.markShared.findIndex( o => o.shareable_type === shareable_type && o.shareable_id === shareable_id );
+      if (index !== -1) {
+        this.markShared.splice(index, 1); // remove
+      } else {
+        this.markShared.push({ shareable_type, shareable_id }); // add
+      }
+    },
 
     shareFiles(e) {
     },
@@ -359,6 +380,10 @@ li:hover {
 #autosuggest { width: 100%; display: block;}
 .autosuggest__results-item--highlighted {
   background-color: rgba(51, 217, 178,0.2);
+}
+
+.tag-shared {
+  background-color: pink;
 }
 </style>
 
