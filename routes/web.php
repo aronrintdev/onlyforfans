@@ -138,6 +138,8 @@ Route::group(['middleware' => ['auth']], function () {
     Route::resource('vaultfolders', 'VaultfoldersController', [
         'only' => [ 'index', 'show', 'store' ],
     ]);
+
+    Route::patch('/vaults/{vault}/update-shares', ['as'=>'vaults.updateShares', 'uses' => 'VaultsController@updateShares']);
     Route::resource('vaults', 'VaultsController', [
         'only' => [ 'index', 'show' ],
     ]);

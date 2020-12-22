@@ -19,8 +19,8 @@
                              role="button" 
                              v-bind:class="{ 'tag-shared': isShareMode && isMarkShared({shareable_type: 'vaultfolders', shareable_id: vf.id}) }"
                              >
-            {{ vf.vfname }}
-            <span v-if="isShareMode"><button @click="toggleMarkShared($event, 'vaultfolders', vf.id)" type="button" class="btn btn-link ml-3">Share</button></span>
+                             {{ vf.vfname }}
+                             <span v-if="isShareMode"><button @click="toggleMarkShared($event, 'vaultfolders', vf.id)" type="button" class="btn btn-link ml-3">Share</button></span>
           </b-list-group-item>
         </b-list-group>
 
@@ -46,39 +46,34 @@
         </b-form>
 
         <b-form @submit="shareFiles" v-if="isShareMode">
-          <b-form-group>
-            <b-form-input
-              id="sharee"
-              v-model="shareForm.sharee"
-              type="text"
-              placeholder="Enter user to share with"
-              required
-              ></b-form-input>
-          </b-form-group>
 
-          <section class="demo">
-            <div v-if="selected" style="padding-top:10px; width: 100%;">
-              You have selected <code>{{selected.name}}, the {{selected.race}}</code>
-            </div>
-            <div class="autosuggest-container">
+          <div class="autosuggest-container">
+            <b-form-group>
               <vue-autosuggest
                 v-model="query"
                 :suggestions="filteredOptions"
                 @focus="focusMe"
                 @click="clickHandler"
                 @input="onInputChange"
-                @selected="onSelected"
+                @selected="addSharee"
                 :get-suggestion-value="getSuggestionValue"
-                :input-props="{id:'autosuggest__input', placeholder:'Start typing...'}">
+                :input-props="{id:'autosuggest__input', class: 'form-control', placeholder:'Enter user to share with...'}">
                 <div slot-scope="{suggestion}" style="display: flex; align-items: center;">
-                  <div style="{ display: 'flex', color: 'navyblue'}">{{suggestion.item.label}}</div>
+                  <div style="{ display: 'flex' }">{{suggestion.item.label}}</div>
                 </div>
               </vue-autosuggest>
-            </div>
-          </section>
+            </b-form-group>
+          </div>
+
           <b-button type="submit" variant="primary">Share Selected</b-button>
           <b-button @click="cancelShareFiles" type="cancel" variant="secondary">Cancel</b-button>
         </b-form>
+
+        <ul v-if="shareForm.sharees.length">
+          <li v-for="(se) in shareForm.sharees">
+            {{ se.label }}
+          </li>
+        </ul>
 
       </aside>
 
@@ -150,7 +145,7 @@ export default {
     suggestions() {
       return [];
     },
-    */
+     */
     mediafiles() {
       return this.vaultfolder.mediafiles;
     },
@@ -185,7 +180,7 @@ export default {
             return option.name.toLowerCase().indexOf(this.query.toLowerCase()) > -1;
           })
         }];
-        */
+       */
     },
   },
 
@@ -193,17 +188,17 @@ export default {
 
     showCreateForm: false,
 
-    isShareMode: false,
-
-    markShared: [],
+    isShareMode: true,
 
     createForm: {
       vfname: '',
       //vault_id: this.vault_pkid,
       //parent_id: this.currentFolderPKID,
     },
+
     shareForm: {
-      sharee: '',
+      sharees: [],
+      markShared: [],
     },
 
     currentFolderPKID: null,
@@ -222,18 +217,7 @@ export default {
     // ---
 
     query: "",
-    selected: "",
     suggestions: [],
-    /*
-    suggestions: [{
-      data: [
-        { id: 1, name: "Frodo", race: "Hobbit", avatar: "https://upload.wikimedia.org/wikipedia/en/thumb/4/4e/Elijah_Wood_as_Frodo_Baggins.png/220px-Elijah_Wood_as_Frodo_Baggins.png" },
-        { id: 2, name: "Samwise", race: "Hobbit", avatar: "https://upload.wikimedia.org/wikipedia/en/thumb/7/7b/Sean_Astin_as_Samwise_Gamgee.png/200px-Sean_Astin_as_Samwise_Gamgee.png" },
-        { id: 3, name: "Gandalf", race: "Maia", avatar: "https://upload.wikimedia.org/wikipedia/en/thumb/e/e9/Gandalf600ppx.jpg/220px-Gandalf600ppx.jpg" },
-        { id: 4, name: "Aragorn", race: "Human", avatar: "https://upload.wikimedia.org/wikipedia/en/thumb/3/35/Aragorn300ppx.png/150px-Aragorn300ppx.png" }
-      ],
-    }],
-    */
   }),
 
   mounted() {
@@ -248,24 +232,33 @@ export default {
   methods: {
 
     isMarkShared({shareable_type, shareable_id}) {
-      return this.markShared.some( o => o.shareable_type === shareable_type && o.shareable_id === shareable_id );
+      return this.shareForm.markShared.some( o => o.shareable_type === shareable_type && o.shareable_id === shareable_id );
     },
 
     toggleMarkShared(e, shareable_type, shareable_id) {
       // toggle adding/removing this resource from the shared list
-      const index = this.markShared.findIndex( o => o.shareable_type === shareable_type && o.shareable_id === shareable_id );
+      const index = this.shareForm.markShared.findIndex( o => o.shareable_type === shareable_type && o.shareable_id === shareable_id );
       if (index !== -1) {
-        this.markShared.splice(index, 1); // remove
+        this.shareForm.markShared.splice(index, 1); // remove
       } else {
-        this.markShared.push({ shareable_type, shareable_id }); // add
+        this.shareForm.markShared.push({ shareable_type, shareable_id }); // add
       }
     },
 
-    shareFiles(e) {
+    async shareFiles(e) {
+      e.preventDefault();
+      //const response = await axios.patch(`/vaults/${this.vault_pkid}/update-shares`, this.shareForm);
+      const response = await axios.patch(`/vaults/${this.vault_pkid}/update-shares`, {
+        shareables: this.shareForm.markShared,
+        sharees: this.shareForm.sharees.map( o => { return {sharee_id: o.id}; }),
+      });
+      console.log('response', { response });
+      //this.$store.dispatch('getVaultfolder', this.currentFolderPKID);
+      this.cancelShareFiles();
     },
 
     storeFolder(e) {
-      e.preventDefault()
+      e.preventDefault();
       const payload = {
         vault_id: this.vault_pkid,
         parent_id: this.currentFolderPKID,
@@ -284,7 +277,8 @@ export default {
     },
     cancelShareFiles() {
       this.isShareMode = false;
-      this.shareForm.sharee = '';
+      this.shareForm.sharees = [];
+      this.shareForm.markShared = [];
     },
 
     getLink(e, mediafilePKID) {
@@ -317,11 +311,10 @@ export default {
     clickHandler(item) {
       // event fired when clicking on the input
     },
-    onSelected(item) {
-      console.log('onSelected', {
-        item
-      });
-      this.selected = item.item;
+    addSharee(item) {
+      console.log('addSharee', { item });
+      this.shareForm.sharees.push(item.item);
+      this.query = '';
     },
     async onInputChange(text) {
       // event fired when the input changes
@@ -356,10 +349,7 @@ export default {
 <style scoped>
 /* --- */
 
-.demo { 
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-}
-
+/*
 input {
   width: 260px;
   padding: 0.5rem;
@@ -393,6 +383,7 @@ li:hover {
 .autosuggest__results-item--highlighted {
   background-color: rgba(51, 217, 178,0.2);
 }
+ */
 
 .tag-shared {
   background-color: pink;

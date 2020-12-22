@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Storage;
 use App\Mediafile;
 use App\Vault;
 use App\Vaultfolder;
+use App\User;
 
 class VaultsController extends AppBaseController
 {
@@ -64,6 +65,40 @@ class VaultsController extends AppBaseController
     {
         $sessionUser = Auth::user();
         $vault = Vault::where('id', $pkid)->where('user_id', $sessionUser->id)->first();
+        return response()->json([
+            'vault' => $vault,
+        ]);
+    }
+
+    // %TODO: 
+    //   ~ use DB transaction (?)
+    //   ~ verify resource belongs to the given vault (??)
+    public function updateShares(Request $request, $pkid)
+    {
+        $sessionUser = Auth::user();
+        $vault = Vault::where('id', $pkid)->where('user_id', $sessionUser->id)->first();
+
+        $shareables = $request->input('shareables', []);
+        $sharees = $request->input('sharees', []);
+
+        foreach ( $sharees as $se ) {
+            $user = User::find($se['sharee_id']); // user to share with, ie 'sharee'
+            if ( !$user ) {
+                continue;
+            }
+            ]));
+            foreach ( $shareables as $sb ) {
+                switch ( $sb['shareable_type'] ) {
+                    case 'mediafiles':
+                        $user->sharedmediafiles()->syncWithoutDetaching($sb['shareable_id']); // do share
+                        break;
+                    case 'vaultfolders':
+                        $user->sharedvaultfolders()->syncWithoutDetaching($sb['shareable_id']); // do share
+                        break;
+                }
+            }
+        }
+
         return response()->json([
             'vault' => $vault,
         ]);
