@@ -129,6 +129,12 @@ Route::group(['middleware' => ['auth']], function () {
     Route::resource('mediafiles', 'MediafilesController', [
     ]);
 
+    Route::get('/users/match', ['as'=>'users.match', 'uses' => 'UsersController@match']);
+    /*
+    Route::resource('users', 'UsersController', [
+        'only' => [ 'index' ],
+    ]);
+     */
     Route::resource('vaultfolders', 'VaultfoldersController', [
         'only' => [ 'index', 'show', 'store' ],
     ]);

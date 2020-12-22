@@ -19,8 +19,8 @@
                              role="button" 
                              v-bind:class="{ 'tag-shared': isShareMode && isMarkShared({shareable_type: 'vaultfolders', shareable_id: vf.id}) }"
                              >
-                             {{ vf.vfname }}
-                             <span v-if="isShareMode"><button @click="toggleMarkShared($event, 'vaultfolders', vf.id)" type="button" class="btn btn-link ml-3">Share</button></span>
+            {{ vf.vfname }}
+            <span v-if="isShareMode"><button @click="toggleMarkShared($event, 'vaultfolders', vf.id)" type="button" class="btn btn-link ml-3">Share</button></span>
           </b-list-group-item>
         </b-list-group>
 
@@ -69,10 +69,9 @@
                 @input="onInputChange"
                 @selected="onSelected"
                 :get-suggestion-value="getSuggestionValue"
-                :input-props="{id:'autosuggest__input', placeholder:'Do you feel lucky, punk?'}">
+                :input-props="{id:'autosuggest__input', placeholder:'Start typing...'}">
                 <div slot-scope="{suggestion}" style="display: flex; align-items: center;">
-                  <img :style="{ display: 'flex', width: '25px', height: '25px', borderRadius: '15px', marginRight: '10px'}" :src="suggestion.item.avatar" />
-                  <div style="{ display: 'flex', color: 'navyblue'}">{{suggestion.item.name}}</div>
+                  <div style="{ display: 'flex', color: 'navyblue'}">{{suggestion.item.label}}</div>
                 </div>
               </vue-autosuggest>
             </div>
@@ -107,32 +106,13 @@
                                  role="button" 
                                  v-bind:class="{ 'tag-shared': isShareMode && isMarkShared({shareable_type: 'mediafiles', shareable_id: mf.id}) }"
                                  >
+                                 <img class="OFF-img-fluid" height="64" :src="mf.filepath" />
                                  <span>{{ mf.orig_filename }}</span>
                                  <span v-if="isShareMode"><button @click="toggleMarkShared($event, 'mediafiles', mf.id)" type="button" class="btn btn-link ml-3">Share</button></span>
               </b-list-group-item>
             </b-list-group>
           </div>
         </section>
-
-        <!--
-          https://www.dropzonejs.com/#config-previewTemplate
-          https://github.com/rowanwins/vue-dropzone/blob/master/docs/src/pages/customPreviewDemo.vue
-        -->
-        <div id="tpl">
-          <div class="dz-preview dz-file-preview">
-            <div class="dz-image">
-              <div data-dz-thumbnail-bg></div>
-            </div>
-            <div class="dz-details">
-              <div class="dz-size"><span data-dz-size></span></div>
-              <div class="dz-filename"><span data-dz-name></span></div>
-            </div>
-            <div class="dz-progress"><span class="dz-upload" data-dz-uploadprogress></span></div>
-            <div class="dz-error-message"><span data-dz-errormessage></span></div>
-            <div class="dz-success-mark"><i class="fa fa-check"></i></div>
-            <div class="dz-error-mark"><i class="fa fa-close"></i></div>
-          </div>
-        </div>
 
       </main>
 
@@ -166,6 +146,11 @@ export default {
     ...Vuex.mapState(['vaultfolder']),
     ...Vuex.mapState(['breadcrumb']),
 
+    /*
+    suggestions() {
+      return [];
+    },
+    */
     mediafiles() {
       return this.vaultfolder.mediafiles;
     },
@@ -189,13 +174,18 @@ export default {
     },
 
     filteredOptions() {
-      return [
-        { 
+      return [{
+        data: this.suggestions,
+      }];
+      //this.$store.dispatch('getVaultfolder', this.currentFolderPKID);
+      //this.cancelCreateFolder();
+      /*
+      return [{ 
           data: this.suggestions[0].data.filter(option => {
             return option.name.toLowerCase().indexOf(this.query.toLowerCase()) > -1;
           })
-        }
-      ];
+        }];
+        */
     },
   },
 
@@ -219,7 +209,6 @@ export default {
     currentFolderPKID: null,
 
     dropzoneOptions: {
-      //previewTemplate: '<h2>foo</h2>', // %TODO: https://www.dropzonejs.com/#config-previewTemplate, https://github.com/rowanwins/vue-dropzone/blob/master/docs/src/pages/customPreviewDemo.vue
       url: '/mediafiles',
       paramName: 'mediafile',
       thumbnailHeight: 128,
@@ -234,6 +223,8 @@ export default {
 
     query: "",
     selected: "",
+    suggestions: [],
+    /*
     suggestions: [{
       data: [
         { id: 1, name: "Frodo", race: "Hobbit", avatar: "https://upload.wikimedia.org/wikipedia/en/thumb/4/4e/Elijah_Wood_as_Frodo_Baggins.png/220px-Elijah_Wood_as_Frodo_Baggins.png" },
@@ -241,12 +232,11 @@ export default {
         { id: 3, name: "Gandalf", race: "Maia", avatar: "https://upload.wikimedia.org/wikipedia/en/thumb/e/e9/Gandalf600ppx.jpg/220px-Gandalf600ppx.jpg" },
         { id: 4, name: "Aragorn", race: "Human", avatar: "https://upload.wikimedia.org/wikipedia/en/thumb/3/35/Aragorn300ppx.png/150px-Aragorn300ppx.png" }
       ],
-    }]
+    }],
+    */
   }),
 
   mounted() {
-    //console.log('mounted', { cwf: this.cwf, // use prop });
-    document.querySelector('#tpl').innerHTML;
   },
 
   created() {
@@ -316,48 +306,11 @@ export default {
       this.$store.dispatch('getVaultfolder', this.currentFolderPKID);
     },
 
-    /*
-    queueCompleteEvent() {
-      //this.$store.dispatch('getVaultfolder', this.currentFolderPKID);
-    },
-    */
-
     // Preload the mediafiles in the current folder (pwd)
-    loadDropzone(files) {
-      this.$refs.myVueDropzone.removeAllFiles();
-      console.log('loadDropzone', { 
-        files 
-      });
-      for ( let mf of files ) { // use prop
-        this.$refs.myVueDropzone.manuallyAddFile({
-          size: 1024, 
-          name: mf.slug,
-          type: mf.mimetype, // "image/png"
-          meta: {
-            id: mf.id,
-            guid: mf.guid,
-          },
-        }, mf.filepath);
-      }
-    },
-
     async doNav(e, vaultFolderPKID) {
       this.currentFolderPKID = vaultFolderPKID;
       this.$store.dispatch('getVaultfolder', vaultFolderPKID);
     },
-
-    fileAddedManuallyEvent(file) {
-      /*
-      //console.log('vdropzone-file-added-manually:fileAddedManuallyEvent', { file, });
-      file.previewElement.addEventListener('click', function(e) {
-        console.log('vdropzone-file-added-manually:fileAddedManuallyEvent CLICKED', {
-          val: e.target.value,
-          file,
-        });
-      });
-      */
-    },
-
 
     // ---
 
@@ -370,13 +323,17 @@ export default {
       });
       this.selected = item.item;
     },
-    onInputChange(text) {
+    async onInputChange(text) {
       // event fired when the input changes
-      console.log(text)
+      //console.log('onInputChange', {text})
+      const response = await axios.get(`/users/match?term=${text}&field=email`);
+      //console.log('onInputChange', { response });
+      this.suggestions = response.data;
     },
     // This is what the <input/> value is set to when you are selecting a suggestion.
     getSuggestionValue(suggestion) {
-      return suggestion.item.name;
+      console.log('getSuggestionValue', { suggestion });
+      return suggestion.item.label;
     },
     focusMe(e) {
       console.log(e) // FocusEvent
@@ -386,7 +343,6 @@ export default {
 
   watch: {
     mediafiles (newVal, oldVal) {
-      //this.loadDropzone(newVal);
     },
   },
 
