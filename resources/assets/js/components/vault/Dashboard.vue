@@ -14,9 +14,13 @@
         </b-breadcrumb>
 
         <b-list-group>
-          <b-list-group-item v-for="(vf, index) in children" :key="vf.guid" role="button" @click="!isShareMode ? doNav($event, vf.id) : null">
-            {{ vf.vfname }}
-            <span v-if="isShareMode"><button @click="toggleMarkShared($event, 'vaultfolders', vf.id)" type="button" class="btn btn-link ml-3">Share</button></span>
+          <b-list-group-item v-for="(vf, index) in children" :key="vf.guid" 
+                             @click="!isShareMode ? doNav($event, vf.id) : null"
+                             role="button" 
+                             v-bind:class="{ 'tag-shared': isShareMode && isMarkShared({shareable_type: 'vaultfolders', shareable_id: vf.id}) }"
+                             >
+                             {{ vf.vfname }}
+                             <span v-if="isShareMode"><button @click="toggleMarkShared($event, 'vaultfolders', vf.id)" type="button" class="btn btn-link ml-3">Share</button></span>
           </b-list-group-item>
         </b-list-group>
 
@@ -89,6 +93,7 @@
                id="dropzone" 
                :options="dropzoneOptions"
                v-on:vdropzone-sending="sendingEvent"
+               v-on:vdropzone-success="successEvent"
                ></vue-dropzone>
           </div>
         </section>
@@ -98,16 +103,36 @@
           <div class="col-sm-12">
             <b-list-group>
               <b-list-group-item v-for="(mf) in mediafiles" :key="mf.guid" 
-                @click="false ? getLink($event, mf.id) : null"
-                role="button" 
-                v-bind:class="{ 'tag-shared': isShareMode && isMarkShared({shareable_type: 'mediafiles', shareable_id: mf.id}) }"
-                >
-                <span>{{ mf.orig_filename }}</span>
-                <span v-if="isShareMode"><button @click="toggleMarkShared($event, 'mediafiles', mf.id)" type="button" class="btn btn-link ml-3">Share</button></span>
+                                 @click="false ? getLink($event, mf.id) : null"
+                                 role="button" 
+                                 v-bind:class="{ 'tag-shared': isShareMode && isMarkShared({shareable_type: 'mediafiles', shareable_id: mf.id}) }"
+                                 >
+                                 <span>{{ mf.orig_filename }}</span>
+                                 <span v-if="isShareMode"><button @click="toggleMarkShared($event, 'mediafiles', mf.id)" type="button" class="btn btn-link ml-3">Share</button></span>
               </b-list-group-item>
             </b-list-group>
           </div>
         </section>
+
+        <!--
+          https://www.dropzonejs.com/#config-previewTemplate
+          https://github.com/rowanwins/vue-dropzone/blob/master/docs/src/pages/customPreviewDemo.vue
+        -->
+        <div id="tpl">
+          <div class="dz-preview dz-file-preview">
+            <div class="dz-image">
+              <div data-dz-thumbnail-bg></div>
+            </div>
+            <div class="dz-details">
+              <div class="dz-size"><span data-dz-size></span></div>
+              <div class="dz-filename"><span data-dz-name></span></div>
+            </div>
+            <div class="dz-progress"><span class="dz-upload" data-dz-uploadprogress></span></div>
+            <div class="dz-error-message"><span data-dz-errormessage></span></div>
+            <div class="dz-success-mark"><i class="fa fa-check"></i></div>
+            <div class="dz-error-mark"><i class="fa fa-close"></i></div>
+          </div>
+        </div>
 
       </main>
 
@@ -221,6 +246,7 @@ export default {
 
   mounted() {
     //console.log('mounted', { cwf: this.cwf, // use prop });
+    document.querySelector('#tpl').innerHTML;
   },
 
   created() {
@@ -285,14 +311,32 @@ export default {
       formData.append('mftype', 'vault');
     },
 
+    successEvent(file, response) {
+      // %TODO: more efficient just to append the new file(s) (?)
+      this.$store.dispatch('getVaultfolder', this.currentFolderPKID);
+    },
+
+    /*
+    queueCompleteEvent() {
+      //this.$store.dispatch('getVaultfolder', this.currentFolderPKID);
+    },
+    */
+
     // Preload the mediafiles in the current folder (pwd)
     loadDropzone(files) {
       this.$refs.myVueDropzone.removeAllFiles();
+      console.log('loadDropzone', { 
+        files 
+      });
       for ( let mf of files ) { // use prop
         this.$refs.myVueDropzone.manuallyAddFile({
           size: 1024, 
           name: mf.slug,
           type: mf.mimetype, // "image/png"
+          meta: {
+            id: mf.id,
+            guid: mf.guid,
+          },
         }, mf.filepath);
       }
     },
@@ -300,6 +344,18 @@ export default {
     async doNav(e, vaultFolderPKID) {
       this.currentFolderPKID = vaultFolderPKID;
       this.$store.dispatch('getVaultfolder', vaultFolderPKID);
+    },
+
+    fileAddedManuallyEvent(file) {
+      /*
+      //console.log('vdropzone-file-added-manually:fileAddedManuallyEvent', { file, });
+      file.previewElement.addEventListener('click', function(e) {
+        console.log('vdropzone-file-added-manually:fileAddedManuallyEvent CLICKED', {
+          val: e.target.value,
+          file,
+        });
+      });
+      */
     },
 
 
@@ -330,7 +386,7 @@ export default {
 
   watch: {
     mediafiles (newVal, oldVal) {
-      this.loadDropzone(newVal);
+      //this.loadDropzone(newVal);
     },
   },
 
