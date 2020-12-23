@@ -7,6 +7,8 @@ use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use App\Invite;
+use App\Enums\InviteTypeEnum;
 use App\Mediafile;
 use App\Vault;
 use App\Vaultfolder;
@@ -102,6 +104,19 @@ class VaultsController extends AppBaseController
         // (2) Handle invites/invitees
         $invitees = $request->input('invitees', []);
         foreach ( $invitees as $i ) {
+            // (a) create invite
+            $invite = Invite::create([
+                'inviter_id' => $sessionUser->id,
+                'email' => $i['email'],
+                'itype' => InviteTypeEnum::VAULT,
+                'token' => str_random(),
+                'cattrs' => [
+                    'shareables' => $shareables,
+                    'vault_id' => $vault->id,
+                ],
+            ]);
+
+            // (b) queue invite-based email
         }
 
         return response()->json([
