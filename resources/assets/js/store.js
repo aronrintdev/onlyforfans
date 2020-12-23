@@ -10,6 +10,7 @@ export default new Vuex.Store({
         vault: {},
         vaultfolder: {},
         breadcrumb: [],
+        shares: [],
         is_loading: true
     },
 
@@ -22,6 +23,9 @@ export default new Vuex.Store({
         },
         UPDATE_BREADCRUMB (state, payload) {
             state.breadcrumb = payload.hasOwnProperty('breadcrumb') ? payload.breadcrumb : [];
+        },
+        UPDATE_SHARES (state, payload) { // shares for a vaultfolder
+            state.shares = payload.hasOwnProperty('shares') ? payload.shares : [];
         },
         UPDATE_LOADING(state, payload) {
             state.is_loading = payload;
@@ -41,6 +45,7 @@ export default new Vuex.Store({
             axios.get(url).then( (response) => {
                 commit('UPDATE_VAULTFOLDER', response.data);
                 commit('UPDATE_BREADCRUMB', response.data);
+                commit('UPDATE_SHARES', response.data);
                 commit('UPDATE_LOADING', false);
             });
         },
@@ -51,6 +56,7 @@ export default new Vuex.Store({
         vault: state => state.vault,
         vaultfolder: state => state.vaultfolder,
         breadcrumb: state => state.breadcrumb,
+        shares: state => state.shares,
         //children: state => state.vault.children, // Flat list
         //mediafiles: state => state.vault.mediafiles, // Flat list
     },

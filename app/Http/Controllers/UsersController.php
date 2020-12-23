@@ -18,6 +18,11 @@ class UsersController extends AppBaseController
         }
 
         $term = $request->input('term',null);
+
+        if ( empty($term) ) {
+            return [];
+        }
+
         $collection = User::where( function($q1) use($term) {
                          //$q1->where('first_name', 'like', $term.'%')->orWhere('last_name', 'like', $term.'%');
                          $q1->where('email', 'like', $term.'%');

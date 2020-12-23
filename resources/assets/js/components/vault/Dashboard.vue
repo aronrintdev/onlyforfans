@@ -10,17 +10,18 @@
         <hr />
 
         <b-breadcrumb>
-          <b-breadcrumb-item v-for="(item, index) in breadcrumbNav" :key="item.pkid" @click="doNav($event, item.pkid)" :active="item.active">{{ item.text }}</b-breadcrumb-item>
+          <b-breadcrumb-item v-for="(bc, index) in breadcrumbNav" :key="bc.pkid" @click="doNav($event, bc.pkid)" :active="bc.active">{{ bc.text }}</b-breadcrumb-item>
         </b-breadcrumb>
 
         <b-list-group>
           <b-list-group-item v-for="(vf, index) in children" :key="vf.guid" 
                              @click="!isShareMode ? doNav($event, vf.id) : null"
                              role="button" 
-                             v-bind:class="{ 'tag-shared': isShareMode && isMarkShared({shareable_type: 'vaultfolders', shareable_id: vf.id}) }"
+                             v-bind:class="{ 'tag-shared': isShareMode && isSelectedToShare({shareable_type: 'vaultfolders', shareable_id: vf.id}) }"
                              >
-                             {{ vf.vfname }}
-                             <span v-if="isShareMode"><button @click="toggleMarkShared($event, 'vaultfolders', vf.id)" type="button" class="btn btn-link ml-3">Share</button></span>
+                             {{ vf.vfname }} 
+                             <span v-if="isShared('vaultfolders', vf.id)"><b-icon icon="share"></b-icon></span>
+                             <span v-if="isShareMode"><button @click="toggleSelectedToShare($event, 'vaultfolders', vf.id)" type="button" class="btn btn-link ml-3">Share</button></span>
           </b-list-group-item>
         </b-list-group>
 
@@ -49,12 +50,20 @@
 
           <div class="autosuggest-container">
             <b-form-group>
+              <b-form-input
+                id="invite-email"
+                v-model="inviteeInput"
+                v-on:keydown.enter.prevent="addInvite"
+                type="text"
+                placeholder="Enter email to invite..."
+                ></b-form-input>
+            </b-form-group>
+            <b-form-group>
               <vue-autosuggest
                 v-model="query"
                 :suggestions="filteredOptions"
                 @focus="focusMe"
-                @click="clickHandler"
-                @input="onInputChange"
+                @input="getMatches"
                 @selected="addSharee"
                 :get-suggestion-value="getSuggestionValue"
                 :input-props="{id:'autosuggest__input', class: 'form-control', placeholder:'Enter user to share with...'}">
@@ -69,9 +78,17 @@
           <b-button @click="cancelShareFiles" type="cancel" variant="secondary">Cancel</b-button>
         </b-form>
 
+        <h4>Shares</h4>
         <ul v-if="shareForm.sharees.length">
           <li v-for="(se) in shareForm.sharees">
             {{ se.label }}
+          </li>
+        </ul>
+
+        <h4>Invites</h4>
+        <ul v-if="shareForm.invitees.length">
+          <li v-for="(i) in shareForm.invitees">
+            {{ i }}
           </li>
         </ul>
 
@@ -99,11 +116,12 @@
               <b-list-group-item v-for="(mf) in mediafiles" :key="mf.guid" 
                                  @click="false ? getLink($event, mf.id) : null"
                                  role="button" 
-                                 v-bind:class="{ 'tag-shared': isShareMode && isMarkShared({shareable_type: 'mediafiles', shareable_id: mf.id}) }"
+                                 v-bind:class="{ 'tag-shared': isShareMode && isSelectedToShare({shareable_type: 'mediafiles', shareable_id: mf.id}) }"
                                  >
                                  <img class="OFF-img-fluid" height="64" :src="mf.filepath" />
                                  <span>{{ mf.orig_filename }}</span>
-                                 <span v-if="isShareMode"><button @click="toggleMarkShared($event, 'mediafiles', mf.id)" type="button" class="btn btn-link ml-3">Share</button></span>
+                                 <span v-if="isShared('mediafiles', mf.id)"><b-icon icon="share"></b-icon></span>
+                                 <span v-if="isShareMode"><button @click="toggleSelectedToShare($event, 'mediafiles', mf.id)" type="button" class="btn btn-link ml-3">Share</button></span>
               </b-list-group-item>
             </b-list-group>
           </div>
@@ -140,12 +158,8 @@ export default {
     ...Vuex.mapState(['vault']),
     ...Vuex.mapState(['vaultfolder']),
     ...Vuex.mapState(['breadcrumb']),
+    ...Vuex.mapState(['shares']),
 
-    /*
-    suggestions() {
-      return [];
-    },
-     */
     mediafiles() {
       return this.vaultfolder.mediafiles;
     },
@@ -174,13 +188,6 @@ export default {
       }];
       //this.$store.dispatch('getVaultfolder', this.currentFolderPKID);
       //this.cancelCreateFolder();
-      /*
-      return [{ 
-          data: this.suggestions[0].data.filter(option => {
-            return option.name.toLowerCase().indexOf(this.query.toLowerCase()) > -1;
-          })
-        }];
-       */
     },
   },
 
@@ -188,7 +195,7 @@ export default {
 
     showCreateForm: false,
 
-    isShareMode: true,
+    isShareMode: false,
 
     createForm: {
       vfname: '',
@@ -196,12 +203,19 @@ export default {
       //parent_id: this.currentFolderPKID,
     },
 
+    currentFolderPKID: null,
+
+    inviteeInput: '',
+
+    query: '',
+
+    suggestions: [],
+
     shareForm: {
       sharees: [],
-      markShared: [],
+      invitees: [],
+      selectedToShare: [],
     },
-
-    currentFolderPKID: null,
 
     dropzoneOptions: {
       url: '/mediafiles',
@@ -216,8 +230,6 @@ export default {
 
     // ---
 
-    query: "",
-    suggestions: [],
   }),
 
   mounted() {
@@ -231,17 +243,23 @@ export default {
 
   methods: {
 
-    isMarkShared({shareable_type, shareable_id}) {
-      return this.shareForm.markShared.some( o => o.shareable_type === shareable_type && o.shareable_id === shareable_id );
+    // In share mode, has the user selected this item to be shared
+    isSelectedToShare({shareable_type, shareable_id}) {
+      return this.shareForm.selectedToShare.some( o => o.shareable_type === shareable_type && o.shareable_id === shareable_id );
     },
 
-    toggleMarkShared(e, shareable_type, shareable_id) {
+    // In non-share mode, is this item shared
+    isShared(resourceType, resourceId) {
+      return this.shares.some( o => o.shareable_type === resourceType && o.shareable_id === resourceId );
+    },
+
+    toggleSelectedToShare(e, shareable_type, shareable_id) {
       // toggle adding/removing this resource from the shared list
-      const index = this.shareForm.markShared.findIndex( o => o.shareable_type === shareable_type && o.shareable_id === shareable_id );
+      const index = this.shareForm.selectedToShare.findIndex( o => o.shareable_type === shareable_type && o.shareable_id === shareable_id );
       if (index !== -1) {
-        this.shareForm.markShared.splice(index, 1); // remove
+        this.shareForm.selectedToShare.splice(index, 1); // remove
       } else {
-        this.shareForm.markShared.push({ shareable_type, shareable_id }); // add
+        this.shareForm.selectedToShare.push({ shareable_type, shareable_id }); // add
       }
     },
 
@@ -249,8 +267,9 @@ export default {
       e.preventDefault();
       //const response = await axios.patch(`/vaults/${this.vault_pkid}/update-shares`, this.shareForm);
       const response = await axios.patch(`/vaults/${this.vault_pkid}/update-shares`, {
-        shareables: this.shareForm.markShared,
-        sharees: this.shareForm.sharees.map( o => { return {sharee_id: o.id}; }),
+        shareables: this.shareForm.selectedToShare,
+        sharees: this.shareForm.sharees.map( o => { return { sharee_id: o.id } }),
+        invitees: this.shareForm.invitees.map( o => { return { email: o } }),
       });
       console.log('response', { response });
       //this.$store.dispatch('getVaultfolder', this.currentFolderPKID);
@@ -278,7 +297,10 @@ export default {
     cancelShareFiles() {
       this.isShareMode = false;
       this.shareForm.sharees = [];
-      this.shareForm.markShared = [];
+      this.shareForm.invitees = [];
+      this.shareForm.selectedToShare = [];
+      this.query = '';
+      this.inviteeInput = '';
     },
 
     getLink(e, mediafilePKID) {
@@ -296,7 +318,6 @@ export default {
     },
 
     successEvent(file, response) {
-      // %TODO: more efficient just to append the new file(s) (?)
       this.$store.dispatch('getVaultfolder', this.currentFolderPKID);
     },
 
@@ -308,28 +329,32 @@ export default {
 
     // ---
 
-    clickHandler(item) {
-      // event fired when clicking on the input
-    },
-    addSharee(item) {
-      console.log('addSharee', { item });
-      this.shareForm.sharees.push(item.item);
+    addSharee(sharee) {
+      console.log('addSharee', { sharee });
+      this.shareForm.sharees.push(sharee.item);
       this.query = '';
+      this.suggestions = []
     },
-    async onInputChange(text) {
-      // event fired when the input changes
-      //console.log('onInputChange', {text})
+
+    addInvite(e) {
+      const email = e.target.value;
+      if ( email && !this.shareForm.invitees.includes(email) ) {
+        this.shareForm.invitees.push(email);
+      }
+      this.inviteeInput = '';
+    },
+
+    async getMatches(text) {
       const response = await axios.get(`/users/match?term=${text}&field=email`);
-      //console.log('onInputChange', { response });
       this.suggestions = response.data;
     },
-    // This is what the <input/> value is set to when you are selecting a suggestion.
+
+    // This is what the <input/> value is set to when you are selecting a suggestion
     getSuggestionValue(suggestion) {
-      console.log('getSuggestionValue', { suggestion });
       return suggestion.item.label;
     },
+
     focusMe(e) {
-      console.log(e) // FocusEvent
     },
 
   },
@@ -347,44 +372,6 @@ export default {
 </script>
 
 <style scoped>
-/* --- */
-
-/*
-input {
-  width: 260px;
-  padding: 0.5rem;
-}
-
-ul {
-  width: 100%;
-  color: rgba(30, 39, 46,1.0);
-  list-style: none;
-  margin: 0;
-  padding: 0.5rem 0 .5rem 0;
-}
-li {
-  margin: 0 0 0 0;
-  border-radius: 5px;
-  padding: 0.75rem 0 0.75rem 0.75rem;
-  display: flex;
-  align-items: center;
-}
-li:hover {
-  cursor: pointer;
-}
-
-.autosuggest-container {
-  display: flex;
-  justify-content: center;
-  width: 280px;
-}
-
-#autosuggest { width: 100%; display: block;}
-.autosuggest__results-item--highlighted {
-  background-color: rgba(51, 217, 178,0.2);
-}
- */
-
 .tag-shared {
   background-color: pink;
 }

@@ -79,14 +79,14 @@ class VaultsController extends AppBaseController
         $vault = Vault::where('id', $pkid)->where('user_id', $sessionUser->id)->first();
 
         $shareables = $request->input('shareables', []);
-        $sharees = $request->input('sharees', []);
 
+        // (1) Handle sharees
+        $sharees = $request->input('sharees', []);
         foreach ( $sharees as $se ) {
             $user = User::find($se['sharee_id']); // user to share with, ie 'sharee'
             if ( !$user ) {
                 continue;
             }
-            ]));
             foreach ( $shareables as $sb ) {
                 switch ( $sb['shareable_type'] ) {
                     case 'mediafiles':
@@ -97,6 +97,11 @@ class VaultsController extends AppBaseController
                         break;
                 }
             }
+        }
+
+        // (2) Handle invites/invitees
+        $invitees = $request->input('invitees', []);
+        foreach ( $invitees as $i ) {
         }
 
         return response()->json([

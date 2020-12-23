@@ -44,11 +44,35 @@ class VaultfoldersController extends AppBaseController
         $sessionUser = Auth::user();
         $vaultfolder = Vaultfolder::where('id', $pkid)->with('vfchildren', 'vfparent', 'mediafiles')->first();
         $breadcrumb = $vaultfolder->getBreadcrumb();
+        $shares = collect();
+        $vaultfolder->mediafiles->each( function($vf) use(&$shares) {
+            $vf->sharees->each( function($u) use(&$vf, &$shares) {
+                $shares->push([
+                    'sharee_id' => $u->id,
+                    'sharee_name' => $u->name,
+                    'sharee_username' => $u->username,
+                    'shareable_type' => 'mediafiles', // %FIXME: cleaner way to do this?, ie just get the pivot (?)
+                    'shareable_id' => $vf->id,
+                ]);
+            });
+        });
+        $vaultfolder->vfchildren->each( function($vf) use(&$shares) {
+            $vf->sharees->each( function($u) use(&$vf, &$shares) {
+                $shares->push([
+                    'sharee_id' => $u->id,
+                    'sharee_name' => $u->name,
+                    'sharee_username' => $u->username,
+                    'shareable_type' => 'vaultfolders', // %FIXME: cleaner way to do this?, ie just get the pivot (?)
+                    'shareable_id' => $vf->id,
+                ]);
+            });
+        });
 
         return response()->json([
             'sessionUser' => $sessionUser,
             'vaultfolder' => $vaultfolder,
             'breadcrumb' => $breadcrumb,
+            'shares' => $shares,
         ]);
     }
 
