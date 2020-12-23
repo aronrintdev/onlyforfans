@@ -2,11 +2,15 @@
 
 namespace App\Http\Controllers\Auth;
 
+use DB;
 use App\Http\Controllers\Controller;
 use App\Media;
 use App\Setting;
 use App\Timeline;
 use App\User;
+use App\Invite;
+use App\EnumsInviteTypeEnum;
+
 use File;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Http\Request;
@@ -194,7 +198,7 @@ class RegisterController extends Controller
 
     }
 
-    public function register()
+    public function register(Request $request)
     {
 //        Timeline::create([
 //            'username' => $_GET['username'],
@@ -210,11 +214,16 @@ class RegisterController extends Controller
         $theme = Theme::uses(Setting::get('current_theme', 'default'))->layout('guest');
         $theme->setTitle(trans('auth.register').' '.Setting::get('title_seperator').' '.Setting::get('site_title').' '.Setting::get('title_seperator').' '.Setting::get('site_tagline'));
 
-        return $theme->scope('register')->render();
+        return $theme->scope('register', [
+            'invite_token' => $request->token ?? null,
+        ])->render();
     }
 
     protected function registerUser(Request $request, $socialLogin = false)
     {
+
+        // %FIXME %TODO: use transaction
+
         if (Setting::get('captcha') == 'on' && !$socialLogin) {
             $validator = $this->validator($request->all(), true, $socialLogin);
         } else {
@@ -225,7 +234,6 @@ class RegisterController extends Controller
             if ($request->ajax()) {
                 return response()->json(['status' => '201', 'err_result' => $validator->errors()->toArray()]);
             }
-            
             return false;
         }
 
@@ -243,12 +251,9 @@ class RegisterController extends Controller
             'type'     => 'user',
             'about'    => '',
             ]);
-        if(Setting::get('mail_verification') == 'off')
-        {
+        if(Setting::get('mail_verification') == 'off') {
             $mail_verification = 1;
-        }
-        else
-        {
+        } else {
             $mail_verification = null;
         }
         //Create user record
@@ -289,6 +294,32 @@ class RegisterController extends Controller
         $userSettings = DB::table('user_settings')->insert($user_settings);
 
         if ($user) {
+
+            // Process invite token if present
+            if ( $request->has('invite_token') ) {
+                $now = \Carbon\Carbon::now();
+                $invite = Invite::where('token', $request->invite_token)->first();
+
+                // Process any shares associated with the invite
+                if ($invite && array_key_exists('shareables', $invite->cattrs??[]) ) {
+                    $attrs = [];
+                    foreach ( $invite->cattrs['shareables'] as $s ) {
+                        $attrs[] = [
+                            'sharee_id' => $user->id,
+                            'shareable_type' => $s['shareable_type'],
+                            'shareable_id' => $s['shareable_id'],
+                            'created_at' => $now,
+                            'updated_at' => $now,
+                        ];
+                    }
+                    DB::table('shareables')->insert($attrs);
+                }
+                // -> email
+                // -> itype
+                // -> cattrs
+                // [ ] how to tie [invites].updated_at to jobs (?)
+            }
+
             if ($socialLogin) {
                 return $timeline;
             } else {

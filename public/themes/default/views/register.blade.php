@@ -15,6 +15,7 @@
         display: flex;
     }
 </style>
+<!-- %VIEW themes/default/views/register.blade.php -->
 <div class="container">
 
 <div class="row tpadding-20 d-flex">
@@ -31,6 +32,10 @@
 
           <form method="POST" class="signup-form" action="{{ url('/register') }}">
             {{ csrf_field() }}
+
+                  @if( isset($invite_token) )
+                  {{ Form::hidden('invite_token', $invite_token) }}
+                  @endif
 
         <div class="row" hidden>
             <div class="col-md-6">

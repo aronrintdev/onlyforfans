@@ -4,15 +4,19 @@ namespace App\Http\Controllers;
 use DB;
 use Auth;
 use Exception;
+
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Mail;
+
 use App\Invite;
-use App\Enums\InviteTypeEnum;
 use App\Mediafile;
 use App\Vault;
 use App\Vaultfolder;
 use App\User;
+//use App\Jobs\ProcessVaultInvites;
+use App\Mail\ShareableInvited;
+use App\Enums\InviteTypeEnum;
 
 class VaultsController extends AppBaseController
 {
@@ -101,10 +105,14 @@ class VaultsController extends AppBaseController
             }
         }
 
+        // %TODO: in job, set update_at for invite each time an email for it is sent
+
         // (2) Handle invites/invitees
+        //   ~ %FIXME: use transaction (?)
         $invitees = $request->input('invitees', []);
         foreach ( $invitees as $i ) {
-            // (a) create invite
+
+            // (a) create invites
             $invite = Invite::create([
                 'inviter_id' => $sessionUser->id,
                 'email' => $i['email'],
@@ -117,6 +125,9 @@ class VaultsController extends AppBaseController
             ]);
 
             // (b) queue invite-based email
+            //ProcessVaultInvites::dispatch($invite); // %TODO: don't think we need this (!?)
+            Mail::to($i['email'])->queue( new ShareableInvited($invite) );
+
         }
 
         return response()->json([

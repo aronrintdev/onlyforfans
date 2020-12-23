@@ -29,6 +29,10 @@ class Invite extends BaseModel implements Guidable
         'meta' => 'array',
     ];
 
+    public function getJoinLinkAttribute($value) {
+        return route('auth.register', ['token' => $this->token]);
+    }
+
     //--------------------------------------------
     // Methods
     //--------------------------------------------

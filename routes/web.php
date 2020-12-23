@@ -112,10 +112,8 @@ Route::get('/login', 'Auth\LoginController@getLogin');
 // Route::get('/login2', 'Auth\LoginController@login');
 
 // Register
-Route::get('/register', 'Auth\RegisterController@register');
-
+Route::get('/register', 'Auth\RegisterController@register')->name('auth.register');
 Route::post('/register', 'Auth\RegisterController@registerUser');
-
 Route::get('email/verify', 'Auth\RegisterController@verifyEmail');
 
 Route::group(['middleware' => ['auth']], function () {
