@@ -146,6 +146,10 @@ Route::group(['middleware' => ['auth']], function () {
     Route::resource('saved', 'SaveditemsController', [
         'only' => [ 'index', 'show', 'store' ],
     ]);
+
+    Route::resource('shareables', 'ShareablesController', [
+        'only' => [ 'index', ],
+    ]);
 });
 
 //main project register

@@ -13,7 +13,8 @@
 
         <section class="row">
           <div class="col-sm-12">
-            HERE
+            HERE 1
+            {{ this.shareables }}
           </div>
         </section>
 
@@ -47,8 +48,7 @@ export default {
   },
 
   computed: {
-    ...Vuex.mapState(['vault']),
-    ...Vuex.mapState(['vaultfolder']),
+    ...Vuex.mapState(['shareables']),
   },
 
   data: () => ({
@@ -56,8 +56,7 @@ export default {
   }),
 
   created() {
-    this.currentFolderPKID = this.vaultfolder_pkid;
-    //this.$store.dispatch('getVault', this.vault_pkid);
+    this.$store.dispatch('getShareables');
   },
 
   methods: {

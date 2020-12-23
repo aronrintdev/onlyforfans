@@ -6,7 +6,6 @@ use Auth;
 use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use App\Mediafile;
 use App\Vault;
 use App\Vaultfolder;
