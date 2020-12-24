@@ -10,14 +10,15 @@ use App\SluggableTraits;
 use App\Interfaces\Guidable;
 //use App\Interfaces\Nameable;
 use App\Interfaces\Sluggable;
+use App\Interfaces\Ownable;
 use App\Enums\MediafileTypeEnum;
 
-class Mediafile extends BaseModel implements Guidable, Sluggable
+class Mediafile extends BaseModel implements Guidable, Sluggable, Ownable
 {
     use SluggableTraits;
 
     protected $guarded = ['id','created_at','updated_at'];
-    protected $appends = ['filepath'];
+    protected $appends = ['filepath', 'name'];
 
     public static $vrules = [
     ];
@@ -35,6 +36,10 @@ class Mediafile extends BaseModel implements Guidable, Sluggable
         return $this->morphToMany('App\User', 'shareable', 'shareables', 'shareable_id', 'sharee_id');
     }
 
+    public function getOwner() : ?User {
+        return $this->resource->getOwner();
+    }
+
     //--------------------------------------------
     // %%% Accessors/Mutators | Casts
     //--------------------------------------------
@@ -47,6 +52,10 @@ class Mediafile extends BaseModel implements Guidable, Sluggable
     public function getFilepathAttribute($value) {
         return !empty($this->filename) ? Storage::disk('s3')->url($this->filename) : null;
         //return !empty($this->filename) ? Storage::disk('s3')->temporaryUrl( $this->filename, now()->addMinutes(5) ) : null;
+    }
+
+    public function getNameAttribute($value) {
+        return $this->orig_filename;
     }
 
     //--------------------------------------------

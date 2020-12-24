@@ -1,34 +1,53 @@
 <template>
-  <div class="container-fluid vault-container">
+  <div class="container vault-container">
+    <main class="row">
+      <section class="col-sm-12">
+        <b-card title="Saved Posts">
 
-    <section class="row h-100">
+          <b-tabs pills content-class="OFF-mt-3">
 
-      <aside class="col-md-3">
+            <b-tab title="Saved" ><p>Saved items TBD</p></b-tab>
 
-        <h2 class="my-3">My Saved</h2>
+            <b-tab title="Purchased" ><p>Purchased items TBD</p></b-tab>
 
-      </aside>
+            <b-tab active title="Shared">
 
-      <main class="col-md-9 OFF-d-flex OFF-align-items-center">
+              <ul class="list-unstyled mt-3">
+                <li v-for="(mf) in this.shareables.mediafiles" :key="mf.guid">
+                  <b-media class="mb-1">
+                    <template #aside>
+                      <b-img class="tag-avatar" rounded="circle" :src="mf.owner.avatar" width="64" height="64" alt="avatar"></b-img>
+                    </template>
+                    <h6 class="mt-0">{{ mf.owner.name }}</h6>
+                  </b-media>
+                  <b-card
+                    :title="mf.name"
+                    :img-src="mf.filepath"
+                    :img-alt="mf.name"
+                    img-bottom
+                    tag="article"
+                    class="mb-5"
+                    >
+                  </b-card>
+                </li>
+              </ul>
 
-        <section class="row">
-          <div class="col-sm-12">
-            HERE 1
-            {{ this.shareables }}
-          </div>
-        </section>
+              <ul>
+                <li v-for="(vf) in this.shareables.vaultfolders" :key="vf.guid">{{ vf.name }}</li>
+              </ul>
 
-        <section class="row mt-5">
-          <div class="col-sm-12">
-            HERE
-          </div>
-        </section>
+            </b-tab>
 
-      </main>
+            <b-tab title="Disabled" disabled><p>disabled tab ex</p></b-tab>
 
-    </section>
+          </b-tabs>
+
+        </b-card>
+      </section>
+    </main>
   </div>
 </template>
+
 
 <script>
 import Vuex from 'vuex';
@@ -69,4 +88,8 @@ export default {
 </script>
 
 <style scoped>
+.tag-avatar {
+  width: 64px;
+  height: 64px;
+}
 </style>

@@ -1,7 +1,7 @@
 @extends('layouts.app2')
 
 @section('content')
-  <div class="row mt-5">
+  <div id="view-saved_dashboard" class="row">
     <div class="col-sm-12">
       <my-saved 
         :vault_pkid="{{ $myVault->id }}"

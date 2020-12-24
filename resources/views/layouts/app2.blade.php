@@ -16,7 +16,7 @@
 <body>
     <div id="app">
         @include('common._header')
-        <div class="container-fluid">
+        <div class="container-fluid pt-3">
         @yield('content')
         </div>
     </div>

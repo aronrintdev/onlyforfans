@@ -1,7 +1,7 @@
 @extends('layouts.app2')
 
 @section('content')
-  <div class="row mt-5">
+  <div id="view-vault_dashboard" class="row">
     <div class="col-sm-12">
       <my-vault 
         :vault_pkid="{{ $myVault->id }}"
@@ -9,11 +9,4 @@
         ></my-vault>
     </div>
   </div>
-{{--
-         :children="{{ json_encode($children) }}"
-         :mediafiles="{{ json_encode($mediafiles) }}" 
-         :cwf="{{ $cwf }}" 
-         :parent="{{ json_encode($parent) }}"
-         username="{{ $sessionUser->username }}" 
---}}
 @endsection

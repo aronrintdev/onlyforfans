@@ -6,8 +6,9 @@ use App\SluggableTraits;
 use App\Interfaces\Guidable;
 //use App\Interfaces\Nameable;
 use App\Interfaces\Sluggable;
+use App\Interfaces\Ownable;
 
-class Vaultfolder extends BaseModel implements Guidable, Sluggable
+class Vaultfolder extends BaseModel implements Guidable, Sluggable, Ownable
 {
     use SluggableTraits;
 
@@ -15,6 +16,8 @@ class Vaultfolder extends BaseModel implements Guidable, Sluggable
 
     public static $vrules = [
     ];
+
+    protected $appends = ['name'];
 
     //--------------------------------------------
     // %%% Relationships
@@ -32,9 +35,12 @@ class Vaultfolder extends BaseModel implements Guidable, Sluggable
     public function vfchildren() {
         return $this->hasMany('App\Vaultfolder', 'parent_id');
     }
-
     public function sharees() {
         return $this->morphToMany('App\User', 'shareable', 'shareables', 'shareable_id', 'sharee_id');
+    }
+
+    public function getOwner() : ?User {
+        return $this->vault->getOwner();
     }
 
     //--------------------------------------------
@@ -64,6 +70,14 @@ class Vaultfolder extends BaseModel implements Guidable, Sluggable
             $vf = !empty($vf->parent_id) ? Vaultfolder::find($vf->parent_id) : null;
         }
         return $breadcrumb;
+    }
+
+    public function getNameAttribute($value) {
+        return $this->vfname;
+    }
+
+    public function getPathAttribute($value) {
+        return $this->vfname; // %TODO: get full path back to root
     }
 
     //--------------------------------------------

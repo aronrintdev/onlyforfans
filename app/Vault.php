@@ -6,8 +6,9 @@ use App\SluggableTraits;
 use App\Interfaces\Guidable;
 //use App\Interfaces\Nameable;
 use App\Interfaces\Sluggable;
+use App\Interfaces\Ownable;
 
-class Vault extends BaseModel implements Guidable, Sluggable
+class Vault extends BaseModel implements Guidable, Sluggable, Ownable
 {
     use SluggableTraits;
 
@@ -29,6 +30,10 @@ class Vault extends BaseModel implements Guidable, Sluggable
 
     public function getRootFolder() {
         return $this->vaultfolders()->whereNull('parent_id')->first();
+    }
+
+    public function getOwner() : ?User {
+        return $this->user;
     }
 
     //--------------------------------------------
