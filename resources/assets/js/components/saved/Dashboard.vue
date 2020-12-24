@@ -6,11 +6,29 @@
 
           <b-tabs pills content-class="OFF-mt-3">
 
-            <b-tab title="Saved" ><p>Saved items TBD</p></b-tab>
+            <b-tab title="Saved">
+              <ul class="list-unstyled mt-3">
+                <li v-for="(sv) in this.saves" :key="sv.guid">
+                  <b-media class="mb-1">
+                    <template #aside>
+                      <b-img class="tag-avatar" rounded="circle" :src="sv.owner.avatar" width="64" height="64" alt="avatar"></b-img>
+                    </template>
+                    <h6 class="mt-0">{{ sv.owner.name }}</h6>
+                  </b-media>
+                  <b-card :title="sv.name" :img-src="sv.filepath" :img-alt="sv.name" img-bottom class="mb-5"></b-card>
+                </li>
+              </ul>
+            </b-tab>
 
-            <b-tab title="Purchased" ><p>Purchased items TBD</p></b-tab>
+            <b-tab title="Purchased">
+              <p>Purchased items TBD</p>
+            </b-tab>
 
             <b-tab active title="Shared">
+
+              <ul>
+                <li v-for="(vf) in this.shareables.vaultfolders" :key="vf.guid">{{ vf.name }}</li>
+              </ul>
 
               <ul class="list-unstyled mt-3">
                 <li v-for="(mf) in this.shareables.mediafiles" :key="mf.guid">
@@ -30,10 +48,6 @@
                     >
                   </b-card>
                 </li>
-              </ul>
-
-              <ul>
-                <li v-for="(vf) in this.shareables.vaultfolders" :key="vf.guid">{{ vf.name }}</li>
               </ul>
 
             </b-tab>
@@ -68,6 +82,7 @@ export default {
 
   computed: {
     ...Vuex.mapState(['shareables']),
+    ...Vuex.mapState(['saves']),
   },
 
   data: () => ({
@@ -75,7 +90,7 @@ export default {
   }),
 
   created() {
-    this.$store.dispatch('getShareables');
+    this.$store.dispatch('getSaves');
   },
 
   methods: {

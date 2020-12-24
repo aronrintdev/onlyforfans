@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Auth;
 
-use DB;
+//use DB;
+use Illuminate\Support\Facades\DB;
+
 use App\Http\Controllers\Controller;
 use App\Media;
 use App\Setting;
@@ -15,7 +17,6 @@ use File;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Redirect;
 use Intervention\Image\Facades\Image;

@@ -7,12 +7,13 @@ Vue.use(Vuex);
 export default new Vuex.Store({
 
     state: {
-        vault: {},
-        vaultfolder: {},
-        breadcrumb: [],
-        shares: [], // shares for a vaultfolder, used to mark what resources session user *has* shared out
-        shareables: [], // resources that have been shared with session user
-        is_loading: true
+      vault: {},
+      vaultfolder: {},
+      breadcrumb: [],
+      shares: [], // shares for a vaultfolder, used to mark what resources session user *has* shared out
+      shareables: [], // resources that have been shared with session user
+      saves: [], // resources that session user has saved
+      is_loading: true
     },
 
     mutations: {
@@ -30,6 +31,9 @@ export default new Vuex.Store({
         },
         UPDATE_SHAREABLES (state, payload) {
             state.shareables = payload.hasOwnProperty('shareables') ? payload.shareables : [];
+        },
+        UPDATE_SAVES (state, payload) {
+            state.saves = payload.hasOwnProperty('saves') ? payload.saves : [];
         },
         UPDATE_LOADING(state, payload) {
             state.is_loading = payload;
@@ -60,6 +64,13 @@ export default new Vuex.Store({
                 commit('UPDATE_LOADING', false);
             });
         },
+        getSaves({ commit }) {
+            const url = `/saves`;
+            axios.get(url).then( (response) => {
+                commit('UPDATE_SAVES', response.data);
+                commit('UPDATE_LOADING', false);
+            });
+        },
     },
 
     getters: {
@@ -69,6 +80,7 @@ export default new Vuex.Store({
         breadcrumb: state => state.breadcrumb,
         shares: state => state.shares,
         shareables: state => state.shareables,
+        saves: state => state.saves,
         //children: state => state.vault.children, // Flat list
         //mediafiles: state => state.vault.mediafiles, // Flat list
     },
