@@ -33,27 +33,10 @@ class SaveditemsController extends AppBaseController
     public function index(Request $request)
     {
         $sessionUser = Auth::user();
-
-        /*
-        //$this->validate($request, [
-        $request->validate([
-            'vf_id' => 'required',
-        ]);
-        $vfId = $request->vf_id;
-
-        if ( is_null($vfId) || $vfId==='root' ) {
-            $myVault = $sessionUser->vaults()->first(); // %FIXME
-            $cwf = $myVault->getRootFolder(); // 'current working folder'
-        } else {
-            $cwf = Vaultfolder::findOrFail($vfId);
-        }
-         */
+        $saves = $sessionUser->postsSaved()->with('user', 'images')->get();
 
         return response()->json([
-            //'cwf' => $cwf,
-            //'parent' => $cwf->vfparent,
-            //'children' => $cwf->vfchildren,
-            //'mediafiles' => $cwf->mediafiles,
+            'saves' => $saves,
         ]);
     }
 
