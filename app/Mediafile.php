@@ -100,11 +100,20 @@ class Mediafile extends BaseModel implements Guidable, Sluggable, Ownable
 
     // %%% --- Nameable Interface Overrides (via BaseModel) ---
 
-    public function renderName() : string 
-    {
+    public function renderName() : string {
         return $this->orig_filename;
     }
 
     // %%% --- Other ---
+
+    public function isImage() : bool {
+        switch ($this->mimetype) {
+            case 'image/jpeg':
+            case 'image/png':
+            case 'image/gif':
+                return true;
+        }
+        return false;
+    }
 
 }

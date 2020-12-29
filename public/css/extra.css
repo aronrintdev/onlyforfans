@@ -705,3 +705,14 @@ body .box-story img {
   height: 40px;
   border-radius: 50%;
 }
+
+
+body .post-image-holder .tag-post_mf_img {
+  height: 100%; 
+  width: 100%; 
+  position: absolute; 
+  filter: blur(4px); 
+  background-size: cover; 
+  z-index: 0; 
+  background-position: center;
+}
