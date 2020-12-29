@@ -58,6 +58,7 @@ class AppServiceProvider extends ServiceProvider
 
         Relation::morphMap([
             'mediafiles' => 'App\Mediafile',
+            'posts' => 'App\Post',
             'stories' => 'App\Story',
             'users' => 'App\User',
             'vaultfolders' => 'App\Vaultfolder',

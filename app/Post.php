@@ -33,8 +33,15 @@ class Post extends Model implements Ownable
    */
     protected $fillable = ['timeline_id', 'description', 'user_id', 'youtube_title', 'youtube_video_id', 'location', 'soundcloud_id', 'soundcloud_title', 'shared_post_id', 'type', 'price', 'active', 'publish_date', 'publish_time', 'expiration_date', 'expiration_time'];
 
-    public function user()
-    {
+    //--------------------------------------------
+    // %%% Relationships
+    //--------------------------------------------
+
+    public function mediafiles() {
+        return $this->morphMany('App\Mediafile', 'resource');
+    }
+
+    public function user() {
         return $this->belongsTo('App\User');
     }
 
@@ -42,72 +49,58 @@ class Post extends Model implements Ownable
         return $this->user;
     }
 
-    public function timeline()
-    {
+    public function timeline() {
         return $this->belongsTo('App\Timeline');
     }
 
-    public function users_liked()
-    {
+    public function users_liked() {
         return $this->belongsToMany('App\User', 'post_likes', 'post_id', 'user_id');
     }
 
-    public function tip()
-    {
+    public function tip() {
         return $this->belongsToMany('App\User', 'post_tips', 'post_id', 'user_id')->withPivot('amount');
     }
 
-    public function shares()
-    {
+    public function shares() {
         return $this->belongsToMany('App\User', 'post_shares', 'post_id', 'user_id');
     }
 
-    public function usersSaved()
-    {
+    public function usersSaved() {
         return $this->belongsToMany('App\User', 'saved_posts', 'post_id', 'user_id');
     }
 
-    public function usersPinned()
-    {
+    public function usersPinned() {
         return $this->belongsToMany('App\User', 'pinned_posts', 'post_id', 'user_id');
     }
 
-    public function notifications_user()
-    {
+    public function notifications_user() {
         return $this->belongsToMany('App\User', 'post_follows', 'post_id', 'user_id');
     }
 
-    public function reports()
-    {
+    public function reports() {
         return $this->belongsToMany('App\User', 'post_reports', 'post_id', 'reporter_id')->withPivot('status');
     }
 
-    public function comments()
-    {
+    public function comments() {
         return $this->hasMany('App\Comment')->where('parent_id', null);
     }
 
-    public function users_shared()
-    {
+    public function users_shared() {
         return $this->belongsToMany('App\User', 'post_shares', 'post_id', 'user_id');
     }
 
-    public function images()
-    {
+    public function images() {
         return $this->belongsToMany('App\Media', 'post_media', 'post_id', 'media_id');
     }
 
     public function videos() {
-
     }
 
-    public function users_posts()
-    {
+    public function users_posts() {
         return $this->belongsToMany('App\User', 'posts', 'id', 'user_id');
     }
 
-    public function managePostReport($post_id, $user_id)
-    {
+    public function managePostReport($post_id, $user_id) {
         $post_report = DB::table('post_reports')->insert(['post_id' => $post_id, 'reporter_id' => $user_id, 'status' => 'pending', 'created_at' => Carbon::now()]);
 
         $result = $post_report ? true : false;

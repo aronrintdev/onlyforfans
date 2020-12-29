@@ -38,6 +38,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Log;
 use Intervention\Image\Facades\Image;
 use Intervention\Image\File;
 use Intervention\Image\Gd\Font;
@@ -49,6 +50,9 @@ use Spatie\Referer\Referer;
 use Storage;
 use Teepluss\Theme\Facades\Theme;
 use Validator;
+
+use App\Mediafile;
+use App\Enums\MediafileTypeEnum;
 
 
 class TimelineController extends AppBaseController
@@ -890,6 +894,7 @@ class TimelineController extends AppBaseController
 
     public function createPost(Request $request)
     {
+Log::info('MARK-0'); // post-image-1
         $validator = Validator::make($request->all(), [
             'post_video_upload' => 'max:512000',
         ]);
@@ -934,6 +939,7 @@ class TimelineController extends AppBaseController
 //            $timestamp = date('Y-m-d-H-i-s');
 //
         if (isset($input['image1'])) {
+Log::info('MARK-1');
             $s3audio = Storage::disk('settings');
             $fileBase64 = str_replace('data:audio/wav;base64,', '',  $request->get('image1'));
             $s3audio->put('user/audio/'.$timestamp.'.wav', base64_decode($fileBase64));
@@ -947,16 +953,20 @@ class TimelineController extends AppBaseController
         }
         
         if ($request->file('post_images_upload_modified')) {
+Log::info('MARK-2'); // post-image-2
             foreach ($request->file('post_images_upload_modified') as $postImage) {
                 if ($postImage->getSize() > 524288000) {
                     return response()->json(['status' => '400', 'message' => 'File size is too large. Upload below 100MB']);
                 }
                 if ($postImage->getClientOriginalExtension() != 'mp4' && $postImage->getClientOriginalExtension() != 'mov') {
+                    // %PSG: non-video attached (aka, image upload)
+Log::info('MARK-2.a'); // post-image-3
+
+                    /*
                     $strippedName = str_replace(' ', '', $postImage->getClientOriginalName());
                     $photoName = date('Y-m-d-H-i-s') . $strippedName;
 
                     try {
-                        /** @var File $avatar */
                         $avatar = Image::make($postImage->getRealPath());
                         
                         if(Auth::user()->settings()->watermark == 1){
@@ -1000,33 +1010,45 @@ class TimelineController extends AppBaseController
                     ]);
 
                     $post->images()->attach($media);
-                }
-                else {
+                     */
+
+                    $subFolder = 'posts';
+                    $newFilename = $postImage->store('fans-platform/'.$subFolder, 's3');
+                    $mediafile = Mediafile::create([
+                        //'resource_id' => $request->timeline_id,
+                        'resource_id' => $post->id,
+                        'resource_type' => 'posts',
+                        'filename' => $newFilename,
+                        'mftype' => 'post',
+                        'meta' => $request->input('meta') ?? null,
+                        'cattrs' => [
+                            'timeline_id' => $request->timeline_id,
+                        ],
+                        'mimetype' => $postImage->getMimeType(),
+                        'orig_filename' => $postImage->getClientOriginalName(),
+                        'orig_ext' => $postImage->getClientOriginalExtension(),
+                    ]);
+                } else {
+Log::info('MARK-2.c');
                     $strippedName = str_replace(' ', '', $postImage->getClientOriginalName());
                     $photoName = date('Y-m-d-H-i-s') . $strippedName;
-
                     $s3video = Storage::disk('settings');
-
                     $timestamp = date('Y-m-d-H-i-s');
-
                     $strippedName = $timestamp.str_replace(' ', '', $postImage->getClientOriginalName());
-
                     $s3video->put('user/video/'.$strippedName, file_get_contents($postImage));
-
                     $basename = $timestamp.basename($request->file('post_video_upload')->getClientOriginalName(), '.'.$request->file('post_video_upload')->getClientOriginalExtension());
-
                     $media = Media::create([
                         'title'  => $basename,
                         'type'   => 'video',
                         'source' => $strippedName,
                     ]);
-
                     $post->images()->attach($media);
                 }
             }
         }
 
         if ($post) {
+Log::info('MARK-3.a'); // post-image-4
             // Check for any mentions and notify them
             preg_match_all('/(^|\s)(@\w+)/', $request->description, $usernames);
             foreach ($usernames[2] as $value) {

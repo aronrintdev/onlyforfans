@@ -366,7 +366,7 @@ $main_description = $post->description;
 
                     {{--        @if(isset($user) && !$user->followers->contains(Auth::user()->id) && $user->id != Auth::user()->id && $user->payment != NULL && $user->payment->price > 0 )--}}
                     @if(isset($user) && !$user->followers->contains(Auth::user()->id) && $user->id != Auth::user()->id && $user->price > 0 )
-                      <div class="post-image-holder post-locked  single-image"> 
+                      <div class="post-image-holder post-locked  single-image tag-MARK-A"> 
                         <!-- %PSG: locked -->
                             {{--                <a><img src="{{ url('user/gallery/locked.jpg') }}"  title="{{ $post->user->name }}" alt="{{ $post->user->name }}" onclick="$('#myModal').modal('show')"></a>--}}
                             <a><img src="{{ url('user/gallery/locked.png') }}"  title="{{ $post->user->name }}" alt=""></a>
@@ -392,8 +392,26 @@ $main_description = $post->description;
                         </div>
                     @else
                         <!-- %PSG: UN-locked -->
-                        <div class="post-image-holder {{ $post->images()->first() && $post->images()->first()->type == 'image' ? 'single-image' : ''}}">
+                        <div class="post-image-holder {{ $post->images()->first() && $post->images()->first()->type == 'image' ? 'single-image' : ''}} tag-MARK-B">
 
+                            {{-- %PSG: Post's images --}}
+                            @foreach($post->mediafiles as $mf)
+                                @if( $mf->isImage() )
+                                  <span
+                                    class="tag-post_mf_img {{ $loop->first?'first-image':'hidden' }}" 
+                                    style="background-image: url( {{ $post->mediafiles()->first()->filepath }} );">
+                                  </span>
+                                  <a 
+                                    href="{{ $mf->filepath }}" 
+                                    class="{{ $loop->first?'first-image':'hidden' }}" 
+                                    data-fancybox="gallery.{{$post->id}}">
+                                    <img 
+                                      src="{{ $mf->filepath }}"  
+                                      title="{{ $post->user->name }}" 
+                                      alt="">
+                                  </a>
+                                @endif
+                            @endforeach
                             @foreach($post->images()->get() as $index => $postImage)
                                 @if($postImage->type=='image')
                                     <span class="{{ $index == 0 ? 'first-image' : 'hidden' }}" style="background-image: url({{ url('user/gallery/'.$post->images()->get()->first()->source) }}); height: 100%; width: 100%; position: absolute; filter: blur(4px); background-size: cover; z-index: 0; background-position: center;"></span>
@@ -402,6 +420,7 @@ $main_description = $post->description;
                             @endforeach
                         </div>
 
+                            {{-- %PSG: Post's videos --}}
                         <div class="post-v-holder">
                             @foreach($post->images()->get() as $index => $postImage)
                                 @if($postImage->type=='video')
@@ -414,6 +433,7 @@ $main_description = $post->description;
                             @endforeach
                         </div>
 
+                            {{-- %PSG: Post's audio --}}
                         <div class="post-audio-holder">
                             @foreach($post->images()->get() as $postImage)
                                 @if($postImage->type=='audio')
@@ -583,7 +603,7 @@ $main_description = $post->description;
 
                 {{--        @if(isset($user) && !$user->followers->contains(Auth::user()->id) && $user->id != Auth::user()->id && $user->payment != NULL && $user->payment->price > 0 )--}}
                 @if(isset($user) && !$user->followers->contains(Auth::user()->id) && $user->id != Auth::user()->id && $user->price > 0 )
-                    <div class="post-image-holder post-locked  single-image">
+                    <div class="post-image-holder post-locked  single-image tag-MARK-C">
                         {{--                <a><img src="{{ url('user/gallery/locked.jpg') }}"  title="{{ $post->user->name }}" alt="{{ $post->user->name }}" onclick="$('#myModal').modal('show')"></a>--}}
                         <a><img src="{{ url('user/gallery/locked.png') }}"  title="{{ $post->user->name }}" alt="{{ $post->user->name }}"></a>
 
@@ -610,8 +630,31 @@ $main_description = $post->description;
                         </div>
                     </div>
                 @else
+                      @php
+                      if ($post->id === 245) {
+                        //dd('MARK-D', $post->mediafiles->toArray());
+                      }
+                      @endphp
 
-                    <div class="post-image-holder {{  $post->images()->first() && $post->images()->first()->type == 'image' ? 'single-image' : ''}}">
+                    <div class="post-image-holder {{  $post->mediafiles()->first() && $post->mediafiles()->first()->isImage()?'single-image':''}} tag-MARK-D">
+                        {{-- %PSG: Post's images --}}
+                        @foreach($post->mediafiles as $mf)
+                            @if( $mf->isImage() )
+                              <span
+                                class="tag-post_mf_img {{ $loop->first?'first-image':'hidden' }}" 
+                                style="background-image: url( {{ $post->mediafiles()->first()->filepath }} );">
+                              </span>
+                              <a 
+                                href="{{ $mf->filepath }}" 
+                                class="{{ $loop->first?'first-image':'hidden' }}" 
+                                data-fancybox="gallery.{{$post->id}}">
+                                <img 
+                                  src="{{ $mf->filepath }}"  
+                                  title="{{ $post->user->name }}" 
+                                  alt="">
+                              </a>
+                            @endif
+                        @endforeach
 
                         @foreach($post->images()->get() as $index => $postImage)
                             @if($postImage->type=='image')
