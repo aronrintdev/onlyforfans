@@ -65,7 +65,7 @@ export default new Vuex.Store({
             });
         },
         getSaves({ commit }) {
-            const url = `/saves`;
+            const url = `/saved`;
             axios.get(url).then( (response) => {
                 commit('UPDATE_SAVES', response.data);
                 commit('UPDATE_LOADING', false);

@@ -8,14 +8,35 @@
 
             <b-tab title="Saved">
               <ul class="list-unstyled mt-3">
-                <li v-for="(sv) in this.saves" :key="sv.guid">
+                <li class="mb-3" v-for="(sv) in this.saves" :key="sv.guid">
                   <b-media class="mb-1">
                     <template #aside>
-                      <b-img class="tag-avatar" rounded="circle" :src="sv.owner.avatar" width="64" height="64" alt="avatar"></b-img>
+                      <b-img class="tag-avatar" rounded="circle" :src="sv.user.avatar" width="64" height="64" alt="avatar"></b-img>
                     </template>
-                    <h6 class="mt-0">{{ sv.owner.name }}</h6>
+                    <h6 class="mt-0">{{ sv.user.name }}</h6>
                   </b-media>
+                  <!--
                   <b-card :title="sv.name" :img-src="sv.filepath" :img-alt="sv.name" img-bottom class="mb-5"></b-card>
+                  -->
+                  <article>
+                    <table>
+                      <tr>
+                        <td>Name:</td>
+                        <td>{{ sv.user.name }}</td>
+                      </tr>
+                      <tr>
+                        <td>Images:</td>
+                        <td>
+                          <ul>
+                          <li v-for="(i) in sv.images" :key="i.id">
+                            <img :key="i.id" :src="i.source" :alt="i.source" />
+                          </li>
+                          </ul>
+                        </td>
+                      </tr>
+                    </table>
+                  </article>
+                  <hr />
                 </li>
               </ul>
             </b-tab>
@@ -91,6 +112,7 @@ export default {
 
   created() {
     this.$store.dispatch('getSaves');
+    this.$store.dispatch('getShareables');
   },
 
   methods: {
