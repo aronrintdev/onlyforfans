@@ -6,11 +6,11 @@ use Auth;
 use Carbon\Carbon;
 use DB;
 use Illuminate\Database\Eloquent\Model;
+use App\Interfaces\Ownable;
 
 //use Illuminate\Database\Eloquent\SoftDeletes;
 
-
-class Post extends Model
+class Post extends Model implements Ownable
 {
     const PRICE_TYPE = 'price';
     const FREE_TYPE = 'free';
@@ -36,6 +36,10 @@ class Post extends Model
     public function user()
     {
         return $this->belongsTo('App\User');
+    }
+
+    public function getOwner() : ?User {
+        return $this->user;
     }
 
     public function timeline()
