@@ -1,72 +1,93 @@
 <?php
 namespace App;
 
-//use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
-//use Storage;
-//use App\Libs\Utils\ViewHelpers;
-//use App\Libs\Image;
+use Exception;
 use App\SluggableTraits;
 use App\Interfaces\Guidable;
 //use App\Interfaces\Nameable;
 use App\Interfaces\Sluggable;
 use App\Interfaces\Ownable;
-use App\Enums\MediafileTypeEnum;
 
-class Mediafile extends BaseModel implements Guidable, Sluggable, Ownable
+class Vaultfolder extends BaseModel implements Guidable, Sluggable, Ownable
 {
     use SluggableTraits;
 
     protected $guarded = ['id','created_at','updated_at'];
-    protected $appends = ['filepath', 'name'];
 
     public static $vrules = [
     ];
+
+    protected $appends = ['name'];
 
     //--------------------------------------------
     // %%% Relationships
     //--------------------------------------------
 
-    public function resource() {
-        return $this->morphTo();
+    public function vault() {
+        return $this->belongsTo('App\Vault');
     }
-
+    public function mediafiles() {
+        return $this->morphMany('App\Mediafile', 'resource');
+    }
+    public function vfparent() {
+        return $this->belongsTo('App\Vaultfolder', 'parent_id');
+    }
+    public function vfchildren() {
+        return $this->hasMany('App\Vaultfolder', 'parent_id');
+    }
     public function sharees() {
-        //return $this->morphToMany('App\User', 'shareable');
         return $this->morphToMany('App\User', 'shareable', 'shareables', 'shareable_id', 'sharee_id');
     }
 
     public function getOwner() : ?User {
-        return $this->resource->getOwner();
+        return $this->vault->getOwner();
     }
 
     //--------------------------------------------
-    // %%% Accessors/Mutators | Casts
+    // %%% Accessors/Mutators
     //--------------------------------------------
 
     protected $casts = [
         'cattrs' => 'array',
         'meta' => 'array',
     ];
+    
+    public function getBreadcrumb() : array {
+        $MAX_DEPTH = 15;
+        $iter = 0;
 
-    public function getFilepathAttribute($value) {
-        return !empty($this->filename) ? Storage::disk('s3')->url($this->filename) : null;
-        //return !empty($this->filename) ? Storage::disk('s3')->temporaryUrl( $this->filename, now()->addMinutes(5) ) : null;
+        $breadcrumb = [];
+        $vf = Vaultfolder::find($this->id);
+        while ( !empty($vf) ) {
+            if ($iter++ > $MAX_DEPTH) {
+                throw new Exception('Exceeded max sub-folder depth');
+            }
+            array_unshift($breadcrumb, [
+                'pkid' => $vf->id,
+                'vfname' => $vf->vfname,
+                'slug' => $vf->slug,
+            ]);
+            $vf = !empty($vf->parent_id) ? Vaultfolder::find($vf->parent_id) : null;
+        }
+        return $breadcrumb;
     }
 
     public function getNameAttribute($value) {
-        return $this->orig_filename;
+        return $this->vfname;
+    }
+
+    public function getPathAttribute($value) {
+        return $this->vfname; // %TODO: get full path back to root
     }
 
     //--------------------------------------------
-    // %%% Methods
+    // Methods
     //--------------------------------------------
 
     // %%% --- Implement Sluggable Interface ---
 
-    public function sluggableFields() : array
-    {
-        return ['orig_filename'];
+    public function sluggableFields() : array {
+        return ['vfname'];
     }
 
     // %%% --- Overrides in Model Traits (via BaseModel) ---
@@ -75,9 +96,6 @@ class Mediafile extends BaseModel implements Guidable, Sluggable, Ownable
     {
         $key = trim($key);
         switch ($key) {
-            case 'mftype':
-                $key = 'Media File Type';
-                break;
             default:
                 $key =  parent::_renderFieldKey($key);
         }
@@ -88,11 +106,11 @@ class Mediafile extends BaseModel implements Guidable, Sluggable, Ownable
     {
         $key = trim($field);
         switch ($key) {
+            /*
             case 'meta':
             case 'cattrs':
                 return json_encode($this->{$key});
-            case 'mftype':
-                return empty($this->mftype) ? 'N/A' : MediafileTypeEnum::render($this->mftype);
+             */
             default:
                 return parent::renderField($field);
         }
@@ -100,9 +118,8 @@ class Mediafile extends BaseModel implements Guidable, Sluggable, Ownable
 
     // %%% --- Nameable Interface Overrides (via BaseModel) ---
 
-    public function renderName() : string 
-    {
-        return $this->orig_filename;
+    public function renderName() : string {
+        return $this->vfname;
     }
 
     // %%% --- Other ---

@@ -75,7 +75,7 @@ return [
             'region' => env('AWS_DEFAULT_REGION'),
             'bucket' => env('AWS_BUCKET'),
             'endpoint' => env('AWS_URL'),
-            'visibility' => 'public',
+            'visibility' => 'private',
         ],
 
     ],

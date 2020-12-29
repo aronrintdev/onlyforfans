@@ -56,7 +56,14 @@ return [
     |
     */
 
-    'from' => ['address' => env('MAIL_FROM', 'test@test.com'), 'name' => env('APP_FULL_NAME')],
+    'from' => [
+        'address' => env('MAIL_FROM_ADDRESS', 'support@mjm-allfans.com'), 
+        'name' => env('MAIL_FROM_NAME', 'AllFans Support'),
+    ],
+    'reply_to' => [
+        'address' => env('MAIL_FROM_ADDRESS', 'support@mjm-allfans.com'), 
+        'name' => env('MAIL_FROM_NAME', 'AllFans Support'),
+    ],
 
     /*
     |--------------------------------------------------------------------------

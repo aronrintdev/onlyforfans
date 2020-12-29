@@ -1,5 +1,4 @@
 <?php
-
 namespace App;
 
 use Auth;
@@ -25,19 +24,9 @@ class User extends Authenticatable
     // }
     use Messagable;
 
-    /**
-     * The attributes that should be mutated to dates.
-     *
-     * @var array
-     */
     //protected $dates = ['deleted_at'];
 
 
-      /**
-       * The attributes that are mass assignable.
-       *
-       * @var array
-       */
     protected $appends = [
         'name',
         'avatar',
@@ -45,101 +34,17 @@ class User extends Authenticatable
         'about',
     ];
 
-
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array
-     */
     protected $fillable = [
         'timeline_id', 'email', 'verification_code', 'email_verified', 'remember_token', 'password', 'birthday', 'city', 'gender', 'last_logged', 'timezone', 'affiliate_id', 'language', 'country', 'active', 'verified', 'facebook_link', 'twitter_link', 'dribbble_link', 'instagram_link', 'youtube_link', 'linkedin_link', 'wishlist', 'website', 'instagram','custom_option1', 'custom_option2', 'custom_option3', 'custom_option4'
         , 'bank_account', 'price', 'is_payment_set', 'is_bank_set', 'is_follow_for_free', 'is_online', 'timezone_id'
     ];
 
-    /**
-     * The attributes that should be hidden for arrays.
-     *
-     * @var array
-     */
     protected $hidden = [
         'password', 'remember_token', 'verification_code', 'email', 'timeline',
     ];
 
-    /**
-     * Get the user's  name.
-     *
-     * @param string $value
-     *
-     * @return string
-     */
-    public function getNameAttribute($value)
-    {
-        return $this->timeline->name;
-    }
 
-    /**
-     * Get the user's  username.
-     *
-     * @param string $value
-     *
-     * @return string
-     */
-    public function getUsernameAttribute($value)
-    {
-        return $this->timeline->username;
-    }
-
-    /**
-     * Get the user's  avatar.user().
-     *
-     * @param string $value
-     *
-     * @return string
-     */
-    public function getAvatarAttribute($value)
-    {
-        return $this->timeline->avatar ? url('user/avatar/'.$this->timeline->avatar->source) : url('user/avatar/default-'.$this->gender.'-avatar.png');
-    }
-
-    /**
-     * Get the user's  cover.
-     *
-     * @param string $value
-     *
-     * @return string
-     */
-    public function getCoverAttribute($value)
-    {
-        return $this->timeline->cover ? $this->timeline->cover->source : null;
-    }
-
-    /**
-     * Get the user's  about.
-     *
-     * @param string $value
-     *
-     * @return string
-     */
-    public function getAboutAttribute($value)
-    {
-        return $this->timeline->about ? $this->timeline->about : null;
-    }
-
-    //this method is for displaying user avatar and default avatar from group in events feature
-    /**
-     * Get the user's  avatar.user().
-     *
-     * @param string $value
-     *
-     * @return string
-     */
-    public function getPictureAttribute($value)
-    {
-        return $this->timeline->avatar ? url('user/avatar/'.$this->timeline->avatar->source) : url('group/avatar/default-group-avatar.png');
-    }
-
-    public function toArray()
-    {
+    public function toArray() {
         $array = parent::toArray();
 
         $timeline = $this->timeline->toArray();
@@ -153,6 +58,17 @@ class User extends Authenticatable
         $array['avatar'] = $this->avatar;
 
         return $array;
+    }
+
+    //--------------------------------------------
+    // %%% Relationships
+    //--------------------------------------------
+
+    public function sharedmediafiles() {
+        return $this->morphedByMany('App\Mediafile', 'shareable', 'shareables', 'sharee_id')->withTimestamps();
+    }
+    public function sharedvaultfolders() {
+        return $this->morphedByMany('App\Vaultfolder', 'shareable', 'shareables', 'sharee_id')->withTimestamps();
     }
 
     public function timeline() {
@@ -218,30 +134,64 @@ class User extends Authenticatable
         return $this->hasOne('App\Payment');
     }
 
-    public function groups()
-    {
+    public function groups() {
         return $this->belongsToMany('App\Group', 'group_user', 'user_id', 'group_id')->withPivot('role_id', 'status');
     }
 
-    public function posts()
-    {
+    public function posts() {
         return $this->hasMany('App\Post');
     }
 
-    public function pageLikes()
-    {
+    public function pageLikes() {
         return $this->belongsToMany('App\Page', 'page_likes', 'user_id', 'page_id');
     }
 
-    public function notifications()
-    {
+    public function notifications() {
         return $this->hasMany('App\Notification')->with('notified_from');
     }
 
-    public function roles()
-    {
+    public function roles() {
         return $this->belongsToMany('App\Role', 'role_user', 'user_id', 'role_id');
     }
+
+    public function vaults() {
+        return $this->hasMany('App\Vault');
+    }
+
+    public function vaultfolders() {
+        return $this->hasMany('App\Vaultfolder');
+    }
+
+    //--------------------------------------------
+    // %%% Accessors/Mutators | Casts
+    //--------------------------------------------
+
+    public function getNameAttribute($value) {
+        return $this->timeline->name;
+    }
+
+    public function getUsernameAttribute($value) {
+        return $this->timeline->username;
+    }
+
+    public function getAvatarAttribute($value) {
+        return $this->timeline->avatar ? url('user/avatar/'.$this->timeline->avatar->source) : url('user/avatar/default-'.$this->gender.'-avatar.png');
+    }
+
+    public function getCoverAttribute($value) {
+        return $this->timeline->cover ? $this->timeline->cover->source : null;
+    }
+
+    public function getAboutAttribute($value) {
+        return $this->timeline->about ? $this->timeline->about : null;
+    }
+
+    //this method is for displaying user avatar and default avatar from group in events feature
+    public function getPictureAttribute($value) {
+        return $this->timeline->avatar ? url('user/avatar/'.$this->timeline->avatar->source) : url('group/avatar/default-group-avatar.png');
+    }
+
+    // ---
 
     public function get_group($id)
     {
@@ -392,18 +342,15 @@ class User extends Authenticatable
         return $result;
     }
 
-    public function events()
-    {
+    public function events() {
         return $this->belongsToMany('App\Event', 'event_user', 'user_id', 'event_id');
     }
 
-    public function get_eventuser($id)
-    {
+    public function get_eventuser($id) {
         return $this->events()->where('events.id', $id)->first();
     }
 
-    public function is_eventadmin($user_id, $event_id)
-    {
+    public function is_eventadmin($user_id, $event_id) {
         $chk_isadmin = Event::where('id', $event_id)->where('user_id', $user_id)->first();
 
         $result = $chk_isadmin ? true : false;
@@ -411,8 +358,7 @@ class User extends Authenticatable
         return $result;
     }
 
-    public function getEvents()
-    {
+    public function getEvents() {
         $result = [];
         $guestevents =  $this->events()->get();
         if ($guestevents) {

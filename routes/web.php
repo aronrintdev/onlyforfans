@@ -112,10 +112,8 @@ Route::get('/login', 'Auth\LoginController@getLogin');
 // Route::get('/login2', 'Auth\LoginController@login');
 
 // Register
-Route::get('/register', 'Auth\RegisterController@register');
-
+Route::get('/register', 'Auth\RegisterController@register')->name('auth.register');
 Route::post('/register', 'Auth\RegisterController@registerUser');
-
 Route::get('email/verify', 'Auth\RegisterController@verifyEmail');
 
 Route::group(['middleware' => ['auth']], function () {
@@ -125,7 +123,33 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('purchased-posts', 'TimelineController@showPurchasedPosts')->name('purchased-posts');
     Route::get('post/{id}', 'TimelineController@showPost')->name('post.show');
     Route::post('update-last-seen', 'UserController@updateLastSeen')->name('update-user-status');
-    Route::resource('mediafiles', 'MediafilesController', []);
+
+    Route::resource('mediafiles', 'MediafilesController', [
+    ]);
+
+    Route::get('/users/match', ['as'=>'users.match', 'uses' => 'UsersController@match']);
+    /*
+    Route::resource('users', 'UsersController', [
+        'only' => [ 'index' ],
+    ]);
+     */
+    Route::resource('vaultfolders', 'VaultfoldersController', [
+        'only' => [ 'index', 'show', 'store' ],
+    ]);
+
+    Route::patch('/vaults/{vault}/update-shares', ['as'=>'vaults.updateShares', 'uses' => 'VaultsController@updateShares']);
+    Route::resource('vaults', 'VaultsController', [
+        'only' => [ 'index', 'show' ],
+    ]);
+
+    Route::get('/saved/dashboard', ['as'=>'saved.dashboard', 'uses' => 'SaveditemsController@dashboard']);
+    Route::resource('saved', 'SaveditemsController', [
+        'only' => [ 'index', 'show', 'store' ],
+    ]);
+
+    Route::resource('shareables', 'ShareablesController', [
+        'only' => [ 'index', ],
+    ]);
 });
 
 //main project register
@@ -247,7 +271,6 @@ Route::group(['prefix' => '/admin', 'middleware' => ['auth', 'role:admin']], fun
 Route::get('messages/{username?}', 'MessageController@index');
 
 
-
 /*
 |--------------------------------------------------------------------------
 | User routes
@@ -316,6 +339,7 @@ Route::group(['prefix' => '/{username}', 'middleware' => 'auth'], function ($use
 
 });
 
+
 Route::group(['prefix' => '/{username}', 'middleware' => ['auth', 'editown']], function ($username) {
 
     Route::get('/messages', 'UserController@messages');
@@ -338,13 +362,15 @@ Route::group(['prefix' => '/{username}', 'middleware' => ['auth', 'editown']], f
 
     // Route::get('/pages', 'UserController@pages');
     // Route::get('/groups', 'UserController@groups');
-    Route::get('/saved', 'UserController@savedItems');
+    Route::get('/saved', 'UserController@savedItems'); // %FIXME %DEPRECATE, use new resource route for this
 
     // %PSG
     Route::get('/stories/player', ['as'=>'stories.player', 'uses' => 'StoriesController@player']);
     Route::resource('stories', 'StoriesController', [
         'only' => ['index', 'store', 'create',],
     ]);
+
+    Route::get('/my-vault', ['as'=>'vault.dashboard', 'uses' => 'VaultsController@dashboard']);
 
 });
 

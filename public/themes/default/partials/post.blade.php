@@ -15,6 +15,7 @@ $main_description = $post->description;
     <div class="post-author">
 
     @if(isset($user) == false || $user->followers->contains(Auth::user()->id) || $user->id == Auth::user()->id || $user->price == 0)
+    <!-- %PSG: post options dropdown (upper-right) -->
       <div class="post-options">
         <ul class="list-inline no-margin">
           <li class="dropdown"><a href="#" class="dropdown-togle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-angle-down"></i></a>
@@ -139,6 +140,8 @@ $main_description = $post->description;
         </ul>
       </div>
     @endif
+
+    <!-- %PSG: the post body itself -->
       <div class="user-avatar">
         <a href="{{ url($post->user->username) }}"><img src="{{ $post->user->avatar }}" alt="{{ $post->user->name }}" title="{{ $post->user->name }}"></a>
       </div>
@@ -247,7 +250,7 @@ $main_description = $post->description;
                 </div>
             </div>
         @else
-            <div class="panel-body image-with-blur {{ clean($main_description) == ''  ? 'single-image-panel' : '' }}">
+              <div data-post_id="{{ $post->id }}" class="panel-body image-with-blur {{ clean($main_description) == ''  ? 'single-image-panel' : '' }}">
                 <div class="text-wrapper">
 
                     <div id="statisticsModal{{ $post->id }}" class="modal fade" role="dialog" tabindex='-1'>
@@ -363,7 +366,8 @@ $main_description = $post->description;
 
                     {{--        @if(isset($user) && !$user->followers->contains(Auth::user()->id) && $user->id != Auth::user()->id && $user->payment != NULL && $user->payment->price > 0 )--}}
                     @if(isset($user) && !$user->followers->contains(Auth::user()->id) && $user->id != Auth::user()->id && $user->price > 0 )
-                        <div class="post-image-holder post-locked  single-image">
+                      <div class="post-image-holder post-locked  single-image"> 
+                        <!-- %PSG: locked -->
                             {{--                <a><img src="{{ url('user/gallery/locked.jpg') }}"  title="{{ $post->user->name }}" alt="{{ $post->user->name }}" onclick="$('#myModal').modal('show')"></a>--}}
                             <a><img src="{{ url('user/gallery/locked.png') }}"  title="{{ $post->user->name }}" alt=""></a>
 
@@ -387,7 +391,7 @@ $main_description = $post->description;
                             </div>
                         </div>
                     @else
-
+                        <!-- %PSG: UN-locked -->
                         <div class="post-image-holder {{ $post->images()->first() && $post->images()->first()->type == 'image' ? 'single-image' : ''}}">
 
                             @foreach($post->images()->get() as $index => $postImage)
@@ -467,7 +471,7 @@ $main_description = $post->description;
         @endif
       
     @else
-        <div class="panel-body image-with-blur {{ clean($main_description) == '' ? 'single-image-panel' : '' }}">
+        <div data-post_id="{{ $post->id }}" class="panel-body image-with-blur {{ clean($main_description) == '' ? 'single-image-panel' : '' }}">
             <div class="text-wrapper">
 
                 <div id="statisticsModal{{ $post->id }}" class="modal fade" role="dialog" tabindex='-1'>

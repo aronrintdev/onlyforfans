@@ -4,9 +4,12 @@
  * building robust, powerful web applications using Vue and Laravel.
  */
 
+import store from './store';
+
 //require('./bootstrap');
 window.axios = require('axios');
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+//axios.defaults.baseURL = '/';
 
 window.Vue = require('vue');
 
@@ -23,8 +26,9 @@ Vue.use(BootstrapVueIcons)
  */
 
 Vue.component('create-story', require('./components/stories/Wizard.vue'));
-//Vue.component('story-player', require('./components/stories/Player.vue'));
 Vue.component('story-player', require('./components/stories/AutoPlayer.vue'));
+Vue.component('my-vault', require('./components/vault/Dashboard.vue'));
+Vue.component('my-saved', require('./components/saved/Dashboard.vue'));
 
 export const eventBus = new Vue({
 /*
@@ -40,6 +44,14 @@ export const eventBus = new Vue({
 });
 
 const app = new Vue({
-    el: '#app'
+    store,
+    el: '#app',
 });
 
+/*
+const app = new Vue({
+    //router,
+    store,
+    render: h => h(App),
+}).$mount('#app');
+*/

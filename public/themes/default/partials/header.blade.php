@@ -78,7 +78,10 @@
 @if(Auth::guest())
     <nav class="navbar fans navbar-default no-bg guest-nav">
         <div class="container">
-            @else
+@else
+@php
+  $username = Auth::user()->username;
+@endphp
                 <nav class="navbar fans navbar-default no-bg" id="navbar-right" v-cloak>
                     <div class="container-fluid">
                         @endif
@@ -235,6 +238,7 @@
                                             <li class=""><a href="{{ url(Auth::user()->username.'/settings/addbank') }}"><i class="fa fa-university" aria-hidden="true"></i>{{ trans('common.add_bank') }}</a></li>
                                             <li class=""><a href="{{ url(Auth::user()->username.'/settings/earnings') }}"><i class="fa fa-dollar" aria-hidden="true"></i>{{ trans('common.earnings') }}</a></li>
                                             <li class=""><a href="{{ url(Auth::user()->username.'/settings/addpayment') }}"><i class="fa fa-credit-card" aria-hidden="true"></i>{{ trans('common.add_payment') }}</a></li>
+                                            <li class=""><a href="{{ route('vault.dashboard', $username) }}"><i class="fa fa-lock" aria-hidden="true"></i>Vault</a></li>
                                             @if (Auth::user()->is_bank_set)
                                                 <li class=""><a href="{{ url(Auth::user()->payment->dashboard_url) }}"><i class="fa fa-credit-card" aria-hidden="true"></i>{{ trans('common.dashboard') }}</a></li>
                                             @endif
@@ -452,6 +456,7 @@
                                             <li class="">
                                                 <a href="{{ url(Auth::user()->username.'/settings/addpayment') }}"><i class="fa fa-credit-card" aria-hidden="true"></i>{{ trans('common.add_payment') }}</a>
                                             </li>
+                                            <li class=""><a href="{{ route('vault.dashboard', $username) }}"><i class="fa fa-lock" aria-hidden="true"></i>Vault</a></li>
                                             @if (Auth::user()->is_bank_set)
                                                 <li class="">
                                                     <a href="{{ url(Auth::user()->payment->dashboard_url) }}"><i class="fa fa-credit-card" aria-hidden="true"></i>{{ trans('common.dashboard') }}</a>

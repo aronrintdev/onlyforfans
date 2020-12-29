@@ -57,7 +57,10 @@ class AppServiceProvider extends ServiceProvider
         }
 
         Relation::morphMap([
+            'mediafiles' => 'App\Mediafile',
             'stories' => 'App\Story',
+            'users' => 'App\User',
+            'vaultfolders' => 'App\Vaultfolder',
         ]);
     }
 

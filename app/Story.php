@@ -20,15 +20,10 @@ class Story extends Model
     }
 
     //--------------------------------------------
-    // Accessors/Mutators
+    // Accessors/Mutators | Casts
     //--------------------------------------------
 
-    public function getCattrsAttribute($value) {
-        return empty($value) ? [] : json_decode($value,true);
-    }
-
-    public function setCattrsAttribute($value) {
-        $this->attributes['cattrs'] = json_encode($value);
-    }
-
+    protected $casts = [
+        'cattrs' => 'array',
+    ];
 }
