@@ -175,11 +175,13 @@ class User extends Authenticatable
     }
 
     public function getAvatarAttribute($value) {
-        return $this->timeline->avatar ? url('user/avatar/'.$this->timeline->avatar->source) : url('user/avatar/default-'.$this->gender.'-avatar.png');
+        return $this->timeline->avatar 
+            ? $this->timeline->avatar
+            : url('user/avatar/default-'.$this->gender.'-avatar.png');
     }
 
     public function getCoverAttribute($value) {
-        return $this->timeline->cover ? $this->timeline->cover->source : null;
+        return $this->timeline->cover ? $this->timeline->cover : null;
     }
 
     public function getAboutAttribute($value) {
@@ -188,7 +190,9 @@ class User extends Authenticatable
 
     //this method is for displaying user avatar and default avatar from group in events feature
     public function getPictureAttribute($value) {
-        return $this->timeline->avatar ? url('user/avatar/'.$this->timeline->avatar->source) : url('group/avatar/default-group-avatar.png');
+        return $this->timeline->avatar 
+            ? $this->timeline->avatar
+            : url('group/avatar/default-group-avatar.png');
     }
 
     // ---

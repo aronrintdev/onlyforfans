@@ -1,3 +1,4 @@
+<!-- %VIEW: themes/default/paritals/public-user-header --> 
 <div class="timeline-cover-section">
 	<div class="timeline-cover">
 		<ul class="list-inline pagelike-links">							
@@ -36,7 +37,7 @@
 			@endif
 		</ul>
 	    
-		<img src=" @if($timeline->cover_id) {{ url('user/cover/'.$timeline->cover->source) }} @else {{ url('user/cover/default-cover-user.png') }} @endif" alt="{{ $timeline->name }}" title="{{ $timeline->name }}">
+		<img src=" @if($timeline->cover_id) {{ $timeline->cover->filepath)}} @else {{ url('user/cover/default-cover-user.png') }} @endif" alt="{{ $timeline->name }}" title="{{ $timeline->name }}">
 {{--		@if($timeline->id == $user->timeline_id)--}}
 {{--			<a href="#" class="btn btn-camera-cover change-cover"><i class="fa fa-camera" aria-hidden="true"></i><span class="change-cover-text">{{ trans('common.change_cover') }}</span></a>--}}
 {{--		@endif--}}

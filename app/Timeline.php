@@ -62,11 +62,11 @@ class Timeline extends Model
     }
 
     public function avatar() {
-        return $this->hasOne('App\Mediafile', 'avatar_id');
+        return $this->belongsTo('App\Mediafile', 'avatar_id');
     }
 
     public function cover() {
-        return $this->hasOne('App\Mediafile', 'cover_id');
+        return $this->belongsTo('App\Mediafile', 'cover_id');
     }
 
     public function page() {

@@ -1202,7 +1202,7 @@ class UserController extends AppBaseController
         $users = $timelines;
         foreach ($timelines as $key => $value) {
             if ($value->avatar != null) {
-                $users[$key]['image'] = url('user/avatar/'.$value->avatar->source);
+                $users[$key]['image'] = $value->avatar->filepath;
             } else {
                 $gender = isset($value->user) ? $value->user->gender : 'male';
                 $users[$key]['image'] = url('user/avatar/default-'.$gender.'-avatar.png');

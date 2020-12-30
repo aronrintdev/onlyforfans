@@ -71,7 +71,7 @@
 				</li>
 			</ul>
 		</div>
-		<img src=" @if($timeline->cover_id) {{ url('user/cover/'.$timeline->cover->source) }} @else {{ url('user/cover/default-cover-user.png') }} @endif" alt="{{ $timeline->name }}" title="{{ $timeline->name }}">
+		<img src=" @if($timeline->cover_id) {{ $timeline->cover->filepath }} @else {{ url('user/cover/default-cover-user.png') }} @endif" alt="{{ $timeline->name }}" title="{{ $timeline->name }}">
 		@if($timeline->id == Auth::user()->timeline_id)
 			<a href="#" class="btn btn-camera-cover change-cover">
     			<svg width="1.5em" height="1.5em" viewBox="0 0 16 16" class="bi bi-camera-fill" fill="#fff" xmlns="http://www.w3.org/2000/svg">

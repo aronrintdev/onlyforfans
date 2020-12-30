@@ -223,9 +223,9 @@
                                             </form>
                                         </div>
                                     </li>
-                                    <li class="dropdown user-image fans" style="display: inline-block;">
+                                    <li class="dropdown user-image fans MARK-A" style="display: inline-block;">
                                         <a href="{{ url(Auth::user()->username) }}" class="dropdown-toggle no-padding" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                                            <img src="{{ Auth::user()->avatar }}" alt="{{ Auth::user()->name }}" class="img-radius img-30" title="{{ Auth::user()->name }}">
+                                          <img src="{{ Auth::user()->avatar->filepath }}" alt="{{ Auth::user()->name }}" class="img-radius img-30" title="{{ Auth::user()->name }}">
                                         </a>
                                         <ul class="dropdown-menu">
                                             @if(Auth::user()->hasRole('admin'))
@@ -427,9 +427,9 @@
                                             {{--                                           </li>--}}
                                         </ul>
                                     </li>
-                                    <li class="dropdown user-image fans">
+                                    <li class="dropdown user-image fans MARK-B">
                                         <a href="{{ url(Auth::user()->username) }}" class="dropdown-toggle no-padding" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                                            <img src="{{ Auth::user()->avatar }}" alt="{{ Auth::user()->name }}" class="img-radius img-30" title="{{ Auth::user()->name }}">
+                                          <img src="{{ Auth::user()->avatar->filepath }}" alt="{{ Auth::user()->name }}" class="img-radius img-30" title="{{ Auth::user()->name }}">
                                             <span class="user-name">{{ Auth::user()->name }}</span><i class="fa fa-angle-down" aria-hidden="true"></i></a>
                                         <ul class="dropdown-menu">
                                             @if(Auth::user()->hasRole('admin'))

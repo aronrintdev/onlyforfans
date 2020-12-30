@@ -49,7 +49,7 @@ class TruncateData extends Command
     }
 
     private function removeMediafile($mf) {
-        //Storage::disk('s3')->delete($mf); // Remove from S3
+        Storage::disk('s3')->delete($mf->filename); // Remove from S3
         $mf->delete();
     }
 
@@ -64,7 +64,7 @@ class TruncateData extends Command
         'stories',
         'subscriptions',
 
-        'user_role',
+        'role_user',
         'user_settings',
         'user_lists',
         'users_tips',
