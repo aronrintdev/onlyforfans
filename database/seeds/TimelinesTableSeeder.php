@@ -5,6 +5,7 @@ use App\Page;
 use App\Timeline;
 use App\User;
 use Illuminate\Database\Seeder;
+use Exception;
 
 class TimelinesTableSeeder extends Seeder
 {
@@ -15,6 +16,7 @@ class TimelinesTableSeeder extends Seeder
      */
     public function run()
     {
+        throw new Exception('Do Not USe -- use UsersTableSeeder instead (%PSG, 12/29/20)');
 
         //Create admin account
         $account = Timeline::firstOrNew(['username' => 'bootstrapguru']);

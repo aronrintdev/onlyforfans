@@ -19,6 +19,7 @@ $factory->define(App\Timeline::class, function (Faker\Generator $faker) {
         'username' => $faker->userName,
         'name'     => $faker->name,
         'about'    => $faker->text,
+        'type'    => 'user',
         // 'avatar_id' => $faker->numberBetween($min = 1, $max = 80),
         // 'cover_id' => $faker->numberBetween($min = 1, $max = 80),
 
