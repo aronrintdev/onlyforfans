@@ -10,7 +10,89 @@ use App\Enums\MediafileTypeEnum;
 
 class UsersTableSeeder extends Seeder
 {
-    private function createImage($mftype)
+
+    public function run()
+    {
+        $this->faker = \Faker\Factory::create();
+
+        // +++ Create admin users +++
+
+        $this->createAdminUser([
+            'name' => 'Peter G',
+            'username' => 'peter',
+            'email' => 'peter@peltronic.com',
+            'password' => 'foo-123',
+            'gender' => 'male',
+            'city' => 'Las Vegas',
+            'country' => 'US',
+        ]);
+
+        $this->createAdminUser([
+            'name' => 'Matt M',
+            'username' => 'mattm',
+            'email' => 'matt@mjmwebdesign.com',
+            'password' => 'foo-123',
+            'gender' => 'male',
+            'city' => 'Las Vegas',
+            'country' => 'US',
+        ]);
+
+        //Populate dummy users
+        //factory(User::class, 40)->create();
+
+        // +++ Update default user settings +++
+
+        $users = User::get();
+        foreach ($users as $u) {
+            DB::table('user_settings')->insert([
+                'user_id'               => $u->id,
+                'confirm_follow'        => 'no',
+                'follow_privacy'        => 'everyone',
+                'comment_privacy'       => 'everyone',
+                'timeline_post_privacy' => 'everyone',
+                'post_privacy'          => 'everyone',
+                'message_privacy'       => 'everyone', 
+            ]);
+
+        }
+    }
+
+    private function createAdminUser($attrs)
+    {
+        dump('Creating user: '.$attrs['email']);
+        $adminRole = Role::where('name','admin')->firstOrFail();
+        $user = factory(User::class)->create();
+        $user->email = $attrs['email'];
+        $user->password = Hash::make($attrs['password']);
+        $user->email_verified = 1;
+        if ( array_key_exists('gender', $attrs) ) {
+            $user->gender = $attrs['gender'];
+        }
+        if ( array_key_exists('city', $attrs) ) {
+            $user->city = $attrs['city'];
+        }
+        if ( array_key_exists('country', $attrs) ) {
+            $user->country = $attrs['country'];
+        }
+        $user->remember_token = str_random(10);
+        $user->verification_code = str_random(18);
+        $user->save();
+
+        $user->roles()->attach($adminRole->id);
+
+        $avatar = $this->createImage(MediafileTypeEnum::AVATAR);
+        $cover = $this->createImage(MediafileTypeEnum::COVER);
+        $timeline = $user->timeline;
+        $timeline->username = $attrs['username'];
+        $timeline->name = $attrs['name'];
+        $timeline->avatar_id = $avatar->id;
+        $timeline->cover_id = $cover->id;
+        $timeline->save();
+
+        unset($user, $timeline);
+    }
+
+    private function createImage($mftype) : ?Mediafile
     {
         $url = 'https://loremflickr.com/json/g/320/240/paris,girl,cat,dog/all';
         $json = json_decode(file_get_contents($url));
@@ -20,7 +102,7 @@ class UsersTableSeeder extends Seeder
         $s3Path = 'avatars/'.$basename;
         //$contents = file_get_contents('https://loremflickr.com/640/360');
         $contents = file_get_contents($json->file);
-//dd($json, $info);
+        //dd($json, $info);
 
         //$path = 'avatars/'.$mediafile->slug.'.'.$mediafile->slug;
         Storage::disk('s3')->put($s3Path, $contents);
@@ -44,97 +126,6 @@ class UsersTableSeeder extends Seeder
             'orig_ext' => $ext, // $file->getClientOriginalExtension(),
         ]);
 
-    }
-
-    public function run()
-    {
-        $this->faker = \Faker\Factory::create();
-
-        $this->createImage(MediafileTypeEnum::AVATAR);
-dd('done');
-
-        $contents = file_get_contents('https://loremflickr.com/640/360');
-        Storage::disk('s3')->put('tmp/name', $contents);
-
-
-
-        $adminRole = Role::where('name','admin')->firstOrFail();
-        // Lets create roles first
-        //     $roles = array(
-        //     array('name' => 'admin' ),
-        //     array('name' => 'user' ),
-        //     array('name' => 'moderator' )
-        // );
-
-        // Role::insert($roles);
-
-        // [ ] attach role
-        // [ ] settings
-
-        // +++ Create admin users +++
-
-        $user = factory(User::class)->create();
-        $user->email = 'peter@peltronic.com';
-        $user->password = Hash::make('foo-123');
-        $user->remember_token = str_random(10);
-        $user->verification_code = str_random(18);
-        $user->email_verified = 1;
-        $user->verified = 1;
-        $user->gender = 'male';
-        $user->city = 'Las Vegas';
-        $user->country = 'US';
-        $user->save();
-
-        $user->roles()->attach($adminRole->id);
-
-        $timeline = $user->timeline;
-        $timeline->username = 'peter';
-        $timeline->name = 'Peter G';
-        //$timeline->avatar = file_get_contents('https://loremflickr.com/640/360');
-        //$timeline->cover = %TODO: switch to Mediafile
-        $timeline->save();
-
-        unset($user, $timeline);
-
-        // ---
-
-        $user = factory(User::class)->create();
-        $user->email = 'matt@mjmwebdesign.com';
-        $user->password = Hash::make('foo-123');
-        $user->remember_token = str_random(10);
-        $user->verification_code = str_random(18);
-        $user->email_verified = 1;
-        $user->gender = 'male';
-        $user->city = 'Las Vegas';
-        $user->country = 'US';
-        $user->save();
-
-        $user->roles()->attach($adminRole->id);
-
-        $timeline = $user->timeline;
-        $timeline->username = 'mattm';
-        $timeline->name = 'Matt M';
-        $timeline->save();
-
-        unset($user, $timeline);
-
-        //Populate dummy users
-        //factory(User::class, 40)->create();
-
-        // +++ Update default user settings +++
-
-        $users = User::get();
-        foreach ($users as $u) {
-            DB::table('user_settings')->insert([
-                'user_id'               => $u->id,
-                'confirm_follow'        => 'no',
-                'follow_privacy'        => 'everyone',
-                'comment_privacy'       => 'everyone',
-                'timeline_post_privacy' => 'everyone',
-                'post_privacy'          => 'everyone',
-                'message_privacy'       => 'everyone', 
-            ]);
-
-        }
+        return $mediafile;
     }
 }
