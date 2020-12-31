@@ -1,3 +1,4 @@
+<!-- %VIEW: stories/_index -->
 <section class="row mb-3 ml-0 mr-0">
   <article class="OFF-box-story OFF-tag-ctrl col-sm-1">
     <div class="tag-ctrl box-story">
@@ -10,7 +11,7 @@
   </article>
   @foreach($stories as $s) 
     @php
-      $bgColor = array_key_exists('background-color', $s->cattrs) ? $s->cattrs['background-color'] : 'yellow';
+      $bgColor = array_key_exists('background-color', $s->cattrs??[]) ? $s->cattrs['background-color'] : 'yellow';
     @endphp
     @if ($s->stype==='text')
       <article class="col-sm-1">

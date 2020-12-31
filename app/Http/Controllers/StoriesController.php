@@ -80,7 +80,7 @@ class StoriesController extends AppBaseController
             'timeline' => $sessionUser->timeline,
             'stories' => $storiesA,
             'dtoUser' => [
-                'avatar_url' => $sessionUser->avatar,
+                'avatar' => $sessionUser->avatar,
                 'fullname' => $sessionUser->timeline->name,
                 'username' => $sessionUser->timeline->username,
             ],
@@ -114,7 +114,7 @@ class StoriesController extends AppBaseController
                 if ( $request->attrs['stype'] === 'image' ) {
                     $file = $request->file('mediafile');
                     $subFolder = 'stories';
-                    $newFilename = $file->store('fans-platform/'.$subFolder, 's3'); // %FIXME: hardcoded
+                    $newFilename = $file->store('./'.$subFolder, 's3'); // %FIXME: hardcoded
                     $mediafile = Mediafile::create([
                         'resource_id' => $story->id,
                         'resource_type' => 'stories',

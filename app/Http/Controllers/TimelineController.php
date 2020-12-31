@@ -1013,7 +1013,7 @@ Log::info('MARK-2.a'); // post-image-3
                      */
 
                     $subFolder = 'posts';
-                    $newFilename = $postImage->store('fans-platform/'.$subFolder, 's3');
+                    $newFilename = $postImage->store('./'.$subFolder, 's3');
                     $mediafile = Mediafile::create([
                         //'resource_id' => $request->timeline_id,
                         'resource_id' => $post->id,
@@ -1980,6 +1980,12 @@ Log::info('MARK-3.a'); // post-image-4
     
             // liked_posts
             $liked_post = \Illuminate\Support\Facades\DB::table('post_likes')->where('user_id', \Illuminate\Support\Facades\Auth::user()->id)->get();
+
+            $sessionUser = Auth::user();
+            $this->_php2jsVars['session'] = [
+                'username' => $sessionUser->username,
+            ];
+            \View::share('g_php2jsVars',$this->_php2jsVars);
     
             return $theme->scope('timeline/posts',
                 compact('timeline', 'liked_post', 'user', 'posts', 'liked_pages', 'followRequests', 'joined_groups', 'own_pages',
@@ -1987,8 +1993,7 @@ Log::info('MARK-3.a'); // post-image-4
                     'joined_groups_count', 'next_page_url', 'user_events', 'guest_events', 'user_lists', 'period', 'sort_by', 'order_by', 'favouritePosts', 'postMedia'))->render();
         
         }
-    }
-    
+    } // posts()
     
 
     /**

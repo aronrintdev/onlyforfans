@@ -113,6 +113,7 @@ $factory->define(App\Album::class, function (Faker\Generator $faker) {
 });
 
 $factory->define(App\Mediafile::class, function (Faker\Generator $faker) {
+    // Uses fake file
     $file = UploadedFile::fake()->image('avatar.jpg');
     return [
         'filename'=>(string) Uuid::uuid4(),
@@ -129,14 +130,16 @@ $factory->define(App\Mediafile::class, function (Faker\Generator $faker) {
 });
 
 $factory->define(App\Story::class, function (Faker\Generator $faker) {
-    return [
+    // Creates an associated user/timeline (unless timeline_id is passed in ?)
+    $attrs = [
         'content'     => $faker->text,
-        'stype'       => $faker->randomElement(['text']),
+        'stype'       => 'text', // for image, need to override from caller
         'timeline_id' => function () {
             $user = factory(App\User::class)->create();
             return $user->timeline->id;
         },
     ];
+    return $attrs;
 });
 
 $factory->define(App\User::class, function (Faker\Generator $faker) {
