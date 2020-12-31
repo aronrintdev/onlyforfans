@@ -26,7 +26,7 @@
 									<div class="connect-list">
 										<div class="connect-link side-left">
 											<a href="{{ url($userpage->username) }}">
-												<img src=" @if($userpage->timeline_id && $userpage->avatar) {{ url('page/avatar/'.$userpage->avatar) }} @else {{ url('page/avatar/default-page-avatar.png') }} @endif" alt="{{ $userpage->name }}" title="{{ $userpage->name }}">{{ $userpage->name }}
+                        <img src=" @if($userpage->timeline_id && $userpage->avatar) {{ $userpage->avatar->filepath }} @else {{ url('page/avatar/default-page-avatar.png') }} @endif" alt="{{ $userpage->name }}" title="{{ $userpage->name }}">{{ $userpage->name }}
 											</a>
 										</div>
 										<div class="side-right">
@@ -72,7 +72,7 @@
 										<div class="connect-link side-left">
 											
 											<a href="{{ url($grouppage->username) }}">
-												<img src=" @if($grouppage->timeline_id && $grouppage->avatar) {{ url('group/avatar/'.$grouppage->avatar) }} @else {{ url('group/avatar/default-group-avatar.png') }} @endif" alt="{{ $grouppage->name }}" title="{{ $grouppage->name }}">{{ $grouppage->name }}
+                        <img src=" @if($grouppage->timeline_id && $grouppage->avatar) {{ $grouppage->avatar->filepath }} @else {{ url('group/avatar/default-group-avatar.png') }} @endif" alt="{{ $grouppage->name }}" title="{{ $grouppage->name }}">{{ $grouppage->name }}
 											</a>
 											<span class="label label-default">{{ $grouppage->type }}</span>
 

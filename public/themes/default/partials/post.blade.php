@@ -392,7 +392,7 @@ $main_description = $post->description;
                         </div>
                     @else
                         <!-- %PSG: UN-locked -->
-                        <div class="post-image-holder {{ $post->images()->first() && $post->images()->first()->type == 'image' ? 'single-image' : ''}} tag-MARK-B">
+                        <div class="post-image-holder {{ $post->mediafiles()->first() && $post->mediafiles()->first()->isImage() ?'single-image':''}} tag-MARK-B">
 
                             {{-- %PSG: Post's images --}}
                             @foreach($post->mediafiles as $mf)

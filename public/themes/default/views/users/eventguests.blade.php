@@ -29,7 +29,7 @@
 										<div class="connect-list">
 											<div class="connect-link side-left">
 												<a href="{{ url($event_guest->username) }}">													
-													<img src="{{ $event_guest->avatar }}" alt="{{ $event_guest->name }}" class="img-icon img-30" title="{{ 
+                          <img src="{{ $event_guest->avatar->filepath }}" alt="{{ $event_guest->name }}" class="img-icon img-30" title="{{ 
 														$event_guest->name }}">
 													{{ $event_guest->name }}
 												</a>

@@ -137,7 +137,7 @@ $sessionUser = Auth::user();
             </div>
           @endforeach
         @else
-          <div class="alert alert-warning">
+          <div class="mt-3 alert alert-warning">
             {{ trans('messages.no_suggested_users') }}
           </div>
         @endif

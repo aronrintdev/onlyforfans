@@ -28,7 +28,7 @@
 											<div class="connect-link side-left">
 												<a href="{{ url($page->username) }}">
 													@if($page->avatar != NULL)
-													<img src="{{ url('page/avatar/'.$page->avatar) }}" alt="{{ $page->name }}" title="{{ $page->name }}">
+                            <img src="{{ $page->avatar->filepath }}" alt="{{ $page->name }}" title="{{ $page->name }}">
 													@else
 													<img src="{{ url('page/avatar/default-page-avatar.png') }}" alt="{{ $page->name }}" title="{{ $page->name }}">
 													@endif

@@ -28,7 +28,7 @@
 										<div class="connect-list">
 											<div class="connect-link side-left">
 												<a href="{{ url($follower->username) }}">													
-													<img src="{{ $follower->avatar }}" alt="{{ $follower->name }}" class="img-icon img-30" title="{{ $follower->name }}">
+                          <img src="{{ $follower->avatar->filepath }}" alt="{{ $follower->name }}" class="img-icon img-30" title="{{ $follower->name }}">
 													{{ $follower->name }}
 												</a>
 												@if($follower->verified)
