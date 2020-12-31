@@ -1,16 +1,52 @@
 <?php
 
+use App\User;
 use App\Post;
+use App\Enums\MediafileTypeEnum;
+use App\Enums\PostTypeEnum;
+use App\Libs\FactoryHelpers;
 use Illuminate\Database\Seeder;
 
 class PostsTableSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     *
-     * @return void
-     */
     public function run()
+    {
+        $this->command->info('Running Seeder: PostsTableSeeder...');
+        $faker = \Faker\Factory::create();
+
+        // +++ Create ... +++
+
+        $users = User::get();
+
+        $users->each( function($u) use(&$faker) {
+            $max = $faker->numberBetween(2,20);
+            $this->command->info("  - Creating $max posts for user ".$u->name);
+            collect(range(1,$max))->each( function() use(&$faker, &$u) {
+                $ptype = $faker->randomElement([
+                    PostTypeEnum::SUBSCRIBER,
+                    PostTypeEnum::PRICED,
+                    PostTypeEnum::FREE,
+                    PostTypeEnum::FREE,
+                    PostTypeEnum::FREE,
+                ]);
+                $attrs = [
+                    'description'  => $faker->text.' ('.$ptype.')',
+                    'user_id'      => $u->id,
+                    'timeline_id'  => $u->timeline->id,
+                    'type'         => $ptype,
+                ];
+                $post = factory(Post::class)->create($attrs);
+                if ( $faker->boolean(70) ) { // % post has image
+                    $mf = FactoryHelpers::createImage(MediafileTypeEnum::POST, $post->id);
+                }
+            });
+        });
+    }
+
+
+
+    /*
+    private function oldSeeder() 
     {
         //Populate dummy posts
         factory(Post::class, 260)->create();
@@ -60,4 +96,5 @@ class PostsTableSeeder extends Seeder
 
         // }
     }
+     */
 }

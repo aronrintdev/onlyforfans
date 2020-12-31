@@ -84,6 +84,11 @@ class FactoryHelpers {
             case MediafileTypeEnum::COVER:
                 $s3Path = 'covers/'.$basename;
                 break;
+            case MediafileTypeEnum::POST:
+                $s3Path = 'posts/'.$basename;
+                $attrs['resource_id'] =  $resouceID; // ie story_id: required for story type
+                $attrs['resource_type'] = 'posts';
+                break;
             case MediafileTypeEnum::STORY:
                 $s3Path = 'stories/'.$basename;
                 $attrs['resource_id'] =  $resouceID; // ie story_id: required for story type

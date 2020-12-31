@@ -5,16 +5,18 @@ use App\Interfaces\Selectable;
 
 class MediafileTypeEnum extends SmartEnum implements Selectable {
 
+    const AVATAR = 'avatar';
+    const COVER = 'cover';
+    const POST = 'post';
     const STORY = 'story';
     const VAULT = 'vault';
-    const COVER = 'cover';
-    const AVATAR = 'avatar';
 
     public static $keymap = [
+        self::AVATAR => 'Avatar',
+        self::COVER => 'Cover',
+        self::POST => 'Post',
         self::STORY => 'Story',
         self::VAULT => 'Vault',
-        self::COVER => 'Cover',
-        self::AVATAR => 'Avatar',
     ];
 
 }

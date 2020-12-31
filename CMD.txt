@@ -29,3 +29,4 @@ $ php artisan config:cache --env=local
 $ php artisan truncate:data
 $ php artisan db:seed --class="UsersTableSeeder"
 $ php artisan db:seed --class="StoriesTableSeeder"
+$ php artisan db:seed --class="PostsTableSeeder"

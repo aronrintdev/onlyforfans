@@ -12,9 +12,9 @@ use App\Interfaces\Ownable;
 
 class Post extends Model implements Ownable
 {
-    const PRICE_TYPE = 'price';
+    const PRICE_TYPE = 'price'; // associated with a price
     const FREE_TYPE = 'free';
-    const PAID_TYPE = 'paid';
+    const PAID_TYPE = 'paid'; // %PSG: ie, for subscribers (?)
     
     //use SoftDeletes;
 
