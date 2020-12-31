@@ -15,10 +15,8 @@ class FactoryHelpers {
     // Adds avatar & cover images
     public static function updateUser(&$user, $attrs)
     {
-        dump('Creating user: '.$attrs['email']);
+        dump('Updating user: '.$attrs['email']);
         $user->email = $attrs['email'];
-        $user->password = Hash::make($attrs['password']);
-        $user->email_verified = 1;
         if ( array_key_exists('gender', $attrs) ) {
             $user->gender = $attrs['gender'];
         }
@@ -28,8 +26,6 @@ class FactoryHelpers {
         if ( array_key_exists('country', $attrs) ) {
             $user->country = $attrs['country'];
         }
-        $user->remember_token = str_random(10);
-        $user->verification_code = str_random(18);
         $user->save();
 
         $avatar = self::createImage(MediafileTypeEnum::AVATAR);

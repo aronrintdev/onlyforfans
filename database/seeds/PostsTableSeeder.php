@@ -1,11 +1,12 @@
 <?php
 
+use Illuminate\Database\Seeder;
+
 use App\User;
 use App\Post;
 use App\Enums\MediafileTypeEnum;
 use App\Enums\PostTypeEnum;
 use App\Libs\FactoryHelpers;
-use Illuminate\Database\Seeder;
 
 class PostsTableSeeder extends Seeder
 {
@@ -35,6 +36,11 @@ class PostsTableSeeder extends Seeder
                     'timeline_id'  => $u->timeline->id,
                     'type'         => $ptype,
                 ];
+
+                if ( $ptype === PostTypeEnum::PRICED ) {
+                    $attrs['price'] = $faker->randomFloat(2, 1, 300);
+                }
+
                 $post = factory(Post::class)->create($attrs);
                 if ( $faker->boolean(70) ) { // % post has image
                     $mf = FactoryHelpers::createImage(MediafileTypeEnum::POST, $post->id);

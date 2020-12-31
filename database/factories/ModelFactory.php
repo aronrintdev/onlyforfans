@@ -145,10 +145,13 @@ $factory->define(App\Story::class, function (Faker\Generator $faker) {
 $factory->define(App\User::class, function (Faker\Generator $faker) {
     static $password;
 
+    $isFollowForFree = $faker->boolean(70);
+
     return [
         'email' => $faker->unique()->safeEmail,
-        'password' => $password ?: $password = bcrypt('secret'),
+        'password' => $password ?: $password = bcrypt('foo-123'), // secret
         'remember_token' => str_random(10),
+        'verification_code' => str_random(10),
         'timeline_id' => function () {
             return factory(App\Timeline::class)->create()->id;
         },
@@ -158,7 +161,11 @@ $factory->define(App\User::class, function (Faker\Generator $faker) {
         'instagram' => $faker->url,
         'gender' => $faker->randomElement(['male','female']),
         'active' => 1,
-        //'city' => $faker->city,
+        'verified' => 1,
+        'email_verified' => 1,
+        'is_follow_for_free' => $isFollowForFree,
+        'price' => $isFollowForFree ? null : $faker->randomFloat(2, 1, 300),
+        'birthday' => $faker->dateTimeBetween('1970-01-01', '1998-12-31')->format('Y-m-d'),
     ];
 });
 

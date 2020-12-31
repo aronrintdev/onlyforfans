@@ -7,7 +7,7 @@ use App\Role;
 use App\User;
 use App\Libs\FactoryHelpers;
 //use App\Mediafile;
-//use App\Enums\MediafileTypeEnum;
+use App\Enums\MediafileTypeEnum;
 
 class UsersTableSeeder extends Seeder
 {
@@ -21,16 +21,15 @@ class UsersTableSeeder extends Seeder
 
         // +++ Create admin users +++
 
-        //$this->createAdminUser([
         $user = factory(User::class)->create();
         FactoryHelpers::updateUser($user, [
             'name' => 'Peter G',
             'username' => 'peter',
             'email' => 'peter@peltronic.com',
-            'password' => 'foo-123',
             'gender' => 'male',
             'city' => 'Las Vegas',
             'country' => 'US',
+            'is_follow_for_free' => 1,
         ]);
         $user->roles()->attach($adminRole->id);
         unset($user);
@@ -42,21 +41,31 @@ class UsersTableSeeder extends Seeder
             'name' => 'Matt M',
             'username' => 'mattm',
             'email' => 'matt@mjmwebdesign.com',
-            'password' => 'foo-123',
             'gender' => 'male',
             'city' => 'Las Vegas',
             'country' => 'US',
+            'is_follow_for_free' => 1, // if not free need to set price as well
         ]);
         $user->roles()->attach($adminRole->id);
         unset($user);
 
-        //Populate dummy users
-        //factory(User::class, 40)->create();
+        // +++ Create non-admin users +++
+
+        factory(User::class, 10)->create()->each( function($u) {
+            $this->command->info("Adding avatar & cover for new user ".$u->name);
+            $avatar = FactoryHelpers::createImage(MediafileTypeEnum::AVATAR);
+            $cover = FactoryHelpers::createImage(MediafileTypeEnum::COVER);
+            $timeline = $u->timeline;
+            $timeline->avatar_id = $avatar->id;
+            $timeline->cover_id = $cover->id;
+            $timeline->save();
+        });
 
         // +++ Update default user settings +++
 
-        $users = User::get();
-        foreach ($users as $u) {
+        //$users = User::get();
+        //foreach ($users as $u) {
+        User::get()->each( function($u) {
             DB::table('user_settings')->insert([
                 'user_id'               => $u->id,
                 'confirm_follow'        => 'no',
@@ -66,7 +75,6 @@ class UsersTableSeeder extends Seeder
                 'post_privacy'          => 'everyone',
                 'message_privacy'       => 'everyone', 
             ]);
-
-        }
+        });
     }
 }

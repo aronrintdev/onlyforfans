@@ -25,39 +25,38 @@ function trendingTags()
 
 function suggestedUsers()
 {
-    $user = Auth::user();
+    $sessionUser = Auth::user();
     $admin_role = App\Role::where('name', 'admin')->get()->first();
     $admin_users = NULL;
     if ($admin_role != NULL) {
         $admin_users = DB::table('role_user')->where('role_id', $admin_role->id)->get();
     }
 
-    $blockProfiles = BlockedProfile::where('blocked_by', $user->id)->get();
+    $blockProfiles = BlockedProfile::where('blocked_by', $sessionUser->id)->get();
     $blockCountry = $blockProfiles->pluck('country')->toArray();
     $blockedUsers = User::whereIn('country', $blockCountry)->pluck('id')->toArray();
 
     $suggested_users = '';
-    $userIds = $user->following()->get()->pluck('id')->toArray();
+    $followingUsers = $sessionUser->following()->get()->pluck('id')->toArray();
 
     if ($admin_users != NULL) {
         $blockedUsers = array_merge($blockedUsers, $admin_users->pluck('user_id')->toArray());
-        $blockedUsers[] = $user->id;
-
+        $blockedUsers[] = $sessionUser->id;
         $suggested_users = App\User::with('blockedProfiles')
-            ->whereDoesntHave('blockedProfiles', function (Builder $q) use ($user) {
-                $q->where('country', 'like', '%'.$user->country.'%');
+            ->whereDoesntHave('blockedProfiles', function (Builder $q) use ($sessionUser) {
+                $q->where('country', 'like', '%'.$sessionUser->country.'%');
             })
-            ->whereNotIn('id', $userIds)
+            ->whereNotIn('id', $followingUsers)
             ->whereNotIn('id', $blockedUsers)
             ->get();
     }
     else {
-        $blockedUsers = array_merge($blockedUsers,$userIds);
-        $blockedUsers[] = $user->id;
+        $blockedUsers = array_merge($blockedUsers, $followingUsers);
+        $blockedUsers[] = $sessionUser->id; // session user
 
         $suggested_users = App\User::whereNotIn('id', $blockedUsers)
-            ->whereDoesntHave('blockedProfiles', function (Builder $q) use ($user) {
-                $q->where('country', 'like', '%'.$user->country.'%');
+            ->whereDoesntHave('blockedProfiles', function (Builder $q) use ($sessionUser) {
+                $q->where('country', 'like', '%'.$sessionUser->country.'%');
             })->get();
     }
 

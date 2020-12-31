@@ -30,6 +30,7 @@ use DB;
 use Flash;
 use Flavy;
 use Exception;
+use Throwable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -1530,6 +1531,7 @@ Log::info('MARK-3.a'); // post-image-4
                 //Notify the user for follow
                 Notification::create(['user_id' => $follow->id, 'timeline_id' => $timeline_id, 'notified_by' => Auth::user()->id, 'description' => Auth::user()->name.' '.trans('common.is_following_you'), 'type' => 'follow']);
             }catch(\Exception $e){
+            }catch(Throwable $e){
             }
 
 //            return response()->json(['status' => '200', 'followed' => true, 'message' => 'successfully followed']);
@@ -1541,6 +1543,7 @@ Log::info('MARK-3.a'); // post-image-4
                 //Notify the user for follow
                 Notification::create(['user_id' => $follow->id, 'timeline_id' => $timeline_id, 'notified_by' => Auth::user()->id, 'description' => Auth::user()->name.' '.trans('common.is_unfollowing_you'), 'type' => 'unfollow']);
             }catch(\Exception $e){
+            }catch(Throwable $e){
             }
 
 //            return response()->json(['status' => '200', 'followed' => false, 'message' => 'successfully unFollowed']);
@@ -1555,7 +1558,7 @@ Log::info('MARK-3.a'); // post-image-4
         $follow = User::where('timeline_id', '=', $timeline_id)->first();
         $timeline = Timeline::where('id', $timeline_id)->first();
         
-        if(! checkBlockedProfiles($timeline->username)){
+        if ( !checkBlockedProfiles($timeline->username) ) {
             return response()->json(['status' => '422', 'message' => 'User blocked your profile. you can not subscribe.']);
         }
 
@@ -1569,7 +1572,8 @@ Log::info('MARK-3.a'); // post-image-4
             try{
                 //Notify the user for follow
                 Notification::create(['user_id' => $follow->id, 'timeline_id' => $timeline_id, 'notified_by' => Auth::user()->id, 'description' => Auth::user()->name.' '.trans('common.is_following_you'), 'type' => 'follow']);
-            }catch(\Exception $e){
+            } catch(\Exception $e){
+            } catch(Throwable $e) {
             }
 
             return response()->json(['status' => '200', 'followed' => true, 'message' => 'successfully followed']);
@@ -1580,6 +1584,7 @@ Log::info('MARK-3.a'); // post-image-4
                 //Notify the user for follow
                 Notification::create(['user_id' => $follow->id, 'timeline_id' => $timeline_id, 'notified_by' => Auth::user()->id, 'description' => Auth::user()->name.' '.trans('common.is_unfollowing_you'), 'type' => 'unfollow']);
             }catch(\Exception $e){
+            } catch(Throwable $e) {
             }
 
             return response()->json(['status' => '200', 'followed' => false, 'message' => 'successfully unFollowed']);
@@ -1601,6 +1606,7 @@ Log::info('MARK-3.a'); // post-image-4
                 //Notify the user for follow
                 Notification::create(['user_id' => $follow->id, 'timeline_id' => $request->timeline_id, 'notified_by' => Auth::user()->id, 'description' => Auth::user()->name.' '.trans('common.is_unfollowing_you'), 'type' => 'unfollow']);
             }catch(\Exception $e){
+            } catch(Throwable $e) {
             }
 
             return response()->json(['status' => '200', 'followed' => false, 'message' => 'successfully unFollowed']);
@@ -1622,6 +1628,7 @@ Log::info('MARK-3.a'); // post-image-4
                 //Notify the user for follow
                 Notification::create(['user_id' => $follow->id, 'timeline_id' => $request->timeline_id, 'notified_by' => Auth::user()->id, 'description' => Auth::user()->name.' '.trans('common.is_following_you'), 'type' => 'follow']);
             }catch(\Exception $e){
+            } catch(Throwable $e) {
             }
 
             return response()->json(['status' => '200', 'followed' => true, 'message' => 'successfully followed']);
@@ -1632,6 +1639,7 @@ Log::info('MARK-3.a'); // post-image-4
                 //Notify the user for follow
                 Notification::create(['user_id' => $follow->id, 'timeline_id' => $request->timeline_id, 'notified_by' => Auth::user()->id, 'description' => Auth::user()->name.' '.trans('common.is_unfollowing_you'), 'type' => 'unfollow']);
             }catch(\Exception $e){
+            } catch(Throwable $e) {
             }
 
             return response()->json(['status' => '200', 'followed' => false, 'message' => 'successfully unFollowed']);
