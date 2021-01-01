@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Database\Seeder;
+//use Carbon\Carbon;
 
 use App\User;
 use App\Post;
@@ -19,10 +20,13 @@ class PostsTableSeeder extends Seeder
 
         $users = User::get();
 
-        $users->each( function($u) use(&$faker) {
+        $users->each( function($u) use(&$faker, &$users) {
+
             $max = $faker->numberBetween(2,20);
             $this->command->info("  - Creating $max posts for user ".$u->name);
-            collect(range(1,$max))->each( function() use(&$faker, &$u) {
+
+            collect(range(1,$max))->each( function() use(&$faker, &$users, &$u) {
+
                 $ptype = $faker->randomElement([
                     PostTypeEnum::SUBSCRIBER,
                     PostTypeEnum::PRICED,
@@ -45,7 +49,19 @@ class PostsTableSeeder extends Seeder
                 if ( $faker->boolean(70) ) { // % post has image
                     $mf = FactoryHelpers::createImage(MediafileTypeEnum::POST, $post->id);
                 }
+
+                // Select random users to like this post...
+                $likers = FactoryHelpers::parseRandomSubset($users, 10);
+                $likee = $u;
+                $likers->each( function($liker) use(&$post) {
+                    if ( !$post->users_liked->contains($liker->id) ) {
+                        $post->users_liked()->attach($liker->id);
+                        $post->notifications_user()->attach($liker->id);
+                    }
+                });
+
             });
+
         });
     }
 

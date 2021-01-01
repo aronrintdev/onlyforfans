@@ -56,6 +56,7 @@ class TruncateData extends Command
     private static $truncateList = [
         'album_media',
         'post_media',
+        'post_likes',
         'media',
         'albums',
 

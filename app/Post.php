@@ -54,7 +54,7 @@ class Post extends Model implements Ownable
     }
 
     public function users_liked() {
-        return $this->belongsToMany('App\User', 'post_likes', 'post_id', 'user_id');
+        return $this->belongsToMany('App\User', 'post_likes', 'post_id', 'user_id')->withTimestamps();
     }
 
     public function tip() {
@@ -74,7 +74,7 @@ class Post extends Model implements Ownable
     }
 
     public function notifications_user() {
-        return $this->belongsToMany('App\User', 'post_follows', 'post_id', 'user_id');
+        return $this->belongsToMany('App\User', 'post_follows', 'post_id', 'user_id')->withTimestamps();
     }
 
     public function reports() {

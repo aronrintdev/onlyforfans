@@ -3,7 +3,7 @@ namespace App\Libs;
 
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Collection; 
 
 use App\User;
 use App\Mediafile;
@@ -40,8 +40,17 @@ class FactoryHelpers {
         //unset($user, $timeline);
     }
 
+    public static function parseRandomSubset(Collection $setIn, $MAX=10) : Collection
+    {
+        $faker = \Faker\Factory::create();
+        $_max = min([ $MAX, $setIn->count()-1  ]);
+        $_num = $faker->numberBetween(0,$_max);
+        $subset = $setIn->random($_num);
+        return $subset;
+    }
+
     // Inserts a [mediafiles] record
-    public static function createImage($mftype, $resouceID=null) : ?Mediafile
+    public static function createImage(string $mftype, ?int $resouceID=null) : ?Mediafile
     {
         $faker = \Faker\Factory::create();
 
