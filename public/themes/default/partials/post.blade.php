@@ -773,7 +773,7 @@ $main_description = $post->description;
                             <li><a href="#" class="like-post unlike-{{ $post->id }}" data-post-id="{{ $post->id }}"><i class="fa fa-heart"></i></i></a></li>
                         @endif
                         @if($display_comment)
-                        <li><a href="#" class="show-comments"><i class="fa fa-comment-o"></i></a></li>
+                          <li><a href="#" class="show-comments"><i class="fa fa-comment-o"></i></a></li> ({{ $post->comments->count() }})
                         @endif
                         @if(Auth::user()->id != $post->user_id)
                             @if(!$post->users_shared->contains(Auth::user()->id))
@@ -810,7 +810,7 @@ $main_description = $post->description;
             @endif
             @if($display_comment)
                 <li>
-                    <a href="#" class="show-comments"><i class="fa fa-comment-o"></i></a>
+                  <a href="#" class="show-comments"><i class="fa fa-comment-o"></i></a> ({{ $post->comments->count() }})
                 </li>
             @endif
             @if(Auth::user()->id != $post->user_id)
