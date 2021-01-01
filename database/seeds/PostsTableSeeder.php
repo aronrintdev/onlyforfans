@@ -1,16 +1,19 @@
 <?php
 
 use Illuminate\Database\Seeder;
-//use Carbon\Carbon;
+use Carbon\Carbon;
 
 use App\User;
 use App\Post;
+use App\Comment;
 use App\Enums\MediafileTypeEnum;
 use App\Enums\PostTypeEnum;
 use App\Libs\FactoryHelpers;
 
 class PostsTableSeeder extends Seeder
 {
+    private static $PROB_POST_HAS_IMAGE = 1; // 70;
+
     public function run()
     {
         $this->command->info('Running Seeder: PostsTableSeeder...');
@@ -46,11 +49,20 @@ class PostsTableSeeder extends Seeder
                 }
 
                 $post = factory(Post::class)->create($attrs);
-                if ( $faker->boolean(70) ) { // % post has image
+                if ( $faker->boolean(self::$PROB_POST_HAS_IMAGE) ) { // % post has image
                     $mf = FactoryHelpers::createImage(MediafileTypeEnum::POST, $post->id);
                 }
 
-                // Select random users to like this post...
+                // Set a realistic post date
+                $ts = $faker->dateTimeThisDecade->format('Y-m-d H:i:s');
+                //$ts = $ts->format('Y-m-d H:i:s');
+                //dd($ts);
+                \DB::table('posts')->where('id',$post->id)->update([
+                    'created_at' => Carbon::parse($ts),
+                    //'description' => 'foo',
+                ]);
+
+                // LIKES - Select random users to like this post...
                 $likers = FactoryHelpers::parseRandomSubset($users, 10);
                 $likee = $u;
                 $likers->each( function($liker) use(&$post) {
@@ -58,6 +70,18 @@ class PostsTableSeeder extends Seeder
                         $post->users_liked()->attach($liker->id);
                         $post->notifications_user()->attach($liker->id);
                     }
+                });
+
+                // COMMENTS - Select random users to comment on this post...
+                $commenters = FactoryHelpers::parseRandomSubset($users, 9);
+                $likee = $u;
+                $commenters->each( function($commenter) use(&$faker, &$post) {
+                    $comment = Comment::create([
+                        'post_id'     => $post->id,
+                        'description' => $faker->realText( $faker->numberBetween(20,200) ),
+                        'user_id'     => $commenter->id,
+                        'parent_id'   => null, // %TODO: nested comments
+                    ]);
                 });
 
             });

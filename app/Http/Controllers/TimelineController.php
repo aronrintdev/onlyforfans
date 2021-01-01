@@ -1165,8 +1165,15 @@ Log::info('MARK-3.a'); // post-image-4
 
         if ($comment) {
             if (Auth::user()->id != $post->user_id) {
-                //Notify the user for comment on his/her post
-                Notification::create(['user_id' => $post->user_id, 'post_id' => $request->post_id, 'notified_by' => Auth::user()->id, 'description' => Auth::user()->name.' '.trans('common.commented_on_your_post'), 'type' => 'comment_post']);
+                try { 
+                    //Notify the user for comment on his/her post
+                    Notification::create(['user_id' => $post->user_id, 'post_id' => $request->post_id, 'notified_by' => Auth::user()->id, 'description' => Auth::user()->name.' '.trans('common.commented_on_your_post'), 'type' => 'comment_post']);
+                } catch(Exception | Throwable $e) {
+                    Log::error(json_encode([
+                        'msg' => 'TimlineController::postComment() - Could not send notification',
+                        'emsg' => $e->getMessage(),
+                    ]));
+                }
             }
 
             $theme = Theme::uses(Setting::get('current_theme', 'default'))->layout('ajax');
@@ -1227,7 +1234,7 @@ Log::info('MARK-3.a'); // post-image-4
             if ($post->user->id != Auth::user()->id) {
                 try {
                     Notification::create(['user_id' => $post->user->id, 'post_id' => $post->id, 'notified_by' => Auth::user()->id, 'description' => Auth::user()->name.' '.$notify_message, 'type' => $notify_type]);
-                } catch(Exception | Throwable $e){
+                } catch(Exception | Throwable $e) {
                     Log::error(json_encode([
                         'msg' => 'TimlineController::likePost() - Could not send notification',
                         'emsg' => $e->getMessage(),
