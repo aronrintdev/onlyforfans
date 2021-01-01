@@ -116,12 +116,20 @@ class UsernameRulesController extends Controller
     /**
      * Check a specific usernames validity.
      *
-     * @param  \Illuminate\Http\Request $request
-     * @param  string  $username
+     * @param  \App\Http\Requests\CheckUsername $request
      * @return \Illuminate\Http\Response
      */
-    public function checkUsername(Request $request, string $username = null)
+    public function checkUsername(\App\Http\Requests\CheckUsername $request)
     {
-        //
+        $validated = $request->validated();
+
+        // Check validity
+        if ($ruleCaught = UsernameRule::check($validated->username)) {
+            return response()->json([
+                'valid' => false,
+                'message' => $ruleCaught->explanation,
+            ]);
+        }
+        return response()->json(['valid' => true]);
     }
 }

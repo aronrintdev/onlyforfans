@@ -16,7 +16,8 @@ class UsernameRule extends Model
      * - rule            | rule word or regex
      * - type            | `blacklist`, `whitelist`, or `approval`
      * - comparison_type | `word` or `regex`
-     * - explication     | English explication for end user if rule is invoked
+     * - explanation     | Common language explanation for end user if rule is invoked, This can be a localization item
+     *                        added to `username.custom` localizations.
      * - added_by        | Admin that added rule, null for system/list added.
      * - (timestamps)
      */
@@ -24,33 +25,7 @@ class UsernameRule extends Model
      /** Table name */
     protected $table = 'username_rules';
 
-    /** Lazy Loaded faker factory */
-    private $faker = null;
-
-    /**
-     * Faker seeding for unit testing
-     * @return UsernameRule - new instance of UsernameRule with seeded faker instance
-     */
-    public static function seed($seed) {
-        $instance = new UsernameRule();
-        $instance->faker($seed);
-        return $instance;
-    }
-
-    /**
-     * Get faker instance
-     * @return Faker
-     */
-    function faker($seed = null) {
-        if ($this->faker === null) {
-            $this->faker = Faker::create();
-        }
-        if ($seed !== null) {
-            $this->faker->seed($seed);
-        }
-        return $this->faker;
-    }
-
+    protected $hidden = [ 'added_by', ];
 
     /**
      * Check if the this username value is valid.
@@ -60,13 +35,20 @@ class UsernameRule extends Model
      */
     public static function check($value)
     {
+        // Check if username is already in use
+        if (Timeline::where('username', $value)->exists()) {
+            return [
+                'explanation' => __('username.already_in_use'),
+            ];
+        }
+
         // Check word rules first, this is the fastest check.
         $caught = UsernameRule::where('type', 'blacklist')
             ->where('comparison_type', 'word')
             ->where('rule', $value)
             ->first();
         if ($caught) {
-            return $caught;
+            return UsernameRule::localize($caught);
         }
 
         // Run through regex rules next, they are more computationally intensive.
@@ -75,8 +57,9 @@ class UsernameRule extends Model
             ->whereRaw('? regexp rule', [$value])
             ->first();
         if ($caught) {
-            return $caught;
+            return UsernameRule::localize($caught);
         }
+
         return false;
     }
 
@@ -86,17 +69,37 @@ class UsernameRule extends Model
      * Rule replaces `#` with numbers, `?` with letters, and `*` with number or letter
      *
      * @param string $rule - bothify rule, defaults to value set in config `users.generatedUsernameTemplate`
+     * @param \Faker\Factory $faker - Faker instance if you want to seed or not create new instance
      * @return string - non conflicting username.
      */
-    public function create_random($rule = null)
+    public static function create_random($rule = null, $faker = null)
     {
+        if ($faker === null) {
+            $faker = Faker::create();
+        }
         if (!$rule) {
             $rule = config('users.generatedUsernameTemplate');
         }
         do {
-            $username = $this->faker()->bothify($rule);
+            $username = $faker()->bothify($rule);
         } while (Timeline::where('username')->count() > 0);
         return $username;
+    }
+
+    /**
+     * Localizes rule explanation for end user
+     */
+    public static function localize($rule)
+    {
+        if ($rule->explanation) {
+            $caught->explanation = __('username.custom.' . $rule->explanation) ?? $rule->explanation;
+        } else {
+            // Priority: custom named after rule => default wording for rule => invalid
+            $rule->explanation = __('username.custom.' . $rule->rule) ??
+                __('username.default.' . $rule->comparison_type, ['rule' => $rule->rule]) ??
+                __('username.invalid');
+        }
+        return $rule;
     }
 
 }

@@ -5,6 +5,7 @@ namespace Tests\Unit;
 use App\UsernameRule;
 
 use Tests\TestCase;
+use Faker\Factory as Faker;
 // use Tests\MigrateFreshOnce;
 // use Illuminate\Foundation\Testing\WithFaker;
 // use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -27,8 +28,9 @@ class UsernameRuleModelTest extends TestCase
      * Note: `u4488659055` is true for seed `0` with pattern `u##########`
      */
     public function testRandomGenerate() {
-        // Setup
-        $username = UsernameRule::seed(0)->create_random();
+        $faker = Faker::create();
+        $faker->seed(0);
+        $username = UsernameRule::create_random('u##########', $faker);
         $this->assertEquals($username, 'u4488659055');
     }
 
@@ -44,7 +46,9 @@ class UsernameRuleModelTest extends TestCase
             'timeline' => $timeline->id
         ]);
 
-        $username = UsernameRule::seed(0)->create_random();
+        $faker = Faker::create();
+        $faker->seed(0);
+        $username = UsernameRule::create_random('u##########', $faker);
 
         $this->assertNotEquals($username, 'u4488659055');
     }

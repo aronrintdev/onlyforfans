@@ -28,7 +28,7 @@ class CreateUsernameRulesTable extends Migration
 
             // Common language explanation for blacklist reason if necessary.
             //   So we can return more detailed information to users.
-            $table->string('explication')->nullable();
+            $table->string('explanation')->nullable();
 
             // What Admin added the rule, nullable for system added rules.
             $table->bigInteger('added_by')->nullable();
