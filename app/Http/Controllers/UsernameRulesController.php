@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Username;
+use App\UsernameRule;
 use Illuminate\Http\Request;
 
 // Todo: Limit modify functions to admin only.
@@ -11,15 +11,34 @@ class UsernameRulesController extends Controller
     /**
      * Display a listing of the resource.
      *
+     * Middleware: `['auth', 'role:admin']`
+     *
+     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
+    {
+        //
+    }
+
+    /**
+     * Get a listing of the resources.
+     *
+     * Middleware: `['auth', 'role:admin']`
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  string  $page
+     * @return \Illuminate\Http\Response
+     */
+    public function list(Request $request, string $page)
     {
         //
     }
 
     /**
      * Show the form for creating a new resource.
+     *
+     * Middleware: `['auth', 'role:admin']`
      *
      * @return \Illuminate\Http\Response
      */
@@ -30,6 +49,8 @@ class UsernameRulesController extends Controller
 
     /**
      * Store a newly created resource in storage.
+     *
+     * Middleware: ['auth', 'role:admin']
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
@@ -42,10 +63,12 @@ class UsernameRulesController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Username  $username
+     * Middleware: ['auth', 'role:admin']
+     *
+     * @param  \App\UsernameRule  $usernameRule
      * @return \Illuminate\Http\Response
      */
-    public function show(Username $username)
+    public function show(UsernameRule $usernameRule)
     {
         //
     }
@@ -53,10 +76,12 @@ class UsernameRulesController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Username  $username
+     * Middleware: ['auth', 'role:admin']
+     *
+     * @param  \App\UsernameRule  $usernameRule
      * @return \Illuminate\Http\Response
      */
-    public function edit(Username $username)
+    public function edit(UsernameRule $usernameRule)
     {
         //
     }
@@ -64,11 +89,13 @@ class UsernameRulesController extends Controller
     /**
      * Update the specified resource in storage.
      *
+     * Middleware: ['auth', 'role:admin']
+     *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Username  $username
+     * @param  \App\UsernameRule  $usernameRule
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Username $username)
+    public function update(Request $request, UsernameRule $usernameRule)
     {
         //
     }
@@ -76,10 +103,24 @@ class UsernameRulesController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Username  $username
+     * Middleware: ['auth', 'role:admin']
+     *
+     * @param  \App\UsernameRule  $usernameRule
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Username $username)
+    public function destroy(UsernameRule $usernameRule)
+    {
+        //
+    }
+
+    /**
+     * Check a specific usernames validity.
+     *
+     * @param  \Illuminate\Http\Request $request
+     * @param  string  $username
+     * @return \Illuminate\Http\Response
+     */
+    public function checkUsername(Request $request, string $username = null)
     {
         //
     }
