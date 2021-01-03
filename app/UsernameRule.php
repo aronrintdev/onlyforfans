@@ -45,7 +45,8 @@ class UsernameRule extends Model
         // Check word rules first, this is the fastest check.
         $caught = UsernameRule::where('type', 'blacklist')
             ->where('comparison_type', 'word')
-            ->where('rule', $value)
+            // strtolower to avoid capitalization any nonsense
+            ->where('rule', strtolower($value))
             ->first();
         if ($caught) {
             return UsernameRule::localize($caught);
