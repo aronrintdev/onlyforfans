@@ -25,6 +25,7 @@ class UsernameRule extends Model
      /** Table name */
     protected $table = 'username_rules';
 
+    /** Hidden attributes */
     protected $hidden = [ 'added_by', ];
 
     /**
@@ -101,6 +102,16 @@ class UsernameRule extends Model
                 __('username.invalid');
         }
         return $rule;
+    }
+
+    /**
+     * Relationships
+     *
+     */
+
+    /** Added by admin */
+    public function addedBy() {
+        return $this->hasOne('App\User', 'added_by');
     }
 
 }

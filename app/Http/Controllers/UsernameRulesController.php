@@ -33,6 +33,7 @@ class UsernameRulesController extends Controller
     public function list(Request $request, string $page)
     {
         //
+        throw new NotImplementedException();
     }
 
     /**
@@ -45,6 +46,7 @@ class UsernameRulesController extends Controller
     public function create()
     {
         //
+        throw new NotImplementedException();
     }
 
     /**
@@ -58,6 +60,7 @@ class UsernameRulesController extends Controller
     public function store(Request $request)
     {
         //
+        throw new NotImplementedException();
     }
 
     /**
@@ -71,6 +74,7 @@ class UsernameRulesController extends Controller
     public function show(UsernameRule $usernameRule)
     {
         //
+        throw new NotImplementedException();
     }
 
     /**
@@ -84,6 +88,7 @@ class UsernameRulesController extends Controller
     public function edit(UsernameRule $usernameRule)
     {
         //
+        throw new NotImplementedException();
     }
 
     /**
@@ -98,6 +103,7 @@ class UsernameRulesController extends Controller
     public function update(Request $request, UsernameRule $usernameRule)
     {
         //
+        throw new NotImplementedException();
     }
 
     /**
@@ -111,6 +117,7 @@ class UsernameRulesController extends Controller
     public function destroy(UsernameRule $usernameRule)
     {
         //
+        throw new NotImplementedException();
     }
 
     /**

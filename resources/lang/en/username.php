@@ -16,6 +16,7 @@ return [
     'custom' => [
         /**
          * Place any added explanations from the database here.
+         * Key with the rule or explanation text. Key is preferred over explanation
          */
         'allfans' => 'The word allfans may not be used anywhere in your username',
     ],
