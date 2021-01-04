@@ -83,7 +83,7 @@ class UsernameRule extends Model
             $rule = config('users.generatedUsernameTemplate');
         }
         do {
-            $username = $faker()->bothify($rule);
+            $username = $faker->bothify($rule);
         } while (Timeline::where('username')->count() > 0);
         return $username;
     }
@@ -97,9 +97,13 @@ class UsernameRule extends Model
             $caught->explanation = __('username.custom.' . $rule->explanation) ?? $rule->explanation;
         } else {
             // Priority: custom named after rule => default wording for rule => invalid
-            $rule->explanation = __('username.custom.' . $rule->rule) ??
-                __('username.default.' . $rule->comparison_type, ['rule' => $rule->rule]) ??
-                __('username.invalid');
+            $rule->explanation = __('username.custom.' . $rule->rule);
+            if ( $rule->explanation == 'username.custom.' . $rule->rule ) {
+                $rule->explanation = __('username.default.' . $rule->comparison_type, ['rule' => $rule->rule]);
+                if ($rule->explanation == 'username.default.' . $rule->comparison_type) {
+                    $rule->explanation = __('username.invalid');
+                }
+            }
         }
         return $rule;
     }
