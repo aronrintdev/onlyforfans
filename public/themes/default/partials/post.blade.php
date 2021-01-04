@@ -143,7 +143,7 @@ $main_description = $post->description;
 
     <!-- %PSG: the post body itself -->
       <div class="user-avatar">
-        <a href="{{ url($post->user->username) }}"><img src="{{ $post->user->avatar }}" alt="{{ $post->user->name }}" title="{{ $post->user->name }}"></a>
+        <a href="{{ url($post->user->username) }}"><img src="{{ $post->user->avatar->filepath }}" alt="{{ $post->user->name }}" title="{{ $post->user->name }}"></a>
       </div>
       <div class="user-post-details">
         <ul class="list-unstyled no-margin">
@@ -392,7 +392,7 @@ $main_description = $post->description;
                         </div>
                     @else
                         <!-- %PSG: UN-locked -->
-                        <div class="post-image-holder {{ $post->images()->first() && $post->images()->first()->type == 'image' ? 'single-image' : ''}} tag-MARK-B">
+                        <div class="post-image-holder {{ $post->mediafiles()->first() && $post->mediafiles()->first()->isImage() ?'single-image':''}} tag-MARK-B">
 
                             {{-- %PSG: Post's images --}}
                             @foreach($post->mediafiles as $mf)
@@ -773,7 +773,7 @@ $main_description = $post->description;
                             <li><a href="#" class="like-post unlike-{{ $post->id }}" data-post-id="{{ $post->id }}"><i class="fa fa-heart"></i></i></a></li>
                         @endif
                         @if($display_comment)
-                        <li><a href="#" class="show-comments"><i class="fa fa-comment-o"></i></a></li>
+                          <li><a href="#" class="show-comments"><i class="fa fa-comment-o"></i></a></li> ({{ $post->comments->count() }})
                         @endif
                         @if(Auth::user()->id != $post->user_id)
                             @if(!$post->users_shared->contains(Auth::user()->id))
@@ -810,7 +810,7 @@ $main_description = $post->description;
             @endif
             @if($display_comment)
                 <li>
-                    <a href="#" class="show-comments"><i class="fa fa-comment-o"></i></a>
+                  <a href="#" class="show-comments"><i class="fa fa-comment-o"></i></a> ({{ $post->comments->count() }})
                 </li>
             @endif
             @if(Auth::user()->id != $post->user_id)
@@ -843,7 +843,7 @@ $main_description = $post->description;
           <div class="to-comment">
             @if($display_comment == "only_follow" || $display_comment == "everyone" || $user_setting == "everyone" || $post->user_id == Auth::user()->id)
             <div class="commenter-avatar">
-              <a href="#"><img src="{{ Auth::user()->avatar }}" alt="{{ Auth::user()->name }}" title="{{ Auth::user()->name }}"></a>
+              <a href="#"><img src="{{ Auth::user()->avatar->filepath }}" alt="{{ Auth::user()->name }}" title="{{ Auth::user()->name }}"></a>
             </div>
             <div class="comment-textfield">
               <form action="#" class="comment-form" method="post" files="true" enctype="multipart/form-data" id="comment-form">
@@ -891,7 +891,7 @@ $main_description = $post->description;
                     <div class="panel-heading no-bg">
                         <div class="post-author">
                             <div class="user-avatar">
-                                <a href="{{ url($post->user->username) }}"><img src="{{ $post->user->avatar }}" alt="{{ $post->user->name }}" title="{{ $post->user->name }}"></a>
+                              <a href="{{ url($post->user->username) }}"><img src="{{ $post->user->avatar->filepath }}" alt="{{ $post->user->name }}" title="{{ $post->user->name }}"></a>
                             </div>
                             <div class="user-post-details">
                                 <ul class="list-unstyled no-margin">

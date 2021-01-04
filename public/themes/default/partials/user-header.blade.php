@@ -71,7 +71,7 @@
 				</li>
 			</ul>
 		</div>
-		<img src=" @if($timeline->cover_id) {{ url('user/cover/'.$timeline->cover->source) }} @else {{ url('user/cover/default-cover-user.png') }} @endif" alt="{{ $timeline->name }}" title="{{ $timeline->name }}">
+		<img src=" @if($timeline->cover_id) {{ $timeline->cover->filepath }} @else {{ url('user/cover/default-cover-user.png') }} @endif" alt="{{ $timeline->name }}" title="{{ $timeline->name }}">
 		@if($timeline->id == Auth::user()->timeline_id)
 			<a href="#" class="btn btn-camera-cover change-cover">
     			<svg width="1.5em" height="1.5em" viewBox="0 0 16 16" class="bi bi-camera-fill" fill="#fff" xmlns="http://www.w3.org/2000/svg">
@@ -138,7 +138,7 @@
 {{--			@endif--}}
 		</ul>
 		<div class="timeline-user-avtar">
-			<img src="{{ $timeline->user->avatar }}" alt="{{ $timeline->name }}" title="{{ $timeline->name }}">
+      <img src="{{ $timeline->user->avatar->filepath }}" alt="{{ $timeline->name }}" title="{{ $timeline->name }}">
 			@if($timeline->id == Auth::user()->timeline_id)
 				<div class="chang-user-avatar">
 					<a href="#" class="btn btn-camera change-avatar"><i class="fa fa-camera" aria-hidden="true"></i><span class="avatar-text">{{ trans('common.update_profile') }}<span>{{ trans('common.picture') }}</span></span></a>
@@ -232,7 +232,7 @@
 					<div class="panel-heading no-bg">
 						<div class="post-author">
 							<div class="user-avatar">
-								<a href="{{ url($user->username) }}"><img src="{{ $user->avatar }}" alt="{{ $user->name }}" title="{{ $user->name }}"></a>
+                <a href="{{ url($user->username) }}"><img src="{{ $user->avatar->filepath }}" alt="{{ $user->name }}" title="{{ $user->name }}"></a>
 							</div>
 							<div class="user-post-details">
 								<ul class="list-unstyled no-margin">

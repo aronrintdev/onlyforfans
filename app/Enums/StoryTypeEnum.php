@@ -3,7 +3,6 @@ namespace App\Enums;
 
 use App\Interfaces\Selectable;
 
-// CMS Content Type
 class StoryTypeEnum extends SmartEnum implements Selectable {
 
     const PHOTO    = 'photo';

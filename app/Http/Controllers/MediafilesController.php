@@ -53,7 +53,7 @@ class MediafilesController extends AppBaseController
                     default:
                         $subFolder = 'default';
                 }
-                $newFilename = $file->store('fans-platform/'.$subFolder, 's3');
+                $newFilename = $file->store('./'.$subFolder, 's3');
                 $mediafile = Mediafile::create([
                     'resource_id' => $request->resource_id,
                     'resource_type' => $request->resource_type,

@@ -44,7 +44,12 @@
         var current_username = "{{ Auth::user()->username }}";
         var currentUserId = "{{ Auth::id() }}";
         </script>
-        {!! Theme::asset()->scripts() !!}
+
+        <!-- %PSG: inject Theme script assets... (BEGIN) -->
+        {{-- Theme::asset()->scripts() | %PSG: this is loading main.css as a script (!), load main.js direct below --}}
+        <script src="{{ asset('/themes/default/assets/js/main.js') }}"></script>
+        <!-- %PSG: inject Theme script assets... (END) -->
+
         @if(Setting::get('google_analytics') != NULL)
             {!! Setting::get('google_analytics') !!}
         @endif

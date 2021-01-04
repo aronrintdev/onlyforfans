@@ -1,4 +1,4 @@
-
+<!-- %VIEW: themes/default/paritals/my-list --> 
 <div class="user-follow fans row">
     <!-- Each user is represented with media block -->
 
@@ -13,7 +13,7 @@
                         <div class="background">
                             <div class="widget-bg">
                                 <a href="{{ url($suggested_user->username) }}">
-                                    <img src=" @if($suggested_user->cover) {{ url('user/cover/'.$suggested_user->cover) }} @else {{ url('user/cover/default-cover-user.png') }} @endif" alt="{{ $suggested_user->name }}" title="{{ $suggested_user->name }}">
+                                  <img src=" @if($suggested_user->cover) {{ $suggested_user->cover->filepath }} @else {{ url('user/cover/default-cover-user.png') }} @endif" alt="{{ $suggested_user->name }}" title="{{ $suggested_user->name }}">
                                 </a>
                             </div>
                             <div class="avatar-img">

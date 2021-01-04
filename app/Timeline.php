@@ -53,40 +53,35 @@ class Timeline extends Model
         return $this->hasMany('App\Post');
     }
 
-    public function stories() { return $this->hasMany('App\Story');
+    public function stories() { 
+        return $this->hasMany('App\Story');
     }
 
     public function user() {
         return $this->hasOne('App\User');
     }
 
-    public function avatar()
-    {
-        return $this->belongsTo('App\Media', 'avatar_id');
+    public function avatar() {
+        return $this->belongsTo('App\Mediafile', 'avatar_id');
     }
 
-    public function cover()
-    {
-        return $this->belongsTo('App\Media', 'cover_id');
+    public function cover() {
+        return $this->belongsTo('App\Mediafile', 'cover_id');
     }
 
-    public function page()
-    {
+    public function page() {
         return $this->hasOne('App\Page');
     }
 
-    public function groups()
-    {
+    public function groups() {
         return $this->hasOne('App\Group');
     }
 
-    public function usersSaved()
-    {
+    public function usersSaved() {
         return $this->belongsToMany('App\User', 'saved_timelines', 'timeline_id', 'user_id')->withPivot('type');
     }
 
-    public function reports()
-    {
+    public function reports() {
         return $this->belongsToMany('App\User', 'timeline_reports', 'timeline_id', 'reporter_id')->withPivot('status');
     }
 
@@ -95,8 +90,7 @@ class Timeline extends Model
     //     return $this->belongsTo('App\Event', 'timeline_id');
     // }
 
-    public function event()
-    {
+    public function event() {
         return $this->hasOne('App\Event');
     }
 

@@ -86,23 +86,6 @@ class Event extends Model
         return $result;
     }
 
-   //  public function chkAvatar($id)
-   //  {
-   //   $result = '';
-   //   $user = User::find($id);
-   //   $timeline = $user->timeline;
-   //   if($timeline && $timeline->avatar)
-   //   {
-   //     $result = $timeline->avatar->source;
-   //   }
-   //   else
-   //   {
-   //     $result = false;
-   //   }
-
-   //   return $result;
-   // }
-
     public function isExpire($id)
     {
         $chkExpire = $this->find($id);
@@ -134,7 +117,7 @@ class Event extends Model
          $user = User::find($id);
          $timeline = $user->timeline;
         if ($timeline && $timeline->avatar) {
-            $result = $timeline->avatar->source;
+            $result = $timeline->avatar;
         } else {
             $result = false;
         }

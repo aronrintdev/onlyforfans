@@ -36,6 +36,8 @@
         margin-bottom: 100px;
     }
 </style>
+
+<!-- %VIEW: themes/default/views/messenger/index -->
 <!-- <div class="main-content">-->  
 <div class="container-fluid">
 
@@ -116,7 +118,7 @@
                                         <a href="#" class="show-conversation" @click.prevent="showConversation(conversation)">
                                             <div class="media post-list">
                                                 <div class="media-left">
-                                                    <img v-bind:src="conversation.user.avatar" alt="images"  class="img-radius img-46">
+                                                    <img v-bind:src="conversation.user.avatar.filepath" alt="images"  class="img-radius img-46">
                                                 </div>
                                                 <div class="media-body">
                                                    
@@ -168,7 +170,7 @@
                                                 <div class="media post-list">
                                                     <div class="media-left">
                                                         <a href="#">
-                                                            <img v-bind:src="message.user.avatar" class="img-radius img-40" alt="">
+                                                            <img v-bind:src="message.user.avatar.filepath" class="img-radius img-40" alt="">
                                                         </a>
                                                     </div>
                                                     <div class="media-body ">

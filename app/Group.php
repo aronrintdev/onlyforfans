@@ -58,9 +58,8 @@ class Group extends Model
      *
      * @return string
      */
-    public function getAvatarAttribute($value)
-    {
-        return $this->timeline->avatar ? $this->timeline->avatar->source : null;
+    public function getAvatarAttribute($value) {
+        return $this->timeline->avatar ? $this->timeline->avatar : null;
     }
 
     /**
@@ -70,9 +69,8 @@ class Group extends Model
      *
      * @return string
      */
-    public function getCoverAttribute($value)
-    {
-        return $this->timeline->cover ? $this->timeline->cover->source : null;
+    public function getCoverAttribute($value) {
+        return $this->timeline->cover ? $this->timeline->cover : null;
     }
 
     /**

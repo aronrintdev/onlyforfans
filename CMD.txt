@@ -24,3 +24,10 @@ cp app/Patches/ThemeServiceProvider.php vendor/teepluss/theme/src/ThemeServicePr
 # https://stackoverflow.com/questions/56605551/laravel-5-8-env-testing-file-is-not-working
 $ php artisan config:cache --env=testing
 $ php artisan config:cache --env=local
+
+%%%
+$ php artisan truncate:data
+$ php artisan db:seed --class="UsersTableSeeder"
+$ php artisan db:seed --class="StoriesTableSeeder"
+$ php artisan db:seed --class="PostsTableSeeder"
+$ php artisan db:seed --class="FollowersTableSeeder"

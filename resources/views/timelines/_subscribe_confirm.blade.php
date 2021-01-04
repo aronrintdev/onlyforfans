@@ -6,10 +6,10 @@
       <div class="timeline-cover-section">
 
         <div class="timeline-cover">
-          <img src=" @if($timeline->cover_id) {{ url('user/cover/'.$timeline->cover->source) }} @else {{ url('user/cover/default-cover-user.png') }} @endif" alt="{{ $timeline->name }}" title="{{ $timeline->name }}">
+          <img src=" @if($timeline->cover_id) {{ $timeline->cover->filepath }} @else {{ url('user/cover/default-cover-user.png') }} @endif" alt="{{ $timeline->name }}" title="{{ $timeline->name }}">
         </div>
         <div class="timeline-list box-avatar">
-          <img class="user-avatar" src="{{ $timeline->user->avatar }}" alt="" title="{{ $timeline->name }}">
+          <img class="user-avatar" src="{{ $timeline->user->avatar->filepath }}" alt="" title="{{ $timeline->name }}">
         </div>
 
         <div class="timeline-list box-userinfo">
@@ -47,7 +47,7 @@
       </div>
 
       <div class="px-5 pb-5">
-        <a href="javascript:void(0);" class="btn btn-submit btn-success follow-user follow" style="display:block;" data-price="1" data-timeline-id="35">
+        <a href="javascript:void(0);" class="btn btn-submit btn-success follow-user follow" style="display:block;" data-price="1" data-timeline-id="{{ $timeline->id }}">
           <i class="fa fa-heart"></i> Subscribe
         </a>
       </div>

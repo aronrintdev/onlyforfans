@@ -1,16 +1,125 @@
 <?php
 
-use App\Post;
 use Illuminate\Database\Seeder;
+use Carbon\Carbon;
+
+use App\User;
+use App\Post;
+use App\Comment;
+use App\Enums\MediafileTypeEnum;
+use App\Enums\PostTypeEnum;
+use App\Libs\FactoryHelpers;
 
 class PostsTableSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     *
-     * @return void
-     */
+    private static $PROB_POST_HAS_IMAGE = 70; // 70, 1;
+
     public function run()
+    {
+        $this->command->info('Running Seeder: PostsTableSeeder...');
+        $faker = \Faker\Factory::create();
+
+        // +++ Create ... +++
+
+        $users = User::get();
+
+        $users->each( function($u) use(&$faker, &$users) {
+
+            $max = $faker->numberBetween(2,20);
+            $this->command->info("  - Creating $max posts for user ".$u->name);
+
+            collect(range(1,$max))->each( function() use(&$faker, &$users, &$u) {
+
+                $ptype = $faker->randomElement([
+                    PostTypeEnum::SUBSCRIBER,
+                    PostTypeEnum::PRICED,
+                    PostTypeEnum::FREE,
+                    PostTypeEnum::FREE,
+                    PostTypeEnum::FREE,
+                ]);
+                $attrs = [
+                    'description'  => $faker->text.' ('.$ptype.')',
+                    'user_id'      => $u->id,
+                    'timeline_id'  => $u->timeline->id,
+                    'type'         => $ptype,
+                ];
+
+                if ( $ptype === PostTypeEnum::PRICED ) {
+                    $attrs['price'] = $faker->randomFloat(2, 1, 300);
+                }
+
+                $post = factory(Post::class)->create($attrs);
+                if ( $faker->boolean(self::$PROB_POST_HAS_IMAGE) ) { // % post has image
+                    $mf = FactoryHelpers::createImage(MediafileTypeEnum::POST, $post->id);
+                }
+
+                // Set a realistic post date
+                $ts = $faker->dateTimeThisDecade->format('Y-m-d H:i:s');
+                //$ts = $ts->format('Y-m-d H:i:s');
+                //dd($ts);
+                \DB::table('posts')->where('id',$post->id)->update([
+                    'created_at' => Carbon::parse($ts),
+                    //'description' => 'foo',
+                ]);
+
+                // LIKES - Select random users to like this post...
+                $likers = FactoryHelpers::parseRandomSubset($users, 20);
+                $likee = $u;
+                $likers->each( function($liker) use(&$post) {
+                    if ( !$post->users_liked->contains($liker->id) ) {
+                        $post->users_liked()->attach($liker->id);
+                        $post->notifications_user()->attach($liker->id);
+                    }
+                });
+
+                // COMMENTS - Select random users to comment on this post...
+                $commenters = FactoryHelpers::parseRandomSubset($users, 12);
+                $likee = $u;
+                $commenters->each( function($commenter) use(&$faker, &$post) {
+                    $comment = Comment::create([
+                        'post_id'     => $post->id,
+                        'description' => $faker->realText( $faker->numberBetween(20,200) ),
+                        'user_id'     => $commenter->id,
+                        'parent_id'   => null, // %TODO: nested comments
+                    ]);
+                });
+
+                // SAVES - Select random users to save this post...
+                $savers = FactoryHelpers::parseRandomSubset($users, 10);
+                $savee = $u;
+                $savers->each( function($saver) use(&$post) {
+                    if ( !$post->usersSaved->contains($saver->id) ) {
+                        $post->usersSaved()->attach($saver->id);
+                    }
+                });
+
+                // SHARES - Select random users to share this post (on their timeline)...
+                $sharers = FactoryHelpers::parseRandomSubset($users, 10);
+                $sharee = $u;
+                $sharers->each( function($sharer) use(&$post) {
+                    if ( !$post->shares->contains($sharer->id) ) {
+                        $post->shares()->attach($sharer->id);
+                    }
+                });
+
+                // PINS - Select random users to pin this post (on their timeline ?)...
+                $pinners = FactoryHelpers::parseRandomSubset($users, 7);
+                $pinnee = $u;
+                $pinners->each( function($pinner) use(&$post) {
+                    if ( !$post->usersPinned->contains($pinner->id) ) {
+                        $post->usersPinned()->attach($pinner->id);
+                    }
+                });
+
+            });
+
+        });
+    }
+
+
+
+    /*
+    private function oldSeeder() 
     {
         //Populate dummy posts
         factory(Post::class, 260)->create();
@@ -60,4 +169,5 @@ class PostsTableSeeder extends Seeder
 
         // }
     }
+     */
 }

@@ -30,7 +30,7 @@
 										<div class="connect-list">
 											<div class="connect-link side-left">
 												<a href="{{ url($group_member->username) }}">													
-													<img src="{{ $group_member->avatar }}" alt="{{ $group_member->name }}" class="img-icon img-30" title="{{ 
+                          <img src="{{ $group_member->avatar->filepath }}" alt="{{ $group_member->name }}" class="img-icon img-30" title="{{ 
 														$group_member->name }}">
 													{{ $group_member->name }}
 												</a>

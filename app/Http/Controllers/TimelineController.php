@@ -30,6 +30,7 @@ use DB;
 use Flash;
 use Flavy;
 use Exception;
+use Throwable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -1013,7 +1014,7 @@ Log::info('MARK-2.a'); // post-image-3
                      */
 
                     $subFolder = 'posts';
-                    $newFilename = $postImage->store('fans-platform/'.$subFolder, 's3');
+                    $newFilename = $postImage->store('./'.$subFolder, 's3');
                     $mediafile = Mediafile::create([
                         //'resource_id' => $request->timeline_id,
                         'resource_id' => $post->id,
@@ -1164,8 +1165,15 @@ Log::info('MARK-3.a'); // post-image-4
 
         if ($comment) {
             if (Auth::user()->id != $post->user_id) {
-                //Notify the user for comment on his/her post
-                Notification::create(['user_id' => $post->user_id, 'post_id' => $request->post_id, 'notified_by' => Auth::user()->id, 'description' => Auth::user()->name.' '.trans('common.commented_on_your_post'), 'type' => 'comment_post']);
+                try { 
+                    //Notify the user for comment on his/her post
+                    Notification::create(['user_id' => $post->user_id, 'post_id' => $request->post_id, 'notified_by' => Auth::user()->id, 'description' => Auth::user()->name.' '.trans('common.commented_on_your_post'), 'type' => 'comment_post']);
+                } catch(Exception | Throwable $e) {
+                    Log::error(json_encode([
+                        'msg' => 'TimlineController::postComment() - Could not send notification',
+                        'emsg' => $e->getMessage(),
+                    ]));
+                }
             }
 
             $theme = Theme::uses(Setting::get('current_theme', 'default'))->layout('ajax');
@@ -1224,7 +1232,14 @@ Log::info('MARK-3.a'); // post-image-4
             $status_message = 'successfully liked';
 
             if ($post->user->id != Auth::user()->id) {
-                Notification::create(['user_id' => $post->user->id, 'post_id' => $post->id, 'notified_by' => Auth::user()->id, 'description' => Auth::user()->name.' '.$notify_message, 'type' => $notify_type]);
+                try {
+                    Notification::create(['user_id' => $post->user->id, 'post_id' => $post->id, 'notified_by' => Auth::user()->id, 'description' => Auth::user()->name.' '.$notify_message, 'type' => $notify_type]);
+                } catch(Exception | Throwable $e) {
+                    Log::error(json_encode([
+                        'msg' => 'TimlineController::likePost() - Could not send notification',
+                        'emsg' => $e->getMessage(),
+                    ]));
+                }
             }
 
             $like_count = $post->users_liked()->count();
@@ -1242,7 +1257,14 @@ Log::info('MARK-3.a'); // post-image-4
             $status_message = 'successfully unliked';
 
             if ($post->user->id != Auth::user()->id) {
-                Notification::create(['user_id' => $post->user->id, 'post_id' => $post->id, 'notified_by' => Auth::user()->id, 'description' => Auth::user()->name.' '.$notify_message, 'type' => $notify_type]);
+                try {
+                    Notification::create(['user_id' => $post->user->id, 'post_id' => $post->id, 'notified_by' => Auth::user()->id, 'description' => Auth::user()->name.' '.$notify_message, 'type' => $notify_type]);
+                } catch(Exception | Throwable $e){
+                    Log::error(json_encode([
+                        'msg' => 'TimlineController::likePost() - Could not send notification',
+                        'emsg' => $e->getMessage(),
+                    ]));
+                }
             }
 
             $like_count = $post->users_liked()->count();
@@ -1509,6 +1531,7 @@ Log::info('MARK-3.a'); // post-image-4
         return redirect(route('timelines.index'));
     }
 
+    // %PSG: follow a post
     public function follow(Request $request)
     {
         $timeline_id = $request->timeline_id;
@@ -1529,7 +1552,11 @@ Log::info('MARK-3.a'); // post-image-4
             try{
                 //Notify the user for follow
                 Notification::create(['user_id' => $follow->id, 'timeline_id' => $timeline_id, 'notified_by' => Auth::user()->id, 'description' => Auth::user()->name.' '.trans('common.is_following_you'), 'type' => 'follow']);
-            }catch(\Exception $e){
+            } catch(Exception | Throwable $e){
+                Log::error(json_encode([
+                    'msg' => 'TimlineController::follow() - Could not send notification',
+                    'emsg' => $e->getMessage(),
+                ]));
             }
 
 //            return response()->json(['status' => '200', 'followed' => true, 'message' => 'successfully followed']);
@@ -1540,7 +1567,11 @@ Log::info('MARK-3.a'); // post-image-4
             try{
                 //Notify the user for follow
                 Notification::create(['user_id' => $follow->id, 'timeline_id' => $timeline_id, 'notified_by' => Auth::user()->id, 'description' => Auth::user()->name.' '.trans('common.is_unfollowing_you'), 'type' => 'unfollow']);
-            }catch(\Exception $e){
+            } catch(Exception | Throwable $e){
+                Log::error(json_encode([
+                    'msg' => 'TimlineController::follow() - Could not send notification',
+                    'emsg' => $e->getMessage(),
+                ]));
             }
 
 //            return response()->json(['status' => '200', 'followed' => false, 'message' => 'successfully unFollowed']);
@@ -1549,13 +1580,14 @@ Log::info('MARK-3.a'); // post-image-4
     }
 
 
+    // %PSG
     public function followFreeUser(Request $request)
     {
         $timeline_id = $request->timeline_id;
         $follow = User::where('timeline_id', '=', $timeline_id)->first();
         $timeline = Timeline::where('id', $timeline_id)->first();
         
-        if(! checkBlockedProfiles($timeline->username)){
+        if ( !checkBlockedProfiles($timeline->username) ) {
             return response()->json(['status' => '422', 'message' => 'User blocked your profile. you can not subscribe.']);
         }
 
@@ -1569,7 +1601,8 @@ Log::info('MARK-3.a'); // post-image-4
             try{
                 //Notify the user for follow
                 Notification::create(['user_id' => $follow->id, 'timeline_id' => $timeline_id, 'notified_by' => Auth::user()->id, 'description' => Auth::user()->name.' '.trans('common.is_following_you'), 'type' => 'follow']);
-            }catch(\Exception $e){
+            } catch(\Exception $e){
+            } catch(Throwable $e) {
             }
 
             return response()->json(['status' => '200', 'followed' => true, 'message' => 'successfully followed']);
@@ -1580,6 +1613,7 @@ Log::info('MARK-3.a'); // post-image-4
                 //Notify the user for follow
                 Notification::create(['user_id' => $follow->id, 'timeline_id' => $timeline_id, 'notified_by' => Auth::user()->id, 'description' => Auth::user()->name.' '.trans('common.is_unfollowing_you'), 'type' => 'unfollow']);
             }catch(\Exception $e){
+            } catch(Throwable $e) {
             }
 
             return response()->json(['status' => '200', 'followed' => false, 'message' => 'successfully unFollowed']);
@@ -1601,6 +1635,7 @@ Log::info('MARK-3.a'); // post-image-4
                 //Notify the user for follow
                 Notification::create(['user_id' => $follow->id, 'timeline_id' => $request->timeline_id, 'notified_by' => Auth::user()->id, 'description' => Auth::user()->name.' '.trans('common.is_unfollowing_you'), 'type' => 'unfollow']);
             }catch(\Exception $e){
+            } catch(Throwable $e) {
             }
 
             return response()->json(['status' => '200', 'followed' => false, 'message' => 'successfully unFollowed']);
@@ -1622,6 +1657,7 @@ Log::info('MARK-3.a'); // post-image-4
                 //Notify the user for follow
                 Notification::create(['user_id' => $follow->id, 'timeline_id' => $request->timeline_id, 'notified_by' => Auth::user()->id, 'description' => Auth::user()->name.' '.trans('common.is_following_you'), 'type' => 'follow']);
             }catch(\Exception $e){
+            } catch(Throwable $e) {
             }
 
             return response()->json(['status' => '200', 'followed' => true, 'message' => 'successfully followed']);
@@ -1632,6 +1668,7 @@ Log::info('MARK-3.a'); // post-image-4
                 //Notify the user for follow
                 Notification::create(['user_id' => $follow->id, 'timeline_id' => $request->timeline_id, 'notified_by' => Auth::user()->id, 'description' => Auth::user()->name.' '.trans('common.is_unfollowing_you'), 'type' => 'unfollow']);
             }catch(\Exception $e){
+            } catch(Throwable $e) {
             }
 
             return response()->json(['status' => '200', 'followed' => false, 'message' => 'successfully unFollowed']);
@@ -1980,6 +2017,12 @@ Log::info('MARK-3.a'); // post-image-4
     
             // liked_posts
             $liked_post = \Illuminate\Support\Facades\DB::table('post_likes')->where('user_id', \Illuminate\Support\Facades\Auth::user()->id)->get();
+
+            $sessionUser = Auth::user();
+            $this->_php2jsVars['session'] = [
+                'username' => $sessionUser->username,
+            ];
+            \View::share('g_php2jsVars',$this->_php2jsVars);
     
             return $theme->scope('timeline/posts',
                 compact('timeline', 'liked_post', 'user', 'posts', 'liked_pages', 'followRequests', 'joined_groups', 'own_pages',
@@ -1987,8 +2030,7 @@ Log::info('MARK-3.a'); // post-image-4
                     'joined_groups_count', 'next_page_url', 'user_events', 'guest_events', 'user_lists', 'period', 'sort_by', 'order_by', 'favouritePosts', 'postMedia'))->render();
         
         }
-    }
-    
+    } // posts()
     
 
     /**

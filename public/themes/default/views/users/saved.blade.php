@@ -110,7 +110,7 @@
 										<div class="connect-list">
 											<div class="connect-link side-left">
 					                            <a href="{{ url($timeline->username) }}">
-					                            	<img src=" @if($timeline->avatar_id) {{ url('page/avatar/'.$timeline->avatar->source) }} @else {{ url('page/avatar/default-page-avatar.png') }} @endif" alt="{{ $timeline->name }}" title="{{ $timeline->name }}" alt="{{ $timeline->name }}" class="img-icon">
+					                            	<img src=" @if($timeline->avatar_id) {{ $timeline->avatar->filepath }} @else {{ url('page/avatar/default-page-avatar.png') }} @endif" alt="{{ $timeline->name }}" title="{{ $timeline->name }}" alt="{{ $timeline->name }}" class="img-icon">
 					                            	{{ $timeline->name }}
 					                            </a>
 				                            </div>
@@ -139,7 +139,7 @@
 										<div class="connect-list">
 											<div class="connect-link side-left">
 					                            <a href="{{ url($timeline->username) }}">
-					                            	<img src=" @if($timeline->avatar_id) {{ url('page/avatar/'.$timeline->avatar->source) }} @else {{ url('page/avatar/default-page-avatar.png') }} @endif" alt="{{ $timeline->name }}" title="{{ $timeline->name }}" alt="{{ $timeline->name }}" class="img-icon">
+					                            	<img src=" @if($timeline->avatar_id) {{ $timeline->avatar->filepath }} @else {{ url('page/avatar/default-page-avatar.png') }} @endif" alt="{{ $timeline->name }}" title="{{ $timeline->name }}" alt="{{ $timeline->name }}" class="img-icon">
 					                            	{{ $timeline->name }}
 					                            </a>
 				                            </div>
@@ -168,7 +168,7 @@
 										<div class="connect-list">
 											<div class="connect-link side-left">
 					                            <a href="{{ url($timeline->username) }}">
-					                            	<img src=" @if($timeline->avatar_id) {{ url('page/avatar/'.$timeline->avatar->source) }} @else {{ url('page/avatar/default-page-avatar.png') }} @endif" alt="{{ $timeline->name }}" title="{{ $timeline->name }}" alt="{{ $timeline->name }}" class="img-icon">
+					                            	<img src=" @if($timeline->avatar_id) {{ $timeline->avatar->filepath }} @else {{ url('page/avatar/default-page-avatar.png') }} @endif" alt="{{ $timeline->name }}" title="{{ $timeline->name }}" alt="{{ $timeline->name }}" class="img-icon">
 					                            	{{ $timeline->name }}
 					                            </a>
 				                            </div>

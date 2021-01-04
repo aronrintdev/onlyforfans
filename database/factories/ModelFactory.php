@@ -19,6 +19,7 @@ $factory->define(App\Timeline::class, function (Faker\Generator $faker) {
         'username' => $faker->userName,
         'name'     => $faker->name,
         'about'    => $faker->text,
+        'type'    => 'user',
         // 'avatar_id' => $faker->numberBetween($min = 1, $max = 80),
         // 'cover_id' => $faker->numberBetween($min = 1, $max = 80),
 
@@ -112,6 +113,7 @@ $factory->define(App\Album::class, function (Faker\Generator $faker) {
 });
 
 $factory->define(App\Mediafile::class, function (Faker\Generator $faker) {
+    // Uses fake file
     $file = UploadedFile::fake()->image('avatar.jpg');
     return [
         'filename'=>(string) Uuid::uuid4(),
@@ -128,33 +130,51 @@ $factory->define(App\Mediafile::class, function (Faker\Generator $faker) {
 });
 
 $factory->define(App\Story::class, function (Faker\Generator $faker) {
-    return [
+    // Creates an associated user/timeline (unless timeline_id is passed in ?)
+    $attrs = [
         'content'     => $faker->text,
-        'stype'       => $faker->randomElement(['text']),
+        'stype'       => 'text', // for image, need to override from caller
         'timeline_id' => function () {
             $user = factory(App\User::class)->create();
             return $user->timeline->id;
         },
     ];
+    return $attrs;
 });
 
 $factory->define(App\User::class, function (Faker\Generator $faker) {
     static $password;
 
+    $isFollowForFree = $faker->boolean(70);
+
+    $gender = $faker->randomElement(['male','female']);
+    $firstName = $faker->firstName($gender);
+    $lastName = $faker->lastName;
+    $username = strtolower($firstName.'.'.$lastName);
+    $fullName = $firstName.' '.$lastName;
+
     return [
-        'email' => $faker->unique()->safeEmail,
-        'password' => $password ?: $password = bcrypt('secret'),
+        'email' => $username.'@example.com', // $faker->unique()->safeEmail,
+        'password' => $password ?: $password = bcrypt('foo-123'), // secret
         'remember_token' => str_random(10),
-        'timeline_id' => function () {
-            return factory(App\Timeline::class)->create()->id;
+        'verification_code' => str_random(10),
+        'timeline_id' => function () use($fullName, $username) {
+            return factory(App\Timeline::class)->create([
+                'name' => $fullName,
+                'username' => $username,
+            ])->id;
         },
         'city' => $faker->city,
         'country' => $faker->country,
         'website' => $faker->url,
         'instagram' => $faker->url,
-        'gender' => $faker->randomElement(['male','female']),
+        'gender' => $gender, // $faker->randomElement(['male','female']),
         'active' => 1,
-        //'city' => $faker->city,
+        'verified' => 1,
+        'email_verified' => 1,
+        'is_follow_for_free' => $isFollowForFree,
+        'price' => $isFollowForFree ? null : $faker->randomFloat(2, 1, 300),
+        'birthday' => $faker->dateTimeBetween('1970-01-01', '1998-12-31')->format('Y-m-d'),
     ];
 });
 

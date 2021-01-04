@@ -10,7 +10,7 @@
         <article>
           <b-media no-body>
             <b-media-aside>
-              <b-img :src="dtoUser.avatar_url" rounded="circle" width="64" alt="avatar"></b-img>
+              <b-img :src="dtoUser.avatar.filepath" rounded="circle" width="64" height="64" alt="avatar"></b-img>
             </b-media-aside>
             <b-media-body>
               <h5 class="mt-3">{{ dtoUser.fullname }}</h5>

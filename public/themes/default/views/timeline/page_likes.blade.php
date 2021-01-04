@@ -27,7 +27,7 @@
 										<div class="connect-list">
 											<div class="connect-link side-left">
 												<a href="{{ url($page_like->username) }}">													
-												<img src="{{ $page_like->avatar }}" alt="{{ $page_like->name }}" class="img-icon img-30" title="{{ $page_like->name }}">
+                          <img src="{{ $page_like->avatar->filepath }}" alt="{{ $page_like->name }}" class="img-icon img-30" title="{{ $page_like->name }}">
 													{{ $page_like->name }}
 												</a>
 												@if($page_like->verified)

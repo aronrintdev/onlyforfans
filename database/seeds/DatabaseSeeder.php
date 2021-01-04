@@ -1,16 +1,19 @@
 <?php
-
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Config;
 
 class DatabaseSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     *
-     * @return void
-     */
     public function run()
+    {
+        $this->call([
+            UsersTableSeeder::class,
+            PostsTableSeeder::class,
+            StoriesTableSeeder::class,
+        );
+    }
+
+    private function oldSet() 
     {
         if (Config::get('app.env') == 'demo' || Config::get('app.env') == 'local') {
             $this->call(MediumTableSeeder::class);

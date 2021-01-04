@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Console;
 
 use App\Console\Commands\ExpirePostCommand;
@@ -16,7 +15,8 @@ class Kernel extends ConsoleKernel
      */
     protected $commands = [
         PublishPostCommand::class,
-        ExpirePostCommand::class
+        ExpirePostCommand::class,
+        \App\Console\Commands\TruncateData::class,
     ];
 
     /**

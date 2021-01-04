@@ -12,9 +12,9 @@ use App\Interfaces\Ownable;
 
 class Post extends Model implements Ownable
 {
-    const PRICE_TYPE = 'price';
+    const PRICE_TYPE = 'price'; // associated with a price
     const FREE_TYPE = 'free';
-    const PAID_TYPE = 'paid';
+    const PAID_TYPE = 'paid'; // %PSG: ie, for subscribers (?)
     
     //use SoftDeletes;
 
@@ -54,7 +54,7 @@ class Post extends Model implements Ownable
     }
 
     public function users_liked() {
-        return $this->belongsToMany('App\User', 'post_likes', 'post_id', 'user_id');
+        return $this->belongsToMany('App\User', 'post_likes', 'post_id', 'user_id')->withTimestamps();
     }
 
     public function tip() {
@@ -74,7 +74,7 @@ class Post extends Model implements Ownable
     }
 
     public function notifications_user() {
-        return $this->belongsToMany('App\User', 'post_follows', 'post_id', 'user_id');
+        return $this->belongsToMany('App\User', 'post_follows', 'post_id', 'user_id')->withTimestamps();
     }
 
     public function reports() {

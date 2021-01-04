@@ -2,6 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Log;
+use Exception;
+use Throwable;
+
 use App\Events\MessagePublished;
 use App\Hashtag;
 use App\Setting;
@@ -195,24 +199,25 @@ class MessageController extends Controller
             ]);
 
         $thread->messages()->save($message);
-
-
-
         $thread = Thread::findOrFail($thread->id);
-
-
         $thread->lastMessage = $thread->latestMessage;
 
         $participants = $thread->participants()->get();
 
-        foreach ($participants as $key => $participant) {
-            if (Auth::id() != $participant->user->id) {
-                // echo $participant->user->id;
-                Event::fire(new MessagePublished($message, $participant->user));
+        try {
+            foreach ($participants as $key => $participant) {
+                if (Auth::id() != $participant->user->id) {
+                    Event::fire(new MessagePublished($message, $participant->user));
+                }
+                if ($participant->user->id != Auth::user()->id) {
+                    $thread->user = $participant->user;
+                }
             }
-            if ($participant->user->id != Auth::user()->id) {
-                $thread->user = $participant->user;
-            }
+        } catch(Exception | Throwable $e) {
+            Log::error(json_encode([
+                'msg' => 'MessageeController::update() - Could not send notification',
+                'emsg' => $e->getMessage(),
+            ]));
         }
 
         return response()->json(['status' => '200', 'data' => $thread]);
@@ -243,14 +248,19 @@ class MessageController extends Controller
         $thread->activateAllParticipants();
         // activate all participants
         $participants = $thread->participants()->withTrashed()->get();
-        foreach ($participants as $participant) {
-            $participant->restore();
-            if (Auth::id() != $participant->user->id) {
-                // echo $participant->user->id;
-                Event::fire(new MessagePublished($message, $participant->user));
+        try {
+            foreach ($participants as $participant) {
+                $participant->restore();
+                if (Auth::id() != $participant->user->id) {
+                    Event::fire(new MessagePublished($message, $participant->user));
+                }
             }
+        } catch(Exception | Throwable $e) {
+            Log::error(json_encode([
+                'msg' => 'MessageeController::update() - Could not send notification',
+                'emsg' => $e->getMessage(),
+            ]));
         }
-
 
         // Add replier as a participant
         $participant = Participant::firstOrCreate(
@@ -413,7 +423,6 @@ class MessageController extends Controller
 
     public function getPrivateConversation($userId)
     {
-        //echo "Message route received";
         $recipients = [$userId, Auth::id()];
         $recipients[1] = (string) Auth::id();
 
