@@ -98,7 +98,7 @@ class UsernameRule extends Model
      * @param \Faker\Factory $faker - Faker instance if you want to seed or not create new instance
      * @return string - non conflicting username.
      */
-    public static function create_random($rule = null, $faker = null)
+    public static function createRandom($rule = null, $faker = null)
     {
         if ($faker === null) {
             $faker = Faker::create();

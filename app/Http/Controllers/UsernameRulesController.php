@@ -6,7 +6,6 @@ use App\UsernameRule;
 use Illuminate\Http\Request;
 use Validator;
 
-// Todo: Limit modify functions to admin only.
 class UsernameRulesController extends Controller
 {
     /**

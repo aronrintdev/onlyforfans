@@ -52,7 +52,7 @@ class Timeline extends Model
      */
     public function checkUsername() {
         if (!isset($this->username) || $this->username === '') {
-            $this->username = UsernameRule::create_random();
+            $this->username = UsernameRule::createRandom();
         }
     }
 

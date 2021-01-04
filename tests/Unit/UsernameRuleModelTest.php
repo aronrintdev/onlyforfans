@@ -30,7 +30,7 @@ class UsernameRuleModelTest extends TestCase
     public function testRandomGenerate() {
         $faker = Faker::create();
         $faker->seed(0);
-        $username = UsernameRule::create_random('u##########', $faker);
+        $username = UsernameRule::createRandom('u##########', $faker);
         $this->assertEquals($username, 'u4488659055');
     }
 
@@ -48,7 +48,7 @@ class UsernameRuleModelTest extends TestCase
 
         $faker = Faker::create();
         $faker->seed(0);
-        $username = UsernameRule::create_random('u##########', $faker);
+        $username = UsernameRule::createRandom('u##########', $faker);
 
         $this->assertNotEquals($username, 'u4488659055');
     }
