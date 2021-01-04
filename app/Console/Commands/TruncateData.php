@@ -57,6 +57,10 @@ class TruncateData extends Command
         'album_media',
         'post_media',
         'post_likes',
+        'post_shares',
+        'post_follows',
+        'saved_posts',
+        'comments',
         'media',
         'albums',
 
@@ -78,6 +82,9 @@ class TruncateData extends Command
         'comment_likes',
         'followers',
 
+        'threads',
+        'messages',
+
         'vaultfolders',
         'vaults',
 
@@ -85,12 +92,8 @@ class TruncateData extends Command
         'timelines',
         'users',
 
-        'comments',
-        'messages',
-
         'purchased_posts',
         'posts',
-        'saved_posts',
         /*
          */
     ];

@@ -147,19 +147,20 @@ $factory->define(App\User::class, function (Faker\Generator $faker) {
 
     $isFollowForFree = $faker->boolean(70);
 
-    $gender = $faker->gender;
+    $gender = $faker->randomElement(['male','female']);
     $firstName = $faker->firstName($gender);
     $lastName = $faker->lastName;
-    $username = strtolower($firstName.'.'$lastName);
+    $username = strtolower($firstName.'.'.$lastName);
+    $fullName = $firstName.' '.$lastName;
 
     return [
         'email' => $username.'@example.com', // $faker->unique()->safeEmail,
         'password' => $password ?: $password = bcrypt('foo-123'), // secret
         'remember_token' => str_random(10),
         'verification_code' => str_random(10),
-        'timeline_id' => function () {
+        'timeline_id' => function () use($fullName, $username) {
             return factory(App\Timeline::class)->create([
-                'name' => $firstName.' '.$lastName,
+                'name' => $fullName,
                 'username' => $username,
             ])->id;
         },
