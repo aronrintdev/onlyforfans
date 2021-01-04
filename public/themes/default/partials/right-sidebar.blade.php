@@ -1,4 +1,4 @@
-<!-- right-sidebar -->
+<!-- %VIEW: themes/default/partials/right-sidebar -->
 <div id="chatBoxes" v-cloak>
 	<!--<div class="chat-list">-->
 	<!--	<div class="left-sidebar fans">-->
@@ -53,7 +53,7 @@
 							<div class="media">
 								<div class="media-left" v-bind:class="[({{ Auth::id() }}==message.user.id) ? 'current-user-message' : '',  ]">
 									<a href="#">
-										<img v-bind:src="message.user.avatar" alt="images">
+										<img v-bind:src="message.user.avatar.filepath" alt="images">
 									</a>
 								</div>
 								<div class="media-body ">

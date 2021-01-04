@@ -1,3 +1,4 @@
+<!-- %VIEW: themes/default/views/users/messages -->
 <!-- <div class="main-content">-->	
 <div class="container">
 
@@ -93,7 +94,7 @@
 														<a href="#" class="show-conversation" data-id="{{ $conversation->id }}">
 															<div class="media post-list">
 																<div class="media-left">
-																	<img src="{{ $user->avatar }}" alt="images"  class="img-radius img-46">
+                                  <img src="{{ $user->avatar->filepath }}" alt="images"  class="img-radius img-46">
 																</div>
 																@foreach($conversation->users as $user)
 																	@if($user->id != Auth::user()->id)
