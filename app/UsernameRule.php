@@ -25,8 +25,32 @@ class UsernameRule extends Model
      /** Table name */
     protected $table = 'username_rules';
 
+    /** Guarded attributes */
+    protected $guarded = [ 'added_by' ];
+
     /** Hidden attributes */
     protected $hidden = [ 'added_by', ];
+
+    /**
+     * Validator Rules
+     */
+    public static function validationRules() {
+        return [
+            'rule' => 'required',
+            'type' => [
+                'sometimes',
+                function($value) {
+                    return \in_array($value, [ 'blacklist', 'whitelist', 'approval' ]);
+                }
+            ],
+            'comparison_type' => [
+                'sometimes',
+                function($value) {
+                    return \in_array($value, [ 'word', 'regex' ]);
+                }
+            ],
+        ];
+    }
 
     /**
      * Check if the this username value is valid.
@@ -94,11 +118,14 @@ class UsernameRule extends Model
     public static function localize($rule)
     {
         if ($rule->explanation) {
-            $caught->explanation = __('username.custom.' . $rule->explanation) ?? $rule->explanation;
+            $caught->explanation = __('username.custom.' . $rule->explanation);
+            if ($caught->explanation === 'username.custom.' . $rule->explanation) {
+                $caught->explanation = __($rule->explanation);
+            }
         } else {
             // Priority: custom named after rule => default wording for rule => invalid
             $rule->explanation = __('username.custom.' . $rule->rule);
-            if ( $rule->explanation == 'username.custom.' . $rule->rule ) {
+            if ($rule->explanation == 'username.custom.' . $rule->rule) {
                 $rule->explanation = __('username.default.' . $rule->comparison_type, ['rule' => $rule->rule]);
                 if ($rule->explanation == 'username.default.' . $rule->comparison_type) {
                     $rule->explanation = __('username.invalid');

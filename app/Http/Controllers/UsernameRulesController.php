@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\UsernameRule;
 use Illuminate\Http\Request;
+use Validator;
 
 // Todo: Limit modify functions to admin only.
 class UsernameRulesController extends Controller
@@ -19,6 +20,7 @@ class UsernameRulesController extends Controller
     public function index(Request $request)
     {
         //
+        throw new NotImplementedException();
     }
 
     /**
@@ -59,8 +61,14 @@ class UsernameRulesController extends Controller
      */
     public function store(Request $request)
     {
-        //
-        throw new NotImplementedException();
+        $validator = Validator::make($request->all(), UsernameRule::validationRules());
+        if ($validator->fails()) {
+            return redirect('usernameRules.create')->withErrors($validator)->withInput();
+        }
+
+        $rule = UsernameRule::create($request->all());
+        $rule->added_by = \Auth::user()->id;
+        $rule->save();
     }
 
     /**
@@ -102,8 +110,13 @@ class UsernameRulesController extends Controller
      */
     public function update(Request $request, UsernameRule $usernameRule)
     {
-        //
-        throw new NotImplementedException();
+        $validator = Validator::make($request->all(), UsernameRule::validationRules());
+        if ($validator->fails()) {
+            return redirect('usernameRules.edit')->withErrors($validator)->withInput();
+        }
+        $usernameRule->fill($request->all());
+        $rule->added_by = \Auth::user()->id;
+        $usernameRule->save();
     }
 
     /**
@@ -116,8 +129,7 @@ class UsernameRulesController extends Controller
      */
     public function destroy(UsernameRule $usernameRule)
     {
-        //
-        throw new NotImplementedException();
+        $usernameRule->delete();
     }
 
     /**
