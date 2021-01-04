@@ -1531,6 +1531,7 @@ Log::info('MARK-3.a'); // post-image-4
         return redirect(route('timelines.index'));
     }
 
+    // %PSG: follow a post
     public function follow(Request $request)
     {
         $timeline_id = $request->timeline_id;
@@ -1579,6 +1580,7 @@ Log::info('MARK-3.a'); // post-image-4
     }
 
 
+    // %PSG
     public function followFreeUser(Request $request)
     {
         $timeline_id = $request->timeline_id;
