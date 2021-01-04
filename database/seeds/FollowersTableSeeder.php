@@ -18,7 +18,7 @@ class FollowersTableSeeder extends Seeder
 
         $users = User::get();
         $users->each( function($follower) use(&$faker, &$users) {
-            $max = min([ 10, $users->count()-1  ]);
+            $max = min([ 20, $users->count()-1  ]);
             $num = $faker->numberBetween(0,$max);
             $following = $users->random($num);
 

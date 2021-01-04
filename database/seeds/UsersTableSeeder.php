@@ -49,9 +49,39 @@ class UsersTableSeeder extends Seeder
         $user->roles()->attach($adminRole->id);
         unset($user);
 
+        // --
+
+        $user = factory(User::class)->create();
+        FactoryHelpers::updateUser($user, [
+            'name' => 'Erik H',
+            'username' => 'erikh',
+            'email' => 'erik@hattervigsoftwaresolutions.com',
+            'gender' => 'male',
+            'city' => 'Rapid City',
+            'country' => 'US',
+            'is_follow_for_free' => 1, // if not free need to set price as well
+        ]);
+        $user->roles()->attach($adminRole->id);
+        unset($user);
+
+        // --
+
+        $user = factory(User::class)->create();
+        FactoryHelpers::updateUser($user, [
+            'name' => 'Chad J',
+            'username' => 'chadj',
+            'email' => 'realchadjohnson@gmail.com',
+            'gender' => 'male',
+            'city' => 'Las Vegas',
+            'country' => 'US',
+            'is_follow_for_free' => 1, // if not free need to set price as well
+        ]);
+        $user->roles()->attach($adminRole->id);
+        unset($user);
+
         // +++ Create non-admin users +++
 
-        factory(User::class, 10)->create()->each( function($u) {
+        factory(User::class, 50)->create()->each( function($u) {
             $this->command->info("Adding avatar & cover for new user ".$u->name);
             $avatar = FactoryHelpers::createImage(MediafileTypeEnum::AVATAR);
             $cover = FactoryHelpers::createImage(MediafileTypeEnum::COVER);

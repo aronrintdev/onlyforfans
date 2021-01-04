@@ -12,7 +12,7 @@ use App\Libs\FactoryHelpers;
 
 class PostsTableSeeder extends Seeder
 {
-    private static $PROB_POST_HAS_IMAGE = 1; // 70;
+    private static $PROB_POST_HAS_IMAGE = 70; // 70, 1;
 
     public function run()
     {
@@ -63,7 +63,7 @@ class PostsTableSeeder extends Seeder
                 ]);
 
                 // LIKES - Select random users to like this post...
-                $likers = FactoryHelpers::parseRandomSubset($users, 10);
+                $likers = FactoryHelpers::parseRandomSubset($users, 20);
                 $likee = $u;
                 $likers->each( function($liker) use(&$post) {
                     if ( !$post->users_liked->contains($liker->id) ) {
@@ -73,7 +73,7 @@ class PostsTableSeeder extends Seeder
                 });
 
                 // COMMENTS - Select random users to comment on this post...
-                $commenters = FactoryHelpers::parseRandomSubset($users, 9);
+                $commenters = FactoryHelpers::parseRandomSubset($users, 12);
                 $likee = $u;
                 $commenters->each( function($commenter) use(&$faker, &$post) {
                     $comment = Comment::create([
@@ -82,6 +82,33 @@ class PostsTableSeeder extends Seeder
                         'user_id'     => $commenter->id,
                         'parent_id'   => null, // %TODO: nested comments
                     ]);
+                });
+
+                // SAVES - Select random users to save this post...
+                $savers = FactoryHelpers::parseRandomSubset($users, 10);
+                $savee = $u;
+                $savers->each( function($saver) use(&$post) {
+                    if ( !$post->usersSaved->contains($saver->id) ) {
+                        $post->usersSaved()->attach($saver->id);
+                    }
+                });
+
+                // SHARES - Select random users to share this post (on their timeline)...
+                $sharers = FactoryHelpers::parseRandomSubset($users, 10);
+                $sharee = $u;
+                $sharers->each( function($sharer) use(&$post) {
+                    if ( !$post->shares->contains($sharer->id) ) {
+                        $post->shares()->attach($sharer->id);
+                    }
+                });
+
+                // PINS - Select random users to pin this post (on their timeline ?)...
+                $pinners = FactoryHelpers::parseRandomSubset($users, 7);
+                $pinnee = $u;
+                $pinners->each( function($pinner) use(&$post) {
+                    if ( !$post->usersPinned->contains($pinner->id) ) {
+                        $post->usersPinned()->attach($pinner->id);
+                    }
                 });
 
             });
