@@ -207,7 +207,6 @@ class MessageController extends Controller
         try {
             foreach ($participants as $key => $participant) {
                 if (Auth::id() != $participant->user->id) {
-                    // echo $participant->user->id;
                     Event::fire(new MessagePublished($message, $participant->user));
                 }
                 if ($participant->user->id != Auth::user()->id) {
@@ -253,7 +252,6 @@ class MessageController extends Controller
             foreach ($participants as $participant) {
                 $participant->restore();
                 if (Auth::id() != $participant->user->id) {
-                    // echo $participant->user->id;
                     Event::fire(new MessagePublished($message, $participant->user));
                 }
             }
@@ -425,7 +423,6 @@ class MessageController extends Controller
 
     public function getPrivateConversation($userId)
     {
-        //echo "Message route received";
         $recipients = [$userId, Auth::id()];
         $recipients[1] = (string) Auth::id();
 
