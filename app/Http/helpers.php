@@ -277,16 +277,17 @@ function isBlockByMe($username)
     }
 
     // %PSG: if the above if false (not blocked), test for direct block...
-    $userToTest = $timeline->user;
-    if ($userToTest) {
-        $exists = BlockedProfile::where('blocked_by', $sessionUser->id)
-                    ->where('blockee_id', $userToTest->id)
-                    ->first();
-        if ($exists) {
-            return true; // blocked
+    if ($timeline) {
+        $userToTest = $timeline->user;
+        if ($userToTest) {
+            $exists = BlockedProfile::where('blocked_by', $sessionUser->id)
+                        ->where('blockee_id', $userToTest->id)
+                        ->first();
+            if ($exists) {
+                return true; // blocked
+            }
         }
     }
-
     return false; // not blocked
 }
 
