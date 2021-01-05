@@ -70,6 +70,9 @@ class User extends Authenticatable
     public function sharedvaultfolders() {
         return $this->morphedByMany('App\Vaultfolder', 'shareable', 'shareables', 'sharee_id')->withTimestamps();
     }
+    public function fanledgers() {
+        return $this->morphMany('App\Fanledger', 'purchaseable');
+    }
 
     public function timeline() {
         return $this->belongsTo('App\Timeline');

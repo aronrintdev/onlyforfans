@@ -60,6 +60,7 @@ class AppServiceProvider extends ServiceProvider
             'mediafiles' => 'App\Mediafile',
             'posts' => 'App\Post',
             'stories' => 'App\Story',
+            'subscriptions' => 'App\Subscription',
             'users' => 'App\User',
             'vaultfolders' => 'App\Vaultfolder',
         ]);

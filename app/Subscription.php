@@ -24,4 +24,12 @@ class Subscription extends Model
     protected $fillable = [
         'id', 'subscription_id', 'follower_id', 'leader_id', 'start_at', 'cancel_at'
     ];
+
+    //--------------------------------------------
+    // Relationships
+    //--------------------------------------------
+
+    public function fanledgers() {
+        return $this->morphMany('App\Fanledger', 'purchaseable');
+    }
 }
