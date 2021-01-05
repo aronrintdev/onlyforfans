@@ -25,11 +25,13 @@ class DatabaseSeeder extends Seeder
             $this->call(NotificationsTableSeeder::class);
             $this->call(StaticpageTableSeeder::class);
             $this->call(AlbumsTableSeeder::class);
+            $this->call(UsernameRulesSeeder::class);
         } else {
             $this->call(CategoriesTableSeeder::class);
             $this->call(RolesTableSeeder::class);
             $this->call(StaticpageTableSeeder::class);
             $this->call(InstallerSeeder::class);
+            $this->call(UsernameRulesSeeder::class);
         }
     }
 }

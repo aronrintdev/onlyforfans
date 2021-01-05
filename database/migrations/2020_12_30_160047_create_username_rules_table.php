@@ -14,7 +14,7 @@ class CreateUsernameRulesTable extends Migration
     public function up()
     {
         Schema::create('username_rules', function (Blueprint $table) {
-            $table->bigIncrements('id');
+            $table->increments('id');
 
             // Word or regex
             $table->string('rule', 255);
@@ -31,7 +31,7 @@ class CreateUsernameRulesTable extends Migration
             $table->string('explanation')->nullable();
 
             // What Admin added the rule, nullable for system added rules.
-            $table->bigInteger('added_by')->nullable();
+            $table->integer('added_by')->nullable();
             $table->timestamps();
         });
     }
