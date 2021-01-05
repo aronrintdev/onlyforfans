@@ -518,7 +518,7 @@
                                     <div class="to-comment">
                                         @if($display_comment == "only_follow" || $display_comment == "everyone" || $user_setting == "everyone" || $post->user_id == Auth::user()->id)
                                             <div class="commenter-avatar">
-                                                <a href="#"><img src="{{ Auth::user()->avatar }}" alt="{{ Auth::user()->name }}" title="{{ Auth::user()->name }}"></a>
+                                              <a href="#"><img src="{{ Auth::user()->avatar->filepath }}" alt="{{ Auth::user()->name }}" title="{{ Auth::user()->name }}"></a>
                                             </div>
                                             <div class="comment-textfield">
                                                 <form action="#" class="comment-form" method="post" files="true" enctype="multipart/form-data" id="comment-form">

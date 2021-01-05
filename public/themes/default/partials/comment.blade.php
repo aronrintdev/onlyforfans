@@ -26,7 +26,7 @@
     <li> 
       <div class="comments delete_comment_list"> <!-- main-comment -->
         <div class="commenter-avatar">
-          <a href="#"><img src="{{ $comment->user->avatar }}" title="{{ $comment->user->name }}" alt="{{ $comment->user->name }}"></a>
+          <a href="#"><img src="{{ $comment->user->avatar->filepath }}" title="{{ $comment->user->name }}" alt="{{ $comment->user->name }}"></a>
         </div>
         <div class="comments-list">
           <div class="commenter">
@@ -79,7 +79,7 @@
        @if($display_comment == "only_follow" || $display_comment == "everyone" || $user_setting == "everyone" || $post->user_id == Auth::user()->id)
        <div class="to-comment comment-reply" style="display:none" >  <!-- to-comment -->
         <div class="commenter-avatar">
-          <img src="{{ Auth::user()->avatar }}" alt="{{ Auth::user()->name }}" title="{{ Auth::user()->name }}">
+          <img src="{{ Auth::user()->avatar->filepath }}" alt="{{ Auth::user()->name }}" title="{{ Auth::user()->name }}">
         </div>
         <div class="comment-textfield">
           <form action="#" class="comment-form">

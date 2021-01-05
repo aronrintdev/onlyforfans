@@ -1,7 +1,7 @@
 <li class="commented delete_comment_list comment-replied">
  <div class="comments"> <!-- main-comment -->
   <div class="commenter-avatar">
-    <a href="#"><img src="{{ $reply->user->avatar }}" title="{{ $reply->user->name }}" alt="{{ $reply->user->name }}"></a>
+    <a href="#"><img src="{{ $reply->user->avatar->filepath }}" title="{{ $reply->user->name }}" alt="{{ $reply->user->name }}"></a>
   </div>
   <div class="comments-list">
     <div class="commenter">

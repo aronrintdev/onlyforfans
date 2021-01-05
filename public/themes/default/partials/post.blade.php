@@ -241,7 +241,7 @@ $main_description = $post->description;
     </div>
     @if($post->type == \App\Post::PRICE_TYPE)
         @if($post->user->id != Auth::user()->id && !Auth::user()->PurchasedPostsArr->contains($post->id))
-            <div class="panel-body locked-panel-body">
+            <div class="panel-body locked-panel-body tag-price_type">
                 <div class="locked-content">
                     <div class="locked-content-wrapper">
                         <i class="fa fa-lock" aria-hidden="true"></i>
@@ -250,7 +250,7 @@ $main_description = $post->description;
                 </div>
             </div>
         @else
-              <div data-post_id="{{ $post->id }}" class="panel-body image-with-blur {{ clean($main_description) == ''  ? 'single-image-panel' : '' }}">
+              <div data-post_id="{{ $post->id }}" class="panel-body tag-not_price_type image-with-blur {{ clean($main_description) == ''  ? 'single-image-panel' : '' }}">
                 <div class="text-wrapper">
 
                     <div id="statisticsModal{{ $post->id }}" class="modal fade" role="dialog" tabindex='-1'>
