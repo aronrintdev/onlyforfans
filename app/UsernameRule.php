@@ -60,13 +60,6 @@ class UsernameRule extends Model
      */
     public static function check($value)
     {
-        // Check if username is already in use
-        if (Timeline::where('username', $value)->exists()) {
-            return [
-                'explanation' => __('username.already_in_use'),
-            ];
-        }
-
         // Check word rules first, this is the fastest check.
         $caught = UsernameRule::where('type', 'blacklist')
             ->where('comparison_type', 'word')

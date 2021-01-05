@@ -141,13 +141,22 @@ class UsernameRulesController extends Controller
     {
         $validated = $request->validated();
 
-        // Check validity
+        // Check if in use
+        if (\App\Timelines::where('username', $validated->username)->exists()) {
+            return response()->json([
+                'valid' => $false,
+                'message' => trans('username.already_in_use'),
+            ]);
+        }
+
+        // Check rules
         if ($ruleCaught = UsernameRule::check($validated->username)) {
             return response()->json([
                 'valid' => false,
                 'message' => $ruleCaught->explanation,
             ]);
         }
+
         return response()->json(['valid' => true]);
     }
 }

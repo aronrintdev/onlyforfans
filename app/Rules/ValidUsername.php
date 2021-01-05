@@ -29,14 +29,11 @@ class ValidUsername implements Rule
      */
     public function passes($attribute, $value)
     {
-        Log::debug('Checking valid_username');
         $rule = UsernameRule::check($value);
         if ($rule) {
-            Log::debug('valid_username: caught rule');
             $this->message = $rule->explanation;
             return false;
         }
-        Log::debug('valid_username: username ok');
         return true;
     }
 
