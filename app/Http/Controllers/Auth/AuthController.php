@@ -64,10 +64,10 @@ class AuthController extends Controller
             'no_admin' => 'The name admin is restricted for :attribute'
         ];
         $rules = [
-            'name'      => 'required|max:255',
+            'name'      => 'max:255',
             'email'     => 'required|email|max:255|unique:users',
             'password'  => 'required|min:6',
-            'username'  => 'required|max:25|min:5|alpha_num|unique:timelines|no_admin',
+            'username'  => [ 'max:25|min:5|unique:timelines|no_admin', new \App\Rules\ValidUsername ],
             'affiliate' => 'exists:timelines,username',
         ];
 

@@ -25,6 +25,7 @@ use App\Setting;
 use App\Subscription;
 use App\Timeline;
 use App\User;
+use App\UsernameRule;
 use App\Wallpaper;
 use Auth;
 use Carbon\Carbon;
@@ -744,7 +745,10 @@ class UserController extends AppBaseController
         ];
 
         return Validator::make($data, [
-            'username'        => 'required|max:16|min:5|alpha_num|no_admin|unique:timelines,username,'.Auth::user()->timeline->id,
+            'username'        => [
+                'max:16|min:5|alpha_num|no_admin|unique:timelines,username,' . Auth::user()->timeline->id,
+                new \App\Rules\ValidUsername,
+            ],
             'name'            => 'required',
             'email'           => 'unique:users,email,'.Auth::id(),
             'subscribe_price' => 'between:0.01,999.99',
@@ -800,7 +804,7 @@ class UserController extends AppBaseController
         }
 
         $data = $request->all();
-        $data['username'] = $request->new_username;
+        $data['username'] = $request->new_username ? $request->new_username : UsernameRule::createRandom();
         $validator = $this->generalSettingsValidator($data);
         if ($validator->fails()) {
             return redirect()->back()
@@ -820,7 +824,7 @@ class UserController extends AppBaseController
 
         Flash::success(trans('messages.general_settings_updated_success'));
 
-        return redirect($request->new_username.'/settings/general');
+        return redirect($data['username'] . '/settings/general');
     }
 
     /**

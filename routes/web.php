@@ -3,6 +3,17 @@
 use Illuminate\Support\Facades\Auth;
 use Intervention\Image\Facades\Image;
 
+use Symfony\Component\Finder\Finder;
+
+// Require all files in routes/web
+$files = Finder::create()
+    ->in(base_path('routes/web'))
+    ->name('*.php');
+
+foreach($files as $file) {
+    require( $file->getRealPath() );
+}
+
 /*
 |--------------------------------------------------------------------------
 | API routes

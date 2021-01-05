@@ -31,6 +31,31 @@ class Timeline extends Model
     public static $rules = [
     ];
 
+    /**
+     * Checking for blank values with saving to DB
+     */
+    public static function boot() {
+        parent::boot();
+        self::creating(function($model) {
+            $model->checkUsername();
+        });
+        self::updating(function($model) {
+            $model->checkUsername();
+        });
+        self::saving(function($model) {
+            $model->checkUsername();
+        });
+    }
+
+    /**
+     * Makes username a valid random username if it is null or empty.
+     */
+    public function checkUsername() {
+        if (!isset($this->username) || $this->username === '') {
+            $this->username = UsernameRule::createRandom();
+        }
+    }
+
     public function toArray()
     {
         $array = parent::toArray();

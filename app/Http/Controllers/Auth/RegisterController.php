@@ -75,10 +75,10 @@ class RegisterController extends Controller
         ];
         $rules = [
             'email'     => 'required|email|max:255|unique:users',
-            'name'      => 'required|max:255',
+            'name'      => 'max:255',
             // 'gender'    => 'required',
             'name'  => 'required|max:25|min:2|unique:timelines|no_admin',
-            'username'  => 'required|max:25|min:5|unique:timelines|no_admin',
+            'username'  => [ 'max:25|min:5|unique:timelines|no_admin', new \App\Rules\ValidUsername ],
             'password'  => 'required|min:6',
             'affiliate' => 'exists:timelines,username',
         ];

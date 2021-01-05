@@ -101,7 +101,7 @@ class LoginController extends Controller
             //save to loginSessions
             $login_session = new LoginSession();
             $login_session->user_id = Auth::user()->id;
-            $login_session->user_name = Timeline::where('id', Auth::user()->id)->first()->username;
+            $login_session->user_name = Auth::user()->timeline->username;
             $login_session->ip_address = $_SERVER['REMOTE_ADDR'];
             $login_session->machine_name = gethostname();
             $login_session->os = getOS();
@@ -238,7 +238,7 @@ class LoginController extends Controller
             //save to loginSessions
             $login_session = new LoginSession();
             $login_session->user_id = Auth::user()->id;
-            $login_session->user_name = Timeline::where('id', Auth::user()->id)->first()->username;
+            $login_session->user_name = Auth::user()->timeline->username;
             $login_session->ip_address = $_SERVER['REMOTE_ADDR'];
             $login_session->machine_name = gethostname();
             $login_session->os = getOS();
