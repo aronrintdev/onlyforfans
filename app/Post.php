@@ -40,6 +40,9 @@ class Post extends Model implements Ownable
     public function mediafiles() {
         return $this->morphMany('App\Mediafile', 'resource');
     }
+    public function fanledgers() {
+        return $this->morphMany('App\Fanledger', 'purchaseable');
+    }
 
     public function user() {
         return $this->belongsTo('App\User');

@@ -409,7 +409,7 @@
                                             </li>
                                         </ul>
                                     </div>
-                                    <div class="timeline-posts timeline-default">
+                                    <div class="timeline-posts timeline-default mark-a">
                                         @if(count($posts) > 0)
                                             @foreach($posts as $post)
                                                 @if($post->type == \App\Post::PAID_TYPE)
@@ -429,7 +429,7 @@
                                     <?php
                                     $twoColumn = true;
                                     ?>
-                                    <div class="timeline-posts timeline-condensed-column row" style="display: none">
+                                    <div class="timeline-posts timeline-condensed-column row mark-b" style="display: none">
                                         @if(count($posts) > 0)
                                             @foreach($posts as $post)
                                                 @if($post->type == \App\Post::PAID_TYPE)
