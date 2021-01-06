@@ -11,8 +11,9 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Collection;
 use Zizaco\Entrust\Traits\EntrustUserTrait;
+use App\Interfaces\PaymentSendable;
 
-class User extends Authenticatable
+class User extends Authenticatable implements PaymentSendable
 {
     use Notifiable;
     use EntrustUserTrait;
@@ -64,10 +65,10 @@ class User extends Authenticatable
     // %%% Relationships
     //--------------------------------------------
 
-    public function sharedmediafiles() {
+    public function sharedmediafiles() { // mediafiles shared with me (??)
         return $this->morphedByMany('App\Mediafile', 'shareable', 'shareables', 'sharee_id')->withTimestamps();
     }
-    public function sharedvaultfolders() {
+    public function sharedvaultfolders() { // vaultfolders shared with me (??)
         return $this->morphedByMany('App\Vaultfolder', 'shareable', 'shareables', 'sharee_id')->withTimestamps();
     }
     public function fanledgers() {
@@ -98,15 +99,29 @@ class User extends Authenticatable
         return $this->belongsToMany('App\Timeline', 'saved_timelines', 'user_id', 'timeline_id')->withPivot('type');
     }
 
-    public function postsSaved()
-    {
+    public function posts() { // my own posts (that I own)
+        return $this->hasMany('App\Post');
+    }
+
+    public function sharedposts() { // posts shared with me (by direct share or purchase on my part)
+        return $this->morphedByMany('App\Post', 'shareable', 'shareables', 'sharee_id')->withTimestamps();
+    }
+
+    public function postsSaved() {
         return $this->belongsToMany('App\Post', 'saved_posts', 'user_id', 'post_id');
     }
 
-    public function postsPinned()
-    {
+    public function postsPinned() {
         return $this->belongsToMany('App\Post', 'pinned_posts', 'user_id', 'post_id');
     }
+
+    //public function postShares() {
+        //return $this->belongsToMany('App\User', 'post_shares', 'user_id', 'post_id');
+    //}
+
+    //public function purchasedPosts() {
+        //return $this->hasMany(PurchasedPost::class, 'purchased_by');
+    //}
 
     public function userList()
     {
@@ -141,9 +156,6 @@ class User extends Authenticatable
         return $this->belongsToMany('App\Group', 'group_user', 'user_id', 'group_id')->withPivot('role_id', 'status');
     }
 
-    public function posts() {
-        return $this->hasMany('App\Post');
-    }
 
     public function pageLikes() {
         return $this->belongsToMany('App\Page', 'page_likes', 'user_id', 'page_id');
@@ -421,10 +433,6 @@ class User extends Authenticatable
         return $this->belongsToMany('App\User', 'post_follows', 'user_id', 'post_id');
     }
 
-    public function postShares()
-    {
-        return $this->belongsToMany('App\User', 'post_shares', 'user_id', 'post_id');
-    }
 
     public function postReports()
     {
@@ -540,13 +548,6 @@ class User extends Authenticatable
         return $this->hasMany(BlockedProfile::class, 'blocked_by');
     }
 
-    /**
-     * @return HasMany
-     */
-    public function purchasedPosts()
-    {
-        return $this->hasMany(PurchasedPost::class, 'purchased_by');
-    }
 
     /**
      * @return Collection
@@ -564,27 +565,19 @@ class User extends Authenticatable
         return $this->belongsToMany('App\User', 'favourite_users', 'user_id', 'favourite_user_id')->withPivot('favourite_user_id');
     }
 
-    /**
-     * @return HasMany
-     */
-    public function tips()
-    {
-        return $this->hasMany('App\PostTip', 'user_id');
-    }
+// %FIXME: DEPRECATED 20210105
+    //public function tips() {
+        //return $this->hasMany('App\PostTip', 'user_id');
+    //}
     
-    public function usersSentTips()
-    {
-        return $this->belongsToMany('App\User', 'users_tips', 'tip_from', 'tip_to')->withPivot('amount');
-    }
+    //public function usersSentTips() {
+        //return $this->belongsToMany('App\User', 'users_tips', 'tip_from', 'tip_to')->withPivot('amount')->withTimestamps();
+    //}
     
-    public function usersReceivedTips()
-    {
-        return $this->belongsToMany('App\User', 'users_tips', 'tip_to', 'tip_from')->withPivot('amount');
-    }
+    //public function usersReceivedTips() {
+        //return $this->belongsToMany('App\User', 'users_tips', 'tip_to', 'tip_from')->withPivot('amount')->withTimestamps();
+    //}
 
-    /**
-     * @return HasOne
-     */
     public function bankAccountDetails()
     {
         return $this->hasOne('App\BankAccountDetails', 'user_id');

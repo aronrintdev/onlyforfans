@@ -1030,7 +1030,6 @@ Log::info('MARK-2.a'); // post-image-3
                         'orig_ext' => $postImage->getClientOriginalExtension(),
                     ]);
                 } else {
-Log::info('MARK-2.c');
                     $strippedName = str_replace(' ', '', $postImage->getClientOriginalName());
                     $photoName = date('Y-m-d-H-i-s') . $strippedName;
                     $s3video = Storage::disk('settings');
@@ -1049,7 +1048,6 @@ Log::info('MARK-2.c');
         }
 
         if ($post) {
-Log::info('MARK-3.a'); // post-image-4
             // Check for any mentions and notify them
             preg_match_all('/(^|\s)(@\w+)/', $request->description, $usernames);
             foreach ($usernames[2] as $value) {
@@ -1601,8 +1599,7 @@ Log::info('MARK-3.a'); // post-image-4
             try{
                 //Notify the user for follow
                 Notification::create(['user_id' => $follow->id, 'timeline_id' => $timeline_id, 'notified_by' => Auth::user()->id, 'description' => Auth::user()->name.' '.trans('common.is_following_you'), 'type' => 'follow']);
-            } catch(\Exception $e){
-            } catch(Throwable $e) {
+            } catch(Exception | Throwable $e){
             }
 
             return response()->json(['status' => '200', 'followed' => true, 'message' => 'successfully followed']);
@@ -1612,8 +1609,7 @@ Log::info('MARK-3.a'); // post-image-4
             try{
                 //Notify the user for follow
                 Notification::create(['user_id' => $follow->id, 'timeline_id' => $timeline_id, 'notified_by' => Auth::user()->id, 'description' => Auth::user()->name.' '.trans('common.is_unfollowing_you'), 'type' => 'unfollow']);
-            }catch(\Exception $e){
-            } catch(Throwable $e) {
+            } catch(Exception | Throwable $e){
             }
 
             return response()->json(['status' => '200', 'followed' => false, 'message' => 'successfully unFollowed']);
@@ -1634,8 +1630,7 @@ Log::info('MARK-3.a'); // post-image-4
             try{
                 //Notify the user for follow
                 Notification::create(['user_id' => $follow->id, 'timeline_id' => $request->timeline_id, 'notified_by' => Auth::user()->id, 'description' => Auth::user()->name.' '.trans('common.is_unfollowing_you'), 'type' => 'unfollow']);
-            }catch(\Exception $e){
-            } catch(Throwable $e) {
+            } catch(Exception | Throwable $e){
             }
 
             return response()->json(['status' => '200', 'followed' => false, 'message' => 'successfully unFollowed']);
@@ -1656,8 +1651,7 @@ Log::info('MARK-3.a'); // post-image-4
             try{
                 //Notify the user for follow
                 Notification::create(['user_id' => $follow->id, 'timeline_id' => $request->timeline_id, 'notified_by' => Auth::user()->id, 'description' => Auth::user()->name.' '.trans('common.is_following_you'), 'type' => 'follow']);
-            }catch(\Exception $e){
-            } catch(Throwable $e) {
+            } catch(Exception | Throwable $e){
             }
 
             return response()->json(['status' => '200', 'followed' => true, 'message' => 'successfully followed']);
@@ -1667,8 +1661,7 @@ Log::info('MARK-3.a'); // post-image-4
             try{
                 //Notify the user for follow
                 Notification::create(['user_id' => $follow->id, 'timeline_id' => $request->timeline_id, 'notified_by' => Auth::user()->id, 'description' => Auth::user()->name.' '.trans('common.is_unfollowing_you'), 'type' => 'unfollow']);
-            }catch(\Exception $e){
-            } catch(Throwable $e) {
+            } catch(Exception | Throwable $e){
             }
 
             return response()->json(['status' => '200', 'followed' => false, 'message' => 'successfully unFollowed']);
@@ -3346,32 +3339,52 @@ Log::info('MARK-3.a'); // post-image-4
         return $theme->scope('timeline/my-list', compact(  'following_count', 'followers_count', 'saved_users', 'list_type_id', 'list_type_name'))->render();
     }
 
+    /*
     public function sendTipPost(Request $request)
     {
+        $sessionUser = Auth::user();
         $post = Post::findOrFail($request->post_id);
-        $posted_user = $post->user;
 
-        $post->tip()->attach(Auth::user()->id, ['amount' => $request->amount, 'note' => $request->note, 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()]);
-        $post->notifications_user()->attach(Auth::user()->id);
+        try {
+            $payment = new \App\Libs\Payment(
+                'ptype' => PaymentTypeEnum::TIP,
+                'sender' => $sessionUser,
+                'receiver' => $post,
+                'amount_in_cents' => $request->amount*100,
+                'cattrs' => [
+                    'notes' => $request->note ?? '',
+                ],
+            );
+        } catch(Exception | Throwable $e){
+            Log::error(json_encode([
+                'msg' => 'TimlineController::sendTipPost() - Could not send notification',
+                'emsg' => $e->getMessage(),
+            ]));
+            return response()->json(['status'=>'400', 'message'=>'');
+        }
 
-        $user = User::find(Auth::user()->id);
-        //Notify the user for post like
+        // %NOTE %PSG: $request->amount is in dollars, not cents
+        $post->tip()->attach( $sessionUser->id, ['amount' => $request->amount, 'note' => $request->note] );
+        $post->notifications_user()->attach($sessionUser->id);
+
         $notify_message = 'sent tip for your post';
         $notify_type = 'tip_post';
         $status_message = 'success';
 
-        if ($post->user->id != Auth::user()->id) {
-            Notification::create(['user_id' => $post->user->id, 'post_id' => $post->id, 'notified_by' => Auth::user()->id, 'description' => Auth::user()->name.' '.$notify_message, 'type' => $notify_type]);
+        try {
+            if ($post->user->id != $sessionUser->id) {
+                Notification::create(['user_id' => $post->user->id, 'post_id' => $post->id, 'notified_by' => $sessionUser->id, 'description' => $sessionUser->name.' '.$notify_message, 'type' => $notify_type]);
+            }
+        } catch(Exception | Throwable $e){
+            Log::error(json_encode([
+                'msg' => 'TimlineController::sendTipPost() - Could not send notification',
+                'emsg' => $e->getMessage(),
+            ]));
         }
 
         return response()->json(['status' => '200', 'message' => $status_message]);
     }
 
-    /**
-     * @param Request $request
-     *
-     * @return JsonResponse
-     */
     public function sendTipUser (Request $request)
     {
         $user = User::findOrFail($request->user_id);
@@ -3383,12 +3396,20 @@ Log::info('MARK-3.a'); // post-image-4
         $notify_type = 'tip_post';
         $status_message = 'success';
 
-        if ($user->id != Auth::user()->id) {
-            Notification::create(['user_id' => $user->id, 'notified_by' => Auth::user()->id, 'description' => Auth::user()->name.' '.$notify_message, 'type' => $notify_type]);
+        try {
+            if ($user->id != Auth::user()->id) {
+                Notification::create(['user_id' => $user->id, 'notified_by' => Auth::user()->id, 'description' => Auth::user()->name.' '.$notify_message, 'type' => $notify_type]);
+            }
+        } catch(Exception | Throwable $e){
+            Log::error(json_encode([
+                'msg' => 'TimlineController::sendTipUser() - Could not send notification',
+                'emsg' => $e->getMessage(),
+            ]));
         }
 
         return response()->json(['status' => '200', 'message' => $status_message]);
     }
+     */
 
     public function switchLanguage(Request $request)
     {

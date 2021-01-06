@@ -5,15 +5,12 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+// %FIXME: DEPRECATED 20210105
 class PostTip extends Model
 {
-    protected $table = 'post_tips';
+    //protected $table = 'post_tips';
 
-    /**
-     * @return BelongsTo
-     */
-    public function post()
-    {
-        return $this->belongsTo(Post::class, 'post_id');
-    }
+    //public function post() {
+        //return $this->belongsTo(Post::class, 'post_id');
+    //}
 }

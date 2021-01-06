@@ -2,6 +2,7 @@
 
 use Illuminate\Http\UploadedFile;
 use Ramsey\Uuid\Uuid;
+use App\Enums\PostTypeEnum;
 
 /*
 |--------------------------------------------------------------------------
@@ -62,15 +63,25 @@ $factory->define(App\Media::class, function (Faker\Generator $faker) {
 });
 
 $factory->define(App\Post::class, function (Faker\Generator $faker) {
-    return [
-        'description' => $faker->text,
-        'timeline_id' => $faker->numberBetween($min = 1, $max = 90),
-        'user_id'     => $faker->numberBetween($min = 1, $max = 38),
-        'active'      => 1,
+    $ptype = $faker->randomElement([
+        PostTypeEnum::SUBSCRIBER,
+        PostTypeEnum::PRICED,
+        PostTypeEnum::FREE,
+        PostTypeEnum::FREE,
+        PostTypeEnum::FREE,
+    ]);
+    $attrs = [
+        'description'  => $faker->text.' ('.$ptype.')',
+        //'user_id'      => $u->id,
+        //'timeline_id'  => $u->timeline->id,
+        'type'         => $ptype,
+        'active'       => 1,
         'location'    => $faker->country,
-        'type'        => $faker->randomElement($array = ['text', 'photo', 'music', 'video', 'location']),
-
     ];
+    if ( $ptype === PostTypeEnum::PRICED ) {
+        $attrs['price'] = $faker->randomFloat(2, 1, 300);
+    }
+    return $attrs;
 });
 
 $factory->define(App\Notification::class, function (Faker\Generator $faker) {

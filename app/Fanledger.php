@@ -5,7 +5,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use DB;
 use App\Interfaces\Guidable;
 
-class Fanledger extends BaseModel implements Guidable, Sluggable, Ownable
+class Fanledger extends BaseModel implements Guidable
 {
     use SoftDeletes;
 

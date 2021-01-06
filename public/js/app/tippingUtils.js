@@ -114,7 +114,12 @@ $( document ).ready(function() {
 
     $(document).on('click', ".sendTip", function () {
       let modal = $(this).closest('.tip-modal');
-      $.post(SP_source() + 'ajax/send-tip-post', {post_id: modal.find("#post-id").val(), amount: modal.find("#etTipAmount").val(), note: modal.find('#tipNote').val()}, function(data) {
+      const postId = modal.find('#post-id').val();
+      $.post(`/ajax/send-tip-post/{$postId}`, {
+        //post_id: modal.find("#post-id").val(), 
+        amount: modal.find("#etTipAmount").val(), 
+        note: modal.find('#tipNote').val()
+      }, function(data) {
         if (data.status == 200) {
           notify(data.message,'Tip Sent!');
           modal.modal("hide");
@@ -125,7 +130,12 @@ $( document ).ready(function() {
 
     $(document).on('click', ".sendUserTip", function () {
       let modal = $(this).closest('.tip-modal');
-      $.post(SP_source() + 'ajax/send-tip-user', {user_id: modal.find("#user-id").val(), amount: modal.find("#etTipAmount").val(), note: modal.find('#tipNote').val()}, function(data) {
+      const userId = modal.find('#user-id');
+      $.post(`ajax/send-tip-user/${userId}`, {
+        //user_id: modal.find("#user-id").val(), 
+        amount: modal.find("#etTipAmount").val(), 
+        note: modal.find('#tipNote').val()
+      }, function(data) {
         if (data.status == 200) {
           notify(data.message,'Tip Sent!');
           modal.modal("hide");

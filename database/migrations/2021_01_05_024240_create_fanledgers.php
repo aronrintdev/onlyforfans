@@ -21,8 +21,8 @@ class CreateFanledgers extends Migration
 
             $table->unsignedInteger('qty');
             $table->unsignedInteger('base_unit_cost_in_cents');
-            $table->unsignedInteger('taxes_in_cents');
-            $table->unsignedInteger('fees_in_cents');
+            $table->unsignedInteger('taxes_in_cents')->default(0);
+            $table->unsignedInteger('fees_in_cents')->default(0);
             $table->boolean('is_credit')->default(0)->comment('Is credit or debit (default)');
 
             $table->longtext('cattrs')->nullable()->comment('JSON-encoded custom attributes');

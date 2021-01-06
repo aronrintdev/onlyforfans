@@ -6,40 +6,36 @@ use Auth;
 use Carbon\Carbon;
 use DB;
 use Illuminate\Database\Eloquent\Model;
+use App\User;
+use App\Enums\PaymentTypeEnum;
 use App\Interfaces\Ownable;
+use App\Interfaces\PaymentReceivable;
 
 //use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Post extends Model implements Ownable
+class Post extends Model implements Ownable, PaymentReceivable
 {
     const PRICE_TYPE = 'price'; // associated with a price
     const FREE_TYPE = 'free';
     const PAID_TYPE = 'paid'; // %PSG: ie, for subscribers (?)
     
     //use SoftDeletes;
-
-    /**
-     * The attributes that should be mutated to dates.
-     *
-     * @var array
-     */
     //protected $dates = ['deleted_at'];
 
-
-  /**
-   * The attributes that are mass assignable.
-   *
-   * @var array
-   */
-    protected $fillable = ['timeline_id', 'description', 'user_id', 'youtube_title', 'youtube_video_id', 'location', 'soundcloud_id', 'soundcloud_title', 'shared_post_id', 'type', 'price', 'active', 'publish_date', 'publish_time', 'expiration_date', 'expiration_time'];
+    protected $guarded = ['id','created_at','updated_at'];
 
     //--------------------------------------------
     // %%% Relationships
     //--------------------------------------------
 
+    public function sharees() { // can be shared with many users (via [shareables])
+        return $this->morphToMany('App\User', 'shareable', 'shareables', 'shareable_id', 'sharee_id');
+    }
+
     public function mediafiles() {
         return $this->morphMany('App\Mediafile', 'resource');
     }
+
     public function fanledgers() {
         return $this->morphMany('App\Fanledger', 'purchaseable');
     }
@@ -60,9 +56,9 @@ class Post extends Model implements Ownable
         return $this->belongsToMany('App\User', 'post_likes', 'post_id', 'user_id')->withTimestamps();
     }
 
-    public function tip() {
-        return $this->belongsToMany('App\User', 'post_tips', 'post_id', 'user_id')->withPivot('amount');
-    }
+    //public function tip() {
+        //return $this->belongsToMany('App\User', 'post_tips', 'post_id', 'user_id')->withPivot('amount')->withTimestamps();
+    //}
 
     public function shares() {
         return $this->belongsToMany('App\User', 'post_shares', 'post_id', 'user_id');
@@ -265,4 +261,57 @@ class Post extends Model implements Ownable
 
         $this->delete();
     }
+
+    //--------------------------------------------
+    // %%% Methods
+    //--------------------------------------------
+
+    // %%% --- Implement PaymentReceivable Interface ---
+    public function receivePayment(
+        string $ptype, // PaymentTypeEnum
+        User $sender,
+        //PaymentSendable $sender,
+        //PaymentReceivable $receiver, -> $this
+        int $amountInCents,
+        array $cattrs = []
+    ) : ?Fanledger
+    {
+        $result = DB::transaction( function() use($ptype, $amountInCents, $cattrs, &$sender) {
+
+            switch ($ptype) {
+                case PaymentTypeEnum::TIP:
+                    $result = FanLedger::create([
+                        'fltype' => $ptype,
+                        'purchaser_id' => $sender->id,
+                        'purchaseable_type' => 'posts',
+                        'purchaseable_id' => $this->id,
+                        'qty' => 1,
+                        'base_unit_cost_in_cents' => $amountInCents,
+                        'cattrs' => $cattrs || [],
+                    ]);
+                    break;
+                case PaymentTypeEnum::PURCHASE:
+                    $result = FanLedger::create([
+                        'fltype' => $ptype,
+                        'purchaser_id' => $sender->id,
+                        'purchaseable_type' => 'posts',
+                        'purchaseable_id' => $this->id,
+                        'qty' => 1,
+                        'base_unit_cost_in_cents' => $amountInCents,
+                        'cattrs' => $cattrs || [],
+                    ]);
+                    $sender->sharedposts()->attach($post->id, [
+                        'cattrs' => $cattrs || [],
+                    ]);
+                    break;
+                default:
+                    throw new Exception('Unrecognized payment type : '.$ptype);
+            }
+
+            return $result;
+        });
+
+        return $result ?? null;
+    }
+
 }
