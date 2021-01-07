@@ -52,7 +52,10 @@ class FanledgerTest extends TestCase
         $this->assertEquals( 1, $buyerUser->ledgerpurchases->count() );
         $this->assertEquals( $post->ledgersales[0]->id, $buyerUser->ledgerpurchases[0]->id );
 
-        //$fl = $post->ledgersales()->where('purchaser_id', $buyerUser->id)->get();
+        $fl = $post->ledgersales()->where('purchaser_id', $buyerUser->id)->first();
+        $this->assertEquals( $post->id, $fl->purchaseable_id );
+        $this->assertEquals( 1, $fl->qty );
+        $this->assertEquals( $payload['amount'], $fl->total_amount ); // no taxes applied
     }
 
     /**
@@ -76,6 +79,11 @@ class FanledgerTest extends TestCase
 
         $this->assertEquals( 1, $buyerUser->ledgerpurchases->count() );
         $this->assertEquals( $sellerUser->ledgersales[0]->id, $buyerUser->ledgerpurchases[0]->id );
+
+        $fl = $sellerUser->ledgersales()->where('purchaser_id', $buyerUser->id)->first();
+        $this->assertEquals( $sellerUser->id, $fl->purchaseable_id );
+        $this->assertEquals( 1, $fl->qty );
+        $this->assertEquals( $payload['amount'], $fl->total_amount ); // no taxes applied
     }
 
     /**
@@ -111,6 +119,11 @@ class FanledgerTest extends TestCase
         $this->assertEquals( $post->ledgersales[0]->id, $buyerUser->ledgerpurchases[0]->id );
 
         $this->assertTrue( $buyerUser->sharedPosts->contains('id', $post->id) ); 
+
+        $fl = $post->ledgersales()->where('purchaser_id', $buyerUser->id)->first();
+        $this->assertEquals( $post->id, $fl->purchaseable_id );
+        $this->assertEquals( 1, $fl->qty );
+        $this->assertEquals( $payload['amount'], $fl->total_amount ); // no taxes applied
     }
 
     // ------------------------------
