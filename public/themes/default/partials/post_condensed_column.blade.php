@@ -1,15 +1,13 @@
 <!-- %VIEW: themes/default/paritals/post_condensed_column --> 
 <div class="{{ isset($twoColumn) && $twoColumn ? 'col-lg-6' : 'col-lg-4' }} col-sm-12">
-    @if(isset($post->shared_post_id))
-        <?php
-        $sharedOwner = $post;
-        $post = App\Post::where('id', $post->shared_post_id)->with('comments')->first();
-        ?>
-    @endif
-    
-        <?php
-        $main_description = $post->description;
-        ?>
+@php
+$sessionUser = Auth::user();
+if (isset($post->shared_post_id)) {
+  $sharedOwner = $post;
+  $post = App\Post::where('id', $post->shared_post_id)->with('comments')->first();
+}
+$main_description = $post->description;
+@endphp
 
     <div class="panel panel-default panel-post animated post-wrapper-{{ $post->id }}" id="post{{ $post->id }}">
         <div class="panel-heading no-bg">
@@ -241,7 +239,7 @@
             </div>
         </div>
             @if($post->type == \App\Post::PRICE_TYPE)
-                @if($post->user->id != Auth::user()->id && !Auth::user()->PurchasedPostsArr->contains($post->id))
+                @if ( !$post->isViewableByUser($sessionUser) ) 
                     <div class="panel-body locked-panel-body">
                         <div class="locked-content">
                             <div class="locked-content-wrapper">
@@ -728,7 +726,7 @@
         {{--     @if(isset($user) == false || $user->followers->contains(Auth::user()->id) || $user->id == Auth::user()->id  || $user->payment == NULL|| ($user->payment != NULL && $user->payment->price == 0))--}}
         @if(isset($user) == false || $user->followers->contains(Auth::user()->id) || $user->id == Auth::user()->id  || $user->price == 0)
             @if($post->type == \App\Post::PRICE_TYPE)
-                @if($post->user->id == Auth::user()->id || Auth::user()->PurchasedPostsArr->contains($post->id))
+                @if ( $post->isViewableByUser($sessionUser) ) 
                     <div class="panel-footer fans">
                         <ul class="list-inline footer-list">
                             @if(!$post->users_liked->contains(Auth::user()->id))

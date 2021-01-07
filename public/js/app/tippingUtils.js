@@ -113,18 +113,16 @@ $( document ).ready(function() {
     */
 
     $(document).on('click', ".sendTip", function () {
-      let modal = $(this).closest('.tip-modal');
-      const postId = modal.find('#post-id').val();
-      $.post(`/ajax/send-tip-post/{$postId}`, {
-        //post_id: modal.find("#post-id").val(), 
-        amount: modal.find("#etTipAmount").val(), 
-        note: modal.find('#tipNote').val()
+      let thisModal = $(this).closest('.tip-modal');
+      const postId = thisModal.find('#post-id').val();
+      $.post(`/ajax/send-tip-post/${postId}`, {
+        //post_id: thisModal.find("#post-id").val(), 
+        amount: thisModal.find("#etTipAmount").val(), 
+        note: thisModal.find('#tipNote').val()
       }, function(data) {
-        if (data.status == 200) {
-          notify(data.message,'Tip Sent!');
-          modal.modal("hide");
-          // location.reload(); TODO: Not needed
-        }
+        notify('Tip Sent!');
+        thisModal.modal("hide");
+        // location.reload(); TODO: Not needed
       });
     });
 
@@ -137,7 +135,7 @@ $( document ).ready(function() {
         note: modal.find('#tipNote').val()
       }, function(data) {
         if (data.status == 200) {
-          notify(data.message,'Tip Sent!');
+          notify('Tip Sent!');
           modal.modal("hide");
           // location.reload(); TODO: Not needed
         }

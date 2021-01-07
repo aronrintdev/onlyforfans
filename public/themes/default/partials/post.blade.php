@@ -7,6 +7,7 @@
 
 <?php
 $main_description = $post->description;
+$sessionUser = Auth::user();
 ?>
     
 <!-- %VIEW: themes/default/paritals/post --> 
@@ -240,7 +241,11 @@ $main_description = $post->description;
       </div>
     </div>
     @if($post->type == \App\Post::PRICE_TYPE)
-        @if($post->user->id != Auth::user()->id && !Auth::user()->PurchasedPostsArr->contains($post->id))
+      @php
+        //dd($sessionUser->sharedposts);
+      @endphp
+      @if ( !$post->isViewableByUser($sessionUser) ) 
+          {{-- %PSG if viewer is not post owner, and viewer has not purchased the post, hide it --}}
             <div class="panel-body locked-panel-body tag-price_type">
                 <div class="locked-content">
                     <div class="locked-content-wrapper">
@@ -249,7 +254,7 @@ $main_description = $post->description;
                     </div>
                 </div>
             </div>
-        @else
+      @else
               <div data-post_id="{{ $post->id }}" class="panel-body tag-not_price_type image-with-blur {{ clean($main_description) == ''  ? 'single-image-panel' : '' }}">
                 <div class="text-wrapper">
 
@@ -488,7 +493,7 @@ $main_description = $post->description;
                     </ul>
                 @endif
             </div>                
-        @endif
+      @endif
       
     @else
         <div data-post_id="{{ $post->id }}" class="panel-body image-with-blur {{ clean($main_description) == '' ? 'single-image-panel' : '' }}">
@@ -760,7 +765,7 @@ $main_description = $post->description;
 {{--     @if(isset($user) == false || $user->followers->contains(Auth::user()->id) || $user->id == Auth::user()->id  || $user->payment == NULL|| ($user->payment != NULL && $user->payment->price == 0))--}}
     @if(isset($user) == false || $user->followers->contains(Auth::user()->id) || $user->id == Auth::user()->id  || $user->price == 0)
     @if($post->type == \App\Post::PRICE_TYPE)
-        @if($post->user->id == Auth::user()->id || Auth::user()->PurchasedPostsArr->contains($post->id))
+        @if ( $post->isViewableByUser($sessionUser) ) 
             <div class="panel-footer fans">
                     <ul class="list-inline footer-list">
                         @if(!$post->users_liked->contains(Auth::user()->id))

@@ -588,23 +588,20 @@ class UserController extends AppBaseController
         $theme = Theme::uses(Setting::get('current_theme', 'default'))->layout('default');
         $theme->setTitle(trans('common.general_settings').' '.Setting::get('title_seperator').' '.Setting::get('site_title').' '.Setting::get('title_seperator').' '.Setting::get('site_tagline'));
 
-        $saved_users = Auth::user()->followers()->where('status', '=', 'approved')->with('tips')->get();
-        $currentUser = Auth::user();
-        $bankAccountDetails = $currentUser->bankAccountDetails;
+        $sessionUser = Auth::user();
+        $bankAccountDetails = $sessionUser->bankAccountDetails;
         $totalTip = 0;
-        $totalPurchasedPostAmount = 0;
-        $subscriptionAmount = 0;
-        $posts = $currentUser->posts;
+        $posts = $sessionUser->posts;
         $totalTipsPayout = 0;
         $totalSubscriptionPayout = 0;
-        $tipsPayouts = $currentUser->tips;
+        $tipsPayouts = $sessionUser->tips;
         if (count($tipsPayouts) > 0) {
             foreach ($tipsPayouts as $tip) {
                 $totalTipsPayout += $tip->amount;
             }
         }
         $userFollowings = Auth::user()->following()->where('status', '=', 'approved')->get();
-        $subscriptions = Subscription::where('follower_id', $currentUser->id)->get();
+        $subscriptions = Subscription::where('follower_id', $sessionUser->id)->get();
         foreach ($userFollowings as $following) {            
             $subscriptions = Subscription::where('follower_id', $following->pivot->follower_id)->first();
             if ($subscriptions) {
@@ -612,8 +609,8 @@ class UserController extends AppBaseController
             }
         }
         
-        $sentTipsToUser = $currentUser->usersSentTips;
-        $receivedTipsToUser = $currentUser->usersReceivedTips;
+        $sentTipsToUser = $sessionUser->usersSentTips;
+        $receivedTipsToUser = $sessionUser->usersReceivedTips;
         if (count($sentTipsToUser) > 0) {
             foreach ($sentTipsToUser as $tip) {
                 if (!empty($tip->pivot->amount)) {
@@ -629,7 +626,7 @@ class UserController extends AppBaseController
             }
         }
 
-        $postsWithTips = $currentUser->posts()->with('tip')->get();
+        $postsWithTips = $sessionUser->posts()->with('tip')->get();
         if (count($postsWithTips) > 0) {
             foreach($postsWithTips as $post) {
                 foreach ($post->tip as $tip) {
@@ -639,28 +636,23 @@ class UserController extends AppBaseController
             }
         }
         
-        if (count($saved_users) > 0) {
-            foreach ($saved_users as $user) {
-                $userId = $user->id;
-                $tips = $user->tips;
+        $totalPurchasedPostAmount = Fanledger::where('seller_id', $sessionUser->id)
+            ->where('fltype', PaymentTypeEnum::PURCHASE)
+            ->where('purchaseable_type', 'posts')
+            ->sum('total_amount'); // %NOTE will include taxes %FIXME
+        $subscriptionAmount = Fanledger::where('seller_id', $sessionUser->id)
+            ->where('fltype', PaymentTypeEnum::SUBSCRIPTION)
+            ->sum('total_amount'); // %NOTE will include taxes %FIXME
 
-                $posts = $currentUser->posts;
-                $purchasedPosts = $currentUser->posts->whereIn('id', $user->PurchasedPostsArr);
-                $paidSubscribers = $currentUser->paidSubscribers;
-                foreach ($purchasedPosts as $post) {
-                    if (!empty($post->price)) {
-                        $totalPurchasedPostAmount += $post->price;    
-                    }                    
-                }
-
-                $subscribeUser = $paidSubscribers->where('id', $user->id)->first();
-                if (Subscription::where('leader_id', $currentUser->id)->where('follower_id', $user->id)->exists())
-                {
-                    $subscriptionAmount += $currentUser->price;
-                }
-            }
-        }
-        return $theme->scope('users/settings/addbank', compact('username', 'totalTip', 'totalPurchasedPostAmount', 'subscriptionAmount', 'totalSubscriptionPayout', 'totalTipsPayout', 'bankAccountDetails'))->render();
+        return $theme->scope('users/settings/addbank', compact(
+            'username', 
+            'totalTip', 
+            'totalPurchasedPostAmount', 
+            'subscriptionAmount', 
+            'totalSubscriptionPayout', 
+            'totalTipsPayout', 
+            'bankAccountDetails'
+        ))->render();
     }
     
     public function earnings($username)

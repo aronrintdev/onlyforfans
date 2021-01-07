@@ -186,6 +186,14 @@ class User extends Authenticatable implements PaymentSendable, PaymentReceivable
     // %%% Accessors/Mutators | Casts
     //--------------------------------------------
 
+    // https://stackoverflow.com/questions/30226496/how-to-cast-eloquent-pivot-parameters
+    /* %PSG: could not get this to work, just do 'manually' in controller or other calling code
+    protected $casts = [
+        'sharedposts.pivot.cattrs' => 'array',
+        'sharedposts.pivot.meta' => 'array',
+    ];
+     */
+
     /*
     public function getTipsAttribute($value) {
         return $this->ledgersales()->where('fltype', PaymentTypeEnum::TIP)->get();
@@ -608,7 +616,7 @@ class User extends Authenticatable implements PaymentSendable, PaymentReceivable
                         'purchaseable_id' => $this->id,
                         'qty' => 1,
                         'base_unit_cost_in_cents' => $amountInCents,
-                        'cattrs' => $cattrs || [],
+                        'cattrs' => $cattrs ?? [],
                     ]);
                     break;
                 default:

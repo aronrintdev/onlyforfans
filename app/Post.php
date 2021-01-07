@@ -25,6 +25,10 @@ class Post extends Model implements Ownable, PaymentReceivable
     protected $guarded = ['id','created_at','updated_at'];
 
     //--------------------------------------------
+    // %%% Accessors/Mutators | Casts
+    //--------------------------------------------
+
+    //--------------------------------------------
     // %%% Relationships
     //--------------------------------------------
 
@@ -289,7 +293,7 @@ class Post extends Model implements Ownable, PaymentReceivable
                         'purchaseable_id' => $this->id,
                         'qty' => 1,
                         'base_unit_cost_in_cents' => $amountInCents,
-                        'cattrs' => $cattrs || [],
+                        'cattrs' => $cattrs ?? [],
                     ]);
                     break;
                 case PaymentTypeEnum::PURCHASE:
@@ -301,10 +305,10 @@ class Post extends Model implements Ownable, PaymentReceivable
                         'purchaseable_id' => $this->id,
                         'qty' => 1,
                         'base_unit_cost_in_cents' => $amountInCents,
-                        'cattrs' => $cattrs || [],
+                        'cattrs' => $cattrs ?? [],
                     ]);
                     $sender->sharedposts()->attach($this->id, [
-                        'cattrs' => $cattrs || [],
+                        'cattrs' => json_encode($cattrs ?? []),
                     ]);
                     break;
                 default:
@@ -315,6 +319,25 @@ class Post extends Model implements Ownable, PaymentReceivable
         });
 
         return $result ?? null;
+    }
+
+    // Can a user view this post (?)
+    public function isViewableByUser(User $user) : bool
+    {
+        /*
+        if ($user->sharedposts) {
+            dd($user->sharedposts, $this->id, $user->id);
+        } else {
+            dd('found null');
+        }
+         */
+        $postOwner = $this->user;
+        if ( $postOwner->id === $user->id ) {
+            return true;
+        } else if ( $user->sharedposts->contains('id', $this->id) ) {
+            return true;
+        }
+        return false;
     }
 
 }
