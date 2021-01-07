@@ -31,6 +31,7 @@ $ php artisan db:seed --class="UsersTableSeeder"
 $ php artisan db:seed --class="StoriesTableSeeder"
 $ php artisan db:seed --class="PostsTableSeeder"
 $ php artisan db:seed --class="FollowersTableSeeder"
+$ php artisan db:seed --class="ShareablesTableSeeder"
 
 %%% Tinker
 $ php artisan tinker
