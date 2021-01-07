@@ -519,9 +519,9 @@ Route::group(['prefix' => 'ajax', 'middleware' => ['auth']], function () {
     Route::post('share-post', 'TimelineController@sharePost');
     //Route::post('send-tip-post', 'TimelineController@sendTipPost');
     //Route::post('send-tip-user', 'TimelineController@sendTipUser');
-    Route::post('purchase-post/{post}', 'PostsController@tip')->name('posts.purchase');
+    Route::post('purchase-post/{post}', 'PostsController@purchase')->name('posts.purchase');
     Route::post('send-tip-post/{post}', 'PostsController@tip')->name('posts.tip');
-    Route::post('send-tip-user/{user}', 'PostsController@tip')->name('users.tip');
+    Route::post('send-tip-user/{user}', 'UsersController@tip')->name('users.tip');
     Route::post('page-liked', 'TimelineController@pageLiked');
     // Route::post('get-soundcloud-results', 'TimelineController@getSoundCloudResults');
     // Route::post('join-group', 'TimelineController@joiningGroup');

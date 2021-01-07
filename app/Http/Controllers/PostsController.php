@@ -46,7 +46,33 @@ class PostsController extends AppBaseController
     
         } catch(Exception | Throwable $e){
             Log::error(json_encode([
-                'msg' => 'TimlineController::sendTipPost() - Could not send notification',
+                'msg' => 'PostsController::tip() - error',
+                'emsg' => $e->getMessage(),
+            ]));
+            //throw $e;
+            return response()->json(['status'=>'400', 'message'=>$e->getMessage()]);
+        }
+
+        return response()->json([
+            'post' => $post ?? null,
+        ]);
+    }
+
+    public function purchase(Request $request, $id)
+    {
+        $sessionUser = Auth::user(); // purchaser
+        try {
+            $post = Post::findOrFail($id);
+            $post->receivePayment(
+                PaymentTypeEnum::PURCHASE,
+                $sessionUser,
+                $request->amount*100,
+                [ 'notes' => $request->note ?? '' ]
+            );
+    
+        } catch(Exception | Throwable $e){
+            Log::error(json_encode([
+                'msg' => 'PostsController::tip() - error',
                 'emsg' => $e->getMessage(),
             ]));
             throw $e;

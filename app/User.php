@@ -11,9 +11,11 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Collection;
 use Zizaco\Entrust\Traits\EntrustUserTrait;
+use App\Enums\PaymentTypeEnum;
 use App\Interfaces\PaymentSendable;
+use App\Interfaces\PaymentReceivable;
 
-class User extends Authenticatable implements PaymentSendable
+class User extends Authenticatable implements PaymentSendable, PaymentReceivable
 {
     use Notifiable;
     use EntrustUserTrait;
@@ -71,8 +73,11 @@ class User extends Authenticatable implements PaymentSendable
     public function sharedvaultfolders() { // vaultfolders shared with me (??)
         return $this->morphedByMany('App\Vaultfolder', 'shareable', 'shareables', 'sharee_id')->withTimestamps();
     }
-    public function fanledgers() {
+    public function ledgersales() {
         return $this->morphMany('App\Fanledger', 'purchaseable');
+    }
+    public function ledgerpurchases() {
+        return $this->hasMany('App\Fanledger', 'purchaser_id');
     }
 
     public function timeline() {
@@ -581,6 +586,39 @@ class User extends Authenticatable implements PaymentSendable
     public function bankAccountDetails()
     {
         return $this->hasOne('App\BankAccountDetails', 'user_id');
+    }
+
+    // %%% --- Implement PaymentReceivable Interface ---
+
+    public function receivePayment(
+        string $ptype, // PaymentTypeEnum
+        User $sender,
+        int $amountInCents,
+        array $cattrs = []
+    ) : ?Fanledger
+    {
+        $result = DB::transaction( function() use($ptype, $amountInCents, $cattrs, &$sender) {
+
+            switch ($ptype) {
+                case PaymentTypeEnum::TIP:
+                    $result = FanLedger::create([
+                        'fltype' => $ptype,
+                        'purchaser_id' => $sender->id,
+                        'purchaseable_type' => 'users',
+                        'purchaseable_id' => $this->id,
+                        'qty' => 1,
+                        'base_unit_cost_in_cents' => $amountInCents,
+                        'cattrs' => $cattrs || [],
+                    ]);
+                    break;
+                default:
+                    throw new Exception('Unrecognized payment type : '.$ptype);
+            }
+
+            return $result;
+        });
+
+        return $result ?? null;
     }
 
     // --- %%Extra --- 

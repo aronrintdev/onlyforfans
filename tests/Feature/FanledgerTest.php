@@ -7,14 +7,9 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Http\File;
 
 use App\Enums\PostTypeEnum;
+use App\Enums\PaymentTypeEnum;
 use App\User;
 use App\Post;
-//use App\Mediafile;
-
-// see: https://laravel.com/docs/5.4/http-tests#testing-file-uploads
-// https://stackoverflow.com/questions/47366825/storing-files-to-aws-s3-using-laravel
-// => https://stackoverflow.com/questions/29527611/laravel-5-how-do-you-copy-a-local-file-to-amazon-s3
-// https://stackoverflow.com/questions/34455410/error-executing-putobject-on-aws-upload-fails
 
 class FanledgerTest extends TestCase
 {
@@ -24,67 +19,130 @@ class FanledgerTest extends TestCase
     private static $_persist = false;
 
     //private $admin;
-    private $sessionUser = null;
-    private $otherUser = null;
-
+    private $buyerUser = null; // ie session user
+    private $sellerUser = null;
 
     /**
      *  @group fldev
      */
     public function test_can_send_tip_on_post()
     {
-        $sessionUser = $this->sessionUser;
-        $otherUser = $this->otherUser;
-        $post = Post::where('timeline_id', $otherUser->timeline->id)->where('type', PostTypeEnum::FREE)->first();
+        $buyerUser = $this->buyerUser;
+        $sellerUser = $this->sellerUser;
+        $post = Post::where('timeline_id', $sellerUser->timeline->id)->where('type', PostTypeEnum::FREE)->first();
         $payload = [
             'amount' => $this->faker->randomFloat(2, 1, 99),
         ];
-        $response = $this->actingAs($sessionUser)->ajaxJSON('POST', route('posts.tip', $post->id), $payload);
+        $response = $this->actingAs($buyerUser)->ajaxJSON('POST', route('posts.tip', $post->id), $payload);
 
         $response->assertStatus(200);
 
-        dd( $response );
-        dd( $response->post );
-        $postR = $response['post']->toArray();
+        $content = json_decode($response->content());
+        $postR = $content->post;
         $this->assertEquals($post->id, $postR->id);
 
         $post->refresh();
-        //$this->assertEquals($post->tips);
-        //$this->assertGreaterThan( 0, $post->tips->count() );
-        $this->assertGreaterThan( 0, $post->fanledgers->count() );
+        $buyerUser->refresh();
+        $sellerUser->refresh();
 
-        $fl = $post->fanledgers()->where('purchaser_id', $sessionUser->id)->get();
-        dump('fl', $fl);
+        $this->assertEquals( 1, $post->ledgersales->count() );
+        $this->assertEquals( PaymentTypeEnum::TIP, $post->ledgersales[0]->fltype );
+        $this->assertEquals( 'posts', $post->ledgersales[0]->purchaseable_type );
+
+        $this->assertEquals( 1, $buyerUser->ledgerpurchases->count() );
+        $this->assertEquals( $post->ledgersales[0]->id, $buyerUser->ledgerpurchases[0]->id );
+
+        //$fl = $post->ledgersales()->where('purchaser_id', $buyerUser->id)->get();
     }
+
+    /**
+     *  @group fldev
+     */
+    public function test_can_send_tip_to_user()
+    {
+        $buyerUser = $this->buyerUser; // tipper
+        $sellerUser = $this->sellerUser; // tippee
+        $payload = [ ];
+        $response = $this->actingAs($buyerUser)->ajaxJSON('POST', route('users.tip', $sellerUser->id), $payload);
+        $response->assertStatus(200);
+
+        $content = json_decode($response->content());
+        $buyerUser->refresh();
+        $sellerUser->refresh();
+
+        $this->assertEquals( 1, $sellerUser->ledgersales->count() );
+        $this->assertEquals( PaymentTypeEnum::TIP, $sellerUser->ledgersales[0]->fltype );
+        $this->assertEquals( 'users', $sellerUser->ledgersales[0]->purchaseable_type );
+
+        $this->assertEquals( 1, $buyerUser->ledgerpurchases->count() );
+        $this->assertEquals( $sellerUser->ledgersales[0]->id, $buyerUser->ledgerpurchases[0]->id );
+    }
+
+    /**
+     *  @group fldev
+     */
+    public function test_can_purchase_post()
+    {
+        // [ ] %TODO: RBAC permissions to access post
+        // [ ] %TODO: test ledgersales & ledgerpurchases relations
+        $buyerUser = $this->buyerUser;
+        $sellerUser = $this->sellerUser;
+        $post = Post::where('timeline_id', $sellerUser->timeline->id)->where('type', PostTypeEnum::PRICED)->first();
+        $this->assertNotNull( $post->price );
+        $this->assertGreaterThan( 0, $post->price );
+
+        $payload = [ ];
+        $response = $this->actingAs($buyerUser)->ajaxJSON('POST', route('posts.purchase', $post->id), $payload);
+        $response->assertStatus(200);
+
+        $content = json_decode($response->content());
+        $postR = $content->post;
+        $this->assertEquals($post->id, $postR->id);
+
+        $post->refresh();
+        $buyerUser->refresh();
+        $sellerUser->refresh();
+
+        $this->assertEquals( 1, $post->ledgersales->count() );
+        $this->assertEquals( PaymentTypeEnum::PURCHASE, $post->ledgersales[0]->fltype );
+        $this->assertEquals( 'posts', $post->ledgersales[0]->purchaseable_type );
+
+        $this->assertEquals( 1, $buyerUser->ledgerpurchases->count() );
+        $this->assertEquals( $post->ledgersales[0]->id, $buyerUser->ledgerpurchases[0]->id );
+
+        $this->assertTrue( $buyerUser->sharedPosts->contains('id', $post->id) ); 
+    }
+
+    // ------------------------------
 
     protected function setUp() : void
     {
         parent::setUp();
         $this->_deleteList = collect();
 
-        $this->sessionUser = factory(\App\User::class)->create();
-        $this->_deleteList->push($this->sessionUser);
+        $this->buyerUser = factory(\App\User::class)->create();
+        $this->_deleteList->push($this->buyerUser);
 
-        $this->otherUser = factory(\App\User::class)->create();
-        $this->_deleteList->push($this->otherUser);
+        $this->sellerUser = factory(\App\User::class)->create();
+        $this->_deleteList->push($this->sellerUser);
 
-        // Create some posts for the 'other user'
+        // Create some posts for the 'seller user'
         $post = factory(Post::class)->create([
-            'user_id'      => $this->otherUser->id,
-            'timeline_id'  => $this->otherUser->timeline->id,
+            'user_id'      => $this->sellerUser->id,
+            'timeline_id'  => $this->sellerUser->timeline->id,
             'type'         => PostTypeEnum::FREE,
         ]);
 
         $post = factory(Post::class)->create([
-            'user_id'      => $this->otherUser->id,
-            'timeline_id'  => $this->otherUser->timeline->id,
+            'user_id'      => $this->sellerUser->id,
+            'timeline_id'  => $this->sellerUser->timeline->id,
             'type'         => PostTypeEnum::PRICED,
             'price'        => $this->faker->randomFloat(2, 1, 300),
         ]);
 
         $post = factory(Post::class)->create([
-            'user_id'      => $this->otherUser->id,
-            'timeline_id'  => $this->otherUser->timeline->id,
+            'user_id'      => $this->sellerUser->id,
+            'timeline_id'  => $this->sellerUser->timeline->id,
             'type'         => PostTypeEnum::SUBSCRIBER,
         ]);
     }
@@ -93,11 +151,13 @@ class FanledgerTest extends TestCase
         if ( !self::$_persist ) {
             while ( $this->_deleteList->count() > 0 ) {
                 $obj = $this->_deleteList->pop();
-                if ( $obj instanceof User ) {
-                     $obj->timeline()->delete();
-                     $obj->posts()->delete();
+                if ( $obj instanceof \App\User ) {
+                     $obj->ledgersales->each( function($o) { $o->forceDelete(); } );
+                     $obj->ledgerpurchases->each( function($o) { $o->forceDelete(); } );
+                     $obj->posts->each( function($o) { $o->forceDelete(); } );
+                     $obj->timeline->forceDelete();
                 }
-                $obj->delete();
+                $obj->forceDelete();
             }
         }
         parent::tearDown();

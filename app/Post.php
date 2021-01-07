@@ -36,7 +36,7 @@ class Post extends Model implements Ownable, PaymentReceivable
         return $this->morphMany('App\Mediafile', 'resource');
     }
 
-    public function fanledgers() {
+    public function ledgersales() {
         return $this->morphMany('App\Fanledger', 'purchaseable');
     }
 
@@ -267,6 +267,7 @@ class Post extends Model implements Ownable, PaymentReceivable
     //--------------------------------------------
 
     // %%% --- Implement PaymentReceivable Interface ---
+
     public function receivePayment(
         string $ptype, // PaymentTypeEnum
         User $sender,
@@ -300,7 +301,7 @@ class Post extends Model implements Ownable, PaymentReceivable
                         'base_unit_cost_in_cents' => $amountInCents,
                         'cattrs' => $cattrs || [],
                     ]);
-                    $sender->sharedposts()->attach($post->id, [
+                    $sender->sharedposts()->attach($this->id, [
                         'cattrs' => $cattrs || [],
                     ]);
                     break;
