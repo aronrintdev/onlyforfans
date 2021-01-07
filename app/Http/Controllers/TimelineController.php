@@ -8,11 +8,13 @@ use App\Announcement;
 use App\BlockedProfile;
 use App\Comment;
 use App\Event;
+use App\Fanledger;
 use App\Group;
 use App\Hashtag;
 use App\Http\Requests\CreateTimelineRequest;
 use App\Http\Requests\UpdateTimelineRequest;
 use App\Media;
+use App\Mediafile;
 use App\Notification;
 use App\Page;
 use App\Post;
@@ -52,8 +54,8 @@ use Storage;
 use Teepluss\Theme\Facades\Theme;
 use Validator;
 
-use App\Mediafile;
 use App\Enums\MediafileTypeEnum;
+use App\Enums\PaymentTypeEnum;
 
 
 class TimelineController extends AppBaseController
@@ -366,6 +368,8 @@ class TimelineController extends AppBaseController
 
     public function showFeed(Request $request)
     {
+        $sessionUser = Auth::user();
+
         $mode = "showfeed";
         $user_post = 'showfeed';
         $theme = Theme::uses(Setting::get('current_theme', 'default'))->layout('default');
@@ -434,96 +438,52 @@ class TimelineController extends AppBaseController
             }
         }
 
-        $saved_users = Auth::user()->followers()->where('status', '=', 'approved')->with('tips')->get();
-        $currentUser = Auth::user();
-        $totalTip = 0;
-        $totalPurchasedPostAmount = 0;
+        //$saved_users = Auth::user()->followers()->where('status', '=', 'approved')->with('tips')->get();
+        $saved_users = Auth::user()->followers()->where('status', '=', 'approved')->get();
+
         $subscriptionAmount = 0;
-        $currentUserPosts = $currentUser->posts;
-        $totalTipsPayout = 0;
-        $totalSubscriptionPayout = 0;
-        $tipsPayouts = $currentUser->tips;
-        if (count($tipsPayouts) > 0) {
-            foreach ($tipsPayouts as $tip) {
-                $totalTipsPayout += $tip->amount;
-            }
-        }
-        $userFollowings = Auth::user()->following()->where('status', '=', 'approved')->get();
-        $subscriptions = Subscription::where('follower_id', $currentUser->id)->get();
-        foreach ($userFollowings as $following) {
-            $subscriptions = Subscription::where('follower_id', $following->pivot->follower_id)->first();
-            if ($subscriptions) {
-                $totalSubscriptionPayout += $following->price;
-            }
-        }
-
-        $sentTipsToUser = $currentUser->usersSentTips;
-        $receivedTipsToUser = $currentUser->usersReceivedTips;
-        if (count($sentTipsToUser) > 0) {
-            foreach ($sentTipsToUser as $tip) {
-                if (!empty($tip->pivot->amount)) {
-                    $totalTipsPayout += $tip->pivot->amount;
-                }
-            }
-        }
-        if (count($receivedTipsToUser) > 0) {
-            foreach ($receivedTipsToUser as $tip) {
-                if (!empty($tip->pivot->amount)) {
-                    $totalTip += $tip->pivot->amount;
-                }
-            }
-        }
-
-        $postsWithTips = $currentUser->posts()->with('tip')->get();
-        if (count($postsWithTips) > 0) {
-            foreach($postsWithTips as $post) {
-                foreach ($post->tip as $tip) {
-                    if (!empty($tip->pivot->amount) && $tip->pivot->amount > 0)
-                        $totalTip += $tip->pivot->amount;
-                }
-            }
-        }
 
         if (count($saved_users) > 0) {
             foreach ($saved_users as $user) {
                 $userId = $user->id;
-                $tips = $user->tips;
+                //$tips = $user->tips;
 
-                $currentUserPosts = $currentUser->posts;
-                $purchasedPosts = $currentUser->posts->whereIn('id', $user->PurchasedPostsArr);
-                $paidSubscribers = $currentUser->paidSubscribers;
-                foreach ($purchasedPosts as $post) {
-                    if (!empty($post->price)) {
-                        $totalPurchasedPostAmount += $post->price;
-                    }
-                }
-
+                $purchasedPosts = $sessionUser->posts->whereIn('id', $user->PurchasedPostsArr);
+                $paidSubscribers = $sessionUser->paidSubscribers;
                 $subscribeUser = $paidSubscribers->where('id', $user->id)->first();
-                if (Subscription::where('leader_id', $currentUser->id)->where('follower_id', $user->id)->exists())
-                {
-                    $subscriptionAmount += $currentUser->price;
+                if (Subscription::where('leader_id', $sessionUser->id)->where('follower_id', $user->id)->exists()) {
+                    $subscriptionAmount += $sessionUser->price;
                 }
             }
         }
         
         $next_page_url = url('ajax/get-more-feed?page=2&ajax=true&hashtag='.$request->hashtag.'&username='.Auth::user()->username);
         $theme->setTitle($timeline->name.' '.Setting::get('title_seperator').' '.Setting::get('site_title').' '.Setting::get('title_seperator').' '.Setting::get('site_tagline'));
-//        try{
-//            echo $comment->user->avatar;
-//        }catch(\Exception $e){
-//            echo $e;
-//        }
 
-//        echo($posts);
-
-        $sessionUser = Auth::user();
         $this->_php2jsVars['session'] = [
             'username' => $sessionUser->username,
         ];
         \View::share('g_php2jsVars',$this->_php2jsVars);
 
-        return $theme->scope('home', compact('timeline', 'posts', 'next_page_url', 'trending_tags', 'suggested_users', 'announcement', 'suggested_groups', 'suggested_pages', 'mode', 'user_post', 'subscriptionAmount', 'totalTip'))
-            ->render();
+        //$subscriptionAmount = 
+        $totalTip = Fanledger::where('seller_id', $sessionUser->id)
+            ->where('fltype', PaymentTypeEnum::TIP)
+            ->sum('total_amount'); // %NOTE will include taxes %FIXME
+
+        return $theme->scope('home', compact(
+            'timeline', 
+            'posts', 
+            'next_page_url', 
+            'trending_tags', 
+            'suggested_users', 
+            'announcement', 
+            'suggested_groups', 
+            'suggested_pages', 
+            'mode', 
+            'user_post', 
+            'subscriptionAmount', 
+            'totalTip'
+        ))->render();
 
     } // showFeed()
 

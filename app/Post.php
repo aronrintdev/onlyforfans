@@ -40,7 +40,7 @@ class Post extends Model implements Ownable, PaymentReceivable
         return $this->morphMany('App\Fanledger', 'purchaseable');
     }
 
-    public function user() {
+    public function user() { // owner of the post
         return $this->belongsTo('App\User');
     }
 
@@ -283,6 +283,7 @@ class Post extends Model implements Ownable, PaymentReceivable
                 case PaymentTypeEnum::TIP:
                     $result = FanLedger::create([
                         'fltype' => $ptype,
+                        'seller_id' => $this->user->id,
                         'purchaser_id' => $sender->id,
                         'purchaseable_type' => 'posts',
                         'purchaseable_id' => $this->id,
@@ -294,6 +295,7 @@ class Post extends Model implements Ownable, PaymentReceivable
                 case PaymentTypeEnum::PURCHASE:
                     $result = FanLedger::create([
                         'fltype' => $ptype,
+                        'seller_id' => $this->user->id,
                         'purchaser_id' => $sender->id,
                         'purchaseable_type' => 'posts',
                         'purchaseable_id' => $this->id,

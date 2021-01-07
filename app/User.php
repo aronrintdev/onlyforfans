@@ -186,6 +186,12 @@ class User extends Authenticatable implements PaymentSendable, PaymentReceivable
     // %%% Accessors/Mutators | Casts
     //--------------------------------------------
 
+    /*
+    public function getTipsAttribute($value) {
+        return $this->ledgersales()->where('fltype', PaymentTypeEnum::TIP)->get();
+    }
+     */
+
     public function getNameAttribute($value) {
         return $this->timeline->name;
     }
@@ -554,17 +560,10 @@ class User extends Authenticatable implements PaymentSendable, PaymentReceivable
     }
 
 
-    /**
-     * @return Collection
-     */
-    public function getPurchasedPostsArrAttribute()
-    {
-        return $this->purchasedPosts()->pluck('post_id');
-    }
+    //public function getPurchasedPostsArrAttribute() {
+        //return $this->purchasedPosts()->pluck('post_id');
+    //}
     
-    /**
-     * @return BelongsToMany
-     */
     public function favouriteUsers()
     {
         return $this->belongsToMany('App\User', 'favourite_users', 'user_id', 'favourite_user_id')->withPivot('favourite_user_id');
@@ -604,6 +603,7 @@ class User extends Authenticatable implements PaymentSendable, PaymentReceivable
                     $result = FanLedger::create([
                         'fltype' => $ptype,
                         'purchaser_id' => $sender->id,
+                        'seller_id' => $this->id,
                         'purchaseable_type' => 'users',
                         'purchaseable_id' => $this->id,
                         'qty' => 1,
