@@ -13,8 +13,10 @@ class CreateFanledgers extends Migration
             $table->string('guid')->unique();
 
             $table->string('fltype',63)->comment('Fan Ledger Type: Enumeration');
-            $table->unsignedInteger('purchaser_id');
+            $table->unsignedInteger('purchaser_id')->comment('User who sends payment');
             $table->foreign('purchaser_id')->references('id')->on('users');
+            $table->unsignedInteger('seller_id')->comment('User who receives payment');
+            $table->foreign('seller_id')->references('id')->on('users');
 
             $table->string('purchaseable_type',255)->comment('Polymorhic relation type of resource being purchased, eg post, subscription, etc');
             $table->unsignedInteger('purchaseable_id')->comment('Polymorphic relation FKID of resource being purchased');
@@ -23,6 +25,7 @@ class CreateFanledgers extends Migration
             $table->unsignedInteger('base_unit_cost_in_cents');
             $table->unsignedInteger('taxes_in_cents')->default(0);
             $table->unsignedInteger('fees_in_cents')->default(0);
+            $table->unsignedInteger('total_amount');
             $table->boolean('is_credit')->default(0)->comment('Is credit or debit (default)');
 
             $table->longtext('cattrs')->nullable()->comment('JSON-encoded custom attributes');

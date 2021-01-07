@@ -15,6 +15,26 @@ class Fanledger extends BaseModel implements Guidable
     ];
 
     //--------------------------------------------
+    // Boot
+    //--------------------------------------------
+    public static function boot()
+    {
+        parent::boot();
+        static::creating(function ($model) {
+            $model->total_amount = 
+                ( $model->base_unit_cost_in_cents * $model->qty )
+                + $model->taxes_in_cents
+                + $model->fees_in_cents;
+        });
+        static::updating(function ($model) {
+            $model->total_amount = 
+                ( $model->base_unit_cost_in_cents * $model->qty )
+                + $model->taxes_in_cents
+                + $model->fees_in_cents;
+        });
+    }
+
+    //--------------------------------------------
     // Relationships
     //--------------------------------------------
 
