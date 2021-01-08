@@ -240,11 +240,11 @@
 								@foreach($posts as $post)
                                     @if($post->type == \App\Post::PAID_TYPE)
                                         @if($post->user->activeSubscribers->contains(Auth::user()->id) || $post->user->id == Auth::user()->id)
-									    {!! Theme::partial('post',compact('post','timeline','next_page_url')) !!}
+									                      {!! Theme::partial('post',compact('post','user','timeline','next_page_url')) !!}
                                         @endif
                                     @else
                                         @if(canUserSeePost(Auth::id(), $post->user->id) || Auth::user()->PurchasedPostsArr->contains($post->id))
-                                        {!! Theme::partial('post',compact('post','timeline','next_page_url')) !!}
+                                        {!! Theme::partial('post',compact('post','user','timeline','next_page_url')) !!}
                                         @endif
                                     @endif
 								@endforeach
@@ -257,11 +257,13 @@
                                 @foreach($posts as $post)                                    
                                     @if($post->type == \App\Post::PAID_TYPE)
                                         @if($post->user->activeSubscribers->contains(Auth::user()->id)  || $post->user->id == Auth::user()->id)
-                                            {!! Theme::partial('post_condensed_column',compact('post','timeline','next_page_url')) !!}
+                                            {{-- Theme::partial('post_condensed_column',compact('post','timeline','next_page_url')) --}}
+                                            {!! Theme::partial('post',compact('post','timeline','user','next_page_url')) !!}
                                         @endif
                                     @else
                                         @if(canUserSeePost(Auth::id(), $post->user->id) || Auth::user()->PurchasedPostsArr->contains($post->id))
-                                        {!! Theme::partial('post_condensed_column',compact('post','timeline','next_page_url')) !!}
+                                        {{-- Theme::partial('post_condensed_column',compact('post','timeline','next_page_url')) --}}
+                                        {!! Theme::partial('post',compact('post','timeline','user','next_page_url')) !!}
                                         @endif
                                     @endif
 								@endforeach

@@ -426,19 +426,21 @@
                                             <p class="no-posts">{{ trans('messages.no_posts') }}</p>
                                         @endif
                                     </div>
-                                    <?php
-                                    $twoColumn = true;
-                                    ?>
+                                  @php
+                                    $twoColumn = false; // %PSG true; 
+                                  @endphp
                                     <div class="timeline-posts timeline-condensed-column row mark-b" style="display: none">
                                         @if(count($posts) > 0)
                                             @foreach($posts as $post)
                                                 @if($post->type == \App\Post::PAID_TYPE)
                                                     @if($post->user->activeSubscribers->contains(Auth::user()->id)  || $post->user->id == Auth::user()->id)
-                                                        {!! Theme::partial('post_condensed_column',compact('post','timeline','next_page_url', 'user','twoColumn')) !!}
+                                                        {{-- Theme::partial('post_condensed_column',compact('post','timeline','next_page_url', 'user','twoColumn')) --}}
+                                                        {!! Theme::partial('post',compact('post','timeline','next_page_url', 'user','twoColumn')) !!}
                                                     @endif
                                                 @else
                                                     @if(canUserSeePost(Auth::id(), $post->user->id, $user->timeline->id) || $post->type == \App\Post::PRICE_TYPE)
-                                                        {!! Theme::partial('post_condensed_column',compact('post','timeline','next_page_url', 'user','twoColumn')) !!}
+                                                        {{-- Theme::partial('post_condensed_column',compact('post','timeline','next_page_url', 'user','twoColumn')) --}}
+                                                        {!! Theme::partial('post',compact('post','timeline','next_page_url', 'user','twoColumn')) !!}
                                                     @endif
                                                 @endif
                                             @endforeach
