@@ -374,7 +374,7 @@ class TimelineController extends AppBaseController
         $user_post = 'showfeed';
         $theme = Theme::uses(Setting::get('current_theme', 'default'))->layout('default');
 
-        $timeline = Timeline::where('username', Auth::user()->username)->first();
+        $timeline = Timeline::where('username', $sessionUser->username)->first();
 
         $id = Auth::id();
 
@@ -470,6 +470,8 @@ class TimelineController extends AppBaseController
             ->where('fltype', PaymentTypeEnum::TIP)
             ->sum('total_amount'); // %NOTE will include taxes %FIXME
 
+        $user = $sessionUser;
+
         return $theme->scope('home', compact(
             'timeline', 
             'posts', 
@@ -480,6 +482,7 @@ class TimelineController extends AppBaseController
             'suggested_groups', 
             'suggested_pages', 
             'mode', 
+            'user', 
             'user_post', 
             'subscriptionAmount', 
             'totalTip'
@@ -1279,53 +1282,54 @@ Log::info('MARK-2.a'); // post-image-3
         }
     }
 
+    // toggles share/unshare
     public function sharePost(Request $request)
     {
+        $sessionUser = Auth::user();
         $post = Post::findOrFail($request->post_id);
-        $posted_user = $post->user;
+        $isOwnPost = $post->user_id == $sessionUser->id;
 
+        $isPostSharedWithUser = $post->sharees->contains($sessionUser->id);
 
-        if (!$post->users_shared->contains(Auth::user()->id)) {
-            $post->users_shared()->attach(Auth::user()->id, ['created_at' => Carbon::now(), 'updated_at' => Carbon::now()]);
-            $post_share_count = $post->users_shared()->get()->count();
-            // we need to insert the shared post into the timeline of the person who shared
-            $input['user_id'] = Auth::user()->id;
-            $post = Post::create([
-                'timeline_id' => Auth::user()->timeline->id,
-                'user_id' => Auth::user()->id,
-                'shared_post_id' => $request->post_id,
-            ]);
-
-
-            if ($post->user_id != Auth::user()->id) {
-                //Notify the user for post share
-                Notification::create(['user_id' => $post->user_id, 'post_id' => $request->post_id, 'notified_by' => Auth::user()->id, 'description' => Auth::user()->name.' '.trans('common.shared_your_post'), 'type' => 'share_post', 'link' => '/'.Auth::user()->username]);
-
-                $user = User::find(Auth::user()->id);
-                $user_settings = $user->getUserSettings($posted_user->id);
-
-                if ($user_settings && $user_settings->email_post_share == 'yes') {
-                    Mail::send('emails.postsharemail', ['user' => $user, 'posted_user' => $posted_user], function ($m) use ($user, $posted_user) {
-                        $m->from(Setting::get('noreply_email'), Setting::get('site_name'));
-                        $m->to($posted_user->email, $posted_user->name)->subject($user->name.' '.'shared your post');
-                    });
-                }
+        if ( !$isPostSharedWithUser ) { // share
+            $operation = 'share';
+            $post->sharees()->attach($sessionUser->id);
+            $user = User::find($sessionUser->id);
+            $user_settings = $user->getUserSettings($post->user->id);
+            if (!$isOwnPost && $user_settings && $user_settings->email_post_share == 'yes') {
+                Mail::send('emails.postsharemail', ['user' => $user, 'posted_user' => $post->user], function ($m) use (&$user, &$post) {
+                    $m->from(Setting::get('noreply_email'), Setting::get('site_name'));
+                    $m->to($post->user->email, $post->user->name)->subject($user->name.' '.'shared your post');
+                });
             }
-
-            return response()->json(['status' => '200', 'shared' => true, 'message' => 'successfully shared', 'share_count' => $post_share_count]);
-        } else {
-            $post->users_shared()->detach([Auth::user()->id]);
-            $post_share_count = $post->users_shared()->get()->count();
-
-            $sharedPost = Post::where('shared_post_id', $post->id)->delete();
-
-            if ($post->user_id != Auth::user()->id) {
-                //Notify the user for post share
-                Notification::create(['user_id' => $post->user_id, 'post_id' => $request->post_id, 'notified_by' => Auth::user()->id, 'description' => Auth::user()->name.' '.trans('common.unshared_your_post'), 'type' => 'unshare_post', 'link' => '/'.Auth::user()->username]);
-            }
-
-            return response()->json(['status' => '200', 'unshared' => false, 'message' => 'Successfully unshared', 'share_count' => $post_share_count]);
+        } else { // unshare
+            $operation = 'unshare';
+            $post->sharees()->detach([$sessionUser->id]);
         }
+
+        switch ($operation) {
+            case 'share':
+                $message = 'successfully shared';
+                $description = $sessionUser->name.' '.trans('common.shared_your_post');
+                $type = 'share_post';
+                break;
+            case 'unshare':
+                $message = 'successfully unshared';
+                $description = $sessionUser->name.' '.trans('common.unshared_your_post');
+                $type = 'unshare_post';
+                break;
+        }
+
+        if ( !$isOwnPost ) {
+            Notification::create(['user_id' => $post->user_id, 'post_id' => $request->post_id, 'notified_by' => $sessionUser->id, 'description' => $description, 'type' => $type, 'link' => '/'.$sessionUser->username]);
+        }
+
+        return response()->json([
+            'status' => '200', 
+            'shared' => $operation==='share', 
+            'message' => $message,
+            'share_count' => $post->sharees->count(),
+        ]);
     }
 
     public function pageLiked(Request $request)
