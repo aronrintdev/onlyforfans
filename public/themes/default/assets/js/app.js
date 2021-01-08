@@ -2790,6 +2790,7 @@ $(document).on('click','.unjoin-page-timeline',function(e){
     });
 });
 
+/* PSG: move to smaller file for now 20210109
 $(document).on('click', '.purchase-post', function () {
     const postId = $(this).data('post-id');
     const btn = $(this);
@@ -2806,6 +2807,7 @@ $(document).on('click', '.purchase-post', function () {
         });
     });
 });
+*/
 
 $.ajaxSetup({
     headers: {

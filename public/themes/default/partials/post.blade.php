@@ -103,7 +103,7 @@ if ( empty($user) ) {
                 <div class="locked-content">
                     <div class="locked-content-wrapper">
                         <i class="fa fa-lock" aria-hidden="true"></i>
-                        <button class="btn btn-success purchase-post" data-post-id="{{ $post->id }}">{{ $post->renderCallToAction() }}</button>
+                        <button class="btn btn-success clickme_to-show_purchase_post_confirm OFF-purchase-post" data-post-id="{{ $post->id }}">{{ $post->renderCallToAction() }}</button>
                     </div>
                 </div>
             </div>
@@ -178,7 +178,7 @@ if ( empty($user) ) {
 
 
      {{-- Check if subscribed--}}
-@if(isset($user) == false || $user->followers->contains($sessionUser->id) || $user->id == $sessionUser->id  || $user->price == 0)
+@if(true || $user->followers->contains($sessionUser->id) || $user->id == $sessionUser->id  || $user->price == 0)
 
     {!! Theme::partial('post/_footer',compact('post','sessionUser')) !!}
 

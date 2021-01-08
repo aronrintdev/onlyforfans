@@ -142,6 +142,51 @@ $( document ).ready(function() {
       });
     });
 
+    // .clickme_to-show_purchase_post_confirm
+    $(document).on('click', '.clickme_to-show_purchase_post_confirm', function (e) {
+      e.preventDefault();
+      const context = $(this);
+      const postId = context.data('post-id');
+      const url = `ajax/timeline-render-modal?template=_purchase_post_confirm&post_id=${postId}`;
+      $.getJSON(url, function(response) {
+        $('#global-modal-placeholder').html(response.html);
+        $('#global-modal-placeholder').modal('toggle');
+      });
+
+      /*
+      //const modal = context.closest('.tip-modal');
+      //$(this).attr('disabled', true).append(' <i class="fa fa-spinner fa-pulse "></i>');
+      const payload = {};
+      const url = `ajax/purchase-post/${postId}`;
+      $.post(url, payload, function (response) {
+        // %TODO: reload post HTML partial via AJAX
+        notify('Purchased!');
+        modal.modal('hide');
+      });
+      */
+    });
+
+    $(document).on('click', '.clickme_to-purchase_post', function (e) {
+      e.preventDefault();
+      const context = $(this);
+      const thisForm = context.closest('form');
+      return $.ajax({
+        url: thisForm.attr('action'),
+        type: thisForm.attr('method'),
+        data: thisForm.serializeArray()
+      }).then( function(response) {
+        console.log('purchase post: success');
+        const postId = context.data('post_id');
+        const url = `ajax/timeline-render-modal?template=_post&post_id=${postId}`;
+        $.getJSON(url, function(response) {
+          $('#global-modal-placeholder').html(response.html);
+          $('#global-modal-placeholder').modal('toggle');
+        });
+      }).fail( function(response) {
+        console.log('purchase post: failed');
+      });
+    });
+
     function notify(message,type,layout)
     {
         var n = noty({
