@@ -58,6 +58,8 @@ class PostsController extends AppBaseController
         ]);
     }
 
+    // %TODO: check if already purchased? -> return error
+    // %NOTE: post price in DB is in dollars not cents %FIXME
     public function purchase(Request $request, $id)
     {
         $sessionUser = Auth::user(); // purchaser
@@ -66,7 +68,7 @@ class PostsController extends AppBaseController
             $post->receivePayment(
                 PaymentTypeEnum::PURCHASE,
                 $sessionUser,
-                $request->amount*100,
+                ( $request->has('amount') ? $request->amount : $post->price ) * 100, // option to override post price via request (?)
                 [ 'notes' => $request->note ?? '' ]
             );
     

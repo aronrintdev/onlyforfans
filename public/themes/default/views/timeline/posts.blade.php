@@ -412,6 +412,7 @@
                                     <div class="timeline-posts timeline-default mark-a">
                                         @if(count($posts) > 0)
                                             @foreach($posts as $post)
+                                              <article class="crate-post" id="tag-post_id_{{$post->id}}">
                                                 @if($post->type == \App\Post::PAID_TYPE)
                                                     @if($post->user->activeSubscribers->contains(Auth::user()->id)  || $post->user->id == Auth::user()->id)
                                                         {!! Theme::partial('post',compact('post','timeline','next_page_url', 'user')) !!}
@@ -421,6 +422,7 @@
                                                         {!! Theme::partial('post',compact('post','timeline','next_page_url', 'user')) !!}
                                                     @endif
                                                 @endif
+                                              </article>
                                             @endforeach
                                         @else
                                             <p class="no-posts">{{ trans('messages.no_posts') }}</p>
@@ -432,6 +434,7 @@
                                     <div class="timeline-posts timeline-condensed-column row mark-b" style="display: none">
                                         @if(count($posts) > 0)
                                             @foreach($posts as $post)
+                                              <article class="crate-post" id="tag-post_id_{{$post->id}}">
                                                 @if($post->type == \App\Post::PAID_TYPE)
                                                     @if($post->user->activeSubscribers->contains(Auth::user()->id)  || $post->user->id == Auth::user()->id)
                                                         {{-- Theme::partial('post_condensed_column',compact('post','timeline','next_page_url', 'user','twoColumn')) --}}
@@ -443,6 +446,7 @@
                                                         {!! Theme::partial('post',compact('post','timeline','next_page_url', 'user','twoColumn')) !!}
                                                     @endif
                                                 @endif
+                                              </article>
                                             @endforeach
                                         @else
                                             <p class="no-posts">{{ trans('messages.no_posts') }}</p>
