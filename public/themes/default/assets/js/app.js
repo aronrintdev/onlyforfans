@@ -2905,19 +2905,19 @@ $.ajaxSetup({
 //     return undefined;
 // };
 
-// import Echo from 'laravel-echo';
-//
-// window.Echo = new Echo({
-//     broadcaster: 'pusher',
-//     key: pusherKey,
-//     cluster: pusherCluster,
-//     encrypted: true,
-//     auth: {
-//         headers: {
-//             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
-//         },
-//     },
-// });
+import Echo from 'laravel-echo';
+
+window.Echo = new Echo({
+    broadcaster: 'pusher',
+    key: window.pusherKey,
+    cluster: window.pusherCluster,
+    encrypted: true,
+    auth: {
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+        },
+    },
+});
 //
 // console.log('loaded');
 

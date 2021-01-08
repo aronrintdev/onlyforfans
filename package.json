@@ -25,6 +25,7 @@
     "animejs": "^3.2.1",
     "bootstrap-vue": "^2.20.1",
     "laravel-echo": "^1.10.0",
+    "luxon": "^1.25.0",
     "pusher-js": "^7.0.2",
     "vue-autosuggest": "^2.2.0",
     "vue2-dropzone": "^3.6.0",
