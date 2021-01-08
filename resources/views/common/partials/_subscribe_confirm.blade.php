@@ -1,4 +1,4 @@
-<!-- %VIEW %PARTIAL(MODAL): views/timelines/_subscribe_confirm -->
+<!-- %VIEW %PARTIAL(MODAL): views/common/partials/_subscribe_confirm -->
 <div class="modal-dialog modal-dialog-centered modal-sm">
   <div class="modal-content">
     <section class="modal-body no-padding">
