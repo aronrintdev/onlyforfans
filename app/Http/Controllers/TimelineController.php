@@ -3403,13 +3403,29 @@ Log::info('MARK-2.a'); // post-image-3
         }
          */
 
+        $sessionUser = Auth::user();
+
         switch ($request->template) {
+            case '_purchase_post_confirm':
+                $postId = $request->post_id;
+                $post = Post::find($postId);
+                $html = \View::make('common.partials._purchase_post_confirm', [
+                    'post' => $post,
+                ])->render();
+                break;
             case '_subscribe_confirm':
                 $timelineId = $request->timeline_id;
                 $timeline = Timeline::find($timelineId);
-                $html = \View::make('timelines._subscribe_confirm', [
+                $html = \View::make('common.partials._subscribe_confirm', [
                     'timeline' => $timeline,
                 ])->render();
+                break;
+            case '_post':
+                $postId = $request->post_id;
+                $post = Post::find($postId);
+                $user = $sessionUser;
+                $theme = Theme::uses('default');
+                $html = $theme->partial('post', compact('post','sessionUser','user'));
                 break;
             default:
                 throw new \Exception('Unrecognized template: '.$request->template);
