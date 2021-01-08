@@ -485,8 +485,9 @@ class User extends Authenticatable implements PaymentSendable, PaymentReceivable
 
     public function deleteOthers()
     {
-        $authUserId = Auth::user()->id;
-        $otherposts = $this->timeline->posts()->where('user_id', '!=', Auth::user()->id)->get();
+        // %PSG: Delete posts that aren't my own from my timeline
+        $sessionUser = Auth::user();
+        $otherposts = $this->timeline->posts()->where('user_id', '!=', $sessionUser->id)->get();
         foreach ($otherposts as $otpost) {
             $otpost->users_liked()->detach();
             $otpost->notifications_user()->detach();
@@ -503,12 +504,6 @@ class User extends Authenticatable implements PaymentSendable, PaymentReceivable
                 $comment->delete();
             }
             $otpost->notifications()->delete();
-            // if($otpost->shared_post_id != NULL) {
-            //     $otpost->update(['shared_post_id' => null])->save();
-            // }
-            if (!empty($otpost->sharedPost()->first()) && count($otpost->sharedPost()->first()) != 0) {
-                $otpost->sharedPost->delete();
-            }
             $otpost->delete();
         }
     }

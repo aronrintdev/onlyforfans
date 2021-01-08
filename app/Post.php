@@ -5,8 +5,10 @@ namespace App;
 use Auth;
 use Carbon\Carbon;
 use DB;
+use Exception;
 use Illuminate\Database\Eloquent\Model;
 use App\User;
+use App\Enums\PostTypeEnum;
 use App\Enums\PaymentTypeEnum;
 use App\Interfaces\Ownable;
 use App\Interfaces\PaymentReceivable;
@@ -15,9 +17,10 @@ use App\Interfaces\PaymentReceivable;
 
 class Post extends Model implements Ownable, PaymentReceivable
 {
-    const PRICE_TYPE = 'price'; // associated with a price
-    const FREE_TYPE = 'free';
-    const PAID_TYPE = 'paid'; // %PSG: ie, for subscribers (?)
+    // %TODO: remove these and use enum instead
+    const FREE_TYPE = PostTypeEnum::FREE; // 'free';
+    const PRICE_TYPE = PostTypeEnum::PRICED; // 'price'; // associated with a price
+    const PAID_TYPE = PostTypeEnum::SUBSCRIBER; // 'paid'; // %PSG: ie, for subscribers (?)
     
     //use SoftDeletes;
     //protected $dates = ['deleted_at'];
@@ -33,8 +36,11 @@ class Post extends Model implements Ownable, PaymentReceivable
     //--------------------------------------------
 
     public function sharees() { // can be shared with many users (via [shareables])
-        return $this->morphToMany('App\User', 'shareable', 'shareables', 'shareable_id', 'sharee_id');
+        return $this->morphToMany('App\User', 'shareable', 'shareables', 'shareable_id', 'sharee_id')->withTimestamps();
     }
+    //public function users_shared() {
+        //return $this->belongsToMany('App\User', 'post_shares', 'post_id', 'user_id');
+    //}
 
     public function mediafiles() {
         return $this->morphMany('App\Mediafile', 'resource');
@@ -86,10 +92,6 @@ class Post extends Model implements Ownable, PaymentReceivable
 
     public function comments() {
         return $this->hasMany('App\Comment')->where('parent_id', null);
-    }
-
-    public function users_shared() {
-        return $this->belongsToMany('App\User', 'post_shares', 'post_id', 'user_id');
     }
 
     public function images() {
@@ -225,10 +227,9 @@ class Post extends Model implements Ownable, PaymentReceivable
         return $this->hasMany('App\Notification', 'post_id', 'id');
     }
 
-    public function sharedPost()
-    {
-        return $this->belongsTo('App\Post', 'id', 'shared_post_id');
-    }
+    //public function sharedPost() {
+        //return $this->belongsTo('App\Post', 'id', 'shared_post_id');
+    //}
 
     public function allComments()
     {
@@ -248,20 +249,11 @@ class Post extends Model implements Ownable, PaymentReceivable
         foreach ($comments as $comment) {
             $comment->comments_liked()->detach();
             $dependencies = Comment::where('parent_id', $comment->id)->update(['parent_id' => null]);
-            // $comment->replies()->detach();
             $comment->update(['parent_id' => null]);
             $comment->delete();
         }
 
-        // $this->comments()->delete();
         $this->notifications()->delete();
-        if ($this->shared_post_id != null) {
-            $this->update(['shared_post_id' => null])->save();
-        }
-        print_r($this->sharedPost()->first());
-        if ($this->sharedPost()->first() != NULL && count($this->sharedPost()->first()) != 0) {
-            $this->sharedPost->delete();
-        }
 
         $this->delete();
     }
@@ -321,23 +313,78 @@ class Post extends Model implements Ownable, PaymentReceivable
         return $result ?? null;
     }
 
-    // Can a user view this post (?)
-    public function isViewableByUser(User $user) : bool
+    public function renderCallToAction() : string
     {
-        /*
-        if ($user->sharedposts) {
-            dd($user->sharedposts, $this->id, $user->id);
-        } else {
-            dd('found null');
+        // eg, for button text
+        switch ($this->type) {
+            case PostTypeEnum::PRICED:
+                return 'Buy';
+            case PostTypeEnum::SUBSCRIBER:
+                return 'Subscribe';
         }
-         */
+        return '';
+    }
+
+    // Can a user view this post (?)
+    public function isViewableByUser(User $viewingUser) : bool
+    {
         $postOwner = $this->user;
-        if ( $postOwner->id === $user->id ) {
-            return true;
-        } else if ( $user->sharedposts->contains('id', $this->id) ) {
-            return true;
+/*
+if($user->followers->contains($sessionUser->id) || $user->id == $sessionUser->id || $user->price == 0)
+if(!$user->followers->contains($sessionUser->id) && $user->id != $sessionUser->id && $user->price > 0 )
+ */
+
+        if ( $postOwner->id === $viewingUser->id ) {
+            return true; // users can always see own posts
         }
+
+        if ( $viewingUser->sharedposts->contains('id', $this->id) ) {
+            return true; // valid share, all types
+        }
+
+        switch ($this->type) {
+            case PostTypeEnum::FREE:
+                return true;
+            case PostTypeEnum::PRICED:
+                if( $postOwner->price == 0) {
+                    return true;
+                }
+                break;
+            case PostTypeEnum::SUBSCRIBER:
+                if( $postOwner->followers->contains('id',$viewingUser->id) ) {
+                    return true; // viewer is a follower
+                } 
+                if( $postOwner->price == 0) {
+                    return true;
+                }
+                break;
+            default:
+                throw new Exception('Unrecognized Post type: '.$this->type);
+        }
+
         return false;
+    }
+
+    public function isCommentSectionShown($sessionUser) : bool
+    {
+        $user_follower = $this->chkUserFollower($sessionUser->id,$this->user_id);
+        $user_setting = $this->chkUserSettings($this->user_id);
+    
+        $is = false;
+        if($user_follower != NULL) {
+            if($user_follower == "only_follow") {
+                $is = true;
+            }elseif ($user_follower == "everyone") {
+                $is = true;
+            }
+        } else {
+            if($user_setting){
+                if($user_setting == "everyone"){
+                    $is = true;
+                }
+            }
+        }
+        return $is;
     }
 
 }
