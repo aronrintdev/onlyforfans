@@ -380,3 +380,27 @@ function canCreatePost ($loginUser, $user)
     
     return $canCreatePost;
 }
+
+function parseMainDescription($post) 
+{
+    $links = preg_match_all("/(?i)\b((?:[a-z][\w-]+:(?:\/{1,3}|[a-z0-9%])|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}\/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'\".,<>?«»“”‘’]))/", $post->description, $matches);
+    $main_description = $post->description;
+    foreach ($matches[0] as $link) {
+        $linkPreview = new LinkPreview(/*$link*/ "www.google.com");
+        $parsed = $linkPreview->getParsed();
+        $data = $link;
+        foreach ($parsed as $parserName => $main_link) {
+            $data = '<div class="row link-preview">
+            <div class="col-md-3">
+            <a target="_blank" href="'.$link.'"><img src="'.$main_link->getImage().'"></a>
+            </div>
+            <div class="col-md-9">
+            <a target="_blank" href="'.$link.'">'.$main_link->getTitle().'</a><br>'.substr($main_link->getDescription(), 0, 500). '...'.'
+            </div>
+            </div>';
+            //echo substr($main_link->getDescription(), 0, 500);
+        }
+        $main_description = str_replace($link, $data, $main_description);
+    }
+    return $main_description;
+}
