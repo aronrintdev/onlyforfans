@@ -103,7 +103,11 @@ if ( empty($user) ) {
                 <div class="locked-content">
                     <div class="locked-content-wrapper">
                         <i class="fa fa-lock" aria-hidden="true"></i>
-                        <button class="btn btn-success clickme_to-show_purchase_post_confirm OFF-purchase-post" data-post-id="{{ $post->id }}">{{ $post->renderCallToAction() }}</button>
+                        @if ($post->type === \App\Enums\PostTypeEnum::PRICED)
+                        <button class="btn btn-success clickme_to-show_purchase_post_confirm" data-post_id="{{ $post->id }}">BUY</button>
+                        @elseif ($post->type === \App\Enums\PostTypeEnum::SUBSCRIBER)
+                        <button class="btn btn-success clickme_to-show_subscribe_confirm" data-timline_id="{{ $timeline->id }}">SUBSCRIBE</button>
+                        @endif
                     </div>
                 </div>
             </div>

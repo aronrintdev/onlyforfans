@@ -10,13 +10,14 @@ class AddAccessLevelToSharelables extends Migration
     {
         Schema::table('shareables', function (Blueprint $table) {
             $table->string('access_level',63)->default('default')->after('shareable_id')->comment('Access Level: Enumeration');
+            $table->boolean('is_approved')->default(true)->after('shareable_id');
         });
     }
 
     public function down()
     {
         Schema::table('shareables', function (Blueprint $table) {
-            $table->dropColumn(['access_level']);
+            $table->dropColumn(['access_level', 'is_approved']);
         });
     }
 }
