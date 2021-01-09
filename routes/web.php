@@ -335,7 +335,7 @@ Route::group(['prefix' => '/{username}', 'middleware' => 'auth'], function ($use
     // Route::get('/create-page', 'TimelineController@addPage');
     // Route::post('/create-page', 'TimelineController@createPage');
 
-    Route::get('/subscribe', 'CheckoutController@subscribe');
+    //Route::get('/subscribe', 'CheckoutController@subscribe'); // %PSG  %DEPRECATE 20210109
 
 });
 

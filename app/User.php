@@ -37,29 +37,18 @@ class User extends Authenticatable implements PaymentSendable, PaymentReceivable
         'about',
     ];
 
-    protected $fillable = [
-        'timeline_id', 'email', 'verification_code', 'email_verified', 'remember_token', 'password', 'birthday', 'city', 'gender', 'last_logged', 'timezone', 'affiliate_id', 'language', 'country', 'active', 'verified', 'facebook_link', 'twitter_link', 'dribbble_link', 'instagram_link', 'youtube_link', 'linkedin_link', 'wishlist', 'website', 'instagram','custom_option1', 'custom_option2', 'custom_option3', 'custom_option4'
-        , 'bank_account', 'price', 'is_payment_set', 'is_bank_set', 'is_follow_for_free', 'is_online', 'timezone_id'
-    ];
-
-    protected $hidden = [
-        'password', 'remember_token', 'verification_code', 'email', 'timeline',
-    ];
-
+    protected $guarded = ['id','created_at','updated_at'];
+    protected $hidden = [ 'password', 'remember_token', 'verification_code', 'email', 'timeline' ];
 
     public function toArray() {
         $array = parent::toArray();
-
         $timeline = $this->timeline->toArray();
-
         foreach ($timeline as $key => $value) {
             if ($key != 'id') {
                 $array[$key] = $value;
             }
         }
-
         $array['avatar'] = $this->avatar;
-
         return $array;
     }
 
@@ -84,15 +73,57 @@ class User extends Authenticatable implements PaymentSendable, PaymentReceivable
         return $this->belongsTo('App\Timeline');
     }
 
-    public function followers()
-    {
+    /* HERE Jan 11
+    public function followers() {
         return $this->belongsToMany('App\User', 'followers', 'leader_id', 'follower_id')->withPivot('status', 'referral', 'subscription_id')->withTimestamps();
     }
 
-    public function following()
-    {
+    public function following() {
         return $this->belongsToMany('App\User', 'followers', 'follower_id', 'leader_id')->withPivot('referral');
     }
+    public function updateFollowStatus($user_id) {
+        $chk_user = DB::table('followers')->where('follower_id', $user_id)->where('leader_id', Auth::user()->id)->first();
+        if ($chk_user->status == 'pending') {
+            $result = DB::table('followers')->where('follower_id', $user_id)->where('leader_id', Auth::user()->id)->update(['status' => 'approved']);
+        }
+        return ($result ? true : false);
+    }
+
+    public function decilneRequest($user_id) {
+        $chk_user = DB::table('followers')->where('follower_id', $user_id)->where('leader_id', Auth::user()->id)->first();
+        if ($chk_user->status == 'pending') {
+            $result = DB::table('followers')->where('follower_id', $user_id)->where('leader_id', Auth::user()->id)->delete();
+        }
+        return ($result ? true : false);
+    }
+
+    public function chkMyFollower($diff_timeline_id, $login_id) {
+        $followers = DB::table('followers')->where('follower_id', $login_id)->where('leader_id', $diff_timeline_id)->where('status', '=', 'approved')->first();
+        return $followers ? true : false;
+    }
+    public function postFollows() {
+        return $this->belongsToMany('App\User', 'post_follows', 'user_id', 'post_id');
+    }
+    public function paidSubscribers() {
+        $followers = $this->followers()->pluck('follower_id')->toArray();
+        $activeFollowers = Subscription::whereIn('follower_id', $followers)
+            ->where('leader_id', $this->id)
+            ->pluck('follower_id')->toArray();
+        return $this->followers()->whereIn('follower_id', $activeFollowers);
+    }
+    
+    public function activeSubscribers() {
+        $followers = $this->followers()->pluck('follower_id')->toArray();
+        $activeFollowers = Subscription::whereIn('follower_id', $followers)
+            ->where('leader_id', $this->id)
+            ->where('cancel_at', '=', null)
+            ->pluck('follower_id')->toArray();
+        return $this->followers()->whereIn('follower_id', $activeFollowers);
+    }
+    public function renderFollowersCount() {
+        return $this->followers()->count();
+    }
+     */
 
     public function pages()
     {
@@ -287,50 +318,15 @@ class User extends Authenticatable implements PaymentSendable, PaymentReceivable
         return $result1 + $result2;
     }
 
-    public function updateFollowStatus($user_id)
-    {
-        $chk_user = DB::table('followers')->where('follower_id', $user_id)->where('leader_id', Auth::user()->id)->first();
-        if ($chk_user->status == 'pending') {
-            $result = DB::table('followers')->where('follower_id', $user_id)->where('leader_id', Auth::user()->id)->update(['status' => 'approved']);
-        }
-
-        $result = $result ? true : false;
-
-        return $result;
-    }
-
-    public function decilneRequest($user_id)
-    {
-        $chk_user = DB::table('followers')->where('follower_id', $user_id)->where('leader_id', Auth::user()->id)->first();
-        if ($chk_user->status == 'pending') {
-            $result = DB::table('followers')->where('follower_id', $user_id)->where('leader_id', Auth::user()->id)->delete();
-        }
-
-        $result = $result ? true : false;
-
-        return $result;
-    }
-
-    public function announcements()
-    {
+    public function announcements() {
         return $this->belongsToMany('App\Announcement', 'announcement_user', 'user_id', 'announcement_id');
     }
 
-    public function chkMyFollower($diff_timeline_id, $login_id)
-    {
-        $followers = DB::table('followers')->where('follower_id', $login_id)->where('leader_id', $diff_timeline_id)->where('status', '=', 'approved')->first();
-        $result = $followers ? true : false;
-
-        return $result;
-    }
-
-    public function conversations()
-    {
+    public function conversations() {
         return $this->belongsToMany('App\Conversation', 'conversation_user', 'user_id', 'conversation_id');
     }
 
-    public function messages()
-    {
+    public function messages() {
         return $this->conversations()->with('messages');
     }
 
@@ -447,10 +443,6 @@ class User extends Authenticatable implements PaymentSendable, PaymentReceivable
         return $this->belongsToMany('App\User', 'post_likes', 'user_id', 'post_id');
     }
 
-    public function postFollows()
-    {
-        return $this->belongsToMany('App\User', 'post_follows', 'user_id', 'post_id');
-    }
 
 
     public function postReports()
@@ -528,37 +520,8 @@ class User extends Authenticatable implements PaymentSendable, PaymentReceivable
         return $joined_groups ? $joined_groups : 0;
     }
 
-    /**
-     * @return BelongsToMany
-     */
-    public function paidSubscribers()
-    {
-        $followers = $this->followers()->pluck('follower_id')->toArray();
 
-        $activeFollowers = Subscription::whereIn('follower_id', $followers)
-            ->where('leader_id', $this->id)
-            ->pluck('follower_id')->toArray();
-
-        return $this->followers()->whereIn('follower_id', $activeFollowers);
-    }
-    
-    public function activeSubscribers()
-    {
-        $followers = $this->followers()->pluck('follower_id')->toArray();
-
-        $activeFollowers = Subscription::whereIn('follower_id', $followers)
-            ->where('leader_id', $this->id)
-            ->where('cancel_at', '=', null)
-            ->pluck('follower_id')->toArray();
-
-        return $this->followers()->whereIn('follower_id', $activeFollowers);
-    }
-
-    /**
-     * @return HasMany
-     */
-    public function blockedProfiles()
-    {
+    public function blockedProfiles() {
         return $this->hasMany(BlockedProfile::class, 'blocked_by');
     }
 
@@ -643,9 +606,6 @@ class User extends Authenticatable implements PaymentSendable, PaymentReceivable
 
     public function renderPostCount() {
         return $this->posts()->where('active', 1)->count();
-    }
-    public function renderFollowersCount() {
-        return $this->followers()->count();
     }
     public function renderLikesCount() {
         return $this->pageLikes()->count();

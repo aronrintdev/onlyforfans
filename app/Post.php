@@ -313,18 +313,6 @@ class Post extends Model implements Ownable, PaymentReceivable
         return $result ?? null;
     }
 
-    public function renderCallToAction() : string
-    {
-        // eg, for button text
-        switch ($this->type) {
-            case PostTypeEnum::PRICED:
-                return 'Buy';
-            case PostTypeEnum::SUBSCRIBER:
-                return 'Subscribe';
-        }
-        return '';
-    }
-
     // Can a user view this post (?)
     public function isViewableByUser(User $viewingUser) : bool
     {

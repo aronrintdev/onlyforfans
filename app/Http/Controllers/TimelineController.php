@@ -1496,52 +1496,90 @@ Log::info('MARK-2.a'); // post-image-3
         return redirect(route('timelines.index'));
     }
 
-    // %PSG: follow a post
+    // %%% -----
+
+    // HERE MONDAY Jan 11
+    // toggles follow status
     public function follow(Request $request)
     {
-        $timeline_id = $request->timeline_id;
-        $follow = User::where('timeline_id', '=', $timeline_id)->first();
-        $timeline = Timeline::where('id', $timeline_id)->first();
-        
-        if(! checkBlockedProfiles($timeline->username)){
-            return response()->json(['status' => '422', 'message' => 'User blocked your profile. you can not subscribe.']);
-        }
+        $sessionUser = Auth::user();
 
-        if (!$follow->followers->contains(Auth::user()->id)) {
+        $request->validate([
+            'timeline_id' => 'required|integer|min:1',
+            'is_subscribe' => 'required|integer|min:1',
+        ]);
+        // [users].is_follow_for_free is really is_subscribe for free? redundant with the price field
+
+        try {
+            $timeline = Timeline::firstOrFail($request->timeline_id);
+            if ( !checkBlockedProfiles($timeline->username) ){
+                throw new Exception('Unable to subscribe, error 159');
+            }
+
+            $isFollowing = $timeline->followers->contains($sessionUser->id);
+
             $referer = app(Referer::class)->get();
+            $cattrs = [ 'referrer' => $referer ];
 
-            $follow->followers()->attach(Auth::user()->id, ['status' => 'approved', 'referral' => $referer]);
+            if ( $isFollowing ) { // unfollow
+                $action = 'unfollow';
+                // %TODO
+                //$follow->followers()->detach([Auth::user()->id]);
 
-            $user = User::find(Auth::user()->id);
+            } else { // follow
 
-            try{
-                //Notify the user for follow
-                Notification::create(['user_id' => $follow->id, 'timeline_id' => $timeline_id, 'notified_by' => Auth::user()->id, 'description' => Auth::user()->name.' '.trans('common.is_following_you'), 'type' => 'follow']);
-            } catch(Exception | Throwable $e){
-                Log::error(json_encode([
-                    'msg' => 'TimlineController::follow() - Could not send notification',
-                    'emsg' => $e->getMessage(),
-                ]));
+                $action = 'follow';
+                if ($request->is_subscribe) {
+                    $timeline->receivePayment(
+                        PaymentTypeEnum::SUBSCRIBE,
+                        $sessionUser,
+                        $timeline->user->price*100,
+                        $cattrs,
+                    );
+                } else { // follow only
+                    $sessionUser->followedtimelines()->attach($timeline->id, [
+                        'cattrs' => $cattrs,
+                    ]);
+                    /*
+                    $timeline->followers()->attach($sessionUser->id, [
+                        'cattrs' => $cattrs,
+                    ]);
+                     */
+                }
             }
 
-//            return response()->json(['status' => '200', 'followed' => true, 'message' => 'successfully followed']);
-            return redirect($timeline->username);
-        } else {
-            $follow->followers()->detach([Auth::user()->id]);
+        } catch (Exception | Throwable $e) {
 
-            try{
-                //Notify the user for follow
-                Notification::create(['user_id' => $follow->id, 'timeline_id' => $timeline_id, 'notified_by' => Auth::user()->id, 'description' => Auth::user()->name.' '.trans('common.is_unfollowing_you'), 'type' => 'unfollow']);
-            } catch(Exception | Throwable $e){
-                Log::error(json_encode([
-                    'msg' => 'TimlineController::follow() - Could not send notification',
-                    'emsg' => $e->getMessage(),
-                ]));
-            }
-
-//            return response()->json(['status' => '200', 'followed' => false, 'message' => 'successfully unFollowed']);
-            return redirect()->route($timeline->username);
         }
+
+        //$follow = User::where('timeline_id', '=', $timeline_id)->first();
+
+        try {
+            switch ($action) {
+                case 'follow':
+                    $description = $sessionUser->name.' '.trans('common.is_following_you'), 
+                    $message = 'successfully followed';
+                    break;
+                case 'unfollow':
+                    $description = $sessionUser->name.' '.trans('common.is_unfollowing_you'), 
+                    $message = 'successfully un-followed';
+                    break;
+            }
+            Notification::create([
+                'user_id' => $timeline->user->id,  // followee
+                'timeline_id' => $timeline->id, 
+                'notified_by' => $sessionUser->id, 
+                'description' => $description ?? '',
+                'type' => $action
+            ]);
+        } catch(Exception | Throwable $e) {
+            Log::error(json_encode([
+                'msg' => 'TimlineController::follow() - Could not send notification',
+                'emsg' => $e->getMessage(),
+            ]));
+        }
+
+        return response()->json(['status' => '200', 'followed' => $action==='follow', 'message' => $message]);
     }
 
 
@@ -1658,6 +1696,8 @@ Log::info('MARK-2.a'); // post-image-3
             }
         }
     }
+
+    // %%% -----
 
     public function getNotifications(Request $request)
     {

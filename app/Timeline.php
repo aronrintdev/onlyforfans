@@ -3,9 +3,9 @@ namespace App;
 
 use Eloquent as Model;
 use Intervention\Image\Facades\Image;
+use App\Interfaces\PaymentReceivable;
 
-
-class Timeline extends Model
+class Timeline extends Model implements PaymentReceiveable
 {
     //use SoftDeletes;
 
@@ -151,6 +151,43 @@ class Timeline extends Model
             return $result;
         }
         
+    }
+
+    // %%% --- Implement PaymentReceivable Interface ---
+
+    public function receivePayment(
+        string $ptype, // PaymentTypeEnum
+        User $sender,
+        int $amountInCents,
+        array $cattrs = []
+    ) : ?Fanledger
+    {
+        $result = DB::transaction( function() use($ptype, $amountInCents, $cattrs, &$sender) {
+
+            switch ($ptype) {
+                case PaymentTypeEnum::SUBSCRIBE:
+                    $result = FanLedger::create([
+                        'fltype' => $ptype,
+                        'seller_id' => $this->user->id,
+                        'purchaser_id' => $sender->id,
+                        'purchaseable_type' => 'posts',
+                        'purchaseable_id' => $this->id,
+                        'qty' => 1,
+                        'base_unit_cost_in_cents' => $amountInCents,
+                        'cattrs' => $cattrs ?? [],
+                    ]);
+                    $sender->subcribedtimelines()->attach($this->id, [
+                        'cattrs' => json_encode($cattrs ?? []),
+                    ]);
+                    break;
+                default:
+                    throw new Exception('Unrecognized payment type : '.$ptype);
+            }
+
+            return $result;
+        });
+
+        return $result ?? null;
     }
 }
 
