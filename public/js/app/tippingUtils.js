@@ -176,7 +176,6 @@ $( document ).ready(function() {
         data: thisForm.serializeArray()
       }).then( function(response) {
         console.log('purchase post: success');
-        //$('#global-modal-placeholder').modal('close'); // close modal
         $('#global-modal-placeholder').modal('toggle'); // close modal
         const postId = context.data('post_id');
         const url = `ajax/timeline-render-modal?template=_post&post_id=${postId}`;

@@ -296,6 +296,7 @@ class TimelineController extends AppBaseController
 
     public function getMorePosts(Request $request)
     {
+        $sessionUser = Auth::user();
         $period = 'all';
         $sort_by = 'latest';
         $order_by = 'asc';
@@ -360,7 +361,9 @@ class TimelineController extends AppBaseController
             $layout = 'post_condensed_column';
         }
         foreach ($posts as $post) {
-            $responseHtml .= $theme->partial($layout, ['isSubscribed' => $isSubscribed, 'post' => $post, 'timeline' => $timeline, 'next_page_url' => $next_page_url, 'twoColumn' => $twoColumn]);
+            $responseHtml .= '<article class="crate-post" id="tag-post_id_'.$post->id.'">';
+            $responseHtml .= $theme->partial($layout, ['user'=>$sessionUser, 'isSubscribed'=>$isSubscribed, 'post'=>$post, 'timeline'=>$timeline, 'next_page_url'=>$next_page_url, 'twoColumn'=>$twoColumn]);
+            $responseHtml .= '</article>';
         }
 
         return $responseHtml;

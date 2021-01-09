@@ -18,7 +18,7 @@
 
     @media screen and (min-width: 1200px) {
         .timeline-condensed-column .panel-body, .jscroll-added .panel-body, .timeline-condensed-column > .col-lg-4 .panel-body {
-            height: 200px;
+            //height: 200px;
             overflow: auto;
         }   
     }
