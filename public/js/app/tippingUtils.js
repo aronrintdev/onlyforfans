@@ -142,28 +142,17 @@ $( document ).ready(function() {
       });
     });
 
-    // .clickme_to-show_purchase_post_confirm
+    // --- Purchase Post ---
+
     $(document).on('click', '.clickme_to-show_purchase_post_confirm', function (e) {
       e.preventDefault();
       const context = $(this);
-      const postId = context.data('post-id');
-      const url = `ajax/timeline-render-modal?template=_purchase_post_confirm&post_id=${postId}`;
+      const postID = context.data('post_id');
+      const url = `ajax/timeline-render-modal?template=_purchase_post_confirm&post_id=${postID}`;
       $.getJSON(url, function(response) {
         $('#global-modal-placeholder').html(response.html);
         $('#global-modal-placeholder').modal('toggle');
       });
-
-      /*
-      //const modal = context.closest('.tip-modal');
-      //$(this).attr('disabled', true).append(' <i class="fa fa-spinner fa-pulse "></i>');
-      const payload = {};
-      const url = `ajax/purchase-post/${postId}`;
-      $.post(url, payload, function (response) {
-        // %TODO: reload post HTML partial via AJAX
-        notify('Purchased!');
-        modal.modal('hide');
-      });
-      */
     });
 
     $(document).on('click', '.clickme_to-purchase_post', function (e) {
@@ -177,15 +166,49 @@ $( document ).ready(function() {
       }).then( function(response) {
         console.log('purchase post: success');
         $('#global-modal-placeholder').modal('toggle'); // close modal
-        const postId = context.data('post_id');
-        const url = `ajax/timeline-render-modal?template=_post&post_id=${postId}`;
+        const postID = context.data('post_id');
+        const url = `ajax/timeline-render-modal?template=_post&post_id=${postID}`;
         $.getJSON(url, function(response) {
-          $(`.timeline-posts .crate-post#tag-post_id_${postId}`).html(response.html);
+          $(`.timeline-posts .crate-post#tag-post_id_${postID}`).html(response.html);
         });
+        notify('Purchased!');
       }).fail( function(response) {
         console.log('purchase post: failed');
       });
     });
+
+    // --- Subsribe | Follow Timeline ---
+
+    $(document).on('click', '.clickme_to-show_subscribe_confirm', function (e) {
+      e.preventDefault();
+      const context = $(this);
+      const timelineID = context.data('timeline_id');
+      const url = `ajax/timeline-render-modal?template=_subcribe_confirm&timeline_id=${timelineID}`;
+      $.getJSON(url, function(response) {
+        $('#global-modal-placeholder').html(response.html);
+        $('#global-modal-placeholder').modal('toggle');
+      });
+    });
+
+    $(document).on('click', '.clickme_to-purchase_subscription', function (e) {
+      e.preventDefault();
+      const context = $(this);
+      const thisForm = context.closest('form');
+      return $.ajax({
+        url: thisForm.attr('action'),
+        type: thisForm.attr('method'),
+        data: thisForm.serializeArray()
+      }).then( function(response) {
+        console.log('subscribe timeline: success');
+        $('#global-modal-placeholder').modal('toggle'); // close modal
+        notify('Purchased!');
+        window.location.reload(false); 
+      }).fail( function(response) {
+        console.log('subscribe timeline: failed');
+      });
+    });
+
+    // --- Misc ---
 
     function notify(message,type,layout)
     {
