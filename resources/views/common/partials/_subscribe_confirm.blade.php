@@ -1,7 +1,15 @@
 <!-- %VIEW %PARTIAL(MODAL): views/common/partials/_subscribe_confirm -->
 <div class="modal-dialog modal-dialog-centered modal-sm">
-  <div class="modal-content">
-    <section class="modal-body no-padding">
+  <section class="modal-content" role="document">
+
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <h3 class="modal-title">Subcribe</h3>
+    </div>
+
+    {{ Form::open([ 'route'=>['posts.purchase',$post->id],'method'=>'POST','class'=>'' ]) }}
+
+    <div class="modal-body no-padding">
 
       <div class="timeline-cover-section">
 
@@ -42,16 +50,15 @@
             </ul>
           </div>
         </div>
-
-
       </div>
 
       <div class="px-5 pb-5">
-        <a href="javascript:void(0);" class="btn btn-submit btn-success follow-user follow" style="display:block;" data-price="1" data-timeline-id="{{ $timeline->id }}">
+        <a href="javascript:void(0);" class="btn btn-submit btn-success follow-user follow" style="display:block;" data-price="1" data-timeline_id="{{ $timeline->id }}">
           <i class="fa fa-heart"></i> Subscribe
         </a>
       </div>
 
-    </section>
-  </div>
+    </div>
+
+  </section>
 </div>
