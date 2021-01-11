@@ -289,7 +289,6 @@ Route::group(['prefix' => '/{username}', 'middleware' => 'auth'], function ($use
     // Route::post('/', 'TimelineController@posts');
 
     Route::get('/followers', 'UserController@followers');
-
     Route::get('/following', 'UserController@following');
 
     Route::get('/event-guests', 'UserController@getGuestEvents');
@@ -503,10 +502,6 @@ Route::group(['prefix' => 'ajax', 'middleware' => ['auth']], function () {
 
     Route::post('get-youtube-video', 'TimelineController@getYoutubeVideo');
     Route::post('like-post', 'TimelineController@likePost');
-    Route::post('follow-post-free', 'TimelineController@followFreeUser');
-    Route::post('follow-post', 'TimelineController@follow'); // %PSG
-    Route::post('unfollow-post-free', 'TimelineController@unfollowFreeUser');
-    Route::post('unfollow-post/', 'TimelineController@unfollow');
     Route::post('notify-user', 'TimelineController@getNotifications');
     Route::post('post-comment', 'TimelineController@postComment');
     Route::post('page-like', 'TimelineController@pageLike');
@@ -543,7 +538,6 @@ Route::group(['prefix' => 'ajax', 'middleware' => ['auth']], function () {
     // Route::post('groupmember-remove', 'TimelineController@removeGroupMember');
     // Route::post('group-join', 'TimelineController@timelineGroups');
     Route::post('report-post', 'TimelineController@reportPost');
-    // Route::post('follow-user-confirm', 'TimelineController@userFollowRequest');
     Route::post('post-message/{id}', 'MessageController@update');
     Route::post('create-message', 'MessageController@store');
     Route::post('page-report', 'TimelineController@pageReport');
@@ -584,6 +578,9 @@ Route::group(['prefix' => 'ajax', 'middleware' => ['auth']], function () {
     Route::post('add-new-user-list', 'TimelineController@addNewUserList');
     Route::post('get-lists-sort-by', 'TimelineController@getListsSortBy');
 
+    // --
+
+    Route::post('follow/{timeline}', 'TimelineController@follow');
 });
 
 

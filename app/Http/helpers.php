@@ -289,9 +289,7 @@ function isBlockByMe($username)
     return false; // not blocked
 }
 
-/**
- * @return array
- */
+/* %PSG: DEPRECATE
 function filterByBlockedFollowings()
 {
     $id = Auth::id();
@@ -305,6 +303,7 @@ function filterByBlockedFollowings()
 
     return $followingIds;
 }
+ */
 
 /**
  * @return array

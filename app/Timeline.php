@@ -5,7 +5,7 @@ use Eloquent as Model;
 use Intervention\Image\Facades\Image;
 use App\Interfaces\PaymentReceivable;
 
-class Timeline extends Model implements PaymentReceiveable
+class Timeline extends Model implements PaymentReceivable
 {
     //use SoftDeletes;
 
@@ -47,6 +47,10 @@ class Timeline extends Model implements PaymentReceiveable
         }
 
         return $array;
+    }
+
+    public function followers() {  // includes subscribers (ie premium + default followers)
+        return $this->morphToMany('App\User', 'shareable', 'shareables', 'shareable_id', 'sharee_id');
     }
 
     public function posts() {
@@ -176,7 +180,7 @@ class Timeline extends Model implements PaymentReceiveable
                         'base_unit_cost_in_cents' => $amountInCents,
                         'cattrs' => $cattrs ?? [],
                     ]);
-                    $sender->subcribedtimelines()->attach($this->id, [
+                    $sender->followedtimelines()->attach($this->id, [
                         'cattrs' => json_encode($cattrs ?? []),
                     ]);
                     break;

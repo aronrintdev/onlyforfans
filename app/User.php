@@ -69,8 +69,17 @@ class User extends Authenticatable implements PaymentSendable, PaymentReceivable
         return $this->hasMany('App\Fanledger', 'purchaser_id');
     }
 
-    public function timeline() {
+    public function timeline() { // my timeline
         return $this->belongsTo('App\Timeline');
+    }
+
+    /*
+    //public function subscribedtimelines() { // timelines (users) I subscribe to: only premium subscribe
+        //return $this->morphedByMany('App\Timeline', 'shareable', 'shareables', 'sharee_id')->withTimestamps();
+    //}
+     */
+    public function followedtimelines() { // timelines (users) I follow: premium *and* default subscribe (follow)
+        return $this->morphedByMany('App\Timeline', 'shareable', 'shareables', 'sharee_id')->withTimestamps();
     }
 
     /* HERE Jan 11
