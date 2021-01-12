@@ -339,7 +339,7 @@ if(!$user->followers->contains($sessionUser->id) && $user->id != $sessionUser->i
                 }
                 break;
             case PostTypeEnum::SUBSCRIBER:
-                if( $postOwner->followers->contains('id',$viewingUser->id) ) {
+                if( $postOwner->timeline->followers->contains('id',$viewingUser->id) ) {
                     return true; // viewer is a follower
                 } 
                 if( $postOwner->price == 0) {

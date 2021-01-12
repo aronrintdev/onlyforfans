@@ -23,6 +23,7 @@ function trendingTags()
     return $trending_tags;
 }
 
+/*
 function suggestedUsers()
 {
     $sessionUser = Auth::user();
@@ -37,7 +38,8 @@ function suggestedUsers()
     $blockedUsers = User::whereIn('country', $blockCountry)->pluck('id')->toArray();
 
     $suggested_users = '';
-    $followingUsers = $sessionUser->following()->get()->pluck('id')->toArray();
+    //$followingUsers = $sessionUser->following()->get()->pluck('id')->toArray();
+    $followingUsers = $sessionUser->followedtimelines()->get()->pluck('id')->toArray();
 
     if ($admin_users != NULL) {
         $blockedUsers = array_merge($blockedUsers, $admin_users->pluck('user_id')->toArray());
@@ -71,6 +73,7 @@ function suggestedUsers()
 
     return $suggested_users;
 }
+ */
 
 function suggestedGroups()
 {
@@ -289,22 +292,6 @@ function isBlockByMe($username)
     return false; // not blocked
 }
 
-/* %PSG: DEPRECATE
-function filterByBlockedFollowings()
-{
-    $id = Auth::id();
-    $user = User::with('following')->find($id);
-    $followings = $user->following()->pluck('leader_id')->toArray();
-    $clientIp = get_client_ip();
-    $blockedProfiles = BlockedProfile::where('country', '=', $user->country)
-        ->orWhere('ip_address', '=', $clientIp)
-        ->pluck('blocked_by')->toArray();
-    $followingIds = array_diff($followings, $blockedProfiles);
-
-    return $followingIds;
-}
- */
-
 /**
  * @return array
  */
@@ -323,34 +310,6 @@ function get_image_insert_location()
     ];
 }
 
-/**
- * @param $login_id
- * @param $post_user_id
- * @param $timeline_id
- *
- * @return bool
- */
-function canUserSeePost($login_id, $post_user_id, $timeline_id = null)
-{
-    $user = User::findOrFail($post_user_id);
-    $userSettings = DB::table('user_settings')->where('user_id', $user->id)->first();
-    $result = ($userSettings && !empty($userSettings->post_privacy)) ? $userSettings->post_privacy : 'everyone';
-    $followingThisUser = $user->following->contains($login_id);
-    $canSee = false;
-    if ($result == 'only_follow' && $followingThisUser) {
-        $canSee = true;
-    } elseif ($result == 'everyone') {
-        $canSee = true;
-    } elseif ($result == 'only_follow' && !$followingThisUser && $login_id != $timeline_id) {
-        $canSee = false;
-    }
-
-    if ($login_id == $post_user_id || $login_id == $timeline_id) {
-        $canSee = true;
-    }
-    
-    return $canSee;
-}
 
 function canMessageToUser($loginUser, $user)
 {

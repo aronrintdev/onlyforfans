@@ -292,6 +292,10 @@
     }s
 </style>
 
+@php
+  $sessionUser = Auth::user();
+@endphp
+
 <!-- %VIEW: public/themes/default/views/timeline/posts -->
 <div class="container profile-posts">
 	<div class="row">
@@ -413,14 +417,9 @@
                                         @if(count($posts) > 0)
                                             @foreach($posts as $post)
                                               <article class="crate-post" id="tag-post_id_{{$post->id}}">
-                                                @if($post->type == \App\Post::PAID_TYPE)
-                                                    @if($post->user->activeSubscribers->contains(Auth::user()->id)  || $post->user->id == Auth::user()->id)
+                                                  @if ( $post->isViewableByUser($sessionUser) )
                                                         {!! Theme::partial('post',compact('post','timeline','next_page_url', 'user')) !!}
-                                                    @endif
-                                                @else
-                                                    @if(canUserSeePost(Auth::id(), $post->user->id, $user->timeline->id) || $post->type == \App\Post::PRICE_TYPE)
-                                                        {!! Theme::partial('post',compact('post','timeline','next_page_url', 'user')) !!}
-                                                    @endif
+                                                  @endif
                                                 @endif
                                               </article>
                                             @endforeach
@@ -435,16 +434,8 @@
                                         @if(count($posts) > 0)
                                             @foreach($posts as $post)
                                               <article class="crate-post" id="tag-post_id_{{$post->id}}">
-                                                @if($post->type == \App\Post::PAID_TYPE)
-                                                    @if($post->user->activeSubscribers->contains(Auth::user()->id)  || $post->user->id == Auth::user()->id)
-                                                        {{-- Theme::partial('post_condensed_column',compact('post','timeline','next_page_url', 'user','twoColumn')) --}}
-                                                        {!! Theme::partial('post',compact('post','timeline','next_page_url', 'user','twoColumn')) !!}
-                                                    @endif
-                                                @else
-                                                    @if(canUserSeePost(Auth::id(), $post->user->id, $user->timeline->id) || $post->type == \App\Post::PRICE_TYPE)
-                                                        {{-- Theme::partial('post_condensed_column',compact('post','timeline','next_page_url', 'user','twoColumn')) --}}
-                                                        {!! Theme::partial('post',compact('post','timeline','next_page_url', 'user','twoColumn')) !!}
-                                                    @endif
+                                                @if ( $post->isViewableByUser($sessionUser) )
+                                                    {!! Theme::partial('post',compact('post','timeline','next_page_url', 'user','twoColumn')) !!}
                                                 @endif
                                               </article>
                                             @endforeach
@@ -459,14 +450,8 @@
                                             @foreach($postMedia as $post)
                                                 @if(count($post->images()->get()) > 0 && $post->images()->get()->first()->type=='image')
                                                     <div class="timeline-photos">
-                                                        @if($post->type == \App\Post::PAID_TYPE)
-                                                            @if($post->user->activeSubscribers->contains(Auth::user()->id)  || $post->user->id == Auth::user()->id)
-                                                                {!! Theme::partial('post_media',compact('post','timeline','next_page_url', 'user')) !!}
-                                                            @endif
-                                                        @else
-                                                            @if(canUserSeePost(Auth::id(), $post->user->id, $user->timeline->id) || $post->type == \App\Post::PRICE_TYPE)
-                                                                {!! Theme::partial('post_media',compact('post','timeline','next_page_url', 'user')) !!}
-                                                            @endif
+                                                        @if ( $post->isViewableByUser($sessionUser) )
+                                                            {!! Theme::partial('post_media',compact('post','timeline','next_page_url', 'user')) !!}
                                                         @endif
                                                     </div>
                                                 @endif
@@ -479,14 +464,8 @@
                                         <div class="row">
                                             @foreach($postMedia as $post)
                                                 @if(count($post->images()->get()) > 0 && $post->images()->get()->first()->type=='video')
-                                                    @if($post->type == \App\Post::PAID_TYPE)
-                                                        @if($post->user->activeSubscribers->contains(Auth::user()->id)  || $post->user->id == Auth::user()->id)
-                                                            {!! Theme::partial('post_media',compact('post','timeline','next_page_url', 'user')) !!}
-                                                        @endif
-                                                    @else
-                                                        @if(canUserSeePost(Auth::id(), $post->user->id, $user->timeline->id) || $post->type == \App\Post::PRICE_TYPE)
-                                                            {!! Theme::partial('post_media',compact('post','timeline','next_page_url', 'user')) !!}
-                                                        @endif
+                                                    @if ( $post->isViewableByUser($sessionUser) )
+                                                        {!! Theme::partial('post_media',compact('post','timeline','next_page_url', 'user')) !!}
                                                     @endif
                                                 @endif
                                             @endforeach                                            

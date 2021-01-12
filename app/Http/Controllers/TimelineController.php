@@ -58,7 +58,7 @@ use Validator;
 use App\Enums\MediafileTypeEnum;
 use App\Enums\PaymentTypeEnum;
 use App\Libs\UserMgr;
-
+use App\Libs\FeedMgr;
 
 class TimelineController extends AppBaseController
 {
@@ -379,43 +379,20 @@ class TimelineController extends AppBaseController
         $user_post = 'showfeed';
         $theme = Theme::uses(Setting::get('current_theme', 'default'))->layout('default');
 
-        $timeline = Timeline::where('username', $sessionUser->username)->first();
-
-        $id = Auth::id();
-
-        $followingIds = filterByBlockedFollowings();
+        $timeline = $sessionUser->timeline;
 
         $trending_tags = trendingTags();
-        $suggested_users = suggestedUsers();
+        $suggested_users = FeedMgr::getSuggestedUsers($sessionUser); // suggestedUsers();
         $suggested_groups = suggestedGroups();
         $suggested_pages = suggestedPages();
 
-        // Check for hashtag
         if ($request->hashtag) {
             $hashtag = '#'.$request->hashtag;
-
-            $posts = Post::where('description', 'like', "%{$hashtag}%")->where('active', 1)->whereIn('timeline_id', DB::table('followers')->where('follower_id', $id)->whereIn('leader_id', $followingIds)->pluck('leader_id'))->latest()->paginate(Setting::get('items_page'));
-        } // else show the normal feed
-        else {
-            $query = Post::where('active', 1)->whereIn('user_id', function ($query) use ($id, $followingIds, $timeline) {
-                $query->select('leader_id')
-                    ->from('followers')
-                    ->where('follower_id', $id)
-                    ->whereIn('leader_id', $followingIds);
-            })
-//            })->orWhere('user_id', $id)->where('active', 1)->limit(10);+
-                ->orWhere(function (Builder $query) use ($id, $timeline) {
-                    $query->whereIn('id', function ($query1) use ($id, $timeline) {
-                        $query1->select('post_id')
-                            ->from('pinned_posts')
-                            ->where('user_id', $id);
-//                    ->where('active', 1);
-                    })
-                        ->orWhere('user_id', $id)
-                        ->orWhere('timeline_id', $timeline->id);
-                });
-                
-               $posts = $query->where('active', 1)->latest()->paginate(Setting::get('items_page'));
+            $posts = FeedMgr::getPosts($sessionUser, [
+                'hashtag' => $hashtag,
+            ]);
+        } else {
+            $posts = FeedMgr::getPosts($sessionUser);
         }
 
         if ($request->ajax) {
@@ -444,7 +421,8 @@ class TimelineController extends AppBaseController
         }
 
         //$saved_users = Auth::user()->followers()->where('status', '=', 'approved')->with('tips')->get();
-        $saved_users = Auth::user()->followers()->where('status', '=', 'approved')->get();
+        //$saved_users = Auth::user()->followers()->where('status', '=', 'approved')->get();
+        $saved_users = collect(); // %TODO
 
         $subscriptionAmount = 0;
 
@@ -1514,7 +1492,7 @@ Log::info('MARK-2.a'); // post-image-3
 
         }
         //$follow = User::where('timeline_id', '=', $timeline_id)->first();
-        return response()->json( array_merge(['status' => '200'], $response);
+        return response()->json( array_merge(['status' => '200'], $response));
     }
 
     // %%% -----

@@ -47,6 +47,10 @@ class SubscribeableTest extends TestCase
         $this->assertGreaterThan(0, $follower->followedtimelines->count());
         $this->assertSame($creator->timeline->id, $follower->followedtimelines[0]->id);
 
+        $this->assertNotNull($creator->timeline->followers);
+        $this->assertGreaterThan(0, $creator->timeline->followers->count());
+        $this->assertSame($follower->id, $creator->timeline->followers[0]->id);
+
         //$this->assertInstanceOf(\App\User::class, $mediafile->sharees[0]);
     }
 
@@ -93,9 +97,11 @@ class SubscribeableTest extends TestCase
                      $obj->sharees()->detach();
                 }
                 if ( $obj instanceof \App\User ) {
+                     $obj->followedtimelines()->detach();
                      $obj->ledgersales->each( function($o) { $o->forceDelete(); } );
                      $obj->ledgerpurchases->each( function($o) { $o->forceDelete(); } );
                      $obj->posts->each( function($o) { $o->forceDelete(); } );
+                     $obj->timeline->followers()->detach();
                      $obj->timeline->forceDelete();
                 }
                 $obj->delete();
