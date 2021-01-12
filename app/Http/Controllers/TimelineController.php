@@ -1583,245 +1583,142 @@ Log::info('MARK-2.a'); // post-image-3
         return $theme->scope('timeline/public-posts', compact('timeline', 'liked_post', 'user', 'posts', 'liked_pages', 'followRequests', 'joined_groups', 'own_pages', 'own_groups', 'follow_user_status', 'following_count', 'followers_count', 'follow_confirm', 'user_post', 'timeline_post', 'joined_groups_count', 'next_page_url', 'user_events', 'guest_events'))->render();
     }
 
-    public function posts($username)
+    public function posts(Request $request, $username)
     {
-        if(! checkBlockedProfiles($username)){
+        $sessionUser = Auth::user();
+
+        if ( !checkBlockedProfiles($username) || isBlockByMe($username) ) {
             return view('errors.blocked_profile');
-        } elseif (isBlockByMe($username)) {
-            $customMessage = 'You have blocked this user.';
-            return view('errors.blocked_profile', compact('customMessage'));
-        }
+        } 
 
-        $favouritePosts = [];
-        $period = 'all';
-        $sort_by = 'latest';
-        $order_by = 'asc';
-
-        $query_period = '';
-        $query_sortby = '';
-        $query_orderby = '';
-
-        $startDate = date('y-m-d',strtotime("01-01-1970"));
-
-        if (isset($_GET['p'])) {
-
-            $period = $_GET['p'];
-
-            if ($period == '3m')
+        $period = $request->input('p', 'all');
+        switch ( $period ) {
+            case '3m':
                 $startDate = date('y-m-d',strtotime(Carbon::now()->subMonth(3)));
-            else if ($period == '1m')
+                break;
+            case '1m':
                 $startDate = date('y-m-d',strtotime(Carbon::now()->subMonth(1)));
-            else if ($period == '1w')
+                break;
+            case '1w':
                 $startDate = date('y-m-d',strtotime(Carbon::now()->subWeek(1)));
-            else
-                $period = 'all';
+                break;
+            default:
+                $startDate = date('y-m-d',strtotime("01-01-1970"));
         }
 
-        if (isset($_GET['s'])) {
-            $sort_by = $_GET['s'];
-
-            if ($sort_by != 'liked')
-                $sort_by = 'latest';
+        $sort_by = $request->input('s', 'latest');
+        if ($sort_by !== 'liked') {
+            $sort_by = 'latest';
         }
 
-        if (isset($_GET['o'])) {
-            $order_by = $_GET['o'];
-
-            if ($order_by != "desc" && $order_by != "asc")
-                $order_by = "asc";
+        $order_by = $request->input('o', 'asc');
+        if ($order_by != 'desc' && $order_by != 'asc') {
+            $order_by = 'asc';
         }
 
-
-        if (!Auth::check()) {
-            $admin_role_id = Role::where('name', '=', 'admin')->first();
-            $timeline = Timeline::where('username', $username)->first();
-            $user = User::where('timeline_id', $timeline['id'])->first();
-//            $posts = $timeline->posts()->where('active', 1)->orderBy('created_at', 'desc')->with('comments')->paginate(Setting::get('items_page'));
-
-            $id = $user->id;
-
-//            if (Auth::user()->id == $id) {
-//                $posts = Post::WhereIn('id', function ($query1) use ($id) {
-//                    $query1->select('post_id')
-//                        ->from('pinned_posts')
-//                        ->where('user_id', $id)
-//                        ->where('active', 1);
-//                })->orWhere('user_id', $id)->where('active', 1)->latest()->paginate(Setting::get('items_page'));
-//            } else {
-                $posts = Post::Where('user_id', $user->id)->Where('timeline_id', $timeline->id)->whereDate('created_at', '>=', $startDate)->where('active', 1)->orderBy('created_at', $order_by == 'desc' ? 'asc' : 'desc');
-
-                $postMedia = $posts->get();
-                $posts = $posts->paginate(Setting::get('items_page'));
-//            }
-
-//            $user_lists = UserListType::where(['user_id' => Auth::user()->id])->with('lists')->get();
-//
-//            if (!empty($user_lists)) {
-//
-//                foreach ($user_lists as $user_list) {
-//                    if (UserList::where(['list_type_id' => $user_list->id, 'saved_user_id' => $id])->get()->isEmpty()) {
-//                        $user_list->state = 0;
-//                    } else {
-//                        $user_list->state = 1;
-//                    }
-//                }
-//            }
-
-            if ($timeline->type == 'user') {
-                $follow_user_status = '';
-                $user = User::where('timeline_id', $timeline['id'])->first();
-                $followRequests = $user->followers()->where('status', '=', 'pending')->get();
-                $liked_pages = $user->pageLikes()->get();
-                $joined_groups = $user->groups()->get();
-                $own_pages = $user->own_pages();
-                $own_groups = $user->own_groups();
-                $following_count = $user->following()->where('status', '=', 'approved')->get()->count();
-                $followers_count = $user->followers()->where('status', '=', 'approved')->get()->count();
-                $joined_groups_count = $user->groups()->where('role_id', '!=', $admin_role_id->id)->where('status', '=', 'approved')->get()->count();
-                $follow_user_status = DB::table('followers')->where('follower_id', '=', $user->id)
-                    ->where('leader_id', '=', $user->id)->first();
-                $user_events = $user->events()->whereDate('end_date', '>=', date('Y-m-d', strtotime(Carbon::now())))->get();
-                $guest_events = $user->getEvents();
-    
-    
-                if ($follow_user_status) {
-                    $follow_user_status = $follow_user_status->status;
-                }
-    
-                $confirm_follow_setting = $user->getUserSettings($user->id);
-                $follow_confirm = $confirm_follow_setting->confirm_follow;
-    
-                $live_user_settings = $user->getUserPrivacySettings($user->id, $user->id);
-                $privacy_settings = explode('-', $live_user_settings);
-                $timeline_post = $privacy_settings[0];
-                $user_post = $privacy_settings[1];
-            } else {
-                $user = User::where('id', $user->id)->first();
-            }
-
-            $next_page_url = url('ajax/get-more-posts?page=2&username='.rawurlencode($username).'&p='.$period.'&s='.$sort_by.'&o='.$order_by);
-    
-            $theme = Theme::uses(Setting::get('current_theme', 'default'))->layout('public');
-            $theme->setTitle(trans('common.posts').' '.Setting::get('title_seperator').' '.Setting::get('site_title').' '.Setting::get('title_seperator').' '.Setting::get('site_tagline'));
-    
-            // liked_posts
-            $liked_post = \Illuminate\Support\Facades\DB::table('post_likes')->where('user_id', $user->id)->get();
-    
-            return $theme->scope('timeline/public-posts',
-                compact('timeline', 'liked_post', 'user', 'posts', 'liked_pages', 'followRequests', 'joined_groups',
-                    'own_pages', 'own_groups', 'follow_user_status', 'following_count', 'followers_count', 'follow_confirm', 'user_post',
-                    'timeline_post', 'joined_groups_count', 'next_page_url', 'user_events', 'guest_events', 'period', 'sort_by', 'order_by', 'postMedia'))->render();
-
+        $admin_role_id = Role::where('name', 'admin')->first();
+        $timeline = Timeline::where('username', $username)->first();
+        if ($timeline == NULL) {
+            abort(404);
         }
-        else {
-        
-            $admin_role_id = Role::where('name', '=', 'admin')->first();
-            $timeline = Timeline::where('username', $username)->first();
-            
-            if ($timeline == NULL) {
-                abort(404);
-            }
+        $creator = $timeline->user; // owner
 
-            $user = User::where('timeline_id', $timeline['id'])->first();
+        $filters = [
+            'start_date' => $startDate,
+        ];
+        $pageSize = Setting::get('items_page');
 
-            $id = $user->id;
-//            $posts = $timeline->posts()->where('active', 1)->orderBy('created_at', 'desc')->with('comments')->paginate(Setting::get('items_page'));
+        $posts = FeedMgr::getPostsByTimeline($sessionUser??null, $timeline, $filters=[], $order_by, $pageSize);
+        $postMedia = collect(); // $query->get(); // %TODO %FIXME
 
-            if (Auth::user()->id == $id) {
+        $favouritePosts = empty($sessionUser)
+            ? collect()
+            : Post::with('images')->has('images')
+                ->where('user_id', $creator->id)
+                ->where('active', 1)
+                ->orderBy('created_at', 'desc')->get();
 
-                $posts = (Post::WhereIn('id', function ($query1) use ($id, $startDate) {
-                    $query1->select('post_id')
-                        ->from('pinned_posts')
-                        ->where('user_id', $id)
-                        ->whereDate('created_at', '>=', $startDate)
-                        ->where('active', 1);
-                })->orWhere(function ($query) use ($timeline, $id){
-                    $query->where('timeline_id', $timeline->id)
-                    ->orWhere('user_id', $id);
-                })->whereDate('created_at', '>=', $startDate)->where('active', 1))->orderBy('created_at', $order_by == 'desc' ? 'asc' : 'desc');
-                
-            } else {
-                $posts = Post::Where('user_id', $id)->where('active', 1)->orWhere(function ($query) use ($timeline){
-                    $query->where('timeline_id', $timeline->id);
-//                        ->orWhere('user_id', Auth::id());
-                })->whereDate('created_at', '>=', $startDate)->where('active', 1)->orderBy('created_at', $order_by == 'desc' ? 'asc' : 'desc');
-            }
-
-            if ($user->paidSubscribers->where('id', Auth::id())->first() || Auth::id() == $user->id) {
-                $favouritePosts = Post::with('images')->has('images')
-                    ->where('user_id', $user->id)
-                    ->orderBy('created_at', 'desc')
-                    ->where('active', 1)
-                    ->get();
-            }
-            
-            $postMedia = $posts->get();
-            $posts = $posts->paginate(Setting::get('items_page'));
-            $user_lists = UserListType::where(['user_id' => Auth::user()->id])->with('lists')->get();
-
-            if (!empty($user_lists)) {
-
-                foreach ($user_lists as $user_list) {
-                    if (UserList::where(['list_type_id' => $user_list->id, 'saved_user_id' => $id])->get()->isEmpty()) {
-                        $user_list->state = 0;
-                    } else {
-                        $user_list->state = 1;
-                    }
+        $user_lists = empty($sessionUser)
+            ? collect()
+            : UserListType::where(['user_id' => $sessionUser->id])->with('lists')->get();
+        if ( $user_lists->isNotEmpty() ) {
+            foreach ($user_lists as $user_list) {
+                if (UserList::where(['list_type_id' => $user_list->id, 'saved_user_id' => $creator->id])->get()->isEmpty()) {
+                    $user_list->state = 0;
+                } else {
+                    $user_list->state = 1;
                 }
             }
+        }
 
-            if ($timeline->type == 'user') {
-                $follow_user_status = '';
-                $user = User::where('timeline_id', $timeline['id'])->first();
-                $followRequests = $user->followers()->where('status', '=', 'pending')->get();
-                $liked_pages = $user->pageLikes()->get();
-                $joined_groups = $user->groups()->get();
-                $own_pages = $user->own_pages();
-                $own_groups = $user->own_groups();
-                $following_count = $user->following()->where('status', '=', 'approved')->get()->count();
-                $followers_count = $user->followers()->where('status', '=', 'approved')->get()->count();
-                $joined_groups_count = $user->groups()->where('role_id', '!=', $admin_role_id->id)->where('status', '=', 'approved')->get()->count();
-                $follow_user_status = DB::table('followers')->where('follower_id', '=', Auth::user()->id)
-                                    ->where('leader_id', '=', $user->id)->first();
-                $user_events = $user->events()->whereDate('end_date', '>=', date('Y-m-d', strtotime(Carbon::now())))->get();
-                $guest_events = $user->getEvents();
-    
-    
-                if ($follow_user_status) {
-                    $follow_user_status = $follow_user_status->status;
-                }
-    
-                $confirm_follow_setting = $user->getUserSettings(Auth::user()->id);
-                $follow_confirm = $confirm_follow_setting->confirm_follow;
-    
-                $live_user_settings = $user->getUserPrivacySettings(Auth::user()->id, $user->id);
-                $privacy_settings = explode('-', $live_user_settings);
-                $timeline_post = $privacy_settings[0];
-                $user_post = $privacy_settings[1];
-            } else {
-                $user = User::where('id', Auth::user()->id)->first();
-            }
-    
-            $next_page_url = url('ajax/get-more-posts?page=2&username='.rawurlencode($username).'&p='.$period.'&s='.$sort_by.'&o='.$order_by);
-    
-            $theme = Theme::uses(Setting::get('current_theme', 'default'))->layout('default');
-            $theme->setTitle(trans('common.posts').' '.Setting::get('title_seperator').' '.Setting::get('site_title').' '.Setting::get('title_seperator').' '.Setting::get('site_tagline'));
-    
-            // liked_posts
-            $liked_post = \Illuminate\Support\Facades\DB::table('post_likes')->where('user_id', \Illuminate\Support\Facades\Auth::user()->id)->get();
-
-            $sessionUser = Auth::user();
-            $this->_php2jsVars['session'] = [
-                'username' => $sessionUser->username,
-            ];
+        if ( empty($sessionUser) ) {
+            $confirm_follow_setting = $creator->getUserSettings($creator->id);
+            $follow_confirm = $confirm_follow_setting->confirm_follow;
+            $live_user_settings = $creator->getUserPrivacySettings($creator->id, $creator->id);
+            $liked_post = DB::table('post_likes')->where('user_id', $creator->id)->get();
+            $template = 'timeline/public-posts';
+            $layout = 'public';
+        } else {
+            $confirm_follow_setting = $creator->getUserSettings($sessionUser->id);
+            $follow_confirm = $confirm_follow_setting->confirm_follow;
+            $live_user_settings = $creator->getUserPrivacySettings($sessionUser->id, $creator->id);
+            $liked_post = DB::table('post_likes')->where('user_id', $sessionUser->id)->get();
+            $template = 'timeline/posts';
+            $layout = 'default';
+            $this->_php2jsVars['session'] = [ 'username' => $sessionUser->username ];
             \View::share('g_php2jsVars',$this->_php2jsVars);
-    
-            return $theme->scope('timeline/posts',
-                compact('timeline', 'liked_post', 'user', 'posts', 'liked_pages', 'followRequests', 'joined_groups', 'own_pages',
-                    'own_groups', 'follow_user_status', 'following_count', 'followers_count', 'follow_confirm', 'user_post', 'timeline_post',
-                    'joined_groups_count', 'next_page_url', 'user_events', 'guest_events', 'user_lists', 'period', 'sort_by', 'order_by', 'favouritePosts', 'postMedia'))->render();
-        
         }
+
+        $privacy_settings = explode('-', $live_user_settings);
+        $timeline_post = $privacy_settings[0];
+        $user_post = $privacy_settings[1];
+
+        $followRequests = $creator->timeline->followers()->where('is_approved', 0)->get(); // pending requests
+        $liked_pages = $creator->pageLikes()->get();
+        $joined_groups = $creator->groups()->get();
+        $own_pages = $creator->own_pages();
+        $own_groups = $creator->own_groups();
+        $following_count = $creator->followedtimelines()->where('is_approved', 1)->count();
+        $followers_count = $creator->timeline->followers()->where('is_approved',1)->count();
+        $joined_groups_count = $creator->groups()->where('role_id', '<>', $admin_role_id->id)->where('status', 'approved')->get()->count();
+        $user_events = $creator->events()->whereDate('end_date', '>=', date('Y-m-d', strtotime(Carbon::now())))->get();
+        $guest_events = $creator->getEvents();
+
+        $follow_user_status = DB::table('followers')->where('follower_id', $sessionUser->id)->where('leader_id', $creator->id)->pluck('status');
+        $next_page_url = url('ajax/get-more-posts?page=2&username='.rawurlencode($username).'&p='.$period.'&s='.$sort_by.'&o='.$order_by);
+
+        $theme = Theme::uses(Setting::get('current_theme', 'default'))->layout($layout);
+        $theme->setTitle(trans('common.posts').' '.Setting::get('title_seperator').' '.Setting::get('site_title').' '.Setting::get('title_seperator').' '.Setting::get('site_tagline'));
+
+        $user = $creator;
+
+        return $theme->scope($template, compact('timeline',
+            'liked_post',
+            'user',
+            'posts',
+            'liked_pages',
+            'followRequests',
+            'joined_groups',
+            'own_pages',
+            'own_groups',
+            'follow_user_status',
+            'following_count',
+            'followers_count',
+            'follow_confirm',
+            'user_post',
+            'timeline_post',
+            'joined_groups_count',
+            'next_page_url',
+            'user_events',
+            'guest_events',
+            'user_lists',
+            'period',
+            'sort_by',
+            'order_by',
+            'favouritePosts',
+            'postMedia'
+        ))->render();
+
     } // posts()
     
 
@@ -1964,7 +1861,7 @@ Log::info('MARK-2.a'); // post-image-3
 
     public function reportPost(Request $request)
     {
-        $post = Post::where('id', '=', $request->post_id)->first();
+        $post = Post::where('id', $request->post_id)->first();
         $reported = $post->managePostReport($request->post_id, Auth::user()->id);
 
         if ($reported) {

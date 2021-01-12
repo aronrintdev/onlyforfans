@@ -1,17 +1,20 @@
 <!-- %VIEW: themes/default/partials/user-leftbar -->
+@php
+  $sessionUser = Auth::user();
+@endphp
 @if (        
-        ($timeline->type == 'user' && $timeline->id == Auth::user()->timeline_id) ||
-        ($timeline->type == 'page' && $timeline->page->is_admin(Auth::user()->id) == true) ||
-        ($timeline->type == 'group' && $timeline->groups->is_admin(Auth::user()->id) == true)
+        ($timeline->type == 'user' && $timeline->id == $sessionUser->timeline_id) ||
+        ($timeline->type == 'page' && $timeline->page->is_admin($sessionUser->id) == true) ||
+        ($timeline->type == 'group' && $timeline->groups->is_admin($sessionUser->id) == true)
 )
 @endif
 
 <div class="user-bio-block follow-links">
-    @if($user->id != Auth::user()->id)
+    @if($user->id != $sessionUser->id)
     <div class="online">
         <div class="bio-header">Message</div>
         <div class="bio-description">
-            @if(canMessageToUser(Auth::user(), $user))
+            @if(canMessageToUser($sessionUser, $user))
     			  <a href="#" class="btn btn-submit btn-success" style="display:block; margin-top:10px;" onClick="chatBoxes.sendMessage({{ $timeline->user->id }})">
     				<i class="fa fa-inbox"></i> {{ trans('common.message') }}
     			  </a>
@@ -19,11 +22,11 @@
         </div>
     </div>
     @endif
-    @if($user->is_follow_for_free && $user->id != Auth::user()->id)
+    @if($user->is_follow_for_free && $user->id != $sessionUser->id)
     <div class="follow">
         <div class="bio-header">Follow</div>
         <div class="bio-description">
-            @if(!$user->followers->contains(Auth::user()->id))
+          @if(!$user->timeline->followers->contains($sessionUser->id))
             <div class="follow-btn">
                 <a href="javascript:void(0);" class="btn btn-submit btn-success follow-user follow" style="display:block;" data-price="{{ $user->price }}" data-follow="1"  data-timeline-id="{{ $timeline->id }}">
                     Follow for Free
@@ -49,11 +52,11 @@
 	    </div>
     </div>
     @endif
-    @if($user->id != Auth::user()->id)
+    @if($user->id != $sessionUser->id)
     <div class="subscribe">
         <div class="bio-header">Subscribe</div>
 	    <div class="bio-description">
-			@if(!$user->followers->contains(Auth::user()->id))
+        @if(!$user->timeline->followers->contains($sessionUser->id))
 				<div class="left-col">
 					<a href="javascript:void(0);" class="btn btn-submit btn-success OFF-follow-user follow clickme_to-show_follow_confirm" style="display:block;" data-price="{{ $user->price }}"  data-timeline-id="{{ $timeline->id }}">
 						<i class="fa fa-heart"></i> {{ trans('common.follow') }}
@@ -79,7 +82,7 @@
 	    </div>
     </div>
     @endif
-    @if($user->id != Auth::user()->id)
+    @if($user->id != $sessionUser->id)
         <div class="subscribe">
             <div class="bio-header"> {{ trans('common.send_tip') }}</div>
             <div class="bio-description">

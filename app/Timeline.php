@@ -61,7 +61,7 @@ class Timeline extends Model implements PaymentReceivable
         return $this->hasMany('App\Story');
     }
 
-    public function user() {
+    public function user() { // timeline owner/creator
         return $this->hasOne('App\User');
     }
 

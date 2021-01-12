@@ -16,6 +16,8 @@ use App\User;
 use App\Timeline;
 use App\Enums\PaymentTypeEnum;
 
+// [ ] %TODO: Pinned posts
+
 class FeedMgr {
 
     public static function getSuggestedUsers(User $follower, array $attrs=[]) : ?Collection
@@ -32,16 +34,20 @@ class FeedMgr {
     }
 
     //public static function getPosts(User $follower, array $attrs=[]) : ?Collection
-    public static function getPosts(User $follower, array $attrs=[]) : ?LengthAwarePaginator
+    public static function getPosts(User $follower, array $filters=[]) : ?LengthAwarePaginator
     {
         //$followingIds = filterByBlockedFollowings();
         //$timeline = $follower->timeline;
 
         $query = Post::where('active', 1);
 
-        if ( array_key_exists('hashtag', $attrs) && !empty($attrs['hashtag']) ) {
-            $hashtag = $attrs['hashtag'];
+        if ( array_key_exists('hashtag', $filters) && !empty($filters['hashtag']) ) {
+            $hashtag = $filters['hashtag'];
             $query->where('descripton', 'LIKE', "%{$hashtag}%");
+        }
+
+        if ( array_key_exists('start_date', $filters) && !empty($filters['start_date']) ) {
+            $query->whereDate('created_at', '>=', $filters['start_date']);
         }
 
         // belongs to timeline(s) that I'm following
@@ -49,39 +55,43 @@ class FeedMgr {
             $q1->whereIn('timeline_id', $follower->followedtimelines->pluck('id'));
         });
 
-        // or posts I follow directly 
+        // or posts I follow directly %TODO
 
-        // or posts I've purchased
+        // or posts I've purchased %TODO
 
-        // TEST: ensure no duplicates
-        //$posts = $query->latest()->get();
+        // %TODO: TEST: ensure no duplicates
         $posts = $query->latest()->paginate(Setting::get('items_page'));
-
-            /*
-
-        if ( array_key_exists('hashtag', $attrs) && !empty($attrs['hashtag']) ) {
-            $hashtag = $attrs['hashtag'];
-            $followerIDs = DB::table('followers')->where('follower_id', $follower->id)->whereIn('leader_id', $followingIds)->pluck('leader_id');
-            $posts = Post::where('description', 'like', "%{$hashtag}%")
-                ->where('active', 1)
-                ->whereIn('timeline_id', $followerIDs)
-                ->latest()
-                ->paginate(Setting::get('items_page'));
-        } else {
-            // show the normal feed
-            $query = Post::where('active', 1)->whereIn('user_id', function ($query) use (&$follower, $followingIds, $timeline) {
-                $query->select('leader_id')->from('followers')->where('follower_id', $follower->id)->whereIn('leader_id', $followingIds);
-            })->orWhere(function ($query) use (&$follower, $timeline) {
-                $query->whereIn('id', function ($query1) use (&$follower, $timeline) {
-                    $query1->select('post_id')->from('pinned_posts')->where('user_id', $follower->id);
-                })->orWhere('user_id', $follower->id)
-                  ->orWhere('timeline_id', $timeline->id);
-            });
-            $posts = $query->where('active', 1)->latest()->paginate(Setting::get('items_page'));
-        }
-             */
-
         return $posts;
+    }
+
+    // %NOTE $follower could be null for guest user  %TODO
+    public static function getPostsByTimeline(User $follower, Timeline $timeline, array $filters=[], $sortBy='asc', $take=10) : ?LengthAwarePaginator
+    {
+        //$followingIds = filterByBlockedFollowings();
+        //$timeline = $follower->timeline;
+
+        $query = Post::where('active', 1);
+
+        if ( array_key_exists('hashtag', $filters) && !empty($filters['hashtag']) ) {
+            $hashtag = $filters['hashtag'];
+            $query->where('descripton', 'LIKE', "%{$hashtag}%");
+        }
+
+        if ( array_key_exists('start_date', $filters) && !empty($filters['start_date']) ) {
+            $query->whereDate('created_at', '>=', $filters['start_date']);
+        }
+
+        // belongs to timeline(s) that I'm following
+        $query->where( function($q1) use(&$follower, &$timeline) {
+            $q1->where('timeline_id', $timeline->id);
+        });
+
+        // or posts I follow directly %TODO
+
+        // or posts I've purchased %TODO
+
+        // %TODO: TEST: ensure no duplicates
+        return $query->latest()->paginate($take);
     }
 
 }

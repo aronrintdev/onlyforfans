@@ -420,7 +420,6 @@
                                                   @if ( $post->isViewableByUser($sessionUser) )
                                                         {!! Theme::partial('post',compact('post','timeline','next_page_url', 'user')) !!}
                                                   @endif
-                                                @endif
                                               </article>
                                             @endforeach
                                         @else
