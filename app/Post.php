@@ -38,6 +38,9 @@ class Post extends Model implements Ownable, PaymentReceivable
     public function sharees() { // can be shared with many users (via [shareables])
         return $this->morphToMany('App\User', 'shareable', 'shareables', 'shareable_id', 'sharee_id')->withTimestamps();
     }
+    //public function shares() {
+        //return $this->belongsToMany('App\User', 'post_shares', 'post_id', 'user_id');
+    //}
     //public function users_shared() {
         //return $this->belongsToMany('App\User', 'post_shares', 'post_id', 'user_id');
     //}
@@ -70,9 +73,6 @@ class Post extends Model implements Ownable, PaymentReceivable
         //return $this->belongsToMany('App\User', 'post_tips', 'post_id', 'user_id')->withPivot('amount')->withTimestamps();
     //}
 
-    public function shares() {
-        return $this->belongsToMany('App\User', 'post_shares', 'post_id', 'user_id');
-    }
 
     public function usersSaved() {
         return $this->belongsToMany('App\User', 'saved_posts', 'post_id', 'user_id');
@@ -181,16 +181,20 @@ class Post extends Model implements Ownable, PaymentReceivable
         return $result;
     }
 
+    // Is the owner of this post an approved follower of the session user? | returns settings.comment_privacy field or boolean (?)
     public function chkUserFollower($login_id, $post_user_id)
     {
-        $followers = DB::table('followers')->where('follower_id', $post_user_id)->where('leader_id', $login_id)->where('status', '=', 'approved')->first();
+        //$isApprovedFollower = DB::table('followers')->where('follower_id', $post_user_id)->where('leader_id', $login_id)->where('status', 'approved')->count();
 
-        if ($followers) {
+        $sessionUser = User::findOrFail($login_id);
+        $postOwner = User::findOrFail($post_user_id);
+        $isApprovedFollower = $sessionUser->timeline->followers->contains($postOwner->id);
+        if ($isApprovedFollower) {
             $userSettings = DB::table('user_settings')->where('user_id', $login_id)->first();
             $result = $userSettings ? $userSettings->comment_privacy : false;
-
             return $result;
         }
+        return null;
     }
 
     public function chkUserSettings($login_id)
@@ -358,21 +362,13 @@ if(!$user->followers->contains($sessionUser->id) && $user->id != $sessionUser->i
         $user_follower = $this->chkUserFollower($sessionUser->id,$this->user_id);
         $user_setting = $this->chkUserSettings($this->user_id);
     
-        $is = false;
-        if($user_follower != NULL) {
-            if($user_follower == "only_follow") {
-                $is = true;
-            }elseif ($user_follower == "everyone") {
-                $is = true;
-            }
-        } else {
-            if($user_setting){
-                if($user_setting == "everyone"){
-                    $is = true;
-                }
-            }
+        if ( !is_null($user_follower) && ($user_follower==="only_follow" || $user_follower==="everyone") ) {
+            return true;
+        } 
+        if ( $user_setting && $user_setting == "everyone" ) {
+            return true;
         }
-        return $is;
+        return false;
     }
 
 }

@@ -445,12 +445,12 @@
                                     </li>
                                 @endif
 
-                                @if($post->shares->count() > 0)
+                                @if($post->sharees->count() > 0)
                                     <?php
-                                    $shared_ids = $post->shares->pluck('id')->toArray();
-                                    $shared_names = $post->shares->pluck('name')->toArray(); ?>
+                                    $shared_ids = $post->sharees->pluck('id')->toArray();
+                                    $shared_names = $post->sharees->pluck('name')->toArray(); ?>
                                     <li>
-                                        <a href="#" class="show-users-modal" data-html="true" data-heading="{{ trans('common.shares') }}"  data-users="{{ implode(',', $shared_ids) }}" data-original-title="{{ implode('<br />', $shared_names) }}"><span class="count-circle"><i class="fa fa-share"></i></span> {{ $post->shares->count() }} {{ trans('common.shares') }}</a>
+                                        <a href="#" class="show-users-modal" data-html="true" data-heading="{{ trans('common.shares') }}"  data-users="{{ implode(',', $shared_ids) }}" data-original-title="{{ implode('<br />', $shared_names) }}"><span class="count-circle"><i class="fa fa-share"></i></span> {{ $post->sharees->count() }} {{ trans('common.shares') }}</a>
                                     </li>
                                 @endif
 

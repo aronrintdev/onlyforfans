@@ -1282,14 +1282,6 @@ class UserController extends AppBaseController
         $followRequests = $user->followers()->where('status', '=', 'pending')->get();
         $following_count = $user->following()->where('status', '=', 'approved')->get()->count();
         $followers_count = $user->followers()->where('status', '=', 'approved')->get()->count();
-        $follow_user_status = '';
-        $follow_user_status = DB::table('followers')->where('follower_id', '=', Auth::user()->id)
-            ->where('leader_id', '=', $user->id)->first();
-
-        if ($follow_user_status) {
-            $follow_user_status = $follow_user_status->status;
-        }
-
         $confirm_follow_setting = $user->getUserSettings(Auth::user()->id);
         $follow_confirm = $confirm_follow_setting->confirm_follow;
 
@@ -1308,7 +1300,7 @@ class UserController extends AppBaseController
         // liked_posts
         $liked_post = DB::table('post_likes')->where('user_id', \Illuminate\Support\Facades\Auth::user()->id)->get();
 
-        return $theme->scope('users/followers', compact('timeline', 'user', 'liked_post', 'followers', 'followRequests', 'own_groups', 'own_pages', 'follow_user_status', 'following_count', 'followers_count', 'follow_confirm', 'user_post', 'joined_groups_count', 'user_events', 'guest_events'))->render();
+        return $theme->scope('users/followers', compact('timeline', 'user', 'liked_post', 'followers', 'followRequests', 'own_groups', 'own_pages', 'following_count', 'followers_count', 'follow_confirm', 'user_post', 'joined_groups_count', 'user_events', 'guest_events'))->render();
     }
 
     public function following($username)
@@ -1366,13 +1358,6 @@ class UserController extends AppBaseController
         $following_count = $user->following()->where('status', '=', 'approved')->get()->count();
         $followers_count = $user->followers()->where('status', '=', 'approved')->get()->count();
         $joined_groups_count = $user->groups()->where('role_id', '!=', 1)->where('status', '=', 'approved')->get()->count();
-        $follow_user_status = '';
-        $follow_user_status = DB::table('followers')->where('follower_id', '=', Auth::user()->id)
-            ->where('leader_id', '=', $user->id)->first();
-
-        if ($follow_user_status) {
-            $follow_user_status = $follow_user_status->status;
-        }
 
         $confirm_follow_setting = $user->getUserSettings(Auth::user()->id);
         $follow_confirm = $confirm_follow_setting->confirm_follow;
@@ -1389,7 +1374,7 @@ class UserController extends AppBaseController
         $theme = Theme::uses(Setting::get('current_theme', 'default'))->layout('default');
         $theme->setTitle(trans('common.following').' '.Setting::get('title_seperator').' '.Setting::get('site_title').' '.Setting::get('title_seperator').' '.Setting::get('site_tagline'));
 
-        return $theme->scope('users/guestevents', compact('timeline', 'user', 'following', 'followRequests', 'follow_user_status', 'following_count', 'followers_count', 'follow_confirm', 'user_post', 'joined_groups_count', 'own_pages', 'own_groups', 'user_events', 'guest_events'))->render();
+        return $theme->scope('users/guestevents', compact('timeline', 'user', 'following', 'followRequests', 'following_count', 'followers_count', 'follow_confirm', 'user_post', 'joined_groups_count', 'own_pages', 'own_groups', 'user_events', 'guest_events'))->render();
     }
 
     public function likedPages($username)
@@ -1401,13 +1386,6 @@ class UserController extends AppBaseController
         $following_count = $user->following()->where('status', '=', 'approved')->get()->count();
         $followers_count = $user->followers()->where('status', '=', 'approved')->get()->count();
         $followRequests = $user->followers()->where('status', '=', 'pending')->get();
-        $follow_user_status = '';
-        $follow_user_status = DB::table('followers')->where('follower_id', '=', Auth::user()->id)
-            ->where('leader_id', '=', $user->id)->first();
-
-        if ($follow_user_status) {
-            $follow_user_status = $follow_user_status->status;
-        }
 
         $confirm_follow_setting = $user->getUserSettings(Auth::user()->id);
         $follow_confirm = $confirm_follow_setting->confirm_follow;
@@ -1424,7 +1402,7 @@ class UserController extends AppBaseController
         $theme = Theme::uses(Setting::get('current_theme', 'default'))->layout('default');
         $theme->setTitle(trans('common.liked_pages').' '.Setting::get('title_seperator').' '.Setting::get('site_title').' '.Setting::get('title_seperator').' '.Setting::get('site_tagline'));
 
-        return $theme->scope('users/liked-pages', compact('timeline', 'liked_pages', 'user', 'followRequests', 'own_pages', 'own_groups', 'follow_user_status', 'following_count', 'followers_count', 'follow_confirm', 'user_post', 'joined_groups_count', 'user_events', 'guest_events'))->render();
+        return $theme->scope('users/liked-pages', compact('timeline', 'liked_pages', 'user', 'followRequests', 'own_pages', 'own_groups', 'following_count', 'followers_count', 'follow_confirm', 'user_post', 'joined_groups_count', 'user_events', 'guest_events'))->render();
     }
 
     public function joinedGroups($username)
@@ -1437,13 +1415,6 @@ class UserController extends AppBaseController
         $following_count = $user->following()->where('status', '=', 'approved')->get()->count();
         $followers_count = $user->followers()->where('status', '=', 'approved')->get()->count();
         $followRequests = $user->followers()->where('status', '=', 'pending')->get();
-        $follow_user_status = '';
-        $follow_user_status = DB::table('followers')->where('follower_id', '=', Auth::user()->id)
-            ->where('leader_id', '=', $user->id)->first();
-
-        if ($follow_user_status) {
-            $follow_user_status = $follow_user_status->status;
-        }
 
         $confirm_follow_setting = $user->getUserSettings(Auth::user()->id);
         $follow_confirm = $confirm_follow_setting->confirm_follow;
@@ -1460,7 +1431,7 @@ class UserController extends AppBaseController
         $theme = Theme::uses(Setting::get('current_theme', 'default'))->layout('default');
         $theme->setTitle(trans('common.joined_groups').' '.Setting::get('title_seperator').' '.Setting::get('site_title').' '.Setting::get('title_seperator').' '.Setting::get('site_tagline'));
 
-        return $theme->scope('users/joined-groups', compact('timeline', 'user', 'joined_groups', 'followRequests', 'own_groups', 'own_pages', 'follow_user_status', 'following_count', 'followers_count', 'follow_confirm', 'user_post', 'joined_groups_count', 'user_events', 'guest_events'))->render();
+        return $theme->scope('users/joined-groups', compact('timeline', 'user', 'joined_groups', 'followRequests', 'own_groups', 'own_pages', 'following_count', 'followers_count', 'follow_confirm', 'user_post', 'joined_groups_count', 'user_events', 'guest_events'))->render();
     }
 
     public function followRequests($username)
@@ -1471,13 +1442,6 @@ class UserController extends AppBaseController
         $joined_groups_count = $user->groups()->where('role_id', '!=', 1)->where('status', '=', 'approved')->get()->count();
         $following_count = $user->following()->where('status', '=', 'approved')->get()->count();
         $followers_count = $user->followers()->where('status', '=', 'approved')->get()->count();
-        $follow_user_status = '';
-        $follow_user_status = DB::table('followers')->where('follower_id', '=', Auth::user()->id)
-            ->where('leader_id', '=', $user->id)->first();
-
-        if ($follow_user_status) {
-            $follow_user_status = $follow_user_status->status;
-        }
 
         $confirm_follow_setting = $user->getUserSettings(Auth::user()->id);
         $follow_confirm = $confirm_follow_setting->confirm_follow;
@@ -1494,7 +1458,7 @@ class UserController extends AppBaseController
         $theme = Theme::uses(Setting::get('current_theme', 'default'))->layout('default');
         $theme->setTitle(trans('common.follow_requests').' '.Setting::get('title_seperator').' '.Setting::get('site_title').' '.Setting::get('title_seperator').' '.Setting::get('site_tagline'));
 
-        return $theme->scope('users/follow-requests', compact('timeline', 'user', 'followRequests', 'own_groups', 'own_pages', 'follow_user_status', 'following_count', 'followers_count', 'follow_confirm', 'user_post', 'joined_groups_count', 'user_events', 'guest_events'))->render();
+        return $theme->scope('users/follow-requests', compact('timeline', 'user', 'followRequests', 'own_groups', 'own_pages', 'following_count', 'followers_count', 'follow_confirm', 'user_post', 'joined_groups_count', 'user_events', 'guest_events'))->render();
     }
 
     public function acceptFollowRequest(Request $request)

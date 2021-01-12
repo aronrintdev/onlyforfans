@@ -160,14 +160,6 @@ class User extends Authenticatable implements PaymentSendable, PaymentReceivable
         return $this->belongsToMany('App\Post', 'pinned_posts', 'user_id', 'post_id');
     }
 
-    //public function postShares() {
-        //return $this->belongsToMany('App\User', 'post_shares', 'user_id', 'post_id');
-    //}
-
-    //public function purchasedPosts() {
-        //return $this->hasMany(PurchasedPost::class, 'purchased_by');
-    //}
-
     public function userList()
     {
         return $this->belongsToMany('App\UserListType', 'user_lists', 'user_id', 'list_type_id');
@@ -492,7 +484,7 @@ class User extends Authenticatable implements PaymentSendable, PaymentReceivable
         foreach ($otherposts as $otpost) {
             $otpost->users_liked()->detach();
             $otpost->notifications_user()->detach();
-            $otpost->shares()->detach();
+            $otpost->sharees()->detach();
             $otpost->reports()->detach();
             $otpost->users_tagged()->detach();
             $otpost->images()->detach();

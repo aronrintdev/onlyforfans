@@ -305,7 +305,7 @@
 			<div class="row">
 				<div class=" timeline">
 					<div class="col-md-4 sidebar-wrapper">
-						{!! Theme::partial('user-leftbar',compact('timeline','user','follow_user_status','own_groups','own_pages','user_events', 'favouritePosts', 'next_page_url')) !!}
+						{!! Theme::partial('user-leftbar',compact('timeline','user','own_groups','own_pages','user_events', 'favouritePosts', 'next_page_url')) !!}
 					</div>
 					<div class="col-md-8 content-wrapper">						
                             <div class="panel-body row tabs-wrapper nopadding">

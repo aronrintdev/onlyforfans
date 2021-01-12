@@ -9,7 +9,7 @@
 			<div class="row">
 				<div class=" timeline">
 					<div class="col-md-4">
-						{!! Theme::partial('user-leftbar',compact('timeline','user','follow_user_status','own_pages','own_groups','user_events')) !!}
+						{!! Theme::partial('user-leftbar',compact('timeline','user','own_pages','own_groups','user_events')) !!}
 					</div>
 					<div class="col-md-8">
 						<div class="panel panel-default">

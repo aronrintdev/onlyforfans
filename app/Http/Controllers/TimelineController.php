@@ -229,7 +229,6 @@ class TimelineController extends AppBaseController
         $theme->setTitle($timeline->name.' '.Setting::get('title_seperator').' '.Setting::get('site_title').' '.Setting::get('title_seperator').' '.Setting::get('site_tagline'));
 
         if ($timeline->type == 'user') {
-            $follow_user_status = '';
             $timeline_post_privacy = '';
             $timeline_post = '';
 
@@ -246,13 +245,6 @@ class TimelineController extends AppBaseController
             $guest_events = $user->getEvents();
 
 
-            $follow_user_status = DB::table('followers')->where('follower_id', '=', Auth::user()->id)
-                               ->where('leader_id', '=', $user->id)->first();
-
-            if ($follow_user_status) {
-                $follow_user_status = $follow_user_status->status;
-            }
-
             $confirm_follow_setting = $user->getUserSettings(Auth::user()->id);
             $follow_confirm = $confirm_follow_setting->confirm_follow;
 
@@ -265,7 +257,7 @@ class TimelineController extends AppBaseController
             // liked_posts
             $liked_post = DB::table('post_likes')->where('user_id', Auth::user()->id)->get();
 
-            return $theme->scope('users/timeline', compact('user', 'timeline', 'posts', 'liked_post','liked_pages', 'next_page_url', 'joined_groups', 'follow_user_status', 'followRequests', 'following_count', 'followers_count', 'timeline_post', 'user_post', 'follow_confirm', 'joined_groups_count', 'own_pages', 'own_groups', 'user_events', 'guest_events', 'username'))->render();
+            return $theme->scope('users/timeline', compact('user', 'timeline', 'posts', 'liked_post','liked_pages', 'next_page_url', 'joined_groups', 'followRequests', 'following_count', 'followers_count', 'timeline_post', 'user_post', 'follow_confirm', 'joined_groups_count', 'own_pages', 'own_groups', 'user_events', 'guest_events', 'username'))->render();
 
         }
         elseif ($timeline->type == 'page') {
@@ -1541,7 +1533,6 @@ Log::info('MARK-2.a'); // post-image-3
 
 
         if ($timeline->type == 'user') {
-            $follow_user_status = '';
             $user = User::where('timeline_id', $timeline['id'])->first();
             $followRequests = $user->followers()->where('status', '=', 'pending')->get();
             $liked_pages = $user->pageLikes()->get();
@@ -1551,15 +1542,9 @@ Log::info('MARK-2.a'); // post-image-3
             $following_count = $user->following()->where('status', '=', 'approved')->get()->count();
             $followers_count = $user->followers()->where('status', '=', 'approved')->get()->count();
             $joined_groups_count = $user->groups()->where('role_id', '!=', $admin_role_id->id)->where('status', '=', 'approved')->get()->count();
-            $follow_user_status = DB::table('followers')->where('follower_id', '=', $user->id)
-                ->where('leader_id', '=', $user->id)->first();
             $user_events = $user->events()->whereDate('end_date', '>=', date('Y-m-d', strtotime(Carbon::now())))->get();
             $guest_events = $user->getEvents();
 
-
-            if ($follow_user_status) {
-                $follow_user_status = $follow_user_status->status;
-            }
 
             $confirm_follow_setting = $user->getUserSettings($user->id);
             $follow_confirm = $confirm_follow_setting->confirm_follow;
@@ -1580,7 +1565,7 @@ Log::info('MARK-2.a'); // post-image-3
         // liked_posts
         $liked_post = \Illuminate\Support\Facades\DB::table('post_likes')->where('user_id', $user->id)->get();
 
-        return $theme->scope('timeline/public-posts', compact('timeline', 'liked_post', 'user', 'posts', 'liked_pages', 'followRequests', 'joined_groups', 'own_pages', 'own_groups', 'follow_user_status', 'following_count', 'followers_count', 'follow_confirm', 'user_post', 'timeline_post', 'joined_groups_count', 'next_page_url', 'user_events', 'guest_events'))->render();
+        return $theme->scope('timeline/public-posts', compact('timeline', 'liked_post', 'user', 'posts', 'liked_pages', 'followRequests', 'joined_groups', 'own_pages', 'own_groups', 'following_count', 'followers_count', 'follow_confirm', 'user_post', 'timeline_post', 'joined_groups_count', 'next_page_url', 'user_events', 'guest_events'))->render();
     }
 
     public function posts(Request $request, $username)
@@ -1684,7 +1669,6 @@ Log::info('MARK-2.a'); // post-image-3
         $user_events = $creator->events()->whereDate('end_date', '>=', date('Y-m-d', strtotime(Carbon::now())))->get();
         $guest_events = $creator->getEvents();
 
-        $follow_user_status = DB::table('followers')->where('follower_id', $sessionUser->id)->where('leader_id', $creator->id)->pluck('status');
         $next_page_url = url('ajax/get-more-posts?page=2&username='.rawurlencode($username).'&p='.$period.'&s='.$sort_by.'&o='.$order_by);
 
         $theme = Theme::uses(Setting::get('current_theme', 'default'))->layout($layout);
@@ -1701,7 +1685,6 @@ Log::info('MARK-2.a'); // post-image-3
             'joined_groups',
             'own_pages',
             'own_groups',
-            'follow_user_status',
             'following_count',
             'followers_count',
             'follow_confirm',
@@ -2759,10 +2742,13 @@ Log::info('MARK-2.a'); // post-image-3
 
     public function getUsersListOfCurrentUser($sort_by, $order_by)
     {
-        if ($sort_by == 'recent')
-            $user_lists = UserListType::where(['user_id' => Auth::user()->id])->orderBy('created_at', $order_by)->with('lists')->get();
-        else
-            $user_lists = UserListType::where(['user_id' => Auth::user()->id])->with('lists')->get();
+        $sessionUser = Auth::user();
+
+        if ($sort_by == 'recent') {
+            $user_lists = UserListType::where(['user_id' => $sessionUser->id])->orderBy('created_at', $order_by)->with('lists')->get();
+        } else {
+            $user_lists = UserListType::where(['user_id' => $sessionUser->id])->with('lists')->get();
+        }
 
         if (!empty($user_lists)) {
             foreach ($user_lists as $user_list) {
@@ -2770,51 +2756,46 @@ Log::info('MARK-2.a'); // post-image-3
             }
         }
 
-        $lists = array();
+        $lists = [];
 
         foreach ($user_lists as $user_list) {
-
-            $list = array();
-            $list['name'] = $user_list->list_type;
-            $list['count'] = $user_list->count;
-            $list['id'] = $user_list->id;
-            $list['created_at'] = $user_list->created_at;
-
-            $lists[] = $list;
+            $lists[] = [
+                'name' => $user_list->list_type,
+                'count' => $user_list->count,
+                'id' => $user_list->id,
+                'created_at' => $user_list->created_at,
+            ];
         }
 
-        $following_count = Auth::user()->following()->where('status', '=', 'approved')->get()->count();
-        $followers_count = Auth::user()->followers()->where('status', '=', 'approved')->get()->count();
+        $following_count = $sessionUser->followedtimelines()->where('is_approved', 1)->count();
+        $followers_count = $sessionUser->timeline->followers()->where('is_approved',1)->count();
 
         $list = array();
         $list['name'] = trans('common.following-1');
         $list['count'] = $following_count;
         $list['id'] = 'following';
-        $list['created_at'] = Auth::user()->created_at;
+        $list['created_at'] = $sessionUser->created_at;
         $lists[] = $list;
 
         $list = array();
         $list['name'] = trans('common.followers');
         $list['count'] = $followers_count;
         $list['id'] = 'followers';
-        $list['created_at'] = Auth::user()->created_at;
+        $list['created_at'] = $sessionUser->created_at;
         $lists[] = $list;
 
         $sorted_lists = array();
         foreach ($lists as $key => $row) {
-
-            if ($sort_by == 'name')
+            if ($sort_by == 'name') {
                 $sorted_lists[$key] = $row['name'];
-            else if ($sort_by == 'people')
+            } else if ($sort_by == 'people') {
                 $sorted_lists[$key] = $row['count'];
-            else if ($sort_by == 'recent')
+            } else if ($sort_by == 'recent') {
                 $sorted_lists[$key] = $row['created_at'];
+            }
         }
-
         array_multisort($sorted_lists, $order_by == 'asc' ? SORT_ASC : SORT_DESC, $lists);
-
         return $lists;
-
     }
 
     public function addNewUserList(Request $request)

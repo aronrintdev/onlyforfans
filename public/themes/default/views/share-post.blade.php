@@ -77,12 +77,12 @@
         </li>
         @endif
         
-        @if($post->shares->count() > 0)
+        @if($post->sharees->count() > 0)
         <?php
-        $shared_ids = $post->shares->pluck('id')->toArray();
-        $shared_names = $post->shares->pluck('name')->toArray(); ?>
+        $shared_ids = $post->sharees->pluck('id')->toArray();
+        $shared_names = $post->sharees->pluck('name')->toArray(); ?>
         <li>
-          <a target="_blank" href="{{ url('/post/'.$post->id) }}"><span class="count-circle"><i class="fa fa-share"></i></span> {{ $post->shares->count() }} {{ trans('common.shares') }}</a>
+          <a target="_blank" href="{{ url('/post/'.$post->id) }}"><span class="count-circle"><i class="fa fa-share"></i></span> {{ $post->sharees->count() }} {{ trans('common.shares') }}</a>
         </li>
         @endif
         
