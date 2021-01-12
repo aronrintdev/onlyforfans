@@ -193,6 +193,13 @@ class Timeline extends Model implements PaymentReceivable
 
         return $result ?? null;
     }
+
+
+    public function isOwnedByUser(User $user) : bool
+    {
+        return $this->id === $user->timeline->id;
+        //return $this->id === $user->timeline_id;
+    }
 }
 
 /**

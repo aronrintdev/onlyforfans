@@ -1370,7 +1370,7 @@ Log::info('MARK-2.a'); // post-image-3
 
     public function timelineGroups(Request $request)
     {
-        $group = Group::where('timeline_id', '=', $request->timeline_id)->first();
+        $group = Group::where('timeline_id', $request->timeline_id)->first();
 
         if ($group->users->contains(Auth::user()->id)) {
             $group->users()->detach([Auth::user()->id]);

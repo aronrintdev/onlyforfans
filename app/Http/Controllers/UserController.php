@@ -1313,40 +1313,47 @@ class UserController extends AppBaseController
 
     public function following($username)
     {
+        $sessionUser = Auth::user();
+
         $timeline = Timeline::where('username', $username)->with('user', 'user.pageLikes', 'user.groups')->first();
-        $user = $timeline->user;
-        $following = $user->following()->where('status', '=', 'approved')->get();
-        $followRequests = $user->followers()->where('status', '=', 'pending')->get();
-        $following_count = $user->following()->where('status', '=', 'approved')->get()->count();
-        $followers_count = $user->followers()->where('status', '=', 'approved')->get()->count();
-        $joined_groups_count = $user->groups()->where('role_id', '!=', 1)->where('status', '=', 'approved')->get()->count();
-        $follow_user_status = '';
-        $follow_user_status = DB::table('followers')->where('follower_id', '=', Auth::user()->id)
-            ->where('leader_id', '=', $user->id)->first();
+        $creator = $timeline->user;
+        $followed_timelines = $creator->followedtimelines()->where('is_approved', 1)->where('access_level', \App\Enums\ShareableAccessLevelEnum::DEFAULT)->get();
+        $subscribed_timelines = $creator->followedtimelines()->where('is_approved', 1)->where('access_level', \App\Enums\ShareableAccessLevelEnum::PREMIUM)->get();
+        $following_count = $creator->followedtimelines()->where('is_approved', 1)->count();
+        $followRequests = $creator->timeline->followers()->where('is_approved', 0)->get();
+        $followers_count = $creator->timeline->followers()->where('is_approved', 1)->count();
+        $joined_groups_count = $creator->groups()->where('role_id', '!=', 1)->where('status', '=', 'approved')->get()->count();
 
-        if ($follow_user_status) {
-            $follow_user_status = $follow_user_status->status;
-        }
-
-        $confirm_follow_setting = $user->getUserSettings(Auth::user()->id);
+        $confirm_follow_setting = $creator->getUserSettings($sessionUser->id);
         $follow_confirm = $confirm_follow_setting->confirm_follow;
 
-        $live_user_settings = $user->getUserPrivacySettings(Auth::user()->id, $user->id);
+        $live_user_settings = $creator->getUserPrivacySettings($sessionUser->id, $creator->id);
         $privacy_settings = explode('-', $live_user_settings);
         $timeline_post = $privacy_settings[0];
         $user_post = $privacy_settings[1];
-        $own_pages = $user->own_pages();
-        $own_groups = $user->own_groups();
-        $user_events = $user->events()->whereDate('end_date', '>=', date('Y-m-d', strtotime(Carbon::now())))->get();
-        $guest_events = $user->getEvents();
+        $user_events = $creator->events()->whereDate('end_date', '>=', date('Y-m-d', strtotime(Carbon::now())))->get();
+        $guest_events = $creator->getEvents();
 
         $theme = Theme::uses(Setting::get('current_theme', 'default'))->layout('default');
         $theme->setTitle(trans('common.following').' '.Setting::get('title_seperator').' '.Setting::get('site_title').' '.Setting::get('title_seperator').' '.Setting::get('site_tagline'));
 
-        // liked_posts
-        $liked_post = DB::table('post_likes')->where('user_id', \Illuminate\Support\Facades\Auth::user()->id)->get();
+        $liked_post = DB::table('post_likes')->where('user_id', $sessionUser->id)->get();
 
-        return $theme->scope('users/following', compact('timeline', 'user', 'liked_post','following', 'followRequests', 'follow_user_status', 'following_count', 'followers_count', 'follow_confirm', 'user_post', 'joined_groups_count', 'own_pages', 'own_groups', 'user_events', 'guest_events'))->render();
+        return $theme->scope('users/following', compact(
+            'timeline', 
+            'creator', // 'user', 
+            'liked_post',
+            'followed_timelines', 
+            'subscribed_timelines', 
+            'followRequests', 
+            'following_count', 
+            'followers_count', 
+            'follow_confirm', 
+            'user_post', 
+            'joined_groups_count', 
+            'user_events', 
+            'guest_events'
+        ))->render();
     }
 
     public function getGuestEvents($username)
