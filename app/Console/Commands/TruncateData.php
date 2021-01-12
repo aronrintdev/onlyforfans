@@ -57,8 +57,8 @@ class TruncateData extends Command
         'album_media',
         'post_media',
         'post_likes',
-        'post_shares',
-        'post_follows',
+        //'post_shares',
+        //'post_follows',
         'saved_posts',
         'comments',
         'media',
@@ -67,12 +67,12 @@ class TruncateData extends Command
         'mediafiles',
         'shareables',
         'stories',
-        'subscriptions',
+        //'subscriptions',
 
         'role_user',
         'user_settings',
         'user_lists',
-        'users_tips',
+        //'users_tips',
         'event_user',
         'favourite_users',
         'group_user',
@@ -80,7 +80,7 @@ class TruncateData extends Command
 
         'bank_account_details',
         'comment_likes',
-        'followers',
+        //'followers',
 
         'threads',
         'messages',
@@ -92,7 +92,7 @@ class TruncateData extends Command
         'timelines',
         'users',
 
-        'purchased_posts',
+        //'purchased_posts',
         'posts',
         /*
          */
