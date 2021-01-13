@@ -362,3 +362,11 @@ function parseMainDescription($post)
     }
     return $main_description;
 }
+
+// format USD currecy to 2 decimals max - floors, does NOT round!
+function niceCurrency(float $amount) : ?string
+{
+    // https://stackoverflow.com/questions/4483540/show-a-number-to-two-decimal-places
+    return number_format( (float)$amount, 2, '.', '' );
+    //return sprintf('%0.2f', $amount);
+}

@@ -11,7 +11,7 @@
     @endif
     </div>
 
-    {{ Form::open([ 'route'=>['timelines.subscribe',$timeline->id],'method'=>'POST','class'=>'' ]) }}
+    {{ Form::open([ 'route'=>['timelines.follow',$timeline->id],'method'=>'POST','class'=>'' ]) }}
 
     {{ Form::hidden('is_subscribe', 1) }}
 
@@ -58,11 +58,13 @@
         </div>
       </div>
 
+      <h3 class="text-center">$ {{ niceCurrency($timeline->user->price) }} / mo</h3>
+
       <div class="px-5 pb-5">
         @if ($is_cancel)
-        <button class="btn btn-submit btn-warning" data-timeline_id="{{ $timeline->id }}"><i class="fa fa-heart"></i> Unsubscribe</button>
+        <button class="btn btn-submit btn-warning w-100" data-timeline_id="{{ $timeline->id }}">Unsubscribe</button>
         @else
-        <button class="btn btn-submit btn-success" data-timeline_id="{{ $timeline->id }}"><i class="fa fa-heart"></i> Subscribe</button>
+        <button class="btn btn-submit btn-success w-100" data-timeline_id="{{ $timeline->id }}"><i class="fa fa-heart"></i> Subscribe</button>
         @endif
       </div>
 

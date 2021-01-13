@@ -53,7 +53,7 @@ class Timeline extends Model implements PaymentReceivable
     }
 
     public function followers() {  // includes subscribers (ie premium + default followers)
-        return $this->morphToMany('App\User', 'shareable', 'shareables', 'shareable_id', 'sharee_id');
+        return $this->morphToMany('App\User', 'shareable', 'shareables', 'shareable_id', 'sharee_id')->withPivot('access_level');
     }
 
     public function posts() {
@@ -177,7 +177,7 @@ class Timeline extends Model implements PaymentReceivable
                         'fltype' => $ptype,
                         'seller_id' => $this->user->id,
                         'purchaser_id' => $sender->id,
-                        'purchaseable_type' => 'posts',
+                        'purchaseable_type' => 'timelines', // basically a subscription
                         'purchaseable_id' => $this->id,
                         'qty' => 1,
                         'base_unit_cost_in_cents' => $amountInCents,
@@ -185,6 +185,7 @@ class Timeline extends Model implements PaymentReceivable
                     ]);
                     $sender->followedtimelines()->attach($this->id, [
                         'cattrs' => json_encode($cattrs ?? []),
+                        'access_level' => ShareableAccessLevelEnum::PREMIUM,
                     ]);
                     break;
                 default:
@@ -206,7 +207,7 @@ class Timeline extends Model implements PaymentReceivable
     // Is the user provided following my timeline (includes either premium or default)
     public function isUserSubscribed(User $user) : bool
     {
-        return $this->followers->where()->where('access_level', ShareableAccessLevelEnum::PREMIUM)->contains($user->id);
+        return $this->followers->where('pivot.access_level', ShareableAccessLevelEnum::PREMIUM)->contains($user->id);
     }
 
     public function isOwnedByUser(User $user) : bool

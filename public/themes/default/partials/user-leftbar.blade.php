@@ -27,34 +27,38 @@ $creator = $user;
     <!-- Follow -->
     <section class="follow">
       <div class="bio-header">Follow</div>
-      <div class="bio-description">
         @if ( !$creator->timeline->isUserFollowing($sessionUser) )
+        <div class="bio-description">
           <div class="follow-btn">
             <button class="btn btn-submit btn-success clickme_to-show_follow_confirm w-100" data-timeline_id="{{ $timeline->id }}">Follow for Free</button>
           </div>
-        @else
+        </div>
+        @elseif ( !$creator->timeline->isUserSubscribed($sessionUser) )
+        <div class="bio-description">
           <div class="unfollow-btn">
             <button  class="btn btn-submit btn-success clickme_to-show_follow_confirm w-100" data-timeline_id="{{ $timeline->id }}">Following</button>
           </div>
+        </div>
         @endif
-      </div>
     </section>
 
     <!-- Subscribe -->
     @if ( !$creator->is_follow_for_free )
       <section class="subscribe">
         <div class="bio-header">Subscribe</div>
-        <div class="bio-description">
           @if ( !$creator->timeline->isUserSubscribed($sessionUser) )
+          <div class="bio-description">
             <div class="left-col">
               <button class="btn btn-submit btn-success clickme_to-show_subscribe_confirm w-100" data-timeline_id="{{ $timeline->id }}"> <i class="fa fa-heart"></i> Subscribe</button>
             </div>
+          </div>
           @else
+          <div class="bio-description">
             <div class="left-col">
               <button class="btn btn-submit btn-success clickme_to-show_subscribe_confirm w-100" data-timeline_id="{{ $timeline->id }}"><i class="fa fa-check"></i> Subscribed</button>
             </div>
+          </div>
           @endif
-        </div>
       </section>
     @endif
 

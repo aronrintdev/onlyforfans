@@ -55,7 +55,7 @@
 
       <div class="px-5 pb-5">
         @if ($is_cancel)
-        <button type="submit" class="btn btn-submit btn-warning w-100" data-timeline_id="{{ $timeline->id }}"><i class="fa fa-heart"></i> Unfollow</button>
+        <button type="submit" class="btn btn-submit btn-warning w-100" data-timeline_id="{{ $timeline->id }}">Unfollow</button>
         @else
         <button type="submit" class="btn btn-submit btn-success w-100" data-timeline_id="{{ $timeline->id }}"><i class="fa fa-heart"></i> Follow</button>
         @endif
