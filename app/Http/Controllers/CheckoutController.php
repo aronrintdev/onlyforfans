@@ -294,13 +294,13 @@ class CheckoutController extends Controller
         $subscription->cancel();
     }
 
-
+    /* %PSG  %DEPRECATE 20210109
     public function subscribe($username) {
-
         $theme = Theme::uses(Setting::get('current_theme', 'default'))->layout('default');
         $theme->setTitle($username.' '.Setting::get('title_seperator').' '.Setting::get('site_title').' '.Setting::get('title_seperator').' '.Setting::get('site_tagline'));
         return $theme->scope('users/subscribe-modal', compact('username'))->render();
     }
+     */
 
     public function follow($timeline_id, $user_id)
     {

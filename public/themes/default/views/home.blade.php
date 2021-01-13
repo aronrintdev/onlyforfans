@@ -19,7 +19,7 @@
     }
     @media screen and (min-width: 1200px) {
         .timeline-condensed-column .panel-body, .jscroll-added .panel-body, .timeline-condensed-column > .col-lg-4 .panel-body {
-            height: 200px;
+            //height: 200px;
             overflow: auto;
         }
 		
@@ -217,6 +217,10 @@
 	}
 </style>
 
+@php
+  $sessionUser = Auth::user();
+@endphp
+
 <!-- %VIEW: public/themes/views/home -->
 		<div class="container">
 			<div class="row">
@@ -238,15 +242,9 @@
 						<div class="timeline-posts timeline-default">
 							@if($posts->count() > 0)
 								@foreach($posts as $post)
-                                    @if($post->type == \App\Post::PAID_TYPE)
-                                        @if($post->user->activeSubscribers->contains(Auth::user()->id) || $post->user->id == Auth::user()->id)
-									    {!! Theme::partial('post',compact('post','timeline','next_page_url')) !!}
-                                        @endif
-                                    @else
-                                        @if(canUserSeePost(Auth::id(), $post->user->id) || Auth::user()->PurchasedPostsArr->contains($post->id))
-                                        {!! Theme::partial('post',compact('post','timeline','next_page_url')) !!}
-                                        @endif
-                                    @endif
+                  @if ( $post->isViewableByUser($sessionUser) )
+                      {!! Theme::partial('post',compact('post','user','timeline','next_page_url')) !!}
+                  @endif
 								@endforeach
 							@else
 								<div class="no-posts alert alert-warning">{{ trans('common.no_posts') }}</div>
@@ -254,18 +252,12 @@
 						</div>
 						<div class="timeline-posts timeline-condensed-column row" style="display: none">
 							@if($posts->count() > 0)
-                                @foreach($posts as $post)                                    
-                                    @if($post->type == \App\Post::PAID_TYPE)
-                                        @if($post->user->activeSubscribers->contains(Auth::user()->id)  || $post->user->id == Auth::user()->id)
-                                            {!! Theme::partial('post_condensed_column',compact('post','timeline','next_page_url')) !!}
-                                        @endif
-                                    @else
-                                        @if(canUserSeePost(Auth::id(), $post->user->id) || Auth::user()->PurchasedPostsArr->contains($post->id))
-                                        {!! Theme::partial('post_condensed_column',compact('post','timeline','next_page_url')) !!}
-                                        @endif
-                                    @endif
+                  @foreach($posts as $post)                                    
+                  @if ( $post->isViewableByUser($sessionUser) )
+                    {!! Theme::partial('post',compact('post','timeline','user','next_page_url')) !!}
+                  @endif
 								@endforeach
-                            @else
+              @else
 								<div class="no-posts alert alert-warning">{{ trans('common.no_posts') }}</div>
 							@endif
 						</div>

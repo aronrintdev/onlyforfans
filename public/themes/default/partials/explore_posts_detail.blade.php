@@ -23,7 +23,7 @@
                                     <ul class="list-inline no-margin">
                                         <li class="dropdown"><a href="#" class="dropdown-togle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-angle-down"></i></a>
                                             <ul class="dropdown-menu">
-                                                @if($post->notifications_user->contains(Auth::user()->id))
+                                                @if(false /*$post->notifications_user->contains(Auth::user()->id)*/)
                                                     <li class="main-link">
                                                         <a href="#" data-post-id="{{ $post->id }}" class="notify-user unnotify">
                                                             <i class="fa  fa-bell-slash" aria-hidden="true"></i>{{ trans('common.stop_notifications') }}
@@ -445,12 +445,12 @@
                                     </li>
                                 @endif
 
-                                @if($post->shares->count() > 0)
+                                @if($post->sharees->count() > 0)
                                     <?php
-                                    $shared_ids = $post->shares->pluck('id')->toArray();
-                                    $shared_names = $post->shares->pluck('name')->toArray(); ?>
+                                    $shared_ids = $post->sharees->pluck('id')->toArray();
+                                    $shared_names = $post->sharees->pluck('name')->toArray(); ?>
                                     <li>
-                                        <a href="#" class="show-users-modal" data-html="true" data-heading="{{ trans('common.shares') }}"  data-users="{{ implode(',', $shared_ids) }}" data-original-title="{{ implode('<br />', $shared_names) }}"><span class="count-circle"><i class="fa fa-share"></i></span> {{ $post->shares->count() }} {{ trans('common.shares') }}</a>
+                                        <a href="#" class="show-users-modal" data-html="true" data-heading="{{ trans('common.shares') }}"  data-users="{{ implode(',', $shared_ids) }}" data-original-title="{{ implode('<br />', $shared_names) }}"><span class="count-circle"><i class="fa fa-share"></i></span> {{ $post->sharees->count() }} {{ trans('common.shares') }}</a>
                                     </li>
                                 @endif
 

@@ -5,7 +5,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use DB;
 use App\Interfaces\Guidable;
 
-class Fanledger extends BaseModel implements Guidable, Sluggable, Ownable
+class Fanledger extends BaseModel implements Guidable
 {
     use SoftDeletes;
 
@@ -13,6 +13,26 @@ class Fanledger extends BaseModel implements Guidable, Sluggable, Ownable
 
     public static $vrules = [
     ];
+
+    //--------------------------------------------
+    // Boot
+    //--------------------------------------------
+    public static function boot()
+    {
+        parent::boot();
+        static::creating(function ($model) {
+            $model->total_amount = 
+                ( $model->base_unit_cost_in_cents * $model->qty )
+                + $model->taxes_in_cents
+                + $model->fees_in_cents;
+        });
+        static::updating(function ($model) {
+            $model->total_amount = 
+                ( $model->base_unit_cost_in_cents * $model->qty )
+                + $model->taxes_in_cents
+                + $model->fees_in_cents;
+        });
+    }
 
     //--------------------------------------------
     // Relationships

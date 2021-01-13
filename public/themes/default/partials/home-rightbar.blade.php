@@ -62,7 +62,7 @@ $sessionUser = Auth::user();
                 {{ trans('common.followers') }} 
               </div>
               <div class="activity-count">
-                {{ $sessionUser->followers->count() }}
+                {{ $sessionUser->timeline->followers->count() }}
               </div>
             </a>
           </li>
@@ -72,7 +72,7 @@ $sessionUser = Auth::user();
                 {{ trans('common.following') }}
               </div>
               <div class="activity-count">
-                {{ $sessionUser->following->count() }}
+                {{ $sessionUser->followedtimelines->count() }}
               </div>
             </a>
           </li>

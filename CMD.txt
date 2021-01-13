@@ -14,6 +14,7 @@ COMPOSER_MEMORY_LIMIT=-1 composer update
 %%% Migrations
 php artisan make:migration create_shareditems --create="shareditems"
 php artisan migrate --env=testing
+php artisan migrate:rollback --step=1
 
 %%% Testing
 vendor/bin/phpunit --group mfdev
@@ -27,7 +28,11 @@ $ php artisan config:cache --env=local
 
 %%%
 $ php artisan truncate:data
-$ php artisan db:seed --class="UsersTableSeeder"
-$ php artisan db:seed --class="StoriesTableSeeder"
-$ php artisan db:seed --class="PostsTableSeeder"
-$ php artisan db:seed --class="FollowersTableSeeder"
+$ php artisan db:seed --class=UsersTableSeeder
+$ php artisan db:seed --class=StoriesTableSeeder
+$ php artisan db:seed --class=PostsTableSeeder
+$ php artisan db:seed --class=ShareablesTableSeeder
+
+%%% Tinker
+$ php artisan tinker
+>>> error_reporting(E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED)

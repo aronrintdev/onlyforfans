@@ -1,7 +1,21 @@
-<!-- %VIEW %PARTIAL(MODAL): views/timelines/_subscribe_confirm -->
+<!-- %VIEW %PARTIAL(MODAL): views/common/partials/_subscribe_confirm -->
 <div class="modal-dialog modal-dialog-centered modal-sm">
-  <div class="modal-content">
-    <section class="modal-body no-padding">
+  <section class="modal-content" role="document">
+
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+    @if ($is_cancel)
+      <h3 class="modal-title">Unsubcribe</h3>
+    @else
+      <h3 class="modal-title">Subcribe</h3>
+    @endif
+    </div>
+
+    {{ Form::open([ 'route'=>['timelines.subscribe',$timeline->id],'method'=>'POST','class'=>'' ]) }}
+
+    {{ Form::hidden('is_subscribe', 1) }}
+
+    <div class="modal-body no-padding">
 
       <div class="timeline-cover-section">
 
@@ -28,7 +42,7 @@
           <div class="list-wrap">
             <ul class="list-unstyled list-inline text-center tag-fit_content OFF-mt-3">
               <li>
-                <h3 class="my-0"><strong>{{ $timeline->user->renderFollowersCount() }}</strong></h3>
+                <h3 class="my-0"><strong>{{ $timeline->followers->count() }}</strong></h3>
                 <div>Fans</div>
               </li>
               <li>
@@ -42,16 +56,17 @@
             </ul>
           </div>
         </div>
-
-
       </div>
 
       <div class="px-5 pb-5">
-        <a href="javascript:void(0);" class="btn btn-submit btn-success follow-user follow" style="display:block;" data-price="1" data-timeline-id="{{ $timeline->id }}">
-          <i class="fa fa-heart"></i> Subscribe
-        </a>
+        @if ($is_cancel)
+        <button class="btn btn-submit btn-warning" data-timeline_id="{{ $timeline->id }}"><i class="fa fa-heart"></i> Unsubscribe</button>
+        @else
+        <button class="btn btn-submit btn-success" data-timeline_id="{{ $timeline->id }}"><i class="fa fa-heart"></i> Subscribe</button>
+        @endif
       </div>
 
-    </section>
-  </div>
+    </div>
+
+  </section>
 </div>

@@ -56,7 +56,7 @@
 			<div class="row">
 				<div class=" timeline">
 					<div class="col-md-4">
-						{!! Theme::partial('public-user-leftbar',compact('timeline','user','follow_user_status','own_groups','own_pages','user_events')) !!}
+						{!! Theme::partial('public-user-leftbar',compact('timeline','user','own_groups','own_pages','user_events')) !!}
 					</div>
 					<div class="col-md-8">
 						<div class="timeline-posts">

@@ -115,5 +115,25 @@ class Mediafile extends BaseModel implements Guidable, Sluggable, Ownable
         }
         return false;
     }
+    public function isVideo() : bool {
+        switch ($this->mimetype) {
+            case 'video/mp4':
+            case 'video/x-flv':
+            case 'video/quicktime':
+            case 'video/x-ms-wmv':
+                return true;
+        }
+        return false;
+    }
+    public function isAudio() : bool {
+        switch ($this->mimetype) {
+            case 'audio/mpeg':
+            case 'audio/mp4':
+            case 'audio/ogg':
+            case 'audio/vnd.wav':
+                return true;
+        }
+        return false;
+    }
 
 }

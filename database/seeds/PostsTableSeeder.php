@@ -25,6 +25,8 @@ class PostsTableSeeder extends Seeder
 
         $users->each( function($u) use(&$faker, &$users) {
 
+            // $u is the user who will own the post being created (ie, as well as timeline associated with the post)...
+
             $max = $faker->numberBetween(2,20);
             $this->command->info("  - Creating $max posts for user ".$u->name);
 
@@ -55,8 +57,6 @@ class PostsTableSeeder extends Seeder
 
                 // Set a realistic post date
                 $ts = $faker->dateTimeThisDecade->format('Y-m-d H:i:s');
-                //$ts = $ts->format('Y-m-d H:i:s');
-                //dd($ts);
                 \DB::table('posts')->where('id',$post->id)->update([
                     'created_at' => Carbon::parse($ts),
                     //'description' => 'foo',
@@ -68,7 +68,7 @@ class PostsTableSeeder extends Seeder
                 $likers->each( function($liker) use(&$post) {
                     if ( !$post->users_liked->contains($liker->id) ) {
                         $post->users_liked()->attach($liker->id);
-                        $post->notifications_user()->attach($liker->id);
+                        //$post->notifications_user()->attach($liker->id);
                     }
                 });
 
@@ -93,12 +93,12 @@ class PostsTableSeeder extends Seeder
                     }
                 });
 
-                // SHARES - Select random users to share this post (on their timeline)...
+                // SHARES - Select random users to share this post with (on their timeline)...
                 $sharers = FactoryHelpers::parseRandomSubset($users, 10);
                 $sharee = $u;
-                $sharers->each( function($sharer) use(&$post) {
-                    if ( !$post->shares->contains($sharer->id) ) {
-                        $post->shares()->attach($sharer->id);
+                $sharers->each( function($sharer) use(&$post, &$sharee) {
+                    if ( !$post->sharees->contains($sharee->id) ) {
+                        $post->sharees()->attach($sharee->id);
                     }
                 });
 

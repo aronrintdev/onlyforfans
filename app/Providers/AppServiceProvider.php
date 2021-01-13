@@ -61,6 +61,7 @@ class AppServiceProvider extends ServiceProvider
             'posts' => 'App\Post',
             'stories' => 'App\Story',
             'subscriptions' => 'App\Subscription',
+            'timelines' => 'App\Timeline',
             'users' => 'App\User',
             'vaultfolders' => 'App\Vaultfolder',
         ]);

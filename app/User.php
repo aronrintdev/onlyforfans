@@ -11,8 +11,11 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Collection;
 use Zizaco\Entrust\Traits\EntrustUserTrait;
+use App\Enums\PaymentTypeEnum;
+use App\Interfaces\PaymentSendable;
+use App\Interfaces\PaymentReceivable;
 
-class User extends Authenticatable
+class User extends Authenticatable implements PaymentSendable, PaymentReceivable
 {
     use Notifiable;
     use EntrustUserTrait;
@@ -34,29 +37,18 @@ class User extends Authenticatable
         'about',
     ];
 
-    protected $fillable = [
-        'timeline_id', 'email', 'verification_code', 'email_verified', 'remember_token', 'password', 'birthday', 'city', 'gender', 'last_logged', 'timezone', 'affiliate_id', 'language', 'country', 'active', 'verified', 'facebook_link', 'twitter_link', 'dribbble_link', 'instagram_link', 'youtube_link', 'linkedin_link', 'wishlist', 'website', 'instagram','custom_option1', 'custom_option2', 'custom_option3', 'custom_option4'
-        , 'bank_account', 'price', 'is_payment_set', 'is_bank_set', 'is_follow_for_free', 'is_online', 'timezone_id'
-    ];
-
-    protected $hidden = [
-        'password', 'remember_token', 'verification_code', 'email', 'timeline',
-    ];
-
+    protected $guarded = ['id','created_at','updated_at'];
+    protected $hidden = [ 'password', 'remember_token', 'verification_code', 'email', 'timeline' ];
 
     public function toArray() {
         $array = parent::toArray();
-
         $timeline = $this->timeline->toArray();
-
         foreach ($timeline as $key => $value) {
             if ($key != 'id') {
                 $array[$key] = $value;
             }
         }
-
         $array['avatar'] = $this->avatar;
-
         return $array;
     }
 
@@ -64,29 +56,83 @@ class User extends Authenticatable
     // %%% Relationships
     //--------------------------------------------
 
-    public function sharedmediafiles() {
+    public function sharedmediafiles() { // mediafiles shared with me (??)
         return $this->morphedByMany('App\Mediafile', 'shareable', 'shareables', 'sharee_id')->withTimestamps();
     }
-    public function sharedvaultfolders() {
+    public function sharedvaultfolders() { // vaultfolders shared with me (??)
         return $this->morphedByMany('App\Vaultfolder', 'shareable', 'shareables', 'sharee_id')->withTimestamps();
     }
-    public function fanledgers() {
+    public function ledgersales() {
         return $this->morphMany('App\Fanledger', 'purchaseable');
     }
+    public function ledgerpurchases() {
+        return $this->hasMany('App\Fanledger', 'purchaser_id');
+    }
 
-    public function timeline() {
+    public function timeline() { // my timeline
         return $this->belongsTo('App\Timeline');
     }
 
-    public function followers()
-    {
+    /*
+    //public function subscribedtimelines() { // timelines (users) I subscribe to: only premium subscribe
+        //return $this->morphedByMany('App\Timeline', 'shareable', 'shareables', 'sharee_id')->withTimestamps();
+    //}
+     */
+    public function followedtimelines() { // timelines (users) I follow: premium *and* default subscribe (follow)
+        return $this->morphedByMany('App\Timeline', 'shareable', 'shareables', 'sharee_id')->withTimestamps();
+    }
+
+    /* HERE Jan 11
+    public function followers() {
         return $this->belongsToMany('App\User', 'followers', 'leader_id', 'follower_id')->withPivot('status', 'referral', 'subscription_id')->withTimestamps();
     }
 
-    public function following()
-    {
+    public function following() {
         return $this->belongsToMany('App\User', 'followers', 'follower_id', 'leader_id')->withPivot('referral');
     }
+    public function updateFollowStatus($user_id) {
+        $chk_user = DB::table('followers')->where('follower_id', $user_id)->where('leader_id', Auth::user()->id)->first();
+        if ($chk_user->status == 'pending') {
+            $result = DB::table('followers')->where('follower_id', $user_id)->where('leader_id', Auth::user()->id)->update(['status' => 'approved']);
+        }
+        return ($result ? true : false);
+    }
+
+    public function decilneRequest($user_id) {
+        $chk_user = DB::table('followers')->where('follower_id', $user_id)->where('leader_id', Auth::user()->id)->first();
+        if ($chk_user->status == 'pending') {
+            $result = DB::table('followers')->where('follower_id', $user_id)->where('leader_id', Auth::user()->id)->delete();
+        }
+        return ($result ? true : false);
+    }
+
+    public function chkMyFollower($diff_timeline_id, $login_id) {
+        $followers = DB::table('followers')->where('follower_id', $login_id)->where('leader_id', $diff_timeline_id)->where('status', '=', 'approved')->first();
+        return $followers ? true : false;
+    }
+    public function postFollows() {
+        return $this->belongsToMany('App\User', 'post_follows', 'user_id', 'post_id');
+    }
+    public function paidSubscribers() {
+        $followers = $this->followers()->pluck('follower_id')->toArray();
+        $activeFollowers = Subscription::whereIn('follower_id', $followers)
+            ->where('leader_id', $this->id)
+            ->pluck('follower_id')->toArray();
+        return $this->followers()->whereIn('follower_id', $activeFollowers);
+    }
+    
+    public function activeSubscribers() {
+        $followers = $this->followers()->pluck('follower_id')->toArray();
+        $activeFollowers = Subscription::whereIn('follower_id', $followers)
+            ->where('leader_id', $this->id)
+            ->where('cancel_at', '=', null)
+            ->pluck('follower_id')->toArray();
+        return $this->followers()->whereIn('follower_id', $activeFollowers);
+    }
+    public function renderFollowersCount() {
+        return $this->followers()->count();
+    }
+     */
 
     public function pages()
     {
@@ -98,13 +144,19 @@ class User extends Authenticatable
         return $this->belongsToMany('App\Timeline', 'saved_timelines', 'user_id', 'timeline_id')->withPivot('type');
     }
 
-    public function postsSaved()
-    {
+    public function posts() { // my own posts (that I own)
+        return $this->hasMany('App\Post');
+    }
+
+    public function sharedposts() { // posts shared with me (by direct share or purchase on my part)
+        return $this->morphedByMany('App\Post', 'shareable', 'shareables', 'sharee_id')->withTimestamps();
+    }
+
+    public function postsSaved() {
         return $this->belongsToMany('App\Post', 'saved_posts', 'user_id', 'post_id');
     }
 
-    public function postsPinned()
-    {
+    public function postsPinned() {
         return $this->belongsToMany('App\Post', 'pinned_posts', 'user_id', 'post_id');
     }
 
@@ -141,9 +193,6 @@ class User extends Authenticatable
         return $this->belongsToMany('App\Group', 'group_user', 'user_id', 'group_id')->withPivot('role_id', 'status');
     }
 
-    public function posts() {
-        return $this->hasMany('App\Post');
-    }
 
     public function pageLikes() {
         return $this->belongsToMany('App\Page', 'page_likes', 'user_id', 'page_id');
@@ -168,6 +217,20 @@ class User extends Authenticatable
     //--------------------------------------------
     // %%% Accessors/Mutators | Casts
     //--------------------------------------------
+
+    // https://stackoverflow.com/questions/30226496/how-to-cast-eloquent-pivot-parameters
+    /* %PSG: could not get this to work, just do 'manually' in controller or other calling code
+    protected $casts = [
+        'sharedposts.pivot.cattrs' => 'array',
+        'sharedposts.pivot.meta' => 'array',
+    ];
+     */
+
+    /*
+    public function getTipsAttribute($value) {
+        return $this->ledgersales()->where('fltype', PaymentTypeEnum::TIP)->get();
+    }
+     */
 
     public function getNameAttribute($value) {
         return $this->timeline->name;
@@ -200,41 +263,27 @@ class User extends Authenticatable
 
     // ---
 
-    public function get_group($id)
-    {
+    public function get_group($id) {
         $group_page = $this->groups()->where('groups.id', $id)->first();
-        
-        $result = $group_page ? $group_page->pivot->status : false;
-         
-        return $result;
+        return $group_page ? $group_page->pivot->status : false;
     }
 
-    public function get_page($id)
-    {
+    public function get_page($id) {
         return $this->pages()->where('pages.id', $id)->first();
         // $result = $user_page ? $user_page : false;
         // return $result;
     }
 
-    public function getUserSettings($user_id)
-    {
-        $result = DB::table('user_settings')->where('user_id', $user_id)->first();
-
-        return $result;
+    public function getUserSettings($user_id) {
+        return DB::table('user_settings')->where('user_id', $user_id)->first();
     }
 
-    public function getUserListTypes($user_id)
-    {
-        $result = DB::table('user_list_types')->where('user_id', $user_id)->get();
-
-        return $result;
+    public function getUserListTypes($user_id) {
+        return DB::table('user_list_types')->where('user_id', $user_id)->get();
     }
 
-    public function deleteUserSettings($user_id)
-    {
-        $result = DB::table('user_settings')->where('user_id', $user_id)->delete();
-
-        return $result;
+    public function deleteUserSettings($user_id) {
+        return DB::table('user_settings')->where('user_id', $user_id)->delete();
     }
 
     public function getOthersSettings($username)
@@ -256,50 +305,15 @@ class User extends Authenticatable
         return $result1 + $result2;
     }
 
-    public function updateFollowStatus($user_id)
-    {
-        $chk_user = DB::table('followers')->where('follower_id', $user_id)->where('leader_id', Auth::user()->id)->first();
-        if ($chk_user->status == 'pending') {
-            $result = DB::table('followers')->where('follower_id', $user_id)->where('leader_id', Auth::user()->id)->update(['status' => 'approved']);
-        }
-
-        $result = $result ? true : false;
-
-        return $result;
-    }
-
-    public function decilneRequest($user_id)
-    {
-        $chk_user = DB::table('followers')->where('follower_id', $user_id)->where('leader_id', Auth::user()->id)->first();
-        if ($chk_user->status == 'pending') {
-            $result = DB::table('followers')->where('follower_id', $user_id)->where('leader_id', Auth::user()->id)->delete();
-        }
-
-        $result = $result ? true : false;
-
-        return $result;
-    }
-
-    public function announcements()
-    {
+    public function announcements() {
         return $this->belongsToMany('App\Announcement', 'announcement_user', 'user_id', 'announcement_id');
     }
 
-    public function chkMyFollower($diff_timeline_id, $login_id)
-    {
-        $followers = DB::table('followers')->where('follower_id', $login_id)->where('leader_id', $diff_timeline_id)->where('status', '=', 'approved')->first();
-        $result = $followers ? true : false;
-
-        return $result;
-    }
-
-    public function conversations()
-    {
+    public function conversations() {
         return $this->belongsToMany('App\Conversation', 'conversation_user', 'user_id', 'conversation_id');
     }
 
-    public function messages()
-    {
+    public function messages() {
         return $this->conversations()->with('messages');
     }
 
@@ -400,70 +414,52 @@ class User extends Authenticatable
         return $result;
     }
 
-    public function settings()
-    {
+    public function settings() {
         $settings = DB::table('user_settings')->where('user_id', $this->id)->first();
         return $settings;
     }
 
-    public function commentLikes()
-    {
+    public function commentLikes() {
         return $this->belongsToMany('App\User', 'comment_likes', 'user_id', 'comment_id');
     }
 
-    public function postLikes()
-    {
+    public function postLikes() {
         return $this->belongsToMany('App\User', 'post_likes', 'user_id', 'post_id');
     }
 
-    public function postFollows()
-    {
-        return $this->belongsToMany('App\User', 'post_follows', 'user_id', 'post_id');
-    }
-
-    public function postShares()
-    {
-        return $this->belongsToMany('App\User', 'post_shares', 'user_id', 'post_id');
-    }
-
-    public function postReports()
-    {
+    public function postReports() {
         return $this->belongsToMany('App\User', 'post_reports', 'reporter_id', 'post_id')->withPivot('status');
     }
 
-    public function postTags()
-    {
+    public function postTags() {
         return $this->belongsToMany('App\User', 'post_tags', 'user_id', 'post_id')->withPivot('status');
     }
 
-    public function notifiedBy()
-    {
+    public function notifiedBy() {
         return $this->hasMany('App\Notification', 'notified_by', 'id');
     }
 
-    public function timelineReports()
-    {
+    public function timelineReports() {
         return $this->belongsToMany('App\User', 'timeline_reports', 'reporter_id', 'timeline_id')->withPivot('status');
     }
 
-    public function userEvents()
-    {
+    public function userEvents() {
         return $this->hasMany('App\Event');
     }
 
-    public function comments()
-    {
+    public function comments() {
         return $this->hasMany('App\Comment');
     }
 
     public function deleteOthers()
     {
-        $authUserId = Auth::user()->id;
-        $otherposts = $this->timeline->posts()->where('user_id', '!=', Auth::user()->id)->get();
+        // %PSG: Delete posts that aren't my own from my timeline
+        $sessionUser = Auth::user();
+        $otherposts = $this->timeline->posts()->where('user_id', '!=', $sessionUser->id)->get();
         foreach ($otherposts as $otpost) {
             $otpost->users_liked()->detach();
-            $otpost->notifications_user()->detach();
-            $otpost->shares()->detach();
+            //$otpost->notifications_user()->detach();
+            $otpost->sharees()->detach();
             $otpost->reports()->detach();
             $otpost->users_tagged()->detach();
             $otpost->images()->detach();
@@ -476,12 +472,6 @@ class User extends Authenticatable
                 $comment->delete();
             }
             $otpost->notifications()->delete();
-            // if($otpost->shared_post_id != NULL) {
-            //     $otpost->update(['shared_post_id' => null])->save();
-            // }
-            if (!empty($otpost->sharedPost()->first()) && count($otpost->sharedPost()->first()) != 0) {
-                $otpost->sharedPost->delete();
-            }
             $otpost->delete();
         }
     }
@@ -506,91 +496,65 @@ class User extends Authenticatable
         return $joined_groups ? $joined_groups : 0;
     }
 
-    /**
-     * @return BelongsToMany
-     */
-    public function paidSubscribers()
-    {
-        $followers = $this->followers()->pluck('follower_id')->toArray();
 
-        $activeFollowers = Subscription::whereIn('follower_id', $followers)
-            ->where('leader_id', $this->id)
-            ->pluck('follower_id')->toArray();
-
-        return $this->followers()->whereIn('follower_id', $activeFollowers);
-    }
-    
-    public function activeSubscribers()
-    {
-        $followers = $this->followers()->pluck('follower_id')->toArray();
-
-        $activeFollowers = Subscription::whereIn('follower_id', $followers)
-            ->where('leader_id', $this->id)
-            ->where('cancel_at', '=', null)
-            ->pluck('follower_id')->toArray();
-
-        return $this->followers()->whereIn('follower_id', $activeFollowers);
-    }
-
-    /**
-     * @return HasMany
-     */
-    public function blockedProfiles()
-    {
+    public function blockedProfiles() {
         return $this->hasMany(BlockedProfile::class, 'blocked_by');
     }
 
-    /**
-     * @return HasMany
-     */
-    public function purchasedPosts()
-    {
-        return $this->hasMany(PurchasedPost::class, 'purchased_by');
-    }
 
-    /**
-     * @return Collection
-     */
-    public function getPurchasedPostsArrAttribute()
-    {
-        return $this->purchasedPosts()->pluck('post_id');
-    }
+    //public function getPurchasedPostsArrAttribute() {
+        //return $this->purchasedPosts()->pluck('post_id');
+    //}
     
-    /**
-     * @return BelongsToMany
-     */
     public function favouriteUsers()
     {
         return $this->belongsToMany('App\User', 'favourite_users', 'user_id', 'favourite_user_id')->withPivot('favourite_user_id');
     }
 
-    /**
-     * @return HasMany
-     */
-    public function tips()
-    {
-        return $this->hasMany('App\PostTip', 'user_id');
-    }
-    
-    public function usersSentTips()
-    {
-        return $this->belongsToMany('App\User', 'users_tips', 'tip_from', 'tip_to')->withPivot('amount');
-    }
-    
-    public function usersReceivedTips()
-    {
-        return $this->belongsToMany('App\User', 'users_tips', 'tip_to', 'tip_from')->withPivot('amount');
-    }
-
-    /**
-     * @return HasOne
-     */
-    public function bankAccountDetails()
-    {
+    public function bankAccountDetails() {
         return $this->hasOne('App\BankAccountDetails', 'user_id');
     }
 
+    // %%% --- Implement PaymentReceivable Interface ---
+
+    public function receivePayment(
+        string $ptype, // PaymentTypeEnum
+        User $sender,
+        int $amountInCents,
+        array $cattrs = []
+    ) : ?Fanledger
+    {
+        $result = DB::transaction( function() use($ptype, $amountInCents, $cattrs, &$sender) {
+
+            switch ($ptype) {
+                case PaymentTypeEnum::TIP:
+                    $result = FanLedger::create([
+                        'fltype' => $ptype,
+                        'purchaser_id' => $sender->id,
+                        'seller_id' => $this->id,
+                        'purchaseable_type' => 'users',
+                        'purchaseable_id' => $this->id,
+                        'qty' => 1,
+                        'base_unit_cost_in_cents' => $amountInCents,
+                        'cattrs' => $cattrs ?? [],
+                    ]);
+                    break;
+                default:
+                    throw new Exception('Unrecognized payment type : '.$ptype);
+            }
+
+            return $result;
+        });
+
+        return $result ?? null;
+    }
+
     // --- %%Extra --- 
+
+    public function isMyContent(User $creator) : bool 
+    {
+        return $this->id === $creator->id;
+    }
 
     public function isAboutSet() {
         return ( !empty($this->timeline) && !empty($this->timeline->about) );
@@ -609,9 +573,6 @@ class User extends Authenticatable
 
     public function renderPostCount() {
         return $this->posts()->where('active', 1)->count();
-    }
-    public function renderFollowersCount() {
-        return $this->followers()->count();
     }
     public function renderLikesCount() {
         return $this->pageLikes()->count();

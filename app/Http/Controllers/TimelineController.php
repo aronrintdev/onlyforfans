@@ -8,11 +8,13 @@ use App\Announcement;
 use App\BlockedProfile;
 use App\Comment;
 use App\Event;
+use App\Fanledger;
 use App\Group;
 use App\Hashtag;
 use App\Http\Requests\CreateTimelineRequest;
 use App\Http\Requests\UpdateTimelineRequest;
 use App\Media;
+use App\Mediafile;
 use App\Notification;
 use App\Page;
 use App\Post;
@@ -25,6 +27,7 @@ use App\User;
 use App\UserList;
 use App\UserListType;
 use App\Wallpaper;
+use App\Interfaces\PaymentReceivable;
 use Carbon\Carbon;
 use DB;
 use Flash;
@@ -52,9 +55,10 @@ use Storage;
 use Teepluss\Theme\Facades\Theme;
 use Validator;
 
-use App\Mediafile;
 use App\Enums\MediafileTypeEnum;
-
+use App\Enums\PaymentTypeEnum;
+use App\Libs\UserMgr;
+use App\Libs\FeedMgr;
 
 class TimelineController extends AppBaseController
 {
@@ -225,7 +229,6 @@ class TimelineController extends AppBaseController
         $theme->setTitle($timeline->name.' '.Setting::get('title_seperator').' '.Setting::get('site_title').' '.Setting::get('title_seperator').' '.Setting::get('site_tagline'));
 
         if ($timeline->type == 'user') {
-            $follow_user_status = '';
             $timeline_post_privacy = '';
             $timeline_post = '';
 
@@ -242,13 +245,6 @@ class TimelineController extends AppBaseController
             $guest_events = $user->getEvents();
 
 
-            $follow_user_status = DB::table('followers')->where('follower_id', '=', Auth::user()->id)
-                               ->where('leader_id', '=', $user->id)->first();
-
-            if ($follow_user_status) {
-                $follow_user_status = $follow_user_status->status;
-            }
-
             $confirm_follow_setting = $user->getUserSettings(Auth::user()->id);
             $follow_confirm = $confirm_follow_setting->confirm_follow;
 
@@ -261,7 +257,7 @@ class TimelineController extends AppBaseController
             // liked_posts
             $liked_post = DB::table('post_likes')->where('user_id', Auth::user()->id)->get();
 
-            return $theme->scope('users/timeline', compact('user', 'timeline', 'posts', 'liked_post','liked_pages', 'next_page_url', 'joined_groups', 'follow_user_status', 'followRequests', 'following_count', 'followers_count', 'timeline_post', 'user_post', 'follow_confirm', 'joined_groups_count', 'own_pages', 'own_groups', 'user_events', 'guest_events', 'username'))->render();
+            return $theme->scope('users/timeline', compact('user', 'timeline', 'posts', 'liked_post','liked_pages', 'next_page_url', 'joined_groups', 'followRequests', 'following_count', 'followers_count', 'timeline_post', 'user_post', 'follow_confirm', 'joined_groups_count', 'own_pages', 'own_groups', 'user_events', 'guest_events', 'username'))->render();
 
         }
         elseif ($timeline->type == 'page') {
@@ -294,6 +290,7 @@ class TimelineController extends AppBaseController
 
     public function getMorePosts(Request $request)
     {
+        $sessionUser = Auth::user();
         $period = 'all';
         $sort_by = 'latest';
         $order_by = 'asc';
@@ -358,7 +355,9 @@ class TimelineController extends AppBaseController
             $layout = 'post_condensed_column';
         }
         foreach ($posts as $post) {
-            $responseHtml .= $theme->partial($layout, ['isSubscribed' => $isSubscribed, 'post' => $post, 'timeline' => $timeline, 'next_page_url' => $next_page_url, 'twoColumn' => $twoColumn]);
+            $responseHtml .= '<article class="crate-post" id="tag-post_id_'.$post->id.'">';
+            $responseHtml .= $theme->partial($layout, ['user'=>$sessionUser, 'isSubscribed'=>$isSubscribed, 'post'=>$post, 'timeline'=>$timeline, 'next_page_url'=>$next_page_url, 'twoColumn'=>$twoColumn]);
+            $responseHtml .= '</article>';
         }
 
         return $responseHtml;
@@ -366,47 +365,26 @@ class TimelineController extends AppBaseController
 
     public function showFeed(Request $request)
     {
+        $sessionUser = Auth::user();
+
         $mode = "showfeed";
         $user_post = 'showfeed';
         $theme = Theme::uses(Setting::get('current_theme', 'default'))->layout('default');
 
-        $timeline = Timeline::where('username', Auth::user()->username)->first();
-
-        $id = Auth::id();
-
-        $followingIds = filterByBlockedFollowings();
+        $timeline = $sessionUser->timeline;
 
         $trending_tags = trendingTags();
-        $suggested_users = suggestedUsers();
+        $suggested_users = FeedMgr::getSuggestedUsers($sessionUser); // suggestedUsers();
         $suggested_groups = suggestedGroups();
         $suggested_pages = suggestedPages();
 
-        // Check for hashtag
         if ($request->hashtag) {
             $hashtag = '#'.$request->hashtag;
-
-            $posts = Post::where('description', 'like', "%{$hashtag}%")->where('active', 1)->whereIn('timeline_id', DB::table('followers')->where('follower_id', $id)->whereIn('leader_id', $followingIds)->pluck('leader_id'))->latest()->paginate(Setting::get('items_page'));
-        } // else show the normal feed
-        else {
-            $query = Post::where('active', 1)->whereIn('user_id', function ($query) use ($id, $followingIds, $timeline) {
-                $query->select('leader_id')
-                    ->from('followers')
-                    ->where('follower_id', $id)
-                    ->whereIn('leader_id', $followingIds);
-            })
-//            })->orWhere('user_id', $id)->where('active', 1)->limit(10);+
-                ->orWhere(function (Builder $query) use ($id, $timeline) {
-                    $query->whereIn('id', function ($query1) use ($id, $timeline) {
-                        $query1->select('post_id')
-                            ->from('pinned_posts')
-                            ->where('user_id', $id);
-//                    ->where('active', 1);
-                    })
-                        ->orWhere('user_id', $id)
-                        ->orWhere('timeline_id', $timeline->id);
-                });
-                
-               $posts = $query->where('active', 1)->latest()->paginate(Setting::get('items_page'));
+            $posts = FeedMgr::getPosts($sessionUser, [
+                'hashtag' => $hashtag,
+            ]);
+        } else {
+            $posts = FeedMgr::getPosts($sessionUser);
         }
 
         if ($request->ajax) {
@@ -434,96 +412,56 @@ class TimelineController extends AppBaseController
             }
         }
 
-        $saved_users = Auth::user()->followers()->where('status', '=', 'approved')->with('tips')->get();
-        $currentUser = Auth::user();
-        $totalTip = 0;
-        $totalPurchasedPostAmount = 0;
+        //$saved_users = Auth::user()->followers()->where('status', '=', 'approved')->with('tips')->get();
+        //$saved_users = Auth::user()->followers()->where('status', '=', 'approved')->get();
+        $saved_users = collect(); // %TODO
+
         $subscriptionAmount = 0;
-        $currentUserPosts = $currentUser->posts;
-        $totalTipsPayout = 0;
-        $totalSubscriptionPayout = 0;
-        $tipsPayouts = $currentUser->tips;
-        if (count($tipsPayouts) > 0) {
-            foreach ($tipsPayouts as $tip) {
-                $totalTipsPayout += $tip->amount;
-            }
-        }
-        $userFollowings = Auth::user()->following()->where('status', '=', 'approved')->get();
-        $subscriptions = Subscription::where('follower_id', $currentUser->id)->get();
-        foreach ($userFollowings as $following) {
-            $subscriptions = Subscription::where('follower_id', $following->pivot->follower_id)->first();
-            if ($subscriptions) {
-                $totalSubscriptionPayout += $following->price;
-            }
-        }
-
-        $sentTipsToUser = $currentUser->usersSentTips;
-        $receivedTipsToUser = $currentUser->usersReceivedTips;
-        if (count($sentTipsToUser) > 0) {
-            foreach ($sentTipsToUser as $tip) {
-                if (!empty($tip->pivot->amount)) {
-                    $totalTipsPayout += $tip->pivot->amount;
-                }
-            }
-        }
-        if (count($receivedTipsToUser) > 0) {
-            foreach ($receivedTipsToUser as $tip) {
-                if (!empty($tip->pivot->amount)) {
-                    $totalTip += $tip->pivot->amount;
-                }
-            }
-        }
-
-        $postsWithTips = $currentUser->posts()->with('tip')->get();
-        if (count($postsWithTips) > 0) {
-            foreach($postsWithTips as $post) {
-                foreach ($post->tip as $tip) {
-                    if (!empty($tip->pivot->amount) && $tip->pivot->amount > 0)
-                        $totalTip += $tip->pivot->amount;
-                }
-            }
-        }
 
         if (count($saved_users) > 0) {
             foreach ($saved_users as $user) {
                 $userId = $user->id;
-                $tips = $user->tips;
+                //$tips = $user->tips;
 
-                $currentUserPosts = $currentUser->posts;
-                $purchasedPosts = $currentUser->posts->whereIn('id', $user->PurchasedPostsArr);
-                $paidSubscribers = $currentUser->paidSubscribers;
-                foreach ($purchasedPosts as $post) {
-                    if (!empty($post->price)) {
-                        $totalPurchasedPostAmount += $post->price;
-                    }
-                }
-
+                $purchasedPosts = $sessionUser->posts->whereIn('id', $user->PurchasedPostsArr);
+                $paidSubscribers = $sessionUser->paidSubscribers;
                 $subscribeUser = $paidSubscribers->where('id', $user->id)->first();
-                if (Subscription::where('leader_id', $currentUser->id)->where('follower_id', $user->id)->exists())
-                {
-                    $subscriptionAmount += $currentUser->price;
+                if (Subscription::where('leader_id', $sessionUser->id)->where('follower_id', $user->id)->exists()) {
+                    $subscriptionAmount += $sessionUser->price;
                 }
             }
         }
         
         $next_page_url = url('ajax/get-more-feed?page=2&ajax=true&hashtag='.$request->hashtag.'&username='.Auth::user()->username);
         $theme->setTitle($timeline->name.' '.Setting::get('title_seperator').' '.Setting::get('site_title').' '.Setting::get('title_seperator').' '.Setting::get('site_tagline'));
-//        try{
-//            echo $comment->user->avatar;
-//        }catch(\Exception $e){
-//            echo $e;
-//        }
 
-//        echo($posts);
-
-        $sessionUser = Auth::user();
         $this->_php2jsVars['session'] = [
             'username' => $sessionUser->username,
         ];
         \View::share('g_php2jsVars',$this->_php2jsVars);
 
-        return $theme->scope('home', compact('timeline', 'posts', 'next_page_url', 'trending_tags', 'suggested_users', 'announcement', 'suggested_groups', 'suggested_pages', 'mode', 'user_post', 'subscriptionAmount', 'totalTip'))
-            ->render();
+        //$subscriptionAmount = 
+        $totalTip = Fanledger::where('seller_id', $sessionUser->id)
+            ->where('fltype', PaymentTypeEnum::TIP)
+            ->sum('total_amount'); // %NOTE will include taxes %FIXME
+
+        $user = $sessionUser;
+
+        return $theme->scope('home', compact(
+            'timeline', 
+            'posts', 
+            'next_page_url', 
+            'trending_tags', 
+            'suggested_users', 
+            'announcement', 
+            'suggested_groups', 
+            'suggested_pages', 
+            'mode', 
+            'user', 
+            'user_post', 
+            'subscriptionAmount', 
+            'totalTip'
+        ))->render();
 
     } // showFeed()
 
@@ -895,7 +833,6 @@ class TimelineController extends AppBaseController
 
     public function createPost(Request $request)
     {
-Log::info('MARK-0'); // post-image-1
         $validator = Validator::make($request->all(), [
             'post_video_upload' => 'max:512000',
         ]);
@@ -926,7 +863,7 @@ Log::info('MARK-0'); // post-image-1
             $input['expiration_time'] = null;
         }
         $post = Post::create($input);
-        $post->notifications_user()->sync([Auth::user()->id], true);
+        //$post->notifications_user()->sync([Auth::user()->id], true);
         $s3 = Storage::disk('uploads');
 
         $timestamp = date('Y-m-d-H-i-s');
@@ -1030,7 +967,6 @@ Log::info('MARK-2.a'); // post-image-3
                         'orig_ext' => $postImage->getClientOriginalExtension(),
                     ]);
                 } else {
-Log::info('MARK-2.c');
                     $strippedName = str_replace(' ', '', $postImage->getClientOriginalName());
                     $photoName = date('Y-m-d-H-i-s') . $strippedName;
                     $s3video = Storage::disk('settings');
@@ -1049,7 +985,6 @@ Log::info('MARK-2.c');
         }
 
         if ($post) {
-Log::info('MARK-3.a'); // post-image-4
             // Check for any mentions and notify them
             preg_match_all('/(^|\s)(@\w+)/', $request->description, $usernames);
             foreach ($usernames[2] as $value) {
@@ -1216,7 +1151,7 @@ Log::info('MARK-3.a'); // post-image-4
         //Like the post
         if (!$post->users_liked->contains(Auth::user()->id)) {
             $post->users_liked()->attach(Auth::user()->id, ['created_at' => Carbon::now(), 'updated_at' => Carbon::now()]);
-            $post->notifications_user()->attach(Auth::user()->id);
+            //$post->notifications_user()->attach(Auth::user()->id);
 
             $user = User::find(Auth::user()->id);
             $user_settings = $user->getUserSettings($posted_user->id);
@@ -1249,7 +1184,7 @@ Log::info('MARK-3.a'); // post-image-4
         } //Unlike the post
         else {
             $post->users_liked()->detach([Auth::user()->id]);
-            $post->notifications_user()->detach([Auth::user()->id]);
+            //$post->notifications_user()->detach([Auth::user()->id]);
 
             //Notify the user for post unlike
             $notify_message = 'unliked your post';
@@ -1321,53 +1256,54 @@ Log::info('MARK-3.a'); // post-image-4
         }
     }
 
+    // toggles share/unshare
     public function sharePost(Request $request)
     {
+        $sessionUser = Auth::user();
         $post = Post::findOrFail($request->post_id);
-        $posted_user = $post->user;
+        $isOwnPost = $post->user_id == $sessionUser->id;
 
+        $isPostSharedWithUser = $post->sharees->contains($sessionUser->id);
 
-        if (!$post->users_shared->contains(Auth::user()->id)) {
-            $post->users_shared()->attach(Auth::user()->id, ['created_at' => Carbon::now(), 'updated_at' => Carbon::now()]);
-            $post_share_count = $post->users_shared()->get()->count();
-            // we need to insert the shared post into the timeline of the person who shared
-            $input['user_id'] = Auth::user()->id;
-            $post = Post::create([
-                'timeline_id' => Auth::user()->timeline->id,
-                'user_id' => Auth::user()->id,
-                'shared_post_id' => $request->post_id,
-            ]);
-
-
-            if ($post->user_id != Auth::user()->id) {
-                //Notify the user for post share
-                Notification::create(['user_id' => $post->user_id, 'post_id' => $request->post_id, 'notified_by' => Auth::user()->id, 'description' => Auth::user()->name.' '.trans('common.shared_your_post'), 'type' => 'share_post', 'link' => '/'.Auth::user()->username]);
-
-                $user = User::find(Auth::user()->id);
-                $user_settings = $user->getUserSettings($posted_user->id);
-
-                if ($user_settings && $user_settings->email_post_share == 'yes') {
-                    Mail::send('emails.postsharemail', ['user' => $user, 'posted_user' => $posted_user], function ($m) use ($user, $posted_user) {
-                        $m->from(Setting::get('noreply_email'), Setting::get('site_name'));
-                        $m->to($posted_user->email, $posted_user->name)->subject($user->name.' '.'shared your post');
-                    });
-                }
+        if ( !$isPostSharedWithUser ) { // share
+            $operation = 'share';
+            $post->sharees()->attach($sessionUser->id);
+            $user = User::find($sessionUser->id);
+            $user_settings = $user->getUserSettings($post->user->id);
+            if (!$isOwnPost && $user_settings && $user_settings->email_post_share == 'yes') {
+                Mail::send('emails.postsharemail', ['user' => $user, 'posted_user' => $post->user], function ($m) use (&$user, &$post) {
+                    $m->from(Setting::get('noreply_email'), Setting::get('site_name'));
+                    $m->to($post->user->email, $post->user->name)->subject($user->name.' '.'shared your post');
+                });
             }
-
-            return response()->json(['status' => '200', 'shared' => true, 'message' => 'successfully shared', 'share_count' => $post_share_count]);
-        } else {
-            $post->users_shared()->detach([Auth::user()->id]);
-            $post_share_count = $post->users_shared()->get()->count();
-
-            $sharedPost = Post::where('shared_post_id', $post->id)->delete();
-
-            if ($post->user_id != Auth::user()->id) {
-                //Notify the user for post share
-                Notification::create(['user_id' => $post->user_id, 'post_id' => $request->post_id, 'notified_by' => Auth::user()->id, 'description' => Auth::user()->name.' '.trans('common.unshared_your_post'), 'type' => 'unshare_post', 'link' => '/'.Auth::user()->username]);
-            }
-
-            return response()->json(['status' => '200', 'unshared' => false, 'message' => 'Successfully unshared', 'share_count' => $post_share_count]);
+        } else { // unshare
+            $operation = 'unshare';
+            $post->sharees()->detach([$sessionUser->id]);
         }
+
+        switch ($operation) {
+            case 'share':
+                $message = 'successfully shared';
+                $description = $sessionUser->name.' '.trans('common.shared_your_post');
+                $type = 'share_post';
+                break;
+            case 'unshare':
+                $message = 'successfully unshared';
+                $description = $sessionUser->name.' '.trans('common.unshared_your_post');
+                $type = 'unshare_post';
+                break;
+        }
+
+        if ( !$isOwnPost ) {
+            Notification::create(['user_id' => $post->user_id, 'post_id' => $request->post_id, 'notified_by' => $sessionUser->id, 'description' => $description, 'type' => $type, 'link' => '/'.$sessionUser->username]);
+        }
+
+        return response()->json([
+            'status' => '200', 
+            'shared' => $operation==='share', 
+            'message' => $message,
+            'share_count' => $post->sharees->count(),
+        ]);
     }
 
     public function pageLiked(Request $request)
@@ -1425,7 +1361,7 @@ Log::info('MARK-3.a'); // post-image-4
 
     public function timelineGroups(Request $request)
     {
-        $group = Group::where('timeline_id', '=', $request->timeline_id)->first();
+        $group = Group::where('timeline_id', $request->timeline_id)->first();
 
         if ($group->users->contains(Auth::user()->id)) {
             $group->users()->detach([Auth::user()->id]);
@@ -1507,13 +1443,6 @@ Log::info('MARK-3.a'); // post-image-4
         return redirect(route('timelines.index'));
     }
 
-    /**
-     * Remove the specified Timeline from storage.
-     *
-     * @param int $id
-     *
-     * @return Response
-     */
     public function destroy($id)
     {
         $timeline = $this->timelineRepository->findWithoutFail($id);
@@ -1531,195 +1460,47 @@ Log::info('MARK-3.a'); // post-image-4
         return redirect(route('timelines.index'));
     }
 
-    // %PSG: follow a post
-    public function follow(Request $request)
+    // %%% -----
+
+    // HERE MONDAY Jan 11
+    // toggles follow status
+    public function follow(Request $request, $id)
     {
-        $timeline_id = $request->timeline_id;
-        $follow = User::where('timeline_id', '=', $timeline_id)->first();
-        $timeline = Timeline::where('id', $timeline_id)->first();
-        
-        if(! checkBlockedProfiles($timeline->username)){
-            return response()->json(['status' => '422', 'message' => 'User blocked your profile. you can not subscribe.']);
+        $sessionUser = Auth::user();
+
+        $request->validate([
+            'is_subscribe' => 'required|integer',
+        ]);
+        $attrs = $request->all();
+        // [users].is_follow_for_free is really is_subscribe for free? redundant with the price field
+
+        try {
+            $timeline = Timeline::findOrFail($id);
+            $attrs['referer'] = app(Referer::class)->get();
+            $response = UserMgr::toggleFollow($sessionUser, $timeline, $attrs);
+        } catch (Exception | Throwable $e) {
+            Log::error(json_encode([
+                'msg' => 'TimlineController::follow()',
+                'emsg' => $e->getMessage(),
+            ]));
+            throw $e;
         }
-
-        if (!$follow->followers->contains(Auth::user()->id)) {
-            $referer = app(Referer::class)->get();
-
-            $follow->followers()->attach(Auth::user()->id, ['status' => 'approved', 'referral' => $referer]);
-
-            $user = User::find(Auth::user()->id);
-
-            try{
-                //Notify the user for follow
-                Notification::create(['user_id' => $follow->id, 'timeline_id' => $timeline_id, 'notified_by' => Auth::user()->id, 'description' => Auth::user()->name.' '.trans('common.is_following_you'), 'type' => 'follow']);
-            } catch(Exception | Throwable $e){
-                Log::error(json_encode([
-                    'msg' => 'TimlineController::follow() - Could not send notification',
-                    'emsg' => $e->getMessage(),
-                ]));
-            }
-
-//            return response()->json(['status' => '200', 'followed' => true, 'message' => 'successfully followed']);
-            return redirect($timeline->username);
+        //$follow = User::where('timeline_id', '=', $timeline_id)->first();
+        if ( $request->ajax() ) {
+            return response()->json( array_merge(['status' => '200'], $response));
         } else {
-            $follow->followers()->detach([Auth::user()->id]);
-
-            try{
-                //Notify the user for follow
-                Notification::create(['user_id' => $follow->id, 'timeline_id' => $timeline_id, 'notified_by' => Auth::user()->id, 'description' => Auth::user()->name.' '.trans('common.is_unfollowing_you'), 'type' => 'unfollow']);
-            } catch(Exception | Throwable $e){
-                Log::error(json_encode([
-                    'msg' => 'TimlineController::follow() - Could not send notification',
-                    'emsg' => $e->getMessage(),
-                ]));
-            }
-
-//            return response()->json(['status' => '200', 'followed' => false, 'message' => 'successfully unFollowed']);
-            return redirect()->route($timeline->username);
+            return back();
         }
     }
 
-
-    // %PSG
-    public function followFreeUser(Request $request)
-    {
-        $timeline_id = $request->timeline_id;
-        $follow = User::where('timeline_id', '=', $timeline_id)->first();
-        $timeline = Timeline::where('id', $timeline_id)->first();
-        
-        if ( !checkBlockedProfiles($timeline->username) ) {
-            return response()->json(['status' => '422', 'message' => 'User blocked your profile. you can not subscribe.']);
-        }
-
-        if (!$follow->followers->contains(Auth::user()->id)) {
-            $referer = app(Referer::class)->get();
-
-            $follow->followers()->attach(Auth::user()->id, ['status' => 'approved', 'referral' => $referer]);
-
-            $user = User::find(Auth::user()->id);
-
-            try{
-                //Notify the user for follow
-                Notification::create(['user_id' => $follow->id, 'timeline_id' => $timeline_id, 'notified_by' => Auth::user()->id, 'description' => Auth::user()->name.' '.trans('common.is_following_you'), 'type' => 'follow']);
-            } catch(\Exception $e){
-            } catch(Throwable $e) {
-            }
-
-            return response()->json(['status' => '200', 'followed' => true, 'message' => 'successfully followed']);
-        } else {
-            $follow->followers()->detach([Auth::user()->id]);
-
-            try{
-                //Notify the user for follow
-                Notification::create(['user_id' => $follow->id, 'timeline_id' => $timeline_id, 'notified_by' => Auth::user()->id, 'description' => Auth::user()->name.' '.trans('common.is_unfollowing_you'), 'type' => 'unfollow']);
-            }catch(\Exception $e){
-            } catch(Throwable $e) {
-            }
-
-            return response()->json(['status' => '200', 'followed' => false, 'message' => 'successfully unFollowed']);
-        }
-    }
-
-
-    public function unfollow(Request $request)
-    {
-
-        $subscription = Subscription::where('follower_id', Auth::user()->id)->where('leader_id', $request->timeline_id)->where('cancel_at', NULL)->first();
-        session(['previous_url' => redirect()->back()->getTargetUrl()]);
-        if ($subscription) {
-            app('App\Http\Controllers\CheckoutController')->deleteSubscription($subscription);
-        } else {
-            $follow = User::where('timeline_id', '=', $request->timeline_id)->first();
-            $follow->followers()->detach([Auth::user()->id]);
-            try{
-                //Notify the user for follow
-                Notification::create(['user_id' => $follow->id, 'timeline_id' => $request->timeline_id, 'notified_by' => Auth::user()->id, 'description' => Auth::user()->name.' '.trans('common.is_unfollowing_you'), 'type' => 'unfollow']);
-            }catch(\Exception $e){
-            } catch(Throwable $e) {
-            }
-
-            return response()->json(['status' => '200', 'followed' => false, 'message' => 'successfully unFollowed']);
-        }
-    }
-
-    public function unfollowFreeUser(Request $request) {
-        $follow = User::where('timeline_id', '=', $request->timeline_id)->first();
-        $timeline = Timeline::where('id', $request->timeline_id)->first();
-
-        if (!$follow->followers->contains(Auth::user()->id)) {
-            $referer = app(Referer::class)->get();
-
-            $follow->followers()->attach(Auth::user()->id, ['status' => 'approved', 'referral' => $referer]);
-
-            $user = User::find(Auth::user()->id);
-
-            try{
-                //Notify the user for follow
-                Notification::create(['user_id' => $follow->id, 'timeline_id' => $request->timeline_id, 'notified_by' => Auth::user()->id, 'description' => Auth::user()->name.' '.trans('common.is_following_you'), 'type' => 'follow']);
-            }catch(\Exception $e){
-            } catch(Throwable $e) {
-            }
-
-            return response()->json(['status' => '200', 'followed' => true, 'message' => 'successfully followed']);
-        } else {
-            $follow->followers()->detach([Auth::user()->id]);
-
-            try{
-                //Notify the user for follow
-                Notification::create(['user_id' => $follow->id, 'timeline_id' => $request->timeline_id, 'notified_by' => Auth::user()->id, 'description' => Auth::user()->name.' '.trans('common.is_unfollowing_you'), 'type' => 'unfollow']);
-            }catch(\Exception $e){
-            } catch(Throwable $e) {
-            }
-
-            return response()->json(['status' => '200', 'followed' => false, 'message' => 'successfully unFollowed']);
-        }
-    }
-
-    public function userFollowRequest(Request $request)
-    {
-        $user = User::where('timeline_id', '=', $request->timeline_id)->first();
-
-        if (!$user->followers->contains(Auth::user()->id)) {
-            $user->followers()->attach(Auth::user()->id, ['status' => 'pending']);
-
-            //Notify the user for page like
-            Notification::create(['user_id' => $user->id, 'timeline_id' => Auth::user()->timeline_id, 'notified_by' => Auth::user()->id, 'description' => Auth::user()->name.' '.trans('common.request_follow'), 'type' => 'follow_requested']);
-
-            return response()->json(['status' => '200', 'followrequest' => true, 'message' => 'successfully sent user follow request']);
-        } else {
-            if ($request->follow_status == 'approved') {
-                $user->followers()->detach([Auth::user()->id]);
-
-                return response()->json(['status' => '200', 'unfollow' => true, 'message' => 'unfollowed successfully']);
-            } else {
-                $user->followers()->detach([Auth::user()->id]);
-
-                return response()->json(['status' => '200', 'followrequest' => false, 'message' => 'unsuccessfully request']);
-            }
-        }
-    }
+    // %%% -----
 
     public function getNotifications(Request $request)
     {
         $post = Post::findOrFail($request->post_id);
-
-        if (!$post->notifications_user->contains(Auth::user()->id)) {
-            $post->notifications_user()->attach(Auth::user()->id);
-
-            return response()->json(['status' => '200', 'notified' => true, 'message' => 'Successfull']);
-        } else {
-            $post->notifications_user()->detach([Auth::user()->id]);
-
-            return response()->json(['status' => '200', 'unnotify' => false, 'message' => 'UnSuccessfull']);
-        }
+        return response()->json(['status' => '200', 'unnotify' => false, 'message' => 'TODO']);
     }
-    /**
-     * Get a validator for an incoming registration request.
-     *
-     * @param array $data
-     *
-     * @return \Illuminate\Contracts\Validation\Validator
-     */
+
     protected function validator(array $data)
     {
         $rules = [
@@ -1749,7 +1530,6 @@ Log::info('MARK-3.a'); // post-image-4
 
 
         if ($timeline->type == 'user') {
-            $follow_user_status = '';
             $user = User::where('timeline_id', $timeline['id'])->first();
             $followRequests = $user->followers()->where('status', '=', 'pending')->get();
             $liked_pages = $user->pageLikes()->get();
@@ -1759,15 +1539,9 @@ Log::info('MARK-3.a'); // post-image-4
             $following_count = $user->following()->where('status', '=', 'approved')->get()->count();
             $followers_count = $user->followers()->where('status', '=', 'approved')->get()->count();
             $joined_groups_count = $user->groups()->where('role_id', '!=', $admin_role_id->id)->where('status', '=', 'approved')->get()->count();
-            $follow_user_status = DB::table('followers')->where('follower_id', '=', $user->id)
-                ->where('leader_id', '=', $user->id)->first();
             $user_events = $user->events()->whereDate('end_date', '>=', date('Y-m-d', strtotime(Carbon::now())))->get();
             $guest_events = $user->getEvents();
 
-
-            if ($follow_user_status) {
-                $follow_user_status = $follow_user_status->status;
-            }
 
             $confirm_follow_setting = $user->getUserSettings($user->id);
             $follow_confirm = $confirm_follow_setting->confirm_follow;
@@ -1788,248 +1562,143 @@ Log::info('MARK-3.a'); // post-image-4
         // liked_posts
         $liked_post = \Illuminate\Support\Facades\DB::table('post_likes')->where('user_id', $user->id)->get();
 
-        return $theme->scope('timeline/public-posts', compact('timeline', 'liked_post', 'user', 'posts', 'liked_pages', 'followRequests', 'joined_groups', 'own_pages', 'own_groups', 'follow_user_status', 'following_count', 'followers_count', 'follow_confirm', 'user_post', 'timeline_post', 'joined_groups_count', 'next_page_url', 'user_events', 'guest_events'))->render();
+        return $theme->scope('timeline/public-posts', compact('timeline', 'liked_post', 'user', 'posts', 'liked_pages', 'followRequests', 'joined_groups', 'own_pages', 'own_groups', 'following_count', 'followers_count', 'follow_confirm', 'user_post', 'timeline_post', 'joined_groups_count', 'next_page_url', 'user_events', 'guest_events'))->render();
     }
 
-    public function posts($username)
+    public function posts(Request $request, $username)
     {
-        if(! checkBlockedProfiles($username)){
+        $sessionUser = Auth::user();
+
+        if ( !checkBlockedProfiles($username) || isBlockByMe($username) ) {
             return view('errors.blocked_profile');
-        } elseif (isBlockByMe($username)) {
-            $customMessage = 'You have blocked this user.';
-            return view('errors.blocked_profile', compact('customMessage'));
-        }
+        } 
 
-        $favouritePosts = [];
-        $period = 'all';
-        $sort_by = 'latest';
-        $order_by = 'asc';
-
-        $query_period = '';
-        $query_sortby = '';
-        $query_orderby = '';
-
-        $startDate = date('y-m-d',strtotime("01-01-1970"));
-
-        if (isset($_GET['p'])) {
-
-            $period = $_GET['p'];
-
-            if ($period == '3m')
+        $period = $request->input('p', 'all');
+        switch ( $period ) {
+            case '3m':
                 $startDate = date('y-m-d',strtotime(Carbon::now()->subMonth(3)));
-            else if ($period == '1m')
+                break;
+            case '1m':
                 $startDate = date('y-m-d',strtotime(Carbon::now()->subMonth(1)));
-            else if ($period == '1w')
+                break;
+            case '1w':
                 $startDate = date('y-m-d',strtotime(Carbon::now()->subWeek(1)));
-            else
-                $period = 'all';
+                break;
+            default:
+                $startDate = date('y-m-d',strtotime("01-01-1970"));
         }
 
-        if (isset($_GET['s'])) {
-            $sort_by = $_GET['s'];
-
-            if ($sort_by != 'liked')
-                $sort_by = 'latest';
+        $sort_by = $request->input('s', 'latest');
+        if ($sort_by !== 'liked') {
+            $sort_by = 'latest';
         }
 
-        if (isset($_GET['o'])) {
-            $order_by = $_GET['o'];
-
-            if ($order_by != "desc" && $order_by != "asc")
-                $order_by = "asc";
+        $order_by = $request->input('o', 'asc');
+        if ($order_by != 'desc' && $order_by != 'asc') {
+            $order_by = 'asc';
         }
 
-
-        if (!Auth::check()) {
-            $admin_role_id = Role::where('name', '=', 'admin')->first();
-            $timeline = Timeline::where('username', $username)->first();
-            $user = User::where('timeline_id', $timeline['id'])->first();
-//            $posts = $timeline->posts()->where('active', 1)->orderBy('created_at', 'desc')->with('comments')->paginate(Setting::get('items_page'));
-
-            $id = $user->id;
-
-//            if (Auth::user()->id == $id) {
-//                $posts = Post::WhereIn('id', function ($query1) use ($id) {
-//                    $query1->select('post_id')
-//                        ->from('pinned_posts')
-//                        ->where('user_id', $id)
-//                        ->where('active', 1);
-//                })->orWhere('user_id', $id)->where('active', 1)->latest()->paginate(Setting::get('items_page'));
-//            } else {
-                $posts = Post::Where('user_id', $user->id)->Where('timeline_id', $timeline->id)->whereDate('created_at', '>=', $startDate)->where('active', 1)->orderBy('created_at', $order_by == 'desc' ? 'asc' : 'desc');
-
-                $postMedia = $posts->get();
-                $posts = $posts->paginate(Setting::get('items_page'));
-//            }
-
-//            $user_lists = UserListType::where(['user_id' => Auth::user()->id])->with('lists')->get();
-//
-//            if (!empty($user_lists)) {
-//
-//                foreach ($user_lists as $user_list) {
-//                    if (UserList::where(['list_type_id' => $user_list->id, 'saved_user_id' => $id])->get()->isEmpty()) {
-//                        $user_list->state = 0;
-//                    } else {
-//                        $user_list->state = 1;
-//                    }
-//                }
-//            }
-
-            if ($timeline->type == 'user') {
-                $follow_user_status = '';
-                $user = User::where('timeline_id', $timeline['id'])->first();
-                $followRequests = $user->followers()->where('status', '=', 'pending')->get();
-                $liked_pages = $user->pageLikes()->get();
-                $joined_groups = $user->groups()->get();
-                $own_pages = $user->own_pages();
-                $own_groups = $user->own_groups();
-                $following_count = $user->following()->where('status', '=', 'approved')->get()->count();
-                $followers_count = $user->followers()->where('status', '=', 'approved')->get()->count();
-                $joined_groups_count = $user->groups()->where('role_id', '!=', $admin_role_id->id)->where('status', '=', 'approved')->get()->count();
-                $follow_user_status = DB::table('followers')->where('follower_id', '=', $user->id)
-                    ->where('leader_id', '=', $user->id)->first();
-                $user_events = $user->events()->whereDate('end_date', '>=', date('Y-m-d', strtotime(Carbon::now())))->get();
-                $guest_events = $user->getEvents();
-    
-    
-                if ($follow_user_status) {
-                    $follow_user_status = $follow_user_status->status;
-                }
-    
-                $confirm_follow_setting = $user->getUserSettings($user->id);
-                $follow_confirm = $confirm_follow_setting->confirm_follow;
-    
-                $live_user_settings = $user->getUserPrivacySettings($user->id, $user->id);
-                $privacy_settings = explode('-', $live_user_settings);
-                $timeline_post = $privacy_settings[0];
-                $user_post = $privacy_settings[1];
-            } else {
-                $user = User::where('id', $user->id)->first();
-            }
-
-            $next_page_url = url('ajax/get-more-posts?page=2&username='.rawurlencode($username).'&p='.$period.'&s='.$sort_by.'&o='.$order_by);
-    
-            $theme = Theme::uses(Setting::get('current_theme', 'default'))->layout('public');
-            $theme->setTitle(trans('common.posts').' '.Setting::get('title_seperator').' '.Setting::get('site_title').' '.Setting::get('title_seperator').' '.Setting::get('site_tagline'));
-    
-            // liked_posts
-            $liked_post = \Illuminate\Support\Facades\DB::table('post_likes')->where('user_id', $user->id)->get();
-    
-            return $theme->scope('timeline/public-posts',
-                compact('timeline', 'liked_post', 'user', 'posts', 'liked_pages', 'followRequests', 'joined_groups',
-                    'own_pages', 'own_groups', 'follow_user_status', 'following_count', 'followers_count', 'follow_confirm', 'user_post',
-                    'timeline_post', 'joined_groups_count', 'next_page_url', 'user_events', 'guest_events', 'period', 'sort_by', 'order_by', 'postMedia'))->render();
-
+        $admin_role_id = Role::where('name', 'admin')->first();
+        $timeline = Timeline::where('username', $username)->first();
+        if ($timeline == NULL) {
+            abort(404);
         }
-        else {
-        
-            $admin_role_id = Role::where('name', '=', 'admin')->first();
-            $timeline = Timeline::where('username', $username)->first();
-            
-            if ($timeline == NULL) {
-                abort(404);
-            }
+        $creator = $timeline->user; // owner
 
-            $user = User::where('timeline_id', $timeline['id'])->first();
+        $filters = [
+            'start_date' => $startDate,
+        ];
+        $pageSize = Setting::get('items_page');
 
-            $id = $user->id;
-//            $posts = $timeline->posts()->where('active', 1)->orderBy('created_at', 'desc')->with('comments')->paginate(Setting::get('items_page'));
+        $posts = FeedMgr::getPostsByTimeline($sessionUser??null, $timeline, $filters=[], $order_by, $pageSize);
+        $postMedia = collect(); // $query->get(); // %TODO %FIXME
 
-            if (Auth::user()->id == $id) {
+        $favouritePosts = empty($sessionUser)
+            ? collect()
+            : Post::with('images')->has('images')
+                ->where('user_id', $creator->id)
+                ->where('active', 1)
+                ->orderBy('created_at', 'desc')->get();
 
-                $posts = (Post::WhereIn('id', function ($query1) use ($id, $startDate) {
-                    $query1->select('post_id')
-                        ->from('pinned_posts')
-                        ->where('user_id', $id)
-                        ->whereDate('created_at', '>=', $startDate)
-                        ->where('active', 1);
-                })->orWhere(function ($query) use ($timeline, $id){
-                    $query->where('timeline_id', $timeline->id)
-                    ->orWhere('user_id', $id);
-                })->whereDate('created_at', '>=', $startDate)->where('active', 1))->orderBy('created_at', $order_by == 'desc' ? 'asc' : 'desc');
-                
-            } else {
-                $posts = Post::Where('user_id', $id)->where('active', 1)->orWhere(function ($query) use ($timeline){
-                    $query->where('timeline_id', $timeline->id);
-//                        ->orWhere('user_id', Auth::id());
-                })->whereDate('created_at', '>=', $startDate)->where('active', 1)->orderBy('created_at', $order_by == 'desc' ? 'asc' : 'desc');
-            }
-
-            if ($user->paidSubscribers->where('id', Auth::id())->first() || Auth::id() == $user->id) {
-                $favouritePosts = Post::with('images')->has('images')
-                    ->where('user_id', $user->id)
-                    ->orderBy('created_at', 'desc')
-                    ->where('active', 1)
-                    ->get();
-            }
-            
-            $postMedia = $posts->get();
-            $posts = $posts->paginate(Setting::get('items_page'));
-            $user_lists = UserListType::where(['user_id' => Auth::user()->id])->with('lists')->get();
-
-            if (!empty($user_lists)) {
-
-                foreach ($user_lists as $user_list) {
-                    if (UserList::where(['list_type_id' => $user_list->id, 'saved_user_id' => $id])->get()->isEmpty()) {
-                        $user_list->state = 0;
-                    } else {
-                        $user_list->state = 1;
-                    }
+        $user_lists = empty($sessionUser)
+            ? collect()
+            : UserListType::where(['user_id' => $sessionUser->id])->with('lists')->get();
+        if ( $user_lists->isNotEmpty() ) {
+            foreach ($user_lists as $user_list) {
+                if (UserList::where(['list_type_id' => $user_list->id, 'saved_user_id' => $creator->id])->get()->isEmpty()) {
+                    $user_list->state = 0;
+                } else {
+                    $user_list->state = 1;
                 }
             }
+        }
 
-            if ($timeline->type == 'user') {
-                $follow_user_status = '';
-                $user = User::where('timeline_id', $timeline['id'])->first();
-                $followRequests = $user->followers()->where('status', '=', 'pending')->get();
-                $liked_pages = $user->pageLikes()->get();
-                $joined_groups = $user->groups()->get();
-                $own_pages = $user->own_pages();
-                $own_groups = $user->own_groups();
-                $following_count = $user->following()->where('status', '=', 'approved')->get()->count();
-                $followers_count = $user->followers()->where('status', '=', 'approved')->get()->count();
-                $joined_groups_count = $user->groups()->where('role_id', '!=', $admin_role_id->id)->where('status', '=', 'approved')->get()->count();
-                $follow_user_status = DB::table('followers')->where('follower_id', '=', Auth::user()->id)
-                                    ->where('leader_id', '=', $user->id)->first();
-                $user_events = $user->events()->whereDate('end_date', '>=', date('Y-m-d', strtotime(Carbon::now())))->get();
-                $guest_events = $user->getEvents();
-    
-    
-                if ($follow_user_status) {
-                    $follow_user_status = $follow_user_status->status;
-                }
-    
-                $confirm_follow_setting = $user->getUserSettings(Auth::user()->id);
-                $follow_confirm = $confirm_follow_setting->confirm_follow;
-    
-                $live_user_settings = $user->getUserPrivacySettings(Auth::user()->id, $user->id);
-                $privacy_settings = explode('-', $live_user_settings);
-                $timeline_post = $privacy_settings[0];
-                $user_post = $privacy_settings[1];
-            } else {
-                $user = User::where('id', Auth::user()->id)->first();
-            }
-    
-            $next_page_url = url('ajax/get-more-posts?page=2&username='.rawurlencode($username).'&p='.$period.'&s='.$sort_by.'&o='.$order_by);
-    
-            $theme = Theme::uses(Setting::get('current_theme', 'default'))->layout('default');
-            $theme->setTitle(trans('common.posts').' '.Setting::get('title_seperator').' '.Setting::get('site_title').' '.Setting::get('title_seperator').' '.Setting::get('site_tagline'));
-    
-            // liked_posts
-            $liked_post = \Illuminate\Support\Facades\DB::table('post_likes')->where('user_id', \Illuminate\Support\Facades\Auth::user()->id)->get();
-
-            $sessionUser = Auth::user();
-            $this->_php2jsVars['session'] = [
-                'username' => $sessionUser->username,
-            ];
+        if ( empty($sessionUser) ) {
+            $confirm_follow_setting = $creator->getUserSettings($creator->id);
+            $follow_confirm = $confirm_follow_setting->confirm_follow;
+            $live_user_settings = $creator->getUserPrivacySettings($creator->id, $creator->id);
+            $liked_post = DB::table('post_likes')->where('user_id', $creator->id)->get();
+            $template = 'timeline/public-posts';
+            $layout = 'public';
+        } else {
+            $confirm_follow_setting = $creator->getUserSettings($sessionUser->id);
+            $follow_confirm = $confirm_follow_setting->confirm_follow;
+            $live_user_settings = $creator->getUserPrivacySettings($sessionUser->id, $creator->id);
+            $liked_post = DB::table('post_likes')->where('user_id', $sessionUser->id)->get();
+            $template = 'timeline/posts';
+            $layout = 'default';
+            $this->_php2jsVars['session'] = [ 'username' => $sessionUser->username ];
             \View::share('g_php2jsVars',$this->_php2jsVars);
-    
-            return $theme->scope('timeline/posts',
-                compact('timeline', 'liked_post', 'user', 'posts', 'liked_pages', 'followRequests', 'joined_groups', 'own_pages',
-                    'own_groups', 'follow_user_status', 'following_count', 'followers_count', 'follow_confirm', 'user_post', 'timeline_post',
-                    'joined_groups_count', 'next_page_url', 'user_events', 'guest_events', 'user_lists', 'period', 'sort_by', 'order_by', 'favouritePosts', 'postMedia'))->render();
-        
         }
+
+        $privacy_settings = explode('-', $live_user_settings);
+        $timeline_post = $privacy_settings[0];
+        $user_post = $privacy_settings[1];
+
+        $followRequests = $creator->timeline->followers()->where('is_approved', 0)->get(); // pending requests
+        $liked_pages = $creator->pageLikes()->get();
+        $joined_groups = $creator->groups()->get();
+        $own_pages = $creator->own_pages();
+        $own_groups = $creator->own_groups();
+        $following_count = $creator->followedtimelines()->where('is_approved', 1)->count();
+        $followers_count = $creator->timeline->followers()->where('is_approved',1)->count();
+        $joined_groups_count = $creator->groups()->where('role_id', '<>', $admin_role_id->id)->where('status', 'approved')->get()->count();
+        $user_events = $creator->events()->whereDate('end_date', '>=', date('Y-m-d', strtotime(Carbon::now())))->get();
+        $guest_events = $creator->getEvents();
+
+        $next_page_url = url('ajax/get-more-posts?page=2&username='.rawurlencode($username).'&p='.$period.'&s='.$sort_by.'&o='.$order_by);
+
+        $theme = Theme::uses(Setting::get('current_theme', 'default'))->layout($layout);
+        $theme->setTitle(trans('common.posts').' '.Setting::get('title_seperator').' '.Setting::get('site_title').' '.Setting::get('title_seperator').' '.Setting::get('site_tagline'));
+
+        $user = $creator;
+
+        return $theme->scope($template, compact('timeline',
+            'liked_post',
+            'user',
+            'posts',
+            'liked_pages',
+            'followRequests',
+            'joined_groups',
+            'own_pages',
+            'own_groups',
+            'following_count',
+            'followers_count',
+            'follow_confirm',
+            'user_post',
+            'timeline_post',
+            'joined_groups_count',
+            'next_page_url',
+            'user_events',
+            'guest_events',
+            'user_lists',
+            'period',
+            'sort_by',
+            'order_by',
+            'favouritePosts',
+            'postMedia'
+        ))->render();
+
     } // posts()
     
 
@@ -2172,7 +1841,7 @@ Log::info('MARK-3.a'); // post-image-4
 
     public function reportPost(Request $request)
     {
-        $post = Post::where('id', '=', $request->post_id)->first();
+        $post = Post::where('id', $request->post_id)->first();
         $reported = $post->managePostReport($request->post_id, Auth::user()->id);
 
         if ($reported) {
@@ -3070,10 +2739,13 @@ Log::info('MARK-3.a'); // post-image-4
 
     public function getUsersListOfCurrentUser($sort_by, $order_by)
     {
-        if ($sort_by == 'recent')
-            $user_lists = UserListType::where(['user_id' => Auth::user()->id])->orderBy('created_at', $order_by)->with('lists')->get();
-        else
-            $user_lists = UserListType::where(['user_id' => Auth::user()->id])->with('lists')->get();
+        $sessionUser = Auth::user();
+
+        if ($sort_by == 'recent') {
+            $user_lists = UserListType::where(['user_id' => $sessionUser->id])->orderBy('created_at', $order_by)->with('lists')->get();
+        } else {
+            $user_lists = UserListType::where(['user_id' => $sessionUser->id])->with('lists')->get();
+        }
 
         if (!empty($user_lists)) {
             foreach ($user_lists as $user_list) {
@@ -3081,51 +2753,46 @@ Log::info('MARK-3.a'); // post-image-4
             }
         }
 
-        $lists = array();
+        $lists = [];
 
         foreach ($user_lists as $user_list) {
-
-            $list = array();
-            $list['name'] = $user_list->list_type;
-            $list['count'] = $user_list->count;
-            $list['id'] = $user_list->id;
-            $list['created_at'] = $user_list->created_at;
-
-            $lists[] = $list;
+            $lists[] = [
+                'name' => $user_list->list_type,
+                'count' => $user_list->count,
+                'id' => $user_list->id,
+                'created_at' => $user_list->created_at,
+            ];
         }
 
-        $following_count = Auth::user()->following()->where('status', '=', 'approved')->get()->count();
-        $followers_count = Auth::user()->followers()->where('status', '=', 'approved')->get()->count();
+        $following_count = $sessionUser->followedtimelines()->where('is_approved', 1)->count();
+        $followers_count = $sessionUser->timeline->followers()->where('is_approved',1)->count();
 
         $list = array();
         $list['name'] = trans('common.following-1');
         $list['count'] = $following_count;
         $list['id'] = 'following';
-        $list['created_at'] = Auth::user()->created_at;
+        $list['created_at'] = $sessionUser->created_at;
         $lists[] = $list;
 
         $list = array();
         $list['name'] = trans('common.followers');
         $list['count'] = $followers_count;
         $list['id'] = 'followers';
-        $list['created_at'] = Auth::user()->created_at;
+        $list['created_at'] = $sessionUser->created_at;
         $lists[] = $list;
 
         $sorted_lists = array();
         foreach ($lists as $key => $row) {
-
-            if ($sort_by == 'name')
+            if ($sort_by == 'name') {
                 $sorted_lists[$key] = $row['name'];
-            else if ($sort_by == 'people')
+            } else if ($sort_by == 'people') {
                 $sorted_lists[$key] = $row['count'];
-            else if ($sort_by == 'recent')
+            } else if ($sort_by == 'recent') {
                 $sorted_lists[$key] = $row['created_at'];
+            }
         }
-
         array_multisort($sorted_lists, $order_by == 'asc' ? SORT_ASC : SORT_DESC, $lists);
-
         return $lists;
-
     }
 
     public function addNewUserList(Request $request)
@@ -3346,49 +3013,6 @@ Log::info('MARK-3.a'); // post-image-4
         return $theme->scope('timeline/my-list', compact(  'following_count', 'followers_count', 'saved_users', 'list_type_id', 'list_type_name'))->render();
     }
 
-    public function sendTipPost(Request $request)
-    {
-        $post = Post::findOrFail($request->post_id);
-        $posted_user = $post->user;
-
-        $post->tip()->attach(Auth::user()->id, ['amount' => $request->amount, 'note' => $request->note, 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()]);
-        $post->notifications_user()->attach(Auth::user()->id);
-
-        $user = User::find(Auth::user()->id);
-        //Notify the user for post like
-        $notify_message = 'sent tip for your post';
-        $notify_type = 'tip_post';
-        $status_message = 'success';
-
-        if ($post->user->id != Auth::user()->id) {
-            Notification::create(['user_id' => $post->user->id, 'post_id' => $post->id, 'notified_by' => Auth::user()->id, 'description' => Auth::user()->name.' '.$notify_message, 'type' => $notify_type]);
-        }
-
-        return response()->json(['status' => '200', 'message' => $status_message]);
-    }
-
-    /**
-     * @param Request $request
-     *
-     * @return JsonResponse
-     */
-    public function sendTipUser (Request $request)
-    {
-        $user = User::findOrFail($request->user_id);
-
-        Auth::user()->usersSentTips()->attach(Auth::user()->id, ['amount' => $request->amount,'note' => $request->note,'tip_to' => $request->user_id, 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()]);
-
-        //Notify the user for post like
-        $notify_message = 'sent tip for you';
-        $notify_type = 'tip_post';
-        $status_message = 'success';
-
-        if ($user->id != Auth::user()->id) {
-            Notification::create(['user_id' => $user->id, 'notified_by' => Auth::user()->id, 'description' => Auth::user()->name.' '.$notify_message, 'type' => $notify_type]);
-        }
-
-        return response()->json(['status' => '200', 'message' => $status_message]);
-    }
 
     public function switchLanguage(Request $request)
     {
@@ -3418,13 +3042,38 @@ Log::info('MARK-3.a'); // post-image-4
         }
          */
 
+        $sessionUser = Auth::user();
+
         switch ($request->template) {
+            case '_purchase_post_confirm':
+                $postId = $request->post_id;
+                $post = Post::find($postId);
+                $html = \View::make('common.partials._purchase_post_confirm', [
+                    'post' => $post,
+                ])->render();
+                break;
+            case '_follow_confirm':
+                $timelineId = $request->timeline_id;
+                $timeline = Timeline::find($timelineId);
+                $html = \View::make('common.partials._follow_confirm', [
+                    'timeline' => $timeline,
+                    'is_cancel' => $timeline->isUserFollowing($sessionUser),
+                ])->render();
+                break;
             case '_subscribe_confirm':
                 $timelineId = $request->timeline_id;
                 $timeline = Timeline::find($timelineId);
-                $html = \View::make('timelines._subscribe_confirm', [
+                $html = \View::make('common.partials._subscribe_confirm', [
                     'timeline' => $timeline,
+                    'is_cancel' => $timeline->isUserSubscribed($sessionUser),
                 ])->render();
+                break;
+            case '_post':
+                $postId = $request->post_id;
+                $post = Post::find($postId);
+                $user = $sessionUser;
+                $theme = Theme::uses('default');
+                $html = $theme->partial('post', compact('post','sessionUser','user'));
                 break;
             default:
                 throw new \Exception('Unrecognized template: '.$request->template);

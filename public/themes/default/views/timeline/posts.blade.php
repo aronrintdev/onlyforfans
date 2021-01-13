@@ -18,7 +18,7 @@
 
     @media screen and (min-width: 1200px) {
         .timeline-condensed-column .panel-body, .jscroll-added .panel-body, .timeline-condensed-column > .col-lg-4 .panel-body {
-            height: 200px;
+            //height: 200px;
             overflow: auto;
         }   
     }
@@ -292,6 +292,10 @@
     }s
 </style>
 
+@php
+  $sessionUser = Auth::user();
+@endphp
+
 <!-- %VIEW: public/themes/default/views/timeline/posts -->
 <div class="container profile-posts">
 	<div class="row">
@@ -301,7 +305,7 @@
 			<div class="row">
 				<div class=" timeline">
 					<div class="col-md-4 sidebar-wrapper">
-						{!! Theme::partial('user-leftbar',compact('timeline','user','follow_user_status','own_groups','own_pages','user_events', 'favouritePosts', 'next_page_url')) !!}
+						{!! Theme::partial('user-leftbar',compact('timeline','user','own_groups','own_pages','user_events', 'favouritePosts', 'next_page_url')) !!}
 					</div>
 					<div class="col-md-8 content-wrapper">						
                             <div class="panel-body row tabs-wrapper nopadding">
@@ -412,35 +416,27 @@
                                     <div class="timeline-posts timeline-default mark-a">
                                         @if(count($posts) > 0)
                                             @foreach($posts as $post)
-                                                @if($post->type == \App\Post::PAID_TYPE)
-                                                    @if($post->user->activeSubscribers->contains(Auth::user()->id)  || $post->user->id == Auth::user()->id)
+                                              <article class="crate-post" id="tag-post_id_{{$post->id}}">
+                                                  @if ( $post->isViewableByUser($sessionUser) )
                                                         {!! Theme::partial('post',compact('post','timeline','next_page_url', 'user')) !!}
-                                                    @endif
-                                                @else
-                                                    @if(canUserSeePost(Auth::id(), $post->user->id, $user->timeline->id) || $post->type == \App\Post::PRICE_TYPE)
-                                                        {!! Theme::partial('post',compact('post','timeline','next_page_url', 'user')) !!}
-                                                    @endif
-                                                @endif
+                                                  @endif
+                                              </article>
                                             @endforeach
                                         @else
                                             <p class="no-posts">{{ trans('messages.no_posts') }}</p>
                                         @endif
                                     </div>
-                                    <?php
-                                    $twoColumn = true;
-                                    ?>
+                                  @php
+                                    $twoColumn = false; // %PSG true; 
+                                  @endphp
                                     <div class="timeline-posts timeline-condensed-column row mark-b" style="display: none">
                                         @if(count($posts) > 0)
                                             @foreach($posts as $post)
-                                                @if($post->type == \App\Post::PAID_TYPE)
-                                                    @if($post->user->activeSubscribers->contains(Auth::user()->id)  || $post->user->id == Auth::user()->id)
-                                                        {!! Theme::partial('post_condensed_column',compact('post','timeline','next_page_url', 'user','twoColumn')) !!}
-                                                    @endif
-                                                @else
-                                                    @if(canUserSeePost(Auth::id(), $post->user->id, $user->timeline->id) || $post->type == \App\Post::PRICE_TYPE)
-                                                        {!! Theme::partial('post_condensed_column',compact('post','timeline','next_page_url', 'user','twoColumn')) !!}
-                                                    @endif
+                                              <article class="crate-post" id="tag-post_id_{{$post->id}}">
+                                                @if ( $post->isViewableByUser($sessionUser) )
+                                                    {!! Theme::partial('post',compact('post','timeline','next_page_url', 'user','twoColumn')) !!}
                                                 @endif
+                                              </article>
                                             @endforeach
                                         @else
                                             <p class="no-posts">{{ trans('messages.no_posts') }}</p>
@@ -453,14 +449,8 @@
                                             @foreach($postMedia as $post)
                                                 @if(count($post->images()->get()) > 0 && $post->images()->get()->first()->type=='image')
                                                     <div class="timeline-photos">
-                                                        @if($post->type == \App\Post::PAID_TYPE)
-                                                            @if($post->user->activeSubscribers->contains(Auth::user()->id)  || $post->user->id == Auth::user()->id)
-                                                                {!! Theme::partial('post_media',compact('post','timeline','next_page_url', 'user')) !!}
-                                                            @endif
-                                                        @else
-                                                            @if(canUserSeePost(Auth::id(), $post->user->id, $user->timeline->id) || $post->type == \App\Post::PRICE_TYPE)
-                                                                {!! Theme::partial('post_media',compact('post','timeline','next_page_url', 'user')) !!}
-                                                            @endif
+                                                        @if ( $post->isViewableByUser($sessionUser) )
+                                                            {!! Theme::partial('post_media',compact('post','timeline','next_page_url', 'user')) !!}
                                                         @endif
                                                     </div>
                                                 @endif
@@ -473,14 +463,8 @@
                                         <div class="row">
                                             @foreach($postMedia as $post)
                                                 @if(count($post->images()->get()) > 0 && $post->images()->get()->first()->type=='video')
-                                                    @if($post->type == \App\Post::PAID_TYPE)
-                                                        @if($post->user->activeSubscribers->contains(Auth::user()->id)  || $post->user->id == Auth::user()->id)
-                                                            {!! Theme::partial('post_media',compact('post','timeline','next_page_url', 'user')) !!}
-                                                        @endif
-                                                    @else
-                                                        @if(canUserSeePost(Auth::id(), $post->user->id, $user->timeline->id) || $post->type == \App\Post::PRICE_TYPE)
-                                                            {!! Theme::partial('post_media',compact('post','timeline','next_page_url', 'user')) !!}
-                                                        @endif
+                                                    @if ( $post->isViewableByUser($sessionUser) )
+                                                        {!! Theme::partial('post_media',compact('post','timeline','next_page_url', 'user')) !!}
                                                     @endif
                                                 @endif
                                             @endforeach                                            

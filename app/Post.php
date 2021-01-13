@@ -5,46 +5,55 @@ namespace App;
 use Auth;
 use Carbon\Carbon;
 use DB;
+use Exception;
 use Illuminate\Database\Eloquent\Model;
+use App\User;
+use App\Enums\PostTypeEnum;
+use App\Enums\PaymentTypeEnum;
 use App\Interfaces\Ownable;
+use App\Interfaces\PaymentReceivable;
 
 //use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Post extends Model implements Ownable
+class Post extends Model implements Ownable, PaymentReceivable
 {
-    const PRICE_TYPE = 'price'; // associated with a price
-    const FREE_TYPE = 'free';
-    const PAID_TYPE = 'paid'; // %PSG: ie, for subscribers (?)
+    // %TODO: remove these and use enum instead
+    const FREE_TYPE = PostTypeEnum::FREE; // 'free';
+    const PRICE_TYPE = PostTypeEnum::PRICED; // 'price'; // associated with a price
+    const PAID_TYPE = PostTypeEnum::SUBSCRIBER; // 'paid'; // %PSG: ie, for subscribers (?)
     
     //use SoftDeletes;
-
-    /**
-     * The attributes that should be mutated to dates.
-     *
-     * @var array
-     */
     //protected $dates = ['deleted_at'];
 
+    protected $guarded = ['id','created_at','updated_at'];
 
-  /**
-   * The attributes that are mass assignable.
-   *
-   * @var array
-   */
-    protected $fillable = ['timeline_id', 'description', 'user_id', 'youtube_title', 'youtube_video_id', 'location', 'soundcloud_id', 'soundcloud_title', 'shared_post_id', 'type', 'price', 'active', 'publish_date', 'publish_time', 'expiration_date', 'expiration_time'];
+    //--------------------------------------------
+    // %%% Accessors/Mutators | Casts
+    //--------------------------------------------
 
     //--------------------------------------------
     // %%% Relationships
     //--------------------------------------------
 
+    public function sharees() { // can be shared with many users (via [shareables])
+        return $this->morphToMany('App\User', 'shareable', 'shareables', 'shareable_id', 'sharee_id')->withTimestamps();
+    }
+    //public function shares() {
+        //return $this->belongsToMany('App\User', 'post_shares', 'post_id', 'user_id');
+    //}
+    //public function users_shared() {
+        //return $this->belongsToMany('App\User', 'post_shares', 'post_id', 'user_id');
+    //}
+
     public function mediafiles() {
         return $this->morphMany('App\Mediafile', 'resource');
     }
-    public function fanledgers() {
+
+    public function ledgersales() {
         return $this->morphMany('App\Fanledger', 'purchaseable');
     }
 
-    public function user() {
+    public function user() { // owner of the post
         return $this->belongsTo('App\User');
     }
 
@@ -60,13 +69,10 @@ class Post extends Model implements Ownable
         return $this->belongsToMany('App\User', 'post_likes', 'post_id', 'user_id')->withTimestamps();
     }
 
-    public function tip() {
-        return $this->belongsToMany('App\User', 'post_tips', 'post_id', 'user_id')->withPivot('amount');
-    }
+    //public function tip() {
+        //return $this->belongsToMany('App\User', 'post_tips', 'post_id', 'user_id')->withPivot('amount')->withTimestamps();
+    //}
 
-    public function shares() {
-        return $this->belongsToMany('App\User', 'post_shares', 'post_id', 'user_id');
-    }
 
     public function usersSaved() {
         return $this->belongsToMany('App\User', 'saved_posts', 'post_id', 'user_id');
@@ -76,9 +82,9 @@ class Post extends Model implements Ownable
         return $this->belongsToMany('App\User', 'pinned_posts', 'post_id', 'user_id');
     }
 
-    public function notifications_user() {
-        return $this->belongsToMany('App\User', 'post_follows', 'post_id', 'user_id')->withTimestamps();
-    }
+    //public function notifications_user() {
+        //return $this->belongsToMany('App\User', 'post_follows', 'post_id', 'user_id')->withTimestamps();
+    //}
 
     public function reports() {
         return $this->belongsToMany('App\User', 'post_reports', 'post_id', 'reporter_id')->withPivot('status');
@@ -86,10 +92,6 @@ class Post extends Model implements Ownable
 
     public function comments() {
         return $this->hasMany('App\Comment')->where('parent_id', null);
-    }
-
-    public function users_shared() {
-        return $this->belongsToMany('App\User', 'post_shares', 'post_id', 'user_id');
     }
 
     public function images() {
@@ -179,16 +181,20 @@ class Post extends Model implements Ownable
         return $result;
     }
 
+    // Is the owner of this post an approved follower of the session user? | returns settings.comment_privacy field or boolean (?)
     public function chkUserFollower($login_id, $post_user_id)
     {
-        $followers = DB::table('followers')->where('follower_id', $post_user_id)->where('leader_id', $login_id)->where('status', '=', 'approved')->first();
+        //$isApprovedFollower = DB::table('followers')->where('follower_id', $post_user_id)->where('leader_id', $login_id)->where('status', 'approved')->count();
 
-        if ($followers) {
+        $sessionUser = User::findOrFail($login_id);
+        $postOwner = User::findOrFail($post_user_id);
+        $isApprovedFollower = $sessionUser->timeline->followers->contains($postOwner->id);
+        if ($isApprovedFollower) {
             $userSettings = DB::table('user_settings')->where('user_id', $login_id)->first();
             $result = $userSettings ? $userSettings->comment_privacy : false;
-
             return $result;
         }
+        return null;
     }
 
     public function chkUserSettings($login_id)
@@ -225,10 +231,9 @@ class Post extends Model implements Ownable
         return $this->hasMany('App\Notification', 'post_id', 'id');
     }
 
-    public function sharedPost()
-    {
-        return $this->belongsTo('App\Post', 'id', 'shared_post_id');
-    }
+    //public function sharedPost() {
+        //return $this->belongsTo('App\Post', 'id', 'shared_post_id');
+    //}
 
     public function allComments()
     {
@@ -239,7 +244,7 @@ class Post extends Model implements Ownable
     {
         $this->users_liked()->detach();
         $this->shares()->detach();
-        $this->notifications_user()->detach();
+        //$this->notifications_user()->detach();
         $this->reports()->detach();
         $this->users_tagged()->detach();
         $this->images()->detach();
@@ -248,21 +253,122 @@ class Post extends Model implements Ownable
         foreach ($comments as $comment) {
             $comment->comments_liked()->detach();
             $dependencies = Comment::where('parent_id', $comment->id)->update(['parent_id' => null]);
-            // $comment->replies()->detach();
             $comment->update(['parent_id' => null]);
             $comment->delete();
         }
 
-        // $this->comments()->delete();
         $this->notifications()->delete();
-        if ($this->shared_post_id != null) {
-            $this->update(['shared_post_id' => null])->save();
-        }
-        print_r($this->sharedPost()->first());
-        if ($this->sharedPost()->first() != NULL && count($this->sharedPost()->first()) != 0) {
-            $this->sharedPost->delete();
-        }
 
         $this->delete();
     }
+
+    //--------------------------------------------
+    // %%% Methods
+    //--------------------------------------------
+
+    // %%% --- Implement PaymentReceivable Interface ---
+
+    public function receivePayment(
+        string $ptype, // PaymentTypeEnum
+        User $sender,
+        //PaymentSendable $sender,
+        //PaymentReceivable $receiver, -> $this
+        int $amountInCents,
+        array $cattrs = []
+    ) : ?Fanledger
+    {
+        $result = DB::transaction( function() use($ptype, $amountInCents, $cattrs, &$sender) {
+
+            switch ($ptype) {
+                case PaymentTypeEnum::TIP:
+                    $result = FanLedger::create([
+                        'fltype' => $ptype,
+                        'seller_id' => $this->user->id,
+                        'purchaser_id' => $sender->id,
+                        'purchaseable_type' => 'posts',
+                        'purchaseable_id' => $this->id,
+                        'qty' => 1,
+                        'base_unit_cost_in_cents' => $amountInCents,
+                        'cattrs' => $cattrs ?? [],
+                    ]);
+                    break;
+                case PaymentTypeEnum::PURCHASE:
+                    $result = FanLedger::create([
+                        'fltype' => $ptype,
+                        'seller_id' => $this->user->id,
+                        'purchaser_id' => $sender->id,
+                        'purchaseable_type' => 'posts',
+                        'purchaseable_id' => $this->id,
+                        'qty' => 1,
+                        'base_unit_cost_in_cents' => $amountInCents,
+                        'cattrs' => $cattrs ?? [],
+                    ]);
+                    $sender->sharedposts()->attach($this->id, [
+                        'cattrs' => json_encode($cattrs ?? []),
+                    ]);
+                    break;
+                default:
+                    throw new Exception('Unrecognized payment type : '.$ptype);
+            }
+
+            return $result;
+        });
+
+        return $result ?? null;
+    }
+
+    // Can a user view this post (?)
+    public function isViewableByUser(User $viewingUser) : bool
+    {
+        $postOwner = $this->user;
+/*
+if($user->followers->contains($sessionUser->id) || $user->id == $sessionUser->id || $user->price == 0)
+if(!$user->followers->contains($sessionUser->id) && $user->id != $sessionUser->id && $user->price > 0 )
+ */
+
+        if ( $postOwner->id === $viewingUser->id ) {
+            return true; // users can always see own posts
+        }
+
+        if ( $viewingUser->sharedposts->contains('id', $this->id) ) {
+            return true; // valid share, all types
+        }
+
+        switch ($this->type) {
+            case PostTypeEnum::FREE:
+                return true;
+            case PostTypeEnum::PRICED:
+                if( $postOwner->price == 0) {
+                    return true;
+                }
+                break;
+            case PostTypeEnum::SUBSCRIBER:
+                if( $postOwner->timeline->followers->contains('id',$viewingUser->id) ) {
+                    return true; // viewer is a follower
+                } 
+                if( $postOwner->price == 0) {
+                    return true;
+                }
+                break;
+            default:
+                throw new Exception('Unrecognized Post type: '.$this->type);
+        }
+
+        return false;
+    }
+
+    public function isCommentSectionShown($sessionUser) : bool
+    {
+        $user_follower = $this->chkUserFollower($sessionUser->id,$this->user_id);
+        $user_setting = $this->chkUserSettings($this->user_id);
+    
+        if ( !is_null($user_follower) && ($user_follower==="only_follow" || $user_follower==="everyone") ) {
+            return true;
+        } 
+        if ( $user_setting && $user_setting == "everyone" ) {
+            return true;
+        }
+        return false;
+    }
+
 }

@@ -18,7 +18,7 @@
 					<div class="timeline">
 						<div class="col-md-4">
 							@if($timeline->type == "user")
-							{!! Theme::partial('user-leftbar',compact('timeline','user','follow_user_status','own_pages','own_groups','user_events')) !!}
+							{!! Theme::partial('user-leftbar',compact('timeline','user','own_pages','own_groups','user_events')) !!}
 							@elseif($timeline->type == "page")
 							{!! Theme::partial('page-leftbar',compact('timeline','page','page_members')) !!}
 							@elseif($timeline->type == "group")

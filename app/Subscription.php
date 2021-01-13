@@ -8,28 +8,16 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Subscription extends Model
 {
-    /**
-     * The attributes that should be mutated to dates.
-     *
-     * @var array
-     */
     public $timestamps = false;
 
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array
-     */
-    protected $fillable = [
-        'id', 'subscription_id', 'follower_id', 'leader_id', 'start_at', 'cancel_at'
-    ];
+    protected $guarded = ['id','created_at','updated_at'];
 
     //--------------------------------------------
     // Relationships
     //--------------------------------------------
 
-    public function fanledgers() {
+    public function ledgersales() {
         return $this->morphMany('App\Fanledger', 'purchaseable');
     }
 }

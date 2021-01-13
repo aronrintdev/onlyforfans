@@ -1,11 +1,14 @@
 <?php
 namespace App;
 
+use DB;
 use Eloquent as Model;
 use Intervention\Image\Facades\Image;
+use App\Interfaces\PaymentReceivable;
+use App\Enums\PaymentTypeEnum;
+use App\Enums\ShareableAccessLevelEnum;
 
-
-class Timeline extends Model
+class Timeline extends Model implements PaymentReceivable
 {
     //use SoftDeletes;
 
@@ -74,6 +77,10 @@ class Timeline extends Model
         return $array;
     }
 
+    public function followers() {  // includes subscribers (ie premium + default followers)
+        return $this->morphToMany('App\User', 'shareable', 'shareables', 'shareable_id', 'sharee_id');
+    }
+
     public function posts() {
         return $this->hasMany('App\Post');
     }
@@ -82,7 +89,7 @@ class Timeline extends Model
         return $this->hasMany('App\Story');
     }
 
-    public function user() {
+    public function user() { // timeline owner/creator
         return $this->hasOne('App\User');
     }
 
@@ -176,6 +183,61 @@ class Timeline extends Model
             return $result;
         }
         
+    }
+
+    // %%% --- Implement PaymentReceivable Interface ---
+
+    public function receivePayment(
+        string $ptype, // PaymentTypeEnum
+        User $sender,
+        int $amountInCents,
+        array $cattrs = []
+    ) : ?Fanledger
+    {
+        $result = DB::transaction( function() use($ptype, $amountInCents, $cattrs, &$sender) {
+
+            switch ($ptype) {
+                case PaymentTypeEnum::SUBSCRIPTION:
+                    $result = FanLedger::create([
+                        'fltype' => $ptype,
+                        'seller_id' => $this->user->id,
+                        'purchaser_id' => $sender->id,
+                        'purchaseable_type' => 'posts',
+                        'purchaseable_id' => $this->id,
+                        'qty' => 1,
+                        'base_unit_cost_in_cents' => $amountInCents,
+                        'cattrs' => $cattrs ?? [],
+                    ]);
+                    $sender->followedtimelines()->attach($this->id, [
+                        'cattrs' => json_encode($cattrs ?? []),
+                    ]);
+                    break;
+                default:
+                    throw new Exception('Unrecognized payment type : '.$ptype);
+            }
+
+            return $result;
+        });
+
+        return $result ?? null;
+    }
+
+    // Is the user provided following my timeline (includes either premium or default)
+    public function isUserFollowing(User $user) : bool
+    {
+        return $this->followers->contains($user->id);
+    }
+
+    // Is the user provided following my timeline (includes either premium or default)
+    public function isUserSubscribed(User $user) : bool
+    {
+        return $this->followers->where()->where('access_level', ShareableAccessLevelEnum::PREMIUM)->contains($user->id);
+    }
+
+    public function isOwnedByUser(User $user) : bool
+    {
+        return $this->id === $user->timeline->id;
+        //return $this->id === $user->timeline_id;
     }
 }
 

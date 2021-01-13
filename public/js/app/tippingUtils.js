@@ -112,27 +112,136 @@ $( document ).ready(function() {
     });
     */
 
-    $(document).on('click', ".sendTip", function () {
-      let modal = $(this).closest('.tip-modal');
-      $.post(SP_source() + 'ajax/send-tip-post', {post_id: modal.find("#post-id").val(), amount: modal.find("#etTipAmount").val(), note: modal.find('#tipNote').val()}, function(data) {
-        if (data.status == 200) {
-          notify(data.message,'Tip Sent!');
-          modal.modal("hide");
-          // location.reload(); TODO: Not needed
-        }
+    $(document).on('click', ".sendTip", function (e) {
+      e.preventDefault();
+      let thisModal = $(this).closest('.tip-modal');
+      const postId = thisModal.find('#post-id').val();
+      $.post(`/ajax/send-tip-post/${postId}`, {
+        //post_id: thisModal.find("#post-id").val(), 
+        amount: thisModal.find("#etTipAmount").val(), 
+        note: thisModal.find('#tipNote').val()
+      }, function(data) {
+        notify('Tip Sent!');
+        thisModal.modal("hide");
+        // location.reload(); TODO: Not needed
       });
+      return false;
     });
 
-    $(document).on('click', ".sendUserTip", function () {
+    $(document).on('click', ".sendUserTip", function (e) {
+      e.preventDefault();
       let modal = $(this).closest('.tip-modal');
-      $.post(SP_source() + 'ajax/send-tip-user', {user_id: modal.find("#user-id").val(), amount: modal.find("#etTipAmount").val(), note: modal.find('#tipNote').val()}, function(data) {
+      const userId = modal.find('#user-id');
+      $.post(`ajax/send-tip-user/${userId}`, {
+        //user_id: modal.find("#user-id").val(), 
+        amount: modal.find("#etTipAmount").val(), 
+        note: modal.find('#tipNote').val()
+      }, function(data) {
         if (data.status == 200) {
-          notify(data.message,'Tip Sent!');
+          notify('Tip Sent!');
           modal.modal("hide");
           // location.reload(); TODO: Not needed
         }
       });
+      return false;
     });
+
+    // --- Purchase Post ---
+
+    $(document).on('click', '.clickme_to-show_purchase_post_confirm', function (e) {
+      e.preventDefault();
+      const context = $(this);
+      const postID = context.data('post_id');
+      const url = `ajax/timeline-render-modal?template=_purchase_post_confirm&post_id=${postID}`;
+      $.getJSON(url, function(response) {
+        $('#global-modal-placeholder').html(response.html);
+        $('#global-modal-placeholder').modal('toggle');
+      });
+      return false;
+    });
+
+    $(document).on('click', '.clickme_to-purchase_post', function (e) {
+      e.preventDefault();
+      const context = $(this);
+      const thisForm = context.closest('form');
+      return $.ajax({
+        url: thisForm.attr('action'),
+        type: thisForm.attr('method'),
+        data: thisForm.serializeArray()
+      }).then( function(response) {
+        console.log('purchase post: success');
+        $('#global-modal-placeholder').modal('toggle'); // close modal
+        const postID = context.data('post_id');
+        const url = `ajax/timeline-render-modal?template=_post&post_id=${postID}`;
+        $.getJSON(url, function(response) {
+          $(`.timeline-posts .crate-post#tag-post_id_${postID}`).html(response.html);
+        });
+        notify('Purchased!');
+      }).fail( function(response) {
+        console.log('purchase post: failed');
+      });
+      return false;
+    });
+
+    // --- Subsribe | Follow Timeline ---
+
+    $(document).on('click', '.clickme_to-show_follow_confirm', function (e) {
+      e.preventDefault();
+      const context = $(this);
+      const timelineID = context.data('timeline_id');
+      const url = `ajax/timeline-render-modal?template=_follow_confirm&timeline_id=${timelineID}`;
+      $.getJSON(url, function(response) {
+        $('#global-modal-placeholder').html(response.html);
+        $('#global-modal-placeholder').modal('toggle');
+      });
+      return false;
+    });
+
+    $(document).on('click', '.clickme_to-show_cancel_follow_confirm', function (e) {
+      e.preventDefault();
+      const context = $(this);
+      const timelineID = context.data('timeline_id');
+      const url = `ajax/timeline-render-modal?template=_cancel_follow_confirm&timeline_id=${timelineID}`;
+      $.getJSON(url, function(response) {
+        $('#global-modal-placeholder').html(response.html);
+        $('#global-modal-placeholder').modal('toggle');
+      });
+      return false;
+    });
+
+
+    $(document).on('click', '.clickme_to-show_subscribe_confirm', function (e) {
+      e.preventDefault();
+      const context = $(this);
+      const timelineID = context.data('timeline_id');
+      const url = `ajax/timeline-render-modal?template=_subscribe_confirm&timeline_id=${timelineID}`;
+      $.getJSON(url, function(response) {
+        $('#global-modal-placeholder').html(response.html);
+        $('#global-modal-placeholder').modal('toggle');
+      });
+      return false;
+    });
+
+    $(document).on('click', '.clickme_to-purchase_subscription', function (e) {
+      e.preventDefault();
+      const context = $(this);
+      const thisForm = context.closest('form');
+      return $.ajax({
+        url: thisForm.attr('action'),
+        type: thisForm.attr('method'),
+        data: thisForm.serializeArray()
+      }).then( function(response) {
+        console.log('subscribe timeline: success');
+        $('#global-modal-placeholder').modal('toggle'); // close modal
+        notify('Purchased!');
+        window.location.reload(false); 
+      }).fail( function(response) {
+        console.log('subscribe timeline: failed');
+      });
+      return false;
+    });
+
+    // --- Misc ---
 
     function notify(message,type,layout)
     {

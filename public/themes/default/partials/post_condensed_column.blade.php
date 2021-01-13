@@ -1,15 +1,13 @@
 <!-- %VIEW: themes/default/paritals/post_condensed_column --> 
 <div class="{{ isset($twoColumn) && $twoColumn ? 'col-lg-6' : 'col-lg-4' }} col-sm-12">
-    @if(isset($post->shared_post_id))
-        <?php
-        $sharedOwner = $post;
-        $post = App\Post::where('id', $post->shared_post_id)->with('comments')->first();
-        ?>
-    @endif
-    
-        <?php
-        $main_description = $post->description;
-        ?>
+@php
+$sessionUser = Auth::user();
+if (isset($post->shared_post_id)) {
+  $sharedOwner = $post;
+  $post = App\Post::where('id', $post->shared_post_id)->with('comments')->first();
+}
+$main_description = $post->description;
+@endphp
 
     <div class="panel panel-default panel-post animated post-wrapper-{{ $post->id }}" id="post{{ $post->id }}">
         <div class="panel-heading no-bg">
@@ -22,7 +20,7 @@
                         <ul class="list-inline no-margin">
                             <li class="dropdown"><a href="#" class="dropdown-togle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-angle-down"></i></a>
                                 <ul class="dropdown-menu">
-                                    @if($post->notifications_user->contains(Auth::user()->id))
+                                    @if(false /*$post->notifications_user->contains(Auth::user()->id)*/)
                                         <li class="main-link">
                                             <a href="#" data-post-id="{{ $post->id }}" class="notify-user unnotify">
                                                 <i class="fa  fa-bell-slash" aria-hidden="true"></i>{{ trans('common.stop_notifications') }}
@@ -241,7 +239,7 @@
             </div>
         </div>
             @if($post->type == \App\Post::PRICE_TYPE)
-                @if($post->user->id != Auth::user()->id && !Auth::user()->PurchasedPostsArr->contains($post->id))
+                @if ( !$post->isViewableByUser($sessionUser) ) 
                     <div class="panel-body locked-panel-body">
                         <div class="locked-content">
                             <div class="locked-content-wrapper">
@@ -460,12 +458,12 @@
                                 </li>
                             @endif
 
-                            @if($post->shares->count() > 0)
+                            @if($post->sharees->count() > 0)
                                 <?php
-                                $shared_ids = $post->shares->pluck('id')->toArray();
-                                $shared_names = $post->shares->pluck('name')->toArray(); ?>
+                                $shared_ids = $post->sharees->pluck('id')->toArray();
+                                $shared_names = $post->sharees->pluck('name')->toArray(); ?>
                                 <li>
-                                    <a href="#" class="show-users-modal" data-html="true" data-heading="{{ trans('common.shares') }}"  data-users="{{ implode(',', $shared_ids) }}" data-original-title="{{ implode('<br />', $shared_names) }}"><span class="count-circle"><i class="fa fa-share"></i></span> {{ $post->shares->count() }} {{ trans('common.shares') }}</a>
+                                    <a href="#" class="show-users-modal" data-html="true" data-heading="{{ trans('common.shares') }}"  data-users="{{ implode(',', $shared_ids) }}" data-original-title="{{ implode('<br />', $shared_names) }}"><span class="count-circle"><i class="fa fa-share"></i></span> {{ $post->sharees->count() }} {{ trans('common.shares') }}</a>
                                 </li>
                             @endif
 
@@ -687,12 +685,12 @@
                             </li>
                         @endif
 
-                        @if($post->shares->count() > 0)
+                        @if($post->sharees->count() > 0)
                             <?php
-                            $shared_ids = $post->shares->pluck('id')->toArray();
-                            $shared_names = $post->shares->pluck('name')->toArray(); ?>
+                            $shared_ids = $post->sharees->pluck('id')->toArray();
+                            $shared_names = $post->sharees->pluck('name')->toArray(); ?>
                             <li>
-                                <a href="#" class="show-users-modal" data-html="true" data-heading="{{ trans('common.shares') }}"  data-users="{{ implode(',', $shared_ids) }}" data-original-title="{{ implode('<br />', $shared_names) }}"><span class="count-circle"><i class="fa fa-share"></i></span> {{ $post->shares->count() }} {{ trans('common.shares') }}</a>
+                                <a href="#" class="show-users-modal" data-html="true" data-heading="{{ trans('common.shares') }}"  data-users="{{ implode(',', $shared_ids) }}" data-original-title="{{ implode('<br />', $shared_names) }}"><span class="count-circle"><i class="fa fa-share"></i></span> {{ $post->sharees->count() }} {{ trans('common.shares') }}</a>
                             </li>
                         @endif
 
@@ -728,7 +726,7 @@
         {{--     @if(isset($user) == false || $user->followers->contains(Auth::user()->id) || $user->id == Auth::user()->id  || $user->payment == NULL|| ($user->payment != NULL && $user->payment->price == 0))--}}
         @if(isset($user) == false || $user->followers->contains(Auth::user()->id) || $user->id == Auth::user()->id  || $user->price == 0)
             @if($post->type == \App\Post::PRICE_TYPE)
-                @if($post->user->id == Auth::user()->id || Auth::user()->PurchasedPostsArr->contains($post->id))
+                @if ( $post->isViewableByUser($sessionUser) ) 
                     <div class="panel-footer fans">
                         <ul class="list-inline footer-list">
                             @if(!$post->users_liked->contains(Auth::user()->id))
