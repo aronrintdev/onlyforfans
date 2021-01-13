@@ -35,7 +35,7 @@ class UserMgr {
             $action = 'follow';
             if ($attrs['is_subscribe']) {
                 $timeline->receivePayment(
-                    PaymentTypeEnum::SUBSCRIBE,
+                    PaymentTypeEnum::SUBSCRIPTION,
                     $follower,
                     $timeline->user->price*100, // %FIXME: price should be on timeline not user
                     $cattrs,

@@ -833,7 +833,6 @@ class TimelineController extends AppBaseController
 
     public function createPost(Request $request)
     {
-Log::info('MARK-0'); // post-image-1
         $validator = Validator::make($request->all(), [
             'post_video_upload' => 'max:512000',
         ]);
@@ -864,7 +863,7 @@ Log::info('MARK-0'); // post-image-1
             $input['expiration_time'] = null;
         }
         $post = Post::create($input);
-        $post->notifications_user()->sync([Auth::user()->id], true);
+        //$post->notifications_user()->sync([Auth::user()->id], true);
         $s3 = Storage::disk('uploads');
 
         $timestamp = date('Y-m-d-H-i-s');
@@ -1152,7 +1151,7 @@ Log::info('MARK-2.a'); // post-image-3
         //Like the post
         if (!$post->users_liked->contains(Auth::user()->id)) {
             $post->users_liked()->attach(Auth::user()->id, ['created_at' => Carbon::now(), 'updated_at' => Carbon::now()]);
-            $post->notifications_user()->attach(Auth::user()->id);
+            //$post->notifications_user()->attach(Auth::user()->id);
 
             $user = User::find(Auth::user()->id);
             $user_settings = $user->getUserSettings($posted_user->id);
@@ -1185,7 +1184,7 @@ Log::info('MARK-2.a'); // post-image-3
         } //Unlike the post
         else {
             $post->users_liked()->detach([Auth::user()->id]);
-            $post->notifications_user()->detach([Auth::user()->id]);
+            //$post->notifications_user()->detach([Auth::user()->id]);
 
             //Notify the user for post unlike
             $notify_message = 'unliked your post';
@@ -1492,16 +1491,7 @@ Log::info('MARK-2.a'); // post-image-3
     public function getNotifications(Request $request)
     {
         $post = Post::findOrFail($request->post_id);
-
-        if (!$post->notifications_user->contains(Auth::user()->id)) {
-            $post->notifications_user()->attach(Auth::user()->id);
-
-            return response()->json(['status' => '200', 'notified' => true, 'message' => 'Successfull']);
-        } else {
-            $post->notifications_user()->detach([Auth::user()->id]);
-
-            return response()->json(['status' => '200', 'unnotify' => false, 'message' => 'UnSuccessfull']);
-        }
+        return response()->json(['status' => '200', 'unnotify' => false, 'message' => 'TODO']);
     }
 
     protected function validator(array $data)
@@ -3016,77 +3006,6 @@ Log::info('MARK-2.a'); // post-image-3
         return $theme->scope('timeline/my-list', compact(  'following_count', 'followers_count', 'saved_users', 'list_type_id', 'list_type_name'))->render();
     }
 
-    /*
-    public function sendTipPost(Request $request)
-    {
-        $sessionUser = Auth::user();
-        $post = Post::findOrFail($request->post_id);
-
-        try {
-            $payment = new \App\Libs\Payment(
-                'ptype' => PaymentTypeEnum::TIP,
-                'sender' => $sessionUser,
-                'receiver' => $post,
-                'amount_in_cents' => $request->amount*100,
-                'cattrs' => [
-                    'notes' => $request->note ?? '',
-                ],
-            );
-        } catch(Exception | Throwable $e){
-            Log::error(json_encode([
-                'msg' => 'TimlineController::sendTipPost() - Could not send notification',
-                'emsg' => $e->getMessage(),
-            ]));
-            return response()->json(['status'=>'400', 'message'=>'');
-        }
-
-        // %NOTE %PSG: $request->amount is in dollars, not cents
-        $post->tip()->attach( $sessionUser->id, ['amount' => $request->amount, 'note' => $request->note] );
-        $post->notifications_user()->attach($sessionUser->id);
-
-        $notify_message = 'sent tip for your post';
-        $notify_type = 'tip_post';
-        $status_message = 'success';
-
-        try {
-            if ($post->user->id != $sessionUser->id) {
-                Notification::create(['user_id' => $post->user->id, 'post_id' => $post->id, 'notified_by' => $sessionUser->id, 'description' => $sessionUser->name.' '.$notify_message, 'type' => $notify_type]);
-            }
-        } catch(Exception | Throwable $e){
-            Log::error(json_encode([
-                'msg' => 'TimlineController::sendTipPost() - Could not send notification',
-                'emsg' => $e->getMessage(),
-            ]));
-        }
-
-        return response()->json(['status' => '200', 'message' => $status_message]);
-    }
-
-    public function sendTipUser (Request $request)
-    {
-        $user = User::findOrFail($request->user_id);
-
-        Auth::user()->usersSentTips()->attach(Auth::user()->id, ['amount' => $request->amount,'note' => $request->note,'tip_to' => $request->user_id, 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()]);
-
-        //Notify the user for post like
-        $notify_message = 'sent tip for you';
-        $notify_type = 'tip_post';
-        $status_message = 'success';
-
-        try {
-            if ($user->id != Auth::user()->id) {
-                Notification::create(['user_id' => $user->id, 'notified_by' => Auth::user()->id, 'description' => Auth::user()->name.' '.$notify_message, 'type' => $notify_type]);
-            }
-        } catch(Exception | Throwable $e){
-            Log::error(json_encode([
-                'msg' => 'TimlineController::sendTipUser() - Could not send notification',
-                'emsg' => $e->getMessage(),
-            ]));
-        }
-
-        return response()->json(['status' => '200', 'message' => $status_message]);
-    }
-     */
 
     public function switchLanguage(Request $request)
     {

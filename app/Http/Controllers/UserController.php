@@ -46,6 +46,8 @@ use Response;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 use Teepluss\Theme\Facades\Theme;
 
+use App\Enums\ShareableAccessLevelEnum;
+
 class UserController extends AppBaseController
 {
     /** @var UserRepository */
@@ -1309,8 +1311,8 @@ class UserController extends AppBaseController
 
         $timeline = Timeline::where('username', $username)->with('user', 'user.pageLikes', 'user.groups')->first();
         $creator = $timeline->user;
-        $followed_timelines = $creator->followedtimelines()->where('is_approved', 1)->where('access_level', \App\Enums\ShareableAccessLevelEnum::DEFAULT)->get();
-        $subscribed_timelines = $creator->followedtimelines()->where('is_approved', 1)->where('access_level', \App\Enums\ShareableAccessLevelEnum::PREMIUM)->get();
+        $followed_timelines = $creator->followedtimelines()->where('is_approved', 1)->where('access_level', ShareableAccessLevelEnum::DEFAULT)->get();
+        $subscribed_timelines = $creator->followedtimelines()->where('is_approved', 1)->where('access_level', ShareableAccessLevelEnum::PREMIUM)->get();
         $following_count = $creator->followedtimelines()->where('is_approved', 1)->count();
         $followRequests = $creator->timeline->followers()->where('is_approved', 0)->get();
         $followers_count = $creator->timeline->followers()->where('is_approved', 1)->count();

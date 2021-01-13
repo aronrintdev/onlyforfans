@@ -24,8 +24,8 @@ class TruncateData extends Command
         $isEnvLocal = App::environment(['local']);
         $dbName = env('DB_DATABASE');
         $this->info( '%%% DB Name: '.$dbName.', Is env local?: '.($isEnvLocal?'true':'false') );
-        if ( $dbName !== 'fansplat_dev' || !$isEnvLocal ) {
-            throw new Exception('Environment not in whitelist');
+        if ( $dbName !== 'fansplat_dev' && !$isEnvLocal ) {
+            throw new Exception('Environment not in whitelist: '.App::environment());
         }
 
         DB::statement('SET FOREIGN_KEY_CHECKS=0;'); // disable
