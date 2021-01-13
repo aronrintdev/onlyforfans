@@ -528,7 +528,7 @@ class User extends Authenticatable implements PaymentSendable, PaymentReceivable
 
             switch ($ptype) {
                 case PaymentTypeEnum::TIP:
-                    $result = FanLedger::create([
+                    $result = Fanledger::create([
                         'fltype' => $ptype,
                         'purchaser_id' => $sender->id,
                         'seller_id' => $this->id,

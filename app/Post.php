@@ -281,7 +281,7 @@ class Post extends Model implements Ownable, PaymentReceivable
 
             switch ($ptype) {
                 case PaymentTypeEnum::TIP:
-                    $result = FanLedger::create([
+                    $result = Fanledger::create([
                         'fltype' => $ptype,
                         'seller_id' => $this->user->id,
                         'purchaser_id' => $sender->id,
@@ -293,7 +293,7 @@ class Post extends Model implements Ownable, PaymentReceivable
                     ]);
                     break;
                 case PaymentTypeEnum::PURCHASE:
-                    $result = FanLedger::create([
+                    $result = Fanledger::create([
                         'fltype' => $ptype,
                         'seller_id' => $this->user->id,
                         'purchaser_id' => $sender->id,

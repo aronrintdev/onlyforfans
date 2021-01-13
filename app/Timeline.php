@@ -198,7 +198,7 @@ class Timeline extends Model implements PaymentReceivable
 
             switch ($ptype) {
                 case PaymentTypeEnum::SUBSCRIPTION:
-                    $result = FanLedger::create([
+                    $result = Fanledger::create([
                         'fltype' => $ptype,
                         'seller_id' => $this->user->id,
                         'purchaser_id' => $sender->id,
