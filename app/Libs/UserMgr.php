@@ -22,19 +22,19 @@ class UserMgr {
         //}
 
         $isFollowing = $timeline->followers->contains($follower->id);
-        $cattrs = [];
 
+        $cattrs = [];
         if ( array_key_exists('referer', $attrs) && $attrs['referer'] ) {
             $cattrs['referer'] = $referer;
         }
 
-//dd($attrs, $isFollowing);
         if ( $isFollowing ) { // unfollow
             $action = 'unfollow';
             $follower->followedtimelines()->detach($timeline->id);
         } else { // follow
             $action = 'follow';
             if ($attrs['is_subscribe']) {
+//dd('toggleFollow.2', $attrs, $isFollowing);
                 $timeline->receivePayment(
                     PaymentTypeEnum::SUBSCRIPTION,
                     $follower,
@@ -42,6 +42,7 @@ class UserMgr {
                     $cattrs,
                 );
             } else { // follow only
+//dd('toggleFollow.3', $attrs, $isFollowing);
                 $follower->followedtimelines()->attach($timeline->id, [
                     'cattrs' => json_encode($cattrs),
                 ]);
