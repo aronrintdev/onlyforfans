@@ -4,7 +4,7 @@
   <ul class="list-inline no-margin">
     <li class="dropdown"><a href="#" class="dropdown-togle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-angle-down"></i></a>
       <ul class="dropdown-menu">
-        @if($post->notifications_user->contains(Auth::user()->id))
+        @if(false /*$post->notifications_user->contains(Auth::user()->id)*/)
           <li class="main-link">
             <a href="#" data-post-id="{{ $post->id }}" class="notify-user unnotify">
               <i class="fa  fa-bell-slash" aria-hidden="true"></i>{{ trans('common.stop_notifications') }}
