@@ -1,9 +1,11 @@
 <?php
 namespace App;
 
+use DB;
 use Eloquent as Model;
 use Intervention\Image\Facades\Image;
 use App\Interfaces\PaymentReceivable;
+use App\Enums\PaymentTypeEnum;
 
 class Timeline extends Model implements PaymentReceivable
 {
@@ -169,7 +171,7 @@ class Timeline extends Model implements PaymentReceivable
         $result = DB::transaction( function() use($ptype, $amountInCents, $cattrs, &$sender) {
 
             switch ($ptype) {
-                case PaymentTypeEnum::SUBSCRIBE:
+                case PaymentTypeEnum::SUBSCRIPTION:
                     $result = FanLedger::create([
                         'fltype' => $ptype,
                         'seller_id' => $this->user->id,

@@ -483,7 +483,7 @@ class User extends Authenticatable implements PaymentSendable, PaymentReceivable
         $otherposts = $this->timeline->posts()->where('user_id', '!=', $sessionUser->id)->get();
         foreach ($otherposts as $otpost) {
             $otpost->users_liked()->detach();
-            $otpost->notifications_user()->detach();
+            //$otpost->notifications_user()->detach();
             $otpost->sharees()->detach();
             $otpost->reports()->detach();
             $otpost->users_tagged()->detach();

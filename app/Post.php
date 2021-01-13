@@ -82,9 +82,9 @@ class Post extends Model implements Ownable, PaymentReceivable
         return $this->belongsToMany('App\User', 'pinned_posts', 'post_id', 'user_id');
     }
 
-    public function notifications_user() {
-        return $this->belongsToMany('App\User', 'post_follows', 'post_id', 'user_id')->withTimestamps();
-    }
+    //public function notifications_user() {
+        //return $this->belongsToMany('App\User', 'post_follows', 'post_id', 'user_id')->withTimestamps();
+    //}
 
     public function reports() {
         return $this->belongsToMany('App\User', 'post_reports', 'post_id', 'reporter_id')->withPivot('status');
@@ -244,7 +244,7 @@ class Post extends Model implements Ownable, PaymentReceivable
     {
         $this->users_liked()->detach();
         $this->shares()->detach();
-        $this->notifications_user()->detach();
+        //$this->notifications_user()->detach();
         $this->reports()->detach();
         $this->users_tagged()->detach();
         $this->images()->detach();
