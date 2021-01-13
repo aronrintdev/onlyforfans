@@ -38,18 +38,45 @@ class ShareablesTableSeeder extends Seeder
                 );
             });
 
-            // --- follow some timelines ---
+            // --- follow some free timelines ---
 
-            $timelinesToFollow = Timeline::where('id', '<>', $f->timeline->id) // exclude my own
-                ->get();
-            $max = $faker->numberBetween( 0, min($timelinesToFollow->count()-1, 3) );
+            $timelines = Timeline::where('id', '<>', $f->timeline->id) // exclude my own
+                ->whereHas('User', function($q1) {
+                    $q1->where('is_follow_for_free', 1);
+                })->get(); 
+            $max = $faker->numberBetween( 0, min($timelines->count()-1, 3) );
             $this->command->info("  - Following (default) $max timelines for user ".$f->name);
             $attrs = ['is_subscribe' => 0];
-            $timelinesToFollow->random($max)->each( function($t) use(&$f, $attrs) {
+            $timelines->random($max)->each( function($t) use(&$f, $attrs) {
                 $response = UserMgr::toggleFollow($f, $t, $attrs);
             });
 
             // --- subscribe to some timelines ---
+
+            unset($timelines);
+            $timelines = Timeline::where('id', '<>', $f->timeline->id) // exclude my own
+                ->whereHas('User', function($q1) {
+                    $q1->where('is_follow_for_free', 0);
+                })->get(); 
+            $groups = $timelines->split(2);
+
+            unset($timelines);
+            $timelines = $groups[0];
+            $max = $faker->numberBetween( 0, min($timelines->count()-1, 3) );
+            $this->command->info("  - Following $max premium timelines for user ".$f->name);
+            $attrs = ['is_subscribe' => 0];
+            $timelines->random($max)->each( function($t) use(&$f, $attrs) {
+                $response = UserMgr::toggleFollow($f, $t, $attrs);
+            });
+
+            unset($timelines);
+            $timelines = $groups[1];
+            $max = $faker->numberBetween( 0, min($timelines->count()-1, 3) );
+            $this->command->info("  - Subscribing to $max premium timelines for user ".$f->name);
+            $attrs = ['is_subscribe' => 1];
+            $timelines->random($max)->each( function($t) use(&$f, $attrs) {
+                $response = UserMgr::toggleFollow($f, $t, $attrs);
+            });
 
         });
     }
