@@ -30,6 +30,12 @@ Vue.component('story-player', require('./components/stories/AutoPlayer.vue'));
 Vue.component('my-vault', require('./components/vault/Dashboard.vue'));
 Vue.component('my-saved', require('./components/saved/Dashboard.vue'));
 
+Vue.component('story-bar', require('./components/timelines/StoryBar.vue'));
+Vue.component('create-post', require('./components/timelines/CreatePost.vue'));
+Vue.component('session-widget', require('./components/timelines/SessionWidget.vue'));
+Vue.component('suggested-feed', require('./components/timelines/SuggestedFeed.vue'));
+Vue.component('post-feed', require('./components/timelines/PostFeed.vue'));
+
 export const eventBus = new Vue({
 /*
     methods: {

@@ -844,209 +844,154 @@ class TimelineController extends AppBaseController
             return response()->json(['status' => '400', 'message' => 'File size is too large. Upload below 100MB']);
         }
         try {
-        DB::beginTransaction();
-        $input = $request->all();
+            DB::beginTransaction();
+            $input = $request->all();
         
-        $input['user_id'] = Auth::user()->id;
-        if (!empty($input['publish_date']) && !empty($input['publish_time'])) {
-            $input['publish_date'] = Carbon::createFromFormat('m/d/Y', $input['publish_date']);
-            $input['publish_time'] = Carbon::createFromFormat('H:i A', $input['publish_time']);   
-            $input['active'] = false;   
-        } else {
-            $input['active'] = true;
-        }
-        if (!empty($input['expiration_date']) && !empty($input['expiration_time'])) {
-            $input['expiration_date'] = Carbon::createFromFormat('m/d/Y', $input['expiration_date']);
-            $input['expiration_time'] = Carbon::createFromFormat('H:i A', $input['expiration_time']);
-        } else {
-            $input['expiration_date'] = null;
-            $input['expiration_time'] = null;
-        }
-        $post = Post::create($input);
-        //$post->notifications_user()->sync([Auth::user()->id], true);
-        $s3 = Storage::disk('uploads');
-
-        $timestamp = date('Y-m-d-H-i-s');
-
-//        if ($request->hasFile('post_video_upload')) {
-//            $uploadedFile = $request->file('post_video_upload');
-//
-//
-//            $s3 = Storage::disk('uploads');
-//
-//            $timestamp = date('Y-m-d-H-i-s');
-//
-        if (isset($input['image1'])) {
-Log::info('MARK-1');
-            $s3audio = Storage::disk('settings');
-            $fileBase64 = str_replace('data:audio/wav;base64,', '',  $request->get('image1'));
-            $s3audio->put('user/audio/'.$timestamp.'.wav', base64_decode($fileBase64));
-
-            $media = Media::create([
-                'title'  => $timestamp,
-                'type'   => 'audio',
-                'source' => $timestamp.'.wav',
-            ]);
-            $post->images()->attach($media);   
-        }
-        
-        if ($request->file('post_images_upload_modified')) {
-Log::info('MARK-2'); // post-image-2
-            foreach ($request->file('post_images_upload_modified') as $postImage) {
-                if ($postImage->getSize() > 524288000) {
-                    return response()->json(['status' => '400', 'message' => 'File size is too large. Upload below 100MB']);
-                }
-                if ($postImage->getClientOriginalExtension() != 'mp4' && $postImage->getClientOriginalExtension() != 'mov') {
-                    // %PSG: non-video attached (aka, image upload)
-Log::info('MARK-2.a'); // post-image-3
-
-                    /*
-                    $strippedName = str_replace(' ', '', $postImage->getClientOriginalName());
-                    $photoName = date('Y-m-d-H-i-s') . $strippedName;
-
-                    try {
-                        $avatar = Image::make($postImage->getRealPath());
-                        
-                        if(Auth::user()->settings()->watermark == 1){
-                            $text = Auth::user()->settings()->watermark_text;
-                            $color = Auth::user()->settings()->watermark_font_color != "" ? Auth::user()->settings()->watermark_font_color : '#4285F4';
-                            $position = isset(Auth::user()->settings()->watermark_position) ? Auth::user()->settings()->watermark_position : 'bottom';
-                            $file = public_path('fonts/PTSerif-Bold.ttf');
-                            $size = isset(Auth::user()->settings()->watermark_font_size) ? Auth::user()->settings()->watermark_font_size : 28;
-
-                            if(isset(Auth::user()->settings()->watermark_file_id)){
-                                $media = Media::find(Auth::user()->settings()->watermark_file_id);
-                                $fileName = $media->source;
-                                $file = public_path("uploads/watermark-fonts/".$fileName);
-                            }
-
-                            $font = new Font(urldecode($text));
-                            $font->valign('top');
-                            $font->color($color);
-                            $font->file($file);
-                            $font->size($size);
-                            $size = $font->getBoxSize();
-
-                            $gdmanager = new ImageManager(array('driver' => 'gd'));
-
-                            $image_text = $gdmanager->canvas( $size['width'], $size['height']);
-
-                            $font->applyToImage($image_text);
-
-                            $text_watermark = $gdmanager->make($image_text->encode('data-url'));
-                            $avatar->insert( $text_watermark,$position, 10, 10);
-                        }
-                        $avatar->save(storage_path() . '/uploads/users/gallery/' . $photoName, 60);
-
-                    } catch (NotReadableException $e) {
-                        return redirect('/');
-                    }
-                    $media = Media::create([
-                        'title' => $photoName,
-                        'type' => 'image',
-                        'source' => $photoName,
-                    ]);
-
-                    $post->images()->attach($media);
-                     */
-
-                    $subFolder = 'posts';
-                    $newFilename = $postImage->store('./'.$subFolder, 's3');
-                    $mediafile = Mediafile::create([
-                        //'resource_id' => $request->timeline_id,
-                        'resource_id' => $post->id,
-                        'resource_type' => 'posts',
-                        'filename' => $newFilename,
-                        'mftype' => 'post',
-                        'meta' => $request->input('meta') ?? null,
-                        'cattrs' => [
-                            'timeline_id' => $request->timeline_id,
-                        ],
-                        'mimetype' => $postImage->getMimeType(),
-                        'orig_filename' => $postImage->getClientOriginalName(),
-                        'orig_ext' => $postImage->getClientOriginalExtension(),
-                    ]);
-                } else {
-                    $strippedName = str_replace(' ', '', $postImage->getClientOriginalName());
-                    $photoName = date('Y-m-d-H-i-s') . $strippedName;
-                    $s3video = Storage::disk('settings');
-                    $timestamp = date('Y-m-d-H-i-s');
-                    $strippedName = $timestamp.str_replace(' ', '', $postImage->getClientOriginalName());
-                    $s3video->put('user/video/'.$strippedName, file_get_contents($postImage));
-                    $basename = $timestamp.basename($request->file('post_video_upload')->getClientOriginalName(), '.'.$request->file('post_video_upload')->getClientOriginalExtension());
-                    $media = Media::create([
-                        'title'  => $basename,
-                        'type'   => 'video',
-                        'source' => $strippedName,
-                    ]);
-                    $post->images()->attach($media);
-                }
-            }
-        }
-
-        if ($post) {
-            // Check for any mentions and notify them
-            preg_match_all('/(^|\s)(@\w+)/', $request->description, $usernames);
-            foreach ($usernames[2] as $value) {
-                $timeline = Timeline::where('username', str_replace('@', '', $value))->first();
-                $notification = Notification::create(['user_id' => $timeline->user->id, 'post_id' => $post->id, 'notified_by' => Auth::user()->id, 'description' => Auth::user()->name.' '.trans('common.mentioned_you_in_post'), 'type' => 'mention', 'link' => 'post/'.$post->id]);
-            }
-            $timeline = Timeline::where('id', $request->timeline_id)->first();
-
-            //Notify the user when someone posts on his timeline/page/group
-
-            if ($timeline->type == 'page') {
-                $notify_users = $timeline->page->users()->whereNotIn('user_id', [Auth::user()->id])->get();
-                $notify_message = 'posted on this page';
-            } elseif ($timeline->type == 'group') {
-                $notify_users = $timeline->groups->users()->whereNotIn('user_id', [Auth::user()->id])->get();
-                $notify_message = 'posted on this group';
+            $input['user_id'] = Auth::user()->id;
+            if (!empty($input['publish_date']) && !empty($input['publish_time'])) {
+                $input['publish_date'] = Carbon::createFromFormat('m/d/Y', $input['publish_date']);
+                $input['publish_time'] = Carbon::createFromFormat('H:i A', $input['publish_time']);   
+                $input['active'] = false;   
             } else {
-                $notify_users = $timeline->user()->whereNotIn('id', [Auth::user()->id])->get();
-                $notify_message = 'posted on your timeline';
+                $input['active'] = true;
             }
-
-            foreach ($notify_users as $notify_user) {
-                Notification::create(['user_id' => $notify_user->id, 'timeline_id' => $request->timeline_id, 'post_id' => $post->id, 'notified_by' => Auth::user()->id, 'description' => Auth::user()->name.' '.$notify_message, 'type' => $timeline->type, 'link' => $timeline->username]);
+            if (!empty($input['expiration_date']) && !empty($input['expiration_time'])) {
+                $input['expiration_date'] = Carbon::createFromFormat('m/d/Y', $input['expiration_date']);
+                $input['expiration_time'] = Carbon::createFromFormat('H:i A', $input['expiration_time']);
+            } else {
+                $input['expiration_date'] = null;
+                $input['expiration_time'] = null;
             }
+            $post = Post::create($input);
+            //$post->notifications_user()->sync([Auth::user()->id], true);
+            $s3 = Storage::disk('uploads');
 
+            $timestamp = date('Y-m-d-H-i-s');
 
-            // Check for any hashtags and save them
-            preg_match_all('/(^|\s)(#\w+)/', $request->description, $hashtags);
-            foreach ($hashtags[2] as $value) {
-                $timeline = Timeline::where('username', str_replace('@', '', $value))->first();
-                $hashtag = Hashtag::where('tag', str_replace('#', '', $value))->first();
-                if ($hashtag) {
-                    $hashtag->count = $hashtag->count + 1;
-                    $hashtag->save();
-                } else {
-                    Hashtag::create(['tag' => str_replace('#', '', $value), 'count' => 1]);
+            if (isset($input['image1'])) {
+                Log::info('MARK-1');
+                $s3audio = Storage::disk('settings');
+                $fileBase64 = str_replace('data:audio/wav;base64,', '',  $request->get('image1'));
+                $s3audio->put('user/audio/'.$timestamp.'.wav', base64_decode($fileBase64));
+    
+                $media = Media::create([
+                    'title'  => $timestamp,
+                    'type'   => 'audio',
+                    'source' => $timestamp.'.wav',
+                ]);
+                $post->images()->attach($media);   
+            }
+            
+            if ($request->file('post_images_upload_modified')) {
+                Log::info('MARK-2'); // post-image-2
+                foreach ($request->file('post_images_upload_modified') as $postImage) {
+                    if ($postImage->getSize() > 524288000) {
+                        return response()->json(['status' => '400', 'message' => 'File size is too large. Upload below 100MB']);
+                    }
+                    if ($postImage->getClientOriginalExtension() != 'mp4' && $postImage->getClientOriginalExtension() != 'mov') {
+                        // %PSG: non-video attached (aka, image upload)
+                        Log::info('MARK-2.a'); // post-image-3
+
+                        $subFolder = 'posts';
+                        $newFilename = $postImage->store('./'.$subFolder, 's3');
+                        $mediafile = Mediafile::create([
+                            //'resource_id' => $request->timeline_id,
+                            'resource_id' => $post->id,
+                            'resource_type' => 'posts',
+                            'filename' => $newFilename,
+                            'mftype' => 'post',
+                            'meta' => $request->input('meta') ?? null,
+                            'cattrs' => [
+                                'timeline_id' => $request->timeline_id,
+                            ],
+                            'mimetype' => $postImage->getMimeType(),
+                            'orig_filename' => $postImage->getClientOriginalName(),
+                            'orig_ext' => $postImage->getClientOriginalExtension(),
+                        ]);
+                    } else {
+                        $strippedName = str_replace(' ', '', $postImage->getClientOriginalName());
+                        $photoName = date('Y-m-d-H-i-s') . $strippedName;
+                        $s3video = Storage::disk('settings');
+                        $timestamp = date('Y-m-d-H-i-s');
+                        $strippedName = $timestamp.str_replace(' ', '', $postImage->getClientOriginalName());
+                        $s3video->put('user/video/'.$strippedName, file_get_contents($postImage));
+                        $basename = $timestamp.basename($request->file('post_video_upload')->getClientOriginalName(), '.'.$request->file('post_video_upload')->getClientOriginalExtension());
+                        $media = Media::create([
+                            'title'  => $basename,
+                            'type'   => 'video',
+                            'source' => $strippedName,
+                        ]);
+                        $post->images()->attach($media);
+                    }
                 }
             }
 
-            // Let us tag the post friends :)
-            if ($request->user_tags != null) {
-                $post->users_tagged()->sync(explode(',', $request->user_tags));
+            if ($post) {
+                // Check for any mentions and notify them
+                preg_match_all('/(^|\s)(@\w+)/', $request->description, $usernames);
+                foreach ($usernames[2] as $value) {
+                    $timeline = Timeline::where('username', str_replace('@', '', $value))->first();
+                    $notification = Notification::create(['user_id' => $timeline->user->id, 'post_id' => $post->id, 'notified_by' => Auth::user()->id, 'description' => Auth::user()->name.' '.trans('common.mentioned_you_in_post'), 'type' => 'mention', 'link' => 'post/'.$post->id]);
+                }
+                $timeline = Timeline::where('id', $request->timeline_id)->first();
+    
+                //Notify the user when someone posts on his timeline/page/group
+    
+                if ($timeline->type == 'page') {
+                    $notify_users = $timeline->page->users()->whereNotIn('user_id', [Auth::user()->id])->get();
+                    $notify_message = 'posted on this page';
+                } elseif ($timeline->type == 'group') {
+                    $notify_users = $timeline->groups->users()->whereNotIn('user_id', [Auth::user()->id])->get();
+                    $notify_message = 'posted on this group';
+                } else {
+                    $notify_users = $timeline->user()->whereNotIn('id', [Auth::user()->id])->get();
+                    $notify_message = 'posted on your timeline';
+                }
+    
+                foreach ($notify_users as $notify_user) {
+                    Notification::create(['user_id' => $notify_user->id, 'timeline_id' => $request->timeline_id, 'post_id' => $post->id, 'notified_by' => Auth::user()->id, 'description' => Auth::user()->name.' '.$notify_message, 'type' => $timeline->type, 'link' => $timeline->username]);
+                }
+    
+    
+                // Check for any hashtags and save them
+                preg_match_all('/(^|\s)(#\w+)/', $request->description, $hashtags);
+                foreach ($hashtags[2] as $value) {
+                    $timeline = Timeline::where('username', str_replace('@', '', $value))->first();
+                    $hashtag = Hashtag::where('tag', str_replace('#', '', $value))->first();
+                    if ($hashtag) {
+                        $hashtag->count = $hashtag->count + 1;
+                        $hashtag->save();
+                    } else {
+                        Hashtag::create(['tag' => str_replace('#', '', $value), 'count' => 1]);
+                    }
+                }
+    
+                // Let us tag the post friends :)
+                if ($request->user_tags != null) {
+                    $post->users_tagged()->sync(explode(',', $request->user_tags));
+                }
             }
-        }
+    
+            // $post->users_tagged = $post->users_tagged();
+            $theme = Theme::uses(Setting::get('current_theme', 'default'))->layout('ajax');
+            $postHtml = $theme->scope('timeline/post', compact('post', 'timeline'))->render();
+    
+            $twoColumn = false;
+            if ($request->get('two_column')) {
+                $twoColumn = true;
+            }
+            if ($request->get('condensed_layout') || $request->get('two_column')) {            
+                $postHtml = $theme->scope('timeline/post_condensed', compact('post', 'timeline', 'twoColumn'))->render();
+            }
+            $postHtml = $post->active == 1 ? $postHtml : '';
 
-        // $post->users_tagged = $post->users_tagged();
-        $theme = Theme::uses(Setting::get('current_theme', 'default'))->layout('ajax');
-        $postHtml = $theme->scope('timeline/post', compact('post', 'timeline'))->render();
+            DB::commit();
 
-        $twoColumn = false;
-        if ($request->get('two_column')) {
-            $twoColumn = true;
-        }
-        if ($request->get('condensed_layout') || $request->get('two_column')) {            
-            $postHtml = $theme->scope('timeline/post_condensed', compact('post', 'timeline', 'twoColumn'))->render();
-        }
-        $postHtml = $post->active == 1 ? $postHtml : '';
-        DB::commit();
-        return response()->json(['status' => '200', 'data' => $postHtml]);
+            return response()->json(['status' => '200', 'data' => $postHtml]);
+
         } catch (Exception $e) {
             DB::rollBack();
-            throw new Exception($e->getMessage(), $e->getCode());
+            throw $e;
         }
     }
 

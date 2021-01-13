@@ -144,6 +144,16 @@ Route::group(['middleware' => ['auth']], function () {
         'only' => [ 'index' ],
     ]);
      */
+
+    Route::resource('posts', 'PostsController', [
+        'only' => [ 'store' ],
+    ]);
+
+    Route::get('/timelines/home', ['as'=>'timelines.home', 'uses' => 'TimelinesController@home']);
+    //Route::resource('timelines', 'TimelinesController', [
+        //'only' => [ 'index' ],
+    //]);
+
     Route::resource('vaultfolders', 'VaultfoldersController', [
         'only' => [ 'index', 'show', 'store' ],
     ]);
@@ -507,7 +517,7 @@ Route::group(['prefix' => '/{username}/event-settings', 'middleware' => ['auth',
 
 
 Route::group(['prefix' => 'ajax', 'middleware' => ['auth']], function () {
-    Route::post('create-post', 'TimelineController@createPost');
+    //Route::post('create-post', 'TimelineController@createPost');
 
     Route::get('timeline-render-modal', 'TimelineController@renderModal'); // %PSG
 
@@ -525,8 +535,8 @@ Route::group(['prefix' => 'ajax', 'middleware' => ['auth']], function () {
     Route::post('share-post', 'TimelineController@sharePost');
     //Route::post('send-tip-post', 'TimelineController@sendTipPost');
     //Route::post('send-tip-user', 'TimelineController@sendTipUser');
-    Route::post('purchase-post/{post}', 'PostsController@purchase')->name('posts.purchase');
-    Route::post('send-tip-post/{post}', 'PostsController@tip')->name('posts.tip');
+    Route::post('purchase-post/{post}', 'PostsController@purchase')->name('posts.purchase'); // %FIXME: move to above
+    Route::post('send-tip-post/{post}', 'PostsController@tip')->name('posts.tip'); // %FIXME: move to above
     Route::post('send-tip-user/{user}', 'UsersController@tip')->name('users.tip');
     Route::post('page-liked', 'TimelineController@pageLiked');
     // Route::post('get-soundcloud-results', 'TimelineController@getSoundCloudResults');

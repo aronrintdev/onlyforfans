@@ -221,8 +221,15 @@
   $sessionUser = Auth::user();
 @endphp
 
-<!-- %VIEW: public/themes/views/home -->
+<!-- %VIEW: public/themes/default/views/home -->
+
 		<div class="container">
+			<div class="row">
+        <div class="col-md-12 content-wrapper">
+          <section class="supercrate-stories"></section>
+        </div>
+      </div>
+
 			<div class="row">
                 <div class="col-md-7 col-lg-8 content-wrapper">
 			   		@if (Session::has('message'))

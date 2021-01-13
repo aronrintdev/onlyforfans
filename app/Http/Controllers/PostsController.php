@@ -12,6 +12,14 @@ use App\Enums\PaymentTypeEnum;
 
 class PostsController extends AppBaseController
 {
+    public function store(Request $request)
+    {
+        $attrs = $request->validate([
+            'post_video_upload' => 'max:512000',
+        ]);
+    }
+
+
     public function saves(Request $request)
     {
         $sessionUser = Auth::user();
