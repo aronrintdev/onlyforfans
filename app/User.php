@@ -263,41 +263,27 @@ class User extends Authenticatable implements PaymentSendable, PaymentReceivable
 
     // ---
 
-    public function get_group($id)
-    {
+    public function get_group($id) {
         $group_page = $this->groups()->where('groups.id', $id)->first();
-        
-        $result = $group_page ? $group_page->pivot->status : false;
-         
-        return $result;
+        return $group_page ? $group_page->pivot->status : false;
     }
 
-    public function get_page($id)
-    {
+    public function get_page($id) {
         return $this->pages()->where('pages.id', $id)->first();
         // $result = $user_page ? $user_page : false;
         // return $result;
     }
 
-    public function getUserSettings($user_id)
-    {
-        $result = DB::table('user_settings')->where('user_id', $user_id)->first();
-
-        return $result;
+    public function getUserSettings($user_id) {
+        return DB::table('user_settings')->where('user_id', $user_id)->first();
     }
 
-    public function getUserListTypes($user_id)
-    {
-        $result = DB::table('user_list_types')->where('user_id', $user_id)->get();
-
-        return $result;
+    public function getUserListTypes($user_id) {
+        return DB::table('user_list_types')->where('user_id', $user_id)->get();
     }
 
-    public function deleteUserSettings($user_id)
-    {
-        $result = DB::table('user_settings')->where('user_id', $user_id)->delete();
-
-        return $result;
+    public function deleteUserSettings($user_id) {
+        return DB::table('user_settings')->where('user_id', $user_id)->delete();
     }
 
     public function getOthersSettings($username)
@@ -428,51 +414,40 @@ class User extends Authenticatable implements PaymentSendable, PaymentReceivable
         return $result;
     }
 
-    public function settings()
-    {
+    public function settings() {
         $settings = DB::table('user_settings')->where('user_id', $this->id)->first();
         return $settings;
     }
 
-    public function commentLikes()
-    {
+    public function commentLikes() {
         return $this->belongsToMany('App\User', 'comment_likes', 'user_id', 'comment_id');
     }
 
-    public function postLikes()
-    {
+    public function postLikes() {
         return $this->belongsToMany('App\User', 'post_likes', 'user_id', 'post_id');
     }
 
-
-
-    public function postReports()
-    {
+    public function postReports() {
         return $this->belongsToMany('App\User', 'post_reports', 'reporter_id', 'post_id')->withPivot('status');
     }
 
-    public function postTags()
-    {
+    public function postTags() {
         return $this->belongsToMany('App\User', 'post_tags', 'user_id', 'post_id')->withPivot('status');
     }
 
-    public function notifiedBy()
-    {
+    public function notifiedBy() {
         return $this->hasMany('App\Notification', 'notified_by', 'id');
     }
 
-    public function timelineReports()
-    {
+    public function timelineReports() {
         return $this->belongsToMany('App\User', 'timeline_reports', 'reporter_id', 'timeline_id')->withPivot('status');
     }
 
-    public function userEvents()
-    {
+    public function userEvents() {
         return $this->hasMany('App\Event');
     }
 
-    public function comments()
-    {
+    public function comments() {
         return $this->hasMany('App\Comment');
     }
 
@@ -536,21 +511,7 @@ class User extends Authenticatable implements PaymentSendable, PaymentReceivable
         return $this->belongsToMany('App\User', 'favourite_users', 'user_id', 'favourite_user_id')->withPivot('favourite_user_id');
     }
 
-// %FIXME: DEPRECATED 20210105
-    //public function tips() {
-        //return $this->hasMany('App\PostTip', 'user_id');
-    //}
-    
-    //public function usersSentTips() {
-        //return $this->belongsToMany('App\User', 'users_tips', 'tip_from', 'tip_to')->withPivot('amount')->withTimestamps();
-    //}
-    
-    //public function usersReceivedTips() {
-        //return $this->belongsToMany('App\User', 'users_tips', 'tip_to', 'tip_from')->withPivot('amount')->withTimestamps();
-    //}
-
-    public function bankAccountDetails()
-    {
+    public function bankAccountDetails() {
         return $this->hasOne('App\BankAccountDetails', 'user_id');
     }
 
@@ -589,6 +550,11 @@ class User extends Authenticatable implements PaymentSendable, PaymentReceivable
     }
 
     // --- %%Extra --- 
+
+    public function isMyContent(User $creator) : bool 
+    {
+        return $this->id === $creator->id;
+    }
 
     public function isAboutSet() {
         return ( !empty($this->timeline) && !empty($this->timeline->about) );

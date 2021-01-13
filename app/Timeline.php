@@ -6,6 +6,7 @@ use Eloquent as Model;
 use Intervention\Image\Facades\Image;
 use App\Interfaces\PaymentReceivable;
 use App\Enums\PaymentTypeEnum;
+use App\Enums\ShareableAccessLevelEnum;
 
 class Timeline extends Model implements PaymentReceivable
 {
@@ -196,6 +197,17 @@ class Timeline extends Model implements PaymentReceivable
         return $result ?? null;
     }
 
+    // Is the user provided following my timeline (includes either premium or default)
+    public function isUserFollowing(User $user) : bool
+    {
+        return $this->followers->contains($user->id);
+    }
+
+    // Is the user provided following my timeline (includes either premium or default)
+    public function isUserSubscribed(User $user) : bool
+    {
+        return $this->followers->where()->where('access_level', ShareableAccessLevelEnum::PREMIUM)->contains($user->id);
+    }
 
     public function isOwnedByUser(User $user) : bool
     {

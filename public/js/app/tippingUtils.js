@@ -112,7 +112,8 @@ $( document ).ready(function() {
     });
     */
 
-    $(document).on('click', ".sendTip", function () {
+    $(document).on('click', ".sendTip", function (e) {
+      e.preventDefault();
       let thisModal = $(this).closest('.tip-modal');
       const postId = thisModal.find('#post-id').val();
       $.post(`/ajax/send-tip-post/${postId}`, {
@@ -124,9 +125,11 @@ $( document ).ready(function() {
         thisModal.modal("hide");
         // location.reload(); TODO: Not needed
       });
+      return false;
     });
 
-    $(document).on('click', ".sendUserTip", function () {
+    $(document).on('click', ".sendUserTip", function (e) {
+      e.preventDefault();
       let modal = $(this).closest('.tip-modal');
       const userId = modal.find('#user-id');
       $.post(`ajax/send-tip-user/${userId}`, {
@@ -140,6 +143,7 @@ $( document ).ready(function() {
           // location.reload(); TODO: Not needed
         }
       });
+      return false;
     });
 
     // --- Purchase Post ---
@@ -153,6 +157,7 @@ $( document ).ready(function() {
         $('#global-modal-placeholder').html(response.html);
         $('#global-modal-placeholder').modal('toggle');
       });
+      return false;
     });
 
     $(document).on('click', '.clickme_to-purchase_post', function (e) {
@@ -175,19 +180,46 @@ $( document ).ready(function() {
       }).fail( function(response) {
         console.log('purchase post: failed');
       });
+      return false;
     });
 
     // --- Subsribe | Follow Timeline ---
+
+    $(document).on('click', '.clickme_to-show_follow_confirm', function (e) {
+      e.preventDefault();
+      const context = $(this);
+      const timelineID = context.data('timeline_id');
+      const url = `ajax/timeline-render-modal?template=_follow_confirm&timeline_id=${timelineID}`;
+      $.getJSON(url, function(response) {
+        $('#global-modal-placeholder').html(response.html);
+        $('#global-modal-placeholder').modal('toggle');
+      });
+      return false;
+    });
+
+    $(document).on('click', '.clickme_to-show_cancel_follow_confirm', function (e) {
+      e.preventDefault();
+      const context = $(this);
+      const timelineID = context.data('timeline_id');
+      const url = `ajax/timeline-render-modal?template=_cancel_follow_confirm&timeline_id=${timelineID}`;
+      $.getJSON(url, function(response) {
+        $('#global-modal-placeholder').html(response.html);
+        $('#global-modal-placeholder').modal('toggle');
+      });
+      return false;
+    });
+
 
     $(document).on('click', '.clickme_to-show_subscribe_confirm', function (e) {
       e.preventDefault();
       const context = $(this);
       const timelineID = context.data('timeline_id');
-      const url = `ajax/timeline-render-modal?template=_subcribe_confirm&timeline_id=${timelineID}`;
+      const url = `ajax/timeline-render-modal?template=_subscribe_confirm&timeline_id=${timelineID}`;
       $.getJSON(url, function(response) {
         $('#global-modal-placeholder').html(response.html);
         $('#global-modal-placeholder').modal('toggle');
       });
+      return false;
     });
 
     $(document).on('click', '.clickme_to-purchase_subscription', function (e) {
@@ -206,6 +238,7 @@ $( document ).ready(function() {
       }).fail( function(response) {
         console.log('subscribe timeline: failed');
       });
+      return false;
     });
 
     // --- Misc ---

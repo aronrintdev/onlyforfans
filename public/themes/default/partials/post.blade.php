@@ -106,7 +106,7 @@ if ( empty($user) ) {
                         @if ($post->type === \App\Enums\PostTypeEnum::PRICED)
                         <button class="btn btn-success clickme_to-show_purchase_post_confirm" data-post_id="{{ $post->id }}">BUY</button>
                         @elseif ($post->type === \App\Enums\PostTypeEnum::SUBSCRIBER)
-                        <button class="btn btn-success clickme_to-show_subscribe_confirm" data-timline_id="{{ $timeline->id }}">SUBSCRIBE</button>
+                        <button class="btn btn-success clickme_to-show_subscribe_confirm" data-timeline_id="{{ $timeline->id }}">SUBSCRIBE</button>
                         @endif
                     </div>
                 </div>

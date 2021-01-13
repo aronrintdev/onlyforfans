@@ -1,19 +1,19 @@
-<!-- %VIEW %PARTIAL(MODAL): views/common/partials/_subscribe_confirm -->
+<!-- %VIEW %PARTIAL(MODAL): views/common/partials/_follow_confirm -->
 <div class="modal-dialog modal-dialog-centered modal-sm">
   <section class="modal-content" role="document">
 
     <div class="modal-header">
       <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
     @if ($is_cancel)
-      <h3 class="modal-title">Unsubcribe</h3>
+      <h3 class="modal-title">Unfollow Timeline</h3>
     @else
-      <h3 class="modal-title">Subcribe</h3>
+      <h3 class="modal-title">Follow Timeline</h3>
     @endif
     </div>
 
-    {{ Form::open([ 'route'=>['timelines.subscribe',$post->id],'method'=>'POST','class'=>'' ]) }}
+    {{ Form::open([ 'route'=>['timelines.follow',$post->id],'method'=>'POST','class'=>'' ]) }}
 
-    {{ Form::hidden('is_subscribe', 1) }}
+    {{ Form::hidden('is_subscribe', 0) }}
 
     <div class="modal-body no-padding">
 
@@ -31,11 +31,6 @@
             <h3 class="my-0"><strong>{{ $timeline->name }}</strong></h3>
             <p>{{ $timeline->user->renderLocation() }}</p>
           </div>
-          <ul class="list-unstyled mt-3">
-            <li><i class="fa fa-check"></i> Full access to this user's content</li>
-            <li><i class="fa fa-check"></i> Direct message with this user</li>
-            <li><i class="fa fa-check"></i> Cancel your subscription at any time</li>
-          </ul>
         </div>
 
         <div class="timeline-list box-popinfo">
@@ -59,12 +54,12 @@
       </div>
 
       <div class="px-5 pb-5">
-        <a href="javascript:void(0);" class="btn btn-submit btn-success follow-user follow" style="display:block;" data-price="1" data-timeline_id="{{ $timeline->id }}">
-          <i class="fa fa-heart"></i> Subscribe
-        </a>
+        <button type="submit" class="btn btn-submit btn-success" data-timeline_id="{{ $timeline->id }}"><i class="fa fa-heart"></i> Follow</button>
       </div>
 
     </div>
+
+    {{ Form::close() }}
 
   </section>
 </div>

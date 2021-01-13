@@ -580,7 +580,7 @@ Route::group(['prefix' => 'ajax', 'middleware' => ['auth']], function () {
 
     // --
 
-    Route::post('follow/{timeline}', 'TimelineController@follow');
+    Route::post('follow/{timeline}', 'TimelineController@follow')->name('timelines.follow');
 });
 
 

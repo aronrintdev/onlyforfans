@@ -3045,11 +3045,20 @@ Log::info('MARK-2.a'); // post-image-3
                     'post' => $post,
                 ])->render();
                 break;
+            case '_follow_confirm':
+                $timelineId = $request->timeline_id;
+                $timeline = Timeline::find($timelineId);
+                $html = \View::make('common.partials._follow_confirm', [
+                    'timeline' => $timeline,
+                    'is_cancel' => $timeline->isUserFollowing($sessionUser),
+                ])->render();
+                break;
             case '_subscribe_confirm':
                 $timelineId = $request->timeline_id;
                 $timeline = Timeline::find($timelineId);
                 $html = \View::make('common.partials._subscribe_confirm', [
                     'timeline' => $timeline,
+                    'is_cancel' => $timeline->isUserSubscribed($sessionUser),
                 ])->render();
                 break;
             case '_post':
