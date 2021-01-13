@@ -11,7 +11,7 @@
     @endif
     </div>
 
-    {{ Form::open([ 'route'=>['timelines.follow',$post->id],'method'=>'POST','class'=>'' ]) }}
+    {{ Form::open([ 'route'=>['timelines.follow',$timeline->id],'method'=>'POST','class'=>'' ]) }}
 
     {{ Form::hidden('is_subscribe', 0) }}
 
@@ -37,7 +37,7 @@
           <div class="list-wrap">
             <ul class="list-unstyled list-inline text-center tag-fit_content OFF-mt-3">
               <li>
-                <h3 class="my-0"><strong>{{ $timeline->user->renderFollowersCount() }}</strong></h3>
+                <h3 class="my-0"><strong>{{ $timeline->followers->count() }}</strong></h3>
                 <div>Fans</div>
               </li>
               <li>
@@ -54,7 +54,11 @@
       </div>
 
       <div class="px-5 pb-5">
-        <button type="submit" class="btn btn-submit btn-success" data-timeline_id="{{ $timeline->id }}"><i class="fa fa-heart"></i> Follow</button>
+        @if ($is_cancel)
+        <button type="submit" class="btn btn-submit btn-warning w-100" data-timeline_id="{{ $timeline->id }}"><i class="fa fa-heart"></i> Unfollow</button>
+        @else
+        <button type="submit" class="btn btn-submit btn-success w-100" data-timeline_id="{{ $timeline->id }}"><i class="fa fa-heart"></i> Follow</button>
+        @endif
       </div>
 
     </div>

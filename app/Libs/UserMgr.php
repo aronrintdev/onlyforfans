@@ -28,6 +28,7 @@ class UserMgr {
             $cattrs['referer'] = $referer;
         }
 
+//dd($attrs, $isFollowing);
         if ( $isFollowing ) { // unfollow
             $action = 'unfollow';
             $follower->followedtimelines()->detach($timeline->id);

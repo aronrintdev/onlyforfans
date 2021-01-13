@@ -1469,21 +1469,28 @@ Log::info('MARK-2.a'); // post-image-3
         $sessionUser = Auth::user();
 
         $request->validate([
-            'is_subscribe' => 'required|integer|min:1',
+            'is_subscribe' => 'required|integer',
         ]);
         $attrs = $request->all();
         // [users].is_follow_for_free is really is_subscribe for free? redundant with the price field
 
         try {
-            $timeline = Timeline::firstOrFail($id);
+            $timeline = Timeline::findOrFail($id);
             $attrs['referer'] = app(Referer::class)->get();
             $response = UserMgr::toggleFollow($sessionUser, $timeline, $attrs);
-
         } catch (Exception | Throwable $e) {
-
+            Log::error(json_encode([
+                'msg' => 'TimlineController::follow()',
+                'emsg' => $e->getMessage(),
+            ]));
+            throw $e;
         }
         //$follow = User::where('timeline_id', '=', $timeline_id)->first();
-        return response()->json( array_merge(['status' => '200'], $response));
+        if ( $request->ajax() ) {
+            return response()->json( array_merge(['status' => '200'], $response));
+        } else {
+            return back();
+        }
     }
 
     // %%% -----
