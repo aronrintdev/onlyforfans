@@ -37,7 +37,8 @@ class UserStatusChannel
         // Todo: Block user that are blocked by this user
         // Id of guest prevents other users from know who each other are other than the user this channel is for.
         return [
-            'id' => 'guest'
+            'id' => 'guest',
+            'name' => 'guest',
         ];
     }
 }

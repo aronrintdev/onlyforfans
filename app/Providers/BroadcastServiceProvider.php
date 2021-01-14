@@ -28,5 +28,7 @@ class BroadcastServiceProvider extends ServiceProvider
         Broadcast::channel('user-status', function ($user) {
             return (Auth::check()) ? $user : false;
         });
+
+        Broadcast::channel('user.status.{userId}', \App\Broadcasting\UserStatusChannel::class);
     }
 }

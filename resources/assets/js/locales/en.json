@@ -1,0 +1,10 @@
+{
+  "example-message": "This is an example message",
+  "online-interface": {
+    "online": "Online Now",
+    "away": "Away",
+    "doNotDisturb": "Do Not Disturb",
+    "offline": "Offline",
+    "lastSeen": "Last seen {relativeTime} ago"
+  }
+}

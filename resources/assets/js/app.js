@@ -13,6 +13,11 @@ window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 
 window.Vue = require('vue');
 
+import VueI18n from 'vue-i18n';
+Vue.use(VueI18n);
+
+import ForceCompute from './plugins/forceCompute';
+Vue.use(ForceCompute);
 
 //import BootstrapVue from 'bootstrap-vue' //Importing
 import { BootstrapVue, BootstrapVueIcons } from 'bootstrap-vue'
@@ -25,10 +30,12 @@ Vue.use(BootstrapVueIcons)
  * or customize the JavaScript scaffolding to fit your unique needs.
  */
 
-Vue.component('create-story', require('./components/stories/Wizard.vue'));
-Vue.component('story-player', require('./components/stories/AutoPlayer.vue'));
-Vue.component('my-vault', require('./components/vault/Dashboard.vue'));
-Vue.component('my-saved', require('./components/saved/Dashboard.vue'));
+Vue.component('create-story', require('./components/stories/Wizard.vue').default);
+Vue.component('story-player', require('./components/stories/AutoPlayer.vue').default);
+Vue.component('my-vault', require('./components/vault/Dashboard.vue').default);
+Vue.component('my-saved', require('./components/saved/Dashboard.vue').default);
+
+Vue.component('online-status', require('./components/user/OnlineStatus.vue').default);
 
 export const eventBus = new Vue({
 /*
@@ -43,7 +50,13 @@ export const eventBus = new Vue({
 */
 });
 
+/**
+ * Loading localization translations
+ */
+import i18n from './i18n'
+
 const app = new Vue({
+    i18n,
     store,
     el: '#app',
 });

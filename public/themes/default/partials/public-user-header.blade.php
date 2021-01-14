@@ -1,5 +1,5 @@
 <!-- %VIEW: themes/default/paritals/public-user-header --> 
-<div class="timeline-cover-section">
+<div id="user-cover" class="timeline-cover-section">
 	<div class="timeline-cover">
 		<ul class="list-inline pagelike-links">							
 			@if(!$user->timeline->albums->isEmpty())
@@ -54,7 +54,8 @@
 			<a href="">{{ $timeline->name }}</a><br><a class="user-timeline-username" href="{{ url($timeline->username) }}">{{ $timeline->username }}</a>
 				{!! verifiedBadge($timeline) !!}
 		</div>
-		<span class="status status-holder-{{ $user->id }} {{ $user->last_logged ? '' : 'text-success' }}">{{ $user->last_logged ? 'Last seen '.\Carbon\Carbon::parse($user->last_logged)->timezone(Auth::user()->timezone)->diffForHumans() : 'Online Now' }}</span>
+		<online-status :user-id="{{ $user->id }}" last-seen="{{ \Carbon\Carbon::parse($user->last_logged)->toISOString() }}"></online-status>
+
 		<ul class="list-inline pagelike-links">							
 			<li class="timeline-cover-status {{ Request::segment(2) == 'posts' ? 'active' : '' }}">
 			    <a href="{{ url($timeline->username.'/posts') }}" ><span class="top-list">{{ count($timeline->posts()->where('active', 1)->get()) }} <svg data-toggle="tooltip" data-placement="bottom" data-original-title="Posts" width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-bookmarks-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
@@ -100,3 +101,5 @@
 			.css('background-attachment', 'fixed');
 	@endif
 </script>
+
+<script src="{{ asset('js/app.userProfile.js') }}"></script>
