@@ -2,20 +2,14 @@
   <div class="feed-crate tag-posts tag-crate">
 
     <section class="row">
-      <div class="col">
-
-        <b-card
-          title="Card Title"
-          img-src="https://picsum.photos/600/300/?image=25"
-          img-alt="Image"
-          img-top
-          tag="article"
-          class="OFF-mb-2"
-          >
+      <div v-for="(fi, idx) in feeditems" :key="fi.id" class="col-sm-12">
+        <!-- for now we assume posts; eventually need to convert to a DTO -->
+          <!-- img-src="https://picsum.photos/600/300/?image=25" -->
+        <b-card title="Card Title" tag="article" class="OFF-mb-2">
+          <b-card-img v-if="fi.mediafiles.length>0" src="https://picsum.photos/600/300/?image=25" alt="Image"></b-card-img>
           <b-card-text>
-            Some quick example text to build on the card title and make up the bulk of the card's content.
+            {{ fi.description }}
           </b-card-text>
-
           <b-button href="#" variant="primary">Go somewhere</b-button>
         </b-card>
 
@@ -27,8 +21,6 @@
 
 <script>
 import Vuex from 'vuex';
-//import vue2Dropzone from 'vue2-dropzone';
-//import 'vue2-dropzone/dist/vue2Dropzone.min.css';
 //import { eventBus } from '../../app';
 
 export default {
@@ -43,7 +35,7 @@ export default {
   },
 
   computed: {
-    //...Vuex.mapState(['shares']),
+    ...Vuex.mapState(['feeditems']),
 
     /*
     mediafiles() {
@@ -68,7 +60,7 @@ export default {
 
   created() {
     //this.currentFolderPKID = this.vaultfolder_pkid;
-    //this.$store.dispatch('getVault', this.vault_pkid);
+    this.$store.dispatch('getFeeditems', 'home');
   },
 
   methods: {

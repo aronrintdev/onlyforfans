@@ -33,7 +33,6 @@ class FeedMgr {
             
     }
 
-    //public static function getPosts(User $follower, array $attrs=[]) : ?Collection
     public static function getPosts(User $follower, array $filters=[]) : ?LengthAwarePaginator
     {
         //$followingIds = filterByBlockedFollowings();
@@ -63,6 +62,34 @@ class FeedMgr {
         $posts = $query->latest()->paginate(Setting::get('items_page'));
         return $posts;
     }
+
+    public static function getPostsRaw(User $follower, array $filters=[]) : ?Collection
+    {
+        $query = Post::with('mediafiles')->where('active', 1);
+
+        if ( array_key_exists('hashtag', $filters) && !empty($filters['hashtag']) ) {
+            $hashtag = $filters['hashtag'];
+            $query->where('descripton', 'LIKE', "%{$hashtag}%");
+        }
+
+        if ( array_key_exists('start_date', $filters) && !empty($filters['start_date']) ) {
+            $query->whereDate('created_at', '>=', $filters['start_date']);
+        }
+
+        // belongs to timeline(s) that I'm following
+        $query->where( function($q1) use(&$follower) {
+            $q1->whereIn('timeline_id', $follower->followedtimelines->pluck('id'));
+        });
+
+        // or posts I follow directly %TODO
+
+        // or posts I've purchased %TODO
+
+        // %TODO: TEST: ensure no duplicates
+        $posts = $query->latest()->get();
+        return $posts;
+    }
+
 
     // %NOTE $follower could be null for guest user  %TODO
     public static function getPostsByTimeline(User $follower, Timeline $timeline, array $filters=[], $sortBy='asc', $take=10) : ?LengthAwarePaginator

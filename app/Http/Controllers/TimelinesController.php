@@ -5,8 +5,12 @@ use DB;
 use Auth;
 use Exception;
 use Throwable;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
+
+use App\Libs\UserMgr;
+use App\Libs\FeedMgr;
 
 use App\Timeline;
 //use App\Enums\PaymentTypeEnum;
@@ -17,11 +21,38 @@ class TimelinesController extends AppBaseController
     public function home(Request $request)
     {
         $sessionUser = Auth::user();
-
         return view('timelines.home', [
             'sessionUser' => $sessionUser,
             //'myVault' => $myVault,
             //'vaultRootFolder' => $vaultRootFolder,
+        ]);
+    }
+
+    // Get a list of items that make up a timeline feed, typically posts but
+    //  keep generic as we may want to throw in other things
+    public function feeditems(Request $request, $timelineID)
+    {
+        $sessionUser = Auth::user();
+
+        // %TODO
+        //  ~ [ ] trending tags
+        //  ~ [ ] announcements
+        //  ~ [ ] 
+        //  ~ [ ] 
+        //  ~ [ ] 
+
+        $filters = [];
+
+        if ($request->hashtag) {
+            $filters['hashtag'] = '#'.$request->hashtag;
+        }
+
+        //$feeditems = FeedMgr::getPosts($sessionUser, $filters); // %TODO: work with L5.8 pagination
+        $feeditems = FeedMgr::getPostsRaw($sessionUser, $filters);
+
+        return response()->json([
+            'sessionUser' => $sessionUser,
+            'feeditems' => $feeditems,
         ]);
     }
 

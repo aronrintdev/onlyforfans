@@ -150,6 +150,7 @@ Route::group(['middleware' => ['auth']], function () {
     ]);
 
     Route::get('/timelines/home', ['as'=>'timelines.home', 'uses' => 'TimelinesController@home']);
+    Route::get('/timelines/{timeline}/feeditems', ['as'=>'timelines.feeditems', 'uses' => 'TimelinesController@feeditems']);
     //Route::resource('timelines', 'TimelinesController', [
         //'only' => [ 'index' ],
     //]);

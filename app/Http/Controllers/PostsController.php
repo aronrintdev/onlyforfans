@@ -19,7 +19,6 @@ class PostsController extends AppBaseController
         ]);
     }
 
-
     public function saves(Request $request)
     {
         $sessionUser = Auth::user();
