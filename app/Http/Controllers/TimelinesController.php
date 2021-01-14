@@ -9,6 +9,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 
+use App\Setting;
 use App\Libs\UserMgr;
 use App\Libs\FeedMgr;
 
@@ -34,6 +35,9 @@ class TimelinesController extends AppBaseController
     {
         $sessionUser = Auth::user();
 
+        $page = $request->input('page', 1);
+        $take = $request->input('take', Setting::get('items_page'));
+
         // %TODO
         //  ~ [ ] trending tags
         //  ~ [ ] announcements
@@ -47,8 +51,8 @@ class TimelinesController extends AppBaseController
             $filters['hashtag'] = '#'.$request->hashtag;
         }
 
-        //$feeditems = FeedMgr::getPosts($sessionUser, $filters); // %TODO: work with L5.8 pagination
-        $feeditems = FeedMgr::getPostsRaw($sessionUser, $filters);
+        $feeditems = FeedMgr::getPosts($sessionUser, $filters, $page, $take); // %TODO: work with L5.8 pagination
+        //$feeditems = FeedMgr::getPostsRaw($sessionUser, $filters);
 
         return response()->json([
             'sessionUser' => $sessionUser,

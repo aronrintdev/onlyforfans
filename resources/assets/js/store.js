@@ -76,8 +76,9 @@ export default new Vuex.Store({
         commit('UPDATE_LOADING', false);
       });
     },
-    getFeeditems({ commit }, timelineSlug) {
-      const url = `/timelines/${timelineSlug}/feeditems`;
+    getFeeditems( { commit }, { timelineSlug, page, limit } ) {
+      console.log(`Loading page ${page}`);
+      const url = `/timelines/${timelineSlug}/feeditems?page=${page}&take=${limit}`;
       axios.get(url).then( (response) => {
         commit('UPDATE_FEEDITEMS', response.data);
         commit('UPDATE_LOADING', false);

@@ -33,12 +33,12 @@ class FeedMgr {
             
     }
 
-    public static function getPosts(User $follower, array $filters=[]) : ?LengthAwarePaginator
+    public static function getPosts(User $follower, array $filters=[], $page=1, $take=10) : ?LengthAwarePaginator
     {
         //$followingIds = filterByBlockedFollowings();
         //$timeline = $follower->timeline;
 
-        $query = Post::where('active', 1);
+        $query = Post::with('mediafiles')->where('active', 1);
 
         if ( array_key_exists('hashtag', $filters) && !empty($filters['hashtag']) ) {
             $hashtag = $filters['hashtag'];
@@ -59,7 +59,7 @@ class FeedMgr {
         // or posts I've purchased %TODO
 
         // %TODO: TEST: ensure no duplicates
-        $posts = $query->latest()->paginate(Setting::get('items_page'));
+        $posts = $query->latest()->paginate($take);
         return $posts;
     }
 
