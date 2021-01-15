@@ -38,7 +38,7 @@
                 <li><span id="emoticons"><EmojiIcon /></span> </li>
                 <li><span id="emoticons"><TimerIcon /></span> </li>
                 <li><span id="emoticons"><CalendarIcon /></span> </li>
-                <li class="ml-auto"><button type="submit" class="btn btn-submit btn-success">Post</button></li>
+                <li class="ml-auto"><button @click="savePost()" class="btn btn-submit btn-success">Post</button></li>
               </ul>
           </template>
         </b-card>
@@ -69,12 +69,17 @@ export default {
   },
 
   data: () => ({
+    // ref: 
+    //  ~ https://github.com/rowanwins/vue-dropzone/blob/master/docs/src/pages/SendAdditionalParamsDemo.vue
+    //  ~ https://www.dropzonejs.com/#config-autoProcessQueue
     dropzoneOptions: {
       url: '/mediafiles',
       paramName: 'mediafile',
-      thumbnailHeight: 80,
+      autoProcessQueue: false,
+      thumbnailWidth: 100,
       clickable: false,
       maxFilesize: 3.9,
+      addRemoveLinks: true,
       headers: { 
         'X-Requested-With': 'XMLHttpRequest', 
         'X-CSRF-TOKEN': document.head.querySelector('[name=csrf-token]').content,
@@ -86,6 +91,18 @@ export default {
   },
 
   methods: {
+
+    async savePost() {
+      // (1) create the post
+      const response = await axios.post(`/posts`, {
+        shareables: this.shareForm.selectedToShare,
+        sharees: this.shareForm.sharees.map( o => { return { sharee_id: o.id } }),
+        invitees: this.shareForm.invitees.map( o => { return { email: o } }),
+      });
+
+      // (2) upload & attach the mediafiles
+      this.processQueue();
+    },
 
     // https://rowanwins.github.io/vue-dropzone/docs/dist/#/custom-preview
     thumbnailEvent: function(file, dataUrl) {
@@ -186,9 +203,11 @@ export default {
   resize: none;
 }
 
+/*
 .create_post-crate .dropzone .dz-image img {
   width: 128px;
 }
+*/
 
 .create_post-crate footer ul li {
   margin-right: 1em;
