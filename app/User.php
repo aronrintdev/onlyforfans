@@ -43,6 +43,7 @@ class User extends Authenticatable
         'password', 'remember_token', 'verification_code', 'email', 'timeline',
     ];
 
+    protected $dates = [ 'last_logged' ];
 
     public function toArray() {
         $array = parent::toArray();

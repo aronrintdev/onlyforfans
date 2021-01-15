@@ -54,7 +54,7 @@
 			<a href="">{{ $timeline->name }}</a><br><a class="user-timeline-username" href="{{ url($timeline->username) }}">{{ $timeline->username }}</a>
 				{!! verifiedBadge($timeline) !!}
 		</div>
-		<online-status :user-id="{{ $user->id }}" last-seen="{{ \Carbon\Carbon::parse($user->last_logged)->toISOString() }}"></online-status>
+		<online-status :user="{{ json_encode($user->only(['id', 'last_logged'])) }}"></online-status>
 
 		<ul class="list-inline pagelike-links">							
 			<li class="timeline-cover-status {{ Request::segment(2) == 'posts' ? 'active' : '' }}">

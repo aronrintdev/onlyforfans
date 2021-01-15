@@ -1,18 +1,24 @@
 {
   "cSpell.words": [
+    "Arrayable",
     "Authenticatable",
+    "CSRF",
     "Cmgmyr",
     "Dispatchable",
+    "Macroable",
     "Mediafile",
     "Messagable",
     "Mutators",
+    "PJAX",
     "Queueable",
     "Vaultfolder",
+    "XSRF",
     "Zizaco",
     "bothify",
     "dribbble",
     "linkedin",
     "luxon",
+    "vuejs",
     "youtube"
   ]
 }

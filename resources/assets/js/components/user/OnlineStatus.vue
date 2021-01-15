@@ -1,5 +1,5 @@
 <template>
-  <span v-if="!loading" class="status" :class="[`status-holder-${userId}`, textVariant]">
+  <span v-if="!loading" class="status" :class="[`status-holder-${user.id}`, textVariant]">
     {{ message }}
   </span>
 </template>
@@ -10,19 +10,18 @@ import { DateTime } from 'luxon'
 export default {
   name: 'online-status',
   props: {
-    lastSeen: { type: String, default: ''},
     statusTextVariant: { type: Object, default: () => ({
       online: 'success',
       away: 'warning',
       doNotDisturb: 'danger',
     })},
-    userId: { type: [String, Number] },
+    user: { type: Object, default: () => ({ id: '' }) },
   },
   data: () => ({
     momentsAgoThreshold: 60,
     refreshSpeed: 30 * 1000, // 30 seconds
-    refreshRunning: false,
-    _lastSeen: '',
+    refreshLock: false,
+    lastSeen: '',
     loading: true,
     /**
      * offline | online | away | doNotDisturb
@@ -37,8 +36,8 @@ export default {
       return ''
     },
     message() {
-      if (this.status === 'offline' && this._lastSeen && this._lastSeen !== '') {
-        const lastSeen = DateTime.fromISO(this._lastSeen)
+      if (this.status === 'offline' && this.lastSeen && this.lastSeen !== '') {
+        const lastSeen = DateTime.fromISO(this.lastSeen)
         if (DateTime.local().diff(lastSeen, 'seconds').toObject().seconds < this.momentsAgoThreshold) {
           return this.$t('lastSeenMomentsAgo')
         }
@@ -50,39 +49,49 @@ export default {
   methods: {
     listen() {
       this.loading = true
-      window.Echo.join(`user.status.${this.userId}`)
-        .here((users) => {
-          if (_.findIndex(users, u => ( u.id == this.userId )) != -1) {
-            this.status = 'online'
-          } else {
-            setTimeout(this.updateLastSeen, this.refreshSpeed)
-          }
-          this.loading = false
+      this.$whenAvailable('Echo')
+        .then(echo => {
+          echo.join(`user.status.${this.user.id}`)
+            .here(users => {
+              this.$log.debug(`user.status.${this.user.id}.here`, { users })
+              if (_.findIndex(users, u => ( u.id == this.user.id )) != -1) {
+                this.status = 'online'
+              } else {
+                setTimeout(this.updateLastSeen, this.refreshSpeed)
+              }
+              this.loading = false
+            })
+            .joining(user => {
+              this.$log.debug(`user.status.${this.user.id}.joining`,{ user })
+              if (user.id == this.user.id) {
+                this.status = 'online'
+              }
+            })
+            .leaving(user => {
+              this.$log.debug(`user.status.${this.user.id}.leaving`, { users })
+              if (user.id == this.user.id) {
+                this.status = 'offline'
+                this.lastSeen = DateTime.local().toString()
+                setTimeout(this.updateLastSeen, this.refreshSpeed)
+              }
+            })
+            .listen('statusUpdate', $e => {
+              this.$log.debug(`user.status.${this.user.id}.listen('statusUpdate')`, { $e })
+              this.status = $e.status
+            })
         })
-        .joining((user) => {
-          if (user.id == this.userId) {
-            this.status = 'online'
-          }
-        })
-        .leaving((user) => {
-          if (user.id == this.userId) {
-            this.status = 'offline'
-            this._lastSeen = DateTime.local().toString()
-            setTimeout(this.updateLastSeen, this.refreshSpeed)
-          }
-        })
-        .listen('statusUpdate', ($e) => {
-          this.status = $e.status
+        .catch(error => {
+          this.$log.error(error)
         })
     },
     updateLastSeen(start = true) {
       // Preventing duplicates of this function from running
-      if (start && this.refreshRunning) {
+      if ((start && this.refreshLock) || (!start && !this.refreshLock)) {
         return
       }
-      this.refreshRunning = true
+      this.refreshLock = true
       if (this.status !== 'offline') {
-        this.refreshRunning = false
+        this.refreshLock = false
         return
       }
       this.$forceCompute('message')
@@ -90,8 +99,8 @@ export default {
     },
   },
   mounted() {
-    if (this.lastSeen && this.lastSeen !== '') {
-      this._lastSeen = DateTime.fromISO(this.lastSeen, { zone: 'utc' }).setZone('local').toString()
+    if (this.user.last_logged && this.user.last_logged !== '') {
+      this.lastSeen = DateTime.fromISO(this.user.last_logged, { zone: 'utc' }).setZone('local').toString()
     }
     this.listen()
   }

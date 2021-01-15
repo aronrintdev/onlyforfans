@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Setting;
 use Illuminate\Contracts\Auth\Guard;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
@@ -64,6 +65,10 @@ class AppServiceProvider extends ServiceProvider
             'users' => 'App\User',
             'vaultfolders' => 'App\Vaultfolder',
         ]);
+
+        Carbon::serializeUsing(function ($carbon) {
+            return $carbon->toISOString();
+        });
     }
 
     /**

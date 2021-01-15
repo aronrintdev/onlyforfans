@@ -4,6 +4,8 @@
  * building robust, powerful web applications using Vue and Laravel.
  */
 
+const isProduction = process.env.NODE_ENV === 'production';
+
 import store from './store';
 
 require('./bootstrap');
@@ -13,11 +15,31 @@ window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 
 window.Vue = require('vue');
 
+/**
+ * Enable $log
+ * Use: `this.$log.error(error)`
+ * logLevels : ['debug', 'info', 'warn', 'error', 'fatal']
+ */
+import VueLogger from 'vuejs-logger';
+const options = {
+    isEnabled: true,
+    logLevel : isProduction ? 'error' : 'debug',
+    stringifyArguments : false,
+    showLogLevel : true,
+    showMethodName : !isProduction,
+    separator: '|',
+    showConsoleColors: true
+};
+Vue.use(VueLogger, options);
+
 import VueI18n from 'vue-i18n';
 Vue.use(VueI18n);
 
 import ForceCompute from './plugins/forceCompute';
 Vue.use(ForceCompute);
+
+import WhenAvailable from './plugins/whenAvailable';
+Vue.use(WhenAvailable);
 
 //import BootstrapVue from 'bootstrap-vue' //Importing
 import { BootstrapVue, BootstrapVueIcons } from 'bootstrap-vue'
