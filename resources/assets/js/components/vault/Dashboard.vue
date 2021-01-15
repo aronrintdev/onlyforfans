@@ -311,12 +311,14 @@ export default {
       });
     },
 
+    // for dropzone
     sendingEvent(file, xhr, formData) {
       formData.append('resource_id', this.currentFolderPKID);
       formData.append('resource_type', 'vaultfolders');
       formData.append('mftype', 'vault');
     },
 
+    // for dropzone
     successEvent(file, response) {
       this.$store.dispatch('getVaultfolder', this.currentFolderPKID);
     },

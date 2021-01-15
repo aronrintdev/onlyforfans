@@ -7,8 +7,22 @@ $theme-colors: (
 
 body {
   background-color: rgb(237, 242, 247) !important;
+  font-family: 'Open Sans', sans-serif;
 }
 
 .tag-crate {
   border: solid 2px orange;
+}
+
+body .btn {
+    font-family: 'Open Sans', sans-serif;
+    font-size: 14px;
+    text-transform: capitalize;
+    outline: none !important;
+    border-radius: 25px;
+}
+body .btn-success {
+    background-color: #298ad3;
+    background-image: linear-gradient(-1deg, #298ad3 2%, #298ad3 98%);
+    border: 1px solid #298ad3;
 }
