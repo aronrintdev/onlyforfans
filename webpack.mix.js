@@ -112,3 +112,5 @@ mix.js('resources/assets/js/appPages/userProfile.js', 'public/js/app.userProfile
       },
     },
   });
+
+mix.js('resources/assets/js/appPages/onlineMonitor.js', 'public/js/app.onlineMonitor.js');

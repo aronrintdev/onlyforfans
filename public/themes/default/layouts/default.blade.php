@@ -56,6 +56,7 @@
         @endif
         <script src="{!! Theme::asset()->url('js/lightgallery.js') !!}"></script>
         <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+        <script src="{{ asset('js/app.onlineMonitor.js') }}"></script>
     </head>
     <body @if(Setting::get('enable_rtl') == 'on') class="direction-rtl" @endif>
         {!! Theme::partial('header') !!}

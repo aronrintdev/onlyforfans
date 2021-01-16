@@ -19,6 +19,8 @@ export default {
   },
   data: () => ({
     momentsAgoThreshold: 60,
+    offlineDelay: 10 * 1000, // 10 seconds, amount of reconnect leeway
+    pendingOffline: false, // In offline gray area
     refreshSpeed: 30 * 1000, // 30 seconds
     refreshLock: false,
     lastSeen: '',
@@ -54,8 +56,10 @@ export default {
           echo.join(`user.status.${this.user.id}`)
             .here(users => {
               this.$log.debug(`user.status.${this.user.id}.here`, { users })
-              if (_.findIndex(users, u => ( u.id == this.user.id )) != -1) {
-                this.status = 'online'
+              const userIndex = _.findIndex(users, u => ( u.id == this.user.id ))
+              if (userIndex != -1) {
+                this.pendingOffline = false
+                this.status = users[userIndex].status || 'online'
               } else {
                 setTimeout(this.updateLastSeen, this.refreshSpeed)
               }
@@ -64,15 +68,14 @@ export default {
             .joining(user => {
               this.$log.debug(`user.status.${this.user.id}.joining`,{ user })
               if (user.id == this.user.id) {
-                this.status = 'online'
+                this.pendingOffline = false
+                this.status = user.status || 'online'
               }
             })
             .leaving(user => {
-              this.$log.debug(`user.status.${this.user.id}.leaving`, { users })
+              this.$log.debug(`user.status.${this.user.id}.leaving`, { user })
               if (user.id == this.user.id) {
-                this.status = 'offline'
-                this.lastSeen = DateTime.local().toString()
-                setTimeout(this.updateLastSeen, this.refreshSpeed)
+                this._pendingOffline()
               }
             })
             .listen('statusUpdate', $e => {
@@ -83,6 +86,16 @@ export default {
         .catch(error => {
           this.$log.error(error)
         })
+    },
+    _pendingOffline() {
+      this.pendingOffline = true
+      setTimeout(() => {
+        if (this.pendingOffline) {
+          this.status = 'offline'
+          this.lastSeen = DateTime.local().toString()
+          setTimeout(this.updateLastSeen, this.refreshSpeed)
+        }
+      }, this.offlineDelay)
     },
     updateLastSeen(start = true) {
       // Preventing duplicates of this function from running
