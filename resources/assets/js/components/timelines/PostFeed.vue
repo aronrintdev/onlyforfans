@@ -39,6 +39,7 @@ export default {
 
   computed: {
     ...Vuex.mapState(['feeditems']),
+    ...Vuex.mapState(['timeline']),
     ...Vuex.mapState(['is_loading']),
 
     feeddataitems() {

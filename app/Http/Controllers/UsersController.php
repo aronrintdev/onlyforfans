@@ -14,6 +14,14 @@ use App\Enums\PaymentTypeEnum;
 
 class UsersController extends AppBaseController
 {
+    public function me(Request $request)
+    {
+        $sessionUser = Auth::user(); // sender of tip
+        return response()->json([
+            'session_user' => $sessionUser,
+            'timeline' => $sessionUser->timeline,
+        ]);
+    }
 
     public function tip(Request $request, $id)
     {

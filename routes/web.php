@@ -139,6 +139,7 @@ Route::group(['middleware' => ['auth']], function () {
     ]);
 
     Route::get('/users/match', ['as'=>'users.match', 'uses' => 'UsersController@match']);
+    Route::get('/users/me', ['as'=>'users.me', 'uses' => 'UsersController@me']);
     /*
     Route::resource('users', 'UsersController', [
         'only' => [ 'index' ],
@@ -152,7 +153,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('/timelines/home', ['as'=>'timelines.home', 'uses' => 'TimelinesController@home']);
     Route::get('/timelines/{timeline}/feeditems', ['as'=>'timelines.feeditems', 'uses' => 'TimelinesController@feeditems']);
     //Route::resource('timelines', 'TimelinesController', [
-        //'only' => [ 'index' ],
+        //'only' => [ 'show' ],
     //]);
 
     Route::resource('vaultfolders', 'VaultfoldersController', [

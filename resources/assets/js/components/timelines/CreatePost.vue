@@ -17,11 +17,11 @@
                 :useCustomSlot=true
                 v-on:vdropzone-sending="sendingEvent"
                 v-on:vdropzone-success="successEvent"
-                v-on:vdropzone-thumbnail="thumbnailEvent"
                 class="dropzone OFF-d-flex OFF-align-items-stretch"
                 >
-                <textarea rows="8" class="w-100 OFF-h-100"></textarea>
+                <textarea v-model="description" rows="8" class="w-100 OFF-h-100"></textarea>
                 <!--
+                v-on:vdropzone-thumbnail="thumbnailEvent"
                   <div class="dropzone-custom-content">
                   <h3 class="dropzone-custom-title">Drag and drop to upload content!</h3>
                   <div class="subtitle">...or click to select a file from your computer</div>
@@ -66,9 +66,15 @@ export default {
   },
 
   computed: {
+    ...Vuex.mapState(['session_user']),
+    ...Vuex.mapState(['timeline']),
   },
 
   data: () => ({
+
+    description: '',
+    newPostId: null,
+
     // ref: 
     //  ~ https://github.com/rowanwins/vue-dropzone/blob/master/docs/src/pages/SendAdditionalParamsDemo.vue
     //  ~ https://www.dropzonejs.com/#config-autoProcessQueue
@@ -88,6 +94,7 @@ export default {
   }),
 
   created() {
+    this.$store.dispatch('getMe');
   },
 
   methods: {
@@ -95,15 +102,57 @@ export default {
     async savePost() {
       // (1) create the post
       const response = await axios.post(`/posts`, {
-        shareables: this.shareForm.selectedToShare,
-        sharees: this.shareForm.sharees.map( o => { return { sharee_id: o.id } }),
-        invitees: this.shareForm.invitees.map( o => { return { email: o } }),
+        timeline_id: this.timeline.id,
+        description: this.description,
       });
+      console.log('savePost', { response });
+      const json = response.data;
+      this.newPostId = json.post.id;
 
       // (2) upload & attach the mediafiles
-      this.processQueue();
+      this.$refs.myVueDropzone.processQueue();
     },
 
+    // for dropzone
+    sendingEvent(file, xhr, formData) {
+      console.log('sendingEvent', {
+        file,
+        formData,
+        xhr,
+      });
+      if ( !this.newPostId ) {
+        throw new Error('Cancel upload, invalid post id');
+      }
+      formData.append('resource_id', this.newPostId);
+      formData.append('resource_type', 'posts');
+      formData.append('mftype', 'post');
+    },
+
+    // for dropzone
+    successEvent(file, response) {
+      console.log('successEvent', {
+        file,
+        response,
+      });
+      //this.$store.dispatch('getVaultfolder', this.currentFolderPKID);
+    },
+
+  },
+
+  components: {
+    vueDropzone: vue2Dropzone,
+    EmojiIcon,
+    ImageIcon,
+    CameraIcon,
+    MicIcon,
+    LocationPinIcon,
+    TimerIcon,
+    CalendarIcon,
+  },
+}
+
+
+    /*
     // https://rowanwins.github.io/vue-dropzone/docs/dist/#/custom-preview
     thumbnailEvent: function(file, dataUrl) {
       console.log('thumbnailEvent', {
@@ -130,40 +179,7 @@ export default {
         })(this)), 1);
       }
     },
-
-    // for dropzone
-    sendingEvent(file, xhr, formData) {
-      console.log('sendingEvent', {
-        file,
-        formData,
-      });
-      //formData.append('resource_id', this.currentFolderPKID);
-      //formData.append('resource_type', 'vaultfolders');
-      //formData.append('mftype', 'vault');
-    },
-
-    // for dropzone
-    successEvent(file, response) {
-      console.log('successEvent', {
-        file,
-        response,
-      });
-      //this.$store.dispatch('getVaultfolder', this.currentFolderPKID);
-    },
-
-  },
-
-  components: {
-    vueDropzone: vue2Dropzone,
-    EmojiIcon,
-    ImageIcon,
-    CameraIcon,
-    MicIcon,
-    LocationPinIcon,
-    TimerIcon,
-    CalendarIcon,
-  },
-}
+    */
 </script>
 
 <style>

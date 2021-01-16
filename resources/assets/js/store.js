@@ -14,6 +14,8 @@ export default new Vuex.Store({
     shareables: [], // resources that have been shared with session user
     saves: [], // resources that session user has saved
     feeditems: [],
+    timeline: null,
+    me: null,
     is_loading: true
   },
 
@@ -39,6 +41,12 @@ export default new Vuex.Store({
     UPDATE_FEEDITEMS (state, payload) {
       //console.log('mutation', payload);
       state.feeditems = payload.hasOwnProperty('feeditems') ? payload.feeditems : [];
+    },
+    UPDATE_TIMELINE (state, payload) {
+      state.timeline = payload.hasOwnProperty('timeline') ? payload.timeline : [];
+    },
+    UPDATE_SESSION_USER (state, payload) {
+      state.session_user = payload.hasOwnProperty('session_user') ? payload.session_user : [];
     },
     UPDATE_LOADING(state, payload) {
       state.is_loading = payload;
@@ -81,6 +89,15 @@ export default new Vuex.Store({
       const url = `/timelines/${timelineSlug}/feeditems?page=${page}&take=${limit}`;
       axios.get(url).then( (response) => {
         commit('UPDATE_FEEDITEMS', response.data);
+        commit('UPDATE_TIMELINE', response.data);
+        commit('UPDATE_LOADING', false);
+      });
+    },
+    getMe( { commit } ) {
+      const url = `/users/me`;
+      axios.get(url).then( (response) => {
+        commit('UPDATE_SESSION_USER', response.data);
+        commit('UPDATE_TIMELINE', response.data);
         commit('UPDATE_LOADING', false);
       });
     },
@@ -95,6 +112,8 @@ export default new Vuex.Store({
     shareables: state => state.shareables,
     saves: state => state.saves,
     feeditems: state => state.feeditems,
+    timeline: state => state.timeline,
+    session_user: state => state.session_user,
     //children: state => state.vault.children, // Flat list
     //mediafiles: state => state.vault.mediafiles, // Flat list
   },

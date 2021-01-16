@@ -36,9 +36,21 @@ class FeedMgr {
     public static function getPosts(User $follower, array $filters=[], $page=1, $take=10) : ?LengthAwarePaginator
     {
         //$followingIds = filterByBlockedFollowings();
-        //$timeline = $follower->timeline;
+
+        $timeline = $follower->timeline;
 
         $query = Post::with('mediafiles')->where('active', 1);
+
+        $followedTimelineIDs = $follower->followedtimelines->pluck('id');
+        $followedTimelineIDs->push($timeline->id); // include follower's own timeline %NOTE
+
+        // --- Belongs to timeline(s) that I'm following ---
+        $query->where( function($q1) use(&$follower, $followedTimelineIDs) {
+            $q1->whereIn('timeline_id', $followedTimelineIDs);
+        });
+
+
+        // --- Apply optional filters ---
 
         if ( array_key_exists('hashtag', $filters) && !empty($filters['hashtag']) ) {
             $hashtag = $filters['hashtag'];
@@ -49,10 +61,7 @@ class FeedMgr {
             $query->whereDate('created_at', '>=', $filters['start_date']);
         }
 
-        // belongs to timeline(s) that I'm following
-        $query->where( function($q1) use(&$follower) {
-            $q1->whereIn('timeline_id', $follower->followedtimelines->pluck('id'));
-        });
+        // or my own posts
 
         // or posts I follow directly %TODO
 

@@ -35,6 +35,10 @@ class TimelinesController extends AppBaseController
     {
         $sessionUser = Auth::user();
 
+        $timeline = ( $timelineID === 'home' ) 
+            ? $sessionUser->timeline
+            : null;
+
         $page = $request->input('page', 1);
         $take = $request->input('take', Setting::get('items_page'));
 
@@ -57,6 +61,7 @@ class TimelinesController extends AppBaseController
         return response()->json([
             'sessionUser' => $sessionUser,
             'feeditems' => $feeditems,
+            'timeline' => $timeline,
         ]);
     }
 
