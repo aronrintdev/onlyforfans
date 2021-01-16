@@ -19,6 +19,20 @@ import { BootstrapVue, BootstrapVueIcons } from 'bootstrap-vue'
 Vue.use(BootstrapVue) // Telling Vue to use this in whole application
 Vue.use(BootstrapVueIcons)
 
+import VueTimeago from 'vue-timeago';
+Vue.use(VueTimeago, {
+  name: 'Timeago', // Component name, `Timeago` by default
+  locale: 'en', // Default locale
+  /*
+  // We use `date-fns` under the hood
+  // So you can use all locales from it
+  locales: {
+    'zh-CN': require('date-fns/locale/zh_cn'),
+    ja: require('date-fns/locale/ja')
+  }
+  */
+});
+
 /**
  * Next, we will create a fresh Vue application instance and attach it to
  * the page. Then, you may begin adding components to this application
@@ -35,6 +49,8 @@ Vue.component('create-post', require('./components/timelines/CreatePost.vue'));
 Vue.component('session-widget', require('./components/timelines/SessionWidget.vue'));
 Vue.component('suggested-feed', require('./components/timelines/SuggestedFeed.vue'));
 Vue.component('post-feed', require('./components/timelines/PostFeed.vue'));
+
+
 
 export const eventBus = new Vue({
 /*

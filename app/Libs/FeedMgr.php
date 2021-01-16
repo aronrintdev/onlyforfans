@@ -35,14 +35,18 @@ class FeedMgr {
 
     public static function getPosts(User $follower, array $filters=[], $page=1, $take=10) : ?LengthAwarePaginator
     {
+        // %NOTE %TODO: Filter/distinguish free vs non-free posts in followed timelines
+
         //$followingIds = filterByBlockedFollowings();
 
         $timeline = $follower->timeline;
 
-        $query = Post::with('mediafiles')->where('active', 1);
+        $query = Post::with('mediafiles','user','timeline')->where('active', 1);
 
         $followedTimelineIDs = $follower->followedtimelines->pluck('id');
         $followedTimelineIDs->push($timeline->id); // include follower's own timeline %NOTE
+        // %NOTE %TODO: ^^^ this will not pick up user's own posts that are not free (??)
+
 
         // --- Belongs to timeline(s) that I'm following ---
         $query->where( function($q1) use(&$follower, $followedTimelineIDs) {
