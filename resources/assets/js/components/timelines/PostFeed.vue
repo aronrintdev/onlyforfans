@@ -4,7 +4,7 @@
     <section class="row">
       <div v-infinite-scroll="loadMore" infinite-scroll-disabled="is_loading" infinite-scroll-distance="limit">
         <article v-for="(fi, idx) in rendereditems" :key="fi.id" class="col-sm-12 mb-3">
-          <!-- for now we assume posts; eventually need to convert to a DTO (ie more generic 'feeditem') -->
+          <!-- for now we assume posts; eventually need to convert to a DTO (ie more generic 'feeditem') : GraphQL ? -->
           <ShowPost :post=fi />
         </article>
       </div>

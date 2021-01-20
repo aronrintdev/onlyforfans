@@ -1,6 +1,8 @@
 <template>
   <div class="show_post-crate">
-    <b-card header-tag="header" tag="article" class="superbox-post">
+
+    <b-card header-tag="header" footer-tag="footer" tag="article" class="superbox-post">
+
       <template #header>
         <div class="post-author">
           <section class="user-avatar">
@@ -23,11 +25,45 @@
           </section>
         </div>
       </template>
+
       <b-card-img v-if="post.mediafiles.length>0" :src="post.mediafiles[0].filepath" alt="Image"></b-card-img>
+
       <b-card-text>
-        {{ post.description }}
+        <p>{{ post.description }}</p>
       </b-card-text>
-      <b-button href="#" variant="primary">Go somewhere</b-button>
+
+      <template #footer>
+        <div class="panel-footer fans">
+
+          <ul class="list-inline footer-ctrl">
+            <li class="list-inline-item mr-3"><span @click="togglePostLike()" class="tag-clickable"><b-icon :icon="isPostLikedByMe?'heart-fill':'heart'" :variant="isPostLikedByMe?'danger':'default'" font-scale="1"></b-icon></span></li>
+            <li class="list-inline-item mr-3"><span @click="toggleComments()" class="tag-clickable"><b-icon icon="chat-text" font-scale="1"></b-icon> ({{ this.commentCount }})</span></li>
+            <li class="list-inline-item mr-3"><span @click="share()" class="tag-clickable"><b-icon icon="share" font-scale="1"></b-icon></span></li>
+            <li class="list-inline-item mr-3"><span @click="tip()" class="tag-clickable">$</span></li>
+          </ul>
+
+          <ul v-if="renderComments" class="list-unstyled post-comments mt-3">
+            <b-media tag="li" v-for="(c, idx) in post.comments" :key="c.id" class="mb-3">
+              <template #aside>
+                <b-img thumbnail fluid :src="c.user.avatar.filepath" alt="Avatar"></b-img>
+              </template>
+              <article class="OFF-d-flex">
+                <span class="h5 tag-commenter mt-0 mb-1">{{ c.user.name }}</span>
+                <span class="mb-0 tag-contents">{{ c.description }}</span>
+              </article>
+              <div class="d-flex comment-ctrl mt-1">
+                <div @click="toggleCommentLike()"><b-icon icon="heart" font-scale="1"></b-icon> (0)</div>
+                <div class="mx-1"><b-icon icon="dot" font-scale="1"></b-icon></div>
+                <div>Reply</div>
+                <div class="mx-1"><b-icon icon="dot" font-scale="1"></b-icon></div>
+                <div><timeago :datetime="c.created_at" :auto-update="60"></timeago></div>
+              </div>
+            </b-media>
+          </ul>
+
+        </div>
+      </template>
+
     </b-card>
 
   </div>
@@ -35,13 +71,6 @@
 
 <script>
 import Vuex from 'vuex';
-import ImageIcon from '../common/icons/ImageIcon.vue';
-import CameraIcon from '../common/icons/CameraIcon.vue';
-import EmojiIcon from '../common/icons/EmojiIcon.vue';
-import MicIcon from '../common/icons/MicIcon.vue';
-import LocationPinIcon from '../common/icons/LocationPinIcon.vue';
-import TimerIcon from '../common/icons/TimerIcon.vue';
-import CalendarIcon from '../common/icons/CalendarIcon.vue';
 
 export default {
 
@@ -54,7 +83,10 @@ export default {
   },
 
   data: () => ({
-
+    renderComments: true, // false,
+    isPostLikedByMe: false, // %FIXME INIT
+    likeCount: 0, // %FIXME INIT
+    commentCount: 0, // %FIXME INIT
   }),
 
   created() {
@@ -62,57 +94,121 @@ export default {
 
   methods: {
 
+    async togglePostLike() {
+      const url = `/posts/${this.post.id}/like`;
+      const response = await axios.patch(url, {
+      });
+      console.log('response', { response });
+      this.isPostLikedByMe = response.data.is_liked_by_session_user;
+      this.likeCount = response.data.like_count;
+    },
+
+    toggleCommentLike() {
+    },
+
+    // %FIXME: optimize bandwidth by ajax call to get comments here instead of in initial index call (?)
+    toggleComments() {
+      this.renderComments = !this.renderComments;
+    },
+
+    share() {
+    },
+
+    tip() {
+    },
+
   },
 
   components: {
-    EmojiIcon,
-    ImageIcon,
-    CameraIcon,
-    MicIcon,
-    LocationPinIcon,
-    TimerIcon,
-    CalendarIcon,
   },
 }
 </script>
 
 <style scoped>
+ul {
+  margin: 0;
+}
+
+header.card-header,
+footer.card-footer {
+  background-color: #fff;
+}
+
+footer.card-footer ul.post-comments > li img {
+  width: 36px;
+  height: 36px;
+  border-radius: 4px;
+  padding: 0;
+}
+footer.card-footer ul.post-comments > li article {
+  line-height: 1;
+}
+footer.card-footer ul.post-comments > li .tag-commenter {
+  font-weight: 600;
+  font-size: 14px;
+  color: #2298F1;
+  letter-spacing: 0px;
+  text-transform: capitalize;
+}
+
+footer.card-footer ul.post-comments > li .tag-contents {
+  font-weight: 400;
+  font-size: 13px;
+  color: #5B6B81;
+  word-break: break-word;
+}
+
+footer.card-footer ul.post-comments .comment-ctrl {
+  font-weight: 400;
+  font-size: 12px;
+  color: #859AB5;
+  text-transform: capitalize;
+}
+
+.card-body p {
+  font-size: 14px;
+  font-weight: 400;
+  color: #5B6B81;
+  letter-spacing: 0.3px;
+  margin-bottom: 0px;
+  word-break: break-word;
+}
 .superbox-post .post-author .user-avatar {
-    width: 40px;
-    height: 40px;
-    float: left;
-    margin-right: 10px;
+  width: 40px;
+  height: 40px;
+  float: left;
+  margin-right: 10px;
 }
 .superbox-post .post-author .user-avatar img {
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
 }
 .superbox-post .post-author .user-post-details ul {
-    padding-left: 50px;
-    margin-bottom: 0;
+  padding-left: 50px;
+  margin-bottom: 0;
 }
 .superbox-post .post-author .user-post-details ul > li {
-    color: #859AB5;
-    font-size: 16px;
-    font-weight: 400;
+  color: #859AB5;
+  font-size: 16px;
+  font-weight: 400;
 }
 .superbox-post .post-author .user-post-details ul > li .username {
-    text-transform: capitalize;
+  text-transform: capitalize;
 }
 
 .superbox-post .post-author .user-post-details ul > li .post-time {
-    color: #4a5568;
-    font-size: 12px;
-    letter-spacing: 0px;
-    margin-right: 3px;
+  color: #4a5568;
+  font-size: 12px;
+  letter-spacing: 0px;
+  margin-right: 3px;
 }
 .superbox-post .post-author .user-post-details ul > li:last-child {
-    font-size: 14px;
+  font-size: 14px;
 }
 .superbox-post .post-author .user-post-details ul > li {
-    color: #859AB5;
-    font-size: 16px;
-    font-weight: 400;
+  color: #859AB5;
+  font-size: 16px;
+  font-weight: 400;
 }
 </style>
