@@ -41,7 +41,7 @@ class FeedMgr {
 
         $timeline = $follower->timeline;
 
-        $query = Post::with('mediafiles','user','timeline')->where('active', 1);
+        $query = Post::with('mediafiles', 'user', 'timeline', 'comments.user')->where('active', 1);
 
         $followedTimelineIDs = $follower->followedtimelines->pluck('id');
         $followedTimelineIDs->push($timeline->id); // include follower's own timeline %NOTE
