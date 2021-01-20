@@ -33,7 +33,7 @@ class FeedMgr {
             
     }
 
-    public static function getPosts(User $follower, array $filters=[], $page=1, $take=10) : ?LengthAwarePaginator
+    public static function getPosts(User $follower, array $filters=[], $page=1, $take=5) : ?LengthAwarePaginator
     {
         // %NOTE %TODO: Filter/distinguish free vs non-free posts in followed timelines
 
@@ -105,7 +105,7 @@ class FeedMgr {
 
 
     // %NOTE $follower could be null for guest user  %TODO
-    public static function getPostsByTimeline(User $follower, Timeline $timeline, array $filters=[], $sortBy='asc', $take=10) : ?LengthAwarePaginator
+    public static function getPostsByTimeline(User $follower, Timeline $timeline, array $filters=[], $sortBy='asc', $take=5) : ?LengthAwarePaginator
     {
         //$followingIds = filterByBlockedFollowings();
         //$timeline = $follower->timeline;

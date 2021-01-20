@@ -17,6 +17,7 @@
                 :useCustomSlot=true
                 v-on:vdropzone-sending="sendingEvent"
                 v-on:vdropzone-success="successEvent"
+                v-on:vdropzone-queue-complete="queueCompleteEvent"
                 class="dropzone OFF-d-flex OFF-align-items-stretch"
                 >
                 <textarea v-model="description" rows="8" class="w-100 OFF-h-100"></textarea>
@@ -50,6 +51,7 @@
 
 <script>
 import Vuex from 'vuex';
+//import { eventBus } from '../../app';
 import vue2Dropzone from 'vue2-dropzone';
 import 'vue2-dropzone/dist/vue2Dropzone.min.css';
 import ImageIcon from '../common/icons/ImageIcon.vue';
@@ -99,6 +101,13 @@ export default {
 
   methods: {
 
+    resetForm() {
+      this.description = '';
+      this.newPostId = null;
+      this.$refs.myVueDropzone.removeAllFiles();
+    },
+
+
     async savePost() {
       // (1) create the post
       const response = await axios.post(`/posts`, {
@@ -109,8 +118,16 @@ export default {
       const json = response.data;
       this.newPostId = json.post.id;
 
+      const queued = this.$refs.myVueDropzone.getQueuedFiles();
+
       // (2) upload & attach the mediafiles
-      this.$refs.myVueDropzone.processQueue();
+      if ( queued.length ) {
+        this.$refs.myVueDropzone.processQueue(); // this will call dispatch after files uploaded
+      } else {
+        console.log('savePost: dispatching unshiftPostToTimeline...');
+        this.$store.dispatch('unshiftPostToTimeline', { newPostId: this.newPostId });
+        this.resetForm();
+      }
     },
 
     // for dropzone
@@ -131,10 +148,18 @@ export default {
     // for dropzone
     successEvent(file, response) {
       console.log('successEvent', {
-        file,
-        response,
+        file, response,
       });
-      //this.$store.dispatch('getVaultfolder', this.currentFolderPKID);
+    },
+
+    queueCompleteEvent(file, xhr, formData) {
+      console.log('queueCompleteEvent', {
+        file, xhr, formData,
+      });
+      console.log('queueCompleteEvent: dispatching unshiftPostToTimeline...');
+      //eventBus.$emit('unshift-post-to-timeline', this.newPostId);
+      this.$store.dispatch('unshiftPostToTimeline', { newPostId: this.newPostId });
+      this.resetForm();
     },
 
   },

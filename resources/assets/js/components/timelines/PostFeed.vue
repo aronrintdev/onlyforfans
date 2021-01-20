@@ -33,6 +33,7 @@ export default {
   computed: {
     ...Vuex.mapState(['feeditems']),
     ...Vuex.mapState(['timeline']),
+    ...Vuex.mapState(['unshifted_timeline_post']),
     ...Vuex.mapState(['is_loading']),
 
     feeddataitems() {
@@ -56,7 +57,7 @@ export default {
   data: () => ({
     rendereditems: [],
     renderedpages: [], // track so we don't re-load same page (set of posts) more than 1x
-    limit: 10,
+    limit: 5,
   }),
 
   mounted() {
@@ -77,6 +78,12 @@ export default {
   },
 
   watch: {
+    unshifted_timeline_post (newVal, oldVal) {
+      console.log('PostFeed - watch:unshifted_timeline_post', { newVal, oldVal });
+      //this.feeditems.data.unshift(newVal);
+      this.rendereditems.unshift(newVal);
+    },
+
     feeditems (newVal, oldVal) {
       if ( !this.renderedpages.includes(newVal.current_page) ) {
         this.renderedpages.push(newVal.current_page);

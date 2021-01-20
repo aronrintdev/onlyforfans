@@ -16,7 +16,8 @@ export default new Vuex.Store({
     feeditems: [],
     timeline: null,
     me: null,
-    is_loading: true
+    unshifted_timeline_post: null,
+    is_loading: true,
   },
 
   mutations: {
@@ -47,6 +48,9 @@ export default new Vuex.Store({
     },
     UPDATE_SESSION_USER (state, payload) {
       state.session_user = payload.hasOwnProperty('session_user') ? payload.session_user : [];
+    },
+    UPDATE_UNSHIFTED_TIMELINE_POST (state, payload) {
+      state.unshifted_timeline_post = payload.hasOwnProperty('post') ? payload.post : [];
     },
     UPDATE_LOADING(state, payload) {
       state.is_loading = payload;
@@ -93,6 +97,13 @@ export default new Vuex.Store({
         commit('UPDATE_LOADING', false);
       });
     },
+    unshiftPostToTimeline( { commit }, { newPostId } ) {
+      const url = `/posts/${newPostId}`;
+      axios.get(url).then( (response) => {
+        commit('UPDATE_UNSHIFTED_TIMELINE_POST', response.data);
+        commit('UPDATE_LOADING', false);
+      });
+    },
     getMe( { commit } ) {
       const url = `/users/me`;
       axios.get(url).then( (response) => {
@@ -113,6 +124,7 @@ export default new Vuex.Store({
     saves: state => state.saves,
     feeditems: state => state.feeditems,
     timeline: state => state.timeline,
+    unshifted_timeline_post: state => state.unshifted_timeline_post,
     session_user: state => state.session_user,
     //children: state => state.vault.children, // Flat list
     //mediafiles: state => state.vault.mediafiles, // Flat list
