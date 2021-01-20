@@ -36,10 +36,6 @@ export default {
     ...Vuex.mapState(['unshifted_timeline_post']),
     ...Vuex.mapState(['is_loading']),
 
-    feeddataitems() {
-      return this.feeditems.data;
-    },
-
     currentPage() {
       return this.feeditems.current_page;
     },
@@ -80,7 +76,7 @@ export default {
   watch: {
     unshifted_timeline_post (newVal, oldVal) {
       console.log('PostFeed - watch:unshifted_timeline_post', { newVal, oldVal });
-      //this.feeditems.data.unshift(newVal);
+      this.rendereditems.pop(); // pop the 'oldest' to keep pagination offset correct
       this.rendereditems.unshift(newVal);
     },
 
