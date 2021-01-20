@@ -53,6 +53,17 @@ class PostsController extends AppBaseController
         ]);
     }
 
+    public function show(Request $request, Post $post)
+    {
+        $sessionUser = Auth::user();
+        $post->load('mediafiles', 'user', 'timeline');
+        return response()->json([
+            'post' => $post,
+            'is_liked_by_session_user' => $post->users_liked->contains($sessionUser->id),
+            'like_count' => $post->users_liked()->count(),
+        ]);
+    }
+
     public function saves(Request $request)
     {
         $sessionUser = Auth::user();
