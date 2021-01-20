@@ -146,6 +146,7 @@ Route::group(['middleware' => ['auth']], function () {
     ]);
      */
 
+    Route::patch('/posts/{post}/like', ['as'=>'posts.toggleLike', 'uses' => 'PostsController@toggleLike']);
     Route::resource('posts', 'PostsController', [
         'only' => [ 'store' ],
     ]);
