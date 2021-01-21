@@ -43,32 +43,19 @@
 
           <ul class="list-inline footer-ctrl">
             <li class="list-inline-item mr-3"><span @click="togglePostLike()" class="tag-clickable"><b-icon :icon="isPostLikedByMe?'heart-fill':'heart'" :variant="isPostLikedByMe?'danger':'default'" font-scale="1"></b-icon></span></li>
-            <li class="list-inline-item mr-3"><span @click="toggleComments()" class="tag-clickable"><b-icon icon="chat-text" font-scale="1"></b-icon> ({{ this.commentCount }})</span></li>
+            <li class="list-inline-item mr-3"><span @click="toggleComments()" class="tag-clickable"><b-icon icon="chat-text" font-scale="1"></b-icon> ({{ post.comments.length }})</span></li>
             <li class="list-inline-item mr-3"><span @click="share()" class="tag-clickable"><b-icon icon="share" font-scale="1"></b-icon></span></li>
             <li class="list-inline-item mr-3"><span @click="tip()" class="tag-clickable">$</span></li>
           </ul>
 
           <section v-if="renderComments" class="post-comments mt-3">
             <b-form @submit="submitComment" >
-            <b-form-input class="new-comment" v-model="newCommentForm.description" placeholder="Write a coment...press enter to post"></b-form-input>
+              <b-form-input class="new-comment" v-model="newCommentForm.description" placeholder="Write a comment...press enter to post"></b-form-input>
             </b-form>
             <ul class="list-unstyled mt-1">
-              <b-media tag="li" v-for="(c, idx) in comments" :key="c.id" class="mb-3">
-                <template #aside>
-                  <b-img thumbnail fluid :src="c.user.avatar.filepath" alt="Avatar"></b-img>
-                </template>
-                <article class="OFF-d-flex">
-                  <span class="h5 tag-commenter mt-0 mb-1">{{ c.user.name }}</span>
-                  <span class="mb-0 tag-contents">{{ c.description }}</span>
-                </article>
-                <div class="d-flex comment-ctrl mt-1">
-                  <div @click="toggleCommentLike()"><b-icon icon="heart" font-scale="1"></b-icon> (0)</div>
-                  <div class="mx-1"><b-icon icon="dot" font-scale="1"></b-icon></div>
-                  <div>Reply</div>
-                  <div class="mx-1"><b-icon icon="dot" font-scale="1"></b-icon></div>
-                  <div><timeago :datetime="c.created_at" :auto-update="60"></timeago></div>
-                </div>
-              </b-media>
+              <li v-for="(c, idx) in comments" :key="c.id" class="mb-3">
+                <ShowComment :comment=c :session_user=session_user :post_id=post.id />
+              </li>
             </ul>
           </section>
 
@@ -82,6 +69,7 @@
 
 <script>
 import Vuex from 'vuex';
+import ShowComment from './ShowComment.vue';
 
 export default {
 
@@ -105,8 +93,8 @@ export default {
     renderComments: false,
     isPostLikedByMe: false, // %FIXME INIT
     likeCount: 0, // %FIXME INIT
-    comments: [],
-    commentCount: 0, // %FIXME INIT
+    comments: [], // %NOTE: rendered comments are loaded dynamically as they contain additional relation data,
+                  // whereas comment count is computed from the comments relation on the post itself (%FIXME?)
   }),
 
   created() {
@@ -156,6 +144,12 @@ export default {
       this.newCommentForm.user_id = this.session_user.id;
       this.newCommentForm.parent_id = null; // %TODO
       const response = await axios.post(`/comments`, this.newCommentForm);
+
+      // reset form
+      this.newCommentForm.post_id = null;
+      this.newCommentForm.user_id = null;
+      this.newCommentForm.parent_id = null;
+      this.newCommentForm.description = '';
     },
 
     editPost() {
@@ -174,6 +168,7 @@ export default {
   },
 
   components: {
+    ShowComment,
   },
 }
 </script>
@@ -188,36 +183,6 @@ footer.card-footer {
   background-color: #fff;
 }
 
-footer.card-footer .post-comments ul > li img {
-  width: 36px;
-  height: 36px;
-  border-radius: 4px;
-  padding: 0;
-}
-footer.card-footer .post-comments ul > li article {
-  line-height: 1;
-}
-footer.card-footer .post-comments ul > li .tag-commenter {
-  font-weight: 600;
-  font-size: 14px;
-  color: #2298F1;
-  letter-spacing: 0px;
-  text-transform: capitalize;
-}
-
-footer.card-footer .post-comments ul > li .tag-contents {
-  font-weight: 400;
-  font-size: 13px;
-  color: #5B6B81;
-  word-break: break-word;
-}
-
-footer.card-footer .post-comments ul .comment-ctrl {
-  font-weight: 400;
-  font-size: 12px;
-  color: #859AB5;
-  text-transform: capitalize;
-}
 
 .card-body p {
   font-size: 14px;

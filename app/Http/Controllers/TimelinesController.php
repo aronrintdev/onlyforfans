@@ -40,13 +40,11 @@ class TimelinesController extends AppBaseController
             : null;
 
         $page = $request->input('page', 1);
-        $take = $request->input('take', Setting::get('items_page'));
+        $take = 5; // $request->input('take', Setting::get('items_page'));
 
         // %TODO
         //  ~ [ ] trending tags
         //  ~ [ ] announcements
-        //  ~ [ ] 
-        //  ~ [ ] 
         //  ~ [ ] 
 
         $filters = [];

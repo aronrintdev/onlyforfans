@@ -14,7 +14,7 @@ class CommentsController extends AppBaseController
 {
     public function index(Request $request)
     {
-        $query = Comment::with('user');
+        $query = Comment::with('user', 'replies.user');
 
         // Apply filters
         if ( $request->has('post_id') ) {
