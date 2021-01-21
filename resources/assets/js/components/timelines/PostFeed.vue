@@ -5,7 +5,10 @@
       <div v-infinite-scroll="loadMore" infinite-scroll-disabled="is_loading" infinite-scroll-distance="limit">
         <article v-for="(fi, idx) in rendereditems" :key="fi.id" class="col-sm-12 mb-3">
           <!-- for now we assume posts; eventually need to convert to a DTO (ie more generic 'feeditem') : GraphQL ? -->
-          <ShowPost :post=fi :session_user=session_user v-on:delete-post="deletePost"/>
+          <ShowPost 
+              :post=fi 
+              :session_user=session_user 
+              v-on:delete-post="deletePost"/>
         </article>
       </div>
     </section>
@@ -76,12 +79,8 @@ export default {
     },
 
     loadMore() {
-      console.log('loadMore', {
-        current: this.currentPage,
-        last: this.lastPage,
-        next: this.nextPage,
-      });
       if ( !this.is_loading && (this.nextPage <= this.lastPage) ) {
+        console.log('loadMore', { current: this.currentPage, last: this.lastPage, next: this.nextPage });
         this.$store.dispatch('getFeeditems', { timelineSlug: 'home', page: this.nextPage, limit: this.limit });
       }
     },
@@ -113,7 +112,7 @@ export default {
 <style scoped>
 /*
 .small-text {
-    font-size: 13px !important;
+font-size: 13px !important;
 }
-*/
+ */
 </style>

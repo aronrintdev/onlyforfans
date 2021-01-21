@@ -6,13 +6,13 @@
       <template #header>
         <div class="post-author">
           <section class="user-avatar">
-            <a :href="'/'+post.timeline.username"><b-img :src="post.user.avatar.filepath" :alt="post.timeline.name" :title="post.timeline.name"></b-img></a>
+            <a :href="'/'+session_user.username"><b-img :src="post.user.avatar.filepath" :alt="session_user.name" :title="session_user.name"></b-img></a>
           </section>
           <section class="user-post-details">
             <ul class="list-unstyled">
               <li>
-                <a href="'/'+post.timeline.username" title="" data-toggle="tooltip" data-placement="top" class="username">{{ post.timeline.name }}</a>
-                <span v-if="post.timeline.verified" class="verified-badge"><b-icon icon="check-circle-fill" variant="success" font-scale="1"></b-icon></span>
+                <a href="'/'+session_user.username" title="" data-toggle="tooltip" data-placement="top" class="username">{{ session_user.name }}</a>
+                <span v-if="session_user.verified" class="verified-badge"><b-icon icon="check-circle-fill" variant="success" font-scale="1"></b-icon></span>
                 <div class="small-text"></div>
               </li>
               <li>
@@ -48,24 +48,29 @@
             <li class="list-inline-item mr-3"><span @click="tip()" class="tag-clickable">$</span></li>
           </ul>
 
-          <ul v-if="renderComments" class="list-unstyled post-comments mt-3">
-            <b-media tag="li" v-for="(c, idx) in post.comments" :key="c.id" class="mb-3">
-              <template #aside>
-                <b-img thumbnail fluid :src="c.user.avatar.filepath" alt="Avatar"></b-img>
-              </template>
-              <article class="OFF-d-flex">
-                <span class="h5 tag-commenter mt-0 mb-1">{{ c.user.name }}</span>
-                <span class="mb-0 tag-contents">{{ c.description }}</span>
-              </article>
-              <div class="d-flex comment-ctrl mt-1">
-                <div @click="toggleCommentLike()"><b-icon icon="heart" font-scale="1"></b-icon> (0)</div>
-                <div class="mx-1"><b-icon icon="dot" font-scale="1"></b-icon></div>
-                <div>Reply</div>
-                <div class="mx-1"><b-icon icon="dot" font-scale="1"></b-icon></div>
-                <div><timeago :datetime="c.created_at" :auto-update="60"></timeago></div>
-              </div>
-            </b-media>
-          </ul>
+          <section v-if="renderComments" class="post-comments mt-3">
+            <b-form @submit="submitComment" >
+            <b-form-input class="new-comment" v-model="newCommentForm.description" placeholder="Write a coment...press enter to post"></b-form-input>
+            </b-form>
+            <ul class="list-unstyled mt-1">
+              <b-media tag="li" v-for="(c, idx) in comments" :key="c.id" class="mb-3">
+                <template #aside>
+                  <b-img thumbnail fluid :src="c.user.avatar.filepath" alt="Avatar"></b-img>
+                </template>
+                <article class="OFF-d-flex">
+                  <span class="h5 tag-commenter mt-0 mb-1">{{ c.user.name }}</span>
+                  <span class="mb-0 tag-contents">{{ c.description }}</span>
+                </article>
+                <div class="d-flex comment-ctrl mt-1">
+                  <div @click="toggleCommentLike()"><b-icon icon="heart" font-scale="1"></b-icon> (0)</div>
+                  <div class="mx-1"><b-icon icon="dot" font-scale="1"></b-icon></div>
+                  <div>Reply</div>
+                  <div class="mx-1"><b-icon icon="dot" font-scale="1"></b-icon></div>
+                  <div><timeago :datetime="c.created_at" :auto-update="60"></timeago></div>
+                </div>
+              </b-media>
+            </ul>
+          </section>
 
         </div>
       </template>
@@ -90,9 +95,17 @@ export default {
   },
 
   data: () => ({
-    renderComments: true, // false,
+    newCommentForm: {
+      post_id: null,
+      user_id: null,
+      parent_id: null,
+      description: '',
+      // %TODO: attach mediafiles to comments
+    },
+    renderComments: false,
     isPostLikedByMe: false, // %FIXME INIT
     likeCount: 0, // %FIXME INIT
+    comments: [],
     commentCount: 0, // %FIXME INIT
   }),
 
@@ -114,8 +127,21 @@ export default {
     },
 
     // %FIXME: optimize bandwidth by ajax call to get comments here instead of in initial index call (?)
-    toggleComments() {
-      this.renderComments = !this.renderComments;
+    async toggleComments() {
+      const isCurrentlyVisible = !!this.renderComments;
+      if ( isCurrentlyVisible ) {
+        this.renderComments = false; // toggle -> hide
+      } else {
+        const response = await axios.get(`/comments`, { 
+          params: {
+            post_id: this.post.id,
+          },
+        });
+        console.log('comments', { response });
+        //this.comments = response.comments;
+        this.comments = response.data.comments;
+        this.renderComments = true; // toggle -> show
+      }
     },
 
     share() {
@@ -124,20 +150,25 @@ export default {
     tip() {
     },
 
+    async submitComment(e) {
+      e.preventDefault();
+      this.newCommentForm.post_id = this.post.id;
+      this.newCommentForm.user_id = this.session_user.id;
+      this.newCommentForm.parent_id = null; // %TODO
+      const response = await axios.post(`/comments`, this.newCommentForm);
+    },
+
     editPost() {
-      // Check permissions...
-      const is = this.session_user.id === this.post.user.id;
+      const is = this.session_user.id === this.post.user.id; // Check permissions
       console.log('ShowPost::editPost()', { is });
     },
 
     deletePost() {
-      // Check permissions...
-      const is = this.session_user.id === this.post.user.id;
+      const is = this.session_user.id === this.post.user.id; // Check permissions
       if (!is) {
         return;
       }
       this.$emit('delete-post', this.post.id );
-      //this.$store.dispatch('deletePost', { postId: this.post.id });
     },
 
   },
@@ -157,16 +188,16 @@ footer.card-footer {
   background-color: #fff;
 }
 
-footer.card-footer ul.post-comments > li img {
+footer.card-footer .post-comments ul > li img {
   width: 36px;
   height: 36px;
   border-radius: 4px;
   padding: 0;
 }
-footer.card-footer ul.post-comments > li article {
+footer.card-footer .post-comments ul > li article {
   line-height: 1;
 }
-footer.card-footer ul.post-comments > li .tag-commenter {
+footer.card-footer .post-comments ul > li .tag-commenter {
   font-weight: 600;
   font-size: 14px;
   color: #2298F1;
@@ -174,14 +205,14 @@ footer.card-footer ul.post-comments > li .tag-commenter {
   text-transform: capitalize;
 }
 
-footer.card-footer ul.post-comments > li .tag-contents {
+footer.card-footer .post-comments ul > li .tag-contents {
   font-weight: 400;
   font-size: 13px;
   color: #5B6B81;
   word-break: break-word;
 }
 
-footer.card-footer ul.post-comments .comment-ctrl {
+footer.card-footer .post-comments ul .comment-ctrl {
   font-weight: 400;
   font-size: 12px;
   color: #859AB5;
