@@ -44,6 +44,7 @@ export default {
 
     // like/unlike this comment (base comment or reply)
     async toggleLike(commentId) {
+      console.log('ShowCommentReply.toggleLike', { commentId });
       const url = `/comments/${commentId}/like`;
       const response = await axios.patch(url, { });
       console.log('response', { response });

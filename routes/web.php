@@ -151,7 +151,7 @@ Route::group(['middleware' => ['auth']], function () {
         'only' => [ 'store', 'show', 'destroy' ],
     ]);
 
-    Route::patch('/comments/{post}/like', ['as'=>'comments.toggleLike', 'uses' => 'CommentsController@toggleLike']);
+    Route::patch('/comments/{comment}/like', ['as'=>'comments.toggleLike', 'uses' => 'CommentsController@toggleLike']);
     Route::resource('comments', 'CommentsController', [
         'only' => [ 'index', 'store', ],
     ]);
