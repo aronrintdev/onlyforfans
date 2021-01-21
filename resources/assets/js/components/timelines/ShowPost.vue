@@ -1,5 +1,5 @@
 <template>
-  <div class="show_post-crate">
+  <div class="show_post-crate" v-bind:data-post_guid="post.id">
 
     <b-card header-tag="header" footer-tag="footer" tag="article" class="superbox-post" header-class="d-flex justify-content-between">
 
@@ -52,9 +52,9 @@
             <b-form @submit="submitComment" >
               <b-form-input class="new-comment" v-model="newCommentForm.description" placeholder="Write a comment...press enter to post"></b-form-input>
             </b-form>
-            <ul class="list-unstyled mt-1">
+            <ul class="list-basecomments list-unstyled mt-1">
               <li v-for="(c, idx) in comments" :key="c.id" class="mb-3">
-                <ShowComment :comment=c :session_user=session_user :post_id=post.id />
+                <ShowComment :comment="c" :session_user="session_user" :post_id="post.id" />
               </li>
             </ul>
           </section>

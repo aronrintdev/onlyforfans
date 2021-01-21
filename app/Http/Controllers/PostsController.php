@@ -100,11 +100,11 @@ class PostsController extends AppBaseController
 
         // %TODO: notify user
 
-        if ( !$post->users_liked->contains($sessionUser->id) ) { // like
-            $post->users_liked()->attach($sessionUser->id);
+        if ( !$post->likes->contains($sessionUser->id) ) { // like
+            $post->likes()->attach($sessionUser->id);
             $isLikedBySessionUser = true;
         } else { // unlike
-            $post->users_liked()->detach($sessionUser->id);
+            $post->likes()->detach($sessionUser->id);
             $isLikedBySessionUser = false;
         }
 

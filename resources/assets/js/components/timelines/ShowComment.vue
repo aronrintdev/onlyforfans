@@ -1,47 +1,32 @@
 <template>
-  <b-media class="show_comment-crate">
+  <b-media class="show_comment-crate" :data-comment_guid="comment.id">
 
     <template #aside>
       <b-img thumbnail fluid :src="comment.user.avatar.filepath" alt="Avatar"></b-img>
     </template>
 
-    <article class="OFF-d-flex">
+    <article>
       <span class="h5 tag-commenter mt-0 mb-1">{{ comment.user.name }}</span>
       <span class="mb-0 tag-contents">{{ comment.description }}</span>
     </article>
 
     <div class="d-flex comment-ctrl mt-1">
-      <div @click="toggleCommentLike()"><b-icon icon="heart" font-scale="1"></b-icon> (0)</div>
+      <div @click="toggleLike(comment.id)" class="tag-clickable"><b-icon :icon="isCommentLikedByMe?'heart-fill':'heart'" :variant="isCommentLikedByMe?'danger':'default'" font-scale="1"></b-icon> (0)</div>
       <div class="mx-1"><b-icon icon="dot" font-scale="1"></b-icon></div>
-      <div>Reply</div>
+      <div @click="toggleReplyFormVisibility()" class="tag-clickable">Reply</div>
       <div class="mx-1"><b-icon icon="dot" font-scale="1"></b-icon></div>
       <div><timeago :datetime="comment.created_at" :auto-update="60"></timeago></div>
     </div>
 
     <!-- replies -->
-    <ul class="list-unstyled mt-1">
+    <ul class="list-replies list-unstyled mt-1">
       <li v-for="(r, idx) in comment.replies" :key="r.id" class="mb-3">
-        <b-media class="show_reply-box">
-          <template #aside>
-            <b-img thumbnail fluid :src="r.user.avatar.filepath" alt="Avatar"></b-img>
-          </template>
-          <article class="OFF-d-flex">
-            <span class="h5 tag-commenter mt-0 mb-1">{{ r.user.name }}</span>
-            <span class="mb-0 tag-contents">{{ r.description }}</span>
-          </article>
-          <div class="d-flex comment-ctrl mt-1">
-            <div @click="toggleReplyLike()"><b-icon icon="heart" font-scale="1"></b-icon> (0)</div>
-            <div class="mx-1"><b-icon icon="dot" font-scale="1"></b-icon></div>
-            <div>Reply</div>
-            <div class="mx-1"><b-icon icon="dot" font-scale="1"></b-icon></div>
-            <div><timeago :datetime="r.created_at" :auto-update="60"></timeago></div>
-          </div>
-        </b-media>
+        <ShowCommentReply :reply="r" :session_user="session_user" :post_id="post_id" v-on:toggle-reply-form-visibility="toggleReplyFormVisibility()" />
       </li>
     </ul>
 
     <!-- reply form -->
-    <b-form @submit="submitComment" >
+    <b-form v-if="isReplyFormVisible" @submit="submitComment" >
       <b-form-input class="new-comment" v-model="newCommentForm.description" placeholder="Write a comment...press enter to post"></b-form-input>
     </b-form>
 
@@ -50,6 +35,7 @@
 
 <script>
 import Vuex from 'vuex';
+import ShowCommentReply from './ShowCommentReply.vue';
 
 export default {
 
@@ -63,6 +49,11 @@ export default {
   },
 
   data: () => ({
+
+    isReplyFormVisible: false,
+
+    isCommentLikedByMe: false, // base comment - %FIXME INIT
+
     newCommentForm: {
       post_id: null,
       user_id: null,
@@ -76,6 +67,11 @@ export default {
   },
 
   methods: {
+
+    toggleReplyFormVisibility() {
+      this.isReplyFormVisible = !this.isReplyFormVisible;
+    },
+
     async submitComment(e) { // reply to comment
       e.preventDefault();
       this.newCommentForm.post_id = this.post_id;
@@ -90,12 +86,19 @@ export default {
       this.newCommentForm.description = '';
     },
 
-    toggleReplyLike() {
+    // like/unlike this comment (base comment or reply)
+    async toggleLike(commentId) {
+      const url = `/comments/${commentId}/like`;
+      const response = await axios.patch(url, { });
+      console.log('response', { response });
+      this.isCommentLikedByMe = response.data.is_liked_by_session_user;
+      this.likeCount = response.data.like_count;
     },
 
   },
 
   components: {
+    ShowCommentReply,
   },
 }
 </script>
