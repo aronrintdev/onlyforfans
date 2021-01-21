@@ -20,18 +20,18 @@ class Comment extends Model
 
     protected $fillable = ['post_id', 'description', 'user_id', 'parent_id'];
 
-    public function user()
-    {
+    public function user() {
         return $this->belongsTo('App\User');
     }
 
-    public function comments_liked()
-    {
+    public function likes() {
+        return $this->belongsToMany('App\User', 'comment_likes', 'comment_id', 'user_id');
+    }
+    public function comments_liked() { // %TODO %DEPRECATE
         return $this->belongsToMany('App\User', 'comment_likes', 'comment_id', 'user_id');
     }
 
-    public function replies()
-    {
+    public function replies() {
         return $this->hasMany('App\Comment', 'parent_id', 'id');
     }
 }
