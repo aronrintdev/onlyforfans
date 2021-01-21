@@ -7,16 +7,43 @@ use Carbon\Carbon;
 use DB;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use App\User;
 use App\Enums\PostTypeEnum;
 use App\Enums\PaymentTypeEnum;
 use App\Interfaces\Ownable;
+use App\Interfaces\Deletable;
 use App\Interfaces\PaymentReceivable;
 
-//use Illuminate\Database\Eloquent\SoftDeletes;
-
-class Post extends Model implements Ownable, PaymentReceivable
+class Post extends Model implements Ownable, Deletable, PaymentReceivable
 {
+
+    use SoftDeletes;
+
+    //--------------------------------------------
+    // Boot
+    //--------------------------------------------
+    public static function boot()
+    {
+        parent::boot();
+        static::deleting(function ($model) {
+            if ( !$model->canBeDeleted() ) {
+                throw new Exception('Can not delete Post (26)'); // or soft delete and give access to purchasers (?)
+            }
+            foreach ($model->mediafiles as $o) {
+                Storage::disk('s3')->delete($o->filename); // Remove from S3
+                $o->delete();
+            }
+            foreach ($model->comments as $o) {
+                $o->delete();
+            }
+            foreach ($model->likes as $o) {
+                $o->delete();
+            }
+        });
+    }
+
     // %TODO: remove these and use enum instead
     const FREE_TYPE = PostTypeEnum::FREE; // 'free';
     const PRICE_TYPE = PostTypeEnum::PRICED; // 'price'; // associated with a price
@@ -65,7 +92,10 @@ class Post extends Model implements Ownable, PaymentReceivable
         return $this->belongsTo('App\Timeline');
     }
 
-    public function users_liked() {
+    public function likes() {
+        return $this->belongsToMany('App\User', 'post_likes', 'post_id', 'user_id')->withTimestamps();
+    }
+    public function users_liked() { // %TODO %DEPRECATE
         return $this->belongsToMany('App\User', 'post_likes', 'post_id', 'user_id')->withTimestamps();
     }
 
@@ -369,6 +399,11 @@ if(!$user->followers->contains($sessionUser->id) && $user->id != $sessionUser->i
             return true;
         }
         return false;
+    }
+
+    public function canBeDeleted() : bool
+    {
+        return !( $this->ledgersales->count() > 0 );
     }
 
 }

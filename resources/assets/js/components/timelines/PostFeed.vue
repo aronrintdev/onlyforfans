@@ -5,7 +5,7 @@
       <div v-infinite-scroll="loadMore" infinite-scroll-disabled="is_loading" infinite-scroll-distance="limit">
         <article v-for="(fi, idx) in rendereditems" :key="fi.id" class="col-sm-12 mb-3">
           <!-- for now we assume posts; eventually need to convert to a DTO (ie more generic 'feeditem') : GraphQL ? -->
-          <ShowPost :post=fi />
+          <ShowPost :post=fi :session_user=session_user v-on:delete-post="deletePost"/>
         </article>
       </div>
     </section>
@@ -34,6 +34,7 @@ export default {
     ...Vuex.mapState(['feeditems']),
     ...Vuex.mapState(['timeline']),
     ...Vuex.mapState(['unshifted_timeline_post']),
+    ...Vuex.mapState(['session_user']),
     ...Vuex.mapState(['is_loading']),
 
     currentPage() {
@@ -60,12 +61,26 @@ export default {
   },
 
   created() {
+    this.$store.dispatch('getMe');
     this.$store.dispatch('getFeeditems', { timelineSlug: 'home', page: 1, limit: this.limit });
   },
 
   methods: {
 
+    async deletePost(postId) {
+      const url = `/posts/${postId}`;
+      const response = await axios.delete(url);
+      this.renderedpages = [];
+      this.rendereditems = [];
+      this.$store.dispatch('getFeeditems', { timelineSlug: 'home', page: 1, limit: this.limit });
+    },
+
     loadMore() {
+      console.log('loadMore', {
+        current: this.currentPage,
+        last: this.lastPage,
+        next: this.nextPage,
+      });
       if ( !this.is_loading && (this.nextPage <= this.lastPage) ) {
         this.$store.dispatch('getFeeditems', { timelineSlug: 'home', page: this.nextPage, limit: this.limit });
       }

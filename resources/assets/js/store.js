@@ -15,7 +15,7 @@ export default new Vuex.Store({
     saves: [], // resources that session user has saved
     feeditems: [],
     timeline: null,
-    me: null,
+    session_user: null,
     unshifted_timeline_post: null,
     is_loading: true,
   },
@@ -104,6 +104,14 @@ export default new Vuex.Store({
         commit('UPDATE_LOADING', false);
       });
     },
+    /*
+    async deletePost( { dispatch, commit }, { postId } ) {
+      let url = `/posts/${postId}`;
+      await axios.delete(url);
+      commit('UPDATE_LOADING', false);
+      //await dispatch('getFeeditems', { timelineSlug: 'home', page: 1, limit: 5 }); // %NOTE: hardcoded %FIXME
+    },
+    */
     getMe( { commit } ) {
       const url = `/users/me`;
       axios.get(url).then( (response) => {

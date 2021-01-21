@@ -1,7 +1,7 @@
 <template>
   <div class="show_post-crate">
 
-    <b-card header-tag="header" footer-tag="footer" tag="article" class="superbox-post">
+    <b-card header-tag="header" footer-tag="footer" tag="article" class="superbox-post" header-class="d-flex justify-content-between">
 
       <template #header>
         <div class="post-author">
@@ -23,6 +23,12 @@
               </li>
             </ul>
           </section>
+        </div>
+        <div v-if="session_user.id===post.user.id" class="post-ctrl">
+          <b-dropdown id="dropdown-1" text="" class="m-md-2" variant="outline-dark">
+            <b-dropdown-item @click="editPost()">Edit</b-dropdown-item>
+            <b-dropdown-item @click="deletePost()">Delete</b-dropdown-item>
+          </b-dropdown>
         </div>
       </template>
 
@@ -76,6 +82,7 @@ export default {
 
   props: {
     post: null,
+    session_user: null,
   },
 
   computed: {
@@ -90,14 +97,14 @@ export default {
   }),
 
   created() {
+    //this.$store.dispatch('getMe');
   },
 
   methods: {
 
     async togglePostLike() {
       const url = `/posts/${this.post.id}/like`;
-      const response = await axios.patch(url, {
-      });
+      const response = await axios.patch(url, { });
       console.log('response', { response });
       this.isPostLikedByMe = response.data.is_liked_by_session_user;
       this.likeCount = response.data.like_count;
@@ -115,6 +122,22 @@ export default {
     },
 
     tip() {
+    },
+
+    editPost() {
+      // Check permissions...
+      const is = this.session_user.id === this.post.user.id;
+      console.log('ShowPost::editPost()', { is });
+    },
+
+    deletePost() {
+      // Check permissions...
+      const is = this.session_user.id === this.post.user.id;
+      if (!is) {
+        return;
+      }
+      this.$emit('delete-post', this.post.id );
+      //this.$store.dispatch('deletePost', { postId: this.post.id });
     },
 
   },

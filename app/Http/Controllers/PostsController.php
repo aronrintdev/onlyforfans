@@ -64,6 +64,16 @@ class PostsController extends AppBaseController
         ]);
     }
 
+    public function destroy(Request $request, Post $post)
+    {
+        $sessionUser = Auth::user();
+        if ( $post->user->id !== $sessionUser->id ) {
+            abort(403);
+        }
+        $post->delete();
+        return response()->json([]);
+    }
+
     public function saves(Request $request)
     {
         $sessionUser = Auth::user();
