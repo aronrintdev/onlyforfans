@@ -2,7 +2,7 @@
 </style>
 
 <!-- %VIEW: themes/default/paritals/user-header --> 
-<div class="timeline-cover-section">
+<div id="user-cover" class="timeline-cover-section">
 	<div class="timeline-cover">
 		<div class="profile-dropdown-menu">
 			<ul class="list-inline no-margin">
@@ -89,7 +89,7 @@
 			<a href="{{ url($timeline->username) }}">{{ $timeline->name }}</a><br><a class="user-timeline-username" href="{{ url($timeline->username) }}"><span>@</span>{{ $timeline->username }}</a>
 				{!! verifiedBadge($timeline) !!}
 		</div>
-		<span class="status status-holder-{{ $user->id }} {{ $user->last_logged ? '' : 'text-success' }}">{{ $user->last_logged ? 'Last seen '.\Carbon\Carbon::parse($user->last_logged)->timezone(Auth::user()->timezone)->diffForHumans() : 'Online Now' }}</span>
+		<online-status :user="{{ json_encode($user->only(['id', 'last_logged'])) }}"></online-status>
 		<ul class="list-inline pagelike-links">
 			{{--			@if($user_post == true)--}}
 			<li class="timeline-cover-status {{ Request::segment(2) == 'posts' ? 'active' : '' }}">
@@ -340,3 +340,5 @@
 	});
 
 </script>
+
+<script src="{{ asset('js/app.userProfile.js') }}"></script>

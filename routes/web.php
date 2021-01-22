@@ -14,6 +14,14 @@ foreach($files as $file) {
     require( $file->getRealPath() );
 }
 
+// Quick testing debug route
+Route::get('testing', function() {
+    if (env('APP_DEBUG')) {
+        return view('testing')->with(['user' => Auth::user()]);
+    }
+    return response('', 404);
+});
+
 /*
 |--------------------------------------------------------------------------
 | API routes

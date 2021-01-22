@@ -85,7 +85,8 @@ public/mix.*.js
 settings.html
 yarn.lock
 
-public/js/app2.js 
+public/js/app2.js
+public/js/app.*.js
 public/themes/default/assets/js/main.js
 public/css/app2.css
 public/themes/default/assets/css/bootstrap.css
