@@ -14,12 +14,19 @@
     "Vaultfolder",
     "XSRF",
     "Zizaco",
+    "autoloader",
+    "beyondcode",
     "bothify",
     "dribbble",
+    "fansplat",
     "intlify",
     "linkedin",
     "luxon",
+    "mediafiles",
+    "testsuite",
+    "vaultfolders",
     "vuejs",
+    "websockets",
     "youtube"
   ]
 }

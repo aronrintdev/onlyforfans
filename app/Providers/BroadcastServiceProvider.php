@@ -5,6 +5,8 @@ namespace App\Providers;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Broadcast;
+use Illuminate\Broadcasting\BroadcastManager;
+use Illuminate\Contracts\Foundation\Application;
 
 
 class BroadcastServiceProvider extends ServiceProvider
@@ -14,8 +16,20 @@ class BroadcastServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function boot()
+    public function boot(BroadcastManager $broadcastManager)
     {
+        // Custom Broadcaster driver with pusher
+        $broadcastManager->extend('app', function(Application $app, array $config) {
+            $pusher = new \Pusher\Pusher(
+                $config['key'], // $auth_key,
+                $config['secret'], // $secret,
+                $config['app_id'], // $app_id,
+                $config['options'], // $options = array(),
+            );
+            return new \App\Broadcasting\AppBroadcaster($pusher);
+        });
+
+
         Broadcast::routes();
 
         /*
@@ -30,5 +44,6 @@ class BroadcastServiceProvider extends ServiceProvider
         });
 
         Broadcast::channel('user.status.{userId}', \App\Broadcasting\UserStatusChannel::class);
+
     }
 }

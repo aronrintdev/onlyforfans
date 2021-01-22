@@ -16,6 +16,8 @@ class WebhooksController extends Controller
      * @param  Illuminate\Http\Request  $request
      */
     public function receive(Request $request) {
+        \Log::debug('Webhook received', [ '$request' => $request ]);
+
         // HTTP_X_PUSHER_KEY indicates pusher webhook
         if ($request->header('HTTP_X_PUSHER_KEY')) {
             return Webhook::receivePusher($request);

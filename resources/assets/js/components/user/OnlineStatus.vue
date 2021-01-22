@@ -18,6 +18,7 @@ export default {
     user: { type: Object, default: () => ({ id: '' }) },
   },
   data: () => ({
+    channel: null,
     momentsAgoThreshold: 60,
     offlineDelay: 10 * 1000, // 10 seconds, amount of reconnect leeway
     pendingOffline: false, // In offline gray area
@@ -53,7 +54,7 @@ export default {
       this.loading = true
       this.$whenAvailable('Echo')
         .then(echo => {
-          echo.join(`user.status.${this.user.id}`)
+          this.channel = echo.join(`user.status.${this.user.id}`)
             .here(users => {
               this.$log.debug(`user.status.${this.user.id}.here`, { users })
               const userIndex = _.findIndex(users, u => ( u.id == this.user.id ))

@@ -6,6 +6,7 @@ use App\Setting;
 use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -68,6 +69,11 @@ class AppServiceProvider extends ServiceProvider
 
         Carbon::serializeUsing(function ($carbon) {
             return $carbon->toISOString();
+        });
+
+        // WebSocket Router
+        $this->app->singleton('websockets.router', function () {
+            return new \App\WebSockets\Router();
         });
     }
 

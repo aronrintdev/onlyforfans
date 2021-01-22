@@ -28,6 +28,11 @@ class AuthServiceProvider extends ServiceProvider
     {
         $this->registerPolicies();
 
+        // Access to `/laravel-websockets`
+        Gate::define('viewWebSocketsDashboard', function ($user = null) {
+            return $user->hasRole('admin');
+        });
+
         //
     }
 }

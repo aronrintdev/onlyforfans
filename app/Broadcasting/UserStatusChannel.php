@@ -41,4 +41,35 @@ class UserStatusChannel
             'name' => 'guest',
         ];
     }
+
+    /**
+     * When user joins channel
+     */
+    public function subscribe($data, User $user, $userId)
+    {
+        if ( $user->id == $userId ) {
+            $user->is_online = true;
+            $user->save();
+        }
+    }
+
+    /**
+     * When user leaves channel
+     */
+    public function unsubscribe($data, User $user, $userId)
+    {
+        if ( $user->id == $userId ) {
+            $user->is_online = false;
+            $user->last_logged = \Carbon\Carbon::now();
+            $user->save();
+        }
+    }
+
+    /**
+     * When a user raises an event.
+     */
+    public function clientEvent($event, $data, User $user, $userId) {
+        //
+    }
+
 }
