@@ -62,7 +62,7 @@ class User extends Authenticatable implements PaymentSendable, PaymentReceivable
     public function sharedvaultfolders() { // vaultfolders shared with me (??)
         return $this->morphedByMany('App\Vaultfolder', 'shareable', 'shareables', 'sharee_id')->withTimestamps();
     }
-    public function ledgersales() {
+    public function ledgersales() { // this may only pick up type of 'user'
         return $this->morphMany('App\Fanledger', 'purchaseable');
     }
     public function ledgerpurchases() {

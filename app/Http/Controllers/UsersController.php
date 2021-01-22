@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 use App\User;
+use App\Fanledger;
 use App\Enums\PaymentTypeEnum;
 
 class UsersController extends AppBaseController
@@ -17,6 +18,15 @@ class UsersController extends AppBaseController
     public function me(Request $request)
     {
         $sessionUser = Auth::user(); // sender of tip
+
+        $sessionUser->post_count = $sessionUser->timeline->posts->count();
+        $sessionUser->follower_count = $sessionUser->timeline->followers->count();
+        $sessionUser->following_count = $sessionUser->followedtimelines->count();
+        $sessionUser->subscribed_count = 0; // %TODO $sessionUser->timeline->subscribed->count();
+
+        $sales = Fanledger::where('seller_id', $sessionUser->id)->sum('total_amount');
+        $sessionUser->earnings = $sales;
+
         return response()->json([
             'session_user' => $sessionUser,
             'timeline' => $sessionUser->timeline,

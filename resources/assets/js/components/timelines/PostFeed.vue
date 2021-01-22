@@ -1,5 +1,5 @@
 <template>
-  <div class="feed-crate tag-posts tag-crate">
+  <div v-if="!is_loading && !!session_user" class="feed-crate tag-posts tag-crate">
 
     <section class="row">
       <div v-infinite-scroll="loadMore" infinite-scroll-disabled="is_loading" infinite-scroll-distance="limit">
