@@ -18,7 +18,7 @@
 
       <aside class="col-md-5 col-lg-4">
         <session-widget></session-widget>
-        <suggested-feed></suggested-feed>
+        <suggested-feed class="mt-3"></suggested-feed>
       </aside>
 
     </section>

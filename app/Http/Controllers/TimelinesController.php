@@ -33,9 +33,19 @@ class TimelinesController extends AppBaseController
     // Get suggested users (list/index)
     public function suggested(Request $request)
     {
-        $sessionUser = Auth::user();
-        $query = Timeline::with('user');
         $TAKE = $request->input('take', 5);
+
+        $sessionUser = Auth::user();
+        $followedIDs = $sessionUser->followedtimelines->pluck('id');
+
+        $query = Timeline::with('user')->inRandomOrder();
+        $query->whereHas('user', function($q1) use(&$sessionUser, &$followedIDs) {
+            $q1->where('id', '<>', $sessionUser->id); // skip myself
+            // skip timelines I'm already following
+            $q1->whereHas('followedtimelines', function($q2) use(&$followedIDs) {
+                $q2->whereNotIn('timeline_id', $followedIDs);
+            });
+        });
 
         // Apply filters
         //  ~ %TODO

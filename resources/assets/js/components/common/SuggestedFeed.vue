@@ -1,9 +1,11 @@
 <template>
   <div v-if="!!timelines" class="suggested_feed-crate tag-crate">
 
-    <ul class="list-group">
+    <ul class="list-suggested list-group">
 
-      <li v-for="(t,idx) in timelines" :key="t.id" class="list-group-item">
+      <li class="tag-heading list-group-item my-3"><h3 class="my-0">Suggested People</h3></li>
+
+      <li v-for="(t,idx) in timelines" :key="t.id" class="list-group-item my-3">
 
         <b-card
           :img-src="t.user.cover.filepath"
@@ -72,8 +74,20 @@ export default {
 </script>
 
 <style scoped>
+body ul.list-suggested {
+  background-color: #fff;
+  padding: 0.5rem 0.5rem;
+}
+body ul.list-suggested li.tag-heading h3 {
+  font-size: 18px;
+  text-transform: capitalize;
+  color: #4a5568;
+  font-weight: 500;
+}
+
 body .card .card-body {
-  padding-top: 5px;
+  padding-top: 0.6rem;
+  padding-bottom: 0.6rem;
 }
 body .card.background {
   position: relative;
@@ -107,6 +121,13 @@ body .card .avatar-details .avatar-mail  {
 }
 body .card .avatar-details .avatar-mail > a {
   color: #7F8FA4;
+  text-decoration: none;
+}
+body .list-group-item {
+  border: none;
+  padding: 0 0.5rem;
+}
+body .list-group-item a {
   text-decoration: none;
 }
 </style>
