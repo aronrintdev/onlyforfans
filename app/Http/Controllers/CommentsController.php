@@ -20,6 +20,7 @@ class CommentsController extends AppBaseController
         if ( $request->has('post_id') ) {
             $query->where('post_id', $request->post_id)->whereNull('parent_id'); // only grab 1st level (%NOTE)
         }
+
         return response()->json([
             'comments' => $query->take(5)->get(),
         ]);

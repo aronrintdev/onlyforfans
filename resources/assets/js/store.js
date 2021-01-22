@@ -14,6 +14,7 @@ export default new Vuex.Store({
     shareables: [], // resources that have been shared with session user
     saves: [], // resources that session user has saved
     feeditems: [],
+    stories: [],
     timeline: null,
     session_user: null,
     unshifted_timeline_post: null,
@@ -40,8 +41,10 @@ export default new Vuex.Store({
       state.saves = payload.hasOwnProperty('saves') ? payload.saves : [];
     },
     UPDATE_FEEDITEMS (state, payload) {
-      //console.log('mutation', payload);
       state.feeditems = payload.hasOwnProperty('feeditems') ? payload.feeditems : [];
+    },
+    UPDATE_STORIES (state, payload) {
+      state.stories = payload.hasOwnProperty('stories') ? payload.stories : [];
     },
     UPDATE_TIMELINE (state, payload) {
       state.timeline = payload.hasOwnProperty('timeline') ? payload.timeline : [];
@@ -58,6 +61,7 @@ export default new Vuex.Store({
   },
 
   actions: {
+
     getVault({ commit }, pkid) {
       const url = `/vaults/${pkid}`;
       axios.get(url).then( (response) => {
@@ -65,6 +69,7 @@ export default new Vuex.Store({
         commit('UPDATE_LOADING', false);
       });
     },
+    
     getVaultfolder({ commit }, pkid) {
       const url = `/vaultfolders/${pkid}`;
       axios.get(url).then( (response) => {
@@ -74,6 +79,7 @@ export default new Vuex.Store({
         commit('UPDATE_LOADING', false);
       });
     },
+
     getShareables({ commit }) {
       const url = `/shareables`;
       axios.get(url).then( (response) => {
@@ -81,6 +87,7 @@ export default new Vuex.Store({
         commit('UPDATE_LOADING', false);
       });
     },
+
     getSaves({ commit }) {
       const url = `/saved`;
       axios.get(url).then( (response) => {
@@ -88,6 +95,7 @@ export default new Vuex.Store({
         commit('UPDATE_LOADING', false);
       });
     },
+
     getFeeditems( { commit }, { timelineSlug, page, limit } ) {
       console.log(`Loading page ${page}`);
       const url = `/timelines/${timelineSlug}/feeditems?page=${page}&take=${limit}`;
@@ -97,6 +105,18 @@ export default new Vuex.Store({
         commit('UPDATE_LOADING', false);
       });
     },
+
+    async getStories( { commit }, { filters } ) {
+      const username = this.state.session_user ? this.state.session_user.username : 'mattm';  // Not used - This param will eventually be DEPRECATED
+      const params = {};
+      if ( Object.keys(filters).includes('user_id') ) {
+        params.user_id = filters.user_id;
+      }
+      const response = await axios.get(`/${username}/stories`, { params });
+      commit('UPDATE_STORIES', response.data);
+      commit('UPDATE_LOADING', false);
+    },
+
     unshiftPostToTimeline( { commit }, { newPostId } ) {
       const url = `/posts/${newPostId}`;
       axios.get(url).then( (response) => {
@@ -104,14 +124,7 @@ export default new Vuex.Store({
         commit('UPDATE_LOADING', false);
       });
     },
-    /*
-    async deletePost( { dispatch, commit }, { postId } ) {
-      let url = `/posts/${postId}`;
-      await axios.delete(url);
-      commit('UPDATE_LOADING', false);
-      //await dispatch('getFeeditems', { timelineSlug: 'home', page: 1, limit: 5 }); // %NOTE: hardcoded %FIXME
-    },
-    */
+
     getMe( { commit } ) {
       const url = `/users/me`;
       axios.get(url).then( (response) => {
@@ -120,6 +133,7 @@ export default new Vuex.Store({
         commit('UPDATE_LOADING', false);
       });
     },
+
   },
 
   getters: {
@@ -131,6 +145,7 @@ export default new Vuex.Store({
     shareables: state => state.shareables,
     saves: state => state.saves,
     feeditems: state => state.feeditems,
+    stories: state => state.stories,
     timeline: state => state.timeline,
     unshifted_timeline_post: state => state.unshifted_timeline_post,
     session_user: state => state.session_user,

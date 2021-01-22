@@ -21,13 +21,6 @@
                 class="dropzone OFF-d-flex OFF-align-items-stretch"
                 >
                 <textarea v-model="description" rows="8" class="w-100 OFF-h-100"></textarea>
-                <!--
-                v-on:vdropzone-thumbnail="thumbnailEvent"
-                  <div class="dropzone-custom-content">
-                  <h3 class="dropzone-custom-title">Drag and drop to upload content!</h3>
-                  <div class="subtitle">...or click to select a file from your computer</div>
-                  </div>
-                -->
             </vue-dropzone>
           </div>
           <template #footer>
@@ -175,36 +168,6 @@ export default {
     CalendarIcon,
   },
 }
-
-
-    /*
-    // https://rowanwins.github.io/vue-dropzone/docs/dist/#/custom-preview
-    thumbnailEvent: function(file, dataUrl) {
-      console.log('thumbnailEvent', {
-        file,
-        dataUrl,
-      });
-      //this.$refs.myVueDropzone.methods.thumbnail(file, 'http://placehold.it/500x500')
-
-      return false;
-
-      var j, len, ref, thumbnailElement;
-      if (file.previewElement) {
-        file.previewElement.classList.remove("dz-file-preview");
-        ref = file.previewElement.querySelectorAll("[data-dz-thumbnail-bg]");
-        for (j = 0, len = ref.length; j < len; j++) {
-          thumbnailElement = ref[j];
-          thumbnailElement.alt = file.name;
-          thumbnailElement.style.backgroundImage = 'url("' + dataUrl + '")';
-        }
-        return setTimeout(((function(_this) {
-          return function() {
-            return file.previewElement.classList.add("dz-image-preview");
-          };
-        })(this)), 1);
-      }
-    },
-    */
 </script>
 
 <style>
@@ -226,6 +189,12 @@ export default {
   padding: 20px 20px;
 }
  */
+
+body .create_post-crate textarea,
+body .create_post-crate .dropzone,
+body .create_post-crate .vue-dropzone {
+  border: none;
+}
 
 .create_post-crate .dropzone.dz-started .dz-message {
   display: block;

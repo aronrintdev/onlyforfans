@@ -42,8 +42,17 @@ class StoriesController extends AppBaseController
 
     public function index(Request $request, $username)
     {
+        //$query = Story::with('user', 'replies.user');
         $sessionUser = Auth::user();
-        $stories = Story::where('timeline_id', $sessionUser->timeline->id)->get();
+
+        /*
+        if ( $request->has('user_id') ) {
+            $query->where('user_id', $request->user_id);
+        } else {
+            $stories = Story::where('timeline_id', $sessionUser->timeline->id)->get(); // %TODO: legacy DEPRECATE
+        }
+         */
+        $stories = Story::where('timeline_id', $sessionUser->timeline->id)->get(); // %TODO: legacy DEPRECATE
 
         //$html = view('stories._index', compact('sessionUser', 'stories'))->render();
         $html = view('stories._index', [
@@ -52,7 +61,8 @@ class StoriesController extends AppBaseController
         ])->render();
 
         return response()->json([
-            'html' => $html,
+            'html' => $html, // %TOOD: DEPRECATE after moving completely to Vue
+            'stories' => $stories,
         ]);
     }
 
