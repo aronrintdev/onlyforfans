@@ -18,6 +18,33 @@ use App\Timeline;
 
 class TimelinesController extends AppBaseController
 {
+    public function index(Request $request)
+    {
+        $query = User::query();
+
+        // Apply filters
+        //  ~ %TODO
+
+        return response()->json([
+            'users' => $query->get(),
+        ]);
+    }
+
+    // Get suggested users (list/index)
+    public function suggested(Request $request)
+    {
+        $sessionUser = Auth::user();
+        $query = Timeline::with('user');
+        $TAKE = $request->input('take', 5);
+
+        // Apply filters
+        //  ~ %TODO
+
+        return response()->json([
+            'timelines' => $query->take($TAKE)->get(),
+        ]);
+    }
+
     // Display my home timeline
     public function home(Request $request)
     {

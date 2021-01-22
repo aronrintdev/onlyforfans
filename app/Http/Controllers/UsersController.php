@@ -15,6 +15,18 @@ use App\Enums\PaymentTypeEnum;
 
 class UsersController extends AppBaseController
 {
+    public function index(Request $request)
+    {
+        $query = User::query();
+
+        // Apply filters
+        //  ~ %TODO
+
+        return response()->json([
+            'users' => $query->get(),
+        ]);
+    }
+
     public function me(Request $request)
     {
         $sessionUser = Auth::user(); // sender of tip

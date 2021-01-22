@@ -138,13 +138,12 @@ Route::group(['middleware' => ['auth']], function () {
     Route::resource('mediafiles', 'MediafilesController', [
     ]);
 
-    Route::get('/users/match', ['as'=>'users.match', 'uses' => 'UsersController@match']);
+    //Route::get('/users-suggested', ['as'=>'users.suggested', 'uses' => 'UsersController@suggested']);
     Route::get('/users/me', ['as'=>'users.me', 'uses' => 'UsersController@me']);
-    /*
+    Route::get('/users/match', ['as'=>'users.match', 'uses' => 'UsersController@match']);
     Route::resource('users', 'UsersController', [
         'only' => [ 'index' ],
     ]);
-     */
 
     Route::patch('/posts/{post}/like', ['as'=>'posts.toggleLike', 'uses' => 'PostsController@toggleLike']);
     Route::resource('posts', 'PostsController', [
@@ -156,11 +155,12 @@ Route::group(['middleware' => ['auth']], function () {
         'only' => [ 'index', 'store', ],
     ]);
 
+    Route::get('/timelines-suggested', ['as'=>'timelines.suggested', 'uses' => 'TimelinesController@suggested']);
     Route::get('/timelines/home', ['as'=>'timelines.home', 'uses' => 'TimelinesController@home']);
     Route::get('/timelines/{timeline}/feeditems', ['as'=>'timelines.feeditems', 'uses' => 'TimelinesController@feeditems']);
-    //Route::resource('timelines', 'TimelinesController', [
-        //'only' => [ 'show' ],
-    //]);
+    Route::resource('timelines', 'TimelinesController', [
+        'only' => [ 'index' ],
+    ]);
 
     Route::resource('vaultfolders', 'VaultfoldersController', [
         'only' => [ 'index', 'show', 'store' ],

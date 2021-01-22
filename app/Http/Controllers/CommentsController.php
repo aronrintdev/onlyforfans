@@ -22,7 +22,8 @@ class CommentsController extends AppBaseController
         }
 
         return response()->json([
-            'comments' => $query->take(5)->get(),
+            //'comments' => $query->take(5)->get(),
+            'comments' => $query->get(),
         ]);
     }
 

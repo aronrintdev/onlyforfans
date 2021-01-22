@@ -36,3 +36,7 @@ $ php artisan db:seed --class=ShareablesTableSeeder
 %%% Tinker
 $ php artisan tinker
 >>> error_reporting(E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED)
+
+%%%
+ref: https://bitbucket.org/mjmdesign/fans-platform/pull-requests/19
+$ php artisan websocket:serve
