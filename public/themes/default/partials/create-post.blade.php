@@ -45,9 +45,9 @@
     }
 </style>
 
-<section class="supercrate-stories">
-</section>
-
+{{--
+<section class="supercrate-stories"></section>
+--}}
 <form action="{{ url('') }}" method="post" class="create-post-form">
   {{ csrf_field() }}
     @if ($message = Session::get('error'))

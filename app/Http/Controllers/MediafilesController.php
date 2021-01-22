@@ -50,14 +50,19 @@ class MediafilesController extends AppBaseController
                     case 'story':
                         $subFolder = 'stories';
                         break;
+                    case 'post':
+                        $subFolder = 'posts';
+                        break;
                     default:
                         $subFolder = 'default';
                 }
                 $newFilename = $file->store('./'.$subFolder, 's3');
+                $mfname = $mfname ?? $file->getClientOriginalName();
                 $mediafile = Mediafile::create([
                     'resource_id' => $request->resource_id,
                     'resource_type' => $request->resource_type,
                     'filename' => $newFilename,
+                    'mfname' => $mfname,
                     'mftype' => $request->mftype,
                     'meta' => $request->input('meta') ?? null,
                     'mimetype' => $file->getMimeType(),

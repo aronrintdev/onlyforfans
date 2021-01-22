@@ -400,7 +400,8 @@ $(function () {
     });
 
     $('.create-post-form').ajaxForm({
-        url: SP_source() + 'ajax/create-post',
+        //url: SP_source() + 'ajax/create-post',
+        url: `posts/store`,
         beforeSubmit : function validate(formData, jqForm, options) {
             var form = jqForm[0];
 

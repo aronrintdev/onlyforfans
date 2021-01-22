@@ -33,13 +33,53 @@ class FeedMgr {
             
     }
 
-    //public static function getPosts(User $follower, array $attrs=[]) : ?Collection
-    public static function getPosts(User $follower, array $filters=[]) : ?LengthAwarePaginator
+    public static function getPosts(User $follower, array $filters=[], $page=1, $take=5) : ?LengthAwarePaginator
     {
-        //$followingIds = filterByBlockedFollowings();
-        //$timeline = $follower->timeline;
+        // %NOTE %TODO: Filter/distinguish free vs non-free posts in followed timelines
 
-        $query = Post::where('active', 1);
+        //$followingIds = filterByBlockedFollowings();
+
+        $timeline = $follower->timeline;
+
+        //$query = Post::with('mediafiles', 'user', 'timeline', 'comments.user')->where('active', 1);
+        $query = Post::with('mediafiles', 'user', 'comments')->where('active', 1);
+
+        $followedTimelineIDs = $follower->followedtimelines->pluck('id');
+        $followedTimelineIDs->push($timeline->id); // include follower's own timeline %NOTE
+        // %NOTE %TODO: ^^^ this will not pick up user's own posts that are not free (??)
+
+
+        // --- Belongs to timeline(s) that I'm following ---
+        $query->where( function($q1) use(&$follower, $followedTimelineIDs) {
+            $q1->whereIn('timeline_id', $followedTimelineIDs);
+        });
+
+
+        // --- Apply optional filters ---
+
+        if ( array_key_exists('hashtag', $filters) && !empty($filters['hashtag']) ) {
+            $hashtag = $filters['hashtag'];
+            $query->where('descripton', 'LIKE', "%{$hashtag}%");
+        }
+
+        if ( array_key_exists('start_date', $filters) && !empty($filters['start_date']) ) {
+            $query->whereDate('created_at', '>=', $filters['start_date']);
+        }
+
+        // or my own posts
+
+        // or posts I follow directly %TODO
+
+        // or posts I've purchased %TODO
+
+        // %TODO: TEST: ensure no duplicates
+        $posts = $query->latest()->paginate($take);
+        return $posts;
+    }
+
+    public static function getPostsRaw(User $follower, array $filters=[]) : ?Collection
+    {
+        $query = Post::with('mediafiles')->where('active', 1);
 
         if ( array_key_exists('hashtag', $filters) && !empty($filters['hashtag']) ) {
             $hashtag = $filters['hashtag'];
@@ -60,12 +100,13 @@ class FeedMgr {
         // or posts I've purchased %TODO
 
         // %TODO: TEST: ensure no duplicates
-        $posts = $query->latest()->paginate(Setting::get('items_page'));
+        $posts = $query->latest()->get();
         return $posts;
     }
 
+
     // %NOTE $follower could be null for guest user  %TODO
-    public static function getPostsByTimeline(User $follower, Timeline $timeline, array $filters=[], $sortBy='asc', $take=10) : ?LengthAwarePaginator
+    public static function getPostsByTimeline(User $follower, Timeline $timeline, array $filters=[], $sortBy='asc', $take=5) : ?LengthAwarePaginator
     {
         //$followingIds = filterByBlockedFollowings();
         //$timeline = $follower->timeline;
