@@ -1,5 +1,5 @@
 <template>
-  <div class="story_bar-crate tag-crate row mb-3 mx-0">
+  <div  v-if="!is_loading && !!session_user" class="story_bar-crate tag-crate row mb-3 mx-0">
 
     <section class="d-flex">
       <div @click="createStory()"><a :href="`/${session_user.username}/stories/create`"><b-icon icon="plus-circle" variant="primary" font-scale="2"></b-icon></a></div>
@@ -26,6 +26,7 @@ export default {
   computed: {
     ...Vuex.mapState(['stories']),
     ...Vuex.mapState(['session_user']),
+    ...Vuex.mapState(['is_loading']),
   },
 
   data: () => ({
