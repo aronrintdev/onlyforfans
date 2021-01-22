@@ -1,15 +1,32 @@
 {
   "cSpell.words": [
+    "Arrayable",
     "Authenticatable",
+    "CSRF",
     "Cmgmyr",
+    "Dispatchable",
+    "Macroable",
     "Mediafile",
     "Messagable",
     "Mutators",
+    "PJAX",
+    "Queueable",
     "Vaultfolder",
+    "XSRF",
     "Zizaco",
+    "autoloader",
+    "beyondcode",
     "bothify",
     "dribbble",
+    "fansplat",
+    "intlify",
     "linkedin",
+    "luxon",
+    "mediafiles",
+    "testsuite",
+    "vaultfolders",
+    "vuejs",
+    "websockets",
     "youtube"
   ]
 }

@@ -4,15 +4,42 @@
  * building robust, powerful web applications using Vue and Laravel.
  */
 
+const isProduction = process.env.NODE_ENV === 'production';
+
 import store from './store';
 
-//require('./bootstrap');
+require('./bootstrap');
 window.axios = require('axios');
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 //axios.defaults.baseURL = '/';
 
 window.Vue = require('vue');
 
+/**
+ * Enable $log
+ * Use: `this.$log.error(error)`
+ * logLevels : ['debug', 'info', 'warn', 'error', 'fatal']
+ */
+import VueLogger from 'vuejs-logger';
+const options = {
+    isEnabled: true,
+    logLevel : isProduction ? 'error' : 'debug',
+    stringifyArguments : false,
+    showLogLevel : true,
+    showMethodName : !isProduction,
+    separator: '|',
+    showConsoleColors: true
+};
+Vue.use(VueLogger, options);
+
+import VueI18n from 'vue-i18n';
+Vue.use(VueI18n);
+
+import ForceCompute from './plugins/forceCompute';
+Vue.use(ForceCompute);
+
+import WhenAvailable from './plugins/whenAvailable';
+Vue.use(WhenAvailable);
 
 //import BootstrapVue from 'bootstrap-vue' //Importing
 import { BootstrapVue, BootstrapVueIcons } from 'bootstrap-vue'
@@ -39,19 +66,19 @@ Vue.use(VueTimeago, {
  * or customize the JavaScript scaffolding to fit your unique needs.
  */
 
-Vue.component('suggested-feed', require('./components/common/SuggestedFeed.vue'));
 
-Vue.component('create-story', require('./components/stories/Wizard.vue'));
-Vue.component('story-player', require('./components/stories/AutoPlayer.vue'));
-Vue.component('my-vault', require('./components/vault/Dashboard.vue'));
-Vue.component('my-saved', require('./components/saved/Dashboard.vue'));
+Vue.component('suggested-feed', require('./components/common/SuggestedFeed.vue').default);
+Vue.component('create-story', require('./components/stories/Wizard.vue').default);
+Vue.component('story-player', require('./components/stories/AutoPlayer.vue').default);
+Vue.component('my-vault', require('./components/vault/Dashboard.vue').default);
+Vue.component('my-saved', require('./components/saved/Dashboard.vue').default);
 
-Vue.component('story-bar', require('./components/timelines/StoryBar.vue'));
-Vue.component('create-post', require('./components/timelines/CreatePost.vue'));
-Vue.component('session-widget', require('./components/timelines/SessionWidget.vue'));
-Vue.component('post-feed', require('./components/timelines/PostFeed.vue'));
+Vue.component('online-status', require('./components/user/OnlineStatus.vue').default);
 
-
+Vue.component('story-bar', require('./components/timelines/StoryBar.vue').default);
+Vue.component('create-post', require('./components/timelines/CreatePost.vue').default);
+Vue.component('session-widget', require('./components/timelines/SessionWidget.vue').default);
+Vue.component('post-feed', require('./components/timelines/PostFeed.vue').default);
 
 export const eventBus = new Vue({
 /*
@@ -66,7 +93,13 @@ export const eventBus = new Vue({
 */
 });
 
+/**
+ * Loading localization translations
+ */
+import i18n from './i18n'
+
 const app = new Vue({
+    i18n,
     store,
     el: '#app',
 });

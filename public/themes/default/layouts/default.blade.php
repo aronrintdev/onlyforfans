@@ -6,6 +6,7 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf_token" content="{!! csrf_token() !!}"/>
+        <meta name="csrf-token" content="{!! csrf_token() !!}"/>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
         <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height" />
 
@@ -55,6 +56,7 @@
         @endif
         <script src="{!! Theme::asset()->url('js/lightgallery.js') !!}"></script>
         <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+        <script src="{{ asset('js/app.onlineMonitor.js') }}"></script>
     </head>
     <body @if(Setting::get('enable_rtl') == 'on') class="direction-rtl" @endif>
         {!! Theme::partial('header') !!}
