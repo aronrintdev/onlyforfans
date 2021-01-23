@@ -8,7 +8,7 @@ use App\StaticPage;
 use Flash;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
-use Teepluss\Theme\Facades\Theme;
+use Theme;
 use Validator;
 
 class PageController extends Controller

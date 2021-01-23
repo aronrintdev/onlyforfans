@@ -10,6 +10,7 @@
 
 import Echo from 'laravel-echo'
 
+console.log({ env: process.env })
 
 if (typeof window.Pusher === 'undefined') {
     window.Pusher = require('pusher-js');

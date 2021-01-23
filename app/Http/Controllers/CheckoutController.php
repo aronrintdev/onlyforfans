@@ -15,7 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Log;
-use Teepluss\Theme\Facades\Theme;
+use Theme;
 
 require_once(base_path().'/vendor/stripe/init.php');
 //require_once('/home/fansplatformmjmd/fan/vendor/stripe/init.php');

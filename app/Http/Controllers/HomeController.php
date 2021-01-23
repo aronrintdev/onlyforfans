@@ -9,7 +9,7 @@ use App\Setting;
 use App\Timeline;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Teepluss\Theme\Facades\Theme;
+use Theme;
 
 class HomeController extends Controller
 {

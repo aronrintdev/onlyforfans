@@ -3,8 +3,6 @@
 namespace App\Repositories;
 
 use App\Timeline;
-use InfyOm\Generator\Common\BaseRepository;
-
 
 class TimelineRepository extends BaseRepository
 {
@@ -15,6 +13,16 @@ class TimelineRepository extends BaseRepository
         'name' => 'like',
         'type',
     ];
+
+    /**
+     * Return searchable fields
+     *
+     * @return array
+     */
+    public function getFieldsSearchable()
+    {
+        return $this->fieldSearchable;
+    }
 
     /**
      * Configure the Model.

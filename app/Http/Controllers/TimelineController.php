@@ -52,7 +52,7 @@ use Prettus\Repository\Criteria\RequestCriteria;
 use Response;
 use Spatie\Referer\Referer;
 use Storage;
-use Teepluss\Theme\Facades\Theme;
+use Theme;
 use Validator;
 
 use App\Enums\MediafileTypeEnum;

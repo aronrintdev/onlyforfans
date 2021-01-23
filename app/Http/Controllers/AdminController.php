@@ -31,7 +31,7 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Config;
 use Intervention\Image\Facades\Image;
 use Session;
-use Teepluss\Theme\Facades\Theme;
+use Theme;
 use Validator;
 
 class AdminController extends Controller

@@ -45,7 +45,7 @@ use Illuminate\Support\Facades\Validator;
 use Prettus\Repository\Criteria\RequestCriteria;
 use Response;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
-use Teepluss\Theme\Facades\Theme;
+use Theme;
 
 use App\Enums\ShareableAccessLevelEnum;
 

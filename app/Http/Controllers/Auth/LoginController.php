@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\URL;
-use Teepluss\Theme\Facades\Theme;
+use Theme;
 use Validator;
 
 class LoginController extends Controller
@@ -51,11 +51,12 @@ class LoginController extends Controller
 
     public function getLogin()
     {
-       $routeName =  app('router')->getRoutes()->match(app('request')->create(Session::get('users.profile')))->getName();
+        // dd(Session::get('users.profile'));
+        // $routeName =  app('router')->getRoutes()->match(app('request')->create(Session::get('users.profile')))->getName();
        
-       if ($routeName == 'users.profile') {
-           Session::put('users.profile', Session::get('users.profile'));
-       }
+        // if ($routeName == 'users.profile') {
+        //    Session::put('users.profile', Session::get('users.profile'));
+        // }
 
         //echo "kkk";
         if(isset($_GET['email']))

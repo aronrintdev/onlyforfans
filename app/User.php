@@ -10,15 +10,18 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Collection;
-use Zizaco\Entrust\Traits\EntrustUserTrait;
+// use Zizaco\Entrust\Traits\EntrustUserTrait;
 use App\Enums\PaymentTypeEnum;
 use App\Interfaces\PaymentSendable;
 use App\Interfaces\PaymentReceivable;
 
+use Spatie\Permission\Traits\HasRoles;
+
 class User extends Authenticatable implements PaymentSendable, PaymentReceivable
 {
     use Notifiable;
-    use EntrustUserTrait;
+    use HasRoles;
+    // use EntrustUserTrait;
     // use SoftDeletes, EntrustUserTrait {
 
     //     SoftDeletes::restore insteadof EntrustUserTrait;
