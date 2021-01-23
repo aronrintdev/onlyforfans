@@ -10,8 +10,6 @@
 
 import Echo from 'laravel-echo'
 
-console.log('key',process.env.MIX_PUSHER_APP_KEY, window.pusherKey);
-
 if (typeof window.Pusher === 'undefined') {
     window.Pusher = require('pusher-js');
 }

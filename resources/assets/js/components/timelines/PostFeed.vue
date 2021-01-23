@@ -2,7 +2,7 @@
   <div v-if="!is_loading && !!session_user" class="feed-crate tag-posts tag-crate">
 
     <section class="row">
-      <div v-infinite-scroll="loadMore" infinite-scroll-disabled="is_loading" infinite-scroll-distance="limit">
+      <div>
         <article v-for="(fi, idx) in rendereditems" :key="fi.id" class="col-sm-12 mb-3">
           <!-- for now we assume posts; eventually need to convert to a DTO (ie more generic 'feeditem') : GraphQL ? -->
           <ShowPost 
@@ -19,7 +19,8 @@
 <script>
 import Vuex from 'vuex';
 //import { eventBus } from '../../app';
-import { VueInfiniteScroll } from 'vue-infinite-scroll';
+//import { infiniteScroll } from 'vue-infinite-scroll';
+//import infiniteScroll from 'vue-infinite-scroll';
 import ShowPost from './ShowPost.vue';
 
 export default {
@@ -58,9 +59,14 @@ export default {
     rendereditems: [],
     renderedpages: [], // track so we don't re-load same page (set of posts) more than 1x
     limit: 5,
+    isFetching: false, // local only, not syncronous with actual data load
   }),
 
   mounted() {
+    window.addEventListener('scroll', this.onScroll);
+  },
+  beforeDestroy() {
+    window.removeEventListener('scroll', this.onScroll);
   },
 
   created() {
@@ -70,6 +76,22 @@ export default {
 
   methods: {
 
+    onScroll(e) {
+      const atBottom = document.documentElement.scrollTop + window.innerHeight === document.documentElement.offsetHeight;
+      /*
+      console.log('onScroll()', {
+        e,
+        atBottom,
+        scrollTop: document.documentElement.scrollTop,
+        innerHeight: window.innerHeight,
+        offsetHeight: document.documentElement.offsetHeight,
+      });
+      */
+      if (atBottom && !this.is_loading) {
+        this.loadMore();
+      }
+    },
+
     async deletePost(postId) {
       const url = `/posts/${postId}`;
       const response = await axios.delete(url);
@@ -78,10 +100,12 @@ export default {
       this.$store.dispatch('getFeeditems', { timelineSlug: 'home', page: 1, limit: this.limit });
     },
 
+    // see: https://peachscript.github.io/vue-infinite-loading/guide/#installation
     loadMore() {
       if ( !this.is_loading && (this.nextPage <= this.lastPage) ) {
         console.log('loadMore', { current: this.currentPage, last: this.lastPage, next: this.nextPage });
         this.$store.dispatch('getFeeditems', { timelineSlug: 'home', page: this.nextPage, limit: this.limit });
+        this.isFetching = false; // not, not synchrnous, use is_loading to check for complete transfer
       }
     },
 
@@ -102,8 +126,11 @@ export default {
     },
   },
 
+  directives: { 
+    //infiniteScroll,
+  },
+
   components: {
-    VueInfiniteScroll,
     ShowPost,
   },
 }

@@ -13,7 +13,7 @@ window.axios = require('axios');
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 //axios.defaults.baseURL = '/';
 
-window.Vue = require('vue');
+import Vue from 'vue';
 
 /**
  * Enable $log
