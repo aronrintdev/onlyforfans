@@ -96,12 +96,12 @@ export default new Vuex.Store({
       });
     },
 
-    getFeeditems( { commit }, { timelineSlug, page, limit } ) {
+    getFeeditems( { commit }, { timelineId, page, limit } ) {
       console.log(`Loading page ${page}`);
-      const url = `/timelines/${timelineSlug}/feeditems?page=${page}&take=${limit}`;
+      const url = `/timelines/${timelineId}/feeditems?page=${page}&take=${limit}`;
       axios.get(url).then( (response) => {
         commit('UPDATE_FEEDITEMS', response.data);
-        commit('UPDATE_TIMELINE', response.data);
+        //commit('UPDATE_TIMELINE', response.data);
         commit('UPDATE_LOADING', false);
       });
     },

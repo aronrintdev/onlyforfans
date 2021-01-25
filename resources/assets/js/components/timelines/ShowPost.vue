@@ -79,7 +79,6 @@ export default {
   },
 
   computed: {
-    //...Vuex.mapState(['session_user']),
   },
 
   data: () => ({
@@ -98,7 +97,6 @@ export default {
   }),
 
   created() {
-    //this.$store.dispatch('getMe');
   },
 
   methods: {

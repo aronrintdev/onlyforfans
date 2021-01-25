@@ -1,9 +1,8 @@
-@extends('layouts.app')
+@extends('layouts.app2')
 
 @section('content')
-    @include('timelines.show_fields')
-
-    <div class="form-group">
-           <a href="{!! route('timelines.index') !!}" class="btn btn-default">Back</a>
-    </div>
+  <show-feed
+    :timeline="{{ $timeline }}"
+    :session_user="{{ $sessionUser }}"
+    ></show-feed>
 @endsection

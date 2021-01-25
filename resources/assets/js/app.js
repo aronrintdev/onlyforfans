@@ -67,7 +67,13 @@ Vue.use(VueTimeago, {
  */
 
 
+Vue.component('show-feed', require('./pages/ShowFeed.vue').default);
+
+// ---
+
 Vue.component('suggested-feed', require('./components/common/SuggestedFeed.vue').default);
+Vue.component('session-widget', require('./components/common/SessionWidget.vue').default);
+
 Vue.component('create-story', require('./components/stories/Wizard.vue').default);
 Vue.component('story-player', require('./components/stories/AutoPlayer.vue').default);
 Vue.component('my-vault', require('./components/vault/Dashboard.vue').default);
@@ -77,7 +83,6 @@ Vue.component('online-status', require('./components/user/OnlineStatus.vue').def
 
 Vue.component('story-bar', require('./components/timelines/StoryBar.vue').default);
 Vue.component('create-post', require('./components/timelines/CreatePost.vue').default);
-Vue.component('session-widget', require('./components/timelines/SessionWidget.vue').default);
 Vue.component('post-feed', require('./components/timelines/PostFeed.vue').default);
 
 export const eventBus = new Vue({

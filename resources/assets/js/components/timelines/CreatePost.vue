@@ -58,11 +58,11 @@ import CalendarIcon from '../common/icons/CalendarIcon.vue';
 export default {
 
   props: {
+    session_user: null,
+    timeline: null,
   },
 
   computed: {
-    ...Vuex.mapState(['session_user']),
-    ...Vuex.mapState(['timeline']),
   },
 
   data: () => ({
@@ -89,7 +89,6 @@ export default {
   }),
 
   created() {
-    this.$store.dispatch('getMe');
   },
 
   methods: {
