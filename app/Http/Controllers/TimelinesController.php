@@ -60,6 +60,13 @@ class TimelinesController extends AppBaseController
         $sessionUser = Auth::user();
         $timeline = Timeline::with('user')->where('username', $username)->firstOrFail();
 
+        $timeline->userstats = [
+            'post_count' => 1,
+            'like_count' => 2,
+            'follower_count' => 3,
+            'following_count' => 4,
+        ];
+
         return view('timelines.show', [
             'sessionUser' => $sessionUser,
             'timeline' => $timeline,
