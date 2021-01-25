@@ -70,8 +70,10 @@ class TimelinesController extends AppBaseController
     public function home(Request $request)
     {
         $sessionUser = Auth::user();
+//dd( $sessionUser->timeline );
         return view('timelines.home', [
             'sessionUser' => $sessionUser,
+            'timeline' => $sessionUser->timeline()->with('user')->first(),
             //'myVault' => $myVault,
             //'vaultRootFolder' => $vaultRootFolder,
         ]);

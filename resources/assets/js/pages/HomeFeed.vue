@@ -1,5 +1,5 @@
 <template>
-    <div class="container" id="view-show_timeline">
+    <div class="container" id="view-home_timeline">
 
       <section class="row">
         <article class="col-sm-12">
@@ -9,13 +9,15 @@
 
       <section class="row">
 
-        <aside class="col-md-5 col-lg-4">
-          New sidebar here
-        </aside>
-
         <main class="col-md-7 col-lg-8">
+          <create-post :session_user="session_user" :timeline="timeline"></create-post>
           <post-feed :session_user="session_user" :timeline="timeline"></post-feed>
         </main>
+
+        <aside class="col-md-5 col-lg-4">
+          <session-widget :session_user="session_user" :timeline="timeline"></session-widget>
+          <suggested-feed :session_user="session_user" :timeline="timeline" class="mt-3"></suggested-feed>
+        </aside>
 
       </section>
 
