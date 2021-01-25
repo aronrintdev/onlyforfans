@@ -1,34 +1,33 @@
 <template>
-    <div class="container" id="view-show_timeline">
+  <div class="container" id="view-show_timeline">
 
-      <section class="row">
-        <article class="col-sm-12">
-          <story-bar :session_user="session_user" :timeline="timeline"></story-bar>
-        </article>
-      </section>
+    <section class="row">
+      <article class="col-sm-12">
+        <session-banner :session_user="session_user" :timeline="timeline"></session-banner>
+      </article>
+    </section>
 
-      <section class="row">
+    <section class="row">
 
-        <aside class="col-md-5 col-lg-4">
-          New sidebar here
-        </aside>
+      <aside class="col-md-5 col-lg-4">
+        <follow-ctrl :session_user="session_user" :timeline="timeline"></follow-ctrl>
+      </aside>
 
-        <main class="col-md-7 col-lg-8">
-          <post-feed :session_user="session_user" :timeline="timeline"></post-feed>
-        </main>
+      <main class="col-md-7 col-lg-8">
+        <post-feed :session_user="session_user" :timeline="timeline"></post-feed>
+      </main>
 
-      </section>
+    </section>
 
-    </div>
+  </div>
 </template>
 
 <script>
 import Vuex from 'vuex';
 import PostFeed from '../components/timelines/PostFeed.vue';
 import StoryBar from '../components/timelines/StoryBar.vue';
-import CreatePost from '../components/timelines/CreatePost.vue';
-import SessionWidget from '../components/common/SessionWidget.vue'; // %FIXME: rename, not session
-import SuggestedFeed from '../components/common/SuggestedFeed.vue';
+import SessionBanner from '../components/common/SessionBanner.vue'; // %FIXME: rename, not session
+import FollowCtrl from '../components/common/FollowCtrl.vue';
 
 export default {
 
@@ -55,9 +54,8 @@ export default {
   components: {
     PostFeed,
     StoryBar,
-    CreatePost,
-    SessionWidget,
-    SuggestedFeed,
+    SessionBanner,
+    FollowCtrl,
   },
 }
 </script>
