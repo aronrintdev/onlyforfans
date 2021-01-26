@@ -3,14 +3,16 @@ namespace App;
 
 use Exception;
 use App\SluggableTraits;
-use App\Interfaces\Guidable;
-//use App\Interfaces\Nameable;
-use App\Interfaces\Sluggable;
 use App\Interfaces\Ownable;
+//use App\Interfaces\Nameable;
+use App\Interfaces\Guidable;
+use App\Interfaces\Sluggable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Vaultfolder extends BaseModel implements Guidable, Sluggable, Ownable
 {
     use SluggableTraits;
+    use HasFactory;
 
     protected $guarded = ['id','created_at','updated_at'];
 

@@ -3,8 +3,9 @@
 namespace App;
 
 use DB;
-use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Database\Eloquent\Model;
+use Cviebrock\EloquentSluggable\Sluggable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 //use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -12,6 +13,7 @@ use Illuminate\Database\Eloquent\Model;
 class Album extends Model
 {
     use Sluggable;
+    use HasFactory;
     //use SoftDeletes;
 
     /**

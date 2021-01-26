@@ -2,24 +2,26 @@
 
 namespace App;
 
-use Auth;
-use Carbon\Carbon;
 use DB;
+use Auth;
+use App\User;
 use Exception;
+use Carbon\Carbon;
+use App\Enums\PostTypeEnum;
+use App\Interfaces\Ownable;
+use App\Interfaces\Deletable;
+use App\Enums\PaymentTypeEnum;
+use App\Interfaces\PaymentReceivable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\User;
-use App\Enums\PostTypeEnum;
-use App\Enums\PaymentTypeEnum;
-use App\Interfaces\Ownable;
-use App\Interfaces\Deletable;
-use App\Interfaces\PaymentReceivable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Post extends Model implements Ownable, Deletable, PaymentReceivable
 {
 
     use SoftDeletes;
+    use HasFactory;
 
     //--------------------------------------------
     // Boot

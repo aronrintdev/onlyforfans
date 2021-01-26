@@ -1,5 +1,7 @@
 <?php
-use Illuminate\Database\Seeder;
+
+namespace Database\Seeders;
+
 use Carbon\Carbon;
 
 use App\User;
@@ -43,7 +45,7 @@ class ShareablesTableSeeder extends Seeder
             $timelines = Timeline::where('id', '<>', $f->timeline->id) // exclude my own
                 ->whereHas('User', function($q1) {
                     $q1->where('is_follow_for_free', 1);
-                })->get(); 
+                })->get();
             $max = $faker->numberBetween( 0, min($timelines->count()-1, 3) );
             $this->command->info("  - Following (default) $max timelines for user ".$f->name);
             $attrs = ['is_subscribe' => 0];
@@ -57,7 +59,7 @@ class ShareablesTableSeeder extends Seeder
             $timelines = Timeline::where('id', '<>', $f->timeline->id) // exclude my own
                 ->whereHas('User', function($q1) {
                     $q1->where('is_follow_for_free', 0);
-                })->get(); 
+                })->get();
             $groups = $timelines->split(2);
 
             unset($timelines);

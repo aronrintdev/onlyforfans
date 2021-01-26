@@ -2,20 +2,22 @@
 namespace App;
 
 //use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
+use App\SluggableTraits;
 //use Storage;
 //use App\Libs\Utils\ViewHelpers;
 //use App\Libs\Image;
-use App\SluggableTraits;
+use App\Interfaces\Ownable;
 use App\Interfaces\Guidable;
 //use App\Interfaces\Nameable;
 use App\Interfaces\Sluggable;
-use App\Interfaces\Ownable;
 use App\Enums\MediafileTypeEnum;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Mediafile extends BaseModel implements Guidable, Sluggable, Ownable
 {
     use SluggableTraits;
+    use HasFactory;
 
     protected $guarded = ['id','created_at','updated_at'];
     protected $appends = ['filepath', 'name'];

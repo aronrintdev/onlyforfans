@@ -13,7 +13,7 @@ return [
          * `Spatie\Permission\Contracts\Permission` contract.
          */
 
-        'permission' => Spatie\Permission\Models\Permission::class,
+        'permission' => App\Permission::class,
 
         /*
          * When using the "HasRoles" trait from this package, we need to know which
@@ -24,7 +24,7 @@ return [
          * `Spatie\Permission\Contracts\Role` contract.
          */
 
-        'role' => Spatie\Permission\Models\Role::class,
+        'role' => App\Role::class,
 
     ],
 
@@ -90,7 +90,7 @@ return [
      * the default setting is false here for optimum safety.
      */
 
-    'display_permission_in_exception' => false,
+    'display_permission_in_exception' => env('APP_DEBUG', false),
 
     /*
      * When set to true, the required role names are added to the exception
@@ -98,13 +98,13 @@ return [
      * the default setting is false here for optimum safety.
      */
 
-    'display_role_in_exception' => false,
+    'display_role_in_exception' => env('APP_DEBUG', false),
 
     /*
      * By default wildcard permission lookups are disabled.
      */
 
-    'enable_wildcard_permission' => false,
+    'enable_wildcard_permission' => true,
 
     'cache' => [
 

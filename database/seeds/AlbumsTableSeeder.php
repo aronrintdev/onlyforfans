@@ -1,7 +1,8 @@
 <?php
 
+namespace Database\Seeders;
+
 use App\Album;
-use Illuminate\Database\Seeder;
 
 class AlbumsTableSeeder extends Seeder
 {
@@ -12,7 +13,7 @@ class AlbumsTableSeeder extends Seeder
      */
     public function run()
     {
-        factory(Album::class, 60)->create();
+        Album::factory()->count(60)->create();
 
         //Seeding album photos
         $faker = Faker\Factory::create();

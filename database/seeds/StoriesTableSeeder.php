@@ -1,5 +1,6 @@
 <?php
-use Illuminate\Database\Seeder;
+
+namespace Database\Seeders;
 
 use App\Enums\MediafileTypeEnum;
 use App\Libs\FactoryHelpers;
@@ -31,7 +32,7 @@ class StoriesTableSeeder extends Seeder
                     'stype'       => $stype,
                     'timeline_id' => $u->timeline->id,
                 ];
-                $story = factory(Story::class)->create($attrs);
+                $story = Story::factory()->create($attrs);
                 switch ($stype) {
                 case 'text':
                     break;

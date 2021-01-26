@@ -1,12 +1,16 @@
 <?php
 
+namespace Database\Seeders;
+
 use App\Setting;
 use App\Timeline;
 use App\User;
-use Illuminate\Database\Seeder;
 
 class InstallerSeeder extends Seeder
 {
+    /** Run in all environments */
+    protected $environments = [ 'all' ];
+
     /**
      * Run the database seeds.
      *

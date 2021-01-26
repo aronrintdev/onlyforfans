@@ -10,7 +10,6 @@
 
 import Echo from 'laravel-echo'
 
-console.log({ env: process.env })
 
 if (typeof window.Pusher === 'undefined') {
     window.Pusher = require('pusher-js');
@@ -19,9 +18,9 @@ if (typeof window.Pusher === 'undefined') {
 if (typeof window.Echo === 'undefined') {
     window.Echo = new Echo({
         broadcaster: 'pusher',
-        key: process.env.PUSHER_APP_KEY || window.pusherKey,
+        key: process.env.MIX_PUSHER_APP_KEY || window.pusherKey,
         // key: 'c0277f01daca608700b8',
-        cluster: process.env.PUSHER_APP_CLUSTER || window.pusherCluster,
+        cluster: process.env.MIX_PUSHER_APP_CLUSTER || window.pusherCluster,
         // cluster: 'us2'
         wsHost: window.location.hostname,
         wsPort: 6001,

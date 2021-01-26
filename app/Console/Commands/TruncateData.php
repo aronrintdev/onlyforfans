@@ -70,6 +70,13 @@ class TruncateData extends Command
         //'subscriptions',
 
         'role_user',
+        'model_has_permissions',
+        'model_has_roles',
+        'role_has_permissions',
+        'permission_role',
+        'permissions',
+        'roles',
+
         'user_settings',
         'user_lists',
         //'users_tips',
@@ -91,6 +98,8 @@ class TruncateData extends Command
         'saved_timelines',
         'timelines',
         'users',
+
+        'username_rules',
 
         //'purchased_posts',
         'posts',

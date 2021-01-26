@@ -1,6 +1,7 @@
 <?php
 
-use Illuminate\Database\Seeder;
+namespace Database\Seeders;
+
 use Carbon\Carbon;
 
 use App\User;
@@ -50,7 +51,7 @@ class PostsTableSeeder extends Seeder
                     $attrs['price'] = $faker->randomFloat(2, 1, 300);
                 }
 
-                $post = factory(Post::class)->create($attrs);
+                $post = Post::factory()->create($attrs);
                 if ( $faker->boolean(self::$PROB_POST_HAS_IMAGE) ) { // % post has image
                     $mf = FactoryHelpers::createImage(MediafileTypeEnum::POST, $post->id);
                 }

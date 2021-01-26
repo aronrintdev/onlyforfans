@@ -1,7 +1,8 @@
 <?php
 
+namespace Database\Seeders;
+
 use App\Media;
-use Illuminate\Database\Seeder;
 
 class MediumTableSeeder extends Seeder
 {
@@ -13,6 +14,6 @@ class MediumTableSeeder extends Seeder
     public function run()
     {
         //Populate dummy medium
-        factory(Media::class, 80)->create();
+        Media::factory()->count(80)->create();
     }
 }

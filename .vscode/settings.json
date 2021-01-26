@@ -30,9 +30,13 @@
     "linkedin",
     "luxon",
     "mediafiles",
+    "ptype",
     "publicprofile",
+    "stype",
     "testsuite",
     "vaultfolders",
+    "vfname",
+    "vname",
     "vuejs",
     "websockets",
     "youtube"

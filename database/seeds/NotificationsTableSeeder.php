@@ -1,7 +1,8 @@
 <?php
 
+namespace Database\Seeders;
+
 use App\Notification;
-use Illuminate\Database\Seeder;
 
 class NotificationsTableSeeder extends Seeder
 {
@@ -13,6 +14,6 @@ class NotificationsTableSeeder extends Seeder
     public function run()
     {
         //Populate dummy Notifications
-        factory(Notification::class, 40)->create();
+        Notification::factory()->count(40)->create();
     }
 }

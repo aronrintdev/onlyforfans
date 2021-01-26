@@ -3,14 +3,16 @@ namespace App;
 
 use DB;
 use Eloquent as Model;
-use Intervention\Image\Facades\Image;
-use App\Interfaces\PaymentReceivable;
 use App\Enums\PaymentTypeEnum;
+use App\Interfaces\PaymentReceivable;
+use Intervention\Image\Facades\Image;
 use App\Enums\ShareableAccessLevelEnum;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Timeline extends Model implements PaymentReceivable
 {
     //use SoftDeletes;
+    use HasFactory;
 
     public $table = 'timelines';
 
