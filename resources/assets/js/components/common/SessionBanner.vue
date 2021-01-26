@@ -8,34 +8,36 @@
         </a>
       </section>
       <section class="dropdown profile-ctrl">
-        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          Dropdown button
-        </button>
-        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-          <a class="dropdown-item" href="#">Action</a>
-          <a class="dropdown-item" href="#">Another action</a>
-          <a class="dropdown-item" href="#">Something else here</a>
-        </div>
+        <b-dropdown id="dropdown-1" text="..." class="OFF-m-md-2">
+          <b-dropdown-item>First Action</b-dropdown-item>
+          <b-dropdown-item>Second Action</b-dropdown-item>
+          <b-dropdown-item>Third Action</b-dropdown-item>
+        </b-dropdown>
       </section>
     </header>
-    <div class="avatar-profile d-flex justify-content-between pt-3 pb-4">
-      <section class="avatar-details">
-        <h2 class="avatar-name my-0">
-          <a :href="`/${follower.username}`">{{ follower.name }}</a>
-          <span v-if="follower.verified" class="verified-badge"><b-icon icon="check-circle-fill" variant="success" font-scale="1"></b-icon></span>
-        </h2>
-        <p class="avatar-mail my-0">
-        <a :href="`/${follower.username}`">@{{ follower.username }}</a>
-        </p>
-      </section>
 
-      <ul class="list-unstyled list-inline tag-stats my-0 mr-5">
-        <li class="tag-post_count list-inline-item mr-3"><span>{{ timeline.userstats.post_count }} <b-icon icon="bookmarks-fill" variant="default"></b-icon></span></li>
-        <li class="tag-follower_count list-inline-item mr-3"><span>{{ timeline.userstats.follower_count }} <b-icon icon="people-fill" variant="default"></b-icon></span></li>
-        <li class="tag-like_count list-inline-item mr-3"><span>{{ timeline.userstats.like_count }} <b-icon icon="heart-fill" variant="default"></b-icon></span></li>
-        <li class="tag-following_count list-inline-item"><span>{{ timeline.userstats.following_count }} <b-icon icon="person-check-fill" variant="default"></b-icon></span></li>
-      </ul>
-    </div>
+    <b-container fluid>
+      <b-row class="avatar-profile pt-3 pb-4">
+        <b-col cols="12" md="4" offset-md="2" class="avatar-details text-right text-md-left">
+          <h2 class="avatar-name my-0">
+            <a :href="`/${follower.username}`">{{ follower.name }}</a>
+            <span v-if="follower.verified" class="verified-badge"><b-icon icon="check-circle-fill" variant="success" font-scale="1"></b-icon></span>
+          </h2>
+          <p class="avatar-mail my-0">
+          <a :href="`/${follower.username}`">@{{ follower.username }}</a>
+          </p>
+        </b-col>
+
+        <b-col cols="12" md="4" offset-md="2" class="tag-stats my-0">
+          <ul class="list-unstyled list-inline text-right">
+            <li class="tag-post_count list-inline-item pr-3"><span>{{ timeline.userstats.post_count }} <b-icon icon="bookmarks-fill" variant="default"></b-icon></span></li>
+            <li class="tag-follower_count list-inline-item pr-3"><span>{{ timeline.userstats.follower_count }} <b-icon icon="people-fill" variant="default"></b-icon></span></li>
+            <li class="tag-like_count list-inline-item pr-3"><span>{{ timeline.userstats.like_count }} <b-icon icon="heart-fill" variant="default"></b-icon></span></li>
+            <li class="tag-following_count list-inline-item"><span>{{ timeline.userstats.following_count }} <b-icon icon="person-check-fill" variant="default"></b-icon></span></li>
+          </ul>
+        </b-col>
+      </b-row>
+    </b-container>
   </div>
 </template>
 
@@ -97,6 +99,13 @@ body header.masthead .profile-ctrl.dropdown {
   right: 0;
 }
 
+/* Why doesn't this CSS have any effect ? */
+body header.masthead .profile-ctrl.dropdown button {
+  color: red !important;
+  border: none;
+  background: transparent;
+}
+
 body .avatar-img {
   position: absolute;
   left: 16px;
@@ -109,15 +118,17 @@ body .avatar-details a {
   /*
   color: #4a5568;
   color: #7F8FA4;
-  */
-  color: #555;
-  text-decoration: none;
-  text-transform: capitalize;
+   */
+color: #555;
+text-decoration: none;
+text-transform: capitalize;
 }
 
 body .avatar-details {
-  margin-left: 200px;
-  font-weight: 400;
+  /*
+  margin-left: 172px;
+   */
+font-weight: 400;
 }
 body .avatar-details h2 {
   font-size: 20px;
@@ -125,5 +136,6 @@ body .avatar-details h2 {
 body .avatar-details p {
   font-size: 16px;
 }
+
 </style>
 

@@ -61,10 +61,10 @@ class TimelinesController extends AppBaseController
         $timeline = Timeline::with('user')->where('username', $username)->firstOrFail();
 
         $timeline->userstats = [
-            'post_count' => 1,
-            'like_count' => 2,
-            'follower_count' => 3,
-            'following_count' => 4,
+            'post_count' => $timeline->posts->count(),
+            'like_count' => $timeline->user->postlikes->count(),
+            'follower_count' => $timeline->followers->count(),
+            'following_count' => $timeline->user->followedtimelines->count(),
         ];
 
         return view('timelines.show', [
