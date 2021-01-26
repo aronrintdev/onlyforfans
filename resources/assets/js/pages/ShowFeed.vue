@@ -1,23 +1,39 @@
 <template>
-  <div class="container" id="view-show_timeline">
+  <div>
 
-    <section class="row">
-      <article class="col-sm-12">
-        <session-banner :session_user="session_user" :timeline="timeline"></session-banner>
-      </article>
-    </section>
+    <div class="container" id="view-show_timeline">
 
-    <section class="row">
+      <section class="row">
+        <article class="col-sm-12">
+          <session-banner :session_user="session_user" :timeline="timeline"></session-banner>
+        </article>
+      </section>
 
-      <aside class="col-md-5 col-lg-4">
-        <follow-ctrl :session_user="session_user" :timeline="timeline"></follow-ctrl>
-      </aside>
+      <section class="row">
 
-      <main class="col-md-7 col-lg-8">
-        <post-feed :session_user="session_user" :timeline="timeline"></post-feed>
-      </main>
+        <aside class="col-md-5 col-lg-4">
+          <follow-ctrl :session_user="session_user" :timeline="timeline"></follow-ctrl>
+        </aside>
 
-    </section>
+        <main class="col-md-7 col-lg-8">
+          <post-feed :session_user="session_user" :timeline="timeline"></post-feed>
+        </main>
+
+      </section>
+
+    </div>
+
+    <b-modal id="modal-send_tip" title="Send a Tip" hide-footer body-class="p-0">
+      <send-tip :session_user="session_user" :timeline="timeline"></send-tip>
+    </b-modal>
+
+    <b-modal id="modal-follow" title="Follow" ok-only>
+      <p class="my-4">Follow Modal</p>
+    </b-modal>
+
+    <b-toast id="example-toast" title="BootstrapVue" static no-auto-hide>
+      Hello, world! This is a toast message.
+    </b-toast>
 
   </div>
 </template>
@@ -28,6 +44,7 @@ import PostFeed from '../components/timelines/PostFeed.vue';
 import StoryBar from '../components/timelines/StoryBar.vue';
 import SessionBanner from '../components/common/SessionBanner.vue'; // %FIXME: rename, not session
 import FollowCtrl from '../components/common/FollowCtrl.vue';
+import SendTip from '../components/modals/SendTip.vue';
 
 export default {
 
@@ -56,6 +73,7 @@ export default {
     StoryBar,
     SessionBanner,
     FollowCtrl,
+    SendTip,
   },
 }
 </script>
