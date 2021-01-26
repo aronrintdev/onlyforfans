@@ -21,7 +21,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Session;
-use Teepluss\Theme\Facades\Theme;
+use Theme;
 use Validator;
 
 class MessageController extends Controller

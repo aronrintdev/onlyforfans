@@ -28,9 +28,15 @@ class AuthServiceProvider extends ServiceProvider
     {
         $this->registerPolicies();
 
+        // Implicitly grant "Super Admin" role all permissions
+        //  e.i. all gate-related function return true for user->can() / user->hasPermission()
+        Gate::before(function($user, $ability) {
+            return $user->hasRole('Super Admin') ? true : null;
+        });
+
         // Access to `/laravel-websockets`
         Gate::define('viewWebSocketsDashboard', function ($user = null) {
-            return $user->hasRole('admin');
+            return $user->hasPermissionTo('admin.websockets.dashboard.view');
         });
 
         //

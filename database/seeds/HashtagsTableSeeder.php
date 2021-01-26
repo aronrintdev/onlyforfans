@@ -1,7 +1,8 @@
 <?php
 
+namespace Database\Seeders;
+
 use App\Hashtag;
-use Illuminate\Database\Seeder;
 
 class HashtagsTableSeeder extends Seeder
 {
@@ -12,8 +13,7 @@ class HashtagsTableSeeder extends Seeder
      */
     public function run()
     {
-
         //Populate dummy hashtags
-        factory(Hashtag::class, 30)->create();
+        Hashtag::factory()->count(30)->create();
     }
 }

@@ -1,24 +1,29 @@
 <?php
 namespace App;
 
-use Auth;
-use Cmgmyr\Messenger\Traits\Messagable;
 use DB;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Collection;
-use Zizaco\Entrust\Traits\EntrustUserTrait;
+use Auth;
 use App\Enums\PaymentTypeEnum;
+use Illuminate\Support\Collection;
 use App\Interfaces\PaymentSendable;
 use App\Interfaces\PaymentReceivable;
+use Spatie\Permission\Traits\HasRoles;
+use Cmgmyr\Messenger\Traits\Messagable;
+use Illuminate\Notifications\Notifiable;
+// use Zizaco\Entrust\Traits\EntrustUserTrait;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class User extends Authenticatable implements PaymentSendable, PaymentReceivable
 {
     use Notifiable;
-    use EntrustUserTrait;
+    use HasRoles;
+    use HasFactory;
+    // use EntrustUserTrait;
     // use SoftDeletes, EntrustUserTrait {
 
     //     SoftDeletes::restore insteadof EntrustUserTrait;

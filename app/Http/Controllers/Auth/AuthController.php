@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Redirect;
 use Intervention\Image\Facades\Image;
 use Laravel\Socialite\Facades\Socialite;
-use Teepluss\Theme\Facades\Theme;
+use Theme;
 use Validator;
 //use Dotenv\Validator;
 

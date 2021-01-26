@@ -1,10 +1,14 @@
 <?php
 
+namespace Database\Seeders;
+
 use App\Setting;
-use Illuminate\Database\Seeder;
 
 class SettingsTableSeeder extends Seeder
 {
+    /** Run in all environments */
+    protected $environments = [ 'all' ];
+
     /**
      * Run the database seeds.
      *

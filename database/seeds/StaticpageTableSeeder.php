@@ -1,10 +1,14 @@
 <?php
 
+namespace Database\Seeders;
+
 use App\StaticPage;
-use Illuminate\Database\Seeder;
 
 class StaticpageTableSeeder extends Seeder
 {
+    /** Run in all environments */
+    protected $environments = [ 'all' ];
+
     public function run()
     {
         $faker = Faker\Factory::create();

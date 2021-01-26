@@ -1,5 +1,6 @@
 const mix = require('laravel-mix');
 const path = require('path');
+require('dotenv').config();
 
 /*
  |--------------------------------------------------------------------------
@@ -11,20 +12,6 @@ const path = require('path');
  | file for the application as well as bundling up all the JS files.
  |
  */
-
-// mix.extend('addI18nLoader', (webpackConfig, ...args) => {
-//     let vueLoader = webpackConfig.module.rules.find(loader => loader.loader == 'vue-loader')
-//     vueLoader.options = require('webpack-merge').smart(
-//         vueLoader.options,
-//         {
-//             loaders: {
-//                 i18n: '@intlify/vue-i18n-loader'
-//             }
-//         }
-//     )
-// })
-// mix.addI18nLoader()
-
 
 mix.extend('addWebpackLoaders', (webpackConfig, loaderRules) => {
   loaderRules.forEach((loaderRule) => {

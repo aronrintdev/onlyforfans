@@ -48,21 +48,21 @@ class Kernel extends HttpKernel
      * @var array
      */
     protected $routeMiddleware = [
-        'auth' => \Illuminate\Auth\Middleware\Authenticate::class,
-        'bindings' => \Illuminate\Routing\Middleware\SubstituteBindings::class,
-        'can' => \Illuminate\Auth\Middleware\Authorize::class,
-        'can'         => \Illuminate\Foundation\Http\Middleware\Authorize::class,
-        'guest'       => \App\Http\Middleware\RedirectIfAuthenticated::class,
-        'throttle'    => \Illuminate\Routing\Middleware\ThrottleRequests::class,
-        'editown'     => \App\Http\Middleware\EditOwn::class,
-        'publicprofile'     => \App\Http\Middleware\PublicProfile::class,
-        'disabledemo' => \App\Http\Middleware\DisableDemo::class,
-        'editgroup'   => \App\Http\Middleware\EditGroup::class,
-        'editpage'    => \App\Http\Middleware\EditPage::class,
-        'role'        => \Zizaco\Entrust\Middleware\EntrustRole::class,
-        'permission'  => \Zizaco\Entrust\Middleware\EntrustPermission::class,
-        'ability'     => \Zizaco\Entrust\Middleware\EntrustAbility::class,
-        'cors'        => \App\Http\Middleware\Cors::class,
-        'editevent'   => \App\Http\Middleware\EditEvent::class
+        'auth'               => \Illuminate\Auth\Middleware\Authenticate::class,
+        'bindings'           => \Illuminate\Routing\Middleware\SubstituteBindings::class,
+        'can'                => \Illuminate\Auth\Middleware\Authorize::class,
+        'can'                => \Illuminate\Foundation\Http\Middleware\Authorize::class,
+        'guest'              => \App\Http\Middleware\RedirectIfAuthenticated::class,
+        'throttle'           => \Illuminate\Routing\Middleware\ThrottleRequests::class,
+        'editown'            => \App\Http\Middleware\EditOwn::class,
+        'publicprofile'      => \App\Http\Middleware\PublicProfile::class,
+        'disabledemo'        => \App\Http\Middleware\DisableDemo::class,
+        'editgroup'          => \App\Http\Middleware\EditGroup::class,
+        'editpage'           => \App\Http\Middleware\EditPage::class,
+        'role'               => \Spatie\Permission\Middlewares\RoleMiddleware::class,
+        'permission'         => \Spatie\Permission\Middlewares\PermissionMiddleware::class,
+        'role_or_permission' => \Spatie\Permission\Middlewares\RoleOrPermissionMiddleware::class,
+        'cors'               => \App\Http\Middleware\Cors::class,
+        'editevent'          => \App\Http\Middleware\EditEvent::class
     ];
 }

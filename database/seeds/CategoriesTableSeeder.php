@@ -1,10 +1,14 @@
 <?php
 
+namespace Database\Seeders;
+
 use App\Category;
-use Illuminate\Database\Seeder;
 
 class CategoriesTableSeeder extends Seeder
 {
+
+    protected $environments = [ 'all' ];
+
     /**
      * Run the database seeds.
      *

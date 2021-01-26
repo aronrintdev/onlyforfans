@@ -3,14 +3,22 @@
 namespace App\Repositories;
 
 use App\User;
-use InfyOm\Generator\Common\BaseRepository;
-
 
 class UserRepository extends BaseRepository
 {
     protected $fieldSearchable = [
 
     ];
+
+    /**
+     * Return searchable fields
+     *
+     * @return array
+     */
+    public function getFieldsSearchable()
+    {
+        return $this->fieldSearchable;
+    }
 
     public function model()
     {

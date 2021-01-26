@@ -1,7 +1,8 @@
 <?php
 
+namespace Database\Seeders;
+
 use App\Conversation;
-use Illuminate\Database\Seeder;
 
 class ConversationsTableSeeder extends Seeder
 {
@@ -13,7 +14,7 @@ class ConversationsTableSeeder extends Seeder
     public function run()
     {
         //Populate dummy conversations
-        factory(Conversation::class, 40)->create()
+        Conversation::factory()->count(40)->create()
         ->each(function ($conversation) {
             $faker = Faker\Factory::create();
 

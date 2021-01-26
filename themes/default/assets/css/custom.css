@@ -1,0 +1,264 @@
+.tmargin-10
+{
+  margin-top: 10px !important;
+}
+.tpadding-20
+{
+  padding-top: 20px;
+}
+.second-bar {
+  border-top: 1px solid #EEEEEE;
+  padding-top: 10px;
+  font-size: 16px;
+}
+
+.navbar.guest-nav {
+  min-height: 72px !important;
+  height: auto !important;
+  position: static !important;
+}
+.navbar.guest-nav .navbar-brand.fans {
+  padding-top: 12px;
+}
+.navbar.guest-nav .navbar-form {
+  margin-top: 10px;
+}
+.navbar.guest-nav .navbar-form .form-group {
+  vertical-align: top;
+}
+.navbar.guest-nav .navbar-form .form-group .form-control {
+  background: #F8FAFC;
+}
+@media (max-width: 768px) {
+  .navbar.guest-nav .navbar-form .form-group .checkbox input[type="checkbox"] {
+    margin-left: 0px;
+  }
+}
+.navbar.guest-nav .navbar-form .mail-form {
+  margin-right: 7px;
+}
+.navbar.guest-nav .navbar-form .checkbox,
+.navbar.guest-nav .navbar-form .forgot-password {
+  display: block;
+}
+.navbar.guest-nav .navbar-form .btn-submit {
+  padding: 6px 12px;
+}
+.navbar.guest-nav .navbar-form .forgot-password {
+  font-size: 11px;
+  padding-top: 5px;
+  text-align: right;
+}
+.welcome-message h2
+{
+  font-size: 26px;
+  line-height: 15px !important;
+  font-weight: 300;
+}
+.welcome-message
+{
+  padding-bottom: 25px;
+}
+.welcome-message p
+{
+  margin-bottom: 0px;
+}
+.register-heading
+{
+  font-size: 22px;
+  line-height: 0px !important;
+  font-weight: 300;
+  margin-top: 10px;
+  padding-bottom: 20px;
+}
+.features-list h2
+{
+  font-size: 22px;
+  line-height: 0px !important;
+  font-weight: 300;
+  margin-top: 10px;
+  padding-bottom: 20px;
+}
+.features-list li
+{
+  font-size: 16px;
+  font-weight: 300;
+  padding-top: 20px;
+}
+.features-list li i
+{
+  font-size: 26px;
+  color: #7F8FA4;
+  vertical-align: middle;
+  padding-right: 10px;
+}
+
+/* --- %PSG from 20201119 --- */
+
+body .tip-modal {
+}
+body .tip-modal .modal-header {
+  position: relative;
+}
+body .tip-modal .close-post-modal.close {
+  float: none;
+  font-size: 40px;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+body .tip-modal .panel-footer > * {
+  width: 100%;
+
+}
+
+/* from user-header.blade.php */
+body .smallscreen-report, a.page-report.report {
+  display: block !important;
+}
+
+@media screen and (max-width: 767px) {
+  .user-image.dropdown.fans .dropdown-menu {
+    left: -190px;
+  }
+}
+
+.total-spent, .total-tipped, .subscribed-over, .inactive-over {
+  position: relative;
+}
+
+body .tip-modal .filter-input {
+  border: 0;
+  outline: none;
+  text-align: center;
+  font-weight: bold;
+  color: #fff;
+}
+
+.subscriberFilterModal .panel-footer {
+  text-align: right;
+}
+
+.subscriberFilterModal .panel-heading {
+  border-bottom: none !important;
+}
+
+.subscriberFilterModal .panel-heading .post-author {
+  padding: 0 20px;
+}
+
+.subscriberFilterModal .panel-heading .user-post-details ul {
+  padding-right: 0 !important;
+}
+
+.subscriberFilterModal .panel-body ul li span {
+  color: #298ad3;
+  position: absolute;
+  height: 25px;
+  border-radius: 50%;
+  width: 25px;
+  /*top: 0;*/
+  vertical-align: middle;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  user-select: none;
+  transition: .3s;
+}
+
+.subscriberFilterModal .text-wrapper {
+  top: 0;
+  left: 50%;
+  position: absolute;
+  transform: translateX(-50%);
+  bottom: 0;
+  display: block;
+  max-width: 100%;
+  width: 80%;
+}
+
+.subscriberFilterModal ul li span:hover {
+  background: #e7f3ff;
+}
+
+.subscriberFilterModal ul li span:active {
+  background: #9dd5ff;
+}
+
+.subscriberFilterModal ul li span.decrement {
+  left: 0;
+}
+
+.subscriberFilterModal ul li span.increment {
+  right: 0;
+}
+
+.subscriberFilterModal ul {
+  list-style: none;
+  padding: 0 25px;
+}
+
+.subscriberFilterModal .panel-body ul li {
+  width: 180px;
+  margin: auto;
+  text-align: center;
+}
+
+.subscriberFilterModal .panel-body ul li p{
+  font-weight: bold;
+}
+.subscriberFilterModal .modal-dialog-centered {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 93%;
+}
+
+.subscriberFilterModal .modal-content {
+  width: 270px;
+}
+
+
+
+/* from post.blade.php */
+.link-preview
+{
+  border: 1px solid #EEE;
+  margin: 7px 0px;
+  padding: 5px;
+}
+.link-preview img
+{
+  width: 100%;
+  height: auto;
+}
+
+.locked-content {
+  font-size: 120px;
+  color: #fff;
+  text-align: center;
+  height: 300px;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: -15px;
+  margin-bottom: -7px;
+}
+
+.locked-content .locked-content-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  appearance: none;
+  -moz-appearance: textfield !important;
+}

@@ -171,32 +171,34 @@ return [
         App\Providers\AuthServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
+
         Collective\Html\HtmlServiceProvider::class,
         Laracasts\Flash\FlashServiceProvider::class,
         Prettus\Repository\Providers\RepositoryServiceProvider::class,
         \InfyOm\Generator\InfyOmGeneratorServiceProvider::class,
         //\InfyOm\CoreTemplates\CoreTemplatesServiceProvider::class,
-        //'Teepluss\Theme\ThemeServiceProvider',
         'Alaouy\Youtube\YoutubeServiceProvider',
-        Teepluss\Theme\ThemeServiceProvider::class,
         //Alaouy\Youtube\YoutubeServiceProvider::class,
         Intervention\Image\ImageServiceProvider::class,
         Anhskohbo\NoCaptcha\NoCaptchaServiceProvider::class,
         Laravel\Socialite\SocialiteServiceProvider::class,
-
+        
         Barryvdh\Debugbar\ServiceProvider::class,
         Cmgmyr\Messenger\MessengerServiceProvider::class,
-        Zizaco\Entrust\EntrustServiceProvider::class,
         Cviebrock\EloquentSluggable\ServiceProvider::class,
-        Vijaytupakula\Transvel\TransvelServiceProvider::class,
+        // Vijaytupakula\Transvel\TransvelServiceProvider::class,
         //RachidLaasri\LaravelInstaller\Providers\LaravelInstallerServiceProvider::class,
         Mews\Purifier\PurifierServiceProvider::class,
         Spatie\Referer\RefererServiceProvider::class,
+        Spatie\Permission\PermissionServiceProvider::class,
+        // \Theme\ThemeServiceProvider::class,
+        Ayra\Theme\ThemeServiceProvider::class,
+        // Zizaco\Entrust\EntrustServiceProvider::class,
     ],
 
     /*
     |--------------------------------------------------------------------------
-    | Class Aliases
+    | Class AliaseTeeplusss
     |--------------------------------------------------------------------------
     |
     | This array of class aliases will be registered when this application
@@ -211,7 +213,7 @@ return [
         'Artisan'   => Illuminate\Support\Facades\Artisan::class,
         'Auth'      => Illuminate\Support\Facades\Auth::class,
         'Blade'     => Illuminate\Support\Facades\Blade::class,
-        'Bus' => Illuminate\Support\Facades\Bus::class,
+        'Bus'       => Illuminate\Support\Facades\Bus::class,
         'Cache'     => Illuminate\Support\Facades\Cache::class,
         'Config'    => Illuminate\Support\Facades\Config::class,
         'Cookie'    => Illuminate\Support\Facades\Cookie::class,
@@ -242,14 +244,14 @@ return [
         'Form'      => Collective\Html\FormFacade::class,
         'Html'      => Collective\Html\HtmlFacade::class,
         'Flash'     => Laracasts\Flash\Flash::class,
-        //'Theme'     => 'Teepluss\Theme\Facades\Theme',
-        'Theme'     => Teepluss\Theme\Facades\Theme::class,
+        // 'Theme'     => Teepluss\Theme\Facades\Theme::class,
+        'Theme'     => Ayra\Theme\Facades\Theme::class,
         'Image'     => Intervention\Image\Facades\Image::class,
         'Setting'   => App\Setting::class,
         'Socialite' => Laravel\Socialite\Facades\Socialite::class,
-        'Debugbar' => Barryvdh\Debugbar\Facade::class,
-        'Entrust'   => Zizaco\Entrust\EntrustFacade::class,
-        'Purifier' => Mews\Purifier\Facades\Purifier::class,
+        'Debugbar'  => Barryvdh\Debugbar\Facade::class,
+        // 'Entrust'   => Zizaco\Entrust\EntrustFacade::class,
+        'Purifier'  => Mews\Purifier\Facades\Purifier::class,
         'LinkPreview' => LinkPreview\LinkPreview::class
 
     ],

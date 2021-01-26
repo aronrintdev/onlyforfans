@@ -1,10 +1,10 @@
 <?php
+namespace Database\Seeders;
 
 use App\Group;
 use App\Page;
 use App\Timeline;
 use App\User;
-use Illuminate\Database\Seeder;
 use Exception;
 
 class TimelinesTableSeeder extends Seeder
@@ -83,7 +83,7 @@ class TimelinesTableSeeder extends Seeder
         $userSettings = DB::table('user_settings')->insert($user_settings);
 
         //Populate dummy accounts
-        factory(Timeline::class, 90)->create()
+        Timeline::factory()->count(90)->create()
            ->each(function ($timeline) {
                $faker = Faker\Factory::create();
 

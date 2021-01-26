@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Setting;
 use Illuminate\Foundation\Auth\ResetsPasswords;
-use Teepluss\Theme\Facades\Theme;
+use Theme;
 
 class PasswordController extends Controller
 {

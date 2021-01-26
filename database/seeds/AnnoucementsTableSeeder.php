@@ -1,7 +1,8 @@
 <?php
 
+namespace Database\Seeders;
+
 use App\Announcement;
-use Illuminate\Database\Seeder;
 
 class AnnouncementsTableSeeder extends Seeder
 {
@@ -13,7 +14,7 @@ class AnnouncementsTableSeeder extends Seeder
     public function run()
     {
         //Populate dummy announcements
-        factory(Announcement::class, 20)->create()
+        Announcement::factory()->count(20)->create()
         ->each(function ($announcement) {
             $faker = Faker\Factory::create();
 

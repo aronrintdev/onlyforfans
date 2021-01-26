@@ -1,11 +1,18 @@
 <?php
 
+namespace Database\Seeders;
+
 use App\UsernameRule;
-use Illuminate\Database\Seeder;
 use Symfony\Component\Finder\Finder;
 
+/**
+ * Seeds the UsernameRules with initial rule sets.
+ */
 class UsernameRulesSeeder extends Seeder
 {
+    /** Run in all environments */
+    protected $environments = [ 'all' ];
+
     /**
      * Run the database seeds.
      *

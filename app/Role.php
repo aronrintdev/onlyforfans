@@ -2,20 +2,18 @@
 
 namespace App;
 
-use Zizaco\Entrust\EntrustRole;
+use Spatie\Permission\Models\Role as ParentRole;
 
-
-class Role extends EntrustRole
+/**
+ * See https://spatie.be/docs/laravel-permission/v3/basic-usage/basic-usage
+ *   for usage
+ */
+class Role extends ParentRole
 {
     /**
    * The attributes that are mass assignable.
    *
    * @var array
    */
-    protected $fillable = ['name', 'display_name', 'description'];
-
-    public function users()
-    {
-        return $this->belongsToMany('App\User', 'role_user', 'role_id', 'user_id');
-    }
+    protected $fillable = [];
 }
