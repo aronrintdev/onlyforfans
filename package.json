@@ -30,6 +30,7 @@
   },
   "dependencies": {
     "animejs": "^3.2.1",
+    "bootstrap-sass": "^3.4.1",
     "bootstrap-vue": "^2.20.1",
     "i18n": "^0.13.2",
     "laravel-echo": "^1.10.0",
@@ -37,7 +38,6 @@
     "pusher-js": "^7.0.2",
     "vue-autosuggest": "^2.2.0",
     "vue-i18n": "^8.22.3",
-    "vue-infinite-scroll": "^2.0.2",
     "vue-timeago": "^5.1.2",
     "vue2-dropzone": "^3.6.0",
     "vuejs-logger": "^1.5.5",

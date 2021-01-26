@@ -10,7 +10,6 @@
 
 import Echo from 'laravel-echo'
 
-
 if (typeof window.Pusher === 'undefined') {
     window.Pusher = require('pusher-js');
 }
