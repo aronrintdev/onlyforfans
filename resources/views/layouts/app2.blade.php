@@ -15,9 +15,9 @@
 </head>
 <body>
     <div id="app">
-        @include('common._header')
+        <main-navbar></main-navbar>
         <div class="container-fluid pt-3">
-        @yield('content')
+            @yield('content')
         </div>
     </div>
 

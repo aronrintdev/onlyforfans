@@ -72,6 +72,7 @@ Vue.component('home-feed', require('./pages/HomeFeed.vue').default);
 
 // ---
 
+Vue.component('main-navbar', require('./components/common/MainNavbar.vue').default);
 Vue.component('online-status', require('./components/user/OnlineStatus.vue').default);
 Vue.component('my-vault', require('./components/vault/Dashboard.vue').default);
 Vue.component('my-saved', require('./components/saved/Dashboard.vue').default);
