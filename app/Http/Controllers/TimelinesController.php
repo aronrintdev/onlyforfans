@@ -55,12 +55,32 @@ class TimelinesController extends AppBaseController
         ]);
     }
 
+    public function show(Request $request, $username)
+    {
+        $sessionUser = Auth::user();
+        $timeline = Timeline::with('user')->where('username', $username)->firstOrFail();
+
+        $timeline->userstats = [
+            'post_count' => $timeline->posts->count(),
+            'like_count' => $timeline->user->postlikes->count(),
+            'follower_count' => $timeline->followers->count(),
+            'following_count' => $timeline->user->followedtimelines->count(),
+        ];
+
+        return view('timelines.show', [
+            'sessionUser' => $sessionUser,
+            'timeline' => $timeline,
+        ]);
+    }
+
     // Display my home timeline
     public function home(Request $request)
     {
         $sessionUser = Auth::user();
+//dd( $sessionUser->timeline );
         return view('timelines.home', [
             'sessionUser' => $sessionUser,
+            'timeline' => $sessionUser->timeline()->with('user')->first(),
             //'myVault' => $myVault,
             //'vaultRootFolder' => $vaultRootFolder,
         ]);
@@ -68,14 +88,10 @@ class TimelinesController extends AppBaseController
 
     // Get a list of items that make up a timeline feed, typically posts but
     //  keep generic as we may want to throw in other things
-    public function feeditems(Request $request, $timelineID)
+    public function feeditems(Request $request, Timeline $timeline)
     {
         $sessionUser = Auth::user();
-
-        $timeline = ( $timelineID === 'home' ) 
-            ? $sessionUser->timeline
-            : null;
-
+        $follower = $timeline->user;
         $page = $request->input('page', 1);
         $take = 5; // $request->input('take', Setting::get('items_page'));
 
@@ -90,13 +106,11 @@ class TimelinesController extends AppBaseController
             $filters['hashtag'] = '#'.$request->hashtag;
         }
 
-        $feeditems = FeedMgr::getPosts($sessionUser, $filters, $page, $take); // %TODO: work with L5.8 pagination
+        $feeditems = FeedMgr::getPosts($follower, $filters, $page, $take); // %TODO: work with L5.8 pagination
         //$feeditems = FeedMgr::getPostsRaw($sessionUser, $filters);
 
         return response()->json([
-            'sessionUser' => $sessionUser,
             'feeditems' => $feeditems,
-            'timeline' => $timeline,
         ]);
     }
 

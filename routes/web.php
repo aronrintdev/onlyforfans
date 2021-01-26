@@ -164,10 +164,10 @@ Route::group(['middleware' => ['auth']], function () {
     ]);
 
     Route::get('/timelines-suggested', ['as'=>'timelines.suggested', 'uses' => 'TimelinesController@suggested']);
-    Route::get('/timelines/home', ['as'=>'timelines.home', 'uses' => 'TimelinesController@home']);
     Route::get('/timelines/{timeline}/feeditems', ['as'=>'timelines.feeditems', 'uses' => 'TimelinesController@feeditems']);
+    Route::get('/timelines/home', ['as'=>'timelines.home', 'uses' => 'TimelinesController@home']);
     Route::resource('timelines', 'TimelinesController', [
-        'only' => [ 'index' ],
+        'only' => [ 'index', 'show' ],
     ]);
 
     Route::resource('vaultfolders', 'VaultfoldersController', [

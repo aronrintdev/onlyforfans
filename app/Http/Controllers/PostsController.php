@@ -16,6 +16,8 @@ class PostsController extends AppBaseController
 {
     public function store(Request $request)
     {
+        $sessionUser = Auth::user();
+
         $request->validate([
             'timeline_id' => 'required|exists:timelines,id',
             // [ ] 'description': , // text COLLATE utf8_unicode_ci NOT NULL,
@@ -35,7 +37,11 @@ class PostsController extends AppBaseController
             // [ ] 'expiration_time': , // time DEFAULT NULL,
         ]);
 
-        $timeline = Timeline::find($request->timeline_id);
+        $timeline = Timeline::find($request->timeline_id); // timeline being posted on
+
+        if ( $sessionUser->id !== $timeline->user->id ) { // can only post on own home page
+            abort(403, 'Unauthorized');
+        }
 
         $attrs = $request->all();
         $attrs['user_id'] = $timeline->user->id; // %FIXME: remove this field, redundant

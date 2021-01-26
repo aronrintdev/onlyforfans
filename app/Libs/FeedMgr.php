@@ -39,13 +39,11 @@ class FeedMgr {
 
         //$followingIds = filterByBlockedFollowings();
 
-        $timeline = $follower->timeline;
-
         //$query = Post::with('mediafiles', 'user', 'timeline', 'comments.user')->where('active', 1);
         $query = Post::with('mediafiles', 'user', 'comments')->where('active', 1);
 
         $followedTimelineIDs = $follower->followedtimelines->pluck('id');
-        $followedTimelineIDs->push($timeline->id); // include follower's own timeline %NOTE
+        $followedTimelineIDs->push($follower->timeline->id); // include follower's own timeline %NOTE
         // %NOTE %TODO: ^^^ this will not pick up user's own posts that are not free (??)
 
 

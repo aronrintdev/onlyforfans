@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!is_loading && !!session_user" class="feed-crate tag-posts tag-crate">
+  <div v-if="!is_loading" class="feed-crate tag-posts tag-crate">
 
     <section class="row">
       <div>
@@ -19,27 +19,26 @@
 <script>
 import Vuex from 'vuex';
 //import { eventBus } from '../../app';
-//import { infiniteScroll } from 'vue-infinite-scroll';
-//import infiniteScroll from 'vue-infinite-scroll';
 import ShowPost from './ShowPost.vue';
 
 export default {
 
   props: {
-    /*
-    vault_pkid: {
-      required: true,
-      type: Number,
-    },
-     */
+    session_user: null,
+    timeline: null,
   },
 
   computed: {
     ...Vuex.mapState(['feeditems']),
-    ...Vuex.mapState(['timeline']),
     ...Vuex.mapState(['unshifted_timeline_post']),
-    ...Vuex.mapState(['session_user']),
     ...Vuex.mapState(['is_loading']),
+
+    username() { // feed owner
+      return this.timeline.username;
+    },
+    timelineId() {
+      return this.timeline.id;
+    },
 
     currentPage() {
       return this.feeditems.current_page;
@@ -59,7 +58,6 @@ export default {
     rendereditems: [],
     renderedpages: [], // track so we don't re-load same page (set of posts) more than 1x
     limit: 5,
-    isFetching: false, // local only, not syncronous with actual data load
   }),
 
   mounted() {
@@ -70,23 +68,13 @@ export default {
   },
 
   created() {
-    this.$store.dispatch('getMe');
-    this.$store.dispatch('getFeeditems', { timelineSlug: 'home', page: 1, limit: this.limit });
+    this.$store.dispatch('getFeeditems', { timelineId: this.timelineId, page: 1, limit: this.limit });
   },
 
   methods: {
 
     onScroll(e) {
       const atBottom = document.documentElement.scrollTop + window.innerHeight === document.documentElement.offsetHeight;
-      /*
-      console.log('onScroll()', {
-        e,
-        atBottom,
-        scrollTop: document.documentElement.scrollTop,
-        innerHeight: window.innerHeight,
-        offsetHeight: document.documentElement.offsetHeight,
-      });
-      */
       if (atBottom && !this.is_loading) {
         this.loadMore();
       }
@@ -97,15 +85,14 @@ export default {
       const response = await axios.delete(url);
       this.renderedpages = [];
       this.rendereditems = [];
-      this.$store.dispatch('getFeeditems', { timelineSlug: 'home', page: 1, limit: this.limit });
+      this.$store.dispatch('getFeeditems', { timelineId: this.timelineId, page: 1, limit: this.limit });
     },
 
     // see: https://peachscript.github.io/vue-infinite-loading/guide/#installation
     loadMore() {
       if ( !this.is_loading && (this.nextPage <= this.lastPage) ) {
         console.log('loadMore', { current: this.currentPage, last: this.lastPage, next: this.nextPage });
-        this.$store.dispatch('getFeeditems', { timelineSlug: 'home', page: this.nextPage, limit: this.limit });
-        this.isFetching = false; // not, not synchrnous, use is_loading to check for complete transfer
+        this.$store.dispatch('getFeeditems', { timelineId: this.timelineId, page: this.nextPage, limit: this.limit });
       }
     },
 
@@ -126,10 +113,6 @@ export default {
     },
   },
 
-  directives: { 
-    //infiniteScroll,
-  },
-
   components: {
     ShowPost,
   },
@@ -137,9 +120,4 @@ export default {
 </script>
 
 <style scoped>
-/*
-.small-text {
-font-size: 13px !important;
-}
- */
 </style>

@@ -1,28 +1,28 @@
 <template>
-  <div v-if="!is_loading && !!session_user" class="session_widget-crate tag-crate">
+  <div v-if="!is_loading" class="session_widget-crate tag-crate">
     <section>
 
       <b-card
-        :img-src="session_user.cover.filepath"
-        :img-alt="session_user.name"
+        :img-src="follower.cover.filepath"
+        :img-alt="follower.name"
         img-top
         tag="article"
         class="background"
         >
         <div class="avatar-img">
-          <a :href="`/${session_user.username}`">
-            <b-img thumbnail rounded="circle" class="w-100 h-100" :src="session_user.avatar.filepath" :alt="session_user.name" :title="session_user.name"></b-img>
+          <a :href="`/${follower.username}`">
+            <b-img thumbnail rounded="circle" class="w-100 h-100" :src="follower.avatar.filepath" :alt="follower.name" :title="follower.name"></b-img>
           </a>
         </div>
 
         <div class="avatar-profile d-flex justify-content-between">
           <div class="avatar-details">
             <h2 class="avatar-name my-0">
-              <a :href="`/${session_user.username}`">{{ session_user.name }}</a>
-              <span v-if="session_user.verified" class="verified-badge"><b-icon icon="check-circle-fill" variant="success" font-scale="1"></b-icon></span>
+              <a :href="`/${follower.username}`">{{ follower.name }}</a>
+              <span v-if="follower.verified" class="verified-badge"><b-icon icon="check-circle-fill" variant="success" font-scale="1"></b-icon></span>
             </h2>
             <p class="avatar-mail my-0">
-              <a :href="`/${session_user.username}`">@{{ session_user.username }}</a>
+              <a :href="`/${follower.username}`">@{{ follower.username }}</a>
             </p>
           </div>
           <div class="go-live">
@@ -32,27 +32,27 @@
 
         <ul class="activity-list list-group list-group-horizontal justify-content-center mt-3">
           <li class="list-group-item">
-            <a :href="`/${session_user.username}/posts`">
+            <a :href="`/${follower.username}/posts`">
               <div class="activity-name">Posts</div>
-              <div class="activity-count">{{ session_user.post_count }}</div>
+              <div class="activity-count">{{ follower.post_count }}</div>
             </a>
           </li>
           <li class="list-group-item">
-            <a :href="`/${session_user.username}/followers`">
+            <a :href="`/${follower.username}/followers`">
               <div class="activity-name">Fans</div>
-              <div class="activity-count">{{ session_user.follower_count }}</div>
+              <div class="activity-count">{{ follower.follower_count }}</div>
             </a>
           </li>
           <li class="list-group-item">
-            <a :href="`/${session_user.username}/following`">
+            <a :href="`/${follower.username}/following`">
               <div class="activity-name">Subscribed</div>
-              <div class="activity-count">{{ session_user.following_count }}</div>
+              <div class="activity-count">{{ follower.following_count }}</div>
             </a>
           </li>
           <li class="list-group-item">
-            <a :href="`/${session_user.username}/settings/earnings`">
+            <a :href="`/${follower.username}/settings/earnings`">
               <div class="activity-name">Earnings</div>
-              <div class="activity-count">${{ (session_user.earnings/100).toFixed(2) }}</div>
+              <div class="activity-count">${{ (follower.earnings/100).toFixed(2) }}</div>
             </a>
           </li>
         </ul>
@@ -69,18 +69,22 @@ import Vuex from 'vuex';
 export default {
 
   props: {
+    session_user: null,
+    timeline: null,
   },
 
   computed: {
-    ...Vuex.mapState(['session_user']),
     ...Vuex.mapState(['is_loading']),
+
+    follower() {
+      return this.timeline.user;
+    },
   },
 
   data: () => ({
   }),
 
   created() {
-    this.$store.dispatch('getMe');
   },
 
   methods: {
