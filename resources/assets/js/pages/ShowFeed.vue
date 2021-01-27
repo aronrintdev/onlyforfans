@@ -23,17 +23,13 @@
 
     </div>
 
-    <b-modal id="modal-send_tip" title="Send a Tip" hide-footer body-class="p-0">
+    <b-modal id="modal-send_tip" size="sm" title="Send a Tip" hide-footer body-class="p-0">
       <send-tip :session_user="session_user" :timeline="timeline"></send-tip>
     </b-modal>
 
     <b-modal id="modal-follow" title="Follow" ok-only>
       <p class="my-4">Follow Modal</p>
     </b-modal>
-
-    <b-toast id="example-toast" title="BootstrapVue" static no-auto-hide>
-      Hello, world! This is a toast message.
-    </b-toast>
 
   </div>
 </template>

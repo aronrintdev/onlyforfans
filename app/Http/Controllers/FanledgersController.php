@@ -20,7 +20,6 @@ class FanledgersController extends AppBaseController
         $sessionUser = Auth::user();
 
         $request->validate([
-            'timeline_id' => 'required|exists:timelines,id',
             'fltype' => 'required|alpha_dash',
             'seller_id' => 'required|exists:users,id',
             'purchaseable_id' => 'required|numeric',
@@ -29,12 +28,11 @@ class FanledgersController extends AppBaseController
         ]);
 
         $attrs = $request->only([
-            'timeline_id',
             'fltype',
             'seller_id',
             'purchaseable_id',
             'purchaseable_type',
-            'amount',
+            'base_unit_cost_in_cents',
         ]);
 
         $attrs['purchaser_id'] = $sessionUser->id;

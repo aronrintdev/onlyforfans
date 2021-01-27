@@ -22,10 +22,12 @@
 
         <b-form-spinbutton
           id="tip-amount"
+          class="w-100 mx-auto tag-tip_amount"
           v-model="formPayload.amount"
-          min="3"
+          :formatter-fn="niceCurrency"
+          min="5"
           max="100"
-          step="3"
+          step="5"
           ></b-form-spinbutton>
 
         <textarea v-model="formPayload.notes" cols="60" rows="5" class="w-100 mt-3" placeholder="Write a message"></textarea>
@@ -59,7 +61,7 @@ export default {
 
   data: () => ({
     formPayload: {
-      amount: 3,
+      amount: 5,
       notes: '',
     },
   }),
@@ -69,13 +71,15 @@ export default {
 
   methods: {
 
+    niceCurrency(v) {
+      //return `$ ${v}`;
+      return new Intl.NumberFormat('en-US',
+        { style: 'currency', currency: 'USD' }
+      ).format(v);
+    },
+
     async sendTip(e) {
       e.preventDefault();
-
-      console.log('toast');
-      $bvToast.show('example-toast');
-      return false;
-
       const url = `/fanledgers`;
       const response = await axios.post(url, {
         fltype:  'tip',
@@ -86,7 +90,13 @@ export default {
         notes: this.formPayload.notes || '',
       });
 
-      // close modal, confirm message
+      this.$bvModal.hide('modal-send_tip');
+
+      this.$root.$bvToast.toast(`Tip sent to ${this.timeline.username}`, {
+        toaster: 'b-toaster-top-center',
+        title: 'Success!',
+      });
+
 
     },
 
@@ -126,5 +136,4 @@ body .user-details .tag-username {
   color: #859AB5;
   text-transform: capitalize;
 }
-
 </style>
