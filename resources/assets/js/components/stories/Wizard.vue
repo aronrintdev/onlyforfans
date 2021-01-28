@@ -5,7 +5,7 @@
 
       <aside class="col-md-3">
 
-        <h2 class="my-3">My Story</h2>
+        <h2 class="my-3">My Stories</h2>
 
         <article>
           <b-media no-body>
