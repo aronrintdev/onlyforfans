@@ -34,7 +34,7 @@ class UsersTableSeeder extends Seeder
             'country' => 'US',
             'is_follow_for_free' => 1,
         ]);
-        $user->assignRole('Super Admin');
+        $user->assignRole('super-admin');
         unset($user);
 
         // --
@@ -53,7 +53,7 @@ class UsersTableSeeder extends Seeder
             'country' => 'US',
             'is_follow_for_free' => 1, // if not free need to set price as well
         ]);
-        $user->assignRole('Super Admin');
+        $user->assignRole('super-admin');
         unset($user);
 
         // --
@@ -72,7 +72,7 @@ class UsersTableSeeder extends Seeder
             'country' => 'US',
             'is_follow_for_free' => 1, // if not free need to set price as well
         ]);
-        $user->assignRole('Super Admin');
+        $user->assignRole('super-admin');
         unset($user);
 
         // --
@@ -91,7 +91,7 @@ class UsersTableSeeder extends Seeder
             'country' => 'US',
             'is_follow_for_free' => 1, // if not free need to set price as well
         ]);
-        $user->assignRole('Super Admin');
+        $user->assignRole('super-admin');
         unset($user);
 
         // +++ Create non-admin users +++

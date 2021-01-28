@@ -5,7 +5,6 @@ namespace App\Providers;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 
-
 class AuthServiceProvider extends ServiceProvider
 {
     /**
@@ -31,7 +30,7 @@ class AuthServiceProvider extends ServiceProvider
         // Implicitly grant "Super Admin" role all permissions
         //  e.i. all gate-related function return true for user->can() / user->hasPermission()
         Gate::before(function($user, $ability) {
-            return $user->hasRole('Super Admin') ? true : null;
+            return $user->hasRole('super-admin') ? true : null;
         });
 
         // Access to `/laravel-websockets`

@@ -258,7 +258,7 @@ class User extends Authenticatable implements PaymentSendable, PaymentReceivable
     public function getAvatarAttribute($value) {
         return $this->timeline->avatar 
             ? $this->timeline->avatar
-            : url('user/avatar/default-'.$this->gender.'-avatar.png');
+            : (object) [ 'filepath' => url('user/avatar/default-' . $this->gender . '-avatar.png') ];
     }
 
     public function getCoverAttribute($value) {
@@ -514,6 +514,13 @@ class User extends Authenticatable implements PaymentSendable, PaymentReceivable
 
     public function blockedProfiles() {
         return $this->hasMany(BlockedProfile::class, 'blocked_by');
+    }
+
+    /**
+     * Checks if user is blocked by another user
+     */
+    public function isBlockedBy(User $user) : bool {
+        return $user->blockedProfiles()->where('blockee_id', $this->id)->count() > 0;
     }
 
 

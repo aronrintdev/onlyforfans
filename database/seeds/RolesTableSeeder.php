@@ -17,7 +17,7 @@ class RolesTableSeeder extends Seeder
     public function run()
     {
 
-        $role = Role::firstOrNew(['name' => 'Super Admin', 'guard_name' => 'web']);
+        $role = Role::firstOrNew(['name' => 'super-admin', 'guard_name' => 'web']);
         $role->display_name = 'Super Admin';
         $role->description = 'Access to everything';
         $role->save();
