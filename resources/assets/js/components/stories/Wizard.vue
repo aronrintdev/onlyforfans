@@ -5,7 +5,7 @@
 
       <aside class="col-md-3">
 
-        <h2 class="my-3">My Story</h2>
+        <h2 class="my-3">My Stories</h2>
 
         <article>
           <b-media no-body>
@@ -22,7 +22,7 @@
 
         <div v-if="step===steps.SELECT_STYPE" class="">
           <b-list-group>
-            <b-list-group-item v-for="s in stories" :key="s.id" v-bind:style="{ backgroundColor: s.cattrs['background-color'] }">
+            <b-list-group-item v-for="s in stories" :key="s.id" v-bind:style="{ backgroundColor: parseBackgroundColor(s) }">
               <article v-if="s.stype==='text'">
                 {{ s.content }}
               </article>
@@ -107,6 +107,9 @@ export default {
       type: Array,
       required: true
     },
+  },
+
+  computed: {
   },
 
   data: () => ({
@@ -196,6 +199,14 @@ export default {
       this.mediafile = mediafile;
       this.imgPreviewUrl = URL.createObjectURL(mediafile);
       this.step = this.steps.PREVIEW;
+    },
+
+    parseBackgroundColor(story) {
+      if ( story.stype==='image' ) {
+        return '#fff';
+      } else {
+        return story.cattrs?.['background-color'] || 'yellow';
+      }
     },
 
   },

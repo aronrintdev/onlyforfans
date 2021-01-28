@@ -31,17 +31,21 @@ class UsersController extends AppBaseController
     {
         $sessionUser = Auth::user(); // sender of tip
 
-        $sessionUser->post_count = $sessionUser->timeline->posts->count();
-        $sessionUser->follower_count = $sessionUser->timeline->followers->count();
-        $sessionUser->following_count = $sessionUser->followedtimelines->count();
-        $sessionUser->subscribed_count = 0; // %TODO $sessionUser->timeline->subscribed->count();
-
         $sales = Fanledger::where('seller_id', $sessionUser->id)->sum('total_amount');
-        $sessionUser->earnings = $sales;
+
+        $timeline => $sessionUser->timeline;
+        $timeline->userstats = [ // %FIXME DRY
+            'post_count' => $timeline->posts->count(),
+            'like_count' => $timeline->user->postlikes->count(),
+            'follower_count' => $timeline->followers->count(),
+            'following_count' => $timeline->user->followedtimelines->count(),
+            'subscribed_count' => 0, // %TODO $sessionUser->timeline->subscribed->count()
+            'earnings' => $sales,
+        ];
 
         return response()->json([
             'session_user' => $sessionUser,
-            'timeline' => $sessionUser->timeline,
+            'timeline' => $timeline,
         ]);
     }
 

@@ -13,6 +13,7 @@ use App\Setting;
 use App\Libs\UserMgr;
 use App\Libs\FeedMgr;
 
+use App\Fanledger;
 use App\Timeline;
 //use App\Enums\PaymentTypeEnum;
 
@@ -59,12 +60,15 @@ class TimelinesController extends AppBaseController
     {
         $sessionUser = Auth::user();
         $timeline = Timeline::with('user')->where('username', $username)->firstOrFail();
+        $sales = Fanledger::where('seller_id', $timeline->user->id)->sum('total_amount');
 
-        $timeline->userstats = [
+        $timeline->userstats = [ // %FIXME DRY
             'post_count' => $timeline->posts->count(),
             'like_count' => $timeline->user->postlikes->count(),
             'follower_count' => $timeline->followers->count(),
             'following_count' => $timeline->user->followedtimelines->count(),
+            'subscribed_count' => 0, // %TODO $sessionUser->timeline->subscribed->count()
+            'earnings' => $sales,
         ];
 
         return view('timelines.show', [
@@ -77,10 +81,21 @@ class TimelinesController extends AppBaseController
     public function home(Request $request)
     {
         $sessionUser = Auth::user();
-//dd( $sessionUser->timeline );
+        $timeline = $sessionUser->timeline()->with('user')->first();
+        $sales = Fanledger::where('seller_id', $timeline->user->id)->sum('total_amount');
+
+        $timeline->userstats = [ // %FIXME DRY
+            'post_count' => $timeline->posts->count(),
+            'like_count' => $timeline->user->postlikes->count(),
+            'follower_count' => $timeline->followers->count(),
+            'following_count' => $timeline->user->followedtimelines->count(),
+            'subscribed_count' => 0, // %TODO $sessionUser->timeline->subscribed->count()
+            'earnings' => $sales,
+        ];
+
         return view('timelines.home', [
             'sessionUser' => $sessionUser,
-            'timeline' => $sessionUser->timeline()->with('user')->first(),
+            'timeline' => $timeline,
             //'myVault' => $myVault,
             //'vaultRootFolder' => $vaultRootFolder,
         ]);

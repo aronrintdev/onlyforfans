@@ -34,25 +34,25 @@
           <li class="list-group-item">
             <a :href="`/${follower.username}/posts`">
               <div class="activity-name">Posts</div>
-              <div class="activity-count">{{ follower.post_count }}</div>
+              <div class="activity-count">{{ stats.post_count }}</div>
             </a>
           </li>
           <li class="list-group-item">
             <a :href="`/${follower.username}/followers`">
               <div class="activity-name">Fans</div>
-              <div class="activity-count">{{ follower.follower_count }}</div>
+              <div class="activity-count">{{ stats.follower_count }}</div>
             </a>
           </li>
           <li class="list-group-item">
             <a :href="`/${follower.username}/following`">
               <div class="activity-name">Subscribed</div>
-              <div class="activity-count">{{ follower.following_count }}</div>
+              <div class="activity-count">{{ stats.following_count }}</div>
             </a>
           </li>
           <li class="list-group-item">
             <a :href="`/${follower.username}/settings/earnings`">
               <div class="activity-name">Earnings</div>
-              <div class="activity-count">${{ (follower.earnings/100).toFixed(2) }}</div>
+              <div class="activity-count">${{ (stats.earnings/100).toFixed(2) }}</div>
             </a>
           </li>
         </ul>
@@ -78,6 +78,9 @@ export default {
 
     follower() {
       return this.timeline.user;
+    },
+    stats() {
+      return this.timeline.userstats;
     },
   },
 
