@@ -74,7 +74,6 @@
           <text-story-preview 
                                       v-if="stype==='text'" 
                                       v-bind:attrs="storyAttrs" 
-                                      username="dtoUser.username"
                                       ></text-story-preview>
         </div>
 
@@ -149,7 +148,8 @@ export default {
 
   methods: {
     async shareStory() {
-      const url = `/${this.dtoUser.username}/stories`;
+      //const url = `/${this.dtoUser.username}/stories`;
+      const url = `/stories`;
       let payload = new FormData();
       const json = JSON.stringify({
         stype: this.stype,

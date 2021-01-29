@@ -67,6 +67,9 @@ class Post extends Model implements Ownable, Deletable, PaymentReceivable
     public function sharees() { // can be shared with many users (via [shareables])
         return $this->morphToMany('App\User', 'shareable', 'shareables', 'shareable_id', 'sharee_id')->withTimestamps();
     }
+    public function likes() {
+        return $this->morphToMany('App\User', 'likeable', 'likeables', 'likeable_id', 'likee_id')->withTimestamps();
+    }
     //public function shares() {
         //return $this->belongsToMany('App\User', 'post_shares', 'post_id', 'user_id');
     //}
@@ -94,12 +97,10 @@ class Post extends Model implements Ownable, Deletable, PaymentReceivable
         return $this->belongsTo('App\Timeline');
     }
 
-    public function likes() {
-        return $this->belongsToMany('App\User', 'post_likes', 'post_id', 'user_id')->withTimestamps();
-    }
-    public function users_liked() { // %TODO %DEPRECATE
-        return $this->belongsToMany('App\User', 'post_likes', 'post_id', 'user_id')->withTimestamps();
-    }
+
+    //public function users_liked() { // %TODO %DEPRECATE
+        //return $this->belongsToMany('App\User', 'post_likes', 'post_id', 'user_id')->withTimestamps();
+    //}
 
     //public function tip() {
         //return $this->belongsToMany('App\User', 'post_tips', 'post_id', 'user_id')->withPivot('amount')->withTimestamps();

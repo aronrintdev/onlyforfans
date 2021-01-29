@@ -438,24 +438,9 @@ class User extends Authenticatable implements PaymentSendable, PaymentReceivable
         return $this->belongsToMany('App\User', 'comment_likes', 'user_id', 'comment_id');
     }
 
-    public function postLikes() {
-        return $this->belongsToMany('App\User', 'post_likes', 'user_id', 'post_id');
-    }
-
-    public function postReports() {
-        return $this->belongsToMany('App\User', 'post_reports', 'reporter_id', 'post_id')->withPivot('status');
-    }
-
-    public function postTags() {
-        return $this->belongsToMany('App\User', 'post_tags', 'user_id', 'post_id')->withPivot('status');
-    }
-
-    public function notifiedBy() {
-        return $this->hasMany('App\Notification', 'notified_by', 'id');
-    }
-
-    public function timelineReports() {
-        return $this->belongsToMany('App\User', 'timeline_reports', 'reporter_id', 'timeline_id')->withPivot('status');
+    public function likedposts() { // posts that I've liked (?)
+        return 'tbd';
+        //return $this->belongsToMany('App\User', 'post_likes', 'user_id', 'post_id');
     }
 
     public function userEvents() {

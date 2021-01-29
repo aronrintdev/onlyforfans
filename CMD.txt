@@ -40,3 +40,6 @@ $ php artisan tinker
 %%%
 ref: https://bitbucket.org/mjmdesign/fans-platform/pull-requests/19
 $ php artisan websocket:serve
+
+%%%
+find app resources/views resources/assets \( -name "*.php" -o -name "*.vue" \) | xargs grep stories

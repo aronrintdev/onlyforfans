@@ -27,6 +27,12 @@ class CommentsController extends AppBaseController
         ]);
     }
 
+    public function show(Request $request, Comment $comment)
+    {
+        return response()->json([
+            'comment' => $comment,
+        ]);
+    }
 
     public function store(Request $request)
     {
@@ -36,7 +42,6 @@ class CommentsController extends AppBaseController
             //'parent_id' => 'exists:comments,id', // %TODO
             'description' => 'required|string|min:1',
         ]);
-
         $attrs = $request->all();
 
         try {
@@ -50,6 +55,31 @@ class CommentsController extends AppBaseController
         ]);
     }
 
+    public function update(Request $request, Comment $comment)
+    {
+        $request->validate([
+            'description' => 'required|string|min:1',
+        ]);
+        $attrs = $request->only('description');
+
+        try {
+            $comment = Comment::create($attrs);
+        } catch (Exception $e) {
+            throw $e;
+        }
+
+        return response()->json([
+            'comment' => $comment,
+        ]);
+    }
+
+    public function destroy(Request $request, Comment $comment)
+    {
+        $comment->delete();
+        return response()->json([]);
+    }
+
+    /*
     public function toggleLike(Request $request, Comment $comment)
     {
         $sessionUser = Auth::user();
@@ -71,5 +101,6 @@ class CommentsController extends AppBaseController
             'like_count' => $comment->likes()->count(),
         ]);
     }
+     */
 
 }

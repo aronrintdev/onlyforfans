@@ -2,9 +2,9 @@
   <div  v-if="!is_loading" class="story_bar-crate tag-crate row mb-3 mx-0">
 
     <section class="d-flex">
-      <div @click="createStory()"><a :href="`/${username}/stories/create`"><b-icon icon="plus-circle" variant="primary" font-scale="2"></b-icon></a></div>
+      <div @click="createStory()"><a :href="`/stories/create`"><b-icon icon="plus-circle" variant="primary" font-scale="2"></b-icon></a></div>
       <div v-for="(s, idx) in stories" :key="s.id" class="ml-3">
-        <a :href="`/${username}/stories/player`"
+        <a :href="`/stories/player`"
            class="box-story">
           <b-img v-if='s.stype==="image"' thumbnail fluid rounded="circle" class="p-0" :src="s.mediafiles[0].filepath" alt="Story Thumbnail"></b-img>
           <span v-else class="tag-colorfill" :style="`background-color: ${bgColor(s)}`">&nbsp;</span>
@@ -29,9 +29,11 @@ export default {
     ...Vuex.mapState(['stories']),
     ...Vuex.mapState(['is_loading']),
 
+    /*
     username() { // story owner
       return this.timeline.username;
     },
+    */
   },
 
   data: () => ({

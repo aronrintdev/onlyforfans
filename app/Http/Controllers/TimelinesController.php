@@ -64,7 +64,7 @@ class TimelinesController extends AppBaseController
 
         $timeline->userstats = [ // %FIXME DRY
             'post_count' => $timeline->posts->count(),
-            'like_count' => $timeline->user->postlikes->count(),
+            'like_count' => 0, // %TODO $timeline->user->postlikes->count(),
             'follower_count' => $timeline->followers->count(),
             'following_count' => $timeline->user->followedtimelines->count(),
             'subscribed_count' => 0, // %TODO $sessionUser->timeline->subscribed->count()
@@ -86,7 +86,7 @@ class TimelinesController extends AppBaseController
 
         $timeline->userstats = [ // %FIXME DRY
             'post_count' => $timeline->posts->count(),
-            'like_count' => $timeline->user->postlikes->count(),
+            'like_count' => 0, // %TODO $timeline->user->postlikes->count(),
             'follower_count' => $timeline->followers->count(),
             'following_count' => $timeline->user->followedtimelines->count(),
             'subscribed_count' => 0, // %TODO $sessionUser->timeline->subscribed->count()

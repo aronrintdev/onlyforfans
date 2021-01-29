@@ -14,7 +14,7 @@ use App\Enums\MediafileTypeEnum;
 
 class StoriesController extends AppBaseController
 {
-    public function player(Request $request, $username)
+    public function player(Request $request)
     {
         $sessionUser = Auth::user();
         $stories = Story::where('timeline_id', $sessionUser->timeline->id)->get();
@@ -40,7 +40,7 @@ class StoriesController extends AppBaseController
         ]);
     }
 
-    public function index(Request $request, $username)
+    public function index(Request $request)
     {
         //$query = Story::with('user', 'replies.user');
         $sessionUser = Auth::user();
@@ -66,7 +66,7 @@ class StoriesController extends AppBaseController
         ]);
     }
 
-    public function create(Request $request, $username)
+    public function create(Request $request)
     {
         $sessionUser = Auth::user();
         /*
@@ -97,7 +97,7 @@ class StoriesController extends AppBaseController
         ]);
     }
 
-    public function store(Request $request, $username)
+    public function store(Request $request)
     {
         $request['attrs'] = json_decode($request['attrs'], true); // decode 'complex' data
         
