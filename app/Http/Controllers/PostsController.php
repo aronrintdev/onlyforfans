@@ -14,6 +14,33 @@ use App\Enums\PostTypeEnum;
 
 class PostsController extends AppBaseController
 {
+    public function index(Request $request)
+    {
+        $sessionUser = Auth::user();
+        $sessionTimeline = $sessionUser->timeline;
+
+        $filters = $request->input('filters', []);
+
+        $query = Post::query();
+        if ( !$sessionUser->isAdmin() ) {
+            $query->where('timeline_id', $sessionTimeline->id);
+        }
+
+        foreach ($filters as $f) {
+            switch ($f['key']) {
+                case 'ptype':
+                    $query->where('type', $f['val']);
+                    break;
+            }
+        }
+        $posts = $query->get();
+
+        return response()->json([
+            'posts' => $posts,
+        ]);
+    }
+
+
     public function store(Request $request)
     {
         $sessionUser = Auth::user();
@@ -100,6 +127,7 @@ class PostsController extends AppBaseController
         ]);
     }
 
+    /*
     public function toggleLike(Request $request, Post $post)
     {
         $sessionUser = Auth::user();
@@ -176,4 +204,5 @@ class PostsController extends AppBaseController
             'post' => $post ?? null,
         ]);
     }
+     */
 }

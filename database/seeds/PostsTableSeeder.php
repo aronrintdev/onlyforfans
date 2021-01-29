@@ -1,7 +1,8 @@
 <?php
-
 namespace Database\Seeders;
 
+use Symfony\Component\Console\Output\ConsoleOutput;
+use Illuminate\Support\Facades\Config;
 use Carbon\Carbon;
 
 use App\User;
@@ -14,22 +15,41 @@ use App\Libs\FactoryHelpers;
 class PostsTableSeeder extends Seeder
 {
     private static $PROB_POST_HAS_IMAGE = 70; // 70, 1;
+    private $output;
 
     public function run()
     {
-        $this->command->info('Running Seeder: PostsTableSeeder...');
+        $this->output = new ConsoleOutput();
+
+        $appEnv = Config::get('app.env');
+        switch ($appEnv) {
+            case 'testing':
+                self::$PROB_POST_HAS_IMAGE = 0;
+                $MAX_POST_COUNT = 5;
+                break;
+            case 'local':
+                self::$PROB_POST_HAS_IMAGE = 70;
+                $MAX_POST_COUNT = 20;
+                break;
+            default:
+                self::$PROB_POST_HAS_IMAGE = 70;
+                $MAX_POST_COUNT = 20;
+        }
+
+        $this->output->writeln('Running Seeder: PostsTableSeeder, env: '.$appEnv.', #: '.$MAX_POST_COUNT.' ...');
+
         $faker = \Faker\Factory::create();
 
         // +++ Create ... +++
 
         $users = User::get();
 
-        $users->each( function($u) use(&$faker, &$users) {
+        $users->each( function($u) use(&$faker, &$users, $MAX_POST_COUNT) {
 
             // $u is the user who will own the post being created (ie, as well as timeline associated with the post)...
 
-            $max = $faker->numberBetween(2,20);
-            $this->command->info("  - Creating $max posts for user ".$u->name);
+            $max = $faker->numberBetween(2,$MAX_POST_COUNT);
+            $this->output->writeln("  - Creating $max posts for user ".$u->name);
 
             collect(range(1,$max))->each( function() use(&$faker, &$users, &$u) {
 
@@ -63,6 +83,7 @@ class PostsTableSeeder extends Seeder
                     //'description' => 'foo',
                 ]);
 
+                /*
                 // LIKES - Select random users to like this post...
                 $likers = FactoryHelpers::parseRandomSubset($users, 20);
                 $likee = $u;
@@ -111,64 +132,10 @@ class PostsTableSeeder extends Seeder
                         $post->usersPinned()->attach($pinner->id);
                     }
                 });
+                 */
 
             });
 
         });
     }
-
-
-
-    /*
-    private function oldSeeder() 
-    {
-        //Populate dummy posts
-        factory(Post::class, 260)->create();
-
-        //Seeding post follows
-        $faker = Faker\Factory::create();
-        $posts = Post::all();
-
-        foreach ($posts as $post) {
-            $follows = $faker->randomElements(['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30', '31', '32', '33', '34', '35', '36', '37', '38'], $faker->numberBetween(1, 3));
-
-            $post->notifications_user()->sync($follows);
-        }
-
-        //Seeding post likes
-        foreach ($posts as $post) {
-            $likes = $faker->randomElements(['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30', '31', '32', '33', '34', '35', '36', '37', '38'], $faker->numberBetween(1, 3));
-
-            $post->users_liked()->sync($likes);
-        }
-
-        //Seeding post media
-        foreach ($posts as $post) {
-            $media = $faker->randomElements(['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30', '31', '32', '33', '34', '35', '36', '37', '38'], $faker->numberBetween(1, 3));
-
-            $post->images()->sync($media);
-        }
-
-        //Seeding post shares
-        foreach ($posts as $post) {
-            $shares = $faker->randomElements(['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30', '31', '32', '33', '34', '35', '36', '37', '38'], $faker->numberBetween(1, 3));
-
-            $post->users_shared()->sync($shares);
-        }
-
-        //Seeding post reports
-        // foreach ($posts as $post) {
-
-        //     $reports = $faker->randomElements(array ('1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30','31','32','33','34','35','36','37','38'), $faker->numberBetween(1,3));
-
-        //     $syncReports = array();
-        //     foreach ($reports as $key => $value) {
-        //         $syncReports[$value]  = array('status'=> 'approved');
-        //     }
-
-        //     $post->reports()->sync($syncReports);
-
-        // }
-    }
-     */
 }

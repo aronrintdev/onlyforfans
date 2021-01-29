@@ -386,6 +386,11 @@ class User extends Authenticatable implements PaymentSendable, PaymentReceivable
         return $this->events()->where('events.id', $id)->first();
     }
 
+    public function isAdmin() : bool
+    {
+        return false; // %TODO
+    }
+
     public function is_eventadmin($user_id, $event_id) {
         $chk_isadmin = Event::where('id', $event_id)->where('user_id', $user_id)->first();
 

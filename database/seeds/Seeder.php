@@ -16,6 +16,10 @@ class Seeder extends ParentSeeder
      * Set to ['all'] to run in all environments.
      */
     protected $environments = [ 'local', 'demo' ];
+    // Custom guard: extend the base seeder in there you can set that to all to have the seeder run in all 
+    // environments including production. By default it is set to local and demo.  So if you have a testing 
+    // specific seeder you can set it to [ 'testing' ] and it will only run when the environment is testing. 
+    // Just remember to extend the base seeder to get it to work.
 
     /**
      * Checks if seeder is allowed to run in current environment

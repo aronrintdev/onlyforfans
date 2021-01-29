@@ -1,6 +1,7 @@
 <?php
 namespace App\Libs;
 
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Support\Collection; 
@@ -15,7 +16,7 @@ class FactoryHelpers {
     // Adds avatar & cover images
     public static function updateUser(&$user, $attrs)
     {
-        dump('Updating user: '.$attrs['email']);
+        //dump('Updating user: '.$attrs['email']);
         $user->email = $attrs['email'];
         if ( array_key_exists('gender', $attrs) ) {
             $user->gender = $attrs['gender'];
@@ -28,13 +29,18 @@ class FactoryHelpers {
         }
         $user->save();
 
-        $avatar = self::createImage(MediafileTypeEnum::AVATAR);
-        $cover = self::createImage(MediafileTypeEnum::COVER);
+        if ( Config::get('app.env') !== 'testing' ) {
+            $avatar = self::createImage(MediafileTypeEnum::AVATAR);
+            $cover = self::createImage(MediafileTypeEnum::COVER);
+        } else {
+            $avatar = null;
+            $cover = null;
+        }
         $timeline = $user->timeline;
         $timeline->username = $attrs['username'];
         $timeline->name = $attrs['name'];
-        $timeline->avatar_id = $avatar->id;
-        $timeline->cover_id = $cover->id;
+        $timeline->avatar_id = $avatar->id ?? null;
+        $timeline->cover_id = $cover->id ?? null;
         $timeline->save();
 
         //unset($user, $timeline);
