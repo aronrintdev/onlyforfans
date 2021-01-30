@@ -27,10 +27,12 @@ class RestCommentsTest extends TestCase
         // should return only comments for which session user is the author
 
         //$this->seed(\Database\Seeders\TestDatabaseSeeder::class);
-        $timeline = Timeline::has('posts','>=',1)->first(); // assume non-admin (%FIXME)
+        $timeline = Timeline::has('posts','>=',1)->first();
         $creator = $timeline->user;
 
-        $response = $this->actingAs($creator)->ajaxJSON('GET', route('comments.index'));
+        $response = $this->actingAs($creator)->ajaxJSON('GET', route('comments.index'), [
+            'user_id' => $creator->id,
+        ]);
         $response->assertStatus(200);
 
         $content = json_decode($response->content());
@@ -38,31 +40,36 @@ class RestCommentsTest extends TestCase
         $commentsR = collect($content->comments);
         $this->assertGreaterThan(0, $commentsR->count());
         $this->assertObjectHasAttribute('description', $commentsR[0]);
-        /*
         $commentsR->each( function($c) use(&$creator) { // all belong to owner
             $this->assertEquals($creator->id, $c->user_id);
         });
-         */
     }
 
     /**
-     *  @group OFF-devcomment
+     *  @group devcomment
+     */
+    public function test_can_not_index_general_comments()
+    {
+        // should return only comments for which session user is the author
+
+        //$this->seed(\Database\Seeders\TestDatabaseSeeder::class);
+        $timeline = Timeline::has('posts','>=',1)->first();
+        $creator = $timeline->user;
+        $response = $this->actingAs($creator)->ajaxJSON('GET', route('comments.index'));
+        $response->assertStatus(403);
+    }
+
+    /**
+     *  @group devcomment
      */
     public function test_can_show_my_comment()
     {
-        $timeline = Timeline::has('posts','>=',1)->first(); // assume non-admin (%FIXME)
+        $timeline = Timeline::has('posts','>=',1)->first();
         $creator = $timeline->user;
-        $post = $timeline->posts[0];
+        $comment = Comment::where('user_id', $creator->id)->first();
 
-        $response = $this->actingAs($creator)->ajaxJSON('GET', route('posts.show', $post->id));
+        $response = $this->actingAs($creator)->ajaxJSON('GET', route('comments.show', $comment->id));
         $response->assertStatus(200);
-
-        $content = json_decode($response->content());
-        $this->assertNotNull($content->post);
-        $postR = $content->post;
-        $this->assertNotNull($postR->description);
-        $this->assertNotNull($postR->timeline_id);
-        $this->assertEquals($postR->timeline_id, $timeline->id);
     }
 
     /**
@@ -70,7 +77,7 @@ class RestCommentsTest extends TestCase
      */
     public function test_can_show_followed_timelines_comment()
     {
-        $timeline = Timeline::has('posts','>=',1)->has('followers','>=',1)->first(); // assume non-admin (%FIXME)
+        $timeline = Timeline::has('posts','>=',1)->has('followers','>=',1)->first();
         $creator = $timeline->user;
         $post = $timeline->posts[0];
         $fan = $timeline->followers[0];

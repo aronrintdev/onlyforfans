@@ -19,58 +19,39 @@ class UsersTableSeeder extends Seeder
 
         // $adminRole = Role::where('name','admin')->firstOrFail();
 
-        // +++ Create admin users +++
-
-        $user = User::where('email', 'peter@peltronic.com')->first();
-        if (!$user) {
-            $user = User::factory()->create();
-        }
-        FactoryHelpers::updateUser($user, [
-            'name' => 'Peter G',
-            'username' => 'peter',
-            'email' => 'peter@peltronic.com',
-            'gender' => 'male',
-            'city' => 'Las Vegas',
-            'country' => 'US',
-            'is_follow_for_free' => 1,
-        ]);
-        $user->assignRole('Super Admin');
-        unset($user);
-
-        // --
-
-        $user = User::where('email', 'erik@hattervigsoftwaresolutions.com')->first();
-        if (!$user) {
-            $user = User::factory()->create();
-        }
-        $user = User::factory()->create();
-        FactoryHelpers::updateUser($user, [
-            'name' => 'Erik H',
-            'username' => 'erikh',
-            'email' => 'erik@hattervigsoftwaresolutions.com',
-            'gender' => 'male',
-            'city' => 'Rapid City',
-            'country' => 'US',
-            'is_follow_for_free' => 1, // if not free need to set price as well
-        ]);
-        $user->assignRole('Super Admin');
-        unset($user);
-
-        // --
-
         if ( $this->appEnv !== 'testing' ) {
 
-            $user = User::where('email', 'matt@mjmwebdesign.com')->first();
+            // +++ Create admin users +++
+
+            $user = User::where('email', 'peter@peltronic.com')->first();
+            if (!$user) {
+                $user = User::factory()->create();
+            }
+            FactoryHelpers::updateUser($user, [
+                'name' => 'Peter G',
+                'username' => 'peter',
+                'email' => 'peter@peltronic.com',
+                'gender' => 'male',
+                'city' => 'Las Vegas',
+                'country' => 'US',
+                'is_follow_for_free' => 1,
+            ]);
+            $user->assignRole('Super Admin');
+            unset($user);
+
+            // --
+
+            $user = User::where('email', 'erik@hattervigsoftwaresolutions.com')->first();
             if (!$user) {
                 $user = User::factory()->create();
             }
             $user = User::factory()->create();
             FactoryHelpers::updateUser($user, [
-                'name' => 'Matt M',
-                'username' => 'mattm',
-                'email' => 'matt@mjmwebdesign.com',
+                'name' => 'Erik H',
+                'username' => 'erikh',
+                'email' => 'erik@hattervigsoftwaresolutions.com',
                 'gender' => 'male',
-                'city' => 'Las Vegas',
+                'city' => 'Rapid City',
                 'country' => 'US',
                 'is_follow_for_free' => 1, // if not free need to set price as well
             ]);
@@ -79,22 +60,44 @@ class UsersTableSeeder extends Seeder
 
             // --
 
-            $user = User::where('email', 'realchadjohnson@gmail.com')->first();
-            if (!$user) {
+            if ( $this->appEnv !== 'testing' ) {
+
+                $user = User::where('email', 'matt@mjmwebdesign.com')->first();
+                if (!$user) {
+                    $user = User::factory()->create();
+                }
                 $user = User::factory()->create();
+                FactoryHelpers::updateUser($user, [
+                    'name' => 'Matt M',
+                    'username' => 'mattm',
+                    'email' => 'matt@mjmwebdesign.com',
+                    'gender' => 'male',
+                    'city' => 'Las Vegas',
+                    'country' => 'US',
+                    'is_follow_for_free' => 1, // if not free need to set price as well
+                ]);
+                $user->assignRole('Super Admin');
+                unset($user);
+
+                // --
+
+                $user = User::where('email', 'realchadjohnson@gmail.com')->first();
+                if (!$user) {
+                    $user = User::factory()->create();
+                }
+                $user = User::factory()->create();
+                FactoryHelpers::updateUser($user, [
+                    'name' => 'Chad J',
+                    'username' => 'chadj',
+                    'email' => 'realchadjohnson@gmail.com',
+                    'gender' => 'male',
+                    'city' => 'Las Vegas',
+                    'country' => 'US',
+                    'is_follow_for_free' => 1, // if not free need to set price as well
+                ]);
+                $user->assignRole('Super Admin');
+                unset($user);
             }
-            $user = User::factory()->create();
-            FactoryHelpers::updateUser($user, [
-                'name' => 'Chad J',
-                'username' => 'chadj',
-                'email' => 'realchadjohnson@gmail.com',
-                'gender' => 'male',
-                'city' => 'Las Vegas',
-                'country' => 'US',
-                'is_follow_for_free' => 1, // if not free need to set price as well
-            ]);
-            $user->assignRole('Super Admin');
-            unset($user);
 
         }
 
@@ -123,8 +126,6 @@ class UsersTableSeeder extends Seeder
 
         // +++ Update default user settings +++
 
-        //$users = User::get();
-        //foreach ($users as $u) {
         User::get()->each( function($u) {
             DB::table('user_settings')->insert([
                 'user_id'               => $u->id,

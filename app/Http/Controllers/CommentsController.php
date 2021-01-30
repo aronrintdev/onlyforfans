@@ -12,8 +12,23 @@ use App\Comment;
 
 class CommentsController extends AppBaseController
 {
+    // %TODO: refactor with scopes
     public function index(Request $request)
     {
+        $sessionUser = Auth::user();
+        //dd($request->all());
+
+        // %TODO: convert to validator (?)
+        if ( !$sessionUser->isAdmin() && !$request->hasAny('post_id', 'user_id') ) { // must have user or post id
+            abort(403);
+        }
+        if ( !$sessionUser->isAdmin() && !$request->has('post_id') && $request->has('user_id') ) {
+            if ( $sessionUser->id != $request->user_id ) { // must have user_id equal to session user 
+                abort(403);
+            }
+        }
+        // must have post_id and post must be accessible %TODO
+
         $query = Comment::with('user', 'replies.user');
 
         if ( $request->has('post_id') ) { // for specific post
@@ -22,13 +37,18 @@ class CommentsController extends AppBaseController
                 $query->whereNull('parent_id'); // only grab 1st level (%NOTE)
             }
         }
+        if ( $request->has('user_id') ) {
+            $query->where('user_id', $request->user_id);
+        }
 
+        /* %TODO: subgroup under 'filters' (need to update axios.GET calls as well in Vue)
         // Apply filters
         if ( $request->has('filters') ) {
-            if ( $request->has('user_id') ) { // comment author
-                $query->where('user_id', $request->user_id);
+            if ( $request->has('post_id', 'filters.user_id') ) { // comment author by post
+                $query->where('user_id', $request->filters['user_id']);
             }
         }
+         */
 
         return response()->json([
             'comments' => $query->get(),

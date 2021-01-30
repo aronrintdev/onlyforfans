@@ -230,14 +230,14 @@ class RestPostsTest extends TestCase
         ];
         $response = $this->actingAs($fan)->ajaxJSON('POST', route('comments.store', $fan->id), $payload);
         $response->assertStatus(201);
-        $post->refresh();
         $post->load('comments');
+        $post->refresh();
 
         $content = json_decode($response->content());
         $this->assertObjectHasAttribute('comment', $content);
         $commentR = $content->comment;
 
-        $this->assertNotNull('comments', $post);
+        $this->assertNotNull($post->comments);
         $this->assertGreaterThan(0, $post->comments->count());
         $this->assertEquals($origCommentCount+1, $post->comments->count());
 

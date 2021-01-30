@@ -46,8 +46,6 @@ class PostsController extends AppBaseController
         //$post->load('mediafiles', 'user', 'timeline');
         return response()->json([
             'post' => $post,
-            //'is_liked_by_session_user' => $post->users_liked->contains($sessionUser->id),
-            //'like_count' => $post->users_liked()->count(),
         ]);
     }
 
