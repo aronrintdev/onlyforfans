@@ -16,6 +16,7 @@ class UserMgr {
 
     public static function toggleFollow(User $follower, Timeline $timeline, array $attrs=[]) : ?array
     {
+        throw new Exception('deprecated');
 
         //if ( !checkBlockedProfiles($timeline->username) ){
             //throw new Exception('Unable to subscribe, error 159');
@@ -72,6 +73,7 @@ class UserMgr {
                 'type' => $action
             ]);
         } catch(Exception | Throwable $e) {
+            throw $e;
             Log::error(json_encode([
                 'msg' => 'UserMgr::follow() - Could not send notification',
                 'emsg' => $e->getMessage(),

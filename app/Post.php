@@ -124,7 +124,8 @@ class Post extends Model implements Ownable, Deletable, PaymentReceivable
     }
 
     public function comments() {
-        return $this->hasMany('App\Comment')->where('parent_id', null);
+        return $this->hasMany('App\Comment');
+        //return $this->hasMany('App\Comment')->where('parent_id', null);
     }
 
     public function images() {

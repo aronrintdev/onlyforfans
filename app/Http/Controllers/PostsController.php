@@ -94,6 +94,19 @@ class PostsController extends AppBaseController
 
         return response()->json([
             'post' => $post,
+        ], 201);
+    }
+
+    public function update(Request $request, Post $post)
+    {
+        $sessionUser = Auth::user();
+
+        $attrs = $request->only([ 'description' ]);
+        $post->fill($attrs);
+        $post->save();
+
+        return response()->json([
+            'post' => $post,
         ]);
     }
 

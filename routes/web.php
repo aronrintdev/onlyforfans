@@ -66,7 +66,7 @@ Route::group(['middleware' => ['auth']], function () {
     ]);
 
     // -- mediafiles: likeable | shareable | commentable (?) | tippable | purchaseable --
-    Route::get('/mediafiles/match', ['as'=>'mediafiless.match', 'uses' => 'MediafilessController@match']);
+    Route::get('/mediafiles/match', ['as'=>'mediafiles.match', 'uses' => 'MediafilesController@match']);
     Route::resource('mediafiles', 'MediafilesController', [ ]);
 
     // -- posts: likeable | shareable | commentable | tippable | purchaseable | pinnable --
