@@ -14,13 +14,14 @@ class TestDatabaseSeeder extends ParentSeeder
     public function run()
     {
         $output = new ConsoleOutput();
-        $output->writeln('Running Test DB seeder...');
+        //$output->writeln('Running Test DB seeder...');
 
         $this->call([
             UsernameRulesSeeder::class,
             RolesTableSeeder::class,
             UsersTableSeeder::class,
             PostsTableSeeder::class,
+            ShareablesTableSeeder::class,
             //StoriesTableSeeder::class,
         ]);
     }

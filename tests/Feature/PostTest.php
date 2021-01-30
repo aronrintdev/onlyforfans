@@ -2,23 +2,21 @@
 namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\WithFaker;
-//use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
-
-use Tests\TestCase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Http\File;
+use DB;
 
+use Tests\TestCase;
 use Database\Seeders\TestDatabaseSeeder;
 use App\Enums\PostTypeEnum;
 use App\Enums\PaymentTypeEnum;
-use App\User;
 use App\Post;
+use App\Timeline;
+use App\User;
 
 class PostTest extends TestCase
 {
-    //use RefreshDatabase, WithFaker;
-    //use WithFaker;
     use DatabaseTransactions, WithFaker;
 
     /**
@@ -28,7 +26,8 @@ class PostTest extends TestCase
     public function test_can_index_posts()
     {
         //$this->seed(\Database\Seeders\TestDatabaseSeeder::class);
-        $creator = User::has('posts', '>=', 1)->first(); // assume non-admin (%FIXME)
+        $timeline = Timeline::has('posts','>=',1)->first(); // assume non-admin (%FIXME)
+        $creator = $timeline->user;
 
         $response = $this->actingAs($creator)->ajaxJSON('GET', route('posts.index'));
         $response->assertStatus(200);
@@ -38,9 +37,11 @@ class PostTest extends TestCase
         $postsR = collect($content->posts);
         //dd($postsR, $postsR[0]);
         $this->assertGreaterThan(0, $postsR->count());
-        $this->assertNotNull($postsR[0]->description);
-        $this->assertNotNull($postsR[0]->timeline_id);
-        $this->assertEquals($postsR[0]->timeline_id, $creator->timeline->id);
+        //$this->assertNotNull($postsR[0]->description);
+        //$this->assertNotNull($postsR[0]->timeline_id);
+        $this->assertObjectHasAttribute('timeline_id', $postsR[0]);
+        $this->assertObjectHasAttribute('description', $postsR[0]);
+        $this->assertEquals($postsR[0]->timeline_id, $timeline->id);
     }
 
     /**
@@ -48,17 +49,19 @@ class PostTest extends TestCase
      */
     public function test_can_show_my_post()
     {
-        $creator = User::has('posts', '>=', 1)->first(); // assume non-admin (%FIXME)
-        $post = $creator->posts[0];
+        $timeline = Timeline::has('posts','>=',1)->first(); // assume non-admin (%FIXME)
+        $creator = $timeline->user;
+        $post = $timeline->posts[0];
 
         $response = $this->actingAs($creator)->ajaxJSON('GET', route('posts.show', $post->id));
         $response->assertStatus(200);
 
         $content = json_decode($response->content());
         $this->assertNotNull($content->post);
+        $postR = $content->post;
         $this->assertNotNull($postR->description);
         $this->assertNotNull($postR->timeline_id);
-        $this->assertEquals($postR->timeline_id, $creator->timeline->id);
+        $this->assertEquals($postR->timeline_id, $timeline->id);
     }
 
     /**
@@ -66,21 +69,21 @@ class PostTest extends TestCase
      */
     public function test_can_show_followed_timelines_post()
     {
-        $creator = User::has('posts', '>=', 1)
-            ->has('followers', '>=', 1)
-            ->first(); // assume non-admin (%FIXME)
-        $post = $creator->posts[0];
-        $fan = $creator->followers[0];
+        $timeline = Timeline::has('posts','>=',1)->has('followers','>=',1)->first(); // assume non-admin (%FIXME)
+        $creator = $timeline->user;
+        $post = $timeline->posts[0];
+        $fan = $timeline->followers[0];
 
         $response = $this->actingAs($fan)->ajaxJSON('GET', route('posts.show', $post->id));
         $response->assertStatus(200);
 
         $content = json_decode($response->content());
         $this->assertNotNull($content->post);
-        $this->assertNotNull($postR->timeline_id);
-        $this->assertEquals($postR->timeline_id, $creator->timeline->id);
+        $postR = $content->post;
+        $this->assertObjectHasAttribute('timeline_id', $postR);
+        $this->assertEquals($postR->timeline_id, $timeline->id);
 
-        // %TODO: can not show unfollowed timeline's post
+        // %TODO: test can not show unfollowed timeline's post
     }
 
     /**
@@ -88,11 +91,11 @@ class PostTest extends TestCase
      */
     public function test_can_store_post()
     {
-        $creator = User::has('posts', '>=', 1)
-            ->first(); // assume non-admin (%FIXME)
+        $timeline = Timeline::has('posts','>=',1)->first(); // assume non-admin (%FIXME)
+        $creator = $timeline->user;
 
         $payload = [
-            'timeline_id' => $creator->timeline->id,
+            'timeline_id' => $timeline->id,
             'description' => $this->faker->realText,
         ];
         $response = $this->actingAs($creator)->ajaxJSON('POST', route('posts.store'), $payload);
@@ -100,8 +103,9 @@ class PostTest extends TestCase
 
         $content = json_decode($response->content());
         $this->assertNotNull($content->post);
-        $this->assertNotNull($content->description);
-        $this->assertEquals($payload['description'], $content->description);
+        $postR = $content->post;
+        $this->assertNotNull($postR->description);
+        $this->assertEquals($payload['description'], $postR->description);
     }
 
     /**
@@ -109,9 +113,9 @@ class PostTest extends TestCase
      */
     public function test_can_update_post()
     {
-        $creator = User::has('posts', '>=', 1)
-            ->first(); // assume non-admin (%FIXME)
-        $post = $creator->posts[0];
+        $timeline = Timeline::has('posts','>=',1)->first(); // assume non-admin (%FIXME)
+        $creator = $timeline->user;
+        $post = $timeline->posts[0];
 
         $payload = [
             'description' => 'updated text',
@@ -121,8 +125,9 @@ class PostTest extends TestCase
 
         $content = json_decode($response->content());
         $this->assertNotNull($content->post);
-        $this->assertNotNull($content->description);
-        $this->assertEquals($payload['description'], $content->description);
+        $postR = $content->post;
+        $this->assertNotNull($postR->description);
+        $this->assertEquals($payload['description'], $postR->description);
     }
 
     /**
@@ -130,9 +135,9 @@ class PostTest extends TestCase
      */
     public function test_can_destroy_post()
     {
-        $creator = User::has('posts', '>=', 2)
-            ->first(); // assume non-admin (%FIXME)
-        $post = $creator->posts[0];
+        $timeline = Timeline::has('posts','>=',1)->first(); // assume non-admin (%FIXME)
+        $creator = $timeline->user;
+        $post = $timeline->posts[0];
         $response = $this->actingAs($creator)->ajaxJSON('DELETE', route('posts.destroy', $post->id));
         $response->assertStatus(200);
 
@@ -145,23 +150,43 @@ class PostTest extends TestCase
      */
     public function test_can_like_post()
     {
-    //Route::put('/likeables/{likee}', ['as'=>'likeables.update', 'uses' => 'LikeablesController@update']); // %FIXME: refactor to make consistent
-        $creator = User::has('posts', '>=', 1)
-            ->has('followers', '>=', 1)
-            ->first(); // assume non-admin (%FIXME)
-        $post = $creator->posts[0];
-        $fan = $creator->followers[0];
+        $timeline = Timeline::has('posts','>=',1)->has('followers','>=',1)->first(); // assume non-admin (%FIXME)
+        $creator = $timeline->user;
+        $post = $timeline->posts[0];
+        $fan = $timeline->followers[0];
+
+        // remove any existing likes...
+        $likeable = DB::table('likeables')
+            ->where('likee_id', $fan->id)
+            ->where('likeable_type', 'posts')
+            ->where('likeable_id', $post->id)
+            ->first();
+        if ($likeable) {
+            $likeable->delete();
+        }
+        unset($likeable);
 
         $payload = [
-            'description' => 'updated text',
+            'likeable_type' => 'posts',
+            'likeable_id' => $post->id,
         ];
         $response = $this->actingAs($fan)->ajaxJSON('GET', route('likeables.update', $fan->id), $payload);
         $response->assertStatus(200);
 
         $content = json_decode($response->content());
         $this->assertNotNull($content->post);
-        $this->assertNotNull($postR->timeline_id);
-        $this->assertEquals($postR->timeline_id, $creator->timeline->id);
+        $postR = $content->post;
+        $this->assertEquals($post->id, $postR->id);
+
+        $likeable = DB::table('likeables')
+            ->where('likee_id', $fan->id)
+            ->where('likeable_type', 'posts')
+            ->where('likeable_id', $postR->id)
+            ->first();
+        $this->assertNotNull($likeable);
+        $this->assertEquals($fan->id, $likeable->likee_id);
+        $this->assertEquals('posts', $likeable->likeable_type);
+        $this->assertEquals($postR->id, $likeable->likeable_id);
     }
 
     /**
@@ -169,31 +194,62 @@ class PostTest extends TestCase
      */
     public function test_can_comment_on_post()
     {
+        $timeline = Timeline::has('posts','>=',1)->has('followers','>=',1)->first(); // assume non-admin (%FIXME)
+        $creator = $timeline->user;
+        $post = $timeline->posts[0];
+        $fan = $timeline->followers[0];
+
+        // remove any existing comments on post by fan...
+        DB::table('comments')
+            ->where('post_id', $post->id)
+            ->where('user_id', $fan->id)
+            ->delete();
+
+        $payload = [
+            'post_id' => $post->id,
+            'user_id' => $fan->id,
+            'description' => $this->faker->realText,
+        ];
+        $response = $this->actingAs($fan)->ajaxJSON('GET', route('comments.store', $fan->id), $payload);
+        $response->assertStatus(200);
+
+        $content = json_decode($response->content());
+        $this->assertObjectHasAttribute('post', $content);
+        $postR = $content->post;
+        $this->assertObjectHasAttribute('comments', $postR);
+        $this->assertGreaterThan(0, $postsR->comments->count());
+        $this->assertEquals($post->comments->count()+1, $postsR->comments->count());
+
+        $commentsByFan = $post->comments->filter( function($v,$k) use($fan) {
+            return $v->user_id === $fan->id;
+        });
+        $this->assertEquals(1, $commentsByFan->count());
+        $this->assertEquals($payload['description'], $commentsByFan[0]);
     }
 
     /**
-     *  @group postdev
+     *  @group TODO-postdev
      */
     public function test_can_share_post()
     {
     }
 
     /**
-     *  @group postdev
+     *  @group TODO-postdev
      */
     public function test_can_tip_post()
     {
     }
 
     /**
-     *  @group postdev
+     *  @group TODO-postdev
      */
     public function test_can_purchase_post()
     {
     }
 
     /**
-     *  @group postdev
+     *  @group TODO-postdev
      */
     public function test_can_pin_post()
     {

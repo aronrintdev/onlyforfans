@@ -54,6 +54,10 @@ class LikeablesController extends AppBaseController
 
     public function destroy(Request $request, User $likee)
     {
+        //$likeable->likes()->detach($likee->id);
+        //$likee->liked()->detach($likable->id);
+
+        // %TODO: refactor to a scope
         $like = DB::table('likeables')
             ->where('likee_id', $likee->id)
             ->where('likeable_type', $request->likeable_type)
@@ -65,6 +69,7 @@ class LikeablesController extends AppBaseController
         }
 
         $like->delete();
+
         return response()->json([]);
     }
 }

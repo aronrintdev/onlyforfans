@@ -97,6 +97,10 @@ class User extends Authenticatable implements PaymentSendable, PaymentReceivable
         return $this->morphedByMany('App\Timeline', 'shareable', 'shareables', 'sharee_id')->withTimestamps();
     }
 
+    public function likedposts() {
+        return $this->morphedByMany('App\Post', 'likeable', 'likeables', 'likee_id')->withTimestamps();
+    }
+
     /* HERE Jan 11
     public function followers() {
         return $this->belongsToMany('App\User', 'followers', 'leader_id', 'follower_id')->withPivot('status', 'referral', 'subscription_id')->withTimestamps();
@@ -159,9 +163,11 @@ class User extends Authenticatable implements PaymentSendable, PaymentReceivable
         return $this->belongsToMany('App\Timeline', 'saved_timelines', 'user_id', 'timeline_id')->withPivot('type');
     }
 
+    /* DEPRECATE: go through timeline
     public function posts() { // my own posts (that I own)
         return $this->hasMany('App\Post');
     }
+     */
 
     public function sharedposts() { // posts shared with me (by direct share or purchase on my part)
         return $this->morphedByMany('App\Post', 'shareable', 'shareables', 'sharee_id')->withTimestamps();
@@ -441,11 +447,6 @@ class User extends Authenticatable implements PaymentSendable, PaymentReceivable
 
     public function commentLikes() {
         return $this->belongsToMany('App\User', 'comment_likes', 'user_id', 'comment_id');
-    }
-
-    public function likedposts() { // posts that I've liked (?)
-        return 'tbd';
-        //return $this->belongsToMany('App\User', 'post_likes', 'user_id', 'post_id');
     }
 
     public function userEvents() {

@@ -19,7 +19,7 @@ class UsersTableSeeder extends Seeder
 
         switch ($appEnv) {
             case 'testing':
-                $USER_COUNT = 5;
+                $USER_COUNT = 7;
                 break;
             case 'local':
                 $USER_COUNT = 50;
@@ -28,7 +28,9 @@ class UsersTableSeeder extends Seeder
                 $USER_COUNT = 50;
         }
 
-        $this->output->writeln('Running Seeder: UsersTableSeeder, env: '.$appEnv.', #: '.$USER_COUNT.' ...');
+        if ( $appEnv !== 'testing')  {
+            $this->output->writeln('Running Seeder: UsersTableSeeder, env: '.$appEnv.', #: '.$USER_COUNT.' ...');
+        }
 
         $this->faker = \Faker\Factory::create();
         // $adminRole = Role::where('name','admin')->firstOrFail();
@@ -114,7 +116,8 @@ class UsersTableSeeder extends Seeder
 
         // +++ Create non-admin users +++
 
-        User::factory()->count($USER_COUNT)->create()->each( function($u) use($appEnv) {
+        $isFollowForFree = true;
+        User::factory()->count($USER_COUNT)->create()->each( function($u) use($appEnv, &$isFollowForFree) {
             if ( $appEnv !== 'testing' ) {
                 $this->output->writeln("Adding avatar & cover for new user " . $u->name);
                 $avatar = FactoryHelpers::createImage(MediafileTypeEnum::AVATAR);
@@ -123,6 +126,11 @@ class UsersTableSeeder extends Seeder
                 $avatar = null;
                 $cover = null;
             }
+
+            $u->is_follow_for_free = $isFollowForFree;
+            $u->save();
+            $isFollowForFree = !$isFollowForFree; // toggle so we get at least one of each
+
             $timeline = $u->timeline;
             $timeline->avatar_id = $avatar->id ?? null;
             $timeline->cover_id = $cover->id ?? null;

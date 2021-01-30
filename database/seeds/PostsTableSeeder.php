@@ -25,7 +25,7 @@ class PostsTableSeeder extends Seeder
         switch ($appEnv) {
             case 'testing':
                 self::$PROB_POST_HAS_IMAGE = 0;
-                $MAX_POST_COUNT = 5;
+                $MAX_POST_COUNT = 3;
                 break;
             case 'local':
                 self::$PROB_POST_HAS_IMAGE = 70;
@@ -36,7 +36,9 @@ class PostsTableSeeder extends Seeder
                 $MAX_POST_COUNT = 20;
         }
 
-        $this->output->writeln('Running Seeder: PostsTableSeeder, env: '.$appEnv.', #: '.$MAX_POST_COUNT.' ...');
+        if ( $appEnv !== 'testing' ) {
+            $this->output->writeln('Running Seeder: PostsTableSeeder, env: '.$appEnv.', #: '.$MAX_POST_COUNT.' ...');
+        }
 
         $faker = \Faker\Factory::create();
 
@@ -44,12 +46,15 @@ class PostsTableSeeder extends Seeder
 
         $users = User::get();
 
-        $users->each( function($u) use(&$faker, &$users, $MAX_POST_COUNT) {
+        $users->each( function($u) use(&$faker, &$users, $MAX_POST_COUNT, $appEnv) {
 
             // $u is the user who will own the post being created (ie, as well as timeline associated with the post)...
 
             $max = $faker->numberBetween(2,$MAX_POST_COUNT);
-            $this->output->writeln("  - Creating $max posts for user ".$u->name);
+
+            if ( $appEnv !== 'testing' ) {
+                $this->output->writeln("  - Creating $max posts for user ".$u->name);
+            }
 
             collect(range(1,$max))->each( function() use(&$faker, &$users, &$u) {
 
