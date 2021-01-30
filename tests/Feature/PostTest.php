@@ -137,17 +137,31 @@ class PostTest extends TestCase
     {
         $timeline = Timeline::has('posts','>=',1)->first(); // assume non-admin (%FIXME)
         $creator = $timeline->user;
-        $post = $timeline->posts[0];
-        $response = $this->actingAs($creator)->ajaxJSON('DELETE', route('posts.destroy', $post->id));
+
+        // First create a post (so it doesn't have any relations preventing it from being deleted)
+        //$post = $timeline->posts[0];
+        $payload = [
+            'timeline_id' => $timeline->id,
+            'description' => $this->faker->realText,
+        ];
+        $response = $this->actingAs($creator)->ajaxJSON('POST', route('posts.store'), $payload);
+        $response->assertStatus(201);
+
+        $content = json_decode($response->content());
+        $this->assertNotNull($content->post);
+        $postR = $content->post;
+
+        $response = $this->actingAs($creator)->ajaxJSON('DELETE', route('posts.destroy', $postR->id));
         $response->assertStatus(200);
 
-        $response = $this->actingAs($fan)->ajaxJSON('GET', route('posts.show', $post->id));
+        $response = $this->actingAs($creator)->ajaxJSON('GET', route('posts.show', $postR->id));
         $response->assertStatus(404);
     }
 
     /**
      *  @group postdev
      */
+    // %TODO: unlike
     public function test_can_like_post()
     {
         $timeline = Timeline::has('posts','>=',1)->has('followers','>=',1)->first(); // assume non-admin (%FIXME)
@@ -170,12 +184,13 @@ class PostTest extends TestCase
             'likeable_type' => 'posts',
             'likeable_id' => $post->id,
         ];
-        $response = $this->actingAs($fan)->ajaxJSON('GET', route('likeables.update', $fan->id), $payload);
+        $response = $this->actingAs($fan)->ajaxJSON('PUT', route('likeables.update', $fan->id), $payload);
         $response->assertStatus(200);
 
         $content = json_decode($response->content());
-        $this->assertNotNull($content->post);
-        $postR = $content->post;
+        $this->assertNotNull($content->likeable);
+        $postR = $content->likeable;
+        //$this->assertInstanceOf(Post::class, $postR);
         $this->assertEquals($post->id, $postR->id);
 
         $likeable = DB::table('likeables')
@@ -205,26 +220,33 @@ class PostTest extends TestCase
             ->where('user_id', $fan->id)
             ->delete();
 
+        $post->refresh();
+        $origCommentCount = $post->comments->count();
+
         $payload = [
             'post_id' => $post->id,
             'user_id' => $fan->id,
             'description' => $this->faker->realText,
         ];
-        $response = $this->actingAs($fan)->ajaxJSON('GET', route('comments.store', $fan->id), $payload);
+        $response = $this->actingAs($fan)->ajaxJSON('POST', route('comments.store', $fan->id), $payload);
         $response->assertStatus(200);
+        $post->refresh();
+        $post->load('comments');
 
         $content = json_decode($response->content());
-        $this->assertObjectHasAttribute('post', $content);
-        $postR = $content->post;
-        $this->assertObjectHasAttribute('comments', $postR);
-        $this->assertGreaterThan(0, $postsR->comments->count());
-        $this->assertEquals($post->comments->count()+1, $postsR->comments->count());
+        $this->assertObjectHasAttribute('comment', $content);
+        $commentR = $content->comment;
+
+        $this->assertNotNull('comments', $post);
+        $this->assertGreaterThan(0, $post->comments->count());
+        $this->assertEquals($origCommentCount+1, $post->comments->count());
 
         $commentsByFan = $post->comments->filter( function($v,$k) use($fan) {
             return $v->user_id === $fan->id;
         });
         $this->assertEquals(1, $commentsByFan->count());
-        $this->assertEquals($payload['description'], $commentsByFan[0]);
+        $this->assertEquals($payload['description'], $commentsByFan[0]->description);
+        $this->assertEquals($commentsByFan[0]->id, $commentR->id);
     }
 
     /**

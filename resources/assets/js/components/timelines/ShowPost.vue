@@ -42,7 +42,7 @@
         <div class="panel-footer fans">
 
           <ul class="list-inline footer-ctrl">
-            <li class="list-inline-item mr-3"><span @click="togglePostLike()" class="tag-clickable"><b-icon :icon="isPostLikedByMe?'heart-fill':'heart'" :variant="isPostLikedByMe?'danger':'default'" font-scale="1"></b-icon></span></li>
+            <li class="list-inline-item mr-3"><span @click="togglePostLike()" class="tag-clickable"><b-icon :icon="isLikedByMe?'heart-fill':'heart'" :variant="isLikedByMe?'danger':'default'" font-scale="1"></b-icon></span></li>
             <li class="list-inline-item mr-3"><span @click="toggleComments()" class="tag-clickable"><b-icon icon="chat-text" font-scale="1"></b-icon> ({{ post.comments.length }})</span></li>
             <li class="list-inline-item mr-3"><span @click="share()" class="tag-clickable"><b-icon icon="share" font-scale="1"></b-icon></span></li>
             <li class="list-inline-item mr-3"><span @click="tip()" class="tag-clickable">$</span></li>
@@ -94,11 +94,15 @@ export default {
       // %TODO: attach mediafiles to comments
     },
     renderComments: false,
-    isPostLikedByMe: false, // %FIXME INIT
+    isLikedByMe: false, // this.post.isLikedByMe,
     likeCount: 0, // %FIXME INIT
     comments: [], // %NOTE: rendered comments are loaded dynamically as they contain additional relation data,
                   // whereas comment count is computed from the comments relation on the post itself (%FIXME?)
   }),
+
+  mounted() {
+    this.isLikedByMe = this.post.isLikedByMe;
+  },
 
   created() {
   },
@@ -106,10 +110,21 @@ export default {
   methods: {
 
     async togglePostLike() {
-      const url = `/posts/${this.post.id}/like`;
-      const response = await axios.patch(url, { });
-      console.log('response', { response });
-      this.isPostLikedByMe = response.data.is_liked_by_session_user;
+      let response;
+      if ( this.isLikedByMe ) { // unlike
+        response = await axios.post(`/likeables/${this.session_user.id}`, { 
+          _method: 'delete',
+          likeable_type: 'posts',
+          likeable_id: this.post.id,
+        });
+        this.isLikedByMe = false;
+      } else { // like
+        response = await axios.put(`/likeables/${this.session_user.id}`, { 
+          likeable_type: 'posts',
+          likeable_id: this.post.id,
+        });
+        this.isLikedByMe = true;
+      }
       this.likeCount = response.data.like_count;
     },
 

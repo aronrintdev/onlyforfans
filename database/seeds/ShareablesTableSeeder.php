@@ -1,14 +1,17 @@
 <?php
 namespace Database\Seeders;
 
+use DB;
 use Exception;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Illuminate\Support\Facades\Config;
 use Carbon\Carbon;
 
-use App\User;
+use App\Fanledger;
 use App\Post;
 use App\Timeline;
+use App\User;
+
 use App\Enums\PostTypeEnum;
 use App\Enums\PaymentTypeEnum;
 use App\Libs\FactoryHelpers;
@@ -79,7 +82,13 @@ class ShareablesTableSeeder extends Seeder
             $this->command->info("  - Following (default) $max timelines for user ".$f->name);
             $attrs = ['is_subscribe' => 0];
             $timelines->random($max)->each( function($t) use(&$f, $attrs) {
-                $response = UserMgr::toggleFollow($f, $t, $attrs);
+                DB::table('shareables')->insert([
+                    'sharee_id' => $f->id,
+                    'shareable_type' => 'timelines',
+                    'shareable_id' => $t->id,
+                    'is_approved' => 1,
+                    'access_level' => 'default',
+                ]);
             });
 
             // --- subscribe to some timelines ---
@@ -97,19 +106,42 @@ class ShareablesTableSeeder extends Seeder
             unset($timelines);
             $timelines = $groups[0];
             $max = $faker->numberBetween( 0, min($timelines->count()-1, $MAX['SUBSCRIBER_COUNT']) );
-            $this->command->info("  - Following $max premium timelines for user ".$f->name);
-            $attrs = ['is_subscribe' => 0];
+            //$this->command->info("  - Following $max premium timelines for user ".$f->name);
             $timelines->random($max)->each( function($t) use(&$f, $attrs) {
-                $response = UserMgr::toggleFollow($f, $t, $attrs);
+                DB::table('shareables')->insert([
+                    'sharee_id' => $f->id,
+                    'shareable_type' => 'timelines',
+                    'shareable_id' => $t->id,
+                    'is_approved' => 1,
+                    'access_level' => 'default',
+                ]);
             });
 
             unset($timelines);
             $timelines = $groups[1];
             $max = $faker->numberBetween( 0, min($timelines->count()-1, $MAX['SUBSCRIBER_COUNT']) );
-            $this->command->info("  - Subscribing to $max premium timelines for user ".$f->name);
+            //$this->command->info("  - Subscribing to $max premium timelines for user ".$f->name);
             $attrs = ['is_subscribe' => 1];
             $timelines->random($max)->each( function($t) use(&$f, $attrs) {
-                $response = UserMgr::toggleFollow($f, $t, $attrs);
+                DB::table('shareables')->insert([
+                    'sharee_id' => $f->id, // fan
+                    'shareable_type' => 'timelines',
+                    'shareable_id' => $t->id,
+                    'is_approved' => 1,
+                    'access_level' => 'premium',
+                ]);
+                Fanledger::create([
+                    'fltype' => PaymentTypeEnum::SUBSCRIPTION,
+                    'purchaser_id' => $f->id, // fan
+                    'seller_id' => $t->id,
+                    'purchaseable_type' => 'timelines',
+                    'purchaseable_id' => $t->id,
+                    'qty' => 1,
+                    'base_unit_cost_in_cents' => $t->user->price*100, // %FIXME: price should be on timeline not user
+                    //'total_amount' => $t->user->price*100,
+                    'cattrs' => [],
+                    //'is_credit' => false,
+                ]);
             });
 
         });

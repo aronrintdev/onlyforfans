@@ -36,40 +36,28 @@ class LikeablesController extends AppBaseController
         $model = Relation::getMorphedModel($alias);
         $likeable = (new $model)->where('id', $request->likeable_id)->firstOrFail();
 
-        $likeable->likes()->attach($likee->id);
-        /*
-        $now = \Carbon\Carbon::now();
-        $like = DB::table('likeables')->insertOrIgnore([
-            'likee_id' => $likee->id,
-            'likeable_type' => $request->likeable_type,
-            'likeable_id' => $request->likeable_id,
-            'created_at' => $now,
-            'update_at' => $now,
-        ]);
-         */
+        $likeable->likes()->syncWithoutDetaching($likee->id); // %NOTE!! %TODO: apply elsewhere instead of attach
         return response()->json([
             'likeable' => $likeable,
+            'like_count' => $likeable->likes->count(),
         ]);
     }
 
     public function destroy(Request $request, User $likee)
     {
-        //$likeable->likes()->detach($likee->id);
-        //$likee->liked()->detach($likable->id);
+        $request->validate([
+            'likeable_type' => 'required|string|alpha-dash|in:posts,comments,mediafiles',
+            'likeable_id' => 'required|numeric|min:1',
+        ]);
 
-        // %TODO: refactor to a scope
-        $like = DB::table('likeables')
-            ->where('likee_id', $likee->id)
-            ->where('likeable_type', $request->likeable_type)
-            ->where('likeable_id', $request->likeable_id)
-            ->first();
+        $alias = $request->likeable_type;
+        $model = Relation::getMorphedModel($alias);
+        $likeable = (new $model)->where('id', $request->likeable_id)->firstOrFail();
 
-        if (!$like) {
-            abort(404);
-        }
+        $likeable->likes()->detach($likee->id);
 
-        $like->delete();
-
-        return response()->json([]);
+        return response()->json([
+            'like_count' => $likeable->likes->count(),
+        ]);
     }
 }

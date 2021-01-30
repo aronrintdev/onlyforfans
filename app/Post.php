@@ -56,9 +56,18 @@ class Post extends Model implements Ownable, Deletable, PaymentReceivable
 
     protected $guarded = ['id','created_at','updated_at'];
 
+    protected $appends = [
+        'isLikedByMe',
+    ];
+
     //--------------------------------------------
     // %%% Accessors/Mutators | Casts
     //--------------------------------------------
+
+    public function getIsLikedByMeAttribute($value) {
+        $sessionUser = Auth::user();
+        return $this->likes->contains($sessionUser->id);
+    }
 
     //--------------------------------------------
     // %%% Relationships
