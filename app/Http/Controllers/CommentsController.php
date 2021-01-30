@@ -16,13 +16,21 @@ class CommentsController extends AppBaseController
     {
         $query = Comment::with('user', 'replies.user');
 
+        if ( $request->has('post_id') ) { // for specific post
+            $query->where('post_id', $request->post_id);
+            if ( !$request->has('include_replies') ) {
+                $query->whereNull('parent_id'); // only grab 1st level (%NOTE)
+            }
+        }
+
         // Apply filters
-        if ( $request->has('post_id') ) {
-            $query->where('post_id', $request->post_id)->whereNull('parent_id'); // only grab 1st level (%NOTE)
+        if ( $request->has('filters') ) {
+            if ( $request->has('user_id') ) { // comment author
+                $query->where('user_id', $request->user_id);
+            }
         }
 
         return response()->json([
-            //'comments' => $query->take(5)->get(),
             'comments' => $query->get(),
         ]);
     }
@@ -52,7 +60,7 @@ class CommentsController extends AppBaseController
 
         return response()->json([
             'comment' => $comment,
-        ]);
+        ], 201);
     }
 
     public function update(Request $request, Comment $comment)
@@ -78,29 +86,5 @@ class CommentsController extends AppBaseController
         $comment->delete();
         return response()->json([]);
     }
-
-    /*
-    public function toggleLike(Request $request, Comment $comment)
-    {
-        $sessionUser = Auth::user();
-
-        // %TODO: notify user
-        if ( !$comment->likes->contains($sessionUser->id) ) { // like
-            $comment->likes()->attach($sessionUser->id);
-            $isLikedBySessionUser = true;
-        } else { // unlike
-            $comment->likes()->detach($sessionUser->id);
-            $isLikedBySessionUser = false;
-        }
-
-        $comment->refresh();
-
-        return response()->json([
-            'comment' => $comment,
-            'is_liked_by_session_user' => $isLikedBySessionUser,
-            'like_count' => $comment->likes()->count(),
-        ]);
-    }
-     */
 
 }

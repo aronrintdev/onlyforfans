@@ -11,28 +11,12 @@ use App\User;
 
 class UsersTableSeeder extends Seeder
 {
+    use SeederTraits;
 
     public function run()
     {
-        $this->output = new ConsoleOutput();
-        $appEnv = Config::get('app.env');
+        $this->initSeederTraits('UsersTableSeeder'); // $this->{output, faker, appEnv}
 
-        switch ($appEnv) {
-            case 'testing':
-                $USER_COUNT = 7;
-                break;
-            case 'local':
-                $USER_COUNT = 50;
-                break;
-            default:
-                $USER_COUNT = 50;
-        }
-
-        if ( $appEnv !== 'testing')  {
-            $this->output->writeln('Running Seeder: UsersTableSeeder, env: '.$appEnv.', #: '.$USER_COUNT.' ...');
-        }
-
-        $this->faker = \Faker\Factory::create();
         // $adminRole = Role::where('name','admin')->firstOrFail();
 
         // +++ Create admin users +++
@@ -74,7 +58,7 @@ class UsersTableSeeder extends Seeder
 
         // --
 
-        if ( $appEnv !== 'testing' ) {
+        if ( $this->appEnv !== 'testing' ) {
 
             $user = User::where('email', 'matt@mjmwebdesign.com')->first();
             if (!$user) {
@@ -117,8 +101,8 @@ class UsersTableSeeder extends Seeder
         // +++ Create non-admin users +++
 
         $isFollowForFree = true;
-        User::factory()->count($USER_COUNT)->create()->each( function($u) use($appEnv, &$isFollowForFree) {
-            if ( $appEnv !== 'testing' ) {
+        User::factory()->count($this->getMax('users'))->create()->each( function($u) use(&$isFollowForFree) {
+            if ( $this->appEnv !== 'testing' ) {
                 $this->output->writeln("Adding avatar & cover for new user " . $u->name);
                 $avatar = FactoryHelpers::createImage(MediafileTypeEnum::AVATAR);
                 $cover = FactoryHelpers::createImage(MediafileTypeEnum::COVER);
@@ -152,5 +136,18 @@ class UsersTableSeeder extends Seeder
                 'message_privacy'       => 'everyone',
             ]);
         });
+    }
+
+    private function getMax($param) : int
+    {
+        static $max = [
+            'testing' => [
+                'users' => 7,
+            ],
+            'local' => [
+                'users' => 50,
+            ],
+        ];
+        return $max[$this->appEnv][$param];
     }
 }

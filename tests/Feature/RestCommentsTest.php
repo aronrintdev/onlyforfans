@@ -9,45 +9,46 @@ use DB;
 
 use Tests\TestCase;
 use Database\Seeders\TestDatabaseSeeder;
-use App\Enums\PostTypeEnum;
-use App\Enums\PaymentTypeEnum;
+use App\Comment;
 use App\Post;
 use App\Timeline;
 use App\User;
 
-class PostTest extends TestCase
+class RestCommentsTest extends TestCase
 {
     use DatabaseTransactions, WithFaker;
 
     /**
-     *  @group postdev
+     *  @group devcomment
      */
-    // %TODO: filters, timelines (see posts I follow), etc
-    public function test_can_index_posts()
+    // %TODO: filters, timelines (see comments I have valid access to), etc
+    public function test_can_index_comments()
     {
+        // should return only comments for which session user is the author
+
         //$this->seed(\Database\Seeders\TestDatabaseSeeder::class);
         $timeline = Timeline::has('posts','>=',1)->first(); // assume non-admin (%FIXME)
         $creator = $timeline->user;
 
-        $response = $this->actingAs($creator)->ajaxJSON('GET', route('posts.index'));
+        $response = $this->actingAs($creator)->ajaxJSON('GET', route('comments.index'));
         $response->assertStatus(200);
 
         $content = json_decode($response->content());
-        $this->assertNotNull($content->posts);
-        $postsR = collect($content->posts);
-        //dd($postsR, $postsR[0]);
-        $this->assertGreaterThan(0, $postsR->count());
-        //$this->assertNotNull($postsR[0]->description);
-        //$this->assertNotNull($postsR[0]->timeline_id);
-        $this->assertObjectHasAttribute('timeline_id', $postsR[0]);
-        $this->assertObjectHasAttribute('description', $postsR[0]);
-        $this->assertEquals($postsR[0]->timeline_id, $timeline->id);
+        $this->assertNotNull($content->comments);
+        $commentsR = collect($content->comments);
+        $this->assertGreaterThan(0, $commentsR->count());
+        $this->assertObjectHasAttribute('description', $commentsR[0]);
+        /*
+        $commentsR->each( function($c) use(&$creator) { // all belong to owner
+            $this->assertEquals($creator->id, $c->user_id);
+        });
+         */
     }
 
     /**
-     *  @group postdev
+     *  @group OFF-devcomment
      */
-    public function test_can_show_my_post()
+    public function test_can_show_my_comment()
     {
         $timeline = Timeline::has('posts','>=',1)->first(); // assume non-admin (%FIXME)
         $creator = $timeline->user;
@@ -65,9 +66,9 @@ class PostTest extends TestCase
     }
 
     /**
-     *  @group postdev
+     *  @group OFF-devcomment
      */
-    public function test_can_show_followed_timelines_post()
+    public function test_can_show_followed_timelines_comment()
     {
         $timeline = Timeline::has('posts','>=',1)->has('followers','>=',1)->first(); // assume non-admin (%FIXME)
         $creator = $timeline->user;
@@ -87,9 +88,9 @@ class PostTest extends TestCase
     }
 
     /**
-     *  @group postdev
+     *  @group OFF-devcomment
      */
-    public function test_can_store_post()
+    public function test_can_store_comment()
     {
         $timeline = Timeline::has('posts','>=',1)->first(); // assume non-admin (%FIXME)
         $creator = $timeline->user;
@@ -109,9 +110,9 @@ class PostTest extends TestCase
     }
 
     /**
-     *  @group postdev
+     *  @group OFF-devcomment
      */
-    public function test_can_update_post()
+    public function test_can_update_comment()
     {
         $timeline = Timeline::has('posts','>=',1)->first(); // assume non-admin (%FIXME)
         $creator = $timeline->user;
@@ -131,9 +132,9 @@ class PostTest extends TestCase
     }
 
     /**
-     *  @group postdev
+     *  @group OFF-devcomment
      */
-    public function test_can_destroy_post()
+    public function test_can_destroy_comment()
     {
         $timeline = Timeline::has('posts','>=',1)->first(); // assume non-admin (%FIXME)
         $creator = $timeline->user;
@@ -159,10 +160,10 @@ class PostTest extends TestCase
     }
 
     /**
-     *  @group postdev
+     *  @group OFF-devcomment
      */
     // %TODO: unlike
-    public function test_can_like_post()
+    public function test_can_like_comment()
     {
         $timeline = Timeline::has('posts','>=',1)->has('followers','>=',1)->first(); // assume non-admin (%FIXME)
         $creator = $timeline->user;
@@ -205,9 +206,9 @@ class PostTest extends TestCase
     }
 
     /**
-     *  @group postdev
+     *  @group OFF-devcomment
      */
-    public function test_can_comment_on_post()
+    public function test_can_comment_on_comment()
     {
         $timeline = Timeline::has('posts','>=',1)->has('followers','>=',1)->first(); // assume non-admin (%FIXME)
         $creator = $timeline->user;
@@ -250,30 +251,30 @@ class PostTest extends TestCase
     }
 
     /**
-     *  @group TODO-postdev
+     *  @group TODO-devcomment
      */
-    public function test_can_share_post()
+    public function test_can_share_comment()
     {
     }
 
     /**
-     *  @group TODO-postdev
+     *  @group TODO-devcomment
      */
-    public function test_can_tip_post()
+    public function test_can_tip_comment()
     {
     }
 
     /**
-     *  @group TODO-postdev
+     *  @group TODO-devcomment
      */
-    public function test_can_purchase_post()
+    public function test_can_purchase_comment()
     {
     }
 
     /**
-     *  @group TODO-postdev
+     *  @group TODO-devcomment
      */
-    public function test_can_pin_post()
+    public function test_can_pin_comment()
     {
     }
 

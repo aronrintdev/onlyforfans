@@ -14,75 +14,51 @@ use App\Libs\FactoryHelpers;
 
 class PostsTableSeeder extends Seeder
 {
-    private static $PROB_POST_HAS_IMAGE = 70; // 70, 1;
-    private $output;
+    use SeederTraits;
 
     public function run()
     {
-        $this->output = new ConsoleOutput();
-
-        $appEnv = Config::get('app.env');
-        switch ($appEnv) {
-            case 'testing':
-                self::$PROB_POST_HAS_IMAGE = 0;
-                $MAX_POST_COUNT = 3;
-                break;
-            case 'local':
-                self::$PROB_POST_HAS_IMAGE = 70;
-                $MAX_POST_COUNT = 20;
-                break;
-            default:
-                self::$PROB_POST_HAS_IMAGE = 70;
-                $MAX_POST_COUNT = 20;
-        }
-
-        if ( $appEnv !== 'testing' ) {
-            $this->output->writeln('Running Seeder: PostsTableSeeder, env: '.$appEnv.', #: '.$MAX_POST_COUNT.' ...');
-        }
-
-        $faker = \Faker\Factory::create();
+        $this->initSeederTraits('PostsTableSeeder'); // $this->{output, faker, appEnv}
 
         // +++ Create ... +++
 
         $users = User::get();
 
-        $users->each( function($u) use(&$faker, &$users, $MAX_POST_COUNT, $appEnv) {
+        $users->each( function($u) use(&$users) {
 
             // $u is the user who will own the post being created (ie, as well as timeline associated with the post)...
 
-            $max = $faker->numberBetween(2,$MAX_POST_COUNT);
+            $max = $this->faker->numberBetween(2, $this->getMax('posts'));
 
-            if ( $appEnv !== 'testing' ) {
+            if ( $this->appEnv !== 'testing' ) {
                 $this->output->writeln("  - Creating $max posts for user ".$u->name);
             }
 
-            collect(range(1,$max))->each( function() use(&$faker, &$users, &$u) {
+            collect(range(1,$max))->each( function() use(&$users, &$u) { // Post generation loop
 
-                $ptype = $faker->randomElement([
+                $ptype = $this->faker->randomElement([
                     PostTypeEnum::SUBSCRIBER,
                     PostTypeEnum::PRICED,
-                    PostTypeEnum::FREE,
-                    PostTypeEnum::FREE,
-                    PostTypeEnum::FREE,
+                    PostTypeEnum::FREE, PostTypeEnum::FREE, PostTypeEnum::FREE, 
                 ]);
                 $attrs = [
-                    'description'  => $faker->text.' ('.$ptype.')',
+                    'description'  => $this->faker->text.' ('.$ptype.')',
                     'user_id'      => $u->id,
                     'timeline_id'  => $u->timeline->id,
                     'type'         => $ptype,
                 ];
 
                 if ( $ptype === PostTypeEnum::PRICED ) {
-                    $attrs['price'] = $faker->randomFloat(2, 1, 300);
+                    $attrs['price'] = $this->faker->randomFloat(2, 1, 300);
                 }
 
                 $post = Post::factory()->create($attrs);
-                if ( $faker->boolean(self::$PROB_POST_HAS_IMAGE) ) { // % post has image
+                if ( $this->faker->boolean($this->getMax('prob_post_has_image')) ) { // % post has image
                     $mf = FactoryHelpers::createImage(MediafileTypeEnum::POST, $post->id);
                 }
 
                 // Set a realistic post date
-                $ts = $faker->dateTimeThisDecade->format('Y-m-d H:i:s');
+                $ts = $this->faker->dateTimeThisDecade->format('Y-m-d H:i:s');
                 \DB::table('posts')->where('id',$post->id)->update([
                     'created_at' => Carbon::parse($ts),
                     //'description' => 'foo',
@@ -97,18 +73,6 @@ class PostsTableSeeder extends Seeder
                         $post->users_liked()->attach($liker->id);
                         //$post->notifications_user()->attach($liker->id);
                     }
-                });
-
-                // COMMENTS - Select random users to comment on this post...
-                $commenters = FactoryHelpers::parseRandomSubset($users, 12);
-                $likee = $u;
-                $commenters->each( function($commenter) use(&$faker, &$post) {
-                    $comment = Comment::create([
-                        'post_id'     => $post->id,
-                        'description' => $faker->realText( $faker->numberBetween(20,200) ),
-                        'user_id'     => $commenter->id,
-                        'parent_id'   => null, // %TODO: nested comments
-                    ]);
                 });
 
                 // SAVES - Select random users to save this post...
@@ -143,4 +107,23 @@ class PostsTableSeeder extends Seeder
 
         });
     }
+
+    private function getMax($param) : int
+    {
+        static $max = [
+            'testing' => [
+                'prob_post_has_image' => 0,
+                'users' => 4,
+                'posts' => 3,
+            ],
+            'local' => [
+                'prob_post_has_image' => 70, // will create image and store in S3 (!)
+                'users' => 10,
+                'posts' => 20,
+            ],
+        ];
+
+        return $max[$this->appEnv][$param];
+    }
+
 }
