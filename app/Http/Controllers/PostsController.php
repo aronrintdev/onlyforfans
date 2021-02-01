@@ -139,29 +139,6 @@ class PostsController extends AppBaseController
     }
 
     /*
-    public function toggleLike(Request $request, Post $post)
-    {
-        $sessionUser = Auth::user();
-
-        // %TODO: notify user
-
-        if ( !$post->likes->contains($sessionUser->id) ) { // like
-            $post->likes()->attach($sessionUser->id);
-            $isLikedBySessionUser = true;
-        } else { // unlike
-            $post->likes()->detach($sessionUser->id);
-            $isLikedBySessionUser = false;
-        }
-
-        $post->refresh();
-
-        return response()->json([
-            'post' => $post,
-            'is_liked_by_session_user' => $isLikedBySessionUser,
-            'like_count' => $post->users_liked()->count(),
-        ]);
-    }
-
     public function tip(Request $request, $id)
     {
         $sessionUser = Auth::user(); // sender of tip

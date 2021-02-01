@@ -3,8 +3,6 @@ namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Http\File;
 use DB;
 
 use Tests\TestCase;
@@ -20,7 +18,8 @@ class RestPostsTest extends TestCase
     use DatabaseTransactions, WithFaker;
 
     /**
-     *  @group devpost
+     *  @group group_posts
+     *  @group group_regression
      */
     // %TODO: filters, timelines (see posts I follow), etc
     public function test_can_index_posts()
@@ -45,7 +44,8 @@ class RestPostsTest extends TestCase
     }
 
     /**
-     *  @group devpost
+     *  @group group_posts
+     *  @group group_regression
      */
     public function test_can_show_my_post()
     {
@@ -65,7 +65,8 @@ class RestPostsTest extends TestCase
     }
 
     /**
-     *  @group devpost
+     *  @group group_posts
+     *  @group group_regression
      */
     public function test_can_show_followed_timelines_post()
     {
@@ -87,7 +88,8 @@ class RestPostsTest extends TestCase
     }
 
     /**
-     *  @group devpost
+     *  @group group_posts
+     *  @group group_regression
      */
     public function test_can_store_post_on_own_timeline()
     {
@@ -109,7 +111,8 @@ class RestPostsTest extends TestCase
     }
 
     /**
-     *  @group devpost
+     *  @group group_posts
+     *  @group group_regression
      */
     public function test_can_update_own_post()
     {
@@ -131,7 +134,8 @@ class RestPostsTest extends TestCase
     }
 
     /**
-     *  @group devpost
+     *  @group group_posts
+     *  @group group_regression
      */
     public function test_can_destroy_own_post()
     {
@@ -159,7 +163,8 @@ class RestPostsTest extends TestCase
     }
 
     /**
-     *  @group devpost
+     *  @group group_posts
+     *  @group group_regression
      */
     public function test_timeline_follower_can_like_then_unlike_post()
     {
@@ -220,28 +225,28 @@ class RestPostsTest extends TestCase
     }
 
     /**
-     *  @group TODO-devpost
+     *  @group TODO-group_posts
      */
     public function test_can_share_post()
     {
     }
 
     /**
-     *  @group TODO-devpost
+     *  @group TODO-group_posts
      */
     public function test_can_tip_post()
     {
     }
 
     /**
-     *  @group TODO-devpost
+     *  @group TODO-group_posts
      */
     public function test_can_purchase_post()
     {
     }
 
     /**
-     *  @group TODO-devpost
+     *  @group TODO-group_posts
      */
     public function test_can_pin_post()
     {

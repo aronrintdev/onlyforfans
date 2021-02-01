@@ -83,6 +83,10 @@ class Timeline extends Model implements PaymentReceivable
         return $this->morphToMany('App\User', 'shareable', 'shareables', 'shareable_id', 'sharee_id')->withPivot('access_level');
     }
 
+    public function ledgersales() {
+        return $this->morphMany('App\Fanledger', 'purchaseable');
+    }
+
     public function posts() {
         return $this->hasMany('App\Post');
     }

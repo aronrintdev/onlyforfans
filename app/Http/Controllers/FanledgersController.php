@@ -20,10 +20,10 @@ class FanledgersController extends AppBaseController
         $sessionUser = Auth::user();
 
         $request->validate([
-            'fltype' => 'required|alpha_dash',
+            'fltype' => 'required|alpha_dash|in:'.implode(',',PaymentTypeEnum::getKeys()),
             'seller_id' => 'required|exists:users,id',
             'purchaseable_id' => 'required|numeric',
-            'purchaseable_type' => 'required|alpha_dash',
+            'purchaseable_type' => 'required|alpha_dash|in:posts,timelines,mediafiles,vaultfolders',
             'base_unit_cost_in_cents' => 'required|numeric',
         ]);
 
@@ -48,7 +48,7 @@ class FanledgersController extends AppBaseController
 
         return response()->json([
             'fanledger' => $obj,
-        ]);
+        ], 201);
     }
 
     /*

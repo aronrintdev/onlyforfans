@@ -2,92 +2,97 @@
 namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Http\File;
+use Database\Seeders\TestDatabaseSeeder;
 
-use App\Enums\PostTypeEnum;
+//use App\Enums\PostTypeEnum;
 use App\Enums\PaymentTypeEnum;
-use App\User;
+use App\Fanledger;
 use App\Post;
+use App\Timeline;
+use App\User;
 
 class FanledgerTest extends TestCase
 {
-    use WithFaker;
-
-    private $_deleteList;
-    private static $_persist = false;
-
-    //private $admin;
-    private $buyerUser = null; // ie session user
-    private $sellerUser = null;
+    use DatabaseTransactions, WithFaker;
 
     /**
-     *  @group fldev
+     *  @group group_fanledgers
+     *  @group group_regression
      */
     public function test_can_send_tip_on_post()
     {
-        $buyerUser = $this->buyerUser;
-        $sellerUser = $this->sellerUser;
-        $post = Post::where('timeline_id', $sellerUser->timeline->id)->where('type', PostTypeEnum::FREE)->first();
+        $timeline = Timeline::has('posts','>=',1)->has('followers','>=',1)->first(); // assume non-admin (%FIXME)
+        $creator = $timeline->user;
+        $post = $timeline->posts[0];
+        $fan = $timeline->followers[0];
+
         $payload = [
-            'amount' => $this->faker->randomFloat(2, 1, 99),
+            'base_unit_cost_in_cents' => $this->faker->randomNumber(3),
+            'fltype' => PaymentTypeEnum::TIP,
+            'seller_id' => $fan->id,
+            'purchaseable_id' => $post->id,
+            'purchaseable_type' => 'posts',
         ];
-        $response = $this->actingAs($buyerUser)->ajaxJSON('POST', route('posts.tip', $post->id), $payload);
+        $response = $this->actingAs($fan)->ajaxJSON('POST', route('fanledgers.store'), $payload);
 
-        $response->assertStatus(200);
+        $response->assertStatus(201);
 
         $content = json_decode($response->content());
-        $postR = $content->post;
-        $this->assertEquals($post->id, $postR->id);
+        $fanledgerR = $content->fanledger;
 
-        $post->refresh();
-        $buyerUser->refresh();
-        $sellerUser->refresh();
-
-        $this->assertEquals( 1, $post->ledgersales->count() );
-        $this->assertEquals( PaymentTypeEnum::TIP, $post->ledgersales[0]->fltype );
-        $this->assertEquals( 'posts', $post->ledgersales[0]->purchaseable_type );
-
-        $this->assertEquals( 1, $buyerUser->ledgerpurchases->count() );
-        $this->assertEquals( $post->ledgersales[0]->id, $buyerUser->ledgerpurchases[0]->id );
-
-        $fl = $post->ledgersales()->where('purchaser_id', $buyerUser->id)->first();
-        $this->assertEquals( $post->id, $fl->purchaseable_id );
-        $this->assertEquals( 1, $fl->qty );
-        $this->assertEquals( $payload['amount'], $fl->total_amount ); // no taxes applied
+        $fanledger = Fanledger::find($fanledgerR->id);
+        $this->assertNotNull($fanledger);
+        $this->assertEquals(1, $fanledger->qty);
+        $this->assertEquals(PaymentTypeEnum::TIP, $fanledger->fltype);
+        $this->assertEquals('posts', $fanledger->purchaseable_type);
+        $this->assertEquals($post->id, $fanledger->purchaseable_id);
+        $this->assertEquals($fan->id, $fanledger->seller_id);
+        $this->assertEquals($payload['base_unit_cost_in_cents'], $fanledger->base_unit_cost_in_cents);
+        $this->assertTrue( $post->ledgersales->contains( $fanledger->id ) );
+        $this->assertTrue( $fan->ledgerpurchases->contains( $fanledger->id ) );
     }
 
     /**
-     *  @group fldev
+     *  @group group_fanledgers
+     *  @group group_regression
      */
-    public function test_can_send_tip_to_user()
+    public function test_can_send_tip_to_timeline()
     {
-        $buyerUser = $this->buyerUser; // tipper
-        $sellerUser = $this->sellerUser; // tippee
-        $payload = [ ];
-        $response = $this->actingAs($buyerUser)->ajaxJSON('POST', route('users.tip', $sellerUser->id), $payload);
-        $response->assertStatus(200);
+        $timeline = Timeline::has('posts','>=',1)->has('followers','>=',1)->first(); // assume non-admin (%FIXME)
+        $creator = $timeline->user;
+        $post = $timeline->posts[0];
+        $fan = $timeline->followers[0];
+
+        $payload = [
+            'base_unit_cost_in_cents' => $this->faker->randomNumber(3),
+            'fltype' => PaymentTypeEnum::TIP,
+            'seller_id' => $fan->id,
+            'purchaseable_id' => $timeline->id,
+            'purchaseable_type' => 'timelines',
+        ];
+        $response = $this->actingAs($fan)->ajaxJSON('POST', route('fanledgers.store'), $payload);
+
+        $response->assertStatus(201);
 
         $content = json_decode($response->content());
-        $buyerUser->refresh();
-        $sellerUser->refresh();
+        $fanledgerR = $content->fanledger;
 
-        $this->assertEquals( 1, $sellerUser->ledgersales->count() );
-        $this->assertEquals( PaymentTypeEnum::TIP, $sellerUser->ledgersales[0]->fltype );
-        $this->assertEquals( 'users', $sellerUser->ledgersales[0]->purchaseable_type );
-
-        $this->assertEquals( 1, $buyerUser->ledgerpurchases->count() );
-        $this->assertEquals( $sellerUser->ledgersales[0]->id, $buyerUser->ledgerpurchases[0]->id );
-
-        $fl = $sellerUser->ledgersales()->where('purchaser_id', $buyerUser->id)->first();
-        $this->assertEquals( $sellerUser->id, $fl->purchaseable_id );
-        $this->assertEquals( 1, $fl->qty );
-        $this->assertEquals( $payload['amount'], $fl->total_amount ); // no taxes applied
+        $fanledger = Fanledger::find($fanledgerR->id);
+        $this->assertNotNull($fanledger);
+        $this->assertEquals(1, $fanledger->qty);
+        $this->assertEquals(PaymentTypeEnum::TIP, $fanledger->fltype);
+        $this->assertEquals('timelines', $fanledger->purchaseable_type);
+        $this->assertEquals($timeline->id, $fanledger->purchaseable_id);
+        $this->assertEquals($fan->id, $fanledger->seller_id);
+        $this->assertEquals($payload['base_unit_cost_in_cents'], $fanledger->base_unit_cost_in_cents);
+        $this->assertTrue( $timeline->ledgersales->contains( $fanledger->id ) );
+        $this->assertTrue( $fan->ledgerpurchases->contains( $fanledger->id ) );
     }
 
     /**
-     *  @group fldev
+     *  @group group_fanledgers
      */
     public function test_can_purchase_post()
     {
@@ -131,48 +136,10 @@ class FanledgerTest extends TestCase
     protected function setUp() : void
     {
         parent::setUp();
-        $this->_deleteList = collect();
-
-        $this->buyerUser = factory(\App\User::class)->create();
-        $this->_deleteList->push($this->buyerUser);
-
-        $this->sellerUser = factory(\App\User::class)->create();
-        $this->_deleteList->push($this->sellerUser);
-
-        // Create some posts for the 'seller user'
-        $post = factory(Post::class)->create([
-            'user_id'      => $this->sellerUser->id,
-            'timeline_id'  => $this->sellerUser->timeline->id,
-            'type'         => PostTypeEnum::FREE,
-        ]);
-
-        $post = factory(Post::class)->create([
-            'user_id'      => $this->sellerUser->id,
-            'timeline_id'  => $this->sellerUser->timeline->id,
-            'type'         => PostTypeEnum::PRICED,
-            'price'        => $this->faker->randomFloat(2, 1, 300),
-        ]);
-
-        $post = factory(Post::class)->create([
-            'user_id'      => $this->sellerUser->id,
-            'timeline_id'  => $this->sellerUser->timeline->id,
-            'type'         => PostTypeEnum::SUBSCRIBER,
-        ]);
+        $this->seed(TestDatabaseSeeder::class);
     }
 
     protected function tearDown() : void {
-        if ( !self::$_persist ) {
-            while ( $this->_deleteList->count() > 0 ) {
-                $obj = $this->_deleteList->pop();
-                if ( $obj instanceof \App\User ) {
-                     $obj->ledgersales->each( function($o) { $o->forceDelete(); } );
-                     $obj->ledgerpurchases->each( function($o) { $o->forceDelete(); } );
-                     $obj->posts->each( function($o) { $o->forceDelete(); } );
-                     $obj->timeline->forceDelete();
-                }
-                $obj->forceDelete();
-            }
-        }
         parent::tearDown();
     }
 }

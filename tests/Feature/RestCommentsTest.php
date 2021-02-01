@@ -3,8 +3,6 @@ namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Http\File;
 use DB;
 
 use Tests\TestCase;
@@ -19,7 +17,8 @@ class RestCommentsTest extends TestCase
     use DatabaseTransactions, WithFaker;
 
     /**
-     *  @group devcomment
+     *  @group group_comments
+     *  @group group_regression
      */
     // %TODO: filters, timelines (see comments I have valid access to), etc
     public function test_can_index_comments()
@@ -46,7 +45,8 @@ class RestCommentsTest extends TestCase
     }
 
     /**
-     *  @group devcomment
+     *  @group group_comments
+     *  @group group_regression
      */
     public function test_can_not_index_general_comments()
     {
@@ -60,7 +60,8 @@ class RestCommentsTest extends TestCase
     }
 
     /**
-     *  @group devcomment
+     *  @group group_comments
+     *  @group group_regression
      */
     public function test_can_show_my_comment()
     {
@@ -73,7 +74,8 @@ class RestCommentsTest extends TestCase
     }
 
     /**
-     *  @group devcomment
+     *  @group group_comments
+     *  @group group_regression
      */
     public function test_can_show_followed_timelines_comment()
     {
@@ -86,7 +88,8 @@ class RestCommentsTest extends TestCase
     }
 
     /**
-     *  @group devcomment
+     *  @group group_comments
+     *  @group group_regression
      */
     public function test_can_not_show_nonfollowed_timelines_comment()
     {
@@ -101,7 +104,8 @@ class RestCommentsTest extends TestCase
     }
 
     /**
-     *  @group devcomment
+     *  @group group_comments
+     *  @group group_regression
      */
     public function test_timeline_follower_can_store_comment_on_post()
     {
@@ -151,7 +155,8 @@ class RestCommentsTest extends TestCase
     }
 
     /**
-     *  @group devcomment
+     *  @group group_comments
+     *  @group group_regression
      */
     public function test_can_update_own_comment()
     {
@@ -165,7 +170,8 @@ class RestCommentsTest extends TestCase
     }
 
     /**
-     *  @group devcomment
+     *  @group group_comments
+     *  @group group_regression
      */
     public function test_can_destroy_own_comment()
     {
@@ -178,7 +184,8 @@ class RestCommentsTest extends TestCase
     }
 
     /**
-     *  @group devcomment
+     *  @group group_comments
+     *  @group group_regression
      */
     public function test_timeline_follower_can_like_then_unlike_post_comment()
     {

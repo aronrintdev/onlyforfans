@@ -28,7 +28,7 @@ class LikeablesController extends AppBaseController
     public function update(Request $request, User $likee)
     {
         $request->validate([
-            'likeable_type' => 'required|string|alpha-dash|in:posts,comments,mediafiles',
+            'likeable_type' => 'required|alpha_dash|in:posts,comments,mediafiles',
             'likeable_id' => 'required|numeric|min:1',
         ]);
 
