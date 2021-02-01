@@ -100,4 +100,15 @@ mix.js('resources/assets/js/appPages/userProfile.js', 'public/js/app.userProfile
     },
   });
 
+mix.js('resources/assets/js/admin.app.js', 'public/js/admin.app.js')
+  .vue({
+    options: {
+      loaders: {
+        i18n: '@intlify/vue-i18n-loader',
+      },
+    },
+  })
+  // .extract(['vue', 'axios', 'pusher-js', 'laravel-echo', 'jquery', 'vuejs-logger'])
+  // .sourceMaps();
+
 mix.js('resources/assets/js/appPages/onlineMonitor.js', 'public/js/app.onlineMonitor.js');

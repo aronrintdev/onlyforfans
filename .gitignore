@@ -64,6 +64,9 @@ storage/debugbar
 bootstrap/cache/services.php
 bootstrap/cache/*
 
+# IDE Helper
+_ide_helper.php
+
 dot-env.txt
 .*.swp
 *.vim
@@ -87,6 +90,9 @@ yarn.lock
 
 public/js/app2.js
 public/js/app.*.js
+public/js/*.app.js
+public/js/vendor.js
+public/js/manifest.js
 public/themes/default/assets/js/main.js
 public/css/app2.css
 public/themes/default/assets/css/bootstrap.css

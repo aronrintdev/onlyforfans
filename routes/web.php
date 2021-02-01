@@ -1,21 +1,24 @@
 <?php
 
+use Pusher\Pusher;
 use Illuminate\Support\Facades\Auth;
-use Intervention\Image\Facades\Image;
-
 use Symfony\Component\Finder\Finder;
+use Illuminate\Support\Facades\Route;
+use Intervention\Image\Facades\Image;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Response;
 
 // Require all files in routes/web
 $files = Finder::create()
     ->in(base_path('routes/web'))
     ->name('*.php');
 
-foreach($files as $file) {
-    require( $file->getRealPath() );
+foreach ($files as $file) {
+    require($file->getRealPath());
 }
 
 // Quick testing debug route
-Route::get('testing', function() {
+Route::get('testing', function () {
     if (env('APP_DEBUG')) {
         return view('testing')->with(['user' => Auth::user()]);
     }
@@ -98,7 +101,7 @@ Route::get('account/linkedin', 'Auth\RegisterController@linkedin');
 
 Route::get('failed-payment', 'CheckoutController@handleFailedPayment')->name('failed-payment');
 // Stripe
-Route::group(['prefix' => 'checkout', 'middleware' => ['auth']], function() {
+Route::group(['prefix' => 'checkout', 'middleware' => ['auth']], function () {
     Route::post('create-checkout-session/{timeline_id}', 'CheckoutController@createCheckoutSession');
     Route::get('create-checkout-session/{timeline_id}', 'CheckoutController@createCheckoutSession');
     Route::post('create-post-checkout-session/{post_id}', 'CheckoutController@createPostCheckoutSession');
@@ -112,7 +115,6 @@ Route::group(['prefix' => 'checkout', 'middleware' => ['auth']], function() {
     Route::get('get-oauth-link', 'CheckoutController@getOAuthLink');
     Route::post('/authorize-oauth', 'CheckoutController@authorizeOAuth');
     Route::get('/authorize-oauth', 'CheckoutController@authorizeOAuth');
-
 });
 
 // User support
@@ -143,49 +145,48 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('post/{id}', 'TimelineController@showPost')->name('post.show');
     Route::post('update-last-seen', 'UserController@updateLastSeen')->name('update-user-status');
 
-    Route::resource('mediafiles', 'MediafilesController', [
-    ]);
+    Route::resource('mediafiles', 'MediafilesController', []);
 
     //Route::get('/users-suggested', ['as'=>'users.suggested', 'uses' => 'UsersController@suggested']);
-    Route::get('/users/me', ['as'=>'users.me', 'uses' => 'UsersController@me']);
-    Route::get('/users/match', ['as'=>'users.match', 'uses' => 'UsersController@match']);
+    Route::get('/users/me', ['as' => 'users.me', 'uses' => 'UsersController@me']);
+    Route::get('/users/match', ['as' => 'users.match', 'uses' => 'UsersController@match']);
     Route::resource('users', 'UsersController', [
-        'only' => [ 'index' ],
+        'only' => ['index'],
     ]);
 
-    Route::patch('/posts/{post}/like', ['as'=>'posts.toggleLike', 'uses' => 'PostsController@toggleLike']);
+    Route::patch('/posts/{post}/like', ['as' => 'posts.toggleLike', 'uses' => 'PostsController@toggleLike']);
     Route::resource('posts', 'PostsController', [
-        'only' => [ 'store', 'show', 'destroy' ],
+        'only' => ['store', 'show', 'destroy'],
     ]);
 
-    Route::patch('/comments/{comment}/like', ['as'=>'comments.toggleLike', 'uses' => 'CommentsController@toggleLike']);
+    Route::patch('/comments/{comment}/like', ['as' => 'comments.toggleLike', 'uses' => 'CommentsController@toggleLike']);
     Route::resource('comments', 'CommentsController', [
-        'only' => [ 'index', 'store', ],
+        'only' => ['index', 'store',],
     ]);
 
-    Route::get('/timelines-suggested', ['as'=>'timelines.suggested', 'uses' => 'TimelinesController@suggested']);
-    Route::get('/timelines/{timeline}/feeditems', ['as'=>'timelines.feeditems', 'uses' => 'TimelinesController@feeditems']);
-    Route::get('/timelines/home', ['as'=>'timelines.home', 'uses' => 'TimelinesController@home']);
+    Route::get('/timelines-suggested', ['as' => 'timelines.suggested', 'uses' => 'TimelinesController@suggested']);
+    Route::get('/timelines/{timeline}/feeditems', ['as' => 'timelines.feeditems', 'uses' => 'TimelinesController@feeditems']);
+    Route::get('/timelines/home', ['as' => 'timelines.home', 'uses' => 'TimelinesController@home']);
     Route::resource('timelines', 'TimelinesController', [
-        'only' => [ 'index', 'show' ],
+        'only' => ['index', 'show'],
     ]);
 
     Route::resource('vaultfolders', 'VaultfoldersController', [
-        'only' => [ 'index', 'show', 'store' ],
+        'only' => ['index', 'show', 'store'],
     ]);
 
-    Route::patch('/vaults/{vault}/update-shares', ['as'=>'vaults.updateShares', 'uses' => 'VaultsController@updateShares']);
+    Route::patch('/vaults/{vault}/update-shares', ['as' => 'vaults.updateShares', 'uses' => 'VaultsController@updateShares']);
     Route::resource('vaults', 'VaultsController', [
-        'only' => [ 'index', 'show' ],
+        'only' => ['index', 'show'],
     ]);
 
-    Route::get('/saved/dashboard', ['as'=>'saved.dashboard', 'uses' => 'SaveditemsController@dashboard']);
+    Route::get('/saved/dashboard', ['as' => 'saved.dashboard', 'uses' => 'SaveditemsController@dashboard']);
     Route::resource('saved', 'SaveditemsController', [
-        'only' => [ 'index', 'show', 'store' ],
+        'only' => ['index', 'show', 'store'],
     ]);
 
     Route::resource('shareables', 'ShareablesController', [
-        'only' => [ 'index', ],
+        'only' => ['index',],
     ]);
 });
 
@@ -204,100 +205,6 @@ Route::get('/post/{post_id}', 'TimelineController@singlePost');
 Route::get('allnotifications', 'TimelineController@allNotifications');
 Route::get('/mylists', 'TimelineController@showMyLists');
 Route::get('/mylist/{list_type_id}', 'TimelineController@showSpecificList');
-
-/*
-|--------------------------------------------------------------------------
-| Admin routes
-|--------------------------------------------------------------------------
-*/
-
-
-Route::group(['prefix' => '/admin', 'middleware' => ['auth', 'role:admin']], function () {
-    Route::get('/', 'AdminController@dashboard');
-    Route::get('/general-settings', 'AdminController@generalSettings');
-    Route::post('/general-settings', 'AdminController@updateGeneralSettings');
-    Route::post('/home-settings', 'AdminController@updateHomeSettings');
-
-    Route::get('/user-settings', 'AdminController@userSettings');
-    Route::post('/user-settings', 'AdminController@updateUserSettings');
-
-    // Route::get('/page-settings', 'AdminController@pageSettings');
-    // Route::post('/page-settings', 'AdminController@updatePageSettings');
-
-    // Route::get('/group-settings', 'AdminController@groupSettings');
-    // Route::post('/group-settings', 'AdminController@updateGroupSettings');
-
-    // Route::get('/custom-pages', 'AdminController@listCustomPages');
-    // Route::get('/custom-pages/create', 'AdminController@createCustomPage');
-    // Route::post('/custom-pages', 'AdminController@storeCustomPage');
-    // Route::get('/custom-pages/{id}/edit', 'AdminController@editCustomPage');
-    // Route::post('/custom-pages/{id}/update', 'AdminController@updateCustomPage');
-
-    // Route::get('/announcements', 'AdminController@getAnnouncements');
-    // Route::get('/announcements/create', 'AdminController@createAnnouncement');
-    // Route::get('/announcements/{id}/edit', 'AdminController@editAnnouncement');
-    // Route::post('/announcements/{id}/update', 'AdminController@updateAnnouncement');
-    // Route::post('/announcements', 'AdminController@addAnnouncements');
-    // Route::get('/activate/{announcement_id}', 'AdminController@activeAnnouncement');
-
-    Route::get('/themes', 'AdminController@themes');
-    Route::get('/change-theme/{name}', 'AdminController@changeTheme');
-
-    Route::get('/users', 'AdminController@showUsers');
-    Route::get('/users/{username}/edit', 'AdminController@editUser');
-    Route::post('/users/{username}/edit', 'AdminController@updateUser');
-    Route::get('/users/{user_id}/delete', 'AdminController@deleteUser');
-
-    Route::get('/users/{username}/delete', 'UserController@deleteMe');
-    Route::post('/users/{username}/newpassword', 'AdminController@updatePassword');
-
-    // Route::get('/pages', 'AdminController@showPages');
-    // Route::get('/pages/{username}/edit', 'AdminController@editPage');
-    // Route::post('/pages/{username}/edit', 'AdminController@updatePage');
-    // Route::get('/pages/{page_id}/delete', 'AdminController@deletePage');
-
-
-    // Route::get('/groups', 'AdminController@showGroups');
-    // Route::get('/groups/{username}/edit', 'AdminController@editGroup');
-    // Route::post('/groups/{username}/edit', 'AdminController@updateGroup');
-    // Route::get('/groups/{group_id}/delete', 'AdminController@deleteGroup');
-
-
-    Route::get('/manage-reports', 'AdminController@manageReports');
-    Route::post('/manage-reports', 'AdminController@updateManageReports');
-    Route::get('/mark-safe/{report_id}', 'AdminController@markSafeReports');
-    Route::get('/delete-post/{report_id}/{post_id}', 'AdminController@deletePostReports');
-
-    // Route::get('/manage-ads', 'AdminController@manageAds');
-    Route::get('/update-database', 'AdminController@getUpdateDatabase');
-    Route::post('/update-database', 'AdminController@postUpdateDatabase');
-    Route::get('/get-env', 'AdminController@getEnv');
-    Route::post('/save-env', 'AdminController@saveEnv');
-    // Route::post('/manage-ads', 'AdminController@updateManageAds');
-    Route::get('/settings', 'AdminController@settings');
-    Route::get('/markpage-safe/{report_id}', 'AdminController@markPageSafeReports');
-    // Route::get('/deletepage/{page_id}/{status}', 'AdminController@deletePage');
-    Route::get('/deleteuser/{username}', 'UserController@deleteMe');
-    // Route::get('/deletegroup/{group_id}', 'AdminController@deleteGroup');
-
-    // Route::get('/category/create', 'AdminController@addCategory');
-    // Route::post('/category/create', 'AdminController@storeCategory');
-    // Route::get('/category/{id}/edit', 'AdminController@editCategory');
-    // Route::post('/category/{id}/update', 'AdminController@updateCategory');
-
-    // Route::get('/events', 'AdminController@getEvents');
-    // Route::get('/events/{username}/edit', 'AdminController@editEvent');
-    // Route::post('/events/{username}/edit', 'AdminController@updateEvent');
-    // Route::get('/events/{event_id}/delete', 'AdminController@removeEvent');
-
-    // Route::get('/event-settings', 'AdminController@eventSettings');
-    // Route::post('/event-settings', 'AdminController@updateEventSettings');
-
-    Route::get('/wallpapers', 'AdminController@wallpapers');
-    Route::post('/wallpapers', 'AdminController@addWallpapers');
-    Route::get('/wallpaper/{wallpaper}/delete', 'AdminController@deleteWallpaper');
-});
-
 
 /*
 |--------------------------------------------------------------------------
@@ -334,7 +241,7 @@ Route::group(['prefix' => '/{username}', 'middleware' => 'auth'], function ($use
 
     Route::get('/liked-pages', 'UserController@likedPages');
     Route::get('/joined-groups', 'UserController@joinedGroups');
-    
+
     Route::get('/members/{group_id}', 'TimelineController@getGroupMember');
 
     // Route::get('/groupadmin/{group_id}', 'TimelineController@getAdminMember');
@@ -347,11 +254,11 @@ Route::group(['prefix' => '/{username}', 'middleware' => 'auth'], function ($use
     // Route::get('/add-pagemembers', 'UserController@pageMembersList');
 
     // Route::get('/groupevent/{group_id}', 'TimelineController@addEvent');
-    
+
     Route::get('/notification/{id}', 'NotificationController@redirectNotification');
 
     // Route::get('/events', 'TimelineController@eventsList');
-    
+
     // Route::get('/event-posts', 'TimelineController@getEventPosts');
     // Route::get('/invite-guests', 'UserController@guestList');
     // Route::get('/eventguests', 'TimelineController@displayGuests');
@@ -382,7 +289,7 @@ Route::group(['prefix' => '/{username}', 'middleware' => ['auth', 'editown']], f
     Route::get('/follow-requests', 'UserController@followRequests');
 
     Route::get('/pages-groups', 'TimelineController@pagesGroups');
-    
+
     Route::get('/album/create', 'TimelineController@createAlbum');
     Route::post('/album/create', 'TimelineController@saveAlbum');
 
@@ -401,13 +308,12 @@ Route::group(['prefix' => '/{username}', 'middleware' => ['auth', 'editown']], f
     Route::get('/saved', 'UserController@savedItems'); // %FIXME %DEPRECATE, use new resource route for this
 
     // %PSG
-    Route::get('/stories/player', ['as'=>'stories.player', 'uses' => 'StoriesController@player']);
+    Route::get('/stories/player', ['as' => 'stories.player', 'uses' => 'StoriesController@player']);
     Route::resource('stories', 'StoriesController', [
         'only' => ['index', 'store', 'create',],
     ]);
 
-    Route::get('/my-vault', ['as'=>'vault.dashboard', 'uses' => 'VaultsController@dashboard']);
-
+    Route::get('/my-vault', ['as' => 'vault.dashboard', 'uses' => 'VaultsController@dashboard']);
 });
 
 /*
@@ -419,19 +325,19 @@ Route::group(['prefix' => '/{username}', 'middleware' => ['auth', 'editown']], f
 Route::group(['prefix' => '/{username}/settings', 'middleware' => ['auth', 'editown']], function ($username) {
     Route::get('/general', 'UserController@userGeneralSettings');
     Route::post('/general', 'UserController@saveUserGeneralSettings');
-    
+
     Route::post('/localization', 'UserController@saveUserLocalizationSettings');
     Route::post('/subscription', 'UserController@saveUserSubscriptionSettings');
-    
+
     Route::get('/profile', 'UserController@userEditProfile');
     Route::post('/profile', 'UserController@saveProfile');
 
     Route::get('/privacy', 'UserController@userPrivacySettings');
     Route::post('/privacy', 'UserController@SaveUserPrivacySettings');
-    
+
     Route::get('/security', 'UserController@userSecuritySettings');
     Route::post('/security', 'UserController@SaveUserSecuritySettings');
-    
+
     Route::post('/block-profile', 'UserController@blockProfile')->name('block-profile');
     Route::post('/update-block-profile', 'UserController@updateBlockProfile')->name('update-block-profile');
     Route::get('edit-block-profile/{id}', 'UserController@editBlockProfile')->where('id', '[0-9]+');
@@ -452,15 +358,15 @@ Route::group(['prefix' => '/{username}/settings', 'middleware' => ['auth', 'edit
 
     Route::get('/notifications', 'UserController@emailNotifications');
     Route::post('/notifications', 'UserController@updateEmailNotifications');
-    
+
     Route::get('/addbank', 'UserController@addBank');
     Route::post('/addbank', 'UserController@addBank');
-    
+
     Route::get('/earnings', 'UserController@earnings');
     Route::post('/earnings', 'UserController@earnings');
-    
+
     Route::post('/bankdetails', 'UserController@saveBankAccountDetails');
-    
+
     Route::get('/addpayment', 'UserController@addPayment');
     Route::post('/addpayment', 'UserController@addPayment');
 
@@ -469,9 +375,8 @@ Route::group(['prefix' => '/{username}/settings', 'middleware' => ['auth', 'edit
 
     Route::get('/save-bank-details', 'UserController@saveUserBankDetails');
     Route::post('/save-bank-details', 'UserController@saveUserBankDetails');
-    
-    Route::post('/save-watermark-settings', 'UserController@saveWaterMarkSetting');
 
+    Route::post('/save-watermark-settings', 'UserController@saveWaterMarkSetting');
 });
 
 
@@ -515,7 +420,7 @@ Route::group(['prefix' => '/{username}/group-settings', 'middleware' => ['auth',
 |--------------------------------------------------------------------------
 */
 
-Route::group(['prefix' => '/{username}/event-settings', 'middleware' => ['auth','editevent']], function ($username) {
+Route::group(['prefix' => '/{username}/event-settings', 'middleware' => ['auth', 'editevent']], function ($username) {
     Route::get('/general', 'TimelineController@generalEventSettings');
     Route::post('/general', 'TimelineController@updateUserEventSettings');
 });
@@ -628,11 +533,11 @@ Route::group(['prefix' => 'ajax', 'middleware' => ['auth']], function () {
 */
 
 Route::get('user/avatar/{filename}', function ($filename) {
-    return Image::make(storage_path().'/uploads/users/avatars/'.$filename)->response();
+    return Image::make(storage_path() . '/uploads/users/avatars/' . $filename)->response();
 });
 
 Route::get('user/cover/{filename}', function ($filename) {
-    return Image::make(storage_path().'/uploads/users/covers/'.$filename)->response();
+    return Image::make(storage_path() . '/uploads/users/covers/' . $filename)->response();
 });
 
 Route::get('user/gallery/video/{filename}', function ($filename) {
@@ -645,49 +550,48 @@ Route::get('user/gallery/video/{filename}', function ($filename) {
 
 Route::get('user/gallery/{filename}', function ($filename) {
     try {
-        return Image::make(storage_path().'/uploads/users/gallery/'.$filename)->response();
+        return Image::make(storage_path() . '/uploads/users/gallery/' . $filename)->response();
     } catch (\Exception $e) {
         $defaultFN = 'default-cover-user.png';
-        return Image::make(storage_path().'/uploads/users/covers/'.$defaultFN)->response();
+        return Image::make(storage_path() . '/uploads/users/covers/' . $defaultFN)->response();
     }
 });
 
 
 Route::get('page/avatar/{filename}', function ($filename) {
-    return Image::make(storage_path().'/uploads/pages/avatars/'.$filename)->response();
+    return Image::make(storage_path() . '/uploads/pages/avatars/' . $filename)->response();
 });
 
 Route::get('page/cover/{filename}', function ($filename) {
-    return Image::make(storage_path().'/uploads/pages/covers/'.$filename)->response();
+    return Image::make(storage_path() . '/uploads/pages/covers/' . $filename)->response();
 });
 
 Route::get('group/avatar/{filename}', function ($filename) {
-    return Image::make(storage_path().'/uploads/groups/avatars/'.$filename)->response();
+    return Image::make(storage_path() . '/uploads/groups/avatars/' . $filename)->response();
 });
 
 Route::get('group/cover/{filename}', function ($filename) {
-    return Image::make(storage_path().'/uploads/groups/covers/'.$filename)->response();
+    return Image::make(storage_path() . '/uploads/groups/covers/' . $filename)->response();
 });
 
 Route::get('setting/{filename}', function ($filename) {
-    return Image::make(storage_path().'/uploads/settings/'.$filename)->response();
+    return Image::make(storage_path() . '/uploads/settings/' . $filename)->response();
 });
 
 Route::get('event/cover/{filename}', function ($filename) {
-    return Image::make(storage_path().'/uploads/events/covers/'.$filename)->response();
+    return Image::make(storage_path() . '/uploads/events/covers/' . $filename)->response();
 });
 
 Route::get('event/avatar/{filename}', function ($filename) {
-    return Image::make(storage_path().'/uploads/events/avatars/'.$filename)->response();
+    return Image::make(storage_path() . '/uploads/events/avatars/' . $filename)->response();
 });
 
 Route::get('/page/{pagename}', 'PageController@page');
 
 Route::get('album/{filename}', function ($filename) {
-    return Image::make(storage_path().'/uploads/albums/'.$filename)->response();
+    return Image::make(storage_path() . '/uploads/albums/' . $filename)->response();
 });
 
 Route::get('wallpaper/{filename}', function ($filename) {
-    return Image::make(storage_path().'/uploads/wallpapers/'.$filename)->response();
+    return Image::make(storage_path() . '/uploads/wallpapers/' . $filename)->response();
 });
-

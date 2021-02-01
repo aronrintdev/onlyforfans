@@ -78,6 +78,19 @@ class AdminController extends Controller
             ]);
     }
 
+    /**
+     * Checks if user has permission to action.
+     *
+     * Permisions should be set up as such `{section}.{action}`
+     */
+    protected function permissionTo($permission)
+    {
+        if( ! $this->request->user()->hasPermissionTo($permission, 'admin')) {
+            abort(403);
+        }
+    }
+
+
     protected function checkCensored()
     {
         $messages['not_contains'] = 'The :attribute must not contain banned words';
@@ -107,6 +120,8 @@ class AdminController extends Controller
 
     public function dashboard()
     {
+        $this->permissionTo('dashboard.view');
+
         //User registered
         $users = Auth::user()->get();
         $dashboard_user_results = $this->getDashboard($users);
@@ -172,13 +187,17 @@ class AdminController extends Controller
         $total_report_count = count($postReports);
 
         //Stories Shared
-        $postShared = $post->postShared();
-        $dashboard_shared_results = $this->getDashboard($postShared);
-        $result = explode('-', $dashboard_shared_results);
-        $today_shared_count = $result[0];
-        $month_shared_count = $result[1];
-        $year_shared_count = $result[2];
-        $total_shared_count = count($postShared);
+        // $postShared = $post->postShared();
+        // $dashboard_shared_results = $this->getDashboard($postShared);
+        // $result = explode('-', $dashboard_shared_results);
+        // $today_shared_count = $result[0];
+        $today_shared_count = 0;
+        // $month_shared_count = $result[1];
+        $month_shared_count = 0;
+        // $year_shared_count = $result[2];
+        $year_shared_count = 0;
+        // $total_shared_count = count($postShared);
+        $total_shared_count = 0;
 
         $theme = Theme::uses(Setting::get('current_theme', 'default'))->layout('admin');
         $theme->setTitle(trans('common.dashboard').' '.Setting::get('title_seperator').' '.Setting::get('site_title').' '.Setting::get('title_seperator').' '.Setting::get('site_tagline'));
@@ -221,6 +240,8 @@ class AdminController extends Controller
 
     public function getDashboard($data_args)
     {
+        $this->permissionTo('dashboard.get');
+
         $current_date = date('Y-m-d', strtotime(Carbon::now()));
         $current_month = date('Y-m', strtotime(Carbon::now()));
         $current_year = date('Y', strtotime(Carbon::now()));
@@ -247,6 +268,8 @@ class AdminController extends Controller
 
     public function generalSettings()
     {
+        $this->permissionTo('settings.general.view');
+
         $theme = Theme::uses(Setting::get('current_theme', 'default'))->layout('admin');
         $theme->setTitle(trans('common.general_settings').' '.Setting::get('title_seperator').' '.Setting::get('site_title').' '.Setting::get('title_seperator').' '.Setting::get('site_tagline'));
 
@@ -255,6 +278,8 @@ class AdminController extends Controller
 
     public function listCustomPages()
     {
+        $this->permissionTo('customPage.list');
+
         $staticpages = StaticPage::all();
         $theme = Theme::uses(Setting::get('current_theme', 'default'))->layout('admin');
         $theme->setTitle(trans('common.custom_pages').' '.Setting::get('title_seperator').' '.Setting::get('site_title').' '.Setting::get('title_seperator').' '.Setting::get('site_tagline'));
@@ -264,6 +289,8 @@ class AdminController extends Controller
 
     public function createCustomPage()
     {
+        $this->permissionTo('customPage.create');
+
         $mode = 'create';
         $theme = Theme::uses(Setting::get('current_theme', 'default'))->layout('admin');
         $theme->setTitle(trans('admin.create_custom_page').' '.Setting::get('title_seperator').' '.Setting::get('site_title').' '.Setting::get('title_seperator').' '.Setting::get('site_tagline'));
@@ -273,6 +300,8 @@ class AdminController extends Controller
 
     public function editCustomPage($id)
     {
+        $this->permissionTo('customPage.edit');
+
         $mode = 'edit';
         $staticPage = StaticPage::find($id);
         $theme = Theme::uses(Setting::get('current_theme', 'default'))->layout('admin');
@@ -298,6 +327,8 @@ class AdminController extends Controller
 
     public function storeCustomPage(Request $request)
     {
+        $this->permissionTo('customPage.store');
+
         $mode = 'create';
         $staticPage = new StaticPage();
         $validation = Validator::make(
@@ -326,6 +357,8 @@ class AdminController extends Controller
 
     public function updateCustomPage(Request $request, $id)
     {
+        $this->permissionTo('customPage.update');
+
         $validator = $this->customPageValidator($request->all());
 
         if ($validator->fails()) {
@@ -347,23 +380,25 @@ class AdminController extends Controller
 
     public function updateGeneralSettings(Request $request)
     {
+        $this->permissionTo('settings.general.update');
+
         $settings = $request->except('_token');
 
         if ($request->mail_verification == 'on') {
-//            if ((env('MAIL_DRIVER') == "" || (env('MAIL_DRIVER') == null)) ||
-//              ((env('MAIL_HOST') == "" || env('MAIL_HOST') == null)) ||
-//              ((env('MAIL_PORT') == "" || env('MAIL_PORT') == null)) ||
-//              ((env('MAIL_USERNAME') == "" || env('MAIL_USERNAME') == null)) ||
-//              ((env('MAIL_PASSWORD') == "" || env('MAIL_PASSWORD') == null)) ||
-//              ((env('MAIL_ENCRYPTION') == "" || env('MAIL_ENCRYPTION') == null))) {
-//            if ((env('MAIL_DRIVER') == "" || (env('MAIL_DRIVER') == null)) ||
-//              ((env('MAIL_HOST') == "" || env('MAIL_HOST') == null)) ||
-//              ((env('MAIL_PORT') == "" || env('MAIL_PORT') == null)) ||
-//              ((env('MAIL_USERNAME') == "" || env('MAIL_USERNAME') == null)) ||
-//              ((env('MAIL_PASSWORD') == "" || env('MAIL_PASSWORD') == null))) {
-//                $messages = trans('admin.email_not_configured');
-//                return redirect()->back()->with('messages', $messages);
-//            }
+        //    if ((env('MAIL_DRIVER') == "" || (env('MAIL_DRIVER') == null)) ||
+        //      ((env('MAIL_HOST') == "" || env('MAIL_HOST') == null)) ||
+        //      ((env('MAIL_PORT') == "" || env('MAIL_PORT') == null)) ||
+        //      ((env('MAIL_USERNAME') == "" || env('MAIL_USERNAME') == null)) ||
+        //      ((env('MAIL_PASSWORD') == "" || env('MAIL_PASSWORD') == null)) ||
+        //      ((env('MAIL_ENCRYPTION') == "" || env('MAIL_ENCRYPTION') == null))) {
+        //    if ((env('MAIL_DRIVER') == "" || (env('MAIL_DRIVER') == null)) ||
+        //      ((env('MAIL_HOST') == "" || env('MAIL_HOST') == null)) ||
+        //      ((env('MAIL_PORT') == "" || env('MAIL_PORT') == null)) ||
+        //      ((env('MAIL_USERNAME') == "" || env('MAIL_USERNAME') == null)) ||
+        //      ((env('MAIL_PASSWORD') == "" || env('MAIL_PASSWORD') == null))) {
+        //        $messages = trans('admin.email_not_configured');
+        //        return redirect()->back()->with('messages', $messages);
+        //    }
         }
 
         if ($request->captcha == 'on') {
@@ -402,6 +437,8 @@ class AdminController extends Controller
 
     public function userSettings()
     {
+        $this->permissionTo('user.settings.view');
+
         $theme = Theme::uses(Setting::get('current_theme', 'default'))->layout('admin');
         $theme->setTitle(trans('common.user_settings').' '.Setting::get('title_seperator').' '.Setting::get('site_title').' '.Setting::get('title_seperator').' '.Setting::get('site_tagline'));
 
@@ -410,6 +447,8 @@ class AdminController extends Controller
 
     public function updateUserSettings(Request $request)
     {
+        $this->permissionTo('user.settings.update');
+
         $settings = $request->except('_token');
 
         $categories = Category::paginate(10);
@@ -422,6 +461,8 @@ class AdminController extends Controller
 
     public function pageSettings()
     {
+        $this->permissionTo('page.settings.view');
+
         $categories = Category::paginate(10);
 
         $theme = Theme::uses(Setting::get('current_theme', 'default'))->layout('admin');
@@ -432,9 +473,11 @@ class AdminController extends Controller
 
     public function updatePageSettings(Request $request)
     {
+        $this->permissionTo('page.settings.update');
+
         $settings = $request->except('_token');
         Setting::set($settings);
-        
+
         $categories = Category::paginate(10);
         Flash::success(trans('messages.page_settings_updated_success'));
         $theme = Theme::uses(Setting::get('current_theme', 'default'))->layout('admin');
@@ -444,6 +487,8 @@ class AdminController extends Controller
 
     public function groupSettings()
     {
+        $this->permissionTo('group.settings.view');
+
         $theme = Theme::uses(Setting::get('current_theme', 'default'))->layout('admin');
         $theme->setTitle(trans('common.group_settings').' '.Setting::get('title_seperator').' '.Setting::get('site_title').' '.Setting::get('title_seperator').' '.Setting::get('site_tagline'));
 
@@ -452,6 +497,8 @@ class AdminController extends Controller
 
     public function updateGroupSettings(Request $request)
     {
+        $this->permissionTo('group.settings.update');
+
         $settings = $request->except('_token');
 
         Setting::set($settings);
@@ -463,6 +510,8 @@ class AdminController extends Controller
 
     public function eventSettings()
     {
+        $this->permissionTo('event.settings.view');
+
         $theme = Theme::uses(Setting::get('current_theme', 'default'))->layout('admin');
         $theme->setTitle(trans('common.event_settings').' | '.Setting::get('site_title').' | '.Setting::get('site_tagline'));
 
@@ -471,6 +520,8 @@ class AdminController extends Controller
 
     public function updateEventSettings(Request $request)
     {
+        $this->permissionTo('event.settings.update');
+
         $settings = $request->except('_token');
 
         Setting::set($settings);
@@ -499,6 +550,8 @@ class AdminController extends Controller
 
     public function getAnnouncements()
     {
+        $this->permissionTo('announcement.viewAny');
+
         $total_days = '';
         $announcements = Announcement::paginate(10);
         $current_anouncement = Announcement::find(Setting::get('announcement'));
@@ -515,6 +568,8 @@ class AdminController extends Controller
 
     public function createAnnouncement()
     {
+        $this->permissionTo('announcement.create');
+
         $mode = 'create';
         $theme = Theme::uses(Setting::get('current_theme', 'default'))->layout('admin');
         $theme->setTitle(trans('admin.create_announcement').' '.Setting::get('title_seperator').' '.Setting::get('site_title').' '.Setting::get('title_seperator').' '.Setting::get('site_tagline'));
@@ -524,6 +579,8 @@ class AdminController extends Controller
 
     public function editAnnouncement($id)
     {
+        $this->permissionTo('announcement.view');
+
         $mode = 'update';
         $announcement = Announcement::find($id);
 
@@ -535,6 +592,8 @@ class AdminController extends Controller
 
     public function updateAnnouncement(Request $request, $id)
     {
+        $this->permissionTo('announcement.update');
+
         $validator = $this->announcementValidator($request->all());
 
         if ($validator->fails()) {
@@ -558,6 +617,8 @@ class AdminController extends Controller
 
     public function addCategory()
     {
+        $this->permissionTo('category.create');
+
         $mode = 'create';
         $theme = Theme::uses(Setting::get('current_theme', 'default'))->layout('admin');
         $theme->setTitle(trans('admin.create_category').' '.Setting::get('title_seperator').' '.Setting::get('site_title').' '.Setting::get('title_seperator').' '.Setting::get('site_tagline'));
@@ -567,6 +628,8 @@ class AdminController extends Controller
 
     public function editCategory($id)
     {
+        $this->permissionTo('category.view');
+
         $mode = 'update';
         $category = Category::find($id);
 
@@ -594,6 +657,8 @@ class AdminController extends Controller
 
     public function storeCategory(Request $request)
     {
+        $this->permissionTo('category.create');
+
         $validator = $this->categoryValidator($request->all());
 
         if ($validator->fails()) {
@@ -616,6 +681,8 @@ class AdminController extends Controller
 
     public function updateCategory(Request $request, $id)
     {
+        $this->permissionTo('category.update');
+
         $validator = $this->categoryValidator($request->all());
 
         if ($validator->fails()) {
@@ -636,6 +703,8 @@ class AdminController extends Controller
 
     public function removeCategory(Request $request)
     {
+        $this->permissionTo('category.delete');
+
         $category = Category::find($request->category_id);
 
         if($category == null)
@@ -663,6 +732,8 @@ class AdminController extends Controller
 
     public function addAnnouncements(Request $request)
     {
+        $this->permissionTo('announcement.create');
+
         $validator = $this->announcementValidator($request->all());
 
         if ($validator->fails()) {
@@ -692,6 +763,8 @@ class AdminController extends Controller
 
     public function removeAnnouncement(Request $request)
     {
+        $this->permissionTo('announcement.delete');
+
         $announcements = Announcement::find($request->announcement_id);
         if ($announcements->delete()) {
             Flash::success(trans('messages.announcement_deleted_success'));
@@ -702,6 +775,8 @@ class AdminController extends Controller
 
     public function activeAnnouncement($announcement_id)
     {
+        $this->permissionTo('category.activate');
+
         if (Setting::get('announcement') != null) {
             Setting::set('announcement', $announcement_id);
         } else {
@@ -715,6 +790,8 @@ class AdminController extends Controller
 
     public function themes()
     {
+        $this->permissionTo('theme.viewAny');
+
         $theme = Theme::uses(Setting::get('current_theme', 'default'))->layout('admin');
         $theme->setTitle(trans('common.themes').' '.Setting::get('title_seperator').' '.Setting::get('site_title').' '.Setting::get('title_seperator').' '.Setting::get('site_tagline'));
 
@@ -737,6 +814,8 @@ class AdminController extends Controller
 
     public function changeTheme($name)
     {
+        $this->permissionTo('theme.update');
+
         Setting::set('current_theme', $name);
 
         return redirect('admin/themes');
@@ -744,6 +823,7 @@ class AdminController extends Controller
 
     public function showUsers(Request $request)
     {
+        $this->permissionTo('user.viewAny');
 
 //        $timelines = '';
 //        if ($request->all()) {
@@ -767,6 +847,8 @@ class AdminController extends Controller
 
     public function editUser($username)
     {
+        $this->permissionTo('user.view');
+
         $timeline = Timeline::where('username', $username)->first();
 
         if (!$timeline) {
@@ -804,6 +886,8 @@ class AdminController extends Controller
 
     public function updateUser($oldUsername, Request $request)
     {
+        $this->permissionTo('user.update');
+
         $data = $request->all();
         $timeline = Timeline::where('username', $oldUsername)->first();
         $user = $timeline->user;
@@ -854,6 +938,8 @@ class AdminController extends Controller
 
     public function updatePassword(Request $request, $username)
     {
+        $this->permissionTo('user.password.update');
+
         $validator = $this->validatePassword($request->all());
         if ($validator->fails()) {
             return redirect()->back()
@@ -876,6 +962,8 @@ class AdminController extends Controller
 
     public function showPages(Request $request)
     {
+        $this->permissionTo('page.viewAny');
+
         $timelines = '';
         $likesarr = [];
 
@@ -941,6 +1029,8 @@ class AdminController extends Controller
 
     public function editPage($username)
     {
+        $this->permissionTo('page.edit');
+
         $timeline = Timeline::where('username', $username)->first();
         $page = $timeline->page()->first();
         $category_options = ['' => 'Select Category'] + Category::pluck('name', 'id')->all();
@@ -969,6 +1059,8 @@ class AdminController extends Controller
 
     public function updatePage(Request $request, $username)
     {
+        $this->permissionTo('page.update');
+
         $validator = $this->adminPageValidation($request->all());
         if ($validator->fails()) {
             return redirect()->back()
@@ -995,6 +1087,8 @@ class AdminController extends Controller
 
     public function deletePage($page_id)
     {
+        $this->permissionTo('page.delete');
+
         $page = Page::find($page_id);
 
         $page->timeline->reports()->detach();
@@ -1038,6 +1132,8 @@ class AdminController extends Controller
 
     public function manageSortings($sort_by, $timeline_type)
     {
+        $this->permissionTo('sorting.manage');
+
         $timelines = '';
         if ($sort_by == 'name_asc') {
             $timelines = Timeline::orderBy('name', 'ASC')->where('type', $timeline_type)->paginate(Setting::get('items_page', 10));
@@ -1056,6 +1152,8 @@ class AdminController extends Controller
 
     public function showGroups(Request $request)
     {
+        $this->permissionTo('group.viewAny');
+
         $timelines = '';
         
         if ($request->all()) {
@@ -1136,6 +1234,8 @@ class AdminController extends Controller
 
     public function editGroup($username)
     {
+        $this->permissionTo('group.view');
+
         $timeline = Timeline::where('username', $username)->first();
         $groups = $timeline->groups()->first();
 
@@ -1167,6 +1267,8 @@ class AdminController extends Controller
 
     public function updateGroup(Request $request, $username)
     {
+        $this->permissionTo('group.update');
+
         $validator = $this->adminGroupValidator($request->all());
         if ($validator->fails()) {
             return redirect()->back()
@@ -1192,6 +1294,8 @@ class AdminController extends Controller
 
     public function deleteGroup($group_id)
     {
+        $this->permissionTo('group.delete');
+
         $group = Group::find($group_id);
 
         $group->timeline->reports()->detach();
@@ -1259,6 +1363,8 @@ class AdminController extends Controller
 
     public function manageReports()
     {
+        $this->permissionTo('reports.manage');
+
         $user = User::all();
         $post = new Post();
         $page_reports = [];
@@ -1291,6 +1397,8 @@ class AdminController extends Controller
 
     public function markSafeReports($report_id)
     {
+        $this->permissionTo('report.markSafe');
+
         $post = new Post();
         $check_report = $post->deleteManageReport($report_id);
         if ($check_report) {
@@ -1302,6 +1410,8 @@ class AdminController extends Controller
 
     public function deletePostReports($report_id, $post_id)
     {
+        $this->permissionTo('report.delete');
+
         $post = Post::find($post_id);
         $notifications = Notification::where('post_id', $post_id)->get();
         //$comments = Comment::where('post_id',$post_id)->get();
@@ -1322,6 +1432,8 @@ class AdminController extends Controller
 
     public function manageAds()
     {
+        $this->permissionTo('ad.viewAny');
+
         $theme = Theme::uses(Setting::get('current_theme', 'default'))->layout('admin');
         $theme->setTitle(trans('common.manage_ads').' '.Setting::get('title_seperator').' '.Setting::get('site_title').' '.Setting::get('title_seperator').' '.Setting::get('site_tagline'));
 
@@ -1330,6 +1442,8 @@ class AdminController extends Controller
 
     public function updateManageAds(Request $request)
     {
+        $this->permissionTo('ad.update');
+
         $settings = $request->except('_token');
         Setting::set($settings);
         Flash::success(trans('messages.ads_updated_success'));
@@ -1341,6 +1455,8 @@ class AdminController extends Controller
 
     public function settings()
     {
+        $this->permissionTo('settings.viewAny');
+
         $theme = Theme::uses(Setting::get('current_theme', 'default'))->layout('admin');
         $theme->setTitle(trans('common.settings').' '.Setting::get('title_seperator').' '.Setting::get('site_title').' '.Setting::get('title_seperator').' '.Setting::get('site_tagline'));
 
@@ -1349,6 +1465,8 @@ class AdminController extends Controller
 
     public function markPageSafeReports($report_id)
     {
+        $this->permissionTo('report.markSafe');
+
         $post = new Post();
         $check_report = $post->deletePageReport($report_id);
         if ($check_report) {
@@ -1360,6 +1478,8 @@ class AdminController extends Controller
 
     public function getEnv()
     {
+        $this->permissionTo('env.view');
+
         if (Config::get('app.env') == 'demo') {
             $env = File::get(base_path('env.example'));
         } else {
@@ -1374,6 +1494,8 @@ class AdminController extends Controller
 
     public function saveEnv(Request $request)
     {
+        $this->permissionTo('env.update');
+
         Flash::success(trans('common.saved_changes'));
 
         $env = $request->env;
@@ -1384,6 +1506,8 @@ class AdminController extends Controller
 
     public function getUpdateDatabase(Request $request)
     {
+        $this->permissionTo('database.view');
+
         $migrations = DB::table('migrations')->select('migration')->get();
 
 
@@ -1404,6 +1528,8 @@ class AdminController extends Controller
 
     public function postUpdateDatabase(Request $request)
     {
+        $this->permissionTo('database.update');
+
         try {
             Artisan::call('migrate', [
                     '--force' => true,
@@ -1456,6 +1582,8 @@ class AdminController extends Controller
 
     public function getEvents(Request $request)
     {
+        $this->permissionTo('event.viewAny');
+
         if ($request->sort) {
             $sort_type = $request->sort;
             if ($sort_type && ($sort_type != 'guest_asc' || $sort_type != 'guest_desc'|| $sort_type != 'private'|| $sort_type != 'public')) {
@@ -1523,6 +1651,8 @@ class AdminController extends Controller
 
     public function editEvent($username)
     {
+        $this->permissionTo('event.view');
+
         $timeline = Timeline::where('username', $username)->first();
         $event = $timeline->event()->first();
 
@@ -1552,6 +1682,8 @@ class AdminController extends Controller
 
     public function updateEvent(Request $request, $username)
     {
+        $this->permissionTo('event.update');
+
         $validator = $this->validateEventPage($request->all());
         if ($validator->fails()) {
             return redirect()->back()
@@ -1578,6 +1710,8 @@ class AdminController extends Controller
 
     public function removeEvent($event_id)
     {
+        $this->permissionTo('event.delete');
+
         $event = Event::find($event_id);
         
         //Deleting Events
@@ -1611,6 +1745,8 @@ class AdminController extends Controller
 
     public function wallpapers()
     {
+        $this->permissionTo('wallpaper.viewAny');
+
         $theme = Theme::uses(Setting::get('current_theme', 'default'))->layout('admin');
         $theme->setTitle(trans('common.wallpapers').' '.Setting::get('title_seperator').' '.Setting::get('site_title').' '.Setting::get('title_seperator').' '.Setting::get('site_tagline'));
         return $theme->scope('admin/wallpapers')->render();
@@ -1618,6 +1754,8 @@ class AdminController extends Controller
 
     public function addWallpapers(Request $request)
     {
+        $this->permissionTo('wallpaper.create');
+
         if($request->wallpapers[0] == NULL)
         {
             Flash::error(trans('messages.no_file_added'));
@@ -1646,6 +1784,8 @@ class AdminController extends Controller
 
     public function deleteWallpaper(Wallpaper $wallpaper)
     {
+        $this->permissionTo('wallpaper.delete');
+
         $media_id = $wallpaper->media()->first()->id;
         Timeline::where('background_id', $media_id)->update(['background_id' => null]);
         $wallpaper->delete();
@@ -1670,6 +1810,8 @@ class AdminController extends Controller
      */
     public function deleteUser($user_id)
     {
+        $this->permissionTo('user.delete');
+
         try {
             DB::beginTransaction();
 

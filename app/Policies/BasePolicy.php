@@ -17,7 +17,7 @@ class BasePolicy
      */
     protected $policies = [];
 
-    public const permissionOnly = 'permissionOnly';
+    public $permissionOnly = 'permissionOnly';
 
     /**
      * Overwrite for specific name for this model.
@@ -40,9 +40,10 @@ class BasePolicy
     protected $actionNames = [];
 
     public function __call($method, $arguments) {
+        // dd($method, $arguments);
         if ( method_exists($this, $method) || Arr::has($this->policies, $method) ) {
             if ($this->usePermissions && ! in_array($method, $this->skipPermissionsOn)) {
-                if ($this->hasPermission($method, $arguments[0], $arguments[1])) {
+                if ($this->hasPermission($method, $arguments[0], $arguments[1] ?? null)) {
                     // If has permission then return true.
                     return true;
                 }

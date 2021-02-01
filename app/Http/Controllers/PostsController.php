@@ -102,6 +102,8 @@ class PostsController extends AppBaseController
 
     public function toggleLike(Request $request, Post $post)
     {
+        $this->authorize('toggleLike', $post);
+
         $sessionUser = Auth::user();
 
         // %TODO: notify user
@@ -125,6 +127,9 @@ class PostsController extends AppBaseController
 
     public function tip(Request $request, $id)
     {
+        $post = Post::find($id);
+        $this->authorize('tip', $post);
+
         $sessionUser = Auth::user(); // sender of tip
         try {
             $post = Post::findOrFail($id);

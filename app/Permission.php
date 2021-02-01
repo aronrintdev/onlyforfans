@@ -2,6 +2,7 @@
 
 namespace App;
 
+use Illuminate\Support\Collection;
 use Spatie\Permission\Models\Permission as ParentPermission;
 
 /**
@@ -16,4 +17,15 @@ class Permission extends ParentPermission
    * @var array
    */
     protected $fillable = [];
+
+
+    /**
+     * Checks if object/collection passed will edit any fields
+     */
+    public function willBeEditedBy(Collection $data) : bool
+    {
+        return $data->contains(function($value, $key) {
+            return $this->{$key} !== $value;
+        });
+    }
 }
