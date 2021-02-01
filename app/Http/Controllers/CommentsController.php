@@ -57,6 +57,17 @@ class CommentsController extends AppBaseController
 
     public function show(Request $request, Comment $comment)
     {
+        $sessionUser = Auth::user();
+        //dd('here', $sessionUser->id);
+        if ( !$sessionUser->isAdmin() ) { // admin can view all comments
+            $isCommentOwner = ($sessionUser->id === $comment->user_id ); // can see own comments
+            $isPostOwner = ($sessionUser->id === $comment->post->user_id ); // can see comments on own post
+            $isFollowedTimeline = $sessionUser->followedtimelines->contains($comment->post->timeline_id); // can see comments on followed timeline's posts
+            //dd( 'co: '.$isCommentOwner, 'po'.$isPostOwner, 'ft'.$isFollowedTimeline);
+            if ( !$isCommentOwner && !$isPostOwner && !$isFollowedTimeline ) {
+                abort(403);
+            }
+        }
         return response()->json([
             'comment' => $comment,
         ]);

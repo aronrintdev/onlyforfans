@@ -36,14 +36,17 @@ class ShareablesTableSeeder extends Seeder
                 ->get();
             $max = $this->faker->numberBetween( 0, min($purchaseablePosts->count()-1, $this->getMax('purchased')) );
             $this->command->info("  - Creating $max purchased-posts for user ".$f->name);
-            $purchaseablePosts->random($max)->each( function($p) use(&$f) {
-                $p->receivePayment(
-                    PaymentTypeEnum::PURCHASE, // PaymentTypeEnum
-                    $f, // User $sender | follower | purchaser
-                    $p->price*100, // int $amountInCents
-                    [ 'notes' => 'ShareablesTableSeeder' ],
-                );
-            });
+
+            if ( $max > 0 ) {
+                $purchaseablePosts->random($max)->each( function($p) use(&$f) {
+                    $p->receivePayment(
+                        PaymentTypeEnum::PURCHASE, // PaymentTypeEnum
+                        $f, // User $sender | follower | purchaser
+                        $p->price*100, // int $amountInCents
+                        [ 'notes' => 'ShareablesTableSeeder' ],
+                    );
+                });
+            }
 
             // --- follow some free timelines ---
 
@@ -56,16 +59,18 @@ class ShareablesTableSeeder extends Seeder
             }
             $max = $this->faker->numberBetween( 0, min($timelines->count()-1, $this->getMax('follower')) );
             $this->command->info("  - Following (default) $max timelines for user ".$f->name);
-            $attrs = ['is_subscribe' => 0];
-            $timelines->random($max)->each( function($t) use(&$f, $attrs) {
-                DB::table('shareables')->insert([
-                    'sharee_id' => $f->id,
-                    'shareable_type' => 'timelines',
-                    'shareable_id' => $t->id,
-                    'is_approved' => 1,
-                    'access_level' => 'default',
-                ]);
-            });
+
+            if ( $max > 0 ) {
+                $timelines->random($max)->each( function($t) use(&$f) {
+                    DB::table('shareables')->insert([
+                        'sharee_id' => $f->id,
+                        'shareable_type' => 'timelines',
+                        'shareable_id' => $t->id,
+                        'is_approved' => 1,
+                        'access_level' => 'default',
+                    ]);
+                });
+            }
 
             // --- subscribe to some timelines ---
 
@@ -81,9 +86,9 @@ class ShareablesTableSeeder extends Seeder
 
             unset($timelines);
             $timelines = $groups[0];
-            $max = $this->faker->numberBetween( 0, min($timelines->count()-1, $this->getMax('subscriber')) );
+            $max = $this->faker->numberBetween( 1, min($timelines->count()-1, $this->getMax('subscriber')) );
             //$this->command->info("  - Following $max premium timelines for user ".$f->name);
-            $timelines->random($max)->each( function($t) use(&$f, $attrs) {
+            $timelines->random($max)->each( function($t) use(&$f) {
                 DB::table('shareables')->insert([
                     'sharee_id' => $f->id,
                     'shareable_type' => 'timelines',
@@ -95,10 +100,9 @@ class ShareablesTableSeeder extends Seeder
 
             unset($timelines);
             $timelines = $groups[1];
-            $max = $this->faker->numberBetween( 0, min($timelines->count()-1, $this->getMax('subscriber')) );
+            $max = $this->faker->numberBetween( 1, min($timelines->count()-1, $this->getMax('subscriber')) );
             //$this->command->info("  - Subscribing to $max premium timelines for user ".$f->name);
-            $attrs = ['is_subscribe' => 1];
-            $timelines->random($max)->each( function($t) use(&$f, $attrs) {
+            $timelines->random($max)->each( function($t) use(&$f) {
                 DB::table('shareables')->insert([
                     'sharee_id' => $f->id, // fan
                     'shareable_type' => 'timelines',
@@ -120,7 +124,44 @@ class ShareablesTableSeeder extends Seeder
                 ]);
             });
 
-        });
+            // ---
+
+            // Create an additional users/timelines, which won't have any followers (useful for testing)
+            $isFollowForFree = true;
+            User::factory()->count(2)->create()->each( function($u) use(&$isFollowForFree) {
+
+                if ( $this->appEnv !== 'testing' ) {
+                    $this->output->writeln("ShareablesTableSeeder - Adding avatar & cover for new user " . $u->name);
+                    $avatar = FactoryHelpers::createImage(MediafileTypeEnum::AVATAR);
+                    $cover = FactoryHelpers::createImage(MediafileTypeEnum::COVER);
+                } else {
+                    $avatar = null;
+                    $cover = null;
+                }
+    
+                $u->is_follow_for_free = $isFollowForFree;
+                $u->save();
+                $isFollowForFree = !$isFollowForFree; // toggle so we get at least one of each
+    
+                $timeline = $u->timeline;
+                $timeline->avatar_id = $avatar->id ?? null;
+                $timeline->cover_id = $cover->id ?? null;
+                $timeline->save();
+
+                //Update default user settings
+                DB::table('user_settings')->insert([
+                    'user_id'               => $u->id,
+                    'confirm_follow'        => 'no',
+                    'follow_privacy'        => 'everyone',
+                    'comment_privacy'       => 'everyone',
+                    'timeline_post_privacy' => 'everyone',
+                    'post_privacy'          => 'everyone',
+                    'message_privacy'       => 'everyone',
+                ]);
+            });
+
+        }); // $followers->each( ... )
+
     }
 
     private function getMax($param) : int

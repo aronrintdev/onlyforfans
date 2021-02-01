@@ -60,20 +60,20 @@ class RestCommentsTest extends TestCase
     }
 
     /**
-     *  @group devcomment
+     *  @group devcommentthis
      */
     public function test_can_show_my_comment()
     {
-        $timeline = Timeline::has('posts','>=',1)->first();
-        $creator = $timeline->user;
+        //$timeline = Timeline::has('posts','>=',1)->first();
+        //$creator = $timeline->user;
+        $creator = User::has('comments', '>', 1)->first();
         $comment = Comment::where('user_id', $creator->id)->first();
-
         $response = $this->actingAs($creator)->ajaxJSON('GET', route('comments.show', $comment->id));
         $response->assertStatus(200);
     }
 
     /**
-     *  @group OFF-devcomment
+     *  @group devcomment
      */
     public function test_can_show_followed_timelines_comment()
     {
@@ -81,17 +81,23 @@ class RestCommentsTest extends TestCase
         $creator = $timeline->user;
         $post = $timeline->posts[0];
         $fan = $timeline->followers[0];
-
-        $response = $this->actingAs($fan)->ajaxJSON('GET', route('posts.show', $post->id));
+        $response = $this->actingAs($fan)->ajaxJSON('GET', route('comments.show', $post->id));
         $response->assertStatus(200);
+    }
 
-        $content = json_decode($response->content());
-        $this->assertNotNull($content->post);
-        $postR = $content->post;
-        $this->assertObjectHasAttribute('timeline_id', $postR);
-        $this->assertEquals($postR->timeline_id, $timeline->id);
-
-        // %TODO: test can not show unfollowed timeline's post
+    /**
+     *  @group devcommentthis
+     */
+    public function test_can_not_show_nonfollowed_timelines_comment()
+    {
+        $timeline = Timeline::has('posts','>=',1)->has('followers',0)->first();
+        $this->assertNotNull($timeline);
+        $this->assertEquals(0, $timeline->followers->count());
+        $post = $timeline->posts[0];
+        $creator = $timeline->user;
+        $fan = User::where('id', '<>', $creator->id)->first(); // some user other than owner of timeline
+        $response = $this->actingAs($fan)->ajaxJSON('GET', route('comments.show', $post->comments->first()->id));
+        $response->assertStatus(403);
     }
 
     /**
@@ -106,7 +112,7 @@ class RestCommentsTest extends TestCase
             'timeline_id' => $timeline->id,
             'description' => $this->faker->realText,
         ];
-        $response = $this->actingAs($creator)->ajaxJSON('POST', route('posts.store'), $payload);
+        $response = $this->actingAs($creator)->ajaxJSON('POST', route('comments.store'), $payload);
         $response->assertStatus(201);
 
         $content = json_decode($response->content());
@@ -128,7 +134,7 @@ class RestCommentsTest extends TestCase
         $payload = [
             'description' => 'updated text',
         ];
-        $response = $this->actingAs($creator)->ajaxJSON('PATCH', route('posts.update', $post->id), $payload);
+        $response = $this->actingAs($creator)->ajaxJSON('PATCH', route('comments.update', $post->id), $payload);
         $response->assertStatus(200);
 
         $content = json_decode($response->content());
@@ -152,17 +158,17 @@ class RestCommentsTest extends TestCase
             'timeline_id' => $timeline->id,
             'description' => $this->faker->realText,
         ];
-        $response = $this->actingAs($creator)->ajaxJSON('POST', route('posts.store'), $payload);
+        $response = $this->actingAs($creator)->ajaxJSON('POST', route('comments.store'), $payload);
         $response->assertStatus(201);
 
         $content = json_decode($response->content());
         $this->assertNotNull($content->post);
         $postR = $content->post;
 
-        $response = $this->actingAs($creator)->ajaxJSON('DELETE', route('posts.destroy', $postR->id));
+        $response = $this->actingAs($creator)->ajaxJSON('DELETE', route('comments.destroy', $postR->id));
         $response->assertStatus(200);
 
-        $response = $this->actingAs($creator)->ajaxJSON('GET', route('posts.show', $postR->id));
+        $response = $this->actingAs($creator)->ajaxJSON('GET', route('comments.show', $postR->id));
         $response->assertStatus(404);
     }
 

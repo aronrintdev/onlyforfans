@@ -27,6 +27,11 @@ class Comment extends Model
     public function likes() {
         return $this->belongsToMany('App\User', 'comment_likes', 'comment_id', 'user_id')->withTimestamps();
     }
+
+    public function post() {
+        return $this->belongsTo('App\Post');
+    }
+
     public function comments_liked() { // %TODO %DEPRECATE
         return $this->belongsToMany('App\User', 'comment_likes', 'comment_id', 'user_id');
     }
