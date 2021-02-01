@@ -99,13 +99,9 @@ class CommentsController extends AppBaseController
         $request->validate([
             'description' => 'required|string|min:1',
         ]);
-        $attrs = $request->only('description');
-
-        try {
-            $comment = Comment::create($attrs);
-        } catch (Exception $e) {
-            throw $e;
-        }
+        $attrs = $request->only([ 'description' ]);
+        $comment->fill($attrs);
+        $comment->save();
 
         return response()->json([
             'comment' => $comment,

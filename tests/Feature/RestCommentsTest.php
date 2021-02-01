@@ -60,7 +60,7 @@ class RestCommentsTest extends TestCase
     }
 
     /**
-     *  @group devcommentthis
+     *  @group devcomment
      */
     public function test_can_show_my_comment()
     {
@@ -86,7 +86,7 @@ class RestCommentsTest extends TestCase
     }
 
     /**
-     *  @group devcommentthis
+     *  @group devcomment
      */
     public function test_can_not_show_nonfollowed_timelines_comment()
     {
@@ -101,121 +101,114 @@ class RestCommentsTest extends TestCase
     }
 
     /**
-     *  @group OFF-devcomment
+     *  @group devcommentthis
      */
-    public function test_can_store_comment()
+    public function test_can_store_comment_on_own_timeline()
     {
-        $timeline = Timeline::has('posts','>=',1)->first(); // assume non-admin (%FIXME)
-        $creator = $timeline->user;
-
-        $payload = [
-            'timeline_id' => $timeline->id,
-            'description' => $this->faker->realText,
-        ];
-        $response = $this->actingAs($creator)->ajaxJSON('POST', route('comments.store'), $payload);
-        $response->assertStatus(201);
-
-        $content = json_decode($response->content());
-        $this->assertNotNull($content->post);
-        $postR = $content->post;
-        $this->assertNotNull($postR->description);
-        $this->assertEquals($payload['description'], $postR->description);
-    }
-
-    /**
-     *  @group OFF-devcomment
-     */
-    public function test_can_update_comment()
-    {
-        $timeline = Timeline::has('posts','>=',1)->first(); // assume non-admin (%FIXME)
-        $creator = $timeline->user;
+        $timeline = Timeline::has('posts','>=',1)->has('followers',0)->first();
         $post = $timeline->posts[0];
-
-        $payload = [
-            'description' => 'updated text',
-        ];
-        $response = $this->actingAs($creator)->ajaxJSON('PATCH', route('comments.update', $post->id), $payload);
-        $response->assertStatus(200);
-
-        $content = json_decode($response->content());
-        $this->assertNotNull($content->post);
-        $postR = $content->post;
-        $this->assertNotNull($postR->description);
-        $this->assertEquals($payload['description'], $postR->description);
-    }
-
-    /**
-     *  @group OFF-devcomment
-     */
-    public function test_can_destroy_comment()
-    {
-        $timeline = Timeline::has('posts','>=',1)->first(); // assume non-admin (%FIXME)
         $creator = $timeline->user;
-
-        // First create a post (so it doesn't have any relations preventing it from being deleted)
-        //$post = $timeline->posts[0];
         $payload = [
-            'timeline_id' => $timeline->id,
+            'post_id' => $post->id,
+            'user_id' => $creator->id,
             'description' => $this->faker->realText,
         ];
         $response = $this->actingAs($creator)->ajaxJSON('POST', route('comments.store'), $payload);
         $response->assertStatus(201);
+    }
 
-        $content = json_decode($response->content());
-        $this->assertNotNull($content->post);
-        $postR = $content->post;
+    public function test_can_store_comment_on_followed_timeline()
+    {
+        $response->assertStatus(201);
+    }
 
-        $response = $this->actingAs($creator)->ajaxJSON('DELETE', route('comments.destroy', $postR->id));
+    /**
+     *  @group devcomment
+     */
+    public function test_can_update_own_comment()
+    {
+        $creator = User::has('comments', '>', 1)->first();
+        $comment = Comment::where('user_id', $creator->id)->first();
+        $payload = [
+            'description' => $this->faker->realText,
+        ];
+        $response = $this->actingAs($creator)->ajaxJSON('PATCH', route('comments.update', $comment->id), $payload);
         $response->assertStatus(200);
+    }
 
-        $response = $this->actingAs($creator)->ajaxJSON('GET', route('comments.show', $postR->id));
+    /**
+     *  @group devcomment
+     */
+    public function test_can_destroy_own_comment()
+    {
+        $creator = User::has('comments', '>', 1)->first();
+        $comment = Comment::where('user_id', $creator->id)->first();
+        $response = $this->actingAs($creator)->ajaxJSON('DELETE', route('comments.destroy', $comment->id));
+        $response->assertStatus(200);
+        $response = $this->actingAs($creator)->ajaxJSON('GET', route('comments.show', $comment->id));
         $response->assertStatus(404);
     }
 
     /**
-     *  @group OFF-devcomment
+     *  @group devcomment
      */
-    // %TODO: unlike
-    public function test_can_like_comment()
+    public function test_timeline_follower_can_like_post_comment()
     {
-        $timeline = Timeline::has('posts','>=',1)->has('followers','>=',1)->first(); // assume non-admin (%FIXME)
+        $timeline = Timeline::has('posts','>=',1)->has('followers','>=',1)->first(); 
         $creator = $timeline->user;
-        $post = $timeline->posts[0];
         $fan = $timeline->followers[0];
+        $post = $timeline->posts()->has('comments','>=',1)->first(); // %FIXME: sometimes this will not exist
+        $comment = $post->comments[0];
+        $this->assertNotNull($comment);
 
-        // remove any existing likes...
+        // remove any existing likes by fan...
         $likeable = DB::table('likeables')
             ->where('likee_id', $fan->id)
-            ->where('likeable_type', 'posts')
-            ->where('likeable_id', $post->id)
+            ->where('likeable_type', 'comments')
+            ->where('likeable_id', $comment->id)
             ->first();
         if ($likeable) {
             $likeable->delete();
         }
         unset($likeable);
 
+        // LIKE the comment
         $payload = [
-            'likeable_type' => 'posts',
-            'likeable_id' => $post->id,
+            'likeable_type' => 'comments',
+            'likeable_id' => $comment->id,
         ];
         $response = $this->actingAs($fan)->ajaxJSON('PUT', route('likeables.update', $fan->id), $payload);
         $response->assertStatus(200);
 
         $content = json_decode($response->content());
         $this->assertNotNull($content->likeable);
-        $postR = $content->likeable;
-        //$this->assertInstanceOf(Post::class, $postR);
-        $this->assertEquals($post->id, $postR->id);
+        $commentR = $content->likeable;
+        $this->assertEquals($comment->id, $commentR->id);
 
         $likeable = DB::table('likeables')
             ->where('likee_id', $fan->id)
-            ->where('likeable_type', 'posts')
-            ->where('likeable_id', $postR->id)
+            ->where('likeable_type', 'comments')
+            ->where('likeable_id', $commentR->id)
             ->first();
         $this->assertNotNull($likeable);
         $this->assertEquals($fan->id, $likeable->likee_id);
-        $this->assertEquals('posts', $likeable->likeable_type);
-        $this->assertEquals($postR->id, $likeable->likeable_id);
+        $this->assertEquals('comments', $likeable->likeable_type);
+        $this->assertEquals($commentR->id, $likeable->likeable_id);
+
+        // UNLIKE the comment
+        $payload = [
+            'likeable_type' => 'comments',
+            'likeable_id' => $comment->id,
+        ];
+        $response = $this->actingAs($fan)->ajaxJSON('DELETE', route('likeables.destroy', $fan->id), $payload); // fan->likee
+        $response->assertStatus(200);
+
+        $likeable = DB::table('likeables')
+            ->where('likee_id', $fan->id)
+            ->where('likeable_type', 'comments')
+            ->where('likeable_id', $commentR->id)
+            ->first();
+        $this->assertNull($likeable);
     }
 
     /**
@@ -223,7 +216,7 @@ class RestCommentsTest extends TestCase
      */
     public function test_can_comment_on_comment()
     {
-        $timeline = Timeline::has('posts','>=',1)->has('followers','>=',1)->first(); // assume non-admin (%FIXME)
+        $timeline = Timeline::has('posts','>=',1)->has('followers','>=',1)->first(); 
         $creator = $timeline->user;
         $post = $timeline->posts[0];
         $fan = $timeline->followers[0];

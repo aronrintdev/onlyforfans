@@ -89,7 +89,7 @@ class RestPostsTest extends TestCase
     /**
      *  @group devpost
      */
-    public function test_can_store_post()
+    public function test_can_store_post_on_own_timeline()
     {
         $timeline = Timeline::has('posts','>=',1)->first(); // assume non-admin (%FIXME)
         $creator = $timeline->user;
@@ -111,7 +111,7 @@ class RestPostsTest extends TestCase
     /**
      *  @group devpost
      */
-    public function test_can_update_post()
+    public function test_can_update_own_post()
     {
         $timeline = Timeline::has('posts','>=',1)->first(); // assume non-admin (%FIXME)
         $creator = $timeline->user;
@@ -133,7 +133,7 @@ class RestPostsTest extends TestCase
     /**
      *  @group devpost
      */
-    public function test_can_destroy_post()
+    public function test_can_destroy_own_post()
     {
         $timeline = Timeline::has('posts','>=',1)->first(); // assume non-admin (%FIXME)
         $creator = $timeline->user;
@@ -161,15 +161,14 @@ class RestPostsTest extends TestCase
     /**
      *  @group devpost
      */
-    // %TODO: unlike
-    public function test_can_like_post()
+    public function test_can_like_then_unlike_post()
     {
         $timeline = Timeline::has('posts','>=',1)->has('followers','>=',1)->first(); // assume non-admin (%FIXME)
         $creator = $timeline->user;
         $post = $timeline->posts[0];
         $fan = $timeline->followers[0];
 
-        // remove any existing likes...
+        // remove any existing likes by fan...
         $likeable = DB::table('likeables')
             ->where('likee_id', $fan->id)
             ->where('likeable_type', 'posts')
@@ -180,11 +179,12 @@ class RestPostsTest extends TestCase
         }
         unset($likeable);
 
+        // LIKE the post
         $payload = [
             'likeable_type' => 'posts',
             'likeable_id' => $post->id,
         ];
-        $response = $this->actingAs($fan)->ajaxJSON('PUT', route('likeables.update', $fan->id), $payload);
+        $response = $this->actingAs($fan)->ajaxJSON('PUT', route('likeables.update', $fan->id), $payload); // fan->likee
         $response->assertStatus(200);
 
         $content = json_decode($response->content());
@@ -202,10 +202,25 @@ class RestPostsTest extends TestCase
         $this->assertEquals($fan->id, $likeable->likee_id);
         $this->assertEquals('posts', $likeable->likeable_type);
         $this->assertEquals($postR->id, $likeable->likeable_id);
+
+        // UNLIKE the post
+        $payload = [
+            'likeable_type' => 'posts',
+            'likeable_id' => $post->id,
+        ];
+        $response = $this->actingAs($fan)->ajaxJSON('DELETE', route('likeables.destroy', $fan->id), $payload); // fan->likee
+        $response->assertStatus(200);
+
+        $likeable = DB::table('likeables')
+            ->where('likee_id', $fan->id)
+            ->where('likeable_type', 'posts')
+            ->where('likeable_id', $postR->id)
+            ->first();
+        $this->assertNull($likeable);
     }
 
     /**
-     *  @group devpost
+     *  @group devpost-MOVE_TO_COMMENT_TEST
      */
     public function test_can_comment_on_post()
     {
