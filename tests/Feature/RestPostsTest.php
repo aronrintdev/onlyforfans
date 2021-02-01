@@ -161,7 +161,7 @@ class RestPostsTest extends TestCase
     /**
      *  @group devpost
      */
-    public function test_can_like_then_unlike_post()
+    public function test_timeline_follower_can_like_then_unlike_post()
     {
         $timeline = Timeline::has('posts','>=',1)->has('followers','>=',1)->first(); // assume non-admin (%FIXME)
         $creator = $timeline->user;
@@ -217,52 +217,6 @@ class RestPostsTest extends TestCase
             ->where('likeable_id', $postR->id)
             ->first();
         $this->assertNull($likeable);
-    }
-
-    /**
-     *  @group devpost-MOVE_TO_COMMENT_TEST
-     */
-    public function test_can_comment_on_post()
-    {
-        $timeline = Timeline::has('posts','>=',1)->has('followers','>=',1)->first(); // assume non-admin (%FIXME)
-        $creator = $timeline->user;
-        $post = $timeline->posts[0];
-        $fan = $timeline->followers[0];
-
-        // remove any existing comments on post by fan...
-        DB::table('comments')
-            ->where('post_id', $post->id)
-            ->where('user_id', $fan->id)
-            ->delete();
-
-        $post->refresh();
-        $origCommentCount = $post->comments->count();
-
-        $payload = [
-            'post_id' => $post->id,
-            'user_id' => $fan->id,
-            'description' => $this->faker->realText,
-        ];
-        $response = $this->actingAs($fan)->ajaxJSON('POST', route('comments.store', $fan->id), $payload);
-        $response->assertStatus(201);
-        $post->load('comments');
-        $post->refresh();
-
-        $content = json_decode($response->content());
-        $this->assertObjectHasAttribute('comment', $content);
-        $commentR = $content->comment;
-
-        $this->assertNotNull($post->comments);
-        $this->assertGreaterThan(0, $post->comments->count());
-        $this->assertEquals($origCommentCount+1, $post->comments->count());
-
-        $commentsByFan = $post->comments->filter( function($v,$k) use($fan) {
-            return $v->user_id === $fan->id;
-        });
-        //dd($commentsByFan);
-        $this->assertEquals(1, $commentsByFan->count());
-        $this->assertEquals($payload['description'], $commentsByFan[0]->description);
-        $this->assertEquals($commentsByFan[0]->id, $commentR->id);
     }
 
     /**
