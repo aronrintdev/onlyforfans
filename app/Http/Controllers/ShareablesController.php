@@ -7,8 +7,8 @@ use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use App\Mediafile;
-use App\Vault;
 use App\Vaultfolder;
+use App\Timeline;
 use App\User;
 
 class ShareablesController extends AppBaseController
@@ -27,6 +27,26 @@ class ShareablesController extends AppBaseController
                 'mediafiles' => $mediafiles,
                 'vaultfolders' => $sessionUser->sharedvaultfolders,
             ],
+        ]);
+    }
+
+    public function followTimeline(Request $request, Timeline $shareable)
+    {
+        $request->validate([
+            'sharee_id' => 'required|numeric|min:1',
+        ]);
+
+        $shareable->followers()->syncWithoutDetaching($request->sharee_id, [
+            'shareable_type' => 'timelines',
+            'shareable_id' => $shareable->id,
+            'is_approved' => 1, // %FIXME
+            'access_level' => 'default',
+            'cattrs' => [],
+        ]); //
+
+        return response()->json([
+            'shareable' => $shareable,
+            'follower_count' => $shareable->followers->count(),
         ]);
     }
 }

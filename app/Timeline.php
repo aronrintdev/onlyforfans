@@ -80,7 +80,7 @@ class Timeline extends Model implements PaymentReceivable
     }
 
     public function followers() {  // includes subscribers (ie premium + default followers)
-        return $this->morphToMany('App\User', 'shareable', 'shareables', 'shareable_id', 'sharee_id')->withPivot('access_level');
+        return $this->morphToMany('App\User', 'shareable', 'shareables', 'shareable_id', 'sharee_id')->withPivot('access_level', 'shareable_type', 'sharee_id');
     }
 
     public function ledgersales() {

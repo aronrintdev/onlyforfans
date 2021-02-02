@@ -22,6 +22,12 @@ class LikeablesController extends AppBaseController
     }
 
     // %TODO: notify user
+    // %TODO: better architecture would be:
+    //  ~ addLike(), removeLike(): each of which handle all resources...OR...
+    //  ~ addPostLike() + removePostLike | addCommentLike() + removeCommentLike(), etc
+    //     This latter may be better, as the UI context generally *knows* what resource
+    //     is being liked and thus it's cleaner to encode that in the URL itself. We can also
+    //     then use DI on the $likeable which makes more sense
     // to use an arg like Likeable $likeable, replacing getMorphedModel below, see
     //  ~ https://www.reddit.com/r/laravel/comments/ai0x6w/polymorphic_route_model_binding/eek37vs
     //  ~ https://laravel.com/docs/8.x/routing#route-model-binding
@@ -46,6 +52,7 @@ class LikeablesController extends AppBaseController
     }
 
     // %FIXME: not really REST-ful (ie likee param should be likeable, but not sure that makes sense in the UI)
+    // ~ https://stackoverflow.com/questions/299628/is-an-entity-body-allowed-for-an-http-delete-request
     public function destroy(Request $request, User $likee)
     {
         $request->validate([

@@ -234,13 +234,6 @@ class RestPostsTest extends TestCase
     /**
      *  @group TODO-group_posts
      */
-    public function test_can_tip_post()
-    {
-    }
-
-    /**
-     *  @group TODO-group_posts
-     */
     public function test_can_purchase_post()
     {
     }

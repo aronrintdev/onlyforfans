@@ -94,7 +94,7 @@ class User extends Authenticatable implements PaymentSendable, PaymentReceivable
     //}
      */
     public function followedtimelines() { // timelines (users) I follow: premium *and* default subscribe (follow)
-        return $this->morphedByMany('App\Timeline', 'shareable', 'shareables', 'sharee_id')->withTimestamps();
+        return $this->morphedByMany('App\Timeline', 'shareable', 'shareables', 'sharee_id')->withPivot('access_level', 'shareable_type', 'sharee_id')->withTimestamps();
     }
 
     public function likedposts() {

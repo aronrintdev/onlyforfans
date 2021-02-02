@@ -81,8 +81,10 @@ Route::group(['middleware' => ['auth']], function () {
 
     // -- shareables:  --
     //   ~  implements push-share(?), followable, subscribeable
+    Route::put('/shareables/{shareable}/follow-timeline', ['as'=>'shareables.followTimeline', 'uses' => 'ShareablesController@followTimeline']);
+    //Route::put('/shareables/{shareable}/unfollow-timeline', ['as'=>'shareables.unfollowTimeline', 'uses' => 'ShareablesController@unfollowTimeline']);
     Route::resource('shareables', 'ShareablesController', [
-        'only' => [ 'index', 'update', 'destroy' ],
+        'only' => [ 'index', ],
     ]);
 
     // -- timelines: tippable | subscribeable | followable --
