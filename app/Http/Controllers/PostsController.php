@@ -43,6 +43,19 @@ class PostsController extends AppBaseController
     public function show(Request $request, Post $post)
     {
         $sessionUser = Auth::user();
+
+        switch ($post->type) {
+        case PostTypeEnum::PRICED:
+            if ( $sessionUser->id !== $post->user->id && !$post->sharees->contains($sessionUser->id) ) {
+                abort(403);
+            }
+            break;
+        case PostTypeEnum::FREE:
+            break;
+        case PostTypeEnum::SUBSCRIBER:
+            break;
+        }
+
         return response()->json([
             'post' => $post,
         ]);
@@ -170,7 +183,7 @@ class PostsController extends AppBaseController
             $post->receivePayment(
                 PaymentTypeEnum::PURCHASE,
                 $sessionUser,
-                $request->base_unit_cost_in_cents,
+                $post->price*100, // %FIXME: should be on timeline
                 [ 'notes' => $request->note ?? '' ]
             );
     

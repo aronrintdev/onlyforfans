@@ -53,7 +53,6 @@ class TimelinesTest extends TestCase
     /**
      *  @group shareables
      *  @group regression
-     *  @group this
      */
     public function test_can_follow_timeline()
     {
@@ -97,6 +96,7 @@ class TimelinesTest extends TestCase
         $creator->is_follow_for_free = false;
         $creator->price = $this->faker->randomNumber(3);
         $creator->save();
+        $timeline->refresh();
 
         $fan = User::has('followedtimelines','<>',$timeline->id)->first(); // not yet a follower (includes susbcribers) of timeline
 
@@ -122,23 +122,24 @@ class TimelinesTest extends TestCase
         $this->assertEquals('premium', $timeline->followers->find($fan->id)->pivot->access_level);
         $this->assertEquals('timelines', $timeline->followers->find($fan->id)->pivot->shareable_type);
         $this->assertTrue( $timeline->followers->contains( $fan->id ) );
-        $this->assertTrue( $fan->followedtimelines->contains( $shareableR->id ) );
+        $this->assertTrue( $fan->followedtimelines->contains( $timelineR->id ) );
 
         // Check ledger
-        $fanledger = Fanledger::where('fltype', PaymentTypeEnum::SUBSCRIPTION)->latest()->first();
+        $fanledger = Fanledger::where('fltype', PaymentTypeEnum::SUBSCRIPTION)->latest()->first(); // HERE TUES
         $this->assertNotNull($fanledger);
         $this->assertEquals(1, $fanledger->qty);
-        $this->assertEquals($timeline->user->price*100, $fanledger->base_unit_cost_in_cents);
         $this->assertEquals(PaymentTypeEnum::SUBSCRIPTION, $fanledger->fltype);
         $this->assertEquals($fan->id, $fanledger->purchaser_id);
         $this->assertEquals($creator->id, $fanledger->seller_id);
         $this->assertEquals('timelines', $fanledger->purchaseable_type);
         $this->assertEquals($timeline->id, $fanledger->purchaseable_id);
+        $this->assertEquals(intval($timeline->user->price*100), $fanledger->base_unit_cost_in_cents);
         $this->assertTrue( $timeline->ledgersales->contains( $fanledger->id ) );
         $this->assertTrue( $fan->ledgerpurchases->contains( $fanledger->id ) );
 
         // Check access (after: should be allowed)
-        $response = $this->actingAs($fan)->ajaxJSON('GET', route('timelines.show', $timeline->id));
+        //$response = $this->actingAs($fan)->ajaxJSON('GET', route('timelines.show', $timeline->id));
+        $response = $this->actingAs($fan)->ajaxJSON('GET', route('timelines.show', $timeline->username));
         $response->assertStatus(200);
 
         // %TODO: unsubscribe (will not be charged next recurring payment period)

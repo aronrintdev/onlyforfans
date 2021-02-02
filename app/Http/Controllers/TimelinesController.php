@@ -140,12 +140,13 @@ class TimelinesController extends AppBaseController
             abort(403);
         }
 
-        $timeline->followers()->syncWithoutDetaching($request->sharee_id, [
+        // syncWithoutDetaching doesn't seem to accept pivot attributes
+        $timeline->followers()->attach($request->sharee_id, [
             'shareable_type' => 'timelines',
             'shareable_id' => $timeline->id,
             'is_approved' => 1, // %FIXME
             'access_level' => 'default',
-            'cattrs' => [],
+            'cattrs' => json_encode([]),
         ]); //
 
         $timeline->refresh();
@@ -167,12 +168,12 @@ class TimelinesController extends AppBaseController
         }
 
         $timeline = DB::transaction( function() use(&$timeline, &$request, &$sessionUser) {
-            $timeline->followers()->syncWithoutDetaching($request->sharee_id, [
+            $timeline->followers()->attach($request->sharee_id, [
                 'shareable_type' => 'timelines',
                 'shareable_id' => $timeline->id,
                 'is_approved' => 1, // %FIXME
                 'access_level' => 'premium',
-                'cattrs' => [],
+                'cattrs' => json_encode([]), // %FIXME: add a observer function?
             ]); //
             $timeline->receivePayment(
                 PaymentTypeEnum::SUBSCRIPTION,

@@ -9,6 +9,7 @@ use Tests\TestCase;
 use Database\Seeders\TestDatabaseSeeder;
 use App\Enums\PostTypeEnum;
 use App\Enums\PaymentTypeEnum;
+use App\Fanledger;
 use App\Post;
 use App\Timeline;
 use App\User;
@@ -261,7 +262,6 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
-     *  @group this
      */
     public function test_can_purchase_post()
     {
@@ -285,7 +285,6 @@ class RestPostsTest extends TestCase
             'sharee_id' => $fan->id,
         ];
         $response = $this->actingAs($fan)->ajaxJSON('PUT', route('posts.purchase', $post->id), $payload);
-
         $response->assertStatus(200);
 
         $content = json_decode($response->content());
@@ -301,6 +300,7 @@ class RestPostsTest extends TestCase
         $this->assertEquals($creator->id, $fanledger->seller_id);
         $this->assertEquals('posts', $fanledger->purchaseable_type);
         $this->assertEquals($post->id, $fanledger->purchaseable_id);
+        $this->assertTrue( $post->sharees->contains( $fan->id ) );
         $this->assertTrue( $post->ledgersales->contains( $fanledger->id ) );
         $this->assertTrue( $fan->ledgerpurchases->contains( $fanledger->id ) );
 
