@@ -138,19 +138,23 @@ class PostsController extends AppBaseController
         ]);
     }
 
-    /*
-    public function tip(Request $request, $id)
+    public function tip(Request $request, Post $post)
     {
-        $sessionUser = Auth::user(); // sender of tip
+        $sessionUser = Auth::user(); // sender of tip (purchaser)
+
+        $request->validate([
+            'base_unit_cost_in_cents' => 'required|numeric',
+            //'purchaseable_id' => $post->id
+            //'purchaseable_type' => 'posts'
+        ]);
+
         try {
-            $post = Post::findOrFail($id);
             $post->receivePayment(
                 PaymentTypeEnum::TIP,
                 $sessionUser,
-                $request->amount*100,
+                $request->base_unit_cost_in_cents,
                 [ 'notes' => $request->note ?? '' ]
             );
-    
         } catch(Exception | Throwable $e){
             Log::error(json_encode([
                 'msg' => 'PostsController::tip() - error',
@@ -161,10 +165,11 @@ class PostsController extends AppBaseController
         }
 
         return response()->json([
-            'post' => $post ?? null,
+            'post' => $post,
         ]);
     }
 
+    /*
     // %TODO: check if already purchased? -> return error
     // %NOTE: post price in DB is in dollars not cents %FIXME
     public function purchase(Request $request, $id)

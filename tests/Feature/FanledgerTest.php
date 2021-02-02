@@ -30,26 +30,23 @@ class FanledgerTest extends TestCase
 
         $payload = [
             'base_unit_cost_in_cents' => $this->faker->randomNumber(3),
-            'fltype' => PaymentTypeEnum::TIP,
-            'seller_id' => $fan->id,
-            'purchaseable_id' => $post->id,
-            'purchaseable_type' => 'posts',
         ];
-        $response = $this->actingAs($fan)->ajaxJSON('POST', route('fanledgers.store'), $payload);
+        $response = $this->actingAs($fan)->ajaxJSON('POST', route('posts.tip', $post->id), $payload);
 
-        $response->assertStatus(201);
+        $response->assertStatus(200);
 
         $content = json_decode($response->content());
-        $fanledgerR = $content->fanledger;
+        $postR = $content->post;
 
-        $fanledger = Fanledger::find($fanledgerR->id);
+        $fanledger = Fanledger::where('fltype', PaymentTypeEnum::TIP)->latest()->first();
         $this->assertNotNull($fanledger);
         $this->assertEquals(1, $fanledger->qty);
+        $this->assertEquals($payload['base_unit_cost_in_cents'], $fanledger->base_unit_cost_in_cents);
         $this->assertEquals(PaymentTypeEnum::TIP, $fanledger->fltype);
+        $this->assertEquals($fan->id, $fanledger->purchaser_id);
+        $this->assertEquals($creator->id, $fanledger->seller_id);
         $this->assertEquals('posts', $fanledger->purchaseable_type);
         $this->assertEquals($post->id, $fanledger->purchaseable_id);
-        $this->assertEquals($fan->id, $fanledger->seller_id);
-        $this->assertEquals($payload['base_unit_cost_in_cents'], $fanledger->base_unit_cost_in_cents);
         $this->assertTrue( $post->ledgersales->contains( $fanledger->id ) );
         $this->assertTrue( $fan->ledgerpurchases->contains( $fanledger->id ) );
     }
@@ -57,6 +54,7 @@ class FanledgerTest extends TestCase
     /**
      *  @group group_fanledgers
      *  @group group_regression
+     *  @group this
      */
     public function test_can_send_tip_to_timeline()
     {
@@ -67,32 +65,30 @@ class FanledgerTest extends TestCase
 
         $payload = [
             'base_unit_cost_in_cents' => $this->faker->randomNumber(3),
-            'fltype' => PaymentTypeEnum::TIP,
-            'seller_id' => $fan->id,
-            'purchaseable_id' => $timeline->id,
-            'purchaseable_type' => 'timelines',
         ];
-        $response = $this->actingAs($fan)->ajaxJSON('POST', route('fanledgers.store'), $payload);
+        $response = $this->actingAs($fan)->ajaxJSON('POST', route('timelines.tip', $timeline->id), $payload);
 
-        $response->assertStatus(201);
+        $response->assertStatus(200);
 
         $content = json_decode($response->content());
-        $fanledgerR = $content->fanledger;
+        $timelineR = $content->timeline;
 
-        $fanledger = Fanledger::find($fanledgerR->id);
+        $fanledger = Fanledger::where('fltype', PaymentTypeEnum::TIP)->latest()->first();
         $this->assertNotNull($fanledger);
         $this->assertEquals(1, $fanledger->qty);
+        $this->assertEquals($payload['base_unit_cost_in_cents'], $fanledger->base_unit_cost_in_cents);
         $this->assertEquals(PaymentTypeEnum::TIP, $fanledger->fltype);
+        $this->assertEquals($fan->id, $fanledger->purchaser_id);
+        $this->assertEquals($creator->id, $fanledger->seller_id);
         $this->assertEquals('timelines', $fanledger->purchaseable_type);
         $this->assertEquals($timeline->id, $fanledger->purchaseable_id);
-        $this->assertEquals($fan->id, $fanledger->seller_id);
-        $this->assertEquals($payload['base_unit_cost_in_cents'], $fanledger->base_unit_cost_in_cents);
         $this->assertTrue( $timeline->ledgersales->contains( $fanledger->id ) );
         $this->assertTrue( $fan->ledgerpurchases->contains( $fanledger->id ) );
+
     }
 
     /**
-     *  @group group_fanledgers
+     *  @group TODO-group_fanledgers
      */
     public function test_can_purchase_post()
     {

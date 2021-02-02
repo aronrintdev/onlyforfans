@@ -6,7 +6,7 @@ use Auth;
 use App\Enums\PaymentTypeEnum;
 use Illuminate\Support\Collection;
 use App\Interfaces\PaymentSendable;
-use App\Interfaces\PaymentReceivable;
+use App\Interfaces\Purchaseable;
 use Spatie\Permission\Traits\HasRoles;
 use Cmgmyr\Messenger\Traits\Messagable;
 use Illuminate\Notifications\Notifiable;
@@ -18,7 +18,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
-class User extends Authenticatable implements PaymentSendable, PaymentReceivable
+class User extends Authenticatable implements PaymentSendable, Purchaseable
 {
     use Notifiable;
     use HasRoles;
@@ -521,7 +521,7 @@ class User extends Authenticatable implements PaymentSendable, PaymentReceivable
         return $this->hasOne('App\BankAccountDetails', 'user_id');
     }
 
-    // %%% --- Implement PaymentReceivable Interface ---
+    // %%% --- Implement Purchaseable Interface ---
 
     public function receivePayment(
         string $ptype, // PaymentTypeEnum

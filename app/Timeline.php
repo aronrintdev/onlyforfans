@@ -4,12 +4,12 @@ namespace App;
 use DB;
 use Eloquent as Model;
 use App\Enums\PaymentTypeEnum;
-use App\Interfaces\PaymentReceivable;
+use App\Interfaces\Purchaseable;
 use Intervention\Image\Facades\Image;
 use App\Enums\ShareableAccessLevelEnum;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Timeline extends Model implements PaymentReceivable
+class Timeline extends Model implements Purchaseable
 {
     //use SoftDeletes;
     use HasFactory;
@@ -191,7 +191,7 @@ class Timeline extends Model implements PaymentReceivable
         
     }
 
-    // %%% --- Implement PaymentReceivable Interface ---
+    // %%% --- Implement Purchaseable Interface ---
 
     public function receivePayment(
         string $ptype, // PaymentTypeEnum
@@ -203,6 +203,18 @@ class Timeline extends Model implements PaymentReceivable
         $result = DB::transaction( function() use($ptype, $amountInCents, $cattrs, &$sender) {
 
             switch ($ptype) {
+                case PaymentTypeEnum::TIP:
+                    $result = Fanledger::create([
+                        'fltype' => $ptype,
+                        'seller_id' => $this->user->id,
+                        'purchaser_id' => $sender->id,
+                        'purchaseable_type' => 'timelines',
+                        'purchaseable_id' => $this->id,
+                        'qty' => 1,
+                        'base_unit_cost_in_cents' => $amountInCents,
+                        'cattrs' => $cattrs ?? [],
+                    ]);
+                    break;
                 case PaymentTypeEnum::SUBSCRIPTION:
                     $result = Fanledger::create([
                         'fltype' => $ptype,

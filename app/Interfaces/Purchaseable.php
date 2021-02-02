@@ -5,7 +5,7 @@ use App\User;
 use App\Enums\PaymentTypeEnum;
 use App\Fanledger;
 
-interface PaymentReceivable {
+interface Purchaseable {
 
     public function receivePayment(
         string $ptype, // PaymentTypeEnum

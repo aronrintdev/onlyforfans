@@ -26,7 +26,7 @@ class ShareablesTest extends TestCase
         $timeline = Timeline::has('posts','>=',1)->has('followers','>=',1)->first();
         $creator = $timeline->user;
         $post = $timeline->posts[0];
-        $fan = User::has('followedtimelines','<>',$timeline->id)->first(); // not yet a follower of this timeline
+        $fan = User::has('followedtimelines','<>',$timeline->id)->first(); // not yet a follower of timeline
 
         $payload = [
             'sharee_id' => $fan->id,
@@ -45,6 +45,9 @@ class ShareablesTest extends TestCase
         $this->assertEquals('timelines', $shareable->followers->find($fan->id)->pivot->shareable_type);
         $this->assertTrue( $timeline->followers->contains( $fan->id ) );
         $this->assertTrue( $fan->followedtimelines->contains( $shareable->id ) );
+
+
+        // %TODO: unfollow
     }
 
     /**
@@ -53,35 +56,30 @@ class ShareablesTest extends TestCase
      */
     public function test_can_subscribe_to_timeline()
     {
-        $timeline = Timeline::has('posts','>=',1)->has('followers','>=',1)->first(); // assume non-admin (%FIXME)
+        $timeline = Timeline::has('posts','>=',1)->has('followers','>=',1)->first(); // includes subscribers
         $creator = $timeline->user;
         $post = $timeline->posts[0];
-        $fan = $timeline->followers[0];
+        $fan = User::has('followedtimelines','<>',$timeline->id)->first(); // not yet a follower (includes susbcribers) of timeline
 
         $payload = [
-            'base_unit_cost_in_cents' => $this->faker->randomNumber(3),
-            'fltype' => PaymentTypeEnum::TIP,
-            'seller_id' => $fan->id,
-            'purchaseable_id' => $post->id,
-            'purchaseable_type' => 'posts',
+            'sharee_id' => $fan->id,
         ];
-        $response = $this->actingAs($fan)->ajaxJSON('POST', route('fanledgers.store'), $payload);
+        $response = $this->actingAs($fan)->ajaxJSON('PUT', route('shareables.subscribeTimeline', $timeline->id), $payload);
 
-        $response->assertStatus(201);
+        $response->assertStatus(200);
 
         $content = json_decode($response->content());
-        $fanledgerR = $content->fanledger;
+        $shareableR = $content->shareable;
 
-        $fanledger = Fanledger::find($fanledgerR->id);
-        $this->assertNotNull($fanledger);
-        $this->assertEquals(1, $fanledger->qty);
-        $this->assertEquals(PaymentTypeEnum::TIP, $fanledger->fltype);
-        $this->assertEquals('posts', $fanledger->purchaseable_type);
-        $this->assertEquals($post->id, $fanledger->purchaseable_id);
-        $this->assertEquals($fan->id, $fanledger->seller_id);
-        $this->assertEquals($payload['base_unit_cost_in_cents'], $fanledger->base_unit_cost_in_cents);
-        $this->assertTrue( $post->ledgersales->contains( $fanledger->id ) );
-        $this->assertTrue( $fan->ledgerpurchases->contains( $fanledger->id ) );
+        $shareable = Timeline::find($shareableR->id);
+        $this->assertNotNull($shareable);
+        $this->assertEquals($timeline->id, $shareable->id);
+        $this->assertEquals('premium', $shareable->followers->find($fan->id)->pivot->access_level);
+        $this->assertEquals('timelines', $shareable->followers->find($fan->id)->pivot->shareable_type);
+        $this->assertTrue( $timeline->followers->contains( $fan->id ) );
+        $this->assertTrue( $fan->followedtimelines->contains( $shareable->id ) );
+
+        // %TODO: unsubscribe (will not be charged next recurring payment period)
     }
 
     // ------------------------------

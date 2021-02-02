@@ -50,10 +50,8 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('/comments/match', ['as'=>'comments.match', 'uses' => 'CommentsController@match']);
     Route::resource('comments', 'CommentsController', [ 'except' => ['create','edit'] ]);
 
-    // -- fanledgers:  --
-    //  ~ 'store' is the implmentation for most/all 'tippables' (???)
     Route::resource('fanledgers', 'FanledgersController', [
-        'only' => [ 'index', 'show', 'store' ],
+        'only' => [ 'index', ],
     ]);
 
     // -- likeables:  --
@@ -72,6 +70,7 @@ Route::group(['middleware' => ['auth']], function () {
 
     // -- posts: likeable | shareable | commentable | tippable | purchaseable | pinnable --
     Route::get('/posts/match', ['as'=>'posts.match', 'uses' => 'PostsController@match']);
+    Route::post('/posts/{post}/tip', ['as'=>'posts.tip', 'uses' => 'PostsController@tip']);
     Route::resource('posts', 'PostsController', [ ]);
 
     // -- stories:  --
@@ -92,6 +91,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('/timelines/home', ['as'=>'timelines.home', 'uses' => 'TimelinesController@home']); // special case of 'show'
     Route::get('/timelines/{timeline}/feeditems', ['as'=>'timelines.feeditems', 'uses' => 'TimelinesController@feeditems']);
     Route::get('/timelines/match', ['as'=>'timelines.match', 'uses' => 'TimelinesController@match']);
+    Route::post('/timelines/{timeline}/tip', ['as'=>'timelines.tip', 'uses' => 'TimelinesController@tip']);
     Route::resource('timelines', 'TimelinesController', [
         'only' => [ 'index', 'show' ],
     ]);

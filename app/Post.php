@@ -11,13 +11,13 @@ use App\Enums\PostTypeEnum;
 use App\Interfaces\Ownable;
 use App\Interfaces\Deletable;
 use App\Enums\PaymentTypeEnum;
-use App\Interfaces\PaymentReceivable;
+use App\Interfaces\Purchaseable; // was PaymentReceivable
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Post extends Model implements Ownable, Deletable, PaymentReceivable
+class Post extends Model implements Ownable, Deletable, Purchaseable
 {
 
     use SoftDeletes;
@@ -309,13 +309,13 @@ class Post extends Model implements Ownable, Deletable, PaymentReceivable
     // %%% Methods
     //--------------------------------------------
 
-    // %%% --- Implement PaymentReceivable Interface ---
+    // %%% --- Implement Purchaseable Interface ---
 
     public function receivePayment(
         string $ptype, // PaymentTypeEnum
         User $sender,
         //PaymentSendable $sender,
-        //PaymentReceivable $receiver, -> $this
+        //Purchaseable $receiver, -> $this
         int $amountInCents,
         array $cattrs = []
     ) : ?Fanledger

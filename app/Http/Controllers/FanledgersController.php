@@ -15,69 +15,22 @@ use App\Enums\PostTypeEnum;
 
 class FanledgersController extends AppBaseController
 {
-    public function store(Request $request)
+    public function index(Request $request)
     {
         $sessionUser = Auth::user();
+        $filters = $request->input('filters', []);
 
-        $request->validate([
-            'fltype' => 'required|alpha_dash|in:'.implode(',',PaymentTypeEnum::getKeys()),
-            'seller_id' => 'required|exists:users,id',
-            'purchaseable_id' => 'required|numeric',
-            'purchaseable_type' => 'required|alpha_dash|in:posts,timelines,mediafiles,vaultfolders',
-            'base_unit_cost_in_cents' => 'required|numeric',
-        ]);
-
-        $attrs = $request->only([
-            'fltype',
-            'seller_id',
-            'purchaseable_id',
-            'purchaseable_type',
-            'base_unit_cost_in_cents',
-        ]);
-
-        $attrs['purchaser_id'] = $sessionUser->id;
-        $attrs['qty'] = 1;
-        $attrs['cattrs'] = [];
-        $attrs['cattrs']['notes'] = $request->has('notes') && !empty($request->notes) ? $request->notes : '';
-
-        try {
-            $obj = Fanledger::create($attrs);
-        } catch (Exception $e) {
-            throw $e;
+        $query = Post::query();
+        foreach ($filters as $f) {
+            switch ($f['key']) {
+                case 'todo':
+                    break;
+            }
         }
+        $fanledgers = $query->get();
 
         return response()->json([
-            'fanledger' => $obj,
-        ], 201);
-    }
-
-    /*
-    // %TODO: check if already purchased? -> return error
-    // %NOTE: post price in DB is in dollars not cents %FIXME
-    public function purchase(Request $request, $id)
-    {
-        $sessionUser = Auth::user(); // purchaser
-        try {
-            $post = Post::findOrFail($id);
-            $post->receivePayment(
-                PaymentTypeEnum::PURCHASE,
-                $sessionUser,
-                ( $request->has('amount') ? $request->amount : $post->price ) * 100, // option to override post price via request (?)
-                [ 'notes' => $request->note ?? '' ]
-            );
-    
-        } catch(Exception | Throwable $e){
-            Log::error(json_encode([
-                'msg' => 'PostsController::tip() - error',
-                'emsg' => $e->getMessage(),
-            ]));
-            throw $e;
-            return response()->json(['status'=>'400', 'message'=>$e->getMessage()]);
-        }
-
-        return response()->json([
-            'post' => $post ?? null,
+            'fanledgers' => $fanledgers,
         ]);
     }
-     */
 }

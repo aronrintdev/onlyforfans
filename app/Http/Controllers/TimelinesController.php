@@ -15,7 +15,7 @@ use App\Libs\FeedMgr;
 
 use App\Fanledger;
 use App\Timeline;
-//use App\Enums\PaymentTypeEnum;
+use App\Enums\PaymentTypeEnum;
 
 class TimelinesController extends AppBaseController
 {
@@ -126,6 +126,37 @@ class TimelinesController extends AppBaseController
 
         return response()->json([
             'feeditems' => $feeditems,
+        ]);
+    }
+
+    public function tip(Request $request, Timeline $timeline)
+    {
+        $sessionUser = Auth::user(); // sender of tip (purchaser)
+
+        $request->validate([
+            'base_unit_cost_in_cents' => 'required|numeric',
+        ]);
+
+        try {
+            $timeline->receivePayment(
+                PaymentTypeEnum::TIP,
+                $sessionUser,
+                $request->base_unit_cost_in_cents,
+                [ 'notes' => $request->note ?? '' ]
+            );
+        } catch(Exception | Throwable $e){
+            Log::error(json_encode([
+                'msg' => 'TimelinesController::tip() - error',
+                'emsg' => $e->getMessage(),
+            ]));
+            //throw $e;
+            return response()->json([
+                'message'=>$e->getMessage()
+            ], 400);
+        }
+
+        return response()->json([
+            'timeline' => $timeline,
         ]);
     }
 
