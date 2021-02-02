@@ -44,6 +44,9 @@ class Fanledger extends BaseModel implements Guidable
     public function purchaser() {
         return $this->belongsTo('App\User', 'purchaser_id');
     }
+    public function seller() {
+        return $this->belongsTo('App\User', 'seller_id');
+    }
 
     //--------------------------------------------
     // Accessors/Mutators | Casts
