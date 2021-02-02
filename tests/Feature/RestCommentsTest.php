@@ -18,7 +18,7 @@ class RestCommentsTest extends TestCase
 
     /**
      *  @group group_comments
-     *  @group group_regression
+     *  @group regression
      */
     // %TODO: filters, timelines (see comments I have valid access to), etc
     public function test_can_index_comments()
@@ -45,8 +45,8 @@ class RestCommentsTest extends TestCase
     }
 
     /**
-     *  @group group_comments
-     *  @group group_regression
+     *  @group comments
+     *  @group regression
      */
     public function test_can_not_index_general_comments()
     {
@@ -60,8 +60,8 @@ class RestCommentsTest extends TestCase
     }
 
     /**
-     *  @group group_comments
-     *  @group group_regression
+     *  @group comments
+     *  @group regression
      */
     public function test_can_show_my_comment()
     {
@@ -74,38 +74,40 @@ class RestCommentsTest extends TestCase
     }
 
     /**
-     *  @group group_comments
-     *  @group group_regression
+     *  @group comments
+     *  @group regression
      */
     public function test_can_show_followed_timelines_comment()
     {
         $timeline = Timeline::has('posts','>=',1)->has('followers','>=',1)->first();
         $creator = $timeline->user;
-        $post = $timeline->posts[0];
         $fan = $timeline->followers[0];
-        $response = $this->actingAs($fan)->ajaxJSON('GET', route('comments.show', $post->id));
+        $post = $timeline->posts()->has('comments','>=',1)->first();
+        $comment = $post->comments[0];
+        $response = $this->actingAs($fan)->ajaxJSON('GET', route('comments.show', $comment->id));
         $response->assertStatus(200);
     }
 
     /**
-     *  @group group_comments
-     *  @group group_regression
+     *  @group comments
+     *  @group regression
      */
     public function test_can_not_show_nonfollowed_timelines_comment()
     {
         $timeline = Timeline::has('posts','>=',1)->has('followers',0)->first();
         $this->assertNotNull($timeline);
         $this->assertEquals(0, $timeline->followers->count());
-        $post = $timeline->posts[0];
         $creator = $timeline->user;
         $fan = User::where('id', '<>', $creator->id)->first(); // some user other than owner of timeline
-        $response = $this->actingAs($fan)->ajaxJSON('GET', route('comments.show', $post->comments->first()->id));
+        $post = $timeline->posts()->has('comments','>=',1)->first();
+        $comment = $post->comments[0];
+        $response = $this->actingAs($fan)->ajaxJSON('GET', route('comments.show', $comment->id));
         $response->assertStatus(403);
     }
 
     /**
-     *  @group group_comments
-     *  @group group_regression
+     *  @group comments
+     *  @group regression
      */
     public function test_timeline_follower_can_store_comment_on_post()
     {
@@ -155,8 +157,8 @@ class RestCommentsTest extends TestCase
     }
 
     /**
-     *  @group group_comments
-     *  @group group_regression
+     *  @group comments
+     *  @group regression
      */
     public function test_can_update_own_comment()
     {
@@ -170,8 +172,8 @@ class RestCommentsTest extends TestCase
     }
 
     /**
-     *  @group group_comments
-     *  @group group_regression
+     *  @group comments
+     *  @group regression
      */
     public function test_can_destroy_own_comment()
     {
@@ -184,8 +186,8 @@ class RestCommentsTest extends TestCase
     }
 
     /**
-     *  @group group_comments
-     *  @group group_regression
+     *  @group comments
+     *  @group regression
      */
     public function test_timeline_follower_can_like_then_unlike_post_comment()
     {

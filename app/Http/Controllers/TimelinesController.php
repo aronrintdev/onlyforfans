@@ -129,6 +129,67 @@ class TimelinesController extends AppBaseController
         ]);
     }
 
+    public function follow(Request $request, Timeline $timeline)
+    {
+        $sessionUser = Auth::user(); // subscriber (purchaser)
+
+        $request->validate([
+            'sharee_id' => 'required|numeric|min:1',
+        ]);
+        if ( $request->sharee_id != $sessionUser->id ) {
+            abort(403);
+        }
+
+        $timeline->followers()->syncWithoutDetaching($request->sharee_id, [
+            'shareable_type' => 'timelines',
+            'shareable_id' => $timeline->id,
+            'is_approved' => 1, // %FIXME
+            'access_level' => 'default',
+            'cattrs' => [],
+        ]); //
+
+        $timeline->refresh();
+        return response()->json([
+            'timeline' => $timeline,
+            'follower_count' => $timeline->followers->count(),
+        ]);
+    }
+
+    public function subscribe(Request $request, Timeline $timeline)
+    {
+        $sessionUser = Auth::user(); // subscriber (purchaser)
+
+        $request->validate([
+            'sharee_id' => 'required|numeric|min:1',
+        ]);
+        if ( $request->sharee_id != $sessionUser->id ) {
+            abort(403);
+        }
+
+        $timeline = DB::transaction( function() use(&$timeline, &$request, &$sessionUser) {
+            $timeline->followers()->syncWithoutDetaching($request->sharee_id, [
+                'shareable_type' => 'timelines',
+                'shareable_id' => $timeline->id,
+                'is_approved' => 1, // %FIXME
+                'access_level' => 'premium',
+                'cattrs' => [],
+            ]); //
+            $timeline->receivePayment(
+                PaymentTypeEnum::SUBSCRIPTION,
+                $sessionUser,
+                $timeline->user->price*100, // %FIXME: should be on timeline
+                [ 'notes' => $request->note ?? '' ]
+            );
+            return $timeline;
+        });
+
+        $timeline->refresh();
+        return response()->json([
+            'timeline' => $timeline,
+            'follower_count' => $timeline->followers->count(),
+        ]);
+    }
+
     public function tip(Request $request, Timeline $timeline)
     {
         $sessionUser = Auth::user(); // sender of tip (purchaser)
@@ -144,17 +205,11 @@ class TimelinesController extends AppBaseController
                 $request->base_unit_cost_in_cents,
                 [ 'notes' => $request->note ?? '' ]
             );
-        } catch(Exception | Throwable $e){
-            Log::error(json_encode([
-                'msg' => 'TimelinesController::tip() - error',
-                'emsg' => $e->getMessage(),
-            ]));
-            //throw $e;
-            return response()->json([
-                'message'=>$e->getMessage()
-            ], 400);
+        } catch(Exception | Throwable $e) {
+            return response()->json([ 'message'=>$e->getMessage() ], 400);
         }
 
+        $timeline->refresh();
         return response()->json([
             'timeline' => $timeline,
         ]);

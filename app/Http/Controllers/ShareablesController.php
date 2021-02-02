@@ -30,23 +30,4 @@ class ShareablesController extends AppBaseController
         ]);
     }
 
-    public function followTimeline(Request $request, Timeline $shareable)
-    {
-        $request->validate([
-            'sharee_id' => 'required|numeric|min:1',
-        ]);
-
-        $shareable->followers()->syncWithoutDetaching($request->sharee_id, [
-            'shareable_type' => 'timelines',
-            'shareable_id' => $shareable->id,
-            'is_approved' => 1, // %FIXME
-            'access_level' => 'default',
-            'cattrs' => [],
-        ]); //
-
-        return response()->json([
-            'shareable' => $shareable,
-            'follower_count' => $shareable->followers->count(),
-        ]);
-    }
 }

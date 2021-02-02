@@ -70,7 +70,7 @@ Route::group(['middleware' => ['auth']], function () {
 
     // -- posts: likeable | shareable | commentable | tippable | purchaseable | pinnable --
     Route::get('/posts/match', ['as'=>'posts.match', 'uses' => 'PostsController@match']);
-    Route::post('/posts/{post}/tip', ['as'=>'posts.tip', 'uses' => 'PostsController@tip']);
+    Route::put('/posts/{post}/tip', ['as'=>'posts.tip', 'uses' => 'PostsController@tip']);
     Route::resource('posts', 'PostsController', [ ]);
 
     // -- stories:  --
@@ -79,9 +79,6 @@ Route::group(['middleware' => ['auth']], function () {
     Route::resource('stories', 'StoriesController', [ ]);
 
     // -- shareables:  --
-    //   ~  implements push-share(?), followable, subscribeable
-    Route::put('/shareables/{shareable}/follow-timeline', ['as'=>'shareables.followTimeline', 'uses' => 'ShareablesController@followTimeline']);
-    //Route::put('/shareables/{shareable}/unfollow-timeline', ['as'=>'shareables.unfollowTimeline', 'uses' => 'ShareablesController@unfollowTimeline']);
     Route::resource('shareables', 'ShareablesController', [
         'only' => [ 'index', ],
     ]);
@@ -89,9 +86,11 @@ Route::group(['middleware' => ['auth']], function () {
     // -- timelines: tippable | subscribeable | followable --
     Route::get('/timelines-suggested', ['as'=>'timelines.suggested', 'uses' => 'TimelinesController@suggested']); // %FIXME: refactor: use index(?)
     Route::get('/timelines/home', ['as'=>'timelines.home', 'uses' => 'TimelinesController@home']); // special case of 'show'
-    Route::get('/timelines/{timeline}/feeditems', ['as'=>'timelines.feeditems', 'uses' => 'TimelinesController@feeditems']);
     Route::get('/timelines/match', ['as'=>'timelines.match', 'uses' => 'TimelinesController@match']);
-    Route::post('/timelines/{timeline}/tip', ['as'=>'timelines.tip', 'uses' => 'TimelinesController@tip']);
+    Route::get('/timelines/{timeline}/feeditems', ['as'=>'timelines.feeditems', 'uses' => 'TimelinesController@feeditems']);
+    Route::put('/timelines/{timeline}/tip', ['as'=>'timelines.tip', 'uses' => 'TimelinesController@tip']);
+    Route::put('/timelines/{timeline}/follow', ['as'=>'timelines.follow', 'uses' => 'TimelinesController@follow']);
+    Route::put('/timelines/{timeline}/subscribe', ['as'=>'timelines.subscribe', 'uses' => 'TimelinesController@subscribe']);
     Route::resource('timelines', 'TimelinesController', [
         'only' => [ 'index', 'show' ],
     ]);

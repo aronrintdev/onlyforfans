@@ -43,7 +43,6 @@ class PostsController extends AppBaseController
     public function show(Request $request, Post $post)
     {
         $sessionUser = Auth::user();
-        //$post->load('mediafiles', 'user', 'timeline');
         return response()->json([
             'post' => $post,
         ]);
@@ -144,8 +143,6 @@ class PostsController extends AppBaseController
 
         $request->validate([
             'base_unit_cost_in_cents' => 'required|numeric',
-            //'purchaseable_id' => $post->id
-            //'purchaseable_type' => 'posts'
         ]);
 
         try {
@@ -156,12 +153,7 @@ class PostsController extends AppBaseController
                 [ 'notes' => $request->note ?? '' ]
             );
         } catch(Exception | Throwable $e){
-            Log::error(json_encode([
-                'msg' => 'PostsController::tip() - error',
-                'emsg' => $e->getMessage(),
-            ]));
-            //throw $e;
-            return response()->json(['status'=>'400', 'message'=>$e->getMessage()]);
+            return response()->json(['message'=>$e->getMessage()], 400);
         }
 
         return response()->json([
@@ -169,33 +161,27 @@ class PostsController extends AppBaseController
         ]);
     }
 
-    /*
     // %TODO: check if already purchased? -> return error
     // %NOTE: post price in DB is in dollars not cents %FIXME
-    public function purchase(Request $request, $id)
+    public function purchase(Request $request, Post $post)
     {
         $sessionUser = Auth::user(); // purchaser
         try {
-            $post = Post::findOrFail($id);
             $post->receivePayment(
                 PaymentTypeEnum::PURCHASE,
                 $sessionUser,
-                ( $request->has('amount') ? $request->amount : $post->price ) * 100, // option to override post price via request (?)
+                $request->base_unit_cost_in_cents,
                 [ 'notes' => $request->note ?? '' ]
             );
     
-        } catch(Exception | Throwable $e){
-            Log::error(json_encode([
-                'msg' => 'PostsController::tip() - error',
-                'emsg' => $e->getMessage(),
-            ]));
-            throw $e;
-            return response()->json(['status'=>'400', 'message'=>$e->getMessage()]);
+        } catch(Exception | Throwable $e) {
+            return response()->json(['message'=>$e->getMessage()], 400);
         }
 
         return response()->json([
             'post' => $post ?? null,
         ]);
     }
+    /*
      */
 }
