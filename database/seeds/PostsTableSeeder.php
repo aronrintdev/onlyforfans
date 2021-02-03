@@ -7,7 +7,6 @@ use Carbon\Carbon;
 
 use App\User;
 use App\Post;
-use App\Comment;
 use App\Enums\MediafileTypeEnum;
 use App\Enums\PostTypeEnum;
 use App\Libs\FactoryHelpers;

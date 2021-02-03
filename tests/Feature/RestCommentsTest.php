@@ -25,9 +25,15 @@ class RestCommentsTest extends TestCase
     {
         // should return only comments for which session user is the author
 
-        //$this->seed(\Database\Seeders\TestDatabaseSeeder::class);
-        $timeline = Timeline::has('posts','>=',1)->first();
-        $creator = $timeline->user;
+        $post = Post::has('comments','>=',1)->first();
+        $creator = $post->timeline->user;
+
+        // ensure post has a comment by creator
+        $comment = Comment::create([
+            'post_id' => $post->id,
+            'user_id' => $creator->id,
+            'description' => $this->faker->realText,
+        ]);
 
         $response = $this->actingAs($creator)->ajaxJSON('GET', route('comments.index'), [
             'user_id' => $creator->id,
@@ -38,7 +44,7 @@ class RestCommentsTest extends TestCase
         $this->assertNotNull($content->comments);
         $commentsR = collect($content->comments);
         $this->assertGreaterThan(0, $commentsR->count());
-        $this->assertObjectHasAttribute('description', $commentsR[0]);
+        $this->assertObjectHasAttribute('description', $commentsR->first());
         $commentsR->each( function($c) use(&$creator) { // all belong to owner
             $this->assertEquals($creator->id, $c->user_id);
         });
@@ -52,7 +58,6 @@ class RestCommentsTest extends TestCase
     {
         // should return only comments for which session user is the author
 
-        //$this->seed(\Database\Seeders\TestDatabaseSeeder::class);
         $timeline = Timeline::has('posts','>=',1)->first();
         $creator = $timeline->user;
         $response = $this->actingAs($creator)->ajaxJSON('GET', route('comments.index'));
@@ -65,8 +70,6 @@ class RestCommentsTest extends TestCase
      */
     public function test_can_show_my_comment()
     {
-        //$timeline = Timeline::has('posts','>=',1)->first();
-        //$creator = $timeline->user;
         $creator = User::has('comments', '>', 1)->first();
         $comment = Comment::where('user_id', $creator->id)->first();
         $response = $this->actingAs($creator)->ajaxJSON('GET', route('comments.show', $comment->id));
@@ -81,9 +84,9 @@ class RestCommentsTest extends TestCase
     {
         $timeline = Timeline::has('posts','>=',1)->has('followers','>=',1)->first();
         $creator = $timeline->user;
-        $fan = $timeline->followers[0];
+        $fan = $timeline->followers->first();
         $post = $timeline->posts()->has('comments','>=',1)->first();
-        $comment = $post->comments[0];
+        $comment = $post->comments->first();
         $response = $this->actingAs($fan)->ajaxJSON('GET', route('comments.show', $comment->id));
         $response->assertStatus(200);
     }
@@ -94,13 +97,16 @@ class RestCommentsTest extends TestCase
      */
     public function test_can_not_show_nonfollowed_timelines_comment()
     {
-        $timeline = Timeline::has('posts','>=',1)->has('followers',0)->first();
-        $this->assertNotNull($timeline);
-        $this->assertEquals(0, $timeline->followers->count());
+        $post = Post::has('comments','>=',1)->first();
+        $timeline = $post->timeline;
         $creator = $timeline->user;
-        $fan = User::where('id', '<>', $creator->id)->first(); // some user other than owner of timeline
+        $fan = User::whereDoesntHave('followedtimelines', function($q1) use(&$timeline) {
+            $q1->where('timelines.id', $timeline->id);
+        })->where('id', '<>', $creator->id)->first();
+        $this->assertFalse( $timeline->followers->contains( $fan->id ) );
+
         $post = $timeline->posts()->has('comments','>=',1)->first();
-        $comment = $post->comments[0];
+        $comment = $post->comments->first();
         $response = $this->actingAs($fan)->ajaxJSON('GET', route('comments.show', $comment->id));
         $response->assertStatus(403);
     }
@@ -111,10 +117,10 @@ class RestCommentsTest extends TestCase
      */
     public function test_timeline_follower_can_store_comment_on_post()
     {
-        $timeline = Timeline::has('posts','>=',1)->has('followers',1)->first();
-        $post = $timeline->posts[0];
+        $timeline = Timeline::has('posts', '>=', 1)->has('followers', '>=', 1)->first();
+        $post = $timeline->posts->first();
         $creator = $timeline->user;
-        $fan = $timeline->followers[0];
+        $fan = $timeline->followers->first();
 
         // remove any existing comments on post by fan...
         DB::table('comments')
@@ -147,8 +153,8 @@ class RestCommentsTest extends TestCase
             return $v->user_id === $fan->id;
         });
         $this->assertEquals(1, $commentsByFan->count());
-        $this->assertEquals($payload['description'], $commentsByFan[0]->description);
-        $this->assertEquals($commentsByFan[0]->id, $commentR->id);
+        $this->assertEquals($payload['description'], $commentsByFan->first()->description);
+        $this->assertEquals($commentsByFan->first()->id, $commentR->id);
     }
 
     public function test_can_store_comment_on_followed_timeline()
@@ -191,11 +197,15 @@ class RestCommentsTest extends TestCase
      */
     public function test_timeline_follower_can_like_then_unlike_post_comment()
     {
-        $timeline = Timeline::has('posts','>=',1)->has('followers','>=',1)->first(); 
+        $timeline = Timeline::has('posts','>=',1)
+            ->has('followers', '>=', 1)
+            ->whereHas('posts', function($q1) {
+                $q1->has('comments', '>', 1);
+            })->first(); 
         $creator = $timeline->user;
-        $fan = $timeline->followers[0];
+        $fan = $timeline->followers->first();
         $post = $timeline->posts()->has('comments','>=',1)->first(); // %FIXME: sometimes this will not exist
-        $comment = $post->comments[0];
+        $comment = $post->comments->first();
         $this->assertNotNull($comment);
 
         // remove any existing likes by fan...

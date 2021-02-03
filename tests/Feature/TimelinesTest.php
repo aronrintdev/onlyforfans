@@ -15,7 +15,8 @@ use App\User;
 
 class TimelinesTest extends TestCase
 {
-    use DatabaseTransactions, WithFaker;
+    use DatabaseTransactions;
+    use WithFaker;
 
     /**
      *  @group timelines
@@ -37,15 +38,15 @@ class TimelinesTest extends TestCase
         $content = json_decode($response->content());
         $timelineR = $content->timeline;
 
-        $fanledger = Fanledger::where('fltype', PaymentTypeEnum::TIP)->latest()->first();
+        $fanledger = Fanledger::where('fltype', PaymentTypeEnum::TIP)
+            ->where('purchaseable_type', 'timelines')
+            ->where('purchaseable_id', $timeline->id)
+            ->where('seller_id', $creator->id)
+            ->where('purchaser_id', $fan->id)
+            ->first();
         $this->assertNotNull($fanledger);
         $this->assertEquals(1, $fanledger->qty);
         $this->assertEquals($payload['base_unit_cost_in_cents'], $fanledger->base_unit_cost_in_cents);
-        $this->assertEquals(PaymentTypeEnum::TIP, $fanledger->fltype);
-        $this->assertEquals($fan->id, $fanledger->purchaser_id);
-        $this->assertEquals($creator->id, $fanledger->seller_id);
-        $this->assertEquals('timelines', $fanledger->purchaseable_type);
-        $this->assertEquals($timeline->id, $fanledger->purchaseable_id);
         $this->assertTrue( $timeline->ledgersales->contains( $fanledger->id ) );
         $this->assertTrue( $fan->ledgerpurchases->contains( $fanledger->id ) );
     }
@@ -58,10 +59,13 @@ class TimelinesTest extends TestCase
     {
         $timeline = Timeline::has('posts','>=',1)->has('followers','>=',1)->first();
         $creator = $timeline->user;
-        $fan = User::has('followedtimelines','<>',$timeline->id)->first(); // not yet a follower of timeline
+        $fan = User::has('followedtimelines','<>',$timeline->id) // not yet a follower of timeline
+            ->where('id', '<>', $creator->id)
+            ->first(); // not yet a follower (includes susbcribers) of timeline
 
         $payload = [
             'sharee_id' => $fan->id,
+            'notes'=>'test_can_subscribe_to_timeline',
         ];
         //$response = $this->actingAs($fan)->ajaxJSON('PUT', route('shareables.followTimeline', $timeline->id), $payload);
         $response = $this->actingAs($fan)->ajaxJSON('PUT', route('timelines.follow', $timeline->id), $payload);
@@ -98,7 +102,9 @@ class TimelinesTest extends TestCase
         $creator->save();
         $timeline->refresh();
 
-        $fan = User::has('followedtimelines','<>',$timeline->id)->first(); // not yet a follower (includes susbcribers) of timeline
+        $fan = User::has('followedtimelines','<>',$timeline->id)
+            ->where('id', '<>', $creator->id)
+            ->first(); // not yet a follower (includes susbcribers) of timeline
 
         // Check access (before: should be denied)
         // [ ] %TODO: actually this is more complex: they can access the timeline, but can only see a subset
@@ -108,6 +114,7 @@ class TimelinesTest extends TestCase
 
         $payload = [
             'sharee_id' => $fan->id,
+            'notes'=>'test_can_subscribe_to_timeline',
         ];
         $response = $this->actingAs($fan)->ajaxJSON('PUT', route('timelines.subscribe', $timeline->id), $payload);
         $response->assertStatus(200);
@@ -125,14 +132,14 @@ class TimelinesTest extends TestCase
         $this->assertTrue( $fan->followedtimelines->contains( $timelineR->id ) );
 
         // Check ledger
-        $fanledger = Fanledger::where('fltype', PaymentTypeEnum::SUBSCRIPTION)->latest()->first(); // HERE TUES
+        $fanledger = Fanledger::where('fltype', PaymentTypeEnum::SUBSCRIPTION)
+            ->where('purchaseable_type', 'timelines')
+            ->where('purchaseable_id', $timeline->id)
+            ->where('seller_id', $creator->id)
+            ->where('purchaser_id', $fan->id)
+            ->first();
         $this->assertNotNull($fanledger);
         $this->assertEquals(1, $fanledger->qty);
-        $this->assertEquals(PaymentTypeEnum::SUBSCRIPTION, $fanledger->fltype);
-        $this->assertEquals($fan->id, $fanledger->purchaser_id);
-        $this->assertEquals($creator->id, $fanledger->seller_id);
-        $this->assertEquals('timelines', $fanledger->purchaseable_type);
-        $this->assertEquals($timeline->id, $fanledger->purchaseable_id);
         $this->assertEquals(intval($timeline->user->price*100), $fanledger->base_unit_cost_in_cents);
         $this->assertTrue( $timeline->ledgersales->contains( $fanledger->id ) );
         $this->assertTrue( $fan->ledgerpurchases->contains( $fanledger->id ) );

@@ -39,11 +39,13 @@ class ShareablesTableSeeder extends Seeder
 
             if ( $max > 0 ) {
                 $purchaseablePosts->random($max)->each( function($p) use(&$f) {
+                    $cattrs = [ 'notes' => 'ShareablesTableSeeder.purchase_some_posts' ];
+                    // %FIXME: this should also update shareables, and be encapsualted in a method in model or class-lib
                     $p->receivePayment(
                         PaymentTypeEnum::PURCHASE, // PaymentTypeEnum
                         $f, // User $sender | follower | purchaser
                         $p->price*100, // int $amountInCents
-                        [ 'notes' => 'ShareablesTableSeeder' ],
+                        $cattrs,
                     );
                 });
             }
@@ -62,12 +64,15 @@ class ShareablesTableSeeder extends Seeder
 
             if ( $max > 0 ) {
                 $timelines->random($max)->each( function($t) use(&$f) {
+                    $cattrs = [ 'notes' => 'ShareablesTableSeeder.follow_some_free_timelines' ];
+                // %FIXME: should be encapsualted in a method in model or class-lib
                     DB::table('shareables')->insert([
                         'sharee_id' => $f->id,
                         'shareable_type' => 'timelines',
                         'shareable_id' => $t->id,
                         'is_approved' => 1,
                         'access_level' => 'default',
+                        'cattrs' => json_encode($cattrs),
                     ]);
                 });
             }
@@ -89,12 +94,15 @@ class ShareablesTableSeeder extends Seeder
             $max = $this->faker->numberBetween( 1, min($timelines->count()-1, $this->getMax('subscriber')) );
             //$this->command->info("  - Following $max premium timelines for user ".$f->name);
             $timelines->random($max)->each( function($t) use(&$f) {
+                // %FIXME: should be encapsualted in a method in model or class-lib
+                $cattrs = [ 'notes' => 'ShareablesTableSeeder.follow_some_premium_timelines' ];
                 DB::table('shareables')->insert([
                     'sharee_id' => $f->id,
                     'shareable_type' => 'timelines',
                     'shareable_id' => $t->id,
                     'is_approved' => 1,
                     'access_level' => 'default',
+                    'cattrs' => json_encode($cattrs),
                 ]);
             });
 
@@ -103,12 +111,15 @@ class ShareablesTableSeeder extends Seeder
             $max = $this->faker->numberBetween( 1, min($timelines->count()-1, $this->getMax('subscriber')) );
             //$this->command->info("  - Subscribing to $max premium timelines for user ".$f->name);
             $timelines->random($max)->each( function($t) use(&$f) {
+                // %FIXME: should be encapsualted in a method in model or class-lib
+                $cattrs = [ 'notes' => 'ShareablesTableSeeder.subscribe_to_some_premium_timelines' ];
                 DB::table('shareables')->insert([
                     'sharee_id' => $f->id, // fan
                     'shareable_type' => 'timelines',
                     'shareable_id' => $t->id,
                     'is_approved' => 1,
                     'access_level' => 'premium',
+                    'cattrs' => json_encode($cattrs),
                 ]);
                 Fanledger::create([
                     'fltype' => PaymentTypeEnum::SUBSCRIPTION,
@@ -118,9 +129,7 @@ class ShareablesTableSeeder extends Seeder
                     'purchaseable_id' => $t->id,
                     'qty' => 1,
                     'base_unit_cost_in_cents' => $t->user->price*100, // %FIXME: price should be on timeline not user
-                    //'total_amount' => $t->user->price*100,
-                    'cattrs' => [],
-                    //'is_credit' => false,
+                    'cattrs' => $cattrs,
                 ]);
             });
 
