@@ -66,18 +66,21 @@ Route::group(['middleware' => ['auth']], function () {
 
     // -- mediafiles: likeable | shareable | commentable (?) | tippable | purchaseable --
     Route::get('/mediafiles/match', ['as'=>'mediafiles.match', 'uses' => 'MediafilesController@match']);
-    Route::resource('mediafiles', 'MediafilesController', [ ]);
+    Route::resource('mediafiles', 'MediafilesController', [ 'except' => [ 'create', 'edit', ] ]);
 
     // -- posts: likeable | shareable | commentable | tippable | purchaseable | pinnable --
     Route::get('/posts/match', ['as'=>'posts.match', 'uses' => 'PostsController@match']);
     Route::put('/posts/{post}/tip', ['as'=>'posts.tip', 'uses' => 'PostsController@tip']);
     Route::put('/posts/{post}/purchase', ['as'=>'posts.purchase', 'uses' => 'PostsController@purchase']);
-    Route::resource('posts', 'PostsController', [ ]);
+    Route::resource('posts', 'PostsController', [ 
+        'except' => [ 'create', 'edit', ],
+    ]);
 
     // -- stories:  --
     Route::get('/stories/player', ['as'=>'stories.player', 'uses' => 'StoriesController@player']);
     Route::get('/stories/match', ['as'=>'stories.match', 'uses' => 'StoriesController@match']);
-    Route::resource('stories', 'StoriesController', [ ]);
+    Route::get('/stories/dashboard', ['as'=>'stories.dashboard', 'uses' => 'StoriesController@dashboard']);
+    Route::resource('stories', 'StoriesController', [ 'except' => [ 'create', 'edit', ] ]);
 
     // -- shareables:  --
     Route::resource('shareables', 'ShareablesController', [
@@ -100,7 +103,7 @@ Route::group(['middleware' => ['auth']], function () {
     //Route::get('/users-suggested', ['as'=>'users.suggested', 'uses' => 'UsersController@suggested']);
     Route::get('/users/me', ['as'=>'users.me', 'uses' => 'UsersController@me']);
     Route::get('/users/match', ['as'=>'users.match', 'uses' => 'UsersController@match']);
-    Route::resource('users', 'UsersController', [ ]);
+    Route::resource('users', 'UsersController', [ 'except' => [ 'create', 'edit', ] ]);
 
     // -- vaults:  --
     Route::get('/my-vault', ['as'=>'vault.dashboard', 'uses' => 'VaultsController@dashboard']);

@@ -29,4 +29,17 @@ class Story extends Model
     protected $casts = [
         'cattrs' => 'array',
     ];
+
+    //--------------------------------------------
+    // Overrides
+    //--------------------------------------------
+
+    /*
+    public static function create(array $attrs=[])
+    {
+        $model = static::query()->create($attrs);
+        // ...
+        return $model;
+    }
+     */
 }

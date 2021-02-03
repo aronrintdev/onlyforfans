@@ -2,7 +2,7 @@
   <div  v-if="!is_loading" class="story_bar-crate tag-crate row mb-3 mx-0">
 
     <section class="d-flex">
-      <div @click="createStory()"><a :href="`/stories/create`"><b-icon icon="plus-circle" variant="primary" font-scale="2"></b-icon></a></div>
+      <div @click="createStory()"><a :href="`/stories/dashboard`"><b-icon icon="plus-circle" variant="primary" font-scale="2"></b-icon></a></div>
       <div v-for="(s, idx) in stories" :key="s.id" class="ml-3">
         <a :href="`/stories/player`"
            class="box-story">
