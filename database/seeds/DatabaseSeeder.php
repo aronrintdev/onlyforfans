@@ -1,7 +1,7 @@
 <?php
-
 namespace Database\Seeders;
 
+use Symfony\Component\Console\Output\ConsoleOutput;
 use Illuminate\Support\Facades\Config;
 
 class DatabaseSeeder extends Seeder
@@ -11,6 +11,9 @@ class DatabaseSeeder extends Seeder
 
     public function run()
     {
+        $output = new ConsoleOutput();
+        $output->writeln('Running DB seeder...');
+
         $this->call([
             UsernameRulesSeeder::class,
             RolesTableSeeder::class,

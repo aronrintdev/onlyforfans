@@ -15,7 +15,7 @@ use App\Libs\FeedMgr;
 
 use App\Fanledger;
 use App\Timeline;
-//use App\Enums\PaymentTypeEnum;
+use App\Enums\PaymentTypeEnum;
 
 class TimelinesController extends AppBaseController
 {
@@ -64,7 +64,7 @@ class TimelinesController extends AppBaseController
 
         $timeline->userstats = [ // %FIXME DRY
             'post_count' => $timeline->posts->count(),
-            'like_count' => $timeline->user->postlikes->count(),
+            'like_count' => 0, // %TODO $timeline->user->postlikes->count(),
             'follower_count' => $timeline->followers->count(),
             'following_count' => $timeline->user->followedtimelines->count(),
             'subscribed_count' => 0, // %TODO $sessionUser->timeline->subscribed->count()
@@ -86,7 +86,7 @@ class TimelinesController extends AppBaseController
 
         $timeline->userstats = [ // %FIXME DRY
             'post_count' => $timeline->posts->count(),
-            'like_count' => $timeline->user->postlikes->count(),
+            'like_count' => 0, // %TODO $timeline->user->postlikes->count(),
             'follower_count' => $timeline->followers->count(),
             'following_count' => $timeline->user->followedtimelines->count(),
             'subscribed_count' => 0, // %TODO $sessionUser->timeline->subscribed->count()
@@ -126,6 +126,108 @@ class TimelinesController extends AppBaseController
 
         return response()->json([
             'feeditems' => $feeditems,
+        ]);
+    }
+
+    public function follow(Request $request, Timeline $timeline)
+    {
+        $sessionUser = Auth::user(); // subscriber (purchaser)
+
+        $request->validate([
+            'sharee_id' => 'required|numeric|min:1',
+        ]);
+        if ( $request->sharee_id != $sessionUser->id ) {
+            abort(403);
+        }
+
+        $cattrs = [];
+        if ( $request->has('notes') ) {
+            $cattrs['notes'] = $request->notes;
+        }
+
+        $timeline->followers()->detach($request->sharee_id); // remove existing
+        $timeline->followers()->attach($request->sharee_id, [ // will sync work here?
+            'shareable_type' => 'timelines',
+            'shareable_id' => $timeline->id,
+            'is_approved' => 1, // %FIXME
+            'access_level' => 'default',
+            'cattrs' => json_encode($cattrs),
+        ]); //
+
+        $timeline->refresh();
+        return response()->json([
+            'timeline' => $timeline,
+            'follower_count' => $timeline->followers->count(),
+        ]);
+    }
+
+    public function subscribe(Request $request, Timeline $timeline)
+    {
+        $sessionUser = Auth::user(); // subscriber (purchaser)
+
+        $request->validate([
+            'sharee_id' => 'required|numeric|min:1',
+        ]);
+        if ( $request->sharee_id != $sessionUser->id ) {
+            abort(403);
+        }
+
+        $timeline = DB::transaction( function() use(&$timeline, &$request, &$sessionUser) {
+            $cattrs = [];
+            if ( $request->has('notes') ) {
+                $cattrs['notes'] = $request->notes;
+            }
+            $timeline->followers()->detach($request->sharee_id); // remove existing (covers 'upgrade') case
+            $timeline->followers()->attach($request->sharee_id, [
+                'shareable_type' => 'timelines',
+                'shareable_id' => $timeline->id,
+                'is_approved' => 1, // %FIXME
+                'access_level' => 'premium',
+                'cattrs' => json_encode($cattrs), // %FIXME: add a observer function?
+            ]); //
+            $timeline->receivePayment(
+                PaymentTypeEnum::SUBSCRIPTION,
+                $sessionUser,
+                $timeline->user->price*100, // %FIXME: should be on timeline
+                $cattrs,
+            );
+            return $timeline;
+        });
+
+        $timeline->refresh();
+        return response()->json([
+            'timeline' => $timeline,
+            'follower_count' => $timeline->followers->count(),
+        ]);
+    }
+
+    public function tip(Request $request, Timeline $timeline)
+    {
+        $sessionUser = Auth::user(); // sender of tip (purchaser)
+
+        $request->validate([
+            'base_unit_cost_in_cents' => 'required|numeric',
+        ]);
+
+        $cattrs = [];
+        if ( $request->has('notes') ) {
+            $cattrs['notes'] = $request->notes;
+        }
+
+        try {
+            $timeline->receivePayment(
+                PaymentTypeEnum::TIP,
+                $sessionUser,
+                $request->base_unit_cost_in_cents,
+                $cattrs,
+            );
+        } catch(Exception | Throwable $e) {
+            return response()->json([ 'message'=>$e->getMessage() ], 400);
+        }
+
+        $timeline->refresh();
+        return response()->json([
+            'timeline' => $timeline,
         ]);
     }
 

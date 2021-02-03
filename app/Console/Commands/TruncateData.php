@@ -22,9 +22,12 @@ class TruncateData extends Command
     public function handle()
     {
         $isEnvLocal = App::environment(['local']);
+        $isEnvTesting = App::environment(['testing']);
         $dbName = env('DB_DATABASE');
-        $this->info( '%%% DB Name: '.$dbName.', Is env local?: '.($isEnvLocal?'true':'false') );
-        if ( $dbName !== 'fansplat_dev' && !$isEnvLocal ) {
+        $this->info( '%%% DB Name: '.$dbName);
+        $this->info( '%%% Is env local?: '.($isEnvLocal?'true':'false') );
+        $this->info( '%%% Is env testing?: '.($isEnvTesting?'true':'false') );
+        if ( $dbName !== 'fansplat_dev_test' && !$isEnvTesting ) {
             throw new Exception('Environment not in whitelist: '.App::environment());
         }
 
@@ -54,56 +57,31 @@ class TruncateData extends Command
     }
 
     private static $truncateList = [
-        'album_media',
-        'post_media',
-        'post_likes',
-        //'post_shares',
-        //'post_follows',
-        'saved_posts',
-        'comments',
-        'media',
-        'albums',
-
-        'mediafiles',
+        'role_user',
+        'permission_role',
+        'fanledgers',
         'shareables',
+        'likeables',
+        'comments',
+        'mediafiles',
         'stories',
         //'subscriptions',
 
-        'role_user',
         'model_has_permissions',
         'model_has_roles',
         'role_has_permissions',
-        'permission_role',
+        'user_settings',
         'permissions',
         'roles',
-
-        'user_settings',
-        'user_lists',
-        //'users_tips',
-        'event_user',
-        'favourite_users',
-        'group_user',
-        'announcement_user',
-
-        'bank_account_details',
-        'comment_likes',
-        //'followers',
-
-        'threads',
-        'messages',
 
         'vaultfolders',
         'vaults',
 
-        'saved_timelines',
+        'posts',
         'timelines',
         'users',
 
         'username_rules',
 
-        //'purchased_posts',
-        'posts',
-        /*
-         */
     ];
 }

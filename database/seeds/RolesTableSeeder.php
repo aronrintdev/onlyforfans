@@ -1,7 +1,7 @@
 <?php
-
 namespace Database\Seeders;
 
+use Illuminate\Support\Facades\Config;
 use App\Role;
 
 class RolesTableSeeder extends Seeder
@@ -16,6 +16,9 @@ class RolesTableSeeder extends Seeder
      */
     public function run()
     {
+
+        $appEnv = Config::get('app.env');
+        $this->command->info('Running Seeder: RolesTableSeeder, env: '.$appEnv.' ...');
 
         $role = Role::firstOrNew(['name' => 'Super Admin', 'guard_name' => 'web']);
         $role->display_name = 'Super Admin';

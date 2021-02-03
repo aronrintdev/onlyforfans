@@ -6,11 +6,10 @@ use Auth;
 use App\Enums\PaymentTypeEnum;
 use Illuminate\Support\Collection;
 use App\Interfaces\PaymentSendable;
-use App\Interfaces\PaymentReceivable;
+use App\Interfaces\Purchaseable;
 use Spatie\Permission\Traits\HasRoles;
 use Cmgmyr\Messenger\Traits\Messagable;
 use Illuminate\Notifications\Notifiable;
-// use Zizaco\Entrust\Traits\EntrustUserTrait;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -18,22 +17,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
-class User extends Authenticatable implements PaymentSendable, PaymentReceivable
+class User extends Authenticatable implements PaymentSendable, Purchaseable
 {
-    use Notifiable;
-    use HasRoles;
-    use HasFactory;
-    // use EntrustUserTrait;
-    // use SoftDeletes, EntrustUserTrait {
-
-    //     SoftDeletes::restore insteadof EntrustUserTrait;
-    //     EntrustUserTrait::restore insteadof SoftDeletes;
-
-    // }
-    use Messagable;
-
-    //protected $dates = ['deleted_at'];
-
+    use Notifiable, HasRoles, HasFactory, Messagable;
 
     protected $appends = [
         'name',
@@ -41,19 +27,9 @@ class User extends Authenticatable implements PaymentSendable, PaymentReceivable
         'cover',
         'about',
     ];
-
     protected $guarded = ['id','created_at','updated_at'];
-
-    protected $fillable = [
-        'timeline_id', 'email', 'verification_code', 'email_verified', 'remember_token', 'password', 'birthday', 'city', 'gender', 'last_logged', 'timezone', 'affiliate_id', 'language', 'country', 'active', 'verified', 'facebook_link', 'twitter_link', 'dribbble_link', 'instagram_link', 'youtube_link', 'linkedin_link', 'wishlist', 'website', 'instagram','custom_option1', 'custom_option2', 'custom_option3', 'custom_option4'
-        , 'bank_account', 'price', 'is_payment_set', 'is_bank_set', 'is_follow_for_free', 'is_online', 'timezone_id'
-    ];
-
-    protected $hidden = [
-        'password', 'remember_token', 'verification_code', 'email', 'timeline',
-    ];
-
-    protected $dates = [ 'last_logged' ];
+    protected $hidden = [ 'password', 'remember_token', 'verification_code', 'email', 'timeline' ];
+    protected $dates = [ 'last_logged' ]; // ['deleted_at'];
 
     public function toArray() {
         $array = parent::toArray();
@@ -77,8 +53,8 @@ class User extends Authenticatable implements PaymentSendable, PaymentReceivable
     public function sharedvaultfolders() { // vaultfolders shared with me (??)
         return $this->morphedByMany('App\Vaultfolder', 'shareable', 'shareables', 'sharee_id')->withTimestamps();
     }
-    public function ledgersales() { // this may only pick up type of 'user'
-        return $this->morphMany('App\Fanledger', 'purchaseable');
+    public function ledgersales() {
+        return $this->hasMany('App\Fanledger', 'seller_id');
     }
     public function ledgerpurchases() {
         return $this->hasMany('App\Fanledger', 'purchaser_id');
@@ -94,60 +70,13 @@ class User extends Authenticatable implements PaymentSendable, PaymentReceivable
     //}
      */
     public function followedtimelines() { // timelines (users) I follow: premium *and* default subscribe (follow)
-        return $this->morphedByMany('App\Timeline', 'shareable', 'shareables', 'sharee_id')->withTimestamps();
+        return $this->morphedByMany('App\Timeline', 'shareable', 'shareables', 'sharee_id')->withPivot('access_level', 'shareable_type', 'sharee_id')->withTimestamps();
     }
 
-    /* HERE Jan 11
-    public function followers() {
-        return $this->belongsToMany('App\User', 'followers', 'leader_id', 'follower_id')->withPivot('status', 'referral', 'subscription_id')->withTimestamps();
+    public function likedposts() {
+        return $this->morphedByMany('App\Post', 'likeable', 'likeables', 'likee_id')->withTimestamps();
     }
 
-    public function following() {
-        return $this->belongsToMany('App\User', 'followers', 'follower_id', 'leader_id')->withPivot('referral');
-    }
-    public function updateFollowStatus($user_id) {
-        $chk_user = DB::table('followers')->where('follower_id', $user_id)->where('leader_id', Auth::user()->id)->first();
-        if ($chk_user->status == 'pending') {
-            $result = DB::table('followers')->where('follower_id', $user_id)->where('leader_id', Auth::user()->id)->update(['status' => 'approved']);
-        }
-        return ($result ? true : false);
-    }
-
-    public function decilneRequest($user_id) {
-        $chk_user = DB::table('followers')->where('follower_id', $user_id)->where('leader_id', Auth::user()->id)->first();
-        if ($chk_user->status == 'pending') {
-            $result = DB::table('followers')->where('follower_id', $user_id)->where('leader_id', Auth::user()->id)->delete();
-        }
-        return ($result ? true : false);
-    }
-
-    public function chkMyFollower($diff_timeline_id, $login_id) {
-        $followers = DB::table('followers')->where('follower_id', $login_id)->where('leader_id', $diff_timeline_id)->where('status', '=', 'approved')->first();
-        return $followers ? true : false;
-    }
-    public function postFollows() {
-        return $this->belongsToMany('App\User', 'post_follows', 'user_id', 'post_id');
-    }
-    public function paidSubscribers() {
-        $followers = $this->followers()->pluck('follower_id')->toArray();
-        $activeFollowers = Subscription::whereIn('follower_id', $followers)
-            ->where('leader_id', $this->id)
-            ->pluck('follower_id')->toArray();
-        return $this->followers()->whereIn('follower_id', $activeFollowers);
-    }
-    
-    public function activeSubscribers() {
-        $followers = $this->followers()->pluck('follower_id')->toArray();
-        $activeFollowers = Subscription::whereIn('follower_id', $followers)
-            ->where('leader_id', $this->id)
-            ->where('cancel_at', '=', null)
-            ->pluck('follower_id')->toArray();
-        return $this->followers()->whereIn('follower_id', $activeFollowers);
-    }
-    public function renderFollowersCount() {
-        return $this->followers()->count();
-    }
-     */
 
     public function pages()
     {
@@ -159,9 +88,11 @@ class User extends Authenticatable implements PaymentSendable, PaymentReceivable
         return $this->belongsToMany('App\Timeline', 'saved_timelines', 'user_id', 'timeline_id')->withPivot('type');
     }
 
+    /* DEPRECATE: go through timeline
     public function posts() { // my own posts (that I own)
         return $this->hasMany('App\Post');
     }
+     */
 
     public function sharedposts() { // posts shared with me (by direct share or purchase on my part)
         return $this->morphedByMany('App\Post', 'shareable', 'shareables', 'sharee_id')->withTimestamps();
@@ -386,6 +317,11 @@ class User extends Authenticatable implements PaymentSendable, PaymentReceivable
         return $this->events()->where('events.id', $id)->first();
     }
 
+    public function isAdmin() : bool
+    {
+        return false; // %TODO
+    }
+
     public function is_eventadmin($user_id, $event_id) {
         $chk_isadmin = Event::where('id', $event_id)->where('user_id', $user_id)->first();
 
@@ -436,26 +372,6 @@ class User extends Authenticatable implements PaymentSendable, PaymentReceivable
 
     public function commentLikes() {
         return $this->belongsToMany('App\User', 'comment_likes', 'user_id', 'comment_id');
-    }
-
-    public function postLikes() {
-        return $this->belongsToMany('App\User', 'post_likes', 'user_id', 'post_id');
-    }
-
-    public function postReports() {
-        return $this->belongsToMany('App\User', 'post_reports', 'reporter_id', 'post_id')->withPivot('status');
-    }
-
-    public function postTags() {
-        return $this->belongsToMany('App\User', 'post_tags', 'user_id', 'post_id')->withPivot('status');
-    }
-
-    public function notifiedBy() {
-        return $this->hasMany('App\Notification', 'notified_by', 'id');
-    }
-
-    public function timelineReports() {
-        return $this->belongsToMany('App\User', 'timeline_reports', 'reporter_id', 'timeline_id')->withPivot('status');
     }
 
     public function userEvents() {
@@ -530,7 +446,7 @@ class User extends Authenticatable implements PaymentSendable, PaymentReceivable
         return $this->hasOne('App\BankAccountDetails', 'user_id');
     }
 
-    // %%% --- Implement PaymentReceivable Interface ---
+    // %%% --- Implement Purchaseable Interface ---
 
     public function receivePayment(
         string $ptype, // PaymentTypeEnum
@@ -597,3 +513,56 @@ class User extends Authenticatable implements PaymentSendable, PaymentReceivable
     }
 
 }
+
+
+    /* HERE Jan 11
+    public function followers() {
+        return $this->belongsToMany('App\User', 'followers', 'leader_id', 'follower_id')->withPivot('status', 'referral', 'subscription_id')->withTimestamps();
+    }
+
+    public function following() {
+        return $this->belongsToMany('App\User', 'followers', 'follower_id', 'leader_id')->withPivot('referral');
+    }
+    public function updateFollowStatus($user_id) {
+        $chk_user = DB::table('followers')->where('follower_id', $user_id)->where('leader_id', Auth::user()->id)->first();
+        if ($chk_user->status == 'pending') {
+            $result = DB::table('followers')->where('follower_id', $user_id)->where('leader_id', Auth::user()->id)->update(['status' => 'approved']);
+        }
+        return ($result ? true : false);
+    }
+
+    public function decilneRequest($user_id) {
+        $chk_user = DB::table('followers')->where('follower_id', $user_id)->where('leader_id', Auth::user()->id)->first();
+        if ($chk_user->status == 'pending') {
+            $result = DB::table('followers')->where('follower_id', $user_id)->where('leader_id', Auth::user()->id)->delete();
+        }
+        return ($result ? true : false);
+    }
+
+    public function chkMyFollower($diff_timeline_id, $login_id) {
+        $followers = DB::table('followers')->where('follower_id', $login_id)->where('leader_id', $diff_timeline_id)->where('status', '=', 'approved')->first();
+        return $followers ? true : false;
+    }
+    public function postFollows() {
+        return $this->belongsToMany('App\User', 'post_follows', 'user_id', 'post_id');
+    }
+    public function paidSubscribers() {
+        $followers = $this->followers()->pluck('follower_id')->toArray();
+        $activeFollowers = Subscription::whereIn('follower_id', $followers)
+            ->where('leader_id', $this->id)
+            ->pluck('follower_id')->toArray();
+        return $this->followers()->whereIn('follower_id', $activeFollowers);
+    }
+    
+    public function activeSubscribers() {
+        $followers = $this->followers()->pluck('follower_id')->toArray();
+        $activeFollowers = Subscription::whereIn('follower_id', $followers)
+            ->where('leader_id', $this->id)
+            ->where('cancel_at', '=', null)
+            ->pluck('follower_id')->toArray();
+        return $this->followers()->whereIn('follower_id', $activeFollowers);
+    }
+    public function renderFollowersCount() {
+        return $this->followers()->count();
+    }
+     */

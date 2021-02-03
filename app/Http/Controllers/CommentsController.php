@@ -12,21 +12,67 @@ use App\Comment;
 
 class CommentsController extends AppBaseController
 {
+    // %TODO: refactor with scopes
     public function index(Request $request)
     {
+        $sessionUser = Auth::user();
+        //dd($request->all());
+
+        // %TODO: convert to validator (?)
+        if ( !$sessionUser->isAdmin() && !$request->hasAny('post_id', 'user_id') ) { // must have user or post id
+            abort(403);
+        }
+        if ( !$sessionUser->isAdmin() && !$request->has('post_id') && $request->has('user_id') ) {
+            if ( $sessionUser->id != $request->user_id ) { // must have user_id equal to session user 
+                abort(403);
+            }
+        }
+        // must have post_id and post must be accessible %TODO
+
         $query = Comment::with('user', 'replies.user');
 
-        // Apply filters
-        if ( $request->has('post_id') ) {
-            $query->where('post_id', $request->post_id)->whereNull('parent_id'); // only grab 1st level (%NOTE)
+        if ( $request->has('post_id') ) { // for specific post
+            $query->where('post_id', $request->post_id);
+            if ( !$request->has('include_replies') ) {
+                $query->whereNull('parent_id'); // only grab 1st level (%NOTE)
+            }
+        }
+        if ( $request->has('user_id') ) {
+            $query->where('user_id', $request->user_id);
         }
 
+        /* %TODO: subgroup under 'filters' (need to update axios.GET calls as well in Vue)
+        // Apply filters
+        if ( $request->has('filters') ) {
+            if ( $request->has('post_id', 'filters.user_id') ) { // comment author by post
+                $query->where('user_id', $request->filters['user_id']);
+            }
+        }
+         */
+
         return response()->json([
-            //'comments' => $query->take(5)->get(),
             'comments' => $query->get(),
         ]);
     }
 
+    public function show(Request $request, Comment $comment)
+    {
+        $sessionUser = Auth::user();
+        //dd('here', $sessionUser->id);
+        if ( !$sessionUser->isAdmin() ) { // admin can view all comments
+            $isCommentOwner = ($sessionUser->id === $comment->user_id ); // can see own comments
+            $isPostOwner = ($sessionUser->id === $comment->post->user_id ); // can see comments on own post
+            $isFollowedTimeline = $sessionUser->followedtimelines->contains($comment->post->timeline_id); // can see comments on followed timeline's posts
+            //dd( 'co: '.($isCommentOwner?'T':'F'), 'po: '.($isPostOwner?'T':'F'), 'ft: '.($isFollowedTimeline?'T':'F') );
+            if ( !$isCommentOwner && !$isPostOwner && !$isFollowedTimeline ) {
+                //dd('abort', 'co: '.($isCommentOwner?'T':'F'), 'po: '.($isPostOwner?'T':'F'), 'ft: '.($isFollowedTimeline?'T':'F') );
+                abort(403);
+            }
+        }
+        return response()->json([
+            'comment' => $comment,
+        ]);
+    }
 
     public function store(Request $request)
     {
@@ -36,7 +82,6 @@ class CommentsController extends AppBaseController
             //'parent_id' => 'exists:comments,id', // %TODO
             'description' => 'required|string|min:1',
         ]);
-
         $attrs = $request->all();
 
         try {
@@ -47,29 +92,27 @@ class CommentsController extends AppBaseController
 
         return response()->json([
             'comment' => $comment,
-        ]);
+        ], 201);
     }
 
-    public function toggleLike(Request $request, Comment $comment)
+    public function update(Request $request, Comment $comment)
     {
-        $sessionUser = Auth::user();
-
-        // %TODO: notify user
-        if ( !$comment->likes->contains($sessionUser->id) ) { // like
-            $comment->likes()->attach($sessionUser->id);
-            $isLikedBySessionUser = true;
-        } else { // unlike
-            $comment->likes()->detach($sessionUser->id);
-            $isLikedBySessionUser = false;
-        }
-
-        $comment->refresh();
+        $request->validate([
+            'description' => 'required|string|min:1',
+        ]);
+        $attrs = $request->only([ 'description' ]);
+        $comment->fill($attrs);
+        $comment->save();
 
         return response()->json([
             'comment' => $comment,
-            'is_liked_by_session_user' => $isLikedBySessionUser,
-            'like_count' => $comment->likes()->count(),
         ]);
+    }
+
+    public function destroy(Request $request, Comment $comment)
+    {
+        $comment->delete();
+        return response()->json([]);
     }
 
 }

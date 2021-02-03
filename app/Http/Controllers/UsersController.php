@@ -33,7 +33,7 @@ class UsersController extends AppBaseController
 
         $sales = Fanledger::where('seller_id', $sessionUser->id)->sum('total_amount');
 
-        $timeline => $sessionUser->timeline;
+        $timeline = $sessionUser->timeline;
         $timeline->userstats = [ // %FIXME DRY
             'post_count' => $timeline->posts->count(),
             'like_count' => $timeline->user->postlikes->count(),

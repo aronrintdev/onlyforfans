@@ -4,12 +4,12 @@ namespace App;
 use DB;
 use Eloquent as Model;
 use App\Enums\PaymentTypeEnum;
-use App\Interfaces\PaymentReceivable;
+use App\Interfaces\Purchaseable;
 use Intervention\Image\Facades\Image;
 use App\Enums\ShareableAccessLevelEnum;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Timeline extends Model implements PaymentReceivable
+class Timeline extends Model implements Purchaseable
 {
     //use SoftDeletes;
     use HasFactory;
@@ -79,8 +79,15 @@ class Timeline extends Model implements PaymentReceivable
         return $array;
     }
 
+    // users
     public function followers() {  // includes subscribers (ie premium + default followers)
-        return $this->morphToMany('App\User', 'shareable', 'shareables', 'shareable_id', 'sharee_id')->withPivot('access_level');
+        return $this->morphToMany('App\User', 'shareable', 'shareables', 'shareable_id', 'sharee_id')
+                    ->withPivot('access_level', 'shareable_type', 'sharee_id', 'is_approved', 'cattrs')
+                    ->withTimestamps();
+    }
+
+    public function ledgersales() {
+        return $this->morphMany('App\Fanledger', 'purchaseable');
     }
 
     public function posts() {
@@ -132,7 +139,7 @@ class Timeline extends Model implements PaymentReceivable
     {
         $rand   = 0;
         for ($i = 0; $i<15; $i++) {
-                $rand .= mt_rand(0, 9);
+            $rand .= mt_rand(0, 9);
         }
         return $rand;
     }
@@ -160,13 +167,13 @@ class Timeline extends Model implements PaymentReceivable
         $photo->save(storage_path().'/uploads/wallpapers/'.$photoName, 60);
 
         $media = Media::create([
-          'title'  => $wallpaper->getClientOriginalName(),
-          'type'   => 'image',
-          'source' => $photoName,
+            'title'  => $wallpaper->getClientOriginalName(),
+            'type'   => 'image',
+            'source' => $photoName,
         ]);
-        
+
         $result = $this->update(['background_id' => $media->id]);
-        
+
         $result = $result ? true : false;
         return $result;
 
@@ -175,7 +182,7 @@ class Timeline extends Model implements PaymentReceivable
     public function toggleWallpaper($action, $media)
     {
         if($action == 'activate'){
-            
+
             $result = $this->update(['background_id' => $media->id]) ? 'activate' : false;
             return $result;
         }
@@ -184,10 +191,10 @@ class Timeline extends Model implements PaymentReceivable
             $result = $this->update(['background_id' => null]) ? 'deactivate' : false;
             return $result;
         }
-        
+
     }
 
-    // %%% --- Implement PaymentReceivable Interface ---
+    // %%% --- Implement Purchaseable Interface ---
 
     public function receivePayment(
         string $ptype, // PaymentTypeEnum
@@ -196,31 +203,38 @@ class Timeline extends Model implements PaymentReceivable
         array $cattrs = []
     ) : ?Fanledger
     {
-        $result = DB::transaction( function() use($ptype, $amountInCents, $cattrs, &$sender) {
 
-            switch ($ptype) {
-                case PaymentTypeEnum::SUBSCRIPTION:
-                    $result = Fanledger::create([
-                        'fltype' => $ptype,
-                        'seller_id' => $this->user->id,
-                        'purchaser_id' => $sender->id,
-                        'purchaseable_type' => 'timelines', // basically a subscription
-                        'purchaseable_id' => $this->id,
-                        'qty' => 1,
-                        'base_unit_cost_in_cents' => $amountInCents,
-                        'cattrs' => $cattrs ?? [],
-                    ]);
-                    $sender->followedtimelines()->attach($this->id, [
-                        'cattrs' => json_encode($cattrs ?? []),
-                        'access_level' => ShareableAccessLevelEnum::PREMIUM,
-                    ]);
-                    break;
-                default:
-                    throw new Exception('Unrecognized payment type : '.$ptype);
-            }
+        $result = null;
 
-            return $result;
-        });
+        switch ($ptype) {
+        case PaymentTypeEnum::TIP:
+            $result = Fanledger::create([
+                'fltype' => $ptype,
+                'seller_id' => $this->user->id,
+                'purchaser_id' => $sender->id,
+                'purchaseable_type' => 'timelines',
+                'purchaseable_id' => $this->id,
+                'qty' => 1,
+                'base_unit_cost_in_cents' => $amountInCents,
+                'cattrs' => $cattrs ?? [],
+            ]);
+            break;
+        case PaymentTypeEnum::SUBSCRIPTION:
+            $result = Fanledger::create([
+                'fltype' => $ptype,
+                'seller_id' => $this->user->id,
+                'purchaser_id' => $sender->id,
+                'purchaseable_type' => 'timelines', // basically a subscription
+                'purchaseable_id' => $this->id,
+                'qty' => 1,
+                'base_unit_cost_in_cents' => $amountInCents,
+                'cattrs' => $cattrs ?? [],
+            ]);
+            //dd($result->toArray());
+            break;
+        default:
+            throw new Exception('Unrecognized payment type : '.$ptype);
+        }
 
         return $result ?? null;
     }
@@ -243,53 +257,3 @@ class Timeline extends Model implements PaymentReceivable
         //return $this->id === $user->timeline_id;
     }
 }
-
-/**
- * @SWG\Definition(
- *      definition="Timeline",
- *      required={},
- *      @SWG\Property(
- *          property="id",
- *          description="id",
- *          type="integer",
- *          format="int32"
- *      ),
- *      @SWG\Property(
- *          property="username",
- *          description="username",
- *          type="string"
- *      ),
- *      @SWG\Property(
- *          property="name",
- *          description="name",
- *          type="string"
- *      ),
- *      @SWG\Property(
- *          property="about",
- *          description="about",
- *          type="string"
- *      ),
- *      @SWG\Property(
- *          property="avatar_id",
- *          description="avatar_id",
- *          type="integer",
- *          format="int32"
- *      ),
- *      @SWG\Property(
- *          property="cover_id",
- *          description="cover_id",
- *          type="integer",
- *          format="int32"
- *      ),
- *      @SWG\Property(
- *          property="cover_position",
- *          description="cover_position",
- *          type="string"
- *      ),
- *      @SWG\Property(
- *          property="type",
- *          description="type",
- *          type="string"
- *      )
- * )
- */

@@ -112,7 +112,7 @@ export default new Vuex.Store({
       if ( Object.keys(filters).includes('user_id') ) {
         params.user_id = filters.user_id;
       }
-      const response = await axios.get(`/${username}/stories`, { params });
+      const response = await axios.get(`/stories`, { params });
       commit('UPDATE_STORIES', response.data);
       commit('UPDATE_LOADING', false);
     },

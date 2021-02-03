@@ -74,7 +74,6 @@
           <text-story-preview 
                                       v-if="stype==='text'" 
                                       v-bind:attrs="storyAttrs" 
-                                      username="dtoUser.username"
                                       ></text-story-preview>
         </div>
 
@@ -149,7 +148,7 @@ export default {
 
   methods: {
     async shareStory() {
-      const url = `/${this.dtoUser.username}/stories`;
+      //const url = `/${this.dtoUser.username}/stories`;
       let payload = new FormData();
       const json = JSON.stringify({
         stype: this.stype,
@@ -166,7 +165,7 @@ export default {
           break;
       } 
 
-      const response = await axios.post(url, payload, {
+      const response = await axios.post(`/stories`, payload, {
         headers: {
           'Content-Type': 'application/json',
         }

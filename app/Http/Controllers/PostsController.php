@@ -14,6 +14,54 @@ use App\Enums\PostTypeEnum;
 
 class PostsController extends AppBaseController
 {
+    public function index(Request $request)
+    {
+        $sessionUser = Auth::user();
+        $sessionTimeline = $sessionUser->timeline;
+
+        $filters = $request->input('filters', []);
+
+        $query = Post::query();
+        if ( !$sessionUser->isAdmin() ) {
+            $query->where('timeline_id', $sessionTimeline->id);
+        }
+
+        foreach ($filters as $f) {
+            switch ($f['key']) {
+                case 'ptype':
+                    $query->where('type', $f['val']);
+                    break;
+            }
+        }
+        $posts = $query->get();
+
+        return response()->json([
+            'posts' => $posts,
+        ]);
+    }
+
+    public function show(Request $request, Post $post)
+    {
+        $sessionUser = Auth::user();
+
+        switch ($post->type) {
+        case PostTypeEnum::PRICED:
+            if ( $sessionUser->id !== $post->user->id && !$post->sharees->contains($sessionUser->id) ) {
+                abort(403);
+            }
+            break;
+        case PostTypeEnum::FREE:
+            break;
+        case PostTypeEnum::SUBSCRIBER:
+            break;
+        }
+
+        return response()->json([
+            'post' => $post,
+        ]);
+    }
+
+
     public function store(Request $request)
     {
         $sessionUser = Auth::user();
@@ -56,17 +104,19 @@ class PostsController extends AppBaseController
 
         return response()->json([
             'post' => $post,
-        ]);
+        ], 201);
     }
 
-    public function show(Request $request, Post $post)
+    public function update(Request $request, Post $post)
     {
         $sessionUser = Auth::user();
-        $post->load('mediafiles', 'user', 'timeline');
+
+        $attrs = $request->only([ 'description' ]);
+        $post->fill($attrs);
+        $post->save();
+
         return response()->json([
             'post' => $post,
-            'is_liked_by_session_user' => $post->users_liked->contains($sessionUser->id),
-            'like_count' => $post->users_liked()->count(),
         ]);
     }
 
@@ -100,80 +150,51 @@ class PostsController extends AppBaseController
         ]);
     }
 
-    public function toggleLike(Request $request, Post $post)
+    public function tip(Request $request, Post $post)
     {
-        $sessionUser = Auth::user();
+        $sessionUser = Auth::user(); // sender of tip (purchaser)
 
-        // %TODO: notify user
-
-        if ( !$post->likes->contains($sessionUser->id) ) { // like
-            $post->likes()->attach($sessionUser->id);
-            $isLikedBySessionUser = true;
-        } else { // unlike
-            $post->likes()->detach($sessionUser->id);
-            $isLikedBySessionUser = false;
-        }
-
-        $post->refresh();
-
-        return response()->json([
-            'post' => $post,
-            'is_liked_by_session_user' => $isLikedBySessionUser,
-            'like_count' => $post->users_liked()->count(),
+        $request->validate([
+            'base_unit_cost_in_cents' => 'required|numeric',
         ]);
-    }
 
-    public function tip(Request $request, $id)
-    {
-        $sessionUser = Auth::user(); // sender of tip
         try {
-            $post = Post::findOrFail($id);
             $post->receivePayment(
                 PaymentTypeEnum::TIP,
                 $sessionUser,
-                $request->amount*100,
+                $request->base_unit_cost_in_cents,
                 [ 'notes' => $request->note ?? '' ]
             );
-    
         } catch(Exception | Throwable $e){
-            Log::error(json_encode([
-                'msg' => 'PostsController::tip() - error',
-                'emsg' => $e->getMessage(),
-            ]));
-            //throw $e;
-            return response()->json(['status'=>'400', 'message'=>$e->getMessage()]);
+            return response()->json(['message'=>$e->getMessage()], 400);
         }
 
         return response()->json([
-            'post' => $post ?? null,
+            'post' => $post,
         ]);
     }
 
     // %TODO: check if already purchased? -> return error
     // %NOTE: post price in DB is in dollars not cents %FIXME
-    public function purchase(Request $request, $id)
+    public function purchase(Request $request, Post $post)
     {
         $sessionUser = Auth::user(); // purchaser
         try {
-            $post = Post::findOrFail($id);
             $post->receivePayment(
                 PaymentTypeEnum::PURCHASE,
                 $sessionUser,
-                ( $request->has('amount') ? $request->amount : $post->price ) * 100, // option to override post price via request (?)
+                $post->price*100, // %FIXME: should be on timeline
                 [ 'notes' => $request->note ?? '' ]
             );
     
-        } catch(Exception | Throwable $e){
-            Log::error(json_encode([
-                'msg' => 'PostsController::tip() - error',
-                'emsg' => $e->getMessage(),
-            ]));
-            throw $e;
-            return response()->json(['status'=>'400', 'message'=>$e->getMessage()]);
+        } catch(Exception | Throwable $e) {
+            return response()->json(['message'=>$e->getMessage()], 400);
         }
 
         return response()->json([
             'post' => $post ?? null,
         ]);
     }
+    /*
+     */
 }
