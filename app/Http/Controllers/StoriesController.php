@@ -14,31 +14,6 @@ use App\Enums\MediafileTypeEnum;
 
 class StoriesController extends AppBaseController
 {
-    public function player(Request $request)
-    {
-        $sessionUser = Auth::user();
-        $stories = Story::where('timeline_id', $sessionUser->timeline->id)->get();
-        $storiesA = $stories->map( function($item, $iter) {
-            $a = $item->toArray();
-            if ( count($item->mediafiles) ) {
-                $fn = $item->mediafiles[0]->filename;
-                $a['mf_filename'] = $fn;
-                $a['mf_url'] = Storage::disk('s3')->url($fn); // %FIXME: use model attribute
-            }
-            return $a;
-        });
-
-        $this->_php2jsVars['session'] = [
-            'username' => $sessionUser->username,
-        ];
-        \View::share('g_php2jsVars',$this->_php2jsVars);
-
-        return view('stories.player', [
-            'sessionUser' => $sessionUser,
-            'stories' => $storiesA,
-            'timeline' => $sessionUser->timeline,
-        ]);
-    }
 
     public function index(Request $request)
     {
@@ -153,6 +128,32 @@ class StoriesController extends AppBaseController
         } else {
             return back()->withInput();
         }
+    }
+
+    public function player(Request $request)
+    {
+        $sessionUser = Auth::user();
+        $stories = Story::where('timeline_id', $sessionUser->timeline->id)->get();
+        $storiesA = $stories->map( function($item, $iter) {
+            $a = $item->toArray();
+            if ( count($item->mediafiles) ) {
+                $fn = $item->mediafiles[0]->filename;
+                $a['mf_filename'] = $fn;
+                $a['mf_url'] = Storage::disk('s3')->url($fn); // %FIXME: use model attribute
+            }
+            return $a;
+        });
+
+        $this->_php2jsVars['session'] = [
+            'username' => $sessionUser->username,
+        ];
+        \View::share('g_php2jsVars',$this->_php2jsVars);
+
+        return view('stories.player', [
+            'sessionUser' => $sessionUser,
+            'stories' => $storiesA,
+            'timeline' => $sessionUser->timeline,
+        ]);
     }
 
 }

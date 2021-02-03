@@ -89,7 +89,6 @@ class TimelinesTest extends TestCase
     /**
      *  @group shareables
      *  @group regression
-     *  @group this
      */
     public function test_can_subscribe_to_timeline()
     {
