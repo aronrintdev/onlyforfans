@@ -10,7 +10,6 @@ use App\Interfaces\Purchaseable;
 use Spatie\Permission\Traits\HasRoles;
 use Cmgmyr\Messenger\Traits\Messagable;
 use Illuminate\Notifications\Notifiable;
-// use Zizaco\Entrust\Traits\EntrustUserTrait;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -20,20 +19,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class User extends Authenticatable implements PaymentSendable, Purchaseable
 {
-    use Notifiable;
-    use HasRoles;
-    use HasFactory;
-    // use EntrustUserTrait;
-    // use SoftDeletes, EntrustUserTrait {
-
-    //     SoftDeletes::restore insteadof EntrustUserTrait;
-    //     EntrustUserTrait::restore insteadof SoftDeletes;
-
-    // }
-    use Messagable;
-
-    //protected $dates = ['deleted_at'];
-
+    use Notifiable, HasRoles, HasFactory, Messagable;
 
     protected $appends = [
         'name',
@@ -41,19 +27,9 @@ class User extends Authenticatable implements PaymentSendable, Purchaseable
         'cover',
         'about',
     ];
-
     protected $guarded = ['id','created_at','updated_at'];
-
-    protected $fillable = [
-        'timeline_id', 'email', 'verification_code', 'email_verified', 'remember_token', 'password', 'birthday', 'city', 'gender', 'last_logged', 'timezone', 'affiliate_id', 'language', 'country', 'active', 'verified', 'facebook_link', 'twitter_link', 'dribbble_link', 'instagram_link', 'youtube_link', 'linkedin_link', 'wishlist', 'website', 'instagram','custom_option1', 'custom_option2', 'custom_option3', 'custom_option4'
-        , 'bank_account', 'price', 'is_payment_set', 'is_bank_set', 'is_follow_for_free', 'is_online', 'timezone_id'
-    ];
-
-    protected $hidden = [
-        'password', 'remember_token', 'verification_code', 'email', 'timeline',
-    ];
-
-    protected $dates = [ 'last_logged' ];
+    protected $hidden = [ 'password', 'remember_token', 'verification_code', 'email', 'timeline' ];
+    protected $dates = [ 'last_logged' ]; // ['deleted_at'];
 
     public function toArray() {
         $array = parent::toArray();
@@ -77,8 +53,8 @@ class User extends Authenticatable implements PaymentSendable, Purchaseable
     public function sharedvaultfolders() { // vaultfolders shared with me (??)
         return $this->morphedByMany('App\Vaultfolder', 'shareable', 'shareables', 'sharee_id')->withTimestamps();
     }
-    public function ledgersales() { // this may only pick up type of 'user'
-        return $this->morphMany('App\Fanledger', 'purchaseable');
+    public function ledgersales() {
+        return $this->hasMany('App\Fanledger', 'seller_id');
     }
     public function ledgerpurchases() {
         return $this->hasMany('App\Fanledger', 'purchaser_id');
@@ -101,57 +77,6 @@ class User extends Authenticatable implements PaymentSendable, Purchaseable
         return $this->morphedByMany('App\Post', 'likeable', 'likeables', 'likee_id')->withTimestamps();
     }
 
-    /* HERE Jan 11
-    public function followers() {
-        return $this->belongsToMany('App\User', 'followers', 'leader_id', 'follower_id')->withPivot('status', 'referral', 'subscription_id')->withTimestamps();
-    }
-
-    public function following() {
-        return $this->belongsToMany('App\User', 'followers', 'follower_id', 'leader_id')->withPivot('referral');
-    }
-    public function updateFollowStatus($user_id) {
-        $chk_user = DB::table('followers')->where('follower_id', $user_id)->where('leader_id', Auth::user()->id)->first();
-        if ($chk_user->status == 'pending') {
-            $result = DB::table('followers')->where('follower_id', $user_id)->where('leader_id', Auth::user()->id)->update(['status' => 'approved']);
-        }
-        return ($result ? true : false);
-    }
-
-    public function decilneRequest($user_id) {
-        $chk_user = DB::table('followers')->where('follower_id', $user_id)->where('leader_id', Auth::user()->id)->first();
-        if ($chk_user->status == 'pending') {
-            $result = DB::table('followers')->where('follower_id', $user_id)->where('leader_id', Auth::user()->id)->delete();
-        }
-        return ($result ? true : false);
-    }
-
-    public function chkMyFollower($diff_timeline_id, $login_id) {
-        $followers = DB::table('followers')->where('follower_id', $login_id)->where('leader_id', $diff_timeline_id)->where('status', '=', 'approved')->first();
-        return $followers ? true : false;
-    }
-    public function postFollows() {
-        return $this->belongsToMany('App\User', 'post_follows', 'user_id', 'post_id');
-    }
-    public function paidSubscribers() {
-        $followers = $this->followers()->pluck('follower_id')->toArray();
-        $activeFollowers = Subscription::whereIn('follower_id', $followers)
-            ->where('leader_id', $this->id)
-            ->pluck('follower_id')->toArray();
-        return $this->followers()->whereIn('follower_id', $activeFollowers);
-    }
-    
-    public function activeSubscribers() {
-        $followers = $this->followers()->pluck('follower_id')->toArray();
-        $activeFollowers = Subscription::whereIn('follower_id', $followers)
-            ->where('leader_id', $this->id)
-            ->where('cancel_at', '=', null)
-            ->pluck('follower_id')->toArray();
-        return $this->followers()->whereIn('follower_id', $activeFollowers);
-    }
-    public function renderFollowersCount() {
-        return $this->followers()->count();
-    }
-     */
 
     public function pages()
     {
@@ -588,3 +513,56 @@ class User extends Authenticatable implements PaymentSendable, Purchaseable
     }
 
 }
+
+
+    /* HERE Jan 11
+    public function followers() {
+        return $this->belongsToMany('App\User', 'followers', 'leader_id', 'follower_id')->withPivot('status', 'referral', 'subscription_id')->withTimestamps();
+    }
+
+    public function following() {
+        return $this->belongsToMany('App\User', 'followers', 'follower_id', 'leader_id')->withPivot('referral');
+    }
+    public function updateFollowStatus($user_id) {
+        $chk_user = DB::table('followers')->where('follower_id', $user_id)->where('leader_id', Auth::user()->id)->first();
+        if ($chk_user->status == 'pending') {
+            $result = DB::table('followers')->where('follower_id', $user_id)->where('leader_id', Auth::user()->id)->update(['status' => 'approved']);
+        }
+        return ($result ? true : false);
+    }
+
+    public function decilneRequest($user_id) {
+        $chk_user = DB::table('followers')->where('follower_id', $user_id)->where('leader_id', Auth::user()->id)->first();
+        if ($chk_user->status == 'pending') {
+            $result = DB::table('followers')->where('follower_id', $user_id)->where('leader_id', Auth::user()->id)->delete();
+        }
+        return ($result ? true : false);
+    }
+
+    public function chkMyFollower($diff_timeline_id, $login_id) {
+        $followers = DB::table('followers')->where('follower_id', $login_id)->where('leader_id', $diff_timeline_id)->where('status', '=', 'approved')->first();
+        return $followers ? true : false;
+    }
+    public function postFollows() {
+        return $this->belongsToMany('App\User', 'post_follows', 'user_id', 'post_id');
+    }
+    public function paidSubscribers() {
+        $followers = $this->followers()->pluck('follower_id')->toArray();
+        $activeFollowers = Subscription::whereIn('follower_id', $followers)
+            ->where('leader_id', $this->id)
+            ->pluck('follower_id')->toArray();
+        return $this->followers()->whereIn('follower_id', $activeFollowers);
+    }
+    
+    public function activeSubscribers() {
+        $followers = $this->followers()->pluck('follower_id')->toArray();
+        $activeFollowers = Subscription::whereIn('follower_id', $followers)
+            ->where('leader_id', $this->id)
+            ->where('cancel_at', '=', null)
+            ->pluck('follower_id')->toArray();
+        return $this->followers()->whereIn('follower_id', $activeFollowers);
+    }
+    public function renderFollowersCount() {
+        return $this->followers()->count();
+    }
+     */
