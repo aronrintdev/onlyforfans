@@ -140,13 +140,18 @@ class TimelinesController extends AppBaseController
             abort(403);
         }
 
-        // syncWithoutDetaching doesn't seem to accept pivot attributes
-        $timeline->followers()->attach($request->sharee_id, [
+        $cattrs = [];
+        if ( $request->has('notes') ) {
+            $cattrs['notes'] = $request->notes;
+        }
+
+        $timeline->followers()->detach($request->sharee_id); // remove existing
+        $timeline->followers()->attach($request->sharee_id, [ // will sync work here?
             'shareable_type' => 'timelines',
             'shareable_id' => $timeline->id,
             'is_approved' => 1, // %FIXME
             'access_level' => 'default',
-            'cattrs' => json_encode([]),
+            'cattrs' => json_encode($cattrs),
         ]); //
 
         $timeline->refresh();
@@ -168,18 +173,23 @@ class TimelinesController extends AppBaseController
         }
 
         $timeline = DB::transaction( function() use(&$timeline, &$request, &$sessionUser) {
+            $cattrs = [];
+            if ( $request->has('notes') ) {
+                $cattrs['notes'] = $request->notes;
+            }
+            $timeline->followers()->detach($request->sharee_id); // remove existing (covers 'upgrade') case
             $timeline->followers()->attach($request->sharee_id, [
                 'shareable_type' => 'timelines',
                 'shareable_id' => $timeline->id,
                 'is_approved' => 1, // %FIXME
                 'access_level' => 'premium',
-                'cattrs' => json_encode([]), // %FIXME: add a observer function?
+                'cattrs' => json_encode($cattrs), // %FIXME: add a observer function?
             ]); //
             $timeline->receivePayment(
                 PaymentTypeEnum::SUBSCRIPTION,
                 $sessionUser,
                 $timeline->user->price*100, // %FIXME: should be on timeline
-                [ 'notes' => $request->note ?? '' ]
+                $cattrs,
             );
             return $timeline;
         });
@@ -199,12 +209,17 @@ class TimelinesController extends AppBaseController
             'base_unit_cost_in_cents' => 'required|numeric',
         ]);
 
+        $cattrs = [];
+        if ( $request->has('notes') ) {
+            $cattrs['notes'] = $request->notes;
+        }
+
         try {
             $timeline->receivePayment(
                 PaymentTypeEnum::TIP,
                 $sessionUser,
                 $request->base_unit_cost_in_cents,
-                [ 'notes' => $request->note ?? '' ]
+                $cattrs,
             );
         } catch(Exception | Throwable $e) {
             return response()->json([ 'message'=>$e->getMessage() ], 400);

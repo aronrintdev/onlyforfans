@@ -22,9 +22,12 @@ class TruncateData extends Command
     public function handle()
     {
         $isEnvLocal = App::environment(['local']);
+        $isEnvTesting = App::environment(['testing']);
         $dbName = env('DB_DATABASE');
-        $this->info( '%%% DB Name: '.$dbName.', Is env local?: '.($isEnvLocal?'true':'false') );
-        if ( $dbName !== 'fansplat_dev' && !$isEnvLocal ) {
+        $this->info( '%%% DB Name: '.$dbName);
+        $this->info( '%%% Is env local?: '.($isEnvLocal?'true':'false') );
+        $this->info( '%%% Is env testing?: '.($isEnvTesting?'true':'false') );
+        if ( $dbName !== 'fansplat_dev_test' && !$isEnvTesting ) {
             throw new Exception('Environment not in whitelist: '.App::environment());
         }
 
@@ -56,6 +59,7 @@ class TruncateData extends Command
     private static $truncateList = [
         'role_user',
         'permission_role',
+        'fanledgers',
         'shareables',
         'likeables',
         'comments',
