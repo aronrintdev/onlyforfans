@@ -17,58 +17,22 @@ class StoriesController extends AppBaseController
 
     public function index(Request $request)
     {
-        //$query = Story::with('user', 'replies.user');
         $sessionUser = Auth::user();
+        $sessionTimeline = $sessionUser->timeline;
 
-        /*
-        if ( $request->has('user_id') ) {
-            $query->where('user_id', $request->user_id);
-        } else {
-            $stories = Story::where('timeline_id', $sessionUser->timeline->id)->get(); // %TODO: legacy DEPRECATE
+        $filters = $request->input('filters', []);
+
+        $query = Story::query();
+        $query->with('mediafiles');
+
+        if ( !$sessionUser->isAdmin() ) {
+            $query->where('timeline_id', $sessionTimeline->id);
         }
-         */
-        $stories = Story::where('timeline_id', $sessionUser->timeline->id)->get(); // %TODO: legacy DEPRECATE
 
-        //$html = view('stories._index', compact('sessionUser', 'stories'))->render();
-        $html = view('stories._index', [
-            'sessionUser' => $sessionUser,
-            'stories' => $stories,
-        ])->render();
+        $stories = $query->get();
 
         return response()->json([
-            'html' => $html, // %TOOD: DEPRECATE after moving completely to Vue
             'stories' => $stories,
-        ]);
-    }
-
-    public function create(Request $request)
-    {
-        $sessionUser = Auth::user();
-        /*
-        dd( 
-            $sessionUser->avatar,
-            $sessionUser->timeline->toArray()
-        );
-         */
-        $stories = $sessionUser->timeline->stories;
-        $storiesA = $stories->map( function($item, $iter) {
-            $a = $item->toArray();
-            if ( count($item->mediafiles) ) {
-                $fn = $item->mediafiles[0]->filename;
-                $a['mf_filename'] = $fn;
-                $a['mf_url'] = Storage::disk('s3')->url($fn); // %FIXME: use model attribute
-            }
-            return $a;
-        });
-        return view('stories.create', [
-            'session_user' => $sessionUser,
-            'timeline' => $sessionUser->timeline,
-            'stories' => $storiesA,
-            'dtoUser' => [
-                'avatar' => $sessionUser->avatar,
-                'fullname' => $sessionUser->timeline->name,
-                'username' => $sessionUser->timeline->username,
-            ],
         ]);
     }
 
@@ -82,7 +46,6 @@ class StoriesController extends AppBaseController
             'attrs.stype' => 'required',
             'mediafile' => 'required_if:attrs.stype,image|file',
         ]);
-
 
         try {
             $obj = DB::transaction(function () use(&$sessionUser, &$request) {
@@ -115,19 +78,10 @@ class StoriesController extends AppBaseController
                 return $story;
             });
         } catch (Exception $e) {
-            // %TODO: delete file on s3 if it got uploaded
-            Log::error(json_encode([
-                'msg' => $e->getMessage(),
-                'debug' => ['request'=>$request->all()],
-            ], JSON_PRETTY_PRINT ));
-            throw $e; // %FIXME: report error to user via browser message
+            abort(400);
         }
 
-        if ( $request->ajax() ) {
-            return response()->json([ 'obj' => $obj ]);
-        } else {
-            return back()->withInput();
-        }
+        return response()->json([ 'obj' => $obj ]);
     }
 
     public function player(Request $request)
@@ -156,4 +110,30 @@ class StoriesController extends AppBaseController
         ]);
     }
 
+    public function dashboard(Request $request)
+    {
+        $sessionUser = Auth::user();
+        $stories = $sessionUser->timeline->stories;
+        $storiesA = $stories->map( function($item, $iter) {
+            $a = $item->toArray();
+            if ( count($item->mediafiles) ) {
+                $fn = $item->mediafiles[0]->filename;
+                $a['mf_filename'] = $fn;
+                $a['mf_url'] = Storage::disk('s3')->url($fn); // %FIXME: use model attribute
+            }
+            return $a;
+        });
+        return view('stories.create', [
+            'session_user' => $sessionUser,
+            'timeline' => $sessionUser->timeline,
+            'stories' => $storiesA,
+            'dtoUser' => [
+                'avatar' => $sessionUser->avatar,
+                'fullname' => $sessionUser->timeline->name,
+                'username' => $sessionUser->timeline->username,
+            ],
+        ]);
+    }
+
 }
+

@@ -21,8 +21,8 @@ class MediafilesController extends AppBaseController
         try {
             $this->validate($request, [
                 'mediafile' => 'required',
-                'resource_id' => 'required',
-                'resource_type' => 'required',
+                //'resource_id' => 'required',
+                //'resource_type' => 'required',
                 'mftype' => 'required',
             ]);
         } catch (\Exception $e) {
@@ -75,11 +75,9 @@ class MediafilesController extends AppBaseController
             throw $e; // %FIXME: report error to user via browser message
         }
 
-        if (\Request::ajax()) {
-            return response()->json([ 'obj' => $mediafile ]);
-        } else {
-            return back()->withInput();
-        }
+        return response()->json([ 
+            'mediafile' => $mediafile,
+        ]);
     }
 
     public function show(Request $request, $pkid)
