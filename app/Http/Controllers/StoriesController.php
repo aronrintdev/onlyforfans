@@ -48,7 +48,7 @@ class StoriesController extends AppBaseController
         ]);
 
         try {
-            $obj = DB::transaction(function () use(&$sessionUser, &$request) {
+            $story = DB::transaction(function () use(&$sessionUser, &$request) {
 
                 $story = Story::create([
                     'timeline_id' => $sessionUser->timeline_id,
@@ -81,7 +81,7 @@ class StoriesController extends AppBaseController
             abort(400);
         }
 
-        return response()->json([ 'obj' => $obj ]);
+        return response()->json([ 'story' => $story ]);
     }
 
     public function player(Request $request)
