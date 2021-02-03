@@ -11,6 +11,7 @@ use App\Setting;
 use App\Story;
 use App\Mediafile;
 use App\Enums\MediafileTypeEnum;
+//use App\Enums\StoryTypeEnum; // generalize?
 
 class StoriesController extends AppBaseController
 {
@@ -43,8 +44,8 @@ class StoriesController extends AppBaseController
         $sessionUser = Auth::user();
         $this->validate($request, [
             'attrs' => 'required',
-            'attrs.stype' => 'required',
-            'mediafile' => 'required_if:attrs.stype,image|file',
+            'attrs.stype' => 'required|in:text,photo',
+            'mediafile' => 'required_if:attrs.stype,photo|file',
         ]);
 
         try {
@@ -59,7 +60,7 @@ class StoriesController extends AppBaseController
                     'stype' => $request->attrs['stype'],
                 ]);
 
-                if ( $request->attrs['stype'] === 'image' ) {
+                if ( $request->attrs['stype'] === 'photo' ) {
                     $file = $request->file('mediafile');
                     $subFolder = 'stories';
                     $newFilename = $file->store('./'.$subFolder, 's3'); // %FIXME: hardcoded
@@ -67,6 +68,7 @@ class StoriesController extends AppBaseController
                         'resource_id' => $story->id,
                         'resource_type' => 'stories',
                         'filename' => $newFilename,
+                        'mfname' => $mfname ?? $file->getClientOriginalName(),
                         'mftype' => MediafileTypeEnum::STORY,
                         'meta' => $request->input('attrs.foo') ?? null,
                         'cattrs' => $request->input('attrs.bar') ?? null,

@@ -25,6 +25,7 @@ class MediafileTest extends TestCase
     use DatabaseTransactions, WithFaker;
 
     /**
+     *  @group mediafiles
      *  @group regression
      */
     public function test_can_store_mediafile()
