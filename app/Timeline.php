@@ -79,8 +79,11 @@ class Timeline extends Model implements Purchaseable
         return $array;
     }
 
+    // users
     public function followers() {  // includes subscribers (ie premium + default followers)
-        return $this->morphToMany('App\User', 'shareable', 'shareables', 'shareable_id', 'sharee_id')->withPivot('access_level', 'shareable_type', 'sharee_id');
+        return $this->morphToMany('App\User', 'shareable', 'shareables', 'shareable_id', 'sharee_id')
+                    ->withPivot('access_level', 'shareable_type', 'sharee_id', 'is_approved', 'cattrs')
+                    ->withTimestamps();
     }
 
     public function ledgersales() {
@@ -254,53 +257,3 @@ class Timeline extends Model implements Purchaseable
         //return $this->id === $user->timeline_id;
     }
 }
-
-/**
- * @SWG\Definition(
- *      definition="Timeline",
- *      required={},
- *      @SWG\Property(
- *          property="id",
- *          description="id",
- *          type="integer",
- *          format="int32"
- *      ),
- *      @SWG\Property(
- *          property="username",
- *          description="username",
- *          type="string"
- *      ),
- *      @SWG\Property(
- *          property="name",
- *          description="name",
- *          type="string"
- *      ),
- *      @SWG\Property(
- *          property="about",
- *          description="about",
- *          type="string"
- *      ),
- *      @SWG\Property(
- *          property="avatar_id",
- *          description="avatar_id",
- *          type="integer",
- *          format="int32"
- *      ),
- *      @SWG\Property(
- *          property="cover_id",
- *          description="cover_id",
- *          type="integer",
- *          format="int32"
- *      ),
- *      @SWG\Property(
- *          property="cover_position",
- *          description="cover_position",
- *          type="string"
- *      ),
- *      @SWG\Property(
- *          property="type",
- *          description="type",
- *          type="string"
- *      )
- * )
- */

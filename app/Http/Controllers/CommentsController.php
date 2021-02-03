@@ -63,8 +63,9 @@ class CommentsController extends AppBaseController
             $isCommentOwner = ($sessionUser->id === $comment->user_id ); // can see own comments
             $isPostOwner = ($sessionUser->id === $comment->post->user_id ); // can see comments on own post
             $isFollowedTimeline = $sessionUser->followedtimelines->contains($comment->post->timeline_id); // can see comments on followed timeline's posts
-            //dd( 'co: '.$isCommentOwner, 'po'.$isPostOwner, 'ft'.$isFollowedTimeline);
+            //dd( 'co: '.($isCommentOwner?'T':'F'), 'po: '.($isPostOwner?'T':'F'), 'ft: '.($isFollowedTimeline?'T':'F') );
             if ( !$isCommentOwner && !$isPostOwner && !$isFollowedTimeline ) {
+                //dd('abort', 'co: '.($isCommentOwner?'T':'F'), 'po: '.($isPostOwner?'T':'F'), 'ft: '.($isFollowedTimeline?'T':'F') );
                 abort(403);
             }
         }
