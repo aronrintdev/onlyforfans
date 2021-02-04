@@ -108,7 +108,6 @@ class StoriesTest extends TestCase
     /**
      *  @group stories
      *  @group regression
-     *  @group this
      */
     public function test_owner_can_delete_picture_story()
     {
@@ -147,7 +146,6 @@ class StoriesTest extends TestCase
     /**
      *  @group stories
      *  @group regression
-     *  @group this
      */
     public function test_nonowner_can_not_delete_picture_story()
     {
@@ -181,7 +179,6 @@ class StoriesTest extends TestCase
     /**
      *  @group stories
      *  @group regression
-     *  @group this
      */
     public function test_can_like_then_unlike_viewable_story()
     {
@@ -210,7 +207,7 @@ class StoriesTest extends TestCase
      *  @group regression
      *  @group this
      */
-    public function test_can_not_like_then_unviewable_story()
+    public function test_can_not_like_unviewable_story()
     {
         $timeline = Timeline::has('stories', '>=', 1)->has('followers', '>=', 1)->first();
         $creator = $timeline->user;

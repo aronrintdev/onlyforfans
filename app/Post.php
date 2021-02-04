@@ -8,6 +8,7 @@ use App\User;
 use Exception;
 use Carbon\Carbon;
 use App\Enums\PostTypeEnum;
+use App\Interfaces\Likeable;
 use App\Interfaces\Ownable;
 use App\Interfaces\Deletable;
 use App\Enums\PaymentTypeEnum;
@@ -17,7 +18,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Post extends Model implements Ownable, Deletable, Purchaseable
+class Post extends Model implements Ownable, Deletable, Purchaseable, Likeable
 {
 
     use SoftDeletes;

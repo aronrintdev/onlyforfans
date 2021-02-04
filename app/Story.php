@@ -3,8 +3,9 @@ namespace App;
 
 use Eloquent as Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Interfaces\Likeable;
 
-class Story extends Model
+class Story extends Model implements Likeable
 {
     use HasFactory;
 

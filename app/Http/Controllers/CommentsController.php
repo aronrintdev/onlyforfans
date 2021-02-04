@@ -15,6 +15,7 @@ class CommentsController extends AppBaseController
     // %TODO: refactor with scopes
     public function index(Request $request)
     {
+        // %TODO: replace with $request->user()
         $sessionUser = Auth::user();
         //dd($request->all());
 
