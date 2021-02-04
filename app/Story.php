@@ -11,24 +11,33 @@ class Story extends Model
     protected $guarded = ['id','created_at','updated_at'];
 
     //--------------------------------------------
-    // Relationships
-    //--------------------------------------------
-
-    public function timeline() {
-        return $this->belongsTo('App\Timeline');
-    }
-
-    public function mediafiles() {
-        return $this->morphMany('App\Mediafile', 'resource');
-    }
-
-    //--------------------------------------------
     // Accessors/Mutators | Casts
     //--------------------------------------------
 
     protected $casts = [
         'cattrs' => 'array',
     ];
+
+    public function getIsLikedByMeAttribute($value) {
+        $sessionUser = Auth::user();
+        return $this->likes->contains($sessionUser->id);
+    }
+
+    //--------------------------------------------
+    // Relationships
+    //--------------------------------------------
+
+    public function likes() {
+        return $this->morphToMany('App\User', 'likeable', 'likeables', 'likeable_id', 'likee_id')->withTimestamps();
+    }
+
+    public function mediafiles() {
+        return $this->morphMany('App\Mediafile', 'resource');
+    }
+
+    public function timeline() {
+        return $this->belongsTo('App\Timeline');
+    }
 
     //--------------------------------------------
     // Overrides
