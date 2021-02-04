@@ -3,12 +3,10 @@ namespace App;
 
 use DB;
 use Auth;
-use App\Enums\PaymentTypeEnum;
+use Exception;
+
 use Illuminate\Support\Collection;
-use App\Interfaces\PaymentSendable;
-use App\Interfaces\Purchaseable;
-use Spatie\Permission\Traits\HasRoles;
-use Cmgmyr\Messenger\Traits\Messagable;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -16,6 +14,14 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+
+use Spatie\Permission\Traits\HasRoles;
+use Cmgmyr\Messenger\Traits\Messagable;
+
+use App\Interfaces\PaymentSendable;
+use App\Interfaces\Purchaseable;
+use App\Interfaces\Ownable;
+use App\Enums\PaymentTypeEnum;
 
 class User extends Authenticatable implements PaymentSendable, Purchaseable
 {
@@ -510,6 +516,12 @@ class User extends Authenticatable implements PaymentSendable, Purchaseable
     }
     public function renderFansCount() {
         return $this->pageLikes()->count();
+    }
+
+    public function isOwner(Ownable $resource) : bool
+    {
+        $owner = $resource->getOwner();
+        return $owner->id === $this->id;
     }
 
 }

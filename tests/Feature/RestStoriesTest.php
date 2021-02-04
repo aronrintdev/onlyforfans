@@ -26,6 +26,64 @@ class StoriesTest extends TestCase
      *  @group stories
      *  @group regression
      */
+    public function test_can_index_own_stories()
+    {
+        $timeline = Timeline::has('stories', '>=', 1)->has('followers', '>=', 1)->first();
+        $creator = $timeline->user;
+
+        $payload = [
+            'filters' => [
+                'timeline_id' => $timeline->id,
+            ],
+        ];
+        $response = $this->actingAs($creator)->ajaxJSON('GET', route('stories.index'), $payload);
+        $response->assertStatus(200);
+        $content = json_decode($response->content());
+        $this->assertNotNull($content->stories);
+        $storiesR = $content->stories;
+        $this->assertGreaterThan(0, count($storiesR));
+
+        // Test that all stories returned belong to the timeline (because timeline_id filter applied)
+        $anyNonownedStories = collect($storiesR)->filter( function($s) use(&$timeline) {
+            return $s->timeline_id !== $timeline->id;
+        });
+        $this->assertEquals(0, $anyNonownedStories->count(), 'Returned a story not owned by session user');
+    }
+
+    /**
+     *  @group stories
+     *  @group regression
+     *  @group this
+     */
+    public function test_can_index_stories_on_followed_timeline()
+    {
+        $timeline = Timeline::has('stories', '>=', 1)->has('followers', '>=', 1)->first();
+        $creator = $timeline->user;
+        $fan = $timeline->followers->first();
+
+        $payload = [
+            'filters' => [
+                'timeline_id' => $timeline->id,
+            ],
+        ];
+        $response = $this->actingAs($fan)->ajaxJSON('GET', route('stories.index'), $payload);
+        $response->assertStatus(200);
+        $content = json_decode($response->content());
+        $this->assertNotNull($content->stories);
+        $storiesR = $content->stories;
+        $this->assertGreaterThan(0, count($storiesR));
+
+        // Test that all stories returned belong to the timeline (because timeline_id filter applied)
+        $anyNonownedStories = collect($storiesR)->filter( function($s) use(&$timeline) {
+            return $s->timeline_id !== $timeline->id;
+        });
+        $this->assertEquals(0, $anyNonownedStories->count(), 'Returned a story not owned by session user');
+    }
+
+    /**
+     *  @group stories
+     *  @group regression
+     */
     public function test_can_store_text_story()
     {
         $owner = User::first();
@@ -205,7 +263,6 @@ class StoriesTest extends TestCase
     /**
      *  @group stories
      *  @group regression
-     *  @group this
      */
     public function test_can_not_like_unviewable_story()
     {

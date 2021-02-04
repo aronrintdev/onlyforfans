@@ -3,13 +3,14 @@ namespace App;
 
 use DB;
 use Eloquent as Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Enums\PaymentTypeEnum;
+use App\Interfaces\Ownable;
 use App\Interfaces\Purchaseable;
 use Intervention\Image\Facades\Image;
 use App\Enums\ShareableAccessLevelEnum;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Timeline extends Model implements Purchaseable
+class Timeline extends Model implements Purchaseable, Ownable
 {
     //use SoftDeletes;
     use HasFactory;
@@ -255,5 +256,9 @@ class Timeline extends Model implements Purchaseable
     {
         return $this->id === $user->timeline->id;
         //return $this->id === $user->timeline_id;
+    }
+
+    public function getOwner() : ?User {
+        return $this->user;
     }
 }

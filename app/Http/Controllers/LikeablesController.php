@@ -39,7 +39,6 @@ class LikeablesController extends AppBaseController
 
         $alias = $request->likeable_type;
         $model = Relation::getMorphedModel($alias);
-        //dd($request->all(), $alias, $model);
         $likeable = (new $model)->where('id', $request->likeable_id)->firstOrFail();
 
         if ($request->user()->cannot('like', $likeable)) {
@@ -65,6 +64,10 @@ class LikeablesController extends AppBaseController
         $alias = $request->likeable_type;
         $model = Relation::getMorphedModel($alias);
         $likeable = (new $model)->where('id', $request->likeable_id)->firstOrFail();
+
+        if ($request->user()->cannot('like', $likeable)) {
+            abort(403);
+        }
 
         $likeable->likes()->detach($likee->id);
 
