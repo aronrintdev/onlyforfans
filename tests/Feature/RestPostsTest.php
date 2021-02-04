@@ -137,6 +137,28 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group todo
+     */
+    public function test_can_store_post_on_followed_timeline()
+    {
+        // post on followed timeline (not my own)
+        //$response->assertStatus(200);
+    }
+
+    /**
+     *  @group posts
+     *  @group regression
+     *  @group todo
+     */
+    public function test_can_store_post_with_image_on_followed_timeline()
+    {
+        // post on followed timeline (not my own)
+        //$response->assertStatus(200);
+    }
+
+    /**
+     *  @group posts
+     *  @group regression
      */
     public function test_can_destroy_own_post()
     {

@@ -86,6 +86,23 @@ class StoriesController extends AppBaseController
         return response()->json([ 'story' => $story ]);
     }
 
+    public function destroy(Request $request, Story $story)
+    {
+        $sessionUser = Auth::user();
+        if ( $sessionUser->id !== $story->timeline->user->id) {
+            abort(403);
+        }
+
+        // %TODO: use DB transaction
+        $story->mediafiles->each( function($mf) {
+            Storage::disk('s3')->delete($mf->filename); // Remove from S3
+            $mf->delete();
+        });
+        $story->delete();
+
+        return response()->json([]);
+    }
+
     public function player(Request $request)
     {
         $sessionUser = Auth::user();
