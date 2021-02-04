@@ -23,7 +23,7 @@ class TestDatabaseSeeder extends ParentSeeder
             PostsTableSeeder::class,
             ShareablesTableSeeder::class,
             CommentsTableSeeder::class,
-            //StoriesTableSeeder::class,
+            StoriesTableSeeder::class,
         ]);
     }
 

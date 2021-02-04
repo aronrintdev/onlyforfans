@@ -94,7 +94,7 @@ class RestPostsTest extends TestCase
      */
     public function test_can_store_post_on_own_timeline()
     {
-        $timeline = Timeline::has('posts','>=',1)->first(); // assume non-admin (%FIXME)
+        $timeline = Timeline::has('posts','>=',1)->first();
         $creator = $timeline->user;
 
         $payload = [
@@ -117,7 +117,7 @@ class RestPostsTest extends TestCase
      */
     public function test_can_update_own_post()
     {
-        $timeline = Timeline::has('posts','>=',1)->first(); // assume non-admin (%FIXME)
+        $timeline = Timeline::has('posts','>=',1)->first(); 
         $creator = $timeline->user;
         $post = $timeline->posts[0];
 
@@ -162,7 +162,7 @@ class RestPostsTest extends TestCase
      */
     public function test_can_destroy_own_post()
     {
-        $timeline = Timeline::has('posts','>=',1)->first(); // assume non-admin (%FIXME)
+        $timeline = Timeline::has('posts','>=',1)->first();
         $creator = $timeline->user;
 
         // First create a post (so it doesn't have any relations preventing it from being deleted)
@@ -197,15 +197,11 @@ class RestPostsTest extends TestCase
         $fan = $timeline->followers[0];
 
         // remove any existing likes by fan...
-        $likeable = DB::table('likeables')
+        DB::table('likeables')
             ->where('likee_id', $fan->id)
             ->where('likeable_type', 'posts')
             ->where('likeable_id', $post->id)
-            ->first();
-        if ($likeable) {
-            $likeable->delete();
-        }
-        unset($likeable);
+            ->delete();
 
         // LIKE the post
         $payload = [

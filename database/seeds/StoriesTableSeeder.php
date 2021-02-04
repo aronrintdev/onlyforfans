@@ -1,5 +1,4 @@
 <?php
-
 namespace Database\Seeders;
 
 use App\Enums\MediafileTypeEnum;
@@ -9,26 +8,31 @@ use App\User;
 
 class StoriesTableSeeder extends Seeder
 {
+    use SeederTraits;
 
     public function run()
     {
-        $this->command->info('Running Seeder: StoriesTableSeeder...');
-        $faker = \Faker\Factory::create();
+        $this->initSeederTraits('StoriesTableSeeder');
 
         // +++ Create ... +++
 
         $users = User::get();
 
-        $users->each( function($u) use(&$faker) {
+        $users->each( function($u) {
 
-            $max = $faker->numberBetween(3,12);
-            $this->command->info("  - Creating $max stories for user ".$u->name);
+            $max = $this->faker->numberBetween(3,12);
+            if ( $this->appEnv !== 'testing' ) {
+                $this->output->writeln("  - Creating $max stories for user ".$u->name);
+            }
 
-            collect(range(1,$max))->each( function() use(&$faker, &$u) {
+            collect(range(1,$max))->each( function() use(&$u) {
 
-                $stype = $faker->randomElement(['text','image','image']);
+                $stype = ($this->appEnv==='testing')
+                    ? 'text'
+                    : $this->faker->randomElement(['text','image','image']);
+
                 $attrs = [
-                    'content'     => $faker->text,
+                    'content'     => $this->faker->text,
                     'stype'       => $stype,
                     'timeline_id' => $u->timeline->id,
                 ];
