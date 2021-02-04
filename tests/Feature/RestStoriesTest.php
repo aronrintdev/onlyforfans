@@ -26,6 +26,112 @@ class StoriesTest extends TestCase
      *  @group stories
      *  @group regression
      */
+    public function test_can_index_own_stories()
+    {
+        $timeline = Timeline::has('stories', '>=', 1)->has('followers', '>=', 1)->first();
+        $creator = $timeline->user;
+
+        $payload = [
+            'filters' => [
+                'timeline_id' => $timeline->id,
+            ],
+        ];
+        $response = $this->actingAs($creator)->ajaxJSON('GET', route('stories.index'), $payload);
+        $response->assertStatus(200);
+        $content = json_decode($response->content());
+        $this->assertNotNull($content->stories);
+        $storiesR = $content->stories;
+        $this->assertGreaterThan(0, count($storiesR));
+
+        $nonTimelineStories = collect($storiesR)->filter( function($s) use(&$timeline) {
+            return $s->timeline_id !== $timeline->id;
+        });
+        $this->assertEquals(0, $nonTimelineStories->count(), 'Returned a story not on specified timeline');
+    }
+
+    /**
+     *  @group stories
+     *  @group regression
+     */
+    public function test_can_index_stories_on_followed_timeline()
+    {
+        $timeline = Timeline::has('stories', '>=', 1)->has('followers', '>=', 1)->first();
+        $creator = $timeline->user;
+        $fan = $timeline->followers->first();
+
+        $payload = [
+            'filters' => [
+                'timeline_id' => $timeline->id,
+            ],
+        ];
+        $response = $this->actingAs($fan)->ajaxJSON('GET', route('stories.index'), $payload);
+        $response->assertStatus(200);
+        $content = json_decode($response->content());
+        $this->assertNotNull($content->stories);
+        $storiesR = $content->stories;
+        $this->assertGreaterThan(0, count($storiesR));
+
+        $nonTimelineStories = collect($storiesR)->filter( function($s) use(&$timeline) {
+            return $s->timeline_id !== $timeline->id;
+        });
+        $this->assertEquals(0, $nonTimelineStories->count(), 'Returned a story not on specified timeline');
+    }
+
+    /**
+     *  @group stories
+     *  @group regression
+     */
+    public function test_can_not_index_stories_on_unfollowed_timeline()
+    {
+        $timeline = Timeline::has('stories', '>=', 1)->has('followers', '>=', 1)->first();
+        $creator = $timeline->user;
+        $nonfan = User::whereDoesntHave('followedtimelines', function($q1) use(&$timeline) {
+            $q1->where('timelines.id', $timeline->id);
+        })->where('id', '<>', $creator->id)->first();
+
+        $payload = [
+            'filters' => [
+                'timeline_id' => $timeline->id,
+            ],
+        ];
+        $response = $this->actingAs($nonfan)->ajaxJSON('GET', route('stories.index'), $payload);
+        $response->assertStatus(403);
+    }
+
+    /**
+     *  @group stories
+     *  @group regression
+     */
+    public function test_can_index_stories_of_followed_timelines()
+    {
+        $timeline = Timeline::has('stories', '>=', 1)->has('followers', '>=', 1)->first();
+        $creator = $timeline->user;
+        $fan = $timeline->followers->first();
+
+        $payload = [
+            'filters' => [
+                'following' => true,
+            ],
+        ];
+        $response = $this->actingAs($fan)->ajaxJSON('GET', route('stories.index'), $payload);
+        $response->assertStatus(200);
+        $content = json_decode($response->content());
+        $this->assertNotNull($content->stories);
+        $storiesR = $content->stories;
+        $this->assertGreaterThan(0, count($storiesR));
+
+        $storiesOnTimelineNotFollowedByFan = collect($storiesR)->filter( function($s) use(&$fan) {
+            $story = Story::find($s->id);
+            return !$story->timeline->followers->contains($fan->id);
+        });
+        $this->assertEquals(0, $storiesOnTimelineNotFollowedByFan->count(), 'Returned a story on a timeline not followed by fan');
+    }
+
+
+    /**
+     *  @group stories
+     *  @group regression
+     */
     public function test_can_store_text_story()
     {
         $owner = User::first();
@@ -108,7 +214,6 @@ class StoriesTest extends TestCase
     /**
      *  @group stories
      *  @group regression
-     *  @group this
      */
     public function test_owner_can_delete_picture_story()
     {
@@ -147,7 +252,6 @@ class StoriesTest extends TestCase
     /**
      *  @group stories
      *  @group regression
-     *  @group this
      */
     public function test_nonowner_can_not_delete_picture_story()
     {
@@ -181,7 +285,6 @@ class StoriesTest extends TestCase
     /**
      *  @group stories
      *  @group regression
-     *  @group this
      */
     public function test_can_like_then_unlike_viewable_story()
     {
@@ -208,9 +311,8 @@ class StoriesTest extends TestCase
     /**
      *  @group stories
      *  @group regression
-     *  @group this
      */
-    public function test_can_not_like_then_unviewable_story()
+    public function test_can_not_like_unviewable_story()
     {
         $timeline = Timeline::has('stories', '>=', 1)->has('followers', '>=', 1)->first();
         $creator = $timeline->user;

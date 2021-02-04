@@ -26,7 +26,7 @@ class RestPostsTest extends TestCase
     public function test_can_index_posts()
     {
         //$this->seed(\Database\Seeders\TestDatabaseSeeder::class);
-        $timeline = Timeline::has('posts','>=',1)->first(); // assume non-admin (%FIXME)
+        $timeline = Timeline::has('posts','>=',1)->first(); 
         $creator = $timeline->user;
 
         $response = $this->actingAs($creator)->ajaxJSON('GET', route('posts.index'));
@@ -50,7 +50,7 @@ class RestPostsTest extends TestCase
      */
     public function test_can_show_my_post()
     {
-        $timeline = Timeline::has('posts','>=',1)->first(); // assume non-admin (%FIXME)
+        $timeline = Timeline::has('posts','>=',1)->first();
         $creator = $timeline->user;
         $post = $timeline->posts[0];
 

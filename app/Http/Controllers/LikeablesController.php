@@ -14,7 +14,6 @@ class LikeablesController extends AppBaseController
 {
     public function index(Request $request)
     {
-        $sessionUser = Auth::user();
         $likeables = collect(); // %TODO
         return response()->json([
             'likeables' => $likeables,
@@ -38,11 +37,13 @@ class LikeablesController extends AppBaseController
             'likeable_id' => 'required|numeric|min:1',
         ]);
 
-
         $alias = $request->likeable_type;
         $model = Relation::getMorphedModel($alias);
-        //dd($request->all(), $alias, $model);
         $likeable = (new $model)->where('id', $request->likeable_id)->firstOrFail();
+
+        if ($request->user()->cannot('like', $likeable)) {
+            abort(403);
+        }
 
         $likeable->likes()->syncWithoutDetaching($likee->id); // %NOTE!! %TODO: apply elsewhere instead of attach
         return response()->json([
@@ -63,6 +64,10 @@ class LikeablesController extends AppBaseController
         $alias = $request->likeable_type;
         $model = Relation::getMorphedModel($alias);
         $likeable = (new $model)->where('id', $request->likeable_id)->firstOrFail();
+
+        if ($request->user()->cannot('like', $likeable)) {
+            abort(403);
+        }
 
         $likeable->likes()->detach($likee->id);
 

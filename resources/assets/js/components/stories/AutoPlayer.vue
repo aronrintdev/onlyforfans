@@ -65,9 +65,12 @@ export default {
       }
     },
     cssDisplay() {
-      return {
-        '--background-image': `url(${this.stories[this.current].mf_url})`,
+      if ( this.stories[this.current].mf_url ) {
+        return {
+          '--background-image': `url(${this.stories[this.current].mf_url})`,
+        }
       }
+      return {};
     },
   },
 

@@ -7,29 +7,55 @@ use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use App\Mediafile;
 use App\Setting;
 use App\Story;
-use App\Mediafile;
+use App\Timeline;
 use App\Enums\MediafileTypeEnum;
 //use App\Enums\StoryTypeEnum; // generalize?
 
 class StoriesController extends AppBaseController
 {
 
+    // this is the general REST version. There should also be timelines/{timeline}/stories (?)
     public function index(Request $request)
     {
-        $sessionUser = Auth::user();
-        $sessionTimeline = $sessionUser->timeline;
-
-        $filters = $request->input('filters', []);
-
-        $query = Story::query();
-        $query->with('mediafiles');
-
-        if ( !$sessionUser->isAdmin() ) {
-            $query->where('timeline_id', $sessionTimeline->id);
+        $filters = [];
+        if ( !$request->has('filters') || empty($request->filters) ) {
+            $filters['following'] = true;
+        }  else {
+            $filters = $request->filters;
         }
 
+        if ( !$request->user()->isAdmin() ) {
+            do {
+                if ( array_key_exists('following', $filters) ) {
+                    break; // ok
+                }
+                if ( array_key_exists('timeline_id', $filters) ) {
+                    $timeline = Timeline::findOrFail($request->filters['timeline_id']);
+                    if ( $request->user()->can('view', $timeline) ) { // should include followers & owner (!)
+                        break;
+                    }
+                }
+                abort(403); // none of the above match, therefore unauthorized
+            } while(0);
+        }
+
+
+        $query = Story::query()->with('mediafiles');
+
+        foreach ( $request->input('filters', []) as $k => $v ) {
+            switch ($k) {
+            case 'following':
+                $query->whereHas('timeline', function($q1) use(&$request) {
+                    $q1->whereIn('id', $request->user()->followedtimelines);
+                });
+                break;
+            default:
+                $query->where($k, $v);
+            }
+        }
         $stories = $query->get();
 
         return response()->json([
@@ -41,7 +67,6 @@ class StoriesController extends AppBaseController
     {
         $request['attrs'] = json_decode($request['attrs'], true); // decode 'complex' data
         
-        $sessionUser = Auth::user();
         $this->validate($request, [
             'attrs' => 'required',
             'attrs.stype' => 'required|in:text,photo',
@@ -49,10 +74,10 @@ class StoriesController extends AppBaseController
         ]);
 
         try {
-            $story = DB::transaction(function () use(&$sessionUser, &$request) {
+            $story = DB::transaction(function () use(&$request) {
 
                 $story = Story::create([
-                    'timeline_id' => $sessionUser->timeline_id,
+                    'timeline_id' => $request->user()->timeline_id,
                     'content' => $request->attrs['content'] ?? null,
                     'cattrs' => [
                         'background-color' => array_key_exists('bgcolor', $request->attrs) ? $request->attrs['bgcolor'] : '#fff',
@@ -88,8 +113,7 @@ class StoriesController extends AppBaseController
 
     public function destroy(Request $request, Story $story)
     {
-        $sessionUser = Auth::user();
-        if ( $sessionUser->id !== $story->timeline->user->id) {
+        if ( $request->user()->id !== $story->timeline->user->id) {
             abort(403);
         }
 
@@ -105,8 +129,7 @@ class StoriesController extends AppBaseController
 
     public function player(Request $request)
     {
-        $sessionUser = Auth::user();
-        $stories = Story::where('timeline_id', $sessionUser->timeline->id)->get();
+        $stories = Story::where('timeline_id', $request->user()->timeline->id)->get();
         $storiesA = $stories->map( function($item, $iter) {
             $a = $item->toArray();
             if ( count($item->mediafiles) ) {
@@ -118,21 +141,20 @@ class StoriesController extends AppBaseController
         });
 
         $this->_php2jsVars['session'] = [
-            'username' => $sessionUser->username,
+            'username' => $request->user()->username,
         ];
         \View::share('g_php2jsVars',$this->_php2jsVars);
 
         return view('stories.player', [
-            'sessionUser' => $sessionUser,
+            'sessionUser' => $request->user(),
             'stories' => $storiesA,
-            'timeline' => $sessionUser->timeline,
+            'timeline' => $request->user()->timeline,
         ]);
     }
 
     public function dashboard(Request $request)
     {
-        $sessionUser = Auth::user();
-        $stories = $sessionUser->timeline->stories;
+        $stories = $request->user()->timeline->stories;
         $storiesA = $stories->map( function($item, $iter) {
             $a = $item->toArray();
             if ( count($item->mediafiles) ) {
@@ -143,13 +165,13 @@ class StoriesController extends AppBaseController
             return $a;
         });
         return view('stories.create', [
-            'session_user' => $sessionUser,
-            'timeline' => $sessionUser->timeline,
+            'session_user' => $request->user(),
+            'timeline' => $request->user()->timeline,
             'stories' => $storiesA,
             'dtoUser' => [
-                'avatar' => $sessionUser->avatar,
-                'fullname' => $sessionUser->timeline->name,
-                'username' => $sessionUser->timeline->username,
+                'avatar' => $request->user()->avatar,
+                'fullname' => $request->user()->timeline->name,
+                'username' => $request->user()->timeline->username,
             ],
         ]);
     }
