@@ -188,6 +188,7 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group this
      */
     public function test_timeline_follower_can_like_then_unlike_post()
     {

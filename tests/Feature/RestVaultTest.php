@@ -55,7 +55,6 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
-     *  @group this
      */
     public function test_can_not_index_other_nonshared_vaultfolders()
     {
