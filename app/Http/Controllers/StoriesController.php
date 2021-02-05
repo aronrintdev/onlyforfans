@@ -30,18 +30,17 @@ class StoriesController extends AppBaseController
         if ( !$request->user()->isAdmin() ) {
             do {
                 if ( array_key_exists('following', $filters) ) {
-                    break; // ok
+                    break; // allowed
                 }
                 if ( array_key_exists('timeline_id', $filters) ) {
                     $timeline = Timeline::findOrFail($request->filters['timeline_id']);
                     if ( $request->user()->can('view', $timeline) ) { // should include followers & owner (!)
-                        break;
+                        break; // allowed
                     }
                 }
                 abort(403); // none of the above match, therefore unauthorized
             } while(0);
         }
-
 
         $query = Story::query()->with('mediafiles');
 

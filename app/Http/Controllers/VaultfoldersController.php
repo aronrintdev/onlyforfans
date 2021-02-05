@@ -11,32 +11,67 @@ use App\Mediafile;
 use App\Vault;
 use App\Vaultfolder;
 
+/*
+        $request->validate([
+            'vf_id' => 'required',
+        ]);
+ */
 class VaultfoldersController extends AppBaseController
 {
     public function index(Request $request)
     {
-        $sessionUser = Auth::user();
+        $filters = $request->filters ?? [];
 
-        //$this->validate($request, [
-        $request->validate([
-            'vf_id' => 'required',
+        if ( !$request->user()->isAdmin() ) {
+            do {
+                if ( array_key_exists('vault_id', $filters) ) {
+                    $vault = Vault::findOrFail($request->filters['vault_id']);
+                    if ( $request->user()->can('view', $vault) ) {
+                        break; // allowed
+                    }
+                }
+                abort(403); // none of the above match, therefore unauthorized
+            } while(0);
+        }
+
+        $query = Vaultfolder::query();
+        $query->with('mediafiles');
+        //$query->with('vfchildren');
+        //$query->with('vfchildren');
+
+        foreach ( $request->input('filters', []) as $k => $v ) {
+            switch ($k) {
+            case 'parent_id':
+                if ( is_null($v) || ($v==='root') ) {
+                    // $cwf = $myVault->getRootFolder(); // 'current working folder'
+                    $query->whereNull('parent_id');
+                } else {
+                    // $cwf = Vaultfolder::findOrFail($vfId);
+                    $query->where('parent_id', $v);
+                }
+                break;
+            default:
+                $query->where($k, $v);
+            }
+        }
+        $vaultfolders = $query->get();
+
+        return response()->json([
+            'vaultfolders' => $vaultfolders,
+            //'cwf' => $cwf,
+            //'parent' => $cwf->vfparent,
+            //'children' => $cwf->vfchildren,
+            //'mediafiles' => $cwf->mediafiles,
         ]);
-        $vfId = $request->vf_id;
-
+    }
+        /*
         if ( is_null($vfId) || $vfId==='root' ) {
             $myVault = $sessionUser->vaults()->first(); // %FIXME
             $cwf = $myVault->getRootFolder(); // 'current working folder'
         } else {
             $cwf = Vaultfolder::findOrFail($vfId);
         }
-
-        return response()->json([
-            'cwf' => $cwf,
-            'parent' => $cwf->vfparent,
-            'children' => $cwf->vfchildren,
-            'mediafiles' => $cwf->mediafiles,
-        ]);
-    }
+         */
 
     // %TODO: check session user owner
     public function show(Request $request, $pkid)

@@ -55,10 +55,10 @@ trait SluggableTraits {
         //$slug = Str::of(implode(' ',$sluggables))->slug('-');
         if ($makeUnique) {
             $numMatches = empty($dbconnection)
-                ? DB::table($tablename)->where($slugField, '=', $slug)->count()
+                ? DB::table($tablename)->where($slugField, $slug)->count()
                 : DB::connection($dbconnection)->table($tablename)->where($slugField, $slug)->count();
             if ($numMatches > 0) {
-                $suffix = mt_rand(2,999);
+                $suffix = mt_rand(2,99999);
                 $slug = $slug.'-'.$suffix;
                 //$slug = Str::of($slug)->append('-'.$suffix);
             }

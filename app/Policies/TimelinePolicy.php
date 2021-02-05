@@ -14,10 +14,10 @@ class TimelinePolicy
         //
     }
 
-    public function view(User $user, Timeline $timeline)
+    public function view(User $user, Timeline $resource)
     {
-        return $user->isOwner($timeline)
-            || $timeline->followers->contains($user->id);
+        return $user->isOwner($resource)
+            || $resource->followers->contains($user->id);
     }
 
     public function create(User $user)
@@ -25,22 +25,22 @@ class TimelinePolicy
         //
     }
 
-    public function update(User $user, Timeline $timeline)
+    public function update(User $user, Timeline $resource)
     {
         //
     }
 
-    public function delete(User $user, Timeline $timeline)
+    public function delete(User $user, Timeline $resource)
     {
         //
     }
 
-    public function restore(User $user, Timeline $timeline)
+    public function restore(User $user, Timeline $resource)
     {
         //
     }
 
-    public function forceDelete(User $user, Timeline $timeline)
+    public function forceDelete(User $user, Timeline $resource)
     {
         //
     }

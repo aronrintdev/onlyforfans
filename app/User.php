@@ -40,6 +40,7 @@ class User extends Authenticatable implements PaymentSendable, Purchaseable
     //--------------------------------------------
     // Boot
     //--------------------------------------------
+
     public static function boot()
     {
         parent::boot();

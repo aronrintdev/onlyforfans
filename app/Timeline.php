@@ -258,6 +258,8 @@ class Timeline extends Model implements Purchaseable, Ownable
         //return $this->id === $user->timeline_id;
     }
 
+    // %%% --- Implement Ownable Interface ---
+
     public function getOwner() : ?User {
         return $this->user;
     }
