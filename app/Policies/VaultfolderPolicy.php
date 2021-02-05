@@ -21,7 +21,7 @@ class VaultfolderPolicy
 
     public function create(User $user)
     {
-        return $user->isOwner($resource);
+        return true; // %TODO: restrict to creators (?)
     }
 
     public function update(User $user, Vaultfolder $resource)

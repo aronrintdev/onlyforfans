@@ -19,6 +19,7 @@ php artisan migrate:rollback --step=1
 %%% Testing
 vendor/bin/phpunit --group mfdev
 vendor/bin/phpunit --testdox --group devcomment 
+echo "" > storage/logs/laravel.log; vendor/bin/phpunit --testdox  --group this
 
 %%%
 cp app/Patches/ThemeServiceProvider.php vendor/teepluss/theme/src/ThemeServiceProvider.php

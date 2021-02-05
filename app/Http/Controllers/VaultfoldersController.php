@@ -31,8 +31,7 @@ class VaultfoldersController extends AppBaseController
         }
 
         $query = Vaultfolder::query();
-        $query->with('mediafiles');
-        //$query->with('vfparent')->with('vfchildren');
+        $query->with(['mediafiles', 'vfparent', 'vfchildren']);
 
         foreach ( $request->input('filters', []) as $k => $v ) {
             switch ($k) {
@@ -51,18 +50,17 @@ class VaultfoldersController extends AppBaseController
 
         return response()->json([
             'vaultfolders' => $vaultfolders,
-            //'cwf' => $cwf,
-            //'parent' => $cwf->vfparent,
-            //'children' => $cwf->vfchildren,
-            //'mediafiles' => $cwf->mediafiles,
         ]);
     }
 
     // %TODO: check session user owner
-    public function show(Request $request, $pkid)
+    public function show(Request $request, Vaultfolder $vaultfolder)
     {
-        $sessionUser = Auth::user();
-        $vaultfolder = Vaultfolder::where('id', $pkid)->with('vfchildren', 'vfparent', 'mediafiles')->first();
+        if ( $request->user()->cannot('view', $vaultfolder) ) {
+            abort(403);
+        }
+
+        $vaultfolder->load('vfchildren', 'vfparent', 'mediafiles');
         $breadcrumb = $vaultfolder->getBreadcrumb();
         $shares = collect();
         $vaultfolder->mediafiles->each( function($vf) use(&$shares) {
@@ -89,27 +87,47 @@ class VaultfoldersController extends AppBaseController
         });
 
         return response()->json([
-            'sessionUser' => $sessionUser,
+            'sessionUser' => $request->user(),
             'vaultfolder' => $vaultfolder,
             'breadcrumb' => $breadcrumb,
             'shares' => $shares,
         ]);
     }
 
+    // %FIXME: this should be in VaultController, an does the Vault policy (?)
     public function store(Request $request)
     {
-        $request->validate([
-            'parent_id' => 'required|integer|min:1',
+        //dd($request->all());
+        $vrules = [
             'vault_id' => 'required|integer|min:1',
             'vfname' => 'required|string',
-        ]);
+        ];
 
-        $sessionUser = Auth::user();
-        $vaultfolder = Vaultfolder::create( $request->only('parent_id', 'vault_id', 'vfname') );
+        $attrs = [];
+        if ( $request->has('parent_id') && !is_null($request->parent_id) ) {
+            $vrules['parent_id'] = 'required|integer|min:1'; // add validation rule
+            $attrs['parent_id'] = $request->parent_id;
+        } else {
+            $attrs['parent_id'] = null; // parent will be root folder, skip parent_id validation (optional param in effect)
+        }
+        $request->validate($vrules);
+        $attrs['vault_id'] = $request->vault_id;
+        $attrs['vfname'] = $request->vfname;
+
+        $vault = Vault::find($request->vault_id);
+
+        if ( $request->user()->cannot('update', $vault) || $request->user()->cannot('create', Vaultfolder::class) ) {
+            abort(403);
+        }
+
+        $vaultfolder = Vaultfolder::create($attrs);
 
         return response()->json([
             'vaultfolder' => $vaultfolder,
-        ]);
+        ], 201);
     }
+
+    // ---
+
 
 }
