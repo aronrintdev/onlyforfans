@@ -32,7 +32,7 @@ class VaultfoldersController extends AppBaseController
 
         $query = Vaultfolder::query();
         $query->with('mediafiles');
-        //$query->with('vfparent')->with('vfchildren');
+        $query->with('vfparent')->with('vfchildren');
 
         foreach ( $request->input('filters', []) as $k => $v ) {
             switch ($k) {
@@ -51,10 +51,6 @@ class VaultfoldersController extends AppBaseController
 
         return response()->json([
             'vaultfolders' => $vaultfolders,
-            //'cwf' => $cwf,
-            //'parent' => $cwf->vfparent,
-            //'children' => $cwf->vfchildren,
-            //'mediafiles' => $cwf->mediafiles,
         ]);
     }
 
@@ -96,6 +92,7 @@ class VaultfoldersController extends AppBaseController
         ]);
     }
 
+    // %FIXME: this should be in VaultController, an duse the Vault policy (?)
     public function store(Request $request)
     {
         $request->validate([
@@ -103,13 +100,17 @@ class VaultfoldersController extends AppBaseController
             'vault_id' => 'required|integer|min:1',
             'vfname' => 'required|string',
         ]);
+        $vault = Vault::find($request->vault_id);
 
-        $sessionUser = Auth::user();
+        if ( $request->user()->cannot('update', $vault) || $request->user()->cannot('create', Vaultfolder::class) ) {
+            abort(403);
+        }
+
         $vaultfolder = Vaultfolder::create( $request->only('parent_id', 'vault_id', 'vfname') );
 
         return response()->json([
             'vaultfolder' => $vaultfolder,
-        ]);
+        ], 201);
     }
 
 }

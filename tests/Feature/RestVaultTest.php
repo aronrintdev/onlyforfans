@@ -108,6 +108,85 @@ class RestVaultTest extends TestCase
         $this->assertEquals($expectedCount, $vaultfoldersR->count(), 'Number of vaultfolders returned does not match expected value');
     }
 
+    /**
+     *  @group vault
+     *  @group regression
+     *  @group this
+     */
+    public function test_can_create_a_new_vaultfolder()
+    {
+        $creator = User::first();
+        $primaryVault = Vault::primary($creator)->first();
+        $rootFolder = Vaultfolder::isRoot()->where('vault_id', $primaryVault->id)->first();
+        $origNumChildren = $rootFolder->vfchildren->count();
+
+        $payload = [
+            'vault_id' => $primaryVault->id,
+            'parent_id' => $rootFolder->id,
+            'vfname' => $this->faker->slug,
+        ];
+        $response = $this->actingAs($creator)->ajaxJSON('POST', route('vaultfolders.store'), $payload);
+        $response->assertStatus(201);
+        $rootFolder->refresh();
+        $this->assertEquals( $origNumChildren+1, $rootFolder->vfchildren->count() ); // should be +1
+
+        $content = json_decode($response->content());
+        $this->assertNotNull($content->vaultfolder);
+        $vaultfolderR = $content->vaultfolder;
+        $vaultfolder = Vaultfolder::find($vaultfolderR->id);
+        $this->assertEquals($rootFolder->id, $vaultfolder->parent_id);
+    }
+
+    /**
+     *  @group vault
+     *  @group regression
+     *  @group this
+     */
+    public function test_can_not_create_a_new_vaultfolder()
+    {
+        $creator = User::first();
+        $primaryVault = Vault::primary($creator)->first();
+        $rootFolder = Vaultfolder::isRoot()->where('vault_id', $primaryVault->id)->first();
+        $nonownedVault = Vault::where('user_id', '<>', $creator->id)->first();
+
+        $payload = [
+            'vault_id' => $nonownedVault->id,
+            'parent_id' => $rootFolder->id,
+            'vfname' => $this->faker->slug,
+        ];
+        $response = $this->actingAs($creator)->ajaxJSON('POST', route('vaultfolders.store'), $payload);
+        $response->assertStatus(403);
+    }
+
+    /**
+     *  @group vault
+     *  @group regression
+     */
+    public function test_can_navigate_my_vaultfolders()
+    {
+        $creator = User::first();
+        $primaryVault = Vault::primary($creator)->first();
+
+        $payload = [
+            'filters' => [
+                'vault_id' => $primaryVault->id,
+            ],
+        ];
+        $response = $this->actingAs($creator)->ajaxJSON('GET', route('vaultfolders.index'), $payload);
+        $response->assertStatus(200);
+        $content = json_decode($response->content());
+        $this->assertNotNull($content->vaultfolders);
+        $vaultfoldersR = collect($content->vaultfolders);
+        $this->assertGreaterThan(0, $vaultfoldersR->count());
+
+        $nonOwned = $vaultfoldersR->filter( function($vf) use(&$primaryVault) {
+            return $primaryVault->id !== $vf->vault_id; // %FIXME: impl dependency
+        });
+        $this->assertEquals(0, $nonOwned->count(), 'Returned a vaultfolder that does not belong to creator');
+        $expectedCount = Vaultfolder::where('vault_id', $primaryVault->id)->count(); // %FIXME scope
+        $this->assertEquals($expectedCount, $vaultfoldersR->count(), 'Number of vaultfolders returned does not match expected value');
+    }
+
     // ------------------------------
 
     protected function setUp() : void
