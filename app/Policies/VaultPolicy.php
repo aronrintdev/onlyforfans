@@ -3,10 +3,21 @@ namespace App\Policies;
 
 use App\User;
 use App\Vault;
-use Illuminate\Auth\Access\HandlesAuthorization;
+use App\Policies\Traits\OwnablePolicies;
 
-class VaultPolicy
+class VaultPolicy extends BasePolicy
 {
+    use OwnablePolicies;
+
+    protected $policies = [
+        'viewAny'     => 'permissionOnly',
+        'view'        => 'isBlockedByOwner:fail',
+        'update'      => 'isOwner:pass',
+        'delete'      => 'isOwner:pass',
+        'restore'     => 'isOwner:pass',
+        'forceDelete' => 'permissionOnly',
+    ];
+    /*
     use HandlesAuthorization;
 
     public function __construct()
@@ -47,4 +58,5 @@ class VaultPolicy
     {
         return $user->isOwner($resource);
     }
+     */
 }
