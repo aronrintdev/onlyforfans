@@ -26,7 +26,7 @@ class StoriesTest extends TestCase
      *  @group stories
      *  @group regression
      */
-    public function test_can_index_own_stories()
+    public function test_can_index_my_stories()
     {
         $timeline = Timeline::has('stories', '>=', 1)->has('followers', '>=', 1)->first();
         $creator = $timeline->user;

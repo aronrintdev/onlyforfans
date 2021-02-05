@@ -4,7 +4,6 @@ namespace App;
 use Exception;
 use App\SluggableTraits;
 use App\Interfaces\Ownable;
-//use App\Interfaces\Nameable;
 use App\Interfaces\Guidable;
 use App\Interfaces\Sluggable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -15,10 +14,7 @@ class Vaultfolder extends BaseModel implements Guidable, Sluggable, Ownable
     use HasFactory;
 
     protected $guarded = ['id','created_at','updated_at'];
-
-    public static $vrules = [
-    ];
-
+    public static $vrules = [ ];
     protected $appends = ['name'];
 
     //--------------------------------------------
@@ -40,6 +36,8 @@ class Vaultfolder extends BaseModel implements Guidable, Sluggable, Ownable
     public function sharees() {
         return $this->morphToMany('App\User', 'shareable', 'shareables', 'shareable_id', 'sharee_id');
     }
+
+    // %%% --- Implement Ownable Interface ---
 
     public function getOwner() : ?User {
         return $this->vault->getOwner();
