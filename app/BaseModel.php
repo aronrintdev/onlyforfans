@@ -36,7 +36,7 @@ abstract class BaseModel extends Model implements Nameable, FieldRenderable
 
     // Route-model binding custom key
     public function getRouteKeyName() {
-        return 'guid'; // ideally only for admin but global atm
+        return request()->routeIs('admin.*') ? 'guid' : 'id';
     }
 
     /*

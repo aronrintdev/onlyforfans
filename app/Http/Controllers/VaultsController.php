@@ -135,4 +135,20 @@ class VaultsController extends AppBaseController
         ]);
     }
 
+    //public function getRootFolder(Request $request, Vault $vault)
+    public function getRootFolder(Request $request, Vault $vault)
+    {
+        if ( $request->user()->cannot('view', $vault) ) {
+            abort(403);
+        }
+        $vaultfolder = Vaultfolder::with('vfchildren', 'vfparent', 'mediafiles')
+            ->where('vault_id', $vault->id)
+            ->whereNull('parent_id')
+            ->first();
+
+        return response()->json([
+            'vaultfolder' => $vaultfolder,
+        ]);
+    }
+
 }

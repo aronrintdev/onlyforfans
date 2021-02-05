@@ -42,6 +42,8 @@ class RestVaultTest extends TestCase
         $content = json_decode($response->content());
         $this->assertNotNull($content->vaultfolders);
         $vaultfoldersR = collect($content->vaultfolders);
+        dd($vaultfoldersR);
+
         $this->assertGreaterThan(0, $vaultfoldersR->count());
 
         $nonOwned = $vaultfoldersR->filter( function($vf) use(&$primaryVault) {
@@ -111,7 +113,6 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
-     *  @group this
      */
     public function test_can_create_a_new_vaultfolder()
     {
@@ -140,7 +141,6 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
-     *  @group this
      */
     public function test_can_not_create_a_new_vaultfolder()
     {
@@ -161,30 +161,67 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
+     *  @group this
      */
     public function test_can_navigate_my_vaultfolders()
     {
         $creator = User::first();
         $primaryVault = Vault::primary($creator)->first();
+        $rootFolder = Vaultfolder::isRoot()->where('vault_id', $primaryVault->id)->first();
 
-        $payload = [
-            'filters' => [
-                'vault_id' => $primaryVault->id,
-            ],
-        ];
-        $response = $this->actingAs($creator)->ajaxJSON('GET', route('vaultfolders.index'), $payload);
+        $this->assertEquals(0, $rootFolder->vfchildren->count(), 'Root should not have any subfolders');
+        $this->assertNull($rootFolder->vfparent, 'Root should have null parent');
+
+        // set cwf via api call
+        $response = $this->actingAs($creator)->ajaxJSON('GET', route('vaults.getRootFolder', $primaryVault->id));
         $response->assertStatus(200);
         $content = json_decode($response->content());
-        $this->assertNotNull($content->vaultfolders);
-        $vaultfoldersR = collect($content->vaultfolders);
-        $this->assertGreaterThan(0, $vaultfoldersR->count());
+        $this->assertNotNull($content->vaultfolder);
+        $cwf = $content->vaultfolder; // root
+        $this->assertEquals($rootFolder->id, $cwf->id, 'Current working folder (root) pkid should match root');
+        $this->assertNull($cwf->vfparent, 'Current working folder (root) should not have null parent');
+        $this->assertNotNull($cwf->vfchildren, 'Current working folder (root) should not have children (subfolders) attribute');
+        $this->assertEquals(0, count($cwf->vfchildren), 'Current working folder should not have any subfolders');
 
-        $nonOwned = $vaultfoldersR->filter( function($vf) use(&$primaryVault) {
-            return $primaryVault->id !== $vf->vault_id; // %FIXME: impl dependency
-        });
-        $this->assertEquals(0, $nonOwned->count(), 'Returned a vaultfolder that does not belong to creator');
-        $expectedCount = Vaultfolder::where('vault_id', $primaryVault->id)->count(); // %FIXME scope
-        $this->assertEquals($expectedCount, $vaultfoldersR->count(), 'Number of vaultfolders returned does not match expected value');
+        // ---
+
+        // make a subfolder
+        $payload = [
+            'vault_id' => $cwf->vault_id, // $primaryVault->id,
+            'parent_id' => $cwf->id, // $rootFolder->id,
+            'vfname' => $this->faker->slug,
+        ];
+        $response = $this->actingAs($creator)->ajaxJSON('POST', route('vaultfolders.store'), $payload);
+        $response->assertStatus(201);
+        $content = json_decode($response->content());
+        $this->assertNotNull($content->vaultfolder);
+        $childVaultfolderR = $content->vaultfolder;
+        $rootFolder->refresh();
+        $rootFolder->load('vfchildren');
+
+        // test cwf children, expect subfolder
+        $this->assertEquals(1, $rootFolder->vfchildren->count(), 'Root should have 1 subfolder');
+        $this->assertTrue($rootFolder->vfchildren->contains($childVaultfolderR->id), 'Root subfolders should include the one just created');
+
+        // refresh 'cwf' via api call
+        $response = $this->actingAs($creator)->ajaxJSON('GET', route('vaultfolders.show', $cwf->id));
+        $response->assertStatus(200);
+        $content = json_decode($response->content());
+        $this->assertNotNull($content->vaultfolder);
+        $cwf = $content->vaultfolder;
+        $this->assertEquals($rootFolder->id, $cwf->id, 'Current working folder should still be root');
+        $this->assertEquals(1, count($cwf->vfchildren), 'Current working folder should have 1 subfolder');
+
+        // cd to subfolder
+        $response = $this->actingAs($creator)->ajaxJSON('GET', route('vaultfolders.show', $cwf->vfchildren[0]->id));
+        $response->assertStatus(200);
+        $content = json_decode($response->content());
+        $this->assertNotNull($content->vaultfolder);
+        $cwf = $content->vaultfolder;
+
+        // test cwf parent, expect root
+        $this->assertEquals($rootFolder->id, $cwf->parent_id, 'Current working folder parent should be root');
+
     }
 
     // ------------------------------

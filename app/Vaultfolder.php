@@ -15,7 +15,12 @@ class Vaultfolder extends BaseModel implements Guidable, Sluggable, Ownable
 
     protected $guarded = ['id','created_at','updated_at'];
     public static $vrules = [ ];
-    protected $appends = ['name'];
+    protected $appends = [
+        'name',
+        //'vfparent',
+        //'vfchildren',
+        //'mediafiles',
+    ];
 
     //--------------------------------------------
     // %%% Relationships

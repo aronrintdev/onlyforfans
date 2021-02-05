@@ -107,7 +107,8 @@ Route::group(['middleware' => ['auth']], function () {
 
     // -- vaults:  --
     Route::get('/my-vault', ['as'=>'vault.dashboard', 'uses' => 'VaultsController@dashboard']);
-    Route::patch('/vaults/{vault}/update-shares', ['as'=>'vaults.updateShares', 'uses' => 'VaultsController@updateShares']); // %FIXME: refactor to make consistent
+    Route::get('/vaults/{vault}/getRootFolder', ['as'=>'vaults.getRootFolder', 'uses' => 'VaultsController@getRootFolder']);
+    Route::patch('/vaults/{vault}/updateShares', ['as'=>'vaults.updateShares', 'uses' => 'VaultsController@updateShares']); // %FIXME: refactor to make consistent
     Route::resource('vaults', 'VaultsController', [
         'only' => [ 'index', 'show' ],
     ]);
