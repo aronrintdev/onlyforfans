@@ -12,12 +12,12 @@ $sessionUser = Auth::user();
         <div class="background">
           <div class="widget-bg tag-cover-img">
             <a href="{{ url($sessionUser->username) }}">
-              <img src=" @if($sessionUser->cover) {{ $sessionUser->cover->filepath }} @else {{ url('user/cover/default-cover-user.png') }} @endif" alt="{{ $sessionUser->name }}" title="{{ $sessionUser->name }}">
+              <img src=" @if($sessionUser->cover) {{ optional($sessionUser->cover)->filepath }} @else {{ url('user/cover/default-cover-user.png') }} @endif" alt="{{ $sessionUser->name }}" title="{{ $sessionUser->name }}">
             </a>
           </div>
           <div class="avatar-img">
             <a href="{{ url($sessionUser->username) }}">	
-              <img src="{{ $sessionUser->avatar->filepath }}" alt="{{ $sessionUser->name }}" title="{{ $sessionUser->name }}">
+              <img src="{{ optional($sessionUser->avatar)->filepath }}" alt="{{ $sessionUser->name }}" title="{{ $sessionUser->name }}">
             </a>
           </div>
         </div>
@@ -105,12 +105,12 @@ $sessionUser = Auth::user();
                 <div class="background">
                   <div class="widget-bg">
                     <a href="{{ url($suggested_user->username) }}">
-                      <img src=" @if($suggested_user->cover->filepath) {{ $suggested_user->cover->filepath }} @else {{ url('user/cover/default-cover-user.png') }} @endif" alt="{{ $suggested_user->name }}" title="{{ $suggested_user->name }}">
+                      <img src=" @if(optional($suggested_user->cover)->filepath) {{ $suggested_user->cover->filepath }} @else {{ url('user/cover/default-cover-user.png') }} @endif" alt="{{ $suggested_user->name }}" title="{{ $suggested_user->name }}">
                     </a>
                   </div>
                   <div class="avatar-img">
                     <a href="{{ url($suggested_user->username) }}">
-                      <img src="{{ $suggested_user->avatar->filepath }}" alt="{{ $suggested_user->name }}" title="{{ $suggested_user->name }}">
+                      <img src="{{ optional($suggested_user->avatar)->filepath }}" alt="{{ $suggested_user->name }}" title="{{ $suggested_user->name }}">
                     </a>
                   </div>
                 </div>

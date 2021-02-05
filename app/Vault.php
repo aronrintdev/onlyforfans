@@ -7,12 +7,15 @@ use App\Interfaces\Ownable;
 //use App\Interfaces\Nameable;
 use App\Interfaces\Guidable;
 use App\Interfaces\Sluggable;
+use App\Traits\OwnableFunctions;
+use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Vault extends BaseModel implements Guidable, Sluggable, Ownable
 {
     use SluggableTraits;
     use HasFactory;
+    use OwnableFunctions;
 
     protected $guarded = ['id','created_at','updated_at'];
     public static $vrules = [ ];
@@ -59,10 +62,8 @@ class Vault extends BaseModel implements Guidable, Sluggable, Ownable
         return $this->vaultfolders()->whereNull('parent_id')->first();
     }
 
-    // %%% --- Implement Ownable Interface ---
-
-    public function getOwner() : ?User {
-        return $this->user;
+    public function getOwner() : ?Collection {
+        return new Collection($this->user);
     }
 
     //--------------------------------------------

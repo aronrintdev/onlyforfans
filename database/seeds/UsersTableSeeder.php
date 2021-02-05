@@ -45,6 +45,7 @@ class UsersTableSeeder extends Seeder
             if (!$user) {
                 $user = User::factory()->create();
             }
+
             $user = User::factory()->create();
             FactoryHelpers::updateUser($user, [
                 'name' => 'Erik H',

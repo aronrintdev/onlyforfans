@@ -1,23 +1,28 @@
 <?php
+
 namespace App\Policies;
 
-use App\User;
 use App\Comment;
-use Illuminate\Auth\Access\HandlesAuthorization;
+use App\User;
+use App\Policies\Traits\OwnablePolicies;
 
-class CommentPolicy
+class CommentPolicy extends BasePolicy
 {
-    use HandlesAuthorization;
+    use OwnablePolicies;
 
-    public function __construct()
-    {
-        //
-    }
+    protected $policies = [
+        'viewAny'     => 'permissionOnly',
+        'view'        => 'isBlockedByOwner:fail',
+        'update'      => 'isOwner:pass',
+        'delete'      => 'isOwner:pass',
+        'restore'     => 'isOwner:pass',
+        'forceDelete' => 'isOwner:pass',
+        'like'        => 'isOwner:pass',
+    ];
 
-    public function like(User $user, Comment $resource)
+    protected function like(User $user, Comment $resource)
     {
-        return $resource->post->timeline->followers->contains($user->id)
-            || $user->isOwner($resource);
+        return $resource->post->timeline->followers->contains($user->id);
     }
 
 }

@@ -1,4 +1,5 @@
 <?php
+
 namespace App;
 
 use DB;
@@ -33,18 +34,24 @@ class User extends Authenticatable implements PaymentSendable, Purchaseable
         'cover',
         'about',
     ];
-    protected $guarded = ['id','created_at','updated_at'];
+
+
+    protected $guarded = ['id', 'created_at', 'updated_at'];
+
+    protected $fillable = [
+        'timeline_id', 'email', 'verification_code', 'email_verified', 'remember_token', 'password', 'birthday', 'city', 'gender', 'last_logged', 'timezone', 'affiliate_id', 'language', 'country', 'active', 'verified', 'facebook_link', 'twitter_link', 'dribbble_link', 'instagram_link', 'youtube_link', 'linkedin_link', 'wishlist', 'website', 'instagram', 'custom_option1', 'custom_option2', 'custom_option3', 'custom_option4', 'bank_account', 'price', 'is_payment_set', 'is_bank_set', 'is_follow_for_free', 'is_online', 'timezone_id'
+    ];
+
     protected $hidden = [ 'password', 'remember_token', 'verification_code', 'email', 'timeline' ];
     protected $dates = [ 'last_logged' ]; // ['deleted_at'];
 
     //--------------------------------------------
     // Boot
     //--------------------------------------------
-
     public static function boot()
     {
         parent::boot();
-        
+
         static::created(function ($model) {
             $vault = Vault::create([
                 'vname' => 'My Home Vault',
@@ -59,7 +66,8 @@ class User extends Authenticatable implements PaymentSendable, Purchaseable
         });
     }
 
-    public function toArray() {
+    public function toArray()
+    {
         $array = parent::toArray();
         $timeline = $this->timeline->toArray();
         foreach ($timeline as $key => $value) {
@@ -75,20 +83,24 @@ class User extends Authenticatable implements PaymentSendable, Purchaseable
     // %%% Relationships
     //--------------------------------------------
 
-    public function sharedmediafiles() { // mediafiles shared with me (??)
+    public function sharedmediafiles()
+    { // mediafiles shared with me (??)
         return $this->morphedByMany('App\Mediafile', 'shareable', 'shareables', 'sharee_id')->withTimestamps();
     }
-    public function sharedvaultfolders() { // vaultfolders shared with me (??)
+    public function sharedvaultfolders()
+    { // vaultfolders shared with me (??)
         return $this->morphedByMany('App\Vaultfolder', 'shareable', 'shareables', 'sharee_id')->withTimestamps();
     }
     public function ledgersales() {
         return $this->hasMany('App\Fanledger', 'seller_id');
     }
-    public function ledgerpurchases() {
+    public function ledgerpurchases()
+    {
         return $this->hasMany('App\Fanledger', 'purchaser_id');
     }
 
-    public function timeline() { // my timeline
+    public function timeline()
+    { // my timeline
         return $this->belongsTo('App\Timeline');
     }
 
@@ -122,15 +134,18 @@ class User extends Authenticatable implements PaymentSendable, Purchaseable
     }
      */
 
-    public function sharedposts() { // posts shared with me (by direct share or purchase on my part)
+    public function sharedposts()
+    { // posts shared with me (by direct share or purchase on my part)
         return $this->morphedByMany('App\Post', 'shareable', 'shareables', 'sharee_id')->withTimestamps();
     }
 
-    public function postsSaved() {
+    public function postsSaved()
+    {
         return $this->belongsToMany('App\Post', 'saved_posts', 'user_id', 'post_id');
     }
 
-    public function postsPinned() {
+    public function postsPinned()
+    {
         return $this->belongsToMany('App\Post', 'pinned_posts', 'user_id', 'post_id');
     }
 
@@ -159,32 +174,39 @@ class User extends Authenticatable implements PaymentSendable, Purchaseable
         return $result;
     }
 
-    public function payment() {
+    public function payment()
+    {
         return $this->hasOne('App\Payment');
     }
 
-    public function groups() {
+    public function groups()
+    {
         return $this->belongsToMany('App\Group', 'group_user', 'user_id', 'group_id')->withPivot('role_id', 'status');
     }
 
 
-    public function pageLikes() {
+    public function pageLikes()
+    {
         return $this->belongsToMany('App\Page', 'page_likes', 'user_id', 'page_id');
     }
 
-    public function notifications() {
+    public function notifications()
+    {
         return $this->hasMany('App\Notification')->with('notified_from');
     }
 
-    public function roles() {
+    public function roles()
+    {
         return $this->belongsToMany('App\Role', 'role_user', 'user_id', 'role_id');
     }
 
-    public function vaults() {
+    public function vaults()
+    {
         return $this->hasMany('App\Vault');
     }
 
-    public function vaultfolders() {
+    public function vaultfolders()
+    {
         return $this->hasMany('App\Vaultfolder');
     }
 
@@ -206,57 +228,68 @@ class User extends Authenticatable implements PaymentSendable, Purchaseable
     }
      */
 
-    public function getNameAttribute($value) {
+    public function getNameAttribute($value)
+    {
         return $this->timeline->name;
     }
 
-    public function getUsernameAttribute($value) {
+    public function getUsernameAttribute($value)
+    {
         return $this->timeline->username;
     }
 
-    public function getAvatarAttribute($value) {
-        return $this->timeline->avatar 
+    public function getAvatarAttribute($value)
+    {
+        return $this->timeline->avatar
             ? $this->timeline->avatar
-            : url('user/avatar/default-'.$this->gender.'-avatar.png');
+            : (object) ['filepath' => url('user/avatar/default-' . $this->gender . '-avatar.png')];
     }
 
-    public function getCoverAttribute($value) {
+    public function getCoverAttribute($value)
+    {
         return $this->timeline->cover ? $this->timeline->cover : null;
     }
 
-    public function getAboutAttribute($value) {
+    public function getAboutAttribute($value)
+    {
         return $this->timeline->about ? $this->timeline->about : null;
     }
 
     //this method is for displaying user avatar and default avatar from group in events feature
-    public function getPictureAttribute($value) {
-        return $this->timeline->avatar 
+    public function getPictureAttribute($value)
+    {
+        return $this->timeline->avatar
             ? $this->timeline->avatar
             : url('group/avatar/default-group-avatar.png');
     }
 
     // ---
 
-    public function get_group($id) {
+    public function get_group($id)
+    {
         $group_page = $this->groups()->where('groups.id', $id)->first();
         return $group_page ? $group_page->pivot->status : false;
     }
 
-    public function get_page($id) {
+    public function get_page($id)
+    {
         return $this->pages()->where('pages.id', $id)->first();
         // $result = $user_page ? $user_page : false;
         // return $result;
     }
 
-    public function getUserSettings($user_id) {
+    public function getUserSettings($user_id)
+    {
         return DB::table('user_settings')->where('user_id', $user_id)->first();
     }
 
-    public function getUserListTypes($user_id) {
+    public function getUserListTypes($user_id)
+    {
         return DB::table('user_list_types')->where('user_id', $user_id)->get();
     }
 
-    public function deleteUserSettings($user_id) {
+    public function deleteUserSettings($user_id)
+    {
         return DB::table('user_settings')->where('user_id', $user_id)->delete();
     }
 
@@ -279,15 +312,18 @@ class User extends Authenticatable implements PaymentSendable, Purchaseable
         return $result1 + $result2;
     }
 
-    public function announcements() {
+    public function announcements()
+    {
         return $this->belongsToMany('App\Announcement', 'announcement_user', 'user_id', 'announcement_id');
     }
 
-    public function conversations() {
+    public function conversations()
+    {
         return $this->belongsToMany('App\Conversation', 'conversation_user', 'user_id', 'conversation_id');
     }
 
-    public function messages() {
+    public function messages()
+    {
         return $this->conversations()->with('messages');
     }
 
@@ -318,7 +354,7 @@ class User extends Authenticatable implements PaymentSendable, Purchaseable
                 $timeline_post = false;
             }
 
-          //start $this if block is for user post privacy settings
+            //start $this if block is for user post privacy settings
             if ($user_post_privacy != null && $user_post_privacy == 'only_follow') {
                 $isFollower = $this->chkMyFollower($others_id, $loginId);
                 if ($isFollower) {
@@ -331,17 +367,19 @@ class User extends Authenticatable implements PaymentSendable, Purchaseable
             $timeline_post = true;
             $user_post = 'user';
         }
-           //End
-        $result = $timeline_post.'-'.$user_post;
+        //End
+        $result = $timeline_post . '-' . $user_post;
 
         return $result;
     }
 
-    public function events() {
+    public function events()
+    {
         return $this->belongsToMany('App\Event', 'event_user', 'user_id', 'event_id');
     }
 
-    public function get_eventuser($id) {
+    public function get_eventuser($id)
+    {
         return $this->events()->where('events.id', $id)->first();
     }
 
@@ -354,11 +392,12 @@ class User extends Authenticatable implements PaymentSendable, Purchaseable
         $chk_isadmin = Event::where('id', $event_id)->where('user_id', $user_id)->first();
 
         $result = $chk_isadmin ? true : false;
-        
+
         return $result;
     }
 
-    public function getEvents() {
+    public function getEvents()
+    {
         $result = [];
         $guestevents =  $this->events()->get();
         if ($guestevents) {
@@ -393,12 +432,14 @@ class User extends Authenticatable implements PaymentSendable, Purchaseable
         return $result;
     }
 
-    public function settings() {
+    public function settings()
+    {
         $settings = DB::table('user_settings')->where('user_id', $this->id)->first();
         return $settings;
     }
 
-    public function commentLikes() {
+    public function commentLikes()
+    {
         return $this->belongsToMany('App\User', 'comment_likes', 'user_id', 'comment_id');
     }
 
@@ -406,7 +447,8 @@ class User extends Authenticatable implements PaymentSendable, Purchaseable
         return $this->hasMany('App\Event');
     }
 
-    public function comments() {
+    public function comments()
+    {
         return $this->hasMany('App\Comment');
     }
 
@@ -439,9 +481,9 @@ class User extends Authenticatable implements PaymentSendable, Purchaseable
     {
         $admin_role_id = Role::where('name', '=', 'admin')->first();
         $joined_pages = $this->pages()
-                        ->where('role_id', '!=', $admin_role_id->id)
-                        ->where('page_user.active', 1)
-                        ->get();
+            ->where('role_id', '!=', $admin_role_id->id)
+            ->where('page_user.active', 1)
+            ->get();
         return $joined_pages ? $joined_pages : 0;
     }
 
@@ -449,28 +491,38 @@ class User extends Authenticatable implements PaymentSendable, Purchaseable
     {
         $admin_role_id = Role::where('name', '=', 'admin')->first();
         $joined_groups = $this->groups()
-                        ->where('role_id', '!=', $admin_role_id->id)
-                        ->where('group_user.status', 'approved')
-                        ->get();
+            ->where('role_id', '!=', $admin_role_id->id)
+            ->where('group_user.status', 'approved')
+            ->get();
         return $joined_groups ? $joined_groups : 0;
     }
 
 
-    public function blockedProfiles() {
+    public function blockedProfiles()
+    {
         return $this->hasMany(BlockedProfile::class, 'blocked_by');
+    }
+
+    /**
+     * Checks if user is blocked by another user
+     */
+    public function isBlockedBy(User $user): bool
+    {
+        return $user->blockedProfiles()->where('blockee_id', $this->id)->count() > 0;
     }
 
 
     //public function getPurchasedPostsArrAttribute() {
-        //return $this->purchasedPosts()->pluck('post_id');
+    //return $this->purchasedPosts()->pluck('post_id');
     //}
-    
+
     public function favouriteUsers()
     {
         return $this->belongsToMany('App\User', 'favourite_users', 'user_id', 'favourite_user_id')->withPivot('favourite_user_id');
     }
 
-    public function bankAccountDetails() {
+    public function bankAccountDetails()
+    {
         return $this->hasOne('App\BankAccountDetails', 'user_id');
     }
 
@@ -481,9 +533,8 @@ class User extends Authenticatable implements PaymentSendable, Purchaseable
         User $sender,
         int $amountInCents,
         array $cattrs = []
-    ) : ?Fanledger
-    {
-        $result = DB::transaction( function() use($ptype, $amountInCents, $cattrs, &$sender) {
+    ): ?Fanledger {
+        $result = DB::transaction(function () use ($ptype, $amountInCents, $cattrs, &$sender) {
 
             switch ($ptype) {
                 case PaymentTypeEnum::TIP:
@@ -499,7 +550,7 @@ class User extends Authenticatable implements PaymentSendable, Purchaseable
                     ]);
                     break;
                 default:
-                    throw new Exception('Unrecognized payment type : '.$ptype);
+                    throw new Exception('Unrecognized payment type : ' . $ptype);
             }
 
             return $result;
@@ -510,40 +561,46 @@ class User extends Authenticatable implements PaymentSendable, Purchaseable
 
     // --- %%Extra --- 
 
-    public function isMyContent(User $creator) : bool 
+    public function isMyContent(User $creator): bool
     {
         return $this->id === $creator->id;
     }
 
-    public function isAboutSet() {
-        return ( !empty($this->timeline) && !empty($this->timeline->about) );
+    public function isAboutSet()
+    {
+        return (!empty($this->timeline) && !empty($this->timeline->about));
     }
 
-    public function renderLocation() {
+    public function renderLocation()
+    {
         $a = [];
-        if ( $this->city ) {
+        if ($this->city) {
             $a[] = $this->city;
         }
-        if ( $this->country ) {
+        if ($this->country) {
             $a[] = $this->country;
         }
         return implode(', ', $a);
     }
 
-    public function renderPostCount() {
+    public function renderPostCount()
+    {
         return $this->posts()->where('active', 1)->count();
     }
-    public function renderLikesCount() {
+    public function renderLikesCount()
+    {
         return $this->pageLikes()->count();
     }
-    public function renderFansCount() {
+    public function renderFansCount()
+    {
         return $this->pageLikes()->count();
     }
 
     public function isOwner(Ownable $resource) : bool
     {
-        $owner = $resource->getOwner();
-        return $owner->id === $this->id;
+        return $resource->getOwner()->contains(function ($value, $key) {
+            return $value->id === $this->id;
+        });
     }
 
 }

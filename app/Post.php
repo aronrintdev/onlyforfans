@@ -12,6 +12,8 @@ use App\Interfaces\Likeable;
 use App\Interfaces\Ownable;
 use App\Interfaces\Deletable;
 use App\Enums\PaymentTypeEnum;
+use App\Traits\OwnableFunctions;
+use Illuminate\Support\Collection;
 use App\Interfaces\Purchaseable; // was PaymentReceivable
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
@@ -20,9 +22,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Post extends Model implements Ownable, Deletable, Purchaseable, Likeable
 {
-
     use SoftDeletes;
     use HasFactory;
+    use OwnableFunctions;
 
     //--------------------------------------------
     // Boot
@@ -99,8 +101,8 @@ class Post extends Model implements Ownable, Deletable, Purchaseable, Likeable
         return $this->belongsTo('App\User');
     }
 
-    public function getOwner() : ?User {
-        return $this->user;
+    public function getOwner() : ?Collection {
+        return new Collection([ $this->user ]);
     }
 
     public function timeline() {

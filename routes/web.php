@@ -1,5 +1,18 @@
 <?php
+use Pusher\Pusher;
 use Illuminate\Support\Facades\Auth;
+use Symfony\Component\Finder\Finder;
+use Illuminate\Support\Facades\Route;
+
+// Require all files in routes/web
+$files = Finder::create()
+    ->in(base_path('routes/web'))
+    ->name('*.php');
+
+foreach ($files as $file) {
+    require($file->getRealPath());
+}
+
 
 /*
 |--------------------------------------------------------------------------
@@ -96,7 +109,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::put('/timelines/{timeline}/follow', ['as'=>'timelines.follow', 'uses' => 'TimelinesController@follow']);
     Route::put('/timelines/{timeline}/subscribe', ['as'=>'timelines.subscribe', 'uses' => 'TimelinesController@subscribe']);
     Route::resource('timelines', 'TimelinesController', [
-        'only' => [ 'index', 'show' ],
+        'only' => ['index', 'show'],
     ]);
 
     // -- users: messageable --
@@ -109,7 +122,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('/my-vault', ['as'=>'vault.dashboard', 'uses' => 'VaultsController@dashboard']);
     Route::patch('/vaults/{vault}/update-shares', ['as'=>'vaults.updateShares', 'uses' => 'VaultsController@updateShares']); // %FIXME: refactor to make consistent
     Route::resource('vaults', 'VaultsController', [
-        'only' => [ 'index', 'show' ],
+        'only' => ['index', 'show'],
     ]);
 
     // -- vaultfolders: shareable | purchaseable --
@@ -121,7 +134,7 @@ Route::group(['middleware' => ['auth']], function () {
     /*
     Route::get('/saved/dashboard', ['as'=>'saved.dashboard', 'uses' => 'SaveditemsController@dashboard']);
     Route::resource('saved', 'SaveditemsController', [
-        'only' => [ 'index', 'show', 'store' ],
+        'only' => ['index', 'show', 'store'],
     ]);
      */
 
@@ -150,7 +163,7 @@ Route::group(['prefix' => '/username'], function() {
 
 /*
 |--------------------------------------------------------------------------
-| Webhok 
+| Webhook
 |--------------------------------------------------------------------------
 */
 

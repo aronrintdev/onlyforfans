@@ -18,7 +18,7 @@ class ShareablesController extends AppBaseController
         $sessionUser = Auth::user();
 
         $mediafiles = $sessionUser->sharedmediafiles->map( function($mf) {
-            $mf->owner = $mf->getOwner()->only('username', 'name', 'avatar');
+            $mf->owner = $mf->getOwner()->first()->only('username', 'name', 'avatar');
             return $mf;
         });
 

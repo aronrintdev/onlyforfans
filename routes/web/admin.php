@@ -1,7 +1,71 @@
 <?php
 
-Route::group(['prefix' => '/admin', 'middleware' => ['auth', 'role:admin']], function () {
-    Route::get('/', 'AdminController@dashboard');
+use Illuminate\Support\Facades\Route;
+
+/* -------------------------------------------------------------------------- */
+/*                            Administration routes                           */
+/* -------------------------------------------------------------------------- */
+
+Route::group(['prefix' => '/admin', 'middleware' => ['auth', 'role:admin|super-admin']], function () {
+
+    /* -------------------------------- Role -------------------------------- */
+    Route::group(['prefix' => '/role'], function () {
+        $controller = 'Admin\RolesController';
+        $baseName = 'admin.role.';
+
+        Route::resource('', Admin\RolesController::class)
+            ->parameters(['' => 'role'])
+            ->except([ 'create', 'edit' ])
+            ->names([
+                'index'   => $baseName . 'index',
+                'store'   => $baseName . 'store',
+                'show'    => $baseName . 'show',
+                'update'  => $baseName . 'update',
+                'destroy' => $baseName . 'destroy',
+        ]);
+
+        /* --------------------------- Permissions -------------------------- */
+        Route::group(['prefix' => '/{role}/permissions'], function() use($controller, $baseName) {
+            Route::get('/', $controller . '@getPermissions')
+            ->name($baseName . 'permissions.get');
+            Route::post('/assign', $controller . '@assignPermissions')
+            ->name($baseName . 'permissions.assign');
+            Route::post('/remove', $controller . '@removePermissions')
+            ->name($baseName . 'permissions.remove');
+        });
+
+        /* ------------------------------ User ------------------------------ */
+        Route::get('/{role}/users', $controller . '@getUsers')
+            ->name($baseName . 'users');
+        Route::get('/user/{user}/roles', $controller . '@getUserRoles')
+            ->name($baseName . 'user.get');
+        Route::post('/user/assign', $controller . '@assignUserRole')
+            ->name($baseName . 'user.assign');
+        Route::post('/user/remove', $controller . '@removeUserRole')
+            ->name($baseName . 'user.remove');
+    });
+
+    /* ----------------------------- Permission ----------------------------- */
+    Route::group(['prefix' => '/permission'], function() {
+        $controller = 'Admin\PermissionsController';
+        $baseName = 'admin.permission.';
+
+        Route::resource('', Admin\PermissionsController::class)
+            ->parameters(['' => 'permission'])
+            ->except(['create', 'edit'])
+            ->names([
+                'index'   => $baseName . 'index',
+                'store'   => $baseName . 'store',
+                'show'    => $baseName . 'show',
+                'update'  => $baseName . 'update',
+                'destroy' => $baseName . 'destroy',
+        ]);
+    });
+
+
+    Route::get('/', 'Admin\DashboardController@index');
+    // Route::get('/', 'AdminController@dashboard');
+
     Route::get('/general-settings', 'AdminController@generalSettings');
     Route::post('/general-settings', 'AdminController@updateGeneralSettings');
     Route::post('/home-settings', 'AdminController@updateHomeSettings');
@@ -31,13 +95,21 @@ Route::group(['prefix' => '/admin', 'middleware' => ['auth', 'role:admin']], fun
     Route::get('/themes', 'AdminController@themes');
     Route::get('/change-theme/{name}', 'AdminController@changeTheme');
 
-    Route::get('/users', 'AdminController@showUsers');
-    Route::get('/users/{username}/edit', 'AdminController@editUser');
-    Route::post('/users/{username}/edit', 'AdminController@updateUser');
-    Route::get('/users/{user_id}/delete', 'AdminController@deleteUser');
+    Route::group(['prefix' => '/users'], function () {
+        Route::get('/', 'AdminController@showUsers')
+            ->name('admin.users.index');
+        Route::get('/{username}/edit', 'AdminController@editUser')
+            ->name('admin.user.view');
+        Route::post('/{username}/edit', 'AdminController@updateUser')
+            ->name('admin.user.update');
+        Route::get('/{user_id}/delete', 'AdminController@deleteUser')
+            ->name('admin.user.deleteById');
+        Route::get('/{username}/delete', 'UserController@deleteMe')
+            ->name('admin.user.deleteByUsername');
+        Route::post('/{username}/newpassword', 'AdminController@updatePassword')
+            ->name('admin.user.updatePassword');
+    });
 
-    Route::get('/users/{username}/delete', 'UserController@deleteMe');
-    Route::post('/users/{username}/newpassword', 'AdminController@updatePassword');
 
     // Route::get('/pages', 'AdminController@showPages');
     // Route::get('/pages/{username}/edit', 'AdminController@editPage');

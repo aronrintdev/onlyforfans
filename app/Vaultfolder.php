@@ -6,12 +6,15 @@ use App\SluggableTraits;
 use App\Interfaces\Ownable;
 use App\Interfaces\Guidable;
 use App\Interfaces\Sluggable;
+use App\Traits\OwnableFunctions;
+use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Vaultfolder extends BaseModel implements Guidable, Sluggable, Ownable
 {
     use SluggableTraits;
     use HasFactory;
+    use OwnableFunctions;
 
     protected $guarded = ['id','created_at','updated_at'];
     public static $vrules = [ ];
@@ -37,9 +40,7 @@ class Vaultfolder extends BaseModel implements Guidable, Sluggable, Ownable
         return $this->morphToMany('App\User', 'shareable', 'shareables', 'shareable_id', 'sharee_id');
     }
 
-    // %%% --- Implement Ownable Interface ---
-
-    public function getOwner() : ?User {
+    public function getOwner() : ?Collection {
         return $this->vault->getOwner();
     }
 
@@ -91,7 +92,7 @@ class Vaultfolder extends BaseModel implements Guidable, Sluggable, Ownable
 
     public function scopeIsChildOf($query, Vaultfolder $vf)
     {
-        return $query->where('parent_id', $vf-id);
+        return $query->where('parent_id', $vf->id);
     }
 
     //--------------------------------------------
