@@ -18,9 +18,34 @@ class Vault extends BaseModel implements Guidable, Sluggable, Ownable
     use OwnableFunctions;
 
     protected $guarded = ['id','created_at','updated_at'];
+    public static $vrules = [ ];
 
-    public static $vrules = [
-    ];
+    //--------------------------------------------
+    // Boot
+    //--------------------------------------------
+
+    public static function boot()
+    {
+        parent::boot();
+        
+        static::creating(function ($model) {
+            $model->is_primary = true; // this one - created at boot - is the primary
+        });
+
+        static::created(function ($model) {
+            $rootfolder = Vaultfolder::create([
+                'vfname' => 'Root',
+                'vault_id' => $model->id,
+                'parent_id' => null,
+            ]);
+        });
+
+        static::deleting(function ($model) {
+            foreach ($model->vaultfolders as $o) {
+                $o->delete();
+            }
+        });
+    }
 
     //--------------------------------------------
     // Relationships
@@ -51,12 +76,23 @@ class Vault extends BaseModel implements Guidable, Sluggable, Ownable
     ];
 
     //--------------------------------------------
+    // Scopes
+    //--------------------------------------------
+
+    // get the primary vault for a user
+    public function scopePrimary($query, User $user)
+    {
+        return $query->where('is_primary', 1)->where('user_id', $user->id);
+    }
+
+    //--------------------------------------------
     // Methods
     //--------------------------------------------
 
     // %%% --- Implement Sluggable Interface ---
 
-    public function sluggableFields() : array {
+    public function sluggableFields() : array 
+    {
         return ['vname'];
     }
 

@@ -17,7 +17,7 @@ class PostPolicy extends BasePolicy
         'delete'      => 'isOwner:pass',
         'restore'     => 'isOwner:pass',
         'forceDelete' => 'isOwner:pass',
-        'toggleLike'  => 'isBlockedByOwner:fail',
+        'like'        => 'isOwner:pass isBlockedByOwner:fail',
         'tip'         => 'isBlockedByOwner:fail',
     ];
 
@@ -70,14 +70,14 @@ class PostPolicy extends BasePolicy
         return false;
     }
 
-    protected function toggleLike(User $user, Post $post)
+    protected function tip(User $user, Post $post)
     {
         return true;
     }
 
-    protected function tip(User $user, Post $post)
+    public function like(User $user, Post $resource)
     {
-        return true;
+        return $resource->timeline->followers->contains($user->id);
     }
 
 }

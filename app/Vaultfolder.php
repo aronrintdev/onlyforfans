@@ -4,7 +4,6 @@ namespace App;
 use Exception;
 use App\SluggableTraits;
 use App\Interfaces\Ownable;
-//use App\Interfaces\Nameable;
 use App\Interfaces\Guidable;
 use App\Interfaces\Sluggable;
 use App\Traits\OwnableFunctions;
@@ -18,10 +17,7 @@ class Vaultfolder extends BaseModel implements Guidable, Sluggable, Ownable
     use OwnableFunctions;
 
     protected $guarded = ['id','created_at','updated_at'];
-
-    public static $vrules = [
-    ];
-
+    public static $vrules = [ ];
     protected $appends = ['name'];
 
     //--------------------------------------------
@@ -83,6 +79,20 @@ class Vaultfolder extends BaseModel implements Guidable, Sluggable, Ownable
 
     public function getPathAttribute($value) {
         return $this->vfname; // %TODO: get full path back to root
+    }
+
+    //--------------------------------------------
+    // Scopes
+    //--------------------------------------------
+
+    public function scopeIsRoot($query)
+    {
+        return $query->whereNull('parent_id');
+    }
+
+    public function scopeIsChildOf($query, Vaultfolder $vf)
+    {
+        return $query->where('parent_id', $vf->id);
     }
 
     //--------------------------------------------

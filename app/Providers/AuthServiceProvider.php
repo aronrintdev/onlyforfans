@@ -1,9 +1,11 @@
 <?php
-
 namespace App\Providers;
 
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
+use App\Interfaces\Likeable;
+use App\Timeline;
+use App\Vaultfolder;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -13,7 +15,12 @@ class AuthServiceProvider extends ServiceProvider
      * @var array
      */
     protected $policies = [
-        'App\Model' => 'App\Policies\ModelPolicy',
+        Comment::class     => \App\Policies\CommentPolicy::class,
+        Likeable::class    => \App\Policies\LikeablePolicy::class,
+        Post::class        => \App\Policies\PostPolicy::class,
+        Timeline::class    => \App\Policies\TimelinePolicy::class,
+        Vault::class       => \App\Policies\VaultPolicy::class,
+        Vaultfolder::class => \App\Policies\VaultfolderPolicy::class,
     ];
 
     /**

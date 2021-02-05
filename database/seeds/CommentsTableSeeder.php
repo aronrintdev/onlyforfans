@@ -1,38 +1,57 @@
 <?php
-
 namespace Database\Seeders;
 
+use Illuminate\Support\Facades\DB;
+use App\Libs\FactoryHelpers;
+use App\Comment;
 use App\Post;
+use App\User;
 
 class CommentsTableSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     *
-     * @return void
-     */
+    use SeederTraits;
+
     public function run()
     {
-        $faker = Faker\Factory::create();
-        //Populate dummy comments
-        $posts = Post::all();
+        $this->initSeederTraits('CommentsTableSeeder'); // $this->{output, faker, appEnv}
 
-        foreach ($posts as $post) {
-            $comments = [
-                'post_id'     => $faker->numberBetween($min = 1, $max = 60),
-                'description' => $faker->text,
-                'user_id'     => $faker->numberBetween($min = 1, $max = 38), ];
+        $posts = Post::get();
+        $users = User::get();
 
-            $postComments = DB::table('comments')->insert($comments);
-        }
+        $posts->each( function($post) use(&$users) { // all posts will have comments
 
-        $comments = DB::table('comments')->select('id')->get();
-        foreach ($comments as $comment) {
-            $likes = [
-                'user_id'    => $faker->numberBetween($min = 1, $max = 38),
-                'comment_id' => $faker->numberBetween($min = 1, $max = 60), ];
+            // COMMENTS - Select random users to comment on this post...
 
-            $postLikes = DB::table('comment_likes')->insert($likes);
-        }
+            $numUsers = $this->faker->numberBetween( 1, min($users->count()-1, $this->getMax('users')) );
+            $commenters = FactoryHelpers::parseRandomSubset($users, $numUsers);
+
+            $commenters->each( function($commenter) use(&$post) {
+                $numComments = $this->faker->numberBetween( 1, $this->getMax('comments') );
+                collect(range(1,$numComments))->each( function() use(&$post, &$commenter) { // Comment generation loop
+                    $comment = Comment::create([
+                        'post_id'     => $post->id,
+                        'description' => $this->faker->realText( $this->faker->numberBetween(20,200) ),
+                        'user_id'     => $commenter->id,
+                        'parent_id'   => null, // %TODO: nested comments
+                    ]);
+                });
+            });
+        });
     }
+
+    private function getMax($param) : int
+    {
+        static $max = [
+            'testing' => [
+                'users' => 4,
+                'comments' => 3,
+            ],
+            'local' => [
+                'users' => 10,
+                'comments' => 3,
+            ],
+        ];
+        return $max[$this->appEnv][$param];
+    }
+
 }

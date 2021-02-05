@@ -1,7 +1,7 @@
 <?php
-
 namespace Database\Seeders;
 
+use Illuminate\Support\Facades\Config;
 use App\Role;
 use App\Permission;
 
@@ -17,6 +17,8 @@ class RolesTableSeeder extends Seeder
      */
     public function run()
     {
+        $appEnv = Config::get('app.env');
+        $this->command->info('Running Seeder: RolesTableSeeder, env: '.$appEnv.' ...');
         /* --------------------------- SUPER ADMIN -------------------------- */
         /**
          * Super Admin Role access controlled by Gate in Auth service provider,

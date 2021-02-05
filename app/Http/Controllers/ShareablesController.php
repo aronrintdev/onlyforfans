@@ -7,8 +7,8 @@ use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use App\Mediafile;
-use App\Vault;
 use App\Vaultfolder;
+use App\Timeline;
 use App\User;
 
 class ShareablesController extends AppBaseController
@@ -29,4 +29,5 @@ class ShareablesController extends AppBaseController
             ],
         ]);
     }
+
 }

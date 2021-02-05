@@ -1,7 +1,7 @@
 <?php
-
 namespace Database\Seeders;
 
+use Illuminate\Support\Facades\Config;
 use App\UsernameRule;
 use Symfony\Component\Finder\Finder;
 
@@ -20,6 +20,9 @@ class UsernameRulesSeeder extends Seeder
      */
     public function run()
     {
+        $appEnv = Config::get('app.env');
+        $this->command->info('Running Seeder: UsernameRulesSeeder, env: '.$appEnv.' ...');
+
         // Regex Rules
         foreach($this->regexRules() as $rule) {
             $usernameRule = UsernameRule::firstOrNew([

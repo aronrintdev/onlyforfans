@@ -5,7 +5,7 @@
 
       <aside class="col-md-3">
 
-        <h2 class="my-3">My Story</h2>
+        <h2 class="my-3">My Stories</h2>
 
         <article>
           <b-media no-body>
@@ -22,11 +22,11 @@
 
         <div v-if="step===steps.SELECT_STYPE" class="">
           <b-list-group>
-            <b-list-group-item v-for="s in stories" :key="s.id" v-bind:style="{ backgroundColor: s.cattrs['background-color'] }">
+            <b-list-group-item v-for="s in stories" :key="s.id" v-bind:style="{ backgroundColor: parseBackgroundColor(s) }">
               <article v-if="s.stype==='text'">
                 {{ s.content }}
               </article>
-              <article v-if="s.stype==='image'" v-bind:class="{ 'tag-image': s.stype==='image' }">
+              <article v-if="s.stype==='photo'" v-bind:class="{ 'tag-image': s.stype==='photo' }">
                 <b-img fluid :src="s.mf_url" alt="story pic"></b-img>
               </article>
             </b-list-group-item>
@@ -39,7 +39,7 @@
                            v-on:set-color="setColor($event)"
                            v-on:do-cancel="step=steps.SELECT_STYPE"
                            ></text-story-form>
-          <photo-story-form v-if="stype==='image'" 
+          <photo-story-form v-if="stype==='photo'" 
                             v-bind:attrs="storyAttrs"
                             v-on:do-cancel="step=steps.SELECT_STYPE"
                             ></photo-story-form>
@@ -74,7 +74,6 @@
           <text-story-preview 
                                       v-if="stype==='text'" 
                                       v-bind:attrs="storyAttrs" 
-                                      username="dtoUser.username"
                                       ></text-story-preview>
         </div>
 
@@ -107,6 +106,9 @@ export default {
       type: Array,
       required: true
     },
+  },
+
+  computed: {
   },
 
   data: () => ({
@@ -146,7 +148,7 @@ export default {
 
   methods: {
     async shareStory() {
-      const url = `/${this.dtoUser.username}/stories`;
+      //const url = `/${this.dtoUser.username}/stories`;
       let payload = new FormData();
       const json = JSON.stringify({
         stype: this.stype,
@@ -158,12 +160,12 @@ export default {
       switch ( this.stype ) {
         case 'text':
           break;
-        case 'image':
+        case 'photo':
           payload.append('mediafile', this.mediafile);
           break;
       } 
 
-      const response = await axios.post(url, payload, {
+      const response = await axios.post(`/stories`, payload, {
         headers: {
           'Content-Type': 'application/json',
         }
@@ -183,7 +185,7 @@ export default {
     },
 
     createPhotoStory(e) {
-      this.stype = 'image';
+      this.stype = 'photo';
       //this.step = this.steps.EDIT;
       //document.getElementById("fileUpload").click()
       this.$refs.fileUpload.click()
@@ -196,6 +198,14 @@ export default {
       this.mediafile = mediafile;
       this.imgPreviewUrl = URL.createObjectURL(mediafile);
       this.step = this.steps.PREVIEW;
+    },
+
+    parseBackgroundColor(story) {
+      if ( story.stype==='photo' ) {
+        return '#fff';
+      } else {
+        return story.cattrs?.['background-color'] || 'yellow';
+      }
     },
 
   },

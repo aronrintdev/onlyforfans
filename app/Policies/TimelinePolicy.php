@@ -13,7 +13,7 @@ class TimelinePolicy extends BasePolicy
     protected $policies = [
         'viewAny'     => 'permissionOnly',
         'create'      => 'permissionOnly',  // User's don't really create timelines, but it may be something a admin may be able to do in the future.
-        'view'        => 'isBlockedByOwner:fail',
+        'view'        => 'isOwner:pass isBlockedByOwner:fail',
         'update'      => 'isOwner:pass',
         'delete'      => 'isOwner:pass',
         'restore'     => 'isOwner:pass',
@@ -27,11 +27,11 @@ class TimelinePolicy extends BasePolicy
      * @param  \App\Timeline  $timeline
      * @return mixed
      */
-    public function view(User $user, Timeline $timeline)
+    public function view(User $user, Timeline $resource)
     {
         // Is viewable by user?
 
-        return true;
+        return $resource->followers->contains($user->id);;
     }
 
 }

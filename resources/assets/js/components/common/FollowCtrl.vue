@@ -3,9 +3,9 @@
     <b-card tag="article" class="OFF-mb-2">
       <b-card-text>
         <ul class="list-unstyled">
-          <li class=""><button class="btn btn-primary w-100">Message</button></li>
-          <li class=""><button class="btn btn-primary w-100 mt-3">Follow For Free</button></li>
-          <li class=""><button class="btn btn-primary w-100 mt-3">$ Send Tip</button></li>
+          <li class=""><b-button variant="primary" class="w-100">Message</b-button></li>
+          <li class=""><b-button v-b-modal.modal-follow variant="primary" class="w-100 mt-3">Follow For Free</b-button></li>
+          <li class=""><b-button v-b-modal.modal-send_tip variant="primary" class="w-100 mt-3">$ Send Tip</b-button></li>
         </ul>
         <p>{{ timeline.about }}</p>
         <ul class="list-unstyled">
@@ -54,5 +54,10 @@ export default {
 </script>
 
 <style scoped>
+
+body #modal-send_tip .modal-body {
+  padding: 0;
+}
+
 </style>
 

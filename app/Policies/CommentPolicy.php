@@ -17,6 +17,12 @@ class CommentPolicy extends BasePolicy
         'delete'      => 'isOwner:pass',
         'restore'     => 'isOwner:pass',
         'forceDelete' => 'isOwner:pass',
-        'toggleLike'  => 'isBlockedByOwner:fail',
+        'like'        => 'isOwner:pass',
     ];
+
+    protected function like(User $user, Comment $resource)
+    {
+        return $resource->post->timeline->followers->contains($user->id);
+    }
+
 }

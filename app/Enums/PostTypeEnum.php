@@ -12,7 +12,7 @@ class PostTypeEnum extends SmartEnum implements Selectable {
     public static $keymap = [
         self::FREE          => 'Free',
         self::PRICED        => 'Requires 1-time Payment',
-        self::SUBSCRIBER    => 'Subscribers Only',
+        self::SUBSCRIBER    => 'Timeline Subscribers Only', // ie premium followers
     ];
 
 }

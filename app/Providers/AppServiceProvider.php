@@ -59,6 +59,7 @@ class AppServiceProvider extends ServiceProvider
         }
 
         Relation::morphMap([
+            'comments' => 'App\Comment',
             'mediafiles' => 'App\Mediafile',
             'posts' => 'App\Post',
             'stories' => 'App\Story',
