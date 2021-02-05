@@ -15,7 +15,9 @@ class AuthServiceProvider extends ServiceProvider
      * @var array
      */
     protected $policies = [
+        Comment::class     => \App\Policies\CommentPolicy::class,
         Likeable::class    => \App\Policies\LikeablePolicy::class,
+        Post::class        => \App\Policies\PostPolicy::class,
         Timeline::class    => \App\Policies\TimelinePolicy::class,
         Vault::class       => \App\Policies\VaultPolicy::class,
         Vaultfolder::class => \App\Policies\VaultfolderPolicy::class,

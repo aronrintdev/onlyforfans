@@ -81,6 +81,20 @@ class Vaultfolder extends BaseModel implements Guidable, Sluggable, Ownable
     }
 
     //--------------------------------------------
+    // Scopes
+    //--------------------------------------------
+
+    public function scopeIsRoot($query)
+    {
+        return $query->whereNull('parent_id');
+    }
+
+    public function scopeIsChildOf($query, Vaultfolder $vf)
+    {
+        return $query->where('parent_id', $vf-id);
+    }
+
+    //--------------------------------------------
     // Methods
     //--------------------------------------------
 

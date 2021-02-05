@@ -25,17 +25,16 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
-     *  @group this
      */
     public function test_can_index_all_of_my_vaultfolders()
     {
         $timeline = Timeline::has('stories', '>=', 1)->has('followers', '>=', 1)->first();
         $creator = $timeline->user;
-        $firstVault = $creator->vaults()->first();
+        $primaryVault = Vault::primary($creator)->first();
 
         $payload = [
             'filters' => [
-                'vault_id' => $firstVault->id,
+                'vault_id' => $primaryVault->id,
             ],
         ];
         $response = $this->actingAs($creator)->ajaxJSON('GET', route('vaultfolders.index'), $payload);
@@ -45,28 +44,49 @@ class RestVaultTest extends TestCase
         $vaultfoldersR = collect($content->vaultfolders);
         $this->assertGreaterThan(0, $vaultfoldersR->count());
 
-        $nonOwned = $vaultfoldersR->filter( function($vf) use(&$firstVault) {
-            return $firstVault->id !== $vf->vault_id; // %FIXME: impl dependency
+        $nonOwned = $vaultfoldersR->filter( function($vf) use(&$primaryVault) {
+            return $primaryVault->id !== $vf->vault_id; // %FIXME: impl dependency
         });
         $this->assertEquals(0, $nonOwned->count(), 'Returned a vaultfolder that does not belong to creator');
-        $expectedCount = Vaultfolder::where('vault_id', $firstVault->id)->count(); // %FIXME scope
+        $expectedCount = Vaultfolder::where('vault_id', $primaryVault->id)->count(); // %FIXME scope
         $this->assertEquals($expectedCount, $vaultfoldersR->count(), 'Number of vaultfolders returned does not match expected value');
     }
 
     /**
      *  @group vault
      *  @group regression
-     *  @group this
+     */
+    public function test_can_not_index_other_nonshared_vaultfolders()
+    {
+        $creator = User::first();
+        $primaryVault = Vault::primary($creator)->first();
+
+        $nonfan = User::whereDoesntHave('sharedvaultfolders', function($q1) use(&$primaryVault) {
+            $q1->where('vault_id', $primaryVault->id);
+        })->where('id', '<>', $creator->id)->first();
+
+        $payload = [
+            'filters' => [
+                'vault_id' => $primaryVault->id,
+            ],
+        ];
+        $response = $this->actingAs($nonfan)->ajaxJSON('GET', route('vaultfolders.index'), $payload);
+        $response->assertStatus(403);
+    }
+
+    /**
+     *  @group vault
+     *  @group regression
      */
     public function test_can_index_my_root_level_vaultfolders()
     {
         $timeline = Timeline::has('stories', '>=', 1)->has('followers', '>=', 1)->first();
         $creator = $timeline->user;
-        $firstVault = $creator->vaults()->first();
+        $primaryVault = Vault::primary($creator)->first();
 
         $payload = [
             'filters' => [
-                'vault_id' => $firstVault->id,
+                'vault_id' => $primaryVault->id,
                 'parent_id' => 'root',
             ],
         ];
@@ -82,7 +102,7 @@ class RestVaultTest extends TestCase
         });
         $this->assertEquals(0, $nonRoot->count(), 'Returned a vaultfolder not in root folder');
 
-        $expectedCount = Vaultfolder::where('vault_id', $firstVault->id)
+        $expectedCount = Vaultfolder::where('vault_id', $primaryVault->id)
             ->whereNull('parent_id')
             ->count(); // %FIXME scope
         $this->assertEquals($expectedCount, $vaultfoldersR->count(), 'Number of vaultfolders returned does not match expected value');
