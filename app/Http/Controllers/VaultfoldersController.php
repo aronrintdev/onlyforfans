@@ -97,7 +97,6 @@ class VaultfoldersController extends AppBaseController
     // %FIXME: this should be in VaultController, an does the Vault policy (?)
     public function store(Request $request)
     {
-        //dd($request->all());
         $vrules = [
             'vault_id' => 'required|integer|min:1',
             'vfname' => 'required|string',
@@ -125,6 +124,32 @@ class VaultfoldersController extends AppBaseController
         return response()->json([
             'vaultfolder' => $vaultfolder,
         ], 201);
+    }
+
+    public function update(Request $request, Vaultfolder $vaultfolder)
+    {
+        if ( $request->user()->cannot('update', $vaultfolder) ) {
+            abort(403);
+        }
+
+        $vrules = [
+            'vfname' => 'required|sometimes|string',
+        ];
+
+        $attrs = [];
+        if ( $request->has('parent_id') && !is_null($request->parent_id) ) {
+            $vrules['parent_id'] = 'required|integer|min:1'; // add validation rule
+            $attrs['parent_id'] = $request->parent_id;
+        }
+        $request->validate($vrules);
+        $attrs['vfname'] = $request->vfname;
+
+        $vaultfolder->fill($attrs);
+        $vaultfolder->save();
+
+        return response()->json([
+            'vaultfolder' => $vaultfolder,
+        ]);
     }
 
     // ---

@@ -161,7 +161,6 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
-     *  @group this
      */
     public function test_can_navigate_my_vaultfolders()
     {
@@ -222,6 +221,65 @@ class RestVaultTest extends TestCase
         // test cwf parent, expect root
         $this->assertEquals($rootFolder->id, $cwf->parent_id, 'Current working folder parent should be root');
 
+    }
+
+    /**
+     *  @group vault
+     *  @group regression
+     *  @group this
+     */
+    public function test_can_update_my_vaultfolder()
+    {
+        $creator = User::first();
+        $primaryVault = Vault::primary($creator)->first();
+        $rootFolder = Vaultfolder::isRoot()->where('vault_id', $primaryVault->id)->first();
+
+        // rename the root folder
+        $payload = [
+            'vfname' => $this->faker->slug,
+        ];
+        $response = $this->actingAs($creator)->ajaxJSON('PATCH', route('vaultfolders.update', $rootFolder->id), $payload);
+        $response->assertStatus(200);
+
+        $content = json_decode($response->content());
+        $this->assertNotNull($content->vaultfolder);
+        $vaultfolderR = $content->vaultfolder;
+        $this->assertEquals($rootFolder->id, $vaultfolderR->id);
+
+        $this->assertNotSame($payload['vfname'], $rootFolder->vfname, 'Pre-updated root folder name should not match payload param');
+        $rootFolder->refresh();
+        $this->assertSame($payload['vfname'], $rootFolder->vfname, 'Updated root folder name should match payload param');
+        $this->assertNull($rootFolder->parent_id, 'Updated root folder parent should still be null');
+
+        // make a subfolder
+        $origSubfolderName = $this->faker->slug;
+        $payload = [
+            'vault_id' => $rootFolder->vault_id, // $primaryVault->id,
+            'parent_id' => $rootFolder->id,
+            'vfname' => $origSubfolderName,
+        ];
+        $response = $this->actingAs($creator)->ajaxJSON('POST', route('vaultfolders.store'), $payload);
+        $response->assertStatus(201);
+        $content = json_decode($response->content());
+        $this->assertNotNull($content->vaultfolder);
+        $subfolderR = $content->vaultfolder;
+        $rootFolder->refresh();
+
+        // rename the new subfolder
+        $updatedSubfolderName = $this->faker->slug;
+        $payload = [
+            'vfname' => $updatedSubfolderName,
+        ];
+        $response = $this->actingAs($creator)->ajaxJSON('PATCH', route('vaultfolders.update', $subfolderR->id), $payload);
+        $response->assertStatus(200);
+
+        $content = json_decode($response->content());
+        $this->assertNotNull($content->vaultfolder);
+        $subfolder = Vaultfolder::find($content->vaultfolder->id);
+
+        $this->assertNotSame($origSubfolderName, $subfolder->vfname, 'Updated sub-folder name should not match original');
+        $this->assertSame($updatedSubfolderName, $subfolder->vfname, 'Updated sub-folder name should match new value');
+        $this->assertEquals($rootFolder->id, $subfolder->parent_id, 'Updated sub-folder parent should still be root folder');
     }
 
     // ------------------------------
