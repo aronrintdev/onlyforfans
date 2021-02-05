@@ -37,6 +37,27 @@ class User extends Authenticatable implements PaymentSendable, Purchaseable
     protected $hidden = [ 'password', 'remember_token', 'verification_code', 'email', 'timeline' ];
     protected $dates = [ 'last_logged' ]; // ['deleted_at'];
 
+    //--------------------------------------------
+    // Boot
+    //--------------------------------------------
+    public static function boot()
+    {
+        parent::boot();
+        
+        static::created(function ($model) {
+            $vault = Vault::create([
+                'vname' => 'My Home Vault',
+                'user_id' => $model->id,
+            ]);
+        });
+
+        static::deleting(function ($model) {
+            foreach ($model->vaults as $o) {
+                $o->delete();
+            }
+        });
+    }
+
     public function toArray() {
         $array = parent::toArray();
         $timeline = $this->timeline->toArray();

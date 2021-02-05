@@ -15,9 +15,30 @@ class Vault extends BaseModel implements Guidable, Sluggable, Ownable
     use HasFactory;
 
     protected $guarded = ['id','created_at','updated_at'];
+    public static $vrules = [ ];
 
-    public static $vrules = [
-    ];
+    //--------------------------------------------
+    // Boot
+    //--------------------------------------------
+
+    public static function boot()
+    {
+        parent::boot();
+        
+        static::created(function ($model) {
+            $rootfolder = Vaultfolder::create([
+                'vfname' => 'Root',
+                'vault_id' => $model->id,
+                'parent_id' => null,
+            ]);
+        });
+
+        static::deleting(function ($model) {
+            foreach ($model->vaultfolders as $o) {
+                $o->delete();
+            }
+        });
+    }
 
     //--------------------------------------------
     // Relationships
@@ -33,6 +54,8 @@ class Vault extends BaseModel implements Guidable, Sluggable, Ownable
     public function getRootFolder() {
         return $this->vaultfolders()->whereNull('parent_id')->first();
     }
+
+    // %%% --- Implement Ownable Interface ---
 
     public function getOwner() : ?User {
         return $this->user;
