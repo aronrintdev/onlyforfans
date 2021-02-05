@@ -36,18 +36,15 @@ class VaultfoldersController extends AppBaseController
 
         $query = Vaultfolder::query();
         $query->with('mediafiles');
-        //$query->with('vfchildren');
-        //$query->with('vfchildren');
+        //$query->with('vfparent')->with('vfchildren');
 
         foreach ( $request->input('filters', []) as $k => $v ) {
             switch ($k) {
             case 'parent_id':
                 if ( is_null($v) || ($v==='root') ) {
-                    // $cwf = $myVault->getRootFolder(); // 'current working folder'
-                    $query->whereNull('parent_id');
+                    $query->isRoot();
                 } else {
-                    // $cwf = Vaultfolder::findOrFail($vfId);
-                    $query->where('parent_id', $v);
+                    $query->isChildOf($v);
                 }
                 break;
             default:
