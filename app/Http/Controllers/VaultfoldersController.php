@@ -152,6 +152,15 @@ class VaultfoldersController extends AppBaseController
         ]);
     }
 
+    public function destroy(Request $request, Vaultfolder $vaultfolder)
+    {
+        if ( $request->user()->cannot('delete', $vaultfolder) ) {
+            abort(403);
+        }
+        $vaultfolder->delete();
+        return response()->json([]);
+    }
+
     // ---
 
 

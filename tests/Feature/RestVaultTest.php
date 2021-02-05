@@ -226,7 +226,6 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
-     *  @group this
      */
     public function test_can_update_my_vaultfolder()
     {
@@ -251,7 +250,7 @@ class RestVaultTest extends TestCase
         $this->assertSame($payload['vfname'], $rootFolder->vfname, 'Updated root folder name should match payload param');
         $this->assertNull($rootFolder->parent_id, 'Updated root folder parent should still be null');
 
-        // make a subfolder
+        // create a subfolder
         $origSubfolderName = $this->faker->slug;
         $payload = [
             'vault_id' => $rootFolder->vault_id, // $primaryVault->id,
@@ -281,6 +280,43 @@ class RestVaultTest extends TestCase
         $this->assertSame($updatedSubfolderName, $subfolder->vfname, 'Updated sub-folder name should match new value');
         $this->assertEquals($rootFolder->id, $subfolder->parent_id, 'Updated sub-folder parent should still be root folder');
     }
+
+    /**
+     *  @group vault
+     *  @group regression
+     *  @group this
+     */
+    public function test_can_my_non_root_vaultfolder()
+    {
+        $creator = User::first();
+        $primaryVault = Vault::primary($creator)->first();
+        $rootFolder = Vaultfolder::isRoot()->where('vault_id', $primaryVault->id)->first();
+
+        // make a subfolder
+        $payload = [
+            'vault_id' => $rootFolder->vault_id,
+            'parent_id' => $rootFolder->id,
+            'vfname' => $this->faker->slug,
+        ];
+        $response = $this->actingAs($creator)->ajaxJSON('POST', route('vaultfolders.store'), $payload);
+        $response->assertStatus(201);
+        $content = json_decode($response->content());
+        $this->assertNotNull($content->vaultfolder);
+        $subfolderR = $content->vaultfolder;
+        $rootFolder->refresh();
+        $exists = Vaultfolder::find($subfolderR->id);
+        $this->assertNotNull($exists);
+        $this->assertTrue($rootFolder->vfchildren->contains($subfolderR->id), 'Root should now contain newly creatred subfolder');
+
+        // delete the subfolder
+        $response = $this->actingAs($creator)->ajaxJSON('DELETE', route('vaultfolders.destroy', $subfolderR->id));
+        $response->assertStatus(200);
+        $rootFolder->refresh();
+        $exists = Vaultfolder::find($subfolderR->id);
+        $this->assertNull($exists);
+        $this->assertFalse($rootFolder->vfchildren->contains($subfolderR->id), 'Root should not contain deleted subfolder');
+    }
+
 
     // ------------------------------
 
