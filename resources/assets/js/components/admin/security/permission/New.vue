@@ -1,6 +1,7 @@
 <template>
   <div>
-    <!-- TODO: Add permissions overview list -->
+    <!-- TODO: Create new permission form -->
+    In Progress
   </div>
 </template>
 

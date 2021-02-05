@@ -35,6 +35,8 @@ Route::group(['prefix' => '/admin', 'middleware' => ['auth', 'role:admin|super-a
         });
 
         /* ------------------------------ User ------------------------------ */
+        Route::get('/{role}/users', $controller . '@getUsers')
+            ->name($baseName . 'users');
         Route::get('/user/{user}/roles', $controller . '@getUserRoles')
             ->name($baseName . 'user.get');
         Route::post('/user/assign', $controller . '@assignUserRole')

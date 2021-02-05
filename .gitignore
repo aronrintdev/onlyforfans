@@ -84,6 +84,7 @@ public/themes/default/assets/css/main.*.css
 public/themes/default/assets/js/main.*.js
 public/themes/default/assets/css/style.css
 public/mix.*.js
+public/hot
 
 settings.html
 yarn.lock

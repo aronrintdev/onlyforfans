@@ -1,0 +1,56 @@
+/**
+ * Custom utility classes
+ */
+
+/**
+ * Cursor
+ * cursor-{option}
+ * example: .cursor-pointer
+ */
+$cursors: () !default;
+$cursors: map-merge(
+  (
+    // General
+    "auto":    auto,
+    "default": default,
+
+    // Links & Status
+    "context-menu": context-menu,
+    "help":         help,
+    "pointer":      pointer,
+    "progress":     progress,
+    "wait":         wait,
+
+    // Selection
+    "cell":          cell,
+    "crosshair":     crosshair,
+    "text":          text,
+    "vertical-text": vertical-text,
+
+    // Drag & drop
+    "alias":       alias,
+    "copy":        copy,
+    "move":        move,
+    "no-drop":     no-drop,
+    "not-allowed": not-allowed,
+    "grab":        grab,
+    "grabbing":    grabbing,
+
+    // Resizing
+    "ew-resize":   ew-resize,
+    "ns-resize":   ns-resize,
+    "nesw-resize": nesw-resize,
+    "nwse-resize": nwse-resize,
+
+    // Zooming
+    "zoom-in":  zoom-in,
+    "zoom-out": zoom-out
+  ),
+  $cursors
+);
+
+@each $key, $value in $cursors {
+  .cursor-#{$value} {
+    cursor: $value !important;
+  }
+}

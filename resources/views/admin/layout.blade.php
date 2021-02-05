@@ -11,7 +11,10 @@
     <title>{{ config('app.name', 'Laravel') }}</title>
 
     <!-- Styles -->
-    <link href="{{ asset('css/app2.css') }}" rel="stylesheet">
+    <link href="{{ mix('css/app2.css') }}" rel="stylesheet">
+
+    <!-- Routing -->
+    @routes('admin')
 </head>
 <body>
     <div id="app">
@@ -22,9 +25,9 @@
     </div>
 
     <!-- Scripts -->
-    <script src="{{ asset('js/admin.app.js') }}"></script>
-    <script src="{{ asset('js/vendor.js') }}"></script>
-    <script src="{{ asset('js/manifest.js') }}"></script>
+    <script src="{{ mix('js/admin.app.js') }}"></script>
+    <script src="{{ mix('js/vendor.js') }}"></script>
+    <script src="{{ mix('js/manifest.js') }}"></script>
 </body>
 </html>
 

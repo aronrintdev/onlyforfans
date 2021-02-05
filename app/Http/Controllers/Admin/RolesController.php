@@ -13,6 +13,11 @@ class RolesController extends Controller
 {
 
     /* --------------------------- Resource Action -------------------------- */
+
+    /**
+     * Roles listing.
+     * - Paginated
+     */
     public function index()
     {
         $this->authorize('viewAny', Role::class);
@@ -21,9 +26,13 @@ class RolesController extends Controller
         return Role::paginate($perPage)->withQueryString();
     }
 
+    /**
+     * View a role
+     */
     public function show(Role $role)
     {
         $this->authorize('view', $role);
+        $role->permissions;
         return $role;
     }
 
@@ -44,8 +53,8 @@ class RolesController extends Controller
     {
         $this->authorize('update', $role);
         $this->request->validate([
-            'name'         => 'required|unique:roles,name',
-            'display_name' => 'required|unique:roles,display_name',
+            'name'         => 'required',
+            'display_name' => 'required',
             'description'  => 'required',
         ]);
         if ( $role->update($this->request->all()) ) {
@@ -83,12 +92,12 @@ class RolesController extends Controller
         // Check if creating or editing new permissions. Authorize actions if so
         $permissions = collect([]);
         foreach($this->request->permissions as $permission) {
-            if (isset($permission->guard_name) && $permission->guard_name !== $role->guard_name) {
+            if (isset($permission->guard_name) && $permission['guard_name'] !== $role->guard_name) {
                 throw ValidationException::withMessages([
                     'guard_name' => ['Guard name mismatch, do not attempt to edit the guard name when adding permissions'],
                 ]);
             }
-            $permissionModel = Permission::where('name', $permission->name)
+            $permissionModel = Permission::where('name', $permission['name'])
                 ->where('guard_name', $role->guard_name)
                 ->first();
             if (!isset($permissionModel)) {
@@ -109,6 +118,7 @@ class RolesController extends Controller
             $permissions->push($permissionModel);
         }
         $role->addPermissions($permissions);
+        $role->permissions;
         return $role;
     }
 
@@ -122,11 +132,29 @@ class RolesController extends Controller
             'permissions.*.name' => 'required'
         ]);
         $role->removePermissions(collect($this->request->permissions));
+        $role->permissions;
         return $role;
     }
 
 
     /* -------------------------------- Users ------------------------------- */
+    /**
+     * Get the users that have a role
+     * - Paginated
+     */
+    public function getUsers(Role $role)
+    {
+        $this->authorize('viewUsers', $role);
+        $perPage = $this->request->perPage ?? 15;
+        $query = User::role($role->name)->with('roles');
+        $users = $query->paginate($perPage);
+        $users->setCollection($users->getCollection()->makeVisible('email'));
+        return $users;
+    }
+
+    /**
+     * Get a user's roles
+     */
     public function getUserRoles(User $user)
     {
         $this->authorize('viewUserRoles', Role::class);

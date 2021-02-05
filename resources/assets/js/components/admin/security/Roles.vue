@@ -3,36 +3,70 @@
     <template #header>
       <div class="d-flex justify-content-between">
         <span class="h3">Roles</span>
-        <b-button variant="success">
+        <b-button variant="success" @click="showNew = true">
           <fa-icon icon="plus" fixed-width /> Add New Role
         </b-button>
-       </div>
+      </div>
     </template>
     <b-skeleton-table v-if="state === 'loading'" :table-props="tableProps" :rows="5" :columns="7" />
-    <div v-else-if="state === 'error'">
-      You are not authorized to view this resource.
-    </div>
+    <error-alert v-else-if="state === 'error'" title="Unauthorized"
+      >You are not authorized to view this resource.</error-alert
+    >
     <div v-else>
-      <b-table :fields="fields" :items="roles" v-bind="tableProps" :busy="state === 'busy'" @row-clicked="rowClicked" />
-      <b-pagination class="mx-3" v-model="currentPage" :per-page="perPage" :total-rows="total" :disabled="state !== 'loaded'" />
+      <b-table
+        :fields="fields"
+        :items="roles"
+        v-bind="tableProps"
+        :busy="state === 'busy'"
+        @row-clicked="rowClicked"
+      >
+        <template #cell(actions)="data">
+          <div>
+            <b-btn
+              variant="info"
+              size="sm"
+              v-b-tooltip.hover
+              title="What users have this role?"
+              @click="viewUsers(data.item)"
+            >
+              <fa-icon icon="users" />
+            </b-btn>
+          </div>
+        </template>
+      </b-table>
+      <b-pagination
+        class="mx-3"
+        v-model="currentPage"
+        :per-page="perPage"
+        :total-rows="total"
+        :disabled="state !== 'loaded'"
+      />
     </div>
 
-    <b-modal v-model="showView" size="lg" title="Role" >
-      <ViewRole :role-id="selected" />
+    <b-modal v-model="showView" size="xl" :title="`Role ${selected.display_name || selected.name}`" @shown="$forceUpdate()">
+      <ViewRole ref="viewRole" :role-id="selected.id" v-model="showView" />
     </b-modal>
 
     <b-modal v-model="showNew" size="lg">
-      <NewRole :role-id="selected" />
+      <NewRole :role-id="selected.id" />
     </b-modal>
 
+    <b-modal
+      v-model="showUsers"
+      size="xl"
+      :title="`Users with the Role ${selected.display_name || selected.name}`"
+      @shown="$refs.userList.load()"
+    >
+      <UserList ref="userList" :endpoint="getUserEndpoint()" />
+    </b-modal>
   </b-card>
 </template>
 
 <script>
 import { clamp } from 'lodash'
 import { DateTime } from 'luxon'
-import NewRole from './role/New'
-import ViewRole from './role/View'
+import { NewRole, ViewRole } from './role'
+import UserList from '../users/List.vue'
 
 const fields = [
   {
@@ -49,7 +83,7 @@ const fields = [
     key: 'description',
   },
   {
-    key: 'guard_name'
+    key: 'guard_name',
   },
   {
     key: 'updated_at',
@@ -57,7 +91,11 @@ const fields = [
     formatter: (value) => {
       const dt = DateTime.fromISO(value)
       return `${dt.toLocaleString(DateTime.DATETIME_MED)} (${dt.toRelative()})`
-    }
+    },
+  },
+  {
+    key: 'actions',
+    label: 'Actions',
   },
 ]
 
@@ -65,6 +103,7 @@ export default {
   components: {
     NewRole,
     ViewRole,
+    UserList,
   },
   data: () => ({
     currentPage: 1,
@@ -73,26 +112,32 @@ export default {
     roles: [],
     total: 0,
     totalPages: 1,
-    selected: null,
+    selected: {},
     showView: false,
     showNew: false,
+    showUsers: false,
     tableProps: {
       'head-variant': 'light',
       responsive: true,
       hover: true,
       striped: true,
       outlined: true,
+      'tbody-tr-class': 'cursor-pointer',
       'primary-key': 'id',
     },
     fields: fields,
   }),
   methods: {
+    /**
+     * Load a page of roles
+     */
     load() {
       if (this.state !== 'loading') {
-        this.state = 'busy';
+        this.state = 'busy'
       }
-      this.axios.get(`/admin/role?page=${this.currentPage}&perPage=${this.perPage}`)
-        .then(result => {
+      this.axios
+        .get(`/admin/role?page=${this.currentPage}&perPage=${this.perPage}`)
+        .then((result) => {
           if (result.statusText === 'OK') {
             this.roles = result.data.data
             this.total = result.data.total
@@ -102,18 +147,32 @@ export default {
             this.state = 'error'
           }
         })
-        .catch(error => {
+        .catch((error) => {
           this.$log.error(error)
         })
     },
+
+    /**
+     * Table row was clicked
+     */
     rowClicked(item, index, event) {
-      this.selected = item.id
+      this.selected = item
       this.showView = true
-    }
+    },
+
+    /** Get list of users that have the role */
+    viewUsers(role) {
+      this.selected = role
+      this.showUsers = true
+    },
+
+    getUserEndpoint() {
+      return () => this.$route('admin.role.users', this.selected)
+    },
   },
   watch: {
     currentPage(value, oldVal) {
-      this.currentPage = clamp(value, 1, this.totalPages);
+      this.currentPage = clamp(value, 1, this.totalPages)
       this.load()
     },
   },
@@ -122,7 +181,3 @@ export default {
   },
 }
 </script>
-
-<style lang="scss" scoped>
-
-</style>

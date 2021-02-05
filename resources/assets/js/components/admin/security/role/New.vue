@@ -1,6 +1,7 @@
 <template>
   <div>
-    New Role Form
+    <!-- TODO: Add new role form -->
+    New Role Form ( In progress )
   </div>
 </template>
 
@@ -8,11 +9,5 @@
 /**
  * New Role Form
  */
-export default {
-  
-}
+export default {}
 </script>
-
-<style lang="scss" scoped>
-
-</style>

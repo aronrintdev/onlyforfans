@@ -41,7 +41,7 @@ class Role extends ParentRole
     public function removePermissions(Collection $permissions) {
         DB::transaction(function () use ($permissions) {
             $permissions->each(function ($permission, $key) {
-                $this->revokePermissionTo($permission->name);
+                $this->revokePermissionTo($permission['name']);
             });
         });
     }

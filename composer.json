@@ -35,7 +35,8 @@
         "pusher/pusher-php-server": "~3.0",
         "ramsey/uuid": "^4.0",
         "spatie/laravel-permission": "^3.18",
-        "spatie/laravel-referer": "^1.7"
+        "spatie/laravel-referer": "^1.7",
+        "tightenco/ziggy": "^1.0"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.2.3",
