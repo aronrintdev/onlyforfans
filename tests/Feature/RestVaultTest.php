@@ -25,7 +25,6 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
-     *  @group this
      */
     public function test_can_index_all_of_my_vaultfolders()
     {
@@ -57,6 +56,28 @@ class RestVaultTest extends TestCase
      *  @group vault
      *  @group regression
      *  @group this
+     */
+    public function test_can_not_index_other_nonshared_vaultfolders()
+    {
+        $creator = User::first();
+        $primaryVault = Vault::primary($creator)->first();
+
+        $nonfan = User::whereDoesntHave('sharedvaultfolders', function($q1) use(&$primaryVault) {
+            $q1->where('vault_id', $primaryVault->id);
+        })->where('id', '<>', $creator->id)->first();
+
+        $payload = [
+            'filters' => [
+                'vault_id' => $primaryVault->id,
+            ],
+        ];
+        $response = $this->actingAs($nonfan)->ajaxJSON('GET', route('vaultfolders.index'), $payload);
+        $response->assertStatus(403);
+    }
+
+    /**
+     *  @group vault
+     *  @group regression
      */
     public function test_can_index_my_root_level_vaultfolders()
     {

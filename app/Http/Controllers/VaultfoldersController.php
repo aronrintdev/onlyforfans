@@ -11,11 +11,7 @@ use App\Mediafile;
 use App\Vault;
 use App\Vaultfolder;
 
-/*
-        $request->validate([
-            'vf_id' => 'required',
-        ]);
- */
+// $request->validate([ 'vf_id' => 'required', ]);
 class VaultfoldersController extends AppBaseController
 {
     public function index(Request $request)
@@ -61,14 +57,6 @@ class VaultfoldersController extends AppBaseController
             //'mediafiles' => $cwf->mediafiles,
         ]);
     }
-        /*
-        if ( is_null($vfId) || $vfId==='root' ) {
-            $myVault = $sessionUser->vaults()->first(); // %FIXME
-            $cwf = $myVault->getRootFolder(); // 'current working folder'
-        } else {
-            $cwf = Vaultfolder::findOrFail($vfId);
-        }
-         */
 
     // %TODO: check session user owner
     public function show(Request $request, $pkid)
