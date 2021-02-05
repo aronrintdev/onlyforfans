@@ -16,15 +16,6 @@ Route::get('check-php', function () {
 });
 Route::post('ajax/switch-language', 'TimelineController@switchLanguage');
 
-// Require all files in routes/web
-$files = Finder::create()
-    ->in(base_path('routes/web'))
-    ->name('*.php');
-
-foreach($files as $file) {
-    require( $file->getRealPath() );
-}
-
 // Quick testing debug route
 Route::get('testing', function() {
     if (env('APP_DEBUG')) {
