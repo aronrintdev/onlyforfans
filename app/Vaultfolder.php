@@ -143,4 +143,8 @@ class Vaultfolder extends BaseModel implements Guidable, Sluggable, Ownable
 
     // %%% --- Other ---
 
+    public function isRootFolder() : bool {
+        return empty($this->parent_id);
+    }
+
 }

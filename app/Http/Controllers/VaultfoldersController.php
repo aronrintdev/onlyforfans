@@ -157,6 +157,9 @@ class VaultfoldersController extends AppBaseController
         if ( $request->user()->cannot('delete', $vaultfolder) ) {
             abort(403);
         }
+        if ( $vaultfolder->isRootFolder() ) {
+            abort(400);
+        }
         $vaultfolder->delete();
         return response()->json([]);
     }

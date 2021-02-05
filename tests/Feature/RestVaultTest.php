@@ -284,9 +284,8 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
-     *  @group this
      */
-    public function test_can_my_non_root_vaultfolder()
+    public function test_can_delete_my_non_root_vaultfolder()
     {
         $creator = User::first();
         $primaryVault = Vault::primary($creator)->first();
@@ -315,6 +314,55 @@ class RestVaultTest extends TestCase
         $exists = Vaultfolder::find($subfolderR->id);
         $this->assertNull($exists);
         $this->assertFalse($rootFolder->vfchildren->contains($subfolderR->id), 'Root should not contain deleted subfolder');
+    }
+
+    /**
+     *  @group vault
+     *  @group regression
+     *  @group this
+     */
+    public function test_nonowner_can_not_delete_my_vaultfolder()
+    {
+        $creator = User::first();
+        $primaryVault = Vault::primary($creator)->first();
+        $rootFolder = Vaultfolder::isRoot()->where('vault_id', $primaryVault->id)->first();
+        $nonowner = User::where('id', '<>', $creator->id)->first();
+
+        // make a subfolder
+        $payload = [
+            'vault_id' => $rootFolder->vault_id,
+            'parent_id' => $rootFolder->id,
+            'vfname' => $this->faker->slug,
+        ];
+        $response = $this->actingAs($creator)->ajaxJSON('POST', route('vaultfolders.store'), $payload);
+        $response->assertStatus(201);
+        $content = json_decode($response->content());
+        $this->assertNotNull($content->vaultfolder);
+        $subfolderR = $content->vaultfolder;
+        $rootFolder->refresh();
+        $exists = Vaultfolder::find($subfolderR->id);
+        $this->assertNotNull($exists);
+        $this->assertTrue($rootFolder->vfchildren->contains($subfolderR->id), 'Root should now contain newly creatred subfolder');
+
+        // delete the subfolder
+        $response = $this->actingAs($nonowner)->ajaxJSON('DELETE', route('vaultfolders.destroy', $subfolderR->id));
+        $response->assertStatus(403);
+    }
+
+    /**
+     *  @group vault
+     *  @group regression
+     *  @group this
+     */
+    public function test_can_not_delete_my_root_vaultfolder()
+    {
+        $creator = User::first();
+        $primaryVault = Vault::primary($creator)->first();
+        $rootFolder = Vaultfolder::isRoot()->where('vault_id', $primaryVault->id)->first();
+
+        // try to delete root folder
+        $response = $this->actingAs($creator)->ajaxJSON('DELETE', route('vaultfolders.destroy', $rootFolder->id));
+        $response->assertStatus(400);
     }
 
 
