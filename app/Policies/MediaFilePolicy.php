@@ -2,15 +2,13 @@
 
 namespace App\Policies;
 
-use App\MediaFile;
 use App\User;
-use App\Policies\Addons\IsBlockedByOwner;
-use App\Policies\Addons\IsOwner;
+use App\MediaFile;
+use App\Policies\Traits\OwnablePolicies;
 
 class MediaFilePolicy extends BasePolicy
 {
-    use IsBlockedByOwner;
-    use IsOwner;
+    use OwnablePolicies;
 
     protected $policies = [
         'viewAny'     => 'permissionOnly',

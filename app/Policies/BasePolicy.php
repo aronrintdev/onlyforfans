@@ -3,6 +3,8 @@
 namespace App\Policies;
 
 use App\User;
+use Exception;
+use ReflectionMethod;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use App\Policies\Enums\PolicyValidation;
@@ -126,7 +128,7 @@ class BasePolicy
             // Check for specific permission
             // {model}.{id}.{action}
             // ex. `Post.2.update`
-            return $user->hasPermissionTo($this->permissionName . '.' . $model->getKey() . '.' . $action);
+            return $user->hasPermissionTo($this->permissionName . '.' . $action . '.' . $model->getKey());
         }
 
         // No model key in this case.

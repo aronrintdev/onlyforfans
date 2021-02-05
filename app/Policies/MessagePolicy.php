@@ -4,8 +4,7 @@ namespace App\Policies;
 
 // use App\Message;
 use App\User;
-use App\Policies\Addons\IsBlockedByOwner;
-use App\Policies\Addons\IsOwner;
+use App\Policies\Traits\OwnablePolicies;
 
 /**
  * **Stub** | Placeholder until message model is implemented.
@@ -13,8 +12,7 @@ use App\Policies\Addons\IsOwner;
 
 class MessagePolicy extends BasePolicy
 {
-    use IsBlockedByOwner;
-    use IsOwner;
+    use OwnablePolicies;
 
     protected $policies = [
         'viewAny'     => 'permissionOnly',

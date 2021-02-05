@@ -4,13 +4,11 @@ namespace App\Policies;
 
 use App\Comment;
 use App\User;
-use App\Policies\Addons\IsBlockedByOwner;
-use App\Policies\Addons\IsOwner;
+use App\Policies\Traits\OwnablePolicies;
 
 class CommentPolicy extends BasePolicy
 {
-    use IsBlockedByOwner;
-    use IsOwner;
+    use OwnablePolicies;
 
     protected $policies = [
         'viewAny'     => 'permissionOnly',

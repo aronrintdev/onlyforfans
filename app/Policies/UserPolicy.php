@@ -9,7 +9,7 @@ class UserPolicy extends BasePolicy
     protected $policies = [
         'viewAny'     => 'permissionOnly',
         'create'      => 'permissionOnly',
-        'view'        => 'isBlockedBy:fail:next',
+        'view'        => 'isBlockedBy:fail',
         'update'      => 'isSelf:pass',
         'delete'      => 'permissionOnly',
         'restore'     => 'permissionOnly',

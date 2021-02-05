@@ -34,7 +34,7 @@ protected $skipPermissionsOn = [];
 #### Policy Permission Action Names
 Normally permissions will be saved like such.
 ```
-   {Model Name}.{identifier}.{action}
+   {Model Name}.{action}.{identifier}
    or
    {Model Name}.{action}
 ```
@@ -48,7 +48,7 @@ protected $actionNames = [
    'tip' => 'tippable',
 ];
 ```
-will result in the permission being named `Post.4.tippable` instead of `Post.4.tip`
+will result in the permission being named `Post.tippable.4` instead of `Post.tip.4`
 
 
 ## Addon Policies Array
@@ -157,3 +157,16 @@ protected function view(User $user, Post $post)
    //
 }
 ```
+
+## Permission
+When giving out permission for policies, use wildcard syntax where necessary.
+Examples:
+```
+'Post.*'
+'Post.update.*'
+'Post.show.*'
+'Post.create'
+'Post.show.5'
+```
+**Warning**: `*` means all, not any.
+`Post.*` and `Post.update.*` will both be true for `Post.update.5`

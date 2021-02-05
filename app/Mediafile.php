@@ -11,6 +11,8 @@ use App\Interfaces\Guidable;
 //use App\Interfaces\Nameable;
 use App\Interfaces\Sluggable;
 use App\Enums\MediafileTypeEnum;
+use App\Traits\OwnableFunctions;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -18,6 +20,7 @@ class Mediafile extends BaseModel implements Guidable, Sluggable, Ownable
 {
     use SluggableTraits;
     use HasFactory;
+    use OwnableFunctions;
 
     protected $guarded = ['id','created_at','updated_at'];
     protected $appends = ['filepath', 'name'];
@@ -38,7 +41,7 @@ class Mediafile extends BaseModel implements Guidable, Sluggable, Ownable
         return $this->morphToMany('App\User', 'shareable', 'shareables', 'shareable_id', 'sharee_id');
     }
 
-    public function getOwner() : ?User {
+    public function getOwner() : ?Collection {
         return $this->resource->getOwner();
     }
 

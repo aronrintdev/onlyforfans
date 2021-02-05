@@ -2,15 +2,13 @@
 
 namespace App\Policies;
 
-use App\Vault;
 use App\User;
-use App\Policies\Addons\IsBlockedByOwner;
-use App\Policies\Addons\IsOwner;
+use App\Vault;
+use App\Policies\Traits\OwnablePolicies;
 
 class VaultPolicy extends BasePolicy
 {
-    use IsBlockedByOwner;
-    use IsOwner;
+    use OwnablePolicies;
 
     protected $policies = [
         'viewAny'     => 'permissionOnly',

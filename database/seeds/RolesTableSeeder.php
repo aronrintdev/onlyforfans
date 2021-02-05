@@ -46,7 +46,7 @@ class RolesTableSeeder extends Seeder
 
         $role->givePermissionTo([
             'admin.*',
-            'user.*.view',
+            'User.view.*',
         ]);
 
         unset($role);
@@ -87,7 +87,7 @@ class RolesTableSeeder extends Seeder
         ]);
 
         $role->givePermissionTo([
-            'post.create',
+            'Post.create',
         ]);
 
         unset($role);

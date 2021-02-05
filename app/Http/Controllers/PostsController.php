@@ -86,9 +86,9 @@ class PostsController extends AppBaseController
 
         $saves = $sessionUser->sharedmediafiles->map( function($mf) {
             $mf->foo = 'bar';
-            //$mf->owner = $mf->getOwner(); // %TODO
+            //$mf->owner = $mf->getOwner()->first(); // %TODO
             //dd( 'owner', $mf->owner->only('username', 'name', 'avatar') ); // HERE
-            $mf->owner = $mf->getOwner()->only('username', 'name', 'avatar');
+            $mf->owner = $mf->getOwner()->first()->only('username', 'name', 'avatar');
             return $mf;
         });
 
