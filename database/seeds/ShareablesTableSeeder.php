@@ -125,7 +125,7 @@ class ShareablesTableSeeder extends Seeder
                 Fanledger::create([
                     'fltype' => PaymentTypeEnum::SUBSCRIPTION,
                     'purchaser_id' => $f->id, // fan
-                    'seller_id' => $t->id,
+                    'seller_id' => $t->user->id,
                     'purchaseable_type' => 'timelines',
                     'purchaseable_id' => $t->id,
                     'qty' => 1,
