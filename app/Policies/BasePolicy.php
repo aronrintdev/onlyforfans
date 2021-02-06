@@ -58,7 +58,7 @@ class BasePolicy
                     }
                     $policy = Str::of($policy)->explode(':')->all();
                     if ( method_exists($this, $policy[0]) ) {
-                        $result = call_user_func_array(array($this, $policy), $arguments);
+                        $result = call_user_func_array(array($this, $policy[0]), $arguments);
                         if ($result === true) {
                             if (isset($policy[1])) {
                                 if ( $policy[1] == PolicyValidation::PASS ) {
