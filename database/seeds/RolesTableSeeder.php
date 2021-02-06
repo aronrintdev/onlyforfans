@@ -41,7 +41,7 @@ class RolesTableSeeder extends Seeder
             'display_name' => 'All Admin Permissions',
             'description' => 'Access to any admin permission'
         ]);
-        Permission::firstOrCreate(['name' => 'user.*.view', 'guard_name' => 'web'])->update([
+        Permission::firstOrCreate(['name' => 'User.view.*', 'guard_name' => 'web'])->update([
             'display_name' => 'View Any User',
             'description' => 'Access to view any user'
         ]);
@@ -83,7 +83,7 @@ class RolesTableSeeder extends Seeder
 
         // TODO: Add Permissions
 
-        Permission::firstOrCreate(['name' => 'post.create', 'guard_name' => 'web'])->update([
+        Permission::firstOrCreate(['name' => 'Post.create', 'guard_name' => 'web'])->update([
             'display_name' => 'Create New Post',
             'description' => 'Access to Create a new Post'
         ]);

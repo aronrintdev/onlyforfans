@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use Faker\Factory;
 use App\Conversation;
 
 class ConversationsTableSeeder extends Seeder
@@ -16,7 +17,7 @@ class ConversationsTableSeeder extends Seeder
         //Populate dummy conversations
         Conversation::factory()->count(40)->create()
         ->each(function ($conversation) {
-            $faker = Faker\Factory::create();
+            $faker = Factory::create();
 
 
             $views = $faker->randomElements(['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20'], 2);

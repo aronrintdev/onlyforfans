@@ -1,11 +1,14 @@
 <?php
 namespace Database\Seeders;
 
-use App\Group;
 use App\Page;
-use App\Timeline;
 use App\User;
+use App\Group;
 use Exception;
+use App\Timeline;
+use Faker\Factory;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class TimelinesTableSeeder extends Seeder
 {
@@ -80,7 +83,7 @@ class TimelinesTableSeeder extends Seeder
         //Populate dummy accounts
         Timeline::factory()->count(90)->create()
            ->each(function ($timeline) {
-               $faker = Faker\Factory::create();
+               $faker = Factory::create();
 
             if ($timeline->id < 40) {
                 //Seeding users
@@ -159,7 +162,7 @@ class TimelinesTableSeeder extends Seeder
            });
 
             //Seeding Followers
-            $faker = Faker\Factory::create();
+            $faker = Factory::create();
         $users = User::all();
 
         foreach ($users as $user) {
