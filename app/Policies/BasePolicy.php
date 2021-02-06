@@ -82,14 +82,14 @@ class BasePolicy
             if ( method_exists($this, $method) ) {
                 $reflection = new ReflectionMethod($this, $method);
                 // To avoid the private infinite loop
-                if ( $reflection->isProtected()) {
+                if ($reflection->isProtected() === false) {
                     throw new Exception('Method ' . $method . ' is not a protected method on ' . class_basename($this));
                 }
                 return call_user_func_array(array($this, $method), $arguments);
             } else if( method_exists($this, $method . 'Policy') ) {
                 $reflection = new ReflectionMethod($this, $method . 'Policy');
                 // To avoid the private infinite loop
-                if ( $reflection->isPrivate()) {
+                if ( $reflection->isPrivate() === true) {
                     throw new Exception('Method ' . $method . 'Policy' . ' is a private method on ' . class_basename($this));
                 }
                 return call_user_func_array(array($this, $method . 'Policy'), $arguments);

@@ -18,7 +18,6 @@ class PostPolicy extends BasePolicy
         'restore'     => 'isOwner:pass',
         'forceDelete' => 'isOwner:pass',
         'like'        => 'isOwner:pass isBlockedByOwner:fail',
-        'tip'         => 'isBlockedByOwner:fail',
     ];
 
     /**
@@ -30,7 +29,7 @@ class PostPolicy extends BasePolicy
      */
     protected function view(User $user, Post $post)
     {
-        return $post->isViewableByUser($user);
+        return $post->timeline->followers->contains($user->id);
     }
 
     /**
