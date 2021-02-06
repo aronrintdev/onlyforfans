@@ -2,7 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Message;
+// Message was removed.
+// use App\Message;
 
 class MessagesTableSeeder extends Seeder
 {
@@ -13,6 +14,7 @@ class MessagesTableSeeder extends Seeder
      */
     public function run()
     {
-        Message::factory()->count(40)->create();
+        $this->command->getOutput()->writeln("Messages was removed MessagesTableSeeder doing nothing. (Remove seeder soon)");
+        // Message::factory()->count(40)->create();
     }
 }

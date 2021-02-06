@@ -2,18 +2,19 @@
 namespace Database\Seeders;
 
 use DB;
-use Exception;
-use Symfony\Component\Console\Output\ConsoleOutput;
-use Illuminate\Support\Facades\Config;
-use Carbon\Carbon;
-use App\Fanledger;
 use App\Post;
-use App\Timeline;
 use App\User;
-use App\Enums\PostTypeEnum;
-use App\Enums\PaymentTypeEnum;
-use App\Libs\FactoryHelpers;
+use Exception;
+use App\Timeline;
+use App\Fanledger;
+use Carbon\Carbon;
 use App\Libs\UserMgr;
+use App\Enums\PostTypeEnum;
+use App\Libs\FactoryHelpers;
+use App\Enums\PaymentTypeEnum;
+use App\Enums\MediafileTypeEnum;
+use Illuminate\Support\Facades\Config;
+use Symfony\Component\Console\Output\ConsoleOutput;
 
 class ShareablesTableSeeder extends Seeder
 {
@@ -147,11 +148,11 @@ class ShareablesTableSeeder extends Seeder
                     $avatar = null;
                     $cover = null;
                 }
-    
+
                 $u->is_follow_for_free = $isFollowForFree;
                 $u->save();
                 $isFollowForFree = !$isFollowForFree; // toggle so we get at least one of each
-    
+
                 $timeline = $u->timeline;
                 $timeline->avatar_id = $avatar->id ?? null;
                 $timeline->cover_id = $cover->id ?? null;
