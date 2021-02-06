@@ -11,52 +11,10 @@ class VaultPolicy extends BasePolicy
 
     protected $policies = [
         'viewAny'     => 'permissionOnly',
-        'view'        => 'isBlockedByOwner:fail',
+        'view'        => 'isOwner:pass',
         'update'      => 'isOwner:pass',
         'delete'      => 'isOwner:pass',
         'restore'     => 'isOwner:pass',
-        'forceDelete' => 'permissionOnly',
+        'forceDelete' => 'isOwner:pass',
     ];
-    /*
-    use HandlesAuthorization;
-
-    public function __construct()
-    {
-        //
-    }
-
-    public function viewAny(User $user)
-    {
-    }
-
-    public function view(User $user, Vault $resource)
-    {
-        return $user->isOwner($resource);
-    }
-
-    public function create(User $user)
-    {
-        return $user->isOwner($resource);
-    }
-
-    public function update(User $user, Vault $resource)
-    {
-        return $user->isOwner($resource);
-    }
-
-    public function delete(User $user, Vault $resource)
-    {
-        return $user->isOwner($resource);
-    }
-
-    public function restore(User $user, Vault $resource)
-    {
-        return $user->isOwner($resource);
-    }
-
-    public function forceDelete(User $user, Vault $resource)
-    {
-        return $user->isOwner($resource);
-    }
-     */
 }

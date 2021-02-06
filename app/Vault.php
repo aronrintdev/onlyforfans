@@ -63,7 +63,7 @@ class Vault extends BaseModel implements Guidable, Sluggable, Ownable
     }
 
     public function getOwner() : ?Collection {
-        return new Collection($this->user);
+        return new Collection([$this->user]);
     }
 
     //--------------------------------------------

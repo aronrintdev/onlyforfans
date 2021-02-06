@@ -1,46 +1,30 @@
 <?php
 namespace App\Policies;
 
-use Illuminate\Auth\Access\HandlesAuthorization;
 use App\User;
 use App\Vaultfolder;
+use App\Policies\Traits\OwnablePolicies;
 
-class VaultfolderPolicy
+class VaultfolderPolicy extends BasePolicy
 {
-    use HandlesAuthorization;
+    use OwnablePolicies;
 
-    public function viewAny(User $user)
+    protected $policies = [
+        'viewAny'     => 'permissionOnly',
+        'view'        => 'isOwner:pass isBlockedByOwner:fail',
+        'update'      => 'isOwner:pass',
+        'delete'      => 'isOwner:pass',
+        'restore'     => 'isOwner:pass',
+        'forceDelete' => 'isOwner:pass',
+    ];
+
+    protected function view(User $user, Vaultfolder $resource)
     {
+        return $resource->sharees->contains($user->id);
     }
 
-    public function view(User $user, Vaultfolder $resource)
-    {
-        return $user->isOwner($resource)
-            || $resource->sharees->contains($user->id);
-    }
-
-    public function create(User $user)
+    protected function create(User $user)
     {
         return true; // %TODO: restrict to creators (?)
-    }
-
-    public function update(User $user, Vaultfolder $resource)
-    {
-        return $user->isOwner($resource);
-    }
-
-    public function delete(User $user, Vaultfolder $resource)
-    {
-        return $user->isOwner($resource);
-    }
-
-    public function restore(User $user, Vaultfolder $resource)
-    {
-        return $user->isOwner($resource);
-    }
-
-    public function forceDelete(User $user, Vaultfolder $resource)
-    {
-        return $user->isOwner($resource);
     }
 }
