@@ -27,10 +27,15 @@ class TimelinePolicy extends BasePolicy
      * @param  \App\Timeline  $timeline
      * @return mixed
      */
-    public function view(User $user, Timeline $resource)
+    protected function view(User $user, Timeline $resource)
     {
         // Is viewable by user?
+        return $resource->followers->contains($user->id);;
+    }
 
+    protected function like(User $user, Timeline $resource)
+    {
+        // Is viewable by user?
         return $resource->followers->contains($user->id);;
     }
 
