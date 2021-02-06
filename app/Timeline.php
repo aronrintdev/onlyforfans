@@ -9,11 +9,14 @@ use App\Interfaces\Ownable;
 use App\Interfaces\Purchaseable;
 use Intervention\Image\Facades\Image;
 use App\Enums\ShareableAccessLevelEnum;
+use App\Traits\OwnableFunctions;
+use Illuminate\Support\Collection;
 
 class Timeline extends Model implements Purchaseable, Ownable
 {
     //use SoftDeletes;
     use HasFactory;
+    use OwnableFunctions;
 
     public $table = 'timelines';
 
@@ -260,7 +263,7 @@ class Timeline extends Model implements Purchaseable, Ownable
 
     // %%% --- Implement Ownable Interface ---
 
-    public function getOwner() : ?User {
-        return $this->user;
+    public function getOwner() : ?Collection {
+        return new Collection([$this->user]);
     }
 }

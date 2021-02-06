@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * Deprecated Routes
+ */
+
 // Webhooks
 Route::post('webhook', 'CheckoutController@webhook');
 Route::post('/register/{affliate}', 'Auth\RegisterController@registerUser');
@@ -14,7 +18,8 @@ Route::get('/get-location/{location}', 'HomeController@getLocation');
 Route::get('check-php', function () {
     return phpinfo();
 });
-Route::post('ajax/switch-language', 'TimelineController@switchLanguage');
+Route::post('ajax/switch-language', 'ZDeprecated\TimelineController@switchLanguage');
+
 
 // Quick testing debug route
 Route::get('testing', function() {
@@ -51,10 +56,10 @@ Route::group(['prefix' => 'checkout', 'middleware' => ['auth']], function() {
 });
 
 Route::group(['middleware' => ['auth']], function () {
-    Route::get('/browse', 'TimelineController@showGlobalFeed');
-    Route::get('explore', 'TimelineController@showExplorePosts')->name('explore-posts');
-    Route::get('purchased-posts', 'TimelineController@showPurchasedPosts')->name('purchased-posts');
-    Route::get('post/{id}', 'TimelineController@showPost')->name('post.show');
+    Route::get('/browse', 'ZDeprecated\TimelineController@showGlobalFeed');
+    Route::get('explore', 'ZDeprecated\TimelineController@showExplorePosts')->name('explore-posts');
+    Route::get('purchased-posts', 'ZDeprecated\TimelineController@showPurchasedPosts')->name('purchased-posts');
+    Route::get('post/{id}', 'ZDeprecated\TimelineController@showPost')->name('post.show');
 });
 
 /*
@@ -127,43 +132,43 @@ Route::get('wallpaper/{filename}', function ($filename) {
     return Image::make(storage_path().'/uploads/wallpapers/'.$filename)->response();
 });
 
-Route::post('/member/update-role', 'TimelineController@assignMemberRole');
-Route::post('/member/updatepage-role', 'TimelineController@assignPageMemberRole');
-Route::get('/post/{post_id}', 'TimelineController@singlePost');
+Route::post('/member/update-role', 'ZDeprecated\TimelineController@assignMemberRole');
+Route::post('/member/updatepage-role', 'ZDeprecated\TimelineController@assignPageMemberRole');
+Route::get('/post/{post_id}', 'ZDeprecated\TimelineController@singlePost');
 
-Route::get('allnotifications', 'TimelineController@allNotifications');
-Route::get('/mylists', 'TimelineController@showMyLists');
-Route::get('/mylist/{list_type_id}', 'TimelineController@showSpecificList');
+Route::get('allnotifications', 'ZDeprecated\TimelineController@allNotifications');
+Route::get('/mylists', 'ZDeprecated\TimelineController@showMyLists');
+Route::get('/mylist/{list_type_id}', 'ZDeprecated\TimelineController@showSpecificList');
 
 Route::group(['prefix' => '/{username}', 'middleware' => ['auth', 'editown']], function ($username) {
 
-    Route::get('/messages', 'UserController@messages');
-    Route::get('/follow-requests', 'UserController@followRequests');
+    Route::get('/messages', 'ZDeprecated\UserController@messages');
+    Route::get('/follow-requests', 'ZDeprecated\UserController@followRequests');
 
-    Route::get('/pages-groups', 'TimelineController@pagesGroups');
+    Route::get('/pages-groups', 'ZDeprecated\TimelineController@pagesGroups');
     
-    Route::get('/album/create', 'TimelineController@createAlbum');
-    Route::post('/album/create', 'TimelineController@saveAlbum');
+    Route::get('/album/create', 'ZDeprecated\TimelineController@createAlbum');
+    Route::post('/album/create', 'ZDeprecated\TimelineController@saveAlbum');
 
-    Route::get('/album/{id}/edit', 'TimelineController@editAlbum');
-    Route::post('/album/{id}/edit', 'TimelineController@updateAlbum');
-    Route::get('/album/{album}/delete', 'TimelineController@deleteAlbum');
+    Route::get('/album/{id}/edit', 'ZDeprecated\TimelineController@editAlbum');
+    Route::post('/album/{id}/edit', 'ZDeprecated\TimelineController@updateAlbum');
+    Route::get('/album/{album}/delete', 'ZDeprecated\TimelineController@deleteAlbum');
 
-    Route::get('/album-preview/{id}/{photo_id}', 'TimelineController@addPreview');
-    Route::get('/delete-media/{media}', 'TimelineController@deleteMedia');
+    Route::get('/album-preview/{id}/{photo_id}', 'ZDeprecated\TimelineController@addPreview');
+    Route::get('/delete-media/{media}', 'ZDeprecated\TimelineController@deleteMedia');
 
-    Route::post('/move-photos', 'UserController@movePhotos');
-    Route::post('/delete-photos', 'UserController@deletePhotos');
+    Route::post('/move-photos', 'ZDeprecated\UserController@movePhotos');
+    Route::post('/delete-photos', 'ZDeprecated\UserController@deletePhotos');
 
-    // Route::get('/pages', 'UserController@pages');
-    // Route::get('/groups', 'UserController@groups');
-    Route::get('/saved', 'UserController@savedItems'); // %FIXME %DEPRECATE, use new resource route for this
+    // Route::get('/pages', 'ZDeprecated\UserController@pages');
+    // Route::get('/groups', 'ZDeprecated\UserController@groups');
+    Route::get('/saved', 'ZDeprecated\UserController@savedItems'); // %FIXME %DEPRECATE, use new resource route for this
 
 });
 
 Route::group(['prefix' => '/{username}'], function ($username) {
-    Route::get('/', 'TimelineController@posts')->name('users.profile');
-    Route::post('/', 'TimelineController@posts');
+    Route::get('/', 'ZDeprecated\TimelineController@posts')->name('users.profile');
+    Route::post('/', 'ZDeprecated\TimelineController@posts');
 });
 /*
 |--------------------------------------------------------------------------
@@ -172,15 +177,15 @@ Route::group(['prefix' => '/{username}'], function ($username) {
 */
 
 Route::group(['prefix' => '/{username}/page-settings', 'middleware' => ['auth', 'editpage']], function ($username) {
-    Route::get('/general', 'TimelineController@generalPageSettings');
-    Route::post('/general', 'TimelineController@updateGeneralPageSettings');
-    Route::get('/privacy', 'TimelineController@privacyPageSettings');
-    Route::post('/privacy', 'TimelineController@updatePrivacyPageSettings');
-    Route::get('/wallpaper', 'TimelineController@pageWallpaperSettings');
-    Route::post('/wallpaper', 'TimelineController@saveWallpaperSettings');
-    Route::get('/toggle-wallpaper/{action}/{media}', 'TimelineController@toggleWallpaper');
-    Route::get('/roles', 'TimelineController@rolesPageSettings');
-    Route::get('/likes', 'TimelineController@likesPageSettings');
+    Route::get('/general', 'ZDeprecated\TimelineController@generalPageSettings');
+    Route::post('/general', 'ZDeprecated\TimelineController@updateGeneralPageSettings');
+    Route::get('/privacy', 'ZDeprecated\TimelineController@privacyPageSettings');
+    Route::post('/privacy', 'ZDeprecated\TimelineController@updatePrivacyPageSettings');
+    Route::get('/wallpaper', 'ZDeprecated\TimelineController@pageWallpaperSettings');
+    Route::post('/wallpaper', 'ZDeprecated\TimelineController@saveWallpaperSettings');
+    Route::get('/toggle-wallpaper/{action}/{media}', 'ZDeprecated\TimelineController@toggleWallpaper');
+    Route::get('/roles', 'ZDeprecated\TimelineController@rolesPageSettings');
+    Route::get('/likes', 'ZDeprecated\TimelineController@likesPageSettings');
 });
 
 /*
@@ -190,13 +195,13 @@ Route::group(['prefix' => '/{username}/page-settings', 'middleware' => ['auth', 
 */
 
 Route::group(['prefix' => '/{username}/group-settings', 'middleware' => ['auth', 'editgroup']], function ($username) {
-    Route::get('/general', 'TimelineController@groupGeneralSettings');
-    Route::post('/general', 'TimelineController@updateUserGroupSettings');
-    // Route::get('/closegroup', 'TimelineController@groupGeneralSettings');
-    // Route::get('/join-requests/{group_id}', 'TimelineController@getJoinRequests');
-    Route::get('/wallpaper', 'TimelineController@groupWallpaperSettings');
-    Route::post('/wallpaper', 'TimelineController@saveWallpaperSettings');
-    Route::get('/toggle-wallpaper/{action}/{media}', 'TimelineController@toggleWallpaper');
+    Route::get('/general', 'ZDeprecated\TimelineController@groupGeneralSettings');
+    Route::post('/general', 'ZDeprecated\TimelineController@updateUserGroupSettings');
+    // Route::get('/closegroup', 'ZDeprecated\TimelineController@groupGeneralSettings');
+    // Route::get('/join-requests/{group_id}', 'ZDeprecated\TimelineController@getJoinRequests');
+    Route::get('/wallpaper', 'ZDeprecated\TimelineController@groupWallpaperSettings');
+    Route::post('/wallpaper', 'ZDeprecated\TimelineController@saveWallpaperSettings');
+    Route::get('/toggle-wallpaper/{action}/{media}', 'ZDeprecated\TimelineController@toggleWallpaper');
 });
 
 /*
@@ -206,109 +211,109 @@ Route::group(['prefix' => '/{username}/group-settings', 'middleware' => ['auth',
 */
 
 Route::group(['prefix' => '/{username}/event-settings', 'middleware' => ['auth','editevent']], function ($username) {
-    Route::get('/general', 'TimelineController@generalEventSettings');
-    Route::post('/general', 'TimelineController@updateUserEventSettings');
+    Route::get('/general', 'ZDeprecated\TimelineController@generalEventSettings');
+    Route::post('/general', 'ZDeprecated\TimelineController@updateUserEventSettings');
 });
 
 Route::group(['prefix' => 'ajax', 'middleware' => ['auth']], function () {
 
-    Route::get('timeline-render-modal', 'TimelineController@renderModal'); // %PSG
+    Route::get('timeline-render-modal', 'ZDeprecated\TimelineController@renderModal'); // %PSG
 
-    Route::post('get-youtube-video', 'TimelineController@getYoutubeVideo');
-    Route::post('like-post', 'TimelineController@likePost');
-    Route::post('notify-user', 'TimelineController@getNotifications');
-    Route::post('post-comment', 'TimelineController@postComment');
-    Route::post('page-like', 'TimelineController@pageLike');
-    Route::post('change-avatar', 'TimelineController@changeAvatar');
-    Route::post('change-cover', 'TimelineController@changeCover');
-    Route::post('comment-like', 'TimelineController@likeComment');
-    Route::post('comment-delete', 'TimelineController@deleteComment');
-    Route::post('post-delete', 'TimelineController@deletePost');
-    Route::post('page-delete', 'TimelineController@deletePage');
-    Route::post('share-post', 'TimelineController@sharePost');
+    Route::post('get-youtube-video', 'ZDeprecated\TimelineController@getYoutubeVideo');
+    Route::post('like-post', 'ZDeprecated\TimelineController@likePost');
+    Route::post('notify-user', 'ZDeprecated\TimelineController@getNotifications');
+    Route::post('post-comment', 'ZDeprecated\TimelineController@postComment');
+    Route::post('page-like', 'ZDeprecated\TimelineController@pageLike');
+    Route::post('change-avatar', 'ZDeprecated\TimelineController@changeAvatar');
+    Route::post('change-cover', 'ZDeprecated\TimelineController@changeCover');
+    Route::post('comment-like', 'ZDeprecated\TimelineController@likeComment');
+    Route::post('comment-delete', 'ZDeprecated\TimelineController@deleteComment');
+    Route::post('post-delete', 'ZDeprecated\TimelineController@deletePost');
+    Route::post('page-delete', 'ZDeprecated\TimelineController@deletePage');
+    Route::post('share-post', 'ZDeprecated\TimelineController@sharePost');
     Route::post('purchase-post/{post}', 'PostsController@purchase')->name('posts.purchase'); // %FIXME: move to above
     Route::post('send-tip-post/{post}', 'PostsController@tip')->name('posts.tip'); // %FIXME: move to above
     Route::post('send-tip-user/{user}', 'UsersController@tip')->name('users.tip');
-    Route::post('page-liked', 'TimelineController@pageLiked');
-    Route::get('get-more-posts', 'TimelineController@getMorePosts');
-    Route::get('get-more-feed', 'TimelineController@showFeed');
-    Route::get('get-global-feed', 'TimelineController@showGlobalFeed');
-    Route::get('get-explore-posts', 'TimelineController@showExplorePosts');
-    Route::get('get-purchased-posts', 'TimelineController@showPurchasedPosts');
-    Route::get('search-explore-posts', 'TimelineController@searchExplorePosts')->name('post.search');
-    Route::get('search-purchased-posts', 'TimelineController@searchPurchasedPosts')->name('purchased-post.search');
+    Route::post('page-liked', 'ZDeprecated\TimelineController@pageLiked');
+    Route::get('get-more-posts', 'ZDeprecated\TimelineController@getMorePosts');
+    Route::get('get-more-feed', 'ZDeprecated\TimelineController@showFeed');
+    Route::get('get-global-feed', 'ZDeprecated\TimelineController@showGlobalFeed');
+    Route::get('get-explore-posts', 'ZDeprecated\TimelineController@showExplorePosts');
+    Route::get('get-purchased-posts', 'ZDeprecated\TimelineController@showPurchasedPosts');
+    Route::get('search-explore-posts', 'ZDeprecated\TimelineController@searchExplorePosts')->name('post.search');
+    Route::get('search-purchased-posts', 'ZDeprecated\TimelineController@searchPurchasedPosts')->name('purchased-post.search');
     
-    Route::post('get-users', 'UserController@getUsersJoin');
-    Route::get('get-users-mentions', 'UserController@getUsersMentions');
+    Route::post('get-users', 'ZDeprecated\UserController@getUsersJoin');
+    Route::get('get-users-mentions', 'ZDeprecated\UserController@getUsersMentions');
 
-    Route::post('report-post', 'TimelineController@reportPost');
+    Route::post('report-post', 'ZDeprecated\TimelineController@reportPost');
     Route::post('post-message/{id}', 'MessageController@update');
     Route::post('create-message', 'MessageController@store');
-    Route::post('page-report', 'TimelineController@pageReport');
-    Route::post('get-notifications', 'UserController@getNotifications');
-    Route::post('get-unread-notifications', 'UserController@getUnreadNotifications');
+    Route::post('page-report', 'ZDeprecated\TimelineController@pageReport');
+    Route::post('get-notifications', 'ZDeprecated\UserController@getNotifications');
+    Route::post('get-unread-notifications', 'ZDeprecated\UserController@getUnreadNotifications');
     Route::post('get-messages', 'MessageController@getMessages')->name('conversation.get-messages');
     Route::post('favourite-user', 'MessageController@favouriteUser')->name('conversation.favourite-user');
     Route::post('get-message/{id}', 'MessageController@getMessage');
     Route::post('get-conversation/{id}', 'MessageController@show');
     Route::post('get-private-conversation/{userId}', 'MessageController@getPrivateConversation');
-    Route::post('get-unread-message', 'UserController@getUnreadMessage');
+    Route::post('get-unread-message', 'ZDeprecated\UserController@getUnreadMessage');
     Route::post('get-unread-messages', 'MessageController@getUnreadMessages');
 
-    Route::post('get-users-modal', 'UserController@getUsersModal');
-    Route::post('edit-post', 'TimelineController@editPost');
-    Route::get('load-emoji', 'TimelineController@loadEmoji');
-    Route::post('update-post', 'TimelineController@updatePost');
+    Route::post('get-users-modal', 'ZDeprecated\UserController@getUsersModal');
+    Route::post('edit-post', 'ZDeprecated\TimelineController@editPost');
+    Route::get('load-emoji', 'ZDeprecated\TimelineController@loadEmoji');
+    Route::post('update-post', 'ZDeprecated\TimelineController@updatePost');
     Route::post('/mark-all-notifications', 'NotificationController@markAllRead');
-    // Route::post('add-page-members', 'UserController@addingMembersPage');
-    // Route::post('get-members-join', 'UserController@getMembersJoin');
+    // Route::post('add-page-members', 'ZDeprecated\UserController@addingMembersPage');
+    // Route::post('get-members-join', 'ZDeprecated\UserController@getMembersJoin');
     // Route::post('announce-delete', 'AdminController@removeAnnouncement');
     // Route::post('category-delete', 'AdminController@removeCategory');
-    Route::post('get-members-invite', 'UserController@getMembersInvite');
-    // Route::post('add-event-members', 'UserController@addingEventMembers');
-    // Route::post('join-event', 'TimelineController@joiningEvent');
-    // Route::post('event-delete', 'TimelineController@deleteEvent');
-    Route::post('notification-delete', 'TimelineController@deleteNotification');
-    Route::post('allnotifications-delete', 'TimelineController@deleteAllNotifications');
-    Route::post('post-hide', 'TimelineController@hidePost');
-    // Route::post('group-delete', 'TimelineController@deleteGroup');
-    Route::post('media-edit', 'TimelineController@albumPhotoEdit');
-    // Route::post('unjoinPage', 'TimelineController@unjoinPage');
-    Route::post('save-timeline', 'TimelineController@saveTimeline');
-    Route::post('save-post', 'TimelineController@savePost');
-    Route::post('pin-post', 'TimelineController@pinPost');
-    Route::post('update-user-list', 'TimelineController@updateUserList');
-    Route::post('get-user-list', 'TimelineController@getUserList');
-    Route::post('add-new-user-list', 'TimelineController@addNewUserList');
-    Route::post('get-lists-sort-by', 'TimelineController@getListsSortBy');
+    Route::post('get-members-invite', 'ZDeprecated\UserController@getMembersInvite');
+    // Route::post('add-event-members', 'ZDeprecated\UserController@addingEventMembers');
+    // Route::post('join-event', 'ZDeprecated\TimelineController@joiningEvent');
+    // Route::post('event-delete', 'ZDeprecated\TimelineController@deleteEvent');
+    Route::post('notification-delete', 'ZDeprecated\TimelineController@deleteNotification');
+    Route::post('allnotifications-delete', 'ZDeprecated\TimelineController@deleteAllNotifications');
+    Route::post('post-hide', 'ZDeprecated\TimelineController@hidePost');
+    // Route::post('group-delete', 'ZDeprecated\TimelineController@deleteGroup');
+    Route::post('media-edit', 'ZDeprecated\TimelineController@albumPhotoEdit');
+    // Route::post('unjoinPage', 'ZDeprecated\TimelineController@unjoinPage');
+    Route::post('save-timeline', 'ZDeprecated\TimelineController@saveTimeline');
+    Route::post('save-post', 'ZDeprecated\TimelineController@savePost');
+    Route::post('pin-post', 'ZDeprecated\TimelineController@pinPost');
+    Route::post('update-user-list', 'ZDeprecated\TimelineController@updateUserList');
+    Route::post('get-user-list', 'ZDeprecated\TimelineController@getUserList');
+    Route::post('add-new-user-list', 'ZDeprecated\TimelineController@addNewUserList');
+    Route::post('get-lists-sort-by', 'ZDeprecated\TimelineController@getListsSortBy');
 
     // --
 
-    Route::post('follow/{timeline}', 'TimelineController@follow')->name('timelines.follow');
+    Route::post('follow/{timeline}', 'ZDeprecated\TimelineController@follow')->name('timelines.follow');
 });
 
 Route::group(['prefix' => '/{username}', 'middleware' => 'auth'], function ($username) {
-    // Route::get('/', 'TimelineController@posts');
-    // Route::post('/', 'TimelineController@posts');
+    // Route::get('/', 'ZDeprecated\TimelineController@posts');
+    // Route::post('/', 'ZDeprecated\TimelineController@posts');
 
-    Route::get('/followers', 'UserController@followers');
-    Route::get('/following', 'UserController@following');
+    Route::get('/followers', 'ZDeprecated\UserController@followers');
+    Route::get('/following', 'ZDeprecated\UserController@following');
 
-    Route::get('/event-guests', 'UserController@getGuestEvents');
+    Route::get('/event-guests', 'ZDeprecated\UserController@getGuestEvents');
 
-    Route::get('/posts', 'TimelineController@posts');
+    Route::get('/posts', 'ZDeprecated\TimelineController@posts');
 
-    Route::get('/liked-pages', 'UserController@likedPages');
-    Route::get('/joined-groups', 'UserController@joinedGroups');
+    Route::get('/liked-pages', 'ZDeprecated\UserController@likedPages');
+    Route::get('/joined-groups', 'ZDeprecated\UserController@joinedGroups');
     
-    Route::get('/members/{group_id}', 'TimelineController@getGroupMember');
+    Route::get('/members/{group_id}', 'ZDeprecated\TimelineController@getGroupMember');
     
     Route::get('/notification/{id}', 'NotificationController@redirectNotification');
 
-    Route::get('/albums', 'TimelineController@allAlbums');
-    Route::get('/photos', 'TimelineController@allPhotos');
-    Route::get('/videos', 'TimelineController@allVideos');
-    Route::get('/album/show/{id}', 'TimelineController@viewAlbum');
+    Route::get('/albums', 'ZDeprecated\TimelineController@allAlbums');
+    Route::get('/photos', 'ZDeprecated\TimelineController@allPhotos');
+    Route::get('/videos', 'ZDeprecated\TimelineController@allVideos');
+    Route::get('/album/show/{id}', 'ZDeprecated\TimelineController@viewAlbum');
 
 });
 

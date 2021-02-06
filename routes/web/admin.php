@@ -104,8 +104,8 @@ Route::group(['prefix' => '/admin', 'middleware' => ['auth', 'role:admin|super-a
             ->name('admin.user.update');
         Route::get('/{user_id}/delete', 'AdminController@deleteUser')
             ->name('admin.user.deleteById');
-        Route::get('/{username}/delete', 'UserController@deleteMe')
-            ->name('admin.user.deleteByUsername');
+        // Route::get('/{username}/delete', 'UsersControllers@deleteMe')
+        //     ->name('admin.user.deleteByUsername');
         Route::post('/{username}/newpassword', 'AdminController@updatePassword')
             ->name('admin.user.updatePassword');
     });
@@ -137,7 +137,7 @@ Route::group(['prefix' => '/admin', 'middleware' => ['auth', 'role:admin|super-a
     Route::get('/settings', 'AdminController@settings');
     Route::get('/markpage-safe/{report_id}', 'AdminController@markPageSafeReports');
     // Route::get('/deletepage/{page_id}/{status}', 'AdminController@deletePage');
-    Route::get('/deleteuser/{username}', 'UserController@deleteMe');
+    // Route::get('/deleteuser/{username}', 'UsersController@deleteMe');
     // Route::get('/deletegroup/{group_id}', 'AdminController@deleteGroup');
 
     // Route::get('/category/create', 'AdminController@addCategory');
