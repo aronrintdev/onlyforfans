@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Album;
+use Faker\Factory;
 
 class AlbumsTableSeeder extends Seeder
 {
@@ -16,7 +17,7 @@ class AlbumsTableSeeder extends Seeder
         Album::factory()->count(60)->create();
 
         //Seeding album photos
-        $faker = Faker\Factory::create();
+        $faker = Factory::create();
         $albums = Album::all();
 
         foreach ($albums as $album) {

@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use Faker\Factory;
 use App\StaticPage;
 
 class StaticpageTableSeeder extends Seeder
@@ -11,7 +12,7 @@ class StaticpageTableSeeder extends Seeder
 
     public function run()
     {
-        $faker = Faker\Factory::create();
+        $faker = Factory::create();
         $pages = ['about'            => 'about',
                         'privacy'    => 'privacy',
                         'disclaimer' => 'disclaimer',

@@ -13,7 +13,6 @@ foreach ($files as $file) {
     require($file->getRealPath());
 }
 
-
 /*
 |--------------------------------------------------------------------------
 | Auth 
@@ -131,7 +130,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::resource('vaultfolders', 'VaultfoldersController', [ ]);
 
     // -- misc --
-    Route::post('update-last-seen', 'UserController@updateLastSeen')->name('update-user-status');
+    Route::post('update-last-seen', 'UsersController@updateLastSeen')->name('update-user-status');
     /*
     Route::get('/saved/dashboard', ['as'=>'saved.dashboard', 'uses' => 'SaveditemsController@dashboard']);
     Route::resource('saved', 'SaveditemsController', [
