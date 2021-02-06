@@ -136,7 +136,7 @@ class RestPostsTest extends TestCase
 
     /**
      *  @group posts
-     *  @group regression
+     *  @group OFF-regression
      *  @group todo
      */
     public function test_can_store_post_on_followed_timeline()
@@ -148,7 +148,7 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
-     *  @group todo
+     *  @group OFF_todo
      */
     public function test_can_store_post_with_image_on_followed_timeline()
     {

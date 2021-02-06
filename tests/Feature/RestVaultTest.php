@@ -318,7 +318,6 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
-     *  @group this
      */
     public function test_nonowner_can_not_delete_my_vaultfolder()
     {
@@ -351,7 +350,6 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
-     *  @group this
      */
     public function test_can_not_delete_my_root_vaultfolder()
     {
