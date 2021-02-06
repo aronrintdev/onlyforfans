@@ -42,7 +42,6 @@ class RestVaultTest extends TestCase
         $content = json_decode($response->content());
         $this->assertNotNull($content->vaultfolders);
         $vaultfoldersR = collect($content->vaultfolders);
-        dd($vaultfoldersR);
 
         $this->assertGreaterThan(0, $vaultfoldersR->count());
 
