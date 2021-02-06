@@ -56,7 +56,7 @@ class BasePolicy
                     if ($policy === $this->permissionOnly) {
                         return false;
                     }
-                    $policy = Str::of($this->policy)->explode(':')->all();
+                    $policy = Str::of($policy)->explode(':')->all();
                     if ( method_exists($this, $policy[0]) ) {
                         $result = call_user_func_array(array($this, $policy), $arguments);
                         if ($result === true) {
