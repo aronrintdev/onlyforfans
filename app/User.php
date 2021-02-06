@@ -83,24 +83,44 @@ class User extends Authenticatable implements PaymentSendable, Purchaseable
     // %%% Relationships
     //--------------------------------------------
 
+    /**
+     * mediafiles shared with me (??)
+     * TODO: camelCase method signature
+     */
     public function sharedmediafiles()
-    { // mediafiles shared with me (??)
+    {
         return $this->morphedByMany('App\Mediafile', 'shareable', 'shareables', 'sharee_id')->withTimestamps();
     }
+
+    /**
+     * vaultfolders shared with me (??)
+     * TODO: camelCase method signature
+     */
     public function sharedvaultfolders()
-    { // vaultfolders shared with me (??)
+    {
         return $this->morphedByMany('App\Vaultfolder', 'shareable', 'shareables', 'sharee_id')->withTimestamps();
     }
+
+    /**
+     * TODO: camelCase method signature
+     */
     public function ledgersales() {
         return $this->hasMany('App\Fanledger', 'seller_id');
     }
+
+    /**
+     * TODO: camelCase method signature
+     */
     public function ledgerpurchases()
     {
         return $this->hasMany('App\Fanledger', 'purchaser_id');
     }
 
+    /**
+     * my timeline
+     */
     public function timeline()
-    { // my timeline
+    {
         return $this->belongsTo('App\Timeline');
     }
 
@@ -109,10 +129,16 @@ class User extends Authenticatable implements PaymentSendable, Purchaseable
         //return $this->morphedByMany('App\Timeline', 'shareable', 'shareables', 'sharee_id')->withTimestamps();
     //}
      */
+    /**
+     * TODO: camelCase method signature
+     */
     public function followedtimelines() { // timelines (users) I follow: premium *and* default subscribe (follow)
         return $this->morphedByMany('App\Timeline', 'shareable', 'shareables', 'sharee_id')->withPivot('access_level', 'shareable_type', 'sharee_id')->withTimestamps();
     }
 
+    /**
+     * TODO: camelCase method signature
+     */
     public function likedposts() {
         return $this->morphedByMany('App\Post', 'likeable', 'likeables', 'likee_id')->withTimestamps();
     }
