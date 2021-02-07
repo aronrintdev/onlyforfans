@@ -56,9 +56,9 @@ class BasePolicy
                     if ($policy === $this->permissionOnly) {
                         return false;
                     }
-                    $policy = Str::of($this->policy)->explode(':')->all();
+                    $policy = Str::of($policy)->explode(':')->all();
                     if ( method_exists($this, $policy[0]) ) {
-                        $result = call_user_func_array(array($this, $policy), $arguments);
+                        $result = call_user_func_array(array($this, $policy[0]), $arguments);
                         if ($result === true) {
                             if (isset($policy[1])) {
                                 if ( $policy[1] == PolicyValidation::PASS ) {
@@ -82,14 +82,14 @@ class BasePolicy
             if ( method_exists($this, $method) ) {
                 $reflection = new ReflectionMethod($this, $method);
                 // To avoid the private infinite loop
-                if ( $reflection->isProtected()) {
+                if ($reflection->isProtected() === false) {
                     throw new Exception('Method ' . $method . ' is not a protected method on ' . class_basename($this));
                 }
                 return call_user_func_array(array($this, $method), $arguments);
             } else if( method_exists($this, $method . 'Policy') ) {
                 $reflection = new ReflectionMethod($this, $method . 'Policy');
                 // To avoid the private infinite loop
-                if ( $reflection->isPrivate()) {
+                if ( $reflection->isPrivate() === true) {
                     throw new Exception('Method ' . $method . 'Policy' . ' is a private method on ' . class_basename($this));
                 }
                 return call_user_func_array(array($this, $method . 'Policy'), $arguments);

@@ -42,7 +42,6 @@ class RestVaultTest extends TestCase
         $content = json_decode($response->content());
         $this->assertNotNull($content->vaultfolders);
         $vaultfoldersR = collect($content->vaultfolders);
-        dd($vaultfoldersR);
 
         $this->assertGreaterThan(0, $vaultfoldersR->count());
 
@@ -319,7 +318,6 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
-     *  @group this
      */
     public function test_nonowner_can_not_delete_my_vaultfolder()
     {
@@ -352,7 +350,6 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
-     *  @group this
      */
     public function test_can_not_delete_my_root_vaultfolder()
     {
