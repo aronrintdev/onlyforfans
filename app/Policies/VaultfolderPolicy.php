@@ -12,10 +12,15 @@ class VaultFolderPolicy extends BasePolicy
 
     protected $policies = [
         'viewAny'     => 'permissionOnly',
-        'view'        => 'isBlockedByOwner:fail',
+        'view'        => 'isOwner:pass isBlockedByOwner:fail',
         'update'      => 'isOwner:pass',
         'delete'      => 'isOwner:pass',
         'restore'     => 'isOwner:pass',
         'forceDelete' => 'permissionOnly',
     ];
+
+    protected function create(User $user)
+    {
+        return true;
+    }
 }
