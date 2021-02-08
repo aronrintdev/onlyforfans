@@ -80,9 +80,11 @@ class MediafilesController extends AppBaseController
         ], 201);
     }
 
-    public function show(Request $request, $pkid)
+    public function show(Request $request, Mediafile $mediafile)
     {
-        $mediafile = Mediafile::find($pkid);
+        if ( $request->user()->cannot('view', $mediafile) ) {
+            abort(403);
+        }
 
         // Create sharable link
         //   ~ https://laravel.com/docs/5.5/filesystem#retrieving-files
