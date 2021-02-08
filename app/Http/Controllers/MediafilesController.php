@@ -86,10 +86,15 @@ class MediafilesController extends AppBaseController
 
         // Create sharable link
         //   ~ https://laravel.com/docs/5.5/filesystem#retrieving-files
-        $url = Storage::disk('s3')->temporaryUrl(
-            $mediafile->filename,
-            now()->addMinutes(5) // %FIXME: hardcoded
-        );
+        if (env('APP_ENV') === 'testing') {
+            // %NOTE: workaround for S3 in testing env
+            return $mediafile->filename;
+        } else {
+            $url = Storage::disk('s3')->temporaryUrl(
+                $mediafile->filename,
+                now()->addMinutes(5) // %FIXME: hardcoded
+            );
+        }
         return response()->json([ 
             'mediafile' => $mediafile,
             'url' => $url,

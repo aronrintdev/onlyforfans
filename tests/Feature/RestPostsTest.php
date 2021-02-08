@@ -119,7 +119,6 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
-     *  @group here
      */
     public function test_can_store_post_with_single_imagefile_on_my_timeline()
     {
@@ -170,6 +169,79 @@ class RestPostsTest extends TestCase
      *  @group posts
      *  @group regression
      *  @group here
+     */
+    public function test_follower_can_view_free_post_on_my_timeline()
+    {
+        $timeline = Timeline::has('followers', '>=', 1)
+            ->whereHas('posts', function($q1) {
+                $q1->where('type', PostTypeEnum::FREE);
+            })->firstOrFail();
+        $creator = $timeline->user;
+        $post = $timeline->posts->where('type', PostTypeEnum::FREE)->first();
+        $fan = $timeline->followers[0];
+        $response = $this->actingAs($fan)->ajaxJSON('GET', route('posts.show', $post->id));
+        $response->assertStatus(200);
+    }
+
+    /**
+     *  @group posts
+     *  @group regression
+     *  @group here
+     */
+    public function test_follower_can_view_image_of_free_post_on_my_timeline()
+    {
+        Storage::fake('s3');
+
+        $timeline = Timeline::has('posts', '>=', 1)->has('followers', '>=', 1)->first();
+        $creator = $timeline->user;
+
+        // --- Create a free post with an image ---
+
+        $filename = $this->faker->slug;
+        $file = UploadedFile::fake()->image($filename, 200, 200);
+        $payload = [
+            'mftype' => PostTypeEnum::FREE,
+            'timeline_id' => $timeline->id,
+            'description' => $this->faker->realText,
+        ];
+        $response = $this->actingAs($creator)->ajaxJSON('POST', route('posts.store'), $payload);
+        $response->assertStatus(201);
+
+        $content = json_decode($response->content());
+        $this->assertNotNull($content->post);
+        $postR = $content->post;
+        $payload = [
+            'mftype' => MediafileTypeEnum::POST,
+            'mediafile' => $file,
+            'resource_type' => 'posts',
+            'resource_id' => $postR->id,
+        ];
+        $response = $this->actingAs($creator)->ajaxJSON('POST', route('mediafiles.store'), $payload);
+        $response->assertStatus(201);
+
+        // --
+
+        $timeline = Timeline::has('followers', '>=', 1)
+            ->whereHas('posts', function($q1) {
+                $q1->where('type', PostTypeEnum::FREE)->has('mediafiles', '>=', 1);
+            })->firstOrFail();
+        $creator = $timeline->user;
+        $fan = $timeline->followers[0];
+        $post = $timeline->posts()->has('mediafiles', '>=', 1)
+                         ->where('type', PostTypeEnum::FREE)
+                         ->firstOrFail();
+        $mediafile = $post->mediafiles->shift();
+
+        $response = $this->actingAs($fan)->ajaxJSON('GET', route('posts.show', $post->id));
+        $response->assertStatus(200);
+
+        $response = $this->actingAs($fan)->ajaxJSON('GET', route('mediafiles.show', $mediafile->id));
+        $response->assertStatus(200);
+    }
+
+    /**
+     *  @group posts
+     *  @group regression
      */
     public function test_nonowner_can_not_store_post_on_my_timeline()
     {
