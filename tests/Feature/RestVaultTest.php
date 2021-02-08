@@ -400,7 +400,6 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
-     *  @group here
      */
     public function test_can_upload_multiple_imagefiles_to_my_vaultfolder()
     {

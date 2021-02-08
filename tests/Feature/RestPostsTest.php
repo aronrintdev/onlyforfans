@@ -3,16 +3,21 @@ namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Http\File;
+use Illuminate\Support\Facades\Storage;
 use DB;
 
 use Tests\TestCase;
 use Database\Seeders\TestDatabaseSeeder;
-use App\Enums\PostTypeEnum;
-use App\Enums\PaymentTypeEnum;
 use App\Fanledger;
+use App\Mediafile;
 use App\Post;
 use App\Timeline;
 use App\User;
+use App\Enums\MediafileTypeEnum;
+use App\Enums\PaymentTypeEnum;
+use App\Enums\PostTypeEnum;
 
 class RestPostsTest extends TestCase
 {
@@ -92,7 +97,7 @@ class RestPostsTest extends TestCase
      *  @group posts
      *  @group regression
      */
-    public function test_can_store_post_on_own_timeline()
+    public function test_can_store_textonly_post_on_my_timeline()
     {
         $timeline = Timeline::has('posts','>=',1)->first();
         $creator = $timeline->user;
@@ -114,8 +119,77 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group here
      */
-    public function test_can_update_own_post()
+    public function test_can_store_post_with_single_imagefile_on_my_timeline()
+    {
+        Storage::fake('s3');
+
+        $timeline = Timeline::has('posts','>=',1)->first();
+        $creator = $timeline->user;
+
+        $filename = $this->faker->slug;
+        $file = UploadedFile::fake()->image($filename, 200, 200);
+
+        $payload = [
+            'timeline_id' => $timeline->id,
+            'description' => $this->faker->realText,
+        ];
+        $response = $this->actingAs($creator)->ajaxJSON('POST', route('posts.store'), $payload);
+        $response->assertStatus(201);
+        $content = json_decode($response->content());
+        $this->assertNotNull($content->post);
+        $postR = $content->post;
+
+        // --
+
+        $payload = [
+            'mftype' => MediafileTypeEnum::POST,
+            'mediafile' => $file,
+            'resource_type' => 'posts',
+            'resource_id' => $postR->id,
+        ];
+        $response = $this->actingAs($creator)->ajaxJSON('POST', route('mediafiles.store'), $payload);
+        $response->assertStatus(201);
+
+        $mediafile = Mediafile::where('resource_type', 'posts')->where('resource_id', $postR->id)->first();
+        $this->assertNotNull($mediafile);
+        Storage::disk('s3')->assertExists($mediafile->filename);
+        $this->assertSame($filename, $mediafile->mfname);
+        $this->assertSame(MediafileTypeEnum::POST, $mediafile->mftype);
+
+        // Test relations
+        $post = Post::find($postR->id);
+        $this->assertNotNull($post);
+        $this->assertTrue( $post->mediafiles->contains($mediafile->id) );
+        $this->assertEquals( $post->id, $mediafile->resource->id );
+
+    }
+
+    /**
+     *  @group posts
+     *  @group regression
+     *  @group here
+     */
+    public function test_nonowner_can_not_store_post_on_my_timeline()
+    {
+        $timeline = Timeline::has('posts', '>=', 1)->first();
+        $creator = $timeline->user;
+        $nonowner = User::where('id', '<>', $creator->id)->first();
+
+        $payload = [
+            'timeline_id' => $timeline->id,
+            'description' => $this->faker->realText,
+        ];
+        $response = $this->actingAs($nonowner)->ajaxJSON('POST', route('posts.store'), $payload);
+        $response->assertStatus(403);
+    }
+
+    /**
+     *  @group posts
+     *  @group regression
+     */
+    public function test_can_update_my_post()
     {
         $timeline = Timeline::has('posts','>=',1)->first(); 
         $creator = $timeline->user;
@@ -160,7 +234,7 @@ class RestPostsTest extends TestCase
      *  @group posts
      *  @group regression
      */
-    public function test_can_destroy_own_post()
+    public function test_can_destroy_my_post()
     {
         $timeline = Timeline::has('posts','>=',1)->first();
         $creator = $timeline->user;
