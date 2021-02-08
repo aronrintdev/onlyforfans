@@ -42,7 +42,7 @@ class MediafileTest extends TestCase
         ];
         $response = $this->actingAs($user)->ajaxJSON('POST', route('mediafiles.store'), $payload);
 
-        $response->assertStatus(200);
+        $response->assertStatus(201);
 
         $content = json_decode($response->content());
         $this->assertNotNull($content->mediafile);

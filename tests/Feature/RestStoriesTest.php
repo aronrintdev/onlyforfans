@@ -184,7 +184,6 @@ class StoriesTest extends TestCase
             'mediafile' => $file,
         ];
         $response = $this->actingAs($owner)->ajaxJSON('POST', route('stories.store'), $payload);
-
         $response->assertStatus(200);
 
         $content = json_decode($response->content());

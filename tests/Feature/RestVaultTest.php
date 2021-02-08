@@ -362,6 +362,40 @@ class RestVaultTest extends TestCase
         $response->assertStatus(400);
     }
 
+    /**
+     *  @group vault
+     *  @group regression
+     *  @group here
+     */
+    public function test_can_upload_single_image_to_my_vaultfolder()
+    {
+        Storage::fake('s3');
+
+        $filename = $this->faker->slug;
+        $owner = User::first();
+        $file = UploadedFile::fake()->image($filename, 200, 200);
+
+        $primaryVault = Vault::primary($owner)->first();
+        $vaultfolder = Vaultfolder::isRoot()->where('vault_id', $primaryVault->id)->first(); // root
+
+        $payload = [
+            'mftype' => MediafileTypeEnum::VAULT,
+            'mediafile' => $file,
+            'resource_type' => 'vaultfolders',
+            'resource_id' => $vaultfolder->id,
+        ];
+        $response = $this->actingAs($owner)->ajaxJSON('POST', route('mediafiles.store'), $payload);
+        $response->assertStatus(201);
+
+        // -- 
+
+        $mediafile = Mediafile::where('resource_type', 'vaultfolders')->where('resource_id', $vaultfolder->id)->first();
+        $this->assertNotNull($mediafile);
+        Storage::disk('s3')->assertExists($mediafile->filename);
+        $this->assertSame($filename, $mediafile->mfname);
+        $this->assertSame(MediafileTypeEnum::VAULT, $mediafile->mftype);
+    }
+
 
     // ------------------------------
 

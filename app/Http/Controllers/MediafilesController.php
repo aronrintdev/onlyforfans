@@ -18,28 +18,14 @@ class MediafilesController extends AppBaseController
 
     public function store(Request $request)
     {
-        try {
-            $this->validate($request, [
-                'mediafile' => 'required',
-                //'resource_id' => 'required',
-                //'resource_type' => 'required',
-                'mftype' => 'required',
-            ]);
-        } catch (\Exception $e) {
-            Log::warning(json_encode([
-                'verror' => $e->getMessage(),
-                //'e' => $e,
-                //'error_bag' => $e->getMessage(),
-            ]));
-            if ( $request->ajax() ) {
-                return \Response::json(['message'=> $e->getMessage()],422);
-            } else {
-                throw $e; // %FIXME: report error to user via browser message
-            }
-        }
+        $this->validate($request, [
+            'mediafile' => 'required',
+            'mftype' => 'required|in:avatar,cover,post,story,vault',
+            'resource_type' => 'nullable|in:comments,posts,stories,vaultfolders',
+            'resource_id' => 'required_with:resource_type',
+        ]);
 
         $file = $request->file('mediafile');
-        //dd($file); // lluminate\Http\Testing\File
 
         try {
             $mediafile = DB::transaction(function () use(&$file, &$request) {
@@ -77,7 +63,7 @@ class MediafilesController extends AppBaseController
 
         return response()->json([ 
             'mediafile' => $mediafile,
-        ]);
+        ], 201);
     }
 
     public function show(Request $request, $pkid)
