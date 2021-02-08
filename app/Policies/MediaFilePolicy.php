@@ -20,4 +20,11 @@ class MediaFilePolicy extends BasePolicy
         'like'        => 'isBlockedByOwner:fail',
         'tip'         => 'isBlockedByOwner:fail',
     ];
+
+    /*
+    protected function create(User $user)
+    {
+        return true;
+    }
+     */
 }

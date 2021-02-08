@@ -5,6 +5,7 @@ use DB;
 use Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\File;
 //use Illuminate\Http\UploadedFile;
@@ -21,11 +22,24 @@ class MediafilesController extends AppBaseController
         $this->validate($request, [
             'mediafile' => 'required',
             'mftype' => 'required|in:avatar,cover,post,story,vault',
-            'resource_type' => 'nullable|in:comments,posts,stories,vaultfolders',
-            'resource_id' => 'required_with:resource_type',
+            'resource_type' => 'nullable|alpha-dash|in:comments,posts,stories,vaultfolders',
+            'resource_id' => 'required_with:resource_type|numeric|min:1',
         ]);
 
         $file = $request->file('mediafile');
+
+        // If tied to a resource, check RBAC permission/policy for updating that resource...
+        if ( $request->has('resource_type') ) {
+            $alias = $request->resource_type;
+            $model = Relation::getMorphedModel($alias);
+            $resource = (new $model)->where('id', $request->resource_id)->first();
+            if ( empty($resource) ) {
+                abort(404);
+            }
+            if ( $request->user()->cannot('update', $resource) ) {
+                abort(403);
+            }
+        }
 
         try {
             $mediafile = DB::transaction(function () use(&$file, &$request) {
