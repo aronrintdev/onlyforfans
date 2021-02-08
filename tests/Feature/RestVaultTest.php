@@ -365,14 +365,13 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
-     *  @group here
      */
-    public function test_can_upload_single_image_to_my_vaultfolder()
+    public function test_can_upload_single_imagefile_to_my_vaultfolder()
     {
         Storage::fake('s3');
 
-        $filename = $this->faker->slug;
         $owner = User::first();
+        $filename = $this->faker->slug;
         $file = UploadedFile::fake()->image($filename, 200, 200);
 
         $primaryVault = Vault::primary($owner)->first();
@@ -392,12 +391,74 @@ class RestVaultTest extends TestCase
         Storage::disk('s3')->assertExists($mediafile->filename);
         $this->assertSame($filename, $mediafile->mfname);
         $this->assertSame(MediafileTypeEnum::VAULT, $mediafile->mftype);
+
+        // Test relations
+        $this->assertTrue( $vaultfolder->mediafiles->contains($mediafile->id) );
+        $this->assertEquals( $vaultfolder->id, $mediafile->resource->id );
     }
 
     /**
      *  @group vault
      *  @group regression
      *  @group here
+     */
+    public function test_can_upload_multiple_imagefiles_to_my_vaultfolder()
+    {
+        Storage::fake('s3');
+
+        $owner = User::first();
+        $filename1 = $this->faker->slug;
+        $file1 = UploadedFile::fake()->image($filename1, 200, 200);
+        $filename2 = $this->faker->slug;
+        $file2 = UploadedFile::fake()->image($filename2, 300, 270);
+
+        $primaryVault = Vault::primary($owner)->first();
+        $vaultfolder = Vaultfolder::isRoot()->where('vault_id', $primaryVault->id)->first(); // root
+
+        $payload = [
+            'mftype' => MediafileTypeEnum::VAULT,
+            'mediafile' => $file1,
+            'resource_type' => 'vaultfolders',
+            'resource_id' => $vaultfolder->id,
+        ];
+        $response = $this->actingAs($owner)->ajaxJSON('POST', route('mediafiles.store'), $payload);
+        $response->assertStatus(201);
+
+        $payload = [
+            'mftype' => MediafileTypeEnum::VAULT,
+            'mediafile' => $file2,
+            'resource_type' => 'vaultfolders',
+            'resource_id' => $vaultfolder->id,
+        ];
+        $response = $this->actingAs($owner)->ajaxJSON('POST', route('mediafiles.store'), $payload);
+        $response->assertStatus(201);
+
+        $mediafiles = Mediafile::where('resource_type', 'vaultfolders')->get();
+        $this->assertNotNull($mediafiles);
+        $this->assertEquals(2, $mediafiles->count());
+
+        $mf1 = $mediafiles->shift();
+        Storage::disk('s3')->assertExists($mf1->filename);
+        $this->assertSame($filename1, $mf1->mfname);
+        $this->assertSame(MediafileTypeEnum::VAULT, $mf1->mftype);
+
+        // Test relations
+        $this->assertTrue( $vaultfolder->mediafiles->contains($mf1->id) );
+        $this->assertEquals( $vaultfolder->id, $mf1->resource->id );
+
+        $mf2 = $mediafiles->shift();
+        Storage::disk('s3')->assertExists($mf2->filename);
+        $this->assertSame($filename2, $mf2->mfname);
+        $this->assertSame(MediafileTypeEnum::VAULT, $mf2->mftype);
+
+        // Test relations
+        $this->assertTrue( $vaultfolder->mediafiles->contains($mf2->id) );
+        $this->assertEquals( $vaultfolder->id, $mf2->resource->id );
+    }
+
+    /**
+     *  @group vault
+     *  @group regression
      */
     public function test_nonowner_can_not_upload_image_to_my_vaultfolder()
     {
