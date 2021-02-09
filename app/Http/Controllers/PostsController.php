@@ -8,6 +8,7 @@ use Throwable;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use App\Post;
+use App\Mediafile;
 use App\Timeline;
 use App\Enums\PaymentTypeEnum;
 use App\Enums\PostTypeEnum;
@@ -93,10 +94,29 @@ class PostsController extends AppBaseController
 
     public function update(Request $request, Post $post)
     {
-
         $attrs = $request->only([ 'description' ]);
         $post->fill($attrs);
         $post->save();
+        return response()->json([
+            'post' => $post,
+        ]);
+    }
+
+    public function attachMediafile(Request $request, Post $post, Mediafile $mediafile)
+    {
+        // require mediafile to be in vault (?)
+        if ( empty($mediafile->resource) ) {
+            abort(400, 'source file must have associated resource');
+        }
+        if ( $mediafile->resource_type !== 'vaultfolders' ) {
+            abort(400, 'source file associated resource type must be vaultfolder');
+        }
+        $this->authorize('update', $post);
+        $this->authorize('update', $mediafile);
+        $this->authorize('update', $mediafile->resource);
+
+        $mediafile->doClone('posts', $post->id);
+        $post->refresh();
 
         return response()->json([
             'post' => $post,
@@ -114,7 +134,6 @@ class PostsController extends AppBaseController
 
     public function saves(Request $request)
     {
-
         $saves = $request->user()->sharedmediafiles->map( function($mf) {
             $mf->foo = 'bar';
             //$mf->owner = $mf->getOwner()->first(); // %TODO

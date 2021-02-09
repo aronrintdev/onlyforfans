@@ -111,6 +111,19 @@ class Mediafile extends BaseModel implements Guidable, Sluggable, Ownable
 
     // %%% --- Other ---
 
+    // Shallow clone: copies/pastes the DB record, not the asset/file
+    //   ~ cloning onl allowed if new copy is associated with another resource (eg post)
+    //   ~ see: https://trello.com/c/0fBcmPjq
+    public function doClone(string $resourceType, int $resourceId)
+    {
+        $cloned = $this->replicate()->fill([
+            'resource_type' => $resourceType,
+            'resource_id' => $resourceId,
+        ]);
+        $cloned->save();
+    }
+
+
     public function isImage() : bool {
         switch ($this->mimetype) {
             case 'image/jpeg':

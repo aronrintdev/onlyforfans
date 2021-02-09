@@ -521,6 +521,7 @@ class RestVaultTest extends TestCase
         $this->assertNotNull($content->mediafile);
         $mediafile = Mediafile::find($content->mediafile->id);
         $this->assertNotNull($mediafile);
+        $this->assertTrue( $vaultfolder->mediafiles->contains($mediafile->id) );
 
         // --- Create a free post with image from vault ---
 
@@ -538,18 +539,8 @@ class RestVaultTest extends TestCase
         $postR = $content->post;
         $post = Post::findOrFail($postR->id);
 
-        // HERE TUESDAY
-        // [ ] API to attach vaultfolder file to post
-        /*
-        $payload = [
-            'mftype' => MediafileTypeEnum::POST,
-            'mediafile' => $file,
-            'resource_type' => 'posts',
-            'resource_id' => $postR->id,
-        ];
-        $response = $this->actingAs($owner)->ajaxJSON('POST', route('mediafiles.store'), $payload);
-        $response->assertStatus(201);
-         */
+        $response = $this->actingAs($owner)->ajaxJSON('PATCH', route('posts.attachMediafile', [$post->id, $mediafile->id]));
+        $response->assertStatus(200);
 
         // --
 
@@ -564,6 +555,12 @@ class RestVaultTest extends TestCase
 
         $response = $this->actingAs($fan)->ajaxJSON('GET', route('mediafiles.show', $mediafile->id));
         $response->assertStatus(200);
+    }
+
+    public function test_nonowner_can_not_select_mediafile_from_vaultfolder_to_attach_to_post()
+    {
+        // [ ] check nonower of mediafile, owner of post
+        // [ ] check nonower of post, owner of mediafile
     }
 
     // ------------------------------

@@ -80,43 +80,14 @@ class MediafilesController extends AppBaseController
         ], 201);
     }
 
-    // Shallow clone: copies/pastes the DB record, not the asset/file
-    // HERE TUESDAY
-    // like a store in that we are creating a new [mediafiles] record (with edits)
-    // like an update (on src) as far as policies are concerned
-    // see: https://trello.com/c/0fBcmPjq
-    public function doClone(Request $request, Mediafile $src)
-    {
-        if ( $request->user()->cannot('update', $src) ) {
-            abort(403);
-        }
-        $this->validate($request, [
-            'mediafile' => 'required',
-            'mftype' => 'required|in:avatar,cover,post,story,vault',
-            'resource_type' => 'nullable|alpha-dash|in:comments,posts,stories,vaultfolders',
-            'resource_id' => 'required_with:resource_type|numeric|min:1',
-        ]);
-                switch ($request->mftype) {
-                    case 'vault':
-                        $subFolder = 'vaultfolders';
-                        break;
-                    case 'story':
-                        $subFolder = 'stories';
-                        break;
-                    case 'post':
-                        $subFolder = 'posts';
-                        break;
-                    default:
-                        $subFolder = 'default';
-                }
-        $new = $src->replicate();
-    }
-
     public function show(Request $request, Mediafile $mediafile)
     {
+        $this->authorize('view', $mediafile);
+        /*
         if ( $request->user()->cannot('view', $mediafile) ) {
             abort(403);
         }
+         */
 
         // Create sharable link
         //   ~ https://laravel.com/docs/5.5/filesystem#retrieving-files
