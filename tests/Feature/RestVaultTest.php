@@ -12,11 +12,13 @@ use Tests\TestCase;
 use Database\Seeders\TestDatabaseSeeder;
 
 use App\Mediafile;
+use App\Post;
 use App\Timeline;
 use App\User;
 use App\Vault;
 use App\Vaultfolder;
 use App\Enums\MediafileTypeEnum;
+use App\Enums\PostTypeEnum;
 
 class RestVaultTest extends TestCase
 {
@@ -385,9 +387,15 @@ class RestVaultTest extends TestCase
         ];
         $response = $this->actingAs($owner)->ajaxJSON('POST', route('mediafiles.store'), $payload);
         $response->assertStatus(201);
+        $content = json_decode($response->content());
+        $this->assertNotNull($content->mediafile);
+        $mediafileR = $content->mediafile;
 
-        $mediafile = Mediafile::where('resource_type', 'vaultfolders')->where('resource_id', $vaultfolder->id)->first();
+        //$mediafile = Mediafile::where('resource_type', 'vaultfolders')->where('resource_id', $vaultfolder->id)->first(); // %FIXME: this assumes there are no priorimages in the vault
+        $mediafile = Mediafile::find($mediafileR->id);
         $this->assertNotNull($mediafile);
+        $this->assertEquals('vaultfolders', $mediafile->resource_type);
+        $this->assertEquals($vaultfolder->id, $mediafile->resource_id);
         Storage::disk('s3')->assertExists($mediafile->filename);
         $this->assertSame($filename, $mediafile->mfname);
         $this->assertSame(MediafileTypeEnum::VAULT, $mediafile->mftype);
@@ -481,6 +489,82 @@ class RestVaultTest extends TestCase
         $response->assertStatus(403);
     }
 
+    /**
+     *  @group vault
+     *  @group regression
+     *  @group here
+     */
+    public function test_can_select_mediafile_from_vaultfolder_to_attach_to_post()
+    {
+        Storage::fake('s3');
+
+        $timeline = Timeline::has('posts', '>=', 1)->has('followers', '>=', 1)->first();
+        $owner = $timeline->user;
+        $fan = $timeline->followers[0];
+
+        // --- Upload image to vault ---
+        $filename = $this->faker->slug;
+        $file = UploadedFile::fake()->image($filename, 200, 200);
+
+        $primaryVault = Vault::primary($owner)->first();
+        $vaultfolder = Vaultfolder::isRoot()->where('vault_id', $primaryVault->id)->first(); // root
+
+        $payload = [
+            'mftype' => MediafileTypeEnum::VAULT,
+            'mediafile' => $file,
+            'resource_type' => 'vaultfolders',
+            'resource_id' => $vaultfolder->id,
+        ];
+        $response = $this->actingAs($owner)->ajaxJSON('POST', route('mediafiles.store'), $payload);
+        $response->assertStatus(201);
+        $content = json_decode($response->content());
+        $this->assertNotNull($content->mediafile);
+        $mediafile = Mediafile::find($content->mediafile->id);
+        $this->assertNotNull($mediafile);
+
+        // --- Create a free post with image from vault ---
+
+        $filename = $this->faker->slug;
+        $file = UploadedFile::fake()->image($filename, 200, 200);
+        $payload = [
+            'mftype' => PostTypeEnum::FREE,
+            'timeline_id' => $timeline->id,
+            'description' => $this->faker->realText,
+        ];
+        $response = $this->actingAs($owner)->ajaxJSON('POST', route('posts.store'), $payload);
+        $response->assertStatus(201);
+        $content = json_decode($response->content());
+        $this->assertNotNull($content->post);
+        $postR = $content->post;
+        $post = Post::findOrFail($postR->id);
+
+        // HERE TUESDAY
+        // [ ] API to attach vaultfolder file to post
+        /*
+        $payload = [
+            'mftype' => MediafileTypeEnum::POST,
+            'mediafile' => $file,
+            'resource_type' => 'posts',
+            'resource_id' => $postR->id,
+        ];
+        $response = $this->actingAs($owner)->ajaxJSON('POST', route('mediafiles.store'), $payload);
+        $response->assertStatus(201);
+         */
+
+        // --
+
+        $timeline->refresh();
+        $owner->refresh();
+        $post->refresh();
+        $mediafile = $post->mediafiles->shift();
+        $this->assertNotNull($mediafile, 'No mediafiles attached to post');
+
+        $response = $this->actingAs($fan)->ajaxJSON('GET', route('posts.show', $post->id));
+        $response->assertStatus(200);
+
+        $response = $this->actingAs($fan)->ajaxJSON('GET', route('mediafiles.show', $mediafile->id));
+        $response->assertStatus(200);
+    }
 
     // ------------------------------
 

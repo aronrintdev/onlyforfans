@@ -185,7 +185,6 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
-     *  @group here
      */
     public function test_follower_can_view_image_of_free_post_on_my_timeline()
     {
@@ -220,11 +219,8 @@ class RestPostsTest extends TestCase
 
         // --
 
-        $timeline = Timeline::has('followers', '>=', 1)
-            ->whereHas('posts', function($q1) {
-                $q1->where('type', PostTypeEnum::FREE)->has('mediafiles', '>=', 1);
-            })->firstOrFail();
-        $creator = $timeline->user;
+        $timeline->refresh();
+        $creator->refresh();
         $fan = $timeline->followers[0];
         $post = $timeline->posts()->has('mediafiles', '>=', 1)
                          ->where('type', PostTypeEnum::FREE)
@@ -241,7 +237,6 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
-     *  @group here
      */
     public function test_nonfollower_can_not_view_image_of_free_post_on_my_timeline()
     {
