@@ -492,7 +492,6 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
-     *  @group here
      */
     public function test_can_select_mediafile_from_vaultfolder_to_attach_to_post()
     {
@@ -557,10 +556,56 @@ class RestVaultTest extends TestCase
         $response->assertStatus(200);
     }
 
-    public function test_nonowner_can_not_select_mediafile_from_vaultfolder_to_attach_to_post()
+    /**
+     *  @group vault
+     *  @group regression
+     *  @group here
+     */
+    public function test_nonowner_can_not_select_vaultfolder_mediafile_to_attach_to_post()
     {
-        // [ ] check nonower of mediafile, owner of post
-        // [ ] check nonower of post, owner of mediafile
+        Storage::fake('s3');
+
+        $timeline = Timeline::has('posts', '>=', 1)->has('followers', '>=', 1)->first();
+        $postowner = $timeline->user;
+        $mediafileowner = User::where('id', '<>', $postowner->id)->first();
+
+        // --- Upload image to vault ---
+        $filename = $this->faker->slug;
+        $file = UploadedFile::fake()->image($filename, 200, 200);
+
+        $primaryVault = Vault::primary($mediafileowner)->first();
+        $vaultfolder = Vaultfolder::isRoot()->where('vault_id', $primaryVault->id)->first(); // root
+        $payload = [
+            'mftype' => MediafileTypeEnum::VAULT,
+            'mediafile' => $file,
+            'resource_type' => 'vaultfolders',
+            'resource_id' => $vaultfolder->id,
+        ];
+        $response = $this->actingAs($mediafileowner)->ajaxJSON('POST', route('mediafiles.store'), $payload);
+        $response->assertStatus(201);
+        $content = json_decode($response->content());
+        $mediafile = Mediafile::findOrFail($content->mediafile->id);
+
+        // --- Create a free post ---
+        $filename = $this->faker->slug;
+        $file = UploadedFile::fake()->image($filename, 200, 200);
+        $payload = [
+            'mftype' => PostTypeEnum::FREE,
+            'timeline_id' => $timeline->id,
+            'description' => $this->faker->realText,
+        ];
+        $response = $this->actingAs($postowner)->ajaxJSON('POST', route('posts.store'), $payload);
+        $response->assertStatus(201);
+        $content = json_decode($response->content());
+        $post = Post::findOrFail($content->post->id);
+
+        // --- Try to attach image to post as post owner (but not mediafile owner) ---
+        $response = $this->actingAs($postowner)->ajaxJSON('PATCH', route('posts.attachMediafile', [$post->id, $mediafile->id]));
+        $response->assertStatus(403);
+
+        // --- Try to attach image to post as mediafile owner (but not post owner) ---
+        $response = $this->actingAs($mediafileowner)->ajaxJSON('PATCH', route('posts.attachMediafile', [$post->id, $mediafile->id]));
+        $response->assertStatus(403);
     }
 
     // ------------------------------
