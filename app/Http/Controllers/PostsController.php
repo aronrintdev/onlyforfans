@@ -51,41 +51,29 @@ class PostsController extends AppBaseController
 
     public function store(Request $request)
     {
+        $this->authorize('create', Post::class);
+
         $request->validate([
             'timeline_id' => 'required|exists:timelines,id',
-            // [ ] 'description': , // text COLLATE utf8_unicode_ci NOT NULL,
-            // [/] 'user_id': , // int(10) unsigned NOT NULL,
-            // [/] 'active': , // tinyint(1) NOT NULL DEFAULT '1',
-            // [ ] 'soundcloud_title': , // varchar(250) COLLATE utf8_unicode_ci DEFAULT NULL,
-            // [ ] 'soundcloud_id': , // varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
-            // [ ] 'youtube_title': , // varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
-            // [ ] 'youtube_video_id': , // varchar(250) COLLATE utf8_unicode_ci DEFAULT NULL,
-            // [ ] 'location': , // varchar(250) COLLATE utf8_unicode_ci DEFAULT NULL,
-            // [/] 'type': , // varchar(100) COLLATE utf8_unicode_ci DEFAULT NULL,
-            // [ ] 'price': , // varchar(100) COLLATE utf8_unicode_ci DEFAULT NULL,
-            // [ ] 'shared_post_id': , // int(10) unsigned DEFAULT NULL,
-            // [ ] 'publish_date': , // date DEFAULT NULL,
-            // [ ] 'publish_time': , // time DEFAULT NULL,
-            // [ ] 'expiration_date': , // date DEFAULT NULL,
-            // [ ] 'expiration_time': , // time DEFAULT NULL,
+            'mediafiles' => 'array',
+            'mediafiles.*.*' => 'integer|exists:mediafiles',
         ]);
 
         $timeline = Timeline::find($request->timeline_id); // timeline being posted on
-
-        if ( $request->user()->id !== $timeline->user->id ) { // can only post on own home page
-            abort(403, 'Unauthorized');
-        }
 
         $attrs = $request->all();
         $attrs['user_id'] = $timeline->user->id; // %FIXME: remove this field, redundant
         $attrs['active'] = $request->input('active', 1);
         $attrs['type'] = $request->input('type', PostTypeEnum::FREE);
 
-        try {
-            $post = Post::create($attrs);
-        } catch (Exception $e) {
-            throw $e;
+        $post = Post::create($attrs);
+        if ( $request->has('mediafiles') ) {
+            foreach ( $request->mediafiles as $mfID ) {
+                $cloned = Mediafile::find($mfID)->doClone('posts', $post->id);
+                $post->mediafiles()->save($cloned);
+            }
         }
+        $post->refresh();
 
         return response()->json([
             'post' => $post,

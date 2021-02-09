@@ -493,7 +493,8 @@ class RestVaultTest extends TestCase
      *  @group vault
      *  @group regression
      */
-    public function test_can_select_mediafile_from_vaultfolder_to_attach_to_post()
+    // Creates post in first API call, then attaches selected mediafile in a second API call
+    public function test_can_select_mediafile_from_vaultfolder_to_attach_to_post_by_attach()
     {
         Storage::fake('s3');
 
@@ -527,7 +528,7 @@ class RestVaultTest extends TestCase
         $filename = $this->faker->slug;
         $file = UploadedFile::fake()->image($filename, 200, 200);
         $payload = [
-            'mftype' => PostTypeEnum::FREE,
+            'type' => PostTypeEnum::FREE,
             'timeline_id' => $timeline->id,
             'description' => $this->faker->realText,
         ];
@@ -559,9 +560,8 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
-     *  @group here
      */
-    public function test_nonowner_can_not_select_vaultfolder_mediafile_to_attach_to_post()
+    public function test_nonowner_can_not_select_vaultfolder_mediafile_to_attach_to_postby_attach()
     {
         Storage::fake('s3');
 
@@ -590,7 +590,7 @@ class RestVaultTest extends TestCase
         $filename = $this->faker->slug;
         $file = UploadedFile::fake()->image($filename, 200, 200);
         $payload = [
-            'mftype' => PostTypeEnum::FREE,
+            'type' => PostTypeEnum::FREE,
             'timeline_id' => $timeline->id,
             'description' => $this->faker->realText,
         ];
@@ -607,6 +607,142 @@ class RestVaultTest extends TestCase
         $response = $this->actingAs($mediafileowner)->ajaxJSON('PATCH', route('posts.attachMediafile', [$post->id, $mediafile->id]));
         $response->assertStatus(403);
     }
+
+    /**
+     *  @group vault
+     *  @group regression
+     *  @group here
+     */
+    // Creates post and attaches selected mediafile in a single API call
+    public function test_can_select_mediafile_from_vaultfolder_to_attach_to_post_singleop()
+    {
+        Storage::fake('s3');
+
+        $timeline = Timeline::has('posts', '>=', 1)->has('followers', '>=', 1)->first();
+        $owner = $timeline->user;
+        $fan = $timeline->followers[0];
+
+        // --- Upload image to vault ---
+        $filename = $this->faker->slug;
+        $file = UploadedFile::fake()->image($filename, 200, 200);
+
+        $primaryVault = Vault::primary($owner)->first();
+        $vaultfolder = Vaultfolder::isRoot()->where('vault_id', $primaryVault->id)->first(); // root
+
+        $payload = [
+            'mftype' => MediafileTypeEnum::VAULT,
+            'mediafile' => $file,
+            'resource_type' => 'vaultfolders',
+            'resource_id' => $vaultfolder->id,
+        ];
+        $response = $this->actingAs($owner)->ajaxJSON('POST', route('mediafiles.store'), $payload);
+        $response->assertStatus(201);
+        $content = json_decode($response->content());
+        $this->assertNotNull($content->mediafile);
+        $mediafile = Mediafile::find($content->mediafile->id);
+        $this->assertNotNull($mediafile);
+        $this->assertTrue( $vaultfolder->mediafiles->contains($mediafile->id) );
+
+        // --- Create a free post with image from vault ---
+
+        $filename = $this->faker->slug;
+        $file = UploadedFile::fake()->image($filename, 200, 200);
+        $payload = [
+            'type' => PostTypeEnum::FREE,
+            'timeline_id' => $timeline->id,
+            'description' => $this->faker->realText,
+            'mediafiles' => [$mediafile->id],
+        ];
+        $response = $this->actingAs($owner)->ajaxJSON('POST', route('posts.store'), $payload);
+        $response->assertStatus(201);
+        $content = json_decode($response->content());
+        $this->assertNotNull($content->post);
+        $postR = $content->post;
+        $post = Post::findOrFail($postR->id);
+
+        // --
+
+        $timeline->refresh();
+        $owner->refresh();
+        $post->refresh();
+        $mediafile = $post->mediafiles->shift();
+        $this->assertNotNull($mediafile, 'No mediafiles attached to post');
+
+        $response = $this->actingAs($fan)->ajaxJSON('GET', route('posts.show', $post->id));
+        $response->assertStatus(200);
+
+        $response = $this->actingAs($fan)->ajaxJSON('GET', route('mediafiles.show', $mediafile->id));
+        $response->assertStatus(200);
+    }
+
+    /**
+     *  @group vault
+     *  @group regression
+     */
+    /*
+    public function test_can_select_mediafile_from_vaultfolder_to_attach_to_story()
+    {
+        Storage::fake('s3');
+
+        $timeline = Timeline::has('stories', '>=', 1)->has('followers', '>=', 1)->first();
+        $owner = $timeline->user;
+        $fan = $timeline->followers[0];
+
+        // --- Upload image to vault ---
+        $filename = $this->faker->slug;
+        $file = UploadedFile::fake()->image($filename, 200, 200);
+
+        $primaryVault = Vault::primary($owner)->first();
+        $vaultfolder = Vaultfolder::isRoot()->where('vault_id', $primaryVault->id)->first(); // root
+
+        $payload = [
+            'mftype' => MediafileTypeEnum::VAULT,
+            'mediafile' => $file,
+            'resource_type' => 'vaultfolders',
+            'resource_id' => $vaultfolder->id,
+        ];
+        $response = $this->actingAs($owner)->ajaxJSON('POST', route('mediafiles.store'), $payload);
+        $response->assertStatus(201);
+        $content = json_decode($response->content());
+        $this->assertNotNull($content->mediafile);
+        $mediafile = Mediafile::find($content->mediafile->id);
+        $this->assertNotNull($mediafile);
+        $this->assertTrue( $vaultfolder->mediafiles->contains($mediafile->id) );
+
+        // --- Create a free story with image from vault ---
+
+        $filename = $this->faker->slug;
+        $file = UploadedFile::fake()->image($filename, 200, 200);
+        $payload = [
+            'type' => PostTypeEnum::FREE,
+            'timeline_id' => $timeline->id,
+            'description' => $this->faker->realText,
+        ];
+        $response = $this->actingAs($owner)->ajaxJSON('POST', route('posts.store'), $payload);
+        $response->assertStatus(201);
+        $content = json_decode($response->content());
+        $this->assertNotNull($content->post);
+        $postR = $content->post;
+        $post = Post::findOrFail($postR->id);
+
+        $response = $this->actingAs($owner)->ajaxJSON('PATCH', route('posts.attachMediafile', [$post->id, $mediafile->id]));
+        $response->assertStatus(200);
+
+        // --
+
+        $timeline->refresh();
+        $owner->refresh();
+        $post->refresh();
+        $mediafile = $post->mediafiles->shift();
+        $this->assertNotNull($mediafile, 'No mediafiles attached to post');
+
+        $response = $this->actingAs($fan)->ajaxJSON('GET', route('posts.show', $post->id));
+        $response->assertStatus(200);
+
+        $response = $this->actingAs($fan)->ajaxJSON('GET', route('mediafiles.show', $mediafile->id));
+        $response->assertStatus(200);
+    }
+     */
 
     // ------------------------------
 
