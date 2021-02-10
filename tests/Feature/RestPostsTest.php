@@ -349,8 +349,8 @@ class RestPostsTest extends TestCase
 
     /**
      *  @group posts
-     *  @group regression
-     *  @group OFF_todo
+     *  @group OFF-regression
+     *  @group TODO
      */
     public function test_can_store_post_with_image_on_followed_timeline()
     {
@@ -393,9 +393,12 @@ class RestPostsTest extends TestCase
      */
     public function test_timeline_follower_can_like_then_unlike_post()
     {
-        $timeline = Timeline::has('posts','>=',1)->has('followers','>=',1)->first(); // assume non-admin (%FIXME)
+        $timeline = Timeline::has('followers', '>=', 1)
+            ->whereHas('posts', function($q1) {
+                $q1->where('type', PostTypeEnum::FREE);
+            })->firstOrFail();
         $creator = $timeline->user;
-        $post = $timeline->posts[0];
+        $post = $timeline->posts->where('type', PostTypeEnum::FREE)->first();
         $fan = $timeline->followers[0];
 
         // remove any existing likes by fan...
@@ -482,13 +485,17 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group here
      */
     public function test_can_purchase_post()
     {
-        $timeline = Timeline::has('posts','>=',1)->has('followers','>=',1)->first(); // assume non-admin (%FIXME)
+        $timeline = Timeline::has('followers', '>=', 1)
+            ->whereHas('posts', function($q1) {
+                $q1->where('type', PostTypeEnum::PRICED);
+            })->firstOrFail();
         $creator = $timeline->user;
         $fan = $timeline->followers[0];
-        $post = $timeline->posts[0];
+        $post = $timeline->posts->where('type', PostTypeEnum::PRICED)->first();
 
         // Make sure post is 'priced'
         $post->type = PostTypeEnum::PRICED;
