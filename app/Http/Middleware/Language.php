@@ -3,7 +3,7 @@
 
 namespace App\Http\Middleware;
 
-use App\Setting;
+use App\Models\Setting;
 use Closure;
 use Illuminate\Foundation\Application;
 use Illuminate\Http\Request;
