@@ -6,6 +6,7 @@ use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Http\File;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 
 use Tests\TestCase;
@@ -563,7 +564,7 @@ class RestVaultTest extends TestCase
      *  @group vault
      *  @group regression
      */
-    public function test_nonowner_can_not_select_vaultfolder_mediafile_to_attach_to_postby_attach()
+    public function test_nonowner_can_not_select_vaultfolder_mediafile_to_attach_to_post_by_attach()
     {
         Storage::fake('s3');
 
@@ -680,7 +681,7 @@ class RestVaultTest extends TestCase
      *  @group vault
      *  @group regression
      */
-    public function test_can_select_mediafile_from_vaultfolder_to_attach_to_story()
+    public function test_can_select_mediafile_from_vaultfolder_to_attach_to_story_singleop()
     {
         Storage::fake('s3');
 
@@ -740,8 +741,122 @@ class RestVaultTest extends TestCase
         $response = $this->actingAs($fan)->ajaxJSON('GET', route('mediafiles.show', $mediafile->id));
         $response->assertStatus(200);
     }
-    /*
+
+    /**
+     *  @group vault
+     *  @group OFF-regression: this test only makes sense if we pass the timeline_id which the story will be added to
      */
+    /*
+    public function test_nonowner_can_not_select_mediafile_from_vaultfolder_to_attach_to_story_singleop()
+    {
+        Storage::fake('s3');
+
+        $timeline = Timeline::has('stories', '>=', 1)->has('followers', '>=', 1)->first();
+        $storyowner = $timeline->user;
+        $mediafileowner = User::where('id', '<>', $storyowner->id)->first();
+
+        // --- Upload image to vault ---
+        $filename = $this->faker->slug;
+        $file = UploadedFile::fake()->image($filename, 200, 200);
+
+        $primaryVault = Vault::primary($mediafileowner)->first();
+        $vaultfolder = Vaultfolder::isRoot()->where('vault_id', $primaryVault->id)->first(); // root
+
+        $payload = [
+            'mftype' => MediafileTypeEnum::VAULT,
+            'mediafile' => $file,
+            'resource_type' => 'vaultfolders',
+            'resource_id' => $vaultfolder->id,
+        ];
+        $response = $this->actingAs($mediafileowner)->ajaxJSON('POST', route('mediafiles.store'), $payload);
+        $response->assertStatus(201);
+        $content = json_decode($response->content());
+        $this->assertNotNull($content->mediafile);
+        $mediafile = Mediafile::find($content->mediafile->id);
+        $this->assertNotNull($mediafile);
+        $this->assertTrue( $vaultfolder->mediafiles->contains($mediafile->id) );
+
+        // --- Create a free story with image from vault ---
+
+        $payload = [
+            'attrs' => json_encode([ 'stype' => StoryTypeEnum::PHOTO, 'content' => $this->faker->realText ]),
+            'mediafile' => $mediafile->id,
+        ];
+        $response = $this->actingAs($mediafileowner)->ajaxJSON('POST', route('stories.store'), $payload);
+        $response->assertStatus(403);
+        $response = $this->actingAs($storyowner)->ajaxJSON('POST', route('stories.store'), $payload);
+        $response->assertStatus(403);
+    }
+     */
+
+    /**
+     *  @group vault
+     *  @group regression
+     *  @group here
+     *  %TODO: [ ] test for disallow sharing root folder
+     */
+    public function test_select_vaultfolder_to_share_via_signup_invite_to_non_registered_user_via_email()
+    {
+        Mail::fake();
+
+        $owner = User::first();
+        $primaryVault = Vault::primary($owner)->first();
+        $rootFolder = Vaultfolder::isRoot()->where('vault_id', $primaryVault->id)->first();
+
+        // make a subfolder
+        $payload = [
+            'vault_id' => $primaryVault->id,
+            'parent_id' => $rootFolder->id,
+            'vfname' => $this->faker->slug,
+        ];
+        $response = $this->actingAs($owner)->ajaxJSON('POST', route('vaultfolders.store'), $payload);
+        $response->assertStatus(201);
+        $content = json_decode($response->content());
+        $this->assertNotNull($content->vaultfolder);
+        $subFolder = Vaultfolder::find($content->vaultfolder->id);
+        $this->assertNotNull($subFolder);
+        $rootFolder->refresh();
+        //$rootFolder->load('vfchildren');
+
+        $invitees = [];
+        $firstName = $this->faker->firstName();
+        $lastName = $this->faker->lastName;
+        $email = strtolower($firstName.'.'.$lastName).'@example.com';
+        $invitees[] = [
+            'email' => $email,
+            'name' => $firstName.' '.$lastName,
+        ];
+        $firstName = $this->faker->firstName();
+        $lastName = $this->faker->lastName;
+        $email = strtolower($firstName.'.'.$lastName).'@example.com';
+        $invitees[] = [
+            'email' => $email,
+            'name' => $firstName.' '.$lastName,
+        ];
+
+        // share the subfolder
+        $payload = [
+            'invitees' => $invitees,
+        ];
+        $response = $this->actingAs($owner)->ajaxJSON('POST', route('vaultfolders.invite', $subFolder->id), $payload);
+        $response->assertStatus(200);
+        $content = json_decode($response->content());
+        $this->assertNotNull($content->invites);
+        $invites = collect($content->invites);
+        $this->assertEquals(2, $invites->count());
+
+        $invite = $invites->shift();
+        $this->assertEquals($invitees[0]['email'], $invite->email);
+
+        // assertSent | assertQueued
+        Mail::assertQueued(\App\Mail\ShareableInvited::class, function ($mail) use ($invitees) {
+            return $mail->hasTo($invitees[0]['email']); 
+        });
+        Mail::assertQueued(\App\Mail\ShareableInvited::class, function ($mail) use ($invitees) {
+            return $mail->hasTo($invitees[1]['email']); 
+        });
+
+    }
 
     // ------------------------------
 
