@@ -28,7 +28,6 @@ class MediafileTest extends TestCase
     /**
      *  @group mediafiles
      *  @group regression
-     *  @group here
      */
     public function test_can_store_mediafile()
     {

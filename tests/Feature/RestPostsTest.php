@@ -73,6 +73,7 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group here
      */
     public function test_can_show_followed_timelines_post()
     {

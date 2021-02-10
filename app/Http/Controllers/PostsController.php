@@ -40,9 +40,7 @@ class PostsController extends AppBaseController
 
     public function show(Request $request, Post $post)
     {
-        if ( $request->user()->cannot('view', $post) ) {
-            abort(403);
-        }
+        $this->authorize('view', $post);
         return response()->json([
             'post' => $post,
         ]);
@@ -83,7 +81,7 @@ class PostsController extends AppBaseController
     public function update(Request $request, Post $post)
     {
         $this->authorize('update', $post);
-        $post->fill( $request->only([ 'description' ]) );
+        $post->fill($request->only([ 'description' ]));
         $post->save();
         return response()->json([
             'post' => $post,
