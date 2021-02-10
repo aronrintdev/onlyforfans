@@ -65,8 +65,6 @@ class StoriesController extends AppBaseController
 
     public function store(Request $request)
     {
-        $this->authorize('create', Story::class);
-
         $request['attrs'] = json_decode($request['attrs'], true); // decode 'complex' data
 
         $vrules = [
@@ -83,11 +81,17 @@ class StoriesController extends AppBaseController
         
         $this->validate($request, $vrules);
 
+        // policy check is redundant as a story is always created on session user's
+        //   timeline, however in the future we may be more flexible, or support
+        //   multiple timelines which will require request->timeline_id
+        $timeline = Timeline::find($request->user()->timeline_id);
+        $this->authorize('update', $timeline);
+
         try {
-            $story = DB::transaction(function () use(&$request) {
+            $story = DB::transaction(function () use(&$request, &$timeline) {
 
                 $story = Story::create([
-                    'timeline_id' => $request->user()->timeline_id,
+                    'timeline_id' => $timeline->id,
                     'content' => $request->attrs['content'] ?? null,
                     'cattrs' => [
                         'background-color' => array_key_exists('bgcolor', $request->attrs) ? $request->attrs['bgcolor'] : '#fff',

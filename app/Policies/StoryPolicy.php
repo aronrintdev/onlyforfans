@@ -23,8 +23,16 @@ class StoryPolicy extends BasePolicy
         return $story->timeline->followers->contains($user->id);
     }
 
+    public function like(User $user, Story $story)
+    {
+        return $user->can('view', $story);
+        //return $story->timeline->followers->contains($user->id);
+    }
+
+    /*
     protected function create(User $user)
     {
-        return true;
+        throw new \Exception('check update policy for timeline instead');
     }
+     */
 }
