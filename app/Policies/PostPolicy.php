@@ -62,7 +62,8 @@ class PostPolicy extends BasePolicy
 
     public function like(User $user, Post $post)
     {
-        return $post->timeline->followers->contains($user->id);
+        return $user->can('view', $post);
+        //return $post->timeline->followers->contains($user->id);
     }
 
 }
