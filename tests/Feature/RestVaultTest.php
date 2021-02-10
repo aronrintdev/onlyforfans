@@ -13,12 +13,14 @@ use Database\Seeders\TestDatabaseSeeder;
 
 use App\Mediafile;
 use App\Post;
+use App\Story;
 use App\Timeline;
 use App\User;
 use App\Vault;
 use App\Vaultfolder;
 use App\Enums\MediafileTypeEnum;
 use App\Enums\PostTypeEnum;
+use App\Enums\StoryTypeEnum;
 
 class RestVaultTest extends TestCase
 {
@@ -525,8 +527,8 @@ class RestVaultTest extends TestCase
 
         // --- Create a free post with image from vault ---
 
-        $filename = $this->faker->slug;
-        $file = UploadedFile::fake()->image($filename, 200, 200);
+        //$filename = $this->faker->slug;
+        //$file = UploadedFile::fake()->image($filename, 200, 200);
         $payload = [
             'type' => PostTypeEnum::FREE,
             'timeline_id' => $timeline->id,
@@ -587,8 +589,8 @@ class RestVaultTest extends TestCase
         $mediafile = Mediafile::findOrFail($content->mediafile->id);
 
         // --- Create a free post ---
-        $filename = $this->faker->slug;
-        $file = UploadedFile::fake()->image($filename, 200, 200);
+        //$filename = $this->faker->slug;
+        //$file = UploadedFile::fake()->image($filename, 200, 200);
         $payload = [
             'type' => PostTypeEnum::FREE,
             'timeline_id' => $timeline->id,
@@ -611,7 +613,6 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
-     *  @group here
      */
     // Creates post and attaches selected mediafile in a single API call
     public function test_can_select_mediafile_from_vaultfolder_to_attach_to_post_singleop()
@@ -645,8 +646,8 @@ class RestVaultTest extends TestCase
 
         // --- Create a free post with image from vault ---
 
-        $filename = $this->faker->slug;
-        $file = UploadedFile::fake()->image($filename, 200, 200);
+        //$filename = $this->faker->slug;
+        //$file = UploadedFile::fake()->image($filename, 200, 200);
         $payload = [
             'type' => PostTypeEnum::FREE,
             'timeline_id' => $timeline->id,
@@ -678,8 +679,8 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
+     *  @group here
      */
-    /*
     public function test_can_select_mediafile_from_vaultfolder_to_attach_to_story()
     {
         Storage::fake('s3');
@@ -711,37 +712,36 @@ class RestVaultTest extends TestCase
 
         // --- Create a free story with image from vault ---
 
-        $filename = $this->faker->slug;
-        $file = UploadedFile::fake()->image($filename, 200, 200);
-        $payload = [
-            'type' => PostTypeEnum::FREE,
-            'timeline_id' => $timeline->id,
-            'description' => $this->faker->realText,
+        $attrs = [
+            'stype' => StoryTypeEnum::PHOTO,
+            'content' => $this->faker->realText,
         ];
-        $response = $this->actingAs($owner)->ajaxJSON('POST', route('posts.store'), $payload);
+        $payload = [
+            'attrs' => json_encode($attrs),
+            'mediafile' => $mediafile->id,
+        ];
+        $response = $this->actingAs($owner)->ajaxJSON('POST', route('stories.store'), $payload);
         $response->assertStatus(201);
         $content = json_decode($response->content());
-        $this->assertNotNull($content->post);
-        $postR = $content->post;
-        $post = Post::findOrFail($postR->id);
-
-        $response = $this->actingAs($owner)->ajaxJSON('PATCH', route('posts.attachMediafile', [$post->id, $mediafile->id]));
-        $response->assertStatus(200);
+        $this->assertNotNull($content->story);
+        $storyR = $content->story;
+        $story = Story::findOrFail($storyR->id);
 
         // --
 
         $timeline->refresh();
         $owner->refresh();
-        $post->refresh();
-        $mediafile = $post->mediafiles->shift();
-        $this->assertNotNull($mediafile, 'No mediafiles attached to post');
+        $story->refresh();
+        $mediafile = $story->mediafiles->shift();
+        $this->assertNotNull($mediafile, 'No mediafiles attached to story');
 
-        $response = $this->actingAs($fan)->ajaxJSON('GET', route('posts.show', $post->id));
+        $response = $this->actingAs($fan)->ajaxJSON('GET', route('stories.show', $story->id));
         $response->assertStatus(200);
 
         $response = $this->actingAs($fan)->ajaxJSON('GET', route('mediafiles.show', $mediafile->id));
         $response->assertStatus(200);
     }
+    /*
      */
 
     // ------------------------------

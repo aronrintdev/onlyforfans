@@ -82,8 +82,8 @@ class PostsController extends AppBaseController
 
     public function update(Request $request, Post $post)
     {
-        $attrs = $request->only([ 'description' ]);
-        $post->fill($attrs);
+        $this->authorize('update', $post);
+        $post->fill( $request->only([ 'description' ]) );
         $post->save();
         return response()->json([
             'post' => $post,
