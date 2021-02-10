@@ -1,11 +1,13 @@
 <?php
 namespace App;
 
+use Illuminate\Database\Eloquent\Model;
 //use Illuminate\Support\Facades\Auth;
 use App\SluggableTraits;
 //use Storage;
 //use App\Libs\Utils\ViewHelpers;
 //use App\Libs\Image;
+use App\Interfaces\Cloneable;
 use App\Interfaces\Ownable;
 use App\Interfaces\Guidable;
 //use App\Interfaces\Nameable;
@@ -16,7 +18,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Mediafile extends BaseModel implements Guidable, Sluggable, Ownable
+class Mediafile extends BaseModel implements Guidable, Sluggable, Ownable, Cloneable
 {
     use SluggableTraits;
     use HasFactory;
@@ -110,6 +112,20 @@ class Mediafile extends BaseModel implements Guidable, Sluggable, Ownable
     }
 
     // %%% --- Other ---
+
+    // Shallow clone: copies/pastes the DB record, not the asset/file
+    //   ~ cloning onl allowed if new copy is associated with another resource (eg post)
+    //   ~ see: https://trello.com/c/0fBcmPjq
+    public function doClone(string $resourceType, int $resourceId) : ?Model
+    {
+        $cloned = $this->replicate()->fill([
+            'resource_type' => $resourceType,
+            'resource_id' => $resourceId,
+        ]);
+        $cloned->save();
+        return $cloned;
+    }
+
 
     public function isImage() : bool {
         switch ($this->mimetype) {

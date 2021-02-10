@@ -15,6 +15,7 @@ use Database\Seeders\TestDatabaseSeeder;
 use App\User;
 use App\Story;
 use App\Mediafile;
+use App\Enums\MediafileTypeEnum;
 
 // see: https://laravel.com/docs/5.4/http-tests#testing-file-uploads
 // https://stackoverflow.com/questions/47366825/storing-files-to-aws-s3-using-laravel
@@ -38,11 +39,11 @@ class MediafileTest extends TestCase
 
         $payload = [
             'mediafile' => $file,
-            'mftype' => 'test',
+            'mftype' => MediafileTypeEnum::AVATAR,
         ];
         $response = $this->actingAs($user)->ajaxJSON('POST', route('mediafiles.store'), $payload);
 
-        $response->assertStatus(200);
+        $response->assertStatus(201);
 
         $content = json_decode($response->content());
         $this->assertNotNull($content->mediafile);
@@ -50,7 +51,7 @@ class MediafileTest extends TestCase
 
         Storage::disk('s3')->assertExists($mediafile->filename);
         $this->assertSame($filename, $mediafile->mfname);
-        $this->assertSame('test', $mediafile->mftype);
+        $this->assertSame(MediafileTypeEnum::AVATAR, $mediafile->mftype);
 
         //dd($response['cart']->toArray());
     }

@@ -8,6 +8,7 @@ use Throwable;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use App\Models\Post;
+use App\Models\MediaFile;
 use App\Models\Timeline;
 use App\Enums\PaymentTypeEnum;
 use App\Enums\PostTypeEnum;
@@ -16,14 +17,11 @@ class PostsController extends AppBaseController
 {
     public function index(Request $request)
     {
-        $sessionUser = Auth::user();
-        $sessionTimeline = $sessionUser->timeline;
-
         $filters = $request->input('filters', []);
 
         $query = Post::query();
-        if ( !$sessionUser->isAdmin() ) {
-            $query->where('timeline_id', $sessionTimeline->id);
+        if ( !$request->user()->isAdmin() ) {
+            $query->where('timeline_id', $request->user()->timeline->id);
         }
 
         foreach ($filters as $f) {
@@ -42,20 +40,7 @@ class PostsController extends AppBaseController
 
     public function show(Request $request, Post $post)
     {
-        $sessionUser = Auth::user();
-
-        switch ($post->type) {
-        case PostTypeEnum::PRICED:
-            if ( $sessionUser->id !== $post->user->id && !$post->sharees->contains($sessionUser->id) ) {
-                abort(403);
-            }
-            break;
-        case PostTypeEnum::FREE:
-            break;
-        case PostTypeEnum::SUBSCRIBER:
-            break;
-        }
-
+        $this->authorize('view', $post);
         return response()->json([
             'post' => $post,
         ]);
@@ -64,43 +49,29 @@ class PostsController extends AppBaseController
 
     public function store(Request $request)
     {
-        $sessionUser = Auth::user();
-
         $request->validate([
             'timeline_id' => 'required|exists:timelines,id',
-            // [ ] 'description': , // text COLLATE utf8_unicode_ci NOT NULL,
-            // [/] 'user_id': , // int(10) unsigned NOT NULL,
-            // [/] 'active': , // tinyint(1) NOT NULL DEFAULT '1',
-            // [ ] 'soundcloud_title': , // varchar(250) COLLATE utf8_unicode_ci DEFAULT NULL,
-            // [ ] 'soundcloud_id': , // varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
-            // [ ] 'youtube_title': , // varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
-            // [ ] 'youtube_video_id': , // varchar(250) COLLATE utf8_unicode_ci DEFAULT NULL,
-            // [ ] 'location': , // varchar(250) COLLATE utf8_unicode_ci DEFAULT NULL,
-            // [/] 'type': , // varchar(100) COLLATE utf8_unicode_ci DEFAULT NULL,
-            // [ ] 'price': , // varchar(100) COLLATE utf8_unicode_ci DEFAULT NULL,
-            // [ ] 'shared_post_id': , // int(10) unsigned DEFAULT NULL,
-            // [ ] 'publish_date': , // date DEFAULT NULL,
-            // [ ] 'publish_time': , // time DEFAULT NULL,
-            // [ ] 'expiration_date': , // date DEFAULT NULL,
-            // [ ] 'expiration_time': , // time DEFAULT NULL,
+            'mediaFile' => 'array',
+            'mediaFile.*.*' => 'integer|exists:mediaFile',
         ]);
 
         $timeline = Timeline::find($request->timeline_id); // timeline being posted on
 
-        if ( $sessionUser->id !== $timeline->user->id ) { // can only post on own home page
-            abort(403, 'Unauthorized');
-        }
+        $this->authorize('update', $timeline); // create post considered timeline update
 
         $attrs = $request->all();
         $attrs['user_id'] = $timeline->user->id; // %FIXME: remove this field, redundant
         $attrs['active'] = $request->input('active', 1);
         $attrs['type'] = $request->input('type', PostTypeEnum::FREE);
 
-        try {
-            $post = Post::create($attrs);
-        } catch (Exception $e) {
-            throw $e;
+        $post = Post::create($attrs);
+        if ( $request->has('mediaFile') ) {
+            foreach ( $request->mediaFile as $mfID ) {
+                $cloned = MediaFile::find($mfID)->doClone('posts', $post->id);
+                $post->mediaFile()->save($cloned);
+            }
         }
+        $post->refresh();
 
         return response()->json([
             'post' => $post,
@@ -109,11 +80,29 @@ class PostsController extends AppBaseController
 
     public function update(Request $request, Post $post)
     {
-        $sessionUser = Auth::user();
-
-        $attrs = $request->only([ 'description' ]);
-        $post->fill($attrs);
+        $this->authorize('update', $post);
+        $post->fill($request->only([ 'description' ]));
         $post->save();
+        return response()->json([
+            'post' => $post,
+        ]);
+    }
+
+    public function attachMediaFile(Request $request, Post $post, MediaFile $mediaFile)
+    {
+        // require mediaFile to be in vault (?)
+        if ( empty($mediaFile->resource) ) {
+            abort(400, 'source file must have associated resource');
+        }
+        if ( $mediaFile->resource_type !== 'vaultFolders' ) {
+            abort(400, 'source file associated resource type must be vaultFolder');
+        }
+        $this->authorize('update', $post);
+        $this->authorize('update', $mediaFile);
+        $this->authorize('update', $mediaFile->resource);
+
+        $mediaFile->doClone('posts', $post->id);
+        $post->refresh();
 
         return response()->json([
             'post' => $post,
@@ -122,8 +111,7 @@ class PostsController extends AppBaseController
 
     public function destroy(Request $request, Post $post)
     {
-        $sessionUser = Auth::user();
-        if ( $post->user->id !== $sessionUser->id ) {
+        if ( $post->user->id !== $request->user()->id ) {
             abort(403);
         }
         $post->delete();
@@ -132,9 +120,7 @@ class PostsController extends AppBaseController
 
     public function saves(Request $request)
     {
-        $sessionUser = Auth::user();
-
-        $saves = $sessionUser->sharedMediaFiles->map( function($mf) {
+        $saves = $request->user()->sharedMediaFile->map( function($mf) {
             $mf->foo = 'bar';
             //$mf->owner = $mf->getOwner()->first(); // %TODO
             //dd( 'owner', $mf->owner->only('username', 'name', 'avatar') ); // HERE
@@ -144,8 +130,8 @@ class PostsController extends AppBaseController
 
         return response()->json([
             'shareables' => [
-                'mediaFiles' => $mediaFiles,
-                'vaultFolders' => $sessionUser->sharedVaultFolders,
+                'mediaFile' => $mediaFile,
+                'vaultFolders' => $request->user()->sharedVaultFolders,
             ],
         ]);
     }
@@ -153,7 +139,6 @@ class PostsController extends AppBaseController
     public function tip(Request $request, Post $post)
     {
         $this->authorize('tip', $post);
-        $sessionUser = Auth::user(); // sender of tip (purchaser)
 
         $request->validate([
             'base_unit_cost_in_cents' => 'required|numeric',
@@ -162,7 +147,7 @@ class PostsController extends AppBaseController
         try {
             $post->receivePayment(
                 PaymentTypeEnum::TIP,
-                $sessionUser,
+                $request->user(), // send of tip
                 $request->base_unit_cost_in_cents,
                 [ 'notes' => $request->note ?? '' ]
             );
@@ -179,11 +164,10 @@ class PostsController extends AppBaseController
     // %NOTE: post price in DB is in dollars not cents %FIXME
     public function purchase(Request $request, Post $post)
     {
-        $sessionUser = Auth::user(); // purchaser
         try {
             $post->receivePayment(
                 PaymentTypeEnum::PURCHASE,
-                $sessionUser,
+                $request->user(),
                 $post->price*100, // %FIXME: should be on timeline
                 [ 'notes' => $request->note ?? '' ]
             );

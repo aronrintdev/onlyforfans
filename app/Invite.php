@@ -8,9 +8,22 @@ use App\Interfaces\Guidable;
 class Invite extends BaseModel implements Guidable
 {
     protected $guarded = ['id','created_at','updated_at'];
+    protected $hidden = [ 'cattrs', 'meta', ];
 
     public static $vrules = [
     ];
+
+    //--------------------------------------------
+    // Boot
+    //--------------------------------------------
+    public static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            $model->token = str_random();
+        });
+    }
 
     //--------------------------------------------
     // Relationships

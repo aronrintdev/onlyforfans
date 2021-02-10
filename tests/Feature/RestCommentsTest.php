@@ -82,7 +82,11 @@ class RestCommentsTest extends TestCase
      */
     public function test_can_show_followed_timelines_comment()
     {
-        $timeline = Timeline::has('posts','>=',1)->has('followers','>=',1)->first();
+        //$timeline = Timeline::has('posts','>=',1)->has('followers','>=',1)->first();
+        $timeline = Timeline::has('followers', '>=', 1)
+            ->whereHas('posts', function($q1) {
+                $q1->has('comments', '>=', 1);
+            })->first();
         $creator = $timeline->user;
         $fan = $timeline->followers->first();
         $post = $timeline->posts()->has('comments','>=',1)->first();

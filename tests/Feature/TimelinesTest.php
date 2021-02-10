@@ -59,9 +59,11 @@ class TimelinesTest extends TestCase
     {
         $timeline = Timeline::has('posts','>=',1)->has('followers','>=',1)->first();
         $creator = $timeline->user;
-        $fan = User::has('followedtimelines','<>',$timeline->id) // not yet a follower of timeline
-            ->where('id', '<>', $creator->id)
-            ->first(); // not yet a follower (includes susbcribers) of timeline
+
+        // find a user who is not yet a follower (includes susbcribers) of timeline
+        $fan = User::whereDoesntHave('followedtimelines', function($q1) use(&$timeline) {
+            $q1->where('timelines.id', '<>', $timeline->id);
+        })->where('id', '<>', $creator->id)->first();
 
         $payload = [
             'sharee_id' => $fan->id,
@@ -101,9 +103,10 @@ class TimelinesTest extends TestCase
         $creator->save();
         $timeline->refresh();
 
-        $fan = User::has('followedtimelines','<>',$timeline->id)
-            ->where('id', '<>', $creator->id)
-            ->first(); // not yet a follower (includes susbcribers) of timeline
+        // find a user who is not yet a follower (includes susbcribers) of timeline
+        $fan = User::whereDoesntHave('followedtimelines', function($q1) use(&$timeline) {
+            $q1->where('timelines.id', '<>', $timeline->id);
+        })->where('id', '<>', $creator->id)->first();
 
         // Check access (before: should be denied)
         // [ ] %TODO: actually this is more complex: they can access the timeline, but can only see a subset

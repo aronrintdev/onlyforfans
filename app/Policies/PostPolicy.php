@@ -1,10 +1,10 @@
 <?php
-
 namespace App\Policies;
 
+use App\Policies\Traits\OwnablePolicies;
 use App\Models\Post;
 use App\Models\User;
-use App\Policies\Traits\OwnablePolicies;
+use App\Enums\PostTypeEnum;
 
 class PostPolicy extends BasePolicy
 {
@@ -12,7 +12,7 @@ class PostPolicy extends BasePolicy
 
     protected $policies = [
         'viewAny'     => 'permissionOnly',
-        'view'        => 'isBlockedByOwner:fail',
+        'view'        => 'isOwner:pass isBlockedByOwner:fail',
         'update'      => 'isOwner:pass',
         'delete'      => 'isOwner:pass',
         'restore'     => 'isOwner:pass',
@@ -20,50 +20,36 @@ class PostPolicy extends BasePolicy
         'like'        => 'isOwner:pass isBlockedByOwner:fail',
     ];
 
-    /**
-     * Determine whether the user can view the model.
-     *
-     * @param  \App\User  $user
-     * @param  \App\Post  $post
-     * @return mixed
-     */
     protected function view(User $user, Post $post)
     {
-        return $post->timeline->followers->contains($user->id);
+        //return $post->timeline->followers->contains($user->id);
+        switch ($post->type) {
+        case PostTypeEnum::FREE:
+            return $post->timeline->followers->count()
+                && $post->timeline->followers->contains($user->id);
+        case PostTypeEnum::SUBSCRIBER:
+            //return $post->timeline->subscribers->contains($user->id);
+            return $post->timeline->followers->count()
+                && $post->timeline->followers()->wherePivot('access_level','premium')->count()
+                && $post->timeline->followers()->wherePivot('access_level','premium')->contains($user->id);
+        case PostTypeEnum::PRICED:
+            return $post->sharees->count()
+                && $post->sharees->contains($user->id); // premium (?)
+        }
     }
 
-    /**
-     * Determine whether the user can create models.
-     *
-     * @param  \App\User  $user
-     * @return mixed
-     */
+    /*
     protected function create(User $user)
     {
-        // Not blocked from creating posts?
-        // TODO: Add method when logic is finalized.
-        return true;
+        throw new \Exception('check update policy for timeline instead');
     }
+    */
 
-    /**
-     * Determine whether the user can restore the model.
-     *
-     * @param  \App\User  $user
-     * @param  \App\Post  $post
-     * @return mixed
-     */
     protected function restore(User $user, Post $post)
     {
         return false;
     }
 
-    /**
-     * Determine whether the user can permanently delete the model.
-     *
-     * @param  \App\User  $user
-     * @param  \App\Post  $post
-     * @return mixed
-     */
     protected function forceDelete(User $user, Post $post)
     {
         return false;
@@ -74,9 +60,10 @@ class PostPolicy extends BasePolicy
         return true;
     }
 
-    public function like(User $user, Post $resource)
+    public function like(User $user, Post $post)
     {
-        return $resource->timeline->followers->contains($user->id);
+        return $user->can('view', $post);
+        //return $post->timeline->followers->contains($user->id);
     }
 
 }

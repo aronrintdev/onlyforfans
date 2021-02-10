@@ -5,6 +5,7 @@ use DB;
 use Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\File;
 //use Illuminate\Http\UploadedFile;
@@ -18,28 +19,27 @@ class MediaFilesController extends AppBaseController
 
     public function store(Request $request)
     {
-        try {
-            $this->validate($request, [
-                'mediaFile' => 'required',
-                //'resource_id' => 'required',
-                //'resource_type' => 'required',
-                'type' => 'required',
-            ]);
-        } catch (\Exception $e) {
-            Log::warning(json_encode([
-                'verror' => $e->getMessage(),
-                //'e' => $e,
-                //'error_bag' => $e->getMessage(),
-            ]));
-            if ( $request->ajax() ) {
-                return \Response::json(['message'=> $e->getMessage()],422);
-            } else {
-                throw $e; // %FIXME: report error to user via browser message
-            }
-        }
+        $this->validate($request, [
+            'mediaFile' => 'required',
+            'mftype' => 'required|in:avatar,cover,post,story,vault',
+            'resource_type' => 'nullable|alpha-dash|in:comments,posts,stories,vaultfolders',
+            'resource_id' => 'required_with:resource_type|numeric|min:1',
+        ]);
 
         $file = $request->file('mediaFile');
-        //dd($file); // illuminate\Http\Testing\File
+
+        // If tied to a resource, check RBAC permission/policy for updating that resource...
+        if ( $request->has('resource_type') ) {
+            $alias = $request->resource_type;
+            $model = Relation::getMorphedModel($alias);
+            $resource = (new $model)->where('id', $request->resource_id)->first();
+            if ( empty($resource) ) {
+                abort(404);
+            }
+            if ( $request->user()->cannot('update', $resource) ) {
+                abort(403);
+            }
+        }
 
         try {
             $mediaFile = DB::transaction(function () use(&$file, &$request) {
@@ -75,21 +75,31 @@ class MediaFilesController extends AppBaseController
             throw $e; // %FIXME: report error to user via browser message
         }
 
-        return response()->json([
+        return response()->json([ 
             'mediaFile' => $mediaFile,
-        ]);
+        ], 201);
     }
 
-    public function show(Request $request, $pkid)
+    public function show(Request $request, Mediafile $mediaFile)
     {
-        $mediaFile = MediaFile::find($pkid);
+        $this->authorize('view', $mediaFile);
+        /*
+        if ( $request->user()->cannot('view', $mediaFile) ) {
+            abort(403);
+        }
+         */
 
         // Create sharable link
         //   ~ https://laravel.com/docs/5.5/filesystem#retrieving-files
-        $url = Storage::disk('s3')->temporaryUrl(
-            $mediaFile->filename,
-            now()->addMinutes(5) // %FIXME: hardcoded
-        );
+        if (env('APP_ENV') === 'testing') {
+            // %NOTE: workaround for S3 in testing env
+            return $mediaFile->filename;
+        } else {
+            $url = Storage::disk('s3')->temporaryUrl(
+                $mediaFile->filename,
+                now()->addMinutes(5) // %FIXME: hardcoded
+            );
+        }
         return response()->json([
             'mediaFile' => $mediaFile,
             'url' => $url,

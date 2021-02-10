@@ -6,9 +6,11 @@ use Auth;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use App\Models\MediaFile;
-use App\Models\Story;
-use App\Models\Timeline;
+use Illuminate\Support\Facades\Validator;
+use App\MediaFile;
+use App\Setting;
+use App\Story;
+use App\Timeline;
 use App\Enums\MediaFileTypeEnum;
 //use App\Enums\StoryTypeEnum; // generalize?
 
@@ -63,18 +65,32 @@ class StoriesController extends AppBaseController
     public function store(Request $request)
     {
         $request['attrs'] = json_decode($request['attrs'], true); // decode 'complex' data
-        
-        $this->validate($request, [
+
+        $vrules = [
             'attrs' => 'required',
             'attrs.stype' => 'required|in:text,photo',
-            'mediaFile' => 'required_if:attrs.stype,photo|file',
-        ]);
+        ];
+        if ( $request->has('mediaFile') ) {
+            if ( $request->hasFile('mediaFile') ) {
+                $vrules['mediaFile'] = 'required_if:attrs.stype,photo|file';
+            } else {
+                $vrules['mediaFile'] = 'required_if:attrs.stype,photo|integer|exists:mediaFiles,id'; // must be fk to [mediaFiles]
+            }
+        }
+        
+        $this->validate($request, $vrules);
+
+        // policy check is redundant as a story is always created on session user's
+        //   timeline, however in the future we may be more flexible, or support
+        //   multiple timelines which will require request->timeline_id
+        $timeline = Timeline::find($request->user()->timeline_id);
+        $this->authorize('update', $timeline);
 
         try {
-            $story = DB::transaction(function () use(&$request) {
+            $story = DB::transaction(function () use(&$request, &$timeline) {
 
                 $story = Story::create([
-                    'timeline_id' => $request->user()->timeline_id,
+                    'timeline_id' => $timeline->id,
                     'content' => $request->attrs['content'] ?? null,
                     'custom_attributes' => [
                         'background-color' => array_key_exists('bgcolor', $request->attrs) ? $request->attrs['bgcolor'] : '#fff',
@@ -83,21 +99,27 @@ class StoriesController extends AppBaseController
                 ]);
 
                 if ( $request->attrs['stype'] === 'photo' ) {
-                    $file = $request->file('mediaFile');
-                    $subFolder = 'stories';
-                    $newFilename = $file->store('./'.$subFolder, 's3'); // %FIXME: hardcoded
-                    $mediaFile = MediaFile::create([
-                        'resource_id' => $story->id,
-                        'resource_type' => 'stories',
-                        'filename' => $newFilename,
-                        'name' => $mediaFileName ?? $file->getClientOriginalName(),
-                        'type' => MediaFileTypeEnum::STORY,
-                        'metadata' => $request->input('attrs.foo') ?? null,
-                        'custom_attributes' => $request->input('attrs.bar') ?? null,
-                        'mimetype' => $file->getMimeType(),
-                        'orig_filename' => $file->getClientOriginalName(),
-                        'orig_ext' => $file->getClientOriginalExtension(),
-                    ]);
+                    if ( $request->hasFile('mediaFile') ) {
+                        $file = $request->file('mediaFile');
+                        $subFolder = 'stories';
+                        $newFilename = $file->store('./'.$subFolder, 's3'); // %FIXME: hardcoded
+                        $mediaFile = MediaFile::create([
+                            'resource_id' => $story->id,
+                            'resource_type' => 'stories',
+                            'filename' => $newFilename,
+                            'name' => $mediaFileName ?? $file->getClientOriginalName(),
+                            'type' => MediaFileTypeEnum::STORY,
+                            'metadata' => $request->input('attrs.foo') ?? null,
+                            'custom_attributes' => $request->input('attrs.bar') ?? null,
+                            'mimetype' => $file->getMimeType(),
+                            'orig_filename' => $file->getClientOriginalName(),
+                            'orig_ext' => $file->getClientOriginalExtension(),
+                        ]);
+                    } else {
+                        $src = MediaFile::find($request->mediaFile);
+                        $cloned = $src->doClone('stories', $story->id);
+                        $story->mediaFiles()->save($cloned);
+                    }
                 }
                 return $story;
             });
@@ -105,14 +127,22 @@ class StoriesController extends AppBaseController
             abort(400);
         }
 
-        return response()->json([ 'story' => $story ]);
+        return response()->json([
+            'story' => $story,
+        ], 201);
+    }
+
+    public function show(Request $request, Story $story)
+    {
+        $this->authorize('view', $story);
+        return response()->json([
+            'story' => $story,
+        ]);
     }
 
     public function destroy(Request $request, Story $story)
     {
-        if ( $request->user()->id !== $story->timeline->user->id) {
-            abort(403);
-        }
+        $this->authorize('delete', $story);
 
         // %TODO: use DB transaction
         $story->mediaFiles->each( function($mf) {
@@ -123,6 +153,8 @@ class StoriesController extends AppBaseController
 
         return response()->json([]);
     }
+
+    // --
 
     public function player(Request $request)
     {

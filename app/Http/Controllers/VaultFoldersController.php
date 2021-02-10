@@ -6,10 +6,14 @@ use Auth;
 use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
+use App\Models\Invite;
 use App\Models\MediaFile;
 use App\Models\Vault;
 use App\Models\VaultFolder;
+use App\Enums\InviteTypeEnum;
+use App\Mail\ShareableInvited;
 
 // $request->validate([ 'vf_id' => 'required', ]);
 class VaultFoldersController extends AppBaseController
@@ -56,9 +60,7 @@ class VaultFoldersController extends AppBaseController
     // %TODO: check session user owner
     public function show(Request $request, VaultFolder $vaultFolder)
     {
-        if ( $request->user()->cannot('view', $vaultFolder) ) {
-            abort(403);
-        }
+        $this->authorize('view', $vaultFolder);
 
         $vaultFolder->load('children', 'parent', 'mediaFiles');
         $breadcrumb = $vaultFolder->getBreadcrumb();
@@ -99,7 +101,7 @@ class VaultFoldersController extends AppBaseController
     {
         $vrules = [
             'vault_id' => 'required|integer|min:1',
-            'vfname' => 'required|string',
+            'name' => 'required|string',
         ];
 
         $attrs = [];
@@ -114,10 +116,12 @@ class VaultFoldersController extends AppBaseController
         $attrs['name'] = $request->name;
 
         $vault = Vault::find($request->vault_id);
-
+        $this->authorize('update', $vault);
+        /*
         if ( $request->user()->cannot('update', $vault) || $request->user()->cannot('create', VaultFolder::class) ) {
             abort(403);
         }
+         */
 
         $vaultFolder = VaultFolder::create($attrs);
 
@@ -128,9 +132,7 @@ class VaultFoldersController extends AppBaseController
 
     public function update(Request $request, VaultFolder $vaultFolder)
     {
-        if ( $request->user()->cannot('update', $vaultFolder) ) {
-            abort(403);
-        }
+        $this->authorize('update', $vaultFolder);
 
         $vrules = [
             'name' => 'required|sometimes|string',
@@ -154,9 +156,7 @@ class VaultFoldersController extends AppBaseController
 
     public function destroy(Request $request, VaultFolder $vaultFolder)
     {
-        if ( $request->user()->cannot('delete', $vaultFolder) ) {
-            abort(403);
-        }
+        $this->authorize('delete', $vaultFolder);
         if ( $vaultFolder->isRootFolder() ) {
             abort(400);
         }
@@ -165,6 +165,41 @@ class VaultFoldersController extends AppBaseController
     }
 
     // ---
+
+    // Invite one or more persons to register for the site to share a (single) vaultFolder (access)
+    public function invite(Request $request, VaultFolder $vaultFolder)
+    {
+        $this->authorize('update', $vaultFolder);
+
+        $vrules = [
+            'invitees' => 'required|array',
+            'invitees.*.email' => 'required|email',
+            'invitees.*.name' => 'string',
+        ];
+
+        $sharees = $request->input('invitees', []);
+        $invites = collect();
+        foreach ( $sharees as $se ) {
+            $i = Invite::create([
+                'inviter_id' => $request->user()->id,
+                'email' => $se['email'],
+                'type' => InviteTypeEnum::VAULT,
+                'custom_attributes' => [
+                    'shareables' => $request->invitees ?? [],
+                    'vaultFolder_id' => $vaultFolder->id,
+                ],
+            ]);
+            Mail::to($i->email)->queue( new ShareableInvited($i) );
+            //$i->send();
+            $invites->push($i);
+        }
+
+        //$request->user()->sharedVaultFolders()->syncWithoutDetaching($vaultFolder->id); // do share %TODO: need to do when they register (!)
+
+        return response()->json([
+            'invites' => $invites,
+        ]);
+    }
 
 
 }

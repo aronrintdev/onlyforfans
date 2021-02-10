@@ -78,11 +78,12 @@ class VaultsController extends AppBaseController
         ]);
     }
 
-    // %TODO: 
+    // %TODO: DEPRECATE - move to VaultFoldersController & MediaFilesController (batch)
     //   ~ use DB transaction (?)
     //   ~ verify resource belongs to the given vault (??)
     public function updateShares(Request $request, $pkid)
     {
+        throw new \Exception('DEPRECATED - use VaultFoldersController or MediaFilesController (batch)');
         $sessionUser = Auth::user();
         $vault = Vault::where('id', $pkid)->where('user_id', $sessionUser->id)->first();
 
@@ -119,7 +120,6 @@ class VaultsController extends AppBaseController
                 'inviter_id' => $sessionUser->id,
                 'email' => $i['email'],
                 'type' => InviteTypeEnum::VAULT,
-                'token' => str_random(),
                 'custom_attributes' => [
                     'shareables' => $shareables,
                     'vault_id' => $vault->id,
@@ -143,7 +143,7 @@ class VaultsController extends AppBaseController
         if ( $request->user()->cannot('view', $vault) ) {
             abort(403);
         }
-        $vaultFolder = Vaultfolder::with('children', 'parent', 'mediaFiles')
+        $vaultFolder = VaultFolder::with('children', 'parent', 'mediaFiles')
             ->where('vault_id', $vault->id)
             ->whereNull('parent_id')
             ->first();

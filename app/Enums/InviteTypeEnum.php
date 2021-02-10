@@ -5,7 +5,7 @@ use App\Interfaces\Selectable;
 
 class InviteTypeEnum extends SmartEnum implements Selectable {
 
-    const VAULT = 'vault';
+    const VAULT = 'vault'; // %TODO: this should probably be VAULTFOLDER
 
     public static $keymap = [
         self::VAULT => 'Vault',

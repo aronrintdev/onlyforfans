@@ -1,11 +1,11 @@
 <?php
 namespace App\Policies;
 
-use App\Models\User;
-use App\Models\VaultFolder;
+use App\User;
+use App\Story;
 use App\Policies\Traits\OwnablePolicies;
 
-class VaultfolderPolicy extends BasePolicy
+class StoryPolicy extends BasePolicy
 {
     use OwnablePolicies;
 
@@ -18,8 +18,21 @@ class VaultfolderPolicy extends BasePolicy
         'forceDelete' => 'permissionOnly',
     ];
 
+    protected function view(User $user, Story $story)
+    {
+        return $story->timeline->followers->contains($user->id);
+    }
+
+    public function like(User $user, Story $story)
+    {
+        return $user->can('view', $story);
+        //return $story->timeline->followers->contains($user->id);
+    }
+
+    /*
     protected function create(User $user)
     {
-        return true;
+        throw new \Exception('check update policy for timeline instead');
     }
+     */
 }
