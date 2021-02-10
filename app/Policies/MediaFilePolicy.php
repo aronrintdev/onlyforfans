@@ -37,6 +37,11 @@ class MediaFilePolicy extends BasePolicy
         }
     }
 
+    protected function doClone(User $user, Mediafile $mediafile)
+    {
+        return $user->isOwner($mediafile);
+    }
+
     protected function create(User $user)
     {
         return true; // %TODO

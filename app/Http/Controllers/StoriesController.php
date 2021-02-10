@@ -117,7 +117,8 @@ class StoriesController extends AppBaseController
                             'orig_ext' => $file->getClientOriginalExtension(),
                         ]);
                     } else {
-                        $cloned = Mediafile::find($request->mediafile)->doClone('stories', $story->id);
+                        $src = Mediafile::find($request->mediafile);
+                        $cloned = $src->doClone('stories', $story->id);
                         $story->mediafiles()->save($cloned);
                     }
                 }
