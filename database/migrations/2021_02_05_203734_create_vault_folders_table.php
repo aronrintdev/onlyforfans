@@ -15,19 +15,22 @@ class CreateVaultFoldersTable extends Migration
     {
         Schema::create('vault_folders', function (Blueprint $table) {
             $table->uuid('id')->primary;
-            $table->string('guid')->unique();
+            $table->uuid('user_id');
+            $table->foreign('user_id')->references('id')->on('users');
+
+            // $table->string('guid')->unique();
             $table->string('slug')->unique();
 
             $table->uuid('parent_id')->nullable()->comment('Parent folder, NULL for root');
-            $table->foreign('parent_id')->references('id')->on('vaultfolders');
+            $table->foreign('parent_id')->references('id')->on('vault_folders');
 
             $table->uuid('vault_id');
             $table->foreign('vault_id')->references('id')->on('vaults');
 
-            $table->string('vfname')->comment('Vault folder name');
+            $table->string('name')->comment('Vault folder name');
 
-            $table->json('cattrs')->nullable()->comment('JSON-encoded custom attributes');
-            $table->json('meta')->nullable()->comment('JSON-encoded meta attributes');
+            $table->json('custom_attributes')->nullable()->comment('JSON-encoded custom attributes');
+            $table->json('metadata')->nullable()->comment('JSON-encoded meta attributes');
 
             $table->timestamps();
         });

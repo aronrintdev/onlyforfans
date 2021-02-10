@@ -21,6 +21,7 @@ class CreateUsersTable extends Migration
             $table->string('remember_token', 250);
             $table->string('verification_code', 250);
             $table->boolean('email_verified');
+            $table->boolean('is_online')->nullable();
             $table->timestamp('last_logged')->nullable();
             $table->timestamps();
             $table->softDeletes();

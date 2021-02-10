@@ -15,10 +15,10 @@ class CreateStoriesTable extends Migration
     {
         Schema::create('stories', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->uuid('timeline')->nullable();
+            $table->uuid('timeline_id')->nullable();
             $table->longText('content')->nullable()->comment('JSON-encoded attributes');
-            $table->longText('cattrs')->nullable()->comment('JSON-encoded attributes');
-            $table->string('stype')->comment('Enum: Story type');
+            $table->longText('custom_attributes')->nullable()->comment('JSON-encoded attributes');
+            $table->string('type')->comment('Enum: Story type');
             $table->timestamps();
             $table->softDeletes();
         });

@@ -59,14 +59,14 @@ class AppServiceProvider extends ServiceProvider
         }
 
         Relation::morphMap([
-            'comments' => 'App\Comment',
-            'mediafiles' => 'App\Mediafile',
-            'posts' => 'App\Post',
-            'stories' => 'App\Story',
-            'subscriptions' => 'App\Subscription',
-            'timelines' => 'App\Timeline',
-            'users' => 'App\User',
-            'vaultfolders' => 'App\Vaultfolder',
+            'comments'      => 'App\Models\Comment',
+            'mediaFiles'    => 'App\Models\MediaFile',
+            'posts'         => 'App\Models\Post',
+            'stories'       => 'App\Models\Story',
+            'subscriptions' => 'App\Models\Subscription',
+            'timelines'     => 'App\Models\Timeline',
+            'users'         => 'App\Models\User',
+            'vaultFolders'  => 'App\Models\VaultFolder',
         ]);
 
         Carbon::serializeUsing(function ($carbon) {

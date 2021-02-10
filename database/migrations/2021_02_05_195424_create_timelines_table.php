@@ -15,10 +15,14 @@ class CreateTimelinesTable extends Migration
     {
         Schema::create('timelines', function (Blueprint $table) {
             $table->uuid('id')->primary();
+            $table->uuid('user_id');
+            $table->foreign('user_id')->references('id')->on('users');
+
             $table->string('name', 250);
             $table->text('about');
             $table->uuid('avatar_id')->nullable();
             $table->uuid('cover_id')->nullable();
+            $table->boolean('verified')->default(false);
             $table->timestamps();
             $table->softDeletes();
         });

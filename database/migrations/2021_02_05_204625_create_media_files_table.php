@@ -15,19 +15,19 @@ class CreateMediaFilesTable extends Migration
     {
         Schema::create('media_files', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('guid')->unique();
+            // $table->string('guid')->unique();
             $table->string('slug')->unique();
             $table->string('filename')->nullable()->comment('Filename as stored, in S3 for ex')->unique();
 
-            $table->string('mfname')->comment('Mediafile name');
-            $table->string('mftype', 63)->comment('MediaFile Type: Enumeration');
+            $table->string('name')->comment('Mediafile name');
+            $table->string('type', 63)->comment('MediaFile Type: Enumeration');
 
             $table->string('mimetype', 255)->nullable();
-            $table->string('orig_ext', 15)->nullable();
-            $table->string('orig_filename', 511)->nullable();
+            $table->string('original_ext', 15)->nullable();
+            $table->string('original_filename', 511)->nullable();
             $table->nullableUuidMorphs('resource');
-            $table->json('cattrs')->nullable()->comment('JSON-encoded custom attributes');
-            $table->json('meta')->nullable()->comment('JSON-encoded meta attributes');
+            $table->json('custom_attributes')->nullable()->comment('JSON-encoded custom attributes');
+            $table->json('metadata')->nullable()->comment('JSON-encoded meta attributes');
 
             $table->timestamps();
         });

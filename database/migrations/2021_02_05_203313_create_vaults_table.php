@@ -15,16 +15,15 @@ class CreateVaultsTable extends Migration
     {
         Schema::create('vaults', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('guid')->unique();
             $table->string('slug')->unique();
 
             $table->uuid('user_id');
             $table->foreign('user_id')->references('id')->on('users');
 
-            $table->string('vname')->comment('Vault name');
+            $table->string('name')->comment('Vault name');
 
-            $table->json('cattrs')->nullable()->comment('JSON-encoded custom attributes');
-            $table->json('meta')->nullable()->comment('JSON-encoded meta attributes');
+            $table->json('custom_attributes')->nullable()->comment('JSON-encoded custom attributes');
+            $table->json('metadata')->nullable()->comment('JSON-encoded metadata attributes');
 
             $table->timestamps();
         });

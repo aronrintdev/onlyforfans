@@ -15,9 +15,9 @@ class CreatePostsTable extends Migration
     {
         Schema::create('posts', function (Blueprint $table) {
             $table->uuid('id')->primary();
+            $table->uuid('user_id');
+            $table->uuidMorphs('postable');
             $table->text('description');
-            $table->uuid('timeline');
-            $table->uuid('posted_by');
             $table->boolean('active');
             $table->string('type');
             $table->unsignedInteger('price');
