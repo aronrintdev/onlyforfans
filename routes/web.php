@@ -129,6 +129,7 @@ Route::group(['middleware' => ['auth']], function () {
 
     // -- vaultfolders: shareable | purchaseable --
     Route::get('/vaultfolders/match', ['as'=>'vaultfolders.match', 'uses' => 'VaultfoldersController@match']);
+    Route::post('/vaultfolders/{vaultfolder}/invite', ['as'=>'vaultfolders.invite', 'uses' => 'VaultfoldersController@invite']);
     Route::resource('vaultfolders', 'VaultfoldersController', [ ]);
 
     // -- misc --
