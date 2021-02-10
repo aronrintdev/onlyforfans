@@ -5,17 +5,18 @@ namespace App\Models;
 use App\SluggableTraits;
 use App\Interfaces\Ownable;
 use App\Interfaces\Guidable;
-use App\Interfaces\Sluggable;
-use App\Enums\MediaFileTypeEnum;
+use App\Interfaces\Cloneable;
 use App\Interfaces\ShortUuid;
-use App\Models\Traits\UsesShortUuid;
+use App\Interfaces\Sluggable;
 use App\Models\Traits\UsesUuid;
+use App\Enums\MediaFileTypeEnum;
 use App\Traits\OwnableFunctions;
 use Illuminate\Support\Collection;
+use App\Models\Traits\UsesShortUuid;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class MediaFile extends BaseModel implements Guidable, Sluggable, Ownable, ShortUuid
+class MediaFile extends BaseModel implements Guidable, Sluggable, Ownable, ShortUuid, Cloneable
 {
     use UsesUuid;
     use UsesShortUuid;
@@ -125,6 +126,21 @@ class MediaFile extends BaseModel implements Guidable, Sluggable, Ownable, Short
     }
 
     // %%% --- Other ---
+
+    /**
+     *  Shallow clone: copies/pastes the DB record, not the asset/file
+     *  ~ cloning onl allowed if new copy is associated with another resource (eg post)
+     *  ~ see: https://trello.com/c/0fBcmPjq
+     */
+    public function doClone(string $resourceType, int $resourceId): ?Model
+    {
+        $cloned = $this->replicate()->fill([
+            'resource_type' => $resourceType,
+            'resource_id' => $resourceId,
+        ]);
+        $cloned->save();
+        return $cloned;
+    }
 
     public function isImage(): bool
     {
