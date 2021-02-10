@@ -2,8 +2,8 @@
 
 namespace App\Policies;
 
-use App\User;
-use App\Timeline;
+use App\Models\User;
+use App\Models\Timeline;
 use App\Policies\Traits\OwnablePolicies;
 
 class TimelinePolicy extends BasePolicy

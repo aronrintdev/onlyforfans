@@ -1,7 +1,7 @@
 <?php
 namespace Database\Seeders;
 
-use App\Enums\MediafileTypeEnum;
+use App\Enums\MediaFileTypeEnum;
 use App\Libs\FactoryHelpers;
 use App\Story;
 use App\User;
@@ -41,7 +41,7 @@ class StoriesTableSeeder extends Seeder
                 case 'text':
                     break;
                 case 'image':
-                    $mf = FactoryHelpers::createImage(MediafileTypeEnum::STORY, $story->id);
+                    $mf = FactoryHelpers::createImage(MediaFileTypeEnum::STORY, $story->id);
                     break;
                 }
             });

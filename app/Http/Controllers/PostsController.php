@@ -7,8 +7,8 @@ use Exception;
 use Throwable;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
-use App\Post;
-use App\Timeline;
+use App\Models\Post;
+use App\Models\Timeline;
 use App\Enums\PaymentTypeEnum;
 use App\Enums\PostTypeEnum;
 
@@ -134,7 +134,7 @@ class PostsController extends AppBaseController
     {
         $sessionUser = Auth::user();
 
-        $saves = $sessionUser->sharedmediafiles->map( function($mf) {
+        $saves = $sessionUser->sharedMediaFiles->map( function($mf) {
             $mf->foo = 'bar';
             //$mf->owner = $mf->getOwner()->first(); // %TODO
             //dd( 'owner', $mf->owner->only('username', 'name', 'avatar') ); // HERE
@@ -144,8 +144,8 @@ class PostsController extends AppBaseController
 
         return response()->json([
             'shareables' => [
-                'mediafiles' => $mediafiles,
-                'vaultfolders' => $sessionUser->sharedvaultfolders,
+                'mediaFiles' => $mediaFiles,
+                'vaultFolders' => $sessionUser->sharedVaultFolders,
             ],
         ]);
     }

@@ -11,7 +11,7 @@ use Ramsey\Uuid\Uuid;
 use App\Mediafile;
 use App\Vault;
 use App\Vaultfolder;
-use App\Enums\MediafileTypeEnum;
+use App\Enums\MediaFileTypeEnum;
 
 class VaultModelTest extends TestCase
 {

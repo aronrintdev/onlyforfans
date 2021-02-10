@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateLinksTable extends Migration
+class CreateInvitesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,15 +13,17 @@ class CreateLinksTable extends Migration
      */
     public function up()
     {
-        Schema::create('links', function (Blueprint $table) {
-            $table->uuid('id')->primary;
-            $table->uuidMorphs('resource');
-            $table->string('url');
-            $table->string('name');
+        Schema::create('invites', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->string('email');
             $table->string('type', 63);
+            $table->uuid('inviter_id');
+            $table->foreign('inviter_id')->references('id')->on('users');
+            $table->text('token');
             $table->json('custom_attributes');
             $table->json('metadata');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
@@ -32,6 +34,6 @@ class CreateLinksTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('links');
+        Schema::dropIfExists('invites');
     }
 }

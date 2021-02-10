@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\LoginSession;
-use App\Setting;
-use App\Timeline;
+use App\Models\Session as LoginSession;
+use App\Models\Setting;
+use App\Models\Timeline;
 use DB;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
@@ -73,7 +73,6 @@ class LoginController extends Controller
         }
         else{
             $theme = Theme::uses(Setting::get('current_theme', 'default'))->layout('guest');
-            $theme->setTitle(trans('auth.login').' '.Setting::get('title_seperator').' '.Setting::get('site_title').' '.Setting::get('title_seperator').' '.Setting::get('site_tagline'));
 
             return $theme->scope('users.login')->render();
         }
@@ -91,7 +90,6 @@ class LoginController extends Controller
         if (empty($user)) {
 
             $theme = Theme::uses(Setting::get('current_theme', 'default'))->layout('guest');
-            $theme->setTitle(trans('auth.login').' '.Setting::get('title_seperator').' '.Setting::get('site_title').' '.Setting::get('title_seperator').' '.Setting::get('site_tagline'));
 
             $error_msg = "Login failed. Try again";
             return $theme->scope('users.login', compact('error_msg'))->render();
@@ -123,8 +121,6 @@ class LoginController extends Controller
         }
         else {
             $theme = Theme::uses(Setting::get('current_theme', 'default'))->layout('guest');
-            $theme->setTitle(trans('auth.login').' '.Setting::get('title_seperator').' '.Setting::get('site_title').' '.Setting::get('title_seperator').' '.Setting::get('site_tagline'));
-
             $error_msg = "Login failed. Try again";
             return $theme->scope('users.login', compact('error_msg'))->render();
         }
@@ -140,19 +136,19 @@ class LoginController extends Controller
 //            return response()->json(['status' => '201', 'message' => trans('auth.login_failed')]);
 //        } else {
 //            $user = '';
-//            $nameoremail = '';
+//            $nameOrEmail = '';
 //            $canLogin = false;
 //            $remember = ($request->remember ? true : false);
 //
 //            if (filter_var(($request->email), FILTER_VALIDATE_EMAIL)  == true) {
-//                $nameoremail = $request->email;
+//                $nameOrEmail = $request->email;
 //                $user = DB::table('users')->where('email', $request->email)->first();
 //            } else {
 //                $timeline = DB::table('timelines')->where('username', $request->email)->first();
 //                if ($timeline != null) {
 //                    $user = DB::table('users')->where('timeline_id', $timeline->id)->first();
 //                    if ($user) {
-//                        $nameoremail = $user->email;
+//                        $nameOrEmail = $user->email;
 //                    }
 //                }
 //            }
@@ -170,7 +166,7 @@ class LoginController extends Controller
 //            }
 //        }
 //
-//        if ($canLogin && Auth::attempt(['email' => $nameoremail])) {
+//        if ($canLogin && Auth::attempt(['email' => $nameOrEmail])) {
 //            return \redirect('/');
 ////            return response()->json(['status' => '200', 'message' => trans('auth.login_success')]);
 //        } else {
@@ -202,19 +198,19 @@ class LoginController extends Controller
             return redirect()->back();
         } else {
             $user = '';
-            $nameoremail = '';
+            $nameOrEmail = '';
             $canLogin = false;
             $remember = ($request->remember ? true : false);
 
             if (filter_var(($request->email), FILTER_VALIDATE_EMAIL)  == true) {
-                $nameoremail = $request->email;
+                $nameOrEmail = $request->email;
                 $user = DB::table('users')->where('email', $request->email)->first();
             } else {
                 $timeline = DB::table('timelines')->where('username', $request->email)->first();
                 if ($timeline != null) {
                     $user = DB::table('users')->where('timeline_id', $timeline->id)->first();
                     if ($user) {
-                        $nameoremail = $user->email;
+                        $nameOrEmail = $user->email;
                     }
                 }
             }
@@ -234,7 +230,7 @@ class LoginController extends Controller
             }
         }
 
-        if ($canLogin && Auth::attempt(['email' => $nameoremail, 'password' => $request->password], $remember)) {
+        if ($canLogin && Auth::attempt(['email' => $nameOrEmail, 'password' => $request->password], $remember)) {
             // return response()->json(['status' => '200', 'message' => trans('auth.login_success')]);
             //save to loginSessions
             $login_session = new LoginSession();
@@ -256,8 +252,7 @@ class LoginController extends Controller
             $login_session->date = date("Y-m-d");
             $login_session->save();
             $session = $request->session()->get('profileUrl');
-            
-            
+
             if (!empty($session)) {
                 return redirect($session);
             } else {

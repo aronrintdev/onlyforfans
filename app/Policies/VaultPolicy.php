@@ -1,8 +1,8 @@
 <?php
 namespace App\Policies;
 
-use App\User;
-use App\Vault;
+use App\Models\User;
+use App\Models\Vault;
 use App\Policies\Traits\OwnablePolicies;
 
 class VaultPolicy extends BasePolicy

@@ -41,7 +41,7 @@ use Intervention\Image\File;
 use LinkPreview\LinkPreview;
 use App\Enums\PaymentTypeEnum;
 use Intervention\Image\Gd\Font;
-use App\Enums\MediafileTypeEnum;
+use App\Enums\MediaFileTypeEnum;
 use Illuminate\Http\JsonResponse;
 use Alaouy\Youtube\Facades\Youtube;
 use Illuminate\Support\Facades\App;

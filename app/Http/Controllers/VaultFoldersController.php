@@ -7,12 +7,12 @@ use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use App\Mediafile;
-use App\Vault;
-use App\Vaultfolder;
+use App\Models\MediaFile;
+use App\Models\Vault;
+use App\Models\VaultFolder;
 
 // $request->validate([ 'vf_id' => 'required', ]);
-class VaultfoldersController extends AppBaseController
+class VaultFoldersController extends AppBaseController
 {
     public function index(Request $request)
     {
@@ -30,8 +30,8 @@ class VaultfoldersController extends AppBaseController
             } while(0);
         }
 
-        $query = Vaultfolder::query();
-        $query->with(['mediafiles', 'vfparent', 'vfchildren']);
+        $query = VaultFolder::query();
+        $query->with(['mediaFiles', 'parent', 'children']);
 
         foreach ( $request->input('filters', []) as $k => $v ) {
             switch ($k) {
@@ -46,41 +46,41 @@ class VaultfoldersController extends AppBaseController
                 $query->where($k, $v);
             }
         }
-        $vaultfolders = $query->get();
+        $vaultFolders = $query->get();
 
         return response()->json([
-            'vaultfolders' => $vaultfolders,
+            'vaultFolders' => $vaultFolders,
         ]);
     }
 
     // %TODO: check session user owner
-    public function show(Request $request, Vaultfolder $vaultfolder)
+    public function show(Request $request, VaultFolder $vaultFolder)
     {
-        if ( $request->user()->cannot('view', $vaultfolder) ) {
+        if ( $request->user()->cannot('view', $vaultFolder) ) {
             abort(403);
         }
 
-        $vaultfolder->load('vfchildren', 'vfparent', 'mediafiles');
-        $breadcrumb = $vaultfolder->getBreadcrumb();
+        $vaultFolder->load('children', 'parent', 'mediaFiles');
+        $breadcrumb = $vaultFolder->getBreadcrumb();
         $shares = collect();
-        $vaultfolder->mediafiles->each( function($vf) use(&$shares) {
+        $vaultFolder->mediaFiles->each( function($vf) use(&$shares) {
             $vf->sharees->each( function($u) use(&$vf, &$shares) {
                 $shares->push([
                     'sharee_id' => $u->id,
                     'sharee_name' => $u->name,
                     'sharee_username' => $u->username,
-                    'shareable_type' => 'mediafiles', // %FIXME: cleaner way to do this?, ie just get the pivot (?)
+                    'shareable_type' => 'mediaFiles', // %FIXME: cleaner way to do this?, ie just get the pivot (?)
                     'shareable_id' => $vf->id,
                 ]);
             });
         });
-        $vaultfolder->vfchildren->each( function($vf) use(&$shares) {
+        $vaultFolder->children->each( function($vf) use(&$shares) {
             $vf->sharees->each( function($u) use(&$vf, &$shares) {
                 $shares->push([
                     'sharee_id' => $u->id,
                     'sharee_name' => $u->name,
                     'sharee_username' => $u->username,
-                    'shareable_type' => 'vaultfolders', // %FIXME: cleaner way to do this?, ie just get the pivot (?)
+                    'shareable_type' => 'vaultFolders', // %FIXME: cleaner way to do this?, ie just get the pivot (?)
                     'shareable_id' => $vf->id,
                 ]);
             });
@@ -88,7 +88,7 @@ class VaultfoldersController extends AppBaseController
 
         return response()->json([
             'sessionUser' => $request->user(),
-            'vaultfolder' => $vaultfolder,
+            'vaultFolder' => $vaultFolder,
             'breadcrumb' => $breadcrumb,
             'shares' => $shares,
         ]);
@@ -111,29 +111,29 @@ class VaultfoldersController extends AppBaseController
         }
         $request->validate($vrules);
         $attrs['vault_id'] = $request->vault_id;
-        $attrs['vfname'] = $request->vfname;
+        $attrs['name'] = $request->name;
 
         $vault = Vault::find($request->vault_id);
 
-        if ( $request->user()->cannot('update', $vault) || $request->user()->cannot('create', Vaultfolder::class) ) {
+        if ( $request->user()->cannot('update', $vault) || $request->user()->cannot('create', VaultFolder::class) ) {
             abort(403);
         }
 
-        $vaultfolder = Vaultfolder::create($attrs);
+        $vaultFolder = VaultFolder::create($attrs);
 
         return response()->json([
-            'vaultfolder' => $vaultfolder,
+            'vaultFolder' => $vaultFolder,
         ], 201);
     }
 
-    public function update(Request $request, Vaultfolder $vaultfolder)
+    public function update(Request $request, VaultFolder $vaultFolder)
     {
-        if ( $request->user()->cannot('update', $vaultfolder) ) {
+        if ( $request->user()->cannot('update', $vaultFolder) ) {
             abort(403);
         }
 
         $vrules = [
-            'vfname' => 'required|sometimes|string',
+            'name' => 'required|sometimes|string',
         ];
 
         $attrs = [];
@@ -142,25 +142,25 @@ class VaultfoldersController extends AppBaseController
             $attrs['parent_id'] = $request->parent_id;
         }
         $request->validate($vrules);
-        $attrs['vfname'] = $request->vfname;
+        $attrs['name'] = $request->name;
 
-        $vaultfolder->fill($attrs);
-        $vaultfolder->save();
+        $vaultFolder->fill($attrs);
+        $vaultFolder->save();
 
         return response()->json([
-            'vaultfolder' => $vaultfolder,
+            'vaultFolder' => $vaultFolder,
         ]);
     }
 
-    public function destroy(Request $request, Vaultfolder $vaultfolder)
+    public function destroy(Request $request, VaultFolder $vaultFolder)
     {
-        if ( $request->user()->cannot('delete', $vaultfolder) ) {
+        if ( $request->user()->cannot('delete', $vaultFolder) ) {
             abort(403);
         }
-        if ( $vaultfolder->isRootFolder() ) {
+        if ( $vaultFolder->isRootFolder() ) {
             abort(400);
         }
-        $vaultfolder->delete();
+        $vaultFolder->delete();
         return response()->json([]);
     }
 

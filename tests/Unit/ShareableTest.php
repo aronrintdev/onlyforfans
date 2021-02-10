@@ -11,7 +11,7 @@ use Ramsey\Uuid\Uuid;
 use App\Mediafile;
 use App\Vault;
 use App\Vaultfolder;
-use App\Enums\MediafileTypeEnum;
+use App\Enums\MediaFileTypeEnum;
 
 class ShareableTest extends TestCase
 {
@@ -40,7 +40,7 @@ class ShareableTest extends TestCase
             'resource_id'=>$rootVF->id,
             'resource_type'=>'vaultfolders',
             'filename'=>(string) Uuid::uuid4(),
-            'mftype' => MediafileTypeEnum::VAULT,
+            'mftype' => MediaFileTypeEnum::VAULT,
             'mimetype' => $file->getMimeType(),
             'orig_filename' => $file->getClientOriginalName(),
             'orig_ext' => $file->getClientOriginalExtension(),

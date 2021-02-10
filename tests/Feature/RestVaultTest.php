@@ -16,7 +16,7 @@ use App\Timeline;
 use App\User;
 use App\Vault;
 use App\Vaultfolder;
-use App\Enums\MediafileTypeEnum;
+use App\Enums\MediaFileTypeEnum;
 
 class RestVaultTest extends TestCase
 {

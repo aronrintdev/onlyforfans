@@ -19,13 +19,15 @@ class CreateMediaFilesTable extends Migration
             $table->string('slug')->unique();
             $table->string('filename')->nullable()->comment('Filename as stored, in S3 for ex')->unique();
 
-            $table->string('name')->comment('Mediafile name');
+            $table->string('name')->comment('MediaFile name');
             $table->string('type', 63)->comment('MediaFile Type: Enumeration');
 
             $table->string('mimetype', 255)->nullable();
-            $table->string('original_ext', 15)->nullable();
+            $table->string('original_extension', 15)->nullable();
             $table->string('original_filename', 511)->nullable();
+
             $table->nullableUuidMorphs('resource');
+
             $table->json('custom_attributes')->nullable()->comment('JSON-encoded custom attributes');
             $table->json('metadata')->nullable()->comment('JSON-encoded meta attributes');
 

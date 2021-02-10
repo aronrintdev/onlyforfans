@@ -4,14 +4,12 @@ namespace App\Http\Controllers;
 use DB;
 use Auth;
 use Exception;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use App\Mediafile;
-use App\Setting;
-use App\Story;
-use App\Timeline;
-use App\Enums\MediafileTypeEnum;
+use App\Models\MediaFile;
+use App\Models\Story;
+use App\Models\Timeline;
+use App\Enums\MediaFileTypeEnum;
 //use App\Enums\StoryTypeEnum; // generalize?
 
 class StoriesController extends AppBaseController
@@ -42,13 +40,13 @@ class StoriesController extends AppBaseController
             } while(0);
         }
 
-        $query = Story::query()->with('mediafiles');
+        $query = Story::query()->with('mediaFiles');
 
         foreach ( $request->input('filters', []) as $k => $v ) {
             switch ($k) {
             case 'following':
                 $query->whereHas('timeline', function($q1) use(&$request) {
-                    $q1->whereIn('id', $request->user()->followedtimelines);
+                    $q1->whereIn('id', $request->user()->followedTimelines);
                 });
                 break;
             default:
@@ -69,7 +67,7 @@ class StoriesController extends AppBaseController
         $this->validate($request, [
             'attrs' => 'required',
             'attrs.stype' => 'required|in:text,photo',
-            'mediafile' => 'required_if:attrs.stype,photo|file',
+            'mediaFile' => 'required_if:attrs.stype,photo|file',
         ]);
 
         try {
@@ -78,24 +76,24 @@ class StoriesController extends AppBaseController
                 $story = Story::create([
                     'timeline_id' => $request->user()->timeline_id,
                     'content' => $request->attrs['content'] ?? null,
-                    'cattrs' => [
+                    'custom_attributes' => [
                         'background-color' => array_key_exists('bgcolor', $request->attrs) ? $request->attrs['bgcolor'] : '#fff',
                     ],
-                    'stype' => $request->attrs['stype'],
+                    'type' => $request->attrs['type'],
                 ]);
 
                 if ( $request->attrs['stype'] === 'photo' ) {
-                    $file = $request->file('mediafile');
+                    $file = $request->file('mediaFile');
                     $subFolder = 'stories';
                     $newFilename = $file->store('./'.$subFolder, 's3'); // %FIXME: hardcoded
-                    $mediafile = Mediafile::create([
+                    $mediaFile = MediaFile::create([
                         'resource_id' => $story->id,
                         'resource_type' => 'stories',
                         'filename' => $newFilename,
-                        'mfname' => $mfname ?? $file->getClientOriginalName(),
-                        'mftype' => MediafileTypeEnum::STORY,
-                        'meta' => $request->input('attrs.foo') ?? null,
-                        'cattrs' => $request->input('attrs.bar') ?? null,
+                        'name' => $mediaFileName ?? $file->getClientOriginalName(),
+                        'type' => MediaFileTypeEnum::STORY,
+                        'metadata' => $request->input('attrs.foo') ?? null,
+                        'custom_attributes' => $request->input('attrs.bar') ?? null,
                         'mimetype' => $file->getMimeType(),
                         'orig_filename' => $file->getClientOriginalName(),
                         'orig_ext' => $file->getClientOriginalExtension(),
@@ -117,7 +115,7 @@ class StoriesController extends AppBaseController
         }
 
         // %TODO: use DB transaction
-        $story->mediafiles->each( function($mf) {
+        $story->mediaFiles->each( function($mf) {
             Storage::disk('s3')->delete($mf->filename); // Remove from S3
             $mf->delete();
         });
@@ -131,8 +129,8 @@ class StoriesController extends AppBaseController
         $stories = Story::where('timeline_id', $request->user()->timeline->id)->get();
         $storiesA = $stories->map( function($item, $iter) {
             $a = $item->toArray();
-            if ( count($item->mediafiles) ) {
-                $fn = $item->mediafiles[0]->filename;
+            if ( count($item->mediaFiles) ) {
+                $fn = $item->mediaFiles[0]->filename;
                 $a['mf_filename'] = $fn;
                 $a['mf_url'] = Storage::disk('s3')->url($fn); // %FIXME: use model attribute
             }
@@ -156,8 +154,8 @@ class StoriesController extends AppBaseController
         $stories = $request->user()->timeline->stories;
         $storiesA = $stories->map( function($item, $iter) {
             $a = $item->toArray();
-            if ( count($item->mediafiles) ) {
-                $fn = $item->mediafiles[0]->filename;
+            if ( count($item->mediaFiles) ) {
+                $fn = $item->mediaFiles[0]->filename;
                 $a['mf_filename'] = $fn;
                 $a['mf_url'] = Storage::disk('s3')->url($fn); // %FIXME: use model attribute
             }
@@ -169,7 +167,7 @@ class StoriesController extends AppBaseController
             'stories' => $storiesA,
             'dtoUser' => [
                 'avatar' => $request->user()->avatar,
-                'fullname' => $request->user()->timeline->name,
+                'fullName' => $request->user()->timeline->name,
                 'username' => $request->user()->timeline->username,
             ],
         ]);

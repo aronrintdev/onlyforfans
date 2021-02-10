@@ -16,8 +16,9 @@ class CreateStoriesTable extends Migration
         Schema::create('stories', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('timeline_id')->nullable();
-            $table->longText('content')->nullable()->comment('JSON-encoded attributes');
-            $table->longText('custom_attributes')->nullable()->comment('JSON-encoded attributes');
+            $table->json('content')->nullable()->comment('JSON-encoded content attributes');
+            $table->json('custom_attributes')->nullable()->comment('JSON-encoded custom attributes');
+            $table->json('metadata')->nullable()->comment('JSON-encoded metadata');
             $table->string('type')->comment('Enum: Story type');
             $table->timestamps();
             $table->softDeletes();

@@ -2,8 +2,8 @@
 
 namespace App\Policies;
 
-use App\Post;
-use App\User;
+use App\Models\Post;
+use App\Models\User;
 use App\Policies\Traits\OwnablePolicies;
 
 class PostPolicy extends BasePolicy

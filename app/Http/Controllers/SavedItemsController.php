@@ -4,13 +4,14 @@ namespace App\Http\Controllers;
 use DB;
 use Auth;
 use Exception;
+use View;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
-use App\Mediafile;
-use App\Vault;
-use App\Vaultfolder;
+use App\Models\MediaFile;
+use App\Models\Vault;
+use App\Models\VaultFolder;
 
-class SaveditemsController extends AppBaseController
+class SavedItemsController extends AppBaseController
 {
     public function dashboard(Request $request)
     {
@@ -19,7 +20,7 @@ class SaveditemsController extends AppBaseController
         $this->_php2jsVars['session'] = [
             'username' => $sessionUser->username,
         ];
-        \View::share('g_php2jsVars',$this->_php2jsVars);
+        View::share('g_php2jsVars',$this->_php2jsVars);
 
         $myVault = $sessionUser->vaults()->first(); // %FIXME
         $vaultRootFolder = $myVault->getRootFolder();
@@ -45,13 +46,13 @@ class SaveditemsController extends AppBaseController
     {
         $sessionUser = Auth::user();
         /*
-        $vaultfolder = Vaultfolder::where('id', $pkid)->with('vfchildren', 'vfparent', 'mediafiles')->first();
-        $breadcrumb = $vaultfolder->getBreadcrumb();
+        $vaultFolder = VaultFolder::where('id', $pkid)->with('children', 'parent', 'mediaFiles')->first();
+        $breadcrumb = $vaultFolder->getBreadcrumb();
          */
 
         return response()->json([
             //'sessionUser' => $sessionUser,
-            //'vaultfolder' => $vaultfolder,
+            //'vaultFolder' => $vaultFolder,
             //'breadcrumb' => $breadcrumb,
         ]);
     }
@@ -61,16 +62,16 @@ class SaveditemsController extends AppBaseController
         $request->validate([
             'parent_id' => 'required|integer|min:1',
             'vault_id' => 'required|integer|min:1',
-            'vfname' => 'required|string',
+            'name' => 'required|string',
         ]);
 
         /*
         $sessionUser = Auth::user();
-        $vaultfolder = Vaultfolder::create( $request->only('parent_id', 'vault_id', 'vfname') );
+        $vaultFolder = VaultFolder::create( $request->only('parent_id', 'vault_id', 'name') );
          */
 
         return response()->json([
-            //'vaultfolder' => $vaultfolder,
+            //'vaultFolder' => $vaultFolder,
         ]);
     }
 

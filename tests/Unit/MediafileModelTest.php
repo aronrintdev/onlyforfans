@@ -8,7 +8,7 @@ use Illuminate\Http\UploadedFile;
 use DB;
 use Ramsey\Uuid\Uuid;
 use App\Mediafile;
-use App\Enums\MediafileTypeEnum;
+use App\Enums\MediaFileTypeEnum;
 //use App\Models\Image;
 
 class MediafileModelTest extends TestCase
@@ -60,7 +60,7 @@ class MediafileModelTest extends TestCase
             'resource_id'=>$story->id,
             'resource_type'=>'stories',
             'filename'=>(string) Uuid::uuid4(),
-            'mftype' => MediafileTypeEnum::STORY,
+            'mftype' => MediaFileTypeEnum::STORY,
             'mimetype' => $file->getMimeType(),
             'orig_filename' => $file->getClientOriginalName(),
             'orig_ext' => $file->getClientOriginalExtension(),
@@ -72,7 +72,7 @@ class MediafileModelTest extends TestCase
         //$this->assertFileExists($mediafile->absolute_resource_path);
         //$this->assertSame('employees',$mediafile->resource_type);
         //$this->assertSame($employee->id,$mediafile->resource_id);
-        $this->assertSame(MediafileTypeEnum::STORY,$mediafile->mftype);
+        $this->assertSame(MediaFileTypeEnum::STORY,$mediafile->mftype);
     }
 
 }

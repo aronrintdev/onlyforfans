@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Storage;
 use App;
 use DB;
 use Exception;
-use App\Mediafile;
+use App\Models\MediaFile;
 
 class TruncateData extends Command
 {
@@ -35,10 +35,10 @@ class TruncateData extends Command
         foreach ( self::$truncateList as $t ) {
             $this->info( ' - Truncate "'.$t.'"...');
             switch ($t) {
-                case 'mediafiles':
-                    $mediafiles = Mediafile::get();
-                    $mediafiles->each( function($mf) {
-                        $this->removeMediafile($mf);
+                case 'media_files':
+                    $mediaFiles = MediaFile::get();
+                    $mediaFiles->each( function($mf) {
+                        $this->removeMediaFile($mf);
                     });
                     break;
                 default:
@@ -51,7 +51,7 @@ class TruncateData extends Command
          */
     }
 
-    private function removeMediafile($mf) {
+    private function removeMediaFile($mf) {
         Storage::disk('s3')->delete($mf->filename); // Remove from S3
         $mf->delete();
     }
@@ -63,7 +63,7 @@ class TruncateData extends Command
         'shareables',
         'likeables',
         'comments',
-        'mediafiles',
+        'media_files',
         'stories',
         //'subscriptions',
 
@@ -74,7 +74,7 @@ class TruncateData extends Command
         'permissions',
         'roles',
 
-        'vaultfolders',
+        'vault_folders',
         'vaults',
 
         'posts',

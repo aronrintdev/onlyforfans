@@ -40,15 +40,15 @@ class Vault extends BaseModel implements Guidable, Sluggable, Ownable, ShortUuid
 
         static::created(function ($model) {
             // rootFolder
-            Vaultfolder::create([
-                'vfname' => 'Root',
+            VaultFolder::create([
+                'name' => 'Root',
                 'vault_id' => $model->id,
                 'parent_id' => null,
             ]);
         });
 
         static::deleting(function ($model) {
-            foreach ($model->vaultfolders as $o) {
+            foreach ($model->vaultFolders as $o) {
                 $o->delete();
             }
         });
@@ -62,14 +62,14 @@ class Vault extends BaseModel implements Guidable, Sluggable, Ownable, ShortUuid
     {
         return $this->belongsTo('App\Models\User');
     }
-    public function vaultfolders()
+    public function vaultFolders()
     {
-        return $this->hasMany('App\Models\Vaultfolder');
+        return $this->hasMany('App\Models\VaultFolder');
     }
 
     public function getRootFolder()
     {
-        return $this->vaultfolders()->whereNull('parent_id')->first();
+        return $this->vaultFolders()->whereNull('parent_id')->first();
     }
 
     public function getOwner(): ?Collection
@@ -82,8 +82,8 @@ class Vault extends BaseModel implements Guidable, Sluggable, Ownable, ShortUuid
     //--------------------------------------------
 
     protected $casts = [
-        'cattrs' => 'array',
-        'meta' => 'array',
+        'custom_attributes' => 'array',
+        'metadata' => 'array',
     ];
 
     //--------------------------------------------
@@ -106,7 +106,7 @@ class Vault extends BaseModel implements Guidable, Sluggable, Ownable, ShortUuid
 
     public function sluggableFields(): array
     {
-        return ['name'];
+        return [ 'name' ];
     }
 
     // %%% --- Overrides in Model Traits (via BaseModel) ---
@@ -126,8 +126,8 @@ class Vault extends BaseModel implements Guidable, Sluggable, Ownable, ShortUuid
         $key = trim($field);
         switch ($key) {
                 /*
-            case 'meta':
-            case 'cattrs':
+            case 'metadata':
+            case 'custom_attributes':
                 return json_encode($this->{$key});
              */
             default:
@@ -139,7 +139,7 @@ class Vault extends BaseModel implements Guidable, Sluggable, Ownable, ShortUuid
 
     public function renderName(): string
     {
-        return $this->vname;
+        return $this->name;
     }
 
     // %%% --- Other ---
@@ -152,7 +152,7 @@ class Vault extends BaseModel implements Guidable, Sluggable, Ownable, ShortUuid
                 'name' => $name,
                 'user_id' => $owner->id,
             ]);
-            $vf = Vaultfolder::create([
+            $vf = VaultFolder::create([
                 'parent_id' => null,
                 'vault_id' => $v->id,
                 'name' => 'Root',

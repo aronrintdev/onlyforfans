@@ -2,8 +2,8 @@
 
 namespace App\Policies;
 
-use App\Permission;
-use App\User;
+use App\Models\Permission;
+use App\Models\User;
 
 class PermissionPolicy extends BasePolicy
 {

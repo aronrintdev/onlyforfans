@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers;
 
+use App;
 use DB;
 use Auth;
 use Exception;
@@ -34,11 +35,11 @@ class UsersController extends AppBaseController
         $sales = Fanledger::where('seller_id', $sessionUser->id)->sum('total_amount');
 
         $timeline = $sessionUser->timeline;
-        $timeline->userstats = [ // %FIXME DRY
+        $timeline->userStats = [ // %FIXME DRY
             'post_count' => $timeline->posts->count(),
-            'like_count' => $timeline->user->postlikes->count(),
+            'like_count' => $timeline->user->postLikes->count(),
             'follower_count' => $timeline->followers->count(),
-            'following_count' => $timeline->user->followedtimelines->count(),
+            'following_count' => $timeline->user->followedTimelines->count(),
             'subscribed_count' => 0, // %TODO $sessionUser->timeline->subscribed->count()
             'earnings' => $sales,
         ];
@@ -60,7 +61,7 @@ class UsersController extends AppBaseController
                 $request->amount*100,
                 [ 'notes' => $request->note ?? '' ]
             );
-    
+
         } catch(Exception | Throwable $e){
             Log::error(json_encode([
                 'msg' => 'UsersController::tip() - error',
@@ -78,7 +79,7 @@ class UsersController extends AppBaseController
     public function match(Request $request)
     {
         if ( !$request->ajax() ) {
-            \App::abort(400, 'Requires AJAX');
+            App::abort(400, 'Requires AJAX');
         }
 
         $term = $request->input('term',null);

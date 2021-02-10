@@ -2,7 +2,7 @@
 
 namespace App\Policies\Traits;
 
-use App\User;
+use App\Models\User;
 use App\Interfaces\Ownable;
 
 /**

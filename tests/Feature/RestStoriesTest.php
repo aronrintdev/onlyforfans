@@ -16,7 +16,7 @@ use App\Story;
 use App\Timeline;
 use App\User;
 use App\Enums\StoryTypeEnum;
-use App\Enums\MediafileTypeEnum;
+use App\Enums\MediaFileTypeEnum;
 
 class StoriesTest extends TestCase
 {
@@ -204,7 +204,7 @@ class StoriesTest extends TestCase
         $this->assertNotNull($mediafile);
         Storage::disk('s3')->assertExists($mediafile->filename);
         $this->assertSame($filename, $mediafile->mfname);
-        $this->assertSame(MediafileTypeEnum::STORY, $mediafile->mftype);
+        $this->assertSame(MediaFileTypeEnum::STORY, $mediafile->mftype);
 
         // Test relations
         $this->assertTrue( $story->mediafiles->contains($mediafile->id) );

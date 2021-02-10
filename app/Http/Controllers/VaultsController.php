@@ -4,19 +4,21 @@ namespace App\Http\Controllers;
 use DB;
 use Auth;
 use Exception;
+use View;
 
-use Illuminate\Support\Facades\Log;
+use App\Models\User;
+use App\Models\Story;
+use App\Models\Vault;
+
+use App\Models\Invite;
+use App\Models\MediaFile;
+use App\Models\VaultFolder;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Mail;
-
-use App\Invite;
-use App\Mediafile;
-use App\Vault;
-use App\Vaultfolder;
-use App\User;
+use App\Enums\InviteTypeEnum;
 //use App\Jobs\ProcessVaultInvites;
 use App\Mail\ShareableInvited;
-use App\Enums\InviteTypeEnum;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class VaultsController extends AppBaseController
 {
@@ -27,7 +29,7 @@ class VaultsController extends AppBaseController
         $this->_php2jsVars['session'] = [
             'username' => $sessionUser->username,
         ];
-        \View::share('g_php2jsVars',$this->_php2jsVars);
+        View::share('g_php2jsVars',$this->_php2jsVars);
 
         $myVault = $sessionUser->vaults()->first(); // %FIXME
 
@@ -35,13 +37,13 @@ class VaultsController extends AppBaseController
         if ( empty($myVault) ) {
             $myVault = DB::transaction(function () use(&$sessionUser) {
                 $v = Vault::create([
-                    'vname' => 'My Home Vault',
+                    'name' => 'My Home Vault',
                     'user_id' => $sessionUser->id,
                 ]);
-                $vf = Vaultfolder::create([
+                $vf = VaultFolder::create([
                     'parent_id' => null,
                     'vault_id' => $v->id,
-                    'vfname' => 'Root',
+                    'name' => 'Root',
                 ]);
                 $v->refresh();
                 return $v;
@@ -95,11 +97,11 @@ class VaultsController extends AppBaseController
             }
             foreach ( $shareables as $sb ) {
                 switch ( $sb['shareable_type'] ) {
-                    case 'mediafiles':
-                        $user->sharedmediafiles()->syncWithoutDetaching($sb['shareable_id']); // do share
+                    case 'mediaFiles':
+                        $user->sharedMediaFiles()->syncWithoutDetaching($sb['shareable_id']); // do share
                         break;
-                    case 'vaultfolders':
-                        $user->sharedvaultfolders()->syncWithoutDetaching($sb['shareable_id']); // do share
+                    case 'vaultFolders':
+                        $user->sharedVaultFolders()->syncWithoutDetaching($sb['shareable_id']); // do share
                         break;
                 }
             }
@@ -116,9 +118,9 @@ class VaultsController extends AppBaseController
             $invite = Invite::create([
                 'inviter_id' => $sessionUser->id,
                 'email' => $i['email'],
-                'itype' => InviteTypeEnum::VAULT,
+                'type' => InviteTypeEnum::VAULT,
                 'token' => str_random(),
-                'cattrs' => [
+                'custom_attributes' => [
                     'shareables' => $shareables,
                     'vault_id' => $vault->id,
                 ],
@@ -141,13 +143,13 @@ class VaultsController extends AppBaseController
         if ( $request->user()->cannot('view', $vault) ) {
             abort(403);
         }
-        $vaultfolder = Vaultfolder::with('vfchildren', 'vfparent', 'mediafiles')
+        $vaultFolder = Vaultfolder::with('children', 'parent', 'mediaFiles')
             ->where('vault_id', $vault->id)
             ->whereNull('parent_id')
             ->first();
 
         return response()->json([
-            'vaultfolder' => $vaultfolder,
+            'vaultFolder' => $vaultFolder,
         ]);
     }
 

@@ -6,10 +6,10 @@ use Auth;
 use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
-use App\Mediafile;
-use App\Vaultfolder;
-use App\Timeline;
-use App\User;
+use App\Models\MediaFile;
+use App\Models\VaultFolder;
+use App\Models\Timeline;
+use App\Models\User;
 
 class ShareablesController extends AppBaseController
 {
@@ -17,15 +17,15 @@ class ShareablesController extends AppBaseController
     {
         $sessionUser = Auth::user();
 
-        $mediafiles = $sessionUser->sharedmediafiles->map( function($mf) {
+        $mediaFiles = $sessionUser->sharedMediaFiles->map( function($mf) {
             $mf->owner = $mf->getOwner()->first()->only('username', 'name', 'avatar');
             return $mf;
         });
 
         return response()->json([
             'shareables' => [
-                'mediafiles' => $mediafiles,
-                'vaultfolders' => $sessionUser->sharedvaultfolders,
+                'mediaFiles' => $mediaFiles,
+                'vaultFolders' => $sessionUser->sharedVaultFolders,
             ],
         ]);
     }

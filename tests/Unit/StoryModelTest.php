@@ -10,7 +10,7 @@ use DB;
 use Ramsey\Uuid\Uuid;
 use App\Mediafile;
 use App\Story;
-use App\Enums\MediafileTypeEnum;
+use App\Enums\MediaFileTypeEnum;
 
 class StoryModelTest extends TestCase
 {
@@ -39,7 +39,7 @@ class StoryModelTest extends TestCase
         $story = factory(Story::class)->create();
         $story->mediafiles()->save(factory(Mediafile::class)->create([
             'resource_type' => 'stories',
-            'mftype' => MediafileTypeEnum::STORY,
+            'mftype' => MediaFileTypeEnum::STORY,
         ]));
         $story->refresh();
         $this->assertNotNull($story);

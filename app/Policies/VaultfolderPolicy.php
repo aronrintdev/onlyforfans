@@ -2,8 +2,8 @@
 
 namespace App\Policies;
 
-use App\User;
-use App\VaultFolder;
+use App\Models\User;
+use App\Models\VaultFolder;
 use App\Policies\Traits\OwnablePolicies;
 
 class VaultFolderPolicy extends BasePolicy

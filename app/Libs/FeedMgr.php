@@ -10,10 +10,10 @@ use DB;
 use Exception;
 use Throwable;
 
-use App\Setting;
-use App\Post;
-use App\User;
-use App\Timeline;
+use App\Models\Setting;
+use App\Models\Post;
+use App\Models\User;
+use App\Models\Timeline;
 use App\Enums\PaymentTypeEnum;
 
 // [ ] %TODO: Pinned posts
@@ -22,11 +22,11 @@ class FeedMgr {
 
     public static function getSuggestedUsers(User $follower, array $attrs=[]) : ?Collection
     {
-        // get random timlines I'm not currently following
+        // get random timelines I'm not currently following
         $max = Setting::get('min_items_page', 3);
         $suggested = User::inRandomOrder()
             ->where('id', '<>', $follower->id)
-            ->whereNotIn( 'timeline_id', $follower->followedtimelines->pluck('id') )
+            ->whereNotIn( 'timeline_id', $follower->followedTimelines->pluck('id') )
             ->take($max)
             ->get();
         return $suggested;
@@ -39,10 +39,10 @@ class FeedMgr {
 
         //$followingIds = filterByBlockedFollowings();
 
-        //$query = Post::with('mediafiles', 'user', 'timeline', 'comments.user')->where('active', 1);
-        $query = Post::with('mediafiles', 'user', 'comments')->where('active', 1);
+        //$query = Post::with('mediaFiles', 'user', 'timeline', 'comments.user')->where('active', 1);
+        $query = Post::with('mediaFiles', 'user', 'comments')->where('active', 1);
 
-        $followedTimelineIDs = $follower->followedtimelines->pluck('id');
+        $followedTimelineIDs = $follower->followedTimelines->pluck('id');
         $followedTimelineIDs->push($follower->timeline->id); // include follower's own timeline %NOTE
         // %NOTE %TODO: ^^^ this will not pick up user's own posts that are not free (??)
 
@@ -57,7 +57,7 @@ class FeedMgr {
 
         if ( array_key_exists('hashtag', $filters) && !empty($filters['hashtag']) ) {
             $hashtag = $filters['hashtag'];
-            $query->where('descripton', 'LIKE', "%{$hashtag}%");
+            $query->where('description', 'LIKE', "%{$hashtag}%");
         }
 
         if ( array_key_exists('start_date', $filters) && !empty($filters['start_date']) ) {
@@ -77,11 +77,11 @@ class FeedMgr {
 
     public static function getPostsRaw(User $follower, array $filters=[]) : ?Collection
     {
-        $query = Post::with('mediafiles')->where('active', 1);
+        $query = Post::with('mediaFiles')->where('active', 1);
 
         if ( array_key_exists('hashtag', $filters) && !empty($filters['hashtag']) ) {
             $hashtag = $filters['hashtag'];
-            $query->where('descripton', 'LIKE', "%{$hashtag}%");
+            $query->where('description', 'LIKE', "%{$hashtag}%");
         }
 
         if ( array_key_exists('start_date', $filters) && !empty($filters['start_date']) ) {
@@ -90,7 +90,7 @@ class FeedMgr {
 
         // belongs to timeline(s) that I'm following
         $query->where( function($q1) use(&$follower) {
-            $q1->whereIn('timeline_id', $follower->followedtimelines->pluck('id'));
+            $q1->whereIn('timeline_id', $follower->followedTimelines->pluck('id'));
         });
 
         // or posts I follow directly %TODO
@@ -113,7 +113,7 @@ class FeedMgr {
 
         if ( array_key_exists('hashtag', $filters) && !empty($filters['hashtag']) ) {
             $hashtag = $filters['hashtag'];
-            $query->where('descripton', 'LIKE', "%{$hashtag}%");
+            $query->where('description', 'LIKE', "%{$hashtag}%");
         }
 
         if ( array_key_exists('start_date', $filters) && !empty($filters['start_date']) ) {

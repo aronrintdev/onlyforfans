@@ -2,8 +2,8 @@
 
 namespace App\Policies;
 
-use App\User;
-use App\MediaFile;
+use App\Models\User;
+use App\Models\MediaFile;
 use App\Policies\Traits\OwnablePolicies;
 
 class MediaFilePolicy extends BasePolicy

@@ -2,9 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\UsernameRule;
-use Illuminate\Http\Request;
+use Exception;
 use Validator;
+use App\Models\User;
+use App\Models\UsernameRule;
+use Illuminate\Http\Request;
+use App\Http\Requests\CheckUsername;
+use Illuminate\Support\Facades\Auth;
 
 class UsernameRulesController extends Controller
 {
@@ -19,7 +23,7 @@ class UsernameRulesController extends Controller
     public function index(Request $request)
     {
         //
-        throw new NotImplementedException();
+        throw new Exception('Not Implement');
     }
 
     /**
@@ -34,7 +38,7 @@ class UsernameRulesController extends Controller
     public function list(Request $request, string $page)
     {
         //
-        throw new NotImplementedException();
+        throw new Exception('Not Implement');
     }
 
     /**
@@ -47,7 +51,7 @@ class UsernameRulesController extends Controller
     public function create()
     {
         //
-        throw new NotImplementedException();
+        throw new Exception('Not Implement');
     }
 
     /**
@@ -81,7 +85,7 @@ class UsernameRulesController extends Controller
     public function show(UsernameRule $usernameRule)
     {
         //
-        throw new NotImplementedException();
+        throw new Exception('Not Implement');
     }
 
     /**
@@ -95,7 +99,7 @@ class UsernameRulesController extends Controller
     public function edit(UsernameRule $usernameRule)
     {
         //
-        throw new NotImplementedException();
+        throw new Exception('Not Implement');
     }
 
     /**
@@ -114,7 +118,7 @@ class UsernameRulesController extends Controller
             return redirect('usernameRules.edit')->withErrors($validator)->withInput();
         }
         $usernameRule->fill($request->all());
-        $rule->added_by = \Auth::user()->id;
+        $usernameRule->added_by = Auth::user()->id;
         $usernameRule->save();
     }
 
@@ -137,20 +141,20 @@ class UsernameRulesController extends Controller
      * @param  \App\Http\Requests\CheckUsername $request
      * @return \Illuminate\Http\Response
      */
-    public function checkUsername(\App\Http\Requests\CheckUsername $request)
+    public function checkUsername($request)
     {
         $validated = $request->validated();
 
         // Check if in use
-        if (\App\Timelines::where('username', $validated->username)->exists()) {
+        if (User::where('username', $validated['username'])->exists()) {
             return response()->json([
-                'valid' => $false,
+                'valid' => false,
                 'message' => trans('username.already_in_use'),
             ]);
         }
 
         // Check rules
-        if ($ruleCaught = UsernameRule::check($validated->username)) {
+        if ($ruleCaught = UsernameRule::check($validated['username'])) {
             return response()->json([
                 'valid' => false,
                 'message' => $ruleCaught->explanation,

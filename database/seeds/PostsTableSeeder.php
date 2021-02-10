@@ -7,7 +7,7 @@ use Carbon\Carbon;
 
 use App\User;
 use App\Post;
-use App\Enums\MediafileTypeEnum;
+use App\Enums\MediaFileTypeEnum;
 use App\Enums\PostTypeEnum;
 use App\Libs\FactoryHelpers;
 
@@ -53,7 +53,7 @@ class PostsTableSeeder extends Seeder
 
                 $post = Post::factory()->create($attrs);
                 if ( $this->faker->boolean($this->getMax('prob_post_has_image')) ) { // % post has image
-                    $mf = FactoryHelpers::createImage(MediafileTypeEnum::POST, $post->id);
+                    $mf = FactoryHelpers::createImage(MediaFileTypeEnum::POST, $post->id);
                 }
 
                 // Set a realistic post date

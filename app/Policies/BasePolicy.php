@@ -2,7 +2,7 @@
 
 namespace App\Policies;
 
-use App\User;
+use App\Models\User;
 use Exception;
 use ReflectionMethod;
 use Illuminate\Support\Arr;

@@ -7,7 +7,7 @@ use Exception;
 use Throwable;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
-use App\Comment;
+use App\Models\Comment;
 //use App\Post;
 
 class CommentsController extends AppBaseController
@@ -63,7 +63,7 @@ class CommentsController extends AppBaseController
         if ( !$sessionUser->isAdmin() ) { // admin can view all comments
             $isCommentOwner = ($sessionUser->id === $comment->user_id ); // can see own comments
             $isPostOwner = ($sessionUser->id === $comment->post->user_id ); // can see comments on own post
-            $isFollowedTimeline = $sessionUser->followedtimelines->contains($comment->post->timeline_id); // can see comments on followed timeline's posts
+            $isFollowedTimeline = $sessionUser->followedTimelines->contains($comment->post->timeline_id); // can see comments on followed timeline's posts
             //dd( 'co: '.($isCommentOwner?'T':'F'), 'po: '.($isPostOwner?'T':'F'), 'ft: '.($isFollowedTimeline?'T':'F') );
             if ( !$isCommentOwner && !$isPostOwner && !$isFollowedTimeline ) {
                 //dd('abort', 'co: '.($isCommentOwner?'T':'F'), 'po: '.($isPostOwner?'T':'F'), 'ft: '.($isFollowedTimeline?'T':'F') );

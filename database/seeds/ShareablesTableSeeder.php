@@ -12,7 +12,7 @@ use App\Libs\UserMgr;
 use App\Enums\PostTypeEnum;
 use App\Libs\FactoryHelpers;
 use App\Enums\PaymentTypeEnum;
-use App\Enums\MediafileTypeEnum;
+use App\Enums\MediaFileTypeEnum;
 use Illuminate\Support\Facades\Config;
 use Symfony\Component\Console\Output\ConsoleOutput;
 
@@ -142,8 +142,8 @@ class ShareablesTableSeeder extends Seeder
 
                 if ( $this->appEnv !== 'testing' ) {
                     $this->output->writeln("ShareablesTableSeeder - Adding avatar & cover for new user " . $u->name);
-                    $avatar = FactoryHelpers::createImage(MediafileTypeEnum::AVATAR);
-                    $cover = FactoryHelpers::createImage(MediafileTypeEnum::COVER);
+                    $avatar = FactoryHelpers::createImage(MediaFileTypeEnum::AVATAR);
+                    $cover = FactoryHelpers::createImage(MediaFileTypeEnum::COVER);
                 } else {
                     $avatar = null;
                     $cover = null;

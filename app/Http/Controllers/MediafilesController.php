@@ -9,21 +9,21 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\File;
 //use Illuminate\Http\UploadedFile;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use App\User;
-use App\Mediafile;
-use App\Enums\MediafileTypeEnum;
+use App\Models\User;
+use App\Models\MediaFile;
+use App\Enums\MediaFileTypeEnum;
 
-class MediafilesController extends AppBaseController
+class MediaFilesController extends AppBaseController
 {
 
     public function store(Request $request)
     {
         try {
             $this->validate($request, [
-                'mediafile' => 'required',
+                'mediaFile' => 'required',
                 //'resource_id' => 'required',
                 //'resource_type' => 'required',
-                'mftype' => 'required',
+                'type' => 'required',
             ]);
         } catch (\Exception $e) {
             Log::warning(json_encode([
@@ -38,14 +38,14 @@ class MediafilesController extends AppBaseController
             }
         }
 
-        $file = $request->file('mediafile');
-        //dd($file); // lluminate\Http\Testing\File
+        $file = $request->file('mediaFile');
+        //dd($file); // illuminate\Http\Testing\File
 
         try {
-            $mediafile = DB::transaction(function () use(&$file, &$request) {
-                switch ($request->mftype) {
+            $mediaFile = DB::transaction(function () use(&$file, &$request) {
+                switch ($request->type) {
                     case 'vault':
-                        $subFolder = 'vaultfolders';
+                        $subFolder = 'vaultFolders';
                         break;
                     case 'story':
                         $subFolder = 'stories';
@@ -57,54 +57,54 @@ class MediafilesController extends AppBaseController
                         $subFolder = 'default';
                 }
                 $newFilename = $file->store('./'.$subFolder, 's3');
-                $mfname = $mfname ?? $file->getClientOriginalName();
-                $mediafile = Mediafile::create([
+                $name = $name ?? $file->getClientOriginalName();
+                $mediaFile = MediaFile::create([
                     'resource_id' => $request->resource_id,
                     'resource_type' => $request->resource_type,
                     'filename' => $newFilename,
-                    'mfname' => $mfname,
-                    'mftype' => $request->mftype,
+                    'name' => $name,
+                    'type' => $request->type,
                     'meta' => $request->input('meta') ?? null,
                     'mimetype' => $file->getMimeType(),
                     'orig_filename' => $file->getClientOriginalName(),
                     'orig_ext' => $file->getClientOriginalExtension(),
                 ]);
-                return $mediafile;
+                return $mediaFile;
             });
         } catch (\Exception $e) {
             throw $e; // %FIXME: report error to user via browser message
         }
 
-        return response()->json([ 
-            'mediafile' => $mediafile,
+        return response()->json([
+            'mediaFile' => $mediaFile,
         ]);
     }
 
     public function show(Request $request, $pkid)
     {
-        $mediafile = Mediafile::find($pkid);
+        $mediaFile = MediaFile::find($pkid);
 
         // Create sharable link
         //   ~ https://laravel.com/docs/5.5/filesystem#retrieving-files
         $url = Storage::disk('s3')->temporaryUrl(
-            $mediafile->filename,
+            $mediaFile->filename,
             now()->addMinutes(5) // %FIXME: hardcoded
         );
-        return response()->json([ 
-            'mediafile' => $mediafile,
+        return response()->json([
+            'mediaFile' => $mediaFile,
             'url' => $url,
         ]);
     }
 
     public function update(Request $request, $pkid)
     {
-        $this->validate($request, Mediafile::$vrules);
+        $this->validate($request, mediaFile::$vrules);
 
         try {
 
-            $obj = Mediafile::find($pkid);
+            $obj = mediaFile::find($pkid);
             if ( empty($obj) ) {
-                throw new ModelNotFoundException('Could not find Mediafile with pkid '.$pkid);
+                throw new ModelNotFoundException('Could not find mediaFile with pkid '.$pkid);
             }
 
             $obj = DB::transaction(function () use ($request, $obj) {
@@ -132,9 +132,9 @@ class MediafilesController extends AppBaseController
     {
         $sessionUser = Auth::user();
 
-        $obj = Mediafile::find($pkid);
+        $obj = mediaFile::find($pkid);
         if ( empty($obj) ) {
-            throw new ModelNotFoundException('Could not find mediafile with pkid '.$pkid);
+            throw new ModelNotFoundException('Could not find mediaFile with pkid '.$pkid);
         }
         $msg = 'There was a problem...'; // default
 
@@ -151,4 +151,4 @@ class MediafilesController extends AppBaseController
 }
 
 // $path = "public/directory_pics/MAaKSCm96gaep1cMulfasWBWupVs33Z6GZ5RcfU4.png"
-// $fullpath = "/Users/petergorgone/workspace/cdn/jmbm/intranet-v4/public/directory_pics/MAaKSCm96gaep1cMulfasWBWupVs33Z6GZ5RcfU4.png"
+// $fullPath = "/Users/petergorgone/workspace/cdn/jmbm/intranet-v4/public/directory_pics/MAaKSCm96gaep1cMulfasWBWupVs33Z6GZ5RcfU4.png"

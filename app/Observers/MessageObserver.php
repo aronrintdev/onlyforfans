@@ -3,7 +3,7 @@
 namespace App\Observers;
 
 use App\Events\MessagePublished;
-use App\User;
+use App\Models\User;
 use Event;
 
 
@@ -13,7 +13,7 @@ use Event;
 class MessageObserver
 {
     /**
-     * Function will be triggerd when a Message is updated.
+     * Function will be triggered when a Message is updated.
      *
      * @param Users $model
      */

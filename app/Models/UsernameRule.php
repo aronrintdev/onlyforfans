@@ -26,10 +26,13 @@ class UsernameRule extends Model
     protected $table = 'username_rules';
 
     /** Guarded attributes */
-    protected $guarded = ['added_by'];
+    protected $guarded = [
+        'id',
+        'added_by',
+    ];
 
     /** Hidden attributes */
-    protected $hidden = ['added_by',];
+    protected $hidden = [ 'added_by' ];
 
     /**
      * Validator Rules

@@ -1,17 +1,20 @@
 <?php
 namespace App\Interfaces;
 
-use App\User;
+use App\Models\User;
 use App\Enums\PaymentTypeEnum;
-use App\Fanledger;
+use App\Models\FanLedger;
 
 interface Purchaseable {
 
+    /**
+     * @param  string  $type - PaymentTypeEnum
+     */
     public function receivePayment(
-        string $ptype, // PaymentTypeEnum
+        string $type,
         User $sender,
         int $amountInCents,
-        array $cattrs = []
-    ) : ?Fanledger;
+        array $customAttributes = []
+    ) : ?FanLedger;
 
 }

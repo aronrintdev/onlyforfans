@@ -5,17 +5,18 @@ use DB;
 use Auth;
 use Exception;
 use Throwable;
+use App\Models\User;
+use App\Libs\FeedMgr;
+use App\Libs\UserMgr;
+
+use App\Models\Setting;
+use App\Models\Timeline;
+use App\Models\FanLedger;
+
+use Illuminate\Http\Request;
+use App\Enums\PaymentTypeEnum;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Http\Request;
-
-use App\Setting;
-use App\Libs\UserMgr;
-use App\Libs\FeedMgr;
-
-use App\Fanledger;
-use App\Timeline;
-use App\Enums\PaymentTypeEnum;
 
 class TimelinesController extends AppBaseController
 {
@@ -37,13 +38,13 @@ class TimelinesController extends AppBaseController
         $TAKE = $request->input('take', 5);
 
         $sessionUser = Auth::user();
-        $followedIDs = $sessionUser->followedtimelines->pluck('id');
+        $followedIDs = $sessionUser->followedTimelines->pluck('id');
 
         $query = Timeline::with('user')->inRandomOrder();
         $query->whereHas('user', function($q1) use(&$sessionUser, &$followedIDs) {
             $q1->where('id', '<>', $sessionUser->id); // skip myself
             // skip timelines I'm already following
-            $q1->whereHas('followedtimelines', function($q2) use(&$followedIDs) {
+            $q1->whereHas('followedTimelines', function($q2) use(&$followedIDs) {
                 $q2->whereNotIn('timeline_id', $followedIDs);
             });
         });
@@ -60,13 +61,13 @@ class TimelinesController extends AppBaseController
     {
         $sessionUser = Auth::user();
         $timeline = Timeline::with('user')->where('username', $username)->firstOrFail();
-        $sales = Fanledger::where('seller_id', $timeline->user->id)->sum('total_amount');
+        $sales = FanLedger::where('seller_id', $timeline->user->id)->sum('total_amount');
 
-        $timeline->userstats = [ // %FIXME DRY
+        $timeline->userStats = [ // %FIXME DRY
             'post_count' => $timeline->posts->count(),
-            'like_count' => 0, // %TODO $timeline->user->postlikes->count(),
+            'like_count' => 0, // %TODO $timeline->user->postLikes->count(),
             'follower_count' => $timeline->followers->count(),
-            'following_count' => $timeline->user->followedtimelines->count(),
+            'following_count' => $timeline->user->followedTimelines->count(),
             'subscribed_count' => 0, // %TODO $sessionUser->timeline->subscribed->count()
             'earnings' => $sales,
         ];
@@ -84,11 +85,11 @@ class TimelinesController extends AppBaseController
         $timeline = $sessionUser->timeline()->with('user')->first();
         $sales = Fanledger::where('seller_id', $timeline->user->id)->sum('total_amount');
 
-        $timeline->userstats = [ // %FIXME DRY
+        $timeline->userStats = [ // %FIXME DRY
             'post_count' => $timeline->posts->count(),
-            'like_count' => 0, // %TODO $timeline->user->postlikes->count(),
+            'like_count' => 0, // %TODO $timeline->user->postLikes->count(),
             'follower_count' => $timeline->followers->count(),
-            'following_count' => $timeline->user->followedtimelines->count(),
+            'following_count' => $timeline->user->followedTimelines->count(),
             'subscribed_count' => 0, // %TODO $sessionUser->timeline->subscribed->count()
             'earnings' => $sales,
         ];
@@ -103,7 +104,7 @@ class TimelinesController extends AppBaseController
 
     // Get a list of items that make up a timeline feed, typically posts but
     //  keep generic as we may want to throw in other things
-    public function feeditems(Request $request, Timeline $timeline)
+    public function feedItems(Request $request, Timeline $timeline)
     {
         $sessionUser = Auth::user();
         $follower = $timeline->user;
@@ -121,11 +122,11 @@ class TimelinesController extends AppBaseController
             $filters['hashtag'] = '#'.$request->hashtag;
         }
 
-        $feeditems = FeedMgr::getPosts($follower, $filters, $page, $take); // %TODO: work with L5.8 pagination
-        //$feeditems = FeedMgr::getPostsRaw($sessionUser, $filters);
+        $feedItems = FeedMgr::getPosts($follower, $filters, $page, $take); // %TODO: work with L5.8 pagination
+        //$feedItems = FeedMgr::getPostsRaw($sessionUser, $filters);
 
         return response()->json([
-            'feeditems' => $feeditems,
+            'feedItems' => $feedItems,
         ]);
     }
 
@@ -140,9 +141,9 @@ class TimelinesController extends AppBaseController
             abort(403);
         }
 
-        $cattrs = [];
+        $customAttributes = [];
         if ( $request->has('notes') ) {
-            $cattrs['notes'] = $request->notes;
+            $customAttributes['notes'] = $request->notes;
         }
 
         $timeline->followers()->detach($request->sharee_id); // remove existing
@@ -151,7 +152,7 @@ class TimelinesController extends AppBaseController
             'shareable_id' => $timeline->id,
             'is_approved' => 1, // %FIXME
             'access_level' => 'default',
-            'cattrs' => json_encode($cattrs),
+            'custom_attributes' => json_encode($customAttributes),
         ]); //
 
         $timeline->refresh();
@@ -173,9 +174,9 @@ class TimelinesController extends AppBaseController
         }
 
         $timeline = DB::transaction( function() use(&$timeline, &$request, &$sessionUser) {
-            $cattrs = [];
+            $customAttributes = [];
             if ( $request->has('notes') ) {
-                $cattrs['notes'] = $request->notes;
+                $customAttributes['notes'] = $request->notes;
             }
             $timeline->followers()->detach($request->sharee_id); // remove existing (covers 'upgrade') case
             $timeline->followers()->attach($request->sharee_id, [
@@ -183,13 +184,13 @@ class TimelinesController extends AppBaseController
                 'shareable_id' => $timeline->id,
                 'is_approved' => 1, // %FIXME
                 'access_level' => 'premium',
-                'cattrs' => json_encode($cattrs), // %FIXME: add a observer function?
+                'custom_attributes' => json_encode($customAttributes), // %FIXME: add a observer function?
             ]); //
             $timeline->receivePayment(
                 PaymentTypeEnum::SUBSCRIPTION,
                 $sessionUser,
                 $timeline->user->price*100, // %FIXME: should be on timeline
-                $cattrs,
+                $customAttributes,
             );
             return $timeline;
         });
@@ -209,9 +210,9 @@ class TimelinesController extends AppBaseController
             'base_unit_cost_in_cents' => 'required|numeric',
         ]);
 
-        $cattrs = [];
+        $customAttributes = [];
         if ( $request->has('notes') ) {
-            $cattrs['notes'] = $request->notes;
+            $customAttributes['notes'] = $request->notes;
         }
 
         try {
@@ -219,7 +220,7 @@ class TimelinesController extends AppBaseController
                 PaymentTypeEnum::TIP,
                 $sessionUser,
                 $request->base_unit_cost_in_cents,
-                $cattrs,
+                $customAttributes,
             );
         } catch(Exception | Throwable $e) {
             return response()->json([ 'message'=>$e->getMessage() ], 400);
