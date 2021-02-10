@@ -147,7 +147,7 @@ class StoriesTest extends TestCase
         ];
         $response = $this->actingAs($owner)->ajaxJSON('POST', route('stories.store'), $payload);
 
-        $response->assertStatus(200);
+        $response->assertStatus(201);
 
         $content = json_decode($response->content());
         $this->assertNotNull($content->story);
@@ -184,7 +184,7 @@ class StoriesTest extends TestCase
             'mediafile' => $file,
         ];
         $response = $this->actingAs($owner)->ajaxJSON('POST', route('stories.store'), $payload);
-        $response->assertStatus(200);
+        $response->assertStatus(201);
 
         $content = json_decode($response->content());
         $this->assertNotNull($content->story);
@@ -232,7 +232,7 @@ class StoriesTest extends TestCase
             'mediafile' => $file,
         ];
         $response = $this->actingAs($owner)->ajaxJSON('POST', route('stories.store'), $payload);
-        $response->assertStatus(200);
+        $response->assertStatus(201);
 
         $content = json_decode($response->content());
         $this->assertNotNull($content->story);
@@ -271,7 +271,7 @@ class StoriesTest extends TestCase
             'mediafile' => $file,
         ];
         $response = $this->actingAs($owner)->ajaxJSON('POST', route('stories.store'), $payload);
-        $response->assertStatus(200);
+        $response->assertStatus(201);
 
         $content = json_decode($response->content());
         $this->assertNotNull($content->story);
