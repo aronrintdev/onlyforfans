@@ -49,8 +49,6 @@ class PostsController extends AppBaseController
 
     public function store(Request $request)
     {
-        $this->authorize('create', Post::class);
-
         $request->validate([
             'timeline_id' => 'required|exists:timelines,id',
             'mediafiles' => 'array',
@@ -58,6 +56,8 @@ class PostsController extends AppBaseController
         ]);
 
         $timeline = Timeline::find($request->timeline_id); // timeline being posted on
+
+        $this->authorize('update', $timeline); // create post considered timeline update
 
         $attrs = $request->all();
         $attrs['user_id'] = $timeline->user->id; // %FIXME: remove this field, redundant

@@ -73,7 +73,6 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
-     *  @group here
      */
     public function test_can_show_followed_timelines_post()
     {
@@ -296,6 +295,7 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group here
      */
     public function test_nonowner_can_not_store_post_on_my_timeline()
     {
