@@ -7,6 +7,7 @@ use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 use App\Mediafile;
 use App\Setting;
 use App\Story;
@@ -64,13 +65,23 @@ class StoriesController extends AppBaseController
 
     public function store(Request $request)
     {
+        $this->authorize('create', Story::class);
+
         $request['attrs'] = json_decode($request['attrs'], true); // decode 'complex' data
-        
-        $this->validate($request, [
+
+        $vrules = [
             'attrs' => 'required',
             'attrs.stype' => 'required|in:text,photo',
-            'mediafile' => 'required_if:attrs.stype,photo|file',
-        ]);
+        ];
+        if ( $request->has('mediafile') ) {
+            if ( $request->hasFile('mediafile') ) {
+                $vrules['mediafile'] = 'required_if:attrs.stype,photo|file';
+            } else {
+                $vrules['mediafile'] = 'required_if:attrs.stype,photo|integer|exists:mediafiles,id'; // must be fk to [mediafiles]
+            }
+        }
+        
+        $this->validate($request, $vrules);
 
         try {
             $story = DB::transaction(function () use(&$request) {
@@ -85,21 +96,26 @@ class StoriesController extends AppBaseController
                 ]);
 
                 if ( $request->attrs['stype'] === 'photo' ) {
-                    $file = $request->file('mediafile');
-                    $subFolder = 'stories';
-                    $newFilename = $file->store('./'.$subFolder, 's3'); // %FIXME: hardcoded
-                    $mediafile = Mediafile::create([
-                        'resource_id' => $story->id,
-                        'resource_type' => 'stories',
-                        'filename' => $newFilename,
-                        'mfname' => $mfname ?? $file->getClientOriginalName(),
-                        'mftype' => MediafileTypeEnum::STORY,
-                        'meta' => $request->input('attrs.foo') ?? null,
-                        'cattrs' => $request->input('attrs.bar') ?? null,
-                        'mimetype' => $file->getMimeType(),
-                        'orig_filename' => $file->getClientOriginalName(),
-                        'orig_ext' => $file->getClientOriginalExtension(),
-                    ]);
+                    if ( $request->hasFile('mediafile') ) {
+                        $file = $request->file('mediafile');
+                        $subFolder = 'stories';
+                        $newFilename = $file->store('./'.$subFolder, 's3'); // %FIXME: hardcoded
+                        $mediafile = Mediafile::create([
+                            'resource_id' => $story->id,
+                            'resource_type' => 'stories',
+                            'filename' => $newFilename,
+                            'mfname' => $mfname ?? $file->getClientOriginalName(),
+                            'mftype' => MediafileTypeEnum::STORY,
+                            'meta' => $request->input('attrs.foo') ?? null,
+                            'cattrs' => $request->input('attrs.bar') ?? null,
+                            'mimetype' => $file->getMimeType(),
+                            'orig_filename' => $file->getClientOriginalName(),
+                            'orig_ext' => $file->getClientOriginalExtension(),
+                        ]);
+                    } else {
+                        $cloned = Mediafile::find($request->mediafile)->doClone('stories', $story->id);
+                        $story->mediafiles()->save($cloned);
+                    }
                 }
                 return $story;
             });
@@ -107,14 +123,22 @@ class StoriesController extends AppBaseController
             abort(400);
         }
 
-        return response()->json([ 'story' => $story ]);
+        return response()->json([ 
+            'story' => $story,
+        ], 201);
+    }
+
+    public function show(Request $request, Story $story)
+    {
+        $this->authorize('view', $story);
+        return response()->json([
+            'story' => $story,
+        ]);
     }
 
     public function destroy(Request $request, Story $story)
     {
-        if ( $request->user()->id !== $story->timeline->user->id) {
-            abort(403);
-        }
+        $this->authorize('delete', $story);
 
         // %TODO: use DB transaction
         $story->mediafiles->each( function($mf) {
@@ -125,6 +149,8 @@ class StoriesController extends AppBaseController
 
         return response()->json([]);
     }
+
+    // --
 
     public function player(Request $request)
     {

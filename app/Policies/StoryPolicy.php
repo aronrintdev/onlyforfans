@@ -2,10 +2,10 @@
 namespace App\Policies;
 
 use App\User;
-use App\Vaultfolder;
+use App\Story;
 use App\Policies\Traits\OwnablePolicies;
 
-class VaultfolderPolicy extends BasePolicy
+class StoryPolicy extends BasePolicy
 {
     use OwnablePolicies;
 
@@ -17,6 +17,11 @@ class VaultfolderPolicy extends BasePolicy
         'restore'     => 'isOwner:pass',
         'forceDelete' => 'permissionOnly',
     ];
+
+    protected function view(User $user, Story $story)
+    {
+        return $story->timeline->followers->contains($user->id);
+    }
 
     protected function create(User $user)
     {

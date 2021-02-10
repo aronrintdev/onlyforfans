@@ -47,3 +47,5 @@ $ php artisan websocket:serve
 
 %%%
 find app resources/views resources/assets \( -name "*.php" -o -name "*.vue" \) | xargs grep stories
+
+mvim A-HERE.txt routes/web.php tests app/Http/Controllers resources/views resources/assets/js/

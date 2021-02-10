@@ -77,6 +77,7 @@ Route::group(['middleware' => ['auth']], function () {
     ]);
 
     // -- mediafiles: likeable | shareable | commentable (?) | tippable | purchaseable --
+    //Route::post('/mediafiles/{mediafile}/doClone', ['as'=>'mediafiles.doClone', 'uses' => 'MediafilesController@doClone']);
     Route::get('/mediafiles/match', ['as'=>'mediafiles.match', 'uses' => 'MediafilesController@match']);
     Route::resource('mediafiles', 'MediafilesController', [ 'except' => [ 'create', 'edit', ] ]);
 
@@ -84,6 +85,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('/posts/match', ['as'=>'posts.match', 'uses' => 'PostsController@match']);
     Route::put('/posts/{post}/tip', ['as'=>'posts.tip', 'uses' => 'PostsController@tip']);
     Route::put('/posts/{post}/purchase', ['as'=>'posts.purchase', 'uses' => 'PostsController@purchase']);
+    Route::patch('/posts/{post}/attachMediafile/{mediafile}', ['as'=>'posts.attachMediafile', 'uses' => 'PostsController@attachMediafile']);
     Route::resource('posts', 'PostsController', [ 
         'except' => [ 'create', 'edit', ],
     ]);

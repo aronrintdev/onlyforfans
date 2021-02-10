@@ -12,11 +12,15 @@ use Tests\TestCase;
 use Database\Seeders\TestDatabaseSeeder;
 
 use App\Mediafile;
+use App\Post;
+use App\Story;
 use App\Timeline;
 use App\User;
 use App\Vault;
 use App\Vaultfolder;
 use App\Enums\MediafileTypeEnum;
+use App\Enums\PostTypeEnum;
+use App\Enums\StoryTypeEnum;
 
 class RestVaultTest extends TestCase
 {
@@ -362,6 +366,383 @@ class RestVaultTest extends TestCase
         $response->assertStatus(400);
     }
 
+    /**
+     *  @group vault
+     *  @group regression
+     */
+    public function test_can_upload_single_imagefile_to_my_vaultfolder()
+    {
+        Storage::fake('s3');
+
+        $owner = User::first();
+        $filename = $this->faker->slug;
+        $file = UploadedFile::fake()->image($filename, 200, 200);
+
+        $primaryVault = Vault::primary($owner)->first();
+        $vaultfolder = Vaultfolder::isRoot()->where('vault_id', $primaryVault->id)->first(); // root
+
+        $payload = [
+            'mftype' => MediafileTypeEnum::VAULT,
+            'mediafile' => $file,
+            'resource_type' => 'vaultfolders',
+            'resource_id' => $vaultfolder->id,
+        ];
+        $response = $this->actingAs($owner)->ajaxJSON('POST', route('mediafiles.store'), $payload);
+        $response->assertStatus(201);
+        $content = json_decode($response->content());
+        $this->assertNotNull($content->mediafile);
+        $mediafileR = $content->mediafile;
+
+        //$mediafile = Mediafile::where('resource_type', 'vaultfolders')->where('resource_id', $vaultfolder->id)->first(); // %FIXME: this assumes there are no priorimages in the vault
+        $mediafile = Mediafile::find($mediafileR->id);
+        $this->assertNotNull($mediafile);
+        $this->assertEquals('vaultfolders', $mediafile->resource_type);
+        $this->assertEquals($vaultfolder->id, $mediafile->resource_id);
+        Storage::disk('s3')->assertExists($mediafile->filename);
+        $this->assertSame($filename, $mediafile->mfname);
+        $this->assertSame(MediafileTypeEnum::VAULT, $mediafile->mftype);
+
+        // Test relations
+        $this->assertTrue( $vaultfolder->mediafiles->contains($mediafile->id) );
+        $this->assertEquals( $vaultfolder->id, $mediafile->resource->id );
+    }
+
+    /**
+     *  @group vault
+     *  @group regression
+     */
+    public function test_can_upload_multiple_imagefiles_to_my_vaultfolder()
+    {
+        Storage::fake('s3');
+
+        $owner = User::first();
+        $filename1 = $this->faker->slug;
+        $file1 = UploadedFile::fake()->image($filename1, 200, 200);
+        $filename2 = $this->faker->slug;
+        $file2 = UploadedFile::fake()->image($filename2, 300, 270);
+
+        $primaryVault = Vault::primary($owner)->first();
+        $vaultfolder = Vaultfolder::isRoot()->where('vault_id', $primaryVault->id)->first(); // root
+
+        $payload = [
+            'mftype' => MediafileTypeEnum::VAULT,
+            'mediafile' => $file1,
+            'resource_type' => 'vaultfolders',
+            'resource_id' => $vaultfolder->id,
+        ];
+        $response = $this->actingAs($owner)->ajaxJSON('POST', route('mediafiles.store'), $payload);
+        $response->assertStatus(201);
+
+        $payload = [
+            'mftype' => MediafileTypeEnum::VAULT,
+            'mediafile' => $file2,
+            'resource_type' => 'vaultfolders',
+            'resource_id' => $vaultfolder->id,
+        ];
+        $response = $this->actingAs($owner)->ajaxJSON('POST', route('mediafiles.store'), $payload);
+        $response->assertStatus(201);
+
+        $mediafiles = Mediafile::where('resource_type', 'vaultfolders')->get();
+        $this->assertNotNull($mediafiles);
+        $this->assertEquals(2, $mediafiles->count());
+
+        $mf1 = $mediafiles->shift();
+        Storage::disk('s3')->assertExists($mf1->filename);
+        $this->assertSame($filename1, $mf1->mfname);
+        $this->assertSame(MediafileTypeEnum::VAULT, $mf1->mftype);
+
+        // Test relations
+        $this->assertTrue( $vaultfolder->mediafiles->contains($mf1->id) );
+        $this->assertEquals( $vaultfolder->id, $mf1->resource->id );
+
+        $mf2 = $mediafiles->shift();
+        Storage::disk('s3')->assertExists($mf2->filename);
+        $this->assertSame($filename2, $mf2->mfname);
+        $this->assertSame(MediafileTypeEnum::VAULT, $mf2->mftype);
+
+        // Test relations
+        $this->assertTrue( $vaultfolder->mediafiles->contains($mf2->id) );
+        $this->assertEquals( $vaultfolder->id, $mf2->resource->id );
+    }
+
+    /**
+     *  @group vault
+     *  @group regression
+     */
+    public function test_nonowner_can_not_upload_image_to_my_vaultfolder()
+    {
+        Storage::fake('s3');
+
+        $filename = $this->faker->slug;
+        $owner = User::first();
+        $nonowner = User::where('id', '<>', $owner->id)->first();
+        $file = UploadedFile::fake()->image($filename, 200, 200);
+
+        $primaryVault = Vault::primary($owner)->first();
+        $vaultfolder = Vaultfolder::isRoot()->where('vault_id', $primaryVault->id)->first(); // root
+
+        $payload = [
+            'mftype' => MediafileTypeEnum::VAULT,
+            'mediafile' => $file,
+            'resource_type' => 'vaultfolders',
+            'resource_id' => $vaultfolder->id,
+        ];
+        $response = $this->actingAs($nonowner)->ajaxJSON('POST', route('mediafiles.store'), $payload);
+        $response->assertStatus(403);
+    }
+
+    /**
+     *  @group vault
+     *  @group regression
+     */
+    // Creates post in first API call, then attaches selected mediafile in a second API call
+    public function test_can_select_mediafile_from_vaultfolder_to_attach_to_post_by_attach()
+    {
+        Storage::fake('s3');
+
+        $timeline = Timeline::has('posts', '>=', 1)->has('followers', '>=', 1)->first();
+        $owner = $timeline->user;
+        $fan = $timeline->followers[0];
+
+        // --- Upload image to vault ---
+        $filename = $this->faker->slug;
+        $file = UploadedFile::fake()->image($filename, 200, 200);
+
+        $primaryVault = Vault::primary($owner)->first();
+        $vaultfolder = Vaultfolder::isRoot()->where('vault_id', $primaryVault->id)->first(); // root
+
+        $payload = [
+            'mftype' => MediafileTypeEnum::VAULT,
+            'mediafile' => $file,
+            'resource_type' => 'vaultfolders',
+            'resource_id' => $vaultfolder->id,
+        ];
+        $response = $this->actingAs($owner)->ajaxJSON('POST', route('mediafiles.store'), $payload);
+        $response->assertStatus(201);
+        $content = json_decode($response->content());
+        $this->assertNotNull($content->mediafile);
+        $mediafile = Mediafile::find($content->mediafile->id);
+        $this->assertNotNull($mediafile);
+        $this->assertTrue( $vaultfolder->mediafiles->contains($mediafile->id) );
+
+        // --- Create a free post with image from vault ---
+
+        //$filename = $this->faker->slug;
+        //$file = UploadedFile::fake()->image($filename, 200, 200);
+        $payload = [
+            'type' => PostTypeEnum::FREE,
+            'timeline_id' => $timeline->id,
+            'description' => $this->faker->realText,
+        ];
+        $response = $this->actingAs($owner)->ajaxJSON('POST', route('posts.store'), $payload);
+        $response->assertStatus(201);
+        $content = json_decode($response->content());
+        $this->assertNotNull($content->post);
+        $postR = $content->post;
+        $post = Post::findOrFail($postR->id);
+
+        $response = $this->actingAs($owner)->ajaxJSON('PATCH', route('posts.attachMediafile', [$post->id, $mediafile->id]));
+        $response->assertStatus(200);
+
+        // --
+
+        $timeline->refresh();
+        $owner->refresh();
+        $post->refresh();
+        $mediafile = $post->mediafiles->shift();
+        $this->assertNotNull($mediafile, 'No mediafiles attached to post');
+
+        $response = $this->actingAs($fan)->ajaxJSON('GET', route('posts.show', $post->id));
+        $response->assertStatus(200);
+
+        $response = $this->actingAs($fan)->ajaxJSON('GET', route('mediafiles.show', $mediafile->id));
+        $response->assertStatus(200);
+    }
+
+    /**
+     *  @group vault
+     *  @group regression
+     */
+    public function test_nonowner_can_not_select_vaultfolder_mediafile_to_attach_to_postby_attach()
+    {
+        Storage::fake('s3');
+
+        $timeline = Timeline::has('posts', '>=', 1)->has('followers', '>=', 1)->first();
+        $postowner = $timeline->user;
+        $mediafileowner = User::where('id', '<>', $postowner->id)->first();
+
+        // --- Upload image to vault ---
+        $filename = $this->faker->slug;
+        $file = UploadedFile::fake()->image($filename, 200, 200);
+
+        $primaryVault = Vault::primary($mediafileowner)->first();
+        $vaultfolder = Vaultfolder::isRoot()->where('vault_id', $primaryVault->id)->first(); // root
+        $payload = [
+            'mftype' => MediafileTypeEnum::VAULT,
+            'mediafile' => $file,
+            'resource_type' => 'vaultfolders',
+            'resource_id' => $vaultfolder->id,
+        ];
+        $response = $this->actingAs($mediafileowner)->ajaxJSON('POST', route('mediafiles.store'), $payload);
+        $response->assertStatus(201);
+        $content = json_decode($response->content());
+        $mediafile = Mediafile::findOrFail($content->mediafile->id);
+
+        // --- Create a free post ---
+        //$filename = $this->faker->slug;
+        //$file = UploadedFile::fake()->image($filename, 200, 200);
+        $payload = [
+            'type' => PostTypeEnum::FREE,
+            'timeline_id' => $timeline->id,
+            'description' => $this->faker->realText,
+        ];
+        $response = $this->actingAs($postowner)->ajaxJSON('POST', route('posts.store'), $payload);
+        $response->assertStatus(201);
+        $content = json_decode($response->content());
+        $post = Post::findOrFail($content->post->id);
+
+        // --- Try to attach image to post as post owner (but not mediafile owner) ---
+        $response = $this->actingAs($postowner)->ajaxJSON('PATCH', route('posts.attachMediafile', [$post->id, $mediafile->id]));
+        $response->assertStatus(403);
+
+        // --- Try to attach image to post as mediafile owner (but not post owner) ---
+        $response = $this->actingAs($mediafileowner)->ajaxJSON('PATCH', route('posts.attachMediafile', [$post->id, $mediafile->id]));
+        $response->assertStatus(403);
+    }
+
+    /**
+     *  @group vault
+     *  @group regression
+     */
+    // Creates post and attaches selected mediafile in a single API call
+    public function test_can_select_mediafile_from_vaultfolder_to_attach_to_post_singleop()
+    {
+        Storage::fake('s3');
+
+        $timeline = Timeline::has('posts', '>=', 1)->has('followers', '>=', 1)->first();
+        $owner = $timeline->user;
+        $fan = $timeline->followers[0];
+
+        // --- Upload image to vault ---
+        $filename = $this->faker->slug;
+        $file = UploadedFile::fake()->image($filename, 200, 200);
+
+        $primaryVault = Vault::primary($owner)->first();
+        $vaultfolder = Vaultfolder::isRoot()->where('vault_id', $primaryVault->id)->first(); // root
+
+        $payload = [
+            'mftype' => MediafileTypeEnum::VAULT,
+            'mediafile' => $file,
+            'resource_type' => 'vaultfolders',
+            'resource_id' => $vaultfolder->id,
+        ];
+        $response = $this->actingAs($owner)->ajaxJSON('POST', route('mediafiles.store'), $payload);
+        $response->assertStatus(201);
+        $content = json_decode($response->content());
+        $this->assertNotNull($content->mediafile);
+        $mediafile = Mediafile::find($content->mediafile->id);
+        $this->assertNotNull($mediafile);
+        $this->assertTrue( $vaultfolder->mediafiles->contains($mediafile->id) );
+
+        // --- Create a free post with image from vault ---
+
+        //$filename = $this->faker->slug;
+        //$file = UploadedFile::fake()->image($filename, 200, 200);
+        $payload = [
+            'type' => PostTypeEnum::FREE,
+            'timeline_id' => $timeline->id,
+            'description' => $this->faker->realText,
+            'mediafiles' => [$mediafile->id],
+        ];
+        $response = $this->actingAs($owner)->ajaxJSON('POST', route('posts.store'), $payload);
+        $response->assertStatus(201);
+        $content = json_decode($response->content());
+        $this->assertNotNull($content->post);
+        $postR = $content->post;
+        $post = Post::findOrFail($postR->id);
+
+        // --
+
+        $timeline->refresh();
+        $owner->refresh();
+        $post->refresh();
+        $mediafile = $post->mediafiles->shift();
+        $this->assertNotNull($mediafile, 'No mediafiles attached to post');
+
+        $response = $this->actingAs($fan)->ajaxJSON('GET', route('posts.show', $post->id));
+        $response->assertStatus(200);
+
+        $response = $this->actingAs($fan)->ajaxJSON('GET', route('mediafiles.show', $mediafile->id));
+        $response->assertStatus(200);
+    }
+
+    /**
+     *  @group vault
+     *  @group regression
+     *  @group here
+     */
+    public function test_can_select_mediafile_from_vaultfolder_to_attach_to_story()
+    {
+        Storage::fake('s3');
+
+        $timeline = Timeline::has('stories', '>=', 1)->has('followers', '>=', 1)->first();
+        $owner = $timeline->user;
+        $fan = $timeline->followers[0];
+
+        // --- Upload image to vault ---
+        $filename = $this->faker->slug;
+        $file = UploadedFile::fake()->image($filename, 200, 200);
+
+        $primaryVault = Vault::primary($owner)->first();
+        $vaultfolder = Vaultfolder::isRoot()->where('vault_id', $primaryVault->id)->first(); // root
+
+        $payload = [
+            'mftype' => MediafileTypeEnum::VAULT,
+            'mediafile' => $file,
+            'resource_type' => 'vaultfolders',
+            'resource_id' => $vaultfolder->id,
+        ];
+        $response = $this->actingAs($owner)->ajaxJSON('POST', route('mediafiles.store'), $payload);
+        $response->assertStatus(201);
+        $content = json_decode($response->content());
+        $this->assertNotNull($content->mediafile);
+        $mediafile = Mediafile::find($content->mediafile->id);
+        $this->assertNotNull($mediafile);
+        $this->assertTrue( $vaultfolder->mediafiles->contains($mediafile->id) );
+
+        // --- Create a free story with image from vault ---
+
+        $attrs = [
+            'stype' => StoryTypeEnum::PHOTO,
+            'content' => $this->faker->realText,
+        ];
+        $payload = [
+            'attrs' => json_encode($attrs),
+            'mediafile' => $mediafile->id,
+        ];
+        $response = $this->actingAs($owner)->ajaxJSON('POST', route('stories.store'), $payload);
+        $response->assertStatus(201);
+        $content = json_decode($response->content());
+        $this->assertNotNull($content->story);
+        $storyR = $content->story;
+        $story = Story::findOrFail($storyR->id);
+
+        // --
+
+        $timeline->refresh();
+        $owner->refresh();
+        $story->refresh();
+        $mediafile = $story->mediafiles->shift();
+        $this->assertNotNull($mediafile, 'No mediafiles attached to story');
+
+        $response = $this->actingAs($fan)->ajaxJSON('GET', route('stories.show', $story->id));
+        $response->assertStatus(200);
+
+        $response = $this->actingAs($fan)->ajaxJSON('GET', route('mediafiles.show', $mediafile->id));
+        $response->assertStatus(200);
+    }
+    /*
+     */
 
     // ------------------------------
 

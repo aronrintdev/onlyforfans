@@ -3,11 +3,15 @@ namespace App;
 
 use Eloquent as Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Collection;
+use App\Traits\OwnableFunctions;
 use App\Interfaces\Likeable;
+use App\Interfaces\Ownable;
 
-class Story extends Model implements Likeable
+class Story extends Model implements Likeable, Ownable
 {
     use HasFactory;
+    use OwnableFunctions;
 
     protected $guarded = ['id','created_at','updated_at'];
 
@@ -38,6 +42,10 @@ class Story extends Model implements Likeable
 
     public function timeline() {
         return $this->belongsTo('App\Timeline');
+    }
+
+    public function getOwner() : ?Collection {
+        return new Collection([ $this->timeline->user ]);
     }
 
     //--------------------------------------------

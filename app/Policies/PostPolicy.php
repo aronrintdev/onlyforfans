@@ -1,10 +1,10 @@
 <?php
-
 namespace App\Policies;
 
+use App\Policies\Traits\OwnablePolicies;
 use App\Post;
 use App\User;
-use App\Policies\Traits\OwnablePolicies;
+use App\Enums\PostTypeEnum;
 
 class PostPolicy extends BasePolicy
 {
@@ -12,7 +12,7 @@ class PostPolicy extends BasePolicy
 
     protected $policies = [
         'viewAny'     => 'permissionOnly',
-        'view'        => 'isBlockedByOwner:fail',
+        'view'        => 'isOwner:pass isBlockedByOwner:fail',
         'update'      => 'isOwner:pass',
         'delete'      => 'isOwner:pass',
         'restore'     => 'isOwner:pass',
@@ -20,24 +20,20 @@ class PostPolicy extends BasePolicy
         'like'        => 'isOwner:pass isBlockedByOwner:fail',
     ];
 
-    /**
-     * Determine whether the user can view the model.
-     *
-     * @param  \App\User  $user
-     * @param  \App\Post  $post
-     * @return mixed
-     */
     protected function view(User $user, Post $post)
     {
-        return $post->timeline->followers->contains($user->id);
+        //return $post->timeline->followers->contains($user->id);
+        switch ($post->type) {
+        case PostTypeEnum::FREE:
+            return $post->timeline->followers->contains($user->id);
+        case PostTypeEnum::SUBSCRIBER:
+            //return $post->timeline->subscribers->contains($user->id);
+            return $post->timeline->followers()->wherePivot('access_level','premium')->contains($user->id);
+        case PostTypeEnum::PRICED:
+            return $post->sharees->contains($user->id); // premium (?)
+        }
     }
 
-    /**
-     * Determine whether the user can create models.
-     *
-     * @param  \App\User  $user
-     * @return mixed
-     */
     protected function create(User $user)
     {
         // Not blocked from creating posts?
@@ -45,25 +41,11 @@ class PostPolicy extends BasePolicy
         return true;
     }
 
-    /**
-     * Determine whether the user can restore the model.
-     *
-     * @param  \App\User  $user
-     * @param  \App\Post  $post
-     * @return mixed
-     */
     protected function restore(User $user, Post $post)
     {
         return false;
     }
 
-    /**
-     * Determine whether the user can permanently delete the model.
-     *
-     * @param  \App\User  $user
-     * @param  \App\Post  $post
-     * @return mixed
-     */
     protected function forceDelete(User $user, Post $post)
     {
         return false;
