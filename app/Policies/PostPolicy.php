@@ -30,6 +30,7 @@ class PostPolicy extends BasePolicy
         case PostTypeEnum::SUBSCRIBER:
             //return $post->timeline->subscribers->contains($user->id);
             return $post->timeline->followers->count() 
+                && $post->timeline->followers()->wherePivot('access_level','premium')->count()
                 && $post->timeline->followers()->wherePivot('access_level','premium')->contains($user->id);
         case PostTypeEnum::PRICED:
             return $post->sharees->count() 
@@ -37,12 +38,12 @@ class PostPolicy extends BasePolicy
         }
     }
 
+    /*
     protected function create(User $user)
     {
-        // Not blocked from creating posts?
-        // TODO: Add method when logic is finalized.
-        return true;
+        throw new \Exception('check update policy for timeline instead');
     }
+    */
 
     protected function restore(User $user, Post $post)
     {
@@ -59,9 +60,9 @@ class PostPolicy extends BasePolicy
         return true;
     }
 
-    public function like(User $user, Post $resource)
+    public function like(User $user, Post $post)
     {
-        return $resource->timeline->followers->contains($user->id);
+        return $post->timeline->followers->contains($user->id);
     }
 
 }

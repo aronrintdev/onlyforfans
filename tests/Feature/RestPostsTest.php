@@ -77,9 +77,12 @@ class RestPostsTest extends TestCase
      */
     public function test_can_show_followed_timelines_post()
     {
-        $timeline = Timeline::has('posts','>=',1)->has('followers','>=',1)->first(); // assume non-admin (%FIXME)
+        //$timeline = Timeline::has('posts','>=',1)->has('followers','>=',1)->first(); // assume non-admin (%FIXME)
+        $timeline = Timeline::whereHas('posts', function($q1) {
+            $q1->where('type', PostTypeEnum::FREE);
+        })->has('followers','>=',1)->first();
         $creator = $timeline->user;
-        $post = $timeline->posts[0];
+        $post = $timeline->posts()->where('type', PostTypeEnum::FREE)->first();
         $fan = $timeline->followers[0];
 
         $response = $this->actingAs($fan)->ajaxJSON('GET', route('posts.show', $post->id));
