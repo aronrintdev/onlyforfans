@@ -14,7 +14,7 @@ use App\Traits\OwnableFunctions;
 use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class VaultFolder extends BaseModel implements Guidable, Sluggable, Ownable, ShortUuid
+class Vaultfolder extends BaseModel implements Guidable, Sluggable, Ownable, ShortUuid
 {
     use UsesUuid;
     use UsesShortUuid;
@@ -22,7 +22,7 @@ class VaultFolder extends BaseModel implements Guidable, Sluggable, Ownable, Sho
     use HasFactory;
     use OwnableFunctions;
 
-    protected $table = 'vault_folders';
+    protected $table = 'vaultfolders';
 
     protected $guarded = ['id', 'created_at', 'updated_at'];
 
@@ -30,9 +30,9 @@ class VaultFolder extends BaseModel implements Guidable, Sluggable, Ownable, Sho
 
     protected $appends = [
         'name',
-        //'parent',
-        //'children',
-        //'mediaFiles',
+        //'vfparent',
+        //'vfchildren',
+        //'mediafiles',
     ];
 
     //--------------------------------------------
@@ -44,24 +44,24 @@ class VaultFolder extends BaseModel implements Guidable, Sluggable, Ownable, Sho
         return $this->belongsTo('App\Models\Vault');
     }
 
-    public function mediaFiles()
+    public function mediafiles()
     {
-        return $this->morphMany('App\Models\MediaFile', 'resource');
+        return $this->morphMany('App\Models\mediafile', 'resource');
     }
 
-    public function parent()
+    public function vfparent()
     {
-        return $this->belongsTo('App\Models\VaultFolder', 'parent_id');
+        return $this->belongsTo('App\Models\Vaultfolder', 'parent_id');
     }
 
-    public function children()
+    public function vfchildren()
     {
-        return $this->hasMany('App\Models\VaultFolder', 'parent_id');
+        return $this->hasMany('App\Models\Vaultfolder', 'parent_id');
     }
 
     public function sharees()
     {
-        return $this->morphToMany('App\Models\User', 'shareable', 'shareables', 'shareable_id', 'shared_with');
+        return $this->morphToMany('App\Models\User', 'shareable', 'shareables', 'shareable_id', 'sharee_id');
     }
 
     public function getOwner(): ?Collection
@@ -84,29 +84,29 @@ class VaultFolder extends BaseModel implements Guidable, Sluggable, Ownable, Sho
         $iter = 0;
 
         $breadcrumb = [];
-        $vf = VaultFolder::find($this->id);
+        $vf = Vaultfolder::find($this->id);
         while (!empty($vf)) {
             if ($iter++ > $MAX_DEPTH) {
                 throw new Exception('Exceeded max sub-folder depth');
             }
             array_unshift($breadcrumb, [
                 'pkid' => $vf->id,
-                'name' => $vf->name,
+                'vfname' => $vf->vfname,
                 'slug' => $vf->slug,
             ]);
-            $vf = !empty($vf->parent_id) ? VaultFolder::find($vf->parent_id) : null;
+            $vf = !empty($vf->parent_id) ? Vaultfolder::find($vf->parent_id) : null;
         }
         return $breadcrumb;
     }
 
     public function getNameAttribute($value)
     {
-        return $this->name;
+        return $this->vfname;
     }
 
     public function getPathAttribute($value)
     {
-        return $this->name; // %TODO: get full path back to root
+        return $this->vfname; // %TODO: get full path back to root
     }
 
     //--------------------------------------------
@@ -118,9 +118,9 @@ class VaultFolder extends BaseModel implements Guidable, Sluggable, Ownable, Sho
         return $query->whereNull('parent_id');
     }
 
-    public function scopeIsChildOf($query, VaultFolder $vaultFolder)
+    public function scopeIsChildOf($query, Vaultfolder $vaultfolder)
     {
-        return $query->where('parent_id', $vaultFolder->id);
+        return $query->where('parent_id', $vaultfolder->id);
     }
 
     //--------------------------------------------

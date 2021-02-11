@@ -64,7 +64,7 @@ class AppServiceProvider extends ServiceProvider
             'invites'       => 'App\Models\Invite',
             'links'         => 'App\Models\Link',
             'locations'     => 'App\Models\Location',
-            'mediaFiles'    => 'App\Models\MediaFile',
+            'mediafiles'    => 'App\Models\Mediafile',
             'notifications' => 'App\Models\Notification',
             'permissions'   => 'App\Models\Permission',
             'posts'         => 'App\Models\Post',
@@ -77,7 +77,7 @@ class AppServiceProvider extends ServiceProvider
             'users'         => 'App\Models\User',
             'usernameRules' => 'App\Models\UsernameRule',
             'vaults'        => 'App\Models\Vault',
-            'vaultFolders'  => 'App\Models\VaultFolder',
+            'vaultfolders'  => 'App\Models\Vaultfolder',
             'webhooks'      => 'App\Models\Webhook',
         ]);
 

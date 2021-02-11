@@ -32,7 +32,7 @@
         </div>
       </template>
 
-      <b-card-img v-if="post.mediaFiles.length>0" :src="post.mediaFiles[0].filepath" alt="Image"></b-card-img>
+      <b-card-img v-if="post.mediafiles.length>0" :src="post.mediafiles[0].filepath" alt="Image"></b-card-img>
 
       <b-card-text>
         <p>{{ post.description }}</p>
@@ -91,7 +91,7 @@ export default {
       user_id: null,
       parent_id: null,
       description: '',
-      // %TODO: attach mediaFiles to comments
+      // %TODO: attach mediafiles to comments
     },
     renderComments: false,
     isLikedByMe: false, // this.post.isLikedByMe,

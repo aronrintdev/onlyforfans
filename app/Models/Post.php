@@ -44,7 +44,7 @@ class Post extends Model implements Ownable, Deletable, Purchaseable, Likeable, 
             if (!$model->canBeDeleted()) {
                 throw new Exception('Can not delete Post (26)'); // or soft delete and give access to purchasers (?)
             }
-            foreach ($model->mediaFiles as $o) {
+            foreach ($model->mediafiles as $o) {
                 Storage::disk('s3')->delete($o->filename); // Remove from S3
                 $o->delete();
             }
@@ -86,12 +86,12 @@ class Post extends Model implements Ownable, Deletable, Purchaseable, Likeable, 
      */
     public function sharees()
     {
-        return $this->morphToMany('App\Models\User', 'shareable', 'shareables', 'shareable_id', 'shared_with')->withTimestamps();
+        return $this->morphToMany('App\Models\User', 'shareable', 'shareables', 'shareable_id', 'sharee_id')->withTimestamps();
     }
 
-    public function mediaFiles()
+    public function mediafiles()
     {
-        return $this->morphMany('App\Models\MediaFile', 'resource');
+        return $this->morphMany('App\Models\Mediafile', 'resource');
     }
 
     public function ledgerSales()
@@ -138,17 +138,17 @@ class Post extends Model implements Ownable, Deletable, Purchaseable, Likeable, 
     // %%% --- Implement Purchaseable Interface ---
 
     public function receivePayment(
-        string $type, // PaymentTypeEnum
+        string $fltype, // PaymentTypeEnum
         User $sender,
         int $amountInCents,
         array $customAttributes = []
     ): ?FanLedger {
-        $result = DB::transaction(function () use ($type, $amountInCents, $customAttributes, &$sender) {
+        $result = DB::transaction(function () use ($fltype, $amountInCents, $customAttributes, &$sender) {
 
             switch ($type) {
                 case PaymentTypeEnum::TIP:
                     $result = Fanledger::create([
-                        'fltype' => $type,
+                        'fltype' => $fltype,
                         'seller_id' => $this->user->id,
                         'purchaser_id' => $sender->id,
                         'purchaseable_type' => 'posts',
@@ -160,7 +160,7 @@ class Post extends Model implements Ownable, Deletable, Purchaseable, Likeable, 
                     break;
                 case PaymentTypeEnum::PURCHASE:
                     $result = Fanledger::create([
-                        'fltype' => $type,
+                        'fltype' => $fltype,
                         'seller_id' => $this->user->id,
                         'purchaser_id' => $sender->id,
                         'purchaseable_type' => 'posts',
@@ -169,7 +169,7 @@ class Post extends Model implements Ownable, Deletable, Purchaseable, Likeable, 
                         'base_unit_cost_in_cents' => $amountInCents,
                         'cattrs' => $customAttributes ?? [],
                     ]);
-                    $sender->sharedPosts()->attach($this->id, [
+                    $sender->sharedposts()->attach($this->id, [
                         'cattrs' => json_encode($customAttributes ?? []),
                     ]);
                     break;

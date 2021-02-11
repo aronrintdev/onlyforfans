@@ -6,7 +6,7 @@
       <div v-for="(s, idx) in stories" :key="s.id" class="ml-3">
         <a :href="`/stories/player`"
            class="box-story">
-          <b-img v-if='s.type==="image"' thumbnail fluid rounded="circle" class="p-0" :src="s.mediaFiles[0].filepath" alt="Story Thumbnail"></b-img>
+          <b-img v-if='s.stype==="image"' thumbnail fluid rounded="circle" class="p-0" :src="s.mediafiles[0].filepath" alt="Story Thumbnail"></b-img>
           <span v-else class="tag-colorfill" :style="`background-color: ${bgColor(s)}`">&nbsp;</span>
         </a>
       </div>

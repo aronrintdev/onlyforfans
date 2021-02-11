@@ -9,14 +9,14 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Invite;
-use App\Models\MediaFile;
+use App\Models\Mediafile;
 use App\Models\Vault;
-use App\Models\VaultFolder;
+use App\Models\Vaultfolder;
 use App\Enums\InviteTypeEnum;
 use App\Mail\ShareableInvited;
 
 // $request->validate([ 'vf_id' => 'required', ]);
-class VaultFoldersController extends AppBaseController
+class VaultfoldersController extends AppBaseController
 {
     public function index(Request $request)
     {
@@ -34,8 +34,8 @@ class VaultFoldersController extends AppBaseController
             } while(0);
         }
 
-        $query = VaultFolder::query();
-        $query->with(['mediaFiles', 'parent', 'children']);
+        $query = Vaultfolder::query();
+        $query->with(['mediafiles', 'vfparent', 'vfchildren']);
 
         foreach ( $request->input('filters', []) as $k => $v ) {
             switch ($k) {
@@ -50,39 +50,39 @@ class VaultFoldersController extends AppBaseController
                 $query->where($k, $v);
             }
         }
-        $vaultFolders = $query->get();
+        $vaultfolders = $query->get();
 
         return response()->json([
-            'vaultFolders' => $vaultFolders,
+            'vaultfolders' => $vaultfolders,
         ]);
     }
 
     // %TODO: check session user owner
-    public function show(Request $request, VaultFolder $vaultFolder)
+    public function show(Request $request, Vaultfolder $vaultfolder)
     {
-        $this->authorize('view', $vaultFolder);
+        $this->authorize('view', $vaultfolder);
 
-        $vaultFolder->load('children', 'parent', 'mediaFiles');
-        $breadcrumb = $vaultFolder->getBreadcrumb();
+        $vaultfolder->load('vfchildren', 'vfparent', 'mediafiles');
+        $breadcrumb = $vaultfolder->getBreadcrumb();
         $shares = collect();
-        $vaultFolder->mediaFiles->each( function($vf) use(&$shares) {
+        $vaultfolder->mediafiles->each( function($vf) use(&$shares) {
             $vf->sharees->each( function($u) use(&$vf, &$shares) {
                 $shares->push([
                     'sharee_id' => $u->id,
                     'sharee_name' => $u->name,
                     'sharee_username' => $u->username,
-                    'shareable_type' => 'mediaFiles', // %FIXME: cleaner way to do this?, ie just get the pivot (?)
+                    'shareable_type' => 'mediafiles', // %FIXME: cleaner way to do this?, ie just get the pivot (?)
                     'shareable_id' => $vf->id,
                 ]);
             });
         });
-        $vaultFolder->children->each( function($vf) use(&$shares) {
+        $vaultfolder->vfchildren->each( function($vf) use(&$shares) {
             $vf->sharees->each( function($u) use(&$vf, &$shares) {
                 $shares->push([
                     'sharee_id' => $u->id,
                     'sharee_name' => $u->name,
                     'sharee_username' => $u->username,
-                    'shareable_type' => 'vaultFolders', // %FIXME: cleaner way to do this?, ie just get the pivot (?)
+                    'shareable_type' => 'vaultfolders', // %FIXME: cleaner way to do this?, ie just get the pivot (?)
                     'shareable_id' => $vf->id,
                 ]);
             });
@@ -90,7 +90,7 @@ class VaultFoldersController extends AppBaseController
 
         return response()->json([
             'sessionUser' => $request->user(),
-            'vaultFolder' => $vaultFolder,
+            'vaultfolder' => $vaultfolder,
             'breadcrumb' => $breadcrumb,
             'shares' => $shares,
         ]);
@@ -101,7 +101,7 @@ class VaultFoldersController extends AppBaseController
     {
         $vrules = [
             'vault_id' => 'required|integer|min:1',
-            'name' => 'required|string',
+            'vfname' => 'required|string',
         ];
 
         $attrs = [];
@@ -113,29 +113,29 @@ class VaultFoldersController extends AppBaseController
         }
         $request->validate($vrules);
         $attrs['vault_id'] = $request->vault_id;
-        $attrs['name'] = $request->name;
+        $attrs['vfname'] = $request->vfname;
 
         $vault = Vault::find($request->vault_id);
         $this->authorize('update', $vault);
         /*
-        if ( $request->user()->cannot('update', $vault) || $request->user()->cannot('create', VaultFolder::class) ) {
+        if ( $request->user()->cannot('update', $vault) || $request->user()->cannot('create', Vaultfolder::class) ) {
             abort(403);
         }
          */
 
-        $vaultFolder = VaultFolder::create($attrs);
+        $vaultfolder = Vaultfolder::create($attrs);
 
         return response()->json([
-            'vaultFolder' => $vaultFolder,
+            'vaultfolder' => $vaultfolder,
         ], 201);
     }
 
-    public function update(Request $request, VaultFolder $vaultFolder)
+    public function update(Request $request, Vaultfolder $vaultfolder)
     {
-        $this->authorize('update', $vaultFolder);
+        $this->authorize('update', $vaultfolder);
 
         $vrules = [
-            'name' => 'required|sometimes|string',
+            'vfname' => 'required|sometimes|string',
         ];
 
         $attrs = [];
@@ -144,32 +144,32 @@ class VaultFoldersController extends AppBaseController
             $attrs['parent_id'] = $request->parent_id;
         }
         $request->validate($vrules);
-        $attrs['name'] = $request->name;
+        $attrs['vfname'] = $request->vfname;
 
-        $vaultFolder->fill($attrs);
-        $vaultFolder->save();
+        $vaultfolder->fill($attrs);
+        $vaultfolder->save();
 
         return response()->json([
-            'vaultFolder' => $vaultFolder,
+            'vaultfolder' => $vaultfolder,
         ]);
     }
 
-    public function destroy(Request $request, VaultFolder $vaultFolder)
+    public function destroy(Request $request, Vaultfolder $vaultfolder)
     {
-        $this->authorize('delete', $vaultFolder);
-        if ( $vaultFolder->isRootFolder() ) {
+        $this->authorize('delete', $vaultfolder);
+        if ( $vaultfolder->isRootFolder() ) {
             abort(400);
         }
-        $vaultFolder->delete();
+        $vaultfolder->delete();
         return response()->json([]);
     }
 
     // ---
 
-    // Invite one or more persons to register for the site to share a (single) vaultFolder (access)
-    public function invite(Request $request, VaultFolder $vaultFolder)
+    // Invite one or more persons to register for the site to share a (single) vaultfolder (access)
+    public function invite(Request $request, Vaultfolder $vaultfolder)
     {
-        $this->authorize('update', $vaultFolder);
+        $this->authorize('update', $vaultfolder);
 
         $vrules = [
             'invitees' => 'required|array',
@@ -183,10 +183,10 @@ class VaultFoldersController extends AppBaseController
             $i = Invite::create([
                 'inviter_id' => $request->user()->id,
                 'email' => $se['email'],
-                'type' => InviteTypeEnum::VAULT,
+                'itype' => InviteTypeEnum::VAULT,
                 'custom_attributes' => [
                     'shareables' => $request->invitees ?? [],
-                    'vaultFolder_id' => $vaultFolder->id,
+                    'vaultfolder_id' => $vaultfolder->id,
                 ],
             ]);
             Mail::to($i->email)->queue( new ShareableInvited($i) );
@@ -194,7 +194,7 @@ class VaultFoldersController extends AppBaseController
             $invites->push($i);
         }
 
-        //$request->user()->sharedVaultFolders()->syncWithoutDetaching($vaultFolder->id); // do share %TODO: need to do when they register (!)
+        //$request->user()->sharedVaultfolders()->syncWithoutDetaching($vaultfolder->id); // do share %TODO: need to do when they register (!)
 
         return response()->json([
             'invites' => $invites,

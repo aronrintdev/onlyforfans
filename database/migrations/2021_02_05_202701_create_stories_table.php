@@ -19,7 +19,7 @@ class CreateStoriesTable extends Migration
             $table->json('content')->nullable()->comment('JSON-encoded content attributes');
             $table->json('custom_attributes')->nullable()->comment('JSON-encoded custom attributes');
             $table->json('metadata')->nullable()->comment('JSON-encoded metadata');
-            $table->string('type')->comment('Enum: Story type');
+            $table->string('stype')->comment('Enum: Story type');
             $table->timestamps();
             $table->softDeletes();
         });

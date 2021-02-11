@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateVaultFoldersTable extends Migration
+class CreateMediafilesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,20 +13,20 @@ class CreateVaultFoldersTable extends Migration
      */
     public function up()
     {
-        Schema::create('vault_folders', function (Blueprint $table) {
-            $table->uuid('id')->primary;
-            $table->uuid('user_id');
-            $table->foreign('user_id')->references('id')->on('users');
-
+        Schema::create('mediafiles', function (Blueprint $table) {
+            $table->uuid('id')->primary();
             // $table->string('guid')->unique();
             $table->string('slug')->unique();
+            $table->string('filename')->nullable()->comment('Filename as stored, in S3 for ex');
 
-            $table->uuid('parent_id')->nullable()->comment('Parent folder, NULL for root');
+            $table->string('mfname')->comment('Mediafile name');
+            $table->string('mftype', 63)->comment('Mediafile Type: Enumeration');
 
-            $table->uuid('vault_id');
-            $table->foreign('vault_id')->references('id')->on('vaults');
+            $table->string('mimetype', 255)->nullable();
+            $table->string('original_extension', 15)->nullable();
+            $table->string('original_filename', 511)->nullable();
 
-            $table->string('name')->comment('Vault folder name');
+            $table->nullableUuidMorphs('resource');
 
             $table->json('custom_attributes')->nullable()->comment('JSON-encoded custom attributes');
             $table->json('metadata')->nullable()->comment('JSON-encoded meta attributes');
@@ -42,6 +42,6 @@ class CreateVaultFoldersTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('vault_folders');
+        Schema::dropIfExists('mediafiles');
     }
 }

@@ -26,7 +26,7 @@ class FeedMgr {
         $max = Setting::get('min_items_page', 3);
         $suggested = User::inRandomOrder()
             ->where('id', '<>', $follower->id)
-            ->whereNotIn( 'timeline_id', $follower->followedTimelines->pluck('id') )
+            ->whereNotIn( 'timeline_id', $follower->followedtimelines->pluck('id') )
             ->take($max)
             ->get();
         return $suggested;
@@ -39,10 +39,10 @@ class FeedMgr {
 
         //$followingIds = filterByBlockedFollowings();
 
-        //$query = Post::with('mediaFiles', 'user', 'timeline', 'comments.user')->where('active', 1);
-        $query = Post::with('mediaFiles', 'user', 'comments')->where('active', 1);
+        //$query = Post::with('mediafiles', 'user', 'timeline', 'comments.user')->where('active', 1);
+        $query = Post::with('mediafiles', 'user', 'comments')->where('active', 1);
 
-        $followedTimelineIDs = $follower->followedTimelines->pluck('id');
+        $followedTimelineIDs = $follower->followedtimelines->pluck('id');
         $followedTimelineIDs->push($follower->timeline->id); // include follower's own timeline %NOTE
         // %NOTE %TODO: ^^^ this will not pick up user's own posts that are not free (??)
 
@@ -77,7 +77,7 @@ class FeedMgr {
 
     public static function getPostsRaw(User $follower, array $filters=[]) : ?Collection
     {
-        $query = Post::with('mediaFiles')->where('active', 1);
+        $query = Post::with('mediafiles')->where('active', 1);
 
         if ( array_key_exists('hashtag', $filters) && !empty($filters['hashtag']) ) {
             $hashtag = $filters['hashtag'];
@@ -90,7 +90,7 @@ class FeedMgr {
 
         // belongs to timeline(s) that I'm following
         $query->where( function($q1) use(&$follower) {
-            $q1->whereIn('timeline_id', $follower->followedTimelines->pluck('id'));
+            $q1->whereIn('timeline_id', $follower->followedtimelines->pluck('id'));
         });
 
         // or posts I follow directly %TODO

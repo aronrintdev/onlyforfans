@@ -39,7 +39,7 @@ function suggestedUsers()
 
     $suggested_users = '';
     //$followingUsers = $sessionUser->following()->get()->pluck('id')->toArray();
-    $followingUsers = $sessionUser->followedTimelines()->get()->pluck('id')->toArray();
+    $followingUsers = $sessionUser->followedtimelines()->get()->pluck('id')->toArray();
 
     if ($admin_users != NULL) {
         $blockedUsers = array_merge($blockedUsers, $admin_users->pluck('user_id')->toArray());

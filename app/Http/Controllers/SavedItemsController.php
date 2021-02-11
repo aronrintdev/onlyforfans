@@ -7,9 +7,9 @@ use Exception;
 use View;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
-use App\Models\MediaFile;
+use App\Models\Mediafile;
 use App\Models\Vault;
-use App\Models\VaultFolder;
+use App\Models\Vaultfolder;
 
 class SavedItemsController extends AppBaseController
 {
@@ -46,13 +46,13 @@ class SavedItemsController extends AppBaseController
     {
         $sessionUser = Auth::user();
         /*
-        $vaultFolder = VaultFolder::where('id', $pkid)->with('children', 'parent', 'mediaFiles')->first();
-        $breadcrumb = $vaultFolder->getBreadcrumb();
+        $vaultfolder = Vaultfolder::where('id', $pkid)->with('vfchildren', 'vfparent', 'mediafiles')->first();
+        $breadcrumb = $vaultfolder->getBreadcrumb();
          */
 
         return response()->json([
             //'sessionUser' => $sessionUser,
-            //'vaultFolder' => $vaultFolder,
+            //'vaultfolder' => $vaultfolder,
             //'breadcrumb' => $breadcrumb,
         ]);
     }
@@ -62,16 +62,16 @@ class SavedItemsController extends AppBaseController
         $request->validate([
             'parent_id' => 'required|integer|min:1',
             'vault_id' => 'required|integer|min:1',
-            'name' => 'required|string',
+            'vfname' => 'required|string',
         ]);
 
         /*
         $sessionUser = Auth::user();
-        $vaultFolder = VaultFolder::create( $request->only('parent_id', 'vault_id', 'name') );
+        $vaultfolder = Vaultfolder::create( $request->only('parent_id', 'vault_id', 'name') );
          */
 
         return response()->json([
-            //'vaultFolder' => $vaultFolder,
+            //'vaultfolder' => $vaultfolder,
         ]);
     }
 

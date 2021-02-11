@@ -3,7 +3,7 @@ namespace App\Enums;
 
 use App\Interfaces\Selectable;
 
-class MediaFileTypeEnum extends SmartEnum implements Selectable {
+class MediafileTypeEnum extends SmartEnum implements Selectable {
 
     const AVATAR = 'avatar';
     const COVER = 'cover';

@@ -11,12 +11,12 @@ use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 use Database\Seeders\TestDatabaseSeeder;
 
-use App\Models\MediaFile;
+use App\Models\Mediafile;
 use App\Models\Story;
 use App\Models\Timeline;
 use App\Models\User;
 use App\Enums\StoryTypeEnum;
-use App\Enums\MediaFileTypeEnum;
+use App\Enums\MediafileTypeEnum;
 
 class StoriesTest extends TestCase
 {
@@ -85,7 +85,7 @@ class StoriesTest extends TestCase
     {
         $timeline = Timeline::has('stories', '>=', 1)->has('followers', '>=', 1)->first();
         $creator = $timeline->user;
-        $nonFan = User::whereDoesntHave('followedTimelines', function($q1) use(&$timeline) {
+        $nonFan = User::whereDoesntHave('followedtimelines', function($q1) use(&$timeline) {
             $q1->where('timelines.id', $timeline->id);
         })->where('id', '<>', $creator->id)->first();
 
@@ -137,7 +137,7 @@ class StoriesTest extends TestCase
         $owner = User::first();
 
         $attrs = [
-            'type' => StoryTypeEnum::TEXT,
+            'stype' => StoryTypeEnum::TEXT,
             'bgcolor' => 'blue',
             'content' => $this->faker->realText,
         ];
@@ -154,12 +154,12 @@ class StoriesTest extends TestCase
         $storyR = $content->story;
 
         $this->assertSame($attrs['content'], $storyR->content);
-        $this->assertSame($attrs['type'], $storyR->type);
+        $this->assertSame($attrs['stype'], $storyR->stype);
 
         $story = Story::find($storyR->id);
         $this->assertNotNull($story);
         $this->assertSame($story->content, $storyR->content);
-        $this->assertSame(StoryTypeEnum::TEXT, $storyR->type);
+        $this->assertSame(StoryTypeEnum::TEXT, $storyR->stype);
     }
 
     /**
@@ -175,13 +175,13 @@ class StoriesTest extends TestCase
         $file = UploadedFile::fake()->image($filename, 200, 200);
 
         $attrs = [
-            'type' => StoryTypeEnum::PHOTO,
+            'stype' => StoryTypeEnum::PHOTO,
             'content' => $this->faker->realText,
         ];
 
         $payload = [
             'attrs' => json_encode($attrs),
-            'mediaFile' => $file,
+            'mediafile' => $file,
         ];
         $response = $this->actingAs($owner)->ajaxJSON('POST', route('stories.store'), $payload);
         $response->assertStatus(201);
@@ -191,23 +191,23 @@ class StoriesTest extends TestCase
         $storyR = $content->story;
 
         $this->assertSame($attrs['content'], $storyR->content);
-        $this->assertSame(StoryTypeEnum::PHOTO, $storyR->type);
+        $this->assertSame(StoryTypeEnum::PHOTO, $storyR->stype);
 
         $story = Story::find($storyR->id);
         $this->assertNotNull($story);
-        $this->assertSame(StoryTypeEnum::PHOTO, $storyR->type);
+        $this->assertSame(StoryTypeEnum::PHOTO, $storyR->stype);
         $this->assertEquals($owner->id, $story->timeline->user->id);
 
         // Should only be one as this is a new story
-        $mediaFile = MediaFile::where('resource_type', 'stories')->where('resource_id', $story->id)->first();
-        $this->assertNotNull($mediaFile);
-        Storage::disk('s3')->assertExists($mediaFile->filename);
-        $this->assertSame($filename, $mediaFile->name);
-        $this->assertSame(MediaFileTypeEnum::STORY, $mediaFile->type);
+        $mediafile = Mediafile::where('resource_type', 'stories')->where('resource_id', $story->id)->first();
+        $this->assertNotNull($mediafile);
+        Storage::disk('s3')->assertExists($mediafile->filename);
+        $this->assertSame($filename, $mediafile->mfname);
+        $this->assertSame(MediafileTypeEnum::STORY, $mediafile->mftype);
 
         // Test relations
-        $this->assertTrue( $story->mediaFiles->contains($mediaFile->id) );
-        $this->assertEquals( $story->id, $mediaFile->resource->id );
+        $this->assertTrue( $story->mediafiles->contains($mediafile->id) );
+        $this->assertEquals( $story->id, $mediafile->resource->id );
     }
 
     /**
@@ -223,13 +223,13 @@ class StoriesTest extends TestCase
         $file = UploadedFile::fake()->image($filename, 200, 200);
 
         $attrs = [
-            'type' => StoryTypeEnum::PHOTO,
+            'stype' => StoryTypeEnum::PHOTO,
             'content' => $this->faker->realText,
         ];
 
         $payload = [
             'attrs' => json_encode($attrs),
-            'mediaFile' => $file,
+            'mediafile' => $file,
         ];
         $response = $this->actingAs($owner)->ajaxJSON('POST', route('stories.store'), $payload);
         $response->assertStatus(201);
@@ -238,13 +238,13 @@ class StoriesTest extends TestCase
         $this->assertNotNull($content->story);
         $storyR = $content->story;
         $story = Story::find($storyR->id);
-        $mediaFile = MediaFile::where('resource_type', 'stories')->where('resource_id', $story->id)->first();
-        $this->assertNotNull($mediaFile);
+        $mediafile = Mediafile::where('resource_type', 'stories')->where('resource_id', $story->id)->first();
+        $this->assertNotNull($mediafile);
 
         $response = $this->actingAs($owner)->ajaxJSON('DELETE', route('stories.destroy', $storyR->id));
         $response->assertStatus(200);
-        Storage::disk('s3')->assertMissing($mediaFile->filename);
-        $exists = MediaFile::where('resource_type', 'stories')->where('resource_id', $story->id)->count();
+        Storage::disk('s3')->assertMissing($mediafile->filename);
+        $exists = Mediafile::where('resource_type', 'stories')->where('resource_id', $story->id)->count();
         $this->assertEquals(0, $exists);
     }
 
@@ -262,13 +262,13 @@ class StoriesTest extends TestCase
         $file = UploadedFile::fake()->image($filename, 200, 200);
 
         $attrs = [
-            'type' => StoryTypeEnum::PHOTO,
+            'stype' => StoryTypeEnum::PHOTO,
             'content' => $this->faker->realText,
         ];
 
         $payload = [
             'attrs' => json_encode($attrs),
-            'mediaFile' => $file,
+            'mediafile' => $file,
         ];
         $response = $this->actingAs($owner)->ajaxJSON('POST', route('stories.store'), $payload);
         $response->assertStatus(201);
@@ -317,7 +317,7 @@ class StoriesTest extends TestCase
         $creator = $timeline->user;
         $story = $timeline->stories[0];
 
-        $nonFan = User::whereDoesntHave('followedTimelines', function($q1) use(&$timeline) {
+        $nonFan = User::whereDoesntHave('followedtimelines', function($q1) use(&$timeline) {
             $q1->where('timelines.id', $timeline->id);
         })->where('id', '<>', $creator->id)->first();
 

@@ -52,8 +52,8 @@ class Timeline extends Model implements Purchaseable, Ownable, Reportable, Short
      */
     public function followers()
     {
-        return $this->morphToMany('App\Models\User', 'shareable', 'shareables', 'shareable_id', 'shared_with')
-            ->withPivot('access_level', 'shareable_type', 'shared_with', 'is_approved', 'custom_attributes')
+        return $this->morphToMany('App\Models\User', 'shareable', 'shareables', 'shareable_id', 'sharee_id')
+            ->withPivot('access_level', 'shareable_type', 'sharee_id', 'is_approved', 'custom_attributes')
             ->withTimestamps();
     }
 
@@ -82,18 +82,18 @@ class Timeline extends Model implements Purchaseable, Ownable, Reportable, Short
 
     public function avatar()
     {
-        return $this->belongsTo('App\Models\MediaFile', 'avatar_id');
+        return $this->belongsTo('App\Models\Mediafile', 'avatar_id');
     }
 
     public function cover()
     {
-        return $this->belongsTo('App\Models\MediaFile', 'cover_id');
+        return $this->belongsTo('App\Models\Mediafile', 'cover_id');
     }
 
     // %%% --- Implement Purchaseable Interface ---
 
     public function receivePayment(
-        string $type, // PaymentTypeEnum
+        string $fltype, // PaymentTypeEnum
         User $sender,
         int $amountInCents,
         array $customAttributes = []
@@ -101,10 +101,10 @@ class Timeline extends Model implements Purchaseable, Ownable, Reportable, Short
 
         $result = null;
 
-        switch ($type) {
+        switch ($fltype) {
             case PaymentTypeEnum::TIP:
                 $result = FanLedger::create([
-                    'fltype' => $type,
+                    'fltype' => $fltype,
                     'seller_id' => $this->user->id,
                     'purchaser_id' => $sender->id,
                     'purchaseable_type' => 'timelines',
@@ -116,7 +116,7 @@ class Timeline extends Model implements Purchaseable, Ownable, Reportable, Short
                 break;
             case PaymentTypeEnum::SUBSCRIPTION:
                 $result = FanLedger::create([
-                    'fltype' => $type,
+                    'fltype' => $fltype,
                     'seller_id' => $this->user->id,
                     'purchaser_id' => $sender->id,
                     'purchaseable_type' => 'timelines', // basically a subscription
@@ -128,7 +128,7 @@ class Timeline extends Model implements Purchaseable, Ownable, Reportable, Short
                 //dd($result->toArray());
                 break;
             default:
-                throw new Exception('Unrecognized payment type : ' . $type);
+                throw new Exception('Unrecognized payment type : ' . $fltype);
         }
 
         return $result ?? null;

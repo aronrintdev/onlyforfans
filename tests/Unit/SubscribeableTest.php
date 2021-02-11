@@ -8,7 +8,7 @@ use App\Models\User;
 use App\Libs\UserMgr;
 use App\Models\Vault;
 use Ramsey\Uuid\Uuid;
-use App\Models\MediaFile;
+use App\Models\Mediafile;
 use App\Enums\PostTypeEnum;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -45,15 +45,15 @@ class SubscribeableTest extends TestCase
         $this->assertEquals(1, count($shareables) );
         $this->assertSame('default', $shareables[0]->access_level );
 
-        $this->assertNotNull($follower->followedTimelines);
-        $this->assertGreaterThan(0, $follower->followedTimelines->count());
-        $this->assertSame($creator->timeline->id, $follower->followedTimelines[0]->id);
+        $this->assertNotNull($follower->followedtimelines);
+        $this->assertGreaterThan(0, $follower->followedtimelines->count());
+        $this->assertSame($creator->timeline->id, $follower->followedtimelines[0]->id);
 
         $this->assertNotNull($creator->timeline->followers);
         $this->assertGreaterThan(0, $creator->timeline->followers->count());
         $this->assertSame($follower->id, $creator->timeline->followers[0]->id);
 
-        //$this->assertInstanceOf(User::class, $mediaFile->sharees[0]);
+        //$this->assertInstanceOf(User::class, $mediafile->sharees[0]);
     }
 
 
@@ -93,13 +93,13 @@ class SubscribeableTest extends TestCase
             while ( $this->_deleteList->count() > 0 ) {
                 $obj = $this->_deleteList->pop();
                 if ( $obj instanceof Vault ) {
-                     $obj->vaultFolders()->delete();
+                     $obj->vaultfolders()->delete();
                 }
-                if ( $obj instanceof MediaFile ) {
+                if ( $obj instanceof Mediafile ) {
                      $obj->sharees()->detach();
                 }
                 if ( $obj instanceof User ) {
-                     $obj->followedTimelines()->detach();
+                     $obj->followedtimelines()->detach();
                      $obj->ledgerSales->each( function($o) { $o->forceDelete(); } );
                      $obj->ledgerPurchases->each( function($o) { $o->forceDelete(); } );
                      $obj->posts->each( function($o) { $o->forceDelete(); } );

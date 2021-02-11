@@ -32,7 +32,7 @@ class UserMgr {
 
         if ( $isFollowing ) { // unfollow
             $action = 'unfollow';
-            $follower->followedTimelines()->detach($timeline->id);
+            $follower->followedtimelines()->detach($timeline->id);
         } else { // follow
             $action = 'follow';
             if ($attrs['is_subscribe']) {
@@ -45,7 +45,7 @@ class UserMgr {
                 );
             } else { // follow only
 //dd('toggleFollow.3', $attrs, $isFollowing);
-                $follower->followedTimelines()->attach($timeline->id, [
+                $follower->followedtimelines()->attach($timeline->id, [
                     'custom_attributes' => json_encode($customAttributes),
                 ]);
                 //$timeline->followers()->attach($follower->id, [ 'custom_attributes' => $customAttributes ]);

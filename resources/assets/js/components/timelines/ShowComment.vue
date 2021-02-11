@@ -59,7 +59,7 @@ export default {
       user_id: null,
       parent_id: null,
       description: '',
-      // %TODO: attach mediaFiles to comments
+      // %TODO: attach mediafiles to comments
     },
   }),
 

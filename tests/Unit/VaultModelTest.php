@@ -6,9 +6,9 @@ use Tests\TestCase;
 use App\Models\User;
 use App\Models\Vault;
 use Ramsey\Uuid\Uuid;
-use App\Models\MediaFile;
-use App\Models\VaultFolder;
-use App\Enums\MediaFileTypeEnum;
+use App\Models\Mediafile;
+use App\Models\Vaultfolder;
+use App\Enums\MediafileTypeEnum;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Foundation\Testing\WithFaker;
@@ -26,15 +26,15 @@ class VaultModelTest extends TestCase
     /*
     public function test_debug()
     {
-        $mediaFile = MediaFile::find(4);
-        //$f = $s->mediaFiles->first()->filename;
-        $f = $mediaFile->filename;
+        $mediafile = Mediafile::find(4);
+        //$f = $s->mediafiles->first()->filename;
+        $f = $mediafile->filename;
         //dd($f);
         //$s = Storage::disk('s3')->get($f);
         $s = Storage::disk('s3')->url($f);
-        //$s = Storage::disk('s3')->get($s->mediaFiles->first()->filename);
+        //$s = Storage::disk('s3')->get($s->mediafiles->first()->filename);
         dd($s);
-        dd($mediaFile->toArray());
+        dd($mediafile->toArray());
     }
      */
 
@@ -57,13 +57,13 @@ class VaultModelTest extends TestCase
         $vault->refresh();
         $this->_deleteList->push($vault);
 
-        $root = factory(VaultFolder::class)->create([
+        $root = factory(Vaultfolder::class)->create([
             'vault_id' => $vault->id,
         ]);
         $root->refresh();
         $this->_deleteList->push($root);
 
-        $child1 = factory(VaultFolder::class)->create([
+        $child1 = factory(Vaultfolder::class)->create([
             'vault_id' => $vault->id,
             'parent_id' => $root->id,
         ]);

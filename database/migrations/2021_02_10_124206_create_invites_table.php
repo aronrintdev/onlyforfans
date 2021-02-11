@@ -16,7 +16,7 @@ class CreateInvitesTable extends Migration
         Schema::create('invites', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('email');
-            $table->string('type', 63);
+            $table->string('itype', 63);
             $table->uuid('inviter_id');
             $table->foreign('inviter_id')->references('id')->on('users');
             $table->text('token');

@@ -38,13 +38,13 @@ class TimelinesController extends AppBaseController
         $TAKE = $request->input('take', 5);
 
         $sessionUser = Auth::user();
-        $followedIDs = $sessionUser->followedTimelines->pluck('id');
+        $followedIDs = $sessionUser->followedtimelines->pluck('id');
 
         $query = Timeline::with('user')->inRandomOrder();
         $query->whereHas('user', function($q1) use(&$sessionUser, &$followedIDs) {
             $q1->where('id', '<>', $sessionUser->id); // skip myself
             // skip timelines I'm already following
-            $q1->whereHas('followedTimelines', function($q2) use(&$followedIDs) {
+            $q1->whereHas('followedtimelines', function($q2) use(&$followedIDs) {
                 $q2->whereNotIn('timeline_id', $followedIDs);
             });
         });
@@ -63,11 +63,11 @@ class TimelinesController extends AppBaseController
         $timeline = Timeline::with('user')->where('username', $username)->firstOrFail();
         $sales = FanLedger::where('seller_id', $timeline->user->id)->sum('total_amount');
 
-        $timeline->userStats = [ // %FIXME DRY
+        $timeline->userstats = [ // %FIXME DRY
             'post_count' => $timeline->posts->count(),
-            'like_count' => 0, // %TODO $timeline->user->postLikes->count(),
+            'like_count' => 0, // %TODO $timeline->user->postlikes->count(),
             'follower_count' => $timeline->followers->count(),
-            'following_count' => $timeline->user->followedTimelines->count(),
+            'following_count' => $timeline->user->followedtimelines->count(),
             'subscribed_count' => 0, // %TODO $sessionUser->timeline->subscribed->count()
             'earnings' => $sales,
         ];
@@ -85,11 +85,11 @@ class TimelinesController extends AppBaseController
         $timeline = $sessionUser->timeline()->with('user')->first();
         $sales = Fanledger::where('seller_id', $timeline->user->id)->sum('total_amount');
 
-        $timeline->userStats = [ // %FIXME DRY
+        $timeline->userstats = [ // %FIXME DRY
             'post_count' => $timeline->posts->count(),
-            'like_count' => 0, // %TODO $timeline->user->postLikes->count(),
+            'like_count' => 0, // %TODO $timeline->user->postlikes->count(),
             'follower_count' => $timeline->followers->count(),
-            'following_count' => $timeline->user->followedTimelines->count(),
+            'following_count' => $timeline->user->followedtimelines->count(),
             'subscribed_count' => 0, // %TODO $sessionUser->timeline->subscribed->count()
             'earnings' => $sales,
         ];
@@ -104,7 +104,7 @@ class TimelinesController extends AppBaseController
 
     // Get a list of items that make up a timeline feed, typically posts but
     //  keep generic as we may want to throw in other things
-    public function feedItems(Request $request, Timeline $timeline)
+    public function feeditems(Request $request, Timeline $timeline)
     {
         $sessionUser = Auth::user();
         $follower = $timeline->user;
@@ -122,11 +122,11 @@ class TimelinesController extends AppBaseController
             $filters['hashtag'] = '#'.$request->hashtag;
         }
 
-        $feedItems = FeedMgr::getPosts($follower, $filters, $page, $take); // %TODO: work with L5.8 pagination
-        //$feedItems = FeedMgr::getPostsRaw($sessionUser, $filters);
+        $feeditems = FeedMgr::getPosts($follower, $filters, $page, $take); // %TODO: work with L5.8 pagination
+        //$feeditems = FeedMgr::getPostsRaw($sessionUser, $filters);
 
         return response()->json([
-            'feedItems' => $feedItems,
+            'feeditems' => $feeditems,
         ]);
     }
 

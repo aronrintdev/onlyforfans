@@ -8,9 +8,9 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use DB;
 use Ramsey\Uuid\Uuid;
-use App\Models\MediaFile;
+use App\Models\Mediafile;
 use App\Models\Story;
-use App\Enums\MediaFileTypeEnum;
+use App\Enums\MediafileTypeEnum;
 
 class StoryModelTest extends TestCase
 {
@@ -19,15 +19,15 @@ class StoryModelTest extends TestCase
      */
     public function test_debug()
     {
-        $mediaFile = MediaFile::find(4);
-        //$f = $s->mediaFiles->first()->filename;
-        $f = $mediaFile->filename;
+        $mediafile = Mediafile::find(4);
+        //$f = $s->mediafiles->first()->filename;
+        $f = $mediafile->filename;
         //dd($f);
         //$s = Storage::disk('s3')->get($f);
         $s = Storage::disk('s3')->url($f);
-        //$s = Storage::disk('s3')->get($s->mediaFiles->first()->filename);
+        //$s = Storage::disk('s3')->get($s->mediafiles->first()->filename);
         dd($s);
-        dd($mediaFile->toArray());
+        dd($mediafile->toArray());
     }
 
 
@@ -37,15 +37,15 @@ class StoryModelTest extends TestCase
     public function test_can_create_photo_story()
     {
         $story = factory(Story::class)->create();
-        $story->mediaFiles()->save(factory(MediaFile::class)->create([
+        $story->mediafiles()->save(factory(Mediafile::class)->create([
             'resource_type' => 'stories',
-            'type' => MediaFileTypeEnum::STORY,
+            'mftype' => MediafileTypeEnum::STORY,
         ]));
         $story->refresh();
         $this->assertNotNull($story);
         $this->assertNotNull($story->id);
-        $this->assertNotNull($story->mediaFiles);
-        $this->assertNotNull($story->mediaFiles->first());
+        $this->assertNotNull($story->mediafiles);
+        $this->assertNotNull($story->mediafiles->first());
     }
 
 }

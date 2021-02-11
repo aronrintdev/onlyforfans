@@ -104,7 +104,7 @@ class RestCommentsTest extends TestCase
         $post = Post::has('comments','>=',1)->first();
         $timeline = $post->timeline;
         $creator = $timeline->user;
-        $fan = User::whereDoesntHave('followedTimelines', function($q1) use(&$timeline) {
+        $fan = User::whereDoesntHave('followedtimelines', function($q1) use(&$timeline) {
             $q1->where('timelines.id', $timeline->id);
         })->where('id', '<>', $creator->id)->first();
         $this->assertFalse( $timeline->followers->contains( $fan->id ) );

@@ -13,14 +13,14 @@
     @php
       $bgColor = array_key_exists('background-color', $s->customAttributes??[]) ? $s->customAttributes['background-color'] : 'yellow';
     @endphp
-    @if ($s->type==='text')
+    @if ($s->stype==='text')
       <article class="col-sm-1">
         <a class="box-story" href="{{ route('stories.player', $sessionUser->username) }}" style="background-color: {{ $bgColor }};">&nbsp;</a>
       </article>
-    @elseif ($s->type==='image')
+    @elseif ($s->stype==='image')
       <article class="col-sm-1">
         <a class="box-story" style="background-color: {{ $bgColor }};" href="{{ route('stories.player', $sessionUser->username) }}">
-          <img src="{{ Storage::disk('s3')->url($s->mediaFiles->first()->filename) }}" alt="" />
+          <img src="{{ Storage::disk('s3')->url($s->mediafiles->first()->filename) }}" alt="" />
         </a>
       </article>
     @endif

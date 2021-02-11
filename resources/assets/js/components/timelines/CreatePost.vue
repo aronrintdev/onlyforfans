@@ -74,8 +74,8 @@ export default {
     //  ~ https://github.com/rowanwins/vue-dropzone/blob/master/docs/src/pages/SendAdditionalParamsDemo.vue
     //  ~ https://www.dropzonejs.com/#config-autoProcessQueue
     dropzoneOptions: {
-      url: '/media-files',
-      paramName: 'mediaFile',
+      url: '/mediafiles',
+      paramName: 'mediafile',
       autoProcessQueue: false,
       thumbnailWidth: 100,
       clickable: false,
@@ -112,7 +112,7 @@ export default {
 
       const queued = this.$refs.myVueDropzone.getQueuedFiles();
 
-      // (2) upload & attach the mediaFiles
+      // (2) upload & attach the mediafiles
       if ( queued.length ) {
         this.$refs.myVueDropzone.processQueue(); // this will call dispatch after files uploaded
       } else {
@@ -134,7 +134,7 @@ export default {
       }
       formData.append('resource_id', this.newPostId);
       formData.append('resource_type', 'posts');
-      formData.append('type', 'post');
+      formData.append('mftype', 'post');
     },
 
     // for dropzone

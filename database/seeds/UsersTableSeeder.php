@@ -5,7 +5,7 @@ use Symfony\Component\Console\Output\ConsoleOutput;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Config;
 use App\Libs\FactoryHelpers;
-use App\Enums\MediaFileTypeEnum;
+use App\Enums\MediafileTypeEnum;
 use App\Models\Role;
 use App\Models\User;
 
@@ -108,8 +108,8 @@ class UsersTableSeeder extends Seeder
         User::factory()->count($this->getMax('users'))->create()->each( function($u) use(&$isFollowForFree) {
             if ( $this->appEnv !== 'testing' ) {
                 $this->output->writeln("Adding avatar & cover for new user " . $u->name);
-                $avatar = FactoryHelpers::createImage(MediaFileTypeEnum::AVATAR);
-                $cover = FactoryHelpers::createImage(MediaFileTypeEnum::COVER);
+                $avatar = FactoryHelpers::createImage(MediafileTypeEnum::AVATAR);
+                $cover = FactoryHelpers::createImage(MediafileTypeEnum::COVER);
             } else {
                 $avatar = null;
                 $cover = null;

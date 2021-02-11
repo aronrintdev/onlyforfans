@@ -25,7 +25,7 @@ class StoryFactory extends Factory
         // Creates an associated user/timeline (unless timeline_id is passed in ?)
         $attrs = [
             'content'     => $this->faker->text,
-            'type'        => 'text', // for image, need to override from caller
+            'stype'        => 'text', // for image, need to override from caller
             'timeline_id' => function () {
                 $user = User::factory()->create();
                 return $user->timeline->id;

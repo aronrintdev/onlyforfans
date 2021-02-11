@@ -30,10 +30,10 @@
 
         <b-col cols="12" md="4" offset-md="2" class="tag-stats my-0">
           <ul class="list-unstyled list-inline text-right">
-            <li class="tag-post_count list-inline-item pr-3"><span>{{ timeline.userStats.post_count }} <b-icon icon="bookmarks-fill" variant="default"></b-icon></span></li>
-            <li class="tag-follower_count list-inline-item pr-3"><span>{{ timeline.userStats.follower_count }} <b-icon icon="people-fill" variant="default"></b-icon></span></li>
-            <li class="tag-like_count list-inline-item pr-3"><span>{{ timeline.userStats.like_count }} <b-icon icon="heart-fill" variant="default"></b-icon></span></li>
-            <li class="tag-following_count list-inline-item"><span>{{ timeline.userStats.following_count }} <b-icon icon="person-check-fill" variant="default"></b-icon></span></li>
+            <li class="tag-post_count list-inline-item pr-3"><span>{{ timeline.userstats.post_count }} <b-icon icon="bookmarks-fill" variant="default"></b-icon></span></li>
+            <li class="tag-follower_count list-inline-item pr-3"><span>{{ timeline.userstats.follower_count }} <b-icon icon="people-fill" variant="default"></b-icon></span></li>
+            <li class="tag-like_count list-inline-item pr-3"><span>{{ timeline.userstats.like_count }} <b-icon icon="heart-fill" variant="default"></b-icon></span></li>
+            <li class="tag-following_count list-inline-item"><span>{{ timeline.userstats.following_count }} <b-icon icon="person-check-fill" variant="default"></b-icon></span></li>
           </ul>
         </b-col>
       </b-row>

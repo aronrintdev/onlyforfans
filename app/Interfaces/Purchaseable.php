@@ -11,7 +11,7 @@ interface Purchaseable {
      * @param  string  $type - PaymentTypeEnum
      */
     public function receivePayment(
-        string $type,
+        string $fltype,
         User $sender,
         int $amountInCents,
         array $customAttributes = []

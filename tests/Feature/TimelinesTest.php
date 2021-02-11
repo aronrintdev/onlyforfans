@@ -61,7 +61,7 @@ class TimelinesTest extends TestCase
         $creator = $timeline->user;
 
         // find a user who is not yet a follower (includes subscribers) of timeline
-        $fan = User::whereDoesntHave('followedTimelines', function($q1) use(&$timeline) {
+        $fan = User::whereDoesntHave('followedtimelines', function($q1) use(&$timeline) {
             $q1->where('timelines.id', '<>', $timeline->id);
         })->where('id', '<>', $creator->id)->first();
 
@@ -83,7 +83,7 @@ class TimelinesTest extends TestCase
         $this->assertEquals('default', $timeline->followers->find($fan->id)->pivot->access_level);
         $this->assertEquals('timelines', $timeline->followers->find($fan->id)->pivot->shareable_type);
         $this->assertTrue( $timeline->followers->contains( $fan->id ) );
-        $this->assertTrue( $fan->followedTimelines->contains( $timelineR->id ) );
+        $this->assertTrue( $fan->followedtimelines->contains( $timelineR->id ) );
 
         // %TODO: unfollow
     }
@@ -104,7 +104,7 @@ class TimelinesTest extends TestCase
         $timeline->refresh();
 
         // find a user who is not yet a follower (includes subscribers) of timeline
-        $fan = User::whereDoesntHave('followedTimelines', function($q1) use(&$timeline) {
+        $fan = User::whereDoesntHave('followedtimelines', function($q1) use(&$timeline) {
             $q1->where('timelines.id', '<>', $timeline->id);
         })->where('id', '<>', $creator->id)->first();
 
@@ -131,7 +131,7 @@ class TimelinesTest extends TestCase
         $this->assertEquals('premium', $timeline->followers->find($fan->id)->pivot->access_level);
         $this->assertEquals('timelines', $timeline->followers->find($fan->id)->pivot->shareable_type);
         $this->assertTrue( $timeline->followers->contains( $fan->id ) );
-        $this->assertTrue( $fan->followedTimelines->contains( $timelineR->id ) );
+        $this->assertTrue( $fan->followedtimelines->contains( $timelineR->id ) );
 
         // Check ledger
         $fanledger = Fanledger::where('fltype', PaymentTypeEnum::SUBSCRIPTION)

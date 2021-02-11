@@ -122,10 +122,10 @@ if ( empty($user) ) {
                     <p class="post-description">{{ $post->description }}</p>
 
                     <!-- %PSG: UN-locked -->
-                    <article class="post-image-holder {{ $post->mediaFiles()->first() && $post->mediaFiles()->first()->isImage() ?'single-image':''}} tag-MARK-B">
-                        @foreach($post->mediaFiles as $mf)
+                    <article class="post-image-holder {{ $post->mediafiles()->first() && $post->mediafiles()->first()->isImage() ?'single-image':''}} tag-MARK-B">
+                        @foreach($post->mediafiles as $mf)
                             @if( $mf->isImage() )
-                              <span class="tag-post_mf_img {{ $loop->first?'first-image':'hidden' }}" style="background-image: url( {{ $post->mediaFiles()->first()->filepath }} );"></span>
+                              <span class="tag-post_mf_img {{ $loop->first?'first-image':'hidden' }}" style="background-image: url( {{ $post->mediafiles()->first()->filepath }} );"></span>
                               <a href="{{ $mf->filepath }}" class="{{ $loop->first?'first-image':'hidden' }}" data-fancybox="gallery.{{$post->id}}">
                                 <img src="{{ $mf->filepath }}"  title="{{ $post->user->name }}" alt="">
                               </a>

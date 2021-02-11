@@ -45,9 +45,9 @@ class Story extends Model implements Likeable, ShortUuid
     // Relationships
     //--------------------------------------------
 
-    public function mediaFiles()
+    public function mediafiles()
     {
-        return $this->morphMany('App\MediaFile', 'resource');
+        return $this->morphMany('App\Mediafile', 'resource');
     }
 
     public function timeline()

@@ -4,10 +4,10 @@ namespace App\Policies;
 
 use Illuminate\Database\Eloquent\Relations\Relation;
 use App\Models\User;
-use App\Models\MediaFile;
+use App\Models\Mediafile;
 use App\Policies\Traits\OwnablePolicies;
 
-class MediaFilePolicy extends BasePolicy
+class MediafilePolicy extends BasePolicy
 {
     use OwnablePolicies;
 
@@ -22,25 +22,25 @@ class MediaFilePolicy extends BasePolicy
         'tip'         => 'isBlockedByOwner:fail',
     ];
 
-    protected function view(User $user, MediaFile $mediaFile)
+    protected function view(User $user, Mediafile $mediafile)
     {
-        switch ($mediaFile->resource_type) {
+        switch ($mediafile->resource_type) {
         case 'comments':
         case 'posts':
         case 'stories':
-        case 'vaultFolders':
-            $alias = $mediaFile->resource_type;
+        case 'vaultfolders':
+            $alias = $mediafile->resource_type;
             $model = Relation::getMorphedModel($alias);
-            $resource = (new $model)->where('id', $mediaFile->resource_id)->first();
+            $resource = (new $model)->where('id', $mediafile->resource_id)->first();
             return $user->can('view', $resource);
         default:
             return false;
         }
     }
 
-    protected function doClone(User $user, MediaFile $mediaFile)
+    protected function doClone(User $user, Mediafile $mediafile)
     {
-        return $user->isOwner($mediaFile);
+        return $user->isOwner($mediafile);
     }
 
     protected function create(User $user)

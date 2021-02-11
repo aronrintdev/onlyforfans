@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use App\Interfaces\Likeable;
 use App\Models\Timeline;
-use App\Models\VaultFolder;
+use App\Models\Vaultfolder;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -20,7 +20,7 @@ class AuthServiceProvider extends ServiceProvider
         Post::class        => \App\Policies\PostPolicy::class,
         Timeline::class    => \App\Policies\TimelinePolicy::class,
         Vault::class       => \App\Policies\VaultPolicy::class,
-        VaultFolder::class => \App\Policies\VaultFolderPolicy::class,
+        Vaultfolder::class => \App\Policies\VaultfolderPolicy::class,
     ];
 
     /**

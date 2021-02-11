@@ -11,11 +11,11 @@ use DB;
 use Tests\TestCase;
 use Database\Seeders\TestDatabaseSeeder;
 use App\Models\FanLedger;
-use App\Models\MediaFile;
+use App\Models\Mediafile;
 use App\Models\Post;
 use App\Models\Timeline;
 use App\Models\User;
-use App\Enums\MediaFileTypeEnum;
+use App\Enums\MediafileTypeEnum;
 use App\Enums\PaymentTypeEnum;
 use App\Enums\PostTypeEnum;
 
@@ -146,25 +146,25 @@ class RestPostsTest extends TestCase
         // --
 
         $payload = [
-            'type' => MediaFileTypeEnum::POST,
-            'mediaFile' => $file,
+            'mftype' => MediafileTypeEnum::POST,
+            'mediafile' => $file,
             'resource_type' => 'posts',
             'resource_id' => $postR->id,
         ];
-        $response = $this->actingAs($creator)->ajaxJSON('POST', route('mediaFiles.store'), $payload);
+        $response = $this->actingAs($creator)->ajaxJSON('POST', route('mediafiles.store'), $payload);
         $response->assertStatus(201);
 
-        $mediaFile = MediaFile::where('resource_type', 'posts')->where('resource_id', $postR->id)->first();
-        $this->assertNotNull($mediaFile);
-        Storage::disk('s3')->assertExists($mediaFile->filename);
-        $this->assertSame($filename, $mediaFile->name);
-        $this->assertSame(MediaFileTypeEnum::POST, $mediaFile->type);
+        $mediafile = Mediafile::where('resource_type', 'posts')->where('resource_id', $postR->id)->first();
+        $this->assertNotNull($mediafile);
+        Storage::disk('s3')->assertExists($mediafile->filename);
+        $this->assertSame($filename, $mediafile->mfname);
+        $this->assertSame(MediafileTypeEnum::POST, $mediafile->mftype);
 
         // Test relations
         $post = Post::find($postR->id);
         $this->assertNotNull($post);
-        $this->assertTrue( $post->mediaFiles->contains($mediaFile->id) );
-        $this->assertEquals( $post->id, $mediaFile->resource->id );
+        $this->assertTrue( $post->mediafiles->contains($mediafile->id) );
+        $this->assertEquals( $post->id, $mediafile->resource->id );
 
     }
 
@@ -212,12 +212,12 @@ class RestPostsTest extends TestCase
         $this->assertNotNull($content->post);
         $postR = $content->post;
         $payload = [
-            'type' => MediaFileTypeEnum::POST,
-            'mediaFile' => $file,
+            'mftype' => MediafileTypeEnum::POST,
+            'mediafile' => $file,
             'resource_type' => 'posts',
             'resource_id' => $postR->id,
         ];
-        $response = $this->actingAs($creator)->ajaxJSON('POST', route('mediaFiles.store'), $payload);
+        $response = $this->actingAs($creator)->ajaxJSON('POST', route('mediafiles.store'), $payload);
         $response->assertStatus(201);
 
         // --
@@ -225,15 +225,15 @@ class RestPostsTest extends TestCase
         $timeline->refresh();
         $creator->refresh();
         $fan = $timeline->followers[0];
-        $post = $timeline->posts()->has('mediaFiles', '>=', 1)
+        $post = $timeline->posts()->has('mediafiles', '>=', 1)
                          ->where('type', PostTypeEnum::FREE)
                          ->firstOrFail();
-        $mediaFile = $post->mediaFiles->shift();
+        $mediafile = $post->mediafiles->shift();
 
         $response = $this->actingAs($fan)->ajaxJSON('GET', route('posts.show', $post->id));
         $response->assertStatus(200);
 
-        $response = $this->actingAs($fan)->ajaxJSON('GET', route('mediaFiles.show', $mediaFile->id));
+        $response = $this->actingAs($fan)->ajaxJSON('GET', route('mediafiles.show', $mediafile->id));
         $response->assertStatus(200);
     }
 
@@ -264,34 +264,34 @@ class RestPostsTest extends TestCase
         $this->assertNotNull($content->post);
         $postR = $content->post;
         $payload = [
-            'type' => MediaFileTypeEnum::POST,
-            'mediaFile' => $file,
+            'mftype' => MediafileTypeEnum::POST,
+            'mediafile' => $file,
             'resource_type' => 'posts',
             'resource_id' => $postR->id,
         ];
-        $response = $this->actingAs($creator)->ajaxJSON('POST', route('mediaFiles.store'), $payload);
+        $response = $this->actingAs($creator)->ajaxJSON('POST', route('mediafiles.store'), $payload);
         $response->assertStatus(201);
 
         // --
 
         $timeline->refresh();
         $creator->refresh();
-        $nonFan = User::whereDoesntHave('followedTimelines', function($q1) use(&$timeline) {
+        $nonFan = User::whereDoesntHave('followedtimelines', function($q1) use(&$timeline) {
             $q1->where('timelines.id', '<>', $timeline->id);
         })->where('id', '<>', $creator->id)->first();
 
         //$this->assertNotEquals($nonFan->id, $creator->id);
         //$this->assertFalse($timeline->followers->contains($nonFan->id));
 
-        $post = $timeline->posts()->has('mediaFiles', '>=', 1)
+        $post = $timeline->posts()->has('mediafiles', '>=', 1)
                          ->where('type', PostTypeEnum::FREE)
                          ->firstOrFail();
-        $mediaFile = $post->mediaFiles->shift();
+        $mediafile = $post->mediafiles->shift();
 
         $response = $this->actingAs($nonFan)->ajaxJSON('GET', route('posts.show', $post->id));
         $response->assertStatus(403);
 
-        $response = $this->actingAs($nonFan)->ajaxJSON('GET', route('mediaFiles.show', $mediaFile->id));
+        $response = $this->actingAs($nonFan)->ajaxJSON('GET', route('mediafiles.show', $mediafile->id));
         $response->assertStatus(403);
     }
 

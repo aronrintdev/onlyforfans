@@ -6,14 +6,14 @@ use Tests\TestCase;
 use App\Models\User;
 use App\Models\Story;
 use Ramsey\Uuid\Uuid;
-use App\Models\MediaFile;
-use App\Enums\MediaFileTypeEnum;
+use App\Models\Mediafile;
+use App\Enums\MediafileTypeEnum;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 //use App\Models\Image;
 
-class MediaFileModelTest extends TestCase
+class MediafileModelTest extends TestCase
 {
     /**
      * @group OFF-mfdev
@@ -58,23 +58,23 @@ class MediaFileModelTest extends TestCase
 
         $file = UploadedFile::fake()->image('file-foo.png', 400, 400);
 
-        $mediaFile = MediaFile::create([
+        $mediafile = Mediafile::create([
             'resource_id'=>$story->id,
             'resource_type'=>'stories',
             'filename'=>(string) Uuid::uuid4(),
-            'type' => MediaFileTypeEnum::STORY,
+            'mftype' => MediafileTypeEnum::STORY,
             'mimetype' => $file->getMimeType(),
             'orig_filename' => $file->getClientOriginalName(),
             'orig_ext' => $file->getClientOriginalExtension(),
         ]);
 
         // Test it exists
-        $mediaFile = MediaFile::find($mediaFile->id);
-        $this->assertNotNull($mediaFile);
-        //$this->assertFileExists($mediaFile->absolute_resource_path);
-        //$this->assertSame('employees',$mediaFile->resource_type);
-        //$this->assertSame($employee->id,$mediaFile->resource_id);
-        $this->assertSame(MediaFileTypeEnum::STORY,$mediaFile->type);
+        $mediafile = Mediafile::find($mediafile->id);
+        $this->assertNotNull($mediafile);
+        //$this->assertFileExists($mediafile->absolute_resource_path);
+        //$this->assertSame('employees',$mediafile->resource_type);
+        //$this->assertSame($employee->id,$mediafile->resource_id);
+        $this->assertSame(MediafileTypeEnum::STORY,$mediafile->mftype);
     }
 
 }

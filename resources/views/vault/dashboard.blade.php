@@ -5,7 +5,7 @@
     <div class="col-sm-12">
       <my-vault
         :vault_pkid="{{ $myVault->id }}"
-        :vaultFolder_pkid="{{ $vaultRootFolder->id }}"
+        :vaultfolder_pkid="{{ $vaultRootFolder->id }}"
         ></my-vault>
     </div>
   </div>

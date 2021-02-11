@@ -1,7 +1,7 @@
 <?php
 namespace Database\Seeders;
 
-use App\Enums\MediaFileTypeEnum;
+use App\Enums\MediafileTypeEnum;
 use App\Libs\FactoryHelpers;
 use App\Models\Story;
 use App\Models\User;
@@ -27,21 +27,21 @@ class StoriesTableSeeder extends Seeder
 
             collect(range(1,$max))->each( function() use(&$u) {
 
-                $type = ($this->appEnv==='testing')
+                $stype = ($this->appEnv==='testing')
                     ? 'text'
                     : $this->faker->randomElement(['text','image','image']);
 
                 $attrs = [
                     'content'     => $this->faker->text,
-                    'type'       => $type,
+                    'stype'       => $stype,
                     'timeline_id' => $u->timeline->id,
                 ];
                 $story = Story::factory()->create($attrs);
-                switch ($type) {
+                switch ($stype) {
                 case 'text':
                     break;
                 case 'image':
-                    $mf = FactoryHelpers::createImage(MediaFileTypeEnum::STORY, $story->id);
+                    $mf = FactoryHelpers::createImage(MediafileTypeEnum::STORY, $story->id);
                     break;
                 }
             });

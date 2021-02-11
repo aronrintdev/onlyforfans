@@ -80,7 +80,7 @@ export default {
       return this.timeline.user;
     },
     stats() {
-      return this.timeline.userStats;
+      return this.timeline.userstats;
     },
   },
 

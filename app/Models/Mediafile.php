@@ -9,14 +9,14 @@ use App\Interfaces\Cloneable;
 use App\Interfaces\ShortUuid;
 use App\Interfaces\Sluggable;
 use App\Models\Traits\UsesUuid;
-use App\Enums\MediaFileTypeEnum;
+use App\Enums\MediafileTypeEnum;
 use App\Traits\OwnableFunctions;
 use Illuminate\Support\Collection;
 use App\Models\Traits\UsesShortUuid;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class MediaFile extends BaseModel implements Guidable, Sluggable, Ownable, ShortUuid, Cloneable
+class Mediafile extends BaseModel implements Guidable, Sluggable, Ownable, ShortUuid, Cloneable
 {
     use UsesUuid;
     use UsesShortUuid;
@@ -24,7 +24,7 @@ class MediaFile extends BaseModel implements Guidable, Sluggable, Ownable, Short
     use HasFactory;
     use OwnableFunctions;
 
-    protected $table = 'media_files';
+    protected $table = 'mediafiles';
     protected $guarded = [
         'id',
         'created_at',
@@ -45,7 +45,7 @@ class MediaFile extends BaseModel implements Guidable, Sluggable, Ownable, Short
 
     public function sharees()
     {
-        return $this->morphToMany('App\Models\User', 'shareable', 'shareables', 'shareable_id', 'shared_with');
+        return $this->morphToMany('App\Models\User', 'shareable', 'shareables', 'shareable_id', 'sharee_id');
     }
 
     public function getOwner(): ?Collection
@@ -95,7 +95,7 @@ class MediaFile extends BaseModel implements Guidable, Sluggable, Ownable, Short
     {
         $key = trim($key);
         switch ($key) {
-            case 'type':
+            case 'mftype':
                 $key = 'Media File Type';
                 break;
             default:
@@ -111,8 +111,8 @@ class MediaFile extends BaseModel implements Guidable, Sluggable, Ownable, Short
             case 'metadata':
             case 'custom_attributes':
                 return json_encode($this->{$key});
-            case 'type':
-                return empty($this->type) ? 'N/A' : MediaFileTypeEnum::render($this->type);
+            case 'mftype':
+                return empty($this->mftype) ? 'N/A' : MediafileTypeEnum::render($this->mftype);
             default:
                 return parent::renderField($field);
         }

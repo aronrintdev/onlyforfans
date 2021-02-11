@@ -20,7 +20,7 @@ class CreateVaultsTable extends Migration
             $table->uuid('user_id');
             $table->foreign('user_id')->references('id')->on('users');
 
-            $table->string('name')->comment('Vault name');
+            $table->string('vname')->comment('Vault name');
 
             $table->json('custom_attributes')->nullable()->comment('JSON-encoded custom attributes');
             $table->json('metadata')->nullable()->comment('JSON-encoded metadata attributes');

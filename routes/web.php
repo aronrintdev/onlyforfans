@@ -76,16 +76,16 @@ Route::group(['middleware' => ['auth']], function () {
         'only' => [ 'index' ],
     ]);
 
-    // -- mediaFiles: likeable | shareable | commentable (?) | tippable | purchaseable --
-    //Route::post('/media-files/{media-file}/doClone', ['as'=>'mediaFiles.doClone', 'uses' => 'MediaFilesController@doClone']);
-    Route::get('/media-files/match', ['as'=>'mediaFiles.match', 'uses' => 'MediaFilesController@match']);
-    Route::resource('media-files', 'MediaFilesController', [ 'except' => [ 'create', 'edit', ] ]);
+    // -- mediafiles: likeable | shareable | commentable (?) | tippable | purchaseable --
+    //Route::post('/mediafiles/{mediafile}/doClone', ['as'=>'mediafiles.doClone', 'uses' => 'MediafilesController@doClone']);
+    Route::get('/mediafiles/match', ['as'=>'mediafiles.match', 'uses' => 'MediafilesController@match']);
+    Route::resource('mediafiles', 'MediafilesController', [ 'except' => [ 'create', 'edit', ] ]);
 
     // -- posts: likeable | shareable | commentable | tippable | purchaseable | pinnable --
     Route::get('/posts/match', ['as'=>'posts.match', 'uses' => 'PostsController@match']);
     Route::put('/posts/{post}/tip', ['as'=>'posts.tip', 'uses' => 'PostsController@tip']);
     Route::put('/posts/{post}/purchase', ['as'=>'posts.purchase', 'uses' => 'PostsController@purchase']);
-    Route::patch('/posts/{post}/attachMediaFile/{media-file}', ['as'=>'posts.attachMediaFile', 'uses' => 'PostsController@attachMediaFile']);
+    Route::patch('/posts/{post}/attachMediafile/{mediafile}', ['as'=>'posts.attachMediafile', 'uses' => 'PostsController@attachMediafile']);
     Route::resource('posts', 'PostsController', [ 
         'except' => [ 'create', 'edit', ],
     ]);
@@ -105,7 +105,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('/timelines-suggested', ['as'=>'timelines.suggested', 'uses' => 'TimelinesController@suggested']); // %FIXME: refactor: use index(?)
     Route::get('/timelines/home', ['as'=>'timelines.home', 'uses' => 'TimelinesController@home']); // special case of 'show'
     Route::get('/timelines/match', ['as'=>'timelines.match', 'uses' => 'TimelinesController@match']);
-    Route::get('/timelines/{timeline}/feed-items', ['as'=>'timelines.feedItems', 'uses' => 'TimelinesController@feedItems']);
+    Route::get('/timelines/{timeline}/feed-items', ['as'=>'timelines.feeditems', 'uses' => 'TimelinesController@feeditems']);
     Route::put('/timelines/{timeline}/tip', ['as'=>'timelines.tip', 'uses' => 'TimelinesController@tip']);
     Route::put('/timelines/{timeline}/follow', ['as'=>'timelines.follow', 'uses' => 'TimelinesController@follow']);
     Route::put('/timelines/{timeline}/subscribe', ['as'=>'timelines.subscribe', 'uses' => 'TimelinesController@subscribe']);
@@ -127,10 +127,10 @@ Route::group(['middleware' => ['auth']], function () {
         'only' => ['index', 'show'],
     ]);
 
-    // -- vaultFolders: shareable | purchaseable --
-    Route::get('/vault-folders/match', ['as'=>'vaultFolders.match', 'uses' => 'VaultFoldersController@match']);
-    Route::post('/vault-folders/{vaultFolder}/invite', ['as'=>'vaultFolders.invite', 'uses' => 'VaultFoldersController@invite']);
-    Route::resource('vault-folders', 'VaultFoldersController', [ ]);
+    // -- vaultfolders: shareable | purchaseable --
+    Route::get('/vaultfolders/match', ['as'=>'vaultfolders.match', 'uses' => 'VaultfoldersController@match']);
+    Route::post('/vaultfolders/{vaultfolder}/invite', ['as'=>'vaultfolders.invite', 'uses' => 'VaultfoldersController@invite']);
+    Route::resource('vaultfolders', 'VaultfoldersController', [ ]);
 
     // -- misc --
     Route::post('update-last-seen', 'UsersController@updateLastSeen')->name('update-user-status');

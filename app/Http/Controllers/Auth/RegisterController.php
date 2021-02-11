@@ -6,7 +6,7 @@ namespace App\Http\Controllers\Auth;
 use Illuminate\Support\Facades\DB;
 
 use App\Http\Controllers\Controller;
-use App\Models\MediaFile;
+use App\Models\Mediafile;
 use App\Models\Setting;
 use App\Models\Timeline;
 use App\Models\User;
@@ -307,7 +307,7 @@ class RegisterController extends Controller
                     DB::table('shareables')->insert($attrs);
                 }
                 // -> email
-                // -> type
+                // -> itype
                 // -> custom_attributes
                 // [ ] how to tie [invites].updated_at to jobs (?)
             }
@@ -395,7 +395,7 @@ class RegisterController extends Controller
                 $photoName = date('Y-m-d-H-i-s').str_random(8).'.png';
                 File::put(storage_path() . '/uploads/users/avatars/' . $photoName, $fileContents);
 
-                $media = MediaFile::create([
+                $media = Mediafile::create([
                         'title'  => $photoName,
                         'type'   => 'image',
                         'source' => $photoName,
@@ -446,7 +446,7 @@ class RegisterController extends Controller
             $photoName = date('Y-m-d-H-i-s').str_random(8).'.png';
             $avatar->save(storage_path().'/uploads/users/avatars/'.$photoName, 60);
 
-            $media = MediaFile::create([
+            $media = Mediafile::create([
                       'title'  => $photoName,
                       'type'   => 'image',
                       'source' => $photoName,
@@ -493,7 +493,7 @@ class RegisterController extends Controller
             $photoName = date('Y-m-d-H-i-s').str_random(8).'.png';
             $avatar->save(storage_path().'/uploads/users/avatars/'.$photoName, 60);
 
-            $media = MediaFile::create([
+            $media = Mediafile::create([
                       'title'  => $photoName,
                       'type'   => 'image',
                       'source' => $photoName,

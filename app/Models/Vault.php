@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use DB;
-use App\SluggableTraits;
+use App\Models\Traits\SluggableTraits;
 use App\Interfaces\Ownable;
 //use App\Interfaces\Nameable;
 use App\Interfaces\Guidable;
@@ -40,15 +40,15 @@ class Vault extends BaseModel implements Guidable, Sluggable, Ownable, ShortUuid
 
         static::created(function ($model) {
             // rootFolder
-            VaultFolder::create([
-                'name' => 'Root',
+            Vaultfolder::create([
+                'vfname' => 'Root',
                 'vault_id' => $model->id,
                 'parent_id' => null,
             ]);
         });
 
         static::deleting(function ($model) {
-            foreach ($model->vaultFolders as $o) {
+            foreach ($model->vaultfolders as $o) {
                 $o->delete();
             }
         });
@@ -62,14 +62,14 @@ class Vault extends BaseModel implements Guidable, Sluggable, Ownable, ShortUuid
     {
         return $this->belongsTo('App\Models\User');
     }
-    public function vaultFolders()
+    public function vaultfolders()
     {
-        return $this->hasMany('App\Models\VaultFolder');
+        return $this->hasMany('App\Models\Vaultfolder');
     }
 
     public function getRootFolder()
     {
-        return $this->vaultFolders()->whereNull('parent_id')->first();
+        return $this->vaultfolders()->whereNull('parent_id')->first();
     }
 
     public function getOwner(): ?Collection
@@ -106,7 +106,7 @@ class Vault extends BaseModel implements Guidable, Sluggable, Ownable, ShortUuid
 
     public function sluggableFields(): array
     {
-        return [ 'name' ];
+        return [ 'vname' ];
     }
 
     // %%% --- Overrides in Model Traits (via BaseModel) ---
@@ -139,23 +139,23 @@ class Vault extends BaseModel implements Guidable, Sluggable, Ownable, ShortUuid
 
     public function renderName(): string
     {
-        return $this->name;
+        return $this->vname;
     }
 
     // %%% --- Other ---
 
     // %FIXME: move to observer/boot 'create'
-    public static function doCreate(string $name, User $owner): Vault
+    public static function doCreate(string $vname, User $owner): Vault
     {
-        $vault = DB::transaction(function () use ($name, &$owner) {
+        $vault = DB::transaction(function () use ($vname, &$owner) {
             $v = Vault::create([
-                'name' => $name,
+                'vname' => $vname,
                 'user_id' => $owner->id,
             ]);
-            $vf = VaultFolder::create([
+            $vf = Vaultfolder::create([
                 'parent_id' => null,
                 'vault_id' => $v->id,
-                'name' => 'Root',
+                'vfname' => 'Root',
             ]);
             $v->refresh();
             return $v;

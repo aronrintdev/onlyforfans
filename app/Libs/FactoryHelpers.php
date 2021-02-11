@@ -3,10 +3,10 @@ namespace App\Libs;
 
 use Exception;
 use App\Models\User;
-use App\Models\MediaFile;
+use App\Models\Mediafile;
 use Illuminate\Support\Str;
 
-use App\Enums\MediaFileTypeEnum;
+use App\Enums\MediafileTypeEnum;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Storage;
@@ -33,8 +33,8 @@ class FactoryHelpers {
         $user->save();
 
         if ( Config::get('app.env') !== 'testing' ) {
-            $avatar = self::createImage(MediaFileTypeEnum::AVATAR);
-            $cover = self::createImage(MediaFileTypeEnum::COVER);
+            $avatar = self::createImage(MediafileTypeEnum::AVATAR);
+            $cover = self::createImage(MediafileTypeEnum::COVER);
         } else {
             $avatar = null;
             $cover = null;
@@ -65,8 +65,8 @@ class FactoryHelpers {
         return $subset;
     }
 
-    // Inserts a [mediaFiles] record
-    public static function createImage(string $type, ?int $resourceID=null) : ?MediaFile
+    // Inserts a [mediafiles] record
+    public static function createImage(string $mftype, ?int $resourceID=null) : ?Mediafile
     {
         $faker = \Faker\Factory::create();
 
@@ -91,32 +91,32 @@ class FactoryHelpers {
         })($ext);
 
         $attrs = [
-            'name' => Str::slug($faker->catchPhrase,'-').'.'.$ext,
-            'type' => $type,
+            'mfname' => Str::slug($faker->catchPhrase,'-').'.'.$ext,
+            'mftype' => $mftype,
             'mimetype' => $mimetype, // $file->getMimeType(),
             'orig_filename' => $basename, // $file->getClientOriginalName(),
             'orig_ext' => $ext, // $file->getClientOriginalExtension(),
         ];
 
-        switch ($type) {
-            case MediaFileTypeEnum::AVATAR:
+        switch ($mftype) {
+            case MediafileTypeEnum::AVATAR:
                 $s3Path = 'avatars/'.$basename;
                 break;
-            case MediaFileTypeEnum::COVER:
+            case MediafileTypeEnum::COVER:
                 $s3Path = 'covers/'.$basename;
                 break;
-            case MediaFileTypeEnum::POST:
+            case MediafileTypeEnum::POST:
                 $s3Path = 'posts/'.$basename;
                 $attrs['resource_id'] =  $resourceID; // ie story_id: required for story type
                 $attrs['resource_type'] = 'posts';
                 break;
-            case MediaFileTypeEnum::STORY:
+            case MediafileTypeEnum::STORY:
                 $s3Path = 'stories/'.$basename;
                 $attrs['resource_id'] =  $resourceID; // ie story_id: required for story type
                 $attrs['resource_type'] = 'stories';
                 break;
             default:
-                throw new Exception('media file type of ' . $type . ' not supported');
+                throw new Exception('media file type of ' . $mftype . ' not supported');
         }
         $contents = file_get_contents($json->file);
         //dd($json, $info);
@@ -124,9 +124,9 @@ class FactoryHelpers {
         Storage::disk('s3')->put($s3Path, $contents);
         $attrs['filename'] = $s3Path;
 
-        $mediaFile = MediaFile::create($attrs);
+        $mediafile = Mediafile::create($attrs);
 
-        return $mediaFile;
+        return $mediafile;
     }
 
 }

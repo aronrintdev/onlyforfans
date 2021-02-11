@@ -10,10 +10,10 @@
 
       <main class="col-md-9 tag-debug">
         <section>
-          <article v-if="stories[index].type==='text'">
+          <article v-if="stories[index].stype==='text'">
             <p>{{ stories[index].content }}</p>
           </article>
-          <article v-else-if="stories[index].type==='image'">
+          <article v-else-if="stories[index].stype==='image'">
             <img v-bind:src="stories[index].mf_url" class="img-fluid" />
           </article>
           <!--

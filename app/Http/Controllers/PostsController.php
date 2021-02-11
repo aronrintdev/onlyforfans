@@ -8,7 +8,7 @@ use Throwable;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use App\Models\Post;
-use App\Models\MediaFile;
+use App\Models\Mediafile;
 use App\Models\Timeline;
 use App\Enums\PaymentTypeEnum;
 use App\Enums\PostTypeEnum;
@@ -51,8 +51,8 @@ class PostsController extends AppBaseController
     {
         $request->validate([
             'timeline_id' => 'required|exists:timelines,id',
-            'mediaFile' => 'array',
-            'mediaFile.*.*' => 'integer|exists:mediaFile',
+            'mediafile' => 'array',
+            'mediafile.*.*' => 'integer|exists:mediafile',
         ]);
 
         $timeline = Timeline::find($request->timeline_id); // timeline being posted on
@@ -65,10 +65,10 @@ class PostsController extends AppBaseController
         $attrs['type'] = $request->input('type', PostTypeEnum::FREE);
 
         $post = Post::create($attrs);
-        if ( $request->has('mediaFile') ) {
-            foreach ( $request->mediaFile as $mfID ) {
-                $cloned = MediaFile::find($mfID)->doClone('posts', $post->id);
-                $post->mediaFile()->save($cloned);
+        if ( $request->has('mediafile') ) {
+            foreach ( $request->mediafile as $mfID ) {
+                $cloned = Mediafile::find($mfID)->doClone('posts', $post->id);
+                $post->mediafile()->save($cloned);
             }
         }
         $post->refresh();
@@ -88,20 +88,20 @@ class PostsController extends AppBaseController
         ]);
     }
 
-    public function attachMediaFile(Request $request, Post $post, MediaFile $mediaFile)
+    public function attachMediafile(Request $request, Post $post, Mediafile $mediafile)
     {
-        // require mediaFile to be in vault (?)
-        if ( empty($mediaFile->resource) ) {
+        // require mediafile to be in vault (?)
+        if ( empty($mediafile->resource) ) {
             abort(400, 'source file must have associated resource');
         }
-        if ( $mediaFile->resource_type !== 'vaultFolders' ) {
-            abort(400, 'source file associated resource type must be vaultFolder');
+        if ( $mediafile->resource_type !== 'vaultfolders' ) {
+            abort(400, 'source file associated resource type must be vaultfolder');
         }
         $this->authorize('update', $post);
-        $this->authorize('update', $mediaFile);
-        $this->authorize('update', $mediaFile->resource);
+        $this->authorize('update', $mediafile);
+        $this->authorize('update', $mediafile->resource);
 
-        $mediaFile->doClone('posts', $post->id);
+        $mediafile->doClone('posts', $post->id);
         $post->refresh();
 
         return response()->json([
@@ -120,7 +120,7 @@ class PostsController extends AppBaseController
 
     public function saves(Request $request)
     {
-        $saves = $request->user()->sharedMediaFile->map( function($mf) {
+        $saves = $request->user()->sharedMediafile->map( function($mf) {
             $mf->foo = 'bar';
             //$mf->owner = $mf->getOwner()->first(); // %TODO
             //dd( 'owner', $mf->owner->only('username', 'name', 'avatar') ); // HERE
@@ -130,8 +130,8 @@ class PostsController extends AppBaseController
 
         return response()->json([
             'shareables' => [
-                'mediaFile' => $mediaFile,
-                'vaultFolders' => $request->user()->sharedVaultFolders,
+                'mediafile' => $mediafile,
+                'vaultfolders' => $request->user()->sharedVaultfolders,
             ],
         ]);
     }

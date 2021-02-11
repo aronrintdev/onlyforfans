@@ -20,10 +20,10 @@
           <div class="bg-blur">
           </div>
           <div class="crate-content">
-            <article v-if="stories[index].type==='text'" class="h-100 v-wrap">
+            <article v-if="stories[index].stype==='text'" class="h-100 v-wrap">
               <p class="h4 text-center v-box">{{ stories[index].content }}</p>
             </article>
-            <article v-else-if="stories[index].type==='image'" class="h-100">
+            <article v-else-if="stories[index].stype==='image'" class="h-100">
               <img v-bind:src="stories[index].mf_url" class="OFF-img-fluid OFF-h-100" />
             </article>
           </div>

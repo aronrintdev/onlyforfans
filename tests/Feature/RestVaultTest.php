@@ -12,14 +12,14 @@ use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 use Database\Seeders\TestDatabaseSeeder;
 
-use App\Models\MediaFile;
+use App\Models\Mediafile;
 use App\Models\Post;
 use App\Models\Story;
 use App\Models\Timeline;
 use App\Models\User;
 use App\Models\Vault;
-use App\Models\VaultFolder;
-use App\Enums\MediaFileTypeEnum;
+use App\Models\Vaultfolder;
+use App\Enums\MediafileTypeEnum;
 use App\Enums\PostTypeEnum;
 use App\Enums\StoryTypeEnum;
 
@@ -42,20 +42,20 @@ class RestVaultTest extends TestCase
                 'vault_id' => $primaryVault->id,
             ],
         ];
-        $response = $this->actingAs($creator)->ajaxJSON('GET', route('vaultFolders.index'), $payload);
+        $response = $this->actingAs($creator)->ajaxJSON('GET', route('vaultfolders.index'), $payload);
         $response->assertStatus(200);
         $content = json_decode($response->content());
-        $this->assertNotNull($content->vaultFolders);
-        $vaultFoldersR = collect($content->vaultFolders);
+        $this->assertNotNull($content->vaultfolders);
+        $vaultfoldersR = collect($content->vaultfolders);
 
-        $this->assertGreaterThan(0, $vaultFoldersR->count());
+        $this->assertGreaterThan(0, $vaultfoldersR->count());
 
-        $nonOwned = $vaultFoldersR->filter( function($vf) use(&$primaryVault) {
+        $nonOwned = $vaultfoldersR->filter( function($vf) use(&$primaryVault) {
             return $primaryVault->id !== $vf->vault_id; // %FIXME: impl dependency
         });
-        $this->assertEquals(0, $nonOwned->count(), 'Returned a vaultFolder that does not belong to creator');
-        $expectedCount = VaultFolder::where('vault_id', $primaryVault->id)->count(); // %FIXME scope
-        $this->assertEquals($expectedCount, $vaultFoldersR->count(), 'Number of vaultFolders returned does not match expected value');
+        $this->assertEquals(0, $nonOwned->count(), 'Returned a vaultfolder that does not belong to creator');
+        $expectedCount = Vaultfolder::where('vault_id', $primaryVault->id)->count(); // %FIXME scope
+        $this->assertEquals($expectedCount, $vaultfoldersR->count(), 'Number of vaultfolders returned does not match expected value');
     }
 
     /**
@@ -67,7 +67,7 @@ class RestVaultTest extends TestCase
         $creator = User::first();
         $primaryVault = Vault::primary($creator)->first();
 
-        $nonFan = User::whereDoesntHave('sharedVaultFolders', function($q1) use(&$primaryVault) {
+        $nonFan = User::whereDoesntHave('sharedVaultfolders', function($q1) use(&$primaryVault) {
             $q1->where('vault_id', $primaryVault->id);
         })->where('id', '<>', $creator->id)->first();
 
@@ -76,7 +76,7 @@ class RestVaultTest extends TestCase
                 'vault_id' => $primaryVault->id,
             ],
         ];
-        $response = $this->actingAs($nonFan)->ajaxJSON('GET', route('vaultFolders.index'), $payload);
+        $response = $this->actingAs($nonFan)->ajaxJSON('GET', route('vaultfolders.index'), $payload);
         $response->assertStatus(403);
     }
 
@@ -96,22 +96,22 @@ class RestVaultTest extends TestCase
                 'parent_id' => 'root',
             ],
         ];
-        $response = $this->actingAs($creator)->ajaxJSON('GET', route('vaultFolders.index'), $payload);
+        $response = $this->actingAs($creator)->ajaxJSON('GET', route('vaultfolders.index'), $payload);
         $response->assertStatus(200);
         $content = json_decode($response->content());
-        $this->assertNotNull($content->vaultFolders);
-        $vaultFoldersR = collect($content->vaultFolders);
-        $this->assertGreaterThan(0, $vaultFoldersR->count());
+        $this->assertNotNull($content->vaultfolders);
+        $vaultfoldersR = collect($content->vaultfolders);
+        $this->assertGreaterThan(0, $vaultfoldersR->count());
 
-        $nonRoot = $vaultFoldersR->filter( function($vf) {
+        $nonRoot = $vaultfoldersR->filter( function($vf) {
             return $vf->parent_id !== null;
         });
-        $this->assertEquals(0, $nonRoot->count(), 'Returned a vaultFolder not in root folder');
+        $this->assertEquals(0, $nonRoot->count(), 'Returned a vaultfolder not in root folder');
 
-        $expectedCount = VaultFolder::where('vault_id', $primaryVault->id)
+        $expectedCount = Vaultfolder::where('vault_id', $primaryVault->id)
             ->whereNull('parent_id')
             ->count(); // %FIXME scope
-        $this->assertEquals($expectedCount, $vaultFoldersR->count(), 'Number of vaultFolders returned does not match expected value');
+        $this->assertEquals($expectedCount, $vaultfoldersR->count(), 'Number of vaultfolders returned does not match expected value');
     }
 
     /**
@@ -122,24 +122,24 @@ class RestVaultTest extends TestCase
     {
         $creator = User::first();
         $primaryVault = Vault::primary($creator)->first();
-        $rootFolder = VaultFolder::isRoot()->where('vault_id', $primaryVault->id)->first();
-        $origNumChildren = $rootFolder->children->count();
+        $rootFolder = Vaultfolder::isRoot()->where('vault_id', $primaryVault->id)->first();
+        $origNumChildren = $rootFolder->vfchildren->count();
 
         $payload = [
             'vault_id' => $primaryVault->id,
             'parent_id' => $rootFolder->id,
             'name' => $this->faker->slug,
         ];
-        $response = $this->actingAs($creator)->ajaxJSON('POST', route('vaultFolders.store'), $payload);
+        $response = $this->actingAs($creator)->ajaxJSON('POST', route('vaultfolders.store'), $payload);
         $response->assertStatus(201);
         $rootFolder->refresh();
-        $this->assertEquals( $origNumChildren+1, $rootFolder->children->count() ); // should be +1
+        $this->assertEquals( $origNumChildren+1, $rootFolder->vfchildren->count() ); // should be +1
 
         $content = json_decode($response->content());
-        $this->assertNotNull($content->vaultFolder);
-        $vaultFolderR = $content->vaultFolder;
-        $vaultFolder = VaultFolder::find($vaultFolderR->id);
-        $this->assertEquals($rootFolder->id, $vaultFolder->parent_id);
+        $this->assertNotNull($content->vaultfolder);
+        $vaultfolderR = $content->vaultfolder;
+        $vaultfolder = Vaultfolder::find($vaultfolderR->id);
+        $this->assertEquals($rootFolder->id, $vaultfolder->parent_id);
     }
 
     /**
@@ -150,7 +150,7 @@ class RestVaultTest extends TestCase
     {
         $creator = User::first();
         $primaryVault = Vault::primary($creator)->first();
-        $rootFolder = VaultFolder::isRoot()->where('vault_id', $primaryVault->id)->first();
+        $rootFolder = Vaultfolder::isRoot()->where('vault_id', $primaryVault->id)->first();
         $nonOwnedVault = Vault::where('user_id', '<>', $creator->id)->first();
 
         $payload = [
@@ -158,7 +158,7 @@ class RestVaultTest extends TestCase
             'parent_id' => $rootFolder->id,
             'name' => $this->faker->slug,
         ];
-        $response = $this->actingAs($creator)->ajaxJSON('POST', route('vaultFolders.store'), $payload);
+        $response = $this->actingAs($creator)->ajaxJSON('POST', route('vaultfolders.store'), $payload);
         $response->assertStatus(403);
     }
 
@@ -170,21 +170,21 @@ class RestVaultTest extends TestCase
     {
         $creator = User::first();
         $primaryVault = Vault::primary($creator)->first();
-        $rootFolder = VaultFolder::isRoot()->where('vault_id', $primaryVault->id)->first();
+        $rootFolder = Vaultfolder::isRoot()->where('vault_id', $primaryVault->id)->first();
 
-        $this->assertEquals(0, $rootFolder->children->count(), 'Root should not have any subfolders');
-        $this->assertNull($rootFolder->parent, 'Root should have null parent');
+        $this->assertEquals(0, $rootFolder->vfchildren->count(), 'Root should not have any subfolders');
+        $this->assertNull($rootFolder->vfparent, 'Root should have null parent');
 
         // set cwf via api call
         $response = $this->actingAs($creator)->ajaxJSON('GET', route('vaults.getRootFolder', $primaryVault->id));
         $response->assertStatus(200);
         $content = json_decode($response->content());
-        $this->assertNotNull($content->vaultFolder);
-        $cwf = $content->vaultFolder; // root
+        $this->assertNotNull($content->vaultfolder);
+        $cwf = $content->vaultfolder; // root
         $this->assertEquals($rootFolder->id, $cwf->id, 'Current working folder (root) pkid should match root');
-        $this->assertNull($cwf->parent, 'Current working folder (root) should not have null parent');
-        $this->assertNotNull($cwf->children, 'Current working folder (root) should not have children (subfolders) attribute');
-        $this->assertEquals(0, count($cwf->children), 'Current working folder should not have any subfolders');
+        $this->assertNull($cwf->vfparent, 'Current working folder (root) should not have null parent');
+        $this->assertNotNull($cwf->vfchildren, 'Current working folder (root) should not have children (subfolders) attribute');
+        $this->assertEquals(0, count($cwf->vfchildren), 'Current working folder should not have any subfolders');
 
         // ---
 
@@ -194,33 +194,33 @@ class RestVaultTest extends TestCase
             'parent_id' => $cwf->id, // $rootFolder->id,
             'name' => $this->faker->slug,
         ];
-        $response = $this->actingAs($creator)->ajaxJSON('POST', route('vaultFolders.store'), $payload);
+        $response = $this->actingAs($creator)->ajaxJSON('POST', route('vaultfolders.store'), $payload);
         $response->assertStatus(201);
         $content = json_decode($response->content());
-        $this->assertNotNull($content->vaultFolder);
-        $childVaultFolderR = $content->vaultFolder;
+        $this->assertNotNull($content->vaultfolder);
+        $childVaultfolderR = $content->vaultfolder;
         $rootFolder->refresh();
-        $rootFolder->load('children');
+        $rootFolder->load('vfchildren');
 
         // test cwf children, expect subfolder
-        $this->assertEquals(1, $rootFolder->children->count(), 'Root should have 1 subfolder');
-        $this->assertTrue($rootFolder->children->contains($childVaultFolderR->id), 'Root subfolders should include the one just created');
+        $this->assertEquals(1, $rootFolder->vfchildren->count(), 'Root should have 1 subfolder');
+        $this->assertTrue($rootFolder->vfchildren->contains($childVaultfolderR->id), 'Root subfolders should include the one just created');
 
         // refresh 'cwf' via api call
-        $response = $this->actingAs($creator)->ajaxJSON('GET', route('vaultFolders.show', $cwf->id));
+        $response = $this->actingAs($creator)->ajaxJSON('GET', route('vaultfolders.show', $cwf->id));
         $response->assertStatus(200);
         $content = json_decode($response->content());
-        $this->assertNotNull($content->vaultFolder);
-        $cwf = $content->vaultFolder;
+        $this->assertNotNull($content->vaultfolder);
+        $cwf = $content->vaultfolder;
         $this->assertEquals($rootFolder->id, $cwf->id, 'Current working folder should still be root');
-        $this->assertEquals(1, count($cwf->children), 'Current working folder should have 1 subfolder');
+        $this->assertEquals(1, count($cwf->vfchildren), 'Current working folder should have 1 subfolder');
 
         // cd to subfolder
-        $response = $this->actingAs($creator)->ajaxJSON('GET', route('vaultFolders.show', $cwf->children[0]->id));
+        $response = $this->actingAs($creator)->ajaxJSON('GET', route('vaultfolders.show', $cwf->vfchildren[0]->id));
         $response->assertStatus(200);
         $content = json_decode($response->content());
-        $this->assertNotNull($content->vaultFolder);
-        $cwf = $content->vaultFolder;
+        $this->assertNotNull($content->vaultfolder);
+        $cwf = $content->vaultfolder;
 
         // test cwf parent, expect root
         $this->assertEquals($rootFolder->id, $cwf->parent_id, 'Current working folder parent should be root');
@@ -235,19 +235,19 @@ class RestVaultTest extends TestCase
     {
         $creator = User::first();
         $primaryVault = Vault::primary($creator)->first();
-        $rootFolder = VaultFolder::isRoot()->where('vault_id', $primaryVault->id)->first();
+        $rootFolder = Vaultfolder::isRoot()->where('vault_id', $primaryVault->id)->first();
 
         // rename the root folder
         $payload = [
             'name' => $this->faker->slug,
         ];
-        $response = $this->actingAs($creator)->ajaxJSON('PATCH', route('vaultFolders.update', $rootFolder->id), $payload);
+        $response = $this->actingAs($creator)->ajaxJSON('PATCH', route('vaultfolders.update', $rootFolder->id), $payload);
         $response->assertStatus(200);
 
         $content = json_decode($response->content());
-        $this->assertNotNull($content->vaultFolder);
-        $vaultFolderR = $content->vaultFolder;
-        $this->assertEquals($rootFolder->id, $vaultFolderR->id);
+        $this->assertNotNull($content->vaultfolder);
+        $vaultfolderR = $content->vaultfolder;
+        $this->assertEquals($rootFolder->id, $vaultfolderR->id);
 
         $this->assertNotSame($payload['name'], $rootFolder->name, 'Pre-updated root folder name should not match payload param');
         $rootFolder->refresh();
@@ -261,11 +261,11 @@ class RestVaultTest extends TestCase
             'parent_id' => $rootFolder->id,
             'name' => $origSubfolderName,
         ];
-        $response = $this->actingAs($creator)->ajaxJSON('POST', route('vaultFolders.store'), $payload);
+        $response = $this->actingAs($creator)->ajaxJSON('POST', route('vaultfolders.store'), $payload);
         $response->assertStatus(201);
         $content = json_decode($response->content());
-        $this->assertNotNull($content->vaultFolder);
-        $subfolderR = $content->vaultFolder;
+        $this->assertNotNull($content->vaultfolder);
+        $subfolderR = $content->vaultfolder;
         $rootFolder->refresh();
 
         // rename the new subfolder
@@ -273,12 +273,12 @@ class RestVaultTest extends TestCase
         $payload = [
             'name' => $updatedSubfolderName,
         ];
-        $response = $this->actingAs($creator)->ajaxJSON('PATCH', route('vaultFolders.update', $subfolderR->id), $payload);
+        $response = $this->actingAs($creator)->ajaxJSON('PATCH', route('vaultfolders.update', $subfolderR->id), $payload);
         $response->assertStatus(200);
 
         $content = json_decode($response->content());
-        $this->assertNotNull($content->vaultFolder);
-        $subfolder = VaultFolder::find($content->vaultFolder->id);
+        $this->assertNotNull($content->vaultfolder);
+        $subfolder = Vaultfolder::find($content->vaultfolder->id);
 
         $this->assertNotSame($origSubfolderName, $subfolder->name, 'Updated sub-folder name should not match original');
         $this->assertSame($updatedSubfolderName, $subfolder->name, 'Updated sub-folder name should match new value');
@@ -293,7 +293,7 @@ class RestVaultTest extends TestCase
     {
         $creator = User::first();
         $primaryVault = Vault::primary($creator)->first();
-        $rootFolder = VaultFolder::isRoot()->where('vault_id', $primaryVault->id)->first();
+        $rootFolder = Vaultfolder::isRoot()->where('vault_id', $primaryVault->id)->first();
 
         // make a subfolder
         $payload = [
@@ -301,23 +301,23 @@ class RestVaultTest extends TestCase
             'parent_id' => $rootFolder->id,
             'name' => $this->faker->slug,
         ];
-        $response = $this->actingAs($creator)->ajaxJSON('POST', route('vaultFolders.store'), $payload);
+        $response = $this->actingAs($creator)->ajaxJSON('POST', route('vaultfolders.store'), $payload);
         $response->assertStatus(201);
         $content = json_decode($response->content());
-        $this->assertNotNull($content->vaultFolder);
-        $subfolderR = $content->vaultFolder;
+        $this->assertNotNull($content->vaultfolder);
+        $subfolderR = $content->vaultfolder;
         $rootFolder->refresh();
-        $exists = VaultFolder::find($subfolderR->id);
+        $exists = Vaultfolder::find($subfolderR->id);
         $this->assertNotNull($exists);
-        $this->assertTrue($rootFolder->children->contains($subfolderR->id), 'Root should now contain newly created subfolder');
+        $this->assertTrue($rootFolder->vfchildren->contains($subfolderR->id), 'Root should now contain newly created subfolder');
 
         // delete the subfolder
-        $response = $this->actingAs($creator)->ajaxJSON('DELETE', route('vaultFolders.destroy', $subfolderR->id));
+        $response = $this->actingAs($creator)->ajaxJSON('DELETE', route('vaultfolders.destroy', $subfolderR->id));
         $response->assertStatus(200);
         $rootFolder->refresh();
-        $exists = VaultFolder::find($subfolderR->id);
+        $exists = Vaultfolder::find($subfolderR->id);
         $this->assertNull($exists);
-        $this->assertFalse($rootFolder->children->contains($subfolderR->id), 'Root should not contain deleted subfolder');
+        $this->assertFalse($rootFolder->vfchildren->contains($subfolderR->id), 'Root should not contain deleted subfolder');
     }
 
     /**
@@ -328,7 +328,7 @@ class RestVaultTest extends TestCase
     {
         $creator = User::first();
         $primaryVault = Vault::primary($creator)->first();
-        $rootFolder = VaultFolder::isRoot()->where('vault_id', $primaryVault->id)->first();
+        $rootFolder = Vaultfolder::isRoot()->where('vault_id', $primaryVault->id)->first();
         $nonowner = User::where('id', '<>', $creator->id)->first();
 
         // make a subfolder
@@ -337,18 +337,18 @@ class RestVaultTest extends TestCase
             'parent_id' => $rootFolder->id,
             'name' => $this->faker->slug,
         ];
-        $response = $this->actingAs($creator)->ajaxJSON('POST', route('vaultFolders.store'), $payload);
+        $response = $this->actingAs($creator)->ajaxJSON('POST', route('vaultfolders.store'), $payload);
         $response->assertStatus(201);
         $content = json_decode($response->content());
-        $this->assertNotNull($content->vaultFolder);
-        $subfolderR = $content->vaultFolder;
+        $this->assertNotNull($content->vaultfolder);
+        $subfolderR = $content->vaultfolder;
         $rootFolder->refresh();
-        $exists = VaultFolder::find($subfolderR->id);
+        $exists = Vaultfolder::find($subfolderR->id);
         $this->assertNotNull($exists);
-        $this->assertTrue($rootFolder->children->contains($subfolderR->id), 'Root should now contain newly created subfolder');
+        $this->assertTrue($rootFolder->vfchildren->contains($subfolderR->id), 'Root should now contain newly created subfolder');
 
         // delete the subfolder
-        $response = $this->actingAs($nonowner)->ajaxJSON('DELETE', route('vaultFolders.destroy', $subfolderR->id));
+        $response = $this->actingAs($nonowner)->ajaxJSON('DELETE', route('vaultfolders.destroy', $subfolderR->id));
         $response->assertStatus(403);
     }
 
@@ -360,10 +360,10 @@ class RestVaultTest extends TestCase
     {
         $creator = User::first();
         $primaryVault = Vault::primary($creator)->first();
-        $rootFolder = VaultFolder::isRoot()->where('vault_id', $primaryVault->id)->first();
+        $rootFolder = Vaultfolder::isRoot()->where('vault_id', $primaryVault->id)->first();
 
         // try to delete root folder
-        $response = $this->actingAs($creator)->ajaxJSON('DELETE', route('vaultFolders.destroy', $rootFolder->id));
+        $response = $this->actingAs($creator)->ajaxJSON('DELETE', route('vaultfolders.destroy', $rootFolder->id));
         $response->assertStatus(400);
     }
 
@@ -380,33 +380,33 @@ class RestVaultTest extends TestCase
         $file = UploadedFile::fake()->image($filename, 200, 200);
 
         $primaryVault = Vault::primary($owner)->first();
-        $vaultFolder = VaultFolder::isRoot()->where('vault_id', $primaryVault->id)->first(); // root
+        $vaultfolder = Vaultfolder::isRoot()->where('vault_id', $primaryVault->id)->first(); // root
 
         $payload = [
-            'type' => MediaFileTypeEnum::VAULT,
-            'mediaFile' => $file,
-            'resource_type' => 'vaultFolders',
-            'resource_id' => $vaultFolder->id,
+            'mftype' => MediafileTypeEnum::VAULT,
+            'mediafile' => $file,
+            'resource_type' => 'vaultfolders',
+            'resource_id' => $vaultfolder->id,
         ];
-        $response = $this->actingAs($owner)->ajaxJSON('POST', route('mediaFiles.store'), $payload);
+        $response = $this->actingAs($owner)->ajaxJSON('POST', route('mediafiles.store'), $payload);
         $response->assertStatus(201);
         $content = json_decode($response->content());
-        $this->assertNotNull($content->mediaFile);
-        $mediaFileR = $content->mediaFile;
+        $this->assertNotNull($content->mediafile);
+        $mediafileR = $content->mediafile;
 
-        // $mediaFile = MediaFile::where('resource_type', 'vaultFolders')->where('resource_id',
-        // $vaultFolder->id)->first(); // %FIXME: this assumes there are no prior images in the vault
-        $mediaFile = MediaFile::find($mediaFileR->id);
-        $this->assertNotNull($mediaFile);
-        $this->assertEquals('vaultFolders', $mediaFile->resource_type);
-        $this->assertEquals($vaultFolder->id, $mediaFile->resource_id);
-        Storage::disk('s3')->assertExists($mediaFile->filename);
-        $this->assertSame($filename, $mediaFile->name);
-        $this->assertSame(MediaFileTypeEnum::VAULT, $mediaFile->type);
+        // $mediafile = Mediafile::where('resource_type', 'vaultfolders')->where('resource_id',
+        // $vaultfolder->id)->first(); // %FIXME: this assumes there are no prior images in the vault
+        $mediafile = Mediafile::find($mediafileR->id);
+        $this->assertNotNull($mediafile);
+        $this->assertEquals('vaultfolders', $mediafile->resource_type);
+        $this->assertEquals($vaultfolder->id, $mediafile->resource_id);
+        Storage::disk('s3')->assertExists($mediafile->filename);
+        $this->assertSame($filename, $mediafile->mfname);
+        $this->assertSame(MediafileTypeEnum::VAULT, $mediafile->mftype);
 
         // Test relations
-        $this->assertTrue( $vaultFolder->mediaFiles->contains($mediaFile->id) );
-        $this->assertEquals( $vaultFolder->id, $mediaFile->resource->id );
+        $this->assertTrue( $vaultfolder->mediafiles->contains($mediafile->id) );
+        $this->assertEquals( $vaultfolder->id, $mediafile->resource->id );
     }
 
     /**
@@ -424,47 +424,47 @@ class RestVaultTest extends TestCase
         $file2 = UploadedFile::fake()->image($filename2, 300, 270);
 
         $primaryVault = Vault::primary($owner)->first();
-        $vaultFolder = VaultFolder::isRoot()->where('vault_id', $primaryVault->id)->first(); // root
+        $vaultfolder = Vaultfolder::isRoot()->where('vault_id', $primaryVault->id)->first(); // root
 
         $payload = [
-            'type' => MediaFileTypeEnum::VAULT,
-            'mediaFile' => $file1,
-            'resource_type' => 'vaultFolders',
-            'resource_id' => $vaultFolder->id,
+            'mftype' => MediafileTypeEnum::VAULT,
+            'mediafile' => $file1,
+            'resource_type' => 'vaultfolders',
+            'resource_id' => $vaultfolder->id,
         ];
-        $response = $this->actingAs($owner)->ajaxJSON('POST', route('mediaFiles.store'), $payload);
+        $response = $this->actingAs($owner)->ajaxJSON('POST', route('mediafiles.store'), $payload);
         $response->assertStatus(201);
 
         $payload = [
-            'type' => MediaFileTypeEnum::VAULT,
-            'mediaFile' => $file2,
-            'resource_type' => 'vaultFolders',
-            'resource_id' => $vaultFolder->id,
+            'mftype' => MediafileTypeEnum::VAULT,
+            'mediafile' => $file2,
+            'resource_type' => 'vaultfolders',
+            'resource_id' => $vaultfolder->id,
         ];
-        $response = $this->actingAs($owner)->ajaxJSON('POST', route('mediaFiles.store'), $payload);
+        $response = $this->actingAs($owner)->ajaxJSON('POST', route('mediafiles.store'), $payload);
         $response->assertStatus(201);
 
-        $mediaFiles = MediaFile::where('resource_type', 'vaultFolders')->get();
-        $this->assertNotNull($mediaFiles);
-        $this->assertEquals(2, $mediaFiles->count());
+        $mediafiles = Mediafile::where('resource_type', 'vaultfolders')->get();
+        $this->assertNotNull($mediafiles);
+        $this->assertEquals(2, $mediafiles->count());
 
-        $mf1 = $mediaFiles->shift();
+        $mf1 = $mediafiles->shift();
         Storage::disk('s3')->assertExists($mf1->filename);
-        $this->assertSame($filename1, $mf1->name);
-        $this->assertSame(MediaFileTypeEnum::VAULT, $mf1->type);
+        $this->assertSame($filename1, $mf1->mfname);
+        $this->assertSame(MediafileTypeEnum::VAULT, $mf1->mftype);
 
         // Test relations
-        $this->assertTrue( $vaultFolder->mediaFiles->contains($mf1->id) );
-        $this->assertEquals( $vaultFolder->id, $mf1->resource->id );
+        $this->assertTrue( $vaultfolder->mediafiles->contains($mf1->id) );
+        $this->assertEquals( $vaultfolder->id, $mf1->resource->id );
 
-        $mf2 = $mediaFiles->shift();
+        $mf2 = $mediafiles->shift();
         Storage::disk('s3')->assertExists($mf2->filename);
-        $this->assertSame($filename2, $mf2->name);
-        $this->assertSame(MediaFileTypeEnum::VAULT, $mf2->type);
+        $this->assertSame($filename2, $mf2->mfname);
+        $this->assertSame(MediafileTypeEnum::VAULT, $mf2->mftype);
 
         // Test relations
-        $this->assertTrue( $vaultFolder->mediaFiles->contains($mf2->id) );
-        $this->assertEquals( $vaultFolder->id, $mf2->resource->id );
+        $this->assertTrue( $vaultfolder->mediafiles->contains($mf2->id) );
+        $this->assertEquals( $vaultfolder->id, $mf2->resource->id );
     }
 
     /**
@@ -481,15 +481,15 @@ class RestVaultTest extends TestCase
         $file = UploadedFile::fake()->image($filename, 200, 200);
 
         $primaryVault = Vault::primary($owner)->first();
-        $vaultFolder = VaultFolder::isRoot()->where('vault_id', $primaryVault->id)->first(); // root
+        $vaultfolder = Vaultfolder::isRoot()->where('vault_id', $primaryVault->id)->first(); // root
 
         $payload = [
-            'type' => MediaFileTypeEnum::VAULT,
-            'mediaFile' => $file,
-            'resource_type' => 'vaultFolders',
-            'resource_id' => $vaultFolder->id,
+            'mftype' => MediafileTypeEnum::VAULT,
+            'mediafile' => $file,
+            'resource_type' => 'vaultfolders',
+            'resource_id' => $vaultfolder->id,
         ];
-        $response = $this->actingAs($nonowner)->ajaxJSON('POST', route('mediaFiles.store'), $payload);
+        $response = $this->actingAs($nonowner)->ajaxJSON('POST', route('mediafiles.store'), $payload);
         $response->assertStatus(403);
     }
 
@@ -497,8 +497,8 @@ class RestVaultTest extends TestCase
      *  @group vault
      *  @group regression
      */
-    // Creates post in first API call, then attaches selected mediaFile in a second API call
-    public function test_can_select_mediaFile_from_vault_folder_to_attach_to_post_by_attach()
+    // Creates post in first API call, then attaches selected mediafile in a second API call
+    public function test_can_select_mediafile_from_vault_folder_to_attach_to_post_by_attach()
     {
         Storage::fake('s3');
 
@@ -511,21 +511,21 @@ class RestVaultTest extends TestCase
         $file = UploadedFile::fake()->image($filename, 200, 200);
 
         $primaryVault = Vault::primary($owner)->first();
-        $vaultFolder = VaultFolder::isRoot()->where('vault_id', $primaryVault->id)->first(); // root
+        $vaultfolder = Vaultfolder::isRoot()->where('vault_id', $primaryVault->id)->first(); // root
 
         $payload = [
-            'type' => MediaFileTypeEnum::VAULT,
-            'mediaFile' => $file,
-            'resource_type' => 'vaultFolders',
-            'resource_id' => $vaultFolder->id,
+            'mftype' => MediafileTypeEnum::VAULT,
+            'mediafile' => $file,
+            'resource_type' => 'vaultfolders',
+            'resource_id' => $vaultfolder->id,
         ];
-        $response = $this->actingAs($owner)->ajaxJSON('POST', route('mediaFiles.store'), $payload);
+        $response = $this->actingAs($owner)->ajaxJSON('POST', route('mediafiles.store'), $payload);
         $response->assertStatus(201);
         $content = json_decode($response->content());
-        $this->assertNotNull($content->mediaFile);
-        $mediaFile = MediaFile::find($content->mediaFile->id);
-        $this->assertNotNull($mediaFile);
-        $this->assertTrue( $vaultFolder->mediaFiles->contains($mediaFile->id) );
+        $this->assertNotNull($content->mediafile);
+        $mediafile = Mediafile::find($content->mediafile->id);
+        $this->assertNotNull($mediafile);
+        $this->assertTrue( $vaultfolder->mediafiles->contains($mediafile->id) );
 
         // --- Create a free post with image from vault ---
 
@@ -543,7 +543,7 @@ class RestVaultTest extends TestCase
         $postR = $content->post;
         $post = Post::findOrFail($postR->id);
 
-        $response = $this->actingAs($owner)->ajaxJSON('PATCH', route('posts.attachMediaFile', [$post->id, $mediaFile->id]));
+        $response = $this->actingAs($owner)->ajaxJSON('PATCH', route('posts.attachMediafile', [$post->id, $mediafile->id]));
         $response->assertStatus(200);
 
         // --
@@ -551,13 +551,13 @@ class RestVaultTest extends TestCase
         $timeline->refresh();
         $owner->refresh();
         $post->refresh();
-        $mediaFile = $post->mediaFiles->shift();
-        $this->assertNotNull($mediaFile, 'No mediaFiles attached to post');
+        $mediafile = $post->mediafiles->shift();
+        $this->assertNotNull($mediafile, 'No mediafiles attached to post');
 
         $response = $this->actingAs($fan)->ajaxJSON('GET', route('posts.show', $post->id));
         $response->assertStatus(200);
 
-        $response = $this->actingAs($fan)->ajaxJSON('GET', route('mediaFiles.show', $mediaFile->id));
+        $response = $this->actingAs($fan)->ajaxJSON('GET', route('mediafiles.show', $mediafile->id));
         $response->assertStatus(200);
     }
 
@@ -565,30 +565,30 @@ class RestVaultTest extends TestCase
      *  @group vault
      *  @group regression
      */
-    public function test_nonowner_can_not_select_vault_folder_mediaFile_to_attach_to_post_by_attach()
+    public function test_nonowner_can_not_select_vault_folder_mediafile_to_attach_to_post_by_attach()
     {
         Storage::fake('s3');
 
         $timeline = Timeline::has('posts', '>=', 1)->has('followers', '>=', 1)->first();
         $postOwner = $timeline->user;
-        $mediaFileowner = User::where('id', '<>', $postOwner->id)->first();
+        $mediafileowner = User::where('id', '<>', $postOwner->id)->first();
 
         // --- Upload image to vault ---
         $filename = $this->faker->slug;
         $file = UploadedFile::fake()->image($filename, 200, 200);
 
-        $primaryVault = Vault::primary($mediaFileowner)->first();
-        $vaultFolder = VaultFolder::isRoot()->where('vault_id', $primaryVault->id)->first(); // root
+        $primaryVault = Vault::primary($mediafileowner)->first();
+        $vaultfolder = Vaultfolder::isRoot()->where('vault_id', $primaryVault->id)->first(); // root
         $payload = [
-            'type' => MediaFileTypeEnum::VAULT,
-            'mediaFile' => $file,
-            'resource_type' => 'vaultFolders',
-            'resource_id' => $vaultFolder->id,
+            'mftype' => MediafileTypeEnum::VAULT,
+            'mediafile' => $file,
+            'resource_type' => 'vaultfolders',
+            'resource_id' => $vaultfolder->id,
         ];
-        $response = $this->actingAs($mediaFileowner)->ajaxJSON('POST', route('mediaFiles.store'), $payload);
+        $response = $this->actingAs($mediafileowner)->ajaxJSON('POST', route('mediafiles.store'), $payload);
         $response->assertStatus(201);
         $content = json_decode($response->content());
-        $mediaFile = MediaFile::findOrFail($content->mediaFile->id);
+        $mediafile = Mediafile::findOrFail($content->mediafile->id);
 
         // --- Create a free post ---
         //$filename = $this->faker->slug;
@@ -603,12 +603,12 @@ class RestVaultTest extends TestCase
         $content = json_decode($response->content());
         $post = Post::findOrFail($content->post->id);
 
-        // --- Try to attach image to post as post owner (but not mediaFile owner) ---
-        $response = $this->actingAs($postOwner)->ajaxJSON('PATCH', route('posts.attachMediaFile', [$post->id, $mediaFile->id]));
+        // --- Try to attach image to post as post owner (but not mediafile owner) ---
+        $response = $this->actingAs($postOwner)->ajaxJSON('PATCH', route('posts.attachMediafile', [$post->id, $mediafile->id]));
         $response->assertStatus(403);
 
-        // --- Try to attach image to post as mediaFile owner (but not post owner) ---
-        $response = $this->actingAs($mediaFileowner)->ajaxJSON('PATCH', route('posts.attachMediaFile', [$post->id, $mediaFile->id]));
+        // --- Try to attach image to post as mediafile owner (but not post owner) ---
+        $response = $this->actingAs($mediafileowner)->ajaxJSON('PATCH', route('posts.attachMediafile', [$post->id, $mediafile->id]));
         $response->assertStatus(403);
     }
 
@@ -616,8 +616,8 @@ class RestVaultTest extends TestCase
      *  @group vault
      *  @group regression
      */
-    // Creates post and attaches selected mediaFile in a single API call
-    public function test_can_select_mediaFile_from_vault_folder_to_attach_to_post_single_op()
+    // Creates post and attaches selected mediafile in a single API call
+    public function test_can_select_mediafile_from_vault_folder_to_attach_to_post_single_op()
     {
         Storage::fake('s3');
 
@@ -630,21 +630,21 @@ class RestVaultTest extends TestCase
         $file = UploadedFile::fake()->image($filename, 200, 200);
 
         $primaryVault = Vault::primary($owner)->first();
-        $vaultFolder = VaultFolder::isRoot()->where('vault_id', $primaryVault->id)->first(); // root
+        $vaultfolder = Vaultfolder::isRoot()->where('vault_id', $primaryVault->id)->first(); // root
 
         $payload = [
-            'type' => MediaFileTypeEnum::VAULT,
-            'mediaFile' => $file,
-            'resource_type' => 'vaultFolders',
-            'resource_id' => $vaultFolder->id,
+            'mftype' => MediafileTypeEnum::VAULT,
+            'mediafile' => $file,
+            'resource_type' => 'vaultfolders',
+            'resource_id' => $vaultfolder->id,
         ];
-        $response = $this->actingAs($owner)->ajaxJSON('POST', route('mediaFiles.store'), $payload);
+        $response = $this->actingAs($owner)->ajaxJSON('POST', route('mediafiles.store'), $payload);
         $response->assertStatus(201);
         $content = json_decode($response->content());
-        $this->assertNotNull($content->mediaFile);
-        $mediaFile = MediaFile::find($content->mediaFile->id);
-        $this->assertNotNull($mediaFile);
-        $this->assertTrue( $vaultFolder->mediaFiles->contains($mediaFile->id) );
+        $this->assertNotNull($content->mediafile);
+        $mediafile = Mediafile::find($content->mediafile->id);
+        $this->assertNotNull($mediafile);
+        $this->assertTrue( $vaultfolder->mediafiles->contains($mediafile->id) );
 
         // --- Create a free post with image from vault ---
 
@@ -654,7 +654,7 @@ class RestVaultTest extends TestCase
             'type' => PostTypeEnum::FREE,
             'timeline_id' => $timeline->id,
             'description' => $this->faker->realText,
-            'mediaFiles' => [$mediaFile->id],
+            'mediafiles' => [$mediafile->id],
         ];
         $response = $this->actingAs($owner)->ajaxJSON('POST', route('posts.store'), $payload);
         $response->assertStatus(201);
@@ -668,13 +668,13 @@ class RestVaultTest extends TestCase
         $timeline->refresh();
         $owner->refresh();
         $post->refresh();
-        $mediaFile = $post->mediaFiles->shift();
-        $this->assertNotNull($mediaFile, 'No mediaFiles attached to post');
+        $mediafile = $post->mediafiles->shift();
+        $this->assertNotNull($mediafile, 'No mediafiles attached to post');
 
         $response = $this->actingAs($fan)->ajaxJSON('GET', route('posts.show', $post->id));
         $response->assertStatus(200);
 
-        $response = $this->actingAs($fan)->ajaxJSON('GET', route('mediaFiles.show', $mediaFile->id));
+        $response = $this->actingAs($fan)->ajaxJSON('GET', route('mediafiles.show', $mediafile->id));
         $response->assertStatus(200);
     }
 
@@ -682,7 +682,7 @@ class RestVaultTest extends TestCase
      *  @group vault
      *  @group regression
      */
-    public function test_can_select_mediaFile_from_vault_folder_to_attach_to_story_single_op()
+    public function test_can_select_mediafile_from_vault_folder_to_attach_to_story_single_op()
     {
         Storage::fake('s3');
 
@@ -695,31 +695,31 @@ class RestVaultTest extends TestCase
         $file = UploadedFile::fake()->image($filename, 200, 200);
 
         $primaryVault = Vault::primary($owner)->first();
-        $vaultFolder = VaultFolder::isRoot()->where('vault_id', $primaryVault->id)->first(); // root
+        $vaultfolder = Vaultfolder::isRoot()->where('vault_id', $primaryVault->id)->first(); // root
 
         $payload = [
-            'type' => MediaFileTypeEnum::VAULT,
-            'mediaFile' => $file,
-            'resource_type' => 'vaultFolders',
-            'resource_id' => $vaultFolder->id,
+            'mftype' => MediafileTypeEnum::VAULT,
+            'mediafile' => $file,
+            'resource_type' => 'vaultfolders',
+            'resource_id' => $vaultfolder->id,
         ];
-        $response = $this->actingAs($owner)->ajaxJSON('POST', route('mediaFiles.store'), $payload);
+        $response = $this->actingAs($owner)->ajaxJSON('POST', route('mediafiles.store'), $payload);
         $response->assertStatus(201);
         $content = json_decode($response->content());
-        $this->assertNotNull($content->mediaFile);
-        $mediaFile = MediaFile::find($content->mediaFile->id);
-        $this->assertNotNull($mediaFile);
-        $this->assertTrue( $vaultFolder->mediaFiles->contains($mediaFile->id) );
+        $this->assertNotNull($content->mediafile);
+        $mediafile = Mediafile::find($content->mediafile->id);
+        $this->assertNotNull($mediafile);
+        $this->assertTrue( $vaultfolder->mediafiles->contains($mediafile->id) );
 
         // --- Create a free story with image from vault ---
 
         $attrs = [
-            'type' => StoryTypeEnum::PHOTO,
+            'stype' => StoryTypeEnum::PHOTO,
             'content' => $this->faker->realText,
         ];
         $payload = [
             'attrs' => json_encode($attrs),
-            'mediaFile' => $mediaFile->id,
+            'mediafile' => $mediafile->id,
         ];
         $response = $this->actingAs($owner)->ajaxJSON('POST', route('stories.store'), $payload);
         $response->assertStatus(201);
@@ -733,13 +733,13 @@ class RestVaultTest extends TestCase
         $timeline->refresh();
         $owner->refresh();
         $story->refresh();
-        $mediaFile = $story->mediaFiles->shift();
-        $this->assertNotNull($mediaFile, 'No mediaFiles attached to story');
+        $mediafile = $story->mediafiles->shift();
+        $this->assertNotNull($mediafile, 'No mediafiles attached to story');
 
         $response = $this->actingAs($fan)->ajaxJSON('GET', route('stories.show', $story->id));
         $response->assertStatus(200);
 
-        $response = $this->actingAs($fan)->ajaxJSON('GET', route('mediaFiles.show', $mediaFile->id));
+        $response = $this->actingAs($fan)->ajaxJSON('GET', route('mediafiles.show', $mediafile->id));
         $response->assertStatus(200);
     }
 
@@ -748,42 +748,42 @@ class RestVaultTest extends TestCase
      *  @group OFF-regression: this test only makes sense if we pass the timeline_id which the story will be added to
      */
     /*
-    public function test_nonowner_can_not_select_mediaFile_from_vault_folder_to_attach_to_story_single_op()
+    public function test_nonowner_can_not_select_mediafile_from_vault_folder_to_attach_to_story_single_op()
     {
         Storage::fake('s3');
 
         $timeline = Timeline::has('stories', '>=', 1)->has('followers', '>=', 1)->first();
         $storyOwner = $timeline->user;
-        $mediaFileowner = User::where('id', '<>', $storyOwner->id)->first();
+        $mediafileowner = User::where('id', '<>', $storyOwner->id)->first();
 
         // --- Upload image to vault ---
         $filename = $this->faker->slug;
         $file = UploadedFile::fake()->image($filename, 200, 200);
 
-        $primaryVault = Vault::primary($mediaFileowner)->first();
-        $vaultFolder = VaultFolder::isRoot()->where('vault_id', $primaryVault->id)->first(); // root
+        $primaryVault = Vault::primary($mediafileowner)->first();
+        $vaultfolder = Vaultfolder::isRoot()->where('vault_id', $primaryVault->id)->first(); // root
 
         $payload = [
-            'type' => MediaFileTypeEnum::VAULT,
-            'mediaFile' => $file,
-            'resource_type' => 'vaultFolders',
-            'resource_id' => $vaultFolder->id,
+            'mftype' => MediafileTypeEnum::VAULT,
+            'mediafile' => $file,
+            'resource_type' => 'vaultfolders',
+            'resource_id' => $vaultfolder->id,
         ];
-        $response = $this->actingAs($mediaFileowner)->ajaxJSON('POST', route('mediaFiles.store'), $payload);
+        $response = $this->actingAs($mediafileowner)->ajaxJSON('POST', route('mediafiles.store'), $payload);
         $response->assertStatus(201);
         $content = json_decode($response->content());
-        $this->assertNotNull($content->mediaFile);
-        $mediaFile = MediaFile::find($content->mediaFile->id);
-        $this->assertNotNull($mediaFile);
-        $this->assertTrue( $vaultFolder->mediaFiles->contains($mediaFile->id) );
+        $this->assertNotNull($content->mediafile);
+        $mediafile = Mediafile::find($content->mediafile->id);
+        $this->assertNotNull($mediafile);
+        $this->assertTrue( $vaultfolder->mediafiles->contains($mediafile->id) );
 
         // --- Create a free story with image from vault ---
 
         $payload = [
-            'attrs' => json_encode([ 'type' => StoryTypeEnum::PHOTO, 'content' => $this->faker->realText ]),
-            'mediaFile' => $mediaFile->id,
+            'attrs' => json_encode([ 'stype' => StoryTypeEnum::PHOTO, 'content' => $this->faker->realText ]),
+            'mediafile' => $mediafile->id,
         ];
-        $response = $this->actingAs($mediaFileowner)->ajaxJSON('POST', route('stories.store'), $payload);
+        $response = $this->actingAs($mediafileowner)->ajaxJSON('POST', route('stories.store'), $payload);
         $response->assertStatus(403);
         $response = $this->actingAs($storyOwner)->ajaxJSON('POST', route('stories.store'), $payload);
         $response->assertStatus(403);
@@ -802,7 +802,7 @@ class RestVaultTest extends TestCase
 
         $owner = User::first();
         $primaryVault = Vault::primary($owner)->first();
-        $rootFolder = VaultFolder::isRoot()->where('vault_id', $primaryVault->id)->first();
+        $rootFolder = Vaultfolder::isRoot()->where('vault_id', $primaryVault->id)->first();
 
         // make a subfolder
         $payload = [
@@ -810,14 +810,14 @@ class RestVaultTest extends TestCase
             'parent_id' => $rootFolder->id,
             'name' => $this->faker->slug,
         ];
-        $response = $this->actingAs($owner)->ajaxJSON('POST', route('vaultFolders.store'), $payload);
+        $response = $this->actingAs($owner)->ajaxJSON('POST', route('vaultfolders.store'), $payload);
         $response->assertStatus(201);
         $content = json_decode($response->content());
-        $this->assertNotNull($content->vaultFolder);
-        $subFolder = VaultFolder::find($content->vaultFolder->id);
+        $this->assertNotNull($content->vaultfolder);
+        $subFolder = Vaultfolder::find($content->vaultfolder->id);
         $this->assertNotNull($subFolder);
         $rootFolder->refresh();
-        //$rootFolder->load('children');
+        //$rootFolder->load('vfchildren');
 
         $invitees = [];
         $firstName = $this->faker->firstName();
@@ -839,7 +839,7 @@ class RestVaultTest extends TestCase
         $payload = [
             'invitees' => $invitees,
         ];
-        $response = $this->actingAs($owner)->ajaxJSON('POST', route('vaultFolders.invite', $subFolder->id), $payload);
+        $response = $this->actingAs($owner)->ajaxJSON('POST', route('vaultfolders.invite', $subFolder->id), $payload);
         $response->assertStatus(200);
         $content = json_decode($response->content());
         $this->assertNotNull($content->invites);

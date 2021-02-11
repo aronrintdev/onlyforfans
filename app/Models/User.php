@@ -69,7 +69,7 @@ class User extends Authenticatable implements PaymentSendable, ShortUuid, Blocka
 
         static::created(function ($model) {
             $vault = Vault::create([
-                'name' => 'My Home Vault',
+                'vname' => 'My Home Vault',
                 'user_id' => $model->id,
             ]);
         });
@@ -109,20 +109,20 @@ class User extends Authenticatable implements PaymentSendable, ShortUuid, Blocka
     //--------------------------------------------
 
     /**
-     * MediaFiles shared with me (??)
+     * Mediafiles shared with me (??)
      */
-    public function sharedMediaFiles()
+    public function sharedMediafiles()
     {
-        return $this->morphedByMany('App\Models\MediaFile', 'shareable', 'shareables', 'shared_with')
+        return $this->morphedByMany('App\Models\Mediafile', 'shareable', 'shareables', 'sharee_id')
             ->withTimestamps();
     }
 
     /**
-     * VaultFolders shared with me (??)
+     * Vaultfolders shared with me (??)
      */
-    public function sharedVaultFolders()
+    public function sharedVaultfolders()
     {
-        return $this->morphedByMany('App\Models\VaultFolder', 'shareable', 'shareables', 'shared_with')
+        return $this->morphedByMany('App\Models\Vaultfolder', 'shareable', 'shareables', 'sharee_id')
             ->withTimestamps();
     }
     public function ledgerSales()
@@ -145,10 +145,10 @@ class User extends Authenticatable implements PaymentSendable, ShortUuid, Blocka
     /**
      * timelines (users) I follow: premium *and* default subscribe (follow)
      */
-    public function followedTimelines()
+    public function followedtimelines()
     {
-        return $this->morphedByMany('App\Models\Timeline', 'shareable', 'shareables', 'shared_with')
-            ->withPivot('access_level', 'shareable_type', 'shared_with')->withTimestamps();
+        return $this->morphedByMany('App\Models\Timeline', 'shareable', 'shareables', 'sharee_id')
+            ->withPivot('access_level', 'shareable_type', 'sharee_id')->withTimestamps();
     }
 
     public function likedPosts()
@@ -160,9 +160,9 @@ class User extends Authenticatable implements PaymentSendable, ShortUuid, Blocka
     /**
      * posts shared with me (by direct share or purchase on my part)
      */
-    public function sharedPosts()
+    public function sharedposts()
     {
-        return $this->morphedByMany('App\Models\Post', 'shareable', 'shareables', 'shared_with')->withTimestamps();
+        return $this->morphedByMany('App\Models\Post', 'shareable', 'shareables', 'sharee_id')->withTimestamps();
     }
 
     /**
@@ -184,9 +184,9 @@ class User extends Authenticatable implements PaymentSendable, ShortUuid, Blocka
     /**
      * Vault Folders owned by user
      */
-    public function vaultFolders()
+    public function vaultfolders()
     {
-        return $this->hasMany('App\Models\VaultFolder');
+        return $this->hasMany('App\Models\Vaultfolder');
     }
 
     //--------------------------------------------
@@ -196,8 +196,8 @@ class User extends Authenticatable implements PaymentSendable, ShortUuid, Blocka
     // https://stackoverflow.com/questions/30226496/how-to-cast-eloquent-pivot-parameters
     /* %PSG: could not get this to work, just do 'manually' in controller or other calling code
     protected $casts = [
-        'sharedPosts.pivot.custom_attributes' => 'array',
-        'sharedPosts.pivot.meta' => 'array',
+        'sharedposts.pivot.custom_attributes' => 'array',
+        'sharedposts.pivot.meta' => 'array',
     ];
      */
 

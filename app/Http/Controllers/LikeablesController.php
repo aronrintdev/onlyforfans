@@ -33,7 +33,7 @@ class LikeablesController extends AppBaseController
     public function update(Request $request, User $likee)
     {
         $request->validate([
-            'likeable_type' => 'required|string|alpha-dash|in:comments,media_files,posts,stories',
+            'likeable_type' => 'required|string|alpha-dash|in:comments,mediafiles,posts,stories',
             'likeable_id' => 'required|numeric|min:1',
         ]);
 
@@ -58,7 +58,7 @@ class LikeablesController extends AppBaseController
     public function destroy(Request $request, User $likee)
     {
         $request->validate([
-            'likeable_type' => 'required|string|alpha-dash|in:comments,media_files,posts,stories',
+            'likeable_type' => 'required|string|alpha-dash|in:comments,mediafiles,posts,stories',
             'likeable_id' => 'required|numeric|min:1',
         ]);
 

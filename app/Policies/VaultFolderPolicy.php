@@ -3,10 +3,10 @@
 namespace App\Policies;
 
 use App\Models\User;
-use App\Models\VaultFolder;
+use App\Models\Vaultfolder;
 use App\Policies\Traits\OwnablePolicies;
 
-class VaultFolderPolicy extends BasePolicy
+class VaultfolderPolicy extends BasePolicy
 {
     use OwnablePolicies;
 
