@@ -1003,6 +1003,7 @@ class RestVaultTest extends TestCase
         //dd($invite->cattrs);
 
         $response = $this->actingAs($nonowner)->ajaxJSON('GET', route('mediafiles.show', $mediafileR->id));
+        $response->assertStatus(403);
 
     }
 
