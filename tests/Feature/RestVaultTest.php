@@ -929,11 +929,11 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
-     *  @group here
      */
     public function test_select_vaultfolder_to_share_with_registered_user()
     {
         Mail::fake();
+        Storage::fake('s3');
 
         $owner = User::first();
         $primaryVault = Vault::primary($owner)->first();
@@ -992,10 +992,73 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
-     *  @group OFF-here
+     *  @group here
      */
     public function test_select_mediafiles_in_vaultfolder_to_share_with_registered_user()
     {
+        Mail::fake();
+        Storage::fake('s3');
+
+        $owner = User::first();
+        $primaryVault = Vault::primary($owner)->first();
+        $rootFolder = Vaultfolder::isRoot()->where('vault_id', $primaryVault->id)->first();
+
+        $nonowner = User::where('id', '<>', $owner->id)
+            ->whereDoesntHave('sharedvaultfolders', function($q1) use(&$rootFolder) {
+                $q1->where('vaultfolders.id', $rootFolder->id);
+            })->first(); // %TODO: also ensure not a sharee already? or create new user
+        $this->assertFalse( $rootFolder->sharees->contains($nonowner->id) );
+
+        // Upload a few images to the vaultfolder...
+        // (1st)
+        $filename = $this->faker->slug;
+        $file = UploadedFile::fake()->image($filename, 200, 200);
+        $payload = [
+            'mftype' => MediafileTypeEnum::VAULT,
+            'mediafile' => $file,
+            'resource_type' => 'vaultfolders',
+            'resource_id' => $rootFolder->id,
+        ];
+        $response = $this->actingAs($owner)->ajaxJSON('POST', route('mediafiles.store'), $payload);
+        $response->assertStatus(201);
+        $content = json_decode($response->content());
+        $this->assertNotNull($content->mediafile);
+        $mediafileR = $content->mediafile;
+        $rootFolder->refresh();
+        $this->assertTrue( $rootFolder->mediafiles->contains($mediafileR->id) );
+
+        // (2nd) %TODO
+
+        $sharees = [];
+        $sharees[] = [
+            'id' => $nonowner->id,
+        ];
+
+        // share the folder
+        $payload = [
+            'sharees' => $sharees,
+            'shareables' => [
+                [ 'shareable_type' => 'mediafiles', 'shareable_id' => $mediafileR->id, ],
+            ],
+        ];
+        $response = $this->actingAs($owner)->ajaxJSON('POST', route('vaultfolders.share', $rootFolder->id), $payload);
+        $response->assertStatus(200);
+        $content = json_decode($response->content());
+        $this->assertNotNull($content->sharees);
+        $sharees = collect($content->sharees);
+        $this->assertEquals(1, $sharees->count());
+
+        $response = $this->actingAs($nonowner)->ajaxJSON('GET', route('mediafiles.show', $mediafileR->id));
+        $response->assertStatus(200);
+
+        $nonowner2 = User::where('id', '<>', $owner->id)
+            ->whereDoesntHave('sharedvaultfolders', function($q1) use(&$rootFolder) {
+                $q1->where('vaultfolders.id', $rootFolder->id);
+            })->first(); // %TODO: also ensure not a sharee already? or create new user
+        $response = $this->actingAs($nonowner2)->ajaxJSON('GET', route('mediafiles.show', $mediafileR->id));
+        $response->assertStatus(403);
+
+
     }
 
     // ------------------------------
