@@ -25,35 +25,31 @@ class MediafilePolicy extends BasePolicy
 
     protected function view(User $user, Mediafile $mediafile)
     {
-//dd('here.Z');
         switch ($mediafile->resource_type) {
 
         case 'comments':
         case 'posts':
         case 'stories':
-            //dd('here.A');
             $alias = $mediafile->resource_type;
             $model = Relation::getMorphedModel($alias);
             $resource = (new $model)->where('id', $mediafile->resource_id)->first();
             return $user->can('view', $resource);
 
         case 'vaultfolders':
-            //dd('here.0');
             // if vaultfolder is shared => allowed
             // else, if mediafile is shared => allowed
             // else, not allowed
-            //dd('view', $mediafile->resource_type);
             $vaultfolder = Vaultfolder::find($mediafile->resource_id);
-            $isVaultfolderShared = $vaultfolder->sharees->contains($user->id));
+            if ( !$vaultfolder ) {
+                return false;
+            }
+            $isVaultfolderShared = $vaultfolder->sharees->contains($user->id);
             if ( $isVaultfolderShared ) {
-                //dd('here.1');
                 return true;
             }
 
-            $mediafile = Mediafile::find($mediafile->resource_id);
-            $isMediafileShared = $mediafile->sharees->contains($user->id));
+            $isMediafileShared = $mediafile->sharees->contains($user->id);
             if ( $isMediafileShared ) {
-                //dd('here.2');
                 return true;
             }
             return false;
