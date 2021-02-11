@@ -83,6 +83,7 @@ class MediafilesController extends AppBaseController
     public function show(Request $request, Mediafile $mediafile)
     {
         $this->authorize('view', $mediafile);
+        //dd('controller.0');
         /*
         if ( $request->user()->cannot('view', $mediafile) ) {
             abort(403);
