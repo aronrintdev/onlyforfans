@@ -69,7 +69,8 @@ class RestVaultTest extends TestCase
         $primaryVault = Vault::primary($creator)->first();
 
         $nonfan = User::whereDoesntHave('sharedvaultfolders', function($q1) use(&$primaryVault) {
-            $q1->where('vault_id', $primaryVault->id);
+            $q1->where('vault_id', $primaryVault->id); // %FIXME: should this be on vaultfolder?
+            //$q1->where('vaultfolders.id', $rootFolder->id);
         })->where('id', '<>', $creator->id)->first();
 
         $payload = [
@@ -940,7 +941,31 @@ class RestVaultTest extends TestCase
         $primaryVault = Vault::primary($owner)->first();
         $rootFolder = Vaultfolder::isRoot()->where('vault_id', $primaryVault->id)->first();
 
-        $nonowner = User::where('id', '<>', $owner->id)->first(); // %TODO: also ensure not a sharee already? or create new user
+        $nonowner = User::where('id', '<>', $owner->id)
+            ->whereDoesntHave('sharedvaultfolders', function($q1) use(&$rootFolder) {
+                $q1->where('vaultfolders.id', $rootFolder->id);
+            })->first(); // %TODO: also ensure not a sharee already? or create new user
+        $this->assertFalse( $rootFolder->sharees->contains($nonowner->id) );
+
+        // Upload a few images to the vaultfolder...
+        // (1st)
+        $filename = $this->faker->slug;
+        $file = UploadedFile::fake()->image($filename, 200, 200);
+        $payload = [
+            'mftype' => MediafileTypeEnum::VAULT,
+            'mediafile' => $file,
+            'resource_type' => 'vaultfolders',
+            'resource_id' => $rootFolder->id,
+        ];
+        $response = $this->actingAs($owner)->ajaxJSON('POST', route('mediafiles.store'), $payload);
+        $response->assertStatus(201);
+        $content = json_decode($response->content());
+        $this->assertNotNull($content->mediafile);
+        $mediafileR = $content->mediafile;
+        $rootFolder->refresh();
+        $this->assertTrue( $rootFolder->mediafiles->contains($mediafileR->id) );
+
+        // (2nd) %TODO
 
         $invitees = [];
         $invitees[] = [
@@ -976,6 +1001,8 @@ class RestVaultTest extends TestCase
         $this->assertEquals('vaultfolders', $invite->cattrs['shareables'][0]['shareable_type']);
         $this->assertEquals($rootFolder->id, $invite->cattrs['shareables'][0]['shareable_id']);
         //dd($invite->cattrs);
+
+        $response = $this->actingAs($nonowner)->ajaxJSON('GET', route('mediafiles.show', $mediafileR->id));
 
     }
 
