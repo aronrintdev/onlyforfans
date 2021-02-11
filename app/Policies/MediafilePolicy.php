@@ -8,7 +8,7 @@ use App\Vaultfolder;
 use App\Policies\Traits\OwnablePolicies;
 
 // %FIXME: correct name is Mediafile (only M is upper)
-class MediaFilePolicy extends BasePolicy
+class MediafilePolicy extends BasePolicy
 {
     use OwnablePolicies;
 
