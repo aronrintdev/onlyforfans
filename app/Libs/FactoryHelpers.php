@@ -57,7 +57,7 @@ class FactoryHelpers {
     }
 
     // Inserts a [mediaFiles] record
-    public static function createImage(string $type, ?int $resourceID=null) : ?Mediafile
+    public static function createImage(string $type, ?int $resourceID=null) : ?MediaFile
     {
         $faker = \Faker\Factory::create();
 
@@ -107,7 +107,7 @@ class FactoryHelpers {
                 $attrs['resource_type'] = 'stories';
                 break;
             default:
-                throw new Exception('mftype of ' . $type . ' not supported');
+                throw new Exception('media file type of ' . $type . ' not supported');
         }
         $contents = file_get_contents($json->file);
         //dd($json, $info);

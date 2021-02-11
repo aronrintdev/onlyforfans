@@ -2,8 +2,8 @@
 
 namespace Database\Factories;
 
-use App\User;
-use App\Timeline;
+use App\Models\User;
+use App\Models\Timeline;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class UserFactory extends Factory

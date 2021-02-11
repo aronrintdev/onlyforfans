@@ -13,20 +13,20 @@
               <b-img :src="dtoUser.avatar.filepath" rounded="circle" width="64" height="64" alt="avatar"></b-img>
             </b-media-aside>
             <b-media-body>
-              <h5 class="mt-3">{{ dtoUser.fullname }}</h5>
+              <h5 class="mt-3">{{ dtoUser.fullName }}</h5>
             </b-media-body>
           </b-media>
         </article>
 
         <hr />
 
-        <div v-if="step===steps.SELECT_STYPE" class="">
+        <div v-if="step===steps.SELECT_TYPE" class="">
           <b-list-group>
             <b-list-group-item v-for="s in stories" :key="s.id" v-bind:style="{ backgroundColor: parseBackgroundColor(s) }">
-              <article v-if="s.stype==='text'">
+              <article v-if="s.type==='text'">
                 {{ s.content }}
               </article>
-              <article v-if="s.stype==='photo'" v-bind:class="{ 'tag-image': s.stype==='photo' }">
+              <article v-if="s.type==='photo'" v-bind:class="{ 'tag-image': s.type==='photo' }">
                 <b-img fluid :src="s.mf_url" alt="story pic"></b-img>
               </article>
             </b-list-group-item>
@@ -34,24 +34,24 @@
         </div>
 
         <div v-if="step===steps.EDIT || step===steps.PREVIEW" class="step-edit">
-          <text-story-form v-if="stype==='text'" 
+          <text-story-form v-if="type==='text'" 
                            v-bind:attrs="storyAttrs"
                            v-on:set-color="setColor($event)"
-                           v-on:do-cancel="step=steps.SELECT_STYPE"
+                           v-on:do-cancel="step=steps.SELECT_TYPE"
                            ></text-story-form>
-          <photo-story-form v-if="stype==='photo'" 
+          <photo-story-form v-if="type==='photo'" 
                             v-bind:attrs="storyAttrs"
-                            v-on:do-cancel="step=steps.SELECT_STYPE"
+                            v-on:do-cancel="step=steps.SELECT_TYPE"
                             ></photo-story-form>
         </div>
 
       </aside>
 
       <main class="col-md-9 d-flex align-items-center">
-        <div v-if="step===steps.SELECT_STYPE" class="step-select_stype mx-auto">
+        <div v-if="step===steps.SELECT_TYPE" class="step-select_type mx-auto">
           <section class="row">
             <article class="col-md-6">
-              <input ref="fileUpload" type="file" @change="selectMediafile" hidden>
+              <input ref="fileUpload" type="file" @change="selectMediaFile" hidden>
               <div @click="createPhotoStory()" class="clickme_to-create tag-photo tag-bg-cyan text-center d-flex">
                 <div class="align-self-center">
                   <b-icon icon="camera" font-scale="4"></b-icon>
@@ -72,7 +72,7 @@
 
         <div v-if="step===steps.EDIT" class="step-edit w-100">
           <text-story-preview 
-                                      v-if="stype==='text'" 
+                                      v-if="type==='text'" 
                                       v-bind:attrs="storyAttrs" 
                                       ></text-story-preview>
         </div>
@@ -119,12 +119,12 @@ export default {
       contents: '',
       color: '#fff',
     },
-    mediafile: null, // the photo
+    mediaFile: null, // the photo
 
-    stype: 'text',
+    type: 'text',
 
     steps : {
-      SELECT_STYPE: 'select-stype',
+      SELECT_TYPE: 'select-type',
       EDIT: 'edit',
       PREVIEW: 'preview',
     },
@@ -136,7 +136,7 @@ export default {
   }),
 
   mounted() {
-    this.step = this.steps.SELECT_STYPE;
+    this.step = this.steps.SELECT_TYPE;
   },
 
   created() {
@@ -151,17 +151,17 @@ export default {
       //const url = `/${this.dtoUser.username}/stories`;
       let payload = new FormData();
       const json = JSON.stringify({
-        stype: this.stype,
+        type: this.type,
         bgcolor: this.storyAttrs.color || null,
         content: this.storyAttrs.contents,
       });
       payload.append('attrs', json);
 
-      switch ( this.stype ) {
+      switch ( this.type ) {
         case 'text':
           break;
         case 'photo':
-          payload.append('mediafile', this.mediafile);
+          payload.append('mediaFile', this.mediaFile);
           break;
       } 
 
@@ -170,7 +170,7 @@ export default {
           'Content-Type': 'application/json',
         }
       });
-      this.step = this.steps.SELECT_STYPE;
+      this.step = this.steps.SELECT_TYPE;
       // %TODO: handle error case / catch
     },
 
@@ -180,31 +180,31 @@ export default {
     },
 
     createTextStory(e) {
-      this.stype = 'text';
+      this.type = 'text';
       this.step = this.steps.EDIT;
     },
 
     createPhotoStory(e) {
-      this.stype = 'photo';
+      this.type = 'photo';
       //this.step = this.steps.EDIT;
       //document.getElementById("fileUpload").click()
       this.$refs.fileUpload.click()
     },
 
     // https://dev.to/diogoko/file-upload-using-laravel-and-vue-js-the-right-way-1775
-    selectMediafile(event) {
+    selectMediaFile(event) {
       // `files` is always an array because the file input may be in multiple mode
-      const mediafile = event.target.files[0];
-      this.mediafile = mediafile;
-      this.imgPreviewUrl = URL.createObjectURL(mediafile);
+      const mediaFile = event.target.files[0];
+      this.mediaFile = mediaFile;
+      this.imgPreviewUrl = URL.createObjectURL(mediaFile);
       this.step = this.steps.PREVIEW;
     },
 
     parseBackgroundColor(story) {
-      if ( story.stype==='photo' ) {
+      if ( story.type==='photo' ) {
         return '#fff';
       } else {
-        return story.cattrs?.['background-color'] || 'yellow';
+        return story.customAttributes?.['background-color'] || 'yellow';
       }
     },
 

@@ -2,7 +2,7 @@
   <div>
     <div>
       <h2>Uploader</h2>
-      <input type="file" @change="selectMediafile">
+      <input type="file" @change="selectMediaFile">
     </div>
     <div>
       <button @click="shareStory()">Share Image</button>
@@ -20,16 +20,16 @@ export default {
   props: ['username'],
 
   data: () => ({
-    mediafile: null,
+    mediaFile: null,
   }),
 
   methods: {
     // https://dev.to/diogoko/file-upload-using-laravel-and-vue-js-the-right-way-1775
-    selectMediafile(event) {
+    selectMediaFile(event) {
       // `files` is always an array because the file input may be in multiple mode
-      const mediafile = event.target.files[0];
-      this.mediafile = mediafile; // %FIXME DEBUG
-      eventBus.$emit('select-mediafile', mediafile );
+      const mediaFile = event.target.files[0];
+      this.mediaFile = mediaFile; // %FIXME DEBUG
+      eventBus.$emit('select-mediaFile', mediaFile );
     },
 
     async shareStory(event) {

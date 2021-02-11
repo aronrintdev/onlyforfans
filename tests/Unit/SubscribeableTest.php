@@ -1,17 +1,19 @@
 <?php
 namespace Tests\Unit;
 
+use DB;
 use Tests\TestCase;
-use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Models\Post;
+use App\Models\User;
+use App\Libs\UserMgr;
+use App\Models\Vault;
+use Ramsey\Uuid\Uuid;
+use App\Models\MediaFile;
+use App\Enums\PostTypeEnum;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
-use DB;
-use Ramsey\Uuid\Uuid;
-use App\Post;
-//use App\Vault;
-use App\Libs\UserMgr;
-use App\Enums\PostTypeEnum;
+use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class SubscribeableTest extends TestCase
 {
@@ -43,15 +45,15 @@ class SubscribeableTest extends TestCase
         $this->assertEquals(1, count($shareables) );
         $this->assertSame('default', $shareables[0]->access_level );
 
-        $this->assertNotNull($follower->followedtimelines);
-        $this->assertGreaterThan(0, $follower->followedtimelines->count());
-        $this->assertSame($creator->timeline->id, $follower->followedtimelines[0]->id);
+        $this->assertNotNull($follower->followedTimelines);
+        $this->assertGreaterThan(0, $follower->followedTimelines->count());
+        $this->assertSame($creator->timeline->id, $follower->followedTimelines[0]->id);
 
         $this->assertNotNull($creator->timeline->followers);
         $this->assertGreaterThan(0, $creator->timeline->followers->count());
         $this->assertSame($follower->id, $creator->timeline->followers[0]->id);
 
-        //$this->assertInstanceOf(\App\User::class, $mediafile->sharees[0]);
+        //$this->assertInstanceOf(User::class, $mediaFile->sharees[0]);
     }
 
 
@@ -59,10 +61,10 @@ class SubscribeableTest extends TestCase
         parent::setUp();
         $this->_deleteList = collect();
 
-        $this->follower = factory(\App\User::class)->create();
+        $this->follower = factory(User::class)->create();
         $this->_deleteList->push($this->follower);
 
-        $this->creator = factory(\App\User::class)->create();
+        $this->creator = factory(User::class)->create();
         $this->_deleteList->push($this->creator);
 
         // Create some posts for the 'seller user'
@@ -91,15 +93,15 @@ class SubscribeableTest extends TestCase
             while ( $this->_deleteList->count() > 0 ) {
                 $obj = $this->_deleteList->pop();
                 if ( $obj instanceof Vault ) {
-                     $obj->vaultfolders()->delete();
+                     $obj->vaultFolders()->delete();
                 }
-                if ( $obj instanceof Mediafile ) {
+                if ( $obj instanceof MediaFile ) {
                      $obj->sharees()->detach();
                 }
-                if ( $obj instanceof \App\User ) {
-                     $obj->followedtimelines()->detach();
-                     $obj->ledgersales->each( function($o) { $o->forceDelete(); } );
-                     $obj->ledgerpurchases->each( function($o) { $o->forceDelete(); } );
+                if ( $obj instanceof User ) {
+                     $obj->followedTimelines()->detach();
+                     $obj->ledgerSales->each( function($o) { $o->forceDelete(); } );
+                     $obj->ledgerPurchases->each( function($o) { $o->forceDelete(); } );
                      $obj->posts->each( function($o) { $o->forceDelete(); } );
                      $obj->timeline->followers()->detach();
                      $obj->timeline->forceDelete();

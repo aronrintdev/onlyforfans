@@ -5,8 +5,8 @@ use Symfony\Component\Console\Output\ConsoleOutput;
 use Illuminate\Support\Facades\Config;
 use Carbon\Carbon;
 
-use App\User;
-use App\Post;
+use App\Models\User;
+use App\Models\Post;
 use App\Enums\MediaFileTypeEnum;
 use App\Enums\PostTypeEnum;
 use App\Libs\FactoryHelpers;

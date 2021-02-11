@@ -7,10 +7,10 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
-use App\MediaFile;
-use App\Setting;
-use App\Story;
-use App\Timeline;
+use App\Models\MediaFile;
+use App\Models\Setting;
+use App\Models\Story;
+use App\Models\Timeline;
 use App\Enums\MediaFileTypeEnum;
 //use App\Enums\StoryTypeEnum; // generalize?
 
@@ -68,13 +68,13 @@ class StoriesController extends AppBaseController
 
         $vrules = [
             'attrs' => 'required',
-            'attrs.stype' => 'required|in:text,photo',
+            'attrs.type' => 'required|in:text,photo',
         ];
         if ( $request->has('mediaFile') ) {
             if ( $request->hasFile('mediaFile') ) {
-                $vrules['mediaFile'] = 'required_if:attrs.stype,photo|file';
+                $vrules['mediaFile'] = 'required_if:attrs.type,photo|file';
             } else {
-                $vrules['mediaFile'] = 'required_if:attrs.stype,photo|integer|exists:mediaFiles,id'; // must be fk to [mediaFiles]
+                $vrules['mediaFile'] = 'required_if:attrs.type,photo|integer|exists:mediaFiles,id'; // must be fk to [mediaFiles]
             }
         }
         
@@ -98,7 +98,7 @@ class StoriesController extends AppBaseController
                     'type' => $request->attrs['type'],
                 ]);
 
-                if ( $request->attrs['stype'] === 'photo' ) {
+                if ( $request->attrs['type'] === 'photo' ) {
                     if ( $request->hasFile('mediaFile') ) {
                         $file = $request->file('mediaFile');
                         $subFolder = 'stories';

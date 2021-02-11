@@ -2,11 +2,11 @@
 namespace Database\Seeders;
 
 use DB;
-use App\Post;
-use App\User;
+use App\Models\Post;
+use App\Models\User;
 use Exception;
-use App\Timeline;
-use App\Fanledger;
+use App\Models\Timeline;
+use App\Models\FanLedger;
 use Carbon\Carbon;
 use App\Libs\UserMgr;
 use App\Enums\PostTypeEnum;
@@ -40,13 +40,13 @@ class ShareablesTableSeeder extends Seeder
 
             if ( $max > 0 ) {
                 $purchaseablePosts->random($max)->each( function($p) use(&$f) {
-                    $cattrs = [ 'notes' => 'ShareablesTableSeeder.purchase_some_posts' ];
+                    $customAttributes = [ 'notes' => 'ShareablesTableSeeder.purchase_some_posts' ];
                     // %FIXME: this should also update shareables, and be encapsualted in a method in model or class-lib
                     $p->receivePayment(
                         PaymentTypeEnum::PURCHASE, // PaymentTypeEnum
                         $f, // User $sender | follower | purchaser
                         $p->price*100, // int $amountInCents
-                        $cattrs,
+                        $customAttributes,
                     );
                 });
             }
@@ -65,7 +65,7 @@ class ShareablesTableSeeder extends Seeder
 
             if ( $max > 0 ) {
                 $timelines->random($max)->each( function($t) use(&$f) {
-                    $cattrs = [ 'notes' => 'ShareablesTableSeeder.follow_some_free_timelines' ];
+                    $customAttributes = [ 'notes' => 'ShareablesTableSeeder.follow_some_free_timelines' ];
                 // %FIXME: should be encapsualted in a method in model or class-lib
                     DB::table('shareables')->insert([
                         'sharee_id' => $f->id,
@@ -73,7 +73,7 @@ class ShareablesTableSeeder extends Seeder
                         'shareable_id' => $t->id,
                         'is_approved' => 1,
                         'access_level' => 'default',
-                        'cattrs' => json_encode($cattrs),
+                        'custom_attributes' => json_encode($customAttributes),
                     ]);
                 });
             }
@@ -96,14 +96,14 @@ class ShareablesTableSeeder extends Seeder
             //$this->command->info("  - Following $max premium timelines for user ".$f->name);
             $timelines->random($max)->each( function($t) use(&$f) {
                 // %FIXME: should be encapsualted in a method in model or class-lib
-                $cattrs = [ 'notes' => 'ShareablesTableSeeder.follow_some_premium_timelines' ];
+                $customAttributes = [ 'notes' => 'ShareablesTableSeeder.follow_some_premium_timelines' ];
                 DB::table('shareables')->insert([
                     'sharee_id' => $f->id,
                     'shareable_type' => 'timelines',
                     'shareable_id' => $t->id,
                     'is_approved' => 1,
                     'access_level' => 'default',
-                    'cattrs' => json_encode($cattrs),
+                    'custom_attributes' => json_encode($customAttributes),
                 ]);
             });
 
@@ -113,16 +113,16 @@ class ShareablesTableSeeder extends Seeder
             //$this->command->info("  - Subscribing to $max premium timelines for user ".$f->name);
             $timelines->random($max)->each( function($t) use(&$f) {
                 // %FIXME: should be encapsualted in a method in model or class-lib
-                $cattrs = [ 'notes' => 'ShareablesTableSeeder.subscribe_to_some_premium_timelines' ];
+                $customAttributes = [ 'notes' => 'ShareablesTableSeeder.subscribe_to_some_premium_timelines' ];
                 DB::table('shareables')->insert([
                     'sharee_id' => $f->id, // fan
                     'shareable_type' => 'timelines',
                     'shareable_id' => $t->id,
                     'is_approved' => 1,
                     'access_level' => 'premium',
-                    'cattrs' => json_encode($cattrs),
+                    'custom_attributes' => json_encode($customAttributes),
                 ]);
-                Fanledger::create([
+                FanLedger::create([
                     'fltype' => PaymentTypeEnum::SUBSCRIPTION,
                     'purchaser_id' => $f->id, // fan
                     'seller_id' => $t->user->id,
@@ -130,7 +130,7 @@ class ShareablesTableSeeder extends Seeder
                     'purchaseable_id' => $t->id,
                     'qty' => 1,
                     'base_unit_cost_in_cents' => $t->user->price*100, // %FIXME: price should be on timeline not user
-                    'cattrs' => $cattrs,
+                    'custom_attributes' => $customAttributes,
                 ]);
             });
 

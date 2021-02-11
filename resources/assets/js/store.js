@@ -8,12 +8,12 @@ export default new Vuex.Store({
 
   state: {
     vault: {},
-    vaultfolder: {},
+    vaultFolder: {},
     breadcrumb: [],
-    shares: [], // shares for a vaultfolder, used to mark what resources session user *has* shared out
+    shares: [], // shares for a vaultFolder, used to mark what resources session user *has* shared out
     shareables: [], // resources that have been shared with session user
     saves: [], // resources that session user has saved
-    feeditems: [],
+    feedItems: [],
     stories: [],
     timeline: null,
     session_user: null,
@@ -26,7 +26,7 @@ export default new Vuex.Store({
       state.vault = payload.hasOwnProperty('vault') ? payload.vault : [];
     },
     UPDATE_VAULTFOLDER (state, payload) {
-      state.vaultfolder = payload.hasOwnProperty('vaultfolder') ? payload.vaultfolder : [];
+      state.vaultFolder = payload.hasOwnProperty('vaultFolder') ? payload.vaultFolder : [];
     },
     UPDATE_BREADCRUMB (state, payload) {
       state.breadcrumb = payload.hasOwnProperty('breadcrumb') ? payload.breadcrumb : [];
@@ -41,7 +41,7 @@ export default new Vuex.Store({
       state.saves = payload.hasOwnProperty('saves') ? payload.saves : [];
     },
     UPDATE_FEEDITEMS (state, payload) {
-      state.feeditems = payload.hasOwnProperty('feeditems') ? payload.feeditems : [];
+      state.feedItems = payload.hasOwnProperty('feedItems') ? payload.feedItems : [];
     },
     UPDATE_STORIES (state, payload) {
       state.stories = payload.hasOwnProperty('stories') ? payload.stories : [];
@@ -71,7 +71,7 @@ export default new Vuex.Store({
     },
     
     getVaultfolder({ commit }, pkid) {
-      const url = `/vaultfolders/${pkid}`;
+      const url = `/vault-folders/${pkid}`;
       axios.get(url).then( (response) => {
         commit('UPDATE_VAULTFOLDER', response.data);
         commit('UPDATE_BREADCRUMB', response.data);
@@ -96,9 +96,9 @@ export default new Vuex.Store({
       });
     },
 
-    getFeeditems( { commit }, { timelineId, page, limit } ) {
+    getFeedItems( { commit }, { timelineId, page, limit } ) {
       console.log(`Loading page ${page}`);
-      const url = `/timelines/${timelineId}/feeditems?page=${page}&take=${limit}`;
+      const url = `/timelines/${timelineId}/feedItems?page=${page}&take=${limit}`;
       axios.get(url).then( (response) => {
         commit('UPDATE_FEEDITEMS', response.data);
         //commit('UPDATE_TIMELINE', response.data);
@@ -139,18 +139,18 @@ export default new Vuex.Store({
   getters: {
     is_loading: state => state.is_loading, // indicates if Vuex has loaded data or not
     vault: state => state.vault,
-    vaultfolder: state => state.vaultfolder,
+    vaultFolder: state => state.vaultFolder,
     breadcrumb: state => state.breadcrumb,
     shares: state => state.shares,
     shareables: state => state.shareables,
     saves: state => state.saves,
-    feeditems: state => state.feeditems,
+    feedItems: state => state.feedItems,
     stories: state => state.stories,
     timeline: state => state.timeline,
     unshifted_timeline_post: state => state.unshifted_timeline_post,
     session_user: state => state.session_user,
     //children: state => state.vault.children, // Flat list
-    //mediafiles: state => state.vault.mediafiles, // Flat list
+    //mediaFiles: state => state.vault.mediaFiles, // Flat list
   },
 });
 

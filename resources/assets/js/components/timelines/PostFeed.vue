@@ -3,11 +3,11 @@
 
     <section class="row">
       <div>
-        <article v-for="(fi, idx) in rendereditems" :key="fi.id" class="col-sm-12 mb-3">
-          <!-- for now we assume posts; eventually need to convert to a DTO (ie more generic 'feeditem') : GraphQL ? -->
-          <ShowPost 
-              :post=fi 
-              :session_user=session_user 
+        <article v-for="(fi, idx) in renderedItems" :key="fi.id" class="col-sm-12 mb-3">
+          <!-- for now we assume posts; eventually need to convert to a DTO (ie more generic 'feedItem') : GraphQL ? -->
+          <ShowPost
+              :post=fi
+              :session_user=session_user
               v-on:delete-post="deletePost"/>
         </article>
       </div>
@@ -29,7 +29,7 @@ export default {
   },
 
   computed: {
-    ...Vuex.mapState(['feeditems']),
+    ...Vuex.mapState(['feedItems']),
     ...Vuex.mapState(['unshifted_timeline_post']),
     ...Vuex.mapState(['is_loading']),
 
@@ -41,22 +41,22 @@ export default {
     },
 
     currentPage() {
-      return this.feeditems.current_page;
+      return this.feedItems.current_page;
     },
     nextPage() {
-      return this.feeditems.current_page + 1;
+      return this.feedItems.current_page + 1;
     },
     lastPage() {
-      return this.feeditems.last_page;
+      return this.feedItems.last_page;
     },
     isLastPage() {
-      return this.feeditems.current_page === this.feeditems.last_page;
+      return this.feedItems.current_page === this.feedItems.last_page;
     },
   },
 
   data: () => ({
-    rendereditems: [],
-    renderedpages: [], // track so we don't re-load same page (set of posts) more than 1x
+    renderedItems: [],
+    renderedPages: [], // track so we don't re-load same page (set of posts) more than 1x
     limit: 5,
   }),
 
@@ -68,7 +68,7 @@ export default {
   },
 
   created() {
-    this.$store.dispatch('getFeeditems', { timelineId: this.timelineId, page: 1, limit: this.limit });
+    this.$store.dispatch('getFeedItems', { timelineId: this.timelineId, page: 1, limit: this.limit });
   },
 
   methods: {
@@ -83,16 +83,16 @@ export default {
     async deletePost(postId) {
       const url = `/posts/${postId}`;
       const response = await axios.delete(url);
-      this.renderedpages = [];
-      this.rendereditems = [];
-      this.$store.dispatch('getFeeditems', { timelineId: this.timelineId, page: 1, limit: this.limit });
+      this.renderedPages = [];
+      this.renderedItems = [];
+      this.$store.dispatch('getFeedItems', { timelineId: this.timelineId, page: 1, limit: this.limit });
     },
 
     // see: https://peachscript.github.io/vue-infinite-loading/guide/#installation
     loadMore() {
       if ( !this.is_loading && (this.nextPage <= this.lastPage) ) {
         console.log('loadMore', { current: this.currentPage, last: this.lastPage, next: this.nextPage });
-        this.$store.dispatch('getFeeditems', { timelineId: this.timelineId, page: this.nextPage, limit: this.limit });
+        this.$store.dispatch('getFeedItems', { timelineId: this.timelineId, page: this.nextPage, limit: this.limit });
       }
     },
 
@@ -101,14 +101,14 @@ export default {
   watch: {
     unshifted_timeline_post (newVal, oldVal) {
       console.log('PostFeed - watch:unshifted_timeline_post', { newVal, oldVal });
-      this.rendereditems.pop(); // pop the 'oldest' to keep pagination offset correct
-      this.rendereditems.unshift(newVal);
+      this.renderedItems.pop(); // pop the 'oldest' to keep pagination offset correct
+      this.renderedItems.unshift(newVal);
     },
 
-    feeditems (newVal, oldVal) {
-      if ( !this.renderedpages.includes(newVal.current_page) ) {
-        this.renderedpages.push(newVal.current_page);
-        this.rendereditems = this.rendereditems.concat(newVal.data);
+    feedItems (newVal, oldVal) {
+      if ( !this.renderedPages.includes(newVal.current_page) ) {
+        this.renderedPages.push(newVal.current_page);
+        this.renderedItems = this.renderedItems.concat(newVal.data);
       }
     },
   },

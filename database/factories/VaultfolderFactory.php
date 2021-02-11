@@ -22,7 +22,7 @@ class VaultfolderFactory extends Factory
     public function definition()
     {
         return [
-            'vfname' => $this->faker->bs,
+            'name' => $this->faker->bs,
         ];
     }
 }

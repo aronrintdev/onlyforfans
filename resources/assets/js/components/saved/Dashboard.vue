@@ -48,11 +48,11 @@
             <b-tab active title="Shared">
 
               <ul>
-                <li v-for="(vf) in this.shareables.vaultfolders" :key="vf.guid">{{ vf.name }}</li>
+                <li v-for="(vf) in this.shareables.vaultFolders" :key="vf.guid">{{ vf.name }}</li>
               </ul>
 
               <ul class="list-unstyled mt-3">
-                <li v-for="(mf) in this.shareables.mediafiles" :key="mf.guid">
+                <li v-for="(mf) in this.shareables.mediaFiles" :key="mf.guid">
                   <b-media class="mb-1">
                     <template #aside>
                       <b-img class="tag-avatar" rounded="circle" :src="mf.owner.avatar" width="64" height="64" alt="avatar"></b-img>
@@ -95,7 +95,7 @@ export default {
       required: true,
       type: Number,
     },
-    vaultfolder_pkid: { // init value
+    vaultFolder_pkid: { // init value
       required: true,
       type: Number,
     },

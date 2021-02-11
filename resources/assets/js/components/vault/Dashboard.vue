@@ -17,11 +17,11 @@
           <b-list-group-item v-for="(vf, index) in children" :key="vf.guid" 
                              @click="!isShareMode ? doNav($event, vf.id) : null"
                              role="button" 
-                             v-bind:class="{ 'tag-shared': isShareMode && isSelectedToShare({shareable_type: 'vaultfolders', shareable_id: vf.id}) }"
+                             v-bind:class="{ 'tag-shared': isShareMode && isSelectedToShare({shareable_type: 'vaultFolders', shareable_id: vf.id}) }"
                              >
-                             {{ vf.vfname }} 
-                             <span v-if="isShared('vaultfolders', vf.id)"><b-icon icon="share"></b-icon></span>
-                             <span v-if="isShareMode"><button @click="toggleSelectedToShare($event, 'vaultfolders', vf.id)" type="button" class="btn btn-link ml-3">Share</button></span>
+                             {{ vf.name }} 
+                             <span v-if="isShared('vaultFolders', vf.id)"><b-icon icon="share"></b-icon></span>
+                             <span v-if="isShareMode"><button @click="toggleSelectedToShare($event, 'vaultFolders', vf.id)" type="button" class="btn btn-link ml-3">Share</button></span>
           </b-list-group-item>
         </b-list-group>
 
@@ -36,7 +36,7 @@
           <b-form-group>
             <b-form-input
               id="folder-name"
-              v-model="createForm.vfname"
+              v-model="createForm.name"
               type="text"
               placeholder="Enter new folder name"
               required
@@ -113,15 +113,15 @@
         <section class="row mt-5">
           <div class="col-sm-12">
             <b-list-group>
-              <b-list-group-item v-for="(mf) in mediafiles" :key="mf.guid" 
+              <b-list-group-item v-for="(mf) in mediaFiles" :key="mf.guid" 
                                  @click="false ? getLink($event, mf.id) : null"
                                  role="button" 
-                                 v-bind:class="{ 'tag-shared': isShareMode && isSelectedToShare({shareable_type: 'mediafiles', shareable_id: mf.id}) }"
+                                 v-bind:class="{ 'tag-shared': isShareMode && isSelectedToShare({shareable_type: 'mediaFiles', shareable_id: mf.id}) }"
                                  >
                                  <img class="OFF-img-fluid" height="64" :src="mf.filepath" />
                                  <span>{{ mf.orig_filename }}</span>
-                                 <span v-if="isShared('mediafiles', mf.id)"><b-icon icon="share"></b-icon></span>
-                                 <span v-if="isShareMode"><button @click="toggleSelectedToShare($event, 'mediafiles', mf.id)" type="button" class="btn btn-link ml-3">Share</button></span>
+                                 <span v-if="isShared('mediaFiles', mf.id)"><b-icon icon="share"></b-icon></span>
+                                 <span v-if="isShareMode"><button @click="toggleSelectedToShare($event, 'mediaFiles', mf.id)" type="button" class="btn btn-link ml-3">Share</button></span>
               </b-list-group-item>
             </b-list-group>
           </div>
@@ -148,7 +148,7 @@ export default {
       required: true,
       type: Number,
     },
-    vaultfolder_pkid: { // init value
+    vaultFolder_pkid: { // init value
       required: true,
       type: Number,
     },
@@ -156,18 +156,18 @@ export default {
 
   computed: {
     ...Vuex.mapState(['vault']),
-    ...Vuex.mapState(['vaultfolder']),
+    ...Vuex.mapState(['vaultFolder']),
     ...Vuex.mapState(['breadcrumb']),
     ...Vuex.mapState(['shares']),
 
-    mediafiles() {
-      return this.vaultfolder.mediafiles;
+    mediaFiles() {
+      return this.vaultFolder.mediaFiles;
     },
     parent() {
-      return this.vaultfolder.vfparent;
+      return this.vaultFolder.parent;
     },
     children() {
-      return this.vaultfolder.vfchildren;
+      return this.vaultFolder.children;
     },
     breadcrumbNav() {
       const result = [];
@@ -175,7 +175,7 @@ export default {
         const isActive = b.pkid === this.currentFolderPKID;
         result.push({
           pkid: b.pkid,
-          text: b.vfname,
+          text: b.name,
           active: isActive,
         });
       }
@@ -198,7 +198,7 @@ export default {
     isShareMode: false,
 
     createForm: {
-      vfname: '',
+      name: '',
       //vault_id: this.vault_pkid,
       //parent_id: this.currentFolderPKID,
     },
@@ -218,8 +218,8 @@ export default {
     },
 
     dropzoneOptions: {
-      url: '/mediafiles',
-      paramName: 'mediafile',
+      url: '/media-files',
+      paramName: 'mediaFile',
       thumbnailHeight: 128,
       maxFilesize: 3.9,
       headers: { 
@@ -236,9 +236,9 @@ export default {
   },
 
   created() {
-    this.currentFolderPKID = this.vaultfolder_pkid;
+    this.currentFolderPKID = this.vaultFolder_pkid;
     this.$store.dispatch('getVault', this.vault_pkid);
-    this.$store.dispatch('getVaultfolder', this.vaultfolder_pkid);
+    this.$store.dispatch('getVaultfolder', this.vaultFolder_pkid);
   },
 
   methods: {
@@ -281,9 +281,9 @@ export default {
       const payload = {
         vault_id: this.vault_pkid,
         parent_id: this.currentFolderPKID,
-        vfname: this.createForm.vfname,
+        name: this.createForm.name,
       };
-      axios.post('/vaultfolders', payload).then( (response) => {
+      axios.post('/vaultFolders', payload).then( (response) => {
         console.log('response', { response });
         this.$store.dispatch('getVaultfolder', this.currentFolderPKID);
         this.cancelCreateFolder();
@@ -292,7 +292,7 @@ export default {
 
     cancelCreateFolder() {
       this.showCreateForm = false;
-      this.createForm.vfname = '';
+      this.createForm.name = '';
     },
     cancelShareFiles() {
       this.isShareMode = false;
@@ -303,8 +303,8 @@ export default {
       this.inviteeInput = '';
     },
 
-    getLink(e, mediafilePKID) {
-      axios.get(`/mediafiles/${mediafilePKID}`).then( (response) => {
+    getLink(e, mediaFilePKID) {
+      axios.get(`/media-files/${mediaFilePKID}`).then( (response) => {
         console.log('response', { response });
         //this.$store.dispatch('getVaultfolder', this.currentFolderPKID);
         //this.cancelCreateFolder();
@@ -314,8 +314,8 @@ export default {
     // for dropzone
     sendingEvent(file, xhr, formData) {
       formData.append('resource_id', this.currentFolderPKID);
-      formData.append('resource_type', 'vaultfolders');
-      formData.append('mftype', 'vault');
+      formData.append('resource_type', 'vaultFolders');
+      formData.append('type', 'vault');
     },
 
     // for dropzone
@@ -323,7 +323,7 @@ export default {
       this.$store.dispatch('getVaultfolder', this.currentFolderPKID);
     },
 
-    // Preload the mediafiles in the current folder (pwd)
+    // Preload the mediaFiles in the current folder (pwd)
     async doNav(e, vaultFolderPKID) {
       this.currentFolderPKID = vaultFolderPKID;
       this.$store.dispatch('getVaultfolder', vaultFolderPKID);
@@ -362,7 +362,7 @@ export default {
   },
 
   watch: {
-    mediafiles (newVal, oldVal) {
+    mediaFiles (newVal, oldVal) {
     },
   },
 

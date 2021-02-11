@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
-use App\Setting;
-use App\Timeline;
-use App\User;
+use App\Models\Setting;
+use App\Models\Timeline;
+use App\Models\User;
 
 class InstallerSeeder extends Seeder
 {

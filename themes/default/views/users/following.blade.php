@@ -45,7 +45,7 @@ $user = $creator;
                       </div>
                       @if ( $timeline->isOwnedByUser($sessionUser) )
                         <div class="side-right follow-links">
-                          @if(!$creator->followedtimelines->contains($t->id))
+                          @if(!$creator->followedTimelines->contains($t->id))
                             <div class="left-col"><a href="#" class="btn btn-to-follow btn-default follow-user follow" data-price="{{ $t->price }}"  data-timeline-id="{{ $t->timeline_id }}"><i class="fa fa-heart"></i> {{ trans('common.follow') }} </a></div>
                             <div class="left-col hidden"><a href="#" class="btn btn-success unfollow " data-price="{{ $t->price }}" data-timeline-id="{{ $t->timeline_id }}"><i class="fa fa-check"></i>{{ trans('common.following') }}</a></div>
                           @else
@@ -89,7 +89,7 @@ $user = $creator;
                       </div>
                       @if ( $timeline->isOwnedByUser($sessionUser) )
                         <div class="side-right follow-links">
-                          @if(!$creator->followedtimelines->contains($t->id))
+                          @if(!$creator->followedTimelines->contains($t->id))
                             <div class="left-col"><a href="#" class="btn btn-to-follow btn-default follow-user follow" data-price="{{ $t->price }}"  data-timeline-id="{{ $t->timeline_id }}"><i class="fa fa-heart"></i> {{ trans('common.follow') }} </a></div>
                             <div class="left-col hidden"><a href="#" class="btn btn-success unfollow " data-price="{{ $t->price }}" data-timeline-id="{{ $t->timeline_id }}"><i class="fa fa-check"></i>{{ trans('common.following') }}</a></div>
                           @else

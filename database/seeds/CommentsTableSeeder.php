@@ -3,9 +3,9 @@ namespace Database\Seeders;
 
 use Illuminate\Support\Facades\DB;
 use App\Libs\FactoryHelpers;
-use App\Comment;
-use App\Post;
-use App\User;
+use App\Models\Comment;
+use App\Models\Post;
+use App\Models\User;
 
 class CommentsTableSeeder extends Seeder
 {

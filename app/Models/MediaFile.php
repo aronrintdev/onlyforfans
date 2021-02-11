@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\SluggableTraits;
+use App\Models\Traits\SluggableTraits;
 use App\Interfaces\Ownable;
 use App\Interfaces\Guidable;
 use App\Interfaces\Cloneable;
@@ -45,7 +45,7 @@ class MediaFile extends BaseModel implements Guidable, Sluggable, Ownable, Short
 
     public function sharees()
     {
-        return $this->morphToMany('App\User', 'shareable', 'shareables', 'shareable_id', 'shared_with');
+        return $this->morphToMany('App\Models\User', 'shareable', 'shareables', 'shareable_id', 'shared_with');
     }
 
     public function getOwner(): ?Collection

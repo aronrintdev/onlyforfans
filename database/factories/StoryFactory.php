@@ -2,8 +2,8 @@
 
 namespace Database\Factories;
 
-use App\Story;
-use App\User;
+use App\Models\Story;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class StoryFactory extends Factory
@@ -25,7 +25,7 @@ class StoryFactory extends Factory
         // Creates an associated user/timeline (unless timeline_id is passed in ?)
         $attrs = [
             'content'     => $this->faker->text,
-            'stype'       => 'text', // for image, need to override from caller
+            'type'       => 'text', // for image, need to override from caller
             'timeline_id' => function () {
                 $user = User::factory()->create();
                 return $user->timeline->id;

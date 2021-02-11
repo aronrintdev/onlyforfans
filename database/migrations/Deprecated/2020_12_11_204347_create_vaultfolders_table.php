@@ -18,7 +18,7 @@ class CreateVaultfoldersTable extends Migration
             $table->unsignedInteger('vault_id');
             $table->foreign('vault_id')->references('id')->on('vaults');
 
-            $table->string('vfname')->comment('Vault folder name');
+            $table->string('name')->comment('Vault folder name');
 
             $table->longtext('cattrs')->nullable()->comment('JSON-encoded custom attributes');
             $table->longtext('meta')->nullable()->comment('JSON-encoded meta attributes');

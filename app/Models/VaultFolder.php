@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use Exception;
-use App\SluggableTraits;
+use App\Models\Traits\SluggableTraits;
 use App\Interfaces\Ownable;
 use App\Interfaces\Guidable;
 use App\Interfaces\ShortUuid;
@@ -30,9 +30,9 @@ class VaultFolder extends BaseModel implements Guidable, Sluggable, Ownable, Sho
 
     protected $appends = [
         'name',
-        //'vfparent',
-        //'vfchildren',
-        //'mediafiles',
+        //'parent',
+        //'children',
+        //'mediaFiles',
     ];
 
     //--------------------------------------------

@@ -6,8 +6,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Config;
 use App\Libs\FactoryHelpers;
 use App\Enums\MediaFileTypeEnum;
-use App\Role;
-use App\User;
+use App\Models\Role;
+use App\Models\User;
 
 class UsersTableSeeder extends Seeder
 {

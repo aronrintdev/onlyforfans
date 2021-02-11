@@ -21,8 +21,8 @@ class MediaFilesController extends AppBaseController
     {
         $this->validate($request, [
             'mediaFile' => 'required',
-            'mftype' => 'required|in:avatar,cover,post,story,vault',
-            'resource_type' => 'nullable|alpha-dash|in:comments,posts,stories,vaultfolders',
+            'type' => 'required|in:avatar,cover,post,story,vault',
+            'resource_type' => 'nullable|alpha-dash|in:comments,posts,stories,vault_folders',
             'resource_id' => 'required_with:resource_type|numeric|min:1',
         ]);
 
@@ -80,7 +80,7 @@ class MediaFilesController extends AppBaseController
         ], 201);
     }
 
-    public function show(Request $request, Mediafile $mediaFile)
+    public function show(Request $request, MediaFile $mediaFile)
     {
         $this->authorize('view', $mediaFile);
         /*

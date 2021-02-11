@@ -2,10 +2,12 @@
 
 namespace Tests\Unit;
 
-use App\UsernameRule;
-
 use Tests\TestCase;
+
+use App\Models\User;
+use App\Models\Timeline;
 use Faker\Factory as Faker;
+use App\Models\UsernameRule;
 // use Tests\MigrateFreshOnce;
 // use Illuminate\Foundation\Testing\WithFaker;
 // use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -39,10 +41,10 @@ class UsernameRuleModelTest extends TestCase
      */
     public function testRandomCollidePrevention() {
         // Add User to DB with username `u4488659055`
-        $timeline = factory(\App\Timeline::class)->create([
+        $timeline = factory(Timeline::class)->create([
             'username' => 'u4488659055'
         ]);
-        $user = factory(\App\User::class)->create([
+        $user = factory(User::class)->create([
             'timeline' => $timeline->id
         ]);
 

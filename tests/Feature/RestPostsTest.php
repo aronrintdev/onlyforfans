@@ -10,12 +10,12 @@ use DB;
 
 use Tests\TestCase;
 use Database\Seeders\TestDatabaseSeeder;
-use App\Fanledger;
-use App\Mediafile;
-use App\Post;
-use App\Timeline;
-use App\User;
-use App\Enums\MediafileTypeEnum;
+use App\Models\FanLedger;
+use App\Models\MediaFile;
+use App\Models\Post;
+use App\Models\Timeline;
+use App\Models\User;
+use App\Enums\MediaFileTypeEnum;
 use App\Enums\PaymentTypeEnum;
 use App\Enums\PostTypeEnum;
 
@@ -100,7 +100,7 @@ class RestPostsTest extends TestCase
      *  @group posts
      *  @group regression
      */
-    public function test_can_store_textonly_post_on_my_timeline()
+    public function test_can_store_text_only_post_on_my_timeline()
     {
         $timeline = Timeline::has('posts','>=',1)->first();
         $creator = $timeline->user;
@@ -123,7 +123,7 @@ class RestPostsTest extends TestCase
      *  @group posts
      *  @group regression
      */
-    public function test_can_store_post_with_single_imagefile_on_my_timeline()
+    public function test_can_store_post_with_single_image_file_on_my_timeline()
     {
         Storage::fake('s3');
 
@@ -146,25 +146,25 @@ class RestPostsTest extends TestCase
         // --
 
         $payload = [
-            'mftype' => MediafileTypeEnum::POST,
-            'mediafile' => $file,
+            'type' => MediaFileTypeEnum::POST,
+            'mediaFile' => $file,
             'resource_type' => 'posts',
             'resource_id' => $postR->id,
         ];
-        $response = $this->actingAs($creator)->ajaxJSON('POST', route('mediafiles.store'), $payload);
+        $response = $this->actingAs($creator)->ajaxJSON('POST', route('mediaFiles.store'), $payload);
         $response->assertStatus(201);
 
-        $mediafile = Mediafile::where('resource_type', 'posts')->where('resource_id', $postR->id)->first();
-        $this->assertNotNull($mediafile);
-        Storage::disk('s3')->assertExists($mediafile->filename);
-        $this->assertSame($filename, $mediafile->mfname);
-        $this->assertSame(MediafileTypeEnum::POST, $mediafile->mftype);
+        $mediaFile = MediaFile::where('resource_type', 'posts')->where('resource_id', $postR->id)->first();
+        $this->assertNotNull($mediaFile);
+        Storage::disk('s3')->assertExists($mediaFile->filename);
+        $this->assertSame($filename, $mediaFile->name);
+        $this->assertSame(MediaFileTypeEnum::POST, $mediaFile->type);
 
         // Test relations
         $post = Post::find($postR->id);
         $this->assertNotNull($post);
-        $this->assertTrue( $post->mediafiles->contains($mediafile->id) );
-        $this->assertEquals( $post->id, $mediafile->resource->id );
+        $this->assertTrue( $post->mediaFiles->contains($mediaFile->id) );
+        $this->assertEquals( $post->id, $mediaFile->resource->id );
 
     }
 
@@ -201,7 +201,7 @@ class RestPostsTest extends TestCase
         $filename = $this->faker->slug;
         $file = UploadedFile::fake()->image($filename, 200, 200);
         $payload = [
-            'mftype' => PostTypeEnum::FREE,
+            'type' => PostTypeEnum::FREE,
             'timeline_id' => $timeline->id,
             'description' => $this->faker->realText,
         ];
@@ -212,12 +212,12 @@ class RestPostsTest extends TestCase
         $this->assertNotNull($content->post);
         $postR = $content->post;
         $payload = [
-            'mftype' => MediafileTypeEnum::POST,
-            'mediafile' => $file,
+            'type' => MediaFileTypeEnum::POST,
+            'mediaFile' => $file,
             'resource_type' => 'posts',
             'resource_id' => $postR->id,
         ];
-        $response = $this->actingAs($creator)->ajaxJSON('POST', route('mediafiles.store'), $payload);
+        $response = $this->actingAs($creator)->ajaxJSON('POST', route('mediaFiles.store'), $payload);
         $response->assertStatus(201);
 
         // --
@@ -225,15 +225,15 @@ class RestPostsTest extends TestCase
         $timeline->refresh();
         $creator->refresh();
         $fan = $timeline->followers[0];
-        $post = $timeline->posts()->has('mediafiles', '>=', 1)
+        $post = $timeline->posts()->has('mediaFiles', '>=', 1)
                          ->where('type', PostTypeEnum::FREE)
                          ->firstOrFail();
-        $mediafile = $post->mediafiles->shift();
+        $mediaFile = $post->mediaFiles->shift();
 
         $response = $this->actingAs($fan)->ajaxJSON('GET', route('posts.show', $post->id));
         $response->assertStatus(200);
 
-        $response = $this->actingAs($fan)->ajaxJSON('GET', route('mediafiles.show', $mediafile->id));
+        $response = $this->actingAs($fan)->ajaxJSON('GET', route('mediaFiles.show', $mediaFile->id));
         $response->assertStatus(200);
     }
 
@@ -241,7 +241,7 @@ class RestPostsTest extends TestCase
      *  @group posts
      *  @group regression
      */
-    public function test_nonfollower_can_not_view_image_of_free_post_on_my_timeline()
+    public function test_non_follower_can_not_view_image_of_free_post_on_my_timeline()
     {
         Storage::fake('s3');
 
@@ -253,7 +253,7 @@ class RestPostsTest extends TestCase
         $filename = $this->faker->slug;
         $file = UploadedFile::fake()->image($filename, 200, 200);
         $payload = [
-            'mftype' => PostTypeEnum::FREE,
+            'type' => PostTypeEnum::FREE,
             'timeline_id' => $timeline->id,
             'description' => $this->faker->realText,
         ];
@@ -264,34 +264,34 @@ class RestPostsTest extends TestCase
         $this->assertNotNull($content->post);
         $postR = $content->post;
         $payload = [
-            'mftype' => MediafileTypeEnum::POST,
-            'mediafile' => $file,
+            'type' => MediaFileTypeEnum::POST,
+            'mediaFile' => $file,
             'resource_type' => 'posts',
             'resource_id' => $postR->id,
         ];
-        $response = $this->actingAs($creator)->ajaxJSON('POST', route('mediafiles.store'), $payload);
+        $response = $this->actingAs($creator)->ajaxJSON('POST', route('mediaFiles.store'), $payload);
         $response->assertStatus(201);
 
         // --
 
         $timeline->refresh();
         $creator->refresh();
-        $nonfan = User::whereDoesntHave('followedtimelines', function($q1) use(&$timeline) {
+        $nonFan = User::whereDoesntHave('followedTimelines', function($q1) use(&$timeline) {
             $q1->where('timelines.id', '<>', $timeline->id);
         })->where('id', '<>', $creator->id)->first();
 
-        //$this->assertNotEquals($nonfan->id, $creator->id);
-        //$this->assertFalse($timeline->followers->contains($nonfan->id));
+        //$this->assertNotEquals($nonFan->id, $creator->id);
+        //$this->assertFalse($timeline->followers->contains($nonFan->id));
 
-        $post = $timeline->posts()->has('mediafiles', '>=', 1)
+        $post = $timeline->posts()->has('mediaFiles', '>=', 1)
                          ->where('type', PostTypeEnum::FREE)
                          ->firstOrFail();
-        $mediafile = $post->mediafiles->shift();
+        $mediaFile = $post->mediaFiles->shift();
 
-        $response = $this->actingAs($nonfan)->ajaxJSON('GET', route('posts.show', $post->id));
+        $response = $this->actingAs($nonFan)->ajaxJSON('GET', route('posts.show', $post->id));
         $response->assertStatus(403);
 
-        $response = $this->actingAs($nonfan)->ajaxJSON('GET', route('mediafiles.show', $mediafile->id));
+        $response = $this->actingAs($nonFan)->ajaxJSON('GET', route('mediaFiles.show', $mediaFile->id));
         $response->assertStatus(403);
     }
 
@@ -478,8 +478,8 @@ class RestPostsTest extends TestCase
         $this->assertEquals($creator->id, $fanledger->seller_id);
         $this->assertEquals('posts', $fanledger->purchaseable_type);
         $this->assertEquals($post->id, $fanledger->purchaseable_id);
-        $this->assertTrue( $post->ledgersales->contains( $fanledger->id ) );
-        $this->assertTrue( $fan->ledgerpurchases->contains( $fanledger->id ) );
+        $this->assertTrue( $post->ledgerSales->contains( $fanledger->id ) );
+        $this->assertTrue( $fan->ledgerPurchases->contains( $fanledger->id ) );
     }
 
     /**
@@ -527,8 +527,8 @@ class RestPostsTest extends TestCase
         $this->assertEquals('posts', $fanledger->purchaseable_type);
         $this->assertEquals($post->id, $fanledger->purchaseable_id);
         $this->assertTrue( $post->sharees->contains( $fan->id ) );
-        $this->assertTrue( $post->ledgersales->contains( $fanledger->id ) );
-        $this->assertTrue( $fan->ledgerpurchases->contains( $fanledger->id ) );
+        $this->assertTrue( $post->ledgerSales->contains( $fanledger->id ) );
+        $this->assertTrue( $fan->ledgerPurchases->contains( $fanledger->id ) );
 
         // Check access (after: should be allowed)
         $response = $this->actingAs($fan)->ajaxJSON('GET', route('posts.show', $post->id));

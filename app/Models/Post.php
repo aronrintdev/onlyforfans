@@ -4,25 +4,25 @@ namespace App\Models;
 
 use DB;
 use Auth;
-use App\User;
 use Exception;
+use App\Models\FanLedger;
 use App\Interfaces\Ownable;
 use App\Interfaces\Likeable;
 use App\Interfaces\Deletable;
 use App\Interfaces\ShortUuid;
 use App\Enums\PaymentTypeEnum;
-use App\Interfaces\Commentable;
 use App\Interfaces\Reportable;
+use App\Interfaces\Commentable;
 use App\Models\Traits\UsesUuid;
 use App\Traits\OwnableFunctions;
 use Illuminate\Support\Collection;
 use App\Models\Traits\UsesShortUuid;
+use App\Models\Traits\LikeableTraits;
 use Illuminate\Support\Facades\Storage;
+use App\Models\Traits\CommentableTraits;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Interfaces\Purchaseable; // was PaymentReceivable
-use App\Models\Traits\CommentableTraits;
-use App\Models\Traits\LikeableTraits;
 
 class Post extends Model implements Ownable, Deletable, Purchaseable, Likeable, Reportable, ShortUuid, Commentable
 {
@@ -44,7 +44,7 @@ class Post extends Model implements Ownable, Deletable, Purchaseable, Likeable, 
             if (!$model->canBeDeleted()) {
                 throw new Exception('Can not delete Post (26)'); // or soft delete and give access to purchasers (?)
             }
-            foreach ($model->mediafiles as $o) {
+            foreach ($model->mediaFiles as $o) {
                 Storage::disk('s3')->delete($o->filename); // Remove from S3
                 $o->delete();
             }
@@ -143,45 +143,43 @@ class Post extends Model implements Ownable, Deletable, Purchaseable, Likeable, 
     // %%% --- Implement Purchaseable Interface ---
 
     public function receivePayment(
-        string $ptype, // PaymentTypeEnum
+        string $type, // PaymentTypeEnum
         User $sender,
-        //PaymentSendable $sender,
-        //Purchaseable $receiver, -> $this
         int $amountInCents,
-        array $cattrs = []
+        array $customAttributes = []
     ): ?FanLedger {
-        $result = DB::transaction(function () use ($ptype, $amountInCents, $cattrs, &$sender) {
+        $result = DB::transaction(function () use ($type, $amountInCents, $customAttributes, &$sender) {
 
-            switch ($ptype) {
+            switch ($type) {
                 case PaymentTypeEnum::TIP:
                     $result = Fanledger::create([
-                        'fltype' => $ptype,
+                        'fltype' => $type,
                         'seller_id' => $this->user->id,
                         'purchaser_id' => $sender->id,
                         'purchaseable_type' => 'posts',
                         'purchaseable_id' => $this->id,
                         'qty' => 1,
                         'base_unit_cost_in_cents' => $amountInCents,
-                        'cattrs' => $cattrs ?? [],
+                        'cattrs' => $customAttributes ?? [],
                     ]);
                     break;
                 case PaymentTypeEnum::PURCHASE:
                     $result = Fanledger::create([
-                        'fltype' => $ptype,
+                        'fltype' => $type,
                         'seller_id' => $this->user->id,
                         'purchaser_id' => $sender->id,
                         'purchaseable_type' => 'posts',
                         'purchaseable_id' => $this->id,
                         'qty' => 1,
                         'base_unit_cost_in_cents' => $amountInCents,
-                        'cattrs' => $cattrs ?? [],
+                        'cattrs' => $customAttributes ?? [],
                     ]);
-                    $sender->sharedposts()->attach($this->id, [
-                        'cattrs' => json_encode($cattrs ?? []),
+                    $sender->sharedPosts()->attach($this->id, [
+                        'cattrs' => json_encode($customAttributes ?? []),
                     ]);
                     break;
                 default:
-                    throw new Exception('Unrecognized payment type : ' . $ptype);
+                    throw new Exception('Unrecognized payment type : ' . $type);
             }
 
             return $result;

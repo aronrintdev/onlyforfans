@@ -2,7 +2,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Support\Facades\Config;
-use App\UsernameRule;
+use App\Models\UsernameRule;
 use Symfony\Component\Finder\Finder;
 
 /**

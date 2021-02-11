@@ -1,17 +1,18 @@
 <?php
 namespace Tests\Unit;
 
+use DB;
 use Tests\TestCase;
-use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Models\User;
+use App\Models\Vault;
+use Ramsey\Uuid\Uuid;
+use App\Models\MediaFile;
+use App\Models\VaultFolder;
+use App\Enums\MediaFileTypeEnum;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
-use DB;
-use Ramsey\Uuid\Uuid;
-use App\Mediafile;
-use App\Vault;
-use App\Vaultfolder;
-use App\Enums\MediaFileTypeEnum;
+use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class ShareableTest extends TestCase
 {
@@ -24,9 +25,9 @@ class ShareableTest extends TestCase
     /**
      * @group OFF-sdev
      */
-    public function test_can_share_mediafile()
+    public function test_can_share_media_file()
     {
-        $user = factory(\App\User::class)->create();
+        $user = factory(User::class)->create();
         $user->refresh();
         $this->_deleteList[] = $user;
 
@@ -36,19 +37,19 @@ class ShareableTest extends TestCase
         $this->_deleteList->push($vault);
 
         $file = UploadedFile::fake()->image('file-foo.png', 400, 400);
-        $mediafile = Mediafile::create([
+        $mediaFile = MediaFile::create([
             'resource_id'=>$rootVF->id,
-            'resource_type'=>'vaultfolders',
+            'resource_type'=>'vaultFolders',
             'filename'=>(string) Uuid::uuid4(),
-            'mftype' => MediaFileTypeEnum::VAULT,
+            'type' => MediaFileTypeEnum::VAULT,
             'mimetype' => $file->getMimeType(),
             'orig_filename' => $file->getClientOriginalName(),
             'orig_ext' => $file->getClientOriginalExtension(),
         ]);
-        $mediafile->refresh();
-        $this->_deleteList->push($mediafile);
+        $mediaFile->refresh();
+        $this->_deleteList->push($mediaFile);
 
-        $user->sharedmediafiles()->attach($mediafile->id); // do share
+        $user->sharedMediaFiles()->attach($mediaFile->id); // do share
 
         // --
 
@@ -56,25 +57,25 @@ class ShareableTest extends TestCase
         $this->assertGreaterThan(0, $user->id);
         $this->assertNotNull($vault);
         $this->assertGreaterThan(0, $vault->id);
-        $this->assertNotNull($mediafile);
-        $this->assertGreaterThan(0, $mediafile->id);
+        $this->assertNotNull($mediaFile);
+        $this->assertGreaterThan(0, $mediaFile->id);
 
-        $this->assertGreaterThan(0, $user->sharedmediafiles->count());
-        $this->assertNotNull($user->sharedmediafiles[0]);
-        $this->assertSame($mediafile->guid, $user->sharedmediafiles[0]->guid);
+        $this->assertGreaterThan(0, $user->sharedMediaFiles->count());
+        $this->assertNotNull($user->sharedMediaFiles[0]);
+        $this->assertSame($mediaFile->guid, $user->sharedMediaFiles[0]->guid);
 
-        $this->assertGreaterThan(0, $mediafile->sharees()->count());
-        $this->assertNotNull($mediafile->sharees[0]);
-        $this->assertInstanceOf(\App\User::class, $mediafile->sharees[0]);
-        $this->assertSame($user->id, $mediafile->sharees[0]->id);
+        $this->assertGreaterThan(0, $mediaFile->sharees()->count());
+        $this->assertNotNull($mediaFile->sharees[0]);
+        $this->assertInstanceOf(User::class, $mediaFile->sharees[0]);
+        $this->assertSame($user->id, $mediaFile->sharees[0]->id);
     }
 
     /**
      * @group sdev
      */
-    public function test_can_share_vaultfolder()
+    public function test_can_share_vault_folder()
     {
-        $user = factory(\App\User::class)->create();
+        $user = factory(User::class)->create();
         $user->refresh();
         $this->_deleteList[] = $user;
 
@@ -83,10 +84,10 @@ class ShareableTest extends TestCase
         $vault->refresh();
         $this->_deleteList->push($vault);
 
-        $vaultfolder = $rootVF;
-        $vaultfolder->refresh();
+        $vaultFolder = $rootVF;
+        $vaultFolder->refresh();
 
-        $user->sharedvaultfolders()->attach($vaultfolder->id); // do share
+        $user->sharedVaultFolders()->attach($vaultFolder->id); // do share
 
         // --
 
@@ -94,17 +95,17 @@ class ShareableTest extends TestCase
         $this->assertGreaterThan(0, $user->id);
         $this->assertNotNull($vault);
         $this->assertGreaterThan(0, $vault->id);
-        $this->assertNotNull($vaultfolder);
-        $this->assertGreaterThan(0, $vaultfolder->id);
+        $this->assertNotNull($vaultFolder);
+        $this->assertGreaterThan(0, $vaultFolder->id);
 
-        $this->assertGreaterThan(0, $user->sharedvaultfolders->count());
-        $this->assertNotNull($user->sharedvaultfolders[0]);
-        $this->assertSame($vaultfolder->guid, $user->sharedvaultfolders[0]->guid);
+        $this->assertGreaterThan(0, $user->sharedVaultFolders->count());
+        $this->assertNotNull($user->sharedVaultFolders[0]);
+        $this->assertSame($vaultFolder->guid, $user->sharedVaultFolders[0]->guid);
 
-        $this->assertGreaterThan(0, $vaultfolder->sharees()->count());
-        $this->assertNotNull($vaultfolder->sharees[0]);
-        $this->assertInstanceOf(\App\User::class, $vaultfolder->sharees[0]);
-        $this->assertSame($user->id, $vaultfolder->sharees[0]->id);
+        $this->assertGreaterThan(0, $vaultFolder->sharees()->count());
+        $this->assertNotNull($vaultFolder->sharees[0]);
+        $this->assertInstanceOf(User::class, $vaultFolder->sharees[0]);
+        $this->assertSame($user->id, $vaultFolder->sharees[0]->id);
     }
 
     protected function setUp() : void {
@@ -117,14 +118,14 @@ class ShareableTest extends TestCase
             while ( $this->_deleteList->count() > 0 ) {
                 $obj = $this->_deleteList->pop();
                 if ( $obj instanceof Vault ) {
-                     $obj->vaultfolders()->delete();
+                     $obj->vaultFolders()->delete();
                 }
-                if ( $obj instanceof Mediafile ) {
+                if ( $obj instanceof MediaFile ) {
                      $obj->sharees()->detach();
                 }
                 /*
                 if ( $obj instanceof User ) {
-                     $obj->sharedmediafiles()->detach();
+                     $obj->sharedMediaFiles()->detach();
                 }
                  */
                 $obj->delete();

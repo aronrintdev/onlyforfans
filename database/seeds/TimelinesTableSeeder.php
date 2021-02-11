@@ -1,11 +1,9 @@
 <?php
 namespace Database\Seeders;
 
-use App\Page;
-use App\User;
-use App\Group;
 use Exception;
-use App\Timeline;
+use App\Models\User;
+use App\Models\Timeline;
 use Faker\Factory;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;

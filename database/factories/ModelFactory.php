@@ -125,7 +125,7 @@ use App\Enums\PostTypeEnum;
 //     ];
 // });
 
-// $factory->define(App\Mediafile::class, function (Faker\Generator $faker) {
+// $factory->define(App\MediaFile::class, function (Faker\Generator $faker) {
 //     // Uses fake file
 //     $file = UploadedFile::fake()->image('avatar.jpg');
 //     return [
@@ -146,7 +146,7 @@ use App\Enums\PostTypeEnum;
 //     // Creates an associated user/timeline (unless timeline_id is passed in ?)
 //     $attrs = [
 //         'content'     => $faker->text,
-//         'stype'       => 'text', // for image, need to override from caller
+//         'type'       => 'text', // for image, need to override from caller
 //         'timeline_id' => function () {
 //             $user = factory(App\User::class)->create();
 //             return $user->timeline->id;
@@ -193,11 +193,11 @@ use App\Enums\PostTypeEnum;
 
 // $factory->define(App\Vault::class, function (Faker\Generator $faker) {
 //     return [
-//         'vname' => $faker->catchPhrase,
+//         'name' => $faker->catchPhrase,
 //     ];
 // });
-// $factory->define(App\Vaultfolder::class, function (Faker\Generator $faker) {
+// $factory->define(App\VaultFolder::class, function (Faker\Generator $faker) {
 //     return [
-//         'vfname' => $faker->bs,
+//         'name' => $faker->bs,
 //     ];
 // });

@@ -7,19 +7,19 @@ use Tests\TestCase;
 use Database\Seeders\TestDatabaseSeeder;
 
 use App\Enums\PaymentTypeEnum;
-use App\Fanledger;
-use App\Post;
-use App\Timeline;
-use App\User;
+use App\Models\FanLedger;
+use App\Models\Post;
+use App\Models\Timeline;
+use App\Models\User;
 
-class FanledgerTest extends TestCase
+class FanLedgerTest extends TestCase
 {
     use DatabaseTransactions, WithFaker;
 
     /**
-     *  @group TODO-fanledgers
+     *  @group TODO-fanLedgers
      */
-    public function test_can_index_fanledgers()
+    public function test_can_index_fan_ledgers()
     {
     }
 

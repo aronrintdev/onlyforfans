@@ -17,7 +17,7 @@ class CreateMediaFilesTable extends Migration
             $table->uuid('id')->primary();
             // $table->string('guid')->unique();
             $table->string('slug')->unique();
-            $table->string('filename')->nullable()->comment('Filename as stored, in S3 for ex')->unique();
+            $table->string('filename')->nullable()->comment('Filename as stored, in S3 for ex');
 
             $table->string('name')->comment('MediaFile name');
             $table->string('type', 63)->comment('MediaFile Type: Enumeration');

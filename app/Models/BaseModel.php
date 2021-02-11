@@ -43,12 +43,12 @@ abstract class BaseModel extends Model implements Nameable, FieldRenderable
     {
         foreach ($fields as $f) {
             if ( array_key_exists($f, $reqAttrs) ) {
-                $cattrs = $this->{$f}; // current DB value
+                $customAttributes = $this->{$f}; // current DB value
                 // %CAREFUL: preserve any keys in the DB record not in the request
                 foreach ($reqAttrs[$f] as $k => $v) {
-                    $cattrs[$k] = $v; // overwrite from request
+                    $customAttributes[$k] = $v; // overwrite from request
                 }
-                $reqAttrs[$f] = $cattrs;
+                $reqAttrs[$f] = $customAttributes;
             }
         }
         return $reqAttrs;

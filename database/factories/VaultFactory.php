@@ -22,7 +22,7 @@ class VaultFactory extends Factory
     public function definition()
     {
         return [
-            'vname' => $this->faker->catchPhrase,
+            'name' => $this->faker->catchPhrase,
         ];
     }
 }

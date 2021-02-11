@@ -3,7 +3,7 @@
 use App\BlockedProfile;
 use App\Setting;
 use App\Timeline;
-use App\User;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 
@@ -39,12 +39,12 @@ function suggestedUsers()
 
     $suggested_users = '';
     //$followingUsers = $sessionUser->following()->get()->pluck('id')->toArray();
-    $followingUsers = $sessionUser->followedtimelines()->get()->pluck('id')->toArray();
+    $followingUsers = $sessionUser->followedTimelines()->get()->pluck('id')->toArray();
 
     if ($admin_users != NULL) {
         $blockedUsers = array_merge($blockedUsers, $admin_users->pluck('user_id')->toArray());
         $blockedUsers[] = $sessionUser->id;
-        $suggested_users = App\User::with('blockedProfiles')
+        $suggested_users = App\Models\User::with('blockedProfiles')
             ->whereDoesntHave('blockedProfiles', function (Builder $q) use ($sessionUser) {
                 $q->where('country', 'like', '%'.$sessionUser->country.'%');
             })
@@ -56,7 +56,7 @@ function suggestedUsers()
         $blockedUsers = array_merge($blockedUsers, $followingUsers);
         $blockedUsers[] = $sessionUser->id; // session user
 
-        $suggested_users = App\User::whereNotIn('id', $blockedUsers)
+        $suggested_users = App\Models\User::whereNotIn('id', $blockedUsers)
             ->whereDoesntHave('blockedProfiles', function (Builder $q) use ($sessionUser) {
                 $q->where('country', 'like', '%'.$sessionUser->country.'%');
             })->get();

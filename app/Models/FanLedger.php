@@ -56,8 +56,8 @@ class FanLedger extends BaseModel implements Guidable
     //--------------------------------------------
 
     protected $casts = [
-        'cattrs' => 'array',
-        'meta' => 'array',
+        'custom_attributes' => 'array',
+        'metadata'          => 'array',
     ];
 
     //--------------------------------------------
@@ -81,8 +81,8 @@ class FanLedger extends BaseModel implements Guidable
         $key = trim($field);
         switch ($key) {
                 /*
-            case 'meta':
-            case 'cattrs':
+            case 'metadata':
+            case 'custom_attributes':
                 return json_encode($this->{$key});
              */
             default:

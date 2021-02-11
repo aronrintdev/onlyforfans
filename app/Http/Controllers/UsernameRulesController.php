@@ -79,7 +79,7 @@ class UsernameRulesController extends Controller
      *
      * Middleware: ['auth', 'role:admin']
      *
-     * @param  \App\UsernameRule  $usernameRule
+     * @param  \App\Models\UsernameRule  $usernameRule
      * @return \Illuminate\Http\Response
      */
     public function show(UsernameRule $usernameRule)
@@ -93,7 +93,7 @@ class UsernameRulesController extends Controller
      *
      * Middleware: ['auth', 'role:admin']
      *
-     * @param  \App\UsernameRule  $usernameRule
+     * @param  \App\Models\UsernameRule  $usernameRule
      * @return \Illuminate\Http\Response
      */
     public function edit(UsernameRule $usernameRule)
@@ -108,7 +108,7 @@ class UsernameRulesController extends Controller
      * Middleware: ['auth', 'role:admin']
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\UsernameRule  $usernameRule
+     * @param  \App\Models\UsernameRule  $usernameRule
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, UsernameRule $usernameRule)
@@ -127,7 +127,7 @@ class UsernameRulesController extends Controller
      *
      * Middleware: ['auth', 'role:admin']
      *
-     * @param  \App\UsernameRule  $usernameRule
+     * @param  \App\Models\UsernameRule  $usernameRule
      * @return \Illuminate\Http\Response
      */
     public function destroy(UsernameRule $usernameRule)

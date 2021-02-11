@@ -8,10 +8,10 @@ use Database\Seeders\TestDatabaseSeeder;
 
 //use App\Enums\PostTypeEnum;
 use App\Enums\PaymentTypeEnum;
-use App\Fanledger;
-use App\Post;
-use App\Timeline;
-use App\User;
+use App\Models\FanLedger;
+use App\Models\Post;
+use App\Models\Timeline;
+use App\Models\User;
 
 class ShareablesTest extends TestCase
 {

@@ -2,18 +2,19 @@
 
 namespace Database\Factories;
 
-use App\Mediafile;
-use Illuminate\Database\Eloquent\Factories\Factory;
+use Ramsey\Uuid\Uuid;
+use App\Models\MediaFile;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
-class MediafileFactory extends Factory
+class MediaFileFactory extends Factory
 {
     /**
      * The name of the factory's corresponding model.
      *
      * @var string
      */
-    protected $model = Mediafile::class;
+    protected $model = MediaFile::class;
 
     /**
      * Define the model's default state.
