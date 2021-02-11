@@ -22,7 +22,6 @@ class CreateVaultFoldersTable extends Migration
             $table->string('slug')->unique();
 
             $table->uuid('parent_id')->nullable()->comment('Parent folder, NULL for root');
-            $table->foreign('parent_id')->references('id')->on('vault_folders');
 
             $table->uuid('vault_id');
             $table->foreign('vault_id')->references('id')->on('vaults');

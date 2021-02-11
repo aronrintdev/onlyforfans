@@ -2,17 +2,22 @@
 
 namespace App\Models\Traits;
 
-use App\Models\Casts\ShortUuid as ShortUuidCast;
 use Exception;
 use Ramsey\Uuid\Uuid;
+use Illuminate\Support\Arr;
 use PascalDeVink\ShortUuid\ShortUuid;
+use App\Models\Casts\ShortUuid as ShortUuidCast;
 
 trait UsesShortUuid
 {
 
-    protected $casts = [
-        'id' => ShortUuidCast::class,
-    ];
+    public function getCasts()
+    {
+        if (!isset($this->casts['id'])) {
+            return Arr::add($this->casts, 'id', ShortUuidCast::class);
+        }
+        return $this->casts;
+    }
 
     public function fromShortId(string $value): string
     {

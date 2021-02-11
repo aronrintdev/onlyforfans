@@ -12,8 +12,16 @@ use GoldSpecDigital\LaravelEloquentUUID\Database\Eloquent\Uuid as GoldSpecDigita
 trait UsesUuid
 {
     use GoldSpecDigitalUuid;
-    protected $keyType = 'string';
-    protected $incrementing = false;
+
+    public function getIncrementing()
+    {
+        return false;
+    }
+
+    public function getKeyType()
+    {
+        return 'string';
+    }
 
     protected function generateUuid(): string
     {

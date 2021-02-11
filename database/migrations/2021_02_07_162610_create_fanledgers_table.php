@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateFanledgers extends Migration
+class CreateFanledgersTable extends Migration
 {
     public function up()
     {
@@ -17,9 +17,9 @@ class CreateFanledgers extends Migration
 
             $table->string('fltype', 63)->comment('Fan Ledger Type: Enumeration');
 
-            $table->unsignedInteger('purchaser_id')->comment('User who sends payment');
+            $table->uuid('purchaser_id')->comment('User who sends payment');
             $table->foreign('purchaser_id')->references('id')->on('users');
-            $table->unsignedInteger('seller_id')->comment('User who receives payment');
+            $table->uuid('seller_id')->comment('User who receives payment');
             $table->foreign('seller_id')->references('id')->on('users');
 
             // resource being purchased

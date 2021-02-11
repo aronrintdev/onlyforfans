@@ -43,7 +43,7 @@ class CreateFinancialCurrencyExchangeTransactionsTable extends Migration
             /**
              * The exchange rate when this transaction was recorded.
              */
-            $table->unsignedDecimal('exchange_rate', 8, 14);
+            $table->unsignedDecimal('exchange_rate', 28, 14);
 
             /**
              * Any additional metadata

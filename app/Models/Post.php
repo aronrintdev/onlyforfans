@@ -131,11 +131,6 @@ class Post extends Model implements Ownable, Deletable, Purchaseable, Likeable, 
             ->where('postable_type', $this->getMorphString('App\Models\Timeline'));
     }
 
-    public function notifications()
-    {
-        return $this->hasMany('App\Notification', 'post_id', 'id');
-    }
-
     //--------------------------------------------
     // %%% Methods
     //--------------------------------------------
