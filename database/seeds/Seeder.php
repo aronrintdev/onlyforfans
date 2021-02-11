@@ -27,8 +27,7 @@ class Seeder extends ParentSeeder implements EnvironmentCheckable
      * Checks if seeder is allowed to run in current environment
      */
     public function shouldRun(): bool {
-        return \in_array('all', $this->environments) ||
-            \in_array(Config::get('app.env'), $this->environments);
+        return in_array('all', $this->environments) || in_array(Config::get('app.env'), $this->environments);
     }
 
     /**

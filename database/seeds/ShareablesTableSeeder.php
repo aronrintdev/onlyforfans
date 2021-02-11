@@ -45,7 +45,7 @@ class ShareablesTableSeeder extends Seeder
                     $p->receivePayment(
                         PaymentTypeEnum::PURCHASE, // PaymentTypeEnum
                         $f, // User $sender | follower | purchaser
-                        $p->price*100, // int $amountInCents
+                        $p->price * 100, // int $amountInCents
                         $customAttributes,
                     );
                 });

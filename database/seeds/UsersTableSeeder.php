@@ -115,29 +115,29 @@ class UsersTableSeeder extends Seeder
                 $cover = null;
             }
 
-            $u->is_follow_for_free = $isFollowForFree;
             $u->save();
-            $isFollowForFree = !$isFollowForFree; // toggle so we get at least one of each
 
             $timeline = $u->timeline;
             $timeline->avatar_id = $avatar->id ?? null;
             $timeline->cover_id = $cover->id ?? null;
+            $u->is_follow_for_free = $isFollowForFree;
             $timeline->save();
+            $isFollowForFree = !$isFollowForFree; // toggle so we get at least one of each
         });
 
         // +++ Update default user settings +++
 
-        User::get()->each( function($u) {
-            DB::table('user_settings')->insert([
-                'user_id'               => $u->id,
-                'confirm_follow'        => 'no',
-                'follow_privacy'        => 'everyone',
-                'comment_privacy'       => 'everyone',
-                'timeline_post_privacy' => 'everyone',
-                'post_privacy'          => 'everyone',
-                'message_privacy'       => 'everyone',
-            ]);
-        });
+        // User::get()->each( function($u) {
+        //     DB::table('user_settings')->insert([
+        //         'user_id'               => $u->id,
+        //         'confirm_follow'        => 'no',
+        //         'follow_privacy'        => 'everyone',
+        //         'comment_privacy'       => 'everyone',
+        //         'timeline_post_privacy' => 'everyone',
+        //         'post_privacy'          => 'everyone',
+        //         'message_privacy'       => 'everyone',
+        //     ]);
+        // });
     }
 
     private function getMax($param) : int

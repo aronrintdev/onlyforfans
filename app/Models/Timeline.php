@@ -64,7 +64,7 @@ class Timeline extends Model implements Purchaseable, Ownable, Reportable, Short
 
     public function posts()
     {
-        return $this->hasMany('App\Models\Post');
+        return $this->morphMany('App\Models\Post', 'postable');
     }
 
     public function stories()

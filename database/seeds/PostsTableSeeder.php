@@ -1,6 +1,7 @@
 <?php
 namespace Database\Seeders;
 
+use DB;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Illuminate\Support\Facades\Config;
 use Carbon\Carbon;
@@ -38,12 +39,11 @@ class PostsTableSeeder extends Seeder
                 $ptype = $this->faker->randomElement([
                     PostTypeEnum::SUBSCRIBER,
                     PostTypeEnum::PRICED,
-                    PostTypeEnum::FREE, PostTypeEnum::FREE, PostTypeEnum::FREE, 
+                    PostTypeEnum::FREE, PostTypeEnum::FREE, PostTypeEnum::FREE,
                 ]);
                 $attrs = [
                     'description'  => $this->faker->text.' ('.$ptype.')',
                     'user_id'      => $u->id,
-                    'timeline_id'  => $u->timeline->id,
                     'type'         => $ptype,
                 ];
 
@@ -52,13 +52,15 @@ class PostsTableSeeder extends Seeder
                 }
 
                 $post = Post::factory()->create($attrs);
+                $u->timeline->posts()->save($post);
+
                 if ( $this->faker->boolean($this->getMax('prob_post_has_image')) ) { // % post has image
                     $mf = FactoryHelpers::createImage(MediaFileTypeEnum::POST, $post->id);
                 }
 
                 // Set a realistic post date
                 $ts = $this->faker->dateTimeThisDecade->format('Y-m-d H:i:s');
-                \DB::table('posts')->where('id',$post->id)->update([
+                DB::table('posts')->where('id',$post->id)->update([
                     'created_at' => Carbon::parse($ts),
                     //'description' => 'foo',
                 ]);

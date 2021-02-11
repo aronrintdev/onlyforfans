@@ -19,15 +19,17 @@ class FactoryHelpers {
     {
         //dump('Updating user: '.$attrs['email']);
         $user->email = $attrs['email'];
-        if ( array_key_exists('gender', $attrs) ) {
-            $user->gender = $attrs['gender'];
-        }
-        if ( array_key_exists('city', $attrs) ) {
-            $user->city = $attrs['city'];
-        }
-        if ( array_key_exists('country', $attrs) ) {
-            $user->country = $attrs['country'];
-        }
+        $user->username = $attrs['username'];
+
+        // if ( array_key_exists('gender', $attrs) ) {
+        //     $user->gender = $attrs['gender'];
+        // }
+        // if ( array_key_exists('city', $attrs) ) {
+        //     $user->city = $attrs['city'];
+        // }
+        // if ( array_key_exists('country', $attrs) ) {
+        //     $user->country = $attrs['country'];
+        // }
         $user->save();
 
         if ( Config::get('app.env') !== 'testing' ) {
@@ -38,13 +40,20 @@ class FactoryHelpers {
             $cover = null;
         }
         $timeline = $user->timeline;
-        $timeline->username = $attrs['username'];
         $timeline->name = $attrs['name'];
         $timeline->avatar_id = $avatar->id ?? null;
         $timeline->cover_id = $cover->id ?? null;
-        $timeline->save();
+        if ( array_key_exists('is_follow_for_free', $attrs) ) {
+            $timeline->is_follow_for_free = $attrs['is_follow_for_free'];
+        }
+        if (array_key_exists('price', $attrs)) {
+            $timeline->price = $attrs['price'];
+        }
+        if (array_key_exists('currency', $attrs)) {
+            $timeline->currency = $attrs['currency'];
+        }
 
-        //unset($user, $timeline);
+        $timeline->save();
     }
 
     public static function parseRandomSubset(Collection $setIn, $MAX=10) : Collection
