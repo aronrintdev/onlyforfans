@@ -66,6 +66,10 @@ Route::group(['middleware' => ['auth']], function () {
         'only' => [ 'index', ],
     ]);
 
+    Route::resource('invites', 'InvitesController', [ 
+        'only' => ['index', 'show', 'store'],
+    ]);
+
     // -- likeables:  --
     // ~ PUT /api/v1/resource/:id/likes/:userid
     // ~ DELETE /api/v1/resource/:id/likes/:userid
@@ -129,7 +133,6 @@ Route::group(['middleware' => ['auth']], function () {
 
     // -- vaultfolders: shareable | purchaseable --
     Route::get('/vaultfolders/match', ['as'=>'vaultfolders.match', 'uses' => 'VaultfoldersController@match']);
-    Route::post('/vaultfolders/{vaultfolder}/invite', ['as'=>'vaultfolders.invite', 'uses' => 'VaultfoldersController@invite']);
     Route::resource('vaultfolders', 'VaultfoldersController', [ ]);
 
     // -- misc --
