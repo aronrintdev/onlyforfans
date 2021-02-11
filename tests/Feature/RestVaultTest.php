@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 use Database\Seeders\TestDatabaseSeeder;
 
+use App\Invite;
 use App\Mediafile;
 use App\Post;
 use App\Story;
@@ -863,7 +864,6 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
-     *  @group here
      */
     public function test_select_subset_of_mediafiles_in_vaultfolder_to_share_via_signup_invite_to_non_registered_user_via_email()
     {
@@ -925,6 +925,57 @@ class RestVaultTest extends TestCase
         Mail::assertQueued(\App\Mail\ShareableInvited::class, function ($mail) use ($invitees) {
             return $mail->hasTo($invitees[0]['email']); 
         });
+    }
+
+    /**
+     *  @group vault
+     *  @group regression
+     *  @group here
+     */
+    public function test_select_vaultfolder_to_share_via_invite_to_registered_user()
+    {
+        Mail::fake();
+
+        $owner = User::first();
+        $primaryVault = Vault::primary($owner)->first();
+        $rootFolder = Vaultfolder::isRoot()->where('vault_id', $primaryVault->id)->first();
+
+        $nonowner = User::where('id', '<>', $owner->id)->first(); // %TODO: also ensure not a sharee already? or create new user
+
+        $invitees = [];
+        $invitees[] = [
+            'email' => $nonowner->email,
+            'name' => $nonowner->name,
+        ];
+
+        // share the folder
+        $payload = [
+            'invitees' => $invitees,
+            'vaultfolder_id' => $rootFolder->id,
+            'shareables' => [
+                [ 'shareable_type' => 'vaultfolders', 'shareable_id' => $rootFolder->id, ],
+            ],
+        ];
+        $response = $this->actingAs($owner)->ajaxJSON('POST', route('invites.store'), $payload);
+        $response->assertStatus(200);
+        $content = json_decode($response->content());
+        $this->assertNotNull($content->invites);
+        $invites = collect($content->invites);
+        $this->assertEquals(1, $invites->count());
+
+        $invite = $invites->shift();
+        $this->assertEquals($invitees[0]['email'], $invite->email);
+
+        $invite = Invite::find($invite->id);
+        $this->assertIsArray( $invite->cattrs);
+        $this->assertArrayHasKey('shareables', $invite->cattrs);
+        $this->assertIsArray($invite->cattrs['shareables']);
+        $this->assertGreaterThan(0, count($invite->cattrs['shareables']));
+        $this->assertArrayHasKey('shareable_type', $invite->cattrs['shareables'][0]);
+        $this->assertArrayHasKey('shareable_id', $invite->cattrs['shareables'][0]);
+        $this->assertEquals('vaultfolders', $invite->cattrs['shareables'][0]['shareable_type']);
+        $this->assertEquals($rootFolder->id, $invite->cattrs['shareables'][0]['shareable_id']);
+        //dd($invite->cattrs);
 
     }
 
