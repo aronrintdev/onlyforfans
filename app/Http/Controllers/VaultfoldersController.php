@@ -166,40 +166,4 @@ class VaultfoldersController extends AppBaseController
 
     // ---
 
-    // Invite one or more persons to register for the site to share a (single) vaultfolder (access)
-    public function invite(Request $request, Vaultfolder $vaultfolder)
-    {
-        $this->authorize('update', $vaultfolder);
-
-        $vrules = [
-            'invitees' => 'required|array',
-            'invitees.*.email' => 'required|email',
-            'invitees.*.name' => 'string',
-        ];
-
-        $sharees = $request->input('invitees', []);
-        $invites = collect();
-        foreach ( $sharees as $se ) {
-            $i = Invite::create([
-                'inviter_id' => $request->user()->id,
-                'email' => $se['email'],
-                'itype' => InviteTypeEnum::VAULT,
-                'cattrs' => [
-                    'shareables' => $request->invitees ?? [],
-                    'vaultfolder_id' => $vaultfolder->id,
-                ],
-            ]);
-            Mail::to($i->email)->queue( new ShareableInvited($i) );
-            //$i->send();
-            $invites->push($i);
-        }
-
-        //$request->user()->sharedvaultfolders()->syncWithoutDetaching($vaultfolder->id); // do share %TODO: need to do when they register (!)
-
-        return response()->json([
-            'invites' => $invites,
-        ]);
-    }
-
-
 }
