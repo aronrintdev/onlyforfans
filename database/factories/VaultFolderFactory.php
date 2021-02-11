@@ -2,17 +2,17 @@
 
 namespace Database\Factories;
 
-use App\Vaultfolder;
+use App\Models\VaultFolder;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-class VaultfolderFactory extends Factory
+class VaultFolderFactory extends Factory
 {
     /**
      * The name of the factory's corresponding model.
      *
      * @var string
      */
-    protected $model = Vaultfolder::class;
+    protected $model = VaultFolder::class;
 
     /**
      * Define the model's default state.

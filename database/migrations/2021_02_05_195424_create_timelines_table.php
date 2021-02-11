@@ -23,6 +23,9 @@ class CreateTimelinesTable extends Migration
             $table->uuid('avatar_id')->nullable();
             $table->uuid('cover_id')->nullable();
             $table->boolean('verified')->default(false);
+            $table->boolean('is_follow_for_free')->default(false);
+            $table->unsignedInteger('price')->default(0);
+            $table->string('currency', 4)->default('USD');
             $table->timestamps();
             $table->softDeletes();
         });

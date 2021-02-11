@@ -2,7 +2,7 @@
 
 namespace Database\Factories;
 
-use App\Post;
+use App\Models\Post;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use App\Enums\PostTypeEnum;
 
@@ -22,7 +22,7 @@ class PostFactory extends Factory
      */
     public function definition()
     {
-        $ptype = $this->faker->randomElement([
+        $type = $this->faker->randomElement([
             PostTypeEnum::SUBSCRIBER,
             PostTypeEnum::PRICED,
             PostTypeEnum::FREE,
@@ -30,15 +30,13 @@ class PostFactory extends Factory
             PostTypeEnum::FREE,
         ]);
         $attrs = [
-            'description'  => $this->faker->text . ' (' . $ptype . ')',
-            //'user_id'      => $u->id,
-            //'timeline_id'  => $u->timeline->id,
-            'type'         => $ptype,
+            'description'  => $this->faker->text . ' (' . $type . ')',
+            'type'         => $type,
             'active'       => 1,
-            'location'     => $this->faker->country,
         ];
-        if ( $ptype === PostTypeEnum::PRICED ) {
+        if ( $type === PostTypeEnum::PRICED ) {
             $attrs['price'] = $this->faker->randomFloat(2, 1, 300);
+            $attrs['currency'] = 'USD';
         }
         return $attrs;
     }

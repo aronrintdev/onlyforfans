@@ -2,7 +2,7 @@
 
 namespace Database\Factories;
 
-use App\Timeline;
+use App\Models\Timeline;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class TimelineFactory extends Factory
@@ -21,14 +21,14 @@ class TimelineFactory extends Factory
      */
     public function definition()
     {
+        $isFollowForFree = $this->faker->boolean(70);
+
         return [
-            'username' => $this->faker->userName,
             'name'     => $this->faker->name,
             'about'    => $this->faker->text,
-            'type'    => 'user',
-            // 'avatar_id' => $this->faker->numberBetween($min = 1, $max = 80),
-            // 'cover_id' => $this->faker->numberBetween($min = 1, $max = 80),
-
+            'verified' => 1,
+            'is_follow_for_free' => $isFollowForFree,
+            'price' => $isFollowForFree ? null : $this->faker->randomFloat(2, 1, 300),
         ];
     }
 }
