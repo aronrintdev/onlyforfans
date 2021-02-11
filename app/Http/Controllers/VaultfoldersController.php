@@ -10,10 +10,11 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use App\Invite;
 use App\Mediafile;
+use App\User;
 use App\Vault;
 use App\Vaultfolder;
 use App\Enums\InviteTypeEnum;
-use App\Mail\ShareableInvited;
+use App\Mail\VaultfolderShared;
 
 // $request->validate([ 'vf_id' => 'required', ]);
 class VaultfoldersController extends AppBaseController
@@ -166,4 +167,33 @@ class VaultfoldersController extends AppBaseController
 
     // ---
 
+    public function share(Request $request, Vaultfolder $vaultfolder)
+    {
+        $vrules = [
+            'shareables' => 'array', // things being shared
+            'sharees' => 'required|array', // sharee: registered user
+            'sharees.*.id' => 'required|exists:users',
+        ];
+
+        $this->authorize('update', $vaultfolder);
+        $sharees = collect();
+
+        $shareeIDs = $request->input('sharees', []);
+        foreach ( $shareeIDs as $_a ) {
+            $_sharee = User::find($_a['id']);
+            if ($_sharee) {
+                $vaultfolder->sharees()->attach($_sharee->id);  
+                Mail::to($_sharee->email)->queue( new VaultfolderShared($_sharee) );
+                $sharees->push($_sharee);
+            } else {
+                Log::warning('Could not find user with id '.$_a['id'].' to share vaultfolder');
+            }
+        }
+        return response()->json([
+            'sharees' => $sharees,
+        ]);
+    }
+
 }
+
+                //$request->user()->sharedvaultfolders()->syncWithoutDetaching($vaultfolder->id); // do share %TODO: need to do when they register (!)

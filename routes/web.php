@@ -66,6 +66,7 @@ Route::group(['middleware' => ['auth']], function () {
         'only' => [ 'index', ],
     ]);
 
+    Route::post('/invites/{vaultfolder}/share', ['as'=>'invites.shareVaultResources', 'uses' => 'InvitesController@shareVaultResources']);
     Route::resource('invites', 'InvitesController', [ 
         'only' => ['index', 'show', 'store'],
     ]);
@@ -133,6 +134,7 @@ Route::group(['middleware' => ['auth']], function () {
 
     // -- vaultfolders: shareable | purchaseable --
     Route::get('/vaultfolders/match', ['as'=>'vaultfolders.match', 'uses' => 'VaultfoldersController@match']);
+    Route::post('/vaultfolders/{vaultfolder}/share', ['as'=>'vaultfolders.share', 'uses' => 'VaultfoldersController@share']);
     Route::resource('vaultfolders', 'VaultfoldersController', [ ]);
 
     // -- misc --
