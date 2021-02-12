@@ -52,7 +52,7 @@ class TimelinesTest extends TestCase
     }
 
     /**
-     *  @group shareables
+     *  @group timelines
      *  @group regression
      */
     public function test_can_follow_timeline()
@@ -89,8 +89,9 @@ class TimelinesTest extends TestCase
     }
 
     /**
-     *  @group shareables
+     *  @group timelines
      *  @group regression
+     *  @group here
      */
     public function test_can_subscribe_to_timeline()
     {

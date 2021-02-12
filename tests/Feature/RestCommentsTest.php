@@ -124,7 +124,6 @@ class RestCommentsTest extends TestCase
     /**
      *  @group comments
      *  @group regression
-     *  @group here
      */
     public function test_timeline_follower_can_store_comment_on_post()
     {
