@@ -317,7 +317,7 @@ class User extends Authenticatable implements PaymentSendable, Blockable
 
     public function comments()
     {
-        return $this->hasMany('App\Comment');
+        return $this->hasMany('App\Models\Comment');
     }
 
     public function deleteOthers()
