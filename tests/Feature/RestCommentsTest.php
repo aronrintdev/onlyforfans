@@ -30,7 +30,9 @@ class RestCommentsTest extends TestCase
 
         // ensure post has a comment by creator
         $comment = Comment::create([
-            'post_id' => $post->id,
+            //'post_id' => $post->id,
+            'commentable_id'     => $post->id,
+            'commentable_type'   => 'posts',
             'user_id' => $creator->id,
             'description' => $this->faker->realText,
         ]);
@@ -79,6 +81,7 @@ class RestCommentsTest extends TestCase
     /**
      *  @group comments
      *  @group regression
+     *  @group here
      */
     public function test_can_show_followed_timelines_comment()
     {
