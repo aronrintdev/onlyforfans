@@ -14,10 +14,10 @@ class CreateLikeablesTable extends Migration
     public function up()
     {
         Schema::create('likeables', function (Blueprint $table) {
-            $table->uuid('id')->primary();
             $table->uuid('user_id')->comment('User who is doing the liking');
             $table->foreign('user_id')->references('id')->on('users');
             $table->uuidMorphs('likeable');
+            $table->index(['user_id', 'likeable_id']);
             $table->timestamps();
         });
     }

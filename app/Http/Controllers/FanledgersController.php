@@ -7,13 +7,13 @@ use Exception;
 use Throwable;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
-use App\Models\FanLedger;
+use App\Models\Fanledger;
 use App\Models\Post;
 use App\Models\Timeline;
 use App\Enums\PaymentTypeEnum;
 use App\Enums\PostTypeEnum;
 
-class FanLedgersController extends AppBaseController
+class FanledgersController extends AppBaseController
 {
     public function index(Request $request)
     {
@@ -27,10 +27,10 @@ class FanLedgersController extends AppBaseController
                     break;
             }
         }
-        $fanLedgers = $query->get();
+        $fanledgers = $query->get();
 
         return response()->json([
-            'fanLedgers' => $fanLedgers,
+            'fanledgers' => $fanledgers,
         ]);
     }
 }

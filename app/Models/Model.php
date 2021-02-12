@@ -8,33 +8,28 @@ use Illuminate\Database\Eloquent\Model as EloquentModel;
 class Model extends EloquentModel
 {
 
+    protected $customAttributesField = 'custom_attributes';
+    protected $metadataField = 'metadata';
+
     /** Aliases */
     public function getCattrsAttribute($value)
     {
-        if ( isset($this->custom_attributes) ) {
-            return $this->custom_attributes;
-        }
-        return $value;
+        return $this->{$this->customAttributesField};
     }
 
     public function setCattrsAttribute($value)
     {
-        $this->attributes['custom_attributes'] = $value;
-        $this->attributes['cattrs'] = $value;
+        $this->attributes[$this->customAttributesField] = $value;
     }
 
     public function getMetaAttribute($value)
     {
-        if (isset($this->metadata)) {
-            return $this->metadata;
-        }
-        return $value;
+        return $this->{$this->metadataField};
     }
 
     public function setMetaAttribute($value)
     {
-        $this->attributes['metadata'] = $value;
-        $this->attributes['meta'] = $value;
+        $this->attributes[$this->metadataField] = $value;
     }
 
 

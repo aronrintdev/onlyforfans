@@ -6,9 +6,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Interfaces\Guidable;
 use App\Models\Traits\UsesUuid;
 
-class FanLedger extends BaseModel implements Guidable
+class Fanledger extends BaseModel implements Guidable
 {
     use SoftDeletes, UsesUuid;
+
+    protected $customAttributesField = 'cattrs';
+    protected $metadataField = 'meta';
 
     protected $guarded = ['id', 'created_at', 'updated_at'];
 

@@ -2,14 +2,15 @@
 namespace Database\Seeders;
 
 use DB;
+use Exception;
+use Carbon\Carbon;
 use App\Models\Post;
 use App\Models\User;
-use Exception;
-use App\Models\Timeline;
-use App\Models\FanLedger;
-use Carbon\Carbon;
 use App\Libs\UserMgr;
+use App\Models\Timeline;
+use App\Models\Fanledger;
 use App\Enums\PostTypeEnum;
+use App\Libs\UuidGenerator;
 use App\Libs\FactoryHelpers;
 use App\Enums\PaymentTypeEnum;
 use App\Enums\MediafileTypeEnum;
@@ -54,7 +55,8 @@ class ShareablesTableSeeder extends Seeder
             // --- follow some free timelines ---
 
             $timelines = Timeline::where('id', '<>', $f->timeline->id) // exclude my own
-                ->where('is_follow_for_free', 1)->get();
+                ->where('is_follow_for_free', true)
+                ->get();
             if ( $timelines->count() == 0 ) {
                 throw new Exception('No free timelines found, please adjust user/timeline seeder and/or factory');
             }
@@ -118,7 +120,7 @@ class ShareablesTableSeeder extends Seeder
                     'access_level' => 'premium',
                     'custom_attributes' => json_encode($customAttributes),
                 ]);
-                FanLedger::create([
+                Fanledger::create([
                     'fltype' => PaymentTypeEnum::SUBSCRIPTION,
                     'purchaser_id' => $f->id, // fan
                     'seller_id' => $t->user->id,
@@ -126,7 +128,7 @@ class ShareablesTableSeeder extends Seeder
                     'purchaseable_id' => $t->id,
                     'qty' => 1,
                     'base_unit_cost_in_cents' => $t->user->price*100, // %FIXME: price should be on timeline not user
-                    'custom_attributes' => $customAttributes,
+                    'cattrs' => json_encode($customAttributes),
                 ]);
             });
 

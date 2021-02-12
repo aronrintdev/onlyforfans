@@ -23,7 +23,7 @@ abstract class BaseModel extends Model implements Nameable, FieldRenderable
         static::creating(function ($model) {
             // if ( $model instanceOf Guidable ) {
             //     //$model->guid = (string) Str::uuid();
-            //     $model->guid = (string) Uuid::uuid4();
+            //     $model->guid = $model->id ?? (string) Uuid::uuid4();
             // }
             if ( $model instanceOf Sluggable ) {
                 $sluggableFields = self::sluggableFields(); //['string'=>'name'];

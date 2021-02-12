@@ -57,8 +57,6 @@ class TruncateData extends Command
     }
 
     private static $truncateList = [
-        'role_user',
-        'permission_role',
         'fanledgers',
         'shareables',
         'likeables',
@@ -74,7 +72,7 @@ class TruncateData extends Command
         'permissions',
         'roles',
 
-        'vault_folders',
+        'vaultfolders',
         'vaults',
 
         'posts',

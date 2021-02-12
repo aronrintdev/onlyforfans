@@ -69,7 +69,7 @@ class FactoryHelpers {
     // Inserts a [mediafiles] record
     public static function createImage(string $mftype, string $resourceID = null) : ?Mediafile
     {
-        $faker = \Faker\Factory::create();
+        $faker = Factory::create();
 
         // https://loremflickr.com/320/240/paris,girl,kitten,puppy,beach,rave
         //$url = 'https://loremflickr.com/json/320/240/paris,girl,kitten,puppy,beach,rave';

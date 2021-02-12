@@ -10,7 +10,7 @@ class CreateFanledgersTable extends Migration
     {
         Schema::create('fanledgers', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('guid')->unique();
+            $table->string('guid')->nullable();
 
             $table->uuid('from_account')->comment('The account this transaction is from.');
             $table->uuid('to_account')->comment('The account this transaction goes to.');

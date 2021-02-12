@@ -24,16 +24,13 @@ class Timeline extends Model implements Purchaseable, Ownable, Reportable
     use OwnableFunctions;
     use UsesUuid;
 
-    public $table = 'timelines';
+    protected $keyType = 'string';
 
     protected $guarded = ['id', 'created_at', 'updated_at'];
 
     protected $casts = [
-        'id'             => 'integer',
         'name'           => 'string',
         'about'          => 'string',
-        'avatar_id'      => 'integer',
-        'cover_id'       => 'integer',
     ];
 
     public function toArray()
@@ -58,7 +55,7 @@ class Timeline extends Model implements Purchaseable, Ownable, Reportable
 
     public function ledgerSales()
     {
-        return $this->morphMany('App\Models\FanLedger', 'purchaseable');
+        return $this->morphMany('App\Models\Fanledger', 'purchaseable');
     }
 
     public function posts()
@@ -96,13 +93,13 @@ class Timeline extends Model implements Purchaseable, Ownable, Reportable
         User $sender,
         int $amountInCents,
         array $customAttributes = []
-    ): ?FanLedger {
+    ): ?Fanledger {
 
         $result = null;
 
         switch ($fltype) {
             case PaymentTypeEnum::TIP:
-                $result = FanLedger::create([
+                $result = Fanledger::create([
                     'fltype' => $fltype,
                     'seller_id' => $this->user->id,
                     'purchaser_id' => $sender->id,
@@ -110,11 +107,11 @@ class Timeline extends Model implements Purchaseable, Ownable, Reportable
                     'purchaseable_id' => $this->id,
                     'qty' => 1,
                     'base_unit_cost_in_cents' => $amountInCents,
-                    'cattrs' => $customAttributes ?? [],
+                    'cattrs' => json_encode($customAttributes ?? []),
                 ]);
                 break;
             case PaymentTypeEnum::SUBSCRIPTION:
-                $result = FanLedger::create([
+                $result = Fanledger::create([
                     'fltype' => $fltype,
                     'seller_id' => $this->user->id,
                     'purchaser_id' => $sender->id,
@@ -122,7 +119,7 @@ class Timeline extends Model implements Purchaseable, Ownable, Reportable
                     'purchaseable_id' => $this->id,
                     'qty' => 1,
                     'base_unit_cost_in_cents' => $amountInCents,
-                    'cattrs' => $customAttributes ?? [],
+                    'cattrs' => json_encode($customAttributes ?? []),
                 ]);
                 //dd($result->toArray());
                 break;

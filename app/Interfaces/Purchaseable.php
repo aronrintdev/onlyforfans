@@ -3,7 +3,7 @@ namespace App\Interfaces;
 
 use App\Models\User;
 use App\Enums\PaymentTypeEnum;
-use App\Models\FanLedger;
+use App\Models\Fanledger;
 
 interface Purchaseable {
 
@@ -15,6 +15,6 @@ interface Purchaseable {
         User $sender,
         int $amountInCents,
         array $customAttributes = []
-    ) : ?FanLedger;
+    ) : ?Fanledger;
 
 }

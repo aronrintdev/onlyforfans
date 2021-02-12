@@ -11,7 +11,7 @@ use App\Libs\UserMgr;
 
 use App\Models\Setting;
 use App\Models\Timeline;
-use App\Models\FanLedger;
+use App\Models\Fanledger;
 
 use Illuminate\Http\Request;
 use App\Enums\PaymentTypeEnum;
@@ -61,7 +61,7 @@ class TimelinesController extends AppBaseController
     {
         $sessionUser = Auth::user();
         $timeline = Timeline::with('user')->where('username', $username)->firstOrFail();
-        $sales = FanLedger::where('seller_id', $timeline->user->id)->sum('total_amount');
+        $sales = Fanledger::where('seller_id', $timeline->user->id)->sum('total_amount');
 
         $timeline->userstats = [ // %FIXME DRY
             'post_count' => $timeline->posts->count(),

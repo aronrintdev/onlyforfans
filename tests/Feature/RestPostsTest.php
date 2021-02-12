@@ -10,7 +10,7 @@ use DB;
 
 use Tests\TestCase;
 use Database\Seeders\TestDatabaseSeeder;
-use App\Models\FanLedger;
+use App\Models\Fanledger;
 use App\Models\Mediafile;
 use App\Models\Post;
 use App\Models\Timeline;

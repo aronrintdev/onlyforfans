@@ -14,10 +14,12 @@ class CreateShareablesTable extends Migration
     public function up()
     {
         Schema::create('shareables', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->uuid('user')->comment('User that is sharing the resource');
+            $table->uuid('user_id')->nullable()->comment('User that is sharing the resource');
             $table->uuid('sharee_id')->nullable()->comment('User with whom resource is being shared with');
             $table->nullableUuidMorphs('shareable');
+
+            $table->index(['sharee_id', 'shareable_id']);
+
             $table->boolean('is_approved')->default(true);
             $table->string('access_level', 63);
             $table->json('metadata')->nullable();

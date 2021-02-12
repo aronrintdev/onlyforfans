@@ -5,7 +5,7 @@ namespace App\Models;
 use DB;
 use Auth;
 use Exception;
-use App\Models\FanLedger;
+use App\Models\Fanledger;
 use App\Interfaces\Ownable;
 use App\Interfaces\Likeable;
 use App\Interfaces\Deletable;
@@ -95,7 +95,7 @@ class Post extends Model implements Ownable, Deletable, Purchaseable, Likeable, 
 
     public function ledgerSales()
     {
-        return $this->morphMany('App\Models\FanLedger', 'purchaseable');
+        return $this->morphMany('App\Models\Fanledger', 'purchaseable');
     }
 
     /**
@@ -141,10 +141,10 @@ class Post extends Model implements Ownable, Deletable, Purchaseable, Likeable, 
         User $sender,
         int $amountInCents,
         array $customAttributes = []
-    ): ?FanLedger {
+    ): ?Fanledger {
         $result = DB::transaction(function () use ($fltype, $amountInCents, $customAttributes, &$sender) {
 
-            switch ($type) {
+            switch ($fltype) {
                 case PaymentTypeEnum::TIP:
                     $result = Fanledger::create([
                         'fltype' => $fltype,
@@ -154,7 +154,7 @@ class Post extends Model implements Ownable, Deletable, Purchaseable, Likeable, 
                         'purchaseable_id' => $this->id,
                         'qty' => 1,
                         'base_unit_cost_in_cents' => $amountInCents,
-                        'cattrs' => $customAttributes ?? [],
+                        'cattrs' => json_encode($customAttributes ?? []),
                     ]);
                     break;
                 case PaymentTypeEnum::PURCHASE:
@@ -166,14 +166,14 @@ class Post extends Model implements Ownable, Deletable, Purchaseable, Likeable, 
                         'purchaseable_id' => $this->id,
                         'qty' => 1,
                         'base_unit_cost_in_cents' => $amountInCents,
-                        'cattrs' => $customAttributes ?? [],
+                        'cattrs' => json_encode($customAttributes ?? []),
                     ]);
                     $sender->sharedposts()->attach($this->id, [
-                        'cattrs' => json_encode($customAttributes ?? []),
+                        'custom_attributes' => json_encode($customAttributes ?? []),
                     ]);
                     break;
                 default:
-                    throw new Exception('Unrecognized payment type : ' . $type);
+                    throw new Exception('Unrecognized payment type : ' . $fltype);
             }
 
             return $result;

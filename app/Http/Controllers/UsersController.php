@@ -11,7 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 use App\Models\User;
-use App\Models\FanLedger;
+use App\Models\Fanledger;
 use App\Enums\PaymentTypeEnum;
 
 class UsersController extends AppBaseController

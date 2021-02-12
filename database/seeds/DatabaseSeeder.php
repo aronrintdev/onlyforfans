@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             UsersTableSeeder::class,
             StoriesTableSeeder::class,
             PostsTableSeeder::class,
+            ShareablesTableSeeder::class,
         ]);
     }
 
