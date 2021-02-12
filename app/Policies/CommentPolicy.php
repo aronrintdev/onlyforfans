@@ -33,8 +33,8 @@ class CommentPolicy extends BasePolicy
 
     protected function view(User $user, Comment $comment)
     {
-        dd('here.v');
-        dd($user, $comment);
+        //dd($user, $comment);
+        //dd($user, $comment, $comment->post);
         return $user->can('view', $comment->post); // %FIXME: this should be tested, was throwing 500
     }
 

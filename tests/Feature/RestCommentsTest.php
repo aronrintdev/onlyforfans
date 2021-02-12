@@ -11,6 +11,7 @@ use App\Models\Comment;
 use App\Models\Post;
 use App\Models\Timeline;
 use App\Models\User;
+use App\Enums\PostTypeEnum;
 
 class RestCommentsTest extends TestCase
 {
@@ -81,18 +82,20 @@ class RestCommentsTest extends TestCase
     /**
      *  @group comments
      *  @group regression
-     *  @group here
      */
     public function test_can_show_followed_timelines_comment()
     {
-        //$timeline = Timeline::has('posts','>=',1)->has('followers','>=',1)->first();
         $timeline = Timeline::has('followers', '>=', 1)
             ->whereHas('posts', function($q1) {
-                $q1->has('comments', '>=', 1);
+                $q1->has('comments', '>=', 1)->where('type', PostTypeEnum::FREE);
             })->first();
         $creator = $timeline->user;
         $fan = $timeline->followers->first();
+
         $post = $timeline->posts()->has('comments','>=',1)->first();
+        $response = $this->actingAs($fan)->ajaxJSON('GET', route('posts.show', $post->id));
+        $response->assertStatus(200);
+
         $comment = $post->comments->first();
         $response = $this->actingAs($fan)->ajaxJSON('GET', route('comments.show', $comment->id));
         $response->assertStatus(200);
@@ -121,10 +124,14 @@ class RestCommentsTest extends TestCase
     /**
      *  @group comments
      *  @group regression
+     *  @group here
      */
     public function test_timeline_follower_can_store_comment_on_post()
     {
-        $timeline = Timeline::has('posts', '>=', 1)->has('followers', '>=', 1)->first();
+        $timeline = Timeline::has('followers', '>=', 1)
+            ->whereHas('posts', function($q1) {
+                $q1->where('type', PostTypeEnum::FREE);
+            })->first();
         $post = $timeline->posts->first();
         $creator = $timeline->user;
         $fan = $timeline->followers->first();
@@ -204,11 +211,10 @@ class RestCommentsTest extends TestCase
      */
     public function test_timeline_follower_can_like_then_unlike_post_comment()
     {
-        $timeline = Timeline::has('posts','>=',1)
-            ->has('followers', '>=', 1)
+        $timeline = Timeline::has('followers', '>=', 1)
             ->whereHas('posts', function($q1) {
-                $q1->has('comments', '>', 1);
-            })->first(); 
+                $q1->has('comments', '>=', 1)->where('type', PostTypeEnum::FREE);
+            })->first();
         $creator = $timeline->user;
         $fan = $timeline->followers->first();
         $post = $timeline->posts()->has('comments','>=',1)->first(); // %FIXME: sometimes this will not exist
