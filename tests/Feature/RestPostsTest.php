@@ -124,7 +124,6 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
-     *  @group here
      */
     public function test_can_store_post_with_single_image_file_on_my_timeline()
     {
@@ -191,6 +190,7 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group here
      */
     public function test_follower_can_view_image_of_free_post_on_my_timeline()
     {
@@ -222,6 +222,8 @@ class RestPostsTest extends TestCase
         ];
         $response = $this->actingAs($creator)->ajaxJSON('POST', route('mediafiles.store'), $payload);
         $response->assertStatus(201);
+$post = Post::find($postR->id);
+dd($post->mediafiles);
 
         // --
 
