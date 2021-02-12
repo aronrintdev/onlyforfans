@@ -8,11 +8,11 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
-use App\Invite;
-use App\Mediafile;
-use App\User;
-use App\Vault;
-use App\Vaultfolder;
+use App\Models\Invite;
+use App\Models\Mediafile;
+use App\Models\User;
+use App\Models\Vault;
+use App\Models\Vaultfolder;
 use App\Enums\InviteTypeEnum;
 use App\Mail\ShareableInvited;
 

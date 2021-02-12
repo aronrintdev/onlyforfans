@@ -24,7 +24,7 @@ class TimelinePolicy extends BasePolicy
      * Determine whether the user can view the model.
      *
      * @param  \App\Models\User  $user
-     * @param  \App\Timeline  $timeline
+     * @param  \App\Models\Timeline  $timeline
      * @return mixed
      */
     protected function view(User $user, Timeline $resource)

@@ -91,7 +91,6 @@ class TimelinesTest extends TestCase
     /**
      *  @group timelines
      *  @group regression
-     *  @group here
      */
     public function test_can_subscribe_to_timeline()
     {

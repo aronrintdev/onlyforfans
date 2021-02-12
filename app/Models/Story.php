@@ -46,12 +46,12 @@ class Story extends Model implements Likeable
 
     public function mediafiles()
     {
-        return $this->morphMany('App\Mediafile', 'resource');
+        return $this->morphMany('App\Models\Mediafile', 'resource');
     }
 
     public function timeline()
     {
-        return $this->belongsTo('App\Timeline');
+        return $this->belongsTo('App\Models\Timeline');
     }
 
     //--------------------------------------------

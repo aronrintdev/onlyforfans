@@ -2,7 +2,7 @@
 
 namespace App\Repositories;
 
-use App\Timeline;
+use App\Models\Timeline;
 
 class TimelineRepository extends BaseRepository
 {
