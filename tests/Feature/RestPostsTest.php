@@ -222,8 +222,8 @@ class RestPostsTest extends TestCase
         ];
         $response = $this->actingAs($creator)->ajaxJSON('POST', route('mediafiles.store'), $payload);
         $response->assertStatus(201);
-$post = Post::find($postR->id);
-dd($post->mediafiles);
+//$post = Post::find($postR->id);
+//dd($post->mediafiles);
 
         // --
 
