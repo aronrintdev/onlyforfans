@@ -135,10 +135,12 @@ class RestCommentsTest extends TestCase
         $post = $timeline->posts->first();
         $creator = $timeline->user;
         $fan = $timeline->followers->first();
+//dump('test', $fan->id, $creator->id);
 
         // remove any existing comments on post by fan...
         DB::table('comments')
             ->where('commentable_id', $post->id)
+            ->where('commentable_type', 'posts')
             ->where('user_id', $fan->id)
             ->delete();
 

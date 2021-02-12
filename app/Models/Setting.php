@@ -13,10 +13,7 @@ class Setting extends Model
 {
     public $table = 'settings';
 
-    public $fillable = [
-        'key',
-        'value',
-    ];
+    protected $guarded = [ 'id', 'created_at', 'updated_at' ];
 
     /**
      * The attributes that should be casted to native types.

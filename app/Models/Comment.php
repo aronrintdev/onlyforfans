@@ -29,12 +29,7 @@ class Comment extends Model implements Likeable, Commentable, Ownable
      */
     //protected $dates = ['deleted_at'];
 
-    protected $fillable = [
-        'post_id',
-        'description',
-        'user_id',
-        'parent_id'
-    ];
+    protected $guarded = [ 'id', 'created_at', 'updated_at' ];
 
     protected $casts = [
         'cattrs' => 'array',
