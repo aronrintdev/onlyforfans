@@ -135,7 +135,8 @@ class MediafilesController extends AppBaseController
             return \Redirect::route('admin.users.show', [$obj->slug]);
         }
 
-    } // update()
+    }
+
 
     /*
     public function destroy($pkid)
