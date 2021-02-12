@@ -2,7 +2,7 @@
 namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use DB;
 
 use Tests\TestCase;
@@ -14,7 +14,7 @@ use App\Models\User;
 
 class RestCommentsTest extends TestCase
 {
-    use DatabaseTransactions, WithFaker;
+    use RefreshDatabase, WithFaker;
 
     /**
      *  @group group_comments

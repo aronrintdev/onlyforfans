@@ -3,7 +3,7 @@ namespace Tests\Feature;
 
 use DB;
 use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Http\File;
 use Illuminate\Support\Facades\Storage;
@@ -20,7 +20,7 @@ use App\Enums\MediafileTypeEnum;
 
 class StoriesTest extends TestCase
 {
-    use DatabaseTransactions, WithFaker;
+    use RefreshDatabase, WithFaker;
 
     /**
      *  @group stories

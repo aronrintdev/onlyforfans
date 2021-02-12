@@ -3,7 +3,8 @@ namespace Tests\Feature;
 
 use DB;
 use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
+//use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Foundation\Testing\RefreshDatabase; 
 use Illuminate\Http\UploadedFile;
 use Illuminate\Http\File;
 use Illuminate\Support\Facades\Mail;
@@ -19,13 +20,14 @@ use App\Models\Story;
 use App\Models\Timeline;
 use App\Models\User;
 use App\Models\Vault;
+use App\Models\Vaultfolder;
 use App\Enums\MediafileTypeEnum;
 use App\Enums\PostTypeEnum;
 use App\Enums\StoryTypeEnum;
 
 class RestVaultTest extends TestCase
 {
-    use DatabaseTransactions, WithFaker;
+    use RefreshDatabase, WithFaker;
 
     /**
      *  @group vault
