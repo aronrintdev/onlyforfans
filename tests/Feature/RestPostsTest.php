@@ -223,18 +223,18 @@ class RestPostsTest extends TestCase
         $response = $this->actingAs($creator)->ajaxJSON('POST', route('mediafiles.store'), $payload);
         $response->assertStatus(201);
 //$post = Post::find($postR->id);
-//dd($post->mediafiles);
+//dd($post->mediafiles, $post->id, $post->postable_id, $timeline->id, $post->toArray());
 
         // --
 
         $timeline->refresh();
         $creator->refresh();
-        $fan = $timeline->followers[0];
         $post = $timeline->posts()->has('mediafiles', '>=', 1)
                          ->where('type', PostTypeEnum::FREE)
                          ->firstOrFail();
         $mediafile = $post->mediafiles->shift();
 
+        $fan = $timeline->followers[0];
         $response = $this->actingAs($fan)->ajaxJSON('GET', route('posts.show', $post->id));
         $response->assertStatus(200);
 
