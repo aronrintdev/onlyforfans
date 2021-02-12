@@ -62,8 +62,8 @@ class Comment extends Model implements Likeable, Commentable, Ownable
 
     public function post()
     {
-        return $this->belongsTo('App\Models\Post', 'commentable_id')
-            ->where('commentable_type', $this->getMorphString('App\Models\Post'));
+        //return $this->belongsTo('App\Models\Post', 'commentable_id')->where('commentable_type', $this->getMorphString('App\Models\Post'));
+        return $this->belongsTo('App\Models\Post', 'commentable_id'); // %FIXME...the above doesn't work
     }
 
 }
