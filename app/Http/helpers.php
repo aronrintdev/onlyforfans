@@ -1,8 +1,8 @@
 <?php
 
 use App\BlockedProfile;
-use App\Setting;
-use App\Timeline;
+use App\Models\Setting;
+use App\Models\Timeline;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;

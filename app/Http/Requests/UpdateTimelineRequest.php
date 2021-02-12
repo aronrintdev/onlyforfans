@@ -3,7 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use App\Timeline;
+use App\Models\Timeline;
 
 class UpdateTimelineRequest extends FormRequest
 {

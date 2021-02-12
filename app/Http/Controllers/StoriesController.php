@@ -64,12 +64,13 @@ class StoriesController extends AppBaseController
 
     public function store(Request $request)
     {
+        //dd($request->all());
         $request['attrs'] = json_decode($request['attrs'], true); // decode 'complex' data
 
         $vrules = [
             'attrs' => 'required',
             'attrs.stype' => 'required|in:text,photo',
-            'timeline_id' => 'required|uuid|exists:timelines',
+            //'timeline_id' => 'required|uuid|exists:timelines',
         ];
         if ( $request->has('mediafile') ) {
             if ( $request->hasFile('mediafile') ) {
@@ -84,7 +85,8 @@ class StoriesController extends AppBaseController
         // policy check is redundant as a story is always created on session user's
         //   timeline, however in the future we may be more flexible, or support
         //   multiple timelines which will require request->timeline_id
-        $timeline = Timeline::find($request->user()->timeline_id);
+        //$timeline = Timeline::find($request->user()->timeline_id);
+        $timeline = $request->user()->timeline;
         $this->authorize('update', $timeline);
 
         try {

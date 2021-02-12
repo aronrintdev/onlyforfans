@@ -53,7 +53,7 @@ class StoriesTest extends TestCase
      *  @group stories
      *  @group regression
      */
-    public function test_can_index_stories_on_followed_timeline()
+    public function test_can_index_stories_filtered_by_timeline()
     {
         $timeline = Timeline::has('stories', '>=', 1)->has('followers', '>=', 1)->first();
         $creator = $timeline->user;
@@ -102,7 +102,7 @@ class StoriesTest extends TestCase
      *  @group stories
      *  @group regression
      */
-    public function test_can_index_stories_of_followed_timelines()
+    public function test_can_index_stories_on_followed_timelines()
     {
         $timeline = Timeline::has('stories', '>=', 1)->has('followers', '>=', 1)->first();
         $creator = $timeline->user;
@@ -131,15 +131,18 @@ class StoriesTest extends TestCase
     /**
      *  @group stories
      *  @group regression
+     *  @group here
      */
     public function test_can_store_text_story()
     {
-        $owner = User::first();
+        $timeline = Timeline::has('stories', '>=', 1)->has('followers', '>=', 1)->first();
+        $owner = $timeline->user;
 
         $attrs = [
             'stype' => StoryTypeEnum::TEXT,
             'bgcolor' => 'blue',
             'content' => $this->faker->realText,
+            //'timeline_id' => $timeline->id,
         ];
 
         $payload = [
