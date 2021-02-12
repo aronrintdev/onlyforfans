@@ -17,7 +17,7 @@ class ShareablesController extends AppBaseController
     {
         $sessionUser = Auth::user();
 
-        $mediafiles = $sessionUser->sharedMediafiles->map( function($mf) {
+        $mediafiles = $sessionUser->sharedmediafiles->map( function($mf) {
             $mf->owner = $mf->getOwner()->first()->only('username', 'name', 'avatar');
             return $mf;
         });
@@ -25,7 +25,7 @@ class ShareablesController extends AppBaseController
         return response()->json([
             'shareables' => [
                 'mediafiles' => $mediafiles,
-                'vaultfolders' => $sessionUser->sharedVaultfolders,
+                'vaultfolders' => $sessionUser->sharedvaultfolders,
             ],
         ]);
     }

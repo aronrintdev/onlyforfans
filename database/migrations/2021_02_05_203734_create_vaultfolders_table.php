@@ -28,8 +28,8 @@ class CreateVaultfoldersTable extends Migration
 
             $table->string('vfname')->comment('Vault folder name');
 
-            $table->json('custom_attributes')->nullable()->comment('JSON-encoded custom attributes');
-            $table->json('metadata')->nullable()->comment('JSON-encoded meta attributes');
+            $table->json('cattrs')->nullable()->comment('JSON-encoded custom attributes');
+            $table->json('meta')->nullable()->comment('JSON-encoded meta attributes');
 
             $table->timestamps();
         });

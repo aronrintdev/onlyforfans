@@ -22,6 +22,8 @@ class CreatePostsTable extends Migration
             $table->string('type');
             $table->unsignedInteger('price');
             $table->string('currency')->default('USD');
+            $table->json('cattrs')->nullable()->comment('JSON-encoded custom attributes');
+            $table->json('meta')->nullable()->comment('JSON-encoded meta attributes');
             $table->timestamps();
             $table->softDeletes();
         });

@@ -76,6 +76,11 @@ class Post extends Model implements Ownable, Deletable, Purchaseable, Likeable, 
         return $this->likes->contains($sessionUser->id);
     }
 
+    protected $casts = [
+        'cattrs' => 'array',
+        'meta' => 'array',
+    ];
+
     //--------------------------------------------
     // %%% Relationships
     //--------------------------------------------
@@ -93,7 +98,7 @@ class Post extends Model implements Ownable, Deletable, Purchaseable, Likeable, 
         return $this->morphMany('App\Models\Mediafile', 'resource');
     }
 
-    public function ledgerSales()
+    public function ledgersales()
     {
         return $this->morphMany('App\Models\Fanledger', 'purchaseable');
     }
@@ -140,9 +145,9 @@ class Post extends Model implements Ownable, Deletable, Purchaseable, Likeable, 
         string $fltype, // PaymentTypeEnum
         User $sender,
         int $amountInCents,
-        array $customAttributes = []
+        array $cattrs = []
     ): ?Fanledger {
-        $result = DB::transaction(function () use ($fltype, $amountInCents, $customAttributes, &$sender) {
+        $result = DB::transaction(function () use ($fltype, $amountInCents, $cattrs, &$sender) {
 
             switch ($fltype) {
                 case PaymentTypeEnum::TIP:
@@ -154,7 +159,7 @@ class Post extends Model implements Ownable, Deletable, Purchaseable, Likeable, 
                         'purchaseable_id' => $this->id,
                         'qty' => 1,
                         'base_unit_cost_in_cents' => $amountInCents,
-                        'cattrs' => json_encode($customAttributes ?? []),
+                        'cattrs' => json_encode($cattrs ?? []),
                     ]);
                     break;
                 case PaymentTypeEnum::PURCHASE:
@@ -166,10 +171,10 @@ class Post extends Model implements Ownable, Deletable, Purchaseable, Likeable, 
                         'purchaseable_id' => $this->id,
                         'qty' => 1,
                         'base_unit_cost_in_cents' => $amountInCents,
-                        'cattrs' => json_encode($customAttributes ?? []),
+                        'cattrs' => json_encode($cattrs ?? []),
                     ]);
                     $sender->sharedposts()->attach($this->id, [
-                        'custom_attributes' => json_encode($customAttributes ?? []),
+                        'cattrs' => json_encode($cattrs ?? []),
                     ]);
                     break;
                 default:
@@ -184,6 +189,6 @@ class Post extends Model implements Ownable, Deletable, Purchaseable, Likeable, 
 
     public function canBeDeleted(): bool
     {
-        return !($this->ledgerSales->count() > 0);
+        return !($this->ledgersales->count() > 0);
     }
 }

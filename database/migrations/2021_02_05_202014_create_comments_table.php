@@ -18,6 +18,8 @@ class CreateCommentsTable extends Migration
             $table->uuidMorphs('commentable');
             $table->uuid('user_id');
             $table->text('description');
+            $table->json('cattrs')->nullable()->comment('JSON-encoded custom attributes');
+            $table->json('meta')->nullable()->comment('JSON-encoded meta attributes');
             $table->timestamps();
             $table->softDeletes();
         });

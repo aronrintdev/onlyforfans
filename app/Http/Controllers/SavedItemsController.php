@@ -67,7 +67,7 @@ class SavedItemsController extends AppBaseController
 
         /*
         $sessionUser = Auth::user();
-        $vaultfolder = Vaultfolder::create( $request->only('parent_id', 'vault_id', 'name') );
+        $vaultfolder = Vaultfolder::create( $request->only('parent_id', 'vault_id', 'vfname') );
          */
 
         return response()->json([

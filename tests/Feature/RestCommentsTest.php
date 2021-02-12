@@ -17,7 +17,7 @@ class RestCommentsTest extends TestCase
     use RefreshDatabase, WithFaker;
 
     /**
-     *  @group group_comments
+     *  @group comments
      *  @group regression
      */
     // %TODO: filters, timelines (see comments I have valid access to), etc

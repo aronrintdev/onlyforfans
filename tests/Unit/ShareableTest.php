@@ -49,7 +49,7 @@ class ShareableTest extends TestCase
         $mediafile->refresh();
         $this->_deleteList->push($mediafile);
 
-        $user->sharedMediafiles()->attach($mediafile->id); // do share
+        $user->sharedmediafiles()->attach($mediafile->id); // do share
 
         // --
 
@@ -60,9 +60,9 @@ class ShareableTest extends TestCase
         $this->assertNotNull($mediafile);
         $this->assertGreaterThan(0, $mediafile->id);
 
-        $this->assertGreaterThan(0, $user->sharedMediafiles->count());
-        $this->assertNotNull($user->sharedMediafiles[0]);
-        $this->assertSame($mediafile->guid, $user->sharedMediafiles[0]->guid);
+        $this->assertGreaterThan(0, $user->sharedmediafiles->count());
+        $this->assertNotNull($user->sharedmediafiles[0]);
+        $this->assertSame($mediafile->guid, $user->sharedmediafiles[0]->guid);
 
         $this->assertGreaterThan(0, $mediafile->sharees()->count());
         $this->assertNotNull($mediafile->sharees[0]);
@@ -87,7 +87,7 @@ class ShareableTest extends TestCase
         $vaultfolder = $rootVF;
         $vaultfolder->refresh();
 
-        $user->sharedVaultfolders()->attach($vaultfolder->id); // do share
+        $user->sharedvaultfolders()->attach($vaultfolder->id); // do share
 
         // --
 
@@ -98,9 +98,9 @@ class ShareableTest extends TestCase
         $this->assertNotNull($vaultfolder);
         $this->assertGreaterThan(0, $vaultfolder->id);
 
-        $this->assertGreaterThan(0, $user->sharedVaultfolders->count());
-        $this->assertNotNull($user->sharedVaultfolders[0]);
-        $this->assertSame($vaultfolder->guid, $user->sharedVaultfolders[0]->guid);
+        $this->assertGreaterThan(0, $user->sharedvaultfolders->count());
+        $this->assertNotNull($user->sharedvaultfolders[0]);
+        $this->assertSame($vaultfolder->guid, $user->sharedvaultfolders[0]->guid);
 
         $this->assertGreaterThan(0, $vaultfolder->sharees()->count());
         $this->assertNotNull($vaultfolder->sharees[0]);
@@ -125,7 +125,7 @@ class ShareableTest extends TestCase
                 }
                 /*
                 if ( $obj instanceof User ) {
-                     $obj->sharedMediafiles()->detach();
+                     $obj->sharedmediafiles()->detach();
                 }
                  */
                 $obj->delete();

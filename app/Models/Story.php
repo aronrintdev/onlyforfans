@@ -30,8 +30,8 @@ class Story extends Model implements Likeable
 
     protected $casts = [
         'content' => 'array',
-        'custom_attributes' => 'array',
-        'metadata' => 'array',
+        'cattrs' => 'array',
+        'meta' => 'array',
     ];
 
     public function getIsLikedByMeAttribute($value)

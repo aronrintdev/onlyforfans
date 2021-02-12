@@ -92,7 +92,7 @@ class StoriesController extends AppBaseController
                 $story = Story::create([
                     'timeline_id' => $timeline->id,
                     'content' => $request->attrs['content'] ?? null,
-                    'custom_attributes' => [
+                    'cattrs' => [
                         'background-color' => array_key_exists('bgcolor', $request->attrs) ? $request->attrs['bgcolor'] : '#fff',
                     ],
                     'stype' => $request->attrs['stype'],
@@ -109,8 +109,8 @@ class StoriesController extends AppBaseController
                             'filename' => $newFilename,
                             'mfname' => $mfname ?? $file->getClientOriginalName(),
                             'mftype' => MediafileTypeEnum::STORY,
-                            'metadata' => $request->input('attrs.foo') ?? null,
-                            'custom_attributes' => $request->input('attrs.bar') ?? null,
+                            'meta' => $request->input('attrs.foo') ?? null,
+                            'cattrs' => $request->input('attrs.bar') ?? null,
                             'mimetype' => $file->getMimeType(),
                             'orig_filename' => $file->getClientOriginalName(),
                             'orig_ext' => $file->getClientOriginalExtension(),
@@ -199,7 +199,7 @@ class StoriesController extends AppBaseController
             'stories' => $storiesA,
             'dtoUser' => [
                 'avatar' => $request->user()->avatar,
-                'fullName' => $request->user()->timeline->name,
+                'fullname' => $request->user()->timeline->name,
                 'username' => $request->user()->timeline->username,
             ],
         ]);

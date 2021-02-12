@@ -9,7 +9,7 @@ use App\Interfaces\Guidable;
 class Invite extends BaseModel implements Guidable
 {
     protected $guarded = ['id', 'created_at', 'updated_at'];
-    protected $hidden = ['custom_attributes', 'metadata',];
+    protected $hidden = ['cattrs', 'meta',];
 
     public static $vrules = [];
 
@@ -38,8 +38,8 @@ class Invite extends BaseModel implements Guidable
     //--------------------------------------------
 
     protected $casts = [
-        'custom_attributes' => 'array',
-        'metadata' => 'array',
+        'cattrs' => 'array',
+        'meta' => 'array',
     ];
 
     public function getJoinLinkAttribute($value)

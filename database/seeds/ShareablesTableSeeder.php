@@ -73,7 +73,7 @@ class ShareablesTableSeeder extends Seeder
                         'shareable_id' => $t->id,
                         'is_approved' => 1,
                         'access_level' => 'default',
-                        'custom_attributes' => json_encode($customAttributes),
+                        'cattrs' => json_encode($customAttributes),
                     ]);
                 });
             }
@@ -101,7 +101,7 @@ class ShareablesTableSeeder extends Seeder
                     'shareable_id' => $t->id,
                     'is_approved' => 1,
                     'access_level' => 'default',
-                    'custom_attributes' => json_encode($customAttributes),
+                    'cattrs' => json_encode($customAttributes),
                 ]);
             });
 
@@ -118,7 +118,7 @@ class ShareablesTableSeeder extends Seeder
                     'shareable_id' => $t->id,
                     'is_approved' => 1,
                     'access_level' => 'premium',
-                    'custom_attributes' => json_encode($customAttributes),
+                    'cattrs' => json_encode($customAttributes),
                 ]);
                 Fanledger::create([
                     'fltype' => PaymentTypeEnum::SUBSCRIPTION,

@@ -47,8 +47,8 @@ class TimelinesTest extends TestCase
         $this->assertNotNull($fanledger);
         $this->assertEquals(1, $fanledger->qty);
         $this->assertEquals($payload['base_unit_cost_in_cents'], $fanledger->base_unit_cost_in_cents);
-        $this->assertTrue( $timeline->ledgerSales->contains( $fanledger->id ) );
-        $this->assertTrue( $fan->ledgerPurchases->contains( $fanledger->id ) );
+        $this->assertTrue( $timeline->ledgersales->contains( $fanledger->id ) );
+        $this->assertTrue( $fan->ledgerpurchases->contains( $fanledger->id ) );
     }
 
     /**
@@ -143,8 +143,8 @@ class TimelinesTest extends TestCase
         $this->assertNotNull($fanledger);
         $this->assertEquals(1, $fanledger->qty);
         $this->assertEquals(intval($timeline->user->price*100), $fanledger->base_unit_cost_in_cents);
-        $this->assertTrue( $timeline->ledgerSales->contains( $fanledger->id ) );
-        $this->assertTrue( $fan->ledgerPurchases->contains( $fanledger->id ) );
+        $this->assertTrue( $timeline->ledgersales->contains( $fanledger->id ) );
+        $this->assertTrue( $fan->ledgerpurchases->contains( $fanledger->id ) );
 
         // Check access (after: should be allowed)
         //$response = $this->actingAs($fan)->ajaxJSON('GET', route('timelines.show', $timeline->id));

@@ -65,8 +65,8 @@ trait ModelTraits
             case 'guid':
                 //return strtoupper($this->{$field});
                 return strtoupper(substr($this->{$field}, 0, 8));
-            case 'metadata':
-            case 'custom_attributes':
+            case 'meta':
+            case 'cattrs':
                 return json_encode($this->{$field});
             case 'created_at':
             case 'updated_at':
@@ -96,10 +96,10 @@ trait ModelTraits
             case 'id':
                 $key = 'PKID';
                 break;
-            case 'custom_attributes':
+            case 'cattrs':
                 $key = 'Custom Attrs';
                 break;
-            case 'metadata':
+            case 'meta':
                 $key = 'Meta Attrs';
                 break;
             case 'created_at_str':

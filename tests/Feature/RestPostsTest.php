@@ -26,6 +26,7 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group here
      */
     // %TODO: filters, timelines (see posts I follow), etc
     public function test_can_index_posts()
@@ -44,9 +45,11 @@ class RestPostsTest extends TestCase
         $this->assertGreaterThan(0, $postsR->count());
         //$this->assertNotNull($postsR[0]->description);
         //$this->assertNotNull($postsR[0]->timeline_id);
-        $this->assertObjectHasAttribute('timeline_id', $postsR[0]);
+        $this->assertObjectHasAttribute('postable_id', $postsR[0]);
+        $this->assertObjectHasAttribute('postable_type', $postsR[0]);
         $this->assertObjectHasAttribute('description', $postsR[0]);
-        $this->assertEquals($postsR[0]->timeline_id, $timeline->id);
+        $this->assertEquals($postsR[0]->postable_type, 'timelines');
+        $this->assertEquals($postsR[0]->postable_id, $timeline->id);
     }
 
     /**
@@ -478,8 +481,8 @@ class RestPostsTest extends TestCase
         $this->assertEquals($creator->id, $fanledger->seller_id);
         $this->assertEquals('posts', $fanledger->purchaseable_type);
         $this->assertEquals($post->id, $fanledger->purchaseable_id);
-        $this->assertTrue( $post->ledgerSales->contains( $fanledger->id ) );
-        $this->assertTrue( $fan->ledgerPurchases->contains( $fanledger->id ) );
+        $this->assertTrue( $post->ledgersales->contains( $fanledger->id ) );
+        $this->assertTrue( $fan->ledgerpurchases->contains( $fanledger->id ) );
     }
 
     /**
@@ -527,8 +530,8 @@ class RestPostsTest extends TestCase
         $this->assertEquals('posts', $fanledger->purchaseable_type);
         $this->assertEquals($post->id, $fanledger->purchaseable_id);
         $this->assertTrue( $post->sharees->contains( $fan->id ) );
-        $this->assertTrue( $post->ledgerSales->contains( $fanledger->id ) );
-        $this->assertTrue( $fan->ledgerPurchases->contains( $fanledger->id ) );
+        $this->assertTrue( $post->ledgersales->contains( $fanledger->id ) );
+        $this->assertTrue( $fan->ledgerpurchases->contains( $fanledger->id ) );
 
         // Check access (after: should be allowed)
         $response = $this->actingAs($fan)->ajaxJSON('GET', route('posts.show', $post->id));

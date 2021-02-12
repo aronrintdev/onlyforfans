@@ -36,6 +36,11 @@ class Comment extends Model implements Likeable, Commentable, Ownable
         'parent_id'
     ];
 
+    protected $casts = [
+        'cattrs' => 'array',
+        'meta' => 'array',
+    ];
+
     public function getOwner(): ?Collection
     {
         return new Collection([ $this->user ]);

@@ -994,7 +994,7 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
-     *  @group here
+     *  @group OFF-here
      */
     public function test_select_mediafiles_in_vaultfolder_to_share_with_registered_user()
     {

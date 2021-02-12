@@ -22,8 +22,8 @@ class CreateShareablesTable extends Migration
 
             $table->boolean('is_approved')->default(true);
             $table->string('access_level', 63);
-            $table->json('metadata')->nullable();
-            $table->json('custom_attributes')->nullable();
+            $table->json('cattrs')->nullable();
+            $table->json('meta')->nullable();
             $table->timestamps();
         });
     }

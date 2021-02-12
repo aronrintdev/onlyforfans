@@ -22,7 +22,7 @@ class MediafilesController extends AppBaseController
         $this->validate($request, [
             'mediafile' => 'required',
             'mftype' => 'required|in:avatar,cover,post,story,vault',
-            'resource_type' => 'nullable|alpha-dash|in:comments,posts,stories,vault_folders',
+            'resource_type' => 'nullable|alpha-dash|in:comments,posts,stories,vaultfolders',
             'resource_id' => 'required_with:resource_type|numeric|min:1',
         ]);
 
@@ -108,13 +108,13 @@ class MediafilesController extends AppBaseController
 
     public function update(Request $request, $pkid)
     {
-        $this->validate($request, mediafile::$vrules);
+        $this->validate($request, Mediafile::$vrules);
 
         try {
 
             $obj = mediafile::find($pkid);
             if ( empty($obj) ) {
-                throw new ModelNotFoundException('Could not find mediafile with pkid '.$pkid);
+                throw new ModelNotFoundException('Could not find Mediafile with pkid '.$pkid);
             }
 
             $obj = DB::transaction(function () use ($request, $obj) {
@@ -143,7 +143,7 @@ class MediafilesController extends AppBaseController
     {
         $sessionUser = Auth::user();
 
-        $obj = mediafile::find($pkid);
+        $obj = Mediafile::find($pkid);
         if ( empty($obj) ) {
             throw new ModelNotFoundException('Could not find mediafile with pkid '.$pkid);
         }
