@@ -135,7 +135,7 @@ class TimelinesController extends AppBaseController
         $sessionUser = Auth::user(); // subscriber (purchaser)
 
         $request->validate([
-            'sharee_id' => 'required|numeric|min:1',
+            'sharee_id' => 'required|uuid|exists:users',
         ]);
         if ( $request->sharee_id != $sessionUser->id ) {
             abort(403);
@@ -167,7 +167,7 @@ class TimelinesController extends AppBaseController
         $sessionUser = Auth::user(); // subscriber (purchaser)
 
         $request->validate([
-            'sharee_id' => 'required|numeric|min:1',
+            'sharee_id' => 'required|uuid|exists:users',
         ]);
         if ( $request->sharee_id != $sessionUser->id ) {
             abort(403);

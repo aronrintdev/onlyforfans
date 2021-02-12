@@ -23,7 +23,7 @@ class MediafilesController extends AppBaseController
             'mediafile' => 'required',
             'mftype' => 'required|in:avatar,cover,post,story,vault',
             'resource_type' => 'nullable|alpha-dash|in:comments,posts,stories,vaultfolders',
-            'resource_id' => 'required_with:resource_type',
+            'resource_id' => 'required_with:resource_type|uuid',
         ]);
 
         $file = $request->file('mediafile');
@@ -44,17 +44,17 @@ class MediafilesController extends AppBaseController
         try {
             $mediafile = DB::transaction(function () use(&$file, &$request) {
                 switch ($request->mftype) {
-                    case 'vault':
-                        $subFolder = 'vaultfolders';
-                        break;
-                    case 'story':
-                        $subFolder = 'stories';
-                        break;
-                    case 'post':
-                        $subFolder = 'posts';
-                        break;
-                    default:
-                        $subFolder = 'default';
+                case 'vault':
+                    $subFolder = 'vaultfolders';
+                    break;
+                case 'story':
+                    $subFolder = 'stories';
+                    break;
+                case 'post':
+                    $subFolder = 'posts';
+                    break;
+                default:
+                    $subFolder = 'default';
                 }
                 $newFilename = $file->store('./'.$subFolder, 's3');
                 $mfname = $mfname ?? $file->getClientOriginalName();
@@ -108,7 +108,9 @@ class MediafilesController extends AppBaseController
 
     public function update(Request $request, $pkid)
     {
-        $this->validate($request, Mediafile::$vrules);
+        $this->validate($request, [
+            'mfname' => 'string|alpha_dash',
+        ]);
 
         try {
 

@@ -51,9 +51,9 @@ class PostsController extends AppBaseController
     {
         //dd($request->all());
         $request->validate([
-            'timeline_id' => 'required|exists:timelines,id',
+            'timeline_id' => 'required|uuid|exists:timelines,id',
             'mediafiles' => 'array',
-            'mediafiles.*.*' => 'integer|exists:mediafiles',
+            'mediafiles.*.*' => 'integer|uuid|exists:mediafiles',
         ]);
 
         $timeline = Timeline::find($request->timeline_id); // timeline being posted on
