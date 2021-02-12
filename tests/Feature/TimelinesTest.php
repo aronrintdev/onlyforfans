@@ -52,7 +52,7 @@ class TimelinesTest extends TestCase
     }
 
     /**
-     *  @group shareables
+     *  @group timelines
      *  @group regression
      */
     public function test_can_follow_timeline()
@@ -89,8 +89,9 @@ class TimelinesTest extends TestCase
     }
 
     /**
-     *  @group shareables
+     *  @group timelines
      *  @group regression
+     *  @group here
      */
     public function test_can_subscribe_to_timeline()
     {
@@ -148,7 +149,7 @@ class TimelinesTest extends TestCase
 
         // Check access (after: should be allowed)
         //$response = $this->actingAs($fan)->ajaxJSON('GET', route('timelines.show', $timeline->id));
-        $response = $this->actingAs($fan)->ajaxJSON('GET', route('timelines.show', $timeline->username));
+        $response = $this->actingAs($fan)->ajaxJSON('GET', route('timelines.show', $timeline->user->username));
         $response->assertStatus(200);
 
         // %TODO: unsubscribe (will not be charged next recurring payment period)

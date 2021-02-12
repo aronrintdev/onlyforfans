@@ -197,6 +197,7 @@ Route::post('pusher/auth', function (Illuminate\Http\Request $request, Pusher $p
 | Static Pages
 |--------------------------------------------------------------------------
 */
+/*
 Route::get('faq', 'PageController@faq');
 Route::get('support', 'PageController@support');
 Route::get('terms-of-use', 'PageController@termsOfUse');
@@ -205,8 +206,7 @@ Route::get('dmca', 'PageController@dmca');
 Route::get('usc2257', 'PageController@usc2257');
 Route::get('legal', 'PageController@legal');
 Route::get('blog', 'PageController@blog');
-
-
+*/
 
 /*
 |--------------------------------------------------------------------------

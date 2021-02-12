@@ -59,8 +59,10 @@ class TimelinesController extends AppBaseController
 
     public function show(Request $request, $username)
     {
-        $sessionUser = Auth::user();
-        $timeline = Timeline::with('user')->where('username', $username)->firstOrFail();
+        //$timeline = Timeline::with('user')->where('username', $username)->firstOrFail();
+        $timeline = Timeline::with('user')->whereHas('user', function($q1) use($username) {
+            $q1->where('username', $username);
+        })->first();
         $sales = Fanledger::where('seller_id', $timeline->user->id)->sum('total_amount');
 
         $timeline->userstats = [ // %FIXME DRY
@@ -73,7 +75,7 @@ class TimelinesController extends AppBaseController
         ];
 
         return view('timelines.show', [
-            'sessionUser' => $sessionUser,
+            'sessionUser' => $request->user(),
             'timeline' => $timeline,
         ]);
     }
@@ -81,8 +83,7 @@ class TimelinesController extends AppBaseController
     // Display my home timeline
     public function home(Request $request)
     {
-        $sessionUser = Auth::user();
-        $timeline = $sessionUser->timeline()->with('user')->first();
+        $timeline = $request->user()->timeline()->with('user')->first();
         $sales = Fanledger::where('seller_id', $timeline->user->id)->sum('total_amount');
 
         $timeline->userstats = [ // %FIXME DRY
@@ -95,7 +96,7 @@ class TimelinesController extends AppBaseController
         ];
 
         return view('timelines.home', [
-            'sessionUser' => $sessionUser,
+            'sessionUser' => $request->user(),
             'timeline' => $timeline,
             //'myVault' => $myVault,
             //'vaultRootFolder' => $vaultRootFolder,
@@ -135,7 +136,7 @@ class TimelinesController extends AppBaseController
         $sessionUser = Auth::user(); // subscriber (purchaser)
 
         $request->validate([
-            'sharee_id' => 'required|uuid|exists:users',
+            'sharee_id' => 'required|uuid|exists:users,id',
         ]);
         if ( $request->sharee_id != $sessionUser->id ) {
             abort(403);
@@ -167,7 +168,7 @@ class TimelinesController extends AppBaseController
         $sessionUser = Auth::user(); // subscriber (purchaser)
 
         $request->validate([
-            'sharee_id' => 'required|uuid|exists:users',
+            'sharee_id' => 'required|uuid|exists:users,id',
         ]);
         if ( $request->sharee_id != $sessionUser->id ) {
             abort(403);
