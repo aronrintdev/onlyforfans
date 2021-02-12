@@ -25,19 +25,18 @@ class CommentsTableSeeder extends Seeder
             $numUsers = $this->faker->numberBetween( 1, min($users->count()-1, $this->getMax('users')) );
             $commenters = FactoryHelpers::parseRandomSubset($users, $numUsers);
 
-            // Needs to be redone
-
-            // $commenters->each( function($commenter) use(&$post) {
-            //     $numComments = $this->faker->numberBetween( 1, $this->getMax('comments') );
-            //     collect(range(1,$numComments))->each( function() use(&$post, &$commenter) { // Comment generation loop
-            //         $comment = Comment::create([
-            //             'post_id'     => $post->id,
-            //             'description' => $this->faker->realText( $this->faker->numberBetween(20,200) ),
-            //             'user_id'     => $commenter->id,
-            //             'parent_id'   => null, // %TODO: nested comments
-            //         ]);
-            //     });
-            // });
+             $commenters->each( function($commenter) use(&$post) {
+                 $numComments = $this->faker->numberBetween( 1, $this->getMax('comments') );
+                 collect(range(1,$numComments))->each( function() use(&$post, &$commenter) { // Comment generation loop
+                     $comment = Comment::create([
+                         'commentable_id'     => $post->id,
+                         'commentable_type'   => 'posts',
+                         'description' => $this->faker->realText( $this->faker->numberBetween(20,200) ),
+                         'user_id'     => $commenter->id,
+                         //'parent_id'   => null, // %TODO: nested comments
+                     ]);
+                 });
+             });
         });
     }
 
