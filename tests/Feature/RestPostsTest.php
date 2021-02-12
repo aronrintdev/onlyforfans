@@ -26,7 +26,6 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
-     *  @group here
      */
     // %TODO: filters, timelines (see posts I follow), etc
     public function test_can_index_posts()
@@ -69,8 +68,8 @@ class RestPostsTest extends TestCase
         $this->assertNotNull($content->post);
         $postR = $content->post;
         $this->assertNotNull($postR->description);
-        $this->assertNotNull($postR->timeline_id);
-        $this->assertEquals($postR->timeline_id, $timeline->id);
+        $this->assertNotNull($postR->postable_id);
+        $this->assertEquals($postR->postable_id, $timeline->id);
     }
 
     /**
@@ -93,8 +92,8 @@ class RestPostsTest extends TestCase
         $content = json_decode($response->content());
         $this->assertNotNull($content->post);
         $postR = $content->post;
-        $this->assertObjectHasAttribute('timeline_id', $postR);
-        $this->assertEquals($postR->timeline_id, $timeline->id);
+        $this->assertObjectHasAttribute('postable_id', $postR);
+        $this->assertEquals($postR->postable_id, $timeline->id);
 
         // %TODO: test can not show unfollowed timeline's post
     }
@@ -125,6 +124,7 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group here
      */
     public function test_can_store_post_with_single_image_file_on_my_timeline()
     {

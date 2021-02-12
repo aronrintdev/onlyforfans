@@ -131,8 +131,8 @@ class Post extends Model implements Ownable, Deletable, Purchaseable, Likeable, 
 
     public function timeline()
     {
-        return $this->belongsTo('App\Models\Timeline', 'postable_id')
-            ->where('postable_type', $this->getMorphString('App\Models\Timeline'));
+        //return $this->belongsTo('App\Models\Timeline', 'postable_id')->where('postable_type', $this->getMorphString('App\Models\Timeline')); // %FIXME: FAILS REGRESSION
+        return $this->belongsTo('App\Models\Timeline', 'postable_id');
     }
 
     //--------------------------------------------

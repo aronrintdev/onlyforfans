@@ -23,7 +23,7 @@ class MediafilesController extends AppBaseController
             'mediafile' => 'required',
             'mftype' => 'required|in:avatar,cover,post,story,vault',
             'resource_type' => 'nullable|alpha-dash|in:comments,posts,stories,vaultfolders',
-            'resource_id' => 'required_with:resource_type|numeric|min:1',
+            'resource_id' => 'required_with:resource_type',
         ]);
 
         $file = $request->file('mediafile');
