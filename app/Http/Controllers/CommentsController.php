@@ -70,18 +70,13 @@ class CommentsController extends AppBaseController
             'post_id' => 'required|uuid|exists:posts,id',
             'user_id' => 'required|uuid|exists:users,id',
             //'parent_id' => 'exists:comments,id', // %TODO
-            'description' => 'required|string|min:1',
+            'description' => 'required|string|min:3',
         ]);
-        //$attrs = $request->all();
         $attrs = $request->except('post_id'); // timeline_id is now postable
-        $attrs['commentable_type'] = 'commentable'; // %FIXME: hardcoded
+        $attrs['commentable_type'] = 'posts'; // %FIXME: hardcoded
         $attrs['commentable_id'] = $request->post_id; // %FIXME: hardcoded
 
-        try {
-            $comment = Comment::create($attrs);
-        } catch (Exception $e) {
-            throw $e;
-        }
+        $comment = Comment::create($attrs);
 
         return response()->json([
             'comment' => $comment,

@@ -14,5 +14,5 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Notification extends Model
 {
     use SoftDeletes;
-    protected $fillable = [];
+    protected $guarded = [ 'id', 'created_at', 'updated_at' ];
 }

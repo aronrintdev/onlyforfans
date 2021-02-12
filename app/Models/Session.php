@@ -9,20 +9,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Session extends Model
 {
-    //
-    protected $fillable = [
-        'id',
-        'user_id',
-        'user_agent',
-        // 'user_name',
-        // 'browser',
-        // 'os',
-        // 'machine_name',
-        // 'location',
-        'ip_address',
-        'last_activity',
-        // 'date'
-    ];
+    protected $guarded = [ 'id', 'created_at', 'updated_at' ];
 
     /**
      * The attributes that should be hidden for arrays.
