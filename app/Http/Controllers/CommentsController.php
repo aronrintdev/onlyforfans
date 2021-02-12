@@ -78,8 +78,8 @@ class CommentsController extends AppBaseController
     public function store(Request $request)
     {
         $request->validate([
-            'post_id' => 'required|exists:posts,id',
-            'user_id' => 'required|exists:users,id',
+            'post_id' => 'required|uuid|exists:posts,id',
+            'user_id' => 'required|uuid|exists:users,id',
             //'parent_id' => 'exists:comments,id', // %TODO
             'description' => 'required|string|min:1',
         ]);

@@ -103,8 +103,9 @@ class VaultfoldersController extends AppBaseController
     public function store(Request $request)
     {
         $vrules = [
-            'vault_id' => 'required|integer|min:1',
+            'vault_id' => 'required|uuid|exists:vaults',
             'vfname' => 'required|string',
+            'parent_id' => 'nullable|uuid|exists:vaultfolders',
         ];
 
         $attrs = [];

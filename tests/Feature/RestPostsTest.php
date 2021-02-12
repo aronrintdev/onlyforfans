@@ -190,7 +190,6 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
-     *  @group here
      */
     public function test_follower_can_view_image_of_free_post_on_my_timeline()
     {
@@ -222,8 +221,6 @@ class RestPostsTest extends TestCase
         ];
         $response = $this->actingAs($creator)->ajaxJSON('POST', route('mediafiles.store'), $payload);
         $response->assertStatus(201);
-//$post = Post::find($postR->id);
-//dd($post->mediafiles, $post->id, $post->postable_id, $timeline->id, $post->toArray());
 
         // --
 
@@ -342,7 +339,7 @@ class RestPostsTest extends TestCase
     }
 
     /**
-     *  @group posts
+     *  @group OFF-posts
      *  @group OFF-regression
      *  @group todo
      */
@@ -353,7 +350,7 @@ class RestPostsTest extends TestCase
     }
 
     /**
-     *  @group posts
+     *  @group OFF-posts
      *  @group OFF-regression
      *  @group TODO
      */
@@ -395,6 +392,7 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group here
      */
     public function test_timeline_follower_can_like_then_unlike_post()
     {

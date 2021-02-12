@@ -34,7 +34,7 @@ class LikeablesController extends AppBaseController
     {
         $request->validate([
             'likeable_type' => 'required|string|alpha-dash|in:comments,mediafiles,posts,stories',
-            'likeable_id' => 'required|numeric|min:1',
+            'likeable_id' => 'required|uuid',
         ]);
 
         $alias = $request->likeable_type;
@@ -59,7 +59,7 @@ class LikeablesController extends AppBaseController
     {
         $request->validate([
             'likeable_type' => 'required|string|alpha-dash|in:comments,mediafiles,posts,stories',
-            'likeable_id' => 'required|numeric|min:1',
+            'likeable_id' => 'required|uuid',
         ]);
 
         $alias = $request->likeable_type;

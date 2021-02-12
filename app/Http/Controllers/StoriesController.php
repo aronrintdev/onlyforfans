@@ -69,6 +69,7 @@ class StoriesController extends AppBaseController
         $vrules = [
             'attrs' => 'required',
             'attrs.stype' => 'required|in:text,photo',
+            'timeline_id' => 'required|uuid|exists:timelines',
         ];
         if ( $request->has('mediafile') ) {
             if ( $request->hasFile('mediafile') ) {
