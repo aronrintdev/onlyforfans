@@ -9,7 +9,7 @@ trait LikeableTraits
      */
     public function likes()
     {
-        return $this->morphToMany('App\Models\User', 'likeable', 'likeables')
+        return $this->morphToMany('App\Models\User', 'likeable', 'likeables', 'likee_id')
             ->withTimestamps();
     }
 

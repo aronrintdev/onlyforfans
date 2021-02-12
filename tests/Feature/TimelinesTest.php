@@ -98,9 +98,9 @@ class TimelinesTest extends TestCase
         $creator = $timeline->user;
 
         // Make sure creator's timeline is paid-only
-        $creator->is_follow_for_free = false;
-        $creator->price = $this->faker->randomNumber(3);
-        $creator->save();
+        $timeline->is_follow_for_free = false;
+        $timeline->price = $this->faker->randomNumber(3);
+        $timeline->save();
         $timeline->refresh();
 
         // find a user who is not yet a follower (includes subscribers) of timeline

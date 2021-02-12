@@ -128,7 +128,7 @@ class RestCommentsTest extends TestCase
 
         // remove any existing comments on post by fan...
         DB::table('comments')
-            ->where('post_id', $post->id)
+            ->where('commentable_id', $post->id)
             ->where('user_id', $fan->id)
             ->delete();
 

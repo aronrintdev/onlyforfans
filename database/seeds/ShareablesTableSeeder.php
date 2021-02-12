@@ -150,7 +150,8 @@ class ShareablesTableSeeder extends Seeder
                 $u->save();
 
                 $timeline = $u->timeline;
-                $u->is_follow_for_free = $isFollowForFree;
+                $timeline->is_follow_for_free = $isFollowForFree;
+                $timeline->price = $isFollowForFree ? 0 : $this->faker->randomFloat(2, 1, 300);
                 $timeline->avatar_id = $avatar->id ?? null;
                 $timeline->cover_id = $cover->id ?? null;
                 $timeline->save();

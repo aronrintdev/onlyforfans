@@ -152,7 +152,7 @@ class User extends Authenticatable implements PaymentSendable, Blockable
 
     public function likedposts()
     {
-        return $this->morphedByMany('App\Models\Post', 'likeable', 'likeables', 'user')
+        return $this->morphedByMany('App\Models\Post', 'likeable', 'likeables', 'likee_id')
             ->withTimestamps();
     }
 
@@ -356,7 +356,7 @@ class User extends Authenticatable implements PaymentSendable, Blockable
 
     public function commentLikes()
     {
-        return $this->morphedByMany('App\Models\Comment', 'likeable', 'likeables', 'user')
+        return $this->morphedByMany('App\Models\Comment', 'likeable', 'likeables', 'likee_id')
             ->withTimestamps();
     }
 
