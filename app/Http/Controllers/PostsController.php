@@ -60,7 +60,9 @@ class PostsController extends AppBaseController
 
         $this->authorize('update', $timeline); // create post considered timeline update
 
-        $attrs = $request->all();
+        $attrs = $request->except('timeline_id'); // timeline_id is now postable
+        $attrs['postable_type'] = 'timelines'; // %FIXME: hardcoded
+        $attrs['postable_id'] = $timeline->id; // %FIXME: hardcoded
         $attrs['user_id'] = $timeline->user->id; // %FIXME: remove this field, redundant
         $attrs['active'] = $request->input('active', 1);
         $attrs['type'] = $request->input('type', PostTypeEnum::FREE);
