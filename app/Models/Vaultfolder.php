@@ -73,8 +73,8 @@ class Vaultfolder extends BaseModel implements Guidable, Sluggable, Ownable
     //--------------------------------------------
 
     protected $casts = [
-        'custom_attributes' => 'array',
-        'metadata' => 'array',
+        'cattrs' => 'array',
+        'meta' => 'array',
     ];
 
     public function getBreadcrumb(): array

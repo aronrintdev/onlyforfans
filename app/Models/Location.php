@@ -20,8 +20,8 @@ class Location extends Model
 
     protected $casts = [
         'gps'               => 'array',
-        'custom_attributes' => 'array',
-        'metadata'          => 'array',
+        'cattrs' => 'array',
+        'meta'          => 'array',
     ];
 
     public function resource()

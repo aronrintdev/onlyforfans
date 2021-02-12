@@ -56,7 +56,6 @@ class User extends Authenticatable implements PaymentSendable, Blockable
     public static function boot()
     {
         parent::boot();
-        parent::boot();
         self::creating(function ($model) {
             $model->checkUsername();
         });
@@ -111,7 +110,7 @@ class User extends Authenticatable implements PaymentSendable, Blockable
     /**
      * Mediafiles shared with me (??)
      */
-    public function sharedMediafiles()
+    public function sharedmediafiles()
     {
         return $this->morphedByMany('App\Models\Mediafile', 'shareable', 'shareables', 'sharee_id')
             ->withTimestamps();
@@ -120,16 +119,16 @@ class User extends Authenticatable implements PaymentSendable, Blockable
     /**
      * Vaultfolders shared with me (??)
      */
-    public function sharedVaultfolders()
+    public function sharedvaultfolders()
     {
         return $this->morphedByMany('App\Models\Vaultfolder', 'shareable', 'shareables', 'sharee_id')
             ->withTimestamps();
     }
-    public function ledgerSales()
+    public function ledgersales()
     {
         return $this->hasMany('App\Models\Fanledger', 'seller_id');
     }
-    public function ledgerPurchases()
+    public function ledgerpurchases()
     {
         return $this->hasMany('App\Models\Fanledger', 'purchaser_id');
     }
@@ -151,7 +150,7 @@ class User extends Authenticatable implements PaymentSendable, Blockable
             ->withPivot('access_level', 'shareable_type', 'sharee_id')->withTimestamps();
     }
 
-    public function likedPosts()
+    public function likedposts()
     {
         return $this->morphedByMany('App\Models\Post', 'likeable', 'likeables', 'user')
             ->withTimestamps();
@@ -164,7 +163,52 @@ class User extends Authenticatable implements PaymentSendable, Blockable
     {
         return $this->morphedByMany('App\Models\Post', 'shareable', 'shareables', 'sharee_id')->withTimestamps();
     }
+    public function postsPinned()
+    {
+        return $this->belongsToMany('App\Post', 'pinned_posts', 'user_id', 'post_id');
+    }
 
+    public function userList()
+    {
+        return $this->belongsToMany('App\UserListType', 'user_lists', 'user_id', 'list_type_id');
+    }
+
+    public function own_pages()
+    {
+        $admin_role_id = Role::where('name', '=', 'admin')->first();
+        $own_pages = $this->pages()->where('role_id', $admin_role_id->id)->where('page_user.active', 1)->get();
+
+        $result = $own_pages ? $own_pages : false;
+
+        return $result;
+    }
+
+    public function own_groups()
+    {
+        $admin_role_id = Role::where('name', '=', 'admin')->first();
+        $own_groups = $this->groups()->where('role_id', $admin_role_id->id)->where('status', 'approved')->get();
+
+        $result = $own_groups ? $own_groups : false;
+
+        return $result;
+    }
+
+    public function payment()
+    {
+        return $this->hasOne('App\Payment');
+    }
+
+    public function groups()
+    {
+        return $this->belongsToMany('App\Group', 'group_user', 'user_id', 'group_id')->withPivot('role_id', 'status');
+    }
+
+
+    public function pageLikes()
+    {
+        return $this->belongsToMany('App\Page', 'page_likes', 'user_id', 'page_id');
+    }
+    
     /**
      * Users Notifications
      */
@@ -196,7 +240,7 @@ class User extends Authenticatable implements PaymentSendable, Blockable
     // https://stackoverflow.com/questions/30226496/how-to-cast-eloquent-pivot-parameters
     /* %PSG: could not get this to work, just do 'manually' in controller or other calling code
     protected $casts = [
-        'sharedposts.pivot.custom_attributes' => 'array',
+        'sharedposts.pivot.cattrs' => 'array',
         'sharedposts.pivot.meta' => 'array',
     ];
      */
@@ -248,6 +292,7 @@ class User extends Authenticatable implements PaymentSendable, Blockable
         return DB::table('user_settings')->where('user_id', $user_id)->delete();
     }
 
+    /*
     public function getOthersSettings($username)
     {
         $timeline = Timeline::where('username', $username)->first();
@@ -256,7 +301,6 @@ class User extends Authenticatable implements PaymentSendable, Blockable
 
         return $result;
     }
-
     public function getUserPrivacySettings($loginId, $others_id)
     {
         $timeline_post_privacy = '';
@@ -302,6 +346,7 @@ class User extends Authenticatable implements PaymentSendable, Blockable
 
         return $result;
     }
+     */
 
     public function settings()
     {
@@ -380,5 +425,67 @@ class User extends Authenticatable implements PaymentSendable, Blockable
         return $resource->getOwner()->contains(function ($value, $key) {
             return $value->id === $this->id;
         });
+    }
+    
+    
+    
+
+    public function events()
+    {
+        return $this->belongsToMany('App\Event', 'event_user', 'user_id', 'event_id');
+    }
+
+    public function get_eventuser($id)
+    {
+        return $this->events()->where('events.id', $id)->first();
+    }
+
+    public function isAdmin() : bool
+    {
+        return false; // %TODO
+    }
+
+    public function is_eventadmin($user_id, $event_id) {
+        $chk_isadmin = Event::where('id', $event_id)->where('user_id', $user_id)->first();
+
+        $result = $chk_isadmin ? true : false;
+
+        return $result;
+    }
+
+    public function getEvents()
+    {
+        $result = [];
+        $guestevents =  $this->events()->get();
+        if ($guestevents) {
+            foreach ($guestevents as $guestevent) {
+                if (!$this->is_eventadmin(Auth::user()->id, $guestevent->id)) {
+                    array_push($result, $guestevent);
+                }
+            }
+        }
+        return $result;
+    }
+
+    public function is_groupAdmin($user_id, $group_id)
+    {
+        $admin_role_id = Role::where('name', 'admin')->first();
+
+        $groupUser = $this->groups()->where('group_id', $group_id)->where('user_id', $user_id)->where('role_id', $admin_role_id->id)->where('status', 'approved')->first();
+
+        $result = $groupUser ? true : false;
+
+        return $result;
+    }
+
+    public function is_groupMember($user_id, $group_id)
+    {
+        $admin_role_id = Role::where('name', 'admin')->first();
+
+        $groupMember = $this->groups()->where('group_id', $group_id)->where('user_id', $user_id)->where('role_id', '!=', $admin_role_id->id)->where('status', 'approved')->first();
+
+        $result = $groupMember ? true : false;
+
+        return $result;
     }
 }

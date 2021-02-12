@@ -8,10 +8,11 @@ use Illuminate\Database\Eloquent\Model as EloquentModel;
 class Model extends EloquentModel
 {
 
-    protected $customAttributesField = 'custom_attributes';
-    protected $metadataField = 'metadata';
+    //protected $customAttributesField = 'cattrs';
+    //protected $metaField = 'meta';
 
     /** Aliases */
+    /*
     public function getCattrsAttribute($value)
     {
         return $this->{$this->customAttributesField};
@@ -24,13 +25,14 @@ class Model extends EloquentModel
 
     public function getMetaAttribute($value)
     {
-        return $this->{$this->metadataField};
+        return $this->{$this->metaField};
     }
 
     public function setMetaAttribute($value)
     {
-        $this->attributes[$this->metadataField] = $value;
+        $this->attributes[$this->metaField] = $value;
     }
+     */
 
 
     public function getMorphString(string $class) : string

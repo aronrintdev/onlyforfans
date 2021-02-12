@@ -49,7 +49,7 @@ class VaultModelTest extends TestCase
 
         $vault = factory(Vault::class)->create([
             'user_id' => $user->id,
-            'custom_attributes' => [
+            'cattrs' => [
                 'foo' => 'bar',
                 'baz' => 'lorem',
             ],

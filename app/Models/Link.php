@@ -19,8 +19,8 @@ class Link extends Model
     ];
 
     protected $casts = [
-        'custom_attributes' => 'array',
-        'metadata'          => 'array',
+        'cattrs' => 'array',
+        'meta'          => 'array',
     ];
 
     public function resource()

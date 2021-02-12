@@ -81,8 +81,8 @@ class Vault extends BaseModel implements Guidable, Sluggable, Ownable
     //--------------------------------------------
 
     protected $casts = [
-        'custom_attributes' => 'array',
-        'metadata' => 'array',
+        'cattrs' => 'array',
+        'meta' => 'array',
     ];
 
     //--------------------------------------------
@@ -125,8 +125,8 @@ class Vault extends BaseModel implements Guidable, Sluggable, Ownable
         $key = trim($field);
         switch ($key) {
                 /*
-            case 'metadata':
-            case 'custom_attributes':
+            case 'meta':
+            case 'cattrs':
                 return json_encode($this->{$key});
              */
             default:

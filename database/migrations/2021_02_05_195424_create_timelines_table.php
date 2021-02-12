@@ -26,6 +26,8 @@ class CreateTimelinesTable extends Migration
             $table->boolean('is_follow_for_free')->default(false);
             $table->unsignedInteger('price')->nullable()->default(0);
             $table->string('currency', 4)->nullable()->default('USD');
+            $table->json('cattrs')->nullable()->comment('JSON-encoded custom attributes');
+            $table->json('meta')->nullable()->comment('JSON-encoded meta attributes');
             $table->timestamps();
             $table->softDeletes();
         });

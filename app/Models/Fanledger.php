@@ -11,7 +11,7 @@ class Fanledger extends BaseModel implements Guidable
     use SoftDeletes, UsesUuid;
 
     protected $customAttributesField = 'cattrs';
-    protected $metadataField = 'meta';
+    protected $metaField = 'meta';
 
     protected $guarded = ['id', 'created_at', 'updated_at'];
 
@@ -59,8 +59,8 @@ class Fanledger extends BaseModel implements Guidable
     //--------------------------------------------
 
     protected $casts = [
-        'custom_attributes' => 'array',
-        'metadata'          => 'array',
+        'cattrs' => 'array',
+        'mdata' => 'array',
     ];
 
     //--------------------------------------------
@@ -84,8 +84,8 @@ class Fanledger extends BaseModel implements Guidable
         $key = trim($field);
         switch ($key) {
                 /*
-            case 'metadata':
-            case 'custom_attributes':
+            case 'meta':
+            case 'cattrs':
                 return json_encode($this->{$key});
              */
             default:

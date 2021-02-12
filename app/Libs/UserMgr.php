@@ -46,9 +46,9 @@ class UserMgr {
             } else { // follow only
 //dd('toggleFollow.3', $attrs, $isFollowing);
                 $follower->followedtimelines()->attach($timeline->id, [
-                    'custom_attributes' => json_encode($customAttributes),
+                    'cattrs' => json_encode($customAttributes),
                 ]);
-                //$timeline->followers()->attach($follower->id, [ 'custom_attributes' => $customAttributes ]);
+                //$timeline->followers()->attach($follower->id, [ 'cattrs' => $customAttributes ]);
             }
         }
 

@@ -78,12 +78,12 @@ class VaultsController extends AppBaseController
         ]);
     }
 
-    // %TODO: DEPRECATE - move to VaultfoldersController & MediafilesController (batch)
+    // %TODO: DEPRECATE - move to VaultfoldersContoller & MediafilesController (batch)
     //   ~ use DB transaction (?)
     //   ~ verify resource belongs to the given vault (??)
     public function updateShares(Request $request, $pkid)
     {
-        throw new \Exception('DEPRECATED - use VaultfoldersController or MediafilesController (batch)');
+        throw new \Exception('DEPRECATED - use VaultfoldersContoller or MediafilesController (batch)');
         $sessionUser = Auth::user();
         $vault = Vault::where('id', $pkid)->where('user_id', $sessionUser->id)->first();
 
@@ -99,10 +99,10 @@ class VaultsController extends AppBaseController
             foreach ( $shareables as $sb ) {
                 switch ( $sb['shareable_type'] ) {
                     case 'mediafiles':
-                        $user->sharedMediafiles()->syncWithoutDetaching($sb['shareable_id']); // do share
+                        $user->sharedmediafiles()->syncWithoutDetaching($sb['shareable_id']); // do share
                         break;
                     case 'vaultfolders':
-                        $user->sharedVaultfolders()->syncWithoutDetaching($sb['shareable_id']); // do share
+                        $user->sharedvaultfolders()->syncWithoutDetaching($sb['shareable_id']); // do share
                         break;
                 }
             }
@@ -120,7 +120,7 @@ class VaultsController extends AppBaseController
                 'inviter_id' => $sessionUser->id,
                 'email' => $i['email'],
                 'itype' => InviteTypeEnum::VAULT,
-                'custom_attributes' => [
+                'cattrs' => [
                     'shareables' => $shareables,
                     'vault_id' => $vault->id,
                 ],

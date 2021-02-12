@@ -57,8 +57,8 @@ class Mediafile extends BaseModel implements Guidable, Sluggable, Ownable, Clone
     //--------------------------------------------
 
     protected $casts = [
-        'custom_attributes' => 'array',
-        'metadata'          => 'array',
+        'cattrs' => 'array',
+        'meta'          => 'array',
     ];
 
     public function getGuidAttribute($value)
@@ -107,8 +107,8 @@ class Mediafile extends BaseModel implements Guidable, Sluggable, Ownable, Clone
     {
         $key = trim($field);
         switch ($key) {
-            case 'metadata':
-            case 'custom_attributes':
+            case 'meta':
+            case 'cattrs':
                 return json_encode($this->{$key});
             case 'mftype':
                 return empty($this->mftype) ? 'N/A' : MediafileTypeEnum::render($this->mftype);

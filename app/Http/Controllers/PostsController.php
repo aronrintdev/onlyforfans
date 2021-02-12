@@ -21,7 +21,8 @@ class PostsController extends AppBaseController
 
         $query = Post::query();
         if ( !$request->user()->isAdmin() ) {
-            $query->where('timeline_id', $request->user()->timeline->id);
+            //$query->where('timeline_id', $request->user()->timeline->id);
+            $query->where('postable_type', 'timelines')->where('postable_id', $request->user()->timeline->id);
         }
 
         foreach ($filters as $f) {
@@ -51,8 +52,8 @@ class PostsController extends AppBaseController
     {
         $request->validate([
             'timeline_id' => 'required|exists:timelines,id',
-            'mediafile' => 'array',
-            'mediafile.*.*' => 'integer|exists:mediafile',
+            'mediafiles' => 'array',
+            'mediafiles.*.*' => 'integer|exists:mediafiles',
         ]);
 
         $timeline = Timeline::find($request->timeline_id); // timeline being posted on
@@ -65,10 +66,10 @@ class PostsController extends AppBaseController
         $attrs['type'] = $request->input('type', PostTypeEnum::FREE);
 
         $post = Post::create($attrs);
-        if ( $request->has('mediafile') ) {
-            foreach ( $request->mediafile as $mfID ) {
+        if ( $request->has('mediafiles') ) {
+            foreach ( $request->mediafiles as $mfID ) {
                 $cloned = Mediafile::find($mfID)->doClone('posts', $post->id);
-                $post->mediafile()->save($cloned);
+                $post->mediafiles()->save($cloned);
             }
         }
         $post->refresh();
@@ -120,7 +121,7 @@ class PostsController extends AppBaseController
 
     public function saves(Request $request)
     {
-        $saves = $request->user()->sharedMediafile->map( function($mf) {
+        $saves = $request->user()->sharedmediafiles->map( function($mf) {
             $mf->foo = 'bar';
             //$mf->owner = $mf->getOwner()->first(); // %TODO
             //dd( 'owner', $mf->owner->only('username', 'name', 'avatar') ); // HERE
@@ -130,8 +131,8 @@ class PostsController extends AppBaseController
 
         return response()->json([
             'shareables' => [
-                'mediafile' => $mediafile,
-                'vaultfolders' => $request->user()->sharedVaultfolders,
+                'mediafiles' => $mediafiles,
+                'vaultfolders' => $request->user()->sharedvaultfolders,
             ],
         ]);
     }

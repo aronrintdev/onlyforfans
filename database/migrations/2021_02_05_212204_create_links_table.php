@@ -19,8 +19,8 @@ class CreateLinksTable extends Migration
             $table->string('url');
             $table->string('name');
             $table->string('type', 63);
-            $table->json('custom_attributes');
-            $table->json('metadata');
+            $table->json('cattrs');
+            $table->json('meta');
             $table->timestamps();
         });
     }

@@ -31,6 +31,8 @@ class Timeline extends Model implements Purchaseable, Ownable, Reportable
     protected $casts = [
         'name'           => 'string',
         'about'          => 'string',
+        'cattrs' => 'array',
+        'meta' => 'array',
     ];
 
     public function toArray()
@@ -49,11 +51,11 @@ class Timeline extends Model implements Purchaseable, Ownable, Reportable
     public function followers()
     {
         return $this->morphToMany('App\Models\User', 'shareable', 'shareables', 'shareable_id', 'sharee_id')
-            ->withPivot('access_level', 'shareable_type', 'sharee_id', 'is_approved', 'custom_attributes')
+            ->withPivot('access_level', 'shareable_type', 'sharee_id', 'is_approved', 'cattrs')
             ->withTimestamps();
     }
 
-    public function ledgerSales()
+    public function ledgersales()
     {
         return $this->morphMany('App\Models\Fanledger', 'purchaseable');
     }

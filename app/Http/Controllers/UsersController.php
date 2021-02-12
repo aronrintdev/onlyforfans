@@ -79,7 +79,7 @@ class UsersController extends AppBaseController
     public function match(Request $request)
     {
         if ( !$request->ajax() ) {
-            App::abort(400, 'Requires AJAX');
+            \App::abort(400, 'Requires AJAX');
         }
 
         $term = $request->input('term',null);

@@ -16,10 +16,10 @@ class CreateStoriesTable extends Migration
         Schema::create('stories', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('timeline_id')->nullable();
-            $table->json('content')->nullable()->comment('JSON-encoded content attributes');
-            $table->json('custom_attributes')->nullable()->comment('JSON-encoded custom attributes');
-            $table->json('metadata')->nullable()->comment('JSON-encoded metadata');
             $table->string('stype')->comment('Enum: Story type');
+            $table->json('content')->nullable()->comment('JSON-encoded content attributes');
+            $table->json('cattrs')->nullable()->comment('JSON-encoded custom attributes');
+            $table->json('meta')->nullable()->comment('JSON-encoded metadata');
             $table->timestamps();
             $table->softDeletes();
         });

@@ -37,6 +37,8 @@ $ php artisan db:seed --class=StoriesTableSeeder
 $ php artisan db:seed --class=PostsTableSeeder
 $ php artisan db:seed --class=ShareablesTableSeeder
 
+$ php artisan db:seed --class=TestDatabaseSeeder
+
 %%% Tinker
 $ php artisan tinker
 >>> error_reporting(E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED)

@@ -17,8 +17,8 @@ class CreateTableLocations extends Migration
             $table->uuid('id')->primary();
             $table->uuidMorphs('resource');
             $table->json('gps')->nullable();
-            $table->json('custom_attributes')->nullable();
-            $table->json('metadata')->nullable();
+            $table->json('cattrs')->nullable();
+            $table->json('meta')->nullable();
             $table->string('address')->nullable();
             $table->string('address2')->nullable();
             $table->string('city')->nullable();
