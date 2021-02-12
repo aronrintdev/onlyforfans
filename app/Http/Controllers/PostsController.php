@@ -47,9 +47,9 @@ class PostsController extends AppBaseController
         ]);
     }
 
-
     public function store(Request $request)
     {
+        //dd($request->all());
         $request->validate([
             'timeline_id' => 'required|exists:timelines,id',
             'mediafiles' => 'array',
