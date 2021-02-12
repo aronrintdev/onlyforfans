@@ -5,6 +5,7 @@ namespace App\Policies;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use App\Models\User;
 use App\Models\Mediafile;
+use App\Models\Vaultfolder;
 use App\Policies\Traits\OwnablePolicies;
 
 class MediafilePolicy extends BasePolicy
@@ -25,14 +26,34 @@ class MediafilePolicy extends BasePolicy
     protected function view(User $user, Mediafile $mediafile)
     {
         switch ($mediafile->resource_type) {
+
         case 'comments':
         case 'posts':
         case 'stories':
-        case 'vaultfolders':
             $alias = $mediafile->resource_type;
             $model = Relation::getMorphedModel($alias);
             $resource = (new $model)->where('id', $mediafile->resource_id)->first();
             return $user->can('view', $resource);
+
+        case 'vaultfolders':
+            // if vaultfolder is shared => allowed
+            // else, if mediafile is shared => allowed
+            // else, not allowed
+            $vaultfolder = Vaultfolder::find($mediafile->resource_id);
+            if ( !$vaultfolder ) {
+                return false;
+            }
+            $isVaultfolderShared = $vaultfolder->sharees->contains($user->id);
+            if ( $isVaultfolderShared ) {
+                return true;
+            }
+
+            $isMediafileShared = $mediafile->sharees->contains($user->id);
+            if ( $isMediafileShared ) {
+                return true;
+            }
+            return false;
+
         default:
             return false;
         }

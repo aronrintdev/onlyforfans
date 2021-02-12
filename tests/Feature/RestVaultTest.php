@@ -12,13 +12,13 @@ use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 use Database\Seeders\TestDatabaseSeeder;
 
+use App\Models\Invite;
 use App\Models\Mediafile;
 use App\Models\Post;
 use App\Models\Story;
 use App\Models\Timeline;
 use App\Models\User;
 use App\Models\Vault;
-use App\Models\Vaultfolder;
 use App\Enums\MediafileTypeEnum;
 use App\Enums\PostTypeEnum;
 use App\Enums\StoryTypeEnum;
@@ -67,8 +67,9 @@ class RestVaultTest extends TestCase
         $creator = User::first();
         $primaryVault = Vault::primary($creator)->first();
 
-        $nonFan = User::whereDoesntHave('sharedVaultfolders', function($q1) use(&$primaryVault) {
-            $q1->where('vault_id', $primaryVault->id);
+        $nonfan = User::whereDoesntHave('sharedvaultfolders', function($q1) use(&$primaryVault) {
+            $q1->where('vault_id', $primaryVault->id); // %FIXME: should this be on vaultfolder?
+            //$q1->where('vaultfolders.id', $rootFolder->id);
         })->where('id', '<>', $creator->id)->first();
 
         $payload = [
@@ -793,8 +794,6 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
-     *  @group here
-     *  %TODO: [ ] test for disallow sharing root folder
      */
     public function test_select_vault_folder_to_share_via_signup_invite_to_non_registered_user_via_email()
     {
@@ -838,8 +837,12 @@ class RestVaultTest extends TestCase
         // share the subfolder
         $payload = [
             'invitees' => $invitees,
+            'vaultfolder_id' => $subFolder->id,
+            'shareables' => [
+                [ 'shareable_type' => 'vaultfolders', 'shareable_id' => $subFolder->id, ],
+            ],
         ];
-        $response = $this->actingAs($owner)->ajaxJSON('POST', route('vaultfolders.invite', $subFolder->id), $payload);
+        $response = $this->actingAs($owner)->ajaxJSON('POST', route('invites.store'), $payload);
         $response->assertStatus(200);
         $content = json_decode($response->content());
         $this->assertNotNull($content->invites);
@@ -859,6 +862,151 @@ class RestVaultTest extends TestCase
 
     }
 
+    /**
+     *  @group vault
+     *  @group regression
+     */
+    public function test_select_subset_of_mediafiles_in_vaultfolder_to_share_via_signup_invite_to_non_registered_user_via_email()
+    {
+        Mail::fake();
+        Storage::fake('s3');
+
+        $owner = User::first();
+        $primaryVault = Vault::primary($owner)->first();
+        $rootFolder = Vaultfolder::isRoot()->where('vault_id', $primaryVault->id)->first();
+
+        // Upload a few images to the vaultfolder...
+        // (1st)
+        $filename = $this->faker->slug;
+        $file = UploadedFile::fake()->image($filename, 200, 200);
+        $payload = [
+            'mftype' => MediafileTypeEnum::VAULT,
+            'mediafile' => $file,
+            'resource_type' => 'vaultfolders',
+            'resource_id' => $rootFolder->id,
+        ];
+        $response = $this->actingAs($owner)->ajaxJSON('POST', route('mediafiles.store'), $payload);
+        $response->assertStatus(201);
+        $content = json_decode($response->content());
+        $this->assertNotNull($content->mediafile);
+        $mediafileR = $content->mediafile;
+        $rootFolder->refresh();
+        $this->assertTrue( $rootFolder->mediafiles->contains($mediafileR->id) );
+
+        // (2nd) %TODO
+
+        $invitees = [];
+        $firstName = $this->faker->firstName();
+        $lastName = $this->faker->lastName;
+        $email = strtolower($firstName.'.'.$lastName).'@example.com';
+        $invitees[] = [
+            'email' => $email,
+            'name' => $firstName.' '.$lastName,
+        ];
+
+        // find mediafile(s) in the folder and share file(s) only
+        $payload = [
+            'invitees' => $invitees,
+            'vaultfolder_id' => $rootFolder->id,
+            'shareables' => [
+                [ 'shareable_type' => 'mediafiles', 'shareable_id' => $mediafileR->id, ],
+            ],
+        ];
+        $response = $this->actingAs($owner)->ajaxJSON('POST', route('invites.store'), $payload);
+        $response->assertStatus(200);
+        $content = json_decode($response->content());
+        $this->assertNotNull($content->invites);
+        $invites = collect($content->invites);
+        $this->assertEquals(1, $invites->count());
+
+        $invite = $invites->shift();
+        $this->assertEquals($invitees[0]['email'], $invite->email);
+
+        // assertSent | assertQueued
+        Mail::assertQueued(\App\Mail\ShareableInvited::class, function ($mail) use ($invitees) {
+            return $mail->hasTo($invitees[0]['email']); 
+        });
+    }
+
+    /**
+     *  @group vault
+     *  @group regression
+     *  @group here
+     */
+    public function test_select_vaultfolder_to_share_via_invite_to_registered_user()
+    {
+        Mail::fake();
+
+        $owner = User::first();
+        $primaryVault = Vault::primary($owner)->first();
+        $rootFolder = Vaultfolder::isRoot()->where('vault_id', $primaryVault->id)->first();
+
+        $nonowner = User::where('id', '<>', $owner->id)
+            ->whereDoesntHave('sharedvaultfolders', function($q1) use(&$rootFolder) {
+                $q1->where('vaultfolders.id', $rootFolder->id);
+            })->first(); // %TODO: also ensure not a sharee already? or create new user
+        $this->assertFalse( $rootFolder->sharees->contains($nonowner->id) );
+
+        // Upload a few images to the vaultfolder...
+        // (1st)
+        $filename = $this->faker->slug;
+        $file = UploadedFile::fake()->image($filename, 200, 200);
+        $payload = [
+            'mftype' => MediafileTypeEnum::VAULT,
+            'mediafile' => $file,
+            'resource_type' => 'vaultfolders',
+            'resource_id' => $rootFolder->id,
+        ];
+        $response = $this->actingAs($owner)->ajaxJSON('POST', route('mediafiles.store'), $payload);
+        $response->assertStatus(201);
+        $content = json_decode($response->content());
+        $this->assertNotNull($content->mediafile);
+        $mediafileR = $content->mediafile;
+        $rootFolder->refresh();
+        $this->assertTrue( $rootFolder->mediafiles->contains($mediafileR->id) );
+
+        // (2nd) %TODO
+
+        $invitees = [];
+        $invitees[] = [
+            'email' => $nonowner->email,
+            'name' => $nonowner->name,
+        ];
+
+        // share the folder
+        $payload = [
+            'invitees' => $invitees,
+            'vaultfolder_id' => $rootFolder->id,
+            'shareables' => [
+                [ 'shareable_type' => 'vaultfolders', 'shareable_id' => $rootFolder->id, ],
+            ],
+        ];
+        $response = $this->actingAs($owner)->ajaxJSON('POST', route('invites.store'), $payload);
+        $response->assertStatus(200);
+        $content = json_decode($response->content());
+        $this->assertNotNull($content->invites);
+        $invites = collect($content->invites);
+        $this->assertEquals(1, $invites->count());
+
+        $invite = $invites->shift();
+        $this->assertEquals($invitees[0]['email'], $invite->email);
+
+        $invite = Invite::find($invite->id);
+        $this->assertIsArray( $invite->cattrs);
+        $this->assertArrayHasKey('shareables', $invite->cattrs);
+        $this->assertIsArray($invite->cattrs['shareables']);
+        $this->assertGreaterThan(0, count($invite->cattrs['shareables']));
+        $this->assertArrayHasKey('shareable_type', $invite->cattrs['shareables'][0]);
+        $this->assertArrayHasKey('shareable_id', $invite->cattrs['shareables'][0]);
+        $this->assertEquals('vaultfolders', $invite->cattrs['shareables'][0]['shareable_type']);
+        $this->assertEquals($rootFolder->id, $invite->cattrs['shareables'][0]['shareable_id']);
+        //dd($invite->cattrs);
+
+        $response = $this->actingAs($nonowner)->ajaxJSON('GET', route('mediafiles.show', $mediafileR->id));
+        $response->assertStatus(403);
+
+    }
+
     // ------------------------------
 
     protected function setUp() : void
@@ -871,4 +1019,41 @@ class RestVaultTest extends TestCase
         parent::tearDown();
     }
 }
+
+    /**
+     *  @group vault
+     *  @group regression
+     *  @group todo (?)
+     */
+    /*
+    public function test_can_not_share_root_vaultfolder()
+    {
+        Mail::fake();
+
+        $owner = User::first();
+        $primaryVault = Vault::primary($owner)->first();
+        $rootFolder = Vaultfolder::isRoot()->where('vault_id', $primaryVault->id)->first();
+
+        $invitees = [];
+        $firstName = $this->faker->firstName();
+        $lastName = $this->faker->lastName;
+        $email = strtolower($firstName.'.'.$lastName).'@example.com';
+        $invitees[] = [
+            'email' => $email,
+            'name' => $firstName.' '.$lastName,
+        ];
+
+        // try to share the rootfolder
+        $payload = [
+            'invitees' => $invitees,
+            'vaultfolder_id' => $rootFolder->id,
+            'shareables' => [
+                'shareable_type' => 'vaultfolders',
+                'shareable_id' => $rootFolder->id,
+            ],
+        ];
+        $response = $this->actingAs($owner)->ajaxJSON('POST', route('invites.store'), $payload);
+        $response->assertStatus(400);
+    }
+     */
 

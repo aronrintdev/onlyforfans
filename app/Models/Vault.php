@@ -5,7 +5,6 @@ namespace App\Models;
 use DB;
 use App\Models\Traits\SluggableTraits;
 use App\Interfaces\Ownable;
-//use App\Interfaces\Nameable;
 use App\Interfaces\Guidable;
 use App\Interfaces\ShortUuid;
 use App\Interfaces\Sluggable;
@@ -162,4 +161,10 @@ class Vault extends BaseModel implements Guidable, Sluggable, Ownable
         });
         return $vault;
     }
+
+    public function isRoot() : bool
+    {
+        return is_null($this->parent_id);
+    }
+
 }
