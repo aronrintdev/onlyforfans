@@ -24,10 +24,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Interfaces\Purchaseable; // was PaymentReceivable
 
-class Post extends Model implements Ownable, Deletable, Purchaseable, Likeable, Reportable, ShortUuid, Commentable
+class Post extends Model implements Ownable, Deletable, Purchaseable, Likeable, Reportable, Commentable
 {
     use UsesUuid;
-    use UsesShortUuid;
     use SoftDeletes;
     use HasFactory;
     use OwnableFunctions;

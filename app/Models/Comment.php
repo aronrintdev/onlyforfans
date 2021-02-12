@@ -14,10 +14,9 @@ use App\Models\Traits\OwnableTraits;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection;
 
-class Comment extends Model implements ShortUuid, Likeable, Commentable, Ownable
+class Comment extends Model implements Likeable, Commentable, Ownable
 {
     use UsesUuid;
-    use UsesShortUuid;
     use SoftDeletes;
     use LikeableTraits;
     use CommentableTraits;

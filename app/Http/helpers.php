@@ -27,7 +27,7 @@ function trendingTags()
 function suggestedUsers()
 {
     $sessionUser = Auth::user();
-    $admin_role = App\Role::where('name', 'admin')->get()->first();
+    $admin_role = App\Models\Role::where('name', 'admin')->get()->first();
     $admin_users = NULL;
     if ($admin_role != NULL) {
         $admin_users = DB::table('role_user')->where('role_id', $admin_role->id)->get();

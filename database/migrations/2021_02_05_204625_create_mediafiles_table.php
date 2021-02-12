@@ -23,8 +23,8 @@ class CreateMediafilesTable extends Migration
             $table->string('mftype', 63)->comment('Mediafile Type: Enumeration');
 
             $table->string('mimetype', 255)->nullable();
-            $table->string('original_extension', 15)->nullable();
-            $table->string('original_filename', 511)->nullable();
+            $table->string('orig_ext', 15)->nullable();
+            $table->string('orig_filename', 511)->nullable();
 
             $table->nullableUuidMorphs('resource');
 

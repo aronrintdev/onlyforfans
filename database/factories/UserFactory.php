@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Models\User;
 use App\Models\Timeline;
+use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class UserFactory extends Factory
@@ -35,12 +36,18 @@ class UserFactory extends Factory
             'password' => $password ?: $password = bcrypt('foo-123'), // secret
             'remember_token' => str_random(10),
             'verification_code' => str_random(10),
-            'timeline_id' => function () use($fullName) {
-                return Timeline::factory()->create([
-                    'name' => $fullName,
-                ])->id;
-            },
             'email_verified' => 1,
         ];
     }
+
+    public function configure()
+    {
+        return $this->afterCreating(function (User $user) {
+            Timeline::factory()->create([
+                'user_id' => $user->id,
+                'name' => ucwords(Str::of($user->username)->replaceFirst('.', ' ')),
+            ]);
+        });
+    }
+
 }

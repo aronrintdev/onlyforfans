@@ -57,6 +57,6 @@ class CreateFinancialAccountsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('fan_accounts');
+        Schema::dropIfExists('financial_accounts');
     }
 }

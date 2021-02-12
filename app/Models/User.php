@@ -21,9 +21,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
-class User extends Authenticatable implements PaymentSendable, ShortUuid, Blockable
+class User extends Authenticatable implements PaymentSendable, Blockable
 {
-    use Notifiable, HasRoles, HasFactory, Messagable, SoftDeletes, UsesUuid, UsesShortUuid;
+    use Notifiable, HasRoles, HasFactory, Messagable, SoftDeletes, UsesUuid;
 
     protected $appends = [
         'name',

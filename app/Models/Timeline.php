@@ -17,13 +17,12 @@ use App\Enums\ShareableAccessLevelEnum;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Timeline extends Model implements Purchaseable, Ownable, Reportable, ShortUuid
+class Timeline extends Model implements Purchaseable, Ownable, Reportable
 {
     use SoftDeletes;
     use HasFactory;
     use OwnableFunctions;
     use UsesUuid;
-    use UsesShortUuid;
 
     public $table = 'timelines';
 

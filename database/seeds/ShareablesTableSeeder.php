@@ -33,7 +33,7 @@ class ShareablesTableSeeder extends Seeder
             // --- purchase some posts ---
 
             $purchaseablePosts = Post::where('type', PostTypeEnum::PRICED)
-                ->where('timeline_id', '<>', $f->timeline->id) // exclude my own
+                ->where('postable_id', '<>', $f->timeline->id) // exclude my own
                 ->get();
             $max = $this->faker->numberBetween( 0, min($purchaseablePosts->count()-1, $this->getMax('purchased')) );
             $this->command->info("  - Creating $max purchased-posts for user ".$f->name);
@@ -54,9 +54,7 @@ class ShareablesTableSeeder extends Seeder
             // --- follow some free timelines ---
 
             $timelines = Timeline::where('id', '<>', $f->timeline->id) // exclude my own
-                ->whereHas('User', function($q1) {
-                    $q1->where('is_follow_for_free', 1);
-                })->get();
+                ->where('is_follow_for_free', 1)->get();
             if ( $timelines->count() == 0 ) {
                 throw new Exception('No free timelines found, please adjust user/timeline seeder and/or factory');
             }
@@ -82,9 +80,7 @@ class ShareablesTableSeeder extends Seeder
 
             unset($timelines);
             $timelines = Timeline::where('id', '<>', $f->timeline->id) // exclude my own
-                ->whereHas('User', function($q1) {
-                    $q1->where('is_follow_for_free', 0);
-                })->get();
+                ->where('is_follow_for_free', 0)->get();
             if ( $timelines->count() == 0 ) {
                 throw new Exception('No paid timelines found, please adjust user/timeline seeder and/or factory');
             }
@@ -149,25 +145,25 @@ class ShareablesTableSeeder extends Seeder
                     $cover = null;
                 }
 
-                $u->is_follow_for_free = $isFollowForFree;
                 $u->save();
-                $isFollowForFree = !$isFollowForFree; // toggle so we get at least one of each
 
                 $timeline = $u->timeline;
+                $u->is_follow_for_free = $isFollowForFree;
                 $timeline->avatar_id = $avatar->id ?? null;
                 $timeline->cover_id = $cover->id ?? null;
                 $timeline->save();
+                $isFollowForFree = !$isFollowForFree; // toggle so we get at least one of each
 
                 //Update default user settings
-                DB::table('user_settings')->insert([
-                    'user_id'               => $u->id,
-                    'confirm_follow'        => 'no',
-                    'follow_privacy'        => 'everyone',
-                    'comment_privacy'       => 'everyone',
-                    'timeline_post_privacy' => 'everyone',
-                    'post_privacy'          => 'everyone',
-                    'message_privacy'       => 'everyone',
-                ]);
+                // DB::table('user_settings')->insert([
+                //     'user_id'               => $u->id,
+                //     'confirm_follow'        => 'no',
+                //     'follow_privacy'        => 'everyone',
+                //     'comment_privacy'       => 'everyone',
+                //     'timeline_post_privacy' => 'everyone',
+                //     'post_privacy'          => 'everyone',
+                //     'message_privacy'       => 'everyone',
+                // ]);
             });
 
         }); // $followers->each( ... )

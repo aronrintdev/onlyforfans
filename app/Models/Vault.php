@@ -15,10 +15,9 @@ use App\Traits\OwnableFunctions;
 use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Vault extends BaseModel implements Guidable, Sluggable, Ownable, ShortUuid
+class Vault extends BaseModel implements Guidable, Sluggable, Ownable
 {
     use UsesUuid;
-    use UsesShortUuid;
     use SluggableTraits;
     use HasFactory;
     use OwnableFunctions;
@@ -44,6 +43,7 @@ class Vault extends BaseModel implements Guidable, Sluggable, Ownable, ShortUuid
                 'vfname' => 'Root',
                 'vault_id' => $model->id,
                 'parent_id' => null,
+                'user_id' => $model->user_id,
             ]);
         });
 

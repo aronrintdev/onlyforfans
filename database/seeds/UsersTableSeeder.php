@@ -36,7 +36,7 @@ class UsersTableSeeder extends Seeder
                 'country' => 'US',
                 'is_follow_for_free' => 1,
             ]);
-            $user->assignRole('Super Admin');
+            $user->assignRole('super-admin');
             unset($user);
 
             // --
@@ -45,8 +45,6 @@ class UsersTableSeeder extends Seeder
             if (!$user) {
                 $user = User::factory()->create();
             }
-
-            $user = User::factory()->create();
             FactoryHelpers::updateUser($user, [
                 'name' => 'Erik H',
                 'username' => 'erikh',
@@ -56,49 +54,44 @@ class UsersTableSeeder extends Seeder
                 'country' => 'US',
                 'is_follow_for_free' => 1, // if not free need to set price as well
             ]);
-            $user->assignRole('Super Admin');
+            $user->assignRole('super-admin');
             unset($user);
 
             // --
 
-            if ( $this->appEnv !== 'testing' ) {
-
-                $user = User::where('email', 'matt@mjmwebdesign.com')->first();
-                if (!$user) {
-                    $user = User::factory()->create();
-                }
+            $user = User::where('email', 'matt@mjmwebdesign.com')->first();
+            if (!$user) {
                 $user = User::factory()->create();
-                FactoryHelpers::updateUser($user, [
-                    'name' => 'Matt M',
-                    'username' => 'mattm',
-                    'email' => 'matt@mjmwebdesign.com',
-                    'gender' => 'male',
-                    'city' => 'Las Vegas',
-                    'country' => 'US',
-                    'is_follow_for_free' => 1, // if not free need to set price as well
-                ]);
-                $user->assignRole('Super Admin');
-                unset($user);
-
-                // --
-
-                $user = User::where('email', 'realchadjohnson@gmail.com')->first();
-                if (!$user) {
-                    $user = User::factory()->create();
-                }
-                $user = User::factory()->create();
-                FactoryHelpers::updateUser($user, [
-                    'name' => 'Chad J',
-                    'username' => 'chadj',
-                    'email' => 'realchadjohnson@gmail.com',
-                    'gender' => 'male',
-                    'city' => 'Las Vegas',
-                    'country' => 'US',
-                    'is_follow_for_free' => 1, // if not free need to set price as well
-                ]);
-                $user->assignRole('Super Admin');
-                unset($user);
             }
+            FactoryHelpers::updateUser($user, [
+                'name' => 'Matt M',
+                'username' => 'mattm',
+                'email' => 'matt@mjmwebdesign.com',
+                'gender' => 'male',
+                'city' => 'Las Vegas',
+                'country' => 'US',
+                'is_follow_for_free' => 1, // if not free need to set price as well
+            ]);
+            $user->assignRole('super-admin');
+            unset($user);
+
+            // --
+
+            $user = User::where('email', 'realchadjohnson@gmail.com')->first();
+            if (!$user) {
+                $user = User::factory()->create();
+            }
+            FactoryHelpers::updateUser($user, [
+                'name' => 'Chad J',
+                'username' => 'chadj',
+                'email' => 'realchadjohnson@gmail.com',
+                'gender' => 'male',
+                'city' => 'Las Vegas',
+                'country' => 'US',
+                'is_follow_for_free' => 1, // if not free need to set price as well
+            ]);
+            $user->assignRole('super-admin');
+            unset($user);
 
         }
 
@@ -120,7 +113,7 @@ class UsersTableSeeder extends Seeder
             $timeline = $u->timeline;
             $timeline->avatar_id = $avatar->id ?? null;
             $timeline->cover_id = $cover->id ?? null;
-            $u->is_follow_for_free = $isFollowForFree;
+            $timeline->is_follow_for_free = $isFollowForFree;
             $timeline->save();
             $isFollowForFree = !$isFollowForFree; // toggle so we get at least one of each
         });

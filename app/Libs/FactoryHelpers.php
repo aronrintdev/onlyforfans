@@ -5,6 +5,7 @@ use Exception;
 use App\Models\User;
 use App\Models\Mediafile;
 use Illuminate\Support\Str;
+use Faker\Factory;
 
 use App\Enums\MediafileTypeEnum;
 use Illuminate\Support\Collection;
@@ -58,7 +59,7 @@ class FactoryHelpers {
 
     public static function parseRandomSubset(Collection $setIn, $MAX=10) : Collection
     {
-        $faker = \Faker\Factory::create();
+        $faker = Factory::create();
         $_max = min([ $MAX, $setIn->count()-1  ]);
         $_num = $faker->numberBetween(0,$_max);
         $subset = $setIn->random($_num);
@@ -66,7 +67,7 @@ class FactoryHelpers {
     }
 
     // Inserts a [mediafiles] record
-    public static function createImage(string $mftype, ?int $resourceID=null) : ?Mediafile
+    public static function createImage(string $mftype, string $resourceID = null) : ?Mediafile
     {
         $faker = \Faker\Factory::create();
 

@@ -11,10 +11,9 @@ use App\Models\Traits\LikeableTraits;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Story extends Model implements Likeable, ShortUuid
+class Story extends Model implements Likeable
 {
     use UsesUuid;
-    use UsesShortUuid;
     use HasFactory;
     use LikeableTraits;
     use SoftDeletes;

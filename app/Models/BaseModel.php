@@ -21,10 +21,10 @@ abstract class BaseModel extends Model implements Nameable, FieldRenderable
     {
         parent::boot();
         static::creating(function ($model) {
-            if ( $model instanceOf Guidable ) {
-                //$model->guid = (string) Str::uuid();
-                $model->guid = (string) Uuid::uuid4();
-            }
+            // if ( $model instanceOf Guidable ) {
+            //     //$model->guid = (string) Str::uuid();
+            //     $model->guid = (string) Uuid::uuid4();
+            // }
             if ( $model instanceOf Sluggable ) {
                 $sluggableFields = self::sluggableFields(); //['string'=>'name'];
                 $model->slug = $model->slugify($sluggableFields);
@@ -34,7 +34,7 @@ abstract class BaseModel extends Model implements Nameable, FieldRenderable
 
     // Route-model binding custom key
     public function getRouteKeyName() {
-        return request()->routeIs('admin.*') ? 'guid' : 'id';
+        return 'id';
     }
 
     /*

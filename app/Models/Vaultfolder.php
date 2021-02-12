@@ -14,10 +14,9 @@ use App\Traits\OwnableFunctions;
 use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Vaultfolder extends BaseModel implements Guidable, Sluggable, Ownable, ShortUuid
+class Vaultfolder extends BaseModel implements Guidable, Sluggable, Ownable
 {
     use UsesUuid;
-    use UsesShortUuid;
     use SluggableTraits;
     use HasFactory;
     use OwnableFunctions;

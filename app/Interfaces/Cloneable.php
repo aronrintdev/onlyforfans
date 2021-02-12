@@ -1,7 +1,7 @@
 <?php
 namespace App\Interfaces;
 
-use Illuminate\Database\Eloquent\Model;
+use App\Models\Model;
 
 interface Cloneable {
 

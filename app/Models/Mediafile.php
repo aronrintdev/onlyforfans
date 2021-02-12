@@ -16,10 +16,9 @@ use App\Models\Traits\UsesShortUuid;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Mediafile extends BaseModel implements Guidable, Sluggable, Ownable, ShortUuid, Cloneable
+class Mediafile extends BaseModel implements Guidable, Sluggable, Ownable, Cloneable
 {
     use UsesUuid;
-    use UsesShortUuid;
     use SluggableTraits;
     use HasFactory;
     use OwnableFunctions;
