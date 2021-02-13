@@ -19,13 +19,8 @@ class Comment extends Model implements Likeable, Commentable, Ownable
     use UsesUuid, SoftDeletes, LikeableTraits, CommentableTraits, OwnableTraits;
 
     //protected $dates = ['deleted_at'];
-
     protected $guarded = [ 'id', 'created_at', 'updated_at' ];
-
-    protected $casts = [
-        'cattrs' => 'array',
-        'meta' => 'array',
-    ];
+    protected $casts = [ 'cattrs' => 'array', 'meta' => 'array', ];
 
     public function getOwner(): ?Collection
     {

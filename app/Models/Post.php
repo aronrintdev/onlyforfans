@@ -52,15 +52,8 @@ class Post extends Model implements Ownable, Deletable, Purchaseable, Likeable, 
         });
     }
 
-    protected $guarded = [
-        'id',
-        'created_at',
-        'updated_at'
-    ];
-
-    protected $appends = [
-        'isLikedByMe',
-    ];
+    protected $guarded = [ 'id', 'created_at', 'updated_at' ];
+    protected $appends = [ 'isLikedByMe', ];
 
     //--------------------------------------------
     // %%% Accessors/Mutators | Casts

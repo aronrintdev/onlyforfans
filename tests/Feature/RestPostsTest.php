@@ -497,14 +497,19 @@ class RestPostsTest extends TestCase
             })->firstOrFail();
         $creator = $timeline->user;
         $fan = $timeline->followers[0];
-        $post = $timeline->posts->where('type', PostTypeEnum::PRICED)->first();
 
-        // Make sure post is 'priced'
-        $post->type = PostTypeEnum::PRICED;
-        $post->price = $this->faker->randomNumber(3);
-        $post->save();
-
+        // Store a new post just to ensure it's not already shared with the fan...
+        $payload = [
+            'timeline_id' => $timeline->id,
+            'description' => $this->faker->realText,
+            'type' => PostTypeEnum::PRICED,
+        ];
+        $response = $this->actingAs($creator)->ajaxJSON('POST', route('posts.store'), $payload);
+        $response->assertStatus(201);
+        $content = json_decode($response->content());
+        $post = Post::find($content->post->id);
         $this->assertNotNull($post);
+        //$this->assertFalse( $fan->sharedposts->contains($post->id) ); // not yet shared w/ fan
 
         // Check access (before: should be denied)
         $response = $this->actingAs($fan)->ajaxJSON('GET', route('posts.show', $post->id));
