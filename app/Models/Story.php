@@ -3,20 +3,20 @@
 namespace App\Models;
 
 use App\Interfaces\Likeable;
+use App\Interfaces\Ownable;
 use App\Interfaces\ShortUuid;
 use App\Models\Traits\UsesUuid;
 use App\Models\Traits\UsesShortUuid;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Traits\LikeableTraits;
+use App\Models\Traits\OwnableTraits;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Collection;
 
-class Story extends Model implements Likeable
+class Story extends Model implements Likeable, Ownable
 {
-    use UsesUuid;
-    use HasFactory;
-    use LikeableTraits;
-    use SoftDeletes;
+    use UsesUuid, HasFactory, LikeableTraits, SoftDeletes, OwnableTraits;
 
     protected $guarded = [
         'id',
@@ -66,4 +66,9 @@ class Story extends Model implements Likeable
         return $model;
     }
      */
+
+    public function getOwner(): ?Collection
+    {
+        return new Collection([ $this->timeline->user ]);
+    }
 }
