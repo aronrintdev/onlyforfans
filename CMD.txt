@@ -37,7 +37,11 @@ $ php artisan db:seed --class=StoriesTableSeeder
 $ php artisan db:seed --class=PostsTableSeeder
 $ php artisan db:seed --class=ShareablesTableSeeder
 
+# Run all seeds in test env (.env.testing)
 $ php artisan db:seed --class=TestDatabaseSeeder
+
+# Run all seeds in dev/staging/demo env (eg localhost, .env)
+$ php artisan db:seed --class=DatabaseSeeder
 
 %%% Tinker
 $ php artisan tinker

@@ -16,25 +16,11 @@ use Illuminate\Support\Collection;
 
 class Comment extends Model implements Likeable, Commentable, Ownable
 {
-    use UsesUuid;
-    use SoftDeletes;
-    use LikeableTraits;
-    use CommentableTraits;
-    use OwnableTraits;
+    use UsesUuid, SoftDeletes, LikeableTraits, CommentableTraits, OwnableTraits;
 
-    /**
-     * The attributes that should be mutated to dates.
-     *
-     * @var array
-     */
     //protected $dates = ['deleted_at'];
-
     protected $guarded = [ 'id', 'created_at', 'updated_at' ];
-
-    protected $casts = [
-        'cattrs' => 'array',
-        'meta' => 'array',
-    ];
+    protected $casts = [ 'cattrs' => 'array', 'meta' => 'array', ];
 
     public function getOwner(): ?Collection
     {

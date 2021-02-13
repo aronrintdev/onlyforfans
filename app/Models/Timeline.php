@@ -19,18 +19,14 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Timeline extends Model implements Purchaseable, Ownable, Reportable
 {
-    use SoftDeletes;
-    use HasFactory;
-    use OwnableFunctions;
-    use UsesUuid;
+    use SoftDeletes, HasFactory, OwnableFunctions, UsesUuid;
 
     protected $keyType = 'string';
-
     protected $guarded = ['id', 'created_at', 'updated_at'];
 
     protected $casts = [
-        'name'           => 'string',
-        'about'          => 'string',
+        'name' => 'string',
+        'about' => 'string',
         'cattrs' => 'array',
         'meta' => 'array',
     ];
@@ -38,10 +34,8 @@ class Timeline extends Model implements Purchaseable, Ownable, Reportable
     public function toArray()
     {
         $array = parent::toArray();
-
         $array['cover_url'] = $this->cover()->get()->toArray();
         $array['avatar_url'] = $this->avatar()->get()->toArray();
-
         return $array;
     }
 

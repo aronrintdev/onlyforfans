@@ -9,14 +9,12 @@ use App\Models\Fanledger;
 use App\Interfaces\Ownable;
 use App\Interfaces\Likeable;
 use App\Interfaces\Deletable;
-use App\Interfaces\ShortUuid;
 use App\Enums\PaymentTypeEnum;
 use App\Interfaces\Reportable;
 use App\Interfaces\Commentable;
 use App\Models\Traits\UsesUuid;
-use App\Traits\OwnableFunctions;
+//use App\Traits\OwnableFunctions;
 use Illuminate\Support\Collection;
-use App\Models\Traits\UsesShortUuid;
 use App\Models\Traits\LikeableTraits;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Traits\CommentableTraits;
@@ -25,13 +23,14 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Interfaces\Purchaseable; // was PaymentReceivable
 use App\Interfaces\UuidId;
 use Cviebrock\EloquentSluggable\Sluggable;
+use App\Models\Traits\OwnableTraits;
 
 class Post extends Model implements UuidId, Ownable, Deletable, Purchaseable, Likeable, Reportable, Commentable
 {
     use UsesUuid;
     use SoftDeletes;
     use HasFactory;
-    use OwnableFunctions;
+    use OwnableTraits;
     use LikeableTraits;
     use CommentableTraits;
     use Sluggable;
@@ -59,15 +58,8 @@ class Post extends Model implements UuidId, Ownable, Deletable, Purchaseable, Li
         });
     }
 
-    protected $guarded = [
-        'id',
-        'created_at',
-        'updated_at'
-    ];
-
-    protected $appends = [
-        'isLikedByMe',
-    ];
+    protected $guarded = [ 'id', 'created_at', 'updated_at' ];
+    protected $appends = [ 'isLikedByMe', ];
 
     public function sluggable(): array
     {

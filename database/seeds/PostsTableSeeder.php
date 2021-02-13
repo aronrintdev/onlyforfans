@@ -28,7 +28,7 @@ class PostsTableSeeder extends Seeder
 
             // $u is the user who will own the post being created (ie, as well as timeline associated with the post)...
 
-            $max = $this->faker->numberBetween(2, $this->getMax('posts'));
+            $max = $this->faker->numberBetween(4, $this->getMax('posts'));
 
             if ( $this->appEnv !== 'testing' ) {
                 $this->output->writeln("  - Creating $max posts for user ".$u->name);
@@ -36,11 +36,18 @@ class PostsTableSeeder extends Seeder
 
             collect(range(1,$max))->each( function() use(&$users, &$u) { // Post generation loop
 
+                static $typesUsed = []; // guarantee one of each
                 $ptype = $this->faker->randomElement([
                     PostTypeEnum::SUBSCRIBER,
                     PostTypeEnum::PRICED,
                     PostTypeEnum::FREE, PostTypeEnum::FREE, PostTypeEnum::FREE,
                 ]);
+                $diff = array_diff( $typesUsed, PostTypeEnum::getKeys() );
+                if ( count($diff) ) {
+                    $ptype = array_pop($diff);
+                }
+                $typesUsed[] = $ptype;
+
                 $attrs = [
                     'description'  => $this->faker->text.' ('.$ptype.')',
                     'user_id'      => $u->id,

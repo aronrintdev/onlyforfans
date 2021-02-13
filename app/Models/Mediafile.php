@@ -135,7 +135,7 @@ class Mediafile extends BaseModel implements Guidable, Ownable, Cloneable
      *  ~ cloning onl allowed if new copy is associated with another resource (eg post)
      *  ~ see: https://trello.com/c/0fBcmPjq
      */
-    public function doClone(string $resourceType, int $resourceId): ?Model
+    public function doClone(string $resourceType, string $resourceId): ?Model
     {
         $cloned = $this->replicate()->fill([
             'resource_type' => $resourceType,

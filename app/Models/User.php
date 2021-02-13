@@ -25,30 +25,10 @@ class User extends Authenticatable implements PaymentSendable, Blockable
 {
     use Notifiable, HasRoles, HasFactory, Messagable, SoftDeletes, UsesUuid;
 
-    protected $appends = [
-        'name',
-        'avatar',
-        'cover',
-        'about',
-    ];
-
-    protected $fillable = [
-        'is_online',
-        'last_logged',
-    ];
-
-    // protected $guarded = [];
-
-    protected $hidden = [
-        'email',
-        'password',
-        'remember_token',
-        'verification_code',
-    ];
-
-    protected $dates = [
-        'last_logged',
-    ];
+    protected $appends = [ 'name', 'avatar', 'cover', 'about', ];
+    protected $guarded = [ 'id', 'created_at', 'updated_at' ];
+    protected $hidden = [ 'email', 'password', 'remember_token', 'verification_code', ];
+    protected $dates = [ 'last_logged', ];
 
     //--------------------------------------------
     // Boot
@@ -107,43 +87,34 @@ class User extends Authenticatable implements PaymentSendable, Blockable
     // %%% Relationships
     //--------------------------------------------
 
-    /**
-     * Mediafiles shared with me (??)
-     */
     public function sharedmediafiles()
-    {
+    { // Mediafiles shared with me (??)
         return $this->morphedByMany('App\Models\Mediafile', 'shareable', 'shareables', 'sharee_id')
             ->withTimestamps();
     }
 
-    /**
-     * Vaultfolders shared with me (??)
-     */
     public function sharedvaultfolders()
-    {
+    { // Vaultfolders shared with me (??)
         return $this->morphedByMany('App\Models\Vaultfolder', 'shareable', 'shareables', 'sharee_id')
             ->withTimestamps();
     }
+
     public function ledgersales()
     {
         return $this->hasMany('App\Models\Fanledger', 'seller_id');
     }
+
     public function ledgerpurchases()
     {
         return $this->hasMany('App\Models\Fanledger', 'purchaser_id');
     }
 
-    /**
-     * My timeline
-     */
     public function timeline()
     {
         return $this->hasOne('App\Models\Timeline');
     }
 
-    /**
-     * timelines (users) I follow: premium *and* default subscribe (follow)
-     */
+    // timelines (users) I follow: premium *and* default subscribe (follow)
     public function followedtimelines()
     {
         return $this->morphedByMany('App\Models\Timeline', 'shareable', 'shareables', 'sharee_id')
@@ -156,13 +127,12 @@ class User extends Authenticatable implements PaymentSendable, Blockable
             ->withTimestamps();
     }
 
-    /**
-     * posts shared with me (by direct share or purchase on my part)
-     */
+    // posts shared with me (by direct share or purchase on my part)
     public function sharedposts()
     {
         return $this->morphedByMany('App\Models\Post', 'shareable', 'shareables', 'sharee_id')->withTimestamps();
     }
+
     public function postsPinned()
     {
         return $this->belongsToMany('App\Post', 'pinned_posts', 'user_id', 'post_id');

@@ -18,9 +18,10 @@ class DatabaseSeeder extends Seeder
             UsernameRulesSeeder::class,
             RolesTableSeeder::class,
             UsersTableSeeder::class,
-            StoriesTableSeeder::class,
             PostsTableSeeder::class,
             ShareablesTableSeeder::class,
+            CommentsTableSeeder::class,
+            StoriesTableSeeder::class,
         ]);
     }
 
