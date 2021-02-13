@@ -131,7 +131,6 @@ class StoriesTest extends TestCase
     /**
      *  @group stories
      *  @group regression
-     *  @group here
      */
     public function test_can_store_text_story()
     {
@@ -216,6 +215,7 @@ class StoriesTest extends TestCase
     /**
      *  @group stories
      *  @group regression
+     *  @group here
      */
     public function test_owner_can_delete_picture_story()
     {
