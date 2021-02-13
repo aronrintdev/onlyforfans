@@ -6,20 +6,19 @@ use Exception;
 use App\Models\Traits\SluggableTraits;
 use App\Interfaces\Ownable;
 use App\Interfaces\Guidable;
-use App\Interfaces\ShortUuid;
-use App\Interfaces\Sluggable;
-use App\Models\Traits\UsesShortUuid;
 use App\Models\Traits\UsesUuid;
 use App\Traits\OwnableFunctions;
+use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Vaultfolder extends BaseModel implements Guidable, Sluggable, Ownable
+class Vaultfolder extends BaseModel implements Guidable, Ownable
 {
     use UsesUuid;
     use SluggableTraits;
     use HasFactory;
     use OwnableFunctions;
+    use Sluggable;
 
     protected $table = 'vaultfolders';
 
@@ -127,6 +126,13 @@ class Vaultfolder extends BaseModel implements Guidable, Sluggable, Ownable
     //--------------------------------------------
 
     // %%% --- Implement Sluggable Interface ---
+
+    public function sluggable(): array
+    {
+        return ['slug' => [
+            'source' => ['name'],
+        ]];
+    }
 
     public function sluggableFields(): array
     {

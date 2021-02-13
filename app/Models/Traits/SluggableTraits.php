@@ -5,6 +5,9 @@ namespace App\Models\Traits;
 use Illuminate\Support\Str;
 use DB;
 
+/**
+ * @deprecated use Cviebrock\EloquentSluggable\Sluggable;
+ */
 trait SluggableTraits
 {
 
