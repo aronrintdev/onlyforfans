@@ -8,6 +8,7 @@ use App\Models\Traits\UsesUuid;
 use App\Models\Traits\UsesShortUuid;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Traits\LikeableTraits;
+use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -17,12 +18,25 @@ class Story extends Model implements Likeable
     use HasFactory;
     use LikeableTraits;
     use SoftDeletes;
+    use Sluggable;
 
     protected $guarded = [
         'id',
         'created_at',
         'updated_at',
     ];
+
+    public function sluggable(): array
+    {
+        return ['slug' => [
+            'source' => [ 'sluggableContent' ],
+        ]];
+    }
+
+    public function getSluggableContentAttribute(): string
+    {
+        return $this->timeline->name . ' ' . 'story';
+    }
 
     //--------------------------------------------
     // Accessors/Mutators | Casts

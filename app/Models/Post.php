@@ -23,8 +23,10 @@ use App\Models\Traits\CommentableTraits;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Interfaces\Purchaseable; // was PaymentReceivable
+use App\Interfaces\UuidId;
+use Cviebrock\EloquentSluggable\Sluggable;
 
-class Post extends Model implements Ownable, Deletable, Purchaseable, Likeable, Reportable, Commentable
+class Post extends Model implements UuidId, Ownable, Deletable, Purchaseable, Likeable, Reportable, Commentable
 {
     use UsesUuid;
     use SoftDeletes;
@@ -32,6 +34,7 @@ class Post extends Model implements Ownable, Deletable, Purchaseable, Likeable, 
     use OwnableFunctions;
     use LikeableTraits;
     use CommentableTraits;
+    use Sluggable;
 
     //--------------------------------------------
     // Boot
@@ -65,6 +68,15 @@ class Post extends Model implements Ownable, Deletable, Purchaseable, Likeable, 
     protected $appends = [
         'isLikedByMe',
     ];
+
+    public function sluggable(): array
+    {
+        return [
+            'slug' => [
+                'source' => [ 'description' ]
+            ]
+        ];
+    }
 
     //--------------------------------------------
     // %%% Accessors/Mutators | Casts

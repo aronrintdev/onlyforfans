@@ -16,6 +16,7 @@ class CreateCommentsTable extends Migration
         Schema::create('comments', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuidMorphs('commentable');
+            $table->uuid('parent_id')->nullable();
             $table->uuid('user_id');
             $table->text('description');
             $table->json('cattrs')->nullable()->comment('JSON-encoded custom attributes');

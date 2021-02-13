@@ -1,6 +1,9 @@
 <?php
 namespace App\Interfaces;
 
+/**
+ * @deprecated: use Cviebrock\EloquentSluggable\Sluggable;
+ */
 interface Sluggable {
 
     /**

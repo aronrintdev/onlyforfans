@@ -2,26 +2,23 @@
 
 namespace App\Models;
 
-use App\Models\Traits\SluggableTraits;
 use App\Interfaces\Ownable;
 use App\Interfaces\Guidable;
 use App\Interfaces\Cloneable;
-use App\Interfaces\ShortUuid;
-use App\Interfaces\Sluggable;
 use App\Models\Traits\UsesUuid;
 use App\Enums\MediafileTypeEnum;
 use App\Traits\OwnableFunctions;
+use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Support\Collection;
-use App\Models\Traits\UsesShortUuid;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Mediafile extends BaseModel implements Guidable, Sluggable, Ownable, Cloneable
+class Mediafile extends BaseModel implements Guidable, Ownable, Cloneable
 {
     use UsesUuid;
-    use SluggableTraits;
     use HasFactory;
     use OwnableFunctions;
+    use Sluggable;
 
     protected $table = 'mediafiles';
     protected $guarded = [
@@ -82,6 +79,13 @@ class Mediafile extends BaseModel implements Guidable, Sluggable, Ownable, Clone
     //--------------------------------------------
 
     // %%% --- Implement Sluggable Interface ---
+
+    public function sluggable(): array
+    {
+        return ['slug' => [
+            'source' => ['orig_filename'],
+        ]];
+    }
 
     public function sluggableFields(): array
     {

@@ -3,23 +3,20 @@
 namespace App\Models;
 
 use DB;
-use App\Models\Traits\SluggableTraits;
 use App\Interfaces\Ownable;
 use App\Interfaces\Guidable;
-use App\Interfaces\ShortUuid;
-use App\Interfaces\Sluggable;
-use App\Models\Traits\UsesShortUuid;
 use App\Models\Traits\UsesUuid;
 use App\Traits\OwnableFunctions;
+use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Vault extends BaseModel implements Guidable, Sluggable, Ownable
+class Vault extends BaseModel implements Guidable, Ownable
 {
     use UsesUuid;
-    use SluggableTraits;
     use HasFactory;
     use OwnableFunctions;
+    use Sluggable;
 
     protected $guarded = ['id', 'created_at', 'updated_at'];
     public static $vrules = [];
@@ -102,6 +99,13 @@ class Vault extends BaseModel implements Guidable, Sluggable, Ownable
     //--------------------------------------------
 
     // %%% --- Implement Sluggable Interface ---
+
+    public function sluggable(): array
+    {
+        return ['slug' => [
+            'source' => ['vname'],
+        ]];
+    }
 
     public function sluggableFields(): array
     {

@@ -5,13 +5,29 @@ namespace App\Models;
 use DB;
 use App\SluggableTraits;
 use App\Interfaces\Guidable;
+use Cviebrock\EloquentSluggable\Sluggable;
 
 class Invite extends BaseModel implements Guidable
 {
+    use Sluggable;
+
     protected $guarded = ['id', 'created_at', 'updated_at'];
     protected $hidden = ['cattrs', 'meta',];
 
     public static $vrules = [];
+
+    public function sluggable(): array
+    {
+        return ['slug' => [
+            'source' => ['sluggableContent'],
+        ]];
+    }
+
+    public function getSluggableContentAttribute(): string
+    {
+        return 'Invite from ' . $this->inviter->username;
+    }
+
 
     //--------------------------------------------
     // Boot
