@@ -82,17 +82,18 @@ class RestCommentsTest extends TestCase
     /**
      *  @group comments
      *  @group regression
+     *  @group here
      */
     public function test_can_show_followed_timelines_comment()
     {
         $timeline = Timeline::has('followers', '>=', 1)
             ->whereHas('posts', function($q1) {
                 $q1->has('comments', '>=', 1)->where('type', PostTypeEnum::FREE);
-            })->first();
+            })->firstOrFail();
         $creator = $timeline->user;
         $fan = $timeline->followers->first();
 
-        $post = $timeline->posts()->has('comments','>=',1)->first();
+        $post = $timeline->posts()->where('type', PostTypeEnum::FREE)->has('comments','>=',1)->first();
         $response = $this->actingAs($fan)->ajaxJSON('GET', route('posts.show', $post->id));
         $response->assertStatus(200);
 

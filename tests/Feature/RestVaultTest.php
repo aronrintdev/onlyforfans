@@ -79,7 +79,7 @@ class RestVaultTest extends TestCase
                 'vault_id' => $primaryVault->id,
             ],
         ];
-        $response = $this->actingAs($nonFan)->ajaxJSON('GET', route('vaultfolders.index'), $payload);
+        $response = $this->actingAs($nonfan)->ajaxJSON('GET', route('vaultfolders.index'), $payload);
         $response->assertStatus(403);
     }
 
@@ -131,7 +131,7 @@ class RestVaultTest extends TestCase
         $payload = [
             'vault_id' => $primaryVault->id,
             'parent_id' => $rootFolder->id,
-            'name' => $this->faker->slug,
+            'vfname' => $this->faker->slug,
         ];
         $response = $this->actingAs($creator)->ajaxJSON('POST', route('vaultfolders.store'), $payload);
         $response->assertStatus(201);
@@ -159,7 +159,7 @@ class RestVaultTest extends TestCase
         $payload = [
             'vault_id' => $nonOwnedVault->id,
             'parent_id' => $rootFolder->id,
-            'name' => $this->faker->slug,
+            'vfname' => $this->faker->slug,
         ];
         $response = $this->actingAs($creator)->ajaxJSON('POST', route('vaultfolders.store'), $payload);
         $response->assertStatus(403);
@@ -195,7 +195,7 @@ class RestVaultTest extends TestCase
         $payload = [
             'vault_id' => $cwf->vault_id, // $primaryVault->id,
             'parent_id' => $cwf->id, // $rootFolder->id,
-            'name' => $this->faker->slug,
+            'vfname' => $this->faker->slug,
         ];
         $response = $this->actingAs($creator)->ajaxJSON('POST', route('vaultfolders.store'), $payload);
         $response->assertStatus(201);
@@ -242,7 +242,7 @@ class RestVaultTest extends TestCase
 
         // rename the root folder
         $payload = [
-            'name' => $this->faker->slug,
+            'vfname' => $this->faker->slug,
         ];
         $response = $this->actingAs($creator)->ajaxJSON('PATCH', route('vaultfolders.update', $rootFolder->id), $payload);
         $response->assertStatus(200);
@@ -252,9 +252,9 @@ class RestVaultTest extends TestCase
         $vaultfolderR = $content->vaultfolder;
         $this->assertEquals($rootFolder->id, $vaultfolderR->id);
 
-        $this->assertNotSame($payload['name'], $rootFolder->name, 'Pre-updated root folder name should not match payload param');
+        $this->assertNotSame($payload['vfname'], $rootFolder->name, 'Pre-updated root folder name should not match payload param');
         $rootFolder->refresh();
-        $this->assertSame($payload['name'], $rootFolder->name, 'Updated root folder name should match payload param');
+        $this->assertSame($payload['vfname'], $rootFolder->name, 'Updated root folder name should match payload param');
         $this->assertNull($rootFolder->parent_id, 'Updated root folder parent should still be null');
 
         // create a subfolder
@@ -262,7 +262,7 @@ class RestVaultTest extends TestCase
         $payload = [
             'vault_id' => $rootFolder->vault_id, // $primaryVault->id,
             'parent_id' => $rootFolder->id,
-            'name' => $origSubfolderName,
+            'vfname' => $origSubfolderName,
         ];
         $response = $this->actingAs($creator)->ajaxJSON('POST', route('vaultfolders.store'), $payload);
         $response->assertStatus(201);
@@ -274,7 +274,7 @@ class RestVaultTest extends TestCase
         // rename the new subfolder
         $updatedSubfolderName = $this->faker->slug;
         $payload = [
-            'name' => $updatedSubfolderName,
+            'vfname' => $updatedSubfolderName,
         ];
         $response = $this->actingAs($creator)->ajaxJSON('PATCH', route('vaultfolders.update', $subfolderR->id), $payload);
         $response->assertStatus(200);
@@ -302,7 +302,7 @@ class RestVaultTest extends TestCase
         $payload = [
             'vault_id' => $rootFolder->vault_id,
             'parent_id' => $rootFolder->id,
-            'name' => $this->faker->slug,
+            'vfname' => $this->faker->slug,
         ];
         $response = $this->actingAs($creator)->ajaxJSON('POST', route('vaultfolders.store'), $payload);
         $response->assertStatus(201);
@@ -338,7 +338,7 @@ class RestVaultTest extends TestCase
         $payload = [
             'vault_id' => $rootFolder->vault_id,
             'parent_id' => $rootFolder->id,
-            'name' => $this->faker->slug,
+            'vfname' => $this->faker->slug,
         ];
         $response = $this->actingAs($creator)->ajaxJSON('POST', route('vaultfolders.store'), $payload);
         $response->assertStatus(201);
@@ -796,6 +796,7 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
+     *  @group here
      */
     public function test_select_vault_folder_to_share_via_signup_invite_to_non_registered_user_via_email()
     {
@@ -809,7 +810,7 @@ class RestVaultTest extends TestCase
         $payload = [
             'vault_id' => $primaryVault->id,
             'parent_id' => $rootFolder->id,
-            'name' => $this->faker->slug,
+            'vfname' => $this->faker->slug,
         ];
         $response = $this->actingAs($owner)->ajaxJSON('POST', route('vaultfolders.store'), $payload);
         $response->assertStatus(201);
@@ -826,14 +827,14 @@ class RestVaultTest extends TestCase
         $email = strtolower($firstName.'.'.$lastName).'@example.com';
         $invitees[] = [
             'email' => $email,
-            'name' => $firstName.' '.$lastName,
+            'vfname' => $firstName.' '.$lastName,
         ];
         $firstName = $this->faker->firstName();
         $lastName = $this->faker->lastName;
         $email = strtolower($firstName.'.'.$lastName).'@example.com';
         $invitees[] = [
             'email' => $email,
-            'name' => $firstName.' '.$lastName,
+            'vfname' => $firstName.' '.$lastName,
         ];
 
         // share the subfolder
@@ -902,7 +903,7 @@ class RestVaultTest extends TestCase
         $email = strtolower($firstName.'.'.$lastName).'@example.com';
         $invitees[] = [
             'email' => $email,
-            'name' => $firstName.' '.$lastName,
+            'vfname' => $firstName.' '.$lastName,
         ];
 
         // find mediafile(s) in the folder and share file(s) only
@@ -1096,7 +1097,7 @@ class RestVaultTest extends TestCase
         $email = strtolower($firstName.'.'.$lastName).'@example.com';
         $invitees[] = [
             'email' => $email,
-            'name' => $firstName.' '.$lastName,
+            'vfname' => $firstName.' '.$lastName,
         ];
 
         // try to share the rootfolder

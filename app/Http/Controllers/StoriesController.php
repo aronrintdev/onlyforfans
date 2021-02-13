@@ -64,7 +64,6 @@ class StoriesController extends AppBaseController
 
     public function store(Request $request)
     {
-        //dd($request->all());
         $request['attrs'] = json_decode($request['attrs'], true); // decode 'complex' data
 
         $vrules = [
@@ -76,7 +75,7 @@ class StoriesController extends AppBaseController
             if ( $request->hasFile('mediafile') ) {
                 $vrules['mediafile'] = 'required_if:attrs.stype,photo|file';
             } else {
-                $vrules['mediafile'] = 'required_if:attrs.stype,photo|integer|exists:mediafiles,id'; // must be fk to [mediafiles]
+                $vrules['mediafile'] = 'required_if:attrs.stype,photo|uuid|exists:mediafiles,id'; // must be fk to [mediafiles]
             }
         }
         

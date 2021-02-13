@@ -103,23 +103,23 @@ class VaultfoldersController extends AppBaseController
     public function store(Request $request)
     {
         $vrules = [
-            'vault_id' => 'required|uuid|exists:vaults',
+            'vault_id' => 'required|uuid|exists:vaults,id',
             'vfname' => 'required|string',
-            'parent_id' => 'nullable|uuid|exists:vaultfolders',
         ];
 
         $attrs = [];
         if ( $request->has('parent_id') && !is_null($request->parent_id) ) {
-            $vrules['parent_id'] = 'required|integer|min:1'; // add validation rule
+            $vrules['parent_id'] = 'required|uuid|exists:vaultfolders,id';
             $attrs['parent_id'] = $request->parent_id;
         } else {
             $attrs['parent_id'] = null; // parent will be root folder, skip parent_id validation (optional param in effect)
         }
         $request->validate($vrules);
-        $attrs['vault_id'] = $request->vault_id;
-        $attrs['vfname'] = $request->vfname;
 
         $vault = Vault::find($request->vault_id);
+        $attrs['vault_id'] = $request->vault_id;
+        $attrs['vfname'] = $request->vfname;
+        $attrs['user_id'] = $request->user()->id;
         $this->authorize('update', $vault);
         /*
         if ( $request->user()->cannot('update', $vault) || $request->user()->cannot('create', Vaultfolder::class) ) {
