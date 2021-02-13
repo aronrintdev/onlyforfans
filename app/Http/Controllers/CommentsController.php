@@ -69,7 +69,7 @@ class CommentsController extends AppBaseController
         $request->validate([
             'post_id' => 'required|uuid|exists:posts,id',
             'user_id' => 'required|uuid|exists:users,id',
-            //'parent_id' => 'exists:comments,id', // %TODO
+            'parent_id' => 'nullable|uuid|exists:comments,id',
             'description' => 'required|string|min:3',
         ]);
         $attrs = $request->except('post_id'); // timeline_id is now postable
