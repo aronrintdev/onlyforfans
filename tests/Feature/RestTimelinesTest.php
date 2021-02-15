@@ -55,7 +55,6 @@ class TimelinesTest extends TestCase
     /**
      *  @group timelines
      *  @group regression
-     *  @group here
      */
     public function test_can_follow_timeline()
     {
@@ -91,7 +90,6 @@ class TimelinesTest extends TestCase
     /**
      *  @group timelines
      *  @group regression
-     *  @group here
      */
     public function test_can_unfollow_timeline()
     {
@@ -121,6 +119,7 @@ class TimelinesTest extends TestCase
     /**
      *  @group timelines
      *  @group regression
+     *  @group broken
      */
     public function test_blocked_can_not_follow_timeline()
     {

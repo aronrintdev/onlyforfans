@@ -29,7 +29,8 @@ class TimelinePolicy extends BasePolicy
 
     protected function follow(User $user, Timeline $resource)
     {
-        return true; // allowed unless explicitly blocked above
+        //return true; // allowed unless explicitly blocked above -- doesn't seem to work ??
+        return !$this->isBlockedByOwner($user, $resource);
     }
 
     protected function like(User $user, Timeline $resource)
