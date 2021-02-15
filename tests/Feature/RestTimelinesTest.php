@@ -1,6 +1,7 @@
 <?php
 namespace Tests\Feature;
 
+use DB;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -86,6 +87,39 @@ class TimelinesTest extends TestCase
         $this->assertTrue( $fan->followedtimelines->contains( $timelineR->id ) );
 
         // %TODO: unfollow
+    }
+
+    /**
+     *  @group timelines
+     *  @group regression
+     *  @group here
+     */
+    public function test_blocked_can_not_follow_timeline()
+    {
+        $timeline = Timeline::has('posts','>=',1)->has('followers','>=',1)->first();
+        $creator = $timeline->user;
+
+        // find a user who is not yet a follower (includes subscribers) of timeline
+        $fan = User::whereDoesntHave('followedtimelines', function($q1) use(&$timeline) {
+            $q1->where('timelines.id', '<>', $timeline->id);
+        })->where('id', '<>', $creator->id)->first();
+
+        // Block the fan (note we do programatically, not via API as this is not integral to this test)
+        DB::table('blockables')->insert([
+            'blockable_type' => 'timelines',
+            'blockable_id' => $timeline->id,
+            'user_id' => $fan->id,
+        ]);
+        $timeline->refresh();
+        $fan->refresh();
+
+        // Try to follow
+        $payload = [
+            'sharee_id' => $fan->id,
+            'notes'=>'test_can_subscribe_to_timeline',
+        ];
+        $response = $this->actingAs($fan)->ajaxJSON('PUT', route('timelines.follow', $timeline->id), $payload);
+        $response->assertStatus(403);
     }
 
     /**

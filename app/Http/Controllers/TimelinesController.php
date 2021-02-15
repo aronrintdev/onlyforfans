@@ -133,12 +133,12 @@ class TimelinesController extends AppBaseController
 
     public function follow(Request $request, Timeline $timeline)
     {
-        $sessionUser = Auth::user(); // subscriber (purchaser)
+        $this->authorize('view', $timeline);
 
         $request->validate([
             'sharee_id' => 'required|uuid|exists:users,id',
         ]);
-        if ( $request->sharee_id != $sessionUser->id ) {
+        if ( $request->sharee_id != $request->user()->id ) {
             abort(403);
         }
 

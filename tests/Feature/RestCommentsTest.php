@@ -82,7 +82,6 @@ class RestCommentsTest extends TestCase
     /**
      *  @group comments
      *  @group regression
-     *  @group here
      */
     public function test_can_show_followed_timelines_comment()
     {
