@@ -63,6 +63,7 @@ class TimelinesController extends AppBaseController
         $timeline = Timeline::with('user')->whereHas('user', function($q1) use($username) {
             $q1->where('username', $username);
         })->first();
+        $this->authorize('view', $timeline);
         $sales = Fanledger::where('seller_id', $timeline->user->id)->sum('total_amount');
 
         $timeline->userstats = [ // %FIXME DRY
@@ -174,41 +175,56 @@ class TimelinesController extends AppBaseController
 
     public function subscribe(Request $request, Timeline $timeline)
     {
-        $sessionUser = Auth::user(); // subscriber (purchaser)
+        $this->authorize('follow', $timeline);
 
         $request->validate([
             'sharee_id' => 'required|uuid|exists:users,id',
         ]);
-        if ( $request->sharee_id != $sessionUser->id ) {
+        if ( $request->sharee_id != $request->user()->id ) {
             abort(403);
         }
 
-        $timeline = DB::transaction( function() use(&$timeline, &$request, &$sessionUser) {
+        list($timeline, $isSubscribed) = DB::transaction( function() use(&$timeline, &$request) {
             $cattrs = [];
             if ( $request->has('notes') ) {
                 $cattrs['notes'] = $request->notes;
             }
-            $timeline->followers()->detach($request->sharee_id); // remove existing (covers 'upgrade') case
-            $timeline->followers()->attach($request->sharee_id, [
-                'shareable_type' => 'timelines',
-                'shareable_id' => $timeline->id,
-                'is_approved' => 1, // %FIXME
-                'access_level' => 'premium',
-                'cattrs' => json_encode($cattrs), // %FIXME: add a observer function?
-            ]); //
-            $timeline->receivePayment(
-                PaymentTypeEnum::SUBSCRIPTION,
-                $sessionUser,
-                $timeline->user->price*100, // %FIXME: should be on timeline
-                $cattrs,
-            );
-            return $timeline;
+
+            $existingFollowing = $timeline->followers->contains($request->sharee_id); // currently following?
+            $existingSubscribed = $timeline->subscribers->contains($request->sharee_id); // currently subscribed?
+
+            if ( $existingSubscribed ) {
+                // unsubscribe & unfollow
+                $timeline->followers()->detach($request->sharee_id);
+                $isSubscribed = false;
+            } else {
+                if ( $existingFollowing ) {
+                    // upgrade from follow to subscribe => remove existing (covers 'upgrade') case
+                    $timeline->followers()->detach($request->sharee_id); 
+                } // otherwise, just a direct subscription...
+                $timeline->followers()->attach($request->sharee_id, [
+                    'shareable_type' => 'timelines',
+                    'shareable_id' => $timeline->id,
+                    'is_approved' => 1, // %FIXME
+                    'access_level' => 'premium',
+                    'cattrs' => json_encode($cattrs), // %FIXME: add a observer function?
+                ]); //
+                $timeline->receivePayment(
+                    PaymentTypeEnum::SUBSCRIPTION,
+                    $request->user(),
+                    $timeline->price,
+                    $cattrs,
+                );
+                $isSubscribed = true;
+            }
+            return [$timeline, $isSubscribed];
         });
 
         $timeline->refresh();
         return response()->json([
+            'is_subscribed' => $isSubscribed,
             'timeline' => $timeline,
-            'follower_count' => $timeline->followers->count(),
+            'subscriber_count' => $timeline->subscribers->count(),
         ]);
     }
 

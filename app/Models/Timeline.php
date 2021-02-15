@@ -39,15 +39,22 @@ class Timeline extends Model implements Purchaseable, Ownable, Reportable
         return $array;
     }
 
-    /**
-     * includes subscribers (ie premium + default followers)
-     */
+    // includes subscribers (ie premium + default followers)
     public function followers()
     {
         return $this->morphToMany('App\Models\User', 'shareable', 'shareables', 'shareable_id', 'sharee_id')
             ->withPivot('access_level', 'shareable_type', 'sharee_id', 'is_approved', 'cattrs')
             ->withTimestamps();
     }
+
+    public function subscribers()
+    {
+        return $this->morphToMany('App\Models\User', 'shareable', 'shareables', 'shareable_id', 'sharee_id')
+            ->withPivot('access_level', 'shareable_type', 'sharee_id', 'is_approved', 'cattrs')
+            ->where('access_level', 'premium')
+            ->withTimestamps();
+    }
+
 
     public function ledgersales()
     {
@@ -64,9 +71,6 @@ class Timeline extends Model implements Purchaseable, Ownable, Reportable
         return $this->hasMany('App\Models\Story');
     }
 
-    /**
-     * timeline owner/creator
-     */
     public function user()
     {
         return $this->belongsTo('App\Models\User');
