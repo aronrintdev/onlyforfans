@@ -101,6 +101,7 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group here
      */
     public function test_can_store_text_only_post_on_my_timeline()
     {
@@ -118,8 +119,35 @@ class RestPostsTest extends TestCase
         $this->assertNotNull($content->post);
         $this->assertNotNull($content->post->description);
         $this->assertEquals($payload['description'], $content->post->description);
+        $this->assertEquals(PostTypeEnum::FREE, $content->post->type);
+        $this->assertEquals(0, $content->post->price);
     }
 
+    /**
+     *  @group posts
+     *  @group regression
+     *  @group here
+     */
+    public function test_can_create_a_post_on_my_timeline_of_type_purchaseable_and_set_a_price()
+    {
+        $timeline = Timeline::has('posts','>=',1)->first();
+        $creator = $timeline->user;
+
+        $payload = [
+            'timeline_id' => $timeline->id,
+            'description' => $this->faker->realText,
+            'type' => PostTypeEnum::PRICED,
+            'price' => $this->faker->randomNumber(3),
+        ];
+        $response = $this->actingAs($creator)->ajaxJSON('POST', route('posts.store'), $payload);
+        $response->assertStatus(201);
+
+        $content = json_decode($response->content());
+        $this->assertNotNull($content->post);
+        $this->assertNotNull($content->post->description);
+        $this->assertEquals(PostTypeEnum::PRICED, $content->post->type);
+        $this->assertEquals($payload['price'], $content->post->price);
+    }
 
     /**
      *  @group posts
@@ -191,7 +219,6 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
-     *  @group here
      */
     public function test_can_store_post_with_multiple_images_on_my_timeline()
     {
