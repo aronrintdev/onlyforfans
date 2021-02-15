@@ -45,6 +45,30 @@ class PostPolicy extends BasePolicy
     }
     */
 
+    public function update(User $user, Post $post)
+    {
+        switch ($post->type) {
+        case PostTypeEnum::FREE:
+            return true;
+        case PostTypeEnum::SUBSCRIBER:
+            return true; // %TODO
+        case PostTypeEnum::PRICED:
+            return !($post->ledgersales->count() > 0);
+        }
+    }
+
+    protected function delete(User $user, Post $post)
+    {
+        switch ($post->type) {
+        case PostTypeEnum::FREE:
+            return true;
+        case PostTypeEnum::SUBSCRIBER:
+            return true; // %TODO
+        case PostTypeEnum::PRICED:
+            return !($post->fanledgers->count() > 0);
+        }
+    }
+
     protected function restore(User $user, Post $post)
     {
         return false;
