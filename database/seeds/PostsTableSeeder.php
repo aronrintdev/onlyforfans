@@ -16,6 +16,8 @@ class PostsTableSeeder extends Seeder
 {
     use SeederTraits;
 
+    protected static $MIN_POSTS = 4;
+
     public function run()
     {
         $this->initSeederTraits('PostsTableSeeder'); // $this->{output, faker, appEnv}
@@ -28,15 +30,15 @@ class PostsTableSeeder extends Seeder
 
             // $u is the user who will own the post being created (ie, as well as timeline associated with the post)...
 
-            $max = $this->faker->numberBetween(4, $this->getMax('posts'));
+            $count = $this->faker->numberBetween(self::$MIN_POSTS, $this->getMax('posts'));
 
             if ( $this->appEnv !== 'testing' ) {
-                $this->output->writeln("  - Creating $max posts for user ".$u->name);
+                $this->output->writeln("  - Creating $count posts for user ".$u->name);
             }
 
-            collect(range(1,$max))->each( function() use(&$users, &$u) { // Post generation loop
+            collect(range(0,$count))->each( function() use(&$users, &$u) { // Post generation loop
 
-                static $typesUsed = []; // guarantee one of each
+                static $typesUsed = []; // guarantee one of each post type
                 $ptype = $this->faker->randomElement([
                     PostTypeEnum::SUBSCRIBER,
                     PostTypeEnum::PRICED,
@@ -122,7 +124,7 @@ class PostsTableSeeder extends Seeder
             'testing' => [
                 'prob_post_has_image' => 0,
                 'users' => 4,
-                'posts' => 3,
+                'posts' => 7,
             ],
             'local' => [
                 'prob_post_has_image' => 70, // will create image and store in S3 (!)

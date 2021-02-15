@@ -163,6 +163,7 @@ class TimelinesTest extends TestCase
         $timeline->price = $this->faker->randomNumber(3);
         $timeline->save();
         $timeline->refresh();
+        $origSubscriberCount = $timeline->subscribers->count();
 
         // find a user who is not yet a follower (includes subscribers) of timeline
         $fan = User::whereDoesntHave('followedtimelines', function($q1) use(&$timeline) {
@@ -170,10 +171,10 @@ class TimelinesTest extends TestCase
         })->where('id', '<>', $creator->id)->first();
 
         // Check access (before: should be denied)
-        // [ ] %TODO: actually this is more complex: they can access the timeline, but can only see a subset
-        //     of posts on it before subscription
-        //$response = $this->actingAs($fan)->ajaxJSON('GET', route('timelines.show', $timeline->id));
-        //$response->assertStatus(403);
+        // [ ] %TODO: actually this is more complex: they can access the timeline if follower (default), but can only see a subset
+        //     of posts on it before subscription (premium)
+        $response = $this->actingAs($fan)->ajaxJSON('GET', route('timelines.show', $timeline->user->username));
+        $response->assertStatus(403);
 
         $payload = [
             'sharee_id' => $fan->id,
@@ -183,16 +184,19 @@ class TimelinesTest extends TestCase
         $response->assertStatus(200);
 
         $content = json_decode($response->content());
-        $timelineR = $content->timeline;
-
-        $this->assertNotNull($timelineR);
-        $this->assertEquals($timeline->id, $timelineR->id);
+        $this->assertNotNull($content->timeline);
+        $this->assertEquals($timeline->id, $content->timeline->id);
+        $this->assertTrue( $content->is_subscribed );
+        $this->assertEquals( $origSubscriberCount+1, $content->subscriber_count );
 
         $timeline->refresh();
         $this->assertEquals('premium', $timeline->followers->find($fan->id)->pivot->access_level);
         $this->assertEquals('timelines', $timeline->followers->find($fan->id)->pivot->shareable_type);
         $this->assertTrue( $timeline->followers->contains( $fan->id ) );
-        $this->assertTrue( $fan->followedtimelines->contains( $timelineR->id ) );
+        $this->assertTrue( $fan->followedtimelines->contains( $content->timeline->id ) );
+        $this->assertTrue( $timeline->subscribers->contains( $fan->id ) );
+        $this->assertTrue( $fan->subscribedtimelines->contains( $content->timeline->id ) );
+        $this->assertTrue( $content->is_subscribed );
 
         // Check ledger
         $fanledger = Fanledger::where('fltype', PaymentTypeEnum::SUBSCRIPTION)
@@ -203,16 +207,72 @@ class TimelinesTest extends TestCase
             ->first();
         $this->assertNotNull($fanledger);
         $this->assertEquals(1, $fanledger->qty);
-        $this->assertEquals(intval($timeline->user->price*100), $fanledger->base_unit_cost_in_cents);
+        $this->assertEquals(intval($timeline->price), $fanledger->base_unit_cost_in_cents);
         $this->assertTrue( $timeline->ledgersales->contains( $fanledger->id ) );
         $this->assertTrue( $fan->ledgerpurchases->contains( $fanledger->id ) );
 
         // Check access (after: should be allowed)
-        //$response = $this->actingAs($fan)->ajaxJSON('GET', route('timelines.show', $timeline->id));
+        $response = $this->actingAs($fan)->ajaxJSON('GET', route('timelines.show', $timeline->user->username));
+        $response->assertStatus(200);
+    }
+
+    /**
+     *  @group timelines
+     *  @group regression
+     */
+    public function test_can_unsubscribe_from_timeline()
+    {
+        $timeline = Timeline::has('posts','>=',1)->has('followers','>=',1)->first(); // includes subscribers
+        $creator = $timeline->user;
+
+        // Make sure creator's timeline is paid-only
+        $timeline->is_follow_for_free = false;
+        $timeline->price = $this->faker->randomNumber(3);
+        $timeline->save();
+        $timeline->refresh();
+
+        // find a user who is not yet a follower (includes subscribers) of timeline
+        $fan = User::whereDoesntHave('followedtimelines', function($q1) use(&$timeline) {
+            $q1->where('timelines.id', '<>', $timeline->id);
+        })->where('id', '<>', $creator->id)->first();
+
+        // Check access (before: should not be allowed)
+        $response = $this->actingAs($fan)->ajaxJSON('GET', route('timelines.show', $timeline->user->username));
+        $response->assertStatus(403);
+
+        // Subscribe
+        $payload = [
+            'sharee_id' => $fan->id,
+            'notes'=>'test_can_unsubscribe_from_timeline',
+        ];
+        $response = $this->actingAs($fan)->ajaxJSON('PUT', route('timelines.subscribe', $timeline->id), $payload);
+        $response->assertStatus(200);
+
+        $content = json_decode($response->content());
+        $this->assertNotNull($content->timeline);
+        $this->assertTrue( $content->is_subscribed );
+        $timeline->refresh();
+        $origSubscriberCount = $timeline->subscribers->count();
+
+        // Check access (after subscribe: should be allowed)
         $response = $this->actingAs($fan)->ajaxJSON('GET', route('timelines.show', $timeline->user->username));
         $response->assertStatus(200);
 
-        // %TODO: unsubscribe (will not be charged next recurring payment period)
+        // Unsubscribe
+        $response = $this->actingAs($fan)->ajaxJSON('PUT', route('timelines.subscribe', $timeline->id), $payload);
+        $response->assertStatus(200);
+
+        $content = json_decode($response->content());
+        $this->assertNotNull($content->timeline);
+        $this->assertEquals($timeline->id, $content->timeline->id);
+        $this->assertFalse( $content->is_subscribed );
+        $this->assertEquals( $origSubscriberCount-1, $content->subscriber_count );
+
+        $timeline->refresh();
+        $this->assertFalse( $timeline->followers->contains( $fan->id ) );
+        $this->assertFalse( $fan->followedtimelines->contains( $content->timeline->id ) );
+        $this->assertFalse( $timeline->subscribers->contains( $fan->id ) );
+        $this->assertFalse( $fan->subscribedtimelines->contains( $content->timeline->id ) );
     }
 
     // ------------------------------

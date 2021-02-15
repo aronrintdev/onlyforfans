@@ -110,14 +110,14 @@ class RestCommentsTest extends TestCase
         $post = Post::has('comments','>=',1)->first();
         $timeline = $post->timeline;
         $creator = $timeline->user;
-        $fan = User::whereDoesntHave('followedtimelines', function($q1) use(&$timeline) {
+        $nonfan = User::whereDoesntHave('followedtimelines', function($q1) use(&$timeline) {
             $q1->where('timelines.id', $timeline->id);
         })->where('id', '<>', $creator->id)->first();
-        $this->assertFalse( $timeline->followers->contains( $fan->id ) );
+        $this->assertFalse( $timeline->followers->contains( $nonfan->id ) );
 
         $post = $timeline->posts()->has('comments','>=',1)->first();
         $comment = $post->comments->first();
-        $response = $this->actingAs($fan)->ajaxJSON('GET', route('comments.show', $comment->id));
+        $response = $this->actingAs($nonfan)->ajaxJSON('GET', route('comments.show', $comment->id));
         $response->assertStatus(403);
     }
 
