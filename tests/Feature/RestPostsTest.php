@@ -340,7 +340,7 @@ class RestPostsTest extends TestCase
         $timeline = Timeline::has('followers', '>=', 1)
             ->whereHas('posts', function($q1) {
                 $q1->where('type', PostTypeEnum::FREE);
-            })->first();
+            })->firstOrFail();
         $creator = $timeline->user;
         $post = $timeline->posts->where('type', PostTypeEnum::FREE)->first();
         $fan = $timeline->followers[0];
@@ -351,14 +351,13 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
-     *  @group here
      */
     public function test_nonfollower_can_not_view_free_post_on_my_timeline()
     {
         $timeline = Timeline::has('followers', '>=', 1)
             ->whereHas('posts', function($q1) {
                 $q1->where('type', PostTypeEnum::FREE);
-            })->first();
+            })->firstOrFail();
         $creator = $timeline->user;
         $post = $timeline->posts->where('type', PostTypeEnum::FREE)->first();
         $nonfan = User::whereDoesntHave('followedtimelines', function($q1) use(&$timeline) {
@@ -367,6 +366,24 @@ class RestPostsTest extends TestCase
 
         $response = $this->actingAs($nonfan)->ajaxJSON('GET', route('posts.show', $post->id));
         $response->assertStatus(403);
+    }
+
+    /**
+     *  @group posts
+     *  @group regression
+     *  @group here
+     */
+    public function test_subscriber_can_view_subcribe_only_post_on_my_timeline()
+    {
+        $timeline = Timeline::has('subscribers', '>=', 1)
+            ->whereHas('posts', function($q1) {
+                $q1->where('type', PostTypeEnum::SUBSCRIBER);
+            })->firstOrFail();
+        $creator = $timeline->user;
+        $post = $timeline->posts->where('type', PostTypeEnum::SUBSCRIBER)->first();
+        $fan = $timeline->subscribers[0];
+        $response = $this->actingAs($fan)->ajaxJSON('GET', route('posts.show', $post->id));
+        $response->assertStatus(200);
     }
 
     /**
@@ -425,7 +442,7 @@ class RestPostsTest extends TestCase
      *  @group posts
      *  @group regression
      */
-    public function test_non_follower_can_not_view_image_of_free_post_on_my_timeline()
+    public function test_nonfollower_can_not_view_image_of_free_post_on_my_timeline()
     {
         Storage::fake('s3');
 

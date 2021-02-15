@@ -28,10 +28,14 @@ class PostPolicy extends BasePolicy
             return $post->timeline->followers->count()
                 && $post->timeline->followers->contains($user->id);
         case PostTypeEnum::SUBSCRIBER:
+            return $post->timeline->subscribers->count()
+                && $post->timeline->subscribers->contains($user->id);
             //return $post->timeline->subscribers->contains($user->id);
+            /*
             return $post->timeline->followers->count()
                 && $post->timeline->followers()->wherePivot('access_level','premium')->count()
                 && $post->timeline->followers()->wherePivot('access_level','premium')->contains($user->id);
+             */
         case PostTypeEnum::PRICED:
             return $post->sharees->count()
                 && $post->sharees->contains($user->id); // premium (?)
