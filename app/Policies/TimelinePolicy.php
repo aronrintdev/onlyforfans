@@ -18,24 +18,23 @@ class TimelinePolicy extends BasePolicy
         'delete'      => 'isOwner:pass',
         'restore'     => 'isOwner:pass',
         'forceDelete' => 'isOwner:pass',
+        'follow'      => 'isOwner:pass isBlockedByOwner:fail',
+        'like'        => 'isOwner:pass isBlockedByOwner:fail',
     ];
 
-    /**
-     * Determine whether the user can view the model.
-     *
-     * @param  \App\Models\User  $user
-     * @param  \App\Models\Timeline  $timeline
-     * @return mixed
-     */
     protected function view(User $user, Timeline $resource)
     {
-        // Is viewable by user?
         return $resource->followers->contains($user->id);;
+    }
+
+    protected function follow(User $user, Timeline $resource)
+    {
+        //return true; // allowed unless explicitly blocked above -- doesn't seem to work ??
+        return !$this->isBlockedByOwner($user, $resource);
     }
 
     protected function like(User $user, Timeline $resource)
     {
-        // Is viewable by user?
         return $resource->followers->contains($user->id);;
     }
 

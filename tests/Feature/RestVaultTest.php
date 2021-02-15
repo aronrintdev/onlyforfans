@@ -796,7 +796,6 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
-     *  @group here
      */
     public function test_select_vault_folder_to_share_via_signup_invite_to_non_registered_user_via_email()
     {

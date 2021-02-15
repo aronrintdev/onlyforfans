@@ -131,14 +131,15 @@ class TimelinesController extends AppBaseController
         ]);
     }
 
+    // toggles, returns set state
     public function follow(Request $request, Timeline $timeline)
     {
-        $sessionUser = Auth::user(); // subscriber (purchaser)
+        $this->authorize('follow', $timeline);
 
         $request->validate([
             'sharee_id' => 'required|uuid|exists:users,id',
         ]);
-        if ( $request->sharee_id != $sessionUser->id ) {
+        if ( $request->sharee_id != $request->user()->id ) {
             abort(403);
         }
 
@@ -147,17 +148,25 @@ class TimelinesController extends AppBaseController
             $cattrs['notes'] = $request->notes;
         }
 
-        $timeline->followers()->detach($request->sharee_id); // remove existing
-        $timeline->followers()->attach($request->sharee_id, [ // will sync work here?
-            'shareable_type' => 'timelines',
-            'shareable_id' => $timeline->id,
-            'is_approved' => 1, // %FIXME
-            'access_level' => 'default',
-            'cattrs' => json_encode($cattrs),
-        ]); //
+        $existing = $timeline->followers->contains($request->sharee_id); // currently following?
+
+        if ($existing) {
+            $timeline->followers()->detach($request->sharee_id);
+            $isFollowing = false;
+        } else {
+            $timeline->followers()->attach($request->sharee_id, [ // will sync work here?
+                'shareable_type' => 'timelines',
+                'shareable_id' => $timeline->id,
+                'is_approved' => 1, // %FIXME
+                'access_level' => 'default',
+                'cattrs' => json_encode($cattrs),
+            ]); //
+            $isFollowing = true;
+        }
 
         $timeline->refresh();
         return response()->json([
+            'is_following' => $isFollowing,
             'timeline' => $timeline,
             'follower_count' => $timeline->followers->count(),
         ]);
