@@ -116,16 +116,34 @@ class RestPostsTest extends TestCase
 
         $content = json_decode($response->content());
         $this->assertNotNull($content->post);
-        $postR = $content->post;
-        $this->assertNotNull($postR->description);
-        $this->assertEquals($payload['description'], $postR->description);
+        $this->assertNotNull($content->post->description);
+        $this->assertEquals($payload['description'], $content->post->description);
+    }
+
+
+    /**
+     *  @group posts
+     *  @group regression
+     */
+    public function test_nonowner_can_not_store_post_on_my_timeline()
+    {
+        $timeline = Timeline::has('posts', '>=', 1)->first();
+        $creator = $timeline->user;
+        $nonowner = User::where('id', '<>', $creator->id)->first();
+
+        $payload = [
+            'timeline_id' => $timeline->id,
+            'description' => $this->faker->realText,
+        ];
+        $response = $this->actingAs($nonowner)->ajaxJSON('POST', route('posts.store'), $payload);
+        $response->assertStatus(403);
     }
 
     /**
      *  @group posts
      *  @group regression
      */
-    public function test_can_store_post_with_single_image_file_on_my_timeline()
+    public function test_can_store_post_with_single_image_on_my_timeline()
     {
         Storage::fake('s3');
 
@@ -168,6 +186,78 @@ class RestPostsTest extends TestCase
         $this->assertTrue( $post->mediafiles->contains($mediafile->id) );
         $this->assertEquals( $post->id, $mediafile->resource->id );
 
+    }
+
+    /**
+     *  @group posts
+     *  @group regression
+     *  @group here
+     */
+    public function test_can_store_post_with_multiple_images_on_my_timeline()
+    {
+        Storage::fake('s3');
+
+        $timeline = Timeline::has('posts','>=',1)->first();
+        $creator = $timeline->user;
+
+        $filenames = [
+            $this->faker->slug,
+            $this->faker->slug,
+        ];
+        $files = [
+            UploadedFile::fake()->image($filenames[0], 200, 200),
+            UploadedFile::fake()->image($filenames[1], 200, 200),
+        ];
+
+        $payload = [
+            'timeline_id' => $timeline->id,
+            'description' => $this->faker->realText,
+        ];
+        $response = $this->actingAs($creator)->ajaxJSON('POST', route('posts.store'), $payload);
+        $response->assertStatus(201);
+        $content = json_decode($response->content());
+        $this->assertNotNull($content->post);
+        $postR = $content->post;
+
+        // --
+
+        // 1st file
+        $payload = [
+            'mftype' => MediafileTypeEnum::POST,
+            'mediafile' => $files[0],
+            'resource_type' => 'posts',
+            'resource_id' => $postR->id,
+        ];
+        $response = $this->actingAs($creator)->ajaxJSON('POST', route('mediafiles.store'), $payload);
+        $response->assertStatus(201);
+
+        // 2nd file
+        $payload = [
+            'mftype' => MediafileTypeEnum::POST,
+            'mediafile' => $files[1],
+            'resource_type' => 'posts',
+            'resource_id' => $postR->id,
+        ];
+        $response = $this->actingAs($creator)->ajaxJSON('POST', route('mediafiles.store'), $payload);
+        $response->assertStatus(201);
+
+        $mediafiles = Mediafile::where('resource_type', 'posts')->where('resource_id', $postR->id)->get();
+        $this->assertNotNull($mediafiles);
+        $this->assertEquals(2, $mediafiles->count());
+        Storage::disk('s3')->assertExists($mediafiles[0]->filename);
+        Storage::disk('s3')->assertExists($mediafiles[1]->filename);
+        $this->assertSame($filenames[0], $mediafiles[0]->mfname);
+        $this->assertSame($filenames[1], $mediafiles[1]->mfname);
+        $this->assertSame(MediafileTypeEnum::POST, $mediafiles[0]->mftype);
+        $this->assertSame(MediafileTypeEnum::POST, $mediafiles[1]->mftype);
+
+        // Test relations
+        $post = Post::find($postR->id);
+        $this->assertNotNull($post);
+        $this->assertTrue( $post->mediafiles->contains($mediafiles[0]->id) );
+        $this->assertEquals( $post->id, $mediafiles[0]->resource->id );
+        $this->assertTrue( $post->mediafiles->contains($mediafiles[1]->id) );
+        $this->assertEquals( $post->id, $mediafiles[1]->resource->id );
     }
 
     /**
@@ -294,24 +384,6 @@ class RestPostsTest extends TestCase
         $response->assertStatus(403);
 
         $response = $this->actingAs($nonFan)->ajaxJSON('GET', route('mediafiles.show', $mediafile->id));
-        $response->assertStatus(403);
-    }
-
-    /**
-     *  @group posts
-     *  @group regression
-     */
-    public function test_nonowner_can_not_store_post_on_my_timeline()
-    {
-        $timeline = Timeline::has('posts', '>=', 1)->first();
-        $creator = $timeline->user;
-        $nonowner = User::where('id', '<>', $creator->id)->first();
-
-        $payload = [
-            'timeline_id' => $timeline->id,
-            'description' => $this->faker->realText,
-        ];
-        $response = $this->actingAs($nonowner)->ajaxJSON('POST', route('posts.store'), $payload);
         $response->assertStatus(403);
     }
 
