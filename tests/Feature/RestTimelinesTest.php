@@ -55,6 +55,7 @@ class TimelinesTest extends TestCase
     /**
      *  @group timelines
      *  @group regression
+     *  @group here
      */
     public function test_can_follow_timeline()
     {
@@ -65,34 +66,61 @@ class TimelinesTest extends TestCase
         $fan = User::whereDoesntHave('followedtimelines', function($q1) use(&$timeline) {
             $q1->where('timelines.id', '<>', $timeline->id);
         })->where('id', '<>', $creator->id)->first();
+        $origFollowerCount = $timeline->followers->count();
 
         $payload = [
             'sharee_id' => $fan->id,
-            'notes'=>'test_can_subscribe_to_timeline',
+            'notes'=>'test_can_follow_timeline',
         ];
-        //$response = $this->actingAs($fan)->ajaxJSON('PUT', route('shareables.followTimeline', $timeline->id), $payload);
         $response = $this->actingAs($fan)->ajaxJSON('PUT', route('timelines.follow', $timeline->id), $payload);
         $response->assertStatus(200);
 
         $content = json_decode($response->content());
-        $timelineR = $content->timeline;
-
-        $this->assertNotNull($timelineR);
-        $this->assertEquals($timeline->id, $timelineR->id);
+        $this->assertNotNull($content->timeline);
+        $this->assertEquals($timeline->id, $content->timeline->id);
+        $this->assertTrue( $content->is_following );
+        $this->assertEquals( $origFollowerCount+1, $content->follower_count );
 
         $timeline->refresh();
         $this->assertEquals('default', $timeline->followers->find($fan->id)->pivot->access_level);
         $this->assertEquals('timelines', $timeline->followers->find($fan->id)->pivot->shareable_type);
         $this->assertTrue( $timeline->followers->contains( $fan->id ) );
-        $this->assertTrue( $fan->followedtimelines->contains( $timelineR->id ) );
-
-        // %TODO: unfollow
+        $this->assertTrue( $fan->followedtimelines->contains( $content->timeline->id ) );
     }
 
     /**
      *  @group timelines
      *  @group regression
      *  @group here
+     */
+    public function test_can_unfollow_timeline()
+    {
+        $timeline = Timeline::has('posts','>=',1)->has('followers','>=',1)->first();
+        $creator = $timeline->user;
+        $fan = $timeline->followers[0];
+        $origFollowerCount = $timeline->followers->count();
+
+        $payload = [
+            'sharee_id' => $fan->id,
+            'notes'=>'test_can_unfollow_timeline',
+        ];
+        $response = $this->actingAs($fan)->ajaxJSON('PUT', route('timelines.follow', $timeline->id), $payload); // toggles
+        $response->assertStatus(200);
+
+        $content = json_decode($response->content());
+        $this->assertNotNull($content->timeline);
+        $this->assertEquals($timeline->id, $content->timeline->id);
+        $this->assertFalse( $content->is_following );
+        $this->assertEquals( $origFollowerCount-1, $content->follower_count );
+
+        $timeline->refresh();
+        $this->assertFalse( $timeline->followers->contains( $fan->id ) );
+        $this->assertFalse( $fan->followedtimelines->contains( $content->timeline->id ) );
+    }
+
+    /**
+     *  @group timelines
+     *  @group regression
      */
     public function test_blocked_can_not_follow_timeline()
     {
