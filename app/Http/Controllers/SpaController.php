@@ -12,11 +12,16 @@ class SpaController extends Controller
      */
     public function index(Request $request)
     {
-        // Send to app if logged in.
+        // If the request want JSON, then it's a 404 when reaching here
+        if (Request::wantsJson()) {
+            abort(404, 'Route wanted JSON response');
+        }
+
+        // Send to app spa if logged in.
         if (Auth::user()) {
             return view('app');
         }
-        // Send to guest if not logged in.
+        // Send to guest spa if not logged in.
         return view('guest');
     }
 

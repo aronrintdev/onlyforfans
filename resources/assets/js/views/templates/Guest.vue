@@ -1,7 +1,12 @@
 <template>
   <div>
     <!-- Header -->
-    <div class="header"></div>
+    <div class="header">
+      <b-navbar variant="dark">
+        <b-nav-text class="text-light">Guest Application Page</b-nav-text>
+        <b-btn variant="light" href="/login" class="ml-auto">Login</b-btn>
+      </b-navbar>
+    </div>
     <div class="content p-3">
       <router-view />
     </div>

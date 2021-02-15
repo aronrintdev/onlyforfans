@@ -15,6 +15,7 @@ foreach ($files as $file) {
 
 /**
  * Single Page application catch all undefined routes
+ * Laravel router will first try to match static resources, then specific routes, then finally this.
  */
 Route::get('/{any}', 'SpaController@index')->where('any', '.*');
 
@@ -41,19 +42,19 @@ Route::get('account/twitter', 'Auth\RegisterController@twitter');
 Route::get('linkedin', 'Auth\RegisterController@linkedinRedirect');
 Route::get('account/linkedin', 'Auth\RegisterController@linkedin');
 
-// Login
+/* ---------------------------------- Login --------------------------------- */
 // Route::get('/login', 'Auth\LoginController@getLogin');
-// Route::post('/login', 'Auth\LoginController@login');
+Route::post('/login', 'Auth\LoginController@login');
 // Route::get('/login2', 'Auth\LoginController@login');
 
-// Register
+/* -------------------------------- Register -------------------------------- */
 // Route::get('/register', 'Auth\RegisterController@register')->name('auth.register');
 Route::post('/register', 'Auth\RegisterController@registerUser');
 // Route::get('email/verify', 'Auth\RegisterController@verifyEmail');
 
 //main project register
 // Route::get('/main-register', 'Auth\RegisterController@mainProjectRegister');
-Route::post('/main-login', 'Auth\LoginController@mainProjectLogin');
+// Route::post('/main-login', 'Auth\LoginController@mainProjectLogin');
 // Route::get('/main-user-update', 'Auth\RegisterController@mainUserUpdate');
 
 /*

@@ -11,14 +11,25 @@
       </template>
       <!-- Login Form -->
       <div class="login-form p-3">
-        <div v-if="error">
-          <b-alert variant="danger" v-text="error.message" />
+        <div v-if="error && error.message">
+          <b-alert variant="danger" v-text="error.message" show />
         </div>
-        <b-form-group>
-          <b-form-input id="input-email" v-model="form.email" :placeholder="$t('email')" />
+        <b-form-group :invalid-feedback="error.email ? error.email[0] : null" :state="error.email ? false : null">
+          <b-form-input
+            id="input-email"
+            v-model="form.email"
+            :placeholder="$t('email')"
+            :state="error.email ? false : null"
+          />
         </b-form-group>
-        <b-form-group>
-          <b-form-input id="input-password" type="password" v-model="form.password" :placeholder="$t('password')" />
+        <b-form-group :invalid-feedback="error.password ? error.password[0] : null" :state="error.password ? false : null">
+          <b-form-input
+            id="input-password"
+            type="password"
+            v-model="form.password"
+            :placeholder="$t('password')"
+            :state="error.password ? false : null"
+          />
         </b-form-group>
         <div class="text-right">
           <!-- TODO: Link to forgot password page -->
@@ -27,8 +38,9 @@
       </div>
 
       <div class="p-3">
-        <b-btn variant="primary" block @click="login">
-          {{ $t('signInButton') }}
+        <b-btn variant="primary" block @click="login" :disabled="state === 'loading'">
+          <span v-if="state === 'form'">{{ $t('signInButton') }}</span>
+          <fa-icon v-else icon="spinner" spin />
         </b-btn>
       </div>
 
@@ -47,19 +59,28 @@
 
 <script>
 export default {
+  name: 'login',
   data: () => ({
-    state: 'login',
+    state: 'form', // form | loading
     error: {},
     form: {
       email: '',
       password: '',
+      remember: false,
     },
-
   }),
   methods: {
     login() {
-      this.axios.post()
-    }
+      this.state = 'loading'
+      this.axios.post('/login', this.form).then((response) => {
+        if (response.data.error) {
+          this.error = response.data.error
+        } else if (response.data.redirect) {
+          window.location = response.data.redirect
+        }
+        this.state = 'form'
+      })
+    },
   },
 }
 </script>
@@ -75,16 +96,15 @@ export default {
 
 <i18n lang="json5">
 {
-  "en": {
-    "signInHeader": "Sign In",
-    "noAccountQuestion": "Don't have an account?",
-    "signUpLink": "Sign Up",
-    "email": "Email",
-    "password": "Password",
-    "signInButton": "Sign In",
-    "forgotPasswordLink": "Forgot Password?",
-    "or": "or",
-  }
+  en: {
+    signInHeader: 'Sign In',
+    noAccountQuestion: "Don't have an account?",
+    signUpLink: 'Sign Up',
+    email: 'Email',
+    password: 'Password',
+    signInButton: 'Sign In',
+    forgotPasswordLink: 'Forgot Password?',
+    or: 'or',
+  },
 }
 </i18n>
-

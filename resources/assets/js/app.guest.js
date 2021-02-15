@@ -9,6 +9,7 @@ const isProduction = process.env.NODE_ENV === 'production';
 import store from './store';
 
 require('./bootstrap');
+require('./bootstrap/fontAwesome');
 window.axios = require('axios');
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 //axios.defaults.baseURL = '/';
@@ -32,6 +33,9 @@ const options = {
     showConsoleColors: true
 };
 Vue.use(VueLogger, options);
+
+import VueAxios from 'vue-axios';
+Vue.use(VueAxios, window.axios);
 
 import VueI18n from 'vue-i18n';
 Vue.use(VueI18n);
