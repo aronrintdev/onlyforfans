@@ -57,15 +57,23 @@ class PostPolicy extends BasePolicy
         }
     }
 
-    protected function delete(User $user, Post $post)
+    public function delete(User $user, Post $post)
     {
+dd('here.delete');
+    }
+
+
+    public function destroy(User $user, Post $post)
+    {
+dd('here.destroy');
         switch ($post->type) {
         case PostTypeEnum::FREE:
             return true;
         case PostTypeEnum::SUBSCRIBER:
             return true; // %TODO
         case PostTypeEnum::PRICED:
-            return !($post->fanledgers->count() > 0);
+            //return !($post->fanledgers->count() > 0);
+            return $post->canBeDeleted();
         }
     }
 

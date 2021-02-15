@@ -27,9 +27,8 @@ class TimelinePolicy extends BasePolicy
         return $resource->followers->contains($user->id);;
     }
 
-    protected function follow(User $user, Timeline $resource)
+    public function follow(User $user, Timeline $resource)
     {
-        //return true; // allowed unless explicitly blocked above -- doesn't seem to work ??
         return !$this->isBlockedByOwner($user, $resource);
     }
 

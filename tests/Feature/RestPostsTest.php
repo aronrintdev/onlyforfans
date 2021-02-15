@@ -288,9 +288,7 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
-     *  @group here
      *  [ ] can not delete a PRICED post that others have purchased
-     *  [ ] can not edit a PRICED post that others have purchased
      *  [ ] can edit/delete any post if no one has purchased (ie ledger balance of 0)
      */
     public function test_owner_can_edit_free_post()
@@ -316,6 +314,22 @@ class RestPostsTest extends TestCase
         $this->assertEquals($payload['description'], $content->post->description);
     }
 
+    /**
+     *  @group posts
+     *  @group regression
+     */
+    public function test_owner_can_delete_free_post()
+    {
+        $timeline = Timeline::has('followers', '>=', 1)
+            ->whereHas('posts', function($q1) {
+                $q1->where('type', PostTypeEnum::FREE);
+            })->first();
+        $creator = $timeline->user;
+        $post = $timeline->posts->where('type', PostTypeEnum::FREE)->first();
+
+        $response = $this->actingAs($creator)->ajaxJSON('DELETE', route('posts.destroy', $post->id));
+        $response->assertStatus(200);
+    }
 
     /**
      *  @group posts
@@ -332,6 +346,27 @@ class RestPostsTest extends TestCase
         $fan = $timeline->followers[0];
         $response = $this->actingAs($fan)->ajaxJSON('GET', route('posts.show', $post->id));
         $response->assertStatus(200);
+    }
+
+    /**
+     *  @group posts
+     *  @group regression
+     *  @group here
+     */
+    public function test_nonfollower_can_not_view_free_post_on_my_timeline()
+    {
+        $timeline = Timeline::has('followers', '>=', 1)
+            ->whereHas('posts', function($q1) {
+                $q1->where('type', PostTypeEnum::FREE);
+            })->first();
+        $creator = $timeline->user;
+        $post = $timeline->posts->where('type', PostTypeEnum::FREE)->first();
+        $nonfan = User::whereDoesntHave('followedtimelines', function($q1) use(&$timeline) {
+            $q1->where('timelines.id', $timeline->id);
+        })->where('id', '<>', $creator->id)->first();
+
+        $response = $this->actingAs($nonfan)->ajaxJSON('GET', route('posts.show', $post->id));
+        $response->assertStatus(403);
     }
 
     /**
@@ -675,7 +710,6 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
-     *  @group here
      */
     public function test_owner_can_not_edit_a_paid_post_that_others_have_purchased()
     {
@@ -709,6 +743,43 @@ class RestPostsTest extends TestCase
             'description' => $this->faker->realText,
         ];
         $response = $this->actingAs($creator)->ajaxJSON('PATCH', route('posts.update', $content->post->id), $payload);
+        $response->assertStatus(403);
+    }
+
+    /**
+     *  @group posts
+     *  @group regression
+     *  @group broken
+     */
+    public function test_owner_can_not_delete_a_paid_post_that_others_have_purchased()
+    {
+        $timeline = Timeline::has('followers', '>=', 1)
+            ->whereHas('posts', function($q1) {
+                $q1->where('type', PostTypeEnum::PRICED);
+            })->first();
+        $creator = $timeline->user;
+        $fan = $timeline->followers[0];
+
+        // Store a new post just to ensure it's not already shared with the fan...
+        $payload = [
+            'timeline_id' => $timeline->id,
+            'description' => $this->faker->realText,
+            'type' => PostTypeEnum::PRICED,
+            'price' => $this->faker->randomNumber(3),
+        ];
+        $response = $this->actingAs($creator)->ajaxJSON('POST', route('posts.store'), $payload);
+        $response->assertStatus(201);
+        $content = json_decode($response->content());
+
+        // Fan purchases post resulting in a share...
+        $payload = [
+            'sharee_id' => $fan->id,
+        ];
+        $response = $this->actingAs($fan)->ajaxJSON('PUT', route('posts.purchase', $content->post->id), $payload);
+        $response->assertStatus(200);
+
+        // Owner attempts delete
+        $response = $this->actingAs($creator)->ajaxJSON('DELETE', route('posts.destroy', $content->post->id));
         $response->assertStatus(403);
     }
 
