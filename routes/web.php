@@ -13,6 +13,12 @@ foreach ($files as $file) {
     require($file->getRealPath());
 }
 
+/**
+ * Single Page application catch all undefined routes
+ */
+Route::get('/{any}', 'SpaController@index')->where('any', '.*');
+
+
 /*
 |--------------------------------------------------------------------------
 | Auth 
@@ -36,14 +42,14 @@ Route::get('linkedin', 'Auth\RegisterController@linkedinRedirect');
 Route::get('account/linkedin', 'Auth\RegisterController@linkedin');
 
 // Login
-Route::get('/login', 'Auth\LoginController@getLogin');
+// Route::get('/login', 'Auth\LoginController@getLogin');
 // Route::post('/login', 'Auth\LoginController@login');
 // Route::get('/login2', 'Auth\LoginController@login');
 
 // Register
-Route::get('/register', 'Auth\RegisterController@register')->name('auth.register');
+// Route::get('/register', 'Auth\RegisterController@register')->name('auth.register');
 Route::post('/register', 'Auth\RegisterController@registerUser');
-Route::get('email/verify', 'Auth\RegisterController@verifyEmail');
+// Route::get('email/verify', 'Auth\RegisterController@verifyEmail');
 
 //main project register
 // Route::get('/main-register', 'Auth\RegisterController@mainProjectRegister');

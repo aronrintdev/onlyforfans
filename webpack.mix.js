@@ -91,6 +91,15 @@ mix.js('resources/assets/js/app.js', 'public/js/app2.js')
     },
   });
 
+mix.js('resources/assets/js/app.guest.js', 'public/js/app.guest.js')
+  .vue({
+    options: {
+      loaders: {
+        i18n: '@intlify/vue-i18n-loader',
+      },
+    },
+  });
+
 mix.js('resources/assets/js/appPages/userProfile.js', 'public/js/app.userProfile.js')
   .vue({
     options: {

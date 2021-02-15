@@ -100,7 +100,7 @@ class LoginController extends Controller
             //save to loginSessions
             $login_session = new LoginSession();
             $login_session->user_id = Auth::user()->id;
-            $login_session->user_name = Auth::user()->timeline->username;
+            $login_session->user_name = Auth::user()->username;
             $login_session->ip_address = $_SERVER['REMOTE_ADDR'];
             $login_session->machine_name = gethostname();
             $login_session->os = getOS();
@@ -206,9 +206,9 @@ class LoginController extends Controller
                 $nameOrEmail = $request->email;
                 $user = DB::table('users')->where('email', $request->email)->first();
             } else {
-                $timeline = DB::table('timelines')->where('username', $request->email)->first();
-                if ($timeline != null) {
-                    $user = DB::table('users')->where('timeline_id', $timeline->id)->first();
+                $user = DB::table('users')->where('username', $request->email)->first();
+                if ($user != null) {
+                    $user = DB::table('users')->where('email', $request->email)->first();
                     if ($user) {
                         $nameOrEmail = $user->email;
                     }
@@ -235,7 +235,7 @@ class LoginController extends Controller
             //save to loginSessions
             $login_session = new LoginSession();
             $login_session->user_id = Auth::user()->id;
-            $login_session->user_name = Auth::user()->timeline->username;
+            $login_session->user_name = Auth::user()->username;
             $login_session->ip_address = $_SERVER['REMOTE_ADDR'];
             $login_session->machine_name = gethostname();
             $login_session->os = getOS();

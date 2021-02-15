@@ -167,7 +167,7 @@ export default {
     },
 
     getUserEndpoint() {
-      return () => this.$route('admin.role.users', this.selected)
+      return () => this.$apiRoute('admin.role.users', this.selected)
     },
   },
   watch: {

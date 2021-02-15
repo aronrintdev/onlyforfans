@@ -5,5 +5,5 @@
 import Vue from 'vue';
 
 if (window.route) {
-  Vue.mixin({ methods: { $route: window.route }});
+  Vue.mixin({ methods: { $apiRoute: window.route }});
 }

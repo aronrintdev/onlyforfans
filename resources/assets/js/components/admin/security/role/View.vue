@@ -146,7 +146,7 @@ export default {
     addPermission() {
       this.addPermissionState = 'submitting'
       this.axios
-        .post(this.$route('admin.role.permissions.assign', this.role), {
+        .post(this.$apiRoute('admin.role.permissions.assign', this.role), {
           permissions: [this.newPermission],
         })
         .then((result) => {
@@ -170,7 +170,7 @@ export default {
 
     /** Remove Permission from role */
     removePermission(permission) {
-      this.axios.post(this.$route('admin.role.permissions.remove', this.role), {
+      this.axios.post(this.$apiRoute('admin.role.permissions.remove', this.role), {
         permissions: [permission],
       })
       .then(response => {
@@ -185,7 +185,7 @@ export default {
 
     saveRole({ callback }) {
       this.axios
-        .put(this.$route('admin.role.update', this.role), this.role)
+        .put(this.$apiRoute('admin.role.update', this.role), this.role)
         .then((result) => {
           this.$log.debug('saveRole', { result })
           if (result.statusText === 'OK') {
@@ -205,7 +205,7 @@ export default {
       if (this.roleId) {
         this.state = 'loading'
         this.axios
-          .get(this.$route('admin.role.show', { role: this.roleId }))
+          .get(this.$apiRoute('admin.role.show', { role: this.roleId }))
           .then((response) => {
             if (response.statusText === 'OK') {
               this.role = response.data

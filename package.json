@@ -47,6 +47,7 @@
     "vue-autosuggest": "^2.2.0",
     "vue-axios": "^3.2.3",
     "vue-i18n": "^8.22.3",
+    "vue-router": "^3.5.1",
     "vue-timeago": "^5.1.2",
     "vue2-dropzone": "^3.6.0",
     "vuejs-logger": "^1.5.5",
