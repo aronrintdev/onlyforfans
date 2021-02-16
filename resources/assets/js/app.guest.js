@@ -34,6 +34,9 @@ const options = {
 };
 Vue.use(VueLogger, options);
 
+import VueAxios from 'vue-axios';
+Vue.use(VueAxios, window.axios);
+
 import VueI18n from 'vue-i18n';
 Vue.use(VueI18n);
 
@@ -62,60 +65,25 @@ Vue.use(VueTimeago, {
   */
 });
 
-/**
- * Next, we will create a fresh Vue application instance and attach it to
- * the page. Then, you may begin adding components to this application
- * or customize the JavaScript scaffolding to fit your unique needs.
- */
-
-
-Vue.component('show-feed', require('./pages/ShowFeed.vue').default);
-Vue.component('home-feed', require('./pages/HomeFeed.vue').default);
-
 // ---
-
-Vue.component('main-navbar', require('./components/common/MainNavbar.vue').default);
-Vue.component('online-status', require('./components/user/OnlineStatus.vue').default);
-Vue.component('my-vault', require('./components/vault/Dashboard.vue').default);
-Vue.component('my-saved', require('./components/saved/Dashboard.vue').default);
-Vue.component('create-story', require('./components/stories/Wizard.vue').default);
-Vue.component('story-player', require('./components/stories/AutoPlayer.vue').default);
-
-export const eventBus = new Vue({
-/*
-    methods: {
-        switchDetails: function(obj) {
-            this.$emit('detailsWasSwitched', obj);
-        },
-        fixStatus: function(index) {
-            this.$emit('statusWasFixed', index);
-        },
-    }
-*/
-});
 
 /**
  * Loading localization translations
  */
 import i18n from './i18n'
 
+/**
+ * Route Loading for Guest
+ */
 import VueRouter from 'vue-router'
 Vue.use(VueRouter)
-import routes from './routes/app.routes'
-
-import App from './views/templates/App.vue'
+import router from './routes/guest.routes'
+import App from './views/templates/Guest.vue'
 
 const app = new Vue({
-    // routes,
-    i18n,
-    store,
-    // render: h => h(App),
+  router,
+  i18n,
+  store,
+  render: h => h(App),
 }).$mount('#app');
 
-/*
-const app = new Vue({
-    //router,
-    store,
-    render: h => h(App),
-}).$mount('#app');
-*/

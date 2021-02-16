@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Setting;
+use App\Models\Setting;
 use Illuminate\Foundation\Auth\ResetsPasswords;
 use Theme;
 
