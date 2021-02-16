@@ -567,7 +567,10 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
+     *  @group here
      */
+    // Given one user who owns a vault + mediafile, and a different user who owns a timeline/post, 
+    // neither user should be able to attach the mediafile to the post
     public function test_nonowner_can_not_select_vault_folder_mediafile_to_attach_to_post_by_attach()
     {
         Storage::fake('s3');

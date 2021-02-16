@@ -20,8 +20,8 @@ class CreateInvitesTable extends Migration
             $table->uuid('inviter_id');
             $table->foreign('inviter_id')->references('id')->on('users');
             $table->text('token');
-            $table->json('cattrs');
-            $table->json('meta');
+            $table->json('cattrs')->nullable();
+            $table->json('meta')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

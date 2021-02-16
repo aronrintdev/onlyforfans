@@ -12,8 +12,11 @@ class CreateFanledgersTable extends Migration
             $table->uuid('id')->primary();
             $table->string('guid')->nullable();
 
-            $table->uuid('from_account')->comment('The account this transaction is from.');
-            $table->uuid('to_account')->comment('The account this transaction goes to.');
+            // %FIXME: these probably should NOT be nullable, but needed as a workaround for now 
+            // until account seeders are written
+            // see: https://trello.com/c/LzTUmPCp
+            $table->uuid('from_account')->nullable()->comment('The account this transaction is from.');
+            $table->uuid('to_account')->nullable()->comment('The account this transaction goes to.');
 
             $table->string('fltype', 63)->comment('Fan Ledger Type: Enumeration');
 

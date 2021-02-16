@@ -36,7 +36,7 @@ class PostsTableSeeder extends Seeder
                 $this->output->writeln("  - Creating $count posts for user ".$u->name);
             }
 
-            collect(range(0,$count))->each( function() use(&$users, &$u) { // Post generation loop
+            collect(range(self::$MIN_POSTS,$count))->each( function() use(&$users, &$u) { // Post generation loop
 
                 static $typesUsed = []; // guarantee one of each post type
                 $ptype = $this->faker->randomElement([
@@ -44,16 +44,30 @@ class PostsTableSeeder extends Seeder
                     PostTypeEnum::PRICED,
                     PostTypeEnum::FREE, PostTypeEnum::FREE, PostTypeEnum::FREE,
                 ]);
-                $diff = array_diff( $typesUsed, PostTypeEnum::getKeys() );
+                $diff = array_diff( PostTypeEnum::getKeys(), $typesUsed );
                 if ( count($diff) ) {
                     $ptype = array_pop($diff);
                 }
                 $typesUsed[] = $ptype;
+                /*
+                //dd( $ptype, $diff, $typesUsed, PostTypeEnum::getKeys() );
+                dump(
+                    'typesUsed',
+                    $typesUsed, 
+                    'keys',
+                    PostTypeEnum::getKeys(),
+                    'diff',
+                    $diff,
+                    '-------------'
+                );
+                 */
 
                 $attrs = [
-                    'description'  => $this->faker->text.' ('.$ptype.')',
-                    'user_id'      => $u->id,
-                    'type'         => $ptype,
+                    'postable_type' => 'timelines',
+                    'postable_id'   => $u->timeline->id,
+                    'description'   => $this->faker->text.' ('.$ptype.')',
+                    'user_id'       => $u->id,
+                    'type'          => $ptype,
                 ];
 
                 if ( $ptype === PostTypeEnum::PRICED ) {
@@ -61,7 +75,7 @@ class PostsTableSeeder extends Seeder
                 }
 
                 $post = Post::factory()->create($attrs);
-                $u->timeline->posts()->save($post);
+                //$u->timeline->posts()->save($post);
 
                 if ( $this->faker->boolean($this->getMax('prob_post_has_image')) ) { // % post has image
                     $mf = FactoryHelpers::createImage(MediafileTypeEnum::POST, $post->id);

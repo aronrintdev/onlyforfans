@@ -317,6 +317,30 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group here
+     */
+    public function test_nonowner_can_non_edit_free_post()
+    {
+        $timeline = Timeline::has('followers', '>=', 1)
+            ->whereHas('posts', function($q1) {
+                $q1->where('type', PostTypeEnum::FREE);
+            })->first();
+        $creator = $timeline->user;
+        $post = $timeline->posts->where('type', PostTypeEnum::FREE)->first();
+        $origDesc = $post->description;
+        $nonowner = User::where('id', '<>', $creator->id)->first();
+
+        $payload = [
+            'description' => $this->faker->realText,
+        ];
+        $response = $this->actingAs($nonowner)->ajaxJSON('PATCH', route('posts.update', $post->id), $payload);
+        $response->assertStatus(403);
+    }
+
+
+    /**
+     *  @group posts
+     *  @group regression
      */
     public function test_owner_can_delete_free_post()
     {
@@ -371,17 +395,27 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
-     *  @group here
      */
     public function test_subscriber_can_view_subcribe_only_post_on_my_timeline()
     {
-        $timeline = Timeline::has('subscribers', '>=', 1)
+        // %FIXME: ensure at least one subscriber... (hardcode)
+        $timeline = Timeline::has('followers', '>=', 1)
             ->whereHas('posts', function($q1) {
                 $q1->where('type', PostTypeEnum::SUBSCRIBER);
             })->firstOrFail();
         $creator = $timeline->user;
         $post = $timeline->posts->where('type', PostTypeEnum::SUBSCRIBER)->first();
-        $fan = $timeline->subscribers[0];
+        $fan = $timeline->followers[0];
+
+        // [ ] set to premium/subscribe...workaround until shareables seeder is fixed
+        // to guarantee some subscribers not just followers
+        DB::table('shareables')
+            ->where('sharee_id', $fan->id)
+            ->where('shareable_type', 'timelines')
+            ->where('shareable_id', $timeline->id)
+            ->update([
+                'access_level' => 'premium',
+            ]);
         $response = $this->actingAs($fan)->ajaxJSON('GET', route('posts.show', $post->id));
         $response->assertStatus(200);
     }
@@ -728,7 +762,7 @@ class RestPostsTest extends TestCase
      *  @group posts
      *  @group regression
      */
-    public function test_owner_can_not_edit_a_paid_post_that_others_have_purchased()
+    public function test_owner_can_not_edit_a_priced_post_that_others_have_purchased()
     {
         $timeline = Timeline::has('followers', '>=', 1)
             ->whereHas('posts', function($q1) {
@@ -766,9 +800,9 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
-     *  @group broken
      */
-    public function test_owner_can_not_delete_a_paid_post_that_others_have_purchased()
+    // priced: one-time-purchaseable, as opposed to subscribeable
+    public function test_owner_can_not_delete_a_priced_post_that_others_have_purchased()
     {
         $timeline = Timeline::has('followers', '>=', 1)
             ->whereHas('posts', function($q1) {
