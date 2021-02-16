@@ -421,7 +421,6 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
-     *  @group here
      */
     public function test_nonsubscriber_can_not_view_subcribe_only_post_on_my_timeline()
     {
@@ -632,7 +631,7 @@ class RestPostsTest extends TestCase
         $timeline = Timeline::has('followers', '>=', 1)
             ->whereHas('posts', function($q1) {
                 $q1->where('type', PostTypeEnum::FREE);
-            })->first();
+            })->firstOrFail();
         $creator = $timeline->user;
         $post = $timeline->posts->where('type', PostTypeEnum::FREE)->first();
         $fan = $timeline->followers[0];
@@ -682,6 +681,48 @@ class RestPostsTest extends TestCase
             ->where('likeable_id', $postR->id)
             ->first();
         $this->assertNull($likeable);
+    }
+
+    /**
+     *  @group posts
+     *  @group regression
+     *  @group here
+     */
+    public function test_timeline_owner_can_like_own_post()
+    {
+        $timeline = Timeline::has('followers', '>=', 1)
+            ->whereHas('posts', function($q1) {
+                $q1->where('type', PostTypeEnum::FREE);
+            })->firstOrFail();
+        $creator = $timeline->user;
+
+        // LIKE the post (free)
+        $post = $timeline->posts->where('type', PostTypeEnum::FREE)->first();
+        $payload = [
+            'likeable_type' => 'posts',
+            'likeable_id' => $post->id,
+        ];
+        $response = $this->actingAs($creator)->ajaxJSON('PUT', route('likeables.update', $creator->id), $payload); // fan->likee
+        $response->assertStatus(200);
+
+        // LIKE the post (priced)
+        $post = $timeline->posts->where('type', PostTypeEnum::PRICED)->first();
+        $payload = [
+            'likeable_type' => 'posts',
+            'likeable_id' => $post->id,
+        ];
+        $response = $this->actingAs($creator)->ajaxJSON('PUT', route('likeables.update', $creator->id), $payload); // fan->likee
+        $response->assertStatus(200);
+
+        // LIKE the post (subcribe-only)
+        $post = $timeline->posts->where('type', PostTypeEnum::SUBSCRIBER)->first();
+        $payload = [
+            'likeable_type' => 'posts',
+            'likeable_id' => $post->id,
+        ];
+        $response = $this->actingAs($creator)->ajaxJSON('PUT', route('likeables.update', $creator->id), $payload); // fan->likee
+        $response->assertStatus(200);
+
     }
 
     /**
