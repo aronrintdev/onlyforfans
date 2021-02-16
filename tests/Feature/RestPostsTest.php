@@ -375,13 +375,24 @@ class RestPostsTest extends TestCase
      */
     public function test_subscriber_can_view_subcribe_only_post_on_my_timeline()
     {
-        $timeline = Timeline::has('subscribers', '>=', 1)
+        // %FIXME: ensure at least one subscriber... (hardcode)
+        $timeline = Timeline::has('followers', '>=', 1)
             ->whereHas('posts', function($q1) {
                 $q1->where('type', PostTypeEnum::SUBSCRIBER);
             })->firstOrFail();
         $creator = $timeline->user;
         $post = $timeline->posts->where('type', PostTypeEnum::SUBSCRIBER)->first();
-        $fan = $timeline->subscribers[0];
+        $fan = $timeline->followers[0];
+
+        // [ ] set to premium/subscribe...workaround until shareables seeder is fixed
+        // to guarantee some subscribers not just followers
+        DB::table('shareables')
+            ->where('sharee_id', $fan->id)
+            ->where('shareable_type', 'timelines')
+            ->where('shareable_id', $timeline->id)
+            ->update([
+                'access_level' => 'premium',
+            ]);
         $response = $this->actingAs($fan)->ajaxJSON('GET', route('posts.show', $post->id));
         $response->assertStatus(200);
     }

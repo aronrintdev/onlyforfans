@@ -13,7 +13,7 @@ class PostPolicy extends BasePolicy
     protected $policies = [
         'viewAny'     => 'permissionOnly',
         'view'        => 'isOwner:pass isBlockedByOwner:fail',
-        'update'      => 'isOwner:pass',
+        'update'      => 'isOwner:next:fail', // should auto fail any non-owners, but then move onto the update function for owners
         'delete'      => 'isOwner:pass',
         'restore'     => 'isOwner:pass',
         'forceDelete' => 'isOwner:pass',

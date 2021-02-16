@@ -21,6 +21,8 @@ class ShareablesTableSeeder extends Seeder
 {
     use SeederTraits;
 
+    // %FIXME: instead of starting from followers and finding timelines, we should start from timelines and associate
+    // followers, and guarantee a timeline has at least one follower of each type
     public function run()
     {
         $this->initSeederTraits('ShareablesTableSeeder'); // $this->{output, faker, appEnv}
