@@ -169,7 +169,7 @@ class PostsController extends AppBaseController
             $post->receivePayment(
                 PaymentTypeEnum::PURCHASE,
                 $request->user(),
-                $post->price*100, // %FIXME: should be on timeline
+                $post->price,
                 [ 'notes' => $request->note ?? '' ]
             );
     

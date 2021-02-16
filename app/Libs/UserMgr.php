@@ -40,7 +40,7 @@ class UserMgr {
                 $timeline->receivePayment(
                     PaymentTypeEnum::SUBSCRIPTION,
                     $follower,
-                    $timeline->user->price*100, // %FIXME: price should be on timeline not user
+                    $timeline->price,
                     $customAttributes,
                 );
             } else { // follow only
