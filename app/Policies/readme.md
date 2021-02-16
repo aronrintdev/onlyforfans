@@ -170,3 +170,36 @@ Examples:
 ```
 **Warning**: `*` means all, not any.
 `Post.*` and `Post.update.*` will both be true for `Post.update.5`
+
+---
+
+Notes:
+
+Erik Hattervig  12 minutes ago
+If you have 'update' => 'isOwner:pass' in the policies array then the update function won't be entered if the user owns the resource. The policy array rule come before that the function and is basically for common functions that should pass or fail. If you want to enter the function only if a user is an owner you can put 'update' => 'isOwner:next:fail' That will auto fail any non Owners, but then move onto the update function for owners.
+
+Erik Hattervig  10 minutes ago
+Sorry if that wasn't the clearest, you can also enter the protected function all the time if you don't have an 'update' entry in the policies array.
+
+Peter Gorgone  9 minutes ago
+ok, but why did changing the ‘update’ policy method to ‘public’ result it in being called, even with ‘update’ => ‘isOwner:pass’ in the array?
+
+Peter Gorgone  9 minutes ago
+is that a valid use case for the lib?
+
+Erik Hattervig  5 minutes ago
+Has to do with the way the php function __call works. __call catches all unknown function calls. So if you set the function to public it won't ever go through the __call in basePolicy. That is way laravel model attributs are named things like getNameAttribute. Other wise __call would not work for the attribute. (edited) 
+
+Peter Gorgone  3 minutes ago
+ok so create view update delete, etc should be protected…but if we want to add ‘like’ or ‘follow’…they should be public…is this correct?
+
+Peter Gorgone  2 minutes ago
+…minding the array rules as you stated
+
+Erik Hattervig  1 minute ago
+If you use it like this $user->can('action', $resource) Then it needs to be protected.
+
+Erik Hattervig  1 minute ago
+So, like and follow should be protected.
+
+Most every function you put on a policy will be protected. The statement about public functions is for stuff on the left side of the policies array, such as isOwner and isBlockedByOwner, but most of the time those will be added by a trait as they are meant to be functions that we know are going to be reused a bunch of times.
