@@ -21,7 +21,7 @@ class CreateShareablesTable extends Migration
             $table->index(['sharee_id', 'shareable_id']);
 
             $table->boolean('is_approved')->default(true);
-            $table->string('access_level', 63);
+            $table->string('access_level', 63)->default('default');
             $table->json('cattrs')->nullable();
             $table->json('meta')->nullable();
             $table->timestamps();

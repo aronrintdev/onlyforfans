@@ -762,7 +762,7 @@ class RestPostsTest extends TestCase
      *  @group posts
      *  @group regression
      */
-    public function test_owner_can_not_edit_a_paid_post_that_others_have_purchased()
+    public function test_owner_can_not_edit_a_priced_post_that_others_have_purchased()
     {
         $timeline = Timeline::has('followers', '>=', 1)
             ->whereHas('posts', function($q1) {
@@ -801,7 +801,8 @@ class RestPostsTest extends TestCase
      *  @group posts
      *  @group regression
      */
-    public function test_owner_can_not_delete_a_paid_post_that_others_have_purchased()
+    // priced: one-time-purchaseable, as opposed to subscribeable
+    public function test_owner_can_not_delete_a_priced_post_that_others_have_purchased()
     {
         $timeline = Timeline::has('followers', '>=', 1)
             ->whereHas('posts', function($q1) {

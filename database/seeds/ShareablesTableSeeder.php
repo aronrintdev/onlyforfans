@@ -123,6 +123,8 @@ class ShareablesTableSeeder extends Seeder
                     'cattrs' => json_encode($customAttributes),
                 ]);
                 Fanledger::create([
+                    //'from_account' => , // %TODO: see https://trello.com/c/LzTUmPCp
+                    //'to_account' => ,
                     'fltype' => PaymentTypeEnum::SUBSCRIPTION,
                     'purchaser_id' => $f->id, // fan
                     'seller_id' => $t->user->id,

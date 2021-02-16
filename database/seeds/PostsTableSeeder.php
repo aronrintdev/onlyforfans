@@ -63,9 +63,11 @@ class PostsTableSeeder extends Seeder
                  */
 
                 $attrs = [
-                    'description'  => $this->faker->text.' ('.$ptype.')',
-                    'user_id'      => $u->id,
-                    'type'         => $ptype,
+                    'postable_type' => 'timelines',
+                    'postable_id'   => $u->timeline->id,
+                    'description'   => $this->faker->text.' ('.$ptype.')',
+                    'user_id'       => $u->id,
+                    'type'          => $ptype,
                 ];
 
                 if ( $ptype === PostTypeEnum::PRICED ) {
@@ -73,7 +75,7 @@ class PostsTableSeeder extends Seeder
                 }
 
                 $post = Post::factory()->create($attrs);
-                $u->timeline->posts()->save($post);
+                //$u->timeline->posts()->save($post);
 
                 if ( $this->faker->boolean($this->getMax('prob_post_has_image')) ) { // % post has image
                     $mf = FactoryHelpers::createImage(MediafileTypeEnum::POST, $post->id);
