@@ -1,3 +1,6 @@
+%%% Demo site
+$ php artisan serve
+$ npm run hot
 
 %%% Need to unzip js dist folder (!)
 $ pushd public/js
