@@ -24,8 +24,8 @@ class CreateBlockablesTable extends Migration
 
             $table->index(['user_id', 'blockable_id']);
 
-            $table->json('cattrs');
-            $table->json('meta');
+            $table->json('cattrs')->nullable();
+            $table->json('meta')->nullable();
             $table->timestamps();
         });
     }

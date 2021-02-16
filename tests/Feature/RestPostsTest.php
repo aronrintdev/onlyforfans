@@ -116,16 +116,60 @@ class RestPostsTest extends TestCase
 
         $content = json_decode($response->content());
         $this->assertNotNull($content->post);
-        $postR = $content->post;
-        $this->assertNotNull($postR->description);
-        $this->assertEquals($payload['description'], $postR->description);
+        $this->assertNotNull($content->post->description);
+        $this->assertEquals($payload['description'], $content->post->description);
+        $this->assertEquals(PostTypeEnum::FREE, $content->post->type);
+        $this->assertEquals(0, $content->post->price);
     }
 
     /**
      *  @group posts
      *  @group regression
      */
-    public function test_can_store_post_with_single_image_file_on_my_timeline()
+    public function test_can_create_a_post_on_my_timeline_of_type_purchaseable_and_set_a_price()
+    {
+        $timeline = Timeline::has('posts','>=',1)->first();
+        $creator = $timeline->user;
+
+        $payload = [
+            'timeline_id' => $timeline->id,
+            'description' => $this->faker->realText,
+            'type' => PostTypeEnum::PRICED,
+            'price' => $this->faker->randomNumber(3),
+        ];
+        $response = $this->actingAs($creator)->ajaxJSON('POST', route('posts.store'), $payload);
+        $response->assertStatus(201);
+
+        $content = json_decode($response->content());
+        $this->assertNotNull($content->post);
+        $this->assertNotNull($content->post->description);
+        $this->assertEquals(PostTypeEnum::PRICED, $content->post->type);
+        $this->assertEquals($payload['price'], $content->post->price);
+    }
+
+    /**
+     *  @group posts
+     *  @group regression
+     */
+    public function test_nonowner_can_not_store_post_on_my_timeline()
+    {
+        $timeline = Timeline::has('posts', '>=', 1)->first();
+        $creator = $timeline->user;
+        $nonowner = User::where('id', '<>', $creator->id)->first();
+
+        $payload = [
+            'timeline_id' => $timeline->id,
+            'description' => $this->faker->realText,
+        ];
+        $response = $this->actingAs($nonowner)->ajaxJSON('POST', route('posts.store'), $payload);
+        $response->assertStatus(403);
+    }
+
+    /**
+     *  @group posts
+     *  @group regression
+     */
+    public function test_can_store_post_with_single_image_on_my_timeline()
     {
         Storage::fake('s3');
 
@@ -174,6 +218,147 @@ class RestPostsTest extends TestCase
      *  @group posts
      *  @group regression
      */
+    public function test_can_store_post_with_multiple_images_on_my_timeline()
+    {
+        Storage::fake('s3');
+
+        $timeline = Timeline::has('posts','>=',1)->first();
+        $creator = $timeline->user;
+
+        $filenames = [
+            $this->faker->slug,
+            $this->faker->slug,
+        ];
+        $files = [
+            UploadedFile::fake()->image($filenames[0], 200, 200),
+            UploadedFile::fake()->image($filenames[1], 200, 200),
+        ];
+
+        $payload = [
+            'timeline_id' => $timeline->id,
+            'description' => $this->faker->realText,
+        ];
+        $response = $this->actingAs($creator)->ajaxJSON('POST', route('posts.store'), $payload);
+        $response->assertStatus(201);
+        $content = json_decode($response->content());
+        $this->assertNotNull($content->post);
+        $postR = $content->post;
+
+        // --
+
+        // 1st file
+        $payload = [
+            'mftype' => MediafileTypeEnum::POST,
+            'mediafile' => $files[0],
+            'resource_type' => 'posts',
+            'resource_id' => $postR->id,
+        ];
+        $response = $this->actingAs($creator)->ajaxJSON('POST', route('mediafiles.store'), $payload);
+        $response->assertStatus(201);
+
+        // 2nd file
+        $payload = [
+            'mftype' => MediafileTypeEnum::POST,
+            'mediafile' => $files[1],
+            'resource_type' => 'posts',
+            'resource_id' => $postR->id,
+        ];
+        $response = $this->actingAs($creator)->ajaxJSON('POST', route('mediafiles.store'), $payload);
+        $response->assertStatus(201);
+
+        $mediafiles = Mediafile::where('resource_type', 'posts')->where('resource_id', $postR->id)->get();
+        $this->assertNotNull($mediafiles);
+        $this->assertEquals(2, $mediafiles->count());
+        Storage::disk('s3')->assertExists($mediafiles[0]->filename);
+        Storage::disk('s3')->assertExists($mediafiles[1]->filename);
+        $this->assertSame($filenames[0], $mediafiles[0]->mfname);
+        $this->assertSame($filenames[1], $mediafiles[1]->mfname);
+        $this->assertSame(MediafileTypeEnum::POST, $mediafiles[0]->mftype);
+        $this->assertSame(MediafileTypeEnum::POST, $mediafiles[1]->mftype);
+
+        // Test relations
+        $post = Post::find($postR->id);
+        $this->assertNotNull($post);
+        $this->assertTrue( $post->mediafiles->contains($mediafiles[0]->id) );
+        $this->assertEquals( $post->id, $mediafiles[0]->resource->id );
+        $this->assertTrue( $post->mediafiles->contains($mediafiles[1]->id) );
+        $this->assertEquals( $post->id, $mediafiles[1]->resource->id );
+    }
+
+    /**
+     *  @group posts
+     *  @group regression
+     *  [ ] can not delete a PRICED post that others have purchased
+     *  [ ] can edit/delete any post if no one has purchased (ie ledger balance of 0)
+     */
+    public function test_owner_can_edit_free_post()
+    {
+        $timeline = Timeline::has('followers', '>=', 1)
+            ->whereHas('posts', function($q1) {
+                $q1->where('type', PostTypeEnum::FREE);
+            })->first();
+        $creator = $timeline->user;
+        $post = $timeline->posts->where('type', PostTypeEnum::FREE)->first();
+        $origDesc = $post->description;
+
+        $payload = [
+            'description' => $this->faker->realText,
+        ];
+        $response = $this->actingAs($creator)->ajaxJSON('PATCH', route('posts.update', $post->id), $payload);
+        $response->assertStatus(200);
+
+        $content = json_decode($response->content());
+        $this->assertNotNull($content->post);
+        $this->assertNotNull($content->post->description);
+        $this->assertNotEquals($origDesc, $content->post->description);
+        $this->assertEquals($payload['description'], $content->post->description);
+    }
+
+    /**
+     *  @group posts
+     *  @group regression
+     *  @group here
+     */
+    public function test_nonowner_can_non_edit_free_post()
+    {
+        $timeline = Timeline::has('followers', '>=', 1)
+            ->whereHas('posts', function($q1) {
+                $q1->where('type', PostTypeEnum::FREE);
+            })->first();
+        $creator = $timeline->user;
+        $post = $timeline->posts->where('type', PostTypeEnum::FREE)->first();
+        $origDesc = $post->description;
+        $nonowner = User::where('id', '<>', $creator->id)->first();
+
+        $payload = [
+            'description' => $this->faker->realText,
+        ];
+        $response = $this->actingAs($nonowner)->ajaxJSON('PATCH', route('posts.update', $post->id), $payload);
+        $response->assertStatus(403);
+    }
+
+
+    /**
+     *  @group posts
+     *  @group regression
+     */
+    public function test_owner_can_delete_free_post()
+    {
+        $timeline = Timeline::has('followers', '>=', 1)
+            ->whereHas('posts', function($q1) {
+                $q1->where('type', PostTypeEnum::FREE);
+            })->first();
+        $creator = $timeline->user;
+        $post = $timeline->posts->where('type', PostTypeEnum::FREE)->first();
+
+        $response = $this->actingAs($creator)->ajaxJSON('DELETE', route('posts.destroy', $post->id));
+        $response->assertStatus(200);
+    }
+
+    /**
+     *  @group posts
+     *  @group regression
+     */
     public function test_follower_can_view_free_post_on_my_timeline()
     {
         $timeline = Timeline::has('followers', '>=', 1)
@@ -183,6 +368,54 @@ class RestPostsTest extends TestCase
         $creator = $timeline->user;
         $post = $timeline->posts->where('type', PostTypeEnum::FREE)->first();
         $fan = $timeline->followers[0];
+        $response = $this->actingAs($fan)->ajaxJSON('GET', route('posts.show', $post->id));
+        $response->assertStatus(200);
+    }
+
+    /**
+     *  @group posts
+     *  @group regression
+     */
+    public function test_nonfollower_can_not_view_free_post_on_my_timeline()
+    {
+        $timeline = Timeline::has('followers', '>=', 1)
+            ->whereHas('posts', function($q1) {
+                $q1->where('type', PostTypeEnum::FREE);
+            })->firstOrFail();
+        $creator = $timeline->user;
+        $post = $timeline->posts->where('type', PostTypeEnum::FREE)->first();
+        $nonfan = User::whereDoesntHave('followedtimelines', function($q1) use(&$timeline) {
+            $q1->where('timelines.id', $timeline->id);
+        })->where('id', '<>', $creator->id)->first();
+
+        $response = $this->actingAs($nonfan)->ajaxJSON('GET', route('posts.show', $post->id));
+        $response->assertStatus(403);
+    }
+
+    /**
+     *  @group posts
+     *  @group regression
+     */
+    public function test_subscriber_can_view_subcribe_only_post_on_my_timeline()
+    {
+        // %FIXME: ensure at least one subscriber... (hardcode)
+        $timeline = Timeline::has('followers', '>=', 1)
+            ->whereHas('posts', function($q1) {
+                $q1->where('type', PostTypeEnum::SUBSCRIBER);
+            })->firstOrFail();
+        $creator = $timeline->user;
+        $post = $timeline->posts->where('type', PostTypeEnum::SUBSCRIBER)->first();
+        $fan = $timeline->followers[0];
+
+        // [ ] set to premium/subscribe...workaround until shareables seeder is fixed
+        // to guarantee some subscribers not just followers
+        DB::table('shareables')
+            ->where('sharee_id', $fan->id)
+            ->where('shareable_type', 'timelines')
+            ->where('shareable_id', $timeline->id)
+            ->update([
+                'access_level' => 'premium',
+            ]);
         $response = $this->actingAs($fan)->ajaxJSON('GET', route('posts.show', $post->id));
         $response->assertStatus(200);
     }
@@ -228,7 +461,7 @@ class RestPostsTest extends TestCase
         $creator->refresh();
         $post = $timeline->posts()->has('mediafiles', '>=', 1)
                          ->where('type', PostTypeEnum::FREE)
-                         ->firstOrFail();
+                         ->first();
         $mediafile = $post->mediafiles->shift();
 
         $fan = $timeline->followers[0];
@@ -243,7 +476,7 @@ class RestPostsTest extends TestCase
      *  @group posts
      *  @group regression
      */
-    public function test_non_follower_can_not_view_image_of_free_post_on_my_timeline()
+    public function test_nonfollower_can_not_view_image_of_free_post_on_my_timeline()
     {
         Storage::fake('s3');
 
@@ -287,31 +520,13 @@ class RestPostsTest extends TestCase
 
         $post = $timeline->posts()->has('mediafiles', '>=', 1)
                          ->where('type', PostTypeEnum::FREE)
-                         ->firstOrFail();
+                         ->first();
         $mediafile = $post->mediafiles->shift();
 
         $response = $this->actingAs($nonFan)->ajaxJSON('GET', route('posts.show', $post->id));
         $response->assertStatus(403);
 
         $response = $this->actingAs($nonFan)->ajaxJSON('GET', route('mediafiles.show', $mediafile->id));
-        $response->assertStatus(403);
-    }
-
-    /**
-     *  @group posts
-     *  @group regression
-     */
-    public function test_nonowner_can_not_store_post_on_my_timeline()
-    {
-        $timeline = Timeline::has('posts', '>=', 1)->first();
-        $creator = $timeline->user;
-        $nonowner = User::where('id', '<>', $creator->id)->first();
-
-        $payload = [
-            'timeline_id' => $timeline->id,
-            'description' => $this->faker->realText,
-        ];
-        $response = $this->actingAs($nonowner)->ajaxJSON('POST', route('posts.store'), $payload);
         $response->assertStatus(403);
     }
 
@@ -398,7 +613,7 @@ class RestPostsTest extends TestCase
         $timeline = Timeline::has('followers', '>=', 1)
             ->whereHas('posts', function($q1) {
                 $q1->where('type', PostTypeEnum::FREE);
-            })->firstOrFail();
+            })->first();
         $creator = $timeline->user;
         $post = $timeline->posts->where('type', PostTypeEnum::FREE)->first();
         $fan = $timeline->followers[0];
@@ -493,7 +708,7 @@ class RestPostsTest extends TestCase
         $timeline = Timeline::has('followers', '>=', 1)
             ->whereHas('posts', function($q1) {
                 $q1->where('type', PostTypeEnum::PRICED);
-            })->firstOrFail();
+            })->first();
         $creator = $timeline->user;
         $fan = $timeline->followers[0];
 
@@ -502,6 +717,7 @@ class RestPostsTest extends TestCase
             'timeline_id' => $timeline->id,
             'description' => $this->faker->realText,
             'type' => PostTypeEnum::PRICED,
+            'price' => $this->faker->randomNumber(3),
         ];
         $response = $this->actingAs($creator)->ajaxJSON('POST', route('posts.store'), $payload);
         $response->assertStatus(201);
@@ -540,6 +756,82 @@ class RestPostsTest extends TestCase
         // Check access (after: should be allowed)
         $response = $this->actingAs($fan)->ajaxJSON('GET', route('posts.show', $post->id));
         $response->assertStatus(200);
+    }
+
+    /**
+     *  @group posts
+     *  @group regression
+     */
+    public function test_owner_can_not_edit_a_priced_post_that_others_have_purchased()
+    {
+        $timeline = Timeline::has('followers', '>=', 1)
+            ->whereHas('posts', function($q1) {
+                $q1->where('type', PostTypeEnum::PRICED);
+            })->first();
+        $creator = $timeline->user;
+        $fan = $timeline->followers[0];
+
+        // Store a new post just to ensure it's not already shared with the fan...
+        $payload = [
+            'timeline_id' => $timeline->id,
+            'description' => $this->faker->realText,
+            'type' => PostTypeEnum::PRICED,
+            'price' => $this->faker->randomNumber(3),
+        ];
+        $response = $this->actingAs($creator)->ajaxJSON('POST', route('posts.store'), $payload);
+        $response->assertStatus(201);
+        $content = json_decode($response->content());
+
+        // Fan purchases post resulting in a share...
+        $payload = [
+            'sharee_id' => $fan->id,
+        ];
+        $response = $this->actingAs($fan)->ajaxJSON('PUT', route('posts.purchase', $content->post->id), $payload);
+        $response->assertStatus(200);
+
+        // Owner attempts update
+        $payload = [
+            'description' => $this->faker->realText,
+        ];
+        $response = $this->actingAs($creator)->ajaxJSON('PATCH', route('posts.update', $content->post->id), $payload);
+        $response->assertStatus(403);
+    }
+
+    /**
+     *  @group posts
+     *  @group regression
+     */
+    // priced: one-time-purchaseable, as opposed to subscribeable
+    public function test_owner_can_not_delete_a_priced_post_that_others_have_purchased()
+    {
+        $timeline = Timeline::has('followers', '>=', 1)
+            ->whereHas('posts', function($q1) {
+                $q1->where('type', PostTypeEnum::PRICED);
+            })->first();
+        $creator = $timeline->user;
+        $fan = $timeline->followers[0];
+
+        // Store a new post just to ensure it's not already shared with the fan...
+        $payload = [
+            'timeline_id' => $timeline->id,
+            'description' => $this->faker->realText,
+            'type' => PostTypeEnum::PRICED,
+            'price' => $this->faker->randomNumber(3),
+        ];
+        $response = $this->actingAs($creator)->ajaxJSON('POST', route('posts.store'), $payload);
+        $response->assertStatus(201);
+        $content = json_decode($response->content());
+
+        // Fan purchases post resulting in a share...
+        $payload = [
+            'sharee_id' => $fan->id,
+        ];
+        $response = $this->actingAs($fan)->ajaxJSON('PUT', route('posts.purchase', $content->post->id), $payload);
+        $response->assertStatus(200);
+
+        // Owner attempts delete
+        $response = $this->actingAs($creator)->ajaxJSON('DELETE', route('posts.destroy', $content->post->id));
+        $response->assertStatus(403);
     }
 
     /**

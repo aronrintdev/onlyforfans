@@ -82,6 +82,7 @@ __MACOSX
 *.tgz
 *.gz
 .swp
+*.swo
 
 public/themes/default/assets/css/style.*.css
 public/themes/default/assets/css/main.*.css
@@ -107,3 +108,5 @@ public/fonts/*.svg
 composer.json-current
 composer.json-save
 public/mix-manifest.json
+
+database/seeds/RolesTableSeeder.php--save

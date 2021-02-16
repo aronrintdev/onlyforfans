@@ -84,7 +84,7 @@ class PostsController extends AppBaseController
     public function update(Request $request, Post $post)
     {
         $this->authorize('update', $post);
-        $post->fill($request->only([ 'description' ]));
+        $post->fill($request->only([ 'description' ])); // %TODO
         $post->save();
         return response()->json([
             'post' => $post,
@@ -114,9 +114,7 @@ class PostsController extends AppBaseController
 
     public function destroy(Request $request, Post $post)
     {
-        if ( $post->user->id !== $request->user()->id ) {
-            abort(403);
-        }
+        $this->authorize('delete', $post);
         $post->delete();
         return response()->json([]);
     }

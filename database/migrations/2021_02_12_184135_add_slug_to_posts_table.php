@@ -6,23 +6,15 @@ use Illuminate\Support\Facades\Schema;
 
 class AddSlugToPostsTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
     public function up()
     {
         Schema::table('posts', function (Blueprint $table) {
-            $table->string('slug')->unique()->after('id');
+            // need dummy default value to satisfy sqlite error, see:
+            // https://laracasts.com/discuss/channels/general-discussion/migrations-sqlite-general-error-1-cannot-add-a-not-null-column-with-default-value-null
+            $table->string('slug')->default('dummy')->unique()->after('id');
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
     public function down()
     {
         Schema::table('posts', function (Blueprint $table) {

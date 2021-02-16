@@ -121,6 +121,13 @@ class User extends Authenticatable implements PaymentSendable, Blockable
             ->withPivot('access_level', 'shareable_type', 'sharee_id')->withTimestamps();
     }
 
+    public function subscribedtimelines()
+    {
+        return $this->morphedByMany('App\Models\Timeline', 'shareable', 'shareables', 'sharee_id')
+            ->where('access_level', 'premium')
+            ->withPivot('access_level', 'shareable_type', 'sharee_id')->withTimestamps();
+    }
+
     public function likedposts()
     {
         return $this->morphedByMany('App\Models\Post', 'likeable', 'likeables', 'likee_id')

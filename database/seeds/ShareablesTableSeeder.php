@@ -21,6 +21,8 @@ class ShareablesTableSeeder extends Seeder
 {
     use SeederTraits;
 
+    // %FIXME: instead of starting from followers and finding timelines, we should start from timelines and associate
+    // followers, and guarantee a timeline has at least one follower of each type
     public function run()
     {
         $this->initSeederTraits('ShareablesTableSeeder'); // $this->{output, faker, appEnv}
@@ -121,6 +123,8 @@ class ShareablesTableSeeder extends Seeder
                     'cattrs' => json_encode($customAttributes),
                 ]);
                 Fanledger::create([
+                    //'from_account' => , // %TODO: see https://trello.com/c/LzTUmPCp
+                    //'to_account' => ,
                     'fltype' => PaymentTypeEnum::SUBSCRIPTION,
                     'purchaser_id' => $f->id, // fan
                     'seller_id' => $t->user->id,

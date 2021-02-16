@@ -42,9 +42,12 @@ class Post extends Model implements UuidId, Ownable, Deletable, Purchaseable, Li
     {
         parent::boot();
         static::deleting(function ($model) {
+            /*
             if (!$model->canBeDeleted()) {
                 throw new Exception('Can not delete Post (26)'); // or soft delete and give access to purchasers (?)
             }
+             */
+            // %TODO: should refernce count these (?), or N/A as we are cloning (ie ref count always 1)?
             foreach ($model->mediafiles as $o) {
                 Storage::disk('s3')->delete($o->filename); // Remove from S3
                 $o->delete();
