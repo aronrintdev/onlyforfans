@@ -19,9 +19,12 @@ foreach ($files as $file) {
 |--------------------------------------------------------------------------
 */
 
-Route::group(['middleware' => ['web']], function () {
-    Auth::routes();
-});
+/**
+ * Removing due to limitations
+ */
+// Route::group(['middleware' => ['web']], function () {
+//     Auth::routes();
+// });
 
 Route::get('facebook', 'Auth\RegisterController@facebookRedirect'); // auth redirect
 Route::get('account/facebook', 'Auth\RegisterController@facebook'); // return url (?)
