@@ -13,13 +13,6 @@ foreach ($files as $file) {
     require($file->getRealPath());
 }
 
-/**
- * Single Page application catch all undefined routes
- * Laravel router will first try to match static resources, then specific routes, then finally this.
- */
-Route::get('/{any}', 'SpaController@index')->where('any', '.*');
-
-
 /*
 |--------------------------------------------------------------------------
 | Auth 
@@ -222,3 +215,9 @@ Route::get('blog', 'PageController@blog');
 */
 
 Route::get('/home', 'HomeController@index');
+
+/**
+ * Single Page application catch all undefined routes
+ * Laravel router will first try to match static resources, then specific routes, then finally this.
+ */
+Route::get('/{any}', 'SpaController@index')->where('any', '.*');

@@ -9,6 +9,7 @@ const isProduction = process.env.NODE_ENV === 'production';
 import store from './store';
 
 require('./bootstrap');
+require('./bootstrap/fontAwesome');
 window.axios = require('axios');
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 //axios.defaults.baseURL = '/';
@@ -98,11 +99,18 @@ export const eventBus = new Vue({
  */
 import i18n from './i18n'
 
+import VueRouter from 'vue-router'
+Vue.use(VueRouter)
+import routes from './routes/app.routes'
+
+import App from './views/templates/App.vue'
+
 const app = new Vue({
+    // routes,
     i18n,
     store,
-    el: '#app',
-});
+    // render: h => h(App),
+}).$mount('#app');
 
 /*
 const app = new Vue({

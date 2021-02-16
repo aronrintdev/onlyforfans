@@ -23,5 +23,7 @@
 
     <!-- Scripts -->
     <script src="{{ mix('js/app2.js') }}"></script>
+    <script src="{{ mix('js/manifest.js') }}"></script>
+    <script src="{{ mix('js/vendor.js') }}"></script>
 </body>
 </html>
