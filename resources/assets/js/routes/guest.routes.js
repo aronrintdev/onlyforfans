@@ -3,10 +3,18 @@
  */
 import VueRouter from 'vue-router'
 import AuthViews from '../views/auth'
+import ErrorViews from '../views/errors'
 
 export const router = new VueRouter({
   mode: 'history',
   routes: [
+    {
+      name: 'index',
+      path: '/',
+      redirect: to => {
+        return '/login'
+      },
+    },
     {
       name: 'login',
       path: '/login',
@@ -21,7 +29,17 @@ export const router = new VueRouter({
       name: 'forgot-password',
       path: '/forgot-password',
       component: AuthViews.ForgotPassword,
-    }
+    },
+
+    /**
+     * 404, catch all unknowns
+     * This should always be registered last
+     */
+    {
+      name: 'error-not-found',
+      path: '*',
+      component: ErrorViews.NotFound,
+    },
   ]
 })
 

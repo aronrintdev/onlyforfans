@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="w-100 mt-5">
     Register Page
   </div>
 </template>

@@ -4,6 +4,15 @@ $theme-colors: (
   "white": #fff,
 );
 
+html,
+body {
+  min-height: 100% !important;
+  height: 100%;
+}
+
+.app {
+  min-height: 100vh;
+}
 
 body {
   background-color: rgb(237, 242, 247) !important;

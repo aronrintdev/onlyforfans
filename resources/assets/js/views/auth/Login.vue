@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="w-100 mt-5">
     <b-card class="login-card mx-auto" no-body>
       <template #header>
         <div class="h1 text-center" v-text="$t('signInHeader')" />

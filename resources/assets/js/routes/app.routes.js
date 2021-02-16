@@ -2,6 +2,7 @@
  * App.js routes
  */
 import VueRouter from 'vue-router'
+import ErrorViews from '../views/errors'
 
 import Home from '../views/Home.vue'
 import Timelines from '../views/Timelines.vue'
@@ -22,6 +23,17 @@ const router = new VueRouter({
       name: 'timelines',
       path: '/timelines',
       component: Timelines,
-    }
+    },
+
+
+    /**
+     * 404, catch all unknowns
+     * This should always be registered last
+     */
+    {
+      name: 'error-not-found',
+      path: '*',
+      component: ErrorViews.NotFound,
+    },
   ]
 })
