@@ -14,7 +14,7 @@ class PostPolicy extends BasePolicy
         'viewAny'     => 'permissionOnly',
         'view'        => 'isOwner:pass isBlockedByOwner:fail',
         'update'      => 'isOwner:next:fail', // should auto fail any non-owners, but then move onto the update function for owners
-        'delete'      => 'isOwner:pass',
+        'delete'      => 'isOwner:next:fail',
         'restore'     => 'isOwner:pass',
         'forceDelete' => 'isOwner:pass',
         'like'        => 'isOwner:pass isBlockedByOwner:fail',
@@ -49,7 +49,7 @@ class PostPolicy extends BasePolicy
     }
     */
 
-    public function update(User $user, Post $post)
+    protected function update(User $user, Post $post)
     {
         switch ($post->type) {
         case PostTypeEnum::FREE:
@@ -61,15 +61,8 @@ class PostPolicy extends BasePolicy
         }
     }
 
-    public function delete(User $user, Post $post)
+    protected function delete(User $user, Post $post)
     {
-dd('here.delete');
-    }
-
-
-    public function destroy(User $user, Post $post)
-    {
-dd('here.destroy');
         switch ($post->type) {
         case PostTypeEnum::FREE:
             return true;

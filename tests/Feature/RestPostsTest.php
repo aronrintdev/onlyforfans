@@ -317,6 +317,30 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group here
+     */
+    public function test_nonowner_can_non_edit_free_post()
+    {
+        $timeline = Timeline::has('followers', '>=', 1)
+            ->whereHas('posts', function($q1) {
+                $q1->where('type', PostTypeEnum::FREE);
+            })->first();
+        $creator = $timeline->user;
+        $post = $timeline->posts->where('type', PostTypeEnum::FREE)->first();
+        $origDesc = $post->description;
+        $nonowner = User::where('id', '<>', $creator->id)->first();
+
+        $payload = [
+            'description' => $this->faker->realText,
+        ];
+        $response = $this->actingAs($nonowner)->ajaxJSON('PATCH', route('posts.update', $post->id), $payload);
+        $response->assertStatus(403);
+    }
+
+
+    /**
+     *  @group posts
+     *  @group regression
      */
     public function test_owner_can_delete_free_post()
     {
@@ -371,7 +395,6 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
-     *  @group here
      */
     public function test_subscriber_can_view_subcribe_only_post_on_my_timeline()
     {
@@ -777,7 +800,6 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
-     *  @group broken
      */
     public function test_owner_can_not_delete_a_paid_post_that_others_have_purchased()
     {

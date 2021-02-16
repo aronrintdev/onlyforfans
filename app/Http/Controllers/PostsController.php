@@ -114,9 +114,7 @@ class PostsController extends AppBaseController
 
     public function destroy(Request $request, Post $post)
     {
-        if ( $post->user->id !== $request->user()->id ) {
-            abort(403);
-        }
+        $this->authorize('delete', $post);
         $post->delete();
         return response()->json([]);
     }
