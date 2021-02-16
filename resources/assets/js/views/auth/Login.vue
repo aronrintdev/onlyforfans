@@ -1,12 +1,12 @@
 <template>
-  <div class="w-100 mt-5">
+  <div class="container w-100 d-flex flex-column mt-5">
     <b-card class="login-card mx-auto" no-body>
       <template #header>
         <div class="h1 text-center" v-text="$t('signInHeader')" />
         <div class="text-center">
           <div class="d-inline" v-text="$t('noAccountQuestion')" />
           <!-- TODO: Link to registration page -->
-          <a href="#" v-text="$t('signUpLink')" />
+          <router-link :to="{ name: 'register' }" v-text="$t('signUpLink')" />
         </div>
       </template>
       <!-- Login Form -->
@@ -33,7 +33,7 @@
         </b-form-group>
         <div class="text-right">
           <!-- TODO: Link to forgot password page -->
-          <a href="#" v-text="$t('forgotPasswordLink')" />
+          <router-link :to="{ name: 'forgot-password' }" v-text="$t('forgotPasswordLink')" />
         </div>
       </div>
 
@@ -54,12 +54,23 @@
         Sign in with 3rd party here.
       </div>
     </b-card>
+
+    <div class="mt-auto mb-3">
+      <LinkBar />
+    </div>
   </div>
 </template>
 
 <script>
+/**
+ * Login Page
+ */
+import LinkBar from '../../components/staticPages/LinkBar'
 export default {
   name: 'login',
+  components: {
+    LinkBar,
+  },
   data: () => ({
     state: 'form', // form | loading
     error: {},
@@ -87,7 +98,7 @@ export default {
 
 <style lang="scss" scoped>
 .login-card {
-  max-width: 500px;
+  width: 500px;
 }
 .h-line {
   color: var('--gray');
@@ -96,15 +107,15 @@ export default {
 
 <i18n lang="json5">
 {
-  en: {
-    signInHeader: 'Sign In',
-    noAccountQuestion: "Don't have an account?",
-    signUpLink: 'Sign Up',
-    email: 'Email',
-    password: 'Password',
-    signInButton: 'Sign In',
-    forgotPasswordLink: 'Forgot Password?',
-    or: 'or',
+  "en": {
+    "signInHeader": "Sign In",
+    "noAccountQuestion": "Don't have an account?",
+    "signUpLink": "Sign Up",
+    "email": "Email",
+    "password": "Password",
+    "signInButton": "Sign In",
+    "forgotPasswordLink": "Forgot Password?",
+    "or": "or",
   },
 }
 </i18n>

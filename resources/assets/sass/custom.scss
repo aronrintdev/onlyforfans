@@ -46,3 +46,8 @@ body .tag-clickable {
   cursor: pointer;
 }
 
+.static-page-layout {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}

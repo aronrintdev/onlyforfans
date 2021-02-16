@@ -4,6 +4,7 @@
 import VueRouter from 'vue-router'
 import AuthViews from '../views/auth'
 import ErrorViews from '../views/errors'
+import StaticPageRoutes from './staticPages.routes'
 
 export const router = new VueRouter({
   mode: 'history',
@@ -30,6 +31,8 @@ export const router = new VueRouter({
       path: '/forgot-password',
       component: AuthViews.ForgotPassword,
     },
+
+    ...StaticPageRoutes,
 
     /**
      * 404, catch all unknowns

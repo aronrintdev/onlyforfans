@@ -3,6 +3,7 @@
  */
 import VueRouter from 'vue-router'
 import ErrorViews from '../views/errors'
+import StaticPageRoutes from './staticPages.routes'
 
 import Home from '../views/Home.vue'
 import Timelines from '../views/Timelines.vue'
@@ -25,6 +26,8 @@ const router = new VueRouter({
       component: Timelines,
     },
 
+
+    ...StaticPageRoutes,
 
     /**
      * 404, catch all unknowns

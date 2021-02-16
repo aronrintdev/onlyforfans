@@ -4,7 +4,7 @@
     <div class="header">
       <b-navbar variant="dark">
         <b-nav-text class="text-light">Guest Application Page</b-nav-text>
-        <b-btn variant="light" href="/login" class="ml-auto">Login</b-btn>
+        <b-btn variant="light" @click="$router.push({ name: 'login' })" class="ml-auto">Login</b-btn>
       </b-navbar>
     </div>
     <div class="content d-flex p-3 flex-grow-1">
