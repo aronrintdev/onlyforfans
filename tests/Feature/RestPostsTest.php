@@ -397,7 +397,6 @@ class RestPostsTest extends TestCase
      */
     public function test_subscriber_can_view_subcribe_only_post_on_my_timeline()
     {
-        // %FIXME: ensure at least one subscriber... (hardcode)
         $timeline = Timeline::has('followers', '>=', 1)
             ->whereHas('posts', function($q1) {
                 $q1->where('type', PostTypeEnum::SUBSCRIBER);
@@ -417,6 +416,27 @@ class RestPostsTest extends TestCase
             ]);
         $response = $this->actingAs($fan)->ajaxJSON('GET', route('posts.show', $post->id));
         $response->assertStatus(200);
+    }
+
+    /**
+     *  @group posts
+     *  @group regression
+     *  @group here
+     */
+    public function test_nonsubscriber_can_not_view_subcribe_only_post_on_my_timeline()
+    {
+        $timeline = Timeline::has('followers', '>=', 1)
+            ->whereHas('posts', function($q1) {
+                $q1->where('type', PostTypeEnum::SUBSCRIBER);
+            })->firstOrFail();
+        $creator = $timeline->user;
+        $post = $timeline->posts->where('type', PostTypeEnum::SUBSCRIBER)->first();
+        $nonfan = User::whereDoesntHave('subscribedtimelines', function($q1) use(&$timeline) {
+            $q1->where('timelines.id', $timeline->id);
+        })->where('id', '<>', $creator->id)->first();
+
+        $response = $this->actingAs($nonfan)->ajaxJSON('GET', route('posts.show', $post->id));
+        $response->assertStatus(403);
     }
 
     /**
