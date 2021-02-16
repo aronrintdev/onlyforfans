@@ -59,6 +59,24 @@ class UsersTableSeeder extends Seeder
 
             // --
 
+            $user = User::where('email', 'jeremy.fall@contentmarketingleads.com')->first();
+            if (!$user) {
+                $user = User::factory()->create();
+            }
+            FactoryHelpers::updateUser($user, [
+                'name' => 'Jeremy F',
+                'username' => 'jeremeyf',
+                'email' => 'jeremy.fall@contentmarketingleads.com',
+                'gender' => 'male',
+                'city' => 'Las Vegas',
+                'country' => 'US',
+                'is_follow_for_free' => 1, // if not free need to set price as well
+            ]);
+            $user->assignRole('super-admin');
+            unset($user);
+
+            // --
+
             $user = User::where('email', 'matt@mjmwebdesign.com')->first();
             if (!$user) {
                 $user = User::factory()->create();
