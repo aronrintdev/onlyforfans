@@ -48,7 +48,7 @@ class StoriesController extends AppBaseController
             switch ($k) {
             case 'following':
                 $query->whereHas('timeline', function($q1) use(&$request) {
-                    $q1->whereIn('id', $request->user()->followedtimelines);
+                    $q1->whereIn('id', $request->user()->followedtimelines->pluck('id'));
                 });
                 break;
             default:

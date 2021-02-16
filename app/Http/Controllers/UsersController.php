@@ -58,7 +58,7 @@ class UsersController extends AppBaseController
             $tippee->receivePayment(
                 PaymentTypeEnum::TIP,
                 $sessionUser,
-                $request->amount*100,
+                $request->amount,
                 [ 'notes' => $request->note ?? '' ]
             );
 

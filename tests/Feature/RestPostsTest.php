@@ -317,7 +317,6 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
-     *  @group here
      */
     public function test_nonowner_can_non_edit_free_post()
     {
@@ -737,13 +736,18 @@ class RestPostsTest extends TestCase
         $response->assertStatus(200);
 
         $content = json_decode($response->content());
-        $postR = $content->post;
 
         // Check ledger
-        $fanledger = Fanledger::where('fltype', PaymentTypeEnum::PURCHASE)->latest()->first();
+        //$fanledger = Fanledger::where('fltype', PaymentTypeEnum::PURCHASE)->latest()->first();
+        $fanledger = Fanledger::where('fltype', PaymentTypeEnum::PURCHASE)
+            ->where('purchaseable_type', 'posts')
+            ->where('purchaseable_id', $content->post->id)
+            ->where('seller_id', $creator->id)
+            ->where('purchaser_id', $fan->id)
+            ->first();
         $this->assertNotNull($fanledger);
         $this->assertEquals(1, $fanledger->qty);
-        $this->assertEquals($post->price*100, $fanledger->base_unit_cost_in_cents);
+        $this->assertEquals($post->price, $fanledger->base_unit_cost_in_cents);
         $this->assertEquals(PaymentTypeEnum::PURCHASE, $fanledger->fltype);
         $this->assertEquals($fan->id, $fanledger->purchaser_id);
         $this->assertEquals($creator->id, $fanledger->seller_id);
