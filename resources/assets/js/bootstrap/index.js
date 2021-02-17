@@ -38,3 +38,4 @@ if (token) {
 
 require('./echo');
 require('./routing');
+require('./dateTime');

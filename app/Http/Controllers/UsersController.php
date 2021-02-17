@@ -37,7 +37,7 @@ class UsersController extends AppBaseController
         $timeline = $sessionUser->timeline;
         $timeline->userstats = [ // %FIXME DRY
             'post_count' => $timeline->posts->count(),
-            'like_count' => $timeline->user->postlikes->count(),
+            'like_count' => $timeline->user->likedposts->count(),
             'follower_count' => $timeline->followers->count(),
             'following_count' => $timeline->user->followedtimelines->count(),
             'subscribed_count' => 0, // %TODO $sessionUser->timeline->subscribed->count()

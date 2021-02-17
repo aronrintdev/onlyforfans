@@ -36,7 +36,7 @@
 
       </li>
 
-    </ul>							
+    </ul>
 
   </div>
 </template>

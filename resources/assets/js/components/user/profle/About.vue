@@ -1,15 +1,15 @@
 <template>
-  <div class="w-100 mt-5">
-    Register Page
+  <div>
+
   </div>
 </template>
 
 <script>
 /**
- * Register View
+ * User profile about component
  */
 export default {
-  //
+  
 }
 </script>
 

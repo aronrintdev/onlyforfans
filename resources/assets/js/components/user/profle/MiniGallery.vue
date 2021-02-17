@@ -1,12 +1,12 @@
 <template>
-  <div class="w-100 mt-5">
-    Register Page
+  <div>
+
   </div>
 </template>
 
 <script>
 /**
- * Register View
+ * Profile page mini gallery component
  */
 export default {
   //
