@@ -19,7 +19,7 @@ class UsersTableSeeder extends Seeder
 
         // $adminRole = Role::where('name','admin')->firstOrFail();
 
-        if ( $this->appEnv !== 'testing' ) {
+        if ( $this->appEnv !== 'testing' ) { // if tests have pre-existing admins we'll need to make sure a random user chose is *not* an admin
 
             // +++ Create admin users +++
 
@@ -117,7 +117,9 @@ class UsersTableSeeder extends Seeder
 
         // +++ Create non-admin users +++
 
-        $this->output->writeln("  - Creating non-admin users...");
+        if ( $this->appEnv !== 'testing' ) {
+            $this->output->writeln("  - Creating non-admin users...");
+        }
 
         $isFollowForFree = true;
         User::factory()->count($this->getMax('users'))->create()->each( function($u) use(&$isFollowForFree) {
@@ -129,7 +131,7 @@ class UsersTableSeeder extends Seeder
                 $avatar = FactoryHelpers::createImage(MediafileTypeEnum::AVATAR);
                 $cover = FactoryHelpers::createImage(MediafileTypeEnum::COVER);
             } else {
-                $this->output->writeln("Creating new user without avatar & cover: " . $u->name." (iter: $iter)");
+                //$this->output->writeln("Creating new user without avatar & cover: " . $u->name." (iter: $iter)");
                 $avatar = null;
                 $cover = null;
             }

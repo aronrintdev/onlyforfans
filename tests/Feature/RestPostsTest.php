@@ -539,7 +539,7 @@ class RestPostsTest extends TestCase
         $timeline->refresh();
         $creator->refresh();
         $nonFan = User::whereDoesntHave('followedtimelines', function($q1) use(&$timeline) {
-            $q1->where('timelines.id', '<>', $timeline->id);
+            $q1->where('timelines.id', $timeline->id);
         })->where('id', '<>', $creator->id)->first();
 
         //$this->assertNotEquals($nonFan->id, $creator->id);
@@ -695,7 +695,6 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
-     *  @group here
      */
     public function test_timeline_nonfollower_can_not_like_post()
     {

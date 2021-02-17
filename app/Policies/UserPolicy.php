@@ -18,13 +18,14 @@ class UserPolicy extends BasePolicy
         'removeBan'   => 'permissionOnly',
     ];
 
-    public function isBlockedBy(User $sessionUser, User $user) : bool
+    protected function isSelf(User $sessionUser, User $user) : bool
+    {
+        return $sessionUser->getKey() === $user->getKey();
+    }
+
+    protected function isBlockedBy(User $sessionUser, User $user) : bool
     {
         return $sessionUser->$user->isBlockedBy($user);
     }
 
-    public function isSelf(User $sessionUser, User $user) : bool
-    {
-        return $sessionUser->getKey() === $sessionUser->getKey();
-    }
 }
