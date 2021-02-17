@@ -57,17 +57,30 @@ class TruncateData extends Command
     }
 
     private static $truncateList = [
+        'model_has_permissions',
+        'model_has_roles',
+        'password_resets',
+        'role_has_permissions',
+        'sessions',
+        'settings',
+        'user_settings',
+        'websockets_statistics_entries',
+        'migrations',
+        'invites',
+        'jobs',
+        'links',
+        'locations',
+        'blockables',
+        'financial_accounts',
+        'financial_currency_exchange_transactions',
+        'financial_transactions',
         'fanledgers',
         'shareables',
         'likeables',
         'comments',
         'mediafiles',
         'stories',
-        //'subscriptions',
 
-        'model_has_permissions',
-        'model_has_roles',
-        'role_has_permissions',
         'user_settings',
         'permissions',
         'roles',
@@ -80,6 +93,7 @@ class TruncateData extends Command
         'users',
 
         'username_rules',
-
     ];
+
 }
+

@@ -17,15 +17,18 @@ class StoriesTableSeeder extends Seeder
         // +++ Create ... +++
 
         $users = User::get();
+        $this->output->writeln("  - Users seeder: loaded ".$users->count()." users...");
 
         $users->each( function($u) {
 
-            $max = $this->faker->numberBetween(3,12);
+            static $iter = 1;
+
+            $count = $this->faker->numberBetween(3,12);
             if ( $this->appEnv !== 'testing' ) {
-                $this->output->writeln("  - Creating $max stories for user ".$u->name);
+                $this->output->writeln("  - Creating $count stories for user ".$u->name." (iter $iter)");
             }
 
-            collect(range(1,$max))->each( function() use(&$u) {
+            collect(range(1,$count))->each( function() use(&$u) {
 
                 $stype = ($this->appEnv==='testing')
                     ? 'text'
@@ -45,6 +48,8 @@ class StoriesTableSeeder extends Seeder
                     break;
                 }
             });
+
+            $iter++;
 
         });
     }

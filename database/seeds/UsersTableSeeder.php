@@ -23,6 +23,8 @@ class UsersTableSeeder extends Seeder
 
             // +++ Create admin users +++
 
+            $this->output->writeln("  - Creating admin users...");
+
             $user = User::where('email', 'peter@peltronic.com')->first();
             if (!$user) {
                 $user = User::factory()->create();
@@ -115,13 +117,19 @@ class UsersTableSeeder extends Seeder
 
         // +++ Create non-admin users +++
 
+        $this->output->writeln("  - Creating non-admin users...");
+
         $isFollowForFree = true;
         User::factory()->count($this->getMax('users'))->create()->each( function($u) use(&$isFollowForFree) {
+
+            static $iter = 1;
+
             if ( $this->appEnv !== 'testing' ) {
-                $this->output->writeln("Adding avatar & cover for new user " . $u->name);
+                $this->output->writeln("Creating new user with avatar & cover: " . $u->name." (iter: $iter)");
                 $avatar = FactoryHelpers::createImage(MediafileTypeEnum::AVATAR);
                 $cover = FactoryHelpers::createImage(MediafileTypeEnum::COVER);
             } else {
+                $this->output->writeln("Creating new user without avatar & cover: " . $u->name." (iter: $iter)");
                 $avatar = null;
                 $cover = null;
             }
@@ -135,6 +143,8 @@ class UsersTableSeeder extends Seeder
             $timeline->price = $isFollowForFree ? 0 : $this->faker->randomFloat(2, 1, 300);
             $timeline->save();
             $isFollowForFree = !$isFollowForFree; // toggle so we get at least one of each
+
+            $iter++;
         });
 
         // +++ Update default user settings +++
