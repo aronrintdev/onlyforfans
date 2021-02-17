@@ -26,7 +26,6 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
-     *  @group here
      */
     // %TODO: filters, timelines (see posts I follow), etc
     public function test_can_index_posts()
@@ -540,7 +539,7 @@ class RestPostsTest extends TestCase
         $timeline->refresh();
         $creator->refresh();
         $nonFan = User::whereDoesntHave('followedtimelines', function($q1) use(&$timeline) {
-            $q1->where('timelines.id', '<>', $timeline->id);
+            $q1->where('timelines.id', $timeline->id);
         })->where('id', '<>', $creator->id)->first();
 
         //$this->assertNotEquals($nonFan->id, $creator->id);

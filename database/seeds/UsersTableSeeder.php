@@ -19,7 +19,7 @@ class UsersTableSeeder extends Seeder
 
         // $adminRole = Role::where('name','admin')->firstOrFail();
 
-        if ( $this->appEnv !== 'testing' ) {
+        if ( $this->appEnv !== 'testing' ) { // if tests have pre-existing admins we'll need to make sure a random user chose is *not* an admin
 
             // +++ Create admin users +++
 

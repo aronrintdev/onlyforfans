@@ -17,27 +17,37 @@ class PostsController extends AppBaseController
 {
     public function index(Request $request)
     {
-        //$this->authorize('index', Post::class);
+        $request->validate([
+            'filters' => 'array',
+            'filters.timeline_id' => 'uuid|exists:timelines,id', // if admin only
+            'filters.user_id' => 'uuid|exists:users,id', // if admin only
+        ]);
 
-        $filters = $request->input('filters', []);
+        $filters = $request->filters ?? [];
 
+        // Init query
         $query = Post::query();
+
+        // Check permissions
         if ( !$request->user()->isAdmin() ) {
-            //$query->where('timeline_id', $request->user()->timeline->id);
             $query->where('postable_type', 'timelines')->where('postable_id', $request->user()->timeline->id);
+            unset($filters['user_id']);
+            unset($filters['timeline_id']);
         }
 
-        foreach ($filters as $f) {
-            switch ($f['key']) {
-                case 'ptype':
-                    $query->where('type', $f['val']);
+        // Apply any filters
+        foreach ($filters as $key => $f) {
+            switch ($key) {
+                //case 'postable_id':
+                case 'timeline_id':
+                case 'user_id':
+                    $query->where($key, $f);
                     break;
             }
         }
-        $posts = $query->get();
 
         return response()->json([
-            'posts' => $posts,
+            'posts' => $query->get(),
         ]);
     }
 

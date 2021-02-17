@@ -11,19 +11,23 @@ class PostPolicy extends BasePolicy
     use OwnablePolicies;
 
     protected $policies = [
-        'viewAny'     => 'permissionOnly', // ??
-        'view'        => 'isOwner:pass isBlockedByOwner:fail',
-        'update'      => 'isOwner:next:fail', // should auto fail any non-owners, but then move onto the update function for owners
-        'delete'      => 'isOwner:next:fail',
-        'restore'     => 'isOwner:pass',
-        'forceDelete' => 'isOwner:pass',
-        'like'        => 'isOwner:next:fail isBlockedByOwner:fail',
-        'comment'     => 'isOwner:next:fail isBlockedByOwner:fail',
+        'viewAny'     => 'permissionOnly',
+        'view'        => 'isOwner:pass isBlockedByOwner:fail', // if owner pass, if blocked fail, else check function
+        'like'        => 'isOwner:pass isBlockedByOwner:fail', // if owner pass, if blocked fail, else check function
+        'comment'     => 'isOwner:pass isBlockedByOwner:fail', // if owner pass, if blocked fail, else check function
+        'purchase'    => 'isOwner:fail isBlockedByOwner:fail', // if owner fail, if blocked fail, else check function
+        'tip'         => 'isOwner:fail isBlockedByOwner:fail',
+        'update'      => 'isOwner:next:fail', // if non-owner fail, else check function
+        'delete'      => 'isOwner:next:fail', // if non-owner fail, else check function
+        'forceDelete' => 'isOwner:next:fail', // if non-owner fail, else check function
+        'restore'     => 'isOwner:pass:fail', // if owner pass, all others fail
     ];
 
+    /*
     protected function index(User $user) 
     {
     }
+     */
 
     protected function view(User $user, Post $post)
     {
@@ -94,6 +98,11 @@ class PostPolicy extends BasePolicy
         return true;
     }
 
+    protected function purchase(User $user, Post $post)
+    {
+        return true;
+    }
+
     protected function like(User $user, Post $post)
     {
         return $user->can('view', $post);
@@ -102,8 +111,12 @@ class PostPolicy extends BasePolicy
 
     protected function comment(User $user, Post $post)
     {
-        return true; // DEBUG code...still get 403...putting dd here doesn't trigger
         return $user->can('view', $post);
+    }
+
+    protected function isBlockedBy(User $sessionUser, User $user) : bool
+    {
+        return $sessionUser->$user->isBlockedBy($user);
     }
 
 }

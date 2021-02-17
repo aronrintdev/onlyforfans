@@ -16,12 +16,16 @@ class CommentsTableSeeder extends Seeder
         $this->initSeederTraits('CommentsTableSeeder'); // $this->{output, faker, appEnv}
 
         $posts = Post::get();
-        $users = User::get();
+        //$users = User::get();
 
-        $posts->each( function($post) use(&$users) { // all posts will have comments
+        $posts->each( function($post) { // all posts will have comments
 
             // COMMENTS - Select random users to comment on this post...
 
+            $users = $post->timeline->followers;
+            if ( count($users) < 1 ) {
+                return;
+            }
             $numUsers = $this->faker->numberBetween( 1, min($users->count()-1, $this->getMax('users')) );
             $commenters = FactoryHelpers::parseRandomSubset($users, $numUsers);
 

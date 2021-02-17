@@ -419,7 +419,7 @@ class User extends Authenticatable implements PaymentSendable, Blockable
 
     public function isAdmin() : bool
     {
-        return false; // %TODO
+        return $this->roles()->pluck('name')->contains('super-admin');
     }
 
     public function is_eventadmin($user_id, $event_id) {

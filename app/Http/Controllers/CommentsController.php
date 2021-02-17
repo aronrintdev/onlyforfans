@@ -13,46 +13,44 @@ use App\Models\User;
 class CommentsController extends AppBaseController
 {
     // %TODO: refactor with scopes
-    // %TODO: make this version timeline-owner only; followers call posts controller to get
-    //         comments on posts they follow/purchased etc
     public function index(Request $request)
     {
-        //$this->authorize('index', Comment::class);
         $request->validate([
-            'post_id' => 'uuid|exists:posts,id',
-            'user_id' => 'uuid|exists:users,id',
-            'parent_id' => 'uuid|exists:comments,id',
+            'filters' => 'array',
+            'filters.post_id' => 'uuid|exists:posts,id', // if admin or post-owner only (per-post comments by fan use posts controller)
+            'filters.user_id' => 'uuid|exists:users,id', // if admin only
+            'filters.parent_id' => 'uuid|exists:comments,id',
         ]);
 
+        $filters = $request->filters ?? [];
+
+        // Init query
         $query = Comment::with('user', 'replies.user');
+
+        // Check permissions
         if ( !$request->user()->isAdmin() ) {
-            $query->where('user_id', $request->user()->id); // non-admin: only view own comments
-        } else if ( $request->has('user_id') ) {
-            $query->where('user_id', $request->user_id); // admin can optionally filter by any user
-        }
 
-        if ( $request->has('post_id') ) { // for specific post
-            $post = Post::find($request->post_id);
-            $query->where('post_id', $post->id);
-            if ( !$request->user()->isAdmin() ) {
-                $this->authorize('update', $post); // must own post unless admin
-            }
-            /* %FIXME: broken
-            if ( !$request->has('include_replies') ) {
-                $query->whereNull('parent_id'); // only grab 1st level (%NOTE)
-            }
-             */
-        }
+            // non-admin: only view own comments
+            $query->where('user_id', $request->user()->id); 
+            unset($filters['user_id']);
 
-
-        /* %TODO: subgroup under 'filters' (need to update axios.GET calls as well in Vue)
-        // Apply filters
-        if ( $request->has('filters') ) {
-            if ( $request->has('post_id', 'filters.user_id') ) { // comment author by post
-                $query->where('user_id', $request->filters['user_id']);
+            if ( array_key_exists('post_id', $filters) ) {
+                $post = Post::find($filters['post_id']);
+                $this->authorize('update', $post); // non-admin must own post filtered on
             }
         }
-         */
+
+        // Apply any filters
+        foreach ($filters as $key => $f) {
+            // %TODO: subgroup under 'filters' (need to update axios.GET calls as well in Vue)
+            switch ($key) {
+                case 'user_id':
+                case 'post_id':
+                case 'parent_id':
+                    $query->where($key, $f);
+                    break;
+            }
+        }
 
         return response()->json([
             'comments' => $query->get(),
@@ -76,9 +74,7 @@ class CommentsController extends AppBaseController
             'description' => 'required|string|min:3',
         ]);
 
-        $post = Post::where('postable_type', 'timelines')
-                    ->where('postable_id', $request->post_id)
-                    ->first();
+        $post = Post::find($request->post_id);
         $this->authorize('comment', $post);
 
         $attrs = $request->except('post_id'); // timeline_id is now postable
