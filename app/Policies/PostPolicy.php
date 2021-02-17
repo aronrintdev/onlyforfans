@@ -11,7 +11,7 @@ class PostPolicy extends BasePolicy
     use OwnablePolicies;
 
     protected $policies = [
-        'viewAny'     => 'permissionOnly',
+        'viewAny'     => 'permissionOnly', // ??
         'view'        => 'isOwner:pass isBlockedByOwner:fail',
         'update'      => 'isOwner:next:fail', // should auto fail any non-owners, but then move onto the update function for owners
         'delete'      => 'isOwner:next:fail',
@@ -20,6 +20,10 @@ class PostPolicy extends BasePolicy
         'like'        => 'isOwner:next:fail isBlockedByOwner:fail',
         'comment'     => 'isOwner:next:fail isBlockedByOwner:fail',
     ];
+
+    protected function index(User $user) 
+    {
+    }
 
     protected function view(User $user, Post $post)
     {

@@ -17,25 +17,26 @@ class CommentsController extends AppBaseController
     //         comments on posts they follow/purchased etc
     public function index(Request $request)
     {
-        $this->authorize('index', Comment::class);
-
-        if ( !$request->hasAny('user_id', 'post_id') ) {
-            $this->authorize('index', Comment::class);
-        } else {
-            // filters
-            if ( $request->has('post_id') ) {
-                $post = Post::find($request->post_id); // %FIXME: this version probably should be on Posts controller
-                $this->authorize('view', $post);
-            }
-            if ( $request->has('user_id') && $request->user()->id!==$request->user_id ) {
-                abort(403);
-            }
-        }
+        //$this->authorize('index', Comment::class);
+        $request->validate([
+            'post_id' => 'uuid|exists:posts,id',
+            'user_id' => 'uuid|exists:users,id',
+            'parent_id' => 'uuid|exists:comments,id',
+        ]);
 
         $query = Comment::with('user', 'replies.user');
+        if ( !$request->user()->isAdmin() ) {
+            $query->where('user_id', $request->user()->id); // non-admin: only view own comments
+        } else if ( $request->has('user_id') ) {
+            $query->where('user_id', $request->user_id); // admin can optionally filter by any user
+        }
 
         if ( $request->has('post_id') ) { // for specific post
-            $query->where('post_id', $request->post_id);
+            $post = Post::find($request->post_id);
+            $query->where('post_id', $post->id);
+            if ( !$request->user()->isAdmin() ) {
+                $this->authorize('update', $post); // must own post unless admin
+            }
             /* %FIXME: broken
             if ( !$request->has('include_replies') ) {
                 $query->whereNull('parent_id'); // only grab 1st level (%NOTE)
@@ -43,9 +44,6 @@ class CommentsController extends AppBaseController
              */
         }
 
-        if ( $request->has('user_id') ) {
-            $query->where('user_id', $request->user_id);
-        }
 
         /* %TODO: subgroup under 'filters' (need to update axios.GET calls as well in Vue)
         // Apply filters

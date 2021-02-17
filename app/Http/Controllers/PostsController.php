@@ -17,7 +17,7 @@ class PostsController extends AppBaseController
 {
     public function index(Request $request)
     {
-        $this->authorize('index', Post::class);
+        //$this->authorize('index', Post::class);
 
         $filters = $request->input('filters', []);
 
