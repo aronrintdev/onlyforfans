@@ -70,12 +70,6 @@ Vue.use(VueTimeago, {
  * or customize the JavaScript scaffolding to fit your unique needs.
  */
 
-
-Vue.component('show-feed', require('./pages/ShowFeed.vue').default);
-Vue.component('home-feed', require('./pages/HomeFeed.vue').default);
-
-// ---
-
 Vue.component('main-navbar', require('./components/common/MainNavbar.vue').default);
 Vue.component('online-status', require('./components/user/OnlineStatus.vue').default);
 Vue.component('my-vault', require('./components/vault/Dashboard.vue').default);

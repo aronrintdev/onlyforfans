@@ -5,30 +5,57 @@ import VueRouter from 'vue-router'
 import ErrorViews from '../views/errors'
 import StaticPageRoutes from './staticPages.routes'
 
-import Home from '../views/Home.vue'
-import Timelines from '../views/Timelines.vue'
-
-import HomeFeed from '../pages/HomeFeed.vue'
+import stories from '../views/stories'
+import timelines from '../views/timelines'
+import users from '../views/users'
+import vaults from '../views/vaults'
 
 export const routes = [
   {
     name: 'index',
     path: '/',
-    component: HomeFeed,
-  },
-  {
-    name: 'home',
-    path: '/home',
-    component: Home,
-  },
-  {
-    name: 'timelines',
-    path: '/timelines',
-    component: Timelines,
+    component: timelines.Home,
   },
 
+  // Timelines
+  {
+    name: 'timelines.home',
+    path: '/timelines/home',
+    component: timelines.Home,
+  },
+  {
+    name: 'timelines.show',
+    path: '/timelines/:timelineId',
+    component: timelines.Show,
+    props: true,
+  },
+
+  // Stories
+  {
+    name: 'stories.dashboard',
+    path: '/stories/dashboard',
+    component: stories.Dashboard,
+  },
+  {
+    name: 'stories.player',
+    path: '/stories/player',
+    component: stories.Player,
+  },
+
+  // Vaults
+  {
+    name: 'vault.dashboard',
+    path: '/my-vault',
+    component: vaults.Dashboard
+  },
 
   ...StaticPageRoutes,
+
+  {
+    name: 'user.page',
+    path: '/:username',
+    component: users.Home,
+  },
 
   /**
    * 404, catch all unknowns

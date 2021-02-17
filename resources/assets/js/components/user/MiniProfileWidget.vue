@@ -5,8 +5,11 @@
 </template>
 
 <script>
+/**
+ * Mini Profile Widget
+ */
 export default {
-  
+  //
 }
 </script>
 
