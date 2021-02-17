@@ -28,15 +28,17 @@ class PostsTableSeeder extends Seeder
 
         $users->each( function($u) use(&$users) {
 
+            static $iter = 1;
+
             // $u is the user who will own the post being created (ie, as well as timeline associated with the post)...
 
             $count = $this->faker->numberBetween(self::$MIN_POSTS, $this->getMax('posts'));
 
             if ( $this->appEnv !== 'testing' ) {
-                $this->output->writeln("  - Creating $count posts for user ".$u->name);
+                $this->output->writeln("  - Creating $count posts for user ".$u->name." (iter: $iter)");
             }
 
-            collect(range(self::$MIN_POSTS,$count))->each( function() use(&$users, &$u) { // Post generation loop
+            collect(range(0,$count))->each( function() use(&$users, &$u) { // Post generation loop
 
                 static $typesUsed = []; // guarantee one of each post type
                 $ptype = $this->faker->randomElement([
@@ -129,6 +131,7 @@ class PostsTableSeeder extends Seeder
 
             });
 
+            $iter++;
         });
     }
 

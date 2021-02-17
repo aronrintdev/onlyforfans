@@ -30,8 +30,11 @@ class ShareablesTableSeeder extends Seeder
         // +++ Create ... +++
 
         $followers = User::get();
+        $this->output->writeln("  - Shareables seeder: loaded ".$followers->count()." followers...");
 
         $followers->each( function($f) {
+
+            static $iter = 1;
 
             // --- purchase some posts ---
 
@@ -39,7 +42,7 @@ class ShareablesTableSeeder extends Seeder
                 ->where('postable_id', '<>', $f->timeline->id) // exclude my own
                 ->get();
             $max = $this->faker->numberBetween( 0, min($purchaseablePosts->count()-1, $this->getMax('purchased')) );
-            $this->command->info("  - Creating $max purchased-posts for user ".$f->name);
+            $this->command->info("  - Creating $max purchased-posts for user ".$f->name." (iter: $iter)");
 
             if ( $max > 0 ) {
                 $purchaseablePosts->random($max)->each( function($p) use(&$f) {
@@ -68,7 +71,7 @@ class ShareablesTableSeeder extends Seeder
             if ( $max > 0 ) {
                 $timelines->random($max)->each( function($t) use(&$f) {
                     $customAttributes = [ 'notes' => 'ShareablesTableSeeder.follow_some_free_timelines' ];
-                // %FIXME: should be encapsualted in a method in model or class-lib
+                    // %FIXME: should be encapsualted in a method in model or class-lib
                     DB::table('shareables')->insert([
                         'sharee_id' => $f->id,
                         'shareable_type' => 'timelines',
@@ -138,42 +141,45 @@ class ShareablesTableSeeder extends Seeder
 
             // ---
 
-            // Create an additional users/timelines, which won't have any followers (useful for testing)
-            $isFollowForFree = true;
-            User::factory()->count(2)->create()->each( function($u) use(&$isFollowForFree) {
 
-                if ( $this->appEnv !== 'testing' ) {
-                    $this->output->writeln("ShareablesTableSeeder - Adding avatar & cover for new user " . $u->name);
-                    $avatar = FactoryHelpers::createImage(MediafileTypeEnum::AVATAR);
-                    $cover = FactoryHelpers::createImage(MediafileTypeEnum::COVER);
-                } else {
-                    $avatar = null;
-                    $cover = null;
-                }
-
-                $u->save();
-
-                $timeline = $u->timeline;
-                $timeline->is_follow_for_free = $isFollowForFree;
-                $timeline->price = $isFollowForFree ? 0 : $this->faker->randomFloat(2, 1, 300);
-                $timeline->avatar_id = $avatar->id ?? null;
-                $timeline->cover_id = $cover->id ?? null;
-                $timeline->save();
-                $isFollowForFree = !$isFollowForFree; // toggle so we get at least one of each
-
-                //Update default user settings
-                // DB::table('user_settings')->insert([
-                //     'user_id'               => $u->id,
-                //     'confirm_follow'        => 'no',
-                //     'follow_privacy'        => 'everyone',
-                //     'comment_privacy'       => 'everyone',
-                //     'timeline_post_privacy' => 'everyone',
-                //     'post_privacy'          => 'everyone',
-                //     'message_privacy'       => 'everyone',
-                // ]);
-            });
+            $iter++;
 
         }); // $followers->each( ... )
+
+        // Create an additional users/timelines, which won't have any followers (useful for testing)
+        $isFollowForFree = true;
+        User::factory()->count(2)->create()->each( function($u) use(&$isFollowForFree) {
+
+            if ( $this->appEnv !== 'testing' ) {
+                $this->output->writeln("ShareablesTableSeeder - Adding avatar & cover for new user " . $u->name);
+                $avatar = FactoryHelpers::createImage(MediafileTypeEnum::AVATAR);
+                $cover = FactoryHelpers::createImage(MediafileTypeEnum::COVER);
+            } else {
+                $avatar = null;
+                $cover = null;
+            }
+
+            $u->save();
+
+            $timeline = $u->timeline;
+            $timeline->is_follow_for_free = $isFollowForFree;
+            $timeline->price = $isFollowForFree ? 0 : $this->faker->randomFloat(2, 1, 300);
+            $timeline->avatar_id = $avatar->id ?? null;
+            $timeline->cover_id = $cover->id ?? null;
+            $timeline->save();
+            $isFollowForFree = !$isFollowForFree; // toggle so we get at least one of each
+
+            //Update default user settings
+            // DB::table('user_settings')->insert([
+            //     'user_id'               => $u->id,
+            //     'confirm_follow'        => 'no',
+            //     'follow_privacy'        => 'everyone',
+            //     'comment_privacy'       => 'everyone',
+            //     'timeline_post_privacy' => 'everyone',
+            //     'post_privacy'          => 'everyone',
+            //     'message_privacy'       => 'everyone',
+            // ]);
+        });
 
     }
 
