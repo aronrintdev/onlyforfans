@@ -20,6 +20,7 @@ class LikeablesController extends AppBaseController
         ]);
     }
 
+    // %TODO: remove likee param and just use session user for likee (?)
     // %TODO: notify user
     // %TODO: better architecture would be:
     //  ~ addLike(), removeLike(): each of which handle all resources...OR...

@@ -33,50 +33,59 @@ class RestPostsTest extends TestCase
         //$this->seed(\Database\Seeders\TestDatabaseSeeder::class);
         $timeline = Timeline::has('posts','>=',1)->first(); 
         $creator = $timeline->user;
+        $expectedCount = Post::where('postable_type', 'timelines')
+            ->where('postable_id', $timeline->id)
+            ->count();
 
         $response = $this->actingAs($creator)->ajaxJSON('GET', route('posts.index'));
         $response->assertStatus(200);
 
         $content = json_decode($response->content());
         $this->assertNotNull($content->posts);
-        $postsR = collect($content->posts);
-        //dd($postsR, $postsR[0]);
-        $this->assertGreaterThan(0, $postsR->count());
-        //$this->assertNotNull($postsR[0]->description);
-        //$this->assertNotNull($postsR[0]->timeline_id);
-        $this->assertObjectHasAttribute('postable_id', $postsR[0]);
-        $this->assertObjectHasAttribute('postable_type', $postsR[0]);
-        $this->assertObjectHasAttribute('description', $postsR[0]);
-        $this->assertEquals($postsR[0]->postable_type, 'timelines');
-        $this->assertEquals($postsR[0]->postable_id, $timeline->id);
+        $this->assertGreaterThan(0, count($content->posts));
+        $this->assertEquals($expectedCount, count($content->posts));
+        $this->assertEquals($timeline->posts->count(), count($content->posts));
+        $this->assertObjectHasAttribute('postable_id', $content->posts[0]);
+        $this->assertEquals($timeline->id, $content->posts[0]->postable_id);
+        $this->assertObjectHasAttribute('postable_type', $content->posts[0]);
+        $this->assertEquals('timelines', $content->posts[0]->postable_type);
+        $this->assertObjectHasAttribute('description', $content->posts[0]);
     }
 
     /**
      *  @group posts
      *  @group regression
      */
-    public function test_can_show_my_post()
+    public function test_owner_can_view_own_post()
     {
         $timeline = Timeline::has('posts','>=',1)->first();
         $creator = $timeline->user;
-        $post = $timeline->posts[0];
 
+        $post = $timeline->posts->where('type', PostTypeEnum::FREE)->first();
         $response = $this->actingAs($creator)->ajaxJSON('GET', route('posts.show', $post->id));
         $response->assertStatus(200);
 
         $content = json_decode($response->content());
         $this->assertNotNull($content->post);
-        $postR = $content->post;
-        $this->assertNotNull($postR->description);
-        $this->assertNotNull($postR->postable_id);
-        $this->assertEquals($postR->postable_id, $timeline->id);
+        $this->assertNotNull($content->post->description);
+        $this->assertNotNull($content->post->postable_id);
+        $this->assertEquals($timeline->id, $content->post->postable_id);
+        $this->assertSame('timelines', $content->post->postable_type);
+
+        $post = $timeline->posts->where('type', PostTypeEnum::PRICED)->first();
+        $response = $this->actingAs($creator)->ajaxJSON('GET', route('posts.show', $post->id));
+        $response->assertStatus(200);
+
+        $post = $timeline->posts->where('type', PostTypeEnum::SUBSCRIBER)->first();
+        $response = $this->actingAs($creator)->ajaxJSON('GET', route('posts.show', $post->id));
+        $response->assertStatus(200);
     }
 
     /**
      *  @group posts
      *  @group regression
      */
-    public function test_can_show_followed_timelines_post()
+    public function test_can_view_followed_timelines_post()
     {
         //$timeline = Timeline::has('posts','>=',1)->has('followers','>=',1)->first(); // assume non-admin (%FIXME)
         $timeline = Timeline::whereHas('posts', function($q1) {
@@ -317,7 +326,6 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
-     *  @group here
      */
     public function test_nonowner_can_non_edit_free_post()
     {
@@ -398,7 +406,6 @@ class RestPostsTest extends TestCase
      */
     public function test_subscriber_can_view_subcribe_only_post_on_my_timeline()
     {
-        // %FIXME: ensure at least one subscriber... (hardcode)
         $timeline = Timeline::has('followers', '>=', 1)
             ->whereHas('posts', function($q1) {
                 $q1->where('type', PostTypeEnum::SUBSCRIBER);
@@ -418,6 +425,26 @@ class RestPostsTest extends TestCase
             ]);
         $response = $this->actingAs($fan)->ajaxJSON('GET', route('posts.show', $post->id));
         $response->assertStatus(200);
+    }
+
+    /**
+     *  @group posts
+     *  @group regression
+     */
+    public function test_nonsubscriber_can_not_view_subcribe_only_post_on_my_timeline()
+    {
+        $timeline = Timeline::has('followers', '>=', 1)
+            ->whereHas('posts', function($q1) {
+                $q1->where('type', PostTypeEnum::SUBSCRIBER);
+            })->firstOrFail();
+        $creator = $timeline->user;
+        $post = $timeline->posts->where('type', PostTypeEnum::SUBSCRIBER)->first();
+        $nonfan = User::whereDoesntHave('subscribedtimelines', function($q1) use(&$timeline) {
+            $q1->where('timelines.id', $timeline->id);
+        })->where('id', '<>', $creator->id)->first();
+
+        $response = $this->actingAs($nonfan)->ajaxJSON('GET', route('posts.show', $post->id));
+        $response->assertStatus(403);
     }
 
     /**
@@ -613,7 +640,7 @@ class RestPostsTest extends TestCase
         $timeline = Timeline::has('followers', '>=', 1)
             ->whereHas('posts', function($q1) {
                 $q1->where('type', PostTypeEnum::FREE);
-            })->first();
+            })->firstOrFail();
         $creator = $timeline->user;
         $post = $timeline->posts->where('type', PostTypeEnum::FREE)->first();
         $fan = $timeline->followers[0];
@@ -668,6 +695,74 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group here
+     */
+    public function test_timeline_nonfollower_can_not_like_post()
+    {
+        $timeline = Timeline::has('followers', '>=', 1)
+            ->whereHas('posts', function($q1) {
+                $q1->where('type', PostTypeEnum::FREE);
+            })->firstOrFail();
+        $creator = $timeline->user;
+        $post = $timeline->posts->where('type', PostTypeEnum::FREE)->first();
+
+        $nonfan = User::whereDoesntHave('followedtimelines', function($q1) use(&$timeline) {
+            $q1->where('timelines.id', $timeline->id);
+        })->where('id', '<>', $creator->id)->first();
+
+        // LIKE the post
+        $payload = [
+            'likeable_type' => 'posts',
+            'likeable_id' => $post->id,
+        ];
+        $response = $this->actingAs($nonfan)->ajaxJSON('PUT', route('likeables.update', $nonfan->id), $payload); // fan->likee
+        $response->assertStatus(403);
+    }
+
+    /**
+     *  @group posts
+     *  @group regression
+     */
+    public function test_timeline_owner_can_like_own_post()
+    {
+        $timeline = Timeline::has('followers', '>=', 1)
+            ->whereHas('posts', function($q1) {
+                $q1->where('type', PostTypeEnum::FREE);
+            })->firstOrFail();
+        $creator = $timeline->user;
+
+        // LIKE the post (free)
+        $post = $timeline->posts->where('type', PostTypeEnum::FREE)->first();
+        $payload = [
+            'likeable_type' => 'posts',
+            'likeable_id' => $post->id,
+        ];
+        $response = $this->actingAs($creator)->ajaxJSON('PUT', route('likeables.update', $creator->id), $payload); // fan->likee
+        $response->assertStatus(200);
+
+        // LIKE the post (priced)
+        $post = $timeline->posts->where('type', PostTypeEnum::PRICED)->first();
+        $payload = [
+            'likeable_type' => 'posts',
+            'likeable_id' => $post->id,
+        ];
+        $response = $this->actingAs($creator)->ajaxJSON('PUT', route('likeables.update', $creator->id), $payload); // fan->likee
+        $response->assertStatus(200);
+
+        // LIKE the post (subcribe-only)
+        $post = $timeline->posts->where('type', PostTypeEnum::SUBSCRIBER)->first();
+        $payload = [
+            'likeable_type' => 'posts',
+            'likeable_id' => $post->id,
+        ];
+        $response = $this->actingAs($creator)->ajaxJSON('PUT', route('likeables.update', $creator->id), $payload); // fan->likee
+        $response->assertStatus(200);
+
+    }
+
+    /**
+     *  @group posts
+     *  @group regression
      */
     public function test_can_send_tip_on_post()
     {
@@ -703,6 +798,7 @@ class RestPostsTest extends TestCase
      *  @group posts
      *  @group regression
      */
+    // tests purchase itself, plus before and after access
     public function test_can_purchase_post()
     {
         $timeline = Timeline::has('followers', '>=', 1)
@@ -737,13 +833,18 @@ class RestPostsTest extends TestCase
         $response->assertStatus(200);
 
         $content = json_decode($response->content());
-        $postR = $content->post;
 
         // Check ledger
-        $fanledger = Fanledger::where('fltype', PaymentTypeEnum::PURCHASE)->latest()->first();
+        //$fanledger = Fanledger::where('fltype', PaymentTypeEnum::PURCHASE)->latest()->first();
+        $fanledger = Fanledger::where('fltype', PaymentTypeEnum::PURCHASE)
+            ->where('purchaseable_type', 'posts')
+            ->where('purchaseable_id', $content->post->id)
+            ->where('seller_id', $creator->id)
+            ->where('purchaser_id', $fan->id)
+            ->first();
         $this->assertNotNull($fanledger);
         $this->assertEquals(1, $fanledger->qty);
-        $this->assertEquals($post->price*100, $fanledger->base_unit_cost_in_cents);
+        $this->assertEquals($post->price, $fanledger->base_unit_cost_in_cents);
         $this->assertEquals(PaymentTypeEnum::PURCHASE, $fanledger->fltype);
         $this->assertEquals($fan->id, $fanledger->purchaser_id);
         $this->assertEquals($creator->id, $fanledger->seller_id);
@@ -757,6 +858,7 @@ class RestPostsTest extends TestCase
         $response = $this->actingAs($fan)->ajaxJSON('GET', route('posts.show', $post->id));
         $response->assertStatus(200);
     }
+
 
     /**
      *  @group posts
