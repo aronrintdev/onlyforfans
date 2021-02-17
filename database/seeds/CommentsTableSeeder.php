@@ -16,7 +16,6 @@ class CommentsTableSeeder extends Seeder
         $this->initSeederTraits('CommentsTableSeeder'); // $this->{output, faker, appEnv}
 
         $posts = Post::get();
-        //$users = User::get();
 
         $posts->each( function($post) { // all posts will have comments
 

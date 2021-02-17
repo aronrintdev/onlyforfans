@@ -28,7 +28,7 @@ class RestPostsTest extends TestCase
      *  @group regression
      */
     // %TODO: filters, timelines (see posts I follow), etc
-    public function test_can_index_posts()
+    public function test_can_list_posts()
     {
         //$this->seed(\Database\Seeders\TestDatabaseSeeder::class);
         $timeline = Timeline::has('posts','>=',1)->first(); 

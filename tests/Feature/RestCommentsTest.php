@@ -23,7 +23,7 @@ class RestCommentsTest extends TestCase
      */
     // should return only comments for which session user is the author
     // %TODO: filters, timelines (see comments I have valid access to), etc
-    public function test_owner_can_index_comments()
+    public function test_owner_can_list_comments()
     {
         $post = Post::has('comments','>=',1)->first();
         $creator = $post->timeline->user;
@@ -50,7 +50,7 @@ class RestCommentsTest extends TestCase
      *  @group comments
      *  @group regression
      */
-    public function test_admin_can_index_comments()
+    public function test_admin_can_list_comments()
     {
         $timeline = Timeline::has('followers', '>=', 1)
             ->whereHas('posts', function($q1) {
@@ -83,7 +83,7 @@ class RestCommentsTest extends TestCase
      *  @group comments
      *  @group regression
      */
-    public function test_nonowner_can_not_index_comments()
+    public function test_nonowner_can_not_list_comments()
     {
         $timeline = Timeline::has('followers', '>=', 1)
             ->whereHas('posts', function($q1) {
@@ -127,7 +127,7 @@ class RestCommentsTest extends TestCase
      *  @group regression
      */
      // should return only comments for which session user is the author
-    public function test_nonadmin_can_not_index_general_comments()
+    public function test_nonadmin_can_not_list_general_comments()
     {
         $timeline = Timeline::has('posts','>=',1)->first();
         $creator = $timeline->user;
@@ -163,7 +163,7 @@ class RestCommentsTest extends TestCase
      *  @group comments
      *  @group regression
      */
-    public function test_follower_can_view_timeline_comments()
+    public function test_follower_can_list_timeline_comments()
     {
         $timeline = Timeline::has('followers', '>=', 1)
             ->whereHas('posts', function($q1) {
@@ -194,7 +194,27 @@ class RestCommentsTest extends TestCase
      *  @group comments
      *  @group regression
      */
-    public function test_can_not_view_non_followed_timelines_comment()
+    public function test_nonfollower_can_list_timeline_comments()
+    {
+        $timeline = Timeline::has('followers', '>=', 1)
+            ->whereHas('posts', function($q1) {
+                $q1->has('comments', '>=', 1)->where('type', PostTypeEnum::FREE);
+            })->firstOrFail();
+        $creator = $timeline->user;
+        $nonfan = User::whereDoesntHave('followedtimelines', function($q1) use(&$timeline) {
+            $q1->where('timelines.id', $timeline->id);
+        })->where('id', '<>', $creator->id)->first();
+        $post = $timeline->posts()->where('type', PostTypeEnum::FREE)->has('comments','>=',1)->first();
+
+        $response = $this->actingAs($nonfan)->ajaxJSON('GET', route('posts.indexComments', $post->id));
+        $response->assertStatus(403);
+    }
+
+    /**
+     *  @group comments
+     *  @group regression
+     */
+    public function test_nonfollower_can_not_view_comment_on_timeline_post()
     {
         $post = Post::has('comments','>=',1)->first();
         $timeline = $post->timeline;
@@ -214,7 +234,7 @@ class RestCommentsTest extends TestCase
      *  @group comments
      *  @group regression
      */
-    public function test_timeline_follower_can_create_comment_on_post()
+    public function test_follower_can_create_comment_on_timeline_post()
     {
         $timeline = Timeline::has('followers', '>=', 1)
             ->whereHas('posts', function($q1) {
@@ -246,7 +266,6 @@ class RestCommentsTest extends TestCase
 
         $content = json_decode($response->content());
         $this->assertObjectHasAttribute('comment', $content);
-        $commentR = $content->comment;
 
         $this->assertNotNull($post->comments);
         $this->assertGreaterThan(0, $post->comments->count());
@@ -257,7 +276,32 @@ class RestCommentsTest extends TestCase
         });
         $this->assertEquals(1, $commentsByFan->count());
         $this->assertEquals($payload['description'], $commentsByFan->first()->description);
-        $this->assertEquals($commentsByFan->first()->id, $commentR->id);
+        $this->assertEquals($commentsByFan->first()->id, $content->comment->id);
+    }
+
+    /**
+     *  @group comments
+     *  @group regression
+     */
+    public function test_nonfollower_can_not_create_comment_on_timeline_post()
+    {
+        $timeline = Timeline::has('followers', '>=', 1)
+            ->whereHas('posts', function($q1) {
+                $q1->where('type', PostTypeEnum::FREE)->has('comments', '>=', 1);
+            })->firstOrFail();
+        $creator = $timeline->user;
+        $nonfan = User::whereDoesntHave('followedtimelines', function($q1) use(&$timeline) {
+            $q1->where('timelines.id', $timeline->id);
+        })->where('id', '<>', $creator->id)->first();
+        $post = $timeline->posts()->where('type', PostTypeEnum::FREE)->has('comments','>=',1)->first();
+
+        $payload = [
+            'post_id' => $post->id,
+            'user_id' => $nonfan->id,
+            'description' => $this->faker->realText,
+        ];
+        $response = $this->actingAs($nonfan)->ajaxJSON('POST', route('comments.store'), $payload);
+        $response->assertStatus(403);
     }
 
     /**
@@ -282,7 +326,7 @@ class RestCommentsTest extends TestCase
         $response->assertStatus(200);
     }
 
-    /*
+    /**
      *  @group comments
      *  @group regression
      */
@@ -313,7 +357,7 @@ class RestCommentsTest extends TestCase
         $response->assertStatus(404);
     }
 
-    /*
+    /**
      *  @group comments
      *  @group regression
      */
@@ -330,7 +374,38 @@ class RestCommentsTest extends TestCase
      *  @group comments
      *  @group regression
      */
-    public function test_timeline_follower_can_like_then_unlike_post_comment()
+    public function test_owner_can_delete_followers_comment_on_own_post()
+    {
+        $timeline = Timeline::has('followers', '>=', 1)
+            ->whereHas('posts', function($q1) {
+                $q1->where('type', PostTypeEnum::FREE)->has('comments', '>=', 1);
+            })->firstOrFail();
+        $creator = $timeline->user;
+        $fan = $timeline->followers[0];
+        $post = $timeline->posts()->where('type', PostTypeEnum::FREE)->has('comments','>=',1)->first();
+
+        // Add a comment as the follower/fan
+        $payload = [
+            'post_id' => $post->id,
+            'user_id' => $fan->id,
+            'description' => $this->faker->realText,
+        ];
+        $response = $this->actingAs($fan)->ajaxJSON('POST', route('comments.store'), $payload);
+        $response->assertStatus(201);
+        $content = json_decode($response->content());
+
+        // Delete comment
+        $response = $this->actingAs($creator)->ajaxJSON('DELETE', route('comments.destroy', $content->comment->id));
+        $response->assertStatus(200);
+        $response = $this->actingAs($creator)->ajaxJSON('GET', route('comments.show', $content->comment->id));
+        $response->assertStatus(404);
+    }
+
+    /**
+     *  @group comments
+     *  @group regression
+     */
+    public function test_follower_can_like_then_unlike_comment_on_timeline_post()
     {
         $timeline = Timeline::has('followers', '>=', 1)
             ->whereHas('posts', function($q1) {
@@ -390,6 +465,34 @@ class RestCommentsTest extends TestCase
             ->where('likeable_id', $commentR->id)
             ->first();
         $this->assertNull($likeable);
+    }
+
+    /**
+     *  @group comments
+     *  @group regression
+     *  @group here
+     */
+    public function test_nonfollower_can_not_like_comment_on_timeline_post()
+    {
+        $timeline = Timeline::has('followers', '>=', 1)
+            ->whereHas('posts', function($q1) {
+                $q1->has('comments', '>=', 1)->where('type', PostTypeEnum::FREE);
+            })->first();
+        $creator = $timeline->user;
+        $nonfan = User::whereDoesntHave('followedtimelines', function($q1) use(&$timeline) {
+            $q1->where('timelines.id', $timeline->id);
+        })->where('id', '<>', $creator->id)->first();
+        $post = $timeline->posts()->where('type', PostTypeEnum::FREE)->has('comments','>=',1)->first();
+        $comment = $post->comments->first();
+        $this->assertNotNull($comment);
+
+        // LIKE the comment
+        $payload = [
+            'likeable_type' => 'comments',
+            'likeable_id' => $comment->id,
+        ];
+        $response = $this->actingAs($nonfan)->ajaxJSON('PUT', route('likeables.update', $nonfan->id), $payload);
+        $response->assertStatus(403);
     }
 
     // ------------------------------

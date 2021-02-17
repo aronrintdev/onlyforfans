@@ -16,7 +16,7 @@ class CommentPolicy extends BasePolicy
         'like'        => 'isOwner:pass isBlockedByOwner:fail',
         'comment'     => 'isOwner:pass isBlockedByOwner:fail', // ie a comment reply
         'update'      => 'isOwner:pass:fail',
-        'delete'      => 'isOwner:pass:fail',
+        'delete'      => 'isOwner:pass',
         'forceDelete' => 'isOwner:pass:fail',
         'restore'     => 'isOwner:pass:fail',
     ];
@@ -29,6 +29,18 @@ class CommentPolicy extends BasePolicy
     protected function like(User $user, Comment $comment)
     {
         return $comment->post->timeline->followers->contains($user->id);
+    }
+
+    protected function delete(User $user, Comment $comment)
+    {
+        // post owner can delete any comment on the post
+        //return $comment->commentable->isOwner($user);
+        return $comment->post->isOwner($user);
+    }
+
+    protected function forceDelete(User $user, Comment $comment)
+    {
+        return $comment->post->isOwner($user);
     }
 
     protected function isBlockedBy(User $sessionUser, User $user) : bool
