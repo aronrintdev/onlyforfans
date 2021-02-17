@@ -15,7 +15,7 @@ use App\Enums\MediafileTypeEnum;
 class StoryModelTest extends TestCase
 {
     /**
-     * @group mfdev
+     * @group story-model
      */
     public function test_debug()
     {
