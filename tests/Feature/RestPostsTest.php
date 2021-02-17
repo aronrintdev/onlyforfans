@@ -695,7 +695,6 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
-     *  @group here
      */
     public function test_timeline_nonfollower_can_not_like_post()
     {

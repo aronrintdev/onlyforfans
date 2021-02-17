@@ -13,11 +13,16 @@ use App\Models\User;
 class CommentsController extends AppBaseController
 {
     // %TODO: refactor with scopes
+    // %TODO: make this version timeline-owner only; followers call posts controller to get
+    //         comments on posts they follow/purchased etc
     public function index(Request $request)
     {
+        $this->authorize('index', Comment::class);
+
         if ( !$request->hasAny('user_id', 'post_id') ) {
             $this->authorize('index', Comment::class);
         } else {
+            // filters
             if ( $request->has('post_id') ) {
                 $post = Post::find($request->post_id); // %FIXME: this version probably should be on Posts controller
                 $this->authorize('view', $post);
@@ -72,9 +77,15 @@ class CommentsController extends AppBaseController
             'parent_id' => 'nullable|uuid|exists:comments,id',
             'description' => 'required|string|min:3',
         ]);
+
+        $post = Post::where('postable_type', 'timelines')
+                    ->where('postable_id', $request->post_id)
+                    ->first();
+        $this->authorize('comment', $post);
+
         $attrs = $request->except('post_id'); // timeline_id is now postable
         $attrs['commentable_type'] = 'posts'; // %FIXME: hardcoded
-        $attrs['commentable_id'] = $request->post_id; // %FIXME: hardcoded
+        $attrs['commentable_id'] = $post->id;
 
         $comment = Comment::create($attrs);
 
@@ -85,6 +96,7 @@ class CommentsController extends AppBaseController
 
     public function update(Request $request, Comment $comment)
     {
+        $this->authorize('update', $comment);
         $request->validate([
             'description' => 'required|string|min:1',
         ]);
@@ -99,6 +111,7 @@ class CommentsController extends AppBaseController
 
     public function destroy(Request $request, Comment $comment)
     {
+        $this->authorize('delete', $comment);
         $comment->delete();
         return response()->json([]);
     }

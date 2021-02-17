@@ -17,6 +17,8 @@ class PostsController extends AppBaseController
 {
     public function index(Request $request)
     {
+        $this->authorize('index', Post::class);
+
         $filters = $request->input('filters', []);
 
         $query = Post::query();
@@ -119,6 +121,7 @@ class PostsController extends AppBaseController
         return response()->json([]);
     }
 
+    /* NOT SURE WHAT THIS DOES (?)
     public function saves(Request $request)
     {
         $saves = $request->user()->sharedmediafiles->map( function($mf) {
@@ -136,6 +139,7 @@ class PostsController extends AppBaseController
             ],
         ]);
     }
+     */
 
     public function tip(Request $request, Post $post)
     {
@@ -165,6 +169,7 @@ class PostsController extends AppBaseController
     // %NOTE: post price in DB is in dollars not cents %FIXME
     public function purchase(Request $request, Post $post)
     {
+        $this->authorize('purchase', $post);
         try {
             $post->receivePayment(
                 PaymentTypeEnum::PURCHASE,
@@ -181,6 +186,15 @@ class PostsController extends AppBaseController
             'post' => $post ?? null,
         ]);
     }
-    /*
-     */
+
+    public function indexComments(Request $request, Post $post)
+    {
+        $this->authorize('view', $post);
+        //$filters = $request->input('filters', []);
+        $comments = $post->comments;
+        return response()->json([
+            'comments' => $comments,
+        ]);
+    }
+
 }

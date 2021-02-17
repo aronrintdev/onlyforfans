@@ -17,7 +17,8 @@ class PostPolicy extends BasePolicy
         'delete'      => 'isOwner:next:fail',
         'restore'     => 'isOwner:pass',
         'forceDelete' => 'isOwner:pass',
-        'like'        => 'isOwner:pass isBlockedByOwner:fail',
+        'like'        => 'isOwner:next:fail isBlockedByOwner:fail',
+        'comment'     => 'isOwner:next:fail isBlockedByOwner:fail',
     ];
 
     protected function view(User $user, Post $post)
@@ -89,10 +90,16 @@ class PostPolicy extends BasePolicy
         return true;
     }
 
-    public function like(User $user, Post $post)
+    protected function like(User $user, Post $post)
     {
         return $user->can('view', $post);
         //return $post->timeline->followers->contains($user->id);
+    }
+
+    protected function comment(User $user, Post $post)
+    {
+        return true; // DEBUG code...still get 403...putting dd here doesn't trigger
+        return $user->can('view', $post);
     }
 
 }

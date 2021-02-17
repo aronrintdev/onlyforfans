@@ -21,22 +21,13 @@ class RestCommentsTest extends TestCase
      *  @group comments
      *  @group regression
      */
+    // should return only comments for which session user is the author
     // %TODO: filters, timelines (see comments I have valid access to), etc
     public function test_can_index_comments()
     {
-        // should return only comments for which session user is the author
-
         $post = Post::has('comments','>=',1)->first();
         $creator = $post->timeline->user;
-
-        // ensure post has a comment by creator
-        $comment = Comment::create([
-            //'post_id' => $post->id,
-            'commentable_id'     => $post->id,
-            'commentable_type'   => 'posts',
-            'user_id' => $creator->id,
-            'description' => $this->faker->realText,
-        ]);
+        $expectedCount = Comment::where('user_id', $creator->id)->count();
 
         $response = $this->actingAs($creator)->ajaxJSON('GET', route('comments.index'), [
             'user_id' => $creator->id,
@@ -45,10 +36,10 @@ class RestCommentsTest extends TestCase
 
         $content = json_decode($response->content());
         $this->assertNotNull($content->comments);
-        $commentsR = collect($content->comments);
-        $this->assertGreaterThan(0, $commentsR->count());
-        $this->assertObjectHasAttribute('description', $commentsR->first());
-        $commentsR->each( function($c) use(&$creator) { // all belong to owner
+        $this->assertGreaterThan(0, count($content->comments));
+        $this->assertEquals($expectedCount, count($content->comments));
+        $this->assertObjectHasAttribute('description', $content->comments[0]);
+        collect($content->comments)->each( function($c) use(&$creator) { // all belong to owner
             $this->assertEquals($creator->id, $c->user_id);
         });
     }
@@ -57,10 +48,30 @@ class RestCommentsTest extends TestCase
      *  @group comments
      *  @group regression
      */
-    public function test_can_not_index_general_comments()
+    public function test_nonowner_can_not_index_comments()
     {
-        // should return only comments for which session user is the author
+        $timeline = Timeline::has('followers', '>=', 1)
+            ->whereHas('posts', function($q1) {
+                $q1->has('comments', '>=', 1)->where('type', PostTypeEnum::FREE);
+            })->firstOrFail();
+        $creator = $timeline->user;
+        $fan = $timeline->followers[0]; // test as a follower
+        $post = $timeline->posts()->where('type', PostTypeEnum::FREE)->has('comments','>=',1)->first();
+        $expectedCount = Comment::where('user_id', $creator->id)->count();
 
+        $response = $this->actingAs($fan)->ajaxJSON('GET', route('comments.index'), [
+            'user_id' => $creator->id,
+        ]);
+        $response->assertStatus(403);
+    }
+
+    /**
+     *  @group comments
+     *  @group regression
+     */
+     // should return only comments for which session user is the author
+    public function test_nonadmin_can_not_index_general_comments()
+    {
         $timeline = Timeline::has('posts','>=',1)->first();
         $creator = $timeline->user;
         $response = $this->actingAs($creator)->ajaxJSON('GET', route('comments.index'));
@@ -71,7 +82,7 @@ class RestCommentsTest extends TestCase
      *  @group comments
      *  @group regression
      */
-    public function test_can_show_my_comment()
+    public function test_owner_can_view_own_comment()
     {
         $creator = User::has('comments', '>', 1)->first();
         $comment = Comment::where('user_id', $creator->id)->first();
@@ -83,20 +94,29 @@ class RestCommentsTest extends TestCase
      *  @group comments
      *  @group regression
      */
-    public function test_can_show_followed_timelines_comment()
+    public function test_follower_can_view_timeline_comments()
     {
         $timeline = Timeline::has('followers', '>=', 1)
             ->whereHas('posts', function($q1) {
                 $q1->has('comments', '>=', 1)->where('type', PostTypeEnum::FREE);
             })->firstOrFail();
         $creator = $timeline->user;
-        $fan = $timeline->followers->first();
-
+        $fan = $timeline->followers[0];
         $post = $timeline->posts()->where('type', PostTypeEnum::FREE)->has('comments','>=',1)->first();
+
+        // can view individual post
         $response = $this->actingAs($fan)->ajaxJSON('GET', route('posts.show', $post->id));
         $response->assertStatus(200);
 
-        $comment = $post->comments->first();
+        // can index post's comments
+        $response = $this->actingAs($fan)->ajaxJSON('GET', route('posts.indexComments', $post->id));
+        $response->assertStatus(200);
+        $content = json_decode($response->content());
+        $this->assertNotNull($content->comments);
+        $this->assertGreaterThan(0, count($content->comments));
+
+        // can view individual comment
+        $comment = $post->comments[0];
         $response = $this->actingAs($fan)->ajaxJSON('GET', route('comments.show', $comment->id));
         $response->assertStatus(200);
     }
@@ -105,7 +125,7 @@ class RestCommentsTest extends TestCase
      *  @group comments
      *  @group regression
      */
-    public function test_can_not_show_non_followed_timelines_comment()
+    public function test_can_not_view_non_followed_timelines_comment()
     {
         $post = Post::has('comments','>=',1)->first();
         $timeline = $post->timeline;
@@ -116,7 +136,7 @@ class RestCommentsTest extends TestCase
         $this->assertFalse( $timeline->followers->contains( $nonfan->id ) );
 
         $post = $timeline->posts()->has('comments','>=',1)->first();
-        $comment = $post->comments->first();
+        $comment = $post->comments[0];
         $response = $this->actingAs($nonfan)->ajaxJSON('GET', route('comments.show', $comment->id));
         $response->assertStatus(403);
     }
@@ -124,17 +144,18 @@ class RestCommentsTest extends TestCase
     /**
      *  @group comments
      *  @group regression
+     *  @group here
+     *  @group erik
      */
-    public function test_timeline_follower_can_store_comment_on_post()
+    public function test_timeline_follower_can_create_comment_on_post()
     {
         $timeline = Timeline::has('followers', '>=', 1)
             ->whereHas('posts', function($q1) {
                 $q1->where('type', PostTypeEnum::FREE);
             })->first();
-        $post = $timeline->posts->first();
         $creator = $timeline->user;
-        $fan = $timeline->followers->first();
-//dump('test', $fan->id, $creator->id);
+        $fan = $timeline->followers[0];
+        $post = $timeline->posts[0];
 
         // remove any existing comments on post by fan...
         DB::table('comments')
@@ -172,38 +193,70 @@ class RestCommentsTest extends TestCase
         $this->assertEquals($commentsByFan->first()->id, $commentR->id);
     }
 
-    public function test_can_store_comment_on_followed_timeline()
-    {
-        $response->assertStatus(201);
-    }
-
     /**
      *  @group comments
      *  @group regression
      */
-    public function test_can_update_own_comment()
+    public function test_can_edit_own_comment()
     {
-        $creator = User::has('comments', '>', 1)->first();
-        $comment = Comment::where('user_id', $creator->id)->first();
+        $timeline = Timeline::has('followers', '>=', 1)
+            ->whereHas('posts', function($q1) {
+                $q1->where('type', PostTypeEnum::FREE);
+            })->first();
+        $owner = $timeline->user;
+        $post = $timeline->posts()->has('comments', '>=', 1)->first();
+        $comment = $post->comments()->where('user_id', '<>', $owner->id)->first();
+        $fan = $comment->user;
+
         $payload = [
             'description' => $this->faker->realText,
         ];
-        $response = $this->actingAs($creator)->ajaxJSON('PATCH', route('comments.update', $comment->id), $payload);
+        $response = $this->actingAs($fan)->ajaxJSON('PATCH', route('comments.update', $comment->id), $payload);
         $response->assertStatus(200);
+    }
+
+    /*
+     *  @group comments
+     *  @group regression
+     */
+    public function test_can_not_edit_nonowned_comment()
+    {
+        $owner = User::has('comments', '>', 1)->first();
+        $comment = Comment::where('user_id', $owner->id)->first();
+        $nonowner = User::where('id', '<>', $owner->id)->first();
+
+        $payload = [
+            'description' => $this->faker->realText,
+        ];
+        $response = $this->actingAs($nonowner)->ajaxJSON('PATCH', route('comments.update', $comment->id), $payload);
+        $response->assertStatus(403);
     }
 
     /**
      *  @group comments
      *  @group regression
      */
-    public function test_can_destroy_own_comment()
+    public function test_can_delete_own_comment()
     {
-        $creator = User::has('comments', '>', 1)->first();
-        $comment = Comment::where('user_id', $creator->id)->first();
-        $response = $this->actingAs($creator)->ajaxJSON('DELETE', route('comments.destroy', $comment->id));
+        $owner = User::has('comments', '>', 1)->first();
+        $comment = Comment::where('user_id', $owner->id)->first();
+        $response = $this->actingAs($owner)->ajaxJSON('DELETE', route('comments.destroy', $comment->id));
         $response->assertStatus(200);
-        $response = $this->actingAs($creator)->ajaxJSON('GET', route('comments.show', $comment->id));
+        $response = $this->actingAs($owner)->ajaxJSON('GET', route('comments.show', $comment->id));
         $response->assertStatus(404);
+    }
+
+    /*
+     *  @group comments
+     *  @group regression
+     */
+    public function test_can_not_delete_nonowned_comment()
+    {
+        $owner = User::has('comments', '>', 1)->first();
+        $comment = Comment::where('user_id', $owner->id)->first();
+        $nonowner = User::where('id', '<>', $owner->id)->first();
+        $response = $this->actingAs($nonowner)->ajaxJSON('DELETE', route('comments.destroy', $comment->id));
+        $response->assertStatus(403);
     }
 
     /**
