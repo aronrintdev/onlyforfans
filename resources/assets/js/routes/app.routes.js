@@ -23,12 +23,12 @@ export const routes = [
     path: '/timelines/home',
     component: timelines.Home,
   },
-  {
-    name: 'timelines.show',
-    path: '/timelines/:timelineId',
-    component: timelines.Show,
-    props: true,
-  },
+  // {
+  //   name: 'timelines.show',
+  //   path: '/timelines/:timelineId',
+  //   component: timelines.Show,
+  //   props: true,
+  // },
 
   // Stories
   {
@@ -49,12 +49,35 @@ export const routes = [
     component: vaults.Dashboard
   },
 
+  // Static Pages
   ...StaticPageRoutes,
 
+  // User
   {
-    name: 'user.page',
+    name: 'user.posts',
+    path: '/:username/posts',
+    props: true,
+  },
+  {
+    name: 'user.followers',
+    path: '/:username/followers',
+    props: true,
+  },
+  {
+    name: 'user.following',
+    path: '/:username/following',
+    props: true,
+  },
+  {
+    name: 'user.earnings',
+    path: '/:username/earnings',
+    props: true,
+  },
+  {
+    name: 'user.timeline',
     path: '/:username',
-    component: users.Home,
+    component: timelines.Show,
+    props: true,
   },
 
   /**

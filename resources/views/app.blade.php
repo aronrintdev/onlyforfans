@@ -18,6 +18,8 @@
         const myUserId = '{{ Auth::user()->id }}';
     </script>
 
+    {{-- Routing --}}
+    @routes()
 </head>
 <body>
     <div id="app">

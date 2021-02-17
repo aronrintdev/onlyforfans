@@ -75,10 +75,10 @@ class TimelinesController extends AppBaseController
             'earnings' => $sales,
         ];
 
-        return view('timelines.show', [
+        return [
             'sessionUser' => $request->user(),
             'timeline' => $timeline,
-        ]);
+        ];
     }
 
     // Display my home timeline
