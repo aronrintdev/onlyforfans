@@ -2,13 +2,13 @@
  * App.js routes
  */
 import VueRouter from 'vue-router'
-import ErrorViews from '../views/errors'
+import ErrorViews from '@views/errors'
 import StaticPageRoutes from './staticPages.routes'
 
-import stories from '../views/stories'
-import timelines from '../views/timelines'
-import users from '../views/users'
-import vaults from '../views/vaults'
+import stories from '@views/stories'
+import timelines from '@views/timelines'
+import users from '@views/users'
+import vaults from '@views/vaults'
 
 export const routes = [
   {

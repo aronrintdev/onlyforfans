@@ -29,11 +29,11 @@
  * Timelines Home Page
  */
 import Vuex from 'vuex';
-import PostFeed from '../../components/timelines/PostFeed.vue';
-import StoryBar from '../../components/timelines/StoryBar.vue';
-import CreatePost from '../../components/timelines/CreatePost.vue';
-import SessionWidget from '../../components/common/SessionWidget.vue'; // %FIXME: rename, not session
-import SuggestedFeed from '../../components/common/SuggestedFeed.vue';
+import PostFeed from '@components/timelines/PostFeed.vue';
+import StoryBar from '@components/timelines/StoryBar.vue';
+import CreatePost from '@components/timelines/CreatePost.vue';
+import SessionWidget from '@components/common/SessionWidget.vue'; // %FIXME: rename, not session
+import SuggestedFeed from '@components/common/SuggestedFeed.vue';
 
 export default {
 

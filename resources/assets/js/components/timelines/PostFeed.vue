@@ -18,7 +18,7 @@
 
 <script>
 import Vuex from 'vuex';
-//import { eventBus } from '../../app';
+//import { eventBus } from '@/app';
 import ShowPost from './ShowPost.vue';
 
 export default {

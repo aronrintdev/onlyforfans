@@ -36,11 +36,11 @@
 
 <script>
 import Vuex from 'vuex';
-import PostFeed from '../../components/timelines/PostFeed.vue';
-import StoryBar from '../../components/timelines/StoryBar.vue';
-import SessionBanner from '../../components/common/SessionBanner.vue'; // %FIXME: rename, not session
-import FollowCtrl from '../../components/common/FollowCtrl.vue';
-import SendTip from '../../components/modals/SendTip.vue';
+import PostFeed from '@components/timelines/PostFeed.vue';
+import StoryBar from '@components/timelines/StoryBar.vue';
+import SessionBanner from '@components/common/SessionBanner.vue'; // %FIXME: rename, not session
+import FollowCtrl from '@components/common/FollowCtrl.vue';
+import SendTip from '@components/modals/SendTip.vue';
 
 export default {
 

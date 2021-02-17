@@ -1,7 +1,7 @@
 /**
  * Static pages route defs
  */
-import StaticPages from '../components/staticPages'
+import StaticPages from '@components/staticPages'
 
 export const routes = [
   {
