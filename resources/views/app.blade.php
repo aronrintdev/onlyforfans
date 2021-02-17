@@ -12,6 +12,12 @@
 
     <!-- Styles -->
     <link href="{{ mix('css/app2.css') }}" rel="stylesheet">
+
+    <!-- Static Data -->
+    <script>
+        const myUserId = '{{ Auth::user()->id }}';
+    </script>
+
 </head>
 <body>
     <div id="app">

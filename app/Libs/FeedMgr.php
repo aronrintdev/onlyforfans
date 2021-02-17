@@ -26,7 +26,7 @@ class FeedMgr {
         $max = Setting::get('min_items_page', 3);
         $suggested = User::inRandomOrder()
             ->where('id', '<>', $follower->id)
-            ->whereNotIn( 'timeline_id', $follower->followedtimelines->pluck('id') )
+            ->whereNotIn('postable_id', $follower->followedtimelines->pluck('id') )
             ->take($max)
             ->get();
         return $suggested;
@@ -49,7 +49,7 @@ class FeedMgr {
 
         // --- Belongs to timeline(s) that I'm following ---
         $query->where( function($q1) use(&$follower, $followedTimelineIDs) {
-            $q1->whereIn('timeline_id', $followedTimelineIDs);
+            $q1->whereIn('postable_id', $followedTimelineIDs);
         });
 
 
@@ -90,7 +90,7 @@ class FeedMgr {
 
         // belongs to timeline(s) that I'm following
         $query->where( function($q1) use(&$follower) {
-            $q1->whereIn('timeline_id', $follower->followedtimelines->pluck('id'));
+            $q1->whereIn('postable_id', $follower->followedtimelines->pluck('id'));
         });
 
         // or posts I follow directly %TODO
@@ -122,7 +122,7 @@ class FeedMgr {
 
         // belongs to timeline(s) that I'm following
         $query->where( function($q1) use(&$follower, &$timeline) {
-            $q1->where('timeline_id', $timeline->id);
+            $q1->where('postable_id', $timeline->id);
         });
 
         // or posts I follow directly %TODO

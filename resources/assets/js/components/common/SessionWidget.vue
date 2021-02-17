@@ -59,7 +59,7 @@
 
       </b-card>
 
-    </section>							
+    </section>
   </div>
 </template>
 

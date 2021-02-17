@@ -12,7 +12,9 @@
     </div>
     <div class="footer">
       <b-navbar variant="dark">
-        <b-nav-text class="text-light">Footer</b-nav-text>
+        <b-nav-text class="text-light mx-auto">
+          &copy; {{ $DateTime().year }} All Fans. All rights reserved.
+        </b-nav-text>
       </b-navbar>
     </div>
   </div>

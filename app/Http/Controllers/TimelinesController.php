@@ -45,7 +45,7 @@ class TimelinesController extends AppBaseController
             $q1->where('id', '<>', $sessionUser->id); // skip myself
             // skip timelines I'm already following
             $q1->whereHas('followedtimelines', function($q2) use(&$followedIDs) {
-                $q2->whereNotIn('timeline_id', $followedIDs);
+                $q2->whereNotIn('shareable_id', $followedIDs);
             });
         });
 

@@ -22,9 +22,15 @@ foreach ($files as $file) {
 /**
  * Removing due to limitations
  */
-// Route::group(['middleware' => ['web']], function () {
-//     Auth::routes();
-// });
+Route::group(['middleware' => ['web']], function () {
+    Auth::routes();
+
+    // Skip these to spa controller
+    Route::get('/login', 'SpaController@index');
+    Route::get('/register', 'SpaController@index');
+    Route::get('/forgot-password', 'SpaController@index');
+
+});
 
 Route::get('facebook', 'Auth\RegisterController@facebookRedirect'); // auth redirect
 Route::get('account/facebook', 'Auth\RegisterController@facebook'); // return url (?)
@@ -113,7 +119,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('/timelines-suggested', ['as'=>'timelines.suggested', 'uses' => 'TimelinesController@suggested']); // %FIXME: refactor: use index(?)
     Route::get('/timelines/home', ['as'=>'timelines.home', 'uses' => 'TimelinesController@home']); // special case of 'show'
     Route::get('/timelines/match', ['as'=>'timelines.match', 'uses' => 'TimelinesController@match']);
-    Route::get('/timelines/{timeline}/feed-items', ['as'=>'timelines.feeditems', 'uses' => 'TimelinesController@feeditems']);
+    Route::get('/timelines/{timeline}/feeditems', ['as'=>'timelines.feeditems', 'uses' => 'TimelinesController@feeditems']);
     Route::put('/timelines/{timeline}/tip', ['as'=>'timelines.tip', 'uses' => 'TimelinesController@tip']);
     Route::put('/timelines/{timeline}/follow', ['as'=>'timelines.follow', 'uses' => 'TimelinesController@follow']);
     Route::put('/timelines/{timeline}/subscribe', ['as'=>'timelines.subscribe', 'uses' => 'TimelinesController@subscribe']);

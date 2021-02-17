@@ -14,8 +14,10 @@ window.axios = require('axios');
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 //axios.defaults.baseURL = '/';
 
-
 import Vue from 'vue';
+
+import VueAxios from 'vue-axios';
+Vue.use(VueAxios, window.axios);
 
 /**
  * Enable $log
@@ -101,21 +103,13 @@ import i18n from './i18n'
 
 import VueRouter from 'vue-router'
 Vue.use(VueRouter)
-import routes from './routes/app.routes'
+import router from './routes/app.routes'
 
 import App from './views/templates/App.vue'
 
 const app = new Vue({
-    // routes,
+    router,
     i18n,
-    store,
-    // render: h => h(App),
-}).$mount('#app');
-
-/*
-const app = new Vue({
-    //router,
     store,
     render: h => h(App),
 }).$mount('#app');
-*/

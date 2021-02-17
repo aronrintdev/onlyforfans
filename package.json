@@ -42,7 +42,7 @@
     "bootstrap-vue": "^2.20.1",
     "i18n": "^0.13.2",
     "laravel-echo": "^1.10.0",
-    "luxon": "^1.25.0",
+    "luxon": "^1.26.0",
     "pusher-js": "^7.0.2",
     "vue-autosuggest": "^2.2.0",
     "vue-axios": "^3.2.3",
