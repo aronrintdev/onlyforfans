@@ -264,6 +264,10 @@ class RestSettingTest extends TestCase
         $response->assertStatus(302);
     }
 
+    /**
+     *  @group settings
+     *  @group regression
+     */
     public function test_can_creator_set_referral_rewards_enable()
     {
         Session::start();
@@ -284,6 +288,46 @@ class RestSettingTest extends TestCase
 
         $response->assertStatus(302);
     }
+
+    /**
+     *  @group settings
+     *  @group regression
+     */
+    public function test_can_creator_set_enable_or_disable_follow_for_free()
+    {
+        Session::start();
+
+        $timeline = Timeline::has('posts', '>=', 1)->has('followers', '>=', 1)->first();
+        $creator = $timeline->user;
+
+        // Enable follow_for_free
+        $response = $this->actingAs($creator)
+        ->json('POST', '/'.$creator->username.'/settings/subscription', [
+            'subscribe_price_month' => null,
+            'is_follow_for_free' => 'on',
+            'subscribe_price_3_month' => 50.00,
+            'subscribe_price_6_month' => null,
+            'subscribe_price_year' => null,
+            'referral-rewards' =>  '1-free-month',
+            '_token' => Session::token()
+        ]);
+        $response->assertStatus(302);
+    
+        // Disable follow_for_free
+        $response = $this->actingAs($creator)
+        ->json('POST', '/'.$creator->username.'/settings/subscription', [
+            'subscribe_price_month' => null,
+            'subscribe_price_3_month' => 50.00,
+            'subscribe_price_6_month' => null,
+            'subscribe_price_year' => null,
+            'referral-rewards' =>  '1-free-month',
+            '_token' => Session::token()
+        ]);
+
+        $response->assertStatus(302);
+    }
+
+
 
     // ------------------------------
 
