@@ -1,27 +1,43 @@
 <template>
   <div v-if="!is_loading" class="feed-crate tag-posts tag-crate">
-
     <section class="row">
-      <div>
-        <article v-for="(fi, idx) in rendereditems" :key="fi.id" class="col-sm-12 mb-3">
+      <div class="w-100">
+        <article
+          v-for="(feedItem, index) in renderedItems"
+          :key="feedItem.id"
+          class="col-sm-12 mb-3"
+          v-observe-visibility="index === renderedItems.length - 1 ? endPostVisible : false"
+        >
           <!-- for now we assume posts; eventually need to convert to a DTO (ie more generic 'feedItem') : GraphQL ? -->
           <ShowPost
-              :post=fi
-              :session_user=session_user
-              v-on:delete-post="deletePost"/>
+            :post="feedItem"
+            :session_user="session_user"
+            @delete-post="deletePost"
+          />
+        </article>
+        <article class="load-more-item col-sm-12 mb-3">
+          <b-card :class="{ 'cursor-pointer': !moreLoading && !isLastPage }" @click="onLoadMoreClick">
+            <div class="w-100 d-flex my-3 justify-content-center" >
+              <fa-icon v-if="moreLoading" icon="spinner" spin size="lg" />
+              <span v-else-if="isLastPage">End Of Content</span>
+              <span v-else>Load More</span>
+            </div>
+          </b-card>
         </article>
       </div>
     </section>
-
   </div>
 </template>
 
 <script>
-import Vuex from 'vuex';
-//import { eventBus } from '@/app';
-import ShowPost from './ShowPost.vue';
+import Vuex from 'vuex'
+//import { eventBus } from '@/app'
+import ShowPost from './ShowPost.vue'
 
 export default {
+  components: {
+    ShowPost,
+  },
 
   props: {
     session_user: null,
@@ -34,65 +50,82 @@ export default {
     ...Vuex.mapState(['is_loading']),
 
     username() { // feed owner
-      return this.timeline.username;
+      return this.timeline.username
     },
     timelineId() {
-      return this.timeline.id;
+      return this.timeline.id
     },
 
     currentPage() {
-      return this.feeditems.current_page;
+      return this.feeditems.current_page
     },
     nextPage() {
-      return this.feeditems.current_page + 1;
+      return this.feeditems.current_page + 1
     },
     lastPage() {
-      return this.feeditems.last_page;
+      return this.feeditems.last_page
     },
     isLastPage() {
-      return this.feeditems.current_page === this.feeditems.last_page;
+      return this.feeditems.current_page === this.feeditems.last_page
     },
   },
 
   data: () => ({
-    rendereditems: [],
-    renderedpages: [], // track so we don't re-load same page (set of posts) more than 1x
+    renderedItems: [],
+    renderedPages: [], // track so we don't re-load same page (set of posts) more than 1x
     limit: 5,
+    lastPostVisible: false,
+    moreLoading: true,
   }),
 
   mounted() {
-    window.addEventListener('scroll', this.onScroll);
+    // window.addEventListener('scroll', this.onScroll);
   },
   beforeDestroy() {
-    window.removeEventListener('scroll', this.onScroll);
+    // window.removeEventListener('scroll', this.onScroll);
   },
 
   created() {
-    this.$store.dispatch('getFeeditems', { timelineId: this.timelineId, page: 1, limit: this.limit });
+    this.$store.dispatch('getFeeditems', { timelineId: this.timelineId, page: 1, limit: this.limit })
   },
 
   methods: {
 
+    endPostVisible(isVisible) {
+      this.lastPostVisible = isVisible
+      if (isVisible && !this.moreLoading && !this.isLastPage) {
+        this.loadMore()
+      }
+    },
+
+    onLoadMoreClick() {
+      if (!this.moreLoading && !this.isLastPage) {
+        this.loadMore()
+      }
+    },
+
+
     onScroll(e) {
       const atBottom = document.documentElement.scrollTop + window.innerHeight === document.documentElement.offsetHeight;
       if (atBottom && !this.is_loading) {
-        this.loadMore();
+        this.loadMore()
       }
     },
 
     async deletePost(postId) {
-      const url = `/posts/${postId}`;
-      const response = await axios.delete(url);
-      this.renderedpages = [];
-      this.rendereditems = [];
-      this.$store.dispatch('getFeeditems', { timelineId: this.timelineId, page: 1, limit: this.limit });
+      const url = `/posts/${postId}`
+      const response = await axios.delete(url)
+      this.renderedPages = []
+      this.renderedItems = []
+      this.$store.dispatch('getFeeditems', { timelineId: this.timelineId, page: 1, limit: this.limit })
     },
 
     // see: https://peachscript.github.io/vue-infinite-loading/guide/#installation
     loadMore() {
-      if ( !this.is_loading && (this.nextPage <= this.lastPage) ) {
-        console.log('loadMore', { current: this.currentPage, last: this.lastPage, next: this.nextPage });
-        this.$store.dispatch('getFeeditems', { timelineId: this.timelineId, page: this.nextPage, limit: this.limit });
+      if ( !this.moreLoading && !this.is_loading && (this.nextPage <= this.lastPage) ) {
+        this.moreLoading = true;
+        this.$log.debug('loadMore', { current: this.currentPage, last: this.lastPage, next: this.nextPage });
+        this.$store.dispatch('getFeeditems', { timelineId: this.timelineId, page: this.nextPage, limit: this.limit })
       }
     },
 
@@ -100,24 +133,18 @@ export default {
 
   watch: {
     unshifted_timeline_post (newVal, oldVal) {
-      console.log('PostFeed - watch:unshifted_timeline_post', { newVal, oldVal });
-      this.rendereditems.pop(); // pop the 'oldest' to keep pagination offset correct
-      this.rendereditems.unshift(newVal);
+      this.$log.debug('PostFeed - watch:unshifted_timeline_post', { newVal, oldVal })
+      this.renderedItems.pop(); // pop the 'oldest' to keep pagination offset correct
+      this.renderedItems.unshift(newVal)
     },
 
     feeditems (newVal, oldVal) {
-      if ( !this.renderedpages.includes(newVal.current_page) ) {
-        this.renderedpages.push(newVal.current_page);
-        this.rendereditems = this.rendereditems.concat(newVal.data);
+      if ( !this.renderedPages.includes(newVal.current_page) ) {
+        this.renderedPages.push(newVal.current_page)
+        this.renderedItems = this.renderedItems.concat(newVal.data)
+        this.moreLoading = false
       }
     },
   },
-
-  components: {
-    ShowPost,
-  },
 }
 </script>
-
-<style scoped>
-</style>
