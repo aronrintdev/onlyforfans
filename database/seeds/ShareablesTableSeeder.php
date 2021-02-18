@@ -30,7 +30,9 @@ class ShareablesTableSeeder extends Seeder
         // +++ Create ... +++
 
         $followers = User::get();
-        $this->output->writeln("  - Shareables seeder: loaded ".$followers->count()." followers...");
+        if ( $this->appEnv !== 'testing' ) {
+            $this->output->writeln("  - Shareables seeder: loaded ".$followers->count()." followers...");
+        }
 
         $followers->each( function($f) {
 

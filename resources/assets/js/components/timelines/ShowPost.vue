@@ -137,12 +137,15 @@ export default {
       if ( isCurrentlyVisible ) {
         this.renderComments = false; // toggle -> hide
       } else {
+        const response = await axios.get(`/posts/${this.post.id}/indexComments`);
+        /*
         const response = await axios.get(`/comments`, { 
           params: {
             post_id: this.post.id,
           },
         });
-        console.log('comments', { response });
+        */
+        //console.log('comments', { response });
         //this.comments = response.comments;
         this.comments = response.data.comments;
         this.renderComments = true; // toggle -> show

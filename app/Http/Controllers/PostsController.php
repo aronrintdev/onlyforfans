@@ -17,25 +17,37 @@ class PostsController extends AppBaseController
 {
     public function index(Request $request)
     {
-        $filters = $request->input('filters', []);
+        $request->validate([
+            'filters' => 'array',
+            'filters.timeline_id' => 'uuid|exists:timelines,id', // if admin only
+            'filters.user_id' => 'uuid|exists:users,id', // if admin only
+        ]);
 
+        $filters = $request->filters ?? [];
+
+        // Init query
         $query = Post::query();
+
+        // Check permissions
         if ( !$request->user()->isAdmin() ) {
-            //$query->where('timeline_id', $request->user()->timeline->id);
             $query->where('postable_type', 'timelines')->where('postable_id', $request->user()->timeline->id);
+            unset($filters['user_id']);
+            unset($filters['timeline_id']);
         }
 
-        foreach ($filters as $f) {
-            switch ($f['key']) {
-                case 'ptype':
-                    $query->where('type', $f['val']);
+        // Apply any filters
+        foreach ($filters as $key => $f) {
+            switch ($key) {
+                //case 'postable_id':
+                case 'timeline_id':
+                case 'user_id':
+                    $query->where($key, $f);
                     break;
             }
         }
-        $posts = $query->get();
 
         return response()->json([
-            'posts' => $posts,
+            'posts' => $query->get(),
         ]);
     }
 
@@ -119,6 +131,7 @@ class PostsController extends AppBaseController
         return response()->json([]);
     }
 
+    /* NOT SURE WHAT THIS DOES (?)
     public function saves(Request $request)
     {
         $saves = $request->user()->sharedmediafiles->map( function($mf) {
@@ -136,6 +149,7 @@ class PostsController extends AppBaseController
             ],
         ]);
     }
+     */
 
     public function tip(Request $request, Post $post)
     {
@@ -165,6 +179,7 @@ class PostsController extends AppBaseController
     // %NOTE: post price in DB is in dollars not cents %FIXME
     public function purchase(Request $request, Post $post)
     {
+        $this->authorize('purchase', $post);
         try {
             $post->receivePayment(
                 PaymentTypeEnum::PURCHASE,
@@ -181,6 +196,15 @@ class PostsController extends AppBaseController
             'post' => $post ?? null,
         ]);
     }
-    /*
-     */
+
+    public function indexComments(Request $request, Post $post)
+    {
+        $this->authorize('view', $post);
+        //$filters = $request->input('filters', []);
+        $comments = $post->comments;
+        return response()->json([
+            'comments' => $comments,
+        ]);
+    }
+
 }

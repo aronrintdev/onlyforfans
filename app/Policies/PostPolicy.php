@@ -12,13 +12,22 @@ class PostPolicy extends BasePolicy
 
     protected $policies = [
         'viewAny'     => 'permissionOnly',
-        'view'        => 'isOwner:pass isBlockedByOwner:fail',
-        'update'      => 'isOwner:next:fail', // should auto fail any non-owners, but then move onto the update function for owners
-        'delete'      => 'isOwner:next:fail',
-        'restore'     => 'isOwner:pass',
-        'forceDelete' => 'isOwner:pass',
-        'like'        => 'isOwner:pass isBlockedByOwner:fail',
+        'view'        => 'isOwner:pass isBlockedByOwner:fail', // if owner pass, if blocked fail, else check function
+        'like'        => 'isOwner:pass isBlockedByOwner:fail', // if owner pass, if blocked fail, else check function
+        'comment'     => 'isOwner:pass isBlockedByOwner:fail', // if owner pass, if blocked fail, else check function
+        'purchase'    => 'isOwner:fail isBlockedByOwner:fail', // if owner fail, if blocked fail, else check function
+        'tip'         => 'isOwner:fail isBlockedByOwner:fail',
+        'update'      => 'isOwner:next:fail', // if non-owner fail, else check function
+        'delete'      => 'isOwner:next:fail', // if non-owner fail, else check function
+        'forceDelete' => 'isOwner:next:fail', // if non-owner fail, else check function
+        'restore'     => 'isOwner:pass:fail', // if owner pass, all others fail
     ];
+
+    /*
+    protected function index(User $user) 
+    {
+    }
+     */
 
     protected function view(User $user, Post $post)
     {
@@ -89,10 +98,25 @@ class PostPolicy extends BasePolicy
         return true;
     }
 
-    public function like(User $user, Post $post)
+    protected function purchase(User $user, Post $post)
+    {
+        return true;
+    }
+
+    protected function like(User $user, Post $post)
     {
         return $user->can('view', $post);
         //return $post->timeline->followers->contains($user->id);
+    }
+
+    protected function comment(User $user, Post $post)
+    {
+        return $user->can('view', $post);
+    }
+
+    protected function isBlockedBy(User $sessionUser, User $user) : bool
+    {
+        return $sessionUser->$user->isBlockedBy($user);
     }
 
 }

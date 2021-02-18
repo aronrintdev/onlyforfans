@@ -15,41 +15,42 @@ class CommentsController extends AppBaseController
     // %TODO: refactor with scopes
     public function index(Request $request)
     {
-        if ( !$request->hasAny('user_id', 'post_id') ) {
-            $this->authorize('index', Comment::class);
-        } else {
-            if ( $request->has('post_id') ) {
-                $post = Post::find($request->post_id); // %FIXME: this version probably should be on Posts controller
-                $this->authorize('view', $post);
-            }
-            if ( $request->has('user_id') && $request->user()->id!==$request->user_id ) {
-                abort(403);
-            }
-        }
+        $request->validate([
+            'filters' => 'array',
+            'filters.post_id' => 'uuid|exists:posts,id', // if admin or post-owner only (per-post comments by fan use posts controller)
+            'filters.user_id' => 'uuid|exists:users,id', // if admin only
+            'filters.parent_id' => 'uuid|exists:comments,id',
+        ]);
 
+        $filters = $request->filters ?? [];
+
+        // Init query
         $query = Comment::with('user', 'replies.user');
 
-        if ( $request->has('post_id') ) { // for specific post
-            $query->where('post_id', $request->post_id);
-            /* %FIXME: broken
-            if ( !$request->has('include_replies') ) {
-                $query->whereNull('parent_id'); // only grab 1st level (%NOTE)
-            }
-             */
-        }
+        // Check permissions
+        if ( !$request->user()->isAdmin() ) {
 
-        if ( $request->has('user_id') ) {
-            $query->where('user_id', $request->user_id);
-        }
+            // non-admin: only view own comments
+            $query->where('user_id', $request->user()->id); 
+            unset($filters['user_id']);
 
-        /* %TODO: subgroup under 'filters' (need to update axios.GET calls as well in Vue)
-        // Apply filters
-        if ( $request->has('filters') ) {
-            if ( $request->has('post_id', 'filters.user_id') ) { // comment author by post
-                $query->where('user_id', $request->filters['user_id']);
+            if ( array_key_exists('post_id', $filters) ) {
+                $post = Post::find($filters['post_id']);
+                $this->authorize('update', $post); // non-admin must own post filtered on
             }
         }
-         */
+
+        // Apply any filters
+        foreach ($filters as $key => $f) {
+            // %TODO: subgroup under 'filters' (need to update axios.GET calls as well in Vue)
+            switch ($key) {
+                case 'user_id':
+                case 'post_id':
+                case 'parent_id':
+                    $query->where($key, $f);
+                    break;
+            }
+        }
 
         return response()->json([
             'comments' => $query->get(),
@@ -72,9 +73,13 @@ class CommentsController extends AppBaseController
             'parent_id' => 'nullable|uuid|exists:comments,id',
             'description' => 'required|string|min:3',
         ]);
+
+        $post = Post::find($request->post_id);
+        $this->authorize('comment', $post);
+
         $attrs = $request->except('post_id'); // timeline_id is now postable
         $attrs['commentable_type'] = 'posts'; // %FIXME: hardcoded
-        $attrs['commentable_id'] = $request->post_id; // %FIXME: hardcoded
+        $attrs['commentable_id'] = $post->id;
 
         $comment = Comment::create($attrs);
 
@@ -85,6 +90,7 @@ class CommentsController extends AppBaseController
 
     public function update(Request $request, Comment $comment)
     {
+        $this->authorize('update', $comment);
         $request->validate([
             'description' => 'required|string|min:1',
         ]);
@@ -99,6 +105,7 @@ class CommentsController extends AppBaseController
 
     public function destroy(Request $request, Comment $comment)
     {
+        $this->authorize('delete', $comment);
         $comment->delete();
         return response()->json([]);
     }

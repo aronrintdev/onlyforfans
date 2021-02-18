@@ -17,7 +17,10 @@ class StoriesTableSeeder extends Seeder
         // +++ Create ... +++
 
         $users = User::get();
-        $this->output->writeln("  - Users seeder: loaded ".$users->count()." users...");
+
+        if ( $this->appEnv !== 'testing' ) {
+            $this->output->writeln("  - Users seeder: loaded ".$users->count()." users...");
+        }
 
         $users->each( function($u) {
 

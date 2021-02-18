@@ -100,6 +100,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::put('/posts/{post}/tip', ['as'=>'posts.tip', 'uses' => 'PostsController@tip']);
     Route::put('/posts/{post}/purchase', ['as'=>'posts.purchase', 'uses' => 'PostsController@purchase']);
     Route::patch('/posts/{post}/attachMediafile/{mediafile}', ['as'=>'posts.attachMediafile', 'uses' => 'PostsController@attachMediafile']);
+    Route::get('/posts/{post}/index-comments', ['as'=>'posts.indexComments', 'uses' => 'PostsController@indexComments']);
     Route::resource('posts', 'PostsController', [ 
         'except' => [ 'create', 'edit', ],
     ]);

@@ -13,28 +13,16 @@ class CommentPolicy extends BasePolicy
     protected $policies = [
         'viewAny'     => 'permissionOnly',
         'view'        => 'isOwner:pass isBlockedByOwner:fail',
-        'update'      => 'isOwner:pass',
+        'like'        => 'isOwner:pass isBlockedByOwner:fail',
+        'comment'     => 'isOwner:pass isBlockedByOwner:fail', // ie a comment reply
+        'update'      => 'isOwner:pass:fail',
         'delete'      => 'isOwner:pass',
-        'restore'     => 'isOwner:pass',
-        'forceDelete' => 'isOwner:pass',
-        'like'        => 'isOwner:pass',
+        'forceDelete' => 'isOwner:pass:fail',
+        'restore'     => 'isOwner:pass:fail',
     ];
-
-    protected function index(User $user)
-    {
-        if ( $user->isAdmin() ) {
-            return true;
-        }
-        if ( request()->has('user_id')  && $user->id===request()->user_id ) {
-            return true;
-        }
-        return false;
-    }
 
     protected function view(User $user, Comment $comment)
     {
-        //dd($user, $comment);
-        //dd($user, $comment, $comment->post);
         return $user->can('view', $comment->post); // %FIXME: this should be tested, was throwing 500
     }
 
@@ -42,6 +30,24 @@ class CommentPolicy extends BasePolicy
     {
         return $comment->post->timeline->followers->contains($user->id);
     }
+
+    protected function delete(User $user, Comment $comment)
+    {
+        // post owner can delete any comment on the post
+        //return $comment->commentable->isOwner($user);
+        return $comment->post->isOwner($user);
+    }
+
+    protected function forceDelete(User $user, Comment $comment)
+    {
+        return $comment->post->isOwner($user);
+    }
+
+    protected function isBlockedBy(User $sessionUser, User $user) : bool
+    {
+        return $sessionUser->$user->isBlockedBy($user);
+    }
+
 
 }
 // show OG

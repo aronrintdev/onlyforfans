@@ -71,7 +71,6 @@ class RestVaultTest extends TestCase
 
         $nonfan = User::whereDoesntHave('sharedvaultfolders', function($q1) use(&$primaryVault) {
             $q1->where('vault_id', $primaryVault->id); // %FIXME: should this be on vaultfolder?
-            //$q1->where('vaultfolders.id', $rootFolder->id);
         })->where('id', '<>', $creator->id)->first();
 
         $payload = [
@@ -1061,8 +1060,6 @@ class RestVaultTest extends TestCase
             })->first(); // %TODO: also ensure not a sharee already? or create new user
         $response = $this->actingAs($nonowner2)->ajaxJSON('GET', route('mediafiles.show', $mediafileR->id));
         $response->assertStatus(403);
-
-
     }
 
     // ------------------------------
