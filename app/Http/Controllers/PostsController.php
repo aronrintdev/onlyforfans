@@ -180,14 +180,18 @@ class PostsController extends AppBaseController
     public function purchase(Request $request, Post $post)
     {
         $this->authorize('purchase', $post);
+        $sender = $request->user();
+        $cattrs = [ 'notes' => $request->note ?? '' ];
         try {
             $post->receivePayment(
                 PaymentTypeEnum::PURCHASE,
-                $request->user(),
+                $sender,
                 $post->price,
-                [ 'notes' => $request->note ?? '' ]
+                $cattrs
             );
-    
+            $sender->sharedposts()->attach($post->id, [
+                'cattrs' => json_encode($cattrs ?? []),
+            ]);
         } catch(Exception | Throwable $e) {
             return response()->json(['message'=>$e->getMessage()], 400);
         }
