@@ -16,8 +16,30 @@ use App\Models\User;
 
 class TimelinesTest extends TestCase
 {
-    use RefreshDatabase;
-    use WithFaker;
+    use RefreshDatabase, WithFaker;
+
+    /**
+     *  @group timelines
+     *  @group regression
+     */
+    public function test_owner_can_view_own_timeline_feed()
+    {
+        $timeline = Timeline::has('posts','>=',1)->has('followers','>=',1)->first(); // assume non-admin (%FIXME)
+        $creator = $timeline->user;
+
+        $payload = [];
+        $response = $this->actingAs($creator)->ajaxJSON('GET', route('timelines.feeditems', $timeline->id), $payload);
+        $response->assertStatus(200);
+
+        $content = json_decode($response->content());
+        $this->assertNotNull($content->feeditems);
+        $this->assertObjectHasAttribute('current_page', $content->feeditems);
+        $this->assertObjectHasAttribute('data', $content->feeditems);
+        $this->assertGreaterThan(0, count($content->feeditems->data));
+        $this->assertEquals(1, $content->feeditems->current_page);
+        dd($content);
+
+    }
 
     /**
      *  @group timelines
@@ -122,7 +144,6 @@ class TimelinesTest extends TestCase
     /**
      *  @group timelines
      *  @group regression
-     *  @group erik
      *  @group broken
      */
     public function test_blocked_can_not_follow_timeline()

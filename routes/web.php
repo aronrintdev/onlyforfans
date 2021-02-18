@@ -116,6 +116,12 @@ Route::group(['middleware' => ['auth']], function () {
         'only' => [ 'index', ],
     ]);
 
+    Route::get('/feeds/home', ['as'=>'feeds.home', 'uses' => 'FeedsController@home']);
+    Route::get('/feeds/me', ['as'=>'feeds.me', 'uses' => 'FeedsController@me']);
+    Route::resource('feeds', 'FeedsController', [
+        'only' => [ 'show', ],
+    ]);
+
     // -- timelines: tippable | subscribeable | followable --
     Route::get('/timelines-suggested', ['as'=>'timelines.suggested', 'uses' => 'TimelinesController@suggested']); // %FIXME: refactor: use index(?)
     Route::get('/timelines/home', ['as'=>'timelines.home', 'uses' => 'TimelinesController@home']); // special case of 'show'

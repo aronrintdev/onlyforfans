@@ -470,7 +470,6 @@ class RestCommentsTest extends TestCase
     /**
      *  @group comments
      *  @group regression
-     *  @group here
      */
     public function test_nonfollower_can_not_like_comment_on_timeline_post()
     {

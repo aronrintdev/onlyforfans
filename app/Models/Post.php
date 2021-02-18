@@ -13,7 +13,6 @@ use App\Enums\PaymentTypeEnum;
 use App\Interfaces\Reportable;
 use App\Interfaces\Commentable;
 use App\Models\Traits\UsesUuid;
-//use App\Traits\OwnableFunctions;
 use Illuminate\Support\Collection;
 use App\Models\Traits\LikeableTraits;
 use Illuminate\Support\Facades\Storage;
@@ -92,9 +91,7 @@ class Post extends Model implements UuidId, Ownable, Deletable, Purchaseable, Li
     // %%% Relationships
     //--------------------------------------------
 
-    /**
-     * can be shared with many users (via [shareables])
-     */
+    // can be shared with many users (via [shareables])
     public function sharees()
     {
         return $this->morphToMany('App\Models\User', 'shareable', 'shareables', 'shareable_id', 'sharee_id')->withTimestamps();
@@ -110,25 +107,10 @@ class Post extends Model implements UuidId, Ownable, Deletable, Purchaseable, Li
         return $this->morphMany('App\Models\Fanledger', 'purchaseable');
     }
 
-    /**
-     * owner of the post
-     */
+    // owner of the post
     public function user()
     {
         return $this->belongsTo('App\Models\User');
-    }
-
-    /**
-     * `user()` alias
-     */
-    public function poster()
-    {
-        return $this->user();
-    }
-
-    public function getOwner(): ?Collection
-    {
-        return new Collection([$this->user]);
     }
 
     public function postable()
@@ -145,6 +127,17 @@ class Post extends Model implements UuidId, Ownable, Deletable, Purchaseable, Li
     //--------------------------------------------
     // %%% Methods
     //--------------------------------------------
+
+    // `user()` alias
+    public function poster()
+    {
+        return $this->user();
+    }
+
+    public function getOwner(): ?Collection
+    {
+        return new Collection([$this->user]);
+    }
 
     // %%% --- Implement Purchaseable Interface ---
 
