@@ -1,4 +1,5 @@
 <?php
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -9,12 +10,7 @@
 |
 */
 
-
-
-
-
 Route::resource('timelines', 'TimelineAPIController');
 Route::get('search', 'TimelineAPIController@search');
-
 Route::resource('users', 'UserAPIController');
 
