@@ -61,7 +61,6 @@ class PostsController extends AppBaseController
 
     public function store(Request $request)
     {
-        //dd($request->all());
         $request->validate([
             'timeline_id' => 'required|uuid|exists:timelines,id',
             'mediafiles' => 'array',
@@ -137,7 +136,6 @@ class PostsController extends AppBaseController
         $saves = $request->user()->sharedmediafiles->map( function($mf) {
             $mf->foo = 'bar';
             //$mf->owner = $mf->getOwner()->first(); // %TODO
-            //dd( 'owner', $mf->owner->only('username', 'name', 'avatar') ); // HERE
             $mf->owner = $mf->getOwner()->first()->only('username', 'name', 'avatar');
             return $mf;
         });
@@ -180,14 +178,18 @@ class PostsController extends AppBaseController
     public function purchase(Request $request, Post $post)
     {
         $this->authorize('purchase', $post);
+        $sender = $request->user();
+        $cattrs = [ 'notes' => $request->note ?? '' ];
         try {
             $post->receivePayment(
                 PaymentTypeEnum::PURCHASE,
-                $request->user(),
+                $sender,
                 $post->price,
-                [ 'notes' => $request->note ?? '' ]
+                $cattrs
             );
-    
+            $sender->sharedposts()->attach($post->id, [
+                'cattrs' => json_encode($cattrs ?? []),
+            ]);
         } catch(Exception | Throwable $e) {
             return response()->json(['message'=>$e->getMessage()], 400);
         }

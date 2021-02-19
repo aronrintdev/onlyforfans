@@ -114,6 +114,11 @@ class User extends Authenticatable implements PaymentSendable, Blockable
         return $this->hasOne('App\Models\Timeline');
     }
 
+    public function posts()
+    {
+        return $this->hasMany('App\Models\Post', 'user_id');
+    }
+
     // timelines (users) I follow: premium *and* default subscribe (follow)
     public function followedtimelines()
     {

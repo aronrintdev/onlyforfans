@@ -36,7 +36,6 @@ class UserMgr {
         } else { // follow
             $action = 'follow';
             if ($attrs['is_subscribe']) {
-//dd('toggleFollow.2', $attrs, $isFollowing);
                 $timeline->receivePayment(
                     PaymentTypeEnum::SUBSCRIPTION,
                     $follower,
@@ -44,7 +43,6 @@ class UserMgr {
                     $customAttributes,
                 );
             } else { // follow only
-//dd('toggleFollow.3', $attrs, $isFollowing);
                 $follower->followedtimelines()->attach($timeline->id, [
                     'cattrs' => json_encode($customAttributes),
                 ]);

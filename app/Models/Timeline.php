@@ -10,16 +10,16 @@ use App\Enums\PaymentTypeEnum;
 use App\Interfaces\Reportable;
 use App\Models\Traits\UsesUuid;
 use App\Interfaces\Purchaseable;
-use App\Traits\OwnableFunctions;
 use Illuminate\Support\Collection;
 use App\Models\Traits\UsesShortUuid;
 use App\Enums\ShareableAccessLevelEnum;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\Traits\OwnableTraits;
 
 class Timeline extends Model implements Purchaseable, Ownable, Reportable
 {
-    use SoftDeletes, HasFactory, OwnableFunctions, UsesUuid;
+    use SoftDeletes, HasFactory, OwnableTraits, UsesUuid;
 
     protected $keyType = 'string';
     protected $guarded = ['id', 'created_at', 'updated_at'];
@@ -121,7 +121,6 @@ class Timeline extends Model implements Purchaseable, Ownable, Reportable
                     'base_unit_cost_in_cents' => $amountInCents,
                     'cattrs' => json_encode($customAttributes ?? []),
                 ]);
-                //dd($result->toArray());
                 break;
             default:
                 throw new Exception('Unrecognized payment type : ' . $fltype);
@@ -130,25 +129,19 @@ class Timeline extends Model implements Purchaseable, Ownable, Reportable
         return $result ?? null;
     }
 
-    /**
-     * Is the user provided following my timeline (includes either premium or default)
-     */
+    // Is the user provided following my timeline (includes either premium or default)
     public function isUserFollowing(User $user): bool
     {
         return $this->followers->contains($user->id);
     }
 
-    /**
-     * Is the user provided following my timeline (includes either premium or default)
-     */
+    // Is the user provided following my timeline (includes either premium or default)
     public function isUserSubscribed(User $user): bool
     {
         return $this->followers->where('pivot.access_level', ShareableAccessLevelEnum::PREMIUM)->contains($user->id);
     }
 
-    /**
-     * Is timeline owned by a user (alias for `isOwner()`)
-     */
+    // Is timeline owned by a user (alias for `isOwner()`)
     public function isOwnedBy(User $user): bool
     {
         return $this->isOwner($user);

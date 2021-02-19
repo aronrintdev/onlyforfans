@@ -24,7 +24,6 @@ class URLFilterer
         // @see filter_xss_bad_protocol()
         $protocols = config('urlfilterer.allowed_protocols', ['ftp', 'http', 'https', 'irc',
             'mailto', 'news', 'nntp', 'rtsp', 'sftp', 'ssh', 'tel', 'telnet', 'webcal']);
-        //dd($protocols);
         $protocols = implode(':(?://)?|', $protocols) . ':(?://)?';
 
         // Prepare domain name pattern.
