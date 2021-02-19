@@ -327,7 +327,109 @@ class RestSettingTest extends TestCase
         $response->assertStatus(302);
     }
 
+    /**
+     *  @group settings
+     *  @group regression
+     */
+    public function test_can_creator_edit_profile()
+    {
+        Session::start();
 
+        $timeline = Timeline::has('posts', '>=', 1)->has('followers', '>=', 1)->first();
+        $creator = $timeline->user;
+
+        $response = $this->actingAs($creator)
+            ->json('POST', '/'.$creator->username.'/settings/profile', [
+                'about' => 'Distinctio aperiam quaerat sit sed. Sit iusto ea ut ea architecto quidem rerum. Aut sunt sed voluptatum nam sunt et quia.',
+                'country' => 'US',
+                'city' => 'Las Vegas',
+                'gender' => 'male',
+                'birthday' => '02/02/1990',
+                '_token' => Session::token()
+            ]);
+
+        $response->assertStatus(200);
+
+        $response = $this->actingAs($creator)
+            ->json('POST', '/'.$creator->username.'/settings/profile', [
+                'about' => 'Distinctio aperiam quaerat sit sed. Sit iusto ea ut ea architecto quidem rerum. Aut sunt sed voluptatum nam sunt et quia.',
+                'country' => 'US',
+                'city' => 'Las Vegas',
+                'gender' => 'female',
+                'birthday' => '02/02/1990',
+                '_token' => Session::token()
+            ]);
+
+        $response->assertStatus(200);
+
+        // Includes wishlist, website
+        $response = $this->actingAs($creator)
+            ->json('POST', '/'.$creator->username.'/settings/profile', [
+                'about' => 'Distinctio aperiam quaerat sit sed. Sit iusto ea ut ea architecto quidem rerum. Aut sunt sed voluptatum nam sunt et quia.',
+                'country' => 'US',
+                'city' => 'Las Vegas',
+                'gender' => 'female',
+                'birthday' => '02/02/1990',
+                'wishlist' => 'https://www.batz.com',
+                'website' => 'http://www.sauer.biz/et-excepturi-numquam-recusandae-quia-eum-saepe-veritatis-rerum.html',
+                '_token' => Session::token()
+            ]);
+
+        $response->assertStatus(200);
+
+    }
+
+    /**
+     *  @group settings
+     *  @group regression
+     */
+    public function test_can_fan_edit_profile()
+    {
+        Session::start();
+
+        $timeline = Timeline::has('posts', '>=', 1)->has('followers', '>=', 1)->first();
+        $fan = $timeline->followers[0];
+
+        $response = $this->actingAs($fan)
+            ->json('POST', '/'.$fan->username.'/settings/profile', [
+                'about' => 'Distinctio aperiam quaerat sit sed. Sit iusto ea ut ea architecto quidem rerum. Aut sunt sed voluptatum nam sunt et quia.',
+                'country' => 'US',
+                'city' => 'Las Vegas',
+                'gender' => 'male',
+                'birthday' => '02/02/1990',
+                '_token' => Session::token()
+            ]);
+
+        $response->assertStatus(200);
+
+        $response = $this->actingAs($fan)
+            ->json('POST', '/'.$fan->username.'/settings/profile', [
+                'about' => 'Distinctio aperiam quaerat sit sed. Sit iusto ea ut ea architecto quidem rerum. Aut sunt sed voluptatum nam sunt et quia.',
+                'country' => 'US',
+                'city' => 'Las Vegas',
+                'gender' => 'female',
+                'birthday' => '02/02/1990',
+                '_token' => Session::token()
+            ]);
+
+        $response->assertStatus(200);
+
+        // Includes wishlist, website
+        $response = $this->actingAs($fan)
+            ->json('POST', '/'.$fan->username.'/settings/profile', [
+                'about' => 'Distinctio aperiam quaerat sit sed. Sit iusto ea ut ea architecto quidem rerum. Aut sunt sed voluptatum nam sunt et quia.',
+                'country' => 'US',
+                'city' => 'Las Vegas',
+                'gender' => 'female',
+                'birthday' => '02/02/1990',
+                'wishlist' => 'https://www.batz.com',
+                'website' => 'http://www.sauer.biz/et-excepturi-numquam-recusandae-quia-eum-saepe-veritatis-rerum.html',
+                '_token' => Session::token()
+            ]);
+
+        $response->assertStatus(200);
+
+    }
 
     // ------------------------------
 
