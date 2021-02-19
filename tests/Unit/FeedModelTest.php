@@ -44,6 +44,7 @@ class FeedModelTest extends TestCase
     /**
      * @group feed-model
      * @group regression
+     * @group here
      */
     public function test_feed_get_public_feed()
     {
