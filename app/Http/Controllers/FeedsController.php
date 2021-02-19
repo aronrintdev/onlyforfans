@@ -17,7 +17,6 @@ use App\Models\User;
 
 class FeedsController extends AppBaseController
 {
-    // /home
     public function home(Request $request)
     {
         $posts = Feed::getHomeFeed($request->user());
@@ -26,7 +25,6 @@ class FeedsController extends AppBaseController
         ]);
     }
 
-    // show timeline for a user's feed, eg : /{username}
     public function show(Request $request, Timeline $feed)
     {
         $timeline = $feed;
@@ -42,7 +40,6 @@ class FeedsController extends AppBaseController
         ]);
     }
 
-    // /me
     public function me(Request $request)
     {
         $timeline = $request->user()->timeline;
