@@ -149,13 +149,13 @@ class ShareablesTableSeeder extends Seeder
         static $max = [
             'testing' => [
                 'purchased' => 3,
-                'follower' => 7,
-                'subscriber' => 2,
+                'follower' => 8,
+                'subscriber' => 3,
             ],
             'local' => [
                 'purchased' => 3,
-                'follower' => 7,
-                'subscriber' => 2,
+                'follower' => 8,
+                'subscriber' => 3,
             ],
         ];
         return $max[$this->appEnv][$param];
