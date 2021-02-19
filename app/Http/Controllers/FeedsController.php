@@ -20,7 +20,6 @@ class FeedsController extends AppBaseController
     // /home
     public function home(Request $request)
     {
-        //$timeline = $request->user()->timeline;
         $posts = Feed::getHomeFeed($request->user());
         return response()->json([
             'feeditems' => $posts,
@@ -47,6 +46,14 @@ class FeedsController extends AppBaseController
     public function me(Request $request)
     {
         $timeline = $request->user()->timeline;
+        return response()->json([
+            'feeditems' => $posts,
+        ]);
+    }
+
+    public function getPublic(Request $request, Timeline $feed)
+    {
+        $posts = Feed::getPublicFeed($feed);
         return response()->json([
             'feeditems' => $posts,
         ]);

@@ -17,7 +17,6 @@ class Feed
     // %TODO: how to use these as super-admin (?) - just provide a timeline, permissions checked in controller
 
     // *as owner viewing home, get posts for all timelines I follow
-    // always non-strict !
     public static function getHomeFeed(User $user) : Collection
     {
         $query = Post::query();
