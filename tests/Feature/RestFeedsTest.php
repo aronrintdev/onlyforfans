@@ -20,7 +20,6 @@ class RestFeedsTest extends TestCase
     /**
      *  @group feeds
      *  @group regression
-     *  @group here
      */
     public function test_follower_can_view_followed_feed_free_posts_only()
     {

@@ -30,7 +30,7 @@ class FeedsController extends AppBaseController
     public function show(Request $request, Timeline $feed)
     {
         $timeline = $feed;
-        $this->authorize('view', $timeline); // 500 error (?)
+        $this->authorize('view', $timeline);
         $sessionUser = $request->user();
 
         $query = Post::query();

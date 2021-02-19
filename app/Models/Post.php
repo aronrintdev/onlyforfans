@@ -79,7 +79,7 @@ class Post extends Model implements UuidId, Ownable, Deletable, Purchaseable, Li
     public function getIsLikedByMeAttribute($value)
     {
         $sessionUser = Auth::user();
-        return $this->likes->contains($sessionUser->id);
+        return $sessionUser ? $this->likes->contains($sessionUser->id) : false;
     }
 
     protected $casts = [
@@ -173,6 +173,11 @@ class Post extends Model implements UuidId, Ownable, Deletable, Purchaseable, Li
                         'base_unit_cost_in_cents' => $amountInCents,
                         'cattrs' => json_encode($cattrs ?? []),
                     ]);
+                    /*
+                    $sender->sharedposts()->attach($this->id, [
+                        'cattrs' => json_encode($cattrs ?? []),
+                    ]);
+                     */
                     break;
                 default:
                     throw new Exception('Unrecognized payment type : ' . $fltype);
