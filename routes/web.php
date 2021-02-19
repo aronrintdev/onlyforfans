@@ -118,6 +118,7 @@ Route::group(['middleware' => ['auth']], function () {
 
     Route::get('/feeds/home', ['as'=>'feeds.home', 'uses' => 'FeedsController@home']);
     Route::get('/feeds/me', ['as'=>'feeds.me', 'uses' => 'FeedsController@me']);
+    Route::get('/feeds/{feed}/public', ['as'=>'feeds.getPublic', 'uses' => 'FeedsController@getPublic']);
     Route::resource('feeds', 'FeedsController', [
         'only' => [ 'show', ],
     ]);
