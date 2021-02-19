@@ -40,11 +40,41 @@ class RestFeedsTest extends TestCase
         $this->assertGreaterThan(0, $fan->followedtimelines()->where('access_level', 'default')->count());
         $this->assertGreaterThan(0, $fan->subscribedtimelines->count());
 
-        // --- Execute ---
-
         $payload = [];
         $response = $this->actingAs($fan)->ajaxJSON('GET', route('feeds.home'), $payload);
         $response->assertStatus(200);
+
+        $content = json_decode($response->content());
+        $this->assertObjectHasAttribute('feeditems', $content);
+        $fan->refresh();
+
+        $posts = collect($content->feeditems);
+
+        $followedTimelines = $fan->followedtimelines()->pluck('id');
+        $expected = Post::where('postable_type', 'timelines')
+            ->join('timelines', 'timelines.id', '=', 'posts.postable_id')
+            ->whereIn('timelines.id', $followedTimelines)
+            ->whereIn('type', [PostTypeEnum::FREE, PostTypeEnum::PRICED, PostTypeEnum::SUBSCRIBER])
+            ->count();
+        $this->assertGreaterThan(0, count($posts));
+        $this->assertEquals($expected, count($posts));
+
+        // check no posts from timelines I don't follow
+        $num = $posts->reduce( function($acc, $p) use(&$fan) {
+            $post = Post::find($p->id);
+            $this->assertNotNull($post);
+            return ($post->timeline->followers->contains($fan->id)) ? $acc : ($acc+1);
+        }, 0);
+        $this->assertEquals(0, $num, 'Found post in feed from non-followed timeline');
+
+        // check has posts from every timeline I follow that has posts
+        $num = $fan->followedtimelines->reduce( function($acc, $t) use(&$fan, &$posts) {
+            if ( $t->posts->count() && !$posts->contains('id', $t->posts[0]->id) ) { // %TODO %CHECKME
+                $acc += 1;
+            }
+            return $acc;
+        },0 );
+        $this->assertEquals(0, $num, 'Found followed timeline with posts not present in feed');
     }
 
     /**
