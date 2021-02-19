@@ -58,34 +58,33 @@ class FeedModelTest extends TestCase
     /**
      * @group feed-model
      * @group regression
-     * @group here
      */
     public function test_feed_get_home_feed()
     {
         // --- Setup ---
-        $sessionUser = User::has('followedtimelines', '>=', 2)->firstOrFail();
+        $fan = User::has('followedtimelines', '>=', 2)->firstOrFail();
 
         // make sure at least one is default and one is premium, note this will mess up ledger but that's ok for this test
-        $ft0 = $sessionUser->followedtimelines[0];
-        $ft1 = $sessionUser->followedtimelines[1];
-        $sessionUser->followedtimelines()->updateExistingPivot($ft0->id, [
+        $ft0 = $fan->followedtimelines[0];
+        $ft1 = $fan->followedtimelines[1];
+        $fan->followedtimelines()->updateExistingPivot($ft0->id, [
             'access_level' => 'default',
         ]);
-        $sessionUser->followedtimelines()->updateExistingPivot($ft1->id, [
+        $fan->followedtimelines()->updateExistingPivot($ft1->id, [
             'access_level' => 'premium',
         ]);
-        $sessionUser->refresh();
+        $fan->refresh();
 
-        $this->assertGreaterThan(0, $sessionUser->followedtimelines()->where('access_level', 'default')->count());
-        $this->assertGreaterThan(0, $sessionUser->subscribedtimelines->count());
+        $this->assertGreaterThan(0, $fan->followedtimelines()->where('access_level', 'default')->count());
+        $this->assertGreaterThan(0, $fan->subscribedtimelines->count());
 
         // --- Execute ---
 
-        $posts = Feed::getHomeFeed($sessionUser);
+        $posts = Feed::getHomeFeed($fan);
 
         // --- Checks ---
 
-        $followedTimelines = $sessionUser->followedtimelines()->pluck('id');
+        $followedTimelines = $fan->followedtimelines()->pluck('id');
         $expected = Post::where('postable_type', 'timelines')
             ->join('timelines', 'timelines.id', '=', 'posts.postable_id')
             ->whereIn('timelines.id', $followedTimelines)
@@ -95,13 +94,13 @@ class FeedModelTest extends TestCase
         $this->assertEquals($expected, count($posts));
 
         // check no posts from timelines I don't follow
-        $num = $posts->reduce( function($acc, $p) use(&$sessionUser) {
-            return ($p->timeline->followers->contains($sessionUser->id)) ? $acc : ($acc+1);
+        $num = $posts->reduce( function($acc, $p) use(&$fan) {
+            return ($p->timeline->followers->contains($fan->id)) ? $acc : ($acc+1);
         }, 0);
         $this->assertEquals(0, $num, 'Found post in feed from non-followed timeline');
 
         // check has posts from every timeline I follow that has posts
-        $num = $sessionUser->followedtimelines->reduce( function($acc, $t) use(&$sessionUser, &$posts) {
+        $num = $fan->followedtimelines->reduce( function($acc, $t) use(&$fan, &$posts) {
             if ( $t->posts->count() && !$posts->contains($t->posts[0]->id) ) { // %TODO %CHECKME
                 $acc += 1;
             }
@@ -115,7 +114,7 @@ class FeedModelTest extends TestCase
      * @group regression
      */
     // get free + post-purchased-by-user + subscriber-only by timeline (eg: as fan viewing subscribed timeline)
-    public function test_feed_get_subscriber_feed()
+    public function test_feed_get_subscribing_feed()
     {
         $posts = Feed::getSubscriberFeed($this->timeline, $this->subscriber);
 
@@ -163,7 +162,7 @@ class FeedModelTest extends TestCase
      * @group regression
      */
     // get free + post-purchased-by-user by timeline (eg: as fan viewing followed timeline)
-    public function test_feed_get_follower_feed()
+    public function test_feed_get_following_feed()
     {
         $posts = Feed::getFollowerFeed($this->timeline, $this->follower);
 

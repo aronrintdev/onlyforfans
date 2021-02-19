@@ -11,16 +11,17 @@ use Illuminate\Support\Facades\Log;
 use App\Enums\PostTypeEnum;
 use App\Models\Setting;
 use App\Models\Timeline;
+use App\Models\Feed;
 use App\Models\Post;
 use App\Models\User;
 
 class FeedsController extends AppBaseController
 {
-
     // /home
     public function home(Request $request)
     {
-        $timeline = $request->user()->timeline;
+        //$timeline = $request->user()->timeline;
+        $posts = Feed::getHomeFeed($request->user());
         return response()->json([
             'feeditems' => $posts,
         ]);
@@ -30,23 +31,12 @@ class FeedsController extends AppBaseController
     public function show(Request $request, Timeline $feed)
     {
         $timeline = $feed;
-        $this->authorize('view', $timeline);
-        $sessionUser = $request->user();
+        $this->authorize('view', $timeline); // must be follower or subscriber
 
-        $query = Post::query();
-        $query->where('postable_type', 'timelines')
-              ->where('postable_id', $timeline->id)
-              ->where( function($q1) use(&$sessionUser) {
-                  $q1->where('type', PostTypeEnum::FREE)
-                     ->orWhere( function($q2) use(&$sessionUser) {
-                         $q2->where('type', PostTypeEnum::PRICED)
-                            ->whereHas('sharees', function($q3) use(&$sessionUser) {
-                                $q3->where('id', $sessionUser->id);
-                            });
-                     });
-              });
-
-        $posts = $query->get();
+        $isSubscriber = $timeline->subscribers->contains($request->user()->id);
+        $posts = $isSubscriber
+            ? Feed::getSubscriberFeed($timeline, $request->user())
+            : Feed::getFollowerFeed($timeline, $request->user());
 
         return response()->json([
             'feeditems' => $posts,

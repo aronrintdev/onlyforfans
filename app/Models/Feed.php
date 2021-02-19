@@ -101,48 +101,4 @@ class Feed
         return $posts;
     }
 
-
-    // ---
-
-    // generalized version of some of the above
-    public static function getByTimeline(Timeline $timeline, User $viewer, bool $isStrict=true) : Collection
-    {
-        $query = Post::query();
-
-        $query->where('postable_type', 'timelines')
-              ->where('postable_id', $timeline->id);
-
-        if ($isStrict) {
-            if ( $timeline->subscribers->contains($viewer->id) ) {
-                $query->where('postable_type', 'timelines')
-                      ->where('postable_id', $timeline->id)
-                      ->where( function($q1) use(&$viewer) {
-                          $q1->where('type', PostTypeEnum::FREE)
-                             ->orWhere('type', PostTypeEnum::SUBSCRIBER)
-                             ->orWhere( function($q2) use(&$viewer) {
-                                 $q2->where('type', PostTypeEnum::PRICED)
-                                    ->whereHas('sharees', function($q3) use(&$viewer) {
-                                        $q3->where('id', $viewer->id);
-                                    });
-                             });
-                      });
-            } else {
-                $query->where('postable_type', 'timelines')
-                      ->where('postable_id', $timeline->id)
-                      ->where( function($q1) use(&$viewer) {
-                          $q1->where('type', PostTypeEnum::FREE)
-                             ->orWhere( function($q2) use(&$viewer) {
-                                 $q2->where('type', PostTypeEnum::PRICED)
-                                    ->whereHas('sharees', function($q3) use(&$viewer) {
-                                        $q3->where('id', $viewer->id);
-                                    });
-                             });
-                      });
-            }
-        }
-
-        $posts = $query->get();
-        return $posts;
-    }
-
 }
