@@ -40,6 +40,7 @@ class CommentsController extends AppBaseController
             }
         }
 
+//dd($request->all(), $filters);
         // Apply any filters
         foreach ($filters as $key => $f) {
             // %TODO: subgroup under 'filters' (need to update axios.GET calls as well in Vue)

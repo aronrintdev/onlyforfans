@@ -45,12 +45,6 @@ class RestFeedsTest extends TestCase
 
         // upgrade to subscriber...
         /*
-        dd(
-            count($content->feeditems),
-            $timeline->posts->count(),
-        );
-         */
-        /*
         $this->assertNotNull($content->feeditems);
         $this->assertObjectHasAttribute('current_page', $content->feeditems);
         $this->assertObjectHasAttribute('data', $content->feeditems);

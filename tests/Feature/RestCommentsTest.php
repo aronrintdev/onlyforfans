@@ -25,7 +25,7 @@ class RestCommentsTest extends TestCase
     // %TODO: filters, timelines (see comments I have valid access to), etc
     public function test_owner_can_list_comments()
     {
-        $post = Post::has('comments','>=',1)->first();
+        $post = Post::has('comments','>=',1)->firstOrFail();
         $creator = $post->timeline->user;
         $expectedCount = Comment::where('user_id', $creator->id)->count();
 
@@ -365,7 +365,9 @@ class RestCommentsTest extends TestCase
     {
         $owner = User::has('comments', '>', 1)->first();
         $comment = Comment::where('user_id', $owner->id)->first();
-        $nonowner = User::where('id', '<>', $owner->id)->first();
+        $nonowner = User::whereDoesntHave('posts', function($q1) use(&$comment) {
+            $q1->where('posts.id', $comment->post->id); // ensure doesn't own post either
+        })->where('id', '<>', $owner->id)->firstOrFail();
         $response = $this->actingAs($nonowner)->ajaxJSON('DELETE', route('comments.destroy', $comment->id));
         $response->assertStatus(403);
     }

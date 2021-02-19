@@ -61,7 +61,6 @@ class PostsController extends AppBaseController
 
     public function store(Request $request)
     {
-        //dd($request->all());
         $request->validate([
             'timeline_id' => 'required|uuid|exists:timelines,id',
             'mediafiles' => 'array',
@@ -137,7 +136,6 @@ class PostsController extends AppBaseController
         $saves = $request->user()->sharedmediafiles->map( function($mf) {
             $mf->foo = 'bar';
             //$mf->owner = $mf->getOwner()->first(); // %TODO
-            //dd( 'owner', $mf->owner->only('username', 'name', 'avatar') ); // HERE
             $mf->owner = $mf->getOwner()->first()->only('username', 'name', 'avatar');
             return $mf;
         });

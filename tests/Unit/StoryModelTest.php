@@ -22,12 +22,9 @@ class StoryModelTest extends TestCase
         $mediafile = Mediafile::find(4);
         //$f = $s->mediafiles->first()->filename;
         $f = $mediafile->filename;
-        //dd($f);
         //$s = Storage::disk('s3')->get($f);
         $s = Storage::disk('s3')->url($f);
         //$s = Storage::disk('s3')->get($s->mediafiles->first()->filename);
-        dd($s);
-        dd($mediafile->toArray());
     }
 
 

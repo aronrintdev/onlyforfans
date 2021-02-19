@@ -120,7 +120,6 @@ class FactoryHelpers {
                 throw new Exception('media file type of ' . $mftype . ' not supported');
         }
         $contents = file_get_contents($json->file);
-        //dd($json, $info);
 
         Storage::disk('s3')->put($s3Path, $contents);
         $attrs['filename'] = $s3Path;

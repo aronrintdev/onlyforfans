@@ -47,7 +47,6 @@ class FeedsController extends AppBaseController
               });
 
         $posts = $query->get();
-        //dd($posts, $timeline->id, $timeline->posts->count());
 
         return response()->json([
             'feeditems' => $posts,

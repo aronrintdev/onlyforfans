@@ -37,8 +37,6 @@ class TimelinesTest extends TestCase
         $this->assertObjectHasAttribute('data', $content->feeditems);
         $this->assertGreaterThan(0, count($content->feeditems->data));
         $this->assertEquals(1, $content->feeditems->current_page);
-        dd($content);
-
     }
 
     /**

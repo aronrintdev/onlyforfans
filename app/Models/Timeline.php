@@ -121,7 +121,6 @@ class Timeline extends Model implements Purchaseable, Ownable, Reportable
                     'base_unit_cost_in_cents' => $amountInCents,
                     'cattrs' => json_encode($customAttributes ?? []),
                 ]);
-                //dd($result->toArray());
                 break;
             default:
                 throw new Exception('Unrecognized payment type : ' . $fltype);

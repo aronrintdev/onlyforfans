@@ -75,7 +75,6 @@ class FeedModelTest extends TestCase
     /**
      * @group feed-model
      * @group regression
-     * @group here
      */
     public function test_feed_get_by_timeline_for_subscriber_strict()
     {
@@ -123,7 +122,7 @@ class FeedModelTest extends TestCase
 
     /**
      * @group feed-model
-     * @group OFF-regression
+     * @group regression
      */
     // Will get all posts, even ones the follower hasn't purchased, etc...
     //   ~ if a post is not accessible, will be shown as 'locked' in UI with a CTA
@@ -140,7 +139,7 @@ class FeedModelTest extends TestCase
 
     /**
      * @group feed-model
-     * @group OFF-regression
+     * @group regression
      */
     public function test_feed_get_owner_feed()
     {
@@ -153,7 +152,7 @@ class FeedModelTest extends TestCase
 
     /**
      * @group feed-model
-     * @group OFF-regression
+     * @group regression
      */
     public function test_feed_get_public_feed()
     {
@@ -183,9 +182,6 @@ class FeedModelTest extends TestCase
                 $q1->where('timelines.id', $timeline->id);
             })->where('id', '<>', $creator->id)->firstOrFail();
         } catch (Exception $e) {
-            dd('not found', 
-                $timeline->followers->toArray()
-            );
         }
 
         $subscriber = $timeline->subscribers()->where('id','<>',$creator->id)->first();
