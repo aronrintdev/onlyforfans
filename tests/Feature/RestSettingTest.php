@@ -25,9 +25,8 @@ class RestSettingTest extends TestCase
         $response = $this->actingAs($creator)->get('/'.$creator->username.'/settings/general');
         $response->assertStatus(200);
         $content = $response->content();
-        $response->dump();
-
     }
+
 
     /**
      *  @group settings
@@ -49,8 +48,8 @@ class RestSettingTest extends TestCase
     public function test_can_creator_edit_name()
     {
         Session::start();
-
         $timeline = Timeline::has('posts', '>=', 1)->has('followers', '>=', 1)->first();
+
         $owner = $timeline->user;
         $response = $this->actingAs($owner)
             ->json('POST', '/'.$owner->username.'/settings/general', [
@@ -431,12 +430,115 @@ class RestSettingTest extends TestCase
 
     }
 
+
+    /**
+     *  @group settings
+     *  @group regression
+     */
+    public function test_can_creator_edit_privacy() {
+        Session::start();
+
+        $timeline = Timeline::has('posts', '>=', 1)->has('followers', '>=', 1)->first();
+        $creator = $timeline->user;
+
+        // // Who can post on your timeline = Everyone
+        $response = $this->actingAs($creator)
+            ->json('POST', '/'.$creator->username.'/settings/privacy', [
+                'comment_privacy'=> 'everyone',
+                'timeline_post_privacy' => 'everyone',
+                'post_privacy' => 'everyone',
+                'message_privacy' => 'everyone',
+                '_token' => Session::token()
+            ]);
+
+        $response->assertStatus(302);
+
+        // Who can post on your timeline = People I follow
+        $response = $this->actingAs($creator)
+            ->json('POST', '/'.$creator->username.'/settings/privacy', [
+                'comment_privacy' => 'everyone',
+                'timeline_post_privacy' => 'only_follow',
+                'post_privacy' => 'everyone',
+                'message_privacy' => 'everyone',
+                '_token' => Session::token()
+            ]);
+
+        $response->assertStatus(302);
+
+
+        // Who can post on your timeline = No One
+        $response = $this->actingAs($creator)
+            ->json('POST', '/'.$creator->username.'/settings/privacy', [
+                'comment_privacy' => 'everyone',
+                'timeline_post_privacy' => 'nobody',
+                'post_privacy' => 'everyone',
+                'message_privacy' => 'everyone',
+                '_token' => Session::token()
+            ]);
+
+        $response->assertStatus(302);
+
+        // Who can comment on your posts = People I follow
+        $response = $this->actingAs($creator)
+            ->json('POST', '/'.$creator->username.'/settings/privacy', [
+                'comment_privacy' => 'only_follow',
+                'timeline_post_privacy' => 'everyone',
+                'post_privacy' => 'everyone',
+                'message_privacy' => 'everyone',
+                '_token' => Session::token()
+            ]);
+
+        $response->assertStatus(302);
+
+        // Who can see your posts = People I follow
+        $response = $this->actingAs($creator)
+            ->json('POST', '/'.$creator->username.'/settings/privacy', [
+                'comment_privacy' => 'everyone',
+                'timeline_post_privacy' => 'everyone',
+                'post_privacy' => 'only_follow',
+                'message_privacy' => 'everyone',
+                '_token' => Session::token()
+            ]);
+
+        $response->assertStatus(302);
+    
+        // Who can message you = People I follow
+        $response = $this->actingAs($creator)
+            ->json('POST', '/'.$creator->username.'/settings/privacy', [
+                'comment_privacy' => 'everyone',
+                'timeline_post_privacy' => 'everyone',
+                'post_privacy' => 'everyone',
+                'message_privacy' => 'only_follow',
+                '_token' => Session::token()
+            ]);
+
+        $response->assertStatus(302);
+    }
+
+    /**
+     *  @group settings
+     *  @group regression
+     */
+    public function test_can_add_blocked_user() {
+        $timeline = Timeline::has('posts', '>=', 1)->has('followers', '>=', 1)->first();
+        $creator = $timeline->user;
+
+        $payload = [
+            'ip_address' => '120.120.120.120',
+            'country' => ''
+        ];
+
+        $response = $this->actingAs($creator)->ajaxJSON('POST', route('block-profile',['username' => $creator->username]), $payload);
+        $response->assertStatus(201);
+    }
+
+
     // ------------------------------
 
     protected function setUp() : void
     {
         parent::setUp();
-        $this->seed(TestDatabaseSeeder::class);
+        $this->withoutMiddleware();
     }
 
     protected function tearDown() : void {
