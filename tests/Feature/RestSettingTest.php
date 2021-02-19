@@ -533,6 +533,37 @@ class RestSettingTest extends TestCase
     }
 
 
+    /**
+     *  @group settings
+     *  @group regression
+     */
+    public function test_can_add_watermark() {
+        $timeline = Timeline::has('posts', '>=', 1)->has('followers', '>=', 1)->first();
+        $creator = $timeline->user;
+
+        // Enable Watermark
+        $response = $this->actingAs($creator)
+            ->json('POST', '/'.$creator->username.'/settings/save-watermark-settings', [
+                'watermark' => 1,
+                'watermark_text' => 'watermark',
+                'watermark_font_size' => '10',
+                'watermark_position' => 'top',
+                'watermark_font_color' => '#000000',
+                '_token' => Session::token()
+            ]);
+
+        $response->assertStatus(200);
+
+        // Disable Watermark
+        $response = $this->actingAs($creator)
+            ->json('POST', '/'.$creator->username.'/settings/save-watermark-settings', [
+                'watermark' => 0,
+                '_token' => Session::token()
+            ]);
+
+        $response->assertStatus(200);
+    }
+
     // ------------------------------
 
     protected function setUp() : void
