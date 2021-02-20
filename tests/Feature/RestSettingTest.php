@@ -562,12 +562,39 @@ class RestSettingTest extends TestCase
         $response->assertStatus(200);
     }
 
+    /**
+     *  @group settings
+     *  @group regression
+     */
+    public function test_can_view_creator_login_sessions()
+    {
+        $timeline = Timeline::has('posts', '>=', 1)->has('followers', '>=', 1)->first();
+        $creator = $timeline->user;
+        $sessions = Session::where('user_id', $creator->id);
+        $this->assertNotNull($sessions);
+    }
+
+
+    /**
+     *  @group settings
+     *  @group regression
+     */
+    public function test_can_view_creator_referrals()
+    {
+        $timeline = Timeline::has('posts', '>=', 1)->has('followers', '>=', 1)->first();
+        $creator = $timeline->user;
+        $response = $this->actingAs($creator)->get('/'.$creator->username.'/settings/affliates');
+        $response->assertStatus(200);
+        $referrals = User::where('affiliate_id', $creator->id)->where('id', '!=', $creator->id);;
+        $this->assertNotNull($referrals);
+    }
+
     // ------------------------------
 
     protected function setUp() : void
     {
         parent::setUp();
-        $this->withoutMiddleware();
+        $this->seed(TestDatabaseSeeder::class);
     }
 
     protected function tearDown() : void {
