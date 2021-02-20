@@ -4,13 +4,13 @@ namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Support\Facades\Session;
 
 use Tests\TestCase;
 use Database\Seeders\TestDatabaseSeeder;
 
 use App\Models\User;
 use App\Models\Timeline;
+use App\Models\Session;
 
 class RestSettingTest extends TestCase
 {
@@ -47,7 +47,6 @@ class RestSettingTest extends TestCase
      */
     public function test_can_creator_edit_name()
     {
-        Session::start();
         $timeline = Timeline::has('posts', '>=', 1)->has('followers', '>=', 1)->first();
 
         $owner = $timeline->user;
@@ -56,7 +55,7 @@ class RestSettingTest extends TestCase
                 'username' => $owner->username,
                 'name' => 'New Name',
                 'email' => $owner->email,
-                '_token' => Session::token()
+                '_token' => csrf_token()
             ]);
 
         $response->assertStatus(200);
@@ -70,7 +69,6 @@ class RestSettingTest extends TestCase
      */
     public function test_can_creator_edit_username()
     {
-        Session::start();
     
         $timeline = Timeline::has('posts', '>=', 1)->has('followers', '>=', 1)->first();
         $owner = $timeline->user;
@@ -79,7 +77,7 @@ class RestSettingTest extends TestCase
                 'username' => 'test.user',
                 'name' => $owner->name,
                 'email' => $owner->email,
-                '_token' => Session::token()
+                '_token' => csrf_token()
             ]);
 
         $response->assertStatus(200);
@@ -93,7 +91,6 @@ class RestSettingTest extends TestCase
      */
     public function test_can_creator_edit_email()
     {
-        Session::start();
 
         $timeline = Timeline::has('posts', '>=', 1)->has('followers', '>=', 1)->first();
         $owner = $timeline->user;
@@ -102,7 +99,7 @@ class RestSettingTest extends TestCase
                 'username' => $owner->username,
                 'name' => $owner->name,
                 'email' => 'test.user@email.com',
-                '_token' => Session::token()
+                '_token' => csrf_token()
             ]);
 
         $response->assertStatus(200);
@@ -116,7 +113,6 @@ class RestSettingTest extends TestCase
      */
     public function test_can_fan_edit_name()
     {
-        Session::start();
 
         $timeline = Timeline::has('posts', '>=', 1)->has('followers', '>=', 1)->first();
         $fan = $timeline->followers[0];
@@ -125,7 +121,7 @@ class RestSettingTest extends TestCase
                 'username' => $fan->username,
                 'name' => 'New Name',
                 'email' => $fan->email,
-                '_token' => Session::token()
+                '_token' => csrf_token()
             ]);
 
         $response->assertStatus(200);
@@ -139,7 +135,6 @@ class RestSettingTest extends TestCase
      */
     public function test_can_fan_edit_username()
     {
-        Session::start();
     
         $timeline = Timeline::has('posts', '>=', 1)->has('followers', '>=', 1)->first();
         $fan = $timeline->followers[0];
@@ -148,7 +143,7 @@ class RestSettingTest extends TestCase
                 'username' => 'test.user',
                 'name' => $fan->name,
                 'email' => $fan->email,
-                '_token' => Session::token()
+                '_token' => csrf_token()
             ]);
 
         $response->assertStatus(200);
@@ -162,7 +157,6 @@ class RestSettingTest extends TestCase
      */
     public function test_can_fan_edit_email()
     {
-        Session::start();
 
         $timeline = Timeline::has('posts', '>=', 1)->has('followers', '>=', 1)->first();
         $fan = $timeline->followers[0];
@@ -171,7 +165,7 @@ class RestSettingTest extends TestCase
                 'username' => $fan->username,
                 'name' => $fan->name,
                 'email' => 'test.user@email.com',
-                '_token' => Session::token()
+                '_token' => csrf_token()
             ]);
 
         $response->assertStatus(200);
@@ -185,7 +179,6 @@ class RestSettingTest extends TestCase
      */
     public function test_can_creator_set_localization()
     {
-        Session::start();
 
         $timeline = Timeline::has('posts', '>=', 1)->has('followers', '>=', 1)->first();
         $creator = $timeline->user;
@@ -195,7 +188,7 @@ class RestSettingTest extends TestCase
                 'country' => 'US',
                 'timezone' => 'GMT-05:00',
                 'currency' => 'EUR',
-                '_token' => Session::token()
+                '_token' => csrf_token()
             ]);
 
         $response->assertStatus(200);
@@ -208,7 +201,6 @@ class RestSettingTest extends TestCase
      */
     public function test_can_fan_set_localization()
     {
-        Session::start();
 
         $timeline = Timeline::has('posts', '>=', 1)->has('followers', '>=', 1)->first();
         $fan = $timeline->followers[0];
@@ -218,7 +210,7 @@ class RestSettingTest extends TestCase
                 'country' => 'US',
                 'timezone' => 'GMT-05:00',
                 'currency' => 'EUR',
-                '_token' => Session::token()
+                '_token' => csrf_token()
             ]);
 
         $response->assertStatus(200);
@@ -232,8 +224,7 @@ class RestSettingTest extends TestCase
      */
     public function test_can_creator_set_subscription_price()
     {
-        Session::start();
-
+        
         $timeline = Timeline::has('posts', '>=', 1)->has('followers', '>=', 1)->first();
         $creator = $timeline->user;
         $response = $this->actingAs($creator)
@@ -244,7 +235,7 @@ class RestSettingTest extends TestCase
                 'subscribe_price_6_month' => null,
                 'subscribe_price_year' => null,
                 'referral-rewards' =>  'disabled',
-                '_token' => Session::token()
+                '_token' => csrf_token()
             ]);
 
         $response->assertStatus(302);
@@ -257,7 +248,7 @@ class RestSettingTest extends TestCase
             'subscribe_price_6_month' => null,
             'subscribe_price_year' => null,
             'referral-rewards' =>  'disabled',
-            '_token' => Session::token()
+            '_token' => csrf_token()
         ]);
 
         $response->assertStatus(302);
@@ -269,7 +260,6 @@ class RestSettingTest extends TestCase
      */
     public function test_can_creator_set_referral_rewards_enable()
     {
-        Session::start();
 
         $timeline = Timeline::has('posts', '>=', 1)->has('followers', '>=', 1)->first();
         $creator = $timeline->user;
@@ -282,7 +272,7 @@ class RestSettingTest extends TestCase
             'subscribe_price_6_month' => null,
             'subscribe_price_year' => null,
             'referral-rewards' =>  '1-free-month',
-            '_token' => Session::token()
+            '_token' => csrf_token()
         ]);
 
         $response->assertStatus(302);
@@ -294,7 +284,6 @@ class RestSettingTest extends TestCase
      */
     public function test_can_creator_set_enable_or_disable_follow_for_free()
     {
-        Session::start();
 
         $timeline = Timeline::has('posts', '>=', 1)->has('followers', '>=', 1)->first();
         $creator = $timeline->user;
@@ -308,7 +297,7 @@ class RestSettingTest extends TestCase
             'subscribe_price_6_month' => null,
             'subscribe_price_year' => null,
             'referral-rewards' =>  '1-free-month',
-            '_token' => Session::token()
+            '_token' => csrf_token()
         ]);
         $response->assertStatus(302);
     
@@ -320,7 +309,7 @@ class RestSettingTest extends TestCase
             'subscribe_price_6_month' => null,
             'subscribe_price_year' => null,
             'referral-rewards' =>  '1-free-month',
-            '_token' => Session::token()
+            '_token' => csrf_token()
         ]);
 
         $response->assertStatus(302);
@@ -332,7 +321,6 @@ class RestSettingTest extends TestCase
      */
     public function test_can_creator_edit_profile()
     {
-        Session::start();
 
         $timeline = Timeline::has('posts', '>=', 1)->has('followers', '>=', 1)->first();
         $creator = $timeline->user;
@@ -344,7 +332,7 @@ class RestSettingTest extends TestCase
                 'city' => 'Las Vegas',
                 'gender' => 'male',
                 'birthday' => '02/02/1990',
-                '_token' => Session::token()
+                '_token' => csrf_token()
             ]);
 
         $response->assertStatus(200);
@@ -356,7 +344,7 @@ class RestSettingTest extends TestCase
                 'city' => 'Las Vegas',
                 'gender' => 'female',
                 'birthday' => '02/02/1990',
-                '_token' => Session::token()
+                '_token' => csrf_token()
             ]);
 
         $response->assertStatus(200);
@@ -371,7 +359,7 @@ class RestSettingTest extends TestCase
                 'birthday' => '02/02/1990',
                 'wishlist' => 'https://www.batz.com',
                 'website' => 'http://www.sauer.biz/et-excepturi-numquam-recusandae-quia-eum-saepe-veritatis-rerum.html',
-                '_token' => Session::token()
+                '_token' => csrf_token()
             ]);
 
         $response->assertStatus(200);
@@ -384,7 +372,6 @@ class RestSettingTest extends TestCase
      */
     public function test_can_fan_edit_profile()
     {
-        Session::start();
 
         $timeline = Timeline::has('posts', '>=', 1)->has('followers', '>=', 1)->first();
         $fan = $timeline->followers[0];
@@ -396,7 +383,7 @@ class RestSettingTest extends TestCase
                 'city' => 'Las Vegas',
                 'gender' => 'male',
                 'birthday' => '02/02/1990',
-                '_token' => Session::token()
+                '_token' => csrf_token()
             ]);
 
         $response->assertStatus(200);
@@ -408,7 +395,7 @@ class RestSettingTest extends TestCase
                 'city' => 'Las Vegas',
                 'gender' => 'female',
                 'birthday' => '02/02/1990',
-                '_token' => Session::token()
+                '_token' => csrf_token()
             ]);
 
         $response->assertStatus(200);
@@ -423,7 +410,7 @@ class RestSettingTest extends TestCase
                 'birthday' => '02/02/1990',
                 'wishlist' => 'https://www.batz.com',
                 'website' => 'http://www.sauer.biz/et-excepturi-numquam-recusandae-quia-eum-saepe-veritatis-rerum.html',
-                '_token' => Session::token()
+                '_token' => csrf_token()
             ]);
 
         $response->assertStatus(200);
@@ -436,7 +423,6 @@ class RestSettingTest extends TestCase
      *  @group regression
      */
     public function test_can_creator_edit_privacy() {
-        Session::start();
 
         $timeline = Timeline::has('posts', '>=', 1)->has('followers', '>=', 1)->first();
         $creator = $timeline->user;
@@ -448,7 +434,7 @@ class RestSettingTest extends TestCase
                 'timeline_post_privacy' => 'everyone',
                 'post_privacy' => 'everyone',
                 'message_privacy' => 'everyone',
-                '_token' => Session::token()
+                '_token' => csrf_token()
             ]);
 
         $response->assertStatus(302);
@@ -460,7 +446,7 @@ class RestSettingTest extends TestCase
                 'timeline_post_privacy' => 'only_follow',
                 'post_privacy' => 'everyone',
                 'message_privacy' => 'everyone',
-                '_token' => Session::token()
+                '_token' => csrf_token()
             ]);
 
         $response->assertStatus(302);
@@ -473,7 +459,7 @@ class RestSettingTest extends TestCase
                 'timeline_post_privacy' => 'nobody',
                 'post_privacy' => 'everyone',
                 'message_privacy' => 'everyone',
-                '_token' => Session::token()
+                '_token' => csrf_token()
             ]);
 
         $response->assertStatus(302);
@@ -485,7 +471,7 @@ class RestSettingTest extends TestCase
                 'timeline_post_privacy' => 'everyone',
                 'post_privacy' => 'everyone',
                 'message_privacy' => 'everyone',
-                '_token' => Session::token()
+                '_token' => csrf_token()
             ]);
 
         $response->assertStatus(302);
@@ -497,7 +483,7 @@ class RestSettingTest extends TestCase
                 'timeline_post_privacy' => 'everyone',
                 'post_privacy' => 'only_follow',
                 'message_privacy' => 'everyone',
-                '_token' => Session::token()
+                '_token' => csrf_token()
             ]);
 
         $response->assertStatus(302);
@@ -509,7 +495,7 @@ class RestSettingTest extends TestCase
                 'timeline_post_privacy' => 'everyone',
                 'post_privacy' => 'everyone',
                 'message_privacy' => 'only_follow',
-                '_token' => Session::token()
+                '_token' => csrf_token()
             ]);
 
         $response->assertStatus(302);
@@ -528,7 +514,7 @@ class RestSettingTest extends TestCase
             'country' => ''
         ];
 
-        $response = $this->actingAs($creator)->ajaxJSON('POST', route('block-profile',['username' => $creator->username]), $payload);
+        $response = $this->actingAs($creator)->ajaxJSON('POST', '/'.$creator->username.'/settings/block-profile', $payload);
         $response->assertStatus(201);
     }
 
@@ -549,7 +535,7 @@ class RestSettingTest extends TestCase
                 'watermark_font_size' => '10',
                 'watermark_position' => 'top',
                 'watermark_font_color' => '#000000',
-                '_token' => Session::token()
+                '_token' => csrf_token()
             ]);
 
         $response->assertStatus(200);
@@ -558,9 +544,21 @@ class RestSettingTest extends TestCase
         $response = $this->actingAs($creator)
             ->json('POST', '/'.$creator->username.'/settings/save-watermark-settings', [
                 'watermark' => 0,
-                '_token' => Session::token()
+                '_token' => csrf_token()
             ]);
 
+        $response->assertStatus(200);
+    }
+
+    /**
+     *  @group settings
+     *  @group regression
+     */
+    public function test_can_view_creator_earnings_overview()
+    {
+        $timeline = Timeline::has('posts', '>=', 1)->has('followers', '>=', 1)->first();
+        $creator = $timeline->user;
+        $response = $this->actingAs($creator)->get('/'.$creator->username.'/settings/earnings');
         $response->assertStatus(200);
     }
 
