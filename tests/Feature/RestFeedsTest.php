@@ -49,6 +49,7 @@ class RestFeedsTest extends TestCase
 
         $posts = collect($content->feeditems);
 
+        // check number of posts matches count of all post types from all followed timelines 
         $followedTimelines = $fan->followedtimelines()->pluck('id');
         $expected = Post::where('postable_type', 'timelines')
             ->join('timelines', 'timelines.id', '=', 'posts.postable_id')
@@ -79,164 +80,9 @@ class RestFeedsTest extends TestCase
     /**
      *  @group feeds
      *  @group regression
-     *  @group here
      */
-    public function test_follower_can_view_public_feed()
-    {
-        $timeline = Timeline::has('posts','>=',1)->has('followers','>=',1)->firstOrFail();
-        $creator = $timeline->user;
-        $fan = $timeline->followers()->whereDoesntHave('subscribedtimelines', function($q1) use(&$timeline) {
-            $q1->where('timelines.id', $timeline->id);
-        })->where('id', '<>', $creator->id)->first();
-
-        $payload = [];
-        $response = $this->actingAs($fan)->ajaxJSON('GET', route('feeds.getPublic', $timeline->id), $payload);
-        $response->assertStatus(200);
-
-        $content = json_decode($response->content());
-
-        $expected = Post::where('postable_type', 'timelines')
-            ->where('postable_id', $timeline->id)
-            ->whereIn('type', [PostTypeEnum::FREE])
-            //->whereIn('type', [PostTypeEnum::FREE, PostTypeEnum::PRICED])
-            ->count();
-        $this->assertEquals($expected, count($content->feeditems));
-    }
-
-    /**
-     *  @group feeds
-     *  @group regression
-     */
-    // view a free feed I'm following
-    public function test_view_as_follower_of_free_feed()
-    {
-        $timeline = Timeline::where('is_follow_for_free', true)->has('posts','>=',1)->has('followers','>=',1)->firstOrFail();
-        $creator = $timeline->user;
-        $fan = $timeline->followers()->whereDoesntHave('subscribedtimelines', function($q1) use(&$timeline) {
-            $q1->where('timelines.id', $timeline->id);
-        })->where('id', '<>', $creator->id)->first();
-        $this->assertNotNull($fan);
-        $this->assertTrue( $timeline->followers->contains($fan->id) );
-        $this->assertFalse( $timeline->subscribers->contains($fan->id) );
-
-        $payload = [];
-        $response = $this->actingAs($fan)->ajaxJSON('GET', route('feeds.show', $timeline->id), $payload);
-        $response->assertStatus(200);
-
-        $content = json_decode($response->content());
-        $this->assertObjectHasAttribute('feeditems', $content);
-        $fan->refresh();
-        $timeline->refresh();
-
-        $posts = collect($content->feeditems);
-
-        // %NOTE: this calc of expected assumes no free posts can be shared (thus aren't double-counted)
-        $expectedNumFree = DB::table('posts')->where('postable_type', 'timelines')
-                                             ->where('postable_id', $timeline->id)
-                                             ->where('type', PostTypeEnum::FREE)
-                                             ->count();
-        $expectedNumPurchased = DB::table('shareables')
-            ->join('posts', 'posts.id', '=', 'shareables.shareable_id')
-            ->join('timelines', 'timelines.id', '=', 'posts.postable_id')
-            ->where('shareables.sharee_id', $fan->id)
-            ->where('shareables.shareable_type', 'posts')
-            ->where('posts.postable_type', 'timelines')
-            ->where('timelines.id', $timeline->id)
-            ->count();
-        $expected = $expectedNumPurchased + $expectedNumFree;
-        $this->assertEquals($expected, count($content->feeditems));
-
-        // check that we didn't miss any free posts
-        $this->assertEquals($expectedNumFree, collect($content->feeditems)->reduce( function($acc, $p) {
-            return $acc + ( ($p->type===PostTypeEnum::FREE) ? 1 : 0 );
-        }, 0));
-
-        // check that we don't have any purchase-only posts that don't belong to the follower
-        $priced = collect($content->feeditems)->filter( function($p) use(&$fan) {
-            $post = Post::find($p->id);
-            $this->assertNotNull($post);
-            return $post->type === PostTypeEnum::PRICED
-                && !$post->sharees->contains($fan->id);
-        });
-        $this->assertEquals(0, $priced->count(), 'Should not include any non-purchased priced posts');
-
-        // check that we don't have any subcriber-only posts
-        $subscriber = collect($content->feeditems)->filter( function($p) {
-            return $p->type === PostTypeEnum::SUBSCRIBER;
-        });
-        $this->assertEquals(0, $subscriber->count(), 'Should not include any subscriber posts');
-
-    }
-
-    /**
-     *  @group feeds
-     *  @group regression
-     */
-    // view a paid feed I'm following
-    public function test_view_as_follower_of_paid_feed()
-    {
-        $timeline = Timeline::where('is_follow_for_free', false)->has('posts','>=',1)->has('followers','>=',1)->firstOrFail();
-        $creator = $timeline->user;
-        $fan = $timeline->followers()->whereDoesntHave('subscribedtimelines', function($q1) use(&$timeline) {
-            $q1->where('timelines.id', $timeline->id);
-        })->where('id', '<>', $creator->id)->first();
-        $this->assertNotNull($fan);
-        $this->assertTrue( $timeline->followers->contains($fan->id) );
-        $this->assertFalse( $timeline->subscribers->contains($fan->id) );
-
-        $payload = [];
-        $response = $this->actingAs($fan)->ajaxJSON('GET', route('feeds.show', $timeline->id), $payload);
-        $response->assertStatus(200);
-        $content = json_decode($response->content());
-        $this->assertObjectHasAttribute('feeditems', $content);
-        $fan->refresh();
-        $timeline->refresh();
-
-        $posts = collect($content->feeditems);
-        
-        // %NOTE: this calc of expected assumes no free posts can be shared (thus aren't double-counted)
-        $expectedNumFree = DB::table('posts')->where('postable_type', 'timelines')
-                                             ->where('postable_id', $timeline->id)
-                                             ->where('type', PostTypeEnum::FREE)
-                                             ->count();
-        $expectedNumPurchased = DB::table('shareables')
-            ->join('posts', 'posts.id', '=', 'shareables.shareable_id')
-            ->join('timelines', 'timelines.id', '=', 'posts.postable_id')
-            ->where('shareables.sharee_id', $fan->id)
-            ->where('shareables.shareable_type', 'posts')
-            ->where('posts.postable_type', 'timelines')
-            ->where('timelines.id', $timeline->id)
-            ->count();
-        $expected = $expectedNumPurchased + $expectedNumFree;
-        $this->assertEquals($expected, count($posts));
-
-        // check that we didn't miss any free posts
-        $this->assertEquals($expectedNumFree, $posts->reduce( function($acc, $p) {
-            return $acc + ( ($p->type===PostTypeEnum::FREE) ? 1 : 0 );
-        }, 0));
-
-        // check that we don't have any purchase-only posts that don't belong to the follower
-        $priced = $posts->filter( function($p) use(&$fan) {
-            $post = Post::find($p->id);
-            $this->assertNotNull($post);
-            return $post->type === PostTypeEnum::PRICED
-                && !$post->sharees->contains($fan->id);
-        });
-        $this->assertEquals(0, $priced->count(), 'Should not include any non-purchased priced posts');
-
-        // check that we don't have any subcriber-only posts
-        $subscriber = $posts->filter( function($p) {
-            return $p->type === PostTypeEnum::SUBSCRIBER;
-        });
-        $this->assertEquals(0, $subscriber->count(), 'Should not include any subscriber posts');
-    }
-
-    /**
-     *  @group feeds
-     *  @group regression
-     */
-    // view a paid feed I'm subscribed to
-    public function test_view_as_subscriber_of_paid_feed()
+    // NOTE: we don't really care here about subscribed, purchased, etc, as that's all handled in the UI
+    public function test_view_follower_can_view_feed()
     {
         $timeline = Timeline::has('posts','>=',1)->has('subscribers','>=',1)->firstOrFail();
         $creator = $timeline->user;
@@ -275,6 +121,11 @@ class RestFeedsTest extends TestCase
         $expected = $expectedNumPurchased + $expectedNumFree + $expectedNumSubscriber;
         $this->assertEquals($expected, count($posts));
 
+        $expected2 = Post::where('postable_type', 'timelines')
+            ->where('postable_id', $timeline->id)
+            ->count();
+        $this->assertEquals($expected2, count($posts));
+
         // check that we didn't miss any free posts
         $this->assertEquals($expectedNumFree, $posts->reduce( function($acc, $p) {
             return $acc + ( ($p->type===PostTypeEnum::FREE) ? 1 : 0 );
@@ -294,7 +145,6 @@ class RestFeedsTest extends TestCase
             return $acc + ( ($p->type===PostTypeEnum::SUBSCRIBER) ? 1 : 0 );
         }, 0));
     }
-
 
 
     // ------------------------------

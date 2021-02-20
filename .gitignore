@@ -110,3 +110,5 @@ composer.json-save
 public/mix-manifest.json
 
 database/seeds/RolesTableSeeder.php--save
+
+public/info.php

@@ -30,7 +30,7 @@ class FeedModelTest extends TestCase
 
     /**
      * @group feed-model
-     * @group regression
+     * @group todo-deprecate
      */
     public function test_feed_get_owner_feed()
     {
@@ -43,7 +43,7 @@ class FeedModelTest extends TestCase
 
     /**
      * @group feed-model
-     * @group regression
+     * @group todo-deprecate
      * @group here
      */
     public function test_feed_get_public_feed()
@@ -58,7 +58,7 @@ class FeedModelTest extends TestCase
 
     /**
      * @group feed-model
-     * @group regression
+     * @group todo-deprecate
      */
     public function test_feed_get_home_feed()
     {
@@ -112,7 +112,7 @@ class FeedModelTest extends TestCase
 
     /**
      * @group feed-model
-     * @group regression
+     * @group todo-deprecate
      */
     // get free + post-purchased-by-user + subscriber-only by timeline (eg: as fan viewing subscribed timeline)
     public function test_feed_get_subscribing_feed()
@@ -160,7 +160,7 @@ class FeedModelTest extends TestCase
 
     /**
      * @group feed-model
-     * @group regression
+     * @group todo-deprecate
      */
     // get free + post-purchased-by-user by timeline (eg: as fan viewing followed timeline)
     public function test_feed_get_following_feed()
