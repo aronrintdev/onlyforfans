@@ -94,11 +94,11 @@ class RestFeedsTest extends TestCase
         $response = $this->actingAs($fan)->ajaxJSON('GET', route('feeds.show', $timeline->id), $payload);
         $response->assertStatus(200);
         $content = json_decode($response->content());
-        $this->assertObjectHasAttribute('feeditems', $content);
+        $this->assertObjectHasAttribute('data', $content);
         $fan->refresh();
         $timeline->refresh();
 
-        $posts = collect($content->feeditems);
+        $posts = collect($content->data);
 
         // %NOTE: this calc of expected assumes no free posts can be shared (thus aren't double-counted)
         $expectedNumFree = DB::table('posts')->where('postable_type', 'timelines')

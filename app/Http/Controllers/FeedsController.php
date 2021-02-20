@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 
+use App\Http\Resources\PostCollection;
 use App\Enums\PostTypeEnum;
 use App\Models\Setting;
 use App\Models\Timeline;
@@ -40,9 +41,12 @@ class FeedsController extends AppBaseController
         $query = Post::query();
         $query->where('postable_type', 'timelines')->where('postable_id', $timeline->id);
         $posts = $query->get();
+        /*
         return response()->json([
             'feeditems' => $posts,
         ]);
+         */
+        return new PostCollection($posts);
     }
 
 }

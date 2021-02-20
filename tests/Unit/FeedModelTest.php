@@ -44,7 +44,6 @@ class FeedModelTest extends TestCase
     /**
      * @group feed-model
      * @group todo-deprecate
-     * @group here
      */
     public function test_feed_get_public_feed()
     {
