@@ -99,6 +99,11 @@ class RestFeedsTest extends TestCase
         $timeline->refresh();
 
         $posts = collect($content->data);
+        $this->assertGreaterThan(0, count($posts));
+        $this->assertObjectHasAttribute('description', $posts[0]);
+
+        // [ ] %TODO switch for follower, make sure we can't see subscrie-only post's data such as description, mediafiles, etc
+        // [ ] %TODO find a non-accessible paid-only post, make sure we can't see description, mediafiles, etc
 
         // %NOTE: this calc of expected assumes no free posts can be shared (thus aren't double-counted)
         $expectedNumFree = DB::table('posts')->where('postable_type', 'timelines')
