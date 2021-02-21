@@ -40,7 +40,7 @@ class FeedMgr {
         //$followingIds = filterByBlockedFollowings();
 
         //$query = Post::with('mediafiles', 'user', 'timeline', 'comments.user')->where('active', 1);
-        $query = Post::with('mediafiles', 'user', 'comments')->where('active', 1);
+        $query = Post::with('mediafiles', 'user')->withCount('comments')->where('active', 1);
 
         $followedTimelineIDs = $follower->followedtimelines->pluck('id');
         $followedTimelineIDs->push($follower->timeline->id); // include follower's own timeline %NOTE
@@ -69,6 +69,8 @@ class FeedMgr {
         // or posts I follow directly %TODO
 
         // or posts I've purchased %TODO
+
+        // $query->addSelect(DB::raw('(select count(*) from comments where commentable_id = posts.id and parent_id = null) as comments_count' ));
 
         // %TODO: TEST: ensure no duplicates
         $posts = $query->latest()->paginate($take);

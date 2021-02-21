@@ -9,7 +9,7 @@
           v-observe-visibility="index === renderedItems.length - 1 ? endPostVisible : false"
         >
           <!-- for now we assume posts; eventually need to convert to a DTO (ie more generic 'feedItem') : GraphQL ? -->
-          <ShowPost
+          <PostDisplay
             :post="feedItem"
             :session_user="session_user"
             @delete-post="deletePost"
@@ -32,11 +32,11 @@
 <script>
 import Vuex from 'vuex'
 //import { eventBus } from '@/app'
-import ShowPost from './ShowPost.vue'
+import PostDisplay from '@components/posts/Display'
 
 export default {
   components: {
-    ShowPost,
+    PostDisplay,
   },
 
   props: {
