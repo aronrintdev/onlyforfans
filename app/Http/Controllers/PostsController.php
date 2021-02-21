@@ -5,13 +5,14 @@ use DB;
 use Auth;
 use Exception;
 use Throwable;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Http\Request;
 use App\Models\Post;
-use App\Models\Mediafile;
+use App\Models\Comment;
 use App\Models\Timeline;
-use App\Enums\PaymentTypeEnum;
+use App\Models\Mediafile;
 use App\Enums\PostTypeEnum;
+use Illuminate\Http\Request;
+use App\Enums\PaymentTypeEnum;
+use Illuminate\Support\Facades\Log;
 
 class PostsController extends AppBaseController
 {
@@ -203,7 +204,17 @@ class PostsController extends AppBaseController
     {
         $this->authorize('view', $post);
         //$filters = $request->input('filters', []);
-        $comments = $post->comments;
+        $comments = Comment::with(['user'])
+            ->withCount('likes')
+            ->withCount('replies')
+            ->where('commentable_id', $post->id)
+            ->where('parent_id', null)
+            ->get();
+
+        foreach ( $comments as &$comment ) {
+            $comment->prepFor('post', 'all');
+        }
+
         return response()->json([
             'comments' => $comments,
         ]);

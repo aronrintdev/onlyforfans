@@ -1,6 +1,10 @@
+/**
+ * Laravel Mix Configuration file
+ */
 const mix = require('laravel-mix');
 const path = require('path');
 require('dotenv').config();
+// require('laravel-mix-alias');
 
 /*
  |--------------------------------------------------------------------------
@@ -12,6 +16,22 @@ require('dotenv').config();
  | file for the application as well as bundling up all the JS files.
  |
  */
+
+/**
+ * Alias to reduce clutter of `../..`s in js and vue imports
+ */
+mix.webpackConfig({
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, 'resources', 'assets', 'js'),
+      '~': path.resolve(__dirname, 'resources', 'assets', 'sass'),
+      '@components': path.resolve(__dirname, 'resources', 'assets', 'js', 'components'),
+      '@views': path.resolve(__dirname, 'resources', 'assets', 'js', 'views'),
+      '@plugins': path.resolve(__dirname, 'resources', 'assets', 'js', 'plugins'),
+      '@routes': path.resolve(__dirname, 'resources', 'assets', 'js', 'routes'),
+    },
+  },
+});
 
 mix.extend('addWebpackLoaders', (webpackConfig, loaderRules) => {
   loaderRules.forEach((loaderRule) => {
@@ -25,7 +45,7 @@ mix.addWebpackLoaders([
     type: 'javascript/auto',
     loader: '@intlify/vue-i18n-loader',
     include: [
-      path.resolve(__dirname, 'resources/assets/js/locales')
+      path.resolve(__dirname, 'resources', 'assets', 'js', 'locales')
     ],
   },
   {

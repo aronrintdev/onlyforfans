@@ -90,7 +90,7 @@
 </template>
 
 <script>
-import { eventBus } from '../../app';
+import { eventBus } from '@/app';
 import TextStoryForm from './TextStoryForm.vue';
 import TextStoryPreview from './TextStoryPreview.vue';
 import PhotoStoryForm from './PhotoStoryForm.vue';

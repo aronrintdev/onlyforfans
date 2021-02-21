@@ -2,8 +2,8 @@
  * Guest Routes
  */
 import VueRouter from 'vue-router'
-import AuthViews from '../views/auth'
-import ErrorViews from '../views/errors'
+import AuthViews from '@views/auth'
+import ErrorViews from '@views/errors'
 import StaticPageRoutes from './staticPages.routes'
 
 export const routes = [

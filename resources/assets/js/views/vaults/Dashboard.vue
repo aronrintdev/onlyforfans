@@ -5,8 +5,11 @@
 </template>
 
 <script>
+/**
+ * Vaults Dashboard View
+ */
 export default {
-  
+  //
 }
 </script>
 
