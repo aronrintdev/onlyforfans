@@ -53,14 +53,11 @@ class CommentPolicy extends BasePolicy
 // show OG
 /*
         $sessionUser = $request->user();
-        //dd('here', $sessionUser->id);
         if ( !$sessionUser->isAdmin() ) { // admin can view all comments
             $isCommentOwner = ($sessionUser->id === $comment->user_id ); // can see own comments
             $isPostOwner = ($sessionUser->id === $comment->post->user_id ); // can see comments on own post
             $isFollowedTimeline = $sessionUser->followedtimelines->contains($comment->post->timeline_id); // can see comments on followed timeline's posts
-            //dd( 'co: '.($isCommentOwner?'T':'F'), 'po: '.($isPostOwner?'T':'F'), 'ft: '.($isFollowedTimeline?'T':'F') );
             if ( !$isCommentOwner && !$isPostOwner && !$isFollowedTimeline ) {
-                //dd('abort', 'co: '.($isCommentOwner?'T':'F'), 'po: '.($isPostOwner?'T':'F'), 'ft: '.($isFollowedTimeline?'T':'F') );
                 abort(403);
             }
         }

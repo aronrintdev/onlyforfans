@@ -43,7 +43,6 @@ class LikeablesController extends AppBaseController
         $likeable = (new $model)->where('id', $request->likeable_id)->firstOrFail();
 
         if ($request->user()->cannot('like', $likeable)) {
-            //dd('here', $likee, $likeable);
             abort(403);
         }
 

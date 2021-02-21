@@ -20,6 +20,8 @@ use Illuminate\Support\Facades\Log;
 
 class TimelinesController extends AppBaseController
 {
+    // ---
+
     public function index(Request $request)
     {
         $query = User::query();

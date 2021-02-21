@@ -75,7 +75,6 @@ trait ModelTraits
                 //return date('m-d-Y t:i:s', strtotime($this->{$field}));
                 //return $d->format('Y.m.d H:i:s');
 
-                //dd( $this->created_at);
                 //return $this->created_at->format(Y.m.d);
 
                 return $this->{$field};

@@ -54,8 +54,6 @@ class MediafileTest extends TestCase
         Storage::disk('s3')->assertExists($mediafile->filename);
         $this->assertSame($filename, $mediafile->mfname);
         $this->assertSame(MediafileTypeEnum::AVATAR, $mediafile->mftype);
-
-        //dd($response['cart']->toArray());
     }
 
     // ------------------------------

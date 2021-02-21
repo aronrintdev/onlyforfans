@@ -52,7 +52,6 @@ class PostsTableSeeder extends Seeder
                 }
                 $typesUsed[] = $ptype;
                 /*
-                //dd( $ptype, $diff, $typesUsed, PostTypeEnum::getKeys() );
                 dump(
                     'typesUsed',
                     $typesUsed, 

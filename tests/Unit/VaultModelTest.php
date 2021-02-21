@@ -21,24 +21,6 @@ class VaultModelTest extends TestCase
     private static $_persist = false;
 
     /**
-     * @group mfdev
-     */
-    /*
-    public function test_debug()
-    {
-        $mediafile = Mediafile::find(4);
-        //$f = $s->mediafiles->first()->filename;
-        $f = $mediafile->filename;
-        //dd($f);
-        //$s = Storage::disk('s3')->get($f);
-        $s = Storage::disk('s3')->url($f);
-        //$s = Storage::disk('s3')->get($s->mediafiles->first()->filename);
-        dd($s);
-        dd($mediafile->toArray());
-    }
-     */
-
-    /**
      * @group vdev
      */
     public function test_can_create_vault()

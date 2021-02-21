@@ -64,15 +64,6 @@ class FeedMgr {
             $query->whereDate('created_at', '>=', $filters['start_date']);
         }
 
-        // or my own posts
-
-        // or posts I follow directly %TODO
-
-        // or posts I've purchased %TODO
-
-        // $query->addSelect(DB::raw('(select count(*) from comments where commentable_id = posts.id and parent_id = null) as comments_count' ));
-
-        // %TODO: TEST: ensure no duplicates
         $posts = $query->latest()->paginate($take);
         return $posts;
     }
@@ -95,11 +86,6 @@ class FeedMgr {
             $q1->whereIn('postable_id', $follower->followedtimelines->pluck('id'));
         });
 
-        // or posts I follow directly %TODO
-
-        // or posts I've purchased %TODO
-
-        // %TODO: TEST: ensure no duplicates
         $posts = $query->latest()->get();
         return $posts;
     }
