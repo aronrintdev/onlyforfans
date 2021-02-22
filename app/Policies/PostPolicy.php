@@ -34,9 +34,11 @@ class PostPolicy extends BasePolicy
         //return $post->timeline->followers->contains($user->id);
         switch ($post->type) {
         case PostTypeEnum::FREE:
+//dump('policy.f');
             return $post->timeline->followers->count()
                 && $post->timeline->followers->contains($user->id);
         case PostTypeEnum::SUBSCRIBER:
+//dump('policy.s');
             return $post->timeline->subscribers->count()
                 && $post->timeline->subscribers->contains($user->id);
             //return $post->timeline->subscribers->contains($user->id);
@@ -46,6 +48,7 @@ class PostPolicy extends BasePolicy
                 && $post->timeline->followers()->wherePivot('access_level','premium')->contains($user->id);
              */
         case PostTypeEnum::PRICED:
+//dump('policy.p');
             return $post->sharees->count()
                 && $post->sharees->contains($user->id); // premium (?)
         }

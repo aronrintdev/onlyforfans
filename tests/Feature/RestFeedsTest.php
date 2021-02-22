@@ -80,6 +80,7 @@ class RestFeedsTest extends TestCase
     /**
      *  @group feeds
      *  @group regression
+     *  @group here
      */
     // NOTE: we don't really care here about subscribed, purchased, etc, as that's all handled in the UI
     public function test_view_follower_can_view_feed()
@@ -100,12 +101,53 @@ class RestFeedsTest extends TestCase
 
         $posts = collect($content->data);
         $this->assertGreaterThan(0, count($posts));
-        $this->assertObjectHasAttribute('description', $posts[0]);
+        $shares = $posts->reduce( function($acc, $p) use(&$fan) {
+            //dd($p,  (property_exists($p,'description')) ? 1 : 0);
+            switch ($p->type) {
+                case PostTypeEnum::FREE:
+                    $acc[PostTypeEnum::FREE]['expected'] += 1; // free: always visible to suscriber
+                    $acc[PostTypeEnum::FREE]['shared'] += (property_exists($p,'description') ? 1 : 0);
+                    break;
+                case PostTypeEnum::SUBSCRIBER:
+                    $acc[PostTypeEnum::SUBSCRIBER]['expected'] += 1; // since subscriber, should be all
+                    $acc[PostTypeEnum::SUBSCRIBER]['shared'] += (property_exists($p,'description') ? 1 : 0);
+                    break;
+                case PostTypeEnum::PRICED:
+                    $exists = DB::table('shareables')
+                        ->where('sharee_id', $fan->id)
+                        ->where('shareable_type', 'posts')
+                        ->where('shareable_id', $p->id)
+                        ->first();
+                    $acc[PostTypeEnum::PRICED]['expected'] += ($exists ? 1 : 0); // %FIXME: assume none are purchased/shared 
+                    $acc[PostTypeEnum::PRICED]['shared'] += (property_exists($p,'description') ? 1 : 0);
+                    break;
+            }
+            return $acc;
+        }, [
+              PostTypeEnum::FREE       => ['shared' => 0, 'expected' => 0],
+              PostTypeEnum::PRICED     => ['shared' => 0, 'expected' => 0],
+              PostTypeEnum::SUBSCRIBER => ['shared' => 0, 'expected' => 0],
+        ]);
+        $this->assertEquals(
+            $shares[PostTypeEnum::FREE]['expected'],
+            $shares[PostTypeEnum::FREE]['shared'],
+            "Visible number of free posts (".$shares[PostTypeEnum::FREE]['shared'].") did not match expected (".$shares[PostTypeEnum::FREE]['expected'].")"
+        );
+        $this->assertEquals(
+            $shares[PostTypeEnum::SUBSCRIBER]['expected'],
+            $shares[PostTypeEnum::SUBSCRIBER]['shared'],
+            "Visible number of subscriber-only posts (".$shares[PostTypeEnum::SUBSCRIBER]['shared'].") did not match expected (".$shares[PostTypeEnum::SUBSCRIBER]['expected'].")"
+        );
+        $this->assertEquals(
+            $shares[PostTypeEnum::PRICED]['expected'],
+            $shares[PostTypeEnum::PRICED]['shared'],
+            "Visible number of purchase-only posts (".$shares[PostTypeEnum::PRICED]['shared'].") did not match expected (".$shares[PostTypeEnum::PRICED]['expected'].")"
+        );
 
         // [ ] %TODO switch for follower, make sure we can't see subscrie-only post's data such as description, mediafiles, etc
         // [ ] %TODO find a non-accessible paid-only post, make sure we can't see description, mediafiles, etc
 
-        // %NOTE: this calc of expected assumes no free posts can be shared (thus aren't double-counted)
+        // %NOTE: this calc of expected assumes no free posts can be *explicitly* shared (thus aren't double-counted)
         $expectedNumFree = DB::table('posts')->where('postable_type', 'timelines')
                                              ->where('postable_id', $timeline->id)
                                              ->where('type', PostTypeEnum::FREE)

@@ -3,30 +3,16 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 use App\Enums\PostTypeEnum;
+use App\Models\Post as PostModel;
 
 class Post extends JsonResource
 {
     public function toArray($request)
     {
-        //dd('here', $request->user());
-        //dd('here', $this);
-        //return parent::toArray($request);
 
         $sessionUser = $request->user();
-
-        switch ($this->type) {
-        case PostTypeEnum::FREE:
-            $hasAccess = true;
-            break;
-        case PostTypeEnum::PRICED:
-            //$hasAccess = $sessionUser->purchasedposts->contains($this
-            $hasAccess = $this->sharees->contains($sessionUser->id);
-            break;
-        case PostTypeEnum::SUBSCRIBER:
-            $hasAccess = $this->timeline->subscribers->contains($sessionUser->id);
-            break;
-        }
-$hasAccess = false; // %FIXME HERE MONDAY
+        $post = PostModel::find($this->id); // %FIXME: n+1 performance issue
+        $hasAccess = $sessionUser->can('view', $post);
 
         return [
             'id' => $this->id,
