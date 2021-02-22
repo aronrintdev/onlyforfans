@@ -1,25 +1,33 @@
 <template>
-  <div  v-if="!is_loading" class="story_bar-crate tag-crate row mb-3 mx-0">
-
-    <section class="d-flex">
-      <div @click="createStory()"><a :href="`/stories/dashboard`"><b-icon icon="plus-circle" variant="primary" font-scale="2"></b-icon></a></div>
-      <div v-for="(s, idx) in stories" :key="s.id" class="ml-3">
-        <a :href="`/stories/player`"
-           class="box-story">
-          <b-img v-if='s.stype==="image"' thumbnail fluid rounded="circle" class="p-0" :src="s.mediafiles[0].filepath" alt="Story Thumbnail"></b-img>
-          <span v-else class="tag-colorfill" :style="`background-color: ${bgColor(s)}`">&nbsp;</span>
-        </a>
+  <div v-if="!is_loading" class="crate tag-crate row mb-3 mx-0">
+    <section class="d-flex flex-wrap justify-content-between">
+      <div @click="createStory()" class="story">
+        <router-link :to="{ name: 'stories.dashboard' }">
+          <b-icon icon="plus-circle" variant="primary" font-scale="2" />
+        </router-link>
+      </div>
+      <div v-for="story in stories" :key="story.id" class="mb-3 story">
+        <router-link :to="{ name: 'stories.player' }" class="box-story">
+          <b-img
+            v-if="story.stype === 'image'"
+            rounded="circle"
+            class="p-0"
+            :src="story.mediafiles[0].filepath"
+            alt="Story Thumbnail"
+          />
+          <span v-else class="tag-colorfill" :style="`background-color: ${bgColor(story)}`"
+            >&nbsp;
+          </span>
+        </router-link>
       </div>
     </section>
-
   </div>
 </template>
 
 <script>
-import Vuex from 'vuex';
+import Vuex from 'vuex'
 
 export default {
-
   props: {
     session_user: null,
     timeline: null,
@@ -42,24 +50,21 @@ export default {
 
   created() {
     //this.$store.dispatch('getMe');
-    this.$store.dispatch('getStories', { 
+    this.$store.dispatch('getStories', {
       filters: {
         user_id: this.timeline.user.id,
-      }
-    });
+      },
+    })
   },
 
   methods: {
-
-    createStory() {
-    },
+    createStory() {},
 
     bgColor(story) {
-      return Object.keys(story).includes('background-color') 
+      return Object.keys(story).includes('background-color')
         ? story.customAttributes['background-color']
-        : 'yellow';
+        : 'yellow'
     },
-
   },
 
   watch: {
@@ -77,23 +82,37 @@ export default {
     */
   },
 
-  components: {
-  },
+  components: {},
 }
 </script>
 
-<style scoped>
-body .story_bar-crate .b-icon {
-  height: 40px;
-}
-body .story_bar-crate .box-story img {
-  width: 40px;
-  height: 40px;
-}
-body .story_bar-crate .box-story .tag-colorfill {
-  width: 40px;
-  height: 40px;
-  display: block;
-  border-radius: 50%;
+<style lang="scss" scoped>
+$size: 40px;
+$margin: 16px;
+.crate {
+  max-height: $size * 2 + $margin + 2px;
+  overflow-y: scroll;
+
+  .story {
+    margin-left: $margin / 2;
+    margin-right: $margin / 2;
+    margin-bottom: $margin;
+  }
+
+  .b-icon {
+    height: $size;
+  }
+
+  .box-story img {
+    width: $size;
+    height: $size;
+  }
+
+  .box-story .tag-colorfill {
+    width: $size;
+    height: $size;
+    display: block;
+    border-radius: 50%;
+  }
 }
 </style>
