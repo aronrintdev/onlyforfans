@@ -66,11 +66,11 @@ class RestPostsTest extends TestCase
         $response->assertStatus(200);
 
         $content = json_decode($response->content());
-        $this->assertNotNull($content->post);
-        $this->assertNotNull($content->post->description);
-        $this->assertNotNull($content->post->postable_id);
-        $this->assertEquals($timeline->id, $content->post->postable_id);
-        $this->assertSame('timelines', $content->post->postable_type);
+        $this->assertNotNull($content->data);
+        $this->assertNotNull($content->data->description);
+        $this->assertNotNull($content->data->postable_id);
+        $this->assertEquals($timeline->id, $content->data->postable_id);
+        $this->assertSame('timelines', $content->data->postable_type);
 
         $post = $timeline->posts->where('type', PostTypeEnum::PRICED)->first();
         $response = $this->actingAs($creator)->ajaxJSON('GET', route('posts.show', $post->id));
@@ -99,10 +99,9 @@ class RestPostsTest extends TestCase
         $response->assertStatus(200);
 
         $content = json_decode($response->content());
-        $this->assertNotNull($content->post);
-        $postR = $content->post;
-        $this->assertObjectHasAttribute('postable_id', $postR);
-        $this->assertEquals($postR->postable_id, $timeline->id);
+        $this->assertNotNull($content->data);
+        $this->assertObjectHasAttribute('postable_id', $content->data);
+        $this->assertEquals($content->data->postable_id, $timeline->id);
 
         // %TODO: test can not show unfollowed timeline's post
     }
@@ -916,7 +915,10 @@ class RestPostsTest extends TestCase
 
         // Check access (before: should be denied)
         $response = $this->actingAs($fan)->ajaxJSON('GET', route('posts.show', $post->id));
-        $response->assertStatus(403);
+        $response->assertStatus(200); // can see post (locked icon, etc)...
+        $content = json_decode($response->content());
+        $this->assertObjectNotHasAttribute('description', $content->data); // ...can't see contents
+        $this->assertObjectNotHasAttribute('mediafiles', $content->data);
 
         $payload = [
             'sharee_id' => $fan->id,
@@ -949,6 +951,9 @@ class RestPostsTest extends TestCase
         // Check access (after: should be allowed)
         $response = $this->actingAs($fan)->ajaxJSON('GET', route('posts.show', $post->id));
         $response->assertStatus(200);
+        $content = json_decode($response->content());
+        $this->assertObjectHasAttribute('description', $content->data); // can see contents
+        $this->assertObjectHasAttribute('mediafiles', $content->data);
     }
 
 

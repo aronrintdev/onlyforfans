@@ -80,7 +80,6 @@ class RestFeedsTest extends TestCase
     /**
      *  @group feeds
      *  @group regression
-     *  @group here
      */
     // NOTE: some fields are hidden, replaced by a lock icon + call to action, if fan does not have access
     public function test_view_follower_can_view_feed()
@@ -233,7 +232,6 @@ class RestFeedsTest extends TestCase
     /**
      *  @group feeds
      *  @group regression
-     *  @group here
      */
     // NOTE: some fields are hidden, replaced by a lock icon + call to action, if fan does not have access
     public function test_view_subscriber_can_view_feed()
