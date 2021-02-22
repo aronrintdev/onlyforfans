@@ -82,8 +82,161 @@ class RestFeedsTest extends TestCase
      *  @group regression
      *  @group here
      */
-    // NOTE: we don't really care here about subscribed, purchased, etc, as that's all handled in the UI
+    // NOTE: some fields are hidden, replaced by a lock icon + call to action, if fan does not have access
     public function test_view_follower_can_view_feed()
+    {
+        $timeline = Timeline::has('posts','>=',1)->has('followers','>=',1)->firstOrFail();
+        $creator = $timeline->user;
+        $fan = $timeline->followers()->whereDoesntHave('subscribedtimelines', function($q1) use(&$timeline) {
+            $q1->where('timelines.id', $timeline->id);
+        })->where('id', '<>', $creator->id)->first();
+        $this->assertNotNull($fan);
+        $this->assertTrue( $timeline->followers->contains($fan->id) );
+        $this->assertFalse( $timeline->subscribers->contains($fan->id) );
+
+        $payload = [];
+        $response = $this->actingAs($fan)->ajaxJSON('GET', route('feeds.show', $timeline->id), $payload);
+        $response->assertStatus(200);
+        $content = json_decode($response->content());
+        $this->assertObjectHasAttribute('data', $content);
+        $fan->refresh();
+        $timeline->refresh();
+
+        $posts = collect($content->data);
+        $this->assertGreaterThan(0, count($posts));
+        $shares = $posts->reduce( function($acc, $p) use(&$fan) {
+            //dd($p,  (property_exists($p,'description')) ? 1 : 0);
+            switch ($p->type) {
+                case PostTypeEnum::FREE:
+                    $acc[PostTypeEnum::FREE]['description']['expected'] += 1; // free: always visible to suscriber
+                    $acc[PostTypeEnum::FREE]['description']['shared'] += (property_exists($p,'description') ? 1 : 0);
+                    $acc[PostTypeEnum::FREE]['mediafiles']['expected'] += 1; // free: always visible to suscriber
+                    $acc[PostTypeEnum::FREE]['mediafiles']['shared'] += (property_exists($p,'mediafiles') ? 1 : 0);
+                    break;
+                case PostTypeEnum::SUBSCRIBER:
+                    $acc[PostTypeEnum::SUBSCRIBER]['description']['expected'] += 0; // since subscriber, should be none
+                    $acc[PostTypeEnum::SUBSCRIBER]['description']['shared'] += (property_exists($p,'description') ? 1 : 0);
+                    $acc[PostTypeEnum::SUBSCRIBER]['mediafiles']['expected'] += 0; // since subscriber, should be none
+                    $acc[PostTypeEnum::SUBSCRIBER]['mediafiles']['shared'] += (property_exists($p,'mediafiles') ? 1 : 0);
+                    break;
+                case PostTypeEnum::PRICED:
+                    $exists = DB::table('shareables')
+                        ->where('sharee_id', $fan->id)
+                        ->where('shareable_type', 'posts')
+                        ->where('shareable_id', $p->id)
+                        ->first();
+                    $acc[PostTypeEnum::PRICED]['description']['expected'] += ($exists ? 1 : 0); // %FIXME: assume none are purchased/shared 
+                    $acc[PostTypeEnum::PRICED]['description']['shared'] += (property_exists($p,'description') ? 1 : 0);
+                    $acc[PostTypeEnum::PRICED]['mediafiles']['expected'] += ($exists ? 1 : 0); // %FIXME: assume none are purchased/shared 
+                    $acc[PostTypeEnum::PRICED]['mediafiles']['shared'] += (property_exists($p,'mediafiles') ? 1 : 0);
+                    break;
+            }
+            return $acc;
+        }, [
+            PostTypeEnum::FREE => [
+                'description' => ['shared' => 0, 'expected' => 0],
+                'mediafiles'  => ['shared' => 0, 'expected' => 0],
+            ],
+            PostTypeEnum::PRICED => [
+                'description' => ['shared' => 0, 'expected' => 0],
+                'mediafiles'  => ['shared' => 0, 'expected' => 0],
+            ],
+            PostTypeEnum::SUBSCRIBER => [
+                'description' => ['shared' => 0, 'expected' => 0],
+                'mediafiles'  => ['shared' => 0, 'expected' => 0],
+            ],
+              //PostTypeEnum::PRICED     => ['shared' => 0, 'expected' => 0],
+              //PostTypeEnum::SUBSCRIBER => ['shared' => 0, 'expected' => 0],
+        ]);
+        $this->assertEquals(
+            $shares[PostTypeEnum::FREE]['description']['expected'],
+            $shares[PostTypeEnum::FREE]['description']['shared'],
+            "Visible number of free posts w/ visible description fleld (".$shares[PostTypeEnum::FREE]['description']['shared'].") did not match expected (".$shares[PostTypeEnum::FREE]['description']['expected'].")"
+        );
+        $this->assertEquals(
+            $shares[PostTypeEnum::FREE]['mediafiles']['expected'],
+            $shares[PostTypeEnum::FREE]['mediafiles']['shared'],
+            "Visible number of free posts with visible mediafiles field (".$shares[PostTypeEnum::FREE]['mediafiles']['shared'].") did not match expected (".$shares[PostTypeEnum::FREE]['mediafiles']['expected'].")"
+        );
+
+        $this->assertEquals(
+            $shares[PostTypeEnum::SUBSCRIBER]['description']['expected'],
+            $shares[PostTypeEnum::SUBSCRIBER]['description']['shared'],
+            "Visible number of subscriber-only posts with visible description field (".$shares[PostTypeEnum::SUBSCRIBER]['description']['shared'].") did not match expected (".$shares[PostTypeEnum::SUBSCRIBER]['description']['expected'].")"
+        );
+        $this->assertEquals(
+            $shares[PostTypeEnum::SUBSCRIBER]['mediafiles']['expected'],
+            $shares[PostTypeEnum::SUBSCRIBER]['mediafiles']['shared'],
+            "Visible number of subscriber-only posts with visible mediafiles field (".$shares[PostTypeEnum::SUBSCRIBER]['mediafiles']['shared'].") did not match expected (".$shares[PostTypeEnum::SUBSCRIBER]['mediafiles']['expected'].")"
+        );
+
+        $this->assertEquals(
+            $shares[PostTypeEnum::PRICED]['description']['expected'],
+            $shares[PostTypeEnum::PRICED]['description']['shared'],
+            "Visible number of purchase-only posts with visible description field (".$shares[PostTypeEnum::PRICED]['description']['shared'].") did not match expected (".$shares[PostTypeEnum::PRICED]['description']['expected'].")"
+        );
+        $this->assertEquals(
+            $shares[PostTypeEnum::PRICED]['mediafiles']['expected'],
+            $shares[PostTypeEnum::PRICED]['mediafiles']['shared'],
+            "Visible number of purchase-only posts with visible mediafiles field (".$shares[PostTypeEnum::PRICED]['mediafiles']['shared'].") did not match expected (".$shares[PostTypeEnum::PRICED]['mediafiles']['expected'].")"
+        );
+
+        // [ ] %TODO switch for follower, make sure we can't see subscrie-only post's data such as description, mediafiles, etc
+        // [ ] %TODO find a non-accessible paid-only post, make sure we can't see description, mediafiles, etc
+
+        // %NOTE: this calc of expected assumes no free posts can be *explicitly* shared (thus aren't double-counted)
+        $expectedNumFree = DB::table('posts')->where('postable_type', 'timelines')
+                                             ->where('postable_id', $timeline->id)
+                                             ->where('type', PostTypeEnum::FREE)
+                                             ->count();
+        $expectedNumPurchased = DB::table('shareables')
+            ->join('posts', 'posts.id', '=', 'shareables.shareable_id')
+            ->join('timelines', 'timelines.id', '=', 'posts.postable_id')
+            ->where('shareables.sharee_id', $fan->id)
+            ->where('shareables.shareable_type', 'posts')
+            ->where('posts.postable_type', 'timelines')
+            ->where('timelines.id', $timeline->id)
+            ->count();
+        $expectedNumSubscriber = DB::table('posts')->where('postable_type', 'timelines')
+                                                   ->where('postable_id', $timeline->id)
+                                                   ->where('type', PostTypeEnum::SUBSCRIBER)
+                                                   ->count();
+
+        $expected = $expectedNumPurchased + $expectedNumFree + $expectedNumSubscriber;
+        $this->assertEquals($expected, count($posts));
+
+        $expected2 = Post::where('postable_type', 'timelines')
+            ->where('postable_id', $timeline->id)
+            ->count();
+        $this->assertEquals($expected2, count($posts));
+
+        // check that we didn't miss any free posts
+        $this->assertEquals($expectedNumFree, $posts->reduce( function($acc, $p) {
+            return $acc + ( ($p->type===PostTypeEnum::FREE) ? 1 : 0 );
+        }, 0));
+
+        // check that we don't have any purchase-only posts that don't belong to the subscriber
+        $priced = $posts->filter( function($p) use(&$fan) {
+            $post = Post::find($p->id);
+            $this->assertNotNull($post);
+            return $post->type === PostTypeEnum::PRICED
+                && !$post->sharees->contains($fan->id);
+        });
+        $this->assertEquals(0, $priced->count(), 'Should not include any non-purchased priced posts');
+
+        // check that we didn't miss any subscriber-only posts
+        $this->assertEquals($expectedNumSubscriber, $posts->reduce( function($acc, $p) {
+            return $acc + ( ($p->type===PostTypeEnum::SUBSCRIBER) ? 1 : 0 );
+        }, 0));
+    }
+
+    /**
+     *  @group feeds
+     *  @group regression
+     *  @group here
+     */
+    // NOTE: some fields are hidden, replaced by a lock icon + call to action, if fan does not have access
+    public function test_view_subscriber_can_view_feed()
     {
         $timeline = Timeline::has('posts','>=',1)->has('subscribers','>=',1)->firstOrFail();
         $creator = $timeline->user;
@@ -105,12 +258,16 @@ class RestFeedsTest extends TestCase
             //dd($p,  (property_exists($p,'description')) ? 1 : 0);
             switch ($p->type) {
                 case PostTypeEnum::FREE:
-                    $acc[PostTypeEnum::FREE]['expected'] += 1; // free: always visible to suscriber
-                    $acc[PostTypeEnum::FREE]['shared'] += (property_exists($p,'description') ? 1 : 0);
+                    $acc[PostTypeEnum::FREE]['description']['expected'] += 1; // free: always visible to suscriber
+                    $acc[PostTypeEnum::FREE]['description']['shared'] += (property_exists($p,'description') ? 1 : 0);
+                    $acc[PostTypeEnum::FREE]['mediafiles']['expected'] += 1; // free: always visible to suscriber
+                    $acc[PostTypeEnum::FREE]['mediafiles']['shared'] += (property_exists($p,'mediafiles') ? 1 : 0);
                     break;
                 case PostTypeEnum::SUBSCRIBER:
-                    $acc[PostTypeEnum::SUBSCRIBER]['expected'] += 1; // since subscriber, should be all
-                    $acc[PostTypeEnum::SUBSCRIBER]['shared'] += (property_exists($p,'description') ? 1 : 0);
+                    $acc[PostTypeEnum::SUBSCRIBER]['description']['expected'] += 1; // since subscriber, should be all
+                    $acc[PostTypeEnum::SUBSCRIBER]['description']['shared'] += (property_exists($p,'description') ? 1 : 0);
+                    $acc[PostTypeEnum::SUBSCRIBER]['mediafiles']['expected'] += 1; // since subscriber, should be all
+                    $acc[PostTypeEnum::SUBSCRIBER]['mediafiles']['shared'] += (property_exists($p,'mediafiles') ? 1 : 0);
                     break;
                 case PostTypeEnum::PRICED:
                     $exists = DB::table('shareables')
@@ -118,30 +275,60 @@ class RestFeedsTest extends TestCase
                         ->where('shareable_type', 'posts')
                         ->where('shareable_id', $p->id)
                         ->first();
-                    $acc[PostTypeEnum::PRICED]['expected'] += ($exists ? 1 : 0); // %FIXME: assume none are purchased/shared 
-                    $acc[PostTypeEnum::PRICED]['shared'] += (property_exists($p,'description') ? 1 : 0);
+                    $acc[PostTypeEnum::PRICED]['description']['expected'] += ($exists ? 1 : 0); // %FIXME: assume none are purchased/shared 
+                    $acc[PostTypeEnum::PRICED]['description']['shared'] += (property_exists($p,'description') ? 1 : 0);
+                    $acc[PostTypeEnum::PRICED]['mediafiles']['expected'] += ($exists ? 1 : 0); // %FIXME: assume none are purchased/shared 
+                    $acc[PostTypeEnum::PRICED]['mediafiles']['shared'] += (property_exists($p,'mediafiles') ? 1 : 0);
                     break;
             }
             return $acc;
         }, [
-              PostTypeEnum::FREE       => ['shared' => 0, 'expected' => 0],
-              PostTypeEnum::PRICED     => ['shared' => 0, 'expected' => 0],
-              PostTypeEnum::SUBSCRIBER => ['shared' => 0, 'expected' => 0],
+            PostTypeEnum::FREE => [
+                'description' => ['shared' => 0, 'expected' => 0],
+                'mediafiles'  => ['shared' => 0, 'expected' => 0],
+            ],
+            PostTypeEnum::PRICED => [
+                'description' => ['shared' => 0, 'expected' => 0],
+                'mediafiles'  => ['shared' => 0, 'expected' => 0],
+            ],
+            PostTypeEnum::SUBSCRIBER => [
+                'description' => ['shared' => 0, 'expected' => 0],
+                'mediafiles'  => ['shared' => 0, 'expected' => 0],
+            ],
+              //PostTypeEnum::PRICED     => ['shared' => 0, 'expected' => 0],
+              //PostTypeEnum::SUBSCRIBER => ['shared' => 0, 'expected' => 0],
         ]);
         $this->assertEquals(
-            $shares[PostTypeEnum::FREE]['expected'],
-            $shares[PostTypeEnum::FREE]['shared'],
-            "Visible number of free posts (".$shares[PostTypeEnum::FREE]['shared'].") did not match expected (".$shares[PostTypeEnum::FREE]['expected'].")"
+            $shares[PostTypeEnum::FREE]['description']['expected'],
+            $shares[PostTypeEnum::FREE]['description']['shared'],
+            "Visible number of free posts with visible description field (".$shares[PostTypeEnum::FREE]['description']['shared'].") did not match expected (".$shares[PostTypeEnum::FREE]['description']['expected'].")"
         );
         $this->assertEquals(
-            $shares[PostTypeEnum::SUBSCRIBER]['expected'],
-            $shares[PostTypeEnum::SUBSCRIBER]['shared'],
-            "Visible number of subscriber-only posts (".$shares[PostTypeEnum::SUBSCRIBER]['shared'].") did not match expected (".$shares[PostTypeEnum::SUBSCRIBER]['expected'].")"
+            $shares[PostTypeEnum::FREE]['mediafiles']['expected'],
+            $shares[PostTypeEnum::FREE]['mediafiles']['shared'],
+            "Visible number of free posts with visible mediafiles field (".$shares[PostTypeEnum::FREE]['mediafiles']['shared'].") did not match expected (".$shares[PostTypeEnum::FREE]['mediafiles']['expected'].")"
+        );
+
+        $this->assertEquals(
+            $shares[PostTypeEnum::SUBSCRIBER]['description']['expected'],
+            $shares[PostTypeEnum::SUBSCRIBER]['description']['shared'],
+            "Visible number of subscriber-only posts with visible description field (".$shares[PostTypeEnum::SUBSCRIBER]['description']['shared'].") did not match expected (".$shares[PostTypeEnum::SUBSCRIBER]['description']['expected'].")"
         );
         $this->assertEquals(
-            $shares[PostTypeEnum::PRICED]['expected'],
-            $shares[PostTypeEnum::PRICED]['shared'],
-            "Visible number of purchase-only posts (".$shares[PostTypeEnum::PRICED]['shared'].") did not match expected (".$shares[PostTypeEnum::PRICED]['expected'].")"
+            $shares[PostTypeEnum::SUBSCRIBER]['mediafiles']['expected'],
+            $shares[PostTypeEnum::SUBSCRIBER]['mediafiles']['shared'],
+            "Visible number of subscriber-only posts with visible mediafiles field (".$shares[PostTypeEnum::SUBSCRIBER]['mediafiles']['shared'].") did not match expected (".$shares[PostTypeEnum::SUBSCRIBER]['mediafiles']['expected'].")"
+        );
+
+        $this->assertEquals(
+            $shares[PostTypeEnum::PRICED]['description']['expected'],
+            $shares[PostTypeEnum::PRICED]['description']['shared'],
+            "Visible number of purchase-only posts with visible description field (".$shares[PostTypeEnum::PRICED]['description']['shared'].") did not match expected (".$shares[PostTypeEnum::PRICED]['description']['expected'].")"
+        );
+        $this->assertEquals(
+            $shares[PostTypeEnum::PRICED]['mediafiles']['expected'],
+            $shares[PostTypeEnum::PRICED]['mediafiles']['shared'],
+            "Visible number of purchase-only posts with visible mediafiles field (".$shares[PostTypeEnum::PRICED]['mediafiles']['shared'].") did not match expected (".$shares[PostTypeEnum::PRICED]['mediafiles']['expected'].")"
         );
 
         // [ ] %TODO switch for follower, make sure we can't see subscrie-only post's data such as description, mediafiles, etc

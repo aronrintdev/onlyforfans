@@ -255,7 +255,7 @@ class RestPostsTest extends TestCase
 
         // --
 
-        // 1st file
+        // attach 1st file
         $payload = [
             'mftype' => MediafileTypeEnum::POST,
             'mediafile' => $files[0],
@@ -265,7 +265,7 @@ class RestPostsTest extends TestCase
         $response = $this->actingAs($creator)->ajaxJSON('POST', route('mediafiles.store'), $payload);
         $response->assertStatus(201);
 
-        // 2nd file
+        // attach 2nd file
         $payload = [
             'mftype' => MediafileTypeEnum::POST,
             'mediafile' => $files[1],
@@ -406,14 +406,46 @@ class RestPostsTest extends TestCase
      */
     public function test_subscriber_can_view_subcribe_only_post_on_my_timeline()
     {
-        $timeline = Timeline::has('followers', '>=', 1)
+        Storage::fake('s3');
+
+        $timeline = Timeline::has('subscribers', '>=', 1)
             ->whereHas('posts', function($q1) {
                 $q1->where('type', PostTypeEnum::SUBSCRIBER);
             })->firstOrFail();
         $creator = $timeline->user;
-        $post = $timeline->posts->where('type', PostTypeEnum::SUBSCRIBER)->first();
-        $fan = $timeline->followers[0];
+        $fan = $timeline->subscribers[0];
 
+        // --
+
+        // Create a subscribe-only post...
+        $payload = [
+            'timeline_id' => $timeline->id,
+            'description' => $this->faker->realText,
+            'type' => PostTypeEnum::SUBSCRIBER,
+        ];
+        $response = $this->actingAs($creator)->ajaxJSON('POST', route('posts.store'), $payload);
+        $response->assertStatus(201);
+        $content = json_decode($response->content());
+        $this->assertNotNull($content->post);
+        $post = Post::find($content->post->id);
+
+        $filenames = [
+            $this->faker->slug,
+        ];
+        $files = [
+            UploadedFile::fake()->image($filenames[0], 200, 200),
+        ];
+        // attach 1st file
+        $payload = [
+            'mftype' => MediafileTypeEnum::POST,
+            'mediafile' => $files[0],
+            'resource_type' => 'posts',
+            'resource_id' => $post->id,
+        ];
+        $response = $this->actingAs($creator)->ajaxJSON('POST', route('mediafiles.store'), $payload);
+        $response->assertStatus(201);
+
+        /* ?? is this necessary? Posts are subscribe-only or not
         // [ ] set to premium/subscribe...workaround until shareables seeder is fixed
         // to guarantee some subscribers not just followers
         DB::table('shareables')
@@ -423,28 +455,89 @@ class RestPostsTest extends TestCase
             ->update([
                 'access_level' => 'premium',
             ]);
+         */
         $response = $this->actingAs($fan)->ajaxJSON('GET', route('posts.show', $post->id));
         $response->assertStatus(200);
+        $content = json_decode($response->content());
+        $this->assertNotNull($content->data);
+
+        $this->assertObjectHasAttribute('description', $content->data);
+        $this->assertNotNull($content->data->description);
+        $this->assertObjectHasAttribute('mediafiles', $content->data);
+        $this->assertNotNull($content->data->mediafiles);
+        $this->assertEquals(1, count($content->data->mediafiles));
+        $this->assertEquals($filenames[0], $content->data->mediafiles[0]->mfname);
     }
 
     /**
      *  @group posts
      *  @group regression
      */
-    public function test_nonsubscriber_can_not_view_subcribe_only_post_on_my_timeline()
+    public function test_nonsubscribed_follower_can_not_view_subcribe_only_post_content_on_my_timeline()
     {
+        Storage::fake('s3');
+
         $timeline = Timeline::has('followers', '>=', 1)
             ->whereHas('posts', function($q1) {
                 $q1->where('type', PostTypeEnum::SUBSCRIBER);
             })->firstOrFail();
         $creator = $timeline->user;
-        $post = $timeline->posts->where('type', PostTypeEnum::SUBSCRIBER)->first();
-        $nonfan = User::whereDoesntHave('subscribedtimelines', function($q1) use(&$timeline) {
+
+        $fan = $timeline->followers()->whereDoesntHave('subscribedtimelines', function($q1) use(&$timeline) {
             $q1->where('timelines.id', $timeline->id);
         })->where('id', '<>', $creator->id)->first();
+        $this->assertTrue( $timeline->followers->contains($fan->id) );
+        $this->assertFalse( $timeline->subscribers->contains($fan->id) );
 
-        $response = $this->actingAs($nonfan)->ajaxJSON('GET', route('posts.show', $post->id));
-        $response->assertStatus(403);
+        // ---
+
+        $payload = [
+            'timeline_id' => $timeline->id,
+            'description' => $this->faker->realText,
+            'type' => PostTypeEnum::SUBSCRIBER,
+        ];
+        $response = $this->actingAs($creator)->ajaxJSON('POST', route('posts.store'), $payload);
+        $response->assertStatus(201);
+        $content = json_decode($response->content());
+        $this->assertNotNull($content->post);
+        $post = Post::find($content->post->id);
+
+        $filenames = [
+            $this->faker->slug,
+            $this->faker->slug,
+        ];
+        $files = [
+            UploadedFile::fake()->image($filenames[0], 200, 200),
+            UploadedFile::fake()->image($filenames[1], 200, 200),
+        ];
+
+        // attach 1st file
+        $payload = [
+            'mftype' => MediafileTypeEnum::POST,
+            'mediafile' => $files[0],
+            'resource_type' => 'posts',
+            'resource_id' => $post->id,
+        ];
+        $response = $this->actingAs($creator)->ajaxJSON('POST', route('mediafiles.store'), $payload);
+        $response->assertStatus(201);
+
+        // attach 2nd file
+        $payload = [
+            'mftype' => MediafileTypeEnum::POST,
+            'mediafile' => $files[1],
+            'resource_type' => 'posts',
+            'resource_id' => $post->id,
+        ];
+        $response = $this->actingAs($creator)->ajaxJSON('POST', route('mediafiles.store'), $payload);
+        $response->assertStatus(201);
+
+        $response = $this->actingAs($fan)->ajaxJSON('GET', route('posts.show', $post->id));
+        $response->assertStatus(200);
+        $content = json_decode($response->content());
+        $this->assertNotNull($content->data);
+
+        $this->assertObjectNotHasAttribute('description', $content->data);
+        $this->assertObjectNotHasAttribute('mediafiles', $content->data);
     }
 
     /**
