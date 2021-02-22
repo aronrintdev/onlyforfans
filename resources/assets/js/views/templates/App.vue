@@ -26,6 +26,11 @@ export default {
   computed: {
     ...Vuex.mapState(['session_user']),
   },
+
+  data: () => ({
+    onlineMonitor: null,
+  }),
+
   methods: {
     ...Vuex.mapActions(['getMe']),
     logout() {
@@ -34,7 +39,21 @@ export default {
         window.location = '/login'
       })
     },
+    startOnlineMonitor() {
+      if (this.session_user) {
+        this.onlineMonitor = this.$echo.join(`user.status.${this.session_user.id}`)
+      }
+    },
   },
+
+  watch: {
+    session_user(value) {
+      if (value) {
+        this.startOnlineMonitor()
+      }
+    },
+  },
+
   mounted() {
     if (!this.session_user) {
       this.getMe()
