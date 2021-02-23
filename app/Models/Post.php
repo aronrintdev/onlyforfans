@@ -23,6 +23,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Interfaces\Purchaseable; // was PaymentReceivable
+use App\Models\Traits\SluggableTraits;
 
 class Post extends Model implements UuidId, Ownable, Deletable, Purchaseable, Likeable, Reportable, Commentable
 {
@@ -32,6 +33,7 @@ class Post extends Model implements UuidId, Ownable, Deletable, Purchaseable, Li
     use OwnableTraits;
     use LikeableTraits;
     use Sluggable;
+    use SluggableTraits;
 
     //--------------------------------------------
     // Boot

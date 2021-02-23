@@ -19,6 +19,7 @@ class Vaultfolder extends BaseModel implements Guidable, Ownable
     use HasFactory;
     use OwnableFunctions;
     use Sluggable;
+    use SluggableTraits;
 
     protected $table = 'vaultfolders';
 

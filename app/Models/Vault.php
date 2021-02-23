@@ -5,6 +5,7 @@ namespace App\Models;
 use DB;
 use App\Interfaces\Ownable;
 use App\Interfaces\Guidable;
+use App\Models\Traits\SluggableTraits;
 use App\Models\Traits\UsesUuid;
 use App\Traits\OwnableFunctions;
 use Cviebrock\EloquentSluggable\Sluggable;
@@ -17,6 +18,7 @@ class Vault extends BaseModel implements Guidable, Ownable
     use HasFactory;
     use OwnableFunctions;
     use Sluggable;
+    use SluggableTraits;
 
     protected $guarded = ['id', 'created_at', 'updated_at'];
     public static $vrules = [];
