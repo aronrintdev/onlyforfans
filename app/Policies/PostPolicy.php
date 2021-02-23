@@ -13,14 +13,15 @@ class PostPolicy extends BasePolicy
     protected $policies = [
         'viewAny'     => 'permissionOnly',
         'view'        => 'isOwner:pass isBlockedByOwner:fail', // if owner pass, if blocked fail, else check function
-        'like'        => 'isOwner:pass isBlockedByOwner:fail', // if owner pass, if blocked fail, else check function
-        'comment'     => 'isOwner:pass isBlockedByOwner:fail', // if owner pass, if blocked fail, else check function
-        'purchase'    => 'isOwner:fail isBlockedByOwner:fail', // if owner fail, if blocked fail, else check function
+        'contentView' => 'isOwner:pass isBlockedByOwner:fail',
+        'like'        => 'isOwner:pass isBlockedByOwner:fail',
+        'comment'     => 'isOwner:pass isBlockedByOwner:fail',
+        'purchase'    => 'isOwner:fail isBlockedByOwner:fail',
         'tip'         => 'isOwner:fail isBlockedByOwner:fail',
         'update'      => 'isOwner:next:fail', // if non-owner fail, else check function
-        'delete'      => 'isOwner:next:fail', // if non-owner fail, else check function
-        'forceDelete' => 'isOwner:next:fail', // if non-owner fail, else check function
-        'restore'     => 'isOwner:pass:fail', // if owner pass, all others fail
+        'delete'      => 'isOwner:next:fail',
+        'forceDelete' => 'isOwner:next:fail',
+        'restore'     => 'isOwner:pass:fail',
     ];
 
     /*
@@ -31,24 +32,31 @@ class PostPolicy extends BasePolicy
 
     protected function view(User $user, Post $post)
     {
-        //return $post->timeline->followers->contains($user->id);
+        // %NOTE: followers can view all posts, but certain fields (description, mediafiles, etc) will be hidden/locked based on subscriber or purchase status
+        return $post->timeline->followers->contains($user->id);
+    }
+
+    protected function contentView(User $user, Post $post)
+    {
+        // content view (eg, images attached to the post) is checked granularly: dep on post type and user's 'status'
         switch ($post->type) {
         case PostTypeEnum::FREE:
             return $post->timeline->followers->count()
                 && $post->timeline->followers->contains($user->id);
         case PostTypeEnum::SUBSCRIBER:
+            $a = $post->timeline->subscribers->count();
+            $b = $post->timeline->subscribers->contains($user->id);
             return $post->timeline->subscribers->count()
                 && $post->timeline->subscribers->contains($user->id);
-            //return $post->timeline->subscribers->contains($user->id);
-            /*
-            return $post->timeline->followers->count()
-                && $post->timeline->followers()->wherePivot('access_level','premium')->count()
-                && $post->timeline->followers()->wherePivot('access_level','premium')->contains($user->id);
-             */
+            //return $post->timeline->followers->count()
+                //&& $post->timeline->followers()->wherePivot('access_level','premium')->count()
+                //&& $post->timeline->followers()->wherePivot('access_level','premium')->contains($user->id);
         case PostTypeEnum::PRICED:
             return $post->sharees->count()
                 && $post->sharees->contains($user->id); // premium (?)
         }
+        //return $post->timeline->followers->contains($user->id);
+        //return $post->timeline->subscribers->contains($user->id);
     }
 
     /*
