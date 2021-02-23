@@ -42,12 +42,18 @@ class RestFeedsTest extends TestCase
         $payload = [];
         $response = $this->actingAs($fan)->ajaxJSON('GET', route('feeds.home'), $payload);
         $response->assertStatus(200);
+        $response->assertJsonStructure([
+            'data',
+            'links',
+            'meta' => [ 'current_page', 'from', 'last_page', 'path', 'per_page', 'to', 'total', ],
+        ]);
 
         $content = json_decode($response->content());
-        $this->assertObjectHasAttribute('feeditems', $content);
+        $this->assertEquals(1, $content->meta->current_page);
+        //$this->assertObjectHasAttribute('feeditems', $content);
         $fan->refresh();
 
-        $posts = collect($content->feeditems);
+        $posts = collect($content->data);
 
         // check number of posts matches count of all post types from all followed timelines 
         $followedTimelines = $fan->followedtimelines()->pluck('id');
@@ -253,8 +259,14 @@ class RestFeedsTest extends TestCase
         $payload = [];
         $response = $this->actingAs($fan)->ajaxJSON('GET', route('feeds.show', $timeline->id), $payload);
         $response->assertStatus(200);
+        $response->assertJsonStructure([
+            'data',
+            'links',
+            'meta' => [ 'current_page', 'from', 'last_page', 'path', 'per_page', 'to', 'total', ],
+        ]);
         $content = json_decode($response->content());
-        $this->assertObjectHasAttribute('data', $content);
+        $this->assertEquals(1, $content->meta->current_page);
+        //$this->assertObjectHasAttribute('data', $content);
         $fan->refresh();
         $timeline->refresh();
 
