@@ -9,8 +9,8 @@ class Comment extends JsonResource
     public function toArray($request)
     {
         $sessionUser = $request->user();
-        $comment = CommentModel::find($this->id);
-        $hasAccess = $sessionUser->can('view', $comment);
+        $model = CommentModel::find($this->id);
+        $hasAccess = $sessionUser->can('view', $model);
 
         return [
             'id' => $this->id,

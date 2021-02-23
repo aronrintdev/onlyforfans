@@ -10,8 +10,8 @@ class Post extends JsonResource
     public function toArray($request)
     {
         $sessionUser = $request->user();
-        $post = PostModel::find($this->id); // %FIXME: n+1 performance issue (not so bad if paginated?)
-        $hasAccess = $sessionUser->can('contentView', $post);
+        $model = PostModel::find($this->id); // %FIXME: n+1 performance issue (not so bad if paginated?)
+        $hasAccess = $sessionUser->can('contentView', $model);
 
         return [
             'id' => $this->id,
