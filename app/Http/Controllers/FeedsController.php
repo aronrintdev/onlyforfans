@@ -40,12 +40,7 @@ class FeedsController extends AppBaseController
         $this->authorize('view', $timeline); // must be follower or subscriber
         $query = Post::query();
         $query->where('postable_type', 'timelines')->where('postable_id', $timeline->id);
-        $posts = $query->get();
-        /*
-        return response()->json([
-            'feeditems' => $posts,
-        ]);
-         */
+        $posts = $query->paginate( $request->input('take', env('MAX_POSTS_PER_REQUEST', 10)) );
         return new PostCollection($posts);
     }
 

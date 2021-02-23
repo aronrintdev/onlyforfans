@@ -93,11 +93,19 @@ class RestFeedsTest extends TestCase
         $this->assertTrue( $timeline->followers->contains($fan->id) );
         $this->assertFalse( $timeline->subscribers->contains($fan->id) );
 
-        $payload = [];
+        $payload = [
+            //'take' => 1,
+        ];
         $response = $this->actingAs($fan)->ajaxJSON('GET', route('feeds.show', $timeline->id), $payload);
         $response->assertStatus(200);
+        $response->assertJsonStructure([
+            'data',
+            'links',
+            'meta' => [ 'current_page', 'from', 'last_page', 'path', 'per_page', 'to', 'total', ],
+        ]);
         $content = json_decode($response->content());
-        $this->assertObjectHasAttribute('data', $content);
+        $this->assertEquals(1, $content->meta->current_page);
+
         $fan->refresh();
         $timeline->refresh();
 
