@@ -26,7 +26,7 @@ class StoriesTest extends TestCase
      *  @group stories
      *  @group regression
      */
-    public function test_can_index_my_stories()
+    public function test_can_list_my_stories()
     {
         $timeline = Timeline::has('stories', '>=', 1)->has('followers', '>=', 1)->first();
         $creator = $timeline->user;
@@ -38,9 +38,15 @@ class StoriesTest extends TestCase
         ];
         $response = $this->actingAs($creator)->ajaxJSON('GET', route('stories.index'), $payload);
         $response->assertStatus(200);
+        $response->assertJsonStructure([
+            'data',
+            'links',
+            'meta' => [ 'current_page', 'from', 'last_page', 'path', 'per_page', 'to', 'total', ],
+        ]);
         $content = json_decode($response->content());
-        $this->assertNotNull($content->stories);
-        $storiesR = $content->stories;
+        $this->assertEquals(1, $content->meta->current_page);
+        $this->assertNotNull($content->data);
+        $storiesR = $content->data;
         $this->assertGreaterThan(0, count($storiesR));
 
         $nonTimelineStories = collect($storiesR)->filter( function($s) use(&$timeline) {
@@ -53,7 +59,7 @@ class StoriesTest extends TestCase
      *  @group stories
      *  @group regression
      */
-    public function test_can_index_stories_filtered_by_timeline()
+    public function test_can_list_stories_filtered_by_timeline()
     {
         $timeline = Timeline::has('stories', '>=', 1)->has('followers', '>=', 1)->first();
         $creator = $timeline->user;
@@ -66,9 +72,15 @@ class StoriesTest extends TestCase
         ];
         $response = $this->actingAs($fan)->ajaxJSON('GET', route('stories.index'), $payload);
         $response->assertStatus(200);
+        $response->assertJsonStructure([
+            'data',
+            'links',
+            'meta' => [ 'current_page', 'from', 'last_page', 'path', 'per_page', 'to', 'total', ],
+        ]);
         $content = json_decode($response->content());
-        $this->assertNotNull($content->stories);
-        $storiesR = $content->stories;
+        $this->assertEquals(1, $content->meta->current_page);
+        $this->assertNotNull($content->data);
+        $storiesR = $content->data;
         $this->assertGreaterThan(0, count($storiesR));
 
         $nonTimelineStories = collect($storiesR)->filter( function($s) use(&$timeline) {
@@ -81,7 +93,7 @@ class StoriesTest extends TestCase
      *  @group stories
      *  @group regression
      */
-    public function test_can_not_index_stories_on_unfollowed_timeline()
+    public function test_can_not_list_stories_on_unfollowed_timeline()
     {
         $timeline = Timeline::has('stories', '>=', 1)->has('followers', '>=', 1)->first();
         $creator = $timeline->user;
@@ -102,7 +114,7 @@ class StoriesTest extends TestCase
      *  @group stories
      *  @group regression
      */
-    public function test_can_index_stories_on_followed_timelines()
+    public function test_can_list_stories_on_followed_timelines()
     {
         $timeline = Timeline::has('stories', '>=', 1)->has('followers', '>=', 1)->first();
         $creator = $timeline->user;
@@ -115,9 +127,15 @@ class StoriesTest extends TestCase
         ];
         $response = $this->actingAs($fan)->ajaxJSON('GET', route('stories.index'), $payload);
         $response->assertStatus(200);
+        $response->assertJsonStructure([
+            'data',
+            'links',
+            'meta' => [ 'current_page', 'from', 'last_page', 'path', 'per_page', 'to', 'total', ],
+        ]);
         $content = json_decode($response->content());
-        $this->assertNotNull($content->stories);
-        $storiesR = $content->stories;
+        $this->assertEquals(1, $content->meta->current_page);
+        $this->assertNotNull($content->data);
+        $storiesR = $content->data;
         $this->assertGreaterThan(0, count($storiesR));
 
         $storiesOnTimelineNotFollowedByFan = collect($storiesR)->filter( function($s) use(&$fan) {

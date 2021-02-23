@@ -7,6 +7,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use App\Http\Resources\StoryCollection;
 use App\Models\Mediafile;
 use App\Models\Setting;
 use App\Models\Story;
@@ -55,11 +56,9 @@ class StoriesController extends AppBaseController
                 $query->where($k, $v);
             }
         }
-        $stories = $query->get();
 
-        return response()->json([
-            'stories' => $stories,
-        ]);
+        $data = $query->paginate( $request->input('take', env('MAX_STORIES_PER_REQUEST', 10)) );
+        return new StoryCollection($data);
     }
 
     public function store(Request $request)
