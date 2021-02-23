@@ -6,6 +6,7 @@ use Exception;
 use Throwable;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
+use App\Http\Resources\CommentCollection;
 use App\Models\Comment;
 use App\Models\Post;
 use App\Models\User;
@@ -52,9 +53,8 @@ class CommentsController extends AppBaseController
             }
         }
 
-        return response()->json([
-            'comments' => $query->get(),
-        ]);
+        $data = $query->paginate( $request->input('take', env('MAX_COMMENTS_PER_REQUEST', 10)) );
+        return new CommentCollection($data);
     }
 
     public function show(Request $request, Comment $comment)
