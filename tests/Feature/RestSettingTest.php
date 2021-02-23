@@ -16,7 +16,7 @@ class RestSettingTest extends TestCase
 {
     /**
      *  @group settings
-     *  @group regression
+     *  @group OFF-regression
      */
     public function test_can_index_creator_settings()
     {
@@ -30,7 +30,7 @@ class RestSettingTest extends TestCase
 
     /**
      *  @group settings
-     *  @group regression
+     *  @group OFF-regression
      */
     public function test_can_index_fan_settings()
     {
@@ -43,7 +43,7 @@ class RestSettingTest extends TestCase
 
     /**
      *  @group settings
-     *  @group regression
+     *  @group OFF-regression
      */
     public function test_can_creator_edit_name()
     {
@@ -65,7 +65,7 @@ class RestSettingTest extends TestCase
 
     /**
      *  @group settings
-     *  @group regression
+     *  @group OFF-regression
      */
     public function test_can_creator_edit_username()
     {
@@ -87,7 +87,7 @@ class RestSettingTest extends TestCase
 
     /**
      *  @group settings
-     *  @group regression
+     *  @group OFF-regression
      */
     public function test_can_creator_edit_email()
     {
@@ -109,7 +109,7 @@ class RestSettingTest extends TestCase
 
     /**
      *  @group settings
-     *  @group regression
+     *  @group OFF-regression
      */
     public function test_can_fan_edit_name()
     {
@@ -131,7 +131,7 @@ class RestSettingTest extends TestCase
 
     /**
      *  @group settings
-     *  @group regression
+     *  @group OFF-regression
      */
     public function test_can_fan_edit_username()
     {
@@ -153,7 +153,7 @@ class RestSettingTest extends TestCase
 
     /**
      *  @group settings
-     *  @group regression
+     *  @group OFF-regression
      */
     public function test_can_fan_edit_email()
     {
@@ -175,7 +175,7 @@ class RestSettingTest extends TestCase
 
     /**
      *  @group settings
-     *  @group regression
+     *  @group OFF-regression
      */
     public function test_can_creator_set_localization()
     {
@@ -197,7 +197,7 @@ class RestSettingTest extends TestCase
 
     /**
      *  @group settings
-     *  @group regression
+     *  @group OFF-regression
      */
     public function test_can_fan_set_localization()
     {
@@ -220,7 +220,7 @@ class RestSettingTest extends TestCase
 
     /**
      *  @group settings
-     *  @group regression
+     *  @group OFF-regression
      */
     public function test_can_creator_set_subscription_price()
     {
@@ -256,7 +256,7 @@ class RestSettingTest extends TestCase
 
     /**
      *  @group settings
-     *  @group regression
+     *  @group OFF-regression
      */
     public function test_can_creator_set_referral_rewards_enable()
     {
@@ -280,7 +280,7 @@ class RestSettingTest extends TestCase
 
     /**
      *  @group settings
-     *  @group regression
+     *  @group OFF-regression
      */
     public function test_can_creator_set_enable_or_disable_follow_for_free()
     {
@@ -317,7 +317,7 @@ class RestSettingTest extends TestCase
 
     /**
      *  @group settings
-     *  @group regression
+     *  @group OFF-regression
      */
     public function test_can_creator_edit_profile()
     {
@@ -368,7 +368,7 @@ class RestSettingTest extends TestCase
 
     /**
      *  @group settings
-     *  @group regression
+     *  @group OFF-regression
      */
     public function test_can_fan_edit_profile()
     {
@@ -420,7 +420,7 @@ class RestSettingTest extends TestCase
 
     /**
      *  @group settings
-     *  @group regression
+     *  @group OFF-regression
      */
     public function test_can_creator_edit_privacy() {
 
@@ -503,7 +503,7 @@ class RestSettingTest extends TestCase
 
     /**
      *  @group settings
-     *  @group regression
+     *  @group OFF-regression
      */
     public function test_can_add_blocked_user() {
         $timeline = Timeline::has('posts', '>=', 1)->has('followers', '>=', 1)->first();
@@ -521,7 +521,7 @@ class RestSettingTest extends TestCase
 
     /**
      *  @group settings
-     *  @group regression
+     *  @group OFF-regression
      */
     public function test_can_add_watermark() {
         $timeline = Timeline::has('posts', '>=', 1)->has('followers', '>=', 1)->first();
@@ -552,7 +552,7 @@ class RestSettingTest extends TestCase
 
     /**
      *  @group settings
-     *  @group regression
+     *  @group OFF-regression
      */
     public function test_can_view_creator_earnings_overview()
     {
@@ -564,7 +564,7 @@ class RestSettingTest extends TestCase
 
     /**
      *  @group settings
-     *  @group regression
+     *  @group OFF-regression
      */
     public function test_can_view_creator_login_sessions()
     {
@@ -577,7 +577,7 @@ class RestSettingTest extends TestCase
 
     /**
      *  @group settings
-     *  @group regression
+     *  @group OFF-regression
      */
     public function test_can_view_creator_referrals()
     {
