@@ -44,16 +44,16 @@
 
 <script>
 import Vuex from 'vuex';
-//import { eventBus } from '../../app';
+//import { eventBus } from '@/app';
 import vue2Dropzone from 'vue2-dropzone';
 import 'vue2-dropzone/dist/vue2Dropzone.min.css';
-import ImageIcon from '../common/icons/ImageIcon.vue';
-import CameraIcon from '../common/icons/CameraIcon.vue';
-import EmojiIcon from '../common/icons/EmojiIcon.vue';
-import MicIcon from '../common/icons/MicIcon.vue';
-import LocationPinIcon from '../common/icons/LocationPinIcon.vue';
-import TimerIcon from '../common/icons/TimerIcon.vue';
-import CalendarIcon from '../common/icons/CalendarIcon.vue';
+import ImageIcon from '@components/common/icons/ImageIcon.vue';
+import CameraIcon from '@components/common/icons/CameraIcon.vue';
+import EmojiIcon from '@components/common/icons/EmojiIcon.vue';
+import MicIcon from '@components/common/icons/MicIcon.vue';
+import LocationPinIcon from '@components/common/icons/LocationPinIcon.vue';
+import TimerIcon from '@components/common/icons/TimerIcon.vue';
+import CalendarIcon from '@components/common/icons/CalendarIcon.vue';
 
 export default {
 

@@ -11,13 +11,15 @@
     <title>{{ config('app.name', 'Laravel') }}</title>
 
     <!-- Styles -->
-    <link href="{{ mix('css/app2.css') }}" rel="stylesheet">
+    <link href="{{ mix('css/app.css') }}" rel="stylesheet">
 
     <!-- Static Data -->
     <script>
         const myUserId = '{{ Auth::user()->id }}';
     </script>
 
+    {{-- Routing --}}
+    @routes()
 </head>
 <body>
     <div id="app">
@@ -28,7 +30,7 @@
     </div>
 
     <!-- Scripts -->
-    <script src="{{ mix('js/app2.js') }}"></script>
+    <script src="{{ mix('js/app.js') }}"></script>
     <script src="{{ mix('js/manifest.js') }}"></script>
     <script src="{{ mix('js/vendor.js') }}"></script>
 </body>

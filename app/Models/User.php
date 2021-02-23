@@ -63,13 +63,17 @@ class User extends Authenticatable implements PaymentSendable, Blockable
     public function toArray()
     {
         $array = parent::toArray();
-        $timeline = $this->timeline->toArray();
-        foreach ($timeline as $key => $value) {
-            if ($key != 'id') {
-                $array[$key] = $value;
-            }
-        }
-        $array['avatar'] = $this->avatar;
+        /**
+         * Removed, all attributes seem to still be set without needing this and it messes up setVisible()
+         * TODO: Remove this after confirming ui still gets what it needs.
+         */
+        // $timeline = $this->timeline->toArray();
+        // foreach ($timeline as $key => $value) {
+        //     if ($key != 'id') {
+        //         $array[$key] = $value;
+        //     }
+        // }
+        // $array['avatar'] = $this->avatar;
         return $array;
     }
 

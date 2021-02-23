@@ -82,6 +82,7 @@ class CommentsController extends AppBaseController
         $attrs['commentable_id'] = $post->id;
 
         $comment = Comment::create($attrs);
+        $comment->prepFor();
 
         return response()->json([
             'comment' => $comment,
@@ -108,6 +109,14 @@ class CommentsController extends AppBaseController
         $this->authorize('delete', $comment);
         $comment->delete();
         return response()->json([]);
+    }
+
+    /**
+     * Toggle user like on this comment
+     * TODO: Complete this functionality
+     */
+    public function toggleLike(Request $request, Comment $comment) {
+        return $comment;
     }
 
 }

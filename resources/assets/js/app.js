@@ -39,6 +39,9 @@ Vue.use(VueLogger, options);
 import VueI18n from 'vue-i18n';
 Vue.use(VueI18n);
 
+import VueObserveVisibility from 'vue-observe-visibility';
+Vue.use(VueObserveVisibility);
+
 import ForceCompute from './plugins/forceCompute';
 Vue.use(ForceCompute);
 
@@ -69,12 +72,6 @@ Vue.use(VueTimeago, {
  * the page. Then, you may begin adding components to this application
  * or customize the JavaScript scaffolding to fit your unique needs.
  */
-
-
-Vue.component('show-feed', require('./pages/ShowFeed.vue').default);
-Vue.component('home-feed', require('./pages/HomeFeed.vue').default);
-
-// ---
 
 Vue.component('main-navbar', require('./components/common/MainNavbar.vue').default);
 Vue.component('online-status', require('./components/user/OnlineStatus.vue').default);

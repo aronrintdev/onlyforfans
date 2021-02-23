@@ -34,9 +34,11 @@ class Model extends EloquentModel
     }
      */
 
-
-    public function getMorphString(string $class) : string
+    public function getMorphString(string $class = null) : string
     {
+        if (!$class) {
+            $class = get_class($this);
+        }
         return array_flip(Relation::morphMap())[$class] ?? $class;
     }
 }
