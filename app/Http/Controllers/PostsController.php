@@ -15,7 +15,6 @@ use App\Models\Timeline;
 use App\Models\Mediafile;
 use App\Enums\PostTypeEnum;
 use App\Enums\PaymentTypeEnum;
-use Illuminate\Support\Facades\Log;
 
 class PostsController extends AppBaseController
 {
