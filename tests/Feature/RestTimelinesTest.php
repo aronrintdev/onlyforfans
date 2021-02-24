@@ -30,13 +30,19 @@ class TimelinesTest extends TestCase
         $payload = [];
         $response = $this->actingAs($creator)->ajaxJSON('GET', route('timelines.feeditems', $timeline->id), $payload);
         $response->assertStatus(200);
+        $response->assertJsonStructure([
+            'data',
+            'links',
+            'meta' => [ 'current_page', 'from', 'last_page', 'path', 'per_page', 'to', 'total', ],
+        ]);
 
         $content = json_decode($response->content());
-        $this->assertNotNull($content->feeditems);
-        $this->assertObjectHasAttribute('current_page', $content->feeditems);
-        $this->assertObjectHasAttribute('data', $content->feeditems);
-        $this->assertGreaterThan(0, count($content->feeditems->data));
-        $this->assertEquals(1, $content->feeditems->current_page);
+        $this->assertEquals(1, $content->meta->current_page);
+        $this->assertNotNull($content->data);
+        $this->assertObjectHasAttribute('current_page', $content->data);
+        $this->assertObjectHasAttribute('data', $content->data);
+        $this->assertGreaterThan(0, count($content->data->data));
+        $this->assertEquals(1, $content->data->current_page);
     }
 
     /**
