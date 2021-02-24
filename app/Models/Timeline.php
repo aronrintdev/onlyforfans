@@ -43,13 +43,8 @@ class Timeline extends Model implements Purchaseable, Ownable, Reportable
     public function sluggable(): array
     {
         return ['slug' => [
-            'source' => [ 'sluggableContent' ],
+            'source' => [ 'user.username' ],
         ]];
-    }
-
-    public function getSluggableContentAttribute(): string
-    {
-        return $this->user->username;
     }
 
     // includes subscribers (ie premium + default followers)
