@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Traits\LikeableTraits;
 use Cviebrock\EloquentSluggable\Sluggable;
 use App\Models\Traits\OwnableTraits;
+use App\Models\Traits\SluggableTraits;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection;
@@ -20,6 +21,7 @@ class Story extends Model implements Likeable, Ownable
     use LikeableTraits;
     use SoftDeletes;
     use Sluggable;
+    use SluggableTraits;
     use OwnableTraits;
 
     protected $guarded = [

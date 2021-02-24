@@ -4,7 +4,7 @@
       class="masthead text-white text-center"
       v-bind:style="{ backgroundImage: 'url(' + follower.cover.filepath + ')' }"
     >
-      <section class="overlay"></section>
+      <div class="overlay" />
       <section class="avatar-img">
         <router-link :to="{ name: 'user.timeline', params: { username: follower.username } }">
           <b-img
@@ -14,7 +14,7 @@
             :src="follower.avatar.filepath"
             :alt="follower.name"
             :title="follower.name"
-          ></b-img>
+          />
         </router-link>
       </section>
       <section class="dropdown profile-ctrl">
@@ -42,35 +42,13 @@
               @{{ follower.username }}
             </router-link>
           </p>
+          <div>
+            <OnlineStatus :user="timeline.user" />
+          </div>
         </b-col>
 
         <b-col cols="12" md="4" offset-md="2" class="tag-stats my-0">
-          <ul class="list-unstyled list-inline text-right">
-            <li class="tag-post_count list-inline-item pr-3">
-              <span>
-                {{ timeline.userstats.post_count }}
-                <b-icon icon="bookmarks-fill" variant="default"></b-icon>
-              </span>
-            </li>
-            <li class="tag-follower_count list-inline-item pr-3">
-              <span>
-                {{ timeline.userstats.follower_count }}
-                <b-icon icon="people-fill" variant="default"></b-icon>
-              </span>
-            </li>
-            <li class="tag-like_count list-inline-item pr-3">
-              <span>
-                {{ timeline.userstats.like_count }}
-                <b-icon icon="heart-fill" variant="default"></b-icon>
-              </span>
-            </li>
-            <li class="tag-following_count list-inline-item">
-              <span>
-                {{ timeline.userstats.following_count }}
-                <b-icon icon="person-check-fill" variant="default"></b-icon>
-              </span>
-            </li>
-          </ul>
+          <Stats :stats="timeline.userstats" />
         </b-col>
       </b-row>
     </b-container>
@@ -79,15 +57,21 @@
 
 <script>
 import Vuex from 'vuex'
+import Stats from './banner/Stats'
+import OnlineStatus from '@components/user/OnlineStatus'
 
 export default {
+  components: {
+    OnlineStatus,
+    Stats,
+  },
   props: {
-    session_user: null,
     timeline: null,
   },
 
   computed: {
     ...Vuex.mapState(['is_loading']),
+    ...Vuex.mapGetters(['session_user']),
 
     follower() {
       return this.timeline.user
@@ -96,48 +80,43 @@ export default {
 
   data: () => ({}),
 
-  created() {},
-
   methods: {},
 
-  components: {},
+  created() {},
+
 }
 </script>
 
-<style scoped>
-body .tag-crate {
+<style lang="scss" scoped>
+.tag-crate {
   background-color: #fff;
 }
 
-body header.masthead {
+header.masthead {
   position: relative;
-}
-body header.masthead {
   padding-top: 12rem;
   padding-bottom: 12rem;
-}
-body header.masthead {
   position: relative;
   background-color: #343a40;
   background-size: cover;
   padding-top: 8rem;
   padding-bottom: 8rem;
-}
 
-body header.masthead .profile-ctrl.dropdown {
-  position: absolute;
-  top: 0;
-  right: 0;
+  .profile-ctrl.dropdown {
+    position: absolute;
+    top: 0;
+    right: 0;
+  }
 }
 
 /* Why doesn't this CSS have any effect ? */
-body header.masthead .profile-ctrl.dropdown button {
+header.masthead .profile-ctrl.dropdown button {
   color: red !important;
   border: none;
   background: transparent;
 }
 
-body .avatar-img {
+.avatar-img {
   position: absolute;
   left: 16px;
   top: 185px; /* %TODO: bg image height - 1/2*avatar height */
@@ -145,26 +124,28 @@ body .avatar-img {
   height: 130px;
 }
 
-body .avatar-details a {
-  /*
-  color: #4a5568;
-  color: #7F8FA4;
-   */
-  color: #555;
-  text-decoration: none;
-  text-transform: capitalize;
-}
-
-body .avatar-details {
+.avatar-details {
   /*
   margin-left: 172px;
    */
   font-weight: 400;
-}
-body .avatar-details h2 {
-  font-size: 20px;
-}
-body .avatar-details p {
-  font-size: 16px;
+
+  a {
+    /*
+    color: #4a5568;
+    color: #7F8FA4;
+    */
+    color: #555;
+    text-decoration: none;
+    text-transform: capitalize;
+  }
+
+  h2 {
+    font-size: 20px;
+  }
+
+  p {
+    font-size: 16px;
+  }
 }
 </style>

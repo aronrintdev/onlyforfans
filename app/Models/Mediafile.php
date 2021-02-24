@@ -7,6 +7,7 @@ use App\Interfaces\Guidable;
 use App\Interfaces\Cloneable;
 use App\Models\Traits\UsesUuid;
 use App\Enums\MediafileTypeEnum;
+use App\Models\Traits\SluggableTraits;
 use App\Traits\OwnableFunctions;
 use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Support\Collection;
@@ -19,6 +20,7 @@ class Mediafile extends BaseModel implements Guidable, Ownable, Cloneable
     use HasFactory;
     use OwnableFunctions;
     use Sluggable;
+    use SluggableTraits;
 
     protected $table = 'mediafiles';
     protected $guarded = [
