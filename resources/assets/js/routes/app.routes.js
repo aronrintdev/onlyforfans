@@ -54,28 +54,28 @@ export const routes = [
 
   // User
   {
-    name: 'user.posts',
-    path: '/:username/posts',
+    name: 'timeline.posts',
+    path: '/:slug/posts',
     props: true,
   },
   {
-    name: 'user.followers',
-    path: '/:username/followers',
+    name: 'timeline.followers',
+    path: '/:slug/followers',
     props: true,
   },
   {
-    name: 'user.following',
-    path: '/:username/following',
+    name: 'timeline.following',
+    path: '/:slug/following',
     props: true,
   },
   {
-    name: 'user.earnings',
-    path: '/:username/earnings',
+    name: 'timeline.earnings',
+    path: '/:slug/earnings',
     props: true,
   },
   {
-    name: 'user.timeline',
-    path: '/:username',
+    name: 'timeline.show',
+    path: '/:slug',
     component: timelines.Show,
     props: true,
   },
