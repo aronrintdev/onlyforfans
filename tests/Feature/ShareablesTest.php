@@ -20,7 +20,7 @@ class ShareablesTest extends TestCase
     /**
      *  @group TODO-shareables
      */
-    public function test_can_index_shareables()
+    public function test_can_list_shareables()
     {
     }
 

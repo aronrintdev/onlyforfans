@@ -11,15 +11,17 @@ use App\Interfaces\Reportable;
 use App\Models\Traits\UsesUuid;
 use App\Interfaces\Purchaseable;
 use Illuminate\Support\Collection;
+use Cviebrock\EloquentSluggable\Sluggable;
 use App\Models\Traits\UsesShortUuid;
 use App\Enums\ShareableAccessLevelEnum;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Models\Traits\OwnableTraits;
+use App\Models\Traits\SluggableTraits;
 
 class Timeline extends Model implements Purchaseable, Ownable, Reportable
 {
-    use SoftDeletes, HasFactory, OwnableTraits, UsesUuid;
+    use SoftDeletes, HasFactory, OwnableTraits, UsesUuid, Sluggable, SluggableTraits;
 
     protected $keyType = 'string';
     protected $guarded = ['id', 'created_at', 'updated_at'];
@@ -37,6 +39,13 @@ class Timeline extends Model implements Purchaseable, Ownable, Reportable
         $array['cover_url'] = $this->cover()->get()->toArray();
         $array['avatar_url'] = $this->avatar()->get()->toArray();
         return $array;
+    }
+
+    public function sluggable(): array
+    {
+        return ['slug' => [
+            'source' => [ 'user.username' ],
+        ]];
     }
 
     // includes subscribers (ie premium + default followers)

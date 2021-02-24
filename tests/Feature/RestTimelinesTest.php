@@ -21,6 +21,7 @@ class TimelinesTest extends TestCase
     /**
      *  @group timelines
      *  @group regression
+     *  %TODO: DEPRECATE, use FeedsController (?)
      */
     public function test_owner_can_view_own_timeline_feed()
     {
@@ -31,12 +32,32 @@ class TimelinesTest extends TestCase
         $response = $this->actingAs($creator)->ajaxJSON('GET', route('timelines.feeditems', $timeline->id), $payload);
         $response->assertStatus(200);
 
+        //$content = json_decode($response->content());
+        //$this->assertEquals(1, $content->meta->current_page);
+        //$this->assertNotNull($content->data);
+        //$this->assertGreaterThan(0, count($content->data));
+    }
+    /**
+     *  @group timelines
+     *  @group regression
+     */
+    public function test_owner_can_view_own_timeline()
+    {
+        $timeline = Timeline::has('posts','>=',1)->has('followers','>=',1)->first(); // assume non-admin (%FIXME)
+        $creator = $timeline->user;
+
+        $payload = [];
+        $response = $this->actingAs($creator)->ajaxJSON('GET', route('timelines.show', $timeline->slug), $payload);
+        $response->assertStatus(200);
+
         $content = json_decode($response->content());
-        $this->assertNotNull($content->feeditems);
-        $this->assertObjectHasAttribute('current_page', $content->feeditems);
-        $this->assertObjectHasAttribute('data', $content->feeditems);
-        $this->assertGreaterThan(0, count($content->feeditems->data));
-        $this->assertEquals(1, $content->feeditems->current_page);
+        $this->assertObjectHasAttribute('slug', $content->timeline);
+        $this->assertObjectHasAttribute('name', $content->timeline);
+        $this->assertObjectHasAttribute('about', $content->timeline);
+
+        $this->assertNotNull($content->timeline->slug);
+        $this->assertNotNull($content->timeline->name);
+        $this->assertNotNull($content->timeline->about);
     }
 
     /**
@@ -175,6 +196,7 @@ class TimelinesTest extends TestCase
     /**
      *  @group timelines
      *  @group regression
+     *  @group here10
      */
     public function test_can_subscribe_to_timeline()
     {
@@ -196,7 +218,8 @@ class TimelinesTest extends TestCase
         // Check access (before: should be denied)
         // [ ] %TODO: actually this is more complex: they can access the timeline if follower (default), but can only see a subset
         //     of posts on it before subscription (premium)
-        $response = $this->actingAs($fan)->ajaxJSON('GET', route('timelines.show', $timeline->user->username));
+        $response = $this->actingAs($fan)->ajaxJSON('GET', route('timelines.show', $timeline->slug));
+        //$response = $this->actingAs($fan)->ajaxJSON('GET', route('timelines.show', $timeline->user->username));
         $response->assertStatus(403);
 
         $payload = [
@@ -235,7 +258,7 @@ class TimelinesTest extends TestCase
         $this->assertTrue( $fan->ledgerpurchases->contains( $fanledger->id ) );
 
         // Check access (after: should be allowed)
-        $response = $this->actingAs($fan)->ajaxJSON('GET', route('timelines.show', $timeline->user->username));
+        $response = $this->actingAs($fan)->ajaxJSON('GET', route('timelines.show', $timeline->slug));
         $response->assertStatus(200);
     }
 
@@ -260,7 +283,7 @@ class TimelinesTest extends TestCase
         })->where('id', '<>', $creator->id)->first();
 
         // Check access (before: should not be allowed)
-        $response = $this->actingAs($fan)->ajaxJSON('GET', route('timelines.show', $timeline->user->username));
+        $response = $this->actingAs($fan)->ajaxJSON('GET', route('timelines.show', $timeline->slug));
         $response->assertStatus(403);
 
         // Subscribe
@@ -278,7 +301,7 @@ class TimelinesTest extends TestCase
         $origSubscriberCount = $timeline->subscribers->count();
 
         // Check access (after subscribe: should be allowed)
-        $response = $this->actingAs($fan)->ajaxJSON('GET', route('timelines.show', $timeline->user->username));
+        $response = $this->actingAs($fan)->ajaxJSON('GET', route('timelines.show', $timeline->slug));
         $response->assertStatus(200);
 
         // Unsubscribe

@@ -27,13 +27,7 @@ use App\Models\Traits\SluggableTraits;
 
 class Post extends Model implements UuidId, Ownable, Deletable, Purchaseable, Likeable, Reportable, Commentable
 {
-    use UsesUuid;
-    use SoftDeletes;
-    use HasFactory;
-    use OwnableTraits;
-    use LikeableTraits;
-    use Sluggable;
-    use SluggableTraits;
+    use UsesUuid, SoftDeletes, HasFactory, OwnableTraits, LikeableTraits, Sluggable, SluggableTraits;
 
     //--------------------------------------------
     // Boot

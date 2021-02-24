@@ -35,13 +35,19 @@ class RestCommentsTest extends TestCase
             ],
         ]);
         $response->assertStatus(200);
+        $response->assertJsonStructure([
+            'data',
+            'links',
+            'meta' => [ 'current_page', 'from', 'last_page', 'path', 'per_page', 'to', 'total', ],
+        ]);
 
         $content = json_decode($response->content());
-        $this->assertNotNull($content->comments);
-        $this->assertGreaterThan(0, count($content->comments));
-        $this->assertEquals($expectedCount, count($content->comments));
-        $this->assertObjectHasAttribute('description', $content->comments[0]);
-        collect($content->comments)->each( function($c) use(&$creator) { // all belong to owner
+        $this->assertEquals(1, $content->meta->current_page);
+        $this->assertNotNull($content->data);
+        $this->assertGreaterThan(0, count($content->data));
+        $this->assertEquals($expectedCount, count($content->data));
+        $this->assertObjectHasAttribute('description', $content->data[0]);
+        collect($content->data)->each( function($c) use(&$creator) { // all belong to owner
             $this->assertEquals($creator->id, $c->user_id);
         });
     }
@@ -71,12 +77,18 @@ class RestCommentsTest extends TestCase
                 'user_id' => $creator->id,
             ],
         ]);
+        $response->assertJsonStructure([
+            'data',
+            'links',
+            'meta' => [ 'current_page', 'from', 'last_page', 'path', 'per_page', 'to', 'total', ],
+        ]);
         $response->assertStatus(200);
-
         $content = json_decode($response->content());
-        $this->assertNotNull($content->comments);
-        $this->assertEquals($expectedCount, count($content->comments));
-        $this->assertObjectHasAttribute('description', $content->comments[0]);
+        $this->assertEquals(1, $content->meta->current_page);
+
+        $this->assertNotNull($content->data);
+        $this->assertEquals($expectedCount, count($content->data));
+        $this->assertObjectHasAttribute('description', $content->data[0]);
     }
 
     /**
@@ -100,20 +112,26 @@ class RestCommentsTest extends TestCase
             ],
         ]);
         $response->assertStatus(200); // instead of 403, we just get our own comments back (filter is ignored)
+        $response->assertJsonStructure([
+            'data',
+            'links',
+            'meta' => [ 'current_page', 'from', 'last_page', 'path', 'per_page', 'to', 'total', ],
+        ]);
         $content = json_decode($response->content());
-        $this->assertNotNull($content->comments);
+        $this->assertEquals(1, $content->meta->current_page);
+        $this->assertNotNull($content->data);
 
         // test: all comments returned are owned by fan
-        $commentsByFan = collect($content->comments)->reduce( function($acc, $item) use(&$fan) {
+        $commentsByFan = collect($content->data)->reduce( function($acc, $item) use(&$fan) {
             if ( $item->user_id === $fan->id ) {
                 $acc += 1;
             }
             return $acc;
         }, 0);
-        $this->assertEquals(count($content->comments), $commentsByFan); 
+        $this->assertEquals(count($content->data), $commentsByFan); 
 
         // test: no comments returned are owned by creator
-        $commentsByCreator = collect($content->comments)->reduce( function($acc, $item) use(&$creator) {
+        $commentsByCreator = collect($content->data)->reduce( function($acc, $item) use(&$creator) {
             if ( $item->user_id === $creator->id ) {
                 $acc += 1;
             }
@@ -135,16 +153,16 @@ class RestCommentsTest extends TestCase
         $response->assertStatus(200); // instead of 403, we just get our own comments back (filter is ignored)
 
         $content = json_decode($response->content());
-        $this->assertNotNull($content->comments);
+        $this->assertNotNull($content->data);
 
         // test: all comments returned are owned by creator
-        $commentsByCreator = collect($content->comments)->reduce( function($acc, $item) use(&$creator) {
+        $commentsByCreator = collect($content->data)->reduce( function($acc, $item) use(&$creator) {
             if ( $item->user_id === $creator->id ) {
                 $acc += 1;
             }
             return $acc;
         }, 0);
-        $this->assertEquals(count($content->comments), $commentsByCreator); 
+        $this->assertEquals(count($content->data), $commentsByCreator); 
     }
 
     /**
@@ -157,6 +175,12 @@ class RestCommentsTest extends TestCase
         $comment = Comment::where('user_id', $creator->id)->first();
         $response = $this->actingAs($creator)->ajaxJSON('GET', route('comments.show', $comment->id));
         $response->assertStatus(200);
+        $content = json_decode($response->content());
+        $this->assertNotNull($content->comment);
+        $this->assertObjectHasAttribute('slug', $content->comment);
+        $this->assertObjectHasAttribute('description', $content->comment);
+        $this->assertNotNull($content->comment->slug);
+        $this->assertNotNull($content->comment->description);
     }
 
     /**

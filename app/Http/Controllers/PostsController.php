@@ -49,9 +49,8 @@ class PostsController extends AppBaseController
             }
         }
 
-        return response()->json([
-            'posts' => $query->get(),
-        ]);
+        $data = $query->paginate( $request->input('take', env('MAX_POSTS_PER_REQUEST', 10)) );
+        return new PostCollection($data);
     }
 
     public function show(Request $request, Post $post)

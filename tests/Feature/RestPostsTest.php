@@ -39,17 +39,23 @@ class RestPostsTest extends TestCase
 
         $response = $this->actingAs($creator)->ajaxJSON('GET', route('posts.index'));
         $response->assertStatus(200);
+        $response->assertJsonStructure([
+            'data',
+            'links',
+            'meta' => [ 'current_page', 'from', 'last_page', 'path', 'per_page', 'to', 'total', ],
+        ]);
 
         $content = json_decode($response->content());
-        $this->assertNotNull($content->posts);
-        $this->assertGreaterThan(0, count($content->posts));
-        $this->assertEquals($expectedCount, count($content->posts));
-        $this->assertEquals($timeline->posts->count(), count($content->posts));
-        $this->assertObjectHasAttribute('postable_id', $content->posts[0]);
-        $this->assertEquals($timeline->id, $content->posts[0]->postable_id);
-        $this->assertObjectHasAttribute('postable_type', $content->posts[0]);
-        $this->assertEquals('timelines', $content->posts[0]->postable_type);
-        $this->assertObjectHasAttribute('description', $content->posts[0]);
+        $this->assertEquals(1, $content->meta->current_page);
+        $this->assertNotNull($content->data);
+        $this->assertGreaterThan(0, count($content->data));
+        $this->assertEquals($expectedCount, count($content->data));
+        $this->assertEquals($timeline->posts->count(), count($content->data));
+        $this->assertObjectHasAttribute('postable_id', $content->data[0]);
+        $this->assertEquals($timeline->id, $content->data[0]->postable_id);
+        $this->assertObjectHasAttribute('postable_type', $content->data[0]);
+        $this->assertEquals('timelines', $content->data[0]->postable_type);
+        $this->assertObjectHasAttribute('description', $content->data[0]);
     }
 
     /**
@@ -67,7 +73,12 @@ class RestPostsTest extends TestCase
 
         $content = json_decode($response->content());
         $this->assertNotNull($content->data);
+        $this->assertObjectHasAttribute('description', $content->data);
+        $this->assertObjectHasAttribute('slug', $content->data);
+        $this->assertObjectHasAttribute('postable_id', $content->data);
+        $this->assertObjectHasAttribute('postable_type', $content->data);
         $this->assertNotNull($content->data->description);
+        $this->assertNotNull($content->data->slug);
         $this->assertNotNull($content->data->postable_id);
         $this->assertEquals($timeline->id, $content->data->postable_id);
         $this->assertSame('timelines', $content->data->postable_type);

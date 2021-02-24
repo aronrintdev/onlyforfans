@@ -52,7 +52,7 @@ export default {
   },
 
   props: {
-    username: null,
+    slug: null,
   },
 
   computed: {
@@ -65,7 +65,7 @@ export default {
   }),
 
   mounted() {
-    if (this.username) {
+    if (this.slug) {
       this.load()
     }
     if (!this.session_user) {
@@ -77,7 +77,7 @@ export default {
     ...Vuex.mapActions([ 'getMe' ]),
     load() {
       this.state = 'loading'
-      this.axios.get(this.$apiRoute('timelines.show', { timeline: this.username }))
+      this.axios.get(this.$apiRoute('timelines.show', { timeline: this.slug }))
       .then(response => {
         this.timeline = response.data.timeline
         this.state = 'loaded'
@@ -89,7 +89,7 @@ export default {
   },
 
   watch: {
-    username(value) {
+    slug(value) {
       this.load()
     }
   },

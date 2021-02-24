@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 
+use App\Http\Resources\VaultfolderCollection;
 use App\Models\Invite;
 use App\Models\Mediafile;
 use App\Models\User;
@@ -53,11 +54,8 @@ class VaultfoldersController extends AppBaseController
                 $query->where($k, $v);
             }
         }
-        $vaultfolders = $query->get();
-
-        return response()->json([
-            'vaultfolders' => $vaultfolders,
-        ]);
+        $data = $query->paginate( $request->input('take', env('MAX_VAULTFOLDERS_PER_REQUEST', 10)) );
+        return new VaultfolderCollection($data);
     }
 
     // %TODO: check session user owner

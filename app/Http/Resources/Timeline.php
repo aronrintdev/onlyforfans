@@ -2,21 +2,20 @@
 namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
-use App\Enums\PostTypeEnum;
-use App\Models\Post as PostModel;
+use App\Models\Timeline as TimelineModel;
 
-class Post extends JsonResource
+class Timeline extends JsonResource
 {
     public function toArray($request)
     {
         $sessionUser = $request->user();
-        $model = PostModel::find($this->id); // %FIXME: n+1 performance issue (not so bad if paginated?)
-        $hasAccess = $sessionUser->can('contentView', $model);
+        $model = TimelineModel::find($this->id);
+        $hasAccess = $sessionUser->can('view', $model);
 
         return [
             'id' => $this->id,
             'slug' => $this->slug,
-            'type' => $this->type,
+            'name' => $this->name,
             'postable_id' => $this->postable_id,
             'postable_type' => $this->postable_type,
             'description' =>  $this->when($hasAccess, $this->description),
