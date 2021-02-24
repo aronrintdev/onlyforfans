@@ -34,8 +34,8 @@ class FactoryHelpers {
         $user->save();
 
         if ( Config::get('app.env') !== 'testing' ) {
-            $avatar = self::createImage(MediafileTypeEnum::AVATAR);
-            $cover = self::createImage(MediafileTypeEnum::COVER);
+            $avatar = self::createImage(MediafileTypeEnum::AVATAR, true);
+            $cover = self::createImage(MediafileTypeEnum::COVER, true);
         } else {
             $avatar = null;
             $cover = null;
@@ -67,7 +67,7 @@ class FactoryHelpers {
     }
 
     // Inserts a [mediafiles] record
-    public static function createImage(string $mftype, string $resourceID = null) : ?Mediafile
+    public static function createImage(string $mftype, string $resourceID = null, $doS3Upload=false) : ?Mediafile
     {
         $faker = Factory::create();
 
@@ -119,10 +119,14 @@ class FactoryHelpers {
             default:
                 throw new Exception('media file type of ' . $mftype . ' not supported');
         }
-        $contents = file_get_contents($json->file);
 
-        Storage::disk('s3')->put($s3Path, $contents);
-        $attrs['filename'] = $s3Path;
+        if ($doS3Upload) {
+            $contents = file_get_contents($json->file);
+            Storage::disk('s3')->put($s3Path, $contents);
+            $attrs['filename'] = $s3Path;
+        } else {
+            $attrs['filename'] = $attrs['mfname']; // dummy filename for testing, etc
+        }
 
         $mediafile = Mediafile::create($attrs);
 

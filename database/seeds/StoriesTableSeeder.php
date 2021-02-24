@@ -47,7 +47,7 @@ class StoriesTableSeeder extends Seeder
                 case 'text':
                     break;
                 case 'image':
-                    $mf = FactoryHelpers::createImage(MediafileTypeEnum::STORY, $story->id);
+                    $mf = FactoryHelpers::createImage(MediafileTypeEnum::STORY, $story->id, true);
                     break;
                 }
             });

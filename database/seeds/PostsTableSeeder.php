@@ -79,7 +79,7 @@ class PostsTableSeeder extends Seeder
                 //$u->timeline->posts()->save($post);
 
                 if ( $this->faker->boolean($this->getMax('prob_post_has_image')) ) { // % post has image
-                    $mf = FactoryHelpers::createImage(MediafileTypeEnum::POST, $post->id);
+                    $mf = FactoryHelpers::createImage(MediafileTypeEnum::POST, $post->id, true);
                 }
 
                 // Set a realistic post date
