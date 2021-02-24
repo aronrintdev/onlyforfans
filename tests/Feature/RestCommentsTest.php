@@ -175,6 +175,12 @@ class RestCommentsTest extends TestCase
         $comment = Comment::where('user_id', $creator->id)->first();
         $response = $this->actingAs($creator)->ajaxJSON('GET', route('comments.show', $comment->id));
         $response->assertStatus(200);
+        $content = json_decode($response->content());
+        $this->assertNotNull($content->comment);
+        $this->assertObjectHasAttribute('slug', $content->comment);
+        $this->assertObjectHasAttribute('description', $content->comment);
+        $this->assertNotNull($content->comment->slug);
+        $this->assertNotNull($content->comment->description);
     }
 
     /**

@@ -26,12 +26,7 @@ use App\Interfaces\Purchaseable; // was PaymentReceivable
 
 class Post extends Model implements UuidId, Ownable, Deletable, Purchaseable, Likeable, Reportable, Commentable
 {
-    use UsesUuid;
-    use SoftDeletes;
-    use HasFactory;
-    use OwnableTraits;
-    use LikeableTraits;
-    use Sluggable;
+    use UsesUuid, SoftDeletes, HasFactory, OwnableTraits, LikeableTraits, Sluggable;
 
     //--------------------------------------------
     // Boot

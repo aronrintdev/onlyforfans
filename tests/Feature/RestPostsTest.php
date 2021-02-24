@@ -73,7 +73,12 @@ class RestPostsTest extends TestCase
 
         $content = json_decode($response->content());
         $this->assertNotNull($content->data);
+        $this->assertObjectHasAttribute('description', $content->data);
+        $this->assertObjectHasAttribute('slug', $content->data);
+        $this->assertObjectHasAttribute('postable_id', $content->data);
+        $this->assertObjectHasAttribute('postable_type', $content->data);
         $this->assertNotNull($content->data->description);
+        $this->assertNotNull($content->data->slug);
         $this->assertNotNull($content->data->postable_id);
         $this->assertEquals($timeline->id, $content->data->postable_id);
         $this->assertSame('timelines', $content->data->postable_type);

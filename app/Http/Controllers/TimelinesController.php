@@ -59,12 +59,8 @@ class TimelinesController extends AppBaseController
         ]);
     }
 
-    public function show(Request $request, $username)
+    public function show(Request $request, Timeline $timeline)
     {
-        //$timeline = Timeline::with('user')->where('username', $username)->firstOrFail();
-        $timeline = Timeline::with('user')->whereHas('user', function($q1) use($username) {
-            $q1->where('username', $username);
-        })->first();
         $this->authorize('view', $timeline);
         $sales = Fanledger::where('seller_id', $timeline->user->id)->sum('total_amount');
 
@@ -108,6 +104,7 @@ class TimelinesController extends AppBaseController
 
     // Get a list of items that make up a timeline feed, typically posts but
     //  keep generic as we may want to throw in other things
+    //  %TODO: DEPRECATE, use FeedsController (?)
     public function feeditems(Request $request, Timeline $timeline)
     {
         $sessionUser = Auth::user();
