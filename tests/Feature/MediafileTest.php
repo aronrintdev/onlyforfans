@@ -2,20 +2,23 @@
 namespace Tests\Feature;
 
 use DB;
-use Tests\TestCase;
-use App\Models\User;
-use App\Models\Story;
-use App\Models\Mediafile;
+
 use Illuminate\Http\File;
-
-use App\Enums\MediafileTypeEnum;
 use Illuminate\Http\UploadedFile;
-
 use Illuminate\Support\Facades\Storage;
-use Database\Seeders\TestDatabaseSeeder;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Database\Seeders\TestDatabaseSeeder;
+
+use Tests\TestCase;
+
+use App\Libs\FactoryHelpers;
+use App\Models\User;
+use App\Models\Story;
+use App\Models\Timeline;
+use App\Models\Mediafile;
+use App\Enums\MediafileTypeEnum;
 
 // see: https://laravel.com/docs/5.4/http-tests#testing-file-uploads
 // https://stackoverflow.com/questions/47366825/storing-files-to-aws-s3-using-laravel
@@ -23,9 +26,40 @@ use Illuminate\Foundation\Testing\DatabaseTransactions;
 // https://stackoverflow.com/questions/34455410/error-executing-putobject-on-aws-upload-fails
 class MediafileTest extends TestCase
 {
-    // use DatabaseTransactions;
-    use RefreshDatabase;
-    use WithFaker;
+    use RefreshDatabase, WithFaker;
+
+    /**
+     *  @group mediafiles
+     *  @group regression
+     */
+    public function test_admin_can_list_mediafiles()
+    {
+        $expectedCount = Mediafile::where('mftype', MediafileTypeEnum::AVATAR)->count();
+
+        $admin = User::first();
+        $admin->assignRole('super-admin'); // upgrade to admin!
+        $admin->refresh();
+
+        $response = $this->actingAs($admin)->ajaxJSON('GET', route('mediafiles.index'), [
+            'filters' => [
+                'mftype' => MediafileTypeEnum::AVATAR,
+            ],
+        ]);
+        $response->assertJsonStructure([
+            'data',
+            'links',
+            'meta' => [ 'current_page', 'from', 'last_page', 'path', 'per_page', 'to', 'total', ],
+        ]);
+        $response->assertStatus(200);
+        $content = json_decode($response->content());
+        $this->assertEquals(1, $content->meta->current_page);
+
+        $this->assertNotNull($content->data);
+        $this->assertEquals($expectedCount, count($content->data));
+        $this->assertObjectHasAttribute('mfname', $content->data[0]);
+        $this->assertObjectHasAttribute('mftype', $content->data[0]);
+        $this->assertEquals(MediafileTypeEnum::AVATAR, $content->data[0]->mftype);
+    }
 
     /**
      *  @group mediafiles
@@ -62,6 +96,13 @@ class MediafileTest extends TestCase
     {
         parent::setUp();
         $this->seed(TestDatabaseSeeder::class);
+
+        // Update or add avatars to some users for this test...
+        $users = User::take(5)->get();
+        $users->each( function($u) {
+            $avatar = FactoryHelpers::createImage(MediafileTypeEnum::AVATAR, false); //skip S3 upload
+            $u->save();
+        });
     }
 
     protected function tearDown() : void {

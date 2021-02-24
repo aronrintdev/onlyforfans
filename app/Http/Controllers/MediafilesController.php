@@ -10,12 +10,51 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\File;
 //use Illuminate\Http\UploadedFile;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use App\Http\Resources\MediafileCollection;
 use App\Models\User;
 use App\Models\Mediafile;
 use App\Enums\MediafileTypeEnum;
 
 class MediafilesController extends AppBaseController
 {
+
+    public function index(Request $request)
+    {
+        $request->validate([
+            'filters' => 'array',
+            //'filters.post_id' => 'uuid|exists:posts,id', // if admin or post-owner only (per-post comments by fan use posts controller)
+            'filters.user_id' => 'uuid|exists:users,id', // if admin only
+            'filters.mftype' => 'in:'.MediafileTypeEnum::getKeysCsv(), // %TODO : apply elsewhere
+        ]);
+
+        $filters = $request->filters ?? [];
+
+        // Init query
+        $query = Mediafile::query();
+
+        // Check permissions
+        if ( !$request->user()->isAdmin() ) {
+
+            // non-admin: only view own comments
+            $query->where('user_id', $request->user()->id); 
+            unset($filters['user_id']);
+        }
+
+        // Apply any filters
+        foreach ($filters as $key => $f) {
+            // %TODO: subgroup under 'filters' (need to update axios.GET calls as well in Vue)
+            switch ($key) {
+                case 'mftype':
+                case 'user_id':
+                //case 'post_id':
+                    $query->where($key, $f);
+                    break;
+            }
+        }
+
+        $data = $query->paginate( $request->input('take', env('MAX_MEDIAFILES_PER_REQUEST', 10)) );
+        return new MediafileCollection($data);
+    }
 
     public function store(Request $request)
     {
