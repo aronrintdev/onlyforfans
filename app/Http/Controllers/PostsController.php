@@ -5,14 +5,16 @@ use DB;
 use Auth;
 use Exception;
 use Throwable;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Http\Request;
+use App\Http\Resources\Post as PostResource;
+use App\Http\Resources\PostCollection;
 use App\Models\Post;
 use App\Models\Comment;
 use App\Models\Timeline;
 use App\Models\Mediafile;
 use App\Enums\PostTypeEnum;
-use Illuminate\Http\Request;
 use App\Enums\PaymentTypeEnum;
-use Illuminate\Support\Facades\Log;
 
 class PostsController extends AppBaseController
 {
@@ -55,9 +57,7 @@ class PostsController extends AppBaseController
     public function show(Request $request, Post $post)
     {
         $this->authorize('view', $post);
-        return response()->json([
-            'post' => $post,
-        ]);
+        return new PostResource($post);
     }
 
     public function store(Request $request)

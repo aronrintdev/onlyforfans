@@ -106,3 +106,5 @@ composer.json-current
 composer.json-save
 
 database/seeds/RolesTableSeeder.php--save
+
+public/info.php

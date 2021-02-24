@@ -8,54 +8,45 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 
+use App\Http\Resources\PostCollection;
 use App\Enums\PostTypeEnum;
 use App\Models\Setting;
 use App\Models\Timeline;
-use App\Models\Feed;
 use App\Models\Post;
 use App\Models\User;
 
 class FeedsController extends AppBaseController
 {
-    // /home
     public function home(Request $request)
     {
-        $posts = Feed::getHomeFeed($request->user());
+        // posts from all followed timelines
+        $sessionUser = $request->user();
+        $query = Post::query();
+        $query->whereHas('timeline', function($q1) use(&$sessionUser) {
+            $q1->whereHas('followers', function($q2) use(&$sessionUser) {
+                $q2->where('id', $sessionUser->id);
+            });
+        });
+        $posts = $query->get();
         return response()->json([
             'feeditems' => $posts,
         ]);
     }
 
-    // show timeline for a user's feed, eg : /{username}
     public function show(Request $request, Timeline $feed)
     {
+        // posts from specific timeline (feed)
         $timeline = $feed;
         $this->authorize('view', $timeline); // must be follower or subscriber
-
-        $isSubscriber = $timeline->subscribers->contains($request->user()->id);
-        $posts = $isSubscriber
-            ? Feed::getSubscriberFeed($timeline, $request->user())
-            : Feed::getFollowerFeed($timeline, $request->user());
-
+        $query = Post::query();
+        $query->where('postable_type', 'timelines')->where('postable_id', $timeline->id);
+        $posts = $query->get();
+        /*
         return response()->json([
             'feeditems' => $posts,
         ]);
+         */
+        return new PostCollection($posts);
     }
 
-    // /me
-    public function me(Request $request)
-    {
-        $timeline = $request->user()->timeline;
-        return response()->json([
-            'feeditems' => $posts,
-        ]);
-    }
-
-    public function getPublic(Request $request, Timeline $feed)
-    {
-        $posts = Feed::getPublicFeed($feed);
-        return response()->json([
-            'feeditems' => $posts,
-        ]);
-    }
 }
