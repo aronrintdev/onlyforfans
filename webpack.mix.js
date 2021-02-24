@@ -94,5 +94,12 @@ mix.js('resources/assets/js/admin.app.js', 'public/js/admin.app.js')
       },
     },
   })
-  // .extract(['vue', 'axios', 'pusher-js', 'laravel-echo', 'jquery', 'vuejs-logger'])
-  // .sourceMaps();
+  .extract(['vue', 'axios', 'pusher-js', 'laravel-echo', 'jquery', 'vuejs-logger'])
+  .sourceMaps();
+
+mix.options({
+  hmrOptions: {
+      host: '127.0.0.1',
+      port: '8080'
+  }
+});

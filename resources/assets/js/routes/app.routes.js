@@ -12,6 +12,7 @@ import users from '@views/users'
 import vaults from '@views/vaults'
 import search from '@views/search'
 import posts from '@views/posts'
+import liveChat from '@views/live-chat'
 
 import SettingsGeneral from '@components/settings/SettingsGeneral.vue';
 import SettingsProfile from '@components/settings/SettingsProfile.vue';
@@ -28,14 +29,17 @@ export const routes = [
     path: '/',
     component: timelines.Home,
   },
-
   {
     name: 'search.home',
     path: '/search',
     component: search.Home,
     props: true,
   },
-
+  {
+    name: 'messages.home',
+    path: '/messages',
+    component: liveChat.Home,
+  },
   // Timelines
   {
     name: 'timelines.home',

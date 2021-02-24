@@ -189,6 +189,8 @@ Route::group(['middleware' => ['auth']], function () {
 
 });
 
+//  -- messages --
+Route::get('/chat-messages', ['as'=>'messages.index', 'uses' => 'MessageController@index']);
 
 /*
 |--------------------------------------------------------------------------
