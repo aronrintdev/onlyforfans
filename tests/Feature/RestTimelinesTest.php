@@ -47,7 +47,7 @@ class TimelinesTest extends TestCase
         $creator = $timeline->user;
 
         $payload = [];
-        $response = $this->actingAs($creator)->ajaxJSON('GET', route('timelines.show', $timeline->id), $payload);
+        $response = $this->actingAs($creator)->ajaxJSON('GET', route('timelines.show', $timeline->slug), $payload);
         $response->assertStatus(200);
 
         $content = json_decode($response->content());
@@ -218,7 +218,7 @@ class TimelinesTest extends TestCase
         // Check access (before: should be denied)
         // [ ] %TODO: actually this is more complex: they can access the timeline if follower (default), but can only see a subset
         //     of posts on it before subscription (premium)
-        $response = $this->actingAs($fan)->ajaxJSON('GET', route('timelines.show', $timeline->id));
+        $response = $this->actingAs($fan)->ajaxJSON('GET', route('timelines.show', $timeline->slug));
         //$response = $this->actingAs($fan)->ajaxJSON('GET', route('timelines.show', $timeline->user->username));
         $response->assertStatus(403);
 
@@ -258,7 +258,7 @@ class TimelinesTest extends TestCase
         $this->assertTrue( $fan->ledgerpurchases->contains( $fanledger->id ) );
 
         // Check access (after: should be allowed)
-        $response = $this->actingAs($fan)->ajaxJSON('GET', route('timelines.show', $timeline->id));
+        $response = $this->actingAs($fan)->ajaxJSON('GET', route('timelines.show', $timeline->slug));
         $response->assertStatus(200);
     }
 
@@ -283,7 +283,7 @@ class TimelinesTest extends TestCase
         })->where('id', '<>', $creator->id)->first();
 
         // Check access (before: should not be allowed)
-        $response = $this->actingAs($fan)->ajaxJSON('GET', route('timelines.show', $timeline->id));
+        $response = $this->actingAs($fan)->ajaxJSON('GET', route('timelines.show', $timeline->slug));
         $response->assertStatus(403);
 
         // Subscribe
@@ -301,7 +301,7 @@ class TimelinesTest extends TestCase
         $origSubscriberCount = $timeline->subscribers->count();
 
         // Check access (after subscribe: should be allowed)
-        $response = $this->actingAs($fan)->ajaxJSON('GET', route('timelines.show', $timeline->id));
+        $response = $this->actingAs($fan)->ajaxJSON('GET', route('timelines.show', $timeline->slug));
         $response->assertStatus(200);
 
         // Unsubscribe

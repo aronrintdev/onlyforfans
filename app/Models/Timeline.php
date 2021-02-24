@@ -17,10 +17,11 @@ use App\Enums\ShareableAccessLevelEnum;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Models\Traits\OwnableTraits;
+use App\Models\Traits\SluggableTraits;
 
 class Timeline extends Model implements Purchaseable, Ownable, Reportable
 {
-    use SoftDeletes, HasFactory, OwnableTraits, UsesUuid, Sluggable;
+    use SoftDeletes, HasFactory, OwnableTraits, UsesUuid, Sluggable, SluggableTraits;
 
     protected $keyType = 'string';
     protected $guarded = ['id', 'created_at', 'updated_at'];
