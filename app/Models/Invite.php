@@ -4,13 +4,14 @@ namespace App\Models;
 
 use DB;
 use App\Interfaces\Guidable;
-use Cviebrock\EloquentSluggable\Sluggable;
 use App\Models\Traits\UsesUuid;
+use App\Models\Traits\SluggableTraits;
+use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Invite extends BaseModel implements Guidable
 {
-    use HasFactory, UsesUuid, Sluggable;
+    use HasFactory, UsesUuid, Sluggable, SluggableTraits;
 
     protected $guarded = ['id', 'created_at', 'updated_at'];
     protected $hidden = ['cattrs', 'meta',];
