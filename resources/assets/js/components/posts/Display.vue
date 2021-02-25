@@ -130,7 +130,7 @@ export default {
     timelineRoute() {
       return {
         name: 'timeline.show',
-        params: { slug: this.timeline.show }
+        params: { slug: this.timeline.slug }
       }
     },
   },
