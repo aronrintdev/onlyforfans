@@ -24,6 +24,11 @@ class VaultsController extends AppBaseController
 {
     public function dashboard(Request $request)
     {
+        if ($request->wantsJson() === false) {
+            $spaController = new SpaController();
+            return $spaController->index($request);
+        }
+
         $sessionUser = Auth::user();
 
         $this->_php2jsVars['session'] = [
@@ -52,11 +57,10 @@ class VaultsController extends AppBaseController
 
         $vaultRootFolder = $myVault->getRootFolder();
 
-        return view('vault.dashboard', [
-            'sessionUser' => $sessionUser,
+        return [
             'myVault' => $myVault,
             'vaultRootFolder' => $vaultRootFolder,
-        ]);
+        ];
     }
 
     public function index(Request $request)
