@@ -125,7 +125,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('/timelines-suggested', ['as'=>'timelines.suggested', 'uses' => 'TimelinesController@suggested']); // %FIXME: refactor: use index(?)
     Route::get('/timelines/home', ['as'=>'timelines.home', 'uses' => 'TimelinesController@home']); // special case of 'show'
     Route::get('/timelines/match', ['as'=>'timelines.match', 'uses' => 'TimelinesController@match']);
-    Route::get('/timelines/{timeline}/feeditems', ['as'=>'timelines.feeditems', 'uses' => 'TimelinesController@feeditems']);
+    Route::get('/timelines/{timeline}/feeddata', ['as'=>'timelines.feeddata', 'uses' => 'TimelinesController@feeddata']);
     Route::put('/timelines/{timeline}/tip', ['as'=>'timelines.tip', 'uses' => 'TimelinesController@tip']);
     Route::put('/timelines/{timeline}/follow', ['as'=>'timelines.follow', 'uses' => 'TimelinesController@follow']);
     Route::put('/timelines/{timeline}/subscribe', ['as'=>'timelines.subscribe', 'uses' => 'TimelinesController@subscribe']);

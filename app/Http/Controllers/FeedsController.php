@@ -21,13 +21,14 @@ class FeedsController extends AppBaseController
     {
         // posts from all followed timelines
         $sessionUser = $request->user();
-        $query = Post::query();
+        //$query = Post::query();
+        $query = Post::with('mediafiles', 'user')->withCount('comments')->where('active', 1);
         $query->whereHas('timeline', function($q1) use(&$sessionUser) {
             $q1->whereHas('followers', function($q2) use(&$sessionUser) {
                 $q2->where('id', $sessionUser->id);
             });
         });
-        $data = $query->paginate( $request->input('take', env('MAX_POSTS_PER_REQUEST', 10)) );
+        $data = $query->latest()->paginate( $request->input('take', env('MAX_POSTS_PER_REQUEST', 10)) );
         return new PostCollection($data);
     }
 
@@ -36,9 +37,10 @@ class FeedsController extends AppBaseController
         // posts from specific timeline (feed)
         $timeline = $feed;
         $this->authorize('view', $timeline); // must be follower or subscriber
-        $query = Post::query();
+        //$query = Post::query();
+        $query = Post::with('mediafiles', 'user')->withCount('comments')->where('active', 1);
         $query->where('postable_type', 'timelines')->where('postable_id', $timeline->id);
-        $data = $query->paginate( $request->input('take', env('MAX_POSTS_PER_REQUEST', 10)) );
+        $data = $query->latest()->paginate( $request->input('take', env('MAX_POSTS_PER_REQUEST', 10)) );
         return new PostCollection($data);
     }
 

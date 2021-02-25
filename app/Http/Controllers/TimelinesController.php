@@ -5,6 +5,8 @@ use DB;
 use Auth;
 use Exception;
 use Throwable;
+
+use App\Http\Resources\PostCollection;
 use App\Models\User;
 use App\Libs\FeedMgr;
 use App\Libs\UserMgr;
@@ -104,31 +106,19 @@ class TimelinesController extends AppBaseController
 
     // Get a list of items that make up a timeline feed, typically posts but
     //  keep generic as we may want to throw in other things
-    //  %TODO: DEPRECATE, use FeedsController (?)
-    public function feeditems(Request $request, Timeline $timeline)
+    //  %TODO: 
+    //  ~ [ ] DEPRECATE, use FeedsController (?)
+    //  ~ [ ] trending tags
+    //  ~ [ ] announcements
+    //  ~ [ ] hashtag search
+    public function feeddata(Request $request, Timeline $timeline)
     {
-        $sessionUser = Auth::user();
         $follower = $timeline->user;
         $page = $request->input('page', 1);
-        $take = 5; // $request->input('take', Setting::get('items_page'));
-
-        // %TODO
-        //  ~ [ ] trending tags
-        //  ~ [ ] announcements
-        //  ~ [ ] 
-
+        $take = $request->input('take', 5); // Setting::get('items_page'));
         $filters = [];
-
-        if ($request->hashtag) {
-            $filters['hashtag'] = '#'.$request->hashtag;
-        }
-
-        $feeditems = FeedMgr::getPosts($follower, $filters, $page, $take); // %TODO: work with L5.8 pagination
-        //$feeditems = FeedMgr::getPostsRaw($sessionUser, $filters);
-
-        return response()->json([
-            'feeditems' => $feeditems,
-        ]);
+        $data = FeedMgr::getPosts($follower, $filters, $page, $take); // %TODO: work with L5.8 pagination
+        return new PostCollection($data);
     }
 
     // toggles, returns set state

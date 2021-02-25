@@ -45,7 +45,7 @@ export default {
   },
 
   computed: {
-    ...Vuex.mapState(['feeditems']),
+    ...Vuex.mapState(['feeddata']), // should include keys: data (posts) and meta (pagination info), and links 
     ...Vuex.mapState(['unshifted_timeline_post']),
     ...Vuex.mapState(['is_loading']),
 
@@ -57,23 +57,23 @@ export default {
     },
 
     currentPage() {
-      return this.feeditems.current_page
+      return this.feeddata.meta.current_page
     },
     nextPage() {
-      return this.feeditems.current_page + 1
+      return this.feeddata.meta.current_page + 1
     },
     lastPage() {
-      return this.feeditems.last_page
+      return this.feeddata.meta.last_page
     },
     isLastPage() {
-      return this.feeditems.current_page === this.feeditems.last_page
+      return this.feeddata.meta.current_page === this.feeddata.meta.last_page
     },
   },
 
   data: () => ({
-    renderedItems: [],
+    renderedItems: [], // this will likely only be posts
     renderedPages: [], // track so we don't re-load same page (set of posts) more than 1x
-    limit: 5,
+    limit: 5, // %FIXME: un-hardcode
     lastPostVisible: false,
     moreLoading: true,
   }),
@@ -86,7 +86,7 @@ export default {
   },
 
   created() {
-    this.$store.dispatch('getFeeditems', { timelineId: this.timelineId, page: 1, limit: this.limit })
+    this.$store.dispatch('getFeeddata', { timelineId: this.timelineId, page: 1, limit: this.limit })
   },
 
   methods: {
@@ -117,7 +117,7 @@ export default {
       const response = await axios.delete(url)
       this.renderedPages = []
       this.renderedItems = []
-      this.$store.dispatch('getFeeditems', { timelineId: this.timelineId, page: 1, limit: this.limit })
+      this.$store.dispatch('getFeeddata', { timelineId: this.timelineId, page: 1, limit: this.limit })
     },
 
     // see: https://peachscript.github.io/vue-infinite-loading/guide/#installation
@@ -125,7 +125,7 @@ export default {
       if ( !this.moreLoading && !this.is_loading && (this.nextPage <= this.lastPage) ) {
         this.moreLoading = true;
         this.$log.debug('loadMore', { current: this.currentPage, last: this.lastPage, next: this.nextPage });
-        this.$store.dispatch('getFeeditems', { timelineId: this.timelineId, page: this.nextPage, limit: this.limit })
+        this.$store.dispatch('getFeeddata', { timelineId: this.timelineId, page: this.nextPage, limit: this.limit })
       }
     },
 
@@ -138,10 +138,10 @@ export default {
       this.renderedItems.unshift(newVal)
     },
 
-    feeditems (newVal, oldVal) {
-      if ( !this.renderedPages.includes(newVal.current_page) ) {
-        this.renderedPages.push(newVal.current_page)
-        this.renderedItems = this.renderedItems.concat(newVal.data)
+    feeddata (newVal, oldVal) {
+      if ( !this.renderedPages.includes(newVal.meta.current_page) ) {
+        this.renderedPages.push(newVal.meta.current_page)
+        this.renderedItems = this.renderedItems.concat(newVal.data) // the actual posts
         this.moreLoading = false
       }
     },
