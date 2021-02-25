@@ -108,7 +108,11 @@ Route::group(['middleware' => ['auth']], function () {
     // -- stories:  --
     Route::get('/stories/player', ['as' => 'stories.player', 'uses' => 'SpaController@index']);
     Route::get('/stories/match', ['as'=>'stories.match', 'uses' => 'StoriesController@match']);
-    Route::get('/stories/dashboard', ['as' => 'stories.dashboard', 'uses' => 'StoriesController@dashboard']);
+    Route::get('/stories/dashboard', [
+        'middleware' => 'spaMixedRoute',
+        'as' => 'stories.dashboard',
+        'uses' => 'StoriesController@dashboard'
+    ]);
     Route::resource('stories', 'StoriesController', [ 'except' => [ 'create', 'edit', ] ]);
 
     // -- shareables:  --
@@ -135,12 +139,16 @@ Route::group(['middleware' => ['auth']], function () {
 
     // -- users: messageable --
     //Route::get('/users-suggested', ['as'=>'users.suggested', 'uses' => 'UsersController@suggested']);
-    Route::get('/users/me', ['as'=>'users.me', 'uses' => 'UsersController@me']);
+    Route::get('/users/me', ['as' => 'users.me', 'uses' => 'UsersController@me']);
     Route::get('/users/match', ['as'=>'users.match', 'uses' => 'UsersController@match']);
     Route::resource('users', 'UsersController', [ 'except' => [ 'create', 'edit', ] ]);
 
     // -- vaults:  --
-    Route::get('/my-vault', [ 'as' => 'vault.dashboard', 'uses' => 'VaultsController@dashboard' ]);
+    Route::get('/my-vault', [
+        'middleware' => 'spaMixedRoute',
+        'as' => 'vault.dashboard',
+        'uses' => 'VaultsController@dashboard'
+    ]);
     Route::get('/vaults/{vault}/getRootFolder', ['as'=>'vaults.getRootFolder', 'uses' => 'VaultsController@getRootFolder']);
     Route::patch('/vaults/{vault}/updateShares', ['as'=>'vaults.updateShares', 'uses' => 'VaultsController@updateShares']); // %FIXME: refactor to make consistent
     Route::resource('vaults', 'VaultsController', [
