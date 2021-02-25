@@ -1,6 +1,5 @@
 <template>
   <div>
-
     <div class="container" id="view-show_timeline" v-if="state === 'loaded'">
 
       <section class="row">
@@ -16,7 +15,7 @@
         </aside>
 
         <main class="col-md-7 col-lg-8">
-          <PostFeed :session_user="session_user" :timeline="timeline" />
+          <PostFeed :session_user="session_user" :timeline="timeline" :is_homefeed="false" />
         </main>
 
       </section>

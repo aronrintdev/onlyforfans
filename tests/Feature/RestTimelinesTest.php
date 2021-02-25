@@ -29,7 +29,7 @@ class TimelinesTest extends TestCase
         $creator = $timeline->user;
 
         $payload = [];
-        $response = $this->actingAs($creator)->ajaxJSON('GET', route('timelines.feeditems', $timeline->id), $payload);
+        $response = $this->actingAs($creator)->ajaxJSON('GET', route('timelines.feed', $timeline->id), $payload);
         $response->assertStatus(200);
 
         //$content = json_decode($response->content());

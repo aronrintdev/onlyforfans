@@ -13,7 +13,7 @@ export default new Vuex.Store({
     shares: [], // shares for a vaultfolder, used to mark what resources session user *has* shared out
     shareables: [], // resources that have been shared with session user
     saves: [], // resources that session user has saved
-    feeditems: [],
+    feeddata: {},
     stories: [],
     timeline: null,
     session_user: null,
@@ -40,8 +40,9 @@ export default new Vuex.Store({
     UPDATE_SAVES (state, payload) {
       state.saves = payload.hasOwnProperty('saves') ? payload.saves : [];
     },
-    UPDATE_FEEDITEMS (state, payload) {
-      state.feeditems = payload.hasOwnProperty('feeditems') ? payload.feeditems : [];
+    UPDATE_FEEDDATA (state, payload) {
+      console.log('UPDATE_FEEDDATA', { payload, });
+      state.feeddata = payload.hasOwnProperty('data') ? payload.data : {};
     },
     UPDATE_STORIES (state, payload) {
       state.stories = payload.hasOwnProperty('data') ? payload.data : [];
@@ -96,18 +97,18 @@ export default new Vuex.Store({
       });
     },
 
-    getFeeditems( { commit }, { timelineId, page, limit } ) {
-      console.log(`Loading page ${page}`);
-      const url = `/timelines/${timelineId}/feeditems?page=${page}&take=${limit}`;
+    getFeeddata( { commit }, { timelineId, page, limit, isHomefeed } ) {
+      const url = isHomefeed 
+        ? `/timelines/home/feed?page=${page}&take=${limit}`
+        : `/timelines/${timelineId}/feed?page=${page}&take=${limit}`;
       axios.get(url).then( (response) => {
-        commit('UPDATE_FEEDITEMS', response.data);
-        //commit('UPDATE_TIMELINE', response.data);
+        commit('UPDATE_FEEDDATA', response);
         commit('UPDATE_LOADING', false);
       });
     },
 
     getStories( { commit }, { filters } ) {
-      const username = this.state.session_user ? this.state.session_user.username : 'mattm';  // Not used - This param will eventually be DEPRECATED
+      const username = this.state.session_user.username;  // %FIXME Not used - This param will eventually be DEPRECATED
       const params = {};
       if ( Object.keys(filters).includes('user_id') ) {
         params.user_id = filters.user_id;
@@ -146,7 +147,7 @@ export default new Vuex.Store({
     shares: state => state.shares,
     shareables: state => state.shareables,
     saves: state => state.saves,
-    feeditems: state => state.feeditems,
+    feeddata: state => state.feeddata,
     stories: state => state.stories,
     timeline: state => state.timeline,
     unshifted_timeline_post: state => state.unshifted_timeline_post,

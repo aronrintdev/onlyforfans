@@ -116,16 +116,12 @@ Route::group(['middleware' => ['auth']], function () {
         'only' => [ 'index', ],
     ]);
 
-    Route::get('/feeds/home', ['as'=>'feeds.home', 'uses' => 'FeedsController@home']);
-    Route::resource('feeds', 'FeedsController', [
-        'only' => [ 'show', ],
-    ]);
-
     // -- timelines: tippable | subscribeable | followable --
     Route::get('/timelines-suggested', ['as'=>'timelines.suggested', 'uses' => 'TimelinesController@suggested']); // %FIXME: refactor: use index(?)
-    Route::get('/timelines/home', ['as'=>'timelines.home', 'uses' => 'TimelinesController@home']); // special case of 'show'
+    //Route::get('/timelines/home', ['as'=>'timelines.home', 'uses' => 'TimelinesController@home']); // special case of 'show'
     Route::get('/timelines/match', ['as'=>'timelines.match', 'uses' => 'TimelinesController@match']);
-    Route::get('/timelines/{timeline}/feeditems', ['as'=>'timelines.feeditems', 'uses' => 'TimelinesController@feeditems']);
+    Route::get('/timelines/home/feed', ['as'=>'timelines.homefeed', 'uses' => 'TimelinesController@homefeed']);
+    Route::get('/timelines/{timeline}/feed', ['as'=>'timelines.feed', 'uses' => 'TimelinesController@feed']);
     Route::put('/timelines/{timeline}/tip', ['as'=>'timelines.tip', 'uses' => 'TimelinesController@tip']);
     Route::put('/timelines/{timeline}/follow', ['as'=>'timelines.follow', 'uses' => 'TimelinesController@follow']);
     Route::put('/timelines/{timeline}/subscribe', ['as'=>'timelines.subscribe', 'uses' => 'TimelinesController@subscribe']);

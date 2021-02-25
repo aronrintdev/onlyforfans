@@ -11,7 +11,7 @@
 
         <main class="col-md-7 col-lg-8">
           <CreatePost :session_user="session_user" :timeline="timeline" />
-          <PostFeed :session_user="session_user" :timeline="timeline" />
+          <PostFeed :session_user="session_user" :timeline="timeline" :is_homefeed="true" />
         </main>
 
         <aside class="col-md-5 col-lg-4">
