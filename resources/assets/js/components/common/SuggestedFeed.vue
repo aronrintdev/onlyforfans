@@ -3,7 +3,7 @@
     <ul class="list-suggested list-group">
       <li class="tag-heading list-group-item my-3"><h3 class="my-0">Suggested People</h3></li>
       <li v-for="(timeline, i) in timelines" :key="timeline.id || i" class="list-group-item my-3">
-        <MiniProfile :user="timeline ? timeline.user: null" :loading="loading" />
+        <MiniProfile :timeline="timeline" :loading="loading" />
       </li>
     </ul>
   </div>
