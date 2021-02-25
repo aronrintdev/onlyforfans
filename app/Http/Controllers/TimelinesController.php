@@ -14,6 +14,7 @@ use App\Libs\UserMgr;
 use App\Models\Setting;
 use App\Models\Timeline;
 use App\Models\Fanledger;
+use App\Models\Post;
 
 use Illuminate\Http\Request;
 use App\Enums\PaymentTypeEnum;
@@ -41,12 +42,11 @@ class TimelinesController extends AppBaseController
     {
         $TAKE = $request->input('take', 5);
 
-        $sessionUser = Auth::user();
-        $followedIDs = $sessionUser->followedtimelines->pluck('id');
+        $followedIDs = $request->user()->followedtimelines->pluck('id');
 
         $query = Timeline::with('user')->inRandomOrder();
-        $query->whereHas('user', function($q1) use(&$sessionUser, &$followedIDs) {
-            $q1->where('id', '<>', $sessionUser->id); // skip myself
+        $query->whereHas('user', function($q1) use(&$request, &$followedIDs) {
+            $q1->where('id', '<>', $request->user()->id); // skip myself
             // skip timelines I'm already following
             $q1->whereHas('followedtimelines', function($q2) use(&$followedIDs) {
                 $q2->whereNotIn('shareable_id', $followedIDs);
@@ -113,11 +113,11 @@ class TimelinesController extends AppBaseController
     //  ~ [ ] hashtag search
     public function feeddata(Request $request, Timeline $timeline)
     {
-        $follower = $timeline->user;
-        $page = $request->input('page', 1);
-        $take = $request->input('take', 5); // Setting::get('items_page'));
-        $filters = [];
-        $data = FeedMgr::getPosts($follower, $filters, $page, $take); // %TODO: work with L5.8 pagination
+        //$this->authorize('view', $timeline); // must be follower or subscriber
+        //$filters = [];
+        $query = Post::with('mediafiles', 'user')->withCount('comments')->where('active', 1);
+        $query->where('postable_type', 'timelines')->where('postable_id', $timeline->id);
+        $data = $query->latest()->paginate( $request->input('take', env('MAX_POSTS_PER_REQUEST', 10)) );
         return new PostCollection($data);
     }
 
@@ -219,8 +219,6 @@ class TimelinesController extends AppBaseController
 
     public function tip(Request $request, Timeline $timeline)
     {
-        $sessionUser = Auth::user(); // sender of tip (purchaser)
-
         $request->validate([
             'base_unit_cost_in_cents' => 'required|numeric',
         ]);
@@ -233,7 +231,7 @@ class TimelinesController extends AppBaseController
         try {
             $timeline->receivePayment(
                 PaymentTypeEnum::TIP,
-                $sessionUser,
+                $request->user(),
                 $request->base_unit_cost_in_cents,
                 $cattrs,
             );
