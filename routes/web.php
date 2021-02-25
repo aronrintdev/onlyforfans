@@ -106,7 +106,7 @@ Route::group(['middleware' => ['auth']], function () {
     ]);
 
     // -- stories:  --
-    Route::get('/stories/player', ['as'=>'stories.player', 'uses' => 'StoriesController@player']);
+    Route::get('/stories/player', ['as' => 'stories.player', 'uses' => 'SpaController@index']);
     Route::get('/stories/match', ['as'=>'stories.match', 'uses' => 'StoriesController@match']);
     Route::get('/stories/dashboard', ['as'=>'stories.dashboard', 'uses' => 'StoriesController@dashboard']);
     Route::resource('stories', 'StoriesController', [ 'except' => [ 'create', 'edit', ] ]);

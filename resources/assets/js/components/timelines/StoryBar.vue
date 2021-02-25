@@ -15,8 +15,7 @@
             :src="story.mediafiles[0].filepath"
             alt="Story Thumbnail"
           />
-          <span v-else class="tag-colorfill" :style="`background-color: ${bgColor(story)}`"
-            >&nbsp;
+          <span v-else class="tag-colorfill" :style="`background-color: ${bgColor(story)}`">&nbsp;
           </span>
         </router-link>
       </div>

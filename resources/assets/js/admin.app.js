@@ -51,6 +51,19 @@ Vue.use(BootstrapVue) // Telling Vue to use this in whole application
 Vue.use(BootstrapVueIcons)
 
 /**
+ * Vue Animejs
+ */
+import VueAnime from 'vue-animejs';
+Vue.use(VueAnime);
+
+/**
+ * VueSlider
+ */
+import VueSlider from 'vue-slider-component'
+import 'vue-slider-component/theme/default.css'
+Vue.component('VueSlider', VueSlider)
+
+/**
  * Loading localization translations
  */
 import i18n from './i18n'
