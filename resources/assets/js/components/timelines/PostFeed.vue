@@ -40,6 +40,7 @@ export default {
   },
 
   props: {
+    is_homefeed: null,
     session_user: null,
     timeline: null,
   },
@@ -86,7 +87,7 @@ export default {
   },
 
   created() {
-    this.$store.dispatch('getFeeddata', { timelineId: this.timelineId, page: 1, limit: this.limit })
+    this.$store.dispatch('getFeeddata', { timelineId: this.timelineId, page: 1, limit: this.limit, isHomefeed: this.is_homefeed })
   },
 
   methods: {
@@ -117,7 +118,7 @@ export default {
       const response = await axios.delete(url)
       this.renderedPages = []
       this.renderedItems = []
-      this.$store.dispatch('getFeeddata', { timelineId: this.timelineId, page: 1, limit: this.limit })
+      this.$store.dispatch('getFeeddata', { timelineId: this.timelineId, page: 1, limit: this.limit, isHomefeed: this.is_homefeed })
     },
 
     // see: https://peachscript.github.io/vue-infinite-loading/guide/#installation
@@ -125,7 +126,7 @@ export default {
       if ( !this.moreLoading && !this.is_loading && (this.nextPage <= this.lastPage) ) {
         this.moreLoading = true;
         this.$log.debug('loadMore', { current: this.currentPage, last: this.lastPage, next: this.nextPage });
-        this.$store.dispatch('getFeeddata', { timelineId: this.timelineId, page: this.nextPage, limit: this.limit })
+        this.$store.dispatch('getFeeddata', { timelineId: this.timelineId, page: this.nextPage, limit: this.limit, isHomefeed: this.is_homefeed })
       }
     },
 

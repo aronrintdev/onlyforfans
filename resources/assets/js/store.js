@@ -97,8 +97,10 @@ export default new Vuex.Store({
       });
     },
 
-    getFeeddata( { commit }, { timelineId, page, limit } ) {
-      const url = `/timelines/${timelineId}/feeddata?page=${page}&take=${limit}`; // %FIXME
+    getFeeddata( { commit }, { timelineId, page, limit, isHomefeed } ) {
+      const url = isHomefeed 
+        ? `/timelines/home/feed?page=${page}&take=${limit}`
+        : `/timelines/${timelineId}/feed?page=${page}&take=${limit}`;
       axios.get(url).then( (response) => {
         commit('UPDATE_FEEDDATA', response);
         commit('UPDATE_LOADING', false);

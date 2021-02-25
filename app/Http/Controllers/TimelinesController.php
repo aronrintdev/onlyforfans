@@ -61,6 +61,7 @@ class TimelinesController extends AppBaseController
         ]);
     }
 
+    // %TODO: is this still used (?)
     public function show(Request $request, Timeline $timeline)
     {
         $this->authorize('view', $timeline);
@@ -82,26 +83,16 @@ class TimelinesController extends AppBaseController
     }
 
     // Display my home timeline
-    public function home(Request $request)
+    public function homefeed(Request $request)
     {
-        $timeline = $request->user()->timeline()->with('user')->first();
-        $sales = Fanledger::where('seller_id', $timeline->user->id)->sum('total_amount');
-
-        $timeline->userstats = [ // %FIXME DRY
-            'post_count' => $timeline->posts->count(),
-            'like_count' => 0, // %TODO $timeline->user->postlikes->count(),
-            'follower_count' => $timeline->followers->count(),
-            'following_count' => $timeline->user->followedtimelines->count(),
-            'subscribed_count' => 0, // %TODO $sessionUser->timeline->subscribed->count()
-            'earnings' => $sales,
-        ];
-
-        return view('timelines.home', [
-            'sessionUser' => $request->user(),
-            'timeline' => $timeline,
-            //'myVault' => $myVault,
-            //'vaultRootFolder' => $vaultRootFolder,
-        ]);
+        $query = Post::with('mediafiles', 'user')->withCount('comments')->where('active', 1);
+        $query->whereHas('timeline', function($q1) use(&$request) {
+            $q1->whereHas('followers', function($q2) use(&$request) {
+                $q2->where('id', $request->user()->id);
+            });
+        });
+        $data = $query->latest()->paginate( $request->input('take', env('MAX_POSTS_PER_REQUEST', 10)) );
+        return new PostCollection($data);
     }
 
     // Get a list of items that make up a timeline feed, typically posts but
@@ -111,7 +102,7 @@ class TimelinesController extends AppBaseController
     //  ~ [ ] trending tags
     //  ~ [ ] announcements
     //  ~ [ ] hashtag search
-    public function feeddata(Request $request, Timeline $timeline)
+    public function feed(Request $request, Timeline $timeline)
     {
         //$this->authorize('view', $timeline); // must be follower or subscriber
         //$filters = [];
