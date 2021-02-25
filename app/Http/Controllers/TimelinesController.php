@@ -37,30 +37,6 @@ class TimelinesController extends AppBaseController
         ]);
     }
 
-    // Get suggested users (list/index)
-    public function suggested(Request $request)
-    {
-        $TAKE = $request->input('take', 5);
-
-        $followedIDs = $request->user()->followedtimelines->pluck('id');
-
-        $query = Timeline::with('user')->inRandomOrder();
-        $query->whereHas('user', function($q1) use(&$request, &$followedIDs) {
-            $q1->where('id', '<>', $request->user()->id); // skip myself
-            // skip timelines I'm already following
-            $q1->whereHas('followedtimelines', function($q2) use(&$followedIDs) {
-                $q2->whereNotIn('shareable_id', $followedIDs);
-            });
-        });
-
-        // Apply filters
-        //  ~ %TODO
-
-        return response()->json([
-            'timelines' => $query->take($TAKE)->get(),
-        ]);
-    }
-
     // %TODO: is this still used (?)
     public function show(Request $request, Timeline $timeline)
     {
@@ -111,6 +87,31 @@ class TimelinesController extends AppBaseController
         $data = $query->latest()->paginate( $request->input('take', env('MAX_POSTS_PER_REQUEST', 10)) );
         return new PostCollection($data);
     }
+
+    // Get suggested users (list/index)
+    public function suggested(Request $request)
+    {
+        $TAKE = $request->input('take', 5);
+
+        $followedIDs = $request->user()->followedtimelines->pluck('id');
+
+        $query = Timeline::with('user')->inRandomOrder();
+        $query->whereHas('user', function($q1) use(&$request, &$followedIDs) {
+            $q1->where('id', '<>', $request->user()->id); // skip myself
+            // skip timelines I'm already following
+            $q1->whereHas('followedtimelines', function($q2) use(&$followedIDs) {
+                $q2->whereNotIn('shareable_id', $followedIDs);
+            });
+        });
+
+        // Apply filters
+        //  ~ %TODO
+
+        return response()->json([
+            'timelines' => $query->take($TAKE)->get(),
+        ]);
+    }
+
 
     // toggles, returns set state
     public function follow(Request $request, Timeline $timeline)
