@@ -27,10 +27,8 @@ class FeedsController extends AppBaseController
                 $q2->where('id', $sessionUser->id);
             });
         });
-        $posts = $query->get();
-        return response()->json([
-            'feeditems' => $posts,
-        ]);
+        $data = $query->paginate( $request->input('take', env('MAX_POSTS_PER_REQUEST', 10)) );
+        return new PostCollection($data);
     }
 
     public function show(Request $request, Timeline $feed)
@@ -40,13 +38,8 @@ class FeedsController extends AppBaseController
         $this->authorize('view', $timeline); // must be follower or subscriber
         $query = Post::query();
         $query->where('postable_type', 'timelines')->where('postable_id', $timeline->id);
-        $posts = $query->get();
-        /*
-        return response()->json([
-            'feeditems' => $posts,
-        ]);
-         */
-        return new PostCollection($posts);
+        $data = $query->paginate( $request->input('take', env('MAX_POSTS_PER_REQUEST', 10)) );
+        return new PostCollection($data);
     }
 
 }

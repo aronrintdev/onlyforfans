@@ -33,7 +33,7 @@ class RestVaultTest extends TestCase
      *  @group vault
      *  @group regression
      */
-    public function test_can_index_all_of_my_vault_folders()
+    public function test_can_list_all_of_my_vault_folders()
     {
         $timeline = Timeline::has('stories', '>=', 1)->has('followers', '>=', 1)->first();
         $creator = $timeline->user;
@@ -46,9 +46,15 @@ class RestVaultTest extends TestCase
         ];
         $response = $this->actingAs($creator)->ajaxJSON('GET', route('vaultfolders.index'), $payload);
         $response->assertStatus(200);
+        $response->assertJsonStructure([
+            'data',
+            'links',
+            'meta' => [ 'current_page', 'from', 'last_page', 'path', 'per_page', 'to', 'total', ],
+        ]);
         $content = json_decode($response->content());
-        $this->assertNotNull($content->vaultfolders);
-        $vaultfoldersR = collect($content->vaultfolders);
+        $this->assertEquals(1, $content->meta->current_page);
+        $this->assertNotNull($content->data);
+        $vaultfoldersR = collect($content->data);
 
         $this->assertGreaterThan(0, $vaultfoldersR->count());
 
@@ -64,7 +70,7 @@ class RestVaultTest extends TestCase
      *  @group vault
      *  @group regression
      */
-    public function test_can_not_index_other_non_shared_vault_folders()
+    public function test_can_not_list_other_non_shared_vault_folders()
     {
         $creator = User::first();
         $primaryVault = Vault::primary($creator)->first();
@@ -86,7 +92,7 @@ class RestVaultTest extends TestCase
      *  @group vault
      *  @group regression
      */
-    public function test_can_index_my_root_level_vault_folders()
+    public function test_can_list_my_root_level_vault_folders()
     {
         $timeline = Timeline::has('stories', '>=', 1)->has('followers', '>=', 1)->first();
         $creator = $timeline->user;
@@ -100,9 +106,15 @@ class RestVaultTest extends TestCase
         ];
         $response = $this->actingAs($creator)->ajaxJSON('GET', route('vaultfolders.index'), $payload);
         $response->assertStatus(200);
+        $response->assertJsonStructure([
+            'data',
+            'links',
+            'meta' => [ 'current_page', 'from', 'last_page', 'path', 'per_page', 'to', 'total', ],
+        ]);
         $content = json_decode($response->content());
-        $this->assertNotNull($content->vaultfolders);
-        $vaultfoldersR = collect($content->vaultfolders);
+        $this->assertEquals(1, $content->meta->current_page);
+        $this->assertNotNull($content->data);
+        $vaultfoldersR = collect($content->data);
         $this->assertGreaterThan(0, $vaultfoldersR->count());
 
         $nonRoot = $vaultfoldersR->filter( function($vf) {

@@ -53,9 +53,9 @@ export default {
   },
 
   computed: {
-    timelineUrl(username) {
-      return `/timelines/${this.timeline.username}`; // DEBUG
-      //return `/${this.timeline.username}`;
+    timelineUrl() {
+      return `/timelines/${this.timeline.slug}`; // DEBUG
+      //return `/${this.timeline.slug}`;
     },
   },
 

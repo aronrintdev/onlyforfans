@@ -10,6 +10,7 @@ use App\Interfaces\ShortUuid;
 use App\Interfaces\Commentable;
 use App\Models\Traits\UsesUuid;
 use Illuminate\Support\Collection;
+use Cviebrock\EloquentSluggable\Sluggable;
 use App\Models\Traits\OwnableTraits;
 use App\Models\Traits\UsesShortUuid;
 use App\Models\Traits\LikeableTraits;
@@ -18,12 +19,21 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Comment extends Model implements Likeable, Commentable, Ownable
 {
-    use UsesUuid, SoftDeletes, LikeableTraits, CommentableTraits, OwnableTraits;
+    use UsesUuid, SoftDeletes, LikeableTraits, CommentableTraits, OwnableTraits, Sluggable;
 
     //protected $dates = ['deleted_at'];
     protected $guarded = [ 'id', 'created_at', 'updated_at' ];
     protected $casts = [ 'cattrs' => 'array', 'meta' => 'array', ];
     protected $hidden = [ 'deleted_at' ];
+
+    public function sluggable(): array
+    {
+        return [
+            'slug' => [
+                'source' => [ 'description' ]
+            ]
+        ];
+    }
 
     public function getOwner(): ?Collection
     {

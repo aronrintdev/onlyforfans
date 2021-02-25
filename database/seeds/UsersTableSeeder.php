@@ -128,8 +128,8 @@ class UsersTableSeeder extends Seeder
 
             if ( $this->appEnv !== 'testing' ) {
                 $this->output->writeln("Creating new user with avatar & cover: " . $u->name." (iter: $iter)");
-                $avatar = FactoryHelpers::createImage(MediafileTypeEnum::AVATAR);
-                $cover = FactoryHelpers::createImage(MediafileTypeEnum::COVER);
+                $avatar = FactoryHelpers::createImage(MediafileTypeEnum::AVATAR, true);
+                $cover = FactoryHelpers::createImage(MediafileTypeEnum::COVER, true);
             } else {
                 //$this->output->writeln("Creating new user without avatar & cover: " . $u->name." (iter: $iter)");
                 $avatar = null;
