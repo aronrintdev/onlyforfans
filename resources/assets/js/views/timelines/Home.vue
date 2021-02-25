@@ -52,29 +52,24 @@ export default {
     state: 'loading', // loading | loaded
   }),
 
-  created() {
-  },
-
-  mounted() {
-    if (!this.session_user || !this.timeline) {
-      this.getMe()
-    } else {
-      this.state = 'loaded'
-    }
-  },
-
-  methods: {
-    ...Vuex.mapActions([ 'getMe' ]),
-  },
-
   watch: {
     timeline(value) {
-      if (value) {
+      if (value && this.session_user) {
+        this.state = 'loaded'
+      }
+    },
+    session_user(value) {
+      if (value && this.timeline) {
         this.state = 'loaded'
       }
     }
   },
 
+  mounted() {
+    if (this.session_user && this.timeline) {
+      this.state = 'loaded'
+    }
+  },
 
 }
 </script>
