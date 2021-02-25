@@ -38,7 +38,7 @@
         class="background"
       >
         <div class="avatar-img">
-          <router-link :to="{ name: 'timeline.show', params: { slug: user.timeline.slug } }">
+          <router-link :to="{ name: 'timeline.show', params: { slug: timeline.slug } }">
             <b-img
               thumbnail
               rounded="circle"
@@ -53,7 +53,7 @@
         <div class="avatar-profile d-flex justify-content-between">
           <div class="avatar-details">
             <h2 class="avatar-name my-0">
-              <router-link :to="{ name: 'timeline.show', params: { slug: user.timeline.slug } }">
+              <router-link :to="{ name: 'timeline.show', params: { slug: timeline.slug } }">
                 {{ user.name }}
               </router-link>
               <span v-if="user.verified" class="verified-badge">
@@ -61,7 +61,7 @@
               </span>
             </h2>
             <p class="avatar-mail my-0">
-              <router-link :to="{ name: 'timeline.show', params: { slug: user.timeline.slug } }">
+              <router-link :to="{ name: 'timeline.show', params: { slug: timeline.slug } }">
                 @{{ user.username }}
               </router-link>
             </p>
@@ -77,8 +77,13 @@
 export default {
   props: {
     loading: { type: Boolean, default: false },
-    user: { type: Object, default: () => ({ cover: {}, avatar: {} }) },
+    timeline: { type: Object, default: () => ({ cover: {}, avatar: {} }) },
   },
+  computed: {
+    user() {
+      return this.timeline.user || { avatar: {}, cover: {} }
+    }
+  }
 }
 </script>
 

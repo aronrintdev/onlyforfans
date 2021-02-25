@@ -45,7 +45,7 @@ export default new Vuex.Store({
       state.feeddata = payload.hasOwnProperty('data') ? payload.data : {};
     },
     UPDATE_STORIES (state, payload) {
-      state.stories = payload.hasOwnProperty('stories') ? payload.stories : [];
+      state.stories = payload.hasOwnProperty('data') ? payload.data : [];
     },
     UPDATE_TIMELINE (state, payload) {
       state.timeline = payload.hasOwnProperty('timeline') ? payload.timeline : [];
@@ -107,15 +107,17 @@ export default new Vuex.Store({
       });
     },
 
-    async getStories( { commit }, { filters } ) {
+    getStories( { commit }, { filters } ) {
       const username = this.state.session_user.username;  // %FIXME Not used - This param will eventually be DEPRECATED
       const params = {};
       if ( Object.keys(filters).includes('user_id') ) {
         params.user_id = filters.user_id;
       }
-      const response = await axios.get(`/stories`, { params });
-      commit('UPDATE_STORIES', response.data);
-      commit('UPDATE_LOADING', false);
+      axios.get(`/stories`, { params })
+        .then(response => {
+          commit('UPDATE_STORIES', response.data);
+          commit('UPDATE_LOADING', false);
+        });
     },
 
     unshiftPostToTimeline( { commit }, { newPostId } ) {

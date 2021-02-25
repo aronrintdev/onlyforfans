@@ -53,6 +53,12 @@ import { BootstrapVue, BootstrapVueIcons } from 'bootstrap-vue'
 Vue.use(BootstrapVue) // Telling Vue to use this in whole application
 Vue.use(BootstrapVueIcons)
 
+/**
+ * Vue Animejs
+ */
+import VueAnime from 'vue-animejs';
+Vue.use(VueAnime);
+
 import VueTimeago from 'vue-timeago';
 Vue.use(VueTimeago, {
   name: 'Timeago', // Component name, `Timeago` by default
@@ -68,17 +74,22 @@ Vue.use(VueTimeago, {
 });
 
 /**
+ * VueSlider
+ */
+import VueSlider from 'vue-slider-component'
+import 'vue-slider-component/theme/default.css'
+Vue.component('VueSlider', VueSlider)
+
+
+/**
  * Next, we will create a fresh Vue application instance and attach it to
  * the page. Then, you may begin adding components to this application
  * or customize the JavaScript scaffolding to fit your unique needs.
  */
 
 Vue.component('main-navbar', require('./components/common/MainNavbar.vue').default);
-Vue.component('online-status', require('./components/user/OnlineStatus.vue').default);
 Vue.component('my-vault', require('./components/vault/Dashboard.vue').default);
 Vue.component('my-saved', require('./components/saved/Dashboard.vue').default);
-Vue.component('create-story', require('./components/stories/Wizard.vue').default);
-Vue.component('story-player', require('./components/stories/AutoPlayer.vue').default);
 
 export const eventBus = new Vue({
 /*

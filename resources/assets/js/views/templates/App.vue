@@ -2,10 +2,7 @@
   <div class="app d-flex flex-column">
     <!-- Header -->
     <div class="header">
-      <b-navbar variant="dark">
-        <b-nav-text class="text-light">All Fans Application Page</b-nav-text>
-        <b-btn variant="light" class="ml-auto" @click="logout">Logout</b-btn>
-      </b-navbar>
+      <MainNavBar />
     </div>
     <div class="content p-3  flex-grow-1">
       <router-view />
@@ -22,7 +19,12 @@
 
 <script>
 import Vuex from 'vuex';
+import MainNavBar from '@components/common/MainNavbar'
+
 export default {
+  components: {
+    MainNavBar,
+  },
   computed: {
     ...Vuex.mapState(['session_user']),
   },
@@ -33,12 +35,6 @@ export default {
 
   methods: {
     ...Vuex.mapActions(['getMe']),
-    logout() {
-      this.axios.post('/logout')
-      .then(() => {
-        window.location = '/login'
-      })
-    },
     startOnlineMonitor() {
       if (this.session_user) {
         this.onlineMonitor = this.$echo.join(`user.status.${this.session_user.id}`)

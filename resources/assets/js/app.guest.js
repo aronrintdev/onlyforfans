@@ -51,6 +51,12 @@ import { BootstrapVue, BootstrapVueIcons } from 'bootstrap-vue'
 Vue.use(BootstrapVue) // Telling Vue to use this in whole application
 Vue.use(BootstrapVueIcons)
 
+/**
+ * Vue Animejs
+ */
+import VueAnime from 'vue-animejs';
+Vue.use(VueAnime);
+
 import VueTimeago from 'vue-timeago';
 Vue.use(VueTimeago, {
   name: 'Timeago', // Component name, `Timeago` by default
@@ -64,6 +70,13 @@ Vue.use(VueTimeago, {
   }
   */
 });
+
+/**
+ * VueSlider
+ */
+import VueSlider from 'vue-slider-component'
+import 'vue-slider-component/theme/default.css'
+Vue.component('VueSlider', VueSlider)
 
 // ---
 

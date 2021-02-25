@@ -1,6 +1,6 @@
 <template>
   <div v-if="!is_loading" class="crate tag-crate row mb-3 mx-0">
-    <section class="d-flex flex-wrap justify-content-between">
+    <section class="d-flex flex-wrap justify-content-between w-100">
       <div @click="createStory()" class="story">
         <router-link :to="{ name: 'stories.dashboard' }">
           <b-icon icon="plus-circle" variant="primary" font-scale="2" />
@@ -15,8 +15,7 @@
             :src="story.mediafiles[0].filepath"
             alt="Story Thumbnail"
           />
-          <span v-else class="tag-colorfill" :style="`background-color: ${bgColor(story)}`"
-            >&nbsp;
+          <span v-else class="tag-colorfill" :style="`background-color: ${bgColor(story)}`">&nbsp;
           </span>
         </router-link>
       </div>
@@ -91,7 +90,7 @@ $size: 40px;
 $margin: 16px;
 .crate {
   max-height: $size * 2 + $margin + 2px;
-  overflow-y: scroll;
+  overflow-y: auto;
 
   .story {
     margin-left: $margin / 2;
