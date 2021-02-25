@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Request;
+use Illuminate\Http\Request;
 
 class SpaController extends Controller
 {
@@ -13,7 +13,7 @@ class SpaController extends Controller
     public function index(Request $request)
     {
         // If the request want JSON, then it's a 404 when reaching here
-        if (Request::wantsJson()) {
+        if ($request->wantsJson()) {
             abort(404, 'Route wanted JSON response');
         }
 

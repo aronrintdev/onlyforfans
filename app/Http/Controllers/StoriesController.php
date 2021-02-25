@@ -184,6 +184,10 @@ class StoriesController extends AppBaseController
 
     public function dashboard(Request $request)
     {
+        if ($request->wantsJson() === false) {
+            $spaController = new SpaController();
+            return $spaController->index($request);
+        }
         $stories = $request->user()->timeline->stories;
         $storiesA = $stories->map( function($item, $iter) {
             $a = $item->toArray();
@@ -194,16 +198,14 @@ class StoriesController extends AppBaseController
             }
             return $a;
         });
-        return view('stories.create', [
-            'session_user' => $request->user(),
-            'timeline' => $request->user()->timeline,
+        return [
             'stories' => $storiesA,
             'dtoUser' => [
                 'avatar' => $request->user()->avatar,
                 'fullname' => $request->user()->timeline->name,
                 'username' => $request->user()->timeline->username,
             ],
-        ]);
+        ];
     }
 
 }
