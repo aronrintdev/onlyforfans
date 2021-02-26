@@ -3,7 +3,7 @@
 
     <b-card title="General">
       <b-card-text>
-        <b-form @submit.prevent="submitGeneral" @reset="onReset">
+        <b-form @submit.prevent="submitGeneral($event)" @reset="onReset">
 
           <b-row>
             <b-col>
@@ -28,7 +28,7 @@
 
           <b-row align-h="end" class="mt-3">
             <b-col sm="2">
-              <b-button class="w-100" variant="primary">Save</b-button>
+              <b-button type="submit" class="w-100" variant="primary">Save</b-button>
             </b-col>
           </b-row>
 
@@ -38,7 +38,7 @@
 
     <b-card title="Subscriptions" class="mt-5">
       <b-card-text>
-        <b-form @submit.prevent="submitSubscriptions" @reset="onReset">
+        <b-form @submit.prevent="submitSubscriptions($event)" @reset="onReset">
 
           <b-row>
             <b-col>
@@ -70,9 +70,44 @@
             </b-col>
           </b-row>
 
-          <b-row class="mt-3">
+          <b-row align-h="end" class="mt-3">
+            <b-col sm="2">
+              <b-button type="submit" class="w-100" variant="primary">Save</b-button>
+            </b-col>
+          </b-row>
+
+        </b-form>
+      </b-card-text>
+    </b-card>
+
+    <b-card title="Localization" class="mt-5">
+      <b-card-text>
+        <b-form @submit.prevent="submitLocalization($event)" @reset="onReset">
+
+          <b-row>
             <b-col>
-              <b-button variant="primary">Save</b-button>
+              <b-form-group id="input-group-language" label="Language" label-for="language">
+                <b-form-input id="language" v-model="formLocalization.language" placeholder="Enter language" ></b-form-input>
+              </b-form-group>
+            </b-col>
+            <b-col>
+              <b-form-group id="input-group-timezone" label="Time Zone" label-for="timezone">
+                 <b-form-select v-model="formLocalization.timezone" :options="options.timezones"></b-form-select>
+              </b-form-group>
+            </b-col>
+          </b-row>
+
+          <b-row>
+            <b-col>
+              <b-form-group id="input-group-country" label="Country" label-for="country">
+                 <b-form-select v-model="formLocalization.country" :options="options.countries"></b-form-select>
+              </b-form-group>
+            </b-col>
+          </b-row>
+
+          <b-row align-h="end" class="mt-3">
+            <b-col sm="2">
+              <b-button type="submit" class="w-100" variant="primary">Save</b-button>
             </b-col>
           </b-row>
 
@@ -116,6 +151,21 @@ export default {
       currency: '',
     },
 
+    options: {
+      countries: [ 
+        { value: null, text: 'Please select an option' },
+        { value: 'us', text: 'USA' },
+        { value: 'canada', text: 'Canada' },
+      ],
+      timezones: [ 
+        { value: null, text: 'Please select an option' },
+        { value: 'America/Los_Angeles', text: '(GMT-08:00) Pacific Time (US & Canada)' },
+        { value: 'US/Mountain', text: '(GMT-07:00) Mountain Time (US & Canada)' },
+        { value: 'US/Central', text: '(GMT-06:00) Central Time (US & Canada)' },
+        { value: 'US/Eastern', text: '(GMT-05:00) Eastern Time (US & Canada)' },
+      ],
+    },
+
   }),
 
   mounted() {
@@ -126,13 +176,16 @@ export default {
 
   methods: {
 
-    submitGeneral(e) {
+    async submitGeneral(e) {
+      const response = await axios.post(`/settings`, this.formGeneral);
     },
 
-    submitSubscriptions(e) {
+    async submitSubscriptions(e) {
+      const response = await axios.post(`/settings`, this.formSubscriptions);
     },
 
-    submitLocalization(e) {
+    async submitLocalization(e) {
+      const response = await axios.post(`/settings`, this.formLocalization);
     },
 
     onReset(e) {
