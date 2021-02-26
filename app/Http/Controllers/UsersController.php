@@ -28,6 +28,22 @@ class UsersController extends AppBaseController
         ]);
     }
 
+    public function updateSettings(Request $request, User $user)
+    {
+        dd($request->all());
+        $this->authorize('update', $user);
+        $request->validate([
+            'city' => 'string|min:2',
+        ]);
+        $attrs = $request->only([ 'city' ]);
+        $userSetting->fill($attrs);
+        $userSetting->save();
+
+        return response()->json([
+            'user_setting' => $userSetting,
+        ]);
+    }
+
     /**
      * Retrieves information about logged in user
      * Route: `users.me`

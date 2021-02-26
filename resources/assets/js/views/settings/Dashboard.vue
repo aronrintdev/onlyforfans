@@ -24,7 +24,7 @@
       </aside>
 
       <main class="col-md-7 col-lg-8">
-        <router-view></router-view>
+        <router-view :session_user="session_user"></router-view>
       </main>
 
     </section>

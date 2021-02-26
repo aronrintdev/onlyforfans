@@ -41,19 +41,20 @@ export const routes = [
     component: settings.Dashboard,
     children: [
       {
-        // UserProfile will be rendered inside User's <router-view>
-        // when /user/:id/profile is matched
         name: 'settings.general',
+        component: SettingsGeneral,
         path: 'general',
-        component: SettingsGeneral
       },
       {
-        // UserPosts will be rendered inside User's <router-view>
-        // when /user/:id/posts is matched
         name: 'settings.profile',
+        component: SettingsProfile,
         path: 'profile',
-        component: SettingsProfile
-      }
+      },
+      {
+        name: 'settings.general',
+        component: SettingsGeneral,
+        path: '',
+      },
     ],
   },
 

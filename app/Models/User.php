@@ -39,6 +39,11 @@ class User extends Authenticatable implements PaymentSendable, Blockable
         self::creating(function ($model) {
             $model->checkUsername();
         });
+        self::created(function ($model) {
+            UserSetting::create([
+                'user_id' => $model->id,
+            ]);
+        });
         self::updating(function ($model) {
             $model->checkUsername();
         });
