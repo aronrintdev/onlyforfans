@@ -10,8 +10,12 @@
 
       <aside class="col-md-5 col-lg-4">
         <b-list-group>
-          <b-list-group-item>General</b-list-group-item>
-          <b-list-group-item>Profile</b-list-group-item>
+          <b-list-group-item>
+            <router-link :to="{ name: 'settings.general', params: {} }">General</router-link>
+          </b-list-group-item>
+          <b-list-group-item>
+            <router-link :to="{ name: 'settings.profile', params: {} }">Profile</router-link>
+          </b-list-group-item>
           <b-list-group-item>Dapibus ac facilisis in</b-list-group-item>
           <b-list-group-item>Morbi leo risus</b-list-group-item>
           <b-list-group-item>Porta ac consectetur ac</b-list-group-item>

@@ -43,12 +43,14 @@ export const routes = [
       {
         // UserProfile will be rendered inside User's <router-view>
         // when /user/:id/profile is matched
+        name: 'settings.general',
         path: 'general',
         component: SettingsGeneral
       },
       {
         // UserPosts will be rendered inside User's <router-view>
         // when /user/:id/posts is matched
+        name: 'settings.profile',
         path: 'profile',
         component: SettingsProfile
       }
