@@ -5,10 +5,14 @@ import VueRouter from 'vue-router'
 import ErrorViews from '@views/errors'
 import StaticPageRoutes from './staticPages.routes'
 
+import settings from '@views/settings'
 import stories from '@views/stories'
 import timelines from '@views/timelines'
 import users from '@views/users'
 import vaults from '@views/vaults'
+
+import SettingsGeneral from '@components/settings/SettingsGeneral.vue';
+import SettingsProfile from '@components/settings/SettingsProfile.vue';
 
 export const routes = [
   {
@@ -30,6 +34,27 @@ export const routes = [
   //   props: true,
   // },
 
+  // Settings
+  {
+    name: 'settings.dashboard',
+    path: '/settings',
+    component: settings.Dashboard,
+    children: [
+      {
+        // UserProfile will be rendered inside User's <router-view>
+        // when /user/:id/profile is matched
+        path: 'general',
+        component: SettingsGeneral
+      },
+      {
+        // UserPosts will be rendered inside User's <router-view>
+        // when /user/:id/posts is matched
+        path: 'profile',
+        component: SettingsProfile
+      }
+    ],
+  },
+
   // Stories
   {
     name: 'stories.dashboard',
@@ -46,7 +71,7 @@ export const routes = [
   {
     name: 'vault.dashboard',
     path: '/my-vault',
-    component: vaults.Dashboard
+    component: vaults.Dashboard,
   },
 
   // Static Pages
