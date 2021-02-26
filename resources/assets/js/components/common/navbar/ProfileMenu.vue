@@ -35,77 +35,64 @@ export default {
   }),
 
   computed: {
-    ...Vuex.mapState(['session_user']),
+    ...Vuex.mapGetters(['session_user', 'uiFlags']),
     menuItems() {
-      return [
+      var items = []
+
+      if (this.uiFlags.isAdmin) {
+        items.push({
+          label: 'Admin Dashboard',
+          icon: 'user-shield',
+          linkTo: { name: 'index' }, // TODO: Add link to admin dashboard
+        })
+      }
+
+      items = [ ...items,
         {
           label: 'My Profile',
           icon: 'user',
-          action: this.action,
+          linkTo: { name: 'timeline.show', params: { slug: this.session_user.timeline.slug } }
         },
         {
           label: 'Settings',
           icon: 'cog',
-          action: this.action,
-        },
-        {
-          label: 'Fans',
-          icon: 'users',
-          action: this.action,
-        },
-        {
-          label: 'Saved & Purchased',
-          icon: 'bookmark',
-          action: this.action,
-        },
-        {
-          label: 'Banking',
-          icon: 'university',
-          action: this.action,
-        },
-        {
-          label: 'Earnings',
-          icon: 'dollar-sign',
-          action: this.action,
-        },
-        {
-          label: 'Payment Method',
-          icon: 'credit-card',
-          action: this.action,
-        },
-        {
-          label: 'Vault',
-          icon: 'lock',
-          linkTo: { name: 'vault.dashboard' },
-        },
-        {
-          label: 'Referrals',
-          icon: 'retweet',
-          action: this.action,
-        },
-        {
-          label: 'FAQ',
-          icon: 'question',
-          action: this.action,
-        },
-        {
-          label: 'Contact Support',
-          icon: 'envelope',
-          action: this.action,
-        },
-        {
-          label: 'Logout',
-          icon: 'sign-out-alt',
-          action: this.logout,
+          linkTo: { name: 'index' } // TODO: Add route when settings page is added
         },
       ]
+
+      if (this.uiFlags.isCreator && !this.uiFlags.hasBanking) {
+        items.push({
+          label: 'Banking',
+          icon: 'university',
+          linkTo: { name: 'index' } // TODO: Add route when settings page is added
+        })
+      }
+      if (this.uiFlags.isCreator && this.uiFlags.hasEarnings) {
+        items.push({
+          label: 'Earnings',
+          icon: 'dollar-sign',
+          linkTo: { name: 'index' } // TODO: Add route when settings page is added
+        })
+      }
+      if (this.uiFlags.hasPaymentMethod === false) {
+        items.push({
+          label: 'Payment Method',
+          icon: 'credit-card',
+          linkTo: { name: 'index' } // TODO: Add route when settings page is added
+        })
+      }
+
+      items = [ ...items, {
+        label: 'Logout',
+        icon: 'sign-out-alt',
+        action: this.logout,
+      }]
+
+      return items
     }
   },
 
   methods: {
-    action() {
-      //
-    },
     logout() {
       this.axios.post('/logout').then(() => {
         window.location = '/login'
@@ -114,5 +101,3 @@ export default {
   },
 }
 </script>
-
-<style lang="scss" scoped></style>
