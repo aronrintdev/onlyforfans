@@ -24,11 +24,6 @@ class VaultsController extends AppBaseController
 {
     public function dashboard(Request $request)
     {
-        if ($request->wantsJson() === false) {
-            $spaController = new SpaController();
-            return $spaController->index($request);
-        }
-
         $sessionUser = Auth::user();
 
         $this->_php2jsVars['session'] = [

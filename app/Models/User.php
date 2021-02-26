@@ -91,6 +91,10 @@ class User extends Authenticatable implements PaymentSendable, Blockable
     // %%% Relationships
     //--------------------------------------------
 
+    public function settings() {
+        return $this->hasOne(UserSetting::class);
+    }
+
     public function sharedmediafiles()
     { // Mediafiles shared with me (??)
         return $this->morphedByMany('App\Models\Mediafile', 'shareable', 'shareables', 'sharee_id')
@@ -333,12 +337,6 @@ class User extends Authenticatable implements PaymentSendable, Blockable
         return $result;
     }
      */
-
-    public function settings()
-    {
-        $settings = DB::table('user_settings')->where('user_id', $this->id)->first();
-        return $settings;
-    }
 
     public function commentLikes()
     {

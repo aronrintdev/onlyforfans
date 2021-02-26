@@ -27,26 +27,8 @@ export default {
     SearchBar,
   },
 
-  props: {
-    session_user: null,
-    timeline: null,
-  },
-
   computed: {
     ...Vuex.mapGetters(['session_user']),
   },
-
-  data: () => ({
-  }),
-
-  created() {
-  },
-
-  methods: {
-  },
 }
 </script>
-
-<style scoped>
-</style>
-

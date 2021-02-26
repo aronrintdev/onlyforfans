@@ -184,10 +184,6 @@ class StoriesController extends AppBaseController
 
     public function dashboard(Request $request)
     {
-        if ($request->wantsJson() === false) {
-            $spaController = new SpaController();
-            return $spaController->index($request);
-        }
         $stories = $request->user()->timeline->stories;
         $storiesA = $stories->map( function($item, $iter) {
             $a = $item->toArray();
