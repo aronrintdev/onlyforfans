@@ -5,6 +5,8 @@ use DB;
 use Auth;
 use Exception;
 use Throwable;
+
+use App\Http\Resources\PostCollection;
 use App\Models\User;
 use App\Libs\FeedMgr;
 use App\Libs\UserMgr;
@@ -12,6 +14,7 @@ use App\Libs\UserMgr;
 use App\Models\Setting;
 use App\Models\Timeline;
 use App\Models\Fanledger;
+use App\Models\Post;
 
 use Illuminate\Http\Request;
 use App\Enums\PaymentTypeEnum;
@@ -34,31 +37,7 @@ class TimelinesController extends AppBaseController
         ]);
     }
 
-    // Get suggested users (list/index)
-    public function suggested(Request $request)
-    {
-        $TAKE = $request->input('take', 5);
-
-        $sessionUser = Auth::user();
-        $followedIDs = $sessionUser->followedtimelines->pluck('id');
-
-        $query = Timeline::with('user')->inRandomOrder();
-        $query->whereHas('user', function($q1) use(&$sessionUser, &$followedIDs) {
-            $q1->where('id', '<>', $sessionUser->id); // skip myself
-            // skip timelines I'm already following
-            $q1->whereHas('followedtimelines', function($q2) use(&$followedIDs) {
-                $q2->whereNotIn('shareable_id', $followedIDs);
-            });
-        });
-
-        // Apply filters
-        //  ~ %TODO
-
-        return response()->json([
-            'timelines' => $query->take($TAKE)->get(),
-        ]);
-    }
-
+    // %TODO: is this still used (?)
     public function show(Request $request, Timeline $timeline)
     {
         $this->authorize('view', $timeline);
@@ -80,56 +59,59 @@ class TimelinesController extends AppBaseController
     }
 
     // Display my home timeline
-    public function home(Request $request)
+    public function homefeed(Request $request)
     {
-        $timeline = $request->user()->timeline()->with('user')->first();
-        $sales = Fanledger::where('seller_id', $timeline->user->id)->sum('total_amount');
-
-        $timeline->userstats = [ // %FIXME DRY
-            'post_count' => $timeline->posts->count(),
-            'like_count' => 0, // %TODO $timeline->user->postlikes->count(),
-            'follower_count' => $timeline->followers->count(),
-            'following_count' => $timeline->user->followedtimelines->count(),
-            'subscribed_count' => 0, // %TODO $sessionUser->timeline->subscribed->count()
-            'earnings' => $sales,
-        ];
-
-        return view('timelines.home', [
-            'sessionUser' => $request->user(),
-            'timeline' => $timeline,
-            //'myVault' => $myVault,
-            //'vaultRootFolder' => $vaultRootFolder,
-        ]);
+        $query = Post::with('mediafiles', 'user')->withCount('comments')->where('active', 1);
+        $query->whereHas('timeline', function($q1) use(&$request) {
+            $q1->whereHas('followers', function($q2) use(&$request) {
+                $q2->where('id', $request->user()->id);
+            });
+        });
+        $data = $query->latest()->paginate( $request->input('take', env('MAX_POSTS_PER_REQUEST', 10)) );
+        return new PostCollection($data);
     }
 
     // Get a list of items that make up a timeline feed, typically posts but
     //  keep generic as we may want to throw in other things
-    //  %TODO: DEPRECATE, use FeedsController (?)
-    public function feeditems(Request $request, Timeline $timeline)
+    //  %TODO: 
+    //  ~ [ ] DEPRECATE, use FeedsController (?)
+    //  ~ [ ] trending tags
+    //  ~ [ ] announcements
+    //  ~ [ ] hashtag search
+    public function feed(Request $request, Timeline $timeline)
     {
-        $sessionUser = Auth::user();
-        $follower = $timeline->user;
-        $page = $request->input('page', 1);
-        $take = 5; // $request->input('take', Setting::get('items_page'));
+        //$this->authorize('view', $timeline); // must be follower or subscriber
+        //$filters = [];
+        $query = Post::with('mediafiles', 'user')->withCount('comments')->where('active', 1);
+        $query->where('postable_type', 'timelines')->where('postable_id', $timeline->id);
+        $data = $query->latest()->paginate( $request->input('take', env('MAX_POSTS_PER_REQUEST', 10)) );
+        return new PostCollection($data);
+    }
 
-        // %TODO
-        //  ~ [ ] trending tags
-        //  ~ [ ] announcements
-        //  ~ [ ] 
+    // Get suggested users (list/index)
+    public function suggested(Request $request)
+    {
+        $TAKE = $request->input('take', 5);
 
-        $filters = [];
+        $followedIDs = $request->user()->followedtimelines->pluck('id');
 
-        if ($request->hashtag) {
-            $filters['hashtag'] = '#'.$request->hashtag;
-        }
+        $query = Timeline::with('user')->inRandomOrder();
+        $query->whereHas('user', function($q1) use(&$request, &$followedIDs) {
+            $q1->where('id', '<>', $request->user()->id); // skip myself
+            // skip timelines I'm already following
+            $q1->whereHas('followedtimelines', function($q2) use(&$followedIDs) {
+                $q2->whereNotIn('shareable_id', $followedIDs);
+            });
+        });
 
-        $feeditems = FeedMgr::getPosts($follower, $filters, $page, $take); // %TODO: work with L5.8 pagination
-        //$feeditems = FeedMgr::getPostsRaw($sessionUser, $filters);
+        // Apply filters
+        //  ~ %TODO
 
         return response()->json([
-            'feeditems' => $feeditems,
+            'timelines' => $query->take($TAKE)->get(),
         ]);
     }
+
 
     // toggles, returns set state
     public function follow(Request $request, Timeline $timeline)
@@ -229,8 +211,6 @@ class TimelinesController extends AppBaseController
 
     public function tip(Request $request, Timeline $timeline)
     {
-        $sessionUser = Auth::user(); // sender of tip (purchaser)
-
         $request->validate([
             'base_unit_cost_in_cents' => 'required|numeric',
         ]);
@@ -243,7 +223,7 @@ class TimelinesController extends AppBaseController
         try {
             $timeline->receivePayment(
                 PaymentTypeEnum::TIP,
-                $sessionUser,
+                $request->user(),
                 $request->base_unit_cost_in_cents,
                 $cattrs,
             );

@@ -46,6 +46,7 @@ export default new Vuex.Store({
      * Posts on the current open timeline
      */
     feeditems: [],
+    feeddata: {},
     /**
      * Current open stories
      */
@@ -87,6 +88,10 @@ export default new Vuex.Store({
     },
     UPDATE_FEEDITEMS(state, payload) {
       state.feeditems = propSelect(payload, 'feeditems')
+    },
+    UPDATE_FEEDDATA(state, payload) {
+      console.log('UPDATE_FEEDDATA', { payload, })
+      state.feeddata = payload.hasOwnProperty('data') ? payload.data : {}
     },
     UPDATE_STORIES(state, payload) {
       state.stories = propSelect(payload, 'stories')
@@ -144,17 +149,18 @@ export default new Vuex.Store({
       })
     },
 
-    getFeeditems({ commit }, { timelineId, page, limit }) {
-      axios.get(route('timelines.feeditems', { id: timelineId }), { params: { page, take: limit } })
-        .then((response) => {
-          commit('UPDATE_FEEDITEMS', response.data)
-          //commit('UPDATE_TIMELINE', response.data);
-          commit('UPDATE_LOADING', false)
-        })
+    getFeeddata( { commit }, { timelineId, page, limit, isHomefeed } ) {
+      const url = isHomefeed 
+        ? `/timelines/home/feed?page=${page}&take=${limit}`
+        : `/timelines/${timelineId}/feed?page=${page}&take=${limit}`;
+      axios.get(url).then( (response) => {
+        commit('UPDATE_FEEDDATA', response);
+        commit('UPDATE_LOADING', false);
+      });
     },
 
     getStories({ commit }, { filters }) {
-      const username = this.state.session_user ? this.state.session_user.username : 'mattm' // Not used - This param will eventually be DEPRECATED
+      const username = this.state.session_user.username // Not used - This param will eventually be DEPRECATED
       const params = {}
       if (Object.keys(filters).includes('user_id')) {
         params.user_id = filters.user_id
@@ -185,19 +191,19 @@ export default new Vuex.Store({
   },
 
   getters: {
-    is_loading:              (state) => state.is_loading, // indicates if Vuex has loaded data or not
-    vault:                   (state) => state.vault,
-    vaultfolder:             (state) => state.vaultfolder,
-    breadcrumb:              (state) => state.breadcrumb,
-    shares:                  (state) => state.shares,
-    shareables:              (state) => state.shareables,
-    saves:                   (state) => state.saves,
-    feeditems:               (state) => state.feeditems,
-    stories:                 (state) => state.stories,
-    timeline:                (state) => state.timeline,
-    unshifted_timeline_post: (state) => state.unshifted_timeline_post,
-    session_user:            (state) => state.session_user,
-    uiFlags:                 (state) => state.uiFlags,
+    is_loading:              state => state.is_loading, // indicates if Vuex has loaded data or not
+    vault:                   state => state.vault,
+    vaultfolder:             state => state.vaultfolder,
+    breadcrumb:              state => state.breadcrumb,
+    shares:                  state => state.shares,
+    shareables:              state => state.shareables,
+    saves:                   state => state.saves,
+    feeddata:                state => state.feeddata,
+    stories:                 state => state.stories,
+    timeline:                state => state.timeline,
+    unshifted_timeline_post: state => state.unshifted_timeline_post,
+    session_user:            state => state.session_user,
+    uiFlags:                 state => state.uiFlags,
     //children: state => state.vault.children, // Flat list
     //mediafiles: state => state.vault.mediafiles, // Flat list
   },
