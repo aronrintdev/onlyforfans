@@ -28,6 +28,10 @@ class UsersController extends AppBaseController
         ]);
     }
 
+    /**
+     * Retrieves information about logged in user
+     * Route: `users.me`
+     */
     public function me(Request $request)
     {
         $sessionUser = Auth::user(); // sender of tip
@@ -36,18 +40,28 @@ class UsersController extends AppBaseController
 
         $timeline = $sessionUser->timeline;
         $timeline->userstats = [ // %FIXME DRY
-            'post_count' => $timeline->posts->count(),
-            'like_count' => $timeline->user->likedposts->count(),
-            'follower_count' => $timeline->followers->count(),
-            'following_count' => $timeline->user->followedtimelines->count(),
+            'post_count'       => $timeline->posts->count(),
+            'like_count'       => $timeline->user->likedposts->count(),
+            'follower_count'   => $timeline->followers->count(),
+            'following_count'  => $timeline->user->followedtimelines->count(),
             'subscribed_count' => 0, // %TODO $sessionUser->timeline->subscribed->count()
-            'earnings' => $sales,
+            'earnings'         => $sales,
         ];
 
-        return response()->json([
+        /** Flags for the common UI elements */
+        $uiFlags = [
+            'isAdmin'          => $sessionUser->can('admin.dashboard'),
+            'isCreator'        => $sessionUser->settings->is_creator ?? false,
+            'hasBanking'       => false, // TODO: Add Logic when banking is setup
+            'hasEarnings'      => $sales > 0,
+            'hasPaymentMethod' => false, // TODO: Add Logic when payment method is setup
+        ];
+
+        return [
             'session_user' => $sessionUser,
-            'timeline' => $timeline,
-        ]);
+            'timeline'     => $timeline,
+            'uiFlags'      => $uiFlags,
+        ];
     }
 
     public function tip(Request $request, $id)

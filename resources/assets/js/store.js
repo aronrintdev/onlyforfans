@@ -1,100 +1,152 @@
-import Vue from 'vue';
-import Vuex from 'vuex';
-import axios from 'axios';
+import Vue from 'vue'
+import Vuex from 'vuex'
+import axios from 'axios'
 
-Vue.use(Vuex);
+Vue.use(Vuex)
+
+/**
+ * Routes from window, want to eventually deprecate and move to dedicated compiled routes
+ */
+const route = window.route
+console.log({route, window: window.route})
+
+/**
+ * Helps select items from response result set
+ * @param {Object} payload - response payload
+ * @param {String} propertyName - name of property
+ */
+const propSelect = (payload, propertyName, type = 'array') => {
+  return payload.hasOwnProperty(propertyName)
+    ? payload[propertyName]
+    : payload.hasOwnProperty('data')
+      ? payload.data
+      : type === 'array'
+        ? [] : {}
+}
+
 
 export default new Vuex.Store({
-
   state: {
     vault: {},
     vaultfolder: {},
     breadcrumb: [],
-    shares: [], // shares for a vaultfolder, used to mark what resources session user *has* shared out
-    shareables: [], // resources that have been shared with session user
-    saves: [], // resources that session user has saved
+    /**
+     * shares for a vaultfolder, used to mark what resources session user *has* shared out
+     */
+    shares: [],
+    /**
+     * resources that have been shared with session user
+     */
+    shareables: [],
+    /**
+     * resources that session user has saved
+     */
+    saves: [],
+    /**
+     * Posts on the current open timeline
+     */
+    feeditems: [],
     feeddata: {},
+    /**
+     * Current open stories
+     */
     stories: [],
+    /**
+     * Logged in user timeline
+     */
     timeline: null,
+    /**
+     * Logged in user information
+     */
     session_user: null,
+    /**
+     * UI Flags for logged in user
+     */
+    uiFlags: [],
     unshifted_timeline_post: null,
     is_loading: true,
   },
 
   mutations: {
-    UPDATE_VAULT (state, payload) {
-      state.vault = payload.hasOwnProperty('vault') ? payload.vault : [];
+    UPDATE_VAULT(state, payload) {
+      state.vault = propSelect(payload, 'vault')
     },
-    UPDATE_VAULTFOLDER (state, payload) {
-      state.vaultfolder = payload.hasOwnProperty('vaultfolder') ? payload.vaultfolder : [];
+    UPDATE_VAULTFOLDER(state, payload) {
+      state.vaultfolder = propSelect(payload, 'vaultfolder')
     },
-    UPDATE_BREADCRUMB (state, payload) {
-      state.breadcrumb = payload.hasOwnProperty('breadcrumb') ? payload.breadcrumb : [];
+    UPDATE_BREADCRUMB(state, payload) {
+      state.breadcrumb = propSelect(payload, 'breadcrumb')
     },
-    UPDATE_SHARES (state, payload) { 
-      state.shares = payload.hasOwnProperty('shares') ? payload.shares : [];
+    UPDATE_SHARES(state, payload) {
+      state.shares = propSelect(payload, 'shares')
     },
-    UPDATE_SHAREABLES (state, payload) {
-      state.shareables = payload.hasOwnProperty('shareables') ? payload.shareables : [];
+    UPDATE_SHAREABLES(state, payload) {
+      state.shareables = propSelect(payload, 'shareables')
     },
-    UPDATE_SAVES (state, payload) {
-      state.saves = payload.hasOwnProperty('saves') ? payload.saves : [];
+    UPDATE_SAVES(state, payload) {
+      state.saves = propSelect(payload, 'saves')
     },
-    UPDATE_FEEDDATA (state, payload) {
-      console.log('UPDATE_FEEDDATA', { payload, });
-      state.feeddata = payload.hasOwnProperty('data') ? payload.data : {};
+    UPDATE_FEEDITEMS(state, payload) {
+      state.feeditems = propSelect(payload, 'feeditems')
     },
-    UPDATE_STORIES (state, payload) {
-      state.stories = payload.hasOwnProperty('data') ? payload.data : [];
+    UPDATE_FEEDDATA(state, payload) {
+      console.log('UPDATE_FEEDDATA', { payload, })
+      state.feeddata = payload.hasOwnProperty('data') ? payload.data : {}
     },
-    UPDATE_TIMELINE (state, payload) {
-      state.timeline = payload.hasOwnProperty('timeline') ? payload.timeline : [];
+    UPDATE_STORIES(state, payload) {
+      state.stories = propSelect(payload, 'stories')
     },
-    UPDATE_SESSION_USER (state, payload) {
-      state.session_user = payload.hasOwnProperty('session_user') ? payload.session_user : [];
+    UPDATE_TIMELINE(state, payload) {
+      state.timeline = propSelect(payload, 'timeline')
     },
-    UPDATE_UNSHIFTED_TIMELINE_POST (state, payload) {
-      state.unshifted_timeline_post = payload.hasOwnProperty('post') ? payload.post : [];
+    UPDATE_SESSION_USER(state, payload) {
+      state.session_user = propSelect(payload, 'session_user')
+    },
+    UPDATE_UI_FLAGS(state, payload) {
+      state.uiFlags = { ...state.uiFlags, ...propSelect(payload, 'uiFlags', 'object') }
+    },
+    UPDATE_UNSHIFTED_TIMELINE_POST(state, payload) {
+      state.unshifted_timeline_post = propSelect(payload, 'post')
     },
     UPDATE_LOADING(state, payload) {
-      state.is_loading = payload;
+      state.is_loading = payload
     },
   },
 
   actions: {
-
-    getVault({ commit }, pkid) {
-      const url = `/vaults/${pkid}`;
-      axios.get(url).then( (response) => {
-        commit('UPDATE_VAULT', response.data);
-        commit('UPDATE_LOADING', false);
-      });
+    getVault({ commit }, id) {
+      axios.get(route('valuts.show', { id }))
+        .then((response) => {
+          commit('UPDATE_VAULT', response.data)
+          commit('UPDATE_LOADING', false)
+        })
     },
-    
-    getVaultfolder({ commit }, pkid) {
-      const url = `/vaultfolders/${pkid}`;
-      axios.get(url).then( (response) => {
-        commit('UPDATE_VAULTFOLDER', response.data);
-        commit('UPDATE_BREADCRUMB', response.data);
-        commit('UPDATE_SHARES', response.data);
-        commit('UPDATE_LOADING', false);
-      });
+
+    getVaultfolder({ commit }, id) {
+      axios.get(route('vaultfolders.show', { id }))
+        .then((response) => {
+          commit('UPDATE_VAULTFOLDER', response.data)
+          commit('UPDATE_BREADCRUMB', response.data)
+          commit('UPDATE_SHARES', response.data)
+          commit('UPDATE_LOADING', false)
+        })
     },
 
     getShareables({ commit }) {
-      const url = `/shareables`;
-      axios.get(url).then( (response) => {
-        commit('UPDATE_SHAREABLES', response.data);
-        commit('UPDATE_LOADING', false);
-      });
+      axios.get(route('shareables.index'))
+        .then((response) => {
+          commit('UPDATE_SHAREABLES', response.data)
+          commit('UPDATE_LOADING', false)
+        })
     },
 
     getSaves({ commit }) {
-      const url = `/saved`;
-      axios.get(url).then( (response) => {
-        commit('UPDATE_SAVES', response.data);
-        commit('UPDATE_LOADING', false);
-      });
+      // Route does not exist
+      const url = `/saved`
+      axios.get(url).then((response) => {
+        commit('UPDATE_SAVES', response.data)
+        commit('UPDATE_LOADING', false)
+      })
     },
 
     getFeeddata( { commit }, { timelineId, page, limit, isHomefeed } ) {
@@ -107,55 +159,55 @@ export default new Vuex.Store({
       });
     },
 
-    getStories( { commit }, { filters } ) {
-      const username = this.state.session_user.username;  // %FIXME Not used - This param will eventually be DEPRECATED
-      const params = {};
-      if ( Object.keys(filters).includes('user_id') ) {
-        params.user_id = filters.user_id;
+    getStories({ commit }, { filters }) {
+      const username = this.state.session_user.username // Not used - This param will eventually be DEPRECATED
+      const params = {}
+      if (Object.keys(filters).includes('user_id')) {
+        params.user_id = filters.user_id
       }
-      axios.get(`/stories`, { params })
-        .then(response => {
-          commit('UPDATE_STORIES', response.data);
-          commit('UPDATE_LOADING', false);
-        });
+      axios.get(route('stories.index'), { params })
+        .then((response) => {
+          commit('UPDATE_STORIES', response.data)
+          commit('UPDATE_LOADING', false)
+        })
     },
 
-    unshiftPostToTimeline( { commit }, { newPostId } ) {
-      const url = `/posts/${newPostId}`;
-      axios.get(url).then( (response) => {
-        commit('UPDATE_UNSHIFTED_TIMELINE_POST', response.data);
-        commit('UPDATE_LOADING', false);
-      });
+    unshiftPostToTimeline({ commit }, { newPostId }) {
+      axios.get(route('posts.show', { id: newPostId }))
+        .then((response) => {
+          commit('UPDATE_UNSHIFTED_TIMELINE_POST', response.data)
+          commit('UPDATE_LOADING', false)
+        })
     },
 
-    getMe( { commit } ) {
-      const url = `/users/me`;
-      axios.get(url).then( (response) => {
-        commit('UPDATE_SESSION_USER', response.data);
-        commit('UPDATE_TIMELINE', response.data);
-        commit('UPDATE_LOADING', false);
-      });
+    getMe({ commit }) {
+      axios.get(route('users.me')).then((response) => {
+        commit('UPDATE_SESSION_USER', response.data)
+        commit('UPDATE_TIMELINE', response.data)
+        commit('UPDATE_UI_FLAGS', response.data)
+        commit('UPDATE_LOADING', false)
+      })
     },
-
   },
 
   getters: {
-    is_loading: state => state.is_loading, // indicates if Vuex has loaded data or not
-    vault: state => state.vault,
-    vaultfolder: state => state.vaultfolder,
-    breadcrumb: state => state.breadcrumb,
-    shares: state => state.shares,
-    shareables: state => state.shareables,
-    saves: state => state.saves,
-    feeddata: state => state.feeddata,
-    stories: state => state.stories,
-    timeline: state => state.timeline,
+    is_loading:              state => state.is_loading, // indicates if Vuex has loaded data or not
+    vault:                   state => state.vault,
+    vaultfolder:             state => state.vaultfolder,
+    breadcrumb:              state => state.breadcrumb,
+    shares:                  state => state.shares,
+    shareables:              state => state.shareables,
+    saves:                   state => state.saves,
+    feeddata:                state => state.feeddata,
+    stories:                 state => state.stories,
+    timeline:                state => state.timeline,
     unshifted_timeline_post: state => state.unshifted_timeline_post,
-    session_user: state => state.session_user,
+    session_user:            state => state.session_user,
+    uiFlags:                 state => state.uiFlags,
     //children: state => state.vault.children, // Flat list
     //mediafiles: state => state.vault.mediafiles, // Flat list
   },
-});
+})
 
 /*
   // Find a specific movie by slug
@@ -179,4 +231,3 @@ export default new Vuex.Store({
             return result;
         },
         */
-
