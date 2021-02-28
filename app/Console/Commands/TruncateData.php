@@ -21,13 +21,16 @@ class TruncateData extends Command
 
     public function handle()
     {
-        $isEnvLocal = App::environment(['local']);
-        $isEnvTesting = App::environment(['testing']);
+        //$isEnvLocal = App::environment(['local']);
+        //$isEnvTesting = App::environment(['testing']);
+
+        $whitelistedEnvs = ['testing', 'local',];
+        $thisEnv = App::environment();
         $dbName = env('DB_DATABASE');
+
         $this->info( '%%% DB Name: '.$dbName);
-        $this->info( '%%% Is env local?: '.($isEnvLocal?'true':'false') );
-        $this->info( '%%% Is env testing?: '.($isEnvTesting?'true':'false') );
-        if ( $dbName !== 'fansplat_dev_test' && !$isEnvTesting ) {
+        $this->info( '%%% Env: '.$thisEnv);
+        if ( $dbName !== 'fansplat_dev_test' && !in_array($thisEnv, $whitelistedEnvs) ) {
             throw new Exception('Environment not in whitelist: '.App::environment());
         }
 

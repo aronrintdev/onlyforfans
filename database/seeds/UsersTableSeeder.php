@@ -22,98 +22,74 @@ class UsersTableSeeder extends Seeder
         if ( $this->appEnv !== 'testing' ) { // if tests have pre-existing admins we'll need to make sure a random user chose is *not* an admin
 
             // +++ Create admin users +++
+            $manualUsers = [
+                [
+                    'name' => 'Peter G',
+                    'username' => 'peter',
+                    'email' => 'peter@peltronic.com',
+                    'gender' => 'male',
+                    'city' => 'Las Vegas',
+                    'country' => 'US',
+                    'is_follow_for_free' => 1,
+                    'password' => bcrypt('foo-123'), // secret
+                    'email_verified' => 1,
+                ],
+                [
+                    'name' => 'Erik H',
+                    'username' => 'erikh',
+                    'email' => 'erik@hattervigsoftwaresolutions.com',
+                    'gender' => 'male',
+                    'city' => 'Rapid City',
+                    'country' => 'US',
+                    'is_follow_for_free' => 1, // if not free need to set price as well
+                    'password' => bcrypt('foo-123'), // secret
+                    'email_verified' => 1,
+                ],
+                [
+                    'name' => 'Jeremy F',
+                    'username' => 'jeremeyf',
+                    'email' => 'jeremy.fall@contentmarketingleads.com',
+                    'gender' => 'male',
+                    'city' => 'Las Vegas',
+                    'country' => 'US',
+                    'is_follow_for_free' => 1, // if not free need to set price as well
+                    'password' => bcrypt('foo-123'), // secret
+                    'email_verified' => 1,
+                ],
+                [
+                    'name' => 'Matt M',
+                    'username' => 'mattm',
+                    'email' => 'matt@mjmwebdesign.com',
+                    'gender' => 'male',
+                    'city' => 'Las Vegas',
+                    'country' => 'US',
+                    'is_follow_for_free' => 1, // if not free need to set price as well
+                    'password' => bcrypt('foo-123'), // secret
+                    'email_verified' => 1,
+                ],
+                [
+                    'name' => 'Chad J',
+                    'username' => 'chadj',
+                    'email' => 'realchadjohnson@gmail.com',
+                    'gender' => 'male',
+                    'city' => 'Las Vegas',
+                    'country' => 'US',
+                    'is_follow_for_free' => 1, // if not free need to set price as well
+                ],
+            ];
 
             $this->output->writeln("  - Creating admin users...");
 
-            $user = User::where('email', 'peter@peltronic.com')->first();
-            if (!$user) {
-                $user = User::factory()->create();
+            foreach ($manualUsers as $u) {
+                $user = User::where('email', $u['email'])->first();
+                if ($user) {
+                    $user->delete();
+                }
+                $user = FactoryHelpers::createUser($u);
+                $user->assignRole('super-admin');
+                unset($user);
             }
-            FactoryHelpers::updateUser($user, [
-                'name' => 'Peter G',
-                'username' => 'peter',
-                'email' => 'peter@peltronic.com',
-                'gender' => 'male',
-                'city' => 'Las Vegas',
-                'country' => 'US',
-                'is_follow_for_free' => 1,
-            ]);
-            $user->assignRole('super-admin');
-            unset($user);
-
-            // --
-
-            $user = User::where('email', 'erik@hattervigsoftwaresolutions.com')->first();
-            if (!$user) {
-                $user = User::factory()->create();
-            }
-            FactoryHelpers::updateUser($user, [
-                'name' => 'Erik H',
-                'username' => 'erikh',
-                'email' => 'erik@hattervigsoftwaresolutions.com',
-                'gender' => 'male',
-                'city' => 'Rapid City',
-                'country' => 'US',
-                'is_follow_for_free' => 1, // if not free need to set price as well
-            ]);
-            $user->assignRole('super-admin');
-            unset($user);
-
-            // --
-
-            $user = User::where('email', 'jeremy.fall@contentmarketingleads.com')->first();
-            if (!$user) {
-                $user = User::factory()->create();
-            }
-            FactoryHelpers::updateUser($user, [
-                'name' => 'Jeremy F',
-                'username' => 'jeremeyf',
-                'email' => 'jeremy.fall@contentmarketingleads.com',
-                'gender' => 'male',
-                'city' => 'Las Vegas',
-                'country' => 'US',
-                'is_follow_for_free' => 1, // if not free need to set price as well
-            ]);
-            $user->assignRole('super-admin');
-            unset($user);
-
-            // --
-
-            $user = User::where('email', 'matt@mjmwebdesign.com')->first();
-            if (!$user) {
-                $user = User::factory()->create();
-            }
-            FactoryHelpers::updateUser($user, [
-                'name' => 'Matt M',
-                'username' => 'mattm',
-                'email' => 'matt@mjmwebdesign.com',
-                'gender' => 'male',
-                'city' => 'Las Vegas',
-                'country' => 'US',
-                'is_follow_for_free' => 1, // if not free need to set price as well
-            ]);
-            $user->assignRole('super-admin');
-            unset($user);
-
-            // --
-
-            $user = User::where('email', 'realchadjohnson@gmail.com')->first();
-            if (!$user) {
-                $user = User::factory()->create();
-            }
-            FactoryHelpers::updateUser($user, [
-                'name' => 'Chad J',
-                'username' => 'chadj',
-                'email' => 'realchadjohnson@gmail.com',
-                'gender' => 'male',
-                'city' => 'Las Vegas',
-                'country' => 'US',
-                'is_follow_for_free' => 1, // if not free need to set price as well
-            ]);
-            $user->assignRole('super-admin');
-            unset($user);
-
-        }
+        } // testing
 
         // +++ Create non-admin users +++
 
@@ -128,8 +104,8 @@ class UsersTableSeeder extends Seeder
 
             if ( $this->appEnv !== 'testing' ) {
                 $this->output->writeln("Creating new user with avatar & cover: " . $u->name." (iter: $iter)");
-                $avatar = FactoryHelpers::createImage(MediafileTypeEnum::AVATAR, true);
-                $cover = FactoryHelpers::createImage(MediafileTypeEnum::COVER, true);
+                $avatar = FactoryHelpers::createImage(MediafileTypeEnum::AVATAR, null, true);
+                $cover = FactoryHelpers::createImage(MediafileTypeEnum::COVER, null, true);
             } else {
                 //$this->output->writeln("Creating new user without avatar & cover: " . $u->name." (iter: $iter)");
                 $avatar = null;
