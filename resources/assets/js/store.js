@@ -4,17 +4,13 @@ import axios from 'axios'
 
 Vue.use(Vuex)
 
-/**
- * Routes from window, want to eventually deprecate and move to dedicated compiled routes
- */
+// Routes from window, want to eventually deprecate and move to dedicated compiled routes
 const route = window.route
 console.log({route, window: window.route})
 
-/**
- * Helps select items from response result set
- * @param {Object} payload - response payload
- * @param {String} propertyName - name of property
- */
+// Helps select items from response result set
+// @param {Object} payload - response payload
+// @param {String} propertyName - name of property
 const propSelect = (payload, propertyName, type = 'array') => {
   return payload.hasOwnProperty(propertyName)
     ? payload[propertyName]
@@ -24,44 +20,20 @@ const propSelect = (payload, propertyName, type = 'array') => {
         ? [] : {}
 }
 
-
 export default new Vuex.Store({
   state: {
     vault: {},
     vaultfolder: {},
     breadcrumb: [],
-    /**
-     * shares for a vaultfolder, used to mark what resources session user *has* shared out
-     */
-    shares: [],
-    /**
-     * resources that have been shared with session user
-     */
-    shareables: [],
-    /**
-     * resources that session user has saved
-     */
-    saves: [],
-    /**
-     * Posts on the current open timeline
-     */
-    feeditems: [],
+    shares: [], // shares for a vaultfolder, used to mark resources session user *has* shared out
+    shareables: [], // resources shared with session user
+    saves: [], // resources session user has saved
+    feeditems: [], // Posts on current open timeline
     feeddata: {},
-    /**
-     * Current open stories
-     */
-    stories: [],
-    /**
-     * Logged in user timeline
-     */
+    stories: [], // Current open stories
     timeline: null,
-    /**
-     * Logged in user information
-     */
-    session_user: null,
-    /**
-     * UI Flags for logged in user
-     */
+    session_user: null, 
+    user_settings: null,
     uiFlags: [],
     unshifted_timeline_post: null,
     is_loading: true,
@@ -101,6 +73,9 @@ export default new Vuex.Store({
     },
     UPDATE_SESSION_USER(state, payload) {
       state.session_user = propSelect(payload, 'session_user')
+    },
+    UPDATE_USER_SETTINGS(state, payload) {
+      state.user_settings = propSelect(payload, 'user_settings')
     },
     UPDATE_UI_FLAGS(state, payload) {
       state.uiFlags = { ...state.uiFlags, ...propSelect(payload, 'uiFlags', 'object') }
@@ -188,6 +163,13 @@ export default new Vuex.Store({
         commit('UPDATE_LOADING', false)
       })
     },
+
+    getUserSettings({ commit }, { userId }) {
+      axios.get(route('users.showSettings', { id: userId })).then((response) => {
+        commit('UPDATE_USER_SETTINGS', response.data)
+        commit('UPDATE_LOADING', false)
+      })
+    },
   },
 
   getters: {
@@ -203,6 +185,7 @@ export default new Vuex.Store({
     timeline:                state => state.timeline,
     unshifted_timeline_post: state => state.unshifted_timeline_post,
     session_user:            state => state.session_user,
+    user_settings:           state => state.user_settings,
     uiFlags:                 state => state.uiFlags,
     //children: state => state.vault.children, // Flat list
     //mediafiles: state => state.vault.mediafiles, // Flat list

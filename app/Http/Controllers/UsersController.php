@@ -5,11 +5,11 @@ use App;
 use DB;
 use Auth;
 use Exception;
-use Throwable;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
+use App\Http\Resources\UserSetting as UserSettingResource;
 use App\Models\User;
 use App\Models\Fanledger;
 use App\Enums\PaymentTypeEnum;
@@ -28,6 +28,13 @@ class UsersController extends AppBaseController
         ]);
     }
 
+    public function showSettings(Request $request, User $user)
+    {
+        $this->authorize('show', $user);
+        dd($user->settings);
+        return new UserSettingResource($user->settings);
+    }
+
     public function updateSettings(Request $request, User $user)
     {
         dd($request->all());
@@ -36,18 +43,15 @@ class UsersController extends AppBaseController
             'city' => 'string|min:2',
         ]);
         $attrs = $request->only([ 'city' ]);
-        $userSetting->fill($attrs);
-        $userSetting->save();
+        $settings = $user->settings;
+        $settings->fill($attrs);
+        $settings->save();
 
         return response()->json([
-            'user_setting' => $userSetting,
+            'settings' => $settings,
         ]);
     }
 
-    /**
-     * Retrieves information about logged in user
-     * Route: `users.me`
-     */
     public function me(Request $request)
     {
         $sessionUser = Auth::user(); // sender of tip

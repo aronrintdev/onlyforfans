@@ -7,18 +7,8 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 
 class TimelineFactory extends Factory
 {
-    /**
-     * The name of the factory's corresponding model.
-     *
-     * @var string
-     */
     protected $model = Timeline::class;
 
-    /**
-     * Define the model's default state.
-     *
-     * @return array
-     */
     public function definition()
     {
         $isFollowForFree = $this->faker->boolean(70);

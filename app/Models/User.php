@@ -38,6 +38,8 @@ class User extends Authenticatable implements PaymentSendable, Blockable
         parent::boot();
         self::creating(function ($model) {
             $model->checkUsername();
+            $model->remember_token = str_random(10);
+            $model->verification_code = str_random(10);
         });
         self::created(function ($model) {
             UserSetting::create([
@@ -204,25 +206,16 @@ class User extends Authenticatable implements PaymentSendable, Blockable
         return $this->belongsToMany('App\Page', 'page_likes', 'user_id', 'page_id');
     }
     
-    /**
-     * Users Notifications
-     */
     public function notifications()
     {
         return $this->hasMany('App\Models\Notification')->with('notified_from');
     }
 
-    /**
-     * Vaults Owned by user
-     */
     public function vaults()
     {
         return $this->hasMany('App\Models\Vault');
     }
 
-    /**
-     * Vault Folders owned by user
-     */
     public function vaultfolders()
     {
         return $this->hasMany('App\Models\Vaultfolder');
