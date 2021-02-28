@@ -1,6 +1,6 @@
 <template>
-  <b-nav-form>
-    <b-input-group>
+  <b-nav-form form-class="w-100">
+    <b-input-group class="w-100">
       <template #prepend>
         <b-input-group-text>
           <fa-icon icon="search" />

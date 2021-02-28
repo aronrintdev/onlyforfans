@@ -1,9 +1,7 @@
 <template>
   <div class="app d-flex flex-column">
     <!-- Header -->
-    <div class="header">
-      <MainNavBar />
-    </div>
+    <MainNavBar class="header" />
     <div class="content p-3  flex-grow-1">
       <router-view />
     </div>
