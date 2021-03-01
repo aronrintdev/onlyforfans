@@ -2,7 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\PostCollection;
+use App\Http\Resources\StoryCollection;
 use App\Http\Resources\TimelineCollection;
+use App\Models\Post;
+use App\Models\Story;
 use App\Models\Timeline;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -20,7 +24,13 @@ class SearchController extends Controller
         //
 
         // TODO: Dummy Data | Replace with real search
-        $data = Timeline::latest()->paginate(10);
-        return new TimelineCollection($data);
+        $timelines = Timeline::latest()->paginate( $request->input('take', 10) );
+        $posts     = Post::latest()->paginate( $request->input('take', 10) );
+        $stories   = Story::latest()->paginate( $request->input('take', 10) );
+        return [
+            'timelines' => new TimelineCollection($timelines),
+            'posts' => new PostCollection($posts),
+            'stories' => new StoryCollection($stories),
+        ];
     }
 }

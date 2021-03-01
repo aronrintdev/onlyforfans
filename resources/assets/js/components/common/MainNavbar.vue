@@ -17,7 +17,7 @@
       <NavButtons :mobile-style="mobile" class="w-100 mt-3" />
     </ScrollCollapse>
 
-    <b-navbar-nav v-if="!mobile">
+    <b-navbar-nav v-if="!mobile" class="search-nav">
       <SearchBar />
     </b-navbar-nav>
     <b-navbar-nav v-if="!mobile" class="ml-auto">
@@ -121,10 +121,19 @@ export default {
     }
   }
 }
+
 .scroll-collapse-nav {
   overflow-y: hidden;
   & > div {
     position: relative;
   }
 }
+
+.search-nav {
+  width: 500px;
+  .form-inline {
+    width: 100%;
+  }
+}
+
 </style>

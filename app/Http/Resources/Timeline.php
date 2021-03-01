@@ -16,6 +16,7 @@ class Timeline extends JsonResource
             'id' => $this->id,
             'slug' => $this->slug,
             'name' => $this->name,
+            'avatar' => $this->avatar,
             'postable_id' => $this->postable_id,
             'postable_type' => $this->postable_type,
             'description' =>  $this->when($hasAccess, $this->description),
