@@ -8,6 +8,7 @@ class UserSetting extends Model
 {
     use UsesUuid;
 
+    protected $guarded = [ 'id', 'created_at', 'updated_at' ];
     protected $table = 'user_settings';
     protected $casts = [
         'cattrs' => 'array',

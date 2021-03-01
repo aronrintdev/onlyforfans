@@ -73,8 +73,8 @@
                   id="is_follow_for_free"
                   v-model="formSubscriptions.is_follow_for_free"
                   name="is_follow_for_free"
-                  value="true"
-                  unchecked-value="false"
+                  value=1
+                  unchecked-value=0
                   switch size="lg"></b-form-checkbox>
               </b-form-group>
             </b-col>
@@ -130,7 +130,6 @@
               <b-button v-else @click.prevent="isEditing.formLocalization=true" class="w-100" variant="warning">Edit</b-button>
             </b-col>
           </b-row>
-
         </b-form>
       </b-card-text>
     </b-card>
@@ -145,6 +144,7 @@ export default {
 
   props: {
     session_user: null,
+    user_settings: null,
   },
 
   computed: {
@@ -206,6 +206,25 @@ export default {
     },
 
   }),
+
+  watch: {
+      session_user(newVal) {
+        this.formGeneral.username = newVal.username;
+        this.formGeneral.fullname = newVal.name;
+        this.formGeneral.email = newVal.email;
+      },
+      user_settings(newVal) {
+        if ( newVal.cattrs.subscriptions ) {
+          this.formSubscriptions.subscriptions = newVal.cattrs.subscriptions;
+        }
+        if ( newVal.cattrs.is_follow_for_free ) {
+          this.formSubscripitons.is_follow_for_free = newVal.is_follow_for_free;
+        }
+        if ( newVal.cattrs.localization ) {
+          this.formLocalization.localization = newVal.cattrs.localization;
+        }
+      },
+    },
 
   mounted() {
   },

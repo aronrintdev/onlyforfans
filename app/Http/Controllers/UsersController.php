@@ -31,25 +31,51 @@ class UsersController extends AppBaseController
     public function showSettings(Request $request, User $user)
     {
         $this->authorize('show', $user);
-        dd($user->settings);
         return new UserSettingResource($user->settings);
     }
 
     public function updateSettings(Request $request, User $user)
     {
-        dd($request->all());
         $this->authorize('update', $user);
         $request->validate([
             'city' => 'string|min:2',
+            'is_follow_for_free' => 'boolean',
         ]);
-        $attrs = $request->only([ 'city' ]);
-        $settings = $user->settings;
-        $settings->fill($attrs);
-        $settings->save();
 
-        return response()->json([
-            'settings' => $settings,
-        ]);
+        $userSetting = DB::transaction(function () use(&$user, &$request) {
+
+            $timeline = $user->timeline;
+
+            // %TODO %FIXME: subscriptions should be in [timelines].cattrs, not user settings
+
+            // handle fields that reside in [timelines]
+            if ( $request->has('is_follow_for_free') ) {
+                $timeline->is_follow_for_free = $request->boolean('is_follow_for_free');
+                $timeline->save();
+                $request->request->remove('is_follow_for_free');
+            }
+    
+            $cattrsFields = [ 'subscriptions', 'localization', 'weblinks', ];
+            $attrs = $request->except($cattrsFields);
+
+            $userSetting = $user->settings;
+            $userSetting->fill($attrs);
+
+            // handle cattrs
+            if ($request->hasAny($cattrsFields) ){
+                $cattrs = $user->cattrs; // 'pop'
+                foreach ($cattrsFields as $k) {
+                    $cattrs[$k] = $request->has($k) ? $request->input($k) : ($cattrs[$k]??null); // take from request (overwrite current value), else keep current value
+                }
+                $userSetting->cattrs = $cattrs; // 'push'
+            }
+    
+            $userSetting->save();
+
+            return $userSetting;
+        });
+    
+        return new UserSettingResource($userSetting);
     }
 
     public function me(Request $request)

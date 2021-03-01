@@ -2,17 +2,18 @@
 namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
+use App\Models\UserSetting as UserSettingModel;
 
 class UserSetting extends JsonResource
 {
-    /**
-     * Transform the resource into an array.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return array
-     */
     public function toArray($request)
     {
-        return parent::toArray($request);
+        //$sessionUser = $request->user();
+        $userSetting = UserSettingModel::find($this->id); // %FIXME: n+1 performance issue (not so bad if paginated?)
+        $timeline = $userSetting->user->timeline;
+
+        $response =  parent::toArray($request);
+        $response['is_follow_for_free'] = $timeline->is_follow_for_free;
+        return $response;
     }
 }
