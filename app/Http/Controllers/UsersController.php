@@ -13,6 +13,7 @@ use App\Http\Resources\UserSetting as UserSettingResource;
 use App\Models\User;
 use App\Models\Fanledger;
 use App\Enums\PaymentTypeEnum;
+use App\Enums\CountryTypeEnum;
 
 class UsersController extends AppBaseController
 {
@@ -41,6 +42,7 @@ class UsersController extends AppBaseController
             'city' => 'string|min:2',
             'is_follow_for_free' => 'boolean',
         ]);
+        $request->request->remove('username'); // disallow username updates for now
 
         $userSetting = DB::transaction(function () use(&$user, &$request) {
 
@@ -55,7 +57,7 @@ class UsersController extends AppBaseController
                 $request->request->remove('is_follow_for_free');
             }
     
-            $cattrsFields = [ 'subscriptions', 'localization', 'weblinks', ];
+            $cattrsFields = [ 'subscriptions', 'localization', 'weblinks', 'privacy', 'blocked', 'watermark', ];
             $attrs = $request->except($cattrsFields);
 
             $userSetting = $user->settings;
@@ -65,7 +67,35 @@ class UsersController extends AppBaseController
             if ($request->hasAny($cattrsFields) ){
                 $cattrs = $user->cattrs; // 'pop'
                 foreach ($cattrsFields as $k) {
-                    $cattrs[$k] = $request->has($k) ? $request->input($k) : ($cattrs[$k]??null); // take from request (overwrite current value), else keep current value
+                    switch ($k) {
+                    case 'blocked': // %FIXME: move to lib
+                        if ( $request->has('blocked') ) {
+                            $byCountry = [];
+                            $byIP = [];
+                            $byUsername = [];
+                            $blockedListIn = array_map('trim', explode(' ', $request->blocked));
+                            foreach ( $blockedListIn as $b) {
+                                if ( in_array($b, CountryTypeEnum::getKeys()) ) { // country
+                                    $byCountry[] = $b;
+                                } else if ( filter_var($b, FILTER_VALIDATE_IP) ) { // ip
+                                    $byIP[] = $b;
+                                } else { // username
+                                    $byUsername[] = $b;
+                                }
+                            }
+                            $blocked = $cattrs['blocked'] ?? [];
+                            $blocked['ips'] = $blocked['ips'] ?? [];
+                            $blocked['countries'] = $blocked['countries'] ?? [];
+                            $blocked['usernames'] = $blocked['usernames'] ?? [];
+                            array_push($blocked['ips'], ...$byIP);
+                            array_push($blocked['countries'], ...$byCountry);
+                            array_push($blocked['usernames'], ...$byUsername);
+                            $cattrs['blocked'] = array_map('array_unique', $blocked);
+                        }
+                        break;
+                    default:
+                        $cattrs[$k] = $request->has($k) ? $request->input($k) : ($cattrs[$k]??null); // take from request (overwrite current value), else keep current value
+                    }
                 }
                 $userSetting->cattrs = $cattrs; // 'push'
             }
@@ -81,6 +111,7 @@ class UsersController extends AppBaseController
     public function me(Request $request)
     {
         $sessionUser = Auth::user(); // sender of tip
+        $sessionUser->makeVisible('email');
 
         $sales = Fanledger::where('seller_id', $sessionUser->id)->sum('total_amount');
 
