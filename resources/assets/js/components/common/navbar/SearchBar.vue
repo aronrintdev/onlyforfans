@@ -1,5 +1,5 @@
 <template>
-  <b-nav-form form-class="w-100 position-relative" v-click-outside="close">
+  <b-nav-form class="search-bar" :class="{'mobile': mobile}" form-class="w-100 position-relative" v-click-outside="close">
     <b-input-group class="w-100">
       <template #prepend>
         <b-input-group-text>
@@ -15,37 +15,50 @@
         @blur="focus = false"
         @keydown="onKeydown"
       />
+
       <div v-if="loading" class="loading">
         <fa-icon icon="spinner" spin />
       </div>
-      <div v-if="!loading && query" class="clear" @click="reset">
+
+      <div v-if="!loading && query || mobile && focus" class="clear" @click="reset">
         <fa-icon icon="times" />
       </div>
-      <div class="results" :class="{ 'open': open }">
-        <ul class="nav">
-          <li
-            class="group-header"
-            v-for="(group, index) in groups"
-            :key="index"
-            :class="{'selected': selectedGroup === index}"
-            @click="selectGroup(index)"
-          >
-            {{ group.label }}
-          </li>
-        </ul>
-        <ul v-if="selectedGroupName !== ''" class="result-list">
-          <component
-            :is="groups[selectedGroup].component"
-            v-for="(item, index) in results[selectedGroupName]"
-            :key="item.id"
-            :value="item"
-            :highlighted="highlighted === index"
-            :index="index"
-            @click="reset"
-          />
-        </ul>
-      </div>
+
     </b-input-group>
+    <div class="results" :class="{ open, mobile }">
+      <div v-if="query === '' || groups.length === 0" class="text-center mt-2">
+        {{ $t('Search Results') }}
+      </div>
+
+      <ul class="nav">
+        <li
+          class="group-header"
+          v-for="(group, index) in groups"
+          :key="index"
+          :class="{'selected': selectedGroup === index}"
+          @click="selectGroup(index)"
+        >
+          <fa-icon v-if="group.icon" :icon="group.icon" />
+          {{ group.label }}
+        </li>
+      </ul>
+
+      <div v-if="selectedGroupName !== '' && results[selectedGroupName].length === 0" class="text-center">
+        {{ $t('No Results') }}
+      </div>
+
+      <ul v-if="selectedGroupName !== ''" class="result-list">
+        <component
+          :is="groups[selectedGroup].component"
+          v-for="(item, index) in results[selectedGroupName]"
+          :key="item.id"
+          :value="item"
+          :highlighted="highlighted === index"
+          :index="index"
+          @click="reset"
+        />
+      </ul>
+    </div>
   </b-nav-form>
 </template>
 
@@ -77,6 +90,8 @@ export default {
     takeAmount: { type: Number, default: 10 },
     /** Search debounce wait time in ms */
     debounceWait: { type: Number, default: 500 },
+    /** Display mobile style constrains */
+    mobile: { type: Boolean, default: false },
   },
 
   computed: {
@@ -251,6 +266,34 @@ $spacer: 1rem;
 $border-radius: 0.25 * $spacer;
 $border: 1px var(--gray) solid;
 
+.search-bar.mobile {
+  flex-grow: 1;
+  .form-inline {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    .results {
+      display: none;
+      position: relative;
+      flex-grow: 0;
+      top: 0;
+      width: 100%;
+      transition: flex-grow var(--transition-rate, 0.25s) var(--transition-easing, ease);
+      overflow: hidden;
+      margin-bottom: auto;
+      &.open {
+        display: block;
+        flex-grow: 1;
+        overflow-y: auto;
+      }
+      .result-list {
+        margin-bottom: auto;
+      }
+    }
+  }
+}
+
 .loading, .clear {
   position: absolute;
   top: 0.5rem;
@@ -299,7 +342,7 @@ $border: 1px var(--gray) solid;
 
   .result-list {
     overflow-y: auto;
-    max-height: 80vh;
+    max-height: 90vh;
     padding: 0;
     .result-list-item {
       list-style: none;
@@ -329,3 +372,12 @@ $border: 1px var(--gray) solid;
 
 }
 </style>
+
+<i18n lang="json5">
+{
+  "en": {
+    "Search Results": "Search Results",
+    "No Results": "No Results",
+  }
+}
+</i18n>

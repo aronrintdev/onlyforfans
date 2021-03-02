@@ -12,9 +12,11 @@
       </b-navbar-nav>
     </b-collapse>
 
-    <ScrollCollapse v-if="mobile" class="w-100">
-      <SearchBar class="w-100 mt-3" />
-      <NavButtons :mobile-style="mobile" class="w-100 mt-3" />
+    <ScrollCollapse v-if="mobile" ref="scrollCollapse" class="w-100" :full-open="searchOpen" :full-open-height="openHeight">
+      <div class="d-flex flex-column justify-content-between h-100">
+        <SearchBar class="w-100 mt-3" mobile @opening="searchOpen = true" @closing="searchOpen = false" @scroll="onScroll" />
+        <NavButtons :mobile-style="mobile" class="w-100 mt-3" />
+      </div>
     </ScrollCollapse>
 
     <b-navbar-nav v-if="!mobile" class="search-nav">
@@ -71,14 +73,30 @@ export default {
       return parseInt(getComputedStyle(document.documentElement)
         .getPropertyValue(`--breakpoint-${this.toggleMobileAt}`).replace('px', ''))
     },
+    openHeight() {
+      const height = this.$vssHeight - this.$el.clientHeight
+      if(this.$refs['scrollCollapse']) {
+        return height + this.$refs['scrollCollapse'].maxHeight
+      }
+      return height
+    },
+    mobileOpenHeight() {
+      this.openHeight
+    }
   },
 
   data: () => ({
     mobile: false,
+    searchOpen: false,
     screenWidth: null,
   }),
 
   methods: {
+    onScroll() {
+      if (this.searchOpen) {
+        this.$forceCompute('openHeight')
+      }
+    }
   },
 
   watch: {
@@ -89,6 +107,14 @@ export default {
         this.mobile = false
       }
     },
+    mobile(value) {
+      if (!value) {
+        this.searchOpen = false
+      }
+    },
+    searchOpen() {
+      this.$forceCompute('openHeight')
+    }
   },
 
   mounted() {

@@ -1,6 +1,6 @@
 <template>
   <div ref="base" class="wrapper" :style="wrapperCss">
-    <div class="inner" :style="innerCss">
+    <div class="inner h-100" :style="innerCss">
       <slot></slot>
     </div>
   </div>
@@ -17,6 +17,8 @@ export default {
      * Percentage at which to fully close collapse
      */
     closeThreshold: { type: Number, default: 0.90 },
+    fullOpen: { type: Boolean, default: false },
+    fullOpenHeight: { type: Number, default: 500 }
   },
 
   computed: {
@@ -24,10 +26,16 @@ export default {
       if (this.forceOpen) {
         return ``
       }
-      return `height: ${ this.maxHeight + this.hidden }px; transition: height var(--transition-rate, 0.25s) var(--transition-easing, ease);`
+      if (this.fullOpen) {
+        return `height: ${ this.fullOpenHeight }px; transition: height ${this.transition};`
+      }
+      return `height: ${ this.maxHeight + this.hidden }px; transition: height ${this.transition};`
     },
     innerCss() {
-      return `top: ${this.hidden}px; transition: top var(--transition-rate, 0.25s) var(--transition-easing, ease);`
+      if(this.fullOpen) {
+        return `height: 100%; top: ${this.hidden}px; transition: top ${this.transition};`
+      }
+      return `top: ${this.hidden}px; transition: top ${this.transition};`
     },
   },
 
@@ -36,6 +44,7 @@ export default {
     maxHeight: 0,
     lastYPosition: window.scrollY || window.pageYOffset,
     forceOpen: false,
+    transition: 'var(--transition-rate, 0.25s) var(--transition-easing, ease)',
   }),
 
   methods: {
@@ -52,11 +61,11 @@ export default {
       })
     },
     onScroll() {
-      clearTimeout(this.isScrolling)
       const position = window.scrollY || window.pageYOffset
       const diff = this.lastYPosition - position
-      // At top of screen
-      if (position === 0) {
+      if (this.fullOpen) {
+        this.hidden = 0
+      } else if (position === 0) { // At top of screen
         this.hidden = 0
       } else if (diff > this.openThreshold) {
         this.hidden = 0
@@ -68,7 +77,16 @@ export default {
         }
       }
       this.lastYPosition = position
+      this.$emit('scroll')
     },
+  },
+
+  watch: {
+    fullOpen(value) {
+      if (value) {
+        this.hidden = 0
+      }
+    }
   },
 
   created() {

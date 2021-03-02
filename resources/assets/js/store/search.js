@@ -5,6 +5,12 @@ import _ from 'lodash'
 
 const route = window.route
 
+const emptyResults = {
+  timelines: [],
+  stories: [],
+  posts: [],
+}
+
 export const search = {
   namespaced: true,
 
@@ -13,11 +19,7 @@ export const search = {
     query: '',
 
     /** Current saved result set */
-    results: {
-      timelines: [],
-      stories: [],
-      posts: [],
-    },
+    results: _.clone(emptyResults),
 
     /** List of autoCompleteSuggestions */
     autoCompleteSuggestions: [],
@@ -63,6 +65,11 @@ export const search = {
   mutations: {
     UPDATE_QUERY(state, payload) {
       state.query = payload
+      if (payload === '') {
+        console.log('emptyResults', {emptyResults})
+        state.results = _.clone(emptyResults)
+        console.log(state.results)
+      }
     },
 
     UPDATE_RESULTS(state, payload) {
