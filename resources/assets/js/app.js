@@ -53,9 +53,6 @@ import { BootstrapVue, BootstrapVueIcons } from 'bootstrap-vue'
 Vue.use(BootstrapVue) // Telling Vue to use this in whole application
 Vue.use(BootstrapVueIcons)
 
-/**
- * Vue Animejs
- */
 import VueAnime from 'vue-animejs';
 Vue.use(VueAnime);
 
@@ -73,13 +70,12 @@ Vue.use(VueTimeago, {
   */
 });
 
-/**
- * VueSlider
- */
 import VueSlider from 'vue-slider-component'
 import 'vue-slider-component/theme/default.css'
 Vue.component('VueSlider', VueSlider)
 
+import VueTagsInput from '@johmun/vue-tags-input'
+Vue.component('VueTagsInput', VueTagsInput)
 
 /**
  * Next, we will create a fresh Vue application instance and attach it to

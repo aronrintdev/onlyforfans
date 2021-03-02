@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if>
 
     <b-card title="Privacy">
       <b-card-text>
@@ -62,11 +62,47 @@
     <b-card title="Blocked">
       <b-card-text>
         <b-form @submit.prevent="submitBlocked($event)" @reset="onReset">
-          <fieldset :disabled="!isEditing.formBlocked">
+          <fieldset v-if="state !== 'loading'">
 
             <b-row>
               <b-col>
-                  <b-form-textarea id="about" v-model="formBlocked.blocked" placeholder="Enter one or more usernames, IPs, or countries, separated by spaces..." rows="8"></b-form-textarea>
+<vue-tags-input
+   v-if="isEditing.formBlocked"
+      v-model="blockedItem"
+      :tags="formBlocked.blocked"
+      :autocomplete-items="filteredItems"
+      @tags-changed="newTags => formBlocked.blocked = newTags"
+/>
+<!--
+                <b-form-tags v-if="isEditing.formBlocked" id="about" v-model="formBlocked.blocked" placeholder="Enter one or more usernames, IPs, or countries, separated by spaces..." rows="8"></b-form-tags>
+-->
+
+                <div v-else class="accordion" role="tablist">
+                  <section class="mb-3">
+                    <b-button block v-b-toggle.accordion-ips variant="light">IPs</b-button>
+                    <b-collapse id="accordion-ips" accordion="my-accordion" role="tabpanel">
+                      <ul class="list-unstyled">
+                        <li v-for="(b,idx) in user_settings.cattrs.blocked.ips || []"> {{ b }}</li>
+                      </ul>
+                    </b-collapse>
+                  </section>
+                  <section class="mb-3">
+                    <b-button block v-b-toggle.accordion-countries variant="light">Countries</b-button>
+                    <b-collapse id="accordion-countries" accordion="my-accordion" role="tabpanel">
+                      <ul class="list-unstyled">
+                        <li v-for="(b,idx) in user_settings.cattrs.blocked.countries || []"> {{ b }}</li>
+                      </ul>
+                    </b-collapse>
+                  </section>
+                  <section class="mb-3">
+                    <b-button block v-b-toggle.accordion-users variant="light">Users</b-button>
+                    <b-collapse id="accordion-users" accordion="my-accordion" role="tabpanel">
+                      <ul class="list-unstyled">
+                        <li v-for="(b,idx) in user_settings.cattrs.blocked.usernames || []"> {{ b }}</li>
+                      </ul>
+                    </b-collapse>
+                  </section>
+                </div>
               </b-col>
             </b-row>
 
@@ -140,9 +176,15 @@ export default {
 
   computed: {
     //...Vuex.mapState(['vault']),
+    filteredItems() {
+      return this.autocompleteItems.filter(i => {
+        return i.text.toLowerCase().indexOf(this.blockedItem.toLowerCase()) !== -1;
+      });
+    },
   },
 
   data: () => ({
+    state: 'loading', // loading | loaded
 
     isEditing: {
       formPrivacy: false,
@@ -158,8 +200,10 @@ export default {
         who_can_message: null,
       },
     },
+
+    blockedItem: '',
     formBlocked: {
-      blocked: '', // ip, country, or username (?)
+      blocked: [], // ip, country, or username (?)
     },
     formWatermark: {
       watermark: {
@@ -174,6 +218,19 @@ export default {
         { value: 'everyone', text: 'People I Follow' },
       ],
     },
+      //tag: '',
+      //tags: [],
+      autocompleteItems: [{
+        text: 'Spain',
+      }, {
+        text: 'France',
+      }, {
+        text: 'USA',
+      }, {
+        text: 'Germany',
+      }, {
+        text: 'China',
+      }],
 
   }),
 
@@ -181,8 +238,15 @@ export default {
     session_user(newVal) {
     },
     user_settings(newVal) {
+      this.state = 'loaded'
       if ( newVal.cattrs.privacy ) {
-        this.formPrivacy.privacy = newVal.cattrs.privacy;
+        this.formPrivacy.privacy = newVal.cattrs.privacy
+      }
+      if ( newVal.cattrs.blocked ) {
+        this.formBlocked.blocked
+      }
+      if ( newVal.cattrs.watermark ) {
+        this.formWatermark.watermark = newVal.cattrs.watermark
       }
     },
   },
@@ -196,16 +260,16 @@ export default {
   methods: {
 
     async submitPrivacy(e) {
-      const response = await axios.patch(`/users/${this.session_user.id}/settings`, this.formPrivacy);
-      this.isEditing.formPrivacy = false;
+      const response = await axios.patch(`/users/${this.session_user.id}/settings`, this.formPrivacy)
+      this.isEditing.formPrivacy = false
     },
     async submitBlocked(e) {
-      const response = await axios.patch(`/users/${this.session_user.id}/settings`, this.formBlocked);
-      this.isEditing.formBlocked = false;
+      const response = await axios.patch(`/users/${this.session_user.id}/settings`, this.formBlocked)
+      this.isEditing.formBlocked = false
     },
     async submitWatermark(e) {
-      const response = await axios.patch(`/users/${this.session_user.id}/settings`, this.formWatermark);
-      this.isEditing.formWatermark = false;
+      const response = await axios.patch(`/users/${this.session_user.id}/settings`, this.formWatermark)
+      this.isEditing.formWatermark = false
     },
 
     onReset(e) {
