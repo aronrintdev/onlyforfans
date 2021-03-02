@@ -44,29 +44,33 @@ export default {
           icon: 'home',
           to: { name: 'index' },
         },
-        {
-          name: 'Fans',
-          icon: 'users',
-          to: { name: 'timeline.followers', params: { slug: (this.session_user ? this.session_user.timeline.slug : ''), } },
-        },
-        {
-          name: 'Discover',
-          icon: 'compass',
-          to: { name: 'index' },
-        },
-        {
-          name: 'Notifications',
-          icon: 'bell',
-          to: { name: 'index' },
-          // alerts: 4,
-        },
-        {
-          name: 'Messages',
-          icon: 'envelope',
-          to: { name: 'index' },
-          // alerts: 10000,
-        },
       ]
+      if (this.session_user) {
+        items = [ ...items,
+          {
+            name: 'Fans',
+            icon: 'users',
+            to: { name: 'timeline.followers', params: { slug: (this.session_user ? this.session_user.timeline.slug : ''), } },
+          },
+          {
+            name: 'Discover',
+            icon: 'compass',
+            to: { name: 'index' },
+          },
+          {
+            name: 'Notifications',
+            icon: 'bell',
+            to: { name: 'index' },
+            // alerts: 4,
+          },
+          {
+            name: 'Messages',
+            icon: 'envelope',
+            to: { name: 'index' },
+            // alerts: 10000,
+          },
+        ]
+      }
       return items
     },
   },
