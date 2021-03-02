@@ -21,12 +21,13 @@ class SearchController extends Controller
      */
     public function search(Request $request)
     {
-        //
+        $params = $request->all();
+        $query = $params['query'] ?? $params['q'];
 
-        // TODO: Dummy Data | Replace with real search
-        $timelines = Timeline::latest()->paginate( $request->input('take', 10) );
-        $posts     = Post::latest()->paginate( $request->input('take', 10) );
-        $stories   = Story::latest()->paginate( $request->input('take', 10) );
+        // TODO: Dummy Data Like search | Replace with real search engine
+        $timelines = Timeline::where('name', 'LIKE', '%'. $query . '%')->get()->paginate( $request->input('take', 10) );
+        $posts     = Post::where('description', 'LIKE', '%' . $query . '%')->paginate( $request->input('take', 10) );
+        $stories   = Story::where('content', 'LIKE', '%' . $query . '%')->paginate( $request->input('take', 10) );
         return [
             'timelines' => new TimelineCollection($timelines),
             'posts' => new PostCollection($posts),
