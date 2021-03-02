@@ -1,7 +1,7 @@
 <template>
 <router-link
   custom
-  :to="{ name: 'stories.player', params: { slug: story.slug } }"
+  :to="{ name: 'stories.player', params: { slug: value.slug } }"
   v-slot="{ href, navigate, isActive, isExactActive }"
 >
   <li
@@ -19,7 +19,7 @@
   >
     <b-media>
       <template #aside>
-        <b-avatar v-if="story.mediafiles[0]" :src="story.mediafiles[0].filepath" />
+        <b-avatar v-if="value.mediafiles[0]" :src="value.mediafiles[0].filepath" />
         <b-avatar v-else>
           <fa-icon icon="pen" />
         </b-avatar>
@@ -33,7 +33,7 @@
 <script>
 export default {
   props: {
-    story: { type: Object, default: () => ({}) },
+    value: { type: Object, default: () => ({}) },
     highlighted: { type: Boolean, default: false },
     index: { type: Number, default: 0 },
     maxCharacters: { type: Number, default: 100 },
@@ -41,7 +41,7 @@ export default {
 
   computed: {
     text() {
-      return `${this.story.content.slice(0, this.maxCharacters)}...`
+      return `${this.value.content.slice(0, this.maxCharacters)}...`
     }
   },
 }

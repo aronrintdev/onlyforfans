@@ -8,7 +8,8 @@
       </template>
       <b-form-input
         ref="input"
-        v-model="query"
+        :value="query"
+        @input="updateQuery"
         placeholder="Search for creators"
         @focus="focus = true"
         @blur="focus = false"
@@ -32,32 +33,12 @@
             {{ group.label }}
           </li>
         </ul>
-        <ul v-if="groups[selectedGroup].name === 'timelines'" class="result-list timelines">
-          <TimelineDisplay
-            v-for="(timeline, index) in results.timelines"
-            :key="timeline.id"
-            :timeline="timeline"
-            :highlighted="highlighted === index"
-            :index="index"
-            @click="reset"
-          />
-          <b-skeleton v-if="results.timelines.length === 0" width="50%" class="mx-auto my-1" />
-        </ul>
-        <ul v-if="groups[selectedGroup].name === 'stories'" class="result-list stories">
-          <StoryDisplay
-            v-for="(story, index) in results.stories"
-            :key="story.id"
-            :story="story"
-            :highlighted="highlighted === index"
-            :index="index"
-            @click="reset"
-          />
-        </ul>
-        <ul v-if="groups[selectedGroup].name === 'posts'" class="result-list posts">
-          <PostDisplay
-            v-for="(post, index) in results.posts"
-            :key="post.id"
-            :post="post"
+        <ul v-if="selectedGroupName !== ''" class="result-list">
+          <component
+            :is="groups[selectedGroup].component"
+            v-for="(item, index) in results[selectedGroupName]"
+            :key="item.id"
+            :value="item"
             :highlighted="highlighted === index"
             :index="index"
             @click="reset"
@@ -74,6 +55,7 @@
  */
 import _ from 'lodash'
 import ClickOutside from 'vue-click-outside'
+import Vuex from 'vuex'
 
 import PostDisplay from './search/PostDisplay'
 import StoryDisplay from './search/StoryDisplay'
@@ -97,28 +79,28 @@ export default {
     debounceWait: { type: Number, default: 500 },
   },
 
-  data: () => ({
-    query: '',
-    results: {
-      autoComplete: [],
-      timelines: [],
-      stories: [],
-      posts: [],
+  computed: {
+    ...Vuex.mapState('search', {
+      results: 'results',
+      query: 'query',
+      autoComplete: 'autoCompleteSuggestions'
+    }),
+    ...Vuex.mapGetters('search', {
+      groups: 'availableGroups',
+      timelines: 'timelines',
+      stories: 'stories',
+      posts: 'posts',
+    }),
+
+    selectedGroupName() {
+      if (this.groups.length === 0) {
+        return ''
+      }
+      return this.groups[this.selectedGroup].name
     },
-    groups: [
-      {
-        name: 'timelines',
-        label: 'Users',
-      },
-      {
-        name: 'stories',
-        label: 'Stories',
-      },
-      {
-        name: 'posts',
-        label: 'Posts'
-      },
-    ],
+  },
+
+  data: () => ({
     selectedGroup: 0,
     highlighted: -1,
     open: false,
@@ -128,13 +110,16 @@ export default {
   }),
 
   methods: {
+    ...Vuex.mapActions('search', { doSearch: 'search' }),
+    ...Vuex.mapMutations('search', { updateQuery: 'UPDATE_QUERY' }),
+
     close() {
       this.open = false
     },
 
     reset() {
       this.open = false
-      this.query = ''
+      this.updateQuery('')
       this.selectedGroup = 0
       this.highlighted = -1
       this.$refs['input'].blur()
@@ -194,14 +179,16 @@ export default {
     },
 
     _search() {
-      if (this.query) {
-        this.loading = true
-        this.axios.get(this.$apiRoute('search', { q: this.query, take: this.takeAmount }))
-          .then(response => {
-            this.parseData(response.data)
-            this.loading = false
-          })
-      }
+      this.loading = true
+      this.doSearch()
+        .then(() => {
+          this.loading = false
+          this.$forceUpdate()
+        })
+        .catch(error => {
+          this.$log.error(error)
+          this.loading = false
+        })
     },
 
     parseData(data) {
@@ -233,8 +220,11 @@ export default {
       this.search = _.debounce(this._search, value)
     },
     highlighted(value) {
-      // this.highlighted = _.clamp(this.highlighted, -1, this.results[this.selectedGroup].length - 1)
-      const groupLength = this.results[this.groups[this.selectedGroup].name].length + 1
+      if (this.selectedGroupName === '') {
+        this.highlighted = -1
+        return
+      }
+      const groupLength = this.results[this.selectedGroupName].length + 1
       value = value + 1 < 0 ? value + 1 + groupLength : value + 1
       this.highlighted = ( value % groupLength ) - 1
     },

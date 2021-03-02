@@ -1,7 +1,7 @@
 <template>
   <router-link
     custom
-    :to="{ name: 'timeline.show', params: { slug: timeline.slug } }"
+    :to="{ name: 'timeline.show', params: { slug: value.slug } }"
     v-slot="{ href, navigate, isActive, isExactActive }"
   >
     <li
@@ -19,10 +19,10 @@
     >
       <b-media>
         <template #aside>
-          <b-avatar :src="timeline.avatar.filepath" />
+          <b-avatar :src="value.avatar.filepath" />
         </template>
-        <p class="h5" v-text="timeline.name || 'No Name'" />
-        <p class="mb-0" v-text="`@${timeline.slug}`" />
+        <p class="h5" v-text="value.name || 'No Name'" />
+        <p class="mb-0" v-text="`@${value.slug}`" />
       </b-media>
     </li>
   </router-link>
@@ -31,7 +31,7 @@
 <script>
 export default {
   props: {
-    timeline: { type: Object, default: () => ({}) },
+    value: { type: Object, default: () => ({}) },
     highlighted: { type: Boolean, default: false },
     index: { type: Number, default: 0 },
   }

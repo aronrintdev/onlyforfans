@@ -8,7 +8,6 @@ Vue.use(Vuex)
  * Routes from window, want to eventually deprecate and move to dedicated compiled routes
  */
 const route = window.route
-console.log({route, window: window.route})
 
 /**
  * Helps select items from response result set
@@ -24,8 +23,14 @@ const propSelect = (payload, propertyName, type = 'array') => {
         ? [] : {}
 }
 
+// Modules
+import searchModule from './store/search'
 
 export default new Vuex.Store({
+  modules: {
+    search: searchModule,
+  },
+
   state: {
     vault: {},
     vaultfolder: {},
