@@ -1,25 +1,16 @@
 <template>
-  <b-nav-item-dropdown
-    v-if="session_user"
-    id="profile-dropdown"
-    toggle-class="nav-link-custom"
-    right
-    class="py-0"
-  >
-  <template #button-content>
-    <b-avatar v-if="session_user.avatar.filepath" :src="session_user.avatar.filepath" class="mr-2" size="2rem" />
-    <b-avatar v-else class="mr-2" size="2rem" />
-    <span v-text="session_user.name" />
-  </template>
-    <b-dropdown-item
+  <div>
+    <component
+      :is="dropdown ? 'b-dropdown-item' : 'b-nav-item'"
       v-for="(item, i) in menuItems"
       :key="i"
       :to="item.linkTo || null"
       @click="(typeof item.action === 'function') ? item.action() : null"
     >
-      <fa-icon :icon="item.icon" fixed-width class="mr-3" /> {{ item.label }}
-    </b-dropdown-item>
-  </b-nav-item-dropdown>
+      <fa-icon :icon="item.icon" fixed-width class="mr-3" />
+      <span v-text="$t(item.label)" />
+    </component>
+  </div>
 </template>
 
 <script>
@@ -27,8 +18,14 @@
  * components/common/navbar/ProfileMenu.vue
  */
 import Vuex from 'vuex'
+import ProfileButton from './ProfileButton'
+
 export default {
   name: 'ProfileMenu',
+
+  props: {
+    dropdown: { type: Boolean, default: false },
+  },
 
   data: () => ({
     loading: true,
@@ -101,3 +98,15 @@ export default {
   },
 }
 </script>
+
+<i18n lang="json5">
+{
+  "en": {
+    "Admin Dashboard": "Admin Dashboard",
+    "My Profile": "My Profile",
+    "Settings": "Settings",
+    "Payment Method": "Payment Method",
+    "Logout": "Logout",
+  }
+}
+</i18n>
