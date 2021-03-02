@@ -66,6 +66,8 @@ Route::post('/register', 'Auth\RegisterController@registerUser');
 */
 Route::group(['middleware' => ['auth']], function () {
 
+    Route::get('/blockables/match', ['as'=>'blockables.match', 'uses' => 'BlockablesController@match']);
+
     // -- comments: likeable --
     Route::patch('/comments/{comment}/like', ['as'=>'comments.toggleLike', 'uses' => 'CommentsController@toggleLike']);
     Route::get('/comments/match', ['as'=>'comments.match', 'uses' => 'CommentsController@match']);
