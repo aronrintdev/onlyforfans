@@ -16,9 +16,9 @@
           <b-list-group-item>
             <router-link :to="{ name: 'settings.profile', params: {} }">Profile</router-link>
           </b-list-group-item>
-          <b-list-group-item>Dapibus ac facilisis in</b-list-group-item>
-          <b-list-group-item>Morbi leo risus</b-list-group-item>
-          <b-list-group-item>Porta ac consectetur ac</b-list-group-item>
+          <b-list-group-item>
+            <router-link :to="{ name: 'settings.privacy', params: {} }">Privacy</router-link>
+          </b-list-group-item>
           <b-list-group-item>Vestibulum at eros</b-list-group-item>
         </b-list-group>
       </aside>

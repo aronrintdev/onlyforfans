@@ -8,8 +8,8 @@
 
           <b-row>
             <b-col>
-              <b-form-group id="group-username" label="Username" label-for="username" >
-                <b-form-input id="username" v-model="formGeneral.username" placeholder="Enter username" ></b-form-input>
+              <b-form-group id="group-username" label="Username" label-for="username">
+                <b-form-input id="username" v-model="formGeneral.username" placeholder="Enter username" :disabled="true" ></b-form-input>
               </b-form-group>
             </b-col>
             <b-col>
@@ -28,10 +28,15 @@
           </b-row>
           </fieldset>
 
-          <b-row align-h="end" class="mt-3">
-            <b-col sm="2">
-              <b-button v-if="isEditing.formGeneral" type="submit" class="w-100" variant="primary">Save</b-button>
-              <b-button v-else @click.prevent="isEditing.formGeneral=true" class="w-100" variant="warning">Edit</b-button>
+          <b-row class="mt-3">
+            <b-col>
+              <div v-if="isEditing.formGeneral" class="w-100 d-flex justify-content-end">
+                <b-button class="w-25" @click.prevent="isEditing.formGeneral=false" variant="outline-secondary">Cancel</b-button>
+                <b-button class="w-25 ml-3" type="submit" variant="primary">Save</b-button>
+              </div>
+              <div v-else class="w-100 d-flex justify-content-end">
+                <b-button @click.prevent="isEditing.formGeneral=true" class="w-25" variant="warning">Edit</b-button>
+              </div>
             </b-col>
           </b-row>
 
@@ -81,10 +86,15 @@
           </b-row>
           </fieldset>
 
-          <b-row align-h="end" class="mt-3">
-            <b-col sm="2">
-              <b-button v-if="isEditing.formSubscriptions" type="submit" class="w-100" variant="primary">Save</b-button>
-              <b-button v-else @click.prevent="isEditing.formSubscriptions=true" class="w-100" variant="warning">Edit</b-button>
+          <b-row class="mt-3">
+            <b-col>
+              <div v-if="isEditing.formSubscriptions" class="w-100 d-flex justify-content-end">
+                <b-button class="w-25" @click.prevent="isEditing.formSubscriptions=false" variant="outline-secondary">Cancel</b-button>
+                <b-button class="w-25 ml-3" type="submit" variant="primary">Save</b-button>
+              </div>
+              <div v-else class="w-100 d-flex justify-content-end">
+                <b-button @click.prevent="isEditing.formSubscriptions=true" class="w-25" variant="warning">Edit</b-button>
+              </div>
             </b-col>
           </b-row>
 
@@ -124,10 +134,15 @@
           </b-row>
           </fieldset>
 
-          <b-row align-h="end" class="mt-3">
-            <b-col sm="2">
-              <b-button v-if="isEditing.formLocalization" type="submit" class="w-100" variant="primary">Save</b-button>
-              <b-button v-else @click.prevent="isEditing.formLocalization=true" class="w-100" variant="warning">Edit</b-button>
+          <b-row class="mt-3">
+            <b-col>
+              <div v-if="isEditing.formLocalization" class="w-100 d-flex justify-content-end">
+                <b-button class="w-25" @click.prevent="isEditing.formLocalization=false" variant="outline-secondary">Cancel</b-button>
+                <b-button class="w-25 ml-3" type="submit" variant="primary">Save</b-button>
+              </div>
+              <div v-else class="w-100 d-flex justify-content-end">
+                <b-button @click.prevent="isEditing.formLocalization=true" class="w-25" variant="warning">Edit</b-button>
+              </div>
             </b-col>
           </b-row>
         </b-form>
@@ -217,8 +232,8 @@ export default {
         if ( newVal.cattrs.subscriptions ) {
           this.formSubscriptions.subscriptions = newVal.cattrs.subscriptions;
         }
-        if ( newVal.cattrs.is_follow_for_free ) {
-          this.formSubscripitons.is_follow_for_free = newVal.is_follow_for_free;
+        if ( newVal.is_follow_for_free ) {
+          this.formSubscriptions.is_follow_for_free = newVal.is_follow_for_free;
         }
         if ( newVal.cattrs.localization ) {
           this.formLocalization.localization = newVal.cattrs.localization;
@@ -235,7 +250,6 @@ export default {
   methods: {
 
     async submitGeneral(e) {
-      console.log('submit');
       const response = await axios.patch(`/users/${this.session_user.id}/settings`, this.formGeneral);
       this.isEditing.formGeneral = false;
     },

@@ -13,6 +13,7 @@ import vaults from '@views/vaults'
 
 import SettingsGeneral from '@components/settings/SettingsGeneral.vue';
 import SettingsProfile from '@components/settings/SettingsProfile.vue';
+import SettingsPrivacy from '@components/settings/SettingsPrivacy.vue';
 
 export const routes = [
   {
@@ -49,6 +50,11 @@ export const routes = [
         name: 'settings.profile',
         component: SettingsProfile,
         path: 'profile',
+      },
+      {
+        name: 'settings.privacy',
+        component: SettingsPrivacy,
+        path: 'privacy',
       },
       {
         name: 'settings.general',
