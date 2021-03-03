@@ -66,17 +66,14 @@
 
             <b-row>
               <b-col>
+
                 <vue-tags-input
                   v-if="isEditing.formBlocked"
                   v-model="blockedItem"
                   :tags="formBlocked.blocked"
                   :autocomplete-items="autocompleteItems"
-                  @tags-changed="update"
-                  :add-only-from-autocomplete="true"
+                  @tags-changed="handleUpdatedTags"
                   />
-                  <!--
-                    <b-form-tags v-if="isEditing.formBlocked" id="about" v-model="formBlocked.blocked" placeholder="Enter one or more usernames, IPs, or countries, separated by spaces..." rows="8"></b-form-tags>
-                  -->
 
                   <div v-else class="accordion" role="tablist">
                     <section class="mb-3">
@@ -166,7 +163,7 @@
 </template>
 
 <script>
-//import Vuex from 'vuex';
+import Vuex from 'vuex'
 
 export default {
 
@@ -177,13 +174,6 @@ export default {
 
   computed: {
     //...Vuex.mapState(['vault']),
-  /*
-    filteredItems() {
-      return this.autocompleteItems.filter(i => {
-        return i.text.toLowerCase().indexOf(this.blockedItem.toLowerCase()) !== -1;
-      });
-    },
-    */
   },
 
   data: () => ({
@@ -204,11 +194,12 @@ export default {
       },
     },
 
-    debounce: null,
-    blockedItem: '', // tag
     formBlocked: {
       blocked: [], // ip, country, or username (?) , tags
     },
+    blockedItem: '', // tag
+    autocompleteItems: [],
+    debounce: null,
 
     formWatermark: {
       watermark: {
@@ -220,46 +211,34 @@ export default {
       privacy: [ 
         { value: null, text: 'Please select an option' },
         { value: 'everyone', text: 'Everyone' },
-        { value: 'everyone', text: 'People I Follow' },
+        { value: 'followees', text: 'People I Follow' },
       ],
     },
 
-    //tag: '',
-    //tags: [],
-    autocompleteItems: [],
-    /*
-    filteredItems: [],
-    autocompleteItems: [
-      { slug: 'spain', text: 'Spain', }, 
-      { slug: 'france', text: 'France', }, 
-      { slug: 'usa', text: 'USA', }, 
-      { slug: 'germany', text: 'Germany', }, 
-      { slug: 'china', text: 'China', }
-    ],
-    */
 
   }),
 
   methods: {
 
-    update(newTags) {
-      this.autocompleteItems = [];
-      this.formBlocked.blocked = newTags;
+    handleUpdatedTags(newTags) {
+      this.autocompleteItems = []
+      this.formBlocked.blocked = newTags
     },
 
-    initItems() {
+    // see: http://www.vue-tags-input.com/#/examples/autocomplete
+    queryBlockables() {
       if (this.blockedItem.length < 2) {
-        return;
+        return
       }
-      const url = `/blockables/match?term=${this.blockedItem}&take=6`;
-      clearTimeout(this.debounce);
+      const url = `/blockables/match?term=${this.blockedItem}&take=6`
+      clearTimeout(this.debounce)
       this.debounce = setTimeout(() => {
         axios.get(url).then(response => {
           this.autocompleteItems = response.data.results.map(a => {
-            return { text: a.display };
-          });
-        }).catch(() => console.warn('Oh. Something went wrong'));
-      }, 600);
+            return { slug: a.slug, text: a.display }
+          })
+        }).catch(() => console.warn('Oh. Something went wrong'))
+      }, 600)
     },
 
     async submitPrivacy(e) {
@@ -268,7 +247,9 @@ export default {
     },
     async submitBlocked(e) {
       const response = await axios.patch(`/users/${this.session_user.id}/settings`, this.formBlocked)
+      this.$store.dispatch('getUserSettings', { userId: this.session_user.id })
       this.isEditing.formBlocked = false
+      this.formBlocked.blocked = []
     },
     async submitWatermark(e) {
       const response = await axios.patch(`/users/${this.session_user.id}/settings`, this.formWatermark)
@@ -281,10 +262,11 @@ export default {
   },
 
   watch: {
-    'blockedItem': 'initItems',
+    'blockedItem': 'queryBlockables',
 
     session_user(newVal) {
     },
+
     user_settings(newVal) {
       this.state = 'loaded'
       if ( newVal.cattrs.privacy ) {

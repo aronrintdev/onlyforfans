@@ -2,9 +2,9 @@
 namespace App\Http\Controllers;
 
 use App;
-use DB;
 use Auth;
 use Exception;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -12,8 +12,8 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Http\Resources\UserSetting as UserSettingResource;
 use App\Models\User;
 use App\Models\Fanledger;
+use App\Models\Country;
 use App\Enums\PaymentTypeEnum;
-use App\Enums\CountryTypeEnum;
 
 class UsersController extends AppBaseController
 {
@@ -41,6 +41,7 @@ class UsersController extends AppBaseController
         $request->validate([
             'city' => 'string|min:2',
             'is_follow_for_free' => 'boolean',
+            'blocked' => 'array',
         ]);
         $request->request->remove('username'); // disallow username updates for now
 
@@ -65,7 +66,7 @@ class UsersController extends AppBaseController
 
             // handle cattrs
             if ($request->hasAny($cattrsFields) ){
-                $cattrs = $user->cattrs; // 'pop'
+                $cattrs = $userSetting->cattrs; // 'pop'
                 foreach ($cattrsFields as $k) {
                     switch ($k) {
                     case 'blocked': // %FIXME: move to lib
@@ -73,15 +74,28 @@ class UsersController extends AppBaseController
                             $byCountry = [];
                             $byIP = [];
                             $byUsername = [];
-                            $blockedListIn = array_map('trim', explode(' ', $request->blocked));
-                            foreach ( $blockedListIn as $b) {
-                                if ( in_array($b, CountryTypeEnum::getKeys()) ) { // country
-                                    $byCountry[] = $b;
-                                } else if ( filter_var($b, FILTER_VALIDATE_IP) ) { // ip
-                                    $byIP[] = $b;
-                                } else { // username
-                                    $byUsername[] = $b;
-                                }
+                            foreach ( $request->blocked as $bobj) {
+                                $slug = trim($bobj['slug'] ?? '');
+                                $text = trim($bobj['text'] ?? '');
+                                do {
+                                    // country
+                                    $exists = Country::where('slug', $slug)->first();
+                                    if ( $exists ) { 
+                                        $byCountry[] = $slug;
+                                        break;
+                                    }
+                                    // user
+                                    $exists = User::where('username', $slug)->first();
+                                    if ( $exists ) {
+                                        $byUsername[] = $slug;
+                                        break;
+                                    }
+                                    // IP
+                                    if ( filter_var($text, FILTER_VALIDATE_IP) ) { // ip
+                                        $byIP[] = $text;
+                                        break;
+                                    }
+                                } while(0);
                             }
                             $blocked = $cattrs['blocked'] ?? [];
                             $blocked['ips'] = $blocked['ips'] ?? [];
