@@ -9,12 +9,13 @@
             <b-row>
               <b-col>
                 <b-form-group id="group-oldPassword" label="Current Password" label-for="oldPassword">
-                  <b-form-input id="oldPassword" v-model="formPassword.oldPassword" placeholder="Enter old password..." ></b-form-input>
+                  <b-form-input type="password" id="oldPassword" v-model="formPassword.oldPassword" placeholder="Enter old password..." ></b-form-input>
                 </b-form-group>
               </b-col>
               <b-col>
                 <b-form-group id="group-newPassword" label="New Password" label-for="newPassword">
-                  <b-form-input id="newPassword" v-model="formPassword.newPassword" placeholder="Enter new password..." ></b-form-input>
+                  <b-form-input type="password" id="newPassword" v-model="formPassword.newPassword" placeholder="Enter new password..." aria-describedby="password-help-block"></b-form-input>
+                      <b-form-text id="password-help-block">Your password must be 8-20 characters long, contain letters and numbers. We also recommend special characters for enhanced security.</b-form-text>
                 </b-form-group>
               </b-col>
             </b-row>

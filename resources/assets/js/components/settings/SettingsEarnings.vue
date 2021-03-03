@@ -3,32 +3,7 @@
 
     <b-card title="Edit Profile">
       <b-card-text>
-        <b-form @submit.prevent="submitProfile($event)" @reset="onReset">
-          <fieldset :disabled="!isEditing.formProfile">
-
-            <b-row>
-              <b-col>
-                <b-form-group id="group-about" label="About" label-for="about">
-                  <b-form-textarea id="about" v-model="formProfile.about" placeholder="Talk about yourself.." rows="8"></b-form-textarea>
-                </b-form-group>
-              </b-col>
-            </b-row>
-
-          </fieldset>
-
-          <b-row class="mt-3">
-            <b-col>
-              <div v-if="isEditing.formProfile" class="w-100 d-flex justify-content-end">
-                <b-button class="w-25" @click.prevent="isEditing.formProfile=false" variant="outline-secondary">Cancel</b-button>
-                <b-button class="w-25 ml-3" type="submit" variant="primary">Save</b-button>
-              </div>
-              <div v-else class="w-100 d-flex justify-content-end">
-                <b-button @click.prevent="isEditing.formProfile=true" class="w-25" variant="warning">Edit</b-button>
-              </div>
-            </b-col>
-          </b-row>
-
-        </b-form>
+        <b-table striped hover :items="items"></b-table>
       </b-card-text>
     </b-card>
 
@@ -51,31 +26,16 @@ export default {
 
   data: () => ({
 
-    isEditing: {
-      formProfile: false,
-    },
-
-    formProfile: {
-      about: '',
-      country: '',
-      city: '',
-      gender: '',
-      birthdate: '',
-      weblinks: { // cattrs
-        instagram: null,
-      },
-    },
-
-    options: {
-      genders: [ 
-        { value: null, text: 'Please select an option' },
-        { value: 'other', text: 'Other' },
-      ],
-    },
-
+    items: [
+      { age: 40, first_name: 'Dickerson', last_name: 'Macdonald' },
+      { age: 21, first_name: 'Larsen', last_name: 'Shaw' },
+      { age: 89, first_name: 'Geneva', last_name: 'Wilson' },
+      { age: 38, first_name: 'Jami', last_name: 'Carney' }
+    ]
   }),
 
   watch: {
+
     session_user(newVal) {
     },
 
