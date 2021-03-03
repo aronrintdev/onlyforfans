@@ -66,6 +66,7 @@ Route::post('/register', 'Auth\RegisterController@registerUser');
 */
 Route::group(['middleware' => ['auth']], function () {
 
+    Route::delete('/blockables/{user}/unblock/{slug}', ['as'=>'blockables.unblock', 'uses' => 'BlockablesController@unblock']);
     Route::get('/blockables/match', ['as'=>'blockables.match', 'uses' => 'BlockablesController@match']);
 
     // -- comments: likeable --

@@ -79,24 +79,30 @@
                     <section class="mb-3">
                       <b-button block v-b-toggle.accordion-ips variant="light">IPs</b-button>
                       <b-collapse id="accordion-ips" accordion="my-accordion" role="tabpanel">
-                        <ul class="list-unstyled">
-                          <li v-for="(b,idx) in user_settings.cattrs.blocked.ips || []"> {{ b }}</li>
+                        <ul class="list-blocked list-unstyled">
+                          <li v-for="(b,idx) in user_settings.cattrs.blocked.ips || []" :key="idx"> {{ b }}
+                            <span @click="unblock(b)" class="unblock ml-1"><b-icon icon="x-circle-fill" variant="danger" font-scale="1"></b-icon></span>
+                          </li>
                         </ul>
                       </b-collapse>
                     </section>
                     <section class="mb-3">
                       <b-button block v-b-toggle.accordion-countries variant="light">Countries</b-button>
                       <b-collapse id="accordion-countries" accordion="my-accordion" role="tabpanel">
-                        <ul class="list-unstyled">
-                          <li v-for="(b,idx) in user_settings.cattrs.blocked.countries || []"> {{ b }}</li>
+                        <ul class="list-blocked list-unstyled">
+                          <li v-for="(b,idx) in user_settings.cattrs.blocked.countries || []"> {{ b }}
+                            <span @click="unblock(b)" class="unblock ml-1"><b-icon icon="x-circle-fill" variant="danger" font-scale="1"></b-icon></span>
+                          </li>
                         </ul>
                       </b-collapse>
                     </section>
                     <section class="mb-3">
                       <b-button block v-b-toggle.accordion-users variant="light">Users</b-button>
                       <b-collapse id="accordion-users" accordion="my-accordion" role="tabpanel">
-                        <ul class="list-unstyled">
-                          <li v-for="(b,idx) in user_settings.cattrs.blocked.usernames || []"> {{ b }}</li>
+                        <ul class="list-blocked list-unstyled">
+                          <li v-for="(b,idx) in user_settings.cattrs.blocked.usernames || []"> {{ b }}
+                            <span @click="unblock(b)" class="unblock ml-1"><b-icon icon="x-circle-fill" variant="danger" font-scale="1"></b-icon></span>
+                          </li>
                         </ul>
                       </b-collapse>
                     </section>
@@ -255,6 +261,10 @@ export default {
       const response = await axios.patch(`/users/${this.session_user.id}/settings`, this.formWatermark)
       this.isEditing.formWatermark = false
     },
+    async unblock(slug) {
+      const response = await axios.delete(`/blockables/${this.session_user.id}/unblock/${slug}`)
+      this.$store.dispatch('getUserSettings', { userId: this.session_user.id })
+    },
 
     onReset(e) {
       e.preventDefault()
@@ -297,5 +307,10 @@ export default {
 label {
   margin-bottom: 0;
 }
+
+.list-blocked .unblock {
+  cursor: pointer; 
+}
+
 </style>
 
