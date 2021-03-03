@@ -74,6 +74,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('/comments/match', ['as'=>'comments.match', 'uses' => 'CommentsController@match']);
     Route::resource('comments', 'CommentsController', [ 'except' => ['create','edit'] ]);
 
+    Route::get('/fanledgers/{user}/earnings', ['as'=>'fanledgers.showEarnings', 'uses' => 'FanledgersController@showEarnings']);
     Route::resource('fanledgers', 'FanledgersController', [
         'only' => [ 'index', ],
     ]);
