@@ -239,7 +239,7 @@ export default {
           this.formLocalization.localization = newVal.cattrs.localization;
         }
       },
-    },
+  },
 
   mounted() {
   },

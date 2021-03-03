@@ -37,6 +37,8 @@ export default new Vuex.Store({
     feeditems: [], // Posts on current open timeline
     feeddata: {},
     stories: [], // Current open stories
+    earnings: null,
+    fanledgers: {},
     timeline: null,
     session_user: null, 
     user_settings: null,
@@ -68,11 +70,17 @@ export default new Vuex.Store({
       state.feeditems = propSelect(payload, 'feeditems')
     },
     UPDATE_FEEDDATA(state, payload) {
-      console.log('UPDATE_FEEDDATA', { payload, })
       state.feeddata = payload.hasOwnProperty('data') ? payload.data : {}
     },
     UPDATE_STORIES(state, payload) {
       state.stories = propSelect(payload, 'stories')
+    },
+    UPDATE_FANLEDGERS(state, payload) {
+      //state.fanledgers = propSelect(payload, 'fanledgers')
+      state.fanledgers = payload.hasOwnProperty('data') ? payload.data : {}
+    },
+    UPDATE_EARNINGS(state, payload) {
+      state.earnings = propSelect(payload, 'earnings')
     },
     UPDATE_TIMELINE(state, payload) {
       state.timeline = propSelect(payload, 'timeline')
@@ -140,8 +148,25 @@ export default new Vuex.Store({
       });
     },
 
+    getFanledgers({ commit }, params ) {
+      const url = route(`fanledgers.index`);
+      axios.get(url, { params })
+        .then((response) => {
+          commit('UPDATE_FANLEDGERS', response)
+          commit('UPDATE_LOADING', false)
+        })
+    },
+
+    getEarnings({ commit }, userId ) {
+      //console.log('getEarnings', { userId })
+      axios.get(route('fanledgers.showEarnings', userId)).then((response) => {
+        commit('UPDATE_EARNINGS', response.data)
+        commit('UPDATE_LOADING', false)
+      })
+    },
+
     getStories({ commit }, { filters }) {
-      const username = this.state.session_user.username // Not used - This param will eventually be DEPRECATED
+      //const username = this.state.session_user.username // Not used - This param will eventually be DEPRECATED
       const params = {}
       if (Object.keys(filters).includes('user_id')) {
         params.user_id = filters.user_id
@@ -188,6 +213,8 @@ export default new Vuex.Store({
     saves:                   state => state.saves,
     feeddata:                state => state.feeddata,
     stories:                 state => state.stories,
+    fanledgers:              state => state.fanledgers,
+    earnings:                state => state.earnings,
     timeline:                state => state.timeline,
     unshifted_timeline_post: state => state.unshifted_timeline_post,
     session_user:            state => state.session_user,

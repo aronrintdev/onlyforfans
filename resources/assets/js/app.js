@@ -87,6 +87,15 @@ Vue.component('main-navbar', require('./components/common/MainNavbar.vue').defau
 Vue.component('my-vault', require('./components/vault/Dashboard.vue').default);
 Vue.component('my-saved', require('./components/saved/Dashboard.vue').default);
 
+Vue.filter('niceCurrency', function (valueInCents) {
+  if (!valueInCents) {
+    return ''
+  }
+  let value = valueInCents / 100
+  value.toFixed(2)
+  return `$${value}`
+})
+
 export const eventBus = new Vue({
 /*
     methods: {
