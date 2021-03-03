@@ -10,6 +10,8 @@ import stories from '@views/stories'
 import timelines from '@views/timelines'
 import users from '@views/users'
 import vaults from '@views/vaults'
+import search from '@views/search'
+import posts from '@views/posts'
 
 import SettingsGeneral from '@components/settings/SettingsGeneral.vue';
 import SettingsProfile from '@components/settings/SettingsProfile.vue';
@@ -20,6 +22,13 @@ export const routes = [
     name: 'index',
     path: '/',
     component: timelines.Home,
+  },
+
+  {
+    name: 'search.home',
+    path: '/search',
+    component: search.Home,
+    props: true,
   },
 
   // Timelines
@@ -111,6 +120,14 @@ export const routes = [
     name: 'timeline.show',
     path: '/:slug',
     component: timelines.Show,
+    props: true,
+  },
+
+  // Posts
+  {
+    name: 'post.show',
+    path: '/post/:slug',
+    component: posts.Show,
     props: true,
   },
 

@@ -239,6 +239,9 @@ Route::get('blog', 'PageController@blog');
 
 Route::get('/home', 'HomeController@index');
 
+Route::get('/search', 'SearchController@search')->name('search');
+Route::post('/search', 'SearchController@search')->name('search.post');
+
 /**
  * Single Page application catch all undefined routes
  * Laravel router will first try to match static resources, then specific routes, then finally this.
