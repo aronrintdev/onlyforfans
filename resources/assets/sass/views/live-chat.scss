@@ -12,7 +12,33 @@
 		float: left;
 		padding: 12px 12px 14px 12px;
 	}
-
+	.btn {
+		position: relative;
+		
+		&:hover, &:focus {
+			color: #0091ea;
+			outline: none;
+			box-shadow: none;
+		}
+		&:hover:after, &:focus:after {
+			opacity: 0.06;
+		}
+		&:after {
+			content: "";
+			position: absolute;
+			left: 50%;
+			top: 50%;
+			width: 36px;
+			height: 36px;
+			transform: translate(-50%,-50%);
+			transition: opacity .15s;
+			pointer-events: none;
+			opacity: 0;
+			border-radius: 1000px;
+			background-color: #0091ea;
+			display: block;
+		}
+	}
 	.card-header.user-pages {
 		display: flex;
 		align-items: center;
@@ -24,7 +50,6 @@
 		margin-left: auto;
 		position: relative;
 		z-index: 1;
-		margin-right: 7px;
 		font-size: 24px;
 		width: 1em;
 		height: 1em;
@@ -36,18 +61,76 @@
 
 	.card-body {
 		padding: 0;
-
-		.user-search-bar {
+		.top-bar {
 			display: flex;
 			align-items: center;
 			justify-content: space-between;
-			border-bottom: 1px solid #DFE3E9 !important;
-
-			li.dropdown {
-				padding: 15px;
+			padding: 15px 4px 16px;
+			height: 56px;
+			border-bottom: 1px solid rgba(138,150,163,.25);
+			& > div {
+				display: flex;
+				align-items: center;
+			}
+			.btn {
+				height: 28px;
+				width: 28px;
+				padding: 4px;
+				margin: 0 8px;
+				min-height: 0;
+				position: relative;
+				
+				i {
+					font-size: 18px;
+					font-weight: 600;
+				}
+			}
+			.top-bar-title {
+				font-size: 19px;
+    			font-weight: 600;
+				line-height: 1em;
 			}
 		}
-
+		.user-search-bar {
+			height: 56px;
+ 			input {
+				flex: 1;
+				padding: 0;
+				border: none;
+				box-shadow: none;
+			}
+			.btn {
+				i {
+					color: #0091ea;
+				}
+				&:disabled {
+					i {
+						color: lightgray;
+					}
+				}
+			}
+		}
+		.options-bar {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			padding: 16px;
+			
+			.selected-option {
+				text-transform: uppercase;
+				color: #8a96a3;
+				font-weight: 400;
+				font-size: 16px;
+			}
+		}
+		.no-users {
+			font-size: 18px;
+			font-weight: 500;
+			color: rgba(138,150,163,.7);
+			margin: auto;
+			padding: 10px 0;
+			text-align: center;
+		}
 		.message-col-4 {
 			padding-right: 0px;
 			border-right: 1px solid #E6EAEE;
@@ -61,6 +144,132 @@
 
 				.media-body {
 					overflow: hidden;
+				}
+			}
+			.user-list {
+				list-style: none;
+				padding: 0;
+
+				li {
+					width: 100%;
+					cursor: pointer;
+					border-top: solid 1px transparent;
+
+					&.selected {
+						background: rgba(0,145,234,.06);
+						border-bottom: solid 1px rgba(138, 150, 163, 0.25);
+						.divider {
+							display: none;
+						}
+						&:hover {
+							.user-content {
+								background: transparent;
+								border-radius: 0;
+							}
+						}
+					}
+					.divider {
+						margin-left: 84px;
+						height: 1px;
+						width: calc(100% - 84px);
+						background: rgba(138, 150, 163, 0.25);
+					}
+					.user-content {
+						display: flex;
+						align-items: center;
+						padding-left: 12px;
+						margin: 8px;
+						height: 64px;
+					}
+					&:hover {
+						.user-content {
+							background: rgba(0,145,234,.06);
+							border-radius: 8px;
+						}
+					}
+					.user-logo {
+						width: 52px;
+						height: 52px;
+						border-radius: 50%;
+						overflow: hidden;
+						margin-right: 16px;
+						border: solid 2px #fff;
+						img {
+							width: 100%;
+							height: auto;
+						}
+						&.text-logo {
+							display: flex;
+							align-items: center;
+							justify-content: center;
+							color: #00aff0;
+							font-weight: 700;
+							font-size: 16px;
+							background: rgba(138,150,163,.12);
+							letter-spacing: 0;
+							text-transform: uppercase;
+						}
+					}
+					.user-details {
+						width: calc(100% - 70px);
+						padding: 0;
+						padding-right: 8px;
+						height: 100%;
+						display: flex;
+						justify-content: center;
+						flex-direction: column;
+						.username {
+							font-size: 16px;
+							line-height: 1em;
+							color: rgb(36, 37, 41);
+							font-weight: 500;
+						}
+						.user-id {
+							font-size: 15px;
+							color:rgba(138, 150, 163, 0.75)
+							;
+						}
+						.close-btn {
+							font-size: 14px;
+							color: rgba(138, 150, 163, 0.75)
+							;
+							width: auto;
+							height: 24px;
+							display: flex;
+							padding: 04px;
+							align-items: center;
+							justify-content: center;
+							i {
+								font-size: 14px;
+							}
+							&:after {
+								width: 24px;
+								height: 24px;
+							}
+						}
+						.last-message {
+							font-size: 14px;
+							color: rgba(138, 150, 163, 0.75);
+							overflow: hidden;
+							text-overflow: ellipsis;
+							white-space: nowrap;
+							flex: 1;
+							margin-right: 10px;
+						}
+						.last-message-date {
+							font-size: 14px;
+    						color: rgba(138, 150, 163, 0.75);
+						}
+					}
+				}
+			}
+			.user-details-row {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				padding-bottom: 3px;
+				.user-details-row:last-child {
+					padding-bottom: 0;
 				}
 			}
 
@@ -78,6 +287,7 @@
 					border-radius: 4px;
 					border-top-right-radius: 0px;
 					border-bottom-right-radius: 0px;
+					border-bottom: solid 1px #1991EB;
 					margin-bottom: 0px;
 				}
 
@@ -102,6 +312,43 @@
 
 		.message-col-8 {
 			padding-left: 0px;
+			.coversation-tree {
+				position: relative;
+				height: calc(100vh - 156px);
+				overflow: auto;
+			}
+			.conversations-start {
+				position: absolute;
+				top: 50%;
+				left: 50%;
+				width: max-content;
+				transform: translate(-50%, -50%);
+				text-align: center;
+				button {
+					border: none;
+					padding: 9px 18px;
+					font-size: 14px;
+					color: #fefefe;
+					font-weight: 500;
+					background: #00aff0;
+					min-width: 78px;
+					transition: opacity .15s ease,background-color .15s ease,box-shadow .15s ease;
+					display: inline-block;
+					white-space: nowrap;
+					text-align: center;
+					height: 48px;
+					width: 250px;
+					line-height: 1em;
+					border-radius: 24px;
+					text-transform: uppercase;
+				}
+				.conversations-start__title {
+					font-size: 24px;
+					font-weight: 500;
+					margin-bottom: 38px;
+				}
+			}
+			
 
 			.conversation {
 				.left-side {
@@ -359,7 +606,7 @@
 				font-family: 'Source Sans Pro', sans-serif;
 				font-size: 13px;
 				color: #354052;
-				font-weight: 400;
+				font-weight: 600;
 				max-height: 42px;
 				overflow: hidden;
 				width: 180px;

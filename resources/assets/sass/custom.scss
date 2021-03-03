@@ -74,3 +74,41 @@ body .feed-crate.tag-grid-layout .superbox-post .carousel.slide .carousel-item i
   height: 20rem;
 }
 
+#user-filter-dropdown .btn {
+  border: none;
+  background: transparent;
+  padding: 4px;
+  width: 24px;
+  color: rgba(138,150,163,.75);
+  position: relative;
+}
+#user-filter-dropdown .btn:after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 36px;
+  height: 36px;
+  transform: translate(-50%,-50%);
+  transition: opacity .15s;
+  pointer-events: none;
+  opacity: 0;
+  border-radius: 1000px;
+  background-color: #0091ea;
+  display: block;
+}
+#user-filter-dropdown .btn:hover,
+#user-filter-dropdown .btn:focus {
+  color: #0091ea;
+  box-shadow: none;
+}
+#user-filter-dropdown .btn:hover:after {
+  opacity: 0.06;
+}
+#user-filter-dropdown .dropdown-item {
+  padding-right: 0.8rem;
+  padding-left: 0.8rem;
+}
+#user-filter-dropdown  ul {
+  left: 0.5em !important;
+}
