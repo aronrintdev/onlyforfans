@@ -16,6 +16,10 @@ import posts from '@views/posts'
 import SettingsGeneral from '@components/settings/SettingsGeneral.vue';
 import SettingsProfile from '@components/settings/SettingsProfile.vue';
 import SettingsPrivacy from '@components/settings/SettingsPrivacy.vue';
+import SettingsSecurity from '@components/settings/SettingsSecurity.vue';
+import SettingsEarnings from '@components/settings/SettingsEarnings.vue';
+import SettingsSessions from '@components/settings/SettingsSessions.vue';
+import SettingsReferrals from '@components/settings/SettingsReferrals.vue';
 
 export const routes = [
   {
@@ -64,6 +68,26 @@ export const routes = [
         name: 'settings.privacy',
         component: SettingsPrivacy,
         path: 'privacy',
+      },
+      {
+        name: 'settings.security',
+        component: SettingsSecurity,
+        path: 'security',
+      },
+      {
+        name: 'settings.earnings',
+        component: SettingsEarnings,
+        path: 'earnings',
+      },
+      {
+        name: 'settings.sessions',
+        component: SettingsSessions,
+        path: 'sessions',
+      },
+      {
+        name: 'settings.referrals',
+        component: SettingsReferrals,
+        path: 'referrals',
       },
       {
         name: 'settings.general',

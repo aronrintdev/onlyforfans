@@ -6,6 +6,7 @@ use Auth;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
@@ -14,6 +15,7 @@ use App\Models\User;
 use App\Models\Fanledger;
 use App\Models\Country;
 use App\Enums\PaymentTypeEnum;
+use App\Rules\MatchOldPassword;
 
 class UsersController extends AppBaseController
 {
@@ -33,6 +35,23 @@ class UsersController extends AppBaseController
     {
         $this->authorize('show', $user);
         return new UserSettingResource($user->settings);
+    }
+
+    // for the user updating their password while logged in
+    public function updatePassword(Request $request, User $user=null)
+    {
+        $this->authorize('update', $user); // %FIXME: should be update password?
+        $request->validate([
+            'oldPassword' => ['required', new MatchOldPassword],
+            'newPassword' => 'required|min:'.env('MIN_PASSWORD_CHAR_LENGTH', 8),
+            //'newPassword' => 'required|confirmed|min:8',
+            //'newPasswordConfirm' => 'same:newPassword',
+        ]);
+        $sessionUser = $user ?? $request->user(); // $user param for reset by super-admin, TBD
+        $sessionUser->password = Hash::make($request->newPassword);
+        $sessionUser->save();
+        //event(new PasswordReset($sessionUser));
+        return response()->json([ ]);
     }
 
     public function updateSettings(Request $request, User $user)

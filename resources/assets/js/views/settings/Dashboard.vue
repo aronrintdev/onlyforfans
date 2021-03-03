@@ -19,7 +19,18 @@
           <b-list-group-item>
             <router-link :to="{ name: 'settings.privacy', params: {} }">Privacy</router-link>
           </b-list-group-item>
-          <b-list-group-item>Vestibulum at eros</b-list-group-item>
+          <b-list-group-item>
+            <router-link :to="{ name: 'settings.security', params: {} }">Security</router-link>
+          </b-list-group-item>
+          <b-list-group-item>
+            <router-link :to="{ name: 'settings.earnings', params: {} }">Earnings</router-link>
+          </b-list-group-item>
+          <b-list-group-item>
+            <router-link :to="{ name: 'settings.sessions', params: {} }">Login Sessions</router-link>
+          </b-list-group-item>
+          <b-list-group-item>
+            <router-link :to="{ name: 'settings.referrals', params: {} }">Referrals</router-link>
+          </b-list-group-item>
         </b-list-group>
       </aside>
 
@@ -75,7 +86,6 @@ export default {
       }
     }
   },
-
 
 }
 </script>
