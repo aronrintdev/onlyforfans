@@ -18,6 +18,8 @@ class Api
     protected $baseUrl = '';
     /** Base url of one click endpoint */
     protected $baseOneClickUrl = '';
+    /** SegPay Reporting Services API Url */
+    protected $reportingServicesUrl = '';
     /** Segpay UserId */
     protected $userId = '';
     /** Segpay AccessKey */
@@ -77,6 +79,7 @@ class Api
         'mode',
         'baseUrl',
         'baseOneClickUrl',
+        'reportingServicesUrl',
         'userId',
         'accessKey',
     ];
@@ -84,6 +87,7 @@ class Api
     protected $requiredOptions = [
         'baseUrl',
         'baseOneClickUrl',
+        'reportingServicesUrl',
         'userId',
         'accessKey',
     ];
