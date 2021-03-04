@@ -65,6 +65,8 @@ export default {
   mounted() {
     if (!this.session_user) {
       this.getMe()
+    } else {
+      this.state = 'loaded'
     }
   },
 

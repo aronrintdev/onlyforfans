@@ -143,7 +143,11 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('/users/match', ['as'=>'users.match', 'uses' => 'UsersController@match']);
     Route::patch('/users/{user}/settings', ['as'=>'users.updateSettings', 'uses' => 'UsersController@updateSettings']);
     Route::patch('/users/{user}/updatePassword', ['as'=>'users.updatePassword', 'uses' => 'UsersController@updatePassword']);
-    Route::get('/users/{user}/settings', ['as'=>'users.showSettings', 'uses' => 'UsersController@showSettings']);
+    Route::get('/users/{user}/settings', [
+        'middleware' => 'spaMixedRoute',
+        'as'=>'users.showSettings', 
+        'uses' => 'UsersController@showSettings',
+    ]);
     Route::resource('users', 'UsersController', [ 'except' => [ 'create', 'edit', ] ]);
 
     // -- vaults:  --

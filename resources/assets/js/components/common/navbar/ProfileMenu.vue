@@ -53,7 +53,7 @@ export default {
         {
           label: 'Settings',
           icon: 'cog',
-          linkTo: { name: 'index' } // TODO: Add route when settings page is added
+          linkTo: { name: 'settings.general' }
         },
       ]
 

@@ -1,6 +1,5 @@
 <template>
-  <div v-if="!is_loading">
-
+  <div v-if="!isLoading">
     <b-card title="Total Earnings" class="mb-3">
       <b-card-text>
         <div>Subscriptions: {{ earnings.sums.timelines | niceCurrency }}</div>
@@ -44,14 +43,34 @@ export default {
   computed: {
     ...Vuex.mapState(['fanledgers']),
     ...Vuex.mapState(['earnings']),
-    ...Vuex.mapState(['is_loading']),
+    //...Vuex.mapState(['is_loading']),
 
     totalRows() {
       return this.fanledgers.meta ? this.fanledgers.meta.total : 1;
     },
+
+    isLoading() {
+      return !this.is_fanledgers_loading && !this.is_earnings_loading;
+    },
+  },
+
+  watch: {
+    fanledgers(value) {
+      if (value && value.length > 0) {
+        this.is_fanledgers_loading = false
+      }
+    },
+    earnings(value) {
+      if (value) {
+        this.earnings_loading = false
+      }
+    },
   },
 
   data: () => ({
+
+    is_fanledgers_loading: true,
+    is_earnings_loading: true,
 
     perPage: 10,
     currentPage: 1,
