@@ -42,6 +42,7 @@ export default new Vuex.Store({
     timeline: null,
     session_user: null, 
     user_settings: null,
+    login_sessions: [],
     uiFlags: [],
     unshifted_timeline_post: null,
     is_loading: true,
@@ -90,6 +91,9 @@ export default new Vuex.Store({
     },
     UPDATE_USER_SETTINGS(state, payload) {
       state.user_settings = propSelect(payload, 'user_settings')
+    },
+    UPDATE_LOGIN_SESSIONS(state, payload) {
+      state.login_sessions = propSelect(payload, 'login_sessions')
     },
     UPDATE_UI_FLAGS(state, payload) {
       state.uiFlags = { ...state.uiFlags, ...propSelect(payload, 'uiFlags', 'object') }
@@ -200,6 +204,13 @@ export default new Vuex.Store({
         commit('UPDATE_LOADING', false)
       })
     },
+
+    getLoginSessions({ commit }, { params }) {
+      axios.get(route('sessions.index', { params })).then((response) => {
+        commit('UPDATE_LOGIN_SESSIONS', response)
+        commit('UPDATE_LOADING', false)
+      })
+    },
   },
 
   getters: {
@@ -218,6 +229,7 @@ export default new Vuex.Store({
     unshifted_timeline_post: state => state.unshifted_timeline_post,
     session_user:            state => state.session_user,
     user_settings:           state => state.user_settings,
+    login_sessions:          state => state.login_sessions,
     uiFlags:                 state => state.uiFlags,
     //children: state => state.vault.children, // Flat list
     //mediafiles: state => state.vault.mediafiles, // Flat list

@@ -50,13 +50,13 @@ export default {
     },
 
     isLoading() {
-      return !this.is_fanledgers_loading && !this.is_earnings_loading;
+      return this.is_fanledgers_loading && this.is_earnings_loading;
     },
   },
 
   watch: {
     fanledgers(value) {
-      if (value && value.length > 0) {
+      if (value) {
         this.is_fanledgers_loading = false
       }
     },
@@ -114,7 +114,6 @@ export default {
     ],
 
   }),
-
 
   created() {
     this.getEarnings({ 
