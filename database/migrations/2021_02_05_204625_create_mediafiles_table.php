@@ -6,11 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 class CreateMediafilesTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
     public function up()
     {
         Schema::create('mediafiles', function (Blueprint $table) {
@@ -35,11 +30,6 @@ class CreateMediafilesTable extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
     public function down()
     {
         Schema::dropIfExists('mediafiles');

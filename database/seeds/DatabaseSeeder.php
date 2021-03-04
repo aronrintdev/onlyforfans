@@ -15,6 +15,8 @@ class DatabaseSeeder extends Seeder
         $output->writeln('Running DB seeder...');
 
         $this->call([
+            CountriesTableSeeder::class,
+            UsstatesTableSeeder::class,
             UsernameRulesSeeder::class,
             RolesTableSeeder::class,
             UsersTableSeeder::class,

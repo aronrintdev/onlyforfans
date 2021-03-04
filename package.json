@@ -2,12 +2,15 @@
   "private": true,
   "scripts": {
     "dev": "npm run development",
-    "development": "mix",
+    "development": "cross-env NODE_ENV=development node_modules/webpack/bin/webpack.js --progress --config=node_modules/laravel-mix/setup/webpack.config.js",
+    "development2": "mix",
     "watch": "mix watch",
     "watch-poll": "mix watch -- --watch-options-poll=1000",
     "hot": "mix watch --hot",
     "prod": "npm run production",
-    "production": "mix -production"
+    "prod2": "npm run production2",
+    "production": "mix --production",
+    "production2": "cross-env NODE_ENV=production node_modules/webpack/bin/webpack.js --progress --config=node_modules/laravel-mix/setup/webpack.config.js"
   },
   "devDependencies": {
     "@intlify/vue-i18n-loader": "^1.0.0",
@@ -37,6 +40,7 @@
     "@fortawesome/fontawesome-svg-core": "^1.2.34",
     "@fortawesome/free-solid-svg-icons": "^5.15.2",
     "@fortawesome/vue-fontawesome": "^2.0.2",
+    "@johmun/vue-tags-input": "^2.1.0",
     "animejs": "^3.2.1",
     "bootstrap-sass": "^3.4.1",
     "bootstrap-vue": "^2.20.1",
@@ -44,6 +48,7 @@
     "i18n": "^0.13.2",
     "laravel-echo": "^1.10.0",
     "luxon": "^1.26.0",
+    "moment": "^2.29.1",
     "pusher-js": "^7.0.2",
     "vue-animejs": "^2.1.1",
     "vue-autosuggest": "^2.2.0",

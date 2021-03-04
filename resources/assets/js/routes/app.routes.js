@@ -5,12 +5,21 @@ import VueRouter from 'vue-router'
 import ErrorViews from '@views/errors'
 import StaticPageRoutes from './staticPages.routes'
 
+import settings from '@views/settings'
 import stories from '@views/stories'
 import timelines from '@views/timelines'
 import users from '@views/users'
 import vaults from '@views/vaults'
 import search from '@views/search'
 import posts from '@views/posts'
+
+import SettingsGeneral from '@components/settings/SettingsGeneral.vue';
+import SettingsProfile from '@components/settings/SettingsProfile.vue';
+import SettingsPrivacy from '@components/settings/SettingsPrivacy.vue';
+import SettingsSecurity from '@components/settings/SettingsSecurity.vue';
+import SettingsEarnings from '@components/settings/SettingsEarnings.vue';
+import SettingsSessions from '@components/settings/SettingsSessions.vue';
+import SettingsReferrals from '@components/settings/SettingsReferrals.vue';
 
 export const routes = [
   {
@@ -39,6 +48,55 @@ export const routes = [
   //   props: true,
   // },
 
+  // Settings
+  {
+    name: 'settings.dashboard',
+    path: '/settings',
+    component: settings.Dashboard,
+    children: [
+      {
+        name: 'settings.general',
+        component: SettingsGeneral,
+        path: 'general',
+      },
+      {
+        name: 'settings.profile',
+        component: SettingsProfile,
+        path: 'profile',
+      },
+      {
+        name: 'settings.privacy',
+        component: SettingsPrivacy,
+        path: 'privacy',
+      },
+      {
+        name: 'settings.security',
+        component: SettingsSecurity,
+        path: 'security',
+      },
+      {
+        name: 'settings.earnings',
+        component: SettingsEarnings,
+        path: 'earnings',
+      },
+      {
+        name: 'settings.sessions',
+        component: SettingsSessions,
+        path: 'sessions',
+      },
+      {
+        name: 'settings.referrals',
+        component: SettingsReferrals,
+        path: 'referrals',
+      },
+      {
+        name: 'settings.general',
+        component: SettingsGeneral,
+        path: '',
+      },
+    ],
+  },
+
   // Stories
   {
     name: 'stories.dashboard',
@@ -55,7 +113,7 @@ export const routes = [
   {
     name: 'vault.dashboard',
     path: '/my-vault',
-    component: vaults.Dashboard
+    component: vaults.Dashboard,
   },
 
   // Static Pages

@@ -15,10 +15,10 @@ class UpdateUserSettingsTable extends Migration
     {
         Schema::table('user_settings', function (Blueprint $table) {
             $table->uuid('id')->change();
-            $table->uuid('user_id')->after('id');
+            $table->uuid('user_id')->nullable()->after('id');
             $table->foreign('user_id')->references('id')->on('users');
             $table->boolean('is_creator')->default(false)->after('user_id');
-            $table->json('custom')->after('is_creator');
+            $table->json('custom')->nullable()->after('is_creator');
         });
     }
 
