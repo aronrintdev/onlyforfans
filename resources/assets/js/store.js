@@ -157,9 +157,8 @@ export default new Vuex.Store({
         })
     },
 
-    getEarnings({ commit }, userId ) {
-      //console.log('getEarnings', { userId })
-      axios.get(route('fanledgers.showEarnings', userId)).then((response) => {
+    getEarnings({ commit }, { user_id }  ) {
+      axios.get(route('fanledgers.showEarnings', user_id)).then((response) => {
         commit('UPDATE_EARNINGS', response.data)
         commit('UPDATE_LOADING', false)
       })

@@ -1,23 +1,28 @@
 <template>
   <div v-if="!is_loading">
 
-    <b-pagination
-      v-model="currentPage"
-      :total-rows="totalRows"
-      :per-page="perPage"
-      aria-controls="fanledgers-table"
-    ></b-pagination>
+    <b-card title="Total Earnings" class="mb-3">
+      <b-card-text>
+        <div>Subscriptions: {{ earnings.sums.timelines | niceCurrency }}</div>
+        <div>Posts: {{ earnings.sums.posts | niceCurrency }}</div>
+      </b-card-text>
+    </b-card>
 
-    <p class="mt-3">Current Page: {{ currentPage }}</p>
-
-    <b-card title="Earnings">
+    <b-card title="Transactions">
       <b-card-text>
         <b-table hover 
           id="fanledgers-table"
-          :items="myProvider"
+          :items="fanledgers.data"
           :fields="fields"
           :current-page="currentPage"
         ></b-table>
+        <b-pagination
+          v-model="currentPage"
+          :total-rows="totalRows"
+          :per-page="perPage"
+          aria-controls="fanledgers-table"
+          v-on:page-click="pageClickHandler"
+        ></b-pagination>
       </b-card-text>
     </b-card>
 
@@ -38,7 +43,7 @@ export default {
 
   computed: {
     ...Vuex.mapState(['fanledgers']),
-    //...Vuex.mapState(['earnings']),
+    ...Vuex.mapState(['earnings']),
     ...Vuex.mapState(['is_loading']),
 
     totalRows() {
@@ -61,14 +66,12 @@ export default {
         label: 'Date',
         formatter: (value, key, item) => {
           return moment(value).format('MMMM Do, YYYY')
-          //return new Date().getFullYear() - item.age
         }
       },
       {
         key: 'base_unit_cost_in_cents',
         label: 'Gross',
         formatter: (value, key, item) => {
-          //return this.$options.filters.niceCurrency(value)
           return Vue.options.filters.niceCurrency(value)
         }
       },
@@ -85,8 +88,9 @@ export default {
         label: 'Description',
       },
       {
-        key: 'seller_id',
-        label: 'Seller',
+        //key: 'purchaser_id',
+        key: 'purchaser.username',
+        label: 'Purchaser',
       },
     ],
 
@@ -94,38 +98,28 @@ export default {
 
 
   created() {
+    this.getEarnings({ 
+      user_id: this.session_user.id,
+    })
     this.getFanledgers({ 
       seller_id: this.session_user.id,
       page: 1,
-      limit: this.perPage,
+      take: this.perPage,
     })
-    //this.$store.dispatch('getEarnings', this.session_user.id)
   },
 
   methods: {
     ...Vuex.mapActions({
-      getFanledgers: "getFanledgers"
+      getEarnings: "getEarnings",
+      getFanledgers: "getFanledgers",
     }),
 
-    /*
     pageClickHandler(e, page) {
-      console.log('pageClickHandler.A', page)
       this.getFanledgers({ 
         seller_id: this.session_user.id,
         page: page,
+        take: this.perPage,
       })
-    },
-     */
-
-    myProvider(ctx, callback) {
-      this.getFanledgers({ 
-        seller_id: this.session_user.id,
-        page: ctx.currentPage,
-        limit: ctx.perPage,
-      }).then( () => {
-        callback(this.fanledgers.data)
-      })
-      return null
     },
 
     onReset(e) {

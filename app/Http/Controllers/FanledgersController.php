@@ -25,7 +25,7 @@ class FanledgersController extends AppBaseController
 
         $filters = $request->only('seller_id');
 
-        $query = Fanledger::query();
+        $query = Fanledger::query()->with('purchaser');
         // Check permissions
         if ( !$request->user()->isAdmin() ) {
 
@@ -45,9 +45,9 @@ class FanledgersController extends AppBaseController
         foreach ($filters as $key => $f) {
             // %TODO: subgroup under 'filters' (need to update axios.GET calls as well in Vue)
             switch ($key) {
-                case 'seller_id':
-                    $query->where($key, $f);
-                    break;
+            case 'seller_id':
+                $query->where($key, $f);
+                break;
             }
         }
 
@@ -57,8 +57,23 @@ class FanledgersController extends AppBaseController
 
     public function showEarnings(Request $request, User $user)
     {
+        $this->authorize('show', $user);
+        $sums = [];
+        $sums['timelines'] = DB::table('fanledgers')
+            ->where('seller_id', $user->id)
+            ->where('fltype', PaymentTypeEnum::PURCHASE)
+            ->where('purchaseable_type', 'timelines')
+            ->sum('total_amount');
+        $sums['posts'] = DB::table('fanledgers')
+            ->where('seller_id', $user->id)
+            ->where('fltype', PaymentTypeEnum::PURCHASE)
+            ->where('purchaseable_type', 'posts')
+            ->sum('total_amount');
+//dd($sums);
         return response()->json([
-            'foo' => 'bar',
+            'earnings' => [
+                'sums' => $sums,
+            ],
         ]);
     }
 }

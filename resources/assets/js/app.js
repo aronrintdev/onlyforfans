@@ -87,11 +87,9 @@ Vue.component('main-navbar', require('./components/common/MainNavbar.vue').defau
 Vue.component('my-vault', require('./components/vault/Dashboard.vue').default);
 Vue.component('my-saved', require('./components/saved/Dashboard.vue').default);
 
+// converts from cents to dollars, and formats
 Vue.filter('niceCurrency', function (valueInCents) {
-  if (!valueInCents) {
-    return ''
-  }
-  let value = valueInCents / 100
+  let value = valueInCents ? (valueInCents/100) : 0
   value.toFixed(2)
   return `$${value}`
 })
