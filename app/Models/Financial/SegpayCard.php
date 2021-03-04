@@ -26,7 +26,7 @@ class SegpayCard extends Model implements Ownable
         return $this->morphTo();
     }
 
-    // Ownable functions
+    /* ------------------------------- Ownable ------------------------------ */
     public function getOwner(): Collection
     {
         return new Collection([$this->owner]);
