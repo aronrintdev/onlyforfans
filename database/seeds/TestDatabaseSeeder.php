@@ -17,6 +17,8 @@ class TestDatabaseSeeder extends ParentSeeder
         //$output->writeln('Running Test DB seeder...');
 
         $this->call([
+            CountriesTableSeeder::class,
+            UsstatesTableSeeder::class,
             UsernameRulesSeeder::class,
             RolesTableSeeder::class,
             UsersTableSeeder::class,

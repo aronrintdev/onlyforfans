@@ -53,9 +53,6 @@ import { BootstrapVue, BootstrapVueIcons } from 'bootstrap-vue'
 Vue.use(BootstrapVue) // Telling Vue to use this in whole application
 Vue.use(BootstrapVueIcons)
 
-/**
- * Vue Animejs
- */
 import VueAnime from 'vue-animejs';
 Vue.use(VueAnime);
 
@@ -73,13 +70,12 @@ Vue.use(VueTimeago, {
   */
 });
 
-/**
- * VueSlider
- */
 import VueSlider from 'vue-slider-component'
 import 'vue-slider-component/theme/default.css'
 Vue.component('VueSlider', VueSlider)
 
+import VueTagsInput from '@johmun/vue-tags-input'
+Vue.component('VueTagsInput', VueTagsInput)
 
 /**
  * Next, we will create a fresh Vue application instance and attach it to
@@ -90,6 +86,13 @@ Vue.component('VueSlider', VueSlider)
 Vue.component('main-navbar', require('./components/common/MainNavbar.vue').default);
 Vue.component('my-vault', require('./components/vault/Dashboard.vue').default);
 Vue.component('my-saved', require('./components/saved/Dashboard.vue').default);
+
+// converts from cents to dollars, and formats
+Vue.filter('niceCurrency', function (valueInCents) {
+  let value = valueInCents ? (valueInCents/100) : 0
+  value.toFixed(2)
+  return `$${value}`
+})
 
 export const eventBus = new Vue({
 /*

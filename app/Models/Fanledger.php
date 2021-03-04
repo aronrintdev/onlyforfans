@@ -1,12 +1,11 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Interfaces\Guidable;
+//use App\Interfaces\Guidable;
 use App\Models\Traits\UsesUuid;
 
-class Fanledger extends BaseModel implements Guidable
+class Fanledger extends BaseModel // implements Guidable
 {
     use SoftDeletes, UsesUuid;
 
@@ -60,7 +59,7 @@ class Fanledger extends BaseModel implements Guidable
 
     protected $casts = [
         'cattrs' => 'array',
-        'mdata' => 'array',
+        'meta' => 'array',
     ];
 
     //--------------------------------------------

@@ -2,17 +2,20 @@
 namespace App\Http\Controllers;
 
 use App;
-use DB;
 use Auth;
 use Exception;
-use Throwable;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
+use App\Http\Resources\UserSetting as UserSettingResource;
 use App\Models\User;
 use App\Models\Fanledger;
+use App\Models\Country;
 use App\Enums\PaymentTypeEnum;
+use App\Rules\MatchOldPassword;
 
 class UsersController extends AppBaseController
 {
@@ -28,13 +31,120 @@ class UsersController extends AppBaseController
         ]);
     }
 
-    /**
-     * Retrieves information about logged in user
-     * Route: `users.me`
-     */
+    public function showSettings(Request $request, User $user)
+    {
+        $this->authorize('show', $user);
+        return new UserSettingResource($user->settings);
+    }
+
+    // for the user updating their password while logged in
+    public function updatePassword(Request $request, User $user=null)
+    {
+        $this->authorize('update', $user); // %FIXME: should be update password?
+        $request->validate([
+            'oldPassword' => ['required', new MatchOldPassword],
+            'newPassword' => 'required|min:'.env('MIN_PASSWORD_CHAR_LENGTH', 8),
+            //'newPassword' => 'required|confirmed|min:8',
+            //'newPasswordConfirm' => 'same:newPassword',
+        ]);
+        $sessionUser = $user ?? $request->user(); // $user param for reset by super-admin, TBD
+        $sessionUser->password = Hash::make($request->newPassword);
+        $sessionUser->save();
+        //event(new PasswordReset($sessionUser));
+        return response()->json([ ]);
+    }
+
+    public function updateSettings(Request $request, User $user)
+    {
+        $this->authorize('update', $user);
+        $request->validate([
+            'city' => 'string|min:2',
+            'is_follow_for_free' => 'boolean',
+            'blocked' => 'array',
+        ]);
+        $request->request->remove('username'); // disallow username updates for now
+
+        $userSetting = DB::transaction(function () use(&$user, &$request) {
+
+            $timeline = $user->timeline;
+
+            // %TODO %FIXME: subscriptions should be in [timelines].cattrs, not user settings
+
+            // handle fields that reside in [timelines]
+            if ( $request->has('is_follow_for_free') ) {
+                $timeline->is_follow_for_free = $request->boolean('is_follow_for_free');
+                $timeline->save();
+                $request->request->remove('is_follow_for_free');
+            }
+    
+            $cattrsFields = [ 'subscriptions', 'localization', 'weblinks', 'privacy', 'blocked', 'watermark', ];
+            $attrs = $request->except($cattrsFields);
+
+            $userSetting = $user->settings;
+            $userSetting->fill($attrs);
+
+            // handle cattrs
+            if ($request->hasAny($cattrsFields) ){
+                $cattrs = $userSetting->cattrs; // 'pop'
+                foreach ($cattrsFields as $k) {
+                    switch ($k) {
+                    case 'blocked': // %FIXME: move to lib
+                        if ( $request->has('blocked') ) {
+                            $byCountry = [];
+                            $byIP = [];
+                            $byUsername = [];
+                            foreach ( $request->blocked as $bobj) {
+                                $slug = trim($bobj['slug'] ?? '');
+                                $text = trim($bobj['text'] ?? '');
+                                do {
+                                    // country
+                                    $exists = Country::where('slug', $slug)->first();
+                                    if ( $exists ) { 
+                                        $byCountry[] = $slug;
+                                        break;
+                                    }
+                                    // user
+                                    $exists = User::where('username', $slug)->first();
+                                    if ( $exists ) {
+                                        $byUsername[] = $slug;
+                                        break;
+                                    }
+                                    // IP
+                                    if ( filter_var($text, FILTER_VALIDATE_IP) ) { // ip
+                                        $byIP[] = $text;
+                                        break;
+                                    }
+                                } while(0);
+                            }
+                            $blocked = $cattrs['blocked'] ?? [];
+                            $blocked['ips'] = $blocked['ips'] ?? [];
+                            $blocked['countries'] = $blocked['countries'] ?? [];
+                            $blocked['usernames'] = $blocked['usernames'] ?? [];
+                            array_push($blocked['ips'], ...$byIP);
+                            array_push($blocked['countries'], ...$byCountry);
+                            array_push($blocked['usernames'], ...$byUsername);
+                            $cattrs['blocked'] = array_map('array_unique', $blocked);
+                        }
+                        break;
+                    default:
+                        $cattrs[$k] = $request->has($k) ? $request->input($k) : ($cattrs[$k]??null); // take from request (overwrite current value), else keep current value
+                    }
+                }
+                $userSetting->cattrs = $cattrs; // 'push'
+            }
+    
+            $userSetting->save();
+
+            return $userSetting;
+        });
+    
+        return new UserSettingResource($userSetting);
+    }
+
     public function me(Request $request)
     {
         $sessionUser = Auth::user(); // sender of tip
+        $sessionUser->makeVisible('email');
 
         $sales = Fanledger::where('seller_id', $sessionUser->id)->sum('total_amount');
 

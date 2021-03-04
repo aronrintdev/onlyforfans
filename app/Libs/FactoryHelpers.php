@@ -3,9 +3,10 @@ namespace App\Libs;
 
 use Exception;
 use App\Models\User;
+use App\Models\Timeline;
 use App\Models\Mediafile;
 use Illuminate\Support\Str;
-use Faker\Factory;
+use Faker\Factory as Faker;
 
 use App\Enums\MediafileTypeEnum;
 use Illuminate\Support\Collection;
@@ -14,34 +15,36 @@ use Illuminate\Support\Facades\Storage;
 
 class FactoryHelpers {
 
-
     // Adds avatar & cover images
-    public static function updateUser(&$user, $attrs)
+    public static function createUser(array $attrs) : User
     {
-        //dump('Updating user: '.$attrs['email']);
-        $user->email = $attrs['email'];
-        $user->username = $attrs['username'];
+        $faker = Faker::create();
 
-        // if ( array_key_exists('gender', $attrs) ) {
-        //     $user->gender = $attrs['gender'];
-        // }
-        // if ( array_key_exists('city', $attrs) ) {
-        //     $user->city = $attrs['city'];
-        // }
-        // if ( array_key_exists('country', $attrs) ) {
-        //     $user->country = $attrs['country'];
-        // }
-        $user->save();
+        $user = User::create([
+            'username' => $attrs['username'],
+            'email' => $attrs['email'],
+            'password' => array_key_exists('password', $attrs) ? $attrs['password'] : bcrypt('foo-123'), // secret
+            'email_verified' => 1,
+        ]);
+        //dump('Updating user: '.$attrs['email']);
+
+        $isFollowForFree  = $attrs['is_follow_for_free'];
+        $timeline = Timeline::create([
+            'user_id'  => $user->id,
+            'name'     => $attrs['name'],
+            'about'    => $faker->text,
+            'verified' => 1,
+            'is_follow_for_free' => $isFollowForFree,
+            'price' => $isFollowForFree ? 0.00 : $faker->randomFloat(2, 1, 300),
+        ]);
 
         if ( Config::get('app.env') !== 'testing' ) {
-            $avatar = self::createImage(MediafileTypeEnum::AVATAR, true);
-            $cover = self::createImage(MediafileTypeEnum::COVER, true);
+            $avatar = self::createImage(MediafileTypeEnum::AVATAR, null, true);
+            $cover = self::createImage(MediafileTypeEnum::COVER, null, true);
         } else {
             $avatar = null;
             $cover = null;
         }
-        $timeline = $user->timeline;
-        $timeline->name = $attrs['name'];
         $timeline->avatar_id = $avatar->id ?? null;
         $timeline->cover_id = $cover->id ?? null;
         if ( array_key_exists('is_follow_for_free', $attrs) ) {
@@ -55,11 +58,14 @@ class FactoryHelpers {
         }
 
         $timeline->save();
+        $user->refresh();
+
+        return $user;
     }
 
     public static function parseRandomSubset(Collection $setIn, $MAX=10) : Collection
     {
-        $faker = Factory::create();
+        $faker = Faker::create();
         $_max = min([ $MAX, $setIn->count()-1  ]);
         $_num = $faker->numberBetween(0,$_max);
         $subset = $setIn->random($_num);
@@ -69,7 +75,7 @@ class FactoryHelpers {
     // Inserts a [mediafiles] record
     public static function createImage(string $mftype, string $resourceID = null, $doS3Upload=false) : ?Mediafile
     {
-        $faker = Factory::create();
+        $faker = Faker::create();
 
         // https://loremflickr.com/320/240/paris,girl,kitten,puppy,beach,rave
         //$url = 'https://loremflickr.com/json/320/240/paris,girl,kitten,puppy,beach,rave';

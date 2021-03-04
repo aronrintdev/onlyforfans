@@ -4,16 +4,12 @@ import axios from 'axios'
 
 Vue.use(Vuex)
 
-/**
- * Routes from window, want to eventually deprecate and move to dedicated compiled routes
- */
+// Routes from window, want to eventually deprecate and move to dedicated compiled routes
 const route = window.route
 
-/**
- * Helps select items from response result set
- * @param {Object} payload - response payload
- * @param {String} propertyName - name of property
- */
+// Helps select items from response result set
+// @param {Object} payload - response payload
+// @param {String} propertyName - name of property
 const propSelect = (payload, propertyName, type = 'array') => {
   return payload.hasOwnProperty(propertyName)
     ? payload[propertyName]
@@ -35,38 +31,17 @@ export default new Vuex.Store({
     vault: {},
     vaultfolder: {},
     breadcrumb: [],
-    /**
-     * shares for a vaultfolder, used to mark what resources session user *has* shared out
-     */
-    shares: [],
-    /**
-     * resources that have been shared with session user
-     */
-    shareables: [],
-    /**
-     * resources that session user has saved
-     */
-    saves: [],
-    /**
-     * Posts on the current open timeline
-     */
-    feeditems: [],
+    shares: [], // shares for a vaultfolder, used to mark resources session user *has* shared out
+    shareables: [], // resources shared with session user
+    saves: [], // resources session user has saved
+    feeditems: [], // Posts on current open timeline
     feeddata: {},
-    /**
-     * Current open stories
-     */
-    stories: [],
-    /**
-     * Logged in user timeline
-     */
+    stories: [], // Current open stories
+    earnings: null,
+    fanledgers: {},
     timeline: null,
-    /**
-     * Logged in user information
-     */
-    session_user: null,
-    /**
-     * UI Flags for logged in user
-     */
+    session_user: null, 
+    user_settings: null,
     uiFlags: [],
     unshifted_timeline_post: null,
     is_loading: true,
@@ -95,17 +70,26 @@ export default new Vuex.Store({
       state.feeditems = propSelect(payload, 'feeditems')
     },
     UPDATE_FEEDDATA(state, payload) {
-      console.log('UPDATE_FEEDDATA', { payload, })
       state.feeddata = payload.hasOwnProperty('data') ? payload.data : {}
     },
     UPDATE_STORIES(state, payload) {
       state.stories = propSelect(payload, 'stories')
+    },
+    UPDATE_FANLEDGERS(state, payload) {
+      //state.fanledgers = propSelect(payload, 'fanledgers')
+      state.fanledgers = payload.hasOwnProperty('data') ? payload.data : {}
+    },
+    UPDATE_EARNINGS(state, payload) {
+      state.earnings = propSelect(payload, 'earnings')
     },
     UPDATE_TIMELINE(state, payload) {
       state.timeline = propSelect(payload, 'timeline')
     },
     UPDATE_SESSION_USER(state, payload) {
       state.session_user = propSelect(payload, 'session_user')
+    },
+    UPDATE_USER_SETTINGS(state, payload) {
+      state.user_settings = propSelect(payload, 'user_settings')
     },
     UPDATE_UI_FLAGS(state, payload) {
       state.uiFlags = { ...state.uiFlags, ...propSelect(payload, 'uiFlags', 'object') }
@@ -164,8 +148,24 @@ export default new Vuex.Store({
       });
     },
 
+    getFanledgers({ commit }, params ) {
+      const url = route(`fanledgers.index`);
+      axios.get(url, { params })
+        .then((response) => {
+          commit('UPDATE_FANLEDGERS', response)
+          commit('UPDATE_LOADING', false)
+        })
+    },
+
+    getEarnings({ commit }, { user_id }  ) {
+      axios.get(route('fanledgers.showEarnings', user_id)).then((response) => {
+        commit('UPDATE_EARNINGS', response.data)
+        commit('UPDATE_LOADING', false)
+      })
+    },
+
     getStories({ commit }, { filters }) {
-      const username = this.state.session_user.username // Not used - This param will eventually be DEPRECATED
+      //const username = this.state.session_user.username // Not used - This param will eventually be DEPRECATED
       const params = {}
       if (Object.keys(filters).includes('user_id')) {
         params.user_id = filters.user_id
@@ -193,6 +193,13 @@ export default new Vuex.Store({
         commit('UPDATE_LOADING', false)
       })
     },
+
+    getUserSettings({ commit }, { userId }) {
+      axios.get(route('users.showSettings', { id: userId })).then((response) => {
+        commit('UPDATE_USER_SETTINGS', response.data)
+        commit('UPDATE_LOADING', false)
+      })
+    },
   },
 
   getters: {
@@ -205,9 +212,12 @@ export default new Vuex.Store({
     saves:                   state => state.saves,
     feeddata:                state => state.feeddata,
     stories:                 state => state.stories,
+    fanledgers:              state => state.fanledgers,
+    earnings:                state => state.earnings,
     timeline:                state => state.timeline,
     unshifted_timeline_post: state => state.unshifted_timeline_post,
     session_user:            state => state.session_user,
+    user_settings:           state => state.user_settings,
     uiFlags:                 state => state.uiFlags,
     //children: state => state.vault.children, // Flat list
     //mediafiles: state => state.vault.mediafiles, // Flat list

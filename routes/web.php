@@ -66,11 +66,15 @@ Route::post('/register', 'Auth\RegisterController@registerUser');
 */
 Route::group(['middleware' => ['auth']], function () {
 
+    Route::delete('/blockables/{user}/unblock/{slug}', ['as'=>'blockables.unblock', 'uses' => 'BlockablesController@unblock']);
+    Route::get('/blockables/match', ['as'=>'blockables.match', 'uses' => 'BlockablesController@match']);
+
     // -- comments: likeable --
     Route::patch('/comments/{comment}/like', ['as'=>'comments.toggleLike', 'uses' => 'CommentsController@toggleLike']);
     Route::get('/comments/match', ['as'=>'comments.match', 'uses' => 'CommentsController@match']);
     Route::resource('comments', 'CommentsController', [ 'except' => ['create','edit'] ]);
 
+    Route::get('/fanledgers/{user}/earnings', ['as'=>'fanledgers.showEarnings', 'uses' => 'FanledgersController@showEarnings']);
     Route::resource('fanledgers', 'FanledgersController', [
         'only' => [ 'index', ],
     ]);
@@ -137,6 +141,13 @@ Route::group(['middleware' => ['auth']], function () {
     //Route::get('/users-suggested', ['as'=>'users.suggested', 'uses' => 'UsersController@suggested']);
     Route::get('/users/me', ['as' => 'users.me', 'uses' => 'UsersController@me']);
     Route::get('/users/match', ['as'=>'users.match', 'uses' => 'UsersController@match']);
+    Route::patch('/users/{user}/settings', ['as'=>'users.updateSettings', 'uses' => 'UsersController@updateSettings']);
+    Route::patch('/users/{user}/updatePassword', ['as'=>'users.updatePassword', 'uses' => 'UsersController@updatePassword']);
+    Route::get('/users/{user}/settings', [
+        'middleware' => 'spaMixedRoute',
+        'as'=>'users.showSettings', 
+        'uses' => 'UsersController@showSettings',
+    ]);
     Route::resource('users', 'UsersController', [ 'except' => [ 'create', 'edit', ] ]);
 
     // -- vaults:  --
