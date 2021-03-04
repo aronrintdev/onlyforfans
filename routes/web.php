@@ -109,6 +109,9 @@ Route::group(['middleware' => ['auth']], function () {
         'except' => [ 'create', 'edit', ],
     ]);
 
+    // -- sessions:  --
+    Route::resource('sessions', 'SessionsController', [ 'only' => [ 'index' ] ]);
+
     // -- stories:  --
     Route::get('/stories/player', ['as' => 'stories.player', 'uses' => 'SpaController@index']);
     Route::get('/stories/match', ['as'=>'stories.match', 'uses' => 'StoriesController@match']);
