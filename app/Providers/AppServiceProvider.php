@@ -69,6 +69,7 @@ class AppServiceProvider extends ServiceProvider
             'permissions'   => 'App\Models\Permission',
             'posts'         => 'App\Models\Post',
             'roles'         => 'App\Models\Role',
+            'segpay_card'   => 'App\Models\Financial\SegpayCard',
             'sessions'      => 'App\Models\Session',
             'settings'      => 'App\Models\Setting',
             'stories'       => 'App\Models\Story',
