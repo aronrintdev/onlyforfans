@@ -50,18 +50,6 @@ class LoginController extends Controller
             'email' => 'required',
             'password' => 'required',
         ]);
-        /*
-        $validate = Validator::make($request->all(), [
-            'email'    => 'required',
-            'password' => 'required',
-        ]);
-
-        if ($validate->fails()) {
-            return [
-                'error' => $validate->errors()->toArray(),
-            ];
-        }
-         */
 
         $user = User::where('email', $request->email)->first();
         if (empty($user)) {
@@ -98,33 +86,6 @@ class LoginController extends Controller
             }
         }
 
-        /**
-         * TODO: Determine if we need to store this information on a session or not.
-         */
-
-        // if(Auth::loginUsingId($user->id)){
-            //save to loginSessions
-            // $login_session = new LoginSession();
-            // $login_session->user_id = Auth::user()->id;
-            // $login_session->user_name = Auth::user()->username;
-            // $login_session->ip_address = $_SERVER['REMOTE_ADDR'];
-            // $login_session->machine_name = gethostname();
-            // $login_session->os = getOS();
-            // $login_session->browser = getBrowser();
-
-            // get location
-            // $PublicIP = get_client_ip();
-//            $json     = file_get_contents("http://ipinfo.io/$PublicIP/geo");
-//            $json     = json_decode($json, true);
-//            $country  = $json['country'];
-//            $region   = $json['region'];
-//            $city     = $json['city'];
-//            $login_session->location = $region." ".$city;
-            // $login_session->date = date("Y-m-d");
-            // $login_session->save();
-
-            // return \redirect('/');
-        // }
     }
 
     //
