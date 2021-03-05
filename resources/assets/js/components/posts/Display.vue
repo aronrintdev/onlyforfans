@@ -127,7 +127,7 @@ export default {
     timelineRoute() {
       return {
         name: 'timeline.show',
-        params: { slug: this.timeline_slug }
+        params: { slug: this.post.timeline_slug }
       }
     },
   },

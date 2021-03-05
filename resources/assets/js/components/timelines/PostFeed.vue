@@ -12,7 +12,6 @@
           <PostDisplay
             :post="feedItem"
             :session_user="session_user"
-            :timeline_slug="timeline.slug"
             @delete-post="deletePost"
           />
         </article>

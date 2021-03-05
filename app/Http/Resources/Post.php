@@ -19,6 +19,7 @@ class Post extends JsonResource
             'type' => $this->type,
             'postable_id' => $this->postable_id,
             'postable_type' => $this->postable_type,
+            'timeline_slug' => $this->timeline->slug, // needed for links
             'description' =>  $this->when($hasAccess, $this->description),
             'mediafiles' =>  $this->when($hasAccess, $this->mediafiles),
             'user' =>  $this->when($hasAccess, $this->user),
