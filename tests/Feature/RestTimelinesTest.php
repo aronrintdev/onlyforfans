@@ -40,6 +40,7 @@ class TimelinesTest extends TestCase
     /**
      *  @group timelines
      *  @group regression
+     *  @group here
      */
     public function test_owner_can_view_own_timeline()
     {
@@ -54,10 +55,12 @@ class TimelinesTest extends TestCase
         $this->assertObjectHasAttribute('slug', $content->timeline);
         $this->assertObjectHasAttribute('name', $content->timeline);
         $this->assertObjectHasAttribute('about', $content->timeline);
+        $this->assertObjectHasAttribute('user', $content->timeline);
 
         $this->assertNotNull($content->timeline->slug);
         $this->assertNotNull($content->timeline->name);
         $this->assertNotNull($content->timeline->about);
+        $this->assertNotNull($content->timeline->user);
     }
 
     /**

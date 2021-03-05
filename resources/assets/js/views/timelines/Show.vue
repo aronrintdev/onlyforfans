@@ -68,12 +68,10 @@ export default {
       this.load()
     }
     if (!this.session_user) {
-      this.getMe()
     }
   },
 
   methods: {
-    ...Vuex.mapActions([ 'getMe' ]),
     load() {
       this.state = 'loading'
       this.axios.get(this.$apiRoute('timelines.show', { timeline: this.slug }))

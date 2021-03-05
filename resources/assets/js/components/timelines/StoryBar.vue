@@ -41,7 +41,6 @@ export default {
   }),
 
   created() {
-    //this.$store.dispatch('getMe');
     this.$store.dispatch('getStories', {
       filters: {
         user_id: this.session_user.id,

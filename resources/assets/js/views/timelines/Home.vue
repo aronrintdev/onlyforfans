@@ -1,13 +1,13 @@
 <template>
     <div class="container" id="view-home_timeline">
 
-      <section class="row" v-if="state !== 'loading'">
+      <section class="row" v-if="!isLoading">
         <article class="col-sm-12">
           <StoryBar :session_user="session_user"></StoryBar>
         </article>
       </section>
 
-      <section class="row" v-if="state !== 'loading'">
+      <section class="row" v-if="!isLoading">
 
         <main class="col-md-7 col-lg-8">
           <CreatePost :session_user="session_user" :timeline="timeline" />
@@ -25,9 +25,6 @@
 </template>
 
 <script>
-/**
- * Timelines Home Page
- */
 import Vuex from 'vuex';
 import PostFeed from '@components/timelines/PostFeed.vue';
 import StoryBar from '@components/timelines/StoryBar.vue';
@@ -49,30 +46,32 @@ export default {
       'session_user', 
       'timeline',
     ]),
+    isLoading() {
+      return this.is_session_user_loading && this.is_timeline_loading;
+    },
   },
 
   data: () => ({
-    state: 'loading', // loading | loaded
+    is_session_user_loading: true,
+    is_timeline_loading: true,
   }),
+
+  mounted() { },
 
   watch: {
     timeline(value) {
-      if (value && this.session_user) {
-        this.state = 'loaded'
+      //if (value && this.session_user)
+      if (value) {
+        this.is_timeline_loading = false
       }
     },
     session_user(value) {
-      if (value && this.timeline) {
-        this.state = 'loaded'
+      if (value) {
+        this.is_session_user_loading = false
       }
     }
   },
 
-  mounted() {
-    if (this.session_user && this.timeline) {
-      this.state = 'loaded'
-    }
-  },
 
 }
 </script>
