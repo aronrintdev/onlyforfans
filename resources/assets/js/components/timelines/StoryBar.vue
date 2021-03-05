@@ -29,18 +29,11 @@ import Vuex from 'vuex'
 export default {
   props: {
     session_user: null,
-    timeline: null,
   },
 
   computed: {
     ...Vuex.mapState(['stories']),
     ...Vuex.mapState(['is_loading']),
-
-    /*
-    username() { // story owner
-      return this.timeline.username;
-    },
-    */
   },
 
   data: () => ({
@@ -51,7 +44,7 @@ export default {
     //this.$store.dispatch('getMe');
     this.$store.dispatch('getStories', {
       filters: {
-        user_id: this.timeline.user.id,
+        user_id: this.session_user.id,
       },
     })
   },

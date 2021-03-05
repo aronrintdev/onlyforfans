@@ -1,23 +1,23 @@
 <?php
-
 namespace App\Models;
 
 use Exception;
 use Eloquent as Model;
-use App\Interfaces\Ownable;
-use App\Interfaces\ShortUuid;
-use App\Enums\PaymentTypeEnum;
-use App\Interfaces\Reportable;
-use App\Models\Traits\UsesUuid;
-use App\Interfaces\Purchaseable;
 use Illuminate\Support\Collection;
-use Cviebrock\EloquentSluggable\Sluggable;
-use App\Models\Traits\UsesShortUuid;
-use App\Enums\ShareableAccessLevelEnum;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Cviebrock\EloquentSluggable\Sluggable;
+
+use App\Enums\PaymentTypeEnum;
+use App\Enums\ShareableAccessLevelEnum;
+use App\Interfaces\Ownable;
+use App\Interfaces\ShortUuid;
+use App\Interfaces\Reportable;
+use App\Interfaces\Purchaseable;
+use App\Models\Traits\UsesShortUuid;
 use App\Models\Traits\OwnableTraits;
 use App\Models\Traits\SluggableTraits;
+use App\Models\Traits\UsesUuid;
 
 class Timeline extends Model implements Purchaseable, Ownable, Reportable
 {
@@ -33,6 +33,8 @@ class Timeline extends Model implements Purchaseable, Ownable, Reportable
         'meta' => 'array',
     ];
 
+    /*
+    // %FIXME: remove if not used
     public function toArray()
     {
         $array = parent::toArray();
@@ -40,6 +42,7 @@ class Timeline extends Model implements Purchaseable, Ownable, Reportable
         $array['avatar_url'] = $this->avatar()->get()->toArray();
         return $array;
     }
+     */
 
     public function sluggable(): array
     {
@@ -162,4 +165,5 @@ class Timeline extends Model implements Purchaseable, Ownable, Reportable
     {
         return new Collection([ $this->user ]);
     }
+
 }

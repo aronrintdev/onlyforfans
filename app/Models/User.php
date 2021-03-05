@@ -26,7 +26,7 @@ class User extends Authenticatable implements PaymentSendable, Blockable
 
     protected $appends = [ 'name', 'avatar', 'cover', 'about', ];
     protected $guarded = [ 'id', 'created_at', 'updated_at' ];
-    protected $hidden = [ 'email', 'password', 'remember_token', 'verification_code', ];
+    protected $hidden = [ 'email', 'password', 'remember_token', 'verification_code', 'timeline'];
     protected $dates = [ 'last_logged', ];
 
     //--------------------------------------------
@@ -451,22 +451,43 @@ class User extends Authenticatable implements PaymentSendable, Blockable
     public function is_groupAdmin($user_id, $group_id)
     {
         $admin_role_id = Role::where('name', 'admin')->first();
-
         $groupUser = $this->groups()->where('group_id', $group_id)->where('user_id', $user_id)->where('role_id', $admin_role_id->id)->where('status', 'approved')->first();
-
-        $result = $groupUser ? true : false;
-
-        return $result;
+        return $groupUser ? true : false;
     }
 
     public function is_groupMember($user_id, $group_id)
     {
         $admin_role_id = Role::where('name', 'admin')->first();
-
         $groupMember = $this->groups()->where('group_id', $group_id)->where('user_id', $user_id)->where('role_id', '!=', $admin_role_id->id)->where('status', 'approved')->first();
+        return $groupMember ? true : false;
+    }
 
-        $result = $groupMember ? true : false;
+    // total sales in cents
+    public function getSales() : int
+    {
+        return Fanledger::where('seller_id', $this->id)->sum('total_amount');
+    }
 
-        return $result;
+    public function getStats() : array
+    {
+        $timeline = $this->timeline;
+        if ( !$timeline ) {
+            return [];
+        }
+
+        return [
+            'post_count'       => $timeline->posts->count(),
+            'like_count'       => $timeline->user->likedposts->count(),
+            'follower_count'   => $timeline->followers->count(),
+            'following_count'  => $timeline->user->followedtimelines->count(),
+            'subscribed_count' => 0, // %TODO $sessionUser->timeline->subscribed->count()
+            'earnings'         => $this->getSales(),
+        ];
+    }
+
+    public function hasEarnings() : bool
+    {
+        $sales = $this->getSales();
+        return $sales > 0;
     }
 }

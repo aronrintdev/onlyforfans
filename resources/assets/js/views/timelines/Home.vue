@@ -3,7 +3,7 @@
 
       <section class="row" v-if="state !== 'loading'">
         <article class="col-sm-12">
-          <StoryBar :session_user="session_user" :timeline="timeline"></StoryBar>
+          <StoryBar :session_user="session_user"></StoryBar>
         </article>
       </section>
 
@@ -45,7 +45,10 @@ export default {
   },
 
   computed: {
-    ...Vuex.mapGetters(['session_user', 'timeline']),
+    ...Vuex.mapGetters([
+      'session_user', 
+      'timeline',
+    ]),
   },
 
   data: () => ({

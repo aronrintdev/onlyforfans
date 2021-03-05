@@ -32,7 +32,11 @@ export default {
   }),
 
   computed: {
-    ...Vuex.mapGetters(['session_user', 'uiFlags']),
+    ...Vuex.mapGetters([
+      'session_user', 
+      'timeline',
+      'uiFlags',
+    ]),
     menuItems() {
       var items = []
 
@@ -48,7 +52,7 @@ export default {
         {
           label: 'My Profile',
           icon: 'user',
-          linkTo: { name: 'timeline.show', params: { slug: this.session_user.timeline.slug } }
+          linkTo: { name: 'timeline.show', params: { slug: this.timeline.slug } }
         },
         {
           label: 'Settings',

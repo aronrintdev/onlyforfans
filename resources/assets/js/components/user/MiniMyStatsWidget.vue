@@ -82,7 +82,8 @@ export default {
     ...Vuex.mapState(['is_loading']),
 
     follower() {
-      return this.timeline.user
+      //return this.timeline.user
+      return this.session_user
     },
     stats() {
       return this.timeline.userstats
