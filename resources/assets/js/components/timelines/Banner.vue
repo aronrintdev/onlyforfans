@@ -67,15 +67,12 @@ export default {
   },
   props: {
     timeline: null,
+    follower: null,
   },
 
   computed: {
     ...Vuex.mapState(['is_loading']),
     ...Vuex.mapGetters(['session_user']),
-
-    follower() {
-      return this.timeline.user
-    },
   },
 
   data: () => ({}),

@@ -4,7 +4,7 @@
 
       <section class="row">
         <article class="col-sm-12">
-          <Banner :session_user="session_user" :timeline="timeline" />
+          <Banner :session_user="session_user" :timeline="timeline" :follower="timeline.user" />
         </article>
       </section>
 
