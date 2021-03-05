@@ -9,12 +9,12 @@
         </ul>
         <p>{{ timeline.about }}</p>
         <ul class="list-unstyled">
-          <li><a :href="timeline.user.website" class="tag-website">Website</a></li>
-          <li><a :href="timeline.user.instagram" class="tag-instagram">Instagram</a></li>
+          <li><a :href="timeline.userstats.website" class="tag-website">Website</a></li>
+          <li><a :href="timeline.userstats.instagram" class="tag-instagram">Instagram</a></li>
         </ul>
         <ul class="list-unstyled list-details">
-          <li><span><b-icon icon="geo-fill" variant="default"></b-icon> {{ timeline.user.city }}</span></li>
-          <li><span><b-icon icon="globe" variant="default"></b-icon> {{ timeline.user.country }}</span></li>
+          <li><span><b-icon icon="geo-fill" variant="default"></b-icon> {{ timeline.userstats.city }}</span></li>
+          <li><span><b-icon icon="globe" variant="default"></b-icon> {{ timeline.userstats.country }}</span></li>
         </ul>
       </b-card-text>
     </b-card>
@@ -33,23 +33,16 @@ export default {
 
   computed: {
     ...Vuex.mapState(['is_loading']),
-
-    follower() {
-      return this.timeline.user;
-    },
   },
 
   data: () => ({
   }),
 
-  created() {
-  },
+  created() { },
 
-  methods: {
-  },
+  methods: { },
 
-  components: {
-  },
+  components: { },
 }
 </script>
 

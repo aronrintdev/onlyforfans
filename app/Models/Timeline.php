@@ -25,6 +25,7 @@ class Timeline extends Model implements Purchaseable, Ownable, Reportable
 
     protected $keyType = 'string';
     protected $guarded = ['id', 'created_at', 'updated_at'];
+    protected $hidden = ['user', 'posts', 'followers']; // %FIXME: why is this ness? timelines.show (route-model binding) loads these by default but should be lazy loading (?) %PSG
 
     protected $casts = [
         'name' => 'string',
@@ -165,5 +166,18 @@ class Timeline extends Model implements Purchaseable, Ownable, Reportable
     {
         return new Collection([ $this->user ]);
     }
+
+    /*
+    public function getPublicInfo() : array
+    {
+        return [
+            'username'  => $this->user->username,
+            'cover'     => $this->cover,
+            'avatar'    => $this->avatar,
+            'name'      => $this->name,
+            'verified'  => $this->verified,
+        ];
+    }
+     */
 
 }

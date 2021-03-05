@@ -37,21 +37,22 @@ class TimelinesController extends AppBaseController
         ]);
     }
 
-    // %TODO: is this still used (?)
+    // %TODO: is this still used (?) - yes, in Timelines/Show.vue, eg
+    // cover
+    // avatar
+    // name
+    // veririfed
+    // username
+    // 
+    // 
+    // 
     public function show(Request $request, Timeline $timeline)
     {
         $this->authorize('view', $timeline);
-        $sales = Fanledger::where('seller_id', $timeline->user->id)->sum('total_amount');
+        $timeline->load('avatar', 'cover');
+        $timeline->userstats = $request->user()->getStats();
 
-        $timeline->userstats = [ // %FIXME DRY
-            'post_count' => $timeline->posts->count(),
-            'like_count' => 0, // %TODO $timeline->user->postlikes->count(),
-            'follower_count' => $timeline->followers->count(),
-            'following_count' => $timeline->user->followedtimelines->count(),
-            'subscribed_count' => 0, // %TODO $sessionUser->timeline->subscribed->count()
-            'earnings' => $sales,
-        ];
-
+        // %TODO: use UserResource and do public/private filtering there
         return [
             'sessionUser' => $request->user(),
             'timeline' => $timeline,

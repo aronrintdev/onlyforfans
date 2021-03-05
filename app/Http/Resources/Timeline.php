@@ -16,9 +16,9 @@ class Timeline extends JsonResource
             'id' => $this->id,
             'slug' => $this->slug,
             'name' => $this->name,
+            'verified' => $this->verified,
             'avatar' => $this->avatar,
-            'postable_id' => $this->postable_id,
-            'postable_type' => $this->postable_type,
+            'cover' => $this->cover,
             'description' =>  $this->when($hasAccess, $this->description),
             'mediafiles' =>  $this->when($hasAccess, $this->mediafiles),
             // https://laravel.com/docs/8.x/eloquent-resources#conditional-relationships

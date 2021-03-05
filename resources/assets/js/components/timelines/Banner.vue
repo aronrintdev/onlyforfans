@@ -2,18 +2,18 @@
   <div v-if="!is_loading" class="session_banner-crate tag-crate">
     <header
       class="masthead text-white text-center"
-      v-bind:style="{ backgroundImage: 'url(' + follower.cover.filepath + ')' }"
+      v-bind:style="{ backgroundImage: 'url(' + timeline.cover.filepath + ')' }"
     >
       <div class="overlay" />
       <section class="avatar-img">
-        <router-link :to="{ name: 'timeline.show', params: { slug: follower.username } }">
+        <router-link :to="{ name: 'timeline.show', params: { slug: timeline.slug } }">
           <b-img
             thumbnail
             rounded="circle"
             class="w-100 h-100"
-            :src="follower.avatar.filepath"
-            :alt="follower.name"
-            :title="follower.name"
+            :src="timeline.avatar.filepath"
+            :alt="timeline.name"
+            :title="timeline.name"
           />
         </router-link>
       </section>
@@ -31,15 +31,15 @@
         <b-col cols="12" md="4" offset-md="2" class="avatar-details text-right text-md-left">
           <h2 class="avatar-name my-0">
             <router-link :to="{ name: 'timeline.show', params: { slug: timeline.slug } }">
-              {{ follower.name }}
+              {{ timeline.name }}
             </router-link>
-            <span v-if="follower.verified" class="verified-badge">
+            <span v-if="timeline.verified" class="verified-badge">
               <b-icon icon="check-circle-fill" variant="success" font-scale="1"></b-icon>
             </span>
           </h2>
           <p class="avatar-mail my-0">
             <router-link :to="{ name: 'timeline.show', params: { slug: timeline.slug } }">
-              @{{ follower.username }}
+              @{{ timeline.username || "TODO" }}
             </router-link>
           </p>
           <div>
@@ -67,7 +67,6 @@ export default {
   },
   props: {
     timeline: null,
-    follower: null,
   },
 
   computed: {

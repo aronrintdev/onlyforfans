@@ -279,62 +279,6 @@ class User extends Authenticatable implements PaymentSendable, Blockable
         return DB::table('user_settings')->where('user_id', $user_id)->delete();
     }
 
-    /*
-    public function getOthersSettings($username)
-    {
-        $timeline = Timeline::where('username', $username)->first();
-        $user = self::where('timeline_id', $timeline->id)->first();
-        $result = DB::table('user_settings')->where('user_id', $user->id)->first();
-
-        return $result;
-    }
-    public function getUserPrivacySettings($loginId, $others_id)
-    {
-        $timeline_post_privacy = '';
-        $timeline_post = '';
-        $user_post = '';
-        $result = '';
-
-        $live_user_settings = $this->getUserSettings($others_id);
-
-        if ($live_user_settings) {
-            $timeline_post_privacy = $live_user_settings->timeline_post_privacy;
-            $user_post_privacy = $live_user_settings->post_privacy;
-        }
-
-        //start $this if block is for timeline post privacy settings
-        if ($loginId != $others_id) {
-            if ($timeline_post_privacy != null && $timeline_post_privacy == 'only_follow') {
-                $isFollower = $this->chkMyFollower($others_id, $loginId);
-                if ($isFollower) {
-                    $timeline_post = true;
-                }
-            } elseif ($timeline_post_privacy != null && $timeline_post_privacy == 'everyone') {
-                $timeline_post = true;
-            } elseif ($timeline_post_privacy != null && $timeline_post_privacy == 'nobody') {
-                $timeline_post = false;
-            }
-
-            //start $this if block is for user post privacy settings
-            if ($user_post_privacy != null && $user_post_privacy == 'only_follow') {
-                $isFollower = $this->chkMyFollower($others_id, $loginId);
-                if ($isFollower) {
-                    $user_post = 'user';
-                }
-            } elseif ($user_post_privacy != null && $user_post_privacy == 'everyone') {
-                $user_post = 'user';
-            }
-        } else {
-            $timeline_post = true;
-            $user_post = 'user';
-        }
-        //End
-        $result = $timeline_post . '-' . $user_post;
-
-        return $result;
-    }
-     */
-
     public function commentLikes()
     {
         return $this->morphedByMany('App\Models\Comment', 'likeable', 'likeables', 'likee_id')
@@ -383,9 +327,7 @@ class User extends Authenticatable implements PaymentSendable, Blockable
         return $this->morphedByMany('App\Models\User', 'blockable', 'blockables');
     }
 
-    /**
-     * Checks if user is blocked by another user
-     */
+    // Checks if user is blocked by another user
     public function isBlockedBy(User $user): bool
     {
         return $this->blockedBy()->where('user_id', $user->id)->count() > 0;
@@ -398,18 +340,13 @@ class User extends Authenticatable implements PaymentSendable, Blockable
 
     // --- %%Can Own ---
 
-    /**
-     * Check if user owns an ownable resource
-     */
+    // Check if user owns an ownable resource
     public function isOwner(Ownable $resource): bool
     {
         return $resource->getOwner()->contains(function ($value, $key) {
             return $value->id === $this->id;
         });
     }
-    
-    
-    
 
     public function events()
     {
@@ -468,13 +405,13 @@ class User extends Authenticatable implements PaymentSendable, Blockable
         return Fanledger::where('seller_id', $this->id)->sum('total_amount');
     }
 
+
     public function getStats() : array
     {
         $timeline = $this->timeline;
         if ( !$timeline ) {
             return [];
         }
-
         return [
             'post_count'       => $timeline->posts->count(),
             'like_count'       => $timeline->user->likedposts->count(),
@@ -482,6 +419,10 @@ class User extends Authenticatable implements PaymentSendable, Blockable
             'following_count'  => $timeline->user->followedtimelines->count(),
             'subscribed_count' => 0, // %TODO $sessionUser->timeline->subscribed->count()
             'earnings'         => $this->getSales(),
+            'website'          => '', // %TODO
+            'instagram'        => '', // %TODO
+            'city'             => $this->settings->city,
+            'country'          => $this->settings->country,
         ];
     }
 
@@ -491,3 +432,60 @@ class User extends Authenticatable implements PaymentSendable, Blockable
         return $sales > 0;
     }
 }
+
+    /*
+    public function getOthersSettings($username)
+    {
+        $timeline = Timeline::where('username', $username)->first();
+        $user = self::where('timeline_id', $timeline->id)->first();
+        $result = DB::table('user_settings')->where('user_id', $user->id)->first();
+
+        return $result;
+    }
+    public function getUserPrivacySettings($loginId, $others_id)
+    {
+        $timeline_post_privacy = '';
+        $timeline_post = '';
+        $user_post = '';
+        $result = '';
+
+        $live_user_settings = $this->getUserSettings($others_id);
+
+        if ($live_user_settings) {
+            $timeline_post_privacy = $live_user_settings->timeline_post_privacy;
+            $user_post_privacy = $live_user_settings->post_privacy;
+        }
+
+        //start $this if block is for timeline post privacy settings
+        if ($loginId != $others_id) {
+            if ($timeline_post_privacy != null && $timeline_post_privacy == 'only_follow') {
+                $isFollower = $this->chkMyFollower($others_id, $loginId);
+                if ($isFollower) {
+                    $timeline_post = true;
+                }
+            } elseif ($timeline_post_privacy != null && $timeline_post_privacy == 'everyone') {
+                $timeline_post = true;
+            } elseif ($timeline_post_privacy != null && $timeline_post_privacy == 'nobody') {
+                $timeline_post = false;
+            }
+
+            //start $this if block is for user post privacy settings
+            if ($user_post_privacy != null && $user_post_privacy == 'only_follow') {
+                $isFollower = $this->chkMyFollower($others_id, $loginId);
+                if ($isFollower) {
+                    $user_post = 'user';
+                }
+            } elseif ($user_post_privacy != null && $user_post_privacy == 'everyone') {
+                $user_post = 'user';
+            }
+        } else {
+            $timeline_post = true;
+            $user_post = 'user';
+        }
+        //End
+        $result = $timeline_post . '-' . $user_post;
+
+        return $result;
+    }
+     */
+
