@@ -15,8 +15,10 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Validation\ValidationException;
 use Theme;
 use Validator;
+use Exception;
 
 class LoginController extends Controller
 {
@@ -33,18 +35,9 @@ class LoginController extends Controller
 
     use AuthenticatesUsers;
 
-    /**
-     * Where to redirect users after login.
-     *
-     * @var string
-     */
+    //* Where to redirect users after login.
     protected $redirectTo = '/home';
 
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
     public function __construct()
     {
         $this->middleware('guest', ['except' => 'logout']);
@@ -52,6 +45,12 @@ class LoginController extends Controller
 
     public function login(Request $request)
     {
+        $request->validate([
+            //$this->username() => 'required|string',
+            'email' => 'required',
+            'password' => 'required',
+        ]);
+        /*
         $validate = Validator::make($request->all(), [
             'email'    => 'required',
             'password' => 'required',
@@ -62,44 +61,42 @@ class LoginController extends Controller
                 'error' => $validate->errors()->toArray(),
             ];
         }
+         */
 
         $user = User::where('email', $request->email)->first();
         if (empty($user)) {
             $user = User::where('username', $request->email)->first();
         }
 
-        // User exists check
-        if (empty($user)) {
-            // TODO: Trans message
-            return [
-                'error' => [
-                    'message' =>config('app.debug', false) ? '(No User)' : 'These credentials do not match our records',
-                ]
-            ];
-        }
+        try {
+            // User exists check
+            if (empty($user)) {
+                throw new Exception( config('app.debug', false) ? '(No User)' : 'These credentials do not match our records' );
+            }
+    
+            // Password check
+            if (!Hash::check($request->password, $user->password)) {
+                throw new Exception( config('app.debug', false) ? '(Bad Password)' : 'These credentials do not match our records' );
+            }
+    
+            // Email verified Check
+            if ($user->email_verified === false) {
+                throw new Exception( 'Your account email has not verified yet. Please verify your email account before continuing' );
+            }
 
-        // Password check
-        if (!Hash::check($request->password, $user->password)) {
-            return [
-                'error' => [
-                    'message' => config('app.debug', false) ? '(Bad Password)' : 'These credentials do not match our records',
-                ],
-            ];
+            Auth::login($user, $request->remember ? true : false);
+            if ($request->expectsJson()) {
+                return response()->json([ 'redirect' => '/' ]);
+            } else {
+                return redirect('/');
+            }
+        } catch (Exception $e) {
+            if ($request->expectsJson()) {
+                return response()->json(['errors' => ['message'=>$e->getMessage()]], 401);
+            } else {
+                return redirect()->guest('login');
+            }
         }
-
-        // Email verified Check
-        if ($user->email_verified === false) {
-            return [
-                'error' => [
-                    'message' => 'Your account\'s email has not verified yet. Please verify your email account before continuing',
-                ],
-            ];
-        }
-
-        Auth::login($user, $request->remember ? true : false);
-        return [
-            'redirect' => '/',
-        ];
 
         /**
          * TODO: Determine if we need to store this information on a session or not.
