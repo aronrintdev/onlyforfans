@@ -37,15 +37,6 @@ class TimelinesController extends AppBaseController
         ]);
     }
 
-    // %TODO: is this still used (?) - yes, in Timelines/Show.vue, eg
-    // cover
-    // avatar
-    // name
-    // veririfed
-    // username
-    // 
-    // 
-    // 
     public function show(Request $request, Timeline $timeline)
     {
         $this->authorize('view', $timeline);
@@ -93,10 +84,8 @@ class TimelinesController extends AppBaseController
     public function suggested(Request $request)
     {
         $TAKE = $request->input('take', 5);
-
         $followedIDs = $request->user()->followedtimelines->pluck('id');
-
-        $query = Timeline::with('user')->inRandomOrder();
+        $query = Timeline::with(['user', 'avatar', 'cover'])->inRandomOrder();
         $query->whereHas('user', function($q1) use(&$request, &$followedIDs) {
             $q1->where('id', '<>', $request->user()->id); // skip myself
             // skip timelines I'm already following

@@ -1,12 +1,13 @@
 <template>
   <div>
-    <b-skeleton-wrapper :loading="loading" >
+    <b-skeleton-wrapper :loading="isLoading" >
       <template #loading>
         <b-card
           no-body
           img-top
           class="background"
         >
+          <!-- loading... -->
           <b-skeleton-img card-img="top" no-aspect height="120px" />
 
           <b-card-body>
@@ -30,7 +31,7 @@
         </b-card>
       </template>
 
-      <b-card
+      <b-card v-if="!!timeline.cover"
         :img-src="timeline.cover.filepath"
         :img-alt="timeline.slug"
         img-top
@@ -76,10 +77,13 @@
 <script>
 export default {
   props: {
-    loading: { type: Boolean, default: false },
-    timeline: { type: Object, default: () => ({ cover: {}, avatar: {} }) },
+    timeline: null, // { type: Object, default: () => ({ cover: {}, avatar: {} }) },
   },
+
   computed: {
+    isLoading() {
+      return !this.timeline
+    },
   },
 }
 </script>
