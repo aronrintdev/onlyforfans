@@ -3,7 +3,7 @@
     <ul class="list-suggested list-group">
       <li class="tag-heading list-group-item my-3"><h3 class="my-0">Suggested People</h3></li>
       <li v-for="(timeline, i) in timelines" :key="timeline.id || i" class="list-group-item my-3">
-        <MiniProfile :timeline="timeline" :loading="loading" />
+        <MiniProfile :timeline="timeline" :loading="isLoading" />
       </li>
     </ul>
   </div>
@@ -26,7 +26,7 @@ export default {
   },
 
   data: () => ({
-    loading: true,
+    isLoading: true,
     timelines: null,
   }),
 
@@ -36,13 +36,13 @@ export default {
 
   methods: {
     load() {
-      this.loading = true
+      this.isLoading = true
       this.timelines = Array(this.skeletons).fill({})
       axios.get(`/timelines-suggested`)
         .then( response => {
           const json = response.data;
           this.timelines = json.timelines || [];
-          this.loading = false
+          this.isLoading = false
         });
     }
   },
