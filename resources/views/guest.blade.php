@@ -29,7 +29,7 @@
         rel="stylesheet">
 
         {{-- Style Sheets --}}
-        <link href="{{ mix('../css/app.css') }}" rel="stylesheet">
+        <link href="{{ mix('/css/app.css') }}" rel="stylesheet">
 
         {{-- Routing --}}
         @routes()

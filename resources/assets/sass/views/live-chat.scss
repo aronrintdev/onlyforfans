@@ -49,14 +49,14 @@
 		transform: none !important;
 		margin-left: auto;
 		position: relative;
-		z-index: 1;
-		font-size: 24px;
 		width: 1em;
-		height: 1em;
 		min-width: 1em;
 		display: inline-block;
 		fill: currentColor;
 		line-height: 1;
+		font-size: 24px;
+		margin: 0;
+		height: 1em;
 	}
 
 	.card-body {
@@ -311,7 +311,109 @@
 		}
 
 		.message-col-8 {
-			padding-left: 0px;
+			padding: 0px;
+			display: flex;
+			flex-direction: column;
+
+			.message-search .user-search-bar {
+				padding-top: 0;
+				height: auto;
+				padding-bottom: 5px;
+				border-bottom: solid 1px #00aff0;
+			}
+			.conversation-header {
+				display: flex;
+				align-items: flex-start;
+				justify-content: space-between;
+				border-bottom: solid 1px rgba(138,150,163, .25);
+				padding: 8px 16px 8px 4px;
+				&.no-border {
+					border: none;
+				}
+				.btn {
+					height: 28px;
+					padding: 4px;
+					margin: 0 8px;
+					min-height: 0;
+					position: relative;
+					
+					i {
+						font-size: 16px;
+						font-weight: 600;
+					}
+				}
+
+				.content {
+					flex: 1;
+					.user-name {
+						color: #000;
+						font-size: 18px;
+					}
+					.details {
+						display: flex;
+						align-items: center;
+
+						.v-divider {
+							background: rgba(138,150,163,.2);
+							width: 1px;
+							height: 12px;
+							margin: 0 10px; 
+						}
+						
+						.online-status {
+							color: #8a96a3;
+							font-size: 13px;
+							white-space: nowrap;
+							line-height: 21px;
+							display: flex;
+							align-items: center;
+							i {
+								color: #35d063;
+								font-size: 10px;
+								margin-right: 5px;
+							}
+						}
+						.btn {
+							padding: 0 4px;
+							margin: 0; 
+							min-height: 0;
+							position: relative;
+							color: #8a96a3;
+							font-size: 13px;
+							display: flex;
+							align-items: center;
+						
+							svg {
+								width: 11px;
+							}
+							&:after {
+								display: none;
+							}
+							&:hover {
+								color: #0091ea;
+								svg path {
+									fill: #0091ea;
+								}
+							}
+							&:hover:after {
+								opacity: 0;
+							}
+						}
+
+					}
+				}
+			}
+			.conversation-list {
+				flex: 1;
+				.empty-messages {
+					text-align: center;
+					height: 100%;
+					width: 100%;
+					display: flex;
+					align-items: center;
+					justify-content: center;
+				}
+			}
 			.coversation-tree {
 				position: relative;
 				height: calc(100vh - 156px);
@@ -427,7 +529,86 @@
 				}
 			}
 		}
+		.conversation-footer {
+			padding: 0 8px;
+			border-top: solid 1px rgba(138, 150, 163, 0.25);
 
+			textarea {
+				overflow: hidden;
+				overflow-wrap: break-word;
+				height: 56px;
+				border: none;
+				border-radius: 0;
+				padding: 16px 8px;
+				background: transparent;
+				resize: none;
+				max-height: 215px;
+				font-size: 16px;
+				line-height: 24px;
+				width: 100%;
+				transition: border-bottom-color 0.3s ease;
+				box-shadow: none;
+				outline: none;
+				display: block;
+			}
+			.action-btns {
+				display: flex;
+				align-items: center;
+				padding: 7px 0 9px;
+				justify-content: space-between;
+
+				.action-btn {
+					padding: 6px;
+					margin: 0 3px 0 0;
+					color: #8a96a3;
+					height: 36px;
+					width: 36px;
+					border: none;
+					svg {
+						width: 24px;
+						height: 24px;
+						display: block;
+						transition: transform .15s ease;
+						&.dollar {
+							padding: 2px;
+							border: solid 2px #8a96a3;
+							border-radius: 50%;
+						}
+					}
+					&:hover {
+						svg path {
+							fill: #00aff0;
+						}
+						.dollar {
+							border: solid 2px #00aff0;
+						}
+					}
+				}
+				
+				.send-btn {
+					border-radius: 1000px;
+					border: none;
+					padding: 9px 18px;
+					font-size: 14px;
+					line-height: 18px;
+					color: #fefefe;
+					font-weight: 500;
+					background: #00aff0;
+					min-width: 78px;
+					transition: opacity .15s ease,background-color .15s ease,box-shadow .15s ease;
+					display: inline-block;
+					white-space: nowrap;
+					text-align: center;
+					text-transform: uppercase;
+				
+					&:disabled {
+						opacity: .2;
+						background: rgba(138,150,163,.75);
+						pointer-events: none;
+					}
+				}
+			}
+		}
 		.coversations-thread {
 			height: 607px;
 			overflow-y: auto;
@@ -738,6 +919,7 @@
 			overflow: hidden;
 			margin: 0px !important;
 			width: 100%;
+			height: calc(100vh - 156px);
 
 			.message-col-4 {
 				.coversations-list {
