@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 use App\Http\Resources\UserSetting as UserSettingResource;
+use App\Http\Resources\UserCollection;
 use App\Models\User;
 use App\Models\Fanledger;
 use App\Models\Country;
@@ -22,13 +23,9 @@ class UsersController extends AppBaseController
     public function index(Request $request)
     {
         $query = User::query();
-
-        // Apply filters
-        //  ~ %TODO
-
-        return response()->json([
-            'users' => $query->get(),
-        ]);
+        // Apply filters %TODO
+        $data = $query->paginate( $request->input('take', env('MAX_DEFAULT_PER_REQUEST', 10)) );
+        return new UserCollection($data);
     }
 
     public function showSettings(Request $request, User $user)
@@ -200,6 +197,7 @@ class UsersController extends AppBaseController
         ]);
     }
 
+    // currently goes by email
     public function match(Request $request)
     {
         if ( !$request->ajax() ) {
