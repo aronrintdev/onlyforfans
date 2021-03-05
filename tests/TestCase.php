@@ -10,13 +10,20 @@ abstract class TestCase extends BaseTestCase
     public function createApplication()
     {
         $app = require __DIR__.'/../bootstrap/app.php';
-
         $app->make(Kernel::class)->bootstrap();
-
         return $app;
     }
 
      public function ajaxJSON($method, $uri, array $data=[]) {
-         return $this->json($method,$uri,$data,['HTTP_X-Requested-With'=>'XMLHttpRequest']);
+         return $this->json($method,$uri,$data,[
+             'HTTP_X-Requested-With' => 'XMLHttpRequest',
+             //'Accept' => 'application/json',
+             ]);
+         /*
+         return $this->withHeaders([
+             'X-Requested-With' => 'XMLHttpRequest',
+             'X-Accept' => 'application/json',
+         ])->json($method,$uri,$data);
+          */
      }
 }

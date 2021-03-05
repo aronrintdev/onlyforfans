@@ -30,7 +30,7 @@ class UsersController extends AppBaseController
 
     public function showSettings(Request $request, User $user)
     {
-        $this->authorize('show', $user);
+        $this->authorize('view', $user);
         return new UserSettingResource($user->settings);
     }
 
@@ -200,10 +200,6 @@ class UsersController extends AppBaseController
     // currently goes by email
     public function match(Request $request)
     {
-        if ( !$request->ajax() ) {
-            \App::abort(400, 'Requires AJAX');
-        }
-
         $term = $request->input('term',null);
 
         if ( empty($term) ) {

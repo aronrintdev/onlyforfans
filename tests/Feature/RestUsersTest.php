@@ -28,8 +28,7 @@ class RestUsersTest extends TestCase
         $admin->refresh();
 
         $expectedCount = User::count();
-        $response = $this->actingAs($admin)->ajaxJSON('GET', route('users.index'), [
-        ]);
+        $response = $this->actingAs($admin)->ajaxJSON('GET', route('users.index'), [ ]);
         $response->assertJsonStructure([
             'data',
             'links',
@@ -54,6 +53,43 @@ class RestUsersTest extends TestCase
         $creator = $timeline->user;
         $response = $this->actingAs($creator)->ajaxJSON('GET', route('users.showSettings', $creator->id));
         $response->assertStatus(200);
+        $content = json_decode($response->content());
+        $this->assertNotNull($content->data);
+        $this->assertObjectHasAttribute('user_id', $content->data);
+        $this->assertObjectHasAttribute('about', $content->data);
+    }
+
+    /**
+     *  @group users
+     *  @group regression
+     *  @group here
+     */
+    public function test_user_can_login()
+    {
+        $user = User::first();
+        $payload = [
+            'email' => $user->email,
+            'password' => 'foo-123',
+        ];
+        $response = $this->ajaxJSON('POST', '/login', $payload);
+        $response->assertStatus(200);
+    }
+
+    /**
+     *  @group users
+     *  @group regression
+     *  @group here
+     */
+    public function test_user_cant_login_with_wrong_credientials()
+    {
+        $user = User::first();
+        $payload = [
+            'email' => $user->email,
+            'password' => 'blahblah',
+        ];
+        $response = $this->ajaxJSON('POST', '/login', $payload);
+        //$response->assertStatus(401);
+        $response->assertUnauthorized();
     }
 
     /**
@@ -98,7 +134,7 @@ class RestUsersTest extends TestCase
         $payload = [
             'term' => $creator->email,
         ];
-        $response = $this->actingAs($creator)->ajaxJSON('GET', route('users.showSettings'), $payload);
+        $response = $this->actingAs($creator)->ajaxJSON('GET', route('users.match', $admin->id), $payload);
         $response->assertStatus(200);
     }
 

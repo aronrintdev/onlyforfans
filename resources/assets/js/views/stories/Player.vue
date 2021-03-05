@@ -17,6 +17,7 @@ export default {
     Player,
   },
 
+
   props: {
     slug: { type: String, default: '' },
   },
