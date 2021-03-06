@@ -92,6 +92,7 @@ class StoriesTest extends TestCase
     /**
      *  @group stories
      *  @group regression
+     *  @group here2
      */
     public function test_can_not_list_stories_on_unfollowed_timeline()
     {

@@ -37,10 +37,10 @@ class TimelinesTest extends TestCase
         //$this->assertNotNull($content->data);
         //$this->assertGreaterThan(0, count($content->data));
     }
+
     /**
      *  @group timelines
      *  @group regression
-     *  @group here
      */
     public function test_owner_can_view_own_timeline()
     {
@@ -53,14 +53,53 @@ class TimelinesTest extends TestCase
 
         $content = json_decode($response->content());
         $this->assertObjectHasAttribute('slug', $content->timeline);
-        $this->assertObjectHasAttribute('name', $content->timeline);
-        $this->assertObjectHasAttribute('about', $content->timeline);
-        $this->assertObjectHasAttribute('user', $content->timeline);
-
         $this->assertNotNull($content->timeline->slug);
+        $this->assertObjectHasAttribute('name', $content->timeline);
         $this->assertNotNull($content->timeline->name);
+        $this->assertObjectHasAttribute('about', $content->timeline);
         $this->assertNotNull($content->timeline->about);
-        $this->assertNotNull($content->timeline->user);
+        $this->assertObjectHasAttribute('cover', $content->timeline);
+        $this->assertObjectHasAttribute('avatar', $content->timeline);
+
+        $this->assertObjectNotHasAttribute('posts', $content->timeline);
+        $this->assertObjectNotHasAttribute('user', $content->timeline);
+        $this->assertObjectNotHasAttribute('followers', $content->timeline);
+        $this->assertObjectNotHasAttribute('subscribers', $content->timeline);
+        $this->assertObjectNotHasAttribute('ledgersales', $content->timeline);
+        $this->assertObjectNotHasAttribute('stories', $content->timeline);
+    }
+
+    /**
+     *  @group timelines
+     *  @group regression
+     */
+    public function test_owner_can_view_another_timeline()
+    {
+        $timeline = Timeline::has('posts','>=',1)->has('followers','>=',1)->first(); // assume non-admin (%FIXME)
+        $creator = $timeline->user;
+        $nonfan = User::whereDoesntHave('followedtimelines', function($q1) use(&$timeline) {
+            $q1->where('timelines.id', $timeline->id);
+        })->where('id', '<>', $creator->id)->first();
+
+        $payload = [];
+        $response = $this->actingAs($nonfan)->ajaxJSON('GET', route('timelines.show', $timeline->slug), $payload);
+        $response->assertStatus(200);
+
+        $content = json_decode($response->content());
+        $this->assertObjectHasAttribute('slug', $content->timeline);
+        $this->assertNotNull($content->timeline->slug);
+        $this->assertObjectHasAttribute('name', $content->timeline);
+        $this->assertNotNull($content->timeline->name);
+        $this->assertObjectHasAttribute('about', $content->timeline);
+        $this->assertNotNull($content->timeline->about);
+        $this->assertObjectHasAttribute('cover', $content->timeline);
+        $this->assertObjectHasAttribute('avatar', $content->timeline);
+        $this->assertObjectNotHasAttribute('posts', $content->timeline);
+        $this->assertObjectNotHasAttribute('user', $content->timeline);
+        $this->assertObjectNotHasAttribute('followers', $content->timeline);
+        $this->assertObjectNotHasAttribute('subscribers', $content->timeline);
+        $this->assertObjectNotHasAttribute('ledgersales', $content->timeline);
+        $this->assertObjectNotHasAttribute('stories', $content->timeline);
     }
 
     /**
@@ -223,7 +262,7 @@ class TimelinesTest extends TestCase
         //     of posts on it before subscription (premium)
         $response = $this->actingAs($fan)->ajaxJSON('GET', route('timelines.show', $timeline->slug));
         //$response = $this->actingAs($fan)->ajaxJSON('GET', route('timelines.show', $timeline->user->username));
-        $response->assertStatus(403);
+        $response->assertStatus(200); // was 403 but see TODO above
 
         $payload = [
             'sharee_id' => $fan->id,
@@ -284,10 +323,6 @@ class TimelinesTest extends TestCase
         $fan = User::whereDoesntHave('followedtimelines', function($q1) use(&$timeline) {
             $q1->where('timelines.id', $timeline->id);
         })->where('id', '<>', $creator->id)->first();
-
-        // Check access (before: should not be allowed)
-        $response = $this->actingAs($fan)->ajaxJSON('GET', route('timelines.show', $timeline->slug));
-        $response->assertStatus(403);
 
         // Subscribe
         $payload = [

@@ -40,7 +40,7 @@ class TimelinesController extends AppBaseController
     public function show(Request $request, Timeline $timeline)
     {
         $this->authorize('view', $timeline);
-        $timeline->load('avatar', 'cover');
+        $timeline->load(['avatar', 'cover']);
         $timeline->userstats = $request->user()->getStats();
 
         // %TODO: use UserResource and do public/private filtering there

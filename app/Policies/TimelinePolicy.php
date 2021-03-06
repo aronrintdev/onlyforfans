@@ -24,7 +24,7 @@ class TimelinePolicy extends BasePolicy
 
     protected function view(User $user, Timeline $resource)
     {
-        return $resource->followers->contains($user->id);;
+        return true; // $resource->followers->contains($user->id);
     }
 
     public function follow(User $user, Timeline $resource)
@@ -33,6 +33,11 @@ class TimelinePolicy extends BasePolicy
     }
 
     protected function like(User $user, Timeline $resource)
+    {
+        return $resource->followers->contains($user->id);;
+    }
+
+    protected function indexStories(User $user, Timeline $resource)
     {
         return $resource->followers->contains($user->id);;
     }
