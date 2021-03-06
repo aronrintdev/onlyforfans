@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!!timelines" class="suggested_feed-crate tag-crate">
+  <div v-if="!isLoading" class="suggested_feed-crate tag-crate">
     <ul class="list-suggested list-group">
       <li class="tag-heading list-group-item my-3"><h3 class="my-0">Suggested People</h3></li>
       <li v-for="(timeline, i) in timelines" :key="timeline.id || i" class="list-group-item my-3">
@@ -21,9 +21,7 @@ export default {
     skeletons: { type: Number, default: 5 },
   },
 
-  computed: {
-    //...Vuex.mapState(['is_loading']),
-  },
+  computed: { },
 
   data: () => ({
     isLoading: true,

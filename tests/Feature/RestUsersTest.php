@@ -123,19 +123,22 @@ class RestUsersTest extends TestCase
         $creator = $timeline->user;
         $response = $this->actingAs($creator)->ajaxJSON('GET', route('users.me'));
         $response->assertStatus(200);
-        $content = json_decode($response->content());
         $response->assertJsonStructure([
             'uiFlags' => [ 'isAdmin' ],
             'timeline' => [ 
-                //'followers',
-                //'following',
-                //'earnings',
                 'userstats' => ['post_count', 'like_count', 'follower_count', 'following_count', 'subscribed_count', 'earnings'],
             ],
-            'session_user' => [ 'email', 'name', 'avatar', 'cover', 'about', 'roles', ],
+            'session_user' => [ 'email', 'name', 'avatar', 'about', 'roles', ],
         ]);
+        $content = json_decode($response->content());
         $this->assertObjectNotHasAttribute('timeline', $content->session_user);
         $this->assertObjectNotHasAttribute('settings', $content->session_user);
+        $this->assertObjectNotHasAttribute('posts', $content->timeline);
+        $this->assertObjectNotHasAttribute('user', $content->timeline);
+        $this->assertObjectNotHasAttribute('followers', $content->timeline);
+        $this->assertObjectNotHasAttribute('subscribers', $content->timeline);
+        $this->assertObjectNotHasAttribute('ledgersales', $content->timeline);
+        $this->assertObjectNotHasAttribute('stories', $content->timeline);
     }
 
     /**

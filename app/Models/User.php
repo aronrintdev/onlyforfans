@@ -24,7 +24,11 @@ class User extends Authenticatable implements PaymentSendable, Blockable
 {
     use Notifiable, HasRoles, HasFactory, Messagable, SoftDeletes, UsesUuid;
 
-    protected $appends = [ 'name', 'avatar', 'cover', 'about', ];
+    protected $appends = [ 
+        'name', 
+        'avatar', 
+        'about', 
+    ];
     protected $guarded = [ 'id', 'created_at', 'updated_at' ];
     protected $hidden = [ 'email', 'password', 'remember_token', 'verification_code', 'timeline'];
     protected $dates = [ 'last_logged', ];
@@ -66,13 +70,12 @@ class User extends Authenticatable implements PaymentSendable, Blockable
         });
     }
 
+    /*
     public function toArray()
     {
         $array = parent::toArray();
-        /**
-         * Removed, all attributes seem to still be set without needing this and it messes up setVisible()
-         * TODO: Remove this after confirming ui still gets what it needs.
-         */
+        // Removed, all attributes seem to still be set without needing this and it messes up setVisible()
+        // TODO: Remove this after confirming ui still gets what it needs.
         // $timeline = $this->timeline->toArray();
         // foreach ($timeline as $key => $value) {
         //     if ($key != 'id') {
@@ -82,6 +85,7 @@ class User extends Authenticatable implements PaymentSendable, Blockable
         // $array['avatar'] = $this->avatar;
         return $array;
     }
+     */
 
     /**
      * Makes username a valid random username if it is null or empty.
@@ -244,22 +248,9 @@ class User extends Authenticatable implements PaymentSendable, Blockable
             : (object) ['filepath' => url('user/avatar/default-' . $this->gender . '-avatar.png')];
     }
 
-    public function getCoverAttribute($value)
-    {
-        return $this->timeline->cover ? $this->timeline->cover : null;
-    }
-
     public function getAboutAttribute($value)
     {
         return $this->timeline->about ? $this->timeline->about : null;
-    }
-
-    //this method is for displaying user avatar and default avatar from group in events feature
-    public function getPictureAttribute($value)
-    {
-        return $this->timeline->avatar
-            ? $this->timeline->avatar
-            : url('group/avatar/default-group-avatar.png');
     }
 
     // ---

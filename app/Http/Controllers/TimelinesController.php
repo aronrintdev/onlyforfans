@@ -45,7 +45,6 @@ class TimelinesController extends AppBaseController
 
         // %TODO: use UserResource and do public/private filtering there
         return [
-            'sessionUser' => $request->user(),
             'timeline' => $timeline,
         ];
     }

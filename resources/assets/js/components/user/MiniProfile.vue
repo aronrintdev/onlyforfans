@@ -31,7 +31,7 @@
         </b-card>
       </template>
 
-      <b-card v-if="!!timeline.cover"
+      <b-card
         :img-src="timeline.cover.filepath"
         :img-alt="timeline.slug"
         img-top
@@ -82,6 +82,7 @@ export default {
 
   computed: {
     isLoading() {
+      //return !this.timeline || !this.timeline.cover
       return !this.timeline
     },
   },

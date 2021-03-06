@@ -146,8 +146,8 @@ class UsersController extends AppBaseController
         //$timeline = $sessionUser->timeline->with([]);
         //$timeline = $sessionUser->timeline;
         //$timeline = Timeline::with(['followers', 'following',])
-        $timeline = Timeline::where('user_id', $sessionUser->id)
-            //->where('user_id', $sessionUser->id)
+        $timeline = Timeline::with(['avatar', 'cover'])
+            ->where('user_id', $sessionUser->id)
             ->first();
 
         $timeline->userstats = $sessionUser->getStats();

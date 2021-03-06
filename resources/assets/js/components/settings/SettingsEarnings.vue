@@ -43,7 +43,6 @@ export default {
   computed: {
     ...Vuex.mapState(['fanledgers']),
     ...Vuex.mapState(['earnings']),
-    //...Vuex.mapState(['is_loading']),
 
     totalRows() {
       return this.fanledgers.meta ? this.fanledgers.meta.total : 1;

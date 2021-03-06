@@ -45,7 +45,6 @@
 
 <script>
 import Vuex from 'vuex';
-//import MiniMyStatsWidget from '@components/user/MiniMyStatsWidget.vue';
 
 export default {
   components: {

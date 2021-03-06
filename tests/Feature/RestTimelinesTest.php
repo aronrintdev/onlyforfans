@@ -106,6 +106,27 @@ class TimelinesTest extends TestCase
      *  @group timelines
      *  @group regression
      */
+    public function test_can_view_suggested_timelines()
+    {
+        $timeline = Timeline::has('posts','>=',1)->has('followers','>=',1)->first(); // assume non-admin (%FIXME)
+        $creator = $timeline->user;
+        $nonfan = User::whereDoesntHave('followedtimelines', function($q1) use(&$timeline) {
+            $q1->where('timelines.id', $timeline->id);
+        })->where('id', '<>', $creator->id)->first();
+
+        $payload = [];
+        $response = $this->actingAs($nonfan)->ajaxJSON('GET', route('timelines.suggested'), $payload);
+        $response->assertStatus(200);
+        $response->assertJsonStructure([
+            'timelines' => [0 => [ 'id', 'slug', 'name', 'about', 'verified', 'price', 'is_follow_for_free', 'cover', 'avatar', ] ]
+        ]);
+        //$content = json_decode($response->content());
+    }
+
+    /**
+     *  @group timelines
+     *  @group regression
+     */
     public function test_can_send_tip_to_timeline()
     {
         $timeline = Timeline::has('posts','>=',1)->has('followers','>=',1)->first(); // assume non-admin (%FIXME)

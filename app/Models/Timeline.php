@@ -68,7 +68,6 @@ class Timeline extends Model implements Purchaseable, Ownable, Reportable
             ->withTimestamps();
     }
 
-
     public function ledgersales()
     {
         return $this->morphMany('App\Models\Fanledger', 'purchaseable');
