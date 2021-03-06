@@ -45,7 +45,6 @@ export default new Vuex.Store({
     login_sessions: [],
     uiFlags: [],
     unshifted_timeline_post: null,
-    is_loading: true,
   },
 
   mutations: {
@@ -101,9 +100,6 @@ export default new Vuex.Store({
     UPDATE_UNSHIFTED_TIMELINE_POST(state, payload) {
       state.unshifted_timeline_post = propSelect(payload, 'post')
     },
-    UPDATE_LOADING(state, payload) {
-      state.is_loading = payload
-    },
   },
 
   actions: {
@@ -111,7 +107,6 @@ export default new Vuex.Store({
       axios.get(route('valuts.show', { id }))
         .then((response) => {
           commit('UPDATE_VAULT', response.data)
-          commit('UPDATE_LOADING', false)
         })
     },
 
@@ -121,7 +116,6 @@ export default new Vuex.Store({
           commit('UPDATE_VAULTFOLDER', response.data)
           commit('UPDATE_BREADCRUMB', response.data)
           commit('UPDATE_SHARES', response.data)
-          commit('UPDATE_LOADING', false)
         })
     },
 
@@ -129,7 +123,6 @@ export default new Vuex.Store({
       axios.get(route('shareables.index'))
         .then((response) => {
           commit('UPDATE_SHAREABLES', response.data)
-          commit('UPDATE_LOADING', false)
         })
     },
 
@@ -138,7 +131,6 @@ export default new Vuex.Store({
       const url = `/saved`
       axios.get(url).then((response) => {
         commit('UPDATE_SAVES', response.data)
-        commit('UPDATE_LOADING', false)
       })
     },
 
@@ -148,7 +140,6 @@ export default new Vuex.Store({
         : `/timelines/${timelineId}/feed?page=${page}&take=${limit}`;
       axios.get(url).then( (response) => {
         commit('UPDATE_FEEDDATA', response);
-        commit('UPDATE_LOADING', false);
       });
     },
 
@@ -157,14 +148,12 @@ export default new Vuex.Store({
       axios.get(url, { params })
         .then((response) => {
           commit('UPDATE_FANLEDGERS', response)
-          commit('UPDATE_LOADING', false)
         })
     },
 
     getEarnings({ commit }, { user_id }  ) {
       axios.get(route('fanledgers.showEarnings', user_id)).then((response) => {
         commit('UPDATE_EARNINGS', response.data)
-        commit('UPDATE_LOADING', false)
       })
     },
 
@@ -177,7 +166,6 @@ export default new Vuex.Store({
       axios.get(route('stories.index'), { params })
         .then((response) => {
           commit('UPDATE_STORIES', response.data)
-          commit('UPDATE_LOADING', false)
         })
     },
 
@@ -185,7 +173,6 @@ export default new Vuex.Store({
       axios.get(route('posts.show', { id: newPostId }))
         .then((response) => {
           commit('UPDATE_UNSHIFTED_TIMELINE_POST', response.data)
-          commit('UPDATE_LOADING', false)
         })
     },
 
@@ -194,27 +181,23 @@ export default new Vuex.Store({
         commit('UPDATE_SESSION_USER', response.data)
         commit('UPDATE_TIMELINE', response.data)
         commit('UPDATE_UI_FLAGS', response.data)
-        commit('UPDATE_LOADING', false)
       })
     },
 
     getUserSettings({ commit }, { userId }) {
       axios.get(route('users.showSettings', { id: userId })).then((response) => {
         commit('UPDATE_USER_SETTINGS', response.data)
-        commit('UPDATE_LOADING', false)
       })
     },
 
     getLoginSessions({ commit }, { params }) {
       axios.get(route('sessions.index', { params })).then((response) => {
         commit('UPDATE_LOGIN_SESSIONS', response)
-        commit('UPDATE_LOADING', false)
       })
     },
   },
 
   getters: {
-    is_loading:              state => state.is_loading, // indicates if Vuex has loaded data or not
     vault:                   state => state.vault,
     vaultfolder:             state => state.vaultfolder,
     breadcrumb:              state => state.breadcrumb,

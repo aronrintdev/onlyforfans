@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!is_loading" class="feed-crate tag-posts tag-crate">
+  <div v-if="!isLoading" class="feed-crate tag-posts tag-crate">
     <section class="row">
       <div class="w-100">
         <article
@@ -48,7 +48,11 @@ export default {
   computed: {
     ...Vuex.mapState(['feeddata']), // should include keys: data (posts) and meta (pagination info), and links 
     ...Vuex.mapState(['unshifted_timeline_post']),
-    ...Vuex.mapState(['is_loading']),
+    //...Vuex.mapState(['is_loading']),
+
+    isLoading() {
+      return !this.feeddata || !this.session_user || !this.timeline
+    },
 
     username() { // feed owner
       return this.timeline.username
@@ -108,7 +112,7 @@ export default {
 
     onScroll(e) {
       const atBottom = document.documentElement.scrollTop + window.innerHeight === document.documentElement.offsetHeight;
-      if (atBottom && !this.is_loading) {
+      if (atBottom && !this.isLoading) {
         this.loadMore()
       }
     },
@@ -123,7 +127,7 @@ export default {
 
     // see: https://peachscript.github.io/vue-infinite-loading/guide/#installation
     loadMore() {
-      if ( !this.moreLoading && !this.is_loading && (this.nextPage <= this.lastPage) ) {
+      if ( !this.moreLoading && !this.isLoading && (this.nextPage <= this.lastPage) ) {
         this.moreLoading = true;
         this.$log.debug('loadMore', { current: this.currentPage, last: this.lastPage, next: this.nextPage });
         this.$store.dispatch('getFeeddata', { timelineId: this.timelineId, page: this.nextPage, limit: this.limit, isHomefeed: this.is_homefeed })

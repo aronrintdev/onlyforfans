@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!is_loading" class="follow_ctrl-crate tag-crate">
+  <div v-if="!isLoading" class="follow_ctrl-crate tag-crate">
     <b-card tag="article" class="OFF-mb-2">
       <b-card-text>
         <ul class="list-unstyled">
@@ -32,7 +32,9 @@ export default {
   },
 
   computed: {
-    ...Vuex.mapState(['is_loading']),
+    isLoading() {
+      return !this.session_user || !this.timeline
+    }
   },
 
   data: () => ({

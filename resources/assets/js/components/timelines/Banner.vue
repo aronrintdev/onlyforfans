@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!is_loading" class="session_banner-crate tag-crate">
+  <div v-if="!isLoading" class="session_banner-crate tag-crate">
     <header
       class="masthead text-white text-center"
       v-bind:style="{ backgroundImage: 'url(' + timeline.cover.filepath + ')' }"
@@ -39,7 +39,7 @@
           </h2>
           <p class="avatar-mail my-0">
             <router-link :to="{ name: 'timeline.show', params: { slug: timeline.slug } }">
-              @{{ timeline.username || "TODO" }}
+              @{{ timeline.slug || "TODO" }}
             </router-link>
           </p>
           <div>
@@ -70,8 +70,11 @@ export default {
   },
 
   computed: {
-    ...Vuex.mapState(['is_loading']),
     ...Vuex.mapGetters(['session_user']),
+
+    isLoading() {
+      return !this.session_user || !this.timeline
+    },
   },
 
   data: () => ({}),

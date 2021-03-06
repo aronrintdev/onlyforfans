@@ -49,27 +49,14 @@ export default {
     },
 
     isLoading() {
-      return this.is_fanledgers_loading && this.is_earnings_loading;
+      return !this.fanledgers || !this.earnings
     },
   },
 
   watch: {
-    fanledgers(value) {
-      if (value) {
-        this.is_fanledgers_loading = false
-      }
-    },
-    earnings(value) {
-      if (value) {
-        this.earnings_loading = false
-      }
-    },
   },
 
   data: () => ({
-
-    is_fanledgers_loading: true,
-    is_earnings_loading: true,
 
     perPage: 10,
     currentPage: 1,

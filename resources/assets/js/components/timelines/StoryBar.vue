@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!is_loading" class="crate tag-crate row mb-3 mx-0">
+  <div v-if="!isLoading" class="crate tag-crate row mb-3 mx-0">
     <section class="d-flex flex-wrap justify-content-between w-100">
       <div @click="createStory()" class="story">
         <router-link :to="{ name: 'stories.dashboard' }">
@@ -33,7 +33,10 @@ export default {
 
   computed: {
     ...Vuex.mapState(['stories']),
-    ...Vuex.mapState(['is_loading']),
+
+    isLoading() {
+      return !this.stories
+    },
   },
 
   data: () => ({

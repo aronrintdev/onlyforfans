@@ -47,31 +47,17 @@ export default {
       'timeline',
     ]),
     isLoading() {
-      return this.is_session_user_loading && this.is_timeline_loading;
+      return !this.timeline || !this.session_user
     },
   },
 
   data: () => ({
-    is_session_user_loading: true,
-    is_timeline_loading: true,
   }),
 
   mounted() { },
 
   watch: {
-    timeline(value) {
-      //if (value && this.session_user)
-      if (value) {
-        this.is_timeline_loading = false
-      }
-    },
-    session_user(value) {
-      if (value) {
-        this.is_session_user_loading = false
-      }
-    }
   },
-
 
 }
 </script>
