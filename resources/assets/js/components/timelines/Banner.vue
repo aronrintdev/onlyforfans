@@ -1,19 +1,19 @@
 <template>
-  <div v-if="!is_loading" class="session_banner-crate tag-crate">
+  <div v-if="!isLoading" class="session_banner-crate tag-crate">
     <header
       class="masthead text-white text-center"
-      v-bind:style="{ backgroundImage: 'url(' + follower.cover.filepath + ')' }"
+      v-bind:style="{ backgroundImage: 'url(' + timeline.cover.filepath + ')' }"
     >
       <div class="overlay" />
       <section class="avatar-img">
-        <router-link :to="{ name: 'user.timeline', params: { username: follower.username } }">
+        <router-link :to="{ name: 'timeline.show', params: { slug: timeline.slug } }">
           <b-img
             thumbnail
             rounded="circle"
             class="w-100 h-100"
-            :src="follower.avatar.filepath"
-            :alt="follower.name"
-            :title="follower.name"
+            :src="timeline.avatar.filepath"
+            :alt="timeline.name"
+            :title="timeline.name"
           />
         </router-link>
       </section>
@@ -30,16 +30,16 @@
       <b-row class="avatar-profile pt-3 pb-4">
         <b-col cols="12" md="4" offset-md="2" class="avatar-details text-right text-md-left">
           <h2 class="avatar-name my-0">
-            <router-link :to="{ name: 'timeline.show', params: { slug: follower.timeline.slug } }">
-              {{ follower.name }}
+            <router-link :to="{ name: 'timeline.show', params: { slug: timeline.slug } }">
+              {{ timeline.name }}
             </router-link>
-            <span v-if="follower.verified" class="verified-badge">
+            <span v-if="timeline.verified" class="verified-badge">
               <b-icon icon="check-circle-fill" variant="success" font-scale="1"></b-icon>
             </span>
           </h2>
           <p class="avatar-mail my-0">
-            <router-link :to="{ name: 'timeline.show', params: { slug: follower.timeline.slug } }">
-              @{{ follower.username }}
+            <router-link :to="{ name: 'timeline.show', params: { slug: timeline.slug } }">
+              @{{ timeline.slug || "TODO" }}
             </router-link>
           </p>
           <div>
@@ -70,11 +70,10 @@ export default {
   },
 
   computed: {
-    ...Vuex.mapState(['is_loading']),
     ...Vuex.mapGetters(['session_user']),
 
-    follower() {
-      return this.timeline.user
+    isLoading() {
+      return !this.session_user || !this.timeline
     },
   },
 

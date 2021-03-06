@@ -41,17 +41,11 @@ export default {
     },
 
     isLoading() {
-      return this.is_loginSessions_loading;
+      return !this.session_user || !this.user_settings
     },
   },
 
-  watch: {
-    login_sessions(value) {
-      if (value) {
-        this.is_loginSessions_loading = false
-      }
-    },
-  },
+  watch: { },
 
   data: () => ({
 

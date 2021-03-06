@@ -37,23 +37,14 @@ class TimelinesController extends AppBaseController
         ]);
     }
 
-    // %TODO: is this still used (?)
     public function show(Request $request, Timeline $timeline)
     {
         $this->authorize('view', $timeline);
-        $sales = Fanledger::where('seller_id', $timeline->user->id)->sum('total_amount');
+        $timeline->load(['avatar', 'cover']);
+        $timeline->userstats = $request->user()->getStats();
 
-        $timeline->userstats = [ // %FIXME DRY
-            'post_count' => $timeline->posts->count(),
-            'like_count' => 0, // %TODO $timeline->user->postlikes->count(),
-            'follower_count' => $timeline->followers->count(),
-            'following_count' => $timeline->user->followedtimelines->count(),
-            'subscribed_count' => 0, // %TODO $sessionUser->timeline->subscribed->count()
-            'earnings' => $sales,
-        ];
-
+        // %TODO: use UserResource and do public/private filtering there
         return [
-            'sessionUser' => $request->user(),
             'timeline' => $timeline,
         ];
     }
@@ -92,10 +83,8 @@ class TimelinesController extends AppBaseController
     public function suggested(Request $request)
     {
         $TAKE = $request->input('take', 5);
-
         $followedIDs = $request->user()->followedtimelines->pluck('id');
-
-        $query = Timeline::with('user')->inRandomOrder();
+        $query = Timeline::with(['user', 'avatar', 'cover'])->inRandomOrder();
         $query->whereHas('user', function($q1) use(&$request, &$followedIDs) {
             $q1->where('id', '<>', $request->user()->id); // skip myself
             // skip timelines I'm already following

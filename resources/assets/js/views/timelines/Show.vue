@@ -4,7 +4,7 @@
 
       <section class="row">
         <article class="col-sm-12">
-          <Banner :session_user="session_user" :timeline="timeline" />
+          <Banner :session_user="session_user" :timeline="timeline" :follower="timeline.user" />
         </article>
       </section>
 
@@ -68,12 +68,10 @@ export default {
       this.load()
     }
     if (!this.session_user) {
-      this.getMe()
     }
   },
 
   methods: {
-    ...Vuex.mapActions([ 'getMe' ]),
     load() {
       this.state = 'loading'
       this.axios.get(this.$apiRoute('timelines.show', { timeline: this.slug }))

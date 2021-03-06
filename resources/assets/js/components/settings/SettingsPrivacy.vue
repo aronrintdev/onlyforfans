@@ -1,5 +1,5 @@
 <template>
-  <div v-if>
+  <div v-if="!isLoading">
 
     <b-card title="Privacy">
       <b-card-text>
@@ -62,7 +62,7 @@
     <b-card title="Blocked">
       <b-card-text>
         <b-form @submit.prevent="submitBlocked($event)" @reset="onReset">
-          <fieldset v-if="state !== 'loading'">
+          <fieldset>
 
             <b-row>
               <b-col>
@@ -179,11 +179,12 @@ export default {
   },
 
   computed: {
-    //...Vuex.mapState(['vault']),
+    isLoading() {
+      return !this.session_user || !this.user_settings
+    },
   },
 
   data: () => ({
-    state: 'loading', // loading | loaded
 
     isEditing: {
       formPrivacy: false,
@@ -274,11 +275,7 @@ export default {
   watch: {
     'blockedItem': 'queryBlockables',
 
-    session_user(newVal) {
-    },
-
     user_settings(newVal) {
-      this.state = 'loaded'
       if ( newVal.cattrs.privacy ) {
         this.formPrivacy.privacy = newVal.cattrs.privacy
       }

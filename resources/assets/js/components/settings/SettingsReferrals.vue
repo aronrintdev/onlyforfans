@@ -30,23 +30,13 @@ export default {
      */
 
     isLoading() {
-      return false; // this.is_referrals_loading; %FIXME
+      return !this.session_user || !this.user_settings
     },
   },
 
-  watch: {
-    /*
-    referrals(value) {
-      if (value) {
-        this.is_referrals_loading = false
-      }
-    },
-     */
-  },
+  watch: { },
 
   data: () => ({
-
-    is_referrals_loading: true,
 
     perPage: 10,
     currentPage: 1,

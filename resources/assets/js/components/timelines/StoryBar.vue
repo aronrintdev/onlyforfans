@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!is_loading" class="crate tag-crate row mb-3 mx-0">
+  <div v-if="!isLoading" class="crate tag-crate row mb-3 mx-0">
     <section class="d-flex flex-wrap justify-content-between w-100">
       <div @click="createStory()" class="story">
         <router-link :to="{ name: 'stories.dashboard' }">
@@ -29,18 +29,14 @@ import Vuex from 'vuex'
 export default {
   props: {
     session_user: null,
-    timeline: null,
   },
 
   computed: {
     ...Vuex.mapState(['stories']),
-    ...Vuex.mapState(['is_loading']),
 
-    /*
-    username() { // story owner
-      return this.timeline.username;
+    isLoading() {
+      return !this.stories
     },
-    */
   },
 
   data: () => ({
@@ -48,10 +44,9 @@ export default {
   }),
 
   created() {
-    //this.$store.dispatch('getMe');
     this.$store.dispatch('getStories', {
       filters: {
-        user_id: this.timeline.user.id,
+        user_id: this.session_user.id,
       },
     })
   },

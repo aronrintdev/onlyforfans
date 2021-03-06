@@ -31,7 +31,11 @@ export default {
   },
 
   computed: {
-    ...Vuex.mapGetters(['session_user']),
+    ...Vuex.mapGetters([
+      'session_user',
+      'timeline',
+    ]),
+
     showNames() {
       return false
     },
@@ -50,7 +54,7 @@ export default {
           {
             name: 'Fans',
             icon: 'users',
-            to: { name: 'timeline.followers', params: { slug: (this.session_user ? this.session_user.timeline.slug : ''), } },
+            to: { name: 'timeline.followers', params: { slug: (this.timeline ? this.timeline.slug : ''), } },
           },
           {
             name: 'Discover',

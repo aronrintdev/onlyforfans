@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="!isLoading">
 
     <b-card title="Update Password">
       <b-card-text>
@@ -52,7 +52,9 @@ export default {
   },
 
   computed: {
-    //...Vuex.mapState(['vault']),
+    isLoading() {
+      return !this.session_user || !this.user_settings
+    },
   },
 
   data: () => ({

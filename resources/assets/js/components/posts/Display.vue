@@ -124,13 +124,10 @@ export default {
     username() {
       return this.post.user.username
     },
-    timeline() {
-      return this.post.user.timeline // %FIXME: shouldn't need user
-    },
     timelineRoute() {
       return {
         name: 'timeline.show',
-        params: { slug: this.timeline.slug }
+        params: { slug: this.post.timeline_slug }
       }
     },
   },

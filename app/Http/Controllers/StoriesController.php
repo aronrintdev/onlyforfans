@@ -35,7 +35,7 @@ class StoriesController extends AppBaseController
                 }
                 if ( array_key_exists('timeline_id', $filters) ) {
                     $timeline = Timeline::findOrFail($request->filters['timeline_id']);
-                    if ( $request->user()->can('view', $timeline) ) { // should include followers & owner (!)
+                    if ( $request->user()->can('indexStories', $timeline) ) { // should include followers & owner (!)
                         break; // allowed
                     }
                 }
