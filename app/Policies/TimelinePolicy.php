@@ -20,6 +20,7 @@ class TimelinePolicy extends BasePolicy
         'forceDelete' => 'isOwner:pass',
         'follow'      => 'isOwner:pass isBlockedByOwner:fail',
         'like'        => 'isOwner:pass isBlockedByOwner:fail',
+        'indexStories' => 'isOwner:pass isBlockedByOwner:fail',
     ];
 
     protected function view(User $user, Timeline $resource)
