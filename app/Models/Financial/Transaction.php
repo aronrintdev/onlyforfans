@@ -23,7 +23,7 @@ class Transaction extends Model
 
     public function reference()
     {
-        return $this->hasOne(Transaction::class, 'reference');
+        return $this->hasOne(Transaction::class, 'reference_id');
     }
 
 

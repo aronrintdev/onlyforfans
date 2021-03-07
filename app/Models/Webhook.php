@@ -15,10 +15,70 @@ class Webhook extends Model
 
     /** Property Casts */
     protected $casts = [
-        'headers' => 'array',
-        'body' => 'array',
-        'notes' => 'array',
+        'headers' => 'encrypted:array', // Encrypting in case of sensitive information
+        'body'    => 'encrypted:array', // Encrypting in case of sensitive information
+        'notes'   => 'encrypted:array', // Encrypting in case of sensitive information
     ];
+
+    /**
+     * Store Webhook of unknown origin
+     */
+    public static function receiveUnknown(Request $request): Response
+    {
+        Log::info('Received Unknown Webhook');
+        $webhook = Webhook::create([
+            'type' => 'unknown',
+            'origin' => $request->getClientIp(),
+            'headers' => $request->headers,
+            'verified' => false,
+            'body' => $request->all(),
+            'status' => Status::IGNORED,
+        ]);
+        $webhook->save();
+        return response('Not authenticated', 401);
+    }
+
+    /**
+     * Store webhook from SegPay
+     */
+    public static function receiveSegPay(Request $request): Response
+    {
+        Log::info('Received SegPay Webhook');
+
+        $webhook = Webhook::create([
+            'type' => 'SegPay',
+            'origin' => $request->getClientIp(),
+            'headers' => $request->headers,
+            'verified' => false,
+            'body' => $request->all(),
+            'status' => Status::UNHANDLED,
+        ]);
+
+        // Verify webhook integrity
+        if (!Webhook::verifySegPay($request)) {
+            // Verification failed
+            $webhook->status = Status::IGNORED;
+            $webhook->save();
+            return response('Not authenticated', 401);
+        }
+
+        $webhook->verified = true;
+        $webhook->save();
+
+        // TODO: Create job to handle
+
+        return response(); // 200 response
+    }
+
+    /**
+     * Verify integrity of SegPay webhook request
+     */
+    public static function verifySegPay(Request $request): bool
+    {
+        // TODO: Figure out SegPay's verification process
+        return false;
+    }
+
 
     /**
      * Handles storing of pusher webhook requests
@@ -31,6 +91,7 @@ class Webhook extends Model
         Log::info('Received Pusher Webhook');
 
         $webhook = Webhook::create([
+            'type' => 'Pusher',
             'origin' => $request->getClientIp(),
             'headers' => $request->headers,
             'verified' => false,

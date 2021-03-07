@@ -32,6 +32,12 @@ return [
                  * Default Api to use
                  */
                 'api' => 'segpay',
+
+                /**
+                 * Default holding period before content creator can take out funds.
+                 * In minutes
+                 */
+                'holdPeriod' => env('TRANSACTIONS_SEGPAY_HOLD_PERIOD', 3 * 24 * 60), // default 3 days
             ],
             /**
              * Available currencies,
@@ -65,12 +71,12 @@ return [
                 /**
                  * The minimum amount that can be transferred into the system on a single transaction
                  */
-                'in' => env('TRANSACTIONS_SEGPAY_MIN_IN', 1),
+                'in' => env('TRANSACTIONS_SEGPAY_MIN_IN', 300),
 
                 /**
                  * The minimum amount that can be transferred out of the system on a single transaction
                  */
-                'out' => env('TRANSACTIONS_SEGPAY_MIN_OUT', 1),
+                'out' => env('TRANSACTIONS_SEGPAY_MIN_OUT', 300),
             ],
         ],
         // 'other system' => [],

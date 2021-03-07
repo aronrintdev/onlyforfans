@@ -14,7 +14,9 @@ class SegpayCard extends Model implements Ownable
     protected $table = 'segpay_card';
 
     protected $casts = [
-        'token' => 'encrypted'
+        'token' => 'encrypted', // purchase id from webhook
+        'card_type' => 'encrypted',
+        'last_4' => 'encrypted',
     ];
 
     /* ------------------------------ Relations ----------------------------- */

@@ -17,12 +17,20 @@ class UpdateFinancialAccounts extends Migration
     public function up()
     {
         Schema::table('financial_accounts', function (Blueprint $table) {
+            /**
+             * The transaction system this account belongs to.
+             */
             $table->string('system')->after('id');
-            $table->integer('balance')->nullable()->after('type');
+            /**
+             * ISO 4217 Currency Code
+             * https://en.wikipedia.org/wiki/ISO_4217
+             */
+            $table->string('currency', 3)->after('type');
+            $table->integer('balance')->nullable()->after('currency');
             $table->timestamp('balance_last_updated_at')->nullable()->after('balance');
             $table->integer('pending')->nullable()->after('balance_last_updated_at');
             $table->timestamp('pending_last_updated_at')->nullable()->after('pending');
-            $table->timestamp('hidden_at')->nullable()->after('updated_at');
+            $table->softDeletes()->after('updated_at');
         });
     }
 
@@ -34,12 +42,27 @@ class UpdateFinancialAccounts extends Migration
     public function down()
     {
         Schema::table('financial_accounts', function (Blueprint $table) {
-            $table->dropColumn('system');
-            $table->dropColumn('balance');
-            $table->dropColumn('balance_last_updated_at');
-            $table->dropColumn('pending');
-            $table->dropColumn('pending_last_updated_at');
-            $table->dropColumn('hidden_at');
+            if (Schema::hasColumn('financial_accounts', 'system')) {
+                $table->dropColumn('system');
+            }
+            if (Schema::hasColumn('financial_accounts', 'currency')) {
+                $table->dropColumn('currency');
+            }
+            if (Schema::hasColumn('financial_accounts', 'balance')) {
+                $table->dropColumn('balance');
+            }
+            if (Schema::hasColumn('financial_accounts', 'balance_last_updated_at')) {
+                $table->dropColumn('balance_last_updated_at');
+            }
+            if (Schema::hasColumn('financial_accounts', 'pending')) {
+                $table->dropColumn('pending');
+            }
+            if (Schema::hasColumn('financial_accounts', 'pending_last_updated_at')) {
+                $table->dropColumn('pending_last_updated_at');
+            }
+            if (Schema::hasColumn('financial_accounts', 'deleted_at')) {
+                $table->dropColumn('deleted_at');
+            }
         });
     }
 }

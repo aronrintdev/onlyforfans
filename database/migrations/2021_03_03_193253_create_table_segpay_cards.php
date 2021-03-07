@@ -18,6 +18,8 @@ class CreateTableSegpayCards extends Migration
             $table->uuidMorphs('owner');
             $table->string('token');
             $table->string('nickname')->nullable();
+            $table->string('card_type')->nullable();
+            $table->string('last_4')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });
