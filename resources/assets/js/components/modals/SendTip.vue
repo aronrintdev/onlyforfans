@@ -1,4 +1,4 @@
-app/Http/Controllers/PostsController.php<template>
+<template>
   <b-card no-body>
 
     <b-card-header>
