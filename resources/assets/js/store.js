@@ -159,9 +159,14 @@ export default new Vuex.Store({
 
     getStories({ commit }, { filters }) {
       //const username = this.state.session_user.username // Not used - This param will eventually be DEPRECATED
+      // %FIXME
       const params = {}
-      if (Object.keys(filters).includes('user_id')) {
-        params.user_id = filters.user_id
+      if (Object.keys(filters).includes('timeline_id')) {
+        params.user_id = filters.timeline_id
+      } else if (Object.keys(filters).includes('following')) {
+        params.following = true
+      } else {
+        params.following = true // default
       }
       axios.get(route('stories.index'), { params })
         .then((response) => {
