@@ -166,17 +166,4 @@ class Timeline extends Model implements Purchaseable, Ownable, Reportable
         return new Collection([ $this->user ]);
     }
 
-    /*
-    public function getPublicInfo() : array
-    {
-        return [
-            'username'  => $this->user->username,
-            'cover'     => $this->cover,
-            'avatar'    => $this->avatar,
-            'name'      => $this->name,
-            'verified'  => $this->verified,
-        ];
-    }
-     */
-
 }

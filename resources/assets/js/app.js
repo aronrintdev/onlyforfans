@@ -94,6 +94,20 @@ Vue.filter('niceCurrency', function (valueInCents) {
   return `$${value}`
 })
 
+Vue.filter('niceGuid', function (v) {
+  return v.slice(-12)
+})
+Vue.filter('enumPostType', function (k) {
+  switch (k) {
+    case 'free':
+      return 'Free'
+    case 'price':
+      return 'Buy'
+    case 'paid':
+      return 'Subscriber-Only'
+  }
+})
+
 export const eventBus = new Vue({
 /*
     methods: {

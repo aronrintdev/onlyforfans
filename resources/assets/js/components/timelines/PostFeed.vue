@@ -1,5 +1,12 @@
 <template>
   <div v-if="!isLoading" class="feed-crate tag-posts tag-crate">
+  <div class="tag-debug">
+    <ul>
+      <li>Timeline ID: {{ timeline.id | niceGuid }}</li>
+      <li>Price: {{ timeline.price }}</li>
+      <li>Slug: {{ timeline.slug }}</li>
+    </ul>
+  </div>
     <section class="row">
       <div class="w-100">
         <article
@@ -8,11 +15,13 @@
           class="col-sm-12 mb-3"
           v-observe-visibility="index === renderedItems.length - 1 ? endPostVisible : false"
         >
+          <div>HERE {{ feedItem.id | niceGuid }}</div>
           <!-- for now we assume posts; eventually need to convert to a DTO (ie more generic 'feedItem') : GraphQL ? -->
           <PostDisplay
             :post="feedItem"
             :session_user="session_user"
             @delete-post="deletePost"
+            @render-purchase-post="renderPurchasePostModal"
           />
         </article>
         <article class="load-more-item col-sm-12 mb-3">
@@ -26,6 +35,11 @@
         </article>
       </div>
     </section>
+
+    <b-modal id="modal-purchase_post" size="sm" title="Purchase Post" hide-footer body-class="p-0" v-if="true || !isLoading">
+      <PurchasePost :session_user="session_user" :post="selectedPost" />
+    </b-modal>
+
   </div>
 </template>
 
@@ -33,10 +47,12 @@
 import Vuex from 'vuex'
 //import { eventBus } from '@/app'
 import PostDisplay from '@components/posts/Display'
+import PurchasePost from '@components/modals/PurchasePost.vue';
 
 export default {
   components: {
     PostDisplay,
+    PurchasePost,
   },
 
   props: {
@@ -76,6 +92,7 @@ export default {
   },
 
   data: () => ({
+    selectedPost: null, // for purchase modal, etc
     renderedItems: [], // this will likely only be posts
     renderedPages: [], // track so we don't re-load same page (set of posts) more than 1x
     limit: 5, // %FIXME: un-hardcode
@@ -109,12 +126,21 @@ export default {
       }
     },
 
-
     onScroll(e) {
       const atBottom = document.documentElement.scrollTop + window.innerHeight === document.documentElement.offsetHeight;
       if (atBottom && !this.isLoading) {
         this.loadMore()
       }
+    },
+
+    renderPurchasePostModal(post) {
+      console.log('renderPurchasePostModal()')
+      // v-b-modal.modal-purchase_post
+      this.selectedPost = post
+      this.$bvModal.show('modal-purchase_post')
+    },
+
+    async purchasePost(postId) {
     },
 
     async deletePost(postId) {

@@ -1,5 +1,6 @@
 <template>
   <div class="post-crate" v-bind:data-post_guid="post.id">
+    <div>HELLO POST</div>
     <b-card
       header-tag="header"
       footer-tag="footer"
@@ -45,6 +46,14 @@
               </li>
             </ul>
           </section>
+          <div class="tag-debug">
+            <ul>
+              <li>ID: {{ post.id | niceGuid }}</li>
+              <li>Type: {{ post.type | enumPostType }}</li>
+              <li>Price: {{ post.price }}</li>
+              <li>Access: {{ post.access }}</li>
+            </ul>
+          </div>
         </div>
         <div v-if="session_user.id === post.user.id" class="post-ctrl">
           <b-dropdown id="dropdown-1" text="" class="m-md-2" variant="outline-dark">
@@ -54,15 +63,18 @@
         </div>
       </template>
 
-      <b-card-img
-        v-if="post.mediafiles.length > 0"
-        :src="post.mediafiles[0].filepath"
-        alt="Image"
-      ></b-card-img>
-
-      <b-card-text>
-        <p>{{ post.description }}</p>
-      </b-card-text>
+      <template v-if="post.access">
+        <b-card-img v-if="hasMediafiles" :src="primaryMediafile" alt="Image" ></b-card-img>
+        <b-card-text> <p>{{ post.description }}</p> </b-card-text>
+      </template>
+      <template v-else>
+        <div class="locked-content d-flex justify-content-center align-items-center">
+          <div class="d-flex flex-column">
+            <b-icon icon="lock-fill" font-scale="5" variant="light" />
+            <b-button @click="renderPurchasePost" class="mt-3" variant="primary">Buy</b-button>
+          </div>
+        </div>
+      </template>
 
       <template #footer>
         <div class="panel-footer fans">
@@ -129,6 +141,15 @@ export default {
         name: 'timeline.show',
         params: { slug: this.post.timeline_slug }
       }
+    },
+    hasMediafiles() {
+      return this.post.mediafiles?.length > 0
+    },
+    primaryMediafile() {
+      return this.hasMediafiles ? this.post.mediafiles[0].filepath : null
+    },
+    isLoading() {
+      return !this.post || !this.session_user
     },
   },
 
@@ -211,6 +232,10 @@ export default {
       console.log('ShowPost::editPost()', { is })
     },
 
+    renderPurchasePost() {
+      this.$emit('render-purchase-post', this.post)
+    },
+
     deletePost() {
       const is = this.session_user.id === this.post.user.id // Check permissions
       if (!is) {
@@ -289,5 +314,11 @@ body .user-details ul > li {
   color: #859ab5;
   font-size: 16px;
   font-weight: 400;
+}
+body .locked-content {
+  background: url('/images/locked_post.png') center center no-repeat !important;
+  background-size: auto;
+  background-size: cover !important;
+  min-height: 20rem;
 }
 </style>

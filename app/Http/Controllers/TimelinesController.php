@@ -55,7 +55,7 @@ class TimelinesController extends AppBaseController
         $query = Post::with('mediafiles', 'user')->withCount('comments')->where('active', 1);
         $query->whereHas('timeline', function($q1) use(&$request) {
             $q1->whereHas('followers', function($q2) use(&$request) {
-                $q2->where('id', $request->user()->id);
+                $q2->where('users.id', $request->user()->id);
             });
         });
         $data = $query->latest()->paginate( $request->input('take', env('MAX_POSTS_PER_REQUEST', 10)) );
