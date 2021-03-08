@@ -1,17 +1,21 @@
 <?php
 namespace App\Models;
 
+use App\Enums\Financial\AccountTypeEnum;
 use DB;
 use Auth;
 
 use App\Interfaces\Ownable;
 use App\Interfaces\Blockable;
+use App\Interfaces\HasFinancialAccounts;
 use App\Interfaces\ShortUuid;
 use App\Models\Traits\UsesUuid;
 
 use App\Interfaces\PaymentSendable;
+use App\Models\Financial\Account;
+use App\Models\Traits\MorphFunctions;
 use App\Models\Traits\UsesShortUuid;
-
+use Carbon\Carbon;
 use Spatie\Permission\Traits\HasRoles;
 use Cmgmyr\Messenger\Traits\Messagable;
 use Illuminate\Notifications\Notifiable;
@@ -20,9 +24,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
-class User extends Authenticatable implements PaymentSendable, Blockable
+class User extends Authenticatable implements PaymentSendable, Blockable, HasFinancialAccounts
 {
-    use Notifiable, HasRoles, HasFactory, Messagable, SoftDeletes, UsesUuid;
+    use Notifiable, HasRoles, HasFactory, Messagable, SoftDeletes, UsesUuid, MorphFunctions;
 
     protected $appends = [ 'name', 'avatar', 'cover', 'about', ];
     protected $guarded = [ 'id', 'created_at', 'updated_at' ];
@@ -219,6 +223,12 @@ class User extends Authenticatable implements PaymentSendable, Blockable
     {
         return $this->hasMany('App\Models\Vaultfolder');
     }
+
+    public function financialAccounts()
+    {
+        return $this->morphMany(Account::class, 'owner');
+    }
+
 
     //--------------------------------------------
     // %%% Accessors/Mutators | Casts
@@ -469,4 +479,39 @@ class User extends Authenticatable implements PaymentSendable, Blockable
 
         return $result;
     }
+
+
+    /* ------------------------ HasFinancialAccounts ------------------------ */
+    public function getInternalAccount(string $system, string $currency): Account
+    {
+        $account = $this->financialAccounts->where('system', $system)
+            ->where('currency', $currency)
+            ->where('type', AccountTypeEnum::INTERNAL)
+            ->first();
+        if (isset($account)) {
+            return $account;
+        }
+        return $this->createInternalAccount($system, $currency);
+    }
+
+    public function createInternalAccount(string $system, string $currency): Account
+    {
+        $account = Account::create([
+            'system' => $system,
+            'owner_type' => $this->getMorphString(),
+            'owner_id' => $this->getKey(),
+            'name' => $this->username . ' Balance Account',
+            'type' => AccountTypeEnum::INTERNAL,
+            'currency' => $currency,
+            'balance' => 0,
+            'balance_last_updated_at' => Carbon::now(),
+            'pending' => 0,
+            'pending_last_updated_at' => Carbon::now(),
+        ]);
+        $account->verified = true;
+        $account->can_make_transaction = true;
+        $account->save();
+        return $account;
+    }
+
 }

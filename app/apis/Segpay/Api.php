@@ -1,6 +1,6 @@
 <?php
 
-namespace App\apis\Segpay;
+namespace App\Apis\Segpay;
 
 use Exception;
 use Illuminate\Support\Facades\Config;

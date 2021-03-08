@@ -2,11 +2,12 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Relations\Relation;
+use App\Models\Traits\MorphFunctions;
 use Illuminate\Database\Eloquent\Model as EloquentModel;
 
 class Model extends EloquentModel
 {
+    use MorphFunctions;
 
     //protected $customAttributesField = 'cattrs';
     //protected $metaField = 'meta';
@@ -33,12 +34,4 @@ class Model extends EloquentModel
         $this->attributes[$this->metaField] = $value;
     }
      */
-
-    public function getMorphString(string $class = null) : string
-    {
-        if (!$class) {
-            $class = get_class($this);
-        }
-        return array_flip(Relation::morphMap())[$class] ?? $class;
-    }
 }

@@ -20,12 +20,12 @@ class UpdateFinancialAccounts extends Migration
             /**
              * The transaction system this account belongs to.
              */
-            $table->string('system')->after('id');
+            $table->string('system')->nullable()->after('id');
             /**
              * ISO 4217 Currency Code
              * https://en.wikipedia.org/wiki/ISO_4217
              */
-            $table->string('currency', 3)->after('type');
+            $table->string('currency', 3)->nullable()->after('type');
             $table->integer('balance')->nullable()->after('currency');
             $table->timestamp('balance_last_updated_at')->nullable()->after('balance');
             $table->integer('pending')->nullable()->after('balance_last_updated_at');

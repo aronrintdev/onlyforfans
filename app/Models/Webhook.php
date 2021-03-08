@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Log;
 use Exception;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use App\Enums\WebhookStatusEnum as Status;
@@ -63,6 +64,26 @@ class Webhook extends Model
         }
 
         $webhook->verified = true;
+
+        /**
+         * Must be handled synchronously: Probe, Enable, and Disable
+         */
+        try {
+            if (Str::lower($request->action) === 'probe') {
+                // Handle Inquiry
+            } else if (Str::lower($request->action) === 'enable') {
+                // Handle Access Enable
+            } else if (Str::lower($request->action) === 'disable') {
+                // Handle Access Disable
+            }
+        } catch (Exception $e) {
+            $webhook->status = Status::ERROR;
+            $webhook->notes = 'Error on execution: ' . $e->getMessage();
+            $webhook->save();
+            return response('', 500);
+        }
+
+
         $webhook->save();
 
         // TODO: Create job to handle
