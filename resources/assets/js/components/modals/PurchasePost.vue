@@ -17,27 +17,12 @@
     </b-card-header>
 
     <b-form @submit="purchasePost">
-
       <b-card-body>
-
-        <b-form-spinbutton
-          id="purchase-amount"
-          class="w-100 mx-auto tag-purchase_amount"
-          v-model="formPayload.amount"
-          :formatter-fn="niceCurrency"
-          min="5"
-          max="100"
-          step="5"
-          ></b-form-spinbutton>
-
-        <textarea v-model="formPayload.notes" cols="60" rows="5" class="w-100 mt-3" placeholder="Write a message"></textarea>
-
+        <p class="w-100 text-center m-0 tag-purchase_amount">{{ post.price | niceCurrency }}</p>
       </b-card-body>
-
       <b-card-footer>
-        <b-button type="submit" variant="warning" class="w-100">purchase Post</b-button>
+        <b-button type="submit" variant="warning" class="w-100">Purchase Post</b-button>
       </b-card-footer>
-
     </b-form>
 
   </b-card>
@@ -59,15 +44,7 @@ export default {
     },
   },
 
-  data: () => ({
-    formPayload: {
-      amount: 5,
-      notes: '',
-    },
-  }),
-
-  created() {
-  },
+  data: () => ({ }),
 
   methods: {
 
@@ -81,22 +58,21 @@ export default {
     async purchasePost(e) {
       e.preventDefault();
       const url = `/fanledgers`;
-      const response = await axios.post(url, {
-        fltype:  'purchase',
-        purchaseable_type: 'posts',
-        purchaseable_id: this.post.id,
-        seller_id: this.post.user_id,
-        base_unit_cost_in_cents: this.formPayload.amount * 100,
-        notes: this.formPayload.notes || '',
+      const response = await axios.put( route('posts.purchase', this.post.id), {
+        //fltype:  'purchase',
+        //purchaseable_type: 'posts',
+        //purchaseable_id: this.post.id,
+        //seller_id: this.post.user_id,
+        //base_unit_cost_in_cents: this.post.price,
+        //notes: null,
       });
 
       this.$bvModal.hide('modal-purchase_post');
 
-      this.$root.$bvToast.toast(`Tip sent to ${this.post.timeline_slug}`, {
+      this.$root.$bvToast.toast(`Post successfully purchased (${this.post.slug})`, {
         toaster: 'b-toaster-top-center',
         title: 'Success!',
       });
-
 
     },
 
