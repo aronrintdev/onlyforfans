@@ -102,7 +102,7 @@ Vue.filter('enumPostType', function (k) {
     case 'free':
       return 'Free'
     case 'price':
-      return 'Buy'
+      return 'Purchase-Only'
     case 'paid':
       return 'Subscriber-Only'
   }

@@ -57,23 +57,13 @@ export default {
 
     async purchasePost(e) {
       e.preventDefault();
-      const url = `/fanledgers`;
-      const response = await axios.put( route('posts.purchase', this.post.id), {
-        //fltype:  'purchase',
-        //purchaseable_type: 'posts',
-        //purchaseable_id: this.post.id,
-        //seller_id: this.post.user_id,
-        //base_unit_cost_in_cents: this.post.price,
-        //notes: null,
-      });
-
+      const response = await axios.put( route('posts.purchase', this.post.id) );
       this.$bvModal.hide('modal-purchase_post');
-
       this.$root.$bvToast.toast(`Post successfully purchased (${this.post.slug})`, {
         toaster: 'b-toaster-top-center',
         title: 'Success!',
       });
-
+      this.$emit('update-post', this.post.id)
     },
 
     async submitComment(e) {

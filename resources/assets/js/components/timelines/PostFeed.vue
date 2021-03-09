@@ -15,7 +15,7 @@
           class="col-sm-12 mb-3"
           v-observe-visibility="index === renderedItems.length - 1 ? endPostVisible : false"
         >
-          <div>HERE {{ feedItem.id | niceGuid }}</div>
+          <div>HERE {{ feedItem.id | niceGuid }} ({{ index }})</div>
           <!-- for now we assume posts; eventually need to convert to a DTO (ie more generic 'feedItem') : GraphQL ? -->
           <PostDisplay
             :post="feedItem"
@@ -37,7 +37,7 @@
     </section>
 
     <b-modal id="modal-purchase_post" size="sm" title="Purchase Post" hide-footer body-class="p-0" v-if="true || !isLoading">
-      <PurchasePost :session_user="session_user" :post="selectedPost" />
+      <PurchasePost v-on:update-post="onUpdatePost" :session_user="session_user" :post="selectedPost" />
     </b-modal>
 
   </div>
@@ -140,7 +140,17 @@ export default {
       this.$bvModal.show('modal-purchase_post')
     },
 
-    async purchasePost(postId) {
+    // re-render a single post (element of renderedItems), for example after purchase
+    // %TODO: should this update the element in vuex feeddata instead (?)
+    // see: 
+    //   https://vuejs.org/v2/guide/list.html#Array-Change-Detection
+    //   https://vuejs.org/v2/guide/reactivity.html#For-Arrays
+    async onUpdatePost(postId) {
+      const response = await axios.get( route('posts.show', postId) );
+      const idx = this.renderedItems.findIndex( ri => ri.id === postId )
+      //this.renderedItems[idx] = response.data.data
+      this.$set(this.renderedItems, idx, response.data.data)
+      //console.log('updatePost', response)
     },
 
     async deletePost(postId) {
