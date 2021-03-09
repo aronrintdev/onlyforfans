@@ -17,10 +17,10 @@ class Model extends ModelsModel
      */
     public function getSystemAttribute()
     {
-        if (!isset($this->system)) {
-            $this->system = Config::get('transactions.default');
+        if (!isset($this->attributes['system'] )) {
+            $this->attributes['system'] = Config::get('transactions.default');
         }
-        return $this->system;
+        return $this->attributes['system'];
     }
 
     /**
@@ -30,10 +30,10 @@ class Model extends ModelsModel
      */
     public function getCurrencyAttribute()
     {
-        if (!isset($this->currency)) {
-            $this->currency = Config::get('transactions.systems.' . $this->system . '.defaults.currency');
+        if (!isset($this->attributes['currency'])) {
+            $this->attributes['currency'] = Config::get('transactions.systems.' . $this->system . '.defaults.currency');
         }
-        return $this->currency;
+        return $this->attributes['currency'];
     }
 
     /**
@@ -41,9 +41,9 @@ class Model extends ModelsModel
      */
     public function getMinTransactionsAttribute()
     {
-        if (!isset($this->minTransactions)) {
-            $this->minTransactions = Config::get('transactions.systems.' . $this->system . '.minTransactions');
+        if (!isset($this->attributes['minTransactions'])) {
+            $this->attributes['minTransactions'] = Config::get('transactions.systems.' . $this->system . '.minTransactions');
         }
-        return $this->minTransactions;
+        return $this->attributes['minTransactions'];
     }
 }
