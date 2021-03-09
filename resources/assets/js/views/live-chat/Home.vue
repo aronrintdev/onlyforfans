@@ -182,10 +182,29 @@
                     <div class="empty-messages" v-if="messages.length === 0">
                       Type a message below to start a conversation with {{ selectedUser.name }}
                     </div>
-                    <div class="messages" v-if="messages.length">
-                      <div class="message" v-for="message in messages" :key="message.id">
-                        <div class="received" v-if="selectedUser.id === message.user.id">{{ message.text }}</div>
-                        <div class="sent" v-if="selectedUser.id !== message.user.id">{{ message.text }}</div>
+                    <div class="messages" v-if="messages.length > 0">
+                      <div class="message-group" :key="messageGroup.date"  v-for="messageGroup in messages">
+                        <div class="message-group-time"><span>{{ messageGroup.date }}</span></div>
+                        <template v-for="message in messageGroup.messages">
+                          <div class="message" :key="message.id">
+                            <div class="received" v-if="selectedUser && selectedUser.id === message.user.id">
+                              <div class="user-logo text-logo" v-if="selectedUser && !selectedUser.logo">
+                                {{ getLogoFromName(selectedUser.name) }}
+                              </div>
+                              <div class="user-logo" v-if="selectedUser && selectedUser.logo">
+                                <img :src="selectedUser.logo" alt="" />
+                              </div>
+                              <div class="content">
+                                <div class="text">{{ message.text }}</div>
+                                <div class="time">{{ message.time }}</div>
+                              </div>
+                            </div>
+                            <div class="sent" v-if="selectedUser && selectedUser.id !== message.user.id">
+                              <div class="text">{{ message.text }}</div>
+                              <div class="time">{{ message.time }}</div>
+                            </div>
+                          </div>
+                        </template>
                       </div>
                     </div>
                   </div>
@@ -246,6 +265,7 @@
 </template>
 
 <script>
+  import moment from 'moment';
   /**
    * Messages Dashboard View
    */
@@ -299,22 +319,50 @@
       ],
       messages: [
         {
-          id: 1,
-          time: '2021-02-16 7:42 pm',
-          text: 'Sure wish there was more content here.',
-          user: {
-            id: 2,
-            name: 'Lisa S.'
-          },
+          date: moment('2021-2-13').format('MMM DD, YYYY'),
+          messages: [
+            {
+              id: 1,
+              text: 'Hello, how are you?',
+              time: '10:29 PM',
+              user: {
+                id: 2,
+                name: 'Lisa S.'
+              },
+            },
+            {
+              id: 2,
+              text: 'Hey, I am fine. And you?',
+              time: '10:39 PM',
+              user: {
+                id: 3,
+                name: 'MCMXI'
+              },
+            },
+          ]
         },
         {
-          id: 2,
-          time: '2021-02-16 9:12 pm',
-          text: 'Ok, thanks.',
-          user: {
-            id: 3,
-            name: 'MCMXI'
-          },
+          date: moment('2021-2-16').format('MMM DD, YYYY'),
+          messages: [
+            {
+              id: 3,
+              time: '08:29 PM',
+              text: 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.',
+              user: {
+                id: 2,
+                name: 'Lisa S.'
+              },
+            },
+            {
+              id: 4,
+              text: 'Ok, thanks.',
+              time: '09:29 PM',
+              user: {
+                id: 3,
+                name: 'MCMXI'
+              },
+            }
+          ]
         }
       ],
       messageSearchVisible: false
