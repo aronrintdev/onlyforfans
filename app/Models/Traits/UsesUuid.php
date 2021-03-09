@@ -1,10 +1,10 @@
 <?php
-
 namespace App\Models\Traits;
 
 use App\Libs\UuidGenerator;
 use Exception;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Config;
 use Ramsey\Uuid\UuidFactory;
 use Ramsey\Uuid\Generator\CombGenerator;
 use Ramsey\Uuid\Codec\TimestampFirstCombCodec;
@@ -26,6 +26,11 @@ trait UsesUuid
 
     protected function generateUuid(): string
     {
-        return UuidGenerator::generateCombV4Uuid();
+        if ( Config::get('app.env') == 'local' || Config::get('app.env') == 'dev' ) {
+            return (string) Str::uuid();
+        } else {
+            return UuidGenerator::generateCombV4Uuid(); // production
+        }
     }
+
 }
