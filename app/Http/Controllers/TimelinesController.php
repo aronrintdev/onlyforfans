@@ -88,8 +88,8 @@ class TimelinesController extends AppBaseController
         $query->whereHas('user', function($q1) use(&$request, &$followedIDs) {
             $q1->where('id', '<>', $request->user()->id); // skip myself
             // skip timelines I'm already following
-            $q1->whereHas('followedtimelines', function($q2) use(&$followedIDs) {
-                $q2->whereNotIn('shareable_id', $followedIDs);
+            $q1->whereDoesntHave('followedtimelines', function($q2) use(&$followedIDs) {
+                $q2->whereIn('shareable_id', $followedIDs);
             });
         });
 
