@@ -7,6 +7,7 @@ use Exception;
 use Throwable;
 
 use App\Http\Resources\PostCollection;
+use App\Http\Resources\Timeline as TimelineResource;
 use App\Models\User;
 use App\Libs\FeedMgr;
 use App\Libs\UserMgr;
@@ -40,13 +41,10 @@ class TimelinesController extends AppBaseController
     public function show(Request $request, Timeline $timeline)
     {
         $this->authorize('view', $timeline);
-        $timeline->load(['avatar', 'cover']);
-        $timeline->userstats = $request->user()->getStats();
-
-        // %TODO: use UserResource and do public/private filtering there
-        return [
-            'timeline' => $timeline,
-        ];
+        //$timeline->load(['avatar', 'cover']);
+        //$timeline->userstats = $request->user()->getStats();
+        //return [ 'timeline' => $timeline, ];
+        return new TimelineResource($timeline);
     }
 
     // Display my home timeline

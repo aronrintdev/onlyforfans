@@ -250,7 +250,7 @@ class TimelinesTest extends TestCase
         // Try to follow
         $payload = [
             'sharee_id' => $fan->id,
-            'notes'=>'test_can_subscribe_to_timeline',
+            'notes'=>'test_can_not_follow_timeline',
         ];
         $response = $this->actingAs($fan)->ajaxJSON('PUT', route('timelines.follow', $timeline->id), $payload);
         $response->assertStatus(403);

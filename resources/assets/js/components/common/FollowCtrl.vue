@@ -3,9 +3,23 @@
     <b-card tag="article" class="OFF-mb-2">
       <b-card-text>
         <ul class="list-unstyled">
-          <li class=""><b-button variant="primary" class="w-100">Message</b-button></li>
-          <li class=""><b-button v-b-modal.modal-follow variant="primary" class="w-100 mt-3">Follow For Free</b-button></li>
-          <li class=""><b-button v-b-modal.modal-send_tip variant="primary" class="w-100 mt-3">$ Send Tip</b-button></li>
+          <li><b-button :disabled="timeline.is_owner" variant="primary" class="w-100">Message</b-button></li>
+          <li v-if="timeline.is_following">
+            <b-button :disabled="timeline.is_owner" v-b-modal.modal-follow variant="warning" class="w-100 mt-3">
+              <span v-if="timeline.is_subscribed">Unsubscribe</span>
+              <span v-else>Unfollow</span>
+            </b-button>
+          </li>
+          <li v-else >
+            <b-button :disabled="timeline.is_owner" v-b-modal.modal-follow variant="primary" class="w-100 mt-3">
+              <span>Follow For Free</span>
+            </b-button>
+          </li>
+          <li>
+            <b-button :disabled="timeline.is_owner" v-b-modal.modal-send_tip variant="primary" class="w-100 mt-3">
+              <span>$ Send Tip</span>
+              </b-button>
+          </li>
         </ul>
         <p>{{ timeline.about }}</p>
         <ul class="list-unstyled">

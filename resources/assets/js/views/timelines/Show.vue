@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="container" id="view-show_timeline" v-if="state === 'loaded'">
+    <div class="container" id="view-show_timeline" v-if="!isLoading">
 
       <section class="row">
         <article class="col-sm-12">
@@ -22,12 +22,23 @@
 
     </div>
 
-    <b-modal id="modal-send_tip" size="sm" title="Send a Tip" hide-footer body-class="p-0" v-if="state === 'loaded'">
+    <b-modal id="modal-send_tip" size="sm" title="Send a Tip" hide-footer body-class="p-0" v-if="!isLoading">
       <SendTip :session_user="session_user" :timeline="timeline" />
     </b-modal>
 
-    <b-modal id="modal-follow" title="Follow" ok-only v-if="state === 'loaded'">
-      <p class="my-4">Follow Modal</p>
+    <b-modal id="modal-follow" title="Follow" ok-only v-if="!isLoading">
+      <div class="w-100 d-flex justify-content-center">
+        <div v-if="timeline.is_following">
+          <b-button @click="doFollow" type="submit" variant="warning">
+            <span v-if="timeline.is_subscribed">Click to Unsubscribe</span>
+            <span v-else>Click to Unfollow</span>
+          </b-button>
+        </div>
+        <div v-else>
+          <b-button @click="doFollow" type="submit" variant="primary"><span>Click to Follow</span></b-button>
+          <b-button @click="doSubscribe" type="submit" variant="success"><span>Click to Subscribe</span></b-button>
+        </div>
+      </div>
     </b-modal>
 
   </div>
@@ -56,10 +67,13 @@ export default {
 
   computed: {
     ...Vuex.mapGetters(['session_user']),
+
+    isLoading() {
+      return !this.slug || !this.timeline
+    }
   },
 
   data: () => ({
-    state: 'loading', // loading | loaded
     timeline: null,
   }),
 
@@ -72,17 +86,32 @@ export default {
   },
 
   methods: {
-    load() {
-      this.state = 'loading'
-      this.axios.get(this.$apiRoute('timelines.show', { timeline: this.slug }))
-      .then(response => {
-        this.timeline = response.data.timeline
-        this.state = 'loaded'
-      })
-      .catch(error => {
+    async load() {
+      try { 
+        const response = await this.axios.get(this.$apiRoute('timelines.show', { timeline: this.slug }))
+        this.timeline = response.data.data
+      } catch (error) {
         this.$log.error(error)
+      }
+    },
+
+    async doFollow() {
+      const response = await this.axios.put( route('timelines.follow', this.timeline.id), {
+        sharee_id: this.session_user.id,
+        notes: '',
       })
-    }
+      this.$bvModal.hide('modal-follow');
+      this.load()
+    },
+
+    async doSubscribe() {
+      const response = await this.axios.put( route('timelines.subscribe', this.timeline.id), {
+        sharee_id: this.session_user.id,
+        notes: '',
+      })
+      this.$bvModal.hide('modal-follow');
+      this.load()
+    },
   },
 
   watch: {
