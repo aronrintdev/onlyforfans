@@ -42,9 +42,9 @@ class PostsTableSeeder extends Seeder
 
                 static $typesUsed = []; // guarantee one of each post type
                 $ptype = $this->faker->randomElement([
-                    PostTypeEnum::SUBSCRIBER,
-                    PostTypeEnum::PRICED,
-                    PostTypeEnum::FREE, PostTypeEnum::FREE, PostTypeEnum::FREE,
+                    PostTypeEnum::SUBSCRIBER, PostTypeEnum::SUBSCRIBER,
+                    PostTypeEnum::PRICED, PostTypeEnum::PRICED,
+                    PostTypeEnum::FREE,
                 ]);
                 $diff = array_diff( PostTypeEnum::getKeys(), $typesUsed );
                 if ( count($diff) ) {
