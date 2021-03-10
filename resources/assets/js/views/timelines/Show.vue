@@ -10,15 +10,12 @@
       </section>
 
       <section class="row">
-
         <aside class="col-md-5 col-lg-4">
           <FollowCtrl :session_user="session_user" :timeline="timeline" />
         </aside>
-
         <main class="col-md-7 col-lg-8">
           <PostFeed :session_user="session_user" :timeline="timeline" :is_homefeed="false" />
         </main>
-
       </section>
 
     </div>
@@ -33,7 +30,7 @@
     </b-modal>
 
     <b-modal id="modal-follow" title="Follow" hide-footer body-class="p-0">
-      <FollowTimeline :session_user="session_user" :timeline="selectedTimeline" />
+      <FollowTimeline :session_user="session_user" :timeline="timeline" />
     </b-modal>
 
   </div>
@@ -76,7 +73,6 @@ export default {
   data: () => ({
     timeline: null,
     selectedPost: null,
-    selectedTimeline: null,
   }),
 
   created() {

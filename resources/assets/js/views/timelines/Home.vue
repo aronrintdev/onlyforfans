@@ -1,38 +1,39 @@
 <template>
-  <div class="container" id="view-home_timeline">
+  <div v-if="!isLoading">
 
-    <section class="row" v-if="!isLoading">
-      <article class="col-sm-12">
-        <StoryBar :session_user="session_user"></StoryBar>
-      </article>
-    </section>
+    <div class="container" id="view-home_timeline">
 
-    <section class="row" v-if="!isLoading">
+      <section class="row">
+        <article class="col-sm-12">
+          <StoryBar :session_user="session_user"></StoryBar>
+        </article>
+      </section>
 
-      <main class="col-md-7 col-lg-8">
-        <CreatePost :session_user="session_user" :timeline="timeline" />
-        <PostFeed :session_user="session_user" :timeline="timeline" :is_homefeed="true" />
-      </main>
+      <section class="row">
+        <main class="col-md-7 col-lg-8">
+          <CreatePost :session_user="session_user" :timeline="timeline" />
+          <PostFeed :session_user="session_user" :timeline="timeline" :is_homefeed="true" />
+        </main>
+        <aside class="col-md-5 col-lg-4">
+          <MiniMyStatsWidget :session_user="session_user" :timeline="timeline" />
+          <SuggestedFeed :session_user="session_user" :timeline="timeline" class="mt-3" />
+        </aside>
+      </section>
 
-      <aside class="col-md-5 col-lg-4">
-        <MiniMyStatsWidget :session_user="session_user" :timeline="timeline" />
-        <SuggestedFeed :session_user="session_user" :timeline="timeline" class="mt-3" />
-      </aside>
+      <!-- %FIXME: DRY vs Show -->
+      <b-modal id="modal-tip" size="sm" title="Send a Tip" hide-footer body-class="p-0">
+        <SendTip :session_user="session_user" :timeline="timeline" />
+      </b-modal>
 
-    </section>
+      <b-modal id="modal-purchase_post" size="sm" title="Purchase Post" hide-footer body-class="p-0">
+        <PurchasePost :session_user="session_user" :post="selectedPost" />
+      </b-modal>
 
-    <!-- %FIXME: DRY vs Show -->
-    <b-modal id="modal-tip" size="sm" title="Send a Tip" hide-footer body-class="p-0">
-      <SendTip :session_user="session_user" :timeline="timeline" />
-    </b-modal>
+      <b-modal id="modal-follow" title="Follow" hide-footer body-class="p-0">
+        <FollowTimeline :session_user="session_user" :timeline="selectedTimeline" />
+      </b-modal>
 
-    <b-modal id="modal-purchase_post" size="sm" title="Purchase Post" hide-footer body-class="p-0">
-      <PurchasePost :session_user="session_user" :post="selectedPost" />
-    </b-modal>
-
-    <b-modal id="modal-follow" title="Follow" hide-footer body-class="p-0">
-      <FollowTimeline :session_user="session_user" :timeline="selectedTimeline" />
-    </b-modal>
+    </div>
 
   </div>
 </template>
