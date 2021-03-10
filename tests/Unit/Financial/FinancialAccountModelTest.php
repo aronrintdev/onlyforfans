@@ -28,7 +28,7 @@ class FinancialAccountModelTest extends TestCase
     {
         parent::setUp();
         $this->defaultSystem = Config::get('transactions.default');
-        $this->defaultCurrency = Config::get('transactions.systems.' . $this->defaultSystem . '.defaults.currency');
+        $this->defaultCurrency = Config::get('transactions.defaultCurrency');
         $this->accountTableName = app(Account::class)->getTable();
         $this->transactionTableName = app(Transaction::class)->getTable();
     }
@@ -104,19 +104,8 @@ class FinancialAccountModelTest extends TestCase
      */
     public function test_move_to_internal_account_from_in_account()
     {
-        $user = User::factory()->create();
-        $inAccount = Account::create([
-            'system' => $this->defaultSystem,
-            'owner_type' => $user->getMorphString(),
-            'owner_id' => $user->getKey(),
-            'name' => $user->username . ' In Account',
-            'type' => AccountTypeEnum::IN,
-            'currency' => $this->defaultCurrency,
-            'balance' => 0,
-            'balance_last_updated_at' => Carbon::now(),
-            'pending' => 0,
-            'pending_last_updated_at' => Carbon::now(),
-        ]);
+        $inAccount = Account::factory()->asTypeIn()->create();
+        $user = $inAccount->owner;
 
         $this->expectException(InvalidTransactionAmountException::class);
         $inAccount->moveToInternal(-1);

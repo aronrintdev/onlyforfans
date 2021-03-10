@@ -2,21 +2,25 @@
 
 namespace App\Models\Financial;
 
-use App\Interfaces\Ownable;
-use Illuminate\Support\Arr;
-use App\Models\Traits\UsesUuid;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
-use App\Models\Traits\OwnableTraits;
-use Illuminate\Support\Facades\Config;
 use App\Enums\Financial\AccountTypeEnum;
+use App\Interfaces\Ownable;
 use App\Models\Financial\Exceptions\Account\IncorrectTypeException;
 use App\Models\Financial\Exceptions\Account\TransactionNotAllowedException;
+use App\Models\Traits\OwnableTraits;
 use App\Models\Financial\Exceptions\InvalidTransactionAmountException;
+use App\Models\Traits\UsesUuid;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Config;
 
 class Account extends Model implements Ownable
 {
-    use OwnableTraits, UsesUuid;
+    use OwnableTraits,
+        UsesUuid,
+        HasFactory;
 
     protected $table = 'financial_accounts';
 
