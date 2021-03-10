@@ -1,5 +1,12 @@
 <template>
   <div v-if="!isLoading" class="feed-crate tag-posts tag-crate">
+  <div class="tag-debug">
+    <ul>
+      <li>Timeline ID: {{ timeline.id | niceGuid }}</li>
+      <li>Price: {{ timeline.price }}</li>
+      <li>Slug: {{ timeline.slug }}</li>
+    </ul>
+  </div>
     <section class="row">
       <div class="w-100">
         <article
@@ -8,6 +15,7 @@
           class="col-sm-12 mb-3"
           v-observe-visibility="index === renderedItems.length - 1 ? endPostVisible : false"
         >
+          <div>HERE {{ feedItem.id | niceGuid }} ({{ index }})</div>
           <!-- for now we assume posts; eventually need to convert to a DTO (ie more generic 'feedItem') : GraphQL ? -->
           <PostDisplay
             :post="feedItem"
@@ -26,12 +34,13 @@
         </article>
       </div>
     </section>
+
   </div>
 </template>
 
 <script>
 import Vuex from 'vuex'
-//import { eventBus } from '@/app'
+import { eventBus } from '@/app'
 import PostDisplay from '@components/posts/Display'
 
 export default {
@@ -78,20 +87,34 @@ export default {
   data: () => ({
     renderedItems: [], // this will likely only be posts
     renderedPages: [], // track so we don't re-load same page (set of posts) more than 1x
-    limit: 5, // %FIXME: un-hardcode
     lastPostVisible: false,
     moreLoading: true,
+    limit: 5, // %FIXME: un-hardcode
   }),
 
   mounted() {
-    // window.addEventListener('scroll', this.onScroll);
+    // window.addEventListener('scroll', this.onScroll)
   },
   beforeDestroy() {
-    // window.removeEventListener('scroll', this.onScroll);
+    // window.removeEventListener('scroll', this.onScroll)
   },
 
   created() {
     this.$store.dispatch('getFeeddata', { timelineId: this.timelineId, page: 1, limit: this.limit, isHomefeed: this.is_homefeed })
+
+    eventBus.$on('update-post', postId => {
+      console.log('components.timelines.PostFeed - eventBus.$on(update-post)')
+      this.updatePost(postId) 
+    })
+
+    eventBus.$on('update-feed', () => {
+      console.log('components.timelines.PostFeed - eventBus.$on(update-feed)')
+      this.renderedPages = []
+      this.renderedItems = []
+      this.lastPostVisible = false
+      this.moreLoading = true
+      this.$store.dispatch('getFeeddata', { timelineId: this.timelineId, page: 1, limit: this.limit, isHomefeed: this.is_homefeed })
+    })
   },
 
   methods: {
@@ -109,12 +132,35 @@ export default {
       }
     },
 
-
     onScroll(e) {
       const atBottom = document.documentElement.scrollTop + window.innerHeight === document.documentElement.offsetHeight;
       if (atBottom && !this.isLoading) {
         this.loadMore()
       }
+    },
+
+    /*
+    renderPurchasePostModal(post) {
+      // v-b-modal.modal-purchase_post
+      this.$bvModal.show('modal-purchase_post', post)
+    },
+
+    renderSubscribeModal() {
+      this.$bvModal.show('modal-purchase_post')
+    }
+     */
+
+    // re-render a single post (element of renderedItems) based on updated data, for example after purchase
+    // %TODO: should this update the element in vuex feeddata instead (?)
+    // see: 
+    //   https://vuejs.org/v2/guide/list.html#Array-Change-Detection
+    //   https://vuejs.org/v2/guide/reactivity.html#For-Arrays
+    async updatePost(postId) {
+      const response = await axios.get( route('posts.show', postId) );
+      const idx = this.renderedItems.findIndex( ri => ri.id === postId )
+      //this.renderedItems[idx] = response.data.data
+      this.$set(this.renderedItems, idx, response.data.data)
+      //console.log('updatePost', response)
     },
 
     async deletePost(postId) {

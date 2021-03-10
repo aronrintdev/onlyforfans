@@ -44,8 +44,6 @@ class PostPolicy extends BasePolicy
             return $post->timeline->followers->count()
                 && $post->timeline->followers->contains($user->id);
         case PostTypeEnum::SUBSCRIBER:
-            $a = $post->timeline->subscribers->count();
-            $b = $post->timeline->subscribers->contains($user->id);
             return $post->timeline->subscribers->count()
                 && $post->timeline->subscribers->contains($user->id);
             //return $post->timeline->followers->count()

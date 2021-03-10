@@ -92,24 +92,34 @@ Vue.filter('niceCurrency', function (valueInCents) {
   let value = valueInCents ? (valueInCents/100) : 0
   value.toFixed(2)
   return `$${value}`
+  /*
+      return new Intl.NumberFormat('en-US',
+        { style: 'currency', currency: 'USD' }
+      ).format(v);
+    */
 })
 
-export const eventBus = new Vue({
-/*
-    methods: {
-        switchDetails: function(obj) {
-            this.$emit('detailsWasSwitched', obj);
-        },
-        fixStatus: function(index) {
-            this.$emit('statusWasFixed', index);
-        },
-    }
-*/
-});
+Vue.filter('niceGuid', function (v) {
+  return v.slice(-12)
+})
+Vue.filter('enumPostType', function (k) {
+  switch (k) {
+    case 'free':
+      return 'Free'
+    case 'price':
+      return 'Purchase-Only'
+    case 'paid':
+      return 'Subscriber-Only'
+  }
+})
+// Assumes post as input
+Vue.filter('isSubscriberOnly', function (p) {
+  return p.type === 'paid'
+})
 
-/**
- * Loading localization translations
- */
+export const eventBus = new Vue({ });
+
+// Localization translations
 import i18n from './i18n'
 
 import VueRouter from 'vue-router'

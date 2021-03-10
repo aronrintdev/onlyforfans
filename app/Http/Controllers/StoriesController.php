@@ -45,7 +45,7 @@ class StoriesController extends AppBaseController
 
         $query = Story::query()->with('mediafiles');
 
-        foreach ( $request->input('filters', []) as $k => $v ) {
+        foreach ( $filters as $k => $v ) {
             switch ($k) {
             case 'following':
                 $query->whereHas('timeline', function($q1) use(&$request) {
