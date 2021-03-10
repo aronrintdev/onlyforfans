@@ -1,10 +1,13 @@
 <?php
 
-namespace App\Models\Financial\Exceptions;
+namespace App\Models\Financial\Exceptions\Account;
 
 use RuntimeException;
 
-class IncorrectAccountTypeException extends RuntimeException
+/**
+ * Thrown when financial account is not expected account type
+ */
+class IncorrectTypeException extends RuntimeException
 {
     protected $account;
     protected $expectedType;
@@ -19,7 +22,7 @@ class IncorrectAccountTypeException extends RuntimeException
         $this->account = $account;
         $this->expectedType = $expectedType;
 
-        $this->message = "Incorrect Account Type! Expected [{$expectedType}] but got [{$account->type()}]. Account id: [{$account->getKey()}]";
+        $this->message = "Incorrect Financial Account Type! Expected [{$expectedType}] but got [{$account->type()}]. Account id: [{$account->getKey()}]";
     }
 
 }

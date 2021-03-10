@@ -10,16 +10,28 @@ class Transaction extends Model
 
     protected $table = 'financial_transactions';
 
+    protected $guarded = [
+        'settled_at',
+        'failed_at',
+    ];
+
+    protected $dates = [
+        'settled_at',
+        'failed_at',
+        'created_at',
+        'updated_at',
+    ];
+
     /* ---------------------------- Relationships --------------------------- */
     public function account()
     {
-        return $this->belongsTo(Account::class, 'account');
+        return $this->belongsTo(Account::class);
     }
 
-    public function resource()
-    {
-        return $this->morphTo();
-    }
+    // public function resource()
+    // {
+    //     return $this->morphTo();
+    // }
 
     public function reference()
     {
