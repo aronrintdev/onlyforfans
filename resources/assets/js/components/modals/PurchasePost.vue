@@ -29,6 +29,7 @@
 </template>
 
 <script>
+import { eventBus } from '@/app'
 
 export default {
 
@@ -39,8 +40,7 @@ export default {
 
   computed: {
     timelineUrl() {
-      return `/timelines/${this.post.slug}`; // DEBUG
-      //return `/${this.timeline.slug}`;
+      return `/${this.timeline.slug}`
     },
   },
 
@@ -48,26 +48,15 @@ export default {
 
   methods: {
 
-    niceCurrency(v) {
-      //return `$ ${v}`;
-      return new Intl.NumberFormat('en-US',
-        { style: 'currency', currency: 'USD' }
-      ).format(v);
-    },
-
     async purchasePost(e) {
-      e.preventDefault();
-      const response = await axios.put( route('posts.purchase', this.post.id) );
-      this.$bvModal.hide('modal-purchase_post');
-      this.$root.$bvToast.toast(`Post successfully purchased (${this.post.slug})`, {
+      e.preventDefault()
+      const response = await axios.put( route('posts.purchase', this.post.id) )
+      this.$bvModal.hide('modal-purchase_post')
+      this.$root.$bvToast.toast(`Post successfully purchased!`, {
         toaster: 'b-toaster-top-center',
         title: 'Success!',
-      });
+      })
       this.$emit('update-post', this.post.id)
-    },
-
-    async submitComment(e) {
-      e.preventDefault();
     },
 
   },
@@ -84,7 +73,6 @@ header.card-header,
 footer.card-footer {
   background-color: #fff;
 }
-
 
 body .user-avatar {
   width: 40px;

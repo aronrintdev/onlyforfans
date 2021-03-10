@@ -1,6 +1,7 @@
 <template>
-  <div>
-    <div class="container" id="view-show_timeline" v-if="!isLoading">
+  <div v-if="!isLoading">
+
+    <div class="container" id="view-show_timeline">
 
       <section class="row">
         <article class="col-sm-12">
@@ -22,35 +23,31 @@
 
     </div>
 
-    <b-modal id="modal-send_tip" size="sm" title="Send a Tip" hide-footer body-class="p-0" v-if="!isLoading">
+    <b-modal id="modal-tip" size="sm" title="Send a Tip" hide-footer body-class="p-0">
       <SendTip :session_user="session_user" :timeline="timeline" />
     </b-modal>
 
-    <b-modal id="modal-follow" title="Follow" ok-only v-if="!isLoading">
-      <div class="w-100 d-flex justify-content-center">
-        <div v-if="timeline.is_following">
-          <b-button @click="doFollow" type="submit" variant="warning">
-            <span v-if="timeline.is_subscribed">Click to Unsubscribe</span>
-            <span v-else>Click to Unfollow</span>
-          </b-button>
-        </div>
-        <div v-else>
-          <b-button @click="doFollow" type="submit" variant="primary"><span>Click to Follow</span></b-button>
-          <b-button @click="doSubscribe" type="submit" variant="success"><span>Click to Subscribe</span></b-button>
-        </div>
-      </div>
+    <b-modal id="modal-purchase_post" size="sm" title="Purchase Post" hide-footer body-class="p-0">
+      <PurchasePost :session_user="session_user" :post="selectedPost" />
+    </b-modal>
+
+    <b-modal id="modal-follow" title="Follow" hide-footer body-class="p-0">
+      <FollowTimeline :session_user="session_user" :timeline="timeline" />
     </b-modal>
 
   </div>
 </template>
 
 <script>
-import Vuex from 'vuex';
-import PostFeed from '@components/timelines/PostFeed.vue';
-import StoryBar from '@components/timelines/StoryBar.vue';
-import Banner from '@components/timelines/Banner.vue';
-import FollowCtrl from '@components/common/FollowCtrl.vue';
-import SendTip from '@components/modals/SendTip.vue';
+import Vuex from 'vuex'
+import { eventBus } from '@/app'
+import PostFeed from '@components/timelines/PostFeed.vue'
+import StoryBar from '@components/timelines/StoryBar.vue'
+import Banner from '@components/timelines/Banner.vue'
+import FollowCtrl from '@components/common/FollowCtrl.vue'
+import FollowTimeline from '@components/modals/FollowTimeline.vue'
+import PurchasePost from '@components/modals/PurchasePost.vue'
+import SendTip from '@components/modals/SendTip.vue'
 
 export default {
   components: {
@@ -58,6 +55,8 @@ export default {
     StoryBar,
     Banner,
     FollowCtrl,
+    FollowTimeline,
+    PurchasePost,
     SendTip,
   },
 
@@ -75,14 +74,38 @@ export default {
 
   data: () => ({
     timeline: null,
+    selectedPost: null,
   }),
+
+  created() {
+
+    eventBus.$on('open-modal', ({ key, data }) => {
+      console.log('views/timelines/Show.on(open-modal)', {
+        key, data,
+      });
+      switch(key) {
+        case 'render-purchase-post':
+          this.selectedPost = data.post
+          this.$bvModal.show('modal-purchase_post')
+          break
+        case 'render-follow':
+        case 'render-subscribe':
+          this.$bvModal.show('modal-follow')
+          break
+        case 'render-tip':
+          this.$bvModal.show('modal-tip')
+          break
+      }
+    })
+
+    eventBus.$on('update-timeline', () => this.load() )
+  },
 
   mounted() {
     if (this.slug) {
       this.load()
     }
-    if (!this.session_user) {
-    }
+    //if (!this.session_user) { }
   },
 
   methods: {
@@ -95,23 +118,6 @@ export default {
       }
     },
 
-    async doFollow() {
-      const response = await this.axios.put( route('timelines.follow', this.timeline.id), {
-        sharee_id: this.session_user.id,
-        notes: '',
-      })
-      this.$bvModal.hide('modal-follow');
-      this.load()
-    },
-
-    async doSubscribe() {
-      const response = await this.axios.put( route('timelines.subscribe', this.timeline.id), {
-        sharee_id: this.session_user.id,
-        notes: '',
-      })
-      this.$bvModal.hide('modal-follow');
-      this.load()
-    },
   },
 
   watch: {

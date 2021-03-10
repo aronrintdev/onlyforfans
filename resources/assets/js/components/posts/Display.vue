@@ -67,13 +67,21 @@
         <b-card-img v-if="hasMediafiles" :src="primaryMediafile" alt="Image" ></b-card-img>
         <b-card-text> <p>{{ post.description }}</p> </b-card-text>
       </template>
+      <template v-else-if="$options.filters.isSubscriberOnly(post)">
+        <article class="locked-content d-flex justify-content-center align-items-center">
+          <div class="d-flex flex-column">
+            <b-icon icon="lock-fill" font-scale="5" variant="light" />
+            <b-button @click="renderSubscribe" class="mt-3" variant="primary">Subscribe</b-button>
+          </div>
+        </article>
+      </template>
       <template v-else>
-        <div class="locked-content d-flex justify-content-center align-items-center">
+        <article class="locked-content d-flex justify-content-center align-items-center">
           <div class="d-flex flex-column">
             <b-icon icon="lock-fill" font-scale="5" variant="light" />
             <b-button @click="renderPurchasePost" class="mt-3" variant="primary">Buy</b-button>
           </div>
-        </div>
+        </article>
       </template>
 
       <template #footer>
@@ -114,6 +122,7 @@
 
 <script>
 import Vuex from 'vuex'
+import { eventBus } from '@/app'
 import CommentList from '@components/comments/List'
 import CommentDisplay from '@components/comments/Display'
 import LikesButton from '@components/common/LikesButton'
@@ -229,11 +238,30 @@ export default {
 
     editPost() {
       const is = this.session_user.id === this.post.user.id // Check permissions
-      console.log('ShowPost::editPost()', { is })
     },
 
     renderPurchasePost() {
-      this.$emit('render-purchase-post', this.post)
+      //this.$emit('render-purchase-post', this.post)
+      //this.$bvModal.show('modal-purchase_post', this.post)
+      //eventBus.$emit('render-purchase-post-modal', this.post)
+      eventBus.$emit('open-modal', {
+        key: 'render-purchase-post', 
+        data: {
+          post: this.post,
+        }
+      })
+    },
+
+    renderSubscribe() {
+      //this.$emit('render-subcribe', this.post)
+      //eventBus.$emit('render-subscribe-modal', this.post)
+      //this.$bvModal.show('modal-follow', this.post.postable_id) // = timeline id
+      eventBus.$emit('open-modal', {
+        key: 'render-subscribe', 
+        data: {
+          //post: this.post,
+        }
+      })
     },
 
     deletePost() {

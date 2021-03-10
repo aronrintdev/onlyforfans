@@ -92,6 +92,11 @@ Vue.filter('niceCurrency', function (valueInCents) {
   let value = valueInCents ? (valueInCents/100) : 0
   value.toFixed(2)
   return `$${value}`
+  /*
+      return new Intl.NumberFormat('en-US',
+        { style: 'currency', currency: 'USD' }
+      ).format(v);
+    */
 })
 
 Vue.filter('niceGuid', function (v) {
@@ -107,23 +112,14 @@ Vue.filter('enumPostType', function (k) {
       return 'Subscriber-Only'
   }
 })
+// Assumes post as input
+Vue.filter('isSubscriberOnly', function (p) {
+  return p.type === 'paid'
+})
 
-export const eventBus = new Vue({
-/*
-    methods: {
-        switchDetails: function(obj) {
-            this.$emit('detailsWasSwitched', obj);
-        },
-        fixStatus: function(index) {
-            this.$emit('statusWasFixed', index);
-        },
-    }
-*/
-});
+export const eventBus = new Vue({ });
 
-/**
- * Loading localization translations
- */
+// Localization translations
 import i18n from './i18n'
 
 import VueRouter from 'vue-router'
