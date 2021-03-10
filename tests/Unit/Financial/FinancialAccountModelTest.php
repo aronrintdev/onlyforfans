@@ -2,15 +2,21 @@
 
 namespace Tests\Unit\Financial;
 
-use Carbon\Carbon;
-use Tests\TestCase;
+use App\Enums\Financial\AccountTypeEnum;
 use App\Models\User;
 use App\Models\Financial\Account;
-use Illuminate\Support\Facades\Config;
-use App\Enums\Financial\AccountTypeEnum;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use App\Models\Financial\Exceptions\InvalidTransactionAmountException;
 use App\Models\Financial\Transaction;
+use App\Models\Financial\Exceptions\InvalidTransactionAmountException;
+use App\Models\Financial\Exceptions\Account\InsufficientFundsException;
+use App\Models\Financial\Exceptions\Account\TransactionNotAllowedException;
+
+use Carbon\Carbon;
+
+use Illuminate\Support\Facades\Config;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Queue;
+
+use Tests\TestCase;
 
 /**
  * Unit Tests for the `App\Models\Financial\Account` Model
@@ -147,15 +153,76 @@ class FinancialAccountModelTest extends TestCase
         $this->assertEquals($toTransaction->id, $fromTransaction->reference_id);
     }
 
+    /**
+     * @group unit
+     * @group financial
+     */
+    public function test_move_to_internal_account_from_internal_account()
+    {
+        Queue::fake();
+
+        $account = Account::factory()->asTypeInternal()->withBalance(1000)->create();
+        $toAccount = Account::factory()->asTypeInternal()->withBalance(0)->create();
+
+        $this->expectException(InsufficientFundsException::class);
+        $account->moveTo($toAccount, 20000);
+
+        $account->moveTo($toAccount, 300);
+        $this->assertDatabaseHas($this->transactionTableName, [
+            'account_id' => $account->getKey(),
+            'credit_amount' => 0,
+            'debit_amount' => 300,
+            'currency' => $this->defaultCurrency,
+        ]);
+        $this->assertDatabaseHas($this->transactionTableName, [
+            'account_id' => $toAccount->getKey(),
+            'credit_amount' => 300,
+            'debit_amount' => 0,
+            'currency' => $this->defaultCurrency,
+        ]);
+
+        $account->fresh();
+        $this->assertEquals(700, $account->balance);
+
+        Queue::assertPushed(UpdateAccountBalance::class);
+    }
+
 
     /**
      * @group unit
      * @group financial
      */
-    public function test_block_account()
+    public function test_blocked_account_cannot_make_transactions()
     {
-        // TODO: Implement
-        $this->markTestIncomplete();
+        $inAccount = Account::factory()->asTypeIn()->transactionsBlocked()->create();
+
+        $this->expectException(TransactionNotAllowedException::class);
+        $inAccount->moveToInternal(100);
+
+        $blockedAccount1 = Account::factory()
+            ->asInternal()
+            ->withBalance(200)
+            ->transactionsBlocked()
+            ->create();
+        $blockedAccount2 = Account::factory()
+            ->asInternal()
+            ->withBalance(200)
+            ->transactionsBlocked()
+            ->create();
+        $unblockedAccount = Account::factory()
+            ->asInternal()
+            ->withBalance(200)
+            ->transactionsAllowed()
+            ->create();
+
+        $this->expectException(TransactionNotAllowedException::class);
+        $blockedAccount1->moveTo($blockedAccount2, 100);
+
+        $this->expectException(TransactionNotAllowedException::class);
+        $blockedAccount1->moveTo($unblockedAccount, 100);
+
+        $this->expectException(TransactionNotAllowedException::class);
+        $unblockedAccount->moveTo($blockedAccount1, 100);
     }
 
     /**

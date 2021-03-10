@@ -2,10 +2,11 @@
 
 namespace Database\Factories\Financial;
 
-use App\Enums\Financial\AccountTypeEnum;
-use App\Models\Financial\Account;
+use Carbon\Carbon;
 use App\Models\User;
+use App\Models\Financial\Account;
 use Illuminate\Support\Facades\Config;
+use App\Enums\Financial\AccountTypeEnum;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class AccountFactory extends Factory
@@ -36,6 +37,10 @@ class AccountFactory extends Factory
             'name' => $this->faker->name() . ' Internal Account',
             'type' => AccountTypeEnum::INTERNAL,
             'currency' => $defaultCurrency,
+            'balance' => 0,
+            'balance_last_updated_at' => Carbon::now(),
+            'pending' => 0,
+            'pending_last_updated_at' => Carbon::now(),
             'verified' => true,
             'can_make_transactions' => true
         ];
@@ -123,6 +128,36 @@ class AccountFactory extends Factory
     {
         return $this->state(function (array $attributes) {
             return [ 'type' => AccountTypeEnum::OUT, ];
+        });
+    }
+
+    /**
+     * Set account balance
+     *
+     * @return  \Illuminate\Database\Eloquent\Factories\Factory
+     */
+    public function withBalance(int $balance)
+    {
+        return $this->state(function (array $attributes) use($balance) {
+            return [
+                'balance' => $balance,
+                'balance_last_updated_at' => Carbon::now(),
+            ];
+        });
+    }
+
+    /**
+     * Set account pending balance
+     *
+     * @return  \Illuminate\Database\Eloquent\Factories\Factory
+     */
+    public function withPending(int $pending)
+    {
+        return $this->state(function (array $attributes) use ($pending) {
+            return [
+                'pending' => $pending,
+                'pending_last_updated_at' => Carbon::now(),
+            ];
         });
     }
 

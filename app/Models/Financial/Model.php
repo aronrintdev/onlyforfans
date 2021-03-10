@@ -77,7 +77,7 @@ class Model extends ModelsModel
      */
     public function isSameCurrency($model): bool
     {
-        return $this->currency !== $model->currency;
+        return $this->currency === $model->currency;
     }
 
     /**

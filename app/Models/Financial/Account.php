@@ -2,19 +2,25 @@
 
 namespace App\Models\Financial;
 
-use App\Enums\Financial\AccountTypeEnum;
+use Money\Money;
+use Money\Currency;
 use App\Interfaces\Ownable;
-use App\Models\Financial\Exceptions\Account\IncorrectTypeException;
-use App\Models\Financial\Exceptions\Account\TransactionNotAllowedException;
-use App\Models\Traits\OwnableTraits;
-use App\Models\Financial\Exceptions\InvalidTransactionAmountException;
-use App\Models\Traits\UsesUuid;
-
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Carbon;
+use App\Models\Traits\UsesUuid;
 use Illuminate\Support\Collection;
+
 use Illuminate\Support\Facades\DB;
+use App\Models\Traits\OwnableTraits;
 use Illuminate\Support\Facades\Config;
+use App\Enums\Financial\AccountTypeEnum;
+use App\Jobs\Financial\UpdateAccountBalance;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+
+use App\Models\Financial\Exceptions\Account\IncorrectTypeException;
+use App\Models\Financial\Exceptions\InvalidTransactionAmountException;
+use App\Models\Financial\Exceptions\Account\InsufficientFundsException;
+use App\Models\Financial\Exceptions\Account\TransactionNotAllowedException;
 
 class Account extends Model implements Ownable
 {
@@ -89,8 +95,6 @@ class Account extends Model implements Ownable
             throw new InvalidTransactionAmountException($amount, $this);
         }
 
-        // TODO: Verify balance on transactions from internal accounts
-
         $this->verifySameCurrency($toAccount);
 
         // Verify that both accounts allowed to make transactions
@@ -99,31 +103,52 @@ class Account extends Model implements Ownable
 
         // Make transactions
         DB::transaction(function() use($toAccount, $amount, $options) {
+            $fromAccount = Account::lockForUpdate()->find($this->getKey());
+            $currency = new Currency($fromAccount->currency);
+            $transactionAmount = new Money($amount, $currency);
+
+            // Verify from account has valid balance if it is an internal account
+            if ($fromAccount->type === AccountTypeEnum::INTERNAL) {
+                $balance = new Money($fromAccount->balance, $currency);
+                $balance = $balance->subtract($transactionAmount);
+                $ignoreBalance = isset($options['ignoreBalance']) ? $options['ignoreBalance'] : false;
+                if ($balance->isNegative() && !$ignoreBalance ) {
+                    throw new InsufficientFundsException($fromAccount, $transactionAmount->getAmount(), $balance->getAmount());
+                }
+                $fromAccount->balance = $balance->getAmount();
+                $fromAccount->balance_last_updated_at = Carbon::now();
+                $fromAccount->save();
+            }
+
             $commons = [
-                'currency' => $this->currency,
+                'currency' => $fromAccount->currency,
                 'description' => $options['description'] ?? null,
-                'access_id' => $options['access'] ? $options['access']->getKey() : null,
+                'access_id' => isset($options['access']) ? $options['access']->getKey() : null,
                 'metadata' => $options['metadata'] ?? null,
             ];
-            $fromTransaction = Transaction::create(Arr::collapse([
-                'account_id' => $this->getKey(),
+
+            $fromTransaction = Transaction::create(array_merge([
+                'account_id' => $fromAccount->getKey(),
                 'credit_amount' => 0,
-                'debit_amount' => $amount,
+                'debit_amount' => $transactionAmount->getAmount(),
             ], $commons));
-            $toTransaction = Transaction::create(Arr::collapse([
+
+            $toTransaction = Transaction::create(array_merge([
                 'account_id' => $toAccount->getKey(),
-                'credit_amount' => $amount,
+                'credit_amount' => $transactionAmount->getAmount(),
                 'debit_amount' => 0,
             ], $commons));
 
             // Add reference ids
             $fromTransaction->reference_id = $toTransaction->getKey();
-            $toTransaction->reference_id = $toTransaction->getKey();
+            $toTransaction->reference_id = $fromTransaction->getKey();
 
             $fromTransaction->save();
             $toTransaction->save();
+
         }, 1);
 
+        UpdateAccountBalance::dispatch($toAccount);
         return true;
     }
 
@@ -142,7 +167,7 @@ class Account extends Model implements Ownable
      */
     public function verifyCanMakeTransactions()
     {
-        if (!$this->canMakeTransaction()) {
+        if (!$this->canMakeTransactions()) {
             throw new TransactionNotAllowedException($this);
         }
     }

@@ -22,6 +22,10 @@ class Transaction extends Model
         'updated_at',
     ];
 
+    protected $casts = [
+        'metadata' => 'array',
+    ];
+
     /* ---------------------------- Relationships --------------------------- */
     public function account()
     {
