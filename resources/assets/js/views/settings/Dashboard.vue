@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!isLoading" class="container" id="view-home_timeline">
+  <div v-if="!isLoading" class="container-fluid" id="view-settings">
 
     <section class="row">
       <article class="col-sm-12">
@@ -8,7 +8,7 @@
 
     <section class="row">
 
-      <aside class="col-md-5 col-lg-4">
+      <aside class="col-md-3 col-lg-2">
         <b-list-group>
           <b-list-group-item>
             <router-link :to="{ name: 'settings.general', params: {} }">General</router-link>
@@ -34,7 +34,7 @@
         </b-list-group>
       </aside>
 
-      <main class="col-md-7 col-lg-8">
+      <main class="col-md-9 col-lg-10">
         <router-view :session_user="session_user" :user_settings="user_settings"></router-view>
       </main>
 

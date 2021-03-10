@@ -1,35 +1,77 @@
 <template>
   <div v-if="!isLoading">
-    <b-card title="Total Earnings" class="mb-3">
+    <b-card title="Balances" class="mb-1">
+      <hr />
       <b-card-text>
-        <div>Subscriptions: {{ earnings.sums.timelines | niceCurrency }}</div>
-        <div>Posts: {{ earnings.sums.posts | niceCurrency }}</div>
+        <b-row>
+          <b-col>
+            <h6>Credits</h6>
+            <ul>
+              <li>Subscriptions: {{ earnings.sums.subscriptions | niceCurrency }}</li>
+              <li>Posts: {{ earnings.sums.posts | niceCurrency }}</li>
+              <li>Tips: {{ earnings.sums.tips | niceCurrency }}</li>
+            </ul>
+          </b-col>
+          <b-col>
+            <h6>Debits</h6>
+            <ul>
+              <li>Subscriptions: {{ debits.sums.subscriptions | niceCurrency }}</li>
+              <li>Posts: {{ debits.sums.posts | niceCurrency }}</li>
+              <li>Tips: {{ debits.sums.tips | niceCurrency }}</li>
+            </ul>
+          </b-col>
+        </b-row>
       </b-card-text>
     </b-card>
 
     <b-card title="Transactions">
-      <b-card-text>
-        <b-table hover 
-          id="fanledgers-table"
-          :items="fanledgers.data"
-          :fields="fields"
-          :current-page="currentPage"
-        ></b-table>
-        <b-pagination
-          v-model="currentPage"
-          :total-rows="totalRows"
-          :per-page="perPage"
-          aria-controls="fanledgers-table"
-          v-on:page-click="pageClickHandler"
-        ></b-pagination>
-      </b-card-text>
+      <hr />
+      <b-tabs card>
+
+        <b-tab title="Credits" active>
+          <b-card-text>
+            <b-table hover 
+              id="ledgercredits-table"
+              :items="ledgercredits.data"
+              :fields="creditFields"
+              :current-page="currentPageCredit"
+            ></b-table>
+            <b-pagination
+              v-model="currentPageCredit"
+              :total-rows="totalRowsCredits"
+              :per-page="perPage"
+              aria-controls="ledgercredits-table"
+              v-on:page-click="pageClickHandlerCredit"
+            ></b-pagination>
+          </b-card-text>
+        </b-tab>
+
+        <b-tab title="Debits">
+          <b-card-text>
+            <b-table hover 
+              id="ledgerdebits-table"
+              :items="ledgerdebits.data"
+              :fields="debitFields"
+              :current-page="currentPageDebit"
+            ></b-table>
+            <b-pagination
+              v-model="currentPageDebit"
+              :total-rows="totalRowsDebits"
+              :per-page="perPage"
+              aria-controls="ledgerdebits-table"
+              v-on:page-click="pageClickHandlerDebit"
+            ></b-pagination>
+          </b-card-text>
+        </b-tab>
+
+      </b-tabs>
     </b-card>
 
   </div>
 </template>
 
 <script>
-import Vue from 'vue' // needed to use niceCurrency filter in table formatter below
+import Vue from 'vue'
 import Vuex from 'vuex'
 import moment from 'moment'
 
@@ -41,15 +83,23 @@ export default {
   },
 
   computed: {
-    ...Vuex.mapState(['fanledgers']),
-    ...Vuex.mapState(['earnings']),
+    //...Vuex.mapState(['fanledgers']),
+    ...Vuex.mapState([
+      'ledgercredits',
+      'ledgerdebits',
+      'earnings',
+      'debits',
+    ]),
 
-    totalRows() {
-      return this.fanledgers.meta ? this.fanledgers.meta.total : 1;
+    totalRowsCredits() {
+      return this.ledgercredits.meta ? this.ledgercredits.meta.total : 1
+    },
+    totalRowsDebits() {
+      return this.ledgerdebits.meta ? this.ledgerdebits.meta.total : 1
     },
 
     isLoading() {
-      return !this.fanledgers || !this.earnings
+      return !this.ledgercredits || !this.ledgerdebits || !this.earnings || !this.debits
     },
   },
 
@@ -59,13 +109,21 @@ export default {
   data: () => ({
 
     perPage: 10,
-    currentPage: 1,
+    currentPageCredit: 1,
+    currentPageDebit: 1,
     //totalRows: 100,
-    nextPage: null,
-    lastPage: null,
-    isLastPage: null,
+    //nextPage: null,
+    //lastPage: null,
+    //isLastPage: null,
 
-    fields: [
+    creditFields: [
+      {
+        key: 'id',
+        label: 'ID',
+        formatter: (value, key, item) => {
+          return Vue.options.filters.niceGuid(value)
+        }
+      },
       {
         key: 'created_at',
         label: 'Date',
@@ -93,9 +151,48 @@ export default {
         label: 'Description',
       },
       {
-        //key: 'purchaser_id',
         key: 'purchaser.username',
         label: 'Purchaser',
+      },
+    ],
+
+    debitFields: [
+      {
+        key: 'id',
+        label: 'ID',
+        formatter: (value, key, item) => {
+          return Vue.options.filters.niceGuid(value)
+        }
+      },
+      {
+        key: 'created_at',
+        label: 'Date',
+        formatter: (value, key, item) => {
+          return moment(value).format('MMMM Do, YYYY')
+        }
+      },
+      {
+        key: 'base_unit_cost_in_cents',
+        label: 'Gross',
+        formatter: (value, key, item) => {
+          return Vue.options.filters.niceCurrency(value)
+        }
+      },
+      {
+        key: 'fltype',
+        label: 'Txn Type',
+      },
+      {
+        key: 'purchaseable_type',
+        label: 'Item Type',
+      },
+      {
+        key: 'cattrs.notes',
+        label: 'Description',
+      },
+      {
+        key: 'seller.username',
+        label: 'Seller',
       },
     ],
 
@@ -105,22 +202,49 @@ export default {
     this.getEarnings({ 
       user_id: this.session_user.id,
     })
+    this.getDebits({ 
+      user_id: this.session_user.id,
+    })
+    this.getLedgercredits({ 
+      seller_id: this.session_user.id,
+      page: 1,
+      take: this.perPage,
+    })
+    this.getLedgerdebits({ 
+      purchaser_id: this.session_user.id,
+      page: 1,
+      take: this.perPage,
+    })
+    /*
     this.getFanledgers({ 
       seller_id: this.session_user.id,
       page: 1,
       take: this.perPage,
     })
+     */
   },
 
   methods: {
     ...Vuex.mapActions({
       getEarnings: "getEarnings",
-      getFanledgers: "getFanledgers",
+      getDebits: "getDebits",
+      getLedgercredits: "getLedgercredits",
+      getLedgerdebits: "getLedgerdebits",
     }),
 
-    pageClickHandler(e, page) {
-      this.getFanledgers({ 
+    pageClickHandlerCredit(e, page) {
+      console.log('pageClickHandlerCredit', page)
+      this.getLedgercredits({ 
         seller_id: this.session_user.id,
+        page: page,
+        take: this.perPage,
+      })
+    },
+
+    pageClickHandlerDebit(e, page) {
+      console.log('pageClickHandlerDebit', page)
+      this.getLedgerdebits({ 
+        purchaser_id: this.session_user.id,
         page: page,
         take: this.perPage,
       })
@@ -131,19 +255,19 @@ export default {
     },
     /*
     perPage() {
-      return this.fanledgers.meta.per_page
+      return this.ledgercredits.meta.per_page
     },
     currentPage() {
-      return this.fanledgers.meta.current_page
+      return this.ledgercredits.meta.current_page
     },
     nextPage() {
-      return this.fanledgers.meta.current_page + 1
+      return this.ledgercredits.meta.current_page + 1
     },
     lastPage() {
-      return this.fanledgers.meta.last_page
+      return this.ledgercredits.meta.last_page
     },
     isLastPage() {
-      return this.fanledgers.meta.current_page === this.feeddata.meta.last_page
+      return this.ledgercredits.meta.current_page === this.feeddata.meta.last_page
     },
      */
   },

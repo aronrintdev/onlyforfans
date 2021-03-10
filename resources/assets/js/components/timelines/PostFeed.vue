@@ -15,7 +15,7 @@
           class="col-sm-12 mb-3"
           v-observe-visibility="index === renderedItems.length - 1 ? endPostVisible : false"
         >
-          <div>HERE {{ feedItem.id | niceGuid }} ({{ index }})</div>
+          <div>INDEX: {{ index }}</div>
           <!-- for now we assume posts; eventually need to convert to a DTO (ie more generic 'feedItem') : GraphQL ? -->
           <PostDisplay
             :post="feedItem"
@@ -57,7 +57,6 @@ export default {
   computed: {
     ...Vuex.mapState(['feeddata']), // should include keys: data (posts) and meta (pagination info), and links 
     ...Vuex.mapState(['unshifted_timeline_post']),
-    //...Vuex.mapState(['is_loading']),
 
     isLoading() {
       return !this.feeddata || !this.session_user || !this.timeline

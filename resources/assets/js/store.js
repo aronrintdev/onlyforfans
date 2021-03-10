@@ -38,7 +38,10 @@ export default new Vuex.Store({
     feeddata: {},
     stories: [], // Current open stories
     earnings: null,
+    debits: null,
     fanledgers: {},
+    ledgercredits: null,
+    ledgerdebits: null,
     timeline: null,
     session_user: null, 
     user_settings: null,
@@ -79,8 +82,17 @@ export default new Vuex.Store({
       //state.fanledgers = propSelect(payload, 'fanledgers')
       state.fanledgers = payload.hasOwnProperty('data') ? payload.data : {}
     },
+    UPDATE_LEDGERCREDITS(state, payload) {
+      state.ledgercredits = payload.hasOwnProperty('data') ? payload.data : {}
+    },
+    UPDATE_LEDGERDEBITS(state, payload) {
+      state.ledgerdebits = payload.hasOwnProperty('data') ? payload.data : {}
+    },
     UPDATE_EARNINGS(state, payload) {
       state.earnings = propSelect(payload, 'earnings')
+    },
+    UPDATE_DEBITS(state, payload) {
+      state.debits = propSelect(payload, 'debits')
     },
     UPDATE_TIMELINE(state, payload) {
       state.timeline = propSelect(payload, 'timeline')
@@ -150,10 +162,29 @@ export default new Vuex.Store({
           commit('UPDATE_FANLEDGERS', response)
         })
     },
+    getLedgercredits({ commit }, params ) {
+      const url = route(`fanledgers.index`);
+      axios.get(url, { params })
+        .then((response) => {
+          commit('UPDATE_LEDGERCREDITS', response)
+        })
+    },
+    getLedgerdebits({ commit }, params ) {
+      const url = route(`fanledgers.index`);
+      axios.get(url, { params })
+        .then((response) => {
+          commit('UPDATE_LEDGERDEBITS', response)
+        })
+    },
 
     getEarnings({ commit }, { user_id }  ) {
       axios.get(route('fanledgers.showEarnings', user_id)).then((response) => {
         commit('UPDATE_EARNINGS', response.data)
+      })
+    },
+    getDebits({ commit }, { user_id }  ) {
+      axios.get(route('fanledgers.showDebits', user_id)).then((response) => {
+        commit('UPDATE_DEBITS', response.data)
       })
     },
 
@@ -212,7 +243,10 @@ export default new Vuex.Store({
     feeddata:                state => state.feeddata,
     stories:                 state => state.stories,
     fanledgers:              state => state.fanledgers,
+    ledgercredits:              state => state.ledgercredits,
+    ledgerdebits:              state => state.ledgerdebits,
     earnings:                state => state.earnings,
+    debits:                state => state.debits,
     timeline:                state => state.timeline,
     unshifted_timeline_post: state => state.unshifted_timeline_post,
     session_user:            state => state.session_user,
