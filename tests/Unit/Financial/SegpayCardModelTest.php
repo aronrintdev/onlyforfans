@@ -3,7 +3,7 @@
 namespace Tests\Unit\Financial;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use PHPUnit\Framework\TestCase;
+use Tests\TestCase;
 
 class SegpayCardModelTest extends TestCase
 {

@@ -2,7 +2,7 @@
 
 namespace Tests\Unit\Financial;
 
-use PHPUnit\Framework\TestCase;
+use Tests\TestCase;
 
 /**
  * Unit tests for segpay webhooks handling

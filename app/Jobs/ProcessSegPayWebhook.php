@@ -165,6 +165,8 @@ class ProcessSegPayWebhook  implements ShouldQueue
                 $card = SegpayCard::createFromTransaction($transaction);
             }
 
+            // Create Access to resource if necessary
+
             // Move to user internal account
             $buyer = $card->getOwner()->first();
             $card->account->moveToInternal($transaction->price);

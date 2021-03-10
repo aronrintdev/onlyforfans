@@ -12,12 +12,18 @@ use Illuminate\Support\Facades\Config;
 use App\Enums\Financial\AccountTypeEnum;
 use App\Models\Financial\Exceptions\Account\IncorrectTypeException;
 use App\Models\Financial\Exceptions\Account\TransactionNotAllowedException;
+use App\Models\Financial\Exceptions\InvalidTransactionAmountException;
 
 class Account extends Model implements Ownable
 {
     use OwnableTraits, UsesUuid;
 
     protected $table = 'financial_accounts';
+
+    protected $guarded = [
+        'verified',
+        'can_make_transaction',
+    ];
 
     protected $dates = [
         'balance_last_updated_at',
@@ -74,6 +80,12 @@ class Account extends Model implements Ownable
     public function moveTo($toAccount, int $amount, array $options = [])
     {
         // Options => string $description, $access = null, $metadata = null
+
+        if ($amount <= 0) {
+            throw new InvalidTransactionAmountException($amount, $this);
+        }
+
+        // TODO: Verify balance on transactions from internal accounts
 
         $this->verifySameCurrency($toAccount);
 

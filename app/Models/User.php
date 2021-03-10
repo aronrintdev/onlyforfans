@@ -484,7 +484,7 @@ class User extends Authenticatable implements PaymentSendable, Blockable, HasFin
     /* ------------------------ HasFinancialAccounts ------------------------ */
     public function getInternalAccount(string $system, string $currency): Account
     {
-        $account = $this->financialAccounts->where('system', $system)
+        $account = $this->financialAccounts()->where('system', $system)
             ->where('currency', $currency)
             ->where('type', AccountTypeEnum::INTERNAL)
             ->first();
@@ -509,7 +509,7 @@ class User extends Authenticatable implements PaymentSendable, Blockable, HasFin
             'pending_last_updated_at' => Carbon::now(),
         ]);
         $account->verified = true;
-        $account->can_make_transaction = true;
+        $account->can_make_transactions = true;
         $account->save();
         return $account;
     }

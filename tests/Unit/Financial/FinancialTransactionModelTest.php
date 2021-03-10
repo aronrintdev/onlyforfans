@@ -3,7 +3,7 @@
 namespace Tests\Unit\Financial;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use PHPUnit\Framework\TestCase;
+use Tests\TestCase;
 
 /**
  * Unit Tests for the `App\Models\Financial\Transaction` Model
