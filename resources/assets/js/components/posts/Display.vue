@@ -259,7 +259,8 @@ export default {
       eventBus.$emit('open-modal', {
         key: 'render-subscribe', 
         data: {
-          //post: this.post,
+          //timeline_id: this.post.postable_id,
+          timeline: this.post.timeline,
         }
       })
     },

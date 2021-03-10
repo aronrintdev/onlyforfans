@@ -64,14 +64,18 @@ export default {
       console.log('FollowCtrl.renderFollow() - emit');
       eventBus.$emit('open-modal', {
         key: 'render-follow', 
-        data: { }
+        data: {
+          timeline_id: this.timeline.id,
+        }
       })
     },
     renderSubscribe() {
       console.log('FollowCtrl.renderSubscribe() - emit');
       eventBus.$emit('open-modal', {
         key: 'render-subscribe', 
-        data: { }
+        data: {
+          timeline_id: this.timeline.id,
+        }
       })
     },
     renderTip() {

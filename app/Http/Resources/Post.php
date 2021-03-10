@@ -25,6 +25,7 @@ class Post extends JsonResource
             'mediafiles' =>  $this->when($hasAccess, $this->mediafiles),
             'access' =>  $hasAccess,
             'user' =>  $this->user, // $this->when($hasAccess, $this->user),
+            'timeline' =>  $this->timeline->load('avatar', 'cover'), // $this->when($hasAccess, $this->user),
             // https://laravel.com/docs/8.x/eloquent-resources#conditional-relationships
             //'mediafiles' =>  $this->when( $hasAccess, MediafileResource::collection($this->whenLoaded('mediafiles')) ), // ??
             'created_at' => $this->created_at,

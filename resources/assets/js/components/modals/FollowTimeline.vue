@@ -68,7 +68,7 @@ export default {
         title: 'Success!',
       })
       eventBus.$emit('update-timeline', this.timeline.id)
-      //this.load()
+      eventBus.$emit('update-feed') // updates feed being viewed
     },
 
     async doSubscribe(e) {
@@ -86,7 +86,7 @@ export default {
         title: 'Success!',
       })
       eventBus.$emit('update-timeline', this.timeline.id)
-      //this.load()
+      eventBus.$emit('update-feed') // updates feed being viewed
     },
 
   },

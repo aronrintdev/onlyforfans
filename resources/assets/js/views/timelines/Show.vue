@@ -23,6 +23,7 @@
 
     </div>
 
+    <!-- %FIXME: DRY vs Home -->
     <b-modal id="modal-tip" size="sm" title="Send a Tip" hide-footer body-class="p-0">
       <SendTip :session_user="session_user" :timeline="timeline" />
     </b-modal>
@@ -32,7 +33,7 @@
     </b-modal>
 
     <b-modal id="modal-follow" title="Follow" hide-footer body-class="p-0">
-      <FollowTimeline :session_user="session_user" :timeline="timeline" />
+      <FollowTimeline :session_user="session_user" :timeline="selectedTimeline" />
     </b-modal>
 
   </div>
@@ -75,6 +76,7 @@ export default {
   data: () => ({
     timeline: null,
     selectedPost: null,
+    selectedTimeline: null,
   }),
 
   created() {
@@ -90,15 +92,20 @@ export default {
           break
         case 'render-follow':
         case 'render-subscribe':
+          this.selectedTimeline = data.timeline
           this.$bvModal.show('modal-follow')
           break
         case 'render-tip':
+          //this.selectedTimelineId = data.timeline_id // %TODO
           this.$bvModal.show('modal-tip')
           break
       }
     })
 
-    eventBus.$on('update-timeline', () => this.load() )
+    eventBus.$on('update-timeline', () => {
+      console.log('views.timelines.Show - eventBus.$on(update-timeline)')
+      this.load() 
+    })
   },
 
   mounted() {

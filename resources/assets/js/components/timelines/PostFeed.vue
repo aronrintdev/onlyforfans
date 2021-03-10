@@ -87,9 +87,9 @@ export default {
   data: () => ({
     renderedItems: [], // this will likely only be posts
     renderedPages: [], // track so we don't re-load same page (set of posts) more than 1x
-    limit: 5, // %FIXME: un-hardcode
     lastPostVisible: false,
     moreLoading: true,
+    limit: 5, // %FIXME: un-hardcode
   }),
 
   mounted() {
@@ -102,7 +102,19 @@ export default {
   created() {
     this.$store.dispatch('getFeeddata', { timelineId: this.timelineId, page: 1, limit: this.limit, isHomefeed: this.is_homefeed })
 
-    eventBus.$on('update-post', postId => this.updatePost(postId) )
+    eventBus.$on('update-post', postId => {
+      console.log('components.timelines.PostFeed - eventBus.$on(update-post)')
+      this.updatePost(postId) 
+    })
+
+    eventBus.$on('update-feed', () => {
+      console.log('components.timelines.PostFeed - eventBus.$on(update-feed)')
+      this.renderedPages = []
+      this.renderedItems = []
+      this.lastPostVisible = false
+      this.moreLoading = true
+      this.$store.dispatch('getFeeddata', { timelineId: this.timelineId, page: 1, limit: this.limit, isHomefeed: this.is_homefeed })
+    })
   },
 
   methods: {
