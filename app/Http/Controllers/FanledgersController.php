@@ -19,59 +19,86 @@ class FanledgersController extends AppBaseController
     public function index(Request $request)
     {
         $request->validate([
-            'seller_id' => 'uuid|exists:users,id', // if admin only
-            //'post_id' => 'uuid|exists:posts,id', // if admin or post-owner only (per-post comments by fan use posts controller)
+            'seller_id' => 'uuid|exists:users,id',
+            'purchaser_id' => 'uuid|exists:users,id',
         ]);
 
-        $filters = $request->only('seller_id');
+        // Filters
 
-        $query = Fanledger::query()->with('purchaser');
-        // Check permissions
-        if ( !$request->user()->isAdmin() ) {
-
-            // non-admin: only view own resources
-            $query->where('seller_id', $request->user()->id); 
-            unset($filters['seller_id']);
-
-            /*
-            if ( array_key_exists('post_id', $filters) ) {
-                $post = Post::find($filters['post_id']);
-                $this->authorize('update', $post); // non-admin must own post filtered on
+        if ( !$request->user()->isAdmin() ) { // Check permissions
+            // non-admin can only view own resources, option to filter by seller and/or purchaser, defaults to seller
+            $filters = [];
+            if ( $request->has('seller_id') && ($request->seller_id === $request->user()->id) ) {
+                $filters['seller_id'] = $request->seller_id;
             }
-             */
+            if ( $request->has('purchaser_id') && ($request->purchaser_id === $request->user()->id) ) {
+                $filters['purchaser_id'] = $request->purchaser_id;
+            }
+            if ( !count($filters) ) { // if none set, default to seller...
+                $filters['seller_id'] = $request->user()->id;
+            }
+        } else {
+            $filters = $request->only(['seller_id', 'purchaser_id']);
         }
 
-        // Apply any filters
-        foreach ($filters as $key => $f) {
+        // Query 
+
+        $query = Fanledger::query()->with(['seller', 'purchaser']);
+        foreach ($filters as $key => $f) { // Apply any filters
             // %TODO: subgroup under 'filters' (need to update axios.GET calls as well in Vue)
             switch ($key) {
             case 'seller_id':
+            case 'purchaser_id':
                 $query->where($key, $f);
                 break;
             }
         }
 
-        $data = $query->paginate( $request->input('take', env('MAX_DEFAULT_PER_REQUEST', 10)) );
+        $data = $query->latest()->paginate( $request->input('take', env('MAX_DEFAULT_PER_REQUEST', 10)) );
         return new FanledgerCollection($data);
     }
 
     public function showEarnings(Request $request, User $user)
     {
-        $this->authorize('show', $user);
+        $this->authorize('view', $user);
         $sums = [];
-        $sums['timelines'] = DB::table('fanledgers')
+        $sums['subscriptions'] = DB::table('fanledgers')
             ->where('seller_id', $user->id)
-            ->where('fltype', PaymentTypeEnum::PURCHASE)
-            ->where('purchaseable_type', 'timelines')
+            ->where('fltype', PaymentTypeEnum::SUBSCRIPTION)->where('purchaseable_type', 'timelines')
+            ->sum('total_amount');
+        $sums['tips'] = DB::table('fanledgers')
+            ->where('seller_id', $user->id)
+            ->where('fltype', PaymentTypeEnum::TIP)->where('purchaseable_type', 'timelines')
             ->sum('total_amount');
         $sums['posts'] = DB::table('fanledgers')
             ->where('seller_id', $user->id)
-            ->where('fltype', PaymentTypeEnum::PURCHASE)
-            ->where('purchaseable_type', 'posts')
+            ->where('fltype', PaymentTypeEnum::PURCHASE)->where('purchaseable_type', 'posts')
             ->sum('total_amount');
-//dd($sums);
         return response()->json([
             'earnings' => [
+                'sums' => $sums,
+            ],
+        ]);
+    }
+
+    public function showDebits(Request $request, User $user)
+    {
+        $this->authorize('view', $user);
+        $sums = [];
+        $sums['subscriptions'] = DB::table('fanledgers')
+            ->where('purchaser_id', $user->id)
+            ->where('fltype', PaymentTypeEnum::SUBSCRIPTION)->where('purchaseable_type', 'timelines')
+            ->sum('total_amount');
+        $sums['tips'] = DB::table('fanledgers')
+            ->where('purchaser_id', $user->id)
+            ->where('fltype', PaymentTypeEnum::TIP)->where('purchaseable_type', 'timelines')
+            ->sum('total_amount');
+        $sums['posts'] = DB::table('fanledgers')
+            ->where('purchaser_id', $user->id)
+            ->where('fltype', PaymentTypeEnum::PURCHASE)->where('purchaseable_type', 'posts')
+            ->sum('total_amount');
+        return response()->json([
+            'debits' => [
                 'sums' => $sums,
             ],
         ]);

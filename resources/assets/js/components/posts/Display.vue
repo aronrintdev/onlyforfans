@@ -1,6 +1,5 @@
 <template>
   <div class="post-crate" v-bind:data-post_guid="post.id">
-    <div>HELLO POST</div>
     <b-card
       header-tag="header"
       footer-tag="footer"

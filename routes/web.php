@@ -75,6 +75,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::resource('comments', 'CommentsController', [ 'except' => ['create','edit'] ]);
 
     Route::get('/fanledgers/{user}/earnings', ['as'=>'fanledgers.showEarnings', 'uses' => 'FanledgersController@showEarnings']);
+    Route::get('/fanledgers/{user}/debits', ['as'=>'fanledgers.showDebits', 'uses' => 'FanledgersController@showDebits']);
     Route::resource('fanledgers', 'FanledgersController', [
         'only' => [ 'index', ],
     ]);

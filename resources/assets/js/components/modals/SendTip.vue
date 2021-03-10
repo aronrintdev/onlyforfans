@@ -24,10 +24,10 @@
           id="tip-amount"
           class="w-100 mx-auto tag-tip_amount"
           v-model="formPayload.amount"
-          :formatter-fn="niceCurrency"
-          min="5"
-          max="100"
-          step="5"
+          :formatter-fn="$options.filters.niceCurrency"
+          min="500"
+          max="10000"
+          :step="LEDGER_CONFIG.TIP_STEP_DELTA"
           ></b-form-spinbutton>
 
         <textarea v-model="formPayload.notes" cols="60" rows="5" class="w-100 mt-3" placeholder="Write a message"></textarea>
@@ -45,6 +45,7 @@
 
 <script>
 import { eventBus } from '@/app'
+import LEDGER_CONFIG from "@/components/constants"
 
 export default {
 
@@ -60,36 +61,28 @@ export default {
   },
 
   data: () => ({
+    LEDGER_CONFIG,
     formPayload: {
-      amount: 5,
+      amount: LEDGER_CONFIG.MIN_TIP_IN_CENTS,
       notes: '',
     },
   }),
 
-  created() {
-  },
+  created() { },
 
   methods: {
 
     async sendTip(e) {
       e.preventDefault();
-      const url = `/fanledgers`;
-      const response = await axios.post(url, {
-        fltype:  'tip',
-        purchaseable_type: 'timelines',
-        purchaseable_id: this.timeline.id,
-        seller_id: this.timeline.user_id,
-        base_unit_cost_in_cents: this.formPayload.amount * 100,
+      const response = await axios.put(route('timelines.tip', this.timeline.id), {
+        base_unit_cost_in_cents: this.formPayload.amount,
         notes: this.formPayload.notes || '',
       });
-
-      this.$bvModal.hide('modal-send_tip');
-
-      this.$root.$bvToast.toast(`Tip sent to ${this.timeline.username}`, {
+      this.$bvModal.hide('modal-tip');
+      this.$root.$bvToast.toast(`Tip sent to ${this.timeline.slug}`, {
         toaster: 'b-toaster-top-center',
         title: 'Success!',
       });
-
       eventBus.$emit('update-timeline', this.timeline.id)
     },
 
