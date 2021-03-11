@@ -35,7 +35,7 @@ class UpdateFinancialTransactions extends Migration
         });
         Schema::table('financial_transactions',function (Blueprint $table) {
             // Reference to access table
-            $table->uuid('access_id')->nullable()->after('reference_id');
+            $table->uuid('shareable_id')->nullable()->after('reference_id');
         });
 
     }
@@ -65,8 +65,8 @@ class UpdateFinancialTransactions extends Migration
                 $table->nullableUuidMorphs('resource');
             }
 
-            if (Schema::hasColumn('financial_transactions', 'access_id')) {
-                $table->dropColumn('access_id');
+            if (Schema::hasColumn('financial_transactions', 'shareable_id')) {
+                $table->dropColumn('shareable_id');
             }
         });
     }

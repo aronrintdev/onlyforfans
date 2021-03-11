@@ -40,9 +40,10 @@ class Transaction extends Model
         return $this->belongsTo(Account::class);
     }
 
-    public function access()
+    public function sharable()
     {
-        return $this->hasOne(Access::class);
+        // TODO: References Sharable table
+        // return $this->hasOne(Access::class);
     }
 
     public function reference()
