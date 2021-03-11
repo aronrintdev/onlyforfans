@@ -23,7 +23,11 @@ class MessageController extends Controller
         $sessionUser = $request->user();
         $timeline = Timeline::where('user_id', $sessionUser->id)->first();
         $followingUserIDs = $timeline->user->followedtimelines->pluck('id');
-        $users = Timeline::with(['user', 'avatar'])->get();
+        $users = Timeline::with(['user', 'avatar'])->whereIn('id', $followingUserIDs)->get()->makeVisible(['user']);
+        $users->each(function ($user) {
+            $user->username = $user->user->username;
+        });
+    
         return [
             'followers' => $timeline->followers,
             'following' => $users

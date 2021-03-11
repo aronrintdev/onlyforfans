@@ -27,7 +27,7 @@
                     <button class="btn" type="button" disabled>
                       <i class="fa fa-search" aria-hidden="true"></i>
                     </button>
-                    <b-form-input v-model="userSearchText" placeholder="Add People"></b-form-input>
+                    <b-form-input :value="userSearchText" @input="onChangeSearchText" placeholder="Add People"></b-form-input>
                     <button class="btn" type="button" @click="changeSearchbarVisible">
                       <i class="fa fa-times" aria-hidden="true"></i>
                     </button>
@@ -73,9 +73,10 @@
                       </b-dropdown>
                     </div>
                   </div>
+
                   <div class="user-list-container">
-                    <ul class="user-list" v-if="users.length">
-                      <li v-for="user in users" :key="user.id"
+                    <ul class="user-list">
+                      <li v-for="user in filteredUsers" :key="user.id"
                         :class="selectedUser && selectedUser.id === user.id ? 'selected' : ''"
                         @click="onSelectUser(user)"  
                       >
@@ -113,7 +114,7 @@
                   </div>
                   <div class="conversation-footer">
                     <textarea placeholder="Type a message" name="text" rows="1" maxlength="10000"
-                      spellcheck="false"></textarea>
+                      spellcheck="false" v-model="messageText"></textarea>
                     <div class="action-btns">
                       <div>
                         <!-- image --> 
@@ -152,7 +153,7 @@
                           </svg>
                         </button>
                       </div>
-                      <button class="send-btn btn" disabled type="button">
+                      <button class="send-btn btn" :disabled="!messageText" type="button">
                         Send
                       </button>
                     </div>
@@ -168,7 +169,6 @@
 </template>
 
 <script>
-  import moment from 'moment';
   import RoundCheckBox from '../../components/roundCheckBox';
   /**
    * Messages Dashboard View
@@ -180,103 +180,16 @@
       userSearchVisible: false,
       optionValue: 'unread_first',
       selectedUser: undefined,
-      users: [{
-          id: 1,
-          name: 'Nat',
-          logo: 'https://i.picsum.photos/id/565/200/200.jpg?hmac=QvKo8qgzFFNcZoXCpT0CNMDTwWd3ynwqLXxrzK2o8fw',
-          userId: 'natcomedy',
-          lastMessage: 'Sure wish there was more content here.',
-          lastDate: 'Oct 13, 2020',
-          isOnline: false,
-          lastOnline: 'Feb 16',
-        },
-        {
-          id: 2,
-          name: 'Lisa S.',
-          logo: undefined,
-          userId: 'u117945325',
-          lastMessage: 'Sure wish there was more content here.',
-          lastDate: 'Feb 16',
-          isOnline: false,
-          lastOnline: 'Feb 17',
-        },
-        {
-          id: 3,
-          name: 'MCMXI',
-          logo: undefined,
-          userId: 'mcmxi',
-          lastMessage: 'Any vids for sale ? 😳🙈',
-          lastDate: 'Nov 20, 2020',
-          muted: true,
-          isOnline: true,
-        },
-        {
-          id: 4,
-          name: 'Bjørn erik Bjørkhaug',
-          logo: undefined,
-          userId: 'u42082420',
-          lastMessage: 'I want to see the full video with more details explanation',
-          lastDate: 'June 19, 2020',
-          expired: true,
-          isOnline: true
-        },
-      ],
-      messages: [
-        {
-          date: moment('2021-2-13').format('MMM DD, YYYY'),
-          messages: [
-            {
-              id: 1,
-              text: 'Hello, how are you?',
-              time: '10:29 PM',
-              user: {
-                id: 2,
-                name: 'Lisa S.'
-              },
-            },
-            {
-              id: 2,
-              text: 'Hey, I am fine. And you?',
-              time: '10:39 PM',
-              user: {
-                id: 3,
-                name: 'MCMXI'
-              },
-            },
-          ]
-        },
-        {
-          date: moment('2021-2-16').format('MMM DD, YYYY'),
-          messages: [
-            {
-              id: 3,
-              time: '08:29 PM',
-              text: 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.',
-              user: {
-                id: 2,
-                name: 'Lisa S.'
-              },
-            },
-            {
-              id: 4,
-              text: 'Ok, thanks.',
-              time: '09:29 PM',
-              user: {
-                id: 3,
-                name: 'MCMXI'
-              },
-            }
-          ]
-        }
-      ],
-      messageSearchVisible: false,
+      messageText: undefined,
+      users: [],
+      filteredUsers: [],
       selectedUsers: [],
     }),
     mounted() {
       this.axios.get('/chat-messages/users').then((response) => {
         const { following, followers } = response.data;
         this.users = followers.concat(following);
-        console.log('--- users:', this.users);
+        this.filteredUsers = this.users.slice();
       })
     },
     computed: {
@@ -304,6 +217,7 @@
     methods: {
       changeSearchbarVisible: function () {
         this.userSearchText = undefined;
+        this.filteredUsers = this.users.slice();
       },
       onOptionChanged: function (value) {
         this.optionValue = value;
@@ -324,20 +238,9 @@
           this.selectedUsers.push(user);
         }
       },
-      clearSelectedUser: function () {
-        this.selectedUser = undefined;
-      },
-      addToFavourites: function () {
-        this.selectedUser.isFavourite = !this.selectedUser.isFavourite;
-      },
-      muteNotification: function () {
-        this.selectedUser.muted = !this.selectedUser.muted;
-      },
-      searchMessage: function () {
-        this.selectedUser.showSearch = true;
-      },
-      changeMessageSearchVisible: function () {
-        this.messageSearchVisible = !this.messageSearchVisible;
+      onChangeSearchText: function(value) {
+        this.userSearchText = value;
+        this.filteredUsers = this.users.filter(user => user.username.toLowerCase().indexOf(value.toLowerCase()) > -1 || user.name.toLowerCase().indexOf(value.toLowerCase()) > -1);
       }
     }
   }
