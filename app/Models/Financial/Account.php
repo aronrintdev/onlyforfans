@@ -2,25 +2,24 @@
 
 namespace App\Models\Financial;
 
-use Money\Money;
-use Money\Currency;
-use App\Interfaces\Ownable;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Carbon;
-use App\Models\Traits\UsesUuid;
-use Illuminate\Support\Collection;
-
-use Illuminate\Support\Facades\DB;
-use App\Models\Traits\OwnableTraits;
-use Illuminate\Support\Facades\Config;
 use App\Enums\Financial\AccountTypeEnum;
+use App\Interfaces\Ownable;
 use App\Jobs\Financial\UpdateAccountBalance;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+
+use App\Models\Traits\OwnableTraits;
+use App\Models\Traits\UsesUuid;
+use App\Models\Casts\Money;
 
 use App\Models\Financial\Exceptions\Account\IncorrectTypeException;
 use App\Models\Financial\Exceptions\InvalidTransactionAmountException;
 use App\Models\Financial\Exceptions\Account\InsufficientFundsException;
 use App\Models\Financial\Exceptions\Account\TransactionNotAllowedException;
+
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Account extends Model implements Ownable
 {
@@ -39,6 +38,11 @@ class Account extends Model implements Ownable
         'balance_last_updated_at',
         'pending_last_updated_at',
         'hidden_at',
+    ];
+
+    protected $casts = [
+        'balance' => Money::class,
+        'pending' => Money::class,
     ];
 
     protected static function booted()
@@ -104,16 +108,14 @@ class Account extends Model implements Ownable
         // Make transactions
         DB::transaction(function() use($toAccount, $amount, $options) {
             $fromAccount = Account::lockForUpdate()->find($this->getKey());
-            $currency = new Currency($fromAccount->currency);
-            $transactionAmount = new Money($amount, $currency);
+            $amount = $this->asMoney($amount);
 
             // Verify from account has valid balance if it is an internal account
             if ($fromAccount->type === AccountTypeEnum::INTERNAL) {
-                $balance = new Money($fromAccount->balance, $currency);
-                $balance = $balance->subtract($transactionAmount);
+                $balance = $fromAccount->balance->subtract($amount);
                 $ignoreBalance = isset($options['ignoreBalance']) ? $options['ignoreBalance'] : false;
                 if ($balance->isNegative() && !$ignoreBalance ) {
-                    throw new InsufficientFundsException($fromAccount, $transactionAmount->getAmount(), $balance->getAmount());
+                    throw new InsufficientFundsException($fromAccount, $amount->getAmount(), $balance->getAmount());
                 }
                 $fromAccount->balance = $balance->getAmount();
                 $fromAccount->balance_last_updated_at = Carbon::now();
@@ -130,12 +132,12 @@ class Account extends Model implements Ownable
             $fromTransaction = Transaction::create(array_merge([
                 'account_id' => $fromAccount->getKey(),
                 'credit_amount' => 0,
-                'debit_amount' => $transactionAmount->getAmount(),
+                'debit_amount' => $amount->getAmount(),
             ], $commons));
 
             $toTransaction = Transaction::create(array_merge([
                 'account_id' => $toAccount->getKey(),
-                'credit_amount' => $transactionAmount->getAmount(),
+                'credit_amount' => $amount->getAmount(),
                 'debit_amount' => 0,
             ], $commons));
 

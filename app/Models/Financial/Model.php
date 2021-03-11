@@ -7,6 +7,8 @@ use App\Models\Financial\Exceptions\InvalidFinancialSystemException;
 use App\Models\Model as ModelsModel;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Config;
+use Money\Currency;
+use Money\Money;
 
 /**
  * Financial System Base Model
@@ -14,6 +16,11 @@ use Illuminate\Support\Facades\Config;
 class Model extends ModelsModel
 {
     protected $minTransactions = null;
+
+    public function asMoney($amount): Money
+    {
+        return new Money($amount, new Currency($this->currency));
+    }
 
     /**
      * System this model is working under
