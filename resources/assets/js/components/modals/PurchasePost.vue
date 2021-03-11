@@ -40,7 +40,7 @@ export default {
 
   computed: {
     timelineUrl() {
-      return `/${this.timeline.slug}`
+      return `/${this.post.timeline.slug}`
     },
   },
 
