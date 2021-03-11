@@ -1,0 +1,7 @@
+const LEDGER_CONFIG = {
+  MIN_TIP_IN_CENTS: 5*100,
+  MAX_TIP_IN_CENTS: 100*100,
+  TIP_STEP_DELTA: 5*100,
+}
+
+export default LEDGER_CONFIG

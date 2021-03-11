@@ -1,17 +1,17 @@
-app/Http/Controllers/PostsController.php<template>
+<template>
   <b-card no-body>
 
     <b-card-header>
       <section class="user-avatar">
-        <a :href="timelineUrl"><b-img :src="timeline.user.avatar.filepath" :alt="timeline.user.name" :title="timeline.user.name"></b-img></a>
+        <a :href="timelineUrl"><b-img :src="timeline.avatar.filepath" :alt="timeline.name" :title="timeline.name"></b-img></a>
       </section>
       <section class="user-details">
         <div>
-          <a href="timelineUrl" title="" data-toggle="tooltip" data-placement="top" class="username">{{ timeline.user.name }}</a>
-          <span v-if="timeline.user.verified" class="verified-badge"><b-icon icon="check-circle-fill" variant="success" font-scale="1"></b-icon></span>
+          <a href="timelineUrl" title="" data-toggle="tooltip" data-placement="top" class="username">{{ timeline.name }}</a>
+          <span v-if="timeline.verified" class="verified-badge"><b-icon icon="check-circle-fill" variant="success" font-scale="1"></b-icon></span>
         </div>
         <div>
-          <a :href="timelineUrl" class="tag-username">@{{ timeline.username }}</a>
+          <a :href="timelineUrl" class="tag-username">@{{ timeline.slug }}</a>
         </div>
       </section>
     </b-card-header>
@@ -24,10 +24,10 @@ app/Http/Controllers/PostsController.php<template>
           id="tip-amount"
           class="w-100 mx-auto tag-tip_amount"
           v-model="formPayload.amount"
-          :formatter-fn="niceCurrency"
-          min="5"
-          max="100"
-          step="5"
+          :formatter-fn="$options.filters.niceCurrency"
+          min="500"
+          max="10000"
+          :step="LEDGER_CONFIG.TIP_STEP_DELTA"
           ></b-form-spinbutton>
 
         <textarea v-model="formPayload.notes" cols="60" rows="5" class="w-100 mt-3" placeholder="Write a message"></textarea>
@@ -44,6 +44,8 @@ app/Http/Controllers/PostsController.php<template>
 </template>
 
 <script>
+import { eventBus } from '@/app'
+import LEDGER_CONFIG from "@/components/constants"
 
 export default {
 
@@ -54,54 +56,34 @@ export default {
 
   computed: {
     timelineUrl() {
-      return `/timelines/${this.timeline.slug}`; // DEBUG
-      //return `/${this.timeline.slug}`;
+      return `/${this.timeline.slug}`;
     },
   },
 
   data: () => ({
+    LEDGER_CONFIG,
     formPayload: {
-      amount: 5,
+      amount: LEDGER_CONFIG.MIN_TIP_IN_CENTS,
       notes: '',
     },
   }),
 
-  created() {
-  },
+  created() { },
 
   methods: {
 
-    niceCurrency(v) {
-      //return `$ ${v}`;
-      return new Intl.NumberFormat('en-US',
-        { style: 'currency', currency: 'USD' }
-      ).format(v);
-    },
-
     async sendTip(e) {
       e.preventDefault();
-      const url = `/fanledgers`;
-      const response = await axios.post(url, {
-        fltype:  'tip',
-        purchaseable_type: 'timelines',
-        purchaseable_id: this.timeline.id,
-        seller_id: this.timeline.user.id,
-        base_unit_cost_in_cents: this.formPayload.amount * 100,
+      const response = await axios.put(route('timelines.tip', this.timeline.id), {
+        base_unit_cost_in_cents: this.formPayload.amount,
         notes: this.formPayload.notes || '',
       });
-
-      this.$bvModal.hide('modal-send_tip');
-
-      this.$root.$bvToast.toast(`Tip sent to ${this.timeline.username}`, {
+      this.$bvModal.hide('modal-tip');
+      this.$root.$bvToast.toast(`Tip sent to ${this.timeline.slug}`, {
         toaster: 'b-toaster-top-center',
         title: 'Success!',
       });
-
-
-    },
-
-    async submitComment(e) {
-      e.preventDefault();
+      eventBus.$emit('update-timeline', this.timeline.id)
     },
 
   },

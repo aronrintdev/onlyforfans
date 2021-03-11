@@ -45,6 +45,14 @@
               </li>
             </ul>
           </section>
+          <div class="tag-debug">
+            <ul>
+              <li>ID: {{ post.id | niceGuid }}</li>
+              <li>Type: {{ post.type | enumPostType }}</li>
+              <li>Price: {{ post.price }}</li>
+              <li>Access: {{ post.access }}</li>
+            </ul>
+          </div>
         </div>
         <div v-if="session_user.id === post.user.id" class="post-ctrl">
           <b-dropdown id="dropdown-1" text="" class="m-md-2" variant="outline-dark">
@@ -54,15 +62,26 @@
         </div>
       </template>
 
-      <b-card-img
-        v-if="post.mediafiles.length > 0"
-        :src="post.mediafiles[0].filepath"
-        alt="Image"
-      ></b-card-img>
-
-      <b-card-text>
-        <p>{{ post.description }}</p>
-      </b-card-text>
+      <template v-if="post.access">
+        <b-card-img v-if="hasMediafiles" :src="primaryMediafile" alt="Image" ></b-card-img>
+        <b-card-text> <p>{{ post.description }}</p> </b-card-text>
+      </template>
+      <template v-else-if="$options.filters.isSubscriberOnly(post)">
+        <article class="locked-content d-flex justify-content-center align-items-center">
+          <div class="d-flex flex-column">
+            <b-icon icon="lock-fill" font-scale="5" variant="light" />
+            <b-button @click="renderSubscribe" class="mt-3" variant="primary">Subscribe</b-button>
+          </div>
+        </article>
+      </template>
+      <template v-else>
+        <article class="locked-content d-flex justify-content-center align-items-center">
+          <div class="d-flex flex-column">
+            <b-icon icon="lock-fill" font-scale="5" variant="light" />
+            <b-button @click="renderPurchasePost" class="mt-3" variant="primary">Buy</b-button>
+          </div>
+        </article>
+      </template>
 
       <template #footer>
         <div class="panel-footer fans">
@@ -102,6 +121,7 @@
 
 <script>
 import Vuex from 'vuex'
+import { eventBus } from '@/app'
 import CommentList from '@components/comments/List'
 import CommentDisplay from '@components/comments/Display'
 import LikesButton from '@components/common/LikesButton'
@@ -124,14 +144,20 @@ export default {
     username() {
       return this.post.user.username
     },
-    timeline() {
-      return this.post.user.timeline // %FIXME: shouldn't need user
-    },
     timelineRoute() {
       return {
         name: 'timeline.show',
-        params: { slug: this.timeline.slug }
+        params: { slug: this.post.timeline_slug }
       }
+    },
+    hasMediafiles() {
+      return this.post.mediafiles?.length > 0
+    },
+    primaryMediafile() {
+      return this.hasMediafiles ? this.post.mediafiles[0].filepath : null
+    },
+    isLoading() {
+      return !this.post || !this.session_user
     },
   },
 
@@ -211,7 +237,31 @@ export default {
 
     editPost() {
       const is = this.session_user.id === this.post.user.id // Check permissions
-      console.log('ShowPost::editPost()', { is })
+    },
+
+    renderPurchasePost() {
+      //this.$emit('render-purchase-post', this.post)
+      //this.$bvModal.show('modal-purchase_post', this.post)
+      //eventBus.$emit('render-purchase-post-modal', this.post)
+      eventBus.$emit('open-modal', {
+        key: 'render-purchase-post', 
+        data: {
+          post: this.post,
+        }
+      })
+    },
+
+    renderSubscribe() {
+      //this.$emit('render-subcribe', this.post)
+      //eventBus.$emit('render-subscribe-modal', this.post)
+      //this.$bvModal.show('modal-follow', this.post.postable_id) // = timeline id
+      eventBus.$emit('open-modal', {
+        key: 'render-subscribe', 
+        data: {
+          //timeline_id: this.post.postable_id,
+          timeline: this.post.timeline,
+        }
+      })
     },
 
     deletePost() {
@@ -292,5 +342,11 @@ body .user-details ul > li {
   color: #859ab5;
   font-size: 16px;
   font-weight: 400;
+}
+body .locked-content {
+  background: url('/images/locked_post.png') center center no-repeat !important;
+  background-size: auto;
+  background-size: cover !important;
+  min-height: 20rem;
 }
 </style>

@@ -7,6 +7,7 @@ use Exception;
 use Throwable;
 
 use App\Http\Resources\PostCollection;
+use App\Http\Resources\Timeline as TimelineResource;
 use App\Models\User;
 use App\Libs\FeedMgr;
 use App\Libs\UserMgr;
@@ -37,25 +38,13 @@ class TimelinesController extends AppBaseController
         ]);
     }
 
-    // %TODO: is this still used (?)
     public function show(Request $request, Timeline $timeline)
     {
         $this->authorize('view', $timeline);
-        $sales = Fanledger::where('seller_id', $timeline->user->id)->sum('total_amount');
-
-        $timeline->userstats = [ // %FIXME DRY
-            'post_count' => $timeline->posts->count(),
-            'like_count' => 0, // %TODO $timeline->user->postlikes->count(),
-            'follower_count' => $timeline->followers->count(),
-            'following_count' => $timeline->user->followedtimelines->count(),
-            'subscribed_count' => 0, // %TODO $sessionUser->timeline->subscribed->count()
-            'earnings' => $sales,
-        ];
-
-        return [
-            'sessionUser' => $request->user(),
-            'timeline' => $timeline,
-        ];
+        //$timeline->load(['avatar', 'cover']);
+        //$timeline->userstats = $request->user()->getStats();
+        //return [ 'timeline' => $timeline, ];
+        return new TimelineResource($timeline);
     }
 
     // Display my home timeline
@@ -64,7 +53,7 @@ class TimelinesController extends AppBaseController
         $query = Post::with('mediafiles', 'user')->withCount('comments')->where('active', 1);
         $query->whereHas('timeline', function($q1) use(&$request) {
             $q1->whereHas('followers', function($q2) use(&$request) {
-                $q2->where('id', $request->user()->id);
+                $q2->where('users.id', $request->user()->id);
             });
         });
         $data = $query->latest()->paginate( $request->input('take', env('MAX_POSTS_PER_REQUEST', 10)) );
@@ -92,15 +81,13 @@ class TimelinesController extends AppBaseController
     public function suggested(Request $request)
     {
         $TAKE = $request->input('take', 5);
-
         $followedIDs = $request->user()->followedtimelines->pluck('id');
-
-        $query = Timeline::with('user')->inRandomOrder();
+        $query = Timeline::with(['user', 'avatar', 'cover'])->inRandomOrder();
         $query->whereHas('user', function($q1) use(&$request, &$followedIDs) {
             $q1->where('id', '<>', $request->user()->id); // skip myself
             // skip timelines I'm already following
-            $q1->whereHas('followedtimelines', function($q2) use(&$followedIDs) {
-                $q2->whereNotIn('shareable_id', $followedIDs);
+            $q1->whereDoesntHave('followedtimelines', function($q2) use(&$followedIDs) {
+                $q2->whereIn('shareable_id', $followedIDs);
             });
         });
 

@@ -1,5 +1,5 @@
 <template>
-  <div v-if>
+  <div v-if="!isLoading">
 
     <b-card title="Privacy">
       <b-card-text>
@@ -62,7 +62,7 @@
     <b-card title="Blocked">
       <b-card-text>
         <b-form @submit.prevent="submitBlocked($event)" @reset="onReset">
-          <fieldset v-if="state !== 'loading'">
+          <fieldset>
 
             <b-row>
               <b-col>
@@ -80,7 +80,7 @@
                       <b-button block v-b-toggle.accordion-ips variant="light">IPs</b-button>
                       <b-collapse id="accordion-ips" accordion="my-accordion" role="tabpanel">
                         <ul class="list-blocked list-unstyled">
-                          <li v-for="(b,idx) in user_settings.cattrs.blocked.ips || []" :key="idx"> {{ b }}
+                          <li v-for="(b,idx) in blocked.ips || []" :key="idx"> {{ b }}
                             <span @click="unblock(b)" class="unblock ml-1"><b-icon icon="x-circle-fill" variant="danger" font-scale="1"></b-icon></span>
                           </li>
                         </ul>
@@ -90,7 +90,7 @@
                       <b-button block v-b-toggle.accordion-countries variant="light">Countries</b-button>
                       <b-collapse id="accordion-countries" accordion="my-accordion" role="tabpanel">
                         <ul class="list-blocked list-unstyled">
-                          <li v-for="(b,idx) in user_settings.cattrs.blocked.countries || []"> {{ b }}
+                          <li v-for="(b,idx) in blocked.countries || []"> {{ b }}
                             <span @click="unblock(b)" class="unblock ml-1"><b-icon icon="x-circle-fill" variant="danger" font-scale="1"></b-icon></span>
                           </li>
                         </ul>
@@ -100,7 +100,7 @@
                       <b-button block v-b-toggle.accordion-users variant="light">Users</b-button>
                       <b-collapse id="accordion-users" accordion="my-accordion" role="tabpanel">
                         <ul class="list-blocked list-unstyled">
-                          <li v-for="(b,idx) in user_settings.cattrs.blocked.usernames || []"> {{ b }}
+                          <li v-for="(b,idx) in blocked.usernames || []"> {{ b }}
                             <span @click="unblock(b)" class="unblock ml-1"><b-icon icon="x-circle-fill" variant="danger" font-scale="1"></b-icon></span>
                           </li>
                         </ul>
@@ -179,11 +179,15 @@ export default {
   },
 
   computed: {
-    //...Vuex.mapState(['vault']),
+    isLoading() {
+      return !this.session_user || !this.user_settings
+    },
+    blocked() {
+      return this.user_settings.cattrs?.blocked || {}
+    },
   },
 
   data: () => ({
-    state: 'loading', // loading | loaded
 
     isEditing: {
       formPrivacy: false,
@@ -274,11 +278,7 @@ export default {
   watch: {
     'blockedItem': 'queryBlockables',
 
-    session_user(newVal) {
-    },
-
     user_settings(newVal) {
-      this.state = 'loaded'
       if ( newVal.cattrs.privacy ) {
         this.formPrivacy.privacy = newVal.cattrs.privacy
       }

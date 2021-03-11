@@ -11,9 +11,11 @@ use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 use App\Http\Resources\UserSetting as UserSettingResource;
+use App\Http\Resources\UserCollection;
 use App\Models\User;
 use App\Models\Fanledger;
 use App\Models\Country;
+use App\Models\Timeline;
 use App\Enums\PaymentTypeEnum;
 use App\Rules\MatchOldPassword;
 
@@ -22,18 +24,14 @@ class UsersController extends AppBaseController
     public function index(Request $request)
     {
         $query = User::query();
-
-        // Apply filters
-        //  ~ %TODO
-
-        return response()->json([
-            'users' => $query->get(),
-        ]);
+        // Apply filters %TODO
+        $data = $query->paginate( $request->input('take', env('MAX_DEFAULT_PER_REQUEST', 10)) );
+        return new UserCollection($data);
     }
 
     public function showSettings(Request $request, User $user)
     {
-        $this->authorize('show', $user);
+        $this->authorize('view', $user);
         return new UserSettingResource($user->settings);
     }
 
@@ -143,32 +141,28 @@ class UsersController extends AppBaseController
 
     public function me(Request $request)
     {
-        $sessionUser = Auth::user(); // sender of tip
+        $sessionUser = $request->user(); // sender of tip
         $sessionUser->makeVisible('email');
+        //$timeline = $sessionUser->timeline->with([]);
+        //$timeline = $sessionUser->timeline;
+        //$timeline = Timeline::with(['followers', 'following',])
+        $timeline = Timeline::with(['avatar', 'cover'])
+            ->where('user_id', $sessionUser->id)
+            ->first();
 
-        $sales = Fanledger::where('seller_id', $sessionUser->id)->sum('total_amount');
-
-        $timeline = $sessionUser->timeline;
-        $timeline->userstats = [ // %FIXME DRY
-            'post_count'       => $timeline->posts->count(),
-            'like_count'       => $timeline->user->likedposts->count(),
-            'follower_count'   => $timeline->followers->count(),
-            'following_count'  => $timeline->user->followedtimelines->count(),
-            'subscribed_count' => 0, // %TODO $sessionUser->timeline->subscribed->count()
-            'earnings'         => $sales,
-        ];
+        $timeline->userstats = $sessionUser->getStats();
 
         /** Flags for the common UI elements */
         $uiFlags = [
             'isAdmin'          => $sessionUser->can('admin.dashboard'),
             'isCreator'        => $sessionUser->settings->is_creator ?? false,
             'hasBanking'       => false, // TODO: Add Logic when banking is setup
-            'hasEarnings'      => $sales > 0,
+            'hasEarnings'      => $sessionUser->hasEarnings(),
             'hasPaymentMethod' => false, // TODO: Add Logic when payment method is setup
         ];
 
         return [
-            'session_user' => $sessionUser,
+            'session_user' => $sessionUser->setHidden(['timeline', 'settings']),
             'timeline'     => $timeline,
             'uiFlags'      => $uiFlags,
         ];
@@ -200,14 +194,10 @@ class UsersController extends AppBaseController
         ]);
     }
 
+    // currently goes by email
     public function match(Request $request)
     {
-        if ( !$request->ajax() ) {
-            \App::abort(400, 'Requires AJAX');
-        }
-
         $term = $request->input('term',null);
-
         if ( empty($term) ) {
             return [];
         }

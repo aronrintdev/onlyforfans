@@ -50,7 +50,6 @@ export const routes = [
 
   // Settings
   {
-    name: 'settings.dashboard',
     path: '/settings',
     component: settings.Dashboard,
     children: [
@@ -90,7 +89,7 @@ export const routes = [
         path: 'referrals',
       },
       {
-        name: 'settings.general',
+        name: 'settings.default',
         component: SettingsGeneral,
         path: '',
       },

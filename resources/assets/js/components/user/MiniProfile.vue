@@ -1,12 +1,13 @@
 <template>
   <div>
-    <b-skeleton-wrapper :loading="loading" >
+    <b-skeleton-wrapper :loading="isLoading" >
       <template #loading>
         <b-card
           no-body
           img-top
           class="background"
         >
+          <!-- loading... -->
           <b-skeleton-img card-img="top" no-aspect height="120px" />
 
           <b-card-body>
@@ -31,8 +32,8 @@
       </template>
 
       <b-card
-        :img-src="user.cover.filepath"
-        :img-alt="user.name"
+        :img-src="timeline.cover.filepath"
+        :img-alt="timeline.slug"
         img-top
         tag="article"
         class="background"
@@ -43,9 +44,9 @@
               thumbnail
               rounded="circle"
               class="w-100 h-100"
-              :src="user.avatar.filepath"
-              :alt="user.name"
-              :title="user.name"
+              :src="timeline.avatar.filepath"
+              :alt="timeline.slug"
+              :title="timeline.name"
             />
           </router-link>
         </div>
@@ -54,15 +55,15 @@
           <div class="avatar-details">
             <h2 class="avatar-name my-0">
               <router-link :to="{ name: 'timeline.show', params: { slug: timeline.slug } }">
-                {{ user.name }}
+                {{ timeline.name }}
               </router-link>
-              <span v-if="user.verified" class="verified-badge">
+              <span v-if="timeline.verified" class="verified-badge">
                 <b-icon icon="check-circle-fill" variant="success" font-scale="1" />
               </span>
             </h2>
             <p class="avatar-mail my-0">
               <router-link :to="{ name: 'timeline.show', params: { slug: timeline.slug } }">
-                @{{ user.username }}
+                @{{ timeline.slug }}
               </router-link>
             </p>
           </div>
@@ -76,14 +77,15 @@
 <script>
 export default {
   props: {
-    loading: { type: Boolean, default: false },
-    timeline: { type: Object, default: () => ({ cover: {}, avatar: {} }) },
+    timeline: null, // { type: Object, default: () => ({ cover: {}, avatar: {} }) },
   },
+
   computed: {
-    user() {
-      return this.timeline.user || { avatar: {}, cover: {} }
-    }
-  }
+    isLoading() {
+      //return !this.timeline || !this.timeline.cover
+      return !this.timeline
+    },
+  },
 }
 </script>
 

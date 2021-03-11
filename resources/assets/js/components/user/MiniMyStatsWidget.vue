@@ -1,22 +1,22 @@
 <template>
-  <div v-if="!is_loading" class="session_widget-crate tag-crate">
+  <div v-if="!isLoading" class="session_widget-crate tag-crate">
     <section>
       <b-card
-        :img-src="follower.cover.filepath"
-        :img-alt="follower.name"
+        :img-src="timeline.cover.filepath"
+        :img-alt="timeline.name"
         img-top
         tag="article"
         class="background"
       >
         <div class="avatar-img">
-          <a :href="`/${follower.username}`">
+          <a :href="`/${timeline.slug}`">
             <b-img
               thumbnail
               rounded="circle"
               class="w-100 h-100"
-              :src="follower.avatar.filepath"
-              :alt="follower.name"
-              :title="follower.name"
+              :src="timeline.avatar.filepath"
+              :alt="timeline.name"
+              :title="timeline.name"
             ></b-img>
           </a>
         </div>
@@ -24,13 +24,13 @@
         <div class="avatar-profile d-flex justify-content-between">
           <div class="avatar-details">
             <h2 class="avatar-name my-0">
-              <a :href="`/${follower.username}`">{{ follower.name }}</a>
-              <span v-if="follower.verified" class="verified-badge"
+              <a :href="`/${timeline.slug}`">{{ timeline.name }}</a>
+              <span v-if="timeline.verified" class="verified-badge"
                 ><b-icon icon="check-circle-fill" variant="success" font-scale="1"></b-icon
               ></span>
             </h2>
             <p class="avatar-mail my-0">
-              <a :href="`/${follower.username}`">@{{ follower.username }}</a>
+              <a :href="`/${timeline.slug}`">@{{ timeline.slug }}</a>
             </p>
           </div>
           <div class="go-live">
@@ -79,11 +79,10 @@ export default {
   },
 
   computed: {
-    ...Vuex.mapState(['is_loading']),
-
-    follower() {
-      return this.timeline.user
+    isLoading() {
+      return !this.session_user || !this.timeline;
     },
+
     stats() {
       return this.timeline.userstats
     },

@@ -35,7 +35,7 @@ class StoriesController extends AppBaseController
                 }
                 if ( array_key_exists('timeline_id', $filters) ) {
                     $timeline = Timeline::findOrFail($request->filters['timeline_id']);
-                    if ( $request->user()->can('view', $timeline) ) { // should include followers & owner (!)
+                    if ( $request->user()->can('indexStories', $timeline) ) { // should include followers & owner (!)
                         break; // allowed
                     }
                 }
@@ -45,7 +45,7 @@ class StoriesController extends AppBaseController
 
         $query = Story::query()->with('mediafiles');
 
-        foreach ( $request->input('filters', []) as $k => $v ) {
+        foreach ( $filters as $k => $v ) {
             switch ($k) {
             case 'following':
                 $query->whereHas('timeline', function($q1) use(&$request) {

@@ -9,7 +9,7 @@ class UserPolicy extends BasePolicy
     protected $policies = [
         'viewAny'     => 'permissionOnly',
         'create'      => 'permissionOnly',
-        'view'        => 'isBlockedBy:fail',
+        'view'        => 'isSelf:pass',
         'update'      => 'isSelf:pass',
         'delete'      => 'permissionOnly',
         'restore'     => 'permissionOnly',
@@ -25,7 +25,8 @@ class UserPolicy extends BasePolicy
 
     protected function isBlockedBy(User $sessionUser, User $user) : bool
     {
-        return $sessionUser->$user->isBlockedBy($user);
+        //return $sessionUser->$user->isBlockedBy($user);
+        return $sessionUser->isBlockedBy($user); // %TODO %CHECKME
     }
 
 }

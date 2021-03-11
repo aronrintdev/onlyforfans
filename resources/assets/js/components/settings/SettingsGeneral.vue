@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="!isLoading">
 
     <b-card title="General">
       <b-card-text>
@@ -163,7 +163,9 @@ export default {
   },
 
   computed: {
-    //...Vuex.mapState(['vault']),
+    isLoading() {
+      return !this.session_user || !this.user_settings
+    },
   },
 
   data: () => ({

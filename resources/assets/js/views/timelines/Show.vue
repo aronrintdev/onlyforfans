@@ -1,45 +1,51 @@
 <template>
-  <div>
-    <div class="container" id="view-show_timeline" v-if="state === 'loaded'">
+  <div v-if="!isLoading">
+
+    <div class="container" id="view-show_timeline">
 
       <section class="row">
         <article class="col-sm-12">
-          <Banner :session_user="session_user" :timeline="timeline" />
+          <Banner :session_user="session_user" :timeline="timeline" :follower="timeline.user" />
         </article>
       </section>
 
       <section class="row">
-
         <aside class="col-md-5 col-lg-4">
           <FollowCtrl :session_user="session_user" :timeline="timeline" />
         </aside>
-
         <main class="col-md-7 col-lg-8">
           <PostFeed :session_user="session_user" :timeline="timeline" :is_homefeed="false" />
         </main>
-
       </section>
 
     </div>
 
-    <b-modal id="modal-send_tip" size="sm" title="Send a Tip" hide-footer body-class="p-0" v-if="state === 'loaded'">
+    <!-- %FIXME: DRY vs Home -->
+    <b-modal id="modal-tip" size="sm" title="Send a Tip" hide-footer body-class="p-0">
       <SendTip :session_user="session_user" :timeline="timeline" />
     </b-modal>
 
-    <b-modal id="modal-follow" title="Follow" ok-only v-if="state === 'loaded'">
-      <p class="my-4">Follow Modal</p>
+    <b-modal id="modal-purchase_post" size="sm" title="Purchase Post" hide-footer body-class="p-0">
+      <PurchasePost :session_user="session_user" :post="selectedPost" />
+    </b-modal>
+
+    <b-modal id="modal-follow" title="Follow" hide-footer body-class="p-0">
+      <FollowTimeline :session_user="session_user" :timeline="timeline" />
     </b-modal>
 
   </div>
 </template>
 
 <script>
-import Vuex from 'vuex';
-import PostFeed from '@components/timelines/PostFeed.vue';
-import StoryBar from '@components/timelines/StoryBar.vue';
-import Banner from '@components/timelines/Banner.vue';
-import FollowCtrl from '@components/common/FollowCtrl.vue';
-import SendTip from '@components/modals/SendTip.vue';
+import Vuex from 'vuex'
+import { eventBus } from '@/app'
+import PostFeed from '@components/timelines/PostFeed.vue'
+import StoryBar from '@components/timelines/StoryBar.vue'
+import Banner from '@components/timelines/Banner.vue'
+import FollowCtrl from '@components/common/FollowCtrl.vue'
+import FollowTimeline from '@components/modals/FollowTimeline.vue'
+import PurchasePost from '@components/modals/PurchasePost.vue'
+import SendTip from '@components/modals/SendTip.vue'
 
 export default {
   components: {
@@ -47,6 +53,8 @@ export default {
     StoryBar,
     Banner,
     FollowCtrl,
+    FollowTimeline,
+    PurchasePost,
     SendTip,
   },
 
@@ -56,35 +64,63 @@ export default {
 
   computed: {
     ...Vuex.mapGetters(['session_user']),
+
+    isLoading() {
+      return !this.slug || !this.timeline
+    }
   },
 
   data: () => ({
-    state: 'loading', // loading | loaded
     timeline: null,
+    selectedPost: null,
   }),
+
+  created() {
+
+    eventBus.$on('open-modal', ({ key, data }) => {
+      console.log('views/timelines/Show.on(open-modal)', {
+        key, data,
+      });
+      switch(key) {
+        case 'render-purchase-post':
+          this.selectedPost = data.post
+          this.$bvModal.show('modal-purchase_post')
+          break
+        case 'render-follow':
+        case 'render-subscribe':
+          this.selectedTimeline = data.timeline
+          this.$bvModal.show('modal-follow')
+          break
+        case 'render-tip':
+          //this.selectedTimelineId = data.timeline_id // %TODO
+          this.$bvModal.show('modal-tip')
+          break
+      }
+    })
+
+    eventBus.$on('update-timeline', () => {
+      console.log('views.timelines.Show - eventBus.$on(update-timeline)')
+      this.load() 
+    })
+  },
 
   mounted() {
     if (this.slug) {
       this.load()
     }
-    if (!this.session_user) {
-      this.getMe()
-    }
+    //if (!this.session_user) { }
   },
 
   methods: {
-    ...Vuex.mapActions([ 'getMe' ]),
-    load() {
-      this.state = 'loading'
-      this.axios.get(this.$apiRoute('timelines.show', { timeline: this.slug }))
-      .then(response => {
-        this.timeline = response.data.timeline
-        this.state = 'loaded'
-      })
-      .catch(error => {
+    async load() {
+      try { 
+        const response = await this.axios.get(this.$apiRoute('timelines.show', { timeline: this.slug }))
+        this.timeline = response.data.data
+      } catch (error) {
         this.$log.error(error)
-      })
-    }
+      }
+    },
+
   },
 
   watch: {

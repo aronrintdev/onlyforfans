@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="!isLoading">
 
     <b-card title="Edit Profile">
       <b-card-text>
@@ -92,7 +92,9 @@ export default {
   },
 
   computed: {
-    //...Vuex.mapState(['vault']),
+    isLoading() {
+      return !this.session_user || !this.user_settings
+    },
   },
 
   data: () => ({
@@ -126,12 +128,7 @@ export default {
   }),
 
   watch: {
-    session_user(newVal) {
-    },
     user_settings(newVal) {
-      console.log('watch',  {
-        about: newVal.about,
-      });
       this.formProfile.gender = newVal.gender;
       this.formProfile.country = newVal.country;
       this.formProfile.city = newVal.city;

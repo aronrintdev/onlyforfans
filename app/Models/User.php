@@ -28,9 +28,13 @@ class User extends Authenticatable implements PaymentSendable, Blockable, HasFin
 {
     use Notifiable, HasRoles, HasFactory, Messagable, SoftDeletes, UsesUuid, MorphFunctions;
 
-    protected $appends = [ 'name', 'avatar', 'cover', 'about', ];
+    protected $appends = [ 
+        'name', 
+        'avatar', 
+        'about', 
+    ];
     protected $guarded = [ 'id', 'created_at', 'updated_at' ];
-    protected $hidden = [ 'email', 'password', 'remember_token', 'verification_code', ];
+    protected $hidden = [ 'email', 'password', 'remember_token', 'verification_code', 'timeline'];
     protected $dates = [ 'last_logged', ];
 
     //--------------------------------------------
@@ -70,13 +74,12 @@ class User extends Authenticatable implements PaymentSendable, Blockable, HasFin
         });
     }
 
+    /*
     public function toArray()
     {
         $array = parent::toArray();
-        /**
-         * Removed, all attributes seem to still be set without needing this and it messes up setVisible()
-         * TODO: Remove this after confirming ui still gets what it needs.
-         */
+        // Removed, all attributes seem to still be set without needing this and it messes up setVisible()
+        // TODO: Remove this after confirming ui still gets what it needs.
         // $timeline = $this->timeline->toArray();
         // foreach ($timeline as $key => $value) {
         //     if ($key != 'id') {
@@ -86,6 +89,7 @@ class User extends Authenticatable implements PaymentSendable, Blockable, HasFin
         // $array['avatar'] = $this->avatar;
         return $array;
     }
+     */
 
     /**
      * Makes username a valid random username if it is null or empty.
@@ -254,22 +258,9 @@ class User extends Authenticatable implements PaymentSendable, Blockable, HasFin
             : (object) ['filepath' => url('user/avatar/default-' . $this->gender . '-avatar.png')];
     }
 
-    public function getCoverAttribute($value)
-    {
-        return $this->timeline->cover ? $this->timeline->cover : null;
-    }
-
     public function getAboutAttribute($value)
     {
         return $this->timeline->about ? $this->timeline->about : null;
-    }
-
-    //this method is for displaying user avatar and default avatar from group in events feature
-    public function getPictureAttribute($value)
-    {
-        return $this->timeline->avatar
-            ? $this->timeline->avatar
-            : url('group/avatar/default-group-avatar.png');
     }
 
     // ---
@@ -288,6 +279,195 @@ class User extends Authenticatable implements PaymentSendable, Blockable, HasFin
     {
         return DB::table('user_settings')->where('user_id', $user_id)->delete();
     }
+
+    public function commentLikes()
+    {
+        return $this->morphedByMany('App\Models\Comment', 'likeable', 'likeables', 'likee_id')
+            ->withTimestamps();
+    }
+
+    public function comments()
+    {
+        return $this->hasMany('App\Models\Comment');
+    }
+
+    public function deleteOthers()
+    {
+        // %PSG: Delete posts that aren't my own from my timeline
+        $sessionUser = Auth::user();
+        $otherPosts = $this->timeline->posts()->where('user_id', '!=', $sessionUser->id)->get();
+        foreach ($otherPosts as $otherPost) {
+            $otherPost->users_liked()->detach();
+            //$otherPost->notifications_user()->detach();
+            $otherPost->sharees()->detach();
+            $otherPost->reports()->detach();
+            $otherPost->users_tagged()->detach();
+            $otherPost->images()->detach();
+            $comments = $otherPost->allComments()->get();
+
+            foreach ($comments as $comment) {
+                $comment->comments_liked()->detach();
+                $dependencies = Comment::where('parent_id', $comment->id)->update(['parent_id' => null]);
+                $comment->update(['parent_id' => null]);
+                $comment->delete();
+            }
+            $otherPost->notifications()->delete();
+            $otherPost->delete();
+        }
+    }
+
+    // --- Blockable ---
+
+    public function blockedUsers()
+    {
+        return $this->morphToMany('App\Models\User', 'blockable', 'blockables');
+    }
+
+    public function blockedBy(): MorphToMany
+    {
+        return $this->morphedByMany('App\Models\User', 'blockable', 'blockables');
+    }
+
+    // Checks if user is blocked by another user
+    public function isBlockedBy(User $user): bool
+    {
+        return $this->blockedBy()->where('user_id', $user->id)->count() > 0;
+    }
+
+    public function block(Blockable $resource)
+    {
+        $resource->blockedBy()->save($this);
+    }
+
+    // --- %%Can Own ---
+
+    // Check if user owns an ownable resource
+    public function isOwner(Ownable $resource): bool
+    {
+        return $resource->getOwner()->contains(function ($value, $key) {
+            return $value->id === $this->id;
+        });
+    }
+
+    public function events()
+    {
+        return $this->belongsToMany('App\Event', 'event_user', 'user_id', 'event_id');
+    }
+
+    public function get_eventuser($id)
+    {
+        return $this->events()->where('events.id', $id)->first();
+    }
+
+    public function isAdmin() : bool
+    {
+        return $this->roles()->pluck('name')->contains('super-admin');
+    }
+
+    public function is_eventadmin($user_id, $event_id) {
+        $chk_isadmin = Event::where('id', $event_id)->where('user_id', $user_id)->first();
+
+        $result = $chk_isadmin ? true : false;
+
+        return $result;
+    }
+
+    public function getEvents()
+    {
+        $result = [];
+        $guestevents =  $this->events()->get();
+        if ($guestevents) {
+            foreach ($guestevents as $guestevent) {
+                if (!$this->is_eventadmin(Auth::user()->id, $guestevent->id)) {
+                    array_push($result, $guestevent);
+                }
+            }
+        }
+        return $result;
+    }
+
+    public function is_groupAdmin($user_id, $group_id)
+    {
+        $admin_role_id = Role::where('name', 'admin')->first();
+        $groupUser = $this->groups()->where('group_id', $group_id)->where('user_id', $user_id)->where('role_id', $admin_role_id->id)->where('status', 'approved')->first();
+        return $groupUser ? true : false;
+    }
+
+    public function is_groupMember($user_id, $group_id)
+    {
+        $admin_role_id = Role::where('name', 'admin')->first();
+        $groupMember = $this->groups()->where('group_id', $group_id)->where('user_id', $user_id)->where('role_id', '!=', $admin_role_id->id)->where('status', 'approved')->first();
+        return $groupMember ? true : false;
+    }
+
+    // total sales in cents
+    public function getSales() : int
+    {
+        return Fanledger::where('seller_id', $this->id)->sum('total_amount');
+    }
+
+
+    public function getStats() : array
+    {
+        $timeline = $this->timeline;
+        if ( !$timeline ) {
+            return [];
+        }
+        return [
+            'post_count'       => $timeline->posts->count(),
+            'like_count'       => $timeline->user->likedposts->count(),
+            'follower_count'   => $timeline->followers->count(),
+            'following_count'  => $timeline->user->followedtimelines->count(),
+            'subscribed_count' => 0, // %TODO $sessionUser->timeline->subscribed->count()
+            'earnings'         => $this->getSales(),
+            'website'          => '', // %TODO
+            'instagram'        => '', // %TODO
+            'city'             => $this->settings->city,
+            'country'          => $this->settings->country,
+        ];
+    }
+
+    public function hasEarnings() : bool
+    {
+        $sales = $this->getSales();
+        return $sales > 0;
+    }
+
+
+    /* ------------------------ HasFinancialAccounts ------------------------ */
+    public function getInternalAccount(string $system, string $currency): Account
+    {
+        $account = $this->financialAccounts()->where('system', $system)
+            ->where('currency', $currency)
+            ->where('type', AccountTypeEnum::INTERNAL)
+            ->first();
+        if (isset($account)) {
+            return $account;
+        }
+        return $this->createInternalAccount($system, $currency);
+    }
+
+    public function createInternalAccount(string $system, string $currency): Account
+    {
+        $account = Account::create([
+            'system' => $system,
+            'owner_type' => $this->getMorphString(),
+            'owner_id' => $this->getKey(),
+            'name' => $this->username . ' Balance Account',
+            'type' => AccountTypeEnum::INTERNAL,
+            'currency' => $currency,
+            'balance' => 0,
+            'balance_last_updated_at' => Carbon::now(),
+            'pending' => 0,
+            'pending_last_updated_at' => Carbon::now(),
+        ]);
+        $account->verified = true;
+        $account->can_make_transactions = true;
+        $account->save();
+        return $account;
+    }
+
+}
 
     /*
     public function getOthersSettings($username)
@@ -345,173 +525,3 @@ class User extends Authenticatable implements PaymentSendable, Blockable, HasFin
     }
      */
 
-    public function commentLikes()
-    {
-        return $this->morphedByMany('App\Models\Comment', 'likeable', 'likeables', 'likee_id')
-            ->withTimestamps();
-    }
-
-    public function comments()
-    {
-        return $this->hasMany('App\Models\Comment');
-    }
-
-    public function deleteOthers()
-    {
-        // %PSG: Delete posts that aren't my own from my timeline
-        $sessionUser = Auth::user();
-        $otherPosts = $this->timeline->posts()->where('user_id', '!=', $sessionUser->id)->get();
-        foreach ($otherPosts as $otherPost) {
-            $otherPost->users_liked()->detach();
-            //$otherPost->notifications_user()->detach();
-            $otherPost->sharees()->detach();
-            $otherPost->reports()->detach();
-            $otherPost->users_tagged()->detach();
-            $otherPost->images()->detach();
-            $comments = $otherPost->allComments()->get();
-
-            foreach ($comments as $comment) {
-                $comment->comments_liked()->detach();
-                $dependencies = Comment::where('parent_id', $comment->id)->update(['parent_id' => null]);
-                $comment->update(['parent_id' => null]);
-                $comment->delete();
-            }
-            $otherPost->notifications()->delete();
-            $otherPost->delete();
-        }
-    }
-
-    // --- Blockable ---
-
-    public function blockedUsers()
-    {
-        return $this->morphToMany('App\Models\User', 'blockable', 'blockables');
-    }
-
-    public function blockedBy(): MorphToMany
-    {
-        return $this->morphedByMany('App\Models\User', 'blockable', 'blockables');
-    }
-
-    /**
-     * Checks if user is blocked by another user
-     */
-    public function isBlockedBy(User $user): bool
-    {
-        return $this->blockedBy()->where('user_id', $user->id)->count() > 0;
-    }
-
-    public function block(Blockable $resource)
-    {
-        $resource->blockedBy()->save($this);
-    }
-
-    // --- %%Can Own ---
-
-    /**
-     * Check if user owns an ownable resource
-     */
-    public function isOwner(Ownable $resource): bool
-    {
-        return $resource->getOwner()->contains(function ($value, $key) {
-            return $value->id === $this->id;
-        });
-    }
-    
-    
-    
-
-    public function events()
-    {
-        return $this->belongsToMany('App\Event', 'event_user', 'user_id', 'event_id');
-    }
-
-    public function get_eventuser($id)
-    {
-        return $this->events()->where('events.id', $id)->first();
-    }
-
-    public function isAdmin() : bool
-    {
-        return $this->roles()->pluck('name')->contains('super-admin');
-    }
-
-    public function is_eventadmin($user_id, $event_id) {
-        $chk_isadmin = Event::where('id', $event_id)->where('user_id', $user_id)->first();
-
-        $result = $chk_isadmin ? true : false;
-
-        return $result;
-    }
-
-    public function getEvents()
-    {
-        $result = [];
-        $guestevents =  $this->events()->get();
-        if ($guestevents) {
-            foreach ($guestevents as $guestevent) {
-                if (!$this->is_eventadmin(Auth::user()->id, $guestevent->id)) {
-                    array_push($result, $guestevent);
-                }
-            }
-        }
-        return $result;
-    }
-
-    public function is_groupAdmin($user_id, $group_id)
-    {
-        $admin_role_id = Role::where('name', 'admin')->first();
-
-        $groupUser = $this->groups()->where('group_id', $group_id)->where('user_id', $user_id)->where('role_id', $admin_role_id->id)->where('status', 'approved')->first();
-
-        $result = $groupUser ? true : false;
-
-        return $result;
-    }
-
-    public function is_groupMember($user_id, $group_id)
-    {
-        $admin_role_id = Role::where('name', 'admin')->first();
-
-        $groupMember = $this->groups()->where('group_id', $group_id)->where('user_id', $user_id)->where('role_id', '!=', $admin_role_id->id)->where('status', 'approved')->first();
-
-        $result = $groupMember ? true : false;
-
-        return $result;
-    }
-
-
-    /* ------------------------ HasFinancialAccounts ------------------------ */
-    public function getInternalAccount(string $system, string $currency): Account
-    {
-        $account = $this->financialAccounts()->where('system', $system)
-            ->where('currency', $currency)
-            ->where('type', AccountTypeEnum::INTERNAL)
-            ->first();
-        if (isset($account)) {
-            return $account;
-        }
-        return $this->createInternalAccount($system, $currency);
-    }
-
-    public function createInternalAccount(string $system, string $currency): Account
-    {
-        $account = Account::create([
-            'system' => $system,
-            'owner_type' => $this->getMorphString(),
-            'owner_id' => $this->getKey(),
-            'name' => $this->username . ' Balance Account',
-            'type' => AccountTypeEnum::INTERNAL,
-            'currency' => $currency,
-            'balance' => 0,
-            'balance_last_updated_at' => Carbon::now(),
-            'pending' => 0,
-            'pending_last_updated_at' => Carbon::now(),
-        ]);
-        $account->verified = true;
-        $account->can_make_transactions = true;
-        $account->save();
-        return $account;
-    }
-
-}

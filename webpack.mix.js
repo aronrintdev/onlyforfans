@@ -69,7 +69,7 @@ mix.js('resources/assets/js/app.js', 'public/js/app.js')
         i18n: '@intlify/vue-i18n-loader',
       },
     },
-  });
+  }).sourceMaps();
 
 /**
  * Guest App

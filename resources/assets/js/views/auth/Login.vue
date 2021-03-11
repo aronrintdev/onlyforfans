@@ -11,24 +11,26 @@
       </template>
       <!-- Login Form -->
       <div class="login-form p-3">
-        <div v-if="error && error.message">
-          <b-alert variant="danger" v-text="error.message" show />
+        <div v-if="verrors && verrors.message">
+          <b-alert variant="danger" v-text="verrors.message" show />
         </div>
-        <b-form-group :invalid-feedback="error.email ? error.email[0] : null" :state="error.email ? false : null">
+        <b-form-group :invalid-feedback="verrors.email ? verrors.email[0] : null" :state="verrors.email ? false : null">
           <b-form-input
             id="input-email"
             v-model="form.email"
             :placeholder="$t('email')"
-            :state="error.email ? false : null"
+            :state="verrors.email ? false : null"
+            @focus="clearVerrors"
           />
         </b-form-group>
-        <b-form-group :invalid-feedback="error.password ? error.password[0] : null" :state="error.password ? false : null">
+        <b-form-group :invalid-feedback="verrors.password ? verrors.password[0] : null" :state="verrors.password ? false : null">
           <b-form-input
             id="input-password"
             type="password"
             v-model="form.password"
             :placeholder="$t('password')"
-            :state="error.password ? false : null"
+            :state="verrors.password ? false : null"
+            @focus="clearVerrors"
           />
         </b-form-group>
         <div class="text-right">
@@ -73,7 +75,7 @@ export default {
   },
   data: () => ({
     state: 'form', // form | loading
-    error: {},
+    verrors: {}, // rendered validation Errors
     form: {
       email: '',
       password: '',
@@ -81,16 +83,29 @@ export default {
     },
   }),
   methods: {
+    clearVerrors() {
+      this.verrors = {}
+    },
+
     login() {
       this.state = 'loading'
       this.axios.post('/login', this.form).then((response) => {
-        if (response.data.error) {
-          this.error = response.data.error
-        } else if (response.data.redirect) {
+        if (response.data.redirect) {
+          console.log('success', { 
+            redirect: response.data 
+          });
           window.location = response.data.redirect
+        } else {
+          // %TODO
         }
         this.state = 'form'
-      })
+      }).catch( e => {
+        const response = e.response
+        if (response.data && response.data.errors) {
+          this.verrors = response.data.errors // L8 convention is 'errors'
+        }
+        this.state = 'form'
+      });
     },
   },
 }
