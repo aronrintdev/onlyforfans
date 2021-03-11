@@ -40,6 +40,16 @@ export const routes = [
     path: '/messages',
     component: liveChat.Home,
   },
+  {
+    name: 'messages.new',
+    path: '/messages/new',
+    component: liveChat.New,
+  },
+  {
+    name: 'messages.details',
+    path: '/messages/:id',
+    component: liveChat.Details,
+  },
   // Timelines
   {
     name: 'timelines.home',
