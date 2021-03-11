@@ -56,7 +56,7 @@ export default {
         toaster: 'b-toaster-top-center',
         title: 'Success!',
       })
-      this.$emit('update-post', this.post.id)
+      eventBus.$emit('update-post', this.post.id)
     },
 
   },
