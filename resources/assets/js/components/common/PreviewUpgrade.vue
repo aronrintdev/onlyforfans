@@ -6,7 +6,7 @@
           <b-col cols="4" v-for="(p,idx) in previewposts.data" :key="p.id" class="px-1">
             <article class="tag-wrap mb-3">
               <div @click="renderPost(p)" :style="{ backgroundImage: 'url(' + getImage(p) + ')' }" :class="{'blurred': !p.access}" class="tag-thumb"></div>
-              <b-icon v-if="!p.access" class="tag-icon" icon="lock-fill" font-scale="2" variant="light" />
+              <b-icon v-if="!p.access" @click="renderPost(p)" class="tag-icon" icon="lock-fill" font-scale="2" variant="light" />
             </article>
           </b-col>
         </b-row>
@@ -81,7 +81,6 @@ export default {
   filter: blur(4px);
 }
 .tag-thumb {
-  cursor: pointer;
   width: 90px;
   height: 90px;
   background-size: cover;
@@ -90,5 +89,8 @@ export default {
   position: absolute;
   top: 30px;
   left: 30px;
+}
+.tag-thumb, .tag-icon {
+  cursor: pointer;
 }
 </style>

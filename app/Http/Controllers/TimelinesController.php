@@ -97,6 +97,7 @@ class TimelinesController extends AppBaseController
         ]);
     }
 
+    // %FIXME: better way to do this is to pull down a set of mediafiles associated with posts on this timeline (?)
     public function previewPosts(Request $request, Timeline $timeline)
     {
         $TAKE = $request->input('take', 6);
