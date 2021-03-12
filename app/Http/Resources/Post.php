@@ -33,6 +33,12 @@ class Post extends JsonResource
             // https://laravel.com/docs/8.x/eloquent-resources#conditional-relationships
             //'mediafiles' =>  $this->when( $hasAccess, MediafileResource::collection($this->whenLoaded('mediafiles')) ), // ??
             'created_at' => $this->created_at,
+            'stats' => [
+                //'isLikedByMe' => $sessionUser->likedposts->contains($this->id),
+                'isLikedByMe' => $this->isLikedByMe,
+                'likeCount' => $this->likes->count(),
+                'commentCount' => $this->comments->count(),
+            ],
         ];
     }
 }

@@ -101,7 +101,11 @@ class TimelinesController extends AppBaseController
     public function previewPosts(Request $request, Timeline $timeline)
     {
         $TAKE = $request->input('take', 6);
-        $query = Post::with('mediafiles', 'user')->has('mediafiles')->where('active', 1);
+        $query = Post::with('mediafiles', 'user')
+            ->has('mediafiles')
+            ->withCount('comments')->orderBy('comments_count', 'desc')
+            //->withCount('likes')->orderBy('likes_count', 'desc')
+            ->where('active', 1);
         $query->where('postable_type', 'timelines')->where('postable_id', $timeline->id);
         $data = $query->take($TAKE)->latest()->get();
         return new PostCollection($data);
