@@ -36,6 +36,7 @@ export default new Vuex.Store({
     saves: [], // resources session user has saved
     feeditems: [], // Posts on current open timeline
     feeddata: {},
+    previewposts: null,
     stories: [], // Current open stories
     earnings: null,
     debits: null,
@@ -74,6 +75,9 @@ export default new Vuex.Store({
     },
     UPDATE_FEEDDATA(state, payload) {
       state.feeddata = payload.hasOwnProperty('data') ? payload.data : {}
+    },
+    UPDATE_PREVIEWPOSTS(state, payload) {
+      state.previewposts = payload.hasOwnProperty('data') ? payload.data : {}
     },
     UPDATE_STORIES(state, payload) {
       state.stories = propSelect(payload, 'stories')
@@ -152,6 +156,13 @@ export default new Vuex.Store({
         : `/timelines/${timelineId}/feed?page=${page}&take=${limit}`;
       axios.get(url).then( (response) => {
         commit('UPDATE_FEEDDATA', response);
+      });
+    },
+
+    getPreviewposts( { commit }, { timelineId, limit } ) {
+      //const url = `/timeline/${timelineId}/preview-posts/?take=${limit}`
+      axios.get( route('timelines.previewPosts', timelineId) ).then( response => {
+        commit('UPDATE_PREVIEWPOSTS', response);
       });
     },
 
@@ -241,12 +252,13 @@ export default new Vuex.Store({
     shareables:              state => state.shareables,
     saves:                   state => state.saves,
     feeddata:                state => state.feeddata,
+    previewposts:            state => state.previewposts,
     stories:                 state => state.stories,
     fanledgers:              state => state.fanledgers,
-    ledgercredits:              state => state.ledgercredits,
-    ledgerdebits:              state => state.ledgerdebits,
+    ledgercredits:           state => state.ledgercredits,
+    ledgerdebits:            state => state.ledgerdebits,
     earnings:                state => state.earnings,
-    debits:                state => state.debits,
+    debits:                  state => state.debits,
     timeline:                state => state.timeline,
     unshifted_timeline_post: state => state.unshifted_timeline_post,
     session_user:            state => state.session_user,

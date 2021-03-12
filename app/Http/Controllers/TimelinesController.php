@@ -24,8 +24,6 @@ use Illuminate\Support\Facades\Log;
 
 class TimelinesController extends AppBaseController
 {
-    // ---
-
     public function index(Request $request)
     {
         $query = User::query();
@@ -97,6 +95,15 @@ class TimelinesController extends AppBaseController
         return response()->json([
             'timelines' => $query->take($TAKE)->get(),
         ]);
+    }
+
+    public function previewPosts(Request $request, Timeline $timeline)
+    {
+        $TAKE = $request->input('take', 6);
+        $query = Post::with('mediafiles', 'user')->has('mediafiles')->where('active', 1);
+        $query->where('postable_type', 'timelines')->where('postable_id', $timeline->id);
+        $data = $query->take($TAKE)->latest()->get();
+        return new PostCollection($data);
     }
 
 
