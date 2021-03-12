@@ -91,11 +91,12 @@ class Account extends Model implements Ownable
     /**
      * Move funds from one account to another
      */
-    public function moveTo($toAccount, int $amount, array $options = [])
+    public function moveTo($toAccount, $amount, array $options = [])
     {
         // Options => string $description, $access = null, $metadata = null
+        $amount = $this->asMoney($amount);
 
-        if ($amount <= 0) {
+        if (!$amount->isPositive()) {
             throw new InvalidTransactionAmountException($amount, $this);
         }
 
@@ -152,6 +153,23 @@ class Account extends Model implements Ownable
 
         UpdateAccountBalance::dispatch($toAccount);
         return true;
+    }
+
+    /**
+     * Get a system fee account
+     *
+     * @param  string  $name - Name of fee
+     * @param  string  $system - Financial System
+     * @param  string  $currency - Account currency
+     * @return  Account
+     */
+    public static function getFeeAccount(string $name, string $system, string $currency)
+    {
+        $systemOwner = SystemOwner::firstOrCreate([
+            'name' => $name,
+            'system' => $system,
+        ]);
+        return $systemOwner->getInternalAccount($system, $currency);
     }
 
 

@@ -58,17 +58,26 @@ return [
                 'GBP' => 'British Pound',
             ],
 
+            /**
+             * What fees to apply to internal to internal account transactions
+             */
+            'fees' => [
+                /**
+                 * Fee options:
+                 * take => the percentage of the transaction this fee will take
+                 * min => the minimum amount that will always be taken for this fee
+                 */
+                'platformFee' => [
+                    'take' => env('TRANSACTIONS_SEGPAY_PLATFORM_FEE_PERCENTAGE', 30),
+                    'min' => env('TRANSACTIONS_SEGPAY_MIN_PLATFORM_FEE', 5),
+                ],
+                'tax' => [
+                    'take' => env('TRANSACTIONS_SEGPAY_TAX_PERCENTAGE', 6),
+                    'min' => env('TRANSACTIONS_SEGPAY_MIN_TAX', 0),
+                ],
+            ],
+
             'minTransaction' => [
-                /**
-                 * The minimum fee amount on any transaction
-                 */
-                'fee' => env('TRANSACTIONS_SEGPAY_MIN_FEE', 1),
-
-                /**
-                 * The minimum tax amount on any transaction
-                 */
-                'tax' => env('TRANSACTIONS_SEGPAY_MIN_TAX', 0),
-
                 /**
                  * The minimum amount that can be transferred into the system on a single transaction
                  */

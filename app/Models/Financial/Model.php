@@ -19,6 +19,9 @@ class Model extends ModelsModel
 
     public function asMoney($amount): Money
     {
+        if ($amount instanceof Money) {
+            return $amount;
+        }
         return new Money($amount, new Currency($this->currency));
     }
 
