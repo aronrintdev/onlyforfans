@@ -16,7 +16,7 @@ class MessageController extends Controller
     }
     public function index()
     {
-        return Message::all();
+        return Message::with('user', 'receiver')->get();
     }
     public function fetchUsers(Request $request)
     {
@@ -33,4 +33,21 @@ class MessageController extends Controller
             'following' => $users
         ];
     }
+    public function store(Request $request)
+    {
+        $user = $request->user();
+
+        $message = $user->messages()->create([
+            'message' => $request->input('message'),
+            'receiver_id' => $request->input('user'),
+        ]);
+
+        // broadcast(new MessageSentEvent($message, $user))->toOthers();
+
+        return [
+            'message' => $message,
+            'user' => $user,
+        ];
+    }
+
 }

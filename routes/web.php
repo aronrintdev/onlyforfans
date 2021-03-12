@@ -190,8 +190,11 @@ Route::group(['middleware' => ['auth']], function () {
 });
 
 //  -- messages --
-Route::get('/chat-messages', ['as'=>'messages.index', 'uses' => 'MessageController@index']);
 Route::get('/chat-messages/users', ['as'=>'messages.fetchusers', 'uses' => 'MessageController@fetchUsers']);
+Route::resource('chat-messages', 'MessageController')->only([
+    'index',
+    'store'
+]);
 
 /*
 |--------------------------------------------------------------------------

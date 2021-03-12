@@ -48,7 +48,7 @@
     right: -2px;
     bottom: -2px;
   }
-  .b-input-ripple:after, .b-input-ripple:before {
+  .b-input-ripple:after, .b-input-ripple:before { 
     content: "";
     position: absolute;
     left: 0;

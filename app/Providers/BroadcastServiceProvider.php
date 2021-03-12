@@ -45,5 +45,6 @@ class BroadcastServiceProvider extends ServiceProvider
 
         Broadcast::channel('user.status.{userId}', \App\Broadcasting\UserStatusChannel::class);
 
+        Broadcast::channel('chat', \Illuminate\Support\Facades\Auth::check());
     }
 }

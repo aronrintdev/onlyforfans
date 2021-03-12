@@ -11,7 +11,7 @@ class Message extends Model
      *
      * @var array
      */
-    protected $fillable = ['message'];
+    protected $fillable = ['message', 'receiver_id'];
 
     /**
      * A message belong to a user
@@ -21,5 +21,9 @@ class Message extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+    public function receiver()
+    {
+        return $this->belongsTo('App\Models\User', 'receiver_id');
     }
 }

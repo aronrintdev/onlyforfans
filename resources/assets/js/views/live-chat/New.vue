@@ -153,7 +153,7 @@
                           </svg>
                         </button>
                       </div>
-                      <button class="send-btn btn" :disabled="!messageText" type="button">
+                      <button class="send-btn btn" :disabled="!messageText" @click="sendMessage" type="button">
                         Send
                       </button>
                     </div>
@@ -241,6 +241,17 @@
       onChangeSearchText: function(value) {
         this.userSearchText = value;
         this.filteredUsers = this.users.filter(user => user.username.toLowerCase().indexOf(value.toLowerCase()) > -1 || user.name.toLowerCase().indexOf(value.toLowerCase()) > -1);
+      },
+      sendMessage: function() {
+        const promises = [];
+        this.selectedUsers.forEach(user => {
+          const promise = this.axios.post('/chat-messages', { message: this.messageText, user: user.id });
+          promises.push(promise);
+        })
+        Promise.all(promises).then(function(values) {
+          console.log(values);
+        });
+
       }
     }
   }
