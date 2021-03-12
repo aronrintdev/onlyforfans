@@ -23,9 +23,11 @@
                       <button class="btn" type="button" @click="changeSearchbarVisible">
                         <i class="fa fa-search" aria-hidden="true"></i>
                       </button>
-                      <button class="btn" type="button">
-                        <i class="fa fa-plus" aria-hidden="true"></i>
-                      </button>
+                      <router-link to="/messages/new">
+                        <button class="btn" type="button">
+                          <i class="fa fa-plus" aria-hidden="true"></i>
+                        </button>
+                      </router-link>
                     </div>
                   </div>
                   <div class="top-bar user-search-bar" v-if="userSearchVisible">
@@ -74,20 +76,20 @@
                       :class="selectedUser && selectedUser.id === user.id ? 'selected' : ''"
                       @click="onSelectUser(user)">
                       <div class="user-content">
-                        <div class="user-logo text-logo" v-if="!user.logo">
+                        <div class="user-logo text-logo" v-if="!user.avatar">
                           {{ getLogoFromName(user.name) }}
                         </div>
-                        <div class="user-logo" v-if="user.logo">
-                          <img :src="user.logo" alt="" />
+                        <div class="user-logo" v-if="user.avatar">
+                          <img :src="user.avatar.filepath" alt="" />
                         </div>
                         <div class="user-details">
                           <div class="user-details-row">
                             <div>
                               <span class="username">{{ user.name }}</span>
-                              <span class="user-id">{{ `@${user.userId}` }}</span>
+                              <span class="user-id">{{ `@${user.username}` }}</span>
                             </div>
                             <!-- Close Button -->
-                            <button class="close-btn btn" type="button">
+                            <button class="close-btn btn" type="button" @click="clearMessages(user)">
                               <i class="fa fa-times" aria-hidden="true"></i>
                             </button>
                           </div>
@@ -106,7 +108,7 @@
                   <div class="coversation-tree">
                     <div class="conversations-start">
                       <div class="conversations-start__title">Select any Conversation or send a New Message</div>
-                      <button>New Message</button>
+                       <router-link to="/messages/new"><button>New Message</button></router-link>
                     </div>
                   </div>
                 </div>
@@ -276,103 +278,18 @@
       userSearchVisible: false,
       optionValue: 'unread_first',
       selectedUser: undefined,
-      users: [{
-          id: 1,
-          name: 'Nat',
-          logo: 'https://i.picsum.photos/id/565/200/200.jpg?hmac=QvKo8qgzFFNcZoXCpT0CNMDTwWd3ynwqLXxrzK2o8fw',
-          userId: 'natcomedy',
-          lastMessage: 'Sure wish there was more content here.',
-          lastDate: 'Oct 13, 2020',
-          isOnline: false,
-          lastOnline: 'Feb 16',
-        },
-        {
-          id: 2,
-          name: 'Lisa S.',
-          logo: undefined,
-          userId: 'u117945325',
-          lastMessage: 'Sure wish there was more content here.',
-          lastDate: 'Feb 16',
-          isOnline: false,
-          lastOnline: 'Feb 17',
-        },
-        {
-          id: 3,
-          name: 'MCMXI',
-          logo: undefined,
-          userId: 'mcmxi',
-          lastMessage: 'Any vids for sale ? 😳🙈',
-          lastDate: 'Nov 20, 2020',
-          muted: true,
-          isOnline: true,
-        },
-        {
-          id: 4,
-          name: 'Bjørn erik Bjørkhaug',
-          logo: undefined,
-          userId: 'u42082420',
-          lastMessage: 'I want to see the full video with more details explanation',
-          lastDate: 'June 19, 2020',
-          expired: true,
-          isOnline: true
-        },
-      ],
-      messages: [
-        {
-          date: moment('2021-2-13').format('MMM DD, YYYY'),
-          messages: [
-            {
-              id: 1,
-              text: 'Hello, how are you?',
-              time: '10:29 PM',
-              user: {
-                id: 2,
-                name: 'Lisa S.'
-              },
-            },
-            {
-              id: 2,
-              text: 'Hey, I am fine. And you?',
-              time: '10:39 PM',
-              user: {
-                id: 3,
-                name: 'MCMXI'
-              },
-            },
-          ]
-        },
-        {
-          date: moment('2021-2-16').format('MMM DD, YYYY'),
-          messages: [
-            {
-              id: 3,
-              time: '08:29 PM',
-              text: 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.',
-              user: {
-                id: 2,
-                name: 'Lisa S.'
-              },
-            },
-            {
-              id: 4,
-              text: 'Ok, thanks.',
-              time: '09:29 PM',
-              user: {
-                id: 3,
-                name: 'MCMXI'
-              },
-            }
-          ]
-        }
-      ],
-      messageSearchVisible: false
+      users: [],
     }),
     mounted() {
       this.axios.get('/chat-messages').then((response) => {
         console.log('-- response data', response);
+        this.users = response.data;
       })
     },
     computed: {
+      moment: function (params) {
+        return moment(params);
+      },
       selectedOption: function () {
         let optionText;
         switch (this.optionValue) {
