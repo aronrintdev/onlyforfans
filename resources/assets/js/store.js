@@ -162,7 +162,7 @@ export default new Vuex.Store({
     getPreviewposts( { commit }, { timelineId, limit } ) {
       //const url = `/timeline/${timelineId}/preview-posts/?take=${limit}`
       axios.get( route('timelines.previewPosts', timelineId) ).then( response => {
-        commit('UPDATE_PREVIEWPOSTS', response);
+        commit('UPDATE_PREVIEWPOSTS', response.data);
       });
     },
 

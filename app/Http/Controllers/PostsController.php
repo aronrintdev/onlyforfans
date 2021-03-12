@@ -56,6 +56,9 @@ class PostsController extends AppBaseController
     public function show(Request $request, Post $post)
     {
         $this->authorize('view', $post);
+        if ( $request->user()->can('contentView', $post) ) {
+            $post->load('mediafiles');
+        }
         return new PostResource($post);
     }
 
