@@ -4,7 +4,6 @@ namespace App\Models\Casts;
 
 use Money\Currency;
 use Money\Money as MoneyPhp;
-use InvalidArgumentException;
 use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
 
 class Money implements CastsAttributes
@@ -17,7 +16,7 @@ class Money implements CastsAttributes
     public function set($model, $key, $value, $attributes)
     {
         if ($value instanceof MoneyPhp) {
-            $value->getAmount();
+            return $value->getAmount();
         }
 
         return $value;

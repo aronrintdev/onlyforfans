@@ -72,7 +72,7 @@ return [
                     'min' => env('TRANSACTIONS_SEGPAY_MIN_PLATFORM_FEE', 5),
                 ],
                 'tax' => [
-                    'take' => env('TRANSACTIONS_SEGPAY_TAX_PERCENTAGE', 6),
+                    'take' => env('TRANSACTIONS_SEGPAY_TAX_PERCENTAGE', 5),
                     'min' => env('TRANSACTIONS_SEGPAY_MIN_TAX', 0),
                 ],
             ],
@@ -90,6 +90,30 @@ return [
             ],
         ],
         // 'other system' => [],
+    ],
+
+    /**
+     * Name of the queue running summarizations
+     */
+    'summarizeQueue' => 'financial-summaries',
+
+    /**
+     * Number of not summarized transactions in a account to request a summary be made with priority
+     */
+    'summarizeAt' => [
+        [
+            'priority' => 'low',
+            'count'    => 1000, // 1k
+        ], [
+            'priority' => 'mid',
+            'count'    => 10000, // 10k
+        ], [
+            'priority' => 'high',
+            'count'    => 100000, // 100k
+        ], [
+            'priority' => 'urgent',
+            'count'    => 1000000 // 1M
+        ],
     ],
 
     /**

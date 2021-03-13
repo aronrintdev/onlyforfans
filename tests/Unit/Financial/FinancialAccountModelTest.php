@@ -6,11 +6,10 @@ use App\Enums\Financial\AccountTypeEnum;
 use App\Models\User;
 use App\Models\Financial\Account;
 use App\Models\Financial\Transaction;
+use App\Models\Financial\SystemOwner;
 use App\Models\Financial\Exceptions\InvalidTransactionAmountException;
 use App\Models\Financial\Exceptions\Account\InsufficientFundsException;
 use App\Models\Financial\Exceptions\Account\TransactionNotAllowedException;
-
-use Carbon\Carbon;
 
 use Illuminate\Support\Facades\Config;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -25,10 +24,11 @@ class FinancialAccountModelTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected $defaultSystem = null;
-    protected $defaultCurrency = null;
-    protected $accountTableName = null;
-    protected $transactionTableName = null;
+    protected $defaultSystem;
+    protected $defaultCurrency;
+    protected $accountTableName;
+    protected $transactionTableName;
+    protected $systemOwnerTableName;
 
     public function setUp(): void
     {
@@ -37,6 +37,7 @@ class FinancialAccountModelTest extends TestCase
         $this->defaultCurrency = Config::get('transactions.defaultCurrency');
         $this->accountTableName = app(Account::class)->getTable();
         $this->transactionTableName = app(Transaction::class)->getTable();
+        $this->systemOwnerTableName = app(SystemOwner::class)->getTable();
     }
 
     /**
@@ -239,9 +240,23 @@ class FinancialAccountModelTest extends TestCase
      * @group unit
      * @group financial
      */
-    public function test_access_system_account()
+    public function test_get_system_account()
     {
-        // TODO: Implement
-        $this->markTestIncomplete();
+        $account = Account::getFeeAccount('platformFees', $this->defaultSystem, $this->defaultCurrency);
+        $this->assertInstanceOf(Account::class, $account);
+
+        // System Owner Created
+        $this->assertDatabaseHas($this->systemOwnerTableName, [
+            'name' => 'platformFees',
+            'system' => $this->defaultSystem,
+        ]);
+
+        $systemOwner = SystemOwner::where('name', 'platformFees')->where('system', $this->defaultSystem)->first();
+
+        // Account was created
+        $this->assertDatabaseHas($this->accountTableName, [
+            'owner_id' => $systemOwner->getKey(),
+            'type' => AccountTypeEnum::INTERNAL,
+        ]);
     }
 }

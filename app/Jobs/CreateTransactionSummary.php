@@ -1,43 +1,42 @@
 <?php
 
-namespace App\Jobs\Financial;
+namespace App\Jobs;
 
-use App\Enums\Financial\AccountTypeEnum;
 use App\Models\Financial\Account;
-use App\Models\Financial\Transaction;
-
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Events\Dispatchable;
-use Illuminate\Queue\SerializesModels;
+use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
+use Illuminate\Queue\SerializesModels;
 
-class UpdateAccountBalance implements ShouldQueue, ShouldBeUnique
+class CreateTransactionSummary implements ShouldQueue, ShouldBeUnique
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public $uniqueUntilStart = true;
     public $tries = 4;
-    public $backoff = [ 5, 15, 60 ];
+    public $backoff = [5, 15, 60];
 
     /**
      * Account instance
      * @var \App\Models\Financial\Account
      */
     protected $account;
+    protected $type;
+    protected $for;
 
     /**
      * Create a new job instance.
      *
-     * @param  \App\Models\Financial\Account  $account
      * @return void
      */
-    public function __construct(Account $account)
+    public function __construct(Account $account, $type, $for = '')
     {
         $this->account = $account;
-        $this->onQueue('financial-transactions');
+        $this->type = $type;
+        $this->for = $for;
     }
 
     /**
@@ -45,12 +44,9 @@ class UpdateAccountBalance implements ShouldQueue, ShouldBeUnique
      */
     public function uniqueId()
     {
-        return $this->account->id;
+        return "{$this->account->id}-{$this->type}-{$this->for}";
     }
 
-    /**
-     * Prevent multiple update jobs for same account.
-     */
     public function middleware()
     {
         return [
@@ -65,9 +61,6 @@ class UpdateAccountBalance implements ShouldQueue, ShouldBeUnique
      */
     public function handle()
     {
-        $this->account->settleBalance();
+        // TODO: Handle creating Transaction Summary
     }
-
-
-
 }

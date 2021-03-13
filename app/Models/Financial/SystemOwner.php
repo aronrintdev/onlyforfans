@@ -6,12 +6,16 @@ use Carbon\Carbon;
 use App\Models\Traits\UsesUuid;
 use App\Enums\Financial\AccountTypeEnum;
 use App\Interfaces\HasFinancialAccounts;
+use App\Models\Financial\Traits\HasSystem;
 
 class SystemOwner extends Model implements HasFinancialAccounts
 {
-    use UsesUuid;
+    use UsesUuid,
+        HasSystem;
 
     protected $table = 'financial_system_owners';
+
+    protected $guarded = [];
 
     /* ---------------------------- Relationships --------------------------- */
     public function financialAccounts()
@@ -47,7 +51,7 @@ class SystemOwner extends Model implements HasFinancialAccounts
             'pending_last_updated_at' => Carbon::now(),
         ]);
         $account->verified = true;
-        $account->can_make_transaction = true;
+        $account->can_make_transactions = true;
         $account->save();
         return $account;
     }

@@ -26,17 +26,6 @@ class Model extends ModelsModel
     }
 
     /**
-     * System this model is working under
-     */
-    public function getSystemAttribute()
-    {
-        if (!isset($this->attributes['system'] )) {
-            $this->attributes['system'] = Config::get('transactions.default');
-        }
-        return $this->attributes['system'];
-    }
-
-    /**
      * Currency being worked with.
      * This is an `ISO 4217`, a three letter currency code.
      * For more information: https://en.wikipedia.org/wiki/ISO_4217
@@ -61,27 +50,6 @@ class Model extends ModelsModel
     }
 
     /* ----------------------- Verification Functions ----------------------- */
-    /**
-     * Checks if a system is valid in App config
-     */
-    public function isSystemValid(string $system = null): bool {
-        if (!isset($system)) {
-            $system = $this->system;
-        }
-        return Arr::exists(Config::get('transactions.systems', []), $system);
-    }
-
-    /**
-     * Verifies if a system is valid to be used
-     *
-     * @throws InvalidFinancialSystemException
-     */
-    public function verifySystemIsValid(string $system = null) {
-        if (!$this->isSystemValid($system)) {
-            throw new InvalidFinancialSystemException($system);
-        }
-    }
-
     /**
      * Checks that two models have the same currency
      */

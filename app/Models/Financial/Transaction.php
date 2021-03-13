@@ -3,16 +3,20 @@
 namespace App\Models\Financial;
 
 use App\Models\Casts\Money;
-use App\Models\Financial\Exceptions\FeesTooHighException;
-use App\Models\Traits\UsesUuid;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Config;
+use App\Models\Traits\UsesUuid;
+
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\Financial\Exceptions\FeesTooHighException;
+use App\Models\Financial\Exceptions\TransactionAlreadySettled;
 
 class Transaction extends Model
 {
-    use UsesUuid;
+    use UsesUuid,
+        HasFactory;
 
     protected $table = 'financial_transactions';
 
@@ -34,6 +38,11 @@ class Transaction extends Model
         'debit_amount' => Money::class,
         'balance' => Money::class,
     ];
+
+    public function getSystemAttribute()
+    {
+        return $this->account->system;
+    }
 
     /* ---------------------------- Relationships --------------------------- */
     public function account()
@@ -58,8 +67,16 @@ class Transaction extends Model
      * Creates and the transactions for fees, taxes, and any other items that
      * need to be taken out of this transaction.
      */
-    public function settleFees()
+    public function settleFees(): Collection
     {
+        // Check for fees already settled
+        if (isset($this->settled_at)) {
+            throw new TransactionAlreadySettled($this);
+        }
+        if (isset($this->metadata) && isset($this->metadata['feeTransactions'])) {
+            throw new TransactionAlreadySettled($this);
+        }
+
         // Get Defaults
         $fees = Config::get('transactions.systems.' . $this->system . '.fees');
 
@@ -69,7 +86,7 @@ class Transaction extends Model
         // Allocate Funds
         $takes = [];
         foreach($fees as $key => $fee) {
-            $takes[$key] = $fee->take;
+            $takes[$key] = $fee['take'];
         }
         if ( array_sum($takes) >= 100 ) {
             throw new FeesTooHighException($this->system, $fees, $this, array_sum($takes) . '%' );
@@ -96,20 +113,36 @@ class Transaction extends Model
         }
 
         // Move to System Accounts
+        $transactions = new Collection([]);
         foreach ($fees as $key => $fee) {
             if ($result[$key]->isPositive()) {
-                $this->account->moveTo(
+                $transactions[$key] = $this->account->moveTo(
                     Account::getFeeAccount($key, $this->system, $this->currency),
                     $result[$key],
                     [
+                        'ignoreBalance' => true,
                         'description' => $fee->description ?? "Transaction {$key}",
                         'type' => $this->type,
                         'shareable_id' => $this->shareable_id,
+                        'metadata' => [ 'fee' => true ],
                     ]
                 );
             }
         }
+        // Save fees as metadata
+        $this->metadata = array_merge(
+            $this->metadata ?? [],
+            [
+                'feeTransactions' => $transactions->map(function($item) {
+                    return $item->map(function($item) {
+                        return $item->getKey();
+                    })->all();
+                })->all(),
+            ]
+        );
 
+        $this->save();
+        return $transactions;
     }
 
     /**
@@ -117,7 +150,10 @@ class Transaction extends Model
      */
     public function settleBalance()
     {
-        $this->balance = $this->asMoney($this->calculateBalance());
+        if (isset($this->settled_at)) {
+            throw new TransactionAlreadySettled($this);
+        }
+        $this->balance = $this->calculateBalance();
         $this->balance = $this->balance->add($this->credit_amount);
         $this->balance = $this->balance->subtract($this->debit_amount);
         $this->settled_at = Carbon::now();
@@ -128,11 +164,22 @@ class Transaction extends Model
      */
     public function calculateBalance()
     {
-        $balance = Transaction::select(DB::raw('sum(credit_amount) - sum(debit_amount) as amount'))
+        $query = Transaction::select(DB::raw('sum(credit_amount) - sum(debit_amount) as amount'))
             ->where('account_id', $this->account->getKey())
-            ->where('created_at', '<', $this->created_at)
             ->whereNotNull('settled_at');
-        return $balance->amount;
+
+        // Find last finalized transaction summary balance
+        $lastSummary = TransactionSummary::lastFinalized($this->account)->with('to')->first();
+        // Calculate from last summary if there is one
+        if (isset($lastSummary)) {
+            $query = $query->where('settled_at', '>', $lastSummary->to->settled_at);
+        }
+        $balance = $this->asMoney($query->pluck('amount'));
+        if (isset($lastSummary)) {
+            $balance = $lastSummary->balance->add($balance);
+        }
+
+        return $balance;
     }
 
 
