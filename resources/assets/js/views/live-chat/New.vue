@@ -169,6 +169,7 @@
 </template>
 
 <script>
+  import _ from 'lodash';
   import RoundCheckBox from '../../components/roundCheckBox';
   /**
    * Messages Dashboard View
@@ -189,6 +190,7 @@
       this.axios.get('/chat-messages/users').then((response) => {
         const { following, followers } = response.data;
         this.users = followers.concat(following);
+        this.users = _.uniqBy(this.users, 'id');
         this.filteredUsers = this.users.slice();
       })
     },
@@ -243,15 +245,15 @@
         this.filteredUsers = this.users.filter(user => user.username.toLowerCase().indexOf(value.toLowerCase()) > -1 || user.name.toLowerCase().indexOf(value.toLowerCase()) > -1);
       },
       sendMessage: function() {
+        const self = this;
         const promises = [];
         this.selectedUsers.forEach(user => {
           const promise = this.axios.post('/chat-messages', { message: this.messageText, user: user.id });
           promises.push(promise);
         })
-        Promise.all(promises).then(function(values) {
-          console.log(values);
+        Promise.all(promises).then(function() {
+          self.$router.push('/messages');
         });
-
       }
     }
   }

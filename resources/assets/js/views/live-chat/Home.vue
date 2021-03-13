@@ -96,7 +96,7 @@
                           <div class="user-details-row">
                             <span class="last-message">{{ user.last_message.message }}</span>
                             <!-- Date  -->
-                            <span class="last-message-date">{{ moment(user.last_message.created_at).format('MM DD, YYYY') }}</span>
+                            <span class="last-message-date">{{ moment(user.last_message.created_at).format('MMM DD, YYYY') }}</span>
                           </div>
                         </div>
                       </div>
