@@ -87,6 +87,9 @@ __MACOSX
 settings.html
 yarn.lock
 
+# PHP Unit
+.phpunit.result.cache
+
 #############################
 # Public folder built items #
 #############################
