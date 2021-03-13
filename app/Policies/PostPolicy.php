@@ -33,7 +33,8 @@ class PostPolicy extends BasePolicy
     protected function view(User $user, Post $post)
     {
         // %NOTE: followers can view all posts, but certain fields (description, mediafiles, etc) will be hidden/locked based on subscriber or purchase status
-        return $post->timeline->followers->contains($user->id);
+        //return $post->timeline->followers->contains($user->id);
+        return true; // essentially allow viewing of free posts by 'public' (non-followers)
     }
 
     protected function contentView(User $user, Post $post)
@@ -41,8 +42,9 @@ class PostPolicy extends BasePolicy
         // content view (eg, images attached to the post) is checked granularly: dep on post type and user's 'status'
         switch ($post->type) {
         case PostTypeEnum::FREE:
-            return $post->timeline->followers->count()
-                && $post->timeline->followers->contains($user->id);
+            return true; // anyone can see content of free posts
+            //return $post->timeline->followers->count()
+                //&& $post->timeline->followers->contains($user->id);
         case PostTypeEnum::SUBSCRIBER:
             return $post->timeline->subscribers->count()
                 && $post->timeline->subscribers->contains($user->id);

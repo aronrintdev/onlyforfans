@@ -87,12 +87,12 @@
         <div class="panel-footer fans">
           <ul class="list-inline footer-ctrl">
             <li class="list-inline-item mr-3">
-              <LikesButton @toggled="togglePostLike()" :filled="isLikedByMe" />
+              <LikesButton @toggled="togglePostLike()" :filled="isLikedByMe" :count="likeCount" :showCount="true" />
             </li>
             <li class="list-inline-item mr-3">
               <span @click="toggleComments()" class="tag-clickable">
                 <b-icon icon="chat-text" font-scale="1" />
-                ({{ post.comments_count }})
+                ({{ post.stats.commentCount }})
               </span>
             </li>
             <li class="list-inline-item mr-3">
@@ -163,7 +163,7 @@ export default {
 
   data: () => ({
     renderComments: false,
-    isLikedByMe: false, // this.post.isLikedByMe,
+    isLikedByMe: false,
     likeCount: 0, // %FIXME INIT
     comments: [], // %NOTE: rendered comments are loaded dynamically as they contain additional relation data,
     loadingComments: false,
@@ -171,7 +171,8 @@ export default {
   }),
 
   mounted() {
-    this.isLikedByMe = this.post.isLikedByMe
+    this.isLikedByMe = this.post.stats?.isLikedByMe || false
+    this.likeCount = this.post.stats?.likeCount  || 0
   },
 
   created() {},

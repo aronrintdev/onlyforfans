@@ -118,17 +118,13 @@ class Post extends Model implements UuidId, Ownable, Deletable, Purchaseable, Li
         return $this->belongsTo('App\Models\Timeline', 'postable_id');
     }
 
-    /**
-     * Direct comments
-     */
+    // Direct comments
     public function comments(): MorphMany
     {
         return $this->morphMany('App\Models\Comment', 'commentable')->where('parent_id', null);
     }
 
-    /**
-     * Direct comments and all comment replies
-     */
+    // Direct comments and all comment replies
     public function allComments(): MorphMany
     {
         return $this->morphMany('App\Models\Comment', 'commentable');
