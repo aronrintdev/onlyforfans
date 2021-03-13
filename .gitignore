@@ -92,7 +92,7 @@ yarn.lock
 #############################
 public/js/*
 public/css/*
-public/images/*
+#public/images/*
 public/fonts/*
 public/sounds/*
 public/fonts/*
