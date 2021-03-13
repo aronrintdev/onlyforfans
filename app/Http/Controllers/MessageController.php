@@ -26,12 +26,31 @@ class MessageController extends Controller
         $users = Timeline::with(['user', 'avatar'])->whereIn('id', $followingUserIDs)->get()->makeVisible(['user']);
         $users->each(function ($user) {
             $user->username = $user->user->username;
+            $user->id = $user->user->id;
         });
     
         return [
             'followers' => $timeline->followers,
             'following' => $users
         ];
+    }
+    public function fetchContacts(Request $request)
+    {
+        $sessionUser = $request->user();
+        $receivers = Message::where('user_id', $sessionUser->id)->pluck('receiver_id')->toArray();
+       
+        $contacts = array();
+        foreach($receivers as $receiver) {
+            $lastMessage = Message::where('receiver_id', $receiver)->latest()->first();
+            $user = Timeline::with(['user', 'avatar'])->where('user_id', $receiver)->first()->makeVisible(['user']);
+            $user->username = $user->user->username;
+            $user->id = $user->user->id;
+            array_push($contacts, [
+                'last_message' => $lastMessage,
+                'profile' => $user
+            ]);
+        }
+        return $contacts;
     }
     public function store(Request $request)
     {
@@ -49,5 +68,16 @@ class MessageController extends Controller
             'user' => $user,
         ];
     }
-
+    public function clearUser(Request $request, $id)
+    {
+        $deleted = Message::where('receiver_id', $id)->delete();
+        if ($deleted) {
+            return [
+                'status' => 200
+            ];
+        }
+        return [
+            'status' => 400
+        ];
+    }
 }
