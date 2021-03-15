@@ -11,7 +11,7 @@ class Message extends Model
      *
      * @var array
      */
-    protected $fillable = ['message', 'receiver_id'];
+    protected $fillable = ['message', 'receiver_id', 'receiver_name'];
 
     /**
      * A message belong to a user

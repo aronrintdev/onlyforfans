@@ -34,7 +34,7 @@
                     <button class="btn" type="button" @click="changeSearchbarVisible">
                       <i class="fa fa-times" aria-hidden="true"></i>
                     </button>
-                    <b-form-input v-model="userSearchText" placeholder="Search"></b-form-input>
+                    <b-form-input :value="userSearchText" @input="onUserSearch" placeholder="Search"></b-form-input>
                     <button class="btn" type="button" :disabled="!userSearchText">
                       <i class="fa fa-search" aria-hidden="true"></i>
                     </button>
@@ -169,6 +169,12 @@
       changeSearchbarVisible: function () {
         this.userSearchVisible = !this.userSearchVisible;
         this.userSearchText = undefined;
+      },
+      onUserSearch: function() {
+        this.axios.get(`/chat-messages/search?name=${this.userSearchText}`)
+          .then((res) => {
+            this.users = res.data;
+          })
       },
       onOptionChanged: function (value) {
         this.optionValue = value;

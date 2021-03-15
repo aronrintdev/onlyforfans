@@ -62,13 +62,44 @@ class MessageController extends Controller
         }
         return $contacts;
     }
+    public function searchContacts(Request $request)
+    {
+        $sessionUser = $request->user();
+        $searchText = $request->query('name');
+
+        $receivers = Message::with('receiver')
+            ->whereHas('receiver', function($query) {
+                $query->where('user_id', $sessionUser->id)
+                    ->where('username', 'like', '%' . $searchText . '%');
+            })
+            ->orWhere(function($query) {
+                $query->where('user_id', $sessionUser->id)
+                    ->where('receiver_name', 'like', '%' . $searchText . '%');
+            })
+            ->pluck('receiver_id')
+            ->toArray();
+
+        $contacts = array();
+        foreach($receivers as $receiver) {
+            $lastMessage = Message::with(['receiver'])->where('receiver_id', $receiver)->latest()->first();
+            $user = Timeline::with(['user', 'avatar'])->where('user_id', $receiver)->first()->makeVisible(['user']);
+            $user->username = $user->user->username;
+            $user->id = $user->user->id;
+            array_push($contacts, [
+                'last_message' => $lastMessage,
+                'profile' => $user
+            ]);
+        }
+        return $contacts;
+    }
     public function store(Request $request)
     {
         $user = $request->user();
 
         $message = $user->messages()->create([
             'message' => $request->input('message'),
-            'receiver_id' => $request->input('user'),
+            'receiver_id' => $request->input('user_id'),
+            'receiver_name' => $request->input('name'),
         ]);
 
         // broadcast(new MessageSentEvent($message, $user))->toOthers();
