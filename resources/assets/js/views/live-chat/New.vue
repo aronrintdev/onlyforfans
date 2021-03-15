@@ -216,7 +216,7 @@
             optionText = 'Recent';
         }
         return optionText;
-      },s
+      },
     },
     components: {
       'round-check-box': RoundCheckBox
