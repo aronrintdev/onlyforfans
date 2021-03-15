@@ -21,16 +21,26 @@ class MessageController extends Controller
     public function fetchUsers(Request $request)
     {
         $sessionUser = $request->user();
+        // Get contacts
+        $receivers = Message::where('user_id', $sessionUser->id)->pluck('receiver_id')->toArray();
+
         $timeline = Timeline::where('user_id', $sessionUser->id)->first();
         $followingUserIDs = $timeline->user->followedtimelines->pluck('id');
-        $users = Timeline::with(['user', 'avatar'])->whereIn('id', $followingUserIDs)->get()->makeVisible(['user']);
+        $users = Timeline::with(['user', 'avatar'])->whereIn('id', $followingUserIDs)->whereNotIn('user_id', $receivers)->get()->makeVisible(['user']);
         $users->each(function ($user) {
             $user->username = $user->user->username;
             $user->id = $user->user->id;
         });
     
+        $followers = $timeline->followers->whereNotIn('id', $receivers)->all();
+        $arr = [];
+        foreach ($followers as $follower) {
+            array_push($arr, $follower);
+        }
+     
+
         return [
-            'followers' => $timeline->followers,
+            'followers' => $arr,
             'following' => $users
         ];
     }
