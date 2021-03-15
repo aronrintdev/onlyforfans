@@ -11,7 +11,7 @@ class Model extends EloquentModel
 
     public static function getTableName()
     {
-        return (new self())->getTable();
+        return (new static)->getTable();
     }
 
     //protected $customAttributesField = 'cattrs';

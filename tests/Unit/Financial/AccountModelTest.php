@@ -11,38 +11,22 @@ use App\Models\Financial\Exceptions\InvalidTransactionAmountException;
 use App\Models\Financial\Exceptions\Account\InsufficientFundsException;
 use App\Models\Financial\Exceptions\Account\TransactionNotAllowedException;
 
-use Illuminate\Support\Facades\Config;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Queue;
 
-use Tests\TestCase;
-
 /**
  * Unit Tests for the `App\Models\Financial\Account` Model
+ *
+ * @group unit
+ * @group financial
+ * @group financial-account
  */
-class FinancialAccountModelTest extends TestCase
+class AccountModelTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected $defaultSystem;
-    protected $defaultCurrency;
-    protected $accountTableName;
-    protected $transactionTableName;
-    protected $systemOwnerTableName;
-
-    public function setUp(): void
-    {
-        parent::setUp();
-        $this->defaultSystem = Config::get('transactions.default');
-        $this->defaultCurrency = Config::get('transactions.defaultCurrency');
-        $this->accountTableName = app(Account::class)->getTable();
-        $this->transactionTableName = app(Transaction::class)->getTable();
-        $this->systemOwnerTableName = app(SystemOwner::class)->getTable();
-    }
-
     /**
-     * @group unit
-     * @group financial
+     *
      */
     public function test_create_in_account()
     {
@@ -51,8 +35,7 @@ class FinancialAccountModelTest extends TestCase
     }
 
     /**
-     * @group unit
-     * @group financial
+     *
      */
     public function test_create_user_internal_account()
     {
@@ -61,7 +44,7 @@ class FinancialAccountModelTest extends TestCase
         $account = $user->createInternalAccount($this->defaultSystem, $this->defaultCurrency);
 
         $this->assertInstanceOf(Account::class, $account);
-        $this->assertDatabaseHas($this->accountTableName, [
+        $this->assertDatabaseHas($this->tableNames['account'], [
             'id' => $account->id,
             'owner_id' => $user->id,
             'type' => AccountTypeEnum::INTERNAL
@@ -69,8 +52,7 @@ class FinancialAccountModelTest extends TestCase
     }
 
     /**
-     * @group unit
-     * @group financial
+     *
      */
     public function test_get_user_internal_account()
     {
@@ -80,7 +62,7 @@ class FinancialAccountModelTest extends TestCase
         $account = $user->getInternalAccount($this->defaultSystem, $this->defaultCurrency);
 
         $this->assertInstanceOf(Account::class, $account);
-        $this->assertDatabaseHas($this->accountTableName, [
+        $this->assertDatabaseHas($this->tableNames['account'], [
             'id' => $account->id,
             'owner_id' => $user->id,
             'type' => AccountTypeEnum::INTERNAL
@@ -96,8 +78,7 @@ class FinancialAccountModelTest extends TestCase
     }
 
     /**
-     * @group unit
-     * @group financial
+     *
      */
     public function test_create_out_account()
     {
@@ -106,12 +87,11 @@ class FinancialAccountModelTest extends TestCase
     }
 
     /**
-     * @group unit
-     * @group financial
+     *
      */
     public function test_move_to_internal_account_from_in_account()
     {
-        $inAccount = Account::factory()->asTypeIn()->create();
+        $inAccount = Account::factory()->asIn()->create();
         $user = $inAccount->owner;
 
         $this->expectException(InvalidTransactionAmountException::class);
@@ -123,7 +103,7 @@ class FinancialAccountModelTest extends TestCase
         $inAccount->moveToInternal(100);
 
         // Created missing Internal account
-        $this->assertDatabaseHas($this->accountTableName, [
+        $this->assertDatabaseHas($this->tableNames['account'], [
             'owner_id' => $user->id,
             'type' => AccountTypeEnum::INTERNAL
         ]);
@@ -131,7 +111,7 @@ class FinancialAccountModelTest extends TestCase
         $internalAccount = $user->getInternalAccount($this->defaultSystem, $this->defaultCurrency);
 
         // Has from transaction
-        $this->assertDatabaseHas($this->transactionTableName, [
+        $this->assertDatabaseHas($this->tableNames['transaction'], [
             'account_id' => $inAccount->getKey(),
             'credit_amount' => 0,
             'debit_amount' => 100,
@@ -139,7 +119,7 @@ class FinancialAccountModelTest extends TestCase
         ]);
 
         // Has to transaction
-        $this->assertDatabaseHas($this->transactionTableName, [
+        $this->assertDatabaseHas($this->tableNames['transaction'], [
             'account_id' => $internalAccount->getKey(),
             'credit_amount' => 100,
             'debit_amount' => 0,
@@ -155,27 +135,26 @@ class FinancialAccountModelTest extends TestCase
     }
 
     /**
-     * @group unit
-     * @group financial
+     *
      */
     public function test_move_to_internal_account_from_internal_account()
     {
         Queue::fake();
 
-        $account = Account::factory()->asTypeInternal()->withBalance(1000)->create();
-        $toAccount = Account::factory()->asTypeInternal()->withBalance(0)->create();
+        $account = Account::factory()->asInternal()->withBalance(1000)->create();
+        $toAccount = Account::factory()->asInternal()->withBalance(0)->create();
 
         $this->expectException(InsufficientFundsException::class);
         $account->moveTo($toAccount, 20000);
 
         $account->moveTo($toAccount, 300);
-        $this->assertDatabaseHas($this->transactionTableName, [
+        $this->assertDatabaseHas($this->tableNames['transaction'], [
             'account_id' => $account->getKey(),
             'credit_amount' => 0,
             'debit_amount' => 300,
             'currency' => $this->defaultCurrency,
         ]);
-        $this->assertDatabaseHas($this->transactionTableName, [
+        $this->assertDatabaseHas($this->tableNames['transaction'], [
             'account_id' => $toAccount->getKey(),
             'credit_amount' => 300,
             'debit_amount' => 0,
@@ -190,12 +169,11 @@ class FinancialAccountModelTest extends TestCase
 
 
     /**
-     * @group unit
-     * @group financial
+     *
      */
     public function test_blocked_account_cannot_make_transactions()
     {
-        $inAccount = Account::factory()->asTypeIn()->transactionsBlocked()->create();
+        $inAccount = Account::factory()->asIn()->transactionsBlocked()->create();
 
         $this->expectException(TransactionNotAllowedException::class);
         $inAccount->moveToInternal(100);
@@ -227,8 +205,7 @@ class FinancialAccountModelTest extends TestCase
     }
 
     /**
-     * @group unit
-     * @group financial
+     *
      */
     public function test_verify_account()
     {
@@ -237,8 +214,7 @@ class FinancialAccountModelTest extends TestCase
     }
 
     /**
-     * @group unit
-     * @group financial
+     *
      */
     public function test_get_system_account()
     {
@@ -246,7 +222,7 @@ class FinancialAccountModelTest extends TestCase
         $this->assertInstanceOf(Account::class, $account);
 
         // System Owner Created
-        $this->assertDatabaseHas($this->systemOwnerTableName, [
+        $this->assertDatabaseHas($this->tableNames['systemOwner'], [
             'name' => 'platformFees',
             'system' => $this->defaultSystem,
         ]);
@@ -254,7 +230,7 @@ class FinancialAccountModelTest extends TestCase
         $systemOwner = SystemOwner::where('name', 'platformFees')->where('system', $this->defaultSystem)->first();
 
         // Account was created
-        $this->assertDatabaseHas($this->accountTableName, [
+        $this->assertDatabaseHas($this->tableNames['account'], [
             'owner_id' => $systemOwner->getKey(),
             'type' => AccountTypeEnum::INTERNAL,
         ]);

@@ -75,8 +75,8 @@ class TransactionSummary extends Model
      */
     public static function lastFinalized(Account $account)
     {
-        return TransactionSummary::select(self::getTableName() . '.*')
-            ->join(Transaction::getTableName(), Transaction::getTableName() . '.id', '=', self::getTableName() . '.to_transaction_id' )
+        return TransactionSummary::select(TransactionSummary::getTableName() . '.*')
+            ->join(Transaction::getTableName(), Transaction::getTableName() . '.id', '=', TransactionSummary::getTableName() . '.to_transaction_id' )
             ->where('finalized', true)
             ->orderByDesc(Transaction::getTableName() . '.settled_at')
             ->limit(1);

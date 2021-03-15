@@ -3,10 +3,13 @@ namespace Tests;
 
 use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
+use Tests\Asserts\CustomAsserts;
 
 abstract class TestCase extends BaseTestCase
 {
+    use CustomAsserts;
     //use CreatesApplication;
+
     public function createApplication()
     {
         $app = require __DIR__.'/../bootstrap/app.php';

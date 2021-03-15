@@ -169,12 +169,13 @@ class Transaction extends Model
             ->whereNotNull('settled_at');
 
         // Find last finalized transaction summary balance
-        $lastSummary = TransactionSummary::lastFinalized($this->account)->with('to')->first();
+        $lastSummary = TransactionSummary::lastFinalized($this->account)->with('to:settled_at')->first();
         // Calculate from last summary if there is one
         if (isset($lastSummary)) {
             $query = $query->where('settled_at', '>', $lastSummary->to->settled_at);
         }
-        $balance = $this->asMoney($query->pluck('amount'));
+        $balance = $query->pluck('amount');
+        $balance = $this->asMoney($query->pluck('amount')->first());
         if (isset($lastSummary)) {
             $balance = $lastSummary->balance->add($balance);
         }

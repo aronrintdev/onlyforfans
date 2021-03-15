@@ -100,7 +100,7 @@ class AccountFactory extends Factory
      *
      * @return  \Illuminate\Database\Eloquent\Factories\Factory
      */
-    public function asTypeIn()
+    public function asIn()
     {
         return $this->state(function (array $attributes) {
             return [ 'type' => AccountTypeEnum::IN, ];
@@ -112,7 +112,7 @@ class AccountFactory extends Factory
      *
      * @return  \Illuminate\Database\Eloquent\Factories\Factory
      */
-    public function asTypeInternal()
+    public function asInternal()
     {
         return $this->state(function (array $attributes) {
             return [ 'type' => AccountTypeEnum::INTERNAL, ];
@@ -124,7 +124,7 @@ class AccountFactory extends Factory
      *
      * @return  \Illuminate\Database\Eloquent\Factories\Factory
      */
-    public function asTypeOut()
+    public function asOut()
     {
         return $this->state(function (array $attributes) {
             return [ 'type' => AccountTypeEnum::OUT, ];
