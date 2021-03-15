@@ -12,10 +12,14 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Models\Financial\Exceptions\FeesTooHighException;
 use App\Models\Financial\Exceptions\TransactionAlreadySettled;
+use App\Models\Financial\Traits\HasCurrency;
+use App\Models\Financial\Traits\HasSystemByAccount;
 
 class Transaction extends Model
 {
     use UsesUuid,
+        HasSystemByAccount,
+        HasCurrency,
         HasFactory;
 
     protected $table = 'financial_transactions';
@@ -32,6 +36,7 @@ class Transaction extends Model
         'updated_at',
     ];
 
+    #region Casts
     protected $casts = [
         'metadata' => 'array',
         'credit_amount' => Money::class,
@@ -44,7 +49,10 @@ class Transaction extends Model
         return $this->account->system;
     }
 
+    #endregion
+
     /* ---------------------------- Relationships --------------------------- */
+    #region Relationships
     public function account()
     {
         return $this->belongsTo(Account::class);
@@ -61,7 +69,10 @@ class Transaction extends Model
         return $this->hasOne(Transaction::class, 'reference_id');
     }
 
+    #endregion
+
     /* ------------------------------ Functions ----------------------------- */
+    #region Functions
 
     /**
      * Creates and the transactions for fees, taxes, and any other items that
@@ -183,5 +194,6 @@ class Transaction extends Model
         return $balance;
     }
 
+    #endregion
 
 }

@@ -16,6 +16,7 @@ use App\Models\Financial\Exceptions\Account\IncorrectTypeException;
 use App\Models\Financial\Exceptions\InvalidTransactionAmountException;
 use App\Models\Financial\Exceptions\Account\InsufficientFundsException;
 use App\Models\Financial\Exceptions\Account\TransactionNotAllowedException;
+use App\Models\Financial\Traits\HasCurrency;
 use App\Models\Financial\Traits\HasSystem;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
@@ -27,8 +28,9 @@ class Account extends Model implements Ownable
 {
     use OwnableTraits,
         UsesUuid,
-        HasFactory,
-        HasSystem;
+        HasSystem,
+        HasCurrency,
+        HasFactory;
 
     protected $table = 'financial_accounts';
 
@@ -59,6 +61,7 @@ class Account extends Model implements Ownable
 
 
     /* ------------------------------ Relations ----------------------------- */
+    #region Relations
     /**
      * Owner of account
      */
@@ -71,9 +74,11 @@ class Account extends Model implements Ownable
     {
         return $this->morphTo();
     }
+    #endregion
 
 
     /* ------------------------------ Functions ----------------------------- */
+    #region Functions
     /**
      * Move funds to this owners internal account
      *
@@ -286,8 +291,10 @@ class Account extends Model implements Ownable
         return $systemOwner->getInternalAccount($system, $currency);
     }
 
+    #endregion
 
     /* ----------------------- Verification Functions ----------------------- */
+    #region VerificationFunctions
     /**
      * Check if account can make a transactions
      */
@@ -306,12 +313,14 @@ class Account extends Model implements Ownable
         }
     }
 
+    #endregion
 
     /* ------------------------------- Ownable ------------------------------ */
+    #region Ownable
     public function getOwner(): Collection
     {
         return new Collection([ $this->owner ]);
     }
 
-
+    #endregion
 }

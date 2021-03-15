@@ -18,12 +18,16 @@ class SystemOwner extends Model implements HasFinancialAccounts
     protected $guarded = [];
 
     /* ---------------------------- Relationships --------------------------- */
+    #region Relationships
     public function financialAccounts()
     {
         return $this->morphMany(Account::class, 'owner');
     }
 
+    #endregion
+
     /* ------------------------ HasFinancialAccounts ------------------------ */
+    #region HasFinancialAccounts
     public function getInternalAccount(string $system, string $currency): Account
     {
         $account = $this->financialAccounts->where('system', $system)
@@ -55,4 +59,6 @@ class SystemOwner extends Model implements HasFinancialAccounts
         $account->save();
         return $account;
     }
+
+    #endregion
 }

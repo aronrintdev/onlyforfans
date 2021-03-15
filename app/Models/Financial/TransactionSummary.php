@@ -5,11 +5,13 @@ namespace App\Models\Financial;
 use App\Models\Traits\UsesUuid;
 use App\Enums\Financial\TransactionSummaryTypeEnum;
 use App\Models\Casts\Money;
-use Illuminate\Database\Eloquent\Builder;
+use App\Models\Financial\Traits\HasCurrency;
+use App\Models\Financial\Traits\HasSystemByAccount;
 
 class TransactionSummary extends Model
 {
-    use UsesUuid;
+    use UsesUuid,
+        HasSystemByAccount;
 
     protected $table = 'financial_transaction_summaries';
 
@@ -18,6 +20,7 @@ class TransactionSummary extends Model
      */
     protected $guarded = [];
 
+    #region casts
     protected $casts = [
         'balance'        => Money::class,
         'balance_delta'  => Money::class,
@@ -27,8 +30,15 @@ class TransactionSummary extends Model
         'debit_average'  => Money::class,
     ];
 
+    public function getCurrencyAttribute()
+    {
+        return $this->account->currency;
+    }
+
+    #endregion
 
     /* ---------------------------- Relationships --------------------------- */
+    #region Relationships
     public function account()
     {
         return $this->hasOne(Account::class);
@@ -49,7 +59,11 @@ class TransactionSummary extends Model
         return $this->to()->max('settled_at');
     }
 
+    #endregion
+
     /* ------------------------------ Functions ----------------------------- */
+    #region Functions
+
     /**
      * Creates a new un-finalized Transaction Summary
      *
@@ -82,5 +96,6 @@ class TransactionSummary extends Model
             ->limit(1);
     }
 
+    #endregion
 
 }
