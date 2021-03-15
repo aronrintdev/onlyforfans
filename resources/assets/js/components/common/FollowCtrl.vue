@@ -25,8 +25,8 @@
         </ul>
         <p>{{ timeline.about }}</p>
         <ul class="list-unstyled">
-          <li><a :href="timeline.userstats.website" class="tag-website">Website</a></li>
-          <li><a :href="timeline.userstats.instagram" class="tag-instagram">Instagram</a></li>
+          <li>Website: <a :href="timeline.userstats.website" class="tag-website">{{ timeline.userstats.website }}</a></li>
+          <li>Instagram: <a :href="timeline.userstats.instagram" class="tag-instagram">{{ timeline.userstats.instagram }}</a></li>
         </ul>
         <ul class="list-unstyled list-details">
           <li><span><b-icon icon="geo-fill" variant="default"></b-icon> {{ timeline.userstats.city }}</span></li>

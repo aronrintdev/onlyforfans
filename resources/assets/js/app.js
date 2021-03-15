@@ -116,6 +116,9 @@ Vue.filter('enumPostType', function (k) {
 Vue.filter('isSubscriberOnly', function (p) {
   return p.type === 'paid'
 })
+Vue.filter('isPurchaseable', function (p) {
+  return p.type === 'price'
+})
 
 export const eventBus = new Vue({ });
 

@@ -12,6 +12,7 @@
       <section class="row">
         <aside class="col-md-5 col-lg-4">
           <FollowCtrl :session_user="session_user" :timeline="timeline" />
+          <PreviewUpgrade :session_user="session_user" :timeline="timeline" />
         </aside>
         <main class="col-md-7 col-lg-8">
           <PostFeed :session_user="session_user" :timeline="timeline" :is_homefeed="false" />
@@ -33,6 +34,10 @@
       <FollowTimeline :session_user="session_user" :timeline="timeline" />
     </b-modal>
 
+    <b-modal id="modal-post" title="Post" hide-footer body-class="p-0">
+      <PostDisplay :session_user="session_user" :post="selectedPost" />
+    </b-modal>
+
   </div>
 </template>
 
@@ -43,9 +48,11 @@ import PostFeed from '@components/timelines/PostFeed.vue'
 import StoryBar from '@components/timelines/StoryBar.vue'
 import Banner from '@components/timelines/Banner.vue'
 import FollowCtrl from '@components/common/FollowCtrl.vue'
+import PreviewUpgrade from '@components/common/PreviewUpgrade.vue'
 import FollowTimeline from '@components/modals/FollowTimeline.vue'
 import PurchasePost from '@components/modals/PurchasePost.vue'
 import SendTip from '@components/modals/SendTip.vue'
+import PostDisplay from '@components/posts/Display'
 
 export default {
   components: {
@@ -53,9 +60,11 @@ export default {
     StoryBar,
     Banner,
     FollowCtrl,
+    PreviewUpgrade,
     FollowTimeline,
     PurchasePost,
     SendTip,
+    PostDisplay,
   },
 
   props: {
@@ -94,6 +103,10 @@ export default {
         case 'render-tip':
           //this.selectedTimelineId = data.timeline_id // %TODO
           this.$bvModal.show('modal-tip')
+          break
+        case 'show-post':
+          this.selectedPost = data.post
+          this.$bvModal.show('modal-post')
           break
       }
     })
