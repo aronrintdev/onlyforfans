@@ -76,6 +76,9 @@
 
                   <div class="user-list-container">
                     <ul class="user-list">
+                      <div class="text-center" v-if="loading">
+                        <b-spinner variant="secondary" label="Loading..." size="small"></b-spinner>
+                      </div>
                       <li v-for="user in filteredUsers" :key="user.id"
                         :class="selectedUser && selectedUser.id === user.id ? 'selected' : ''"
                         @click="onSelectUser(user)"  
@@ -185,6 +188,7 @@
       users: [],
       filteredUsers: [],
       selectedUsers: [],
+      loading: true,
     }),
     mounted() {
       this.axios.get('/chat-messages/users').then((response) => {
@@ -192,6 +196,7 @@
         this.users = followers.concat(following);
         this.users = _.uniqBy(this.users, 'id');
         this.filteredUsers = this.users.slice();
+        this.loading = false;
       })
     },
     computed: {
@@ -211,7 +216,7 @@
             optionText = 'Recent';
         }
         return optionText;
-      },
+      },s
     },
     components: {
       'round-check-box': RoundCheckBox
@@ -238,7 +243,7 @@
           this.selectedUsers.splice(idx, 1);
         } else {
           this.selectedUsers.push(user);
-        }
+        } 
       },
       onChangeSearchText: function(value) {
         this.userSearchText = value;
