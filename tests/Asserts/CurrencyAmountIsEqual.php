@@ -19,7 +19,7 @@ final class CurrencyAmountIsEqual extends Constraint
 
     public function toString(): string
     {
-        return 'currency amount is equal to';
+        return 'currency amount is equal to ' . $this->value;
     }
 
     protected function matches($other): bool

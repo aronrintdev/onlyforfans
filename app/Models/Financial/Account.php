@@ -124,16 +124,16 @@ class Account extends Model implements Ownable
             $amount = $this->asMoney($amount);
 
             // Verify from account has valid balance if it is an internal account
-            $balance = $fromAccount->balance->subtract($amount);
+            $newBalance = $fromAccount->balance->subtract($amount);
             $ignoreBalance = isset($options['ignoreBalance']) ? $options['ignoreBalance'] : false;
             if (
                 $fromAccount->type === AccountTypeEnum::INTERNAL
-                && $balance->isNegative()
+                && $newBalance->isNegative()
                 && ! $ignoreBalance
             ) {
-                throw new InsufficientFundsException($fromAccount, $amount->getAmount(), $balance->getAmount());
+                throw new InsufficientFundsException($fromAccount, $amount->getAmount(), $newBalance->getAmount());
             }
-            $fromAccount->balance = $balance;
+            $fromAccount->balance = $newBalance;
             $fromAccount->balance_last_updated_at = Carbon::now();
             $fromAccount->save();
 
@@ -163,6 +163,8 @@ class Account extends Model implements Ownable
             $debitTransaction->save();
             $creditTransaction->save();
         }, 1);
+
+        $this->refresh();
 
         UpdateAccountBalance::dispatch($this);
         UpdateAccountBalance::dispatch($toAccount);
@@ -210,8 +212,7 @@ class Account extends Model implements Ownable
             if (isset($lastSummary)) {
                 $query = $query->where('settled_at', '>', $lastSummary->to->settled_at);
             }
-
-            $balance = $this->asMoney($query->pluck('amount'));
+            $balance = $this->asMoney($query->value('amount'));
             if (isset($lastSummary)) {
                 $balance = $lastSummary->balance->add($balance);
             }
@@ -237,7 +238,7 @@ class Account extends Model implements Ownable
                             ->where("{$ttn}.settled_at", '>', $holdSince->toDateString())
                             ->where('account.type', AccountTypeEnum::INTERNAL) // Only transactions from other internal accounts
                             ->whereNotNull("settled_at")
-                            ->pluck('amount')
+                            ->value('amount')
                     );
                 } else {
                     $pending = $this->asMoney(0);
@@ -262,8 +263,8 @@ class Account extends Model implements Ownable
             }
             $count = $query->count();
             $summarizeAt = new Collection(Config::get('transactions.summarizeAt'));
-            $priority = $summarizeAt->sortBy('count')->firstWhere('count', '>=', $count)->get('priority');
-            if (isset($priority)) {
+            $priority = $summarizeAt->sortBy('count')->firstWhere('count', '>=', $count);
+            if (isset($priority) && $count >= $priority['count']) {
                 $queue = Config::get('transactions.summarizeQueue');
                 CreateTransactionSummary::dispatch($this, TransactionSummaryTypeEnum::BUNDLE, 'Transaction Count')
                     ->onQueue("{$queue}-{$priority}");

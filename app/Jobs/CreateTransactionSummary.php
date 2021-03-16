@@ -34,7 +34,7 @@ class CreateTransactionSummary implements ShouldQueue, ShouldBeUnique
      */
     public function __construct(Account $account, $type, $for = '')
     {
-        $this->account = $account;
+        $this->account = $account->withoutRelations();
         $this->type = $type;
         $this->for = $for;
     }

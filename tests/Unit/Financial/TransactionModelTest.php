@@ -3,7 +3,9 @@
 namespace Tests\Unit\Financial;
 
 use App\Models\Financial\Account;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Queue;
+use App\Jobs\Financial\UpdateAccountBalance;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Models\Financial\Exceptions\TransactionAlreadySettled;
 
@@ -23,8 +25,27 @@ class FinancialTransactionModelTest extends TestCase
      */
     public function test_create_transaction()
     {
-        // TODO: Implement
-        $this->markTestIncomplete();
+        Event::fake([UpdateAccountBalance::class]);
+        $accounts = $this->createInternalAccounts([10000, 0]);
+        $transactions = $accounts[0]->moveTo($accounts[1], 1000);
+
+        $this->assertDatabaseHas($this->tableNames['transaction'], [
+            'id' => $transactions['debit']->getKey(),
+            'account_id' => $accounts[0]->getKey(),
+            'credit_amount' => 0,
+            'debit_amount' => 1000,
+            'settled_at' => null,
+        ]);
+
+        $this->assertDatabaseHas($this->tableNames['transaction'], [
+            'id' => $transactions['credit']->getKey(),
+            'account_id' => $accounts[1]->getKey(),
+            'credit_amount' => 1000,
+            'debit_amount' => 0,
+            'settled_at' => null,
+        ]);
+
+        Event::assertDispatched(UpdateAccountBalance::class, 2);
     }
 
     /**
@@ -32,7 +53,6 @@ class FinancialTransactionModelTest extends TestCase
      */
     public function test_settle_default_transaction_fees()
     {
-        Queue::fake();
         // Setup
         $accounts = $this->createInternalAccounts([10000, 0]);
 
@@ -86,18 +106,17 @@ class FinancialTransactionModelTest extends TestCase
         $transactions['debit']->save();
         $this->assertIsSettled($transactions['debit']);
         $this->assertCurrencyAmountIsEqual(-10000, $transactions['debit']->balance);
-        $this->expectException(TransactionAlreadySettled::class);
-        $transactions['debit']->settleBalance();
 
         $transactions['credit']->settleBalance();
         $transactions['credit']->save();
         $this->assertIsSettled($transactions['credit']);
         $this->assertCurrencyAmountIsEqual(10000, $transactions['credit']->balance);
-        $this->expectException(TransactionAlreadySettled::class);
-        $transactions['debit']->settleBalance();
 
         // Moving to creators Account
         $userAccount = $inAccount->owner->getInternalAccount($this->defaultSystem, $this->defaultCurrency);
+
+        // Settle Account balance
+        $userAccount->settleBalance();
 
         $transactions = $userAccount->moveTo($creatorAccount, 1000);
 
@@ -109,15 +128,11 @@ class FinancialTransactionModelTest extends TestCase
         $transactions['debit']->save();
         $this->assertIsSettled($transactions['debit']);
         $this->assertCurrencyAmountIsEqual(9000, $transactions['debit']->balance);
-        $this->expectException(TransactionAlreadySettled::class);
-        $transactions['debit']->settleBalance();
 
         $transactions['credit']->settleBalance();
         $transactions['credit']->save();
         $this->assertIsSettled($transactions['credit']);
         $this->assertCurrencyAmountIsEqual(1000, $transactions['credit']->balance);
-        $this->expectException(TransactionAlreadySettled::class);
-        $transactions['debit']->settleBalance();
 
         // 2nd Transaction
         $transactions = $userAccount->moveTo($creatorAccount, 1000);
@@ -130,13 +145,26 @@ class FinancialTransactionModelTest extends TestCase
         $transactions['debit']->save();
         $this->assertIsSettled($transactions['debit']);
         $this->assertCurrencyAmountIsEqual(8000, $transactions['debit']->balance);
-        $this->expectException(TransactionAlreadySettled::class);
-        $transactions['debit']->settleBalance();
 
         $transactions['credit']->settleBalance();
         $transactions['credit']->save();
         $this->assertIsSettled($transactions['credit']);
         $this->assertCurrencyAmountIsEqual(2000, $transactions['credit']->balance);
+    }
+
+    public function test_cannot_settle_transaction_multiple_times()
+    {
+        $inAccount = Account::factory()->asIn()->create();
+
+        $transactions = $inAccount->moveToInternal(10000);
+
+        $this->assertCurrencyAmountIsEqual(0, $transactions['debit']->calculateBalance());
+        $this->assertCurrencyAmountIsEqual(0, $transactions['credit']->calculateBalance());
+
+        $transactions['debit']->settleBalance();
+        $transactions['debit']->save();
+        $this->assertIsSettled($transactions['debit']);
+        $this->assertCurrencyAmountIsEqual(-10000, $transactions['debit']->balance);
         $this->expectException(TransactionAlreadySettled::class);
         $transactions['debit']->settleBalance();
     }

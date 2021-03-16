@@ -2,17 +2,19 @@
 
 namespace Tests\Unit\Financial;
 
-use App\Enums\Financial\AccountTypeEnum;
 use App\Models\User;
 use App\Models\Financial\Account;
-use App\Models\Financial\Transaction;
 use App\Models\Financial\SystemOwner;
+use App\Models\Financial\Transaction;
+use Illuminate\Support\Facades\Queue;
+use App\Enums\Financial\AccountTypeEnum;
+use App\Jobs\Financial\UpdateAccountBalance;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
 use App\Models\Financial\Exceptions\InvalidTransactionAmountException;
 use App\Models\Financial\Exceptions\Account\InsufficientFundsException;
 use App\Models\Financial\Exceptions\Account\TransactionNotAllowedException;
-
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Queue;
+use Illuminate\Support\Facades\Event;
 
 /**
  * Unit Tests for the `App\Models\Financial\Account` Model
@@ -89,18 +91,31 @@ class AccountModelTest extends TestCase
     /**
      *
      */
+    public function test_move_negative_amount_fails()
+    {
+        $accounts = $this->createInternalAccounts([1000, 1000]);
+        $this->expectException(InvalidTransactionAmountException::class);
+        $accounts[0]->moveTo($accounts[1], -1);
+    }
+
+    public function test_move_zero_amount_fails()
+    {
+        $accounts = $this->createInternalAccounts([1000, 1000]);
+        $this->expectException(InvalidTransactionAmountException::class);
+        $accounts[0]->moveTo($accounts[1], 0);
+    }
+
+    /**
+     *
+     */
     public function test_move_to_internal_account_from_in_account()
     {
         $inAccount = Account::factory()->asIn()->create();
         $user = $inAccount->owner;
 
-        $this->expectException(InvalidTransactionAmountException::class);
-        $inAccount->moveToInternal(-1);
-
-        $this->expectException(InvalidTransactionAmountException::class);
-        $inAccount->moveToInternal(0);
-
         $inAccount->moveToInternal(100);
+
+        $this->assertCurrencyAmountIsEqual(-100, $inAccount->balance);
 
         // Created missing Internal account
         $this->assertDatabaseHas($this->tableNames['account'], [
@@ -137,15 +152,24 @@ class AccountModelTest extends TestCase
     /**
      *
      */
-    public function test_move_to_internal_account_from_internal_account()
+    public function test_move_with_insufficient_funds_fails()
     {
-        Queue::fake();
-
         $account = Account::factory()->asInternal()->withBalance(1000)->create();
         $toAccount = Account::factory()->asInternal()->withBalance(0)->create();
 
         $this->expectException(InsufficientFundsException::class);
         $account->moveTo($toAccount, 20000);
+    }
+
+    /**
+     *
+     */
+    public function test_move_to_internal_account_from_internal_account()
+    {
+        Event::fake([ UpdateAccountBalance::class ]);
+
+        $account = Account::factory()->asInternal()->withBalance(1000)->create();
+        $toAccount = Account::factory()->asInternal()->withBalance(0)->create();
 
         $account->moveTo($toAccount, 300);
         $this->assertDatabaseHas($this->tableNames['transaction'], [
@@ -161,48 +185,55 @@ class AccountModelTest extends TestCase
             'currency' => $this->defaultCurrency,
         ]);
 
-        $account->fresh();
-        $this->assertEquals(700, $account->balance);
+        $this->assertCurrencyAmountIsEqual(700, $account->balance);
 
-        Queue::assertPushed(UpdateAccountBalance::class);
+        Event::assertDispatched(UpdateAccountBalance::class);
+        // Queue::assertPushed(UpdateAccountBalance::class);
     }
 
-
+    #region test_blocked_account_cannot_make_transactions
     /**
      *
      */
-    public function test_blocked_account_cannot_make_transactions()
+    public function test_blocked_account_cannot_make_transactions_variant_1()
     {
         $inAccount = Account::factory()->asIn()->transactionsBlocked()->create();
 
         $this->expectException(TransactionNotAllowedException::class);
         $inAccount->moveToInternal(100);
+    }
 
-        $blockedAccount1 = Account::factory()
-            ->asInternal()
-            ->withBalance(200)
-            ->transactionsBlocked()
-            ->create();
-        $blockedAccount2 = Account::factory()
-            ->asInternal()
-            ->withBalance(200)
-            ->transactionsBlocked()
-            ->create();
-        $unblockedAccount = Account::factory()
-            ->asInternal()
-            ->withBalance(200)
-            ->transactionsAllowed()
-            ->create();
-
+    public function test_blocked_account_cannot_make_transactions_variant_2()
+    {
+        $blockedAccount1 = Account::factory()->asInternal()->withBalance(200)
+            ->transactionsBlocked()->create();
+        $blockedAccount2 = Account::factory()->asInternal()->withBalance(200)
+            ->transactionsBlocked()->create();
         $this->expectException(TransactionNotAllowedException::class);
         $blockedAccount1->moveTo($blockedAccount2, 100);
+    }
 
+    public function test_blocked_account_cannot_make_transactions_variant_3()
+    {
+        $blockedAccount1 = Account::factory()->asInternal()->withBalance(200)
+            ->transactionsBlocked()->create();
+        $unblockedAccount = Account::factory()->asInternal()->withBalance(200)
+            ->transactionsAllowed()->create();
         $this->expectException(TransactionNotAllowedException::class);
         $blockedAccount1->moveTo($unblockedAccount, 100);
+    }
 
+    public function test_blocked_account_cannot_make_transactions_variant_4()
+    {
+        $blockedAccount1 = Account::factory()->asInternal()->withBalance(200)
+            ->transactionsBlocked()->create();
+        $unblockedAccount = Account::factory()->asInternal()->withBalance(200)
+            ->transactionsAllowed()->create();
         $this->expectException(TransactionNotAllowedException::class);
         $unblockedAccount->moveTo($blockedAccount1, 100);
     }
+    #endregion
+
 
     /**
      *
@@ -234,5 +265,18 @@ class AccountModelTest extends TestCase
             'owner_id' => $systemOwner->getKey(),
             'type' => AccountTypeEnum::INTERNAL,
         ]);
+    }
+
+
+    /**
+     * Setup Helper | Create Internal Accounts
+     */
+    private function createInternalAccounts($balances = [])
+    {
+        $accounts = [];
+        foreach ($balances as $balance) {
+            array_push($accounts, Account::factory()->asInternal()->withBalance($balance)->create());
+        }
+        return $accounts;
     }
 }
