@@ -170,8 +170,9 @@
         this.userSearchVisible = !this.userSearchVisible;
         this.userSearchText = undefined;
       },
-      onUserSearch: function() {
-        this.axios.get(`/chat-messages/search?name=${this.userSearchText}`)
+      onUserSearch: function(value) {
+        this.userSearchText = value;
+        this.axios.get(`/chat-messages/search?name=${value}`)
           .then((res) => {
             this.users = res.data;
           })

@@ -64,15 +64,20 @@ class MessageController extends Controller
     }
     public function searchContacts(Request $request)
     {
-        $sessionUser = $request->user();
-        $searchText = $request->query('name');
+        
 
         $receivers = Message::with('receiver')
-            ->whereHas('receiver', function($query) {
+            ->whereHas('receiver', function($query) use(&$request) {
+                $sessionUser = $request->user();
+                $searchText = $request->query('name');
+
                 $query->where('user_id', $sessionUser->id)
                     ->where('username', 'like', '%' . $searchText . '%');
             })
-            ->orWhere(function($query) {
+            ->orWhere(function($query) use(&$request) {
+                $sessionUser = $request->user();
+                $searchText = $request->query('name');
+
                 $query->where('user_id', $sessionUser->id)
                     ->where('receiver_name', 'like', '%' . $searchText . '%');
             })
