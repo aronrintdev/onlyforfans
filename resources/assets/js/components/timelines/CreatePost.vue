@@ -18,9 +18,9 @@
                 v-on:vdropzone-sending="sendingEvent"
                 v-on:vdropzone-success="successEvent"
                 v-on:vdropzone-queue-complete="queueCompleteEvent"
-                class="dropzone OFF-d-flex OFF-align-items-stretch"
+                class="dropzone"
                 >
-                <textarea v-model="description" rows="8" class="w-100 OFF-h-100"></textarea>
+                <textarea v-model="description" rows="8" class="w-100"></textarea>
             </vue-dropzone>
           </div>
           <template #footer>
@@ -79,7 +79,7 @@ export default {
       autoProcessQueue: false,
       thumbnailWidth: 100,
       clickable: false,
-      maxFilesize: 3.9,
+      maxFilesize: 15.9,
       addRemoveLinks: true,
       headers: { 
         'X-Requested-With': 'XMLHttpRequest', 
@@ -113,6 +113,7 @@ export default {
       const queued = this.$refs.myVueDropzone.getQueuedFiles();
 
       // (2) upload & attach the mediafiles
+      // %FIXME: if this fails, don't we have an orphaned post (?)
       if ( queued.length ) {
         this.$refs.myVueDropzone.processQueue(); // this will call dispatch after files uploaded
       } else {

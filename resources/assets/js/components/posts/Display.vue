@@ -63,7 +63,13 @@
       </template>
 
       <template v-if="post.access">
-        <b-card-img v-if="hasMediafiles" :src="primaryMediafile" alt="Image" ></b-card-img>
+        <article v-if="hasMediafiles">
+          <b-card-img v-if="primaryMediafile.is_image" :src="primaryMediafile.filepath" alt="Image" ></b-card-img>
+          <b-embed v-if="primaryMediafile.is_video" type="video" controls poster="poster.png">
+            <source :src="primaryMediafile.filepath" type="video/webm">
+            <source :src="primaryMediafile.filepath" type="video/mp4">
+          </b-embed>
+        </article>
         <b-card-text> <p>{{ post.description }}</p> </b-card-text>
       </template>
       <template v-else-if="$options.filters.isSubscriberOnly(post)">
@@ -154,7 +160,8 @@ export default {
       return this.post.mediafiles?.length > 0
     },
     primaryMediafile() {
-      return this.hasMediafiles ? this.post.mediafiles[0].filepath : null
+      //return this.hasMediafiles ? this.post.mediafiles[0].filepath : null
+      return this.hasMediafiles ? this.post.mediafiles[0] : null
     },
     isLoading() {
       return !this.post || !this.session_user
