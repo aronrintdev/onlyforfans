@@ -10,30 +10,44 @@
           </template>
           <div>
             <vue-dropzone 
-                ref="myVueDropzone" 
-                id="dropzone" 
-                :options="dropzoneOptions" 
-                :include-styling=true
-                :useCustomSlot=true
-                v-on:vdropzone-sending="sendingEvent"
-                v-on:vdropzone-success="successEvent"
-                v-on:vdropzone-queue-complete="queueCompleteEvent"
-                class="dropzone"
-                >
-                <textarea v-model="description" rows="8" class="w-100"></textarea>
+              ref="myVueDropzone" 
+              id="dropzone" 
+              :options="dropzoneOptions" 
+              :include-styling=true
+              :useCustomSlot=true
+              v-on:vdropzone-file-added="addedEvent"
+              v-on:vdropzone-removed-file="removedEvent"
+              v-on:vdropzone-sending="sendingEvent"
+              v-on:vdropzone-success="successEvent"
+              v-on:vdropzone-error="errorEvent"
+              v-on:vdropzone-queue-complete="queueCompleteEvent"
+              class="dropzone"
+            >
+              <textarea v-model="description" rows="8" class="w-100"></textarea>
             </vue-dropzone>
           </div>
           <template #footer>
-              <ul class="list-inline d-flex mb-0">
-                <li><span id="imageUpload"><ImageIcon /></span> </li>
-                <li><span id="selfVideoUpload"><CameraIcon /></span> </li>
-                <li><span id="voiceRecord"><MicIcon /></span> </li>
-                <li><span id="locationUpload"><LocationPinIcon /> </span> </li>
-                <li><span id="emoticons"><EmojiIcon /></span> </li>
-                <li><span id="emoticons"><TimerIcon /></span> </li>
-                <li><span id="emoticons"><CalendarIcon /></span> </li>
-                <li class="ml-auto"><button @click="savePost()" class="btn btn-submit btn-success">Post</button></li>
-              </ul>
+            <b-row>
+              <b-col cols="12" md="8" class="d-flex">
+                <ul class="list-inline d-flex mb-0 OFF-border-right">
+                  <li @click="selectMediatype('pic')" class="selectable select-pic"><b-icon icon="image" :variant="selectedMedia==='pic' ? 'primary' : 'secondary'" font-scale="1.5"></b-icon></li>
+                  <li @click="selectMediatype('video')" class="selectable select-video"><b-icon icon="camera-video" :variant="selectedMedia==='video' ? 'primary' : 'secondary'" font-scale="1.5"></b-icon></li>
+                  <li @click="selectMediatype('audio')" class="selectable select-audio"><b-icon icon="mic" :variant="selectedMedia==='audio' ? 'primary' : 'secondary'" font-scale="1.5"></b-icon></li>
+                </ul> 
+                <div class="border-right"></div>
+                <ul class="list-inline d-flex mb-0 OFF-ml-3">
+                  <li class="selectable select-location"><span><LocationPinIcon /></span> </li>
+                  <li class="selectable select-emoji"><span><EmojiIcon /></span></li>
+                  <li class="selectable select-timer"><span><TimerIcon /></span></li>
+                  <li class="selectable select-calendar"><span><CalendarIcon /></span></li>
+                </ul>
+              </b-col>
+              <b-col cols="12" md="4">
+                <ul class="list-inline d-flex justify-content-end mb-0 mt-3 mt-md-0">
+                  <li class="w-100 mx-0"><button @click="savePost()" class="btn btn-submit btn-success w-100">Post</button></li>
+                </ul>
+              </b-col>
+            </b-row>
           </template>
         </b-card>
       </div>
@@ -47,10 +61,7 @@ import Vuex from 'vuex';
 //import { eventBus } from '@/app';
 import vue2Dropzone from 'vue2-dropzone';
 import 'vue2-dropzone/dist/vue2Dropzone.min.css';
-import ImageIcon from '@components/common/icons/ImageIcon.vue';
-import CameraIcon from '@components/common/icons/CameraIcon.vue';
 import EmojiIcon from '@components/common/icons/EmojiIcon.vue';
-import MicIcon from '@components/common/icons/MicIcon.vue';
 import LocationPinIcon from '@components/common/icons/LocationPinIcon.vue';
 import TimerIcon from '@components/common/icons/TimerIcon.vue';
 import CalendarIcon from '@components/common/icons/CalendarIcon.vue';
@@ -63,12 +74,20 @@ export default {
   },
 
   computed: {
+    /*
+    queueRefCount() {
+      const queued = this.$refs.myVueDropzone.getQueuedFiles()
+      return queued.length
+    }
+     */
   },
 
   data: () => ({
 
+    queueRefCount: 0, // need to manage ourselves
     description: '',
     newPostId: null,
+    selectedMedia: 'pic',
 
     // ref: 
     //  ~ https://github.com/rowanwins/vue-dropzone/blob/master/docs/src/pages/SendAdditionalParamsDemo.vue
@@ -76,6 +95,8 @@ export default {
     dropzoneOptions: {
       url: '/mediafiles',
       paramName: 'mediafile',
+      acceptedFiles: null, // 'image/*', 
+      maxFiles: null,
       autoProcessQueue: false,
       thumbnailWidth: 100,
       clickable: false,
@@ -88,17 +109,24 @@ export default {
     },
   }),
 
-  created() {
-  },
-
   methods: {
 
     resetForm() {
+      this.$refs.myVueDropzone.removeAllFiles();
       this.description = '';
       this.newPostId = null;
-      this.$refs.myVueDropzone.removeAllFiles();
+      this.queueRefCount = 0;
+      this.selectedMedia = 'pic';
     },
 
+    selectMediatype(mtype) {
+      console.log('queueRefCount', this.queueRefCount)
+      if ( this.queueRefCount > 0 ) {
+        return // disallow
+      }
+      this.selectedMedia = mtype
+      this.dropzoneOptions.acceptedFiles = this.dropzoneConfigs[mtype].availFileTypes // HERE THURS
+    },
 
     async savePost() {
       // (1) create the post
@@ -125,11 +153,7 @@ export default {
 
     // for dropzone
     sendingEvent(file, xhr, formData) {
-      console.log('sendingEvent', {
-        file,
-        formData,
-        xhr,
-      });
+      console.log('sendingEvent', { file, formData, xhr });
       if ( !this.newPostId ) {
         throw new Error('Cancel upload, invalid post id');
       }
@@ -139,33 +163,62 @@ export default {
     },
 
     // for dropzone
+    addedEvent(file) {
+      console.log('addedEvent')
+      this.queueRefCount += 1;
+      //const count = this.$refs.myVueDropzone.dropzone.files.length
+    },
+    removedEvent(file, error, xhr) {
+      console.log('removedEvent')
+      this.queueRefCount -= 1;
+    },
     successEvent(file, response) {
-      console.log('successEvent', {
-        file, response,
-      });
+      console.log('successEvent', { file, response, });
+    },
+    errorEvent(file, message, xhr) {
+      console.log('errorEvent', { file, message, xhr });
+      if (file) {
+        this.$refs.myVueDropzone.removeFile(file)
+      }
     },
 
-    queueCompleteEvent(file, xhr, formData) {
-      console.log('queueCompleteEvent', {
-        file, xhr, formData,
-      });
+    queueCompleteEvent() {
+      // Retrieves the newly created post to display at top of feed
+      // Not sure why but this event is invoked when image add fails (eg, drag & drop to dropzone fails), so protect against it
+      if ( !this.newPostId ) {
+        return
+      }
+      console.log('queueCompleteEvent', { });
       console.log('queueCompleteEvent: dispatching unshiftPostToTimeline...');
-      //eventBus.$emit('unshift-post-to-timeline', this.newPostId);
       this.$store.dispatch('unshiftPostToTimeline', { newPostId: this.newPostId });
       this.resetForm();
     },
 
   },
 
+  created() {
+    this.dropzoneConfigs = {
+      pic: {
+        availFileTypes: 'image/*', // csv format
+        maxFiles: 10,
+      },
+      video: {
+        availFileTypes: 'video/*', // csv format
+        maxFiles: 1,
+      },
+      audio: {
+        availFileTypes: 'audio/*', // csv format
+        maxFiles: 1,
+      },
+    }
+    this.dropzoneOptions.acceptedFiles = this.dropzoneConfigs.pic.availFileTypes
+    this.dropzoneOptions.maxFiles = this.dropzoneConfigs.pic.maxFiles
+  },
+
+
   components: {
     vueDropzone: vue2Dropzone,
-    EmojiIcon,
-    ImageIcon,
-    CameraIcon,
-    MicIcon,
-    LocationPinIcon,
-    TimerIcon,
-    CalendarIcon,
+    EmojiIcon, LocationPinIcon, TimerIcon, CalendarIcon,
   },
 }
 </script>
@@ -173,20 +226,20 @@ export default {
 <style>
 /*
 .dropzone, .dropzone * {
-  box-sizing: border-box;
+box-sizing: border-box;
 }
 .vue-dropzone {
-  border: 2px solid #e5e5e5;
-  font-family: Arial,sans-serif;
-  letter-spacing: .2px;
-  color: #777;
-  transition: .2s linear;
+border: 2px solid #e5e5e5;
+font-family: Arial,sans-serif;
+letter-spacing: .2px;
+color: #777;
+transition: .2s linear;
 }
 .dropzone {
-  min-height: 150px;
-  border: 2px solid rgba(0, 0, 0, 0.3);
-  background: white;
-  padding: 20px 20px;
+min-height: 150px;
+border: 2px solid rgba(0, 0, 0, 0.3);
+background: white;
+padding: 20px 20px;
 }
  */
 
@@ -194,6 +247,10 @@ body .create_post-crate textarea,
 body .create_post-crate .dropzone,
 body .create_post-crate .vue-dropzone {
   border: none;
+}
+
+li .selectable {
+  cursor: pointer;
 }
 
 .create_post-crate .dropzone.dz-started .dz-message {
@@ -215,21 +272,26 @@ body .create_post-crate .vue-dropzone {
 
 /*
 .create_post-crate .dropzone .dz-image img {
-  width: 128px;
+width: 128px;
 }
-*/
+ */
 
 .create_post-crate footer ul li {
-  margin-right: 1em;
+  padding-left: 0.5em;
+  padding-right: 0.5em;
 }
 .create_post-crate footer ul li span {
   color: #859AB5;
   font-size: 18px;
 }
 .create_post-crate footer .btn {
-    padding: 6px 18px;
+  padding: 6px 18px;
 }
 .create_post-crate header h6 {
   color: #5B6B81;
+}
+
+body .b-icon.bi {
+  vertical-align: middle;
 }
 </style>
