@@ -172,13 +172,18 @@
       },
       onUserSearch: function(value) {
         this.userSearchText = value;
-        this.axios.get(`/chat-messages/search?name=${value}`)
+        this.axios.get(`/chat-messages/contacts?name=${value}&sort=${this.optionValue}`)
           .then((res) => {
             this.users = res.data;
           })
       },
       onOptionChanged: function (value) {
         this.optionValue = value;
+        const filterQuery =  this.userSearchText ? 'name=' + this.userSearchText : '';
+        this.axios.get(`/chat-messages/contacts?${filterQuery}&sort=${value}`)
+          .then((res) => {
+            this.users = res.data;
+          })
       },
       getLogoFromName: function (username) {
         const names = username.split(' ');

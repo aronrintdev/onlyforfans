@@ -21,7 +21,7 @@ class MessageController extends Controller
     public function fetchUsers(Request $request)
     {
         $sessionUser = $request->user();
-        // Get contacts
+        // Get contacts 
         $receivers = Message::where('user_id', $sessionUser->id)->pluck('receiver_id')->toArray();
 
         $timeline = Timeline::where('user_id', $sessionUser->id)->first();
@@ -32,11 +32,11 @@ class MessageController extends Controller
             $user->id = $user->user->id;
         });
     
-        $followers = $timeline->followers->whereNotIn('id', $receivers)->all();
+        $followers = $timeline->followers->whereNotIn('id', $receivers)->all();  
         $arr = [];
         foreach ($followers as $follower) {
             array_push($arr, $follower);
-        }
+        } 
      
 
         return [
@@ -46,12 +46,35 @@ class MessageController extends Controller
     }
     public function fetchContacts(Request $request)
     {
-        $sessionUser = $request->user();
-        $receivers = Message::where('user_id', $sessionUser->id)->pluck('receiver_id')->toArray();
-       
+        $sortBy = $request->query('sort');
+        $receiversQuery = Message::with('receiver')
+            ->whereHas('receiver', function($query) use(&$request) {
+                $sessionUser = $request->user();
+                $searchText = $request->query('name');
+
+                $query->where('user_id', $sessionUser->id)
+                    ->where('username', 'like', '%' . $searchText . '%');
+            })
+            ->orWhere(function($query) use(&$request) {
+                $sessionUser = $request->user();
+                $searchText = $request->query('name');
+
+                $query->where('user_id', $sessionUser->id)
+                    ->where('receiver_name', 'like', '%' . $searchText . '%');
+            });
+        if ($sortBy === 'recent') {
+            $receivers = $receiversQuery->orderBy('created_at', 'DESC')
+                            ->pluck('receiver_id')
+                            ->toArray();
+        } else {
+            $receivers = $receiversQuery->orderBy('created_at', 'ASC')
+                            ->pluck('receiver_id')
+                            ->toArray();
+        }
+
         $contacts = array();
         foreach($receivers as $receiver) {
-            $lastMessage = Message::where('receiver_id', $receiver)->latest()->first();
+            $lastMessage = Message::with(['receiver'])->where('receiver_id', $receiver)->latest()->first();
             $user = Timeline::with(['user', 'avatar'])->where('user_id', $receiver)->first()->makeVisible(['user']);
             $user->username = $user->user->username;
             $user->id = $user->user->id;
