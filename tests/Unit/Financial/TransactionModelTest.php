@@ -3,8 +3,8 @@
 namespace Tests\Unit\Financial;
 
 use App\Models\Financial\Account;
+use App\Models\Financial\Transaction;
 use Illuminate\Support\Facades\Event;
-use Illuminate\Support\Facades\Queue;
 use Tests\Helpers\Financial\AccountHelpers;
 use App\Jobs\Financial\UpdateAccountBalance;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -87,6 +87,15 @@ class FinancialTransactionModelTest extends TestCase
             'account_id' => $taxAccount->getKey(),
             'credit_amount' => 50,
         ]);
+
+        // Make sure all account fee debit transactions are settled.
+        $platformFeeDebitTransaction = Transaction::where('account_id', $accounts[1]->getKey())
+            ->where('debit_amount', 300)->first();
+        $this->assertIsSettled($platformFeeDebitTransaction);
+
+        $taxDebitTransaction = Transaction::where('account_id', $accounts[1]->getKey())
+            ->where('debit_amount', 50)->first();
+        $this->assertIsSettled($taxDebitTransaction);
     }
 
     /**

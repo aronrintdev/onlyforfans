@@ -198,17 +198,19 @@ class Account extends Model implements Ownable
                 ->lockForUpdate()
                 ->chunkById(10, function ($transactions) {
                     foreach ($transactions as $transaction) {
+                        $feeTransactions = null;
                         $isFeeTransaction = isset($transaction->metadata['fee']) ? $transaction->metadata['fee'] : false;
                         if ( // From Internal to Internal
                             $transaction->reference->account->type === AccountTypeEnum::INTERNAL
                             && $transaction->account->type === AccountTypeEnum::INTERNAL
                             && ! $isFeeTransaction
                         ) {
-                            // Calculate Fees and Taxes On this transaction
+                            // Calculate Fees and Taxes On this transaction, then settle transaction and all fee debit transactions
                             $transaction->settleFees();
+                        } else {
+                            $transaction->settleBalance();
+                            $transaction->save();
                         }
-                        $transaction->settleBalance();
-                        $transaction->save();
                     }
                 });
 

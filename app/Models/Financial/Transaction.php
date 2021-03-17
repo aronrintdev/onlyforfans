@@ -167,6 +167,14 @@ class Transaction extends Model
         );
 
         $this->save();
+        $this->settleBalance();
+        $this->save();
+        // Settle balance on all debit side fee transactions
+        $transactions->each(function($items) {
+            $items['debit']->settleBalance();
+            $items['debit']->save();
+            $items['debit']->refresh();
+        });
         return $transactions;
     }
 

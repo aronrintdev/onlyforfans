@@ -2,9 +2,7 @@
 
 namespace App\Jobs\Financial;
 
-use App\Enums\Financial\AccountTypeEnum;
 use App\Models\Financial\Account;
-use App\Models\Financial\Transaction;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
