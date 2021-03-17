@@ -36,6 +36,20 @@ class Transaction extends Model
         'updated_at',
     ];
 
+    protected static function booted()
+    {
+        static::updating(function ($transaction) {
+            if (isset($transaction->settled_at) && !$transaction->isDirty('settled_at') && $transaction->isDirty()) {
+                throw new TransactionAlreadySettled($transaction);
+            }
+        });
+        static::saving(function ($transaction) {
+            if (isset($transaction->settled_at) && !$transaction->isDirty('settled_at') && $transaction->isDirty()) {
+                throw new TransactionAlreadySettled($transaction);
+            }
+        });
+    }
+
     #region Casts
     protected $casts = [
         'metadata' => 'array',

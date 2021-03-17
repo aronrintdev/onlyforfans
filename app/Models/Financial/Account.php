@@ -97,6 +97,15 @@ class Account extends Model implements Ownable
     }
 
     /**
+     * Gets instance of internal account of owner
+     * @return Account
+     */
+    public function getInternalAccount(): Account
+    {
+        return $this->owner->getInternalAccount($this->system, $this->currency);
+    }
+
+    /**
      * Move funds from one account to another, returns debit and credit transactions in collection
      *
      * @return  Collection  [ 'debit' => debit Transaction, 'credit' => credit Transaction ]

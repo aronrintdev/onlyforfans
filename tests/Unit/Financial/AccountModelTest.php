@@ -6,15 +6,15 @@ use App\Models\User;
 use App\Models\Financial\Account;
 use App\Models\Financial\SystemOwner;
 use App\Models\Financial\Transaction;
-use Illuminate\Support\Facades\Queue;
+use Illuminate\Support\Facades\Event;
 use App\Enums\Financial\AccountTypeEnum;
+use Tests\Helpers\Financial\AccountHelpers;
+
 use App\Jobs\Financial\UpdateAccountBalance;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-
 use App\Models\Financial\Exceptions\InvalidTransactionAmountException;
 use App\Models\Financial\Exceptions\Account\InsufficientFundsException;
 use App\Models\Financial\Exceptions\Account\TransactionNotAllowedException;
-use Illuminate\Support\Facades\Event;
 
 /**
  * Unit Tests for the `App\Models\Financial\Account` Model
@@ -28,7 +28,7 @@ class AccountModelTest extends TestCase
     use RefreshDatabase;
 
     /**
-     *
+     * In account is created correctly
      */
     public function test_create_in_account()
     {
@@ -37,7 +37,7 @@ class AccountModelTest extends TestCase
     }
 
     /**
-     *
+     * Internal account is created correctly
      */
     public function test_create_user_internal_account()
     {
@@ -54,7 +54,7 @@ class AccountModelTest extends TestCase
     }
 
     /**
-     *
+     * User's Internal account is created and retrieved when using getInternalAccount()
      */
     public function test_get_user_internal_account()
     {
@@ -80,7 +80,7 @@ class AccountModelTest extends TestCase
     }
 
     /**
-     *
+     * Out account is created correctly
      */
     public function test_create_out_account()
     {
@@ -88,25 +88,22 @@ class AccountModelTest extends TestCase
         $this->markTestIncomplete();
     }
 
-    /**
-     *
-     */
     public function test_move_negative_amount_fails()
     {
-        $accounts = $this->createInternalAccounts([1000, 1000]);
+        $accounts = AccountHelpers::createInternalAccounts([1000, 1000]);
         $this->expectException(InvalidTransactionAmountException::class);
         $accounts[0]->moveTo($accounts[1], -1);
     }
 
     public function test_move_zero_amount_fails()
     {
-        $accounts = $this->createInternalAccounts([1000, 1000]);
+        $accounts = AccountHelpers::createInternalAccounts([1000, 1000]);
         $this->expectException(InvalidTransactionAmountException::class);
         $accounts[0]->moveTo($accounts[1], 0);
     }
 
     /**
-     *
+     * Move funds from in account -> internal account
      */
     public function test_move_to_internal_account_from_in_account()
     {
@@ -150,7 +147,7 @@ class AccountModelTest extends TestCase
     }
 
     /**
-     *
+     * Internal accounts need to have enough balance
      */
     public function test_move_with_insufficient_funds_fails()
     {
@@ -162,7 +159,7 @@ class AccountModelTest extends TestCase
     }
 
     /**
-     *
+     * Move funds from internal account -> internal account
      */
     public function test_move_to_internal_account_from_internal_account()
     {
@@ -236,7 +233,7 @@ class AccountModelTest extends TestCase
 
 
     /**
-     *
+     * Test that accounts verify correctly.
      */
     public function test_verify_account()
     {
@@ -245,7 +242,7 @@ class AccountModelTest extends TestCase
     }
 
     /**
-     *
+     * A fees account is retrieved correctly.
      */
     public function test_get_system_account()
     {
@@ -265,18 +262,5 @@ class AccountModelTest extends TestCase
             'owner_id' => $systemOwner->getKey(),
             'type' => AccountTypeEnum::INTERNAL,
         ]);
-    }
-
-
-    /**
-     * Setup Helper | Create Internal Accounts
-     */
-    private function createInternalAccounts($balances = [])
-    {
-        $accounts = [];
-        foreach ($balances as $balance) {
-            array_push($accounts, Account::factory()->asInternal()->withBalance($balance)->create());
-        }
-        return $accounts;
     }
 }

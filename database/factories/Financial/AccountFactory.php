@@ -8,6 +8,7 @@ use App\Models\Financial\Account;
 use Illuminate\Support\Facades\Config;
 use App\Enums\Financial\AccountTypeEnum;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Collection;
 
 class AccountFactory extends Factory
 {

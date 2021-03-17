@@ -5,6 +5,7 @@ namespace Tests\Unit\Financial;
 use App\Models\Financial\Account;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Queue;
+use Tests\Helpers\Financial\AccountHelpers;
 use App\Jobs\Financial\UpdateAccountBalance;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Models\Financial\Exceptions\TransactionAlreadySettled;
@@ -26,7 +27,7 @@ class FinancialTransactionModelTest extends TestCase
     public function test_create_transaction()
     {
         Event::fake([UpdateAccountBalance::class]);
-        $accounts = $this->createInternalAccounts([10000, 0]);
+        $accounts = AccountHelpers::createInternalAccounts([10000, 0]);
         $transactions = $accounts[0]->moveTo($accounts[1], 1000);
 
         $this->assertDatabaseHas($this->tableNames['transaction'], [
@@ -54,7 +55,7 @@ class FinancialTransactionModelTest extends TestCase
     public function test_settle_default_transaction_fees()
     {
         // Setup
-        $accounts = $this->createInternalAccounts([10000, 0]);
+        $accounts = AccountHelpers::createInternalAccounts([10000, 0]);
 
         // Default Fees:
         // PlatformFee => 30% | 300
@@ -152,6 +153,9 @@ class FinancialTransactionModelTest extends TestCase
         $this->assertCurrencyAmountIsEqual(2000, $transactions['credit']->balance);
     }
 
+    /**
+     * Settled transactions are final
+     */
     public function test_cannot_settle_transaction_multiple_times()
     {
         $inAccount = Account::factory()->asIn()->create();
@@ -170,24 +174,37 @@ class FinancialTransactionModelTest extends TestCase
     }
 
     /**
+     * Settled transactions are final
+     */
+    public function test_attempting_to_modify_settled_transaction_should_fail()
+    {
+        $inAccount = Account::factory()->asIn()->create();
+
+        $transactions = $inAccount->moveToInternal(10000);
+
+        $this->assertCurrencyAmountIsEqual(0, $transactions['debit']->calculateBalance());
+        $this->assertCurrencyAmountIsEqual(0, $transactions['credit']->calculateBalance());
+
+        $transactions['debit']->settleBalance();
+        $transactions['debit']->save();
+        $this->assertIsSettled($transactions['debit']);
+        $this->assertCurrencyAmountIsEqual(-10000, $transactions['debit']->balance);
+
+        $transactions['credit']->settleBalance();
+        $transactions['credit']->save();
+        $this->assertIsSettled($transactions['credit']);
+        $this->assertCurrencyAmountIsEqual(10000, $transactions['credit']->balance);
+        $transactions['credit']->balance = 0;
+        $this->expectException(TransactionAlreadySettled::class);
+        $transactions['credit']->save();
+    }
+
+    /**
      *
      */
     public function test_fail_transaction_gracefully()
     {
         // TODO: Implement
         $this->markTestIncomplete();
-    }
-
-
-    /**
-     * Setup Helper | Create Internal Accounts
-     */
-    private function createInternalAccounts($balances = [])
-    {
-        $accounts = [];
-        foreach($balances as $balance) {
-            array_push($accounts, Account::factory()->asInternal()->withBalance($balance)->create());
-        }
-        return $accounts;
     }
 }
