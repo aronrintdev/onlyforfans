@@ -198,9 +198,8 @@ class Account extends Model implements Ownable
                 ->lockForUpdate()
                 ->chunkById(10, function ($transactions) {
                     foreach ($transactions as $transaction) {
-                        $feeTransactions = null;
                         $isFeeTransaction = isset($transaction->metadata['fee']) ? $transaction->metadata['fee'] : false;
-                        if ( // From Internal to Internal
+                        if ( // From Internal to Internal account that is not a fee transaction
                             $transaction->reference->account->type === AccountTypeEnum::INTERNAL
                             && $transaction->account->type === AccountTypeEnum::INTERNAL
                             && ! $isFeeTransaction
@@ -228,12 +227,23 @@ class Account extends Model implements Ownable
                 $balance = $lastSummary->balance->add($balance);
             }
 
+            // Check for any failed transaction that debit account and subtract that sum from balance
+            //   Usually this will be zero with no failed transactions
+            $failedAmount = Transaction::select(DB::raw('sum(debit_amount) as amount'))
+                ->where('account_id', $this->getKey())
+                ->whereNotNull('failed_at')
+                ->value('amount');
+            if (isset($failedAmount)) {
+                $balance = $balance->subtract($this->asMoney($failedAmount));
+            }
+
             if ($this->type === AccountTypeEnum::INTERNAL) {
                 // Calculate new Pending
+
                 // Get Default Hold Period
                 $holdMinutes = Config::get('transactions.systems' . $this->system . '.holdPeriod');
 
-                // TODO: Get Custom Hold Periods from DB
+                // TODO: Get Custom Hold Periods from DB | Jira Issue: AF-236
 
                 if ($holdMinutes > 0) { // Don't bother executing this query if hold is 0
 

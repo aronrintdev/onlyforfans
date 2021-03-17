@@ -208,7 +208,7 @@ class Transaction extends Model
             $query = $query->where('settled_at', '>', $lastSummary->to->settled_at);
         }
         $balance = $query->pluck('amount');
-        $balance = $this->asMoney($query->pluck('amount')->first());
+        $balance = $this->asMoney($query->value('amount'));
         if (isset($lastSummary)) {
             $balance = $lastSummary->balance->add($balance);
         }
