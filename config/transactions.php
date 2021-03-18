@@ -4,6 +4,7 @@
  */
 
 use App\apis\Segpay\Api;
+use App\Enums\Financial\TransactionTypeEnum;
 
 /**
  * Note: All currency values in whole integers
@@ -75,6 +76,15 @@ return [
                     'take' => env('TRANSACTIONS_SEGPAY_TAX_PERCENTAGE', 5),
                     'min' => env('TRANSACTIONS_SEGPAY_MIN_TAX', 0),
                 ],
+            ],
+
+            /**
+             * These are the transaction types that fees are calculated on, other transaction types will not calculate
+             * and store fees
+             */
+            'feesOn' => [
+                TransactionTypeEnum::SALE,
+                TransactionTypeEnum::TIP,
             ],
 
             'minTransaction' => [

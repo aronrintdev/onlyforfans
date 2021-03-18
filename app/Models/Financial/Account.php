@@ -149,7 +149,13 @@ class Account extends Model implements Ownable
             $commons = [
                 'currency' => $fromAccount->currency,
                 'description' => $options['description'] ?? null,
-                'access_id' => isset($options['access']) ? $options['access']->getKey() : null,
+                'type' => $options['type'] ?? null,
+                'shareable_id' => isset($options['shareable_id'])
+                    ? $options['shareable_id']
+                    : (isset($options['shareable'])
+                        ? $options['shareable']->getKey()
+                        : null
+                    ),
                 'metadata' => $options['metadata'] ?? null,
             ];
 
@@ -197,12 +203,12 @@ class Account extends Model implements Ownable
                 ->orderBy('created_at')
                 ->lockForUpdate()
                 ->chunkById(10, function ($transactions) {
+                    $feeOn = Config::get("transactions.systems.{$this->system}.feesOn");
                     foreach ($transactions as $transaction) {
-                        $isFeeTransaction = isset($transaction->metadata['fee']) ? $transaction->metadata['fee'] : false;
                         if ( // From Internal to Internal account that is not a fee transaction
                             $transaction->reference->account->type === AccountTypeEnum::INTERNAL
                             && $transaction->account->type === AccountTypeEnum::INTERNAL
-                            && ! $isFeeTransaction
+                            && in_array($transaction->type, $feeOn)
                         ) {
                             // Calculate Fees and Taxes On this transaction, then settle transaction and all fee debit transactions
                             $transaction->settleFees();
@@ -293,7 +299,64 @@ class Account extends Model implements Ownable
         });
     }
 
+    /**
+     * Handle a chargeback on an in account, rolls back transactions made with this transaction
+     *
+     * @param Transaction $transaction  The original transaction that was charge-backed
+     * @param int|Currency $amount  The amount that was charged back uses transaction amount if not provided
+     * @return Collection Collection of new transactions created for the charge back
+     */
+    public function handleChargeback(Transaction $transaction, $amount = null ): Collection
+    {
+        $rollBackTransactions = new Collection([]);
+        DB::transaction(function () use ($transaction, $amount, &$roleBackTransactions) {
+            $account = Account::lockForUpdate()->find($this->getKey());
+            if (!isset($amount)) {
+                $amount = clone $transaction->debit_amount;
+            }
 
+            if (!$amount->isPositive()) {
+                throw new InvalidTransactionAmountException($amount, $transaction);
+            }
+
+            // Find all transactions original transitions funded
+            // First is transaction pair to internal account
+            $transactions = new Collection([ $transaction ]);
+
+            $remainingAmount = clone $amount;
+            $currentTransaction = $transaction->reference;
+            do {
+                // Get next Debit transaction in owners internal account
+                // This is the next purchase made after funds were deposited there, Usually one, but there could
+                // potentially be more transactions so we need to check amounts and rollback all transactions that where
+                // funded by this transaction
+                $currentTransaction = $currentTransaction->getNextDebitTransaction(true);
+                $transactions->push($currentTransaction);
+                $remainingAmount = $remainingAmount->subtract($currentTransaction->credit_amount);
+            } while( $remainingAmount->isPositive() );
+
+            // Perform rollback transactions
+
+            // Check if last transaction was partial.
+            if ($remainingAmount->isNegative()) {
+                $transaction = $transactions->pop();
+                // Create chargeback of partial amount
+                $roleBackTransactions->push(
+                    $transaction->chargeback($this->asCurrency(0)->subtract($remainingAmount))
+                );
+            }
+
+            // Perform chargeback rollbacks on transactions in reverse order
+            do {
+                $transaction = $transactions->pop();
+                $roleBackTransactions->push(
+                    $transaction->chargeback()
+                );
+            } while ($transactions->count > 0);
+        });
+
+        return $rollBackTransactions;
+    }
 
 
     /**

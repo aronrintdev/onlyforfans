@@ -2,7 +2,6 @@
 
 namespace App\Models\Financial\Exceptions;
 
-use Illuminate\Support\Facades\Config;
 use RuntimeException;
 
 class TransactionAlreadySettled extends RuntimeException
