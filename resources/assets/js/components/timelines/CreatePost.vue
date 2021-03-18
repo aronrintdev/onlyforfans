@@ -30,12 +30,12 @@
             <b-row>
               <b-col cols="12" md="8" class="d-flex">
                 <ul class="list-inline d-flex mb-0 OFF-border-right">
-                  <li @click="selectMediatype('pic')" class="selectable select-pic"><b-icon icon="image" :variant="selectedMedia==='pic' ? 'primary' : 'secondary'" font-scale="1.5"></b-icon></li>
-                  <li @click="selectMediatype('video')" class="selectable select-video"><b-icon icon="camera-video" :variant="selectedMedia==='video' ? 'primary' : 'secondary'" font-scale="1.5"></b-icon></li>
-                  <li @click="selectMediatype('audio')" class="selectable select-audio"><b-icon icon="mic" :variant="selectedMedia==='audio' ? 'primary' : 'secondary'" font-scale="1.5"></b-icon></li>
+                  <li @click="takePicture()" class="selectable select-pic"><b-icon icon="image" :variant="selectedMedia==='pic' ? 'primary' : 'secondary'" font-scale="1.5"></b-icon></li>
+                  <li @click="recordVideo()" class="selectable select-video"><b-icon icon="camera-video" :variant="selectedMedia==='video' ? 'primary' : 'secondary'" font-scale="1.5"></b-icon></li>
+                  <li @click="recordAudio()" class="selectable select-audio"><b-icon icon="mic" :variant="selectedMedia==='audio' ? 'primary' : 'secondary'" font-scale="1.5"></b-icon></li>
                 </ul> 
                 <div class="border-right"></div>
-                <ul class="list-inline d-flex mb-0 OFF-ml-3">
+                <ul class="list-inline d-flex mb-0">
                   <li class="selectable select-location"><span><LocationPinIcon /></span> </li>
                   <li class="selectable select-emoji"><span><EmojiIcon /></span></li>
                   <li class="selectable select-timer"><span><TimerIcon /></span></li>
@@ -74,17 +74,10 @@ export default {
   },
 
   computed: {
-    /*
-    queueRefCount() {
-      const queued = this.$refs.myVueDropzone.getQueuedFiles()
-      return queued.length
-    }
-     */
   },
 
   data: () => ({
 
-    queueRefCount: 0, // need to manage ourselves
     description: '',
     newPostId: null,
     selectedMedia: 'pic',
@@ -95,7 +88,7 @@ export default {
     dropzoneOptions: {
       url: '/mediafiles',
       paramName: 'mediafile',
-      acceptedFiles: null, // 'image/*', 
+      acceptedFiles: 'image/*, video/*, audio/*',
       maxFiles: null,
       autoProcessQueue: false,
       thumbnailWidth: 100,
@@ -115,17 +108,7 @@ export default {
       this.$refs.myVueDropzone.removeAllFiles();
       this.description = '';
       this.newPostId = null;
-      this.queueRefCount = 0;
       this.selectedMedia = 'pic';
-    },
-
-    selectMediatype(mtype) {
-      console.log('queueRefCount', this.queueRefCount)
-      if ( this.queueRefCount > 0 ) {
-        return // disallow
-      }
-      this.selectedMedia = mtype
-      this.dropzoneOptions.acceptedFiles = this.dropzoneConfigs[mtype].availFileTypes // HERE THURS
     },
 
     async savePost() {
@@ -151,6 +134,16 @@ export default {
       }
     },
 
+    takePicture() { // %TODO
+      this.selectedMedia = 'pic'
+    }, 
+    recordVideo() { // %TODO
+      this.selectedMedia = 'video'
+    },
+    recordAudio() { // %TODO
+      this.selectedMedia = 'audio'
+    },
+
     // for dropzone
     sendingEvent(file, xhr, formData) {
       console.log('sendingEvent', { file, formData, xhr });
@@ -165,12 +158,9 @@ export default {
     // for dropzone
     addedEvent(file) {
       console.log('addedEvent')
-      this.queueRefCount += 1;
-      //const count = this.$refs.myVueDropzone.dropzone.files.length
     },
     removedEvent(file, error, xhr) {
       console.log('removedEvent')
-      this.queueRefCount -= 1;
     },
     successEvent(file, response) {
       console.log('successEvent', { file, response, });
@@ -211,7 +201,6 @@ export default {
         maxFiles: 1,
       },
     }
-    this.dropzoneOptions.acceptedFiles = this.dropzoneConfigs.pic.availFileTypes
     this.dropzoneOptions.maxFiles = this.dropzoneConfigs.pic.maxFiles
   },
 

@@ -8,52 +8,7 @@
       header-class="d-flex justify-content-between"
     >
       <template #header>
-        <div class="post-author">
-          <section class="user-avatar">
-            <router-link :to="timelineRoute">
-              <b-img
-                :src="post.user.avatar.filepath"
-                :alt="post.user.name"
-                :title="post.user.name"
-              ></b-img>
-            </router-link>
-          </section>
-          <section class="user-details">
-            <ul class="list-unstyled">
-              <li>
-                <router-link
-                  :to="timelineRoute"
-                  title=""
-                  data-toggle="tooltip"
-                  data-placement="top"
-                  class="username"
-                  v-text="post.user.name"
-                />
-                <span v-if="post.user.verified" class="verified-badge">
-                  <b-icon icon="check-circle-fill" variant="success" font-scale="1" />
-                </span>
-              </li>
-              <li>
-                <timeago :datetime="post.created_at" :auto-update="60"></timeago>
-                <span v-if="post.location" class="post-place">
-                  at
-                  <a target="_blank" :href="`/get-location/${post.location}`">
-                    <b-icon icon="geo-fill" variant="primary" font-scale="1" />
-                    {{ post.location }}
-                  </a>
-                </span>
-              </li>
-            </ul>
-          </section>
-          <div class="tag-debug">
-            <ul>
-              <li>ID: {{ post.id | niceGuid }}</li>
-              <li>Type: {{ post.type | enumPostType }}</li>
-              <li>Price: {{ post.price }}</li>
-              <li>Access: {{ post.access }}</li>
-            </ul>
-          </div>
-        </div>
+        <PostHeader :post="post" :session_user="session_user"/>
         <div v-if="session_user.id === post.user.id" class="post-ctrl">
           <b-dropdown id="dropdown-1" text="" class="m-md-2" variant="outline-dark">
             <b-dropdown-item @click="editPost()">Edit</b-dropdown-item>
@@ -90,36 +45,7 @@
       </template>
 
       <template #footer>
-        <div class="panel-footer fans">
-          <ul class="list-inline footer-ctrl">
-            <li class="list-inline-item mr-3">
-              <LikesButton @toggled="togglePostLike()" :filled="isLikedByMe" :count="likeCount" :showCount="true" />
-            </li>
-            <li class="list-inline-item mr-3">
-              <span @click="toggleComments()" class="tag-clickable">
-                <b-icon icon="chat-text" font-scale="1" />
-                ({{ post.stats.commentCount }})
-              </span>
-            </li>
-            <li class="list-inline-item mr-3">
-              <span @click="share()" class="tag-clickable">
-                <b-icon icon="share" font-scale="1" />
-              </span>
-            </li>
-            <li class="list-inline-item mr-3">
-              <span @click="tip()" class="tag-clickable">$</span>
-            </li>
-          </ul>
-
-          <b-collapse v-model="renderComments">
-            <CommentList
-              :post-id="post.id"
-              :loading="loadingComments"
-              v-model="comments"
-            />
-          </b-collapse>
-
-        </div>
+        <PostFooter :post="post" :session_user="session_user" />
       </template>
     </b-card>
   </div>
@@ -128,17 +54,13 @@
 <script>
 import Vuex from 'vuex'
 import { eventBus } from '@/app'
-import CommentList from '@components/comments/List'
-import CommentDisplay from '@components/comments/Display'
-import LikesButton from '@components/common/LikesButton'
-import NewComment from '@components/comments/New'
+import PostHeader from './PostHeader'
+import PostFooter from './PostFooter'
 
 export default {
   components: {
-    CommentList,
-    CommentDisplay,
-    LikesButton,
-    NewComment,
+    PostHeader,
+    PostFooter,
   },
 
   props: {
@@ -149,12 +71,6 @@ export default {
   computed: {
     username() {
       return this.post.user.username
-    },
-    timelineRoute() {
-      return {
-        name: 'timeline.show',
-        params: { slug: this.post.timeline_slug }
-      }
     },
     hasMediafiles() {
       return this.post.mediafiles?.length > 0
@@ -169,75 +85,13 @@ export default {
   },
 
   data: () => ({
-    renderComments: false,
-    isLikedByMe: false,
-    likeCount: 0, // %FIXME INIT
-    comments: [], // %NOTE: rendered comments are loaded dynamically as they contain additional relation data,
-    loadingComments: false,
-    // whereas comment count is computed from the comments relation on the post itself (%FIXME?)
   }),
 
-  mounted() {
-    this.isLikedByMe = this.post.stats?.isLikedByMe || false
-    this.likeCount = this.post.stats?.likeCount  || 0
-  },
+  mounted() { },
 
   created() {},
 
   methods: {
-    async togglePostLike() {
-      let response
-      if (this.isLikedByMe) {
-        // unlike
-        response = await axios.post(`/likeables/${this.session_user.id}`, {
-          _method: 'delete',
-          likeable_type: 'posts',
-          likeable_id: this.post.id,
-        })
-        this.isLikedByMe = false
-      } else {
-        // like
-        response = await axios.put(`/likeables/${this.session_user.id}`, {
-          likeable_type: 'posts',
-          likeable_id: this.post.id,
-        })
-        this.isLikedByMe = true
-      }
-      this.likeCount = response.data.like_count
-    },
-
-    addComment(comment) {
-      this.comments = [ ...this.comments, comment ]
-      this.post.comments_count = this.post.comments_count + 1
-    },
-
-    updateCommentsCount(value, index) {
-      this.comments = this.comments.splice(index, 1, value)
-    },
-
-    toggleComments() {
-      const isCurrentlyVisible = !!this.renderComments
-      if (isCurrentlyVisible) {
-        this.renderComments = false // toggle -> hide
-      } else {
-        if ( this.comments ) {
-          this.renderComments = true // Some stored comments, show comments while loading
-        }
-        this.loadComments()
-      }
-    },
-
-    loadComments() {
-      if (!this.loadingComments) {
-        this.loadingComments = true
-        this.axios.get( this.$apiRoute('posts.indexComments', this.post))
-          .then(response => {
-            this.comments = response.data.comments
-            this.renderComments = true // toggle -> show
-            this.loadingComments = false
-          })
-      }
-    },
 
     share() {},
 
@@ -282,16 +136,8 @@ export default {
   },
 
   watch: {
-    comments(value, oldValue) {
-      if (typeof value === 'undefined' ) {
-        this.comments = []
-        return
-      }
-      if (value.length > 0 && value.length !== oldValue.length) {
-        this.post.comments_count = value.length
-      }
-    }
-  }
+  },
+
 }
 </script>
 
