@@ -134,14 +134,14 @@
     data: () => ({
       userSearchText: undefined,
       userSearchVisible: false,
-      optionValue: 'unread_first',
+      optionValue: 'recent',
       selectedUser: undefined,
       users: [],
       loading: true,
       moment: moment,
     }),
     mounted() {
-      this.axios.get('/chat-messages/contacts').then((response) => {
+      this.axios.get(`/chat-messages/contacts?sort=${this.optionValue}`).then((response) => {
         this.users = response.data;
         this.loading = false;
       })
@@ -172,17 +172,21 @@
       },
       onUserSearch: function(value) {
         this.userSearchText = value;
+        this.loading = true;
         this.axios.get(`/chat-messages/contacts?name=${value}&sort=${this.optionValue}`)
           .then((res) => {
             this.users = res.data;
+            this.loading = false;
           })
       },
       onOptionChanged: function (value) {
         this.optionValue = value;
+        this.loading = true;
         const filterQuery =  this.userSearchText ? 'name=' + this.userSearchText : '';
         this.axios.get(`/chat-messages/contacts?${filterQuery}&sort=${value}`)
           .then((res) => {
             this.users = res.data;
+            this.loading = false;
           })
       },
       getLogoFromName: function (username) {

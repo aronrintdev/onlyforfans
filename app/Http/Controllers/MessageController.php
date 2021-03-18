@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use App\Models\Message;
 use App\Models\Timeline;
 use App\Models\User;
+use function _\sortBy;
+use function _\filter;
 
 class MessageController extends Controller
 {
@@ -25,7 +27,7 @@ class MessageController extends Controller
         $receivers = Message::where('user_id', $sessionUser->id)->pluck('receiver_id')->toArray();
 
         $timeline = Timeline::where('user_id', $sessionUser->id)->first();
-        $followingUserIDs = $timeline->user->followedtimelines->pluck('id');
+        $followingUserIDs = $timeline->user->followedtimelinesa->pluck('id');
         $users = Timeline::with(['user', 'avatar'])->whereIn('id', $followingUserIDs)->whereNotIn('user_id', $receivers)->get()->makeVisible(['user']);
         $users->each(function ($user) {
             $user->username = $user->user->username;
@@ -46,49 +48,6 @@ class MessageController extends Controller
     }
     public function fetchContacts(Request $request)
     {
-        $sortBy = $request->query('sort');
-        $receiversQuery = Message::with('receiver')
-            ->whereHas('receiver', function($query) use(&$request) {
-                $sessionUser = $request->user();
-                $searchText = $request->query('name');
-
-                $query->where('user_id', $sessionUser->id)
-                    ->where('username', 'like', '%' . $searchText . '%');
-            })
-            ->orWhere(function($query) use(&$request) {
-                $sessionUser = $request->user();
-                $searchText = $request->query('name');
-
-                $query->where('user_id', $sessionUser->id)
-                    ->where('receiver_name', 'like', '%' . $searchText . '%');
-            });
-        if ($sortBy === 'recent') {
-            $receivers = $receiversQuery->orderBy('created_at', 'DESC')
-                            ->pluck('receiver_id')
-                            ->toArray();
-        } else {
-            $receivers = $receiversQuery->orderBy('created_at', 'ASC')
-                            ->pluck('receiver_id')
-                            ->toArray();
-        }
-
-        $contacts = array();
-        foreach($receivers as $receiver) {
-            $lastMessage = Message::with(['receiver'])->where('receiver_id', $receiver)->latest()->first();
-            $user = Timeline::with(['user', 'avatar'])->where('user_id', $receiver)->first()->makeVisible(['user']);
-            $user->username = $user->user->username;
-            $user->id = $user->user->id;
-            array_push($contacts, [
-                'last_message' => $lastMessage,
-                'profile' => $user
-            ]);
-        }
-        return $contacts;
-    }
-    public function searchContacts(Request $request)
-    {
-        
-
         $receivers = Message::with('receiver')
             ->whereHas('receiver', function($query) use(&$request) {
                 $sessionUser = $request->user();
@@ -109,7 +68,7 @@ class MessageController extends Controller
 
         $contacts = array();
         foreach($receivers as $receiver) {
-            $lastMessage = Message::with(['receiver'])->where('receiver_id', $receiver)->latest()->first();
+            $lastMessage = Message::with(['receiver'])->where('receiver_id', $receiver)->orWhere('user_id', $receiver)->latest()->first();
             $user = Timeline::with(['user', 'avatar'])->where('user_id', $receiver)->first()->makeVisible(['user']);
             $user->username = $user->user->username;
             $user->id = $user->user->id;
@@ -117,6 +76,25 @@ class MessageController extends Controller
                 'last_message' => $lastMessage,
                 'profile' => $user
             ]);
+        }
+
+        // SortBy
+        $sortBy = $request->query('sort');
+
+        if ($sortBy == 'recent') {
+            $contacts = sortBy($contacts, [function($o) { return $o['last_message']['created_at']; }]);
+            $contacts = array_reverse($contacts);   
+        } else if ($sortBy == 'unread_first') {
+            $arr1 = filter($contacts, function($o) { return $o['last_message']['is_unread']; });
+            $arr1 = array_reverse($arr1);
+            $arr2 = filter($contacts, function($o) { return !$o['last_message']['is_unread']; });
+            $arr2 = array_reverse($arr2);
+            $contacts = array_merge($arr1, $arr2);
+        } else if ($sortBy == 'oldest_unread_first') {
+            $arr1 = filter($contacts, function($o) { return $o['last_message']['is_unread']; });
+            $arr2 = filter($contacts, function($o) { return !$o['last_message']['is_unread']; });
+            $arr2 = array_reverse($arr2);
+            $contacts = array_merge($arr1, $arr2);
         }
         return $contacts;
     }
