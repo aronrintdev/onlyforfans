@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Message;
 use App\Models\Timeline;
 use App\Models\User;
+use App\Events\MessageSentEvent;
 use function _\sortBy;
 use function _\filter;
 use function _\uniq;
@@ -139,19 +140,18 @@ class MessageController extends Controller
     }
     public function store(Request $request)
     {
-        $user = $request->user();
+        $sessionUser = $request->user();
 
-        $message = $user->messages()->create([
+        $message = $sessionUser->messages()->create([
             'message' => $request->input('message'),
             'receiver_id' => $request->input('user_id'),
             'receiver_name' => $request->input('name'),
         ]);
 
-        // broadcast(new MessageSentEvent($message, $user))->toOthers();
+        broadcast(new MessageSentEvent(Message::with(['receiver'])->where('id', $message->id)->first(), $sessionUser))->toOthers();
 
         return [
-            'message' => $message,
-            'user' => $user,
+            'message' => Message::with(['receiver'])->where('id', $message->id)->first(),
         ];
     }
     public function clearUser(Request $request, $id)

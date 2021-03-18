@@ -1,5 +1,9 @@
-.conversation-list {
-  .messages {
-    flex: 1;
+.message-col-8 {
+  height: 100%;
+  .conversation-list {
+    .messages {
+      flex: 1;
+      padding-top: 1em;
+    }
   }
 }

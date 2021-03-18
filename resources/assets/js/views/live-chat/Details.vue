@@ -282,7 +282,8 @@
       messageSearchVisible: false,
       newMessageText: undefined,
       hasNewMessage: false,
-      currentUser: undefined
+      currentUser: undefined,
+      originMessages: [],
     }),
     mounted() {
       this.axios.get('/chat-messages/contacts').then((response) => {
@@ -290,13 +291,27 @@
         this.loading = false;
       });
       this.getMessages();
+      const self = this;
+      Echo.private(`${this.$route.params.id}-message`)
+        .listen('MessageSentEvent', (e) => {
+            self.originMessages.push(e.message);
+            self.groupMessages();
+        });
     },
     watch: {
-      '$route.params.id': function () {
+      '$route.params.id': function (id) {
         this.selectedUser = undefined;
         this.messages = [];
         this.newMessageText = undefined;
         this.getMessages();
+        Echo.private(`${id}-message`)
+        .listen('MessageSentEvent', (e) => {
+          console.log('------ e new message', e);
+            // this.messages.push({
+            //     message: e.message.message,
+            //     user: e.user
+            // });
+        });
       }
     },
     computed: {
@@ -324,17 +339,24 @@
         this.axios.get(`/chat-messages/${user_id}`).then((response) => {
           this.selectedUser = response.data;
           this.currentUser = response.data.currentUser;
-          const messages = response.data.messages.map((message) => {
-            // message.date = moment(message.created_at).format('MMM DD, YYYY');
-            message.date = moment(message.created_at).startOf('day').unix();
-            return message;
-          });
-          this.messages = _.chain(messages)
-            .groupBy('date')
-            .map((value, key) => ({ date: key, messages: value }))
-            .value();
-          _.orderBy(this.messages, ['date'], ['DESC']);
+          this.originMessages = response.data.messages;
+          this.groupMessages();
         })
+      },
+      groupMessages: function() {
+        const messages = this.originMessages.map((message) => {
+          message.date = moment(message.created_at).startOf('day').unix();
+          return message;
+        });
+        this.messages = _.chain(messages)
+          .groupBy('date')
+          .map((value, key) => ({ date: key, messages: value }))
+          .value();
+        _.orderBy(this.messages, ['date'], ['DESC']);
+        setTimeout(() => {
+          const container = this.$el.querySelector(".conversation-list .message-group:last-child");
+          container.scrollIntoView({ block: 'end', behavior: 'auto' });
+        }, 500);
       },
       changeSearchbarVisible: function () {
         this.userSearchVisible = !this.userSearchVisible;
@@ -382,7 +404,6 @@
         this.selectedUser.muted = !this.selectedUser.muted;
       },
       searchMessage: function () {
-        console.log('------ search');
         this.selectedUser.showSearch = true;
       },
       changeMessageSearchVisible: function () {
@@ -395,9 +416,16 @@
         }
       },
       sendMessage: function() {
-        this.axios.post('/chat-messages', { message: this.newMessageText, user_id: this.selectedUser.profile.id, name: this.selectedUser.profile.name })
-          .then((res) => {
-            console.log('----- res:', res);
+        const self = this;
+        this.axios.post('/chat-messages', {
+          message: this.newMessageText,
+          user_id: this.selectedUser.profile.id,
+          name: this.selectedUser.profile.name
+        })
+          .then((response) => {
+            this.originMessages.push(response.data.message)
+            self.groupMessages();
+            self.newMessageText = undefined;
           });
       }
     }
