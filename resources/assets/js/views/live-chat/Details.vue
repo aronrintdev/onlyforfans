@@ -23,16 +23,18 @@
                       <button class="btn" type="button" @click="changeSearchbarVisible">
                         <i class="fa fa-search" aria-hidden="true"></i>
                       </button>
-                      <button class="btn" type="button">
-                        <i class="fa fa-plus" aria-hidden="true"></i>
-                      </button>
+                      <router-link to="/messages/new">
+                        <button class="btn" type="button">
+                          <i class="fa fa-plus" aria-hidden="true"></i>
+                        </button>
+                      </router-link>
                     </div>
                   </div>
                   <div class="top-bar user-search-bar" v-if="userSearchVisible">
                     <button class="btn" type="button" @click="changeSearchbarVisible">
                       <i class="fa fa-times" aria-hidden="true"></i>
                     </button>
-                    <b-form-input v-model="userSearchText" placeholder="Search"></b-form-input>
+                    <b-form-input :value="userSearchText" @input="onUserSearch" placeholder="Search"></b-form-input>
                     <button class="btn" type="button" :disabled="!userSearchText">
                       <i class="fa fa-search" aria-hidden="true"></i>
                     </button>
@@ -68,59 +70,56 @@
                       <b-dropdown-item>Select</b-dropdown-item>
                     </b-dropdown>
                   </div>
+                  <div class="text-center" v-if="loading">
+                    <b-spinner variant="secondary" label="Loading..." size="small"></b-spinner>
+                  </div>
                   <div class="no-users" v-if="!users.length">Nothing was found</div>
                   <ul class="user-list" v-if="users.length">
-                    <li v-for="user in users" :key="user.id"
-                      :class="selectedUser && selectedUser.id === user.id ? 'selected' : ''"
-                      @click="onSelectUser(user)">
-                      <div class="user-content">
-                        <div class="user-logo text-logo" v-if="!user.logo">
-                          {{ getLogoFromName(user.name) }}
-                        </div>
-                        <div class="user-logo" v-if="user.logo">
-                          <img :src="user.logo" alt="" />
-                        </div>
-                        <div class="user-details">
-                          <div class="user-details-row">
-                            <div>
-                              <span class="username">{{ user.name }}</span>
-                              <span class="user-id">{{ `@${user.userId}` }}</span>
+                    <li v-for="user in users" :key="user.profile.id"
+                      :class="selectedUser && selectedUser.profile.id === user.profile.id ? 'selected' : ''"
+                    >
+                      <router-link :to="`/messages/${user.profile.id}`">
+                        <div class="user-content">
+                          <div class="user-logo text-logo" v-if="!user.profile.avatar">
+                            {{ getLogoFromName(user.profile.name) }}
+                          </div>
+                          <div class="user-logo" v-if="user.profile.avatar">
+                            <img :src="user.profile.avatar.filepath" alt="" />
+                          </div>
+                          <div class="user-details">
+                            <div class="user-details-row">
+                              <div>
+                                <span class="username">{{ user.profile.name }}</span>
+                                <span class="user-id">{{ `@${user.profile.username}` }}</span>
+                              </div>
+                              <!-- Close Button -->
+                              <button class="close-btn btn" type="button" @click="clearMessages(user.profile)">
+                                <i class="fa fa-times" aria-hidden="true"></i>
+                              </button>
                             </div>
-                            <!-- Close Button -->
-                            <button class="close-btn btn" type="button">
-                              <i class="fa fa-times" aria-hidden="true"></i>
-                            </button>
-                          </div>
-                          <div class="user-details-row">
-                            <span class="last-message">{{ user.lastMessage }}</span>
-                            <!-- Date  -->
-                            <span class="last-message-date">{{ user.lastDate }}</span>
+                            <div class="user-details-row">
+                              <span class="last-message">{{ user.last_message.message }}</span>
+                              <!-- Date  -->
+                              <span class="last-message-date">{{ moment(user.last_message.created_at).format('MMM DD, YYYY') }}</span>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                      <div class="divider"></div>
+                        <div class="divider"></div>
+                      </router-link>
                     </li>
                   </ul>
                 </div>
-                <div v-if="!selectedUser" class="col-md-8 col-sm-8 col-xs-8 message-col-8">
-                  <div class="coversation-tree">
-                    <div class="conversations-start">
-                      <div class="conversations-start__title">Select any Conversation or send a New Message</div>
-                      <button>New Message</button>
-                    </div>
-                  </div>
-                </div>
-                <div v-if="selectedUser" class="col-md-8 col-sm-8 col-xs-8 message-col-8">
+                 <div v-if="selectedUser" class="col-md-8 col-sm-8 col-xs-8 message-col-8">
                   <div :class="messageSearchVisible ? 'conversation-header no-border' : 'conversation-header'">
                     <button class="back-btn btn" type="button" @click="clearSelectedUser">
                       <i class="fa fa-arrow-left" aria-hidden="true"></i>
                     </button>
                     <div class="content">
                       <div class="user-name">
-                        <span>{{ selectedUser.name }}</span>
+                        <span>{{ selectedUser.profile.name }}</span>
                       </div>
                       <div class="details" v-if="!messageSearchVisible">
-                        <div class="online-status" v-if="!selectedUser.isOnline">Last seen {{ selectedUser.lastOnline }}
+                        <div class="online-status" v-if="!selectedUser.isOnline">Last seen {{ moment(selectedUser.messages[0].created_at).format('MMM DD, YYYY') }}
                         </div>
                         <div class="online-status" v-if="selectedUser.isOnline">
                           <i class="fa fa-circle" aria-hidden="true"></i>Available now
@@ -162,9 +161,9 @@
                       <b-dropdown-item>Hide chat</b-dropdown-item>
                       <b-dropdown-item>Mute notifications</b-dropdown-item>
                       <b-dropdown-divider></b-dropdown-divider>
-                      <b-dropdown-item>Restrict @{{ selectedUser.userId }}</b-dropdown-item>
-                      <b-dropdown-item>Block @{{ selectedUser.userId }}</b-dropdown-item>
-                      <b-dropdown-item>Report @{{ selectedUser.userId }}</b-dropdown-item>
+                      <b-dropdown-item>Restrict @{{ selectedUser.profile.username }}</b-dropdown-item>
+                      <b-dropdown-item>Block @{{ selectedUser.profile.username }}</b-dropdown-item>
+                      <b-dropdown-item>Report @{{ selectedUser.profile.username }}</b-dropdown-item>
                     </b-dropdown>
                   </div>
                   <div class="details message-search" v-if="messageSearchVisible">
@@ -184,24 +183,24 @@
                     </div>
                     <div class="messages" v-if="messages.length > 0">
                       <div class="message-group" :key="messageGroup.date"  v-for="messageGroup in messages">
-                        <div class="message-group-time"><span>{{ messageGroup.date }}</span></div>
+                        <div class="message-group-time"><span>{{ moment.unix(messageGroup.date).format('MMM DD, YYYY') }}</span></div>
                         <template v-for="message in messageGroup.messages">
                           <div class="message" :key="message.id">
-                            <div class="received" v-if="selectedUser && selectedUser.id === message.user.id">
-                              <div class="user-logo text-logo" v-if="selectedUser && !selectedUser.logo">
+                            <div class="received" v-if="currentUser && currentUser.id !== message.user_id">
+                              <div class="user-logo text-logo" v-if="selectedUser && !selectedUser.profile.avatar">
                                 {{ getLogoFromName(selectedUser.name) }}
                               </div>
-                              <div class="user-logo" v-if="selectedUser && selectedUser.logo">
-                                <img :src="selectedUser.logo" alt="" />
+                              <div class="user-logo" v-if="selectedUser && selectedUser.profile.avatar">
+                                <img :src="selectedUser.profile.avatar.filepath" alt="" />
                               </div>
                               <div class="content">
-                                <div class="text">{{ message.text }}</div>
-                                <div class="time">{{ message.time }}</div>
+                                <div class="text">{{ message.message }}</div>
+                                <div class="time">{{ moment(message.created_at).format('hh:mm A') }}</div>
                               </div>
                             </div>
-                            <div class="sent" v-if="selectedUser && selectedUser.id !== message.user.id">
-                              <div class="text">{{ message.text }}</div>
-                              <div class="time">{{ message.time }}</div>
+                            <div class="sent" v-if="currentUser && currentUser.id === message.user_id">
+                              <div class="text">{{ message.message }}</div>
+                              <div class="time">{{ moment(message.created_at).format('hh:mm A') }}</div>
                             </div>
                           </div>
                         </template>
@@ -210,7 +209,7 @@
                   </div>
                   <div class="conversation-footer">
                     <textarea placeholder="Type a message" name="text" rows="1" maxlength="10000"
-                      spellcheck="false"></textarea>
+                      spellcheck="false" :value="newMessageText" @input="onInputNewMessage"></textarea>
                     <div class="action-btns">
                       <div>
                         <!-- image -->
@@ -249,7 +248,7 @@
                           </svg>
                         </button>
                       </div>
-                      <button class="send-btn btn" disabled type="button">
+                      <button class="send-btn btn" :disabled="!hasNewMessage" type="button" @click="sendMessage">
                         Send
                       </button>
                     </div>
@@ -266,6 +265,7 @@
 
 <script>
   import moment from 'moment';
+  import _ from 'lodash';
   /**
    * Messages Dashboard View
    */
@@ -276,101 +276,28 @@
       userSearchVisible: false,
       optionValue: 'unread_first',
       selectedUser: undefined,
-      users: [{
-          id: 1,
-          name: 'Nat',
-          logo: 'https://i.picsum.photos/id/565/200/200.jpg?hmac=QvKo8qgzFFNcZoXCpT0CNMDTwWd3ynwqLXxrzK2o8fw',
-          userId: 'natcomedy',
-          lastMessage: 'Sure wish there was more content here.',
-          lastDate: 'Oct 13, 2020',
-          isOnline: false,
-          lastOnline: 'Feb 16',
-        },
-        {
-          id: 2,
-          name: 'Lisa S.',
-          logo: undefined,
-          userId: 'u117945325',
-          lastMessage: 'Sure wish there was more content here.',
-          lastDate: 'Feb 16',
-          isOnline: false,
-          lastOnline: 'Feb 17',
-        },
-        {
-          id: 3,
-          name: 'MCMXI',
-          logo: undefined,
-          userId: 'mcmxi',
-          lastMessage: 'Any vids for sale ? 😳🙈',
-          lastDate: 'Nov 20, 2020',
-          muted: true,
-          isOnline: true,
-        },
-        {
-          id: 4,
-          name: 'Bjørn erik Bjørkhaug',
-          logo: undefined,
-          userId: 'u42082420',
-          lastMessage: 'I want to see the full video with more details explanation',
-          lastDate: 'June 19, 2020',
-          expired: true,
-          isOnline: true
-        },
-      ],
-      messages: [
-        {
-          date: moment('2021-2-13').format('MMM DD, YYYY'),
-          messages: [
-            {
-              id: 1,
-              text: 'Hello, how are you?',
-              time: '10:29 PM',
-              user: {
-                id: 2,
-                name: 'Lisa S.'
-              },
-            },
-            {
-              id: 2,
-              text: 'Hey, I am fine. And you?',
-              time: '10:39 PM',
-              user: {
-                id: 3,
-                name: 'MCMXI'
-              },
-            },
-          ]
-        },
-        {
-          date: moment('2021-2-16').format('MMM DD, YYYY'),
-          messages: [
-            {
-              id: 3,
-              time: '08:29 PM',
-              text: 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.',
-              user: {
-                id: 2,
-                name: 'Lisa S.'
-              },
-            },
-            {
-              id: 4,
-              text: 'Ok, thanks.',
-              time: '09:29 PM',
-              user: {
-                id: 3,
-                name: 'MCMXI'
-              },
-            }
-          ]
-        }
-      ],
-      messageSearchVisible: false
+      users: [],
+      loading: true,
+      moment: moment,
+      messageSearchVisible: false,
+      newMessageText: undefined,
+      hasNewMessage: false,
+      currentUser: undefined
     }),
     mounted() {
-      this.axios.get('/chat-messages').then((response) => {
-        console.log('-- response data', response);
-      })
+      this.axios.get('/chat-messages/contacts').then((response) => {
+        this.users = response.data;
+        this.loading = false;
+      });
+      this.getMessages();
+    },
+    watch: {
+      '$route.params.id': function () {
+        this.selectedUser = undefined;
+        this.messages = [];
+        this.newMessageText = undefined;
+        this.getMessages();
+      }
     },
     computed: {
       selectedOption: function () {
@@ -392,12 +319,41 @@
       },
     },
     methods: {
+      getMessages: function() {
+        const user_id = this.$route.params.id;
+        this.axios.get(`/chat-messages/${user_id}`).then((response) => {
+          this.selectedUser = response.data;
+          this.currentUser = response.data.currentUser;
+          const messages = response.data.messages.map((message) => {
+            // message.date = moment(message.created_at).format('MMM DD, YYYY');
+            message.date = moment(message.created_at).startOf('day').unix();
+            return message;
+          });
+          this.messages = _.chain(messages)
+            .groupBy('date')
+            .map((value, key) => ({ date: key, messages: value }))
+            .value();
+          _.orderBy(this.messages, ['date'], ['DESC']);
+        })
+      },
       changeSearchbarVisible: function () {
         this.userSearchVisible = !this.userSearchVisible;
         this.userSearchText = undefined;
       },
+      onUserSearch: function(value) {
+        this.userSearchText = value;
+        this.axios.get(`/chat-messages/contacts?name=${value}&sort=${this.optionValue}`)
+          .then((res) => {
+            this.users = res.data;
+          })
+      },
       onOptionChanged: function (value) {
         this.optionValue = value;
+        const filterQuery =  this.userSearchText ? 'name=' + this.userSearchText : '';
+        this.axios.get(`/chat-messages/contacts?${filterQuery}&sort=${value}`)
+          .then((res) => {
+            this.users = res.data;
+          })
       },
       getLogoFromName: function (username) {
         const names = username.split(' ');
@@ -406,11 +362,18 @@
         }
         return names[0].slice(0, 1) + names[1].slice(0, 1);
       },
-      onSelectUser: function (user) {
-        this.selectedUser = user;
+      clearMessages: function (receiver) {
+        this.axios.delete(`/chat-messages/${receiver.id}`)
+          .then((res) => {
+            const { data } = res;
+            if (data.status === 200) {
+              const idx = this.users.findIndex(user => user.profile.id === receiver.id);
+              this.users.splice(idx, 1);
+            }
+          })
       },
       clearSelectedUser: function () {
-        this.selectedUser = undefined;
+        this.$router.push('/messages');
       },
       addToFavourites: function () {
         this.selectedUser.isFavourite = !this.selectedUser.isFavourite;
@@ -424,11 +387,24 @@
       },
       changeMessageSearchVisible: function () {
         this.messageSearchVisible = !this.messageSearchVisible;
+      },
+      onInputNewMessage: function(e) {
+        this.newMessageText = e.target.value;
+        if (this.newMessageText) {
+          this.hasNewMessage = true;
+        }
+      },
+      sendMessage: function() {
+        this.axios.post('/chat-messages', { message: this.newMessageText, user_id: this.selectedUser.profile.id, name: this.selectedUser.profile.name })
+          .then((res) => {
+            console.log('----- res:', res);
+          });
       }
     }
   }
 </script>
 
 <style lang="scss" scoped>
-  @import "../../../sass/views/live-chat.scss";
+  @import "../../../sass/views/live-chat/home.scss";
+  @import "../../../sass/views/live-chat/details.scss";
 </style>

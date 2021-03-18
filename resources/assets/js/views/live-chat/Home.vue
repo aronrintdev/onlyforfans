@@ -77,33 +77,35 @@
                   <ul class="user-list" v-if="users.length">
                     <li v-for="user in users" :key="user.profile.id"
                       :class="selectedUser && selectedUser.profile.id === user.profile.id ? 'selected' : ''"
-                      @click="onSelectUser(user)">
-                      <div class="user-content">
-                        <div class="user-logo text-logo" v-if="!user.profile.avatar">
-                          {{ getLogoFromName(user.profile.name) }}
-                        </div>
-                        <div class="user-logo" v-if="user.profile.avatar">
-                          <img :src="user.profile.avatar.filepath" alt="" />
-                        </div>
-                        <div class="user-details">
-                          <div class="user-details-row">
-                            <div>
-                              <span class="username">{{ user.profile.name }}</span>
-                              <span class="user-id">{{ `@${user.profile.username}` }}</span>
+                    >
+                      <router-link :to="`/messages/${user.profile.id}`">
+                        <div class="user-content">
+                          <div class="user-logo text-logo" v-if="!user.profile.avatar">
+                            {{ getLogoFromName(user.profile.name) }}
+                          </div>
+                          <div class="user-logo" v-if="user.profile.avatar">
+                            <img :src="user.profile.avatar.filepath" alt="" />
+                          </div>
+                          <div class="user-details">
+                            <div class="user-details-row">
+                              <div>
+                                <span class="username">{{ user.profile.name }}</span>
+                                <span class="user-id">{{ `@${user.profile.username}` }}</span>
+                              </div>
+                              <!-- Close Button -->
+                              <button class="close-btn btn" type="button" @click="clearMessages(user.profile)">
+                                <i class="fa fa-times" aria-hidden="true"></i>
+                              </button>
                             </div>
-                            <!-- Close Button -->
-                            <button class="close-btn btn" type="button" @click="clearMessages(user.profile)">
-                              <i class="fa fa-times" aria-hidden="true"></i>
-                            </button>
-                          </div>
-                          <div class="user-details-row">
-                            <span class="last-message">{{ user.last_message.message }}</span>
-                            <!-- Date  -->
-                            <span class="last-message-date">{{ moment(user.last_message.created_at).format('MMM DD, YYYY') }}</span>
+                            <div class="user-details-row">
+                              <span class="last-message">{{ user.last_message.message }}</span>
+                              <!-- Date  -->
+                              <span class="last-message-date">{{ moment(user.last_message.created_at).format('MMM DD, YYYY') }}</span>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                      <div class="divider"></div>
+                        <div class="divider"></div>
+                      </router-link>
                     </li>
                   </ul>
                 </div>
@@ -134,14 +136,14 @@
     data: () => ({
       userSearchText: undefined,
       userSearchVisible: false,
-      optionValue: 'recent',
+      optionValue: 'unread_first',
       selectedUser: undefined,
       users: [],
       loading: true,
       moment: moment,
     }),
     mounted() {
-      this.axios.get(`/chat-messages/contacts?sort=${this.optionValue}`).then((response) => {
+      this.axios.get('/chat-messages/contacts').then((response) => {
         this.users = response.data;
         this.loading = false;
       })
@@ -172,21 +174,17 @@
       },
       onUserSearch: function(value) {
         this.userSearchText = value;
-        this.loading = true;
         this.axios.get(`/chat-messages/contacts?name=${value}&sort=${this.optionValue}`)
           .then((res) => {
             this.users = res.data;
-            this.loading = false;
           })
       },
       onOptionChanged: function (value) {
         this.optionValue = value;
-        this.loading = true;
         const filterQuery =  this.userSearchText ? 'name=' + this.userSearchText : '';
         this.axios.get(`/chat-messages/contacts?${filterQuery}&sort=${value}`)
           .then((res) => {
             this.users = res.data;
-            this.loading = false;
           })
       },
       getLogoFromName: function (username) {
@@ -195,9 +193,6 @@
           return username.slice(0, 2);
         }
         return names[0].slice(0, 1) + names[1].slice(0, 1);
-      },
-      onSelectUser: function (user) {
-        this.selectedUser = user;
       },
       clearMessages: function (receiver) {
         this.axios.delete(`/chat-messages/${receiver.id}`)

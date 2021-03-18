@@ -192,6 +192,7 @@ Route::group(['middleware' => ['auth']], function () {
 //  -- messages --
 Route::get('/chat-messages/users', ['as'=>'messages.fetchusers', 'uses' => 'MessageController@fetchUsers']);
 Route::get('/chat-messages/contacts', ['as'=>'messages.fetchcontacts', 'uses' => 'MessageController@fetchContacts']);
+Route::get('/chat-messages/{id}', ['as'=>'messages.fetchcontact', 'uses' => 'MessageController@fetchcontact']);
 Route::delete('/chat-messages/{id}', ['as'=>'messages.clearcontact', 'uses' => 'MessageController@clearUser']);
 
 Route::resource('chat-messages', 'MessageController')->only([

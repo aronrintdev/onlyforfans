@@ -8,6 +8,7 @@ use App\Models\Timeline;
 use App\Models\User;
 use function _\sortBy;
 use function _\filter;
+use function _\uniq;
 
 class MessageController extends Controller
 {
@@ -24,10 +25,10 @@ class MessageController extends Controller
     {
         $sessionUser = $request->user();
         // Get contacts 
-        $receivers = Message::where('user_id', $sessionUser->id)->pluck('receiver_id')->toArray();
+        $receivers = Message::where('user_id', $sessionUser->id)->orWhere('receiver_id', $sessionUser->id)->pluck('receiver_id')->toArray();
 
         $timeline = Timeline::where('user_id', $sessionUser->id)->first();
-        $followingUserIDs = $timeline->user->followedtimelinesa->pluck('id');
+        $followingUserIDs = $timeline->user->followedtimelines->pluck('id');
         $users = Timeline::with(['user', 'avatar'])->whereIn('id', $followingUserIDs)->whereNotIn('user_id', $receivers)->get()->makeVisible(['user']);
         $users->each(function ($user) {
             $user->username = $user->user->username;
@@ -37,7 +38,7 @@ class MessageController extends Controller
         $followers = $timeline->followers->whereNotIn('id', $receivers)->all();  
         $arr = [];
         foreach ($followers as $follower) {
-            array_push($arr, $follower);
+            array_push($arr, $follower);    
         } 
      
 
@@ -54,21 +55,36 @@ class MessageController extends Controller
                 $searchText = $request->query('name');
 
                 $query->where('user_id', $sessionUser->id)
-                    ->where('username', 'like', '%' . $searchText . '%');
-            })
-            ->orWhere(function($query) use(&$request) {
-                $sessionUser = $request->user();
-                $searchText = $request->query('name');
-
-                $query->where('user_id', $sessionUser->id)
                     ->where('receiver_name', 'like', '%' . $searchText . '%');
             })
             ->pluck('receiver_id')
             ->toArray();
+        // Senders
+        $senders = Message::with('receiver')
+            ->whereHas('receiver', function($query) use(&$request) {
+                $sessionUser = $request->user();
+                $searchText = $request->query('name');
 
+                $query->where('receiver_id', $sessionUser->id);
+                    // ->where('username', 'like', '%' . $searchText . '%');
+            })
+            ->pluck('user_id')
+            ->toArray();
+        $receivers = uniq(array_merge($receivers, $senders));
         $contacts = array();
         foreach($receivers as $receiver) {
-            $lastMessage = Message::with(['receiver'])->where('receiver_id', $receiver)->orWhere('user_id', $receiver)->latest()->first();
+            $lastMessage = Message::with(['receiver'])
+                ->where(function($query) use(&$request, &$receiver) {
+                    $sessionUser = $request->user();
+                    $query->where('user_id', $sessionUser->id)
+                        ->where('receiver_id', $receiver);
+                })
+                ->orWhere(function($query) use(&$request, &$receiver) {
+                    $sessionUser = $request->user();
+                    $query->where('user_id', $receiver)
+                        ->where('receiver_id', $sessionUser->id);
+                })
+                ->latest()->first();
             $user = Timeline::with(['user', 'avatar'])->where('user_id', $receiver)->first()->makeVisible(['user']);
             $user->username = $user->user->username;
             $user->id = $user->user->id;
@@ -97,6 +113,29 @@ class MessageController extends Controller
             $contacts = array_merge($arr1, $arr2);
         }
         return $contacts;
+    }
+    public function fetchcontact(Request $request, $id) {
+        $messages = Message::with(['receiver'])
+            ->where(function($query) use(&$request, &$id) {
+                $sessionUser = $request->user();
+                $query->where('user_id', $sessionUser->id)
+                    ->where('receiver_id',  $id);
+            })
+            ->orWhere(function($query) use(&$request, &$id) {
+                $sessionUser = $request->user();
+                $query->where('receiver_id', $sessionUser->id)
+                    ->where('user_id',  $id);
+            })
+            ->orderBy('created_at', 'ASC')
+            ->get();
+        $user = Timeline::with(['user', 'avatar'])->where('user_id', $id)->first()->makeVisible(['user']);
+        $user->username = $user->user->username;
+        $user->id = $user->user->id;
+        return [
+            'messages' => $messages,
+            'profile' => $user,
+            'currentUser' => $request->user()
+        ];
     }
     public function store(Request $request)
     {
