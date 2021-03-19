@@ -20,6 +20,7 @@ class RestCommentsTest extends TestCase
     /**
      *  @group comments
      *  @group regression
+     *  @group here03
      */
     // should return only comments for which session user is the author
     // %TODO: filters, timelines (see comments I have valid access to), etc
@@ -218,7 +219,7 @@ class RestCommentsTest extends TestCase
      *  @group comments
      *  @group regression
      */
-    public function test_nonfollower_can_list_timeline_comments()
+    public function test_nonfollower_can_not_list_timeline_comments()
     {
         $timeline = Timeline::has('followers', '>=', 1)
             ->whereHas('posts', function($q1) {
