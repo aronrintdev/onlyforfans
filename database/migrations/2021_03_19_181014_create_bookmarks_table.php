@@ -4,11 +4,11 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateBookmarkablesTable extends Migration
+class CreateBookmarksTable extends Migration
 {
     public function up()
     {
-        Schema::create('bookmarkables', function (Blueprint $table) {
+        Schema::create('bookmarks', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('user_id')->nullable()->comment('User that is bookmarking the resource');
             $table->nullableUuidMorphs('bookmarkable');
@@ -21,6 +21,6 @@ class CreateBookmarkablesTable extends Migration
 
     public function down()
     {
-        Schema::dropIfExists('bookmarkables');
+        Schema::dropIfExists('bookmarks');
     }
 }
