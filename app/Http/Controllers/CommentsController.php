@@ -2,74 +2,64 @@
 namespace App\Http\Controllers;
 
 use DB;
-use Auth;
 use Exception;
 use Throwable;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
-use App\Comment;
-//use App\Post;
+use App\Http\Resources\CommentCollection;
+use App\Models\Comment;
+use App\Models\Post;
+use App\Models\User;
 
 class CommentsController extends AppBaseController
 {
     // %TODO: refactor with scopes
     public function index(Request $request)
     {
-        // %TODO: replace with $request->user()
-        $sessionUser = Auth::user();
-        //dd($request->all());
+        $request->validate([
+            'filters' => 'array',
+            'filters.post_id' => 'uuid|exists:posts,id', // if admin or post-owner only (per-post comments by fan use posts controller)
+            'filters.user_id' => 'uuid|exists:users,id', // if admin only
+            'filters.parent_id' => 'uuid|exists:comments,id',
+        ]);
 
-        // %TODO: convert to validator (?)
-        if ( !$sessionUser->isAdmin() && !$request->hasAny('post_id', 'user_id') ) { // must have user or post id
-            abort(403);
-        }
-        if ( !$sessionUser->isAdmin() && !$request->has('post_id') && $request->has('user_id') ) {
-            if ( $sessionUser->id != $request->user_id ) { // must have user_id equal to session user 
-                abort(403);
-            }
-        }
-        // must have post_id and post must be accessible %TODO
+        $filters = $request->filters ?? [];
 
+        // Init query
         $query = Comment::with('user', 'replies.user');
 
-        if ( $request->has('post_id') ) { // for specific post
-            $query->where('post_id', $request->post_id);
-            if ( !$request->has('include_replies') ) {
-                $query->whereNull('parent_id'); // only grab 1st level (%NOTE)
+        // Check permissions
+        if ( !$request->user()->isAdmin() ) {
+
+            // non-admin: only view own comments
+            $query->where('user_id', $request->user()->id); 
+            unset($filters['user_id']);
+
+            if ( array_key_exists('post_id', $filters) ) {
+                $post = Post::find($filters['post_id']);
+                $this->authorize('update', $post); // non-admin must own post filtered on
             }
         }
-        if ( $request->has('user_id') ) {
-            $query->where('user_id', $request->user_id);
-        }
 
-        /* %TODO: subgroup under 'filters' (need to update axios.GET calls as well in Vue)
-        // Apply filters
-        if ( $request->has('filters') ) {
-            if ( $request->has('post_id', 'filters.user_id') ) { // comment author by post
-                $query->where('user_id', $request->filters['user_id']);
+        // Apply any filters
+        foreach ($filters as $key => $f) {
+            // %TODO: subgroup under 'filters' (need to update axios.GET calls as well in Vue)
+            switch ($key) {
+                case 'user_id':
+                case 'post_id':
+                case 'parent_id':
+                    $query->where($key, $f);
+                    break;
             }
         }
-         */
 
-        return response()->json([
-            'comments' => $query->get(),
-        ]);
+        $data = $query->paginate( $request->input('take', env('MAX_COMMENTS_PER_REQUEST', 10)) );
+        return new CommentCollection($data);
     }
 
     public function show(Request $request, Comment $comment)
     {
-        $sessionUser = Auth::user();
-        //dd('here', $sessionUser->id);
-        if ( !$sessionUser->isAdmin() ) { // admin can view all comments
-            $isCommentOwner = ($sessionUser->id === $comment->user_id ); // can see own comments
-            $isPostOwner = ($sessionUser->id === $comment->post->user_id ); // can see comments on own post
-            $isFollowedTimeline = $sessionUser->followedtimelines->contains($comment->post->timeline_id); // can see comments on followed timeline's posts
-            //dd( 'co: '.($isCommentOwner?'T':'F'), 'po: '.($isPostOwner?'T':'F'), 'ft: '.($isFollowedTimeline?'T':'F') );
-            if ( !$isCommentOwner && !$isPostOwner && !$isFollowedTimeline ) {
-                //dd('abort', 'co: '.($isCommentOwner?'T':'F'), 'po: '.($isPostOwner?'T':'F'), 'ft: '.($isFollowedTimeline?'T':'F') );
-                abort(403);
-            }
-        }
+        $this->authorize('view', $comment);
         return response()->json([
             'comment' => $comment,
         ]);
@@ -78,18 +68,21 @@ class CommentsController extends AppBaseController
     public function store(Request $request)
     {
         $request->validate([
-            'post_id' => 'required|exists:posts,id',
-            'user_id' => 'required|exists:users,id',
-            //'parent_id' => 'exists:comments,id', // %TODO
-            'description' => 'required|string|min:1',
+            'post_id' => 'required|uuid|exists:posts,id',
+            'user_id' => 'required|uuid|exists:users,id',
+            'parent_id' => 'nullable|uuid|exists:comments,id',
+            'description' => 'required|string|min:3',
         ]);
-        $attrs = $request->all();
 
-        try {
-            $comment = Comment::create($attrs);
-        } catch (Exception $e) {
-            throw $e;
-        }
+        $post = Post::find($request->post_id);
+        $this->authorize('comment', $post);
+
+        $attrs = $request->except('post_id'); // timeline_id is now postable
+        $attrs['commentable_type'] = 'posts'; // %FIXME: hardcoded
+        $attrs['commentable_id'] = $post->id;
+
+        $comment = Comment::create($attrs);
+        $comment->prepFor();
 
         return response()->json([
             'comment' => $comment,
@@ -98,6 +91,7 @@ class CommentsController extends AppBaseController
 
     public function update(Request $request, Comment $comment)
     {
+        $this->authorize('update', $comment);
         $request->validate([
             'description' => 'required|string|min:1',
         ]);
@@ -112,8 +106,17 @@ class CommentsController extends AppBaseController
 
     public function destroy(Request $request, Comment $comment)
     {
+        $this->authorize('delete', $comment);
         $comment->delete();
         return response()->json([]);
+    }
+
+    /**
+     * Toggle user like on this comment
+     * TODO: Complete this functionality
+     */
+    public function toggleLike(Request $request, Comment $comment) {
+        return $comment;
     }
 
 }

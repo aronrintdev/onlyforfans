@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Setting;
+use App\Models\Setting;
 
 class SettingsTableSeeder extends Seeder
 {

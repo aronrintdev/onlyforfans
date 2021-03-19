@@ -4,14 +4,14 @@ namespace App\Http\Controllers;
 use DB;
 use Auth;
 use Exception;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
-use App\Mediafile;
-use App\Setting;
-use App\Story;
-use App\Timeline;
+use App\Http\Resources\StoryCollection;
+use App\Models\Mediafile;
+use App\Models\Setting;
+use App\Models\Story;
+use App\Models\Timeline;
 use App\Enums\MediafileTypeEnum;
 //use App\Enums\StoryTypeEnum; // generalize?
 
@@ -35,7 +35,7 @@ class StoriesController extends AppBaseController
                 }
                 if ( array_key_exists('timeline_id', $filters) ) {
                     $timeline = Timeline::findOrFail($request->filters['timeline_id']);
-                    if ( $request->user()->can('view', $timeline) ) { // should include followers & owner (!)
+                    if ( $request->user()->can('indexStories', $timeline) ) { // should include followers & owner (!)
                         break; // allowed
                     }
                 }
@@ -45,22 +45,20 @@ class StoriesController extends AppBaseController
 
         $query = Story::query()->with('mediafiles');
 
-        foreach ( $request->input('filters', []) as $k => $v ) {
+        foreach ( $filters as $k => $v ) {
             switch ($k) {
             case 'following':
                 $query->whereHas('timeline', function($q1) use(&$request) {
-                    $q1->whereIn('id', $request->user()->followedtimelines);
+                    $q1->whereIn('id', $request->user()->followedtimelines->pluck('id'));
                 });
                 break;
             default:
                 $query->where($k, $v);
             }
         }
-        $stories = $query->get();
 
-        return response()->json([
-            'stories' => $stories,
-        ]);
+        $data = $query->paginate( $request->input('take', env('MAX_STORIES_PER_REQUEST', 10)) );
+        return new StoryCollection($data);
     }
 
     public function store(Request $request)
@@ -70,12 +68,13 @@ class StoriesController extends AppBaseController
         $vrules = [
             'attrs' => 'required',
             'attrs.stype' => 'required|in:text,photo',
+            //'timeline_id' => 'required|uuid|exists:timelines',
         ];
         if ( $request->has('mediafile') ) {
             if ( $request->hasFile('mediafile') ) {
                 $vrules['mediafile'] = 'required_if:attrs.stype,photo|file';
             } else {
-                $vrules['mediafile'] = 'required_if:attrs.stype,photo|integer|exists:mediafiles,id'; // must be fk to [mediafiles]
+                $vrules['mediafile'] = 'required_if:attrs.stype,photo|uuid|exists:mediafiles,id'; // must be fk to [mediafiles]
             }
         }
         
@@ -84,7 +83,8 @@ class StoriesController extends AppBaseController
         // policy check is redundant as a story is always created on session user's
         //   timeline, however in the future we may be more flexible, or support
         //   multiple timelines which will require request->timeline_id
-        $timeline = Timeline::find($request->user()->timeline_id);
+        //$timeline = Timeline::find($request->user()->timeline_id);
+        $timeline = $request->user()->timeline;
         $this->authorize('update', $timeline);
 
         try {
@@ -128,7 +128,7 @@ class StoriesController extends AppBaseController
             abort(400);
         }
 
-        return response()->json([ 
+        return response()->json([
             'story' => $story,
         ], 201);
     }
@@ -194,16 +194,14 @@ class StoriesController extends AppBaseController
             }
             return $a;
         });
-        return view('stories.create', [
-            'session_user' => $request->user(),
-            'timeline' => $request->user()->timeline,
+        return [
             'stories' => $storiesA,
             'dtoUser' => [
                 'avatar' => $request->user()->avatar,
                 'fullname' => $request->user()->timeline->name,
                 'username' => $request->user()->timeline->username,
             ],
-        ]);
+        ];
     }
 
 }

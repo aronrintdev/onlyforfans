@@ -4,8 +4,8 @@ namespace App\Providers;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use App\Interfaces\Likeable;
-use App\Timeline;
-use App\Vaultfolder;
+use App\Models\Timeline;
+use App\Models\Vaultfolder;
 
 class AuthServiceProvider extends ServiceProvider
 {

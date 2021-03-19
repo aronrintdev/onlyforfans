@@ -1,8 +1,9 @@
 <?php
 namespace Database\Seeders;
 
-use Symfony\Component\Console\Output\ConsoleOutput;
+use Faker\Factory;
 use Illuminate\Support\Facades\Config;
+use Symfony\Component\Console\Output\ConsoleOutput;
 
 trait SeederTraits {
 
@@ -11,7 +12,7 @@ trait SeederTraits {
 
     private function initSeederTraits($name) {
         $this->output = new ConsoleOutput();
-        $this->faker = \Faker\Factory::create();
+        $this->faker = Factory::create();
         $this->appEnv = Config::get('app.env');
 
         if ( $this->appEnv !== 'testing' ) {

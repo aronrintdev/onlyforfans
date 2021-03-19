@@ -1,10 +1,11 @@
 <?php
 namespace App\Policies;
 
+
 use Illuminate\Database\Eloquent\Relations\Relation;
-use App\User;
-use App\Mediafile;
-use App\Vaultfolder;
+use App\Models\User;
+use App\Models\Mediafile;
+use App\Models\Vaultfolder;
 use App\Policies\Traits\OwnablePolicies;
 
 // %FIXME: correct name is Mediafile (only M is upper)

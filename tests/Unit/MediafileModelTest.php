@@ -1,14 +1,16 @@
 <?php
 namespace Tests\Unit;
 
+use DB;
 use Tests\TestCase;
+use App\Models\User;
+use App\Models\Story;
+use Ramsey\Uuid\Uuid;
+use App\Models\Mediafile;
+use App\Enums\MediafileTypeEnum;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Http\UploadedFile;
-use DB;
-use Ramsey\Uuid\Uuid;
-use App\Mediafile;
-use App\Enums\MediafileTypeEnum;
 //use App\Models\Image;
 
 class MediafileModelTest extends TestCase
@@ -18,7 +20,7 @@ class MediafileModelTest extends TestCase
      */
     public function test_hello_story()
     {
-        $story = factory(\App\Story::class)->make();
+        $story = factory(Story::class)->make();
         $story->refresh();
         $this->assertNotNull($story);
         $this->assertNotNull($story->timeline);
@@ -36,7 +38,7 @@ class MediafileModelTest extends TestCase
      */
     public function test_hello_user()
     {
-        $user = factory(\App\User::class)->make();
+        $user = factory(User::class)->make();
         $user->refresh();
         $this->assertNotNull($user);
         $this->assertNotNull($user->timeline);
@@ -52,7 +54,7 @@ class MediafileModelTest extends TestCase
      */
     public function test_should_upload_to_s3()
     {
-        $story = factory(\App\Story::class)->make();
+        $story = factory(Story::class)->make();
 
         $file = UploadedFile::fake()->image('file-foo.png', 400, 400);
 

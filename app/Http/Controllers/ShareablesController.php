@@ -6,10 +6,10 @@ use Auth;
 use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
-use App\Mediafile;
-use App\Vaultfolder;
-use App\Timeline;
-use App\User;
+use App\Models\Mediafile;
+use App\Models\Vaultfolder;
+use App\Models\Timeline;
+use App\Models\User;
 
 class ShareablesController extends AppBaseController
 {

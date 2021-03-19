@@ -19,7 +19,7 @@
                              role="button" 
                              v-bind:class="{ 'tag-shared': isShareMode && isSelectedToShare({shareable_type: 'vaultfolders', shareable_id: vf.id}) }"
                              >
-                             {{ vf.vfname }} 
+                             {{ vf.name }} 
                              <span v-if="isShared('vaultfolders', vf.id)"><b-icon icon="share"></b-icon></span>
                              <span v-if="isShareMode"><button @click="toggleSelectedToShare($event, 'vaultfolders', vf.id)" type="button" class="btn btn-link ml-3">Share</button></span>
           </b-list-group-item>
@@ -36,7 +36,7 @@
           <b-form-group>
             <b-form-input
               id="folder-name"
-              v-model="createForm.vfname"
+              v-model="createForm.name"
               type="text"
               placeholder="Enter new folder name"
               required
@@ -175,7 +175,7 @@ export default {
         const isActive = b.pkid === this.currentFolderPKID;
         result.push({
           pkid: b.pkid,
-          text: b.vfname,
+          text: b.name,
           active: isActive,
         });
       }
@@ -198,7 +198,7 @@ export default {
     isShareMode: false,
 
     createForm: {
-      vfname: '',
+      name: '',
       //vault_id: this.vault_pkid,
       //parent_id: this.currentFolderPKID,
     },
@@ -281,7 +281,7 @@ export default {
       const payload = {
         vault_id: this.vault_pkid,
         parent_id: this.currentFolderPKID,
-        vfname: this.createForm.vfname,
+        name: this.createForm.name,
       };
       axios.post('/vaultfolders', payload).then( (response) => {
         console.log('response', { response });
@@ -292,7 +292,7 @@ export default {
 
     cancelCreateFolder() {
       this.showCreateForm = false;
-      this.createForm.vfname = '';
+      this.createForm.name = '';
     },
     cancelShareFiles() {
       this.isShareMode = false;
@@ -324,9 +324,9 @@ export default {
     },
 
     // Preload the mediafiles in the current folder (pwd)
-    async doNav(e, vaultFolderPKID) {
-      this.currentFolderPKID = vaultFolderPKID;
-      this.$store.dispatch('getVaultfolder', vaultFolderPKID);
+    async doNav(e, vaultfolderPKID) {
+      this.currentFolderPKID = vaultfolderPKID;
+      this.$store.dispatch('getVaultfolder', vaultfolderPKID);
     },
 
     // ---

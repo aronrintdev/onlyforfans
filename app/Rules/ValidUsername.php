@@ -2,7 +2,7 @@
 
 namespace App\Rules;
 
-use App\UsernameRule;
+use App\Models\UsernameRule;
 use Illuminate\Contracts\Validation\Rule;
 use Log;
 

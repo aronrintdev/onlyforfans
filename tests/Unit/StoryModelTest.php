@@ -8,26 +8,23 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use DB;
 use Ramsey\Uuid\Uuid;
-use App\Mediafile;
-use App\Story;
+use App\Models\Mediafile;
+use App\Models\Story;
 use App\Enums\MediafileTypeEnum;
 
 class StoryModelTest extends TestCase
 {
     /**
-     * @group mfdev
+     * @group story-model
      */
     public function test_debug()
     {
         $mediafile = Mediafile::find(4);
         //$f = $s->mediafiles->first()->filename;
         $f = $mediafile->filename;
-        //dd($f);
         //$s = Storage::disk('s3')->get($f);
         $s = Storage::disk('s3')->url($f);
         //$s = Storage::disk('s3')->get($s->mediafiles->first()->filename);
-        dd($s);
-        dd($mediafile->toArray());
     }
 
 

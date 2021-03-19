@@ -2,8 +2,8 @@
 namespace Database\Seeders;
 
 use Illuminate\Support\Facades\Config;
-use App\Role;
-use App\Permission;
+use App\Models\Role;
+use App\Models\Permission;
 
 class RolesTableSeeder extends Seeder
 {

@@ -1,5 +1,6 @@
 <?php
 
+/*
 Route::group(['prefix' => '/{username}/settings', 'middleware' => ['auth', 'editown']], function ($username) {
     Route::get('/general', 'ZDeprecated\UserController@userGeneralSettings');
     Route::post('/general', 'ZDeprecated\UserController@saveUserGeneralSettings');
@@ -57,3 +58,4 @@ Route::group(['prefix' => '/{username}/settings', 'middleware' => ['auth', 'edit
     Route::post('/save-watermark-settings', 'ZDeprecated\UserController@saveWaterMarkSetting');
 
 });
+*/

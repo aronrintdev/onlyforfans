@@ -1,3 +1,6 @@
+%%% Demo site
+$ php artisan serve
+$ npm run hot
 
 %%% Need to unzip js dist folder (!)
 $ pushd public/js
@@ -17,9 +20,16 @@ php artisan migrate --env=testing
 php artisan migrate:rollback --step=1
 
 %%% Testing
-vendor/bin/phpunit --group mfdev
-vendor/bin/phpunit --testdox --group devcomment 
-echo "" > storage/logs/laravel.log; vendor/bin/phpunit --testdox  --group this
+$ vendor/bin/phpunit --group mfdev
+$ vendor/bin/phpunit --testdox --group devcomment 
+$ echo "" > storage/logs/laravel.log; vendor/bin/phpunit --testdox  --group this
+$ echo "" > storage/logs/laravel.log; php -n vendor/bin/phpunit --testdox  --group regression
+
+$ php artisan test  --group regression
+$ php -n artisan test  --group regression
+
+# stress testing...
+$ for i in {1..10}; do php -n vendor/bin/phpunit --testdox  --group here; done
 
 %%%
 cp app/Patches/ThemeServiceProvider.php vendor/teepluss/theme/src/ThemeServiceProvider.php
@@ -36,6 +46,12 @@ $ php artisan db:seed --class=UsersTableSeeder
 $ php artisan db:seed --class=StoriesTableSeeder
 $ php artisan db:seed --class=PostsTableSeeder
 $ php artisan db:seed --class=ShareablesTableSeeder
+
+# Run all seeds in test env (.env.testing)
+$ php artisan db:seed --class=TestDatabaseSeeder
+
+# Run all seeds in dev/staging/demo env (eg localhost, .env)
+$ php artisan db:seed --class=DatabaseSeeder
 
 %%% Tinker
 $ php artisan tinker

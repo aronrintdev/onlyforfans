@@ -2,10 +2,9 @@
 
 namespace App\Providers;
 
-use App\Notification;
-use App\Observers\MessageObserver;
-use App\Observers\NotificationObserver;
-use Cmgmyr\Messenger\Models\Message;
+// use App\Observers\MessageObserver;
+// use App\Observers\NotificationObserver;
+// use Cmgmyr\Messenger\Models\Message;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 
 
@@ -16,15 +15,7 @@ class EventServiceProvider extends ServiceProvider
      *
      * @var array
      */
-    protected $listen = [
-        'App\Events\MessagePublished' => [
-            'App\Listeners\EventListener',
-        ],
-        'App\Events\NotificationPublished' => [
-            'App\Listeners\NotificationEventListener',
-        ],
-
-    ];
+    protected $listen = [];
 
     /**
      * Register any other events for your application.
@@ -36,8 +27,5 @@ class EventServiceProvider extends ServiceProvider
     public function boot()
     {
         parent::boot();
-
-        Notification::observe(new NotificationObserver());
-        // Message::observe(new MessageObserver());
     }
 }

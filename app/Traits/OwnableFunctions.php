@@ -3,7 +3,7 @@
 namespace App\Traits;
 
 use App\Interfaces\Ownable;
-use App\User;
+use App\Models\User;
 
 /**
  * Use on models that implement Ownable

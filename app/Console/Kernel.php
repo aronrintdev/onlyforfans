@@ -17,6 +17,7 @@ class Kernel extends ConsoleKernel
         PublishPostCommand::class,
         ExpirePostCommand::class,
         \App\Console\Commands\TruncateData::class,
+        \App\Console\Commands\UpdateSlugs::class,
     ];
 
     /**

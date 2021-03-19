@@ -17,12 +17,14 @@ class TestDatabaseSeeder extends ParentSeeder
         //$output->writeln('Running Test DB seeder...');
 
         $this->call([
+            CountriesTableSeeder::class,
+            UsstatesTableSeeder::class,
             UsernameRulesSeeder::class,
             RolesTableSeeder::class,
             UsersTableSeeder::class,
             PostsTableSeeder::class,
             ShareablesTableSeeder::class,
-            CommentsTableSeeder::class,
+            CommentsTableSeeder::class, // must be after shareables as requires followers
             StoriesTableSeeder::class,
         ]);
     }

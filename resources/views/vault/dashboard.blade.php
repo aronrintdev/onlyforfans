@@ -3,7 +3,7 @@
 @section('content')
   <div id="view-vault_dashboard" class="row">
     <div class="col-sm-12">
-      <my-vault 
+      <my-vault
         :vault_pkid="{{ $myVault->id }}"
         :vaultfolder_pkid="{{ $vaultRootFolder->id }}"
         ></my-vault>

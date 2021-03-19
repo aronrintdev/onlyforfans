@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Storage;
 use App;
 use DB;
 use Exception;
-use App\Mediafile;
+use App\Models\Mediafile;
 
 class TruncateData extends Command
 {
@@ -21,13 +21,16 @@ class TruncateData extends Command
 
     public function handle()
     {
-        $isEnvLocal = App::environment(['local']);
-        $isEnvTesting = App::environment(['testing']);
+        //$isEnvLocal = App::environment(['local']);
+        //$isEnvTesting = App::environment(['testing']);
+
+        $whitelistedEnvs = ['testing', 'local',];
+        $thisEnv = App::environment();
         $dbName = env('DB_DATABASE');
+
         $this->info( '%%% DB Name: '.$dbName);
-        $this->info( '%%% Is env local?: '.($isEnvLocal?'true':'false') );
-        $this->info( '%%% Is env testing?: '.($isEnvTesting?'true':'false') );
-        if ( $dbName !== 'fansplat_dev_test' && !$isEnvTesting ) {
+        $this->info( '%%% Env: '.$thisEnv);
+        if ( $dbName !== 'fansplat_dev_test' && !in_array($thisEnv, $whitelistedEnvs) ) {
             throw new Exception('Environment not in whitelist: '.App::environment());
         }
 
@@ -57,19 +60,30 @@ class TruncateData extends Command
     }
 
     private static $truncateList = [
-        'role_user',
-        'permission_role',
+        'model_has_permissions',
+        'model_has_roles',
+        'password_resets',
+        'role_has_permissions',
+        'sessions',
+        'settings',
+        'user_settings',
+        'websockets_statistics_entries',
+        'migrations',
+        'invites',
+        'jobs',
+        'links',
+        'locations',
+        'blockables',
+        'financial_accounts',
+        'financial_currency_exchange_transactions',
+        'financial_transactions',
         'fanledgers',
         'shareables',
         'likeables',
         'comments',
         'mediafiles',
         'stories',
-        //'subscriptions',
 
-        'model_has_permissions',
-        'model_has_roles',
-        'role_has_permissions',
         'user_settings',
         'permissions',
         'roles',
@@ -82,6 +96,7 @@ class TruncateData extends Command
         'users',
 
         'username_rules',
-
     ];
+
 }
+

@@ -27,7 +27,7 @@ return [
      * want to make sure your slugs aren't too long.
      */
 
-    'maxLength' => null,
+    'maxLength' => 200,
 
     /*
      * If left to "null", then use the cocur/slugify package to generate the slug
@@ -83,7 +83,7 @@ return [
      * If set to "true", then uniqueness is enforced across trashed and existing models.
      */
 
-    'includeTrashed' => false,
+    'includeTrashed' => true,
 
     /*
      * An array of slug names that can never be used for this model,

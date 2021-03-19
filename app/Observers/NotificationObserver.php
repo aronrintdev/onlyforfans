@@ -3,7 +3,7 @@
 namespace App\Observers;
 
 use App\Events\NotificationPublished;
-use App\User;
+use App\Models\User;
 use Event;
 
 
@@ -13,7 +13,7 @@ use Event;
 class NotificationObserver
 {
     /**
-     * Function will be triggerd when a Notification is updated.
+     * Function will be triggered when a Notification is updated.
      *
      * @param Users $model
      */

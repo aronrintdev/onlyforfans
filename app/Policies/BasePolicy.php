@@ -2,7 +2,7 @@
 
 namespace App\Policies;
 
-use App\User;
+use App\Models\User;
 use Exception;
 use ReflectionMethod;
 use Illuminate\Support\Arr;
@@ -42,7 +42,6 @@ class BasePolicy
     protected $actionNames = [];
 
     public function __call($method, $arguments) {
-        // dd($method, $arguments);
         if ( method_exists($this, $method) || Arr::has($this->policies, $method) ) {
             if ($this->usePermissions && ! in_array($method, $this->skipPermissionsOn)) {
                 if ($this->hasPermission($method, $arguments[0], $arguments[1] ?? null)) {

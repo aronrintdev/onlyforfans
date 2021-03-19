@@ -11,7 +11,7 @@
   </article>
   @foreach($stories as $s) 
     @php
-      $bgColor = array_key_exists('background-color', $s->cattrs??[]) ? $s->cattrs['background-color'] : 'yellow';
+      $bgColor = array_key_exists('background-color', $s->customAttributes??[]) ? $s->customAttributes['background-color'] : 'yellow';
     @endphp
     @if ($s->stype==='text')
       <article class="col-sm-1">

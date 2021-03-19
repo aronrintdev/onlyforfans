@@ -6,11 +6,11 @@ namespace App\Http\Controllers\Auth;
 use Illuminate\Support\Facades\DB;
 
 use App\Http\Controllers\Controller;
-use App\Media;
-use App\Setting;
-use App\Timeline;
-use App\User;
-use App\Invite;
+use App\Models\Mediafile;
+use App\Models\Setting;
+use App\Models\Timeline;
+use App\Models\User;
+use App\Models\Invite;
 use App\EnumsInviteTypeEnum;
 
 use File;
@@ -123,7 +123,7 @@ class RegisterController extends Controller
 
         $timeline = Timeline::create([
             'username' => $_GET['username'],
-            'name'     => $_GET['fullname'],
+            'name'     => $_GET['fullName'],
             'type'     => 'user',
             'about'    => '',
         ]);
@@ -177,10 +177,10 @@ class RegisterController extends Controller
             ]);
             $user = User::where('email', $_GET['email'])->first();
 
-            $timeline = Timeline::find($user->timeline_id);
+            $timeline = $user->timeline;
             $timeline->update([
                 'username' => $_GET['username'],
-                'name'     => $_GET['fullname'],
+                'name'     => $_GET['fullName'],
             ]);
 
             echo 'ok';
@@ -192,7 +192,7 @@ class RegisterController extends Controller
 //        DB::table('timelines')->where('id', $privacy->timeline_id)
 //            ->update([
 //                'username' => $_GET['username'],
-//                'name'     => $_GET['fullname'],
+//                'name'     => $_GET['fullName'],
 //            ]);
 
 
@@ -201,20 +201,11 @@ class RegisterController extends Controller
 
     public function register(Request $request)
     {
-//        Timeline::create([
-//            'username' => $_GET['username'],
-//            'name'     => $_GET['fullname'],
-//            'type'     => 'user',
-//            'about'    => 'write something about yourself'
-//        ]);
-//        echo "ok";
         if (Auth::user()) {
             return Redirect::to('/');
         }
 
         $theme = Theme::uses(Setting::get('current_theme', 'default'))->layout('guest');
-        $theme->setTitle(trans('auth.register').' '.Setting::get('title_seperator').' '.Setting::get('site_title').' '.Setting::get('title_seperator').' '.Setting::get('site_tagline'));
-
         return $theme->scope('register', [
             'invite_token' => $request->token ?? null,
         ])->render();
@@ -302,9 +293,9 @@ class RegisterController extends Controller
                 $invite = Invite::where('token', $request->invite_token)->first();
 
                 // Process any shares associated with the invite
-                if ($invite && array_key_exists('shareables', $invite->cattrs??[]) ) {
+                if ($invite && array_key_exists('shareables', $invite->customAttributes??[]) ) {
                     $attrs = [];
-                    foreach ( $invite->cattrs['shareables'] as $s ) {
+                    foreach ( $invite->customAttributes['shareables'] as $s ) {
                         $attrs[] = [
                             'sharee_id' => $user->id,
                             'shareable_type' => $s['shareable_type'],
@@ -317,7 +308,7 @@ class RegisterController extends Controller
                 }
                 // -> email
                 // -> itype
-                // -> cattrs
+                // -> custom_attributes
                 // [ ] how to tie [invites].updated_at to jobs (?)
             }
 
@@ -338,7 +329,7 @@ class RegisterController extends Controller
                     });
                 }
 
-                return response()->json(['status' => '200', 'message' => trans('auth.verify_email'), 'emailnotify' => $chk]);
+                return response()->json(['status' => '200', 'message' => trans('auth.verify_email'), 'emailNotify' => $chk]);
 
             }
         }
@@ -399,12 +390,12 @@ class RegisterController extends Controller
             $timeline = $this->registerUser($request, true);
             //  Prepare the image for user avatar
             if ($facebook_user->avatar != null) {
-                
+
                 $fileContents = file_get_contents($facebook_user->getAvatar());
                 $photoName = date('Y-m-d-H-i-s').str_random(8).'.png';
                 File::put(storage_path() . '/uploads/users/avatars/' . $photoName, $fileContents);
-                
-                $media = Media::create([
+
+                $media = Mediafile::create([
                         'title'  => $photoName,
                         'type'   => 'image',
                         'source' => $photoName,
@@ -455,7 +446,7 @@ class RegisterController extends Controller
             $photoName = date('Y-m-d-H-i-s').str_random(8).'.png';
             $avatar->save(storage_path().'/uploads/users/avatars/'.$photoName, 60);
 
-            $media = Media::create([
+            $media = Mediafile::create([
                       'title'  => $photoName,
                       'type'   => 'image',
                       'source' => $photoName,
@@ -502,7 +493,7 @@ class RegisterController extends Controller
             $photoName = date('Y-m-d-H-i-s').str_random(8).'.png';
             $avatar->save(storage_path().'/uploads/users/avatars/'.$photoName, 60);
 
-            $media = Media::create([
+            $media = Mediafile::create([
                       'title'  => $photoName,
                       'type'   => 'image',
                       'source' => $photoName,
@@ -523,46 +514,46 @@ class RegisterController extends Controller
 
     public function linkedinRedirect()
     {
-        return fans::with('linkedin')->redirect();
+        // return fans::with('linkedin')->redirect();
     }
 
   // to get authenticate user data
     public function linkedin()
     {
-        $linkedin_user = fans::with('linkedin')->user();
+        // $linkedin_user = fans::with('linkedin')->user();
 
-        $user = User::firstOrNew(['email' => $linkedin_user->email]);
-        if (!$user->id) {
-            $request = new Request(['username'   => preg_replace('/[^A-Za-z0-9 ]/', '', $linkedin_user->id),
-              'name'                           => $linkedin_user->name,
-              'email'                          => $linkedin_user->email,
-              'password'                       => bcrypt(str_random(8)),
-              'gender'                         => 'other',
-            ]);
+        // $user = User::firstOrNew(['email' => $linkedin_user->email]);
+        // if (!$user->id) {
+        //     $request = new Request(['username'   => preg_replace('/[^A-Za-z0-9 ]/', '', $linkedin_user->id),
+        //       'name'                           => $linkedin_user->name,
+        //       'email'                          => $linkedin_user->email,
+        //       'password'                       => bcrypt(str_random(8)),
+        //       'gender'                         => 'other',
+        //     ]);
 
-            $timeline = $this->registerUser($request, true);
+        //     $timeline = $this->registerUser($request, true);
 
-              //  Prepare the image for user avatar
-            $avatar = Image::make($linkedin_user->avatar_original);
-            $photoName = date('Y-m-d-H-i-s').str_random(8).'.png';
-            $avatar->save(storage_path().'/uploads/users/avatars/'.$photoName, 60);
+        //       //  Prepare the image for user avatar
+        //     // $avatar = Image::make($linkedin_user->avatar_original);
+        //     $photoName = date('Y-m-d-H-i-s').str_random(8).'.png';
+        //     // $avatar->save(storage_path().'/uploads/users/avatars/'.$photoName, 60);
 
-            $media = Media::create([
-                      'title'  => $photoName,
-                      'type'   => 'image',
-                      'source' => $photoName,
-                    ]);
+        //     $media = Media::create([
+        //               'title'  => $photoName,
+        //               'type'   => 'image',
+        //               'source' => $photoName,
+        //             ]);
 
-            $timeline->avatar_id = $media->id;
+        //     $timeline->avatar_id = $media->id;
 
-            $timeline->save();
-            $user = $timeline->user;
-        }
+        //     $timeline->save();
+        //     $user = $timeline->user;
+        // }
 
-        if (Auth::loginUsingId($user->id)) {
-            return redirect('/')->with(['message' => trans('messages.change_username_linkedin'), 'status' => 'warning']);
-        } else {
-            return redirect('login')->with(['message' => trans('messages.user_login_failed'), 'status' => 'error']);
-        }
+        // if (Auth::loginUsingId($user->id)) {
+        //     return redirect('/')->with(['message' => trans('messages.change_username_linkedin'), 'status' => 'warning']);
+        // } else {
+        //     return redirect('login')->with(['message' => trans('messages.user_login_failed'), 'status' => 'error']);
+        // }
     }
 }

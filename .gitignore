@@ -3,6 +3,9 @@
 # Learn more about .gitignore:
 #     https://www.atlassian.com/git/tutorials/saving-changes/gitignore
 
+# Git files
+*.patch
+
 # Node artifact files
 node_modules/
 dist/
@@ -79,28 +82,32 @@ __MACOSX
 *.tgz
 *.gz
 .swp
-
-public/themes/default/assets/css/style.*.css
-public/themes/default/assets/css/main.*.css
-public/themes/default/assets/js/main.*.js
-public/themes/default/assets/css/style.css
-public/mix.*.js
-public/hot
+*.swo
 
 settings.html
 yarn.lock
 
-public/js/app2.js
-public/js/app.*.js
-public/js/*.app.js
-public/js/vendor.js
-public/js/manifest.js
-public/themes/default/assets/js/main.js
-public/css/app2.css
-public/themes/default/assets/css/bootstrap.css
-public/themes/default/assets/css/main.css
-public/fonts/*.svg
+# PHP Unit
+.phpunit.result.cache
+
+#############################
+# Public folder built items #
+#############################
+public/js/*
+public/css/*
+#public/images/*
+public/fonts/*
+public/sounds/*
+public/fonts/*
+
+public/hot
+public/mix-*
+public/mix.*
+public/mix.*.js
 
 composer.json-current
 composer.json-save
-public/mix-manifest.json
+
+database/seeds/RolesTableSeeder.php--save
+
+public/info.php

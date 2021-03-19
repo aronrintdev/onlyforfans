@@ -1,17 +1,18 @@
 <?php
 namespace Tests\Unit;
 
+use DB;
 use Tests\TestCase;
-use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Models\User;
+use App\Models\Vault;
+use Ramsey\Uuid\Uuid;
+use App\Models\Mediafile;
+use App\Models\Vaultfolder;
+use App\Enums\MediafileTypeEnum;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
-use DB;
-use Ramsey\Uuid\Uuid;
-use App\Mediafile;
-use App\Vault;
-use App\Vaultfolder;
-use App\Enums\MediafileTypeEnum;
+use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class ShareableTest extends TestCase
 {
@@ -26,7 +27,7 @@ class ShareableTest extends TestCase
      */
     public function test_can_share_mediafile()
     {
-        $user = factory(\App\User::class)->create();
+        $user = factory(User::class)->create();
         $user->refresh();
         $this->_deleteList[] = $user;
 
@@ -65,16 +66,16 @@ class ShareableTest extends TestCase
 
         $this->assertGreaterThan(0, $mediafile->sharees()->count());
         $this->assertNotNull($mediafile->sharees[0]);
-        $this->assertInstanceOf(\App\User::class, $mediafile->sharees[0]);
+        $this->assertInstanceOf(User::class, $mediafile->sharees[0]);
         $this->assertSame($user->id, $mediafile->sharees[0]->id);
     }
 
     /**
      * @group sdev
      */
-    public function test_can_share_vaultfolder()
+    public function test_can_share_vault_folder()
     {
-        $user = factory(\App\User::class)->create();
+        $user = factory(User::class)->create();
         $user->refresh();
         $this->_deleteList[] = $user;
 
@@ -103,7 +104,7 @@ class ShareableTest extends TestCase
 
         $this->assertGreaterThan(0, $vaultfolder->sharees()->count());
         $this->assertNotNull($vaultfolder->sharees[0]);
-        $this->assertInstanceOf(\App\User::class, $vaultfolder->sharees[0]);
+        $this->assertInstanceOf(User::class, $vaultfolder->sharees[0]);
         $this->assertSame($user->id, $vaultfolder->sharees[0]->id);
     }
 

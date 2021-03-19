@@ -2,7 +2,7 @@
 
 namespace App\Broadcasting;
 
-use App\User;
+use App\Models\User;
 /**
  * Monitors the online status of a specific user.
  * Can also be used to push user notifications to other connected users watching this channel.
@@ -22,7 +22,7 @@ class UserStatusChannel
     /**
      * Authenticate the user's access to the channel.
      *
-     * @param  \App\User  $user
+     * @param  \App\Models\User  $user
      * @return array|bool
      */
     public function join(User $user, $userId)

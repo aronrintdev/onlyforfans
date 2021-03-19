@@ -8,7 +8,7 @@
 import _ from 'lodash'
 import { DateTime } from 'luxon'
 export default {
-  name: 'online-status',
+  name: 'OnlineStatus',
   props: {
     statusTextVariant: { type: Object, default: () => ({
       online: 'success',

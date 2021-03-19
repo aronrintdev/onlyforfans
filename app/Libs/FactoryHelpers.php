@@ -1,54 +1,71 @@
 <?php
 namespace App\Libs;
 
+use Exception;
+use App\Models\User;
+use App\Models\Timeline;
+use App\Models\Mediafile;
+use Illuminate\Support\Str;
+use Faker\Factory as Faker;
+
+use App\Enums\MediafileTypeEnum;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
-use Illuminate\Support\Collection; 
-
-use App\User;
-use App\Mediafile;
-use App\Enums\MediafileTypeEnum;
 
 class FactoryHelpers {
 
-
     // Adds avatar & cover images
-    public static function updateUser(&$user, $attrs)
+    public static function createUser(array $attrs) : User
     {
+        $faker = Faker::create();
+
+        $user = User::create([
+            'username' => $attrs['username'],
+            'email' => $attrs['email'],
+            'password' => array_key_exists('password', $attrs) ? $attrs['password'] : bcrypt('foo-123'), // secret
+            'email_verified' => 1,
+        ]);
         //dump('Updating user: '.$attrs['email']);
-        $user->email = $attrs['email'];
-        if ( array_key_exists('gender', $attrs) ) {
-            $user->gender = $attrs['gender'];
-        }
-        if ( array_key_exists('city', $attrs) ) {
-            $user->city = $attrs['city'];
-        }
-        if ( array_key_exists('country', $attrs) ) {
-            $user->country = $attrs['country'];
-        }
-        $user->save();
+
+        $isFollowForFree  = $attrs['is_follow_for_free'];
+        $timeline = Timeline::create([
+            'user_id'  => $user->id,
+            'name'     => $attrs['name'],
+            'about'    => $faker->text,
+            'verified' => 1,
+            'is_follow_for_free' => $isFollowForFree,
+            'price' => $isFollowForFree ? 0.00 : $faker->randomFloat(2, 1, 300),
+        ]);
 
         if ( Config::get('app.env') !== 'testing' ) {
-            $avatar = self::createImage(MediafileTypeEnum::AVATAR);
-            $cover = self::createImage(MediafileTypeEnum::COVER);
+            $avatar = self::createImage(MediafileTypeEnum::AVATAR, null, true);
+            $cover = self::createImage(MediafileTypeEnum::COVER, null, true);
         } else {
             $avatar = null;
             $cover = null;
         }
-        $timeline = $user->timeline;
-        $timeline->username = $attrs['username'];
-        $timeline->name = $attrs['name'];
         $timeline->avatar_id = $avatar->id ?? null;
         $timeline->cover_id = $cover->id ?? null;
-        $timeline->save();
+        if ( array_key_exists('is_follow_for_free', $attrs) ) {
+            $timeline->is_follow_for_free = $attrs['is_follow_for_free'];
+        }
+        if (array_key_exists('price', $attrs)) {
+            $timeline->price = $attrs['price'];
+        }
+        if (array_key_exists('currency', $attrs)) {
+            $timeline->currency = $attrs['currency'];
+        }
 
-        //unset($user, $timeline);
+        $timeline->save();
+        $user->refresh();
+
+        return $user;
     }
 
     public static function parseRandomSubset(Collection $setIn, $MAX=10) : Collection
     {
-        $faker = \Faker\Factory::create();
+        $faker = Faker::create();
         $_max = min([ $MAX, $setIn->count()-1  ]);
         $_num = $faker->numberBetween(0,$_max);
         $subset = $setIn->random($_num);
@@ -56,9 +73,9 @@ class FactoryHelpers {
     }
 
     // Inserts a [mediafiles] record
-    public static function createImage(string $mftype, ?int $resouceID=null) : ?Mediafile
+    public static function createImage(string $mftype, string $resourceID = null, $doS3Upload=false) : ?Mediafile
     {
-        $faker = \Faker\Factory::create();
+        $faker = Faker::create();
 
         // https://loremflickr.com/320/240/paris,girl,kitten,puppy,beach,rave
         //$url = 'https://loremflickr.com/json/320/240/paris,girl,kitten,puppy,beach,rave';
@@ -97,22 +114,25 @@ class FactoryHelpers {
                 break;
             case MediafileTypeEnum::POST:
                 $s3Path = 'posts/'.$basename;
-                $attrs['resource_id'] =  $resouceID; // ie story_id: required for story type
+                $attrs['resource_id'] =  $resourceID; // ie story_id: required for story type
                 $attrs['resource_type'] = 'posts';
                 break;
             case MediafileTypeEnum::STORY:
                 $s3Path = 'stories/'.$basename;
-                $attrs['resource_id'] =  $resouceID; // ie story_id: required for story type
+                $attrs['resource_id'] =  $resourceID; // ie story_id: required for story type
                 $attrs['resource_type'] = 'stories';
                 break;
             default:
-                throw new Exception('mftype of '.$mftype.' not supported');
+                throw new Exception('media file type of ' . $mftype . ' not supported');
         }
-        $contents = file_get_contents($json->file);
-        //dd($json, $info);
 
-        Storage::disk('s3')->put($s3Path, $contents);
-        $attrs['filename'] = $s3Path;
+        if ($doS3Upload) {
+            $contents = file_get_contents($json->file);
+            Storage::disk('s3')->put($s3Path, $contents);
+            $attrs['filename'] = $s3Path;
+        } else {
+            $attrs['filename'] = $attrs['mfname']; // dummy filename for testing, etc
+        }
 
         $mediafile = Mediafile::create($attrs);
 

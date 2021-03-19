@@ -3,8 +3,8 @@ namespace Database\Seeders;
 
 use App\Enums\MediafileTypeEnum;
 use App\Libs\FactoryHelpers;
-use App\Story;
-use App\User;
+use App\Models\Story;
+use App\Models\User;
 
 class StoriesTableSeeder extends Seeder
 {
@@ -18,14 +18,20 @@ class StoriesTableSeeder extends Seeder
 
         $users = User::get();
 
+        if ( $this->appEnv !== 'testing' ) {
+            $this->output->writeln("  - Users seeder: loaded ".$users->count()." users...");
+        }
+
         $users->each( function($u) {
 
-            $max = $this->faker->numberBetween(3,12);
+            static $iter = 1;
+
+            $count = $this->faker->numberBetween(3,12);
             if ( $this->appEnv !== 'testing' ) {
-                $this->output->writeln("  - Creating $max stories for user ".$u->name);
+                $this->output->writeln("  - Creating $count stories for user ".$u->name." (iter $iter)");
             }
 
-            collect(range(1,$max))->each( function() use(&$u) {
+            collect(range(1,$count))->each( function() use(&$u) {
 
                 $stype = ($this->appEnv==='testing')
                     ? 'text'
@@ -41,10 +47,12 @@ class StoriesTableSeeder extends Seeder
                 case 'text':
                     break;
                 case 'image':
-                    $mf = FactoryHelpers::createImage(MediafileTypeEnum::STORY, $story->id);
+                    $mf = FactoryHelpers::createImage(MediafileTypeEnum::STORY, $story->id, true);
                     break;
                 }
             });
+
+            $iter++;
 
         });
     }

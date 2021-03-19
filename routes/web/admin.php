@@ -66,12 +66,12 @@ Route::group(['prefix' => '/admin', 'middleware' => ['auth', 'role:admin|super-a
     Route::get('/', 'Admin\DashboardController@index');
     // Route::get('/', 'AdminController@dashboard');
 
-    Route::get('/general-settings', 'AdminController@generalSettings');
-    Route::post('/general-settings', 'AdminController@updateGeneralSettings');
-    Route::post('/home-settings', 'AdminController@updateHomeSettings');
+    //Route::get('/general-settings', 'AdminController@generalSettings');
+    //Route::post('/general-settings', 'AdminController@updateGeneralSettings');
+    //Route::post('/home-settings', 'AdminController@updateHomeSettings');
 
-    Route::get('/user-settings', 'AdminController@userSettings');
-    Route::post('/user-settings', 'AdminController@updateUserSettings');
+    //Route::get('/user-settings', 'AdminController@userSettings');
+    //Route::post('/user-settings', 'AdminController@updateUserSettings');
 
     // Route::get('/page-settings', 'AdminController@pageSettings');
     // Route::post('/page-settings', 'AdminController@updatePageSettings');
@@ -92,9 +92,10 @@ Route::group(['prefix' => '/admin', 'middleware' => ['auth', 'role:admin|super-a
     // Route::post('/announcements', 'AdminController@addAnnouncements');
     // Route::get('/activate/{announcement_id}', 'AdminController@activeAnnouncement');
 
-    Route::get('/themes', 'AdminController@themes');
-    Route::get('/change-theme/{name}', 'AdminController@changeTheme');
+    //Route::get('/themes', 'AdminController@themes');
+    //Route::get('/change-theme/{name}', 'AdminController@changeTheme');
 
+/*
     Route::group(['prefix' => '/users'], function () {
         Route::get('/', 'AdminController@showUsers')
             ->name('admin.users.index');
@@ -109,6 +110,7 @@ Route::group(['prefix' => '/admin', 'middleware' => ['auth', 'role:admin|super-a
         Route::post('/{username}/newpassword', 'AdminController@updatePassword')
             ->name('admin.user.updatePassword');
     });
+*/
 
 
     // Route::get('/pages', 'AdminController@showPages');
@@ -123,19 +125,19 @@ Route::group(['prefix' => '/admin', 'middleware' => ['auth', 'role:admin|super-a
     // Route::get('/groups/{group_id}/delete', 'AdminController@deleteGroup');
 
 
-    Route::get('/manage-reports', 'AdminController@manageReports');
-    Route::post('/manage-reports', 'AdminController@updateManageReports');
-    Route::get('/mark-safe/{report_id}', 'AdminController@markSafeReports');
-    Route::get('/delete-post/{report_id}/{post_id}', 'AdminController@deletePostReports');
+    //Route::get('/manage-reports', 'AdminController@manageReports');
+    //Route::post('/manage-reports', 'AdminController@updateManageReports');
+    //Route::get('/mark-safe/{report_id}', 'AdminController@markSafeReports');
+    //Route::get('/delete-post/{report_id}/{post_id}', 'AdminController@deletePostReports');
 
     // Route::get('/manage-ads', 'AdminController@manageAds');
-    Route::get('/update-database', 'AdminController@getUpdateDatabase');
-    Route::post('/update-database', 'AdminController@postUpdateDatabase');
-    Route::get('/get-env', 'AdminController@getEnv');
-    Route::post('/save-env', 'AdminController@saveEnv');
+    //Route::get('/update-database', 'AdminController@getUpdateDatabase');
+    //Route::post('/update-database', 'AdminController@postUpdateDatabase');
+    //Route::get('/get-env', 'AdminController@getEnv');
+    //Route::post('/save-env', 'AdminController@saveEnv');
     // Route::post('/manage-ads', 'AdminController@updateManageAds');
-    Route::get('/settings', 'AdminController@settings');
-    Route::get('/markpage-safe/{report_id}', 'AdminController@markPageSafeReports');
+    //Route::get('/settings', 'AdminController@settings');
+    //Route::get('/markpage-safe/{report_id}', 'AdminController@markPageSafeReports');
     // Route::get('/deletepage/{page_id}/{status}', 'AdminController@deletePage');
     // Route::get('/deleteuser/{username}', 'UsersController@deleteMe');
     // Route::get('/deletegroup/{group_id}', 'AdminController@deleteGroup');
@@ -153,7 +155,7 @@ Route::group(['prefix' => '/admin', 'middleware' => ['auth', 'role:admin|super-a
     // Route::get('/event-settings', 'AdminController@eventSettings');
     // Route::post('/event-settings', 'AdminController@updateEventSettings');
 
-    Route::get('/wallpapers', 'AdminController@wallpapers');
-    Route::post('/wallpapers', 'AdminController@addWallpapers');
-    Route::get('/wallpaper/{wallpaper}/delete', 'AdminController@deleteWallpaper');
+    //Route::get('/wallpapers', 'AdminController@wallpapers');
+    //Route::post('/wallpapers', 'AdminController@addWallpapers');
+    //Route::get('/wallpaper/{wallpaper}/delete', 'AdminController@deleteWallpaper');
 });

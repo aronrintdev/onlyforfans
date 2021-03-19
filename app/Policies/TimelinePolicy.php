@@ -2,8 +2,8 @@
 
 namespace App\Policies;
 
-use App\User;
-use App\Timeline;
+use App\Models\User;
+use App\Models\Timeline;
 use App\Policies\Traits\OwnablePolicies;
 
 class TimelinePolicy extends BasePolicy
@@ -18,24 +18,28 @@ class TimelinePolicy extends BasePolicy
         'delete'      => 'isOwner:pass',
         'restore'     => 'isOwner:pass',
         'forceDelete' => 'isOwner:pass',
+        'follow'      => 'isOwner:pass isBlockedByOwner:fail',
+        'like'        => 'isOwner:pass isBlockedByOwner:fail',
+        'indexStories' => 'isOwner:pass isBlockedByOwner:fail',
     ];
 
-    /**
-     * Determine whether the user can view the model.
-     *
-     * @param  \App\User  $user
-     * @param  \App\Timeline  $timeline
-     * @return mixed
-     */
     protected function view(User $user, Timeline $resource)
     {
-        // Is viewable by user?
-        return $resource->followers->contains($user->id);;
+        return true; // $resource->followers->contains($user->id);
+    }
+
+    public function follow(User $user, Timeline $resource)
+    {
+        return !$this->isBlockedByOwner($user, $resource);
     }
 
     protected function like(User $user, Timeline $resource)
     {
-        // Is viewable by user?
+        return $resource->followers->contains($user->id);;
+    }
+
+    protected function indexStories(User $user, Timeline $resource)
+    {
         return $resource->followers->contains($user->id);;
     }
 

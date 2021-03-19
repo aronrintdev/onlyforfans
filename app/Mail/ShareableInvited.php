@@ -5,7 +5,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use App\Invite;
+use App\Models\Invite;
 
 class ShareableInvited extends Mailable
 {

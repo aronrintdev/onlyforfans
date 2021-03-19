@@ -10,12 +10,51 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\File;
 //use Illuminate\Http\UploadedFile;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use App\User;
-use App\Mediafile;
+use App\Http\Resources\MediafileCollection;
+use App\Models\User;
+use App\Models\Mediafile;
 use App\Enums\MediafileTypeEnum;
 
 class MediafilesController extends AppBaseController
 {
+
+    public function index(Request $request)
+    {
+        $request->validate([
+            'filters' => 'array',
+            //'filters.post_id' => 'uuid|exists:posts,id', // if admin or post-owner only (per-post comments by fan use posts controller)
+            'filters.user_id' => 'uuid|exists:users,id', // if admin only
+            'filters.mftype' => 'in:'.MediafileTypeEnum::getKeysCsv(), // %TODO : apply elsewhere
+        ]);
+
+        $filters = $request->filters ?? [];
+
+        // Init query
+        $query = Mediafile::query();
+
+        // Check permissions
+        if ( !$request->user()->isAdmin() ) {
+
+            // non-admin: only view own comments
+            $query->where('user_id', $request->user()->id); 
+            unset($filters['user_id']);
+        }
+
+        // Apply any filters
+        foreach ($filters as $key => $f) {
+            // %TODO: subgroup under 'filters' (need to update axios.GET calls as well in Vue)
+            switch ($key) {
+                case 'mftype':
+                case 'user_id':
+                //case 'post_id':
+                    $query->where($key, $f);
+                    break;
+            }
+        }
+
+        $data = $query->paginate( $request->input('take', env('MAX_MEDIAFILES_PER_REQUEST', 10)) );
+        return new MediafileCollection($data);
+    }
 
     public function store(Request $request)
     {
@@ -23,7 +62,7 @@ class MediafilesController extends AppBaseController
             'mediafile' => 'required',
             'mftype' => 'required|in:avatar,cover,post,story,vault',
             'resource_type' => 'nullable|alpha-dash|in:comments,posts,stories,vaultfolders',
-            'resource_id' => 'required_with:resource_type|numeric|min:1',
+            'resource_id' => 'required_with:resource_type|uuid',
         ]);
 
         $file = $request->file('mediafile');
@@ -44,17 +83,17 @@ class MediafilesController extends AppBaseController
         try {
             $mediafile = DB::transaction(function () use(&$file, &$request) {
                 switch ($request->mftype) {
-                    case 'vault':
-                        $subFolder = 'vaultfolders';
-                        break;
-                    case 'story':
-                        $subFolder = 'stories';
-                        break;
-                    case 'post':
-                        $subFolder = 'posts';
-                        break;
-                    default:
-                        $subFolder = 'default';
+                case 'vault':
+                    $subFolder = 'vaultfolders';
+                    break;
+                case 'story':
+                    $subFolder = 'stories';
+                    break;
+                case 'post':
+                    $subFolder = 'posts';
+                    break;
+                default:
+                    $subFolder = 'default';
                 }
                 $newFilename = $file->store('./'.$subFolder, 's3');
                 $mfname = $mfname ?? $file->getClientOriginalName();
@@ -100,7 +139,7 @@ class MediafilesController extends AppBaseController
                 now()->addMinutes(5) // %FIXME: hardcoded
             );
         }
-        return response()->json([ 
+        return response()->json([
             'mediafile' => $mediafile,
             'url' => $url,
         ]);
@@ -108,11 +147,13 @@ class MediafilesController extends AppBaseController
 
     public function update(Request $request, $pkid)
     {
-        $this->validate($request, Mediafile::$vrules);
+        $this->validate($request, [
+            'mfname' => 'string|alpha_dash',
+        ]);
 
         try {
 
-            $obj = Mediafile::find($pkid);
+            $obj = mediafile::find($pkid);
             if ( empty($obj) ) {
                 throw new ModelNotFoundException('Could not find Mediafile with pkid '.$pkid);
             }
@@ -135,7 +176,8 @@ class MediafilesController extends AppBaseController
             return \Redirect::route('admin.users.show', [$obj->slug]);
         }
 
-    } // update()
+    }
+
 
     /*
     public function destroy($pkid)
@@ -161,4 +203,4 @@ class MediafilesController extends AppBaseController
 }
 
 // $path = "public/directory_pics/MAaKSCm96gaep1cMulfasWBWupVs33Z6GZ5RcfU4.png"
-// $fullpath = "/Users/petergorgone/workspace/cdn/jmbm/intranet-v4/public/directory_pics/MAaKSCm96gaep1cMulfasWBWupVs33Z6GZ5RcfU4.png"
+// $fullPath = "/Users/petergorgone/workspace/cdn/jmbm/intranet-v4/public/directory_pics/MAaKSCm96gaep1cMulfasWBWupVs33Z6GZ5RcfU4.png"

@@ -3,7 +3,7 @@
 namespace App\Policies;
 
 // use App\Message;
-use App\User;
+use App\Models\User;
 use App\Policies\Traits\OwnablePolicies;
 
 /**

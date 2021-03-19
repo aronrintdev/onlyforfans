@@ -1,12 +1,13 @@
 <?php
 namespace Database\Seeders;
 
+use DB;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Illuminate\Support\Facades\Config;
 use Carbon\Carbon;
 
-use App\User;
-use App\Post;
+use App\Models\User;
+use App\Models\Post;
 use App\Enums\MediafileTypeEnum;
 use App\Enums\PostTypeEnum;
 use App\Libs\FactoryHelpers;
@@ -14,6 +15,8 @@ use App\Libs\FactoryHelpers;
 class PostsTableSeeder extends Seeder
 {
     use SeederTraits;
+
+    protected static $MIN_POSTS = 4;
 
     public function run()
     {
@@ -25,26 +28,47 @@ class PostsTableSeeder extends Seeder
 
         $users->each( function($u) use(&$users) {
 
+            static $iter = 1;
+
             // $u is the user who will own the post being created (ie, as well as timeline associated with the post)...
 
-            $max = $this->faker->numberBetween(2, $this->getMax('posts'));
+            $count = $this->faker->numberBetween(self::$MIN_POSTS, $this->getMax('posts'));
 
             if ( $this->appEnv !== 'testing' ) {
-                $this->output->writeln("  - Creating $max posts for user ".$u->name);
+                $this->output->writeln("  - Creating $count posts for user ".$u->name." (iter: $iter)");
             }
 
-            collect(range(1,$max))->each( function() use(&$users, &$u) { // Post generation loop
+            collect(range(0,$count))->each( function() use(&$users, &$u) { // Post generation loop
 
+                static $typesUsed = []; // guarantee one of each post type
                 $ptype = $this->faker->randomElement([
-                    PostTypeEnum::SUBSCRIBER,
-                    PostTypeEnum::PRICED,
-                    PostTypeEnum::FREE, PostTypeEnum::FREE, PostTypeEnum::FREE, 
+                    PostTypeEnum::SUBSCRIBER, PostTypeEnum::SUBSCRIBER,
+                    PostTypeEnum::PRICED, PostTypeEnum::PRICED,
+                    PostTypeEnum::FREE,
                 ]);
+                $diff = array_diff( PostTypeEnum::getKeys(), $typesUsed );
+                if ( count($diff) ) {
+                    $ptype = array_pop($diff);
+                }
+                $typesUsed[] = $ptype;
+                /*
+                dump(
+                    'typesUsed',
+                    $typesUsed, 
+                    'keys',
+                    PostTypeEnum::getKeys(),
+                    'diff',
+                    $diff,
+                    '-------------'
+                );
+                 */
+
                 $attrs = [
-                    'description'  => $this->faker->text.' ('.$ptype.')',
-                    'user_id'      => $u->id,
-                    'timeline_id'  => $u->timeline->id,
-                    'type'         => $ptype,
+                    'postable_type' => 'timelines',
+                    'postable_id'   => $u->timeline->id,
+                    'description'   => $this->faker->text.' ('.$ptype.')',
+                    'user_id'       => $u->id,
+                    'type'          => $ptype,
                 ];
 
                 if ( $ptype === PostTypeEnum::PRICED ) {
@@ -52,13 +76,15 @@ class PostsTableSeeder extends Seeder
                 }
 
                 $post = Post::factory()->create($attrs);
+                //$u->timeline->posts()->save($post);
+
                 if ( $this->faker->boolean($this->getMax('prob_post_has_image')) ) { // % post has image
-                    $mf = FactoryHelpers::createImage(MediafileTypeEnum::POST, $post->id);
+                    $mf = FactoryHelpers::createImage(MediafileTypeEnum::POST, $post->id, true);
                 }
 
                 // Set a realistic post date
                 $ts = $this->faker->dateTimeThisDecade->format('Y-m-d H:i:s');
-                \DB::table('posts')->where('id',$post->id)->update([
+                DB::table('posts')->where('id',$post->id)->update([
                     'created_at' => Carbon::parse($ts),
                     //'description' => 'foo',
                 ]);
@@ -104,6 +130,7 @@ class PostsTableSeeder extends Seeder
 
             });
 
+            $iter++;
         });
     }
 
@@ -113,7 +140,7 @@ class PostsTableSeeder extends Seeder
             'testing' => [
                 'prob_post_has_image' => 0,
                 'users' => 4,
-                'posts' => 3,
+                'posts' => 7,
             ],
             'local' => [
                 'prob_post_has_image' => 70, // will create image and store in S3 (!)

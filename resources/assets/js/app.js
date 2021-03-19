@@ -9,12 +9,15 @@ const isProduction = process.env.NODE_ENV === 'production';
 import store from './store';
 
 require('./bootstrap');
+require('./bootstrap/fontAwesome');
 window.axios = require('axios');
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 //axios.defaults.baseURL = '/';
 
-
 import Vue from 'vue';
+
+import VueAxios from 'vue-axios';
+Vue.use(VueAxios, window.axios);
 
 /**
  * Enable $log
@@ -24,7 +27,7 @@ import Vue from 'vue';
 import VueLogger from 'vuejs-logger';
 const options = {
     isEnabled: true,
-    logLevel : isProduction ? 'error' : 'debug',
+    logLevel : isProduction ? 'error' : 'warn',
     stringifyArguments : false,
     showLogLevel : true,
     showMethodName : !isProduction,
@@ -36,6 +39,9 @@ Vue.use(VueLogger, options);
 import VueI18n from 'vue-i18n';
 Vue.use(VueI18n);
 
+import VueObserveVisibility from 'vue-observe-visibility';
+Vue.use(VueObserveVisibility);
+
 import ForceCompute from './plugins/forceCompute';
 Vue.use(ForceCompute);
 
@@ -46,6 +52,9 @@ Vue.use(WhenAvailable);
 import { BootstrapVue, BootstrapVueIcons } from 'bootstrap-vue'
 Vue.use(BootstrapVue) // Telling Vue to use this in whole application
 Vue.use(BootstrapVueIcons)
+
+import VueAnime from 'vue-animejs';
+Vue.use(VueAnime);
 
 import VueTimeago from 'vue-timeago';
 Vue.use(VueTimeago, {
@@ -61,53 +70,70 @@ Vue.use(VueTimeago, {
   */
 });
 
+import VueSlider from 'vue-slider-component'
+import 'vue-slider-component/theme/default.css'
+Vue.component('VueSlider', VueSlider)
+
+import VueTagsInput from '@johmun/vue-tags-input'
+Vue.component('VueTagsInput', VueTagsInput)
+
 /**
  * Next, we will create a fresh Vue application instance and attach it to
  * the page. Then, you may begin adding components to this application
  * or customize the JavaScript scaffolding to fit your unique needs.
  */
 
-
-Vue.component('show-feed', require('./pages/ShowFeed.vue').default);
-Vue.component('home-feed', require('./pages/HomeFeed.vue').default);
-
-// ---
-
 Vue.component('main-navbar', require('./components/common/MainNavbar.vue').default);
-Vue.component('online-status', require('./components/user/OnlineStatus.vue').default);
 Vue.component('my-vault', require('./components/vault/Dashboard.vue').default);
 Vue.component('my-saved', require('./components/saved/Dashboard.vue').default);
-Vue.component('create-story', require('./components/stories/Wizard.vue').default);
-Vue.component('story-player', require('./components/stories/AutoPlayer.vue').default);
 
-export const eventBus = new Vue({
-/*
-    methods: {
-        switchDetails: function(obj) {
-            this.$emit('detailsWasSwitched', obj);
-        },
-        fixStatus: function(index) {
-            this.$emit('statusWasFixed', index);
-        },
-    }
-*/
-});
+// converts from cents to dollars, and formats
+Vue.filter('niceCurrency', function (valueInCents) {
+  let value = valueInCents ? (valueInCents/100) : 0
+  value.toFixed(2)
+  return `$${value}`
+  /*
+      return new Intl.NumberFormat('en-US',
+        { style: 'currency', currency: 'USD' }
+      ).format(v);
+    */
+})
 
-/**
- * Loading localization translations
- */
+Vue.filter('niceGuid', function (v) {
+  return v.slice(-12)
+})
+Vue.filter('enumPostType', function (k) {
+  switch (k) {
+    case 'free':
+      return 'Free'
+    case 'price':
+      return 'Purchase-Only'
+    case 'paid':
+      return 'Subscriber-Only'
+  }
+})
+// Assumes post as input
+Vue.filter('isSubscriberOnly', function (p) {
+  return p.type === 'paid'
+})
+Vue.filter('isPurchaseable', function (p) {
+  return p.type === 'price'
+})
+
+export const eventBus = new Vue({ });
+
+// Localization translations
 import i18n from './i18n'
 
-const app = new Vue({
-    i18n,
-    store,
-    el: '#app',
-});
+import VueRouter from 'vue-router'
+Vue.use(VueRouter)
+import router from './routes/app.routes'
 
-/*
+import App from './views/templates/App.vue'
+
 const app = new Vue({
-    //router,
+    router,
+    i18n,
     store,
     render: h => h(App),
 }).$mount('#app');
-*/

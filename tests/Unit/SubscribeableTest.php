@@ -1,17 +1,19 @@
 <?php
 namespace Tests\Unit;
 
+use DB;
 use Tests\TestCase;
-use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Models\Post;
+use App\Models\User;
+use App\Libs\UserMgr;
+use App\Models\Vault;
+use Ramsey\Uuid\Uuid;
+use App\Models\Mediafile;
+use App\Enums\PostTypeEnum;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
-use DB;
-use Ramsey\Uuid\Uuid;
-use App\Post;
-//use App\Vault;
-use App\Libs\UserMgr;
-use App\Enums\PostTypeEnum;
+use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class SubscribeableTest extends TestCase
 {
@@ -51,7 +53,7 @@ class SubscribeableTest extends TestCase
         $this->assertGreaterThan(0, $creator->timeline->followers->count());
         $this->assertSame($follower->id, $creator->timeline->followers[0]->id);
 
-        //$this->assertInstanceOf(\App\User::class, $mediafile->sharees[0]);
+        //$this->assertInstanceOf(User::class, $mediafile->sharees[0]);
     }
 
 
@@ -59,10 +61,10 @@ class SubscribeableTest extends TestCase
         parent::setUp();
         $this->_deleteList = collect();
 
-        $this->follower = factory(\App\User::class)->create();
+        $this->follower = factory(User::class)->create();
         $this->_deleteList->push($this->follower);
 
-        $this->creator = factory(\App\User::class)->create();
+        $this->creator = factory(User::class)->create();
         $this->_deleteList->push($this->creator);
 
         // Create some posts for the 'seller user'
@@ -96,7 +98,7 @@ class SubscribeableTest extends TestCase
                 if ( $obj instanceof Mediafile ) {
                      $obj->sharees()->detach();
                 }
-                if ( $obj instanceof \App\User ) {
+                if ( $obj instanceof User ) {
                      $obj->followedtimelines()->detach();
                      $obj->ledgersales->each( function($o) { $o->forceDelete(); } );
                      $obj->ledgerpurchases->each( function($o) { $o->forceDelete(); } );

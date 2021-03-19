@@ -1,0 +1,136 @@
+<template>
+  <div class="container w-100 d-flex flex-column mt-5">
+    <b-card class="login-card mx-auto" no-body>
+      <template #header>
+        <div class="h1 text-center" v-text="$t('signInHeader')" />
+        <div class="text-center">
+          <div class="d-inline" v-text="$t('noAccountQuestion')" />
+          <!-- TODO: Link to registration page -->
+          <router-link :to="{ name: 'register' }" v-text="$t('signUpLink')" />
+        </div>
+      </template>
+      <!-- Login Form -->
+      <div class="login-form p-3">
+        <div v-if="verrors && verrors.message">
+          <b-alert variant="danger" v-text="verrors.message" show />
+        </div>
+        <b-form-group :invalid-feedback="verrors.email ? verrors.email[0] : null" :state="verrors.email ? false : null">
+          <b-form-input
+            id="input-email"
+            v-model="form.email"
+            :placeholder="$t('email')"
+            :state="verrors.email ? false : null"
+            @focus="clearVerrors"
+          />
+        </b-form-group>
+        <b-form-group :invalid-feedback="verrors.password ? verrors.password[0] : null" :state="verrors.password ? false : null">
+          <b-form-input
+            id="input-password"
+            type="password"
+            v-model="form.password"
+            :placeholder="$t('password')"
+            :state="verrors.password ? false : null"
+            @focus="clearVerrors"
+          />
+        </b-form-group>
+        <div class="text-right">
+          <!-- TODO: Link to forgot password page -->
+          <router-link :to="{ name: 'forgot-password' }" v-text="$t('forgotPasswordLink')" />
+        </div>
+      </div>
+
+      <div class="p-3">
+        <b-btn variant="primary" block @click="login" :disabled="state === 'loading'">
+          <span v-if="state === 'form'">{{ $t('signInButton') }}</span>
+          <fa-icon v-else icon="spinner" spin />
+        </b-btn>
+      </div>
+
+      <div class="divider d-flex">
+        <hr class="h-line flex-grow-1" />
+        <div class="mx-3" v-text="$t('or')" />
+        <hr class="h-line flex-grow-1" />
+      </div>
+      <div class="3rd-party-sign-in p-3 text-center">
+        <!-- TODO: Add 3rd party sign ins -->
+        Sign in with 3rd party here.
+      </div>
+    </b-card>
+
+    <div class="mt-auto mb-3">
+      <LinkBar />
+    </div>
+  </div>
+</template>
+
+<script>
+/**
+ * Login Page
+ */
+import LinkBar from '../../components/staticPages/LinkBar'
+export default {
+  name: 'login',
+  components: {
+    LinkBar,
+  },
+  data: () => ({
+    state: 'form', // form | loading
+    verrors: {}, // rendered validation Errors
+    form: {
+      email: '',
+      password: '',
+      remember: false,
+    },
+  }),
+  methods: {
+    clearVerrors() {
+      this.verrors = {}
+    },
+
+    login() {
+      this.state = 'loading'
+      this.axios.post('/login', this.form).then((response) => {
+        if (response.data.redirect) {
+          console.log('success', { 
+            redirect: response.data 
+          });
+          window.location = response.data.redirect
+        } else {
+          // %TODO
+        }
+        this.state = 'form'
+      }).catch( e => {
+        const response = e.response
+        if (response.data && response.data.errors) {
+          this.verrors = response.data.errors // L8 convention is 'errors'
+        }
+        this.state = 'form'
+      });
+    },
+  },
+}
+</script>
+
+<style lang="scss" scoped>
+.login-card {
+  width: 500px;
+}
+.h-line {
+  color: var('--gray');
+}
+</style>
+
+<i18n lang="json5">
+{
+  "en": {
+    "signInHeader": "Sign In",
+    "noAccountQuestion": "Don't have an account?",
+    "signUpLink": "Sign Up",
+    "email": "Email",
+    "password": "Password",
+    "signInButton": "Sign In",
+    "forgotPasswordLink": "Forgot Password?",
+    "or": "or",
+  },
+}
+</i18n>

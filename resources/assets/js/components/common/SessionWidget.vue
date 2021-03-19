@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!is_loading" class="session_widget-crate tag-crate">
+  <div v-if="!isLoading" class="session_widget-crate tag-crate">
     <section>
 
       <b-card
@@ -59,7 +59,7 @@
 
       </b-card>
 
-    </section>							
+    </section>
   </div>
 </template>
 
@@ -74,14 +74,16 @@ export default {
   },
 
   computed: {
-    ...Vuex.mapState(['is_loading']),
-
     follower() {
       return this.timeline.user;
     },
     stats() {
       return this.timeline.userstats;
     },
+
+    isLoading() {
+      return !this.session_user || !this.timeline
+    }
   },
 
   data: () => ({

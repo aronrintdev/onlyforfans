@@ -1,17 +1,18 @@
 <?php
 namespace Tests\Unit;
 
+use DB;
 use Tests\TestCase;
-use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Models\User;
+use App\Models\Vault;
+use Ramsey\Uuid\Uuid;
+use App\Models\Mediafile;
+use App\Models\Vaultfolder;
+use App\Enums\MediafileTypeEnum;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
-use DB;
-use Ramsey\Uuid\Uuid;
-use App\Mediafile;
-use App\Vault;
-use App\Vaultfolder;
-use App\Enums\MediafileTypeEnum;
+use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class VaultModelTest extends TestCase
 {
@@ -20,29 +21,11 @@ class VaultModelTest extends TestCase
     private static $_persist = false;
 
     /**
-     * @group mfdev
-     */
-    /*
-    public function test_debug()
-    {
-        $mediafile = Mediafile::find(4);
-        //$f = $s->mediafiles->first()->filename;
-        $f = $mediafile->filename;
-        //dd($f);
-        //$s = Storage::disk('s3')->get($f);
-        $s = Storage::disk('s3')->url($f);
-        //$s = Storage::disk('s3')->get($s->mediafiles->first()->filename);
-        dd($s);
-        dd($mediafile->toArray());
-    }
-     */
-
-    /**
      * @group vdev
      */
     public function test_can_create_vault()
     {
-        $user = factory(\App\User::class)->create();
+        $user = factory(User::class)->create();
         $user->refresh();
         $this->_deleteList[] = $user;
 
@@ -56,18 +39,18 @@ class VaultModelTest extends TestCase
         $vault->refresh();
         $this->_deleteList->push($vault);
 
-        $vfroot = factory(Vaultfolder::class)->create([
+        $root = factory(Vaultfolder::class)->create([
             'vault_id' => $vault->id,
         ]);
-        $vfroot->refresh();
-        $this->_deleteList->push($vfroot);
+        $root->refresh();
+        $this->_deleteList->push($root);
 
-        $vfchild1 = factory(Vaultfolder::class)->create([
+        $child1 = factory(Vaultfolder::class)->create([
             'vault_id' => $vault->id,
-            'parent_id' => $vfroot->id,
+            'parent_id' => $root->id,
         ]);
-        $vfchild1->refresh();
-        $this->_deleteList->push($vfchild1);
+        $child1->refresh();
+        $this->_deleteList->push($child1);
 
         // --
 
@@ -76,17 +59,17 @@ class VaultModelTest extends TestCase
         $this->assertNotNull($vault);
         $this->assertNotNull($vault->id);
         $this->assertGreaterThan(0, $vault->id);
-        $this->assertEquals('bar', $vault->cattrs['foo']);
+        $this->assertEquals('bar', $vault->customAttributes['foo']);
 
-        $this->assertNotNull($vfroot);
-        $this->assertNotNull($vfroot->id);
-        $this->assertGreaterThan(0, $vfroot->id);
-        $this->assertNull($vfroot->parent_id);
+        $this->assertNotNull($root);
+        $this->assertNotNull($root->id);
+        $this->assertGreaterThan(0, $root->id);
+        $this->assertNull($root->parent_id);
 
-        $this->assertNotNull($vfchild1);
-        $this->assertNotNull($vfchild1->id);
-        $this->assertGreaterThan(0, $vfchild1->id);
-        $this->assertEquals($vfroot->id, $vfchild1->parent_id);
+        $this->assertNotNull($child1);
+        $this->assertNotNull($child1->id);
+        $this->assertGreaterThan(0, $child1->id);
+        $this->assertEquals($root->id, $child1->parent_id);
     }
 
     protected function setUp() : void {

@@ -1,20 +1,21 @@
 <?php
 namespace App\Libs;
 
+use Exception;
+use Throwable;
+use App\Models\User;
+
+use App\Models\Timeline;
 use Illuminate\Support\Str;
+
+use App\Models\Notification;
+use App\Enums\PaymentTypeEnum;
 use Illuminate\Support\Collection; 
 use Illuminate\Support\Facades\Log;
 
-use Exception;
-use Throwable;
-
-use App\User;
-use App\Timeline;
-use App\Enums\PaymentTypeEnum;
-
 class UserMgr {
 
-    public static function toggleFollow(User $follower, Timeline $timeline, array $attrs=[]) : ?array
+    public static function toggleFollow(User $follower, Timeline $timeline, array $attrs = []) : ?array
     {
         throw new Exception('deprecated');
 
@@ -24,9 +25,9 @@ class UserMgr {
 
         $isFollowing = $timeline->followers->contains($follower->id);
 
-        $cattrs = [];
+        $customAttributes = [];
         if ( array_key_exists('referer', $attrs) && $attrs['referer'] ) {
-            $cattrs['referer'] = $referer;
+            $customAttributes['referer'] = $referer;
         }
 
         if ( $isFollowing ) { // unfollow
@@ -35,19 +36,17 @@ class UserMgr {
         } else { // follow
             $action = 'follow';
             if ($attrs['is_subscribe']) {
-//dd('toggleFollow.2', $attrs, $isFollowing);
                 $timeline->receivePayment(
                     PaymentTypeEnum::SUBSCRIPTION,
                     $follower,
-                    $timeline->user->price*100, // %FIXME: price should be on timeline not user
-                    $cattrs,
+                    $timeline->price,
+                    $customAttributes,
                 );
             } else { // follow only
-//dd('toggleFollow.3', $attrs, $isFollowing);
                 $follower->followedtimelines()->attach($timeline->id, [
-                    'cattrs' => json_encode($cattrs),
+                    'cattrs' => json_encode($customAttributes),
                 ]);
-                //$timeline->followers()->attach($follower->id, [ 'cattrs' => $cattrs ]);
+                //$timeline->followers()->attach($follower->id, [ 'cattrs' => $customAttributes ]);
             }
         }
 
@@ -57,18 +56,18 @@ class UserMgr {
         try {
             switch ($action) {
             case 'follow':
-                $description = $follower->name.' '.trans('common.is_following_you'); 
+                $description = $follower->name.' '.trans('common.is_following_you');
                 $message = 'successfully followed';
                 break;
             case 'unfollow':
-                $description = $follower->name.' '.trans('common.is_unfollowing_you'); 
+                $description = $follower->name.' '.trans('common.is_unfollowing_you');
                 $message = 'successfully un-followed';
                 break;
             }
             Notification::create([
                 'user_id' => $timeline->user->id,  // followee
-                'timeline_id' => $timeline->id, 
-                'notified_by' => $follower->id, 
+                'timeline_id' => $timeline->id,
+                'notified_by' => $follower->id,
                 'description' => $description ?? '',
                 'type' => $action
             ]);

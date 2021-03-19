@@ -1,8 +1,8 @@
 <?php
 namespace App\Policies;
 
-use App\User;
-use App\Story;
+use App\Models\User;
+use App\Models\Story;
 use App\Policies\Traits\OwnablePolicies;
 
 class StoryPolicy extends BasePolicy

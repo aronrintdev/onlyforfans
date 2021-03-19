@@ -8,24 +8,34 @@
  * allows your team to easily build robust real-time web applications.
  */
 
+import Vue from 'vue'
+import Pusher from 'pusher-js'
 import Echo from 'laravel-echo'
 
 if (typeof window.Pusher === 'undefined') {
-    window.Pusher = require('pusher-js');
+  window.Pusher = Pusher
 }
 
 if (typeof window.Echo === 'undefined') {
-    window.Echo = new Echo({
-        broadcaster: 'pusher',
-        key: process.env.MIX_PUSHER_APP_KEY || window.pusherKey,
-        // key: 'c0277f01daca608700b8',
-        cluster: process.env.MIX_PUSHER_APP_CLUSTER || window.pusherCluster,
-        // cluster: 'us2'
-        wsHost: window.location.hostname,
-        wsPort: 6001,
-        forceTLS: false,
-        disableStats: true,
-        // encrypted: true,
-    });
+  window.Echo = new Echo({
+    broadcaster: 'pusher',
+    key: process.env.MIX_PUSHER_APP_KEY || window.pusherKey,
+    // key: 'c0277f01daca608700b8',
+    cluster: process.env.MIX_PUSHER_APP_CLUSTER || window.pusherCluster,
+    // cluster: 'us2'
+    wsHost: window.location.hostname,
+    wsPort: 6001,
+    forceTLS: false,
+    disableStats: true,
+    // encrypted: true,
+  })
 }
 
+/**
+ * Add to Vue instance
+ */
+Vue.use({
+  install: (app, options) => {
+    app.prototype.$echo = window.Echo
+  }
+})

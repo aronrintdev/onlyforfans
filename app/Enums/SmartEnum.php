@@ -60,6 +60,16 @@ abstract class SmartEnum {
         return array_keys(static::$keymap);
     }
 
+    public static function getKeysCsv() : string
+    {
+        return implode(',',self::getKeys());
+    }
+
+    public static function count() : int
+    {
+        return count(static::$keymap);
+    }
+
     // Array for a select dropdown form element
     public static function getSelectOptions($includeBlank=false, $keyField='id', $filters=[]) : array
     {

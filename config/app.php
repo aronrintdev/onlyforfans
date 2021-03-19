@@ -247,7 +247,7 @@ return [
         // 'Theme'     => Teepluss\Theme\Facades\Theme::class,
         'Theme'     => Ayra\Theme\Facades\Theme::class,
         'Image'     => Intervention\Image\Facades\Image::class,
-        'Setting'   => App\Setting::class,
+        'Setting'   => App\Models\Setting::class,
         'Socialite' => Laravel\Socialite\Facades\Socialite::class,
         'Debugbar'  => Barryvdh\Debugbar\Facade::class,
         // 'Entrust'   => Zizaco\Entrust\EntrustFacade::class,

@@ -4,6 +4,15 @@ $theme-colors: (
   "white": #fff,
 );
 
+html,
+body {
+  min-height: 100% !important;
+  height: 100%;
+}
+
+.app {
+  min-height: 100vh;
+}
 
 body {
   background-color: rgb(237, 242, 247) !important;
@@ -23,11 +32,6 @@ body .btn {
     outline: none !important;
     border-radius: 25px;
 }
-body .btn-success {
-    background-color: #298ad3;
-    background-image: linear-gradient(-1deg, #298ad3 2%, #298ad3 98%);
-    border: 1px solid #298ad3;
-}
 
 body .small-text {
     font-size: 13px !important;
@@ -37,3 +41,8 @@ body .tag-clickable {
   cursor: pointer;
 }
 
+.static-page-layout {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}

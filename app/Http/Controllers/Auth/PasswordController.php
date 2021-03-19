@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Setting;
+use App\Models\Setting;
 use Illuminate\Foundation\Auth\ResetsPasswords;
 use Theme;
 
@@ -41,8 +41,6 @@ class PasswordController extends Controller
     public function showLinkRequestForm()
     {
         $theme = Theme::uses(Setting::get('current_theme', 'default'))->layout('guest');
-        $theme->setTitle(trans('common.reset_password').' '.Setting::get('title_seperator').' '.Setting::get('site_title').' '.Setting::get('title_seperator').' '.Setting::get('site_tagline'));
-
         return $theme->scope('users.password')->render();
     }
 }

@@ -4,19 +4,21 @@ namespace App\Http\Controllers;
 use DB;
 use Auth;
 use Exception;
+use View;
 
-use Illuminate\Support\Facades\Log;
+use App\Models\User;
+use App\Models\Story;
+use App\Models\Vault;
+
+use App\Models\Invite;
+use App\Models\Mediafile;
+use App\Models\Vaultfolder;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Mail;
-
-use App\Invite;
-use App\Mediafile;
-use App\Vault;
-use App\Vaultfolder;
-use App\User;
+use App\Enums\InviteTypeEnum;
 //use App\Jobs\ProcessVaultInvites;
 use App\Mail\ShareableInvited;
-use App\Enums\InviteTypeEnum;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class VaultsController extends AppBaseController
 {
@@ -27,7 +29,7 @@ class VaultsController extends AppBaseController
         $this->_php2jsVars['session'] = [
             'username' => $sessionUser->username,
         ];
-        \View::share('g_php2jsVars',$this->_php2jsVars);
+        View::share('g_php2jsVars',$this->_php2jsVars);
 
         $myVault = $sessionUser->vaults()->first(); // %FIXME
 
@@ -50,11 +52,10 @@ class VaultsController extends AppBaseController
 
         $vaultRootFolder = $myVault->getRootFolder();
 
-        return view('vault.dashboard', [
-            'sessionUser' => $sessionUser,
+        return [
             'myVault' => $myVault,
             'vaultRootFolder' => $vaultRootFolder,
-        ]);
+        ];
     }
 
     public function index(Request $request)

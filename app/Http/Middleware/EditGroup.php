@@ -2,7 +2,7 @@
 
 namespace App\Http\Middleware;
 
-use App\Timeline;
+use App\Models\Timeline;
 use Closure;
 use Illuminate\Support\Facades\Auth;
 

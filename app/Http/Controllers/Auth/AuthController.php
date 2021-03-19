@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Media;
-use App\Setting;
-use App\Timeline;
-use App\User;
+use App\Models\Mediafile;
+use App\Models\Setting;
+use App\Models\Timeline;
+use App\Models\User;
 use DB;
 use Illuminate\Foundation\Auth\ThrottlesLogins;
 use Illuminate\Http\Request;
@@ -107,8 +107,6 @@ class AuthController extends Controller
         }
 
         $theme = Theme::uses(Setting::get('current_theme', 'default'))->layout('guest');
-        $theme->setTitle(trans('auth.register').' '.Setting::get('title_seperator').' '.Setting::get('site_title').' '.Setting::get('title_seperator').' '.Setting::get('site_tagline'));
-
         return $theme->scope('landing')->render();
     }
 
@@ -221,197 +219,197 @@ class AuthController extends Controller
 
     public function facebookRedirect()
     {
-        return fans::with('facebook')->redirect();
+        // return fans::with('facebook')->redirect();
     }
 
     // to get authenticate user data
     public function facebook()
     {
-        $facebook_user = fans::with('facebook')->user();
+        // $facebook_user = fans::with('facebook')->user();
 
-        $email = $facebook_user->email;
+        // $email = $facebook_user->email;
 
-        if ($email == null) {
-            $email = $facebook_user->id.'@facebook.com';
-        }
+        // if ($email == null) {
+        //     $email = $facebook_user->id.'@facebook.com';
+        // }
 
-        $user = User::firstOrNew(['email' => $email]);
+        // $user = User::firstOrNew(['email' => $email]);
 
-        if ($facebook_user->name != null) {
-            $name = $facebook_user->name;
-        } else {
-            $name = $email;
-        }
+        // if ($facebook_user->name != null) {
+        //     $name = $facebook_user->name;
+        // } else {
+        //     $name = $email;
+        // }
 
-        if (!$user->id) {
-            $request = new Request(['username' => $facebook_user->id,
-              'name'                           => $name,
-              'email'                          => $email,
-              'password'                       => bcrypt(str_random(8)),
-              'gender'                         => 'other',
-            ]);
+        // if (!$user->id) {
+        //     $request = new Request(['username' => $facebook_user->id,
+        //       'name'                           => $name,
+        //       'email'                          => $email,
+        //       'password'                       => bcrypt(str_random(8)),
+        //       'gender'                         => 'other',
+        //     ]);
 
-            $timeline = $this->registerUser($request, true);
-            //  Prepare the image for user avatar
-            if ($facebook_user->avatar != null) {
-                $fileContents = file_get_contents($facebook_user->getAvatar());
-                $photoName = date('Y-m-d-H-i-s').str_random(8).'.png';
-                File::put(storage_path() . '/uploads/users/avatars/' . $photoName, $fileContents);
-                $media = Media::create([
-                        'title'  => $photoName,
-                        'type'   => 'image',
-                        'source' => $photoName,
-                      ]);
-                $timeline->avatar_id = $media->id;
-                $timeline->save();
-            }
+        //     $timeline = $this->registerUser($request, true);
+        //     //  Prepare the image for user avatar
+        //     if ($facebook_user->avatar != null) {
+        //         $fileContents = file_get_contents($facebook_user->getAvatar());
+        //         $photoName = date('Y-m-d-H-i-s').str_random(8).'.png';
+        //         File::put(storage_path() . '/uploads/users/avatars/' . $photoName, $fileContents);
+        //         $media = Media::create([
+        //                 'title'  => $photoName,
+        //                 'type'   => 'image',
+        //                 'source' => $photoName,
+        //               ]);
+        //         $timeline->avatar_id = $media->id;
+        //         $timeline->save();
+        //     }
 
-            $user = $timeline->user;
-        } else {
-            $timeline = $user->timeline;
-        }
+        //     $user = $timeline->user;
+        // } else {
+        //     $timeline = $user->timeline;
+        // }
 
 
-        if (Auth::loginUsingId($user->id)) {
-            return redirect('/')->with(['message' => trans('messages.change_username_facebook'), 'status' => 'warning']);
-        } else {
-            return redirect($timeline->username)->with(['message' => trans('messages.user_login_failed'), 'status' => 'success']);
-        }
+        // if (Auth::loginUsingId($user->id)) {
+        //     return redirect('/')->with(['message' => trans('messages.change_username_facebook'), 'status' => 'warning']);
+        // } else {
+        //     return redirect($timeline->username)->with(['message' => trans('messages.user_login_failed'), 'status' => 'success']);
+        // }
     }
 
     public function googleRedirect()
     {
-        return fans::with('google')->redirect();
+        // return fans::with('google')->redirect();
     }
 
     // to get authenticate user data
     public function google()
     {
-        $google_user = fans::with('google')->user();
-        if (isset($google_user->user['gender'])) {
-            $user_gender = $google_user->user['gender'];
-        } else {
-            $user_gender = 'other';
-        }
-        $user = User::firstOrNew(['email' => $google_user->email]);
-        if (!$user->id) {
-            $request = new Request(['username' => $google_user->id,
-              'name'                           => $google_user->name,
-              'email'                          => $google_user->email,
-              'password'                       => bcrypt(str_random(8)),
-              'gender'                         => $user_gender,
-            ]);
-            $timeline = $this->registerUser($request, true);
+        // $google_user = fans::with('google')->user();
+        // if (isset($google_user->user['gender'])) {
+        //     $user_gender = $google_user->user['gender'];
+        // } else {
+        //     $user_gender = 'other';
+        // }
+        // $user = User::firstOrNew(['email' => $google_user->email]);
+        // if (!$user->id) {
+        //     $request = new Request(['username' => $google_user->id,
+        //       'name'                           => $google_user->name,
+        //       'email'                          => $google_user->email,
+        //       'password'                       => bcrypt(str_random(8)),
+        //       'gender'                         => $user_gender,
+        //     ]);
+        //     $timeline = $this->registerUser($request, true);
 
-            //  Prepare the image for user avatar
-            $avatar = Image::make($google_user->avatar);
-            $photoName = date('Y-m-d-H-i-s').str_random(8).'.png';
-            $avatar->save(storage_path().'/uploads/users/avatars/'.$photoName, 60);
+        //     //  Prepare the image for user avatar
+        //     $avatar = Image::make($google_user->avatar);
+        //     $photoName = date('Y-m-d-H-i-s').str_random(8).'.png';
+        //     $avatar->save(storage_path().'/uploads/users/avatars/'.$photoName, 60);
 
-            $media = Media::create([
-                      'title'  => $photoName,
-                      'type'   => 'image',
-                      'source' => $photoName,
-                    ]);
+        //     $media = Media::create([
+        //               'title'  => $photoName,
+        //               'type'   => 'image',
+        //               'source' => $photoName,
+        //             ]);
 
-            $timeline->avatar_id = $media->id;
+        //     $timeline->avatar_id = $media->id;
 
-            $timeline->save();
-            $user = $timeline->user;
-        }
+        //     $timeline->save();
+        //     $user = $timeline->user;
+        // }
 
-        if (Auth::loginUsingId($user->id)) {
-            return redirect('/')->with(['message' => trans('messages.change_username_google'), 'status' => 'warning']);
-        } else {
-            return redirect($timeline->username)->with(['message' => trans('messages.user_login_failed'), 'status' => 'success']);
-        }
+        // if (Auth::loginUsingId($user->id)) {
+        //     return redirect('/')->with(['message' => trans('messages.change_username_google'), 'status' => 'warning']);
+        // } else {
+        //     return redirect($timeline->username)->with(['message' => trans('messages.user_login_failed'), 'status' => 'success']);
+        // }
     }
 
     public function twitterRedirect()
     {
-        return fans::with('twitter')->redirect();
+        // return fans::with('twitter')->redirect();
     }
 
   // to get authenticate user data
     public function twitter()
     {
-        $twitter_user = fans::with('twitter')->user();
+        // $twitter_user = fans::with('twitter')->user();
 
-        $user = User::firstOrNew(['email' => $twitter_user->id.'@twitter.com']);
-        if (!$user->id) {
-            $request = new Request(['username'   => $twitter_user->id,
-              'name'                           => $twitter_user->name,
-              'email'                          => $twitter_user->id.'@twitter.com',
-              'password'                       => bcrypt(str_random(8)),
-              'gender'                         => 'other',
-            ]);
-            $timeline = $this->registerUser($request, true);
-              //  Prepare the image for user avatar
-            $avatar = Image::make($twitter_user->avatar_original);
-            $photoName = date('Y-m-d-H-i-s').str_random(8).'.png';
-            $avatar->save(storage_path().'/uploads/users/avatars/'.$photoName, 60);
+        // $user = User::firstOrNew(['email' => $twitter_user->id.'@twitter.com']);
+        // if (!$user->id) {
+        //     $request = new Request(['username'   => $twitter_user->id,
+        //       'name'                           => $twitter_user->name,
+        //       'email'                          => $twitter_user->id.'@twitter.com',
+        //       'password'                       => bcrypt(str_random(8)),
+        //       'gender'                         => 'other',
+        //     ]);
+        //     $timeline = $this->registerUser($request, true);
+        //       //  Prepare the image for user avatar
+        //     $avatar = Image::make($twitter_user->avatar_original);
+        //     $photoName = date('Y-m-d-H-i-s').str_random(8).'.png';
+        //     $avatar->save(storage_path().'/uploads/users/avatars/'.$photoName, 60);
 
-            $media = Media::create([
-                      'title'  => $photoName,
-                      'type'   => 'image',
-                      'source' => $photoName,
-                    ]);
+        //     $media = Media::create([
+        //               'title'  => $photoName,
+        //               'type'   => 'image',
+        //               'source' => $photoName,
+        //             ]);
 
-            $timeline->avatar_id = $media->id;
+        //     $timeline->avatar_id = $media->id;
 
-            $timeline->save();
-            $user = $timeline->user;
-        }
+        //     $timeline->save();
+        //     $user = $timeline->user;
+        // }
 
-        if (Auth::loginUsingId($user->id)) {
-            return redirect('/')->with(['message' => trans('messages.change_username_twitter').' <b>'.$user->email.'</b>', 'status' => 'warning']);
-        } else {
-            return redirect('login')->with(['message' => trans('messages.user_login_failed'), 'status' => 'error']);
-        }
+        // if (Auth::loginUsingId($user->id)) {
+        //     return redirect('/')->with(['message' => trans('messages.change_username_twitter').' <b>'.$user->email.'</b>', 'status' => 'warning']);
+        // } else {
+        //     return redirect('login')->with(['message' => trans('messages.user_login_failed'), 'status' => 'error']);
+        // }
     }
 
     public function linkedinRedirect()
     {
-        return fans::with('linkedin')->redirect();
+        // return fans::with('linkedin')->redirect();
     }
 
   // to get authenticate user data
     public function linkedin()
     {
-        $linkedin_user = fans::with('linkedin')->user();
+        // $linkedin_user = fans::with('linkedin')->user();
 
-        $user = User::firstOrNew(['email' => $linkedin_user->email]);
-        if (!$user->id) {
-            $request = new Request(['username'   => preg_replace('/[^A-Za-z0-9 ]/', '', $linkedin_user->id),
-              'name'                           => $linkedin_user->name,
-              'email'                          => $linkedin_user->email,
-              'password'                       => bcrypt(str_random(8)),
-              'gender'                         => 'other',
-            ]);
+        // $user = User::firstOrNew(['email' => $linkedin_user->email]);
+        // if (!$user->id) {
+        //     $request = new Request(['username'   => preg_replace('/[^A-Za-z0-9 ]/', '', $linkedin_user->id),
+        //       'name'                           => $linkedin_user->name,
+        //       'email'                          => $linkedin_user->email,
+        //       'password'                       => bcrypt(str_random(8)),
+        //       'gender'                         => 'other',
+        //     ]);
 
-            $timeline = $this->registerUser($request, true);
+        //     $timeline = $this->registerUser($request, true);
 
-              //  Prepare the image for user avatar
-            $avatar = Image::make($linkedin_user->avatar_original);
-            $photoName = date('Y-m-d-H-i-s').str_random(8).'.png';
-            $avatar->save(storage_path().'/uploads/users/avatars/'.$photoName, 60);
+        //       //  Prepare the image for user avatar
+        //     $avatar = Image::make($linkedin_user->avatar_original);
+        //     $photoName = date('Y-m-d-H-i-s').str_random(8).'.png';
+        //     $avatar->save(storage_path().'/uploads/users/avatars/'.$photoName, 60);
 
-            $media = Media::create([
-                      'title'  => $photoName,
-                      'type'   => 'image',
-                      'source' => $photoName,
-                    ]);
+        //     $media = Media::create([
+        //               'title'  => $photoName,
+        //               'type'   => 'image',
+        //               'source' => $photoName,
+        //             ]);
 
-            $timeline->avatar_id = $media->id;
+        //     $timeline->avatar_id = $media->id;
 
-            $timeline->save();
-            $user = $timeline->user;
-        }
+        //     $timeline->save();
+        //     $user = $timeline->user;
+        // }
 
-        if (Auth::loginUsingId($user->id)) {
-            return redirect('/')->with(['message' => trans('messages.change_username_linkedin'), 'status' => 'warning']);
-        } else {
-            return redirect('login')->with(['message' => trans('messages.user_login_failed'), 'status' => 'error']);
-        }
+        // if (Auth::loginUsingId($user->id)) {
+        //     return redirect('/')->with(['message' => trans('messages.change_username_linkedin'), 'status' => 'warning']);
+        // } else {
+        //     return redirect('login')->with(['message' => trans('messages.user_login_failed'), 'status' => 'error']);
+        // }
     }
 }

@@ -7,7 +7,7 @@ use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use App\User;
+use App\Models\User;
 use App\Interfaces\Likeable;
 
 class LikeablesController extends AppBaseController
@@ -20,6 +20,7 @@ class LikeablesController extends AppBaseController
         ]);
     }
 
+    // %TODO: remove likee param and just use session user for likee (?)
     // %TODO: notify user
     // %TODO: better architecture would be:
     //  ~ addLike(), removeLike(): each of which handle all resources...OR...
@@ -34,7 +35,7 @@ class LikeablesController extends AppBaseController
     {
         $request->validate([
             'likeable_type' => 'required|string|alpha-dash|in:comments,mediafiles,posts,stories',
-            'likeable_id' => 'required|numeric|min:1',
+            'likeable_id' => 'required|uuid',
         ]);
 
         $alias = $request->likeable_type;
@@ -42,7 +43,6 @@ class LikeablesController extends AppBaseController
         $likeable = (new $model)->where('id', $request->likeable_id)->firstOrFail();
 
         if ($request->user()->cannot('like', $likeable)) {
-            //dd('here', $likee, $likeable);
             abort(403);
         }
 
@@ -59,7 +59,7 @@ class LikeablesController extends AppBaseController
     {
         $request->validate([
             'likeable_type' => 'required|string|alpha-dash|in:comments,mediafiles,posts,stories',
-            'likeable_id' => 'required|numeric|min:1',
+            'likeable_id' => 'required|uuid',
         ]);
 
         $alias = $request->likeable_type;

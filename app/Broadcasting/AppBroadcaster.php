@@ -2,7 +2,7 @@
 
 namespace App\Broadcasting;
 
-use App\User;
+use App\Models\User;
 use Illuminate\Broadcasting\Broadcasters\PusherBroadcaster;
 use Illuminate\Container\Container;
 use stdClass;

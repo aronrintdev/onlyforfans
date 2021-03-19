@@ -3,9 +3,10 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\LoginSession;
-use App\Setting;
-use App\Timeline;
+use App\Models\Session as LoginSession;
+use App\Models\Setting;
+use App\Models\Timeline;
+use App\Models\User;
 use DB;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
@@ -14,8 +15,10 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Validation\ValidationException;
 use Theme;
 use Validator;
+use Exception;
 
 class LoginController extends Controller
 {
@@ -32,150 +35,57 @@ class LoginController extends Controller
 
     use AuthenticatesUsers;
 
-    /**
-     * Where to redirect users after login.
-     *
-     * @var string
-     */
+    //* Where to redirect users after login.
     protected $redirectTo = '/home';
 
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
     public function __construct()
     {
         $this->middleware('guest', ['except' => 'logout']);
     }
 
-    public function getLogin()
-    {
-        // dd(Session::get('users.profile'));
-        // $routeName =  app('router')->getRoutes()->match(app('request')->create(Session::get('users.profile')))->getName();
-       
-        // if ($routeName == 'users.profile') {
-        //    Session::put('users.profile', Session::get('users.profile'));
-        // }
-
-        //echo "kkk";
-        if(isset($_GET['email']))
-        {
-            $user = DB::table('users')->where('email', $_GET['email'])->first();
-
-            if (empty($user)) {
-                return \redirect('/');
-            }
-
-            if(Auth::loginUsingId($user->id)){
-                return \redirect('/');
-            }
-        }
-        else{
-            $theme = Theme::uses(Setting::get('current_theme', 'default'))->layout('guest');
-            $theme->setTitle(trans('auth.login').' '.Setting::get('title_seperator').' '.Setting::get('site_title').' '.Setting::get('title_seperator').' '.Setting::get('site_tagline'));
-
-            return $theme->scope('users.login')->render();
-        }
-
-    }
-
     public function login(Request $request)
     {
+        $request->validate([
+            //$this->username() => 'required|string',
+            'email' => 'required',
+            'password' => 'required',
+        ]);
 
-//        echo $request->email;
-
-//        $user = User::where('USER_NAME', '=', $request->email)->first();
-        $user = DB::table('users')->where('email', $request->email)->first();
-
+        $user = User::where('email', $request->email)->first();
         if (empty($user)) {
-
-            $theme = Theme::uses(Setting::get('current_theme', 'default'))->layout('guest');
-            $theme->setTitle(trans('auth.login').' '.Setting::get('title_seperator').' '.Setting::get('site_title').' '.Setting::get('title_seperator').' '.Setting::get('site_tagline'));
-
-            $error_msg = "Login failed. Try again";
-            return $theme->scope('users.login', compact('error_msg'))->render();
+            $user = User::where('username', $request->email)->first();
         }
 
-        if(Auth::loginUsingId($user->id) && Hash::check($request->password, $user->password) && $user->email_verified == 1){
+        try {
+            // User exists check
+            if (empty($user)) {
+                throw new Exception( config('app.debug', false) ? '(No User)' : 'These credentials do not match our records' );
+            }
+    
+            // Password check
+            if (!Hash::check($request->password, $user->password)) {
+                throw new Exception( config('app.debug', false) ? '(Bad Password)' : 'These credentials do not match our records' );
+            }
+    
+            // Email verified Check
+            if ($user->email_verified === false) {
+                throw new Exception( 'Your account email has not verified yet. Please verify your email account before continuing' );
+            }
 
-            //save to loginSessions
-            $login_session = new LoginSession();
-            $login_session->user_id = Auth::user()->id;
-            $login_session->user_name = Auth::user()->timeline->username;
-            $login_session->ip_address = $_SERVER['REMOTE_ADDR'];
-            $login_session->machine_name = gethostname();
-            $login_session->os = getOS();
-            $login_session->browser = getBrowser();
-
-            // get location
-            $PublicIP = get_client_ip();
-//            $json     = file_get_contents("http://ipinfo.io/$PublicIP/geo");
-//            $json     = json_decode($json, true);
-//            $country  = $json['country'];
-//            $region   = $json['region'];
-//            $city     = $json['city'];
-//            $login_session->location = $region." ".$city;
-            $login_session->date = date("Y-m-d");
-            $login_session->save();
-
-            return \redirect('/');
-        }
-        else {
-            $theme = Theme::uses(Setting::get('current_theme', 'default'))->layout('guest');
-            $theme->setTitle(trans('auth.login').' '.Setting::get('title_seperator').' '.Setting::get('site_title').' '.Setting::get('title_seperator').' '.Setting::get('site_tagline'));
-
-            $error_msg = "Login failed. Try again";
-            return $theme->scope('users.login', compact('error_msg'))->render();
+            Auth::login($user, $request->remember ? true : false);
+            if ($request->expectsJson()) {
+                return response()->json([ 'redirect' => '/' ]);
+            } else {
+                return redirect('/');
+            }
+        } catch (Exception $e) {
+            if ($request->expectsJson()) {
+                return response()->json(['errors' => ['message'=>$e->getMessage()]], 401);
+            } else {
+                return redirect()->guest('login');
+            }
         }
 
-
-//        $data = $request->all();
-//        $validate = Validator::make($data, [
-//            'email'    => 'required',
-//            'password' => 'required',
-//        ]);
-//
-//        if (!$validate->passes()) {
-//            return response()->json(['status' => '201', 'message' => trans('auth.login_failed')]);
-//        } else {
-//            $user = '';
-//            $nameoremail = '';
-//            $canLogin = false;
-//            $remember = ($request->remember ? true : false);
-//
-//            if (filter_var(($request->email), FILTER_VALIDATE_EMAIL)  == true) {
-//                $nameoremail = $request->email;
-//                $user = DB::table('users')->where('email', $request->email)->first();
-//            } else {
-//                $timeline = DB::table('timelines')->where('username', $request->email)->first();
-//                if ($timeline != null) {
-//                    $user = DB::table('users')->where('timeline_id', $timeline->id)->first();
-//                    if ($user) {
-//                        $nameoremail = $user->email;
-//                    }
-//                }
-//            }
-//
-//            if (Setting::get('mail_verification') == 'off') {
-//                $canLogin = true;
-//            } else {
-//                if ($user != null) {
-//                    if ($user->email_verified == 1) {
-//                        $canLogin = true;
-//                    } else {
-//                        return response()->json(['status' => '201', 'message' => trans('messages.verify_mail')]);
-//                    }
-//                }
-//            }
-//        }
-//
-//        if ($canLogin && Auth::attempt(['email' => $nameoremail])) {
-//            return \redirect('/');
-////            return response()->json(['status' => '200', 'message' => trans('auth.login_success')]);
-//        } else {
-//            return response()->json(['status' => '201', 'message' => trans('auth.login_failed')]);
-//        }
     }
 
     //
@@ -198,23 +108,22 @@ class LoginController extends Controller
         }
 
         if (!$validate->passes()) {
-//            return response()->json(['status' => '201', 'message' => trans('auth.login_failed')]);
             return redirect()->back();
         } else {
             $user = '';
-            $nameoremail = '';
+            $nameOrEmail = '';
             $canLogin = false;
             $remember = ($request->remember ? true : false);
 
             if (filter_var(($request->email), FILTER_VALIDATE_EMAIL)  == true) {
-                $nameoremail = $request->email;
+                $nameOrEmail = $request->email;
                 $user = DB::table('users')->where('email', $request->email)->first();
             } else {
-                $timeline = DB::table('timelines')->where('username', $request->email)->first();
-                if ($timeline != null) {
-                    $user = DB::table('users')->where('timeline_id', $timeline->id)->first();
+                $user = DB::table('users')->where('username', $request->email)->first();
+                if ($user != null) {
+                    $user = DB::table('users')->where('email', $request->email)->first();
                     if ($user) {
-                        $nameoremail = $user->email;
+                        $nameOrEmail = $user->email;
                     }
                 }
             }
@@ -234,12 +143,12 @@ class LoginController extends Controller
             }
         }
 
-        if ($canLogin && Auth::attempt(['email' => $nameoremail, 'password' => $request->password], $remember)) {
+        if ($canLogin && Auth::attempt(['email' => $nameOrEmail, 'password' => $request->password], $remember)) {
             // return response()->json(['status' => '200', 'message' => trans('auth.login_success')]);
             //save to loginSessions
             $login_session = new LoginSession();
             $login_session->user_id = Auth::user()->id;
-            $login_session->user_name = Auth::user()->timeline->username;
+            $login_session->user_name = Auth::user()->username;
             $login_session->ip_address = $_SERVER['REMOTE_ADDR'];
             $login_session->machine_name = gethostname();
             $login_session->os = getOS();
@@ -256,8 +165,7 @@ class LoginController extends Controller
             $login_session->date = date("Y-m-d");
             $login_session->save();
             $session = $request->session()->get('profileUrl');
-            
-            
+
             if (!empty($session)) {
                 return redirect($session);
             } else {

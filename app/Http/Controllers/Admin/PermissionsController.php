@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Permission;
+use App\Models\Permission;
 
 class PermissionsController extends Controller
 {

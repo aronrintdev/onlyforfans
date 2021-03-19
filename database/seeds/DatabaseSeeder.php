@@ -15,36 +15,16 @@ class DatabaseSeeder extends Seeder
         $output->writeln('Running DB seeder...');
 
         $this->call([
+            CountriesTableSeeder::class,
+            UsstatesTableSeeder::class,
             UsernameRulesSeeder::class,
             RolesTableSeeder::class,
             UsersTableSeeder::class,
-            StoriesTableSeeder::class,
             PostsTableSeeder::class,
+            ShareablesTableSeeder::class,
+            CommentsTableSeeder::class, // must be after shareables as requires followers
+            StoriesTableSeeder::class,
         ]);
     }
 
-    private function oldSet()
-    {
-        if (Config::get('app.env') == 'demo' || Config::get('app.env') == 'local') {
-            $this->call(MediumTableSeeder::class);
-            $this->call(CategoriesTableSeeder::class);
-            $this->call(RolesTableSeeder::class);
-            $this->call(SettingsTableSeeder::class);
-            $this->call(TimelinesTableSeeder::class);
-            $this->call(HashtagsTableSeeder::class);
-            $this->call(AnnouncementsTableSeeder::class);
-            $this->call(PostsTableSeeder::class);
-            $this->call(CommentsTableSeeder::class);
-            $this->call(NotificationsTableSeeder::class);
-            $this->call(StaticpageTableSeeder::class);
-            $this->call(AlbumsTableSeeder::class);
-            $this->call(UsernameRulesSeeder::class);
-        } else {
-            $this->call(CategoriesTableSeeder::class);
-            $this->call(RolesTableSeeder::class);
-            $this->call(StaticpageTableSeeder::class);
-            $this->call(InstallerSeeder::class);
-            $this->call(UsernameRulesSeeder::class);
-        }
-    }
 }

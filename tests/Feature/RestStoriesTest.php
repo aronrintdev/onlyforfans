@@ -3,7 +3,7 @@ namespace Tests\Feature;
 
 use DB;
 use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Http\File;
 use Illuminate\Support\Facades\Storage;
@@ -11,22 +11,22 @@ use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 use Database\Seeders\TestDatabaseSeeder;
 
-use App\Mediafile;
-use App\Story;
-use App\Timeline;
-use App\User;
+use App\Models\Mediafile;
+use App\Models\Story;
+use App\Models\Timeline;
+use App\Models\User;
 use App\Enums\StoryTypeEnum;
 use App\Enums\MediafileTypeEnum;
 
 class StoriesTest extends TestCase
 {
-    use DatabaseTransactions, WithFaker;
+    use RefreshDatabase, WithFaker;
 
     /**
      *  @group stories
      *  @group regression
      */
-    public function test_can_index_my_stories()
+    public function test_can_list_my_stories()
     {
         $timeline = Timeline::has('stories', '>=', 1)->has('followers', '>=', 1)->first();
         $creator = $timeline->user;
@@ -38,9 +38,15 @@ class StoriesTest extends TestCase
         ];
         $response = $this->actingAs($creator)->ajaxJSON('GET', route('stories.index'), $payload);
         $response->assertStatus(200);
+        $response->assertJsonStructure([
+            'data',
+            'links',
+            'meta' => [ 'current_page', 'from', 'last_page', 'path', 'per_page', 'to', 'total', ],
+        ]);
         $content = json_decode($response->content());
-        $this->assertNotNull($content->stories);
-        $storiesR = $content->stories;
+        $this->assertEquals(1, $content->meta->current_page);
+        $this->assertNotNull($content->data);
+        $storiesR = $content->data;
         $this->assertGreaterThan(0, count($storiesR));
 
         $nonTimelineStories = collect($storiesR)->filter( function($s) use(&$timeline) {
@@ -53,7 +59,7 @@ class StoriesTest extends TestCase
      *  @group stories
      *  @group regression
      */
-    public function test_can_index_stories_on_followed_timeline()
+    public function test_can_list_stories_filtered_by_timeline()
     {
         $timeline = Timeline::has('stories', '>=', 1)->has('followers', '>=', 1)->first();
         $creator = $timeline->user;
@@ -66,9 +72,15 @@ class StoriesTest extends TestCase
         ];
         $response = $this->actingAs($fan)->ajaxJSON('GET', route('stories.index'), $payload);
         $response->assertStatus(200);
+        $response->assertJsonStructure([
+            'data',
+            'links',
+            'meta' => [ 'current_page', 'from', 'last_page', 'path', 'per_page', 'to', 'total', ],
+        ]);
         $content = json_decode($response->content());
-        $this->assertNotNull($content->stories);
-        $storiesR = $content->stories;
+        $this->assertEquals(1, $content->meta->current_page);
+        $this->assertNotNull($content->data);
+        $storiesR = $content->data;
         $this->assertGreaterThan(0, count($storiesR));
 
         $nonTimelineStories = collect($storiesR)->filter( function($s) use(&$timeline) {
@@ -81,11 +93,11 @@ class StoriesTest extends TestCase
      *  @group stories
      *  @group regression
      */
-    public function test_can_not_index_stories_on_unfollowed_timeline()
+    public function test_can_not_list_stories_on_unfollowed_timeline()
     {
         $timeline = Timeline::has('stories', '>=', 1)->has('followers', '>=', 1)->first();
         $creator = $timeline->user;
-        $nonfan = User::whereDoesntHave('followedtimelines', function($q1) use(&$timeline) {
+        $nonFan = User::whereDoesntHave('followedtimelines', function($q1) use(&$timeline) {
             $q1->where('timelines.id', $timeline->id);
         })->where('id', '<>', $creator->id)->first();
 
@@ -94,7 +106,7 @@ class StoriesTest extends TestCase
                 'timeline_id' => $timeline->id,
             ],
         ];
-        $response = $this->actingAs($nonfan)->ajaxJSON('GET', route('stories.index'), $payload);
+        $response = $this->actingAs($nonFan)->ajaxJSON('GET', route('stories.index'), $payload);
         $response->assertStatus(403);
     }
 
@@ -102,7 +114,7 @@ class StoriesTest extends TestCase
      *  @group stories
      *  @group regression
      */
-    public function test_can_index_stories_of_followed_timelines()
+    public function test_can_list_stories_on_followed_timelines()
     {
         $timeline = Timeline::has('stories', '>=', 1)->has('followers', '>=', 1)->first();
         $creator = $timeline->user;
@@ -115,9 +127,15 @@ class StoriesTest extends TestCase
         ];
         $response = $this->actingAs($fan)->ajaxJSON('GET', route('stories.index'), $payload);
         $response->assertStatus(200);
+        $response->assertJsonStructure([
+            'data',
+            'links',
+            'meta' => [ 'current_page', 'from', 'last_page', 'path', 'per_page', 'to', 'total', ],
+        ]);
         $content = json_decode($response->content());
-        $this->assertNotNull($content->stories);
-        $storiesR = $content->stories;
+        $this->assertEquals(1, $content->meta->current_page);
+        $this->assertNotNull($content->data);
+        $storiesR = $content->data;
         $this->assertGreaterThan(0, count($storiesR));
 
         $storiesOnTimelineNotFollowedByFan = collect($storiesR)->filter( function($s) use(&$fan) {
@@ -134,12 +152,14 @@ class StoriesTest extends TestCase
      */
     public function test_can_store_text_story()
     {
-        $owner = User::first();
+        $timeline = Timeline::has('stories', '>=', 1)->has('followers', '>=', 1)->first();
+        $owner = $timeline->user;
 
         $attrs = [
             'stype' => StoryTypeEnum::TEXT,
             'bgcolor' => 'blue',
             'content' => $this->faker->realText,
+            //'timeline_id' => $timeline->id,
         ];
 
         $payload = [
@@ -317,11 +337,11 @@ class StoriesTest extends TestCase
         $creator = $timeline->user;
         $story = $timeline->stories[0];
 
-        $nonfan = User::whereDoesntHave('followedtimelines', function($q1) use(&$timeline) {
+        $nonFan = User::whereDoesntHave('followedtimelines', function($q1) use(&$timeline) {
             $q1->where('timelines.id', $timeline->id);
         })->where('id', '<>', $creator->id)->first();
 
-        $response = $this->actingAs($nonfan)->ajaxJSON('PUT', route('likeables.update', $nonfan->id), [
+        $response = $this->actingAs($nonFan)->ajaxJSON('PUT', route('likeables.update', $nonFan->id), [
             'likeable_type' => 'stories',
             'likeable_id' => $story->id,
         ]);
