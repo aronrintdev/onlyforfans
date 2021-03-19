@@ -18,6 +18,7 @@
       </template>
 
       <template v-if="post.access">
+        <b-card-text> <p class="mb-3">{{ post.description }}</p> </b-card-text>
         <article v-if="hasMediafiles">
           <MediaSlider :post="post" :session_user="session_user" />
           <b-card-img v-if="false && primaryMediafile.is_image" :src="primaryMediafile.filepath" alt="Image" ></b-card-img>
@@ -26,7 +27,6 @@
             <source :src="primaryMediafile.filepath" type="video/mp4">
           </b-embed>
         </article>
-        <b-card-text> <p>{{ post.description }}</p> </b-card-text>
       </template>
       <template v-else>
         <PostCta :post="post" :session_user="session_user" />

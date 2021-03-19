@@ -140,4 +140,7 @@ body .user-details ul > li {
   font-size: 16px;
   font-weight: 400;
 }
+.tag-debug {
+  display: none;
+}
 </style>

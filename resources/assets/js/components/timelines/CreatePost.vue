@@ -227,7 +227,7 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
 /*
 .dropzone, .dropzone * {
 box-sizing: border-box;
@@ -253,9 +253,9 @@ padding: 20px 20px;
    */
 }
 
-body .create_post-crate textarea,
-body .create_post-crate .dropzone,
-body .create_post-crate .vue-dropzone {
+.create_post-crate textarea,
+.create_post-crate .dropzone,
+.create_post-crate .vue-dropzone {
   border: none;
 }
 
@@ -301,7 +301,7 @@ width: 128px;
   color: #5B6B81;
 }
 
-body .b-icon.bi {
+.b-icon.bi {
   vertical-align: middle;
 }
 </style>
