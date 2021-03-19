@@ -85,6 +85,12 @@ class Post extends Model implements UuidId, Ownable, Deletable, Purchaseable, Li
     // %%% Relationships
     //--------------------------------------------
 
+    public function bookmarks()
+    {
+        //return $this->morphMany(Bookmark::class, 'bookmarkable')->withTimestamps();
+        return $this->morphMany(Bookmark::class, 'bookmarkable');
+    }
+
     // can be shared with many users (via [shareables])
     public function sharees()
     {

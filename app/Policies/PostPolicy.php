@@ -18,6 +18,7 @@ class PostPolicy extends BasePolicy
         'comment'     => 'isOwner:pass isBlockedByOwner:fail',
         'purchase'    => 'isOwner:fail isBlockedByOwner:fail',
         'tip'         => 'isOwner:fail isBlockedByOwner:fail',
+        'bookmark'         => 'isOwner:fail isBlockedByOwner:fail',
         'update'      => 'isOwner:next:fail', // if non-owner fail, else check function
         'delete'      => 'isOwner:next:fail',
         'forceDelete' => 'isOwner:next:fail',
@@ -102,6 +103,11 @@ class PostPolicy extends BasePolicy
     }
 
     protected function tip(User $user, Post $post)
+    {
+        return true;
+    }
+
+    protected function bookmark(User $user, Post $post)
     {
         return true;
     }

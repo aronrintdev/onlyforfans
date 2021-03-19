@@ -18,6 +18,11 @@
             <li class="list-inline-item mr-3">
               <span @click="tip()" class="tag-clickable">$</span>
             </li>
+            <li class="list-inline-item mr-3">
+              <span @click="addBookmark()" class="tag-clickable">
+                <b-icon icon="bookmark" font-scale="1" />
+              </span>
+            </li>
           </ul>
 
           <b-collapse v-model="renderComments">
@@ -102,6 +107,9 @@ export default {
     addComment(comment) {
       this.comments = [ ...this.comments, comment ]
       this.post.comments_count = this.post.comments_count + 1
+    },
+
+    addBookmark(bookmark) {
     },
 
     updateCommentsCount(value, index) {
