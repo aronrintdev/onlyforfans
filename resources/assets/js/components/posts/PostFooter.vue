@@ -1,6 +1,6 @@
 <template>
         <div class="panel-footer fans">
-          <ul class="list-inline footer-ctrl">
+          <ul class="list-inline footer-ctrl mb-0">
             <li class="list-inline-item mr-3">
               <LikesButton @toggled="togglePostLike()" :filled="isLikedByMe" :count="likeCount" :showCount="true" />
             </li>
@@ -95,6 +95,10 @@ export default {
       this.likeCount = response.data.like_count
     },
 
+    share() {},
+
+    tip() {},
+
     addComment(comment) {
       this.comments = [ ...this.comments, comment ]
       this.post.comments_count = this.post.comments_count + 1
@@ -145,4 +149,11 @@ export default {
 </script>
 
 <style scoped>
+ul {
+  margin: 0;
+}
+footer.card-footer {
+  background-color: #fff;
+}
+
 </style>
