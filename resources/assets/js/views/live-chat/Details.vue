@@ -291,12 +291,24 @@
       originMessages: [],
     }),
     mounted() {
+      const self = this;
+      Echo.join(`user-status`)
+        .here((users) => {
+            users.forEach(user => {
+              self.updateUserStatus(user.id, 1);
+            });
+        })
+        .joining((user) => {
+          self.updateUserStatus(user.id, 1);
+        })
+        .leaving((user) => {
+          self.updateUserStatus(user.id, 0);
+        });
       this.axios.get('/chat-messages/contacts').then((response) => {
         this.users = response.data;
         this.loading = false;
       });
       this.getMessages();
-      const self = this;
       Echo.private(`${this.$route.params.id}-message`)
         .listen('MessageSentEvent', (e) => {
             self.originMessages.push(e.message);
@@ -320,13 +332,11 @@
         this.messages = [];
         this.newMessageText = undefined;
         this.getMessages();
+        const self = this;
         Echo.private(`${id}-message`)
         .listen('MessageSentEvent', (e) => {
-          console.log('------ e new message', e);
-            // this.messages.push({
-            //     message: e.message.message,
-            //     user: e.user
-            // });
+          self.originMessages.push(e.message);
+          self.groupMessages();
         });
       }
     },
@@ -350,6 +360,18 @@
       },
     },
     methods: {
+      updateUserStatus: function (userId, status) {
+        let statusHolder = $(".status-holder-"+ userId);
+        if (status == 1) {
+            statusHolder.addClass('online');        
+        } else {
+          setTimeout(function () {            
+            let last_seen = 'Last seen ' +
+                getCalenderFormatForLastSeen(Date(), 'hh:mma', 0);
+              
+          }, 3000)
+        }
+      },
       getMessages: function() {
         const user_id = this.$route.params.id;
         this.axios.get(`/chat-messages/${user_id}`).then((response) => {

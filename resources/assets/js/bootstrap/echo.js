@@ -44,41 +44,7 @@ window.setLastSeenOfUser = function (status) {
   });
 };
 
-window.getCalenderFormatForLastSeen = function (
-    dateTime, format = 'hh:mma', needToConvertLocalDate = 1) {
-    let date = (needToConvertLocalDate) ? moment(dateTime).
-    utc(dateTime).
-    local() : moment(dateTime);
-    return date.calendar(null, {
-        sameDay: '[Today], ' + format,
-        lastDay: '[Yesterday], ' + format,
-        lastWeek: 'dddd, ' + format,
-        sameElse: function () {
-            if (moment().year() === moment(dateTime).year()) {
-                return 'MMM D, ' + format;
-            } else {
-                return 'MMM D YYYY, ' + format;
-            }
-        },
-    });
-};
-
-window.updateUserStatus = function (userId, status) {
-    let statusHolder = $(".status-holder-"+ userId);
-
-    if (status == 1) {
-        statusHolder.addClass('online');        
-    } else {
-        setTimeout(function () {            
-            let last_seen = 'Last seen ' +
-                getCalenderFormatForLastSeen(Date(), 'hh:mma', 0);
-            
-        }, 3000)
-    }
-};
-
 window.onbeforeunload = function () {
-  window.Echo.leave('user-status');
   // updateUserStatus(1, 0);
   setLastSeenOfUser(0);
   //return undefined; to prevent dialog while window.onbeforeunload
@@ -88,18 +54,6 @@ window.onbeforeunload = function () {
 // 
 $(window).on('load', function() {
   setLastSeenOfUser(1);
-  window.Echo.join(`user-status`)
-    .here((users) => {
-        users.forEach(user => {
-          updateUserStatus(user.id, 1);
-        });
-    })
-    .joining((user) => {
-      updateUserStatus(user.id, 1);
-    })
-    .leaving((user) => {
-      updateUserStatus(user.id, 0);
-    });
 });
 
 /**

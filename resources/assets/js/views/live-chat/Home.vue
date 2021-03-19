@@ -82,9 +82,11 @@
                         <div class="user-content">
                           <div class="user-logo text-logo" v-if="!user.profile.avatar">
                             {{ getLogoFromName(user.profile.name) }}
+                            <span :class="`status-holder status-holder-${user.profile.id}`"></span>
                           </div>
                           <div class="user-logo" v-if="user.profile.avatar">
                             <img :src="user.profile.avatar.filepath" alt="" />
+                            <span :class="`status-holder status-holder-${user.profile.id}`"></span>
                           </div>
                           <div class="user-details">
                             <div class="user-details-row">
@@ -144,7 +146,19 @@
     }),
     mounted() {
       // Fetch Users' Online/Away status
-      
+      const self = this;
+      Echo.join(`user-status`)
+        .here((users) => {
+            users.forEach(user => {
+              self.updateUserStatus(user.id, 1);
+            });
+        })
+        .joining((user) => {
+          self.updateUserStatus(user.id, 1);
+        })
+        .leaving((user) => {
+          self.updateUserStatus(user.id, 0);
+        });
       this.axios.get('/chat-messages/contacts').then((response) => {
         this.users = response.data;
         this.loading = false;
@@ -170,6 +184,18 @@
       },
     },
     methods: {
+      updateUserStatus: function (userId, status) {
+        let statusHolder = $(".status-holder-"+ userId);
+        if (status == 1) {
+            statusHolder.addClass('online');        
+        } else {
+          setTimeout(function () {            
+            let last_seen = 'Last seen ' +
+                getCalenderFormatForLastSeen(Date(), 'hh:mma', 0);
+              
+          }, 3000)
+        }
+      },
       changeSearchbarVisible: function () {
         this.userSearchVisible = !this.userSearchVisible;
         this.userSearchText = undefined;
