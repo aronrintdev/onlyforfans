@@ -26,6 +26,7 @@ class Post extends JsonResource
             //'mediafiles' =>  $this->when($hasAccess, $this->mediafiles),
             // %TODO %NOTE vs above, we depend here on the caller not loading mediafiles relation where they shouldn't have access (eventually we want to send a blurred image in place when no access)
             'mediafiles' =>  $this->whenLoaded('mediafiles'), 
+            'mediafile_count' =>  $this->mediafiles->count(),
 
             'access' =>  $hasAccess,
             'user' =>  $this->user, // $this->when($hasAccess, $this->user),

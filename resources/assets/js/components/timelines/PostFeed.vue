@@ -15,7 +15,7 @@
           class="col-sm-12 mb-3"
           v-observe-visibility="index === renderedItems.length - 1 ? endPostVisible : false"
         >
-          <div>INDEX: {{ index }}</div>
+          <div class="tag-debug">INDEX: {{ index }}</div>
           <!-- for now we assume posts; eventually need to convert to a DTO (ie more generic 'feedItem') : GraphQL ? -->
           <PostDisplay
             :post="feedItem"
@@ -198,3 +198,9 @@ export default {
   },
 }
 </script>
+
+<style scoped>
+.tag-debug {
+  display: none;
+}
+</style>
