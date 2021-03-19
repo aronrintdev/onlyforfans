@@ -82,9 +82,11 @@
                         <div class="user-content">
                           <div class="user-logo text-logo" v-if="!user.profile.avatar">
                             {{ getLogoFromName(user.profile.name) }}
+                            <span :class="`status-holder status-holder-${user.profile.id}`"></span>
                           </div>
                           <div class="user-logo" v-if="user.profile.avatar">
                             <img :src="user.profile.avatar.filepath" alt="" />
+                            <span :class="`status-holder status-holder-${user.profile.id}`"></span>
                           </div>
                           <div class="user-details">
                             <div class="user-details-row">
@@ -119,9 +121,11 @@
                         <span>{{ selectedUser.profile.name }}</span>
                       </div>
                       <div class="details" v-if="!messageSearchVisible">
-                        <div class="online-status" v-if="!selectedUser.isOnline">Last seen {{ moment(selectedUser.messages[0].created_at).format('MMM DD, YYYY') }}
+                        <div class="online-status" v-if="!selectedUser.profile.user.is_online && selectedUser.profile.user.last_logged">Last seen {{ moment(selectedUser.profile.user.last_logged).format('MMM DD, YYYY') }}
                         </div>
-                        <div class="online-status" v-if="selectedUser.isOnline">
+                        <div class="online-status" v-if="!selectedUser.profile.user.is_online && !selectedUser.profile.user.last_logged">Last seen {{ moment(selectedUser.messages[0].created_at).format('MMM DD, YYYY') }}
+                        </div>
+                        <div class="online-status" v-if="selectedUser.profile.user.is_online">
                           <i class="fa fa-circle" aria-hidden="true"></i>Available now
                         </div>
                         <div class="v-divider"></div>
@@ -206,6 +210,7 @@
                         </template>
                       </div>
                     </div>
+                    <div class="typing dot-pulse" style="display: none">...</div>
                   </div>
                   <div class="conversation-footer">
                     <textarea placeholder="Type a message" name="text" rows="1" maxlength="10000"
@@ -296,6 +301,17 @@
         .listen('MessageSentEvent', (e) => {
             self.originMessages.push(e.message);
             self.groupMessages();
+        });
+      Echo.join(`chat-typing`)
+        .listenForWhisper('typing', (e) => {
+          if (e.from === self.$route.params.id && e.to === self.currentUser.id && e.typing) {
+            $('.typing').show();
+          } else {
+            $('.typing').hide();
+          }
+          setTimeout(() => {
+            $('.typing').hide();
+          }, 3000);
         });
     },
     watch: {
@@ -414,6 +430,14 @@
         if (this.newMessageText) {
           this.hasNewMessage = true;
         }
+        let channel = Echo.join(`chat-typing`);
+        setTimeout(() => {
+          channel.whisper('typing', {
+            typing: true,
+            from: this.currentUser.id,
+            to: this.$route.params.id
+          })
+        }, 300);
       },
       sendMessage: function() {
         const self = this;

@@ -196,13 +196,14 @@
 					.user-logo {
 						width: 52px;
 						height: 52px;
-						border-radius: 50%;
-						overflow: hidden;
 						margin-right: 16px;
-						border: solid 2px #fff;
+						position: relative;
+
 						img {
 							width: 100%;
 							height: 100%;
+							border-radius: 50%;
+							border: 2px solid #fff;
 						}
 						&.text-logo {
 							display: flex;
@@ -214,6 +215,23 @@
 							background: rgba(138,150,163,.12);
 							letter-spacing: 0;
 							text-transform: uppercase;
+						}
+						.status-holder {
+							position: absolute;
+							bottom: 2px;
+							right: 2px;
+							width: 14px;
+							height: 14px;
+							border: 2px solid #fff;
+							z-index: 2;
+							display: block;
+							background: #35d063;
+							border-radius: 50%;
+							display: none;
+
+							&.online {
+								display: block;
+							}
 						}
 					}
 					.user-details {
@@ -414,6 +432,7 @@
 				display: flex;
 				overflow-y: scroll;
 				padding: 8px;
+				flex-direction: column;
 				.empty-messages {
 					text-align: center;
 					height: 100%;
@@ -1034,3 +1053,89 @@
 		}
 	}
 }
+
+/**
+ * ==============================================
+ * Dot Pulse
+ * ==============================================
+ */
+ .dot-pulse {
+  position: relative;
+  left: -9999px;
+  width: 10px;
+  height: 10px;
+  border-radius: 5px;
+  background-color: rgba(138, 150, 163, 0.62);
+  color: rgba(138, 150, 163, 0.62);
+  box-shadow: 9999px 0 0 -5px rgba(138, 150, 163, 0.62);
+  animation: dotPulse 1.2s infinite linear;
+  animation-delay: .25s;
+	zoom: 0.5;
+	align-self: flex-end;
+	margin-right: 30px;
+	margin-top: -12px;
+}
+
+.dot-pulse::before, .dot-pulse::after {
+  content: '';
+  display: inline-block;
+  position: absolute;
+  top: 0;
+  width: 10px;
+  height: 10px;
+  border-radius: 5px;
+  background-color: rgba(138, 150, 163, 0.62);
+  color: rgba(138, 150, 163, 0.62);
+}
+
+.dot-pulse::before {
+  box-shadow: 9984px 0 0 -5px rgba(138, 150, 163, 0.62);
+  animation: dotPulseBefore 1.2s infinite linear;
+  animation-delay: 0s;
+}
+
+.dot-pulse::after {
+  box-shadow: 10014px 0 0 -5px rgba(138, 150, 163, 0.62);
+  animation: dotPulseAfter 1.2s infinite linear;
+  animation-delay: .5s;
+}
+
+@keyframes dotPulseBefore {
+  0% {
+    box-shadow: 9984px 0 0 -5px rgba(138, 150, 163, 0.62);
+  }
+  30% {
+    box-shadow: 9984px 0 0 2px rgba(138, 150, 163, 0.62);
+  }
+  60%,
+  100% {
+    box-shadow: 9984px 0 0 -5px rgba(138, 150, 163, 0.62);
+  }
+}
+
+@keyframes dotPulse {
+  0% {
+    box-shadow: 9999px 0 0 -5px rgba(138, 150, 163, 0.62);
+  }
+  30% {
+    box-shadow: 9999px 0 0 2px rgba(138, 150, 163, 0.62);
+  }
+  60%,
+  100% {
+    box-shadow: 9999px 0 0 -5px rgba(138, 150, 163, 0.62);
+  }
+}
+
+@keyframes dotPulseAfter {
+  0% {
+    box-shadow: 10014px 0 0 -5px rgba(138, 150, 163, 0.62);
+  }
+  30% {
+    box-shadow: 10014px 0 0 2px rgba(138, 150, 163, 0.62);
+  }
+  60%,
+  100% {
+    box-shadow: 10014px 0 0 -5px rgba(138, 150, 163, 0.62);
+  }
+}
+

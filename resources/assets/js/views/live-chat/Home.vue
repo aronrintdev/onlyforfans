@@ -143,6 +143,8 @@
       moment: moment,
     }),
     mounted() {
+      // Fetch Users' Online/Away status
+      
       this.axios.get('/chat-messages/contacts').then((response) => {
         this.users = response.data;
         this.loading = false;
