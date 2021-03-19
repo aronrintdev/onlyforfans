@@ -6,7 +6,14 @@
 
         <b-card header-tag="header" footer-tag="footer">
           <template #header>
-            <h6 class="mb-0">New Post</h6>
+            <section class="d-flex justify-content-between">
+              <div class="my-auto">
+                <h6 class="mb-0">New Post</h6>
+              </div>
+              <div class="post_create-ctrl">
+                <b-form-select id="post-type" v-model="postType" :options="ptypes" required ></b-form-select>
+              </div>
+            </section>
           </template>
           <div>
             <vue-dropzone 
@@ -81,6 +88,12 @@ export default {
     description: '',
     newPostId: null,
     selectedMedia: 'pic',
+    postType: 'free',
+    ptypes: [
+      { text: 'Free', value: 'free' }, 
+      { text: 'By Purchase', value: 'price' }, 
+      { text: 'Subscriber-Only', value: 'paid' }, 
+    ],
 
     // ref: 
     //  ~ https://github.com/rowanwins/vue-dropzone/blob/master/docs/src/pages/SendAdditionalParamsDemo.vue
@@ -109,6 +122,7 @@ export default {
       this.description = '';
       this.newPostId = null;
       this.selectedMedia = 'pic';
+      this.ptype = 'free';
     },
 
     async savePost() {
@@ -116,6 +130,7 @@ export default {
       const response = await axios.post(`/posts`, {
         timeline_id: this.timeline.id,
         description: this.description,
+        type: this.postType,
       });
       console.log('savePost', { response });
       const json = response.data;
@@ -230,7 +245,13 @@ border: 2px solid rgba(0, 0, 0, 0.3);
 background: white;
 padding: 20px 20px;
 }
- */
+                               */
+
+.card-header .dropdown {
+  /*
+  background-color: ...;
+   */
+}
 
 body .create_post-crate textarea,
 body .create_post-crate .dropzone,
