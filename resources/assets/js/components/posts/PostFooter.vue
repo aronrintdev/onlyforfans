@@ -19,7 +19,7 @@
               <span @click="tip()" class="tag-clickable">$</span>
             </li>
             <li class="list-inline-item mr-3">
-              <span @click="addBookmark()" class="tag-clickable">
+              <span @click="toggleBookmark()" class="tag-clickable">
                 <b-icon icon="bookmark" font-scale="1" />
               </span>
             </li>
@@ -109,7 +109,25 @@ export default {
       this.post.comments_count = this.post.comments_count + 1
     },
 
-    addBookmark(bookmark) {
+    async toggleBookmark() {
+      let response
+      if (this.isBookmarkedByMe) {
+        // unlike
+        response = await axios.put(`/likeables/${this.session_user.id}`, {
+          _method: 'delete',
+          likeable_type: 'posts',
+          likeable_id: this.post.id,
+        })
+        this.isLikedByMe = false
+      } else {
+        // like
+        response = await axios.put(`/likeables/${this.session_user.id}`, {
+          likeable_type: 'posts',
+          likeable_id: this.post.id,
+        })
+        this.isLikedByMe = true
+      }
+      this.likeCount = response.data.like_count
     },
 
     updateCommentsCount(value, index) {
