@@ -20,7 +20,7 @@
             </li>
             <li class="list-inline-item mr-3">
               <span @click="toggleBookmark()" class="tag-clickable">
-                <b-icon icon="bookmark" font-scale="1" />
+                <b-icon :icon="isBookmarkedByMe ? 'bookmark-fill' : 'bookmark'" font-scale="1" />
               </span>
             </li>
           </ul>
@@ -74,6 +74,7 @@ export default {
   mounted() { 
     this.isLikedByMe = this.post.stats?.isLikedByMe || false
     this.likeCount = this.post.stats?.likeCount  || 0
+    this.isBookmarkedByMe = this.post.stats?.isBookmarkedByMe || false
   },
 
   created() {},
@@ -111,23 +112,19 @@ export default {
 
     async toggleBookmark() {
       let response
-      if (this.isBookmarkedByMe) {
-        // unlike
-        response = await axios.put(`/likeables/${this.session_user.id}`, {
-          _method: 'delete',
-          likeable_type: 'posts',
-          likeable_id: this.post.id,
+      if (this.isBookmarkedByMe) { // remove
+        response = await axios.post(`/bookmarks/remove`, {
+          bookmarkable_type: 'posts',
+          bookmarkable_id: this.post.id,
         })
-        this.isLikedByMe = false
-      } else {
-        // like
-        response = await axios.put(`/likeables/${this.session_user.id}`, {
-          likeable_type: 'posts',
-          likeable_id: this.post.id,
+        this.isBookmarkedByMe = false
+      } else { // add
+        response = await axios.post(`/bookmarks`, {
+          bookmarkable_type: 'posts',
+          bookmarkable_id: this.post.id,
         })
-        this.isLikedByMe = true
+        this.isBookmarkedByMe = true
       }
-      this.likeCount = response.data.like_count
     },
 
     updateCommentsCount(value, index) {

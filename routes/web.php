@@ -96,8 +96,7 @@ Route::group(['middleware' => ['auth']], function () {
     ]);
 
     // -- bookmarks:  --
-    //Route::put('/bookmarks/{resource}', ['as'=>'bookmarks.update', 'uses' => 'BookmarksController@update']); // add bookmark
-    //Route::delete('/bookmarks/{resource}', ['as'=>'bookmarks.destroy', 'uses' => 'BookmarksController@destroy']); // remove bookmark
+    Route::post('/bookmarks/remove', ['as'=>'bookmarks.remove', 'uses' => 'BookmarksController@remove']); // remove bookmark w/o pkid
     Route::resource('bookmarks', 'BookmarksController', [
         'except' => [ 'create', 'edit', 'update', ],
     ]);

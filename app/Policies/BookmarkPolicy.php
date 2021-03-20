@@ -12,7 +12,6 @@ class BookmarkPolicy extends BasePolicy
     protected $policies = [
         'viewAny'     => 'permissionOnly',
         'view'        => 'isOwner:pass isBlockedByOwner:fail',
-        'store'       => 'isOwner:pass:fail',
         'delete'      => 'isOwner:pass',
         'forceDelete' => 'isOwner:pass:fail',
         'restore'     => 'isOwner:pass:fail',

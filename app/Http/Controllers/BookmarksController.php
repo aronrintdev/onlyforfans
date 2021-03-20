@@ -63,26 +63,45 @@ class BookmarksController extends AppBaseController
 
     public function store(Request $request)
     {
-        $this->authorize('create', Bookmark::class);
         $request->validate([
             'bookmarkable_id' => 'required|uuid',
-            'bookmarkabe_type' => 'required|string|alpha-dash|in:posts',
-            'user_id' => 'required|uuid|exists:users,id',
+            'bookmarkable_type' => 'required|string|alpha-dash|in:posts',
+            //'user_id' => 'required|uuid|exists:users,id',
         ]);
 
         $alias = $request->bookmarkable_type;
         $model = Relation::getMorphedModel($alias);
         $bookmarkable = (new $model)->where('id', $request->bookmarkable_id)->firstOrFail();
 
+        //$this->authorize('view', $bookmarkable);
         if ($request->user()->cannot('bookmark', $bookmarkable)) {
             abort(403);
         }
 
-        $bookmarkable->bookmarks()->syncWithoutDetaching($bookmarker->id);
-        return response()->json([
-            'bookmarkable' => $bookmarkable,
-            'bookmark_count' => $bookmarkable->bookmarks->count(),
+        $bookmarker = $request->user();
+        $bookmark = Bookmark::create([
+            'bookmarkable_id' => $request->bookmarkable_id,
+            'bookmarkable_type' => $request->bookmarkable_type,
+            'user_id' => $bookmarker->id,
         ]);
+        return new BookmarkResource($bookmark);
+    }
+
+    public function remove(Request $request)
+    {
+        $request->validate([
+            'bookmarkable_id' => 'required|uuid',
+            'bookmarkable_type' => 'required|string|alpha-dash|in:posts',
+        ]);
+        $bookmark = Bookmark::where('bookmarkable_id', $request->bookmarkable_id)
+                            ->where('bookmarkable_type', $request->bookmarkable_type)
+                            ->first();
+        if (!$bookmark) {
+            abort(404);
+        }
+        $this->authorize('delete', $bookmark);
+        $bookmark->delete();
+        return response()->json([]);
     }
 
     public function destroy(Request $request, Bookmark $bookmark)

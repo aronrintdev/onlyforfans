@@ -37,6 +37,7 @@ class Post extends JsonResource
             'stats' => [
                 //'isLikedByMe' => $sessionUser->likedposts->contains($this->id),
                 'isLikedByMe' => $this->isLikedByMe,
+                'isBookmarkedByMe' => $this->isBookmarkedByMe,
                 'likeCount' => $this->likes->count(),
                 'commentCount' => $this->comments->count(),
             ],
