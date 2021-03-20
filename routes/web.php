@@ -89,10 +89,17 @@ Route::group(['middleware' => ['auth']], function () {
     // ~ PUT /api/v1/resource/:id/likes/:userid
     // ~ DELETE /api/v1/resource/:id/likes/:userid
     // see: https://stackoverflow.com/questions/5665893/the-rest-way-to-check-uncheck-like-unlike-favorite-unfavorite-a-resource
-    Route::put('/likeables/{likee}', ['as'=>'likeables.update', 'uses' => 'LikeablesController@update']); // like
-    Route::delete('/likeables/{likee}', ['as'=>'likeables.destroy', 'uses' => 'LikeablesController@destroy']); // unlike
+    Route::put('/likeables/{liker}', ['as'=>'likeables.update', 'uses' => 'LikeablesController@update']); // like
+    Route::delete('/likeables/{liker}', ['as'=>'likeables.destroy', 'uses' => 'LikeablesController@destroy']); // unlike
     Route::resource('likeables', 'LikeablesController', [
         'only' => [ 'index' ],
+    ]);
+
+    // -- bookmarks:  --
+    //Route::put('/bookmarks/{resource}', ['as'=>'bookmarks.update', 'uses' => 'BookmarksController@update']); // add bookmark
+    //Route::delete('/bookmarks/{resource}', ['as'=>'bookmarks.destroy', 'uses' => 'BookmarksController@destroy']); // remove bookmark
+    Route::resource('bookmarks', 'BookmarksController', [
+        'only' => [ 'index', 'store', 'delete' ],
     ]);
 
     // -- mediafiles: likeable | shareable | commentable (?) | tippable | purchaseable --
@@ -102,7 +109,6 @@ Route::group(['middleware' => ['auth']], function () {
 
     // -- posts: likeable | shareable | commentable | tippable | purchaseable | pinnable --
     Route::get('/posts/match', ['as'=>'posts.match', 'uses' => 'PostsController@match']);
-    Route::put('/posts/{post}/bookmark', ['as'=>'posts.bookmark', 'uses' => 'PostsController@bookmark']);
     Route::put('/posts/{post}/tip', ['as'=>'posts.tip', 'uses' => 'PostsController@tip']);
     Route::put('/posts/{post}/purchase', ['as'=>'posts.purchase', 'uses' => 'PostsController@purchase']);
     Route::patch('/posts/{post}/attachMediafile/{mediafile}', ['as'=>'posts.attachMediafile', 'uses' => 'PostsController@attachMediafile']);
