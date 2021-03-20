@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use App\Http\Resources\BookmarkCollection;
+use App\Http\Resources\Bookmark as BookmarkResource;
 use App\Models\User;
 use App\Models\Bookmark;
 
@@ -24,7 +25,7 @@ class BookmarksController extends AppBaseController
         $filters = $request->filters ?? [];
 
         // Init query
-        $query = Comment::with('user');
+        $query = Bookmark::with('user');
 
         // Check permissions
         if ( !$request->user()->isAdmin() ) {
@@ -54,8 +55,15 @@ class BookmarksController extends AppBaseController
         return new BookmarkCollection($data);
     }
 
+    public function show(Request $request, Bookmark $bookmark)
+    {
+        $this->authorize('view', $bookmark);
+        return new BookmarkResource($bookmark);
+    }
+
     public function store(Request $request)
     {
+        $this->authorize('create', Bookmark::class);
         $request->validate([
             'bookmarkable_id' => 'required|uuid',
             'bookmarkabe_type' => 'required|string|alpha-dash|in:posts',
@@ -75,6 +83,12 @@ class BookmarksController extends AppBaseController
             'bookmarkable' => $bookmarkable,
             'bookmark_count' => $bookmarkable->bookmarks->count(),
         ]);
+    }
 
+    public function destroy(Request $request, Bookmark $bookmark)
+    {
+        $this->authorize('delete', $bookmark);
+        $bookmark->delete();
+        return response()->json([]);
     }
 }

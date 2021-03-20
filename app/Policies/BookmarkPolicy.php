@@ -17,4 +17,12 @@ class BookmarkPolicy extends BasePolicy
         'forceDelete' => 'isOwner:pass:fail',
         'restore'     => 'isOwner:pass:fail',
     ];
+
+    /*
+    protected function view(User $user, Bookmark $bookmark)
+    {
+        dd($user->toArray(), $bookmark->toArray());
+        return true; // essentially allow viewing of free posts by 'public' (non-followers)
+    }
+     */
 }

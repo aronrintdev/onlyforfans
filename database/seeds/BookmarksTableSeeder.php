@@ -43,12 +43,12 @@ class BookmarksTableSeeder extends Seeder
 
             // --- create some bookmarks ---
 
-            $max = $this->faker->numberBetween( 1, min($ownerPool->count()-1, 5) );
+            $max = $this->faker->numberBetween( 1, min($ownerPool->count()-1, 3) );
             if ( $this->appEnv !== 'testing' ) {
                 $this->output->writeln("  - Creating $max bookmarks for post ".$p->slug.", iter: $iter");
             }
 
-            $ownerPool->random($max)->each( function($o) use(&$p) {
+            $ownerPool->take($max)->each( function($o) use(&$p) { // use 'take' so it's always the same users
                 $customAttributes = [ 'notes' => 'BookmarksTableSeeder.bookmark_some_posts' ];
                 $bookmark = Bookmark::create([
                     'user_id' => $o->id,

@@ -99,7 +99,7 @@ Route::group(['middleware' => ['auth']], function () {
     //Route::put('/bookmarks/{resource}', ['as'=>'bookmarks.update', 'uses' => 'BookmarksController@update']); // add bookmark
     //Route::delete('/bookmarks/{resource}', ['as'=>'bookmarks.destroy', 'uses' => 'BookmarksController@destroy']); // remove bookmark
     Route::resource('bookmarks', 'BookmarksController', [
-        'only' => [ 'index', 'store', 'delete' ],
+        'except' => [ 'create', 'edit', 'update', ],
     ]);
 
     // -- mediafiles: likeable | shareable | commentable (?) | tippable | purchaseable --

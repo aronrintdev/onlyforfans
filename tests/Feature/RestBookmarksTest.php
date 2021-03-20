@@ -22,7 +22,7 @@ class RestBookmarksTest extends TestCase
     public function test_owner_can_list_bookmarks()
     {
         $owner = User::has('bookmarks','>=',1)->firstOrFail();
-        $expectedCount = Bookmark::where('owner', $owner->id)->count();
+        $expectedCount = Bookmark::where('user_id', $owner->id)->count();
 
         $response = $this->actingAs($owner)->ajaxJSON('GET', route('bookmarks.index'), [
             'filters' => [
@@ -72,16 +72,17 @@ class RestBookmarksTest extends TestCase
         $response = $this->actingAs($owner)->ajaxJSON('GET', route('bookmarks.show', $bookmark->id));
         $response->assertStatus(200);
         $content = json_decode($response->content());
-        $this->assertNotNull($content->bookmark);
-        $this->assertObjectHasAttribute('bookmarkabke_type', $content->bookmark);
-        $this->assertNotNull($content->bookmark->bookmarkable_type);
-        $this->assertObjectHasAttribute('bookmarkabke_id', $content->bookmark);
-        $this->assertNotNull($content->bookmark->bookmarkable_id);
+        $this->assertNotNull($content->data);
+        $this->assertObjectHasAttribute('bookmarkable_type', $content->data);
+        $this->assertNotNull($content->data->bookmarkable_type);
+        $this->assertObjectHasAttribute('bookmarkable_id', $content->data);
+        $this->assertNotNull($content->data->bookmarkable_id);
     }
 
     /**
      *  @group bookmarks
      *  @group regression
+     *  @group here03
      */
     public function test_can_delete_own_bookmark()
     {

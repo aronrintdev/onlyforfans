@@ -2,14 +2,16 @@
 namespace App\Models;
 
 use Exception;
+use App\Interfaces\Ownable;
 use App\Interfaces\UuidId;
 use App\Models\Traits\UsesUuid;
+use App\Traits\OwnableFunctions;
 use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
-class Bookmark extends Model implements UuidId
+class Bookmark extends Model implements UuidId, Ownable
 {
-    use UsesUuid;
+    use UsesUuid, OwnableFunctions;
 
     protected $guarded = [ 'id', 'created_at', 'updated_at' ];
     //protected $appends = [ '', ];
@@ -41,4 +43,10 @@ class Bookmark extends Model implements UuidId
     // %%% Methods
     //--------------------------------------------
 
+    // %%% --- Implement Ownable Interface ---
+
+    public function getOwner(): ?Collection
+    {
+        return new Collection([$this->user]);
+    }
 }
