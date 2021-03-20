@@ -71,7 +71,7 @@
                     </b-dropdown>
                   </div>
                   <div class="text-center" v-if="loading">
-                    <b-spinner variant="secondary" label="Loading..." size="small"></b-spinner>
+                    <b-spinner variant="secondary" label="Loading..." small></b-spinner>
                   </div>
                   <div class="no-users" v-if="!users.length">Nothing was found</div>
                   <ul class="user-list" v-if="users.length">

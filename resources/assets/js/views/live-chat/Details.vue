@@ -71,7 +71,7 @@
                     </b-dropdown>
                   </div>
                   <div class="text-center" v-if="loading">
-                    <b-spinner variant="secondary" label="Loading..." size="small"></b-spinner>
+                    <b-spinner variant="secondary" label="Loading..." small></b-spinner>
                   </div>
                   <div class="no-users" v-if="!users.length">Nothing was found</div>
                   <ul class="user-list" v-if="users.length">
@@ -186,6 +186,7 @@
                       Type a message below to start a conversation with {{ selectedUser.name }}
                     </div>
                     <div class="messages" v-if="messages.length > 0">
+                      <div class="text-center mb-2" v-if="loadingData"><b-spinner variant="secondary" label="Loading..." small></b-spinner></div>
                       <div class="message-group" :key="messageGroup.date"  v-for="messageGroup in messages">
                         <div class="message-group-time"><span>{{ moment.unix(messageGroup.date).format('MMM DD, YYYY') }}</span></div>
                         <template v-for="message in messageGroup.messages">
@@ -289,6 +290,8 @@
       hasNewMessage: false,
       currentUser: undefined,
       originMessages: [],
+      offset: 0,
+      loadingData: false,
     }),
     mounted() {
       const self = this;
@@ -309,6 +312,10 @@
         this.loading = false;
       });
       this.getMessages();
+      setTimeout(() => {
+        const container = this.$el.querySelector(".conversation-list .message-group:last-child");
+        container.scrollIntoView({ block: 'end', behavior: 'auto' });
+      }, 500);
       Echo.private(`${this.$route.params.id}-message`)
         .listen('MessageSentEvent', (e) => {
             self.originMessages.push(e.message);
@@ -330,9 +337,15 @@
       '$route.params.id': function (id) {
         this.selectedUser = undefined;
         this.messages = [];
+        this.originMessages = [];
+        this.offset = 0;
         this.newMessageText = undefined;
         this.getMessages();
         const self = this;
+          setTimeout(() => {
+          const container = this.$el.querySelector(".conversation-list .message-group:last-child");
+          container.scrollIntoView({ block: 'end', behavior: 'auto' });
+        }, 500);
         Echo.private(`${id}-message`)
         .listen('MessageSentEvent', (e) => {
           self.originMessages.push(e.message);
@@ -359,7 +372,17 @@
         return optionText;
       },
     },
+    beforeDestroy() {
+      this.$el.querySelector('.conversation-list .messages').removeEventListener('scroll', this.handleDebouncedScroll);
+    },
     methods: {
+      handleDebouncedScroll: function(event) {
+        const isUserScrolling = (event.target.scrollTop === 0);
+        if (isUserScrolling && !this.loadingData) {
+          this.getMessages();
+          this.$el.querySelector('.conversation-list .messages').scrollTop = 10;
+        }
+      },
       updateUserStatus: function (userId, status) {
         let statusHolder = $(".status-holder-"+ userId);
         if (status == 1) {
@@ -373,12 +396,20 @@
         }
       },
       getMessages: function() {
+        this.loadingData = true;
         const user_id = this.$route.params.id;
-        this.axios.get(`/chat-messages/${user_id}`).then((response) => {
+        this.axios.get(`/chat-messages/${user_id}?offset=${this.offset}&limit=30`).then((response) => {
           this.selectedUser = response.data;
           this.currentUser = response.data.currentUser;
-          this.originMessages = response.data.messages;
+          this.originMessages = this.originMessages.concat(response.data.messages);
+          if (this.offset === 0 && this.originMessages.length > 0) {
+            setTimeout(() => {
+              this.$el.querySelector('.conversation-list').addEventListener('scroll', this.handleDebouncedScroll);
+            }, 1000);
+          }
+          this.offset = this.originMessages.length;
           this.groupMessages();
+          this.loadingData = false;
         })
       },
       groupMessages: function() {
@@ -388,13 +419,9 @@
         });
         this.messages = _.chain(messages)
           .groupBy('date')
-          .map((value, key) => ({ date: key, messages: value }))
+          .map((value, key) => ({ date: key, messages: value.reverse() }))
           .value();
         _.orderBy(this.messages, ['date'], ['DESC']);
-        setTimeout(() => {
-          const container = this.$el.querySelector(".conversation-list .message-group:last-child");
-          container.scrollIntoView({ block: 'end', behavior: 'auto' });
-        }, 500);
       },
       changeSearchbarVisible: function () {
         this.userSearchVisible = !this.userSearchVisible;

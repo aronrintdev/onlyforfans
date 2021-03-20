@@ -116,6 +116,8 @@ class MessageController extends Controller
         return $contacts;
     }
     public function fetchcontact(Request $request, $id) {
+        $offset = $request->query('offset');
+        $limit = $request->query('limit');
         $messages = Message::with(['receiver'])
             ->where(function($query) use(&$request, &$id) {
                 $sessionUser = $request->user();
@@ -127,7 +129,9 @@ class MessageController extends Controller
                 $query->where('receiver_id', $sessionUser->id)
                     ->where('user_id',  $id);
             })
-            ->orderBy('created_at', 'ASC')
+            ->orderBy('created_at', 'DESC')
+            ->skip($offset)
+            ->take($limit)
             ->get();
         $user = Timeline::with(['user', 'avatar'])->where('user_id', $id)->first()->makeVisible(['user']);
         $user->username = $user->user->username;
