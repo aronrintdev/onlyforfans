@@ -134,25 +134,6 @@ class PostsController extends AppBaseController
         return response()->json([]);
     }
 
-    /* NOT SURE WHAT THIS DOES (?)
-    public function saves(Request $request)
-    {
-        $saves = $request->user()->sharedmediafiles->map( function($mf) {
-            $mf->foo = 'bar';
-            //$mf->owner = $mf->getOwner()->first(); // %TODO
-            $mf->owner = $mf->getOwner()->first()->only('username', 'name', 'avatar');
-            return $mf;
-        });
-
-        return response()->json([
-            'shareables' => [
-                'mediafiles' => $mediafiles,
-                'vaultfolders' => $request->user()->sharedvaultfolders,
-            ],
-        ]);
-    }
-     */
-
     public function bookmark(Request $request, Post $post)
     {
         $this->authorize('bookmark', $post);
@@ -217,7 +198,7 @@ class PostsController extends AppBaseController
 
     public function indexComments(Request $request, Post $post)
     {
-        $this->authorize('view', $post);
+        $this->authorize('indexComments', $post);
         //$filters = $request->input('filters', []);
         $comments = Comment::with(['user'])
             ->withCount('likes')
