@@ -111,10 +111,6 @@ export default {
     perPage: 10,
     currentPageCredit: 1,
     currentPageDebit: 1,
-    //totalRows: 100,
-    //nextPage: null,
-    //lastPage: null,
-    //isLastPage: null,
 
     creditFields: [
       {
@@ -253,23 +249,6 @@ export default {
     onReset(e) {
       e.preventDefault()
     },
-    /*
-    perPage() {
-      return this.ledgercredits.meta.per_page
-    },
-    currentPage() {
-      return this.ledgercredits.meta.current_page
-    },
-    nextPage() {
-      return this.ledgercredits.meta.current_page + 1
-    },
-    lastPage() {
-      return this.ledgercredits.meta.last_page
-    },
-    isLastPage() {
-      return this.ledgercredits.meta.current_page === this.feeddata.meta.last_page
-    },
-     */
   },
 
 }

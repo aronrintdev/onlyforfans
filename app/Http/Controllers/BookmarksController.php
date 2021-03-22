@@ -25,7 +25,7 @@ class BookmarksController extends AppBaseController
         $filters = $request->filters ?? [];
 
         // Init query
-        $query = Bookmark::with('user');
+        $query = Bookmark::with(['user', 'bookmarkable']);
 
         // Check permissions
         if ( !$request->user()->isAdmin() ) {

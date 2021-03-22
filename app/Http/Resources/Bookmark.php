@@ -16,6 +16,8 @@ class Bookmark extends JsonResource
             'id' => $this->id,
             'bookmarkable_id' => $this->bookmarkable_id,
             'bookmarkable_type' => $this->bookmarkable_type,
+            'bookmarkable' => $this->bookmarkable,
+            'creator' => $this->bookmarkable->user,
             'user_id' => $this->user_id,
             'created_at' => $this->created_at,
         ];
