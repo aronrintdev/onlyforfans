@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use App\Http\Resources\Post as PostResource;
 use App\Http\Resources\PostCollection;
+use App\Models\Bookmark;
 use App\Models\Post;
 use App\Models\Comment;
 use App\Models\Timeline;
@@ -133,24 +134,17 @@ class PostsController extends AppBaseController
         return response()->json([]);
     }
 
-    /* NOT SURE WHAT THIS DOES (?)
-    public function saves(Request $request)
+    public function bookmark(Request $request, Post $post)
     {
-        $saves = $request->user()->sharedmediafiles->map( function($mf) {
-            $mf->foo = 'bar';
-            //$mf->owner = $mf->getOwner()->first(); // %TODO
-            $mf->owner = $mf->getOwner()->first()->only('username', 'name', 'avatar');
-            return $mf;
-        });
-
-        return response()->json([
-            'shareables' => [
-                'mediafiles' => $mediafiles,
-                'vaultfolders' => $request->user()->sharedvaultfolders,
-            ],
+        $this->authorize('bookmark', $post);
+        $bookmark = Bookmark::create([
+            'user_id' => $request->user()->id,
+            'bookmarkable_type' => 'posts',
+            'bookmarkable_id' => $post->id,
         ]);
+        $post->refresh();
+        return new PostResource($post);
     }
-     */
 
     public function tip(Request $request, Post $post)
     {
@@ -204,7 +198,7 @@ class PostsController extends AppBaseController
 
     public function indexComments(Request $request, Post $post)
     {
-        $this->authorize('view', $post);
+        $this->authorize('indexComments', $post);
         //$filters = $request->input('filters', []);
         $comments = Comment::with(['user'])
             ->withCount('likes')

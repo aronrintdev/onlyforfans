@@ -31,6 +31,9 @@
           <b-list-group-item>
             <router-link :to="{ name: 'settings.referrals', params: {} }">Referrals</router-link>
           </b-list-group-item>
+          <b-list-group-item>
+            <router-link :to="{ name: 'settings.bookmarks', params: {} }">Bookmarks</router-link>
+          </b-list-group-item>
         </b-list-group>
       </aside>
 
@@ -64,13 +67,6 @@ export default {
 
   mounted() {
     this.getMe()
-    /*
-    if (!this.session_user) {
-      this.getMe()
-    } else {
-      this.state = 'loaded'
-    }
-     */
   },
 
   methods: {

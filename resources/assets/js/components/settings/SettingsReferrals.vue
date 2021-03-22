@@ -22,13 +22,6 @@ export default {
   },
 
   computed: {
-
-    /*
-    totalRows() {
-      return this.referrals.meta ? this.referrals.meta.total : 1;
-    },
-     */
-
     isLoading() {
       return !this.session_user || !this.user_settings
     },
@@ -37,37 +30,12 @@ export default {
   watch: { },
 
   data: () => ({
-
-    perPage: 10,
-    currentPage: 1,
-
-    fields: [
-      {
-        key: 'last_activity',
-        label: 'Latest Activity',
-        formatter: (value, key, item) => {
-          return moment.unix(value).format('MMMM Do, YYYY')
-        }
-      },
-    ],
-
   }),
 
   created() {
   },
 
   methods: {
-    pageClickHandler(e, page) {
-      this.getFanledgers({ 
-        seller_id: this.session_user.id,
-        page: page,
-        take: this.perPage,
-      })
-    },
-
-    onReset(e) {
-      e.preventDefault()
-    },
   },
 
 }

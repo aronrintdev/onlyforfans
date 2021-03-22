@@ -394,7 +394,7 @@ class RestPostsTest extends TestCase
      *  @group posts
      *  @group regression
      */
-    public function test_nonfollower_can_not_view_free_post_on_my_timeline()
+    public function test_nonfollower_can_view_free_post_on_my_timeline()
     {
         $timeline = Timeline::has('followers', '>=', 1)
             ->whereHas('posts', function($q1) {
@@ -407,7 +407,7 @@ class RestPostsTest extends TestCase
         })->where('id', '<>', $creator->id)->first();
 
         $response = $this->actingAs($nonfan)->ajaxJSON('GET', route('posts.show', $post->id));
-        $response->assertStatus(403);
+        $response->assertStatus(200);
     }
 
     /**
@@ -606,7 +606,7 @@ class RestPostsTest extends TestCase
      *  @group posts
      *  @group regression
      */
-    public function test_nonfollower_can_not_view_image_of_free_post_on_my_timeline()
+    public function test_nonfollower_can_view_image_of_free_post_on_my_timeline()
     {
         Storage::fake('s3');
 
@@ -654,10 +654,10 @@ class RestPostsTest extends TestCase
         $mediafile = $post->mediafiles->shift();
 
         $response = $this->actingAs($nonFan)->ajaxJSON('GET', route('posts.show', $post->id));
-        $response->assertStatus(403);
+        $response->assertStatus(200);
 
         $response = $this->actingAs($nonFan)->ajaxJSON('GET', route('mediafiles.show', $mediafile->id));
-        $response->assertStatus(403);
+        $response->assertStatus(200);
     }
 
     /**
@@ -799,7 +799,7 @@ class RestPostsTest extends TestCase
      *  @group posts
      *  @group regression
      */
-    public function test_timeline_nonfollower_can_not_like_post()
+    public function test_timeline_nonfollower_can_like_post()
     {
         $timeline = Timeline::has('followers', '>=', 1)
             ->whereHas('posts', function($q1) {
@@ -818,7 +818,7 @@ class RestPostsTest extends TestCase
             'likeable_id' => $post->id,
         ];
         $response = $this->actingAs($nonfan)->ajaxJSON('PUT', route('likeables.update', $nonfan->id), $payload); // fan->likee
-        $response->assertStatus(403);
+        $response->assertStatus(200);
     }
 
     /**

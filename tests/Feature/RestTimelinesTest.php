@@ -52,21 +52,21 @@ class TimelinesTest extends TestCase
         $response->assertStatus(200);
 
         $content = json_decode($response->content());
-        $this->assertObjectHasAttribute('slug', $content->timeline);
-        $this->assertNotNull($content->timeline->slug);
-        $this->assertObjectHasAttribute('name', $content->timeline);
-        $this->assertNotNull($content->timeline->name);
-        $this->assertObjectHasAttribute('about', $content->timeline);
-        $this->assertNotNull($content->timeline->about);
-        $this->assertObjectHasAttribute('cover', $content->timeline);
-        $this->assertObjectHasAttribute('avatar', $content->timeline);
+        $this->assertObjectHasAttribute('slug', $content->data);
+        $this->assertNotNull($content->data->slug);
+        $this->assertObjectHasAttribute('name', $content->data);
+        $this->assertNotNull($content->data->name);
+        $this->assertObjectHasAttribute('about', $content->data);
+        $this->assertNotNull($content->data->about);
+        $this->assertObjectHasAttribute('cover', $content->data);
+        $this->assertObjectHasAttribute('avatar', $content->data);
 
-        $this->assertObjectNotHasAttribute('posts', $content->timeline);
-        $this->assertObjectNotHasAttribute('user', $content->timeline);
-        $this->assertObjectNotHasAttribute('followers', $content->timeline);
-        $this->assertObjectNotHasAttribute('subscribers', $content->timeline);
-        $this->assertObjectNotHasAttribute('ledgersales', $content->timeline);
-        $this->assertObjectNotHasAttribute('stories', $content->timeline);
+        $this->assertObjectNotHasAttribute('posts', $content->data);
+        $this->assertObjectNotHasAttribute('user', $content->data);
+        $this->assertObjectNotHasAttribute('followers', $content->data);
+        $this->assertObjectNotHasAttribute('subscribers', $content->data);
+        $this->assertObjectNotHasAttribute('ledgersales', $content->data);
+        $this->assertObjectNotHasAttribute('stories', $content->data);
     }
 
     /**
@@ -86,20 +86,20 @@ class TimelinesTest extends TestCase
         $response->assertStatus(200);
 
         $content = json_decode($response->content());
-        $this->assertObjectHasAttribute('slug', $content->timeline);
-        $this->assertNotNull($content->timeline->slug);
-        $this->assertObjectHasAttribute('name', $content->timeline);
-        $this->assertNotNull($content->timeline->name);
-        $this->assertObjectHasAttribute('about', $content->timeline);
-        $this->assertNotNull($content->timeline->about);
-        $this->assertObjectHasAttribute('cover', $content->timeline);
-        $this->assertObjectHasAttribute('avatar', $content->timeline);
-        $this->assertObjectNotHasAttribute('posts', $content->timeline);
-        $this->assertObjectNotHasAttribute('user', $content->timeline);
-        $this->assertObjectNotHasAttribute('followers', $content->timeline);
-        $this->assertObjectNotHasAttribute('subscribers', $content->timeline);
-        $this->assertObjectNotHasAttribute('ledgersales', $content->timeline);
-        $this->assertObjectNotHasAttribute('stories', $content->timeline);
+        $this->assertObjectHasAttribute('slug', $content->data);
+        $this->assertNotNull($content->data->slug);
+        $this->assertObjectHasAttribute('name', $content->data);
+        $this->assertNotNull($content->data->name);
+        $this->assertObjectHasAttribute('about', $content->data);
+        $this->assertNotNull($content->data->about);
+        $this->assertObjectHasAttribute('cover', $content->data);
+        $this->assertObjectHasAttribute('avatar', $content->data);
+        $this->assertObjectNotHasAttribute('posts', $content->data);
+        $this->assertObjectNotHasAttribute('user', $content->data);
+        $this->assertObjectNotHasAttribute('followers', $content->data);
+        $this->assertObjectNotHasAttribute('subscribers', $content->data);
+        $this->assertObjectNotHasAttribute('ledgersales', $content->data);
+        $this->assertObjectNotHasAttribute('stories', $content->data);
     }
 
     /**
@@ -225,7 +225,7 @@ class TimelinesTest extends TestCase
 
     /**
      *  @group timelines
-     *  @group regression
+     *  @group OFF-regression
      *  @group broken
      */
     public function test_blocked_can_not_follow_timeline()
@@ -259,7 +259,6 @@ class TimelinesTest extends TestCase
     /**
      *  @group timelines
      *  @group regression
-     *  @group here10
      */
     public function test_can_subscribe_to_timeline()
     {

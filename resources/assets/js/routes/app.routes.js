@@ -20,6 +20,7 @@ import SettingsSecurity from '@components/settings/SettingsSecurity.vue';
 import SettingsEarnings from '@components/settings/SettingsEarnings.vue';
 import SettingsSessions from '@components/settings/SettingsSessions.vue';
 import SettingsReferrals from '@components/settings/SettingsReferrals.vue';
+import SettingsBookmarks from '@components/settings/SettingsBookmarks.vue';
 
 export const routes = [
   {
@@ -89,6 +90,11 @@ export const routes = [
         path: 'referrals',
       },
       {
+        name: 'settings.bookmarks',
+        component: SettingsBookmarks,
+        path: 'bookmarks',
+      },
+      {
         name: 'settings.default',
         component: SettingsGeneral,
         path: '',
@@ -148,8 +154,8 @@ export const routes = [
 
   // Posts
   {
-    name: 'post.show',
-    path: '/post/:slug',
+    name: 'posts.show',
+    path: '/posts/:slug',
     component: posts.Show,
     props: true,
   },

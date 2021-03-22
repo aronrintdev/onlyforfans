@@ -28,11 +28,7 @@ class User extends Authenticatable implements PaymentSendable, Blockable, HasFin
 {
     use Notifiable, HasRoles, HasFactory, Messagable, SoftDeletes, UsesUuid, MorphFunctions;
 
-    protected $appends = [ 
-        'name', 
-        'avatar', 
-        'about', 
-    ];
+    protected $appends = [ 'name', 'avatar', 'about', ];
     protected $guarded = [ 'id', 'created_at', 'updated_at' ];
     protected $hidden = [ 'email', 'password', 'remember_token', 'verification_code', 'timeline'];
     protected $dates = [ 'last_logged', ];
@@ -74,26 +70,8 @@ class User extends Authenticatable implements PaymentSendable, Blockable, HasFin
         });
     }
 
-    /*
-    public function toArray()
-    {
-        $array = parent::toArray();
-        // Removed, all attributes seem to still be set without needing this and it messes up setVisible()
-        // TODO: Remove this after confirming ui still gets what it needs.
-        // $timeline = $this->timeline->toArray();
-        // foreach ($timeline as $key => $value) {
-        //     if ($key != 'id') {
-        //         $array[$key] = $value;
-        //     }
-        // }
-        // $array['avatar'] = $this->avatar;
-        return $array;
-    }
-     */
 
-    /**
-     * Makes username a valid random username if it is null or empty.
-     */
+    // Makes username a valid random username if it is null or empty.
     public function checkUsername()
     {
         if (!isset($this->username) || $this->username === '') {
@@ -119,6 +97,11 @@ class User extends Authenticatable implements PaymentSendable, Blockable, HasFin
     { // Vaultfolders shared with me (??)
         return $this->morphedByMany('App\Models\Vaultfolder', 'shareable', 'shareables', 'sharee_id')
             ->withTimestamps();
+    }
+
+    public function bookmarks()
+    { 
+        return $this->hasMany('App\Models\Bookmark', 'user_id');
     }
 
     public function ledgersales()
@@ -179,11 +162,9 @@ class User extends Authenticatable implements PaymentSendable, Blockable, HasFin
 
     public function own_pages()
     {
-        $admin_role_id = Role::where('name', '=', 'admin')->first();
+        $admin_role_id = Role::where('name', 'admin')->first();
         $own_pages = $this->pages()->where('role_id', $admin_role_id->id)->where('page_user.active', 1)->get();
-
         $result = $own_pages ? $own_pages : false;
-
         return $result;
     }
 
@@ -191,9 +172,7 @@ class User extends Authenticatable implements PaymentSendable, Blockable, HasFin
     {
         $admin_role_id = Role::where('name', '=', 'admin')->first();
         $own_groups = $this->groups()->where('role_id', $admin_role_id->id)->where('status', 'approved')->get();
-
         $result = $own_groups ? $own_groups : false;
-
         return $result;
     }
 
@@ -206,7 +185,6 @@ class User extends Authenticatable implements PaymentSendable, Blockable, HasFin
     {
         return $this->belongsToMany('App\Group', 'group_user', 'user_id', 'group_id')->withPivot('role_id', 'status');
     }
-
 
     public function pageLikes()
     {

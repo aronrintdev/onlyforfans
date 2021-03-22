@@ -1,34 +1,50 @@
 <template>
-        <div class="panel-footer fans">
-          <ul class="list-inline footer-ctrl mb-0">
-            <li class="list-inline-item mr-3">
-              <LikesButton @toggled="togglePostLike()" :filled="isLikedByMe" :count="likeCount" :showCount="true" />
-            </li>
-            <li class="list-inline-item mr-3">
-              <span @click="toggleComments()" class="tag-clickable">
-                <b-icon icon="chat-text" font-scale="1" />
-                ({{ post.stats.commentCount }})
-              </span>
-            </li>
-            <li class="list-inline-item mr-3">
-              <span @click="share()" class="tag-clickable">
-                <b-icon icon="share" font-scale="1" />
-              </span>
-            </li>
-            <li class="list-inline-item mr-3">
-              <span @click="tip()" class="tag-clickable">$</span>
-            </li>
-          </ul>
+  <div class="panel-footer fans">
 
-          <b-collapse v-model="renderComments">
-            <CommentList
-              :post-id="post.id"
-              :loading="loadingComments"
-              v-model="comments"
-            />
-          </b-collapse>
+    <div class="d-flex justify-content-between">
+      <ul class="d-flex list-inline footer-ctrl mb-0">
+        <li class="mr-3">
+          <LikesButton @toggled="togglePostLike()" :filled="isLikedByMe" :count="likeCount" />
+        </li>
+        <li class="mr-3">
+          <span @click="toggleComments()" class="tag-clickable">
+            <b-icon icon="chat-text" font-scale="1" />
+          </span>
+        </li>
+        <li class="mr-3">
+          <span @click="share()" class="tag-clickable">
+            <b-icon icon="share" font-scale="1" />
+          </span>
+        </li>
+        <li class="mr-3">
+          <span @click="tip()" class="tag-clickable">$</span>
+        </li>
+      </ul>
+      <ul class="d-flex list-inline footer-ctrl mb-0">
+        <li class="mr-3">
+          <span @click="toggleBookmark()" class="tag-clickable">
+            <b-icon :icon="isBookmarkedByMe ? 'bookmark-fill' : 'bookmark'" variant="primary" font-scale="1" />
+          </span>
+        </li>
+      </ul>
+    </div>
 
-        </div>
+    <div class="like-count">
+      <template v-if="likeCount===1"><span class="mr-2">{{ likeCount }} like</span></template>
+      <template v-if="likeCount > 1"><span class="mr-2">{{ likeCount }} likes</span></template>
+      <template v-if="post.stats.commentCount===1"><span class="mr-2">{{ post.stats.commentCount }} comment</span></template>
+      <template v-if="post.stats.commentCount > 1"><span class="mr-2">{{ post.stats.commentCount }} comments</span></template>
+    </div>
+
+    <b-collapse v-model="renderComments">
+      <CommentList
+        :post-id="post.id"
+        :loading="loadingComments"
+        v-model="comments"
+      />
+    </b-collapse>
+
+  </div>
 </template>
 
 <script>
@@ -62,6 +78,7 @@ export default {
     renderComments: false,
     isLikedByMe: false,
     likeCount: 0, // %FIXME INIT
+    isBookmarkedByMe: false,
     loadingComments: false,
     // whereas comment count is computed from the comments relation on the post itself (%FIXME?)
   }),
@@ -69,6 +86,7 @@ export default {
   mounted() { 
     this.isLikedByMe = this.post.stats?.isLikedByMe || false
     this.likeCount = this.post.stats?.likeCount  || 0
+    this.isBookmarkedByMe = this.post.stats?.isBookmarkedByMe || false
   },
 
   created() {},
@@ -102,6 +120,23 @@ export default {
     addComment(comment) {
       this.comments = [ ...this.comments, comment ]
       this.post.comments_count = this.post.comments_count + 1
+    },
+
+    async toggleBookmark() {
+      let response
+      if (this.isBookmarkedByMe) { // remove
+        response = await axios.post(`/bookmarks/remove`, {
+          bookmarkable_type: 'posts',
+          bookmarkable_id: this.post.id,
+        })
+        this.isBookmarkedByMe = false
+      } else { // add
+        response = await axios.post(`/bookmarks`, {
+          bookmarkable_type: 'posts',
+          bookmarkable_id: this.post.id,
+        })
+        this.isBookmarkedByMe = true
+      }
     },
 
     updateCommentsCount(value, index) {
@@ -152,8 +187,9 @@ export default {
 ul {
   margin: 0;
 }
-footer.card-footer {
-  background-color: #fff;
+
+.like-count {
+  font-size: 0.80rem;
 }
 
 </style>

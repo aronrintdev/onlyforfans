@@ -55,7 +55,7 @@ class Post extends Model implements UuidId, Ownable, Deletable, Purchaseable, Li
     }
 
     protected $guarded = [ 'id', 'created_at', 'updated_at' ];
-    protected $appends = [ 'isLikedByMe', ];
+    protected $appends = [ 'isLikedByMe', 'isBookmarkedByMe', ];
 
     public function sluggable(): array
     {
@@ -76,6 +76,16 @@ class Post extends Model implements UuidId, Ownable, Deletable, Purchaseable, Li
         return $sessionUser ? $this->likes->contains($sessionUser->id) : false;
     }
 
+    public function getIsBookmarkedByMeAttribute($value)
+    {
+        $sessionUser = Auth::user();
+        $exists = Bookmark::where('user_id', $sessionUser->id)
+            ->where('bookmarkable_id', $this->id)
+            ->where('bookmarkable_type', 'posts')
+            ->first();
+        return $exists ? true : false;
+    }
+
     protected $casts = [
         'cattrs' => 'array',
         'meta' => 'array',
@@ -84,6 +94,12 @@ class Post extends Model implements UuidId, Ownable, Deletable, Purchaseable, Li
     //--------------------------------------------
     // %%% Relationships
     //--------------------------------------------
+
+    public function bookmarks()
+    {
+        //return $this->morphMany(Bookmark::class, 'bookmarkable')->withTimestamps();
+        return $this->morphMany(Bookmark::class, 'bookmarkable');
+    }
 
     // can be shared with many users (via [shareables])
     public function sharees()
