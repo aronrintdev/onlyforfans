@@ -6,6 +6,7 @@
       tag="article"
       class="superbox-post"
       header-class="d-flex justify-content-between"
+      no-body
     >
       <template #header>
         <PostHeader :post="post" :session_user="session_user"/>
