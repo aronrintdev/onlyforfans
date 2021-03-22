@@ -20,6 +20,7 @@ import SettingsSecurity from '@components/settings/SettingsSecurity.vue';
 import SettingsEarnings from '@components/settings/SettingsEarnings.vue';
 import SettingsSessions from '@components/settings/SettingsSessions.vue';
 import SettingsReferrals from '@components/settings/SettingsReferrals.vue';
+import SettingsBookmarks from '@components/settings/SettingsBookmarks.vue';
 
 export const routes = [
   {
@@ -87,6 +88,11 @@ export const routes = [
         name: 'settings.referrals',
         component: SettingsReferrals,
         path: 'referrals',
+      },
+      {
+        name: 'settings.bookmarks',
+        component: SettingsBookmarks,
+        path: 'bookmarks',
       },
       {
         name: 'settings.default',

@@ -1,8 +1,8 @@
 <template>
   <div v-if="!isLoading">
-    <b-card title="Referrals" class="mb-3">
+    <b-card title="Bookmarks" class="mb-3">
       <b-card-text>
-        TBD
+        Bookmarks TBD
       </b-card-text>
     </b-card>
 
@@ -10,7 +10,7 @@
 </template>
 
 <script>
-import Vue from 'vue' // needed to use niceCurrency filter in table formatter below
+import Vue from 'vue'
 import Vuex from 'vuex'
 import moment from 'moment'
 

@@ -67,6 +67,7 @@ export default {
     renderComments: false,
     isLikedByMe: false,
     likeCount: 0, // %FIXME INIT
+    isBookmarkedByMe: false,
     loadingComments: false,
     // whereas comment count is computed from the comments relation on the post itself (%FIXME?)
   }),
