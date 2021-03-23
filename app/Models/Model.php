@@ -9,6 +9,11 @@ class Model extends EloquentModel
 {
     use MorphFunctions;
 
+    public static function getTableName()
+    {
+        return (new static)->getTable();
+    }
+
     //protected $customAttributesField = 'cattrs';
     //protected $metaField = 'meta';
 

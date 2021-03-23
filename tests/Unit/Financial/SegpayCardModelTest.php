@@ -3,16 +3,18 @@
 namespace Tests\Unit\Financial;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
 
+/**
+ * @group unit
+ * @group financial
+ * @group segpay
+ */
 class SegpayCardModelTest extends TestCase
 {
     use RefreshDatabase;
 
     /**
-     * @group unit
-     * @group financial
-     * @group segpay
+     *
      */
     public function test_create()
     {
@@ -21,9 +23,7 @@ class SegpayCardModelTest extends TestCase
     }
 
     /**
-     * @group unit
-     * @group financial
-     * @group segpay
+     *
      */
     public function test_update()
     {
@@ -32,9 +32,7 @@ class SegpayCardModelTest extends TestCase
     }
 
     /**
-     * @group unit
-     * @group financial
-     * @group segpay
+     *
      */
     public function test_remove()
     {

@@ -24,6 +24,7 @@ class SegpayCard extends Model implements Ownable
     ];
 
     /* ------------------------------ Relations ----------------------------- */
+    #region Relations
     /**
      * Owner of account
      */
@@ -40,8 +41,11 @@ class SegpayCard extends Model implements Ownable
         return $this->morphOne(Account::class, 'resource');
     }
 
+    #endregion
+
 
     /* ------------------------------ Functions ----------------------------- */
+    #region Functions
     /**
      * Get card by token value
      */
@@ -91,12 +95,15 @@ class SegpayCard extends Model implements Ownable
         return $card;
     }
 
-
+    #endregion
 
     /* ------------------------------- Ownable ------------------------------ */
+    #region Ownable
     public function getOwner(): Collection
     {
         return new Collection([$this->owner]);
     }
+
+    #endregion
 
 }

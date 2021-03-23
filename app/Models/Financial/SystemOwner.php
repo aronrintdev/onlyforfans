@@ -6,20 +6,28 @@ use Carbon\Carbon;
 use App\Models\Traits\UsesUuid;
 use App\Enums\Financial\AccountTypeEnum;
 use App\Interfaces\HasFinancialAccounts;
+use App\Models\Financial\Traits\HasSystem;
 
 class SystemOwner extends Model implements HasFinancialAccounts
 {
-    use UsesUuid;
+    use UsesUuid,
+        HasSystem;
 
     protected $table = 'financial_system_owners';
 
+    protected $guarded = [];
+
     /* ---------------------------- Relationships --------------------------- */
+    #region Relationships
     public function financialAccounts()
     {
         return $this->morphMany(Account::class, 'owner');
     }
 
+    #endregion
+
     /* ------------------------ HasFinancialAccounts ------------------------ */
+    #region HasFinancialAccounts
     public function getInternalAccount(string $system, string $currency): Account
     {
         $account = $this->financialAccounts->where('system', $system)
@@ -47,8 +55,10 @@ class SystemOwner extends Model implements HasFinancialAccounts
             'pending_last_updated_at' => Carbon::now(),
         ]);
         $account->verified = true;
-        $account->can_make_transaction = true;
+        $account->can_make_transactions = true;
         $account->save();
         return $account;
     }
+
+    #endregion
 }

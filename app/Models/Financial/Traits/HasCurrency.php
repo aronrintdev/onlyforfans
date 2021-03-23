@@ -1,30 +1,12 @@
 <?php
 
-namespace App\Models\Financial;
+namespace App\Models\Financial\Traits;
 
-use App\Models\Financial\Exceptions\CurrencyMismatchException;
-use App\Models\Financial\Exceptions\InvalidFinancialSystemException;
-use App\Models\Model as ModelsModel;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Config;
-use Money\Currency;
-use Money\Money;
+use App\Models\Financial\Exceptions\CurrencyMismatchException;
 
-/**
- * Financial System Base Model
- */
-class Model extends ModelsModel
+trait HasCurrency
 {
-    protected $minTransactions = null;
-
-    public function asMoney($amount): Money
-    {
-        if ($amount instanceof Money) {
-            return $amount;
-        }
-        return new Money($amount, new Currency($this->currency));
-    }
-
     /**
      * Currency being worked with.
      * This is an `ISO 4217`, a three letter currency code.
@@ -38,20 +20,14 @@ class Model extends ModelsModel
         return $this->attributes['currency'];
     }
 
-    /**
-     * Min Transactions array
-     */
-    public function getMinTransactionsAttribute()
-    {
-        if (!isset($this->attributes['minTransactions'])) {
-            $this->attributes['minTransactions'] = Config::get('transactions.systems.' . $this->system . '.minTransactions');
-        }
-        return $this->attributes['minTransactions'];
-    }
-
     /* ----------------------- Verification Functions ----------------------- */
+    #region Verification
+
     /**
      * Checks that two models have the same currency
+     *
+     * @param  mixed  $model
+     * @return  bool
      */
     public function isSameCurrency($model): bool
     {
@@ -61,6 +37,7 @@ class Model extends ModelsModel
     /**
      * Verifies that two models have the same currency
      *
+     * @param  mixed  $model
      * @throws CurrencyMismatchException
      */
     public function verifySameCurrency($model)
@@ -70,4 +47,5 @@ class Model extends ModelsModel
         }
     }
 
+    #endregion
 }
