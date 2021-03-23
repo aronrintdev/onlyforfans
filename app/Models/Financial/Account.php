@@ -210,6 +210,7 @@ class Account extends Model implements Ownable
                         if ( // From Internal to Internal account that is not a fee transaction
                             $transaction->reference->account->type === AccountTypeEnum::INTERNAL
                             && $transaction->account->type === AccountTypeEnum::INTERNAL
+                            && $transaction->credit_amount->isPositive()
                             && in_array($transaction->type, $feeOn)
                         ) {
                             // Calculate Fees and Taxes On this transaction, then settle transaction and all fee debit transactions

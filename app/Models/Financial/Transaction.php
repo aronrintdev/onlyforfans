@@ -277,7 +277,7 @@ class Transaction extends Model
         }
         if (!isset($creditTrans->settled_at)) {
             $creditTrans->settleBalance();
-            $debitTrans->save();
+            $creditTrans->save();
         }
 
         // If this is a partial chargeback, move funds back on new transaction so new fees can be calculated.

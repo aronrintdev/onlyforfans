@@ -83,6 +83,7 @@ return [
              * and store fees
              */
             'feesOn' => [
+                TransactionTypeEnum::PAYMENT,
                 TransactionTypeEnum::SALE,
                 TransactionTypeEnum::TIP,
             ],
