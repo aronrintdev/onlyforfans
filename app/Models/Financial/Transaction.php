@@ -234,11 +234,11 @@ class Transaction extends Model
     {
         $transactions = new Collection([]);
         if ($this->debit_amount->isPositive()) {
-            $debitTrans = $this->account;
-            $creditTrans = $this->reference->account;
-        } else if ($this->credit_amount->isPositive()) {
-            $debitTrans = $this->reference->account;
-            $creditTrans = $this->account;
+            $debitTrans = $this;
+            $creditTrans = $this->reference;
+        } else {
+            $debitTrans = $this->reference;
+            $creditTrans = $this;
         }
         $options = [
             'type' => TransactionTypeEnum::CHARGEBACK,
@@ -290,7 +290,7 @@ class Transaction extends Model
      * @param bool $withLock Locks transaction and reference for update
      * @return Transaction
      */
-    public function getNextSettledTransaction($withLock = false): Transaction
+    public function getNextSettledTransaction($withLock = false): ?Transaction
     {
         if (!isset($this->settled_at)) {
             throw new TransactionNotSettledException($this);
@@ -312,7 +312,7 @@ class Transaction extends Model
      * @param bool $withLock Locks transaction and reference for update
      * @return Transaction
      */
-    public function getNextTransaction($withLock = false): Transaction
+    public function getNextTransaction($withLock = false): ?Transaction
     {
         $query = Transaction::where('account_id', $this->account_id)
             ->where('created_at', '>', $this->created_at)
@@ -331,7 +331,7 @@ class Transaction extends Model
      * @param bool $withLock Locks transaction and reference for update
      * @return Transaction
      */
-    public function getNextDebitTransaction($withLock = false): Transaction
+    public function getNextDebitTransaction($withLock = false): ?Transaction
     {
         $query = Transaction::where('account_id', $this->account_id)
             ->where('created_at', '>', $this->created_at)
@@ -351,7 +351,7 @@ class Transaction extends Model
      * @param bool $withLock Locks transaction and reference for update
      * @return Transaction
      */
-    public function getNextCreditTransaction($withLock = false): Transaction
+    public function getNextCreditTransaction($withLock = false): ?Transaction
     {
         $query = Transaction::where('account_id', $this->account_id)
             ->where('created_at', '>', $this->created_at)

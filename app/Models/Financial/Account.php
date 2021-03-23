@@ -2,27 +2,29 @@
 
 namespace App\Models\Financial;
 
-use App\Enums\Financial\AccountTypeEnum;
-use App\Enums\Financial\TransactionSummaryTypeEnum;
 use App\Interfaces\Ownable;
-use App\Jobs\CreateTransactionSummary;
-use App\Jobs\Financial\UpdateAccountBalance;
-
-use App\Models\Traits\OwnableTraits;
-use App\Models\Traits\UsesUuid;
 use App\Models\Casts\Money;
+use Illuminate\Support\Carbon;
+use App\Models\Traits\UsesUuid;
+use Illuminate\Support\Collection;
 
+use Illuminate\Support\Facades\DB;
+use App\Models\Traits\OwnableTraits;
+use App\Jobs\CreateTransactionSummary;
+
+use Illuminate\Support\Facades\Config;
+use App\Enums\Financial\AccountTypeEnum;
+use App\Models\Financial\Traits\HasSystem;
+use App\Jobs\Financial\UpdateAccountBalance;
+use App\Models\Financial\Traits\HasCurrency;
+use App\Enums\Financial\TransactionSummaryTypeEnum;
+use App\Enums\Financial\TransactionTypeEnum;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Models\Financial\Exceptions\Account\IncorrectTypeException;
 use App\Models\Financial\Exceptions\InvalidTransactionAmountException;
 use App\Models\Financial\Exceptions\Account\InsufficientFundsException;
+use App\Models\Financial\Exceptions\TransactionAccountMismatchException;
 use App\Models\Financial\Exceptions\Account\TransactionNotAllowedException;
-use App\Models\Financial\Traits\HasCurrency;
-use App\Models\Financial\Traits\HasSystem;
-use Illuminate\Support\Carbon;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Config;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Account extends Model implements Ownable
 {
@@ -149,7 +151,7 @@ class Account extends Model implements Ownable
             $commons = [
                 'currency' => $fromAccount->currency,
                 'description' => $options['description'] ?? null,
-                'type' => $options['type'] ?? null,
+                'type' => $options['type'] ?? TransactionTypeEnum::PAYMENT,
                 'shareable_id' => isset($options['shareable_id'])
                     ? $options['shareable_id']
                     : (isset($options['shareable'])
@@ -199,7 +201,7 @@ class Account extends Model implements Ownable
             Transaction::where('account_id', $account->getKey())
                 ->whereNull('settled_at')
                 ->whereNull('failed_at')
-                ->with(['reference.account:type', 'account'])
+                ->with(['reference.account', 'account'])
                 ->orderBy('created_at')
                 ->lockForUpdate()
                 ->chunkById(10, function ($transactions) {
@@ -308,12 +310,22 @@ class Account extends Model implements Ownable
      */
     public function handleChargeback(Transaction $transaction, $amount = null ): Collection
     {
-        $rollBackTransactions = new Collection([]);
+        if ($this->type !== AccountTypeEnum::IN) {
+            throw new IncorrectTypeException($this, AccountTypeEnum::IN);
+        }
+
+        if ($transaction->account_id !== $this->getKey()) {
+            throw new TransactionAccountMismatchException($this, $transaction);
+        }
+
+        $roleBackTransactions = new Collection([]);
         DB::transaction(function () use ($transaction, $amount, &$roleBackTransactions) {
             $account = Account::lockForUpdate()->find($this->getKey());
             if (!isset($amount)) {
                 $amount = clone $transaction->debit_amount;
             }
+
+            $amount = $this->asMoney($amount);
 
             if (!$amount->isPositive()) {
                 throw new InvalidTransactionAmountException($amount, $transaction);
@@ -325,15 +337,29 @@ class Account extends Model implements Ownable
 
             $remainingAmount = clone $amount;
             $currentTransaction = $transaction->reference;
-            do {
+
+            // Take funds from the owners internal account balance first if there is any balance
+            $internalAccount = $currentTransaction->account;
+            $internalAccount->settleBalance();
+            $internalAccount->refresh();
+            if ($internalAccount->balance->isPositive()) {
+                $remainingAmount = $remainingAmount->subtract($internalAccount->balance);
+            }
+
+            // TODO: Raise timestamp accuracy to ms
+
+            while ($remainingAmount->isPositive()) {
                 // Get next Debit transaction in owners internal account
                 // This is the next purchase made after funds were deposited there, Usually one, but there could
                 // potentially be more transactions so we need to check amounts and rollback all transactions that where
                 // funded by this transaction
                 $currentTransaction = $currentTransaction->getNextDebitTransaction(true);
+                if (!isset($currentTransaction)) {
+                    break;
+                }
                 $transactions->push($currentTransaction);
                 $remainingAmount = $remainingAmount->subtract($currentTransaction->credit_amount);
-            } while( $remainingAmount->isPositive() );
+            }
 
             // Perform rollback transactions
 
@@ -352,10 +378,10 @@ class Account extends Model implements Ownable
                 $roleBackTransactions->push(
                     $transaction->chargeback()
                 );
-            } while ($transactions->count > 0);
+            } while ($transactions->count() > 0);
         });
 
-        return $rollBackTransactions;
+        return $roleBackTransactions;
     }
 
 
