@@ -65,7 +65,7 @@
                           first</b-form-radio>
                       </b-dropdown-item>
                       <b-dropdown-divider></b-dropdown-divider>
-                      <b-dropdown-item disabled>Mark all as read</b-dropdown-item>
+                      <b-dropdown-item @click="markAllAsRead">Mark all as read</b-dropdown-item>
                       <b-dropdown-divider></b-dropdown-divider>
                       <b-dropdown-item>Select</b-dropdown-item>
                     </b-dropdown>
@@ -307,6 +307,8 @@
         .leaving((user) => {
           self.updateUserStatus(user.id, 0);
         });
+      // Mark unread messages as read
+      this.axios.post(`/chat-messages/${this.$route.params.id}/mark-as-read`);
       this.axios.get('/chat-messages/contacts').then((response) => {
         this.users = response.data;
         this.loading = false;
@@ -340,9 +342,13 @@
         this.originMessages = [];
         this.offset = 0;
         this.newMessageText = undefined;
+
+        // Mark unread messages as read
+        this.axios.post(`/chat-messages/${this.$route.params.id}/mark-as-read`);
+
         this.getMessages();
         const self = this;
-          setTimeout(() => {
+        setTimeout(() => {
           const container = this.$el.querySelector(".conversation-list .message-group:last-child");
           container.scrollIntoView({ block: 'end', behavior: 'auto' });
         }, 500);
@@ -488,12 +494,15 @@
           })
         }, 300);
       },
+      markAllAsRead: function() {
+        this.axios.post('/chat-messages/mark-all-as-read');
+      },
       sendMessage: function() {
         const self = this;
         this.axios.post('/chat-messages', {
           message: this.newMessageText,
           user_id: this.selectedUser.profile.id,
-          name: this.selectedUser.profile.name
+          name: this.selectedUser.profile.name,
         })
           .then((response) => {
             this.originMessages.push(response.data.message)

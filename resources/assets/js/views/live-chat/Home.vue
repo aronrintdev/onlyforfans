@@ -65,7 +65,7 @@
                           first</b-form-radio>
                       </b-dropdown-item>
                       <b-dropdown-divider></b-dropdown-divider>
-                      <b-dropdown-item disabled>Mark all as read</b-dropdown-item>
+                      <b-dropdown-item @click="markAllAsRead">Mark all as read</b-dropdown-item>
                       <b-dropdown-divider></b-dropdown-divider>
                       <b-dropdown-item>Select</b-dropdown-item>
                     </b-dropdown>
@@ -232,7 +232,10 @@
             }
           })
       }
-    }
+    },
+    markAllAsRead: function() {
+      this.axios.post('/chat-messages/mark-all-as-read');
+    },
   }
 </script>
 

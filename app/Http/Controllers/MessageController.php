@@ -145,11 +145,13 @@ class MessageController extends Controller
     public function store(Request $request)
     {
         $sessionUser = $request->user();
+        $receiver = User::where('id', $request->input('user_id'))->first();
 
         $message = $sessionUser->messages()->create([
             'message' => $request->input('message'),
             'receiver_id' => $request->input('user_id'),
             'receiver_name' => $request->input('name'),
+            'is_unread' => !$receiver->is_online
         ]);
 
         broadcast(new MessageSentEvent(Message::with(['receiver'])->where('id', $message->id)->first(), $sessionUser))->toOthers();
@@ -169,5 +171,20 @@ class MessageController extends Controller
         return [
             'status' => 400
         ];
+    }
+    public function markAsRead(Request $request, $id) {
+        $sessionUser = $request->user();
+
+        $messages = Message::where('user_id', $sessionUser->id)
+            ->where('receiver_id',  $id)
+            ->update(['is_unread' => 0]);
+        return ['status' => 200];
+    }
+    public function markAllAsRead(Request $request) {
+        $sessionUser = $request->user();
+
+        $messages = Message::where('user_id', $sessionUser->id)
+            ->update(['is_unread' => 0]);
+        return ['status' => 200];
     }
 }

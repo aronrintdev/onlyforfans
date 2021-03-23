@@ -253,7 +253,11 @@
         const self = this;
         const promises = [];
         this.selectedUsers.forEach(user => {
-          const promise = this.axios.post('/chat-messages', { message: this.messageText, user_id: user.id, name: user.name });
+          const promise = this.axios.post('/chat-messages', {
+            message: this.messageText,
+            user_id: user.id,
+            name: user.name,
+          });
           promises.push(promise);
         })
         Promise.all(promises).then(function() {
