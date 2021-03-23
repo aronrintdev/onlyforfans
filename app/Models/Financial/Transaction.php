@@ -322,8 +322,8 @@ class Transaction extends Model
             ->where('id', '!=', $this->getKey()) // Not this transaction
             ->orderBy($options['by']);
 
-        if (isset($option['has'])) {
-            $query->where($option['has'], '>', 0);
+        if (isset($options['has'])) {
+            $query->where($options['has'], '>', 0);
         }
 
         foreach($options['ignore'] as $ignore) {

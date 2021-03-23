@@ -86,6 +86,7 @@ return [
                 TransactionTypeEnum::PAYMENT,
                 TransactionTypeEnum::SALE,
                 TransactionTypeEnum::TIP,
+                TransactionTypeEnum::CHARGEBACK_PARTIAL,
             ],
 
             'minTransaction' => [

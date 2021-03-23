@@ -346,8 +346,9 @@ class Account extends Model implements Ownable
             if ($internalAccount->balance->isPositive()) {
                 $remainingAmount = $remainingAmount->subtract($internalAccount->balance);
             }
-
-            // TODO: Raise timestamp accuracy to ms
+            if ($remainingAmount->isNegative()) { // Extra Balance
+                $remainingAmount = $this->asMoney(0);
+            }
 
             while ($remainingAmount->isPositive()) {
                 // Get next Debit transaction in owners internal account
@@ -363,7 +364,7 @@ class Account extends Model implements Ownable
                     break;
                 }
                 $transactions->push($currentTransaction);
-                $remainingAmount = $remainingAmount->subtract($currentTransaction->credit_amount);
+                $remainingAmount = $remainingAmount->subtract($currentTransaction->debit_amount);
             }
 
             // Perform rollback transactions
@@ -373,17 +374,17 @@ class Account extends Model implements Ownable
                 $transaction = $transactions->pop();
                 // Create chargeback of partial amount
                 $roleBackTransactions->push(
-                    $transaction->chargeback($this->asCurrency(0)->subtract($remainingAmount))
+                    $transaction->chargeback($this->asMoney(0)->subtract($remainingAmount))
                 );
             }
 
             // Perform chargeback rollbacks on transactions in reverse order
-            do {
+            while ($transactions->count() > 0) {
                 $transaction = $transactions->pop();
                 $roleBackTransactions->push(
                     $transaction->chargeback()
                 );
-            } while ($transactions->count() > 0);
+            }
         });
 
         return $roleBackTransactions;
