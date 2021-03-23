@@ -89,10 +89,16 @@ Route::group(['middleware' => ['auth']], function () {
     // ~ PUT /api/v1/resource/:id/likes/:userid
     // ~ DELETE /api/v1/resource/:id/likes/:userid
     // see: https://stackoverflow.com/questions/5665893/the-rest-way-to-check-uncheck-like-unlike-favorite-unfavorite-a-resource
-    Route::put('/likeables/{likee}', ['as'=>'likeables.update', 'uses' => 'LikeablesController@update']); // like
-    Route::delete('/likeables/{likee}', ['as'=>'likeables.destroy', 'uses' => 'LikeablesController@destroy']); // unlike
+    Route::put('/likeables/{liker}', ['as'=>'likeables.update', 'uses' => 'LikeablesController@update']); // like
+    Route::delete('/likeables/{liker}', ['as'=>'likeables.destroy', 'uses' => 'LikeablesController@destroy']); // unlike
     Route::resource('likeables', 'LikeablesController', [
         'only' => [ 'index' ],
+    ]);
+
+    // -- bookmarks:  --
+    Route::post('/bookmarks/remove', ['as'=>'bookmarks.remove', 'uses' => 'BookmarksController@remove']); // remove bookmark w/o pkid
+    Route::resource('bookmarks', 'BookmarksController', [
+        'except' => [ 'create', 'edit', 'update', ],
     ]);
 
     // -- mediafiles: likeable | shareable | commentable (?) | tippable | purchaseable --

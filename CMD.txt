@@ -25,6 +25,9 @@ $ vendor/bin/phpunit --testdox --group devcomment
 $ echo "" > storage/logs/laravel.log; vendor/bin/phpunit --testdox  --group this
 $ echo "" > storage/logs/laravel.log; php -n vendor/bin/phpunit --testdox  --group regression
 
+$ php artisan test  --group regression
+$ php -n artisan test  --group regression
+
 # stress testing...
 $ for i in {1..10}; do php -n vendor/bin/phpunit --testdox  --group here; done
 

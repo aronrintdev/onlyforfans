@@ -18,6 +18,8 @@ class PostPolicy extends BasePolicy
         'comment'     => 'isOwner:pass isBlockedByOwner:fail',
         'purchase'    => 'isOwner:fail isBlockedByOwner:fail',
         'tip'         => 'isOwner:fail isBlockedByOwner:fail',
+        'indexComments' => 'isOwner:fail isBlockedByOwner:fail',
+        'bookmark'    => 'isOwner:fail isBlockedByOwner:fail',
         'update'      => 'isOwner:next:fail', // if non-owner fail, else check function
         'delete'      => 'isOwner:next:fail',
         'forceDelete' => 'isOwner:next:fail',
@@ -45,6 +47,27 @@ class PostPolicy extends BasePolicy
             return true; // anyone can see content of free posts
             //return $post->timeline->followers->count()
                 //&& $post->timeline->followers->contains($user->id);
+        case PostTypeEnum::SUBSCRIBER:
+            return $post->timeline->subscribers->count()
+                && $post->timeline->subscribers->contains($user->id);
+            //return $post->timeline->followers->count()
+                //&& $post->timeline->followers()->wherePivot('access_level','premium')->count()
+                //&& $post->timeline->followers()->wherePivot('access_level','premium')->contains($user->id);
+        case PostTypeEnum::PRICED:
+            return $post->sharees->count()
+                && $post->sharees->contains($user->id); // premium (?)
+        }
+        //return $post->timeline->followers->contains($user->id);
+        //return $post->timeline->subscribers->contains($user->id);
+    }
+
+    protected function indexComments(User $user, Post $post)
+    {
+        // content view (eg, images attached to the post) is checked granularly: dep on post type and user's 'status'
+        switch ($post->type) {
+        case PostTypeEnum::FREE:
+            return $post->timeline->followers->count()
+                && $post->timeline->followers->contains($user->id);
         case PostTypeEnum::SUBSCRIBER:
             return $post->timeline->subscribers->count()
                 && $post->timeline->subscribers->contains($user->id);
@@ -106,6 +129,11 @@ class PostPolicy extends BasePolicy
         return true;
     }
 
+    protected function bookmark(User $user, Post $post)
+    {
+        return true;
+    }
+
     protected function purchase(User $user, Post $post)
     {
         return true;
@@ -119,7 +147,7 @@ class PostPolicy extends BasePolicy
 
     protected function comment(User $user, Post $post)
     {
-        return $user->can('view', $post);
+        return $user->can('indexComments', $post);
     }
 
     protected function isBlockedBy(User $sessionUser, User $user) : bool

@@ -43,6 +43,7 @@ export default new Vuex.Store({
     fanledgers: {},
     ledgercredits: null,
     ledgerdebits: null,
+    bookmarks: null,
     timeline: null,
     session_user: null, 
     user_settings: null,
@@ -97,6 +98,9 @@ export default new Vuex.Store({
     },
     UPDATE_DEBITS(state, payload) {
       state.debits = propSelect(payload, 'debits')
+    },
+    UPDATE_BOOKMARKS(state, payload) {
+      state.bookmarks = payload.hasOwnProperty('data') ? payload.data : {}
     },
     UPDATE_TIMELINE(state, payload) {
       state.timeline = propSelect(payload, 'timeline')
@@ -199,6 +203,14 @@ export default new Vuex.Store({
       })
     },
 
+    getBookmarks({ commit }, params ) {
+      const url = route(`bookmarks.index`);
+      axios.get(url, { params })
+        .then((response) => {
+          commit('UPDATE_BOOKMARKS', response)
+        })
+    },
+
     getStories({ commit }, { filters }) {
       //const username = this.state.session_user.username // Not used - This param will eventually be DEPRECATED
       // %FIXME
@@ -259,6 +271,7 @@ export default new Vuex.Store({
     ledgerdebits:            state => state.ledgerdebits,
     earnings:                state => state.earnings,
     debits:                  state => state.debits,
+    bookmarks:               state => state.bookmarks,
     timeline:                state => state.timeline,
     unshifted_timeline_post: state => state.unshifted_timeline_post,
     session_user:            state => state.session_user,

@@ -1,7 +1,7 @@
 <template>
   <router-link
     custom
-    :to="{ name: 'post.show', params: { slug: value.slug } }"
+    :to="{ name: 'posts.show', params: { slug: value.slug } }"
     v-slot="{ href, navigate, isActive, isExactActive }"
   >
     <li

@@ -18,7 +18,7 @@ class RestFeedsTest extends TestCase
     use RefreshDatabase, WithFaker;
 
     /**
-     *  @group feeds
+     *  @group OFF-feeds
      *  @group DEPRECATED-regression
      */
     public function test_creator_can_view_home_feed()
@@ -84,7 +84,7 @@ class RestFeedsTest extends TestCase
     }
 
     /**
-     *  @group feeds
+     *  @group OFF-feeds
      *  @group DEPRECATED-regression
      */
     // NOTE: some fields are hidden, replaced by a lock icon + call to action, if fan does not have access
@@ -244,7 +244,7 @@ class RestFeedsTest extends TestCase
     }
 
     /**
-     *  @group feeds
+     *  @group OFF-feeds
      *  @group DEPRECATED-regression
      */
     // NOTE: some fields are hidden, replaced by a lock icon + call to action, if fan does not have access

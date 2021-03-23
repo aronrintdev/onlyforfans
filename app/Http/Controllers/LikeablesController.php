@@ -20,7 +20,7 @@ class LikeablesController extends AppBaseController
         ]);
     }
 
-    // %TODO: remove likee param and just use session user for likee (?)
+    // %TODO: remove liker param and just use session user for liker (?)
     // %TODO: notify user
     // %TODO: better architecture would be:
     //  ~ addLike(), removeLike(): each of which handle all resources...OR...
@@ -31,7 +31,9 @@ class LikeablesController extends AppBaseController
     // to use an arg like Likeable $likeable, replacing getMorphedModel below, see
     //  ~ https://www.reddit.com/r/laravel/comments/ai0x6w/polymorphic_route_model_binding/eek37vs
     //  ~ https://laravel.com/docs/8.x/routing#route-model-binding
-    public function update(Request $request, User $likee)
+    // %FIXME: are liker and session_user always the same (?) -> remove liker field just use session user
+    // %FIXME: should probably be store not update
+    public function update(Request $request, User $liker)
     {
         $request->validate([
             'likeable_type' => 'required|string|alpha-dash|in:comments,mediafiles,posts,stories',
@@ -46,7 +48,7 @@ class LikeablesController extends AppBaseController
             abort(403);
         }
 
-        $likeable->likes()->syncWithoutDetaching($likee->id); // %NOTE!! %TODO: apply elsewhere instead of attach
+        $likeable->likes()->syncWithoutDetaching($liker->id); // %NOTE!! %TODO: apply elsewhere instead of attach
         return response()->json([
             'likeable' => $likeable,
             'like_count' => $likeable->likes->count(),
@@ -55,7 +57,7 @@ class LikeablesController extends AppBaseController
 
     // %FIXME: not really REST-ful (ie likee param should be likeable, but not sure that makes sense in the UI)
     // ~ https://stackoverflow.com/questions/299628/is-an-entity-body-allowed-for-an-http-delete-request
-    public function destroy(Request $request, User $likee)
+    public function destroy(Request $request, User $liker)
     {
         $request->validate([
             'likeable_type' => 'required|string|alpha-dash|in:comments,mediafiles,posts,stories',
@@ -70,7 +72,7 @@ class LikeablesController extends AppBaseController
             abort(403);
         }
 
-        $likeable->likes()->detach($likee->id);
+        $likeable->likes()->detach($liker->id);
 
         return response()->json([
             'like_count' => $likeable->likes->count(),

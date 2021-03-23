@@ -171,7 +171,7 @@ export default {
             })
           } else if (this.groups[this.selectedGroup].name === 'posts') {
             this.$router.push({
-              name: 'post.show',
+              name: 'posts.show',
               params: { slug: this.results.posts[this.highlighted].slug }
             })
           }

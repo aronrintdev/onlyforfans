@@ -16,20 +16,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Mediafile extends BaseModel implements Guidable, Ownable, Cloneable
 {
-    use UsesUuid;
-    use HasFactory;
-    use OwnableFunctions;
-    use Sluggable;
-    use SluggableTraits;
+    use UsesUuid, HasFactory, OwnableFunctions, Sluggable, SluggableTraits;
 
     protected $table = 'mediafiles';
-    protected $guarded = [
-        'id',
-        'created_at',
-        'updated_at'
-    ];
-    protected $appends = ['filepath', 'name'];
-
+    protected $guarded = [ 'id', 'created_at', 'updated_at' ];
+    protected $appends = ['filepath', 'name', 'is_image', 'is_video'];
     public static $vrules = [];
 
     //--------------------------------------------
@@ -46,19 +37,24 @@ class Mediafile extends BaseModel implements Guidable, Ownable, Cloneable
         return $this->morphToMany('App\Models\User', 'shareable', 'shareables', 'shareable_id', 'sharee_id');
     }
 
-    public function getOwner(): ?Collection
-    {
-        return $this->resource->getOwner();
-    }
-
     //--------------------------------------------
     // %%% Accessors/Mutators | Casts
     //--------------------------------------------
 
     protected $casts = [
         'cattrs' => 'array',
-        'meta'          => 'array',
+        'meta'   => 'array',
     ];
+
+    public function getIsImageAttribute($value)
+    {
+        return $this->isImage();
+    }
+
+    public function getIsVideoAttribute($value)
+    {
+        return $this->isVideo();
+    }
 
     public function getGuidAttribute($value)
     {
@@ -79,6 +75,13 @@ class Mediafile extends BaseModel implements Guidable, Ownable, Cloneable
     //--------------------------------------------
     // %%% Methods
     //--------------------------------------------
+
+    // %%% --- Implement Ownable Interface ---
+
+    public function getOwner(): ?Collection
+    {
+        return $this->resource->getOwner();
+    }
 
     // %%% --- Implement Sluggable Interface ---
 
@@ -149,7 +152,7 @@ class Mediafile extends BaseModel implements Guidable, Ownable, Cloneable
 
     public function isImage(): bool
     {
-        switch ($this->mimetype) {
+        switch ( strtolower($this->mimetype) ) {
             case 'image/jpeg':
             case 'image/png':
             case 'image/gif':
@@ -159,7 +162,7 @@ class Mediafile extends BaseModel implements Guidable, Ownable, Cloneable
     }
     public function isVideo(): bool
     {
-        switch ($this->mimetype) {
+        switch ( strtolower($this->mimetype) ) {
             case 'video/mp4':
             case 'video/x-flv':
             case 'video/quicktime':
@@ -170,7 +173,7 @@ class Mediafile extends BaseModel implements Guidable, Ownable, Cloneable
     }
     public function isAudio(): bool
     {
-        switch ($this->mimetype) {
+        switch ( strtolower($this->mimetype) ) {
             case 'audio/mpeg':
             case 'audio/mp4':
             case 'audio/ogg':

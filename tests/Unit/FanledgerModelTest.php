@@ -17,7 +17,7 @@ class FanledgerModelTest extends TestCase
 
     /**
      * @group fanledger-model
-     * @group regression
+     * @group OFF-regression
      * @group erik
      */
     public function test_ledger_should_have_from_and_to_account_relations()
