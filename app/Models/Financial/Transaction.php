@@ -65,6 +65,12 @@ class Transaction extends Model
         return $this->account->system;
     }
 
+    protected function getDateFormate()
+    {
+        // Need high accuracy on this table
+        return 'Y-m-d H:i:s.u';
+    }
+
     #endregion
 
     /* ---------------------------- Relationships --------------------------- */
@@ -285,79 +291,46 @@ class Transaction extends Model
     }
 
     /**
-     * Gets instance of the next settled transaction in this transaction's account
-     *
-     * @param bool $withLock Locks transaction and reference for update
-     * @return Transaction
-     */
-    public function getNextSettledTransaction($withLock = false): ?Transaction
-    {
-        if (!isset($this->settled_at)) {
-            throw new TransactionNotSettledException($this);
-        }
-        $query = Transaction::where('account_id', $this->account_id)
-            ->where('settled_at', '>', $this->settled_at)
-            ->orderBy('settled_at');
-        if ($withLock) {
-            $query->with(['reference' => function ($query) {
-                $query->lockForUpdate();
-            }])->lockForUpdate();
-        }
-        return $query->first();
-    }
-
-    /**
      * Get instance of the next created transaction in this transaction's account
      *
-     * @param bool $withLock Locks transaction and reference for update
+     * @param array $options Options for getting next transaction
+     * ```
+     * [
+     *      'has' => 'debit_amount', // or 'credit_amount', This is optional
+     *      'by' => 'created_at', // or 'settled_at', // Timestamp to go by
+     *      'ignore' => new Collection([]) // Collection of transactions to not pick as next
+     *      'withLock' => false, // Locks transaction and reference for update
+     * ]
+     * ```
      * @return Transaction
      */
-    public function getNextTransaction($withLock = false): ?Transaction
+    public function getNextTransaction(array $options = []): ?Transaction
     {
-        $query = Transaction::where('account_id', $this->account_id)
-            ->where('created_at', '>', $this->created_at)
-            ->orderBy('created_at');
-        if ($withLock) {
-            $query->with(['reference' => function ($query) {
-                $query->lockForUpdate();
-            }])->lockForUpdate();
+        // Default Options
+        if (!isset($options['by'])) {
+            $options['by'] = 'created_at';
         }
-        return $query->first();
-    }
-
-    /**
-     * Get instance of the next created debit transaction in this transaction's account
-     *
-     * @param bool $withLock Locks transaction and reference for update
-     * @return Transaction
-     */
-    public function getNextDebitTransaction($withLock = false): ?Transaction
-    {
-        $query = Transaction::where('account_id', $this->account_id)
-            ->where('created_at', '>', $this->created_at)
-            ->where('debit_amount', '>', 0)
-            ->orderBy('created_at');
-        if ($withLock) {
-            $query->with(['reference' => function ($query) {
-                $query->lockForUpdate();
-            }])->lockForUpdate();
+        if (!isset($options['ignore'])) {
+            $options['ignore'] = new Collection([]);
         }
-        return $query->first();
-    }
+        if (!isset($options['withLock'])) {
+            $options['withLock'] = false;
+        }
 
-    /**
-     * Get instance of the next created credit transaction in this transaction's account
-     *
-     * @param bool $withLock Locks transaction and reference for update
-     * @return Transaction
-     */
-    public function getNextCreditTransaction($withLock = false): ?Transaction
-    {
         $query = Transaction::where('account_id', $this->account_id)
-            ->where('created_at', '>', $this->created_at)
-            ->where('credit_amount', '>', 0)
-            ->orderBy('created_at');
-        if ($withLock) {
+            ->where($options['by'], '>=', $this->{$options['by']})
+            ->where('id', '!=', $this->getKey()) // Not this transaction
+            ->orderBy($options['by']);
+
+        if (isset($option['has'])) {
+            $query->where($option['has'], '>', 0);
+        }
+
+        foreach($options['ignore'] as $ignore) {
+            $query->where('id', '!=', $ignore->getKey());
+        }
+
+        if ($options['withLock']) {
             $query->with(['reference' => function ($query) {
                 $query->lockForUpdate();
             }])->lockForUpdate();

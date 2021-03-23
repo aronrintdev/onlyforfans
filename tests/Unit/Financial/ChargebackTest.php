@@ -2,11 +2,15 @@
 
 namespace Tests\Unit\Financial;
 
-use App\Enums\Financial\TransactionTypeEnum;
 use App\Models\Financial\Account;
+use Illuminate\Support\Facades\DB;
+use App\Models\Financial\Transaction;
 use Illuminate\Support\Facades\Event;
+use App\Enums\Financial\TransactionTypeEnum;
 use App\Jobs\Financial\UpdateAccountBalance;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Models\Financial\Exceptions\Account\IncorrectTypeException;
+use App\Models\Financial\Exceptions\TransactionAccountMismatchException;
 
 /**
  * Unit Tests related to chargeback handling
@@ -24,12 +28,23 @@ class ChargebackTest extends TestCase
 
     public function test_can_only_be_made_on_in_accounts()
     {
-        $this->markTestIncomplete();
+        Event::fake([UpdateAccountBalance::class]);
+        $inAccount = Account::factory()->asIn()->create();
+        $internalAccount = $inAccount->owner->getInternalAccount($this->defaultSystem, $this->defaultCurrency);
+        $transactions = $inAccount->moveToInternal(1000);
+
+        $this->expectException(IncorrectTypeException::class);
+        $internalAccount->handleChargeback($transactions['credit']);
     }
 
     public function test_account_transaction_mismatch_exception_works()
     {
-        $this->markTestIncomplete();
+        Event::fake([UpdateAccountBalance::class]);
+        $inAccount = Account::factory()->asIn()->create();
+        $internalAccount = $inAccount->owner->getInternalAccount($this->defaultSystem, $this->defaultCurrency);
+        $transactions = $inAccount->moveToInternal(1000);
+        $this->expectException(TransactionAccountMismatchException::class);
+        $inAccount->handleChargeback($transactions['credit']);
     }
 
     public function test_single_transaction_without_fees()
@@ -51,6 +66,35 @@ class ChargebackTest extends TestCase
 
         // Do Chargeback before creators account ballance and fees are settled.
         $chargebackTransactions = $inAccount->handleChargeback($chargebackTransaction);
+
+        // Chargeback from internal account to in account
+        $this->assertDatabaseHas($this->tableNames['transaction'], [
+            'account_id' => $inAccount->getKey(),
+            'type' => TransactionTypeEnum::CHARGEBACK,
+            'credit_amount' => 1000,
+        ]);
+
+        // Chargeback from user internal account to in account
+        $this->assertDatabaseHas($this->tableNames['transaction'], [
+            'account_id' => $internalAccount->getKey(),
+            'type' => TransactionTypeEnum::CHARGEBACK,
+            'debit_amount' => 1000,
+        ]);
+
+        // Chargeback from creator to user internal account
+        $this->assertDatabaseHas($this->tableNames['transaction'], [
+            'account_id' => $internalAccount->getKey(),
+            'type' => TransactionTypeEnum::CHARGEBACK,
+            'credit_amount' => 1000,
+        ]);
+
+        // Chargeback from creator Account
+        $this->assertDatabaseHas($this->tableNames['transaction'], [
+            'account_id' => $creatorAccount->getKey(),
+            'type' => TransactionTypeEnum::CHARGEBACK,
+            'debit_amount' => 1000,
+        ]);
+
         // Settle all balances
         $inAccount->settleBalance();
         $inAccount->save();
@@ -59,13 +103,9 @@ class ChargebackTest extends TestCase
         $creatorAccount->settleBalance();
         $creatorAccount->save();
 
-        dump($chargebackTransactions);
-
         $this->assertCurrencyAmountIsEqual(0, $inAccount->balance, 'In account balance back at zero');
         $this->assertCurrencyAmountIsEqual(0, $internalAccount->balance, 'Internal account balance back at zero');
         $this->assertCurrencyAmountIsEqual(0, $creatorAccount->balance, 'Creator account balance back at zero');
-
-        $this->markTestIncomplete();
     }
 
     public function test_single_transaction_with_fees()

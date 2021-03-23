@@ -333,10 +333,10 @@ class Account extends Model implements Ownable
 
             // Find all transactions original transitions funded
             // First is transaction pair to internal account
-            $transactions = new Collection([ $transaction ]);
-
             $remainingAmount = clone $amount;
             $currentTransaction = $transaction->reference;
+
+            $transactions = new Collection([ $currentTransaction ]);
 
             // Take funds from the owners internal account balance first if there is any balance
             $internalAccount = $currentTransaction->account;
@@ -353,7 +353,11 @@ class Account extends Model implements Ownable
                 // This is the next purchase made after funds were deposited there, Usually one, but there could
                 // potentially be more transactions so we need to check amounts and rollback all transactions that where
                 // funded by this transaction
-                $currentTransaction = $currentTransaction->getNextDebitTransaction(true);
+                $currentTransaction = $currentTransaction->getNextTransaction([
+                    'has' => 'debit_amount',
+                    'withLock' => true,
+                    'ignore' => $transactions,
+                ]);
                 if (!isset($currentTransaction)) {
                     break;
                 }
@@ -400,6 +404,28 @@ class Account extends Model implements Ownable
             'system' => $system,
         ]);
         return $systemOwner->getInternalAccount($system, $currency);
+    }
+
+    #endregion
+
+    /* ------------------------- Debugging Functions ------------------------ */
+    #region Debugging Functions
+    /**
+     * Dumps Leger of Account transactions
+     * @return void
+     */
+    public function dumpLedger($message = '')
+    {
+        if (Config::get('app.env') === 'production') {
+            return;
+        }
+        dump("Account Ledger Dump Begin {$message}", $this->attributes);
+        $transactions = Transaction::where('account_id', $this->getKey())->orderBy('settled_at')->get();
+        foreach($transactions as $key => $transaction) {
+            $current = $key + 1;
+            dump("Transaction {$current} of {$transactions->count()}", $transaction->attributes);
+        }
+        dump("Account Leger Dump End {$message}");
     }
 
     #endregion
