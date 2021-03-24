@@ -33,4 +33,17 @@ class AccountHelpers
         }
         return $accounts;
     }
+
+    /**
+     * Settle and save account given
+     * @param array|Collection $accounts
+     * @return void
+     */
+    public static function settleAccounts($accounts = [])
+    {
+        foreach($accounts as $account) {
+            $account->settleBalance();
+            $account->save();
+        }
+    }
 }

@@ -22,7 +22,7 @@ class IncorrectTypeException extends RuntimeException
         $this->account = $account;
         $this->expectedType = $expectedType;
 
-        $this->message = "Incorrect Financial Account Type! Expected [{$expectedType}] but got [{$account->type()}]. Account id: [{$account->getKey()}]";
+        $this->message = "Incorrect Financial Account Type! Expected [{$expectedType}] but got [{$account->type}]. Account id: [{$account->getKey()}]";
     }
 
 }

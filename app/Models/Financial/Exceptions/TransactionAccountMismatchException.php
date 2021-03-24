@@ -8,8 +8,14 @@ use RuntimeException;
 
 class TransactionAccountMismatchException extends RuntimeException
 {
-    protected Account $account;
-    protected Transaction $transaction;
+    /**
+     * @var Account
+     */
+    protected $account;
+    /**
+     * @var Transaction
+     */
+    protected $transaction;
 
     public function __construct(Account $account, Transaction $transaction)
     {

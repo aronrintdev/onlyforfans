@@ -209,4 +209,21 @@ class AccountFactory extends Factory
             return [ 'can_make_transactions' => false, ];
         });
     }
+
+    /**
+     * Sets the owner to be the same as passed account
+     *
+     * @param Account $account
+     * @return  \Illuminate\Database\Eloquent\Factories\Factory
+     */
+    public function sameOwnerAs(Account $account)
+    {
+        return $this->state(function (array $attributes) use ($account) {
+            return [
+                'owner_type' => $account->getOwner()->first()->getMorphString(),
+                'owner_id' => $account->getOwner()->first()->getKey(),
+            ];
+        });
+    }
+
 }

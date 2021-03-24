@@ -210,6 +210,7 @@ class Account extends Model implements Ownable
                         if ( // From Internal to Internal account that is not a fee transaction
                             $transaction->reference->account->type === AccountTypeEnum::INTERNAL
                             && $transaction->account->type === AccountTypeEnum::INTERNAL
+                            && $transaction->credit_amount->isPositive()
                             && in_array($transaction->type, $feeOn)
                         ) {
                             // Calculate Fees and Taxes On this transaction, then settle transaction and all fee debit transactions
@@ -249,7 +250,7 @@ class Account extends Model implements Ownable
                 // Calculate new Pending
 
                 // Get Default Hold Period
-                $holdMinutes = Config::get('transactions.systems' . $this->system . '.holdPeriod');
+                $holdMinutes = Config::get("transactions.systems.{$this->system}.defaults.holdPeriod");
 
                 // TODO: Get Custom Hold Periods from DB | Jira Issue: AF-236
 
@@ -333,10 +334,10 @@ class Account extends Model implements Ownable
 
             // Find all transactions original transitions funded
             // First is transaction pair to internal account
-            $transactions = new Collection([ $transaction ]);
-
             $remainingAmount = clone $amount;
             $currentTransaction = $transaction->reference;
+
+            $transactions = new Collection([ $currentTransaction ]);
 
             // Take funds from the owners internal account balance first if there is any balance
             $internalAccount = $currentTransaction->account;
@@ -345,20 +346,25 @@ class Account extends Model implements Ownable
             if ($internalAccount->balance->isPositive()) {
                 $remainingAmount = $remainingAmount->subtract($internalAccount->balance);
             }
-
-            // TODO: Raise timestamp accuracy to ms
+            if ($remainingAmount->isNegative()) { // Extra Balance
+                $remainingAmount = $this->asMoney(0);
+            }
 
             while ($remainingAmount->isPositive()) {
                 // Get next Debit transaction in owners internal account
                 // This is the next purchase made after funds were deposited there, Usually one, but there could
                 // potentially be more transactions so we need to check amounts and rollback all transactions that where
                 // funded by this transaction
-                $currentTransaction = $currentTransaction->getNextDebitTransaction(true);
+                $currentTransaction = $currentTransaction->getNextTransaction([
+                    'has' => 'debit_amount',
+                    'withLock' => true,
+                    'ignore' => $transactions,
+                ]);
                 if (!isset($currentTransaction)) {
                     break;
                 }
                 $transactions->push($currentTransaction);
-                $remainingAmount = $remainingAmount->subtract($currentTransaction->credit_amount);
+                $remainingAmount = $remainingAmount->subtract($currentTransaction->debit_amount);
             }
 
             // Perform rollback transactions
@@ -368,17 +374,17 @@ class Account extends Model implements Ownable
                 $transaction = $transactions->pop();
                 // Create chargeback of partial amount
                 $roleBackTransactions->push(
-                    $transaction->chargeback($this->asCurrency(0)->subtract($remainingAmount))
+                    $transaction->chargeback($this->asMoney(0)->subtract($remainingAmount))
                 );
             }
 
             // Perform chargeback rollbacks on transactions in reverse order
-            do {
+            while ($transactions->count() > 0) {
                 $transaction = $transactions->pop();
                 $roleBackTransactions->push(
                     $transaction->chargeback()
                 );
-            } while ($transactions->count() > 0);
+            }
         });
 
         return $roleBackTransactions;
@@ -400,6 +406,28 @@ class Account extends Model implements Ownable
             'system' => $system,
         ]);
         return $systemOwner->getInternalAccount($system, $currency);
+    }
+
+    #endregion
+
+    /* ------------------------- Debugging Functions ------------------------ */
+    #region Debugging Functions
+    /**
+     * Dumps Leger of Account transactions
+     * @return void
+     */
+    public function dumpLedger($message = '')
+    {
+        if (Config::get('app.env') === 'production') {
+            return;
+        }
+        dump("Account Ledger Dump Begin {$message}", $this->attributes);
+        $transactions = Transaction::where('account_id', $this->getKey())->orderBy('settled_at')->get();
+        foreach($transactions as $key => $transaction) {
+            $current = $key + 1;
+            dump("Transaction {$current} of {$transactions->count()}", $transaction->attributes);
+        }
+        dump("Account Leger Dump End {$message}");
     }
 
     #endregion
