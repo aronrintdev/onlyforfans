@@ -3,7 +3,6 @@
 namespace Tests\Unit\Financial;
 
 use App\Models\Financial\Account;
-use Illuminate\Support\Facades\DB;
 use App\Models\Financial\Transaction;
 use Illuminate\Support\Facades\Event;
 use App\Enums\Financial\TransactionTypeEnum;
@@ -12,6 +11,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Models\Financial\Exceptions\Account\IncorrectTypeException;
 use App\Models\Financial\Exceptions\TransactionAccountMismatchException;
 use Tests\Helpers\Financial\AccountHelpers;
+use Tests\traits\Financial\NoHoldPeriod;
 
 /**
  * Unit Tests related to chargeback handling
@@ -24,9 +24,16 @@ use Tests\Helpers\Financial\AccountHelpers;
  */
 class ChargebackTest extends TestCase
 {
-    use RefreshDatabase;
+    use RefreshDatabase,
+        NoHoldPeriod;
 
 
+    #region Error Handling
+
+    /**
+     * Properly throws exceptions
+     * @return void
+     */
     public function test_can_only_be_made_on_in_accounts()
     {
         Event::fake([UpdateAccountBalance::class]);
@@ -38,6 +45,10 @@ class ChargebackTest extends TestCase
         $internalAccount->handleChargeback($transactions['credit']);
     }
 
+    /**
+     * Properly throws exception
+     * @return void
+     */
     public function test_account_transaction_mismatch_exception_works()
     {
         Event::fake([UpdateAccountBalance::class]);
@@ -48,6 +59,14 @@ class ChargebackTest extends TestCase
         $inAccount->handleChargeback($transactions['credit']);
     }
 
+    #endregion
+
+    #region Single Transaction
+
+    /**
+     * Single transaction chargeback before fees are settled on transaction
+     * @return void
+     */
     public function test_single_transaction_without_fees()
     {
         Event::fake([ UpdateAccountBalance::class ]);
@@ -101,6 +120,10 @@ class ChargebackTest extends TestCase
         $this->assertCurrencyAmountIsEqual(0, $creatorAccount->balance, 'Creator account balance back at zero');
     }
 
+    /**
+     * Single transaction chargeback with settled fees
+     * @return void
+     */
     public function test_single_transaction_with_fees()
     {
         Event::fake([UpdateAccountBalance::class]);
@@ -108,10 +131,7 @@ class ChargebackTest extends TestCase
         $inAccount = Account::factory()->asIn()->create();
         $internalAccount = $inAccount->owner->getInternalAccount($this->defaultSystem, $this->defaultCurrency);
         $transactions = $inAccount->moveToInternal(1000);
-        $inAccount->settleBalance();
-        $inAccount->save();
-        $internalAccount->settleBalance();
-        $internalAccount->save();
+        AccountHelpers::settleAccounts([$inAccount, $internalAccount]);
         $chargebackTransaction = $transactions['debit']; // The transaction being charged back
         $chargebackTransaction->refresh();
 
@@ -193,35 +213,428 @@ class ChargebackTest extends TestCase
         $this->assertCurrencyAmountIsEqual(0, $taxAccount->balance, 'Tax account balance back at zero');
     }
 
+    #endregion
+
+    #region Multiple Transactions
+
+    /**
+     * Simulate batched purchases before creator accounts have time to settle balance and calculate fees
+     * @return void
+     */
     public function test_multiple_transactions_without_fees()
     {
         Event::fake([UpdateAccountBalance::class]);
-        $this->markTestIncomplete();
+
+        // User's accounts
+        $inAccount = Account::factory()->asIn()->create();
+        $internalAccount = $inAccount->owner->getInternalAccount($this->defaultSystem, $this->defaultCurrency);
+        $transactions = $inAccount->moveToInternal(1000);
+        AccountHelpers::settleAccounts([$inAccount, $internalAccount]);
+        $chargebackTransaction = $transactions['debit'];
+
+        // Payments to multiple creators
+        $creatorAccount1 = Account::factory()->asInternal()->create();
+        $creatorAccount2 = Account::factory()->asInternal()->create();
+        $creatorAccount3 = Account::factory()->asInternal()->create();
+
+        $internalAccount->moveTo($creatorAccount1, 500);
+        $internalAccount->moveTo($creatorAccount2, 300);
+        $internalAccount->moveTo($creatorAccount3, 200);
+
+        // Chargeback
+        $inAccount->handleChargeback($chargebackTransaction);
+
+        // Chargeback Transactions
+        $this->assertDatabaseHas($this->tableNames['transaction'], [
+            'account_id' => $creatorAccount1->getKey(),
+            'type' => TransactionTypeEnum::CHARGEBACK,
+            'debit_amount' => 500,
+        ]);
+        $this->assertDatabaseHas($this->tableNames['transaction'], [
+            'account_id' => $creatorAccount2->getKey(),
+            'type' => TransactionTypeEnum::CHARGEBACK,
+            'debit_amount' => 300,
+        ]);
+        $this->assertDatabaseHas($this->tableNames['transaction'], [
+            'account_id' => $creatorAccount3->getKey(),
+            'type' => TransactionTypeEnum::CHARGEBACK,
+            'debit_amount' => 200,
+        ]);
+        $this->assertDatabaseHas($this->tableNames['transaction'], [
+            'account_id' => $internalAccount->getKey(),
+            'type' => TransactionTypeEnum::CHARGEBACK,
+            'debit_amount' => 1000,
+        ]);
+        $this->assertDatabaseHas($this->tableNames['transaction'], [
+            'account_id' => $inAccount->getKey(),
+            'type' => TransactionTypeEnum::CHARGEBACK,
+            'credit_amount' => 1000,
+        ]);
+
+        AccountHelpers::settleAccounts([
+            $inAccount, $internalAccount, $creatorAccount1, $creatorAccount2, $creatorAccount3
+        ]);
+
+        $this->assertCurrencyAmountIsEqual(0, $inAccount->balance);
+        $this->assertCurrencyAmountIsEqual(0, $internalAccount->balance);
+        $this->assertCurrencyAmountIsEqual(0, $creatorAccount1->balance);
+        $this->assertCurrencyAmountIsEqual(0, $creatorAccount2->balance);
+        $this->assertCurrencyAmountIsEqual(0, $creatorAccount3->balance);
     }
 
+    /**
+     * Simulate batched purchases after creator accounts have time to settle balance and calculate fees
+     * @return void
+     */
     public function test_multiple_transactions_with_fees()
     {
         Event::fake([UpdateAccountBalance::class]);
-        $this->markTestIncomplete();
+        // User's accounts
+        $inAccount = Account::factory()->asIn()->create();
+        $internalAccount = $inAccount->owner->getInternalAccount($this->defaultSystem, $this->defaultCurrency);
+        $transactions = $inAccount->moveToInternal(1000);
+        AccountHelpers::settleAccounts([$inAccount, $internalAccount]);
+        $chargebackTransaction = $transactions['debit'];
+
+        // Payments to multiple creators
+        $creatorAccount1 = Account::factory()->asInternal()->create();
+        $creatorAccount2 = Account::factory()->asInternal()->create();
+        $creatorAccount3 = Account::factory()->asInternal()->create();
+
+        $internalAccount->moveTo($creatorAccount1, 500);
+        $internalAccount->moveTo($creatorAccount2, 300);
+        $internalAccount->moveTo($creatorAccount3, 200);
+
+        $platformFeesAccount = Account::getFeeAccount('platformFee', $this->defaultSystem, $this->defaultCurrency);
+        $taxAccount = Account::getFeeAccount('tax', $this->defaultSystem, $this->defaultCurrency);
+
+        // Settle balances and fees
+        AccountHelpers::settleAccounts([
+            $inAccount,
+            $internalAccount,
+            $creatorAccount1,
+            $creatorAccount2,
+            $creatorAccount3,
+            $platformFeesAccount,
+            $taxAccount
+        ]);
+
+        // Chargeback
+        $inAccount->handleChargeback($chargebackTransaction);
+
+        // Chargeback Transactions
+        $this->assertEquals(3, Transaction::where([
+            'account_id' => $platformFeesAccount->getKey(),
+            'type' => TransactionTypeEnum::CHARGEBACK,
+        ])->count());
+        $this->assertEquals(3, Transaction::where([
+            'account_id' => $taxAccount->getKey(),
+            'type' => TransactionTypeEnum::CHARGEBACK,
+        ])->count());
+
+        $this->assertDatabaseHas($this->tableNames['transaction'], [
+            'account_id' => $creatorAccount1->getKey(),
+            'type' => TransactionTypeEnum::CHARGEBACK,
+            'debit_amount' => 500,
+        ]);
+        $this->assertDatabaseHas($this->tableNames['transaction'], [
+            'account_id' => $creatorAccount2->getKey(),
+            'type' => TransactionTypeEnum::CHARGEBACK,
+            'debit_amount' => 300,
+        ]);
+        $this->assertDatabaseHas($this->tableNames['transaction'], [
+            'account_id' => $creatorAccount3->getKey(),
+            'type' => TransactionTypeEnum::CHARGEBACK,
+            'debit_amount' => 200,
+        ]);
+        $this->assertDatabaseHas($this->tableNames['transaction'], [
+            'account_id' => $internalAccount->getKey(),
+            'type' => TransactionTypeEnum::CHARGEBACK,
+            'debit_amount' => 1000,
+        ]);
+        $this->assertDatabaseHas($this->tableNames['transaction'], [
+            'account_id' => $inAccount->getKey(),
+            'type' => TransactionTypeEnum::CHARGEBACK,
+            'credit_amount' => 1000,
+        ]);
+
+        AccountHelpers::settleAccounts([
+            $inAccount,
+            $internalAccount,
+            $creatorAccount1,
+            $creatorAccount2,
+            $creatorAccount3,
+            $platformFeesAccount,
+            $taxAccount
+        ]);
+
+        $this->assertCurrencyAmountIsEqual(0, $inAccount->balance);
+        $this->assertCurrencyAmountIsEqual(0, $internalAccount->balance);
+        $this->assertCurrencyAmountIsEqual(0, $creatorAccount1->balance);
+        $this->assertCurrencyAmountIsEqual(0, $creatorAccount2->balance);
+        $this->assertCurrencyAmountIsEqual(0, $creatorAccount3->balance);
+        $this->assertCurrencyAmountIsEqual(0, $platformFeesAccount->balance);
+        $this->assertCurrencyAmountIsEqual(0, $taxAccount->balance);
     }
 
+    /**
+     * Simulate batched purchases where some creator accounts have had time to settle balance and calculate fees and
+     * some have not
+     * @return void
+     */
     public function test_multiple_transactions_with_mixed_fees()
     {
         Event::fake([UpdateAccountBalance::class]);
-        $this->markTestIncomplete();
+        // User's accounts
+        $inAccount = Account::factory()->asIn()->create();
+        $internalAccount = $inAccount->owner->getInternalAccount($this->defaultSystem, $this->defaultCurrency);
+        $transactions = $inAccount->moveToInternal(1000);
+        AccountHelpers::settleAccounts([$inAccount, $internalAccount]);
+        $chargebackTransaction = $transactions['debit'];
+
+        // Payments to multiple creators
+        $creatorAccount1 = Account::factory()->asInternal()->create();
+        $creatorAccount2 = Account::factory()->asInternal()->create();
+        $creatorAccount3 = Account::factory()->asInternal()->create();
+
+        $internalAccount->moveTo($creatorAccount1, 500);
+        $internalAccount->moveTo($creatorAccount2, 300);
+        $internalAccount->moveTo($creatorAccount3, 200);
+
+        $platformFeesAccount = Account::getFeeAccount('platformFee', $this->defaultSystem, $this->defaultCurrency);
+        $taxAccount = Account::getFeeAccount('tax', $this->defaultSystem, $this->defaultCurrency);
+
+        // Settle some balances and fees
+        AccountHelpers::settleAccounts([
+            $inAccount,
+            $internalAccount,
+            $creatorAccount1,
+            $creatorAccount2,
+            $platformFeesAccount,
+            $taxAccount
+        ]);
+
+        // Chargeback
+        $inAccount->handleChargeback($chargebackTransaction);
+
+        // Chargeback Transactions
+        $this->assertEquals(2, Transaction::where([
+            'account_id' => $platformFeesAccount->getKey(),
+            'type' => TransactionTypeEnum::CHARGEBACK,
+        ])->count());
+        $this->assertEquals(2, Transaction::where([
+            'account_id' => $taxAccount->getKey(),
+            'type' => TransactionTypeEnum::CHARGEBACK,
+        ])->count());
+
+        $this->assertDatabaseHas($this->tableNames['transaction'], [
+            'account_id' => $creatorAccount1->getKey(),
+            'type' => TransactionTypeEnum::CHARGEBACK,
+            'debit_amount' => 500,
+        ]);
+        $this->assertDatabaseHas($this->tableNames['transaction'], [
+            'account_id' => $creatorAccount2->getKey(),
+            'type' => TransactionTypeEnum::CHARGEBACK,
+            'debit_amount' => 300,
+        ]);
+        $this->assertDatabaseHas($this->tableNames['transaction'], [
+            'account_id' => $creatorAccount3->getKey(),
+            'type' => TransactionTypeEnum::CHARGEBACK,
+            'debit_amount' => 200,
+        ]);
+        $this->assertDatabaseHas($this->tableNames['transaction'], [
+            'account_id' => $internalAccount->getKey(),
+            'type' => TransactionTypeEnum::CHARGEBACK,
+            'debit_amount' => 1000,
+        ]);
+        $this->assertDatabaseHas($this->tableNames['transaction'], [
+            'account_id' => $inAccount->getKey(),
+            'type' => TransactionTypeEnum::CHARGEBACK,
+            'credit_amount' => 1000,
+        ]);
+
+        AccountHelpers::settleAccounts([
+            $inAccount,
+            $internalAccount,
+            $creatorAccount1,
+            $creatorAccount2,
+            $creatorAccount3,
+            $platformFeesAccount,
+            $taxAccount
+        ]);
+
+        $this->assertCurrencyAmountIsEqual(0, $inAccount->balance);
+        $this->assertCurrencyAmountIsEqual(0, $internalAccount->balance);
+        $this->assertCurrencyAmountIsEqual(0, $creatorAccount1->balance);
+        $this->assertCurrencyAmountIsEqual(0, $creatorAccount2->balance);
+        $this->assertCurrencyAmountIsEqual(0, $creatorAccount3->balance);
+        $this->assertCurrencyAmountIsEqual(0, $platformFeesAccount->balance);
+        $this->assertCurrencyAmountIsEqual(0, $taxAccount->balance);
     }
 
+    /**
+     * Batched purchases where last chargeback is partial charge back
+     * @return void
+     */
     public function test_multiple_transaction_with_partial()
     {
         Event::fake([UpdateAccountBalance::class]);
-        $this->markTestIncomplete();
+        // User's accounts
+        $inAccount = Account::factory()->asIn()->create();
+        $internalAccount = $inAccount->owner->getInternalAccount($this->defaultSystem, $this->defaultCurrency);
+        $transactions = $inAccount->moveToInternal(900);
+        $inAccount->moveToInternal(100);
+        AccountHelpers::settleAccounts([$inAccount, $internalAccount]);
+        $chargebackTransaction = $transactions['debit'];
+
+        // Payments to multiple creators
+        $creatorAccount1 = Account::factory()->asInternal()->create();
+        $creatorAccount2 = Account::factory()->asInternal()->create();
+        $creatorAccount3 = Account::factory()->asInternal()->create();
+
+        $internalAccount->moveTo($creatorAccount1, 500);
+        $internalAccount->moveTo($creatorAccount2, 300);
+        $internalAccount->moveTo($creatorAccount3, 200);
+
+        $platformFeesAccount = Account::getFeeAccount('platformFee', $this->defaultSystem, $this->defaultCurrency);
+        $taxAccount = Account::getFeeAccount('tax', $this->defaultSystem, $this->defaultCurrency);
+
+        // Settle balances and fees
+        AccountHelpers::settleAccounts([
+            $inAccount,
+            $internalAccount,
+            $creatorAccount1,
+            $creatorAccount2,
+            $creatorAccount3,
+            $platformFeesAccount,
+            $taxAccount
+        ]);
+
+        // Chargeback
+        $inAccount->handleChargeback($chargebackTransaction);
+
+        // Chargeback Transactions
+        $this->assertEquals(3, Transaction::where([
+            'account_id' => $platformFeesAccount->getKey(),
+            'type' => TransactionTypeEnum::CHARGEBACK,
+        ])->count());
+        $this->assertEquals(3, Transaction::where([
+            'account_id' => $taxAccount->getKey(),
+            'type' => TransactionTypeEnum::CHARGEBACK,
+        ])->count());
+
+        $this->assertDatabaseHas($this->tableNames['transaction'], [
+            'account_id' => $creatorAccount1->getKey(),
+            'type' => TransactionTypeEnum::CHARGEBACK,
+            'debit_amount' => 500,
+        ]);
+        $this->assertDatabaseHas($this->tableNames['transaction'], [
+            'account_id' => $creatorAccount2->getKey(),
+            'type' => TransactionTypeEnum::CHARGEBACK,
+            'debit_amount' => 300,
+        ]);
+        $this->assertDatabaseHas($this->tableNames['transaction'], [
+            'account_id' => $creatorAccount3->getKey(),
+            'type' => TransactionTypeEnum::CHARGEBACK,
+            'debit_amount' => 200,
+        ]);
+        $this->assertDatabaseHas($this->tableNames['transaction'], [
+            'account_id' => $creatorAccount3->getKey(),
+            'type' => TransactionTypeEnum::CHARGEBACK_PARTIAL,
+            'credit_amount' => 100,
+        ]);
+        $this->assertDatabaseHas($this->tableNames['transaction'], [
+            'account_id' => $internalAccount->getKey(),
+            'type' => TransactionTypeEnum::CHARGEBACK,
+            'debit_amount' => 900,
+        ]);
+        $this->assertDatabaseHas($this->tableNames['transaction'], [
+            'account_id' => $inAccount->getKey(),
+            'type' => TransactionTypeEnum::CHARGEBACK,
+            'credit_amount' => 900,
+        ]);
+
+        AccountHelpers::settleAccounts([
+            $inAccount,
+            $internalAccount,
+            $creatorAccount1,
+            $creatorAccount2,
+            $creatorAccount3,
+            $platformFeesAccount,
+            $taxAccount
+        ]);
+
+        $this->assertCurrencyAmountIsEqual(-100, $inAccount->balance);
+        $this->assertCurrencyAmountIsEqual(0, $internalAccount->balance);
+        $this->assertCurrencyAmountIsEqual(0, $creatorAccount1->balance);
+        $this->assertCurrencyAmountIsEqual(0, $creatorAccount2->balance);
+        // 65% of 100
+        $this->assertCurrencyAmountIsEqual(65, $creatorAccount3->balance);
+        // 30% of 100
+        $this->assertCurrencyAmountIsEqual(30, $platformFeesAccount->balance);
+        // 5% of 100
+        $this->assertCurrencyAmountIsEqual(5, $taxAccount->balance);
     }
 
+    #endregion
+
+    /**
+     * Case where creator has taken funds out of internal account should make creators account balance go negative.
+     * @return void
+     */
     public function test_creators_account_balance_can_go_negative()
     {
         Event::fake([UpdateAccountBalance::class]);
-        $this->markTestIncomplete();
+        $inAccount = Account::factory()->asIn()->create();
+        $internalAccount = $inAccount->owner->getInternalAccount($this->defaultSystem, $this->defaultCurrency);
+        $transactions = $inAccount->moveToInternal(1000);
+        AccountHelpers::settleAccounts([$inAccount, $internalAccount]);
+        $chargebackTransaction = $transactions['debit'];
+
+        // Creators account
+        $creatorAccount = Account::factory()->asInternal()->create();
+        $creatorOutAccount = Account::factory()->asOut()->sameOwnerAs($creatorAccount)->create();
+
+        $internalAccount->moveTo($creatorAccount, 1000);
+
+        $platformFeesAccount = Account::getFeeAccount('platformFee', $this->defaultSystem, $this->defaultCurrency);
+        $taxAccount = Account::getFeeAccount('tax', $this->defaultSystem, $this->defaultCurrency);
+
+        // Settle balances and fees
+        AccountHelpers::settleAccounts([
+            $inAccount,
+            $internalAccount,
+            $creatorAccount,
+            $platformFeesAccount,
+            $taxAccount
+        ]);
+
+        // Move to Out account
+        $creatorAccount->moveTo($creatorOutAccount, 650);
+
+        AccountHelpers::settleAccounts([
+            $creatorAccount,
+            $creatorOutAccount
+        ]);
+
+        // Perform Chargeback
+        $inAccount->handleChargeBack($chargebackTransaction);
+
+        AccountHelpers::settleAccounts([
+            $inAccount,
+            $internalAccount,
+            $creatorAccount,
+            $platformFeesAccount,
+            $taxAccount
+        ]);
+
+        $this->assertCurrencyAmountIsEqual(-650, $creatorAccount->balance);
+        // Fees get paid back into chargeback
+        $this->assertCurrencyAmountIsEqual(0, $platformFeesAccount->balance);
+        $this->assertCurrencyAmountIsEqual(0, $taxAccount->balance);
     }
+
+    #region Has Wallet Balance Tests
 
     /**
      * If funds were only move to the owners internal account and no additional purchases were made.
@@ -333,5 +746,7 @@ class ChargebackTest extends TestCase
         $this->assertCurrencyAmountIsEqual(200, $internalAccount->balance, 'Internal account at 0 balance after chargeback');
         $this->assertCurrencyAmountIsEqual(650, $creatorAccount->balance, 'Creator account at 650');
     }
+
+    #endregion
 
 }

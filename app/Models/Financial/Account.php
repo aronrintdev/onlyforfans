@@ -250,7 +250,7 @@ class Account extends Model implements Ownable
                 // Calculate new Pending
 
                 // Get Default Hold Period
-                $holdMinutes = Config::get('transactions.systems' . $this->system . '.holdPeriod');
+                $holdMinutes = Config::get("transactions.systems.{$this->system}.defaults.holdPeriod");
 
                 // TODO: Get Custom Hold Periods from DB | Jira Issue: AF-236
 

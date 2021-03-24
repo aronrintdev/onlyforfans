@@ -285,6 +285,7 @@ class Transaction extends Model
             $debitTrans->account->moveTo($creditTrans->account, $partialAmount, [
                 'type' => TransactionTypeEnum::CHARGEBACK_PARTIAL,
                 'shareable_id' => $debitTrans->sharable_id ?? null,
+                'ignoreBalance' => true,
             ]);
         }
         return $transactions;
