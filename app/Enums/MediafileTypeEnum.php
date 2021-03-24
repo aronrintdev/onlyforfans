@@ -19,4 +19,19 @@ class MediafileTypeEnum extends SmartEnum implements Selectable {
         self::VAULT => 'Vault',
     ];
 
+    public static function getSubfolder($mftype) {
+        switch ($mftype) {
+        case MediafileTypeEnum::VAULT:
+            $subFolder = 'vaultfolders';
+            break;
+        case MediafileTypeEnum::STORY:
+            $subFolder = 'stories';
+            break;
+        case MediafileTypeEnum::POST:
+            $subFolder = 'posts';
+            break;
+        default:
+            $subFolder = 'default';
+        }
+    }
 }
