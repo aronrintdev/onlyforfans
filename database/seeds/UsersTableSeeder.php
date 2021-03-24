@@ -1,6 +1,7 @@
 <?php
 namespace Database\Seeders;
 
+use Exception;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Config;

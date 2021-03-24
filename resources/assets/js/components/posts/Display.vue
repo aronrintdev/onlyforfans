@@ -21,12 +21,7 @@
       <template v-if="post.access">
         <b-card-text> <p class="mb-3">{{ post.description }}</p> </b-card-text>
         <article v-if="hasMediafiles">
-          <MediaSlider :post="post" :session_user="session_user" />
-          <b-card-img v-if="false && primaryMediafile.is_image" :src="primaryMediafile.filepath" alt="Image" ></b-card-img>
-          <b-embed v-if="false && primaryMediafile.is_video" type="video" controls poster="poster.png">
-            <source :src="primaryMediafile.filepath" type="video/webm">
-            <source :src="primaryMediafile.filepath" type="video/mp4">
-          </b-embed>
+          <MediaSlider :post="post" :session_user="session_user" :use_mid="use_mid" />
         </article>
       </template>
       <template v-else>
@@ -60,6 +55,7 @@ export default {
   props: {
     post: null,
     session_user: null,
+    use_mid: { type: Boolean, default: false }, // use mid-sized images instead of full
   },
 
   computed: {
@@ -70,7 +66,6 @@ export default {
       return this.post.mediafiles?.length > 0
     },
     primaryMediafile() {
-      //return this.hasMediafiles ? this.post.mediafiles[0].filepath : null
       return this.hasMediafiles ? this.post.mediafiles[0] : null
     },
     isLoading() {

@@ -1,6 +1,7 @@
 <?php
 namespace Database\Seeders;
 
+use Exception;
 use App\Enums\MediafileTypeEnum;
 use App\Libs\FactoryHelpers;
 use App\Models\Story;

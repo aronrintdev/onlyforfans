@@ -28,7 +28,7 @@
           </video>
           <img v-if="mf.is_image"
             class="d-block OFF-img-fluid OFF-w-100"
-            :src="mf.filepath"
+            :src="(use_mid && mf.has_mid) ? mf.midFilepath : mf.filepath"
             :alt="mf.mfname"
           >
         </template>
@@ -46,6 +46,7 @@ export default {
   props: {
     post: null,
     session_user: null,
+    use_mid: { type: Boolean, default: false }, // use mid-sized images instead of full
   },
 
   computed: {

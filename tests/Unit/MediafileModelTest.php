@@ -1,80 +1,93 @@
 <?php
 namespace Tests\Unit;
 
+use Illuminate\Http\UploadedFile;
+use Illuminate\Foundation\Testing\WithFaker;
+//use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Support\Facades\Storage;
+use Database\Seeders\TestDatabaseSeeder;
 use DB;
+use App;
 use Tests\TestCase;
+use App\Libs\FactoryHelpers;
 use App\Models\User;
-use App\Models\Story;
+use App\Models\Post;
 use Ramsey\Uuid\Uuid;
 use App\Models\Mediafile;
 use App\Enums\MediafileTypeEnum;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-//use App\Models\Image;
 
 class MediafileModelTest extends TestCase
 {
-    /**
-     * @group OFF-mfdev
-     */
-    public function test_hello_story()
-    {
-        $story = factory(Story::class)->make();
-        $story->refresh();
-        $this->assertNotNull($story);
-        $this->assertNotNull($story->timeline);
-        $this->assertGreaterThan(0, $story->timeline->id);
-        $this->assertNotNull($story->timeline->user);
-        $this->assertGreaterThan(0, $story->timeline->user->id);
-
-        //$car = Car::find($result->content());
-        //$this->assertNotNull($car);
-        //$this->assertEquals($data, $car->only(['make']));
-    }
+    use WithFaker; 
+    //use RefreshDatabase; -- need to impl locally to disable during run-time %TODO
 
     /**
-     * @group OFF-mfdev
+     * @group mediafile-model
      */
-    public function test_hello_user()
+    // %NOTE: do not add to regressions as it needs to create actual images and upload to S3
+    // $ APP_ENV=LOCAL  php  vendor/bin/phpunit --testdox  --group mediafile-model
+    public function test_should_create_mediafile_then_thumbnail()
     {
-        $user = factory(User::class)->make();
-        $user->refresh();
-        $this->assertNotNull($user);
-        $this->assertNotNull($user->timeline);
-        $this->assertGreaterThan(0, $user->timeline->id);
+        //$post = factory(Post::class)->make();
+        $post = Post::firstOrFail();
+        $mediafile = FactoryHelpers::createImage(
+            MediafileTypeEnum::POST, // string $mftype,
+            $post->id, // string $resourceID
+            true, // $doS3Upload
+            ['width'=>1280, 'height'=>720] // $attrs
+        );
+        //dd( $mediafile->filename, $mediafile->filepath, $mediafile->thumbFilename, $mediafile->thumbFilepath);
+        $mediafile->createThumbnail();
+        $mediafile->createMid();
 
-        //$car = Car::find($result->content());
-        //$this->assertNotNull($car);
-        //$this->assertEquals($data, $car->only(['make']));
-    }
-
-    /**
-     * @group OFF-mfdev
-     */
-    public function test_should_upload_to_s3()
-    {
-        $story = factory(Story::class)->make();
-
-        $file = UploadedFile::fake()->image('file-foo.png', 400, 400);
-
-        $mediafile = Mediafile::create([
-            'resource_id'=>$story->id,
-            'resource_type'=>'stories',
-            'filename'=>(string) Uuid::uuid4(),
-            'mftype' => MediafileTypeEnum::STORY,
-            'mimetype' => $file->getMimeType(),
-            'orig_filename' => $file->getClientOriginalName(),
-            'orig_ext' => $file->getClientOriginalExtension(),
-        ]);
-
-        // Test it exists
         $mediafile = Mediafile::find($mediafile->id);
         $this->assertNotNull($mediafile);
-        //$this->assertFileExists($mediafile->absolute_resource_path);
-        //$this->assertSame('employees',$mediafile->resource_type);
-        //$this->assertSame($employee->id,$mediafile->resource_id);
-        $this->assertSame(MediafileTypeEnum::STORY,$mediafile->mftype);
+        $this->assertSame(MediafileTypeEnum::POST,$mediafile->mftype);
+        $this->assertTrue( Storage::disk('s3')->exists($mediafile->filename) );
+        $this->assertTrue( $mediafile->has_thumb );
+        $this->assertTrue( Storage::disk('s3')->exists($mediafile->thumbFilename) );
+        $this->assertTrue( $mediafile->has_mid );
+        $this->assertTrue( Storage::disk('s3')->exists($mediafile->midFilename) );
+
+        // Test delete
+        $mediafile->delete(); // should do soft delete
+        $this->assertTrue( $mediafile->trashed() );
+        $this->assertTrue( $mediafile->has_thumb );
+        $this->assertTrue( $mediafile->has_mid );
+        $this->assertTrue( Storage::disk('s3')->exists($mediafile->filename) );
+        $this->assertTrue( Storage::disk('s3')->exists($mediafile->thumbFilename) );
+        $this->assertTrue( Storage::disk('s3')->exists($mediafile->midFilename) );
+
+        $mediafile->deleteAssets();
+        $this->assertFalse( $mediafile->has_thumb );
+        $this->assertFalse( $mediafile->has_mid );
+        $this->assertFalse( Storage::disk('s3')->exists($mediafile->filename) );
+        $this->assertFalse( Storage::disk('s3')->exists($mediafile->thumbFilename) );
+        $this->assertFalse( Storage::disk('s3')->exists($mediafile->midFilename) );
     }
 
+    // ------------------------------
+
+    protected function setUp() : void
+    {
+        parent::setUp();
+
+        if ( !App::environment(['testing']) ) {
+            return;
+        }
+
+        $this->seed(TestDatabaseSeeder::class);
+
+        // Update or add avatars to some users for this test...
+        $users = User::take(5)->get();
+        $users->each( function($u) {
+            $avatar = FactoryHelpers::createImage(MediafileTypeEnum::AVATAR, null, false); //skip S3 upload
+            $u->save();
+        });
+    }
+
+    protected function tearDown() : void {
+        parent::tearDown();
+    }
 }

@@ -2,6 +2,7 @@
 namespace Database\Seeders;
 
 use DB;
+use Exception;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Illuminate\Support\Facades\Config;
 use Carbon\Carbon;

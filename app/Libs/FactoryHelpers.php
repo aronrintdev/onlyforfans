@@ -73,20 +73,27 @@ class FactoryHelpers {
     }
 
     // Inserts a [mediafiles] record
-    public static function createImage(string $mftype, string $resourceID = null, $doS3Upload=false) : ?Mediafile
+    public static function createImage(
+        string $mftype, 
+        string $resourceID = null, 
+        $doS3Upload=false,
+        $attrs=[]
+    ) : ?Mediafile
     {
         $faker = Faker::create();
 
         // https://loremflickr.com/320/240/paris,girl,kitten,puppy,beach,rave
         //$url = 'https://loremflickr.com/json/320/240/paris,girl,kitten,puppy,beach,rave';
         $keyword = $faker->randomElement([ 'paris', 'girl', 'kitten', 'puppy', 'beach', 'rave' ]);
-        $url = 'https://loremflickr.com/json/320/240';
+        $width = $attrs['width'] ?? 320;
+        $height = $attrs['height'] ?? 240;
+        $url = "https://loremflickr.com/json/$width/$height";
         $url .= '/'.$keyword;
         $url .= '?random='.$faker->uuid;
         $json = json_decode(file_get_contents($url));
         $info = pathinfo($json->file);
         $ext = $info['extension'];
-        $basename = $info['basename'].'-'.$faker->randomNumber(6,true);
+        $fnameToStore = parse_filebase($info['basename']).'-'.$faker->randomNumber(6,true).'.'.$ext;
         $mimetype = (function($ext) {
             switch ($ext) {
                 case 'jpeg':
@@ -101,24 +108,22 @@ class FactoryHelpers {
             'mfname' => Str::slug($faker->catchPhrase,'-').'.'.$ext,
             'mftype' => $mftype,
             'mimetype' => $mimetype, // $file->getMimeType(),
-            'orig_filename' => $basename, // $file->getClientOriginalName(),
+            'orig_filename' => $fnameToStore, // $file->getClientOriginalName(),
             'orig_ext' => $ext, // $file->getClientOriginalExtension(),
         ];
 
+        $subFolder = MediafileTypeEnum::getSubfolder($mftype);
+        $s3Path = "$subFolder/$fnameToStore";
+
         switch ($mftype) {
-            case MediafileTypeEnum::AVATAR:
-                $s3Path = 'avatars/'.$basename;
-                break;
             case MediafileTypeEnum::COVER:
-                $s3Path = 'covers/'.$basename;
+            case MediafileTypeEnum::AVATAR:
                 break;
             case MediafileTypeEnum::POST:
-                $s3Path = 'posts/'.$basename;
                 $attrs['resource_id'] =  $resourceID; // ie story_id: required for story type
                 $attrs['resource_type'] = 'posts';
                 break;
             case MediafileTypeEnum::STORY:
-                $s3Path = 'stories/'.$basename;
                 $attrs['resource_id'] =  $resourceID; // ie story_id: required for story type
                 $attrs['resource_type'] = 'stories';
                 break;
@@ -127,6 +132,7 @@ class FactoryHelpers {
         }
 
         if ($doS3Upload) {
+            // https://stackoverflow.com/questions/15076819/file-get-contents-ignoring-verify-peer-false
             $contents = file_get_contents($json->file);
             Storage::disk('s3')->put($s3Path, $contents);
             $attrs['filename'] = $s3Path;
