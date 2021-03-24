@@ -16,7 +16,6 @@ use App\Models\Post;
 use Ramsey\Uuid\Uuid;
 use App\Models\Mediafile;
 use App\Enums\MediafileTypeEnum;
-//use App\Models\Image;
 
 class MediafileModelTest extends TestCase
 {
@@ -32,22 +31,40 @@ class MediafileModelTest extends TestCase
     {
         //$post = factory(Post::class)->make();
         $post = Post::firstOrFail();
-        if ( !App::environment(['testing']) ) {
-            $mediafile = FactoryHelpers::createImage(
-                MediafileTypeEnum::POST, // string $mftype,
-                $post->id, // string $resourceID
-                true, // $doS3Upload
-                ['width'=>1280, 'height'=>720] // $attrs
-            );
-            //dd( $mediafile->filename, $mediafile->filepath, $mediafile->thumbFilename, $mediafile->thumbFilepath);
-            $mediafile->createThumbnail();
-        }
+        $mediafile = FactoryHelpers::createImage(
+            MediafileTypeEnum::POST, // string $mftype,
+            $post->id, // string $resourceID
+            true, // $doS3Upload
+            ['width'=>1280, 'height'=>720] // $attrs
+        );
+        //dd( $mediafile->filename, $mediafile->filepath, $mediafile->thumbFilename, $mediafile->thumbFilepath);
+        $mediafile->createThumbnail();
+        $mediafile->createMid();
 
         $mediafile = Mediafile::find($mediafile->id);
         $this->assertNotNull($mediafile);
         $this->assertSame(MediafileTypeEnum::POST,$mediafile->mftype);
         $this->assertTrue( Storage::disk('s3')->exists($mediafile->filename) );
+        $this->assertTrue( $mediafile->has_thumb );
         $this->assertTrue( Storage::disk('s3')->exists($mediafile->thumbFilename) );
+        $this->assertTrue( $mediafile->has_mid );
+        $this->assertTrue( Storage::disk('s3')->exists($mediafile->midFilename) );
+
+        // Test delete
+        $mediafile->delete(); // should do soft delete
+        $this->assertTrue( $mediafile->trashed() );
+        $this->assertTrue( $mediafile->has_thumb );
+        $this->assertTrue( $mediafile->has_mid );
+        $this->assertTrue( Storage::disk('s3')->exists($mediafile->filename) );
+        $this->assertTrue( Storage::disk('s3')->exists($mediafile->thumbFilename) );
+        $this->assertTrue( Storage::disk('s3')->exists($mediafile->midFilename) );
+
+        $mediafile->deleteAssets();
+        $this->assertFalse( $mediafile->has_thumb );
+        $this->assertFalse( $mediafile->has_mid );
+        $this->assertFalse( Storage::disk('s3')->exists($mediafile->filename) );
+        $this->assertFalse( Storage::disk('s3')->exists($mediafile->thumbFilename) );
+        $this->assertFalse( Storage::disk('s3')->exists($mediafile->midFilename) );
     }
 
     // ------------------------------

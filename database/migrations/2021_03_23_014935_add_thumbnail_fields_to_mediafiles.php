@@ -14,6 +14,7 @@ class AddThumbnailFieldsToMediafiles extends Migration
             $table->boolean('has_mid')->default(false)->after('slug');
             $table->boolean('has_thumb')->default(false)->after('slug');
             $table->string('basename')->nullable()->after('slug');
+            $table->softDeletes();
         });
     }
 
@@ -27,6 +28,7 @@ class AddThumbnailFieldsToMediafiles extends Migration
                 'has_blur',
                 'orig_size',
             ]);
+            $table->dropSoftDeletes();
         });
     }
 }

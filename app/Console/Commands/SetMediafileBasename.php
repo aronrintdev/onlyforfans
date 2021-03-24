@@ -24,8 +24,13 @@ class SetMediafileBasename extends Command
     public function handle()
     {
         $take = $this->argument('take');
-        $take = 1;
-        $mediafiles = Mediafile::where('mimetype', 'image/png') ->whereNull('basename')->take($take)->get();
+
+        $query = Mediafile::whereIn('mimetype', ['image/png', 'image/jpg', 'image/jpeg']) ->whereNull('basename');
+        if ($take) {
+            $query->take($take);
+        }
+        $mediafiles = $query->get();
+
         $mediafiles->each( function($mf) {
             try {
                 $parsedbase = parse_filebase($mf->filepath);

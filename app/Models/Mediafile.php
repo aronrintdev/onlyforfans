@@ -1,7 +1,10 @@
 <?php
-
 namespace App\Models;
 
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Interfaces\Ownable;
 use App\Interfaces\Guidable;
 use App\Interfaces\Cloneable;
@@ -11,13 +14,10 @@ use App\Models\Traits\SluggableTraits;
 use App\Traits\OwnableFunctions;
 use Cviebrock\EloquentSluggable\Sluggable;
 use Intervention\Image\Facades\Image;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Mediafile extends BaseModel implements Guidable, Ownable, Cloneable
 {
-    use UsesUuid, HasFactory, OwnableFunctions, Sluggable, SluggableTraits;
+    use UsesUuid, SoftDeletes, HasFactory, OwnableFunctions, Sluggable, SluggableTraits;
 
     protected $table = 'mediafiles';
     protected $guarded = [ 'id', 'created_at', 'updated_at' ];
@@ -36,13 +36,6 @@ class Mediafile extends BaseModel implements Guidable, Ownable, Cloneable
             if ( $parsedbase ) {
                 $model->basename = $parsedbase;
             }
-        });
-
-        static::deleting(function ($model) {
-            // %TODO: move to post-processing script (?)
-            Storage::disk('s3')->delete($model->filename); // Remove from S3
-            Storage::disk('s3')->delete($model->midFilepath);
-            Storage::disk('s3')->delete($model->thumbFilepath);
         });
     }
 
@@ -67,6 +60,8 @@ class Mediafile extends BaseModel implements Guidable, Ownable, Cloneable
     protected $casts = [
         'cattrs' => 'array',
         'meta'   => 'array',
+        'has_thumb'   => 'bool',
+        'has_mid'   => 'bool',
     ];
 
     public function getIsImageAttribute($value)
@@ -99,6 +94,11 @@ class Mediafile extends BaseModel implements Guidable, Ownable, Cloneable
         return $subfolder.'/thumb/'.$this->basename.'.jpg';
     }
 
+    public function getBlurFilenameAttribute($value) {
+        $subfolder = MediafileTypeEnum::getSubfolder($this->mftype);
+        return $subfolder.'/blur/'.$this->basename.'.jpg';
+    }
+
     public function getFilepathAttribute($value) {
         return !empty($this->filename) ? Storage::disk('s3')->url($this->filename) : null;
         //return !empty($this->filename) ? Storage::disk('s3')->temporaryUrl( $this->filename, now()->addMinutes(5) ) : null;
@@ -113,6 +113,12 @@ class Mediafile extends BaseModel implements Guidable, Ownable, Cloneable
     public function getThumbFilepathAttribute($value) {
         $subfolder = MediafileTypeEnum::getSubfolder($this->mftype);
         $path = $subfolder.'/thumb/'.$this->basename.'.jpg';
+        return !empty($path) ? Storage::disk('s3')->url($path) : null;
+    }
+
+    public function getBlurFilepathAttribute($value) {
+        $subfolder = MediafileTypeEnum::getSubfolder($this->mftype);
+        $path = $subfolder.'/blur/'.$this->basename.'.jpg';
         return !empty($path) ? Storage::disk('s3')->url($path) : null;
     }
 
@@ -265,6 +271,28 @@ class Mediafile extends BaseModel implements Guidable, Ownable, Cloneable
         $contents = $img->stream();
         Storage::disk('s3')->put($s3Path, $contents);
         $this->has_blur = true;
+        $this->save();
+    }
+
+    // Deletes all images, videos, etc associated with the mediafile record
+    //  ~ Typically there will only be a single video, but a video could have related images such as a preview
+    //  ~ An image could have an associated thumb, blur, etc.
+    //  ~ Should be called *before* a mediafile is hard-deleted
+    public function deleteAssets()
+    {
+        if ( $this->has_thumb ) {
+            Storage::disk('s3')->delete($this->thumbFilename);
+            $this->has_thumb = false;
+        }
+        if ( $this->has_mid ) {
+            Storage::disk('s3')->delete($this->midFilename);
+            $this->has_mid = false;
+        }
+        if ( $this->has_blur ) {
+            Storage::disk('s3')->delete($this->blurFilename);
+            $this->has_blur = false;
+        }
+        Storage::disk('s3')->delete($this->filename);
         $this->save();
     }
 }
