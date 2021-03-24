@@ -24,6 +24,28 @@ class Mediafile extends BaseModel implements Guidable, Ownable, Cloneable
     public static $vrules = [];
 
     //--------------------------------------------
+    // Boot
+    //--------------------------------------------
+    public static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            $parsedbase = parse_filebase($model->filepath);
+            if ( $parsedbase ) {
+                $model->basename = $parsedbase;
+            }
+        });
+
+        static::deleting(function ($model) {
+            // %TODO: move to post-processing script (?)
+            Storage::disk('s3')->delete($model->filename); // Remove from S3
+            Storage::disk('s3')->delete($model->midFilepath);
+            Storage::disk('s3')->delete($model->thumbFilepath);
+        });
+    }
+
+    //--------------------------------------------
     // %%% Relationships
     //--------------------------------------------
 
@@ -59,6 +81,19 @@ class Mediafile extends BaseModel implements Guidable, Ownable, Cloneable
     public function getGuidAttribute($value)
     {
         return $this->id;
+    }
+
+    public function getMidFilepathAttribute($value)
+    {
+        $subfolder = MediafileTypeEnum::getSubfolder($this->mftype);
+        $path = $subfolder.'/mid/'.$this->basename.'.jpg';
+        return !empty($path) ? Storage::disk('s3')->url($path) : null;
+    }
+    public function getThumbFilepathAttribute($value)
+    {
+        $subfolder = MediafileTypeEnum::getSubfolder($this->mftype);
+        $path = $subfolder.'/thumb/'.$this->basename.'.jpg';
+        return !empty($path) ? Storage::disk('s3')->url($path) : null;
     }
 
     public function getFilepathAttribute($value)
