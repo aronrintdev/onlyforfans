@@ -22,6 +22,8 @@ use App\Models\Financial\Exceptions\Account\TransactionNotAllowedException;
  * @group unit
  * @group financial
  * @group financial-account
+ *
+ * @package Tests\Unit\Financial
  */
 class AccountModelTest extends TestCase
 {

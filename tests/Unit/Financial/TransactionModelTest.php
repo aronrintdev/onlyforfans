@@ -16,6 +16,8 @@ use App\Models\Financial\Exceptions\TransactionAlreadySettled;
  * @group unit
  * @group financial
  * @group financial-transaction
+ *
+ * @package Tests\Unit\Financial
  */
 class FinancialTransactionModelTest extends TestCase
 {
