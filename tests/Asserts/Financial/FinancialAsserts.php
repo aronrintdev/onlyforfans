@@ -2,6 +2,7 @@
 
 namespace Tests\Asserts\Financial;
 
+use App\Models\Financial\Account;
 use App\Models\Financial\Transaction;
 
 trait FinancialAsserts
@@ -26,5 +27,18 @@ trait FinancialAsserts
     protected function assertIsNotSettled(Transaction $transaction, bool $lazy = false)
     {
         $this->assertThat($transaction, new IsNotSettled());
+    }
+
+    /**
+     * Checks Account or Transaction balance amount
+     *
+     * @param int|Money $amount
+     * @param Account|Transaction $model
+     * @param string $message
+     * @return void
+     */
+    protected function assertHasBalanceOf($amount, $model, string $message = '')
+    {
+        $this->assertThat($model, new BalanceEquals($amount), $message);
     }
 }

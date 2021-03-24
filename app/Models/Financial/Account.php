@@ -261,13 +261,13 @@ class Account extends Model implements Ownable
                     $ttn = Transaction::getTableName(); // Transaction Table Name
                     $atn = Account::getTableName(); // Account Table Name
                     $pending = $this->asMoney(
-                        Transaction::select(DB::raw('sum(credit_amount) as amount'))
+                        Transaction::select(DB::raw("sum({$ttn}.credit_amount) as amount"))
                             ->join("{$ttn} as ref", "{$ttn}.reference_id", '=', 'ref.id')
                             ->join("{$atn} as account", 'ref.account_id', '=', 'account.id')
                             ->where("{$ttn}.account_id", $this->getKey())
                             ->where("{$ttn}.settled_at", '>', $holdSince->toDateString())
                             ->where('account.type', AccountTypeEnum::INTERNAL) // Only transactions from other internal accounts
-                            ->whereNotNull("settled_at")
+                            ->whereNotNull("{$ttn}.settled_at")
                             ->value('amount')
                     );
                 } else {

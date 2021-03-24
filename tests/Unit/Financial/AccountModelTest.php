@@ -112,7 +112,7 @@ class AccountModelTest extends TestCase
 
         $inAccount->moveToInternal(100);
 
-        $this->assertCurrencyAmountIsEqual(-100, $inAccount->balance);
+        $this->assertHasBalanceOf(-100, $inAccount);
 
         // Created missing Internal account
         $this->assertDatabaseHas($this->tableNames['account'], [
@@ -182,7 +182,7 @@ class AccountModelTest extends TestCase
             'currency' => $this->defaultCurrency,
         ]);
 
-        $this->assertCurrencyAmountIsEqual(700, $account->balance);
+        $this->assertHasBalanceOf(700, $account);
 
         Event::assertDispatched(UpdateAccountBalance::class);
         // Queue::assertPushed(UpdateAccountBalance::class);

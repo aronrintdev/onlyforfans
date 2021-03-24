@@ -115,12 +115,12 @@ class FinancialTransactionModelTest extends TestCase
         $transactions['debit']->settleBalance();
         $transactions['debit']->save();
         $this->assertIsSettled($transactions['debit']);
-        $this->assertCurrencyAmountIsEqual(-10000, $transactions['debit']->balance);
+        $this->assertHasBalanceOf(-10000, $transactions['debit']);
 
         $transactions['credit']->settleBalance();
         $transactions['credit']->save();
         $this->assertIsSettled($transactions['credit']);
-        $this->assertCurrencyAmountIsEqual(10000, $transactions['credit']->balance);
+        $this->assertHasBalanceOf(10000, $transactions['credit']);
 
         // Moving to creators Account
         $userAccount = $inAccount->owner->getInternalAccount($this->defaultSystem, $this->defaultCurrency);
@@ -137,12 +137,12 @@ class FinancialTransactionModelTest extends TestCase
         $transactions['debit']->settleBalance();
         $transactions['debit']->save();
         $this->assertIsSettled($transactions['debit']);
-        $this->assertCurrencyAmountIsEqual(9000, $transactions['debit']->balance);
+        $this->assertHasBalanceOf(9000, $transactions['debit']);
 
         $transactions['credit']->settleBalance();
         $transactions['credit']->save();
         $this->assertIsSettled($transactions['credit']);
-        $this->assertCurrencyAmountIsEqual(1000, $transactions['credit']->balance);
+        $this->assertHasBalanceOf(1000, $transactions['credit']);
 
         // 2nd Transaction
         $transactions = $userAccount->moveTo($creatorAccount, 1000);
@@ -154,12 +154,12 @@ class FinancialTransactionModelTest extends TestCase
         $transactions['debit']->settleBalance();
         $transactions['debit']->save();
         $this->assertIsSettled($transactions['debit']);
-        $this->assertCurrencyAmountIsEqual(8000, $transactions['debit']->balance);
+        $this->assertHasBalanceOf(8000, $transactions['debit']);
 
         $transactions['credit']->settleBalance();
         $transactions['credit']->save();
         $this->assertIsSettled($transactions['credit']);
-        $this->assertCurrencyAmountIsEqual(2000, $transactions['credit']->balance);
+        $this->assertHasBalanceOf(2000, $transactions['credit']);
     }
 
     /**
@@ -177,7 +177,7 @@ class FinancialTransactionModelTest extends TestCase
         $transactions['debit']->settleBalance();
         $transactions['debit']->save();
         $this->assertIsSettled($transactions['debit']);
-        $this->assertCurrencyAmountIsEqual(-10000, $transactions['debit']->balance);
+        $this->assertHasBalanceOf(-10000, $transactions['debit']);
         $this->expectException(TransactionAlreadySettled::class);
         $transactions['debit']->settleBalance();
     }
@@ -197,12 +197,12 @@ class FinancialTransactionModelTest extends TestCase
         $transactions['debit']->settleBalance();
         $transactions['debit']->save();
         $this->assertIsSettled($transactions['debit']);
-        $this->assertCurrencyAmountIsEqual(-10000, $transactions['debit']->balance);
+        $this->assertHasBalanceOf(-10000, $transactions['debit']);
 
         $transactions['credit']->settleBalance();
         $transactions['credit']->save();
         $this->assertIsSettled($transactions['credit']);
-        $this->assertCurrencyAmountIsEqual(10000, $transactions['credit']->balance);
+        $this->assertHasBalanceOf(10000, $transactions['credit']);
         $transactions['credit']->balance = 0;
         $this->expectException(TransactionAlreadySettled::class);
         $transactions['credit']->save();
