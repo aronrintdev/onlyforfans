@@ -14,7 +14,7 @@ use function _\uniq;
 class MessageController extends Controller
 {
     public function __construct(Request $request)
-    {
+    {  
         $this->request = $request;
         $this->middleware('auth');
     }
@@ -186,5 +186,30 @@ class MessageController extends Controller
         $messages = Message::where('user_id', $sessionUser->id)
             ->update(['is_unread' => 0]);
         return ['status' => 200];
+    }
+    public function filterMessages(Request $request, $id) {
+        $sessionUser = $request->user();
+
+        $messages = Message::with(['receiver'])
+            ->where(function($query) use(&$request, &$id) {
+                $sessionUser = $request->user();
+                $filter = $request->query('query');
+
+                $query->where('user_id', $sessionUser->id)
+                    ->where('receiver_id',  $id)
+                    ->where('message', 'like', '%'.$filter.'%');
+            })
+            ->orWhere(function($query) use(&$request, &$id) {
+                $sessionUser = $request->user();
+                $filter = $request->query('query');
+
+                $query->where('receiver_id', $sessionUser->id)
+                    ->where('user_id',  $id)
+                    ->where('message', 'like', '%'.$filter.'%');
+            })
+            ->orderBy('created_at', 'DESC')
+            ->pluck('id')
+            ->toArray();
+        return $messages;
     }
 }

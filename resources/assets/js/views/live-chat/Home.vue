@@ -13,7 +13,7 @@
                   <div class="top-bar" v-if="!userSearchVisible">
                     <div>
                       <router-link to="/">
-                        <button class="btn" type="button">
+                        <button class="btn" type="button"> 
                           <i class="fa fa-arrow-left" aria-hidden="true"></i>
                         </button>
                       </router-link>

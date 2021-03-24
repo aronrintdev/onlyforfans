@@ -160,7 +160,7 @@
                       </b-dropdown-item>
                       <b-dropdown-item>
                         Give user a discount
-                      </b-dropdown-item>
+                    </b-dropdown-item>
                       <b-dropdown-divider></b-dropdown-divider>
                       <b-dropdown-item>Hide chat</b-dropdown-item>
                       <b-dropdown-item>Mute notifications</b-dropdown-item>
@@ -175,8 +175,21 @@
                       <button class="btn" type="button" @click="changeMessageSearchVisible">
                         <i class="fa fa-times" aria-hidden="true"></i>
                       </button>
-                      <b-form-input v-model="userSearchText" placeholder="Find in chat"></b-form-input>
-                      <button class="btn" type="button">
+                      <b-form-input v-model="messageSearchText" placeholder="Find in chat"></b-form-input>
+                      <div class="search-results d-none">
+                          <span class="search-results-count">{{currentSearchIndex + 1}} / {{ totalSearches.length }}</span>
+                        <button class="btn" type="button" :disabled="currentSearchIndex  >= totalSearches.length - 1" @click="onShowNextSearch">
+                          <svg id="icon-arrow-up" viewBox="0 0 24 24">
+                            <path d="M12 7.25l-6.87 6.88a1 1 0 0 0-.3.7 1 1 0 0 0 1 1 1 1 0 0 0 .71-.29L12 10.08l5.46 5.46a1 1 0 0 0 .71.29 1 1 0 0 0 1-1 1 1 0 0 0-.3-.7z"></path>
+                          </svg>
+                        </button>
+                        <button class="btn" type="button" :disabled="currentSearchIndex < 1" @click="onShowPrevSearch">
+                          <svg id="icon-arrow-down" viewBox="0 0 24 24">
+                            <path d="M12 16.75L5.13 9.87a1 1 0 0 1-.3-.7 1 1 0 0 1 1-1 1 1 0 0 1 .71.29L12 13.92l5.46-5.46a1 1 0 0 1 .71-.29 1 1 0 0 1 1 1 1 1 0 0 1-.3.7z"></path>
+                          </svg>
+                        </button>
+                      </div>
+                      <button class="btn" type="button" @click="onMessageSearchTextChange">
                         <i class="fa fa-search" aria-hidden="true"></i>
                       </button>
                     </div>
@@ -190,7 +203,7 @@
                       <div class="message-group" :key="messageGroup.date"  v-for="messageGroup in messages">
                         <div class="message-group-time"><span>{{ moment.unix(messageGroup.date).format('MMM DD, YYYY') }}</span></div>
                         <template v-for="message in messageGroup.messages">
-                          <div class="message" :key="message.id">
+                          <div :class="`message message-${message.id}`" :key="message.id">
                             <div class="received" v-if="currentUser && currentUser.id !== message.user_id">
                               <div class="user-logo text-logo" v-if="selectedUser && !selectedUser.profile.avatar">
                                 {{ getLogoFromName(selectedUser.name) }}
@@ -292,6 +305,9 @@
       originMessages: [],
       offset: 0,
       loadingData: false,
+      messageSearchText: undefined,
+      currentSearchIndex: -1,
+      totalSearches: [],
     }),
     mounted() {
       const self = this;
@@ -315,8 +331,8 @@
       });
       this.getMessages();
       setTimeout(() => {
-        const container = this.$el.querySelector(".conversation-list .message-group:last-child");
-        container.scrollIntoView({ block: 'end', behavior: 'auto' });
+        // const container = this.$el.querySelector(".conversation-list .message-group:last-child");
+        // container.scrollIntoView({ block: 'end', behavior: 'auto' });
       }, 500);
       Echo.private(`${this.$route.params.id}-message`)
         .listen('MessageSentEvent', (e) => {
@@ -416,7 +432,7 @@
           this.offset = this.originMessages.length;
           this.groupMessages();
           this.loadingData = false;
-        })
+        }) 
       },
       groupMessages: function() {
         const messages = this.originMessages.map((message) => {
@@ -430,7 +446,7 @@
         _.orderBy(this.messages, ['date'], ['DESC']);
       },
       changeSearchbarVisible: function () {
-        this.userSearchVisible = !this.userSearchVisible;
+        this.userSearchVisible = !this.userSearchVisible; 
         this.userSearchText = undefined;
       },
       onUserSearch: function(value) {
@@ -474,11 +490,21 @@
       muteNotification: function () {
         this.selectedUser.muted = !this.selectedUser.muted;
       },
-      searchMessage: function () {
-        this.selectedUser.showSearch = true;
+      onMessageSearchTextChange: function () {
+        this.clearHighlightMessages();
+        this.axios.get(`/chat-messages/${this.$route.params.id}/search?query=${this.messageSearchText}`)
+          .then((response) => {
+            this.totalSearches = response.data;
+            this.currentSearchIndex = -1;
+            $('.user-search-bar .search-results').removeClass('d-none');
+          });
       },
       changeMessageSearchVisible: function () {
         this.messageSearchVisible = !this.messageSearchVisible;
+        $('.user-search-bar .search-results').addClass('d-none');
+        this.currentSearchIndex = -1;
+        this.messageSearchText = undefined;
+        this.clearHighlightMessages();
       },
       onInputNewMessage: function(e) {
         this.newMessageText = e.target.value;
@@ -509,6 +535,42 @@
             self.groupMessages();
             self.newMessageText = undefined;
           });
+      },
+      onShowNextSearch: function() {
+        if (this.currentSearchIndex < this.totalSearches.length) {
+          this.clearHighlightMessages();
+          this.currentSearchIndex++;
+          this.showMessageWithId(this.totalSearches[this.currentSearchIndex]);
+        }
+      },
+      onShowPrevSearch: function() {
+        if (this.currentSearchIndex > 0) {
+          this.currentSearchIndex--;
+          this.clearHighlightMessages();
+          this.showMessageWithId(this.totalSearches[this.currentSearchIndex]);
+        }
+      },
+      showMessageWithId: async function(messageId) {
+        this.loadingData = true;
+        const user_id = this.$route.params.id;
+
+        let index = this.originMessages.findIndex(message => message.id === messageId);
+        while (index < 0) {
+          await this.axios.get(`/chat-messages/${user_id}?offset=${this.offset}&limit=30`).then((response) => {
+            this.originMessages = this.originMessages.concat(response.data.messages);
+            this.offset = this.originMessages.length;
+          });
+          index = this.originMessages.findIndex(message => message.id === messageId);
+        }
+        const el = $(`.message-${messageId}.message .text`);
+        el.html(el.html().replace(this.messageSearchText, `<span class="highlight">${this.messageSearchText}</span>`));
+        const newPos = $('.conversation-list').scrollTop() + $(`.message-${messageId}.message`).height() + $(`.message-${messageId}.message`).offset().top - $('.conversation-list').height() - $('.conversation-list').offset().top;
+        $('.conversation-list').animate({scrollTop: newPos}, 500);
+        this.loadingData = false;
+      },
+      clearHighlightMessages: function() {
+        const el = $('.highlight').parent();
+        el.html(el.text());
       }
     }
   }
@@ -517,4 +579,11 @@
 <style lang="scss" scoped>
   @import "../../../sass/views/live-chat/home.scss";
   @import "../../../sass/views/live-chat/details.scss";
+</style>
+<style>
+  .highlight {
+    background: #ffd761;
+    padding: 3px 0px;
+    border-radius: 3px;
+  }
 </style>
