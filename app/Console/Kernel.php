@@ -18,6 +18,8 @@ class Kernel extends ConsoleKernel
         ExpirePostCommand::class,
         \App\Console\Commands\TruncateData::class,
         \App\Console\Commands\UpdateSlugs::class,
+        \App\Console\Commands\MakeThumbnails::class,
+        \App\Console\Commands\SetMediafileBasename::class,
     ];
 
     /**
