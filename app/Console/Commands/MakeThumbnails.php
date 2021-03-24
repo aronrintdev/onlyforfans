@@ -23,19 +23,23 @@ class MakeThumbnails extends Command
 
     public function handle()
     {
-        //$MID_THRESHOLD = env('MID_IMG_SIZE_THRESHOLD', 500*1000);
-        //$THUMB_THRESHOLD = env('THUMB_IMG_SIZE_THRESHOLD', 50*1000);
         $take = $this->argument('take');
-        $take = 1;
+        //$take = 200;
 
-        $mediafiles = Mediafile::where('mimetype', 'image/png')
+        $query = Mediafile::whereIn('mimetype', ['image/png', 'image/jpg', 'image/jpeg'])
             ->where( function($q1) {
                 $q1->where('has_thumb', false)->orWhere('has_mid', false);
-            })->take($take)->get();
+            });
+        if ($take) {
+            $query->take($take);
+        }
+        $mediafiles = $query->get();
 
-        $mediafiles->each( function($mf) {
+        $mediafiles->each( function($mf) use($take) {
+            static $iter = 1;
+            $take = $take ?? 'all';
             try {
-                $this->info( '% Processing file: '.$mf->slug);
+                $this->info( "% Processing file: ".$mf->slug.", (iter $iter / $take)");
 
                 // Set basename if null
                 if ( empty($mf->basename) ) {
@@ -61,6 +65,7 @@ class MakeThumbnails extends Command
                 $this->info( '% Could not minimize file: '.$mf->slug.', '.$e->getMessage());
             }
 
+            $iter++;
         });
 
         // remove any existing thumb or mid file
