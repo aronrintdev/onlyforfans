@@ -3,7 +3,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Storage;
-use Intervention\Image\Facades\Image;
+//use Intervention\Image\Facades\Image;
 use App;
 use DB;
 use Exception;
@@ -46,23 +46,15 @@ class MakeThumbnails extends Command
                     }
                 }
 
-                $url = Storage::disk('s3')->temporaryUrl( $mf->filename, now()->addMinutes(10) );
-
                 $ogSize = Storage::disk('s3')->size( $mf->filename );
                 $this->info( '    - size: '.$ogSize);
 
                 if ( !$mf->has_thumb ) {
-                    $img = Image::make($url);
-                    //$img->resize(320, 240)->save('public/bar.jpg', 90, 'jpg');
-                    $subFolder = MediafileTypeEnum::getSubfolder($mf->mftype);
-                    $img->resize(320, null)->save($subFolder.'/thumb/'.$mf->basename.'.jpg', 90, 'jpg');
+                    $mf->createThumbnail();
                 }
 
                 if ( !$mf->has_mid ) {
-                    $img = Image::make($url);
-                    //$img->resize(320, 240)->save('public/bar.jpg', 90, 'jpg');
-                    $subFolder = MediafileTypeEnum::getSubfolder($mf->mftype);
-                    $img->resize(1280, null)->save($subFolder.'/mid/'.$mf->basename.'.jpg', 90, 'jpg');
+                    $mf->createMid();
                 }
 
             } catch (Exception $e) {

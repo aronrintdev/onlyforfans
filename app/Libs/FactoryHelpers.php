@@ -73,15 +73,21 @@ class FactoryHelpers {
     }
 
     // Inserts a [mediafiles] record
-    public static function createImage(string $mftype, string $resourceID = null, $doS3Upload=false) : ?Mediafile
+    public static function createImage(
+        string $mftype, 
+        string $resourceID = null, 
+        $doS3Upload=false,
+        $attrs=[]
+    ) : ?Mediafile
     {
         $faker = Faker::create();
 
         // https://loremflickr.com/320/240/paris,girl,kitten,puppy,beach,rave
         //$url = 'https://loremflickr.com/json/320/240/paris,girl,kitten,puppy,beach,rave';
         $keyword = $faker->randomElement([ 'paris', 'girl', 'kitten', 'puppy', 'beach', 'rave' ]);
-        $url = 'https://loremflickr.com/json/320/240';
-        //$url = 'https://loremflickr.com/json/640/480'; // %TODO: randomize dimensions ?
+        $width = $attrs['width'] ?? 320;
+        $height = $attrs['height'] ?? 240;
+        $url = "https://loremflickr.com/json/$width/$height";
         $url .= '/'.$keyword;
         $url .= '?random='.$faker->uuid;
         $json = json_decode(file_get_contents($url));
@@ -106,20 +112,18 @@ class FactoryHelpers {
             'orig_ext' => $ext, // $file->getClientOriginalExtension(),
         ];
 
+        $subFolder = MediafileTypeEnum::getSubfolder($mftype);
+        $s3Path = "$subFolder/$fnameToStore";
+
         switch ($mftype) {
-            case MediafileTypeEnum::AVATAR:
-                $s3Path = 'avatars/'.$fnameToStore;
-                break;
             case MediafileTypeEnum::COVER:
-                $s3Path = 'covers/'.$fnameToStore;
+            case MediafileTypeEnum::AVATAR:
                 break;
             case MediafileTypeEnum::POST:
-                $s3Path = 'posts/'.$fnameToStore;
                 $attrs['resource_id'] =  $resourceID; // ie story_id: required for story type
                 $attrs['resource_type'] = 'posts';
                 break;
             case MediafileTypeEnum::STORY:
-                $s3Path = 'stories/'.$fnameToStore;
                 $attrs['resource_id'] =  $resourceID; // ie story_id: required for story type
                 $attrs['resource_type'] = 'stories';
                 break;

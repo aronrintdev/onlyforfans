@@ -5,6 +5,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Foundation\Testing\WithFaker;
 //use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Support\Facades\Storage;
 use Database\Seeders\TestDatabaseSeeder;
 use DB;
 use App;
@@ -25,31 +26,28 @@ class MediafileModelTest extends TestCase
     /**
      * @group mediafile-model
      */
-    public function test_should_upload_to_s3()
+    // %NOTE: do not add to regressions as it needs to create actual images and upload to S3
+    // $ APP_ENV=LOCAL  php  vendor/bin/phpunit --testdox  --group mediafile-model
+    public function test_should_create_mediafile_then_thumbnail()
     {
         //$post = factory(Post::class)->make();
         $post = Post::firstOrFail();
+        if ( !App::environment(['testing']) ) {
+            $mediafile = FactoryHelpers::createImage(
+                MediafileTypeEnum::POST, // string $mftype,
+                $post->id, // string $resourceID
+                true, // $doS3Upload
+                ['width'=>1280, 'height'=>720] // $attrs
+            );
+            //dd( $mediafile->filename, $mediafile->filepath, $mediafile->thumbFilename, $mediafile->thumbFilepath);
+            $mediafile->createThumbnail();
+        }
 
-        $file = UploadedFile::fake()->image('file-foo.png', 400, 400);
-
-        $mediafile = Mediafile::create([
-            'resource_id'=>$post->id,
-            'resource_type'=>'posts',
-            'mfname' => $this->faker->slug,
-            'filename' => $this->faker->slug,
-            'mftype' => MediafileTypeEnum::POST,
-            'mimetype' => $file->getMimeType(),
-            'orig_filename' => $file->getClientOriginalName(),
-            'orig_ext' => $file->getClientOriginalExtension(),
-        ]);
-
-        // Test it exists
         $mediafile = Mediafile::find($mediafile->id);
         $this->assertNotNull($mediafile);
-        //$this->assertFileExists($mediafile->absolute_resource_path);
-        //$this->assertSame('employees',$mediafile->resource_type);
-        //$this->assertSame($employee->id,$mediafile->resource_id);
         $this->assertSame(MediafileTypeEnum::POST,$mediafile->mftype);
+        $this->assertTrue( Storage::disk('s3')->exists($mediafile->filename) );
+        $this->assertTrue( Storage::disk('s3')->exists($mediafile->thumbFilename) );
     }
 
     // ------------------------------
