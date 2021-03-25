@@ -202,8 +202,8 @@ export default {
 
 <style scoped>
 .tag-debug {
-  /*
   display: none;
+  /*
    */
 }
 </style>

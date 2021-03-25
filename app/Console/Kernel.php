@@ -19,6 +19,7 @@ class Kernel extends ConsoleKernel
         \App\Console\Commands\TruncateData::class,
         \App\Console\Commands\UpdateSlugs::class,
         \App\Console\Commands\MakeThumbnails::class,
+        \App\Console\Commands\MakeBlurs::class,
         \App\Console\Commands\SetMediafileBasename::class,
         \App\Console\Commands\DeleteMediafileAssets::class,
     ];

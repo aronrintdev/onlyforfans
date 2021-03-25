@@ -58,10 +58,11 @@ class Mediafile extends BaseModel implements Guidable, Ownable, Cloneable
     //--------------------------------------------
 
     protected $casts = [
-        'cattrs' => 'array',
-        'meta'   => 'array',
-        'has_thumb'   => 'bool',
+        'cattrs'    => 'array',
+        'meta'      => 'array',
+        'has_thumb' => 'bool',
         'has_mid'   => 'bool',
+        'has_blur'  => 'bool',
     ];
 
     public function getIsImageAttribute($value)
@@ -262,12 +263,13 @@ class Mediafile extends BaseModel implements Guidable, Ownable, Cloneable
 
     public function createBlur()
     {
-        $WIDTH = 1280;
+        $WIDTH = 320;
+        $BLUR_STRENGTH = 90; // 0 ~ 100 http://image.intervention.io/api/blur
         $url = Storage::disk('s3')->temporaryUrl( $this->filename, now()->addMinutes(10) );
         $subFolder = MediafileTypeEnum::getSubfolder($this->mftype);
         $img = Image::make($url);
         $s3Path = "$subFolder/blur/".$this->basename.".jpg";
-        $img->widen($WIDTH)->encode('jpg', 90);
+        $img->widen($WIDTH)->blur($BLUR_STRENGTH)->encode('jpg', 90);
         $contents = $img->stream();
         Storage::disk('s3')->put($s3Path, $contents);
         $this->has_blur = true;

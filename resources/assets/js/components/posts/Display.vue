@@ -19,7 +19,7 @@
       </template>
 
       <template v-if="post.access">
-        <b-card-text> <p class="mb-3">{{ post.description }}</p> </b-card-text>
+        <b-card-text class="mb-0"> <p class="mb-0 p-3">{{ post.description }}</p> </b-card-text>
         <article v-if="hasMediafiles">
           <MediaSlider :post="post" :session_user="session_user" :use_mid="use_mid" />
         </article>
@@ -65,9 +65,11 @@ export default {
     hasMediafiles() {
       return this.post.mediafiles?.length > 0
     },
+    /*
     primaryMediafile() {
       return this.hasMediafiles ? this.post.mediafiles[0] : null
     },
+     */
     isLoading() {
       return !this.post || !this.session_user
     },
