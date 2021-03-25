@@ -38,7 +38,7 @@ class Account extends Model implements Ownable
 
     protected $guarded = [
         'verified',
-        'can_make_transaction',
+        'can_make_transactions',
     ];
 
     protected $dates = [
@@ -386,6 +386,19 @@ class Account extends Model implements Ownable
                 );
             }
         });
+
+        // Set account to not be able to make transactions
+        $canMakeTransactions = $this->can_make_transactions;
+        $this->can_make_transactions = false;
+        $this->save();
+
+        // Raise Admin Flag
+        Flag::raise($this, [
+            'column' => 'can_make_transactions',
+            'delta_before' => $canMakeTransactions,
+            'delta_after' => false,
+            'description' => 'Account was disabled due to chargeback issued',
+        ]);
 
         return $roleBackTransactions;
     }

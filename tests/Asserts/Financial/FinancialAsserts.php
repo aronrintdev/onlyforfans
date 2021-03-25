@@ -41,4 +41,29 @@ trait FinancialAsserts
     {
         $this->assertThat($model, new BalanceEquals($amount), $message);
     }
+
+    /**
+     * Checks if account can make transactions
+     * @param Account $account
+     * @param bool $lazy
+     * @param string $message
+     * @return void
+     */
+    protected function assertCanMakeTransactions(Account $account, $lazy = false, string $message = '')
+    {
+        $this->assertThat($account, new CanMakeTransactions($lazy), $message);
+    }
+
+    /**
+     * Checks if account can not make transactions
+     * @param Account $account
+     * @param bool $lazy
+     * @param string $message
+     * @return void
+     */
+    protected function assertCanNotMakeTransactions(Account $account, $lazy = false, string $message = '')
+    {
+        $this->assertThat($account, new CanNotMakeTransactions($lazy), $message);
+    }
+
 }

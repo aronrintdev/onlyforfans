@@ -89,7 +89,7 @@ class SegpayCard extends Model implements Ownable
             'resource_type' => $card->getMorphString(),
             'resource_id' => $card->getKey(),
         ]);
-        $account->can_make_transaction = true;
+        $account->can_make_transactions = true;
         $account->save();
 
         return $card;
