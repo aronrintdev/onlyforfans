@@ -20,6 +20,7 @@
           <PostDisplay
             :post="feedItem"
             :session_user="session_user"
+            :use_mid="true"
             @delete-post="deletePost"
           />
         </article>
@@ -201,6 +202,8 @@ export default {
 
 <style scoped>
 .tag-debug {
+  /*
   display: none;
+   */
 }
 </style>

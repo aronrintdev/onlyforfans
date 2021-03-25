@@ -1,7 +1,10 @@
 <?php
-
 namespace App\Models;
 
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Interfaces\Ownable;
 use App\Interfaces\Guidable;
 use App\Interfaces\Cloneable;
@@ -10,18 +13,31 @@ use App\Enums\MediafileTypeEnum;
 use App\Models\Traits\SluggableTraits;
 use App\Traits\OwnableFunctions;
 use Cviebrock\EloquentSluggable\Sluggable;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Intervention\Image\Facades\Image;
 
 class Mediafile extends BaseModel implements Guidable, Ownable, Cloneable
 {
-    use UsesUuid, HasFactory, OwnableFunctions, Sluggable, SluggableTraits;
+    use UsesUuid, SoftDeletes, HasFactory, OwnableFunctions, Sluggable, SluggableTraits;
 
     protected $table = 'mediafiles';
     protected $guarded = [ 'id', 'created_at', 'updated_at' ];
     protected $appends = ['filepath', 'name', 'is_image', 'is_video'];
     public static $vrules = [];
+
+    //--------------------------------------------
+    // Boot
+    //--------------------------------------------
+    public static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            $parsedbase = parse_filebase($model->filepath);
+            if ( $parsedbase ) {
+                $model->basename = $parsedbase;
+            }
+        });
+    }
 
     //--------------------------------------------
     // %%% Relationships
@@ -44,6 +60,8 @@ class Mediafile extends BaseModel implements Guidable, Ownable, Cloneable
     protected $casts = [
         'cattrs' => 'array',
         'meta'   => 'array',
+        'has_thumb'   => 'bool',
+        'has_mid'   => 'bool',
     ];
 
     public function getIsImageAttribute($value)
@@ -61,15 +79,47 @@ class Mediafile extends BaseModel implements Guidable, Ownable, Cloneable
         return $this->id;
     }
 
-    public function getFilepathAttribute($value)
-    {
+    // %FIXME: this should be consistent with getMidFilename, etc (ie not orig filename)
+    public function getNameAttribute($value) {
+        return $this->orig_filename;
+    }
+
+    public function getMidFilenameAttribute($value) {
+        $subfolder = MediafileTypeEnum::getSubfolder($this->mftype);
+        return $subfolder.'/mid/'.$this->basename.'.jpg';
+    }
+
+    public function getThumbFilenameAttribute($value) {
+        $subfolder = MediafileTypeEnum::getSubfolder($this->mftype);
+        return $subfolder.'/thumb/'.$this->basename.'.jpg';
+    }
+
+    public function getBlurFilenameAttribute($value) {
+        $subfolder = MediafileTypeEnum::getSubfolder($this->mftype);
+        return $subfolder.'/blur/'.$this->basename.'.jpg';
+    }
+
+    public function getFilepathAttribute($value) {
         return !empty($this->filename) ? Storage::disk('s3')->url($this->filename) : null;
         //return !empty($this->filename) ? Storage::disk('s3')->temporaryUrl( $this->filename, now()->addMinutes(5) ) : null;
     }
 
-    public function getNameAttribute($value)
-    {
-        return $this->orig_filename;
+    public function getMidFilepathAttribute($value) {
+        $subfolder = MediafileTypeEnum::getSubfolder($this->mftype);
+        $path = $subfolder.'/mid/'.$this->basename.'.jpg';
+        return !empty($path) ? Storage::disk('s3')->url($path) : null;
+    }
+
+    public function getThumbFilepathAttribute($value) {
+        $subfolder = MediafileTypeEnum::getSubfolder($this->mftype);
+        $path = $subfolder.'/thumb/'.$this->basename.'.jpg';
+        return !empty($path) ? Storage::disk('s3')->url($path) : null;
+    }
+
+    public function getBlurFilepathAttribute($value) {
+        $subfolder = MediafileTypeEnum::getSubfolder($this->mftype);
+        $path = $subfolder.'/blur/'.$this->basename.'.jpg';
+        return !empty($path) ? Storage::disk('s3')->url($path) : null;
     }
 
     //--------------------------------------------
@@ -135,11 +185,9 @@ class Mediafile extends BaseModel implements Guidable, Ownable, Cloneable
 
     // %%% --- Other ---
 
-    /**
-     *  Shallow clone: copies/pastes the DB record, not the asset/file
-     *  ~ cloning onl allowed if new copy is associated with another resource (eg post)
-     *  ~ see: https://trello.com/c/0fBcmPjq
-     */
+    //  Shallow clone: copies/pastes the DB record, not the asset/file
+    //  ~ cloning only allowed if new copy is associated with another resource (eg post)
+    //  ~ see: https://trello.com/c/0fBcmPjq
     public function doClone(string $resourceType, string $resourceId): ?Model
     {
         $cloned = $this->replicate()->fill([
@@ -181,5 +229,70 @@ class Mediafile extends BaseModel implements Guidable, Ownable, Cloneable
                 return true;
         }
         return false;
+    }
+
+    // set width to number and height to null to scale existing
+    public function createThumbnail()
+    {
+        $WIDTH = 320;
+        $url = Storage::disk('s3')->temporaryUrl( $this->filename, now()->addMinutes(10) );
+        $subFolder = MediafileTypeEnum::getSubfolder($this->mftype);
+        $img = Image::make($url);
+        $s3Path = "$subFolder/thumb/".$this->basename.".jpg";
+        $img->widen($WIDTH)->encode('jpg', 90);
+        $contents = $img->stream();
+        Storage::disk('s3')->put($s3Path, $contents); //$contents = file_get_contents($json->file);
+        $this->has_thumb = true;
+        $this->save();
+    }
+
+    public function createMid()
+    {
+        $WIDTH = 1280;
+        $url = Storage::disk('s3')->temporaryUrl( $this->filename, now()->addMinutes(10) );
+        $subFolder = MediafileTypeEnum::getSubfolder($this->mftype);
+        $img = Image::make($url);
+        $s3Path = "$subFolder/mid/".$this->basename.".jpg";
+        $img->widen($WIDTH)->encode('jpg', 90);
+        $contents = $img->stream();
+        Storage::disk('s3')->put($s3Path, $contents);
+        $this->has_mid = true;
+        $this->save();
+    }
+
+    public function createBlur()
+    {
+        $WIDTH = 1280;
+        $url = Storage::disk('s3')->temporaryUrl( $this->filename, now()->addMinutes(10) );
+        $subFolder = MediafileTypeEnum::getSubfolder($this->mftype);
+        $img = Image::make($url);
+        $s3Path = "$subFolder/blur/".$this->basename.".jpg";
+        $img->widen($WIDTH)->encode('jpg', 90);
+        $contents = $img->stream();
+        Storage::disk('s3')->put($s3Path, $contents);
+        $this->has_blur = true;
+        $this->save();
+    }
+
+    // Deletes all images, videos, etc associated with the mediafile record
+    //  ~ Typically there will only be a single video, but a video could have related images such as a preview
+    //  ~ An image could have an associated thumb, blur, etc.
+    //  ~ Should be called *before* a mediafile is hard-deleted
+    public function deleteAssets()
+    {
+        if ( $this->has_thumb ) {
+            Storage::disk('s3')->delete($this->thumbFilename);
+            $this->has_thumb = false;
+        }
+        if ( $this->has_mid ) {
+            Storage::disk('s3')->delete($this->midFilename);
+            $this->has_mid = false;
+        }
+        if ( $this->has_blur ) {
+            Storage::disk('s3')->delete($this->blurFilename);
+            $this->has_blur = false;
+        }
+        Storage::disk('s3')->delete($this->filename);
+        $this->save();
     }
 }
