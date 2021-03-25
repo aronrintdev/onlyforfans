@@ -53,6 +53,7 @@ class FinancialTransactionModelTest extends TestCase
 
     /**
      * Test if transaction fees settle correctly
+     * @depends test_settle_transaction_balance
      */
     public function test_settle_default_transaction_fees()
     {
@@ -102,6 +103,7 @@ class FinancialTransactionModelTest extends TestCase
 
     /**
      * Test if transaction balance settles correctly
+     * @depends test_create_transaction
      */
     public function test_settle_transaction_balance()
     {
@@ -166,6 +168,7 @@ class FinancialTransactionModelTest extends TestCase
 
     /**
      * Settled transactions are final
+     * @depends test_settle_transaction_balance
      */
     public function test_cannot_settle_transaction_multiple_times()
     {
@@ -186,6 +189,7 @@ class FinancialTransactionModelTest extends TestCase
 
     /**
      * Settled transactions are final
+     * @depends test_settle_transaction_balance
      */
     public function test_attempting_to_modify_settled_transaction_should_fail()
     {
@@ -212,6 +216,7 @@ class FinancialTransactionModelTest extends TestCase
 
     /**
      *
+     * @depends test_create_transaction
      */
     public function test_fail_transaction_gracefully()
     {
