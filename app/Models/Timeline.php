@@ -3,21 +3,23 @@ namespace App\Models;
 
 use Exception;
 use Eloquent as Model;
-use Illuminate\Support\Collection;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Cviebrock\EloquentSluggable\Sluggable;
-
-use App\Enums\PaymentTypeEnum;
-use App\Enums\ShareableAccessLevelEnum;
 use App\Interfaces\Ownable;
 use App\Interfaces\ShortUuid;
+use App\Enums\PaymentTypeEnum;
 use App\Interfaces\Reportable;
-use App\Interfaces\Purchaseable;
-use App\Models\Traits\UsesShortUuid;
-use App\Models\Traits\OwnableTraits;
-use App\Models\Traits\SluggableTraits;
+
 use App\Models\Traits\UsesUuid;
+use App\Interfaces\Purchaseable;
+use App\Models\Financial\Account;
+use Illuminate\Support\Collection;
+use App\Models\Traits\OwnableTraits;
+use App\Models\Traits\UsesShortUuid;
+use App\Models\Financial\Transaction;
+use App\Models\Traits\SluggableTraits;
+use App\Enums\ShareableAccessLevelEnum;
+use Cviebrock\EloquentSluggable\Sluggable;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Timeline extends Model implements Purchaseable, Ownable, Reportable
 {
@@ -99,6 +101,7 @@ class Timeline extends Model implements Purchaseable, Ownable, Reportable
     }
 
     // %%% --- Implement Purchaseable Interface ---
+    #region Purchasable
 
     public function receivePayment(
         string $fltype, // PaymentTypeEnum
@@ -140,6 +143,24 @@ class Timeline extends Model implements Purchaseable, Ownable, Reportable
 
         return $result ?? null;
     }
+
+    public function purchase(Account $from, int $amount = null): void
+    {
+        // TODO: Implement
+    }
+
+    public function chargeback(Transaction $transaction): void
+    {
+        // TODO: Implement
+    }
+
+    public function verifyPrice(int $amount): bool
+    {
+        // TODO: Implement
+        return false;
+    }
+
+    #endregion
 
     // Is the user provided following my timeline (includes either premium or default)
     public function isUserFollowing(User $user): bool

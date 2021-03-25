@@ -13,16 +13,18 @@ use App\Enums\PaymentTypeEnum;
 use App\Interfaces\Reportable;
 use App\Interfaces\Commentable;
 use App\Models\Traits\UsesUuid;
+use App\Models\Financial\Account;
 use Illuminate\Support\Collection;
 use App\Models\Traits\OwnableTraits;
+use App\Models\Financial\Transaction;
 use App\Models\Traits\LikeableTraits;
+use App\Models\Traits\SluggableTraits;
 use Illuminate\Support\Facades\Storage;
 use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Interfaces\Purchaseable; // was PaymentReceivable
-use App\Models\Traits\SluggableTraits;
 
 class Post extends Model implements UuidId, Ownable, Deletable, Purchaseable, Likeable, Reportable, Commentable
 {
@@ -162,6 +164,7 @@ class Post extends Model implements UuidId, Ownable, Deletable, Purchaseable, Li
     }
 
     // %%% --- Implement Purchaseable Interface ---
+    #region Purchaseable
 
     public function receivePayment(
         string $fltype, // PaymentTypeEnum
@@ -210,6 +213,24 @@ class Post extends Model implements UuidId, Ownable, Deletable, Purchaseable, Li
 
         return $result ?? null;
     }
+
+    public function purchase(Account $from,int $amount = null): void
+    {
+        // TODO: Implement
+    }
+
+    public function chargeback(Transaction $transaction): void
+    {
+        // TODO: Implement
+    }
+
+    public function verifyPrice(int $amount): bool
+    {
+        // TODO: Implement
+        return false;
+    }
+
+    #endregion
 
     public function canBeDeleted(): bool
     {
