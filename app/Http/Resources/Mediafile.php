@@ -13,14 +13,17 @@ class Mediafile extends JsonResource
         $hasAccess = $sessionUser->can('view', $model);
 
         return [
+            'access' =>  $hasAccess,
             'id' => $this->id,
             'slug' => $this->slug,
 	        'name' => $this->name,
 	        'basename' => $this->basename,
             'mfname' => $this->mfname,
             'filename' => $this->filename,
-            'filepath' => $this->filepath,
-            'midFilepath' => $this->midFilepath,
+            'filepath' => $hasAccess ? $this->filepath : null,
+            'midFilepath' => $hasAccess ? $this->midFilepath : null,
+            'thumbFilepath' => $hasAccess ? $this->thumbFilepath : null,
+            'blurFilepath' => !$hasAccess ? $this->blurFilepath : null,
             'mftype' => $this->mftype,
 	        'has_thumb' => $this->has_thumb,
 	        'has_mid' => $this->has_mid,
