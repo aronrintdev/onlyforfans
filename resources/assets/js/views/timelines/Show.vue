@@ -97,17 +97,14 @@ export default {
           this.$bvModal.show('modal-purchase_post')
           break
         case 'render-follow':
-          //this.selectedTimeline = data.timeline
           this.subscribeOnly = false
           this.$bvModal.show('modal-follow')
           break
         case 'render-subscribe':
-          //this.selectedTimeline = data.timeline
           this.subscribeOnly = true
           this.$bvModal.show('modal-follow')
           break
         case 'render-tip':
-          //this.selectedTimelineId = data.timeline_id // %TODO
           this.$bvModal.show('modal-tip')
           break
         case 'show-post':
