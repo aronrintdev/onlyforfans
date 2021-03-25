@@ -90,7 +90,7 @@ export default {
     backgroundImg(post) {
       if ( post.access ) {
         if ( post.mediafiles && post.mediafiles[0] && post.mediafiles[0].has_thumb ) {
-          return { '--background-image': `url(${post.mediafiles[0].midFilepath})` }
+          return { '--background-image': `url(${post.mediafiles[0].thumbFilepath})` }
         }
         if ( post.mediafiles && post.mediafiles[0] && post.mediafiles[0].has_mid ) {
           return { '--background-image': `url(${post.mediafiles[0].midFilepath})` }
