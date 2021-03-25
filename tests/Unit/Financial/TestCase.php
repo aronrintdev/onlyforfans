@@ -3,6 +3,7 @@
 namespace Tests\Unit\Financial;
 
 use App\Models\Financial\Account;
+use App\Models\Financial\Flag;
 use Tests\TestCase as TestsTestCase;
 use App\Models\Financial\SystemOwner;
 use App\Models\Financial\Transaction;
@@ -32,10 +33,11 @@ class TestCase extends TestsTestCase
     public function getTableNames()
     {
         return [
-            'account' => app(Account::class)->getTable(),
-            'transaction' => app(Transaction::class)->getTable(),
+            'account'            => app(Account::class)->getTable(),
+            'transaction'        => app(Transaction::class)->getTable(),
             'transactionSummary' => app(TransactionSummary::class)->getTable(),
-            'systemOwner' => app(SystemOwner::class)->getTable(),
+            'systemOwner'        => app(SystemOwner::class)->getTable(),
+            'flag'               => app(Flag::class)->getTable(),
         ];
     }
 }

@@ -6,6 +6,7 @@ use App\Models\Financial\Account;
 use App\Models\Financial\Transaction;
 use Illuminate\Support\Facades\Event;
 use App\Enums\Financial\TransactionTypeEnum;
+use App\Events\FinancialFlagRaised;
 use App\Jobs\Financial\UpdateAccountBalance;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Models\Financial\Exceptions\Account\IncorrectTypeException;
@@ -71,12 +72,7 @@ class ChargebackTest extends TestCase
     {
         Event::fake([ UpdateAccountBalance::class ]);
 
-        $inAccount = Account::factory()->asIn()->create();
-        $internalAccount = $inAccount->owner->getInternalAccount($this->defaultSystem, $this->defaultCurrency);
-        $transactions = $inAccount->moveToInternal(1000);
-        AccountHelpers::settleAccounts([ $inAccount, $internalAccount ]);
-        $chargebackTransaction = $transactions['debit']; // The transaction being charged back
-        $chargebackTransaction->refresh();
+        [$inAccount, $internalAccount, $chargebackTransaction] = $this->setupUserAccounts(1000);
 
         $creatorAccount = Account::factory()->asInternal()->create();
         $paymentTransactions = $internalAccount->moveTo($creatorAccount, 1000);
@@ -115,9 +111,10 @@ class ChargebackTest extends TestCase
         // Settle all balances
         AccountHelpers::settleAccounts([ $inAccount, $internalAccount, $creatorAccount, ]);
 
-        $this->assertCurrencyAmountIsEqual(0, $inAccount->balance, 'In account balance back at zero');
-        $this->assertCurrencyAmountIsEqual(0, $internalAccount->balance, 'Internal account balance back at zero');
-        $this->assertCurrencyAmountIsEqual(0, $creatorAccount->balance, 'Creator account balance back at zero');
+        $this->assertHasBalanceOf(0, $inAccount, 'In account balance back at zero');
+        $this->assertHasBalanceOf(0, $inAccount, 'In account balance back at zero');
+        $this->assertHasBalanceOf(0, $internalAccount, 'Internal account balance back at zero');
+        $this->assertHasBalanceOf(0, $creatorAccount, 'Creator account balance back at zero');
     }
 
     /**
@@ -128,12 +125,7 @@ class ChargebackTest extends TestCase
     {
         Event::fake([UpdateAccountBalance::class]);
 
-        $inAccount = Account::factory()->asIn()->create();
-        $internalAccount = $inAccount->owner->getInternalAccount($this->defaultSystem, $this->defaultCurrency);
-        $transactions = $inAccount->moveToInternal(1000);
-        AccountHelpers::settleAccounts([$inAccount, $internalAccount]);
-        $chargebackTransaction = $transactions['debit']; // The transaction being charged back
-        $chargebackTransaction->refresh();
+        [$inAccount, $internalAccount, $chargebackTransaction] = $this->setupUserAccounts(1000);
 
         $creatorAccount = Account::factory()->asInternal()->create();
         // Payment to creator
@@ -157,8 +149,8 @@ class ChargebackTest extends TestCase
 
         // Check fees accounts
         // 30% => 300, 5% => 50
-        $this->assertCurrencyAmountIsEqual(300, $platformFeesAccount->balance, 'Platform Fee was charged correctly');
-        $this->assertCurrencyAmountIsEqual(50, $taxAccount->balance, 'Tax was charged correctly');
+        $this->assertHasBalanceOf(300, $platformFeesAccount, 'Platform Fee was charged correctly');
+        $this->assertHasBalanceOf(50, $taxAccount, 'Tax was charged correctly');
 
         // Perform chargeback
         $chargebackTransactions = $inAccount->handleChargeback($chargebackTransaction);
@@ -206,11 +198,11 @@ class ChargebackTest extends TestCase
         ]);
 
         // All balances at 0
-        $this->assertCurrencyAmountIsEqual(0, $inAccount->balance, 'In account balance back at zero');
-        $this->assertCurrencyAmountIsEqual(0, $internalAccount->balance, 'Internal account balance back at zero');
-        $this->assertCurrencyAmountIsEqual(0, $creatorAccount->balance, 'Creator account balance back at zero');
-        $this->assertCurrencyAmountIsEqual(0, $platformFeesAccount->balance, 'Platform fees account balance back at zero');
-        $this->assertCurrencyAmountIsEqual(0, $taxAccount->balance, 'Tax account balance back at zero');
+        $this->assertHasBalanceOf(0, $inAccount, 'In account balance back at zero');
+        $this->assertHasBalanceOf(0, $internalAccount, 'Internal account balance back at zero');
+        $this->assertHasBalanceOf(0, $creatorAccount, 'Creator account balance back at zero');
+        $this->assertHasBalanceOf(0, $platformFeesAccount, 'Platform fees account balance back at zero');
+        $this->assertHasBalanceOf(0, $taxAccount, 'Tax account balance back at zero');
     }
 
     #endregion
@@ -226,11 +218,7 @@ class ChargebackTest extends TestCase
         Event::fake([UpdateAccountBalance::class]);
 
         // User's accounts
-        $inAccount = Account::factory()->asIn()->create();
-        $internalAccount = $inAccount->owner->getInternalAccount($this->defaultSystem, $this->defaultCurrency);
-        $transactions = $inAccount->moveToInternal(1000);
-        AccountHelpers::settleAccounts([$inAccount, $internalAccount]);
-        $chargebackTransaction = $transactions['debit'];
+        [$inAccount, $internalAccount, $chargebackTransaction] = $this->setupUserAccounts(1000);
 
         // Payments to multiple creators
         $creatorAccount1 = Account::factory()->asInternal()->create();
@@ -275,11 +263,11 @@ class ChargebackTest extends TestCase
             $inAccount, $internalAccount, $creatorAccount1, $creatorAccount2, $creatorAccount3
         ]);
 
-        $this->assertCurrencyAmountIsEqual(0, $inAccount->balance);
-        $this->assertCurrencyAmountIsEqual(0, $internalAccount->balance);
-        $this->assertCurrencyAmountIsEqual(0, $creatorAccount1->balance);
-        $this->assertCurrencyAmountIsEqual(0, $creatorAccount2->balance);
-        $this->assertCurrencyAmountIsEqual(0, $creatorAccount3->balance);
+        $this->assertHasBalanceOf(0, $inAccount);
+        $this->assertHasBalanceOf(0, $internalAccount);
+        $this->assertHasBalanceOf(0, $creatorAccount1);
+        $this->assertHasBalanceOf(0, $creatorAccount2);
+        $this->assertHasBalanceOf(0, $creatorAccount3);
     }
 
     /**
@@ -290,11 +278,7 @@ class ChargebackTest extends TestCase
     {
         Event::fake([UpdateAccountBalance::class]);
         // User's accounts
-        $inAccount = Account::factory()->asIn()->create();
-        $internalAccount = $inAccount->owner->getInternalAccount($this->defaultSystem, $this->defaultCurrency);
-        $transactions = $inAccount->moveToInternal(1000);
-        AccountHelpers::settleAccounts([$inAccount, $internalAccount]);
-        $chargebackTransaction = $transactions['debit'];
+        [$inAccount, $internalAccount, $chargebackTransaction] = $this->setupUserAccounts(1000);
 
         // Payments to multiple creators
         $creatorAccount1 = Account::factory()->asInternal()->create();
@@ -368,13 +352,13 @@ class ChargebackTest extends TestCase
             $taxAccount
         ]);
 
-        $this->assertCurrencyAmountIsEqual(0, $inAccount->balance);
-        $this->assertCurrencyAmountIsEqual(0, $internalAccount->balance);
-        $this->assertCurrencyAmountIsEqual(0, $creatorAccount1->balance);
-        $this->assertCurrencyAmountIsEqual(0, $creatorAccount2->balance);
-        $this->assertCurrencyAmountIsEqual(0, $creatorAccount3->balance);
-        $this->assertCurrencyAmountIsEqual(0, $platformFeesAccount->balance);
-        $this->assertCurrencyAmountIsEqual(0, $taxAccount->balance);
+        $this->assertHasBalanceOf(0, $inAccount);
+        $this->assertHasBalanceOf(0, $internalAccount);
+        $this->assertHasBalanceOf(0, $creatorAccount1);
+        $this->assertHasBalanceOf(0, $creatorAccount2);
+        $this->assertHasBalanceOf(0, $creatorAccount3);
+        $this->assertHasBalanceOf(0, $platformFeesAccount);
+        $this->assertHasBalanceOf(0, $taxAccount);
     }
 
     /**
@@ -386,11 +370,7 @@ class ChargebackTest extends TestCase
     {
         Event::fake([UpdateAccountBalance::class]);
         // User's accounts
-        $inAccount = Account::factory()->asIn()->create();
-        $internalAccount = $inAccount->owner->getInternalAccount($this->defaultSystem, $this->defaultCurrency);
-        $transactions = $inAccount->moveToInternal(1000);
-        AccountHelpers::settleAccounts([$inAccount, $internalAccount]);
-        $chargebackTransaction = $transactions['debit'];
+        [$inAccount, $internalAccount, $chargebackTransaction] = $this->setupUserAccounts(1000);
 
         // Payments to multiple creators
         $creatorAccount1 = Account::factory()->asInternal()->create();
@@ -463,13 +443,13 @@ class ChargebackTest extends TestCase
             $taxAccount
         ]);
 
-        $this->assertCurrencyAmountIsEqual(0, $inAccount->balance);
-        $this->assertCurrencyAmountIsEqual(0, $internalAccount->balance);
-        $this->assertCurrencyAmountIsEqual(0, $creatorAccount1->balance);
-        $this->assertCurrencyAmountIsEqual(0, $creatorAccount2->balance);
-        $this->assertCurrencyAmountIsEqual(0, $creatorAccount3->balance);
-        $this->assertCurrencyAmountIsEqual(0, $platformFeesAccount->balance);
-        $this->assertCurrencyAmountIsEqual(0, $taxAccount->balance);
+        $this->assertHasBalanceOf(0, $inAccount);
+        $this->assertHasBalanceOf(0, $internalAccount);
+        $this->assertHasBalanceOf(0, $creatorAccount1);
+        $this->assertHasBalanceOf(0, $creatorAccount2);
+        $this->assertHasBalanceOf(0, $creatorAccount3);
+        $this->assertHasBalanceOf(0, $platformFeesAccount);
+        $this->assertHasBalanceOf(0, $taxAccount);
     }
 
     /**
@@ -564,16 +544,16 @@ class ChargebackTest extends TestCase
             $taxAccount
         ]);
 
-        $this->assertCurrencyAmountIsEqual(-100, $inAccount->balance);
-        $this->assertCurrencyAmountIsEqual(0, $internalAccount->balance);
-        $this->assertCurrencyAmountIsEqual(0, $creatorAccount1->balance);
-        $this->assertCurrencyAmountIsEqual(0, $creatorAccount2->balance);
+        $this->assertHasBalanceOf(-100, $inAccount);
+        $this->assertHasBalanceOf(0, $internalAccount);
+        $this->assertHasBalanceOf(0, $creatorAccount1);
+        $this->assertHasBalanceOf(0, $creatorAccount2);
         // 65% of 100
-        $this->assertCurrencyAmountIsEqual(65, $creatorAccount3->balance);
+        $this->assertHasBalanceOf(65, $creatorAccount3);
         // 30% of 100
-        $this->assertCurrencyAmountIsEqual(30, $platformFeesAccount->balance);
+        $this->assertHasBalanceOf(30, $platformFeesAccount);
         // 5% of 100
-        $this->assertCurrencyAmountIsEqual(5, $taxAccount->balance);
+        $this->assertHasBalanceOf(5, $taxAccount);
     }
 
     #endregion
@@ -585,11 +565,7 @@ class ChargebackTest extends TestCase
     public function test_creators_account_balance_can_go_negative()
     {
         Event::fake([UpdateAccountBalance::class]);
-        $inAccount = Account::factory()->asIn()->create();
-        $internalAccount = $inAccount->owner->getInternalAccount($this->defaultSystem, $this->defaultCurrency);
-        $transactions = $inAccount->moveToInternal(1000);
-        AccountHelpers::settleAccounts([$inAccount, $internalAccount]);
-        $chargebackTransaction = $transactions['debit'];
+        [$inAccount, $internalAccount, $chargebackTransaction] = $this->setupUserAccounts(1000);
 
         // Creators account
         $creatorAccount = Account::factory()->asInternal()->create();
@@ -628,10 +604,10 @@ class ChargebackTest extends TestCase
             $taxAccount
         ]);
 
-        $this->assertCurrencyAmountIsEqual(-650, $creatorAccount->balance);
+        $this->assertHasBalanceOf(-650, $creatorAccount);
         // Fees get paid back into chargeback
-        $this->assertCurrencyAmountIsEqual(0, $platformFeesAccount->balance);
-        $this->assertCurrencyAmountIsEqual(0, $taxAccount->balance);
+        $this->assertHasBalanceOf(0, $platformFeesAccount);
+        $this->assertHasBalanceOf(0, $taxAccount);
     }
 
     #region Has Wallet Balance Tests
@@ -644,19 +620,15 @@ class ChargebackTest extends TestCase
     {
         Event::fake([UpdateAccountBalance::class]);
 
-        $inAccount = Account::factory()->asIn()->create();
-        $internalAccount = $inAccount->owner->getInternalAccount($this->defaultSystem, $this->defaultCurrency);
-        $transactions = $inAccount->moveToInternal(1000);
-
-        AccountHelpers::settleAccounts([$inAccount, $internalAccount]);
+        [$inAccount, $internalAccount, $chargebackTransaction] = $this->setupUserAccounts(1000);
 
         // Chargeback
-        $inAccount->handleChargeback($transactions['debit']);
+        $inAccount->handleChargeback($chargebackTransaction);
 
         AccountHelpers::settleAccounts([$inAccount, $internalAccount]);
 
-        $this->assertCurrencyAmountIsEqual(0, $inAccount->balance, 'In account balance back at zero');
-        $this->assertCurrencyAmountIsEqual(0, $internalAccount->balance, 'Internal account balance back at zero');
+        $this->assertHasBalanceOf(0, $inAccount, 'In account balance back at zero');
+        $this->assertHasBalanceOf(0, $internalAccount, 'Internal account balance back at zero');
     }
 
     /**
@@ -667,12 +639,7 @@ class ChargebackTest extends TestCase
     {
         Event::fake([UpdateAccountBalance::class]);
 
-        $inAccount = Account::factory()->asIn()->create();
-        $internalAccount = $inAccount->owner->getInternalAccount($this->defaultSystem, $this->defaultCurrency);
-        $transactions = $inAccount->moveToInternal(1000);
-        $chargebackTransaction = $transactions['debit'];
-
-        AccountHelpers::settleAccounts([$inAccount, $internalAccount]);
+        [$inAccount, $internalAccount, $chargebackTransaction] = $this->setupUserAccounts(1000);
 
         $creatorAccount = Account::factory()->asInternal()->create();
         $internalAccount->moveTo($creatorAccount, 1000);
@@ -684,9 +651,9 @@ class ChargebackTest extends TestCase
 
         AccountHelpers::settleAccounts([$inAccount, $internalAccount, $creatorAccount]);
 
-        $this->assertCurrencyAmountIsEqual(-300, $inAccount->balance, 'In account at -300 balance after chargeback');
-        $this->assertCurrencyAmountIsEqual(0, $internalAccount->balance, 'Internal account at 0 balance after chargeback');
-        $this->assertCurrencyAmountIsEqual(195, $creatorAccount->balance, 'Creator account 195 after partial chargeback');
+        $this->assertHasBalanceOf(-300, $inAccount, 'In account at -300 balance after chargeback');
+        $this->assertHasBalanceOf(0, $internalAccount, 'Internal account at 0 balance after chargeback');
+        $this->assertHasBalanceOf(195, $creatorAccount, 'Creator account 195 after partial chargeback');
     }
 
     /**
@@ -697,12 +664,7 @@ class ChargebackTest extends TestCase
     {
         Event::fake([UpdateAccountBalance::class]);
 
-        $inAccount = Account::factory()->asIn()->create();
-        $internalAccount = $inAccount->owner->getInternalAccount($this->defaultSystem, $this->defaultCurrency);
-        $transactions = $inAccount->moveToInternal(1000);
-        $chargebackTransaction = $transactions['debit'];
-
-        AccountHelpers::settleAccounts([$inAccount, $internalAccount]);
+        [$inAccount, $internalAccount, $chargebackTransaction] = $this->setupUserAccounts(1000);
 
         $creatorAccount = Account::factory()->asInternal()->create();
         $internalAccount->moveTo($creatorAccount, 1000);
@@ -713,9 +675,9 @@ class ChargebackTest extends TestCase
         $inAccount->handleChargeback($chargebackTransaction);
         AccountHelpers::settleAccounts([$inAccount, $internalAccount, $creatorAccount]);
 
-        $this->assertCurrencyAmountIsEqual(-1000, $inAccount->balance, 'In account at -300 balance after chargeback');
-        $this->assertCurrencyAmountIsEqual(0, $internalAccount->balance, 'Internal account at 0 balance after chargeback');
-        $this->assertCurrencyAmountIsEqual(650, $creatorAccount->balance, 'Creator account at 650');
+        $this->assertHasBalanceOf(-1000, $inAccount, 'In account at -300 balance after chargeback');
+        $this->assertHasBalanceOf(0, $internalAccount, 'Internal account at 0 balance after chargeback');
+        $this->assertHasBalanceOf(650, $creatorAccount, 'Creator account at 650');
     }
 
     /**
@@ -726,12 +688,7 @@ class ChargebackTest extends TestCase
     {
         Event::fake([UpdateAccountBalance::class]);
 
-        $inAccount = Account::factory()->asIn()->create();
-        $internalAccount = $inAccount->owner->getInternalAccount($this->defaultSystem, $this->defaultCurrency);
-        $transactions = $inAccount->moveToInternal(1000);
-        $chargebackTransaction = $transactions['debit'];
-
-        AccountHelpers::settleAccounts([$inAccount, $internalAccount]);
+        [$inAccount, $internalAccount, $chargebackTransaction] = $this->setupUserAccounts(1000);
 
         $creatorAccount = Account::factory()->asInternal()->create();
         $internalAccount->moveTo($creatorAccount, 1000);
@@ -742,10 +699,71 @@ class ChargebackTest extends TestCase
         $inAccount->handleChargeback($chargebackTransaction);
         AccountHelpers::settleAccounts([$inAccount, $internalAccount, $creatorAccount]);
 
-        $this->assertCurrencyAmountIsEqual(-1200, $inAccount->balance, 'In account at -300 balance after chargeback');
-        $this->assertCurrencyAmountIsEqual(200, $internalAccount->balance, 'Internal account at 0 balance after chargeback');
-        $this->assertCurrencyAmountIsEqual(650, $creatorAccount->balance, 'Creator account at 650');
+        $this->assertHasBalanceOf(-1200, $inAccount, 'In account at -300 balance after chargeback');
+        $this->assertHasBalanceOf(200, $internalAccount, 'Internal account at 0 balance after chargeback');
+        $this->assertHasBalanceOf(650, $creatorAccount, 'Creator account at 650');
     }
+
+    #endregion
+
+    #region Account Blocking and Flag Rasing
+
+    public function test_account_blocked_from_making_transactions()
+    {
+        Event::fake([UpdateAccountBalance::class]);
+
+        [$inAccount, $internalAccount, $chargebackTransaction] = $this->setupUserAccounts(1000);
+        $creatorAccount = Account::factory()->asInternal()->create();
+        $internalAccount->moveTo($creatorAccount, 1000);
+
+        $inAccount->handleChargeback($chargebackTransaction);
+        AccountHelpers::settleAccounts([$inAccount, $internalAccount, $creatorAccount]);
+
+        $this->assertCanNotMakeTransactions($inAccount);
+    }
+
+    public function test_admin_flag_is_raised()
+    {
+        Event::fake([UpdateAccountBalance::class, FinancialFlagRaised::class]);
+
+        [$inAccount, $internalAccount, $chargebackTransaction] = $this->setupUserAccounts(1000);
+        $creatorAccount = Account::factory()->asInternal()->create();
+        $internalAccount->moveTo($creatorAccount, 1000);
+
+        $inAccount->handleChargeback($chargebackTransaction);
+        AccountHelpers::settleAccounts([$inAccount, $internalAccount, $creatorAccount]);
+
+        $this->assertDatabaseHas($this->tableNames['flag'], [
+            'model_type' => $inAccount->getMorphString(),
+            'model_id' => $inAccount->getKey(),
+            'column' => 'can_make_transactions',
+            'delta_before' => true,
+            'delta_after' => false,
+        ]);
+
+        Event::assertDispatched(FinancialFlagRaised::class);
+    }
+
+    #endregion
+
+    #region Helpers
+    /**
+     * Common Setup for many tests
+     * @param int $amount
+     * @return array `[ $inAccount, $internalAccount, $chargebackTransaction ]`
+     */
+    private function setupUserAccounts(int $amount)
+    {
+        $inAccount = Account::factory()->asIn()->create();
+        $internalAccount = $inAccount->owner->getInternalAccount($this->defaultSystem, $this->defaultCurrency);
+        $transactions = $inAccount->moveToInternal($amount);
+        $chargebackTransaction = $transactions['debit'];
+
+        AccountHelpers::settleAccounts([$inAccount, $internalAccount]);
+
+        return [ $inAccount, $internalAccount, $chargebackTransaction ];
+    }
+
 
     #endregion
 

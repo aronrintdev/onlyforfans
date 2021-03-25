@@ -38,7 +38,7 @@ class Account extends Model implements Ownable
 
     protected $guarded = [
         'verified',
-        'can_make_transaction',
+        'can_make_transactions',
     ];
 
     protected $dates = [
@@ -261,13 +261,13 @@ class Account extends Model implements Ownable
                     $ttn = Transaction::getTableName(); // Transaction Table Name
                     $atn = Account::getTableName(); // Account Table Name
                     $pending = $this->asMoney(
-                        Transaction::select(DB::raw('sum(credit_amount) as amount'))
+                        Transaction::select(DB::raw("sum({$ttn}.credit_amount) as amount"))
                             ->join("{$ttn} as ref", "{$ttn}.reference_id", '=', 'ref.id')
                             ->join("{$atn} as account", 'ref.account_id', '=', 'account.id')
                             ->where("{$ttn}.account_id", $this->getKey())
                             ->where("{$ttn}.settled_at", '>', $holdSince->toDateString())
                             ->where('account.type', AccountTypeEnum::INTERNAL) // Only transactions from other internal accounts
-                            ->whereNotNull("settled_at")
+                            ->whereNotNull("{$ttn}.settled_at")
                             ->value('amount')
                     );
                 } else {
@@ -386,6 +386,19 @@ class Account extends Model implements Ownable
                 );
             }
         });
+
+        // Set account to not be able to make transactions
+        $canMakeTransactions = $this->can_make_transactions;
+        $this->can_make_transactions = false;
+        $this->save();
+
+        // Raise Admin Flag
+        Flag::raise($this, [
+            'column' => 'can_make_transactions',
+            'delta_before' => $canMakeTransactions,
+            'delta_after' => false,
+            'description' => 'Account was disabled due to chargeback issued',
+        ]);
 
         return $roleBackTransactions;
     }
