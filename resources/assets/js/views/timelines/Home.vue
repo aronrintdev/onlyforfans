@@ -30,7 +30,7 @@
       </b-modal>
 
       <b-modal id="modal-follow" title="Follow" hide-footer body-class="p-0">
-        <FollowTimeline :session_user="session_user" :timeline="selectedTimeline" />
+        <FollowTimeline :session_user="session_user" :timeline="selectedTimeline" :subscribe_only="subscribeOnly" />
       </b-modal>
 
     </div>
@@ -75,6 +75,7 @@ export default {
   data: () => ({
     selectedPost: null,
     selectedTimeline: null,
+    subscribeOnly: true, // for modal
   }),
 
   created() {
@@ -90,8 +91,13 @@ export default {
           this.$bvModal.show('modal-purchase_post')
           break
         case 'render-follow':
+          this.selectedTimeline = data.timeline
+          this.subscribeOnly = false
+          this.$bvModal.show('modal-follow')
+          break
         case 'render-subscribe':
           this.selectedTimeline = data.timeline
+          this.subscribeOnly = true
           this.$bvModal.show('modal-follow')
           break
         case 'render-tip':
