@@ -65,11 +65,6 @@ export default {
     hasMediafiles() {
       return this.post.mediafiles?.length > 0
     },
-    /*
-    primaryMediafile() {
-      return this.hasMediafiles ? this.post.mediafiles[0] : null
-    },
-     */
     isLoading() {
       return !this.post || !this.session_user
     },

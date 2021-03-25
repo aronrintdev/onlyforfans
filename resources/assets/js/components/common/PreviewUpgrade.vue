@@ -15,6 +15,7 @@
             <article class="tag-wrap mb-3">
               <div v-if="!p.access" @click="renderPost(p)" :style="backgroundImg(p)" class="locked-content tag-thumb"></div>
               <b-icon v-if="!p.access" @click="renderPost(p)" class="tag-icon" icon="lock-fill" font-scale="2" variant="light" />
+              <div v-if="p.access" @click="renderPost(p)" :style="backgroundImg(p)" class="tag-thumb"></div>
             </article>
           </b-col>
         </b-row>
@@ -87,24 +88,21 @@ export default {
     },
 
     backgroundImg(post) {
-      if ( post.mediafiles && post.mediafiles[0] && post.mediafiles[0].has_blur ) {
-        return {
-          '--background-image': `url(${post.mediafiles[0].blurFilepath})`,
+      if ( post.access ) {
+        if ( post.mediafiles && post.mediafiles[0] && post.mediafiles[0].has_thumb ) {
+          return { '--background-image': `url(${post.mediafiles[0].midFilepath})` }
         }
-      } else {
-        return {
-          '--background-image': `url(/images/locked_post.png)`,
+        if ( post.mediafiles && post.mediafiles[0] && post.mediafiles[0].has_mid ) {
+          return { '--background-image': `url(${post.mediafiles[0].midFilepath})` }
         }
+        return { '--background-image': `url(${post.mediafiles[0].filepath})` }
+      } else { // locked content 
+        if ( post.mediafiles && post.mediafiles[0] && post.mediafiles[0].has_blur ) {
+          return { '--background-image': `url(${post.mediafiles[0].blurFilepath})` }
+        } 
+        return { '--background-image': `url(/images/locked_post.png)` }
       }
     },
-
-
-    /*
-    getImage(p) {
-      return p.mediafiles[0].filepath
-    },
-     */
-
   },
 
   components: { },
@@ -122,16 +120,16 @@ export default {
 }
  */
 .locked-content {
+}
+.tag-thumb {
+  width: 90px;
+  height: 90px;
   background-image: var(--background-image);
   /*
   background-position: center;
   background-repeat: no-repeat;
    */
   background-size: cover !important;
-}
-.tag-thumb {
-  width: 90px;
-  height: 90px;
 }
 .tag-icon {
   position: absolute;
