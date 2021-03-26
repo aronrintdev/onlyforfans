@@ -17,6 +17,28 @@ use App\Models\Financial\Exceptions\FeesTooHighException;
 use App\Models\Financial\Exceptions\TransactionAlreadySettled;
 use App\Models\Financial\Exceptions\TransactionNotSettledException;
 
+/**
+ * Financial Transaction Model
+ *
+ * @property string $id
+ * @property string $account_id
+ * @property \Money\Money $credit_amount
+ * @property \Money\Money $debit_amount
+ * @property \Money\Money $balance
+ * @property \Money\Money $currency
+ * @property string $type
+ * @property string $description
+ * @property string $reference_id
+ * @property string $purchasable_type
+ * @property string $purchasable_id
+ * @property array  $metadata
+ * @property \Carbon\Carbon $settled_at
+ * @property \Carbon\Carbon $failed_at
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ *
+ * @package App\Models\Financial
+ */
 class Transaction extends Model
 {
     use UsesUuid,

@@ -25,12 +25,42 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Interfaces\Purchaseable; // was PaymentReceivable
+use App\Interfaces\Tippable;
 use App\Models\Casts\Money;
 use App\Models\Financial\Traits\HasCurrency;
 use App\Models\Financial\Traits\HasSystem;
 use App\Models\Traits\FormatMoney;
 
-class Post extends Model implements UuidId, Ownable, Deletable, Purchaseable, Likeable, Reportable, Commentable
+/**
+ * Post Model
+ * @package App\Models
+ * 
+ * @property string $id
+ * @property string $slug
+ * @property string $user_id
+ * @property string $postable_type
+ * @property string $postable_id
+ * @property string $description
+ * @property bool   $active
+ * @property string $type
+ * @property \Money\Money $price
+ * @property string $currency
+ * @property array  $cattrs
+ * @property array  $meta
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @property \Carbon\Carbon $deleted_at
+ */
+class Post extends Model
+    implements
+        UuidId,
+        Ownable,
+        Deletable,
+        Purchaseable,
+        Tippable,
+        Likeable,
+        Reportable,
+        Commentable
 {
     use UsesUuid,
     SoftDeletes,
@@ -40,7 +70,6 @@ class Post extends Model implements UuidId, Ownable, Deletable, Purchaseable, Li
     Sluggable,
     SluggableTraits,
     FormatMoney,
-    HasSystem,
     HasCurrency;
 
     //--------------------------------------------

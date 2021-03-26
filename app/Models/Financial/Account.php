@@ -33,6 +33,30 @@ use RuntimeException;
 use Throwable;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
+/**
+ * Financial Account Model
+ *
+ * @property string $id
+ * @property string $system
+ * @property string $owner_type
+ * @property string $owner_id
+ * @property string $name
+ * @property string $type
+ * @property string $currency
+ * @property \Money\Money $balance
+ * @property \Carbon\Carbon $balance_last_updated_at
+ * @property \Money\Money $pending
+ * @property \Carbon\Carbon $pending_last_updated_at
+ * @property string $resource_type
+ * @property string $resource_id
+ * @property bool   $verified
+ * @property bool   $can_make_transactions
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @property \Carbon\Carbon $deleted_at
+ *
+ * @package App\Models\Financial
+ */
 class Account extends Model implements Ownable
 {
     use OwnableTraits,

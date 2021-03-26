@@ -4,6 +4,7 @@
     "Authenticatable",
     "Blockables",
     "CSRF",
+    "Castable",
     "Cmgmyr",
     "Cviebrock",
     "Deletable",

@@ -2,24 +2,26 @@
 
 namespace App\Interfaces;
 
-use App\Models\Financial\Account;
-use App\Models\Financial\Transaction;
-
 interface Tippable
 {
     /**
-     * Tip this Tippable model from Account $from
-     *
-     * @param Account $from
-     * @param int $amount
-     * @return void
+     * Eloquent Model Method, This is so intellisense works with the interface.
+     * Gets model primary key.
      */
-    public function tip(Account $from, int $amount): void;
+    public function getKey();
 
     /**
-     * Chargeback a tip made to this model.
-     * @param Transaction $transaction
-     * @return void
+     * Model Method, this is so intellisense works with interface.
+     * Gets the Morph string for model.
      */
-    public function tipChargeback(Transaction $transaction): void;
+    public function getMorphString(): string;
+
+    /**
+     * The string used in the transaction description.
+     * e.i. "Purchase of `{This methods return}`"
+     *
+     * @return string
+     */
+    public function getDescriptionNameString(): string;
+
 }

@@ -16,14 +16,37 @@ use App\Models\Traits\UsesShortUuid;
 use App\Models\Financial\Transaction;
 use App\Models\Traits\SluggableTraits;
 use App\Enums\ShareableAccessLevelEnum;
+use App\Interfaces\Tippable;
 use App\Models\Casts\Money;
+use App\Models\Financial\Traits\HasCurrency;
 use App\Models\Traits\FormatMoney;
 use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Money\Currencies\ISOCurrencies;
 
-class Timeline extends Model implements Purchaseable, Ownable, Reportable
+/**
+ * Timeline Model
+ *
+ * @property string $id
+ * @property string $slug
+ * @property string $name
+ * @property string $about
+ * @property string $avatar_id
+ * @property string $cover_id
+ * @property bool   $verified
+ * @property bool   $is_follow_for_free
+ * @property \Money\Money $price
+ * @property string $currency
+ * @property array  $cattrs
+ * @property array  $meta
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @property \Carbon\Carbon $deleted_at
+ *
+ * @package App\Models
+ */
+class Timeline extends Model implements Purchaseable, Tippable, Ownable, Reportable
 {
     use SoftDeletes,
         HasFactory,
@@ -31,7 +54,8 @@ class Timeline extends Model implements Purchaseable, Ownable, Reportable
         UsesUuid,
         Sluggable,
         SluggableTraits,
-        FormatMoney;
+        FormatMoney,
+        HasCurrency;
 
     protected $keyType = 'string';
     protected $guarded = ['id', 'created_at', 'updated_at'];

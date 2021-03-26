@@ -4,11 +4,20 @@ namespace App\Models\Financial\Traits;
 
 use Money\Money;
 use Money\Currency;
+use Money\Currencies\ISOCurrencies;
 use Illuminate\Support\Facades\Config;
+use Money\Exception\UnknownCurrencyException;
 use App\Models\Financial\Exceptions\CurrencyMismatchException;
+use App\Models\Financial\Exceptions\CurrencyNotAllowedException;
 
 trait HasCurrency
 {
+    /**
+     * Casts a value to Money object
+     *
+     * @param mixed $amount
+     * @return Money
+     */
     public function asMoney($amount): Money
     {
         if ($amount instanceof Money) {
@@ -17,6 +26,17 @@ trait HasCurrency
         return new Money($amount, new Currency($this->currency));
     }
 
+    /**
+     * Alias for asMoney.
+     * Casts a value to Money object.
+     *
+     * @param mixed $item
+     * @return Money
+     */
+    public function castToMoney($item): Money
+    {
+        return $this->asMoney($item);
+    }
 
     /**
      * Currency being worked with.
@@ -26,9 +46,53 @@ trait HasCurrency
     public function getCurrencyAttribute()
     {
         if (!isset($this->attributes['currency'])) {
-            $this->attributes['currency'] = Config::get('transactions.systems.' . $this->system . '.defaults.currency');
+            $this->attributes['currency'] = Config::get("transactions.systems.{$this->getSystem()}.defaults.currency");
         }
         return $this->attributes['currency'];
+    }
+
+    /**
+     * Validates Currency Attribute to make sure it is allowed on this system
+     *
+     * @return void
+     */
+    public function setCurrencyAttribute($value)
+    {
+        $allowedCurrencies = $this->getAllowedCurrencies();
+        if (isset($allowedCurrencies)) {
+            if (!isset($allowedCurrencies[$value])) {
+                throw new CurrencyNotAllowedException($value, $this->getSystem());
+            }
+        } else {
+            // Use default ISO currencies
+            if (!(new ISOCurrencies())->contains(new Currency($value))) {
+                throw new UnknownCurrencyException('Cannot find ISO currency ' . $value);
+            }
+        }
+        $this->attributes['currency'] = $value;
+    }
+
+    /**
+     * Gets allowed currencies in this system
+     *
+     * @return array|null
+     */
+    public function getAllowedCurrencies()
+    {
+        return Config::get("transactions.systems.{$this->getSystem()}.availableCurrencies", null);
+    }
+
+    /**
+     * Gets default system
+     *
+     * @return string
+     */
+    public function getSystem(): string
+    {
+        if (isset($this->system)) {
+            return $this->system;
+        }
+        return Config::get("transactions.default");
     }
 
     /* ----------------------- Verification Functions ----------------------- */
