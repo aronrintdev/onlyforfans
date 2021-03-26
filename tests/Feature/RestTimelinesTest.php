@@ -7,7 +7,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 use Database\Seeders\TestDatabaseSeeder;
 
-//use App\Enums\PostTypeEnum;
+use App\Enums\PostTypeEnum;
 use App\Enums\PaymentTypeEnum;
 use App\Models\Fanledger;
 use App\Models\Post;
@@ -21,7 +21,118 @@ class TimelinesTest extends TestCase
     /**
      *  @group timelines
      *  @group regression
-     *  %TODO: DEPRECATE, use FeedsController (?)
+     */
+    public function test_owner_can_view_home_feed()
+    {
+        //$timeline = Timeline::has('posts','>=',1)->has('followers','>=',1)->first(); // assume non-admin (%FIXME)
+
+        // get timeline that has both priced & subscriber posts
+        $timeline = Timeline::whereHas('posts', function($q1) {
+            $q1->whereIn('type', [PostTypeEnum::SUBSCRIBER, PostTypeEnum::PRICED]); // ?? this is OR not AND 
+        })->has('followers','>=',1)->firstOrFail();
+        $creator = $timeline->user;
+
+        $payload = [];
+        $response = $this->actingAs($creator)->ajaxJSON('GET', route('timelines.homefeed'), $payload);
+        $response->assertStatus(200);
+
+        $content = json_decode($response->content());
+        //dd($content);
+        $posts = collect($content->data);
+
+        $num = $posts->reduce( function($acc, $p) {
+            return ( $p->type!==PostTypeEnum::FREE) ? ($acc+1) : $acc;
+        }, 0);
+        $this->assertGreaterThan(0, $num, 'Feed should contain at least 1 non-free post');
+    }
+
+    /**
+     *  @group timelines
+     *  @group regression
+     */
+    public function test_owner_can_sort_home_feed_by_like_count()
+    {
+        $timeline = Timeline::whereHas('posts', function($q1) {
+            $q1->whereIn('type', [PostTypeEnum::SUBSCRIBER, PostTypeEnum::PRICED]); // ?? this is OR not AND 
+        })->has('followers','>=',1)->firstOrFail();
+        $creator = $timeline->user;
+
+        $payload = ['sortBy'=>'likes'];
+        $response = $this->actingAs($creator)->ajaxJSON('GET', route('timelines.homefeed'), $payload);
+        $response->assertStatus(200);
+
+        $content = json_decode($response->content());
+        $posts = collect($content->data);
+
+        $num = $posts->reduce( function($acc, $p) {
+            static $last = null;
+            if ( $last && ($p->stats->likeCount > $last->stats->likeCount) ) {
+                $acc += 1;
+            }
+            $last = $p;
+            return $acc;
+        }, 0);
+        $this->assertEquals(0, $num, 'Feed should not contain any out-of-order (non-sorted) posts by like count');
+    }
+
+    /**
+     *  @group timelines
+     *  @group regression
+     */
+    public function test_owner_can_sort_home_feed_by_comment_count()
+    {
+        $timeline = Timeline::whereHas('posts', function($q1) {
+            $q1->whereIn('type', [PostTypeEnum::SUBSCRIBER, PostTypeEnum::PRICED]); // ?? this is OR not AND 
+        })->has('followers','>=',1)->firstOrFail();
+        $creator = $timeline->user;
+
+        $payload = ['sortBy'=>'comments'];
+        $response = $this->actingAs($creator)->ajaxJSON('GET', route('timelines.homefeed'), $payload);
+        $response->assertStatus(200);
+
+        $content = json_decode($response->content());
+        $posts = collect($content->data);
+
+        $num = $posts->reduce( function($acc, $p) {
+            static $last = null;
+            if ( $last && ($p->stats->commentCount > $last->stats->commentCount) ) {
+                $acc += 1;
+            }
+            $last = $p;
+            return $acc;
+        }, 0);
+        $this->assertEquals(0, $num, 'Feed should not contain any out-of-order (non-sorted) posts by comment count');
+    }
+
+    /**
+     *  @group timelines
+     *  @group regression
+     */
+    public function test_owner_can_filter_home_feed_by_nonlocked()
+    {
+        // %FIXME: we aren't really guaranteed a timeine with non-accessible posts...
+        $timeline = Timeline::whereHas('posts', function($q1) {
+            $q1->whereIn('type', [PostTypeEnum::SUBSCRIBER, PostTypeEnum::PRICED]); // ?? this is OR not AND 
+        })->has('followers','>=',1)->firstOrFail();
+        $creator = $timeline->user;
+
+        //$payload = [];
+        $payload = ['hideLocked'=>'true'];
+        $response = $this->actingAs($creator)->ajaxJSON('GET', route('timelines.homefeed'), $payload);
+        $response->assertStatus(200);
+
+        $content = json_decode($response->content());
+        $posts = collect($content->data);
+
+        $num = $posts->reduce( function($acc, $p) {
+            return !$p->access ? ($acc+1) : $acc;
+        }, 0);
+        $this->assertEquals(0, $num, 'Feed should not contain any non-accessible posts');
+    }
+
+    /**
+     *  @group timelines
+     *  @group regression
      */
     public function test_owner_can_view_own_timeline_feed()
     {
