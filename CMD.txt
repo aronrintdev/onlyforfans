@@ -21,9 +21,9 @@ php artisan migrate:rollback --step=1
 
 %%% Testing
 $ vendor/bin/phpunit --group mfdev
-$ vendor/bin/phpunit --testdox --group devcomment 
-$ echo "" > storage/logs/laravel.log; vendor/bin/phpunit --testdox  --group this
-$ echo "" > storage/logs/laravel.log; php -n vendor/bin/phpunit --testdox  --group regression
+$ vendor/bin/phpunit  -d memory_limit=-1 --testdox --group devcomment 
+$ echo "" > storage/logs/laravel.log; vendor/bin/phpunit  -d memory_limit=-1 --testdox  --group this
+$ echo "" > storage/logs/laravel.log; php -n vendor/bin/phpunit  -d memory_limit=-1 --testdox  --group regression
 
 $ php artisan test  --group regression
 $ php -n artisan test  --group regression
