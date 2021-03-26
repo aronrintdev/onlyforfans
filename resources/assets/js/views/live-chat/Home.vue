@@ -231,11 +231,11 @@
               this.users.splice(idx, 1);
             }
           })
-      }
-    },
-    markAllAsRead: function() {
-      this.axios.post('/chat-messages/mark-all-as-read');
-    },
+      },
+      markAllAsRead: function() {
+        this.axios.post('/chat-messages/mark-all-as-read');
+      },
+    }
   }
 </script>
 

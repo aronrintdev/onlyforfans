@@ -331,9 +331,11 @@
       });
       this.getMessages();
       setTimeout(() => {
-        // const container = this.$el.querySelector(".conversation-list .message-group:last-child");
-        // container.scrollIntoView({ block: 'end', behavior: 'auto' });
-      }, 500);
+        const container = this.$el.querySelector(".conversation-list .message-group:last-child");
+        if (container) {
+          container.scrollIntoView({ block: 'end', behavior: 'smooth' });
+        }
+      }, 1000);
       Echo.private(`${this.$route.params.id}-message`)
         .listen('MessageSentEvent', (e) => {
             self.originMessages.push(e.message);
@@ -366,8 +368,8 @@
         const self = this;
         setTimeout(() => {
           const container = this.$el.querySelector(".conversation-list .message-group:last-child");
-          container.scrollIntoView({ block: 'end', behavior: 'auto' });
-        }, 500);
+          container.scrollIntoView({ block: 'end', behavior: 'smooth' });
+        }, 1000);
         Echo.private(`${id}-message`)
         .listen('MessageSentEvent', (e) => {
           self.originMessages.push(e.message);
@@ -563,7 +565,7 @@
           index = this.originMessages.findIndex(message => message.id === messageId);
         }
         const el = $(`.message-${messageId}.message .text`);
-        el.html(el.html().replace(this.messageSearchText, `<span class="highlight">${this.messageSearchText}</span>`));
+        el.html(el.html().replace(new RegExp(this.messageSearchText, 'gi'), (str) => `<span class="highlight">${str}</span>`));
         const newPos = $('.conversation-list').scrollTop() + $(`.message-${messageId}.message`).height() + $(`.message-${messageId}.message`).offset().top - $('.conversation-list').height() - $('.conversation-list').offset().top;
         $('.conversation-list').animate({scrollTop: newPos}, 500);
         this.loadingData = false;
