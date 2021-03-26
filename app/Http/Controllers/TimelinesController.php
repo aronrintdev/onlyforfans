@@ -5,10 +5,12 @@ use DB;
 use Auth;
 use Exception;
 use Throwable;
+use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 
 use App\Http\Resources\PostCollection;
 use App\Http\Resources\Timeline as TimelineResource;
-use App\Models\User;
 use App\Libs\FeedMgr;
 use App\Libs\UserMgr;
 
@@ -16,11 +18,10 @@ use App\Models\Setting;
 use App\Models\Timeline;
 use App\Models\Fanledger;
 use App\Models\Post;
+use App\Models\User;
 
-use Illuminate\Http\Request;
 use App\Enums\PaymentTypeEnum;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Log;
+use App\Enums\PostTypeEnum;
 
 class TimelinesController extends AppBaseController
 {
@@ -48,20 +49,34 @@ class TimelinesController extends AppBaseController
     // Display my home timeline
     public function homefeed(Request $request)
     {
-        $query = Post::with('mediafiles', 'user')->withCount('comments')->where('active', 1);
-        $query->whereHas('timeline', function($q1) use(&$request) {
-            $q1->whereHas('followers', function($q2) use(&$request) {
-                $q2->where('users.id', $request->user()->id);
+        $sessionUser = request()->user();
+        $query = Post::with('mediafiles', 'user')->withCount(['comments', 'likes'])->where('active', 1);
+        $query->homeTimeline()->sort( $request->input('sortBy', 'default') );
+        // %NOTE: we could also just remove post-query, as the feed will auto-update to fill length of page (?)
+        if ( $request->boolean('hideLocked') ) {
+            $query->where( function($q1) use(&$sessionUser) {
+                $q1->where('type', PostTypeEnum::FREE)
+                   ->orWhere( function($q2) use(&$sessionUser) {
+                       $q2->where('type', PostTypeEnum::PRICED)
+                          ->whereDoesntHave('sharees', function($q3) use(&$sessionUser) {
+                              $q3->where('users.id', $sessionUser->id);
+                          });
+                       $q2->where('type', PostTypeEnum::SUBSCRIBER)
+                          ->whereDoesntHave('timeline.subscribers', function($q3) use(&$sessionUser) {
+                              $q3->where('users.id', $sessionUser->id);
+                          });
+                   });
             });
-        });
-        $data = $query->latest()->paginate( $request->input('take', env('MAX_POSTS_PER_REQUEST', 10)) );
+        }
+        if ( $request->boolean('hidePromotions') ) {
+        }
+        $data = $query->paginate( $request->input('take', env('MAX_POSTS_PER_REQUEST', 10)) );
         return new PostCollection($data);
     }
 
     // Get a list of items that make up a timeline feed, typically posts but
     //  keep generic as we may want to throw in other things
     //  %TODO: 
-    //  ~ [ ] DEPRECATE, use FeedsController (?)
     //  ~ [ ] trending tags
     //  ~ [ ] announcements
     //  ~ [ ] hashtag search
@@ -69,9 +84,9 @@ class TimelinesController extends AppBaseController
     {
         //$this->authorize('view', $timeline); // must be follower or subscriber
         //$filters = [];
-        $query = Post::with('mediafiles', 'user')->withCount('comments')->where('active', 1);
-        $query->where('postable_type', 'timelines')->where('postable_id', $timeline->id);
-        $data = $query->latest()->paginate( $request->input('take', env('MAX_POSTS_PER_REQUEST', 10)) );
+        $query = Post::with('mediafiles', 'user')->withCount(['comments', 'likes'])->where('active', 1);
+        $query->byTimeline($timeline->id)->sort( $request->input('sortBy', 'default') );
+        $data = $query->paginate( $request->input('take', env('MAX_POSTS_PER_REQUEST', 10)) );
         return new PostCollection($data);
     }
 

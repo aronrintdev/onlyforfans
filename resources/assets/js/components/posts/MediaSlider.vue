@@ -4,7 +4,7 @@
       id="carousel-1"
       v-model="slide"
       :interval="0"
-      controls
+      :controls="isNavVisible"
       indicators
       background="#ababab"
       img-width="1024"
@@ -53,6 +53,9 @@ export default {
     isLoading() {
       return !this.post || !this.session_user
     },
+    isNavVisible() {
+      return this.post.mediafiles.length > 1
+    }
   },
 
   data: () => ({

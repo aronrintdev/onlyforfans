@@ -37,11 +37,10 @@ class Post extends JsonResource
             //'mediafiles' =>  $this->when( $hasAccess, MediafileResource::collection($this->whenLoaded('mediafiles')) ), // ??
             'created_at' => $this->created_at,
             'stats' => [
-                //'isLikedByMe' => $sessionUser->likedposts->contains($this->id),
                 'isLikedByMe' => $this->isLikedByMe,
                 'isBookmarkedByMe' => $this->isBookmarkedByMe,
-                'likeCount' => $this->likes->count(),
-                'commentCount' => $this->comments->count(),
+                'likeCount' => $this->likes_count,
+                'commentCount' => $this->comments_count,
             ],
         ];
     }
