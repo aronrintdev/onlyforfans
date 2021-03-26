@@ -24,7 +24,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
-class User extends Authenticatable implements PaymentSendable, Blockable, HasFinancialAccounts
+class User extends Authenticatable implements Blockable, HasFinancialAccounts
 {
     use Notifiable, HasRoles, HasFactory, Messagable, SoftDeletes, UsesUuid, MorphFunctions;
 

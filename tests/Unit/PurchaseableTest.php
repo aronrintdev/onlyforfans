@@ -2,7 +2,6 @@
 
 namespace Tests\Unit;
 
-use App\Enums\Financial\TransactionTypeEnum;
 use Money\Money;
 use Money\Currency;
 use Tests\TestCase;
@@ -10,8 +9,11 @@ use App\Models\Post;
 use App\Models\User;
 use App\Models\Timeline;
 use App\Models\Financial\Transaction;
+use Illuminate\Support\Facades\Event;
 use PHPUnit\Framework\IncompleteTestError;
 use Tests\Helpers\Financial\AccountHelpers;
+use App\Enums\Financial\TransactionTypeEnum;
+use App\Events\ItemPurchased;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 /**
@@ -54,6 +56,7 @@ class PurchaseableTest extends TestCase
      */
     public function test_can_purchase_post()
     {
+        Event::fake([ ItemPurchased::class ]);
         $post = Post::factory()->pricedAt(1000)->create();
         $purchaserAccounts = AccountHelpers::loadWallet(1000);
 
@@ -66,6 +69,8 @@ class PurchaseableTest extends TestCase
             'purchasable_id' => $post->getKey(),
             'purchasable_type' => $post->getMorphString(),
         ]);
+
+        Event::assertDispatched(ItemPurchased::class);
     }
 
     /**

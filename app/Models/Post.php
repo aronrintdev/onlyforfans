@@ -54,7 +54,6 @@ use App\Models\Traits\FormatMoney;
 class Post extends Model
     implements
         UuidId,
-        Ownable,
         Deletable,
         Purchaseable,
         Tippable,

@@ -20,6 +20,7 @@ use App\Models\Financial\Traits\HasCurrency;
 use App\Enums\Financial\TransactionSummaryTypeEnum;
 use App\Enums\Financial\TransactionTypeEnum;
 use App\Enums\ShareableAccessLevelEnum;
+use App\Events\ItemPurchased;
 use App\Interfaces\Purchaseable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Models\Financial\Exceptions\Account\IncorrectTypeException;
@@ -471,6 +472,7 @@ class Account extends Model implements Ownable
         ]);
 
         $purchaseable->grantAccess($this->getOwner()->first(), ShareableAccessLevelEnum::PREMIUM);
+        ItemPurchased::dispatch($purchaseable, $this->getOwner()->first());
         return $transactions;
     }
 
