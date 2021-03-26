@@ -161,12 +161,14 @@ export default new Vuex.Store({
       limit, 
       sortBy='latest', 
       hideLocked=false,
+      hidePromotions=false,
     }) {
       const params = {
         page,
         take: limit,
         sortBy,
         hideLocked,
+        hidePromotions,
       }
       const url = isHomefeed ? `/timelines/home/feed` : `/timelines/${timelineId}/feed`
       axios.get(url, { params }).then( (response) => {

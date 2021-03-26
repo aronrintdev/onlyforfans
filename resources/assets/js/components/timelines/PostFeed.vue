@@ -20,12 +20,14 @@
             </template>
             <b-dropdown-form>
               <b-form-group label="">
-                <b-form-radio v-model="sortPostsBy" name="sort-posts-by" value="latest">Latest</b-form-radio>
-                <b-form-radio v-model="sortPostsBy" name="sort-posts-by" value="likes">Likes</b-form-radio>
-                <b-form-radio v-model="sortPostsBy" name="sort-posts-by" value="comments">Comments</b-form-radio>
+                <b-form-radio v-model="sortPostsBy" size="sm" name="sort-posts-by" value="latest">Latest</b-form-radio>
+                <b-form-radio v-model="sortPostsBy" size="sm" name="sort-posts-by" value="likes">Likes</b-form-radio>
+                <b-form-radio v-model="sortPostsBy" size="sm" name="sort-posts-by" value="comments">Comments</b-form-radio>
               </b-form-group>
+              <b-dropdown-divider></b-dropdown-divider>
               <b-form-group label="">
-                <b-form-checkbox v-model="hideLocked" name="render-locked" value="true">Hide Locked</b-form-checkbox>
+                <b-form-checkbox v-model="hideLocked" size="sm" name="render-locked" value="true">Hide Locked</b-form-checkbox>
+                <b-form-checkbox v-model="hidePromotions" size="sm" name="render-locked" value="true">Hide Promotions</b-form-checkbox>
               </b-form-group>
             </b-dropdown-form>
           </b-dropdown>
@@ -125,6 +127,7 @@ export default {
     limit: 5, // %FIXME: un-hardcode
 
     hideLocked: false,
+    hidePromotions: false,
     isGridLayout: false,
 
   }),
@@ -157,8 +160,9 @@ export default {
         isHomefeed: this.is_homefeed,
         page: 1, 
         limit: this.limit, 
-        sortBy: this.sortBy, 
+        sortBy: this.sortPostsBy, 
         hideLocked: this.hideLocked, 
+        hidePromotions: this.hidePromotions, 
       })
     })
   },
@@ -224,12 +228,12 @@ export default {
         this.$log.debug('loadMore', { current: this.currentPage, last: this.lastPage, next: this.nextPage });
         this.$store.dispatch('getFeeddata', { 
           timelineId: this.timelineId, 
+          isHomefeed: this.is_homefeed,
           page: this.nextPage, 
           limit: this.limit, 
-          isHomefeed: 
-          this.is_homefeed,
-          sortBy: this.sortBy, 
+          sortBy: this.sortPostsBy, 
           hideLocked: this.hideLocked, 
+          hidePromotions: this.hidePromotions, 
         })
       }
     },
@@ -246,7 +250,6 @@ export default {
   watch: {
 
     hideLocked (newVal) {
-      console.log('components.timelines.PostFeed - watch.hideLocked: reload feed')
       this.$refs.feedCtrls.hide(true)
       this.resetFeed();
       this.$store.dispatch('getFeeddata', { 
@@ -256,11 +259,25 @@ export default {
         limit: this.limit, 
         sortBy: this.sortPostsBy, 
         hideLocked: newVal, 
+        hidePromotions: this.hidePromotions, 
+      })
+    },
+
+    hidePromotions (newVal) {
+      this.$refs.feedCtrls.hide(true)
+      this.resetFeed();
+      this.$store.dispatch('getFeeddata', { 
+        timelineId: this.timelineId, 
+        isHomefeed: this.is_homefeed,
+        page: 1, 
+        limit: this.limit, 
+        sortBy: this.sortPostsBy, 
+        hideLocked: this.hideLocked, 
+        hidePromotions: newVal,
       })
     },
 
     sortPostsBy (newVal) {
-      console.log('components.timelines.PostFeed - watch.sortPostsBy: reload feed')
       this.$refs.feedCtrls.hide(true)
       this.resetFeed();
       this.$store.dispatch('getFeeddata', { 
@@ -270,6 +287,7 @@ export default {
         limit: this.limit, 
         sortBy: newVal, 
         hideLocked: this.hideLocked, 
+        hidePromotions: this.hidePromotions, 
       })
     },
 
@@ -297,8 +315,9 @@ export default {
   border-radius: 3px;
 }
 .tag-debug {
-  /*
   display: none;
+  /*
    */
 }
+
 </style>
