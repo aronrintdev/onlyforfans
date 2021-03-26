@@ -24,8 +24,10 @@
                 <b-form-radio v-model="sortPostsBy" name="sort-posts-by" value="likes">Likes</b-form-radio>
                 <b-form-radio v-model="sortPostsBy" name="sort-posts-by" value="comments">Comments</b-form-radio>
               </b-form-group>
+              <b-form-group label="">
+                <b-form-checkbox v-model="renderLocked" name="render-locked" value="true">Hide Locked</b-form-checkbox>
+              </b-form-group>
             </b-dropdown-form>
-            <b-dropdown-item>Third Action</b-dropdown-item>
           </b-dropdown>
         </section>
       </b-col>
@@ -122,6 +124,7 @@ export default {
     moreLoading: true,
     limit: 5, // %FIXME: un-hardcode
 
+    renderLocked: true,
     isGridLayout: false,
 
   }),
@@ -149,13 +152,6 @@ export default {
   },
 
   methods: {
-
-    resetFeed() {
-      this.renderedPages = []
-      this.renderedItems = []
-      this.lastPostVisible = false
-      this.moreLoading = true
-    },
 
     endPostVisible(isVisible) {
       this.lastPostVisible = isVisible
@@ -218,15 +214,41 @@ export default {
       }
     },
 
+    resetFeed() {
+      this.renderedPages = []
+      this.renderedItems = []
+      this.lastPostVisible = false
+      this.moreLoading = true
+    },
+
   },
 
   watch: {
+
+    renderLocked (newVal) {
+      console.log('components.timelines.PostFeed - watch.renderLocked: reload feed')
+      this.$refs.feedCtrls.hide(true)
+      this.resetFeed();
+      this.$store.dispatch('getFeeddata', { 
+        timelineId: this.timelineId, 
+        page: 1, 
+        limit: this.limit, 
+        sortBy: newVal, 
+        isHomefeed: this.is_homefeed 
+      })
+    },
 
     sortPostsBy (newVal) {
       console.log('components.timelines.PostFeed - watch.sortPostsBy: reload feed')
       this.$refs.feedCtrls.hide(true)
       this.resetFeed();
-      this.$store.dispatch('getFeeddata', { timelineId: this.timelineId, page: 1, limit: this.limit, sortBy: newVal, isHomefeed: this.is_homefeed })
+      this.$store.dispatch('getFeeddata', { 
+        timelineId: this.timelineId, 
+        page: 1, 
+        limit: this.limit, 
+        sortBy: newVal, 
+        isHomefeed: this.is_homefeed 
+      })
     },
 
     unshifted_timeline_post (newVal, oldVal) {

@@ -28,7 +28,7 @@
     </header>
 
     <b-container fluid>
-      <b-row class="avatar-profile pt-3 pb-4">
+      <b-row class="avatar-profile py-3">
         <b-col cols="12" md="4" offset-md="2" class="avatar-details text-right text-md-left">
           <h2 class="avatar-name my-0">
             <router-link :to="{ name: 'timeline.show', params: { slug: timeline.slug } }">

@@ -49,22 +49,7 @@ class TimelinesController extends AppBaseController
     public function homefeed(Request $request)
     {
         $query = Post::with('mediafiles', 'user')->withCount(['comments', 'likes'])->where('active', 1);
-        $query->whereHas('timeline', function($q1) use(&$request) {
-            $q1->whereHas('followers', function($q2) use(&$request) {
-                $q2->where('users.id', $request->user()->id);
-            });
-        });
-
-        switch ($request->sortBy) {
-        case 'likes':
-            $query->orderBy('likes_count', 'desc');
-            break;
-        case 'comments':
-            $query->orderBy('comments_count', 'desc');
-            break;
-        default:
-            $query->latest();
-        }
+        $query->homeTimeline()->sort( $request->input('sortBy', 'default') );
         $data = $query->paginate( $request->input('take', env('MAX_POSTS_PER_REQUEST', 10)) );
         return new PostCollection($data);
     }
@@ -81,18 +66,7 @@ class TimelinesController extends AppBaseController
         //$this->authorize('view', $timeline); // must be follower or subscriber
         //$filters = [];
         $query = Post::with('mediafiles', 'user')->withCount(['comments', 'likes'])->where('active', 1);
-        $query->where('postable_type', 'timelines')->where('postable_id', $timeline->id);
-
-        switch ($request->sortBy) {
-        case 'likes':
-            $query->orderBy('likes_count', 'desc');
-            break;
-        case 'comments':
-            $query->orderBy('comments_count', 'desc');
-            break;
-        default:
-            $query->latest();
-        }
+        $query->byTimeline($timeline->id)->sort( $request->input('sortBy', 'default') );
         $data = $query->paginate( $request->input('take', env('MAX_POSTS_PER_REQUEST', 10)) );
         return new PostCollection($data);
     }
