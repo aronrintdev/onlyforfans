@@ -120,8 +120,30 @@ body .feed-crate.tag-grid-layout .superbox-post .carousel.slide .carousel-item i
 #more-dropdown .dropdown-item {
   padding-right: 0.8rem;
   padding-left: 0.8rem;
+  margin: 0.8em 0;
 } 
 #user-filter-dropdown ul,
 #more-dropdown ul {
-  left: 0.5em !important;
+  left: 0.3em !important;
+  width: 250px;
+}
+#user-filter-dropdown ul a:hover ,
+#more-dropdown ul a:hover {
+  color: #0091ea;
+}
+#user-filter-dropdown ul .block-item a:hover,
+#more-dropdown ul .block-item a:hover {
+  color: #ff6060;
+}
+#user-filter-dropdown ul li a:focus,
+#user-filter-dropdown ul li a:active,
+#more-dropdown ul li a:focus,
+#more-dropdown ul li a:active {
+  background: transparent;
+  color: #0091ea;
+}
+#user-filter-dropdown ul .block-item a:hover,
+#more-dropdown ul li .block-item a:hover {
+  background: transparent;
+  color: #ff6060;
 }

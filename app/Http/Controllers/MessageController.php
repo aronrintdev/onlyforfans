@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+
 use App\Models\Message;
 use App\Models\Timeline;
 use App\Models\User;
@@ -50,24 +52,30 @@ class MessageController extends Controller
     }
     public function fetchContacts(Request $request)
     {
-        $receivers = Message::with('receiver')
-            ->whereHas('receiver', function($query) use(&$request) {
+        $sessionUser = $request->user();
+
+        $cattrs = DB::table('user_settings')->where('user_id', $sessionUser->id)->first();
+        $blocked = json_decode($cattrs->cattrs)->blocked->usernames;
+        $blockers = User::whereIn('username', $blocked)->pluck('id')->toArray();
+        $receivers = Message::where(function($query) use(&$request, &$blockers) {
                 $sessionUser = $request->user();
                 $searchText = $request->query('name');
 
                 $query->where('user_id', $sessionUser->id)
+                    ->whereNotIn('receiver_id', $blockers)
                     ->where('receiver_name', 'like', '%' . $searchText . '%');
             })
             ->pluck('receiver_id')
             ->toArray();
         // Senders
-        $senders = Message::with('receiver')
-            ->whereHas('receiver', function($query) use(&$request) {
+        $senders = Message::with(['user'])
+            ->whereHas('user', function($query) use(&$request, &$blockers) {
                 $sessionUser = $request->user();
                 $searchText = $request->query('name');
 
-                $query->where('receiver_id', $sessionUser->id);
-                    // ->where('username', 'like', '%' . $searchText . '%');
+                $query->where('receiver_id', $sessionUser->id)
+                    ->whereNotIn('user_id', $blockers)
+                    ->where('username', 'like', '%' . $searchText . '%');
             })
             ->pluck('user_id')
             ->toArray();

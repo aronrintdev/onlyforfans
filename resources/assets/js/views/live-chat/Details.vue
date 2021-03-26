@@ -18,7 +18,7 @@
                         </button>
                       </router-link>
                       <span class="top-bar-title">Messages</span>
-                    </div>
+                    </div> 
                     <div class="top-bar-action-btns">
                       <button class="btn" type="button" @click="changeSearchbarVisible">
                         <i class="fa fa-search" aria-hidden="true"></i>
@@ -165,9 +165,9 @@
                       <b-dropdown-item>Hide chat</b-dropdown-item>
                       <b-dropdown-item>Mute notifications</b-dropdown-item>
                       <b-dropdown-divider></b-dropdown-divider>
-                      <b-dropdown-item>Restrict @{{ selectedUser.profile.username }}</b-dropdown-item>
-                      <b-dropdown-item>Block @{{ selectedUser.profile.username }}</b-dropdown-item>
-                      <b-dropdown-item>Report @{{ selectedUser.profile.username }}</b-dropdown-item>
+                      <b-dropdown-item class="block-item">Restrict @{{ selectedUser.profile.username }}</b-dropdown-item>
+                      <b-dropdown-item @click="showBlockModal" class="block-item">Block @{{ selectedUser.profile.username }}</b-dropdown-item>
+                      <b-dropdown-item class="block-item">Report @{{ selectedUser.profile.username }}</b-dropdown-item>
                     </b-dropdown>
                   </div>
                   <div class="details message-search" v-if="messageSearchVisible">
@@ -279,17 +279,45 @@
         </div>
       </div>
     </div>
+    <b-modal v-if="selectedUser" hide-header centered hide-footer ref="block-modal" title="Block User Modal">
+      <div class="block-modal">
+        <h4>Block @{{ selectedUser.profile.username }}</h4>
+        <div class="content">
+          <radio-group-box
+            group_name="block_reason"
+            value="block"
+            @onChange="selectBlockReason"
+            label="Block user from accessing your profile.">
+          </radio-group-box>
+          <radio-group-box
+            group_name="block_reason"
+            value="restrict"
+            @onChange="selectBlockReason"
+            label="Restrict, user will not be able to send you direct messages or reply to your posts.">
+          </radio-group-box>
+        </div>
+        <div class="action-btns">
+          <button class="link-btn" @click="closeBlockModal">Cancel</button>
+          <button class="link-btn" @click="confirmBlockReason" :disabled="!blockReason">Confirm</button>
+        </div>
+      </div>
+    </b-modal>
   </div>
 </template>
 
 <script>
   import moment from 'moment';
   import _ from 'lodash';
+  import RadioGroupBox from '../../components/radioGroupBox';
+
   /**
    * Messages Dashboard View
    */
   export default {
     //
+    props: {
+      session_user: null,
+    },
     data: () => ({
       userSearchText: undefined,
       userSearchVisible: false,
@@ -308,6 +336,7 @@
       messageSearchText: undefined,
       currentSearchIndex: -1,
       totalSearches: [],
+      blockReason: undefined,
     }),
     mounted() {
       const self = this;
@@ -376,6 +405,9 @@
           self.groupMessages();
         });
       }
+    },
+    components: {
+      'radio-group-box': RadioGroupBox
     },
     computed: {
       selectedOption: function () {
@@ -573,6 +605,26 @@
       clearHighlightMessages: function() {
         const el = $('.highlight').parent();
         el.html(el.text());
+      },
+      showBlockModal: function() {
+        this.$refs['block-modal'].show();
+      },
+      closeBlockModal: function() {
+        this.$refs['block-modal'].hide();
+        this.blockReason = undefined;
+      },
+      selectBlockReason: function(value) {
+        this.blockReason = value;
+      },
+      confirmBlockReason: function() {
+        const self = this;
+        if (this.blockReason === 'block') {
+          this.axios.patch(`/users/${this.currentUser.id}/settings`, { blocked: [{ slug: this.selectedUser.profile.username }] })
+            .then(() => {
+              self.closeBlockModal();
+              self.$router.push('/messages');
+            });
+        }
       }
     }
   }
@@ -582,10 +634,60 @@
   @import "../../../sass/views/live-chat/home.scss";
   @import "../../../sass/views/live-chat/details.scss";
 </style>
-<style>
+<style lang="scss">
   .highlight {
     background: #ffd761;
     padding: 3px 0px;
     border-radius: 3px;
+  }
+  .block-modal {
+    h4 {
+      text-transform: uppercase;
+      font-weight: 500;
+      font-size: 14px;
+      padding: 0 0 14px 0;
+    }
+    .content {
+      padding: 0;
+    }
+    .action-btns {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: flex-end;
+      padding: 0;
+      margin-bottom: -8px;
+
+      .link-btn {
+        padding: 9px 16px;
+        border-radius: 18px;
+        color: #00aff0;
+        background-color: transparent;
+        margin: 0 0 0 4px;
+        font-size: 14px;
+        white-space: nowrap;
+        text-align: center;
+        text-transform: uppercase;
+        border: none;
+        font-weight: 500;
+        outline: none;
+
+        &:disabled {
+          color: darkgray;
+          &:hover {
+            color: darkgray;
+            background-color: transparent;
+          }
+        }
+        &:active {
+          outline: none;
+          box-shadow: none;
+        }
+        &:hover {
+          color: #0091ea;
+          background-color: rgba(0,145,234,.06);
+        }
+      }
+    }
   }
 </style>
