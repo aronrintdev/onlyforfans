@@ -52,7 +52,7 @@ class LikeablesTableSeeder extends Seeder
             $followers->each( function($f) use(&$t) {
                 $max = min($t->posts->count()-1, 9);
                 $now = \Carbon\Carbon::now();
-                $t->posts->random($max)->each( function($p) use(&$f) {
+                $t->posts->random($max)->each( function($p) use(&$f, $now) {
                     DB::table('likeables')->insert([
                         'likee_id' => $f->id,
                         'likeable_type' => 'posts',
