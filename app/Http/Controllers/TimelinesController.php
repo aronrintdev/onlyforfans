@@ -66,15 +66,9 @@ class TimelinesController extends AppBaseController
                               $q3->where('users.id', $sessionUser->id);
                           });
                    });
-                /*
-                   ->orWhere( function($q2) use(&$sessionUser) {
-                       $q2->where('type', PostTypeEnum::SUBSCRIBER)
-                          ->whereDoesntHave('timeline.subscribers', function($q3) use(&$sessionUser) {
-                              $q3->where('users.id', $sessionUser->id);
-                          });
-                   });
-                 */
             });
+        }
+        if ( $request->boolean('hidePromotions') ) {
         }
         $data = $query->paginate( $request->input('take', env('MAX_POSTS_PER_REQUEST', 10)) );
         return new PostCollection($data);

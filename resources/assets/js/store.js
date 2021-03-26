@@ -157,7 +157,7 @@ export default new Vuex.Store({
     getFeeddata( { commit }, { 
       timelineId, 
       isHomefeed,
-      page, 
+      page=1, 
       limit, 
       sortBy='latest', 
       hideLocked=false,

@@ -36,30 +36,30 @@
     </b-row>
 
     <section class="row">
-        <article
-          v-for="(feedItem, index) in renderedItems"
-          :key="feedItem.id"
-          :class="feedClass"
-          v-observe-visibility="index === renderedItems.length - 1 ? endPostVisible : false"
-        >
-          <div class="tag-debug">INDEX: {{ index }}</div>
-          <!-- for now we assume posts; eventually need to convert to a DTO (ie more generic 'feedItem') : GraphQL ? -->
-          <PostDisplay
-            :post="feedItem"
-            :session_user="session_user"
-            :use_mid="true"
-            @delete-post="deletePost"
-          />
-        </article>
-        <article class="load-more-item" :class="feedClass">
-          <b-card :class="{ 'cursor-pointer': !moreLoading && !isLastPage }" @click="onLoadMoreClick">
-            <div class="w-100 d-flex my-3 justify-content-center" >
-              <fa-icon v-if="moreLoading" icon="spinner" spin size="lg" />
-              <span v-else-if="isLastPage">End Of Content</span>
-              <span v-else>Load More</span>
-            </div>
-          </b-card>
-        </article>
+      <article
+        v-for="(feedItem, index) in renderedItems"
+        :key="feedItem.id"
+        :class="feedClass"
+        v-observe-visibility="index === renderedItems.length - 1 ? endPostVisible : false"
+      >
+        <div class="tag-debug">INDEX: {{ index }}</div>
+        <!-- for now we assume posts; eventually need to convert to a DTO (ie more generic 'feedItem') : GraphQL ? -->
+        <PostDisplay
+          :post="feedItem"
+          :session_user="session_user"
+          :use_mid="true"
+          @delete-post="deletePost"
+        />
+      </article>
+      <article class="load-more-item" :class="feedClass">
+        <b-card :class="{ 'cursor-pointer': !moreLoading && !isLastPage }" @click="onLoadMoreClick">
+          <div class="w-100 d-flex my-3 justify-content-center" >
+            <fa-icon v-if="moreLoading" icon="spinner" spin size="lg" />
+            <span v-else-if="isLastPage">End Of Content</span>
+            <span v-else>Load More</span>
+          </div>
+        </b-card>
+      </article>
     </section>
 
   </div>
@@ -154,16 +154,7 @@ export default {
 
     eventBus.$on('update-feed', () => {
       console.log('components.timelines.PostFeed - eventBus.$on(update-feed)')
-      this.resetFeed();
-      this.$store.dispatch('getFeeddata', { 
-        timelineId: this.timelineId, 
-        isHomefeed: this.is_homefeed,
-        page: 1, 
-        limit: this.limit, 
-        sortBy: this.sortPostsBy, 
-        hideLocked: this.hideLocked, 
-        hidePromotions: this.hidePromotions, 
-      })
+      this.reloadFromFirstPage();
     })
   },
 
@@ -172,60 +163,48 @@ export default {
     endPostVisible(isVisible) {
       this.lastPostVisible = isVisible
       if (isVisible && !this.moreLoading && !this.isLastPage) {
-        this.loadMore()
+        this.loadNextPage()
       }
     },
 
     onLoadMoreClick() {
       if (!this.moreLoading && !this.isLastPage) {
-        this.loadMore()
+        this.loadNextPage()
       }
     },
 
     onScroll(e) {
       const atBottom = document.documentElement.scrollTop + window.innerHeight === document.documentElement.offsetHeight;
       if (atBottom && !this.isLoading) {
-        this.loadMore()
+        this.loadNextPage()
       }
     },
 
-    /*
-    renderPurchasePostModal(post) {
-      // v-b-modal.modal-purchase_post
-      this.$bvModal.show('modal-purchase_post', post)
+    // re-render a single post (element of renderedItems) based on updated data, for example after purchase
+    // %TODO: should this update the element in vuex feeddata instead (?)
+    // see: 
+    //   https://vuejs.org/v2/guide/list.html#Array-Change-Detection
+    //   https://vuejs.org/v2/guide/reactivity.html#For-Arrays
+    async updatePost(postId) {
+      const response = await axios.get( route('posts.show', postId) );
+      const idx = this.renderedItems.findIndex( ri => ri.id === postId )
+      //this.renderedItems[idx] = response.data.data
+      this.$set(this.renderedItems, idx, response.data.data)
     },
-
-    renderSubscribeModal() {
-      this.$bvModal.show('modal-purchase_post')
-    }
-     */
-
-        // re-render a single post (element of renderedItems) based on updated data, for example after purchase
-        // %TODO: should this update the element in vuex feeddata instead (?)
-        // see: 
-        //   https://vuejs.org/v2/guide/list.html#Array-Change-Detection
-        //   https://vuejs.org/v2/guide/reactivity.html#For-Arrays
-        async updatePost(postId) {
-          const response = await axios.get( route('posts.show', postId) );
-          const idx = this.renderedItems.findIndex( ri => ri.id === postId )
-          //this.renderedItems[idx] = response.data.data
-          this.$set(this.renderedItems, idx, response.data.data)
-          //console.log('updatePost', response)
-        },
 
     async deletePost(postId) {
       const url = `/posts/${postId}`
       const response = await axios.delete(url)
-      this.renderedPages = []
-      this.renderedItems = []
-      this.$store.dispatch('getFeeddata', { timelineId: this.timelineId, page: 1, limit: this.limit, isHomefeed: this.is_homefeed })
+      //this.$store.dispatch('getFeeddata', { timelineId: this.timelineId, page: 1, limit: this.limit, isHomefeed: this.is_homefeed })
+      this.reloadFromFirstPage();
     },
 
+    // additional page loads
     // see: https://peachscript.github.io/vue-infinite-loading/guide/#installation
-    loadMore() {
+    loadNextPage() {
       if ( !this.moreLoading && !this.isLoading && (this.nextPage <= this.lastPage) ) {
         this.moreLoading = true;
-        this.$log.debug('loadMore', { current: this.currentPage, last: this.lastPage, next: this.nextPage });
+        this.$log.debug('loadNextPage', { current: this.currentPage, last: this.lastPage, next: this.nextPage });
         this.$store.dispatch('getFeeddata', { 
           timelineId: this.timelineId, 
           isHomefeed: this.is_homefeed,
@@ -238,7 +217,21 @@ export default {
       }
     },
 
-    resetFeed() {
+    // may adjust filters, but always reloads from page 1
+    reloadFromFirstPage() {
+      this.doReset();
+      this.$store.dispatch('getFeeddata', { 
+        page: 1, 
+        timelineId: this.timelineId, 
+        isHomefeed: this.is_homefeed,
+        limit: this.limit, 
+        sortBy: this.sortPostsBy, 
+        hideLocked: this.hideLocked, 
+        hidePromotions: this.hidePromotions,
+      })
+    },
+
+    doReset() {
       this.renderedPages = []
       this.renderedItems = []
       this.lastPostVisible = false
@@ -251,44 +244,17 @@ export default {
 
     hideLocked (newVal) {
       this.$refs.feedCtrls.hide(true)
-      this.resetFeed();
-      this.$store.dispatch('getFeeddata', { 
-        timelineId: this.timelineId, 
-        isHomefeed: this.is_homefeed,
-        page: 1, 
-        limit: this.limit, 
-        sortBy: this.sortPostsBy, 
-        hideLocked: newVal, 
-        hidePromotions: this.hidePromotions, 
-      })
+      this.reloadFromFirstPage();
     },
 
     hidePromotions (newVal) {
       this.$refs.feedCtrls.hide(true)
-      this.resetFeed();
-      this.$store.dispatch('getFeeddata', { 
-        timelineId: this.timelineId, 
-        isHomefeed: this.is_homefeed,
-        page: 1, 
-        limit: this.limit, 
-        sortBy: this.sortPostsBy, 
-        hideLocked: this.hideLocked, 
-        hidePromotions: newVal,
-      })
+      this.reloadFromFirstPage();
     },
 
     sortPostsBy (newVal) {
       this.$refs.feedCtrls.hide(true)
-      this.resetFeed();
-      this.$store.dispatch('getFeeddata', { 
-        timelineId: this.timelineId, 
-        isHomefeed: this.is_homefeed,
-        page: 1, 
-        limit: this.limit, 
-        sortBy: newVal, 
-        hideLocked: this.hideLocked, 
-        hidePromotions: this.hidePromotions, 
-      })
+      this.reloadFromFirstPage();
     },
 
     unshifted_timeline_post (newVal, oldVal) {
