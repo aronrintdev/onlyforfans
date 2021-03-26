@@ -1,12 +1,31 @@
 <template>
   <div v-if="!isLoading" class="feed-crate tag-posts tag-crate">
-  <div class="tag-debug">
-    <ul>
-      <li>Timeline ID: {{ timeline.id | niceGuid }}</li>
-      <li>Price: {{ timeline.price }}</li>
-      <li>Slug: {{ timeline.slug }}</li>
-    </ul>
-  </div>
+    <div class="tag-debug">
+      <ul>
+        <li>Timeline ID: {{ timeline.id | niceGuid }}</li>
+        <li>Price: {{ timeline.price }}</li>
+        <li>Slug: {{ timeline.slug }}</li>
+      </ul>
+    </div>
+
+    <b-row class="feed-ctrl">
+      <b-col>
+        <b-dropdown no-caret ref="feedCtrls" variant="transparent" id="feed-ctrl-dropdown" class="tag-ctrl">
+          <template #button-content>
+            <b-icon icon="filter" scale="1.5" variant="primary"></b-icon>
+          </template>
+          <b-dropdown-form>
+            <b-form-group label="">
+              <b-form-radio v-model="sortPostsBy" name="sort-posts-by" value="latest">Latest</b-form-radio>
+              <b-form-radio v-model="sortPostsBy" name="sort-posts-by" value="likes">Likes</b-form-radio>
+              <b-form-radio v-model="sortPostsBy" name="sort-posts-by" value="comments">Comments</b-form-radio>
+            </b-form-group>
+          </b-dropdown-form>
+          <b-dropdown-item>Third Action</b-dropdown-item>
+        </b-dropdown>
+      </b-col>
+    </b-row>
+
     <section class="row">
       <div class="w-100">
         <article
@@ -85,6 +104,7 @@ export default {
   },
 
   data: () => ({
+    sortPostsBy: null,
     renderedItems: [], // this will likely only be posts
     renderedPages: [], // track so we don't re-load same page (set of posts) more than 1x
     lastPostVisible: false,
@@ -109,15 +129,19 @@ export default {
 
     eventBus.$on('update-feed', () => {
       console.log('components.timelines.PostFeed - eventBus.$on(update-feed)')
-      this.renderedPages = []
-      this.renderedItems = []
-      this.lastPostVisible = false
-      this.moreLoading = true
+      this.resetFeed();
       this.$store.dispatch('getFeeddata', { timelineId: this.timelineId, page: 1, limit: this.limit, isHomefeed: this.is_homefeed })
     })
   },
 
   methods: {
+
+    resetFeed() {
+      this.renderedPages = []
+      this.renderedItems = []
+      this.lastPostVisible = false
+      this.moreLoading = true
+    },
 
     endPostVisible(isVisible) {
       this.lastPostVisible = isVisible
@@ -150,18 +174,18 @@ export default {
     }
      */
 
-    // re-render a single post (element of renderedItems) based on updated data, for example after purchase
-    // %TODO: should this update the element in vuex feeddata instead (?)
-    // see: 
-    //   https://vuejs.org/v2/guide/list.html#Array-Change-Detection
-    //   https://vuejs.org/v2/guide/reactivity.html#For-Arrays
-    async updatePost(postId) {
-      const response = await axios.get( route('posts.show', postId) );
-      const idx = this.renderedItems.findIndex( ri => ri.id === postId )
-      //this.renderedItems[idx] = response.data.data
-      this.$set(this.renderedItems, idx, response.data.data)
-      //console.log('updatePost', response)
-    },
+        // re-render a single post (element of renderedItems) based on updated data, for example after purchase
+        // %TODO: should this update the element in vuex feeddata instead (?)
+        // see: 
+        //   https://vuejs.org/v2/guide/list.html#Array-Change-Detection
+        //   https://vuejs.org/v2/guide/reactivity.html#For-Arrays
+        async updatePost(postId) {
+          const response = await axios.get( route('posts.show', postId) );
+          const idx = this.renderedItems.findIndex( ri => ri.id === postId )
+          //this.renderedItems[idx] = response.data.data
+          this.$set(this.renderedItems, idx, response.data.data)
+          //console.log('updatePost', response)
+        },
 
     async deletePost(postId) {
       const url = `/posts/${postId}`
@@ -183,6 +207,14 @@ export default {
   },
 
   watch: {
+
+    sortPostsBy (newVal) {
+      console.log('components.timelines.PostFeed - watch.sortPostsBy: reload feed')
+      this.$refs.feedCtrls.hide(true)
+      this.resetFeed();
+      this.$store.dispatch('getFeeddata', { timelineId: this.timelineId, page: 1, limit: this.limit, sortBy: newVal, isHomefeed: this.is_homefeed })
+    },
+
     unshifted_timeline_post (newVal, oldVal) {
       this.$log.debug('PostFeed - watch:unshifted_timeline_post', { newVal, oldVal })
       this.renderedItems.pop(); // pop the 'oldest' to keep pagination offset correct
@@ -202,8 +234,8 @@ export default {
 
 <style scoped>
 .tag-debug {
-  display: none;
   /*
+  display: none;
    */
 }
 </style>
