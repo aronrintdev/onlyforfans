@@ -19,12 +19,19 @@ use App\Jobs\Financial\UpdateAccountBalance;
 use App\Models\Financial\Traits\HasCurrency;
 use App\Enums\Financial\TransactionSummaryTypeEnum;
 use App\Enums\Financial\TransactionTypeEnum;
+use App\Enums\ShareableAccessLevelEnum;
+use App\Interfaces\Purchaseable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Models\Financial\Exceptions\Account\IncorrectTypeException;
 use App\Models\Financial\Exceptions\InvalidTransactionAmountException;
 use App\Models\Financial\Exceptions\Account\InsufficientFundsException;
 use App\Models\Financial\Exceptions\TransactionAccountMismatchException;
 use App\Models\Financial\Exceptions\Account\TransactionNotAllowedException;
+use App\Models\Financial\Exceptions\CurrencyMismatchException;
+use App\Models\Financial\Exceptions\InvalidPaymentAmountException;
+use RuntimeException;
+use Throwable;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class Account extends Model implements Ownable
 {
@@ -152,10 +159,16 @@ class Account extends Model implements Ownable
                 'currency' => $fromAccount->currency,
                 'description' => $options['description'] ?? null,
                 'type' => $options['type'] ?? TransactionTypeEnum::PAYMENT,
-                'shareable_id' => isset($options['shareable_id'])
-                    ? $options['shareable_id']
-                    : (isset($options['shareable'])
-                        ? $options['shareable']->getKey()
+                'purchasable_id' => isset($options['purchasable_id'])
+                    ? $options['purchasable_id']
+                    : (isset($options['purchasable'])
+                        ? $options['purchasable']->getKey()
+                        : null
+                    ),
+                'purchasable_type' => isset($options['purchasable_type'])
+                    ? $options['purchasable_type']
+                    : (isset($options['purchasable'])
+                        ? $options['purchasable']->getMorphString()
                         : null
                     ),
                 'metadata' => $options['metadata'] ?? null,
@@ -403,6 +416,39 @@ class Account extends Model implements Ownable
         return $roleBackTransactions;
     }
 
+    /**
+     * Creates transactions to purchase a purchaseable model and grants access to that model
+     *
+     * @param Purchaseable $purchaseable
+     * @param mixed $payment
+     * @return Collection
+     */
+    public function purchase(Purchaseable $purchaseable, $payment): Collection
+    {
+        $payment = $this->asMoney($payment);
+        // Verify Price
+        if ($purchaseable->verifyPrice($payment) === false) {
+            throw new InvalidPaymentAmountException($this, $payment, $purchaseable);
+        }
+
+        // Move funds to internal account first if this is a in account
+        if ($this->type === AccountTypeEnum::IN) {
+            $this->moveToInternal($payment);
+            $internalAccount = $this->getInternalAccount();
+            $internalAccount->settleBalance();
+            return $internalAccount->purchase($purchaseable, $payment);
+        }
+
+        // Payment funds movement
+        $transactions = $this->moveTo($purchaseable->getOwnerAccount($this->system, $this->currency), $payment, [
+            'purchasable' => $purchaseable,
+            'type' => TransactionTypeEnum::SALE,
+            'description' => "Purchase of {$purchaseable->getDescriptionNameString()} {$purchaseable->getKey()}"
+        ]);
+
+        $purchaseable->grantAccess($this->getOwner()->first(), ShareableAccessLevelEnum::PREMIUM);
+        return $transactions;
+    }
 
     /**
      * Get a system fee account

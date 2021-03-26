@@ -80,10 +80,9 @@ class Transaction extends Model
         return $this->belongsTo(Account::class);
     }
 
-    public function sharable()
+    public function purchasable()
     {
-        // TODO: References Sharable table
-        // return $this->hasOne(Access::class);
+        return $this->morphTo();
     }
 
     public function reference()

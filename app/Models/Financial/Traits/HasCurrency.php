@@ -2,11 +2,22 @@
 
 namespace App\Models\Financial\Traits;
 
+use Money\Money;
+use Money\Currency;
 use Illuminate\Support\Facades\Config;
 use App\Models\Financial\Exceptions\CurrencyMismatchException;
 
 trait HasCurrency
 {
+    public function asMoney($amount): Money
+    {
+        if ($amount instanceof Money) {
+            return $amount;
+        }
+        return new Money($amount, new Currency($this->currency));
+    }
+
+
     /**
      * Currency being worked with.
      * This is an `ISO 4217`, a three letter currency code.

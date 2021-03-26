@@ -41,7 +41,7 @@ class AccountHelpers
      *
      * @param int $amount
      * @param mixed|null $in
-     * @return Collection
+     * @return Collection `[ 'in', 'internal', 'transactions' ]`
      */
     public static function loadWallet(int $amount, $in = null): Collection
     {

@@ -25,10 +25,23 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Interfaces\Purchaseable; // was PaymentReceivable
+use App\Models\Casts\Money;
+use App\Models\Financial\Traits\HasCurrency;
+use App\Models\Financial\Traits\HasSystem;
+use App\Models\Traits\FormatMoney;
 
 class Post extends Model implements UuidId, Ownable, Deletable, Purchaseable, Likeable, Reportable, Commentable
 {
-    use UsesUuid, SoftDeletes, HasFactory, OwnableTraits, LikeableTraits, Sluggable, SluggableTraits;
+    use UsesUuid,
+    SoftDeletes,
+    HasFactory,
+    OwnableTraits,
+    LikeableTraits,
+    Sluggable,
+    SluggableTraits,
+    FormatMoney,
+    HasSystem,
+    HasCurrency;
 
     //--------------------------------------------
     // Boot
@@ -89,9 +102,18 @@ class Post extends Model implements UuidId, Ownable, Deletable, Purchaseable, Li
     }
 
     protected $casts = [
+        'price' => Money::class,
         'cattrs' => 'array',
         'meta' => 'array',
     ];
+
+    public function toArray()
+    {
+        $array = parent::toArray();
+        // Localize Price
+        $array['price_display'] = static::formatMoney($array['price']);
+        return $array;
+    }
 
     //--------------------------------------------
     // %%% Relationships
@@ -214,20 +236,29 @@ class Post extends Model implements UuidId, Ownable, Deletable, Purchaseable, Li
         return $result ?? null;
     }
 
-    public function purchase(Account $from,int $amount = null): void
+    public function grantAccess(User $user, string $accessLevel, $cattrs = [], $meta = []): void
     {
-        // TODO: Implement
+        //
+    }
+    public function revokeAccess(User $user, $cattrs = [], $meta = []): void
+    {
+        //
     }
 
-    public function chargeback(Transaction $transaction): void
+    public function getOwnerAccount(string $system, string $currency): Account
     {
-        // TODO: Implement
+        return $this->getOwner()->first()->getInternalAccount($system, $currency);
     }
 
-    public function verifyPrice(int $amount): bool
+    public function verifyPrice($amount): bool
     {
-        // TODO: Implement
-        return false;
+        $amount = $this->asMoney($amount);
+        return $this->price->equals($amount);
+    }
+
+    public function getDescriptionNameString(): string
+    {
+        return 'Post';
     }
 
     #endregion

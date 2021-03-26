@@ -19,26 +19,20 @@ interface Purchaseable {
         array $customAttributes = []
     ) : ?Fanledger;
 
-    /**
-     * Purchase this model from Account $from
-     * @param Account $from
-     * @param int|null $amount
-     * @return void
-     */
-    public function purchase(Account $from,int $amount = null): void;
+    public function grantAccess(User $user, string $accessLevel, $cattrs = [], $meta = []): void;
+    public function revokeAccess(User $user, $cattrs = [], $meta = []): void;
 
-    /**
-     * "un-purchase" this model in the event of a chargeback
-     * @param Transaction $transaction
-     * @return void
-     */
-    public function chargeback(Transaction $transaction): void;
+    public function getOwnerAccount(string $system, string $currency): Account;
 
     /**
      * Verifies if a price point if valid for purchasing this model
-     * @param int $amount
+     * @param int|Money $amount
      * @return bool
      */
-    public function verifyPrice(int $amount): bool;
+    public function verifyPrice($amount): bool;
 
+
+    public function getKey();
+    public function getMorphString(): string;
+    public function getDescriptionNameString(): string;
 }
