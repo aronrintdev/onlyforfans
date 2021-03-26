@@ -8,30 +8,34 @@
       </ul>
     </div>
 
-    <b-row class="feed-ctrl">
+    <b-row>
       <b-col>
-        <b-dropdown no-caret ref="feedCtrls" variant="transparent" id="feed-ctrl-dropdown" class="tag-ctrl">
-          <template #button-content>
-            <b-icon icon="filter" scale="1.5" variant="primary"></b-icon>
-          </template>
-          <b-dropdown-form>
-            <b-form-group label="">
-              <b-form-radio v-model="sortPostsBy" name="sort-posts-by" value="latest">Latest</b-form-radio>
-              <b-form-radio v-model="sortPostsBy" name="sort-posts-by" value="likes">Likes</b-form-radio>
-              <b-form-radio v-model="sortPostsBy" name="sort-posts-by" value="comments">Comments</b-form-radio>
-            </b-form-group>
-          </b-dropdown-form>
-          <b-dropdown-item>Third Action</b-dropdown-item>
-        </b-dropdown>
+        <section class="feed-ctrl my-3 p-2 d-flex justify-content-end">
+          <div @click="isGridLayout = !isGridLayout" class="btn">
+            <b-icon icon="grid" scale="1.2" variant="primary"></b-icon>
+          </div>
+          <b-dropdown no-caret ref="feedCtrls" variant="transparent" id="feed-ctrl-dropdown" class="tag-ctrl">
+            <template #button-content>
+              <b-icon icon="filter" scale="1.5" variant="primary"></b-icon>
+            </template>
+            <b-dropdown-form>
+              <b-form-group label="">
+                <b-form-radio v-model="sortPostsBy" name="sort-posts-by" value="latest">Latest</b-form-radio>
+                <b-form-radio v-model="sortPostsBy" name="sort-posts-by" value="likes">Likes</b-form-radio>
+                <b-form-radio v-model="sortPostsBy" name="sort-posts-by" value="comments">Comments</b-form-radio>
+              </b-form-group>
+            </b-dropdown-form>
+            <b-dropdown-item>Third Action</b-dropdown-item>
+          </b-dropdown>
+        </section>
       </b-col>
     </b-row>
 
     <section class="row">
-      <div class="w-100">
         <article
           v-for="(feedItem, index) in renderedItems"
           :key="feedItem.id"
-          class="col-sm-12 mb-3"
+          :class="feedClass"
           v-observe-visibility="index === renderedItems.length - 1 ? endPostVisible : false"
         >
           <div class="tag-debug">INDEX: {{ index }}</div>
@@ -43,7 +47,7 @@
             @delete-post="deletePost"
           />
         </article>
-        <article class="load-more-item col-sm-12 mb-3">
+        <article class="load-more-item" :class="feedClass">
           <b-card :class="{ 'cursor-pointer': !moreLoading && !isLastPage }" @click="onLoadMoreClick">
             <div class="w-100 d-flex my-3 justify-content-center" >
               <fa-icon v-if="moreLoading" icon="spinner" spin size="lg" />
@@ -52,7 +56,6 @@
             </div>
           </b-card>
         </article>
-      </div>
     </section>
 
   </div>
@@ -80,6 +83,14 @@ export default {
 
     isLoading() {
       return !this.feeddata || !this.session_user || !this.timeline
+    },
+
+    feedClass() {
+      return {
+        'col-sm-12': !this.isGridLayout,
+        'col-sm-4': this.isGridLayout,
+        'mb-3': true,
+      }
     },
 
     username() { // feed owner
@@ -110,6 +121,9 @@ export default {
     lastPostVisible: false,
     moreLoading: true,
     limit: 5, // %FIXME: un-hardcode
+
+    isGridLayout: false,
+
   }),
 
   mounted() {
@@ -233,9 +247,14 @@ export default {
 </script>
 
 <style scoped>
+.feed-ctrl {
+  background: #fff;
+  border: solid #a5a5a5 1px;
+  border-radius: 3px;
+}
 .tag-debug {
-  /*
   display: none;
+  /*
    */
 }
 </style>
