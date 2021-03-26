@@ -142,7 +142,7 @@ body .user-details ul > li {
 }
 .tag-debug {
   /*
-   */
   display: none;
+   */
 }
 </style>

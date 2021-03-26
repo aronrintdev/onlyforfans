@@ -25,7 +25,7 @@
                 <b-form-radio v-model="sortPostsBy" name="sort-posts-by" value="comments">Comments</b-form-radio>
               </b-form-group>
               <b-form-group label="">
-                <b-form-checkbox v-model="renderLocked" name="render-locked" value="true">Hide Locked</b-form-checkbox>
+                <b-form-checkbox v-model="hideLocked" name="render-locked" value="true">Hide Locked</b-form-checkbox>
               </b-form-group>
             </b-dropdown-form>
           </b-dropdown>
@@ -124,7 +124,7 @@ export default {
     moreLoading: true,
     limit: 5, // %FIXME: un-hardcode
 
-    renderLocked: true,
+    hideLocked: false,
     isGridLayout: false,
 
   }),
@@ -137,7 +137,12 @@ export default {
   },
 
   created() {
-    this.$store.dispatch('getFeeddata', { timelineId: this.timelineId, page: 1, limit: this.limit, isHomefeed: this.is_homefeed })
+    this.$store.dispatch('getFeeddata', { 
+      timelineId: this.timelineId, 
+      isHomefeed: this.is_homefeed,
+      page: 1, 
+      limit: this.limit, 
+    })
 
     eventBus.$on('update-post', postId => {
       console.log('components.timelines.PostFeed - eventBus.$on(update-post)')
@@ -147,7 +152,14 @@ export default {
     eventBus.$on('update-feed', () => {
       console.log('components.timelines.PostFeed - eventBus.$on(update-feed)')
       this.resetFeed();
-      this.$store.dispatch('getFeeddata', { timelineId: this.timelineId, page: 1, limit: this.limit, isHomefeed: this.is_homefeed })
+      this.$store.dispatch('getFeeddata', { 
+        timelineId: this.timelineId, 
+        isHomefeed: this.is_homefeed,
+        page: 1, 
+        limit: this.limit, 
+        sortBy: this.sortBy, 
+        hideLocked: this.hideLocked, 
+      })
     })
   },
 
@@ -210,7 +222,15 @@ export default {
       if ( !this.moreLoading && !this.isLoading && (this.nextPage <= this.lastPage) ) {
         this.moreLoading = true;
         this.$log.debug('loadMore', { current: this.currentPage, last: this.lastPage, next: this.nextPage });
-        this.$store.dispatch('getFeeddata', { timelineId: this.timelineId, page: this.nextPage, limit: this.limit, isHomefeed: this.is_homefeed })
+        this.$store.dispatch('getFeeddata', { 
+          timelineId: this.timelineId, 
+          page: this.nextPage, 
+          limit: this.limit, 
+          isHomefeed: 
+          this.is_homefeed,
+          sortBy: this.sortBy, 
+          hideLocked: this.hideLocked, 
+        })
       }
     },
 
@@ -225,16 +245,17 @@ export default {
 
   watch: {
 
-    renderLocked (newVal) {
-      console.log('components.timelines.PostFeed - watch.renderLocked: reload feed')
+    hideLocked (newVal) {
+      console.log('components.timelines.PostFeed - watch.hideLocked: reload feed')
       this.$refs.feedCtrls.hide(true)
       this.resetFeed();
       this.$store.dispatch('getFeeddata', { 
         timelineId: this.timelineId, 
+        isHomefeed: this.is_homefeed,
         page: 1, 
         limit: this.limit, 
-        sortBy: newVal, 
-        isHomefeed: this.is_homefeed 
+        sortBy: this.sortPostsBy, 
+        hideLocked: newVal, 
       })
     },
 
@@ -244,10 +265,11 @@ export default {
       this.resetFeed();
       this.$store.dispatch('getFeeddata', { 
         timelineId: this.timelineId, 
+        isHomefeed: this.is_homefeed,
         page: 1, 
         limit: this.limit, 
         sortBy: newVal, 
-        isHomefeed: this.is_homefeed 
+        hideLocked: this.hideLocked, 
       })
     },
 
@@ -275,8 +297,8 @@ export default {
   border-radius: 3px;
 }
 .tag-debug {
-  display: none;
   /*
+  display: none;
    */
 }
 </style>
