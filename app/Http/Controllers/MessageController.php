@@ -38,7 +38,7 @@ class MessageController extends Controller
             $user->id = $user->user->id;
         });
     
-        $followers = $timeline->followers->whereNotIn('id', $receivers)->all();  
+        $followers = $timeline->followers->whereNotIn('id', $receivers)->all();     
         $arr = [];
         foreach ($followers as $follower) {
             array_push($arr, $follower);    
@@ -53,7 +53,6 @@ class MessageController extends Controller
     public function fetchContacts(Request $request)
     {
         $sessionUser = $request->user();
-
         $cattrs = DB::table('user_settings')->where('user_id', $sessionUser->id)->first();
         $blocked = json_decode($cattrs->cattrs)->blocked->usernames;
         $blockers = User::whereIn('username', $blocked)->pluck('id')->toArray();
@@ -219,5 +218,37 @@ class MessageController extends Controller
             ->pluck('id')
             ->toArray();
         return $messages;
+    }
+    public function mute(Request $request, $id) {
+        $sessionUser = $request->user();
+        $userSetting = $sessionUser->settings;
+        $cattrs = $userSetting->cattrs;
+        if ( !array_key_exists('muted', $cattrs) ) {
+            $muted = [];
+        } else {
+            $muted = $cattrs['muted'];
+        }
+        array_push($muted, $id);
+        $cattrs['muted'] = $muted;
+        $userSetting->cattrs = $cattrs;
+        $userSetting->save();
+        return;
+    }
+    public function unmute(Request $request, $id) {
+        $sessionUser = $request->user();
+        $userSetting = $sessionUser->settings;
+        $cattrs = $userSetting->cattrs;
+        if ( !array_key_exists('muted', $cattrs) ) {
+            return;
+        }
+        $muted = $cattrs['muted']; // pop
+        $index = array_search($id, $muted);
+        if ( $index !== false ) {
+            array_splice($muted, $index, 1);
+        }
+        $cattrs['muted'] = $muted; 
+        $userSetting->cattrs = $cattrs;
+        $userSetting->save();
+        return;
     }
 }

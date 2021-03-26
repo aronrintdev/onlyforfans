@@ -409,6 +409,12 @@
 						
 							svg {
 								width: 11px;
+								padding: 0 1px;
+								box-sizing: content-box;
+							}
+							svg[data-icon="bell-slash"] {
+								width: 13px;
+								padding: 0;
 							}
 							&:after {
 								display: none;

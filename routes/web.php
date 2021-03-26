@@ -197,6 +197,8 @@ Route::delete('/chat-messages/{id}', ['as'=>'messages.clearcontact', 'uses' => '
 Route::post('/chat-messages/{id}/mark-as-read', ['as'=>'messages.markasread', 'uses' => 'MessageController@markAsRead']);
 Route::post('/chat-messages/mark-all-as-read', ['as'=>'messages.markallasread', 'uses' => 'MessageController@markAllAsRead']);
 Route::get('/chat-messages/{id}/search', ['as'=>'messages.filtermessages', 'uses' => 'MessageController@filterMessages']);
+Route::patch('/chat-messages/{id}/mute', ['as'=>'messages.mute', 'uses' => 'MessageController@mute']);
+Route::patch('/chat-messages/{id}/unmute', ['as'=>'messages.unmute', 'uses' => 'MessageController@unmute']);
 
 Route::resource('chat-messages', 'MessageController')->only([
     'index',

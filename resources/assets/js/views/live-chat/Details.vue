@@ -130,11 +130,11 @@
                         </div>
                         <div class="v-divider"></div>
                         <button class="star-btn btn" type="button" @click="addToFavourites()">
-                          <font-awesome-icon :icon="['far', 'star']" />
+                          <font-awesome-icon :icon="this.selectedUser.is_favourite ? ['fas', 'star'] : ['far', 'star']" />
                         </button>
                         <div class="v-divider"></div>
                         <button class="notification-btn btn" type="button" @click="muteNotification()">
-                          <font-awesome-icon :icon="['far', 'bell']" />
+                          <font-awesome-icon :icon="this.selectedUser.muted ? ['far', 'bell-slash'] : ['far', 'bell'] " />
                         </button>
                         <div class="v-divider"></div>
                         <button class="gallery-btn btn" type="button">
@@ -163,7 +163,8 @@
                     </b-dropdown-item>
                       <b-dropdown-divider></b-dropdown-divider>
                       <b-dropdown-item>Hide chat</b-dropdown-item>
-                      <b-dropdown-item>Mute notifications</b-dropdown-item>
+                      <b-dropdown-item v-if="!selectedUser.muted" @click="muteNotification">Mute notifications</b-dropdown-item>
+                      <b-dropdown-item v-if="selectedUser.muted" @click="muteNotification">Unmute notifications</b-dropdown-item>
                       <b-dropdown-divider></b-dropdown-divider>
                       <b-dropdown-item class="block-item">Restrict @{{ selectedUser.profile.username }}</b-dropdown-item>
                       <b-dropdown-item @click="showBlockModal" class="block-item">Block @{{ selectedUser.profile.username }}</b-dropdown-item>
@@ -337,6 +338,7 @@
       currentSearchIndex: -1,
       totalSearches: [],
       blockReason: undefined,
+      muted: undefined,
     }),
     mounted() {
       const self = this;
@@ -519,10 +521,15 @@
         this.$router.push('/messages');
       },
       addToFavourites: function () {
-        this.selectedUser.isFavourite = !this.selectedUser.isFavourite;
+        this.selectedUser = { ...this.selectedUser, is_favourite: !this.selectedUser.is_favourite };
       },
-      muteNotification: function () {
-        this.selectedUser.muted = !this.selectedUser.muted;
+      muteNotification: async function () {
+        if (!this.selectedUser.muted) {
+          await this.axios.patch(`/chat-messages/${this.$route.params.id}/mute`);
+        } else {
+          await this.axios.patch(`/chat-messages/${this.$route.params.id}/unmute`);
+        }
+        this.selectedUser = { ...this.selectedUser, muted: !this.selectedUser.muted };
       },
       onMessageSearchTextChange: function () {
         this.clearHighlightMessages();
