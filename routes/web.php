@@ -199,6 +199,7 @@ Route::post('/chat-messages/mark-all-as-read', ['as'=>'messages.markallasread', 
 Route::get('/chat-messages/{id}/search', ['as'=>'messages.filtermessages', 'uses' => 'MessageController@filterMessages']);
 Route::patch('/chat-messages/{id}/mute', ['as'=>'messages.mute', 'uses' => 'MessageController@mute']);
 Route::patch('/chat-messages/{id}/unmute', ['as'=>'messages.unmute', 'uses' => 'MessageController@unmute']);
+Route::post('/chat-messages/{id}/custom-name', ['as'=>'messages.customname', 'uses' => 'MessageController@setCustomName']);
 
 Route::resource('chat-messages', 'MessageController')->only([
     'index',

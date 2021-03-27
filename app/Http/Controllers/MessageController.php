@@ -53,9 +53,14 @@ class MessageController extends Controller
     public function fetchContacts(Request $request)
     {
         $sessionUser = $request->user();
-        $cattrs = DB::table('user_settings')->where('user_id', $sessionUser->id)->first();
-        $blocked = json_decode($cattrs->cattrs)->blocked->usernames;
-        $blockers = User::whereIn('username', $blocked)->pluck('id')->toArray();
+        $userSetting = $sessionUser->settings;
+        $cattrs = $userSetting->cattrs;
+        if ( !array_key_exists('blocked', $cattrs) ) {
+            $blockedUsers = [];
+        } else {
+            $blockedUsers = $cattrs['blocked']['usernames'];
+        }
+        $blockers = User::whereIn('username', $blockedUsers)->pluck('id')->toArray();
         $receivers = Message::where(function($query) use(&$request, &$blockers) {
                 $sessionUser = $request->user();
                 $searchText = $request->query('name');
@@ -79,6 +84,9 @@ class MessageController extends Controller
             ->pluck('user_id')
             ->toArray();
         $receivers = uniq(array_merge($receivers, $senders));
+
+        $userSettings = $sessionUser->settings;
+
         $contacts = array();
         foreach($receivers as $receiver) {
             $lastMessage = Message::with(['receiver'])
@@ -94,6 +102,12 @@ class MessageController extends Controller
                 })
                 ->latest()->first();
             $user = Timeline::with(['user', 'avatar'])->where('user_id', $receiver)->first()->makeVisible(['user']);
+            $cattrs = $userSettings->cattrs;
+            if ( array_key_exists('display_name', $cattrs) ) {
+                if ( array_key_exists($receiver, $cattrs['display_name']) ) {
+                    $user->display_name = $cattrs['display_name'][$receiver];
+                }
+            }
             $user->username = $user->user->username;
             $user->id = $user->user->id;
             array_push($contacts, [
@@ -120,9 +134,11 @@ class MessageController extends Controller
             $arr2 = array_reverse($arr2);
             $contacts = array_merge($arr1, $arr2);
         }
-        return $contacts;
+        return $contacts; 
     }
     public function fetchcontact(Request $request, $id) {
+        $sessionUser = $request->user();
+
         $offset = $request->query('offset');
         $limit = $request->query('limit');
         $messages = Message::with(['receiver'])
@@ -142,6 +158,13 @@ class MessageController extends Controller
             ->get();
         $user = Timeline::with(['user', 'avatar'])->where('user_id', $id)->first()->makeVisible(['user']);
         $user->username = $user->user->username;
+        $userSetting = $sessionUser->settings;
+        $cattrs = $userSetting->cattrs;
+        if ( array_key_exists('display_name', $cattrs) ) {
+            if ( array_key_exists($id, $cattrs['display_name']) ) {
+                $user->display_name = $cattrs['display_name'][$id];
+            }
+        }
         $user->id = $user->user->id;
         return [
             'messages' => $messages,
@@ -247,6 +270,22 @@ class MessageController extends Controller
             array_splice($muted, $index, 1);
         }
         $cattrs['muted'] = $muted; 
+        $userSetting->cattrs = $cattrs;
+        $userSetting->save();
+        return;
+    }
+    public function setCustomName(Request $request, $id) {
+        $sessionUser = $request->user();
+        $userSetting = $sessionUser->settings;
+        $cattrs = $userSetting->cattrs;
+        if ( !array_key_exists('display_name', $cattrs) ) {
+            $display_name = [];
+        } else {
+            $display_name = $cattrs['display_name'];
+        }
+        $new[$id] = $request->input('name');
+        $display_name += $new;
+        $cattrs['display_name'] = $display_name; 
         $userSetting->cattrs = $cattrs;
         $userSetting->save();
         return;

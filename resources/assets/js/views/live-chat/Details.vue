@@ -91,7 +91,7 @@
                           <div class="user-details">
                             <div class="user-details-row">
                               <div>
-                                <span class="username">{{ user.profile.name }}</span>
+                                <span class="username">{{ user.profile.display_name ? user.profile.display_name : user.profile.name }}</span>
                                 <span class="user-id">{{ `@${user.profile.username}` }}</span>
                               </div>
                               <!-- Close Button -->
@@ -118,7 +118,7 @@
                     </button>
                     <div class="content">
                       <div class="user-name">
-                        <span>{{ selectedUser.profile.name }}</span>
+                        <span>{{ selectedUser.profile.display_name ? `${selectedUser.profile.display_name} (${selectedUser.profile.name})` : selectedUser.profile.name }}</span>
                       </div>
                       <div class="details" v-if="!messageSearchVisible">
                         <div class="online-status" v-if="!selectedUser.profile.user.is_online && selectedUser.profile.user.last_logged">Last seen {{ moment(selectedUser.profile.user.last_logged).format('MMM DD, YYYY') }}
@@ -160,7 +160,10 @@
                       </b-dropdown-item>
                       <b-dropdown-item>
                         Give user a discount
-                    </b-dropdown-item>
+                      </b-dropdown-item>
+                      <b-dropdown-item @click="editCustomName">
+                        Edit Name
+                      </b-dropdown-item>
                       <b-dropdown-divider></b-dropdown-divider>
                       <b-dropdown-item>Hide chat</b-dropdown-item>
                       <b-dropdown-item v-if="!selectedUser.muted" @click="muteNotification">Mute notifications</b-dropdown-item>
@@ -303,6 +306,18 @@
         </div>
       </div>
     </b-modal>
+    <b-modal v-if="selectedUser" hide-header centered hide-footer ref="custom-name-modal" title="Custom Name Modal">
+      <div class="block-modal">
+        <h4>RENAME @{{ selectedUser.profile.username }}</h4>
+        <div class="content mb-3 mt-3">
+          <b-form-input v-model="userCustomName" placeholder="Custom name"></b-form-input>
+        </div>
+        <div class="action-btns">
+          <button class="link-btn" @click="closeCustomNameModal">Cancel</button>
+          <button class="link-btn" @click="saveCustomName" :disabled="!userCustomName">Save</button>
+        </div>
+      </div>
+    </b-modal>
   </div>
 </template>
 
@@ -339,6 +354,7 @@
       totalSearches: [],
       blockReason: undefined,
       muted: undefined,
+      userCustomName: undefined
     }),
     mounted() {
       const self = this;
@@ -632,7 +648,20 @@
               self.$router.push('/messages');
             });
         }
-      }
+      },
+      editCustomName: function() {
+        this.$refs['custom-name-modal'].show();
+      },
+      closeCustomNameModal: function() {
+        this.$refs['custom-name-modal'].hide();
+        this.userCustomName = undefined;
+      },
+      saveCustomName: function() {
+        if (this.userCustomName) {
+          this.axios.post(`/chat-messages/${this.$route.params.id}/custom-name`, { name: this.userCustomName });
+        }
+        this.closeCustomNameModal();
+      },
     }
   }
 </script>
