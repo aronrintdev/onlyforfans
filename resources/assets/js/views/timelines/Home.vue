@@ -10,11 +10,11 @@
       </section>
 
       <section class="row">
-        <main class="col-md-7 col-lg-8">
+        <main :class="mainClass">
           <CreatePost :session_user="session_user" :timeline="timeline" />
           <PostFeed :session_user="session_user" :timeline="timeline" :is_homefeed="true" />
         </main>
-        <aside class="col-md-5 col-lg-4">
+        <aside v-if="!isGridLayout" class="col-md-5 col-lg-4">
           <MiniMyStatsWidget :session_user="session_user" :timeline="timeline" />
           <SuggestedFeed :session_user="session_user" :timeline="timeline" class="mt-3" />
         </aside>
@@ -67,12 +67,22 @@ export default {
       'session_user', 
       'timeline',
     ]),
+
+    mainClass() {
+      return {
+        'col-md-7': !this.isGridLayout,
+        'col-lg-8': !this.isGridLayout,
+        'col-md-12': this.isGridLayout, // full-width
+      }
+    },
+
     isLoading() {
       return !this.timeline || !this.session_user
     },
   },
 
   data: () => ({
+    isGridLayout: false, // %FIXME: can this be set in created() so we have 1 source of truth ? (see PostFeed)
     selectedPost: null,
     selectedTimeline: null,
     subscribeOnly: true, // for modal
@@ -82,9 +92,7 @@ export default {
 
     // %FIXME: DRY
     eventBus.$on('open-modal', ({ key, data }) => {
-      console.log('views/timelines/Show.on(open-modal)', {
-        key, data,
-      });
+      console.log('views/timelines/Show.on(open-modal)', { key, data });
       switch(key) {
         case 'render-purchase-post':
           this.selectedPost = data.post
@@ -107,12 +115,17 @@ export default {
     })
 
     eventBus.$on('update-timeline', () => {
-      console.log('views.timelines.Show - eventBus.$on(update-timeline)')
       this.load() 
     })
 
+    eventBus.$on('set-feed-layout',  isGridLayout  => {
+      this.isGridLayout = isGridLayout
+    })
+
   },
+
   mounted() { },
+  watch: { },
 
 }
 </script>

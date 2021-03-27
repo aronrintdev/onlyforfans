@@ -10,11 +10,11 @@
       </section>
 
       <section class="row">
-        <aside class="col-md-5 col-lg-4">
+        <aside v-if="!isGridLayout" class="col-md-5 col-lg-4">
           <FollowCtrl :session_user="session_user" :timeline="timeline" />
           <PreviewUpgrade :session_user="session_user" :timeline="timeline" />
         </aside>
-        <main class="col-md-7 col-lg-8">
+        <main :class="mainClass">
           <PostFeed :session_user="session_user" :timeline="timeline" :is_homefeed="false" />
         </main>
       </section>
@@ -74,12 +74,21 @@ export default {
   computed: {
     ...Vuex.mapGetters(['session_user']),
 
+    mainClass() {
+      return {
+        'col-md-7': !this.isGridLayout,
+        'col-lg-8': !this.isGridLayout,
+        'col-md-12': this.isGridLayout, // full-width
+      }
+    },
+
     isLoading() {
       return !this.slug || !this.timeline
     }
   },
 
   data: () => ({
+    isGridLayout: false, // %FIXME: can this be set in created() so we have 1 source of truth ? (see PostFeed)
     timeline: null,
     selectedPost: null,
     subscribeOnly: true, // for modal
@@ -115,8 +124,11 @@ export default {
     })
 
     eventBus.$on('update-timeline', () => {
-      console.log('views.timelines.Show - eventBus.$on(update-timeline)')
       this.load() 
+    })
+
+    eventBus.$on('set-feed-layout',  isGridLayout  => {
+      this.isGridLayout = isGridLayout
     })
   },
 

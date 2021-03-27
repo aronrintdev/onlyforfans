@@ -11,7 +11,7 @@
     <b-row>
       <b-col>
         <section class="feed-ctrl my-3 p-2 d-flex justify-content-end">
-          <div @click="isGridLayout = !isGridLayout" class="btn">
+          <div @click="toggleGridLayout" class="btn">
             <b-icon icon="grid" scale="1.2" variant="primary"></b-icon>
           </div>
           <b-dropdown no-caret ref="feedCtrls" variant="transparent" id="feed-ctrl-dropdown" class="tag-ctrl">
@@ -159,6 +159,13 @@ export default {
   },
 
   methods: {
+
+    toggleGridLayout() {
+      this.isGridLayout = !this.isGridLayout
+      eventBus.$emit('set-feed-layout', this.isGridLayout )
+        /*
+         */
+    },
 
     endPostVisible(isVisible) {
       this.lastPostVisible = isVisible
