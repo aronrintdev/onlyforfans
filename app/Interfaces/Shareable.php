@@ -12,6 +12,12 @@ use App\Models\User;
 interface Shareable
 {
     /**
+     * Get the name of the shareablesTable
+     * @return string
+     */
+    public function getShareableTable(): string;
+
+    /**
      * Grants access to this resource for a user
      *
      * @param User $user

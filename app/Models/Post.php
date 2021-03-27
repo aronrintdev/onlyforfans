@@ -30,6 +30,7 @@ use App\Models\Casts\Money;
 use App\Models\Financial\Traits\HasCurrency;
 use App\Models\Financial\Traits\HasSystem;
 use App\Models\Traits\FormatMoney;
+use App\Models\Traits\ShareableTraits;
 
 /**
  * Post Model
@@ -68,6 +69,7 @@ class Post extends Model
     LikeableTraits,
     Sluggable,
     SluggableTraits,
+    ShareableTraits,
     FormatMoney,
     HasCurrency;
 
@@ -264,24 +266,19 @@ class Post extends Model
         return $result ?? null;
     }
 
-    public function grantAccess(User $user, string $accessLevel, $cattrs = [], $meta = []): void
-    {
-        //
-    }
-    public function revokeAccess(User $user, $cattrs = [], $meta = []): void
-    {
-        //
-    }
-
-    public function getOwnerAccount(string $system, string $currency): Account
-    {
-        return $this->getOwner()->first()->getInternalAccount($system, $currency);
-    }
-
     public function verifyPrice($amount): bool
     {
         $amount = $this->asMoney($amount);
         return $this->price->equals($amount);
+    }
+
+    #endregion
+
+    #region PaymentSendable
+
+    public function getOwnerAccount(string $system, string $currency): Account
+    {
+        return $this->getOwner()->first()->getInternalAccount($system, $currency);
     }
 
     public function getDescriptionNameString(): string
@@ -290,6 +287,7 @@ class Post extends Model
     }
 
     #endregion
+
 
     public function canBeDeleted(): bool
     {

@@ -20,6 +20,7 @@ use App\Interfaces\Tippable;
 use App\Models\Casts\Money;
 use App\Models\Financial\Traits\HasCurrency;
 use App\Models\Traits\FormatMoney;
+use App\Models\Traits\ShareableTraits;
 use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -54,6 +55,7 @@ class Timeline extends Model implements Purchaseable, Tippable, Reportable
         UsesUuid,
         Sluggable,
         SluggableTraits,
+        ShareableTraits,
         FormatMoney,
         HasCurrency;
 

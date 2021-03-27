@@ -13,8 +13,10 @@ use Illuminate\Support\Facades\Event;
 use PHPUnit\Framework\IncompleteTestError;
 use Tests\Helpers\Financial\AccountHelpers;
 use App\Enums\Financial\TransactionTypeEnum;
+use App\Enums\ShareableAccessLevelEnum;
 use App\Events\ItemPurchased;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use RuntimeException;
 
 /**
  * Purchaseable Unit Test Cases
@@ -31,6 +33,7 @@ class PurchaseableTest extends TestCase
 
     /**
      * Verify price point works correctly
+     *
      * @group post
      * @return void
      */
@@ -50,6 +53,7 @@ class PurchaseableTest extends TestCase
 
     /**
      * Can purchase post
+     *
      * @group post
      * @depends test_verify_post_price_point
      * @return void
@@ -74,9 +78,35 @@ class PurchaseableTest extends TestCase
     }
 
     /**
-     * Chargeback disables access to post
+     * Check that purchasing a post grants access to that post
+     *
      * @group post
      * @depends test_can_purchase_post
+     * @return void
+     */
+    public function test_purchase_post_grants_assess_to_post()
+    {
+        Event::fake([ItemPurchased::class]);
+        $post = Post::factory()->pricedAt(1000)->create();
+        $purchaserAccounts = AccountHelpers::loadWallet(1000);
+        $user = $purchaserAccounts['internal']->getOwner()->first();
+
+        $purchaserAccounts['internal']->purchase($post, 1000);
+
+        $this->assertDatabaseHas('shareables', [
+            'sharee_id' => $user->getKey(),
+            'shareable_type' => $post->getMorphString(),
+            'shareable_id' => $post->getKey(),
+            'is_approved' => true,
+            'access_level' => ShareableAccessLevelEnum::PREMIUM,
+        ]);
+    }
+
+    /**
+     * Chargeback disables access to post
+     *
+     * @group post
+     * @depends test_purchase_post_grants_assess_to_post
      * @return void
      */
     public function test_chargeback_disables_post_access()
