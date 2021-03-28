@@ -14,6 +14,8 @@ use PHPUnit\Framework\IncompleteTestError;
 use Tests\Helpers\Financial\AccountHelpers;
 use App\Enums\Financial\TransactionTypeEnum;
 use App\Enums\ShareableAccessLevelEnum;
+use App\Events\AccessGranted;
+use App\Events\AccessRevoked;
 use App\Events\ItemPurchased;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use RuntimeException;
@@ -30,6 +32,9 @@ use RuntimeException;
 class PurchaseableTest extends TestCase
 {
     use RefreshDatabase;
+
+    /* ------------------------------- Posts -------------------------------- */
+    #region Posts
 
     /**
      * Verify price point works correctly
@@ -60,7 +65,8 @@ class PurchaseableTest extends TestCase
      */
     public function test_can_purchase_post()
     {
-        Event::fake([ ItemPurchased::class ]);
+        Event::fake([ ItemPurchased::class, AccessGranted::class ]);
+
         $post = Post::factory()->pricedAt(1000)->create();
         $purchaserAccounts = AccountHelpers::loadWallet(1000);
 
@@ -86,7 +92,8 @@ class PurchaseableTest extends TestCase
      */
     public function test_purchase_post_grants_assess_to_post()
     {
-        Event::fake([ItemPurchased::class]);
+        Event::fake([ItemPurchased::class, AccessGranted::class]);
+
         $post = Post::factory()->pricedAt(1000)->create();
         $purchaserAccounts = AccountHelpers::loadWallet(1000);
         $user = $purchaserAccounts['internal']->getOwner()->first();
@@ -100,6 +107,9 @@ class PurchaseableTest extends TestCase
             'is_approved' => true,
             'access_level' => ShareableAccessLevelEnum::PREMIUM,
         ]);
+        Event::assertDispatched(function (AccessGranted $event) use ($post, $user) {
+            return $event->item->getKey() === $post->getKey() && $event->grantedTo === $user->getKey();
+        });
     }
 
     /**
@@ -111,7 +121,177 @@ class PurchaseableTest extends TestCase
      */
     public function test_chargeback_disables_post_access()
     {
+        Event::fake([ItemPurchased::class, AccessGranted::class, AccessRevoked::class]);
+
+        $post = Post::factory()->pricedAt(1000)->create();
+        $purchaserAccounts = AccountHelpers::loadWallet(1000);
+        $user = $purchaserAccounts['internal']->getOwner()->first();
+
+        $purchaserAccounts['internal']->purchase($post, 1000);
+
+        $purchaserAccounts['in']->handleChargeback($purchaserAccounts['transactions']['debit']);
+
+        $this->assertDatabaseHas('shareables', [
+            'sharee_id' => $user->getKey(),
+            'shareable_type' => $post->getMorphString(),
+            'shareable_id' => $post->getKey(),
+            'is_approved' => false,
+            'access_level' => ShareableAccessLevelEnum::REVOKED,
+        ]);
+
+        Event::assertDispatched(function(AccessRevoked $event) use ($post, $user) {
+            return $event->item->getKey() === $post->getKey() && $event->revokedFrom === $user->getKey();
+        });
+    }
+
+    /**
+     * Chargeback disables access to multiple posts made with chargeback transaction
+     *
+     * @group post
+     * @depends test_chargeback_disables_post_access
+     * @return void
+     */
+    public function test_chargeback_disables_multiple_posts_access()
+    {
+        Event::fake([ItemPurchased::class, AccessGranted::class, AccessRevoked::class]);
+
+        $posts = Post::factory()->count(3)->pricedAt(1000)->create();
+        $purchaserAccounts = AccountHelpers::loadWallet(3000);
+        $user = $purchaserAccounts['internal']->getOwner()->first();
+
+        $purchaserAccounts['internal']->purchase($posts[0], 1000);
+        $purchaserAccounts['internal']->purchase($posts[1], 1000);
+        $purchaserAccounts['internal']->purchase($posts[2], 1000);
+
+        $purchaserAccounts['in']->handleChargeback($purchaserAccounts['transactions']['debit']);
+
+        $this->assertDatabaseHas('shareables', [
+            'sharee_id' => $user->getKey(),
+            'shareable_type' => $posts[0]->getMorphString(),
+            'shareable_id' => $posts[0]->getKey(),
+            'is_approved' => false,
+            'access_level' => ShareableAccessLevelEnum::REVOKED,
+        ]);
+
+        $this->assertDatabaseHas('shareables', [
+            'sharee_id' => $user->getKey(),
+            'shareable_type' => $posts[1]->getMorphString(),
+            'shareable_id' => $posts[1]->getKey(),
+            'is_approved' => false,
+            'access_level' => ShareableAccessLevelEnum::REVOKED,
+        ]);
+
+        $this->assertDatabaseHas('shareables', [
+            'sharee_id' => $user->getKey(),
+            'shareable_type' => $posts[2]->getMorphString(),
+            'shareable_id' => $posts[2]->getKey(),
+            'is_approved' => false,
+            'access_level' => ShareableAccessLevelEnum::REVOKED,
+        ]);
+
+        Event::assertDispatched(AccessRevoked::class, 3);
+    }
+
+    /**
+     * Chargeback disables access to multiple posts made with chargeback transaction
+     *
+     * @group post
+     * @depends test_chargeback_disables_multiple_posts_access
+     * @return void
+     */
+    public function test_chargeback_disables_multiple_posts_access_with_partial()
+    {
+        Event::fake([ItemPurchased::class, AccessGranted::class, AccessRevoked::class]);
+
+        $posts = Post::factory()->count(3)->pricedAt(1000)->create();
+        $purchaserAccounts = AccountHelpers::loadWallet(3500);
+        $user = $purchaserAccounts['internal']->getOwner()->first();
+
+        $purchaserAccounts['internal']->purchase($posts[0], 1000);
+        $purchaserAccounts['internal']->purchase($posts[1], 1000);
+        $purchaserAccounts['internal']->purchase($posts[2], 1000);
+
+        $purchaserAccounts['in']->handleChargeback($purchaserAccounts['transactions']['debit']);
+
+        $this->assertDatabaseHas('shareables', [
+            'sharee_id' => $user->getKey(),
+            'shareable_type' => $posts[0]->getMorphString(),
+            'shareable_id' => $posts[0]->getKey(),
+            'is_approved' => false,
+            'access_level' => ShareableAccessLevelEnum::REVOKED,
+        ]);
+
+        $this->assertDatabaseHas('shareables', [
+            'sharee_id' => $user->getKey(),
+            'shareable_type' => $posts[1]->getMorphString(),
+            'shareable_id' => $posts[1]->getKey(),
+            'is_approved' => false,
+            'access_level' => ShareableAccessLevelEnum::REVOKED,
+        ]);
+
+        $this->assertDatabaseHas('shareables', [
+            'sharee_id' => $user->getKey(),
+            'shareable_type' => $posts[2]->getMorphString(),
+            'shareable_id' => $posts[2]->getKey(),
+            'is_approved' => false,
+            'access_level' => ShareableAccessLevelEnum::REVOKED,
+        ]);
+
+        Event::assertDispatched(AccessRevoked::class, 3);
+    }
+
+    #endregion
+
+    /* ------------------------------ Timelines ----------------------------- */
+    #region Timelines
+
+    /**
+     * Verify price point works correctly
+     *
+     * @group timeline
+     * @return void
+     */
+    public function test_verify_timeline_price_point()
+    {
         $this->markTestIncomplete();
     }
+
+    /**
+     * Can purchase timeline
+     *
+     * @group timeline
+     * @depends test_verify_timeline_price_point
+     * @return void
+     */
+    public function test_can_purchase_timeline()
+    {
+        $this->markTestIncomplete();
+    }
+
+    /**
+     * Check that purchasing a timeline grants access to that timeline
+     *
+     * @group timeline
+     * @depends test_can_purchase_timeline
+     * @return void
+     */
+    public function test_purchase_timeline_grants_assess_to_timeline()
+    {
+        $this->markTestIncomplete();
+    }
+
+    /**
+     * Chargeback disables access to timeline
+     *
+     * @group timeline
+     * @depends test_purchase_timeline_grants_assess_to_timeline
+     * @return void
+     */
+    public function test_chargeback_disables_timeline_access()
+    {
+        $this->markTestIncomplete();
+    }
+
+    #endregion
 
 }

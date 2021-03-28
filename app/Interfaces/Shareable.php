@@ -9,7 +9,7 @@ use App\Models\User;
  *
  * @package App\Interfaces
  */
-interface Shareable
+interface Shareable extends IsModel
 {
     /**
      * Get the name of the shareablesTable

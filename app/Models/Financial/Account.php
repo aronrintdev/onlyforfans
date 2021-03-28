@@ -414,6 +414,12 @@ class Account extends Model implements Ownable
                 $roleBackTransactions->push(
                     $transaction->chargeback($this->asMoney(0)->subtract($remainingAmount))
                 );
+                if (isset($transaction->purchasable_id)) {
+                    // Revoke access to item for every owner of chargeback account
+                    $this->getOwner()->each(function ($owner) use ($transaction) {
+                        $transaction->purchasable->revokeAccess($owner, 'chargeback');
+                    });
+                }
             }
 
             // Perform chargeback rollbacks on transactions in reverse order
@@ -422,6 +428,12 @@ class Account extends Model implements Ownable
                 $roleBackTransactions->push(
                     $transaction->chargeback()
                 );
+                if (isset($transaction->purchasable_id)) {
+                    // Revoke access to item for every owner of chargeback account
+                    $this->getOwner()->each(function ($owner) use ($transaction) {
+                        $transaction->purchasable->revokeAccess($owner, 'chargeback');
+                    });
+                }
             }
         });
 
@@ -448,7 +460,7 @@ class Account extends Model implements Ownable
      * @param mixed $payment
      * @return Collection
      */
-    public function purchase(Purchaseable $purchaseable, $payment): Collection
+    public function purchase(Purchaseable $purchaseable, $payment, $purchaseLevel = ShareableAccessLevelEnum::PREMIUM): Collection
     {
         $payment = $this->asMoney($payment);
         // Verify Price
@@ -471,8 +483,16 @@ class Account extends Model implements Ownable
             'description' => "Purchase of {$purchaseable->getDescriptionNameString()} {$purchaseable->getKey()}"
         ]);
 
-        $purchaseable->grantAccess($this->getOwner()->first(), ShareableAccessLevelEnum::PREMIUM);
+        $purchaseable->grantAccess($this->getOwner()->first(), $purchaseLevel, [
+            'purchase' => [
+                'price' => $payment->getAmount(),
+                'currency' => $payment->getCurrency(),
+                'transaction_id' => $transactions['credit']->getKey(),
+            ],
+        ]);
+
         ItemPurchased::dispatch($purchaseable, $this->getOwner()->first());
+
         return $transactions;
     }
 
