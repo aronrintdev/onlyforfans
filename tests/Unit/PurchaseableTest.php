@@ -253,6 +253,17 @@ class PurchaseableTest extends TestCase
      */
     public function test_verify_timeline_price_point()
     {
+        // Create Timeline with Price
+        $timeline = Timeline::factory()->pricedAt(1000)->create();
+
+        $this->assertTrue($timeline->verifyPrice(1000));
+        $money = new Money(1000, new Currency('USD'));
+        $this->assertTrue($timeline->verifyPrice($money));
+
+        $this->assertFalse($timeline->verifyPrice(800));
+        $money = new Money(800, new Currency('USD'));
+        $this->assertFalse($timeline->verifyPrice($money));
+
         $this->markTestIncomplete();
     }
 

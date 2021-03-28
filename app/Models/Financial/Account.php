@@ -2,37 +2,39 @@
 
 namespace App\Models\Financial;
 
+use Throwable;
+use RuntimeException;
 use App\Interfaces\Ownable;
 use App\Models\Casts\Money;
+use App\Events\ItemPurchased;
+
+use App\Interfaces\PricePoint;
 use Illuminate\Support\Carbon;
 use App\Models\Traits\UsesUuid;
-use Illuminate\Support\Collection;
 
+use App\Interfaces\Purchaseable;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use App\Models\Traits\OwnableTraits;
 use App\Jobs\CreateTransactionSummary;
-
 use Illuminate\Support\Facades\Config;
+use App\Enums\ShareableAccessLevelEnum;
 use App\Enums\Financial\AccountTypeEnum;
 use App\Models\Financial\Traits\HasSystem;
+use App\Enums\Financial\TransactionTypeEnum;
 use App\Jobs\Financial\UpdateAccountBalance;
 use App\Models\Financial\Traits\HasCurrency;
 use App\Enums\Financial\TransactionSummaryTypeEnum;
-use App\Enums\Financial\TransactionTypeEnum;
-use App\Enums\ShareableAccessLevelEnum;
-use App\Events\ItemPurchased;
-use App\Interfaces\Purchaseable;
+use App\Interfaces\HasPricePoints;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use App\Models\Financial\Exceptions\CurrencyMismatchException;
+use App\Models\Financial\Exceptions\InvalidPaymentAmountException;
 use App\Models\Financial\Exceptions\Account\IncorrectTypeException;
 use App\Models\Financial\Exceptions\InvalidTransactionAmountException;
 use App\Models\Financial\Exceptions\Account\InsufficientFundsException;
 use App\Models\Financial\Exceptions\TransactionAccountMismatchException;
 use App\Models\Financial\Exceptions\Account\TransactionNotAllowedException;
-use App\Models\Financial\Exceptions\CurrencyMismatchException;
-use App\Models\Financial\Exceptions\InvalidPaymentAmountException;
-use RuntimeException;
-use Throwable;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 /**
  * Financial Account Model
@@ -457,27 +459,37 @@ class Account extends Model implements Ownable
      * Creates transactions to purchase a purchaseable model and grants access to that model
      *
      * @param Purchaseable $purchaseable
-     * @param mixed $payment
+     * @param int|Money|PricePoint $payment
      * @return Collection
      */
     public function purchase(Purchaseable $purchaseable, $payment, $purchaseLevel = ShareableAccessLevelEnum::PREMIUM): Collection
     {
-        $payment = $this->asMoney($payment);
+        if ($payment instanceof PricePoint) {
+            $amount = $payment->price;
+        } else {
+            $amount = $this->asMoney($payment);
+        }
         // Verify Price
-        if ($purchaseable->verifyPrice($payment) === false) {
-            throw new InvalidPaymentAmountException($this, $payment, $purchaseable);
+        if ($payment instanceof PricePoint && $purchaseable instanceof HasPricePoints) {
+            if ($purchaseable->verifyPricePoint($payment) === false) {
+                throw new InvalidPaymentAmountException($this, $amount, $purchaseable);
+            }
+        } else {
+            if ($purchaseable->verifyPrice($amount) === false) {
+                throw new InvalidPaymentAmountException($this, $amount, $purchaseable);
+            }
         }
 
         // Move funds to internal account first if this is a in account
         if ($this->type === AccountTypeEnum::IN) {
-            $this->moveToInternal($payment);
+            $this->moveToInternal($amount);
             $internalAccount = $this->getInternalAccount();
             $internalAccount->settleBalance();
-            return $internalAccount->purchase($purchaseable, $payment);
+            return $internalAccount->purchase($purchaseable, $amount);
         }
 
         // Payment funds movement
-        $transactions = $this->moveTo($purchaseable->getOwnerAccount($this->system, $this->currency), $payment, [
+        $transactions = $this->moveTo($purchaseable->getOwnerAccount($this->system, $this->currency), $amount, [
             'purchasable' => $purchaseable,
             'type' => TransactionTypeEnum::SALE,
             'description' => "Purchase of {$purchaseable->getDescriptionNameString()} {$purchaseable->getKey()}"
@@ -485,8 +497,9 @@ class Account extends Model implements Ownable
 
         $purchaseable->grantAccess($this->getOwner()->first(), $purchaseLevel, [
             'purchase' => [
-                'price' => $payment->getAmount(),
-                'currency' => $payment->getCurrency(),
+                'pricePoint' => ($payment instanceof PricePoint) ? $payment->getKey() : null,
+                'price' => $amount->getAmount(),
+                'currency' => $amount->getCurrency(),
                 'transaction_id' => $transactions['credit']->getKey(),
             ],
         ]);

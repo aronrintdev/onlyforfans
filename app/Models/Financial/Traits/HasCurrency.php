@@ -95,6 +95,12 @@ trait HasCurrency
         return Config::get("transactions.default");
     }
 
+    public static function getDefaultCurrency(): string
+    {
+        $defaultSystem = Config::get("transactions.default");
+        return Config::get("transactions.systems.{$defaultSystem}.defaults.currency");
+    }
+
     /* ----------------------- Verification Functions ----------------------- */
     #region Verification
 
