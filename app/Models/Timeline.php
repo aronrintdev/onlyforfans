@@ -76,7 +76,7 @@ class Timeline extends Model implements Purchaseable, Tippable, Reportable
     {
         $array = parent::toArray();
         // Localize Price
-        $array['price_display'] = static::formatMoney($array['price']);
+        $array['price_display'] = static::formatMoney($this->price);
         return $array;
     }
 

@@ -400,8 +400,8 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
             'earnings'         => $this->getSales(),
             'website'          => '', // %TODO
             'instagram'        => '', // %TODO
-            'city'             => $this->settings->city,
-            'country'          => $this->settings->country,
+            'city'             => (isset($this->settings)) ? $this->settings->city : null,
+            'country'          => (isset($this->settings)) ? $this->settings->country : null,
         ];
     }
 
