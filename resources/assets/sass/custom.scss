@@ -51,35 +51,31 @@ body .tag-ctrl .btn:focus {
   box-shadow: none;
 }
 
-body .feed-crate.tag-grid-layout .superbox-post .card-text {
-  /*
-  display: none;
-  */
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 5;
-  overflow: hidden;
-  height: 18rem;
+/* %%% superbox-post overrides for grid layout (do here as may span multiple Vue scopes) */
+
+body .feed-crate .superbox-post .card-text {
 }
-/*
 body .feed-crate.tag-grid-layout .superbox-post .card-text {
-  */
+  /* Note that text will be hidden if in grid view and post has mediafiles */
+  -webkit-line-clamp: 12; /* manually adjusted so that the ellipsis will show in the grid height, but may not work in all circumstances ? */
+}
+
 body .feed-crate.tag-grid-layout .superbox-post .text-wrap {
   height: 20rem;
 }
+
 body .feed-crate.tag-grid-layout .superbox-post .text-wrap.tag-has-mediafiles {
-  display: none;
-}
-body .feed-crate.tag-grid-layout .superbox-post .text-wrap.tag-has-mediafiles .card-text {
+  display: none; /* hide the text when in grid mode unless post is text-only */
 }
 
 /* In 'grid' view, normalize the height so that we don't get a variation messing up row alignment */
-body .feed-crate.tag-grid-layout .carousel.slide .carousel-item,
+body .feed-crate.tag-grid-layout .superbox-post .carousel.slide .carousel-item,
 body .feed-crate.tag-grid-layout .superbox-post .locked-content {
   height: 20rem;
 }
-body .feed-crate.tag-grid-layout .carousel.slide .carousel-item video,
-body .feed-crate.tag-grid-layout .carousel.slide .carousel-item img {
+
+body .feed-crate.tag-grid-layout .superbox-post .carousel.slide .carousel-item video,
+body .feed-crate.tag-grid-layout .superbox-post .carousel.slide .carousel-item img {
   object-fit: cover;
   height: 20rem;
 }

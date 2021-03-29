@@ -19,8 +19,8 @@
       </template>
 
       <template v-if="post.access">
-        <div :class="{ 'tag-has-mediafiles': hasMediafiles }" class="text-wrap">
-          <b-card-text class="p-3 mb-0 tag-post_desc">{{ post.description }}</b-card-text>
+        <div :class="{ 'tag-has-mediafiles': hasMediafiles }" class="py-3 text-wrap">
+          <b-card-text class="px-3 mb-0 tag-post_desc">{{ post.description }}</b-card-text>
         </div>
         <article v-if="hasMediafiles">
           <MediaSlider :post="post" :session_user="session_user" :use_mid="use_mid" />
@@ -94,8 +94,7 @@ export default {
     },
   },
 
-  watch: {
-  },
+  watch: { },
 
 }
 </script>
@@ -105,64 +104,53 @@ ul {
   margin: 0;
 }
 
-.superbox-post {
-  /*
-  height: 480px;
-   */
-}
-
-/*
-body .card-body p {
-  font-size: 14px;
-  font-weight: 400;
-  color: #5b6b81;
-  letter-spacing: 0.3px;
-  margin-bottom: 0px;
-  word-break: break-word;
-}
- */
-
-body .feed-crate .superbox-post .card-text {
-  white-space: pre-wrap;
+.feed-crate .superbox-post .card-text {
   color: #383838;
-  word-break: break-word;
+  white-space: no-wrap;
+  overflow: hidden;
+  max-height: 18rem;
+  text-overflow: ellipsis;
+
+  display: -webkit-box;
+  -webkit-line-clamp: 5;
+  -webkit-box-orient: vertical;
 }
 
-body .user-avatar {
+.user-avatar {
   width: 40px;
   height: 40px;
   float: left;
   margin-right: 10px;
 }
 
-body .user-avatar img {
+.user-avatar img {
   width: 100%;
   height: 100%;
   border-radius: 50%;
 }
 
-body .user-details ul {
+.user-details ul {
   padding-left: 50px;
   margin-bottom: 0;
 }
 
-body .user-details ul > li {
+.user-details ul > li {
   color: #859ab5;
   font-size: 16px;
   font-weight: 400;
 }
 
-body .user-details ul > li .username {
+.user-details ul > li .username {
   text-transform: capitalize;
 }
 
-body .user-details ul > li .post-time {
+.user-details ul > li .post-time {
   color: #4a5568;
   font-size: 12px;
   letter-spacing: 0px;
   margin-right: 3px;
 }
-body .user-details ul > li:last-child {
+.user-details ul > li:last-child {
   font-size: 14px;
 }
 </style>
