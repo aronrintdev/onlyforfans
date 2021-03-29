@@ -19,7 +19,7 @@
       </template>
 
       <template v-if="post.access">
-        <b-card-text class="mb-0"> <p class="mb-0 p-3">{{ post.description }}</p> </b-card-text>
+        <b-card-text class="p-3 mb-0 tag-post_desc">{{ post.description }}</b-card-text>
         <article v-if="hasMediafiles">
           <MediaSlider :post="post" :session_user="session_user" :use_mid="use_mid" />
         </article>
@@ -101,6 +101,12 @@ export default {
 <style scoped>
 ul {
   margin: 0;
+}
+
+.superbox-post {
+  /*
+  height: 480px;
+   */
 }
 
 body .card-body p {

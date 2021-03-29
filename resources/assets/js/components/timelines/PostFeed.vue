@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!isLoading" class="feed-crate tag-posts tag-crate">
+  <div v-if="!isLoading" class="feed-crate tag-posts tag-crate" :class="{ 'tag-grid-layout': isGridLayout }">
     <div class="tag-debug">
       <ul>
         <li>Timeline ID: {{ timeline.id | niceGuid }}</li>
@@ -163,8 +163,6 @@ export default {
     toggleGridLayout() {
       this.isGridLayout = !this.isGridLayout
       eventBus.$emit('set-feed-layout', this.isGridLayout )
-        /*
-         */
     },
 
     endPostVisible(isVisible) {

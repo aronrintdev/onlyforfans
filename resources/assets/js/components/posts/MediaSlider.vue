@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="position-relative">
     <b-carousel
       id="carousel-1"
       v-model="slide"
@@ -7,8 +7,6 @@
       :controls="isNavVisible"
       indicators
       background="#ababab"
-      img-width="1024"
-      img-height="480"
       style="text-shadow: 1px 1px 2px #333;"
       @sliding-start="onSlideStart"
       @sliding-end="onSlideEnd"
@@ -27,7 +25,7 @@
             <source :src="mf.filepath" type="video/mp4">
           </video>
           <img v-if="mf.is_image"
-            class="d-block OFF-img-fluid OFF-w-100"
+            class="d-block"
             :src="(use_mid && mf.has_mid) ? mf.midFilepath : mf.filepath"
             :alt="mf.mfname"
           >
@@ -35,6 +33,7 @@
       </b-carousel-slide>
 
     </b-carousel>
+    <div v-if="post.mediafile_count" class="mediafile-count text-white position-absolute"><b-icon icon="images" font-scale="1" variant="light" class="d-inline my-auto" /> {{ post.mediafile_count }}</div>
   </div>
 </template>
 
@@ -82,6 +81,11 @@ export default {
 </script>
 
 <style scoped>
+
+.mediafile-count {
+  bottom: 0.5rem;
+  right: 1rem;
+}
 
 body .carousel.slide .carousel-item video {
   object-fit: contain;

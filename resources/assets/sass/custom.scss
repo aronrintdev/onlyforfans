@@ -50,3 +50,13 @@ body .tag-clickable {
 body .tag-ctrl .btn:focus {
   box-shadow: none;
 }
+
+body .feed-crate.tag-grid-layout .superbox-post .card-text {
+  display: none;
+  /*
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  */
+}
