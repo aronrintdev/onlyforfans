@@ -154,13 +154,26 @@ export default new Vuex.Store({
       })
     },
 
-    getFeeddata( { commit }, { timelineId, page, limit, isHomefeed } ) {
-      const url = isHomefeed 
-        ? `/timelines/home/feed?page=${page}&take=${limit}`
-        : `/timelines/${timelineId}/feed?page=${page}&take=${limit}`;
-      axios.get(url).then( (response) => {
+    getFeeddata( { commit }, { 
+      timelineId, 
+      isHomefeed,
+      page=1, 
+      limit, 
+      sortBy='latest', 
+      hideLocked=false,
+      hidePromotions=false,
+    }) {
+      const params = {
+        page,
+        take: limit,
+        sortBy,
+        hideLocked,
+        hidePromotions,
+      }
+      const url = isHomefeed ? `/timelines/home/feed` : `/timelines/${timelineId}/feed`
+      axios.get(url, { params }).then( (response) => {
         commit('UPDATE_FEEDDATA', response);
-      });
+      })
     },
 
     getPreviewposts( { commit }, { timelineId, limit } ) {

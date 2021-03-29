@@ -17,17 +17,18 @@
           />
         </router-link>
       </section>
-      <section class="dropdown profile-ctrl">
-        <b-dropdown id="dropdown-1" text="..." class="OFF-m-md-2">
-          <b-dropdown-item>First Action</b-dropdown-item>
-          <b-dropdown-item>Second Action</b-dropdown-item>
-          <b-dropdown-item>Third Action</b-dropdown-item>
-        </b-dropdown>
-      </section>
+      <b-dropdown no-caret variant="transparent" id="profile-ctrl-dropdown" class="tag-ctrl">
+        <template #button-content>
+          <b-icon icon="filter-left" font-scale="2" variant="light"></b-icon>
+        </template>
+        <b-dropdown-item>First Action</b-dropdown-item>
+        <b-dropdown-item>Second Action</b-dropdown-item>
+        <b-dropdown-item>Third Action</b-dropdown-item>
+      </b-dropdown>
     </header>
 
     <b-container fluid>
-      <b-row class="avatar-profile pt-3 pb-4">
+      <b-row class="avatar-profile py-3">
         <b-col cols="12" md="4" offset-md="2" class="avatar-details text-right text-md-left">
           <h2 class="avatar-name my-0">
             <router-link :to="{ name: 'timeline.show', params: { slug: timeline.slug } }">
@@ -101,7 +102,7 @@ header.masthead {
   padding-top: 8rem;
   padding-bottom: 8rem;
 
-  .profile-ctrl.dropdown {
+  #profile-ctrl-dropdown {
     position: absolute;
     top: 0;
     right: 0;

@@ -23,9 +23,12 @@
           <b-button v-else @click="doFollow" variant="danger" class="w-100">Click to Unfollow</b-button>
         </div>
         <div v-else> <!-- follow or subscribe -->
-          <p>Follow this creator for free to see limited content...or, for {{ timeline.price | niceCurrency }} montly buy a premium subscripton for full access!</p>
-          <b-button @click="doFollow" variant="primary" class="w-100 mb-3">Follow for Free</b-button>
-          <b-button @click="doSubscribe" variant="success" class="w-100">Subscribe for Full Access</b-button>
+          <p>Get Full Access for {{ timeline.price | niceCurrency }} monthly premium subscription!</p>
+          <b-button @click="doSubscribe" variant="success" class="w-100 mb-3">Subscribe for Full Access</b-button>
+          <template v-if="!subscribe_only">
+            <p>...or follow this creator for free to see limited content</p>
+            <b-button @click="doFollow" variant="primary" class="w-100 mb-3">Follow for Free</b-button>
+          </template>
         </div>
 
       </b-card-body>
@@ -41,6 +44,7 @@ export default {
   props: {
     session_user: null,
     timeline: null,
+    subscribe_only: { type: Boolean, default: true },
   },
 
   computed: {

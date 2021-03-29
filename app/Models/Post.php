@@ -212,6 +212,39 @@ class Post extends Model
     }
 
     //--------------------------------------------
+    // %%% Scopes
+    //--------------------------------------------
+
+    public function scopeByTimeline($query, $timelineID)
+    {
+        return $query->where('postable_type', 'timelines')->where('postable_id', $timelineID);
+    }
+
+    public function scopeHomeTimeline($query)
+    {
+        return $query->whereHas('timeline', function($q1) {
+            $q1->whereHas('followers', function($q2) {
+                $q2->where('users.id', request()->user()->id );
+            });
+        });
+    }
+
+    public function scopeSort($query, $sortBy)
+    {
+        switch ($sortBy) {
+        case 'likes':
+            $query->orderBy('likes_count', 'desc');
+            break;
+        case 'comments':
+            $query->orderBy('comments_count', 'desc');
+            break;
+        default:
+            $query->latest();
+        }
+        return $query;
+    }
+
+    //--------------------------------------------
     // %%% Methods
     //--------------------------------------------
 

@@ -28,8 +28,13 @@ class MediafilePolicy extends BasePolicy
     {
         switch ($mediafile->resource_type) {
 
-        case 'comments':
         case 'posts':
+            $alias = $mediafile->resource_type;
+            $model = Relation::getMorphedModel($alias);
+            $resource = (new $model)->where('id', $mediafile->resource_id)->first();
+            return $user->can('contentView', $resource); // %NOTE: contentView!
+
+        case 'comments':
         case 'stories':
             $alias = $mediafile->resource_type;
             $model = Relation::getMorphedModel($alias);

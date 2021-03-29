@@ -46,3 +46,7 @@ body .tag-clickable {
   display: flex;
   flex-direction: column;
 }
+
+body .tag-ctrl .btn:focus {
+  box-shadow: none;
+}

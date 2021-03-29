@@ -45,20 +45,13 @@ class PostPolicy extends BasePolicy
         switch ($post->type) {
         case PostTypeEnum::FREE:
             return true; // anyone can see content of free posts
-            //return $post->timeline->followers->count()
-                //&& $post->timeline->followers->contains($user->id);
         case PostTypeEnum::SUBSCRIBER:
             return $post->timeline->subscribers->count()
                 && $post->timeline->subscribers->contains($user->id);
-            //return $post->timeline->followers->count()
-                //&& $post->timeline->followers()->wherePivot('access_level','premium')->count()
-                //&& $post->timeline->followers()->wherePivot('access_level','premium')->contains($user->id);
         case PostTypeEnum::PRICED:
             return $post->sharees->count()
                 && $post->sharees->contains($user->id); // premium (?)
         }
-        //return $post->timeline->followers->contains($user->id);
-        //return $post->timeline->subscribers->contains($user->id);
     }
 
     protected function indexComments(User $user, Post $post)
@@ -71,23 +64,11 @@ class PostPolicy extends BasePolicy
         case PostTypeEnum::SUBSCRIBER:
             return $post->timeline->subscribers->count()
                 && $post->timeline->subscribers->contains($user->id);
-            //return $post->timeline->followers->count()
-                //&& $post->timeline->followers()->wherePivot('access_level','premium')->count()
-                //&& $post->timeline->followers()->wherePivot('access_level','premium')->contains($user->id);
         case PostTypeEnum::PRICED:
             return $post->sharees->count()
                 && $post->sharees->contains($user->id); // premium (?)
         }
-        //return $post->timeline->followers->contains($user->id);
-        //return $post->timeline->subscribers->contains($user->id);
     }
-
-    /*
-    protected function create(User $user)
-    {
-        throw new \Exception('check update policy for timeline instead');
-    }
-    */
 
     protected function update(User $user, Post $post)
     {

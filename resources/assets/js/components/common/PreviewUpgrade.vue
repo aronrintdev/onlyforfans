@@ -13,8 +13,9 @@
             </ul>
   </div>
             <article class="tag-wrap mb-3">
-              <div @click="renderPost(p)" :style="{ backgroundImage: 'url(' + getImage(p) + ')' }" :class="{'blurred': !p.access}" class="tag-thumb"></div>
+              <div v-if="!p.access" @click="renderPost(p)" :style="backgroundImg(p)" class="locked-content tag-thumb"></div>
               <b-icon v-if="!p.access" @click="renderPost(p)" class="tag-icon" icon="lock-fill" font-scale="2" variant="light" />
+              <div v-if="p.access" @click="renderPost(p)" :style="backgroundImg(p)" class="tag-thumb"></div>
             </article>
           </b-col>
         </b-row>
@@ -86,10 +87,22 @@ export default {
       })
     },
 
-    getImage(p) {
-      return p.mediafiles[0].filepath
+    backgroundImg(post) {
+      if ( post.access ) {
+        if ( post.mediafiles && post.mediafiles[0] && post.mediafiles[0].has_thumb ) {
+          return { '--background-image': `url(${post.mediafiles[0].thumbFilepath})` }
+        }
+        if ( post.mediafiles && post.mediafiles[0] && post.mediafiles[0].has_mid ) {
+          return { '--background-image': `url(${post.mediafiles[0].midFilepath})` }
+        }
+        return { '--background-image': `url(${post.mediafiles[0].filepath})` }
+      } else { // locked content 
+        if ( post.mediafiles && post.mediafiles[0] && post.mediafiles[0].has_blur ) {
+          return { '--background-image': `url(${post.mediafiles[0].blurFilepath})` }
+        } 
+        return { '--background-image': `url(/images/locked_post.png)` }
+      }
     },
-
   },
 
   components: { },
@@ -101,13 +114,22 @@ export default {
   border: solid 4px #a5a5a5;
   position: relative;
 }
+/*
 .blurred {
   filter: blur(4px);
+}
+ */
+.locked-content {
 }
 .tag-thumb {
   width: 90px;
   height: 90px;
-  background-size: cover;
+  background-image: var(--background-image);
+  /*
+  background-position: center;
+  background-repeat: no-repeat;
+   */
+  background-size: cover !important;
 }
 .tag-icon {
   position: absolute;
@@ -119,5 +141,6 @@ export default {
 }
 .tag-debug * {
   font-size: 10px;
+  display: none;
 }
 </style>

@@ -24,6 +24,7 @@ class DatabaseSeeder extends Seeder
             ShareablesTableSeeder::class,
             CommentsTableSeeder::class, // must be after shareables as requires followers
             StoriesTableSeeder::class,
+            LikeablesTableSeeder::class,
         ]);
     }
 

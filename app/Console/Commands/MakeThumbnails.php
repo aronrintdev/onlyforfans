@@ -39,8 +39,9 @@ class MakeThumbnails extends Command
             static $iter = 1;
             $take = $take ?? 'all';
             try {
-                $this->info( "% Processing file: ".$mf->slug.", (iter $iter / $take)");
+                $this->info( "% Minimizing file: ".$mf->slug.", (iter $iter / $take)");
 
+                /*
                 // Set basename if null
                 if ( empty($mf->basename) ) {
                     $parsedbase = parse_filebase($mf->filepath);
@@ -49,6 +50,7 @@ class MakeThumbnails extends Command
                         $mf->save();
                     }
                 }
+                 */
 
                 $ogSize = Storage::disk('s3')->size( $mf->filename );
                 $this->info( '    - size: '.$ogSize);
