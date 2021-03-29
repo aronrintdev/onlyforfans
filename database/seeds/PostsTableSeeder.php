@@ -18,6 +18,13 @@ class PostsTableSeeder extends Seeder
     use SeederTraits;
 
     protected static $MIN_POSTS = 4;
+    protected static $IMAGE_SIZES = [
+        [ 'width' => 320, 'height' => 180 ], // 16:9
+        [ 'width' => 320, 'height' => 240 ], // 4:3
+        [ 'width' => 300, 'height' => 200], // 3:2
+        [ 'width' => 200, 'height' => 300], // 2:3
+        [ 'width' => 300, 'height' => 300], // 1:1
+    ];
 
     public function run()
     {
@@ -80,7 +87,16 @@ class PostsTableSeeder extends Seeder
                 //$u->timeline->posts()->save($post);
 
                 if ( $this->faker->boolean($this->getMax('prob_post_has_image')) ) { // % post has image
-                    $mf = FactoryHelpers::createImage(MediafileTypeEnum::POST, $post->id, true);
+                    $numberOfImages = $this->faker->randomElement([1,1,1,2,3]); // multiple images per post
+                    for ( $i = 0 ; $i < $numberOfImages ; $i++ ) {
+                        $imgDim = $this->faker->randomElement(self::$IMAGE_SIZES);
+                        $mf = FactoryHelpers::createImage(
+                            MediafileTypeEnum::POST,  // mftype
+                            $post->id,  // resourceID
+                            true, // doS3Upload
+                            [ 'width' => $imgDim['width'], 'height' => $imgDim['height'] ] // attrs
+                        );
+                    }
                 }
 
                 // Set a realistic post date
