@@ -19,7 +19,9 @@
       </template>
 
       <template v-if="post.access">
-        <b-card-text class="p-3 mb-0 tag-post_desc">{{ post.description }}</b-card-text>
+        <div :class="{ 'tag-has-mediafiles': hasMediafiles }" class="text-wrap">
+          <b-card-text class="p-3 mb-0 tag-post_desc">{{ post.description }}</b-card-text>
+        </div>
         <article v-if="hasMediafiles">
           <MediaSlider :post="post" :session_user="session_user" :use_mid="use_mid" />
         </article>
@@ -109,12 +111,20 @@ ul {
    */
 }
 
+/*
 body .card-body p {
   font-size: 14px;
   font-weight: 400;
   color: #5b6b81;
   letter-spacing: 0.3px;
   margin-bottom: 0px;
+  word-break: break-word;
+}
+ */
+
+body .feed-crate .superbox-post .card-text {
+  white-space: pre-wrap;
+  color: #383838;
   word-break: break-word;
 }
 

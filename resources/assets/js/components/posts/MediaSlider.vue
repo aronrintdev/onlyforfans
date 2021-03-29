@@ -87,20 +87,14 @@ export default {
   right: 1rem;
 }
 
+/* default settings for single feed view - for grid view these
+are overriddent in custom.scss */
 body .carousel.slide .carousel-item video {
   object-fit: contain;
-  /*
-  object-fit: cover;
-  height: 350px;
-   */
   width: 100%;
 }
 body .carousel.slide .carousel-item img {
   object-fit: contain;
-  /*
-  object-fit: cover;
-  height: 350px;
-   */
   width: 100%;
 }
 body .carousel.slide .carousel-item.active {
@@ -110,9 +104,6 @@ body .carousel.slide .carousel-item {
   flex-direction: column;
   flex-wrap: wrap;
   align-items: flex-middle;
-  /*
-  width: 100%;
-   */
 }
 body .carousel.slide .carousel-item .embed-responsive{
 }

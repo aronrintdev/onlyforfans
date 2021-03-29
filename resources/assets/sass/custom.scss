@@ -52,11 +52,35 @@ body .tag-ctrl .btn:focus {
 }
 
 body .feed-crate.tag-grid-layout .superbox-post .card-text {
-  display: none;
   /*
+  display: none;
+  */
   display: -webkit-box;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 5;
   overflow: hidden;
-  */
+  height: 18rem;
 }
+/*
+body .feed-crate.tag-grid-layout .superbox-post .card-text {
+  */
+body .feed-crate.tag-grid-layout .superbox-post .text-wrap {
+  height: 20rem;
+}
+body .feed-crate.tag-grid-layout .superbox-post .text-wrap.tag-has-mediafiles {
+  display: none;
+}
+body .feed-crate.tag-grid-layout .superbox-post .text-wrap.tag-has-mediafiles .card-text {
+}
+
+/* In 'grid' view, normalize the height so that we don't get a variation messing up row alignment */
+body .feed-crate.tag-grid-layout .carousel.slide .carousel-item,
+body .feed-crate.tag-grid-layout .superbox-post .locked-content {
+  height: 20rem;
+}
+body .feed-crate.tag-grid-layout .carousel.slide .carousel-item video,
+body .feed-crate.tag-grid-layout .carousel.slide .carousel-item img {
+  object-fit: cover;
+  height: 20rem;
+}
+
