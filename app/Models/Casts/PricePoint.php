@@ -2,18 +2,20 @@
 
 namespace App\Models\Casts;
 
+use App\Interfaces\HasPricePoints;
 use Money\Currency;
 use Money\Money as MoneyPhp;
+use App\Models\PurchasablePricePoint;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
 use Illuminate\Contracts\Database\Eloquent\SerializesCastableAttributes;
-use Illuminate\Database\Eloquent\Model;
 
 /**
  * Casts integer amounts on models with a currency to Money\Money objects
  *
  * @package App\Models\Casts
  */
-class Money implements CastsAttributes, SerializesCastableAttributes
+class PricePoint implements CastsAttributes, SerializesCastableAttributes
 {
     /**
      * Get value as Money\Money Object that uses model's currency
@@ -26,7 +28,9 @@ class Money implements CastsAttributes, SerializesCastableAttributes
      */
     public function get($model, $key, $value, $attributes): \Money\Money
     {
-        return new MoneyPhp( $value, new Currency($model->currency) );
+        // TODO: Add user currency preference checking
+        $pricePoint = $model->pricePoints()->getCurrent();
+        return (isset($pricePoint)) ? $pricePoint->price : new MoneyPhp(0, new Currency($model->currency));
     }
 
     /**
@@ -36,15 +40,17 @@ class Money implements CastsAttributes, SerializesCastableAttributes
      * @param string $key
      * @param mixed $value
      * @param array $attributes
-     * @return int
+     * @return void
      */
-    public function set($model, $key, $value, $attributes): int
+    public function set($model, $key, $value, $attributes)
     {
+        // Save value passed in as current default price point
+        if ($model instanceof HasPricePoints) {
+            PurchasablePricePoint::getDefaultFor($model, $value)->saveAsCurrentDefault();
+        }
         if ($value instanceof MoneyPhp) {
-            $attributes['currency'] = $value->getCurrency();
             return (int)$value->getAmount();
         }
-
         return (int)$value;
     }
 
@@ -59,9 +65,6 @@ class Money implements CastsAttributes, SerializesCastableAttributes
      */
     public function serialize($model, string $key, $value, array $attributes): int
     {
-        if ($value instanceof MoneyPhp) {
-            return (int)$value->getAmount();
-        }
-        return (int)$value;
+        return (int)$this->get($model, $key, $value, $attributes)->getAmount();
     }
 }

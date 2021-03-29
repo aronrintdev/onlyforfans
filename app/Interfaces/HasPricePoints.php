@@ -27,9 +27,9 @@ interface HasPricePoints extends IsModel
      * Current Active Price Point
      *
      * @param string|null $currency
-     * @return Money
+     * @return Money|null
      */
-    public function currentPrice($currency = null): Money;
+    public function currentPrice($currency = null): ?Money;
 
     /**
      * Checks validness of a promo code

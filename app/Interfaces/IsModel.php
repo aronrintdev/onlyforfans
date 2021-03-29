@@ -21,4 +21,6 @@ interface IsModel
     public function getMorphString(): string;
 
     public function withoutRelations();
+
+    public function refresh();
 }

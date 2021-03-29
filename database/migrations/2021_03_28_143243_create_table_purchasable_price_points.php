@@ -26,8 +26,11 @@ class CreateTablePurchasablePricePoints extends Migration
             // Indicates price point can be used
             $table->boolean('active')->default(false);
 
-            // When active status will expire
-            $table->timestamp('expires')->nullable();
+            // Time when the price point becomes active
+            $table->timestamp('available_at')->nullable();
+
+            // Time when active status will expire
+            $table->timestamp('expires_at')->nullable();
 
             // Promo Code ability
             $table->string('available_with')->nullable();

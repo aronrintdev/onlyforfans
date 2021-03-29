@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\ShareableAccessLevelEnum;
+use App\Interfaces\HasPricePoints;
 use App\Interfaces\PricePoint;
 use Carbon\Carbon;
 use App\Models\Casts\Money;
@@ -12,32 +14,40 @@ use App\Models\Financial\Traits\HasCurrency;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
+use InvalidArgumentException;
 
 /**
  * Price point of a purchasable item.
  *
- * @property string      $id
- * @property string      $purchasable_id
- * @property string      $purchasable_type
- * @property int         $price
- * @property string      $currency
- * @property bool        $current
- * @property bool        $active
- * @property Carbon|null $expires_at
- * @property string|null $available_with
- * @property string      $access_level
- * @property array|null  $custom_attributes
- * @property array|null  $metadata
- * @property Carbon      $created_at
- * @property Carbon      $updated_at
- * @property Carbon|null $deleted_at
+ * @property string       $id
+ * @property string       $purchasable_id
+ * @property string       $purchasable_type
+ * @property \Money\Money $price
+ * @property string       $currency
+ * @property bool         $current
+ * @property bool         $active
+ * @property Carbon|null  $available_at
+ * @property Carbon|null  $expires_at
+ * @property string|null  $available_with
+ * @property string       $access_level
+ * @property array|null   $custom_attributes
+ * @property array|null   $metadata
+ * @property Carbon       $created_at
+ * @property Carbon       $updated_at
+ * @property Carbon|null  $deleted_at
+ * 
+ * @property Purchaseable $purchasable
  *
  * Scopes
  * @method static static|Builder active()
+ * @method static static|Builder default()
+ * @method static static|Builder expired()
  * @method static static|Builder forItem(Purchasable $item)
- * @method static static|Builder getCurrent()
+ * @method static PurchasablePricePoint|null getCurrent()
  * @method static static|Builder ofCurrency(string|null $currencyCode)
  * @method static static|Builder promoCode(string $promoCode)
+ * @method static static|Builder upcoming()
  *
  * @package App\Models
  */
@@ -60,6 +70,7 @@ class PurchasablePricePoint extends Model implements PricePoint
     ];
 
     protected $dates = [
+        'available_at',
         'expires_at',
     ];
 
@@ -88,10 +99,35 @@ class PurchasablePricePoint extends Model implements PricePoint
      */
     public function scopeActive($query)
     {
-        return $query->where('active', true)->where(function ($query) {
-            $query->where('expires_at', '>=', Carbon::now())
-                ->orWhereNull('expires_at');
+        return $query->where('active', true)
+            ->where(function ($query) {
+                $query->where('expires_at', '>=', Carbon::now())
+                    ->orWhereNull('expires_at');
+            })->where(function ($query) {
+                $query->where('available_at', '<=', Carbon::now())
+                    ->orWhereNull('available_at');
         });
+    }
+
+    /**
+     * Is a default price, e.i. no special times or promo codes
+     * @param Builder $query
+     * @return Builder
+     */
+    public function scopeDefault(Builder $query)
+    {
+        return $query->whereNull('available_at')->whereNull('expires_at')->whereNull('available_with');
+    }
+
+    /**
+     * Expired Price points
+     *
+     * @param Builder $query
+     * @return Builder
+     */
+    public function scopeExpired(Builder $query)
+    {
+        return $query->where('expires_at', '<=', Carbon::now());
     }
 
     /**
@@ -147,10 +183,56 @@ class PurchasablePricePoint extends Model implements PricePoint
         return $query->where('available_with', $promoCode);
     }
 
+    /**
+     * Scopes upcoming price points
+     *
+     * @param Builder $query
+     * @return Builder
+     */
+    public function scopeUpcoming(Builder $query)
+    {
+        return $query->where('active', true)->where('available_at', '>', Carbon::now());
+    }
+
     #endregion Scopes
 
     /* ------------------------------ Functions ----------------------------- */
     #region Functions
+
+    /**
+     * Makes this price point the active current point for this item and currency
+     * @return void
+     */
+    public function saveAsCurrentDefault()
+    {
+        DB::transaction(function() {
+            PurchasablePricePoint::forItem($this->purchasable)
+                ->default()
+                ->ofCurrency($this->currency)
+                ->where('current', 'true')
+                ->update([ 'current' => false, 'active' => false ]);
+            $this->current = true;
+            $this->active = true;
+            $this->save();
+        });
+    }
+
+    /**
+     * Gets or creates default price point item
+     * @param int|\Money\Money  $price
+     * @return PurchasablePricePoint
+     */
+    public static function getDefaultFor(HasPricePoints $item, $price, $access_level = ShareableAccessLevelEnum::PREMIUM): PurchasablePricePoint
+    {
+        return $item->pricePoints()->firstOrCreate([
+            'price'          => $price,
+            'currency'       => ($price instanceof \Money\Money) ? $price->getCurrency() : static::getDefaultCurrency(),
+            'available_at'   => null,
+            'expires_at'     => null,
+            'available_with' => null,
+            'access_level'   => $access_level,
+        ]);
+    }
 
     /**
      * Returns the Price Point of item with
@@ -171,6 +253,17 @@ class PurchasablePricePoint extends Model implements PricePoint
             'available' => static::forItem($item)->ofCurrency($currency)->promoCode($promoCode)->active()->count() > 0,
             'expired'   => static::forItem($item)->ofCurrency($currency)->promoCode($promoCode)->count() > 0,
         ]);
+    }
+
+    /**
+     * Checks if Price point is active
+     * @param PurchasablePricePoint $pricePoint
+     * @return bool
+     */
+    public static function isActive(PurchasablePricePoint $pricePoint): bool
+    {
+        $pricePoint->refresh();
+        return $pricePoint->active && ($pricePoint->expires_at->isFuture() || !isset($pricePoint->expires_at));
     }
 
     #endregion Functions
