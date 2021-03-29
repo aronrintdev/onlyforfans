@@ -58,6 +58,9 @@ trait HasCurrency
      */
     public function setCurrencyAttribute($value)
     {
+        if ($value instanceof Currency) {
+            $value = $value->getCode();
+        }
         $allowedCurrencies = $this->getAllowedCurrencies();
         if (isset($allowedCurrencies)) {
             if (!isset($allowedCurrencies[$value])) {

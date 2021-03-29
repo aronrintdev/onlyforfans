@@ -61,10 +61,23 @@ class PurchasablePricePoint extends Model implements PricePoint
 
     protected $guarded = [];
 
+    /**
+     * Model's Default values
+     *
+     * @var array
+     */
+    protected $attributes = [
+        'current' => false,
+        'active' => false,
+        'access_level' => ShareableAccessLevelEnum::PREMIUM,
+    ];
+
     /* -------------------------------- Casts ------------------------------- */
     #region Casts
     protected $casts = [
-        'amount'            => Money::class,
+        'price'             => Money::class,
+        'current'           => 'bool',
+        'active'            => 'bool',
         'custom_attributes' => 'array',
         'metadata'          => 'array',
     ];
@@ -157,6 +170,17 @@ class PurchasablePricePoint extends Model implements PricePoint
     }
 
     /**
+     * Gets the current price point
+     *
+     * @param  Builder  $query
+     * @return PurchasablePricePoint
+     */
+    public function scopeGetCurrentDefault($query)
+    {
+        return $query->default()->where('current', true)->orderByDesc('updated_at')->first();
+    }
+
+    /**
      * Scopes price points to a currency
      *
      * @param mixed $query
@@ -209,7 +233,7 @@ class PurchasablePricePoint extends Model implements PricePoint
             PurchasablePricePoint::forItem($this->purchasable)
                 ->default()
                 ->ofCurrency($this->currency)
-                ->where('current', 'true')
+                ->where('current', true)
                 ->update([ 'current' => false, 'active' => false ]);
             $this->current = true;
             $this->active = true;
@@ -225,7 +249,7 @@ class PurchasablePricePoint extends Model implements PricePoint
     public static function getDefaultFor(HasPricePoints $item, $price, $access_level = ShareableAccessLevelEnum::PREMIUM): PurchasablePricePoint
     {
         return $item->pricePoints()->firstOrCreate([
-            'price'          => $price,
+            'price'          => ($price instanceof \Money\Money) ? $price->getAmount() : $price,
             'currency'       => ($price instanceof \Money\Money) ? $price->getCurrency() : static::getDefaultCurrency(),
             'available_at'   => null,
             'expires_at'     => null,
