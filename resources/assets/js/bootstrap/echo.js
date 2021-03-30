@@ -31,6 +31,31 @@ if (typeof window.Echo === 'undefined') {
   })
 }
 
+window.setLastSeenOfUser = function (status) {
+  $.ajax({
+      type: 'post',
+      url: '/update-last-seen',
+      data: { status: status },
+      headers: {
+        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+      },
+      success: function (data) {
+      },
+  });
+};
+
+window.onbeforeunload = function () {
+  // updateUserStatus(1, 0);
+  setLastSeenOfUser(0);
+  //return undefined; to prevent dialog while window.onbeforeunload
+  return undefined;
+};
+
+// 
+$(window).on('load', function() {
+  setLastSeenOfUser(1);
+});
+
 /**
  * Add to Vue instance
  */

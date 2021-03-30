@@ -411,7 +411,6 @@ class User extends Authenticatable implements PaymentSendable, Blockable, HasFin
         return $sales > 0;
     }
 
-
     /* ------------------------ HasFinancialAccounts ------------------------ */
     public function getInternalAccount(string $system, string $currency): Account
     {
@@ -445,6 +444,25 @@ class User extends Authenticatable implements PaymentSendable, Blockable, HasFin
         return $account;
     }
 
+    /**
+     * A user can have many messages
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function messages()
+    {
+        return $this->hasMany(Message::class);
+    }
+
+    public function lists()
+    {
+        return $this->belongsToMany('App\Models\Lists', 'lists_users', 'user_id', 'list_id')->withTimestamps();
+    }
+
+    public function userlists()
+    {
+        return $this->hasMany('App\Models\Lists', 'creator_id');
+    }
 }
 
     /*

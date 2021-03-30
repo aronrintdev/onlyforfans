@@ -189,6 +189,22 @@ Route::group(['middleware' => ['auth']], function () {
 
 });
 
+//  -- messages --
+Route::get('/chat-messages/users', ['as'=>'messages.fetchusers', 'uses' => 'MessageController@fetchUsers']);
+Route::get('/chat-messages/contacts', ['as'=>'messages.fetchcontacts', 'uses' => 'MessageController@fetchContacts']);
+Route::get('/chat-messages/{id}', ['as'=>'messages.fetchcontact', 'uses' => 'MessageController@fetchcontact']);
+Route::delete('/chat-messages/{id}', ['as'=>'messages.clearcontact', 'uses' => 'MessageController@clearUser']);
+Route::post('/chat-messages/{id}/mark-as-read', ['as'=>'messages.markasread', 'uses' => 'MessageController@markAsRead']);
+Route::post('/chat-messages/mark-all-as-read', ['as'=>'messages.markallasread', 'uses' => 'MessageController@markAllAsRead']);
+Route::get('/chat-messages/{id}/search', ['as'=>'messages.filtermessages', 'uses' => 'MessageController@filterMessages']);
+Route::patch('/chat-messages/{id}/mute', ['as'=>'messages.mute', 'uses' => 'MessageController@mute']);
+Route::patch('/chat-messages/{id}/unmute', ['as'=>'messages.unmute', 'uses' => 'MessageController@unmute']);
+Route::post('/chat-messages/{id}/custom-name', ['as'=>'messages.customname', 'uses' => 'MessageController@setCustomName']);
+
+Route::resource('chat-messages', 'MessageController')->only([
+    'index',
+    'store'
+]);
 
 /*
 |--------------------------------------------------------------------------
@@ -259,6 +275,11 @@ Route::get('/home', 'HomeController@index');
 
 Route::get('/search', 'SearchController@search')->name('search');
 Route::post('/search', 'SearchController@search')->name('search.post');
+
+Route::get('/lists', 'ListsController@index')->name('lists.index');
+Route::post('/lists', 'ListsController@store')->name('lists.store');
+Route::post('/lists/{id}/users', 'ListsController@addUserToList')->name('lists.adduser');
+Route::delete('/lists/{id}/users/{userId}', 'ListsController@removeUserFromList')->name('lists.removeuser');
 
 /**
  * Single Page application catch all undefined routes

@@ -70,7 +70,7 @@ export default {
           {
             name: 'Messages',
             icon: 'envelope',
-            to: { name: 'index' },
+            to: { name: 'messages.home' },
             // alerts: 10000,
           },
         ]

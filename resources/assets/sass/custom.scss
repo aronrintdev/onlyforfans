@@ -74,3 +74,97 @@ body .feed-crate.tag-grid-layout .superbox-post .carousel.slide .carousel-item i
   height: 20rem;
 }
 
+#user-filter-dropdown .btn,
+.filter-dropdown .btn,
+#more-dropdown .btn {
+  border: none;
+  background-color: transparent !important;
+  width: 24px;
+  height: 24px;
+  color: rgba(138,150,163,.75);
+  position: relative;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#user-filter-dropdown .btn:after,
+.filter-dropdown .btn:after,
+#more-dropdown .btn:after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 36px;
+  height: 36px;
+  transform: translate(-50%,-50%);
+  transition: opacity .15s;
+  pointer-events: none;
+  opacity: 0;
+  border-radius: 1000px;
+  background-color: #0091ea;
+  display: block;
+  border: none;
+  margin: 0;
+}
+#user-filter-dropdown .btn:hover,
+#user-filter-dropdown .btn:focus,
+.filter-dropdown .btn:hover,
+.filter-dropdown .btn:focus,
+#more-dropdown .btn:hover,
+#more-dropdown .btn:focus {
+  color: #0091ea;
+  box-shadow: none;
+}
+#user-filter-dropdown .btn:hover:after,
+.filter-dropdown .btn:hover:after,
+#more-dropdown .btn:hover:after {
+  opacity: 0.06;
+}
+#user-filter-dropdown .dropdown-item,
+#more-dropdown .dropdown-item {
+  padding-right: 0.8rem;
+  padding-left: 0.8rem;
+  margin: 0.8em 0;
+} 
+.filter-dropdown .dropdown-item {
+  padding:0 8px;
+  margin: 0;
+}
+#user-filter-dropdown ul,
+.filter-dropdown ul,
+#more-dropdown ul {
+  left: 0.3em !important;
+  width: 250px;
+}
+#user-filter-dropdown ul a:hover,
+.filter-dropdown ul a:hover,
+#more-dropdown ul a:hover {
+  color: #0091ea;
+}
+#user-filter-dropdown ul .block-item a:hover,
+.filter-dropdown ul .block-item a:hover,
+#more-dropdown ul .block-item a:hover {
+  color: #ff6060;
+}
+#user-filter-dropdown ul li a:focus,
+#user-filter-dropdown ul li a:active,
+.filter-dropdown ul li a:focus,
+.filter-dropdown ul li a:active,
+#more-dropdown ul li a:focus,
+#more-dropdown ul li a:active {
+  background: transparent;
+  color: #0091ea;
+}
+#user-filter-dropdown ul .block-item a:hover,
+.filter-dropdown ul .block-item a:hover,
+#more-dropdown ul li .block-item a:hover {
+  background: transparent;
+  color: #ff6060;
+}
+.filter-dropdown .g-input__wrapper.b-input-radio__wrapper {
+  padding: 8px 8px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+}

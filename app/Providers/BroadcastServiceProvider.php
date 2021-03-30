@@ -43,7 +43,14 @@ class BroadcastServiceProvider extends ServiceProvider
             return (Auth::check()) ? $user : false;
         });
 
+        Broadcast::channel('chat-typing', function ($user) {
+            return (Auth::check()) ? $user : false;
+        });
+
         Broadcast::channel('user.status.{userId}', \App\Broadcasting\UserStatusChannel::class);
 
+        Broadcast::channel('{userId}-message',  function ($user) {
+            return (Auth::check()) ? $user : false;
+        });
     }
 }
