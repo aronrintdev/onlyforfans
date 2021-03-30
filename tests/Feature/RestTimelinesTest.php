@@ -152,6 +152,27 @@ class TimelinesTest extends TestCase
     /**
      *  @group timelines
      *  @group regression
+     *  @group here0330
+     */
+    public function test_owner_can_view_followed_timeline_feed()
+    {
+        $timeline = Timeline::has('posts','>=',1)->has('followers','>=',1)->first(); // assume non-admin (%FIXME)
+        $creator = $timeline->user;
+        $fan = $timeline->followers[0];
+
+        $payload = [];
+        $response = $this->actingAs($fan)->ajaxJSON('GET', route('timelines.feed', $timeline->id), $payload);
+        $response->assertStatus(200);
+
+        //$content = json_decode($response->content());
+        //$this->assertEquals(1, $content->meta->current_page);
+        //$this->assertNotNull($content->data);
+        //$this->assertGreaterThan(0, count($content->data));
+    }
+
+    /**
+     *  @group timelines
+     *  @group regression
      */
     public function test_owner_can_view_own_timeline()
     {
