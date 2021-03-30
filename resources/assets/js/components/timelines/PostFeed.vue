@@ -10,8 +10,8 @@
 
     <b-row>
       <b-col>
-        <section class="feed-ctrl my-3 p-2 d-flex justify-content-between">
-          <article>
+        <section class="feed-ctrl my-3 p-2 d-flex flex-column OFF-text-center flex-md-row justify-content-center justify-content-md-between">
+          <article class="d-flex align-items-center">
             <div style="" class="btn">
               <span>All</span>
             </div>
@@ -22,14 +22,14 @@
               <span>Videos</span>
             </div>
           </article>
-          <article>
-            <div style="" class="btn">
+          <article class="d-none d-md-block">
+            <div @click="renderTip" style="" class="btn">
               <div style="font-size: 1.2rem; margin-top: 0.1rem" class="text-primary tag-ctrl">$</div>
             </div>
             <div style="margin-top: 0.3rem" class="btn">
               <b-icon icon="box-arrow-in-right" font-scale="1.5" variant="primary" class="tag-ctrl" /> 
             </div>
-            <div style="margin-top: 0.3rem" class="btn">
+            <div @click="renderFollow" style="margin-top: 0.3rem" class="btn">
               <b-icon :icon="timeline.is_following ? 'eye-fill' : 'eye'" font-scale="1.5" variant="primary" class="tag-ctrl" /> 
             </div>
             <div @click="toggleGridLayout" style="margin-top: 0.3rem" class="btn">
@@ -181,6 +181,30 @@ export default {
   },
 
   methods: {
+
+    renderTip() {
+      eventBus.$emit('open-modal', {
+        key: 'render-tip', 
+        data: { }
+      })
+    },
+
+    renderFollow() {
+      eventBus.$emit('open-modal', {
+        key: 'render-follow', 
+        data: {
+          timeline_id: this.timeline.id,
+        }
+      })
+    },
+    renderSubscribe() {
+      eventBus.$emit('open-modal', {
+        key: 'render-subscribe', 
+        data: {
+          timeline_id: this.timeline.id,
+        }
+      })
+    },
 
     toggleGridLayout() {
       this.isGridLayout = !this.isGridLayout
