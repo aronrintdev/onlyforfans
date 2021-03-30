@@ -2,17 +2,19 @@
 
 namespace App\Models\Financial;
 
+use Exception;
 use Throwable;
 use RuntimeException;
 use App\Interfaces\Ownable;
 use App\Models\Casts\Money;
-use App\Events\ItemPurchased;
 
+use App\Events\ItemPurchased;
 use App\Interfaces\PricePoint;
 use Illuminate\Support\Carbon;
-use App\Models\Traits\UsesUuid;
 
+use App\Models\Traits\UsesUuid;
 use App\Interfaces\Purchaseable;
+use App\Interfaces\HasPricePoints;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use App\Models\Traits\OwnableTraits;
@@ -25,9 +27,9 @@ use App\Enums\Financial\TransactionTypeEnum;
 use App\Jobs\Financial\UpdateAccountBalance;
 use App\Models\Financial\Traits\HasCurrency;
 use App\Enums\Financial\TransactionSummaryTypeEnum;
-use App\Interfaces\HasPricePoints;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use App\Models\Financial\Exceptions\AlreadyPurchasedException;
 use App\Models\Financial\Exceptions\CurrencyMismatchException;
 use App\Models\Financial\Exceptions\InvalidPaymentAmountException;
 use App\Models\Financial\Exceptions\Account\IncorrectTypeException;
@@ -80,6 +82,8 @@ class Account extends Model implements Ownable
         'pending_last_updated_at',
         'hidden_at',
     ];
+
+    protected $dateFormat = 'Y-m-d H:i:s.u';
 
     protected $casts = [
         'balance' => Money::class,
@@ -244,21 +248,12 @@ class Account extends Model implements Ownable
                 ->with(['reference.account', 'account'])
                 ->orderBy('created_at')
                 ->lockForUpdate()
-                ->chunkById(10, function ($transactions) {
-                    $feeOn = Config::get("transactions.systems.{$this->system}.feesOn");
-                    foreach ($transactions as $transaction) {
-                        if ( // From Internal to Internal account that is not a fee transaction
-                            $transaction->reference->account->type === AccountTypeEnum::INTERNAL
-                            && $transaction->account->type === AccountTypeEnum::INTERNAL
-                            && $transaction->credit_amount->isPositive()
-                            && in_array($transaction->type, $feeOn)
-                        ) {
-                            // Calculate Fees and Taxes On this transaction, then settle transaction and all fee debit transactions
-                            $transaction->settleFees();
-                        } else {
-                            $transaction->settleBalance();
-                            $transaction->save();
-                        }
+                ->cursor()->each(function ($transaction) {
+                    if ($transaction->shouldCalculateFees()) {
+                        // Calculate Fees and Taxes On this transaction, then settle transaction and all fee debit transactions
+                        $transaction->settleFees();
+                    } else {
+                        $transaction->settleBalance();
                     }
                 });
 
@@ -286,6 +281,9 @@ class Account extends Model implements Ownable
                 $balance = $balance->subtract($this->asMoney($failedAmount));
             }
 
+            $pending = $this->asMoney(0);
+            $feesFromPending = $this->asMoney(0);
+
             if ($this->type === AccountTypeEnum::INTERNAL) {
                 // Calculate new Pending
 
@@ -298,28 +296,31 @@ class Account extends Model implements Ownable
 
                     $holdSince = Carbon::now()->subMinutes($holdMinutes);
 
-                    $ttn = Transaction::getTableName(); // Transaction Table Name
-                    $atn = Account::getTableName(); // Account Table Name
+                    $holdOnTypes = Config::get("transactions.systems.{$this->system}.holdOn");
                     $pending = $this->asMoney(
-                        Transaction::select(DB::raw("sum({$ttn}.credit_amount) as amount"))
-                            ->join("{$ttn} as ref", "{$ttn}.reference_id", '=', 'ref.id')
-                            ->join("{$atn} as account", 'ref.account_id', '=', 'account.id')
-                            ->where("{$ttn}.account_id", $this->getKey())
-                            ->where("{$ttn}.settled_at", '>', $holdSince->toDateString())
-                            ->where('account.type', AccountTypeEnum::INTERNAL) // Only transactions from other internal accounts
-                            ->whereNotNull("{$ttn}.settled_at")
+                        Transaction::select(DB::raw("sum(credit_amount) as amount"))
+                            ->where("account_id", $this->getKey())
+                            ->where("settled_at", '>=', $holdSince->toDateString())
+                            ->whereIn('type', $holdOnTypes)
+                            ->whereNotNull("settled_at")
                             ->value('amount')
                     );
-                } else {
-                    $pending = $this->asMoney(0);
+                    if ($pending->isPositive()) {
+                        // The amount deducted by fees during pending period
+                        $feesFromPending = $this->asMoney(
+                            Transaction::select(DB::raw("sum(debit_amount) as amount"))
+                                ->where("type", TransactionTypeEnum::FEE)
+                                ->where("account_id", $this->getKey())
+                                ->where("settled_at", '>=', $holdSince->toDateString())
+                                ->whereNotNull("settled_at")
+                                ->value('amount')
+                        );
+                    }
                 }
-            } else {
-                // Non internal accounts don't have pending balance
-                $pending = $this->asMoney(0);
             }
 
             // Save new balance and pending
-            $this->balance = $balance->subtract($pending);
+            $this->balance = $balance->subtract($pending)->add($feesFromPending);
             $this->balance_last_updated_at = Carbon::now();
             $this->pending = $pending;
             $this->pending_last_updated_at = Carbon::now();
@@ -462,8 +463,13 @@ class Account extends Model implements Ownable
      * @param int|Money|PricePoint $payment
      * @return Collection
      */
-    public function purchase(Purchaseable $purchaseable, $payment, $purchaseLevel = ShareableAccessLevelEnum::PREMIUM): Collection
+    public function purchase(Purchaseable $purchaseable, $payment, $purchaseLevel = ShareableAccessLevelEnum::PREMIUM, $customAttributes = []): Collection
     {
+        // Prevent purchasing more than once
+        if ($purchaseable->checkAccess($this->getOwner()->first(), $purchaseLevel) === true) {
+            throw new AlreadyPurchasedException($purchaseable, $this->getOwner()->first());
+        }
+
         if ($payment instanceof PricePoint) {
             $amount = $payment->price;
         } else {
@@ -485,7 +491,8 @@ class Account extends Model implements Ownable
             $this->moveToInternal($amount);
             $internalAccount = $this->getInternalAccount();
             $internalAccount->settleBalance();
-            return $internalAccount->purchase($purchaseable, $amount);
+            $internalAccount->refresh();
+            return $internalAccount->purchase($purchaseable, $amount, $purchaseLevel, $customAttributes);
         }
 
         // Payment funds movement
@@ -495,14 +502,14 @@ class Account extends Model implements Ownable
             'description' => "Purchase of {$purchaseable->getDescriptionNameString()} {$purchaseable->getKey()}"
         ]);
 
-        $purchaseable->grantAccess($this->getOwner()->first(), $purchaseLevel, [
+        $purchaseable->grantAccess($this->getOwner()->first(), $purchaseLevel, array_merge($customAttributes,  [
             'purchase' => [
                 'pricePoint' => ($payment instanceof PricePoint) ? $payment->getKey() : null,
                 'price' => $amount->getAmount(),
                 'currency' => $amount->getCurrency(),
                 'transaction_id' => $transactions['credit']->getKey(),
             ],
-        ]);
+        ]));
 
         ItemPurchased::dispatch($purchaseable, $this->getOwner()->first());
 

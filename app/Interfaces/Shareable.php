@@ -2,6 +2,7 @@
 
 namespace App\Interfaces;
 
+use App\Enums\ShareableAccessLevelEnum;
 use App\Models\User;
 
 /**
@@ -27,6 +28,14 @@ interface Shareable extends IsModel
      * @return void
      */
     public function grantAccess(User $user, string $accessLevel, $cattrs = [], $meta = []): void;
+
+    /**
+     * Checks if user has access to Shareable Item at access level
+     * @param User $user
+     * @param string $accessLevel
+     * @return bool
+     */
+    public function checkAccess(User $user, string $accessLevel = ShareableAccessLevelEnum::PREMIUM): bool;
 
     /**
      * Revokes access to this resource for a user

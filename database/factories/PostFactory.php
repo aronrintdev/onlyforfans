@@ -39,7 +39,7 @@ class PostFactory extends Factory
             'active'       => 1,
         ];
         if ( $type === PostTypeEnum::PRICED ) {
-            $attrs['price'] = $this->faker->randomFloat(2, 1, 300);
+            $attrs['price'] = $this->faker->randomFloat(0, 100, 1000);
             $attrs['currency'] = 'USD';
         }
         return $attrs;

@@ -57,6 +57,14 @@ trait ShareableTraits
         AccessGranted::dispatch($this, $user);
     }
 
+    public function checkAccess(User $user, string $accessLevel = ShareableAccessLevelEnum::PREMIUM): bool
+    {
+        return $this->sharees()->wherePivot('is_approved', true)
+            ->wherePivot('access_level', $accessLevel)
+            ->where('id', $user->getKey())
+            ->count() > 0;
+    }
+
     /**
      * Revokes access to this resource for a user
      *
