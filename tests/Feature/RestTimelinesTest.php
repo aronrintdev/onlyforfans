@@ -7,10 +7,12 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 use Database\Seeders\TestDatabaseSeeder;
 
+use App\Enums\MediafileTypeEnum;
 use App\Enums\PostTypeEnum;
 use App\Enums\PaymentTypeEnum;
 use App\Models\Fanledger;
 use App\Models\Post;
+use App\Models\Mediafile;
 use App\Models\Timeline;
 use App\Models\User;
 
@@ -154,20 +156,87 @@ class TimelinesTest extends TestCase
      *  @group regression
      *  @group here0330
      */
-    public function test_owner_can_view_followed_timeline_feed()
+    public function test_fan_can_not_access_locked_content_via_feed()
     {
-        $timeline = Timeline::has('posts','>=',1)->has('followers','>=',1)->first(); // assume non-admin (%FIXME)
-        $creator = $timeline->user;
-        $fan = $timeline->followers[0];
+        $timeline = Timeline::has('posts','>=',5)->has('followers','>=',1)->firstOrFail(); // assume non-admin (%FIXME)
 
-        $payload = [];
-        $response = $this->actingAs($fan)->ajaxJSON('GET', route('timelines.feed', $timeline->id), $payload);
+        // Makes sure we have at least 1 free, 1 priced, and 1 subscibe-only post, then add some mediafiles to the posts...
+        $posts = Post::where('postable_type', 'timelines')->where('postable_id', $timeline->id)->latest()->take(5)->get();
+
+        $freePost = $posts[0];
+        $freePost->type = PostTypeEnum::FREE;
+        $freePost->save();
+        $this->attachMediafile($freePost);
+        $this->attachMediafile($freePost);
+
+        $pricedPost = $posts[1];
+        $pricedPost->type = PostTypeEnum::PRICED;
+        $pricedPost->price = 3*100;
+        $pricedPost->save();
+        $this->attachMediafile($pricedPost);
+        $this->attachMediafile($pricedPost);
+
+        $subPost = $posts[2];
+        $subPost->type = PostTypeEnum::SUBSCRIBER;
+        $subPost->save();
+        $this->attachMediafile($subPost);
+        $this->attachMediafile($subPost);
+
+        //$posts = Post::with('mediafiles')->where('postable_type', 'timelines')->where('postable_id', $timeline->id)->latest()->take(5)->get();
+        //dd($posts);
+
+        $timeline = Timeline::has('posts','>=',1)->has('posts.mediafiles')->has('followers','>=',1)->firstOrFail(); // assume non-admin (%FIXME)
+        $creator = $timeline->user;
+        $nonfan = User::whereDoesntHave('followedtimelines', function($q1) use(&$timeline) {
+            $q1->where('timelines.id', $timeline->id);
+        })->where('id', '<>', $creator->id)->firstOrFail();
+        $this->assertFalse( $timeline->followers->contains( $nonfan->id ) );
+        $this->assertFalse( $nonfan->followedtimelines->contains( $timeline->id ) );
+
+        // Follow the timeline (default, not premium)
+        $response = $this->actingAs($nonfan)->ajaxJSON('PUT', route('timelines.follow', $timeline->id), ['sharee_id'=>$nonfan->id]);
+        $response->assertStatus(200);
+        $fan = $nonfan;
+        $fan->refresh();
+        $timeline->refresh();
+        $this->assertTrue( $timeline->followers->contains( $fan->id ) );
+        $this->assertTrue( $fan->followedtimelines->contains( $timeline->id ) );
+
+        // --
+
+        $response = $this->actingAs($fan)->ajaxJSON('GET', route('timelines.feed', $timeline->id), []);
         $response->assertStatus(200);
 
-        //$content = json_decode($response->content());
-        //$this->assertEquals(1, $content->meta->current_page);
-        //$this->assertNotNull($content->data);
-        //$this->assertGreaterThan(0, count($content->data));
+        $content = json_decode($response->content());
+        $this->assertNotNull($content->data);
+        $this->assertGreaterThan(0, count($content->data));
+        //dd($content);
+        unset($freePost, $pricedPost, $subPost);
+
+        $posts = collect($content->data);
+
+        $freePost = $posts->first( function($p) {
+            return $p->type === PostTypeEnum::FREE;
+        });
+        $this->assertNotNull($freePost);
+        $this->assertEquals(2, $freePost->mediafile_count);
+        $this->assertTrue($freePost->access);
+
+        $pricedPost = $posts->first( function($p) {
+            return $p->type === PostTypeEnum::PRICED;
+        });
+        $this->assertNotNull($pricedPost);
+        $this->assertEquals(2, $pricedPost->mediafile_count);
+        $this->assertFalse($pricedPost->access);
+
+        $subPost = $posts->first( function($p) {
+            return $p->type === PostTypeEnum::SUBSCRIBER;
+        });
+        $this->assertNotNull($subPost);
+        $this->assertEquals(2, $subPost->mediafile_count);
+        $this->assertFalse($subPost->access);
+
+        //dd($freePost, $pricedPost, $subPost);
     }
 
     /**
@@ -521,6 +590,22 @@ class TimelinesTest extends TestCase
 
     protected function tearDown() : void {
         parent::tearDown();
+    }
+
+    protected function attachMediafile(Post &$post, string $type='image') 
+    {
+        $fname = $this->faker->slug.'.jpg';
+        Mediafile::create([
+            'filename' => $fname,
+            'mfname' => $fname,
+            'mftype' => MediafileTypeEnum::POST,
+            'mimetype' => 'image/jpeg',
+            'orig_ext' => 'jpg',
+            'orig_filename' => $fname,
+            'resource_type' => 'posts',
+            'resource_id' => $post->id,
+        ]);
+        return $post;
     }
 }
 
