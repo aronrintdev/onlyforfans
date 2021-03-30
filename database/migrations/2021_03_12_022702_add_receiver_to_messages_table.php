@@ -14,7 +14,7 @@ class AddReceiverToMessagesTable extends Migration
     public function up()
     {
         Schema::table('messages', function (Blueprint $table) {
-            $table->uuid('receiver_id');
+            $table->uuid('receiver_id')->nullable();
         });
     }
 

@@ -15,7 +15,7 @@ class AddReceiverNameToMessages extends Migration
     {
         Schema::table('messages', function (Blueprint $table) {
             //
-            $table->string('receiver_name');
+            $table->string('receiver_name')->nullable();
         });
     }
 

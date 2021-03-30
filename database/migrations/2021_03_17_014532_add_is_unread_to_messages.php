@@ -15,7 +15,7 @@ class AddIsUnreadToMessages extends Migration
     {
         Schema::table('messages', function (Blueprint $table) {
             //
-            $table->boolean('is_unread');
+            $table->boolean('is_unread')->default(true);
         });
     }
 
