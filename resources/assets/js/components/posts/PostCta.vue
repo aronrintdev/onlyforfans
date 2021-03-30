@@ -107,10 +107,6 @@ ul {
   right: 1rem;
 }
 .locked-content {
-  /*
-  background: url('/images/locked_post.png') center center no-repeat !important;
-  background-size: auto;
-   */
   background-image: var(--background-image);
   background-position: center;
   background-repeat: no-repeat;

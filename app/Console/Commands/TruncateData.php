@@ -60,6 +60,7 @@ class TruncateData extends Command
     }
 
     private static $truncateList = [
+        'bookmarks',
         'model_has_permissions',
         'model_has_roles',
         'password_resets',
@@ -68,7 +69,7 @@ class TruncateData extends Command
         'settings',
         'user_settings',
         'websockets_statistics_entries',
-        'migrations',
+        //'migrations',
         'invites',
         'jobs',
         'links',

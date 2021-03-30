@@ -90,13 +90,7 @@ Vue.component('my-saved', require('./components/saved/Dashboard.vue').default);
 // converts from cents to dollars, and formats
 Vue.filter('niceCurrency', function (valueInCents) {
   let value = valueInCents ? (valueInCents/100) : 0
-  value.toFixed(2)
-  return `$${value}`
-  /*
-      return new Intl.NumberFormat('en-US',
-        { style: 'currency', currency: 'USD' }
-      ).format(v);
-    */
+  return value.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
 })
 
 Vue.filter('niceGuid', function (v) {
