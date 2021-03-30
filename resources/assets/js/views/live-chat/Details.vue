@@ -481,10 +481,7 @@
       });
       this.getMessages();
       setTimeout(() => {
-        const container = this.$el.querySelector(".conversation-list .message-group:last-child");
-        if (container) {
-          container.scrollIntoView({ block: 'end', behavior: 'smooth' });
-        }
+        $('.conversation-list').animate({ scrollTop: $('.conversation-list')[0].scrollHeight }, 500);
       }, 1000);
       Echo.private(`${this.$route.params.id}-message`)
         .listen('MessageSentEvent', (e) => {
@@ -517,12 +514,11 @@
         this.getMessages();
         const self = this;
         setTimeout(() => {
-          const container = this.$el.querySelector(".conversation-list .message-group:last-child");
-          container.scrollIntoView({ block: 'end', behavior: 'smooth' });
+          $('.conversation-list').animate({ scrollTop: $('.conversation-list')[0].scrollHeight }, 500);
         }, 1000);
         Echo.private(`${id}-message`)
         .listen('MessageSentEvent', (e) => {
-          self.originMessages.push(e.message);
+          self.originMessages.unshift(e.message);
           self.groupMessages();
         });
       }
@@ -565,12 +561,6 @@
         let statusHolder = $(".status-holder-"+ userId);
         if (status == 1) {
             statusHolder.addClass('online');        
-        } else {
-          setTimeout(function () {            
-            let last_seen = 'Last seen ' +
-                getCalenderFormatForLastSeen(Date(), 'hh:mma', 0);
-              
-          }, 3000)
         }
       },
       getMessages: function() {
@@ -580,6 +570,7 @@
           this.selectedUser = response.data;
           this.currentUser = response.data.currentUser;
           this.originMessages = this.originMessages.concat(response.data.messages);
+          this.selectedUser.messages = this.originMessages.slice();
           if (this.offset === 0 && this.originMessages.length > 0) {
             setTimeout(() => {
               this.$el.querySelector('.conversation-list').addEventListener('scroll', this.handleDebouncedScroll);
@@ -591,6 +582,7 @@
         }) 
       },
       groupMessages: function() {
+        console.log('---- this.originMessages",', this.originMessages);
         const messages = this.originMessages.map((message) => {
           message.date = moment(message.created_at).startOf('day').unix();
           return message;
@@ -692,7 +684,7 @@
           name: this.selectedUser.profile.name,
         })
           .then((response) => {
-            this.originMessages.push(response.data.message)
+            this.originMessages.unshift(response.data.message)
             self.groupMessages();
             self.newMessageText = undefined;
           });
