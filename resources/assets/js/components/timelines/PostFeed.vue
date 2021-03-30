@@ -10,27 +10,49 @@
 
     <b-row>
       <b-col>
-        <section class="feed-ctrl my-3 p-2 d-flex justify-content-end">
-          <div @click="toggleGridLayout" class="btn">
-            <b-icon icon="grid" scale="1.2" variant="primary"></b-icon>
-          </div>
-          <b-dropdown no-caret ref="feedCtrls" variant="transparent" id="feed-ctrl-dropdown" class="tag-ctrl">
-            <template #button-content>
-              <b-icon icon="filter" scale="1.5" variant="primary"></b-icon>
-            </template>
-            <b-dropdown-form>
-              <b-form-group label="">
-                <b-form-radio v-model="sortPostsBy" size="sm" name="sort-posts-by" value="latest">Latest</b-form-radio>
-                <b-form-radio v-model="sortPostsBy" size="sm" name="sort-posts-by" value="likes">Likes</b-form-radio>
-                <b-form-radio v-model="sortPostsBy" size="sm" name="sort-posts-by" value="comments">Comments</b-form-radio>
-              </b-form-group>
-              <b-dropdown-divider></b-dropdown-divider>
-              <b-form-group label="">
-                <b-form-checkbox v-model="hideLocked" size="sm" name="render-locked" value="true">Hide Locked</b-form-checkbox>
-                <b-form-checkbox v-model="hidePromotions" size="sm" name="render-locked" value="true">Hide Promotions</b-form-checkbox>
-              </b-form-group>
-            </b-dropdown-form>
-          </b-dropdown>
+        <section class="feed-ctrl my-3 p-2 d-flex justify-content-between">
+          <article>
+            <div style="" class="btn">
+              <span>All</span>
+            </div>
+            <div style="" class="btn">
+              <span>Photos</span>
+            </div>
+            <div style="" class="btn">
+              <span>Videos</span>
+            </div>
+          </article>
+          <article>
+            <div style="" class="btn">
+              <div style="font-size: 1.2rem; margin-top: 0.1rem" class="text-primary tag-ctrl">$</div>
+            </div>
+            <div style="margin-top: 0.3rem" class="btn">
+              <b-icon icon="box-arrow-in-right" font-scale="1.5" variant="primary" class="tag-ctrl" /> 
+            </div>
+            <div style="margin-top: 0.3rem" class="btn">
+              <b-icon :icon="timeline.is_following ? 'eye-fill' : 'eye'" font-scale="1.5" variant="primary" class="tag-ctrl" /> 
+            </div>
+            <div @click="toggleGridLayout" style="margin-top: 0.3rem" class="btn">
+              <b-icon icon="grid" scale="1.2" variant="primary"></b-icon>
+            </div>
+            <b-dropdown no-caret ref="feedCtrls" variant="transparent" id="feed-ctrl-dropdown" class="tag-ctrl">
+              <template #button-content>
+                <b-icon icon="filter" scale="1.5" variant="primary"></b-icon>
+              </template>
+              <b-dropdown-form>
+                <b-form-group label="">
+                  <b-form-radio v-model="sortPostsBy" size="sm" name="sort-posts-by" value="latest">Latest</b-form-radio>
+                  <b-form-radio v-model="sortPostsBy" size="sm" name="sort-posts-by" value="likes">Likes</b-form-radio>
+                  <b-form-radio v-model="sortPostsBy" size="sm" name="sort-posts-by" value="comments">Comments</b-form-radio>
+                </b-form-group>
+                <b-dropdown-divider></b-dropdown-divider>
+                <b-form-group label="">
+                  <b-form-checkbox v-model="hideLocked" size="sm" name="render-locked" value="true">Hide Locked</b-form-checkbox>
+                  <b-form-checkbox v-model="hidePromotions" size="sm" name="render-locked" value="true">Hide Promotions</b-form-checkbox>
+                </b-form-group>
+              </b-dropdown-form>
+            </b-dropdown>
+          </article>
         </section>
       </b-col>
     </b-row>
