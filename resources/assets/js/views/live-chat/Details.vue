@@ -41,7 +41,7 @@
                   </div>
                   <div class="options-bar">
                     <span class="selected-option">{{selectedOption}}</span>
-                    <b-dropdown id="user-filter-dropdown" right>
+                    <b-dropdown class="filter-dropdown" id="user-filter-dropdown" right>
                       <template #button-content>
                         <svg class="sort-icon has-tooltip" aria-hidden="true" data-original-title="null">
                           <use xlink:href="#icon-sort" href="#icon-sort">
@@ -137,9 +137,8 @@
                           <font-awesome-icon :icon="this.selectedUser.muted ? ['far', 'bell-slash'] : ['far', 'bell'] " />
                         </button>
                         <div class="v-divider"></div>
-                        <button class="gallery-btn btn" type="button">
+                        <button class="gallery-btn btn" type="button" @click="goToGallery">
                           <font-awesome-icon :icon="['far', 'image']" />&nbsp;&nbsp;Gallery
-
                         </button>
                         <div class="v-divider"></div>
                         <button class="search-btn btn" type="button" @click="changeMessageSearchVisible">
@@ -152,24 +151,24 @@
                       <template #button-content>
                         <i class="fa fa-ellipsis-h" aria-hidden="true"></i>
                       </template>
-                      <b-dropdown-item>
+                      <b-dropdown-item disabled>
                         Copy link to profile
                       </b-dropdown-item>
-                      <b-dropdown-item>
+                      <b-dropdown-item @click="showListModal">
                         Add to / remove from lists
                       </b-dropdown-item>
-                      <b-dropdown-item>
+                      <b-dropdown-item disabled>
                         Give user a discount
                       </b-dropdown-item>
                       <b-dropdown-item @click="editCustomName">
                         Edit Name
                       </b-dropdown-item>
                       <b-dropdown-divider></b-dropdown-divider>
-                      <b-dropdown-item>Hide chat</b-dropdown-item>
+                      <b-dropdown-item disabled>Hide chat</b-dropdown-item>
                       <b-dropdown-item v-if="!selectedUser.muted" @click="muteNotification">Mute notifications</b-dropdown-item>
                       <b-dropdown-item v-if="selectedUser.muted" @click="muteNotification">Unmute notifications</b-dropdown-item>
                       <b-dropdown-divider></b-dropdown-divider>
-                      <b-dropdown-item class="block-item">Restrict @{{ selectedUser.profile.username }}</b-dropdown-item>
+                      <b-dropdown-item class="block-item" disabled>Restrict @{{ selectedUser.profile.username }}</b-dropdown-item>
                       <b-dropdown-item @click="showBlockModal" class="block-item">Block @{{ selectedUser.profile.username }}</b-dropdown-item>
                       <b-dropdown-item class="block-item">Report @{{ selectedUser.profile.username }}</b-dropdown-item>
                     </b-dropdown>
@@ -318,6 +317,105 @@
         </div>
       </div>
     </b-modal>
+    <b-modal v-if="selectedUser" hide-header centered hide-footer ref="list-edit-modal" title="List Edit Modal">
+      <div class="block-modal list-edit-modal">
+        <div class="header d-flex justify-content-between align-items-center">
+          <h4>Save to List</h4>
+          <b-dropdown class="filter-dropdown" id="list-sort-dropdown" right>
+            <template #button-content>
+              <svg class="sort-icon has-tooltip" aria-hidden="true" data-original-title="null">
+                <use xlink:href="#icon-sort" href="#icon-sort">
+                  <svg id="icon-sort" viewBox="0 0 24 24">
+                    <path
+                      d="M4 19h4a1 1 0 0 0 1-1 1 1 0 0 0-1-1H4a1 1 0 0 0-1 1 1 1 0 0 0 1 1zM3 6a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1 1 1 0 0 0-1-1H4a1 1 0 0 0-1 1zm1 7h10a1 1 0 0 0 1-1 1 1 0 0 0-1-1H4a1 1 0 0 0-1 1 1 1 0 0 0 1 1z">
+                    </path>
+                  </svg>
+                </use>
+              </svg>
+            </template>
+            <b-dropdown-item>
+              <radio-group-box
+                group_name="list-sort-options"
+                value="name"
+                label="Name">
+              </radio-group-box>
+            </b-dropdown-item>
+            <b-dropdown-item>
+              <radio-group-box
+                group_name="list-sort-options"
+                value="recent"
+                label="Recent">
+              </radio-group-box>
+            </b-dropdown-item>
+            <b-dropdown-item>
+              <radio-group-box
+                group_name="list-sort-options"
+                value="people"
+                label="People">
+              </radio-group-box>
+            </b-dropdown-item>
+            <b-dropdown-divider></b-dropdown-divider>
+            <b-dropdown-item>
+              <radio-group-box
+                group_name="list-sort-directions"
+                value="asc"
+                label="Ascendening">
+              </radio-group-box>
+            </b-dropdown-item>
+            <b-dropdown-item>
+              <radio-group-box
+                group_name="list-sort-directions"
+                value="desc"
+                label="Descending">
+              </radio-group-box>
+            </b-dropdown-item>
+          </b-dropdown>
+        </div>
+        <div class="content border-box mb-1 mt-1">
+          <div class="text-center mb-3 mt-3 text-muted" v-if="!isListUpdating && !lists.length">
+            <em>No Available List. Please add a new list.</em>
+          </div>
+          <div class="list-item" v-for="listItem in lists" :key="listItem.id" @click="onListChanged(listItem)">
+            <round-check-box :value="isUserInList(listItem)" :key="isUserInList(listItem)"></round-check-box>
+            <div class="list-item-content d-flex justify-content-between align-items-center">
+              <div>
+                <div class="title">{{listItem.name}}</div>
+                <div class="content">{{listItem.users.length}} people</div>
+              </div>
+              <div class="avatars">
+                <template v-for="user in listItem.users">
+                  <div class="user-logo text-logo" v-if="!user.avatar" :key="user.id">
+                    {{ getLogoFromName(user.name) }}
+                  </div>
+                  <div class="user-logo" v-if="user.avatar"  :key="user.id">
+                    <img :src="user.avatar.filepath" alt="" />
+                  </div>
+                </template>
+              </div>
+            </div>
+          </div>
+          <div class="text-center" v-if="isListUpdating">
+            <b-spinner variant="secondary" label="Loading..." small></b-spinner>
+          </div>
+        </div>
+        <div class="action-btns">
+          <button class="link-btn" @click="addNewList">+ New List</button>
+          <button class="link-btn" @click="closeListModal">Close</button>
+        </div>
+      </div>
+    </b-modal>
+    <b-modal v-if="selectedUser" hide-header centered hide-footer ref="new-list-modal" title="New List Modal">
+      <div class="block-modal">
+        <h4>CREATE NEW LIST</h4>
+        <div class="content mb-3 mt-3">
+          <b-form-input v-model="newListName" placeholder="New list name"></b-form-input>
+        </div>
+        <div class="action-btns">
+          <button class="link-btn" @click="closeNewListModal">Cancel</button>
+          <button class="link-btn" @click="saveNewListName" :disabled="!newListName">Save</button>
+        </div>
+      </div>
+    </b-modal>
   </div>
 </template>
 
@@ -325,6 +423,7 @@
   import moment from 'moment';
   import _ from 'lodash';
   import RadioGroupBox from '../../components/radioGroupBox';
+  import RoundCheckBox from '../../components/roundCheckBox';
 
   /**
    * Messages Dashboard View
@@ -354,7 +453,11 @@
       totalSearches: [],
       blockReason: undefined,
       muted: undefined,
-      userCustomName: undefined
+      userCustomName: undefined,
+      isListUpdating: false,
+      listOption: undefined,
+      lists: [],
+      newListName: undefined,
     }),
     mounted() {
       const self = this;
@@ -425,7 +528,8 @@
       }
     },
     components: {
-      'radio-group-box': RadioGroupBox
+      'radio-group-box': RadioGroupBox,
+      'round-check-box': RoundCheckBox
     },
     computed: {
       selectedOption: function () {
@@ -537,7 +641,7 @@
         this.$router.push('/messages');
       },
       addToFavourites: function () {
-        this.selectedUser = { ...this.selectedUser, is_favourite: !this.selectedUser.is_favourite };
+        this.showListModal();
       },
       muteNotification: async function () {
         if (!this.selectedUser.muted) {
@@ -662,6 +766,66 @@
         }
         this.closeCustomNameModal();
       },
+      showListModal: async function() {
+        this.$refs['list-edit-modal'].show();
+        this.isListUpdating = true;
+        this.axios.get('/lists')
+          .then(res => {
+            this.lists = res.data;
+            this.isListUpdating = false;
+          });
+      },
+      closeListModal: function() {
+        this.$refs['list-edit-modal'].hide();
+      },
+      onListChanged: function(list) {
+        if (!this.isUserInList(list)) {
+          this.addUserToList(list.id);
+        } else {
+          this.removeUserFromList(list.id);
+        }
+      },
+      addNewList: function() {
+        this.closeListModal();
+        this.$refs['new-list-modal'].show();
+        this.newListName = undefined;
+      },
+      isUserInList: function(listItem) {
+        if (listItem.users) {
+          return listItem.users.findIndex(user => user.id === this.selectedUser.profile.id) > -1;
+        }
+        return false;
+      },
+      closeNewListModal: function() {
+        this.$refs['new-list-modal'].hide();
+        this.showListModal();
+      },
+      saveNewListName: async function() {
+        const res = await this.axios.post('/lists', { name: this.newListName })
+        this.lists.push(res.data);
+        this.closeNewListModal();
+      },
+      addUserToList: function(id) {
+        this.axios.post(`/lists/${id}/users`, { user: this.selectedUser.profile.id })
+          .then((res) => {
+            const newLists = this.lists.slice();
+            const index = newLists.findIndex(list => list.id === id);
+            newLists[index] = res.data;
+            this.lists = newLists;
+          });
+      },
+      removeUserFromList: function(id) {
+        this.axios.delete(`/lists/${id}/users/${this.selectedUser.profile.id }`)
+          .then((res) => {
+            const newLists = this.lists.slice();
+            const index = newLists.findIndex(list => list.id === id);
+            newLists[index] = res.data;
+            this.lists = newLists;
+          });
+      },
+      goToGallery: function() {
+        this.$router.push(`/messages/${this.selectedUser.profile.id}/gallery`);
+      }
     }
   }
 </script>
@@ -726,4 +890,86 @@
       }
     }
   }
+  .list-edit-modal {
+    margin: -1rem;
+    .header {
+      padding: 10px 16px;
+      border-bottom: 1px solid rgba(138,150,163,.2);
+      h4 {
+        padding: 0;
+        margin: 0;
+      }
+      svg {
+        fill: rgba(138, 150, 163, 0.75);
+        width: 22px;
+        height: 22px;
+      }
+    }
+    .action-btns {
+      justify-content: space-between;
+      padding: 6px 7.5px;
+      border-top: 1px solid rgba(138,150,163,.2);
+
+      .link-btn {
+        margin: 0;
+      }
+    }
+    .list-item {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      height: 64px;
+      .round__checkbox {
+        margin: 0 16px;
+      }
+      .list-item-content {
+        flex: 1;
+        padding-right: 16px;
+        height: 64px;
+        border-bottom: 1px solid rgba(138,150,163,.25);
+        .title {
+          font-size: 16px;
+          line-height: 24px;
+          font-weight: 500;
+        }
+        .content {
+          font-size: 14px;
+          color: #8a96a3;
+        }
+
+      }
+      &:last-child .list-item-content {
+        border-bottom: none;
+      }
+    }
+  }
+  .avatars {
+    display: flex;
+    align-items: center;
+    margin-right: 10px;
+  }
+  .user-logo {
+		width: 38px;
+		height: 38px;
+		margin-right: -12px;
+		position: relative;
+
+		img {
+			width: 100%;
+			height: 100%;
+			border-radius: 50%;
+			border: 2px solid #fff;
+		}
+		&.text-logo {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			color: #00aff0;
+			font-weight: 700;
+			font-size: 16px;
+			background: rgba(138,150,163,.12);
+			letter-spacing: 0;
+			text-transform: uppercase;
+		}
+	}
 </style>

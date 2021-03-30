@@ -147,4 +147,11 @@
     opacity: 1;
     transform: scale(1);
 }
+.dropdown-item:hover .b-input-radio__label {
+    border-color: #00aff0;
+}
+.dropdown-item:hover .b-input-ripple:before {
+    opacity: 1;
+    transform: scale(1);
+}
 </style>

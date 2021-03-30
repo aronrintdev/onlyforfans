@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddReceiverToMessagesTable extends Migration
+class ListsUsers extends Migration
 {
     /**
      * Run the migrations.
@@ -13,8 +13,12 @@ class AddReceiverToMessagesTable extends Migration
      */
     public function up()
     {
-        Schema::table('messages', function (Blueprint $table) {
-            $table->uuid('receiver_id');
+        //
+        Schema::create('lists_users', function (Blueprint $table) {
+            $table->increments('id');
+            $table->uuid('user_id');
+            $table->uuid('list_id');
+            $table->timestamps();
         });
     }
 
@@ -25,8 +29,7 @@ class AddReceiverToMessagesTable extends Migration
      */
     public function down()
     {
-        Schema::table('messages', function (Blueprint $table) {
-            $table->dropColumn('receiver_id');
-        });
+        //
+        Schema::dropIfExists('lists_users');
     }
 }

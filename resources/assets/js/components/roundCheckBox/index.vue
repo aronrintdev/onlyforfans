@@ -93,4 +93,17 @@
   .round__checkbox.active .g-icon {
     display: block;
   }
+  .list-item:hover .b-input-ripple:before,
+  .user-details:hover .b-input-ripple:before{
+    opacity: 1;
+    transform: scale(1);
+  }
+  .list-item:hover .round__checkbox,
+  .user-details:hover .round__checkbox {
+    border-color: #00aff0;
+  }
+  .list-item:hover .round__checkbox svg,
+  .user-details:hover .round__checkbox svg {
+    fill: #00aff0;
+  }
 </style>

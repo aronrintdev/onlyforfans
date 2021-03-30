@@ -276,6 +276,11 @@ Route::get('/home', 'HomeController@index');
 Route::get('/search', 'SearchController@search')->name('search');
 Route::post('/search', 'SearchController@search')->name('search.post');
 
+Route::get('/lists', 'ListsController@index')->name('lists.index');
+Route::post('/lists', 'ListsController@store')->name('lists.store');
+Route::post('/lists/{id}/users', 'ListsController@addUserToList')->name('lists.adduser');
+Route::delete('/lists/{id}/users/{userId}', 'ListsController@removeUserFromList')->name('lists.removeuser');
+
 /**
  * Single Page application catch all undefined routes
  * Laravel router will first try to match static resources, then specific routes, then finally this.

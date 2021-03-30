@@ -453,6 +453,16 @@ class User extends Authenticatable implements PaymentSendable, Blockable, HasFin
     {
         return $this->hasMany(Message::class);
     }
+
+    public function lists()
+    {
+        return $this->belongsToMany('App\Models\Lists', 'lists_users', 'user_id', 'list_id')->withTimestamps();
+    }
+
+    public function userlists()
+    {
+        return $this->hasMany('App\Models\Lists', 'creator_id');
+    }
 }
 
     /*

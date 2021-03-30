@@ -10,7 +10,47 @@
 		text-transform: capitalize;
 		color: #4a5568;
 	}
+	.user-logo {
+		width: 52px;
+		height: 52px;
+		margin-right: 16px;
+		position: relative;
 
+		img {
+			width: 100%;
+			height: 100%;
+			border-radius: 50%;
+			border: 2px solid #fff;
+		}
+		&.text-logo {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			color: #00aff0;
+			font-weight: 700;
+			font-size: 16px;
+			background: rgba(138,150,163,.12);
+			letter-spacing: 0;
+			text-transform: uppercase;
+		}
+		.status-holder {
+			position: absolute;
+			bottom: 2px;
+			right: 2px;
+			width: 14px;
+			height: 14px;
+			border: 2px solid #fff;
+			z-index: 2;
+			display: block;
+			background: #35d063;
+			border-radius: 50%;
+			display: none;
+
+			&.online {
+				display: block;
+			}
+		}
+	}
 	.page-heading {
 		float: left;
 		padding: 12px 12px 14px 12px;
@@ -193,47 +233,7 @@
 							border-radius: 8px;
 						}
 					}
-					.user-logo {
-						width: 52px;
-						height: 52px;
-						margin-right: 16px;
-						position: relative;
-
-						img {
-							width: 100%;
-							height: 100%;
-							border-radius: 50%;
-							border: 2px solid #fff;
-						}
-						&.text-logo {
-							display: flex;
-							align-items: center;
-							justify-content: center;
-							color: #00aff0;
-							font-weight: 700;
-							font-size: 16px;
-							background: rgba(138,150,163,.12);
-							letter-spacing: 0;
-							text-transform: uppercase;
-						}
-						.status-holder {
-							position: absolute;
-							bottom: 2px;
-							right: 2px;
-							width: 14px;
-							height: 14px;
-							border: 2px solid #fff;
-							z-index: 2;
-							display: block;
-							background: #35d063;
-							border-radius: 50%;
-							display: none;
-
-							&.online {
-								display: block;
-							}
-						}
-					}
+					
 					.user-details {
 						width: calc(100% - 70px);
 						padding: 0;
@@ -294,6 +294,12 @@
 				padding-bottom: 3px;
 				.user-details-row:last-child {
 					padding-bottom: 0;
+				}
+				& > div {
+					white-space: nowrap;
+					text-overflow: ellipsis;
+					overflow: hidden;
+					margin-right: 8px;
 				}
 			}
 
