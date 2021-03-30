@@ -10,12 +10,17 @@
     >
       <template #header>
         <PostHeader :post="post" :session_user="session_user"/>
-        <div v-if="session_user.id === post.user.id" class="post-ctrl">
-          <b-dropdown id="dropdown-1" text="" class="m-md-2" variant="outline-dark">
-            <b-dropdown-item @click="editPost()">Edit</b-dropdown-item>
-            <b-dropdown-item @click="deletePost()">Delete</b-dropdown-item>
-          </b-dropdown>
-        </div>
+        <section class="d-flex align-items-center">
+          <div v-if="session_user.id === post.user.id" class="post-ctrl mr-2">
+            <b-dropdown id="dropdown-1" text="" class="m-md-2" variant="outline-dark">
+              <b-dropdown-item @click="editPost()">Edit</b-dropdown-item>
+              <b-dropdown-item @click="deletePost()">Delete</b-dropdown-item>
+            </b-dropdown>
+          </div>
+          <div @click="renderPost" v-if="is_feed" class="p-2 btn">
+              <b-icon icon="arrows-angle-expand" variant="primary" font-scale="1.2" />
+          </div>
+        </section>
       </template>
 
       <template v-if="post.access">
@@ -40,7 +45,7 @@
 
 <script>
 import Vuex from 'vuex'
-//import { eventBus } from '@/app'
+import { eventBus } from '@/app'
 import PostHeader from './PostHeader'
 import PostFooter from './PostFooter'
 import PostCta from './PostCta'
@@ -58,6 +63,7 @@ export default {
     post: null,
     session_user: null,
     use_mid: { type: Boolean, default: false }, // use mid-sized images instead of full
+    is_feed: { type: Boolean, default: true }, // is in context of a feed?
   },
 
   computed: {
@@ -80,6 +86,18 @@ export default {
   created() {},
 
   methods: {
+
+    renderPost() {
+      if (this.post.access) {
+        eventBus.$emit('open-modal', { key: 'show-post', data: { post: this.post } })
+      } else {
+        if ( this.$options.filters.isSubscriberOnly(this.post) ) {
+          eventBus.$emit('open-modal', { key: 'render-subscribe', data: { timeline: this.timeline } })
+        } else if ( this.$options.filters.isPurchaseable(this.post) ) {
+          eventBus.$emit('open-modal', { key: 'render-purchase-post', data: { post: this.post } })
+        }
+      }
+    },
 
     editPost() {
       const is = this.session_user.id === this.post.user.id // Check permissions

@@ -20,20 +20,24 @@
         </aside>
       </section>
 
-      <!-- %FIXME: DRY vs Show -->
-      <b-modal id="modal-tip" size="sm" title="Send a Tip" hide-footer body-class="p-0">
-        <SendTip :session_user="session_user" :timeline="timeline" />
-      </b-modal>
-
-      <b-modal id="modal-purchase_post" size="sm" title="Purchase Post" hide-footer body-class="p-0">
-        <PurchasePost :session_user="session_user" :post="selectedPost" />
-      </b-modal>
-
-      <b-modal id="modal-follow" title="Follow" hide-footer body-class="p-0">
-        <FollowTimeline :session_user="session_user" :timeline="selectedTimeline" :subscribe_only="subscribeOnly" />
-      </b-modal>
-
     </div>
+
+    <!-- %FIXME: DRY vs Show -->
+    <b-modal id="modal-tip" size="sm" title="Send a Tip" hide-footer body-class="p-0">
+      <SendTip :session_user="session_user" :timeline="timeline" />
+    </b-modal>
+
+    <b-modal id="modal-purchase_post" size="sm" title="Purchase Post" hide-footer body-class="p-0">
+      <PurchasePost :session_user="session_user" :post="selectedPost" />
+    </b-modal>
+
+    <b-modal id="modal-follow" title="Follow" hide-footer body-class="p-0">
+      <FollowTimeline :session_user="session_user" :timeline="selectedTimeline" :subscribe_only="subscribeOnly" />
+    </b-modal>
+
+    <b-modal size="xl" id="modal-post" title="Post" hide-footer body-class="p-0">
+      <PostDisplay :session_user="session_user" :post="selectedPost" :is_feed="false" />
+    </b-modal>
 
   </div>
 </template>
@@ -49,6 +53,7 @@ import SuggestedFeed from '@components/common/SuggestedFeed.vue';
 import FollowTimeline from '@components/modals/FollowTimeline.vue'
 import PurchasePost from '@components/modals/PurchasePost.vue'
 import SendTip from '@components/modals/SendTip.vue'
+import PostDisplay from '@components/posts/Display'
 
 export default {
   components: {
@@ -60,6 +65,7 @@ export default {
     FollowTimeline,
     PurchasePost,
     SendTip,
+    PostDisplay,
   },
 
   computed: {
@@ -84,8 +90,8 @@ export default {
   data: () => ({
     isGridLayout: false, // %FIXME: can this be set in created() so we have 1 source of truth ? (see PostFeed)
     selectedPost: null,
-    selectedTimeline: null,
     subscribeOnly: true, // for modal
+    selectedTimeline: null,
   }),
 
   created() {
@@ -110,6 +116,10 @@ export default {
           break
         case 'render-tip':
           this.$bvModal.show('modal-tip')
+          break
+        case 'show-post':
+          this.selectedPost = data.post
+          this.$bvModal.show('modal-post')
           break
       }
     })

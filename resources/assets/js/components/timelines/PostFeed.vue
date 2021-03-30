@@ -27,7 +27,7 @@
               <div style="font-size: 1.2rem; margin-top: 0.1rem" class="text-primary tag-ctrl">$</div>
             </div>
             <div style="margin-top: 0.3rem" class="btn">
-              <b-icon icon="box-arrow-in-right" font-scale="1.5" variant="primary" class="tag-ctrl" /> 
+              <b-icon icon="chat" font-scale="1.5" variant="primary" class="tag-ctrl" /> 
             </div>
             <div @click="renderFollow" style="margin-top: 0.3rem" class="btn">
               <b-icon :icon="timeline.is_following ? 'eye-fill' : 'eye'" font-scale="1.5" variant="primary" class="tag-ctrl" /> 
