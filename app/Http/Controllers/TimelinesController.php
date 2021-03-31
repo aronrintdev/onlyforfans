@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 
+use App\Http\Resources\MediafileCollection;
 use App\Http\Resources\PostCollection;
 use App\Http\Resources\Timeline as TimelineResource;
 use App\Libs\FeedMgr;
@@ -17,10 +18,12 @@ use App\Libs\UserMgr;
 use App\Models\Setting;
 use App\Models\Timeline;
 use App\Models\Fanledger;
+use App\Models\Mediafile;
 use App\Models\Post;
 use App\Models\User;
 
 use App\Enums\PaymentTypeEnum;
+use App\Enums\MediafileTypeEnum;
 use App\Enums\PostTypeEnum;
 
 class TimelinesController extends AppBaseController
@@ -88,6 +91,20 @@ class TimelinesController extends AppBaseController
         $query->byTimeline($timeline->id)->sort( $request->input('sortBy', 'default') );
         $data = $query->paginate( $request->input('take', env('MAX_POSTS_PER_REQUEST', 10)) );
         return new PostCollection($data);
+    }
+
+    // 'Photos' Feed
+    public function photos(Request $request, Timeline $timeline)
+    {
+        $query = Mediafile::with('resource')
+            ->whereIn('mimetype', ['image/jpeg', 'image/jpg', 'image/png'])
+            ->where('mftype', MediafileTypeEnum::POST);
+        //$query->byTimeline($timeline->id)->sort( $request->input('sortBy', 'default') );
+        $query->whereHasMorph( 'resource', [Post::class], function($q1) use(&$timeline) {
+            $q1->where('postable_type', 'timelines')->where('postable_id', $timeline->id);
+        });
+        $data = $query->paginate( $request->input('take', env('MAX_POSTS_PER_REQUEST', 10)) );
+        return new MediafileCollection($data);
     }
 
     // Get suggested users (list/index)

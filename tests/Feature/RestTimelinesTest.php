@@ -154,7 +154,6 @@ class TimelinesTest extends TestCase
     /**
      *  @group timelines
      *  @group regression
-     *  @group here0330
      */
     public function test_fan_can_not_access_locked_content_via_feed()
     {
@@ -221,6 +220,8 @@ class TimelinesTest extends TestCase
         $this->assertNotNull($freePost);
         $this->assertEquals(2, $freePost->mediafile_count);
         $this->assertTrue($freePost->access);
+        $this->assertNotNull($freePost->mediafiles[0]);
+        $this->assertNotNull($freePost->mediafiles[0]->filepath);
 
         $pricedPost = $posts->first( function($p) {
             return $p->type === PostTypeEnum::PRICED;
@@ -228,6 +229,8 @@ class TimelinesTest extends TestCase
         $this->assertNotNull($pricedPost);
         $this->assertEquals(2, $pricedPost->mediafile_count);
         $this->assertFalse($pricedPost->access);
+        $this->assertNotNull($pricedPost->mediafiles[0]);
+        $this->assertNull($pricedPost->mediafiles[0]->filepath); // can't access media!
 
         $subPost = $posts->first( function($p) {
             return $p->type === PostTypeEnum::SUBSCRIBER;
@@ -235,9 +238,40 @@ class TimelinesTest extends TestCase
         $this->assertNotNull($subPost);
         $this->assertEquals(2, $subPost->mediafile_count);
         $this->assertFalse($subPost->access);
+        $this->assertNotNull($subPost->mediafiles[0]);
+        $this->assertNull($subPost->mediafiles[0]->filepath); // can't access media!
 
         //dd($freePost, $pricedPost, $subPost);
     }
+
+    /**
+     *  @group timelines
+     *  @group regression
+     *  @group here0330
+     */
+    public function test_fan_can_view_photos_only_feed()
+    {
+        $timeline = Timeline::has('posts','>=',5)->has('followers','>=',1)->firstOrFail();
+        $creator = $timeline->user;
+        $fan = $timeline->followers[0];
+
+        // Add some mediafiles (photos) to the posts...
+        $posts = Post::where('postable_type', 'timelines')->where('postable_id', $timeline->id)->latest()->take(5)->get();
+        $this->attachMediafile($posts[0]);
+        $this->attachMediafile($posts[0]);
+        $this->attachMediafile($posts[1]);
+        $this->attachMediafile($posts[2]);
+        $this->attachMediafile($posts[2]);
+        $this->attachMediafile($posts[2]);
+        $this->attachMediafile($posts[3]);
+
+        $response = $this->actingAs($fan)->ajaxJSON('GET', route('timelines.photos', $timeline->id), []);
+        $response->assertStatus(200);
+        $content = json_decode($response->content());
+        $mediafiles = collect($content->data);
+        dd($content);
+    }
+
 
     /**
      *  @group timelines

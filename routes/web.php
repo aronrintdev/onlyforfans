@@ -140,6 +140,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('/timelines/match', ['as'=>'timelines.match', 'uses' => 'TimelinesController@match']);
     Route::get('/timelines/home/feed', ['as'=>'timelines.homefeed', 'uses' => 'TimelinesController@homefeed']);
     Route::get('/timelines/{timeline}/feed', ['as'=>'timelines.feed', 'uses' => 'TimelinesController@feed']);
+    Route::get('/timelines/{timeline}/photos', ['as'=>'timelines.photos', 'uses' => 'TimelinesController@photos']); // photos feed
     Route::get('/timelines/{timeline}/preview-posts', ['as'=>'timelines.previewPosts', 'uses' => 'TimelinesController@previewPosts']);
     Route::put('/timelines/{timeline}/tip', ['as'=>'timelines.tip', 'uses' => 'TimelinesController@tip']);
     Route::put('/timelines/{timeline}/follow', ['as'=>'timelines.follow', 'uses' => 'TimelinesController@follow']);
