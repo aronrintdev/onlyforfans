@@ -27,7 +27,7 @@ Vue.use(VueAxios, window.axios);
 import VueLogger from 'vuejs-logger';
 const options = {
     isEnabled: true,
-    logLevel : isProduction ? 'error' : 'warn',
+    logLevel : isProduction ? 'error' : 'debug',
     stringifyArguments : false,
     showLogLevel : true,
     showMethodName : !isProduction,
