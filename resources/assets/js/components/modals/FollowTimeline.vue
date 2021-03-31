@@ -17,13 +17,13 @@
     </b-card-header>
 
       <b-card-body>
-        <div v-if="timeline.is_following"> <!-- un-follow or un-suscribe -->
+        <div v-if="timeline.is_following"> <!-- un-follow or un-subscribe -->
           <p>Sorry to see you go! If you're sure you want to cancel, confirm below...</p>
           <b-button v-if="timeline.is_subscribed" @click="doSubscribe" variant="danger" class="w-100">Click to Cancel Subscription</b-button>
           <b-button v-else @click="doFollow" variant="danger" class="w-100">Click to Unfollow</b-button>
         </div>
         <div v-else> <!-- follow or subscribe -->
-          <p>Get Full Access for {{ timeline.price | niceCurrency }} monthly premium subscription!</p>
+          <p>Get Full Access for {{ timeline.price_display || (timeline.price | niceCurrency) }} monthly premium subscription!</p>
           <b-button @click="doSubscribe" variant="success" class="w-100 mb-3">Subscribe for Full Access</b-button>
           <template v-if="!subscribe_only">
             <p>...or follow this creator for free to see limited content</p>
@@ -38,8 +38,13 @@
 
 <script>
 import { eventBus } from '@/app'
+import PurchaseForm from '@components/payments/PurchaseForm'
 
 export default {
+
+  components: {
+    PurchaseForm,
+  },
 
   props: {
     session_user: null,
@@ -51,6 +56,10 @@ export default {
     timelineUrl() {
       return `/${this.timeline.slug}`
     },
+  },
+
+  mounted() {
+    console.log({timeline: this.timeline})
   },
 
   data: () => ({ }),
@@ -77,20 +86,24 @@ export default {
 
     async doSubscribe(e) {
       e.preventDefault()
-      const response = await this.axios.put( route('timelines.subscribe', this.timeline.id), {
-        sharee_id: this.session_user.id,
-        notes: '',
-      })
+      // const response = await this.axios.put( route('timelines.subscribe', this.timeline.id), {
+      //   sharee_id: this.session_user.id,
+      //   notes: '',
+      // })
       this.$bvModal.hide('modal-follow')
-      const msg = response.is_subscribed 
-        ? `You are now subscribed to ${this.timeline.name}!`
-        : `You are no longer subscribed to ${this.timeline.name}!`
-      this.$root.$bvToast.toast(msg, {
-        toaster: 'b-toaster-top-center',
-        title: 'Success!',
-      })
-      eventBus.$emit('update-timeline', this.timeline.id)
-      eventBus.$emit('update-feed') // updates feed being viewed
+
+
+      // Needs to be moved
+
+      // const msg = response.is_subscribed 
+      //   ? `You are now subscribed to ${this.timeline.name}!`
+      //   : `You are no longer subscribed to ${this.timeline.name}!`
+      // this.$root.$bvToast.toast(msg, {
+      //   toaster: 'b-toaster-top-center',
+      //   title: 'Success!',
+      // })
+      // eventBus.$emit('update-timeline', this.timeline.id)
+      // eventBus.$emit('update-feed') // updates feed being viewed
     },
 
   },

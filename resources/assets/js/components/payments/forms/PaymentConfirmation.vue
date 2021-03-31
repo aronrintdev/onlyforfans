@@ -7,7 +7,7 @@
         </div>
       </template>
       <div class="h4 mb-3">
-        Confirm payment with Method:
+        Confirm payment with:
       </div>
       <b-row>
         <b-col class="mb-3 mb-md-0">
@@ -37,7 +37,7 @@ export default {
   },
   props: {
     paymentMethod: { type: Object, default: () => ({}) },
-    priceDisplay: { type: String, default: () => '$ 0.00' }
+    priceDisplay: { type: String, default: () => '$0.00' }
   },
 
   data: () => ({

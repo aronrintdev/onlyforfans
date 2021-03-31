@@ -3,7 +3,14 @@
     <SavedPaymentMethodList class="mb-3" @loadNewForm="loadNewForm" @loadPayWithForm="loadPayWithForm" />
 
     <transition name="component-fade" mode="out-in">
-      <component :is="loadedForm" :payment-method="selectedPaymentMethod" />
+      <component
+        :is="loadedForm"
+        :payment-method="selectedPaymentMethod"
+        :value="value"
+        :price="price"
+        :currency="currency"
+        :price-display="displayPrice"
+      />
     </transition>
 
     <!-- <PayWithForm class="mt-3" /> -->
@@ -29,9 +36,10 @@ export default {
   },
 
   props: {
+    value: { type: Object, default: () => ({}) },
     price: { type: Number, default: 0 },
     currency: { type: String, default: 'USD' },
-    displayPrice: { type: String, default: '$ 0.00' },
+    displayPrice: { type: String, default: '$0.00' },
   },
 
   data: () => ({

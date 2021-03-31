@@ -16,22 +16,30 @@
       </section>
     </b-card-header>
 
-    <b-form @submit="purchasePost">
-      <b-card-body>
-        <p class="w-100 text-center m-0 tag-purchase_amount">{{ post.price | niceCurrency }}</p>
-      </b-card-body>
-      <b-card-footer>
-        <b-button type="submit" variant="warning" class="w-100">Purchase Post</b-button>
-      </b-card-footer>
-    </b-form>
-
+    <b-card-body>
+      <p class="w-100 text-center m-0 tag-purchase_amount">
+        Purchase post for {{ post.price_display || (post.price | niceCurrency) }}
+      </p>
+      <PurchaseForm
+        :value="post"
+        :price="post.price"
+        :currency="post.currency"
+        :display-price="post.price_display || (post.price | niceCurrency)"
+        class="mt-3"
+      />
+    </b-card-body>
   </b-card>
 </template>
 
 <script>
 import { eventBus } from '@/app'
+import PurchaseForm from '@components/payments/PurchaseForm'
 
 export default {
+
+  components: {
+    PurchaseForm,
+  },
 
   props: {
     session_user: null,
@@ -48,9 +56,9 @@ export default {
 
   methods: {
 
-    async purchasePost(e) {
-      e.preventDefault()
-      const response = await axios.put( route('posts.purchase', this.post.id) )
+    setup() {
+
+      // TODO: Move this to websockets listener
       this.$bvModal.hide('modal-purchase_post')
       this.$root.$bvToast.toast(`Post successfully purchased!`, {
         toaster: 'b-toaster-top-center',

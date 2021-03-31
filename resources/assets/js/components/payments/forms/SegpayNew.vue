@@ -21,7 +21,11 @@
  */
 export default {
   name: 'SegpayNew',
-  props: {},
+  props: {
+    price: { type: Number, default: 0 },
+    currency: { type: String, default: 'USD' },
+    value: { type: Object, default: () => ({})},
+  },
 
   data: () => ({
     baseUrl: null,
@@ -31,7 +35,11 @@ export default {
 
   methods: {
     loadBaseUrl() {
-      var price = '20.00'
+      var price = this.price
+      if (this.currency === 'USD') {
+        price = (price / 100).toFixed(2)
+      }
+
       this.axios.post(`/payment/segpay/generate-url`, { price })
         .then(response => {
           this.axios.get(response.data)
