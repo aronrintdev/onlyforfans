@@ -1,42 +1,26 @@
 <template>
-  <div class="post-crate" v-bind:data-post_guid="post.id">
+  <div class="mediafile-crate" v-bind:data-mediafile_guid="mediafile.id">
     <b-card
       header-tag="header"
       footer-tag="footer"
       tag="article"
-      class="superbox-post"
+      class="superbox-mediafile"
       header-class="d-flex justify-content-between"
       no-body
     >
-      <template #header>
-        <PostHeader :post="post" :session_user="session_user"/>
-        <section class="d-flex align-items-center">
-          <div v-if="session_user.id === post.user.id" class="post-ctrl mr-2">
-            <b-dropdown id="dropdown-1" text="" class="m-md-2" variant="outline-dark">
-              <b-dropdown-item @click="editPost()">Edit</b-dropdown-item>
-              <b-dropdown-item @click="deletePost()">Delete</b-dropdown-item>
-            </b-dropdown>
-          </div>
-          <div @click="renderFull" v-if="is_feed" class="p-2 btn">
-              <b-icon icon="arrows-angle-expand" variant="primary" font-scale="1.2" />
-          </div>
-        </section>
-      </template>
 
-      <template v-if="post.access">
-        <div :class="{ 'tag-has-mediafiles': hasMediafiles }" class="py-3 text-wrap">
-          <b-card-text class="px-3 mb-0 tag-post_desc">{{ post.description }}</b-card-text>
+      <template v-if="mediafile.access">
+        <div @click="renderFull" v-if="is_feed" class="p-2 btn">
+          <b-icon icon="arrows-angle-expand" variant="primary" font-scale="1.2" />
         </div>
-        <article v-if="hasMediafiles">
-          <MediaSlider :post="post" :session_user="session_user" :use_mid="use_mid" />
-        </article>
+        <img v-if="mediafile.is_image"
+          class="d-block"
+          :src="(use_mid && mediafile.has_mid) ? mediafile.midFilepath : mediafile.filepath"
+          :alt="mediafile.mfname"
+        >
       </template>
-      <template v-else>
-        <PostCta :post="post" :session_user="session_user" />
-      </template>
-
-      <template #footer>
-        <PostFooter :post="post" :session_user="session_user" />
+      <template v-else-if="mediafile.resource_type==='posts'">
+        <PostCta :post="mediafile.resource" :session_user="session_user" />
       </template>
 
     </b-card>
@@ -46,21 +30,17 @@
 <script>
 import Vuex from 'vuex'
 import { eventBus } from '@/app'
-import PostHeader from './PostHeader'
-import PostFooter from './PostFooter'
-import PostCta from './PostCta'
-import MediaSlider from './MediaSlider'
+import PostCta from '@components/posts/PostCta'
+//import MediaSlider from './MediaSlider'
 
 export default {
   components: {
-    PostHeader,
-    PostFooter,
     PostCta,
-    MediaSlider,
+    //MediaSlider,
   },
 
   props: {
-    post: null,
+    mediafile: null,
     session_user: null,
     use_mid: { type: Boolean, default: false }, // use mid-sized images instead of full
     is_feed: { type: Boolean, default: true }, // is in context of a feed?
@@ -70,11 +50,8 @@ export default {
     username() {
       return this.post.user.username
     },
-    hasMediafiles() {
-      return this.post.mediafiles?.length > 0
-    },
     isLoading() {
-      return !this.post || !this.session_user
+      return !this.mediafile || !this.session_user
     },
   },
 

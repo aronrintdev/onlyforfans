@@ -12,13 +12,13 @@
       <b-col>
         <section class="feed-ctrl my-3 p-2 d-flex flex-column OFF-text-center flex-md-row justify-content-center justify-content-md-between">
           <article class="d-flex align-items-center">
-            <div style="" class="btn">
+            <div @click="setFeedType('default')" style="" class="btn">
               <span>All</span>
             </div>
-            <div style="" class="btn">
+            <div @click="setFeedType('photos')" style="" class="btn">
               <span>Photos</span>
             </div>
-            <div style="" class="btn">
+            <div @click="setFeedType('videos')" style="" class="btn">
               <span>Videos</span>
             </div>
           </article>
@@ -65,8 +65,12 @@
         v-observe-visibility="index === renderedItems.length - 1 ? endPostVisible : false"
       >
         <div class="tag-debug">INDEX: {{ index }}</div>
-        <!-- for now we assume posts; eventually need to convert to a DTO (ie more generic 'feedItem') : GraphQL ? -->
-        <PostDisplay
+        <ImageDisplay v-if="feedType==='photos'"
+          :mediafile="feedItem"
+          :session_user="session_user"
+          :use_mid="true"
+        />
+        <PostDisplay v-else
           :post="feedItem"
           :session_user="session_user"
           :use_mid="true"
@@ -91,10 +95,12 @@
 import Vuex from 'vuex'
 import { eventBus } from '@/app'
 import PostDisplay from '@components/posts/Display'
+import ImageDisplay from '@components/timelines/elements/ImageDisplay'
 
 export default {
   components: {
     PostDisplay,
+    ImageDisplay,
   },
 
   props: {
@@ -141,7 +147,7 @@ export default {
   },
 
   data: () => ({
-    sortPostsBy: null,
+    sortPostsBy: null, // %TODO: rename to sortBy
     renderedItems: [], // this will likely only be posts
     renderedPages: [], // track so we don't re-load same page (set of posts) more than 1x
     lastPostVisible: false,
@@ -151,6 +157,7 @@ export default {
     hideLocked: false,
     hidePromotions: false,
     isGridLayout: false,
+    feedType: 'default',
 
   }),
 
@@ -163,6 +170,7 @@ export default {
 
   created() {
     this.$store.dispatch('getFeeddata', { 
+      feedType: this.feedType,
       timelineId: this.timelineId, 
       isHomefeed: this.is_homefeed,
       page: 1, 
@@ -181,6 +189,12 @@ export default {
   },
 
   methods: {
+
+    setFeedType(feedType) {
+      this.feedType = feedType
+      this.isGridLayout = true
+      this.reloadFromFirstPage()
+    },
 
     renderTip() {
       eventBus.$emit('open-modal', {
@@ -247,7 +261,7 @@ export default {
       const url = `/posts/${postId}`
       const response = await axios.delete(url)
       //this.$store.dispatch('getFeeddata', { timelineId: this.timelineId, page: 1, limit: this.limit, isHomefeed: this.is_homefeed })
-      this.reloadFromFirstPage();
+      this.reloadFromFirstPage()
     },
 
     // additional page loads
@@ -257,6 +271,7 @@ export default {
         this.moreLoading = true;
         this.$log.debug('loadNextPage', { current: this.currentPage, last: this.lastPage, next: this.nextPage });
         this.$store.dispatch('getFeeddata', { 
+        feedType: this.feedType,
           timelineId: this.timelineId, 
           isHomefeed: this.is_homefeed,
           page: this.nextPage, 
@@ -270,8 +285,9 @@ export default {
 
     // may adjust filters, but always reloads from page 1
     reloadFromFirstPage() {
-      this.doReset();
+      this.doReset()
       this.$store.dispatch('getFeeddata', { 
+        feedType: this.feedType,
         page: 1, 
         timelineId: this.timelineId, 
         isHomefeed: this.is_homefeed,

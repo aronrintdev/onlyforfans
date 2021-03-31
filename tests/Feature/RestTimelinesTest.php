@@ -267,9 +267,35 @@ class TimelinesTest extends TestCase
 
         $response = $this->actingAs($fan)->ajaxJSON('GET', route('timelines.photos', $timeline->id), []);
         $response->assertStatus(200);
+        $response->assertJsonStructure([
+            'data' => [ 
+                0 => [ 
+                    'slug', 
+                    'access', 
+                    'basename', 
+                    'mfname', 
+                    'mftype', 
+                    'filename', 
+                    'resource_id', 
+                    'resource_type', 
+                    'has_thumb', 
+                    'has_mid', 
+                    'has_blur', 
+                    'is_image', 
+                    'is_video', 
+                    'mimetype', 
+                    'filepath', 
+                    'thumbFilepath', 
+                    'midFilepath', 
+                    'blurFilepath', 
+                ],
+            ],
+            'links',
+            'meta',
+        ]);
         $content = json_decode($response->content());
         $mediafiles = collect($content->data);
-        dd($content);
+        //dd($content);
     }
 
 

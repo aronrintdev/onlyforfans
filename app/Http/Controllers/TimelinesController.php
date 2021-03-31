@@ -94,6 +94,7 @@ class TimelinesController extends AppBaseController
     }
 
     // 'Photos' Feed
+    // %TODO: move to mediafiles controller (?)
     public function photos(Request $request, Timeline $timeline)
     {
         $query = Mediafile::with('resource')

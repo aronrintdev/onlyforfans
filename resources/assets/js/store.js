@@ -155,6 +155,7 @@ export default new Vuex.Store({
     },
 
     getFeeddata( { commit }, { 
+      feedType='default', 
       timelineId, 
       isHomefeed,
       page=1, 
@@ -170,7 +171,14 @@ export default new Vuex.Store({
         hideLocked,
         hidePromotions,
       }
-      const url = isHomefeed ? `/timelines/home/feed` : `/timelines/${timelineId}/feed`
+      let url
+      switch (feedType) {
+        case 'photos':
+          url = route('timelines.photos', timelineId)
+          break
+        default:
+          url = isHomefeed ? `/timelines/home/feed` : `/timelines/${timelineId}/feed`
+      }
       axios.get(url, { params }).then( (response) => {
         commit('UPDATE_FEEDDATA', response);
       })
