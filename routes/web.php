@@ -190,6 +190,13 @@ Route::group(['middleware' => ['auth']], function () {
 });
 
 
+Route::group(['prefix' => '/payment'], function() {
+    Route::group(['prefix' => '/segpay'], function() {
+        Route::post('/generate-url', 'SegPayController@generatePayPageUrl');
+    });
+});
+
+
 /*
 |--------------------------------------------------------------------------
 | UsernameRules 

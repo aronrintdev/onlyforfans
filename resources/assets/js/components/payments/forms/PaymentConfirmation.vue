@@ -11,7 +11,7 @@
       </div>
       <b-row>
         <b-col class="mb-3 mb-md-0">
-          <SavedPaymentMethod :as="'div'" :value="paymentMethod" />
+          <SavedPaymentMethod as="div" :value="paymentMethod" />
         </b-col>
         <b-col md="auto" class="ml-auto">
           <b-btn block variant="success" class="d-flex align-items-center" @click="onConfirm">

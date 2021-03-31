@@ -6,7 +6,7 @@
       <component :is="loadedForm" :payment-method="selectedPaymentMethod" />
     </transition>
 
-    <PayWithForm class="mt-3" />
+    <!-- <PayWithForm class="mt-3" /> -->
   </div>
 </template>
 

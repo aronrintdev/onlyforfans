@@ -1,6 +1,8 @@
 <template>
   <div>
-    <component :is="(systems[selected]) ? systems[selected].component : null" />
+    <keep-alive>
+      <component :is="(systems[selected]) ? systems[selected].component : null" />
+    </keep-alive>
   </div>
 </template>
 

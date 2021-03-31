@@ -9,11 +9,10 @@
 </template>
 
 <script>
-import { BListGroupItem } from 'bootstrap-vue'
 
 export default {
   props: {
-    as: { type: [ Symbol ], default: () => (BListGroupItem) },
+    as: { type: [ String, Symbol ], default: 'b-list-group-item' },
     fallbackIcon: { type: String, default: 'circle', },
     iconSize: { type: String, default: '2x' },
     selected: { type: Boolean, default: false },
