@@ -1,0 +1,99 @@
+
+%%% UPDATE
+
+
+%%% UPDATE
+rsync -az --force --delete --progress \
+    --chmod=g+w       \
+    --rsync-path='rsync'       \
+    --exclude-from=rsyncconfig/rsync_exclude--update.txt       \
+    . \
+    fansdev2a:/home/bitnami/stack/frameworks/src/20201207
+
+rsync -az --force --delete --progress \
+    --chmod=g+w       \
+    --rsync-path='rsync'       \
+    ./vendor \
+    fansdev2a:/home/bitnami/stack/frameworks/src/20201207
+
+
+%%% INIT
+rsync -az --force --delete --progress \
+    --chmod=g+w       \
+    --rsync-path='rsync'       \
+    --exclude-from=rsyncconfig/rsync_exclude--init.txt       \
+    . \
+    fansdev2a:/home/bitnami/stack/frameworks/src/20201207
+
+
+----------------------------------------
+
+%%% SPECIAL
+
+% routes
+rsync -az --force --delete --progress \
+    --chmod=g+w       \
+    --rsync-path='rsync'       \
+    ./routes/web.php \
+    fansdev2a:/home/bitnami/stack/frameworks/src/20201207/routes
+
+rsync -az --force --delete --progress \
+    --chmod=g+w       \
+    --rsync-path='rsync'       \
+    ./config/app.php \
+    fansdev2a:/home/bitnami/stack/frameworks/src/20201207/config
+
+rsync -az --force --delete --progress \
+    --chmod=g+w       \
+    --rsync-path='rsync'       \
+    ./config/auth.php \
+    fansdev2a:/home/bitnami/stack/frameworks/src/20201207/config
+
+rsync -az --force --delete --progress \
+    --chmod=g+w       \
+    --rsync-path='rsync'       \
+    ./config/services.php \
+    fansdev2a:/home/bitnami/stack/frameworks/src/20201207/config
+
+rsync -az --force --delete --progress \
+    --chmod=g+w       \
+    --rsync-path='rsync'       \
+    ./config/messenger.php \
+    fansdev2a:/home/bitnami/stack/frameworks/src/20201207/config
+
+rsync -az --force --delete --progress \
+    --chmod=g+w       \
+    --rsync-path='rsync'       \
+    ./config \
+    fansdev2a:/home/bitnami/stack/frameworks/src/20201207
+
+rsync -az --force --delete --progress \
+    --chmod=g+w       \
+    --rsync-path='rsync'       \
+    ./bootstrap \
+    fansdev2a:/home/bitnami/stack/frameworks/src/20201207
+
+rsync -az --force --delete --progress \
+    --chmod=g+w       \
+    --rsync-path='rsync'       \
+    ./vendor \
+    fansdev:/home/fansdevmjmdesign/src/20201120
+
+rsync -az --force --delete --progress \
+    --chmod=g+w       \
+    --rsync-path='rsync'       \
+    ./public/css/vendor \
+    fansdev2a:/home/bitnami/stack/frameworks/src/20201207
+
+rsync -az --force --delete --progress \
+    --chmod=g+w       \
+    --rsync-path='rsync'       \
+    ./public/js/vendor \
+    fansdev2a:/home/bitnami/stack/frameworks/src/20201207
+
+
+rsync -az --force --delete --progress \
+    --chmod=g+w       \
+    --rsync-path='rsync'       \
+    ./vendor/league/ flysystem-aws-s3-v3 \
+    fansdev2a:/home/fansdevmjmdesign/src/20201120/vendor/league/
