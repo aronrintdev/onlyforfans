@@ -59,6 +59,11 @@ class Money implements CastsAttributes, SerializesCastableAttributes
      */
     public function serialize($model, string $key, $value, array $attributes): int
     {
+        return $this->doSerialize($value);
+    }
+
+    public static function doSerialize($value): int
+    {
         if ($value instanceof MoneyPhp) {
             return (int)$value->getAmount();
         }
