@@ -1,5 +1,5 @@
 <template>
-  <div class="mediafile-crate" v-bind:data-mediafile_guid="mediafile.id">
+  <div v-if="!isLoading" class="mediafile-crate" v-bind:data-mediafile_guid="mediafile.id">
     <b-card
       header-tag="header"
       footer-tag="footer"
@@ -10,17 +10,14 @@
     >
 
       <template v-if="mediafile.access">
-        <div @click="renderFull" v-if="is_feed" class="p-2 btn">
-          <b-icon icon="arrows-angle-expand" variant="primary" font-scale="1.2" />
-        </div>
-        <img v-if="mediafile.is_image"
+        <img v-if="mediafile.is_image" @click="renderFull"
           class="d-block"
           :src="(use_mid && mediafile.has_mid) ? mediafile.midFilepath : mediafile.filepath"
           :alt="mediafile.mfname"
         >
       </template>
       <template v-else-if="mediafile.resource_type==='posts'">
-        <PostCta :post="mediafile.resource" :session_user="session_user" />
+        <PostCta :post="mediafile.resource" :session_user="session_user" :primary_mediafile="mediafile" />
       </template>
 
     </b-card>
@@ -31,12 +28,10 @@
 import Vuex from 'vuex'
 import { eventBus } from '@/app'
 import PostCta from '@components/posts/PostCta'
-//import MediaSlider from './MediaSlider'
 
 export default {
   components: {
     PostCta,
-    //MediaSlider,
   },
 
   props: {
@@ -47,9 +42,6 @@ export default {
   },
 
   computed: {
-    username() {
-      return this.post.user.username
-    },
     isLoading() {
       return !this.mediafile || !this.session_user
     },
@@ -58,38 +50,22 @@ export default {
   data: () => ({
   }),
 
-  mounted() { },
-
-  created() {},
-
   methods: {
 
     renderFull() {
-      if (this.post.access) {
-        eventBus.$emit('open-modal', { key: 'show-post', data: { post: this.post } })
+      // %FIXME: currently hardcoded for mediafiles that belong to *posts*
+      if (this.mediafile.access) {
+        eventBus.$emit('open-modal', { key: 'show-photo', data: { mediafile: this.mediafile } })
       } else {
-        if ( this.$options.filters.isSubscriberOnly(this.post) ) {
+        if ( this.$options.filters.isSubscriberOnly(this.mediafile.resource) ) {
           eventBus.$emit('open-modal', { key: 'render-subscribe', data: { timeline: this.timeline } })
-        } else if ( this.$options.filters.isPurchaseable(this.post) ) {
-          eventBus.$emit('open-modal', { key: 'render-purchase-post', data: { post: this.post } })
+        } else if ( this.$options.filters.isPurchaseable(this.mediafile.resource) ) {
+          eventBus.$emit('open-modal', { key: 'render-purchase-post', data: { post: this.mediafile.resource } })
         }
       }
     },
 
-    editPost() {
-      const is = this.session_user.id === this.post.user.id // Check permissions
-    },
-
-    deletePost() {
-      const is = this.session_user.id === this.post.user.id // Check permissions
-      if (!is) {
-        return
-      }
-      this.$emit('delete-post', this.post.id)
-    },
   },
-
-  watch: { },
 
 }
 </script>
