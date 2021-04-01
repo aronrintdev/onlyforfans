@@ -31,6 +31,7 @@ export default {
   props: {
     post: null,
     session_user: null,
+    primary_mediafile: null,
   },
 
   computed: {
@@ -46,6 +47,7 @@ export default {
     },
      */
 
+    /*
     hasMediafiles() {
       return this.post.mediafiles?.length > 0
     },
@@ -53,11 +55,12 @@ export default {
     primaryMediafile() {
       return this.hasMediafiles ? this.post.mediafiles[0] : null
     },
+     */
 
     backgroundImg() {
-      if (this.primaryMediafile && this.primaryMediafile.has_blur) {
+      if (this.primary_mediafile && this.primary_mediafile.has_blur) {
         return {
-          '--background-image': `url(${this.primaryMediafile.blurFilepath})`,
+          '--background-image': `url(${this.primary_mediafile.blurFilepath})`,
         }
       } else {
         return {
