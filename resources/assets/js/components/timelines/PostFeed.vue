@@ -10,18 +10,12 @@
 
     <b-row>
       <b-col>
-        <section class="feed-ctrl my-3 p-2 d-flex flex-column OFF-text-center flex-md-row justify-content-center justify-content-md-between">
-          <article class="d-flex align-items-center">
-            <div @click="setFeedType('default')" style="" class="btn">
-              <span>All</span>
-            </div>
-            <div @click="setFeedType('photos')" style="" class="btn">
-              <span>Photos</span>
-            </div>
-            <div @click="setFeedType('videos')" style="" class="btn">
-              <span>Videos</span>
-            </div>
-          </article>
+        <section class="feed-ctrl my-3 px-2 py-2 d-flex flex-column OFF-text-center flex-md-row justify-content-center justify-content-md-between">
+          <b-nav v-if="!is_homefeed" pills>
+            <b-nav-item @click="setFeedType('default')" :active="feedType==='default'">All</b-nav-item>
+            <b-nav-item @click="setFeedType('photos')" :active="feedType==='photos'">Photos</b-nav-item>
+            <b-nav-item @click="setFeedType('videos')" :active="feedType==='videos'">Videos</b-nav-item>
+          </b-nav>
           <article class="d-none d-md-block">
             <div @click="renderTip" style="" class="btn">
               <div style="font-size: 1.2rem; margin-top: 0.1rem" class="text-primary tag-ctrl">$</div>
@@ -171,7 +165,7 @@ export default {
   created() {
     this.$store.dispatch('getFeeddata', { 
       feedType: this.feedType,
-      timelineId: this.timelineId, 
+      timelineId: this.timelineId,  // only valid if not home feed
       isHomefeed: this.is_homefeed,
       page: 1, 
       limit: this.limit, 
@@ -191,8 +185,21 @@ export default {
   methods: {
 
     setFeedType(feedType) {
+      if (this.isHomefeed) {
+        return // skip
+      }
+
+      // only for specific timelines (non-home feed)
       this.feedType = feedType
-      this.isGridLayout = true
+      switch (feedType) {
+        case 'photos':
+        case 'videos':
+          this.isGridLayout = true
+          break
+        default:
+          this.isGridLayout = false
+      }
+      eventBus.$emit('set-feed-layout', this.isGridLayout )
       this.reloadFromFirstPage()
     },
 
@@ -260,7 +267,6 @@ export default {
     async deletePost(postId) {
       const url = `/posts/${postId}`
       const response = await axios.delete(url)
-      //this.$store.dispatch('getFeeddata', { timelineId: this.timelineId, page: 1, limit: this.limit, isHomefeed: this.is_homefeed })
       this.reloadFromFirstPage()
     },
 
@@ -272,7 +278,7 @@ export default {
         this.$log.debug('loadNextPage', { current: this.currentPage, last: this.lastPage, next: this.nextPage });
         this.$store.dispatch('getFeeddata', { 
         feedType: this.feedType,
-          timelineId: this.timelineId, 
+          timelineId: this.timelineId,  // only valid if not home feed
           isHomefeed: this.is_homefeed,
           page: this.nextPage, 
           limit: this.limit, 
@@ -289,7 +295,7 @@ export default {
       this.$store.dispatch('getFeeddata', { 
         feedType: this.feedType,
         page: 1, 
-        timelineId: this.timelineId, 
+        timelineId: this.timelineId,  // only valid if not home feed
         isHomefeed: this.is_homefeed,
         limit: this.limit, 
         sortBy: this.sortPostsBy, 
