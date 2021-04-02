@@ -2,7 +2,10 @@
 
 namespace App\Providers;
 
+use App\Broadcasting\UserEvents;
+use App\Broadcasting\UserPurchases;
 use Illuminate\Support\Facades\Auth;
+use App\Broadcasting\UserStatusChannel;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Broadcasting\BroadcastManager;
@@ -43,7 +46,9 @@ class BroadcastServiceProvider extends ServiceProvider
             return (Auth::check()) ? $user : false;
         });
 
-        Broadcast::channel('user.status.{userId}', \App\Broadcasting\UserStatusChannel::class);
+        Broadcast::channel('user.status.{userId}'   , UserStatusChannel::class);
+        Broadcast::channel('user.{userId}.purchases', UserPurchases::class);
+        Broadcast::channel('user.{userId}.events'   , UserEvents::class);
 
     }
 }
