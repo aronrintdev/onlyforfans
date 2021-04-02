@@ -47,7 +47,7 @@ use Money\Currencies\ISOCurrencies;
  *
  * @package App\Models
  */
-class Timeline extends Model implements Purchaseable, Tippable, Reportable
+class Timeline extends Model implements Tippable, Reportable
 {
     use SoftDeletes,
         HasFactory,

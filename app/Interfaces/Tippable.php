@@ -7,7 +7,7 @@ namespace App\Interfaces;
  *
  * @package App\Interfaces
  */
-interface Tippable extends PaymentSendable
+interface Tippable extends PaymentSendable, CanFormatMoney
 {
     //
 }

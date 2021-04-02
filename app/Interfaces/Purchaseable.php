@@ -12,7 +12,7 @@ use App\Models\Fanledger;
  *
  * @package App\Interfaces
  */
-interface Purchaseable extends PaymentSendable, Shareable
+interface Purchaseable extends PaymentSendable, Shareable, CanFormatMoney
 {
     /**
      * @param  string  $type - PaymentTypeEnum
@@ -31,20 +31,5 @@ interface Purchaseable extends PaymentSendable, Shareable
      * @return bool
      */
     public function verifyPrice($amount): bool;
-
-    /**
-     * Format money for current local and currency
-     *
-     * @param Money $money
-     * @return string
-     */
-    public static function formatMoney(Money $money): string;
-
-    /**
-     * Format money to decimal for current local
-     * @param Money $money
-     * @return string
-     */
-    public static function formatMoneyDecimal(Money $money): string;
 
 }
