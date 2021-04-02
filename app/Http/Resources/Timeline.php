@@ -1,8 +1,9 @@
 <?php
 namespace App\Http\Resources;
 
-use Illuminate\Http\Resources\Json\JsonResource;
+use App\Models\Casts\Money as CastsMoney;
 use App\Models\Timeline as TimelineModel;
+use Illuminate\Http\Resources\Json\JsonResource;
 
 class Timeline extends JsonResource
 {
@@ -17,13 +18,17 @@ class Timeline extends JsonResource
             'slug' => $this->slug,
             'name' => $this->name,
             'about' => $this->about,
-            'price' => $this->price,
+            'price' => CastsMoney::doSerialize($this->price),
+            'price_display' => TimelineModel::formatMoney($this->price),
             'is_follow_for_free' => $this->is_follow_for_free,
             'verified' => $this->verified,
             'avatar' => $this->avatar,
             'cover' => $this->cover,
             'description' =>  $this->when($hasAccess, $this->description),
             'mediafiles' =>  $this->when($hasAccess, $this->mediafiles),
+            'user' => [
+                'id' => $this->user->id,
+            ],
             'userstats' => $sessionUser->getStats(),
             'is_owner' => $sessionUser->id === $this->user->id,
             'is_following' => $this->followers->contains($sessionUser->id),

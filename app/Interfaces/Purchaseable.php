@@ -1,14 +1,19 @@
 <?php
 namespace App\Interfaces;
 
+use Money\Money;
 use App\Models\User;
 use App\Models\Fanledger;
-use App\Enums\PaymentTypeEnum;
-use App\Models\Financial\Account;
-use App\Models\Financial\Transaction;
 
-interface Purchaseable {
-
+/**
+ * A Purchaseable Item
+ *
+ * @param Money $price
+ *
+ * @package App\Interfaces
+ */
+interface Purchaseable extends PaymentSendable, Shareable, CanFormatMoney
+{
     /**
      * @param  string  $type - PaymentTypeEnum
      */
@@ -20,25 +25,11 @@ interface Purchaseable {
     ) : ?Fanledger;
 
     /**
-     * Purchase this model from Account $from
-     * @param Account $from
-     * @param int|null $amount
-     * @return void
-     */
-    public function purchase(Account $from,int $amount = null): void;
-
-    /**
-     * "un-purchase" this model in the event of a chargeback
-     * @param Transaction $transaction
-     * @return void
-     */
-    public function chargeback(Transaction $transaction): void;
-
-    /**
      * Verifies if a price point if valid for purchasing this model
-     * @param int $amount
+     *
+     * @param int|Money $amount
      * @return bool
      */
-    public function verifyPrice(int $amount): bool;
+    public function verifyPrice($amount): bool;
 
 }

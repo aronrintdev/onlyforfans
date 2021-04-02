@@ -83,7 +83,15 @@ return [
              * and store fees
              */
             'feesOn' => [
-                TransactionTypeEnum::PAYMENT,
+                TransactionTypeEnum::SALE,
+                TransactionTypeEnum::TIP,
+                TransactionTypeEnum::CHARGEBACK_PARTIAL,
+            ],
+
+            /**
+             * Transaction Types that cause a hold on funds for a creator. i.e puts funds in pending for pending period
+             */
+            'holdOn' => [
                 TransactionTypeEnum::SALE,
                 TransactionTypeEnum::TIP,
                 TransactionTypeEnum::CHARGEBACK_PARTIAL,

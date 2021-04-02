@@ -12,6 +12,7 @@ import users from '@views/users'
 import vaults from '@views/vaults'
 import search from '@views/search'
 import posts from '@views/posts'
+import payments from '@views/payments'
 import liveChat from '@views/live-chat'
 
 import SettingsGeneral from '@components/settings/SettingsGeneral.vue';
@@ -164,11 +165,12 @@ export const routes = [
     path: '/:slug/earnings',
     props: true,
   },
+
+  // Payments
   {
-    name: 'timeline.show',
-    path: '/:slug',
-    component: timelines.Show,
-    props: true,
+    name: 'payments.makePayment',
+    path: '/payment-home',
+    component: payments.MakePayment,
   },
 
   // Posts
@@ -176,6 +178,17 @@ export const routes = [
     name: 'posts.show',
     path: '/posts/:slug',
     component: posts.Show,
+    props: true,
+  },
+
+
+  /**
+   * timeline.show must be declared after other routes due to it only being a slug
+   */
+  {
+    name: 'timeline.show',
+    path: '/:slug',
+    component: timelines.Show,
     props: true,
   },
 

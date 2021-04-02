@@ -12,6 +12,8 @@ use App\Interfaces\Deletable;
 use App\Enums\PaymentTypeEnum;
 use App\Interfaces\Reportable;
 use App\Interfaces\Commentable;
+use App\Interfaces\HasPricePoints;
+use App\Interfaces\PricePoint;
 use App\Models\Traits\UsesUuid;
 use App\Models\Financial\Account;
 use Illuminate\Support\Collection;
@@ -25,10 +27,56 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Interfaces\Purchaseable; // was PaymentReceivable
+use App\Interfaces\Tippable;
+use App\Models\Casts\Money as CastsMoney;
+use App\Models\Casts\PricePoint as CastsPricePoint;
+use App\Models\Financial\Traits\HasCurrency;
+use App\Models\Financial\Traits\HasSystem;
+use App\Models\Traits\FormatMoney;
+use App\Models\Traits\ShareableTraits;
+use Money\Money as Money;
 
-class Post extends Model implements UuidId, Ownable, Deletable, Purchaseable, Likeable, Reportable, Commentable
+/**
+ * Post Model
+ * @package App\Models
+ * 
+ * @property string $id
+ * @property string $slug
+ * @property string $user_id
+ * @property string $postable_type
+ * @property string $postable_id
+ * @property string $description
+ * @property bool   $active
+ * @property string $type
+ * @property Money $price
+ * @property string $currency
+ * @property array  $cattrs
+ * @property array  $meta
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @property \Carbon\Carbon $deleted_at
+ */
+class Post extends Model
+    implements
+        UuidId,
+        Deletable,
+        Purchaseable,
+        HasPricePoints,
+        Tippable,
+        Likeable,
+        Reportable,
+        Commentable
 {
-    use UsesUuid, SoftDeletes, HasFactory, OwnableTraits, LikeableTraits, Sluggable, SluggableTraits;
+    use UsesUuid,
+    SoftDeletes,
+    HasFactory,
+    OwnableTraits,
+    LikeableTraits,
+    Sluggable,
+    SluggableTraits,
+    ShareableTraits,
+    FormatMoney,
+    HasCurrency;
 
     //--------------------------------------------
     // Boot
@@ -89,9 +137,19 @@ class Post extends Model implements UuidId, Ownable, Deletable, Purchaseable, Li
     }
 
     protected $casts = [
+        'price' => CastsMoney::class,
+        // 'price' => CastsPricePoint::class, // Uses current price point or 0
         'cattrs' => 'array',
         'meta' => 'array',
     ];
+
+    public function toArray()
+    {
+        $array = parent::toArray();
+        // Localize Price
+        $array['price_display'] = static::formatMoney($array['price']);
+        return $array;
+    }
 
     //--------------------------------------------
     // %%% Relationships
@@ -146,6 +204,11 @@ class Post extends Model implements UuidId, Ownable, Deletable, Purchaseable, Li
     public function allComments(): MorphMany
     {
         return $this->morphMany('App\Models\Comment', 'commentable');
+    }
+
+    public function pricePoints(): MorphMany
+    {
+        return $this->morphMany(PurchasablePricePoint::class, 'purchasable');
     }
 
     //--------------------------------------------
@@ -247,23 +310,50 @@ class Post extends Model implements UuidId, Ownable, Deletable, Purchaseable, Li
         return $result ?? null;
     }
 
-    public function purchase(Account $from,int $amount = null): void
+    public function verifyPrice($amount): bool
     {
-        // TODO: Implement
+        $amount = $this->asMoney($amount);
+        return $this->price->equals($amount);
     }
 
-    public function chargeback(Transaction $transaction): void
+    #endregion Purchaseable
+
+    /* --------------------------- HasPricePoints --------------------------- */
+    #region HasPricePoints
+
+    public function currentPrice($currency = null): ?Money
     {
-        // TODO: Implement
+        $current = PurchasablePricePoint::forItem($this)->ofCurrency($currency)->getCurrent();
+        return isset($current) ? $current->price : null;
     }
 
-    public function verifyPrice(int $amount): bool
+    public function checkPromoCode(string $promoCode): Collection
     {
-        // TODO: Implement
-        return false;
+        return PurchasablePricePoint::checkPromoCode($this, $promoCode);
     }
 
-    #endregion
+    public function verifyPricePoint(PricePoint $pricePoint): bool
+    {
+        return PurchasablePricePoint::isActive($pricePoint);
+    }
+
+    #endregion HasPricePoints
+
+    /* --------------------------- PaymentSendable -------------------------- */
+    #region PaymentSendable
+
+    public function getOwnerAccount(string $system, string $currency): Account
+    {
+        return $this->getOwner()->first()->getInternalAccount($system, $currency);
+    }
+
+    public function getDescriptionNameString(): string
+    {
+        return 'Post';
+    }
+
+    #endregion PaymentSendable
+
 
     public function canBeDeleted(): bool
     {

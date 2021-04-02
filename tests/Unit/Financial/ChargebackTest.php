@@ -754,14 +754,8 @@ class ChargebackTest extends TestCase
      */
     private function setupUserAccounts(int $amount)
     {
-        $inAccount = Account::factory()->asIn()->create();
-        $internalAccount = $inAccount->owner->getInternalAccount($this->defaultSystem, $this->defaultCurrency);
-        $transactions = $inAccount->moveToInternal($amount);
-        $chargebackTransaction = $transactions['debit'];
-
-        AccountHelpers::settleAccounts([$inAccount, $internalAccount]);
-
-        return [ $inAccount, $internalAccount, $chargebackTransaction ];
+        $items = AccountHelpers::loadWallet($amount);
+        return [ $items['in'], $items['internal'], $items['transactions']['debit'] ];
     }
 
 

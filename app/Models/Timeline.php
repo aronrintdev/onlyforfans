@@ -2,7 +2,6 @@
 namespace App\Models;
 
 use Exception;
-use Eloquent as Model;
 use App\Interfaces\Ownable;
 use App\Interfaces\ShortUuid;
 use App\Enums\PaymentTypeEnum;
@@ -17,13 +16,48 @@ use App\Models\Traits\UsesShortUuid;
 use App\Models\Financial\Transaction;
 use App\Models\Traits\SluggableTraits;
 use App\Enums\ShareableAccessLevelEnum;
+use App\Interfaces\Tippable;
+use App\Models\Casts\Money;
+use App\Models\Financial\Traits\HasCurrency;
+use App\Models\Traits\FormatMoney;
+use App\Models\Traits\ShareableTraits;
 use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Money\Currencies\ISOCurrencies;
 
-class Timeline extends Model implements Purchaseable, Ownable, Reportable
+/**
+ * Timeline Model
+ *
+ * @property string $id
+ * @property string $slug
+ * @property string $name
+ * @property string $about
+ * @property string $avatar_id
+ * @property string $cover_id
+ * @property bool   $verified
+ * @property bool   $is_follow_for_free
+ * @property \Money\Money $price
+ * @property string $currency
+ * @property array  $cattrs
+ * @property array  $meta
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @property \Carbon\Carbon $deleted_at
+ *
+ * @package App\Models
+ */
+class Timeline extends Model implements Tippable, Reportable
 {
-    use SoftDeletes, HasFactory, OwnableTraits, UsesUuid, Sluggable, SluggableTraits;
+    use SoftDeletes,
+        HasFactory,
+        OwnableTraits,
+        UsesUuid,
+        Sluggable,
+        SluggableTraits,
+        ShareableTraits,
+        FormatMoney,
+        HasCurrency;
 
     protected $keyType = 'string';
     protected $guarded = ['id', 'created_at', 'updated_at'];
@@ -32,20 +66,20 @@ class Timeline extends Model implements Purchaseable, Ownable, Reportable
     protected $casts = [
         'name' => 'string',
         'about' => 'string',
+        'price' => Money::class,
         'cattrs' => 'array',
         'meta' => 'array',
     ];
 
-    /*
-    // %FIXME: remove if not used
+
     public function toArray()
     {
         $array = parent::toArray();
-        $array['cover_url'] = $this->cover()->get()->toArray();
-        $array['avatar_url'] = $this->avatar()->get()->toArray();
+        // Localize Price
+        $array['price_display'] = static::formatMoney($this->price);
         return $array;
     }
-     */
+
 
     public function sluggable(): array
     {
@@ -144,20 +178,29 @@ class Timeline extends Model implements Purchaseable, Ownable, Reportable
         return $result ?? null;
     }
 
-    public function purchase(Account $from, int $amount = null): void
+    public function grantAccess(User $user, string $accessLevel, $cattrs = [], $meta = []): void
     {
-        // TODO: Implement
+        //
+    }
+    public function revokeAccess(User $user, $cattrs = [], $meta = []): void
+    {
+        //
     }
 
-    public function chargeback(Transaction $transaction): void
+    public function getOwnerAccount(string $system, string $currency): Account
     {
-        // TODO: Implement
+        return $this->owner->getInternalAccount($system, $currency);
     }
 
-    public function verifyPrice(int $amount): bool
+    public function verifyPrice($amount): bool
     {
-        // TODO: Implement
-        return false;
+        $amount = $this->asMoney($amount);
+        return $this->price->equals($amount);
+    }
+
+    public function getDescriptionNameString(): string
+    {
+        return "Timeline of {$this->name}";
     }
 
     #endregion

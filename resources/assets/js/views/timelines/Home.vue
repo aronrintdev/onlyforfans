@@ -22,12 +22,13 @@
 
     </div>
 
+
     <!-- %FIXME: DRY vs Show -->
     <b-modal id="modal-tip" size="sm" title="Send a Tip" hide-footer body-class="p-0">
       <SendTip :session_user="session_user" :timeline="timeline" />
     </b-modal>
 
-    <b-modal id="modal-purchase_post" size="sm" title="Purchase Post" hide-footer body-class="p-0">
+    <b-modal id="modal-purchase_post" title="Purchase Post" hide-footer body-class="p-0">
       <PurchasePost :session_user="session_user" :post="selectedPost" />
     </b-modal>
 

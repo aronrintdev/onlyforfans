@@ -3,23 +3,27 @@
 
     <b-card-header>
       <section class="user-avatar">
-        <a :href="timelineUrl"><b-img :src="timeline.avatar.filepath" :alt="timeline.name" :title="timeline.name"></b-img></a>
+        <router-link :to="timelineUrl">
+          <b-img :src="timeline.avatar.filepath" :alt="timeline.name" :title="timeline.name" />
+        </router-link>
       </section>
       <section class="user-details">
         <div>
-          <a href="timelineUrl" title="" data-toggle="tooltip" data-placement="top" class="username">{{ timeline.name }}</a>
-          <span v-if="timeline.verified" class="verified-badge"><b-icon icon="check-circle-fill" variant="success" font-scale="1"></b-icon></span>
+          <router-link :to="timelineUrl" title="" data-toggle="tooltip" data-placement="top" class="username">
+            {{ timeline.name }}
+          </router-link>
+          <span v-if="timeline.verified" class="verified-badge">
+            <b-icon icon="check-circle-fill" variant="success" font-scale="1" />
+          </span>
         </div>
         <div>
-          <a :href="timelineUrl" class="tag-username">@{{ timeline.slug }}</a>
+          <router-link :href="timelineUrl" class="tag-username">@{{ timeline.slug }}</router-link>
         </div>
       </section>
     </b-card-header>
 
     <b-form @submit="sendTip">
-
       <b-card-body>
-
         <b-form-spinbutton
           id="tip-amount"
           class="w-100 mx-auto tag-tip_amount"
@@ -28,16 +32,21 @@
           min="500"
           max="10000"
           :step="LEDGER_CONFIG.TIP_STEP_DELTA"
-          ></b-form-spinbutton>
+        />
 
-        <textarea v-model="formPayload.notes" cols="60" rows="5" class="w-100 mt-3" placeholder="Write a message"></textarea>
+        <textarea
+          v-model="formPayload.notes"
+          cols="60"
+          rows="5"
+          class="w-100 mt-3"
+          placeholder="Write a message"
+        ></textarea>
 
       </b-card-body>
 
       <b-card-footer>
         <b-button type="submit" variant="warning" class="w-100">Send Tip</b-button>
       </b-card-footer>
-
     </b-form>
 
   </b-card>

@@ -33,6 +33,13 @@ final class BalanceEquals extends Constraint
         return "{$this->modelClassName} has a balance of {$amount}";
     }
 
+    public function failureDescription($model): string
+    {
+        $balance = $model->balance instanceof Money ? $model->balance->getAmount() : $model->balance;
+        $amount = $this->amount instanceof Money ? $this->amount->getAmount() : $this->amount;
+        return "{$this->modelClassName} with a balance of {$balance} has balance of {$amount}";
+    }
+
     public function matches($model): bool
     {
         $this->modelClassName = class_basename($model);
