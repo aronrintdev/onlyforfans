@@ -47,6 +47,7 @@ window.setLastSeenOfUser = function (status) {
 window.onbeforeunload = function () {
   // updateUserStatus(1, 0);
   setLastSeenOfUser(0);
+  window.Echo.leave('user-status');
   //return undefined; to prevent dialog while window.onbeforeunload
   return undefined;
 };

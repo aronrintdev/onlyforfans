@@ -148,11 +148,6 @@
       // Fetch Users' Online/Away status
       const self = this;
       Echo.join(`user-status`)
-        .here((users) => {
-            users.forEach(user => {
-              self.updateUserStatus(user.id, 1);
-            });
-        })
         .joining((user) => {
           self.updateUserStatus(user.id, 1);
         })
@@ -161,8 +156,15 @@
         });
       this.axios.get('/chat-messages/contacts').then((response) => {
         this.users = response.data;
+        this.users.forEach(user => {
+          if (user.profile.user.is_online) {
+            setTimeout(() => {
+              this.updateUserStatus(user.profile.user.id, 1);
+            }, 2000);
+          }
+        });
         this.loading = false;
-      })
+      });
     },
     computed: {
       selectedOption: function () {
@@ -187,13 +189,9 @@
       updateUserStatus: function (userId, status) {
         let statusHolder = $(".status-holder-"+ userId);
         if (status == 1) {
-            statusHolder.addClass('online');        
+          statusHolder.addClass('online');
         } else {
-          setTimeout(function () {            
-            let last_seen = 'Last seen ' +
-                getCalenderFormatForLastSeen(Date(), 'hh:mma', 0);
-              
-          }, 3000)
+          statusHolder.removeClass('online');
         }
       },
       changeSearchbarVisible: function () {

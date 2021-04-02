@@ -95,6 +95,8 @@ export default {
 
   methods: {
     logout() {
+      Echo.leave('user-status');
+      window.setLastSeenOfUser(0);
       this.axios.post('/logout').then(() => {
         window.location = '/login'
       })
