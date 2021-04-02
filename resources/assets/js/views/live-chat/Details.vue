@@ -461,32 +461,36 @@
     }),
     mounted() {
       const self = this;
+      // Mark unread messages as read
+      this.axios.post(`/chat-messages/${this.$route.params.id}/mark-as-read`);
+      this.axios.get('/chat-messages/contacts').then((response) => {
+        this.users = response.data;
+        this.users.forEach(user => {
+          if (user.profile.user.is_online) {
+            setTimeout(() => {
+              this.updateUserStatus(user.profile.user.id, 1);
+            }, 2000);
+          }
+        });
+        this.loading = false;
+      });
+      this.getMessages();
+      this.findConversationList();
+      Echo.private(`${this.$route.params.id}-message`)
+        .listen('MessageSentEvent', (e) => {
+          if (e.message.receiver_id === self.currentUser.id) {
+            self.originMessages.unshift(e.message);
+            self.offset += 1;
+            self.groupMessages();
+            $('.conversation-list').animate({ scrollTop: $('.conversation-list')[0].scrollHeight }, 500);
+          }
+        });
       Echo.join(`user-status`)
-        .here((users) => {
-            users.forEach(user => {
-              self.updateUserStatus(user.id, 1);
-            });
-        })
         .joining((user) => {
           self.updateUserStatus(user.id, 1);
         })
         .leaving((user) => {
           self.updateUserStatus(user.id, 0);
-        });
-      // Mark unread messages as read
-      this.axios.post(`/chat-messages/${this.$route.params.id}/mark-as-read`);
-      this.axios.get('/chat-messages/contacts').then((response) => {
-        this.users = response.data;
-        this.loading = false;
-      });
-      this.getMessages();
-      setTimeout(() => {
-        $('.conversation-list').animate({ scrollTop: $('.conversation-list')[0].scrollHeight }, 500);
-      }, 1000);
-      Echo.private(`${this.$route.params.id}-message`)
-        .listen('MessageSentEvent', (e) => {
-            self.originMessages.push(e.message);
-            self.groupMessages();
         });
       Echo.join(`chat-typing`)
         .listenForWhisper('typing', (e) => {
@@ -513,13 +517,15 @@
 
         this.getMessages();
         const self = this;
-        setTimeout(() => {
-          $('.conversation-list').animate({ scrollTop: $('.conversation-list')[0].scrollHeight }, 500);
-        }, 1000);
+        this.findConversationList();
         Echo.private(`${id}-message`)
         .listen('MessageSentEvent', (e) => {
-          self.originMessages.unshift(e.message);
-          self.groupMessages();
+          if (e.message.receiver_id === self.currentUser.id) {
+            self.originMessages.unshift(e.message);
+            self.offset += 1;
+            self.groupMessages();
+            $('.conversation-list').animate({ scrollTop: $('.conversation-list')[0].scrollHeight }, 500);
+          }
         });
       }
     },
@@ -554,35 +560,41 @@
         const isUserScrolling = (event.target.scrollTop === 0);
         if (isUserScrolling && !this.loadingData) {
           this.getMessages();
-          this.$el.querySelector('.conversation-list .messages').scrollTop = 10;
+          $('.conversation-list').animate({ scrollTop: 10 }, 10);
         }
       },
       updateUserStatus: function (userId, status) {
         let statusHolder = $(".status-holder-"+ userId);
         if (status == 1) {
-            statusHolder.addClass('online');        
+          statusHolder.addClass('online');        
+        } else {
+          statusHolder.removeClass('online');   
         }
       },
-      getMessages: function() {
+      findConversationList: function() {
+        setTimeout(() => {
+            if (this.$el.querySelector('.conversation-list')) {
+              $('.conversation-list').animate({ scrollTop: $('.conversation-list')[0].scrollHeight }, 500);
+              this.$el.querySelector('.conversation-list').addEventListener('scroll', this.handleDebouncedScroll);
+            } else {
+              this.findConversationList();
+            }
+          }, 1000);
+      },
+      getMessages: async function() {
         this.loadingData = true;
         const user_id = this.$route.params.id;
-        this.axios.get(`/chat-messages/${user_id}?offset=${this.offset}&limit=30`).then((response) => {
-          this.selectedUser = response.data;
+        const response = await this.axios.get(`/chat-messages/${user_id}?offset=${this.offset}&limit=30`);
+        this.selectedUser = response.data;
+        if (!this.currentUser) {
           this.currentUser = response.data.currentUser;
-          this.originMessages = this.originMessages.concat(response.data.messages);
-          this.selectedUser.messages = this.originMessages.slice();
-          if (this.offset === 0 && this.originMessages.length > 0) {
-            setTimeout(() => {
-              this.$el.querySelector('.conversation-list').addEventListener('scroll', this.handleDebouncedScroll);
-            }, 1000);
-          }
-          this.offset = this.originMessages.length;
-          this.groupMessages();
-          this.loadingData = false;
-        }) 
+        }
+        this.originMessages = response.data.messages.concat(this.originMessages);
+        this.offset = this.originMessages.length;
+        this.groupMessages();
+        this.loadingData = false;
       },
       groupMessages: function() {
-        console.log('---- this.originMessages",', this.originMessages);
         const messages = this.originMessages.map((message) => {
           message.date = moment(message.created_at).startOf('day').unix();
           return message;
@@ -592,6 +604,8 @@
           .map((value, key) => ({ date: key, messages: value.reverse() }))
           .value();
         _.orderBy(this.messages, ['date'], ['DESC']);
+        this.messages = _.cloneDeep(this.messages);
+        this.selectedUser = { ...this.selectedUser, messages: this.messages };
       },
       changeSearchbarVisible: function () {
         this.userSearchVisible = !this.userSearchVisible; 
@@ -687,6 +701,7 @@
             this.originMessages.unshift(response.data.message)
             self.groupMessages();
             self.newMessageText = undefined;
+            $('.conversation-list').animate({ scrollTop: $('.conversation-list')[0].scrollHeight }, 500);
           });
       },
       onShowNextSearch: function() {
