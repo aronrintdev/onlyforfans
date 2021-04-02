@@ -2673,7 +2673,7 @@ $.ajaxSetup({
 //     });
 // };
 
-//set user status online
+// set user status online
 // setLastSeenOfUser(1);
 
 // window.onbeforeunload = function () {
@@ -2780,6 +2780,7 @@ window.getCalenderFormatForLastSeen = function (
 };
 
 window.updateUserStatus = function (userId, status) {
+    console.log('------ userid', userId);
     let statusHolder = $(".status-holder-"+ userId);
 
     if (status == 1) {

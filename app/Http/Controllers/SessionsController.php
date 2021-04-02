@@ -16,7 +16,7 @@ class SessionsController extends AppBaseController
 {
     public function index(Request $request)
     {
-        $this->authorize('show', $request->user());
+        $this->authorize('view', $request->user());
         $query = Session::query()->with('user');
         $query->where('user_id', $request->user()->id);
         $data = $query->paginate( $request->input('take', env('MAX_DEFAULT_PER_REQUEST', 10)) );
