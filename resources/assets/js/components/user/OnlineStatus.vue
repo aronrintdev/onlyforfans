@@ -52,40 +52,34 @@ export default {
   methods: {
     listen() {
       this.loading = true
-      this.$whenAvailable('Echo')
-        .then(echo => {
-          this.channel = echo.join(`user.status.${this.user.id}`)
-            .here(users => {
-              this.$log.debug(`user.status.${this.user.id}.here`, { users })
-              const userIndex = _.findIndex(users, u => ( u.id == this.user.id ))
-              if (userIndex != -1) {
-                this.pendingOffline = false
-                this.status = users[userIndex].status || 'online'
-              } else {
-                setTimeout(this.updateLastSeen, this.refreshSpeed)
-              }
-              this.loading = false
-            })
-            .joining(user => {
-              this.$log.debug(`user.status.${this.user.id}.joining`,{ user })
-              if (user.id == this.user.id) {
-                this.pendingOffline = false
-                this.status = user.status || 'online'
-              }
-            })
-            .leaving(user => {
-              this.$log.debug(`user.status.${this.user.id}.leaving`, { user })
-              if (user.id == this.user.id) {
-                this._pendingOffline()
-              }
-            })
-            .listen('statusUpdate', $e => {
-              this.$log.debug(`user.status.${this.user.id}.listen('statusUpdate')`, { $e })
-              this.status = $e.status
-            })
+      this.channel = this.$echo.join(`user.status.${this.user.id}`)
+        .here(users => {
+          this.$log.debug(`user.status.${this.user.id}.here`, { users })
+          const userIndex = _.findIndex(users, u => ( u.id == this.user.id ))
+          if (userIndex != -1) {
+            this.pendingOffline = false
+            this.status = users[userIndex].status || 'online'
+          } else {
+            setTimeout(this.updateLastSeen, this.refreshSpeed)
+          }
+          this.loading = false
         })
-        .catch(error => {
-          this.$log.error(error)
+        .joining(user => {
+          this.$log.debug(`user.status.${this.user.id}.joining`,{ user })
+          if (user.id == this.user.id) {
+            this.pendingOffline = false
+            this.status = user.status || 'online'
+          }
+        })
+        .leaving(user => {
+          this.$log.debug(`user.status.${this.user.id}.leaving`, { user })
+          if (user.id == this.user.id) {
+            this._pendingOffline()
+          }
+        })
+        .listen('statusUpdate', $e => {
+          this.$log.debug(`user.status.${this.user.id}.listen('statusUpdate')`, { $e })
+          this.status = $e.status
         })
     },
     _pendingOffline() {

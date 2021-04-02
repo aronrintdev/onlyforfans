@@ -26,6 +26,9 @@ class Timeline extends JsonResource
             'cover' => $this->cover,
             'description' =>  $this->when($hasAccess, $this->description),
             'mediafiles' =>  $this->when($hasAccess, $this->mediafiles),
+            'user' => [
+                'id' => $this->user->id,
+            ],
             'userstats' => $sessionUser->getStats(),
             'is_owner' => $sessionUser->id === $this->user->id,
             'is_following' => $this->followers->contains($sessionUser->id),
