@@ -2,8 +2,8 @@
 
 namespace App\Providers;
 
-use App\Broadcasting\UserEvents;
-use App\Broadcasting\UserPurchases;
+use App\Broadcasting\UserEventsChannel;
+use App\Broadcasting\UserPurchasesChannel;
 use Illuminate\Support\Facades\Auth;
 use App\Broadcasting\UserStatusChannel;
 use Illuminate\Support\ServiceProvider;
@@ -32,24 +32,11 @@ class BroadcastServiceProvider extends ServiceProvider
             return new \App\Broadcasting\AppBroadcaster($pusher);
         });
 
-
         Broadcast::routes();
 
-        /*
-         * Authenticate the user's personal channel...
-         */
-        Broadcast::channel('App.User.*', function ($user, $userId) {
-            return (int) $user->id === (int) $userId;
-        });
-
-        Broadcast::channel('user-status', function ($user) {
-            return (Auth::check()) ? $user : false;
-        });
-
-
         Broadcast::channel('user.status.{userId}'   , UserStatusChannel::class);
-        Broadcast::channel('user.{userId}.purchases', UserPurchases::class);
-        Broadcast::channel('user.{userId}.events'   , UserEvents::class);
+        Broadcast::channel('user.{userId}.purchases', UserPurchasesChannel::class);
+        Broadcast::channel('user.{userId}.events'   , UserEventsChannel::class);
 
         Broadcast::channel('chat-typing', function ($user) {
             return (Auth::check()) ? $user : false;
