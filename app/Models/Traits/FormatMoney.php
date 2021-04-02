@@ -32,4 +32,12 @@ trait FormatMoney
 
         return $moneyFormatter->format($money);
     }
+
+    public static function formatMoneyDecimal(Money $money): string
+    {
+        $currencies = new ISOCurrencies();
+        $numberFormatter = new NumberFormatter(App::currentLocale(), NumberFormatter::DECIMAL);
+        $moneyFormatter = new IntlMoneyFormatter($numberFormatter, $currencies);
+        return $moneyFormatter->format($money);
+    }
 }

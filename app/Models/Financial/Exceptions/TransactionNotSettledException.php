@@ -7,7 +7,10 @@ use App\Models\Financial\Transaction;
 
 class TransactionNotSettledException extends RuntimeException
 {
-    protected Transaction $transaction;
+    /**
+     * @var Transaction
+     */
+    protected $transaction;
 
     public function __construct(Transaction $transaction)
     {

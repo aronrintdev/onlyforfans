@@ -3,15 +3,15 @@
 
     <b-card-header>
       <section class="user-avatar">
-        <a :href="timelineUrl"><b-img :src="post.user.avatar.filepath" :alt="post.user.name" :title="post.user.name"></b-img></a>
+        <router-link :to="timelineUrl"><b-img :src="post.user.avatar.filepath" :alt="post.user.name" :title="post.user.name"></b-img></router-link>
       </section>
       <section class="user-details">
         <div>
-          <a href="timelineUrl" title="" data-toggle="tooltip" data-placement="top" class="username">{{ post.user.name }}</a>
+          <router-link :to="timelineUrl" title="" data-toggle="tooltip" data-placement="top" class="username">{{ post.user.name }}</router-link>
           <span v-if="post.user.verified" class="verified-badge"><b-icon icon="check-circle-fill" variant="success" font-scale="1"></b-icon></span>
         </div>
         <div>
-          <a :href="timelineUrl" class="tag-username">@{{ post.timeline_slug }}</a>
+          <router-link :to="timelineUrl" class="tag-username">@{{ post.timeline_slug }}</router-link>
         </div>
       </section>
     </b-card-header>
@@ -32,7 +32,6 @@
 </template>
 
 <script>
-import { eventBus } from '@/app'
 import PurchaseForm from '@components/payments/PurchaseForm'
 
 export default {
@@ -50,24 +49,27 @@ export default {
     timelineUrl() {
       return `/${this.post.timeline.slug}`
     },
+    purchasesChannel() {
+      return `user.${this.session_user.id}.purchases`
+    },
   },
 
   data: () => ({ }),
 
   methods: {
-
-    setup() {
-
-      // TODO: Move this to websockets listener
-      this.$bvModal.hide('modal-purchase_post')
-      this.$root.$bvToast.toast(`Post successfully purchased!`, {
-        toaster: 'b-toaster-top-center',
-        title: 'Success!',
-      })
-      eventBus.$emit('update-post', this.post.id)
+    init() {
+      this.$echo.private(this.purchasesChannel)
+        .listen('ItemPurchased', e => {
+          if (e.item_id === this.post.id) {
+            this.$bvModal.hide('modal-purchase_post')
+          }
+        })
     },
-
   },
+
+  mounted() {
+    this.init()
+  }
 
 }
 </script>

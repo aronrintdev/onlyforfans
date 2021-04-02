@@ -25,7 +25,7 @@
         <SendTip :session_user="session_user" :timeline="timeline" />
       </b-modal>
 
-      <b-modal id="modal-purchase_post" size="lg" title="Purchase Post" hide-footer body-class="p-0">
+      <b-modal id="modal-purchase_post" title="Purchase Post" hide-footer body-class="p-0">
         <PurchasePost :session_user="session_user" :post="selectedPost" />
       </b-modal>
 

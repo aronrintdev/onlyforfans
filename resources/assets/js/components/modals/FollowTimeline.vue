@@ -3,15 +3,15 @@
 
     <b-card-header>
       <section class="user-avatar">
-        <a :href="timelineUrl"><b-img :src="timeline.avatar.filepath" :alt="timeline.name" :title="timeline.name"></b-img></a>
+        <router-link :to="timelineUrl"><b-img :src="timeline.avatar.filepath" :alt="timeline.name" :title="timeline.name"></b-img></router-link>
       </section>
       <section class="user-details">
         <div>
-          <a href="timelineUrl" title="" data-toggle="tooltip" data-placement="top" class="username">{{ timeline.name }}</a>
+          <router-link :to="timelineUrl" title="" data-toggle="tooltip" data-placement="top" class="username">{{ timeline.name }}</router-link>
           <span v-if="timeline.verified" class="verified-badge"><b-icon icon="check-circle-fill" variant="success" font-scale="1"></b-icon></span>
         </div>
         <div>
-          <a :href="timelineUrl" class="tag-username">@{{ timeline.slug }}</a>
+          <router :to="timelineUrl" class="tag-username">@{{ timeline.slug }}</router>
         </div>
       </section>
     </b-card-header>
