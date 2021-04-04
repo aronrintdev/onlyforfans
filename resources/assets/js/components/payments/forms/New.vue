@@ -15,12 +15,14 @@
 /**
  * Form for new payment method
  */
+import NewCard from './NewCard'
 import SegpayNew from './SegpayNew'
 
 export default {
   name: 'New',
 
   components: {
+    NewCard,
     SegpayNew,
   },
 
@@ -34,7 +36,8 @@ export default {
   data: () => ({
     systems: {
       'segpay': {
-        component: SegpayNew,
+        component: NewCard,
+        // component: SegpayNew,
       }
     }
   }),

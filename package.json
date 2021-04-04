@@ -52,6 +52,7 @@
     "luxon": "^1.26.0",
     "moment": "^2.29.1",
     "pusher-js": "^7.0.2",
+    "v-mask": "^2.2.4",
     "vue-animejs": "^2.1.1",
     "vue-autosuggest": "^2.2.0",
     "vue-axios": "^3.2.3",
