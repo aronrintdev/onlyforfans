@@ -6,6 +6,7 @@ use BeyondCode\LaravelWebSockets\WebSockets\Channels\PrivateChannel as ParentCla
 
 use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Str;
+use Ratchet\ConnectionInterface;
 
 class PrivateChannel extends ParentClass
 {
