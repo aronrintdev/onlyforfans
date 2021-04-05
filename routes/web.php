@@ -206,13 +206,6 @@ Route::resource('chat-messages', 'MessageController')->only([
     'store'
 ]);
 
-Route::group(['prefix' => '/payment'], function() {
-    Route::group(['prefix' => '/segpay'], function() {
-        Route::post('/generate-url', 'SegPayController@generatePayPageUrl');
-    });
-});
-
-
 /*
 |--------------------------------------------------------------------------
 | UsernameRules 

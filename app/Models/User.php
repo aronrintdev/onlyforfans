@@ -412,6 +412,7 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
     }
 
     /* ------------------------ HasFinancialAccounts ------------------------ */
+    #region HasFinancialAccounts
     public function getInternalAccount(string $system, string $currency): Account
     {
         $account = $this->financialAccounts()->where('system', $system)
@@ -443,6 +444,8 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
         $account->save();
         return $account;
     }
+
+    #endregion HasFinancialAccounts
 
     /**
      * A user can have many messages

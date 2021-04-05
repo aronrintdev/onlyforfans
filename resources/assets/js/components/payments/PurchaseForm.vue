@@ -1,6 +1,10 @@
 <template>
   <div>
-    <SavedPaymentMethodList class="mb-3" @loadNewForm="loadNewForm" @loadPayWithForm="loadPayWithForm" />
+    <SavedPaymentMethodList
+      class="mb-3"
+      @loadNewForm="loadNewForm"
+      @loadPayWithForm="loadPayWithForm"
+    />
 
     <transition name="component-fade" mode="out-in">
       <component
@@ -36,15 +40,20 @@ export default {
   },
 
   props: {
+    /** Item being purchased */
     value: { type: Object, default: () => ({}) },
+    /** Price as integer */
     price: { type: Number, default: 0 },
+    /** Price currency */
     currency: { type: String, default: 'USD' },
+    /** Localized String of how to display currency to user */
     displayPrice: { type: String, default: '$0.00' },
   },
 
   data: () => ({
     loadedForm: FromNew,
     selectedPaymentMethod: null,
+    loading: true,
   }),
 
   methods: {
