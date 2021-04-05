@@ -4,7 +4,7 @@ namespace App\Broadcasting;
 
 use App\Models\User;
 
-class UserEvents
+class UserPurchasesChannel
 {
     /**
      * Authenticate the user's access to the channel.
@@ -14,11 +14,6 @@ class UserEvents
      */
     public function join(User $user, $userId)
     {
-        if ($user->id == $userId) {
-            return [
-                'id' => $user->id,
-                'name' => $user->timeline->name,
-            ];
-        }
+        return $user->id === $userId;
     }
 }

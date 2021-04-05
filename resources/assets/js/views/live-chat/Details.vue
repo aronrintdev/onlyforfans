@@ -427,8 +427,8 @@
 <script>
   import moment from 'moment';
   import _ from 'lodash';
-  import RadioGroupBox from '../../components/radioGroupBox';
-  import RoundCheckBox from '../../components/roundCheckBox';
+  import RadioGroupBox from '@components/radioGroupBox';
+  import RoundCheckBox from '@components/roundCheckBox';
 
   /**
    * Messages Dashboard View
