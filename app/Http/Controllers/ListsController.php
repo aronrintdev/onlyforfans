@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Lists;
 use \Illuminate\Database\QueryException;
+use function _\orderBy;
+use function _\map;
 
 class ListsController extends Controller
 {
@@ -13,9 +15,38 @@ class ListsController extends Controller
         $this->request = $request;
         $this->middleware('auth');
     }
-    public function index()
+    public function index(Request $request)
     {
-        return Lists::with(['creator', 'users'])->get();
+        $sortBy = $request->query('sort');
+        $sortDir = $request->query('dir');
+        if (!$sortDir) {
+            $sortDir = 'asc';
+        }
+        if ($sortBy === 'name') {
+            $lists = Lists::with(['creator', 'users'])
+                ->orderBy('name', $sortDir)
+                ->get();
+        } else if ($sortBy === 'recent') {
+            $lists = Lists::with(['creator', 'users'])
+                ->orderBy('created_at', $sortDir)
+                ->get();
+        } else if ($sortBy === 'people') {
+            $lists = Lists::with(['creator', 'users'])->get()->makeVisible(['user']);
+            $lists->each(function ($list) {
+                if (!$list->users) {
+                    $list->users = [];
+                }
+                $list->people = sizeof($list->users);
+            });
+            $lists = orderBy($lists, ['people', 'created_at'], [$sortDir, 'asc']);
+            $lists = map($lists, function ($list) {
+                return $list['value'];
+            });
+        } else {
+            $lists = Lists::with(['creator', 'users'])
+                ->get();
+        }
+        return $lists;
     }
     public function store(Request $request)
     {
@@ -25,6 +56,7 @@ class ListsController extends Controller
             $list = $sessionUser->userLists()->create([
                 'name' => $request->input('name'),
             ]);
+            $list->users = [];
             return $list;
         } catch(QueryException $e){
             $errorCode = $e->errorInfo[1];

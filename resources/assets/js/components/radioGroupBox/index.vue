@@ -6,6 +6,7 @@
         :name="group_name"
         type="radio"
         :value="value"
+        :checked="checked"
         class="b-input-radio"
         @change="onChange"
       />
@@ -23,6 +24,7 @@
     props: {
       label: '',
       value: undefined,
+      checked: false,
       group_name: '',
     },
     methods: {

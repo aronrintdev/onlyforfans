@@ -15,7 +15,7 @@
                       <router-link to="/">
                         <button class="btn" type="button">
                           <i class="fa fa-arrow-left" aria-hidden="true"></i>
-                        </button>
+                        </button> 
                       </router-link>
                       <span class="top-bar-title">Messages</span>
                     </div> 
@@ -130,11 +130,11 @@
                         </div>
                         <div class="v-divider"></div>
                         <button class="star-btn btn" type="button" @click="addToFavourites()">
-                          <font-awesome-icon :icon="this.selectedUser.is_favourite ? ['fas', 'star'] : ['far', 'star']" />
+                          <font-awesome-icon :icon="selectedUser.profile.hasLists ? ['fas', 'star'] : ['far', 'star']" />
                         </button>
                         <div class="v-divider"></div>
                         <button class="notification-btn btn" type="button" @click="muteNotification()">
-                          <font-awesome-icon :icon="this.selectedUser.muted ? ['far', 'bell-slash'] : ['far', 'bell'] " />
+                          <font-awesome-icon :icon="selectedUser.profile.muted ? ['far', 'bell-slash'] : ['far', 'bell'] " />
                         </button>
                         <div class="v-divider"></div>
                         <button class="gallery-btn btn" type="button" @click="goToGallery">
@@ -165,8 +165,8 @@
                       </b-dropdown-item>
                       <b-dropdown-divider></b-dropdown-divider>
                       <b-dropdown-item disabled>Hide chat</b-dropdown-item>
-                      <b-dropdown-item v-if="!selectedUser.muted" @click="muteNotification">Mute notifications</b-dropdown-item>
-                      <b-dropdown-item v-if="selectedUser.muted" @click="muteNotification">Unmute notifications</b-dropdown-item>
+                      <b-dropdown-item v-if="!selectedUser.profile.muted" @click="muteNotification">Mute notifications</b-dropdown-item>
+                      <b-dropdown-item v-if="selectedUser.profile.muted" @click="muteNotification">Unmute notifications</b-dropdown-item>
                       <b-dropdown-divider></b-dropdown-divider>
                       <b-dropdown-item class="block-item" disabled>Restrict @{{ selectedUser.profile.username }}</b-dropdown-item>
                       <b-dropdown-item @click="showBlockModal" class="block-item">Block @{{ selectedUser.profile.username }}</b-dropdown-item>
@@ -333,39 +333,44 @@
                 </use>
               </svg>
             </template>
-            <b-dropdown-item>
+            <b-dropdown-item @click="getListsBySort('name', sortDir)">
               <radio-group-box
                 group_name="list-sort-options"
                 value="name"
+                :checked="sortWith === 'name'"
                 label="Name">
               </radio-group-box>
             </b-dropdown-item>
-            <b-dropdown-item>
+            <b-dropdown-item @click="getListsBySort('recent', sortDir)">
               <radio-group-box
                 group_name="list-sort-options"
                 value="recent"
+                :checked="sortWith === 'recent'"
                 label="Recent">
               </radio-group-box>
             </b-dropdown-item>
-            <b-dropdown-item>
+            <b-dropdown-item @click="getListsBySort('people', sortDir)">
               <radio-group-box
                 group_name="list-sort-options"
                 value="people"
+                :checked="sortWith === 'people'"
                 label="People">
               </radio-group-box>
             </b-dropdown-item>
             <b-dropdown-divider></b-dropdown-divider>
-            <b-dropdown-item>
+            <b-dropdown-item @click="getListsBySort(sortWith, 'asc')">
               <radio-group-box
                 group_name="list-sort-directions"
                 value="asc"
+                :checked="sortDir === 'asc'"
                 label="Ascendening">
               </radio-group-box>
             </b-dropdown-item>
-            <b-dropdown-item>
+            <b-dropdown-item @click="getListsBySort(sortWith, 'desc')">
               <radio-group-box
                 group_name="list-sort-directions"
                 value="desc"
+                :checked="sortDir === 'desc'"
                 label="Descending">
               </radio-group-box>
             </b-dropdown-item>
@@ -458,9 +463,23 @@
       listOption: undefined,
       lists: [],
       newListName: undefined,
+      sortDir: '',
+      sortWith: 'name',
     }),
     mounted() {
       const self = this;
+      Echo.join(`user-status`)
+        .here((users) => {
+            users.forEach(user => {
+              self.updateUserStatus(user.id, 1);
+            });
+        })
+        .joining((user) => {
+          self.updateUserStatus(user.id, 1);
+        })
+        .leaving((user) => {
+          self.updateUserStatus(user.id, 0);
+        });
       // Mark unread messages as read
       this.axios.post(`/chat-messages/${this.$route.params.id}/mark-as-read`);
       this.axios.get('/chat-messages/contacts').then((response) => {
@@ -560,7 +579,7 @@
         const isUserScrolling = (event.target.scrollTop === 0);
         if (isUserScrolling && !this.loadingData) {
           this.getMessages();
-          $('.conversation-list').animate({ scrollTop: 10 }, 10);
+          this.$el.querySelector('.conversation-list .messages').scrollTop = 10;
         }
       },
       updateUserStatus: function (userId, status) {
@@ -568,7 +587,7 @@
         if (status == 1) {
           statusHolder.addClass('online');        
         } else {
-          statusHolder.removeClass('online');   
+          statusHolder.removeClass('online');
         }
       },
       findConversationList: function() {
@@ -650,12 +669,12 @@
         this.showListModal();
       },
       muteNotification: async function () {
-        if (!this.selectedUser.muted) {
+        if (!this.selectedUser.profile.muted) {
           await this.axios.patch(`/chat-messages/${this.$route.params.id}/mute`);
         } else {
           await this.axios.patch(`/chat-messages/${this.$route.params.id}/unmute`);
         }
-        this.selectedUser = { ...this.selectedUser, muted: !this.selectedUser.muted };
+        this.selectedUser = { ...this.selectedUser, profile: { ...this.selectedUser.profile, muted: !this.selectedUser.profile.muted } };
       },
       onMessageSearchTextChange: function () {
         this.clearHighlightMessages();
@@ -701,7 +720,6 @@
             this.originMessages.unshift(response.data.message)
             self.groupMessages();
             self.newMessageText = undefined;
-            $('.conversation-list').animate({ scrollTop: $('.conversation-list')[0].scrollHeight }, 500);
           });
       },
       onShowNextSearch: function() {
@@ -768,14 +786,30 @@
         this.userCustomName = undefined;
       },
       saveCustomName: function() {
+        const self = this;
         if (this.userCustomName) {
-          this.axios.post(`/chat-messages/${this.$route.params.id}/custom-name`, { name: this.userCustomName });
+          this.axios.post(`/chat-messages/${this.$route.params.id}/custom-name`, { name: this.userCustomName })
+            .then(() => {
+              this.selectedUser = {
+                ...this.selectedUser,
+                profile: {
+                  ...this.selectedUser.profile,
+                  display_name: this.userCustomName,
+                }
+              };
+              const newUsers = this.users.slice();
+              const index = newUsers.findIndex(user => user.profile.id === this.selectedUser.profile.id);
+              newUsers[index].profile = this.selectedUser.profile;
+              this.users = newUsers;
+              this.closeCustomNameModal();
+            });
         }
-        this.closeCustomNameModal();
       },
       showListModal: async function() {
         this.$refs['list-edit-modal'].show();
         this.isListUpdating = true;
+        this.sortDir = '';
+        this.sortWith = '';
         this.axios.get('/lists')
           .then(res => {
             this.lists = res.data;
@@ -819,6 +853,13 @@
             const index = newLists.findIndex(list => list.id === id);
             newLists[index] = res.data;
             this.lists = newLists;
+            let hasLists = false;
+            newLists.forEach(list => {
+              if (this.isUserInList(list)) {
+                hasLists = true;
+              }
+            });
+            this.selectedUser = { ...this.selectedUser, profile: { ...this.selectedUser.profile, hasLists: hasLists } };
           });
       },
       removeUserFromList: function(id) {
@@ -828,10 +869,25 @@
             const index = newLists.findIndex(list => list.id === id);
             newLists[index] = res.data;
             this.lists = newLists;
+            let hasLists = false;
+            newLists.forEach(list => {
+              if (this.isUserInList(list)) {
+                hasLists = true;
+              }
+            });
+            this.selectedUser = { ...this.selectedUser, profile: { ...this.selectedUser.profile, hasLists: hasLists } };
           });
       },
       goToGallery: function() {
         this.$router.push(`/messages/${this.selectedUser.profile.id}/gallery`);
+      },
+      getListsBySort: function(sortWith, sortDir) {
+        this.sortWith = sortWith;
+        this.sortDir = sortDir;
+        this.axios.get(`/lists?sort=${sortWith}&dir=${sortDir}`)
+          .then((res) => {
+            this.lists = res.data;
+          });
       }
     }
   }
