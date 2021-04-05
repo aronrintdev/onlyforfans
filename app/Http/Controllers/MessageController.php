@@ -108,6 +108,12 @@ class MessageController extends Controller
                     $user->display_name = $cattrs['display_name'][$receiver];
                 }
             }
+            if ( array_key_exists('muted', $cattrs) ) {
+                $index = array_search($receiver, $cattrs['muted']);
+                if ( $index !== false ) {
+                    $user->muted = true;
+                }
+            }
             $user->username = $user->user->username;
             $user->id = $user->user->id;
             array_push($contacts, [
@@ -165,6 +171,14 @@ class MessageController extends Controller
                 $user->display_name = $cattrs['display_name'][$id];
             }
         }
+        if ( array_key_exists('muted', $cattrs) ) {
+            $index = array_search($id, $cattrs['muted']);
+            if ( $index !== false ) {
+                $user->muted = true;
+            }
+        }
+        $lists = DB::table('lists_users')->where('user_id', $id)->get();
+        $user->hasLists = sizeof($lists) > 0;
         $user->id = $user->user->id;
         return [
             'messages' => $messages,
@@ -282,10 +296,11 @@ class MessageController extends Controller
             $display_name = [];
         } else {
             $display_name = $cattrs['display_name'];
+            unset($display_name[$id]);
         }
         $new[$id] = $request->input('name');
         $display_name += $new;
-        $cattrs['display_name'] = $display_name; 
+        $cattrs['display_name'] = $display_name;
         $userSetting->cattrs = $cattrs;
         $userSetting->save();
         return;

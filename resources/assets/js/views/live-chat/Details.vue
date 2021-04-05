@@ -130,11 +130,11 @@
                         </div>
                         <div class="v-divider"></div>
                         <button class="star-btn btn" type="button" @click="addToFavourites()">
-                          <font-awesome-icon :icon="this.selectedUser.is_favourite ? ['fas', 'star'] : ['far', 'star']" />
+                          <font-awesome-icon :icon="selectedUser.profile.hasLists ? ['fas', 'star'] : ['far', 'star']" />
                         </button>
                         <div class="v-divider"></div>
                         <button class="notification-btn btn" type="button" @click="muteNotification()">
-                          <font-awesome-icon :icon="this.selectedUser.muted ? ['far', 'bell-slash'] : ['far', 'bell'] " />
+                          <font-awesome-icon :icon="selectedUser.profile.muted ? ['far', 'bell-slash'] : ['far', 'bell'] " />
                         </button>
                         <div class="v-divider"></div>
                         <button class="gallery-btn btn" type="button" @click="goToGallery">
@@ -165,8 +165,8 @@
                       </b-dropdown-item>
                       <b-dropdown-divider></b-dropdown-divider>
                       <b-dropdown-item disabled>Hide chat</b-dropdown-item>
-                      <b-dropdown-item v-if="!selectedUser.muted" @click="muteNotification">Mute notifications</b-dropdown-item>
-                      <b-dropdown-item v-if="selectedUser.muted" @click="muteNotification">Unmute notifications</b-dropdown-item>
+                      <b-dropdown-item v-if="!selectedUser.profile.muted" @click="muteNotification">Mute notifications</b-dropdown-item>
+                      <b-dropdown-item v-if="selectedUser.profile.muted" @click="muteNotification">Unmute notifications</b-dropdown-item>
                       <b-dropdown-divider></b-dropdown-divider>
                       <b-dropdown-item class="block-item" disabled>Restrict @{{ selectedUser.profile.username }}</b-dropdown-item>
                       <b-dropdown-item @click="showBlockModal" class="block-item">Block @{{ selectedUser.profile.username }}</b-dropdown-item>
@@ -484,16 +484,32 @@
       this.axios.post(`/chat-messages/${this.$route.params.id}/mark-as-read`);
       this.axios.get('/chat-messages/contacts').then((response) => {
         this.users = response.data;
+        this.users.forEach(user => {
+          if (user.profile.user.is_online) {
+            setTimeout(() => {
+              this.updateUserStatus(user.profile.user.id, 1);
+            }, 2000);
+          }
+        });
         this.loading = false;
       });
       this.getMessages();
-      setTimeout(() => {
-        $('.conversation-list').animate({ scrollTop: $('.conversation-list')[0].scrollHeight }, 500);
-      }, 1000);
+      this.findConversationList();
       Echo.private(`${this.$route.params.id}-message`)
         .listen('MessageSentEvent', (e) => {
-            self.originMessages.push(e.message);
+          if (e.message.receiver_id === self.currentUser.id) {
+            self.originMessages.unshift(e.message);
+            self.offset += 1;
             self.groupMessages();
+            $('.conversation-list').animate({ scrollTop: $('.conversation-list')[0].scrollHeight }, 500);
+          }
+        });
+      Echo.join(`user-status`)
+        .joining((user) => {
+          self.updateUserStatus(user.id, 1);
+        })
+        .leaving((user) => {
+          self.updateUserStatus(user.id, 0);
         });
       Echo.join(`chat-typing`)
         .listenForWhisper('typing', (e) => {
@@ -520,13 +536,15 @@
 
         this.getMessages();
         const self = this;
-        setTimeout(() => {
-          $('.conversation-list').animate({ scrollTop: $('.conversation-list')[0].scrollHeight }, 500);
-        }, 1000);
+        this.findConversationList();
         Echo.private(`${id}-message`)
         .listen('MessageSentEvent', (e) => {
-          self.originMessages.unshift(e.message);
-          self.groupMessages();
+          if (e.message.receiver_id === self.currentUser.id) {
+            self.originMessages.unshift(e.message);
+            self.offset += 1;
+            self.groupMessages();
+            $('.conversation-list').animate({ scrollTop: $('.conversation-list')[0].scrollHeight }, 500);
+          }
         });
       }
     },
@@ -567,26 +585,33 @@
       updateUserStatus: function (userId, status) {
         let statusHolder = $(".status-holder-"+ userId);
         if (status == 1) {
-            statusHolder.addClass('online');        
+          statusHolder.addClass('online');        
+        } else {
+          statusHolder.removeClass('online');
         }
       },
-      getMessages: function() {
+      findConversationList: function() {
+        setTimeout(() => {
+            if (this.$el.querySelector('.conversation-list')) {
+              $('.conversation-list').animate({ scrollTop: $('.conversation-list')[0].scrollHeight }, 500);
+              this.$el.querySelector('.conversation-list').addEventListener('scroll', this.handleDebouncedScroll);
+            } else {
+              this.findConversationList();
+            }
+          }, 1000);
+      },
+      getMessages: async function() {
         this.loadingData = true;
         const user_id = this.$route.params.id;
-        this.axios.get(`/chat-messages/${user_id}?offset=${this.offset}&limit=30`).then((response) => {
-          this.selectedUser = response.data;
+        const response = await this.axios.get(`/chat-messages/${user_id}?offset=${this.offset}&limit=30`);
+        this.selectedUser = response.data;
+        if (!this.currentUser) {
           this.currentUser = response.data.currentUser;
-          this.originMessages = this.originMessages.concat(response.data.messages);
-          this.selectedUser.messages = this.originMessages.slice();
-          if (this.offset === 0 && this.originMessages.length > 0) {
-            setTimeout(() => {
-              this.$el.querySelector('.conversation-list').addEventListener('scroll', this.handleDebouncedScroll);
-            }, 1000);
-          }
-          this.offset = this.originMessages.length;
-          this.groupMessages();
-          this.loadingData = false;
-        }) 
+        }
+        this.originMessages = response.data.messages.concat(this.originMessages);
+        this.offset = this.originMessages.length;
+        this.groupMessages();
+        this.loadingData = false;
       },
       groupMessages: function() {
         const messages = this.originMessages.map((message) => {
@@ -598,6 +623,8 @@
           .map((value, key) => ({ date: key, messages: value.reverse() }))
           .value();
         _.orderBy(this.messages, ['date'], ['DESC']);
+        this.messages = _.cloneDeep(this.messages);
+        this.selectedUser = { ...this.selectedUser, messages: this.messages };
       },
       changeSearchbarVisible: function () {
         this.userSearchVisible = !this.userSearchVisible; 
@@ -642,12 +669,12 @@
         this.showListModal();
       },
       muteNotification: async function () {
-        if (!this.selectedUser.muted) {
+        if (!this.selectedUser.profile.muted) {
           await this.axios.patch(`/chat-messages/${this.$route.params.id}/mute`);
         } else {
           await this.axios.patch(`/chat-messages/${this.$route.params.id}/unmute`);
         }
-        this.selectedUser = { ...this.selectedUser, muted: !this.selectedUser.muted };
+        this.selectedUser = { ...this.selectedUser, profile: { ...this.selectedUser.profile, muted: !this.selectedUser.profile.muted } };
       },
       onMessageSearchTextChange: function () {
         this.clearHighlightMessages();
@@ -759,10 +786,24 @@
         this.userCustomName = undefined;
       },
       saveCustomName: function() {
+        const self = this;
         if (this.userCustomName) {
-          this.axios.post(`/chat-messages/${this.$route.params.id}/custom-name`, { name: this.userCustomName });
+          this.axios.post(`/chat-messages/${this.$route.params.id}/custom-name`, { name: this.userCustomName })
+            .then(() => {
+              this.selectedUser = {
+                ...this.selectedUser,
+                profile: {
+                  ...this.selectedUser.profile,
+                  display_name: this.userCustomName,
+                }
+              };
+              const newUsers = this.users.slice();
+              const index = newUsers.findIndex(user => user.profile.id === this.selectedUser.profile.id);
+              newUsers[index].profile = this.selectedUser.profile;
+              this.users = newUsers;
+              this.closeCustomNameModal();
+            });
         }
-        this.closeCustomNameModal();
       },
       showListModal: async function() {
         this.$refs['list-edit-modal'].show();
@@ -812,6 +853,13 @@
             const index = newLists.findIndex(list => list.id === id);
             newLists[index] = res.data;
             this.lists = newLists;
+            let hasLists = false;
+            newLists.forEach(list => {
+              if (this.isUserInList(list)) {
+                hasLists = true;
+              }
+            });
+            this.selectedUser = { ...this.selectedUser, profile: { ...this.selectedUser.profile, hasLists: hasLists } };
           });
       },
       removeUserFromList: function(id) {
@@ -821,6 +869,13 @@
             const index = newLists.findIndex(list => list.id === id);
             newLists[index] = res.data;
             this.lists = newLists;
+            let hasLists = false;
+            newLists.forEach(list => {
+              if (this.isUserInList(list)) {
+                hasLists = true;
+              }
+            });
+            this.selectedUser = { ...this.selectedUser, profile: { ...this.selectedUser.profile, hasLists: hasLists } };
           });
       },
       goToGallery: function() {
