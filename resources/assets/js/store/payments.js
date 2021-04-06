@@ -3,7 +3,7 @@
  * Vuex store module for items related to payments
  */
 import _ from 'lodash'
-import { axios } from 'vue/types/umd'
+import axios from 'axios'
 import propSelect from '@helpers/propSelect'
 
 const route = window.route
@@ -80,3 +80,4 @@ export const payments = {
   },
 }
 
+export default payments

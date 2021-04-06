@@ -103,7 +103,6 @@ export default {
 
   methods: {
     loadDefaultValues() {
-      console.log(this.timeline)
       var name = this.timeline.name.split(' ')
       this.firstName = name[0] || ''
       this.lastName = name[1]

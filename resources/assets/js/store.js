@@ -10,10 +10,12 @@ const route = window.route
 
 // Modules
 import searchModule from './store/search'
+import paymentModule from './store/payments'
 
 export default new Vuex.Store({
   modules: {
     search: searchModule,
+    payments: paymentModule,
   },
 
   state: {

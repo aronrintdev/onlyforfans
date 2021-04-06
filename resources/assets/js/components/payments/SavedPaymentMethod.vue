@@ -2,7 +2,7 @@
   <component :is="as" button class="payment-method-selection cursor-pointer d-flex" :variant="selected ? 'success' : 'default'" @click="select">
     <fa-icon :icon="icon" fixed-width :size="iconSize" />
     <span class="nickname mx-3" v-text="value.nickname" />
-    <span v-if="value.last4" v-text="` ending in ${value.last4}`" />
+    <span v-if="value.last_4" v-text="` ending in ${value.last_4}`" />
 
     <fa-icon v-if="selected" :icon="selectedIcon" fixed-width :size="iconSize" class="text-success ml-auto" />
   </component>
