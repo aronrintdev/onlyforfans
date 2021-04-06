@@ -77,6 +77,10 @@ Vue.component('VueSlider', VueSlider)
 import VueTagsInput from '@johmun/vue-tags-input'
 Vue.component('VueTagsInput', VueTagsInput)
 
+import 'swiper/swiper.min.css'
+import 'photoswipe/dist/photoswipe.css'
+import 'photoswipe/dist/default-skin/default-skin.css'
+
 /**
  * v-mask: https://github.com/probil/v-mask#readme
  */

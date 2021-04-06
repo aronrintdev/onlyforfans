@@ -230,22 +230,76 @@
                     <div class="typing dot-pulse" style="display: none">...</div>
                   </div>
                   <div class="conversation-footer">
+                    <div class="swiper-slider">
+                      <swiper ref="mySwiper" :options="swiperOptions" >
+                        <swiper-slide class="slide">
+                          <div class="swiper-image-wrapper">
+                            <img v-preview class="swiper-lazy" src="https://via.placeholder.com/1500x1250" />
+                            <div class="icon-close">
+                              <svg viewBox="0 0 24 24">
+                                <path d="M13.41 12l5.3-5.29A1 1 0 0 0 19 6a1 1 0 0 0-1-1 1 1 0 0 0-.71.29L12 10.59l-5.29-5.3A1 1 0 0 0 6 5a1 1 0 0 0-1 1 1 1 0 0 0 .29.71l5.3 5.29-5.3 5.29A1 1 0 0 0 5 18a1 1 0 0 0 1 1 1 1 0 0 0 .71-.29l5.29-5.3 5.29 5.3A1 1 0 0 0 18 19a1 1 0 0 0 1-1 1 1 0 0 0-.29-.71z"></path>
+                              </svg>
+                            </div>
+                          </div>
+                          <div class="swiper-image-wrapper">
+                            <img v-preview class="swiper-lazy" src="https://via.placeholder.com/3500x1250" />
+                            <div class="icon-close">
+                              <svg viewBox="0 0 24 24">
+                                <path d="M13.41 12l5.3-5.29A1 1 0 0 0 19 6a1 1 0 0 0-1-1 1 1 0 0 0-.71.29L12 10.59l-5.29-5.3A1 1 0 0 0 6 5a1 1 0 0 0-1 1 1 1 0 0 0 .29.71l5.3 5.29-5.3 5.29A1 1 0 0 0 5 18a1 1 0 0 0 1 1 1 1 0 0 0 .71-.29l5.29-5.3 5.29 5.3A1 1 0 0 0 18 19a1 1 0 0 0 1-1 1 1 0 0 0-.29-.71z"></path>
+                              </svg>
+                            </div>
+                          </div>
+                          <div class="swiper-image-wrapper">
+                            <img v-preview class="swiper-lazy" src="https://via.placeholder.com/2500x1250" />
+                            <div class="icon-close">
+                              <svg viewBox="0 0 24 24">
+                                <path d="M13.41 12l5.3-5.29A1 1 0 0 0 19 6a1 1 0 0 0-1-1 1 1 0 0 0-.71.29L12 10.59l-5.29-5.3A1 1 0 0 0 6 5a1 1 0 0 0-1 1 1 1 0 0 0 .29.71l5.3 5.29-5.3 5.29A1 1 0 0 0 5 18a1 1 0 0 0 1 1 1 1 0 0 0 .71-.29l5.29-5.3 5.29 5.3A1 1 0 0 0 18 19a1 1 0 0 0 1-1 1 1 0 0 0-.29-.71z"></path>
+                              </svg>
+                            </div>
+                          </div>
+                          <button class="slider-btn arrows-btn">
+                            <svg id="icon-arrow-left" viewBox="0 0 24 24">
+                              <path d="M7.25 12l6.88-6.87a1 1 0 0 1 .7-.3 1 1 0 0 1 1 1 1 1 0 0 1-.29.71L10.08 12l5.46 5.46a1 1 0 0 1 .29.71 1 1 0 0 1-1 1 1 1 0 0 1-.7-.3z"></path>
+                            </svg>
+                            <svg id="icon-arrow-right" viewBox="0 0 24 24"> 
+                              <path d="M16.75 12l-6.88 6.87a1 1 0 0 1-.7.3 1 1 0 0 1-1-1 1 1 0 0 1 .29-.71L13.92 12 8.46 6.54a1 1 0 0 1-.29-.71 1 1 0 0 1 1-1 1 1 0 0 1 .7.3z"></path>
+                            </svg>
+                          </button>
+                          <button class="slider-btn" @click="addNewMedia"><span>+</span></button>
+                        </swiper-slide>
+                      </swiper>
+                    </div>
                     <textarea placeholder="Type a message" name="text" rows="1" maxlength="10000"
                       spellcheck="false" :value="newMessageText" @input="onInputNewMessage"></textarea>
                     <div class="action-btns">
                       <div>
                         <!-- image -->
-                        <button class="btn action-btn" type="button">
-                          <svg id="icon-media" viewBox="0 0 24 24"> <path d="M18,3H6A3,3,0,0,0,3,6V18a3,3,0,0,0,3,3H18a3,3,0,0,0,3-3V6A3,3,0,0,0,18,3Zm1,15a1,1,0,0,1-1,1H6a1,1,0,0,1-1-1V6A1,1,0,0,1,6,5H18a1,1,0,0,1,1,1ZM9,10.5A1.5,1.5,0,1,0,7.5,9,1.5,1.5,0,0,0,9,10.5ZM14,13l-3,3L9,14,6.85,16.15a.47.47,0,0,0-.14.35.5.5,0,0,0,.5.5h9.58a.5.5,0,0,0,.5-.5.47.47,0,0,0-.14-.35Z" fill="#8a96a3"></path> </svg>
-                        </button>
+                        <input
+                          type="file"
+                          id="image-upload-btn"
+                          accept="image/x-png,image/gif,image/jpeg" ref="imagesUpload"
+                          @click="activeMediaRef = $refs.imagesUpload"
+                        />
+                        <label for="image-upload-btn" class="btn action-btn">
+                          <svg id="icon-media" viewBox="0 0 24 24">
+                            <path d="M18,3H6A3,3,0,0,0,3,6V18a3,3,0,0,0,3,3H18a3,3,0,0,0,3-3V6A3,3,0,0,0,18,3Zm1,15a1,1,0,0,1-1,1H6a1,1,0,0,1-1-1V6A1,1,0,0,1,6,5H18a1,1,0,0,1,1,1ZM9,10.5A1.5,1.5,0,1,0,7.5,9,1.5,1.5,0,0,0,9,10.5ZM14,13l-3,3L9,14,6.85,16.15a.47.47,0,0,0-.14.35.5.5,0,0,0,.5.5h9.58a.5.5,0,0,0,.5-.5.47.47,0,0,0-.14-.35Z" fill="#8a96a3"></path>
+                          </svg>
+                        </label>
                         <!-- video -->
-                        <button class="btn action-btn" type="button">
+                        <input
+                          type="file"
+                          id="video-upload-btn"
+                          accept="video/mp4,video/x-m4v,video/*"
+                          ref="videosUpload"
+                          @click="activeMediaRef = $refs.videosUpload"
+                        />
+                        <label for="video-upload-btn" class="btn action-btn">
                           <svg id="icon-video" viewBox="0 0 24 24">
                             <path
                               d="M21.79 6a1.21 1.21 0 0 0-.86.35L19 8.25V7a3 3 0 0 0-3-3H5a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h11a3 3 0 0 0 3-3v-1.25l1.93 1.93a1.22 1.22 0 0 0 2.07-.86V7.18A1.21 1.21 0 0 0 21.79 6zM17 17a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h11a1 1 0 0 1 1 1zm4-2.08l-1.34-1.34a2.25 2.25 0 0 1 0-3.16L21 9.08z"
                               fill="#8a96a3"></path>
                           </svg>
-                        </button>
+                        </label>
                         <!-- microphone -->
                         <button class="btn action-btn" type="button">
                           <svg id="icon-voice" viewBox="0 0 24 24">
@@ -427,6 +481,11 @@
 <script>
   import moment from 'moment';
   import _ from 'lodash';
+  import { Swiper, SwiperSlide, directive } from 'vue-awesome-swiper';
+  import PhotoSwipe from 'photoswipe/dist/photoswipe'
+  import PhotoSwipeUI from 'photoswipe/dist/photoswipe-ui-default'
+  import createPreviewDirective from 'vue-photoswipe-directive';
+
   import RadioGroupBox from '@components/radioGroupBox';
   import RoundCheckBox from '@components/roundCheckBox';
 
@@ -434,7 +493,6 @@
    * Messages Dashboard View
    */
   export default {
-    //
     props: {
       session_user: null,
     },
@@ -465,6 +523,11 @@
       newListName: undefined,
       sortDir: '',
       sortWith: 'name',
+      swiperOptions: {
+        lazy: true,
+        slidesPerView: 'auto',
+      },
+      activeMediaRef: null,
     }),
     mounted() {
       const self = this;
@@ -549,8 +612,14 @@
       }
     },
     components: {
+      Swiper,
+      SwiperSlide,
       'radio-group-box': RadioGroupBox,
       'round-check-box': RoundCheckBox
+    },
+    directives: {
+      swiper: directive,
+      preview: createPreviewDirective(null, PhotoSwipe, PhotoSwipeUI)
     },
     computed: {
       selectedOption: function () {
@@ -720,6 +789,7 @@
             this.originMessages.unshift(response.data.message)
             self.groupMessages();
             self.newMessageText = undefined;
+            $('.conversation-list').animate({ scrollTop: $('.conversation-list')[0].scrollHeight }, 500)
           });
       },
       onShowNextSearch: function() {
@@ -888,7 +958,11 @@
           .then((res) => {
             this.lists = res.data;
           });
-      }
+      },
+      addNewMedia: function() {
+        console.log('------- add media');
+        this.activeMediaRef.click();
+      },
     }
   }
 </script>
@@ -1035,4 +1109,78 @@
 			text-transform: uppercase;
 		}
 	}
+  .swiper-slider {
+    padding: 12px 8px 8px;
+    .slide {
+      width: unset;
+      flex: 0 0 auto;
+      display: flex;
+    }
+    img {
+      height: 144px;
+      border-radius: 10px;
+      margin-right: 8px;
+      width: auto;
+      object-fit: contain;
+    }
+    .slider-btn {
+      cursor: pointer;
+      background: rgba(138,150,163,.12);
+      border-radius: 6px;
+      width: 80px;
+      min-width: 80px;
+      min-height: 144px;
+      height: 100%;
+      margin-right: 8px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      border: none;
+      outline: none;  
+
+      &.arrows-btn {
+        width: 60px;
+        min-width: 60px;
+      }
+      svg {
+        font-size: 24px;
+        width: 1em;
+        height: 1em;
+        min-width: 1em;
+        display: inline-block;
+        fill: rgba(138,150,163,.7);
+        line-height: 1;
+      }
+      span {
+        font-size: 28px;
+        color: rgba(138,150,163,.7);
+      }
+    }
+    .swiper-image-wrapper {
+      position: relative;
+
+      .icon-close {
+        position: absolute;
+        top: 8px;
+        right: 16px;
+        background-color: #00aff0;
+        border-radius: 50%;
+        padding: 2px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        svg {
+          width: 18px;
+          height: 18px;
+          fill: #fff;
+        }
+        &:hover {
+          background-color: #0091ea;
+        }
+      }
+    }
+  }
 </style>
