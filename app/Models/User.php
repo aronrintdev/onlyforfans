@@ -24,7 +24,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
-class User extends Authenticatable implements PaymentSendable, Blockable, HasFinancialAccounts
+class User extends Authenticatable implements Blockable, HasFinancialAccounts
 {
     use Notifiable, HasRoles, HasFactory, Messagable, SoftDeletes, UsesUuid, MorphFunctions;
 
@@ -400,8 +400,8 @@ class User extends Authenticatable implements PaymentSendable, Blockable, HasFin
             'earnings'         => $this->getSales(),
             'website'          => '', // %TODO
             'instagram'        => '', // %TODO
-            'city'             => $this->settings->city,
-            'country'          => $this->settings->country,
+            'city'             => (isset($this->settings)) ? $this->settings->city : null,
+            'country'          => (isset($this->settings)) ? $this->settings->country : null,
         ];
     }
 
@@ -411,8 +411,8 @@ class User extends Authenticatable implements PaymentSendable, Blockable, HasFin
         return $sales > 0;
     }
 
-
     /* ------------------------ HasFinancialAccounts ------------------------ */
+    #region HasFinancialAccounts
     public function getInternalAccount(string $system, string $currency): Account
     {
         $account = $this->financialAccounts()->where('system', $system)
@@ -445,6 +445,27 @@ class User extends Authenticatable implements PaymentSendable, Blockable, HasFin
         return $account;
     }
 
+    #endregion HasFinancialAccounts
+
+    /**
+     * A user can have many messages
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function messages()
+    {
+        return $this->hasMany(Message::class);
+    }
+
+    public function lists()
+    {
+        return $this->belongsToMany('App\Models\Lists', 'lists_users', 'user_id', 'list_id')->withTimestamps();
+    }
+
+    public function userlists()
+    {
+        return $this->hasMany('App\Models\Lists', 'creator_id');
+    }
 }
 
     /*

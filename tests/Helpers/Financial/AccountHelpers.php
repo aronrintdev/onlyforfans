@@ -13,6 +13,7 @@ class AccountHelpers
 {
     /**
      * Starts a new transaction builder
+     *
      * @return TransactionsBuilder
      */
     public static function generateTransactions(): TransactionsBuilder
@@ -22,6 +23,7 @@ class AccountHelpers
 
     /**
      * Create Collection of Internal accounts
+     *
      * @param array $balances
      * @return Collection
      */
@@ -35,7 +37,26 @@ class AccountHelpers
     }
 
     /**
+     * Loads a users wallet with funds
+     *
+     * @param int $amount
+     * @param mixed|null $in
+     * @return Collection `[ 'in', 'internal', 'transactions' ]`
+     */
+    public static function loadWallet(int $amount, $in = null): Collection
+    {
+        if (!isset($in)) {
+            $in = Account::factory()->asIn()->create();
+        }
+        $internal = $in->owner->getInternalAccount($in->system, $in->currency);
+        $transactions = $in->moveToInternal($amount);
+        AccountHelpers::settleAccounts([$in, $internal]);
+        return new Collection([ 'in' => $in, 'internal' => $internal, 'transactions' => $transactions ]);
+    }
+
+    /**
      * Settle and save account given
+     *
      * @param array|Collection $accounts
      * @return void
      */

@@ -31,6 +31,7 @@
         "laravel/ui": "^3.2",
         "laravelcollective/html": "*",
         "league/flysystem-aws-s3-v3": "~1.0",
+        "lodash-php/lodash-php": "^0.0.7",
         "mews/purifier": "^3.3",
         "moneyphp/money": "^3.3",
         "pascaldevink/shortuuid": "^3.0",

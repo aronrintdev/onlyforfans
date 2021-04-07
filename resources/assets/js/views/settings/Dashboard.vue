@@ -10,35 +10,23 @@
 
       <aside class="col-md-3 col-lg-2">
         <b-list-group>
-          <b-list-group-item>
-            <router-link :to="{ name: 'settings.general', params: {} }">General</router-link>
-          </b-list-group-item>
-          <b-list-group-item>
-            <router-link :to="{ name: 'settings.profile', params: {} }">Profile</router-link>
-          </b-list-group-item>
-          <b-list-group-item>
-            <router-link :to="{ name: 'settings.privacy', params: {} }">Privacy</router-link>
-          </b-list-group-item>
-          <b-list-group-item>
-            <router-link :to="{ name: 'settings.security', params: {} }">Security</router-link>
-          </b-list-group-item>
-          <b-list-group-item>
-            <router-link :to="{ name: 'settings.earnings', params: {} }">Earnings</router-link>
-          </b-list-group-item>
-          <b-list-group-item>
-            <router-link :to="{ name: 'settings.sessions', params: {} }">Login Sessions</router-link>
-          </b-list-group-item>
-          <b-list-group-item>
-            <router-link :to="{ name: 'settings.referrals', params: {} }">Referrals</router-link>
-          </b-list-group-item>
-          <b-list-group-item>
-            <router-link :to="{ name: 'settings.bookmarks', params: {} }">Bookmarks</router-link>
+          <b-list-group-item
+            v-for="(link, i) in routes"
+            :key="i"
+            :to="link.to"
+            :active="$router.currentRoute.name === link.to.name"
+            class="d-flex align-items-center"
+          >
+            <span v-text="$t(link.name)" />
+            <fa-icon icon="caret-right" class="ml-auto" />
           </b-list-group-item>
         </b-list-group>
       </aside>
 
       <main class="col-md-9 col-lg-10">
-        <router-view :session_user="session_user" :user_settings="user_settings"></router-view>
+        <transition mode="out-in" name="quick-fade">
+          <router-view :session_user="session_user" :user_settings="user_settings" />
+        </transition>
       </main>
 
     </section>
@@ -61,7 +49,38 @@ export default {
     },
   },
 
-  data: () => ({ }),
+  data: () => ({
+    routes: [
+      {
+        name: 'General',
+        to: { name: 'settings.general', params: {} },
+      }, {
+        name: 'Profile',
+        to: { name: 'settings.profile', params: {} },
+      }, {
+        name: 'Privacy',
+        to: { name: 'settings.privacy', params: {} },
+      }, {
+        name: 'Security',
+        to: { name: 'settings.security', params: {} },
+      }, {
+        name: 'Payment Methods',
+        to: { name: 'settings.payments', params: {} },
+      }, {
+        name: 'Earnings',
+        to: { name: 'settings.earnings', params: {} },
+      }, {
+        name: 'Login Sessions',
+        to: { name: 'settings.sessions', params: {} },
+      }, {
+        name: 'Referrals',
+        to: { name: 'settings.referrals', params: {} },
+      }, {
+        name: 'Bookmarks',
+        to: { name: 'settings.bookmarks', params: {} },
+      },
+    ]
+  }),
 
   created() { },
 
@@ -70,8 +89,8 @@ export default {
   },
 
   methods: {
-    ...Vuex.mapActions([ 
-      'getMe', 
+    ...Vuex.mapActions([
+      'getMe',
       'getUserSettings',
     ]),
   },
@@ -89,5 +108,18 @@ export default {
 }
 </script>
 
-<style scoped>
-</style>
+<i18n lang="json5" scoped>
+{
+  "en": {
+    "General": "General",
+    "Profile": "Profile",
+    "Privacy": "Privacy",
+    "Security": "Security",
+    "Payment Methods": "Payment Methods",
+    "Earnings": "Earnings",
+    "Login Sessions": "Login Sessions",
+    "Referrals": "Referrals",
+    "Bookmarks": "Bookmarks"
+  }
+}
+</i18n>

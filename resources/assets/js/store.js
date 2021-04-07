@@ -1,33 +1,26 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import axios from 'axios'
+import propSelect from '@helpers/propSelect'
 
 Vue.use(Vuex)
 
 // Routes from window, want to eventually deprecate and move to dedicated compiled routes
 const route = window.route
 
-// Helps select items from response result set
-// @param {Object} payload - response payload
-// @param {String} propertyName - name of property
-const propSelect = (payload, propertyName, type = 'array') => {
-  return payload.hasOwnProperty(propertyName)
-    ? payload[propertyName]
-    : payload.hasOwnProperty('data')
-      ? payload.data
-      : type === 'array'
-        ? [] : {}
-}
-
 // Modules
 import searchModule from './store/search'
+import paymentModule from './store/payments'
 
 export default new Vuex.Store({
   modules: {
     search: searchModule,
+    payments: paymentModule,
   },
 
   state: {
+    mobile: false,
+    screenSize: 'xs',
     vault: {},
     vaultfolder: {},
     breadcrumb: [],
@@ -45,7 +38,7 @@ export default new Vuex.Store({
     ledgerdebits: null,
     bookmarks: null,
     timeline: null,
-    session_user: null, 
+    session_user: null,
     user_settings: null,
     login_sessions: [],
     uiFlags: [],
@@ -53,6 +46,14 @@ export default new Vuex.Store({
   },
 
   mutations: {
+    UPDATE_MOBILE(state, payload) {
+      state.mobile = payload
+    },
+
+    UPDATE_SCREEN_SIZE(state, payload) {
+      state.screenSize = payload
+    },
+
     UPDATE_VAULT(state, payload) {
       state.vault = propSelect(payload, 'vault')
     },

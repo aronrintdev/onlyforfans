@@ -4,6 +4,7 @@ namespace App\Providers;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use App\Interfaces\Likeable;
+use App\Models\Financial\Account;
 use App\Models\Timeline;
 use App\Models\Vaultfolder;
 
@@ -21,6 +22,8 @@ class AuthServiceProvider extends ServiceProvider
         Timeline::class    => \App\Policies\TimelinePolicy::class,
         Vault::class       => \App\Policies\VaultPolicy::class,
         Vaultfolder::class => \App\Policies\VaultfolderPolicy::class,
+
+        Account::class => \App\Policies\Financial\AccountPolicy::class,
     ];
 
     /**

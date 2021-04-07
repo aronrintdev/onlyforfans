@@ -1,9 +1,10 @@
 <?php
 namespace App\Http\Resources;
 
-use Illuminate\Http\Resources\Json\JsonResource;
 use App\Enums\PostTypeEnum;
+use App\Models\Casts\Money as CastsMoney;
 use App\Models\Post as PostModel;
+use Illuminate\Http\Resources\Json\JsonResource;
 use App\Http\Resources\Mediafile as MediafileResource;
 
 class Post extends JsonResource
@@ -18,7 +19,8 @@ class Post extends JsonResource
             'id' => $this->id,
             'slug' => $this->slug,
             'type' => $this->type,
-            'price' => $this->price,
+            'price' => CastsMoney::doSerialize($this->price),
+            'price_display' => PostModel::formatMoney($this->price),
             'postable_id' => $this->postable_id,
             'postable_type' => $this->postable_type,
             'timeline_slug' => $this->timeline->slug, // needed for links

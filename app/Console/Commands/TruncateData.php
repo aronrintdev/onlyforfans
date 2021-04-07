@@ -39,8 +39,7 @@ class TruncateData extends Command
             $this->info( ' - Truncate "'.$t.'"...');
             switch ($t) {
                 case 'mediafiles':
-                    $mediafiles = Mediafile::get();
-                    $mediafiles->each( function($mf) {
+                    Mediafile::cursor()->each(function($mf) {
                         $this->removeMediafile($mf);
                     });
                     break;
@@ -69,7 +68,7 @@ class TruncateData extends Command
         'settings',
         'user_settings',
         'websockets_statistics_entries',
-        //'migrations',
+        // 'migrations',
         'invites',
         'jobs',
         'links',

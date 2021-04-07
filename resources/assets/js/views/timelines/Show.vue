@@ -26,12 +26,12 @@
       <SendTip :session_user="session_user" :timeline="timeline" />
     </b-modal>
 
-    <b-modal id="modal-follow" title="Follow" hide-footer body-class="p-0">
-      <FollowTimeline :session_user="session_user" :timeline="timeline" :subscribe_only="subscribeOnly" />
+    <b-modal id="modal-purchase_post" size="lg" title="Purchase Post" hide-footer body-class="p-0">
+      <PurchasePost :session_user="session_user" :post_id="selectedResourceId" />
     </b-modal>
 
-    <b-modal id="modal-purchase_post" size="sm" title="Purchase Post" hide-footer body-class="p-0">
-      <PurchasePost :session_user="session_user" :post_id="selectedResourceId" />
+    <b-modal id="modal-follow" title="Follow" hide-footer body-class="p-0">
+      <FollowTimeline :session_user="session_user" :timeline="timeline" :subscribe_only="subscribeOnly" />
     </b-modal>
 
     <b-modal size="xl" id="modal-post" title="Post" hide-footer body-class="p-0">

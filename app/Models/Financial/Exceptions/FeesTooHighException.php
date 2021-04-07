@@ -25,6 +25,5 @@ class FeesTooHighException extends RuntimeException
         $this->totalTaken = $totalTaken;
 
         $this->message = "The fees in system [{$system}] for transaction [{$transaction->id}] take 100% or more of a transaction. Fees take [{$totalTaken}] of available [{$transaction->credit_amount->getAmount()}]";
-        dump($transaction);
     }
 }

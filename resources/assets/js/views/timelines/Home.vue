@@ -22,17 +22,18 @@
 
     </div>
 
+
     <!-- %FIXME: DRY vs Show -->
     <b-modal id="modal-tip" size="sm" title="Send a Tip" hide-footer body-class="p-0">
       <SendTip :session_user="session_user" :timeline="timeline" />
     </b-modal>
 
-    <b-modal id="modal-follow" title="Follow" hide-footer body-class="p-0">
-      <FollowTimeline :session_user="session_user" :timeline="selectedTimeline" :subscribe_only="subscribeOnly" />
+    <b-modal id="modal-purchase_post" size="lg" title="Purchase Post" hide-footer body-class="p-0">
+      <PurchasePost :session_user="session_user" :post_id="selectedResource.id" />
     </b-modal>
 
-    <b-modal id="modal-purchase_post" size="sm" title="Purchase Post" hide-footer body-class="p-0">
-      <PurchasePost :session_user="session_user" :post_id="selectedResource.id" />
+    <b-modal id="modal-follow" title="Follow" hide-footer body-class="p-0">
+      <FollowTimeline :session_user="session_user" :timeline="selectedTimeline" :subscribe_only="subscribeOnly" />
     </b-modal>
 
     <b-modal size="xl" id="modal-post" title="Post" hide-footer body-class="p-0">

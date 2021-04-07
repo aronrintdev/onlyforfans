@@ -27,7 +27,7 @@ Vue.use(VueAxios, window.axios);
 import VueLogger from 'vuejs-logger';
 const options = {
     isEnabled: true,
-    logLevel : isProduction ? 'error' : 'warn',
+    logLevel : isProduction ? 'error' : 'debug',
     stringifyArguments : false,
     showLogLevel : true,
     showMethodName : !isProduction,
@@ -76,6 +76,16 @@ Vue.component('VueSlider', VueSlider)
 
 import VueTagsInput from '@johmun/vue-tags-input'
 Vue.component('VueTagsInput', VueTagsInput)
+
+import 'swiper/swiper.min.css'
+import 'photoswipe/dist/photoswipe.css'
+import 'photoswipe/dist/default-skin/default-skin.css'
+
+/**
+ * v-mask: https://github.com/probil/v-mask#readme
+ */
+import { VueMaskDirective } from 'v-mask'
+Vue.directive('mask', VueMaskDirective)
 
 /**
  * Next, we will create a fresh Vue application instance and attach it to

@@ -224,4 +224,17 @@ class UsersController extends AppBaseController
         }) );
 
     }
+    public function updateLastSeen(Request $request) {
+        $sessionUser = $request -> user();
+        $status = $request -> input('status');
+        if ($status) {
+            $sessionUser->is_online = true;
+            $sessionUser->last_logged = null;
+        } else {
+            $sessionUser->last_logged = new \DateTime();
+            $sessionUser->is_online = false;
+        }
+        $sessionUser->save();
+        return ['status' => 200];
+    }
 }

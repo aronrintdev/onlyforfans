@@ -72,14 +72,14 @@ export default {
         items.push({
           label: 'Earnings',
           icon: 'dollar-sign',
-          linkTo: { name: 'index' } // TODO: Add route when settings page is added
+          linkTo: { name: 'settings.earnings' }
         })
       }
       if (this.uiFlags.hasPaymentMethod === false) {
         items.push({
           label: 'Payment Method',
           icon: 'credit-card',
-          linkTo: { name: 'index' } // TODO: Add route when settings page is added
+          linkTo: { name: 'settings.payments' }
         })
       }
 
@@ -95,6 +95,8 @@ export default {
 
   methods: {
     logout() {
+      Echo.leave('user-status');
+      window.setLastSeenOfUser(0);
       this.axios.post('/logout').then(() => {
         window.location = '/login'
       })

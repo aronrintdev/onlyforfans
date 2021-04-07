@@ -15,6 +15,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Models\Financial\Exceptions\InvalidTransactionAmountException;
 use App\Models\Financial\Exceptions\Account\InsufficientFundsException;
 use App\Models\Financial\Exceptions\Account\TransactionNotAllowedException;
+use Tests\traits\Financial\NoHoldPeriod;
 
 /**
  * Unit Tests for the `App\Models\Financial\Account` Model
@@ -27,7 +28,8 @@ use App\Models\Financial\Exceptions\Account\TransactionNotAllowedException;
  */
 class AccountModelTest extends TestCase
 {
-    use RefreshDatabase;
+    use RefreshDatabase,
+        NoHoldPeriod;
 
     /**
      * In account is created correctly
@@ -57,6 +59,7 @@ class AccountModelTest extends TestCase
 
     /**
      * User's Internal account is created and retrieved when using getInternalAccount()
+     * @depends test_create_user_internal_account
      */
     public function test_get_user_internal_account()
     {
@@ -106,6 +109,7 @@ class AccountModelTest extends TestCase
 
     /**
      * Move funds from in account -> internal account
+     * @depends test_get_user_internal_account
      */
     public function test_move_to_internal_account_from_in_account()
     {
@@ -150,6 +154,7 @@ class AccountModelTest extends TestCase
 
     /**
      * Internal accounts need to have enough balance
+     * @depends test_move_to_internal_account_from_internal_account
      */
     public function test_move_with_insufficient_funds_fails()
     {
@@ -233,6 +238,27 @@ class AccountModelTest extends TestCase
     }
     #endregion
 
+
+    /**
+     * Account balance is settled correctly
+     * @depends test_move_to_internal_account_from_in_account
+     * @depends test_move_to_internal_account_from_internal_account
+     * @return void
+     */
+    public function test_settle_account_balance()
+    {
+        Event::fake([ UpdateAccountBalance::class ]);
+        $items = AccountHelpers::loadWallet(1000);
+        $this->assertHasBalanceOf(-1000, $items['in']);
+        $this->assertHasBalanceOf(1000, $items['internal']);
+        $creator = Account::factory()->asInternal()->create();
+        $items['internal']->moveTo($creator, 1000);
+        AccountHelpers::settleAccounts([$items['in'], $items['internal'], $creator]);
+
+        $this->assertHasBalanceOf(-1000, $items['in']);
+        $this->assertHasBalanceOf(0, $items['internal']);
+        $this->assertHasBalanceOf(650, $creator);
+    }
 
     /**
      * Test that accounts verify correctly.

@@ -8,14 +8,16 @@ use App\Interfaces\Ownable;
 use App\Models\Traits\OwnableTraits;
 use App\Models\Traits\UsesUuid;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Crypt;
 
 class SegpayCard extends Model implements Ownable
 {
-    use OwnableTraits, UsesUuid;
+    use OwnableTraits, UsesUuid, HasFactory, SoftDeletes;
 
-    protected $table = 'segpay_card';
+    protected $table = 'segpay_cards';
 
     protected $casts = [
         'token' => 'encrypted', // purchase id from webhook
