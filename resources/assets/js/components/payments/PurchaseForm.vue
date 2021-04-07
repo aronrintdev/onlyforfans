@@ -8,6 +8,7 @@
       </template>
       <SavedPaymentMethodList
         class="mb-3"
+        :selected="selectedPaymentMethod"
         @loadNewForm="loadNewForm"
         @loadPayWithForm="loadPayWithForm"
       />
@@ -32,6 +33,7 @@
 /**
  * Base purchase form, for when something is being purchased
  */
+import _ from 'lodash'
 import Vuex from 'vuex'
 import FromNew from './forms/New'
 import PaymentConfirmation from './forms/PaymentConfirmation'
@@ -59,7 +61,7 @@ export default {
   },
 
   computed: {
-    ...Vuex.mapState('payments', [ 'savedPaymentMethods' ]),
+    ...Vuex.mapState('payments', [ 'savedPaymentMethods', 'defaultMethod' ]),
   },
 
   data: () => ({
@@ -74,13 +76,17 @@ export default {
     loadPaymentMethods() {
       this.loading = true
       this.getSavedPaymentMethods()
-      .then(() => {
-        this.loading = false
-      })
+        .then(() => {
+          this.loading = false
+          if (this.defaultMethod) {
+            this.loadPayWithForm(_.find(this.savedPaymentMethods, ['id', this.defaultMethod]))
+          }
+        })
     },
 
     loadNewForm() {
       this.loadedForm = FromNew
+      this.selectedPaymentMethod = { id: 'new' }
     },
 
     loadPayWithForm(paymentMethod) {

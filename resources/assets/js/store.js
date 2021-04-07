@@ -19,6 +19,8 @@ export default new Vuex.Store({
   },
 
   state: {
+    mobile: false,
+    screenSize: 'xs',
     vault: {},
     vaultfolder: {},
     breadcrumb: [],
@@ -36,7 +38,7 @@ export default new Vuex.Store({
     ledgerdebits: null,
     bookmarks: null,
     timeline: null,
-    session_user: null, 
+    session_user: null,
     user_settings: null,
     login_sessions: [],
     uiFlags: [],
@@ -44,6 +46,14 @@ export default new Vuex.Store({
   },
 
   mutations: {
+    UPDATE_MOBILE(state, payload) {
+      state.mobile = payload
+    },
+
+    UPDATE_SCREEN_SIZE(state, payload) {
+      state.screenSize = payload
+    },
+
     UPDATE_VAULT(state, payload) {
       state.vault = propSelect(payload, 'vault')
     },
