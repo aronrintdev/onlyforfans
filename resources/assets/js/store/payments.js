@@ -13,6 +13,7 @@ export const payments = {
 
   state: () => ({
     savedPaymentMethods: [],
+    defaultMethod: '',
   }),
 
   getters: {
@@ -28,6 +29,7 @@ export const payments = {
   mutations: {
     UPDATE_SAVED_PAYMENT_METHODS(state, payload) {
       state.savedPaymentMethods = propSelect(payload, 'paymentMethods')
+      state.defaultMethod = payload.default || ''
     },
   },
 
@@ -77,6 +79,17 @@ export const payments = {
           .catch(error => reject(error))
       })
     },
+
+    setDefaultPaymentMethod({ commit }, id) {
+      return new Promise((resolve, reject) => {
+        axios.post(route('payment.paymentMethods.setDefault'), { id })
+          .then(response => {
+            commit('UPDATE_SAVED_PAYMENT_METHODS', response.data)
+            resolve()
+          })
+        .catch(error => reject(error))
+      })
+    }
   },
 }
 

@@ -10,12 +10,12 @@
           v-for="(item, index) in savedPaymentMethods"
           :key="item.id || index"
           :value="item"
-          :selected="(item.id || index) === selected"
+          :selected="(item.id || index) === selected.id"
           @selected="onSelected((item.id || index))"
         />
         <SavedPaymentMethod
           :value="{ id: 'new', nickname: 'New Payment Method', icon: 'plus-circle' }"
-          :selected="selected === null || selected === 'new'"
+          :selected="selected.id === null || selected.id === 'new'"
           @selected="onSelected('new')"
         />
       </b-list-group>
@@ -35,13 +35,16 @@ export default {
     SavedPaymentMethod,
   },
 
+  props: {
+    selected: { type: Object, default: () => ({}) },
+  },
+
   computed: {
     ...Vuex.mapState('payments', [ 'savedPaymentMethods' ])
   },
 
   data: () => ({
     loading: true,
-    selected: null,
   }),
 
   methods: {
@@ -60,17 +63,11 @@ export default {
 
     onSelected(index) {
       this.$log.debug(`Payment method selected`, index);
-      this.selected = index
-    }
-  },
-
-  watch: {
-    selected(value) {
-      if (value === 'new') {
+      if (index === 'new') {
         this.$emit('loadNewForm')
       } else {
-        var paymentMethod =  _.find(this.savedPaymentMethods, ['id', value])
-        this.$emit('loadPayWithForm', paymentMethod || this.savedPaymentMethods[value] );
+        var paymentMethod =  _.find(this.savedPaymentMethods, ['id', index])
+        this.$emit('loadPayWithForm', paymentMethod || this.savedPaymentMethods[index] );
       }
     }
   },

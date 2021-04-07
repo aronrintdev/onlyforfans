@@ -1,10 +1,24 @@
 <template>
-  <component :is="as" button class="payment-method-selection cursor-pointer d-flex" :variant="selected ? 'success' : 'default'" @click="select">
+  <component
+    :is="as"
+    :button="selectable"
+    class="payment-method-selection d-flex align-items-center"
+    :class="{ 'cursor-pointer': selectable }"
+    :variant="selected ? 'success' : 'default'"
+    @click="select"
+  >
     <fa-icon :icon="icon" fixed-width :size="iconSize" />
     <span class="nickname mx-3" v-text="value.nickname" />
     <span v-if="value.last_4" v-text="$t('last4', { last_4: value.last_4 })" />
 
-    <fa-icon v-if="selected" :icon="selectedIcon" fixed-width :size="iconSize" class="text-success ml-auto" />
+    <slot></slot>
+
+    <fa-icon v-if="showSelectedIcon && selected"
+      :icon="selectedIcon"
+      fixed-width
+      :size="iconSize"
+      class="text-success ml-auto"
+    />
   </component>
 </template>
 
@@ -15,8 +29,10 @@ export default {
     as: { type: [ String, Symbol ], default: 'b-list-group-item' },
     fallbackIcon: { type: String, default: 'circle', },
     iconSize: { type: String, default: '2x' },
+    selectable: { type: Boolean, default: true },
     selected: { type: Boolean, default: false },
     selectedIcon: { type: [String, Array], default: 'check'},
+    showSelectedIcon: { type: Boolean, default: true },
     value: { type: Object, default: () => ({}), },
   },
   computed: {

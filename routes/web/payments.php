@@ -10,4 +10,6 @@ Route::group(['prefix' => '/payment'], function () {
     });
 
     Route::get('/my-payment-methods', 'PaymentsController@myPaymentMethods')->name('payment.paymentMethods.get');
+    Route::post('/set-default-method', 'PaymentsController@setDefaultPaymentMethod')->name('payment.paymentMethods.setDefault');
+
 });

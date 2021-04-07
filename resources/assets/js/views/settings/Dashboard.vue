@@ -15,14 +15,18 @@
             :key="i"
             :to="link.to"
             :active="$router.currentRoute.name === link.to.name"
+            class="d-flex align-items-center"
           >
             <span v-text="$t(link.name)" />
+            <fa-icon icon="caret-right" class="ml-auto" />
           </b-list-group-item>
         </b-list-group>
       </aside>
 
       <main class="col-md-9 col-lg-10">
-        <router-view :session_user="session_user" :user_settings="user_settings"></router-view>
+        <transition mode="out-in" name="quick-fade">
+          <router-view :session_user="session_user" :user_settings="user_settings" />
+        </transition>
       </main>
 
     </section>

@@ -14,7 +14,7 @@
 
     <ScrollCollapse v-if="mobile" ref="scrollCollapse" class="w-100" :full-open="searchOpen" :full-open-height="openHeight">
       <div class="d-flex flex-column justify-content-between h-100">
-        <SearchBar class="w-100 mt-3" mobile @opening="searchOpen = true" @closing="searchOpen = false" @scroll="onScroll" />
+        <SearchBar class="w-100 mt-3" :mobile="true" @opening="searchOpen = true" @closing="searchOpen = false" @scroll="onScroll" />
         <NavButtons :mobile-style="mobile" class="w-100 mt-3" />
       </div>
     </ScrollCollapse>
@@ -65,14 +65,8 @@ export default {
   },
 
   computed: {
+    ...Vuex.mapState([ 'mobile' ]),
     ...Vuex.mapGetters(['session_user']),
-    mobileWidth() {
-      if (typeof this.toggleMobileAt === 'number') {
-        return this.toggleMobileAt
-      }
-      return parseInt(getComputedStyle(document.documentElement)
-        .getPropertyValue(`--breakpoint-${this.toggleMobileAt}`).replace('px', ''))
-    },
     openHeight() {
       const height = this.$vssHeight - this.$el.clientHeight
       if(this.$refs['scrollCollapse']) {
@@ -86,7 +80,6 @@ export default {
   },
 
   data: () => ({
-    mobile: false,
     searchOpen: false,
     screenWidth: null,
   }),
@@ -100,13 +93,6 @@ export default {
   },
 
   watch: {
-    $vssWidth(value) {
-      if (value < this.mobileWidth) {
-        this.mobile = true
-      } else {
-        this.mobile = false
-      }
-    },
     mobile(value) {
       if (!value) {
         this.searchOpen = false
@@ -119,7 +105,6 @@ export default {
 
   mounted() {
     if (this.$vssWidth < this.mobileWidth) {
-      this.mobile = true
     }
   }
 
