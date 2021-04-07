@@ -29,7 +29,7 @@
     </b-modal>
 
     <b-modal id="modal-purchase_post" size="lg" title="Purchase Post" hide-footer body-class="p-0">
-      <PurchasePost :session_user="session_user" :post_id="selectedResource.id" />
+      <PurchasePost :session_user="session_user" :post_id="selectedResourceId" />
     </b-modal>
 
     <b-modal id="modal-follow" title="Follow" hide-footer body-class="p-0">
@@ -93,6 +93,7 @@ export default {
     subscribeOnly: true, // for modal
     selectedTimeline: null,
     selectedResource: null, // post or mediafile, etc
+    selectedResourceId: null, // %FIXME: hacky
   }),
 
   created() {
@@ -103,6 +104,7 @@ export default {
       switch(key) {
         case 'render-purchase-post':
           this.selectedResource = data.post
+          this.selectedResourceId = data.post.id
           this.$bvModal.show('modal-purchase_post')
           break
         case 'render-follow':
