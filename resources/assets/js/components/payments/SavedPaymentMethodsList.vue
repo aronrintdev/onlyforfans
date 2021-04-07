@@ -4,7 +4,7 @@
       <template #loading>
         <b-skeleton />
       </template>
-      <span class="header mb-2">Use Payment Method:</span>
+      <span class="header mb-2" v-text="$t('UsePaymentMethod')" />
       <b-list-group class="my-2">
         <SavedPaymentMethod
           v-for="(item, index) in savedPaymentMethods"
@@ -81,6 +81,10 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
-
-</style>
+<i18n lang="json5" scoped>
+{
+  "en": {
+    "UsePaymentMethod": "Use Payment Method:"
+  }
+}
+</i18n>
