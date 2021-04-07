@@ -71,7 +71,7 @@
           @delete-post="deletePost"
         />
       </article>
-      <article class="load-more-item" :class="feedClass">
+      <article class="load-more-item col-sm-12">
         <b-card :class="{ 'cursor-pointer': !moreLoading && !isLastPage }" @click="onLoadMoreClick">
           <div class="w-100 d-flex my-3 justify-content-center" >
             <fa-icon v-if="moreLoading" icon="spinner" spin size="lg" />
