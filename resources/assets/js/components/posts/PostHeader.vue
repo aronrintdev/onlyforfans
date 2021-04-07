@@ -51,7 +51,6 @@
 //import { eventBus } from '@/app'
 
 export default {
-  components: { },
 
   props: {
     post: null,
@@ -72,15 +71,8 @@ export default {
 
   data: () => ({
   }),
-
-  mounted() { },
-
-  created() {},
-
-  methods: { },
-
-  watch: { }
 }
+
 </script>
 
 <style scoped>

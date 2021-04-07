@@ -33,6 +33,7 @@ class Mediafile extends JsonResource
             'mimetype' => $this->mimetype,
             'orig_ext' => $this->orig_ext,
             'orig_filename' => $this->orig_filename,
+            'resource' => $this->whenLoaded('resource'),
             'resource_id' => $this->resource_id,
             'resource_type' => $this->resource_type,
             'created_at' => $this->created_at,

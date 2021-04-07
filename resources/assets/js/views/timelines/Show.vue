@@ -27,7 +27,7 @@
     </b-modal>
 
     <b-modal id="modal-purchase_post" size="lg" title="Purchase Post" hide-footer body-class="p-0">
-      <PurchasePost :session_user="session_user" :post="selectedPost" />
+      <PurchasePost :session_user="session_user" :post_id="selectedResourceId" />
     </b-modal>
 
     <b-modal id="modal-follow" title="Follow" hide-footer body-class="p-0">
@@ -35,7 +35,11 @@
     </b-modal>
 
     <b-modal size="xl" id="modal-post" title="Post" hide-footer body-class="p-0">
-      <PostDisplay :session_user="session_user" :post="selectedPost" :is_feed="false" />
+      <PostDisplay :session_user="session_user" :post="selectedResource" :is_feed="false" />
+    </b-modal>
+
+    <b-modal size="xl" id="modal-photo" title="Photo" hide-footer body-class="p-0">
+      <ImageDisplay :session_user="session_user" :mediafile="selectedResource" :is_feed="false" />
     </b-modal>
 
   </div>
@@ -53,6 +57,7 @@ import FollowTimeline from '@components/modals/FollowTimeline.vue'
 import PurchasePost from '@components/modals/PurchasePost.vue'
 import SendTip from '@components/modals/SendTip.vue'
 import PostDisplay from '@components/posts/Display'
+import ImageDisplay from '@components/timelines/elements/ImageDisplay'
 
 export default {
   components: {
@@ -65,6 +70,7 @@ export default {
     PurchasePost,
     SendTip,
     PostDisplay,
+    ImageDisplay,
   },
 
   props: {
@@ -89,7 +95,8 @@ export default {
 
   data: () => ({
     isGridLayout: false, // %FIXME: can this be set in created() so we have 1 source of truth ? (see PostFeed)
-    selectedPost: null,
+    selectedResource: null,
+    selectedResourceId: null, // %FIXME: hacky
     subscribeOnly: true, // for modal
     timeline: null,
   }),
@@ -100,7 +107,8 @@ export default {
       console.log('views/timelines/Show.on(open-modal)', { key, data });
       switch(key) {
         case 'render-purchase-post':
-          this.selectedPost = data.post
+          this.selectedResource = data.post
+          this.selectedResourceId = data.post.id
           this.$bvModal.show('modal-purchase_post')
           break
         case 'render-follow':
@@ -115,8 +123,12 @@ export default {
           this.$bvModal.show('modal-tip')
           break
         case 'show-post':
-          this.selectedPost = data.post
+          this.selectedResource = data.post
           this.$bvModal.show('modal-post')
+          break
+        case 'show-photo':
+          this.selectedResource = data.mediafile
+          this.$bvModal.show('modal-photo')
           break
       }
     })

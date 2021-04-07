@@ -17,7 +17,7 @@
               <b-dropdown-item @click="deletePost()">Delete</b-dropdown-item>
             </b-dropdown>
           </div>
-          <div @click="renderPost" v-if="is_feed" class="p-2 btn">
+          <div @click="renderFull" v-if="is_feed" class="p-2 btn">
               <b-icon icon="arrows-angle-expand" variant="primary" font-scale="1.2" />
           </div>
         </section>
@@ -32,7 +32,7 @@
         </article>
       </template>
       <template v-else>
-        <PostCta :post="post" :session_user="session_user" />
+        <PostCta :post="post" :session_user="session_user" :primary_mediafile="primaryMediafile" />
       </template>
 
       <template #footer>
@@ -73,6 +73,9 @@ export default {
     hasMediafiles() {
       return this.post.mediafiles?.length > 0
     },
+    primaryMediafile() {
+      return this.hasMediafiles ? this.post.mediafiles[0] : null
+    },
     isLoading() {
       return !this.post || !this.session_user
     },
@@ -87,7 +90,7 @@ export default {
 
   methods: {
 
-    renderPost() {
+    renderFull() {
       if (this.post.access) {
         eventBus.$emit('open-modal', { key: 'show-post', data: { post: this.post } })
       } else {

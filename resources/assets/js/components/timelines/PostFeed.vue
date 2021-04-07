@@ -10,18 +10,12 @@
 
     <b-row>
       <b-col>
-        <section class="feed-ctrl my-3 p-2 d-flex flex-column OFF-text-center flex-md-row justify-content-center justify-content-md-between">
-          <article class="d-flex align-items-center">
-            <div style="" class="btn">
-              <span>All</span>
-            </div>
-            <div style="" class="btn">
-              <span>Photos</span>
-            </div>
-            <div style="" class="btn">
-              <span>Videos</span>
-            </div>
-          </article>
+        <section class="feed-ctrl my-3 px-2 py-2 d-flex flex-column OFF-text-center flex-md-row justify-content-center justify-content-md-between">
+          <b-nav v-if="!is_homefeed" pills>
+            <b-nav-item @click="setFeedType('default')" :active="feedType==='default'">All</b-nav-item>
+            <b-nav-item @click="setFeedType('photos')" :active="feedType==='photos'">Photos</b-nav-item>
+            <b-nav-item @click="setFeedType('videos')" :active="feedType==='videos'">Videos</b-nav-item>
+          </b-nav>
           <article class="d-none d-md-block">
             <div @click="renderTip" style="" class="btn">
               <div style="font-size: 1.2rem; margin-top: 0.1rem" class="text-primary tag-ctrl">$</div>
@@ -65,15 +59,19 @@
         v-observe-visibility="index === renderedItems.length - 1 ? endPostVisible : false"
       >
         <div class="tag-debug">INDEX: {{ index }}</div>
-        <!-- for now we assume posts; eventually need to convert to a DTO (ie more generic 'feedItem') : GraphQL ? -->
-        <PostDisplay
+        <ImageDisplay v-if="feedType==='photos'"
+          :mediafile="feedItem"
+          :session_user="session_user"
+          :use_mid="true"
+        />
+        <PostDisplay v-else
           :post="feedItem"
           :session_user="session_user"
           :use_mid="true"
           @delete-post="deletePost"
         />
       </article>
-      <article class="load-more-item" :class="feedClass">
+      <article class="load-more-item col-sm-12">
         <b-card :class="{ 'cursor-pointer': !moreLoading && !isLastPage }" @click="onLoadMoreClick">
           <div class="w-100 d-flex my-3 justify-content-center" >
             <fa-icon v-if="moreLoading" icon="spinner" spin size="lg" />
@@ -91,10 +89,12 @@
 import Vuex from 'vuex'
 import { eventBus } from '@/app'
 import PostDisplay from '@components/posts/Display'
+import ImageDisplay from '@components/timelines/elements/ImageDisplay'
 
 export default {
   components: {
     PostDisplay,
+    ImageDisplay,
   },
 
   props: {
@@ -141,7 +141,7 @@ export default {
   },
 
   data: () => ({
-    sortPostsBy: null,
+    sortPostsBy: null, // %TODO: rename to sortBy
     renderedItems: [], // this will likely only be posts
     renderedPages: [], // track so we don't re-load same page (set of posts) more than 1x
     lastPostVisible: false,
@@ -151,6 +151,7 @@ export default {
     hideLocked: false,
     hidePromotions: false,
     isGridLayout: false,
+    feedType: 'default',
 
   }),
 
@@ -163,7 +164,8 @@ export default {
 
   created() {
     this.$store.dispatch('getFeeddata', { 
-      timelineId: this.timelineId, 
+      feedType: this.feedType,
+      timelineId: this.timelineId,  // only valid if not home feed
       isHomefeed: this.is_homefeed,
       page: 1, 
       limit: this.limit, 
@@ -181,6 +183,25 @@ export default {
   },
 
   methods: {
+
+    setFeedType(feedType) {
+      if (this.isHomefeed) {
+        return // skip
+      }
+
+      // only for specific timelines (non-home feed)
+      this.feedType = feedType
+      switch (feedType) {
+        case 'photos':
+        case 'videos':
+          this.isGridLayout = true
+          break
+        default:
+          this.isGridLayout = false
+      }
+      eventBus.$emit('set-feed-layout', this.isGridLayout )
+      this.reloadFromFirstPage()
+    },
 
     renderTip() {
       eventBus.$emit('open-modal', {
@@ -246,8 +267,7 @@ export default {
     async deletePost(postId) {
       const url = `/posts/${postId}`
       const response = await axios.delete(url)
-      //this.$store.dispatch('getFeeddata', { timelineId: this.timelineId, page: 1, limit: this.limit, isHomefeed: this.is_homefeed })
-      this.reloadFromFirstPage();
+      this.reloadFromFirstPage()
     },
 
     // additional page loads
@@ -257,7 +277,8 @@ export default {
         this.moreLoading = true;
         this.$log.debug('loadNextPage', { current: this.currentPage, last: this.lastPage, next: this.nextPage });
         this.$store.dispatch('getFeeddata', { 
-          timelineId: this.timelineId, 
+        feedType: this.feedType,
+          timelineId: this.timelineId,  // only valid if not home feed
           isHomefeed: this.is_homefeed,
           page: this.nextPage, 
           limit: this.limit, 
@@ -270,10 +291,11 @@ export default {
 
     // may adjust filters, but always reloads from page 1
     reloadFromFirstPage() {
-      this.doReset();
+      this.doReset()
       this.$store.dispatch('getFeeddata', { 
+        feedType: this.feedType,
         page: 1, 
-        timelineId: this.timelineId, 
+        timelineId: this.timelineId,  // only valid if not home feed
         isHomefeed: this.is_homefeed,
         limit: this.limit, 
         sortBy: this.sortPostsBy, 

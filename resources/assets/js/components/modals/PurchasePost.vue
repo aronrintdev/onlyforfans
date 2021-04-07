@@ -1,5 +1,5 @@
 <template>
-  <b-card no-body>
+  <b-card v-if="!isLoading" no-body>
 
     <b-card-header>
       <section class="user-avatar">
@@ -11,7 +11,7 @@
           <span v-if="post.user.verified" class="verified-badge"><b-icon icon="check-circle-fill" variant="success" font-scale="1"></b-icon></span>
         </div>
         <div>
-          <router-link :to="timelineUrl" class="tag-username">@{{ post.timeline_slug }}</router-link>
+          <router-link :to="timelineUrl" class="tag-username">@{{ post.timeline.slug }}</router-link>
         </div>
       </section>
     </b-card-header>
@@ -42,10 +42,14 @@ export default {
 
   props: {
     session_user: null,
-    post: null,
+    post_id: null,
   },
 
   computed: {
+    isLoading() {
+      //return !this.post || !this.session_user || !this.timeline
+      return !this.post_id || !this.session_user || !this.post
+    },
     timelineUrl() {
       return `/${this.post.timeline.slug}`
     },
@@ -54,7 +58,10 @@ export default {
     },
   },
 
-  data: () => ({ }),
+  data: () => ({ 
+    post: null,
+    //timeline: null, // dynamically load from server based on post
+  }),
 
   methods: {
     init() {
@@ -67,9 +74,18 @@ export default {
     },
   },
 
+
+  created() {
+    // Dynamically load the full post so we ensure we have the related timeline data
+    // (not guaranteed to be attached as a relation as this is ref'd from multiple components)
+    axios.get( route('posts.show', this.post_id) ).then( response => {
+      this.post = response.data.data
+    })
+  },
+
   mounted() {
     this.init()
-  }
+  },
 
 }
 </script>

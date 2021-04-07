@@ -28,8 +28,8 @@
       <SendTip :session_user="session_user" :timeline="timeline" />
     </b-modal>
 
-    <b-modal id="modal-purchase_post" title="Purchase Post" hide-footer body-class="p-0">
-      <PurchasePost :session_user="session_user" :post="selectedPost" />
+    <b-modal id="modal-purchase_post" size="lg" title="Purchase Post" hide-footer body-class="p-0">
+      <PurchasePost :session_user="session_user" :post_id="selectedResource.id" />
     </b-modal>
 
     <b-modal id="modal-follow" title="Follow" hide-footer body-class="p-0">
@@ -37,7 +37,7 @@
     </b-modal>
 
     <b-modal size="xl" id="modal-post" title="Post" hide-footer body-class="p-0">
-      <PostDisplay :session_user="session_user" :post="selectedPost" :is_feed="false" />
+      <PostDisplay :session_user="session_user" :post="selectedResource" :is_feed="false" />
     </b-modal>
 
   </div>
@@ -90,9 +90,9 @@ export default {
 
   data: () => ({
     isGridLayout: false, // %FIXME: can this be set in created() so we have 1 source of truth ? (see PostFeed)
-    selectedPost: null,
     subscribeOnly: true, // for modal
     selectedTimeline: null,
+    selectedResource: null, // post or mediafile, etc
   }),
 
   created() {
@@ -102,7 +102,7 @@ export default {
       console.log('views/timelines/Show.on(open-modal)', { key, data });
       switch(key) {
         case 'render-purchase-post':
-          this.selectedPost = data.post
+          this.selectedResource = data.post
           this.$bvModal.show('modal-purchase_post')
           break
         case 'render-follow':
@@ -119,7 +119,7 @@ export default {
           this.$bvModal.show('modal-tip')
           break
         case 'show-post':
-          this.selectedPost = data.post
+          this.selectedResource = data.post
           this.$bvModal.show('modal-post')
           break
       }
