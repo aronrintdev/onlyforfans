@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Financial\Account;
 use Illuminate\Support\Facades\Config;
 use App\Enums\Financial\AccountTypeEnum;
+use App\Models\Financial\SegpayCard;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Collection;
 
@@ -59,6 +60,23 @@ class AccountFactory extends Factory
         })->afterCreating(function (Account $account) {
             $account->name = $this->makeAccountName($account);
             $account->save();
+        });
+    }
+
+    public function withResource($resource)
+    {
+        return $this->state(function (array $attributes) use ($resource) {
+            return ['resource_id' => $resource];
+        });
+    }
+
+    public function withCard($card = null)
+    {
+        return $this->state(function (array $attributes) use ($card) {
+            return [
+                'resource_type' => $card ? $card->getMorphString() : app(SegpayCard::class)->getMorphString(),
+                'resource_id' => $card ? $card : SegpayCard::factory(),
+            ];
         });
     }
 

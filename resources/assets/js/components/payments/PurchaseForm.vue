@@ -1,17 +1,28 @@
 <template>
   <div>
-    <SavedPaymentMethodList class="mb-3" @loadNewForm="loadNewForm" @loadPayWithForm="loadPayWithForm" />
-
-    <transition name="component-fade" mode="out-in">
-      <component
-        :is="loadedForm"
-        :payment-method="selectedPaymentMethod"
-        :value="value"
-        :price="price"
-        :currency="currency"
-        :price-display="displayPrice"
+    <b-skeleton-wrapper :loading="loading">
+      <template #loading>
+        <div class="w-100 my-5 d-flex align-items-center justify-content-center">
+          <fa-icon icon="spinner" size="3x" spin />
+        </div>
+      </template>
+      <SavedPaymentMethodList
+        class="mb-3"
+        @loadNewForm="loadNewForm"
+        @loadPayWithForm="loadPayWithForm"
       />
-    </transition>
+
+      <transition name="component-fade" mode="out-in">
+        <component
+          :is="loadedForm"
+          :payment-method="selectedPaymentMethod"
+          :value="value"
+          :price="price"
+          :currency="currency"
+          :price-display="displayPrice"
+        />
+      </transition>
+    </b-skeleton-wrapper>
 
     <!-- <PayWithForm class="mt-3" /> -->
   </div>
@@ -21,6 +32,7 @@
 /**
  * Base purchase form, for when something is being purchased
  */
+import Vuex from 'vuex'
 import FromNew from './forms/New'
 import PaymentConfirmation from './forms/PaymentConfirmation'
 import PayWithForm from './PayWithForm'
@@ -36,26 +48,50 @@ export default {
   },
 
   props: {
+    /** Item being purchased */
     value: { type: Object, default: () => ({}) },
+    /** Price as integer */
     price: { type: Number, default: 0 },
+    /** Price currency */
     currency: { type: String, default: 'USD' },
+    /** Localized String of how to display currency to user */
     displayPrice: { type: String, default: '$0.00' },
+  },
+
+  computed: {
+    ...Vuex.mapState('payments', [ 'savedPaymentMethods' ]),
   },
 
   data: () => ({
     loadedForm: FromNew,
     selectedPaymentMethod: null,
+    loading: true,
   }),
 
   methods: {
+    ...Vuex.mapActions('payments', [ 'getSavedPaymentMethods' ]),
+
+    loadPaymentMethods() {
+      this.loading = true
+      this.getSavedPaymentMethods()
+      .then(() => {
+        this.loading = false
+      })
+    },
+
     loadNewForm() {
       this.loadedForm = FromNew
     },
+
     loadPayWithForm(paymentMethod) {
       this.selectedPaymentMethod = paymentMethod
       this.loadedForm = PaymentConfirmation
     },
-  }
+  },
+
+  mounted() {
+    this.loadPaymentMethods()
+  },
 
 }
 </script>

@@ -147,7 +147,7 @@ class Post extends Model
     {
         $array = parent::toArray();
         // Localize Price
-        $array['price_display'] = static::formatMoney($array['price']);
+        $array['price_display'] = static::formatMoney($this->asMoney($array['price']));
         return $array;
     }
 

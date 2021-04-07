@@ -4,10 +4,10 @@
       <template #loading>
         <b-skeleton />
       </template>
-      <span class="header mb-2">Use Payment Method:</span>
+      <span class="header mb-2" v-text="$t('UsePaymentMethod')" />
       <b-list-group class="my-2">
         <SavedPaymentMethod
-          v-for="(item, index) in paymentMethods"
+          v-for="(item, index) in savedPaymentMethods"
           :key="item.id || index"
           :value="item"
           :selected="(item.id || index) === selected"
@@ -28,25 +28,34 @@
  * User's Saved Payment methods that can be used
  */
 import _ from 'lodash'
+import Vuex from 'vuex'
 import SavedPaymentMethod from './SavedPaymentMethod'
 export default {
   components: {
     SavedPaymentMethod,
   },
 
+  computed: {
+    ...Vuex.mapState('payments', [ 'savedPaymentMethods' ])
+  },
+
   data: () => ({
     loading: true,
-    paymentMethods: [
-      { id: 'a', nickname: 'Card 1', type: 'card', brand: 'visa', last4: '1234' },
-      { id: 'b', nickname: 'Card 2', type: 'card', brand: 'mastercard', last4: '5555' },
-    ],
     selected: null,
   }),
 
   methods: {
-    loadPaymentMethods() {
+    ...Vuex.mapActions('payments', [ 'getSavedPaymentMethods' ]),
 
-      this.loading = false
+    loadPaymentMethods() {
+      this.loading = true
+      if (this.savedPaymentMethods.length > 0) {
+        this.loading = false
+      }
+      this.getSavedPaymentMethods()
+      .then(() => {
+        this.loading = false
+      })
     },
 
     onSelected(index) {
@@ -60,8 +69,8 @@ export default {
       if (value === 'new') {
         this.$emit('loadNewForm')
       } else {
-        var paymentMethod =  _.find(this.paymentMethods, ['id', value])
-        this.$emit('loadPayWithForm', paymentMethod || this.paymentMethods[value] );
+        var paymentMethod =  _.find(this.savedPaymentMethods, ['id', value])
+        this.$emit('loadPayWithForm', paymentMethod || this.savedPaymentMethods[value] );
       }
     }
   },
@@ -72,6 +81,10 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
-
-</style>
+<i18n lang="json5" scoped>
+{
+  "en": {
+    "UsePaymentMethod": "Use Payment Method:"
+  }
+}
+</i18n>

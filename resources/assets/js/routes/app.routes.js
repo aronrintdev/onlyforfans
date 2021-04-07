@@ -15,14 +15,7 @@ import posts from '@views/posts'
 import payments from '@views/payments'
 import liveChat from '@views/live-chat'
 
-import SettingsGeneral from '@components/settings/SettingsGeneral.vue';
-import SettingsProfile from '@components/settings/SettingsProfile.vue';
-import SettingsPrivacy from '@components/settings/SettingsPrivacy.vue';
-import SettingsSecurity from '@components/settings/SettingsSecurity.vue';
-import SettingsEarnings from '@components/settings/SettingsEarnings.vue';
-import SettingsSessions from '@components/settings/SettingsSessions.vue';
-import SettingsReferrals from '@components/settings/SettingsReferrals.vue';
-import SettingsBookmarks from '@components/settings/SettingsBookmarks.vue';
+import settingsRoutes from './settings.routes'
 
 export const routes = [
   {
@@ -73,53 +66,7 @@ export const routes = [
   {
     path: '/settings',
     component: settings.Dashboard,
-    children: [
-      {
-        name: 'settings.general',
-        component: SettingsGeneral,
-        path: 'general',
-      },
-      {
-        name: 'settings.profile',
-        component: SettingsProfile,
-        path: 'profile',
-      },
-      {
-        name: 'settings.privacy',
-        component: SettingsPrivacy,
-        path: 'privacy',
-      },
-      {
-        name: 'settings.security',
-        component: SettingsSecurity,
-        path: 'security',
-      },
-      {
-        name: 'settings.earnings',
-        component: SettingsEarnings,
-        path: 'earnings',
-      },
-      {
-        name: 'settings.sessions',
-        component: SettingsSessions,
-        path: 'sessions',
-      },
-      {
-        name: 'settings.referrals',
-        component: SettingsReferrals,
-        path: 'referrals',
-      },
-      {
-        name: 'settings.bookmarks',
-        component: SettingsBookmarks,
-        path: 'bookmarks',
-      },
-      {
-        name: 'settings.default',
-        component: SettingsGeneral,
-        path: '',
-      },
-    ],
+    children: settingsRoutes,
   },
 
   // Stories
