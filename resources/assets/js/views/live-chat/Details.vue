@@ -230,42 +230,61 @@
                     <div class="typing dot-pulse" style="display: none">...</div>
                   </div>
                   <div class="conversation-footer">
-                    <div class="swiper-slider">
-                      <swiper ref="mySwiper" :options="swiperOptions" >
-                        <swiper-slide class="slide">
-                          <div class="swiper-image-wrapper">
-                            <img v-preview class="swiper-lazy" src="https://via.placeholder.com/1500x1250" />
-                            <div class="icon-close">
-                              <svg viewBox="0 0 24 24">
-                                <path d="M13.41 12l5.3-5.29A1 1 0 0 0 19 6a1 1 0 0 0-1-1 1 1 0 0 0-.71.29L12 10.59l-5.29-5.3A1 1 0 0 0 6 5a1 1 0 0 0-1 1 1 1 0 0 0 .29.71l5.3 5.29-5.3 5.29A1 1 0 0 0 5 18a1 1 0 0 0 1 1 1 1 0 0 0 .71-.29l5.29-5.3 5.29 5.3A1 1 0 0 0 18 19a1 1 0 0 0 1-1 1 1 0 0 0-.29-.71z"></path>
+                    <div class="swiper-slider" v-if="sortableImgs.length > 0">
+                      <div v-if="isDragListVisible" >
+                        <draggable class="sort-change-div" v-model="sortableImgs" :group="'column.components'" handle=".handle" ghost-class="ghost">
+                          <div v-for="(element, index) in sortableImgs" :key="index" class="drag-element">
+                            <div class="img-wrapper">
+                              <img :src="element.src" alt="" />
+                              <span v-if="!element.selected"  class="unchecked-circle" @click="onSelectSortableImg(index, true)"></span>
+                              <span v-if="element.selected" class="checked-circle" @click="onSelectSortableImg(index, false)">{{element.order}}</span>
+                            </div>
+                            <div class="handle">
+                              <svg class="icon-drag" viewBox="0 0 24 24">    
+                                <path d="M6 7a2 2 0 102 2 2 2 0 00-2-2zm12 4a2 2 0 10-2-2 2 2 0 002 2zm-6-4a2 2 0 102 2 2 2 0 00-2-2zm6 6a2 2 0 102 2 2 2 0 00-2-2zm-6 0a2 2 0 102 2 2 2 0 00-2-2zm-6 0a2 2 0 102 2 2 2 0 00-2-2z"></path>
                               </svg>
                             </div>
                           </div>
-                          <div class="swiper-image-wrapper">
-                            <img v-preview class="swiper-lazy" src="https://via.placeholder.com/3500x1250" />
-                            <div class="icon-close">
-                              <svg viewBox="0 0 24 24">
-                                <path d="M13.41 12l5.3-5.29A1 1 0 0 0 19 6a1 1 0 0 0-1-1 1 1 0 0 0-.71.29L12 10.59l-5.29-5.3A1 1 0 0 0 6 5a1 1 0 0 0-1 1 1 1 0 0 0 .29.71l5.3 5.29-5.3 5.29A1 1 0 0 0 5 18a1 1 0 0 0 1 1 1 1 0 0 0 .71-.29l5.29-5.3 5.29 5.3A1 1 0 0 0 18 19a1 1 0 0 0 1-1 1 1 0 0 0-.29-.71z"></path>
+                        </draggable>
+                        <div class="sort-action-btns">
+                          <div>
+                            <button :disabled="!applyBtnEnabled" class="btn arrows-btn" @click="applyImgsSort">
+                              <svg id="icon-arrow-left" viewBox="0 0 24 24">
+                                <path d="M7.25 12l6.88-6.87a1 1 0 0 1 .7-.3 1 1 0 0 1 1 1 1 1 0 0 1-.29.71L10.08 12l5.46 5.46a1 1 0 0 1 .29.71 1 1 0 0 1-1 1 1 1 0 0 1-.7-.3z"></path>
                               </svg>
-                            </div>
-                          </div>
-                          <div class="swiper-image-wrapper">
-                            <img v-preview class="swiper-lazy" src="https://via.placeholder.com/2500x1250" />
-                            <div class="icon-close">
-                              <svg viewBox="0 0 24 24">
-                                <path d="M13.41 12l5.3-5.29A1 1 0 0 0 19 6a1 1 0 0 0-1-1 1 1 0 0 0-.71.29L12 10.59l-5.29-5.3A1 1 0 0 0 6 5a1 1 0 0 0-1 1 1 1 0 0 0 .29.71l5.3 5.29-5.3 5.29A1 1 0 0 0 5 18a1 1 0 0 0 1 1 1 1 0 0 0 .71-.29l5.29-5.3 5.29 5.3A1 1 0 0 0 18 19a1 1 0 0 0 1-1 1 1 0 0 0-.29-.71z"></path>
+                              <svg id="icon-arrow-right" viewBox="0 0 24 24"> 
+                                <path d="M16.75 12l-6.88 6.87a1 1 0 0 1-.7.3 1 1 0 0 1-1-1 1 1 0 0 1 .29-.71L13.92 12 8.46 6.54a1 1 0 0 1-.29-.71 1 1 0 0 1 1-1 1 1 0 0 1 .7.3z"></path>
                               </svg>
-                            </div>
+                            </button>
                           </div>
-                          <button class="slider-btn arrows-btn">
-                            <svg id="icon-arrow-left" viewBox="0 0 24 24">
-                              <path d="M7.25 12l6.88-6.87a1 1 0 0 1 .7-.3 1 1 0 0 1 1 1 1 1 0 0 1-.29.71L10.08 12l5.46 5.46a1 1 0 0 1 .29.71 1 1 0 0 1-1 1 1 1 0 0 1-.7-.3z"></path>
-                            </svg>
-                            <svg id="icon-arrow-right" viewBox="0 0 24 24"> 
-                              <path d="M16.75 12l-6.88 6.87a1 1 0 0 1-.7.3 1 1 0 0 1-1-1 1 1 0 0 1 .29-.71L13.92 12 8.46 6.54a1 1 0 0 1-.29-.71 1 1 0 0 1 1-1 1 1 0 0 1 .7.3z"></path>
+                          <button class="btn confirm-btn" @click="confirmImgsSort">
+                            <svg id="icon-done" viewBox="0 0 24 24">
+                              <path d="M9 19.42l-5.71-5.71A1 1 0 0 1 3 13a1 1 0 0 1 1-1 1 1 0 0 1 .71.29L9 16.59l10.29-10.3A1 1 0 0 1 20 6a1 1 0 0 1 1 1 1 1 0 0 1-.29.71z"></path>
                             </svg>
                           </button>
-                          <button class="slider-btn" @click="addNewMedia"><span>+</span></button>
+                        </div>
+                      </div>
+                      <swiper ref="mySwiper" :options="swiperOptions" :key="sortableImgs.length">
+                        <swiper-slide class="slide">
+                          <div v-if="!isDragListVisible">
+                            <div class="swiper-image-wrapper" v-for="(img, index) in sortableImgs" :key="index">
+                              <img v-preview class="swiper-lazy" :src="img.src" />
+                              <div class="icon-close" @click="removeSortableImg(index)">
+                                <svg viewBox="0 0 24 24">
+                                  <path d="M13.41 12l5.3-5.29A1 1 0 0 0 19 6a1 1 0 0 0-1-1 1 1 0 0 0-.71.29L12 10.59l-5.29-5.3A1 1 0 0 0 6 5a1 1 0 0 0-1 1 1 1 0 0 0 .29.71l5.3 5.29-5.3 5.29A1 1 0 0 0 5 18a1 1 0 0 0 1 1 1 1 0 0 0 .71-.29l5.29-5.3 5.29 5.3A1 1 0 0 0 18 19a1 1 0 0 0 1-1 1 1 0 0 0-.29-.71z"></path>
+                                </svg>
+                              </div>
+                            </div>
+                            <button class="slider-btn arrows-btn" @click="isDragListVisible = true">
+                              <svg id="icon-arrow-left" viewBox="0 0 24 24">
+                                <path d="M7.25 12l6.88-6.87a1 1 0 0 1 .7-.3 1 1 0 0 1 1 1 1 1 0 0 1-.29.71L10.08 12l5.46 5.46a1 1 0 0 1 .29.71 1 1 0 0 1-1 1 1 1 0 0 1-.7-.3z"></path>
+                              </svg>
+                              <svg id="icon-arrow-right" viewBox="0 0 24 24"> 
+                                <path d="M16.75 12l-6.88 6.87a1 1 0 0 1-.7.3 1 1 0 0 1-1-1 1 1 0 0 1 .29-.71L13.92 12 8.46 6.54a1 1 0 0 1-.29-.71 1 1 0 0 1 1-1 1 1 0 0 1 .7.3z"></path>
+                              </svg>
+                            </button>
+                            <button class="slider-btn" @click="addNewMedia"><span>+</span></button>
+                          </div>
                         </swiper-slide>
                       </swiper>
                     </div>
@@ -277,7 +296,10 @@
                         <input
                           type="file"
                           id="image-upload-btn"
-                          accept="image/x-png,image/gif,image/jpeg" ref="imagesUpload"
+                          @change="onMediaChanged"
+                          accept="image/x-png,image/gif,image/jpeg"
+                          ref="imagesUpload"
+                          multiple
                           @click="activeMediaRef = $refs.imagesUpload"
                         />
                         <label for="image-upload-btn" class="btn action-btn">
@@ -288,12 +310,13 @@
                         <!-- video -->
                         <input
                           type="file"
+                          disabled
                           id="video-upload-btn"
                           accept="video/mp4,video/x-m4v,video/*"
                           ref="videosUpload"
                           @click="activeMediaRef = $refs.videosUpload"
                         />
-                        <label for="video-upload-btn" class="btn action-btn">
+                        <label for="video-upload-btn" class="btn action-btn" disabled>
                           <svg id="icon-video" viewBox="0 0 24 24">
                             <path
                               d="M21.79 6a1.21 1.21 0 0 0-.86.35L19 8.25V7a3 3 0 0 0-3-3H5a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h11a3 3 0 0 0 3-3v-1.25l1.93 1.93a1.22 1.22 0 0 0 2.07-.86V7.18A1.21 1.21 0 0 0 21.79 6zM17 17a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h11a1 1 0 0 1 1 1zm4-2.08l-1.34-1.34a2.25 2.25 0 0 1 0-3.16L21 9.08z"
@@ -301,7 +324,7 @@
                           </svg>
                         </label>
                         <!-- microphone -->
-                        <button class="btn action-btn" type="button">
+                        <button class="btn action-btn" type="button" disabled>
                           <svg id="icon-voice" viewBox="0 0 24 24">
                             <path
                               d="M12 15a4 4 0 0 0 4-4V6a4 4 0 0 0-8 0v5a4 4 0 0 0 4 4zm-2-9a2 2 0 0 1 4 0v5a2 2 0 0 1-4 0zm9 4a1 1 0 0 0-1 1 6 6 0 0 1-12 0 1 1 0 0 0-2 0 8 8 0 0 0 7 7.93V21a1 1 0 0 0 2 0v-2.07A8 8 0 0 0 20 11a1 1 0 0 0-1-1z"
@@ -309,14 +332,14 @@
                           </svg>
                         </button>
                         <!-- Medis from vault -->
-                        <button class="btn action-btn" type="button">
+                        <button class="btn action-btn" type="button" disabled>
                           <svg id="icon-vault" viewBox="0 0 24 24">
                             <path
                               d="M20.33,5.69h0l-.9-1.35A3,3,0,0,0,16.93,3H7.07a3,3,0,0,0-2.5,1.34l-.9,1.35A4,4,0,0,0,3,7.91V18a3,3,0,0,0,3,3H18a3,3,0,0,0,3-3V7.91A4,4,0,0,0,20.33,5.69ZM6.24,5.45A1,1,0,0,1,7.07,5h9.86a1,1,0,0,1,.83.45l.37.55H5.87ZM19,18a1,1,0,0,1-1,1H6a1,1,0,0,1-1-1V8H19ZM9.5,12.75A1.25,1.25,0,1,0,8.25,11.5,1.25,1.25,0,0,0,9.5,12.75ZM7.93,17h8.14a.42.42,0,0,0,.3-.73L13.7,13.6l-2.55,2.55-1.7-1.7L7.63,16.27a.42.42,0,0,0,.3.73Z"
                               fill="#8a96a3"></path>
                           </svg></button>
                         <!-- message price -->
-                        <button class="btn action-btn" type="button">
+                        <button class="btn action-btn" type="button" disabled>
                           <svg id="icon-price" viewBox="0 0 24 24">
                             <path
                               d="M22 13a3.38 3.38 0 0 0-1-2.4l-7.41-7.43A4.06 4.06 0 0 0 10.76 2H5a3 3 0 0 0-3 3v5.76a4 4 0 0 0 1.17 2.83L10.6 21a3.4 3.4 0 0 0 4.8 0l5.6-5.6a3.38 3.38 0 0 0 1-2.4zm-2.4 1L14 19.6a1.45 1.45 0 0 1-2 0l-7.41-7.43A2 2 0 0 1 4 10.76V5a1 1 0 0 1 1-1h5.76a2 2 0 0 1 1.41.59L19.6 12a1.4 1.4 0 0 1 0 2zM7.7 6a1.7 1.7 0 1 0 1.7 1.7A1.7 1.7 0 0 0 7.7 6zm6.16 6.28c-1-.22-1.85-.3-1.85-.78s.43-.51 1.06-.51a1.2 1.2 0 0 1 .92.43.48.48 0 0 0 .35.16h1.35a.23.23 0 0 0 .21-.22c0-.71-.86-1.55-2-1.84v-.75a.27.27 0 0 0-.26-.27h-1.27a.27.27 0 0 0-.26.27v.74a2.31 2.31 0 0 0-2 2c0 2.81 4.07 1.85 4.07 2.89 0 .48-.47.53-1.27.53a1.3 1.3 0 0 1-1-.52.66.66 0 0 0-.4-.17h-1.28a.23.23 0 0 0-.2.22c0 1 1 1.72 2.08 2v.74a.27.27 0 0 0 .26.27h1.25a.26.26 0 0 0 .26-.27v-.71A2.18 2.18 0 0 0 16 14.43c0-1.2-.86-1.88-2.14-2.15z"
@@ -324,7 +347,8 @@
                           </svg>
                         </button>
                       </div>
-                      <button class="send-btn btn" :disabled="!hasNewMessage" type="button" @click="sendMessage">
+                      <button class="send-btn btn" :disabled="!(hasNewMessage || sortableImgs.length > 0)" type="button" @click="sendMessage">
+                        <b-spinner variant="secondary" v-if="isSendingFiles" small></b-spinner>
                         Send
                       </button>
                     </div>
@@ -482,9 +506,10 @@
   import moment from 'moment';
   import _ from 'lodash';
   import { Swiper, SwiperSlide, directive } from 'vue-awesome-swiper';
-  import PhotoSwipe from 'photoswipe/dist/photoswipe'
-  import PhotoSwipeUI from 'photoswipe/dist/photoswipe-ui-default'
+  import PhotoSwipe from 'photoswipe/dist/photoswipe';
+  import PhotoSwipeUI from 'photoswipe/dist/photoswipe-ui-default';
   import createPreviewDirective from 'vue-photoswipe-directive';
+  import draggable from 'vuedraggable';
 
   import RadioGroupBox from '@components/radioGroupBox';
   import RoundCheckBox from '@components/roundCheckBox';
@@ -526,8 +551,14 @@
       swiperOptions: {
         lazy: true,
         slidesPerView: 'auto',
+        observer: true,
+        observeParents: true,
       },
       activeMediaRef: null,
+      isDragListVisible: false,
+      sortableImgs: [],
+      applyBtnEnabled: false,
+      isSendingFiles: false,
     }),
     mounted() {
       const self = this;
@@ -615,7 +646,8 @@
       Swiper,
       SwiperSlide,
       'radio-group-box': RadioGroupBox,
-      'round-check-box': RoundCheckBox
+      'round-check-box': RoundCheckBox,
+      draggable: draggable,
     },
     directives: {
       swiper: directive,
@@ -765,6 +797,8 @@
         this.newMessageText = e.target.value;
         if (this.newMessageText) {
           this.hasNewMessage = true;
+        } else {
+          this.hasNewMessage = false;
         }
         let channel = Echo.join(`chat-typing`);
         setTimeout(() => {
@@ -779,18 +813,41 @@
         this.axios.post('/chat-messages/mark-all-as-read');
       },
       sendMessage: function() {
-        const self = this;
-        this.axios.post('/chat-messages', {
-          message: this.newMessageText,
-          user_id: this.selectedUser.profile.id,
-          name: this.selectedUser.profile.name,
-        })
-          .then((response) => {
-            this.originMessages.unshift(response.data.message)
-            self.groupMessages();
-            self.newMessageText = undefined;
-            $('.conversation-list').animate({ scrollTop: $('.conversation-list')[0].scrollHeight }, 500)
+        // Sending Text Message
+        if (this.newMessageText) {
+          this.axios.post('/chat-messages', {
+            message: this.newMessageText,
+            user_id: this.selectedUser.profile.id,
+            name: this.selectedUser.profile.name,
+          })
+            .then((response) => {
+              this.originMessages.unshift(response.data.message);
+              this.groupMessages();
+              this.newMessageText = undefined;
+              $('.conversation-list').animate({ scrollTop: $('.conversation-list')[0].scrollHeight }, 500);
+            });
+        }
+        // Sending media files
+        if (this.sortableImgs.length > 0) {
+          const files = this.sortableImgs.map(img => img.file);
+          this.isSendingFiles = true;
+          // const mediafilesLinks = [];
+          files.map(file => {
+            const data = new FormData();
+            data.append('mediafile', file);
+            data.append('mftype', 'vault');
+            this.axios.post('/mediafiles', data)
+              .then((res) => {
+                console.log(res.data.mediafile.filepath);
+              });
+              // mediafilesLinks.push(res.data.mediafile.filepath);
+              // await this.axios.post('/chat-messages', {
+              //   media: mediafilesLinks,
+              //   user_id: this.selectedUser.profile.id,
+              //   name: this.selectedUser.profile.name,
+              // });
           });
+        }
       },
       onShowNextSearch: function() {
         if (this.currentSearchIndex < this.totalSearches.length) {
@@ -960,8 +1017,58 @@
           });
       },
       addNewMedia: function() {
-        console.log('------- add media');
         this.activeMediaRef.click();
+      },
+      removeSortableImg: function(index) {
+        const newArr = this.sortableImgs.slice();
+        newArr.splice(index, 1);
+        
+        this.sortableImgs = newArr;
+        if (this.$refs.mySwiper) {
+          this.$refs.mySwiper.updateSwiper();
+        }
+      },
+      onSelectSortableImg: function(index, status) {
+        const newArr = this.sortableImgs.slice();
+        newArr[index].selected = status;
+        const sortedArr = _.orderBy(newArr, ['order'], ['asc']);
+        let order = 0;
+        sortedArr.forEach(item => {
+          if (item.selected) { 
+            order++;
+            const idx = newArr.findIndex(it => it.src === item.src);
+            newArr[idx].order = order;
+          }
+        });
+        this.sortableImgs = newArr;
+        this.applyBtnEnabled = true;
+      },
+      applyImgsSort: function() {
+        const newArr = this.sortableImgs.slice();
+        const sortedArr = _.orderBy(newArr, ['order'], ['asc']);
+        sortedArr.forEach(item => {
+          item.order = undefined;
+          item.selected = undefined;
+        });
+        this.sortableImgs = sortedArr;
+        this.applyBtnEnabled = false;
+      },
+      confirmImgsSort: function() {
+        this.applyImgsSort();
+        this.isDragListVisible = false;
+      },
+      onMediaChanged: function(e) {
+        const files = _.values(e.target.files);
+        files.forEach(file => {
+          this.sortableImgs.push({
+            src: URL.createObjectURL(file),
+            file,
+          });
+        });
+        console.log('---- this.sortableImgs", ', this.sortableImgs);
+        if (this.$refs.mySwiper) {
+          this.$refs.mySwiper.updateSwiper();
+        }
       },
     }
   }
@@ -1111,10 +1218,18 @@
 	}
   .swiper-slider {
     padding: 12px 8px 8px;
+
+    & > div {
+      display: flex;
+    }
     .slide {
       width: unset;
       flex: 0 0 auto;
-      display: flex;
+
+      & > div {
+        display: flex;
+        width: 100%;
+      }
     }
     img {
       height: 144px;
