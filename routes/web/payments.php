@@ -9,7 +9,8 @@ Route::group(['prefix' => '/payment'], function () {
         Route::post('/generate-url', 'SegPayController@generatePayPageUrl');
     });
 
-    Route::get('/my-payment-methods', 'PaymentsController@myPaymentMethods')->name('payment.paymentMethods.get');
-    Route::post('/set-default-method', 'PaymentsController@setDefaultPaymentMethod')->name('payment.paymentMethods.setDefault');
+    Route::get('/methods/index', 'PaymentsController@index')->name('payment.methods.index');
+    Route::put('/methods/default', 'PaymentsController@setDefault')->name('payment.methods.setDefault');
+    Route::delete('/method', 'PaymentsController@remove')->name('payment.methods.remove');
 
 });

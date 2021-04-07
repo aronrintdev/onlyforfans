@@ -2,7 +2,7 @@
  * js/store/payments.js
  * Vuex store module for items related to payments
  */
-import _ from 'lodash'
+import _, { reject } from 'lodash'
 import axios from 'axios'
 import propSelect from '@helpers/propSelect'
 
@@ -71,7 +71,7 @@ export const payments = {
      */
     updateSavedPaymentMethods({ commit }) {
       return new Promise((resolve, reject) => {
-        axios.get(route('payment.paymentMethods.get', {}))
+        axios.get(route('payment.methods.index', {}))
           .then(response => {
             commit('UPDATE_SAVED_PAYMENT_METHODS', response.data)
             resolve()
@@ -82,12 +82,27 @@ export const payments = {
 
     setDefaultPaymentMethod({ commit }, id) {
       return new Promise((resolve, reject) => {
-        axios.post(route('payment.paymentMethods.setDefault'), { id })
+        axios.put(route('payment.methods.setDefault'), { id })
           .then(response => {
             commit('UPDATE_SAVED_PAYMENT_METHODS', response.data)
             resolve()
           })
         .catch(error => reject(error))
+      })
+    },
+
+    /**
+     * Removes payment method
+     */
+    removePaymentMethod({ dispatch }, id) {
+      return new Promise((resolve, reject) => {
+        axios.delete(route('payment.methods.remove'), { data: { id } })
+          .then(response => {
+            dispatch('updateSavedPaymentMethods')
+              .then(response => resolve())
+              .catch(error => reject(error))
+          })
+          .catch(error => reject(error))
       })
     }
   },
