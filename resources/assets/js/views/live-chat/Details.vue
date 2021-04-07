@@ -348,7 +348,7 @@
                         </button>
                       </div>
                       <button class="send-btn btn" :disabled="!(hasNewMessage || sortableImgs.length > 0)" type="button" @click="sendMessage">
-                        <b-spinner variant="secondary" v-if="isSendingFiles" small></b-spinner>
+                        <b-spinner v-if="isSendingFiles" small></b-spinner>
                         Send
                       </button>
                     </div>
@@ -832,20 +832,27 @@
           const files = this.sortableImgs.map(img => img.file);
           this.isSendingFiles = true;
           // const mediafilesLinks = [];
+          const promises = [];
           files.map(file => {
             const data = new FormData();
             data.append('mediafile', file);
             data.append('mftype', 'vault');
-            this.axios.post('/mediafiles', data)
+            const promise = this.axios.post('/mediafiles', data)
               .then((res) => {
                 console.log(res.data.mediafile.filepath);
               });
+            promises.push(promise);
               // mediafilesLinks.push(res.data.mediafile.filepath);
               // await this.axios.post('/chat-messages', {
               //   media: mediafilesLinks,
               //   user_id: this.selectedUser.profile.id,
               //   name: this.selectedUser.profile.name,
               // });
+          });
+          const self = this;
+          Promise.all(promises).then(function() {
+            self.isSendingFiles = false;
+            self.sortableImgs = [];
           });
         }
       },
