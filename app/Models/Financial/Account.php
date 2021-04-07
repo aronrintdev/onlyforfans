@@ -37,6 +37,7 @@ use App\Models\Financial\Exceptions\InvalidTransactionAmountException;
 use App\Models\Financial\Exceptions\Account\InsufficientFundsException;
 use App\Models\Financial\Exceptions\TransactionAccountMismatchException;
 use App\Models\Financial\Exceptions\Account\TransactionNotAllowedException;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Financial Account Model
@@ -68,7 +69,8 @@ class Account extends Model implements Ownable
         UsesUuid,
         HasSystem,
         HasCurrency,
-        HasFactory;
+        HasFactory,
+        SoftDeletes;
 
     protected $table = 'financial_accounts';
 
