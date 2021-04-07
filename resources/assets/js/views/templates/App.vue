@@ -2,8 +2,10 @@
   <div class="app d-flex flex-column">
     <!-- Header -->
     <MainNavBar class="header" />
-    <div class="content p-3  flex-grow-1">
-      <router-view />
+    <div class="content p-3 flex-grow-1">
+      <transition name="quick-fade" mode="out-in">
+        <router-view />
+      </transition>
     </div>
     <div class="footer">
       <b-navbar variant="dark">

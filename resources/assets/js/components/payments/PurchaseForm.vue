@@ -12,7 +12,7 @@
         @loadPayWithForm="loadPayWithForm"
       />
 
-      <transition name="component-fade" mode="out-in">
+      <transition name="fade" mode="out-in">
         <component
           :is="loadedForm"
           :payment-method="selectedPaymentMethod"
@@ -95,12 +95,3 @@ export default {
 
 }
 </script>
-
-<style lang="scss" scoped>
-.component-fade-enter-active, .component-fade-leave-active {
-  transition: opacity .3s ease;
-}
-.component-fade-enter, .component-fade-leave-to {
-  opacity: 0;
-}
-</style>
