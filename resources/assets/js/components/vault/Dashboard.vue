@@ -1,5 +1,5 @@
 <template>
-  <div class="container-fluid vault-container">
+  <div v-if="!isLoading" class="container-fluid vault-container">
 
     <section class="row h-100">
 
@@ -146,11 +146,11 @@ export default {
   props: {
     vault_pkid: {
       required: true,
-      type: Number,
+      type: String,
     },
     vaultfolder_pkid: { // init value
       required: true,
-      type: Number,
+      type: String,
     },
   },
 
@@ -159,6 +159,10 @@ export default {
     ...Vuex.mapState(['vaultfolder']),
     ...Vuex.mapState(['breadcrumb']),
     ...Vuex.mapState(['shares']),
+
+    isLoading() {
+      return !this.vault_pkid || !this.vaultfolder_pkid
+    },
 
     mediafiles() {
       return this.vaultfolder.mediafiles;

@@ -55,6 +55,11 @@ export default {
           linkTo: { name: 'timeline.show', params: { slug: this.timeline.slug } }
         },
         {
+          label: 'My Vault',
+          icon: 'user',
+          linkTo: { name: 'vault.dashboard', params: { } },
+        },
+        {
           label: 'Settings',
           icon: 'cog',
           linkTo: { name: 'settings.general' }

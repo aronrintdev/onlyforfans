@@ -125,7 +125,7 @@ export default new Vuex.Store({
 
   actions: {
     getVault({ commit }, id) {
-      axios.get(route('valuts.show', { id }))
+      axios.get(route('vaults.show', { id }))
         .then((response) => {
           commit('UPDATE_VAULT', response.data)
         })
