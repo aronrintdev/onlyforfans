@@ -193,15 +193,16 @@ class MessageController extends Controller
 
         $message = $sessionUser->messages()->create([
             'message' => $request->input('message'),
+            'media_id' => $request->input('media_id'),
             'receiver_id' => $request->input('user_id'),
             'receiver_name' => $request->input('name'),
             'is_unread' => !$receiver->is_online
         ]);
 
-        broadcast(new MessageSentEvent(Message::with(['receiver'])->where('id', $message->id)->first(), $sessionUser))->toOthers();
+        broadcast(new MessageSentEvent(Message::with(['receiver', 'media'])->where('id', $message->id)->first(), $sessionUser))->toOthers();
 
         return [
-            'message' => Message::with(['receiver'])->where('id', $message->id)->first(),
+            'message' => Message::with(['receiver', 'media'])->where('id', $message->id)->first(),
         ];
     }
     public function clearUser(Request $request, $id)
@@ -304,5 +305,28 @@ class MessageController extends Controller
         $userSetting->cattrs = $cattrs;
         $userSetting->save();
         return;
+    }
+    public function listMediafiles(Request $request, $id) {
+        $sessionUser = $request->user();
+        $messages = Message::with('media')
+            ->where(function($query) use(&$request, &$id) {
+                $sessionUser = $request->user();
+                $query->where('user_id', $sessionUser->id)
+                    ->where('receiver_id', $id);
+            })
+            ->orWhere(function($query) use(&$request, &$id) {
+                $sessionUser = $request->user();
+                $query->where('user_id', $id)
+                    ->where('receiver_id', $sessionUser->id);
+            })
+            ->get()
+            ->toArray();
+        $mediafiles = [];
+        foreach ($messages as $message) {
+            if ($message['media']) {
+                array_push($mediafiles, $message['media']);
+            }
+        };
+        return $mediafiles;
     }
 }

@@ -11,7 +11,7 @@ class Message extends Model
      *
      * @var array
      */
-    protected $fillable = ['message', 'receiver_id', 'receiver_name', 'is_unread'];
+    protected $fillable = ['message', 'receiver_id', 'receiver_name', 'is_unread', 'media_id'];
 
     /**
      * A message belong to a user
@@ -25,5 +25,9 @@ class Message extends Model
     public function receiver()
     {
         return $this->belongsTo('App\Models\User', 'receiver_id');
+    }
+    public function media()
+    {
+        return $this->belongsTo('App\Models\Mediafile', 'media_id');
     }
 }

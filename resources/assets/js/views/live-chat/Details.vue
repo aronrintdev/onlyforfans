@@ -268,7 +268,7 @@
                         <swiper-slide class="slide">
                           <div v-if="!isDragListVisible">
                             <div class="swiper-image-wrapper" v-for="(img, index) in sortableImgs" :key="index">
-                              <img v-preview class="swiper-lazy" :src="img.src" />
+                              <img v-preview:scope-a class="swiper-lazy" :src="img.src" />
                               <div class="icon-close" @click="removeSortableImg(index)">
                                 <svg viewBox="0 0 24 24">
                                   <path d="M13.41 12l5.3-5.29A1 1 0 0 0 19 6a1 1 0 0 0-1-1 1 1 0 0 0-.71.29L12 10.59l-5.29-5.3A1 1 0 0 0 6 5a1 1 0 0 0-1 1 1 1 0 0 0 .29.71l5.3 5.29-5.3 5.29A1 1 0 0 0 5 18a1 1 0 0 0 1 1 1 1 0 0 0 .71-.29l5.29-5.3 5.29 5.3A1 1 0 0 0 18 19a1 1 0 0 0 1-1 1 1 0 0 0-.29-.71z"></path>
@@ -651,7 +651,10 @@
     },
     directives: {
       swiper: directive,
-      preview: createPreviewDirective(null, PhotoSwipe, PhotoSwipeUI)
+      preview: createPreviewDirective({
+          showAnimationDuration: 0,
+          bgOpacity: 0.75
+        }, PhotoSwipe, PhotoSwipeUI)
     },
     computed: {
       selectedOption: function () {
@@ -839,7 +842,11 @@
             data.append('mftype', 'vault');
             const promise = this.axios.post('/mediafiles', data)
               .then((res) => {
-                console.log(res.data.mediafile.filepath);
+                this.axios.post('/chat-messages', {
+                  media_id: res.data.mediafile.id,
+                  user_id: this.selectedUser.profile.id,
+                  name: this.selectedUser.profile.name,
+                });
               });
             promises.push(promise);
               // mediafilesLinks.push(res.data.mediafile.filepath);
