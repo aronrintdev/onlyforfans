@@ -146,7 +146,7 @@
                         </button>
                       </div>
                     </div>
-
+                    <!-- More Dropdown Menu -->
                     <b-dropdown id="more-dropdown" right>
                       <template #button-content>
                         <i class="fa fa-ellipsis-h" aria-hidden="true"></i>
@@ -157,11 +157,14 @@
                       <b-dropdown-item @click="showListModal">
                         Add to / remove from lists
                       </b-dropdown-item>
+                      <b-dropdown-item v-if="!selectedUser.profile.is_follow_for_free" @click="setFollowForFree(selectedUser.profile.id)">
+                        Follow for free
+                      </b-dropdown-item>
                       <b-dropdown-item disabled>
                         Give user a discount
                       </b-dropdown-item>
                       <b-dropdown-item @click="editCustomName">
-                        Edit Name
+                        Rename @{{ selectedUser.profile.username }}
                       </b-dropdown-item>
                       <b-dropdown-divider></b-dropdown-divider>
                       <b-dropdown-item disabled>Hide chat</b-dropdown-item>
@@ -1079,237 +1082,31 @@
             file,
           });
         });
-        console.log('---- this.sortableImgs", ', this.sortableImgs);
         if (this.$refs.mySwiper) {
           this.$refs.mySwiper.updateSwiper();
         }
       },
+      setFollowForFree: function(userId) {
+        this.axios.patch(`/users/${userId}/settings`, {
+          is_follow_for_free: true,
+        }).then(() => {
+          this.selectedUser = {
+            ...this.selectedUser,
+            profile: {
+              ...this.selectedUser.profile,
+              is_follow_for_free: true,
+            }
+          };
+        })
+      }
     }
   }
 </script>
 
 <style lang="scss" scoped>
   @import "../../../sass/views/live-chat/home.scss";
-  @import "../../../sass/views/live-chat/details.scss";
+  @import "../../../sass/views/live-chat/details_scoped.scss";
 </style>
 <style lang="scss">
-  .highlight {
-    background: #ffd761;
-    padding: 3px 0px;
-    border-radius: 3px;
-  }
-  .block-modal {
-    h4 {
-      text-transform: uppercase;
-      font-weight: 500;
-      font-size: 14px;
-      padding: 0 0 14px 0;
-    }
-    .content {
-      padding: 0;
-    }
-    .action-btns {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: flex-end;
-      padding: 0;
-      margin-bottom: -8px;
-
-      .link-btn {
-        padding: 9px 16px;
-        border-radius: 18px;
-        color: #00aff0;
-        background-color: transparent;
-        margin: 0 0 0 4px;
-        font-size: 14px;
-        white-space: nowrap;
-        text-align: center;
-        text-transform: uppercase;
-        border: none;
-        font-weight: 500;
-        outline: none;
-
-        &:disabled {
-          color: darkgray;
-          &:hover {
-            color: darkgray;
-            background-color: transparent;
-          }
-        }
-        &:active {
-          outline: none;
-          box-shadow: none;
-        }
-        &:hover {
-          color: #0091ea;
-          background-color: rgba(0,145,234,.06);
-        }
-      }
-    }
-  }
-  .list-edit-modal {
-    margin: -1rem;
-    .header {
-      padding: 10px 16px;
-      border-bottom: 1px solid rgba(138,150,163,.2);
-      h4 {
-        padding: 0;
-        margin: 0;
-      }
-      svg {
-        fill: rgba(138, 150, 163, 0.75);
-        width: 22px;
-        height: 22px;
-      }
-    }
-    .action-btns {
-      justify-content: space-between;
-      padding: 6px 7.5px;
-      border-top: 1px solid rgba(138,150,163,.2);
-
-      .link-btn {
-        margin: 0;
-      }
-    }
-    .list-item {
-      display: flex;
-      align-items: center;
-      cursor: pointer;
-      height: 64px;
-      .round__checkbox {
-        margin: 0 16px;
-      }
-      .list-item-content {
-        flex: 1;
-        padding-right: 16px;
-        height: 64px;
-        border-bottom: 1px solid rgba(138,150,163,.25);
-        .title {
-          font-size: 16px;
-          line-height: 24px;
-          font-weight: 500;
-        }
-        .content {
-          font-size: 14px;
-          color: #8a96a3;
-        }
-
-      }
-      &:last-child .list-item-content {
-        border-bottom: none;
-      }
-    }
-  }
-  .avatars {
-    display: flex;
-    align-items: center;
-    margin-right: 10px;
-  }
-  .user-logo {
-		width: 38px;
-		height: 38px;
-		margin-right: -12px;
-		position: relative;
-
-		img {
-			width: 100%;
-			height: 100%;
-			border-radius: 50%;
-			border: 2px solid #fff;
-		}
-		&.text-logo {
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			color: #00aff0;
-			font-weight: 700;
-			font-size: 16px;
-			background: rgba(138,150,163,.12);
-			letter-spacing: 0;
-			text-transform: uppercase;
-		}
-	}
-  .swiper-slider {
-    padding: 12px 8px 8px;
-
-    & > div {
-      display: flex;
-    }
-    .slide {
-      width: unset;
-      flex: 0 0 auto;
-
-      & > div {
-        display: flex;
-        width: 100%;
-      }
-    }
-    img {
-      height: 144px;
-      border-radius: 10px;
-      margin-right: 8px;
-      width: auto;
-      object-fit: contain;
-    }
-    .slider-btn {
-      cursor: pointer;
-      background: rgba(138,150,163,.12);
-      border-radius: 6px;
-      width: 80px;
-      min-width: 80px;
-      min-height: 144px;
-      height: 100%;
-      margin-right: 8px;
-      position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0;
-      border: none;
-      outline: none;  
-
-      &.arrows-btn {
-        width: 60px;
-        min-width: 60px;
-      }
-      svg {
-        font-size: 24px;
-        width: 1em;
-        height: 1em;
-        min-width: 1em;
-        display: inline-block;
-        fill: rgba(138,150,163,.7);
-        line-height: 1;
-      }
-      span {
-        font-size: 28px;
-        color: rgba(138,150,163,.7);
-      }
-    }
-    .swiper-image-wrapper {
-      position: relative;
-
-      .icon-close {
-        position: absolute;
-        top: 8px;
-        right: 16px;
-        background-color: #00aff0;
-        border-radius: 50%;
-        padding: 2px;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        svg {
-          width: 18px;
-          height: 18px;
-          fill: #fff;
-        }
-        &:hover {
-          background-color: #0091ea;
-        }
-      }
-    }
-  }
+  @import "../../../sass/views/live-chat/details.scss";
 </style>
