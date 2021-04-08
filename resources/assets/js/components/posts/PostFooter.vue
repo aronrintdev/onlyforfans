@@ -147,7 +147,7 @@ export default {
       const isCurrentlyVisible = !!this.renderComments
       if (isCurrentlyVisible) {
         this.renderComments = false // toggle -> hide
-      } else {
+      } else if ( this.post.access ) {
         if ( this.comments ) {
           this.renderComments = true // Some stored comments, show comments while loading
         }
