@@ -24,10 +24,10 @@ class Message extends Model
     }
     public function receiver()
     {
-        return $this->belongsTo('App\Models\User', 'receiver_id');
+        return $this->belongsTo(User::class, 'receiver_id');
     }
     public function media()
     {
-        return $this->belongsTo('App\Models\Mediafile', 'media_id');
+        return $this->belongsTo(Mediafile::class, 'media_id');
     }
 }

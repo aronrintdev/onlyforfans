@@ -14,11 +14,11 @@ class Lists extends Model
 
     public function users()
     {
-        return $this->belongsToMany('App\Models\User', 'lists_users', 'list_id', 'user_id');
+        return $this->belongsToMany(User::class, 'lists_users', 'list_id', 'user_id');
     }
 
     public function creator()
     {
-        return $this->belongsTo('App\Models\User', 'creator_id');
+        return $this->belongsTo(User::class, 'creator_id');
     }
 }

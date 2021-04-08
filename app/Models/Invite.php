@@ -48,7 +48,7 @@ class Invite extends BaseModel implements Guidable
 
     public function inviter()
     {
-        return $this->belongsTo('App\Models\User', 'inviter_id');
+        return $this->belongsTo(User::class, 'inviter_id');
     }
 
     //--------------------------------------------

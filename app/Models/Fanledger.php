@@ -46,11 +46,11 @@ class Fanledger extends BaseModel // implements Guidable
     }
     public function purchaser()
     {
-        return $this->belongsTo('App\Models\User', 'purchaser_id');
+        return $this->belongsTo(User::class, 'purchaser_id');
     }
     public function seller()
     {
-        return $this->belongsTo('App\Models\User', 'seller_id');
+        return $this->belongsTo(User::class, 'seller_id');
     }
 
     //--------------------------------------------

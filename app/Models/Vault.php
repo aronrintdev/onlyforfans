@@ -58,11 +58,11 @@ class Vault extends BaseModel implements Guidable, Ownable
 
     public function user()
     {
-        return $this->belongsTo('App\Models\User');
+        return $this->belongsTo(User::class);
     }
     public function vaultfolders()
     {
-        return $this->hasMany('App\Models\Vaultfolder');
+        return $this->hasMany(Vaultfolder::class);
     }
 
     public function getRootFolder()

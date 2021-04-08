@@ -89,70 +89,70 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
 
     public function sharedmediafiles()
     { // Mediafiles shared with me (??)
-        return $this->morphedByMany('App\Models\Mediafile', 'shareable', 'shareables', 'sharee_id')
+        return $this->morphedByMany(Mediafile::class, 'shareable', 'shareables', 'sharee_id')
             ->withTimestamps();
     }
 
     public function sharedvaultfolders()
     { // Vaultfolders shared with me (??)
-        return $this->morphedByMany('App\Models\Vaultfolder', 'shareable', 'shareables', 'sharee_id')
+        return $this->morphedByMany(Vaultfolder::class, 'shareable', 'shareables', 'sharee_id')
             ->withTimestamps();
     }
 
     public function bookmarks()
     { 
-        return $this->hasMany('App\Models\Bookmark', 'user_id');
+        return $this->hasMany(Bookmark::class, 'user_id');
     }
 
     public function ledgersales()
     {
-        return $this->hasMany('App\Models\Fanledger', 'seller_id');
+        return $this->hasMany(Fanledger::class, 'seller_id');
     }
 
     public function ledgerpurchases()
     {
-        return $this->hasMany('App\Models\Fanledger', 'purchaser_id');
+        return $this->hasMany(Fanledger::class, 'purchaser_id');
     }
 
     public function timeline()
     {
-        return $this->hasOne('App\Models\Timeline');
+        return $this->hasOne(Timeline::class);
     }
 
     public function posts()
     {
-        return $this->hasMany('App\Models\Post', 'user_id');
+        return $this->hasMany(Post::class, 'user_id');
     }
 
     // timelines (users) I follow: premium *and* default subscribe (follow)
     public function followedtimelines()
     {
-        return $this->morphedByMany('App\Models\Timeline', 'shareable', 'shareables', 'sharee_id')
+        return $this->morphedByMany(Timeline::class, 'shareable', 'shareables', 'sharee_id')
             ->withPivot('access_level', 'shareable_type', 'sharee_id')->withTimestamps();
     }
 
     public function subscribedtimelines()
     {
-        return $this->morphedByMany('App\Models\Timeline', 'shareable', 'shareables', 'sharee_id')
+        return $this->morphedByMany(Timeline::class, 'shareable', 'shareables', 'sharee_id')
             ->where('access_level', 'premium')
             ->withPivot('access_level', 'shareable_type', 'sharee_id')->withTimestamps();
     }
 
     public function likedposts()
     {
-        return $this->morphedByMany('App\Models\Post', 'likeable', 'likeables', 'likee_id')
+        return $this->morphedByMany(Post::class, 'likeable', 'likeables', 'likee_id')
             ->withTimestamps();
     }
 
     // posts shared with me (by direct share or purchase on my part)
     public function sharedposts()
     {
-        return $this->morphedByMany('App\Models\Post', 'shareable', 'shareables', 'sharee_id')->withTimestamps();
+        return $this->morphedByMany(Post::class, 'shareable', 'shareables', 'sharee_id')->withTimestamps();
     }
 
     public function postsPinned()
     {
-        return $this->belongsToMany('App\Post', 'pinned_posts', 'user_id', 'post_id');
+        return $this->belongsToMany(Post::class, 'pinned_posts', 'user_id', 'post_id');
     }
 
     public function userList()
@@ -198,12 +198,12 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
 
     public function vaults()
     {
-        return $this->hasMany('App\Models\Vault');
+        return $this->hasMany(Vault::class);
     }
 
     public function vaultfolders()
     {
-        return $this->hasMany('App\Models\Vaultfolder');
+        return $this->hasMany(Vaultfolder::class);
     }
 
     public function financialAccounts()
@@ -260,13 +260,13 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
 
     public function commentLikes()
     {
-        return $this->morphedByMany('App\Models\Comment', 'likeable', 'likeables', 'likee_id')
+        return $this->morphedByMany(Comment::class, 'likeable', 'likeables', 'likee_id')
             ->withTimestamps();
     }
 
     public function comments()
     {
-        return $this->hasMany('App\Models\Comment');
+        return $this->hasMany(Comment::class);
     }
 
     public function deleteOthers()
@@ -298,12 +298,12 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
 
     public function blockedUsers()
     {
-        return $this->morphToMany('App\Models\User', 'blockable', 'blockables');
+        return $this->morphToMany(User::class, 'blockable', 'blockables');
     }
 
     public function blockedBy(): MorphToMany
     {
-        return $this->morphedByMany('App\Models\User', 'blockable', 'blockables');
+        return $this->morphedByMany(User::class, 'blockable', 'blockables');
     }
 
     // Checks if user is blocked by another user
@@ -459,12 +459,12 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
 
     public function lists()
     {
-        return $this->belongsToMany('App\Models\Lists', 'lists_users', 'user_id', 'list_id')->withTimestamps();
+        return $this->belongsToMany(Lists::class, 'lists_users', 'user_id', 'list_id')->withTimestamps();
     }
 
     public function userlists()
     {
-        return $this->hasMany('App\Models\Lists', 'creator_id');
+        return $this->hasMany(Lists::class, 'creator_id');
     }
 }
 

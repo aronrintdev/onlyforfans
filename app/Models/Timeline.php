@@ -91,14 +91,14 @@ class Timeline extends Model implements Tippable, Reportable
     // includes subscribers (ie premium + default followers)
     public function followers()
     {
-        return $this->morphToMany('App\Models\User', 'shareable', 'shareables', 'shareable_id', 'sharee_id')
+        return $this->morphToMany(User::class, 'shareable', 'shareables', 'shareable_id', 'sharee_id')
             ->withPivot('access_level', 'shareable_type', 'sharee_id', 'is_approved', 'cattrs')
             ->withTimestamps();
     }
 
     public function subscribers()
     {
-        return $this->morphToMany('App\Models\User', 'shareable', 'shareables', 'shareable_id', 'sharee_id')
+        return $this->morphToMany(User::class, 'shareable', 'shareables', 'shareable_id', 'sharee_id')
             ->withPivot('access_level', 'shareable_type', 'sharee_id', 'is_approved', 'cattrs')
             ->where('access_level', 'premium')
             ->withTimestamps();
@@ -106,32 +106,32 @@ class Timeline extends Model implements Tippable, Reportable
 
     public function ledgersales()
     {
-        return $this->morphMany('App\Models\Fanledger', 'purchaseable');
+        return $this->morphMany(Fanledger::class, 'purchaseable');
     }
 
     public function posts()
     {
-        return $this->morphMany('App\Models\Post', 'postable');
+        return $this->morphMany(Post::class, 'postable');
     }
 
     public function stories()
     {
-        return $this->hasMany('App\Models\Story');
+        return $this->hasMany(Story::class);
     }
 
     public function user()
     {
-        return $this->belongsTo('App\Models\User');
+        return $this->belongsTo(User::class);
     }
 
     public function avatar()
     {
-        return $this->belongsTo('App\Models\Mediafile', 'avatar_id');
+        return $this->belongsTo(Mediafile::class, 'avatar_id');
     }
 
     public function cover()
     {
-        return $this->belongsTo('App\Models\Mediafile', 'cover_id');
+        return $this->belongsTo(Mediafile::class, 'cover_id');
     }
 
     // %%% --- Implement Purchaseable Interface ---

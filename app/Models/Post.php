@@ -164,23 +164,23 @@ class Post extends Model
     // can be shared with many users (via [shareables])
     public function sharees()
     {
-        return $this->morphToMany('App\Models\User', 'shareable', 'shareables', 'shareable_id', 'sharee_id')->withTimestamps();
+        return $this->morphToMany(User::class, 'shareable', 'shareables', 'shareable_id', 'sharee_id')->withTimestamps();
     }
 
     public function mediafiles()
     {
-        return $this->morphMany('App\Models\Mediafile', 'resource');
+        return $this->morphMany(Mediafile::class, 'resource');
     }
 
     public function ledgersales()
     {
-        return $this->morphMany('App\Models\Fanledger', 'purchaseable');
+        return $this->morphMany(Fanledger::class, 'purchaseable');
     }
 
     // owner of the post
     public function user()
     {
-        return $this->belongsTo('App\Models\User');
+        return $this->belongsTo(User::class);
     }
 
     public function postable()

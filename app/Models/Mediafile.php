@@ -50,7 +50,7 @@ class Mediafile extends BaseModel implements Guidable, Ownable, Cloneable
 
     public function sharees()
     {
-        return $this->morphToMany('App\Models\User', 'shareable', 'shareables', 'shareable_id', 'sharee_id');
+        return $this->morphToMany(User::class, 'shareable', 'shareables', 'shareable_id', 'sharee_id');
     }
 
     //--------------------------------------------
