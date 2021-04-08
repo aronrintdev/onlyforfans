@@ -102,16 +102,19 @@ class ShareablesTableSeeder extends Seeder
                         $paymentAccount = $follower->financialAccounts()->firstOrCreate([
                             'type' => AccountTypeEnum::IN,
                             'name' => "{$follower->username} Seeder Account",
-                            'verified' => true,
-                            'can_make_transactions' => true,
                         ]);
+                        $paymentAccount->verified = true;
+                        $paymentAccount->can_make_transactions = true;
+                        $paymentAccount->save();
 
                         Event::fakeFor(function() use ($paymentAccount, $post, $customAttributes) {
                             try {
                                 $paymentAccount->purchase($post, $post->price, ShareableAccessLevelEnum::PREMIUM, $customAttributes);
                             } catch (RuntimeException $e) {
                                 $exceptionClass = class_basename($e);
-                                $this->output->writeln("Exception while purchasing Post [{$post->getKey()}] | {$exceptionClass} | {$e->getMessage()}");
+                                if ($this->appEnv !== 'testing') {
+                                    $this->output->writeln("Exception while purchasing Post [{$post->getKey()}] | {$exceptionClass} | {$e->getMessage()}");
+                                }
                             }
                         }, $this->eventsToDelayOnPurchase);
 
@@ -181,9 +184,13 @@ class ShareablesTableSeeder extends Seeder
 
 
         // Run update Balance on accounts now.
-        $this->output->writeln("Updating Account Balances");
+        if ($this->appEnv !== 'testing') {
+            $this->output->writeln("Updating Account Balances");
+        }
         Account::cursor()->each(function($account) {
-            $this->output->writeln("Updating Balance for {$account->name}");
+            if ($this->appEnv !== 'testing') {
+                $this->output->writeln("Updating Balance for {$account->name}");
+            }
             $account->settleBalance();
         });
 
