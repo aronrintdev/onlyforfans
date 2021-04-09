@@ -899,7 +899,6 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
-     *  @group here0409
      */
     // tests purchase itself, plus before and after access
     public function test_can_purchase_post()

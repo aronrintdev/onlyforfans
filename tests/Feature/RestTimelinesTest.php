@@ -321,9 +321,10 @@ class TimelinesTest extends TestCase
         $this->assertNotNull($content->data->about);
         $this->assertObjectHasAttribute('cover', $content->data);
         $this->assertObjectHasAttribute('avatar', $content->data);
+        $this->assertObjectHasAttribute('user', $content->data);
+        $this->assertNotNull($content->data->user->id);
 
         $this->assertObjectNotHasAttribute('posts', $content->data);
-        $this->assertObjectNotHasAttribute('user', $content->data);
         $this->assertObjectNotHasAttribute('followers', $content->data);
         $this->assertObjectNotHasAttribute('subscribers', $content->data);
         $this->assertObjectNotHasAttribute('ledgersales', $content->data);
@@ -356,7 +357,6 @@ class TimelinesTest extends TestCase
         $this->assertObjectHasAttribute('cover', $content->data);
         $this->assertObjectHasAttribute('avatar', $content->data);
         $this->assertObjectNotHasAttribute('posts', $content->data);
-        $this->assertObjectNotHasAttribute('user', $content->data);
         $this->assertObjectNotHasAttribute('followers', $content->data);
         $this->assertObjectNotHasAttribute('subscribers', $content->data);
         $this->assertObjectNotHasAttribute('ledgersales', $content->data);
@@ -485,7 +485,7 @@ class TimelinesTest extends TestCase
     }
 
     /**
-     *  @group timelines
+     *  @group OFF-timelines
      *  @group OFF-regression
      *  @group broken
      */
