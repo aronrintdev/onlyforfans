@@ -305,7 +305,11 @@
         this.users = contacts;
       },
       openPinToListsModal: function() {
-        this.$refs['pin-to-list-modal'].show();
+        this.axios.get('/lists')
+          .then(res => {
+            this.lists = res.data;
+            this.$refs['pin-to-list-modal'].show();
+          });
       },
       closePinToListsModal: function() {
         this.$refs['pin-to-list-modal'].hide();
