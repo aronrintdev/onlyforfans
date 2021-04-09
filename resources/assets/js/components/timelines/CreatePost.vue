@@ -31,6 +31,7 @@
               class="dropzone"
             >
               <textarea v-model="description" rows="8" class="w-100"></textarea>
+              <label id="clickme_to-select" class="">Browse</label>
             </vue-dropzone>
           </div>
           <template #footer>
@@ -101,11 +102,12 @@ export default {
     dropzoneOptions: {
       url: '/mediafiles',
       paramName: 'mediafile',
-      acceptedFiles: 'image/*, video/*, audio/*',
+      //acceptedFiles: 'image/*, video/*, audio/*',
       maxFiles: null,
       autoProcessQueue: false,
       thumbnailWidth: 100,
-      clickable: false,
+      //clickable: false, // must be false otherwise can't focus on text area to type (!)
+      clickable: '#clickme_to-select',
       maxFilesize: 15.9,
       addRemoveLinks: true,
       headers: { 

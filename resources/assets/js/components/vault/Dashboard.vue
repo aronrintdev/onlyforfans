@@ -225,7 +225,7 @@ export default {
       url: '/mediafiles',
       paramName: 'mediafile',
       thumbnailHeight: 128,
-      maxFilesize: 3.9,
+      maxFilesize: 15.9,
       headers: { 
         'X-Requested-With': 'XMLHttpRequest', 
         'X-CSRF-TOKEN': document.head.querySelector('[name=csrf-token]').content,
