@@ -17,7 +17,7 @@
           </span>
         </li>
         <li class="mr-3">
-          <span @click="tip()" class="tag-clickable">$</span>
+          <span @click="renderTip" class="tag-clickable">$</span> <!-- %TODO: replace with font-awesome icon -->
         </li>
       </ul>
       <ul class="d-flex list-inline footer-ctrl mb-0">
@@ -48,7 +48,7 @@
 </template>
 
 <script>
-//import { eventBus } from '@/app'
+import { eventBus } from '@/app'
 import CommentList from '@components/comments/List'
 import CommentDisplay from '@components/comments/Display'
 import NewComment from '@components/comments/New'
@@ -115,7 +115,12 @@ export default {
 
     share() {},
 
-    tip() {},
+    renderTip() {
+      eventBus.$emit('open-modal', {
+        key: 'render-tip', 
+        data: { resource_type: 'posts', resource_id: this.post.id },
+      })
+    },
 
     addComment(comment) {
       this.comments = [ ...this.comments, comment ]
