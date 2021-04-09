@@ -206,7 +206,7 @@ export default {
     renderTip() {
       eventBus.$emit('open-modal', {
         key: 'render-tip', 
-        data: { }
+        data: { resource_type: 'timelines', resource_id: this.timelineId },
       })
     },
 

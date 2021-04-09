@@ -23,7 +23,7 @@
 
     <!-- %FIXME: DRY vs Home -->
     <b-modal id="modal-tip" size="sm" title="Send a Tip" hide-footer body-class="p-0">
-      <SendTip :session_user="session_user" :timeline="timeline" />
+      <SendTip :session_user="session_user" :timeline="timeline" :payload="modalPayload" />
     </b-modal>
 
     <b-modal id="modal-purchase_post" size="lg" title="Purchase Post" hide-footer body-class="p-0">
@@ -94,11 +94,12 @@ export default {
   },
 
   data: () => ({
+    timeline: null,
     isGridLayout: false, // %FIXME: can this be set in created() so we have 1 source of truth ? (see PostFeed)
+    subscribeOnly: true, // for modal
     selectedResource: null,
     selectedResourceId: null, // %FIXME: hacky
-    subscribeOnly: true, // for modal
-    timeline: null,
+    modalPayload: null, // eventually replace all 'selected...' with this %PSG 20210409
   }),
 
   created() {
@@ -120,6 +121,7 @@ export default {
           this.$bvModal.show('modal-follow')
           break
         case 'render-tip':
+          this.modalPayload = data
           this.$bvModal.show('modal-tip')
           break
         case 'show-post':

@@ -34,11 +34,13 @@
           :step="LEDGER_CONFIG.TIP_STEP_DELTA"
         />
 
+        <p class="text-center"><small><span v-if="renderDetails">{{ renderDetails }}</span></small></p>
+
         <textarea
           v-model="formPayload.notes"
           cols="60"
           rows="5"
-          class="w-100 mt-3"
+          class="w-100"
           placeholder="Write a message"
         ></textarea>
 
@@ -61,11 +63,25 @@ export default {
   props: {
     session_user: null,
     timeline: null,
+    // %NOTE: payload is a JSON object that must have keys: resource_type and resource_id
+    payload: null, // %TODO: use this instead of timeline above (?)
   },
 
   computed: {
     timelineUrl() {
-      return `/${this.timeline.slug}`;
+      return `/${this.timeline.slug}`
+    },
+
+    renderDetails() {
+      const { resource_type, resource_id } = this.payload
+      switch (resource_type) {
+        case 'timelines':
+          return 'Send Tip to User'
+        case 'posts':
+          return 'Send Tip to Post'
+        default:
+          return null
+      }
     },
   },
 
@@ -82,16 +98,26 @@ export default {
   methods: {
 
     async sendTip(e) {
-      e.preventDefault();
-      const response = await axios.put(route('timelines.tip', this.timeline.id), {
+      e.preventDefault()
+      const { resource_type, resource_id } = this.payload
+      let url
+      switch (resource_type) {
+        case 'posts':
+          url = route('posts.tip', resource_id)
+          break
+        case 'timelines':
+        default:
+          url = route('timelines.tip', resource_id)
+      }
+      const response = await axios.put(url, {
         base_unit_cost_in_cents: this.formPayload.amount,
         notes: this.formPayload.notes || '',
-      });
-      this.$bvModal.hide('modal-tip');
+      })
+      this.$bvModal.hide('modal-tip')
       this.$root.$bvToast.toast(`Tip sent to ${this.timeline.slug}`, {
         toaster: 'b-toaster-top-center',
         title: 'Success!',
-      });
+      })
       eventBus.$emit('update-timeline', this.timeline.id)
     },
 
