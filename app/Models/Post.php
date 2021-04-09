@@ -324,7 +324,7 @@ class Post extends Model
     public function currentPrice($currency = null): ?Money
     {
         $current = PurchasablePricePoint::forItem($this)->ofCurrency($currency)->getCurrent();
-        return isset($current) ? $current->price : null;
+        return isset($current) ? $current->price : $this->price;
     }
 
     public function checkPromoCode(string $promoCode): Collection
