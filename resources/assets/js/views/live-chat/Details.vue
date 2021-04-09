@@ -70,6 +70,25 @@
                       <b-dropdown-item>Select</b-dropdown-item>
                     </b-dropdown>
                   </div>
+                  <swiper ref="listsGroupSwiper" class="lists-group" :options="swiperOptions">
+                    <swiper-slide class="lists-group-slide">
+                      <button class="lists-item" :class="!selectedPinnedList ? 'selected' : ''" @click="useAllContacts">
+                        All
+                      </button>
+                    </swiper-slide>
+                    <swiper-slide class="lists-group-slide" v-for="list in pinnedLists" :key="list.id">
+                      <button class="lists-item"  :class="selectedPinnedList && selectedPinnedList.id === list.id ? 'selected' : ''" :disabled="!list.users.length" @click="useContactsfromList(list)">
+                        {{list.name}}
+                      </button>
+                    </swiper-slide>
+                    <swiper-slide class="lists-group-slide">
+                      <button class="lists-item lists-group-add" @click="openPinToListsModal">
+                        <svg id="icon-edit" viewBox="0 0 24 24">
+                          <path d="M13.5 6.09L3 16.59V21h4.41l10.5-10.5zM6.12 19a1.12 1.12 0 0 1-.79-1.91l8.17-8.18 1.59 1.59-8.18 8.17a1.11 1.11 0 0 1-.79.33zM21 6.5a2.2 2.2 0 0 0-.64-1.56l-1.3-1.3a2.22 2.22 0 0 0-3.12 0L14.59 5 19 9.41l1.36-1.35A2.2 2.2 0 0 0 21 6.5z"></path>
+                        </svg>
+                      </button>
+                    </swiper-slide>
+                  </swiper>
                   <div class="text-center" v-if="loading">
                     <b-spinner variant="secondary" label="Loading..." small></b-spinner>
                   </div>
@@ -502,6 +521,37 @@
         </div>
       </div>
     </b-modal>
+    <b-modal v-if="selectedUser" hide-header centered hide-footer ref="pin-to-list-modal" title="Pin To List Modal">
+      <div class="block-modal pin-to-list-modal">
+        <div class="header d-flex align-items-center">
+          <h4 class="pt-1 pb-1">PIN TO HOME</h4>
+        </div>
+        <div class="content">
+          <div class="list-item" v-for="listItem in lists" :key="listItem.id" @click="!listItem.isPinned ? addListToPin(listItem) : removeListFromPin(listItem)">
+            <round-check-box :value="listItem.isPinned" :key="listItem.isPinned"></round-check-box>
+            <div class="list-item-content d-flex justify-content-between align-items-center">
+              <div>
+                <div class="title">{{listItem.name}}</div>
+                <div class="content">{{listItem.users.length}} people</div>
+              </div>
+              <div class="avatars">
+                <template v-for="user in listItem.users">
+                  <div class="user-logo text-logo" v-if="!user.avatar" :key="user.id">
+                    {{ getLogoFromName(user.name) }}
+                  </div>
+                  <div class="user-logo" v-if="user.avatar"  :key="user.id">
+                    <img :src="user.avatar.filepath" alt="" />
+                  </div>
+                </template>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="d-flex align-items-center justify-content-end action-btns">
+          <button class="link-btn" @click="closePinToListsModal">Close</button>
+        </div>
+      </div>
+    </b-modal>
   </div>
 </template>
 
@@ -562,24 +612,21 @@
       sortableImgs: [],
       applyBtnEnabled: false,
       isSendingFiles: false,
+      originContacts: [],
+      selectedPinnedList: undefined,
+      pinnedLists: [],
     }),
     mounted() {
       const self = this;
-      Echo.join(`user-status`)
-        .here((users) => {
-            users.forEach(user => {
-              self.updateUserStatus(user.id, 1);
-            });
-        })
-        .joining((user) => {
-          self.updateUserStatus(user.id, 1);
-        })
-        .leaving((user) => {
-          self.updateUserStatus(user.id, 0);
+      this.axios.get('/lists')
+        .then(res => {
+          this.lists = res.data;
+          this.pinnedLists = this.lists.filter(list => list.isPinned);
         });
       // Mark unread messages as read
       this.axios.post(`/chat-messages/${this.$route.params.id}/mark-as-read`);
       this.axios.get('/chat-messages/contacts').then((response) => {
+        this.originContacts = response.data;
         this.users = response.data;
         this.users.forEach(user => {
           if (user.profile.user.is_online) {
@@ -601,13 +648,13 @@
             $('.conversation-list').animate({ scrollTop: $('.conversation-list')[0].scrollHeight }, 500);
           }
         });
-      Echo.join(`user-status`)
-        .joining((user) => {
-          self.updateUserStatus(user.id, 1);
-        })
-        .leaving((user) => {
-          self.updateUserStatus(user.id, 0);
-        });
+      // Echo.join(`user-status`)
+      //   .joining((user) => {
+      //     self.updateUserStatus(user.id, 1);
+      //   })
+      //   .leaving((user) => {
+      //     self.updateUserStatus(user.id, 0);
+      //   });
       Echo.join(`chat-typing`)
         .listenForWhisper('typing', (e) => {
           if (e.from === self.$route.params.id && e.to === self.currentUser.id && e.typing) {
@@ -1085,7 +1132,7 @@
         if (this.$refs.mySwiper) {
           this.$refs.mySwiper.updateSwiper();
         }
-      },
+      }, 
       setFollowForFree: function(userId) {
         this.axios.patch(`/users/${userId}/settings`, {
           is_follow_for_free: true,
@@ -1098,6 +1145,45 @@
             }
           };
         })
+      },
+      useAllContacts: function () {
+        this.users = this.originContacts.slice();
+        this.selectedPinnedList = undefined;
+      },
+      useContactsfromList: function(list) {
+        this.selectedPinnedList = list;
+        const contacts = this.originContacts.slice();
+        _.remove(contacts, function(o) { return list.users.findIndex(user => user.id === o.profile.id) < 0; });
+        this.users = contacts;
+      },
+      openPinToListsModal: function() {
+        this.$refs['pin-to-list-modal'].show();
+      },
+      closePinToListsModal: function() {
+        this.$refs['pin-to-list-modal'].hide();
+      },
+      addListToPin: function(list) {
+        this.axios.post(`/lists/${list.id}/pin`).then(() => {
+          const newPin = this.pinnedLists.slice();
+          newPin.push(list);
+          this.pinnedLists = newPin;
+          const newLists = this.lists.slice();
+          const idx = newLists.findIndex(item => item.id === list.id);
+          newLists[idx].isPinned = true;
+          this.lists = newLists;
+        });
+      },
+      removeListFromPin: function(list) {
+        this.axios.delete(`/lists/${list.id}/pin`).then(() => {
+          const newPin = this.pinnedLists.slice();
+          const index = newPin.findIndex(item => item.id === list.id);
+          newPin.splice(index, 1);
+          this.pinnedLists = newPin;
+          const newLists = this.lists.slice();
+          const idx = newLists.findIndex(item => item.id === list.id);
+          newLists[idx].isPinned = false;
+          this.lists = newLists;
+        });
       }
     }
   }

@@ -1064,6 +1064,60 @@
 			}
 		}
 	}
+	.lists-group {
+		padding: 0 16px 16px;
+
+		.lists-group-slide {
+			width: auto;
+			margin-right: 8px;
+
+      &:last-child {
+        margin-right: 0;
+      }
+			
+		}
+
+    .lists-item {
+      border-radius: 16px;
+      height: 32px;
+      width: auto;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      font-size: 14px;
+      line-height: 1em;
+      text-transform: none;
+      font-weight: 400;
+      color: #242529;
+			padding: 8px 14px;
+      background-color: rgba(138,150,163,.12);
+      transition: background-color .1s,color .1s;
+			outline: none;
+
+			&.selected {
+				background-color: rgba(0,175,240,.25);
+			}
+			&:disabled {
+				opacity: .4;
+				pointer-events: none;
+			}
+			&:hover {
+				background-color: rgba(0,145,234,.18);
+				color: #0091ea;
+			}
+
+      &.lists-group-add {
+        width: 32px;
+				padding: 0;
+        svg {
+          width: 16px;
+          height: 16px;
+          fill: currentColor;
+        }
+      }
+    }
+  }
 }
 
 /**

@@ -100,4 +100,18 @@ class ListsController extends Controller
             }
         }
     }
+    public function addToPin(Request $request, $id)
+    {
+        $list = Lists::where('id', $id)->first();
+        $list->isPinned = true;
+        $list->save();
+        return ['status' => 'success'];
+    }
+    public function removeFromPin(Request $request, $id)
+    {
+        $list = Lists::where('id', $id)->first();
+        $list->isPinned = false;
+        $list->save();
+        return ['status' => 'success'];
+    }
 }
