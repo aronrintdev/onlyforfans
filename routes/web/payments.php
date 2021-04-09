@@ -7,6 +7,7 @@
 Route::group(['prefix' => '/payment'], function () {
     Route::group(['prefix' => '/segpay'], function () {
         Route::post('/generate-url', 'SegPayController@generatePayPageUrl');
+        Route::post('/payment-session', 'SegPayController@getPaymentSession')->name('payments.segpay.getPaymentSession');
     });
 
     Route::get('/methods/index', 'PaymentsController@index')->name('payment.methods.index');

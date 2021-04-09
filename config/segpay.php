@@ -12,4 +12,9 @@ return [
     'packageId' => env('SEGPAY_PACKAGE_ID', '199225'),
     'pricePointId' => env('SEGPAY_PRICE_POINT_ID', '26943'),
     'secret' => env('SEGPAY_SECRET_KEY', '95345D5827AEFC558525AD4878A46'),
+
+    'paymentSessions' => [
+        'baseUrl' => env('SEGPAY_PAYMENT_SESSIONS_BASE_URL', 'https://embedding.segpay.com/client/v1/payment-sessions/new'),
+        'token' => env('SEGPAY_PAYMENT_SESSIONS_TOKEN', ''),
+    ],
 ];

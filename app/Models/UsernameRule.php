@@ -142,6 +142,6 @@ class UsernameRule extends Model
      */
     public function addedBy()
     {
-        return $this->hasOne('App\Models\User', 'added_by');
+        return $this->hasOne(User::class, 'added_by');
     }
 }

@@ -45,22 +45,22 @@ class Vaultfolder extends BaseModel implements Guidable, Ownable
 
     public function mediafiles()
     {
-        return $this->morphMany('App\Models\mediafile', 'resource');
+        return $this->morphMany(Mediafile::class, 'resource');
     }
 
     public function vfparent()
     {
-        return $this->belongsTo('App\Models\Vaultfolder', 'parent_id');
+        return $this->belongsTo(Vaultfolder::class, 'parent_id');
     }
 
     public function vfchildren()
     {
-        return $this->hasMany('App\Models\Vaultfolder', 'parent_id');
+        return $this->hasMany(Vaultfolder::class, 'parent_id');
     }
 
     public function sharees()
     {
-        return $this->morphToMany('App\Models\User', 'shareable', 'shareables', 'shareable_id', 'sharee_id');
+        return $this->morphToMany(User::class, 'shareable', 'shareables', 'shareable_id', 'sharee_id');
     }
 
     public function getOwner(): ?Collection

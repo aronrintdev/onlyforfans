@@ -15,15 +15,15 @@
 /**
  * Form for new payment method
  */
-import NewCard from './NewCard'
 import SegpayNew from './SegpayNew'
+import SegpayNewIFrame from './SegpayNewIFrame'
 
 export default {
   name: 'New',
 
   components: {
-    NewCard,
     SegpayNew,
+    SegpayNewIFrame,
   },
 
   props: {
@@ -36,8 +36,8 @@ export default {
   data: () => ({
     systems: {
       'segpay': {
-        component: NewCard,
-        // component: SegpayNew,
+        component: SegpayNew,
+        // component: SegpayNewIFrame,
       }
     }
   }),

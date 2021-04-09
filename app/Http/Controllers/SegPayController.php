@@ -117,4 +117,39 @@ class SegPayController extends Controller
 
         return $url;
     }
+
+
+    public function getPaymentSession(Request $request)
+    {
+        $request->validate([
+            'item' => 'required|uuid',
+            'price' => 'required',
+        ]);
+
+        // Get purchase item
+        $item = PurchasableHelpers::getPurchasableItem($request->item);
+
+        // Validate Price
+        if (!$item->verifyPrice($request->price)) {
+            abort(400, 'Invalid Price');
+        }
+
+        // Get payment session
+        $client = new Client();
+        $response = $client->request('GET', Config::get('segpay.paymentSessions.baseUrl'), [
+            'query' => [
+                'tokenId' => Config::get('segpay.paymentSessions.token'),
+                'dynamicDescription' => urlencode('All Fans Purchase'),
+                'dynamicInitialAmount' => $item->formatMoneyDecimal($item->price),
+            ],
+        ]);
+
+        return $response;
+    }
+
+    public function getSubscriptionSession(Request $request)
+    {
+        //
+    }
+
 }
