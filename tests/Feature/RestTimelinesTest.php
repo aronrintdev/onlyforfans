@@ -16,6 +16,12 @@ use App\Models\Mediafile;
 use App\Models\Timeline;
 use App\Models\User;
 
+/**
+ * @group feature
+ * @group timelines
+ *
+ * @package Tests\Feature
+ */
 class TimelinesTest extends TestCase
 {
     use RefreshDatabase, WithFaker;
@@ -322,8 +328,16 @@ class TimelinesTest extends TestCase
         $this->assertObjectHasAttribute('cover', $content->data);
         $this->assertObjectHasAttribute('avatar', $content->data);
 
+        $this->assertObjectHasAttribute('user', $content->data);
+        $this->assertObjectHasAttribute('id', $content->data->user);
+        // Only want user id
+        $this->assertObjectNotHasAttribute('username', $content->data->user);
+        $this->assertObjectNotHasAttribute('email', $content->data->user);
+        $this->assertObjectNotHasAttribute('password', $content->data->user);
+        $this->assertObjectNotHasAttribute('remember_token', $content->data->user);
+        $this->assertObjectNotHasAttribute('verification_code', $content->data->user);
+
         $this->assertObjectNotHasAttribute('posts', $content->data);
-        $this->assertObjectNotHasAttribute('user', $content->data);
         $this->assertObjectNotHasAttribute('followers', $content->data);
         $this->assertObjectNotHasAttribute('subscribers', $content->data);
         $this->assertObjectNotHasAttribute('ledgersales', $content->data);
@@ -353,10 +367,19 @@ class TimelinesTest extends TestCase
         $this->assertNotNull($content->data->name);
         $this->assertObjectHasAttribute('about', $content->data);
         $this->assertNotNull($content->data->about);
+
+        $this->assertObjectHasAttribute('user', $content->data);
+        $this->assertObjectHasAttribute('id', $content->data->user);
+        // Only want user id
+        $this->assertObjectNotHasAttribute('username', $content->data->user);
+        $this->assertObjectNotHasAttribute('email', $content->data->user);
+        $this->assertObjectNotHasAttribute('password', $content->data->user);
+        $this->assertObjectNotHasAttribute('remember_token', $content->data->user);
+        $this->assertObjectNotHasAttribute('verification_code', $content->data->user);
+
         $this->assertObjectHasAttribute('cover', $content->data);
         $this->assertObjectHasAttribute('avatar', $content->data);
         $this->assertObjectNotHasAttribute('posts', $content->data);
-        $this->assertObjectNotHasAttribute('user', $content->data);
         $this->assertObjectNotHasAttribute('followers', $content->data);
         $this->assertObjectNotHasAttribute('subscribers', $content->data);
         $this->assertObjectNotHasAttribute('ledgersales', $content->data);
