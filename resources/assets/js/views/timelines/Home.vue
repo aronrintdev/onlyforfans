@@ -22,7 +22,6 @@
 
     </div>
 
-
     <!-- %FIXME: DRY vs Show -->
     <b-modal id="modal-tip" size="sm" title="Send a Tip" hide-footer body-class="p-0">
       <SendTip :session_user="session_user" :timeline="timeline" :payload="modalPayload" />

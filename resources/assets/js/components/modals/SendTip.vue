@@ -62,7 +62,7 @@ export default {
 
   props: {
     session_user: null,
-    timeline: null,
+    timeline: null, // still needed to fill in avatar, etc
     // %NOTE: payload is a JSON object that must have keys: resource_type and resource_id
     payload: null, // %TODO: use this instead of timeline above (?)
   },
