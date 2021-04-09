@@ -171,7 +171,6 @@ class PostsController extends AppBaseController
     }
 
     // %TODO: check if already purchased? -> return error
-    // %NOTE: post price in DB is in dollars not cents %FIXME
     public function purchase(Request $request, Post $post)
     {
         $this->authorize('purchase', $post);
@@ -188,6 +187,7 @@ class PostsController extends AppBaseController
                 'cattrs' => json_encode($cattrs ?? []),
             ]);
         } catch(Exception | Throwable $e) {
+            throw $e;
             return response()->json(['message'=>$e->getMessage()], 400);
         }
 
