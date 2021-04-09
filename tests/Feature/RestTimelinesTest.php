@@ -327,6 +327,8 @@ class TimelinesTest extends TestCase
         $this->assertNotNull($content->data->about);
         $this->assertObjectHasAttribute('cover', $content->data);
         $this->assertObjectHasAttribute('avatar', $content->data);
+        $this->assertObjectHasAttribute('user', $content->data);
+        $this->assertNotNull($content->data->user->id);
 
         $this->assertObjectHasAttribute('user', $content->data);
         $this->assertObjectHasAttribute('id', $content->data->user);
@@ -508,7 +510,7 @@ class TimelinesTest extends TestCase
     }
 
     /**
-     *  @group timelines
+     *  @group OFF-timelines
      *  @group OFF-regression
      *  @group broken
      */
