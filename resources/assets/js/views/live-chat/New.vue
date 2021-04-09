@@ -39,33 +39,54 @@
                           </path>
                         </svg>
                       </button>
-                      <b-dropdown id="user-filter-dropdown" right>
+                      <b-dropdown class="filter-dropdown" right>
                         <template #button-content>
-                          <svg class="sort-icon has-tooltip" aria-hidden="true" data-original-title="null">
-                            <use xlink:href="#icon-sort" href="#icon-sort">
-                              <svg id="icon-sort" viewBox="0 0 24 24">
-                                <path
-                                  d="M4 19h4a1 1 0 0 0 1-1 1 1 0 0 0-1-1H4a1 1 0 0 0-1 1 1 1 0 0 0 1 1zM3 6a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1 1 1 0 0 0-1-1H4a1 1 0 0 0-1 1zm1 7h10a1 1 0 0 0 1-1 1 1 0 0 0-1-1H4a1 1 0 0 0-1 1 1 1 0 0 0 1 1z">
-                                </path>
-                              </svg>
-                            </use>
+                          <svg class="sort-icon" viewBox="0 0 24 24">
+                            <path
+                              d="M4 19h4a1 1 0 0 0 1-1 1 1 0 0 0-1-1H4a1 1 0 0 0-1 1 1 1 0 0 0 1 1zM3 6a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1 1 1 0 0 0-1-1H4a1 1 0 0 0-1 1zm1 7h10a1 1 0 0 0 1-1 1 1 0 0 0-1-1H4a1 1 0 0 0-1 1 1 1 0 0 0 1 1z">
+                            </path>
                           </svg>
                         </template>
                         <b-dropdown-item @click="onOptionChanged('recent')">
-                          <b-form-radio v-model="optionValue" name="some-radios" value="recent">Recent</b-form-radio>
+                          <radio-group-box
+                            group_name="users-sort-options"
+                            value="recent"
+                            :checked="optionValue === 'recent'"
+                            label="Recent">
+                          </radio-group-box>
                         </b-dropdown-item>
                         <b-dropdown-item @click="onOptionChanged('name')">
-                          <b-form-radio v-model="optionValue" name="some-radios" value="name">Name</b-form-radio>
+                          <radio-group-box
+                            group_name="users-sort-options"
+                            value="name"
+                            :checked="optionValue === 'name'"
+                            label="Name">
+                          </radio-group-box>
                         </b-dropdown-item>
                         <b-dropdown-item @click="onOptionChanged('available')">
-                          <b-form-radio v-model="optionValue" name="some-radios" value="available">Available</b-form-radio>
+                          <radio-group-box
+                            group_name="users-sort-options"
+                            value="available"
+                            :checked="optionValue === 'available'"
+                            label="Available">
+                          </radio-group-box>
                         </b-dropdown-item>
                         <b-dropdown-divider></b-dropdown-divider>
-                        <b-dropdown-item @click="onOptionChanged('ASC')"> 
-                          <b-form-radio v-model="optionValue" name="some-radios" value="ASC">Ascending</b-form-radio>
+                        <b-dropdown-item @click="onDirectionChanged('ASC')"> 
+                          <radio-group-box
+                            group_name="users-sort-directions"
+                            value="ASC"
+                            :checked="directionValue === 'ASC'"
+                            label="Ascending"> 
+                          </radio-group-box>
                         </b-dropdown-item>
-                        <b-dropdown-item @click="onOptionChanged('DESC')">
-                          <b-form-radio v-model="optionValue" name="some-radios" value="DESC">Descending</b-form-radio>
+                        <b-dropdown-item @click="onDirectionChanged('DESC')">
+                          <radio-group-box
+                            group_name="users-sort-directions"
+                            value="DESC"
+                            :checked="directionValue === 'DESC'"
+                            label="Descending">  
+                          </radio-group-box>
                         </b-dropdown-item>
                       </b-dropdown>
                     </div>
@@ -169,7 +190,8 @@
 
 <script>
   import _ from 'lodash';
-  import RoundCheckBox from '../../components/roundCheckBox';
+  import RadioGroupBox from '@components/radioGroupBox';
+  import RoundCheckBox from '@components/roundCheckBox';
   /**
    * Messages Dashboard View
    */
@@ -178,7 +200,8 @@
     data: () => ({
       userSearchText: undefined,
       userSearchVisible: false,
-      optionValue: 'unread_first',
+      optionValue: undefined,
+      directionValue: undefined,
       selectedUser: undefined,
       messageText: undefined,
       users: [],
@@ -215,7 +238,8 @@
       },
     },
     components: {
-      'round-check-box': RoundCheckBox
+      'round-check-box': RoundCheckBox,
+      'radio-group-box': RadioGroupBox,
     },
     methods: {
       changeSearchbarVisible: function () {
@@ -259,6 +283,9 @@
         Promise.all(promises).then(function() {
           self.$router.push('/messages');
         });
+      },
+      onDirectionChanged: function(dir) {
+        this.directionValue = dir;
       }
     }
   }
