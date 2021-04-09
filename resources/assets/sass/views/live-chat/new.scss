@@ -3,18 +3,6 @@
 	max-width: 1200px;
 	margin: auto;
 
-	.header-text {
-		font-family: 'Open Sans', sans-serif;
-		font-weight: 400;
-		font-size: 24px;
-		text-transform: capitalize;
-		color: #4a5568;
-	}
-
-	.page-heading {
-		float: left;
-		padding: 12px 12px 14px 12px;
-	}
 	.btn {
 		position: relative;
 		
@@ -93,11 +81,15 @@
 		}
 		.user-search-bar {
 			height: 56px;
+			background-color: #f6f7f8;
+			border-bottom: none;
+
  			input {
 				flex: 1;
 				padding: 0;
 				border: none;
 				box-shadow: none;
+				background: transparent;
 			}
 			.btn {
 				i {
@@ -119,7 +111,7 @@
 			
 			.selected-option {
 				text-transform: uppercase;
-				color: #8a96a3;
+				color: rgb(138, 150, 163);
 				font-weight: 400;
 				font-size: 16px;
 			}

@@ -1,136 +1,14 @@
 <template>
   <div class="container-fluid">
     <div class="row">
-      <div class="col-md-2 visible-lg">
-
-      </div>
+      <div class="col-md-2 visible-lg" />
       <div class="col-md-12 col-lg-12">
         <div class="messages-page" id="messages-page">
           <div class="card">
             <div class="card-body nopadding">
               <div class="row message-box">
-                <div class="col-md-4 col-sm-4 col-xs-4 message-col-4">
-                  <div class="top-bar" v-if="!userSearchVisible">
-                    <div>
-                      <router-link to="/">
-                        <button class="btn" type="button">
-                          <i class="fa fa-arrow-left" aria-hidden="true"></i>
-                        </button> 
-                      </router-link>
-                      <span class="top-bar-title">Messages</span>
-                    </div> 
-                    <div class="top-bar-action-btns">
-                      <button class="btn" type="button" @click="changeSearchbarVisible">
-                        <i class="fa fa-search" aria-hidden="true"></i>
-                      </button>
-                      <router-link to="/messages/new">
-                        <button class="btn" type="button">
-                          <i class="fa fa-plus" aria-hidden="true"></i>
-                        </button>
-                      </router-link>
-                    </div>
-                  </div>
-                  <div class="top-bar user-search-bar" v-if="userSearchVisible">
-                    <button class="btn" type="button" @click="changeSearchbarVisible">
-                      <i class="fa fa-times" aria-hidden="true"></i>
-                    </button>
-                    <b-form-input :value="userSearchText" @input="onUserSearch" placeholder="Search"></b-form-input>
-                    <button class="btn" type="button" :disabled="!userSearchText">
-                      <i class="fa fa-search" aria-hidden="true"></i>
-                    </button>
-                  </div>
-                  <div class="options-bar">
-                    <span class="selected-option">{{selectedOption}}</span>
-                    <b-dropdown class="filter-dropdown" id="user-filter-dropdown" right>
-                      <template #button-content>
-                        <svg class="sort-icon has-tooltip" aria-hidden="true" data-original-title="null">
-                          <use xlink:href="#icon-sort" href="#icon-sort">
-                            <svg id="icon-sort" viewBox="0 0 24 24">
-                              <path
-                                d="M4 19h4a1 1 0 0 0 1-1 1 1 0 0 0-1-1H4a1 1 0 0 0-1 1 1 1 0 0 0 1 1zM3 6a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1 1 1 0 0 0-1-1H4a1 1 0 0 0-1 1zm1 7h10a1 1 0 0 0 1-1 1 1 0 0 0-1-1H4a1 1 0 0 0-1 1 1 1 0 0 0 1 1z">
-                              </path>
-                            </svg>
-                          </use>
-                        </svg>
-                      </template>
-                      <b-dropdown-item @click="onOptionChanged('recent')">
-                        <b-form-radio v-model="optionValue" name="some-radios" value="recent">Recent</b-form-radio>
-                      </b-dropdown-item>
-                      <b-dropdown-item @click="onOptionChanged('unread_first')">
-                        <b-form-radio v-model="optionValue" name="some-radios" value="unread_first">Unread First
-                        </b-form-radio>
-                      </b-dropdown-item>
-                      <b-dropdown-item @click="onOptionChanged('oldest_unread_first')">
-                        <b-form-radio v-model="optionValue" name="some-radios" value="oldest_unread_first">Oldest unread
-                          first</b-form-radio>
-                      </b-dropdown-item>
-                      <b-dropdown-divider></b-dropdown-divider>
-                      <b-dropdown-item @click="markAllAsRead">Mark all as read</b-dropdown-item>
-                      <b-dropdown-divider></b-dropdown-divider>
-                      <b-dropdown-item>Select</b-dropdown-item>
-                    </b-dropdown>
-                  </div>
-                  <swiper ref="listsGroupSwiper" class="lists-group" :options="swiperOptions">
-                    <swiper-slide class="lists-group-slide">
-                      <button class="lists-item" :class="!selectedPinnedList ? 'selected' : ''" @click="useAllContacts">
-                        All
-                      </button>
-                    </swiper-slide>
-                    <swiper-slide class="lists-group-slide" v-for="list in pinnedLists" :key="list.id">
-                      <button class="lists-item"  :class="selectedPinnedList && selectedPinnedList.id === list.id ? 'selected' : ''" :disabled="!list.users.length" @click="useContactsfromList(list)">
-                        {{list.name}}
-                      </button>
-                    </swiper-slide>
-                    <swiper-slide class="lists-group-slide">
-                      <button class="lists-item lists-group-add" @click="openPinToListsModal">
-                        <svg id="icon-edit" viewBox="0 0 24 24">
-                          <path d="M13.5 6.09L3 16.59V21h4.41l10.5-10.5zM6.12 19a1.12 1.12 0 0 1-.79-1.91l8.17-8.18 1.59 1.59-8.18 8.17a1.11 1.11 0 0 1-.79.33zM21 6.5a2.2 2.2 0 0 0-.64-1.56l-1.3-1.3a2.22 2.22 0 0 0-3.12 0L14.59 5 19 9.41l1.36-1.35A2.2 2.2 0 0 0 21 6.5z"></path>
-                        </svg>
-                      </button>
-                    </swiper-slide>
-                  </swiper>
-                  <div class="text-center" v-if="loading">
-                    <b-spinner variant="secondary" label="Loading..." small></b-spinner>
-                  </div>
-                  <div class="no-users" v-if="!users.length">Nothing was found</div>
-                  <ul class="user-list" v-if="users.length">
-                    <li v-for="user in users" :key="user.profile.id"
-                      :class="selectedUser && selectedUser.profile.id === user.profile.id ? 'selected' : ''"
-                    >
-                      <router-link :to="`/messages/${user.profile.id}`">
-                        <div class="user-content">
-                          <div class="user-logo text-logo" v-if="!user.profile.avatar">
-                            {{ getLogoFromName(user.profile.name) }}
-                            <span :class="`status-holder status-holder-${user.profile.id}`"></span>
-                          </div>
-                          <div class="user-logo" v-if="user.profile.avatar">
-                            <img :src="user.profile.avatar.filepath" alt="" />
-                            <span :class="`status-holder status-holder-${user.profile.id}`"></span>
-                          </div>
-                          <div class="user-details">
-                            <div class="user-details-row">
-                              <div>
-                                <span class="username">{{ user.profile.display_name ? user.profile.display_name : user.profile.name }}</span>
-                                <span class="user-id">{{ `@${user.profile.username}` }}</span>
-                              </div>
-                              <!-- Close Button -->
-                              <button class="close-btn btn" type="button" @click="clearMessages(user.profile)">
-                                <i class="fa fa-times" aria-hidden="true"></i>
-                              </button>
-                            </div>
-                            <div class="user-details-row">
-                              <span class="last-message">{{ user.last_message.message }}</span>
-                              <!-- Date  -->
-                              <span class="last-message-date">{{ moment(user.last_message.created_at).format('MMM DD, YYYY') }}</span>
-                            </div>
-                          </div>
-                        </div>
-                        <div class="divider"></div>
-                      </router-link>
-                    </li>
-                  </ul>
-                </div>
-                 <div v-if="selectedUser" class="col-md-8 col-sm-8 col-xs-8 message-col-8">
+                <chat-sidebar :selectedUser="selectedUser" />
+                <div v-if="selectedUser" class="col-md-8 col-sm-8 col-xs-8 message-col-8">
                   <div :class="messageSearchVisible ? 'conversation-header no-border' : 'conversation-header'">
                     <button class="back-btn btn" type="button" @click="clearSelectedUser">
                       <i class="fa fa-arrow-left" aria-hidden="true"></i>
@@ -521,37 +399,6 @@
         </div>
       </div>
     </b-modal>
-    <b-modal v-if="selectedUser" hide-header centered hide-footer ref="pin-to-list-modal" title="Pin To List Modal">
-      <div class="block-modal pin-to-list-modal">
-        <div class="header d-flex align-items-center">
-          <h4 class="pt-1 pb-1">PIN TO HOME</h4>
-        </div>
-        <div class="content">
-          <div class="list-item" v-for="listItem in lists" :key="listItem.id" @click="!listItem.isPinned ? addListToPin(listItem) : removeListFromPin(listItem)">
-            <round-check-box :value="listItem.isPinned" :key="listItem.isPinned"></round-check-box>
-            <div class="list-item-content d-flex justify-content-between align-items-center">
-              <div>
-                <div class="title">{{listItem.name}}</div>
-                <div class="content">{{listItem.users.length}} people</div>
-              </div>
-              <div class="avatars">
-                <template v-for="user in listItem.users">
-                  <div class="user-logo text-logo" v-if="!user.avatar" :key="user.id">
-                    {{ getLogoFromName(user.name) }}
-                  </div>
-                  <div class="user-logo" v-if="user.avatar"  :key="user.id">
-                    <img :src="user.avatar.filepath" alt="" />
-                  </div>
-                </template>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="d-flex align-items-center justify-content-end action-btns">
-          <button class="link-btn" @click="closePinToListsModal">Close</button>
-        </div>
-      </div>
-    </b-modal>
   </div>
 </template>
 
@@ -566,6 +413,7 @@
 
   import RadioGroupBox from '@components/radioGroupBox';
   import RoundCheckBox from '@components/roundCheckBox';
+  import Sidebar from './Sidebar';
 
   /**
    * Messages Dashboard View
@@ -575,9 +423,6 @@
       session_user: null,
     },
     data: () => ({
-      userSearchText: undefined,
-      userSearchVisible: false,
-      optionValue: 'unread_first',
       selectedUser: undefined,
       users: [],
       loading: true,
@@ -612,31 +457,11 @@
       sortableImgs: [],
       applyBtnEnabled: false,
       isSendingFiles: false,
-      originContacts: [],
-      selectedPinnedList: undefined,
-      pinnedLists: [],
     }),
     mounted() {
       const self = this;
-      this.axios.get('/lists')
-        .then(res => {
-          this.lists = res.data;
-          this.pinnedLists = this.lists.filter(list => list.isPinned);
-        });
       // Mark unread messages as read
       this.axios.post(`/chat-messages/${this.$route.params.id}/mark-as-read`);
-      this.axios.get('/chat-messages/contacts').then((response) => {
-        this.originContacts = response.data;
-        this.users = response.data;
-        this.users.forEach(user => {
-          if (user.profile.user.is_online) {
-            setTimeout(() => {
-              this.updateUserStatus(user.profile.user.id, 1);
-            }, 2000);
-          }
-        });
-        this.loading = false;
-      });
       this.getMessages();
       this.findConversationList();
       Echo.private(`${this.$route.params.id}-message`)
@@ -695,9 +520,10 @@
     components: {
       Swiper,
       SwiperSlide,
+      draggable,
       'radio-group-box': RadioGroupBox,
       'round-check-box': RoundCheckBox,
-      draggable: draggable,
+      'chat-sidebar': Sidebar,
     },
     directives: {
       swiper: directive,
@@ -736,14 +562,6 @@
           this.$el.querySelector('.conversation-list .messages').scrollTop = 10;
         }
       },
-      updateUserStatus: function (userId, status) {
-        let statusHolder = $(".status-holder-"+ userId);
-        if (status == 1) {
-          statusHolder.addClass('online');        
-        } else {
-          statusHolder.removeClass('online');
-        }
-      },
       findConversationList: function() {
         setTimeout(() => {
             if (this.$el.querySelector('.conversation-list')) {
@@ -780,41 +598,12 @@
         this.messages = _.cloneDeep(this.messages);
         this.selectedUser = { ...this.selectedUser, messages: this.messages };
       },
-      changeSearchbarVisible: function () {
-        this.userSearchVisible = !this.userSearchVisible; 
-        this.userSearchText = undefined;
-      },
-      onUserSearch: function(value) {
-        this.userSearchText = value;
-        this.axios.get(`/chat-messages/contacts?name=${value}&sort=${this.optionValue}`)
-          .then((res) => {
-            this.users = res.data;
-          })
-      },
-      onOptionChanged: function (value) {
-        this.optionValue = value;
-        const filterQuery =  this.userSearchText ? 'name=' + this.userSearchText : '';
-        this.axios.get(`/chat-messages/contacts?${filterQuery}&sort=${value}`)
-          .then((res) => {
-            this.users = res.data;
-          })
-      },
       getLogoFromName: function (username) {
         const names = username.split(' ');
         if (names.length === 1) {
           return username.slice(0, 2);
         }
         return names[0].slice(0, 1) + names[1].slice(0, 1);
-      },
-      clearMessages: function (receiver) {
-        this.axios.delete(`/chat-messages/${receiver.id}`)
-          .then((res) => {
-            const { data } = res;
-            if (data.status === 200) {
-              const idx = this.users.findIndex(user => user.profile.id === receiver.id);
-              this.users.splice(idx, 1);
-            }
-          })
       },
       clearSelectedUser: function () {
         this.$router.push('/messages');
@@ -861,9 +650,6 @@
             to: this.$route.params.id
           })
         }, 300);
-      },
-      markAllAsRead: function() {
-        this.axios.post('/chat-messages/mark-all-as-read');
       },
       sendMessage: function() {
         // Sending Text Message
@@ -1144,53 +930,13 @@
               is_follow_for_free: true,
             }
           };
-        })
-      },
-      useAllContacts: function () {
-        this.users = this.originContacts.slice();
-        this.selectedPinnedList = undefined;
-      },
-      useContactsfromList: function(list) {
-        this.selectedPinnedList = list;
-        const contacts = this.originContacts.slice();
-        _.remove(contacts, function(o) { return list.users.findIndex(user => user.id === o.profile.id) < 0; });
-        this.users = contacts;
-      },
-      openPinToListsModal: function() {
-        this.$refs['pin-to-list-modal'].show();
-      },
-      closePinToListsModal: function() {
-        this.$refs['pin-to-list-modal'].hide();
-      },
-      addListToPin: function(list) {
-        this.axios.post(`/lists/${list.id}/pin`).then(() => {
-          const newPin = this.pinnedLists.slice();
-          newPin.push(list);
-          this.pinnedLists = newPin;
-          const newLists = this.lists.slice();
-          const idx = newLists.findIndex(item => item.id === list.id);
-          newLists[idx].isPinned = true;
-          this.lists = newLists;
         });
       },
-      removeListFromPin: function(list) {
-        this.axios.delete(`/lists/${list.id}/pin`).then(() => {
-          const newPin = this.pinnedLists.slice();
-          const index = newPin.findIndex(item => item.id === list.id);
-          newPin.splice(index, 1);
-          this.pinnedLists = newPin;
-          const newLists = this.lists.slice();
-          const idx = newLists.findIndex(item => item.id === list.id);
-          newLists[idx].isPinned = false;
-          this.lists = newLists;
-        });
-      }
     }
   }
 </script>
 
 <style lang="scss" scoped>
-  @import "../../../sass/views/live-chat/home.scss";
   @import "../../../sass/views/live-chat/details_scoped.scss";
 </style>
 <style lang="scss">

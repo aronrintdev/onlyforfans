@@ -20,15 +20,12 @@
                       <span class="top-bar-title">New Message</span>
                     </div>
                   </div>
-                  <div class="options-bar">
-                    <span class="selected-option">SEND TO</span>
-                  </div>
                   <div class="top-bar user-search-bar">
                     <button class="btn" type="button" disabled>
                       <i class="fa fa-search" aria-hidden="true"></i>
                     </button>
                     <b-form-input :value="userSearchText" @input="onChangeSearchText" placeholder="Add People"></b-form-input>
-                    <button class="btn" type="button" @click="changeSearchbarVisible">
+                    <button v-if="userSearchText" class="btn" type="button" @click="changeSearchbarVisible">
                       <i class="fa fa-times" aria-hidden="true"></i>
                     </button>
                   </div>
@@ -73,20 +70,6 @@
                       </b-dropdown>
                     </div>
                   </div>
-                  <swiper ref="listsGroupSwiper" :options="swiperOptions">
-                    <swiper-slide class="slide">
-                      <div class="lists-group">
-                        <button class="lists-item" v-for="list in lists" :key="list.id">
-                          {{list.name}}
-                        </button>
-                        <button class="lists-group-add">
-                          <svg id="icon-edit" viewBox="0 0 24 24">
-                            <path d="M13.5 6.09L3 16.59V21h4.41l10.5-10.5zM6.12 19a1.12 1.12 0 0 1-.79-1.91l8.17-8.18 1.59 1.59-8.18 8.17a1.11 1.11 0 0 1-.79.33zM21 6.5a2.2 2.2 0 0 0-.64-1.56l-1.3-1.3a2.22 2.22 0 0 0-3.12 0L14.59 5 19 9.41l1.36-1.35A2.2 2.2 0 0 0 21 6.5z"></path>
-                          </svg>
-                        </button>
-                      </div>
-                    </swiper-slide>
-                  </swiper>
                   <div class="user-list-container">
                     <ul class="user-list">
                       <div class="text-center" v-if="loading">
@@ -202,7 +185,6 @@
       filteredUsers: [],
       selectedUsers: [],
       loading: true,
-      lists: [],
     }),
     mounted() {
       this.axios.get('/chat-messages/users').then((response) => {
@@ -212,10 +194,6 @@
         this.filteredUsers = this.users.slice();
         this.loading = false;
       });
-      this.axios.get('/lists')
-        .then(res => {
-          this.lists = res.data;
-        });
     },
     computed: {
       selectedOption: function () {
