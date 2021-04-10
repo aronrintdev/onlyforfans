@@ -2,12 +2,19 @@
 
 namespace App\Http\Controllers;
 
-use App\Helpers\Purchasable as PurchasableHelpers;
-use App\Helpers\Tippable;
+use App\Enums\Financial\AccountTypeEnum;
+use Carbon\Carbon;
 use GuzzleHttp\Client;
 use Illuminate\Http\Request;
+use App\Enums\PaymentTypeEnum;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
+use App\Helpers\Tippable as TippableHelpers;
+use App\Helpers\Purchasable as PurchasableHelpers;
+use App\Jobs\FakeSegpayPayment;
+use App\Models\Financial\Account;
+use App\Models\Financial\SegpayCard;
+use App\Rules\InEnum;
 
 class SegPayController extends Controller
 {
@@ -72,7 +79,7 @@ class SegPayController extends Controller
     public function generateTipPayPageUre(Request $request)
     {
         if (isset($request->item)) {
-            $item = Tippable::getTippableItem($request->item);
+            $item = TippableHelpers::getTippableItem($request->item);
             $price = $item->formatMoneyDecimal($item->price);
         } else {
             $price = $request->price;
@@ -123,15 +130,38 @@ class SegPayController extends Controller
     {
         $request->validate([
             'item' => 'required|uuid',
+            'type' => [ 'required', new InEnum(new PaymentTypeEnum())],
             'price' => 'required',
         ]);
 
-        // Get purchase item
-        $item = PurchasableHelpers::getPurchasableItem($request->item);
+        // Get payment item
+        if ($request->type === PaymentTypeEnum::PURCHASE) {
+            $item = PurchasableHelpers::getPurchasableItem($request->item);
+            $description = 'All Fans Purchase';
+        } else if ($request->type === PaymentTypeEnum::TIP) {
+            $item = TippableHelpers::getTippableItem($request->item);
+            $description = 'All Fans Tip';
+        } else if ($request->type === PaymentTypeEnum::SUBSCRIPTION) {
+            //
+            $description = 'All Fans Subscription';
+        }
+
+        if (!isset($item)) {
+            abort(400, 'Bad type or item');
+        }
 
         // Validate Price
         if (!$item->verifyPrice($request->price)) {
             abort(400, 'Invalid Price');
+        }
+
+        // If environment variable is set, fake results
+        if (Config::get('segpay.fake') === true && Config::get('app.env') !== 'production') {
+            return [
+                'id' => 'faked',
+                'pageId' => 'faked',
+                'expirationDatTime' => Carbon::now()->addHour(),
+            ];
         }
 
         // Get payment session
@@ -139,7 +169,7 @@ class SegPayController extends Controller
         $response = $client->request('GET', Config::get('segpay.paymentSessions.baseUrl'), [
             'query' => [
                 'tokenId' => Config::get('segpay.paymentSessions.token'),
-                'dynamicDescription' => urlencode('All Fans Purchase'),
+                'dynamicDescription' => urlencode($description),
                 'dynamicInitialAmount' => $item->formatMoneyDecimal($item->price),
             ],
         ]);
@@ -147,9 +177,72 @@ class SegPayController extends Controller
         return $response;
     }
 
-    public function getSubscriptionSession(Request $request)
+    /**
+     * Fake a segpay purchase if system allows segpay fakes
+     *
+     * @param Request $request
+     * @return void
+     */
+    public function fake(Request $request)
     {
-        //
+        if (Config::get('app.env') === 'production' || Config::get('segpay.fake') === false) {
+            abort(403);
+        }
+
+        $request->validate([
+            'item'     => 'required|uuid',
+            'type'     => [ 'required', new InEnum(new PaymentTypeEnum()) ],
+            'price'    => 'required',
+            'currency' => 'required',
+            'last_4'   => 'required',
+        ]);
+
+        // Get payment item
+        if ($request->type === PaymentTypeEnum::PURCHASE) {
+            $item = PurchasableHelpers::getPurchasableItem($request->item);
+        } else if ($request->type === PaymentTypeEnum::TIP) {
+            $item = TippableHelpers::getTippableItem($request->item);
+        } else if ($request->type === PaymentTypeEnum::SUBSCRIPTION) {
+            //
+        }
+
+        if (!isset($item)) {
+            abort(400, 'Bad type or item');
+        }
+
+        // Validate Price
+        if (!$item->verifyPrice($request->price)) {
+            abort(400, 'Invalid Price');
+        }
+
+        // Create Card
+        $user = Auth::user();
+        $card = SegpayCard::create([
+            'owner_type' => $user->getMorphString(),
+            'owner_id'   => $user->getKey(),
+            'token'      => 'fake',
+            'nickname'   => $request->nickname ?? 'Fake Card',
+            'card_type'  => $request->brand ?? '',
+            'last_4'     => $request->last_4 ?? '0000',
+        ]);
+
+        // Create account for card
+        $account = Account::create([
+            'system' => 'segpay',
+            'owner_type' => $user->getMorphString(),
+            'owner_id' => $user->getKey(),
+            'name' => $request->nickname ?? 'Fake Card',
+            'type' => AccountTypeEnum::IN,
+            'currency' => $request->currency,
+            'resource_type' => $card->getMorphString(),
+            'resource_id' => $card->getKey(),
+        ]);
+        $account->verified = true;
+        $account->can_make_transactions = true;
+        $account->save();
+
+        // Dispatch Event
+        FakeSegpayPayment::dispatch($item, $account, $request->type, $request->price);
     }
 
 }

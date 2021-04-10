@@ -11,18 +11,16 @@ export default {
 
   computed: {
     icon() {
-      console.log('icon')
-      for (var key in this.lookupTable) {
-        if (this.lookupTable[key].test(this.cardNumber)) {
-          return ['fab', `cc-${key}`]
-        }
+      if (this.brand !== '') {
+        return ['fab', `cc-${this.brand}`]
       }
-
       return 'credit-card'
     }
   },
 
   data: () => ({
+    brand: '',
+
     lookupTable: {
       'amex': /^3[47]/,
       'diners-club': /^3(?:0[0-5]|[68])/,
@@ -32,6 +30,18 @@ export default {
       'discover': /^6/,
     }
   }),
+
+  watch: {
+    cardNumber(value) {
+      for (var key in this.lookupTable) {
+        if (this.lookupTable[key].test(value)) {
+          this.brand = key
+          return
+        }
+      }
+      this.brand = ''
+    },
+  },
 
 }
 </script>

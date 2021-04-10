@@ -17,4 +17,9 @@ return [
         'baseUrl' => env('SEGPAY_PAYMENT_SESSIONS_BASE_URL', 'https://embedding.segpay.com/client/v1/payment-sessions/new'),
         'token' => env('SEGPAY_PAYMENT_SESSIONS_TOKEN', ''),
     ],
+
+    /**
+     * Set to true to fake segpay functionality that needs ip whitelisting to work
+     */
+    'fake' => env('SEGPAY_FAKE', false),
 ];
