@@ -24,6 +24,8 @@ if (typeof window.Echo === 'undefined') {
     cluster: process.env.MIX_PUSHER_APP_CLUSTER || window.pusherCluster,
     // cluster: 'us2'
     wsHost: window.location.hostname,
+    host: window.location.hostname,
+    httpHost: window.location.hostname,
     wsPort: 6001,
     forceTLS: false,
     disableStats: true,

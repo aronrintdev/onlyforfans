@@ -49,9 +49,9 @@ class ItemPurchased implements ShouldBroadcast
     public function broadcastOn()
     {
         $channels = $this->item->getOwner()->map(function ($owner, $key) {
-            return new PrivateChannel("user-{$owner->getKey()}-events");
+            return new PrivateChannel("user.{$owner->getKey()}.events");
         });
-        $channels->push(new PrivateChannel("user-{$this->purchaser->getKey()}-purchases"));
+        $channels->push(new PrivateChannel("user.{$this->purchaser->getKey()}.purchases"));
         return $channels->all();
     }
 
