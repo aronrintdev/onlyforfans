@@ -16,6 +16,7 @@
             </section>
           </template>
           <div>
+            <textarea v-model="description" rows="8" class="w-100"></textarea>
             <vue-dropzone 
               ref="myVueDropzone" 
               id="dropzone" 
@@ -30,13 +31,14 @@
               v-on:vdropzone-queue-complete="queueCompleteEvent"
               class="dropzone"
             >
-              <textarea v-model="description" rows="8" class="w-100"></textarea>
+              <!-- <label id="clickme_to-select" class="">Browse</label> -->
             </vue-dropzone>
           </div>
           <template #footer>
             <b-row>
               <b-col cols="12" md="8" class="d-flex">
                 <ul class="list-inline d-flex mb-0 OFF-border-right">
+                  <li><label id="clickme_to-select" class=""><b-icon icon="file-earmark" variant="secondary" font-scale="1.5"></b-icon></label></li>
                   <li @click="takePicture()" class="selectable select-pic"><b-icon icon="image" :variant="selectedMedia==='pic' ? 'primary' : 'secondary'" font-scale="1.5"></b-icon></li>
                   <li @click="recordVideo()" class="selectable select-video"><b-icon icon="camera-video" :variant="selectedMedia==='video' ? 'primary' : 'secondary'" font-scale="1.5"></b-icon></li>
                   <li @click="recordAudio()" class="selectable select-audio"><b-icon icon="mic" :variant="selectedMedia==='audio' ? 'primary' : 'secondary'" font-scale="1.5"></b-icon></li>
@@ -87,7 +89,7 @@ export default {
 
     description: '',
     newPostId: null,
-    selectedMedia: 'pic',
+    selectedMedia: null, // 'pic',
     postType: 'free',
     ptypes: [
       { text: 'Free', value: 'free' }, 
@@ -101,11 +103,12 @@ export default {
     dropzoneOptions: {
       url: '/mediafiles',
       paramName: 'mediafile',
-      acceptedFiles: 'image/*, video/*, audio/*',
+      //acceptedFiles: 'image/*, video/*, audio/*',
       maxFiles: null,
       autoProcessQueue: false,
       thumbnailWidth: 100,
-      clickable: false,
+      //clickable: false, // must be false otherwise can't focus on text area to type (!)
+      clickable: '#clickme_to-select',
       maxFilesize: 15.9,
       addRemoveLinks: true,
       headers: { 
@@ -150,13 +153,13 @@ export default {
     },
 
     takePicture() { // %TODO
-      this.selectedMedia = 'pic'
+      this.selectedMedia = this.selectedMedia!=='pic' ? 'pic' : null
     }, 
     recordVideo() { // %TODO
-      this.selectedMedia = 'video'
+      this.selectedMedia = this.selectedMedia!=='video' ? 'video' : null
     },
     recordAudio() { // %TODO
-      this.selectedMedia = 'audio'
+      this.selectedMedia = this.selectedMedia!=='audio' ? 'audio' : null
     },
 
     // for dropzone
