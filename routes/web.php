@@ -282,6 +282,8 @@ Route::get('/lists', 'ListsController@index')->name('lists.index');
 Route::post('/lists', 'ListsController@store')->name('lists.store');
 Route::post('/lists/{id}/users', 'ListsController@addUserToList')->name('lists.adduser');
 Route::delete('/lists/{id}/users/{userId}', 'ListsController@removeUserFromList')->name('lists.removeuser');
+Route::post('/lists/{id}/pin', 'ListsController@addToPin')->name('lists.addtopin');
+Route::delete('/lists/{id}/pin', 'ListsController@removeFromPin')->name('lists.removefrompin');
 
 /**
  * Single Page application catch all undefined routes

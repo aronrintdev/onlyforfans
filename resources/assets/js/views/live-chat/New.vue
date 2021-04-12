@@ -1,9 +1,7 @@
 <template>
   <div class="container-fluid">
     <div class="row">
-      <div class="col-md-2 visible-lg">
-
-      </div>
+      <div class="col-md-2 visible-lg" />
       <div class="col-md-12 col-lg-12">
         <div class="messages-page" id="messages-page">
           <div class="card">
@@ -20,60 +18,77 @@
                       <span class="top-bar-title">New Message</span>
                     </div>
                   </div>
-                  <div class="options-bar">
-                    <span class="selected-option">SEND TO</span>
-                  </div>
                   <div class="top-bar user-search-bar">
                     <button class="btn" type="button" disabled>
                       <i class="fa fa-search" aria-hidden="true"></i>
                     </button>
                     <b-form-input :value="userSearchText" @input="onChangeSearchText" placeholder="Add People"></b-form-input>
-                    <button class="btn" type="button" @click="changeSearchbarVisible">
+                    <button v-if="userSearchText" class="btn" type="button" @click="changeSearchbarVisible">
                       <i class="fa fa-times" aria-hidden="true"></i>
                     </button>
                   </div>
                   <div class="options-bar">
                     <span class="selected-option">{{selectedOption}}</span>
                     <div>
-                      <button class="btn">
+                      <button class="btn" @click="openFilterModal">
                         <svg class="sort-icon filter-icon" aria-hidden="true" viewBox="0 0 24 24">
                           <path
                             d="M3 18a1 1 0 001 1h5v-2H4a1 1 0 00-1 1zM3 6a1 1 0 001 1h9V5H4a1 1 0 00-1 1zm10 14v-1h7a1 1 0 000-2h-7v-1a1 1 0 00-2 0v4a1 1 0 002 0zM7 10v1H4a1 1 0 000 2h3v1a1 1 0 002 0v-4a1 1 0 00-2 0zm14 2a1 1 0 00-1-1h-9v2h9a1 1 0 001-1zm-5-3a1 1 0 001-1V7h3a1 1 0 000-2h-3V4a1 1 0 00-2 0v4a1 1 0 001 1z">
                           </path>
                         </svg>
                       </button>
-                      <b-dropdown id="user-filter-dropdown" right>
+                      <b-dropdown class="filter-dropdown" right>
                         <template #button-content>
-                          <svg class="sort-icon has-tooltip" aria-hidden="true" data-original-title="null">
-                            <use xlink:href="#icon-sort" href="#icon-sort">
-                              <svg id="icon-sort" viewBox="0 0 24 24">
-                                <path
-                                  d="M4 19h4a1 1 0 0 0 1-1 1 1 0 0 0-1-1H4a1 1 0 0 0-1 1 1 1 0 0 0 1 1zM3 6a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1 1 1 0 0 0-1-1H4a1 1 0 0 0-1 1zm1 7h10a1 1 0 0 0 1-1 1 1 0 0 0-1-1H4a1 1 0 0 0-1 1 1 1 0 0 0 1 1z">
-                                </path>
-                              </svg>
-                            </use>
+                          <svg class="sort-icon" viewBox="0 0 24 24">
+                            <path
+                              d="M4 19h4a1 1 0 0 0 1-1 1 1 0 0 0-1-1H4a1 1 0 0 0-1 1 1 1 0 0 0 1 1zM3 6a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1 1 1 0 0 0-1-1H4a1 1 0 0 0-1 1zm1 7h10a1 1 0 0 0 1-1 1 1 0 0 0-1-1H4a1 1 0 0 0-1 1 1 1 0 0 0 1 1z">
+                            </path>
                           </svg>
                         </template>
                         <b-dropdown-item @click="onOptionChanged('recent')">
-                          <b-form-radio v-model="optionValue" name="some-radios" value="recent">Recent</b-form-radio>
+                          <radio-group-box
+                            group_name="users-sort-options"
+                            value="recent"
+                            :checked="optionValue === 'recent'"
+                            label="Recent">
+                          </radio-group-box>
                         </b-dropdown-item>
                         <b-dropdown-item @click="onOptionChanged('name')">
-                          <b-form-radio v-model="optionValue" name="some-radios" value="name">Name</b-form-radio>
+                          <radio-group-box
+                            group_name="users-sort-options"
+                            value="name"
+                            :checked="optionValue === 'name'"
+                            label="Name">
+                          </radio-group-box>
                         </b-dropdown-item>
                         <b-dropdown-item @click="onOptionChanged('available')">
-                          <b-form-radio v-model="optionValue" name="some-radios" value="available">Available</b-form-radio>
+                          <radio-group-box
+                            group_name="users-sort-options"
+                            value="available"
+                            :checked="optionValue === 'available'"
+                            label="Available">
+                          </radio-group-box>
                         </b-dropdown-item>
                         <b-dropdown-divider></b-dropdown-divider>
-                        <b-dropdown-item @click="onOptionChanged('ASC')"> 
-                          <b-form-radio v-model="optionValue" name="some-radios" value="ASC">Ascending</b-form-radio>
+                        <b-dropdown-item @click="onDirectionChanged('asc')"> 
+                          <radio-group-box
+                            group_name="users-sort-directions"
+                            value="asc"
+                            :checked="directionValue === 'asc'"
+                            label="Ascending"> 
+                          </radio-group-box>
                         </b-dropdown-item>
-                        <b-dropdown-item @click="onOptionChanged('DESC')">
-                          <b-form-radio v-model="optionValue" name="some-radios" value="DESC">Descending</b-form-radio>
+                        <b-dropdown-item @click="onDirectionChanged('desc')">
+                          <radio-group-box
+                            group_name="users-sort-directions"
+                            value="desc"
+                            :checked="directionValue === 'desc'"
+                            label="Descending">  
+                          </radio-group-box>
                         </b-dropdown-item>
                       </b-dropdown>
                     </div>
                   </div>
-
                   <div class="user-list-container">
                     <ul class="user-list">
                       <div class="text-center" v-if="loading">
@@ -168,12 +183,137 @@
         </div>
       </div>
     </div>
+    <!-- Filter Modal -->
+    <b-modal hide-header centered hide-footer ref="users-filter-modal" id="users-filter-modal" title="User Filter Modal">
+      <div class="block-modal users-filter-modal">
+        <div class="header d-flex align-items-center">
+          <h4 class="pt-1 pb-1">FILTER SUBSCRIBERS</h4>
+        </div>
+        <div class="content">
+          <div class="list-item">
+            <round-check-box :value="filterOptions.totalSpent" :key="filterOptions.totalSpent"></round-check-box>
+            <div class="list-item-content d-flex justify-content-between align-items-center">
+              <div class="list-item-title" @click="onFilterOptionChanged('totalSpent', filterOptions.totalSpent ? undefined : 100)">Total spent</div>
+              <!-- counter -->
+              <counter
+                min="100"
+                max="10000"
+                step="100"
+                prefix="$"
+                @onchange="(val) => onFilterOptionChanged('totalSpent', val)"
+              />
+            </div>
+          </div>
+          <div class="list-item">
+            <round-check-box :value="filterOptions.tippedOver" :key="filterOptions.tippedOver"></round-check-box>
+            <div class="list-item-content d-flex justify-content-between align-items-center">
+              <div class="list-item-title" @click="onFilterOptionChanged('tippedOver', filterOptions.tippedOver ? undefined : 10)">Tipped over</div>
+              <!-- counter -->
+              <counter
+                min="10"
+                max="10000"
+                step="10"
+                prefix="$"
+                @onchange="(val) => onFilterOptionChanged('tippedOver', val)"
+              />
+            </div>
+          </div>
+          <div class="list-item">
+            <round-check-box :value="filterOptions.subscribedOver" :key="filterOptions.subscribedOver"></round-check-box>
+            <div class="list-item-content d-flex justify-content-between align-items-center">
+              <div class="list-item-title" @click="onFilterOptionChanged('subscribedOver', filterOptions.subscribedOver ? undefined : 1)">Subscribed over</div>
+              <!-- counter -->
+              <counter
+                min="1"
+                max="12"
+                step="1"
+                suffix="month"
+                @onchange="(val) => onFilterOptionChanged('subscribedOver', val)"
+              />
+            </div>
+          </div>
+          <div class="list-item">
+            <round-check-box :value="filterOptions.inactiveOver" :key="filterOptions.inactiveOver"></round-check-box>
+            <div class="list-item-content d-flex justify-content-between align-items-center">
+              <div
+                class="list-item-title"
+                @click="onFilterOptionChanged('inactiveOver', filterOptions.inactiveOver ? undefined : 1)"
+              >
+                Inactive over
+              </div>
+              <!-- counter -->
+              <counter
+                min="1"
+                max="30"
+                step="1"
+                suffix="day"
+                @onchange="(val) => onFilterOptionChanged('inactiveOver', val)"
+              />
+            </div>
+          </div>
+          <div class="list-item">
+            <round-check-box :value="filterOptions.showRecommendations" :key="filterOptions.showRecommendations"></round-check-box>
+            <div class="list-item-content d-flex justify-content-between align-items-center">
+              <div
+                class="list-item-title"
+                @click="onFilterOptionChanged('showRecommendations', filterOptions.showRecommendations ? undefined : true)"
+              >
+                Show only recommendations
+              </div>
+            </div>
+          </div>
+
+          <div class="list-item">
+            <round-check-box :value="filterOptions.signupAfterDate" :key="filterOptions.signupAfterDate"></round-check-box>
+            <div class="list-item-content d-flex justify-content-between align-items-center">
+              <div
+                class="list-item-title"
+                @click="onFilterOptionChanged('signupAfterDate', filterOptions.signupAfterDate ? undefined : signupAfterDate)"
+              >
+                Who signed up after
+              </div>
+            </div>
+          </div>
+          <b-form-datepicker
+            v-model="signupAfterDate"
+            placeholder="Choose a date"
+            :class="filterOptions.signupAfterDate ? '' : 'disabled'"
+            :max="signupBeforeDate ? signupBeforeDate : new Date()">
+          </b-form-datepicker>
+
+          <div class="list-item">
+            <round-check-box :value="filterOptions.signupBeforeDate" :key="filterOptions.signupBeforeDate"></round-check-box>
+            <div class="list-item-content d-flex justify-content-between align-items-center">
+              <div
+                class="list-item-title"
+                @click="onFilterOptionChanged('signupBeforeDate', filterOptions.signupBeforeDate ? undefined : signupBeforeDate)"
+              >Who signed up before</div>
+            </div>
+          </div>
+        </div>
+        <!-- Date Picker -->
+        <b-form-datepicker
+          v-model="signupBeforeDate"
+          placeholder="Choose a date"
+          :class="filterOptions.signupBeforeDate ? '' : 'disabled'"
+          :min="signupAfterDate" :max="new Date()">
+        </b-form-datepicker>
+        <br />
+        <div class="d-flex align-items-center justify-content-end action-btns">
+          <button class="link-btn" @click="closeFilterModal">Cancel</button>
+          <button class="link-btn" @click="closeFilterModal" disabled>Reset</button>
+          <button class="link-btn" @click="closeFilterModal">Apply</button>
+        </div>
+      </div>
+    </b-modal>
   </div>
 </template>
 
 <script>
   import _ from 'lodash';
-  import RoundCheckBox from '../../components/roundCheckBox';
+  import RadioGroupBox from '@components/radioGroupBox';
+  import RoundCheckBox from '@components/roundCheckBox';
+  import Counter from '@components/Counter';
   /**
    * Messages Dashboard View
    */
@@ -182,22 +322,25 @@
     data: () => ({
       userSearchText: undefined,
       userSearchVisible: false,
-      optionValue: 'unread_first',
+      optionValue: undefined,
+      directionValue: undefined,
       selectedUser: undefined,
       messageText: undefined,
       users: [],
       filteredUsers: [],
       selectedUsers: [],
       loading: true,
+      signupAfterDate: new Date(),
+      signupBeforeDate: new Date(),
+      filterOptions: {}
     }),
     mounted() {
       this.axios.get('/chat-messages/users').then((response) => {
-        const { following, followers } = response.data;
-        this.users = followers.concat(following);
-        this.users = _.uniqBy(this.users, 'id');
-        this.filteredUsers = this.users.slice();
+        const { users } = response.data;
+        this.users = users;
+        this.filteredUsers = users.slice();
         this.loading = false;
-      })
+      });
     },
     computed: {
       selectedOption: function () {
@@ -219,7 +362,9 @@
       },
     },
     components: {
-      'round-check-box': RoundCheckBox
+      'round-check-box': RoundCheckBox,
+      'radio-group-box': RadioGroupBox,
+      'counter': Counter,
     },
     methods: {
       changeSearchbarVisible: function () {
@@ -228,6 +373,13 @@
       },
       onOptionChanged: function (value) {
         this.optionValue = value;
+        this.loading = true;
+        this.axios.get(`/chat-messages/users?sort=${value}&dir=${this.directionValue}`).then((response) => {
+          const { users } = response.data;
+          this.users = users;
+          this.filteredUsers = users.slice();
+          this.loading = false;
+        });
       },
       getLogoFromName: function (username) {
         const names = username.split(' ');
@@ -263,6 +415,26 @@
         Promise.all(promises).then(function() {
           self.$router.push('/messages');
         });
+      },
+      onDirectionChanged: function(dir) {
+        this.directionValue = dir;
+        this.loading = true;
+        this.axios.get(`/chat-messages/users?sort=${this.optionValue}&dir=${dir}`).then((response) => {
+          const { users } = response.data;
+          this.users = users;
+          this.filteredUsers = users.slice();
+          this.loading = false;
+        });
+      },
+      openFilterModal: function() {
+        this.$refs['users-filter-modal'].show();
+      },
+      closeFilterModal: function() {
+        this.$refs['users-filter-modal'].hide();
+      },
+      onFilterOptionChanged: function(option, value) {
+        this.filterOptions[option] = value;
+        this.filterOptions = { ...this.filterOptions };
       }
     }
   }
@@ -270,4 +442,68 @@
 
 <style lang="scss" scoped>
   @import "../../../sass/views/live-chat/new.scss";
+</style>
+<style lang="scss">
+#users-filter-modal {
+  .modal-dialog {
+    max-width: 380px;
+  }
+  .b-form-btn-label-control.form-control > .btn {
+    color: #8a96a3;
+  }
+  .b-form-datepicker {
+    padding: 3px;
+    &.disabled {
+      border-color: rgba(138,150,163,.3);
+      & > label, & > .btn {
+        color: rgba(138,150,163,.3);
+      }
+    }
+    &.show {
+      border-color: rgba(138,150,163, 1);
+      color: rgba(138,150,163, 1);
+    }
+  } 
+  .list-item {
+    display: flex;
+    align-items: center;
+    min-height: 48px;
+    margin-top: 3px;
+    
+    .list-item-content {
+      flex: 1;
+      margin-left: 12px;
+
+      .list-item-title {
+        cursor: pointer;
+      }
+    }
+
+    .action-btns {
+      .link-btn {
+        border: none;
+        font-size: 14px;
+        color: #fefefe;
+        font-weight: 500;
+        min-width: 78px;
+        transition: opacity .15s ease,background-color .15s ease,box-shadow .15s ease;
+        display: inline-block;
+        white-space: nowrap;
+        text-align: center;
+        text-transform: uppercase;
+        padding: 9px 16px;
+        border-radius: 18px;
+        color: #00aff0;
+        background-color: transparent;
+      
+        &:disabled {
+          background-color: transparent;
+          background: none;
+          color: #8a96a3;
+          opacity: .4;
+        }
+      }
+    }
+  }
+}
 </style>

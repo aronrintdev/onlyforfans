@@ -64,41 +64,5 @@
 </script>
 
 <style lang="scss" scoped>
-  @import "../../../sass/views/live-chat/home.scss";
-  .gallery-content {
-    height: calc(100vh - 210px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .gallery-content .empty {
-    font-size: 18px;
-    font-weight: 500;
-    color: rgba(138,150,163,.7);
-    margin: auto;
-  }
-  .gallery-list {
-    min-height: calc(100vh - 210px);
-    display: flex;
-    flex-flow: row wrap;
-
-    .img-wrapper {
-      overflow: hidden !important;
-      width: calc(25% - 2px);
-      padding-top: calc(25% - 2px);
-      height: 0;
-      position: relative;
-      border: 1px solid transparent;
-
-      img {
-        object-fit: cover;
-        width: 100%;
-        height: auto;
-        position: absolute;
-        left: 50%;
-        top: 50%;
-        transform: translate(-50%, -50%);
-      }
-    }
-  }
+  @import "../../../sass/views/live-chat/gallery.scss";
 </style>

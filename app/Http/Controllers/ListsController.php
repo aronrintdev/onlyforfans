@@ -17,6 +17,7 @@ class ListsController extends Controller
     }
     public function index(Request $request)
     {
+        $sessionUser = $request->user();
         $sortBy = $request->query('sort');
         $sortDir = $request->query('dir');
         if (!$sortDir) {
@@ -24,14 +25,18 @@ class ListsController extends Controller
         }
         if ($sortBy === 'name') {
             $lists = Lists::with(['creator', 'users'])
+                ->where('creator_id', $sessionUser->id)
                 ->orderBy('name', $sortDir)
                 ->get();
         } else if ($sortBy === 'recent') {
             $lists = Lists::with(['creator', 'users'])
+                ->where('creator_id', $sessionUser->id)
                 ->orderBy('created_at', $sortDir)
                 ->get();
         } else if ($sortBy === 'people') {
-            $lists = Lists::with(['creator', 'users'])->get()->makeVisible(['user']);
+            $lists = Lists::with(['creator', 'users'])
+                ->where('creator_id', $sessionUser->id)
+                ->get()->makeVisible(['user']);
             $lists->each(function ($list) {
                 if (!$list->users) {
                     $list->users = [];
@@ -44,6 +49,7 @@ class ListsController extends Controller
             });
         } else {
             $lists = Lists::with(['creator', 'users'])
+                ->where('creator_id', $sessionUser->id)
                 ->get();
         }
         return $lists;
@@ -99,5 +105,19 @@ class ListsController extends Controller
                 return response()->json(['error' => 'User Not Found'], 404);
             }
         }
+    }
+    public function addToPin(Request $request, $id)
+    {
+        $list = Lists::where('id', $id)->first();
+        $list->isPinned = true;
+        $list->save();
+        return ['status' => 'success'];
+    }
+    public function removeFromPin(Request $request, $id)
+    {
+        $list = Lists::where('id', $id)->first();
+        $list->isPinned = false;
+        $list->save();
+        return ['status' => 'success'];
     }
 }

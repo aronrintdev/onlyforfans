@@ -76,6 +76,7 @@ body .feed-crate.tag-grid-layout .superbox-post .carousel.slide .carousel-item i
 
 #user-filter-dropdown .btn,
 .filter-dropdown .btn,
+.filter-dropdown.show > .btn.dropdown-toggle,
 #more-dropdown .btn {
   border: none;
   background-color: transparent !important;
@@ -126,6 +127,7 @@ body .feed-crate.tag-grid-layout .superbox-post .carousel.slide .carousel-item i
   padding-right: 0.8rem;
   padding-left: 0.8rem;
   margin: 0.8em 0.5em;
+  width: auto;
   background-color: transparent;
   transition: background-color .1s linear;
 } 
@@ -138,9 +140,12 @@ body .feed-crate.tag-grid-layout .superbox-post .carousel.slide .carousel-item i
 #more-dropdown ul {
   left: 0.3em !important;
   width: 250px;
+  padding-top: 5px;
 }
-#user-filter-dropdown ul a:hover,
-.filter-dropdown ul a:hover,
+.filter-dropdown ul a:hover {
+  color: #0091ea;
+  background: transparent;
+}
 #more-dropdown ul a:hover {
   color: #0091ea;
   border-radius: 4px;
@@ -172,4 +177,8 @@ body .feed-crate.tag-grid-layout .superbox-post .carousel.slide .carousel-item i
   height: 48px;
   display: flex;
   align-items: center;
+}
+#user-filter-dropdown.filter-dropdown .g-input__wrapper.b-input-radio__wrapper {
+  padding: 0;
+  height: 32px;
 }

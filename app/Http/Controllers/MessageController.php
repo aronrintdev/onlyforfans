@@ -10,6 +10,7 @@ use App\Models\Timeline;
 use App\Models\User;
 use App\Events\MessageSentEvent;
 use function _\sortBy;
+use function _\orderBy;
 use function _\filter;
 use function _\uniq;
 
@@ -32,24 +33,55 @@ class MessageController extends Controller
 
         $timeline = Timeline::where('user_id', $sessionUser->id)->first();
         $followingUserIDs = $timeline->user->followedtimelines->pluck('id');
-        $users = Timeline::with(['user', 'avatar'])->whereIn('id', $followingUserIDs)->whereNotIn('user_id', $receivers)->get()->makeVisible(['user']);
-        $users->each(function ($user) {
-            $user->username = $user->user->username;
-            $user->id = $user->user->id;
-        });
+        $users = Timeline::with(['user', 'avatar'])->whereIn('id', $followingUserIDs)->whereNotIn('user_id', $receivers)->get()->makeVisible(['user'])->toArray();
+        $followings = [];
+        foreach ($users as $user) {
+            $user['username'] = $user['user']['username'];
+            $user['id'] = $user['user']['id'];
+            array_push($followings, $user);
+        };
     
         $followers = $timeline->followers->whereNotIn('id', $receivers)->all();     
         $arr = [];
         foreach ($followers as $follower) {
             array_push($arr, $follower);    
-        } 
+        }
+        $users = array_merge($followings, $arr);
      
+        // Sort
+        $sortBy = $request->query('sort');
+        $dir = $request->query('dir');
+        $dir = isset($dir) ? $dir : 'asc'; 
+
+        switch ($sortBy) {
+            case 'recent':
+                $users = orderBy($users, ['created_at'], [$dir]);
+                $users = array_map(function($user) {
+                    $user = $user['value'];
+                    return $user;
+                }, $users);
+                break;
+            case 'name':
+                $users = orderBy($users, ['name'], [$dir]);
+                $users = array_map(function($user) {
+                    $user = $user['value'];
+                    return $user;
+                }, $users);
+                break;
+            case 'available':
+                $users = orderBy($users, ['is_online', 'id'], [$dir, $dir]);
+                $users = array_map(function($user) {
+                    $user = $user['value'];
+                    return $user;
+                }, $users);
+                break;
+        }
 
         return [
-            'followers' => $arr,
-            'following' => $users
+            'users' => $users,
         ];
     }
+
     public function fetchContacts(Request $request)
     {
         $sessionUser = $request->user();
