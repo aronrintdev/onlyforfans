@@ -8,7 +8,6 @@ use App\Models\User;
 use App\Models\Timeline;
 use Illuminate\Support\Str;
 
-use App\Models\Notification;
 use App\Enums\PaymentTypeEnum;
 use Illuminate\Support\Collection; 
 use Illuminate\Support\Facades\Log;
@@ -64,13 +63,6 @@ class UserMgr {
                 $message = 'successfully un-followed';
                 break;
             }
-            Notification::create([
-                'user_id' => $timeline->user->id,  // followee
-                'timeline_id' => $timeline->id,
-                'notified_by' => $follower->id,
-                'description' => $description ?? '',
-                'type' => $action
-            ]);
         } catch(Exception | Throwable $e) {
             throw $e;
             Log::error(json_encode([

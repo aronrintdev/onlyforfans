@@ -18,7 +18,6 @@ use App\Models\Traits\UsesShortUuid;
 use Carbon\Carbon;
 use Spatie\Permission\Traits\HasRoles;
 use Cmgmyr\Messenger\Traits\Messagable;
-use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
@@ -26,7 +25,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class User extends Authenticatable implements Blockable, HasFinancialAccounts
 {
-    use Notifiable, HasRoles, HasFactory, Messagable, SoftDeletes, UsesUuid, MorphFunctions;
+    use HasRoles, HasFactory, Messagable, SoftDeletes, UsesUuid, MorphFunctions;
 
     protected $appends = [ 'name', 'avatar', 'about', ];
     protected $guarded = [ 'id', 'created_at', 'updated_at' ];
@@ -191,11 +190,6 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
         return $this->belongsToMany('App\Page', 'page_likes', 'user_id', 'page_id');
     }
     
-    public function notifications()
-    {
-        return $this->hasMany('App\Models\Notification')->with('notified_from');
-    }
-
     public function vaults()
     {
         return $this->hasMany(Vault::class);
