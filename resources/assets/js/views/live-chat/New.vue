@@ -72,19 +72,19 @@
                           </radio-group-box>
                         </b-dropdown-item>
                         <b-dropdown-divider></b-dropdown-divider>
-                        <b-dropdown-item @click="onDirectionChanged('ASC')"> 
+                        <b-dropdown-item @click="onDirectionChanged('asc')"> 
                           <radio-group-box
                             group_name="users-sort-directions"
-                            value="ASC"
-                            :checked="directionValue === 'ASC'"
+                            value="asc"
+                            :checked="directionValue === 'asc'"
                             label="Ascending"> 
                           </radio-group-box>
                         </b-dropdown-item>
-                        <b-dropdown-item @click="onDirectionChanged('DESC')">
+                        <b-dropdown-item @click="onDirectionChanged('desc')">
                           <radio-group-box
                             group_name="users-sort-directions"
-                            value="DESC"
-                            :checked="directionValue === 'DESC'"
+                            value="desc"
+                            :checked="directionValue === 'desc'"
                             label="Descending">  
                           </radio-group-box>
                         </b-dropdown-item>
@@ -211,10 +211,9 @@
     }),
     mounted() {
       this.axios.get('/chat-messages/users').then((response) => {
-        const { following, followers } = response.data;
-        this.users = followers.concat(following);
-        this.users = _.uniqBy(this.users, 'id');
-        this.filteredUsers = this.users.slice();
+        const { users } = response.data;
+        this.users = users;
+        this.filteredUsers = users.slice();
         this.loading = false;
       });
     },
@@ -248,6 +247,13 @@
       },
       onOptionChanged: function (value) {
         this.optionValue = value;
+        this.loading = true;
+        this.axios.get(`/chat-messages/users?sort=${value}&dir=${this.directionValue}`).then((response) => {
+          const { users } = response.data;
+          this.users = users;
+          this.filteredUsers = users.slice();
+          this.loading = false;
+        });
       },
       getLogoFromName: function (username) {
         const names = username.split(' ');
@@ -286,6 +292,13 @@
       },
       onDirectionChanged: function(dir) {
         this.directionValue = dir;
+        this.loading = true;
+        this.axios.get(`/chat-messages/users?sort=${this.optionValue}&dir=${dir}`).then((response) => {
+          const { users } = response.data;
+          this.users = users;
+          this.filteredUsers = users.slice();
+          this.loading = false;
+        });
       }
     }
   }
