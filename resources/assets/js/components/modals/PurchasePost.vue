@@ -58,7 +58,7 @@ export default {
     },
   },
 
-  data: () => ({ 
+  data: () => ({
     post: null,
     //timeline: null, // dynamically load from server based on post
   }),
@@ -68,7 +68,7 @@ export default {
       this.$echo.private(this.purchasesChannel)
         .listen('ItemPurchased', e => {
           if (e.item_id === this.post.id) {
-            this.$bvModal.hide('modal-purchase_post')
+            this.$bvModal.hide('modal-purchase-post')
           }
         })
     },

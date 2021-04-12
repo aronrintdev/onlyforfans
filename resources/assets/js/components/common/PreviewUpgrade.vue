@@ -52,8 +52,8 @@ export default {
   created() { 
     this.$store.dispatch('getPreviewposts', { timelineId: this.timeline.id, limit: this.limit })
 
-    eventBus.$on('update-post', postId => {
-      console.log('components.common.PreviewUpgrade - eventBus.$on(update-post)')
+    eventBus.$on('update-posts', postId => {
+      console.log('components.common.PreviewUpgrade - eventBus.$on(update-posts)')
       this.updatePost(postId) 
     })
   },
@@ -80,9 +80,9 @@ export default {
     renderSubscribe() {
       console.log('FollowCtrl.renderSubscribe() - emit');
       eventBus.$emit('open-modal', {
-        key: 'render-subscribe', 
+        key: 'render-subscribe',
         data: {
-          timeline_id: this.timeline.id,
+          timeline: this.timeline,
         }
       })
     },

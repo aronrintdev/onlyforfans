@@ -102,6 +102,10 @@ export default {
 
   computed: {
     ...Vuex.mapState([ 'session_user', 'timeline' ]),
+
+    purchasesChannel() {
+      return `user.${this.session_user.id}.purchases`
+    },
   },
 
   data: () => ({
@@ -201,6 +205,19 @@ export default {
         eventBus.$emit('error', this, error)
         this.error = true
         this.loading = false
+      })
+      this.$root.$on('bv::modal::hide', (bvEvent, modalId) => {
+        if (modalId === 'modal-purchase-post' && this.processing) {
+          bvEvent.preventDefault()
+        }
+      })
+      this.$echo.private(this.purchasesChannel).listen('ItemPurchased', e => {
+        if (e.item_id === this.value.id) {
+          this.processing = false
+          this.$nextTick(() => {
+            this.$bvModal.hide('modal-purchase-post')
+          })
+        }
       })
     },
 
