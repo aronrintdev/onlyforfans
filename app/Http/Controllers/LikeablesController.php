@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use App\Models\User;
 use App\Interfaces\Likeable;
+use App\Notifications\ResourceLiked;
 
 class LikeablesController extends AppBaseController
 {
@@ -49,6 +50,9 @@ class LikeablesController extends AppBaseController
         }
 
         $likeable->likes()->syncWithoutDetaching($liker->id); // %NOTE!! %TODO: apply elsewhere instead of attach
+
+        $liker->notify(new ResourceLiked($likeable));
+
         return response()->json([
             'likeable' => $likeable,
             'like_count' => $likeable->likes->count(),

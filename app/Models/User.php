@@ -22,10 +22,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable implements Blockable, HasFinancialAccounts
 {
-    use HasRoles, HasFactory, Messagable, SoftDeletes, UsesUuid, MorphFunctions;
+    use HasRoles, HasFactory, Messagable, SoftDeletes, UsesUuid, MorphFunctions, Notifiable;
 
     protected $appends = [ 'name', 'avatar', 'about', ];
     protected $guarded = [ 'id', 'created_at', 'updated_at' ];
@@ -270,7 +271,6 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
         $otherPosts = $this->timeline->posts()->where('user_id', '!=', $sessionUser->id)->get();
         foreach ($otherPosts as $otherPost) {
             $otherPost->users_liked()->detach();
-            //$otherPost->notifications_user()->detach();
             $otherPost->sharees()->detach();
             $otherPost->reports()->detach();
             $otherPost->users_tagged()->detach();
@@ -283,7 +283,6 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
                 $comment->update(['parent_id' => null]);
                 $comment->delete();
             }
-            $otherPost->notifications()->delete();
             $otherPost->delete();
         }
     }
