@@ -22,22 +22,7 @@
 
     </div>
 
-    <!-- %FIXME: DRY vs Show -->
-    <b-modal id="modal-tip" size="sm" title="Send a Tip" hide-footer body-class="p-0">
-      <SendTip :session_user="session_user" :timeline="timeline" :payload="modalPayload" />
-    </b-modal>
-
-    <b-modal id="modal-purchase_post" size="lg" title="Purchase Post" hide-footer body-class="p-0">
-      <PurchasePost :session_user="session_user" :post_id="selectedResourceId" />
-    </b-modal>
-
-    <b-modal id="modal-follow" title="Follow" hide-footer body-class="p-0">
-      <FollowTimeline :session_user="session_user" :timeline="selectedTimeline" :subscribe_only="subscribeOnly" />
-    </b-modal>
-
-    <b-modal size="xl" id="modal-post" title="Post" hide-footer body-class="p-0">
-      <PostDisplay :session_user="session_user" :post="selectedResource" :is_feed="false" />
-    </b-modal>
+    <Modals />
 
   </div>
 </template>
@@ -50,10 +35,7 @@ import StoryBar from '@components/timelines/StoryBar.vue';
 import CreatePost from '@components/timelines/CreatePost.vue';
 import MiniMyStatsWidget from '@components/user/MiniMyStatsWidget.vue';
 import SuggestedFeed from '@components/common/SuggestedFeed.vue';
-import FollowTimeline from '@components/modals/FollowTimeline.vue'
-import PurchasePost from '@components/modals/PurchasePost.vue'
-import SendTip from '@components/modals/SendTip.vue'
-import PostDisplay from '@components/posts/Display'
+import Modals from '@components/Modals'
 
 export default {
   components: {
@@ -62,15 +44,12 @@ export default {
     CreatePost,
     MiniMyStatsWidget,
     SuggestedFeed,
-    FollowTimeline,
-    PurchasePost,
-    SendTip,
-    PostDisplay,
+    Modals,
   },
 
   computed: {
     ...Vuex.mapGetters([
-      'session_user', 
+      'session_user',
       'timeline',
     ]),
 
@@ -89,47 +68,11 @@ export default {
 
   data: () => ({
     isGridLayout: false, // %FIXME: can this be set in created() so we have 1 source of truth ? (see PostFeed)
-    subscribeOnly: true, // for modal
-    selectedTimeline: null,
-    selectedResource: null, // post or mediafile, etc
-    selectedResourceId: null, // %FIXME: hacky
-    modalPayload: null, // eventually replace all 'selected...' with this %PSG 20210409
   }),
 
   created() {
-
-    // %FIXME: DRY
-    eventBus.$on('open-modal', ({ key, data }) => {
-      console.log('views/timelines/Show.on(open-modal)', { key, data });
-      switch(key) {
-        case 'render-purchase-post':
-          this.selectedResource = data.post
-          this.selectedResourceId = data.post.id
-          this.$bvModal.show('modal-purchase_post')
-          break
-        case 'render-follow':
-          this.selectedTimeline = data.timeline
-          this.subscribeOnly = false
-          this.$bvModal.show('modal-follow')
-          break
-        case 'render-subscribe':
-          this.selectedTimeline = data.timeline
-          this.subscribeOnly = true
-          this.$bvModal.show('modal-follow')
-          break
-        case 'render-tip':
-          this.modalPayload = data
-          this.$bvModal.show('modal-tip')
-          break
-        case 'show-post':
-          this.selectedResource = data.post
-          this.$bvModal.show('modal-post')
-          break
-      }
-    })
-
     eventBus.$on('update-timeline', () => {
-      this.load() 
+      this.load()
     })
 
     eventBus.$on('set-feed-layout',  isGridLayout  => {

@@ -40,6 +40,7 @@ return [
                 'host' => env('PUSHER_APP_HOST', 'localhost'),
                 'port' => env('PUSHER_APP_PORT', 6001),
                 'scheme' => env('PUSHER_APP_SCHEME', 'http'),
+                'debug' => env('PUSHER_APP_DEBUG', false),
             ],
         ],
 

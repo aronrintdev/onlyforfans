@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Websockets\Channels;
+namespace App\WebSockets\Channels;
 
 use BeyondCode\LaravelWebSockets\WebSockets\Channels\PresenceChannel as ParentClass;
 

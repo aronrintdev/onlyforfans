@@ -171,8 +171,8 @@ export default {
       limit: this.limit, 
     })
 
-    eventBus.$on('update-post', postId => {
-      console.log('components.timelines.PostFeed - eventBus.$on(update-post)')
+    eventBus.$on('update-posts', postId => {
+      console.log('components.timelines.PostFeed - eventBus.$on(update-posts)')
       this.updatePost(postId) 
     })
 
@@ -205,16 +205,16 @@ export default {
 
     renderTip() {
       eventBus.$emit('open-modal', {
-        key: 'render-tip', 
+        key: 'render-tip',
         data: { resource_type: 'timelines', resource_id: this.timelineId },
       })
     },
 
     renderFollow() {
       eventBus.$emit('open-modal', {
-        key: 'render-follow', 
+        key: 'render-follow',
         data: {
-          timeline_id: this.timeline.id,
+          timeline: this.timeline,
         }
       })
     },
@@ -222,7 +222,7 @@ export default {
       eventBus.$emit('open-modal', {
         key: 'render-subscribe', 
         data: {
-          timeline_id: this.timeline.id,
+          timeline: this.timeline,
         }
       })
     },

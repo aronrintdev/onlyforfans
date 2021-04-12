@@ -7,6 +7,8 @@
         <router-view />
       </transition>
     </div>
+    <Toaster />
+    <EventUpdater />
     <div class="footer">
       <b-navbar variant="dark">
         <b-nav-text class="text-light mx-auto">
@@ -22,11 +24,15 @@ import _ from 'lodash'
 import Vuex from 'vuex';
 import VueScreenSize from 'vue-screen-size'
 import MainNavBar from '@components/common/MainNavbar'
+import EventUpdater from '@components/EventUpdater'
+import Toaster from '@components/Toaster'
 
 export default {
   name: 'App',
   components: {
     MainNavBar,
+    EventUpdater,
+    Toaster,
   },
 
   mixins: [VueScreenSize.VueScreenSizeMixin],

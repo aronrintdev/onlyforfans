@@ -2,63 +2,81 @@
 /**
  * Responsible for listening on event channels and popping toast to the user on Events.
  */
+import Vuex from 'vuex'
+
 export default {
   name: 'Toaster',
 
-  data: () => ({
-    channels: [
-      {
-        id: 'purchases',
-        nameParams: [ 'session_user' ],
-        name: (user) => ( `user.${user.id}.purchases` ),
-        events: [
-          {
-            name: 'ItemPurchased',
-            handler: (e) => {
-              this.popToast(`Post successfully purchased!`, {
-                toaster: 'b-toaster-top-center',
-                title: 'Success!',
-              })
-            },
-          }
-        ],
-      },
-      {
-        id: 'events',
-        nameParams: [ 'session_user' ],
-        name: (user) => ( `user.${user.id}.events` ),
-        events: [
-          {
-            name: 'ItemPurchased',
-            batch: true,
-            handler: (e, dataStore = {}) => {
-              dataStore.purchases[e.item_type][e.item_id]++
-            },
-            batchHandler: (dataStore) => {
-              //
-            }
-          }
-        ],
-      },
-    ],
+  computed: {
+    ...Vuex.mapState([ 'session_user' ]),
+  },
 
-    active: {},
+  data: () => ({
+    myItemsPurchasedBatch: {},
+    cb: {
+      'session_user': []
+    },
   }),
 
   methods: {
-    /**
-     * Initialize listeners
-     */
-    init() {},
+    init() {
+      this.purchases()
+      this.events()
+    },
 
-    listenTo(channel) {},
+    async purchases() {
+      await this.waitFor('session_user')
+      const channel = `user.${this.session_user.id}.purchases`
+      this.$echo.private(channel)
+        .listen('ItemPurchased', (e) => {
+          this.$log.debug('Toast Event', { channel, event: 'ItemPurchased', e })
+          this.popToast(`Post successfully purchased!`, {
+            toaster: 'b-toaster-top-center',
+            title: 'Success!',
+            variant: 'success'
+          })
+        })
+    },
+
+    async events() {
+      await this.waitFor('session_user')
+      const channel = `user.${this.session_user.id}.events`
+      this.$echo.private(channel)
+        .listen('ItemPurchased', (e) => {
+          this.myItemsPurchasedBatch[e.item_type]
+            ? this.myItemsPurchasedBatch[e.item_type]++
+            : 1
+        })
+    },
+
+    waitFor(property) {
+      return new Promise((resolve, reject) => {
+        if (this[property]) {
+          resolve()
+        } else {
+          this.cb[property].push(() => { resolve() })
+        }
+      })
+    },
 
     popToast(message, options) {
-      this.$root.$bvToast.toast(message, options,)
+      this.$root.$bvToast.toast(message, options)
     }
   },
 
-  watch() {},
+  watch: {
+    session_user(value) {
+      if (value) {
+        while(this.cb.session_user.length > 0) {
+          this.cb.session_user.pop()()
+        }
+      }
+    },
+  },
+
+  render() {
+    return this.$slots.default
+  },
 
   mounted() {
     this.$log.debug('Toaster Mounted')

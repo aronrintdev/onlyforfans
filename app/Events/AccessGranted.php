@@ -47,7 +47,7 @@ class AccessGranted implements ShouldBroadcast
      */
     public function broadcastOn()
     {
-        return new PrivateChannel("user-{$this->grantedTo}-access");
+        return new PrivateChannel("user.{$this->grantedTo}.access");
     }
 
     /**

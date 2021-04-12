@@ -8,15 +8,18 @@
         <b-alert show variant="danger" class="text-center" v-text="$t('An Error Has Occurred')" />
       </div>
       <div v-else>
+        <div v-if="processing" class="overlay d-flex justify-content-center align-items-center">
+          <fa-icon icon="spinner" spin size="2x" />
+        </div>
         <b-row>
           <b-col lg="6">
             <b-form-group label="First Name" >
-              <b-form-input v-model="firstName" trim :placeholder="$t('First Name')" />
+              <b-form-input v-model="form.customer.firstName" trim :placeholder="$t('First Name')" />
             </b-form-group>
           </b-col>
           <b-col lg="6">
             <b-form-group label="Last Name" >
-              <b-form-input v-model="lastName" trim :placeholder="$t('Last Name')" />
+              <b-form-input v-model="form.customer.lastName" trim :placeholder="$t('Last Name')" />
             </b-form-group>
           </b-col>
         </b-row>
@@ -24,8 +27,8 @@
           <b-col>
             <b-form-group>
               <div class="d-flex align-items-center">
-                <CardBrandIcon :card-number="cardNumber" class="mr-3" size="2x" />
-                <b-form-input v-model="cardNumber" v-mask="'####-####-####-####'" :placeholder="$t('Card Number')" pattern="\d*" />
+                <CardBrandIcon ref="brandIcon" :card-number="form.card.number" class="mr-3" size="2x" />
+                <b-form-input v-model="form.card.number" v-mask="'####-####-####-####'" :placeholder="$t('Card Number')" pattern="\d*" />
               </div>
             </b-form-group>
           </b-col>
@@ -34,15 +37,15 @@
           <b-col cols="6">
             <b-form-group :label="$t('Expiration Date')" >
               <div class="d-flex align-items-center">
-                <b-form-input id="new-card-month" v-model="expiration.month" v-mask="'##'" placeholder="MM" class="" pattern="\d*" />
+                <b-form-input id="new-card-month" v-model="form.card.expirationMonth" v-mask="'##'" placeholder="MM" class="" pattern="\d*" />
                 <span class="mx-3" style="font-size:150%;" v-text="'/'" />
-                <b-form-input id="new-card-year" v-model="expiration.year" v-mask="'##'" placeholder="YY" pattern="\d*" />
+                <b-form-input id="new-card-year" v-model="form.card.expirationYear" v-mask="'##'" placeholder="YY" pattern="\d*" />
               </div>
             </b-form-group>
           </b-col>
           <b-col cols="6">
             <b-form-group :label="$t('Security Code')" >
-              <b-form-input v-model="securityCode" v-mask="'####'" :placeholder="$t('CVV')" pattern="\d*" />
+              <b-form-input v-model="form.card.ccv" v-mask="'####'" :placeholder="$t('CVV')" pattern="\d*" />
             </b-form-group>
           </b-col>
         </b-row>
@@ -50,12 +53,12 @@
         <b-row>
           <b-col lg="6">
             <b-form-group>
-              <b-form-input v-model="postalCode" :placeholder="$t('Postal Code')" />
+              <b-form-input v-model="form.customer.zip" :placeholder="$t('Postal Code')" />
             </b-form-group>
           </b-col>
           <b-col lg="6">
             <b-form-group>
-              <b-form-input v-model="country" />
+              <b-form-input v-model="form.customer.countryCode" />
             </b-form-group>
           </b-col>
         </b-row>
@@ -89,99 +92,148 @@ export default {
   },
 
   props: {
+    /** Item being purchased, subscripted to, or tipped */
     value: { type: Object, default: () =>({}) },
     price: { type: Number, default: 0 },
     currency: { type: String, default: 'USD' },
+    /** Type of transaction: `'purchase' | 'subscription' | 'tip'` */
+    type: { type: String, default: 'purchase' },
   },
 
   computed: {
     ...Vuex.mapState([ 'session_user', 'timeline' ]),
+
+    purchasesChannel() {
+      return `user.${this.session_user.id}.purchases`
+    },
   },
 
   data: () => ({
-    firstName: '',
-    lastName: '',
-    cardNumber: '',
-    expiration: {
-      month: '',
-      year: '',
+    form: {
+      customer: {
+        firstName: '',
+        lastName: '',
+        zip: '',
+        countryCode: 'US',
+      },
+      card: {
+        number: '',
+        expirationYear: '',
+        expirationMonth: '',
+        cvv: '',
+      },
     },
-    securityCode: '',
-    postalCode: '',
-    country: 'US',
+
+    formErrors: false,
 
     sessionId: '',
     packageId: '',
+    expirationDateTime: '',
+
     loading: true,
     error: false,
+    processing: false,
   }),
 
   methods: {
-    loadDefaultValues() {
+    guessDefaultValues() {
       var name = this.timeline.name.split(' ')
-      this.firstName = name[0] || ''
-      this.lastName = name[1]
+      if ( name.length === 2 ) {
+        this.form.customer.firstName = name[0]
+        this.form.customer.lastName  = name[1]
+      }
+    },
+
+    formValidate() {
+      return new Promise((resolve, reject) => {
+        // TODO: Add validation
+        resolve()
+      })
     },
 
     onComplete() {
-      this.loadSegPaySdk()
-      .then(() => {
-        window.segpay.sdk.completePayment({
-          sessionId: this.sessionId,
-          packageId: this.packageId,
-          customer: {
-            firstName: this.firstName,
-            lastName: this.lastName,
-            zip: this.zip,
-            countryCode: this.country,
-            email: this.session_user.email,
-          },
-          card: {
-            number: this.cardNumber,
-            expirationYear: this.expiration.year,
-            expirationMonth: this.expiration.month,
-            cvv: this.securityCode,
-          },
-        }, (result) => {
-          switch (result.status) {
-            case 'GeneralErrors':
-              //
-            break;
-            case 'ValidationErrors':
-              //
-            break;
-            case 'Success':
-              this.$emit('success', result.purchases)
-            break;
+      this.formValidate().then(() => {
+        this.loadSegPaySdk().then(() => {
+          if (this.sessionId === 'faked') {
+            this.axios.post(route('payments.segpay.fake'), {
+              item: this.value.id,
+              type: this.type,
+              price: this.price,
+              currency: this.currency,
+              last_4: this.form.card.number.slice(-4),
+              brand: this.$refs.brandIcon.brand,
+            })
+            this.$emit('success', 'faked')
+            this.processing = true
+            return
           }
+
+          window.segpay.sdk.completePayment({
+            sessionId: this.sessionId,
+            packageId: this.packageId,
+            customer: {
+              ...this.form.customer,
+              email: this.session_user.email,
+            },
+            card: {
+              ...this.form.card,
+            },
+          }, (result) => {
+            switch (result.status) {
+              case 'GeneralErrors':
+                //
+              break;
+              case 'ValidationErrors':
+                //
+              break;
+              case 'Success':
+                this.$emit('success', result.purchases)
+                this.processing = true
+              break;
+            }
+          })
         })
       })
-
     },
 
     init() {
       Promise.all([
         this.loadSegPaySdk(),
         this.getSessionId(),
-      ])
-        .then(() => { this.loading = false })
-        .catch(error => {
-          eventBus.$emit('error', this, error)
-          this.error = true
-          this.loading = false
-        })
+      ]).then(() => { this.loading = false })
+      .catch(error => {
+        eventBus.$emit('error', this, error)
+        this.error = true
+        this.loading = false
+      })
+      this.$root.$on('bv::modal::hide', (bvEvent, modalId) => {
+        if (modalId === 'modal-purchase-post' && this.processing) {
+          bvEvent.preventDefault()
+        }
+      })
+      this.$echo.private(this.purchasesChannel).listen('ItemPurchased', e => {
+        if (e.item_id === this.value.id) {
+          this.processing = false
+          this.$nextTick(() => {
+            this.$bvModal.hide('modal-purchase-post')
+          })
+        }
+      })
     },
 
     getSessionId() {
       return new Promise((resolve, reject) => {
-        this.axios.post(route('payments.segpay.getPaymentSession'), { item: this.value.id, price: this.price })
-          .then(results => {
-            this.sessionId = results.data.sessionId
-            this.pageId = results.data.pageId
-            this.expirationDateTime = results.data.expirationDateTime
-            resolve()
-          })
-          .catch(error => reject(error))
+        this.axios.post(route('payments.segpay.getPaymentSession'), {
+          item: this.value.id,
+          type: this.type,
+          price: this.price,
+          currency: this.currency,
+        }).then(results => {
+          this.sessionId = results.data.id
+          this.pageId = results.data.pageId
+          this.expirationDateTime = results.data.expirationDateTime
+          resolve()
+        }).catch(error => reject(error))
       })
     },
 
@@ -209,14 +261,23 @@ export default {
   },
 
   mounted() {
-    this.loadDefaultValues()
+    this.guessDefaultValues()
     this.init()
   }
 }
 </script>
 
 <style lang="scss" scoped>
-
+.overlay {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: rgba(0, 0, 0, 0.35);
+  color: var(--white, #ffffff);
+  z-index: 100;
+}
 </style>
 
 <i18n lang="json5">

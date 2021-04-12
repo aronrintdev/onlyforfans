@@ -11,7 +11,7 @@
           <span v-if="timeline.verified" class="verified-badge"><b-icon icon="check-circle-fill" variant="success" font-scale="1"></b-icon></span>
         </div>
         <div>
-          <router :to="timelineUrl" class="tag-username">@{{ timeline.slug }}</router>
+          <router-link :to="timelineUrl" class="tag-username">@{{ timeline.slug }}</router-link>
         </div>
       </section>
     </b-card-header>
@@ -73,7 +73,7 @@ export default {
         notes: '',
       })
       this.$bvModal.hide('modal-follow')
-      const msg = response.is_following 
+      const msg = response.is_following
         ? `You are now following ${this.timeline.name}!`
         : `You are no longer following ${this.timeline.name}!`
       this.$root.$bvToast.toast(msg, {

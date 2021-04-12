@@ -61,26 +61,26 @@ export default {
 
   methods: { 
     renderFollow() {
-      console.log('FollowCtrl.renderFollow() - emit');
+      this.$log.debug('FollowCtrl.renderFollow() - emit');
       eventBus.$emit('open-modal', {
-        key: 'render-follow', 
+        key: 'render-follow',
         data: {
-          timeline_id: this.timeline.id,
+          timeline: this.timeline,
         }
       })
     },
     renderSubscribe() {
-      console.log('FollowCtrl.renderSubscribe() - emit');
+      this.$log.debug('FollowCtrl.renderSubscribe() - emit');
       eventBus.$emit('open-modal', {
-        key: 'render-subscribe', 
+        key: 'render-subscribe',
         data: {
-          timeline_id: this.timeline.id,
+          timeline: this.timeline,
         }
       })
     },
     renderTip() {
       eventBus.$emit('open-modal', {
-        key: 'render-tip', 
+        key: 'render-tip',
         data: { resource_type: 'timelines', resource_id: this.timeline.id },
       })
     },

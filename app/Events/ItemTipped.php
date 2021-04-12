@@ -49,9 +49,9 @@ class ItemTipped implements ShouldBroadcast
     public function broadcastOn()
     {
         $channels = $this->item->getOwner()->map(function ($owner, $key) {
-            return new PrivateChannel("user-{$owner->getKey()}-events");
+            return new PrivateChannel("user.{$owner->getKey()}.events");
         });
-        $channels->push(new PrivateChannel("user-{$this->tipper->getKey()}-tips"));
+        $channels->push(new PrivateChannel("user.{$this->tipper->getKey()}.tips"));
         return $channels->all();
     }
 

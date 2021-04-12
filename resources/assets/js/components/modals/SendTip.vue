@@ -17,7 +17,7 @@
           </span>
         </div>
         <div>
-          <router-link :href="timelineUrl" class="tag-username">@{{ timeline.slug }}</router-link>
+          <router-link :to="timelineUrl" class="tag-username">@{{ timeline.slug }}</router-link>
         </div>
       </section>
     </b-card-header>
