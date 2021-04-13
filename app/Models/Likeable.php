@@ -16,6 +16,12 @@ class Likeable extends Model
     public function likeable() {
         return $this->morphTo();
     }
+
+    public function liker()
+    { 
+        return $this->belongsTo(User::class, 'likee_id'); // %FIXME: mis-named column should be liker_id AF-269
+    }
+
     /*
     public function likedposts() { 
         return $this->morphedByMany(Post::class, 'likeable', 'likeables', 'sharee_id');

@@ -100,7 +100,7 @@ export const routes = [
   // Static Pages
   ...StaticPageRoutes,
 
-  // User
+  // Timeline
   {
     name: 'timeline.posts',
     path: '/:slug/posts',

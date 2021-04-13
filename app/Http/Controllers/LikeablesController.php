@@ -15,6 +15,7 @@ use App\Models\Mediafile;
 use App\Models\Post;
 use App\Interfaces\Likeable;
 use App\Notifications\ResourceLiked;
+use App\Http\Resources\LikeableCollection;
 
 class LikeablesController extends AppBaseController
 {
@@ -28,7 +29,8 @@ class LikeablesController extends AppBaseController
         ]);
 
         // Init query
-        $query = LikeableModel::query();
+        //$query = LikeableModel::query();
+        $query = LikeableModel::with(['liker', 'likeable']);
 
         // Check permissions
         if ( !$request->user()->isAdmin() ) {
@@ -81,14 +83,16 @@ class LikeablesController extends AppBaseController
         }
          */
 
-        //$data = $query->paginate( $request->input('take', env('MAX_DEFAULT_PER_REQUEST', 10)) );
-        //return new LikeableCollection($data);
+        $data = $query->paginate( $request->input('take', env('MAX_DEFAULT_PER_REQUEST', 10)) );
+        return new LikeableCollection($data);
 
+        /*
         $data = $query->get();
-        dd($data);
+        //dd($data);
         return response()->json([
             'likeables' => $data,
         ]);
+         */
     }
 
     // %TODO: remove liker param and just use session user for liker (?)
