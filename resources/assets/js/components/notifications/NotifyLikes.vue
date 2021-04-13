@@ -1,19 +1,24 @@
 <template>
   <div v-if="!isLoading">
-    <ul class="list-unstyled">
-      <b-media v-for="(l,idx) in likeables" tag="li" class="mb-0">
-        <template #aside>
-          <b-img width="48" height="48" rounded="circle" :src="l.liker.avatar.filepath" :alt="l.liker.slug" :title="l.liker.name" />
-        </router-link>
-      </template>
-      <h6 class="mt-0 mb-1">{{ l.liker.name }}  <small class="text-muted">@{{ l.liker.username}}</small></h6>
-      <p class="mb-0">liked your 
-        <router-link :to="{ name: 'posts.show', params: { slug: l.likeable.slug } }">{{ toSingular(l.likeable_type) }}</router-link>
-      </p>
-      <small>{{ moment(l.created_at).format('MMM DD, YYYY') }}</small>
-      <hr class="mt-2 mb-3" />
-    </b-media>
-  </ul>
+    <b-card title="Likes Received">
+      <hr />
+      <b-card-text>
+        <ul class="list-unstyled">
+          <b-media v-for="(l,idx) in likeables" tag="li" class="mb-0">
+            <template #aside>
+              <b-img width="48" height="48" rounded="circle" :src="l.liker.avatar.filepath" :alt="l.liker.slug" :title="l.liker.name" />
+            </router-link>
+          </template>
+          <h6 class="mt-0 mb-1">{{ l.liker.name }}  <small class="text-muted">@{{ l.liker.username}}</small></h6>
+          <p class="mb-0">liked your 
+            <router-link :to="{ name: 'posts.show', params: { slug: l.likeable.slug } }">{{ toSingular(l.likeable_type) }}</router-link>
+          </p>
+          <small>{{ moment(l.created_at).format('MMM DD, YYYY') }}</small>
+          <hr class="mt-2 mb-3" />
+        </b-media>
+      </ul>
+    </b-card-text>
+  </b-card>
 </div>
 </template>
 
