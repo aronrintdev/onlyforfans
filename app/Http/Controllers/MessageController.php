@@ -240,7 +240,7 @@ class MessageController extends Controller
         ]);
         $chatthread->messages = $chatthread->messages()->orderBy('mcounter', 'asc')->get();
 
-        // broadcast(new MessageSentEvent($chatthread, $sessionUser))->toOthers();
+        broadcast(new MessageSentEvent($chatthread, $sessionUser))->toOthers();
 
         return [
             'message' => $chatthread,
@@ -300,33 +300,14 @@ class MessageController extends Controller
             })
             ->get();
         $messages = [];
+        $filter = $request->query('query');
         $chatthreads->each(function($thread) use(&$messages, &$filter) {
-            $messages = $thread->messages()->where('mcontent', 'like', '%'.$filter.'%')->get()->toArray();
+            $messages += $thread->messages()->where('mcontent', 'like', '%'.$filter.'%')->get()->toArray();
         });
         $messages = orderBy($messages, ['created_at'], ['desc']);
         $messages = array_map(function($message) {
             return $message['value']['id'];
         }, $messages);
-        // $messages = Message::with(['receiver'])
-        //     ->where(function($query) use(&$request, &$id) {
-        //         $sessionUser = $request->user();
-        //         $filter = $request->query('query');
-
-        //         $query->where('user_id', $sessionUser->id)
-        //             ->where('receiver_id',  $id)
-        //             ->where('message', 'like', '%'.$filter.'%');
-        //     })
-        //     ->orWhere(function($query) use(&$request, &$id) {
-        //         $sessionUser = $request->user();
-        //         $filter = $request->query('query');
-
-        //         $query->where('receiver_id', $sessionUser->id)
-        //             ->where('user_id',  $id)
-        //             ->where('message', 'like', '%'.$filter.'%');
-        //     })
-        //     ->orderBy('created_at', 'DESC')
-        //     ->pluck('id')
-        //     ->toArray();
         return $messages;
     }
     public function mute(Request $request, $id) {

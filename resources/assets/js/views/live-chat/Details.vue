@@ -468,6 +468,7 @@
       Echo.private(`${this.$route.params.id}-message`)
         .listen('MessageSentEvent', (e) => {
           if (e.message.receiver_id === self.currentUser.id) {
+            console.log('------ e.message:', e.message);
             self.originMessages.unshift(e.message);
             self.offset += 1;
             self.groupMessages();
