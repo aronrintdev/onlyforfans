@@ -17,6 +17,7 @@ use App\Enums\PaymentTypeEnum;
 use App\Enums\MediafileTypeEnum;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Mail;
 use App\Enums\ShareableAccessLevelEnum;
 use App\Enums\Financial\AccountTypeEnum;
 use App\Events\AccessGranted;
@@ -24,6 +25,9 @@ use App\Events\AccessRevoked;
 use App\Events\ItemPurchased;
 use App\Jobs\Financial\UpdateAccountBalance;
 use App\Models\Financial\Account;
+use App\Notifications\TimelineFollowed;
+use App\Notifications\TimelineSubscribed;
+use App\Notifications\TimelineTipped;
 use Symfony\Component\Console\Output\ConsoleOutput;
 
 class ShareablesTableSeeder extends Seeder
@@ -40,6 +44,8 @@ class ShareablesTableSeeder extends Seeder
     public function run()
     {
         $this->initSeederTraits('ShareablesTableSeeder'); // $this->{output, faker, appEnv}
+
+        Mail::fake();
 
         // +++ Create ... +++
 
@@ -89,6 +95,7 @@ class ShareablesTableSeeder extends Seeder
                     'created_at' => $now,
                     'updated_at' => $now,
                 ]);
+                $timeline->user->notify(new TimelineFollowed($timeline, $follower));
 
                 // --- purchase some posts ---
 
@@ -113,6 +120,7 @@ class ShareablesTableSeeder extends Seeder
                         Event::fakeFor(function() use ($paymentAccount, $post, $customAttributes) {
                             try {
                                 $paymentAccount->purchase($post, $post->price, ShareableAccessLevelEnum::PREMIUM, $customAttributes);
+                                $post->user->notify(new PostPurchased($post, $follower));
                             } catch (RuntimeException $e) {
                                 $exceptionClass = class_basename($e);
                                 if ($this->appEnv !== 'testing') {
@@ -184,6 +192,7 @@ class ShareablesTableSeeder extends Seeder
                     'base_unit_cost_in_cents' => $timeline->price->getAmount(),
                     'cattrs' => json_encode($customAttributes),
                 ]);
+                $timeline->user->notify(new TimelineSubscribed($timeline));
             });
 
             $iter++;

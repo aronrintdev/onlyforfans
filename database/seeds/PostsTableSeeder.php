@@ -5,6 +5,7 @@ use DB;
 use Exception;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Mail;
 use Carbon\Carbon;
 
 use App\Models\User;
@@ -29,6 +30,8 @@ class PostsTableSeeder extends Seeder
     public function run()
     {
         $this->initSeederTraits('PostsTableSeeder'); // $this->{output, faker, appEnv}
+
+        Mail::fake();
 
         // +++ Create ... +++
 
