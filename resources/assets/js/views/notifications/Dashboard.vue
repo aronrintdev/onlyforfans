@@ -2,6 +2,12 @@
   <div v-if="!isLoading" class="container-fluid" id="view-notifications">
 
     <section class="row">
+      <article class="col-sm-12">
+        <h1>Notifications</h1>
+      </article>
+    </section>
+
+    <section class="row">
 
       <aside class="col-md-3 col-lg-2">
         <b-list-group>
@@ -58,6 +64,14 @@ export default {
         name: 'Subscribers',
         to: { name: 'notifications.subscribe', params: {} },
       },
+      {
+        name: 'Tips',
+        to: { name: 'notifications.tips', params: {} },
+      },
+      {
+        name: 'Purchases',
+        to: { name: 'notifications.purchases', params: {} },
+      },
     ]
   }),
 
@@ -96,6 +110,8 @@ export default {
   "en": {
     "Likes": "Likes",
     "Subscribers": "Subscribers",
+    "Tips": "Tips",
+    "Purchases": "Purchases",
   }
 }
 </i18n>

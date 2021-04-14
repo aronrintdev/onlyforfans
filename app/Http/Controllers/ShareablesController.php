@@ -33,6 +33,8 @@ class ShareablesController extends AppBaseController
         // Check permissions
         if ( !$request->user()->isAdmin() ) {
 
+// %TODO : filter for session user only!! (aslo for likes)
+
             // non-admin: only view own...
             //$query->where('user_id', $request->user()->id); 
             //$query->take(5);

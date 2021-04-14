@@ -16,6 +16,16 @@ export default [
     path: 'subscribe',
   },
   {
+    name: 'notifications.tips',
+    component: notifications.Tips,
+    path: 'tips',
+  },
+  {
+    name: 'notifications.purchases',
+    component: notifications.Purchases,
+    path: 'purchases',
+  },
+  {
     name: 'notifications.default',
     component: notifications.Likes,
     path: '',

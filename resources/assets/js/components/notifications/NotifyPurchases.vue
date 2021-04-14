@@ -2,17 +2,17 @@
   <div v-if="!isLoading">
 
     <b-card>
-      <h4 class="card-title">Likes Received ({{ totalRows }})</h4>
+      <h4 class="card-title">Purchases Received ({{ totalRows }})</h4>
       <hr />
       <b-card-text>
-        <ul class="list-unstyled" id="likeables-list">
-          <b-media v-for="(l,idx) in likeables" tag="li" class="mb-0">
+        <ul class="list-unstyled" id="fanledgers-list">
+          <b-media v-for="(l,idx) in fanledgers" tag="li" class="mb-0">
             <template #aside>
               <b-img width="48" height="48" rounded="circle" :src="l.liker.avatar.filepath" :alt="l.liker.slug" :title="l.liker.name" />
             </template>
             <h6 class="mt-0 mb-1">{{ l.liker.name }}  <small class="text-muted">@{{ l.liker.username}}</small></h6>
             <p class="mb-0">liked your 
-              <router-link :to="{ name: 'posts.show', params: { slug: l.likeable.slug } }">{{ toSingular(l.likeable_type) }}</router-link>
+              <router-link :to="{ name: 'posts.show', params: { slug: l.purchaseable.slug } }">{{ l.purchaseable_type }}</router-link>
             </p>
             <small>{{ moment(l.created_at).format('MMM DD, YYYY') }}</small>
             <hr class="mt-2 mb-3" />
@@ -25,7 +25,7 @@
       v-model="currentPage"
       :total-rows="totalRows"
       :per-page="perPage"
-      aria-controls="likeables-list"
+      aria-controls="fanledgers-list"
       v-on:page-click="pageClickHandler"
       class="mt-3"
     ></b-pagination>
@@ -46,7 +46,7 @@ export default {
 
   computed: {
     isLoading() {
-      return !this.session_user || !this.likeables
+      return !this.session_user || !this.fanledgers
     },
 
     totalRows() {
@@ -55,7 +55,7 @@ export default {
   },
 
   data: () => ({
-    likeables: null,
+    fanledgers: null,
     meta: null,
     moment: moment,
 
@@ -64,20 +64,16 @@ export default {
   }),
 
   methods: {
-    toSingular(str) {
-      switch (str) {
-        case 'posts':
-        case 'comments':
-        case 'mediafiles':
-          return str.slice(0, -1)
-        default:
-          return ''
-      }
-    },
 
     getPagedData() {
-      axios.get( route('likeables.index'), { params: { page: this.currentPage, take: this.perPage } } ).then( response => {
-        this.likeables = response.data.data
+      const params = {
+        page: this.currentPage, 
+        take: this.perPage,
+        fltype: 'purchase', 
+        purchaseable_type: 'posts', 
+      }
+      axios.get( route('fanledgers.index'), { params } ).then( response => {
+        this.fanledgers = response.data.data
         this.meta = response.data.meta
       })
     },
@@ -104,3 +100,4 @@ export default {
 
 <style scoped>
 </style>
+
