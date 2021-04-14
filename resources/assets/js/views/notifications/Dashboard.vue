@@ -2,12 +2,6 @@
   <div v-if="!isLoading" class="container-fluid" id="view-notifications">
 
     <section class="row">
-      <article class="col-sm-12">
-        HERE NOTIFY
-      </article>
-    </section>
-
-    <section class="row">
 
       <aside class="col-md-3 col-lg-2">
         <b-list-group>
@@ -24,7 +18,7 @@
         </b-list-group>
       </aside>
 
-      <main class="col-md-9 col-lg-10">
+      <main class="col-md-9 col-lg-9">
           <router-view :session_user="session_user" />
         <!--
         <transition mode="out-in" name="quick-fade">
