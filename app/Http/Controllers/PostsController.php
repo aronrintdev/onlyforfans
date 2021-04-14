@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use App\Http\Resources\Post as PostResource;
 use App\Http\Resources\PostCollection;
+use App\Notifications\PostTipped;
+use App\Notifications\PostPurchased;
 use App\Models\Bookmark;
 use App\Models\Post;
 use App\Models\Comment;
@@ -165,6 +167,8 @@ class PostsController extends AppBaseController
             return response()->json(['message'=>$e->getMessage()], 400);
         }
 
+        $post->user->notify(new PostTipped($post));
+
         return response()->json([
             'post' => $post,
         ]);
@@ -174,22 +178,24 @@ class PostsController extends AppBaseController
     public function purchase(Request $request, Post $post)
     {
         $this->authorize('purchase', $post);
-        $sender = $request->user();
+        $purchaser = $request->user();
         $cattrs = [ 'notes' => $request->note ?? '' ];
         try {
             $post->receivePayment(
                 PaymentTypeEnum::PURCHASE,
-                $sender,
+                $purchaser, // payment *sender*
                 $post->price,
                 $cattrs
             );
-            $sender->sharedposts()->attach($post->id, [
+            $purchaser->sharedposts()->attach($post->id, [
                 'cattrs' => json_encode($cattrs ?? []),
             ]);
         } catch(Exception | Throwable $e) {
             throw $e;
             return response()->json(['message'=>$e->getMessage()], 400);
         }
+
+        $post->user->notify(new PostPurchased($post, $purchaser));
 
         return response()->json([
             'post' => $post ?? null,

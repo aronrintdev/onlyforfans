@@ -15,6 +15,10 @@ use App\Http\Resources\Timeline as TimelineResource;
 use App\Libs\FeedMgr;
 use App\Libs\UserMgr;
 
+use App\Notifications\TimelineFollowed;
+use App\Notifications\TimelineSubscribed;
+use App\Notifications\TimelineTipped;
+
 use App\Models\Setting;
 use App\Models\Timeline;
 use App\Models\Fanledger;
@@ -153,7 +157,10 @@ class TimelinesController extends AppBaseController
         $request->validate([
             'sharee_id' => 'required|uuid|exists:users,id',
         ]);
-        if ( $request->sharee_id != $request->user()->id ) {
+
+        $sessionUser = $request->user();
+        $follower = $sessionUser;
+        if ( $request->sharee_id != $follower->id ) {
             abort(403);
         }
 
@@ -162,13 +169,13 @@ class TimelinesController extends AppBaseController
             $cattrs['notes'] = $request->notes;
         }
 
-        $existing = $timeline->followers->contains($request->sharee_id); // currently following?
+        $existing = $timeline->followers->contains($follower->id); // currently following?
 
         if ($existing) {
-            $timeline->followers()->detach($request->sharee_id);
+            $timeline->followers()->detach($follower->id);
             $isFollowing = false;
         } else {
-            $timeline->followers()->attach($request->sharee_id, [ // will sync work here?
+            $timeline->followers()->attach($follower->id, [ // will sync work here?
                 'shareable_type' => 'timelines',
                 'shareable_id' => $timeline->id,
                 'is_approved' => 1, // %FIXME
@@ -177,6 +184,8 @@ class TimelinesController extends AppBaseController
             ]); //
             $isFollowing = true;
         }
+
+        $timeline->user->notify(new TimelineFollowed($timeline, $follower));
 
         $timeline->refresh();
         return response()->json([
@@ -193,29 +202,32 @@ class TimelinesController extends AppBaseController
         $request->validate([
             'sharee_id' => 'required|uuid|exists:users,id',
         ]);
-        if ( $request->sharee_id != $request->user()->id ) {
+
+        $sessionUser = $request->user();
+        $subscriber = $sessionUser;
+        if ( $request->sharee_id != $subscriber->id ) {
             abort(403);
         }
 
-        list($timeline, $isSubscribed) = DB::transaction( function() use(&$timeline, &$request) {
+        list($timeline, $isSubscribed) = DB::transaction( function() use(&$timeline, &$subscriber, &$request) {
             $cattrs = [];
             if ( $request->has('notes') ) {
                 $cattrs['notes'] = $request->notes;
             }
 
-            $existingFollowing = $timeline->followers->contains($request->sharee_id); // currently following?
-            $existingSubscribed = $timeline->subscribers->contains($request->sharee_id); // currently subscribed?
+            $existingFollowing = $timeline->followers->contains($subscriber->id); // currently following?
+            $existingSubscribed = $timeline->subscribers->contains($subscriber->id); // currently subscribed?
 
             if ( $existingSubscribed ) {
                 // unsubscribe & unfollow
-                $timeline->followers()->detach($request->sharee_id);
+                $timeline->followers()->detach($subscriber->id);
                 $isSubscribed = false;
             } else {
                 if ( $existingFollowing ) {
                     // upgrade from follow to subscribe => remove existing (covers 'upgrade') case
-                    $timeline->followers()->detach($request->sharee_id); 
+                    $timeline->followers()->detach($subscriber->id); 
                 } // otherwise, just a direct subscription...
-                $timeline->followers()->attach($request->sharee_id, [
+                $timeline->followers()->attach($subscriber->id, [
                     'shareable_type' => 'timelines',
                     'shareable_id' => $timeline->id,
                     'is_approved' => 1, // %FIXME
@@ -232,6 +244,8 @@ class TimelinesController extends AppBaseController
             }
             return [$timeline, $isSubscribed];
         });
+
+        $timeline->user->notify(new TimelineSubscribed($timeline, $subscriber));
 
         $timeline->refresh();
         return response()->json([
@@ -262,6 +276,8 @@ class TimelinesController extends AppBaseController
         } catch(Exception | Throwable $e) {
             return response()->json([ 'message'=>$e->getMessage() ], 400);
         }
+
+        $timeline->user->notify(new TimelineTipped($timeline));
 
         $timeline->refresh();
         return response()->json([

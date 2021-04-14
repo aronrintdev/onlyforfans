@@ -116,8 +116,9 @@ class LikeablesController extends AppBaseController
         ]);
 
         $alias = $request->likeable_type;
-        $model = Relation::getMorphedModel($alias);
+        $model = Relation::getMorphedModel($alias); // string
         $likeable = (new $model)->where('id', $request->likeable_id)->firstOrFail();
+//dd($likeable, $model, $alias);
 
         if ($request->user()->cannot('like', $likeable)) {
             abort(403);
@@ -125,7 +126,12 @@ class LikeablesController extends AppBaseController
 
         $likeable->likes()->syncWithoutDetaching($liker->id); // %NOTE!! %TODO: apply elsewhere instead of attach
 
-        $liker->notify(new ResourceLiked($likeable));
+        switch ($alias) {
+            case 'posts':
+            case 'comments':
+                $likeable->user->notify(new ResourceLiked($likeable, $liker)); // owner is relation 'user'
+            default:
+        }
 
         return response()->json([
             'likeable' => $likeable,
