@@ -6,15 +6,18 @@
       <hr />
       <b-card-text>
         <ul class="list-unstyled" id="fanledgers-list">
-          <b-media v-for="(l,idx) in fanledgers" tag="li" class="mb-0">
+          <b-media v-for="(fl,idx) in fanledgers" tag="li" class="mb-0">
             <template #aside>
-              <b-img width="48" height="48" rounded="circle" :src="l.liker.avatar.filepath" :alt="l.liker.slug" :title="l.liker.name" />
+              <b-img width="48" height="48" rounded="circle" :src="fl.purchaser.avatar.filepath" :alt="fl.purchaser.slug" :title="fl.purchaser.name" />
             </template>
-            <h6 class="mt-0 mb-1">{{ l.liker.name }}  <small class="text-muted">@{{ l.liker.username}}</small></h6>
-            <p class="mb-0">liked your 
-              <router-link :to="{ name: 'posts.show', params: { slug: l.purchaseable.slug } }">{{ l.purchaseable_type }}</router-link>
+            <h6 class="mt-0 mb-1">{{ fl.purchaser.name }}  <small class="text-muted">@{{ fl.purchaser.username}}</small></h6>
+            <p class="mb-0">has purchased your
+              <router-link v-if="fl.purchaseable_type==='posts'" :to="{ name: 'posts.show', params: { slug: fl.purchaseable.slug } }">post</router-link>
+              <router-link v-if="fl.purchaseable_type==='mediafiles'" :to="{ name: 'mediafiles.show', params: { slug: fl.purchaseable.slug } }">file</router-link>
+              <router-link v-if="fl.purchaseable_type==='messages'" :to="{ name: 'messages.show', params: { slug: fl.purchaseable.slug } }">message</router-link>
+              for {{ fl.base_unit_cost_in_cents | niceCurrency }}
             </p>
-            <small>{{ moment(l.created_at).format('MMM DD, YYYY') }}</small>
+            <small>{{ moment(fl.created_at).format('MMM DD, YYYY') }}</small>
             <hr class="mt-2 mb-3" />
           </b-media>
         </ul>

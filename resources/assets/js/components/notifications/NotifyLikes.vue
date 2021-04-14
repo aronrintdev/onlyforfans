@@ -69,9 +69,8 @@ export default {
         case 'posts':
         case 'comments':
         case 'mediafiles':
-          return str.slice(0, -1)
         default:
-          return ''
+          return str.slice(0, -1)
       }
     },
 
