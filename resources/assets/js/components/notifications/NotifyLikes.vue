@@ -75,12 +75,22 @@ export default {
       }
     },
 
-    pageClickHandler(e, page) {
-      this.currentPage = page
+    getPagedData() {
       axios.get( route('likeables.index'), { params: { page: this.currentPage, take: this.perPage } } ).then( response => {
         this.likeables = response.data.data
         this.meta = response.data.meta
       })
+    },
+
+    pageClickHandler(e, page) {
+      this.currentPage = page
+      this.getPagedData()
+        /*
+      axios.get( route('likeables.index'), { params: { page: this.currentPage, take: this.perPage } } ).then( response => {
+        this.likeables = response.data.data
+        this.meta = response.data.meta
+      })
+      */
     },
 
   },
@@ -90,10 +100,13 @@ export default {
   mounted() { },
 
   created() {
+    this.getPagedData()
+    /*
     axios.get( route('likeables.index'), { params: { page: this.currentPage, take: this.perPage } } ).then( response => {
       this.likeables = response.data.data
       this.meta = response.data.meta
     })
+     */
   },
 
   components: {
@@ -103,4 +116,3 @@ export default {
 
 <style scoped>
 </style>
-

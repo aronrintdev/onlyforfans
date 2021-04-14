@@ -24,7 +24,7 @@ class LikeablesController extends AppBaseController
     {
         $request->validate([
             // filters
-            'likeable_type' => 'string|in:posts,comments, mediafiles',
+            'likeable_type' => 'string|in: posts, comments, mediafiles',
             'liker_id' => 'uuid|exists:users,id', // if admin only
         ]);
 

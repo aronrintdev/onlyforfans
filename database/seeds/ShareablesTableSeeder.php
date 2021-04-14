@@ -76,7 +76,8 @@ class ShareablesTableSeeder extends Seeder
                 $this->output->writeln("  - Creating $max (non-premium) followers for timeline ".$timeline->name.", iter: $iter");
             }
 
-            $followerPool->random($max)->each( function(User $follower) use(&$timeline) {
+            $now = \Carbon\Carbon::now();
+            $followerPool->random($max)->each( function(User $follower) use(&$timeline, $now) {
                 $customAttributes = [ 'notes' => 'ShareablesTableSeeder.follow_some_free_timelines' ];
                 DB::table('shareables')->insert([
                     'sharee_id' => $follower->id,
@@ -85,6 +86,8 @@ class ShareablesTableSeeder extends Seeder
                     'is_approved' => 1,
                     'access_level' => 'default',
                     'cattrs' => json_encode($customAttributes),
+                    'created_at' => $now,
+                    'updated_at' => $now,
                 ]);
 
                 // --- purchase some posts ---
@@ -126,6 +129,8 @@ class ShareablesTableSeeder extends Seeder
                         //     'is_approved' => 1,
                         //     'access_level' => 'premium', // ??
                         //     'cattrs' => json_encode($customAttributes),
+                        //     'created_at' => $now,
+                        //     'updated_at' => $now,
                         // ]);
                         // Fanledger::create([
                         //     //'from_account' => , // %TODO: see https://trello.com/c/LzTUmPCp
@@ -138,6 +143,8 @@ class ShareablesTableSeeder extends Seeder
                         //     'qty' => 1,
                         //     'base_unit_cost_in_cents' => $p->price,
                         //     'cattrs' => json_encode($customAttributes),
+                        //     'created_at' => $now,
+                        //     'updated_at' => $now,
                         // ]);
                     });
                 }
