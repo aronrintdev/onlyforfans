@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 use App\Models\Message;
+use App\Models\ChatThread;
 use App\Models\Timeline;
 use App\Models\User;
 use App\Events\MessageSentEvent;
@@ -13,6 +14,7 @@ use function _\sortBy;
 use function _\orderBy;
 use function _\filter;
 use function _\uniq;
+use function _\uniqBy;
 
 class MessageController extends Controller
 {
@@ -23,13 +25,13 @@ class MessageController extends Controller
     }
     public function index()
     {
-        return Message::with('user', 'receiver')->get();
+        return ChatThread::with('sender', 'receiver')->get();
     }
     public function fetchUsers(Request $request)
     {
         $sessionUser = $request->user();
         // Get contacts 
-        $receivers = Message::where('user_id', $sessionUser->id)->orWhere('receiver_id', $sessionUser->id)->pluck('receiver_id')->toArray();
+        $receivers = ChatThread::where('sender_id', $sessionUser->id)->orWhere('receiver_id', $sessionUser->id)->pluck('receiver_id')->toArray();
 
         $timeline = Timeline::where('user_id', $sessionUser->id)->first();
         $followingUserIDs = $timeline->user->followedtimelines->pluck('id');
@@ -46,7 +48,7 @@ class MessageController extends Controller
         foreach ($followers as $follower) {
             array_push($arr, $follower);    
         }
-        $users = array_merge($followings, $arr);
+        $users = uniqBy(array_merge($followings, $arr), 'id');
      
         // Sort
         $sortBy = $request->query('sort');
@@ -93,27 +95,27 @@ class MessageController extends Controller
             $blockedUsers = $cattrs['blocked']['usernames'];
         }
         $blockers = User::whereIn('username', $blockedUsers)->pluck('id')->toArray();
-        $receivers = Message::where(function($query) use(&$request, &$blockers) {
-                $sessionUser = $request->user();
-                $searchText = $request->query('name');
 
-                $query->where('user_id', $sessionUser->id)
-                    ->whereNotIn('receiver_id', $blockers)
-                    ->where('receiver_name', 'like', '%' . $searchText . '%');
-            })
+        $searchText = $request->query('name');
+        $receivers = ChatThread::with(['receiver' => function($query) { 
+                    $query->where('name', 'like', '%' . $searchText . '%');
+                }
+            ])
+            ->where('sender_id', $sessionUser->id)
+            ->whereNotIn('receiver_id', $blockers)
             ->pluck('receiver_id')
             ->toArray();
         // Senders
-        $senders = Message::with(['user'])
-            ->whereHas('user', function($query) use(&$request, &$blockers) {
+        $senders = ChatThread::with(['sender'])
+            ->whereHas('sender', function($query) use(&$request, &$blockers) {
                 $sessionUser = $request->user();
                 $searchText = $request->query('name');
 
                 $query->where('receiver_id', $sessionUser->id)
-                    ->whereNotIn('user_id', $blockers)
+                    ->whereNotIn('sender_id', $blockers)
                     ->where('username', 'like', '%' . $searchText . '%');
             })
-            ->pluck('user_id')
+            ->pluck('sender_id')
             ->toArray();
         $receivers = uniq(array_merge($receivers, $senders));
 
@@ -121,18 +123,20 @@ class MessageController extends Controller
 
         $contacts = array();
         foreach($receivers as $receiver) {
-            $lastMessage = Message::with(['receiver'])
-                ->where(function($query) use(&$request, &$receiver) {
+            $lastChatThread = ChatThread::where(function($query) use(&$request, &$receiver) {
                     $sessionUser = $request->user();
-                    $query->where('user_id', $sessionUser->id)
+                    $query->where('sender_id', $sessionUser->id)
                         ->where('receiver_id', $receiver);
                 })
                 ->orWhere(function($query) use(&$request, &$receiver) {
                     $sessionUser = $request->user();
-                    $query->where('user_id', $receiver)
+                    $query->where('sender_id', $receiver)
                         ->where('receiver_id', $sessionUser->id);
                 })
-                ->latest()->first();
+                ->orderBy('created_at', 'desc')
+                ->first();
+            $messages = orderBy($lastChatThread->messages->toArray(), ['created_at'], ['desc']);
+            $lastMessage = $messages[0]['value'];
             $user = Timeline::with(['user', 'avatar'])->where('user_id', $receiver)->first()->makeVisible(['user']);
             $cattrs = $userSettings->cattrs;
             if ( array_key_exists('display_name', $cattrs) ) {
@@ -179,21 +183,25 @@ class MessageController extends Controller
 
         $offset = $request->query('offset');
         $limit = $request->query('limit');
-        $messages = Message::with(['receiver'])
+        $chatthreads = ChatThread::with(['receiver'])
             ->where(function($query) use(&$request, &$id) {
                 $sessionUser = $request->user();
-                $query->where('user_id', $sessionUser->id)
+                $query->where('sender_id', $sessionUser->id)
                     ->where('receiver_id',  $id);
             })
             ->orWhere(function($query) use(&$request, &$id) {
                 $sessionUser = $request->user();
                 $query->where('receiver_id', $sessionUser->id)
-                    ->where('user_id',  $id);
+                    ->where('sender_id',  $id);
             })
             ->orderBy('created_at', 'DESC')
             ->skip($offset)
             ->take($limit)
             ->get();
+        $chatthreads->each(function($chatthread) {
+            $chatthread->messages = $chatthread->messages()->orderBy('mcounter', 'asc')->get();
+        });
+
         $user = Timeline::with(['user', 'avatar'])->where('user_id', $id)->first()->makeVisible(['user']);
         $user->username = $user->user->username;
         $userSetting = $sessionUser->settings;
@@ -213,7 +221,7 @@ class MessageController extends Controller
         $user->hasLists = sizeof($lists) > 0;
         $user->id = $user->user->id;
         return [
-            'messages' => $messages,
+            'messages' => $chatthreads,
             'profile' => $user,
             'currentUser' => $request->user()
         ];
@@ -223,70 +231,102 @@ class MessageController extends Controller
         $sessionUser = $request->user();
         $receiver = User::where('id', $request->input('user_id'))->first();
 
-        $message = $sessionUser->messages()->create([
-            'message' => $request->input('message'),
-            'media_id' => $request->input('media_id'),
+        $chatthread = $sessionUser->chatthreads()->create([
             'receiver_id' => $request->input('user_id'),
-            'receiver_name' => $request->input('name'),
-            'is_unread' => !$receiver->is_online
         ]);
+        $message = $chatthread->messages()->create([
+            'mcontent' => $request->input('message'),
+            'is_unread' => 1,
+        ]);
+        $chatthread->messages = $chatthread->messages()->orderBy('mcounter', 'asc')->get();
 
-        broadcast(new MessageSentEvent(Message::with(['receiver', 'media'])->where('id', $message->id)->first(), $sessionUser))->toOthers();
+        // broadcast(new MessageSentEvent($chatthread, $sessionUser))->toOthers();
 
         return [
-            'message' => Message::with(['receiver', 'media'])->where('id', $message->id)->first(),
+            'message' => $chatthread,
         ];
     }
     public function clearUser(Request $request, $id)
     {
-        $deleted = Message::where('receiver_id', $id)->delete();
+        $deleted = ChatThread::where(function($query) use(&$request, &$id) {
+                $sessionUser = $request->user();
+                $query->where('sender_id', $sessionUser->id)
+                    ->where('receiver_id', $id);
+            })
+            ->orWhere(function($query) use(&$request, &$id) {
+                $sessionUser = $request->user();
+                $query->where('sender_id', $id)
+                    ->where('receiver_id', $sessionUser->id);
+            })
+            ->delete();
         if ($deleted) {
-            return [
-                'status' => 200
-            ];
+            return;
         }
-        return [
-            'status' => 400
-        ];
+        abort(400);
     }
     public function markAsRead(Request $request, $id) {
         $sessionUser = $request->user();
-
-        $messages = Message::where('user_id', $sessionUser->id)
-            ->where('receiver_id',  $id)
-            ->update(['is_unread' => 0]);
+        $chatthreads = ChatThread::where('sender_id', $id)
+            ->where('receiver_id', $sessionUser->id)
+            ->get();
+        $chatthreads->each(function($thread) {
+            $thread->messages()
+                ->update(['is_unread' => 0]);
+        });
         return ['status' => 200];
     }
     public function markAllAsRead(Request $request) {
         $sessionUser = $request->user();
 
-        $messages = Message::where('user_id', $sessionUser->id)
-            ->update(['is_unread' => 0]);
+        $chatthreads = ChatThread::where('receiver_id', $sessionUser->id)->get();
+        $chatthreads->each(function($thread) {
+            $thread->messages()
+                ->update(['is_unread' => 0]);
+        });
         return ['status' => 200];
     }
     public function filterMessages(Request $request, $id) {
         $sessionUser = $request->user();
 
-        $messages = Message::with(['receiver'])
-            ->where(function($query) use(&$request, &$id) {
+        $chatthreads = ChatThread::where(function($query) use(&$request, &$id) {
                 $sessionUser = $request->user();
-                $filter = $request->query('query');
-
-                $query->where('user_id', $sessionUser->id)
-                    ->where('receiver_id',  $id)
-                    ->where('message', 'like', '%'.$filter.'%');
+                $query->where('sender_id', $sessionUser->id)
+                    ->where('receiver_id', $id);
             })
             ->orWhere(function($query) use(&$request, &$id) {
                 $sessionUser = $request->user();
-                $filter = $request->query('query');
-
-                $query->where('receiver_id', $sessionUser->id)
-                    ->where('user_id',  $id)
-                    ->where('message', 'like', '%'.$filter.'%');
+                $query->where('sender_id', $id)
+                    ->where('receiver_id', $sessionUser->id);
             })
-            ->orderBy('created_at', 'DESC')
-            ->pluck('id')
-            ->toArray();
+            ->get();
+        $messages = [];
+        $chatthreads->each(function($thread) use(&$messages, &$filter) {
+            $messages = $thread->messages()->where('mcontent', 'like', '%'.$filter.'%')->get()->toArray();
+        });
+        $messages = orderBy($messages, ['created_at'], ['desc']);
+        $messages = array_map(function($message) {
+            return $message['value']['id'];
+        }, $messages);
+        // $messages = Message::with(['receiver'])
+        //     ->where(function($query) use(&$request, &$id) {
+        //         $sessionUser = $request->user();
+        //         $filter = $request->query('query');
+
+        //         $query->where('user_id', $sessionUser->id)
+        //             ->where('receiver_id',  $id)
+        //             ->where('message', 'like', '%'.$filter.'%');
+        //     })
+        //     ->orWhere(function($query) use(&$request, &$id) {
+        //         $sessionUser = $request->user();
+        //         $filter = $request->query('query');
+
+        //         $query->where('receiver_id', $sessionUser->id)
+        //             ->where('user_id',  $id)
+        //             ->where('message', 'like', '%'.$filter.'%');
+        //     })
+        //     ->orderBy('created_at', 'DESC')
+        //     ->pluck('id')
+        //     ->toArray();
         return $messages;
     }
     public function mute(Request $request, $id) {

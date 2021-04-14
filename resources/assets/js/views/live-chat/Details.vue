@@ -106,8 +106,8 @@
                       <div class="message-group" :key="messageGroup.date"  v-for="messageGroup in messages">
                         <div class="message-group-time"><span>{{ moment.unix(messageGroup.date).format('MMM DD, YYYY') }}</span></div>
                         <template v-for="message in messageGroup.messages">
-                          <div :class="`message message-${message.id}`" :key="message.id">
-                            <div class="received" v-if="currentUser && currentUser.id !== message.user_id">
+                          <div class="message" :key="message.id">
+                            <div class="received" v-if="currentUser && currentUser.id !== message.sender_id">
                               <div class="user-logo text-logo" v-if="selectedUser && !selectedUser.profile.avatar">
                                 {{ getLogoFromName(selectedUser.name) }}
                               </div>
@@ -115,12 +115,12 @@
                                 <img :src="selectedUser.profile.avatar.filepath" alt="" />
                               </div>
                               <div class="content">
-                                <div class="text">{{ message.message }}</div>
+                                <div class="text" :class="`message-${msg.id}`" v-for="msg in message.messages" :key="msg.id">{{ msg.mcontent }}</div>
                                 <div class="time">{{ moment(message.created_at).format('hh:mm A') }}</div>
                               </div>
                             </div>
-                            <div class="sent" v-if="currentUser && currentUser.id === message.user_id">
-                              <div class="text">{{ message.message }}</div>
+                            <div class="sent" v-if="currentUser && currentUser.id === message.sender_id">
+                              <div class="text" :class="`message-${msg.id}`" v-for="msg in message.messages" :key="msg.id">{{ msg.mcontent }}</div>
                               <div class="time">{{ moment(message.created_at).format('hh:mm A') }}</div>
                             </div>
                           </div>
@@ -457,6 +457,7 @@
       sortableImgs: [],
       applyBtnEnabled: false,
       isSendingFiles: false,
+      hasMore: true,
     }),
     mounted() {
       const self = this;
@@ -557,7 +558,7 @@
     methods: {
       handleDebouncedScroll: function(event) {
         const isUserScrolling = (event.target.scrollTop === 0);
-        if (isUserScrolling && !this.loadingData) {
+        if (isUserScrolling && !this.loadingData && this.hasMore) {
           this.getMessages();
           this.$el.querySelector('.conversation-list .messages').scrollTop = 10;
         }
@@ -575,10 +576,13 @@
       getMessages: async function() {
         this.loadingData = true;
         const user_id = this.$route.params.id;
-        const response = await this.axios.get(`/chat-messages/${user_id}?offset=${this.offset}&limit=30`);
+        const response = await this.axios.get(`/chat-messages/${user_id}?offset=${this.offset}&limit=10`);
         this.selectedUser = response.data;
         if (!this.currentUser) {
           this.currentUser = response.data.currentUser;
+        }
+        if (response.data.messages.length === 0) {
+          this.hasMore = false;
         }
         this.originMessages = response.data.messages.concat(this.originMessages);
         this.offset = this.originMessages.length;
@@ -657,7 +661,6 @@
           this.axios.post('/chat-messages', {
             message: this.newMessageText,
             user_id: this.selectedUser.profile.id,
-            name: this.selectedUser.profile.name,
           })
             .then((response) => {
               this.originMessages.unshift(response.data.message);
@@ -681,7 +684,6 @@
                 this.axios.post('/chat-messages', {
                   media_id: res.data.mediafile.id,
                   user_id: this.selectedUser.profile.id,
-                  name: this.selectedUser.profile.name,
                 });
               });
             promises.push(promise);
@@ -719,15 +721,19 @@
 
         let index = this.originMessages.findIndex(message => message.id === messageId);
         while (index < 0) {
-          await this.axios.get(`/chat-messages/${user_id}?offset=${this.offset}&limit=30`).then((response) => {
+          await this.axios.get(`/chat-messages/${user_id}?offset=${this.offset}&limit=10`).then((response) => {
             this.originMessages = this.originMessages.concat(response.data.messages);
             this.offset = this.originMessages.length;
           });
-          index = this.originMessages.findIndex(message => message.id === messageId);
+          const allMessages = [];
+          this.originMessages.forEach(message => {
+            allMessages = allMessages.concat(message.messages);
+          });
+          index = allMessages.findIndex(msg => msg.id === messageId);
         }
-        const el = $(`.message-${messageId}.message .text`);
+        const el = $(`.message-${messageId}.text`);
         el.html(el.html().replace(new RegExp(this.messageSearchText, 'gi'), (str) => `<span class="highlight">${str}</span>`));
-        const newPos = $('.conversation-list').scrollTop() + $(`.message-${messageId}.message`).height() + $(`.message-${messageId}.message`).offset().top - $('.conversation-list').height() - $('.conversation-list').offset().top;
+        const newPos = $('.conversation-list').scrollTop() + $(`.message-${messageId}.text`).height() + $(`.message-${messageId}.text`).offset().top - $('.conversation-list').height() - $('.conversation-list').offset().top;
         $('.conversation-list').animate({scrollTop: newPos}, 500);
         this.loadingData = false;
       },

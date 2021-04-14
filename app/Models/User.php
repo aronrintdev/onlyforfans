@@ -441,13 +441,11 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
     #endregion HasFinancialAccounts
 
     /**
-     * A user can have many messages
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * A user can have many chatthreads
      */
-    public function messages()
+    public function chatthreads()
     {
-        return $this->hasMany(Message::class);
+        return $this->hasMany(ChatThread::class, 'sender_id');
     }
 
     public function lists()
