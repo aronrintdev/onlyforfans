@@ -467,9 +467,9 @@
       this.findConversationList();
       Echo.private(`${this.$route.params.id}-message`)
         .listen('MessageSentEvent', (e) => {
-          if (e.message.receiver_id === self.currentUser.id) {
-            console.log('------ e.message:', e.message);
-            self.originMessages.unshift(e.message);
+          const message = JSON.parse(e.message);
+          if (message.receiver_id === self.currentUser.id) {
+            self.originMessages.unshift(message);
             self.offset += 1;
             self.groupMessages();
             $('.conversation-list').animate({ scrollTop: $('.conversation-list')[0].scrollHeight }, 500);
@@ -510,8 +510,9 @@
         this.findConversationList();
         Echo.private(`${id}-message`)
         .listen('MessageSentEvent', (e) => {
-          if (e.message.receiver_id === self.currentUser.id) {
-            self.originMessages.unshift(e.message);
+          const message = JSON.parse(e.message);
+          if (message.receiver_id === self.currentUser.id) {
+            self.originMessages.unshift(message);
             self.offset += 1;
             self.groupMessages();
             $('.conversation-list').animate({ scrollTop: $('.conversation-list')[0].scrollHeight }, 500);

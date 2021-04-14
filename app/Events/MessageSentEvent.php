@@ -27,7 +27,8 @@ class MessageSentEvent  implements ShouldBroadcast
      */
     public function __construct(ChatThread $chatthread, User $sender)
     {
-        $this->message = $chatthread;
+        $json = json_encode($chatthread);
+        $this->message = $json;
         $this->sender = $sender;
     }
 
