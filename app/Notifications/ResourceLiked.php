@@ -6,7 +6,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use App\Interfaces\Likeable;
-//use App\Models\Post;
+use App\Models\User;
 
 // Resource can be Post, Comment, Mediafile, etc
 class ResourceLiked extends Notification
@@ -14,10 +14,12 @@ class ResourceLiked extends Notification
     use Queueable;
 
     public $likeable;
+    public $liker;
 
-    public function __construct(Likeable $likeable)
+    public function __construct(Likeable $likeable, User $liker)
     {
-        $this->likeable = $likeable;
+        $this->likeable = $likeable; // resource liked: Post, Comment, etc.
+        $this->liker = $liker;
     }
 
     public function via($notifiable)
@@ -28,16 +30,19 @@ class ResourceLiked extends Notification
     public function toMail($notifiable)
     {
         return (new MailMessage)
-                    ->line('The introduction to the notification.')
-                    ->action('Notification Action', url('/'))
-                    ->line('Thank you for using our application!');
+                    ->line('You received a like from '.$this->liker->name)
+                    ->action('Notification Action', url('/'));
     }
 
     public function toArray($notifiable)
     {
         return [
             'resource_type' => $this->likeable->getTable(),
-            'id' => $this->likeable->id,
+            'resource_id' => $this->likeable->id,
+            'liker' => [
+                'username' => $this->liker->username,
+                'name' => $this->liker->name,
+            ],
         ];
     }
 }
