@@ -5,8 +5,8 @@
       <h4 class="card-title">Tips Received ({{ totalRows }})</h4>
       <hr />
       <b-card-text>
-        <ul class="list-unstyled" id="fanledgers-list">
-          <b-media v-for="(fl,idx) in fanledgers" tag="li" class="mb-0">
+        <ul class="list-unstyled" id="notifications-list">
+          <b-media v-for="(fl,idx) in notifications" tag="li" class="mb-0">
             <template #aside>
               <b-img width="48" height="48" rounded="circle" :src="fl.purchaser.avatar.filepath" :alt="fl.purchaser.slug" :title="fl.purchaser.name" />
             </template>
@@ -27,7 +27,7 @@
       v-model="currentPage"
       :total-rows="totalRows"
       :per-page="perPage"
-      aria-controls="fanledgers-list"
+      aria-controls="notifications-list"
       v-on:page-click="pageClickHandler"
       class="mt-3"
     ></b-pagination>
@@ -48,7 +48,7 @@ export default {
 
   computed: {
     isLoading() {
-      return !this.session_user || !this.fanledgers
+      return !this.session_user || !this.notifications
     },
 
     totalRows() {
@@ -57,7 +57,7 @@ export default {
   },
 
   data: () => ({
-    fanledgers: null,
+    notifications: null,
     meta: null,
     moment: moment,
 
@@ -74,8 +74,14 @@ export default {
         fltype: 'tip', 
         purchaseable_type: 'timelines', 
       }
+        /*
       axios.get( route('fanledgers.index'), { params } ).then( response => {
         this.fanledgers = response.data.data
+        this.meta = response.data.meta
+      })
+         */
+      axios.get( route('notifications.index'), { params } ).then( response => {
+        this.notifications = response.data.data
         this.meta = response.data.meta
       })
     },
