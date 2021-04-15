@@ -28,6 +28,7 @@ class TestDatabaseSeeder extends ParentSeeder
             StoriesTableSeeder::class,
             BookmarksTableSeeder::class,
             LikeablesTableSeeder::class,
+            //TipsTableSeeder::class,
         ]);
     }
 

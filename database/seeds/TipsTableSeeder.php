@@ -30,8 +30,7 @@ use App\Jobs\Financial\UpdateAccountBalance;
 use App\Models\Financial\Account;
 use App\Notifications\TimelineFollowed;
 use App\Notifications\TimelineSubscribed;
-use App\Notifications\TimelineTipped;
-use App\Notifications\PostTipped;
+use App\Notifications\TipReceived;
 use Symfony\Component\Console\Output\ConsoleOutput;
 
 class TipsTableSeeder extends Seeder
@@ -61,7 +60,7 @@ class TipsTableSeeder extends Seeder
             $this->output->writeln("  - Tips seeder: loaded ".$timelines->count()." timelines...");
         }
 
-        $timelines->each( function($t) {
+        $timelines->take(25)->each( function($t) { // do max 25
 
             static $iter = 1;
 
@@ -81,6 +80,9 @@ class TipsTableSeeder extends Seeder
 
                 // Tip a timeline...
                 Event::fakeFor(function() use (&$paymentAccount, &$t, &$follower ) {
+                    if ( $this->appEnv !== 'testing' ) {
+                        $this->output->writeln("  - Tips seeder: tipping timeline ".$t->slug);
+                    }
                     try {
                         $tipAmount = $this->faker->numberBetween(500,10000);
                         //$paymentAccount->purchase($t, $tipAmount, ShareableAccessLevelEnum::DEFAULT, []);
@@ -94,7 +96,7 @@ class TipsTableSeeder extends Seeder
                             'purchasable_type' => $t->getMorphString(),
                             'metadata' => [ 'notes' => 'TipsTableSeeder.tip_a_timeline' ],
                         ]);
-                        $t->user->notify(new TimelineTipped($t, $follower));
+                        $t->user->notify(new TipReceived($t, $follower));
                     } catch (RuntimeException $e) {
                         $exceptionClass = class_basename($e);
                         if ($this->appEnv !== 'testing') {
@@ -107,6 +109,9 @@ class TipsTableSeeder extends Seeder
                 $posts = $t->posts->take( $this->faker->numberBetween(0,5) );
                 $posts->each( function($p) use(&$paymentAccount, &$follower) {
                     Event::fakeFor(function() use (&$paymentAccount, &$p, &$follower ) {
+                        if ( $this->appEnv !== 'testing' ) {
+                            $this->output->writeln("  - Tips seeder: tipping post ".$p->slug);
+                        }
                         try {
                             $tipAmount = $this->faker->numberBetween(500,7000);
                             //$paymentAccount->purchase($p, $tipAmount, ShareableAccessLevelEnum::DEFAULT, []);
@@ -120,7 +125,7 @@ class TipsTableSeeder extends Seeder
                                 'purchasable_type' => $p->getMorphString(),
                                 'metadata' => [ 'notes' => 'TipsTableSeeder.tip_a_post' ],
                             ]);
-                            $p->user->notify(new PostTipped($p, $follower));
+                            $p->user->notify(new TipReceived($p, $follower));
                         } catch (RuntimeException $e) {
                             $exceptionClass = class_basename($e);
                             if ($this->appEnv !== 'testing') {

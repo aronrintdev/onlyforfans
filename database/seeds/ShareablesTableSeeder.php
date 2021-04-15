@@ -27,7 +27,7 @@ use App\Jobs\Financial\UpdateAccountBalance;
 use App\Models\Financial\Account;
 use App\Notifications\TimelineFollowed;
 use App\Notifications\TimelineSubscribed;
-use App\Notifications\TimelineTipped;
+use App\Notifications\PostPurchased;
 use Symfony\Component\Console\Output\ConsoleOutput;
 
 class ShareablesTableSeeder extends Seeder
@@ -117,7 +117,7 @@ class ShareablesTableSeeder extends Seeder
                         $paymentAccount->can_make_transactions = true;
                         $paymentAccount->save();
 
-                        Event::fakeFor(function() use ($paymentAccount, $post, $customAttributes) {
+                        Event::fakeFor(function() use (&$paymentAccount, &$post, &$follower, $customAttributes) {
                             try {
                                 $paymentAccount->purchase($post, $post->price, ShareableAccessLevelEnum::PREMIUM, $customAttributes);
                                 $post->user->notify(new PostPurchased($post, $follower));
@@ -192,7 +192,7 @@ class ShareablesTableSeeder extends Seeder
                     'base_unit_cost_in_cents' => $timeline->price->getAmount(),
                     'cattrs' => json_encode($customAttributes),
                 ]);
-                $timeline->user->notify(new TimelineSubscribed($timeline));
+                $timeline->user->notify(new TimelineSubscribed($timeline, $f));
             });
 
             $iter++;
