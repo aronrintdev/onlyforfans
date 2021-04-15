@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use App\Http\Resources\Post as PostResource;
 use App\Http\Resources\PostCollection;
-use App\Notifications\PostTipped;
+use App\Notifications\TipReceived;
 use App\Notifications\PostPurchased;
 use App\Models\Bookmark;
 use App\Models\Post;
@@ -167,7 +167,7 @@ class PostsController extends AppBaseController
             return response()->json(['message'=>$e->getMessage()], 400);
         }
 
-        $post->user->notify(new PostTipped($post));
+        $post->user->notify(new TipReceived($post));
 
         return response()->json([
             'post' => $post,

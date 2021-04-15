@@ -17,7 +17,7 @@ use App\Libs\UserMgr;
 
 use App\Notifications\TimelineFollowed;
 use App\Notifications\TimelineSubscribed;
-use App\Notifications\TimelineTipped;
+use App\Notifications\TipReceived;
 
 use App\Models\Setting;
 use App\Models\Timeline;
@@ -277,7 +277,7 @@ class TimelinesController extends AppBaseController
             return response()->json([ 'message'=>$e->getMessage() ], 400);
         }
 
-        $timeline->user->notify(new TimelineTipped($timeline));
+        $timeline->user->notify(new TipReceived($timeline));
 
         $timeline->refresh();
         return response()->json([
