@@ -18,6 +18,7 @@ class PostTipped extends Notification
 
     public function __construct(Post $post, User $purchaser)
     {
+        throw new \Exception('deprecated, use TipReceived');
         $this->post = $post;
         $this->purchaser = $purchaser;
     }
@@ -39,10 +40,10 @@ class PostTipped extends Notification
             'resource_type' => $this->post->getTable(),
             'resource_id' => $this->post->id,
             'resource_slug' => $this->post->slug,
-            'purchaser' => [
+            'actor' => [ // purchaser
                 'username' => $this->purchaser->username,
                 'name' => $this->purchaser->name,
-                'avatar' => $this->purchaser->avatar,
+                'avatar' => $this->purchaser->avatar->filepath ?? null,
             ],
         ];
     }

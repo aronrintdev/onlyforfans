@@ -17,6 +17,7 @@ class TimelineTipped extends Notification
 
     public function __construct(Timeline $timeline, User $purchaser)
     {
+        throw new \Exception('deprecated, use TipReceived');
         $this->timeline = $timeline;
         $this->purchaser = $purchaser;
     }
@@ -38,10 +39,10 @@ class TimelineTipped extends Notification
             'resource_type' => $this->timeline->getTable(),
             'resource_id' => $this->timeline->id,
             'resource_slug' => $this->timeline->slug,
-            'purchaser' => [
+            'actor' => [ // purchaser
                 'username' => $this->purchaser->username,
                 'name' => $this->purchaser->name,
-                'avatar' => $this->purchaser->avatar,
+                'avatar' => $this->purchaser->avatar->filepath ?? null,
             ],
         ];
     }

@@ -13,12 +13,12 @@ class PostPurchased extends Notification
     use Queueable;
 
     public $post;
-    public $purchaser;
+    public $actor; // purchaser
 
-    public function __construct(Post $post, User $purchaser)
+    public function __construct(Post $post, User $actor)
     {
         $this->post = $post;
-        $this->purchaser = $purchaser;
+        $this->actor = $actor;
     }
 
     public function via($notifiable)
@@ -29,7 +29,7 @@ class PostPurchased extends Notification
     public function toMail($notifiable)
     {
         return (new MailMessage)
-                    ->line($this->purchaser->name.' purchased your post');
+                    ->line($this->actor->name.' purchased your post');
     }
 
     public function toArray($notifiable)
@@ -38,10 +38,10 @@ class PostPurchased extends Notification
             'resource_type' => $this->post->getTable(),
             'resource_id' => $this->post->id,
             'resource_slug' => $this->post->slug,
-            'purchaser' => [
-                'username' => $this->purchaser->username,
-                'name' => $this->purchaser->name,
-                'avatar' => $this->purchaser->avatar,
+            'actor' => [ // purchaser
+                'username' => $this->actor->username,
+                'name' => $this->actor->name,
+                'avatar' => $this->actor->avatar->filepath ?? null,
             ],
         ];
     }

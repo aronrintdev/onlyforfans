@@ -5,20 +5,22 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
-use App\Interfaces\Likeable;
+use App\Models\Timeline;
+use App\Models\Post;
 use App\Models\User;
+use App\Interfaces\Tippable;
 
-// Resource can be Post, Comment, Mediafile, etc
-class ResourceLiked extends Notification
+class TipReceived extends Notification
 {
     use Queueable;
 
-    public $likeable;
-    public $actor; // liker
+    public $resource;
+    public $actor; // purchaser;
 
-    public function __construct(Likeable $likeable, User $actor)
+    //public function __construct(Timeline $timeline, User $purchaser)
+    public function __construct(Tippable $resource, User $actor)
     {
-        $this->likeable = $likeable; // resource liked: Post, Comment, etc.
+        $this->resource = $resource;
         $this->actor = $actor;
     }
 
@@ -30,17 +32,16 @@ class ResourceLiked extends Notification
     public function toMail($notifiable)
     {
         return (new MailMessage)
-                    ->line('You received a like from '.$this->actor->name)
-                    ->action('Notification Action', url('/'));
+                    ->line($this->actor->name.' sent you a tip!');
     }
 
     public function toArray($notifiable)
     {
         return [
-            'resource_type' => $this->likeable->getTable(),
-            'resource_id' => $this->likeable->id,
-            'resource_slug' => $this->likeable->slug ?? null,
-            'actor' => [ // liker
+            'resource_type' => $this->resource->getTable(),
+            'resource_id' => $this->resource->id,
+            'resource_slug' => $this->resource->slug,
+            'actor' => [ // purchaser
                 'username' => $this->actor->username,
                 'name' => $this->actor->name,
                 'avatar' => $this->actor->avatar->filepath ?? null,

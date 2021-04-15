@@ -13,12 +13,12 @@ class TimelineFollowed extends Notification
     use Queueable;
 
     public $timeline;
-    public $follower;
+    public $actor; // follower
 
-    public function __construct(Likeable $timeline, User $follower)
+    public function __construct(Timeline $timeline, User $actor)
     {
         $this->timeline = $timeline;
-        $this->follower = $follower;
+        $this->actor = $actor;
     }
 
     public function via($notifiable)
@@ -29,24 +29,19 @@ class TimelineFollowed extends Notification
     public function toMail($notifiable)
     {
         return (new MailMessage)
-                    ->line($this->purchaser->name.' followed your timeline');
+                    ->line($this->actor->name.' followed your timeline');
     }
 
     public function toArray($notifiable)
     {
-        $follower = [];
-        if ( $this->likeable->user ) {
-            $follower['username'] = $this->likeable->user->username;
-            $follower['name'] = $this->likeable->user->name;
-        }
         return [
             'resource_type' => $this->timeline->getTable(),
             'resource_id' => $this->timeline->id,
             'resource_slug' => $this->timeline->slug,
-            'follower' => [
-                'username' => $this->follower->username,
-                'name' => $this->follower->name,
-                'avatar' => $this->follower->avatar,
+            'actor' => [ // follower
+                'username' => $this->actor->username,
+                'name' => $this->actor->name,
+                'avatar' => $this->actor->avatar->filepath ?? null,
             ],
         ];
     }
