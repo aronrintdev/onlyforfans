@@ -2,10 +2,10 @@
 namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
-use App\Models\Sharable as SharableModel;
+use App\Models\Shareable as ShareableModel;
 use App\Http\Resources\Post as PostResource;
 
-class Sharable extends JsonResource
+class Shareable extends JsonResource
 {
     public function toArray($request)
     {
