@@ -42,9 +42,11 @@ class TimelineFollowed extends Notification
         return [
             'resource_type' => $this->timeline->getTable(),
             'resource_id' => $this->timeline->id,
+            'resource_slug' => $this->timeline->slug,
             'follower' => [
                 'username' => $this->follower->username,
                 'name' => $this->follower->name,
+                'avatar' => $this->follower->avatar,
             ],
         ];
     }

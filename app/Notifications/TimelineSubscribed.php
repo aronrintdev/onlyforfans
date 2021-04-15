@@ -13,12 +13,12 @@ class TimelineSubscribed extends Notification
     use Queueable;
 
     public $timeline;
-    public $purchaser;
+    public $subscriber;
 
-    public function __construct(Timeline $timeline, User $purchaser)
+    public function __construct(Timeline $timeline, User $subscriber)
     {
         $this->timeline = $timeline;
-        $this->purchaser = $purchaser;
+        $this->subscriber = $subscriber;
     }
 
     public function via($notifiable)
@@ -29,7 +29,7 @@ class TimelineSubscribed extends Notification
     public function toMail($notifiable)
     {
         return (new MailMessage)
-                    ->line($this->purchaser->name.' subscribed to your timeline');
+                    ->line($this->subscriber->name.' subscribed to your timeline');
     }
 
     public function toArray($notifiable)
@@ -37,9 +37,11 @@ class TimelineSubscribed extends Notification
         return [
             'resource_type' => $this->timeline->getTable(),
             'resource_id' => $this->timeline->id,
-            'purchaser' => [
-                'username' => $this->purchaser->username,
-                'name' => $this->purchaser->name,
+            'resource_slug' => $this->timeline->slug,
+            'subscriber' => [
+                'username' => $this->subscriber->username,
+                'name' => $this->subscriber->name,
+                'avatar' => $this->subscriber->avatar,
             ],
         ];
     }

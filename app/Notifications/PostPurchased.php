@@ -37,9 +37,11 @@ class PostPurchased extends Notification
         return [
             'resource_type' => $this->post->getTable(),
             'resource_id' => $this->post->id,
+            'resource_slug' => $this->post->slug,
             'purchaser' => [
                 'username' => $this->purchaser->username,
                 'name' => $this->purchaser->name,
+                'avatar' => $this->purchaser->avatar,
             ],
         ];
     }

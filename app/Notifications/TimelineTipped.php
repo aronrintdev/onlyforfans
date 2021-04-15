@@ -37,9 +37,11 @@ class TimelineTipped extends Notification
         return [
             'resource_type' => $this->timeline->getTable(),
             'resource_id' => $this->timeline->id,
+            'resource_slug' => $this->timeline->slug,
             'purchaser' => [
                 'username' => $this->purchaser->username,
                 'name' => $this->purchaser->name,
+                'avatar' => $this->purchaser->avatar,
             ],
         ];
     }

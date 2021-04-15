@@ -39,9 +39,11 @@ class ResourceLiked extends Notification
         return [
             'resource_type' => $this->likeable->getTable(),
             'resource_id' => $this->likeable->id,
+            'resource_slug' => $this->likeable->slug ?? null,
             'liker' => [
                 'username' => $this->liker->username,
                 'name' => $this->liker->name,
+                'avatar' => $this->liker->avatar,
             ],
         ];
     }
