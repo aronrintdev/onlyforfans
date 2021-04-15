@@ -17,7 +17,7 @@ import payments from '@views/payments'
 import liveChat from '@views/live-chat'
 
 import settingsRoutes from './settings.routes'
-import notificationsRoutes from './notifications.routes'
+//import notificationsRoutes from './notifications.routes'
 
 export const routes = [
   {
@@ -66,9 +66,10 @@ export const routes = [
 
   // Notifications
   {
-    path: '/notifications',
+    name: 'notifications.dashboard',
+    path: '/notifications/dashboard',
     component: notifications.Dashboard,
-    children:  notificationsRoutes,
+    props: true,
   },
 
   // Settings

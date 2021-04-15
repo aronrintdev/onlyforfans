@@ -14,6 +14,7 @@ use App\Enums\PaymentTypeEnum;
 use App\Enums\MediafileTypeEnum;
 use Illuminate\Support\Facades\Config;
 use Symfony\Component\Console\Output\ConsoleOutput;
+use App\Notifications\ResourceLiked;
 
 class LikeablesTableSeeder extends Seeder
 {
@@ -60,6 +61,7 @@ class LikeablesTableSeeder extends Seeder
                         'created_at' => $now,
                         'updated_at' => $now,
                     ]);
+                    $p->user->notify(new ResourceLiked($p, $f));
                 });
             });
 
