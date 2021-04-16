@@ -2,6 +2,8 @@
 namespace Database\Seeders;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
+use App\Notifications\CommentReceived;
 use App\Libs\FactoryHelpers;
 use App\Models\Comment;
 use App\Models\Post;
@@ -14,6 +16,8 @@ class CommentsTableSeeder extends Seeder
     public function run()
     {
         $this->initSeederTraits('CommentsTableSeeder'); // $this->{output, faker, appEnv}
+
+        Mail::fake();
 
         $posts = Post::get();
 
@@ -38,6 +42,7 @@ class CommentsTableSeeder extends Seeder
                          'user_id'     => $commenter->id,
                          //'parent_id'   => null, // %TODO: nested comments
                      ]);
+                     $post->user->notify(new CommentReceived($post, $commenter));
                  });
              });
         });
