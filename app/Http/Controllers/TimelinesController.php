@@ -277,7 +277,7 @@ class TimelinesController extends AppBaseController
             return response()->json([ 'message'=>$e->getMessage() ], 400);
         }
 
-        $timeline->user->notify(new TipReceived($timeline, $request->user, ['amount'=>$request->base_user_cost_in_cents]));
+        $timeline->user->notify(new TipReceived($timeline, $request->user(), ['amount'=>$request->base_user_cost_in_cents]));
 
         $timeline->refresh();
         return response()->json([
