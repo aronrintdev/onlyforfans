@@ -64,7 +64,7 @@ export default {
           {
             name: 'Notifications',
             icon: 'bell',
-            to: { name: 'notifications.likes' },
+            to: { name: 'notifications.dashboard' },
             // alerts: 4,
           },
           {
