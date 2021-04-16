@@ -78,7 +78,7 @@ import VueTagsInput from '@johmun/vue-tags-input';
 Vue.component('VueTagsInput', VueTagsInput);
 
 import VueLazyload from 'vue-lazyload';
-const loadimage = require('../static/images/loading.gif');
+const loadimage = require('./../static/images/loading.gif');
 
 Vue.use(VueLazyload, {
   preLoad: 1.3,

@@ -120,7 +120,7 @@
                                   <div class="image" :class="`message-${msg.id}`" v-if="msg.mediafile" :key="msg.id">
                                     <img v-preview:scope-b v-if="msg.mediafile.is_image" :data-src="msg.mediafile.filepath" :alt="msg.mediafile.mfname" />
                                     <video v-if="msg.mediafile.is_video" controls>
-                                      <source :data-src="msg.mediafile.filepath" type="video/mp4" />
+                                      <source :src="msg.mediafile.filepath" type="video/mp4" />
                                     </video>
                                   </div>
                                 </template>
