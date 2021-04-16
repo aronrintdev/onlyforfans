@@ -1,14 +1,14 @@
 <?php 
 namespace App\Models;
 
-//use App\Interfaces\ShortUuid;
-//use App\Models\Traits\UsesUuid;
+use App\Interfaces\ShortUuid;
+use App\Models\Traits\UsesUuid;
 use Illuminate\Support\Collection;
-//use App\Models\Traits\UsesShortUuid;
+use App\Models\Traits\UsesShortUuid;
 
 class Likeable extends Model 
 {
-    //use UsesUuid;
+    use UsesUuid;
 
     protected $guarded = [ 'created_at', 'updated_at' ];
     //protected $casts = [ 'cattrs' => 'array', 'meta' => 'array', ];

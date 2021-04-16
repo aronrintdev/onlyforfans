@@ -74,13 +74,6 @@ class UsstatesTableSeeder extends Seeder
         foreach ($sdata as $i => $obj) {
             Usstate::create($obj);
         }
-/*
-        DB::table('usstates')->insert($sdata);
-        DB::table('usstates') ->update([
-            'created_at' => $now,
-            'updated_at' => $now,
-        ]);
-*/
     }
 }
 

@@ -2,6 +2,7 @@
 
 namespace App\Models\Traits;
 
+use Illuminate\Support\Str;
 use App\Enums\ShareableAccessLevelEnum;
 use App\Events\AccessGranted;
 use App\Events\AccessRevoked;
@@ -44,6 +45,7 @@ trait ShareableTraits
             $meta = array_merge(json_decode($shareable->meta, true), $meta);
         }
         $data = [
+            'id' =>  Str::uuid(), // %FIXME: @ERIK this should be fixed for production see trait UsesUuid
             'is_approved' => true,
             'access_level' => $accessLevel,
             'cattrs' => json_encode($cattrs),
@@ -61,7 +63,7 @@ trait ShareableTraits
     {
         return $this->sharees()->wherePivot('is_approved', true)
             ->wherePivot('access_level', $accessLevel)
-            ->where('id', $user->getKey())
+            ->where('users.id', $user->getKey())
             ->count() > 0;
     }
 
