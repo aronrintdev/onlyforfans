@@ -10,7 +10,7 @@ use Illuminate\Http\Request;
 use App\Http\Resources\Post as PostResource;
 use App\Http\Resources\PostCollection;
 use App\Notifications\TipReceived;
-use App\Notifications\PostPurchased;
+use App\Notifications\ResourcePurchased;
 use App\Models\Bookmark;
 use App\Models\Post;
 use App\Models\Comment;
@@ -159,7 +159,7 @@ class PostsController extends AppBaseController
         try {
             $post->receivePayment(
                 PaymentTypeEnum::TIP,
-                $request->user(), // send of tip
+                $request->user(), // sender of tip
                 $request->base_unit_cost_in_cents,
                 [ 'notes' => $request->note ?? '' ]
             );
@@ -167,7 +167,7 @@ class PostsController extends AppBaseController
             return response()->json(['message'=>$e->getMessage()], 400);
         }
 
-        $post->user->notify(new TipReceived($post));
+        $post->user->notify(new TipReceived($post, $request->user, ['amount'=>$request->base_unit_cost_in_cents]));
 
         return response()->json([
             'post' => $post,
@@ -195,7 +195,7 @@ class PostsController extends AppBaseController
             return response()->json(['message'=>$e->getMessage()], 400);
         }
 
-        $post->user->notify(new PostPurchased($post, $purchaser));
+        $post->user->notify(new ResourcePurchased($post, $purchaser, ['amount'=>$post->price]));
 
         return response()->json([
             'post' => $post ?? null,

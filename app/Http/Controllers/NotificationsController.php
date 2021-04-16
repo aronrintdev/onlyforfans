@@ -16,7 +16,7 @@ class NotificationsController extends AppBaseController
     public function index(Request $request)
     {
         $request->validate([
-            'type' => 'string|in:PostPurchased,PostTipped,TimelineTipped,ResourceLiked,TimelineFollowed,TimelineSubscribed',
+            'type' => 'string|in:ResourcePurchased,TipReceived,ResourceLiked,TimelineFollowed,TimelineSubscribed',
             //'purchaser_id' => 'uuid|exists:users,id',
         ]);
 
