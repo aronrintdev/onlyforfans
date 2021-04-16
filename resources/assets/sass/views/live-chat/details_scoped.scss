@@ -268,6 +268,14 @@
 							background: rgba(138,150,163,.12);
 							border-bottom-left-radius: 0;
 						}
+						.image {
+							overflow: hidden;
+
+							img {
+								width: 100%;
+								border-radius: 6px;
+							}
+						}
 					}
 					.sent {
 						max-width: 75%;
@@ -283,6 +291,14 @@
 						}
 						.time {
 							justify-content: flex-end;
+						}
+						.image {
+							margin-bottom: 8px;
+
+							img {
+								width: 100%;
+								border-radius: 6px;
+							}
 						}
 					}
 					

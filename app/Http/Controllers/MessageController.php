@@ -10,6 +10,7 @@ use App\Models\ChatThread;
 use App\Models\Timeline;
 use App\Models\User;
 use App\Events\MessageSentEvent;
+use App\Enums\MediafileTypeEnum;
 use function _\sortBy;
 use function _\orderBy;
 use function _\filter;
@@ -135,8 +136,15 @@ class MessageController extends Controller
                 })
                 ->orderBy('created_at', 'desc')
                 ->first();
-            $messages = orderBy($lastChatThread->messages->toArray(), ['created_at'], ['desc']);
-            $lastMessage = $messages[0]['value'];
+            $messages = $lastChatThread->messages()->with('mediafile')->orderBy('mcounter', 'desc')->get();
+            $hasMediafile = false;
+            $messages->each(function($msg) use(&$hasMediafile) {
+                if (isset($msg->mediafile)) {
+                    $hasMediafile = true;
+                }
+            });
+            $lastMessage = $messages->first();
+            $lastMessage->hasMediafile = $hasMediafile;
             $user = Timeline::with(['user', 'avatar'])->where('user_id', $receiver)->first()->makeVisible(['user']);
             $cattrs = $userSettings->cattrs;
             if ( array_key_exists('display_name', $cattrs) ) {
@@ -199,9 +207,8 @@ class MessageController extends Controller
             ->take($limit)
             ->get();
         $chatthreads->each(function($chatthread) {
-            $chatthread->messages = $chatthread->messages()->orderBy('mcounter', 'asc')->get();
+            $chatthread->messages = $chatthread->messages()->with('mediafile')->orderBy('mcounter', 'asc')->get();
         });
-
         $user = Timeline::with(['user', 'avatar'])->where('user_id', $id)->first()->makeVisible(['user']);
         $user->username = $user->user->username;
         $userSetting = $sessionUser->settings;
@@ -234,11 +241,43 @@ class MessageController extends Controller
         $chatthread = $sessionUser->chatthreads()->create([
             'receiver_id' => $request->input('user_id'),
         ]);
-        $message = $chatthread->messages()->create([
-            'mcontent' => $request->input('message'),
-            'is_unread' => 1,
-        ]);
-        $chatthread->messages = $chatthread->messages()->orderBy('mcounter', 'asc')->get();
+
+        $files = $request->file('mediafile');
+        if ($files) {
+            $index = 1;
+            foreach ($files as $file) {
+                $message = $chatthread->messages()->create([
+                    'mcontent' => '',
+                    'is_unread' => 1,
+                    'mcounter' => $index,
+                ]);
+                $message->mediafile()->create([
+                    'resource_type' => 'messages',
+                    'filename' => $file->store('./galleries', 's3'),
+                    'mfname' => $file->getClientOriginalName(),
+                    'mftype' => MediafileTypeEnum::GALLERY,
+                    'mimetype' => $file->getMimeType(),
+                    'orig_filename' => $file->getClientOriginalName(),
+                    'orig_ext' => $file->getClientOriginalExtension(),
+                ]);
+                $index++;
+            }
+            $mcontent = $request->input('message');
+            if (isset($mcontent)) {
+                $chatthread->messages()->create([
+                    'mcontent' => $mcontent,
+                    'is_unread' => 1,
+                    'mcounter' => $index,
+                ]);
+            }
+        } else {
+            $chatthread->messages()->create([
+                'mcontent' => $request->input('message'),
+                'is_unread' => 1,
+            ]);
+        }
+
+        $chatthread->messages = $chatthread->messages()->with('mediafile')->orderBy('mcounter', 'asc')->get();
 
         broadcast(new MessageSentEvent($chatthread, $sessionUser))->toOthers();
 

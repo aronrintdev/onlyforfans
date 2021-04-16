@@ -24,4 +24,9 @@ class Message extends Model
     {
         return $this->morphTo();
     }
+
+    public function mediafile()
+    {
+        return $this->morphOne(Mediafile::class, 'resource');
+    }
 }

@@ -101,7 +101,7 @@
                     <div class="empty-messages" v-if="messages.length === 0">
                       Type a message below to start a conversation with {{ selectedUser.name }}
                     </div>
-                    <div class="messages" v-if="messages.length > 0">
+                    <div class="messages" v-lazy-container="{ selector: 'img' }" v-if="messages.length > 0">
                       <div class="text-center mb-2" v-if="loadingData"><b-spinner variant="secondary" label="Loading..." small></b-spinner></div>
                       <div class="message-group" :key="messageGroup.date"  v-for="messageGroup in messages">
                         <div class="message-group-time"><span>{{ moment.unix(messageGroup.date).format('MMM DD, YYYY') }}</span></div>
@@ -115,12 +115,22 @@
                                 <img :src="selectedUser.profile.avatar.filepath" alt="" />
                               </div>
                               <div class="content">
-                                <div class="text" :class="`message-${msg.id}`" v-for="msg in message.messages" :key="msg.id">{{ msg.mcontent }}</div>
+                                <template v-for="msg in message.messages">
+                                  <div class="text" :class="`message-${msg.id}`" v-if="!msg.mediafile" :key="msg.id">{{ msg.mcontent }}</div>
+                                  <div class="image" :class="`message-${msg.id}`" v-if="msg.mediafile" :key="msg.id">
+                                    <img v-preview:scope-b :data-src="msg.mediafile.filepath" :alt="msg.mediafile.mfname" />
+                                  </div>
+                                </template>
                                 <div class="time">{{ moment(message.created_at).format('hh:mm A') }}</div>
                               </div>
                             </div>
                             <div class="sent" v-if="currentUser && currentUser.id === message.sender_id">
-                              <div class="text" :class="`message-${msg.id}`" v-for="msg in message.messages" :key="msg.id">{{ msg.mcontent }}</div>
+                              <template v-for="msg in message.messages">
+                                <div class="text" :class="`message-${msg.id}`" v-if="!msg.mediafile" :key="msg.id">{{ msg.mcontent }}</div>
+                                <div class="image" :class="`message-${msg.id}`" v-if="msg.mediafile" :key="msg.id">
+                                  <img v-preview:scope-b :data-src="msg.mediafile.filepath" :alt="msg.mediafile.mfname" />
+                                </div>
+                              </template>
                               <div class="time">{{ moment(message.created_at).format('hh:mm A') }}</div>
                             </div>
                           </div>
@@ -197,7 +207,7 @@
                           type="file"
                           id="image-upload-btn"
                           @change="onMediaChanged"
-                          accept="image/x-png,image/gif,image/jpeg"
+                          accept="image/x-png,image/gif,image/*"
                           ref="imagesUpload"
                           multiple
                           @click="activeMediaRef = $refs.imagesUpload"
@@ -659,7 +669,39 @@
       },
       sendMessage: function() {
         // Sending Text Message
-        if (this.newMessageText) {
+        
+        // Sending media files
+        if (this.sortableImgs.length > 0) {
+          const files = this.sortableImgs.map(img => img.file);
+          this.isSendingFiles = true;
+          // const mediafilesLinks = [];
+          const data = new FormData();
+          files.map((file) => {
+            data.append('mediafile[]', file);
+          });
+          data.append('user_id', this.selectedUser.profile.id);
+          if (this.newMessageText) {
+            data.append('message', this.newMessageText);
+          }
+          this.axios.post('/chat-messages', data)
+            .then((res) => {
+                // this.axios.post('/chat-messages', {
+                //   media_id: res.data.mediafile.id,
+                //   user_id: this.selectedUser.profile.id,
+                // });
+            });
+              // mediafilesLinks.push(res.data.mediafile.filepath);
+              // await this.axios.post('/chat-messages', {
+              //   media: mediafilesLinks,
+              //   user_id: this.selectedUser.profile.id,
+              //   name: this.selectedUser.profile.name,
+              // });
+          // const self = this;
+          // Promise.all(promises).then(function() {
+          //   self.isSendingFiles = false;
+          //   self.sortableImgs = [];
+          // });
+        } else if (this.newMessageText) {
           this.axios.post('/chat-messages', {
             message: this.newMessageText,
             user_id: this.selectedUser.profile.id,
@@ -670,37 +712,6 @@
               this.newMessageText = undefined;
               $('.conversation-list').animate({ scrollTop: $('.conversation-list')[0].scrollHeight }, 500);
             });
-        }
-        // Sending media files
-        if (this.sortableImgs.length > 0) {
-          const files = this.sortableImgs.map(img => img.file);
-          this.isSendingFiles = true;
-          // const mediafilesLinks = [];
-          const promises = [];
-          files.map(file => {
-            const data = new FormData();
-            data.append('mediafile', file);
-            data.append('mftype', 'vault');
-            const promise = this.axios.post('/mediafiles', data)
-              .then((res) => {
-                this.axios.post('/chat-messages', {
-                  media_id: res.data.mediafile.id,
-                  user_id: this.selectedUser.profile.id,
-                });
-              });
-            promises.push(promise);
-              // mediafilesLinks.push(res.data.mediafile.filepath);
-              // await this.axios.post('/chat-messages', {
-              //   media: mediafilesLinks,
-              //   user_id: this.selectedUser.profile.id,
-              //   name: this.selectedUser.profile.name,
-              // });
-          });
-          const self = this;
-          Promise.all(promises).then(function() {
-            self.isSendingFiles = false;
-            self.sortableImgs = [];
-          });
         }
       },
       onShowNextSearch: function() {
