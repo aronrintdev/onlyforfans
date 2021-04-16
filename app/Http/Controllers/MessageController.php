@@ -398,25 +398,27 @@ class MessageController extends Controller
         $userSetting->save();
         return;
     }
-    public function listMediafiles(Request $request, $id) {
-        $sessionUser = $request->user();
-        $messages = Message::with('media')
-            ->where(function($query) use(&$request, &$id) {
+    public function listMediafiles(Request $request, $receiver) {
+        $chatthreads = ChatThread::where(function($query) use(&$request, &$receiver) {
                 $sessionUser = $request->user();
-                $query->where('user_id', $sessionUser->id)
-                    ->where('receiver_id', $id);
+                $query->where('sender_id', $sessionUser->id)
+                    ->where('receiver_id', $receiver);
             })
-            ->orWhere(function($query) use(&$request, &$id) {
+            ->orWhere(function($query) use(&$request, &$receiver) {
                 $sessionUser = $request->user();
-                $query->where('user_id', $id)
+                $query->where('sender_id', $receiver)
                     ->where('receiver_id', $sessionUser->id);
             })
-            ->get()
-            ->toArray();
+            ->orderBy('created_at', 'desc')
+            ->get();
+        $messages = [];
+        $chatthreads->each(function($chatthread) use(&$messages) {
+            $messages = array_merge($messages, $chatthread->messages()->with('mediafile')->orderBy('mcounter', 'asc')->get()->toArray());
+        });
         $mediafiles = [];
         foreach ($messages as $message) {
-            if ($message['media']) {
-                array_push($mediafiles, $message['media']);
+            if ($message['mediafile']) {
+                array_push($mediafiles, $message['mediafile']);
             }
         };
         return $mediafiles;

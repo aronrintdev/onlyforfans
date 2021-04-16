@@ -5,6 +5,7 @@
 
 	.card-body {
 		padding: 0;
+		min-height: calc(100vh - 160px);
 		
 		.top-bar {
 			display: flex;
@@ -49,7 +50,6 @@
 			margin: auto;
 		}
 		.gallery-list {
-			min-height: calc(100vh - 210px);
 			display: flex;
 			flex-flow: row wrap;
 	
@@ -69,6 +69,9 @@
 					left: 50%;
 					top: 50%;
 					transform: translate(-50%, -50%);
+				}
+				&:hover {
+					border: solid 1px #1a1a1a;
 				}
 			}
 		}
