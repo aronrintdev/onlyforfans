@@ -6,6 +6,7 @@ use Exception;
 use Throwable;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
+use App\Notifications\CommentReceived;
 use App\Http\Resources\CommentCollection;
 use App\Models\Comment;
 use App\Models\Post;
@@ -82,6 +83,7 @@ class CommentsController extends AppBaseController
         $attrs['commentable_id'] = $post->id;
 
         $comment = Comment::create($attrs);
+        $post->user->notify(new CommentReceived($post, $request->user()));
         $comment->prepFor();
 
         return response()->json([
