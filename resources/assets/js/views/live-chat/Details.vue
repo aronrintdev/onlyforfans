@@ -112,7 +112,7 @@
                                 {{ getLogoFromName(selectedUser.name) }}
                               </div>
                               <div class="user-logo" v-if="selectedUser && selectedUser.profile.avatar">
-                                <img :src="selectedUser.profile.avatar.filepath" alt="" />
+                                <img :data-src="selectedUser.profile.avatar.filepath" alt="" />
                               </div>
                               <div class="content">
                                 <template v-for="msg in message.messages">
@@ -684,23 +684,14 @@
             data.append('message', this.newMessageText);
           }
           this.axios.post('/chat-messages', data)
-            .then((res) => {
-                // this.axios.post('/chat-messages', {
-                //   media_id: res.data.mediafile.id,
-                //   user_id: this.selectedUser.profile.id,
-                // });
+            .then((response) => {
+              self.isSendingFiles = false;
+              this.newMessageText = undefined;
+              this.sortableImgs = [];
+              this.originMessages.unshift(response.data.message);
+              this.groupMessages();
+              $('.conversation-list').animate({ scrollTop: $('.conversation-list')[0].scrollHeight }, 500);
             });
-              // mediafilesLinks.push(res.data.mediafile.filepath);
-              // await this.axios.post('/chat-messages', {
-              //   media: mediafilesLinks,
-              //   user_id: this.selectedUser.profile.id,
-              //   name: this.selectedUser.profile.name,
-              // });
-          // const self = this;
-          // Promise.all(promises).then(function() {
-          //   self.isSendingFiles = false;
-          //   self.sortableImgs = [];
-          // });
         } else if (this.newMessageText) {
           this.axios.post('/chat-messages', {
             message: this.newMessageText,
