@@ -65,7 +65,6 @@ class AppServiceProvider extends ServiceProvider
             'links'                  => 'App\Models\Link',
             'locations'              => 'App\Models\Location',
             'mediafiles'             => 'App\Models\Mediafile',
-            'notifications'          => 'App\Models\Notification',
             'permissions'            => 'App\Models\Permission',
             'posts'                  => 'App\Models\Post',
             'roles'                  => 'App\Models\Role',

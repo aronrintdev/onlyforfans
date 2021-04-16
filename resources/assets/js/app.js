@@ -93,9 +93,9 @@ Vue.directive('mask', VueMaskDirective)
  * or customize the JavaScript scaffolding to fit your unique needs.
  */
 
-Vue.component('main-navbar', require('./components/common/MainNavbar.vue').default);
-Vue.component('my-vault', require('./components/vault/Dashboard.vue').default);
-Vue.component('my-saved', require('./components/saved/Dashboard.vue').default);
+//Vue.component('main-navbar', require('./components/common/MainNavbar.vue').default);
+//Vue.component('my-vault', require('./components/vault/Dashboard.vue').default);
+//Vue.component('my-saved', require('./components/saved/Dashboard.vue').default);
 
 // converts from cents to dollars, and formats
 Vue.filter('niceCurrency', function (valueInCents) {

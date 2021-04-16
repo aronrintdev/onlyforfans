@@ -41,6 +41,7 @@ class CommentsTableSeeder extends Seeder
                  });
              });
         });
+
     }
 
     private function getMax($param) : int

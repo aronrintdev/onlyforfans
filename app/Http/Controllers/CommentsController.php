@@ -111,12 +111,4 @@ class CommentsController extends AppBaseController
         return response()->json([]);
     }
 
-    /**
-     * Toggle user like on this comment
-     * TODO: Complete this functionality (%FIXME isn't this done in likeables controller?)
-     */
-    public function toggleLike(Request $request, Comment $comment) {
-        return $comment;
-    }
-
 }

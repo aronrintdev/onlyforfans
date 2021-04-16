@@ -102,7 +102,6 @@ export default {
     }),
 
     pageClickHandler(e, page) {
-      console.log('pageClickHandler', page)
       this.getBookmarks({ 
         seller_id: this.session_user.id,
         page: page,
