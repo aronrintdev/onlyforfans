@@ -9,7 +9,6 @@
           <b-img width="48" height="48" rounded="circle" :src="n.data.actor.avatar" :alt="n.data.actor.slug" :title="n.data.actor.name" />
         </template>
         <h6 class="mt-0 mb-1">{{ n.data.actor.name }}  <small class="text-muted">@{{ n.data.actor.username}}</small></h6>
-<small><em>{{ n.data.amount }}</em></small>
         <p class="mb-0">
           <template v-if="n.type==='App\\Notifications\\TimelineFollowed'">followed you</template>
           <template v-if="n.type==='App\\Notifications\\TimelineSubscribed'">subcribed for {{ n.data.amount }}</template>
@@ -29,6 +28,12 @@
               your <router-link :to="{ name: 'posts.show', params: { slug: n.data.resource_slug } }">post</router-link>
             </template>
             <template v-if="n.data.amount"> for {{ n.data.amount | niceCurrency }}</template>
+          </template>
+          <template v-if="n.type==='App\\Notifications\\CommentReceived'">sent you a 
+            <template v-if="n.data.resource_type==='posts'"> <!-- link the post containing the comment -->
+              <router-link :to="{ name: 'posts.show', params: { slug: n.data.resource_slug } }">comment</router-link>
+            </template>
+            <template v-else>comment</template>
           </template>
         </p>
         <small>{{ moment(n.created_at).format('MMM DD, YYYY') }}</small>
@@ -81,6 +86,8 @@ export default {
           return 'TimelineSubscribed'
         case 'tips':
           return 'TipReceived'
+        case 'comments':
+          return 'CommentReceived'
         case 'none':
         default:
           return null
@@ -88,6 +95,8 @@ export default {
     },
     title() {
       switch (this.filter) {
+        case 'purchases':
+          return 'Purchases'
         case 'liked':
           return 'Likes'
         case 'followers':
@@ -96,6 +105,8 @@ export default {
           return 'Subscribers'
         case 'tips':
           return 'Tips'
+        case 'comments':
+          return 'Comments'
         case 'none':
         default:
           return 'All'
