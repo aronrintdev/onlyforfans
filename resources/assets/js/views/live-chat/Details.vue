@@ -118,7 +118,10 @@
                                 <template v-for="msg in message.messages">
                                   <div class="text" :class="`message-${msg.id}`" v-if="!msg.mediafile" :key="msg.id">{{ msg.mcontent }}</div>
                                   <div class="image" :class="`message-${msg.id}`" v-if="msg.mediafile" :key="msg.id">
-                                    <img v-preview:scope-b :data-src="msg.mediafile.filepath" :alt="msg.mediafile.mfname" />
+                                    <img v-preview:scope-b v-if="msg.mediafile.is_image" :data-src="msg.mediafile.filepath" :alt="msg.mediafile.mfname" />
+                                    <video v-if="msg.mediafile.is_video" controls>
+                                      <source :data-src="msg.mediafile.filepath" type="video/mp4" />
+                                    </video>
                                   </div>
                                 </template>
                                 <div class="time">{{ moment(message.created_at).format('hh:mm A') }}</div>
@@ -128,7 +131,10 @@
                               <template v-for="msg in message.messages">
                                 <div class="text" :class="`message-${msg.id}`" v-if="!msg.mediafile" :key="msg.id">{{ msg.mcontent }}</div>
                                 <div class="image" :class="`message-${msg.id}`" v-if="msg.mediafile" :key="msg.id">
-                                  <img v-preview:scope-b :data-src="msg.mediafile.filepath" :alt="msg.mediafile.mfname" />
+                                  <img v-preview:scope-b v-if="msg.mediafile.is_image" :data-src="msg.mediafile.filepath" :alt="msg.mediafile.mfname" />
+                                  <video v-if="msg.mediafile.is_video" controls>
+                                    <source :src="msg.mediafile.filepath" type="video/mp4" />
+                                  </video>
                                 </div>
                               </template>
                               <div class="time">{{ moment(message.created_at).format('hh:mm A') }}</div>
@@ -140,14 +146,17 @@
                     <div class="typing dot-pulse" style="display: none">...</div>
                   </div>
                   <div class="conversation-footer">
-                    <div class="swiper-slider" v-if="sortableImgs.length > 0">
+                    <div class="swiper-slider" v-if="sortableMedias.length > 0">
                       <div v-if="isDragListVisible" >
-                        <draggable class="sort-change-div" v-model="sortableImgs" :group="'column.components'" handle=".handle" ghost-class="ghost">
-                          <div v-for="(element, index) in sortableImgs" :key="index" class="drag-element">
+                        <draggable class="sort-change-div" v-model="sortableMedias" :group="'column.components'" handle=".handle" ghost-class="ghost">
+                          <div v-for="(element, index) in sortableMedias" :key="index" class="drag-element">
                             <div class="img-wrapper">
-                              <img :src="element.src" alt="" />
-                              <span v-if="!element.selected"  class="unchecked-circle" @click="onSelectSortableImg(index, true)"></span>
-                              <span v-if="element.selected" class="checked-circle" @click="onSelectSortableImg(index, false)">{{element.order}}</span>
+                              <img v-if="element.type==='image'" :src="element.src" alt="" />
+                              <video v-if="element.type==='video'">
+                                <source :src="element.src" type="video/mp4" />
+                              </video>
+                              <span v-if="!element.selected"  class="unchecked-circle" @click="onSelectSortableMedia(index, true)"></span>
+                              <span v-if="element.selected" class="checked-circle" @click="onSelectSortableMedia(index, false)">{{element.order}}</span>
                             </div>
                             <div class="handle">
                               <svg class="icon-drag" viewBox="0 0 24 24">    
@@ -158,7 +167,7 @@
                         </draggable>
                         <div class="sort-action-btns">
                           <div>
-                            <button :disabled="!applyBtnEnabled" class="btn arrows-btn" @click="applyImgsSort">
+                            <button :disabled="!applyBtnEnabled" class="btn arrows-btn" @click="applyMediasSort">
                               <svg id="icon-arrow-left" viewBox="0 0 24 24">
                                 <path d="M7.25 12l6.88-6.87a1 1 0 0 1 .7-.3 1 1 0 0 1 1 1 1 1 0 0 1-.29.71L10.08 12l5.46 5.46a1 1 0 0 1 .29.71 1 1 0 0 1-1 1 1 1 0 0 1-.7-.3z"></path>
                               </svg>
@@ -174,12 +183,15 @@
                           </button>
                         </div>
                       </div>
-                      <swiper ref="mySwiper" :options="swiperOptions" :key="sortableImgs.length">
+                      <swiper ref="mySwiper" :options="swiperOptions" :key="sortableMedias.length">
                         <swiper-slide class="slide">
                           <div v-if="!isDragListVisible">
-                            <div class="swiper-image-wrapper" v-for="(img, index) in sortableImgs" :key="index">
-                              <img v-preview:scope-a class="swiper-lazy" :src="img.src" />
-                              <div class="icon-close" @click="removeSortableImg(index)">
+                            <div class="swiper-image-wrapper" v-for="(media, index) in sortableMedias" :key="index">
+                              <img v-preview:scope-a class="swiper-lazy" v-if="media.type==='image'" :src="media.src" />
+                              <video v-preview:scope-a class="swiper-lazy" v-if="media.type==='video'">
+                                <source :src="media.src" type="video/mp4" />
+                              </video>
+                              <div class="icon-close" @click="removeSortableMedia(index)">
                                 <svg viewBox="0 0 24 24">
                                   <path d="M13.41 12l5.3-5.29A1 1 0 0 0 19 6a1 1 0 0 0-1-1 1 1 0 0 0-.71.29L12 10.59l-5.29-5.3A1 1 0 0 0 6 5a1 1 0 0 0-1 1 1 1 0 0 0 .29.71l5.3 5.29-5.3 5.29A1 1 0 0 0 5 18a1 1 0 0 0 1 1 1 1 0 0 0 .71-.29l5.29-5.3 5.29 5.3A1 1 0 0 0 18 19a1 1 0 0 0 1-1 1 1 0 0 0-.29-.71z"></path>
                                 </svg>
@@ -210,7 +222,7 @@
                           accept="image/x-png,image/gif,image/*"
                           ref="imagesUpload"
                           multiple
-                          @click="activeMediaRef = $refs.imagesUpload"
+                          @click="activeMediaRef = $refs.imagesUpload; mediaType = 'image'"
                         />
                         <label for="image-upload-btn" class="btn action-btn">
                           <svg id="icon-media" viewBox="0 0 24 24">
@@ -220,13 +232,14 @@
                         <!-- video -->
                         <input
                           type="file"
-                          disabled
                           id="video-upload-btn"
+                          @change="onMediaChanged"
+                          multiple
                           accept="video/mp4,video/x-m4v,video/*"
                           ref="videosUpload"
-                          @click="activeMediaRef = $refs.videosUpload"
+                          @click="activeMediaRef = $refs.videosUpload; mediaType = 'video'"
                         />
-                        <label for="video-upload-btn" class="btn action-btn" disabled>
+                        <label for="video-upload-btn" class="btn action-btn">
                           <svg id="icon-video" viewBox="0 0 24 24">
                             <path
                               d="M21.79 6a1.21 1.21 0 0 0-.86.35L19 8.25V7a3 3 0 0 0-3-3H5a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h11a3 3 0 0 0 3-3v-1.25l1.93 1.93a1.22 1.22 0 0 0 2.07-.86V7.18A1.21 1.21 0 0 0 21.79 6zM17 17a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h11a1 1 0 0 1 1 1zm4-2.08l-1.34-1.34a2.25 2.25 0 0 1 0-3.16L21 9.08z"
@@ -257,7 +270,7 @@
                           </svg>
                         </button>
                       </div>
-                      <button class="send-btn btn" :disabled="!(hasNewMessage || sortableImgs.length > 0)" type="button" @click="sendMessage">
+                      <button class="send-btn btn" :disabled="!(hasNewMessage || sortableMedias.length > 0)" type="button" @click="sendMessage">
                         <b-spinner v-if="isSendingFiles" small></b-spinner>
                         Send
                       </button>
@@ -464,10 +477,11 @@
       },
       activeMediaRef: null,
       isDragListVisible: false,
-      sortableImgs: [],
+      sortableMedias: [],
       applyBtnEnabled: false,
       isSendingFiles: false,
       hasMore: true,
+      mediaType: undefined,
     }),
     mounted() {
       const self = this;
@@ -671,8 +685,8 @@
         // Sending Text Message
         
         // Sending media files
-        if (this.sortableImgs.length > 0) {
-          const files = this.sortableImgs.map(img => img.file);
+        if (this.sortableMedias.length > 0) {
+          const files = this.sortableMedias.map(img => img.file);
           this.isSendingFiles = true;
           // const mediafilesLinks = [];
           const data = new FormData();
@@ -687,7 +701,7 @@
             .then((response) => {
               self.isSendingFiles = false;
               this.newMessageText = undefined;
-              this.sortableImgs = [];
+              this.sortableMedias = [];
               this.originMessages.unshift(response.data.message);
               this.groupMessages();
               $('.conversation-list').animate({ scrollTop: $('.conversation-list')[0].scrollHeight }, 500);
@@ -879,17 +893,17 @@
       addNewMedia: function() {
         this.activeMediaRef.click();
       },
-      removeSortableImg: function(index) {
-        const newArr = this.sortableImgs.slice();
+      removeSortableMedia: function(index) {
+        const newArr = this.sortableMedias.slice();
         newArr.splice(index, 1);
         
-        this.sortableImgs = newArr;
+        this.sortableMedias = newArr;
         if (this.$refs.mySwiper) {
           this.$refs.mySwiper.updateSwiper();
         }
       },
-      onSelectSortableImg: function(index, status) {
-        const newArr = this.sortableImgs.slice();
+      onSelectSortableMedia: function(index, status) {
+        const newArr = this.sortableMedias.slice();
         newArr[index].selected = status;
         const sortedArr = _.orderBy(newArr, ['order'], ['asc']);
         let order = 0;
@@ -900,29 +914,30 @@
             newArr[idx].order = order;
           }
         });
-        this.sortableImgs = newArr;
+        this.sortableMedias = newArr;
         this.applyBtnEnabled = true;
       },
-      applyImgsSort: function() {
-        const newArr = this.sortableImgs.slice();
+      applyMediasSort: function() {
+        const newArr = this.sortableMedias.slice();
         const sortedArr = _.orderBy(newArr, ['order'], ['asc']);
         sortedArr.forEach(item => {
           item.order = undefined;
           item.selected = undefined;
         });
-        this.sortableImgs = sortedArr;
+        this.sortableMedias = sortedArr;
         this.applyBtnEnabled = false;
       },
       confirmImgsSort: function() {
-        this.applyImgsSort();
+        this.applyMediasSort();
         this.isDragListVisible = false;
       },
       onMediaChanged: function(e) {
         const files = _.values(e.target.files);
         files.forEach(file => {
-          this.sortableImgs.push({
+          this.sortableMedias.push({
             src: URL.createObjectURL(file),
             file,
+            type: this.mediaType,
           });
         });
         if (this.$refs.mySwiper) {

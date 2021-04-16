@@ -277,7 +277,7 @@
 						.image {
 							margin-bottom: 8px;
 
-							img {
+							img, video {
 								width: 100%;
 								border-radius: 6px;
 							}
@@ -301,7 +301,7 @@
 						.image {
 							margin-bottom: 8px;
 
-							img {
+							img, video {
 								width: 100%;
 								border-radius: 6px;
 							}
@@ -872,7 +872,7 @@
             }
             .img-wrapper {
               position: relative;
-              img {
+              img, video {
                 margin: 0;
                 width: 100%;
                 max-width: unset;
