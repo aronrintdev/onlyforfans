@@ -86,7 +86,7 @@ class ShareablesTableSeeder extends Seeder
                 //$ts = $this->faker->dateTimeBetween($startDate = '-5 years', $endDate = 'now');
                 $customAttributes = [ 'notes' => 'ShareablesTableSeeder.follow_some_free_timelines' ];
                 DB::table('shareables')->insert([
-                    'id' =>  Str::uuid(),
+                    //'id' =>  Str::uuid(),
                     'sharee_id' => $follower->id,
                     'shareable_type' => 'timelines',
                     'shareable_id' => $timeline->id,

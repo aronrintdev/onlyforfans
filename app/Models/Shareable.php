@@ -2,14 +2,13 @@
 namespace App\Models;
 
 use Illuminate\Support\Collection;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use App\Interfaces\ShortUuid;
-use App\Models\Traits\UsesUuid;
-use App\Models\Traits\UsesShortUuid;
+//use App\Interfaces\ShortUuid;
+//use App\Models\Traits\UsesUuid;
+//use App\Models\Traits\UsesShortUuid;
 
-class Shareable extends BaseModel 
+class Shareable extends Model 
 {
-    use UsesUuid, HasFactory;
+    //use UsesUuid;
 
     protected $guarded = [ 'created_at', 'updated_at' ];
 

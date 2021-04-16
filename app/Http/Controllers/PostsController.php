@@ -167,7 +167,7 @@ class PostsController extends AppBaseController
             return response()->json(['message'=>$e->getMessage()], 400);
         }
 
-        $post->user->notify(new TipReceived($post, $request->user, ['amount'=>$request->base_unit_cost_in_cents]));
+        $post->user->notify(new TipReceived($post, $request->user(), ['amount'=>$request->base_unit_cost_in_cents]));
 
         return response()->json([
             'post' => $post,

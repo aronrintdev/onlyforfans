@@ -45,7 +45,7 @@ trait ShareableTraits
             $meta = array_merge(json_decode($shareable->meta, true), $meta);
         }
         $data = [
-            'id' =>  Str::uuid(), // %FIXME: @ERIK this should be fixed for production see trait UsesUuid
+            //'id' =>  Str::uuid(), // %FIXME: @ERIK this should be fixed for production see trait UsesUuid
             'is_approved' => true,
             'access_level' => $accessLevel,
             'cattrs' => json_encode($cattrs),

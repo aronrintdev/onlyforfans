@@ -59,7 +59,7 @@ class LikeablesTableSeeder extends Seeder
                 $now = \Carbon\Carbon::now();
                 $t->posts->random($max)->each( function($p) use(&$f, $now) {
                     DB::table('likeables')->insert([
-                        'id' => Str::uuid(),
+                        //'id' => Str::uuid(),
                         'likee_id' => $f->id,
                         'likeable_type' => 'posts',
                         'likeable_id' => $p->id,
