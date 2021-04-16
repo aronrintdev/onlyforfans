@@ -26,6 +26,7 @@ class DatabaseSeeder extends Seeder
             StoriesTableSeeder::class,
             LikeablesTableSeeder::class,
             TipsTableSeeder::class,
+            RandomTimestampSeeder::class,
         ]);
     }
 

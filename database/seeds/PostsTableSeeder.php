@@ -74,12 +74,16 @@ class PostsTableSeeder extends Seeder
                 );
                  */
 
+                $ts = $this->faker->dateTimeBetween($startDate = '-5 years', $endDate = 'now');
+
                 $attrs = [
                     'postable_type' => 'timelines',
                     'postable_id'   => $u->timeline->id,
                     'description'   => $this->faker->text.' ('.$ptype.')',
                     'user_id'       => $u->id,
                     'type'          => $ptype,
+                    'created_at'    => $ts,
+                    'updated_at'    => $ts,
                 ];
 
                 if ( $ptype === PostTypeEnum::PRICED ) {

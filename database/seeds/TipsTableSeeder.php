@@ -64,8 +64,9 @@ class TipsTableSeeder extends Seeder
 
             static $iter = 1;
 
-            $now = \Carbon\Carbon::now();
-            $t->followers->each( function(User $follower) use(&$t, $now) {
+            //$now = \Carbon\Carbon::now();
+            //$ts = $this->faker->dateTimeBetween($startDate = '-5 years', $endDate = 'now');
+            $t->followers->each( function(User $follower) use(&$t) {
                 if ( $this->faker->numberBetween(0,10) < 5 ) {
                     return; // skip: only N/10 processed
                 }
@@ -84,19 +85,19 @@ class TipsTableSeeder extends Seeder
                         $this->output->writeln("  - Tips seeder: tipping timeline ".$t->slug);
                     }
                     try {
-                        $tipAmount = $this->faker->numberBetween(500,10000);
-                        //$paymentAccount->purchase($t, $tipAmount, ShareableAccessLevelEnum::DEFAULT, []);
+                        $tipAmountInCents = $this->faker->numberBetween(500,10000);
+                        //$paymentAccount->purchase($t, $tipAmountInCents, ShareableAccessLevelEnum::DEFAULT, []);
                         // % @Erik workaround code 20210414
-                        $paymentAccount->moveToInternal($tipAmount, [ 'type' => TransactionTypeEnum::TIP ]);
+                        $paymentAccount->moveToInternal($tipAmountInCents, [ 'type' => TransactionTypeEnum::TIP ]);
                         $internalAccount = $paymentAccount->getInternalAccount();
-                        $internalAccount->moveTo($t->getOwner()->first()->getInternalAccount('segpay', 'USD'), $tipAmount, [
+                        $internalAccount->moveTo($t->getOwner()->first()->getInternalAccount('segpay', 'USD'), $tipAmountInCents, [
                             'type' => TransactionTypeEnum::TIP,
                             'ignoreBalance' => true,
                             'purchasable_id' => $t->getKey(),
                             'purchasable_type' => $t->getMorphString(),
                             'metadata' => [ 'notes' => 'TipsTableSeeder.tip_a_timeline' ],
                         ]);
-                        $t->user->notify(new TipReceived($t, $follower));
+                        $t->user->notify(new TipReceived($t, $follower, ['amount'=>$tipAmountInCents]));
                     } catch (RuntimeException $e) {
                         $exceptionClass = class_basename($e);
                         if ($this->appEnv !== 'testing') {
@@ -113,19 +114,19 @@ class TipsTableSeeder extends Seeder
                             $this->output->writeln("  - Tips seeder: tipping post ".$p->slug);
                         }
                         try {
-                            $tipAmount = $this->faker->numberBetween(500,7000);
-                            //$paymentAccount->purchase($p, $tipAmount, ShareableAccessLevelEnum::DEFAULT, []);
+                            $tipAmountInCents = $this->faker->numberBetween(500,7000);
+                            //$paymentAccount->purchase($p, $tipAmountInCents, ShareableAccessLevelEnum::DEFAULT, []);
                             // % @Erik workaround code 20210414
-                            $paymentAccount->moveToInternal($tipAmount, [ 'type' => TransactionTypeEnum::TIP ]);
+                            $paymentAccount->moveToInternal($tipAmountInCents, [ 'type' => TransactionTypeEnum::TIP ]);
                             $internalAccount = $paymentAccount->getInternalAccount();
-                            $internalAccount->moveTo($p->getOwner()->first()->getInternalAccount('segpay', 'USD'), $tipAmount, [
+                            $internalAccount->moveTo($p->getOwner()->first()->getInternalAccount('segpay', 'USD'), $tipAmountInCents, [
                                 'type' => TransactionTypeEnum::TIP,
                                 'ignoreBalance' => true,
                                 'purchasable_id' => $p->getKey(),
                                 'purchasable_type' => $p->getMorphString(),
                                 'metadata' => [ 'notes' => 'TipsTableSeeder.tip_a_post' ],
                             ]);
-                            $p->user->notify(new TipReceived($p, $follower));
+                            $p->user->notify(new TipReceived($p, $follower, ['amount'=>$tipAmountInCents]));
                         } catch (RuntimeException $e) {
                             $exceptionClass = class_basename($e);
                             if ($this->appEnv !== 'testing') {
