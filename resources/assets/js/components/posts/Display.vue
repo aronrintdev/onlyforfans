@@ -95,7 +95,7 @@ export default {
         eventBus.$emit('open-modal', { key: 'show-post', data: { post: this.post } })
       } else {
         if ( this.$options.filters.isSubscriberOnly(this.post) ) {
-          eventBus.$emit('open-modal', { key: 'render-subscribe', data: { timeline: this.timeline } })
+          eventBus.$emit('open-modal', { key: 'render-subscribe', data: { timeline: this.post.timeline } })
         } else if ( this.$options.filters.isPurchaseable(this.post) ) {
           eventBus.$emit('open-modal', { key: 'render-purchase-post', data: { post: this.post } })
         }
