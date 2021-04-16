@@ -281,6 +281,10 @@
 								width: 100%;
 								border-radius: 6px;
 							}
+							audio {
+								width: 100%;
+								outline: none;
+							}
 						}
 					}
 					.sent {
@@ -304,6 +308,10 @@
 							img, video {
 								width: 100%;
 								border-radius: 6px;
+							}
+							audio {
+								width: 100%;
+								outline: none;
 							}
 						}
 					}
@@ -880,6 +888,22 @@
                 height: 96px;
                 object-fit: cover;
               }
+							.audio {
+								font-size: 11px;
+								height: 96px;
+								display: inline-flex;
+								align-items: center;
+								justify-content: center;
+								width: 100%;
+								padding: 8px;
+								border-radius: 6px 6px 0 0;
+								background: rgb(138 150 163 / 35%);
+								border-bottom: solid 1px #fff;
+								span {
+									display: block;
+									width: 100%;
+								}
+							}
               .unchecked-circle,
               .checked-circle {
                 width: 30px;

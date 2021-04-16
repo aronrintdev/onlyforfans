@@ -122,6 +122,9 @@
                                     <video v-if="msg.mediafile.is_video" controls>
                                       <source :src="msg.mediafile.filepath" type="video/mp4" />
                                     </video>
+                                    <audio v-if="msg.mediafile.mimetype.indexOf('audio/') > -1" controls>
+                                      <source :src="msg.mediafile.filepath" type="audio/mpeg" />
+                                    </audio>
                                   </div>
                                 </template>
                                 <div class="time">{{ moment(message.created_at).format('hh:mm A') }}</div>
@@ -135,6 +138,9 @@
                                   <video v-if="msg.mediafile.is_video" controls>
                                     <source :src="msg.mediafile.filepath" type="video/mp4" />
                                   </video>
+                                  <audio v-if="msg.mediafile.mimetype.indexOf('audio/') > -1" controls>
+                                    <source :src="msg.mediafile.filepath" type="audio/mpeg" />
+                                  </audio>
                                 </div>
                               </template>
                               <div class="time">{{ moment(message.created_at).format('hh:mm A') }}</div>
@@ -155,6 +161,7 @@
                               <video v-if="element.type==='video'">
                                 <source :src="element.src" type="video/mp4" />
                               </video>
+                              <div class="audio" v-if="element.type==='audio'"><span>{{ element.file.name }}</span></div>
                               <span v-if="!element.selected"  class="unchecked-circle" @click="onSelectSortableMedia(index, true)"></span>
                               <span v-if="element.selected" class="checked-circle" @click="onSelectSortableMedia(index, false)">{{element.order}}</span>
                             </div>
@@ -191,6 +198,9 @@
                               <video v-preview:scope-a class="swiper-lazy" v-if="media.type==='video'">
                                 <source :src="media.src" type="video/mp4" />
                               </video>
+                              <audio v-preview:scope-a class="swiper-lazy" controls v-if="media.type==='audio'">
+                                <source :src="media.src" type="audio/mpeg" />
+                              </audio>
                               <div class="icon-close" @click="removeSortableMedia(index)">
                                 <svg viewBox="0 0 24 24">
                                   <path d="M13.41 12l5.3-5.29A1 1 0 0 0 19 6a1 1 0 0 0-1-1 1 1 0 0 0-.71.29L12 10.59l-5.29-5.3A1 1 0 0 0 6 5a1 1 0 0 0-1 1 1 1 0 0 0 .29.71l5.3 5.29-5.3 5.29A1 1 0 0 0 5 18a1 1 0 0 0 1 1 1 1 0 0 0 .71-.29l5.29-5.3 5.29 5.3A1 1 0 0 0 18 19a1 1 0 0 0 1-1 1 1 0 0 0-.29-.71z"></path>
@@ -247,13 +257,22 @@
                           </svg>
                         </label>
                         <!-- microphone -->
-                        <button class="btn action-btn" type="button" disabled>
+                        <input
+                          type="file"
+                          id="audio-upload-btn"
+                          @change="onMediaChanged"
+                          multiple
+                          accept="audio/mpeg3,audio/x-mpeg-3"
+                          ref="audiosUpload"
+                          @click="activeMediaRef = $refs.audiosUpload; mediaType = 'audio'"
+                        />
+                        <label for="audio-upload-btn" class="btn action-btn">
                           <svg id="icon-voice" viewBox="0 0 24 24">
                             <path
                               d="M12 15a4 4 0 0 0 4-4V6a4 4 0 0 0-8 0v5a4 4 0 0 0 4 4zm-2-9a2 2 0 0 1 4 0v5a2 2 0 0 1-4 0zm9 4a1 1 0 0 0-1 1 6 6 0 0 1-12 0 1 1 0 0 0-2 0 8 8 0 0 0 7 7.93V21a1 1 0 0 0 2 0v-2.07A8 8 0 0 0 20 11a1 1 0 0 0-1-1z"
                               fill="#8a96a3"></path>
                           </svg>
-                        </button>
+                        </label>
                         <!-- Medis from vault -->
                         <button class="btn action-btn" type="button" disabled>
                           <svg id="icon-vault" viewBox="0 0 24 24">
