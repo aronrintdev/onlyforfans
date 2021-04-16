@@ -269,7 +269,7 @@ class TimelinesController extends AppBaseController
         try {
             $timeline->receivePayment(
                 PaymentTypeEnum::TIP,
-                $request->user(),
+                $request->user(), // sender
                 $request->base_unit_cost_in_cents,
                 $cattrs,
             );
@@ -277,7 +277,7 @@ class TimelinesController extends AppBaseController
             return response()->json([ 'message'=>$e->getMessage() ], 400);
         }
 
-        $timeline->user->notify(new TipReceived($timeline));
+        $timeline->user->notify(new TipReceived($timeline, $request->user, ['amount'=>$request->base_user_cost_in_cents]));
 
         $timeline->refresh();
         return response()->json([
