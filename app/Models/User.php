@@ -450,7 +450,7 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
 
     public function lists()
     {
-        return $this->belongsToMany(Lists::class, 'lists_users', 'user_id', 'list_id')->withTimestamps();
+        return $this->belongsToMany(Lists::class, 'list_user', 'user_id', 'list_id')->withTimestamps();
     }
 
     public function userlists()
