@@ -118,7 +118,12 @@ export default {
     renderTip() {
       eventBus.$emit('open-modal', {
         key: 'render-tip', 
-        data: { resource_type: 'posts', resource_id: this.post.id },
+        data: { 
+          resource: this.post,
+          resource_type: 'posts', 
+          //resource_id: this.post.id,
+          //resource_slug: this.post.slug,
+        },
       })
     },
 

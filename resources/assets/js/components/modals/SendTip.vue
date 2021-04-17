@@ -3,21 +3,21 @@
 
     <b-card-header>
       <section class="user-avatar">
-        <router-link :to="timelineUrl">
-          <b-img :src="timeline.avatar.filepath" :alt="timeline.name" :title="timeline.name" />
+        <router-link :to="tippedTimelineUrl">
+          <b-img :src="tippedTimeline.avatar.filepath" :alt="tippedTimeline.name" :title="tippedTimeline.name" />
         </router-link>
       </section>
       <section class="user-details">
         <div>
-          <router-link :to="timelineUrl" title="" data-toggle="tooltip" data-placement="top" class="username">
-            {{ timeline.name }}
+          <router-link :to="tippedTimelineUrl" title="" data-toggle="tooltip" data-placement="top" class="username">
+            {{ tippedTimeline.name }}
           </router-link>
-          <span v-if="timeline.verified" class="verified-badge">
+          <span v-if="tippedTimeline.verified" class="verified-badge">
             <b-icon icon="check-circle-fill" variant="success" font-scale="1" />
           </span>
         </div>
         <div>
-          <router-link :to="timelineUrl" class="tag-username">@{{ timeline.slug }}</router-link>
+          <router-link :to="tippedTimelineUrl" class="tag-username">@{{ tippedTimeline.slug }}</router-link>
         </div>
       </section>
     </b-card-header>
@@ -58,22 +58,32 @@
 import { eventBus } from '@/app'
 import LEDGER_CONFIG from "@/components/constants"
 
+// Tip timeline on another user's timeline page / feed
+// Tip post on another user's timeline page / feed
+// Tip post on one's own home page / feed
 export default {
 
   props: {
     session_user: null,
-    timeline: null, // still needed to fill in avatar, etc
-    // %NOTE: payload is a JSON object that must have keys: resource_type and resource_id
-    payload: null, // %TODO: use this instead of timeline above (?)
+    payload: null, // JSON object that contains attribute 'resource', the Tippable like 'Post' or 'Timeline' that is the target
   },
 
   computed: {
-    timelineUrl() {
-      return `/${this.timeline.slug}`
+    tippedTimeline() {
+      switch(this.payload.resource_type)  {
+        case 'timelines':
+          return this.payload.resource
+        case 'posts':
+          return this.payload.resource.timeline
+      }
+    },
+
+    tippedTimelineUrl() {
+      return route('timelines.show', this.tippedTimeline.slug)
     },
 
     renderDetails() {
-      const { resource_type, resource_id } = this.payload
+      const { resource, resource_type } = this.payload
       switch (resource_type) {
         case 'timelines':
           return 'Send Tip to User'
@@ -99,26 +109,26 @@ export default {
 
     async sendTip(e) {
       e.preventDefault()
-      const { resource_type, resource_id } = this.payload
+      const { resource, resource_type } = this.payload 
       let url
       switch (resource_type) {
         case 'posts':
-          url = route('posts.tip', resource_id)
+          url = route('posts.tip', resource.id) // tip post (resource)
           break
         case 'timelines':
         default:
-          url = route('timelines.tip', resource_id)
+          url = route('timelines.tip', resource.id) // tip timeline (resource)
       }
       const response = await axios.put(url, {
         base_unit_cost_in_cents: this.formPayload.amount,
         notes: this.formPayload.notes || '',
       })
       this.$bvModal.hide('modal-tip')
-      this.$root.$bvToast.toast(`Tip sent to ${this.timeline.slug}`, {
+      this.$root.$bvToast.toast(`Tip sent to ${this.tippedTimeline.slug}`, {
         toaster: 'b-toaster-top-center',
         title: 'Success!',
       })
-      eventBus.$emit('update-timeline', this.timeline.id)
+      eventBus.$emit('update-timeline', this.tippedTimeline.id) // update 
     },
 
   },
