@@ -156,12 +156,17 @@ class PostsController extends AppBaseController
             'base_unit_cost_in_cents' => 'required|numeric',
         ]);
 
+        $cattrs = [];
+        if ( $request->has('notes') ) {
+            $cattrs['notes'] = $request->notes;
+        }
+
         try {
             $post->receivePayment(
                 PaymentTypeEnum::TIP,
                 $request->user(), // sender of tip
                 $request->base_unit_cost_in_cents,
-                [ 'notes' => $request->note ?? '' ]
+                $cattrs,
             );
         } catch(Exception | Throwable $e){
             return response()->json(['message'=>$e->getMessage()], 400);
