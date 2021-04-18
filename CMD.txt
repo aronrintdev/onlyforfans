@@ -2,6 +2,22 @@
 $ php artisan serve
 $ npm run hot
 
+# Main Laravel server
+$ php artisan serve 
+
+# Laravel queue worker
+$ php artisan queue:work 
+
+# Laravel Websockets server
+$ php artisan websocket:serve 
+
+# webpack service
+$ npm run hot 
+  ...or...
+$ npm run watch 
+
+------------------------
+
 %%% Need to unzip js dist folder (!)
 $ pushd public/js
 $ unzip dist.zip

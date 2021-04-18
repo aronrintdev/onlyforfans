@@ -121,7 +121,14 @@
                 </button>
               </div>
               <div class="user-details-row">
-                <span class="last-message">{{ user.last_message.message }}</span>
+                <span class="last-message" v-if="!user.last_message.hasMediafile">{{ user.last_message.mcontent }}</span>
+                <span class="last-message" v-if="user.last_message.hasMediafile">
+                  <svg class="media-icon" viewBox="0 0 24 24">
+                    <path d="M18,3H6A3,3,0,0,0,3,6V18a3,3,0,0,0,3,3H18a3,3,0,0,0,3-3V6A3,3,0,0,0,18,3Zm1,15a1,1,0,0,1-1,1H6a1,1,0,0,1-1-1V6A1,1,0,0,1,6,5H18a1,1,0,0,1,1,1ZM9,10.5A1.5,1.5,0,1,0,7.5,9,1.5,1.5,0,0,0,9,10.5ZM14,13l-3,3L9,14,6.85,16.15a.47.47,0,0,0-.14.35.5.5,0,0,0,.5.5h9.58a.5.5,0,0,0,.5-.5.47.47,0,0,0-.14-.35Z"></path>
+                  </svg>
+                  &middot;
+                  {{ user.last_message.mcontent ? user.last_message.mcontent : 'media attachment' }}
+                </span>
                 <!-- Date  -->
                 <span class="last-message-date">{{ moment(user.last_message.created_at).format('MMM DD, YYYY') }}</span>
               </div>

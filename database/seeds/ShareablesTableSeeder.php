@@ -4,6 +4,7 @@ namespace Database\Seeders;
 use DB;
 use Exception;
 use Carbon\Carbon;
+use Illuminate\Support\Str;
 use App\Models\Post;
 use App\Models\User;
 use App\Libs\UserMgr;
@@ -17,6 +18,7 @@ use App\Enums\PaymentTypeEnum;
 use App\Enums\MediafileTypeEnum;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Mail;
 use App\Enums\ShareableAccessLevelEnum;
 use App\Enums\Financial\AccountTypeEnum;
 use App\Events\AccessGranted;
@@ -24,6 +26,9 @@ use App\Events\AccessRevoked;
 use App\Events\ItemPurchased;
 use App\Jobs\Financial\UpdateAccountBalance;
 use App\Models\Financial\Account;
+use App\Notifications\TimelineFollowed;
+use App\Notifications\TimelineSubscribed;
+use App\Notifications\ResourcePurchased;
 use Symfony\Component\Console\Output\ConsoleOutput;
 
 class ShareablesTableSeeder extends Seeder
@@ -41,6 +46,8 @@ class ShareablesTableSeeder extends Seeder
     {
         $this->initSeederTraits('ShareablesTableSeeder'); // $this->{output, faker, appEnv}
 
+        Mail::fake();
+
         // +++ Create ... +++
 
         $timelines = Timeline::get();
@@ -54,7 +61,6 @@ class ShareablesTableSeeder extends Seeder
         $timelines->pop();
         $timelines->pop();
         $timelines->pop();
-
 
         $timelines->each( function($timeline) {
 
@@ -77,15 +83,20 @@ class ShareablesTableSeeder extends Seeder
             }
 
             $followerPool->random($max)->each( function(User $follower) use(&$timeline) {
+                //$ts = $this->faker->dateTimeBetween($startDate = '-5 years', $endDate = 'now');
                 $customAttributes = [ 'notes' => 'ShareablesTableSeeder.follow_some_free_timelines' ];
                 DB::table('shareables')->insert([
+                    //'id' =>  Str::uuid(),
                     'sharee_id' => $follower->id,
                     'shareable_type' => 'timelines',
                     'shareable_id' => $timeline->id,
                     'is_approved' => 1,
                     'access_level' => 'default',
                     'cattrs' => json_encode($customAttributes),
+                    //'created_at' => $ts,
+                    //'updated_at' => $ts,
                 ]);
+                $timeline->user->notify(new TimelineFollowed($timeline, $follower));
 
                 // --- purchase some posts ---
 
@@ -107,10 +118,12 @@ class ShareablesTableSeeder extends Seeder
                         $paymentAccount->can_make_transactions = true;
                         $paymentAccount->save();
 
-                        Event::fakeFor(function() use ($paymentAccount, $post, $customAttributes) {
+                        Event::fakeFor(function() use (&$paymentAccount, &$post, &$follower, $customAttributes) {
                             try {
                                 $paymentAccount->purchase($post, $post->price, ShareableAccessLevelEnum::PREMIUM, $customAttributes);
+                                $post->user->notify(new ResourcePurchased($post, $follower, ['amount'=>\App\Models\Casts\Money::doSerialize($post->price)]));
                             } catch (RuntimeException $e) {
+                                //throw $e;
                                 $exceptionClass = class_basename($e);
                                 if ($this->appEnv !== 'testing') {
                                     $this->output->writeln("Exception while purchasing Post [{$post->getKey()}] | {$exceptionClass} | {$e->getMessage()}");
@@ -126,6 +139,8 @@ class ShareablesTableSeeder extends Seeder
                         //     'is_approved' => 1,
                         //     'access_level' => 'premium', // ??
                         //     'cattrs' => json_encode($customAttributes),
+                        //     'created_at' => $ts,
+                        //     'updated_at' => $ts,
                         // ]);
                         // Fanledger::create([
                         //     //'from_account' => , // %TODO: see https://trello.com/c/LzTUmPCp
@@ -138,6 +153,8 @@ class ShareablesTableSeeder extends Seeder
                         //     'qty' => 1,
                         //     'base_unit_cost_in_cents' => $p->price,
                         //     'cattrs' => json_encode($customAttributes),
+                        //     'created_at' => $ts,
+                        //     'updated_at' => $ts,
                         // ]);
                     });
                 }
@@ -165,6 +182,8 @@ class ShareablesTableSeeder extends Seeder
                         'access_level' => 'premium', // ??
                         'cattrs' => json_encode($customAttributes),
                     ]);
+
+                $amountInCents = $timeline->price->getAmount();
                 Fanledger::create([
                     //'from_account' => , // %TODO: see https://trello.com/c/LzTUmPCp
                     //'to_account' => ,
@@ -174,9 +193,10 @@ class ShareablesTableSeeder extends Seeder
                     'purchaseable_type' => 'timelines',
                     'purchaseable_id' => $timeline->id,
                     'qty' => 1,
-                    'base_unit_cost_in_cents' => $timeline->price->getAmount(),
+                    'base_unit_cost_in_cents' => $amountInCents,
                     'cattrs' => json_encode($customAttributes),
                 ]);
+                $timeline->user->notify(new TimelineSubscribed($timeline, $f, ['amount'=>$amountInCents]));
             });
 
             $iter++;

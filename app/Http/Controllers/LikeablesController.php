@@ -7,17 +7,92 @@ use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Database\Eloquent\Builder;
+use App\Models\Likeable as LikeableModel;
 use App\Models\User;
+use App\Models\Comment;
+use App\Models\Mediafile;
+use App\Models\Post;
 use App\Interfaces\Likeable;
+use App\Notifications\ResourceLiked;
+use App\Http\Resources\LikeableCollection;
 
 class LikeablesController extends AppBaseController
 {
+    // %TODO: distinguish returning resources user has liked vs liked resources owned by user (!)
     public function index(Request $request)
     {
-        $likeables = collect(); // %TODO
-        return response()->json([
-            'likeables' => $likeables,
+        $request->validate([
+            // filters
+            'likeable_type' => 'string|in: posts, comments, mediafiles',
+            'liker_id' => 'uuid|exists:users,id', // if admin only
         ]);
+
+        // Init query
+        //$query = LikeableModel::query();
+        $query = LikeableModel::with(['liker', 'likeable']);
+
+        // Check permissions
+        if ( !$request->user()->isAdmin() ) {
+
+            // non-admin: only view own...
+            //$query->where('user_id', $request->user()->id); 
+            //$query->take(5);
+            /*
+            $query->whereHas('posts', function($q1) {
+                $q1->
+            });
+             */
+            $query->whereHasMorph(
+                'likeable',
+                [Post::class, Comment::class],
+                function (Builder $q1, $type) use(&$request) {
+                    switch ($type) {
+                        case Post::class:
+                        case Comment::class:
+                            $column = 'user_id';
+                            break;
+                        default:
+                            throw new Exception('Invalid morphable type for Likeable: '.$type);
+                    }
+                    $q1->where($column, $request->user()->id);
+                }
+            );
+
+            //unset($filters['user_id']);
+
+            /*
+            if ( array_key_exists('post_id', $filters) ) {
+                $post = Post::find($filters['post_id']);
+                $this->authorize('update', $post); // non-admin must own post filtered on
+            }
+             */
+        }
+
+        /*
+        // Apply any filters
+        foreach ($filters as $key => $f) {
+            // %TODO: subgroup under 'filters' (need to update axios.GET calls as well in Vue)
+            switch ($key) {
+                case 'user_id':
+                case 'post_id':
+                case 'parent_id':
+                    $query->where($key, $f);
+                    break;
+            }
+        }
+         */
+
+        $data = $query->paginate( $request->input('take', env('MAX_DEFAULT_PER_REQUEST', 10)) );
+        return new LikeableCollection($data);
+
+        /*
+        $data = $query->get();
+        //dd($data);
+        return response()->json([
+            'likeables' => $data,
+        ]);
+         */
     }
 
     // %TODO: remove liker param and just use session user for liker (?)
@@ -41,14 +116,23 @@ class LikeablesController extends AppBaseController
         ]);
 
         $alias = $request->likeable_type;
-        $model = Relation::getMorphedModel($alias);
+        $model = Relation::getMorphedModel($alias); // string
         $likeable = (new $model)->where('id', $request->likeable_id)->firstOrFail();
+//dd($likeable, $model, $alias);
 
         if ($request->user()->cannot('like', $likeable)) {
             abort(403);
         }
 
         $likeable->likes()->syncWithoutDetaching($liker->id); // %NOTE!! %TODO: apply elsewhere instead of attach
+
+        switch ($alias) {
+            case 'posts':
+            case 'comments':
+                $likeable->user->notify(new ResourceLiked($likeable, $liker)); // owner is relation 'user'
+            default:
+        }
+
         return response()->json([
             'likeable' => $likeable,
             'like_count' => $likeable->likes->count(),

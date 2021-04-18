@@ -120,7 +120,7 @@ class Timeline extends Model implements Tippable, Reportable
     }
 
     public function user()
-    {
+    { // timeline owner
         return $this->belongsTo(User::class);
     }
 

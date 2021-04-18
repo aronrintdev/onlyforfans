@@ -7,7 +7,7 @@
       hide-footer
       body-class="p-0"
     >
-      <SendTip ref="sendTip" :session_user="session_user" :timeline="timeline" :payload="modalPayload" />
+      <SendTip ref="sendTip" :session_user="session_user" :payload="modalPayload" />
     </b-modal>
 
     <b-modal

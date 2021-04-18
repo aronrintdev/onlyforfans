@@ -213,6 +213,7 @@ class Mediafile extends BaseModel implements Guidable, Ownable, Cloneable
     {
         switch ( strtolower($this->mimetype) ) {
             case 'video/mp4':
+            case 'video/x-m4v':
             case 'video/x-flv':
             case 'video/quicktime':
             case 'video/x-ms-wmv':

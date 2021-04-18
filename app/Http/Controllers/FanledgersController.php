@@ -43,7 +43,7 @@ class FanledgersController extends AppBaseController
 
         // Query 
 
-        $query = Fanledger::query()->with(['seller', 'purchaser']);
+        $query = Fanledger::query()->with(['seller', 'purchaser', 'purchaseable']);
         foreach ($filters as $key => $f) { // Apply any filters
             // %TODO: subgroup under 'filters' (need to update axios.GET calls as well in Vue)
             switch ($key) {

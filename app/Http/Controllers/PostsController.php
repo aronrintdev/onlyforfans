@@ -5,19 +5,20 @@ use DB;
 use Auth;
 use Exception;
 use Throwable;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Http\Request;
+use App\Http\Resources\Post as PostResource;
+use App\Http\Resources\PostCollection;
+use App\Notifications\TipReceived;
+use App\Notifications\ResourcePurchased;
+use App\Models\Bookmark;
 use App\Models\Post;
 use App\Rules\InEnum;
 use App\Models\Comment;
-use App\Models\Bookmark;
 use App\Models\Timeline;
 use App\Models\Mediafile;
 use App\Enums\PostTypeEnum;
-use Illuminate\Http\Request;
 use App\Enums\PaymentTypeEnum;
-use Illuminate\Support\Facades\Log;
-use App\Http\Resources\PostCollection;
-use App\Http\Resources\Post as PostResource;
-
 class PostsController extends AppBaseController
 {
     public function index(Request $request)
@@ -186,16 +187,23 @@ class PostsController extends AppBaseController
             'base_unit_cost_in_cents' => 'required|numeric',
         ]);
 
+        $cattrs = [];
+        if ( $request->has('notes') ) {
+            $cattrs['notes'] = $request->notes;
+        }
+
         try {
             $post->receivePayment(
                 PaymentTypeEnum::TIP,
-                $request->user(), // send of tip
+                $request->user(), // sender of tip
                 $request->base_unit_cost_in_cents,
-                [ 'notes' => $request->note ?? '' ]
+                $cattrs,
             );
         } catch(Exception | Throwable $e){
             return response()->json(['message'=>$e->getMessage()], 400);
         }
+
+        $post->user->notify(new TipReceived($post, $request->user(), ['amount'=>$request->base_unit_cost_in_cents]));
 
         return response()->json([
             'post' => $post,
@@ -206,22 +214,24 @@ class PostsController extends AppBaseController
     public function purchase(Request $request, Post $post)
     {
         $this->authorize('purchase', $post);
-        $sender = $request->user();
+        $purchaser = $request->user();
         $cattrs = [ 'notes' => $request->note ?? '' ];
         try {
             $post->receivePayment(
                 PaymentTypeEnum::PURCHASE,
-                $sender,
+                $purchaser, // payment *sender*
                 $post->price,
                 $cattrs
             );
-            $sender->sharedposts()->attach($post->id, [
+            $purchaser->sharedposts()->attach($post->id, [
                 'cattrs' => json_encode($cattrs ?? []),
             ]);
         } catch(Exception | Throwable $e) {
             throw $e;
             return response()->json(['message'=>$e->getMessage()], 400);
         }
+
+        $post->user->notify(new ResourcePurchased($post, $purchaser, ['amount'=>$post->price]));
 
         return response()->json([
             'post' => $post ?? null,

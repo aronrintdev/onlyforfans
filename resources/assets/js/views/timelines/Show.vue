@@ -20,7 +20,9 @@
       </section>
 
     </div>
+
     <Modals />
+
   </div>
 </template>
 

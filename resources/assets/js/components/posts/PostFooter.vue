@@ -4,7 +4,7 @@
     <div class="d-flex justify-content-between">
       <ul class="d-flex list-inline footer-ctrl mb-0">
         <li class="mr-3">
-          <LikesButton @toggled="togglePostLike()" :filled="isLikedByMe" :count="likeCount" />
+          <LikesButton @toggled="toggleLike()" :filled="isLikedByMe" :count="likeCount" />
         </li>
         <li class="mr-3">
           <span @click="toggleComments()" class="tag-clickable">
@@ -92,7 +92,7 @@ export default {
   created() {},
 
   methods: {
-    async togglePostLike() {
+    async toggleLike() { // for Post
       let response
       if (this.isLikedByMe) {
         // unlike
@@ -118,7 +118,12 @@ export default {
     renderTip() {
       eventBus.$emit('open-modal', {
         key: 'render-tip', 
-        data: { resource_type: 'posts', resource_id: this.post.id },
+        data: { 
+          resource: this.post,
+          resource_type: 'posts', 
+          //resource_id: this.post.id,
+          //resource_slug: this.post.slug,
+        },
       })
     },
 

@@ -4,6 +4,8 @@ namespace Database\Seeders;
 use DB;
 use Exception;
 use Carbon\Carbon;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Mail;
 use App\Models\Post;
 use App\Models\User;
 use App\Models\Timeline;
@@ -14,6 +16,7 @@ use App\Enums\PaymentTypeEnum;
 use App\Enums\MediafileTypeEnum;
 use Illuminate\Support\Facades\Config;
 use Symfony\Component\Console\Output\ConsoleOutput;
+use App\Notifications\ResourceLiked;
 
 class LikeablesTableSeeder extends Seeder
 {
@@ -22,6 +25,8 @@ class LikeablesTableSeeder extends Seeder
     public function run()
     {
         $this->initSeederTraits('LikeablesTableSeeder');
+
+        Mail::fake();
 
         // +++ Create ... +++
 
@@ -54,12 +59,14 @@ class LikeablesTableSeeder extends Seeder
                 $now = \Carbon\Carbon::now();
                 $t->posts->random($max)->each( function($p) use(&$f, $now) {
                     DB::table('likeables')->insert([
+                        //'id' => Str::uuid(),
                         'likee_id' => $f->id,
                         'likeable_type' => 'posts',
                         'likeable_id' => $p->id,
                         'created_at' => $now,
                         'updated_at' => $now,
                     ]);
+                    $p->user->notify(new ResourceLiked($p, $f));
                 });
             });
 

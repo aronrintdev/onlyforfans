@@ -6,6 +6,7 @@ use Exception;
 use Throwable;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
+use App\Notifications\CommentReceived;
 use App\Http\Resources\CommentCollection;
 use App\Models\Comment;
 use App\Models\Post;
@@ -82,6 +83,7 @@ class CommentsController extends AppBaseController
         $attrs['commentable_id'] = $post->id;
 
         $comment = Comment::create($attrs);
+        $post->user->notify(new CommentReceived($post, $request->user()));
         $comment->prepFor();
 
         return response()->json([
@@ -109,14 +111,6 @@ class CommentsController extends AppBaseController
         $this->authorize('delete', $comment);
         $comment->delete();
         return response()->json([]);
-    }
-
-    /**
-     * Toggle user like on this comment
-     * TODO: Complete this functionality (%FIXME isn't this done in likeables controller?)
-     */
-    public function toggleLike(Request $request, Comment $comment) {
-        return $comment;
     }
 
 }

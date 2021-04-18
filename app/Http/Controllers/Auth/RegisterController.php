@@ -329,7 +329,10 @@ class RegisterController extends Controller
                     });
                 }
 
-                return response()->json(['status' => '200', 'message' => trans('auth.verify_email'), 'emailNotify' => $chk]);
+                return response()->json([
+                    'status' => '200', 
+                    'message' => trans('auth.verify_email'),
+                ]);
 
             }
         }

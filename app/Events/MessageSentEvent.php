@@ -10,7 +10,7 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-use App\Models\Message;
+use App\Models\ChatThread;
 use App\Models\User;
 
 class MessageSentEvent  implements ShouldBroadcast
@@ -25,9 +25,10 @@ class MessageSentEvent  implements ShouldBroadcast
      *
      * @return void
      */
-    public function __construct(Message $message, User $sender)
+    public function __construct(ChatThread $chatthread, User $sender)
     {
-        $this->message = $message;
+        $json = json_encode($chatthread);
+        $this->message = $json;
         $this->sender = $sender;
     }
 

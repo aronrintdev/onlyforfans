@@ -16,9 +16,9 @@ class PostPolicy extends BasePolicy
         'contentView' => 'isOwner:pass isBlockedByOwner:fail',
         'like'        => 'isOwner:pass isBlockedByOwner:fail',
         'comment'     => 'isOwner:pass isBlockedByOwner:fail',
+        'indexComments' => 'isOwner:pass isBlockedByOwner:fail',
         'purchase'    => 'isOwner:fail isBlockedByOwner:fail',
         'tip'         => 'isOwner:fail isBlockedByOwner:fail',
-        'indexComments' => 'isOwner:fail isBlockedByOwner:fail',
         'bookmark'    => 'isOwner:fail isBlockedByOwner:fail',
         'update'      => 'isOwner:next:fail', // if non-owner fail, else check function
         'delete'      => 'isOwner:next:fail',

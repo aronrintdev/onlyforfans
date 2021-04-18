@@ -5,6 +5,7 @@ use DB;
 use Exception;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Mail;
 use Carbon\Carbon;
 
 use App\Models\User;
@@ -29,6 +30,8 @@ class PostsTableSeeder extends Seeder
     public function run()
     {
         $this->initSeederTraits('PostsTableSeeder'); // $this->{output, faker, appEnv}
+
+        Mail::fake();
 
         // +++ Create ... +++
 
@@ -71,12 +74,16 @@ class PostsTableSeeder extends Seeder
                 );
                  */
 
+                $ts = $this->faker->dateTimeBetween($startDate = '-5 years', $endDate = 'now');
+
                 $attrs = [
                     'postable_type' => 'timelines',
                     'postable_id'   => $u->timeline->id,
                     'description'   => $this->faker->text.' ('.$ptype.')',
                     'user_id'       => $u->id,
                     'type'          => $ptype,
+                    'created_at'    => $ts,
+                    'updated_at'    => $ts,
                 ];
 
                 if ( $ptype === PostTypeEnum::PRICED ) {

@@ -6,6 +6,7 @@ import ErrorViews from '@views/errors'
 import StaticPageRoutes from './staticPages.routes'
 
 import settings from '@views/settings'
+import notifications from '@views/notifications'
 import stories from '@views/stories'
 import timelines from '@views/timelines'
 import users from '@views/users'
@@ -16,6 +17,7 @@ import payments from '@views/payments'
 import liveChat from '@views/live-chat'
 
 import settingsRoutes from './settings.routes'
+//import notificationsRoutes from './notifications.routes'
 
 export const routes = [
   {
@@ -62,11 +64,19 @@ export const routes = [
   //   props: true,
   // },
 
+  // Notifications
+  {
+    name: 'notifications.dashboard',
+    path: '/notifications/dashboard',
+    component: notifications.Dashboard,
+    props: true,
+  },
+
   // Settings
   {
     path: '/settings',
     component: settings.Dashboard,
-    children: settingsRoutes,
+    children:  settingsRoutes,
   },
 
   // Stories
@@ -91,7 +101,7 @@ export const routes = [
   // Static Pages
   ...StaticPageRoutes,
 
-  // User
+  // Timeline
   {
     name: 'timeline.posts',
     path: '/:slug/posts',
