@@ -92,6 +92,7 @@ export default {
   },
 
   data: () => ({
+    focus: false,
     valid: null,
     price: '',
     validationMessage: '',
@@ -133,11 +134,13 @@ export default {
       this.$emit('input', value)
     },
     onFocus(e) {
+      this.focus = true
       if (this.price === '0') {
         this.price = ''
       }
     },
     onBlur(e) {
+      this.focus = false
       this.price = this.numberFormatter.format(this.price)
       this.validate()
       this.$emit('input', this.$parseNumber(this.price) * this.currencyModifier)
@@ -159,16 +162,20 @@ export default {
     price(value) {
       this.onInput(value)
     },
-    value(val) {
-      this.price = val / this.currencyModifier
+    value(value) {
+      if (!this.focus) {
+        this.price = this.formatNumber(value)
+      }
     }
   },
 
-  // mounted() {
-  //   if (this.value < this.min ) {
-  //     this.price = this.numberFormatter.format(this.min / this.currencyModifier)
-  //   }
-  // }
+  mounted() {
+    if (this.value < this.min ) {
+      this.$emit('input', this.min)
+    } else {
+      this.price = this.formatNumber(this.value)
+    }
+  }
 
 }
 </script>

@@ -3,6 +3,7 @@
  * Responsible for listening on event channels and popping toast to the user on Events.
  */
 import Vuex from 'vuex'
+import { eventBus } from '@/app'
 
 export default {
   name: 'Toaster',
@@ -20,8 +21,16 @@ export default {
 
   methods: {
     init() {
+      this.errors()
       this.purchases()
       this.events()
+    },
+
+    errors() {
+      eventBus.$on('error', ({ error, message }) => {
+        this.$log.error(error)
+        this.popToast(message, { variant: 'danger', title: this.$t('errorTitle') })
+      })
     },
 
     async purchases() {
@@ -85,6 +94,10 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
-
-</style>
+<i18n lang="json5" scoped>
+{
+  "en": {
+    "errorTitle": "An Error Has Occurred"
+  }
+}
+</i18n>
