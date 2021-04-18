@@ -6,21 +6,26 @@
 
         <b-card header-tag="header" footer-tag="footer">
           <template #header>
-            <section class="d-flex justify-content-between">
-              <div class="my-auto">
+            <section class="d-flex">
+              <div class="my-auto mr-3">
                 <h6 class="mb-0">New Post</h6>
               </div>
-              <div class="post_create-ctrl">
-                <b-form-select id="post-type" v-model="postType" :options="ptypes" required ></b-form-select>
+              <div class="post_create-ctrl d-flex flex-grow-1">
+                <b-form-select id="post-type" class="w-auto ml-auto" v-model="postType" :options="ptypes" required />
               </div>
             </section>
           </template>
           <div>
+            <div v-if="postType === 'price'" class="w-100">
+              <PriceSelector v-if="postType === 'price'" v-model="price" class="mb-3" />
+              <hr />
+            </div>
+
             <textarea v-model="description" rows="8" class="w-100"></textarea>
-            <vue-dropzone 
-              ref="myVueDropzone" 
-              id="dropzone" 
-              :options="dropzoneOptions" 
+            <vue-dropzone
+              ref="myVueDropzone"
+              id="dropzone"
+              :options="dropzoneOptions"
               :include-styling=true
               :useCustomSlot=true
               v-on:vdropzone-file-added="addedEvent"
@@ -42,7 +47,7 @@
                   <li @click="takePicture()" class="selectable select-pic"><b-icon icon="image" :variant="selectedMedia==='pic' ? 'primary' : 'secondary'" font-scale="1.5"></b-icon></li>
                   <li @click="recordVideo()" class="selectable select-video"><b-icon icon="camera-video" :variant="selectedMedia==='video' ? 'primary' : 'secondary'" font-scale="1.5"></b-icon></li>
                   <li @click="recordAudio()" class="selectable select-audio"><b-icon icon="mic" :variant="selectedMedia==='audio' ? 'primary' : 'secondary'" font-scale="1.5"></b-icon></li>
-                </ul> 
+                </ul>
                 <div class="border-right"></div>
                 <ul class="list-inline d-flex mb-0">
                   <li class="selectable select-location"><span><LocationPinIcon /></span> </li>
@@ -75,6 +80,8 @@ import LocationPinIcon from '@components/common/icons/LocationPinIcon.vue';
 import TimerIcon from '@components/common/icons/TimerIcon.vue';
 import CalendarIcon from '@components/common/icons/CalendarIcon.vue';
 
+import PriceSelector from '@components/common/PriceSelector'
+
 export default {
 
   props: {
@@ -92,12 +99,14 @@ export default {
     selectedMedia: null, // 'pic',
     postType: 'free',
     ptypes: [
-      { text: 'Free', value: 'free' }, 
-      { text: 'By Purchase', value: 'price' }, 
-      { text: 'Subscriber-Only', value: 'paid' }, 
+      { text: 'Free', value: 'free' },
+      { text: 'By Purchase', value: 'price' },
+      { text: 'Subscriber-Only', value: 'paid' },
     ],
+    price: 0,
+    currency: 'USD',
 
-    // ref: 
+    // ref:
     //  ~ https://github.com/rowanwins/vue-dropzone/blob/master/docs/src/pages/SendAdditionalParamsDemo.vue
     //  ~ https://www.dropzonejs.com/#config-autoProcessQueue
     dropzoneOptions: {
@@ -111,8 +120,8 @@ export default {
       clickable: '#clickme_to-select',
       maxFilesize: 15.9,
       addRemoveLinks: true,
-      headers: { 
-        'X-Requested-With': 'XMLHttpRequest', 
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest',
         'X-CSRF-TOKEN': document.head.querySelector('[name=csrf-token]').content,
       },
     },
@@ -126,16 +135,19 @@ export default {
       this.newPostId = null;
       this.selectedMedia = 'pic';
       this.ptype = 'free';
+      this.price = 0
     },
 
     async savePost() {
       // (1) create the post
-      const response = await axios.post(`/posts`, {
+      const response = await axios.post(this.$apiRoute('posts.store'), {
         timeline_id: this.timeline.id,
         description: this.description,
         type: this.postType,
+        price: this.price,
+        currency: this.currency,
       });
-      console.log('savePost', { response });
+      this.$log.debug('savePost', { response });
       const json = response.data;
       this.newPostId = json.post.id;
 
@@ -146,7 +158,7 @@ export default {
       if ( queued.length ) {
         this.$refs.myVueDropzone.processQueue(); // this will call dispatch after files uploaded
       } else {
-        console.log('savePost: dispatching unshiftPostToTimeline...');
+        this.$log.debug('savePost: dispatching unshiftPostToTimeline...');
         this.$store.dispatch('unshiftPostToTimeline', { newPostId: this.newPostId });
         this.resetForm();
       }
@@ -154,7 +166,7 @@ export default {
 
     takePicture() { // %TODO
       this.selectedMedia = this.selectedMedia!=='pic' ? 'pic' : null
-    }, 
+    },
     recordVideo() { // %TODO
       this.selectedMedia = this.selectedMedia!=='video' ? 'video' : null
     },
@@ -164,7 +176,7 @@ export default {
 
     // for dropzone
     sendingEvent(file, xhr, formData) {
-      console.log('sendingEvent', { file, formData, xhr });
+      this.$log.debug('sendingEvent', { file, formData, xhr });
       if ( !this.newPostId ) {
         throw new Error('Cancel upload, invalid post id');
       }
@@ -175,16 +187,16 @@ export default {
 
     // for dropzone
     addedEvent(file) {
-      console.log('addedEvent')
+      this.$log.debug('addedEvent')
     },
     removedEvent(file, error, xhr) {
-      console.log('removedEvent')
+      this.$log.debug('removedEvent')
     },
     successEvent(file, response) {
-      console.log('successEvent', { file, response, });
+      this.$log.debug('successEvent', { file, response, });
     },
     errorEvent(file, message, xhr) {
-      console.log('errorEvent', { file, message, xhr });
+      this.$log.debug('errorEvent', { file, message, xhr });
       if (file) {
         this.$refs.myVueDropzone.removeFile(file)
       }
@@ -196,8 +208,8 @@ export default {
       if ( !this.newPostId ) {
         return
       }
-      console.log('queueCompleteEvent', { });
-      console.log('queueCompleteEvent: dispatching unshiftPostToTimeline...');
+      this.$log.debug('queueCompleteEvent', { });
+      this.$log.debug('queueCompleteEvent: dispatching unshiftPostToTimeline...');
       this.$store.dispatch('unshiftPostToTimeline', { newPostId: this.newPostId });
       this.resetForm();
     },
@@ -224,6 +236,7 @@ export default {
 
 
   components: {
+    PriceSelector,
     vueDropzone: vue2Dropzone,
     EmojiIcon, LocationPinIcon, TimerIcon, CalendarIcon,
   },
