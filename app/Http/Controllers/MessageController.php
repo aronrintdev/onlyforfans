@@ -224,7 +224,7 @@ class MessageController extends Controller
                 $user->muted = true;
             }
         }
-        $lists = DB::table('lists_users')->where('user_id', $id)->get();
+        $lists = DB::table('list_user')->where('user_id', $id)->get();
         $user->hasLists = sizeof($lists) > 0;
         $user->id = $user->user->id;
         return [

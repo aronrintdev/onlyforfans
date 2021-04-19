@@ -158,6 +158,10 @@
     width: auto;
     object-fit: contain;
   }
+  audio.swiper-lazy {
+    width: 300px;
+    outline: none;
+  }
   .slider-btn {
     cursor: pointer;
     background: rgba(138,150,163,.12);

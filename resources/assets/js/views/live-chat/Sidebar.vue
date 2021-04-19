@@ -185,6 +185,7 @@
   export default {
     props: {
       selectedUser: undefined,
+      proplists: Array,
     },
     data: () => ({
       userSearchText: undefined,
@@ -195,8 +196,8 @@
       moment: moment,
       originContacts: [],
       selectedPinnedList: undefined,
-      pinnedLists: [],
       lists: [],
+      pinnedLists: [],
       swiperOptions: {
         lazy: true,
         slidesPerView: 'auto',
@@ -214,8 +215,6 @@
       swiper: directive,
     },
     mounted() {
-      // Fetch Users' Online/Away status
-      const self = this;
       this.axios.get('/lists')
         .then(res => {
           this.lists = res.data;
@@ -233,6 +232,12 @@
         });
         this.loading = false;
       });
+    },
+    watch: { 
+      proplists: function(newVal) {
+        this.lists = newVal.slice();
+        this.pinnedLists = newVal.filter(list => list.isPinned);
+      }
     },
     computed: {
       selectedOption: function () {
