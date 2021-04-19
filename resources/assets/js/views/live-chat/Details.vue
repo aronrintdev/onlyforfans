@@ -7,7 +7,7 @@
           <div class="card">
             <div class="card-body nopadding">
               <div class="row message-box">
-                <chat-sidebar :selectedUser="selectedUser" />
+                <chat-sidebar :selectedUser="selectedUser" :proplists="lists" />
                 <div v-if="selectedUser" class="col-md-8 col-sm-8 col-xs-8 message-col-8">
                   <div :class="messageSearchVisible ? 'conversation-header no-border' : 'conversation-header'">
                     <button class="back-btn btn" type="button" @click="clearSelectedUser">
