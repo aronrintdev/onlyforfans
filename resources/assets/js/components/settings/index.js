@@ -1,7 +1,3 @@
-/**
- * js/components/settings
- */
-
 import Bookmarks from './SettingsBookmarks.vue'
 import Earnings from './SettingsEarnings.vue'
 import General from './SettingsGeneral.vue'

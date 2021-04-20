@@ -7,7 +7,7 @@
       hide-footer
       body-class="p-0"
     >
-      <SendTip ref="sendTip" :session_user="session_user" :timeline="timeline" :payload="modalPayload" />
+      <SendTip ref="sendTip" :session_user="session_user" :payload="modalPayload" />
     </b-modal>
 
     <b-modal
@@ -52,9 +52,9 @@
 </template>
 
 <script>
-/**
- * Container for base modals
- */
+// Container for base modals
+// %PSG: %NOTE %FIXME - not sure if refactoring all modals into a single component was the best idea, as it's possible
+// one or more of the indiviudal modals could be used elsewhere in the app outside of timelines (eg, following list)
 import Vuex from 'vuex';
 import { eventBus } from '@/app'
 import FollowTimeline from '@components/modals/FollowTimeline.vue'
@@ -75,7 +75,7 @@ export default {
   },
 
   computed: {
-    ...Vuex.mapState([ 'session_user', 'timeline', ])
+    ...Vuex.mapState([ 'session_user', 'timeline', ]) // %TODO: may be able to drop timeline here (?)
   },
 
   data: () => ({
@@ -129,12 +129,13 @@ export default {
       })
 
       this.$root.$on('bv::modal::hide', (bvEvent, modalId) => {
-        if (this.references[modalId]) {
+        if (this.references[modalId] && this.$refs[this.references[modalId]]) {
           if (typeof this.$refs[this.references[modalId]].modalHide === 'function') {
             this.$refs[this.references[modalId]].modalHide(bvEvent)
           }
         }
       })
+
     },
   },
 

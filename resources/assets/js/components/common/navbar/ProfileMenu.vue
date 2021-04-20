@@ -64,6 +64,11 @@ export default {
           icon: 'cog',
           linkTo: { name: 'settings.general' }
         },
+        {
+          label: 'Lists',
+          icon: 'cog',
+          linkTo: { name: 'lists.default' }
+        },
       ]
 
       if (this.uiFlags.isCreator && !this.uiFlags.hasBanking) {

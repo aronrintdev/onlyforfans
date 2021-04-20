@@ -125,6 +125,9 @@ export default {
     timelineId() {
       return this.timeline.id
     },
+    timelineSlug() {
+      return this.timeline.slug
+    },
 
     currentPage() {
       return this.feeddata.meta.current_page
@@ -206,7 +209,12 @@ export default {
     renderTip() {
       eventBus.$emit('open-modal', {
         key: 'render-tip',
-        data: { resource_type: 'timelines', resource_id: this.timelineId },
+        data: { 
+          resource: this.timeline,
+          resource_type: 'timelines', 
+          //resource_id: this.timelineId,
+          //resource_slug: this.timelineSlug,
+        },
       })
     },
 

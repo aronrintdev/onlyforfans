@@ -12,9 +12,15 @@
         <PostHeader :post="post" :session_user="session_user"/>
         <section class="d-flex align-items-center">
           <div v-if="session_user.id === post.user.id" class="post-ctrl mr-2">
-            <b-dropdown id="dropdown-1" text="" class="m-md-2" variant="outline-dark">
-              <b-dropdown-item @click="editPost()">Edit</b-dropdown-item>
-              <b-dropdown-item @click="deletePost()">Delete</b-dropdown-item>
+            <b-dropdown id="dropdown-1" right text="" class="m-md-2" variant="outline-dark">
+              <b-dropdown-item @click="editPost()">
+                <fa-icon icon="edit" fixed-width class="mr-2" />
+                Edit
+              </b-dropdown-item>
+              <b-dropdown-item @click="showDeleteConfirmation = true">
+                <fa-icon icon="trash" fixed-width class="mr-2" />
+                Delete
+              </b-dropdown-item>
             </b-dropdown>
           </div>
           <div @click="renderFull" v-if="is_feed" class="p-2 btn">
@@ -40,6 +46,24 @@
       </template>
 
     </b-card>
+    <b-modal
+      v-model="showDeleteConfirmation"
+      header-bg-variant="danger"
+      header-text-variant="light"
+      ok-variant="danger"
+      size="sm"
+      @ok="deletePost()"
+    >
+      <template #modal-title>
+        <fa-icon icon="trash" fixed-width />
+        {{ $t('delete.confirmation.title') }}
+      </template>
+      <div class="text-center" v-text="$t('delete.confirmation.message')" />
+      <template #modal-ok>
+        <fa-icon icon="trash" fixed-width />
+        {{ $t('delete.confirmation.ok') }}
+      </template>
+    </b-modal>
   </div>
 </template>
 
@@ -82,6 +106,7 @@ export default {
   },
 
   data: () => ({
+    showDeleteConfirmation: false,
   }),
 
   mounted() { },
@@ -95,7 +120,7 @@ export default {
         eventBus.$emit('open-modal', { key: 'show-post', data: { post: this.post } })
       } else {
         if ( this.$options.filters.isSubscriberOnly(this.post) ) {
-          eventBus.$emit('open-modal', { key: 'render-subscribe', data: { timeline: this.timeline } })
+          eventBus.$emit('open-modal', { key: 'render-subscribe', data: { timeline: this.post.timeline } })
         } else if ( this.$options.filters.isPurchaseable(this.post) ) {
           eventBus.$emit('open-modal', { key: 'render-purchase-post', data: { post: this.post } })
         }
@@ -104,6 +129,7 @@ export default {
 
     editPost() {
       const is = this.session_user.id === this.post.user.id // Check permissions
+      this.$router.push({ name: 'posts.edit', params: { slug: this.post.slug, post: this.post } })
     },
 
     deletePost() {
@@ -175,3 +201,17 @@ ul {
   font-size: 14px;
 }
 </style>
+
+<i18n lang="json5">
+{
+  "en": {
+    "delete": {
+      "confirmation": {
+        "title": "Delete Post?",
+        "message": "Are you sure you want to delete this post?",
+        "ok": "Delete Post"
+      }
+    }
+  }
+}
+</i18n>

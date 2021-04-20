@@ -146,16 +146,13 @@ export default {
 
   },
 
-  watch: { },
-
-  mounted() { },
-
   created() {
     this.getPagedData()
   },
 
-  components: {
-  },
+  mounted() { },
+
+  components: { },
 }
 </script>
 
