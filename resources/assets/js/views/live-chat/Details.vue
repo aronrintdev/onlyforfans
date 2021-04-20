@@ -7,7 +7,7 @@
           <div class="card">
             <div class="card-body nopadding">
               <div class="row message-box">
-                <chat-sidebar :selectedUser="selectedUser" :proplists="lists" />
+                <chat-sidebar :selectedUser="selectedUser" :proplists="lists" :last_thread="lastMessage" />
                 <div v-if="selectedUser" class="col-md-8 col-sm-8 col-xs-8 message-col-8">
                   <div :class="messageSearchVisible ? 'conversation-header no-border' : 'conversation-header'">
                     <button class="back-btn btn" type="button" @click="clearSelectedUser">
@@ -101,7 +101,7 @@
                     <div class="empty-messages" v-if="messages.length === 0">
                       Type a message below to start a conversation with {{ selectedUser.name }}
                     </div>
-                    <div class="messages" v-lazy-container="{ selector: 'img' }" v-if="messages.length > 0">
+                    <div class="messages" v-lazy-container="{ selector: 'img.lazy' }" v-if="messages.length > 0">
                       <div class="text-center mb-2" v-if="loadingData"><b-spinner variant="secondary" label="Loading..." small></b-spinner></div>
                       <div class="message-group" :key="messageGroup.date"  v-for="messageGroup in messages">
                         <div class="message-group-time"><span>{{ moment.unix(messageGroup.date).format('MMM DD, YYYY') }}</span></div>
@@ -118,7 +118,8 @@
                                 <template v-for="msg in message.messages">
                                   <div class="text" :class="`message-${msg.id}`" v-if="!msg.mediafile" :key="msg.id">{{ msg.mcontent }}</div>
                                   <div class="image" :class="`message-${msg.id}`" v-if="msg.mediafile" :key="msg.id">
-                                    <img v-preview:scope-b v-if="msg.mediafile.is_image" :data-src="msg.mediafile.filepath" :alt="msg.mediafile.mfname" />
+                                    <img v-preview:scope-b class="lazy" v-if="msg.mediafile.is_image" :data-src="msg.mediafile.filepath" :alt="msg.mediafile.mfname" />
+                                    <img src="/images/loading.gif" v-if="msg.mediafile.is_image" class="loading-image" />
                                     <video v-if="msg.mediafile.is_video" controls>
                                       <source :src="msg.mediafile.filepath" type="video/mp4" />
                                     </video>
@@ -134,7 +135,8 @@
                               <template v-for="msg in message.messages">
                                 <div class="text" :class="`message-${msg.id}`" v-if="!msg.mediafile" :key="msg.id">{{ msg.mcontent }}</div>
                                 <div class="image" :class="`message-${msg.id}`" v-if="msg.mediafile" :key="msg.id">
-                                  <img v-preview:scope-b v-if="msg.mediafile.is_image" :data-src="msg.mediafile.filepath" :alt="msg.mediafile.mfname" />
+                                  <img v-preview:scope-b class="lazy" v-if="msg.mediafile.is_image" :data-src="msg.mediafile.filepath" :alt="msg.mediafile.mfname" />
+                                  <img src="/images/loading.gif" v-if="msg.mediafile.is_image"  class="loading-image" />
                                   <video v-if="msg.mediafile.is_video" controls>
                                     <source :src="msg.mediafile.filepath" type="video/mp4" />
                                   </video>
@@ -501,6 +503,7 @@
       isSendingFiles: false,
       hasMore: true,
       mediaType: undefined,
+      lastMessage: undefined,
     }),
     mounted() {
       const self = this;
@@ -516,6 +519,9 @@
             self.offset += 1;
             self.groupMessages();
             $('.conversation-list').animate({ scrollTop: $('.conversation-list')[0].scrollHeight }, 500);
+            this.$Lazyload.$once('loaded', function () {
+              $('.conversation-list').animate({ scrollTop: $('.conversation-list')[0].scrollHeight }, 500);
+            });
           }
         });
       // Echo.join(`user-status`)
@@ -536,6 +542,7 @@
             $('.typing').hide();
           }, 3000);
         });
+
     },
     watch: {
       '$route.params.id': function (id) {
@@ -559,6 +566,9 @@
             self.offset += 1;
             self.groupMessages();
             $('.conversation-list').animate({ scrollTop: $('.conversation-list')[0].scrollHeight }, 500);
+            this.$Lazyload.$once('loaded', function () {
+              $('.conversation-list').animate({ scrollTop: $('.conversation-list')[0].scrollHeight }, 500);
+            });
           }
         });
       }
@@ -718,12 +728,15 @@
           }
           this.axios.post('/chat-messages', data)
             .then((response) => {
-              self.isSendingFiles = false;
+              this.isSendingFiles = false;
               this.newMessageText = undefined;
               this.sortableMedias = [];
               this.originMessages.unshift(response.data.message);
+              this.lastMessage = response.data.message;
               this.groupMessages();
-              $('.conversation-list').animate({ scrollTop: $('.conversation-list')[0].scrollHeight }, 500);
+              this.$Lazyload.$once('loaded', function () {
+                $('.conversation-list').animate({ scrollTop: $('.conversation-list')[0].scrollHeight }, 500);
+              });
             });
         } else if (this.newMessageText) {
           this.axios.post('/chat-messages', {
@@ -732,6 +745,7 @@
           })
             .then((response) => {
               this.originMessages.unshift(response.data.message);
+              this.lastMessage = response.data.message;
               this.groupMessages();
               this.newMessageText = undefined;
               $('.conversation-list').animate({ scrollTop: $('.conversation-list')[0].scrollHeight }, 500);
