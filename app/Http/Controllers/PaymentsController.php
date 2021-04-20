@@ -14,6 +14,7 @@ use App\Enums\Financial\AccountTypeEnum;
 use App\Helpers\Tippable as TippableHelpers;
 use App\Http\Resources\PaymentMethodCollection;
 use App\Helpers\Purchasable as PurchasableHelpers;
+use App\Helpers\Subscribable as SubscribableHelpers;
 use Illuminate\Auth\Access\AuthorizationException;
 
 class PaymentsController extends Controller
@@ -96,13 +97,13 @@ class PaymentsController extends Controller
         } else if ($request->type === PaymentTypeEnum::TIP) {
             $item = TippableHelpers::getTippableItem($request->item);
         } else if ($request->type === PaymentTypeEnum::SUBSCRIPTION) {
-            //
+            $item = SubscribableHelpers::getSubscribableItem($request->item);
         }
 
         if (get_class($account->resource) == SegpayCard::class) {
             if (Config::get('segpay.fake') && Config::get('app.env') != 'production') {
                 // Dispatch Event
-                FakeSegpayPayment::dispatch($item, $account, $request->type, $request->price);
+                FakeSegpayPayment::dispatch($item, $account, $request->type, $request->price, $request->extra ?? null);
                 return;
             }
 

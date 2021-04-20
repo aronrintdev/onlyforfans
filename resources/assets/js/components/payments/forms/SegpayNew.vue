@@ -98,6 +98,7 @@ export default {
     currency: { type: String, default: 'USD' },
     /** Type of transaction: `'purchase' | 'subscription' | 'tip'` */
     type: { type: String, default: 'purchase' },
+    extra: { type: Object, default: () => ({})},
   },
 
   computed: {
@@ -162,8 +163,10 @@ export default {
               currency: this.currency,
               last_4: this.form.card.number.slice(-4),
               brand: this.$refs.brandIcon.brand,
+              extra: this.extra,
             })
             this.$emit('success', 'faked')
+            this.$emit('processing')
             this.processing = true
             return
           }
@@ -188,6 +191,7 @@ export default {
               break;
               case 'Success':
                 this.$emit('success', result.purchases)
+                this.$emit('processing')
                 this.processing = true
               break;
             }

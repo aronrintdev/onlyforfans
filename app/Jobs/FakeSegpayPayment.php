@@ -2,12 +2,14 @@
 
 namespace App\Jobs;
 
-use App\Enums\PaymentTypeEnum;
+use Exception;
+use App\Events\TipFailed;
 use App\Events\ItemPurchased;
+use Illuminate\Bus\Queueable;
+use App\Enums\PaymentTypeEnum;
 use App\Events\PurchaseFailed;
 use App\Models\Financial\Account;
-use Exception;
-use Illuminate\Bus\Queueable;
+use App\Events\SubscriptionFailed;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Queue\InteractsWithQueue;
@@ -33,17 +35,20 @@ class FakeSegpayPayment implements ShouldQueue
 
     public $price;
 
+    public $extra;
+
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct($item, Account $account, $type, $price)
+    public function __construct($item, Account $account, $type, $price, $extra = [])
     {
         $this->item = $item;
         $this->account = $account;
         $this->type = $type;
         $this->price = $price;
+        $this->extra = $extra;
     }
 
     /**
@@ -66,11 +71,21 @@ class FakeSegpayPayment implements ShouldQueue
         }
 
         if ($this->type === PaymentTypeEnum::TIP) {
-            //
+            try {
+                $this->account->tip($this->item, $this->price, [ 'message' => $this->extra['message'] ?? '' ]);
+            } catch (Exception $e) {
+                TipFailed::dispatch($this->item, $this->account);
+            }
         }
 
         if ($this->type === PaymentTypeEnum::SUBSCRIPTION) {
-            //
+            try {
+                $this->account->createSubscription($this->item, $this->price, [
+                    'manual_charge' => false,
+                ]);
+            } catch (Exception $e) {
+                SubscriptionFailed::dispatch($this->item, $this->account);
+            }
         }
 
     }

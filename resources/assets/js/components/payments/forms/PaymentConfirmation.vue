@@ -1,9 +1,9 @@
 <template>
   <b-card class="w-100" style="position: unset;">
-    <LoadingOverlay :loading="processing" :text="$t('processing')" />
-    <div class="h4 mb-3">
-      Confirm payment with:
-    </div>
+    <div
+      class="h4 mb-3"
+      v-text="$t('confirm.header', { type: $t(`types.${this.type}`), })"
+    />
     <b-row>
       <b-col class="mb-3 mb-md-0">
         <SavedPaymentMethod as="div" :value="paymentMethod" />
@@ -11,7 +11,7 @@
       <b-col md="auto" class="ml-auto">
         <b-btn block variant="success" class="d-flex align-items-center" @click="onConfirm">
           <fa-icon icon="check" size="lg" class="mr-2" />
-          {{ $t('confirm', { price: priceDisplay }) }}
+          {{ $t('confirm.button', { type: $t(`types.${this.type}`), price: priceDisplay }) }}
         </b-btn>
       </b-col>
 
@@ -40,7 +40,8 @@ export default {
     price: { type: Number, default: 0 },
     currency: { type: String, default: 'USD' },
     type: { type: String, default: 'purchase' },
-    priceDisplay: { type: String, default: () => '$0.00' }
+    priceDisplay: { type: String, default: () => '$0.00' },
+    extra: { type: Object, default: () => ({})},
   },
 
   computed: {
@@ -57,34 +58,24 @@ export default {
 
   methods: {
     init() {
-      this.$root.$on('bv::modal::hide', (bvEvent, modalId) => {
-        if (modalId === 'modal-purchase-post' && this.processing) {
-          bvEvent.preventDefault()
-        }
-      })
-
-      this.$echo.private(this.purchasesChannel).listen('ItemPurchased', e => {
-        if (e.item_id === this.value.id) {
-          this.processing = false
-          this.$nextTick(() => {
-            this.$bvModal.hide('modal-purchase-post')
-          })
-        }
-      })
+      //
     },
 
     onConfirm() {
-      this.processing = true
+      this.$emit('processing')
       this.axios.post(this.$apiRoute('payments.purchase'), {
         item: this.value.id,
         type: this.type,
         price: this.price,
         currency: this.currency,
         method: this.paymentMethod.id,
-      }).then(response => {}
+        extra: this.extra,
+      }).then(response => {
+        this.$log.debug('PaymentConfirmation onConfirm')
+      }
       ).catch(error => {
         eventBus.$emit('error', { error, message: "An error has occurred", })
-        this.processing = false
+        this.$emit('stopProcessing')
       })
     },
   },
@@ -99,8 +90,15 @@ export default {
 <i18n lang="json5" scoped>
 {
   "en": {
-    "processing": "Processing",
-    "confirm": "Confirm Payment Of {price}"
+    "types": {
+      "purchase": "Purchase",
+      "tip": "Tip",
+      "subscription": "Subscription"
+    },
+    "confirm": {
+      "header": "Confirm {type} With Payment Method:",
+      "button": "Confirm {type} Of {price}"
+    }
   }
 }
 </i18n>

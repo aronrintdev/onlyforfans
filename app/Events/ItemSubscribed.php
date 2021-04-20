@@ -2,7 +2,7 @@
 
 namespace App\Events;
 
-use App\Interfaces\Purchaseable;
+use App\Interfaces\Subscribable;
 use App\Models\User;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
@@ -10,14 +10,14 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class ItemPurchased implements ShouldBroadcast
+class ItemSubscribed implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     /**
      * The Item that was purchased
      *
-     * @var Purchaseable
+     * @var Subscribable
      */
     public $item;
 
@@ -33,7 +33,7 @@ class ItemPurchased implements ShouldBroadcast
      *
      * @return void
      */
-    public function __construct(Purchaseable $item, User $purchaser)
+    public function __construct(Subscribable $item, User $purchaser)
     {
         $this->item = $item->withoutRelations();
         $this->purchaser = $purchaser->withoutRelations();;

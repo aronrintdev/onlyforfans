@@ -29,6 +29,8 @@ use App\Jobs\Financial\UpdateAccountBalance;
 use App\Models\Financial\Traits\HasCurrency;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Enums\Financial\TransactionSummaryTypeEnum;
+use App\Events\ItemTipped;
+use App\Interfaces\Tippable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\InvalidCastException;
 use App\Models\Financial\Exceptions\AlreadyPurchasedException;
@@ -521,6 +523,33 @@ class Account extends Model implements Ownable
         ]));
 
         ItemPurchased::dispatch($purchaseable, $this->getOwner()->first());
+
+        return $transactions;
+    }
+
+    public function tip(
+        Tippable $tippable,
+        $payment,
+        $customAttributes = []
+    ): Collection
+    {
+        $amount = $this->asMoney($payment);
+
+        // Move funds to internal account first if this is a in account
+        if ($this->type === AccountTypeEnum::IN) {
+            $this->moveToInternal($amount);
+            $internalAccount = $this->getInternalAccount();
+            return $internalAccount->tip($tippable, $amount, array_merge($customAttributes, [ 'ignoreBalance' => true ]));
+        }
+
+        // Payment funds movement
+        $transactions = $this->moveTo($tippable->getOwnerAccount($this->system, $this->currency), $amount, [
+            'purchasable' => $tippable,
+            'type' => TransactionTypeEnum::TIP,
+            'description' => "Tip to {$tippable->getDescriptionNameString()} {$tippable->getKey()}"
+        ]);
+
+        ItemTipped::dispatch($tippable, $this->getOwner()->first());
 
         return $transactions;
     }

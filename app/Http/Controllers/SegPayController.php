@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
 use App\Helpers\Tippable as TippableHelpers;
 use App\Helpers\Purchasable as PurchasableHelpers;
+use App\Helpers\Subscribable as SubscribableHelpers;
+use App\Interfaces\Subscribable;
 use App\Jobs\FakeSegpayPayment;
 use App\Models\Financial\Account;
 use App\Models\Financial\SegpayCard;
@@ -142,7 +144,7 @@ class SegPayController extends Controller
             $item = TippableHelpers::getTippableItem($request->item);
             $description = 'All Fans Tip';
         } else if ($request->type === PaymentTypeEnum::SUBSCRIPTION) {
-            //
+            $item = SubscribableHelpers::getSubscribableItem($request->item);
             $description = 'All Fans Subscription';
         }
 
@@ -165,13 +167,23 @@ class SegPayController extends Controller
         }
 
         // Get payment session
+        $query = [
+            'tokenId' => Config::get('segpay.paymentSessions.token'),
+            'dynamicDescription' => urlencode($description),
+            'dynamicInitialAmount' => $item->formatMoneyDecimal($request->price),
+        ];
+
+        if ($request->type === PaymentTypeEnum::SUBSCRIPTION) {
+            $query = array_merge($query, [
+                'dynamicInitialDurationInDays'   => 30,
+                'dynamicRecurringAmount'         => $item->formatMoneyDecimal($request->price),
+                'dynamicRecurringDurationInDays' => 30,
+            ]);
+        }
+
         $client = new Client();
         $response = $client->request('GET', Config::get('segpay.paymentSessions.baseUrl'), [
-            'query' => [
-                'tokenId' => Config::get('segpay.paymentSessions.token'),
-                'dynamicDescription' => urlencode($description),
-                'dynamicInitialAmount' => $item->formatMoneyDecimal($item->price),
-            ],
+            'query' => $query,
         ]);
 
         return $response;
@@ -203,7 +215,7 @@ class SegPayController extends Controller
         } else if ($request->type === PaymentTypeEnum::TIP) {
             $item = TippableHelpers::getTippableItem($request->item);
         } else if ($request->type === PaymentTypeEnum::SUBSCRIPTION) {
-            //
+            $item = SubscribableHelpers::getSubscribableItem($request->item);
         }
 
         if (!isset($item)) {
