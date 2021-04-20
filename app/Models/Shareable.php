@@ -12,6 +12,10 @@ class Shareable extends Model
 
     protected $guarded = [ 'created_at', 'updated_at' ];
 
+    //--------------------------------------------
+    // %%% Relationships
+    //--------------------------------------------
+
     public function shareable() {
         return $this->morphTo();
     }
@@ -19,6 +23,25 @@ class Shareable extends Model
     public function sharee()
     { 
         return $this->belongsTo(User::class, 'sharee_id');
+    }
+
+    //--------------------------------------------
+    // %%% Scopes
+    //--------------------------------------------
+
+    public function scopeSort($query, $sortBy, $sortDir='desc')
+    {
+        switch ($sortBy) {
+        case 'slug':
+            $query->orderBy('shareable.slug', $sortDir);
+            break;
+        case 'created_at':
+            $query->orderBy($sortBy, $sortDir);
+            break;
+        default:
+            $query->latest();
+        }
+        return $query;
     }
 
 }

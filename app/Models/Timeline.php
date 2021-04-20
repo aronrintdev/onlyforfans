@@ -139,6 +139,25 @@ class Timeline extends Model implements Tippable, Reportable
         return $this->belongsTo(Mediafile::class, 'cover_id');
     }
 
+    //--------------------------------------------
+    // %%% Scopes
+    //--------------------------------------------
+
+    /*
+    public function scopeSort($query, $sortBy, $sortDir='desc')
+    {
+        switch ($sortBy) {
+        case 'slug':
+        case 'created_at':
+            $query->orderBy($sortBy, $sortDir);
+            break;
+        default:
+            $query->latest();
+        }
+        return $query;
+    }
+     */
+
     // %%% --- Implement Purchaseable Interface ---
     #region Purchasable
 

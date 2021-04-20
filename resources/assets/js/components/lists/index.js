@@ -1,9 +1,9 @@
-import Bookmarks from './ListsBookmarks.vue'
+import Favorites from './ListsFavorites.vue'
 import Followers from './ListsFollowers.vue'
 import Following from './ListsFollowing.vue'
 
 export default {
-  Bookmarks,
+  Favorites,
   Followers,
   Following,
 }
