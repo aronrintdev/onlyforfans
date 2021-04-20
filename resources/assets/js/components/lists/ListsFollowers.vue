@@ -11,48 +11,7 @@
 
       <hr />
 
-      <b-row class="justify-content-end mt-0">
-        <b-col md="6" class="text-right">
-
-          <b-dropdown no-caret right ref="feedCtrls" variant="transparent" id="feed-ctrl-dropdown" class="tag-ctrl">
-            <template #button-content>
-              <b-icon icon="filter" scale="1.8" variant="primary"></b-icon>
-            </template>
-            <b-dropdown-form>
-              <b-form-group label="Subscription">
-                <b-form-radio v-model="accessLevel" size="sm" name="access-level" value="all">All</b-form-radio>
-                <b-form-radio v-model="accessLevel" size="sm" name="access-level" value="premium">Paid</b-form-radio>
-                <b-form-radio v-model="accessLevel" size="sm" name="access-level" value="default">Free</b-form-radio>
-              </b-form-group>
-              <b-dropdown-divider></b-dropdown-divider>
-              <b-form-group label="Online Status">
-                <b-form-radio v-model="onlineStatus" size="sm" name="online-status" value="all">All</b-form-radio>
-                <b-form-radio v-model="onlineStatus" size="sm" name="online-status" value="online">Online</b-form-radio>
-                <b-form-radio v-model="onlineStatus" size="sm" name="online-status" value="offline">Offline</b-form-radio>
-              </b-form-group>
-            </b-dropdown-form>
-          </b-dropdown>
-
-          <b-dropdown no-caret right ref="feedCtrls" variant="transparent" id="feed-ctrl-dropdown" class="tag-ctrl">
-            <template #button-content>
-              <b-icon icon="arrow-down-up" scale="1.3" variant="primary"></b-icon>
-            </template>
-            <b-dropdown-form>
-              <b-form-group label="">
-                <b-form-radio v-model="sortBy" size="sm" name="sort-by" value="activity">Last Activity</b-form-radio>
-                <b-form-radio v-model="sortBy" size="sm" name="sort-by" value="name">Name</b-form-radio>
-                <b-form-radio v-model="sortBy" size="sm" name="sort-by" value="start_date">Started</b-form-radio>
-              </b-form-group>
-              <b-dropdown-divider></b-dropdown-divider>
-              <b-form-group label="">
-                <b-form-radio v-model="sortDir" size="sm" name="sort-dir" value="asc">Ascending</b-form-radio>
-                <b-form-radio v-model="sortDir" size="sm" name="sort-dir" value="desc">Descending</b-form-radio>
-              </b-form-group>
-            </b-dropdown-form>
-          </b-dropdown>
-
-        </b-col>
-      </b-row>
+      <CtrlBar @apply-filters="applyFilters($event)" />
 
       <b-row class="mt-2">
         <b-col lg="4" v-for="(s,idx) in shareables" :key="s.id" >
@@ -79,7 +38,7 @@
               <b-card-text class="mb-2"><fa-icon fixed-width icon="star" style="color:#007bff" /> Add to favorites</b-card-text>
 
               <b-button variant="outline-primary">Message</b-button>
-              <b-button variant="outline-danger">Block</b-button>
+              <b-button variant="outline-danger">Restrict</b-button>
               <b-button variant="outline-warning">Discount</b-button>
               <div>
                 <small v-if="s.access_level==='premium'" class="text-muted">subscribed since {{ moment(s.updated_at).format('MMM DD, YYYY') }}</small>
@@ -113,6 +72,7 @@
 import { eventBus } from '@/app'
   //import { DateTime } from 'luxon'
 import moment from 'moment'
+import CtrlBar from '@components/lists/CtrlBar'
 
 export default {
 
@@ -136,10 +96,16 @@ export default {
     perPage: 10,
     currentPage: 1,
 
-    sortBy: null,
-    sortDir:  'asc',
-    accessLevel: 'all',
-    onlineStatus: 'all',
+    sort: {
+      by: null,
+      dir:  'asc',
+    },
+
+    filters: {
+      accessLevel: 'all', // %TODO: change default ('all') to null
+      onlineStatus: 'all',
+    },
+
   }),
 
   methods: {
@@ -148,18 +114,55 @@ export default {
         page: this.currentPage, 
         take: this.perPage,
       }
-      if (this.filter && this.filter!=='none') {
-        params.type = this.filterToType // PostTipped, etc
+
+      // Apply any filters
+      if (this.filters.accessLevel && this.filters.accessLevel !== 'all') {
+        params.accessLevel = this.filters.accessLevel
       }
+      if (this.filters.onlineStatus && this.filters.onlineStatus !== 'all') {
+        params.onlineStatus = this.filters.onlineStatus
+      }
+
+      // Apply sort
+      if (this.sort.by) {
+        params.sortBy = this.sort.by
+      }
+      if (this.sort.dir) {
+        params.sortDir = this.sort.dir
+      }
+
       axios.get( route('shareables.indexFollowers'), { params } ).then( response => {
         this.shareables = response.data.data
         this.meta = response.data.meta
       })
     },
 
+    // may adjust filters, but always reloads from page 1
+    reloadFromFirstPage() {
+      this.doReset()
+      this.getPagedData()
+      //sortBy: this.sortPostsBy, 
+      //hideLocked: this.hideLocked, 
+      //hidePromotions: this.hidePromotions,
+    },
+
+    applyFilters({ filters, sort }) {
+      console.log('ListsFollowers', { 
+        filters,
+        sort,
+      })
+      this.filters = filters
+      this.sort = sort
+      this.reloadFromFirstPage()
+    },
+
     pageClickHandler(e, page) {
       this.currentPage = page
       this.getPagedData()
+    },
+
+    doReset() {
+      this.currentPage = 1
     },
   },
 
@@ -170,6 +173,7 @@ export default {
   },
 
   components: {
+    CtrlBar,
   },
 }
 </script>

@@ -68,6 +68,8 @@ class ShareablesController extends AppBaseController
             $query->where('access_level', $request->access_level);
         }
 
+        //$query->sort( $sortBy, ($sortDir==='asc' ?? 'desc') );
+
         $data = $query->paginate( $request->input('take', env('MAX_DEFAULT_PER_REQUEST', 10)) );
         return new ShareableCollection($data);
     }
@@ -75,9 +77,17 @@ class ShareablesController extends AppBaseController
     // list of users/timelines following session user
     public function indexFollowers(Request $request)
     {
+        $request->validate([
+            // filters
+            'accessLevel' => 'string|in:default,premium',
+            //'onlineStatus' => 'string|in: default, premium',
+            //'sharee_id' => 'uuid|exists:users,id', // if admin only
+        ]);
+
         $sessionUser = $request->user();
         $sessionTimeline = $sessionUser->timeline;
-        $query = ShareableModel::with(['sharee', 'shareable']);
+
+        $query = ShareableModel::with(['sharee', 'shareable']); // init
         /*
         $query->whereHasMorph( 'shareable', [Timeline::class], function (Builder $q1, $type) use(&$request) {
             $q1->where('user_id', $request->user()->id);
@@ -85,6 +95,29 @@ class ShareablesController extends AppBaseController
          */
         $query->where('shareable_type', 'timelines');
         $query->where('shareable_id', $sessionTimeline->id);
+
+        // Apply any filters
+        if ( $request->has('accessLevel') ) {
+            $query->where('access_level', $request->accessLevel);
+        }
+        /*
+        if ( $request->has('onlineStatus') ) {
+            $query->where('access_level', $request->onlineStatus);
+        }
+         */
+
+        $sortBy = (function($k) { // map to table columns
+            switch ($k) {
+            case 'start_date':
+                return 'created_at';
+            case 'name':
+                return 'slug';
+            default:
+                return $k;
+            }
+        })( $request->input('sortBy', 'default') );
+        $query->sort( $sortBy, ($request->sortDir==='asc' ?? 'desc') );
+
         $data = $query->paginate( $request->input('take', env('MAX_DEFAULT_PER_REQUEST', 10)) );
         return new ShareableCollection($data);
     }
