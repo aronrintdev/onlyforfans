@@ -280,6 +280,20 @@
 							img, video {
 								width: 100%;
 								border-radius: 6px;
+
+								&[lazy="loaded"] + .loading-image {
+									display: none;
+								}
+								&[lazy="loading"] {
+									height: 0;
+									visibility: hidden;
+									overflow: hidden;
+								}
+								&[lazy="loading"] + .loading-image {
+									display: inline-block;
+									box-shadow: inset 0px 1px 8px 1px #0000002e;
+									background: rgba(0, 0, 0, 0.1);
+								}
 							}
 							audio {
 								width: 100%;
@@ -308,6 +322,7 @@
 							img, video {
 								width: 100%;
 								border-radius: 6px;
+								
 								&[lazy="loaded"] + .loading-image {
 									display: none;
 								}

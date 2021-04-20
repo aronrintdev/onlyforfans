@@ -70,7 +70,7 @@
                       <b-dropdown-divider></b-dropdown-divider>
                       <b-dropdown-item class="block-item" disabled>Restrict @{{ selectedUser.profile.username }}</b-dropdown-item>
                       <b-dropdown-item @click="showBlockModal" class="block-item">Block @{{ selectedUser.profile.username }}</b-dropdown-item>
-                      <b-dropdown-item class="block-item">Report @{{ selectedUser.profile.username }}</b-dropdown-item>
+                      <b-dropdown-item disabled class="block-item">Report @{{ selectedUser.profile.username }}</b-dropdown-item>
                     </b-dropdown>
                   </div>
                   <div class="details message-search" v-if="messageSearchVisible">
@@ -112,7 +112,7 @@
                                 {{ getLogoFromName(selectedUser.name) }}
                               </div>
                               <div class="user-logo" v-if="selectedUser && selectedUser.profile.avatar">
-                                <img :data-src="selectedUser.profile.avatar.filepath" alt="" />
+                                <img :src="selectedUser.profile.avatar.filepath" alt="" />
                               </div>
                               <div class="content">
                                 <template v-for="msg in message.messages">
@@ -516,6 +516,7 @@
           const message = JSON.parse(e.message);
           if (message.receiver_id === self.currentUser.id) {
             self.originMessages.unshift(message);
+            self.lastMessage = _.cloneDeep(message);
             self.offset += 1;
             self.groupMessages();
             $('.conversation-list').animate({ scrollTop: $('.conversation-list')[0].scrollHeight }, 500);
@@ -563,6 +564,7 @@
           const message = JSON.parse(e.message);
           if (message.receiver_id === self.currentUser.id) {
             self.originMessages.unshift(message);
+            self.lastMessage = _.cloneDeep(message);
             self.offset += 1;
             self.groupMessages();
             $('.conversation-list').animate({ scrollTop: $('.conversation-list')[0].scrollHeight }, 500);
@@ -631,7 +633,7 @@
       getMessages: async function() {
         this.loadingData = true;
         const user_id = this.$route.params.id;
-        const response = await this.axios.get(`/chat-messages/${user_id}?offset=${this.offset}&limit=10`);
+        const response = await this.axios.get(`/chat-messages/${user_id}?offset=${this.offset}&limit=30`);
         this.selectedUser = response.data;
         if (!this.currentUser) {
           this.currentUser = response.data.currentUser;
@@ -732,8 +734,9 @@
               this.newMessageText = undefined;
               this.sortableMedias = [];
               this.originMessages.unshift(response.data.message);
-              this.lastMessage = response.data.message;
+              this.lastMessage = _.cloneDeep(response.data.message);
               this.groupMessages();
+              $('.conversation-list').animate({ scrollTop: $('.conversation-list')[0].scrollHeight }, 500);
               this.$Lazyload.$once('loaded', function () {
                 $('.conversation-list').animate({ scrollTop: $('.conversation-list')[0].scrollHeight }, 500);
               });
@@ -745,7 +748,7 @@
           })
             .then((response) => {
               this.originMessages.unshift(response.data.message);
-              this.lastMessage = response.data.message;
+              this.lastMessage = _.cloneDeep(response.data.message);
               this.groupMessages();
               this.newMessageText = undefined;
               $('.conversation-list').animate({ scrollTop: $('.conversation-list')[0].scrollHeight }, 500);
@@ -772,7 +775,7 @@
 
         let index = this.originMessages.findIndex(message => message.id === messageId);
         while (index < 0) {
-          await this.axios.get(`/chat-messages/${user_id}?offset=${this.offset}&limit=10`).then((response) => {
+          await this.axios.get(`/chat-messages/${user_id}?offset=${this.offset}&limit=30`).then((response) => {
             this.originMessages = this.originMessages.concat(response.data.messages);
             this.offset = this.originMessages.length;
           });
@@ -820,7 +823,6 @@
         this.userCustomName = undefined;
       },
       saveCustomName: function() {
-        const self = this;
         if (this.userCustomName) {
           this.axios.post(`/chat-messages/${this.$route.params.id}/custom-name`, { name: this.userCustomName })
             .then(() => {
@@ -831,10 +833,7 @@
                   display_name: this.userCustomName,
                 }
               };
-              const newUsers = this.users.slice();
-              const index = newUsers.findIndex(user => user.profile.id === this.selectedUser.profile.id);
-              newUsers[index].profile = this.selectedUser.profile;
-              this.users = newUsers;
+              $(`.user-content.user-${this.selectedUser.profile.id} .username`).text(this.userCustomName);
               this.closeCustomNameModal();
             });
         }
