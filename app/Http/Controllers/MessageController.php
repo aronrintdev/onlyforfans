@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-use App\Models\Message;
 use App\Models\ChatThread;
 use App\Models\Timeline;
 use App\Models\User;
@@ -97,31 +96,25 @@ class MessageController extends Controller
         }
         $blockers = User::whereIn('username', $blockedUsers)->pluck('id')->toArray();
 
-        $searchText = $request->query('name');
-        $receivers = ChatThread::with(['receiver' => function($query) { 
-                    $query->where('name', 'like', '%' . $searchText . '%');
-                }
-            ])
+        $receivers = ChatThread::with(['receiver'])
             ->where('sender_id', $sessionUser->id)
             ->whereNotIn('receiver_id', $blockers)
             ->pluck('receiver_id')
             ->toArray();
         // Senders
         $senders = ChatThread::with(['sender'])
-            ->whereHas('sender', function($query) use(&$request, &$blockers) {
-                $sessionUser = $request->user();
-                $searchText = $request->query('name');
-
-                $query->where('receiver_id', $sessionUser->id)
-                    ->whereNotIn('sender_id', $blockers)
-                    ->where('username', 'like', '%' . $searchText . '%');
-            })
+            ->where('receiver_id', $sessionUser->id)
+            ->whereNotIn('sender_id', $blockers)
             ->pluck('sender_id')
             ->toArray();
         $receivers = uniq(array_merge($receivers, $senders));
 
         $userSettings = $sessionUser->settings;
 
+        $searchText = $request->query('name');
+        if (!isset($searchText)) {
+            $searchText = '';
+        }
         $contacts = array();
         foreach($receivers as $receiver) {
             $lastChatThread = ChatThread::where(function($query) use(&$request, &$receiver) {
@@ -160,10 +153,13 @@ class MessageController extends Controller
             }
             $user->username = $user->user->username;
             $user->id = $user->user->id;
-            array_push($contacts, [
-                'last_message' => $lastMessage,
-                'profile' => $user
-            ]);
+            if ((isset($user->display_name) && preg_match("/{$searchText}/i", $user->display_name)) ||
+                (isset($user->name) && preg_match("/{$searchText}/i", $user->name))) {
+                array_push($contacts, [
+                    'last_message' => $lastMessage,
+                    'profile' => $user
+                ]);
+            }
         }
 
         // SortBy
