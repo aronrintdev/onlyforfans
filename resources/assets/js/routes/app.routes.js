@@ -6,6 +6,7 @@ import ErrorViews from '@views/errors'
 import StaticPageRoutes from './staticPages.routes'
 
 import settings from '@views/settings'
+import lists from '@views/lists'
 import notifications from '@views/notifications'
 import stories from '@views/stories'
 import timelines from '@views/timelines'
@@ -17,6 +18,7 @@ import payments from '@views/payments'
 import liveChat from '@views/live-chat'
 
 import settingsRoutes from './settings.routes'
+import listRoutes from './list.routes'
 //import notificationsRoutes from './notifications.routes'
 
 export const routes = [
@@ -77,6 +79,13 @@ export const routes = [
     path: '/settings',
     component: settings.Dashboard,
     children:  settingsRoutes,
+  },
+
+  // Lists
+  {
+    path: '/lists',
+    component: lists.Dashboard,
+    children:  listRoutes,
   },
 
   // Stories
