@@ -20,6 +20,8 @@
 
             <b-card-body class="py-1">
 
+              <div class="last-seen">Last seen TBD</div>
+
               <div class="avatar-img">
                 <router-link :to="{ name: 'timeline.show', params: { slug: s.sharee.username } }">
                   <b-img thumbnail rounded="circle" class="w-100 h-100" :src="s.sharee.avatar.filepath" :alt="s.sharee.username" :title="s.sharee.name" />
@@ -44,9 +46,7 @@
                 <small v-if="s.access_level==='premium'" class="text-muted">subscribed since {{ moment(s.updated_at).format('MMM DD, YYYY') }}</small>
                 <small v-else class="text-muted">following for free since {{ moment(s.updated_at).format('MMM DD, YYYY') }}</small>
               </div>
-              <!--
-              <pre>{{ JSON.stringify(s, null, "\t") }}</pre>
-              -->
+              <!-- <pre>{{ JSON.stringify(s, null, "\t") }}</pre> -->
 
             </b-card-body>
 
@@ -93,12 +93,12 @@ export default {
     moment: moment,
     shareables: null,
     meta: null,
-    perPage: 10,
+    perPage: 9,
     currentPage: 1,
 
     sort: {
       by: null,
-      dir:  'asc',
+      dir: 'asc',
     },
 
     filters: {
@@ -115,7 +115,7 @@ export default {
         take: this.perPage,
       }
 
-      // Apply any filters
+      // Apply filters
       if (this.filters.accessLevel && this.filters.accessLevel !== 'all') {
         params.accessLevel = this.filters.accessLevel
       }

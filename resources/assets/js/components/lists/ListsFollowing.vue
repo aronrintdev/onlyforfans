@@ -20,6 +20,8 @@
 
             <b-card-body class="py-1">
 
+              <div class="last-seen">Last seen TBD</div>
+
               <div class="avatar-img">
                 <router-link :to="{ name: 'timeline.show', params: { slug: s.shareable.slug } }">
                   <b-img thumbnail rounded="circle" class="w-100 h-100" :src="s.shareable.avatar.filepath" :alt="s.shareable.slug" :title="s.shareable.name" />
@@ -40,7 +42,7 @@
               <b-button variant="outline-primary">Message</b-button>
               <b-button @click="renderTip(s.shareable)" variant="outline-success">Send Tip</b-button>
               <b-button v-if="s.access_level==='default'" @click="renderSubscribe(s.shareable)" variant="outline-info">Premium Access</b-button>
-              <b-button variant="outline-warning">Cancel</b-button>
+              <b-button @click="renderCancel(s.shareable, s.access_level)" variant="outline-warning">Cancel</b-button>
               <div>
                 <small v-if="s.access_level==='premium'" class="text-muted">subscribed since {{ moment(s.updated_at).format('MMM DD, YYYY') }}</small>
                 <small v-else class="text-muted">following for free since {{ moment(s.updated_at).format('MMM DD, YYYY') }}</small>
@@ -98,7 +100,7 @@ export default {
     moment: moment,
     shareables: null,
     meta: null,
-    perPage: 10,
+    perPage: 9,
     currentPage: 1,
 
     sort: {
@@ -168,11 +170,22 @@ export default {
     },
 
     renderSubscribe(selectedTimeline) {
-      this.$log.debug('ListsFollowing.renderSubscribe() - emit', {
-        selectedTimeline,
-      });
+      this.$log.debug('ListsFollowing.renderSubscribe() - emit', { selectedTimeline, });
       eventBus.$emit('open-modal', {
         key: 'render-subscribe',
+        data: {
+          timeline: selectedTimeline,
+        }
+      })
+    },
+
+    renderCancel(selectedTimeline, accessLevel) {
+      // normally these attributes would be passed from server, but in this context we can determine them on client-side...
+      selectedTimeline.is_following = true
+      selectedTimeline.is_subscribed = (accessLevel==='premium')
+      this.$log.debug('ListsFollowing.renderCancel() - emit', { selectedTimeline, });
+      eventBus.$emit('open-modal', {
+        key: 'render-follow',
         data: {
           timeline: selectedTimeline,
         }
@@ -194,6 +207,10 @@ export default {
 
   created() {
     this.getPagedData()
+
+    eventBus.$on('update-originator', () => {
+      this.getPagedData()
+    })
   },
 
   components: {

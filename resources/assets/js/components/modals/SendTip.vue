@@ -128,7 +128,8 @@ export default {
         toaster: 'b-toaster-top-center',
         title: 'Success!',
       })
-      eventBus.$emit('update-timeline', this.tippedTimeline.id) // update 
+      //eventBus.$emit('update-timeline', this.tippedTimeline.id) // update 
+      eventBus.$emit('update-originator')
     },
 
   },

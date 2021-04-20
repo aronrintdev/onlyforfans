@@ -80,8 +80,10 @@ export default {
         toaster: 'b-toaster-top-center',
         title: 'Success!',
       })
-      eventBus.$emit('update-timeline', this.timeline.id)
-      eventBus.$emit('update-feed') // updates feed being viewed
+      // %FIXME: this emit should be more general, as this modal may be used elsewhere
+       eventBus.$emit('update-originator')
+      //eventBus.$emit('update-timeline', this.timeline.id)
+      //eventBus.$emit('update-feed') // updates feed being viewed
     },
 
     async doSubscribe(e) {
@@ -102,6 +104,7 @@ export default {
       //   toaster: 'b-toaster-top-center',
       //   title: 'Success!',
       // })
+      // eventBus.$emit('update-originator') // %ERIK use this
       // eventBus.$emit('update-timeline', this.timeline.id)
       // eventBus.$emit('update-feed') // updates feed being viewed
     },

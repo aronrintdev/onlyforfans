@@ -132,6 +132,20 @@ body .list-component {
           padding: 0.11rem;
         }
       }
+      .last-seen {
+        color: #fff;
+        margin-left: 5.5rem;
+        font-size: 0.9rem;
+        position: absolute;
+        top: 91px;
+        /*
+        left: 0; 
+        right: 0; 
+        margin-left: auto; 
+        margin-right: auto; 
+        width: 200px;
+         */
+      }
       .card-img-top {
         overflow: hidden;
         height: 120px;
