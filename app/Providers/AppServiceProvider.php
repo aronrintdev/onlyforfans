@@ -84,6 +84,7 @@ class AppServiceProvider extends ServiceProvider
             'vaults'                 => 'App\Models\Vault',
             'vaultfolders'           => 'App\Models\Vaultfolder',
             'webhooks'               => 'App\Models\Webhook',
+            'messages'               => 'App\Models\Message',
         ]);
 
         Carbon::serializeUsing(function ($carbon) {

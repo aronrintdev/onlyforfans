@@ -15,6 +15,17 @@ class ListsController extends Controller
         $this->request = $request;
         $this->middleware('auth');
     }
+
+    function createDefaultLists($sessionUser) {
+        // Create Default Lists for current user:
+        $listNames = ['Free', 'Paid'];
+        foreach ($listNames as $name) {
+            $list = $sessionUser->userLists()->create([
+                'name' => $name,
+            ]);
+        }
+    }
+
     public function index(Request $request)
     {
         $sessionUser = $request->user();
@@ -23,6 +34,10 @@ class ListsController extends Controller
         if (!$sortDir) {
             $sortDir = 'asc';
         }
+        if (sizeof($sessionUser->userLists) === 0) {
+            $this->createDefaultLists($sessionUser);
+        }
+
         if ($sortBy === 'name') {
             $lists = Lists::with(['creator', 'users'])
                 ->where('creator_id', $sessionUser->id)
@@ -52,24 +67,21 @@ class ListsController extends Controller
                 ->where('creator_id', $sessionUser->id)
                 ->get();
         }
+        
         return $lists;
     }
     public function store(Request $request)
     {
         $sessionUser = $request->user();
-
-        try {
-            $list = $sessionUser->userLists()->create([
-                'name' => $request->input('name'),
-            ]);
-            $list->users = [];
-            return $list;
-        } catch(QueryException $e){
-            $errorCode = $e->errorInfo[1];
-            if($errorCode == '1062'){
-                return response()->json(['error' => 'Duplicate Entry'], 400);
-            }
+        $lists = $sessionUser->userLists()->where('name', $request->input('name'))->get();
+        if (sizeof($lists) > 0) {
+            return response()->json(['error' => 'Duplicate Entry'], 400);
         }
+        $list = $sessionUser->userLists()->create([
+            'name' => $request->input('name'),
+        ]);
+        $list->users = [];
+        return $list;
     }
     public function addUserToList(Request $request, $id)
     {

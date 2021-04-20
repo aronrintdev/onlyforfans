@@ -129,18 +129,13 @@ export default {
       })
 
       this.$root.$on('bv::modal::hide', (bvEvent, modalId) => {
-        console.log('Modals.vue', {
-          bvEvent,
-          modalId,
-          references: this.references,
-          refs: this.$refs,
-        })
-        if (this.references[modalId]) {
-          if (typeof this.$refs[this.references[modalId]].modalHide === 'function') { // <<<==
+        if (this.references[modalId] && this.$refs[this.references[modalId]]) {
+          if (typeof this.$refs[this.references[modalId]].modalHide === 'function') {
             this.$refs[this.references[modalId]].modalHide(bvEvent)
           }
         }
       })
+
     },
   },
 

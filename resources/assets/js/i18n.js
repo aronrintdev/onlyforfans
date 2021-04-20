@@ -19,8 +19,39 @@ function loadLocaleMessages() {
   return messages;
 }
 
+const numberFormats = {
+  'en-US': {
+    currency: {
+      style: 'currency',
+      currency: 'USD',
+    },
+  },
+}
+
+/**
+ * Number parser
+ */
+window.parseNumber = function parseNumber(value, locales = navigator.languages) {
+  if (typeof value === 'number') {
+    return value
+  }
+  const example = Intl.NumberFormat(locales).format('1.1');
+  const cleanPattern = new RegExp(`[^-+0-9${ example.charAt( 1 ) }]`, 'g');
+  const cleaned = value.replace(cleanPattern, '');
+  const normalized = cleaned.replace(example.charAt(1), '.');
+
+  return parseFloat(normalized);
+}
+
+Vue.mixin({
+  methods: {
+    $parseNumber: window.parseNumber,
+  }
+});
+
 export default new VueI18n({
   locale: process.env.VUE_APP_I18N_LOCALE || 'en',
   fallbackLocale: process.env.VUE_APP_I18N_FALLBACK_LOCALE || 'en',
+  numberFormats,
   messages: loadLocaleMessages(),
 });

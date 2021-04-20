@@ -10,6 +10,7 @@ class MediafileTypeEnum extends SmartEnum implements Selectable {
     const POST = 'post';
     const STORY = 'story';
     const VAULT = 'vault';
+    const GALLERY = 'gallery';
 
     public static $keymap = [
         self::AVATAR => 'Avatar',
@@ -17,6 +18,7 @@ class MediafileTypeEnum extends SmartEnum implements Selectable {
         self::POST => 'Post',
         self::STORY => 'Story',
         self::VAULT => 'Vault',
+        self::GALLERY => 'Gallery',
     ];
 
     public static function getSubfolder($mftype) {
@@ -27,6 +29,8 @@ class MediafileTypeEnum extends SmartEnum implements Selectable {
             return 'stories';
         case MediafileTypeEnum::POST:
             return 'posts';
+        case MediafileTypeEnum::GALLERY:
+            return 'gallery';
         default:
             return 'default';
         }

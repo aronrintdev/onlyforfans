@@ -3,31 +3,30 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Traits\UsesUuid;
 
 class Message extends Model
 {
+    use UsesUuid;
     /**
      * The attributes that are mass assignable.
      *
      * @var array
      */
-    protected $fillable = ['message', 'receiver_id', 'receiver_name', 'is_unread', 'media_id'];
+    protected $fillable = ['mcontent', 'mcounter', 'is_unread'];
 
     /**
      * A message belong to a user
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function user()
+    public function messagable()
     {
-        return $this->belongsTo(User::class);
+        return $this->morphTo();
     }
-    public function receiver()
+
+    public function mediafile()
     {
-        return $this->belongsTo(User::class, 'receiver_id');
-    }
-    public function media()
-    {
-        return $this->belongsTo(Mediafile::class, 'media_id');
+        return $this->morphOne(Mediafile::class, 'resource');
     }
 }

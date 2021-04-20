@@ -244,6 +244,12 @@
 					white-space: nowrap;
 					flex: 1;
 					margin-right: 10px;
+
+					.media-icon {
+						width: 16px;
+						height: 16px;
+						fill: currentColor;
+					}
 				}
 				.last-message-date {
 					font-size: 14px;

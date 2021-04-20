@@ -151,12 +151,16 @@
       width: 100%;
     }
   }
-  img {
+  .swiper-lazy {
     height: 144px;
     border-radius: 10px;
     margin-right: 8px;
     width: auto;
     object-fit: contain;
+  }
+  audio.swiper-lazy {
+    width: 300px;
+    outline: none;
   }
   .slider-btn {
     cursor: pointer;

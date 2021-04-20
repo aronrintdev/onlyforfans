@@ -146,6 +146,12 @@ export const routes = [
     component: posts.Show,
     props: true,
   },
+  {
+    name: 'posts.edit',
+    path: '/posts/:slug/edit',
+    component: posts.Edit,
+    props: true,
+  },
 
 
   /**

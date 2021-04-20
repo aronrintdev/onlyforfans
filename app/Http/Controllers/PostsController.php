@@ -13,12 +13,12 @@ use App\Notifications\TipReceived;
 use App\Notifications\ResourcePurchased;
 use App\Models\Bookmark;
 use App\Models\Post;
+use App\Rules\InEnum;
 use App\Models\Comment;
 use App\Models\Timeline;
 use App\Models\Mediafile;
 use App\Enums\PostTypeEnum;
 use App\Enums\PaymentTypeEnum;
-
 class PostsController extends AppBaseController
 {
     public function index(Request $request)
@@ -101,8 +101,39 @@ class PostsController extends AppBaseController
     public function update(Request $request, Post $post)
     {
         $this->authorize('update', $post);
-        $post->fill($request->only([ 'description' ])); // %TODO
+
+        $request->validate([
+            'description' => 'required',
+            'type' => [ 'sometimes', 'required', new InEnum(new PostTypeEnum()) ],
+            'price' => 'sometimes|required|integer',
+            'mediafiles' => 'array',
+            'mediafiles.*.*' => 'integer|uuid|exists:mediafiles',
+        ]);
+
+
+        $post->fill($request->only([
+            'description',
+        ])); // %TODO
+
+        if ($request->has('type')) {
+            $post->type = $request->type;
+        }
+
+        if ($request->has('price')) {
+            if ($request->price !== $post->price) {
+                $post->price = $request->price;
+            }
+        }
+
+        if ($request->has('mediafiles')) {
+            foreach ($request->mediafiles as $mfID) {
+                $cloned = Mediafile::find($mfID)->doClone('posts', $post->id);
+                $post->mediafiles()->save($cloned);
+            }
+        }
+
         $post->save();
+
         return response()->json([
             'post' => $post,
         ]);
