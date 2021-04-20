@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!isLoading">
+  <div v-if="!isLoading" class="list-component tag-followers">
     <b-card>
 
       <b-row>
@@ -59,7 +59,7 @@
           <b-card no-body class="background mb-5">
             <b-card-img :src="s.sharee.cover.filepath" alt="s.sharee.username" top></b-card-img>
 
-            <b-card-body>
+            <b-card-body class="py-1">
 
               <div class="avatar-img">
                 <router-link :to="{ name: 'timeline.show', params: { slug: s.sharee.username } }">
@@ -68,10 +68,10 @@
               </div>
 
               <div class="sharee-id">
-                <b-card-title class="mb-2">
+                <b-card-title class="mb-1">
                   <router-link :to="{ name: 'timeline.show', params: { slug: s.sharee.username } }">{{ s.sharee.name }}</router-link>
                 </b-card-title>
-                <b-card-sub-title class="mb-2">
+                <b-card-sub-title class="mb-1">
                   <router-link :to="{ name: 'timeline.show', params: { slug: s.sharee.username } }">@{{ s.sharee.username }}</router-link>
                 </b-card-sub-title>
               </div>
@@ -110,6 +110,7 @@
 
 <script>
 //import Vuex from 'vuex';
+import { eventBus } from '@/app'
   //import { DateTime } from 'luxon'
 import moment from 'moment'
 
@@ -174,65 +175,5 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.card {
-  .card-body {
-    padding-top: 0.6rem;
-    padding-bottom: 0.6rem;
-  }
-
-
-  .card-title a {
-    color: #4a5568;
-    text-decoration: none;
-  }
-  .card-subtitle a {
-    color: #6e747d;
-    text-decoration: none;
-  }
-
-  &.background {
-    position: relative;
-    .avatar-details {
-      margin-left: 58px;
-    }
-    .sharee-id {
-      margin-left: 5.5rem;
-    }
-    .avatar-img {
-      position: absolute;
-      left: 8px;
-      top: 90px; /* bg image height - 1/2*avatar height */
-      width: 90px;
-      height: 90px;
-
-      .rounded-circle.img-thumbnail {
-        padding: 0.11rem;
-      }
-    }
-    .card-img-top {
-      overflow: hidden;
-      height: 120px;
-    }
-  }
-
-  .avatar-details {
-    h2.avatar-name {
-      font-size: 16px;
-      & > a {
-        color: #4a5568;
-        text-decoration: none;
-        text-transform: capitalize;
-      }
-    }
-
-    .avatar-mail  {
-      font-size: 14px;
-      & > a {
-        color: #7F8FA4;
-        text-decoration: none;
-      }
-    }
-  }
-}
 </style>
 
