@@ -186,6 +186,7 @@
     props: {
       selectedUser: undefined,
       proplists: Array,
+      last_thread: undefined,
     },
     data: () => ({
       userSearchText: undefined,
@@ -237,6 +238,20 @@
       proplists: function(newVal) {
         this.lists = newVal.slice();
         this.pinnedLists = newVal.filter(list => list.isPinned);
+      },
+      last_thread: function(newVal) {
+        if (newVal) {
+          
+          const index = this.users.findIndex(user => user.profile.id === this.selectedUser.profile.id);
+          const user = this.users[index];
+          let hasMediafile = false;
+          if (newVal.messages[0].mediafile) {
+            hasMediafile = true;
+          }
+          user.last_message = newVal.messages.pop();
+          user.last_message.hasMediafile = hasMediafile;
+          this.users = [...this.users];
+        }
       }
     },
     computed: {
