@@ -337,7 +337,7 @@ class MessageController extends Controller
         $messages = [];
         $filter = $request->query('query');
         $chatthreads->each(function($thread) use(&$messages, &$filter) {
-            $messages += $thread->messages()->where('mcontent', 'like', '%'.$filter.'%')->get()->toArray();
+            $messages = array_merge($messages, $thread->messages()->where('mcontent', 'like', '%'.$filter.'%')->get()->toArray());
         });
         $messages = orderBy($messages, ['created_at'], ['desc']);
         $messages = array_map(function($message) {

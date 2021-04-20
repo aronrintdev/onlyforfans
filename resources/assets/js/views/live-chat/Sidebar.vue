@@ -100,7 +100,7 @@
         :class="selectedUser && selectedUser.profile.id === user.profile.id ? 'selected' : ''"
       >
         <router-link :to="`/messages/${user.profile.id}`">
-          <div class="user-content">
+          <div class="user-content" :class="`user-${user.profile.id}`">
             <div class="user-logo text-logo" v-if="!user.profile.avatar">
               {{ getLogoFromName(user.profile.name) }}
               <span :class="`status-holder status-holder-${user.profile.id}`"></span>
