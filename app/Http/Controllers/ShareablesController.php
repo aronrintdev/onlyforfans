@@ -33,7 +33,7 @@ class ShareablesController extends AppBaseController
         // Check permissions
         if ( !$request->user()->isAdmin() ) {
 
-// %TODO : filter for session user only!! (aslo for likes)
+            // %TODO : filter for session user only!! (aslo for likes)
 
             // non-admin: only view own...
             //$query->where('user_id', $request->user()->id); 
@@ -44,16 +44,16 @@ class ShareablesController extends AppBaseController
                 //[Post::class, Timeline::class, Mediafile::class],
                 function (Builder $q1, $type) use(&$request) {
                     switch ($type) {
-                        case Post::class:
-                        case Timeline::class:
-                            $column = 'user_id';
-                            break;
-                        case Mediafile::class:
-                            throw new Exception('Mediafile shareables.index TBD');
-                            $column = 'user_id';
-                            break;
-                        default:
-                            throw new Exception('Invalid morphable type for Shareable: '.$type);
+                    case Post::class:
+                    case Timeline::class:
+                        $column = 'user_id';
+                        break;
+                    case Mediafile::class:
+                        throw new Exception('Mediafile shareables.index TBD');
+                        $column = 'user_id';
+                        break;
+                    default:
+                        throw new Exception('Invalid morphable type for Shareable: '.$type);
                     }
                     $q1->where($column, $request->user()->id);
                 }
@@ -71,6 +71,37 @@ class ShareablesController extends AppBaseController
         $data = $query->paginate( $request->input('take', env('MAX_DEFAULT_PER_REQUEST', 10)) );
         return new ShareableCollection($data);
     }
+
+    // list of users/timelines following session user
+    public function indexFollowers(Request $request)
+    {
+        $sessionUser = $request->user();
+        $sessionTimeline = $sessionUser->timeline;
+        $query = ShareableModel::with(['sharee', 'shareable']);
+        /*
+        $query->whereHasMorph( 'shareable', [Timeline::class], function (Builder $q1, $type) use(&$request) {
+            $q1->where('user_id', $request->user()->id);
+        });
+         */
+        $query->where('shareable_type', 'timelines');
+        $query->where('shareable_id', $sessionTimeline->id);
+        $data = $query->paginate( $request->input('take', env('MAX_DEFAULT_PER_REQUEST', 10)) );
+        return new ShareableCollection($data);
+    }
+
+    // list of users/timelines followed by session user
+    public function indexFollowing(Request $request)
+    {
+        $sessionUser = $request->user();
+        $sessionTimeline = $sessionUser->timeline;
+        $query = ShareableModel::with(['sharee', 'shareable.avatar', 'shareable.cover']);
+        $query->where('shareable_type', 'timelines');
+        $query->where('sharee_id', $sessionUser->id);
+        $data = $query->paginate( $request->input('take', env('MAX_DEFAULT_PER_REQUEST', 10)) );
+        return new ShareableCollection($data);
+    }
+
+
     /*
     public function index(Request $request)
     {

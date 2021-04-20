@@ -14,6 +14,8 @@ class Shareable extends JsonResource
         return [
             //'id' => $this->id,
             'shareable_id' => $this->shareable_id,
+            'is_approved' => $this->is_approved,
+            'access_level' => $this->access_level,
             'shareable_type' => $this->shareable_type,
             'sharee_id' => $this->sharee_id,
             'sharee' => $this->whenLoaded('sharee'),
