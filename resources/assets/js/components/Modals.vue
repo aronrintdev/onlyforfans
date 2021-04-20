@@ -52,9 +52,9 @@
 </template>
 
 <script>
-/**
- * Container for base modals
- */
+// Container for base modals
+// %PSG: %NOTE %FIXME - not sure if refactoring all modals into a single component was the best idea, as it's possible
+// one or more of the indiviudal modals could be used elsewhere in the app outside of timelines (eg, following list)
 import Vuex from 'vuex';
 import { eventBus } from '@/app'
 import FollowTimeline from '@components/modals/FollowTimeline.vue'
@@ -75,7 +75,7 @@ export default {
   },
 
   computed: {
-    ...Vuex.mapState([ 'session_user', 'timeline', ])
+    ...Vuex.mapState([ 'session_user', 'timeline', ]) // %TODO: may be able to drop timeline here (?)
   },
 
   data: () => ({
@@ -135,6 +135,7 @@ export default {
           }
         }
       })
+
     },
   },
 

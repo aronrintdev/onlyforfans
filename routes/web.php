@@ -138,6 +138,8 @@ Route::group(['middleware' => ['auth']], function () {
     Route::resource('stories', 'StoriesController', [ 'except' => [ 'create', 'edit', ] ]);
 
     // -- shareables:  --
+    Route::get('/shareables/indexFollowers', ['as' => 'shareables.indexFollowers', 'uses' => 'ShareablesController@indexFollowers']);
+    Route::get('/shareables/indexFollowing', ['as' => 'shareables.indexFollowing', 'uses' => 'ShareablesController@indexFollowing']);
     Route::resource('shareables', 'ShareablesController', [
         'only' => [ 'index', ],
     ]);
