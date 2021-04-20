@@ -16,6 +16,7 @@ use App\Models\Traits\UsesShortUuid;
 use App\Models\Financial\Transaction;
 use App\Models\Traits\SluggableTraits;
 use App\Enums\ShareableAccessLevelEnum;
+use App\Interfaces\Subscribable;
 use App\Interfaces\Tippable;
 use App\Models\Casts\Money;
 use App\Models\Financial\Traits\HasCurrency;
@@ -47,7 +48,7 @@ use Money\Currencies\ISOCurrencies;
  *
  * @package App\Models
  */
-class Timeline extends Model implements Tippable, Reportable
+class Timeline extends Model implements Subscribable, Tippable, Reportable
 {
     use SoftDeletes,
         HasFactory,
@@ -178,19 +179,10 @@ class Timeline extends Model implements Tippable, Reportable
         return $result ?? null;
     }
 
-    public function grantAccess(User $user, string $accessLevel, $cattrs = [], $meta = []): void
-    {
-        //
-    }
-    public function revokeAccess(User $user, $cattrs = [], $meta = []): void
-    {
-        //
-    }
+    #endregion Purchasable
 
-    public function getOwnerAccount(string $system, string $currency): Account
-    {
-        return $this->owner->getInternalAccount($system, $currency);
-    }
+    /* ---------------------------- Subscribable ---------------------------- */
+    #region Subscribable
 
     public function verifyPrice($amount): bool
     {
@@ -203,7 +195,13 @@ class Timeline extends Model implements Tippable, Reportable
         return "Timeline of {$this->name}";
     }
 
-    #endregion
+    public function getOwnerAccount(string $system, string $currency): Account
+    {
+        return $this->getOwner()->first()->getInternalAccount($system, $currency);
+    }
+
+    #endregion Subscribable
+
 
     // Is the user provided following my timeline (includes either premium or default)
     public function isUserFollowing(User $user): bool

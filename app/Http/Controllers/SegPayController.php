@@ -76,7 +76,7 @@ class SegPayController extends Controller
      * @param Request $request
      * @return string
      */
-    public function generateTipPayPageUre(Request $request)
+    public function generateTipPayPageUrl(Request $request)
     {
         if (isset($request->item)) {
             $item = TippableHelpers::getTippableItem($request->item);

@@ -155,7 +155,7 @@ export default {
       this.formValidate().then(() => {
         this.loadSegPaySdk().then(() => {
           if (this.sessionId === 'faked') {
-            this.axios.post(route('payments.segpay.fake'), {
+            this.axios.post(this.$apiRoute('payments.segpay.fake'), {
               item: this.value.id,
               type: this.type,
               price: this.price,

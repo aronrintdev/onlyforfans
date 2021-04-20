@@ -2,19 +2,23 @@
 
 namespace App\Models\Financial;
 
+use LogicException;
 use App\Interfaces\Ownable;
-use App\Models\Casts\Money;
 
+use App\Models\Casts\Money;
+use App\Models\Subscription;
 use App\Events\ItemPurchased;
+
 use App\Interfaces\PricePoint;
 use Illuminate\Support\Carbon;
-
 use App\Models\Traits\UsesUuid;
 use App\Interfaces\Purchaseable;
+use App\Interfaces\Subscribable;
 use App\Interfaces\HasPricePoints;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use App\Models\Traits\OwnableTraits;
+use App\Enums\SubscriptionPeriodEnum;
 use App\Jobs\CreateTransactionSummary;
 use Illuminate\Support\Facades\Config;
 use App\Enums\ShareableAccessLevelEnum;
@@ -23,16 +27,19 @@ use App\Models\Financial\Traits\HasSystem;
 use App\Enums\Financial\TransactionTypeEnum;
 use App\Jobs\Financial\UpdateAccountBalance;
 use App\Models\Financial\Traits\HasCurrency;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Enums\Financial\TransactionSummaryTypeEnum;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\InvalidCastException;
 use App\Models\Financial\Exceptions\AlreadyPurchasedException;
+use App\Models\Financial\Exceptions\AlreadySubscribedException;
 use App\Models\Financial\Exceptions\InvalidPaymentAmountException;
 use App\Models\Financial\Exceptions\Account\IncorrectTypeException;
 use App\Models\Financial\Exceptions\InvalidTransactionAmountException;
 use App\Models\Financial\Exceptions\Account\InsufficientFundsException;
+use App\Models\Financial\Exceptions\InvalidSubscriptionAmountException;
 use App\Models\Financial\Exceptions\TransactionAccountMismatchException;
 use App\Models\Financial\Exceptions\Account\TransactionNotAllowedException;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Financial Account Model
@@ -460,7 +467,12 @@ class Account extends Model implements Ownable
      * @param int|Money|PricePoint $payment
      * @return Collection
      */
-    public function purchase(Purchaseable $purchaseable, $payment, $purchaseLevel = ShareableAccessLevelEnum::PREMIUM, $customAttributes = []): Collection
+    public function purchase(
+        Purchaseable $purchaseable,
+        $payment,
+        $purchaseLevel = ShareableAccessLevelEnum::PREMIUM,
+        $customAttributes = []
+    ): Collection
     {
         // Prevent purchasing more than once
         if ($purchaseable->checkAccess($this->getOwner()->first(), $purchaseLevel) === true) {
@@ -511,6 +523,76 @@ class Account extends Model implements Ownable
         ItemPurchased::dispatch($purchaseable, $this->getOwner()->first());
 
         return $transactions;
+    }
+
+    /**
+     * Creates a new subscription and makes initial charge
+     *
+     * @param Subscribable $subscribable
+     * @param int|Money $payment
+     * @param array $options
+     * @return Collection
+     *
+     * @throws AlreadySubscribedException
+     * @throws InvalidCastException
+     * @throws LogicException
+     */
+    public function createSubscription(
+        Subscribable $subscribable,
+        $payment,
+        $options = []
+    ): Collection
+    {
+        // Check if already subscribed.
+        if (
+            Subscription::where('user_id', $this->getOwner()->first()->getKey())
+                ->where('subscribable_id', $subscribable->getKey())
+                ->where('subscribable_type', $subscribable->getMorphString())
+                ->where('active', true)
+                ->count() > 0
+        ) {
+            throw new AlreadySubscribedException($subscribable, $this->getOwner()->first());
+        }
+
+        // Check price
+        $payment = $this->asMoney($payment);
+        if ($subscribable->verifyPrice($payment) === false) {
+            throw new InvalidSubscriptionAmountException($this, $payment, $subscribable);
+        }
+
+        // Create Subscription Model
+        $subscription = Subscription::create([
+            'subscribable_id'   => $subscribable->getKey(),
+            'subscribable_type' => $subscribable->getMorphString(),
+            'user_id'           => $this->getOwner()->first()->getKey(),
+            'account_id'        => $this->getKey(),
+            'manual_charge'     => $options['manual_charge'] ?? true,
+            'period'            => $options['period'] ?? SubscriptionPeriodEnum::MONTHLY,
+            'period_interval'   => $options['period_interval'] ?? 1,
+            'price'             => $payment->getAmount(),
+            'currency'          => $this->currency,
+            'active'            => true,
+            'access_level'      => $options['access_level'] ?? ShareableAccessLevelEnum::PREMIUM,
+            'custom_attributes' => $options['custom_attributes'] ?? null,
+            'metadata'          => $options['metadata'] ?? null,
+        ]);
+
+        // Make transaction
+        $transactions = $subscription->process();
+
+        if ($transactions) {
+            $subscribable->grantAccess(
+                $this->getOwner()->first(),
+                $options['access_level'] ?? ShareableAccessLevelEnum::PREMIUM,
+                $options['access_cattrs'] ?? [],
+                $options['access_meta'] ?? [],
+            );
+        }
+
+        return new Collection([
+            'subscription' => $subscription,
+            'transactions' => $transactions,
+        ]);
     }
 
     /**

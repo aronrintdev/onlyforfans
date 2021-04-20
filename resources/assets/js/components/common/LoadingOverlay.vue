@@ -3,7 +3,7 @@
     <slot>
       <div class="d-flex flex-column align-items-center">
         <fa-icon icon="spinner" spin size="2x" fixed-width class="mb-3" />
-        <div class="text-center" v-text="$t('Loading')" />
+        <div class="text-center" v-text="text || $t('Loading')" />
       </div>
 
     </slot>
@@ -15,7 +15,8 @@ export default {
   name: 'LoadingOverlay',
 
   props: {
-    loading: { type: Boolean, default: false}
+    loading: { type: Boolean, default: false},
+    text: { type: String, default: null },
   },
 }
 </script>

@@ -2,12 +2,19 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\Financial\AccountTypeEnum;
-use App\Http\Resources\PaymentMethodCollection;
-use App\Models\Financial\Account;
-use Illuminate\Auth\Access\AuthorizationException;
+use App\Rules\InEnum;
 use Illuminate\Http\Request;
+use App\Enums\PaymentTypeEnum;
+use App\Jobs\FakeSegpayPayment;
+use App\Models\Financial\Account;
+use App\Models\Financial\SegpayCard;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Config;
+use App\Enums\Financial\AccountTypeEnum;
+use App\Helpers\Tippable as TippableHelpers;
+use App\Http\Resources\PaymentMethodCollection;
+use App\Helpers\Purchasable as PurchasableHelpers;
+use Illuminate\Auth\Access\AuthorizationException;
 
 class PaymentsController extends Controller
 {
@@ -68,6 +75,41 @@ class PaymentsController extends Controller
             $account->resource->delete();
         }
         $account->delete();
+    }
+
+    public function purchase(Request $request)
+    {
+        $request->validate([
+            'item' => 'required|uuid',
+            'type' => [ 'required', new InEnum(new PaymentTypeEnum()) ],
+            'price' => 'required|integer',
+            'currency' => 'required',
+            'method' => 'required|uuid|exists:financial_accounts,id',
+        ]);
+
+        // Get payment account
+        $account = Account::find($request->method);
+
+        // Get payment item
+        if ($request->type === PaymentTypeEnum::PURCHASE) {
+            $item = PurchasableHelpers::getPurchasableItem($request->item);
+        } else if ($request->type === PaymentTypeEnum::TIP) {
+            $item = TippableHelpers::getTippableItem($request->item);
+        } else if ($request->type === PaymentTypeEnum::SUBSCRIPTION) {
+            //
+        }
+
+        if (get_class($account->resource) == SegpayCard::class) {
+            if (Config::get('segpay.fake') && Config::get('app.env') != 'production') {
+                // Dispatch Event
+                FakeSegpayPayment::dispatch($item, $account, $request->type, $request->price);
+                return;
+            }
+
+            // Call Segpay Api Here
+            $account->resource->token;
+        }
+
     }
 
 }

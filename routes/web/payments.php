@@ -12,6 +12,8 @@ Route::group(['prefix' => '/payment'], function () {
         Route::post('/fake', 'SegPayController@fake')->name('payments.segpay.fake');
     });
 
+    Route::post('/purchase', 'PaymentsController@purchase')->name('payments.purchase');
+
     Route::get('/methods/index', 'PaymentsController@index')->name('payment.methods.index');
     Route::put('/methods/default', 'PaymentsController@setDefault')->name('payment.methods.setDefault');
     Route::delete('/method', 'PaymentsController@remove')->name('payment.methods.remove');
