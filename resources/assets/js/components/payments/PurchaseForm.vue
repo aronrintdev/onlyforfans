@@ -1,5 +1,5 @@
 <template>
-  <div class="position-relative">
+  <div>
     <b-skeleton-wrapper :loading="loading">
       <template #loading>
         <div class="w-100 my-5 d-flex align-items-center justify-content-center">
@@ -11,6 +11,7 @@
       <SavedPaymentMethodList
         class="mb-3"
         :selected="selectedPaymentMethod"
+        collapse
         @loadNewForm="loadNewForm"
         @loadPayWithForm="loadPayWithForm"
       />
