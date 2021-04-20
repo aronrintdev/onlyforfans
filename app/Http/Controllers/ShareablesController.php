@@ -125,11 +125,40 @@ class ShareablesController extends AppBaseController
     // list of users/timelines followed by session user
     public function indexFollowing(Request $request)
     {
+        $request->validate([
+            // filters
+            'accessLevel' => 'string|in:default,premium',
+            //'onlineStatus' => 'string|in: default, premium',
+            //'sharee_id' => 'uuid|exists:users,id', // if admin only
+        ]);
         $sessionUser = $request->user();
         $sessionTimeline = $sessionUser->timeline;
-        $query = ShareableModel::with(['sharee', 'shareable.avatar', 'shareable.cover']);
+
+        $query = ShareableModel::with(['sharee', 'shareable.avatar', 'shareable.cover']); // init
         $query->where('shareable_type', 'timelines');
         $query->where('sharee_id', $sessionUser->id);
+
+        // Apply any filters
+        if ( $request->has('accessLevel') ) {
+            $query->where('access_level', $request->accessLevel);
+        }
+        /*
+        if ( $request->has('onlineStatus') ) {
+            $query->where('access_level', $request->onlineStatus);
+        }
+         */
+
+        $sortBy = (function($k) { // map to table columns
+            switch ($k) {
+            case 'start_date':
+                return 'created_at';
+            case 'name':
+                return 'slug';
+            default:
+                return $k;
+            }
+        })( $request->input('sortBy', 'default') );
+        $query->sort( $sortBy, ($request->sortDir==='asc' ?? 'desc') );
         $data = $query->paginate( $request->input('take', env('MAX_DEFAULT_PER_REQUEST', 10)) );
         return new ShareableCollection($data);
     }

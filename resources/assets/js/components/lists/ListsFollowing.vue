@@ -11,7 +11,7 @@
 
       <hr />
 
-      <CtrlBar />
+      <CtrlBar @apply-filters="applyFilters($event)" />
 
       <b-row class="mt-3">
         <b-col lg="4" v-for="(s,idx) in shareables" :key="s.id" >
@@ -101,30 +101,70 @@ export default {
     perPage: 10,
     currentPage: 1,
 
-    sortBy: null,
-    sortDir:  'asc',
-    accessLevel: 'all',
-    onlineStatus: 'all',
+    sort: {
+      by: null,
+      dir: 'asc',
+    },
+
+    filters: {
+      accessLevel: 'all', // %TODO: change default ('all') to null
+      onlineStatus: 'all',
+    },
   }),
 
   methods: {
     getPagedData(type=null) {
+
       const params = {
         page: this.currentPage, 
         take: this.perPage,
       }
-      if (this.filter && this.filter!=='none') {
-        params.type = this.filterToType // PostTipped, etc
+
+      // Apply filters
+      if (this.filters.accessLevel && this.filters.accessLevel !== 'all') {
+        params.accessLevel = this.filters.accessLevel
       }
+      if (this.filters.onlineStatus && this.filters.onlineStatus !== 'all') {
+        params.onlineStatus = this.filters.onlineStatus
+      }
+
+      // Apply sort
+      if (this.sort.by) {
+        params.sortBy = this.sort.by
+      }
+      if (this.sort.dir) {
+        params.sortDir = this.sort.dir
+      }
+
       axios.get( route('shareables.indexFollowing'), { params } ).then( response => {
         this.shareables = response.data.data
         this.meta = response.data.meta
       })
     },
 
+    // may adjust filters, but always reloads from page 1
+    reloadFromFirstPage() {
+      this.doReset()
+      this.getPagedData()
+    },
+
+    applyFilters({ filters, sort }) {
+      console.log('ListsFollowers', { 
+        filters,
+        sort,
+      })
+      this.filters = filters
+      this.sort = sort
+      this.reloadFromFirstPage()
+    },
+
     pageClickHandler(e, page) {
       this.currentPage = page
       this.getPagedData()
+    },
+
+    doReset() {
+      this.currentPage = 1
     },
 
     renderSubscribe(selectedTimeline) {

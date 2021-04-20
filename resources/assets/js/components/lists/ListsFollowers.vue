@@ -141,9 +141,6 @@ export default {
     reloadFromFirstPage() {
       this.doReset()
       this.getPagedData()
-      //sortBy: this.sortPostsBy, 
-      //hideLocked: this.hideLocked, 
-      //hidePromotions: this.hidePromotions,
     },
 
     applyFilters({ filters, sort }) {
