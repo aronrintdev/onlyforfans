@@ -98,6 +98,7 @@ export default {
     currency: { type: String, default: 'USD' },
     /** Type of transaction: `'purchase' | 'subscription' | 'tip'` */
     type: { type: String, default: 'purchase' },
+    extra: { type: Object, default: () => ({})},
   },
 
   computed: {
@@ -155,15 +156,17 @@ export default {
       this.formValidate().then(() => {
         this.loadSegPaySdk().then(() => {
           if (this.sessionId === 'faked') {
-            this.axios.post(route('payments.segpay.fake'), {
+            this.axios.post(this.$apiRoute('payments.segpay.fake'), {
               item: this.value.id,
               type: this.type,
               price: this.price,
               currency: this.currency,
               last_4: this.form.card.number.slice(-4),
               brand: this.$refs.brandIcon.brand,
+              extra: this.extra,
             })
             this.$emit('success', 'faked')
+            this.$emit('processing')
             this.processing = true
             return
           }
@@ -188,6 +191,7 @@ export default {
               break;
               case 'Success':
                 this.$emit('success', result.purchases)
+                this.$emit('processing')
                 this.processing = true
               break;
             }

@@ -18,52 +18,55 @@
           />
         </b-list-group>
       </b-col>
-      <b-col lg="6" v-if="selectedItem" class="d-flex align-items-stretch">
-        <b-card class="w-100" :body-class="`d-flex justify-content-between ${mobile ? 'flex-column': ''}`">
-          <div class="d-flex flex-column">
-            <SavedPaymentMethod
-              :as="'div'"
-              :value="selectedItem"
-              :selectable="false"
-              class="align-self-start"
-            />
-            <div v-if="defaultMethod === selected" class="mt-3" v-text="$t('IsYouDefault')" />
-          </div>
+      <transition name="quick-fade" mode="out-in">
+        <b-col lg="6" v-if="selectedItem" class="d-flex align-items-stretch" :key="selectedItem ? selectedItem.id : 'none'">
+          <b-card class="w-100" :body-class="`d-flex justify-content-between ${mobile ? 'flex-column': ''}`">
+            <div class="d-flex flex-column">
+              <SavedPaymentMethod
+                :as="'div'"
+                :value="selectedItem"
+                :selectable="false"
+                class="align-self-start"
+              />
+              <div v-if="defaultMethod === selected" class="mt-3" v-text="$t('IsYouDefault')" />
+            </div>
 
-          <b-row v-if="mobile">
-            <b-col xl class="mt-3">
+            <b-row v-if="mobile">
+              <b-col xl class="mt-3">
+                <b-btn
+                  block
+                  :variant="defaultMethod === selected ? 'info' :'outline-info'"
+                  class="py-3"
+                  @click="onSetDefault"
+                >
+                  <fa-icon fixed-width icon="star" size="lg" />
+                  <span v-if="mobile" v-text="$t('SetAsDefaultButton')" @click="onSetDefault" />
+                </b-btn>
+              </b-col>
+              <b-col xl class="mt-3">
+                <b-btn block variant="outline-danger" class="py-3" @click="onTrash">
+                  <fa-icon fixed-width icon="trash" size="lg" />
+                  <span v-if="mobile" v-text="$t('RemoveButton')" />
+                </b-btn>
+              </b-col>
+            </b-row>
+            <div v-else class="d-flex flex-column justify-content-around">
               <b-btn
-                block
                 :variant="defaultMethod === selected ? 'info' :'outline-info'"
-                class="py-3"
+                class="py-3 my-2"
+                v-b-tooltip="$t('SetAsDefaultButton')"
                 @click="onSetDefault"
               >
                 <fa-icon fixed-width icon="star" size="lg" />
-                <span v-if="mobile" v-text="$t('SetAsDefaultButton')" @click="onSetDefault" />
               </b-btn>
-            </b-col>
-            <b-col xl class="mt-3">
-              <b-btn block variant="outline-danger" class="py-3" @click="onTrash">
+              <b-btn variant="outline-danger" class="py-3 my-2" v-b-tooltip="$t('RemoveButton')" @click="onTrash">
                 <fa-icon fixed-width icon="trash" size="lg" />
-                <span v-if="mobile" v-text="$t('RemoveButton')" />
               </b-btn>
-            </b-col>
-          </b-row>
-          <div v-else class="d-flex flex-column justify-content-around">
-            <b-btn
-              :variant="defaultMethod === selected ? 'info' :'outline-info'"
-              class="py-3 my-2"
-              v-b-tooltip="$t('SetAsDefaultButton')"
-              @click="onSetDefault"
-            >
-              <fa-icon fixed-width icon="star" size="lg" />
-            </b-btn>
-            <b-btn variant="outline-danger" class="py-3 my-2" v-b-tooltip="$t('RemoveButton')" @click="onTrash">
-              <fa-icon fixed-width icon="trash" size="lg" />
-            </b-btn>
-          </div>
-        </b-card>
-      </b-col>
+            </div>
+          </b-card>
+        </b-col>
+      </transition>
+      
     </b-row>
     <b-modal
       v-model="trashConfirmation"

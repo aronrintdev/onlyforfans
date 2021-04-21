@@ -131,31 +131,6 @@ class ShareablesTableSeeder extends Seeder
                             }
                         }, $this->eventsToDelayOnPurchase);
 
-
-                        // DB::table('shareables')->insert([
-                        //     'sharee_id' => $follower->id,
-                        //     'shareable_type' => 'posts',
-                        //     'shareable_id' => $post->id,
-                        //     'is_approved' => 1,
-                        //     'access_level' => 'premium', // ??
-                        //     'cattrs' => json_encode($customAttributes),
-                        //     'created_at' => $ts,
-                        //     'updated_at' => $ts,
-                        // ]);
-                        // Fanledger::create([
-                        //     //'from_account' => , // %TODO: see https://trello.com/c/LzTUmPCp
-                        //     //'to_account' => ,
-                        //     'fltype' => PaymentTypeEnum::PURCHASE, 
-                        //     'purchaser_id' => $f->id, // fan
-                        //     'seller_id' => $p->user->id,
-                        //     'purchaseable_type' => 'posts',
-                        //     'purchaseable_id' => $p->id,
-                        //     'qty' => 1,
-                        //     'base_unit_cost_in_cents' => $p->price,
-                        //     'cattrs' => json_encode($customAttributes),
-                        //     'created_at' => $ts,
-                        //     'updated_at' => $ts,
-                        // ]);
                     });
                 }
             });
@@ -164,39 +139,36 @@ class ShareablesTableSeeder extends Seeder
 
             $timeline->refresh();
             $followers = $timeline->followers;
-            $max = $this->faker->numberBetween( 0, min($followers->count()-1, $this->getMax('subscriber')) );
+            $max = $this->faker->numberBetween( 0, min($followers->count() - 1, $this->getMax('subscriber')) );
             if ( $this->appEnv !== 'testing' ) {
                 $this->output->writeln("  - Upgrading $max followers to subscribers for timeline ".$timeline->name.", iter: $iter");
             }
 
-            $followers->random($max)->each( function($f) use(&$timeline) {
-
-                // TODO: Switch this to subscribable transactions
+            $followers->random($max)->each( function($follower) use(&$timeline) {
 
                 $customAttributes = [ 'notes' => 'ShareablesTableSeeder.upgraded_to_subscriber' ];
-                DB::table('shareables')
-                    ->where('sharee_id', $f->id)
-                    ->where('shareable_type', 'timelines')
-                    ->where('shareable_id', $timeline->id)
-                    ->update([
-                        'access_level' => 'premium', // ??
-                        'cattrs' => json_encode($customAttributes),
-                    ]);
 
-                $amountInCents = $timeline->price->getAmount();
-                Fanledger::create([
-                    //'from_account' => , // %TODO: see https://trello.com/c/LzTUmPCp
-                    //'to_account' => ,
-                    'fltype' => PaymentTypeEnum::PURCHASE, 
-                    'purchaser_id' => $f->id, // fan
-                    'seller_id' => $timeline->user->id,
-                    'purchaseable_type' => 'timelines',
-                    'purchaseable_id' => $timeline->id,
-                    'qty' => 1,
-                    'base_unit_cost_in_cents' => $amountInCents,
-                    'cattrs' => json_encode($customAttributes),
+                $paymentAccount = $follower->financialAccounts()->firstOrCreate([
+                    'type' => AccountTypeEnum::IN,
+                    'name' => "{$follower->username} Seeder Account",
                 ]);
-                $timeline->user->notify(new TimelineSubscribed($timeline, $f, ['amount'=>$amountInCents]));
+                $paymentAccount->verified = true;
+                $paymentAccount->can_make_transactions = true;
+                $paymentAccount->save();
+
+                Event::fakeFor(function () use (&$paymentAccount, &$timeline, &$follower, $customAttributes) {
+                    try {
+                        $paymentAccount->createSubscription($timeline, $timeline->price, ShareableAccessLevelEnum::PREMIUM, $customAttributes);
+                        $timeline->user->notify(new TimelineSubscribed($timeline, $follower, ['amount' => \App\Models\Casts\Money::doSerialize($timeline->price)]));
+                    } catch (RuntimeException $e) {
+                        //throw $e;
+                        $exceptionClass = class_basename($e);
+                        if ($this->appEnv !== 'testing') {
+                            $this->output->writeln("Exception while subscribing to Timeline [{$timeline->getKey()}] | {$exceptionClass} | {$e->getMessage()}");
+                        }
+                    }
+                }, $this->eventsToDelayOnPurchase);
+
             });
 
             $iter++;

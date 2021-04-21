@@ -15,6 +15,8 @@ class ChangeMessagesTableFields extends Migration
     {
         Schema::table('messages', function (Blueprint $table) {
             $table->dropColumn(['receiver_id', 'user_id', 'message', 'receiver_name', 'media_id']);
+        });
+        Schema::table('messages', function (Blueprint $table) {
             $table->uuid('id')->change();
             $table->text('mcontent');
             $table->uuidMorphs('messagable');
@@ -29,8 +31,10 @@ class ChangeMessagesTableFields extends Migration
      */
     public function down()
     {
-        Schema::table('messages', f, function (Blueprint $table) {
-            $table->dropColumn(['mcontent', 'mcounter', 'messagable']);
+        Schema::table('messages', function (Blueprint $table) {
+            $table->dropColumn(['mcontent', 'mcounter', 'messagable_id', 'messagable_type']);
+        });
+        Schema::table('messages', function (Blueprint $table) {
             $table->string('receiver_name')->nullable();
             $table->uuid('receiver_id');
             $table->uuid('user_id');

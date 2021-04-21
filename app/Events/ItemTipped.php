@@ -4,10 +4,8 @@ namespace App\Events;
 
 use App\Models\User;
 use App\Interfaces\Tippable;
-use Illuminate\Broadcasting\Channel;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Broadcasting\PrivateChannel;
-use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
@@ -51,7 +49,7 @@ class ItemTipped implements ShouldBroadcast
         $channels = $this->item->getOwner()->map(function ($owner, $key) {
             return new PrivateChannel("user.{$owner->getKey()}.events");
         });
-        $channels->push(new PrivateChannel("user.{$this->tipper->getKey()}.tips"));
+        $channels->push(new PrivateChannel("user.{$this->tipper->getKey()}.purchases"));
         return $channels->all();
     }
 
@@ -65,7 +63,7 @@ class ItemTipped implements ShouldBroadcast
         return [
             'item_type' => $this->item->getMorphString(),
             'item_id' => $this->item->getKey(),
-            'tipper_id' => $this->tipper->getKey(),
+            'purchaser_id' => $this->tipper->getKey(),
         ];
     }
 }
