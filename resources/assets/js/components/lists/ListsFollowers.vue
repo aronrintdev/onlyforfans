@@ -21,6 +21,7 @@
             <b-card-body class="py-1">
 
               <div class="last-seen">Last seen TBD</div>
+              <div class="banner-ctrl"><fa-icon fixed-width icon="star" style="color:#007bff" /></div>
 
               <div class="avatar-img">
                 <router-link :to="{ name: 'timeline.show', params: { slug: s.sharee.username } }">
@@ -177,5 +178,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.clickable {
+  cursor: pointer;
+}
 </style>
 

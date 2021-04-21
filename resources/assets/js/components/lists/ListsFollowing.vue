@@ -16,11 +16,24 @@
       <b-row class="mt-3">
         <b-col lg="4" v-for="(s,idx) in shareables" :key="s.id" >
           <b-card no-body class="background mb-5">
+            <!-- %NOTE: s is the [shareables] record, s.shareable is the related, 'morhped', 'shareable' object (eg timelines) -->
             <b-card-img :src="s.shareable.cover.filepath" alt="s.shareable.slug" top></b-card-img>
 
             <b-card-body class="py-1">
 
               <div class="last-seen">Last seen TBD</div>
+              <div class="banner-ctrl ">
+                <b-dropdown no-caret right ref="bannerCtrls" variant="transparent" id="banner-ctrl-dropdown" class="tag-ctrl"> 
+                  <template #button-content>
+                    <fa-icon fixed-width icon="ellipsis-v" style="font-size:1.2rem; color:#fff" />
+                  </template>
+                  <b-dropdown-item v-clipboard="getTimelineUrl(s.shareable)">Copy link to profile</b-dropdown-item>
+                  <b-dropdown-divider></b-dropdown-divider>
+                  <b-dropdown-item @click="doRestrict(s)">Restrict</b-dropdown-item>
+                  <b-dropdown-item @click="doBlock(s)">Block</b-dropdown-item>
+                  <b-dropdown-item @click="doReport(s)">Report</b-dropdown-item>
+                </b-dropdown>
+              </div>
 
               <div class="avatar-img">
                 <router-link :to="{ name: 'timeline.show', params: { slug: s.shareable.slug } }">
@@ -38,7 +51,7 @@
                 </b-card-sub-title>
               </div>
 
-              <b-card-text class="mb-2"><fa-icon fixed-width :icon="['far', 'star']" style="color:#007bff" /> Add to favorites</b-card-text>
+              <b-card-text class="mb-2"><fa-icon fixed-width :icon="['far', 'star']" class="clickable" style="color:#007bff" /> Add to favorites</b-card-text>
 
               <b-button variant="outline-primary">Message</b-button>
               <b-button @click="renderTip(s.shareable)" variant="outline-success">Send Tip</b-button>
@@ -202,6 +215,24 @@ export default {
         },
       })
     },
+
+    // shareable in this context is the [shareables] record
+    // shareable.shareable in this context is related shareable record (eg timeline)
+    doBlock(shareable) {
+      console.log('doBlock() TODO'); // %TODO
+    },
+
+    doRestrict(shareable) {
+      console.log('doRestrict() TODO'); // %TODO
+    },
+
+    doReport(shareable) {
+      console.log('doReport() TODO'); // %TODO
+    },
+
+    getTimelineUrl(timeline) {
+      return route('spa.index', timeline.slug)
+    }
   },
 
   mounted() { },
@@ -221,5 +252,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.clickable {
+  cursor: pointer;
+}
 </style>
 
