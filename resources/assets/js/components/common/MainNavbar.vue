@@ -15,7 +15,7 @@
     <ScrollCollapse v-if="mobile" ref="scrollCollapse" class="w-100" :full-open="searchOpen" :full-open-height="openHeight">
       <div class="d-flex flex-column justify-content-between h-100">
         <SearchBar class="w-100 mt-3" :mobile="true" @opening="searchOpen = true" @closing="searchOpen = false" @scroll="onScroll" />
-        <NavButtons :mobile-style="mobile" class="w-100 mt-3" />
+        <NavButtons :mobile-style="mobile" :unread-messages-count="unreadMessagesCount" class="w-100 mt-3" />
       </div>
     </ScrollCollapse>
 
@@ -23,7 +23,7 @@
       <SearchBar />
     </b-navbar-nav>
     <b-navbar-nav v-if="!mobile" class="ml-auto">
-      <NavButtons class="mx-3" />
+      <NavButtons class="mx-3" :unread-messages-count="unreadMessagesCount" />
       <b-nav-item-dropdown
         id="profile-dropdown"
         toggle-class="nav-link-custom"
@@ -82,6 +82,7 @@ export default {
   data: () => ({
     searchOpen: false,
     screenWidth: null,
+    unreadMessagesCount: 0,
   }),
 
   methods: {
@@ -104,6 +105,11 @@ export default {
   },
 
   mounted() {
+    // Get unread messages count
+    this.axios.get('/unread-messages-count')
+      .then((res) => {
+        this.unreadMessagesCount = res.data.unread_messages_count;
+      });
     if (this.$vssWidth < this.mobileWidth) {
     }
   }

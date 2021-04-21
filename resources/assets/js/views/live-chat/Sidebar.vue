@@ -120,7 +120,7 @@
                   <i class="fa fa-times" aria-hidden="true"></i>
                 </button>
               </div>
-              <div class="user-details-row">
+              <div class="user-details-row" :key="user.last_message.id" :class="user.last_message.is_unread && user.last_message.receiver_id === session_user.id ? 'is-unread' : ''">
                 <span class="last-message" v-if="!user.last_message.hasMediafile">{{ user.last_message.mcontent }}</span>
                 <span class="last-message" v-if="user.last_message.hasMediafile">
                   <svg class="media-icon" viewBox="0 0 24 24">
@@ -176,6 +176,7 @@
   import moment from 'moment';
   import _ from 'lodash';
   import { Swiper, SwiperSlide, directive } from 'vue-awesome-swiper';
+  import Vuex from 'vuex';
 
   import RadioGroupBox from '@components/radioGroupBox';
   import RoundCheckBox from '@components/roundCheckBox';
@@ -235,6 +236,11 @@
       });
     },
     watch: { 
+      session_user: function(newVal) {
+        if (newVal) {
+          console.log('--- session user:', this.session_user);
+        }
+      },
       proplists: function(newVal) {
         this.lists = newVal.slice();
         this.pinnedLists = newVal.filter(list => list.isPinned);
@@ -242,12 +248,13 @@
       last_thread: function(newVal) {
         if (newVal) {
           
-          const index = this.users.findIndex(user => user.profile.id === this.selectedUser.profile.id);
+          const index = this.users.findIndex(user => user.profile.id === newVal.sender_id);
           const user = this.users[index];
           let hasMediafile = false;
           if (newVal.messages[0].mediafile) {
             hasMediafile = true;
           }
+          user.last_message.receiver_id = newVal.receiver_id;
           user.last_message = newVal.messages.pop();
           user.last_message.hasMediafile = hasMediafile;
           this.users = [...this.users];
@@ -255,6 +262,7 @@
       }
     },
     computed: {
+      ...Vuex.mapGetters(['session_user']),
       selectedOption: function () {
         let optionText;
         switch (this.optionValue) {
@@ -273,7 +281,13 @@
         return optionText;
       },
     },
+    created() { 
+      this.getMe()
+    },
     methods: {
+      ...Vuex.mapActions([
+        'getMe',
+      ]),
       updateUserStatus: function (userId, status) {
         let statusHolder = $(".status-holder-"+ userId);
         if (status == 1) {

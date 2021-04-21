@@ -508,7 +508,15 @@
     mounted() {
       const self = this;
       // Mark unread messages as read
-      this.axios.post(`/chat-messages/${this.$route.params.id}/mark-as-read`);
+      this.axios.post(`/chat-messages/${this.$route.params.id}/mark-as-read`)
+        .then(() => {
+          const count = parseInt($('.unread-messages-count').text(), 10);
+          if (count > 1) {
+            $('.unread-messages-count').text(count - 1);
+          } else {
+            $('.unread-messages-count').addClass('d-none');
+          }
+        });
       this.getMessages();
       this.findConversationList();
       Echo.private(`${this.$route.params.id}-message`)

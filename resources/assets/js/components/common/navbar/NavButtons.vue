@@ -17,6 +17,14 @@
           class="alert-number"
         />
       </fa-layers>
+      <b-badge
+        v-if="button.name == 'Messages'"
+        variant="danger"
+        class="unread-messages-count"
+        :class="unreadMessagesCount > 0 ? '' : 'd-none'"
+      >
+        {{unreadMessagesCount}}
+      </b-badge>
       <div v-if="showNames" class="label" v-text="$t(button.name)" />
     </b-nav-item>
   </b-navbar-nav>
@@ -28,8 +36,8 @@ import Vuex from 'vuex'
 export default {
   props: {
     mobileStyle: { type: Boolean, default: false },
+    unreadMessagesCount: { type: Number, default: 0 }
   },
-
   computed: {
     ...Vuex.mapGetters([
       'session_user',
@@ -96,9 +104,24 @@ export default {
   align-content: center;
   justify-content: center;
   flex-grow: 1;
+  position: relative;
   .nav-link {
     display: flex;
     align-items: center;
+  }
+  .unread-messages-count {
+    position: absolute;
+    top: 7px;
+    right: 4px;
+    border-radius: 50%;
+    font-size: 9px;
+    font-weight: 400;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 15px;
+    height: 15px;
+    padding: 0px 0 0px 0;
   }
 }
 
