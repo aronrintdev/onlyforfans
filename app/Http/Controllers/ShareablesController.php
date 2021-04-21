@@ -113,7 +113,7 @@ class ShareablesController extends AppBaseController
             break;
         case 'name':
             // %FIXME join will be faster see above link
-            $query->orderBy( User::select('slug')->whereColumn('users.id', 'shareables.sharee_id'), $sortDir ); 
+            $query->orderBy( User::select('username')->whereColumn('users.id', 'shareables.sharee_id'), $sortDir ); 
             break;
         }
 
