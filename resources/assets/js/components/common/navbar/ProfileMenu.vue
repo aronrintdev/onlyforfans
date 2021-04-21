@@ -115,6 +115,7 @@ export default {
   "en": {
     "Admin Dashboard": "Admin Dashboard",
     "My Profile": "My Profile",
+    "My Vault": "My Vault",
     "Settings": "Settings",
     "Payment Method": "Payment Method",
     "Logout": "Logout",
