@@ -495,7 +495,7 @@ class RestPostsTest extends TestCase
 
         $fan = $timeline->followers()->whereDoesntHave('subscribedtimelines', function($q1) use(&$timeline) {
             $q1->where('timelines.id', $timeline->id);
-        })->where('id', '<>', $creator->id)->first();
+        })->where('users.id', '<>', $creator->id)->first();
         $this->assertTrue( $timeline->followers->contains($fan->id) );
         $this->assertFalse( $timeline->subscribers->contains($fan->id) );
 
