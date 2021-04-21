@@ -7,12 +7,12 @@ use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use App\Http\Resources\BookmarkCollection;
-use App\Http\Resources\Bookmark as BookmarkResource;
+use App\Http\Resources\FavoriteCollection;
+use App\Http\Resources\Favorite as FavoriteResource;
 use App\Models\User;
-use App\Models\Bookmark;
+use App\Models\Favorite;
 
-class BookmarksController extends AppBaseController
+class FavoritesController extends AppBaseController
 {
     public function index(Request $request)
     {
@@ -25,7 +25,7 @@ class BookmarksController extends AppBaseController
         $filters = $request->filters ?? [];
 
         // Init query
-        $query = Bookmark::with(['user', 'bookmarkable']);
+        $query = Favorite::with(['user', 'favoritable']);
 
         // Check permissions
         if ( !$request->user()->isAdmin() ) {
@@ -52,62 +52,62 @@ class BookmarksController extends AppBaseController
         }
 
         $data = $query->paginate( $request->input('take', env('MAX_DEFAULT_PER_REQUEST', 10)) );
-        return new BookmarkCollection($data);
+        return new FavoriteCollection($data);
     }
 
-    public function show(Request $request, Bookmark $bookmark)
+    public function show(Request $request, Favorite $favorite)
     {
-        $this->authorize('view', $bookmark);
-        return new BookmarkResource($bookmark);
+        $this->authorize('view', $favorite);
+        return new FavoriteResource($favorite);
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'bookmarkable_id' => 'required|uuid',
-            'bookmarkable_type' => 'required|string|alpha-dash|in:posts',
+            'favoritable_id' => 'required|uuid',
+            'favoritable_type' => 'required|string|alpha-dash|in:posts',
             //'user_id' => 'required|uuid|exists:users,id',
         ]);
 
-        $alias = $request->bookmarkable_type;
+        $alias = $request->favoritable_type;
         $model = Relation::getMorphedModel($alias);
-        $bookmarkable = (new $model)->where('id', $request->bookmarkable_id)->firstOrFail();
+        $favoritable = (new $model)->where('id', $request->favoritable_id)->firstOrFail();
 
-        //$this->authorize('view', $bookmarkable);
-        if ($request->user()->cannot('bookmark', $bookmarkable)) {
+        //$this->authorize('view', $favoritable);
+        if ($request->user()->cannot('favorite', $favoritable)) {
             abort(403);
         }
 
-        $bookmarker = $request->user();
-        $bookmark = Bookmark::create([
-            'bookmarkable_id' => $request->bookmarkable_id,
-            'bookmarkable_type' => $request->bookmarkable_type,
-            'user_id' => $bookmarker->id,
+        $favoriteer = $request->user();
+        $favorite = Favorite::create([
+            'favoritable_id' => $request->favoritable_id,
+            'favoritable_type' => $request->favoritable_type,
+            'user_id' => $favoriteer->id,
         ]);
-        return new BookmarkResource($bookmark);
+        return new FavoriteResource($favorite);
     }
 
     public function remove(Request $request)
     {
         $request->validate([
-            'bookmarkable_id' => 'required|uuid',
-            'bookmarkable_type' => 'required|string|alpha-dash|in:posts',
+            'favoritable_id' => 'required|uuid',
+            'favoritable_type' => 'required|string|alpha-dash|in:posts',
         ]);
-        $bookmark = Bookmark::where('bookmarkable_id', $request->bookmarkable_id)
-                            ->where('bookmarkable_type', $request->bookmarkable_type)
+        $favorite = Favorite::where('favoritable_id', $request->favoritable_id)
+                            ->where('favoritable_type', $request->favoritable_type)
                             ->first();
-        if (!$bookmark) {
+        if (!$favorite) {
             abort(404);
         }
-        $this->authorize('delete', $bookmark);
-        $bookmark->delete();
+        $this->authorize('delete', $favorite);
+        $favorite->delete();
         return response()->json([]);
     }
 
-    public function destroy(Request $request, Bookmark $bookmark)
+    public function destroy(Request $request, Favorite $favorite)
     {
-        $this->authorize('delete', $bookmark);
-        $bookmark->delete();
+        $this->authorize('delete', $favorite);
+        $favorite->delete();
         return response()->json([]);
     }
 }

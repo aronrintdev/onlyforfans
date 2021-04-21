@@ -85,7 +85,7 @@ class Post extends Model
     }
 
     protected $guarded = [ 'id', 'created_at', 'updated_at' ];
-    protected $appends = [ 'isLikedByMe', 'isBookmarkedByMe', ];
+    protected $appends = [ 'isLikedByMe', 'isFavoritedByMe', ];
 
     public function sluggable(): array
     {
@@ -106,12 +106,12 @@ class Post extends Model
         return $sessionUser ? $this->likes->contains($sessionUser->id) : false;
     }
 
-    public function getIsBookmarkedByMeAttribute($value)
+    public function getIsFavoritedByMeAttribute($value)
     {
         $sessionUser = Auth::user();
-        $exists = Bookmark::where('user_id', $sessionUser->id)
-            ->where('bookmarkable_id', $this->id)
-            ->where('bookmarkable_type', 'posts')
+        $exists = Favorite::where('user_id', $sessionUser->id)
+            ->where('favoritable_id', $this->id)
+            ->where('favoritable_type', 'posts')
             ->first();
         return $exists ? true : false;
     }
@@ -135,10 +135,10 @@ class Post extends Model
     // %%% Relationships
     //--------------------------------------------
 
-    public function bookmarks()
+    public function favoites()
     {
-        //return $this->morphMany(Bookmark::class, 'bookmarkable')->withTimestamps();
-        return $this->morphMany(Bookmark::class, 'bookmarkable');
+        //return $this->morphMany(Favorite::class, 'favoritable')->withTimestamps();
+        return $this->morphMany(Favorite::class, 'favoritable');
     }
 
     // can be shared with many users (via [shareables])

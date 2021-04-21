@@ -1,11 +1,11 @@
 <?php
 namespace App\Policies;
 
-use App\Models\Bookmark;
+use App\Models\Favorite;
 use App\Models\User;
 use App\Policies\Traits\OwnablePolicies;
 
-class BookmarkPolicy extends BasePolicy
+class FavoritePolicy extends BasePolicy
 {
     use OwnablePolicies;
 
@@ -18,9 +18,9 @@ class BookmarkPolicy extends BasePolicy
     ];
 
     /*
-    protected function view(User $user, Bookmark $bookmark)
+    protected function view(User $user, Favorite $favorite)
     {
-        dd($user->toArray(), $bookmark->toArray());
+        dd($user->toArray(), $favorite->toArray());
         return true; // essentially allow viewing of free posts by 'public' (non-followers)
     }
      */

@@ -94,9 +94,9 @@ Route::group(['middleware' => ['auth']], function () {
         'only' => [ 'index' ],
     ]);
 
-    // -- bookmarks:  --
-    Route::post('/bookmarks/remove', ['as'=>'bookmarks.remove', 'uses' => 'BookmarksController@remove']); // remove bookmark w/o pkid
-    Route::resource('bookmarks', 'BookmarksController', [
+    // -- favorites:  --
+    Route::post('/favorites/remove', ['as'=>'favorites.remove', 'uses' => 'FavoritesController@remove']); // remove favorites w/o pkid
+    Route::resource('favorites', 'FavoritesController', [
         'except' => [ 'create', 'edit', 'update', ],
     ]);
 
