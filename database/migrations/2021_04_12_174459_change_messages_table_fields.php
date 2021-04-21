@@ -18,8 +18,8 @@ class ChangeMessagesTableFields extends Migration
         });
         Schema::table('messages', function (Blueprint $table) {
             $table->uuid('id')->change();
-            $table->text('mcontent');
-            $table->uuidMorphs('messagable');
+            $table->text('mcontent')->nullable();
+            $table->nullableUuidMorphs('messagable');
             $table->integer('mcounter')->default(1);
         });
     }
@@ -36,9 +36,9 @@ class ChangeMessagesTableFields extends Migration
         });
         Schema::table('messages', function (Blueprint $table) {
             $table->string('receiver_name')->nullable();
-            $table->uuid('receiver_id');
-            $table->uuid('user_id');
-            $table->text('message');
+            $table->uuid('receiver_id')->nullable();
+            $table->uuid('user_id')->nullable();
+            $table->text('message')->nullable();
             $table->uuid('media_id')->nullable();
         });
     }
