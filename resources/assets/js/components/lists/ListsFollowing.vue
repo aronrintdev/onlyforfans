@@ -22,6 +22,7 @@
             <b-card-body class="py-1">
 
               <div class="last-seen">Last seen TBD</div>
+
               <div class="banner-ctrl ">
                 <b-dropdown no-caret right ref="bannerCtrls" variant="transparent" id="banner-ctrl-dropdown" class="tag-ctrl"> 
                   <template #button-content>
@@ -29,12 +30,9 @@
                   </template>
                   <b-dropdown-item v-clipboard="getTimelineUrl(s.shareable)">Copy link to profile</b-dropdown-item>
                   <b-dropdown-divider></b-dropdown-divider>
-                  <b-dropdown-item @click="doRestrict(s)">Restrict</b-dropdown-item>
-                  <b-dropdown-item @click="doBlock(s)">Block</b-dropdown-item>
                   <b-dropdown-item @click="doReport(s)">Report</b-dropdown-item>
                 </b-dropdown>
               </div>
-
               <div class="avatar-img">
                 <router-link :to="{ name: 'timeline.show', params: { slug: s.shareable.slug } }">
                   <b-img thumbnail rounded="circle" class="w-100 h-100" :src="s.shareable.avatar.filepath" :alt="s.shareable.slug" :title="s.shareable.name" />
@@ -218,14 +216,6 @@ export default {
 
     // shareable in this context is the [shareables] record
     // shareable.shareable in this context is related shareable record (eg timeline)
-    doBlock(shareable) {
-      console.log('doBlock() TODO'); // %TODO
-    },
-
-    doRestrict(shareable) {
-      console.log('doRestrict() TODO'); // %TODO
-    },
-
     doReport(shareable) {
       console.log('doReport() TODO'); // %TODO
     },
