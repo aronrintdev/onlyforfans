@@ -22,11 +22,25 @@
 
               <div class="last-seen">Last seen TBD</div>
 
+              <div class="banner-ctrl ">
+                <b-dropdown no-caret right ref="bannerCtrls" variant="transparent" id="banner-ctrl-dropdown" class="tag-ctrl"> 
+                  <template #button-content>
+                    <fa-icon fixed-width icon="ellipsis-v" style="font-size:1.2rem; color:#fff" />
+                  </template>
+                  <b-dropdown-item v-clipboard="getTimelineUrl(s.sharee)">Copy link to profile</b-dropdown-item>
+                  <b-dropdown-divider></b-dropdown-divider>
+                  <b-dropdown-item @click="doRestrict(s)">Restrict</b-dropdown-item>
+                  <b-dropdown-item @click="doBlock(s)">Block</b-dropdown-item>
+                  <b-dropdown-item @click="doReport(s)">Report</b-dropdown-item>
+                </b-dropdown>
+              </div>
+
               <div class="avatar-img">
                 <router-link :to="{ name: 'timeline.show', params: { slug: s.sharee.username } }">
                   <b-img thumbnail rounded="circle" class="w-100 h-100" :src="s.sharee.avatar.filepath" :alt="s.sharee.username" :title="s.sharee.name" />
                 </router-link>
               </div>
+
 
               <div class="sharee-id">
                 <b-card-title class="mb-1">
@@ -162,6 +176,24 @@ export default {
     doReset() {
       this.currentPage = 1
     },
+
+    // shareable in this context is the [shareables] record
+    // shareable.sharee in this context is related user record
+    doBlock(shareable) {
+      console.log('doBlock() TODO'); // %TODO
+    },
+
+    doRestrict(shareable) {
+      console.log('doRestrict() TODO'); // %TODO
+    },
+
+    doReport(shareable) {
+      console.log('doReport() TODO'); // %TODO
+    },
+
+    getTimelineUrl(user) {
+      return route('spa.index', user.username)
+    }
   },
 
   mounted() { },
@@ -177,5 +209,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.clickable {
+  cursor: pointer;
+}
 </style>
 

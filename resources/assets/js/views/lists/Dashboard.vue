@@ -127,7 +127,6 @@ body .list-component {
         top: 75px; /* bg image height - 1/2*avatar height */
         width: 90px;
         height: 90px;
-
         .rounded-circle.img-thumbnail {
           padding: 0.11rem;
         }
@@ -138,13 +137,11 @@ body .list-component {
         font-size: 0.9rem;
         position: absolute;
         top: 91px;
-        /*
-        left: 0; 
-        right: 0; 
-        margin-left: auto; 
-        margin-right: auto; 
-        width: 200px;
-         */
+      }
+      .banner-ctrl {
+        position: absolute;
+        top: 5px;
+        right: 0;
       }
       .card-img-top {
         overflow: hidden;
