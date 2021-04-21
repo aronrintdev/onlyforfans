@@ -7,7 +7,7 @@
           <div class="card">
             <div class="card-body nopadding">
               <div class="row message-box">
-                <chat-sidebar :selectedUser="selectedUser" />
+                <chat-sidebar :selectedUser="selectedUser" :proplists="lists" :last_thread="lastMessage" />
                 <div v-if="selectedUser" class="col-md-8 col-sm-8 col-xs-8 message-col-8">
                   <div :class="messageSearchVisible ? 'conversation-header no-border' : 'conversation-header'">
                     <button class="back-btn btn" type="button" @click="clearSelectedUser">
@@ -70,7 +70,7 @@
                       <b-dropdown-divider></b-dropdown-divider>
                       <b-dropdown-item class="block-item" disabled>Restrict @{{ selectedUser.profile.username }}</b-dropdown-item>
                       <b-dropdown-item @click="showBlockModal" class="block-item">Block @{{ selectedUser.profile.username }}</b-dropdown-item>
-                      <b-dropdown-item class="block-item">Report @{{ selectedUser.profile.username }}</b-dropdown-item>
+                      <b-dropdown-item disabled class="block-item">Report @{{ selectedUser.profile.username }}</b-dropdown-item>
                     </b-dropdown>
                   </div>
                   <div class="details message-search" v-if="messageSearchVisible">
@@ -101,7 +101,7 @@
                     <div class="empty-messages" v-if="messages.length === 0">
                       Type a message below to start a conversation with {{ selectedUser.name }}
                     </div>
-                    <div class="messages" v-lazy-container="{ selector: 'img' }" v-if="messages.length > 0">
+                    <div class="messages" v-lazy-container="{ selector: 'img.lazy' }" v-if="messages.length > 0">
                       <div class="text-center mb-2" v-if="loadingData"><b-spinner variant="secondary" label="Loading..." small></b-spinner></div>
                       <div class="message-group" :key="messageGroup.date"  v-for="messageGroup in messages">
                         <div class="message-group-time"><span>{{ moment.unix(messageGroup.date).format('MMM DD, YYYY') }}</span></div>
@@ -112,16 +112,20 @@
                                 {{ getLogoFromName(selectedUser.name) }}
                               </div>
                               <div class="user-logo" v-if="selectedUser && selectedUser.profile.avatar">
-                                <img :data-src="selectedUser.profile.avatar.filepath" alt="" />
+                                <img :src="selectedUser.profile.avatar.filepath" alt="" />
                               </div>
                               <div class="content">
                                 <template v-for="msg in message.messages">
                                   <div class="text" :class="`message-${msg.id}`" v-if="!msg.mediafile" :key="msg.id">{{ msg.mcontent }}</div>
                                   <div class="image" :class="`message-${msg.id}`" v-if="msg.mediafile" :key="msg.id">
-                                    <img v-preview:scope-b v-if="msg.mediafile.is_image" :data-src="msg.mediafile.filepath" :alt="msg.mediafile.mfname" />
+                                    <img v-preview:scope-b class="lazy" v-if="msg.mediafile.is_image" :data-src="msg.mediafile.filepath" :alt="msg.mediafile.mfname" />
+                                    <img src="/images/loading.gif" v-if="msg.mediafile.is_image" class="loading-image" />
                                     <video v-if="msg.mediafile.is_video" controls>
                                       <source :src="msg.mediafile.filepath" type="video/mp4" />
                                     </video>
+                                    <audio v-if="msg.mediafile.mimetype.indexOf('audio/') > -1" controls>
+                                      <source :src="msg.mediafile.filepath" type="audio/mpeg" />
+                                    </audio>
                                   </div>
                                 </template>
                                 <div class="time">{{ moment(message.created_at).format('hh:mm A') }}</div>
@@ -131,10 +135,14 @@
                               <template v-for="msg in message.messages">
                                 <div class="text" :class="`message-${msg.id}`" v-if="!msg.mediafile" :key="msg.id">{{ msg.mcontent }}</div>
                                 <div class="image" :class="`message-${msg.id}`" v-if="msg.mediafile" :key="msg.id">
-                                  <img v-preview:scope-b v-if="msg.mediafile.is_image" :data-src="msg.mediafile.filepath" :alt="msg.mediafile.mfname" />
+                                  <img v-preview:scope-b class="lazy" v-if="msg.mediafile.is_image" :data-src="msg.mediafile.filepath" :alt="msg.mediafile.mfname" />
+                                  <img src="/images/loading.gif" v-if="msg.mediafile.is_image"  class="loading-image" />
                                   <video v-if="msg.mediafile.is_video" controls>
                                     <source :src="msg.mediafile.filepath" type="video/mp4" />
                                   </video>
+                                  <audio v-if="msg.mediafile.mimetype.indexOf('audio/') > -1" controls>
+                                    <source :src="msg.mediafile.filepath" type="audio/mpeg" />
+                                  </audio>
                                 </div>
                               </template>
                               <div class="time">{{ moment(message.created_at).format('hh:mm A') }}</div>
@@ -155,6 +163,7 @@
                               <video v-if="element.type==='video'">
                                 <source :src="element.src" type="video/mp4" />
                               </video>
+                              <div class="audio" v-if="element.type==='audio'"><span>{{ element.file.name }}</span></div>
                               <span v-if="!element.selected"  class="unchecked-circle" @click="onSelectSortableMedia(index, true)"></span>
                               <span v-if="element.selected" class="checked-circle" @click="onSelectSortableMedia(index, false)">{{element.order}}</span>
                             </div>
@@ -191,6 +200,9 @@
                               <video v-preview:scope-a class="swiper-lazy" v-if="media.type==='video'">
                                 <source :src="media.src" type="video/mp4" />
                               </video>
+                              <audio v-preview:scope-a class="swiper-lazy" controls v-if="media.type==='audio'">
+                                <source :src="media.src" type="audio/mpeg" />
+                              </audio>
                               <div class="icon-close" @click="removeSortableMedia(index)">
                                 <svg viewBox="0 0 24 24">
                                   <path d="M13.41 12l5.3-5.29A1 1 0 0 0 19 6a1 1 0 0 0-1-1 1 1 0 0 0-.71.29L12 10.59l-5.29-5.3A1 1 0 0 0 6 5a1 1 0 0 0-1 1 1 1 0 0 0 .29.71l5.3 5.29-5.3 5.29A1 1 0 0 0 5 18a1 1 0 0 0 1 1 1 1 0 0 0 .71-.29l5.29-5.3 5.29 5.3A1 1 0 0 0 18 19a1 1 0 0 0 1-1 1 1 0 0 0-.29-.71z"></path>
@@ -247,13 +259,22 @@
                           </svg>
                         </label>
                         <!-- microphone -->
-                        <button class="btn action-btn" type="button" disabled>
+                        <input
+                          type="file"
+                          id="audio-upload-btn"
+                          @change="onMediaChanged"
+                          multiple
+                          accept="audio/mpeg3,audio/x-mpeg-3"
+                          ref="audiosUpload"
+                          @click="activeMediaRef = $refs.audiosUpload; mediaType = 'audio'"
+                        />
+                        <label for="audio-upload-btn" class="btn action-btn">
                           <svg id="icon-voice" viewBox="0 0 24 24">
                             <path
                               d="M12 15a4 4 0 0 0 4-4V6a4 4 0 0 0-8 0v5a4 4 0 0 0 4 4zm-2-9a2 2 0 0 1 4 0v5a2 2 0 0 1-4 0zm9 4a1 1 0 0 0-1 1 6 6 0 0 1-12 0 1 1 0 0 0-2 0 8 8 0 0 0 7 7.93V21a1 1 0 0 0 2 0v-2.07A8 8 0 0 0 20 11a1 1 0 0 0-1-1z"
                               fill="#8a96a3"></path>
                           </svg>
-                        </button>
+                        </label>
                         <!-- Medis from vault -->
                         <button class="btn action-btn" type="button" disabled>
                           <svg id="icon-vault" viewBox="0 0 24 24">
@@ -482,6 +503,7 @@
       isSendingFiles: false,
       hasMore: true,
       mediaType: undefined,
+      lastMessage: undefined,
     }),
     mounted() {
       const self = this;
@@ -494,9 +516,13 @@
           const message = JSON.parse(e.message);
           if (message.receiver_id === self.currentUser.id) {
             self.originMessages.unshift(message);
+            self.lastMessage = _.cloneDeep(message);
             self.offset += 1;
             self.groupMessages();
             $('.conversation-list').animate({ scrollTop: $('.conversation-list')[0].scrollHeight }, 500);
+            this.$Lazyload.$once('loaded', function () {
+              $('.conversation-list').animate({ scrollTop: $('.conversation-list')[0].scrollHeight }, 500);
+            });
           }
         });
       // Echo.join(`user-status`)
@@ -517,6 +543,7 @@
             $('.typing').hide();
           }, 3000);
         });
+
     },
     watch: {
       '$route.params.id': function (id) {
@@ -537,9 +564,13 @@
           const message = JSON.parse(e.message);
           if (message.receiver_id === self.currentUser.id) {
             self.originMessages.unshift(message);
+            self.lastMessage = _.cloneDeep(message);
             self.offset += 1;
             self.groupMessages();
             $('.conversation-list').animate({ scrollTop: $('.conversation-list')[0].scrollHeight }, 500);
+            this.$Lazyload.$once('loaded', function () {
+              $('.conversation-list').animate({ scrollTop: $('.conversation-list')[0].scrollHeight }, 500);
+            });
           }
         });
       }
@@ -602,7 +633,7 @@
       getMessages: async function() {
         this.loadingData = true;
         const user_id = this.$route.params.id;
-        const response = await this.axios.get(`/chat-messages/${user_id}?offset=${this.offset}&limit=10`);
+        const response = await this.axios.get(`/chat-messages/${user_id}?offset=${this.offset}&limit=30`);
         this.selectedUser = response.data;
         if (!this.currentUser) {
           this.currentUser = response.data.currentUser;
@@ -699,12 +730,16 @@
           }
           this.axios.post('/chat-messages', data)
             .then((response) => {
-              self.isSendingFiles = false;
+              this.isSendingFiles = false;
               this.newMessageText = undefined;
               this.sortableMedias = [];
               this.originMessages.unshift(response.data.message);
+              this.lastMessage = _.cloneDeep(response.data.message);
               this.groupMessages();
               $('.conversation-list').animate({ scrollTop: $('.conversation-list')[0].scrollHeight }, 500);
+              this.$Lazyload.$once('loaded', function () {
+                $('.conversation-list').animate({ scrollTop: $('.conversation-list')[0].scrollHeight }, 500);
+              });
             });
         } else if (this.newMessageText) {
           this.axios.post('/chat-messages', {
@@ -713,6 +748,7 @@
           })
             .then((response) => {
               this.originMessages.unshift(response.data.message);
+              this.lastMessage = _.cloneDeep(response.data.message);
               this.groupMessages();
               this.newMessageText = undefined;
               $('.conversation-list').animate({ scrollTop: $('.conversation-list')[0].scrollHeight }, 500);
@@ -739,7 +775,7 @@
 
         let index = this.originMessages.findIndex(message => message.id === messageId);
         while (index < 0) {
-          await this.axios.get(`/chat-messages/${user_id}?offset=${this.offset}&limit=10`).then((response) => {
+          await this.axios.get(`/chat-messages/${user_id}?offset=${this.offset}&limit=30`).then((response) => {
             this.originMessages = this.originMessages.concat(response.data.messages);
             this.offset = this.originMessages.length;
           });
@@ -787,7 +823,6 @@
         this.userCustomName = undefined;
       },
       saveCustomName: function() {
-        const self = this;
         if (this.userCustomName) {
           this.axios.post(`/chat-messages/${this.$route.params.id}/custom-name`, { name: this.userCustomName })
             .then(() => {
@@ -798,10 +833,7 @@
                   display_name: this.userCustomName,
                 }
               };
-              const newUsers = this.users.slice();
-              const index = newUsers.findIndex(user => user.profile.id === this.selectedUser.profile.id);
-              newUsers[index].profile = this.selectedUser.profile;
-              this.users = newUsers;
+              $(`.user-content.user-${this.selectedUser.profile.id} .username`).text(this.userCustomName);
               this.closeCustomNameModal();
             });
         }

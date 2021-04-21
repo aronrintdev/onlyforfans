@@ -28,7 +28,7 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
 {
     use HasRoles, HasFactory, Messagable, SoftDeletes, UsesUuid, MorphFunctions, Notifiable;
 
-    protected $appends = [ 'name', 'avatar', 'about', ];
+    protected $appends = [ 'name', 'avatar', 'cover', 'about', ];
     protected $guarded = [ 'id', 'created_at', 'updated_at' ];
     protected $hidden = [ 'email', 'password', 'remember_token', 'verification_code', 'timeline'];
     protected $dates = [ 'last_logged', ];
@@ -229,6 +229,14 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
         return $this->timeline->avatar
             ? $this->timeline->avatar
             : (object) ['filepath' => url('user/avatar/default-' . $this->gender . '-avatar.png')];
+    }
+
+    public function getCoverAttribute($value)
+    {
+        return $this->timeline->cover
+            ? $this->timeline->cover
+            : (object) ['filepath' => url('user/avatar/default-' . $this->gender . '-cover.png')];
+            //: (object) ['filepath' => url('user/cover/default-' . $this->gender . '-cover.png')]; // %TODO %FIXME
     }
 
     public function getAboutAttribute($value)
@@ -450,7 +458,7 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
 
     public function lists()
     {
-        return $this->belongsToMany(Lists::class, 'lists_users', 'user_id', 'list_id')->withTimestamps();
+        return $this->belongsToMany(Lists::class, 'list_user', 'user_id', 'list_id')->withTimestamps();
     }
 
     public function userlists()

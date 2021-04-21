@@ -138,6 +138,8 @@ Route::group(['middleware' => ['auth']], function () {
     Route::resource('stories', 'StoriesController', [ 'except' => [ 'create', 'edit', ] ]);
 
     // -- shareables:  --
+    Route::get('/shareables/indexFollowers', ['as' => 'shareables.indexFollowers', 'uses' => 'ShareablesController@indexFollowers']);
+    Route::get('/shareables/indexFollowing', ['as' => 'shareables.indexFollowing', 'uses' => 'ShareablesController@indexFollowing']);
     Route::resource('shareables', 'ShareablesController', [
         'only' => [ 'index', ],
     ]);
@@ -297,4 +299,4 @@ Route::delete('/lists/{id}/pin', 'ListsController@removeFromPin')->name('lists.r
  * Single Page application catch all undefined routes
  * Laravel router will first try to match static resources, then specific routes, then finally this.
  */
-Route::get('/{any}', 'SpaController@index')->where('any', '.*');
+Route::get('/{any}', 'SpaController@index')->name('spa.index')->where('any', '.*');

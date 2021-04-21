@@ -7,7 +7,7 @@
           <div class="card">
             <div class="card-body nopadding">
               <div class="row message-box">
-                <chat-sidebar :selectedUser="null" />
+                <chat-sidebar :selectedUser="null" :proplists="[]" />
                 <div class="col-md-8 col-sm-8 col-xs-8 message-col-8">
                   <div class="coversation-tree">
                     <div class="conversations-start">

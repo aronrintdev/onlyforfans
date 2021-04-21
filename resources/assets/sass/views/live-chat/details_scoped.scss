@@ -280,6 +280,24 @@
 							img, video {
 								width: 100%;
 								border-radius: 6px;
+
+								&[lazy="loaded"] + .loading-image {
+									display: none;
+								}
+								&[lazy="loading"] {
+									height: 0;
+									visibility: hidden;
+									overflow: hidden;
+								}
+								&[lazy="loading"] + .loading-image {
+									display: inline-block;
+									box-shadow: inset 0px 1px 8px 1px #0000002e;
+									background: rgba(0, 0, 0, 0.1);
+								}
+							}
+							audio {
+								width: 100%;
+								outline: none;
 							}
 						}
 					}
@@ -304,6 +322,24 @@
 							img, video {
 								width: 100%;
 								border-radius: 6px;
+								
+								&[lazy="loaded"] + .loading-image {
+									display: none;
+								}
+								&[lazy="loading"] {
+									height: 0;
+									visibility: hidden;
+									overflow: hidden;
+								}
+								&[lazy="loading"] + .loading-image {
+									display: inline-block;
+									box-shadow: inset 0px 1px 8px 1px #0000002e;
+									background: rgba(0, 0, 0, 0.1);
+								}
+							}
+							audio {
+								width: 100%;
+								outline: none;
 							}
 						}
 					}
@@ -880,6 +916,22 @@
                 height: 96px;
                 object-fit: cover;
               }
+							.audio {
+								font-size: 11px;
+								height: 96px;
+								display: inline-flex;
+								align-items: center;
+								justify-content: center;
+								width: 100%;
+								padding: 8px;
+								border-radius: 6px 6px 0 0;
+								background: rgb(138 150 163 / 35%);
+								border-bottom: solid 1px #fff;
+								span {
+									display: block;
+									width: 100%;
+								}
+							}
               .unchecked-circle,
               .checked-circle {
                 width: 30px;

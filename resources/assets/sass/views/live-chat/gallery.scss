@@ -61,14 +61,24 @@
 				position: relative;
 				border: 1px solid transparent;
 	
-				img {
+				img, video {
 					object-fit: cover;
 					width: 100%;
-					height: auto;
+					height: 100%;
 					position: absolute;
 					left: 50%;
 					top: 50%;
 					transform: translate(-50%, -50%);
+					cursor: pointer;
+				}
+				svg {
+					position: absolute;
+					top: 50%;
+					left: 50%;
+					transform: translate(-50%, -50%);
+					width: 50px;
+					pointer-events: none;
+					fill: #fff;
 				}
 				&:hover {
 					border: solid 1px #1a1a1a;

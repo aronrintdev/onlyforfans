@@ -36,26 +36,6 @@ use App\Models\Traits\FormatMoney;
 use App\Models\Traits\ShareableTraits;
 use Money\Money as Money;
 
-/**
- * Post Model
- * @package App\Models
- * 
- * @property string $id
- * @property string $slug
- * @property string $user_id
- * @property string $postable_type
- * @property string $postable_id
- * @property string $description
- * @property bool   $active
- * @property string $type
- * @property Money $price
- * @property string $currency
- * @property array  $cattrs
- * @property array  $meta
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
- * @property \Carbon\Carbon $deleted_at
- */
 class Post extends Model
     implements
         UuidId,

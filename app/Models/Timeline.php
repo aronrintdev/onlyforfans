@@ -60,6 +60,7 @@ class Timeline extends Model implements Subscribable, Tippable, Reportable
         FormatMoney,
         HasCurrency;
 
+    //protected $appends = [ ];
     protected $keyType = 'string';
     protected $guarded = ['id', 'created_at', 'updated_at'];
     protected $hidden = ['user', 'posts', 'followers']; // %FIXME: why is this ness? timelines.show (route-model binding) loads these by default but should be lazy loading (?) %PSG
@@ -71,6 +72,27 @@ class Timeline extends Model implements Subscribable, Tippable, Reportable
         'cattrs' => 'array',
         'meta' => 'array',
     ];
+
+    //--------------------------------------------
+    // %%% Accessors/Mutators | Casts
+    //--------------------------------------------
+
+    /*
+    public function getAvatarAttribute($value)
+    {
+        return $this->avatar
+            ? $this->avatar
+            : (object) ['filepath' => url('user/avatar/default-' . $this->gender . '-avatar.png')];
+    }
+
+    public function getCoverAttribute($value)
+    {
+        return $this->cover
+            ? $this->cover
+            : (object) ['filepath' => url('user/avatar/default-' . $this->gender . '-cover.png')];
+            //: (object) ['filepath' => url('user/cover/default-' . $this->gender . '-cover.png')]; // %TODO %FIXME
+    }
+     */
 
 
     public function toArray()
@@ -88,6 +110,10 @@ class Timeline extends Model implements Subscribable, Tippable, Reportable
             'source' => [ 'user.username' ],
         ]];
     }
+
+    //--------------------------------------------
+    // %%% Relationships
+    //--------------------------------------------
 
     // includes subscribers (ie premium + default followers)
     public function followers()
@@ -134,6 +160,25 @@ class Timeline extends Model implements Subscribable, Tippable, Reportable
     {
         return $this->belongsTo(Mediafile::class, 'cover_id');
     }
+
+    //--------------------------------------------
+    // %%% Scopes
+    //--------------------------------------------
+
+    /*
+    public function scopeSort($query, $sortBy, $sortDir='desc')
+    {
+        switch ($sortBy) {
+        case 'slug':
+        case 'created_at':
+            $query->orderBy($sortBy, $sortDir);
+            break;
+        default:
+            $query->latest();
+        }
+        return $query;
+    }
+     */
 
     // %%% --- Implement Purchaseable Interface ---
     #region Purchasable

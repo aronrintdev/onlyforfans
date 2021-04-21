@@ -100,7 +100,7 @@
         :class="selectedUser && selectedUser.profile.id === user.profile.id ? 'selected' : ''"
       >
         <router-link :to="`/messages/${user.profile.id}`">
-          <div class="user-content">
+          <div class="user-content" :class="`user-${user.profile.id}`">
             <div class="user-logo text-logo" v-if="!user.profile.avatar">
               {{ getLogoFromName(user.profile.name) }}
               <span :class="`status-holder status-holder-${user.profile.id}`"></span>
@@ -185,6 +185,8 @@
   export default {
     props: {
       selectedUser: undefined,
+      proplists: Array,
+      last_thread: undefined,
     },
     data: () => ({
       userSearchText: undefined,
@@ -195,8 +197,8 @@
       moment: moment,
       originContacts: [],
       selectedPinnedList: undefined,
-      pinnedLists: [],
       lists: [],
+      pinnedLists: [],
       swiperOptions: {
         lazy: true,
         slidesPerView: 'auto',
@@ -214,8 +216,6 @@
       swiper: directive,
     },
     mounted() {
-      // Fetch Users' Online/Away status
-      const self = this;
       this.axios.get('/lists')
         .then(res => {
           this.lists = res.data;
@@ -233,6 +233,26 @@
         });
         this.loading = false;
       });
+    },
+    watch: { 
+      proplists: function(newVal) {
+        this.lists = newVal.slice();
+        this.pinnedLists = newVal.filter(list => list.isPinned);
+      },
+      last_thread: function(newVal) {
+        if (newVal) {
+          
+          const index = this.users.findIndex(user => user.profile.id === this.selectedUser.profile.id);
+          const user = this.users[index];
+          let hasMediafile = false;
+          if (newVal.messages[0].mediafile) {
+            hasMediafile = true;
+          }
+          user.last_message = newVal.messages.pop();
+          user.last_message.hasMediafile = hasMediafile;
+          this.users = [...this.users];
+        }
+      }
     },
     computed: {
       selectedOption: function () {

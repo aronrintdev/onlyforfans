@@ -70,6 +70,9 @@ Vue.use(VueTimeago, {
   */
 });
 
+import Clipboard from 'v-clipboard'
+Vue.use(Clipboard)
+
 import VueSlider from 'vue-slider-component';
 import 'vue-slider-component/theme/default.css';
 Vue.component('VueSlider', VueSlider);

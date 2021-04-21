@@ -182,3 +182,22 @@ body .feed-crate.tag-grid-layout .superbox-post .carousel.slide .carousel-item i
   padding: 0;
   height: 32px;
 }
+.media-modal .modal-dialog {
+  max-width: 1000px;
+  
+  .modal-content {
+    background: transparent;
+    border: none;
+    outline: none;
+    overflow: hidden;
+  }
+  .video-modal video, .audio-modal audio {
+    width: 100%;
+    outline: none;
+    border-radius: 5px;
+	}
+  .audio-modal {
+    width: 600px;
+    margin: auto;
+  }
+}
