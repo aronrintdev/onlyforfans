@@ -44,8 +44,8 @@
               <b-button v-if="s.access_level==='default'" @click="renderSubscribe(s.shareable)" variant="outline-info">Premium Access</b-button>
               <b-button @click="renderCancel(s.shareable, s.access_level)" variant="outline-warning">Cancel</b-button>
               <div>
-                <small v-if="s.access_level==='premium'" class="text-muted">subscribed since {{ moment(s.updated_at).format('MMM DD, YYYY') }}</small>
-                <small v-else class="text-muted">following for free since {{ moment(s.updated_at).format('MMM DD, YYYY') }}</small>
+                <small v-if="s.access_level==='premium'" class="text-muted">subscribed since {{ moment(s.created_at).format('MMM DD, YYYY') }}</small>
+                <small v-else class="text-muted">following for free since {{ moment(s.created_at).format('MMM DD, YYYY') }}</small>
               </div>
               <!--
               <pre>

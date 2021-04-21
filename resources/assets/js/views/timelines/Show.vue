@@ -75,9 +75,6 @@ export default {
     eventBus.$on('update-originator', () => {
       this.load()
     })
-    //eventBus.$on('update-timeline', () => {
-    //  this.load()
-    //})
 
     eventBus.$on('set-feed-layout',  isGridLayout  => {
       this.isGridLayout = isGridLayout
