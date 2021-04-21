@@ -82,8 +82,6 @@ export default {
       })
       // %FIXME: this emit should be more general, as this modal may be used elsewhere
        eventBus.$emit('update-originator')
-      //eventBus.$emit('update-timeline', this.timeline.id)
-      //eventBus.$emit('update-feed') // updates feed being viewed
     },
 
     async doSubscribe(e) {

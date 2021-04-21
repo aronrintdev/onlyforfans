@@ -43,8 +43,8 @@
               <b-button variant="outline-danger">Restrict</b-button>
               <b-button variant="outline-warning">Discount</b-button>
               <div>
-                <small v-if="s.access_level==='premium'" class="text-muted">subscribed since {{ moment(s.updated_at).format('MMM DD, YYYY') }}</small>
-                <small v-else class="text-muted">following for free since {{ moment(s.updated_at).format('MMM DD, YYYY') }}</small>
+                <small v-if="s.access_level==='premium'" class="text-muted">subscribed since {{ moment(s.created_at).format('MMM DD, YYYY') }}</small>
+                <small v-else class="text-muted">following for free since {{ moment(s.created_at).format('MMM DD, YYYY') }}</small>
               </div>
               <!-- <pre>{{ JSON.stringify(s, null, "\t") }}</pre> -->
 

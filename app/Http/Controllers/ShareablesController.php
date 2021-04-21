@@ -88,11 +88,9 @@ class ShareablesController extends AppBaseController
         $sessionTimeline = $sessionUser->timeline;
 
         $query = ShareableModel::with(['sharee', 'shareable']); // init
-        /*
-        $query->whereHasMorph( 'shareable', [Timeline::class], function (Builder $q1, $type) use(&$request) {
-            $q1->where('user_id', $request->user()->id);
-        });
-         */
+        //$query->whereHasMorph( 'shareable', [Timeline::class], function (Builder $q1, $type) use(&$request) {
+        //    $q1->where('user_id', $request->user()->id);
+        //});
         $query->where('shareable_type', 'timelines');
         $query->where('shareable_id', $sessionTimeline->id);
 
@@ -100,65 +98,70 @@ class ShareablesController extends AppBaseController
         if ( $request->has('accessLevel') ) {
             $query->where('access_level', $request->accessLevel);
         }
-        /*
         if ( $request->has('onlineStatus') ) {
-            $query->where('access_level', $request->onlineStatus);
+            //$query->where('access_level', $request->onlineStatus);
         }
-         */
 
-        $sortBy = (function($k) { // map to table columns
-            switch ($k) {
-            case 'start_date':
-                return 'created_at';
-            case 'name':
-                return 'slug';
-            default:
-                return $k;
-            }
-        })( $request->input('sortBy', 'default') );
-        $query->sort( $sortBy, ($request->sortDir==='asc' ?? 'desc') );
+        // Order By
+        $sortDir = $request->sortDir==='asc' ? 'asc' : 'desc';
+        switch ($request->sortBy) {
+        case 'start_date':
+            $query->orderBy( 'created_at', $sortDir );  // %FIXME: what if upgrade from free to subscribe?
+            break;
+        case 'activity':
+            // %TODO
+            break;
+        case 'name':
+            // %FIXME join will be faster see above link
+            $query->orderBy( User::select('username')->whereColumn('users.id', 'shareables.sharee_id'), $sortDir ); 
+            break;
+        }
 
         $data = $query->paginate( $request->input('take', env('MAX_DEFAULT_PER_REQUEST', 10)) );
         return new ShareableCollection($data);
     }
 
     // list of users/timelines followed by session user
+    // https://reinink.ca/articles/ordering-database-queries-by-relationship-columns-in-laravel
     public function indexFollowing(Request $request)
     {
         $request->validate([
             // filters
             'accessLevel' => 'string|in:default,premium',
-            //'onlineStatus' => 'string|in: default, premium',
+            //'onlineStatus' => 'string|in:tbd',
             //'sharee_id' => 'uuid|exists:users,id', // if admin only
         ]);
         $sessionUser = $request->user();
         $sessionTimeline = $sessionUser->timeline;
 
-        $query = ShareableModel::with(['sharee', 'shareable.avatar', 'shareable.cover']); // init
+        $query = ShareableModel::with([ 'sharee', 'shareable', 'shareable.avatar', 'shareable.cover' ]); // init
         $query->where('shareable_type', 'timelines');
         $query->where('sharee_id', $sessionUser->id);
 
-        // Apply any filters
+        // Apply filters
         if ( $request->has('accessLevel') ) {
             $query->where('access_level', $request->accessLevel);
         }
-        /*
         if ( $request->has('onlineStatus') ) {
-            $query->where('access_level', $request->onlineStatus);
+            //$query->where('access_level', $request->onlineStatus);
         }
-         */
 
-        $sortBy = (function($k) { // map to table columns
-            switch ($k) {
-            case 'start_date':
-                return 'created_at';
-            case 'name':
-                return 'slug';
-            default:
-                return $k;
-            }
-        })( $request->input('sortBy', 'default') );
-        $query->sort( $sortBy, ($request->sortDir==='asc' ?? 'desc') );
+        // Order By
+        $sortDir = $request->sortDir==='asc' ? 'asc' : 'desc';
+        switch ($request->sortBy) {
+        case 'start_date':
+            $query->orderBy( 'created_at', $sortDir );  // %FIXME: what if upgrade from free to subscribe?
+            break;
+        case 'activity':
+            // %TODO
+            break;
+        case 'name':
+            // %FIXME join will be faster see above link
+            $query->orderBy( Timeline::select('slug')->whereColumn('timelines.id', 'shareables.shareable_id'), $sortDir ); 
+            break;
+        }
+
+        //return new ShareableCollection($query->get()); // %DEBUG
         $data = $query->paginate( $request->input('take', env('MAX_DEFAULT_PER_REQUEST', 10)) );
         return new ShareableCollection($data);
     }

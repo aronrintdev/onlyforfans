@@ -29,8 +29,10 @@ class Shareable extends Model
     // %%% Scopes
     //--------------------------------------------
 
+    /*
     public function scopeSort($query, $sortBy, $sortDir='desc')
     {
+        $sortDir = $sortDir==='asc' ? 'asc' : 'desc';
         switch ($sortBy) {
         case 'slug':
             $query->orderBy('shareable.slug', $sortDir);
@@ -43,6 +45,7 @@ class Shareable extends Model
         }
         return $query;
     }
+     */
 
 }
 

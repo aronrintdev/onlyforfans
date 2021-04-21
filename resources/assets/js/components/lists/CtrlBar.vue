@@ -3,7 +3,7 @@
       <b-row class="justify-content-end mt-0">
         <b-col md="6" class="text-right">
 
-          <b-dropdown no-caret right ref="listCtrls" variant="transparent" id="feed-ctrl-dropdown" class="tag-ctrl">
+          <b-dropdown no-caret right ref="filterCtrls" variant="transparent" id="feed-ctrl-dropdown" class="tag-ctrl">
             <template #button-content>
               <b-icon icon="filter" scale="1.8" variant="primary"></b-icon>
             </template>
@@ -22,7 +22,7 @@
             </b-dropdown-form>
           </b-dropdown>
 
-          <b-dropdown no-caret right ref="feedCtrls" variant="transparent" id="feed-ctrl-dropdown" class="tag-ctrl">
+          <b-dropdown no-caret right ref="sortCtrls" variant="transparent" id="feed-ctrl-dropdown" class="tag-ctrl">
             <template #button-content>
               <b-icon icon="arrow-down-up" scale="1.3" variant="primary"></b-icon>
             </template>
@@ -73,14 +73,7 @@ export default {
   }),
 
   methods: { 
-  },
-
-  watch: {
-    accessLevel (newVal) {
-      console.log('lists.CtrlBar::accessLevel()', { 
-        newVal,
-      })
-      this.$refs.listCtrls.hide(true)
+    applyFilters() {
       this.$emit('apply-filters', {
         filters: {
           accessLevel: this.accessLevel,
@@ -91,8 +84,31 @@ export default {
           dir: this.sortDir,
         },
       })
-      //this.reloadFromFirstPage();
+    }
+  },
+
+  watch: {
+
+    sortDir (newVal) {
+      this.$refs.sortCtrls.hide(true)
+      this.applyFilters()
     },
+
+    sortBy (newVal) {
+      this.$refs.sortCtrls.hide(true)
+      this.applyFilters()
+    },
+
+    onlineStatus (newVal) {
+      this.$refs.filterCtrls.hide(true)
+      this.applyFilters()
+    },
+
+    accessLevel (newVal) {
+      this.$refs.filterCtrls.hide(true)
+      this.applyFilters()
+    },
+
   },
 
   mounted() { },
