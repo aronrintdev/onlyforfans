@@ -31,6 +31,7 @@
               <div class="sharee-id">
                 <b-card-title class="mb-1">
                   <router-link :to="{ name: 'timeline.show', params: { slug: s.sharee.username } }">{{ s.sharee.name }}</router-link>
+                  <fa-icon v-if="s.access_level==='premium'" fixed-width :icon="['fas', 'rss-square']" style="color:#138496; font-size: 16px;" />
                 </b-card-title>
                 <b-card-sub-title class="mb-1">
                   <router-link :to="{ name: 'timeline.show', params: { slug: s.sharee.username } }">@{{ s.sharee.username }}</router-link>
