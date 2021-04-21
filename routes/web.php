@@ -224,7 +224,7 @@ Route::resource('chat-messages', 'MessageController')->only([
 |--------------------------------------------------------------------------
 */
 Route::group(['prefix' => '/username'], function() {
-    Route::match(['get', 'post'], '/check/{username?}', 'UsernameRulesController@checkUsername')->name('usernameRules.index');
+    Route::match(['get', 'post'], '/check/{username?}', 'UsernameRulesController@checkUsername')->name('usernameRules.check');
 
     // Admin Crud API //
     Route::group(['middleware' => ['auth', 'role:admin']], function() {
