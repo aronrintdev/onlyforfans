@@ -23,7 +23,7 @@
       <ul class="d-flex list-inline footer-ctrl mb-0">
         <li class="mr-3">
           <span @click="toggleBookmark()" class="tag-clickable">
-            <b-icon :icon="isBookmarkedByMe ? 'bookmark-fill' : 'bookmark'" variant="primary" font-scale="1" />
+            <b-icon :icon="isBookmarkedByMe ? 'favorite-fill' : 'favorite'" variant="primary" font-scale="1" />
           </span>
         </li>
       </ul>
@@ -133,15 +133,15 @@ export default {
     async toggleBookmark() {
       let response
       if (this.isBookmarkedByMe) { // remove
-        response = await axios.post(`/bookmarks/remove`, {
-          bookmarkable_type: 'posts',
-          bookmarkable_id: this.post.id,
+        response = await axios.post(`/favorites/remove`, {
+          favoritable_type: 'posts',
+          favoritable_id: this.post.id,
         })
         this.isBookmarkedByMe = false
       } else { // add
-        response = await axios.post(`/bookmarks`, {
-          bookmarkable_type: 'posts',
-          bookmarkable_id: this.post.id,
+        response = await axios.post(`/favorites`, {
+          favoritable_type: 'posts',
+          favoritable_id: this.post.id,
         })
         this.isBookmarkedByMe = true
       }
