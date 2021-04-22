@@ -30,7 +30,14 @@ class FavoritesController extends AppBaseController
         }
 
         if ( $request->has('favoritable_type') ) {
-            $query->with(['favoritable.cover', 'favoritable.avatar']);
+            switch ($request->favoritable_type) {
+            case 'timelines':
+                $query->with(['favoritable.cover', 'favoritable.avatar']);
+                break;
+            case 'mediafiles':
+                $query->with(['favoritable.resource']);
+                break;
+            }
             $query->where('favoritable_type', $request->favoritable_type);
         }
 

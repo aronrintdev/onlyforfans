@@ -25,7 +25,7 @@ class MediafilePolicy extends BasePolicy
         'tip'         => 'isBlockedByOwner:fail',
     ];
 
-    protected function view(User $user, Mediafile $mediafile)
+    public static function isViewable(User $user, Mediafile $mediafile)
     {
         switch ($mediafile->resource_type) {
 
@@ -64,6 +64,12 @@ class MediafilePolicy extends BasePolicy
         default:
             return false;
         }
+
+    }
+
+    protected function view(User $user, Mediafile $mediafile)
+    {
+        return self::isViewable($user, $mediafile);
     }
 
     protected function doClone(User $user, Mediafile $mediafile)
