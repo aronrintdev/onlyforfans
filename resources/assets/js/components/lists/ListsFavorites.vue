@@ -6,19 +6,19 @@
         <div>
           <b-tabs content-class="mt-3">
             <b-tab title="All" active>
-              <TabFavoritesAll />
+              <TabFavoritesAll :session_user="session_user" />
             </b-tab>
             <b-tab title="Posts">
-              <TabFavoritesPosts />
+              <TabFavoritesPosts :session_user="session_user" />
             </b-tab>
             <b-tab title="Creators">
-              <TabFavoritesCreators />
+              <TabFavoritesCreators :session_user="session_user" />
             </b-tab>
             <b-tab title="Photos">
-              <TabFavoritesPhotos />
+              <TabFavoritesPhotos :session_user="session_user" />
             </b-tab>
             <b-tab title="Videos">
-              <TabFavoritesVideos />
+              <TabFavoritesVideos :session_user="session_user" />
             </b-tab>
           </b-tabs>
         </div>
