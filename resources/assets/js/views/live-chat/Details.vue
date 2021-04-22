@@ -641,7 +641,7 @@
         if (response.data.messages.length === 0) {
           this.hasMore = false;
         }
-        this.originMessages = response.data.messages.concat(this.originMessages);
+        this.originMessages = this.originMessages.concat(response.data.messages);
         this.offset = this.originMessages.length;
         this.groupMessages();
         this.loadingData = false;
