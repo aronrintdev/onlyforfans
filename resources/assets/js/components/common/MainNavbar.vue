@@ -15,7 +15,7 @@
     <ScrollCollapse v-if="mobile" ref="scrollCollapse" class="w-100" :full-open="searchOpen" :full-open-height="openHeight">
       <div class="d-flex flex-column justify-content-between h-100">
         <SearchBar class="w-100 mt-3" :mobile="true" @opening="searchOpen = true" @closing="searchOpen = false" @scroll="onScroll" />
-        <NavButtons :mobile-style="mobile" :unread-messages-count="unreadMessagesCount" class="w-100 mt-3" />
+        <NavButtons :mobile-style="mobile" :unread-messages-count="unread_messages_count" class="w-100 mt-3" />
       </div>
     </ScrollCollapse>
 
@@ -23,7 +23,7 @@
       <SearchBar />
     </b-navbar-nav>
     <b-navbar-nav v-if="!mobile" class="ml-auto">
-      <NavButtons class="mx-3" :unread-messages-count="unreadMessagesCount" />
+      <NavButtons class="mx-3" :unread-messages-count="unread_messages_count" />
       <b-nav-item-dropdown
         id="profile-dropdown"
         toggle-class="nav-link-custom"
@@ -62,11 +62,12 @@ export default {
 
   props: {
     toggleMobileAt: { type: [String, Number], default: 'md', },
+    unreadMessagesCount: { type: Number, default: 0 },
   },
 
   computed: {
     ...Vuex.mapState([ 'mobile' ]),
-    ...Vuex.mapGetters(['session_user']),
+    ...Vuex.mapGetters(['session_user', 'unread_messages_count']),
     openHeight() {
       const height = this.$vssHeight - this.$el.clientHeight
       if(this.$refs['scrollCollapse']) {
@@ -82,7 +83,6 @@ export default {
   data: () => ({
     searchOpen: false,
     screenWidth: null,
-    unreadMessagesCount: 0,
   }),
 
   methods: {
@@ -103,16 +103,6 @@ export default {
       this.$forceCompute('openHeight')
     }
   },
-
-  mounted() {
-    // Get unread messages count
-    this.axios.get('/unread-messages-count')
-      .then((res) => {
-        this.unreadMessagesCount = res.data.unread_messages_count;
-      });
-    if (this.$vssWidth < this.mobileWidth) {
-    }
-  }
 
 }
 </script>

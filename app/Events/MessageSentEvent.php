@@ -19,17 +19,19 @@ class MessageSentEvent  implements ShouldBroadcast
 
     public $message;
     public $sender;
+    public $receiver;
 
     /**
      * Create a new event instance.
      *
      * @return void
      */
-    public function __construct(ChatThread $chatthread, User $sender)
+    public function __construct(ChatThread $chatthread, User $sender, User $receiver)
     {
         $json = json_encode($chatthread);
         $this->message = $json;
         $this->sender = $sender;
+        $this->receiver = $receiver;
     }
 
 
@@ -40,6 +42,6 @@ class MessageSentEvent  implements ShouldBroadcast
      */
     public function broadcastOn()
     {
-        return new PrivateChannel($this->sender->id.'-message');
+        return new PrivateChannel($this->receiver->id.'-message');
     }
 }

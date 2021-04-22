@@ -277,7 +277,7 @@ class MessageController extends Controller
 
         $chatthread->messages = $chatthread->messages()->with('mediafile')->orderBy('mcounter', 'asc')->get();
 
-        broadcast(new MessageSentEvent($chatthread, $sessionUser))->toOthers();
+        broadcast(new MessageSentEvent($chatthread, $sessionUser, $receiver))->toOthers();
 
         return [
             'message' => $chatthread,

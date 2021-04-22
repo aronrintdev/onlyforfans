@@ -43,6 +43,7 @@ export default new Vuex.Store({
     login_sessions: [],
     uiFlags: [],
     unshifted_timeline_post: null,
+    unread_messages_count: 0,
   },
 
   mutations: {
@@ -120,6 +121,9 @@ export default new Vuex.Store({
     },
     UPDATE_UNSHIFTED_TIMELINE_POST(state, payload) {
       state.unshifted_timeline_post = propSelect(payload, 'post')
+    },
+    UPDATE_UNREAD_MESSAGES_COUNT(state, payload) {
+      state.unread_messages_count = propSelect(payload, 'unread_messages_count')
     },
   },
 
@@ -300,6 +304,7 @@ export default new Vuex.Store({
     user_settings:           state => state.user_settings,
     login_sessions:          state => state.login_sessions,
     uiFlags:                 state => state.uiFlags,
+    unread_messages_count:   state => state.unread_messages_count,
     //children: state => state.vault.children, // Flat list
     //mediafiles: state => state.vault.mediafiles, // Flat list
   },

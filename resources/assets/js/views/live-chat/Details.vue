@@ -107,7 +107,7 @@
                         <div class="message-group-time"><span>{{ moment.unix(messageGroup.date).format('MMM DD, YYYY') }}</span></div>
                         <template v-for="message in messageGroup.messages">
                           <div class="message" :key="message.id">
-                            <div class="received" v-if="currentUser && currentUser.id !== message.sender_id">
+                            <div class="received" v-if="session_user && session_user.id !== message.sender_id">
                               <div class="user-logo text-logo" v-if="selectedUser && !selectedUser.profile.avatar">
                                 {{ getLogoFromName(selectedUser.name) }}
                               </div>
@@ -131,7 +131,7 @@
                                 <div class="time">{{ moment(message.created_at).format('hh:mm A') }}</div>
                               </div>
                             </div>
-                            <div class="sent" v-if="currentUser && currentUser.id === message.sender_id">
+                            <div class="sent" v-if="session_user && session_user.id === message.sender_id">
                               <template v-for="msg in message.messages">
                                 <div class="text" :class="`message-${msg.id}`" v-if="!msg.mediafile" :key="msg.id">{{ msg.mcontent }}</div>
                                 <div class="image" :class="`message-${msg.id}`" v-if="msg.mediafile" :key="msg.id">
@@ -454,6 +454,7 @@
   import PhotoSwipeUI from 'photoswipe/dist/photoswipe-ui-default';
   import createPreviewDirective from 'vue-photoswipe-directive';
   import draggable from 'vuedraggable';
+  import Vuex from 'vuex';
 
   import RadioGroupBox from '@components/radioGroupBox';
   import RoundCheckBox from '@components/roundCheckBox';
@@ -463,9 +464,6 @@
    * Messages Dashboard View
    */
   export default {
-    props: {
-      session_user: null,
-    },
     data: () => ({
       selectedUser: undefined,
       users: [],
@@ -474,7 +472,6 @@
       messageSearchVisible: false,
       newMessageText: undefined,
       hasNewMessage: false,
-      currentUser: undefined,
       originMessages: [],
       offset: 0,
       loadingData: false,
@@ -508,31 +505,9 @@
     mounted() {
       const self = this;
       // Mark unread messages as read
-      this.axios.post(`/chat-messages/${this.$route.params.id}/mark-as-read`)
-        .then(() => {
-          const count = parseInt($('.unread-messages-count').text(), 10);
-          if (count > 1) {
-            $('.unread-messages-count').text(count - 1);
-          } else {
-            $('.unread-messages-count').addClass('d-none');
-          }
-        });
+      this.markAsRead();
       this.getMessages();
       this.findConversationList();
-      Echo.private(`${this.$route.params.id}-message`)
-        .listen('MessageSentEvent', (e) => {
-          const message = JSON.parse(e.message);
-          if (message.receiver_id === self.currentUser.id) {
-            self.originMessages.unshift(message);
-            self.lastMessage = _.cloneDeep(message);
-            self.offset += 1;
-            self.groupMessages();
-            $('.conversation-list').animate({ scrollTop: $('.conversation-list')[0].scrollHeight }, 500);
-            this.$Lazyload.$once('loaded', function () {
-              $('.conversation-list').animate({ scrollTop: $('.conversation-list')[0].scrollHeight }, 500);
-            });
-          }
-        });
       // Echo.join(`user-status`)
       //   .joining((user) => {
       //     self.updateUserStatus(user.id, 1);
@@ -542,7 +517,7 @@
       //   });
       Echo.join(`chat-typing`)
         .listenForWhisper('typing', (e) => {
-          if (e.from === self.$route.params.id && e.to === self.currentUser.id && e.typing) {
+          if (e.from === self.$route.params.id && e.to === self.session_user.id && e.typing) {
             $('.typing').show();
           } else {
             $('.typing').hide();
@@ -554,33 +529,35 @@
 
     },
     watch: {
+      session_user: function(newVal) {
+        const self = this;
+        if (newVal) {
+          Echo.private(`${newVal.id}-message`)
+            .listen('MessageSentEvent', (e) => {
+              const message = JSON.parse(e.message);
+              self.lastMessage = _.cloneDeep(message);
+              if (message.sender_id === this.$route.params.id) {
+                self.originMessages.unshift(message);
+                self.offset += 1;
+                self.groupMessages();
+                $('.conversation-list').animate({ scrollTop: $('.conversation-list')[0].scrollHeight }, 500);
+                this.$Lazyload.$once('loaded', function () {
+                  $('.conversation-list').animate({ scrollTop: $('.conversation-list')[0].scrollHeight }, 500);
+                });
+                self.markAsRead();
+              }
+            });
+        }
+      },
       '$route.params.id': function (id) {
         this.selectedUser = undefined;
         this.messages = [];
         this.originMessages = [];
         this.offset = 0;
         this.newMessageText = undefined;
-
-        // Mark unread messages as read
-        this.axios.post(`/chat-messages/${this.$route.params.id}/mark-as-read`);
-
+        this.markAsRead();
         this.getMessages();
-        const self = this;
         this.findConversationList();
-        Echo.private(`${id}-message`)
-        .listen('MessageSentEvent', (e) => {
-          const message = JSON.parse(e.message);
-          if (message.receiver_id === self.currentUser.id) {
-            self.originMessages.unshift(message);
-            self.lastMessage = _.cloneDeep(message);
-            self.offset += 1;
-            self.groupMessages();
-            $('.conversation-list').animate({ scrollTop: $('.conversation-list')[0].scrollHeight }, 500);
-            this.$Lazyload.$once('loaded', function () {
-              $('.conversation-list').animate({ scrollTop: $('.conversation-list')[0].scrollHeight }, 500);
-            });
-          }
-        });
       }
     },
     components: {
@@ -599,6 +576,7 @@
         }, PhotoSwipe, PhotoSwipeUI)
     },
     computed: {
+      ...Vuex.mapGetters(['session_user', 'unread_messages_count']),
       selectedOption: function () {
         let optionText;
         switch (this.optionValue) {
@@ -621,6 +599,23 @@
       this.$el.querySelector('.conversation-list .messages').removeEventListener('scroll', this.handleDebouncedScroll);
     },
     methods: {
+      ...Vuex.mapMutations([ 'UPDATE_UNREAD_MESSAGES_COUNT' ]),
+      markAsRead: function() {
+        this.axios.post(`/chat-messages/${this.$route.params.id}/mark-as-read`)
+          .then(() => {
+            $(`.user-content.user-${this.$route.params.id} .is-unread`).removeClass('is-unread');
+            if (this.unread_messages_count > 1) {
+              this.UPDATE_UNREAD_MESSAGES_COUNT({
+                unread_messages_count: this.unread_messages_count - 1,
+              });
+            } else {
+              this.UPDATE_UNREAD_MESSAGES_COUNT({
+                unread_messages_count: 0,
+              });
+              $('.unread-messages-count').addClass('d-none');
+            }
+          });
+      },
       handleDebouncedScroll: function(event) {
         const isUserScrolling = (event.target.scrollTop === 0);
         if (isUserScrolling && !this.loadingData && this.hasMore) {
@@ -643,9 +638,6 @@
         const user_id = this.$route.params.id;
         const response = await this.axios.get(`/chat-messages/${user_id}?offset=${this.offset}&limit=30`);
         this.selectedUser = response.data;
-        if (!this.currentUser) {
-          this.currentUser = response.data.currentUser;
-        }
         if (response.data.messages.length === 0) {
           this.hasMore = false;
         }
@@ -715,7 +707,7 @@
         setTimeout(() => {
           channel.whisper('typing', {
             typing: true,
-            from: this.currentUser.id,
+            from: this.session_user.id,
             to: this.$route.params.id
           })
         }, 300);
@@ -816,7 +808,7 @@
       confirmBlockReason: function() {
         const self = this;
         if (this.blockReason === 'block') {
-          this.axios.patch(`/users/${this.currentUser.id}/settings`, { blocked: [{ slug: this.selectedUser.profile.username }] })
+          this.axios.patch(`/users/${this.session_user.id}/settings`, { blocked: [{ slug: this.selectedUser.profile.username }] })
             .then(() => {
               self.closeBlockModal();
               self.$router.push('/messages');
