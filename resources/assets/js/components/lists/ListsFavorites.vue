@@ -3,6 +3,22 @@
 
     <b-card title="Favorites">
       <b-card-text>
+        <div>
+          <b-tabs content-class="mt-3">
+            <b-tab title="All" active>
+              <!-- table -->
+            </b-tab>
+            <b-tab title="Posts">
+              <!-- layout like followers -->
+            </b-tab>
+            <b-tab title="Creators">
+            </b-tab>
+            <b-tab title="Photos">
+            </b-tab>
+            <b-tab title="Videos">
+            </b-tab>
+          </b-tabs>
+        </div>
       </b-card-text>
     </b-card>
 
@@ -11,6 +27,9 @@
 
 <script>
 //import Vuex from 'vuex';
+import { eventBus } from '@/app'
+//import { DateTime } from 'luxon'
+import moment from 'moment'
 
 export default {
 

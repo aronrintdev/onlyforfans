@@ -14,58 +14,8 @@
       <CtrlBar @apply-filters="applyFilters($event)" />
 
       <b-row class="mt-2">
-        <b-col lg="4" v-for="(s,idx) in shareables" :key="s.id" >
-          <b-card no-body class="background mb-5">
-            <b-card-img :src="s.sharee.cover.filepath" alt="s.sharee.username" top></b-card-img>
-
-            <b-card-body class="py-1">
-
-              <div class="last-seen">Last seen TBD</div>
-
-              <div class="banner-ctrl ">
-                <b-dropdown no-caret right ref="bannerCtrls" variant="transparent" id="banner-ctrl-dropdown" class="tag-ctrl"> 
-                  <template #button-content>
-                    <fa-icon fixed-width icon="ellipsis-v" style="font-size:1.2rem; color:#fff" />
-                  </template>
-                  <b-dropdown-item v-clipboard="getTimelineUrl(s.sharee)">Copy link to profile</b-dropdown-item>
-                  <b-dropdown-divider></b-dropdown-divider>
-                  <b-dropdown-item @click="doRestrict(s)">Restrict</b-dropdown-item>
-                  <b-dropdown-item @click="doBlock(s)">Block</b-dropdown-item>
-                  <b-dropdown-item @click="doReport(s)">Report</b-dropdown-item>
-                </b-dropdown>
-              </div>
-
-              <div class="avatar-img">
-                <router-link :to="{ name: 'timeline.show', params: { slug: s.sharee.username } }">
-                  <b-img thumbnail rounded="circle" class="w-100 h-100" :src="s.sharee.avatar.filepath" :alt="s.sharee.username" :title="s.sharee.name" />
-                </router-link>
-              </div>
-
-
-              <div class="sharee-id">
-                <b-card-title class="mb-1">
-                  <router-link :to="{ name: 'timeline.show', params: { slug: s.sharee.username } }">{{ s.sharee.name }}</router-link>
-                  <fa-icon v-if="s.access_level==='premium'" fixed-width :icon="['fas', 'rss-square']" style="color:#138496; font-size: 16px;" />
-                </b-card-title>
-                <b-card-sub-title class="mb-1">
-                  <router-link :to="{ name: 'timeline.show', params: { slug: s.sharee.username } }">@{{ s.sharee.username }}</router-link>
-                </b-card-sub-title>
-              </div>
-
-              <b-card-text class="mb-2"><fa-icon fixed-width icon="star" style="color:#007bff" /> Add to favorites</b-card-text>
-
-              <b-button variant="outline-primary">Message</b-button>
-              <b-button variant="outline-danger">Restrict</b-button>
-              <b-button variant="outline-warning">Discount</b-button>
-              <div>
-                <small v-if="s.access_level==='premium'" class="text-muted">subscribed since {{ moment(s.created_at).format('MMM DD, YYYY') }}</small>
-                <small v-else class="text-muted">following for free since {{ moment(s.created_at).format('MMM DD, YYYY') }}</small>
-              </div>
-              <!-- <pre>{{ JSON.stringify(s, null, "\t") }}</pre> -->
-
-            </b-card-body>
-
-          </b-card>
+        <b-col lg="4" v-for="(s,idx) in shareables" :key="s.id" > 
+          <WidgetUser :session_user="session_user" :user="s.sharee" :access_level="s.access_level" :created_at="s.created_at" />
         </b-col>
       </b-row>
 
@@ -88,6 +38,7 @@ import { eventBus } from '@/app'
   //import { DateTime } from 'luxon'
 import moment from 'moment'
 import CtrlBar from '@components/lists/CtrlBar'
+import WidgetUser from '@components/lists/WidgetUser'
 
 export default {
 
@@ -177,6 +128,7 @@ export default {
       this.currentPage = 1
     },
 
+    /*
     // shareable in this context is the [shareables] record
     // shareable.sharee in this context is related user record
     doBlock(shareable) {
@@ -194,6 +146,7 @@ export default {
     getTimelineUrl(user) {
       return route('spa.index', user.username)
     }
+     */
   },
 
   mounted() { },
@@ -204,13 +157,11 @@ export default {
 
   components: {
     CtrlBar,
+    WidgetUser,
   },
 }
 </script>
 
 <style lang="scss" scoped>
-.clickable {
-  cursor: pointer;
-}
 </style>
 
