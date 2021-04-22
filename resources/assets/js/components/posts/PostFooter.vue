@@ -22,7 +22,7 @@
       </ul>
       <ul class="d-flex list-inline footer-ctrl mb-0">
         <li class="mr-3">
-          <span @click="toggleBookmark()" class="tag-clickable">
+          <span @click="toggleFavorite()" class="tag-clickable">
             <fa-icon v-if="isFavoritedByMe" fixed-width :icon="['fas', 'star']" class="clickable" style="font-size:1.2rem; color:#007bff" />
             <fa-icon v-else fixed-width :icon="['far', 'star']" class="clickable" style="font-size:1.2rem; color:#007bff" />
             <!--
@@ -134,7 +134,7 @@ export default {
       this.post.comments_count = this.post.comments_count + 1
     },
 
-    async toggleBookmark() {
+    async toggleFavorite() { // was toggleBookmark
       let response
       if (this.isFavoritedByMe) { // remove
         response = await axios.post(`/favorites/remove`, {

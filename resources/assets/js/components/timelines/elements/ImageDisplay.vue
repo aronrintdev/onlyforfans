@@ -20,6 +20,33 @@
         <PostCta :post="mediafile.resource" :session_user="session_user" :primary_mediafile="mediafile" />
       </template>
 
+      <template footer>
+        <div class="panel-footer fans">
+
+          <div class="d-flex justify-content-between">
+            <ul class="d-flex list-inline footer-ctrl mb-0">
+              <li class="mr-3">
+                <LikesButton @toggled="toggleLike()" :filled="isLikedByMe" :count="likeCount" />
+              </li>
+            </ul>
+            <ul class="d-flex list-inline footer-ctrl mb-0">
+              <li class="mr-3">
+                <span @click="toggleFavorite()" class="tag-clickable">
+                  <fa-icon v-if="isFavoritedByMe" fixed-width :icon="['fas', 'star']" class="clickable" style="font-size:1.2rem; color:#007bff" />
+                  <fa-icon v-else fixed-width :icon="['far', 'star']" class="clickable" style="font-size:1.2rem; color:#007bff" />
+                </span>
+              </li>
+            </ul>
+          </div>
+
+          <div class="like-count">
+            <template v-if="likeCount===1"><span class="mr-2">{{ likeCount }} like</span></template>
+            <template v-if="likeCount > 1"><span class="mr-2">{{ likeCount }} likes</span></template>
+          </div>
+
+        </div>
+      </template>
+
     </b-card>
   </div>
 </template>
@@ -48,9 +75,32 @@ export default {
   },
 
   data: () => ({
+    isLikedByMe: false,
+    likeCount: 0, // %FIXME INIT
+    isFavoritedByMe: false,
   }),
 
   methods: {
+
+    toggleLike() {
+    },
+
+    async toggleFavorite() { // was toggleBookmark
+      let response
+      if (this.isFavoritedByMe) { // remove
+        response = await axios.post(`/favorites/remove`, {
+          favoritable_type: 'mediafiles', // 'photos' ?
+          favoritable_id: this.mediafile.id,
+        })
+        this.isFavoritedByMe = false
+      } else { // add
+        response = await axios.post(`/favorites`, {
+          favoritable_type: 'mediafiles',
+          favoritable_id: this.mediafile.id,
+        })
+        this.isFavoritedByMe = true
+      }
+    },
 
     renderFull() {
       // %FIXME: currently hardcoded for mediafiles that belong to *posts*

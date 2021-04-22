@@ -6,26 +6,19 @@
         <div>
           <b-tabs content-class="mt-3">
             <b-tab title="All" active>
-              <!-- table -->
-              <TabFavoritesAll>
-              </TabFavoritesAll>
+              <TabFavoritesAll />
             </b-tab>
             <b-tab title="Posts">
-              <!-- layout like followers -->
-              <TabFavoritesPosts>
-              </TabFavoritesPosts>
+              <TabFavoritesPosts />
             </b-tab>
             <b-tab title="Creators">
-              <TabFavoritesCreators>
-              </TabFavoritesCreators>
+              <TabFavoritesCreators />
             </b-tab>
             <b-tab title="Photos">
-              <TabFavoritesPhotos>
-              </TabFavoritesPhotos>
+              <TabFavoritesPhotos />
             </b-tab>
             <b-tab title="Videos">
-              <TabFavoritesVideos>
-              </TabFavoritesVideos>
+              <TabFavoritesVideos />
             </b-tab>
           </b-tabs>
         </div>
