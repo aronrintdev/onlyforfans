@@ -1,7 +1,7 @@
 <template>
   <div>
     <b-table hover 
-      id="favorites-table"
+      id="favorites-all"
       :items="favorites"
       :fields="favoriteFields"
       :current-page="currentPage"
@@ -14,7 +14,7 @@
       v-model="currentPage"
       :total-rows="totalRows"
       :per-page="perPage"
-      aria-controls="favorites-table"
+      aria-controls="favorites-all"
       v-on:page-click="pageClickHandler"
     ></b-pagination>
   </div>

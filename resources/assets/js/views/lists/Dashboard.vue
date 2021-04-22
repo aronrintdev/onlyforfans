@@ -96,7 +96,6 @@ export default {
 </script>
 
 <style lang="scss" >
-/* %NOTE: this is not scoped...meant to apply to child components */
 body .list-component {
   .card {
     .card-body {

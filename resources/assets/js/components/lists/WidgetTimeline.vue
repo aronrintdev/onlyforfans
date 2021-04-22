@@ -57,7 +57,6 @@ import moment from 'moment'
 export default {
 
   props: {
-    session_user: null,
     timeline: null,
     access_level: null,
     created_at: null,
@@ -65,7 +64,7 @@ export default {
 
   computed: {
     isLoading() {
-      return !this.session_user || !this.timeline || !this.access_level || !this.created_at
+      return !this.timeline || !this.access_level || !this.created_at
     },
   },
 

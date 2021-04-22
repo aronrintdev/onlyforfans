@@ -17,38 +17,21 @@ class FavoritesController extends AppBaseController
     public function index(Request $request)
     {
         $request->validate([
-            'filters' => 'array',
-            'filters.post_id' => 'uuid|exists:posts,id', // if admin or post-owner only (per-post comments by fan use posts controller)
-            'filters.user_id' => 'uuid|exists:users,id', // if admin only
+            'user_id' => 'uuid|exists:users,id', // only admin can filter by user
+            'favoritable_type' => 'string|alpha-dash|in:posts,mediafiles,timelines,stories',
         ]);
 
-        $filters = $request->filters ?? [];
-
-        // Init query
-        $query = Favorite::with(['user', 'favoritable']);
+        $query = Favorite::with(['user', 'favoritable']); // Init query
 
         // Check permissions
         if ( !$request->user()->isAdmin() ) {
-
-            // non-admin: only view own comments
+            // non-admin: can only view own 
             $query->where('user_id', $request->user()->id); 
-            unset($filters['user_id']);
-
-            if ( array_key_exists('post_id', $filters) ) {
-                $post = Post::find($filters['post_id']);
-                $this->authorize('update', $post); // non-admin must own post filtered on
-            }
         }
 
-        // Apply any filters
-        foreach ($filters as $key => $f) {
-            // %TODO: subgroup under 'filters' (need to update axios.GET calls as well in Vue)
-            switch ($key) {
-                case 'user_id':
-                case 'post_id':
-                    $query->where($key, $f);
-                    break;
-            }
+        if ( $request->has('favoritable_type') ) {
+            $query->with(['favoritable.cover', 'favoritable.avatar']);
+            $query->where('favoritable_type', $request->favoritable_type);
         }
 
         $data = $query->paginate( $request->input('take', env('MAX_DEFAULT_PER_REQUEST', 10)) );
