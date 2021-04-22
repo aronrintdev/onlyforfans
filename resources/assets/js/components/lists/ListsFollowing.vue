@@ -16,7 +16,6 @@
       <b-row class="mt-3">
         <b-col lg="4" v-for="(s,idx) in shareables" :key="s.id" > 
           <!-- %NOTE: s is the [shareables] record, s.shareable is the related, 'morhped', 'shareable' object (eg timelines) -->
-
           <WidgetTimeline :session_user="session_user" :timeline="s.shareable" :access_level="s.access_level" :created_at="s.created_at" />
           <!-- <pre> Access Level: {{ s.access_level }} {{ JSON.stringify(s, null, "\t") }} </pre> -->
         </b-col>

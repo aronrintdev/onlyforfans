@@ -46,7 +46,6 @@
         <small v-if="access_level==='premium'" class="text-muted">subscribed since {{ moment(created_at).format('MMM DD, YYYY') }}</small>
         <small v-else class="text-muted">following for free since {{ moment(created_at).format('MMM DD, YYYY') }}</small>
       </div>
-      <!-- <pre>{{ JSON.stringify(s, null, "\t") }}</pre> -->
 
     </b-card-body>
 

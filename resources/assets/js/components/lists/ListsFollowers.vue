@@ -16,6 +16,7 @@
       <b-row class="mt-2">
         <b-col lg="4" v-for="(s,idx) in shareables" :key="s.id" > 
           <WidgetUser :session_user="session_user" :user="s.sharee" :access_level="s.access_level" :created_at="s.created_at" />
+          <!-- <pre> Access Level: {{ s.access_level }} {{ JSON.stringify(s, null, "\t") }} </pre> -->
         </b-col>
       </b-row>
 
