@@ -2,7 +2,7 @@
   <div>
     <b-modal
       id="modal-tip"
-      size="sm"
+      size="lg"
       title="Send a Tip"
       hide-footer
       body-class="p-0"
@@ -22,6 +22,7 @@
 
     <b-modal
       id="modal-follow"
+      size="lg"
       title="Follow"
       hide-footer
       body-class="p-0"

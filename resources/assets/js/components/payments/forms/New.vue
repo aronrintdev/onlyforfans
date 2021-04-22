@@ -6,6 +6,9 @@
         :value="value"
         :price="price"
         :currency="currency"
+        :type="type"
+        :extra="extra"
+        @processing="$emit('processing')"
       />
     </keep-alive>
   </div>
@@ -28,9 +31,11 @@ export default {
 
   props: {
     selected: { type: String, default: 'segpay' },
+    type: { type: String, default: 'purchase'},
     price: { type: Number, default: 0 },
     currency: { type: String, default: 'USD' },
     value: { type: Object, default: () => ({})},
+    extra: { type: Object, default: () => ({})},
   },
 
   data: () => ({

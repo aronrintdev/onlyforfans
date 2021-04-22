@@ -84,8 +84,6 @@ export default {
         data: { 
           resource: this.timeline,
           resource_type: 'timelines', 
-          //resource_id: this.timeline.id,
-          //resource_slug: this.timeline.slug,
         },
       })
     },

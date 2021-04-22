@@ -72,7 +72,7 @@ export default {
   }),
 
   created() {
-    eventBus.$on('update-timeline', () => {
+    eventBus.$on('update-originator', () => {
       this.load()
     })
 

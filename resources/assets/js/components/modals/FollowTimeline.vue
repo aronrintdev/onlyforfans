@@ -15,8 +15,8 @@
         </div>
       </section>
     </b-card-header>
-
-      <b-card-body>
+    <transition name="quick-fade" mode="out-in">
+      <b-card-body v-if="step === 'initial'" key="initial">
         <div v-if="timeline.is_following"> <!-- un-follow or un-subscribe -->
           <p>Sorry to see you go! If you're sure you want to cancel, confirm below...</p>
           <b-button v-if="timeline.is_subscribed" @click="doSubscribe" variant="danger" class="w-100">Click to Cancel Subscription</b-button>
@@ -30,9 +30,18 @@
             <b-button @click="doFollow" variant="primary" class="w-100 mb-3">Follow for Free</b-button>
           </template>
         </div>
-
       </b-card-body>
-
+      <b-card-body v-if="step === 'payment'" key="payment">
+        <PurchaseForm
+          :value="timeline"
+          :price="timeline.price"
+          :currency="'USD'"
+          type="subscription"
+          :display-price="timeline.price_display || (timeline.price | niceCurrency)"
+          class="mt-3"
+        />
+      </b-card-body>
+    </transition>
   </b-card>
 </template>
 
@@ -62,7 +71,10 @@ export default {
     console.log({timeline: this.timeline})
   },
 
-  data: () => ({ }),
+  data: () => ({
+    /** 'initial' | 'payment' */
+    step: 'initial',
+  }),
 
   methods: {
 
@@ -80,17 +92,19 @@ export default {
         toaster: 'b-toaster-top-center',
         title: 'Success!',
       })
-      eventBus.$emit('update-timeline', this.timeline.id)
-      eventBus.$emit('update-feed') // updates feed being viewed
+      // %FIXME: this emit should be more general, as this modal may be used elsewhere
+       eventBus.$emit('update-originator')
     },
 
     async doSubscribe(e) {
       e.preventDefault()
+      this.step = 'payment'
+
       // const response = await this.axios.put( route('timelines.subscribe', this.timeline.id), {
       //   sharee_id: this.session_user.id,
       //   notes: '',
       // })
-      this.$bvModal.hide('modal-follow')
+      // this.$bvModal.hide('modal-follow')
 
 
       // Needs to be moved
@@ -102,6 +116,7 @@ export default {
       //   toaster: 'b-toaster-top-center',
       //   title: 'Success!',
       // })
+      // eventBus.$emit('update-originator') // %ERIK use this
       // eventBus.$emit('update-timeline', this.timeline.id)
       // eventBus.$emit('update-feed') // updates feed being viewed
     },

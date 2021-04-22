@@ -54,8 +54,8 @@ export default {
   data: () => ({
     routes: [
       {
-        name: 'Bookmarks',
-        to: { name: 'lists.bookmarks', params: {} },
+        name: 'Favorites',
+        to: { name: 'lists.favorites', params: {} },
       }, 
       {
         name: 'Following',
@@ -95,5 +95,79 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" >
+/* %NOTE: this is not scoped...meant to apply to child components */
+body .list-component {
+  .card {
+    .card-body {
+      padding-top: 0.6rem;
+      padding-bottom: 0.6rem;
+    }
+
+    .card-title a {
+      color: #4a5568;
+      text-decoration: none;
+    }
+    .card-subtitle a {
+      color: #6e747d;
+      text-decoration: none;
+    }
+
+    &.background {
+      position: relative;
+      .avatar-details {
+        margin-left: 58px;
+      }
+      .shareable-id, .sharee-id {
+        margin-left: 5.5rem;
+      }
+      .avatar-img {
+        position: absolute;
+        left: 8px;
+        top: 75px; /* bg image height - 1/2*avatar height */
+        width: 90px;
+        height: 90px;
+        .rounded-circle.img-thumbnail {
+          padding: 0.11rem;
+        }
+      }
+      .last-seen {
+        color: #fff;
+        margin-left: 5.5rem;
+        font-size: 0.9rem;
+        position: absolute;
+        top: 91px;
+      }
+      .banner-ctrl {
+        position: absolute;
+        top: 5px;
+        right: 0;
+      }
+      .card-img-top {
+        overflow: hidden;
+        height: 120px;
+      }
+    }
+
+    .avatar-details {
+      h2.avatar-name {
+        font-size: 16px;
+        & > a {
+          color: #4a5568;
+          text-decoration: none;
+          text-transform: capitalize;
+        }
+      }
+
+      .avatar-mail  {
+        font-size: 14px;
+        & > a {
+          color: #7F8FA4;
+          text-decoration: none;
+        }
+      }
+    }
+  }
+}
+
 </style>

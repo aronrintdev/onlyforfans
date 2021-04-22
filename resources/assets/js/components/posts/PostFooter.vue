@@ -121,8 +121,6 @@ export default {
         data: { 
           resource: this.post,
           resource_type: 'posts', 
-          //resource_id: this.post.id,
-          //resource_slug: this.post.slug,
         },
       })
     },

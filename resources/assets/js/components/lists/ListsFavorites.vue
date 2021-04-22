@@ -1,7 +1,7 @@
 <template>
   <div v-if="!isLoading">
 
-    <b-card title="Bookmarks">
+    <b-card title="Favorites">
       <b-card-text>
       </b-card-text>
     </b-card>

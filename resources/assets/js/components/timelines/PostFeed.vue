@@ -179,10 +179,15 @@ export default {
       this.updatePost(postId) 
     })
 
-    eventBus.$on('update-feed', () => {
-      console.log('components.timelines.PostFeed - eventBus.$on(update-feed)')
+    eventBus.$on('update-originator', () => {
+      console.log('components.timelines.PostFeed - eventBus.$on(update-originator)')
       this.reloadFromFirstPage();
     })
+
+    //eventBus.$on('update-feed', () => {
+    //console.log('components.timelines.PostFeed - eventBus.$on(update-feed)')
+    //this.reloadFromFirstPage();
+    //})
   },
 
   methods: {
@@ -212,8 +217,6 @@ export default {
         data: { 
           resource: this.timeline,
           resource_type: 'timelines', 
-          //resource_id: this.timelineId,
-          //resource_slug: this.timelineSlug,
         },
       })
     },

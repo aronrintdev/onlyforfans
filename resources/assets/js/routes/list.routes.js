@@ -6,9 +6,9 @@ import lists from '@components/lists'
 
 export default [
   {
-    name: 'lists.bookmarks',
-    component: lists.Bookmarks,
-    path: 'bookmarks',
+    name: 'lists.favorites',
+    component: lists.Favorites,
+    path: 'favorites',
   },
   {
     name: 'lists.following',
@@ -22,7 +22,7 @@ export default [
   },
   {
     name: 'lists.default',
-    component: lists.Bookmarks,
+    component: lists.Favorites,
     path: '',
   },
 ]

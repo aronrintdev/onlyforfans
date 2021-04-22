@@ -2,41 +2,41 @@
 
 namespace App\Events;
 
-use App\Interfaces\Purchaseable;
-use App\Models\User;
+use App\Interfaces\Tippable;
+use App\Models\Financial\Account;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class ItemPurchased implements ShouldBroadcast
+class TipFailed implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     /**
      * The Item that was purchased
      *
-     * @var Purchaseable
+     * @var Tippable
      */
     public $item;
 
     /**
-     * The Purchaser of the item.
+     * The account purchasing the item.
      *
-     * @var User
+     * @var Account
      */
-    public $purchaser;
+    public $account;
 
     /**
      * Create a new event instance.
      *
      * @return void
      */
-    public function __construct(Purchaseable $item, User $purchaser)
+    public function __construct(Tippable $item, Account $account)
     {
         $this->item = $item->withoutRelations();
-        $this->purchaser = $purchaser->withoutRelations();;
+        $this->account = $account->withoutRelations();
     }
 
     /**
@@ -46,10 +46,9 @@ class ItemPurchased implements ShouldBroadcast
      */
     public function broadcastOn()
     {
-        $channels = $this->item->getOwner()->map(function ($owner, $key) {
-            return new PrivateChannel("user.{$owner->getKey()}.events");
+        $channels = $this->account->getOwner()->map(function ($owner, $key) {
+            return new PrivateChannel("user-{$owner->getKey()}-purchases");
         });
-        $channels->push(new PrivateChannel("user.{$this->purchaser->getKey()}.purchases"));
         return $channels->all();
     }
 
@@ -63,7 +62,7 @@ class ItemPurchased implements ShouldBroadcast
         return [
             'item_type' => $this->item->getMorphString(),
             'item_id' => $this->item->getKey(),
-            'purchaser_id' => $this->purchaser->getKey(),
+            'account_id' => $this->account->getKey(),
         ];
     }
 }

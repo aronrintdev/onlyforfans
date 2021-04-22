@@ -84,6 +84,7 @@ return [
              */
             'feesOn' => [
                 TransactionTypeEnum::SALE,
+                TransactionTypeEnum::SUBSCRIPTION,
                 TransactionTypeEnum::TIP,
                 TransactionTypeEnum::CHARGEBACK_PARTIAL,
             ],
@@ -93,6 +94,7 @@ return [
              */
             'holdOn' => [
                 TransactionTypeEnum::SALE,
+                TransactionTypeEnum::SUBSCRIPTION,
                 TransactionTypeEnum::TIP,
                 TransactionTypeEnum::CHARGEBACK_PARTIAL,
             ],
