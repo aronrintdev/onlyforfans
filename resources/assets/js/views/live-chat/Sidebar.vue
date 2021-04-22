@@ -323,12 +323,10 @@
       },
       clearMessages: function (receiver) {
         this.axios.delete(`/chat-messages/${receiver.id}`)
-          .then((res) => {
-            const { data } = res;
-            if (data.status === 200) {
-              const idx = this.users.findIndex(user => user.profile.id === receiver.id);
-              this.users.splice(idx, 1);
-            }
+          .then(() => {
+            const idx = this.users.findIndex(user => user.profile.id === receiver.id);
+            this.users.splice(idx, 1);
+            this.$router.push('/messages');
           })
       },
       markAllAsRead: function() {
