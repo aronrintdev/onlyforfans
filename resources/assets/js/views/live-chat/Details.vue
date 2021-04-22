@@ -159,11 +159,11 @@
                         <draggable class="sort-change-div" v-model="sortableMedias" :group="'column.components'" handle=".handle" ghost-class="ghost">
                           <div v-for="(element, index) in sortableMedias" :key="index" class="drag-element">
                             <div class="img-wrapper">
-                              <img v-if="element.type==='image'" :src="element.src" alt="" />
-                              <video v-if="element.type==='video'">
+                              <img v-if="element.type.indexOf('image/') > -1" :src="element.src" alt="" />
+                              <video v-if="element.type.indexOf('video/') > -1">
                                 <source :src="element.src" type="video/mp4" />
                               </video>
-                              <div class="audio" v-if="element.type==='audio'"><span>{{ element.file.name }}</span></div>
+                              <div class="audio" v-if="element.type.indexOf('audio/') > -1"><span>{{ element.file.name }}</span></div>
                               <span v-if="!element.selected"  class="unchecked-circle" @click="onSelectSortableMedia(index, true)"></span>
                               <span v-if="element.selected" class="checked-circle" @click="onSelectSortableMedia(index, false)">{{element.order}}</span>
                             </div>
@@ -196,11 +196,11 @@
                         <swiper-slide class="slide">
                           <div v-if="!isDragListVisible">
                             <div class="swiper-image-wrapper" v-for="(media, index) in sortableMedias" :key="index">
-                              <img v-preview:scope-a class="swiper-lazy" v-if="media.type==='image'" :src="media.src" />
-                              <video v-preview:scope-a class="swiper-lazy" v-if="media.type==='video'">
+                              <img v-preview:scope-a class="swiper-lazy" v-if="media.type.indexOf('image/') > -1" :src="media.src" />
+                              <video v-preview:scope-a class="swiper-lazy" v-if="media.type.indexOf('video/') > -1">
                                 <source :src="media.src" type="video/mp4" />
                               </video>
-                              <audio v-preview:scope-a class="swiper-lazy" controls v-if="media.type==='audio'">
+                              <audio v-preview:scope-a class="swiper-lazy" controls v-if="media.type.indexOf('audio/') > -1">
                                 <source :src="media.src" type="audio/mpeg" />
                               </audio>
                               <div class="icon-close" @click="removeSortableMedia(index)">
@@ -231,10 +231,9 @@
                           type="file"
                           id="image-upload-btn"
                           @change="onMediaChanged"
-                          accept="image/x-png,image/gif,image/*"
-                          ref="imagesUpload"
+                          ref="mediaUpload"
                           multiple
-                          @click="activeMediaRef = $refs.imagesUpload; mediaType = 'image'"
+                          @click="activeMediaRef = $refs.mediaUpload;"
                         />
                         <label for="image-upload-btn" class="btn action-btn">
                           <svg id="icon-media" viewBox="0 0 24 24">
@@ -245,13 +244,11 @@
                         <input
                           type="file"
                           id="video-upload-btn"
-                          @change="onMediaChanged"
                           multiple
-                          accept="video/mp4,video/x-m4v,video/*"
                           ref="videosUpload"
-                          @click="activeMediaRef = $refs.videosUpload; mediaType = 'video'"
+                          disabled
                         />
-                        <label for="video-upload-btn" class="btn action-btn">
+                        <label for="video-upload-btn" class="btn action-btn" disabled>
                           <svg id="icon-video" viewBox="0 0 24 24">
                             <path
                               d="M21.79 6a1.21 1.21 0 0 0-.86.35L19 8.25V7a3 3 0 0 0-3-3H5a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h11a3 3 0 0 0 3-3v-1.25l1.93 1.93a1.22 1.22 0 0 0 2.07-.86V7.18A1.21 1.21 0 0 0 21.79 6zM17 17a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h11a1 1 0 0 1 1 1zm4-2.08l-1.34-1.34a2.25 2.25 0 0 1 0-3.16L21 9.08z"
@@ -262,13 +259,11 @@
                         <input
                           type="file"
                           id="audio-upload-btn"
-                          @change="onMediaChanged"
                           multiple
-                          accept="audio/mpeg3,audio/x-mpeg-3"
                           ref="audiosUpload"
-                          @click="activeMediaRef = $refs.audiosUpload; mediaType = 'audio'"
+                          disabled
                         />
-                        <label for="audio-upload-btn" class="btn action-btn">
+                        <label for="audio-upload-btn" class="btn action-btn" disabled>
                           <svg id="icon-voice" viewBox="0 0 24 24">
                             <path
                               d="M12 15a4 4 0 0 0 4-4V6a4 4 0 0 0-8 0v5a4 4 0 0 0 4 4zm-2-9a2 2 0 0 1 4 0v5a2 2 0 0 1-4 0zm9 4a1 1 0 0 0-1 1 6 6 0 0 1-12 0 1 1 0 0 0-2 0 8 8 0 0 0 7 7.93V21a1 1 0 0 0 2 0v-2.07A8 8 0 0 0 20 11a1 1 0 0 0-1-1z"
@@ -966,10 +961,11 @@
       onMediaChanged: function(e) {
         const files = _.values(e.target.files);
         files.forEach(file => {
+          console.log('---- file.type:', file.type);
           this.sortableMedias.push({
             src: URL.createObjectURL(file),
             file,
-            type: this.mediaType,
+            type: file.type,
           });
         });
         if (this.$refs.mySwiper) {
