@@ -13,6 +13,27 @@ export const mixinModal = {
       })
     },
 
+    renderSubscribe(selectedTimeline) {
+      eventBus.$emit('open-modal', {
+        key: 'render-subscribe',
+        data: {
+          timeline: selectedTimeline,
+        }
+      })
+    },
+
+    renderCancel(selectedTimeline, accessLevel) {
+      // normally these attributes would be passed from server, but in this context we can determine them on client-side...
+      selectedTimeline.is_following = true
+      selectedTimeline.is_subscribed = (accessLevel==='premium')
+      eventBus.$emit('open-modal', {
+        key: 'render-follow',
+        data: {
+          timeline: selectedTimeline,
+        }
+      })
+    },
+
   }
 }
 
