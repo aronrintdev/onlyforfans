@@ -13,7 +13,7 @@ class Message extends Model
      *
      * @var array
      */
-    protected $fillable = ['mcontent', 'mcounter', 'is_unread'];
+    protected $fillable = ['mcontent', 'mcounter'];
 
     /**
      * A message belong to a user

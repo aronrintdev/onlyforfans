@@ -51,6 +51,11 @@ export default [
     path: 'bookmarks',
   },
   {
+    name: 'settings.subscriptions',
+    component: settings.Subscriptions,
+    path: 'subscriptions',
+  },
+  {
     name: 'settings.default',
     component: settings.General,
     path: '',

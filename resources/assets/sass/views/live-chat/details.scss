@@ -222,3 +222,27 @@
     }
   }
 }
+.message-price-modal {
+  .extra-info {
+    font-size: 12px;
+    line-height: 16px;
+    color: rgba(138,150,163,.75);
+  }
+  .currency-form {
+    position: relative;
+
+    .prefix {
+      position: absolute;
+      top: 50%;
+      left: 12px;
+      transform: translate(0, -50%);
+      color:rgb(138, 150, 163);
+    }
+    .form-control {
+      padding-left: 26px;
+    }
+  }
+}
+.unsend-message-modal .modal-dialog {
+  max-width: 360px;
+}

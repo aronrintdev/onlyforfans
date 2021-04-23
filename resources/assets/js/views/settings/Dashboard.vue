@@ -78,6 +78,9 @@ export default {
       }, {
         name: 'Bookmarks',
         to: { name: 'settings.bookmarks', params: {} },
+      }, {
+        name: 'Message with Tip Only',
+        to: { name: 'settings.subscriptions', params: {} },
       },
     ]
   }),
@@ -119,7 +122,8 @@ export default {
     "Earnings": "Earnings",
     "Login Sessions": "Login Sessions",
     "Referrals": "Referrals",
-    "Bookmarks": "Bookmarks"
+    "Bookmarks": "Bookmarks",
+    "Message with Tip Only": "Message with Tip Only"
   }
 }
 </i18n>

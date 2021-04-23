@@ -59,6 +59,8 @@ class UsersController extends AppBaseController
             'city' => 'string|min:2',
             'is_follow_for_free' => 'boolean',
             'blocked' => 'array',
+            'message_with_tip_only' => 'boolean',
+            'enable_message_with_tip_only_pay' => 'boolean',
         ]);
         $request->request->remove('username'); // disallow username updates for now
 
@@ -75,7 +77,7 @@ class UsersController extends AppBaseController
                 $request->request->remove('is_follow_for_free');
             }
     
-            $cattrsFields = [ 'subscriptions', 'localization', 'weblinks', 'privacy', 'blocked', 'watermark', ];
+            $cattrsFields = [ 'subscriptions', 'localization', 'weblinks', 'privacy', 'blocked', 'watermark', 'message_with_tip_only', 'enable_message_with_tip_only_pay' ];
             $attrs = $request->except($cattrsFields);
 
             $userSetting = $user->settings;
