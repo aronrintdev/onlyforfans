@@ -29,7 +29,6 @@
     </b-card >
 
   </div>
-
 </template>
 
 <script>

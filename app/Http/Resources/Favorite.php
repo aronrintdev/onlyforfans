@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Resources\Json\JsonResource;
 use App\Models\Favorite as FavoriteModel;
 use App\Http\Resources\Mediafile as MediafileResource;
+use App\Http\Resources\Post as PostResource;
 
 class Favorite extends JsonResource
 {
@@ -16,6 +17,9 @@ class Favorite extends JsonResource
         switch($this->favoritable_type) {
         case 'mediafiles':
             $fobj = new MediafileResource($this->favoritable);
+            break;
+        case 'posts':
+            $fobj = new PostResource($this->favoritable->load('mediafiles'));
             break;
         default:
             $fobj = $this->favoritable;

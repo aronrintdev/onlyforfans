@@ -1,32 +1,45 @@
 <template>
-  <div>
-    <b-table hover 
-      id="favorites-posts"
-      :items="favorites"
-      :fields="favoriteFields"
-      :current-page="currentPage"
-    >
-      <template #cell(favoriteable_id)="row">
-        <router-link :to="{ name: 'posts.show', params: { slug: row.value } }">Details</router-link>
-      </template>
-    </b-table>
-    <b-pagination
-      v-model="currentPage"
-      :total-rows="totalRows"
-      :per-page="perPage"
-      aria-controls="favorites-posts"
-      v-on:page-click="pageClickHandler"
-    ></b-pagination>
+  <div v-if="!isLoading" class="list-component tab-posts">
+    <b-card>
+
+      <b-row>
+        <b-col>
+          <h2 class="card-title mb-1"><span class="tag-title">Posts</span> ({{ totalRows }})</h2>
+          <small class="text-muted">Favorite posts</small>
+        </b-col>
+      </b-row>
+
+      <hr />
+
+      <b-row class="mt-3">
+        <b-col lg="4" v-for="(f,idx) in favorites" :key="f.id" > 
+          <WidgetPost :session_user="session_user" :post="f.favoritable" :use_mid="false" :is_feed="false" />
+        </b-col>
+      </b-row>
+
+      <b-pagination
+        v-model="currentPage"
+        :total-rows="totalRows"
+        :per-page="perPage"
+        aria-controls="favorites-posts"
+        v-on:page-click="pageClickHandler"
+        class="mt-3"
+      ></b-pagination>
+
+    </b-card >
+
   </div>
 </template>
 
 <script>
 //import Vuex from 'vuex'
 import moment from 'moment'
+import WidgetPost from '@components/posts/Display'
 
 export default {
 
   props: {
+    session_user: null,
   },
 
   computed: {
@@ -45,28 +58,6 @@ export default {
     meta: null,
     perPage: 10,
     currentPage: 1,
-
-    favoriteFields: [
-      {
-        key: 'created_at',
-        label: 'Date',
-        formatter: (value, key, item) => {
-          return moment(value).format('MMMM Do, YYYY')
-        }
-      },
-      {
-        key: 'favoritable_type',
-        label: 'Type',
-      },
-      {
-        key: 'creator.name',
-        label: 'Creator',
-      },
-      {
-        key: 'favoritable_id',
-        label: '',
-      },
-    ],
   }),
 
   methods: {
@@ -97,7 +88,9 @@ export default {
 
   mounted() { },
 
-  components: { },
+  components: { 
+    WidgetPost
+  },
 }
 </script>
 
