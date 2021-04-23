@@ -190,6 +190,7 @@ class ShareablesTableSeeder extends Seeder
                 $this->output->writeln("({$iter} of {$count}): Updating Balance for {$account->name}");
             }
             $account->settleBalance();
+            $iter++;
         });
         Account::where('owner_type', 'financial_system_owner')->each(function($account) {
             if ($this->appEnv !== 'testing') {
