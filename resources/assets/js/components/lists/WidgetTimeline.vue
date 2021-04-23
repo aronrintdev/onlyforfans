@@ -69,40 +69,6 @@ export default {
   }),
 
   methods: {
-    renderSubscribe(selectedTimeline) {
-      this.$log.debug('lists/WidgetTimeline.renderSubscribe() - emit', { selectedTimeline, });
-      eventBus.$emit('open-modal', {
-        key: 'render-subscribe',
-        data: {
-          timeline: selectedTimeline,
-        }
-      })
-    },
-
-    renderCancel(selectedTimeline, accessLevel) {
-      // normally these attributes would be passed from server, but in this context we can determine them on client-side...
-      selectedTimeline.is_following = true
-      selectedTimeline.is_subscribed = (accessLevel==='premium')
-      this.$log.debug('lists/WidgetTimeline.renderCancel() - emit', { selectedTimeline, });
-      eventBus.$emit('open-modal', {
-        key: 'render-follow',
-        data: {
-          timeline: selectedTimeline,
-        }
-      })
-    },
-
-    /*
-    renderTip(selectedTimeline) { // to a timeline (user)
-      eventBus.$emit('open-modal', {
-        key: 'render-tip',
-        data: { 
-          resource: selectedTimeline,
-          resource_type: 'timelines', 
-        },
-      })
-    },
-     */
 
     // shareable in this context is the [shareables] record
     // shareable.shareable in this context is related shareable record (eg timeline)
