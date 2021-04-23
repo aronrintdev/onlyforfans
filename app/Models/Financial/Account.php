@@ -473,7 +473,8 @@ class Account extends Model implements Ownable
         Purchaseable $purchaseable,
         $payment,
         $purchaseLevel = ShareableAccessLevelEnum::PREMIUM,
-        $customAttributes = []
+        $customAttributes = [],
+        $transactionAttributes = []
     ): Collection
     {
         // Prevent purchasing more than once
@@ -501,17 +502,25 @@ class Account extends Model implements Ownable
         if ($this->type === AccountTypeEnum::IN) {
             $this->moveToInternal($amount);
             $internalAccount = $this->getInternalAccount();
-            $internalAccount->settleBalance();
-            $internalAccount->refresh();
-            return $internalAccount->purchase($purchaseable, $amount, $purchaseLevel, $customAttributes);
+            return $internalAccount->purchase(
+                $purchaseable,
+                $amount,
+                $purchaseLevel,
+                $customAttributes,
+                array_merge($transactionAttributes, [
+                    'ignoreBalance' => true,
+            ]));
         }
 
         // Payment funds movement
-        $transactions = $this->moveTo($purchaseable->getOwnerAccount($this->system, $this->currency), $amount, [
-            'purchasable' => $purchaseable,
-            'type' => TransactionTypeEnum::SALE,
-            'description' => "Purchase of {$purchaseable->getDescriptionNameString()} {$purchaseable->getKey()}"
-        ]);
+        $transactions = $this->moveTo(
+            $purchaseable->getOwnerAccount($this->system, $this->currency),
+            $amount,
+            array_merge($transactionAttributes, [
+                'purchasable' => $purchaseable,
+                'type' => TransactionTypeEnum::SALE,
+                'description' => "Purchase of {$purchaseable->getDescriptionNameString()} {$purchaseable->getKey()}"
+        ]));
 
         $purchaseable->grantAccess($this->getOwner()->first(), $purchaseLevel, array_merge($customAttributes,  [
             'purchase' => [
