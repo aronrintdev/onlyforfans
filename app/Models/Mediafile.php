@@ -129,9 +129,27 @@ class Mediafile extends BaseModel implements Guidable, Ownable, Cloneable
 
     // %%% --- Implement Ownable Interface ---
 
+    public function isOwner(User $user): bool {
+       // return true;
+        switch ($this->resource_type) {
+        case 'users':
+            //dd('here 0422', $this->resource);
+            return $this->resource_id === $user->id;
+        default:
+            return $this->resource ? $this->resource->isOwner($user) : false;
+        }
+    }
+
     public function getOwner(): ?Collection
     {
-        return $this->resource->getOwner();
+        //dd('Mediafile', $this->resource->getOwner()); // , $this->toArray());
+        switch ($this->resource_type) {
+        case 'users':
+            //dd('here 0422', $this->resource);
+            return new Collection($this->resource->without(['avatar','cover'])); // owner is the user 
+        default:
+            return $this->resource ? $this->resource->getOwner() : null;
+        }
     }
 
     // %%% --- Implement Sluggable Interface ---

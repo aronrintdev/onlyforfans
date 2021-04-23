@@ -7,26 +7,26 @@ use Carbon\Carbon;
 use App\Models\Post;
 use App\Models\User;
 //use App\Libs\UserMgr;
-use App\Models\Bookmark;
+use App\Models\Favorite;
 use App\Libs\UuidGenerator;
 use App\Libs\FactoryHelpers;
 use Illuminate\Support\Facades\Config;
 use Symfony\Component\Console\Output\ConsoleOutput;
 
-class BookmarksTableSeeder extends Seeder
+class FavoritesTableSeeder extends Seeder
 {
     use SeederTraits;
 
     public function run()
     {
-        $this->initSeederTraits('BookmarksTableSeeder'); // $this->{output, faker, appEnv}
+        $this->initSeederTraits('FavoritesTableSeeder'); // $this->{output, faker, appEnv}
 
         // +++ Create ... +++
 
         $posts = Post::get();
 
         if ( $this->appEnv !== 'testing' ) {
-            $this->output->writeln("  - Bookmarks seeder: loaded ".$posts->count()." posts...");
+            $this->output->writeln("  - Favorites seeder: loaded ".$posts->count()." posts...");
         }
 
         $max = intVal($posts->count() / 3); // do 33%
@@ -41,19 +41,19 @@ class BookmarksTableSeeder extends Seeder
             $ownerPool = $userPool;
             unset($userPool);
 
-            // --- create some bookmarks ---
+            // --- create some favorites ---
 
             $max = $this->faker->numberBetween( 1, min($ownerPool->count()-1, 3) );
             if ( $this->appEnv !== 'testing' ) {
-                $this->output->writeln("  - Creating $max bookmarks for post ".$p->slug.", iter: $iter");
+                $this->output->writeln("  - Creating $max favorites for post ".$p->slug.", iter: $iter");
             }
 
             $ownerPool->take($max)->each( function($o) use(&$p) { // use 'take' so it's always the same users
-                $customAttributes = [ 'notes' => 'BookmarksTableSeeder.bookmark_some_posts' ];
-                $bookmark = Bookmark::create([
+                $customAttributes = [ 'notes' => 'FavoritesTableSeeder.favorite_some_posts' ];
+                $favorite = Favorite::create([
                     'user_id' => $o->id,
-                    'bookmarkable_type' => 'posts',
-                    'bookmarkable_id' => $p->id,
+                    'favoritable_type' => 'posts',
+                    'favoritable_id' => $p->id,
                     'cattrs' => json_encode($customAttributes),
                 ]);
             });

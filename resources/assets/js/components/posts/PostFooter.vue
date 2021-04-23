@@ -22,8 +22,12 @@
       </ul>
       <ul class="d-flex list-inline footer-ctrl mb-0">
         <li class="mr-3">
-          <span @click="toggleBookmark()" class="tag-clickable">
-            <b-icon :icon="isBookmarkedByMe ? 'bookmark-fill' : 'bookmark'" variant="primary" font-scale="1" />
+          <span @click="toggleFavorite()" class="tag-clickable">
+            <fa-icon v-if="isFavoritedByMe" fixed-width :icon="['fas', 'star']" class="clickable" style="font-size:1.2rem; color:#007bff" />
+            <fa-icon v-else fixed-width :icon="['far', 'star']" class="clickable" style="font-size:1.2rem; color:#007bff" />
+            <!--
+            <b-icon :icon="true || isFavoritedByMe ? 'favorite-fill' : 'favorite'" variant="primary" font-scale="1" />
+            -->
           </span>
         </li>
       </ul>
@@ -78,7 +82,7 @@ export default {
     renderComments: false,
     isLikedByMe: false,
     likeCount: 0, // %FIXME INIT
-    isBookmarkedByMe: false,
+    isFavoritedByMe: false,
     loadingComments: false,
     // whereas comment count is computed from the comments relation on the post itself (%FIXME?)
   }),
@@ -86,7 +90,7 @@ export default {
   mounted() { 
     this.isLikedByMe = this.post.stats?.isLikedByMe || false
     this.likeCount = this.post.stats?.likeCount  || 0
-    this.isBookmarkedByMe = this.post.stats?.isBookmarkedByMe || false
+    this.isFavoritedByMe = this.post.stats?.isFavoritedByMe || false
   },
 
   created() {},
@@ -130,20 +134,20 @@ export default {
       this.post.comments_count = this.post.comments_count + 1
     },
 
-    async toggleBookmark() {
+    async toggleFavorite() { // was toggleBookmark
       let response
-      if (this.isBookmarkedByMe) { // remove
-        response = await axios.post(`/bookmarks/remove`, {
-          bookmarkable_type: 'posts',
-          bookmarkable_id: this.post.id,
+      if (this.isFavoritedByMe) { // remove
+        response = await axios.post(`/favorites/remove`, {
+          favoritable_type: 'posts',
+          favoritable_id: this.post.id,
         })
-        this.isBookmarkedByMe = false
+        this.isFavoritedByMe = false
       } else { // add
-        response = await axios.post(`/bookmarks`, {
-          bookmarkable_type: 'posts',
-          bookmarkable_id: this.post.id,
+        response = await axios.post(`/favorites`, {
+          favoritable_type: 'posts',
+          favoritable_id: this.post.id,
         })
-        this.isBookmarkedByMe = true
+        this.isFavoritedByMe = true
       }
     },
 

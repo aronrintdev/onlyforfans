@@ -29,6 +29,10 @@
             <div @click="toggleGridLayout" style="margin-top: 0.3rem" class="btn">
               <b-icon icon="grid" scale="1.2" variant="primary"></b-icon>
             </div>
+            <div @click="toggleFavorite" style="margin-top: 0.3rem" class="btn">
+                <fa-icon v-if="isFavoritedByMe" fixed-width :icon="['fas', 'star']" class="clickable" style="font-size:1.2rem; color:#007bff" />
+                <fa-icon v-else fixed-width :icon="['far', 'star']" class="clickable" style="font-size:1.2rem; color:#007bff" />
+              </div>
             <b-dropdown no-caret ref="feedCtrls" variant="transparent" id="feed-ctrl-dropdown" class="tag-ctrl">
               <template #button-content>
                 <b-icon icon="filter" scale="1.5" variant="primary"></b-icon>
@@ -156,6 +160,8 @@ export default {
     isGridLayout: false,
     feedType: 'default',
 
+    isFavoritedByMe: false, // is timeline/feed a favorite
+
   }),
 
   mounted() {
@@ -236,6 +242,23 @@ export default {
           timeline: this.timeline,
         }
       })
+    },
+
+    async toggleFavorite() {
+      let response
+      if (this.isFavoritedByMe) { // remove
+        response = await axios.post(`/favorites/remove`, {
+          favoritable_type: 'timelines',
+          favoritable_id: this.timeline.id,
+        })
+        this.isFavoritedByMe = false
+      } else { // add
+        response = await axios.post(`/favorites`, {
+          favoritable_type: 'timelines',
+          favoritable_id: this.timeline.id,
+        })
+        this.isFavoritedByMe = true
+      }
     },
 
     toggleGridLayout() {

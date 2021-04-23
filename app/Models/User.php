@@ -99,9 +99,9 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
             ->withTimestamps();
     }
 
-    public function bookmarks()
+    public function favorites()
     { 
-        return $this->hasMany(Bookmark::class, 'user_id');
+        return $this->hasMany(Favorite::class, 'user_id');
     }
 
     public function ledgersales()

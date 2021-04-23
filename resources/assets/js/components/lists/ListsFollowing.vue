@@ -14,61 +14,17 @@
       <CtrlBar @apply-filters="applyFilters($event)" />
 
       <b-row class="mt-3">
-        <b-col lg="4" v-for="(s,idx) in shareables" :key="s.id" >
-          <b-card no-body class="background mb-5">
-            <!-- %NOTE: s is the [shareables] record, s.shareable is the related, 'morhped', 'shareable' object (eg timelines) -->
-            <b-card-img :src="s.shareable.cover.filepath" alt="s.shareable.slug" top></b-card-img>
+        <b-col lg="4" v-for="(s,idx) in shareables" :key="s.id" > 
+          <!-- %NOTE: s is the [shareables] record, s.shareable is the related, 'morhped', 'shareable' object (eg timelines) -->
+          <WidgetTimeline :session_user="session_user" :timeline="s.shareable" :access_level="s.access_level" :created_at="s.created_at">
+            <b-card-text class="mb-2"><fa-icon fixed-width :icon="['far', 'star']" class="clickable" style="color:#007bff" /> Add to favorites</b-card-text>
 
-            <b-card-body class="py-1">
-
-              <div class="last-seen">Last seen TBD</div>
-
-              <div class="banner-ctrl ">
-                <b-dropdown no-caret right ref="bannerCtrls" variant="transparent" id="banner-ctrl-dropdown" class="tag-ctrl"> 
-                  <template #button-content>
-                    <fa-icon fixed-width icon="ellipsis-v" style="font-size:1.2rem; color:#fff" />
-                  </template>
-                  <b-dropdown-item v-clipboard="getTimelineUrl(s.shareable)">Copy link to profile</b-dropdown-item>
-                  <b-dropdown-divider></b-dropdown-divider>
-                  <b-dropdown-item @click="doReport(s)">Report</b-dropdown-item>
-                </b-dropdown>
-              </div>
-              <div class="avatar-img">
-                <router-link :to="{ name: 'timeline.show', params: { slug: s.shareable.slug } }">
-                  <b-img thumbnail rounded="circle" class="w-100 h-100" :src="s.shareable.avatar.filepath" :alt="s.shareable.slug" :title="s.shareable.name" />
-                </router-link>
-              </div>
-
-              <div class="shareable-id">
-                <b-card-title class="mb-1">
-                  <router-link :to="{ name: 'timeline.show', params: { slug: s.shareable.slug } }">{{ s.shareable.name }}</router-link>
-                  <fa-icon v-if="s.access_level==='premium'" fixed-width :icon="['fas', 'rss-square']" style="color:#138496; font-size: 16px;" />
-                </b-card-title>
-                <b-card-sub-title class="mb-1">
-                  <router-link :to="{ name: 'timeline.show', params: { slug: s.shareable.slug } }">@{{ s.shareable.slug }}</router-link>
-                </b-card-sub-title>
-              </div>
-
-              <b-card-text class="mb-2"><fa-icon fixed-width :icon="['far', 'star']" class="clickable" style="color:#007bff" /> Add to favorites</b-card-text>
-
-              <b-button variant="outline-primary">Message</b-button>
-              <b-button @click="renderTip(s.shareable)" variant="outline-success">Send Tip</b-button>
-              <b-button v-if="s.access_level==='default'" @click="renderSubscribe(s.shareable)" variant="outline-info">Premium Access</b-button>
-              <b-button @click="renderCancel(s.shareable, s.access_level)" variant="outline-warning">Cancel</b-button>
-              <div>
-                <small v-if="s.access_level==='premium'" class="text-muted">subscribed since {{ moment(s.created_at).format('MMM DD, YYYY') }}</small>
-                <small v-else class="text-muted">following for free since {{ moment(s.created_at).format('MMM DD, YYYY') }}</small>
-              </div>
-              <!--
-              <pre>
-                Access Level: {{ s.access_level }}
-                {{ JSON.stringify(s, null, "\t") }}
-              </pre>
-              -->
-
-            </b-card-body>
-
-          </b-card>
+            <b-button variant="outline-primary">Message</b-button>
+            <b-button @click="renderTip(s.shareable, 'timelines')" variant="outline-success">Send Tip</b-button>
+            <b-button v-if="s.access_level==='default'" @click="renderSubscribe(s.shareable)" variant="outline-info">Premium Access</b-button>
+            <b-button @click="renderCancel(s.shareable, s.access_level)" variant="outline-warning">Cancel</b-button>
+          </WidgetTimeline>
+          <!-- <pre> Access Level: {{ s.access_level }} {{ JSON.stringify(s, null, "\t") }} </pre> -->
         </b-col>
       </b-row>
 
@@ -91,9 +47,13 @@
 import { eventBus } from '@/app'
 //import { DateTime } from 'luxon'
 import moment from 'moment'
+import mixinModal from '@mixins/modal'
 import CtrlBar from '@components/lists/CtrlBar'
+import WidgetTimeline from '@components/lists/WidgetTimeline'
 
 export default {
+
+  mixins: [mixinModal],
 
   props: {
     session_user: null,
@@ -181,6 +141,7 @@ export default {
       this.currentPage = 1
     },
 
+    /*
     renderSubscribe(selectedTimeline) {
       this.$log.debug('ListsFollowing.renderSubscribe() - emit', { selectedTimeline, });
       eventBus.$emit('open-modal', {
@@ -223,6 +184,8 @@ export default {
     getTimelineUrl(timeline) {
       return route('spa.index', timeline.slug)
     }
+     */
+
   },
 
   mounted() { },
@@ -237,13 +200,11 @@ export default {
 
   components: {
     CtrlBar,
+    WidgetTimeline,
   },
 }
 </script>
 
 <style lang="scss" scoped>
-.clickable {
-  cursor: pointer;
-}
 </style>
 

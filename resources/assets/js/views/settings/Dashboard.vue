@@ -54,31 +54,35 @@ export default {
       {
         name: 'General',
         to: { name: 'settings.general', params: {} },
-      }, {
+      }, 
+      {
         name: 'Profile',
         to: { name: 'settings.profile', params: {} },
-      }, {
+      }, 
+      {
         name: 'Privacy',
         to: { name: 'settings.privacy', params: {} },
-      }, {
+      }, 
+      {
         name: 'Security',
         to: { name: 'settings.security', params: {} },
-      }, {
+      }, 
+      {
         name: 'Payment Methods',
         to: { name: 'settings.payments', params: {} },
-      }, {
+      }, 
+      {
         name: 'Earnings',
         to: { name: 'settings.earnings', params: {} },
-      }, {
+      }, 
+      {
         name: 'Login Sessions',
         to: { name: 'settings.sessions', params: {} },
-      }, {
+      }, 
+      {
         name: 'Referrals',
         to: { name: 'settings.referrals', params: {} },
-      }, {
-        name: 'Bookmarks',
-        to: { name: 'settings.bookmarks', params: {} },
-      },
+      }, 
     ]
   }),
 
@@ -109,17 +113,17 @@ export default {
 </script>
 
 <i18n lang="json5" scoped>
-{
-  "en": {
-    "General": "General",
-    "Profile": "Profile",
-    "Privacy": "Privacy",
-    "Security": "Security",
-    "Payment Methods": "Payment Methods",
-    "Earnings": "Earnings",
-    "Login Sessions": "Login Sessions",
-    "Referrals": "Referrals",
-    "Bookmarks": "Bookmarks"
+  {
+    "en": {
+      "General": "General",
+      "Profile": "Profile",
+      "Privacy": "Privacy",
+      "Security": "Security",
+      "Payment Methods": "Payment Methods",
+      "Earnings": "Earnings",
+      "Login Sessions": "Login Sessions",
+      "Referrals": "Referrals",
+      "Bookmarks": "Bookmarks"
+    }
   }
-}
-</i18n>
+  </i18n>
