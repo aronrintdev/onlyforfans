@@ -16,7 +16,14 @@
       <b-row class="mt-3">
         <b-col lg="4" v-for="(s,idx) in shareables" :key="s.id" > 
           <!-- %NOTE: s is the [shareables] record, s.shareable is the related, 'morhped', 'shareable' object (eg timelines) -->
-          <WidgetTimeline :session_user="session_user" :timeline="s.shareable" :access_level="s.access_level" :created_at="s.created_at" />
+          <WidgetTimeline :session_user="session_user" :timeline="s.shareable" :access_level="s.access_level" :created_at="s.created_at">
+            <b-card-text class="mb-2"><fa-icon fixed-width :icon="['far', 'star']" class="clickable" style="color:#007bff" /> Add to favorites</b-card-text>
+
+            <b-button variant="outline-primary">Message</b-button>
+            <b-button @click="renderTip(s.shareable, 'timelines')" variant="outline-success">Send Tip</b-button>
+            <b-button v-if="s.access_level==='default'" @click="renderSubscribe(s.shareable)" variant="outline-info">Premium Access</b-button>
+            <b-button @click="renderCancel(s.shareable, s.access_level)" variant="outline-warning">Cancel</b-button>
+          </WidgetTimeline>
           <!-- <pre> Access Level: {{ s.access_level }} {{ JSON.stringify(s, null, "\t") }} </pre> -->
         </b-col>
       </b-row>
@@ -40,10 +47,13 @@
 import { eventBus } from '@/app'
 //import { DateTime } from 'luxon'
 import moment from 'moment'
+import mixinModal from '@mixins/modal'
 import CtrlBar from '@components/lists/CtrlBar'
 import WidgetTimeline from '@components/lists/WidgetTimeline'
 
 export default {
+
+  mixins: [mixinModal],
 
   props: {
     session_user: null,

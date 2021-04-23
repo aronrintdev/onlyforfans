@@ -30,6 +30,7 @@ mix.webpackConfig({
       '@plugins': path.resolve(__dirname, 'resources', 'assets', 'js', 'plugins'),
       '@routes': path.resolve(__dirname, 'resources', 'assets', 'js', 'routes'),
       '@helpers': path.resolve(__dirname, 'resources', 'assets', 'js', 'helpers'),
+      '@mixins': path.resolve(__dirname, 'resources', 'assets', 'js', 'mixins'),
     },
   },
 });

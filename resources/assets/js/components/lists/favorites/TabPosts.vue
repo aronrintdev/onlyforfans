@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!isLoading" class="list-component tab-posts">
+  <div v-if="!isLoading" class="list-component tab-posts tag-grid-layout">
     <b-card>
 
       <b-row>

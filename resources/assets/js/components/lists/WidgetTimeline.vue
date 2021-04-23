@@ -33,12 +33,8 @@
         </b-card-sub-title>
       </div>
 
-      <b-card-text class="mb-2"><fa-icon fixed-width :icon="['far', 'star']" class="clickable" style="color:#007bff" /> Add to favorites</b-card-text>
+      <slot></slot>
 
-      <b-button variant="outline-primary">Message</b-button>
-      <b-button @click="renderTip(timeline)" variant="outline-success">Send Tip</b-button>
-      <b-button v-if="access_level==='default'" @click="renderSubscribe(timeline)" variant="outline-info">Premium Access</b-button>
-      <b-button @click="renderCancel(timeline, access_level)" variant="outline-warning">Cancel</b-button>
       <div>
         <small v-if="access_level==='premium'" class="text-muted">subscribed since {{ moment(created_at).format('MMM DD, YYYY') }}</small>
         <small v-else class="text-muted">following for free since {{ moment(created_at).format('MMM DD, YYYY') }}</small>
@@ -96,6 +92,7 @@ export default {
       })
     },
 
+    /*
     renderTip(selectedTimeline) { // to a timeline (user)
       eventBus.$emit('open-modal', {
         key: 'render-tip',
@@ -105,6 +102,7 @@ export default {
         },
       })
     },
+     */
 
     // shareable in this context is the [shareables] record
     // shareable.shareable in this context is related shareable record (eg timeline)

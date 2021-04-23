@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!isLoading" class="list-component tab-timelines">
+  <div v-if="!isLoading" class="list-component tab-timelines tag-grid-layout">
     <b-card>
 
       <b-row>
@@ -13,7 +13,10 @@
 
       <b-row class="mt-3">
         <b-col lg="4" v-for="(f,idx) in favorites" :key="f.id" > 
-          <WidgetTimeline :timeline="f.favoritable" :access_level="() => 'todo'" :created_at="f.created_at" />
+          <WidgetTimeline :timeline="f.favoritable" :access_level="() => 'todo'" :created_at="f.created_at">
+            <b-button variant="outline-primary">Message</b-button>
+            <b-button @click="renderTip(f.favoritable, 'timelines')" variant="outline-success">Send Tip</b-button>
+          </WidgetTimeline>
         </b-col>
       </b-row>
 
@@ -35,9 +38,12 @@
 <script>
 //import Vuex from 'vuex'
 import moment from 'moment'
+import mixinModal from '@mixins/modal'
 import WidgetTimeline from '@components/lists/WidgetTimeline'
 
 export default {
+
+  mixins: [mixinModal],
 
   props: {
   },
