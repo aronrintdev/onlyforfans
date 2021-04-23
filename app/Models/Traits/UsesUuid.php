@@ -26,7 +26,7 @@ trait UsesUuid
 
     protected function generateUuid(): string
     {
-        if ( Config::get('app.env') == 'local' || Config::get('app.env') == 'dev' ) {
+        if ( $this->forceCombV4Uuid !== true && Config::get('app.env') == 'local' || Config::get('app.env') == 'dev' ) {
             return (string) Str::uuid();
         } else {
             return UuidGenerator::generateCombV4Uuid(); // production
