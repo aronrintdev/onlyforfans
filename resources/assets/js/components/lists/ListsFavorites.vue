@@ -5,10 +5,12 @@
       <b-card-text>
         <div>
           <b-tabs content-class="mt-3">
+            <!--
             <b-tab title="All" active>
               <TabFavoritesAll :session_user="session_user" />
             </b-tab>
-            <b-tab title="Posts">
+            -->
+            <b-tab title="Posts" active>
               <TabFavoritesPosts :session_user="session_user" />
             </b-tab>
             <b-tab title="Creators">
@@ -31,7 +33,7 @@
 <script>
 import { eventBus } from '@/app'
 import moment from 'moment'
-import TabFavoritesAll from '@components/lists/favorites/TabAll'
+//import TabFavoritesAll from '@components/lists/favorites/TabAll'
 import TabFavoritesPosts from '@components/lists/favorites/TabPosts'
 import TabFavoritesCreators from '@components/lists/favorites/TabCreators'
 import TabFavoritesPhotos from '@components/lists/favorites/TabPhotos'
@@ -86,7 +88,7 @@ export default {
   },
 
   components: {
-    TabFavoritesAll,
+    //TabFavoritesAll,
     TabFavoritesPosts,
     TabFavoritesCreators,
     TabFavoritesPhotos,
