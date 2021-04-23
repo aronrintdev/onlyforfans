@@ -35,7 +35,7 @@ class FavoritesController extends AppBaseController
                 $query->with(['favoritable.cover', 'favoritable.avatar']);
                 break;
             case 'mediafiles':
-                $query->with(['favoritable.resource']);
+                $query->with(['favoritable.resource']); 
                 break;
             }
             $query->where('favoritable_type', $request->favoritable_type);

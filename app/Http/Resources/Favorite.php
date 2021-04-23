@@ -3,6 +3,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 use App\Models\Favorite as FavoriteModel;
+use App\Http\Resources\Mediafile as MediafileResource;
 
 class Favorite extends JsonResource
 {
@@ -10,13 +11,20 @@ class Favorite extends JsonResource
     {
         $sessionUser = $request->user();
         $model = FavoriteModel::find($this->id);
-        $hasAccess = $sessionUser->can('view', $model);
+        //$hasAccess = $sessionUser->can('view', $model);
 
+        switch($this->favoritable_type) {
+        case 'mediafiles':
+            $fobj = new MediafileResource($this->favoritable);
+            break;
+        default:
+            $fobj = $this->favoritable;
+        }
         return [
             'id' => $this->id,
             'favoritable_id' => $this->favoritable_id,
             'favoritable_type' => $this->favoritable_type,
-            'favoritable' => $this->favoritable,
+            'favoritable' => $fobj, // $this->favoritable,
             'creator' => $this->favoritable->user,
             'user_id' => $this->user_id,
             'created_at' => $this->created_at,

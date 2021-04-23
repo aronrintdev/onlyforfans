@@ -21,7 +21,7 @@ class Mediafile extends BaseModel implements Guidable, Ownable, Cloneable
 
     protected $table = 'mediafiles';
     protected $guarded = [ 'id', 'created_at', 'updated_at' ];
-    protected $appends = ['filepath', 'name', 'is_image', 'is_video', 'access'];
+    protected $appends = ['filepath', 'name', 'is_image', 'is_video'];
     public static $vrules = [];
 
     //--------------------------------------------
@@ -64,20 +64,6 @@ class Mediafile extends BaseModel implements Guidable, Ownable, Cloneable
         'has_mid'   => 'bool',
         'has_blur'  => 'bool',
     ];
-
-    public function getAccessAttribute($value)
-    {
-        //return request()->user()->can('view', $this);
-        //return \Auth::user()->without(['cover', 'avatar'])->can('view', $this->without(['resource'])); // %HERE: $this seems to be causing the issues
-        //return true;
-
-        $sessionUser = User::find(request()->user()->id);
-//dd('Mediafile', $sessionUser, $this);
-        //return $sessionUser->can('view', $this->without(['access'])); // %HERE: this 'works' but access is false
-        //return $sessionUser->can('view', $this);
-        //return $sessionUser->can('view', $this); // isBlockedBy error
-        return \App\Policies\MediafilePolicy::isViewable($sessionUser, $this); // %FIXME: workaround as none of hte above will work correctly
-    }
 
     public function getIsImageAttribute($value)
     {
