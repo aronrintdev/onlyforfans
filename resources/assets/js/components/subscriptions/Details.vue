@@ -38,6 +38,7 @@
       <div class="h3" v-text="$t('transactions.title')" />
       <hr />
       <!-- Transaction Table Here -->
+      <div class="text-center">WIP</div>
 
 
       <b-modal
@@ -110,6 +111,10 @@ export default {
       }
     },
 
+    loadTransactions() {
+      // TODO: Hook up subscription transactions
+    },
+
     onBack() {
       this.$router.go(-1)
     },
@@ -120,7 +125,7 @@ export default {
 
     onChangePaymentMethod() {
       // TODO: Hook up change payment method
-    }
+    },
   },
 
   mounted() {

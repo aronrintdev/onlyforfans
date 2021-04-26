@@ -42,6 +42,11 @@ export default [
     path: 'earnings',
   },
   {
+    name: 'settings.payouts',
+    component: settings.Payouts,
+    path: 'payouts',
+  },
+  {
     name: 'settings.sessions',
     component: settings.Sessions,
     path: 'sessions',
