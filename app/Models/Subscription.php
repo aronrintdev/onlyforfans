@@ -137,7 +137,7 @@ class Subscription extends Model implements Ownable
      */
     public function process($force = false)
     {
-        if ($force === false && $this->due()) {
+        if ($force === false && !$this->due()) {
             return false;
         }
 
@@ -158,7 +158,7 @@ class Subscription extends Model implements Ownable
                     'metadata'         => ['subscription' => $this->getKey()],
                 ]
             );
-            $this->last_transaction_id = $transactions['debit'];
+            $this->last_transaction_id = $transactions['debit']->getKey();
             $this->last_payment_at = Carbon::now();
             $this->updateNextPayment();
             $this->active = true;
