@@ -413,7 +413,11 @@
           promises.push(promise);
         })
         Promise.all(promises).then(function() {
-          self.$router.push('/messages');
+          if (self.selectedUsers.length > 1) {
+            self.$router.push('/messages');
+          } else {
+            self.$router.push(`/messages/${self.selectedUsers[0].id}`);
+          }
         });
       },
       onDirectionChanged: function(dir) {
