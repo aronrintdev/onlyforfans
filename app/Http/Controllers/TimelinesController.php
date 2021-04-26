@@ -128,7 +128,9 @@ class TimelinesController extends AppBaseController
         });
 
         // Apply filters
-        //  ~ %TODO
+        if ( $request->has('free_only') ) {
+            $query->where('is_follow_for_free', true);
+        }
 
         //$data = $query->paginate( $request->input('take', env('MAX_SUGGESTED_TIMELINES_PER_REQUEST', 6)) );
         $data = $query->get();

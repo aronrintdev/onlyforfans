@@ -1,30 +1,37 @@
 <template>
   <div v-if="!isLoading" class="suggested_feed-crate tag-crate">
 
-    <h3 class="my-0">Suggested People</h3>
 
-    <b-pagination
-      class="pagenav-top mt-3"
-      v-model="currentPage"
-      :total-rows="totalRows"
-      :per-page="perPage"
-      aria-controls="suggested-timelines"
-      v-on:page-click="pageClickHandler"
-      hide-goto-end-buttons
-      hide-ellipsis
-      limit="0"
-    >
-      <template v-slot:page>
-        <fa-icon fixed-width icon="circle" />
-      </template>
-    </b-pagination>
+    <section class="ctrl-top d-flex justify-content-between align-items-center">
+      <h5 class="my-0 flex-grow-1">SUGGESTIONS</h5>
+      <span @click="getDataset" class="tag-clickable sync">
+        <fa-icon icon="sync" />
+      </span>
+      <span @click="toggleFree" class="tag-clickable filter" :class="filters.freeOnly ? 'text-success' : ''">
+        <fa-icon icon="dollar-sign" />
+      </span>
+      <b-pagination
+        class="pagenav-top my-0"
+        v-model="currentPage"
+        :total-rows="totalRows"
+        :per-page="perPage"
+        aria-controls="suggested-timelines"
+        v-on:page-click="pageClickHandler"
+        hide-goto-end-buttons
+        hide-ellipsis
+        limit="0"
+      >
+      </b-pagination>
+    </section>
+    
+
     <ul class="list-suggested list-group">
-      <li v-for="(t, i) in rendered" :key="t.id || i" class="list-group-item my-3">
+      <li v-for="(t, i) in rendered" :key="t.id || i" class="list-group-item">
         <MiniProfile :timeline="t" />
       </li>
     </ul>
     <b-pagination
-      class="pagenav-bottom mt-0"
+      class="pagenav-bottom my-0"
       v-model="currentPage"
       :total-rows="totalRows"
       :per-page="perPage"
@@ -33,9 +40,7 @@
       align="center"
       hide-goto-end-buttons
     >
-      <template #page="{ page, active }">
-        <fa-icon :icon="active ? ['fas', 'circle'] : ['far', 'circle']" />
-      </template>
+      <template #page="{ page, active }"><fa-icon :icon="active ? ['fas', 'circle'] : ['far', 'circle']" /></template>
     </b-pagination>
   </div>
 </template>
@@ -65,6 +70,10 @@ export default {
     timelines: null, // full dataset
     rendered: null, // paged (rendered) data subset
 
+    filters: {
+      freeOnly: false,
+    },
+
     perPage: 3,
     currentPage: 1,
   }),
@@ -77,19 +86,17 @@ export default {
   },
 
   methods: {
+    toggleFree() {
+      this.filters.freeOnly = !this.filters.freeOnly
+      this.getDataset()
+    },
+
     // %NOTE: Pagination is done here in client, as we download a superset of randomly selected
     // suggested timelines from the server
     getDataset(type=null) {
-      /*
-      const params = {
-        page: this.currentPage, 
-        take: this.perPage,
-      }
-      if (this.filter && this.filter!=='none') {
-        params.type = this.filterToType // PostTipped, etc
-      }
-       */
-      axios.get( route('timelines.suggested') ).then( response => {
+      const params = {}
+      params.free_only = this.filters.freeOnly
+      axios.get( route('timelines.suggested'), { params }).then( response => {
         this.timelines = response.data.data || [];
         this.setRendered()
       });
@@ -117,6 +124,14 @@ body .suggested_feed-crate {
   background-color: #fff;
   padding: 0.5rem 0.5rem;
 
+  .ctrl-top > * {
+    padding: 0.8rem 0;
+    margin: 0 0.5rem;
+  }
+  .tag-clickable {
+    cursor: pointer;
+  }
+
   ul.list-suggested {
     li.tag-heading {
       h3 {
@@ -137,10 +152,23 @@ body .suggested_feed-crate {
   }
 
   // hide active page so we only show navigation at top
-  ul.pagenav-top li.page-item.active {
-    display: none;
+  ul.pagenav-top {
+    li.page-item.active {
+      display: none;
+    }
+    li.page-item .page-link {
+      font-size: 1.5rem;
+      border: none;
+    }
+    li.page-item .page-link:focus,
+    li.page-item .page-link:visited,
+    li.page-item .page-link:hover {
+      box-shadow: none;
+      color: inherit;
+      background-color: inherit;
+    }
   }
-  
+
   ul.pagenav-bottom {
     // hide navigation at bottom
     li.page-item:first-child, li.page-item:last-child {
