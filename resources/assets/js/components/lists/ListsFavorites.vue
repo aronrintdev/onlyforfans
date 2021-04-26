@@ -32,7 +32,6 @@
 
 <script>
 import { eventBus } from '@/app'
-import moment from 'moment'
 //import TabFavoritesAll from '@components/lists/favorites/TabAll'
 import TabFavoritesPosts from '@components/lists/favorites/TabPosts'
 import TabFavoritesCreators from '@components/lists/favorites/TabCreators'
@@ -52,40 +51,13 @@ export default {
   },
 
   data: () => ({
-    moment: moment,
-    following: null,
-    meta: null,
-    perPage: 10,
-    currentPage: 1,
-
   }),
 
-  methods: {
-    getPagedData(type=null) {
-      const params = {
-        page: this.currentPage, 
-        take: this.perPage,
-      }
-      if (this.filter && this.filter!=='none') {
-        params.type = this.filterToType // PostTipped, etc
-      }
-      axios.get( route('notifications.index'), { params } ).then( response => {
-        this.notifications = response.data.data
-        this.meta = response.data.meta
-      })
-    },
+  methods: { },
 
-    pageClickHandler(e, page) {
-      this.currentPage = page
-      this.getPagedData()
-    },
-  },
+  mounted() { },
 
-  mounted() {
-  },
-
-  created() {
-  },
+  created() { },
 
   components: {
     //TabFavoritesAll,
