@@ -281,12 +281,98 @@
 						display: flex;
 						align-items: center;
 						height: 14px;
+
+						.payment-state {
+							font-weight: 500;
+							font-size: 11px;
+							color: #8a96a3;
+						}
 					}
 					.received {
 						max-width: 75%;
 						display: flex;
 						align-items: flex-start;
 						margin: 8px 0;
+
+						.non-paid-message {
+
+							.non-paid-message-block {
+								background: url(../../../static/images/price-message-bg.png) no-repeat;
+								background-size: 100% 100%;
+								border-radius: 6px;
+							}
+							.text {
+								margin-top: 10px !important;
+							}
+							.lock-icon-wrapper {
+								position: relative;
+								height: 240px;
+								svg {
+									position: absolute;
+									top: 50%;
+									left: 50%;
+									transform: translate(-50%, -50%);
+									width: 64px;
+									fill: #8a96a3;
+									opacity: 0.25;
+								}
+							}
+							.b-purchase {
+								padding: 0 16px 16px;
+								.purchase-block {
+									border: 1px solid rgba(138, 150, 163, 0.25);
+									border-radius: 6px;
+									padding: 14px 16px 16px;
+								}
+								.content-icons {
+									display: flex;
+									align-items: center;
+									justify-content: space-between;
+
+									.media-count, .media-price {
+										display: flex;
+										align-items: center;
+									}
+									.media-icon {
+										display: flex;
+										align-items: center;
+										&:last-child .divide-dot {
+											display: none;
+										}
+									}
+
+									span {
+										font-size: 12px;
+										line-height: 14px;
+										color: #8a96a3;
+										margin-left: 4px;
+
+										&.divide-dot {
+											margin: 0 6px;
+										}
+									}	
+									svg {
+										width: 16px;
+										fill: #8a96a3;
+									}
+								}
+								.unlock-btn {
+									border: none;
+									padding: 9px 18px;
+									font-size: 14px;
+									color: #fefefe;
+									font-weight: 500;
+									background: #00aff0;
+									min-width: 78px;
+									transition: opacity .15s ease,background-color .15s ease,box-shadow .15s ease;
+									display: inline-block;
+									white-space: nowrap;
+									text-align: center;
+									width: 100%;
+									margin-top: 14px;
+								}
+							}
+						}
 
 						.text {
 							background: rgba(138,150,163,.12);

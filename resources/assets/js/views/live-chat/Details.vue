@@ -115,21 +115,73 @@
                                 <img :src="selectedUser.profile.avatar.filepath" alt="" />
                               </div>
                               <div class="content">
-                                <template v-for="msg in message.messages">
-                                  <div class="text" :class="`message-${msg.id}`" v-if="!msg.mediafile" :key="msg.id">{{ msg.mcontent }}</div>
-                                  <div class="image" :class="`message-${msg.id}`" v-if="msg.mediafile" :key="msg.id">
-                                    <img v-preview:scope-b class="lazy" v-if="msg.mediafile.is_image" :data-src="msg.mediafile.filepath" :alt="msg.mediafile.mfname" />
-                                    <img src="/images/loading.gif" v-if="msg.mediafile.is_image" class="loading-image" />
-                                    <video v-if="msg.mediafile.is_video" controls>
-                                      <source :src="msg.mediafile.filepath" type="video/mp4" />
-                                    </video>
-                                    <audio v-if="msg.mediafile.mimetype.indexOf('audio/') > -1" controls>
-                                      <source :src="msg.mediafile.filepath" type="audio/mpeg" />
-                                    </audio>
+                                <div class="non-paid-message" v-if="message.tip_price && !message.paid">
+                                  <div class="non-paid-message-block">
+                                    <div class="lock-icon-wrapper">
+                                      <svg class="icon-locked" viewBox="0 0 24 24">
+                                        <path d="M17.5,8H17V6A5,5,0,0,0,7,6V8H6.5A2.5,2.5,0,0,0,4,10.5V18a4,4,0,0,0,4,4h8a4,4,0,0,0,4-4V10.5A2.5,2.5,0,0,0,17.5,8ZM9,6a3,3,0,0,1,6,0V8H9Zm9,12a2,2,0,0,1-2,2H8a2,2,0,0,1-2-2V10.5a.5.5,0,0,1,.5-.5h11a.5.5,0,0,1,.5.5Zm-6-5a1,1,0,0,0-1,1v2a1,1,0,0,0,2,0V14A1,1,0,0,0,12,13Z"></path>
+                                      </svg>
+                                    </div>
+                                    <div class="b-purchase">
+                                      <div class="purchase-block">
+                                        <div class="content-icons">
+                                          <div class="media-count">
+                                            <div class="media-icon"  v-if="message.images">
+                                              <svg class="icon-media" viewBox="0 0 24 24">
+                                                <path d="M18,3H6A3,3,0,0,0,3,6V18a3,3,0,0,0,3,3H18a3,3,0,0,0,3-3V6A3,3,0,0,0,18,3Zm1,15a1,1,0,0,1-1,1H6a1,1,0,0,1-1-1V6A1,1,0,0,1,6,5H18a1,1,0,0,1,1,1ZM9,10.5A1.5,1.5,0,1,0,7.5,9,1.5,1.5,0,0,0,9,10.5ZM14,13l-3,3L9,14,6.85,16.15a.47.47,0,0,0-.14.35.5.5,0,0,0,.5.5h9.58a.5.5,0,0,0,.5-.5.47.47,0,0,0-.14-.35Z" fill="#8a96a3"></path>
+                                              </svg>
+                                              <span>{{ message.images }}</span>
+                                              <span class="divide-dot">&middot;</span>
+                                            </div>
+                                            <div class="media-icon" v-if="message.videos">
+                                              <svg class="icon-video" viewBox="0 0 24 24">
+                                                <path
+                                                  d="M21.79 6a1.21 1.21 0 0 0-.86.35L19 8.25V7a3 3 0 0 0-3-3H5a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h11a3 3 0 0 0 3-3v-1.25l1.93 1.93a1.22 1.22 0 0 0 2.07-.86V7.18A1.21 1.21 0 0 0 21.79 6zM17 17a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h11a1 1 0 0 1 1 1zm4-2.08l-1.34-1.34a2.25 2.25 0 0 1 0-3.16L21 9.08z"
+                                                  fill="#8a96a3"></path>
+                                              </svg>
+                                              <span>{{ message.videos }}</span>
+                                              <span class="divide-dot">&middot;</span>
+                                            </div>
+                                            <div class="media-icon" v-if="message.audios">
+                                              <svg class="icon-voice" viewBox="0 0 24 24">
+                                                <path
+                                                  d="M12 15a4 4 0 0 0 4-4V6a4 4 0 0 0-8 0v5a4 4 0 0 0 4 4zm-2-9a2 2 0 0 1 4 0v5a2 2 0 0 1-4 0zm9 4a1 1 0 0 0-1 1 6 6 0 0 1-12 0 1 1 0 0 0-2 0 8 8 0 0 0 7 7.93V21a1 1 0 0 0 2 0v-2.07A8 8 0 0 0 20 11a1 1 0 0 0-1-1z"
+                                                  fill="#8a96a3"></path>
+                                              </svg>
+                                              <span>{{ message.audios }}</span>
+                                            </div>
+                                          </div>
+                                          <div class="media-price">
+                                            <span>${{message.tip_price}}&nbsp;</span>
+                                            <svg viewBox="0 0 24 24">
+                                              <path d="M17.5,8H17V6A5,5,0,0,0,7,6V8H6.5A2.5,2.5,0,0,0,4,10.5V18a4,4,0,0,0,4,4h8a4,4,0,0,0,4-4V10.5A2.5,2.5,0,0,0,17.5,8ZM9,6a3,3,0,0,1,6,0V8H9Zm9,12a2,2,0,0,1-2,2H8a2,2,0,0,1-2-2V10.5a.5.5,0,0,1,.5-.5h11a.5.5,0,0,1,.5.5Zm-6-5a1,1,0,0,0-1,1v2a1,1,0,0,0,2,0V14A1,1,0,0,0,12,13Z"></path>
+                                            </svg>
+                                          </div>
+                                        </div>
+                                        <button type="button" class="btn unlock-btn" @click="openMessagePriceConfirmModal(message.tip_price)">Unlock for ${{ message.tip_price }}</button>
+                                      </div>
+                                    </div>
                                   </div>
-                                </template>
+                                  <div class="text" v-if="message.messages[message.messages.length - 1].mcontent" :class="`message-${message.messages[message.messages.length - 1].id}`">{{ message.messages[message.messages.length - 1].mcontent }}</div>
+                                </div>
+                                <div v-if="!message.tip_price">
+                                  <template v-for="msg in message.messages">
+                                    <div class="text" :class="`message-${msg.id}`" v-if="!msg.mediafile" :key="msg.id">{{ msg.mcontent }}</div>
+                                    <div class="image" :class="`message-${msg.id}`" v-if="msg.mediafile" :key="msg.id">
+                                      <img v-preview:scope-b class="lazy" v-if="msg.mediafile.is_image" :data-src="msg.mediafile.filepath" :alt="msg.mediafile.mfname" />
+                                      <img src="/images/loading.gif" v-if="msg.mediafile.is_image" class="loading-image" />
+                                      <video v-if="msg.mediafile.is_video" controls>
+                                        <source :src="msg.mediafile.filepath" type="video/mp4" />
+                                      </video>
+                                      <audio v-if="msg.mediafile.mimetype.indexOf('audio/') > -1" controls>
+                                        <source :src="msg.mediafile.filepath" type="audio/mpeg" />
+                                      </audio>
+                                    </div>
+                                  </template>
+                                </div>
                                 <div class="time">
-                                  {{ moment(message.created_at).format('hh:mm A') }}
+                                  <span>{{ moment(message.created_at).format('hh:mm A') }},&nbsp;</span>
+                                  <span class="payment-state" v-if="message.tip_price && !message.paid">${{message.tip_price}} not paid yet</span>
                                 </div>
                               </div>
                             </div>
@@ -503,6 +555,18 @@
         </div>
       </div>
     </b-modal>
+    <b-modal v-if="selectedUser" modal-class="unsend-message-modal" hide-header centered hide-footer ref="confirm-message-price-modal" title="Message Price Modal">
+      <div class="block-modal">
+        <h4>Message price</h4>
+        <div class="content mb-3 mt-3">
+          Please confirm you want to purchase a message for ${{ confirm_message_price }}.
+        </div>
+        <div class="action-btns">
+          <button class="link-btn" @click="closeMessagePriceConfirmModal">Close</button>
+          <button class="link-btn" @click="closeMessagePriceConfirmModal">Pay</button>
+        </div>
+      </div>
+    </b-modal>
   </div>
 </template>
 
@@ -563,6 +627,7 @@
       lastMessage: undefined,
       messagePrice: undefined,
       tempMessagePrice: undefined,
+      confirm_message_price: undefined,
     }),
     mounted() {
       const self = this;
@@ -703,6 +768,23 @@
         if (response.data.messages.length === 0) {
           this.hasMore = false;
         }
+        response.data.messages.forEach(message => {
+          let videos = 0, audios = 0, images = 0;
+          message.messages.map(msg => {
+            if (msg.mediafile && msg.mediafile.mimetype.indexOf('video/') > -1) {
+              videos++;
+            }
+            if (msg.mediafile && msg.mediafile.mimetype.indexOf('audio/') > -1) {
+              audios++;
+            }
+            if (msg.mediafile && msg.mediafile.mimetype.indexOf('image/') > -1) {
+              images++;
+            }
+          });
+          message.videos = videos;
+          message.audios = audios;
+          message.images = images;
+        });
         this.originMessages = this.originMessages.concat(response.data.messages);
         this.offset = this.originMessages.length;
         this.groupMessages();
@@ -1097,6 +1179,13 @@
             this.messages = newMessages;
           });
         this.unsendTipMessageId = undefined;
+      },
+      openMessagePriceConfirmModal: function(value) {
+        this.confirm_message_price = value;
+        this.$refs['confirm-message-price-modal'].show();
+      },
+      closeMessagePriceConfirmModal: function() {
+        this.$refs['confirm-message-price-modal'].hide();
       }
     }
   }
