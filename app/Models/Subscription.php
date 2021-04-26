@@ -2,20 +2,23 @@
 
 namespace App\Models;
 
-use App\Enums\Financial\AccountTypeEnum;
-use App\Enums\Financial\TransactionTypeEnum;
 use Money\Money;
 use Carbon\Carbon;
+use InvalidArgumentException;
 use App\Models\Traits\UsesUuid;
 use App\Interfaces\Subscribable;
 use App\Models\Financial\Account;
 use Illuminate\Support\Collection;
+use App\Enums\Financial\AccountTypeEnum;
 use App\Models\Casts\Money as CastsMoney;
-use App\Models\Financial\Traits\HasCurrency;
+use Illuminate\Database\Eloquent\Builder;
 use Carbon\Exceptions\InvalidCastException;
-use Carbon\Exceptions\InvalidIntervalException;
+use App\Enums\Financial\TransactionTypeEnum;
+use App\Interfaces\Ownable;
+use App\Models\Financial\Traits\HasCurrency;
+use App\Models\Traits\OwnableTraits;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use InvalidArgumentException;
+use Carbon\Exceptions\InvalidIntervalException;
 
 /**
  * A subscription
@@ -46,12 +49,13 @@ use InvalidArgumentException;
  *
  * @package App\Models
  */
-class Subscription extends Model
+class Subscription extends Model implements Ownable
 {
     use UsesUuid,
         HasCurrency,
         SoftDeletes,
-        HasCurrency;
+        HasCurrency,
+        OwnableTraits;
 
     protected $table = 'subscriptions';
 
@@ -75,18 +79,55 @@ class Subscription extends Model
 
     public function user()
     {
-        return $this->hasOne(User::class);
+        return $this->belongsTo(User::class);
     }
 
     public function account()
     {
-        return $this->hasOne(Account::class);
+        return $this->belongsTo(Account::class);
     }
 
     #endregion Relationships
 
+    /* ------------------------------- Scopes ------------------------------- */
+    #region Scopes
+    /**
+     * Only return active subscriptions
+     *
+     * @param  Builder  $query
+     * @return Builder
+     */
+    public function scopeActive($query)
+    {
+        return $query->where('active', true);
+    }
+
+    /**
+     * Only return inactive subscriptions
+     *
+     * @param  Builder  $query
+     * @return Builder
+     */
+    public function scopeInactive($query)
+    {
+        return $query->where('active', false);
+    }
+
+    #endregion Scopes
+
+
     /* ------------------------------ Functions ----------------------------- */
     #region Functions
+
+    /**
+     * Cancels an active subscription
+     *
+     * @return void
+     */
+    public function cancel()
+    {
+        //
+    }
 
     /**
      * Process a subscription transaction
@@ -120,6 +161,8 @@ class Subscription extends Model
             $this->last_transaction_id = $transactions['debit'];
             $this->last_payment_at = Carbon::now();
             $this->updateNextPayment();
+            $this->active = true;
+            $this->save();
             return $transactions;
         } else if ($this->account->type === AccountTypeEnum::INTERNAL) {
             $transactions = $this->account->moveTo(
@@ -135,6 +178,8 @@ class Subscription extends Model
             $this->last_transaction_id = $transactions['debit'];
             $this->last_payment_at = Carbon::now();
             $this->updateNextPayment();
+            $this->active = true;
+            $this->save();
             return $transactions;
         }
         return false;
@@ -167,6 +212,16 @@ class Subscription extends Model
     }
 
     #endregion Functions
+
+    /* ------------------------------- Ownable ------------------------------ */
+    #region Ownable
+
+    public function getOwner(): ?Collection
+    {
+        return new Collection([ $this->user ]);
+    }
+
+    #endregion Ownable
 
 
     /* ---------------------------- Verifications --------------------------- */

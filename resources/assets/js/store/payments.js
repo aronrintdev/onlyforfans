@@ -2,7 +2,7 @@
  * js/store/payments.js
  * Vuex store module for items related to payments
  */
-import _, { reject } from 'lodash'
+import _ from 'lodash'
 import axios from 'axios'
 import propSelect from '@helpers/propSelect'
 

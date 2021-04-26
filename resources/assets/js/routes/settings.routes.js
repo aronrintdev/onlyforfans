@@ -3,6 +3,7 @@
  */
 
 import settings from '@components/settings'
+import childRoutes from './settings'
 
 export default [
   {
@@ -29,6 +30,11 @@ export default [
     name: 'settings.payments',
     component: settings.Payments,
     path: 'payment-methods',
+  },
+  {
+    component: settings.MySubscriptions,
+    path: 'my-subscriptions',
+    children: childRoutes.subscriptions,
   },
   {
     name: 'settings.earnings',

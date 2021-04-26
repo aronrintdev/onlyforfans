@@ -609,7 +609,7 @@ class Account extends Model implements Ownable
             'period_interval'   => $options['period_interval'] ?? 1,
             'price'             => $payment->getAmount(),
             'currency'          => $this->currency,
-            'active'            => true,
+            'active'            => false,
             'access_level'      => $options['access_level'] ?? ShareableAccessLevelEnum::PREMIUM,
             'custom_attributes' => $options['custom_attributes'] ?? null,
             'metadata'          => $options['metadata'] ?? null,

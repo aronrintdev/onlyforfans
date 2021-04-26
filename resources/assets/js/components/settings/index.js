@@ -1,6 +1,10 @@
+/**
+ * js/components/settings
+ */
 import Bookmarks from './SettingsBookmarks.vue'
 import Earnings from './SettingsEarnings.vue'
 import General from './SettingsGeneral.vue'
+import MySubscriptions from './MySubscriptions.vue'
 import Payments from './SettingsPayments.vue'
 import Privacy from './SettingsPrivacy.vue'
 import Profile from './SettingsProfile.vue'
@@ -12,6 +16,7 @@ export default {
   Bookmarks,
   Earnings,
   General,
+  MySubscriptions,
   Payments,
   Privacy,
   Profile,

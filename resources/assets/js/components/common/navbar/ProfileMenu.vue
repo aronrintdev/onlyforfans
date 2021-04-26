@@ -123,6 +123,7 @@ export default {
     "My Vault": "My Vault",
     "Settings": "Settings",
     "Payment Method": "Payment Method",
+    "Lists": "Lists",
     "Logout": "Logout",
   }
 }
