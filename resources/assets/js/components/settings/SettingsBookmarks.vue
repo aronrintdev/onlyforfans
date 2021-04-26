@@ -1,19 +1,19 @@
 <template>
   <div v-if="!isLoading">
 
-    <b-card title="Bookmarks">
+    <b-card title="Favorites">
       <hr />
       <b-tabs card>
 
-        <b-tab title="Bookmarks" active>
+        <b-tab title="Favorites" active>
           <b-card-text>
             <b-table hover 
-              id="bookmarks-table"
-              :items="bookmarks.data"
-              :fields="bookmarkFields"
+              id="favorites-table"
+              :items="favorites.data"
+              :fields="favoriteFields"
               :current-page="currentPage"
             >
-              <template #cell(bookmarkable_id)="row">
+              <template #cell(favoriteable_id)="row">
                 <router-link :to="{ name: 'posts.show', params: { slug: row.value } }">Details</router-link>
               </template>
             </b-table>
@@ -21,7 +21,7 @@
               v-model="currentPage"
               :total-rows="totalRows"
               :per-page="perPage"
-              aria-controls="bookmarks-table"
+              aria-controls="favorites-table"
               v-on:page-click="pageClickHandler"
             ></b-pagination>
           </b-card-text>
@@ -47,15 +47,15 @@ export default {
 
   computed: {
     ...Vuex.mapState([
-      'bookmarks',
+      'favorites',
     ]),
 
     totalRows() {
-      return this.bookmarks.meta ? this.bookmarks.meta.total : 1
+      return this.favorites.meta ? this.favorites.meta.total : 1
     },
 
     isLoading() {
-      return !this.session_user || !this.user_settings || !this.bookmarks
+      return !this.session_user || !this.user_settings || !this.favorites
     },
   },
 
@@ -65,7 +65,7 @@ export default {
     perPage: 10,
     currentPage: 1,
 
-    bookmarkFields: [
+    favoriteFields: [
       {
         key: 'created_at',
         label: 'Date',
@@ -74,7 +74,7 @@ export default {
         }
       },
       {
-        key: 'bookmarkable_type',
+        key: 'favoriteable_type',
         label: 'Type',
       },
       {
@@ -82,14 +82,14 @@ export default {
         label: 'Creator',
       },
       {
-        key: 'bookmarkable_id',
+        key: 'favoriteable_id',
         label: '',
       },
     ],
   }),
 
   created() {
-    this.getBookmarks({ 
+    this.getFavorites({ 
       seller_id: this.session_user.id,
       page: 1,
       take: this.perPage,
@@ -98,11 +98,11 @@ export default {
 
   methods: {
     ...Vuex.mapActions({
-      getBookmarks: "getBookmarks",
+      getFavorites: "getFavorites",
     }),
 
     pageClickHandler(e, page) {
-      this.getBookmarks({ 
+      this.getFavorites({ 
         seller_id: this.session_user.id,
         page: page,
         take: this.perPage,

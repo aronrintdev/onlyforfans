@@ -1,4 +1,4 @@
-import Bookmarks from './SettingsBookmarks.vue'
+//import Bookmarks from './SettingsBookmarks.vue'
 import Earnings from './SettingsEarnings.vue'
 import General from './SettingsGeneral.vue'
 import Payments from './SettingsPayments.vue'
@@ -10,7 +10,7 @@ import Sessions from './SettingsSessions.vue'
 import Subscriptions from './SettingsSubscriptions.vue'
 
 export default {
-  Bookmarks,
+  //Bookmarks,
   Earnings,
   General,
   Payments,

@@ -26,7 +26,7 @@ class TestDatabaseSeeder extends ParentSeeder
             ShareablesTableSeeder::class,
             CommentsTableSeeder::class, // must be after shareables as requires followers
             StoriesTableSeeder::class,
-            BookmarksTableSeeder::class,
+            FavoritesTableSeeder::class,
             LikeablesTableSeeder::class,
             //TipsTableSeeder::class,
         ]);

@@ -54,25 +54,32 @@ export default {
       {
         name: 'General',
         to: { name: 'settings.general', params: {} },
-      }, {
+      }, 
+      {
         name: 'Profile',
         to: { name: 'settings.profile', params: {} },
-      }, {
+      }, 
+      {
         name: 'Privacy',
         to: { name: 'settings.privacy', params: {} },
-      }, {
+      }, 
+      {
         name: 'Security',
         to: { name: 'settings.security', params: {} },
-      }, {
+      }, 
+      {
         name: 'Payment Methods',
         to: { name: 'settings.payments', params: {} },
-      }, {
+      }, 
+      {
         name: 'Earnings',
         to: { name: 'settings.earnings', params: {} },
-      }, {
+      }, 
+      {
         name: 'Login Sessions',
         to: { name: 'settings.sessions', params: {} },
-      }, {
+      }, 
+      {
         name: 'Referrals',
         to: { name: 'settings.referrals', params: {} },
       }, {

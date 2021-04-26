@@ -40,7 +40,7 @@ class Post extends JsonResource
             'created_at' => $this->created_at,
             'stats' => [
                 'isLikedByMe' => $this->isLikedByMe,
-                'isBookmarkedByMe' => $this->isBookmarkedByMe,
+                'isFavoritedByMe' => $this->isFavoritedByMe,
                 'likeCount' => $this->likes_count,
                 'commentCount' => $this->comments_count,
             ],
