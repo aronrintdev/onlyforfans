@@ -173,4 +173,5 @@ export default {
     "Referrals": "Referrals",
     "Bookmarks": "Bookmarks"
   }
-  </i18n>
+}
+</i18n>
