@@ -17,6 +17,8 @@ use App\Jobs\FakeSegpayPayment;
 use App\Models\Financial\Account;
 use App\Models\Financial\SegpayCard;
 use App\Rules\InEnum;
+use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class SegPayController extends Controller
 {
@@ -197,9 +199,7 @@ class SegPayController extends Controller
      */
     public function fake(Request $request)
     {
-        if (Config::get('app.env') === 'production' || Config::get('segpay.fake') === false) {
-            abort(403);
-        }
+        $this->checkFaking();
 
         $request->validate([
             'item'     => 'required|uuid',
@@ -210,13 +210,7 @@ class SegPayController extends Controller
         ]);
 
         // Get payment item
-        if ($request->type === PaymentTypeEnum::PURCHASE) {
-            $item = PurchasableHelpers::getPurchasableItem($request->item);
-        } else if ($request->type === PaymentTypeEnum::TIP) {
-            $item = TippableHelpers::getTippableItem($request->item);
-        } else if ($request->type === PaymentTypeEnum::SUBSCRIPTION) {
-            $item = SubscribableHelpers::getSubscribableItem($request->item);
-        }
+        $item = $this->getItem($request);
 
         if (!isset($item)) {
             abort(400, 'Bad type or item');
@@ -255,6 +249,70 @@ class SegPayController extends Controller
 
         // Dispatch Event
         FakeSegpayPayment::dispatch($item, $account, $request->type, $request->price);
+    }
+
+    /**
+     *
+     * @param Request $request
+     * @return void
+     */
+    public function fakeConfirmation(Request $request)
+    {
+        $this->checkFaking();
+
+        $request->validate([
+            'item'     => 'required|uuid',
+            'type'     => ['required', new InEnum(new PaymentTypeEnum())],
+            'price'    => 'required',
+            'currency' => 'required',
+            'method'   => 'required|uuid',
+        ]);
+
+        // Get payment item
+        $item = $this->getItem($request);
+        if (!isset($item)) {
+            abort(400, 'Bad type or item');
+        }
+
+        // Validate Price
+        if (!$item->verifyPrice($request->price)) {
+            abort(400, 'Invalid Price');
+        }
+
+        $account = Account::find($request->method);
+
+        // Dispatch Event
+        FakeSegpayPayment::dispatch($item, $account, $request->type, $request->price);
+    }
+
+
+    private function getItem($request)
+    {
+        // Get payment item
+        if ($request->type === PaymentTypeEnum::PURCHASE) {
+            return PurchasableHelpers::getPurchasableItem($request->item);
+        }
+        if ($request->type === PaymentTypeEnum::TIP) {
+            return TippableHelpers::getTippableItem($request->item);
+        }
+        if ($request->type === PaymentTypeEnum::SUBSCRIPTION) {
+            return SubscribableHelpers::getSubscribableItem($request->item);
+        }
+
+        abort(400, 'Bad type or item');
+    }
+
+    /**
+     * Checks if system is in fake mode and aborts if not.
+     *
+     * @return void
+     * @throws HttpException
+     * @throws NotFoundHttpException
+     */
+    private function checkFaking() {
+        if (Config::get('app.env') === 'production' || Config::get('segpay.fake') === false) {
+            abort(403);
+        }
     }
 
 }

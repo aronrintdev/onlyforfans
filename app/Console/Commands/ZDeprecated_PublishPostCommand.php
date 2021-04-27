@@ -6,21 +6,21 @@ use App\Post;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 
-class ExpirePostCommand extends Command
+class ZDeprecated_PublishPostCommand extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'expire:post';
+    protected $signature = 'publish:posts';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'This command will expire the post.';
+    protected $description = 'This command will publish post';
 
     /**
      * Execute the console command.
@@ -29,20 +29,24 @@ class ExpirePostCommand extends Command
      */
     public function handle()
     {
-        $this->info('Expiring post...');
+        $this->info('Publishing Command....');
+        
         $today = Carbon::now()->toDateString();
-        $posts = Post::whereActive(1)->where('expiration_date', $today)->get();
+        $posts = Post::whereActive(0)->where('publish_date', $today)->get();
         /** @var Post $post */
         foreach ($posts as $post) {
             $timezone = ($post->user && !empty($post->user->timezone)) ? $post->user->timezone : 'UTC';
             $time = Carbon::now($timezone)->toTimeString();
-            if ($post->expiration_time <= $time) {
+            if ($post->publish_time <= $time) {
                 $post->update([
-                    'active' => 0,
+                    'active' => 1,
+                    'created_at' => Carbon::now($timezone)
                 ]);
             }
-
+            
         }
-        $this->info('Post expired successfully.');
+        $now = Carbon::now();
+        
+        $this->info('Post Publishing complete');
     }
 }

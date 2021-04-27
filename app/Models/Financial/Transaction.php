@@ -50,6 +50,8 @@ class Transaction extends Model
 
     protected $table = 'financial_transactions';
 
+    protected $forceCombV4Uuid = true;
+
     protected $guarded = [
         'settled_at',
         'failed_at',

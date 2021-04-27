@@ -56,6 +56,7 @@
     "pusher-js": "^7.0.2",
     "swiper": "^6.5.4",
     "text-mask-addons": "^3.8.0",
+    "uuid-encoder": "^1.2.0",
     "v-clipboard": "^2.2.3",
     "v-mask": "^2.2.4",
     "vue-animejs": "^2.1.1",

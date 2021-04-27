@@ -8,8 +8,8 @@
     @click="select"
   >
     <fa-icon :icon="icon" fixed-width :size="iconSize" />
+    <span class="ml-2" v-if="value.last_4" v-text="$t('last4', { last_4: value.last_4 })" />
     <span class="nickname mx-3" v-text="value.nickname" />
-    <span v-if="value.last_4" v-text="$t('last4', { last_4: value.last_4 })" />
 
     <slot></slot>
 

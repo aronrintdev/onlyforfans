@@ -41,6 +41,7 @@
 /**
  * Base purchase form, for when something is being purchased
  */
+import { eventBus } from '@/app'
 import _ from 'lodash'
 import Vuex from 'vuex'
 import FromNew from './forms/New'
@@ -75,7 +76,12 @@ export default {
   },
 
   computed: {
+    ...Vuex.mapState([ 'session_user' ]),
     ...Vuex.mapState('payments', [ 'savedPaymentMethods', 'defaultMethod' ]),
+
+    purchasesChannel() {
+      return `user.${this.session_user.id}.purchases`
+    },
   },
 
   data: () => ({
@@ -129,6 +135,7 @@ export default {
     init() {
       /* Purchase */
       if (this.type === 'purchase') {
+        this.$log.debug('Registering purchase listeners')
         this.$root.$on('bv::modal::hide', (bvEvent, modalId) => {
           if (modalId === 'modal-purchase-post' && this.processing) {
             bvEvent.preventDefault()
@@ -146,6 +153,7 @@ export default {
 
       /* Tip */
       } else if (this.type === 'tip') {
+        this.$log.debug('Registering tip listeners')
         this.$root.$on('bv::modal::hide', (bvEvent, modalId) => {
           if (modalId === 'modal-tip' && this.processing) {
             bvEvent.preventDefault()
@@ -163,12 +171,23 @@ export default {
 
       /* Subscription */
       } else if (this.type === 'subscription') {
+        this.$log.debug('Registering subscription listeners')
         this.$root.$on('bv::modal::hide', (bvEvent, modalId) => {
           if (modalId === 'modal-follow' && this.processing) {
             bvEvent.preventDefault()
           }
         })
         this.$echo.private(this.purchasesChannel).listen('ItemSubscribed', e => {
+          this.$log.debug('ItemSubscribed received', { e, this_item_id: this.value.id })
+          if (e.item_id === this.value.id) {
+            this.processing = false
+            clearTimeout(this.waiting)
+            this.$nextTick(() => {
+              this.$bvModal.hide('modal-follow')
+            })
+          }
+        }).listen('SubscriptionFailed', e => {
+          this.$log.debug('SubscriptionFailed received', { e, this_item_id: this.value.id })
           if (e.item_id === this.value.id) {
             this.processing = false
             clearTimeout(this.waiting)
@@ -183,6 +202,7 @@ export default {
   },
 
   mounted() {
+    this.init()
     this.loadPaymentMethods()
   },
 

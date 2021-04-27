@@ -63,7 +63,10 @@ export default {
 
     onConfirm() {
       this.$emit('processing')
-      this.axios.post(this.$apiRoute('payments.purchase'), {
+      /**
+       * TODO: Hook up to segpay system proper
+       */
+      this.axios.post(this.$apiRoute('payments.segpay.fake-confirmation'), {
         item: this.value.id,
         type: this.type,
         price: this.price,

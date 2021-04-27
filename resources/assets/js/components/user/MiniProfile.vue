@@ -32,42 +32,51 @@
       </template>
 
       <b-card
-        :img-src="timeline.cover.filepath"
-        :img-alt="timeline.slug"
-        img-top
+        no-body
         tag="article"
         class="background"
       >
-        <div class="avatar-img">
-          <router-link :to="{ name: 'timeline.show', params: { slug: timeline.slug } }">
-            <b-img
-              thumbnail
-              rounded="circle"
-              class="w-100 h-100"
-              :src="timeline.avatar.filepath"
-              :alt="timeline.slug"
-              :title="timeline.name"
-            />
-          </router-link>
-        </div>
-
-        <div class="avatar-profile d-flex justify-content-between">
-          <div class="avatar-details">
-            <h2 class="avatar-name my-0">
-              <router-link :to="{ name: 'timeline.show', params: { slug: timeline.slug } }">
-                {{ timeline.name }}
-              </router-link>
-              <span v-if="timeline.verified" class="verified-badge">
-                <b-icon icon="check-circle-fill" variant="success" font-scale="1" />
-              </span>
-            </h2>
-            <p class="avatar-mail my-0">
-              <router-link :to="{ name: 'timeline.show', params: { slug: timeline.slug } }">
-                @{{ timeline.slug }}
-              </router-link>
-            </p>
+        <b-card-img
+          top
+          :src="timeline.cover.filepath"
+          :alt="timeline.slug"
+          class="cursor-pointer"
+          @click="$router.push({ name: 'timeline.show', params: { slug: timeline.slug } })"
+        />
+        <b-card-body>
+          <div class="avatar-img">
+            <router-link :to="{ name: 'timeline.show', params: { slug: timeline.slug } }">
+              <b-img
+                thumbnail
+                rounded="circle"
+                class="w-100 h-100"
+                :src="timeline.avatar.filepath"
+                :alt="timeline.slug"
+                :title="timeline.name"
+              />
+            </router-link>
           </div>
-        </div>
+
+          <div class="avatar-profile d-flex justify-content-between">
+            <div class="avatar-details">
+              <h2 class="avatar-name my-0">
+                <router-link :to="{ name: 'timeline.show', params: { slug: timeline.slug } }">
+                  {{ timeline.name }}
+                </router-link>
+                <span v-if="timeline.verified" class="verified-badge">
+                  <b-icon icon="check-circle-fill" variant="success" font-scale="1" />
+                </span>
+              </h2>
+              <p class="avatar-mail my-0">
+                <router-link :to="{ name: 'timeline.show', params: { slug: timeline.slug } }">
+                  @{{ timeline.slug }}
+                </router-link>
+              </p>
+            </div>
+          </div>
+
+          <slot></slot>
+        </b-card-body>
       </b-card>
     </b-skeleton-wrapper>
   </div>
@@ -110,6 +119,7 @@ export default {
       }
       .card-img-top {
         overflow: hidden;
+        object-fit: cover;
         height: 120px;
       }
     }

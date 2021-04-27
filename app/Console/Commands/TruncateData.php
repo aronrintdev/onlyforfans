@@ -1,16 +1,17 @@
 <?php
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Storage;
-use App;
 use DB;
+use App;
 use Exception;
 use App\Models\Mediafile;
+use Illuminate\Support\Str;
+use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Storage;
 
 class TruncateData extends Command
 {
-    protected $signature = 'truncate:data';
+    protected $signature = 'truncate:data {--list=all}';
 
     protected $description = 'Development-only script to truncate selected DB tables pre-seeding';
 
@@ -28,14 +29,24 @@ class TruncateData extends Command
         $thisEnv = App::environment();
         $dbName = env('DB_DATABASE');
 
-        $this->info( '%%% DB Name: '.$dbName);
-        $this->info( '%%% Env: '.$thisEnv);
+        $this->info( '%%% DB Name: ' . $dbName);
+        $this->info( '%%% Env: ' . $thisEnv);
         if ( $dbName !== 'fansplat_dev_test' && !in_array($thisEnv, $whitelistedEnvs) ) {
-            throw new Exception('Environment not in whitelist: '.App::environment());
+            throw new Exception('Environment not in whitelist: ' . App::environment());
         }
 
         DB::statement('SET FOREIGN_KEY_CHECKS=0;'); // disable
-        foreach ( self::$truncateList as $t ) {
+        $list = [];
+        switch(Str::lower($this->option('list'))) {
+            case 'all':
+                $list = self::$truncateList;
+                break;
+            case 'shareables':
+                $list = self::$shareablesList;
+                break;
+        }
+
+        foreach ( $list as $t ) {
             $this->info( ' - Truncate "'.$t.'"...');
             switch ($t) {
                 case 'mediafiles':
@@ -57,6 +68,15 @@ class TruncateData extends Command
         Storage::disk('s3')->delete($mf->filename); // Remove from S3
         $mf->delete();
     }
+
+    private static $shareablesList = [
+        'financial_transactions',
+        'financial_transaction_summaries',
+        'financial_currency_exchange_transactions',
+        'financial_flags',
+        'shareables',
+        'subscriptions',
+    ];
 
     private static $truncateList = [
         'favorites',
