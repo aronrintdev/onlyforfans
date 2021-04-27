@@ -68,10 +68,20 @@ body .feed-crate.tag-grid-layout .superbox-post .locked-content {
   height: 20rem;
 }
 
-body .feed-crate.tag-grid-layout .superbox-post .carousel.slide .carousel-item video,
-body .feed-crate.tag-grid-layout .superbox-post .carousel.slide .carousel-item img {
-  object-fit: cover;
-  height: 20rem;
+// Lists
+body #view-lists .list-component.tag-grid-layout  .superbox-post .carousel.slide .carousel-item {
+  video, img {
+    object-fit: cover;
+    height: 20rem;
+  }
+}
+
+// Main Timeline Feed
+body .feed-crate.tag-grid-layout .superbox-post .carousel.slide .carousel-item {
+  video, img {
+    object-fit: cover;
+    height: 20rem;
+  }
 }
 
 #user-filter-dropdown .btn,

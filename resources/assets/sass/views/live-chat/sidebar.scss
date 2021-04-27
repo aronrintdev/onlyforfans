@@ -263,6 +263,9 @@
 		align-items: center;
 		justify-content: space-between;
 		padding-bottom: 3px;
+		&.is-unread .last-message {
+			color: #1a1a1a !important;
+		}
 		.user-details-row:last-child {
 			padding-bottom: 0;
 		}

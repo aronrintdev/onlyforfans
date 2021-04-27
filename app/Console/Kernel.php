@@ -19,6 +19,7 @@ class Kernel extends ConsoleKernel
         \App\Console\Commands\SetMediafileBasename::class,
         \App\Console\Commands\TruncateData::class,
         \App\Console\Commands\UpdateCanceledSubscriptions::class,
+        \App\Console\Commands\UpdateMediafilesNullResource::class,
         \App\Console\Commands\UpdateSlugs::class,
     ];
 

@@ -9,40 +9,40 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Database\Seeders\TestDatabaseSeeder;
 use App\Enums\PostTypeEnum;
-use App\Models\Bookmark;
+use App\Models\Favorite;
 use App\Models\Post;
 use App\Models\User;
 
-class BookmarkableTest extends TestCase
+class FavoriteableTest extends TestCase
 {
 
     use RefreshDatabase, WithFaker;
 
     /**
-     * @group bookmarkable-model
+     * @group favoritable-model
      * @group OFF-regression
      */
-    public function test_can_bookmark_free_post()
+    public function test_can_favorite_free_post()
     {
         $post = Post::where('type', PostTypeEnum::FREE)->first();
         $fan = User::factory()->create();
 
-        $bookmark = Bookmark::create([
+        $favorite = Favorite::create([
             'user_id' => $fan->id,
-            'bookmarkable_type' => 'posts',
-            'bookmarkable_id' => $post->id,
+            'favoritable_type' => 'posts',
+            'favoritable_id' => $post->id,
         ]);
         $post->refresh();
 
-        $this->assertNotNull($bookmark);
-        $this->assertNotNull($bookmark->id);
-        $this->assertNotNull($post->bookmarks);
-        $this->assertNotNull($post->bookmarks[0]);
-        $this->assertEquals($post->id, $post->bookmarks[0]->bookmarkable_id);
-        $this->assertEquals('posts', $post->bookmarks[0]->bookmarkable_type);
+        $this->assertNotNull($favorite);
+        $this->assertNotNull($favorite->id);
+        $this->assertNotNull($post->favorites);
+        $this->assertNotNull($post->favorites[0]);
+        $this->assertEquals($post->id, $post->favorites[0]->favoritable_id);
+        $this->assertEquals('posts', $post->favorites[0]->favoritable_type);
 
-        $this->assertInstanceOf(Post::class, $post->bookmarks[0]->bookmarkable);
-        $this->assertEquals($fan->id, $post->bookmarks[0]->user->id);
+        $this->assertInstanceOf(Post::class, $post->favorites[0]->favoritable);
+        $this->assertEquals($fan->id, $post->favorites[0]->user->id);
     }
 
     // ------------------------------

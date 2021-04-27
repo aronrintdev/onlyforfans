@@ -1,7 +1,8 @@
 /**
  * js/components/settings
  */
-import Bookmarks from './SettingsBookmarks.vue'
+
+//import Bookmarks from './SettingsBookmarks.vue'
 import Earnings from './SettingsEarnings.vue'
 import General from './SettingsGeneral.vue'
 import MySubscriptions from './MySubscriptions.vue'
@@ -14,7 +15,7 @@ import Security from './SettingsSecurity.vue'
 import Sessions from './SettingsSessions.vue'
 
 export default {
-  Bookmarks,
+  //Bookmarks,
   Earnings,
   General,
   MySubscriptions,

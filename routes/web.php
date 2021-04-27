@@ -94,9 +94,9 @@ Route::group(['middleware' => ['auth']], function () {
         'only' => [ 'index' ],
     ]);
 
-    // -- bookmarks:  --
-    Route::post('/bookmarks/remove', ['as'=>'bookmarks.remove', 'uses' => 'BookmarksController@remove']); // remove bookmark w/o pkid
-    Route::resource('bookmarks', 'BookmarksController', [
+    // -- favorites:  --
+    Route::post('/favorites/remove', ['as'=>'favorites.remove', 'uses' => 'FavoritesController@remove']); // remove favorites w/o pkid
+    Route::resource('favorites', 'FavoritesController', [
         'except' => [ 'create', 'edit', 'update', ],
     ]);
 
@@ -212,6 +212,7 @@ Route::patch('/chat-messages/{id}/mute', ['as'=>'messages.mute', 'uses' => 'Mess
 Route::patch('/chat-messages/{id}/unmute', ['as'=>'messages.unmute', 'uses' => 'MessageController@unmute']);
 Route::post('/chat-messages/{id}/custom-name', ['as'=>'messages.customname', 'uses' => 'MessageController@setCustomName']);
 Route::get('/chat-messages/{id}/mediafiles', ['as'=>'messages.mediafiles', 'uses' => 'MessageController@listMediafiles']);
+Route::get('/unread-messages-count', ['as'=>'messages.unreadmessagescount', 'uses' => 'MessageController@getUnreadMessagesCount']);
 
 Route::resource('chat-messages', 'MessageController')->only([
     'index',

@@ -9,7 +9,7 @@ use App\Traits\OwnableFunctions;
 use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
-class Bookmark extends Model implements UuidId, Ownable
+class Favorite extends Model implements UuidId, Ownable
 {
     use UsesUuid, OwnableFunctions;
 
@@ -29,7 +29,7 @@ class Bookmark extends Model implements UuidId, Ownable
     // %%% Relationships
     //--------------------------------------------
 
-    public function bookmarkable()
+    public function favoritable()
     {
         return $this->morphTo();
     }

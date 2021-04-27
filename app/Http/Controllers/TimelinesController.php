@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Log;
 
 use App\Http\Resources\MediafileCollection;
 use App\Http\Resources\PostCollection;
+use App\Http\Resources\TimelineCollection;
 use App\Http\Resources\Timeline as TimelineResource;
 use App\Libs\FeedMgr;
 use App\Libs\UserMgr;
@@ -115,9 +116,9 @@ class TimelinesController extends AppBaseController
     // Get suggested users (list/index)
     public function suggested(Request $request)
     {
-        $TAKE = $request->input('take', 5);
+        $MAX = 6*5; // $request->input('take', 5);
         $followedIDs = $request->user()->followedtimelines->pluck('id');
-        $query = Timeline::with(['user', 'avatar', 'cover'])->inRandomOrder();
+        $query = Timeline::with(['user', 'avatar', 'cover'])->take($MAX)->inRandomOrder();
         $query->whereHas('user', function($q1) use(&$request, &$followedIDs) {
             $q1->where('id', '<>', $request->user()->id); // skip myself
             // skip timelines I'm already following
@@ -127,11 +128,13 @@ class TimelinesController extends AppBaseController
         });
 
         // Apply filters
-        //  ~ %TODO
+        if ( $request->has('free_only') ) {
+            $query->where('is_follow_for_free', true);
+        }
 
-        return response()->json([
-            'timelines' => $query->take($TAKE)->get(),
-        ]);
+        //$data = $query->paginate( $request->input('take', env('MAX_SUGGESTED_TIMELINES_PER_REQUEST', 6)) );
+        $data = $query->get();
+        return new TimelineCollection($data);
     }
 
     // %FIXME: better way to do this is to pull down a set of mediafiles associated with posts on this timeline (?)

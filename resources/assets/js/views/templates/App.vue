@@ -63,16 +63,29 @@ export default {
 
   data: () => ({
     onlineMonitor: null,
+    unreadMessagesCount: 0,
   }),
 
   methods: {
     ...Vuex.mapActions(['getMe']),
-    ...Vuex.mapMutations([ 'UPDATE_MOBILE', 'UPDATE_SCREEN_SIZE' ]),
+    ...Vuex.mapMutations([ 'UPDATE_MOBILE', 'UPDATE_SCREEN_SIZE', 'UPDATE_UNREAD_MESSAGES_COUNT' ]),
     startOnlineMonitor() {
       if (this.session_user) {
         this.onlineMonitor = this.$echo.join(`user.status.${this.session_user.id}`)
+        this.$echo.private(`${this.session_user.id}-message`)
+          .listen('MessageSentEvent', () => {
+            this.getUnreadMessagesCount();
+          });
       }
     },
+    getUnreadMessagesCount: function() {
+      this.axios.get('/unread-messages-count')
+        .then((res) => {
+          this.UPDATE_UNREAD_MESSAGES_COUNT({
+            unread_messages_count: res.data.unread_messages_count,
+          });
+        });
+    }
   },
 
   watch: {
@@ -95,7 +108,8 @@ export default {
 
   mounted() {
     if (!this.session_user) {
-      this.getMe()
+      this.getMe();
+      this.getUnreadMessagesCount();
     }
     if (this.$vssWidth < this.mobileWidth) {
       this.mobile = true

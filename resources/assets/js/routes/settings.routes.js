@@ -56,11 +56,13 @@ export default [
     component: settings.Referrals,
     path: 'referrals',
   },
+  /*
   {
     name: 'settings.bookmarks',
     component: settings.Bookmarks,
     path: 'bookmarks',
   },
+  */
   {
     name: 'settings.default',
     component: settings.General,

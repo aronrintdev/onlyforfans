@@ -61,6 +61,7 @@ class AppServiceProvider extends ServiceProvider
         Relation::morphMap([
             'comments'               => 'App\Models\Comment',
             'conversations'          => 'App\Models\Conversation',
+            //'favorites'              => 'App\Models\Favorite',
             'invites'                => 'App\Models\Invite',
             'links'                  => 'App\Models\Link',
             'locations'              => 'App\Models\Location',

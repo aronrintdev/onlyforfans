@@ -102,11 +102,6 @@ export default {
         to: { name: 'settings.referrals', params: {} },
       })
 
-      routes.push({
-        name: 'Bookmarks',
-        to: { name: 'settings.bookmarks', params: {} },
-      })
-
       routes = routes.map(route => ({
         ...route,
         active: this.checkActive(route)
@@ -178,5 +173,4 @@ export default {
     "Referrals": "Referrals",
     "Bookmarks": "Bookmarks"
   }
-}
-</i18n>
+  </i18n>

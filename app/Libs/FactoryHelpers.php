@@ -118,6 +118,8 @@ class FactoryHelpers {
         switch ($mftype) {
             case MediafileTypeEnum::COVER:
             case MediafileTypeEnum::AVATAR:
+                $attrs['resource_id'] =  $resourceID;
+                $attrs['resource_type'] = 'users';
                 break;
             case MediafileTypeEnum::POST:
                 $attrs['resource_id'] =  $resourceID; // ie story_id: required for story type

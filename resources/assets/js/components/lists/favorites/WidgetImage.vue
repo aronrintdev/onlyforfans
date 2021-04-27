@@ -25,17 +25,21 @@
 
           <div class="d-flex justify-content-between">
             <ul class="d-flex list-inline footer-ctrl mb-0">
+                <!--
               <li class="mr-3">
                 <LikesButton @toggled="toggleLike()" :filled="isLikedByMe" :count="likeCount" />
               </li>
+                -->
             </ul>
             <ul class="d-flex list-inline footer-ctrl mb-0">
+                <!--
               <li class="mr-3">
                 <span @click="toggleFavorite()" class="tag-clickable">
                   <fa-icon v-if="isFavoritedByMe" fixed-width :icon="['fas', 'star']" class="clickable" style="font-size:1.2rem; color:#007bff" />
                   <fa-icon v-else fixed-width :icon="['far', 'star']" class="clickable" style="font-size:1.2rem; color:#007bff" />
                 </span>
               </li>
+                -->
             </ul>
           </div>
 
@@ -65,7 +69,7 @@ export default {
     mediafile: null,
     session_user: null,
     use_mid: { type: Boolean, default: false }, // use mid-sized images instead of full
-    is_feed: { type: Boolean, default: true }, // is in context of a feed?
+    is_feed: { type: Boolean, default: false }, // is in context of a feed?
   },
 
   computed: {
@@ -77,29 +81,12 @@ export default {
   data: () => ({
     isLikedByMe: false,
     likeCount: 0, // %FIXME INIT
-    isFavoritedByMe: false,
+    //isFavoritedByMe: false,
   }),
 
   methods: {
 
     toggleLike() {
-    },
-
-    async toggleFavorite() { // was toggleBookmark
-      let response
-      if (this.isFavoritedByMe) { // remove
-        response = await axios.post(`/favorites/remove`, {
-          favoritable_type: 'mediafiles', // 'photos' ?
-          favoritable_id: this.mediafile.id,
-        })
-        this.isFavoritedByMe = false
-      } else { // add
-        response = await axios.post(`/favorites`, {
-          favoritable_type: 'mediafiles',
-          favoritable_id: this.mediafile.id,
-        })
-        this.isFavoritedByMe = true
-      }
     },
 
     renderFull() {

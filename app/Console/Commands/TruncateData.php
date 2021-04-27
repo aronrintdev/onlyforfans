@@ -79,7 +79,7 @@ class TruncateData extends Command
     ];
 
     private static $truncateList = [
-        'bookmarks',
+        'favorites',
         'model_has_permissions',
         'model_has_roles',
         'password_resets',

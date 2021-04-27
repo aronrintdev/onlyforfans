@@ -38,13 +38,14 @@ export default new Vuex.Store({
     fanledgers: {},
     ledgercredits: null,
     ledgerdebits: null,
-    bookmarks: null,
+    favorites: null,
     timeline: null,
     session_user: null,
     user_settings: null,
     login_sessions: [],
     uiFlags: [],
     unshifted_timeline_post: null,
+    unread_messages_count: 0,
   },
 
   mutations: {
@@ -102,8 +103,8 @@ export default new Vuex.Store({
     UPDATE_DEBITS(state, payload) {
       state.debits = propSelect(payload, 'debits')
     },
-    UPDATE_BOOKMARKS(state, payload) {
-      state.bookmarks = payload.hasOwnProperty('data') ? payload.data : {}
+    UPDATE_FAVORITES(state, payload) {
+      state.favorites = payload.hasOwnProperty('data') ? payload.data : {}
     },
     UPDATE_TIMELINE(state, payload) {
       state.timeline = propSelect(payload, 'timeline')
@@ -122,6 +123,9 @@ export default new Vuex.Store({
     },
     UPDATE_UNSHIFTED_TIMELINE_POST(state, payload) {
       state.unshifted_timeline_post = propSelect(payload, 'post')
+    },
+    UPDATE_UNREAD_MESSAGES_COUNT(state, payload) {
+      state.unread_messages_count = propSelect(payload, 'unread_messages_count')
     },
   },
 
@@ -227,11 +231,11 @@ export default new Vuex.Store({
       })
     },
 
-    getBookmarks({ commit }, params ) {
-      const url = route(`bookmarks.index`);
+    getFavorites({ commit }, params ) {
+      const url = route(`favorites.index`);
       axios.get(url, { params })
         .then((response) => {
-          commit('UPDATE_BOOKMARKS', response)
+          commit('UPDATE_FAVORITES', response)
         })
     },
 
@@ -295,13 +299,14 @@ export default new Vuex.Store({
     ledgerdebits:            state => state.ledgerdebits,
     earnings:                state => state.earnings,
     debits:                  state => state.debits,
-    bookmarks:               state => state.bookmarks,
+    favorites:               state => state.favorites,
     timeline:                state => state.timeline,
     unshifted_timeline_post: state => state.unshifted_timeline_post,
     session_user:            state => state.session_user,
     user_settings:           state => state.user_settings,
     login_sessions:          state => state.login_sessions,
     uiFlags:                 state => state.uiFlags,
+    unread_messages_count:   state => state.unread_messages_count,
     //children: state => state.vault.children, // Flat list
     //mediafiles: state => state.vault.mediafiles, // Flat list
   },

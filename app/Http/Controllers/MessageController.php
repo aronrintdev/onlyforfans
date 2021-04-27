@@ -137,6 +137,8 @@ class MessageController extends Controller
                 }
             });
             $lastMessage = $messages->first();
+            $lastMessage->sender_id = $lastChatThread->sender_id;
+            $lastMessage->receiver_id = $lastChatThread->receiver_id;
             $lastMessage->hasMediafile = $hasMediafile;
             $user = Timeline::with(['user', 'avatar'])->where('user_id', $receiver)->first()->makeVisible(['user']);
             $cattrs = $userSettings->cattrs;
@@ -275,7 +277,7 @@ class MessageController extends Controller
 
         $chatthread->messages = $chatthread->messages()->with('mediafile')->orderBy('mcounter', 'asc')->get();
 
-        broadcast(new MessageSentEvent($chatthread, $sessionUser))->toOthers();
+        broadcast(new MessageSentEvent($chatthread, $sessionUser, $receiver))->toOthers();
 
         return [
             'message' => $chatthread,
@@ -418,5 +420,19 @@ class MessageController extends Controller
             }
         };
         return $mediafiles;
+    }
+
+    public function getUnreadMessagesCount(Request $request) {
+        $sessionUser = $request->user();
+        $chatthreads = ChatThread::where('receiver_id', $sessionUser->id)->get();
+        $unread_threads = [];
+        $chatthreads->each(function($thread) use(&$unread_threads) {
+            $unread_messages = $thread->messages()->where('is_unread', 1)->get();
+            if (count($unread_messages) > 0) {
+                array_push($unread_threads, $thread->sender_id);
+            }
+        });
+        $unread_threads = uniq($unread_threads);
+        return ["unread_messages_count" => count($unread_threads)];
     }
 }

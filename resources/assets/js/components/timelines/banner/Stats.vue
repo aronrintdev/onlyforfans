@@ -36,7 +36,7 @@ export default {
       {
         stat: 'post_count',
         tooltip: 'Posts',
-        icon: 'bookmarks-fill',
+        icon: 'favorites-fill',
       },
       {
         stat: 'follower_count',
