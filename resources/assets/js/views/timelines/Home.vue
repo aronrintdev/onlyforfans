@@ -16,7 +16,10 @@
         </main>
         <aside v-if="!isGridLayout" class="col-md-5 col-lg-4">
           <MiniMyStatsWidget :session_user="session_user" :timeline="timeline" />
+          <!--
           <SuggestedFeed :session_user="session_user" :timeline="timeline" class="mt-3" />
+          -->
+          <SuggestedFeed class="mt-3" />
         </aside>
       </section>
 
