@@ -12,7 +12,7 @@
       @sliding-end="onSlideEnd"
     >
 
-      <b-carousel-slide v-for="(mf, idx) in post.mediafiles" :key="mf.id">
+      <b-carousel-slide v-for="(mf, idx) in mediafiles" :key="mf.id">
         <template #img>
           <!--
           <b-embed v-if="mf.is_video" type="video" controls poster="poster.png" class="d-block">
@@ -33,7 +33,7 @@
       </b-carousel-slide>
 
     </b-carousel>
-    <div v-if="post.mediafile_count" class="mediafile-count text-white position-absolute"><b-icon icon="images" font-scale="1" variant="light" class="d-inline my-auto" /> {{ post.mediafile_count }}</div>
+    <div v-if="isNavVisible" class="mediafile-count text-white position-absolute"><b-icon icon="images" font-scale="1" variant="light" class="d-inline my-auto" /> {{ mediafiles.length }}</div>
   </div>
 </template>
 
@@ -43,17 +43,19 @@ import { eventBus } from '@/app'
 export default {
 
   props: {
-    post: null,
+    //post: null,
+    //mediafile_count: null, // was post.mediafile_count
+    mediafiles: null,
     session_user: null,
     use_mid: { type: Boolean, default: false }, // use mid-sized images instead of full
   },
 
   computed: {
     isLoading() {
-      return !this.post || !this.session_user
+      return !this.mediafiles || !this.session_user
     },
     isNavVisible() {
-      return this.post.mediafiles.length > 1
+      return this.mediafiles.length > 1
     }
   },
 
