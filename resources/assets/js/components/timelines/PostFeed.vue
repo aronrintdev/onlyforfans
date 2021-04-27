@@ -364,6 +364,10 @@ export default {
       this.reloadFromFirstPage();
     },
 
+    timelineId() {
+      this.reloadFromFirstPage();
+    },
+
     unshifted_timeline_post (newVal, oldVal) {
       this.$log.debug('PostFeed - watch:unshifted_timeline_post', { newVal, oldVal })
       this.renderedItems.pop(); // pop the 'oldest' to keep pagination offset correct
