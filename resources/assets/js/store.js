@@ -183,6 +183,9 @@ export default new Vuex.Store({
         case 'photos':
           url = route('timelines.photos', timelineId)
           break
+        case 'videos':
+          url = route('timelines.videos', timelineId)
+          break
         default:
           url = isHomefeed ? `/timelines/home/feed` : `/timelines/${timelineId}/feed`
       }

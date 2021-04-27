@@ -124,6 +124,21 @@ class Mediafile extends BaseModel implements Guidable, Ownable, Cloneable
     }
 
     //--------------------------------------------
+    // %%% Scopes
+    //--------------------------------------------
+
+    // %DRY %FIXME: see attribute and appends
+    public function scopeIsImage($query)
+    {
+        return $query->whereIn('mimetype', ['image/jpeg', 'image/jpg', 'image/png']);
+    }
+
+    public function scopeIsVideo($query)
+    {
+        return $query->whereIn('mimetype', ['video/mp4', 'video/mpeg', 'video/ogg', 'video/quicktime']);
+    }
+
+    //--------------------------------------------
     // %%% Methods
     //--------------------------------------------
 
@@ -235,6 +250,7 @@ class Mediafile extends BaseModel implements Guidable, Ownable, Cloneable
             case 'video/x-flv':
             case 'video/quicktime':
             case 'video/x-ms-wmv':
+            case 'video/ogg':
                 return true;
         }
         return false;
