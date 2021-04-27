@@ -18,9 +18,9 @@
                         <span>{{ selectedUser.profile.display_name ? `${selectedUser.profile.display_name} (${selectedUser.profile.name})` : selectedUser.profile.name }}</span>
                       </div>
                       <div class="details" v-if="!messageSearchVisible">
-                        <div class="online-status" v-if="!selectedUser.profile.user.is_online && selectedUser.profile.user.last_logged">Last seen {{ moment(selectedUser.profile.user.last_logged).format('MMM DD, YYYY') }}
+                        <div class="online-status" v-if="!selectedUser.profile.user.is_online && selectedUser.profile.user.last_logged">Last seen {{ moment(selectedUser.profile.user.last_logged).fromNow() }}
                         </div>
-                        <div class="online-status" v-if="!selectedUser.profile.user.is_online && !selectedUser.profile.user.last_logged">Last seen {{ moment(selectedUser.messages[0].created_at).format('MMM DD, YYYY') }}
+                        <div class="online-status" v-if="!selectedUser.profile.user.is_online && !selectedUser.profile.user.last_logged">Last seen {{ moment(selectedUser.messages[0].created_at).fromNow() }}
                         </div>
                         <div class="online-status" v-if="selectedUser.profile.user.is_online">
                           <i class="fa fa-circle" aria-hidden="true"></i>Available now
@@ -59,6 +59,9 @@
                       </b-dropdown-item>
                       <b-dropdown-item disabled>
                         Give user a discount
+                      </b-dropdown-item>
+                      <b-dropdown-item @click="clearMessages(selectedUser.profile)">
+                        Delete conversation
                       </b-dropdown-item>
                       <b-dropdown-item @click="editCustomName">
                         Rename @{{ selectedUser.profile.username }}
@@ -312,7 +315,7 @@
                       </swiper>
                     </div>
                     <textarea placeholder="Type a message" name="text" rows="1" maxlength="10000"
-                      spellcheck="false" :value="newMessageText" @input="onInputNewMessage"></textarea>
+                      spellcheck="false" :value="newMessageText" @input="onInputNewMessage" @keydown="onCheckReturnKey"></textarea>
                     <div class="action-btns">
                       <div>
                         <!-- image -->
@@ -881,7 +884,7 @@
               this.newMessageText = undefined;
               this.sortableMedias = [];
               this.originMessages.unshift(response.data.message);
-              this.lastMessage = _.cloneDeep(response.data.message);
+              this.lastMessage = { ...response.data.message };
               this.groupMessages();
               $('.conversation-list').animate({ scrollTop: $('.conversation-list')[0].scrollHeight }, 500);
               this.$Lazyload.$once('loaded', function () {
@@ -895,8 +898,8 @@
             user_id: this.selectedUser.profile.id,
           })
             .then((response) => {
+              this.lastMessage = response.data.message;
               this.originMessages.unshift(response.data.message);
-              this.lastMessage = _.cloneDeep(response.data.message);
               this.groupMessages();
               this.newMessageText = undefined;
               $('.conversation-list').animate({ scrollTop: $('.conversation-list')[0].scrollHeight }, 500);
@@ -1186,6 +1189,19 @@
       },
       closeMessagePriceConfirmModal: function() {
         this.$refs['confirm-message-price-modal'].hide();
+      },
+      onCheckReturnKey: function(e) {
+        if (e.ctrlKey && e.keyCode == 13) {
+          this.sendMessage();
+        }
+      },
+      clearMessages: function (receiver) {
+        this.axios.delete(`/chat-messages/${receiver.id}`)
+          .then(() => {
+            const idx = this.users.findIndex(user => user.profile.id === receiver.id);
+            this.users.splice(idx, 1);
+            this.$router.push('/messages');
+          })
       }
     }
   }

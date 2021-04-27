@@ -211,7 +211,7 @@
 					font-size: 16px;
 					line-height: 1em;
 					color: rgb(36, 37, 41);
-					font-weight: 500;
+					font-weight: 600;
 				}
 				.user-id { 
 					font-size: 15px;
@@ -264,7 +264,9 @@
 		justify-content: space-between;
 		padding-bottom: 3px;
 		&.is-unread .last-message {
-			color: #1a1a1a !important;
+			color: #242529 !important;
+			font-weight: 500;
+			letter-spacing: -0.2px;
 		}
 		.user-details-row:last-child {
 			padding-bottom: 0;

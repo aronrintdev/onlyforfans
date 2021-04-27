@@ -240,6 +240,7 @@ class MessageController extends Controller
         $chatthread = $sessionUser->chatthreads()->create([
             'receiver_id' => $request->input('user_id'),
             'tip_price' => $request->input('tip_price'),
+            'is_unread' => 1,
         ]);
 
         $files = $request->file('mediafile');

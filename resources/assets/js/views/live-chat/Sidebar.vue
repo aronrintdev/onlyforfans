@@ -1,12 +1,7 @@
 <template>
   <div class="col-md-4 col-sm-4 col-xs-4 messages-page-sidebar">
     <div class="top-bar" v-if="!userSearchVisible">
-      <div>
-        <router-link to="/">
-          <button class="btn" type="button">
-            <i class="fa fa-arrow-left" aria-hidden="true"></i>
-          </button> 
-        </router-link>
+      <div class="pl-2">
         <span class="top-bar-title">Messages</span>
       </div> 
       <div class="top-bar-action-btns">
@@ -113,12 +108,11 @@
               <div class="user-details-row">
                 <div>
                   <span class="username">{{ user.profile.display_name ? user.profile.display_name : user.profile.name }}</span>
-                  <span class="user-id">{{ `@${user.profile.username}` }}</span>
                 </div>
                 <!-- Close Button -->
-                <button class="close-btn btn" type="button" @click="clearMessages(user.profile)">
+                <!-- <button class="close-btn btn" type="button" @click="">
                   <i class="fa fa-times" aria-hidden="true"></i>
-                </button>
+                </button> -->
               </div>
               <div
                 class="user-details-row"
@@ -134,7 +128,7 @@
                   {{ user.last_message.mcontent ? user.last_message.mcontent : 'media attachment' }}
                 </span>
                 <!-- Date  -->
-                <span class="last-message-date">{{ moment(user.last_message.created_at).format('MMM DD, YYYY') }}</span>
+                <span class="last-message-date">{{ getFuzzyFormat(moment(user.last_message.created_at).fromNow(true)) }}</span>
               </div>
             </div>
           </div>
@@ -247,16 +241,21 @@
       last_thread: function(newVal) {
         if (newVal) {
           
-          const index = this.users.findIndex(user => user.profile.id === newVal.sender_id);
-          const user = this.users[index];
-          let hasMediafile = false;
-          if (newVal.messages[0].mediafile) {
-            hasMediafile = true;
+          let index = this.users.findIndex(user => user.profile.id === newVal.sender_id);
+          if (index < 0) {
+            index = this.users.findIndex(user => user.profile.id === newVal.receiver_id);
           }
-          user.last_message = newVal.messages.pop();
-          user.last_message.receiver_id = newVal.receiver_id;
-          user.last_message.hasMediafile = hasMediafile;
-          this.users = [...this.users];
+          const user = this.users[index];
+          if (user) {
+            let hasMediafile = false;
+            if (newVal.messages.length > 1 && newVal.messages[0].mediafile) {
+              hasMediafile = true;
+            }
+            user.last_message = newVal.messages.pop();
+            user.last_message.receiver_id = newVal.receiver_id;
+            user.last_message.hasMediafile = hasMediafile;
+            this.users = [...this.users];
+          }
         }
       }
     },
@@ -321,14 +320,6 @@
         }
         return names[0].slice(0, 1) + names[1].slice(0, 1);
       },
-      clearMessages: function (receiver) {
-        this.axios.delete(`/chat-messages/${receiver.id}`)
-          .then(() => {
-            const idx = this.users.findIndex(user => user.profile.id === receiver.id);
-            this.users.splice(idx, 1);
-            this.$router.push('/messages');
-          })
-      },
       markAllAsRead: function() {
         this.axios.post('/chat-messages/mark-all-as-read');
       },
@@ -374,6 +365,44 @@
           newLists[idx].isPinned = false;
           this.lists = newLists;
         });
+      },
+      getFuzzyFormat: function(value) {
+        if (new RegExp(` seconds`).test(value) || new RegExp(`a minute`).test(value)) {
+          return '1m';
+        }
+        if (new RegExp(` minutes`).test(value)) {
+          return value.replace(` minutes`, `m`);
+        }
+        if (new RegExp(`an hour`).test(value)) {
+          return '1h';
+        }
+        if (new RegExp(` hours`).test(value)) {
+          return value.replace(` hours`, `h`);
+        }
+        if (new RegExp(`a day`).test(value)) {
+          return '1d';
+        }
+        if (new RegExp(` days`).test(value)) {
+          return value.replace(` days`, `d`);
+        }
+        if (new RegExp(`a week`).test(value)) {
+          return '1w';
+        }
+        if (new RegExp(` weeks`).test(value)) {
+          return value.replace(` weeks`, `w`);
+        }
+        if (new RegExp(`a month`).test(value)) {
+          return '1m';
+        }
+        if (new RegExp(` months`).test(value)) {
+          return value.replace(` months`, `m`);
+        }
+        if (new RegExp(` years`).test(value)) {
+          return value.replace(` years`, `y`);
+        }
+        if (new RegExp(`a year`).test(value)) {
+          return '1y';
+        }
       }
     }
   }

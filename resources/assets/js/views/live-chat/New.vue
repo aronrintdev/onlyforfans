@@ -132,7 +132,7 @@
                   </div>
                   <div class="conversation-footer">
                     <textarea placeholder="Type a message" name="text" rows="1" maxlength="10000"
-                      spellcheck="false" v-model="messageText"></textarea>
+                      spellcheck="false" v-model="messageText" @keydown="onCheckReturnKey"></textarea>
                     <div class="action-btns">
                       <div>
                         <!-- image --> 
@@ -439,6 +439,11 @@
       onFilterOptionChanged: function(option, value) {
         this.filterOptions[option] = value;
         this.filterOptions = { ...this.filterOptions };
+      },
+      onCheckReturnKey: function(e) {
+        if (e.ctrlKey && e.keyCode == 13) {
+          this.sendMessage();
+        }
       }
     }
   }
