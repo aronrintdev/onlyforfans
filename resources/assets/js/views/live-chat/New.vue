@@ -61,12 +61,20 @@
                             label="Name">
                           </radio-group-box>
                         </b-dropdown-item>
-                        <b-dropdown-item @click="onOptionChanged('available')">
+                        <b-dropdown-item @click="onOptionChanged('online')">
                           <radio-group-box
                             group_name="users-sort-options"
-                            value="available"
-                            :checked="optionValue === 'available'"
-                            label="Available">
+                            value="online"
+                            :checked="optionValue === 'online'"
+                            label="Online">
+                          </radio-group-box>
+                        </b-dropdown-item>
+                        <b-dropdown-item @click="onOptionChanged('offline')">
+                          <radio-group-box
+                            group_name="users-sort-options"
+                            value="offline"
+                            :checked="optionValue === 'offline'"
+                            label="Offline">
                           </radio-group-box>
                         </b-dropdown-item>
                         <b-dropdown-divider></b-dropdown-divider>
@@ -352,8 +360,11 @@
           case 'name':
             optionText = 'Name';
             break;
-          case 'available':
-            optionText = 'Available';
+          case 'online':
+            optionText = 'Online';
+            break;
+          case 'offline':
+            optionText = 'Offline';
             break;
           default:
             optionText = 'Recent';
