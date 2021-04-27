@@ -6,6 +6,10 @@
           <span v-text="$t(`accessLevel.${subscription.access_level}`)" />
           <fa-icon :icon="subscription.active ? 'check' : 'times'" class="ml-2" fixed-width />
         </b-badge>
+        <b-badge v-if="subscription.canceled" :variant="'warning'" class="user-select-none">
+          <span v-text="$t(`canceled`)" />
+          <fa-icon :icon="'times'" class="ml-2" fixed-width />
+        </b-badge>
       </div>
 
       <div class="ml-3">
@@ -54,7 +58,8 @@ export default {
   "en": {
     "accessLevel": {
       "premium": "Premium"
-    }
+    },
+    "canceled": "Canceled"
   }
 }
 </i18n>

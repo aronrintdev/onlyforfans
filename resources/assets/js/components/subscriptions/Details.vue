@@ -5,57 +5,58 @@
         <fa-icon icon="caret-left" fixed-width /> <span v-text="$t('nav.prev')" />
       </b-btn>
     </div>
-    <b-skeleton-wrapper :loading="loading || subscription === null">
+    <b-skeleton-wrapper :loading="loading || !subscription">
       <template #loading></template>
+      <div v-if="subscription !== null">
+        <div>
+          Your subscription to {{ subscription.for.name }}
+        </div>
 
-      <div>
-        Your subscription to {{ subscription.for.name }}
-      </div>
+        <div class="controls">
+          <b-card
+            :title="$t('payment.title')"
+            class="my-3"
+          >
+            <SavedPaymentMethod :value="subscription.payment_method" :selectable="false">
+              <b-btn variant="info" class="ml-auto">
+                {{ $t('payment.update.button') }}
+              </b-btn>
+            </SavedPaymentMethod>
+          </b-card>
 
-      <div class="controls">
-        <b-card
-          :title="$t('payment.title')"
-          class="my-3"
+          <b-btn
+            v-if="subscription.active && !subscription.canceled"
+            variant="danger"
+            class="my-3"
+            @click="cancelConfirmation = true"
+          >
+            <fa-icon icon="times" fixed-width />
+            {{ $t('cancel.button') }}
+          </b-btn>
+          <div v-if="subscription.canceled" class="text-danger" v-text="$t('cancel.isCanceled')" />
+        </div>
+
+        <div class="h3" v-text="$t('transactions.title')" />
+        <hr />
+        <!-- Transaction Table Here -->
+        <div class="text-center">WIP</div>
+
+        <b-modal
+          v-model="cancelConfirmation"
+          header-bg-variant="danger"
+          header-text-variant="light"
+          :title="$t('cancel.confirm.title')"
+          ok-variant="danger"
+          @ok="onCancel"
+          :cancel-title="$t('cancel.confirm.cancel')"
         >
-          <SavedPaymentMethod :value="subscription.payment_method" :selectable="false">
-            <b-btn variant="info" class="ml-auto">
-              {{ $t('payment.update.button') }}
-            </b-btn>
-          </SavedPaymentMethod>
-        </b-card>
-
-        <b-btn
-          v-if="subscription.active"
-          variant="danger"
-          class="my-3"
-          @click="cancelConfirmation = true"
-        >
-          <fa-icon icon="times" fixed-width />
-          {{ $t('cancel.button') }}
-        </b-btn>
+          {{ $t('cancel.confirm.body', { name: subscription.for.name }) }}
+          <template #modal-ok>
+            <fa-icon icon="times" fixed-width />
+            {{ $t('cancel.confirm.ok') }}
+          </template>
+        </b-modal>
       </div>
-
-      <div class="h3" v-text="$t('transactions.title')" />
-      <hr />
-      <!-- Transaction Table Here -->
-      <div class="text-center">WIP</div>
-
-
-      <b-modal
-        v-model="cancelConfirmation"
-        header-bg-variant="danger"
-        header-text-variant="light"
-        :title="$t('cancel.confirm.title')"
-        ok-variant="danger"
-        @ok="onCancel"
-        :cancel-title="$t('cancel.confirm.cancel')"
-      >
-        {{ $t('cancel.confirm.body', { name: subscription.for.name }) }}
-        <template #modal-ok>
-          <fa-icon icon="times" fixed-width />
-          {{ $t('cancel.confirm.ok') }}
-        </template>
-      </b-modal>
     </b-skeleton-wrapper>
   </div>
 </template>
@@ -100,7 +101,7 @@ export default {
   }),
 
   methods: {
-    ...Vuex.mapActions('subscriptions', [ 'getSubscription' ]),
+    ...Vuex.mapActions('subscriptions', [ 'getSubscription', 'cancelSubscription' ]),
     ...Vuex.mapGetters('subscriptions', [ 'getSubscriptionById' ]),
 
     init() {
@@ -120,7 +121,7 @@ export default {
     },
 
     onCancel() {
-      // TODO: Hook up cancel subscription
+      this.cancelSubscription(this.subscription)
     },
 
     onChangePaymentMethod() {
@@ -150,7 +151,8 @@ export default {
         "body": "Are you sure you wish to cancel you subscription to {name}",
         "ok": "Yes, Cancel Subscription",
         "cancel": "Cancel"
-      }
+      },
+      "isCanceled": "This subscription has been canceled."
     },
     "payment": {
       "title": "Payment Method",

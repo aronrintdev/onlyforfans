@@ -21,8 +21,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Carbon\Exceptions\InvalidIntervalException;
 
 /**
- * A subscription
+ * Subscription model
  *
+ * ===== Properties ========================================================== *
  * @property string $id
  * @property string $subscribable_id    - Id of subscribable item
  * @property string $subscribable_type  - Type of subscribable item
@@ -42,10 +43,16 @@ use Carbon\Exceptions\InvalidIntervalException;
  * @property Carbon $next_payment_at    - Timestamp of when the next payment transaction is due to occur.
  * @property Carbon $last_payment_at    - Timestamp of when the last payment transaction occurred.
  *
- * Relations
+ * ===== Relations =========================================================== *
  * @property User         $user
  * @property Subscribable $subscribable
  * @property Account      $account
+ *
+ * ===== Scopes ============================================================== *
+ * @method static Builder active()
+ * @method static Builder canceled()
+ * @method static Builder due()
+ * @method static Builder inactive()
  *
  * @package App\Models
  */
@@ -103,6 +110,28 @@ class Subscription extends Model implements Ownable
     }
 
     /**
+     * Only return canceled subscriptions
+     *
+     * @param  Builder  $query
+     * @return Builder
+     */
+    public function scopeCanceled($query)
+    {
+        return $query->where('canceled', true);
+    }
+
+    /**
+     * Return only due subscriptions
+     *
+     * @param  Builder  $query
+     * @return Builder
+     */
+    public function scopeDue($query)
+    {
+        return $query->where('next_payment_at', '<=', Carbon::now());
+    }
+
+    /**
      * Only return inactive subscriptions
      *
      * @param  Builder  $query
@@ -126,7 +155,21 @@ class Subscription extends Model implements Ownable
      */
     public function cancel()
     {
-        //
+        // Cancel Payments
+        // if ( is segpay subscription ) {
+        //     Call SRS cancel account
+        // }
+
+        // Check if passed next bill date
+        $this->canceled = true;
+        if ($this->isDue()) {
+            $this->subscribable->revokeAccess($this->user);
+            $this->active = false;
+            $this->save();
+            return;
+        }
+        $this->save();
+        return;
     }
 
     /**
@@ -137,7 +180,7 @@ class Subscription extends Model implements Ownable
      */
     public function process($force = false)
     {
-        if ($force === false && !$this->due()) {
+        if ($force === false && !$this->isDue()) {
             return false;
         }
 
@@ -231,7 +274,7 @@ class Subscription extends Model implements Ownable
      * Checks if the subscription is due to be renewed
      * @return bool
      */
-    public function due(): bool
+    public function isDue(): bool
     {
         if (isset($this->next_payment_at) === false) {
             return true;
