@@ -191,7 +191,7 @@
                             <div class="sent" v-if="session_user && session_user.id === message.sender_id">
                               <template v-for="msg in message.messages">
                                 <div class="text" :class="`message-${msg.id}`" v-if="!msg.mediafile" :key="msg.id">
-                                  {{ msg.mcontent }}
+                                  <span>{{ msg.mcontent }}</span>
                                   <svg
                                     class="icon-undo"
                                     v-if="message.tip_price && !message.paid"

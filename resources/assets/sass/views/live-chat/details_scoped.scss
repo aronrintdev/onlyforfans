@@ -271,6 +271,7 @@
 						font-weight: 300;
 						font-size: 16px;
 						line-height: 24px;
+						white-space: pre-wrap;
 					}
 					.time {
 						font-size: 11px;
@@ -417,6 +418,7 @@
 							background: rgb(218 237 255 / 53%);
 							border-bottom-right-radius: 0;
 							position: relative;
+							white-space: pre-wrap;
 
 							.icon-undo {
 								position: absolute;
