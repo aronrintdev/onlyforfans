@@ -13,6 +13,15 @@ class Shareable extends Model
     protected $guarded = [ 'created_at', 'updated_at' ];
 
     //--------------------------------------------
+    // %%% Accessors/Mutators | Casts
+    //--------------------------------------------
+
+    protected $casts = [
+        'cattrs'    => 'array',
+        'meta'      => 'array',
+    ];
+
+    //--------------------------------------------
     // %%% Relationships
     //--------------------------------------------
 
