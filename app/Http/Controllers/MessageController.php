@@ -134,7 +134,8 @@ class MessageController extends Controller
                     $query->where('sender_id', $receiver)
                         ->where('receiver_id', $sessionUser->id);
                 })
-                ->orderBy('created_at', 'desc');
+                ->orderBy('created_at', 'desc')
+                ->get();
             $lastChatThread = $chatThreads->first();
             $messages = $lastChatThread->messages()->with('mediafile')->orderBy('mcounter', 'desc')->get();
             $hasMediafile = false;
@@ -144,6 +145,9 @@ class MessageController extends Controller
                 }
             });
             $lastMessage = $messages->first();
+            if (!isset($lastMessage)) {
+                $lastMessage = (object)[];
+            }
             $lastMessage->sender_id = $lastChatThread->sender_id;
             $lastMessage->unread_messages_count = ChatThread::where('is_unread', 1)
                 ->where('sender_id', $receiver)
@@ -251,6 +255,7 @@ class MessageController extends Controller
             'receiver_id' => $request->input('user_id'),
             'tip_price' => $request->input('tip_price'),
             'is_unread' => 1,
+            'is_like' => 0,
         ]);
 
         $files = $request->file('mediafile');

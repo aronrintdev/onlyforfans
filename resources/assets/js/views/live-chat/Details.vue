@@ -182,7 +182,7 @@
                                 </div>
                                 <div class="time">
                                   <i v-if="message.is_like" class="fas fa-heart"></i>
-                                  <span>{{ moment(message.created_at).format('hh:mm A') }}</span>
+                                  <span>{{ moment(message.created_at).format('h:mm A') }}</span>
                                   <span class="payment-state" v-if="message.tip_price && !message.paid">,&nbsp; ${{message.tip_price}} not paid yet</span>
                                 </div>
                               </div>
@@ -675,6 +675,9 @@
           Echo.private(`${newVal.id}-message`)
             .listen('MessageSentEvent', (e) => {
               const message = JSON.parse(e.message);
+              if (self.originMessages.findIndex(m => m.id === message.id) > -1) {
+                return;
+              }
               self.lastMessage = _.cloneDeep(message);
               if (message.sender_id === this.$route.params.id) {
                 self.originMessages.unshift(message);
@@ -1222,7 +1225,7 @@
             newMessages.forEach(thread => {
               const idx = thread.messages.findIndex(m => m.id === message.id);
               if (idx > -1) {
-                thread.messages[idx].is_like = true;
+                thread.messages[idx].is_like = 1;
               }
             });
             this.messages = newMessages;
@@ -1235,7 +1238,7 @@
             newMessages.forEach(thread => {
               const idx = thread.messages.findIndex(m => m.id === message.id);
               if (idx > -1) {
-                thread.messages[idx].is_like = false;
+                thread.messages[idx].is_like = 0;
               }
             });
             this.messages = newMessages;

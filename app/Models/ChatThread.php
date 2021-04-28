@@ -15,7 +15,7 @@ class ChatThread extends Model
      */
     protected $table = 'chatthreads';
     protected $guarded = [ 'id', 'created_at', 'updated_at' ];
-    protected $fillable = ['sender_id', 'receiver_id', 'is_unread', 'tip_price', 'paid'];
+    protected $fillable = ['sender_id', 'receiver_id', 'is_unread', 'tip_price', 'paid', 'is_like'];
 
     public function sender()
     {
