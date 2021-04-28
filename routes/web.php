@@ -214,6 +214,8 @@ Route::post('/chat-messages/{id}/custom-name', ['as'=>'messages.customname', 'us
 Route::get('/chat-messages/{id}/mediafiles', ['as'=>'messages.mediafiles', 'uses' => 'MessageController@listMediafiles']);
 Route::get('/unread-messages-count', ['as'=>'messages.unreadmessagescount', 'uses' => 'MessageController@getUnreadMessagesCount']);
 Route::delete('/chat-messages/{id}/threads/{threadId}', ['as'=>'messages.removethread', 'uses' => 'MessageController@removeThread']);
+Route::post('/chat-messages/{id}/threads/{threadId}/like', ['as'=>'messages.setlike', 'uses' => 'MessageController@setLike']);
+Route::post('/chat-messages/{id}/threads/{threadId}/unlike', ['as'=>'messages.setunlike', 'uses' => 'MessageController@setUnlike']);
 
 Route::resource('chat-messages', 'MessageController')->only([
     'index',

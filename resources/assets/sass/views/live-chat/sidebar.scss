@@ -215,17 +215,16 @@
 				}
 				.user-id { 
 					font-size: 15px;
-					color:rgba(138, 150, 163, 0.75)
-					;
+					color:rgba(138, 150, 163, 0.75);
 				}
 				.close-btn {
 					font-size: 14px;
-					color: rgba(138, 150, 163, 0.75)
-					;
+					color: rgba(138, 150, 163);
 					width: auto;
 					height: 24px;
 					display: flex;
-					padding: 04px;
+					padding: 0 4px;
+					margin-right: -4px;
 					align-items: center;
 					justify-content: center;
 					i {
@@ -266,10 +265,21 @@
 		&.is-unread .last-message {
 			color: #242529 !important;
 			font-weight: 500;
-			letter-spacing: -0.2px;
+			font-style: italic;
 		}
 		.user-details-row:last-child {
 			padding-bottom: 0;
+		}
+		.round-badge {
+			width: 19px;
+			height: 19px;
+			border-radius: 50%;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-weight: 500;
+			font-size: 13px;
+			margin-right: -3px;
 		}
 		& > div {
 			white-space: nowrap;

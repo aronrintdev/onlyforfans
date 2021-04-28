@@ -261,9 +261,6 @@
 							text-transform: uppercase;
 						}
 					}
-					.content {
-						flex: 1;
-					}
 					.text {
 						border-radius: 6px;
 						padding: 9px 12px;
@@ -272,6 +269,7 @@
 						font-size: 16px;
 						line-height: 24px;
 						white-space: pre-wrap;
+						display: inline-block;
 					}
 					.time {
 						font-size: 11px;
@@ -288,6 +286,11 @@
 							font-size: 11px;
 							color: #8a96a3;
 						}
+						.fa-heart {
+							font-size: 14px;
+							margin-right: 5px;
+							color: #00aff0;
+						}
 					}
 					.received {
 						max-width: 75%;
@@ -296,7 +299,6 @@
 						margin: 8px 0;
 
 						.non-paid-message {
-
 							.non-paid-message-block {
 								background: url(../../../static/images/price-message-bg.png) no-repeat;
 								background-size: 100% 100%;
@@ -374,10 +376,15 @@
 								}
 							}
 						}
-
+						.chat-more-dropdown {
+							align-self: flex-end;
+							margin-bottom: 2.2em;
+							margin-left: 0.4em;
+						}
 						.text {
 							background: rgba(138,150,163,.12);
 							border-bottom-left-radius: 0;
+							margin-right: auto;
 						}
 						.image {
 							margin-bottom: 8px;

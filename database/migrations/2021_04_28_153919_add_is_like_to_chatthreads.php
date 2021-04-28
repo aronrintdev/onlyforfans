@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class RemoveIsUnreadFromMessages extends Migration
+class AddIsLikeToChatthreads extends Migration
 {
     /**
      * Run the migrations.
@@ -13,8 +13,9 @@ class RemoveIsUnreadFromMessages extends Migration
      */
     public function up()
     {
-        Schema::table('messages', function (Blueprint $table) {
-            $table->dropColumn(['is_unread']);
+        Schema::table('chatthreads', function (Blueprint $table) {
+            //
+            $table->boolean('is_like')->default(false);
         });
     }
 
@@ -25,8 +26,9 @@ class RemoveIsUnreadFromMessages extends Migration
      */
     public function down()
     {
-        Schema::table('messages', function (Blueprint $table) {
-            $table->boolean('is_unread')->default(true);
+        Schema::table('chatthreads', function (Blueprint $table) {
+            //
+            $table->dropColumn(['is_like']);
         });
     }
 }

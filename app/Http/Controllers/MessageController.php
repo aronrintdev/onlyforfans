@@ -124,7 +124,7 @@ class MessageController extends Controller
         }
         $contacts = array();
         foreach($receivers as $receiver) {
-            $lastChatThread = ChatThread::where(function($query) use(&$request, &$receiver) {
+            $chatThreads = ChatThread::where(function($query) use(&$request, &$receiver) {
                     $sessionUser = $request->user();
                     $query->where('sender_id', $sessionUser->id)
                         ->where('receiver_id', $receiver);
@@ -134,8 +134,8 @@ class MessageController extends Controller
                     $query->where('sender_id', $receiver)
                         ->where('receiver_id', $sessionUser->id);
                 })
-                ->orderBy('created_at', 'desc')
-                ->first();
+                ->orderBy('created_at', 'desc');
+            $lastChatThread = $chatThreads->first();
             $messages = $lastChatThread->messages()->with('mediafile')->orderBy('mcounter', 'desc')->get();
             $hasMediafile = false;
             $messages->each(function($msg) use(&$hasMediafile) {
@@ -145,7 +145,10 @@ class MessageController extends Controller
             });
             $lastMessage = $messages->first();
             $lastMessage->sender_id = $lastChatThread->sender_id;
-            $lastMessage->is_unread = $lastChatThread->is_unread;
+            $lastMessage->unread_messages_count = ChatThread::where('is_unread', 1)
+                ->where('sender_id', $receiver)
+                ->where('receiver_id', $sessionUser->id)
+                ->get()->count();
             $lastMessage->receiver_id = $lastChatThread->receiver_id;
             $lastMessage->hasMediafile = $hasMediafile;
             $user = Timeline::with(['user', 'avatar'])->where('user_id', $receiver)->first()->makeVisible(['user']);
@@ -434,6 +437,20 @@ class MessageController extends Controller
     public function removeThread(Request $request, $id, $threadId) {
         $deleted = ChatThread::where('id', $threadId)->delete();
         if ($deleted) {
+            return;
+        }
+        abort(400);
+    }
+    public function setLike(Request $request, $id, $threadId) {
+        $updated = ChatThread::where('id', $threadId)->update(['is_like' => true]);
+        if ($updated) {
+            return;
+        }
+        abort(400);
+    }
+    public function setUnlike(Request $request, $id, $threadId) {
+        $updated = ChatThread::where('id', $threadId)->update(['is_like' => false]);
+        if ($updated) {
             return;
         }
         abort(400);

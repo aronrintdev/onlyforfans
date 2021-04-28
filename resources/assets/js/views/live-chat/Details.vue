@@ -18,14 +18,12 @@
                         <span>{{ selectedUser.profile.display_name ? `${selectedUser.profile.display_name} (${selectedUser.profile.name})` : selectedUser.profile.name }}</span>
                       </div>
                       <div class="details" v-if="!messageSearchVisible">
-                        <div class="online-status" v-if="!selectedUser.profile.user.is_online && selectedUser.profile.user.last_logged">Last seen {{ moment(selectedUser.profile.user.last_logged).fromNow() }}
-                        </div>
-                        <div class="online-status" v-if="!selectedUser.profile.user.is_online && !selectedUser.profile.user.last_logged">Last seen {{ moment(selectedUser.messages[0].created_at).fromNow() }}
+                        <div class="online-status" v-if="!selectedUser.profile.user.is_online && !!selectedUser.profile.user.last_logged">Last seen {{ moment(selectedUser.profile.user.last_logged).fromNow() }}
                         </div>
                         <div class="online-status" v-if="selectedUser.profile.user.is_online">
                           <i class="fa fa-circle" aria-hidden="true"></i>Available now
                         </div>
-                        <div class="v-divider"></div>
+                        <div class="v-divider" v-if="selectedUser.profile.user.is_online || selectedUser.profile.user.last_logged"></div>
                         <button class="star-btn btn" type="button" @click="addToFavourites()">
                           <font-awesome-icon :icon="selectedUser.profile.hasLists ? ['fas', 'star'] : ['far', 'star']" />
                         </button>
@@ -183,10 +181,22 @@
                                   </template>
                                 </div>
                                 <div class="time">
-                                  <span>{{ moment(message.created_at).format('hh:mm A') }},&nbsp;</span>
-                                  <span class="payment-state" v-if="message.tip_price && !message.paid">${{message.tip_price}} not paid yet</span>
+                                  <i v-if="message.is_like" class="fas fa-heart"></i>
+                                  <span>{{ moment(message.created_at).format('hh:mm A') }}</span>
+                                  <span class="payment-state" v-if="message.tip_price && !message.paid">,&nbsp; ${{message.tip_price}} not paid yet</span>
                                 </div>
                               </div>
+                              <b-dropdown class="filter-dropdown chat-more-dropdown" right>
+                                <template #button-content>
+                                  <i class="fas fa-ellipsis-h" aria-hidden="true"></i>
+                                </template>
+                                <b-dropdown-item v-if="!message.is_like" v-on:click.stop.prevent="setLikeMessage(message)">
+                                  Like
+                                </b-dropdown-item>
+                                <b-dropdown-item v-if="message.is_like" v-on:click.stop.prevent="setUnlikeMessage(message)">
+                                  Unlike
+                                </b-dropdown-item>
+                              </b-dropdown>
                             </div>
                             <div class="sent" v-if="session_user && session_user.id === message.sender_id">
                               <template v-for="msg in message.messages">
@@ -675,6 +685,8 @@
                   $('.conversation-list').animate({ scrollTop: $('.conversation-list')[0].scrollHeight }, 500);
                 });
                 self.markAsRead();
+              } else {
+                self.lastMessage = { ...self.lastMessage, unread_messages_count: true };
               }
             });
         }
@@ -733,7 +745,7 @@
       markAsRead: function() {
         this.axios.post(`/chat-messages/${this.$route.params.id}/mark-as-read`)
           .then(() => {
-            $(`.user-content.user-${this.$route.params.id} .is-unread`).removeClass('is-unread');
+            this.lastMessage = { sender_id: this.$route.params.id, unread_messages_count: false };
             if (this.unread_messages_count > 1) {
               this.UPDATE_UNREAD_MESSAGES_COUNT({
                 unread_messages_count: this.unread_messages_count - 1,
@@ -1201,6 +1213,32 @@
             const idx = this.users.findIndex(user => user.profile.id === receiver.id);
             this.users.splice(idx, 1);
             this.$router.push('/messages');
+          })
+      },
+      setLikeMessage: function(message) {
+        this.axios.post(`/chat-messages/${this.$route.params.id}/threads/${message.id}/like`)
+          .then(() => {
+            const newMessages = [...this.messages];
+            newMessages.forEach(thread => {
+              const idx = thread.messages.findIndex(m => m.id === message.id);
+              if (idx > -1) {
+                thread.messages[idx].is_like = true;
+              }
+            });
+            this.messages = newMessages;
+          })
+      },
+      setUnlikeMessage: function(message) {
+        this.axios.post(`/chat-messages/${this.$route.params.id}/threads/${message.id}/unlike`)
+          .then(() => {
+            const newMessages = [...this.messages];
+            newMessages.forEach(thread => {
+              const idx = thread.messages.findIndex(m => m.id === message.id);
+              if (idx > -1) {
+                thread.messages[idx].is_like = false;
+              }
+            });
+            this.messages = newMessages;
           })
       }
     }

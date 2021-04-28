@@ -109,15 +109,19 @@
                 <div>
                   <span class="username">{{ user.profile.display_name ? user.profile.display_name : user.profile.name }}</span>
                 </div>
-                <!-- Close Button -->
-                <!-- <button class="close-btn btn" type="button" @click="">
-                  <i class="fa fa-times" aria-hidden="true"></i>
-                </button> -->
+                <b-dropdown class="filter-dropdown sidebar-more-dropdown" right>
+                  <template #button-content>
+                    <i class="fas fa-ellipsis-h" aria-hidden="true"></i>
+                  </template>
+                  <b-dropdown-item v-on:click.stop.prevent="clearMessages(user.profile)">
+                    Clear conversation
+                  </b-dropdown-item>
+                </b-dropdown>
               </div>
               <div
                 class="user-details-row"
                 :key="user.last_message.id"
-                :class="user.last_message.is_unread && user.last_message.receiver_id === session_user.id ? 'is-unread' : ''"
+                v-if="!user.last_message.unread_messages_count"
               >
                 <span class="last-message" v-if="!user.last_message.hasMediafile">{{ user.last_message.mcontent }}</span>
                 <span class="last-message" v-if="user.last_message.hasMediafile">
@@ -128,6 +132,14 @@
                   {{ user.last_message.mcontent ? user.last_message.mcontent : 'media attachment' }}
                 </span>
                 <!-- Date  -->
+                <span class="last-message-date">{{ getFuzzyFormat(moment(user.last_message.created_at).fromNow(true)) }}</span>
+              </div>
+              <div
+                class="user-details-row is-unread"
+                :key="user.last_message.id"
+                v-if="user.last_message.unread_messages_count"
+              >
+                <span class="last-message">{{ `${user.last_message.unread_messages_count} new message${user.last_message.unread_messages_count > 1 ? 's' : ''}` }}</span>
                 <span class="last-message-date">{{ getFuzzyFormat(moment(user.last_message.created_at).fromNow(true)) }}</span>
               </div>
             </div>
@@ -247,14 +259,23 @@
           }
           const user = this.users[index];
           if (user) {
-            let hasMediafile = false;
-            if (newVal.messages.length > 1 && newVal.messages[0].mediafile) {
-              hasMediafile = true;
+            const count = user.last_message.unread_messages_count;
+            if (newVal.messages) {
+              user.last_message = newVal.messages.pop();
+              user.last_message.receiver_id = newVal.receiver_id;
+              let hasMediafile = false;
+              if (newVal.messages.length > 1 && newVal.messages[0].mediafile) {
+                hasMediafile = true;
+              }
+              user.last_message.hasMediafile = hasMediafile;
             }
-            user.last_message = newVal.messages.pop();
-            user.last_message.receiver_id = newVal.receiver_id;
-            user.last_message.hasMediafile = hasMediafile;
+            if (newVal.unread_messages_count) {
+              user.last_message.unread_messages_count = count ? count + 1 : 1;
+            } else {
+              user.last_message.unread_messages_count = 0;
+            }
             this.users = [...this.users];
+            this.users[index] = user;
           }
         }
       }
@@ -403,6 +424,14 @@
         if (new RegExp(`a year`).test(value)) {
           return '1y';
         }
+      },
+      clearMessages: function (receiver) {
+        this.axios.delete(`/chat-messages/${receiver.id}`)
+          .then(() => {
+            const idx = this.users.findIndex(user => user.profile.id === receiver.id);
+            this.users.splice(idx, 1);
+            this.$router.push('/messages');
+          })
       }
     }
   }

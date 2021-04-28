@@ -156,7 +156,8 @@ body .feed-crate.tag-grid-layout .superbox-post .carousel.slide .carousel-item {
   color: #0091ea;
   background: transparent;
 }
-#more-dropdown ul a:hover {
+#more-dropdown ul a:hover,
+.sidebar-more-dropdown ul a:hover {
   color: #0091ea;
   border-radius: 4px;
   background-color: rgba(0,145,234,.06);
@@ -209,5 +210,34 @@ body .feed-crate.tag-grid-layout .superbox-post .carousel.slide .carousel-item {
   .audio-modal {
     width: 600px;
     margin: auto;
+  }
+}
+
+.messages-page-sidebar .user-details-row > .sidebar-more-dropdown,
+.chat-more-dropdown {
+  overflow: visible !important;
+  margin-right: -4px !important;
+  .btn:after {
+    width: 28px;
+    height: 28px;
+  }
+  .dropdown-menu {
+    width: 180px;
+    padding: 5px 0;
+    font-size: 14px;
+    line-height: 18px;
+
+    .dropdown-item {
+      width: auto;
+      margin: 0 5px;
+      padding: 6px 8px;
+    }
+  }
+}
+
+.chat-more-dropdown {
+  .dropdown-menu {
+    width: 140px;
+    margin-top: 0.9em;
   }
 }
