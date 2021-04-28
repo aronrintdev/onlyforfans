@@ -1,5 +1,4 @@
 <?php
-
 namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -14,8 +13,38 @@ use App\Models\Session;
 
 class RestSettingTest extends TestCase
 {
+    use RefreshDatabase, WithFaker;
+
     /**
      *  @group settings
+     *  @group here0428
+     *  @group OFF-regression
+     */
+    public function test_can_update_single_setting()
+    {
+        $timeline = Timeline::has('posts','>=',1)->first(); 
+        $user = $timeline->user;
+
+        $payload = [
+            'income' => [
+                'new_tip' => ['email', 'sms'],
+            ],
+        ];
+        $response = $this->actingAs($user)->ajaxJSON('PATCH', route('users.updateSetting', [$user->id, 'notifications']), $payload);
+        $response->assertStatus(200);
+
+        $content = json_decode($response->content());
+        dd($content);
+        /*
+        $this->assertNotNull($content->post);
+        $postR = $content->post;
+        $this->assertNotNull($postR->description);
+        $this->assertEquals($payload['description'], $postR->description);
+         */
+    }
+
+    /**
+     *  @group OFF-settings
      *  @group OFF-regression
      */
     public function test_can_index_creator_settings()
@@ -29,7 +58,7 @@ class RestSettingTest extends TestCase
 
 
     /**
-     *  @group settings
+     *  @group OFF-settings
      *  @group OFF-regression
      */
     public function test_can_index_fan_settings()
@@ -42,7 +71,7 @@ class RestSettingTest extends TestCase
 
 
     /**
-     *  @group settings
+     *  @group OFF-settings
      *  @group OFF-regression
      */
     public function test_can_creator_edit_name()
@@ -64,7 +93,7 @@ class RestSettingTest extends TestCase
 
 
     /**
-     *  @group settings
+     *  @group OFF-settings
      *  @group OFF-regression
      */
     public function test_can_creator_edit_username()

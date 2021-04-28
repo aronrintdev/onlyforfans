@@ -53,7 +53,28 @@ class UsersController extends AppBaseController
         return response()->json([ ]);
     }
 
-    public function updateSetting(Request $request, User $user, string $group) { // single
+    public function updateSetting(Request $request, User $user, string $group)  // single
+    {
+
+        $vrules = [
+            'enabled' => 'array',
+            '*.*' => 'array',
+            '*.*.*' => 'string|in:email,sms,site,push',
+        ];
+        $request->validate($vrules);
+
+        switch ($group) {
+        case 'notifications':
+            break;
+        case 'subscriptions':
+            break;
+        }
+
+        $cattrs = $userSetting->cattrs; // 'pop'
+
+        $userSetting->cattrs = $cattrs; // 'push'
+        $userSetting->save();
+        return $userSetting;
     }
 
     // %NOTE: this updates settings in 'batches'...so the request payload must contain all keys for a group such as 'privacy', 
@@ -106,7 +127,6 @@ class UsersController extends AppBaseController
             }
     
             $userSetting->save();
-
             return $userSetting;
         });
     
