@@ -1,7 +1,7 @@
 <template>
   <div v-if="!isLoading">
 
-    <div class="container" id="view-show_timeline">
+    <div class="container-xl" id="view-show_timeline">
 
       <section class="row">
         <article class="col-sm-12">
