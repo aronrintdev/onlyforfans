@@ -41,8 +41,10 @@ trait ShareableTraits
 
         $shareable = DB::table($this->getShareableTable())->where($index)->first();
         if (isset($shareable)) {
-            $cattrs = array_merge($shareable->cattrs, $cattrs);
-            $meta = array_merge($shareable->meta, $meta);
+            //$cattrs = array_merge($shareable->cattrs, $cattrs);
+            //$meta = array_merge($shareable->meta, $meta);
+            $cattrs = array_merge( json_decode($shareable->cattrs, true)??[], $cattrs );
+            $meta = array_merge( json_decode($shareable->meta, true)??[], $meta );
         }
         $data = [
             //'id' =>  Str::uuid(), // %FIXME: @ERIK this should be fixed for production see trait UsesUuid
@@ -89,8 +91,10 @@ trait ShareableTraits
 
         $shareable = DB::table($this->getShareableTable())->where($index)->first();
         if (isset($shareable)) {
-            $cattrs = array_merge($shareable->cattrs, $cattrs);
-            $meta = array_merge($shareable->meta, $meta);
+            //$cattrs = array_merge($shareable->cattrs, $cattrs);
+            //$meta = array_merge($shareable->meta, $meta);
+            $cattrs = array_merge(json_decode($shareable->cattrs, true)??[], $cattrs);
+            $meta = array_merge(json_decode($shareable->meta??[], true), $meta);
         }
         $data = [
             'is_approved' => false,
