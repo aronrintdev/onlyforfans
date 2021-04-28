@@ -17,6 +17,11 @@ export default [
     path: 'profile',
   },
   {
+    name: 'settings.notifications',
+    component: settings.Notifications,
+    path: 'notifications',
+  },
+  {
     name: 'settings.privacy',
     component: settings.Privacy,
     path: 'privacy',
