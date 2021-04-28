@@ -11,11 +11,13 @@ const route = window.route
 // Modules
 import searchModule from './store/search'
 import paymentModule from './store/payments'
+import subscriptionsModule from './store/subscriptions'
 
 export default new Vuex.Store({
   modules: {
     search: searchModule,
     payments: paymentModule,
+    subscriptions: subscriptionsModule,
   },
 
   state: {
@@ -180,6 +182,9 @@ export default new Vuex.Store({
       switch (feedType) {
         case 'photos':
           url = route('timelines.photos', timelineId)
+          break
+        case 'videos':
+          url = route('timelines.videos', timelineId)
           break
         default:
           url = isHomefeed ? `/timelines/home/feed` : `/timelines/${timelineId}/feed`

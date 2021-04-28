@@ -10,7 +10,7 @@
 
     <b-row>
       <b-col>
-        <section class="feed-ctrl my-3 px-2 py-2 d-flex flex-column OFF-text-center flex-md-row justify-content-center justify-content-md-between">
+        <section class="feed-ctrl my-3 px-2 py-2 d-flex flex-column flex-md-row justify-content-center justify-content-md-between">
           <b-nav v-if="!is_homefeed" pills>
             <b-nav-item @click="setFeedType('default')" :active="feedType==='default'">All</b-nav-item>
             <b-nav-item @click="setFeedType('photos')" :active="feedType==='photos'">Photos</b-nav-item>
@@ -63,7 +63,7 @@
         v-observe-visibility="index === renderedItems.length - 1 ? endPostVisible : false"
       >
         <div class="tag-debug">INDEX: {{ index }}</div>
-        <ImageDisplay v-if="feedType==='photos'"
+        <ImageDisplay v-if="feedType==='photos' || feedType==='videos'"
           :mediafile="feedItem"
           :session_user="session_user"
           :use_mid="true"
@@ -361,6 +361,10 @@ export default {
 
     sortPostsBy (newVal) {
       this.$refs.feedCtrls.hide(true)
+      this.reloadFromFirstPage();
+    },
+
+    timelineId() {
       this.reloadFromFirstPage();
     },
 

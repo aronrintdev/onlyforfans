@@ -10,6 +10,7 @@ Route::group(['prefix' => '/payment'], function () {
         Route::post('/payment-session', 'SegPayController@getPaymentSession')->name('payments.segpay.getPaymentSession');
 
         Route::post('/fake', 'SegPayController@fake')->name('payments.segpay.fake');
+        Route::post('/fake-confirmation', 'SegPayController@fakeConfirmation')->name('payments.segpay.fake-confirmation');
     });
 
     Route::post('/purchase', 'PaymentsController@purchase')->name('payments.purchase');

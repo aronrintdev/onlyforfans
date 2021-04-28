@@ -51,6 +51,7 @@ class ShareablesTableSeeder extends Seeder
         // +++ Create ... +++
 
         $timelines = Timeline::get();
+        $timelinesCount = Timeline::count();
 
         if ( $this->appEnv !== 'testing' ) {
             $this->output->writeln("  - Shareables seeder: loaded ".$timelines->count()." timelines...");
@@ -62,7 +63,7 @@ class ShareablesTableSeeder extends Seeder
         $timelines->pop();
         $timelines->pop();
 
-        $timelines->each( function($timeline) {
+        $timelines->each( function($timeline) use ($timelinesCount) {
 
             static $iter = 1;
 
@@ -76,10 +77,11 @@ class ShareablesTableSeeder extends Seeder
 
             $max = $this->faker->numberBetween( 2, min($followerPool->count()-1, $this->getMax('follower')+$this->getMax('subscriber')) );
             if ( $max < 2 ) {
-                throw new Exception('Requires at least 2 followers per timeline - max:'.$max);
+                throw new Exception('Requires at least 2 followers per timeline - max:' . $max);
             }
             if ( $this->appEnv !== 'testing' ) {
-                $this->output->writeln("  - Creating $max (non-premium) followers for timeline ".$timeline->name.", iter: $iter");
+                $this->output->writeln("-- {$iter} of {$timelinesCount} | Timeline: {$timeline->name}");
+                $this->output->writeln("  - Creating $max (non-premium) followers for timeline {$timeline->name}, iter: $iter");
             }
 
             $followerPool->random($max)->each( function(User $follower) use(&$timeline) {
@@ -177,9 +179,20 @@ class ShareablesTableSeeder extends Seeder
 
         // Run update Balance on accounts now.
         if ($this->appEnv !== 'testing') {
+            $this->output->writeln("-------------------------");
             $this->output->writeln("Updating Account Balances");
+            $this->output->writeln("-------------------------");
         }
-        Account::cursor()->each(function($account) {
+        $count = Account::where('owner_type', '!=', 'financial_system_owner')->count();
+        Account::where('owner_type', '!=', 'financial_system_owner')->cursor()->each(function($account) use ($count) {
+            static $iter = 1;
+            if ($this->appEnv !== 'testing') {
+                $this->output->writeln("({$iter} of {$count}): Updating Balance for {$account->name}");
+            }
+            $account->settleBalance();
+            $iter++;
+        });
+        Account::where('owner_type', 'financial_system_owner')->each(function($account) {
             if ($this->appEnv !== 'testing') {
                 $this->output->writeln("Updating Balance for {$account->name}");
             }

@@ -45,6 +45,46 @@ export default {
             variant: 'success'
           })
         })
+        .listen('ItemSubscribed', (e) => {
+          this.$log.debug('Toast Event', { channel, event: 'ItemSubscribed', e })
+          this.popToast(`Subscription was successful!`, {
+            toaster: 'b-toaster-top-center',
+            title: 'Success!',
+            variant: 'success'
+          })
+        })
+        .listen('ItemTipped', (e) => {
+          this.$log.debug('Toast Event', { channel, event: 'ItemTipped', e })
+          this.popToast(`Tip was successful!`, {
+            toaster: 'b-toaster-top-center',
+            title: 'Success!',
+            variant: 'success'
+          })
+        })
+        .listen('PurchasedFailed', (e) => {
+          this.$log.debug('Toast Event', { channel, event: 'PurchasedFailed', e })
+          this.popToast(`There was an issue while attempting to complete your purchase.`, {
+            toaster: 'b-toaster-top-center',
+            title: 'Payment Failure!',
+            variant: 'danger'
+          })
+        })
+        .listen('SubscriptionFailed', (e) => {
+          this.$log.debug('Toast Event', { channel, event: 'SubscriptionFailed', e })
+          this.popToast(`There was an issue while attempting to complete your subscription.`, {
+            toaster: 'b-toaster-top-center',
+            title: 'Payment Failure!',
+            variant: 'danger'
+          })
+        })
+        .listen('TipFailed', (e) => {
+          this.$log.debug('Toast Event', { channel, event: 'TipFailed', e })
+          this.popToast(`There was an issue while attempting to complete your tip.`, {
+            toaster: 'b-toaster-top-center',
+            title: 'Payment Failure!',
+            variant: 'danger'
+          })
+        })
     },
 
     async events() {

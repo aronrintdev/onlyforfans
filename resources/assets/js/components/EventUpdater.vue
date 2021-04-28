@@ -31,6 +31,14 @@ export default {
           this.$log.debug('Event', { channel, event: 'ItemPurchased', e })
           eventBus.$emit(`update-${e.item_type}`, e.item_id)
         })
+        .listen('ItemSubscribed', (e) => {
+          this.$log.debug('Event', { channel, event: 'ItemSubscribed', e })
+          eventBus.$emit(`update-${e.item_type}`, e.item_id)
+        })
+        .listen('ItemTipped', (e) => {
+          this.$log.debug('Event', { channel, event: 'ItemTipped', e })
+          eventBus.$emit(`update-${e.item_type}`, e.item_id)
+        })
     },
 
     waitFor(property) {

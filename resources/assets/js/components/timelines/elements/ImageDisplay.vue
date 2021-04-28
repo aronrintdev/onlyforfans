@@ -10,11 +10,16 @@
     >
 
       <template v-if="mediafile.access">
-        <img v-if="mediafile.is_image" @click="renderFull"
+        <img v-if="mediafile.is_image" 
+          @click="renderFull"
           class="d-block"
           :src="(use_mid && mediafile.has_mid) ? mediafile.midFilepath : mediafile.filepath"
-          :alt="mediafile.mfname"
-        >
+          :alt="mediafile.mfname" >
+        <MediaSlider v-else-if="mediafile.is_video" 
+          @click="renderFull"
+          :mediafiles="[mediafile]" 
+          :session_user="session_user" 
+          :use_mid="use_mid" />
       </template>
       <template v-else-if="mediafile.resource_type==='posts'">
         <PostCta :post="mediafile.resource" :session_user="session_user" :primary_mediafile="mediafile" />
@@ -55,12 +60,10 @@
 import Vuex from 'vuex'
 import { eventBus } from '@/app'
 import PostCta from '@components/posts/PostCta'
+import LikesButton from '@components/common/LikesButton'
+import MediaSlider from '@components/posts/MediaSlider'
 
 export default {
-  components: {
-    PostCta,
-  },
-
   props: {
     mediafile: null,
     session_user: null,
@@ -115,6 +118,12 @@ export default {
       }
     },
 
+  },
+
+  components: {
+    PostCta,
+    MediaSlider,
+    LikesButton,
   },
 
 }

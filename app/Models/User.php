@@ -206,6 +206,10 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
         return $this->morphMany(Account::class, 'owner');
     }
 
+    public function subscriptions()
+    {
+        return $this->hasMany(Subscription::class);
+    }
 
     //--------------------------------------------
     // %%% Accessors/Mutators | Casts

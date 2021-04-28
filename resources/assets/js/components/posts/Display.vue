@@ -1,5 +1,5 @@
 <template>
-  <div class="post-crate" v-bind:data-post_guid="post.id">
+  <div v-if="!isLoading" class="post-crate" v-bind:data-post_guid="post.id">
     <b-card
       header-tag="header"
       footer-tag="footer"
@@ -34,7 +34,7 @@
           <b-card-text class="px-3 mb-0 tag-post_desc">{{ post.description }}</b-card-text>
         </div>
         <article v-if="hasMediafiles">
-          <MediaSlider :post="post" :session_user="session_user" :use_mid="use_mid" />
+          <MediaSlider :mediafiles="post.mediafiles" :session_user="session_user" :use_mid="use_mid" />
         </article>
       </template>
       <template v-else>

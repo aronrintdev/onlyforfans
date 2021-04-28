@@ -2,24 +2,28 @@
 
 namespace App\Models;
 
-use App\Enums\Financial\AccountTypeEnum;
-use App\Enums\Financial\TransactionTypeEnum;
 use Money\Money;
 use Carbon\Carbon;
+use InvalidArgumentException;
 use App\Models\Traits\UsesUuid;
 use App\Interfaces\Subscribable;
 use App\Models\Financial\Account;
 use Illuminate\Support\Collection;
+use App\Enums\Financial\AccountTypeEnum;
 use App\Models\Casts\Money as CastsMoney;
-use App\Models\Financial\Traits\HasCurrency;
+use Illuminate\Database\Eloquent\Builder;
 use Carbon\Exceptions\InvalidCastException;
-use Carbon\Exceptions\InvalidIntervalException;
+use App\Enums\Financial\TransactionTypeEnum;
+use App\Interfaces\Ownable;
+use App\Models\Financial\Traits\HasCurrency;
+use App\Models\Traits\OwnableTraits;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use InvalidArgumentException;
+use Carbon\Exceptions\InvalidIntervalException;
 
 /**
- * A subscription
+ * Subscription model
  *
+ * ===== Properties ========================================================== *
  * @property string $id
  * @property string $subscribable_id    - Id of subscribable item
  * @property string $subscribable_type  - Type of subscribable item
@@ -39,19 +43,26 @@ use InvalidArgumentException;
  * @property Carbon $next_payment_at    - Timestamp of when the next payment transaction is due to occur.
  * @property Carbon $last_payment_at    - Timestamp of when the last payment transaction occurred.
  *
- * Relations
+ * ===== Relations =========================================================== *
  * @property User         $user
  * @property Subscribable $subscribable
  * @property Account      $account
  *
+ * ===== Scopes ============================================================== *
+ * @method static Builder active()
+ * @method static Builder canceled()
+ * @method static Builder due()
+ * @method static Builder inactive()
+ *
  * @package App\Models
  */
-class Subscription extends Model
+class Subscription extends Model implements Ownable
 {
     use UsesUuid,
         HasCurrency,
         SoftDeletes,
-        HasCurrency;
+        HasCurrency,
+        OwnableTraits;
 
     protected $table = 'subscriptions';
 
@@ -75,18 +86,91 @@ class Subscription extends Model
 
     public function user()
     {
-        return $this->hasOne(User::class);
+        return $this->belongsTo(User::class);
     }
 
     public function account()
     {
-        return $this->hasOne(Account::class);
+        return $this->belongsTo(Account::class);
     }
 
     #endregion Relationships
 
+    /* ------------------------------- Scopes ------------------------------- */
+    #region Scopes
+    /**
+     * Only return active subscriptions
+     *
+     * @param  Builder  $query
+     * @return Builder
+     */
+    public function scopeActive($query)
+    {
+        return $query->where('active', true);
+    }
+
+    /**
+     * Only return canceled subscriptions
+     *
+     * @param  Builder  $query
+     * @return Builder
+     */
+    public function scopeCanceled($query)
+    {
+        return $query->where('canceled', true);
+    }
+
+    /**
+     * Return only due subscriptions
+     *
+     * @param  Builder  $query
+     * @return Builder
+     */
+    public function scopeDue($query)
+    {
+        return $query->where('next_payment_at', '<=', Carbon::now());
+    }
+
+    /**
+     * Only return inactive subscriptions
+     *
+     * @param  Builder  $query
+     * @return Builder
+     */
+    public function scopeInactive($query)
+    {
+        return $query->where('active', false);
+    }
+
+    #endregion Scopes
+
+
     /* ------------------------------ Functions ----------------------------- */
     #region Functions
+
+    /**
+     * Cancels an active subscription
+     *
+     * @return void
+     */
+    public function cancel()
+    {
+        // Cancel Payments
+        // if ( is segpay subscription ) {
+        //     Call SRS cancel account
+        // }
+
+        // Check if passed next bill date
+        $this->canceled = true;
+        if ($this->isDue()) {
+            $this->subscribable->revokeAccess($this->user);
+            $this->active = false;
+            $this->save();
+            return;
+        }
+        $this->save();
+        return;
+    }
 
     /**
      * Process a subscription transaction
@@ -96,7 +180,7 @@ class Subscription extends Model
      */
     public function process($force = false)
     {
-        if ($force === false && $this->due()) {
+        if ($force === false && !$this->isDue()) {
             return false;
         }
 
@@ -117,9 +201,11 @@ class Subscription extends Model
                     'metadata'         => ['subscription' => $this->getKey()],
                 ]
             );
-            $this->last_transaction_id = $transactions['debit'];
+            $this->last_transaction_id = $transactions['debit']->getKey();
             $this->last_payment_at = Carbon::now();
             $this->updateNextPayment();
+            $this->active = true;
+            $this->save();
             return $transactions;
         } else if ($this->account->type === AccountTypeEnum::INTERNAL) {
             $transactions = $this->account->moveTo(
@@ -135,6 +221,8 @@ class Subscription extends Model
             $this->last_transaction_id = $transactions['debit'];
             $this->last_payment_at = Carbon::now();
             $this->updateNextPayment();
+            $this->active = true;
+            $this->save();
             return $transactions;
         }
         return false;
@@ -168,6 +256,16 @@ class Subscription extends Model
 
     #endregion Functions
 
+    /* ------------------------------- Ownable ------------------------------ */
+    #region Ownable
+
+    public function getOwner(): ?Collection
+    {
+        return new Collection([ $this->user ]);
+    }
+
+    #endregion Ownable
+
 
     /* ---------------------------- Verifications --------------------------- */
     #region Verifications
@@ -176,7 +274,7 @@ class Subscription extends Model
      * Checks if the subscription is due to be renewed
      * @return bool
      */
-    public function due(): bool
+    public function isDue(): bool
     {
         if (isset($this->next_payment_at) === false) {
             return true;
