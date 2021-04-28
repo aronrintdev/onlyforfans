@@ -94,7 +94,7 @@ class ShareablesTableSeeder extends Seeder
                     'shareable_id' => $timeline->id,
                     'is_approved' => 1,
                     'access_level' => 'default',
-                    'cattrs' => json_encode($customAttributes),
+                    'cattrs' => $customAttributes,
                     //'created_at' => $ts,
                     //'updated_at' => $ts,
                 ]);
