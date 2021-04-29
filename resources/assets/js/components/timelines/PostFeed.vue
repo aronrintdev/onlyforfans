@@ -185,8 +185,8 @@ export default {
       this.updatePost(postId) 
     })
 
-    eventBus.$on('update-originator', () => {
-      console.log('components.timelines.PostFeed - eventBus.$on(update-originator)')
+    eventBus.$on('update-timelines', (timelineId) => {
+      this.$log.debug('components.timelines.PostFeed - eventBus.$on(update-timelines)')
       this.reloadFromFirstPage();
     })
 

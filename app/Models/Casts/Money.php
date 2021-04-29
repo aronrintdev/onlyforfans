@@ -2,6 +2,7 @@
 
 namespace App\Models\Casts;
 
+use App\Models\Traits\FormatMoney;
 use Money\Currency;
 use Money\Money as MoneyPhp;
 use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
@@ -15,6 +16,8 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Money implements CastsAttributes, SerializesCastableAttributes
 {
+    use FormatMoney;
+
     /**
      * Get value as Money\Money Object that uses model's currency
      *
@@ -60,6 +63,11 @@ class Money implements CastsAttributes, SerializesCastableAttributes
     public function serialize($model, string $key, $value, array $attributes): int
     {
         return $this->doSerialize($value);
+    }
+
+    public static function toMoney($value, $currency): MoneyPhp
+    {
+        return new MoneyPhp($value, new Currency($currency));
     }
 
     public static function doSerialize($value): int

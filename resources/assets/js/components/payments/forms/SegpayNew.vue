@@ -28,7 +28,12 @@
             <b-form-group>
               <div class="d-flex align-items-center">
                 <CardBrandIcon ref="brandIcon" :card-number="form.card.number" class="mr-3" size="2x" />
-                <b-form-input v-model="form.card.number" v-mask="'####-####-####-####'" :placeholder="$t('Card Number')" pattern="\d*" />
+                <b-form-input
+                  v-model="form.card.number"
+                  v-mask="'####-####-####-####'"
+                  :placeholder="$t('Card Number')"
+                  pattern="\d*"
+                />
               </div>
             </b-form-group>
           </b-col>
@@ -37,9 +42,22 @@
           <b-col cols="6">
             <b-form-group :label="$t('Expiration Date')" >
               <div class="d-flex align-items-center">
-                <b-form-input id="new-card-month" v-model="form.card.expirationMonth" v-mask="'##'" placeholder="MM" class="" pattern="\d*" />
+                <b-form-input
+                  id="new-card-month"
+                  v-model="form.card.expirationMonth"
+                  v-mask="masks.expirationMonth"
+                  placeholder="MM"
+                  class=""
+                  pattern="\d*"
+                />
                 <span class="mx-3" style="font-size:150%;" v-text="'/'" />
-                <b-form-input id="new-card-year" v-model="form.card.expirationYear" v-mask="'##'" placeholder="YY" pattern="\d*" />
+                <b-form-input
+                  id="new-card-year"
+                  v-model="form.card.expirationYear"
+                  v-mask="masks.expirationYear"
+                  placeholder="YY"
+                  pattern="\d*"
+                />
               </div>
             </b-form-group>
           </b-col>
@@ -83,6 +101,8 @@ import { eventBus } from '@/app'
 import Vuex from 'vuex'
 import CardBrandIcon from './CardBrandIcon'
 import Skeleton from './SegpayNewSkeleton'
+import { monthMask, shortYearMask } from '@helpers/masks'
+
 export default {
   name: 'SegpayNew',
 
@@ -123,6 +143,11 @@ export default {
         expirationMonth: '',
         cvv: '',
       },
+    },
+
+    masks: {
+      expirationMonth: monthMask,
+      expirationYear: shortYearMask,
     },
 
     formErrors: false,
@@ -201,6 +226,7 @@ export default {
     },
 
     init() {
+      this.loading = false
       Promise.all([
         this.loadSegPaySdk(),
         this.getSessionId(),

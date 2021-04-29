@@ -13,6 +13,8 @@ return [
     'pricePointId' => env('SEGPAY_PRICE_POINT_ID', '26943'),
     'secret' => env('SEGPAY_SECRET_KEY', '95345D5827AEFC558525AD4878A46'),
 
+    'baseDynamicOneClickServiceUrl' => env('SEGPAY_BASE_DYNAMIC_ONE_CLICK_SERVICE_URL', 'https://service.segpay.com/OneClickSales.asmx/SalesServiceDynamic'),
+
     'paymentSessions' => [
         'baseUrl' => env('SEGPAY_PAYMENT_SESSIONS_BASE_URL', 'https://embedding.segpay.com/client/v1/payment-sessions/new'),
         'token' => env('SEGPAY_PAYMENT_SESSIONS_TOKEN', ''),

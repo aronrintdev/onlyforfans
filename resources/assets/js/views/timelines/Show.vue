@@ -67,13 +67,15 @@ export default {
   },
 
   data: () => ({
-    timeline: null,
+    timeline: {},
     isGridLayout: false, // %FIXME: can this be set in created() so we have 1 source of truth ? (see PostFeed)
   }),
 
   created() {
-    eventBus.$on('update-originator', () => {
-      this.load()
+    eventBus.$on('update-timelines', (timelineId) => {
+      if (timelineId === this.timeline.id) {
+        this.load()
+      }
     })
 
     eventBus.$on('set-feed-layout',  isGridLayout  => {
