@@ -343,20 +343,13 @@
                           </svg>
                         </label>
                         <!-- video -->
-                        <input
-                          type="file"
-                          id="video-upload-btn"
-                          multiple
-                          ref="videosUpload"
-                          disabled
-                        />
-                        <label for="video-upload-btn" class="btn action-btn" disabled>
+                        <button class="btn action-btn" @click="openVideoRec">
                           <svg id="icon-video" viewBox="0 0 24 24">
                             <path
                               d="M21.79 6a1.21 1.21 0 0 0-.86.35L19 8.25V7a3 3 0 0 0-3-3H5a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h11a3 3 0 0 0 3-3v-1.25l1.93 1.93a1.22 1.22 0 0 0 2.07-.86V7.18A1.21 1.21 0 0 0 21.79 6zM17 17a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h11a1 1 0 0 1 1 1zm4-2.08l-1.34-1.34a2.25 2.25 0 0 1 0-3.16L21 9.08z"
                               fill="#8a96a3"></path>
                           </svg>
-                        </label>
+                        </button>
                         <!-- microphone -->
                         <input
                           type="file"
@@ -580,6 +573,15 @@
         </div>
       </div>
     </b-modal>
+    <div :class="showVideoRec ? '' : 'd-none'" class="video-rec-wrapper">
+      <h4>Record Video Message</h4>
+      <video id="myVideo" playsinline class="video-js vjs-default-skin"></video>
+      <div class="icon-close" @click="hideVideoRec">
+        <svg viewBox="0 0 24 24">
+          <path d="M13.41 12l5.3-5.29A1 1 0 0 0 19 6a1 1 0 0 0-1-1 1 1 0 0 0-.71.29L12 10.59l-5.29-5.3A1 1 0 0 0 6 5a1 1 0 0 0-1 1 1 1 0 0 0 .29.71l5.3 5.29-5.3 5.29A1 1 0 0 0 5 18a1 1 0 0 0 1 1 1 1 0 0 0 .71-.29l5.29-5.3 5.29 5.3A1 1 0 0 0 18 19a1 1 0 0 0 1-1 1 1 0 0 0-.29-.71z"></path>
+        </svg>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -592,6 +594,11 @@
   import createPreviewDirective from 'vue-photoswipe-directive';
   import draggable from 'vuedraggable';
   import Vuex from 'vuex';
+  
+  import videojs from 'video.js';
+  import RecordRTC from 'recordrtc';
+  import Record from 'videojs-record/dist/videojs.record.js';
+  import TsEBMLEngine from 'videojs-record/dist/plugins/videojs.record.ts-ebml.js';
 
   import RadioGroupBox from '@components/radioGroupBox';
   import RoundCheckBox from '@components/roundCheckBox';
@@ -641,6 +648,7 @@
       messagePrice: undefined,
       tempMessagePrice: undefined,
       confirm_message_price: undefined,
+      showVideoRec: false,
     }),
     mounted() {
       const self = this;
@@ -1243,6 +1251,41 @@
             });
             this.messages = newMessages;
           })
+      },
+      openVideoRec: function() {
+        this.showVideoRec = true;
+        const options = {
+          controls: true,
+          fluid: true,
+          bigPlayButton: true,
+          controlBar: {
+              volumePanel: true
+          },
+          plugins: {
+              record: {
+                  audio: false,
+                  video: true,
+                  maxLength: 10,
+                  displayMilliseconds: true,
+                  debug: true,
+                  convertEngine: 'ts-ebml'
+              }
+          }
+        };
+        const player = videojs('myVideo', options, function() {
+        });
+        const self = this;
+        player.on('finishRecord', function() {
+          console.log('finished recording: ', player.recordedData);
+          self.sortableMedias.push({
+            src: URL.createObjectURL(player.recordedData),
+            file: player.recordedData,
+            type: 'video/mp4',
+          });
+        });
+      },
+      hideVideoRec: function() {
+        this.showVideoRec = false;
       }
     }
   }

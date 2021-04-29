@@ -250,6 +250,7 @@ class Mediafile extends BaseModel implements Guidable, Ownable, Cloneable
             case 'video/x-flv':
             case 'video/quicktime':
             case 'video/x-ms-wmv':
+            case 'video/x-matroska':
             case 'video/ogg':
                 return true;
         }

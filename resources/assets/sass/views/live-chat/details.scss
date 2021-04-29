@@ -246,3 +246,42 @@
 .unsend-message-modal .modal-dialog {
   max-width: 360px;
 }
+
+.video-rec-wrapper {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100vw;
+	height: 100vh;
+	z-index: 6000001;
+
+  h4 {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #fff;
+    font-size: 18px;
+    z-index: 1;
+    padding: 6px 15px;
+    border: solid 2px #fff;
+    border-radius: 5px;
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 1px;
+  }
+
+  .icon-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 24px;
+    height: 24px;
+    fill: #fff;
+    cursor: pointer;
+  }
+
+  .myVideo-dimensions.vjs-fluid {
+    padding-top: 100vh;
+  }
+}
