@@ -664,6 +664,56 @@
 				}
 			}
 
+			&.audio-recorder {
+				padding: 1em;
+
+				.audio-recorder-header {
+					display: flex;
+					align-items: center;
+					justify-content: space-between;
+					font-weight: 500;
+
+					.icon-voice {
+						width: 24px;
+						height: 24px;
+						fill: #00aff0;
+						margin-right: 4px;
+					}
+					.icon-close {
+						padding: 0;
+						svg {
+							width: 24px;
+							fill: #000;
+						}
+					}
+				}
+				.audio-recorder-content {
+					display: flex;
+					flex-direction: column;
+					align-items: center;
+					font-size: 24px;
+					.duration {
+						display: flex;
+						align-items: center;
+						margin: 0.3em 0 0.5em 4px;
+
+						span {
+							width: 40px;
+							&:first-child {
+								text-align: right;
+							}
+						}
+					}
+					.vue-audio-recorder,
+					.vue-audio-recorder:hover {
+						background-color: #00aff0;
+					}
+					.vue-audio-recorder.active {
+						background-color: #ef5350;
+					}
+				}
+			}
+
 			textarea {
 				overflow: hidden;
 				overflow-wrap: break-word;

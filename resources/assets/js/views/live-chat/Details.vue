@@ -387,7 +387,28 @@
                     </div>
                   </div>
                   <div class="conversation-footer audio-recorder" v-if="showAudioRec">
-                    <vue-record-audio mode="press" @result="onGetAudioRec" />
+                    <div class="audio-recorder-header">
+                      <div class="d-flex align-items-center">
+                        <svg class="icon-voice" viewBox="0 0 24 24">
+                          <path d="M12 15a4 4 0 0 0 4-4V6a4 4 0 0 0-8 0v5a4 4 0 0 0 4 4zm-2-9a2 2 0 0 1 4 0v5a2 2 0 0 1-4 0zm9 4a1 1 0 0 0-1 1 6 6 0 0 1-12 0 1 1 0 0 0-2 0 8 8 0 0 0 7 7.93V21a1 1 0 0 0 2 0v-2.07A8 8 0 0 0 20 11a1 1 0 0 0-1-1z"></path>
+                        </svg>
+                        RECORDING AUDIO
+                      </div>
+                      <button class="btn icon-close" @click="hideAudioRec">
+                        <svg viewBox="0 0 24 24">
+                          <path d="M13.41 12l5.3-5.29A1 1 0 0 0 19 6a1 1 0 0 0-1-1 1 1 0 0 0-.71.29L12 10.59l-5.29-5.3A1 1 0 0 0 6 5a1 1 0 0 0-1 1 1 1 0 0 0 .29.71l5.3 5.29-5.3 5.29A1 1 0 0 0 5 18a1 1 0 0 0 1 1 1 1 0 0 0 .71-.29l5.29-5.3 5.29 5.3A1 1 0 0 0 18 19a1 1 0 0 0 1-1 1 1 0 0 0-.29-.71z"></path>
+                        </svg>
+                      </button>
+                    </div>
+                    <div class="audio-recorder-content">
+                      <div class="duration">
+                        <span>{{ (audioRecDuration - audioRecDuration % 60) / 60 >= 10 ? (audioRecDuration - audioRecDuration % 60) / 60 : '0' + (audioRecDuration - audioRecDuration % 60) / 60 }}:</span>
+                        <span>{{ audioRecDuration % 60 >= 10 ? audioRecDuration % 60 : '0' + audioRecDuration % 60 }}</span>
+                      </div>
+                      <div class="record-btn" @click="toggleAudioRec">
+                        <vue-record-audio mode="press" @result="onGetAudioRec" />
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -652,6 +673,8 @@
       confirm_message_price: undefined,
       showVideoRec: false,
       showAudioRec: false,
+      audioRecDuration: 0,
+      audioRecInterval: undefined,
     }),
     mounted() {
       const self = this;
@@ -1291,12 +1314,33 @@
         this.showVideoRec = false;
       },
       onGetAudioRec: function(data) {
+        const self = this;
         this.sortableMedias.push({
           src: URL.createObjectURL(data),
           file: data,
           type: 'audio/mp3',
         });
+        setTimeout(() => {
+          self.hideAudioRec();
+        }, 1000);
+      },
+      hideAudioRec: function() {
         this.showAudioRec = false;
+        this.audioRecDuration = 0;
+        clearInterval(this.audioRecInterval);
+        this.audioRecInterval = undefined;
+      },
+      toggleAudioRec: function() {
+        const self = this;
+        if (!this.audioRecInterval) {
+          this.audioRecInterval = setInterval(function() {
+            self.audioRecDuration += 1;
+          }, 1000);
+        } else {
+          setTimeout(() => {
+            self.hideAudioRec();
+          }, 1000);
+        }
       }
     }
   }
