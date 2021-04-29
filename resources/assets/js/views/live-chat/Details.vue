@@ -177,6 +177,9 @@
                                       <audio v-if="msg.mediafile.mimetype.indexOf('audio/') > -1" controls>
                                         <source :src="msg.mediafile.filepath" type="audio/mpeg" />
                                       </audio>
+                                      <audio v-if="msg.mediafile.mimetype === 'video/webm'" controls>
+                                        <source :src="msg.mediafile.filepath" type="video/webm" />
+                                      </audio>
                                     </div>
                                   </template>
                                 </div>
@@ -220,6 +223,9 @@
                                   <audio v-if="msg.mediafile.mimetype.indexOf('audio/') > -1" controls>
                                     <source :src="msg.mediafile.filepath" type="audio/mpeg" />
                                   </audio>
+                                  <audio v-if="msg.mediafile.mimetype === 'video/webm'" controls>
+                                    <source :src="msg.mediafile.filepath" type="video/webm" />
+                                  </audio>
                                 </div>
                               </template>
                               <div class="time">
@@ -239,7 +245,7 @@
                     </div>
                     <div class="typing dot-pulse" style="display: none">...</div>
                   </div>
-                  <div class="conversation-footer" :class="messagePrice ? 'price-view': ''">
+                  <div class="conversation-footer" :class="messagePrice ? 'price-view': ''" v-if="!showAudioRec">
                     <div v-if="messagePrice" class="price-to-view-header d-flex align-items-center justify-content-between">
                       <div class="price-to-view-title">
                         <svg viewBox="0 0 24 24">
@@ -351,20 +357,13 @@
                           </svg>
                         </button>
                         <!-- microphone -->
-                        <input
-                          type="file"
-                          id="audio-upload-btn"
-                          multiple
-                          ref="audiosUpload"
-                          disabled
-                        />
-                        <label for="audio-upload-btn" class="btn action-btn" disabled>
+                        <button class="btn action-btn" @click="showAudioRec = true">
                           <svg id="icon-voice" viewBox="0 0 24 24">
                             <path
                               d="M12 15a4 4 0 0 0 4-4V6a4 4 0 0 0-8 0v5a4 4 0 0 0 4 4zm-2-9a2 2 0 0 1 4 0v5a2 2 0 0 1-4 0zm9 4a1 1 0 0 0-1 1 6 6 0 0 1-12 0 1 1 0 0 0-2 0 8 8 0 0 0 7 7.93V21a1 1 0 0 0 2 0v-2.07A8 8 0 0 0 20 11a1 1 0 0 0-1-1z"
                               fill="#8a96a3"></path>
                           </svg>
-                        </label>
+                        </button>
                         <!-- Medis from vault -->
                         <button class="btn action-btn" type="button" disabled>
                           <svg id="icon-vault" viewBox="0 0 24 24">
@@ -386,6 +385,9 @@
                         Send
                       </button>
                     </div>
+                  </div>
+                  <div class="conversation-footer audio-recorder" v-if="showAudioRec">
+                    <vue-record-audio mode="press" @result="onGetAudioRec" />
                   </div>
                 </div>
               </div>
@@ -649,6 +651,7 @@
       tempMessagePrice: undefined,
       confirm_message_price: undefined,
       showVideoRec: false,
+      showAudioRec: false,
     }),
     mounted() {
       const self = this;
@@ -1286,6 +1289,14 @@
       },
       hideVideoRec: function() {
         this.showVideoRec = false;
+      },
+      onGetAudioRec: function(data) {
+        this.sortableMedias.push({
+          src: URL.createObjectURL(data),
+          file: data,
+          type: 'audio/mp3',
+        });
+        this.showAudioRec = false;
       }
     }
   }

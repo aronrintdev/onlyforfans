@@ -37,6 +37,7 @@
     "vue-template-compiler": "^2.6.12"
   },
   "dependencies": {
+    "@codekraft-studio/vue-record": "0.0.3",
     "@fortawesome/fontawesome-svg-core": "^1.2.34",
     "@fortawesome/free-brands-svg-icons": "^5.15.3",
     "@fortawesome/free-regular-svg-icons": "^5.15.2",
