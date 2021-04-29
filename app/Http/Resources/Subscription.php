@@ -20,7 +20,7 @@ class Subscription extends JsonResource
             'currency' => $this->currency,
             'access_level' => $this->access_level,
             'active' => $this->active,
-            'canceled' => $this->canceled,
+            'canceled' => $this->canceled_at,
         ];
 
         if ( $this->isOwner(Auth::user()) ) {
