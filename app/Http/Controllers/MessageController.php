@@ -71,14 +71,14 @@ class MessageController extends Controller
                 }, $users);
                 break;
             case 'online':
-                $users = orderBy($users, ['is_online', 'id'], [$dir, $dir]);
+                $users = orderBy($users, ['is_online', 'created_at'], [$dir === 'asc' ? 'desc' : 'asc', $dir]);
                 $users = array_map(function($user) {
                     $user = $user['value'];
                     return $user;
                 }, $users);
                 break;
             case 'offline':
-                $users = orderBy($users, ['is_online', 'id'], [$dir === 'asc' ? 'desc' : 'asc', $dir]);
+                $users = orderBy($users, ['is_online', 'created_at'], [$dir, $dir]);
                 $users = array_map(function($user) {
                     $user = $user['value'];
                     return $user;
