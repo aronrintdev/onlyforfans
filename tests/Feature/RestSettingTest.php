@@ -27,10 +27,11 @@ class RestSettingTest extends TestCase
 
         $payload = [
             'income' => [
-                'new_tip' => ['email', 'sms'],
+                //'new_tip' => ['email', 'sms'],
+                'new_tip' => ['email'],
             ],
         ];
-        $response = $this->actingAs($user)->ajaxJSON('PATCH', route('users.updateSetting', [$user->id, 'notifications']), $payload);
+        $response = $this->actingAs($user)->ajaxJSON('PATCH', route('users.enableSetting', [$user->id, 'notifications']), $payload);
         $response->assertStatus(200);
 
         $content = json_decode($response->content());

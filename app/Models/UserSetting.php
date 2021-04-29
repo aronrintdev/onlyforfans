@@ -22,15 +22,25 @@ class UserSetting extends Model
     public static function boot()
     {
         parent::boot();
+
         static::creating(function ($model) {
-            $cattrs = [
-                'notifications' => array_key_exists('notifications',$model->cattrs??[]) ? $model->cattrs['notifications'] : null,
-                'subscriptions' => array_key_exists('subscriptions',$model->cattrs??[]) ? $model->cattrs['subscriptions'] : null,
-                'localization'  => array_key_exists('localization',$model->cattrs??[])  ? $model->cattrs['localization']  : null,
-                'weblinks'      => array_key_exists('weblinks',$model->cattrs??[])      ? $model->cattrs['weblinks']      : null,
-                'privacy'       => array_key_exists('privacy',$model->cattrs??[])       ? $model->cattrs['privacy']       : null,
-                'watermark'     => array_key_exists('watermark',$model->cattrs??[])     ? $model->cattrs['watermark']     : null,
+            $groups = [
+                'notifications',
+                'subscriptions',
+                'localization',
+                'weblinks',
+                'privacy',
+                'watermark',
             ];
+
+            $cattrs = UserSetting::getTemplate(); // init with empty template
+
+            // batch-fill in any values sent from caller
+            foreach ($groups as $g) {
+                if ( array_key_exists($g, $model->cattrs??[]) ) {
+                    $cattrs[$g] = $model->cattrs[$g];
+                }
+            }
             $model->cattrs = $cattrs;
         });
     }
@@ -48,6 +58,107 @@ class UserSetting extends Model
     // %%% Other
     //--------------------------------------------
 
+    public static $notifyTypes = [ 'email', 'sms', 'site', 'push' ];
+
+    public function enable(string $group, array $payload) {
+        $cattrs = $this->cattrs; // 'pop'
+
+        // apply any set payload from input
+        switch ($group) {
+        case 'notifications':
+            //dd($group, $payload);
+            if ( array_key_exists('campaigns', $payload) ) {
+                /*
+                if ( array_key_exists('goal_acheived', $v['campaigns']) ) {
+                    $cattrs['notifications']['campaigns']['goal_achieved'] = $v['campaigns']['goal_achieved'];
+                }
+                if ( array_key_exists('goal_acheived', $v['campaigns']) ) {
+                    $cattrs['notifications']['campaigns']['new_contribution'] = $v['campaigns']['new_contribution'];
+                }
+                 */
+            }
+            if ( array_key_exists('income', $payload) ) {
+//dd('income', $payload);
+                foreach ($payload['income'] as $k => $v) {
+                    //dd($k, $v);
+                    //if ( in_array( , self::$notifyTypes) ) { }
+                    switch ($k) {
+                    case 'new_tip':
+                        $cattrs['notifications']['income']['new_tip'] = array_unique(array_merge($cattrs['notifications']['income']['new_tip'], $v));
+                        break;
+                    }
+                } // foreach
+            }
+            break;
+        } // switch
+
+        $this->cattrs = $cattrs; // 'push'
+        $this->save();
+    }
+
+    public function disable(string $group, array $payload) {
+        $cattrs = $this->cattrs; // 'pop'
+
+        // apply any set payload from input
+        switch ($group) {
+        case 'notifications':
+            if ( array_key_exists('income', $payload) ) {
+                foreach ($payload['income'] as $k => $v) {
+                    switch ($k) {
+                    case 'new_tip':
+                        $cattrs['notifications']['income']['new_tip'] = array_unique(array_diff($cattrs['notifications']['income']['new_tip'], $v));
+                        break;
+                    }
+                } // foreach
+            }
+            break;
+        } // switch
+
+        $this->cattrs = $cattrs; // 'push'
+        $this->save();
+    }
+
+    public static function getTemplate() {
+        $template = [
+            'notifications' => [
+                // in:email,sms,site,push
+                'campaigns' => [
+                    'goal_achieved' => [],
+                    'new_contribution' => [],
+                ],
+                'refunds' => [
+                    'new_refund' => [],
+                ],
+                'income' => [
+                    'new_tip' => [],
+                    //'new_tip' => ['push'], // TEST ONLY
+                    'new_subscription' => [],
+                    'renewed_subscription' => [],
+                ],
+            ],
+            'subscriptions' => [
+            ], 
+            'localization' => [
+            ], 
+            'weblinks' => [
+            ], 
+            'privacy' => [
+            ], 
+            'blocked' => [
+                'ips' => [],
+                'countries' => [],
+                'usernames' => [],
+            ], 
+            'watermark' => [
+            ], 
+        ];
+        return $template;
+        /*
+        $this->cattrs = $template; // 'push'
+        $this->save();
+        return $this;
+         */
+    }
     // updates settings cattrs 'blocked' key, by batch (ips, countries, etc)
     public static function parseBlockedBatched($requestAttrs, $oldBlocked)
     {

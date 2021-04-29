@@ -53,24 +53,25 @@ class UsersController extends AppBaseController
         return response()->json([ ]);
     }
 
-    public function updateSetting(Request $request, User $user, string $group)  // single
+    public function eneableSetting(Request $request, User $user, string $group)  // single
     {
-
+        $this->authorize('update', $user);
         $vrules = [
             'enabled' => 'array',
             '*.*' => 'array',
             '*.*.*' => 'string|in:email,sms,site,push',
         ];
         $request->validate($vrules);
+        //dd($request->all());
 
-        switch ($group) {
-        case 'notifications':
-            break;
-        case 'subscriptions':
-            break;
-        }
-
+        $userSetting = $user->settings;
         $cattrs = $userSetting->cattrs; // 'pop'
+
+        //$tmp = ['notifications' => $request->except(['foo']) ];
+        $result = $userSetting->doInit();
+        //$result = $userSetting->enable( ['notifications' => $request->except(['foo']) ] );
+        $result = $userSetting->enable($group, $request->except(['foo']) ] );
+        dd($request->all(), $result);
 
         $userSetting->cattrs = $cattrs; // 'push'
         $userSetting->save();
