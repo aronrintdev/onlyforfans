@@ -18,14 +18,12 @@
                         <span>{{ selectedUser.profile.display_name ? `${selectedUser.profile.display_name} (${selectedUser.profile.name})` : selectedUser.profile.name }}</span>
                       </div>
                       <div class="details" v-if="!messageSearchVisible">
-                        <div class="online-status" v-if="!selectedUser.profile.user.is_online && selectedUser.profile.user.last_logged">Last seen {{ moment(selectedUser.profile.user.last_logged).format('MMM DD, YYYY') }}
-                        </div>
-                        <div class="online-status" v-if="!selectedUser.profile.user.is_online && !selectedUser.profile.user.last_logged">Last seen {{ moment(selectedUser.messages[0].created_at).format('MMM DD, YYYY') }}
+                        <div class="online-status" v-if="!selectedUser.profile.user.is_online && !!selectedUser.profile.user.last_logged">Last seen {{ moment(selectedUser.profile.user.last_logged).fromNow() }}
                         </div>
                         <div class="online-status" v-if="selectedUser.profile.user.is_online">
                           <i class="fa fa-circle" aria-hidden="true"></i>Available now
                         </div>
-                        <div class="v-divider"></div>
+                        <div class="v-divider" v-if="selectedUser.profile.user.is_online || selectedUser.profile.user.last_logged"></div>
                         <button class="star-btn btn" type="button" @click="addToFavourites()">
                           <font-awesome-icon :icon="selectedUser.profile.hasLists ? ['fas', 'star'] : ['far', 'star']" />
                         </button>
@@ -59,6 +57,9 @@
                       </b-dropdown-item>
                       <b-dropdown-item disabled>
                         Give user a discount
+                      </b-dropdown-item>
+                      <b-dropdown-item @click="clearMessages(selectedUser.profile)">
+                        Delete conversation
                       </b-dropdown-item>
                       <b-dropdown-item @click="editCustomName">
                         Rename @{{ selectedUser.profile.username }}
@@ -115,25 +116,101 @@
                                 <img :src="selectedUser.profile.avatar.filepath" alt="" />
                               </div>
                               <div class="content">
-                                <template v-for="msg in message.messages">
-                                  <div class="text" :class="`message-${msg.id}`" v-if="!msg.mediafile" :key="msg.id">{{ msg.mcontent }}</div>
-                                  <div class="image" :class="`message-${msg.id}`" v-if="msg.mediafile" :key="msg.id">
-                                    <img v-preview:scope-b class="lazy" v-if="msg.mediafile.is_image" :data-src="msg.mediafile.filepath" :alt="msg.mediafile.mfname" />
-                                    <img src="/images/loading.gif" v-if="msg.mediafile.is_image" class="loading-image" />
-                                    <video v-if="msg.mediafile.is_video" controls>
-                                      <source :src="msg.mediafile.filepath" type="video/mp4" />
-                                    </video>
-                                    <audio v-if="msg.mediafile.mimetype.indexOf('audio/') > -1" controls>
-                                      <source :src="msg.mediafile.filepath" type="audio/mpeg" />
-                                    </audio>
+                                <div class="non-paid-message" v-if="message.tip_price && !message.paid">
+                                  <div class="non-paid-message-block">
+                                    <div class="lock-icon-wrapper">
+                                      <svg class="icon-locked" viewBox="0 0 24 24">
+                                        <path d="M17.5,8H17V6A5,5,0,0,0,7,6V8H6.5A2.5,2.5,0,0,0,4,10.5V18a4,4,0,0,0,4,4h8a4,4,0,0,0,4-4V10.5A2.5,2.5,0,0,0,17.5,8ZM9,6a3,3,0,0,1,6,0V8H9Zm9,12a2,2,0,0,1-2,2H8a2,2,0,0,1-2-2V10.5a.5.5,0,0,1,.5-.5h11a.5.5,0,0,1,.5.5Zm-6-5a1,1,0,0,0-1,1v2a1,1,0,0,0,2,0V14A1,1,0,0,0,12,13Z"></path>
+                                      </svg>
+                                    </div>
+                                    <div class="b-purchase">
+                                      <div class="purchase-block">
+                                        <div class="content-icons">
+                                          <div class="media-count">
+                                            <div class="media-icon"  v-if="message.images">
+                                              <svg class="icon-media" viewBox="0 0 24 24">
+                                                <path d="M18,3H6A3,3,0,0,0,3,6V18a3,3,0,0,0,3,3H18a3,3,0,0,0,3-3V6A3,3,0,0,0,18,3Zm1,15a1,1,0,0,1-1,1H6a1,1,0,0,1-1-1V6A1,1,0,0,1,6,5H18a1,1,0,0,1,1,1ZM9,10.5A1.5,1.5,0,1,0,7.5,9,1.5,1.5,0,0,0,9,10.5ZM14,13l-3,3L9,14,6.85,16.15a.47.47,0,0,0-.14.35.5.5,0,0,0,.5.5h9.58a.5.5,0,0,0,.5-.5.47.47,0,0,0-.14-.35Z" fill="#8a96a3"></path>
+                                              </svg>
+                                              <span>{{ message.images }}</span>
+                                              <span class="divide-dot">&middot;</span>
+                                            </div>
+                                            <div class="media-icon" v-if="message.videos">
+                                              <svg class="icon-video" viewBox="0 0 24 24">
+                                                <path
+                                                  d="M21.79 6a1.21 1.21 0 0 0-.86.35L19 8.25V7a3 3 0 0 0-3-3H5a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h11a3 3 0 0 0 3-3v-1.25l1.93 1.93a1.22 1.22 0 0 0 2.07-.86V7.18A1.21 1.21 0 0 0 21.79 6zM17 17a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h11a1 1 0 0 1 1 1zm4-2.08l-1.34-1.34a2.25 2.25 0 0 1 0-3.16L21 9.08z"
+                                                  fill="#8a96a3"></path>
+                                              </svg>
+                                              <span>{{ message.videos }}</span>
+                                              <span class="divide-dot">&middot;</span>
+                                            </div>
+                                            <div class="media-icon" v-if="message.audios">
+                                              <svg class="icon-voice" viewBox="0 0 24 24">
+                                                <path
+                                                  d="M12 15a4 4 0 0 0 4-4V6a4 4 0 0 0-8 0v5a4 4 0 0 0 4 4zm-2-9a2 2 0 0 1 4 0v5a2 2 0 0 1-4 0zm9 4a1 1 0 0 0-1 1 6 6 0 0 1-12 0 1 1 0 0 0-2 0 8 8 0 0 0 7 7.93V21a1 1 0 0 0 2 0v-2.07A8 8 0 0 0 20 11a1 1 0 0 0-1-1z"
+                                                  fill="#8a96a3"></path>
+                                              </svg>
+                                              <span>{{ message.audios }}</span>
+                                            </div>
+                                          </div>
+                                          <div class="media-price">
+                                            <span>${{message.tip_price}}&nbsp;</span>
+                                            <svg viewBox="0 0 24 24">
+                                              <path d="M17.5,8H17V6A5,5,0,0,0,7,6V8H6.5A2.5,2.5,0,0,0,4,10.5V18a4,4,0,0,0,4,4h8a4,4,0,0,0,4-4V10.5A2.5,2.5,0,0,0,17.5,8ZM9,6a3,3,0,0,1,6,0V8H9Zm9,12a2,2,0,0,1-2,2H8a2,2,0,0,1-2-2V10.5a.5.5,0,0,1,.5-.5h11a.5.5,0,0,1,.5.5Zm-6-5a1,1,0,0,0-1,1v2a1,1,0,0,0,2,0V14A1,1,0,0,0,12,13Z"></path>
+                                            </svg>
+                                          </div>
+                                        </div>
+                                        <button type="button" class="btn unlock-btn" @click="openMessagePriceConfirmModal(message.tip_price)">Unlock for ${{ message.tip_price }}</button>
+                                      </div>
+                                    </div>
                                   </div>
-                                </template>
-                                <div class="time">{{ moment(message.created_at).format('hh:mm A') }}</div>
+                                  <div class="text" v-if="message.messages[message.messages.length - 1].mcontent" :class="`message-${message.messages[message.messages.length - 1].id}`">{{ message.messages[message.messages.length - 1].mcontent }}</div>
+                                </div>
+                                <div v-if="!message.tip_price">
+                                  <template v-for="msg in message.messages">
+                                    <div class="text" :class="`message-${msg.id}`" v-if="!msg.mediafile" :key="msg.id">{{ msg.mcontent }}</div>
+                                    <div class="image" :class="`message-${msg.id}`" v-if="msg.mediafile" :key="msg.id">
+                                      <img v-preview:scope-b class="lazy" v-if="msg.mediafile.is_image" :data-src="msg.mediafile.filepath" :alt="msg.mediafile.mfname" />
+                                      <img src="/images/loading.gif" v-if="msg.mediafile.is_image" class="loading-image" />
+                                      <video v-if="msg.mediafile.is_video" controls>
+                                        <source :src="msg.mediafile.filepath" type="video/mp4" />
+                                      </video>
+                                      <audio v-if="msg.mediafile.mimetype.indexOf('audio/') > -1" controls>
+                                        <source :src="msg.mediafile.filepath" type="audio/mpeg" />
+                                      </audio>
+                                    </div>
+                                  </template>
+                                </div>
+                                <div class="time">
+                                  <i v-if="message.is_like" class="fas fa-heart"></i>
+                                  <span>{{ moment(message.created_at).format('h:mm A') }}</span>
+                                  <span class="payment-state" v-if="message.tip_price && !message.paid">,&nbsp; ${{message.tip_price}} not paid yet</span>
+                                </div>
                               </div>
+                              <b-dropdown class="filter-dropdown chat-more-dropdown" right>
+                                <template #button-content>
+                                  <i class="fas fa-ellipsis-h" aria-hidden="true"></i>
+                                </template>
+                                <b-dropdown-item v-if="!message.is_like" v-on:click.stop.prevent="setLikeMessage(message)">
+                                  Like
+                                </b-dropdown-item>
+                                <b-dropdown-item v-if="message.is_like" v-on:click.stop.prevent="setUnlikeMessage(message)">
+                                  Unlike
+                                </b-dropdown-item>
+                              </b-dropdown>
                             </div>
                             <div class="sent" v-if="session_user && session_user.id === message.sender_id">
                               <template v-for="msg in message.messages">
-                                <div class="text" :class="`message-${msg.id}`" v-if="!msg.mediafile" :key="msg.id">{{ msg.mcontent }}</div>
+                                <div class="text" :class="`message-${msg.id}`" v-if="!msg.mediafile" :key="msg.id">
+                                  <span>{{ msg.mcontent }}</span>
+                                  <svg
+                                    class="icon-undo"
+                                    v-if="message.tip_price && !message.paid"
+                                    @click="openUnsendMessageModal(message.id)"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path d="M14.34 6a6.61 6.61 0 0 0-4.7 2L5 12.59V8a1 1 0 0 0-2 0v8h8a1 1 0 0 0 0-2H6.41l4.64-4.64a4.66 4.66 0 0 1 8 3.3A4.62 4.62 0 0 1 17.64 16l-1.35 1.34A1 1 0 0 0 16 18a1 1 0 0 0 1 1 1 1 0 0 0 .71-.29l1.34-1.35a6.57 6.57 0 0 0 1.95-4.7A6.65 6.65 0 0 0 14.34 6z"></path>
+                                  </svg>
+                                </div>
                                 <div class="image" :class="`message-${msg.id}`" v-if="msg.mediafile" :key="msg.id">
                                   <img v-preview:scope-b class="lazy" v-if="msg.mediafile.is_image" :data-src="msg.mediafile.filepath" :alt="msg.mediafile.mfname" />
                                   <img src="/images/loading.gif" v-if="msg.mediafile.is_image"  class="loading-image" />
@@ -145,7 +222,16 @@
                                   </audio>
                                 </div>
                               </template>
-                              <div class="time">{{ moment(message.created_at).format('hh:mm A') }}</div>
+                              <div class="time">
+                                <span class="payment-state" v-if="message.tip_price && !message.paid">${{message.tip_price}} not paid yet,&nbsp;</span>
+                                <span>{{ moment(message.created_at).format('h:mm A') }}</span>
+                                <svg class="icon-done-all" v-if="!message.is_unread" viewBox="0 0 24 24">
+                                  <path d="M22.83 6a1 1 0 0 0-.71.3L11.83 16.59 7.54 12.3a1 1 0 0 0-1.71.7 1 1 0 0 0 .29.71l5.71 5.71L23.54 7.71a1 1 0 0 0 .29-.71 1 1 0 0 0-1-1zm-4.95 1.71a1 1 0 0 0 .29-.71 1 1 0 0 0-1-1 1 1 0 0 0-.71.3l-6 6 1.41 1.42zM1.17 12a1 1 0 0 0-1 1 1 1 0 0 0 .3.71l5.7 5.7L7.59 18l-5.71-5.71a1 1 0 0 0-.71-.29z"></path>
+                                </svg>
+                                <svg class="icon-done" v-if="message.is_unread" viewBox="0 0 24 24">
+                                  <path d="M9 19.42l-5.71-5.71A1 1 0 0 1 3 13a1 1 0 0 1 1-1 1 1 0 0 1 .71.29L9 16.59l10.29-10.3A1 1 0 0 1 20 6a1 1 0 0 1 1 1 1 1 0 0 1-.29.71z"></path>
+                                </svg>
+                              </div>
                             </div>
                           </div>
                         </template>
@@ -153,7 +239,23 @@
                     </div>
                     <div class="typing dot-pulse" style="display: none">...</div>
                   </div>
-                  <div class="conversation-footer">
+                  <div class="conversation-footer" :class="messagePrice ? 'price-view': ''">
+                    <div v-if="messagePrice" class="price-to-view-header d-flex align-items-center justify-content-between">
+                      <div class="price-to-view-title">
+                        <svg viewBox="0 0 24 24">
+                          <path
+                            d="M22 13a3.38 3.38 0 0 0-1-2.4l-7.41-7.43A4.06 4.06 0 0 0 10.76 2H5a3 3 0 0 0-3 3v5.76a4 4 0 0 0 1.17 2.83L10.6 21a3.4 3.4 0 0 0 4.8 0l5.6-5.6a3.38 3.38 0 0 0 1-2.4zm-2.4 1L14 19.6a1.45 1.45 0 0 1-2 0l-7.41-7.43A2 2 0 0 1 4 10.76V5a1 1 0 0 1 1-1h5.76a2 2 0 0 1 1.41.59L19.6 12a1.4 1.4 0 0 1 0 2zM7.7 6a1.7 1.7 0 1 0 1.7 1.7A1.7 1.7 0 0 0 7.7 6zm6.16 6.28c-1-.22-1.85-.3-1.85-.78s.43-.51 1.06-.51a1.2 1.2 0 0 1 .92.43.48.48 0 0 0 .35.16h1.35a.23.23 0 0 0 .21-.22c0-.71-.86-1.55-2-1.84v-.75a.27.27 0 0 0-.26-.27h-1.27a.27.27 0 0 0-.26.27v.74a2.31 2.31 0 0 0-2 2c0 2.81 4.07 1.85 4.07 2.89 0 .48-.47.53-1.27.53a1.3 1.3 0 0 1-1-.52.66.66 0 0 0-.4-.17h-1.28a.23.23 0 0 0-.2.22c0 1 1 1.72 2.08 2v.74a.27.27 0 0 0 .26.27h1.25a.26.26 0 0 0 .26-.27v-.71A2.18 2.18 0 0 0 16 14.43c0-1.2-.86-1.88-2.14-2.15z"
+                          ></path>
+                        </svg>
+                        <span>Price to view</span>
+                      </div>
+                      <div class="price-to-view-side">
+                        <span>${{ messagePrice }}</span>
+                        <svg viewBox="0 0 24 24" @click="clearMessagePrice">
+                          <path d="M13.41 12l5.3-5.29A1 1 0 0 0 19 6a1 1 0 0 0-1-1 1 1 0 0 0-.71.29L12 10.59l-5.29-5.3A1 1 0 0 0 6 5a1 1 0 0 0-1 1 1 1 0 0 0 .29.71l5.3 5.29-5.3 5.29A1 1 0 0 0 5 18a1 1 0 0 0 1 1 1 1 0 0 0 .71-.29l5.29-5.3 5.29 5.3A1 1 0 0 0 18 19a1 1 0 0 0 1-1 1 1 0 0 0-.29-.71z"></path>
+                        </svg>
+                      </div>
+                    </div>
                     <div class="swiper-slider" v-if="sortableMedias.length > 0">
                       <div v-if="isDragListVisible" >
                         <draggable class="sort-change-div" v-model="sortableMedias" :group="'column.components'" handle=".handle" ghost-class="ghost">
@@ -223,7 +325,7 @@
                       </swiper>
                     </div>
                     <textarea placeholder="Type a message" name="text" rows="1" maxlength="10000"
-                      spellcheck="false" :value="newMessageText" @input="onInputNewMessage"></textarea>
+                      spellcheck="false" :value="newMessageText" @input="onInputNewMessage" @keydown="onCheckReturnKey"></textarea>
                     <div class="action-btns">
                       <div>
                         <!-- image -->
@@ -278,7 +380,7 @@
                               fill="#8a96a3"></path>
                           </svg></button>
                         <!-- message price -->
-                        <button class="btn action-btn" type="button" disabled>
+                        <button class="btn action-btn" :disabled="messagePrice" type="button" @click="openMessagePriceModal">
                           <svg id="icon-price" viewBox="0 0 24 24">
                             <path
                               d="M22 13a3.38 3.38 0 0 0-1-2.4l-7.41-7.43A4.06 4.06 0 0 0 10.76 2H5a3 3 0 0 0-3 3v5.76a4 4 0 0 0 1.17 2.83L10.6 21a3.4 3.4 0 0 0 4.8 0l5.6-5.6a3.38 3.38 0 0 0 1-2.4zm-2.4 1L14 19.6a1.45 1.45 0 0 1-2 0l-7.41-7.43A2 2 0 0 1 4 10.76V5a1 1 0 0 1 1-1h5.76a2 2 0 0 1 1.41.59L19.6 12a1.4 1.4 0 0 1 0 2zM7.7 6a1.7 1.7 0 1 0 1.7 1.7A1.7 1.7 0 0 0 7.7 6zm6.16 6.28c-1-.22-1.85-.3-1.85-.78s.43-.51 1.06-.51a1.2 1.2 0 0 1 .92.43.48.48 0 0 0 .35.16h1.35a.23.23 0 0 0 .21-.22c0-.71-.86-1.55-2-1.84v-.75a.27.27 0 0 0-.26-.27h-1.27a.27.27 0 0 0-.26.27v.74a2.31 2.31 0 0 0-2 2c0 2.81 4.07 1.85 4.07 2.89 0 .48-.47.53-1.27.53a1.3 1.3 0 0 1-1-.52.66.66 0 0 0-.4-.17h-1.28a.23.23 0 0 0-.2.22c0 1 1 1.72 2.08 2v.74a.27.27 0 0 0 .26.27h1.25a.26.26 0 0 0 .26-.27v-.71A2.18 2.18 0 0 0 16 14.43c0-1.2-.86-1.88-2.14-2.15z"
@@ -438,6 +540,46 @@
         </div>
       </div>
     </b-modal>
+    <b-modal v-if="selectedUser" hide-header centered hide-footer ref="message-price-modal" title="Message Price Modal">
+      <div class="block-modal message-price-modal">
+        <h4>MESSAGE PRICE</h4>
+        <div class="content mb-3 mt-3">
+          <div class="currency-form">
+            <span class="prefix">$</span>
+            <b-form-input v-model="tempMessagePrice" min="5" type="number" placeholder="5" @change="onMessagePriceChange"></b-form-input>
+          </div>
+          <span class="extra-info">Minimum $5 USD</span>
+        </div>
+        <div class="action-btns">
+          <button class="link-btn" @click="closeMessagePriceModal">Cancel</button>
+          <button class="link-btn" @click="saveMessagePrice">Save</button>
+        </div>
+      </div>
+    </b-modal>
+    <b-modal v-if="selectedUser" modal-class="unsend-message-modal" hide-header centered hide-footer ref="unsend-message-modal" title="Unsend Message Modal">
+      <div class="block-modal">
+        <h4>Unsend this message</h4>
+        <div class="content mb-3 mt-3">
+          Are you sure you want to unsend this message?
+        </div>
+        <div class="action-btns">
+          <button class="link-btn" @click="closeUnsendMessageModal">Cancel</button>
+          <button class="link-btn" @click="unsendTipMessage">Yes, unsend</button>
+        </div>
+      </div>
+    </b-modal>
+    <b-modal v-if="selectedUser" modal-class="unsend-message-modal" hide-header centered hide-footer ref="confirm-message-price-modal" title="Message Price Modal">
+      <div class="block-modal">
+        <h4>Message price</h4>
+        <div class="content mb-3 mt-3">
+          Please confirm you want to purchase a message for ${{ confirm_message_price }}.
+        </div>
+        <div class="action-btns">
+          <button class="link-btn" @click="closeMessagePriceConfirmModal">Close</button>
+          <button class="link-btn" @click="closeMessagePriceConfirmModal">Pay</button>
+        </div>
+      </div>
+    </b-modal>
   </div>
 </template>
 
@@ -496,6 +638,9 @@
       hasMore: true,
       mediaType: undefined,
       lastMessage: undefined,
+      messagePrice: undefined,
+      tempMessagePrice: undefined,
+      confirm_message_price: undefined,
     }),
     mounted() {
       const self = this;
@@ -530,6 +675,9 @@
           Echo.private(`${newVal.id}-message`)
             .listen('MessageSentEvent', (e) => {
               const message = JSON.parse(e.message);
+              if (self.originMessages.findIndex(m => m.id === message.id) > -1) {
+                return;
+              }
               self.lastMessage = _.cloneDeep(message);
               if (message.sender_id === this.$route.params.id) {
                 self.originMessages.unshift(message);
@@ -540,6 +688,8 @@
                   $('.conversation-list').animate({ scrollTop: $('.conversation-list')[0].scrollHeight }, 500);
                 });
                 self.markAsRead();
+              } else {
+                self.lastMessage = { ...self.lastMessage, unread_messages_count: true };
               }
             });
         }
@@ -598,7 +748,7 @@
       markAsRead: function() {
         this.axios.post(`/chat-messages/${this.$route.params.id}/mark-as-read`)
           .then(() => {
-            $(`.user-content.user-${this.$route.params.id} .is-unread`).removeClass('is-unread');
+            this.lastMessage = { sender_id: this.$route.params.id, unread_messages_count: false };
             if (this.unread_messages_count > 1) {
               this.UPDATE_UNREAD_MESSAGES_COUNT({
                 unread_messages_count: this.unread_messages_count - 1,
@@ -636,6 +786,23 @@
         if (response.data.messages.length === 0) {
           this.hasMore = false;
         }
+        response.data.messages.forEach(message => {
+          let videos = 0, audios = 0, images = 0;
+          message.messages.map(msg => {
+            if (msg.mediafile && msg.mediafile.mimetype.indexOf('video/') > -1) {
+              videos++;
+            }
+            if (msg.mediafile && msg.mediafile.mimetype.indexOf('audio/') > -1) {
+              audios++;
+            }
+            if (msg.mediafile && msg.mediafile.mimetype.indexOf('image/') > -1) {
+              images++;
+            }
+          });
+          message.videos = videos;
+          message.audios = audios;
+          message.images = images;
+        });
         this.originMessages = this.originMessages.concat(response.data.messages);
         this.offset = this.originMessages.length;
         this.groupMessages();
@@ -723,13 +890,16 @@
           if (this.newMessageText) {
             data.append('message', this.newMessageText);
           }
+          if (this.messagePrice) {
+            data.append('tip_price', this.messagePrice);
+          }
           this.axios.post('/chat-messages', data)
             .then((response) => {
               this.isSendingFiles = false;
               this.newMessageText = undefined;
               this.sortableMedias = [];
               this.originMessages.unshift(response.data.message);
-              this.lastMessage = _.cloneDeep(response.data.message);
+              this.lastMessage = { ...response.data.message };
               this.groupMessages();
               $('.conversation-list').animate({ scrollTop: $('.conversation-list')[0].scrollHeight }, 500);
               this.$Lazyload.$once('loaded', function () {
@@ -739,11 +909,12 @@
         } else if (this.newMessageText) {
           this.axios.post('/chat-messages', {
             message: this.newMessageText,
+            tip_price: this.messagePrice,
             user_id: this.selectedUser.profile.id,
           })
             .then((response) => {
+              this.lastMessage = response.data.message;
               this.originMessages.unshift(response.data.message);
-              this.lastMessage = _.cloneDeep(response.data.message);
               this.groupMessages();
               this.newMessageText = undefined;
               $('.conversation-list').animate({ scrollTop: $('.conversation-list')[0].scrollHeight }, 500);
@@ -985,6 +1156,94 @@
           };
         });
       },
+      openMessagePriceModal: function() {
+        this.tempMessagePrice = undefined;
+        this.$refs['message-price-modal'].show();
+      },
+      closeMessagePriceModal: function() {
+        this.tempMessagePrice = undefined;
+        this.$refs['message-price-modal'].hide();
+      },
+      saveMessagePrice: function() {
+        this.messagePrice = this.tempMessagePrice;
+        this.$refs['message-price-modal'].hide();
+        console.log('messagePrice:', this.messagePrice);
+      },
+      onMessagePriceChange: function(val) {
+        if (val < 5) {
+          this.tempMessagePrice = 5;
+        } else {
+          this.tempMessagePrice = val;
+        }
+      },
+      clearMessagePrice: function() {
+        this.messagePrice = undefined;
+      },
+      openUnsendMessageModal: function(messageId) {
+        this.$refs['unsend-message-modal'].show();
+        this.unsendTipMessageId = messageId;
+      },
+      closeUnsendMessageModal: function() {
+        this.unsendTipMessageId = undefined;
+        this.$refs['unsend-message-modal'].hide();
+      },
+      unsendTipMessage: function() {
+        this.axios.delete(`/chat-messages/${this.$route.params.id}/threads/${this.unsendTipMessageId}`)
+          .then(() => {
+            this.closeUnsendMessageModal();
+            const newMessages = [...this.messages];
+            const idx = newMessages.findIndex(message => message.id === this.unsendTipMessageId);
+            newMessages.splice(idx, 1);
+            this.messages = newMessages;
+          });
+        this.unsendTipMessageId = undefined;
+      },
+      openMessagePriceConfirmModal: function(value) {
+        this.confirm_message_price = value;
+        this.$refs['confirm-message-price-modal'].show();
+      },
+      closeMessagePriceConfirmModal: function() {
+        this.$refs['confirm-message-price-modal'].hide();
+      },
+      onCheckReturnKey: function(e) {
+        if (e.ctrlKey && e.keyCode == 13) {
+          this.sendMessage();
+        }
+      },
+      clearMessages: function (receiver) {
+        this.axios.delete(`/chat-messages/${receiver.id}`)
+          .then(() => {
+            const idx = this.users.findIndex(user => user.profile.id === receiver.id);
+            this.users.splice(idx, 1);
+            this.$router.push('/messages');
+          })
+      },
+      setLikeMessage: function(message) {
+        this.axios.post(`/chat-messages/${this.$route.params.id}/threads/${message.id}/like`)
+          .then(() => {
+            const newMessages = [...this.messages];
+            newMessages.forEach(thread => {
+              const idx = thread.messages.findIndex(m => m.id === message.id);
+              if (idx > -1) {
+                thread.messages[idx].is_like = 1;
+              }
+            });
+            this.messages = newMessages;
+          })
+      },
+      setUnlikeMessage: function(message) {
+        this.axios.post(`/chat-messages/${this.$route.params.id}/threads/${message.id}/unlike`)
+          .then(() => {
+            const newMessages = [...this.messages];
+            newMessages.forEach(thread => {
+              const idx = thread.messages.findIndex(m => m.id === message.id);
+              if (idx > -1) {
+                thread.messages[idx].is_like = 0;
+              }
+            });
+            this.messages = newMessages;
+          })
+      }
     }
   }
 </script>

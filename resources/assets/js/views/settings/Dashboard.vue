@@ -102,6 +102,16 @@ export default {
         to: { name: 'settings.referrals', params: {} },
       })
 
+      routes.push({
+        name: 'Bookmarks',
+        to: { name: 'settings.bookmarks', params: {} },
+      })
+
+      routes.push({
+        name: 'Message with Tip Only',
+        to: { name: 'settings.subscriptions', params: {} },
+      })
+
       routes = routes.map(route => ({
         ...route,
         active: this.checkActive(route)
@@ -165,13 +175,14 @@ export default {
     "Profile": "Profile",
     "Privacy": "Privacy",
     "Security": "Security",
-    "My Subscriptions": "My Subscriptions",
     "Payment Methods": "Payment Methods",
     "Earnings": "Earnings",
+    "My Subscriptions": "My Subscriptions",
     "Payouts": "Payouts",
     "Login Sessions": "Login Sessions",
     "Referrals": "Referrals",
-    "Bookmarks": "Bookmarks"
+    "Bookmarks": "Bookmarks",
+    "Message with Tip Only": "Message with Tip Only"
   }
 }
 </i18n>

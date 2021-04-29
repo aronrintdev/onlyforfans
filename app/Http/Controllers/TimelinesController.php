@@ -103,9 +103,23 @@ class TimelinesController extends AppBaseController
     public function photos(Request $request, Timeline $timeline)
     {
         $query = Mediafile::with('resource')
-            ->whereIn('mimetype', ['image/jpeg', 'image/jpg', 'image/png'])
+            ->isImage()
+            //->whereIn('mimetype', ['image/jpeg', 'image/jpg', 'image/png'])
             ->where('mftype', MediafileTypeEnum::POST);
-        //$query->byTimeline($timeline->id)->sort( $request->input('sortBy', 'default') );
+        $query->whereHasMorph( 'resource', [Post::class], function($q1) use(&$timeline) {
+            $q1->where('postable_type', 'timelines')->where('postable_id', $timeline->id);
+        });
+        $data = $query->paginate( $request->input('take', env('MAX_POSTS_PER_REQUEST', 10)) );
+        return new MediafileCollection($data);
+    }
+
+    // 'Photos' Feed
+    // %TODO: move to mediafiles controller (?)
+    public function videos(Request $request, Timeline $timeline)
+    {
+        $query = Mediafile::with('resource')
+            ->isVideo()
+            ->where('mftype', MediafileTypeEnum::POST);
         $query->whereHasMorph( 'resource', [Post::class], function($q1) use(&$timeline) {
             $q1->where('postable_type', 'timelines')->where('postable_id', $timeline->id);
         });

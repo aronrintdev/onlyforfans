@@ -61,12 +61,20 @@
                             label="Name">
                           </radio-group-box>
                         </b-dropdown-item>
-                        <b-dropdown-item @click="onOptionChanged('available')">
+                        <b-dropdown-item @click="onOptionChanged('online')">
                           <radio-group-box
                             group_name="users-sort-options"
-                            value="available"
-                            :checked="optionValue === 'available'"
-                            label="Available">
+                            value="online"
+                            :checked="optionValue === 'online'"
+                            label="Online">
+                          </radio-group-box>
+                        </b-dropdown-item>
+                        <b-dropdown-item @click="onOptionChanged('offline')">
+                          <radio-group-box
+                            group_name="users-sort-options"
+                            value="offline"
+                            :checked="optionValue === 'offline'"
+                            label="Offline">
                           </radio-group-box>
                         </b-dropdown-item>
                         <b-dropdown-divider></b-dropdown-divider>
@@ -132,7 +140,7 @@
                   </div>
                   <div class="conversation-footer">
                     <textarea placeholder="Type a message" name="text" rows="1" maxlength="10000"
-                      spellcheck="false" v-model="messageText"></textarea>
+                      spellcheck="false" v-model="messageText" @keydown="onCheckReturnKey"></textarea>
                     <div class="action-btns">
                       <div>
                         <!-- image --> 
@@ -352,8 +360,11 @@
           case 'name':
             optionText = 'Name';
             break;
-          case 'available':
-            optionText = 'Available';
+          case 'online':
+            optionText = 'Online';
+            break;
+          case 'offline':
+            optionText = 'Offline';
             break;
           default:
             optionText = 'Recent';
@@ -413,7 +424,11 @@
           promises.push(promise);
         })
         Promise.all(promises).then(function() {
-          self.$router.push('/messages');
+          if (self.selectedUsers.length > 1) {
+            self.$router.push('/messages');
+          } else {
+            self.$router.push(`/messages/${self.selectedUsers[0].id}`);
+          }
         });
       },
       onDirectionChanged: function(dir) {
@@ -435,6 +450,11 @@
       onFilterOptionChanged: function(option, value) {
         this.filterOptions[option] = value;
         this.filterOptions = { ...this.filterOptions };
+      },
+      onCheckReturnKey: function(e) {
+        if (e.ctrlKey && e.keyCode == 13) {
+          this.sendMessage();
+        }
       }
     }
   }
