@@ -36,6 +36,7 @@ use Carbon\Exceptions\InvalidIntervalException;
  * @property Money  $price              - Price of the subscription
  * @property string $currency           - Currency of the subscription price
  * @property bool   $active             - If the subscription is currently active
+ * @property Carbon $canceled_at        - When the subscription was canceled
  * @property string $access_level       - Access level of this subscription
  * @property array  $custom_attributes
  * @property array  $metadata
@@ -117,7 +118,7 @@ class Subscription extends Model implements Ownable
      */
     public function scopeCanceled($query)
     {
-        return $query->where('canceled', true);
+        return $query->whereNotNull('canceled_at');
     }
 
     /**
@@ -161,7 +162,7 @@ class Subscription extends Model implements Ownable
         // }
 
         // Check if passed next bill date
-        $this->canceled = true;
+        $this->canceled_at = Carbon::now();
         if ($this->isDue()) {
             $this->subscribable->revokeAccess($this->user);
             $this->active = false;
@@ -178,7 +179,7 @@ class Subscription extends Model implements Ownable
      * @param $force - If true, will ignore time sense last payment and period
      * @return Collection|bool
      */
-    public function process($force = false)
+    public function process($force = false, $options = [])
     {
         if ($force === false && !$this->isDue()) {
             return false;
@@ -206,6 +207,15 @@ class Subscription extends Model implements Ownable
             $this->updateNextPayment();
             $this->active = true;
             $this->save();
+
+            // Grant access
+            $this->subscribable->grantAccess(
+                $this->getOwner()->first(),
+                $this->access_level,
+                $options['access_cattrs'] ?? [],
+                $options['access_meta'] ?? [],
+            );
+
             return $transactions;
         } else if ($this->account->type === AccountTypeEnum::INTERNAL) {
             $transactions = $this->account->moveTo(
@@ -223,6 +233,15 @@ class Subscription extends Model implements Ownable
             $this->updateNextPayment();
             $this->active = true;
             $this->save();
+
+            // Grant access
+            $this->subscribable->grantAccess(
+                $this->getOwner()->first(),
+                $this->access_level,
+                $options['access_cattrs'] ?? [],
+                $options['access_meta'] ?? [],
+            );
+
             return $transactions;
         }
         return false;

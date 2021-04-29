@@ -87,7 +87,7 @@ export default {
   }),
 
   methods: {
-    getPagedData(type=null) {
+    getPagedData(type = null) {
 
       const params = {
         page: this.currentPage, 
@@ -160,7 +160,7 @@ export default {
   created() {
     this.getPagedData()
 
-    eventBus.$on('update-originator', () => {
+    eventBus.$on('update-timelines', (timelineId) => {
       this.getPagedData()
     })
   },

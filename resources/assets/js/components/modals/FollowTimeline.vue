@@ -93,7 +93,7 @@ export default {
         title: 'Success!',
       })
       // %FIXME: this emit should be more general, as this modal may be used elsewhere
-       eventBus.$emit('update-originator')
+       eventBus.$emit('update-timelines', this.timeline.id)
     },
 
     async doSubscribe(e) {

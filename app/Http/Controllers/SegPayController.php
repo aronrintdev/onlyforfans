@@ -19,6 +19,14 @@ use App\Models\Financial\SegpayCard;
 use App\Rules\InEnum;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use App\Models\Casts\Money as MoneyCast;
+use App\Models\Financial\SegpayCall;
+use App\Models\Subscription;
+use Illuminate\Contracts\Container\BindingResolutionException;
+use InvalidArgumentException;
+use Carbon\Exceptions\InvalidCastException;
+use Carbon\Exceptions\InvalidIntervalException;
+use GuzzleHttp\Exception\GuzzleException;
 
 class SegPayController extends Controller
 {
@@ -136,26 +144,28 @@ class SegPayController extends Controller
             'item' => 'required|uuid',
             'type' => [ 'required', new InEnum(new PaymentTypeEnum())],
             'price' => 'required',
+            'currency' => 'required',
         ]);
 
         // Get payment item
         if ($request->type === PaymentTypeEnum::PURCHASE) {
-            $item = PurchasableHelpers::getPurchasableItem($request->item);
             $description = 'All Fans Purchase';
         } else if ($request->type === PaymentTypeEnum::TIP) {
-            $item = TippableHelpers::getTippableItem($request->item);
             $description = 'All Fans Tip';
         } else if ($request->type === PaymentTypeEnum::SUBSCRIPTION) {
-            $item = SubscribableHelpers::getSubscribableItem($request->item);
             $description = 'All Fans Subscription';
         }
+
+        $item = $this->getItem($request);
 
         if (!isset($item)) {
             abort(400, 'Bad type or item');
         }
 
+        $price = MoneyCast::toMoney($request->price, $request->currency);
+
         // Validate Price
-        if (!$item->verifyPrice($request->price)) {
+        if (!$item->verifyPrice($price)) {
             abort(400, 'Invalid Price');
         }
 
@@ -172,13 +182,13 @@ class SegPayController extends Controller
         $query = [
             'tokenId' => Config::get('segpay.paymentSessions.token'),
             'dynamicDescription' => urlencode($description),
-            'dynamicInitialAmount' => $item->formatMoneyDecimal($request->price),
+            'dynamicInitialAmount' => $item->formatMoneyDecimal($price),
         ];
 
         if ($request->type === PaymentTypeEnum::SUBSCRIPTION) {
             $query = array_merge($query, [
                 'dynamicInitialDurationInDays'   => 30,
-                'dynamicRecurringAmount'         => $item->formatMoneyDecimal($request->price),
+                'dynamicRecurringAmount'         => $item->formatMoneyDecimal($price),
                 'dynamicRecurringDurationInDays' => 30,
             ]);
         }
@@ -188,7 +198,98 @@ class SegPayController extends Controller
             'query' => $query,
         ]);
 
-        return $response;
+        $segpay = json_decode($response->getBody(), true);
+
+        return [
+            'id' => $segpay['id'],
+            'pageId' => $segpay['pageId'],
+            'expirationDateTime' => $segpay['expirationDateTime'],
+            'packageId' => Config::get('segpay.packageId'),
+        ];
+    }
+
+    /**
+     * Confirms a payment with saved card
+     * 
+     * @param Request $request
+     * @return void
+     */
+    public function paymentConfirmation(Request $request)
+    {
+        $request->validate([
+            'item'     => 'required|uuid',
+            'type'     => ['required', new InEnum(new PaymentTypeEnum())],
+            'price'    => 'required',
+            'currency' => 'required',
+            'method'   => 'required|uuid',
+        ]);
+
+        // Get payment item
+        $item = $this->getItem($request);
+        if (!isset($item)) {
+            abort(400, 'Bad type or item');
+        }
+
+        $price = MoneyCast::toMoney($request->price, $request->currency);
+        if (!$item->verifyPrice($price)) {
+            abort(400, 'Invalid Price');
+        }
+
+        $account = Account::with('resource')->find($request->method);
+
+        if ($account->resource->token === 'fake') {
+            return $this->fakeConfirmation($request);
+        }
+
+        if ($request->type === PaymentTypeEnum::PURCHASE) {
+            // TODO: Add purchase
+        }
+
+        if ($request->type === PaymentTypeEnum::TIP) {
+            // TODO: Add tip
+        }
+
+        if ($request->type === PaymentTypeEnum::SUBSCRIPTION) {
+            // TODO: Reminder to refactor this, much can be moved to models
+
+            // Verify subscription has not already been created
+            if (
+                Auth::user()->subscriptions
+                    ->where('subscribable_id', $item->getKey())
+                    ->where('canceled', false)
+                    ->count() > 0
+            ) {
+                abort(400, 'Already have subscription');
+            }
+
+            // Verify not resubscribing within waiting period
+            if (
+                Auth::user()->subscriptions
+                    ->where('subscribable_id', $item->getKey())
+                    ->canceled()->where(
+                        'canceled_at',
+                        '>=',
+                        Carbon::now()->subtract(
+                            Config::get('subscriptions.resubscribeWaitPeriod.unit'),
+                            Config::get('subscriptions.resubscribeWaitPeriod.interval')
+                        )
+                    )->count() > 0
+            ) {
+                abort(400, 'Too soon to resubscribe');
+            }
+
+            // Create subscription
+            $subscription = $account->createSubscription($item, $price, [
+                'manual_charge' => false,
+            ]);
+
+            // Send Segpay One click call
+            $segpayCall = SegpayCall::confirmSubscription($account, $price, $subscription);
+            if(isset($segpayCall->failed_at)) {
+                abort(500, 'Error Processing Payment');
+            }
+            return;
+        }
     }
 
     /**
