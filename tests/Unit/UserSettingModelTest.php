@@ -20,7 +20,7 @@ class UserSettingModelTest extends TestCase
      * @group settings-model
      * @group here0429
      */
-    public function test_can_init_settings()
+    public function test_can_enable_and_disable_notification_settings()
     {
         $timeline = Timeline::has('posts','>=',1)->first(); 
         $user = $timeline->user;
@@ -37,6 +37,7 @@ class UserSettingModelTest extends TestCase
         $result = $userSettings->enable($group, $payload);
         $userSettings->refresh();
         $this->assertArrayHasKey('notifications', $userSettings->cattrs);
+        $this->assertArrayHasKey('global', $userSettings->cattrs['notifications']);
         $this->assertArrayHasKey('income', $userSettings->cattrs['notifications']);
         $this->assertArrayHasKey('new_tip', $userSettings->cattrs['notifications']['income']);
         $this->assertContains('email', $userSettings->cattrs['notifications']['income']['new_tip']);
@@ -53,7 +54,6 @@ class UserSettingModelTest extends TestCase
 
         $this->assertArrayHasKey('notifications', $userSettings->cattrs);
         $this->assertArrayHasKey('income', $userSettings->cattrs['notifications']);
-        $this->assertArrayHasKey('new_tip', $userSettings->cattrs['notifications']['income']);
         $this->assertContains('email', $userSettings->cattrs['notifications']['income']['new_tip']);
         $this->assertContains('sms', $userSettings->cattrs['notifications']['income']['new_tip']);
         $this->assertContains('site', $userSettings->cattrs['notifications']['income']['new_tip']);
@@ -87,32 +87,68 @@ class UserSettingModelTest extends TestCase
         $this->assertArrayHasKey('new_tip', $userSettings->cattrs['notifications']['income']);
         $this->assertNotContains('site', $userSettings->cattrs['notifications']['income']['new_tip']);
         $this->assertEmpty($userSettings->cattrs['notifications']['income']['new_tip']);
+    }
 
-        /*
+    /**
+     * @group settings-model
+     * @group OFF-here0429
+     */
+    public function test_can_init_notification_settings_from_null()
+    {
+        $timeline = Timeline::has('posts','>=',1)->first(); 
+        $user = $timeline->user;
+
+        $userSettings = $user->settings;
+
+        // Init to null to test corner case
+        $userSettings->cattrs = null;
+        $userSettings->save();
+
+        $group = 'notifications';
+
         $payload = [
             'income' => [
-                //'new_tip' => ['email', 'sms'],
-                'new_tip' => ['email'],
+                'new_tip' => [ 'email', 'sms' ],
             ],
         ];
-        $response = $this->actingAs($user)->ajaxJSON('PATCH', route('users.enableSetting', [$user->id, 'notifications']), $payload);
-        $response->assertStatus(200);
+        $result = $userSettings->enable($group, $payload);
+        $userSettings->refresh();
+        $this->assertArrayHasKey('notifications', $userSettings->cattrs);
+        $this->assertArrayHasKey('global', $userSettings->cattrs['notifications']); // %NOTE: this will fail due to cattrs = null above
+        $this->assertArrayHasKey('income', $userSettings->cattrs['notifications']);
+        $this->assertArrayHasKey('new_tip', $userSettings->cattrs['notifications']['income']);
+        $this->assertContains('email', $userSettings->cattrs['notifications']['income']['new_tip']);
+        $this->assertContains('sms', $userSettings->cattrs['notifications']['income']['new_tip']);
+        $this->assertNotContains('site', $userSettings->cattrs['notifications']['income']['new_tip']);
+    }
 
-        $content = json_decode($response->content());
-        dd($content);
+    /**
+     * @group settings-model
+     * @group here0429
+     */
+    public function test_can_enable_and_disable_global_notification_setting()
+    {
+        $timeline = Timeline::has('posts','>=',1)->first(); 
+        $user = $timeline->user;
 
+        $userSettings = $user->settings;
 
-        $story = factory(Story::class)->create();
-        $story->mediafiles()->save(factory(Mediafile::class)->create([
-            'resource_type' => 'stories',
-            'mftype' => MediafileTypeEnum::STORY,
-        ]));
-        $story->refresh();
-        $this->assertNotNull($story);
-        $this->assertNotNull($story->id);
-        $this->assertNotNull($story->mediafiles);
-        $this->assertNotNull($story->mediafiles->first());
-         */
+        // Init to null to test corner case
+        $userSettings->cattrs = null;
+        $userSettings->save();
+
+        $group = 'notifications';
+
+        $payload = [
+            'global' => [ 'email', 'sms' ],
+        ];
+        $result = $userSettings->enable($group, $payload);
+        $userSettings->refresh();
+        $this->assertArrayHasKey('notifications', $userSettings->cattrs);
+        $this->assertArrayHasKey('global', $userSettings->cattrs['notifications']);
+        $this->assertContains('email', $userSettings->cattrs['notifications']['global']);
+        $this->assertContains('sms', $userSettings->cattrs['notifications']['global']);
+        $this->assertNotContains('site', $userSettings->cattrs['notifications']['global']);
     }
 
     // ------------------------------

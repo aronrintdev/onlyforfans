@@ -33,9 +33,9 @@ class UserSetting extends Model
                 'watermark',
             ];
 
-            $cattrs = UserSetting::getTemplate(); // init with empty template
+            $cattrs = self::$template; // init with empty template
 
-            // batch-fill in any values sent from caller
+            // batch-fill in any values sent from caller (overwrites existing values per group)
             foreach ($groups as $g) {
                 if ( array_key_exists($g, $model->cattrs??[]) ) {
                     $cattrs[$g] = $model->cattrs[$g];
@@ -60,34 +60,59 @@ class UserSetting extends Model
 
     public static $notifyTypes = [ 'email', 'sms', 'site', 'push' ];
 
+    public static $template = [
+        'notifications' => [ // group
+            'global' => [],  // (group) subcat (global override by notifyType)
+            'campaigns' => [ // subcat
+                'goal_achieved' => [],
+                'new_contribution' => [],
+            ],
+            'refunds' => [ // subcat
+                'new_refund' => [],
+            ],
+            'income' => [ // subcat
+                'new_tip' => [],
+                'new_subscription' => [],
+                'renewed_subscription' => [],
+                'returning_subscription' => [],
+            ],
+            'posts' => [ // subcat
+                'new_post_summary' => [],
+            ],
+        ],
+        'subscriptions' => [ // group
+        ], 
+        'localization' => [ // group
+        ], 
+        'weblinks' => [ // group
+        ], 
+        'privacy' => [ // group
+        ], 
+        'blocked' => [ // group
+            'ips' => [],
+            'countries' => [],
+            'usernames' => [],
+        ], 
+        'watermark' => [ // group
+        ], 
+    ];
+
     public function enable(string $group, array $payload) {
         $cattrs = $this->cattrs; // 'pop'
 
         // apply any set payload from input
         switch ($group) {
         case 'notifications':
-            //dd($group, $payload);
-            if ( array_key_exists('campaigns', $payload) ) {
-                /*
-                if ( array_key_exists('goal_acheived', $v['campaigns']) ) {
-                    $cattrs['notifications']['campaigns']['goal_achieved'] = $v['campaigns']['goal_achieved'];
-                }
-                if ( array_key_exists('goal_acheived', $v['campaigns']) ) {
-                    $cattrs['notifications']['campaigns']['new_contribution'] = $v['campaigns']['new_contribution'];
-                }
-                 */
-            }
-            if ( array_key_exists('income', $payload) ) {
-//dd('income', $payload);
-                foreach ($payload['income'] as $k => $v) {
-                    //dd($k, $v);
-                    //if ( in_array( , self::$notifyTypes) ) { }
-                    switch ($k) {
-                    case 'new_tip':
-                        $cattrs['notifications']['income']['new_tip'] = array_unique(array_merge($cattrs['notifications']['income']['new_tip'], $v));
-                        break;
+            foreach (self::$template[$group] as $gsubcat => $tsubobj) {
+                if ( $gsubcat === 'global' && array_key_exists('global', $payload) ) {
+                    $cattrs[$group][$gsubcat] = array_unique(array_merge($cattrs[$group][$gsubcat]??[], $payload[$gsubcat]));
+                } else if ( array_key_exists($gsubcat, $payload) ) {
+                    foreach ($payload[$gsubcat] as $k => $v) {
+                        if ( array_key_exists( $k, self::$template[$group][$gsubcat]) ) {
+                            $cattrs[$group][$gsubcat][$k] = array_unique(array_merge($cattrs[$group][$gsubcat][$k]??[], $v));
+                        }
                     }
-                } // foreach
+                }
             }
             break;
         } // switch
@@ -102,14 +127,16 @@ class UserSetting extends Model
         // apply any set payload from input
         switch ($group) {
         case 'notifications':
-            if ( array_key_exists('income', $payload) ) {
-                foreach ($payload['income'] as $k => $v) {
-                    switch ($k) {
-                    case 'new_tip':
-                        $cattrs['notifications']['income']['new_tip'] = array_unique(array_diff($cattrs['notifications']['income']['new_tip'], $v));
-                        break;
+            foreach (self::$template[$group] as $gsubcat => $tsubobj) {
+                if ( $gsubcat === 'global' && array_key_exists('global', $payload) ) {
+                    $cattrs[$group][$gsubcat] = array_unique(array_diff($cattrs[$group][$gsubcat]??[], $payload[$gsubcat]));
+                } else if ( array_key_exists($gsubcat, $payload) ) {
+                    foreach ($payload[$gsubcat] as $k => $v) {
+                        if ( array_key_exists( $k, self::$template[$group][$gsubcat]) ) {
+                            $cattrs[$group][$gsubcat][$k] = array_unique(array_diff($cattrs[$group][$gsubcat][$k]??[], $v));
+                        }
                     }
-                } // foreach
+                }
             }
             break;
         } // switch
@@ -119,46 +146,9 @@ class UserSetting extends Model
     }
 
     public static function getTemplate() {
-        $template = [
-            'notifications' => [
-                // in:email,sms,site,push
-                'campaigns' => [
-                    'goal_achieved' => [],
-                    'new_contribution' => [],
-                ],
-                'refunds' => [
-                    'new_refund' => [],
-                ],
-                'income' => [
-                    'new_tip' => [],
-                    //'new_tip' => ['push'], // TEST ONLY
-                    'new_subscription' => [],
-                    'renewed_subscription' => [],
-                ],
-            ],
-            'subscriptions' => [
-            ], 
-            'localization' => [
-            ], 
-            'weblinks' => [
-            ], 
-            'privacy' => [
-            ], 
-            'blocked' => [
-                'ips' => [],
-                'countries' => [],
-                'usernames' => [],
-            ], 
-            'watermark' => [
-            ], 
-        ];
-        return $template;
-        /*
-        $this->cattrs = $template; // 'push'
-        $this->save();
-        return $this;
-         */
+        return self::$template;
     }
+
     // updates settings cattrs 'blocked' key, by batch (ips, countries, etc)
     public static function parseBlockedBatched($requestAttrs, $oldBlocked)
     {

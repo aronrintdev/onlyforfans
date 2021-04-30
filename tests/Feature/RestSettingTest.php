@@ -17,7 +17,7 @@ class RestSettingTest extends TestCase
 
     /**
      *  @group settings
-     *  @group here0428
+     *  @group OFF-here0429
      *  @group OFF-regression
      */
     public function test_can_update_single_setting()
@@ -27,8 +27,8 @@ class RestSettingTest extends TestCase
 
         $payload = [
             'income' => [
-                //'new_tip' => ['email', 'sms'],
-                'new_tip' => ['email'],
+                'new_tip' => ['email', 'sms'],
+                //'new_tip' => ['email'],
             ],
         ];
         $response = $this->actingAs($user)->ajaxJSON('PATCH', route('users.enableSetting', [$user->id, 'notifications']), $payload);
@@ -36,6 +36,12 @@ class RestSettingTest extends TestCase
 
         $content = json_decode($response->content());
         dd($content);
+        $this->assertArrayHasKey('notifications', $content->cattrs);
+        $this->assertArrayHasKey('income', $content->cattrs['notifications']);
+        $this->assertArrayHasKey('new_tip', $content->cattrs['notifications']['income']);
+        $this->assertContains('email', $content->cattrs['notifications']['income']['new_tip']);
+        $this->assertContains('sms', $content->cattrs['notifications']['income']['new_tip']);
+        $this->assertNotContains('site', $content->cattrs['notifications']['income']['new_tip']);
         /*
         $this->assertNotNull($content->post);
         $postR = $content->post;
