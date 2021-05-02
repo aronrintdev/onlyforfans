@@ -20,6 +20,20 @@ return [
         'token' => env('SEGPAY_PAYMENT_SESSIONS_TOKEN', ''),
     ],
 
+    'webhook' => [
+        'username' => env('SEGPAY_WEBHOOK_USERNAME', ''),
+        'password' => env('SEGPAY_WEBHOOK_PASSWORD', ''),
+    ],
+
+    /**
+     * The Dynamic description to attach to a transaction
+     */
+    'description' => [
+        'purchase'     => 'All Fans Purchase',
+        'tip'          => 'All Fans Tip',
+        'subscription' => 'All Fans Subscription',
+    ],
+
     /**
      * Set to true to fake segpay functionality that needs ip whitelisting to work
      */

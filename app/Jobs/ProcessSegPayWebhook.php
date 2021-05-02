@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use App\Enums\WebhookStatusEnum as Status;
+use App\Models\Financial\SegpayCall;
 use App\Models\Financial\SegpayCard;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Events\Dispatchable;
@@ -158,6 +159,12 @@ class ProcessSegPayWebhook  implements ShouldQueue
     private function handleAuth($transaction)
     {
         if ($transaction->transactionType === TransactionType::SALE) {
+            // Check for reference_id
+            if (isset($transaction->reference_id)) {
+                $segpayCall = SegpayCall::find($transaction->reference_id);
+            }
+
+
             // Check if user has CC account already
             $card = SegpayCard::findByToken($transaction->purchaseId);
             if (!isset($card)) {

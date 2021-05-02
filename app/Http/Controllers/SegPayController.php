@@ -12,7 +12,9 @@ use Illuminate\Support\Facades\Config;
 use App\Helpers\Tippable as TippableHelpers;
 use App\Helpers\Purchasable as PurchasableHelpers;
 use App\Helpers\Subscribable as SubscribableHelpers;
+use App\Interfaces\Purchaseable;
 use App\Interfaces\Subscribable;
+use App\Interfaces\Tippable;
 use App\Jobs\FakeSegpayPayment;
 use App\Models\Financial\Account;
 use App\Models\Financial\SegpayCard;
@@ -27,9 +29,13 @@ use InvalidArgumentException;
 use Carbon\Exceptions\InvalidCastException;
 use Carbon\Exceptions\InvalidIntervalException;
 use GuzzleHttp\Exception\GuzzleException;
+use Symfony\Component\Finder\Exception\DirectoryNotFoundException;
 
 class SegPayController extends Controller
 {
+
+    // Iframe Pay Page Url generation, Note: depreciated
+    #region PayPageUrl Generation
     /**
      * Generate the pay page Url
      * @return string
@@ -137,7 +143,15 @@ class SegPayController extends Controller
         return $url;
     }
 
+    #endregion PayPageUrl Generation
 
+
+    /**
+     * Payment session for SegPay Segments when entering a new card
+     *
+     * @param Request $request
+     * @return array
+     */
     public function getPaymentSession(Request $request)
     {
         $request->validate([
@@ -149,11 +163,11 @@ class SegPayController extends Controller
 
         // Get payment item
         if ($request->type === PaymentTypeEnum::PURCHASE) {
-            $description = 'All Fans Purchase';
+            $description = Config::get('segpay.description.purchase', 'All Fans Purchase');
         } else if ($request->type === PaymentTypeEnum::TIP) {
-            $description = 'All Fans Tip';
+            $description = Config::get('segpay.description.tip', 'All Fans Tip');
         } else if ($request->type === PaymentTypeEnum::SUBSCRIPTION) {
-            $description = 'All Fans Subscription';
+            $description = Config::get('segpay.description.subscription', 'All Fans Subscription');
         }
 
         $item = $this->getItem($request);
@@ -210,7 +224,7 @@ class SegPayController extends Controller
 
     /**
      * Confirms a payment with saved card
-     * 
+     *
      * @param Request $request
      * @return void
      */
@@ -386,7 +400,12 @@ class SegPayController extends Controller
         FakeSegpayPayment::dispatch($item, $account, $request->type, $request->price);
     }
 
-
+    /**
+     * Helper, gets the item associated with payment.
+     *
+     * @param mixed $request
+     * @return null|Purchaseable|Tippable|Subscribable|void
+     */
     private function getItem($request)
     {
         // Get payment item

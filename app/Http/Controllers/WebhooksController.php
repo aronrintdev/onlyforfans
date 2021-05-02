@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Log;
 use Illuminate\Http\Request;
 use App\Models\Webhook;
+use Illuminate\Support\Facades\Config;
 
 /**
  * Responsible for handling incoming webhooks from clients.
@@ -23,6 +24,16 @@ class WebhooksController extends Controller
         if ($request->header('HTTP_X_PUSHER_KEY')) {
             return Webhook::receivePusher($request);
         }
+    }
 
+    /**
+     * Receive point for a webhook from Segpay
+     * @param Request $request
+     * @return void
+     */
+    public function receiveSegpay(Request $request) {
+        Log::debug('Segpay Webhook received', [ '$request' => $request ]);
+
+        return Webhook::receiveSegPay($request);
     }
 }

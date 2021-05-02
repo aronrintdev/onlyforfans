@@ -89,7 +89,7 @@ class SegpayCall extends Model
         $segpayCall->query = [
             'eticketid' => "{$packageId}:{$pricePointId}",
             'amount' => MoneyCast::formatMoneyDecimal($price),
-            'dynamicdesc' => urlencode('All Fans Subscription'),
+            'dynamicdesc' => urlencode(Config::get('segpay.description.subscription')),
             'OCToken' => $account->resource->token,
             'type' => PaymentTypeEnum::SUBSCRIPTION,
             'reference_id' => $segpayCall->getKey(),
