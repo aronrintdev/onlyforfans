@@ -53,6 +53,7 @@ class RestSettingTest extends TestCase
     /**
      *  @group settings
      *  @group here0429
+     *  @group here0503
      *  @group OFF-regression
      */
     public function test_can_toggle_global_notifications_setting()
@@ -61,24 +62,30 @@ class RestSettingTest extends TestCase
         $user = $timeline->user;
 
         $payload = [
-            'global' => ['email'],
+            'global' => [
+                'enabled' => ['email'],
+            ],
         ];
         $response = $this->actingAs($user)->ajaxJSON('PATCH', route('users.enableSetting', [$user->id, 'notifications']), $payload);
         $response->assertStatus(200);
         $content = json_decode($response->content());
         $this->assertObjectHasAttribute('notifications', $content->cattrs);
         $this->assertObjectHasAttribute('global', $content->cattrs->notifications);
-        $this->assertContains('email', $content->cattrs->notifications->global);
+        $this->assertObjectHasAttribute('enabled', $content->cattrs->notifications->global);
+        $this->assertContains('email', $content->cattrs->notifications->global->enabled);
 
         $payload = [
-            'global' => ['email'],
+            'global' => [
+                'enabled' => ['email'],
+            ],
         ];
         $response = $this->actingAs($user)->ajaxJSON('PATCH', route('users.disableSetting', [$user->id, 'notifications']), $payload);
         $response->assertStatus(200);
         $content = json_decode($response->content());
         $this->assertObjectHasAttribute('notifications', $content->cattrs);
         $this->assertObjectHasAttribute('global', $content->cattrs->notifications);
-        $this->assertNotContains('email', $content->cattrs->notifications->global);
+        $this->assertObjectHasAttribute('enabled', $content->cattrs->notifications->global);
+        $this->assertNotContains('email', $content->cattrs->notifications->global->enabled);
     }
 
     /**

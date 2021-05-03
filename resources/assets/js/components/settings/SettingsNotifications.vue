@@ -51,29 +51,11 @@
                       </section>
                       <section class="d-flex align-items-start">
                         <div>
-                          <b-form-checkbox id="email_new_subscriber" v-model="thisForm.by_email.income.new_subscriber" name="email_new_subscriber" size="lg"></b-form-checkbox>
+                          <b-form-checkbox id="email_new_subscription" v-model="thisForm.by_email.income.new_subscription" name="email_new_subscription" size="lg"></b-form-checkbox>
                         </div>
                         <div>
-                          <label for="email_new_subscriber" class="ml-auto mb-0">New Subscription</label>
+                          <label for="email_new_subscription" class="ml-auto mb-0">New Subscription</label>
                           <p><small class="text-muted">Email on new subscriptions</small></p>
-                        </div>
-                      </section>
-                      <section class="d-flex align-items-start">
-                        <div>
-                          <b-form-checkbox id="email_renewal" v-model="thisForm.by_email.income.renewal" name="email_renewal" size="lg"></b-form-checkbox>
-                        </div>
-                        <div>
-                          <label for="email_renewal" class="ml-auto mb-0">Subscription Renwal</label>
-                          <p><small class="text-muted">Email on subscription renwal</small></p>
-                        </div>
-                      </section>
-                      <section class="d-flex align-items-start">
-                        <div>
-                          <b-form-checkbox id="email_returning_subscriber" v-model="thisForm.by_email.income.returning_subscriber" name="email_returning_subscriber" size="lg"></b-form-checkbox>
-                        </div>
-                        <div>
-                          <label for="email_returning_subscriber" class="ml-auto mb-0">Returning Subscriber</label>
-                          <p><small class="text-muted">Email on returning subscriber</small></p>
                         </div>
                       </section>
                     </b-form-group>
@@ -84,10 +66,10 @@
                       <h5>Posts</h5>
                       <section class="d-flex align-items-start">
                         <div>
-                          <b-form-checkbox id="new_posts_summary" v-model="thisForm.by_email.posts.new_posts_summary" name="new_posts_summary" size="lg"></b-form-checkbox>
+                          <b-form-checkbox id="new_post_summary" v-model="thisForm.by_email.posts.new_post_summary" name="new_post_summary" size="lg"></b-form-checkbox>
                         </div>
                         <div>
-                          <label for="posts.new_posts_summary" class="ml-auto mb-0">New Post Summary</label>
+                          <label for="posts.new_post_summary" class="ml-auto mb-0">New Post Summary</label>
                           <p><small class="text-muted">Email a summary of new posts.</small></p>
                         </div>
                       </section>
@@ -147,10 +129,10 @@
                       <h5>Posts</h5>
                       <section class="d-flex align-items-start">
                         <div>
-                          <b-form-checkbox id="new_posts_summary" v-model="thisForm.by_email.posts.new_posts_summary" name="new_posts_summary" size="lg"></b-form-checkbox>
+                          <b-form-checkbox id="new_post_summary" v-model="thisForm.by_email.posts.new_post_summary" name="new_post_summary" size="lg"></b-form-checkbox>
                         </div>
                         <div>
-                          <label for="posts.new_posts_summary" class="ml-auto mb-0">New Post Summary</label>
+                          <label for="posts.new_post_summary" class="ml-auto mb-0">New Post Summary</label>
                           <p><small class="text-muted">Email a summary of new posts.</small></p>
                         </div>
                       </section>
@@ -187,9 +169,6 @@ export default {
   },
 
   computed: {
-    isByEmailEnabled() {
-      return this.thisForm.by_email.enabled
-    },
     isLoading() {
       return !this.session_user || !this.user_settings
     },
@@ -197,7 +176,6 @@ export default {
 
   data: () => ({
 
-    //isByEmailEnabled: null,
 
     thisForm: {
 
@@ -206,64 +184,55 @@ export default {
 
       by_email: {
 
-        enabled: true,
-        dms_only: false,
-        show_full_text: false,
-        monthly_newsletter: false,
+        enabled: null,
+        show_full_text: null,
+        //dms_only: null,
+        //monthly_newsletter: null,
 
         campaigns: {
-          goal_achieved: false,
-          new_contribution: false,
+          goal_achieved: null,
+          new_contribution: null,
         },
 
         referrals: {
-          new_referral: false,
+          new_referral: null,
         },
 
         income: {
-          new_tip: false,
-          new_subscriber: false,
-          renewal: false, // ?? %TODO
-          returning_subscriber: false, // ?? %TODO
+          new_tip: null,
+          new_subscription: null,
+          //renewal: null, // ?? %TODO
+          //returning_subscriber: null, // ?? %TODO
         },
 
         posts: {
-          new_posts_summary: false,
+          new_post_summary: null,
         },
 
         other: {
-          new_stream: false,
-          upcoming_stream_reminders: false,
+          new_stream: null,
+          upcoming_stream_reminders: null,
         },
       },
 
       by_site: {
         posts: {
-          new_comment: false,
-          new_like: false,
+          new_comment: null,
+          new_like: null,
         },
         campaigns: {
-          new_contribution: false,
+          new_contribution: null,
         },
         income: {
-          new_tip: false,
-          new_subscriber: false,
+          new_tip: null,
+          new_subscription: null,
         },
 
       },
 
     },
 
-    autocompleteItems: [],
     debounce: null,
-
-    options: {
-      privacy: [ 
-        { value: null, text: 'Please select an option' },
-        { value: 'everyone', text: 'Everyone' },
-        { value: 'followees', text: 'People I Follow' },
-      ],
-    },
 
   }),
 
@@ -287,32 +256,44 @@ export default {
 
   watch: {
     'thisForm.by_email.enabled': function (newVal, oldVal) {
-      console.log('watch.1')
-      this.updateSetting('global', ['email'], newVal).then( () => {
-        this.thisForm.by_email.enabled = newVal
+      this.updateSetting('global', {enabled: ['email']}, newVal).then( () => {
+        //this.thisForm.by_email.enabled = newVal
       })
     },
-    'thisForm.by_email.income.new_tip': function (newVal) { 
-      console.log('watch.2')
+    'thisForm.by_email.income.new_tip': function (newVal, oldVal) { 
       this.updateSetting('income', {new_tip: ['email']}, newVal).then( () => {
-        this.thisForm.by_email.new_tip = newVal
+        //this.thisForm.by_email.new_tip = newVal
+      })
+    },
+    'thisForm.by_email.income.new_subscription': function (newVal, oldVal) { 
+      this.updateSetting('income', {new_subscription: ['email']}, newVal).then( () => {
+        //this.thisForm.by_email.new_subscription = newVal
+      })
+    },
+    'thisForm.by_email.posts.new_post_summary': function (newVal, oldVal) { 
+      this.updateSetting('posts', {new_post_summary: ['email']}, newVal).then( () => {
+        //this.thisForm.by_email.new_post_summary = newVal
       })
     },
   },
 
   mounted() {
     console.log('mounted', { here: this.user_settings.cattrs.notifications.global })
-    this.thisForm.by_email.enabled = this.user_settings.cattrs.notifications.global.includes('email') || false
-    this.thisForm.by_email.income.new_tip = this.user_settings.cattrs.notifications.income.new_tip.includes('email') || false
+    this.thisForm.by_email.enabled = this.user_settings.cattrs.notifications.global.enabled?.includes('email') || false
+    this.thisForm.by_email.show_full_text = this.user_settings.cattrs.notifications.global.show_full_text?.includes('email') || false
+
+    this.thisForm.by_email.income.new_tip = this.user_settings.cattrs.notifications.income.new_tip?.includes('email') || false
+    this.thisForm.by_email.income.new_subscription = this.user_settings.cattrs.notifications.income.new_subscription?.includes('email') || false
+    this.thisForm.by_email.posts.new_post_summary = this.user_settings.cattrs.notifications.posts.new_post_summary?.includes('email') || false
+
+    this.thisForm.by_site.income.new_tip = this.user_settings.cattrs.notifications.income.new_tip?.includes('site') || false
+    this.thisForm.by_site.income.new_subscription = this.user_settings.cattrs.notifications.income.new_subscription?.includes('site') || false
+    this.thisForm.by_site.posts.new_post_summary = this.user_settings.cattrs.notifications.posts.new_post_summary?.includes('site') || false
     //this.thisForm.by_email.enabled = this.user_settings.cattrs?.notifications?.global?.includes('email') || false
-    //this.thisForm.by_email.enabled = true
   },
 
-  created() {
-  },
-
-  components: {
-  },
+  created() { },
+  components: { },
 }
 </script>
 

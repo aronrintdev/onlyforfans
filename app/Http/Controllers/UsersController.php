@@ -59,8 +59,8 @@ class UsersController extends AppBaseController
         switch ($group) {
         case 'notifications':
             $vrules = [
-                'global' => 'array',
-                'global.*' => 'string|in:email,sms,site,push',
+                'global.*' => 'array',
+                'global.*.*' => 'string|in:email,sms,site,push',
                 'campaigns.*' => 'array',
                 'campaigns.*.*' => 'string|in:email,sms,site,push',
                 'refunds.*' => 'array',
@@ -90,8 +90,8 @@ class UsersController extends AppBaseController
         switch ($group) {
         case 'notifications':
             $vrules = [
-                'global' => 'array',
-                'global.*' => 'string|in:email,sms,site,push',
+                'global.*' => 'array',
+                'global.*.*' => 'string|in:email,sms,site,push',
                 'campaigns.*' => 'array',
                 'campaigns.*.*' => 'string|in:email,sms,site,push',
                 'refunds.*' => 'array',

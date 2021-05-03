@@ -62,7 +62,10 @@ class UserSetting extends Model
 
     public static $template = [
         'notifications' => [ // group
-            'global' => [],  // (group) subcat (global override by notifyType)
+            'global' => [
+                'enabled' => [],
+                'show_full_text' => [],
+            ],  // (group) subcat (global override by notifyType)
             'campaigns' => [ // subcat
                 'goal_achieved' => [],
                 'new_contribution' => [],
@@ -98,12 +101,19 @@ class UserSetting extends Model
     ];
 
     public function enable(string $group, array $payload) {
+        //dump($payload);
         $cattrs = $this->cattrs; // 'pop'
 
         // apply any set payload from input
         switch ($group) {
         case 'notifications':
             foreach (self::$template[$group] as $gsubcat => $tsubobj) {
+                foreach ($payload[$gsubcat]??[] as $k => $v) {
+                    if ( array_key_exists( $k, self::$template[$group][$gsubcat]) ) {
+                        $cattrs[$group][$gsubcat][$k] = array_unique(array_merge($cattrs[$group][$gsubcat][$k]??[], $v));
+                    }
+                }
+                    /*
                 if ( $gsubcat === 'global' && array_key_exists('global', $payload) ) {
                     $cattrs[$group][$gsubcat] = array_unique(array_merge($cattrs[$group][$gsubcat]??[], $payload[$gsubcat]));
                 } else if ( array_key_exists($gsubcat, $payload) ) {
@@ -113,6 +123,7 @@ class UserSetting extends Model
                         }
                     }
                 }
+                     */
             }
             break;
         } // switch
@@ -128,6 +139,12 @@ class UserSetting extends Model
         switch ($group) {
         case 'notifications':
             foreach (self::$template[$group] as $gsubcat => $tsubobj) {
+                foreach ($payload[$gsubcat]??[] as $k => $v) {
+                    if ( array_key_exists( $k, self::$template[$group][$gsubcat]) ) {
+                        $cattrs[$group][$gsubcat][$k] = array_unique(array_diff($cattrs[$group][$gsubcat][$k]??[], $v));
+                    }
+                }
+                    /*
                 if ( $gsubcat === 'global' && array_key_exists('global', $payload) ) {
                     $cattrs[$group][$gsubcat] = array_unique(array_diff($cattrs[$group][$gsubcat]??[], $payload[$gsubcat]));
                 } else if ( array_key_exists($gsubcat, $payload) ) {
@@ -137,6 +154,7 @@ class UserSetting extends Model
                         }
                     }
                 }
+                     */
             }
             break;
         } // switch
