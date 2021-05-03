@@ -76,11 +76,13 @@ class UserSetting extends Model
             'income' => [ // subcat
                 'new_tip' => [],
                 'new_subscription' => [],
-                'renewed_subscription' => [],
-                'returning_subscription' => [],
+                //'renewed_subscription' => [],
+                //'returning_subscription' => [],
             ],
             'posts' => [ // subcat
                 'new_post_summary' => [],
+                'new_comment' => [],
+                'new_like' => [],
             ],
         ],
         'subscriptions' => [ // group
