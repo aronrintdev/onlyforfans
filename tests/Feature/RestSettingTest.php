@@ -17,10 +17,10 @@ class RestSettingTest extends TestCase
 
     /**
      *  @group settings
-     *  @group OFF-here0429
+     *  @group here0429
      *  @group OFF-regression
      */
-    public function test_can_update_single_setting()
+    public function test_can_update_single_notifications_setting()
     {
         $timeline = Timeline::has('posts','>=',1)->first(); 
         $user = $timeline->user;
@@ -35,19 +35,50 @@ class RestSettingTest extends TestCase
         $response->assertStatus(200);
 
         $content = json_decode($response->content());
-        dd($content);
-        $this->assertArrayHasKey('notifications', $content->cattrs);
-        $this->assertArrayHasKey('income', $content->cattrs['notifications']);
-        $this->assertArrayHasKey('new_tip', $content->cattrs['notifications']['income']);
-        $this->assertContains('email', $content->cattrs['notifications']['income']['new_tip']);
-        $this->assertContains('sms', $content->cattrs['notifications']['income']['new_tip']);
-        $this->assertNotContains('site', $content->cattrs['notifications']['income']['new_tip']);
+        //dd($content);
+        $this->assertObjectHasAttribute('notifications', $content->cattrs);
+        $this->assertObjectHasAttribute('income', $content->cattrs->notifications);
+        $this->assertObjectHasAttribute('new_tip', $content->cattrs->notifications->income);
+        $this->assertContains('email', $content->cattrs->notifications->income->new_tip);
+        $this->assertContains('sms', $content->cattrs->notifications->income->new_tip);
+        $this->assertNotContains('site', $content->cattrs->notifications->income->new_tip);
         /*
         $this->assertNotNull($content->post);
         $postR = $content->post;
         $this->assertNotNull($postR->description);
         $this->assertEquals($payload['description'], $postR->description);
          */
+    }
+
+    /**
+     *  @group settings
+     *  @group here0429
+     *  @group OFF-regression
+     */
+    public function test_can_toggle_global_notifications_setting()
+    {
+        $timeline = Timeline::has('posts','>=',1)->first(); 
+        $user = $timeline->user;
+
+        $payload = [
+            'global' => ['email'],
+        ];
+        $response = $this->actingAs($user)->ajaxJSON('PATCH', route('users.enableSetting', [$user->id, 'notifications']), $payload);
+        $response->assertStatus(200);
+        $content = json_decode($response->content());
+        $this->assertObjectHasAttribute('notifications', $content->cattrs);
+        $this->assertObjectHasAttribute('global', $content->cattrs->notifications);
+        $this->assertContains('email', $content->cattrs->notifications->global);
+
+        $payload = [
+            'global' => ['email'],
+        ];
+        $response = $this->actingAs($user)->ajaxJSON('PATCH', route('users.disableSetting', [$user->id, 'notifications']), $payload);
+        $response->assertStatus(200);
+        $content = json_decode($response->content());
+        $this->assertObjectHasAttribute('notifications', $content->cattrs);
+        $this->assertObjectHasAttribute('global', $content->cattrs->notifications);
+        $this->assertNotContains('email', $content->cattrs->notifications->global);
     }
 
     /**

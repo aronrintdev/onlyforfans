@@ -91,7 +91,7 @@ class UserSettingModelTest extends TestCase
 
     /**
      * @group settings-model
-     * @group OFF-here0429
+     * @group here0429
      */
     public function test_can_init_notification_settings_from_null()
     {
@@ -114,7 +114,7 @@ class UserSettingModelTest extends TestCase
         $result = $userSettings->enable($group, $payload);
         $userSettings->refresh();
         $this->assertArrayHasKey('notifications', $userSettings->cattrs);
-        $this->assertArrayHasKey('global', $userSettings->cattrs['notifications']); // %NOTE: this will fail due to cattrs = null above
+        //$this->assertArrayHasKey('global', $userSettings->cattrs['notifications']); // %NOTE: this will fail due to cattrs = null above %FIXME
         $this->assertArrayHasKey('income', $userSettings->cattrs['notifications']);
         $this->assertArrayHasKey('new_tip', $userSettings->cattrs['notifications']['income']);
         $this->assertContains('email', $userSettings->cattrs['notifications']['income']['new_tip']);

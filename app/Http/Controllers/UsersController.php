@@ -56,11 +56,28 @@ class UsersController extends AppBaseController
     public function enableSetting(Request $request, User $user, string $group)  // single
     {
         $this->authorize('update', $user);
+        /*
         $vrules = [
-            'enabled' => 'array',
             '*.*' => 'array',
             '*.*.*' => 'string|in:email,sms,site,push',
         ];
+         */
+        switch ($group) {
+        case 'notifications':
+            $vrules = [
+                'global' => 'array',
+                'global.*' => 'string|in:email,sms,site,push',
+                'campaigns.*' => 'array',
+                'campaigns.*.*' => 'string|in:email,sms,site,push',
+                'refunds.*' => 'array',
+                'refunds.*.*' => 'string|in:email,sms,site,push',
+                'income.*' => 'array',
+                'income.*.*' => 'string|in:email,sms,site,push',
+                'posts.*' => 'array',
+                'posts.*.*' => 'string|in:email,sms,site,push',
+            ];
+            break;
+        }
         $request->validate($vrules);
         //dd($request->all());
 
@@ -69,6 +86,32 @@ class UsersController extends AppBaseController
         $result = $userSetting->enable($group, $request->except(['foo']) );
         //dd($request->all(), $result);
 
+        $userSetting->refresh();
+        return $userSetting;
+    }
+
+    public function disableSetting(Request $request, User $user, string $group)  // single
+    {
+        $this->authorize('update', $user);
+        switch ($group) {
+        case 'notifications':
+            $vrules = [
+                'global' => 'array',
+                'global.*' => 'string|in:email,sms,site,push',
+                'campaigns.*' => 'array',
+                'campaigns.*.*' => 'string|in:email,sms,site,push',
+                'refunds.*' => 'array',
+                'refunds.*.*' => 'string|in:email,sms,site,push',
+                'income.*' => 'array',
+                'income.*.*' => 'string|in:email,sms,site,push',
+                'posts.*' => 'array',
+                'posts.*.*' => 'string|in:email,sms,site,push',
+            ];
+            break;
+        }
+        $request->validate($vrules);
+        $userSetting = $user->settings;
+        $result = $userSetting->disable($group, $request->except(['foo']) );
         $userSetting->refresh();
         return $userSetting;
     }
