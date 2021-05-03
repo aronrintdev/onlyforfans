@@ -187,12 +187,17 @@ export default {
   },
 
   computed: {
+    isByEmailEnabled() {
+      return this.thisForm.by_email.enabled
+    },
     isLoading() {
       return !this.session_user || !this.user_settings
     },
   },
 
   data: () => ({
+
+    //isByEmailEnabled: null,
 
     thisForm: {
 
@@ -260,14 +265,19 @@ export default {
       ],
     },
 
-
   }),
 
   methods: {
 
-    async submitPrivacy(e) {
-      const response = await axios.patch( route('users.updateSettings', this.session_user.id), this.formPrivacy )
-      this.isEditing.formPrivacy = false
+    async updateSetting(group, val, isEnable) {
+      const payload = { }
+      const url = isEnable 
+        ? route('users.enableSetting', [this.session_user.id, 'notifications'])
+        : route('users.disableSetting', [this.session_user.id, 'notifications'])
+      payload[group] = val
+      console.log('updateSetting', { payload })
+      const response = await axios.patch( url, payload )
+      //this.isEditing.formPrivacy = false
     },
 
     onReset(e) {
@@ -276,10 +286,26 @@ export default {
   },
 
   watch: {
-    //user_settings(newVal) { },
+    'thisForm.by_email.enabled': function (newVal, oldVal) {
+      console.log('watch.1')
+      this.updateSetting('global', ['email'], newVal).then( () => {
+        this.thisForm.by_email.enabled = newVal
+      })
+    },
+    'thisForm.by_email.income.new_tip': function (newVal) { 
+      console.log('watch.2')
+      this.updateSetting('income', {new_tip: ['email']}, newVal).then( () => {
+        this.thisForm.by_email.new_tip = newVal
+      })
+    },
   },
 
   mounted() {
+    console.log('mounted', { here: this.user_settings.cattrs.notifications.global })
+    this.thisForm.by_email.enabled = this.user_settings.cattrs.notifications.global.includes('email') || false
+    this.thisForm.by_email.income.new_tip = this.user_settings.cattrs.notifications.income.new_tip.includes('email') || false
+    //this.thisForm.by_email.enabled = this.user_settings.cattrs?.notifications?.global?.includes('email') || false
+    //this.thisForm.by_email.enabled = true
   },
 
   created() {

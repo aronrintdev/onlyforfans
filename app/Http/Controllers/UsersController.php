@@ -56,12 +56,6 @@ class UsersController extends AppBaseController
     public function enableSetting(Request $request, User $user, string $group)  // single
     {
         $this->authorize('update', $user);
-        /*
-        $vrules = [
-            '*.*' => 'array',
-            '*.*.*' => 'string|in:email,sms,site,push',
-        ];
-         */
         switch ($group) {
         case 'notifications':
             $vrules = [
