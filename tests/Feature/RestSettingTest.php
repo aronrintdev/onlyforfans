@@ -18,7 +18,7 @@ class RestSettingTest extends TestCase
     /**
      *  @group settings
      *  @group here0429
-     *  @group OFF-regression
+     *  @group regression
      */
     public function test_can_update_single_notifications_setting()
     {
@@ -53,7 +53,7 @@ class RestSettingTest extends TestCase
     /**
      *  @group settings
      *  @group here0429
-     *  @group OFF-regression
+     *  @group regression
      */
     public function test_can_toggle_global_notifications_setting()
     {
