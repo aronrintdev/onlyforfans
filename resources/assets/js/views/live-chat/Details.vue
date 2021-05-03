@@ -245,7 +245,10 @@
                     </div>
                     <div class="typing dot-pulse" style="display: none">...</div>
                   </div>
-                  <div class="conversation-footer" :class="messagePrice ? 'price-view': ''" v-if="!showAudioRec">
+                  <div
+                    class="conversation-footer"
+                    :class="messagePrice ? 'price-view': ''" v-if="!showAudioRec"
+                  >
                     <div v-if="messagePrice" class="price-to-view-header d-flex align-items-center justify-content-between">
                       <div class="price-to-view-title">
                         <svg viewBox="0 0 24 24">
@@ -330,8 +333,15 @@
                         </swiper-slide>
                       </swiper>
                     </div>
-                    <textarea placeholder="Type a message" name="text" rows="1" maxlength="10000"
-                      spellcheck="false" :value="newMessageText" @input="onInputNewMessage" @keydown="onCheckReturnKey"></textarea>
+                    <textarea
+                      placeholder="Type a message"
+                      name="text"
+                      rows="1"
+                      maxlength="10000"
+                      spellcheck="false"
+                      @keydown="onCheckReturnKey"
+                      @input="onInputNewMessage"
+                    ></textarea>
                     <div class="action-btns">
                       <div>
                         <!-- image -->
@@ -1377,7 +1387,7 @@
           },
           plugins: {
               record: {
-                  audio: false,
+                  audio: true,
                   video: true,
                   maxLength: 10,
                   displayMilliseconds: true,
