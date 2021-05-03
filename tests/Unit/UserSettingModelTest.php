@@ -125,6 +125,7 @@ class UserSettingModelTest extends TestCase
     /**
      * @group settings-model
      * @group here0429
+     * @group here0503
      */
     public function test_can_enable_and_disable_global_notification_setting()
     {
@@ -140,15 +141,18 @@ class UserSettingModelTest extends TestCase
         $group = 'notifications';
 
         $payload = [
-            'global' => [ 'email', 'sms' ],
+            'global' => [
+                'enabled' => [ 'email', 'sms' ],
+            ],
         ];
         $result = $userSettings->enable($group, $payload);
         $userSettings->refresh();
         $this->assertArrayHasKey('notifications', $userSettings->cattrs);
         $this->assertArrayHasKey('global', $userSettings->cattrs['notifications']);
-        $this->assertContains('email', $userSettings->cattrs['notifications']['global']);
-        $this->assertContains('sms', $userSettings->cattrs['notifications']['global']);
-        $this->assertNotContains('site', $userSettings->cattrs['notifications']['global']);
+        $this->assertArrayHasKey('enabled', $userSettings->cattrs['notifications']['global']);
+        $this->assertContains('email', $userSettings->cattrs['notifications']['global']['enabled']);
+        $this->assertContains('sms', $userSettings->cattrs['notifications']['global']['enabled']);
+        $this->assertNotContains('site', $userSettings->cattrs['notifications']['global']['enabled']);
     }
 
     // ------------------------------
