@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use App\Models\ChatThread;
 use App\Models\Timeline;
 use App\Models\User;
+use App\Models\Mediafile;
 use App\Events\MessageSentEvent;
 use App\Enums\MediafileTypeEnum;
 use function _\sortBy;
@@ -258,23 +259,54 @@ class MessageController extends Controller
             'is_like' => 0,
         ]);
 
-        $files = $request->file('mediafile');
-        if ($files) {
+        $mediafiles = $request->file('mediafile');
+        $vaultfiles = $request->input('vaultfiles');
+        if ($mediafiles) {
             $index = 1;
-            foreach ($files as $file) {
+            foreach ($mediafiles as $file) {
                 $message = $chatthread->messages()->create([
                     'mcontent' => '',
                     'mcounter' => $index,
                 ]);
-                $message->mediafile()->create([
-                    'resource_type' => 'messages',
-                    'filename' => $file->store('./galleries', 's3'),
-                    'mfname' => $file->getClientOriginalName(),
-                    'mftype' => MediafileTypeEnum::GALLERY,
-                    'mimetype' => $file->getMimeType(),
-                    'orig_filename' => $file->getClientOriginalName(),
-                    'orig_ext' => $file->getClientOriginalExtension(),
+                if ($file) {
+                    $message->mediafile()->create([
+                        'resource_type' => 'messages',
+                        'filename' => $file->store('./galleries', 's3'),
+                        'mfname' => $file->getClientOriginalName(),
+                        'mftype' => MediafileTypeEnum::GALLERY,
+                        'mimetype' => $file->getMimeType(),
+                        'orig_filename' => $file->getClientOriginalName(),
+                        'orig_ext' => $file->getClientOriginalExtension(),
+                    ]);
+                }
+                $index++;
+            }
+            $mcontent = $request->input('message');
+            if (isset($mcontent)) {
+                $chatthread->messages()->create([
+                    'mcontent' => $mcontent,
+                    'mcounter' => $index,
                 ]);
+            }
+        } else if ($vaultfiles) {
+            $index = 1;
+            foreach ($vaultfiles as $file) {
+                $message = $chatthread->messages()->create([
+                    'mcontent' => '',
+                    'mcounter' => $index,
+                ]);
+                if ($file) {
+                    $mediafile = MediaFile::where('id', $file)->get()->first();
+                    $message->mediafile()->create([
+                        'resource_type' => 'messages',
+                        'filename' => $mediafile->filename,
+                        'mfname' => $mediafile->mfname,
+                        'mftype' => $mediafile->mftype,
+                        'mimetype' => $mediafile->mimetype,
+                        'orig_filename' => $mediafile->orig_filename,
+                        'orig_ext' => $mediafile->orig_ext,
+                    ]);
+                }
                 $index++;
             }
             $mcontent = $request->input('message');
