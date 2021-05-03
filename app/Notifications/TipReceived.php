@@ -8,6 +8,7 @@ use Illuminate\Notifications\Notification;
 use App\Models\Timeline;
 use App\Models\Post;
 use App\Models\User;
+use App\Models\UserSetting;
 use App\Interfaces\Tippable;
 
 class TipReceived extends Notification
@@ -17,6 +18,7 @@ class TipReceived extends Notification
     public $resource;
     public $actor; // purchaser;
     public $amount;
+    protected $settings;
 
     //public function __construct(Timeline $timeline, User $purchaser)
     public function __construct(Tippable $resource, User $actor, array $attrs=[])
@@ -26,11 +28,17 @@ class TipReceived extends Notification
         if ( array_key_exists('amount', $attrs) ) {
             $this->amount = $attrs['amount'];
         }
+        $this->settings = request()->user()->settings;
     }
 
     public function via($notifiable)
     {
-        return ['database', 'mail'];
+        $channels =  ['database'];
+        $exists = $this->settings->cattrs['notifications']['income']['new_tip'] ?? false;
+        if ( $exists && is_array($exists) && in_array('email', $exists) ) {
+            $channels[] =  ['mail'];
+        }
+        return $channels;
     }
 
     public function toMail($notifiable)

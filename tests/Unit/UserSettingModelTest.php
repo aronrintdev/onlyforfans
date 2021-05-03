@@ -17,6 +17,22 @@ class UserSettingModelTest extends TestCase
     use RefreshDatabase, WithFaker;
 
     /**
+     * @group OFF
+     */
+    /*
+    public function test_can_misc()
+    {
+        $timeline = Timeline::has('posts','>=',1)->first(); 
+        $user = $timeline->user;
+        $userSettings = $user->settings;
+        //$is = $userSettings->cattrs['notifications']['income']['new_tip'] ?? false;
+        //$is = $userSettings->cattrs['foo']['bar']['new_tip'] ?? false;
+        $is = $userSettings->cattrs['foo']['bar']['new_tip'] ?? 'ehy';
+        dd($is);
+    }
+     */
+
+    /**
      * @group settings-model
      * @group regression
      * @group here0429
@@ -25,7 +41,6 @@ class UserSettingModelTest extends TestCase
     {
         $timeline = Timeline::has('posts','>=',1)->first(); 
         $user = $timeline->user;
-
         $userSettings = $user->settings;
 
         $group = 'notifications';

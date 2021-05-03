@@ -74,6 +74,14 @@
                             <p><small class="text-muted">Email a summary of new posts.</small></p>
                           </div>
                         </section>
+                      <section class="d-flex align-items-start">
+                        <div>
+                          <b-form-checkbox id="new_like" v-model="thisForm.by_email.posts.new_like" name="new_like" size="lg"></b-form-checkbox>
+                        </div>
+                        <div>
+                          <label for="posts.new_like" class="ml-auto mb-0">New Like</label>
+                        </div>
+                      </section>
                       </b-form-group>
 
                       <hr />
@@ -298,7 +306,6 @@ export default {
 
 
   mounted() {
-    console.log('mounted.1', { here: this.user_settings.cattrs.notifications.global })
 
     // by email
     this.thisForm.by_email.enabled = this.user_settings.cattrs.notifications.global.enabled?.includes('email') || false
@@ -313,10 +320,6 @@ export default {
     this.thisForm.by_email.campaigns.new_contribution = this.user_settings.cattrs.notifications.campaigns?.new_contribution?.includes('email') || false
 
     // by site
-    console.log('mounted.2',  {
-      here: this.user_settings.cattrs.notifications.global
-      //here: this.user_settings.cattrs.notifications.global.enabled?.includes('site') || false
-    })
     this.thisForm.by_site.enabled = this.user_settings.cattrs.notifications.global.enabled?.includes('site') || false
     this.thisForm.by_site.show_full_text = this.user_settings.cattrs.notifications.global.show_full_text?.includes('site') || false
 
@@ -340,6 +343,12 @@ export default {
     this.$watch('thisForm.by_email.posts.new_post_summary', function (newVal) { 
       this.updateSetting('posts', {new_post_summary: ['email']}, newVal)
     })
+    this.$watch('thisForm.by_email.posts.new_comment', function (newVal) { 
+      this.updateSetting('posts', {new_comment: ['email']}, newVal)
+    })
+    this.$watch('thisForm.by_email.posts.new_like', function (newVal) { 
+      this.updateSetting('posts', {new_like: ['email']}, newVal)
+    })
     this.$watch('thisForm.by_email.campaigns.goal_achieved', function (newVal) { 
       this.updateSetting('campaigns', {goal_achieved: ['email']}, newVal)
     })
@@ -359,6 +368,12 @@ export default {
     })
     this.$watch('thisForm.by_site.posts.new_post_summary', function (newVal) { 
       this.updateSetting('posts', {new_post_summary: ['site']}, newVal)
+    })
+    this.$watch('thisForm.by_site.posts.new_comment', function (newVal) { 
+      this.updateSetting('posts', {new_comment: ['site']}, newVal)
+    })
+    this.$watch('thisForm.by_site.posts.new_like', function (newVal) { 
+      this.updateSetting('posts', {new_like: ['site']}, newVal)
     })
     this.$watch('thisForm.by_site.campaigns.goal_achieved', function (newVal) { 
       this.updateSetting('campaigns', {goal_achieved: ['site']}, newVal)

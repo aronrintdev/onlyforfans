@@ -15,16 +15,26 @@ class ResourceLiked extends Notification
 
     public $likeable;
     public $actor; // liker
+    protected $settings;
 
     public function __construct(Likeable $likeable, User $actor)
     {
         $this->likeable = $likeable; // resource liked: Post, Comment, etc.
         $this->actor = $actor;
+        $this->settings = request()->user()->settings;
     }
 
     public function via($notifiable)
     {
-        return ['database', 'mail'];
+        //return ['database', 'mail'];
+        $channels =  ['database'];
+        // HERE TUESDAY
+        $exists = $this->settings->cattrs['notifications']['posts']['new_like'] ?? false;
+        //dd($exists,  $this->settings->cattrs['notifications']['posts']['new_like'] ?? false);
+        if ( $exists && is_array($exists) && in_array('email', $exists) ) {
+            $channels[] =  ['mail'];
+        }
+        return $channels;
     }
 
     public function toMail($notifiable)

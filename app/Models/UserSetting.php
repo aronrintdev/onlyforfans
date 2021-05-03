@@ -59,6 +59,20 @@ class UserSetting extends Model
     //--------------------------------------------
 
     public static $notifyTypes = [ 'email', 'sms', 'site', 'push' ];
+    public static $vrules = [
+        'notifications' => [
+                'global.*' => 'array',
+                'global.*.*' => 'string|in:email,sms,site,push',
+                'campaigns.*' => 'array',
+                'campaigns.*.*' => 'string|in:email,sms,site,push',
+                'refunds.*' => 'array',
+                'refunds.*.*' => 'string|in:email,sms,site,push',
+                'income.*' => 'array',
+                'income.*.*' => 'string|in:email,sms,site,push',
+                'posts.*' => 'array',
+                'posts.*.*' => 'string|in:email,sms,site,push',
+        ],
+    ];
 
     public static $template = [
         'notifications' => [ // group
@@ -115,17 +129,6 @@ class UserSetting extends Model
                         $cattrs[$group][$gsubcat][$k] = array_unique(array_merge($cattrs[$group][$gsubcat][$k]??[], $v));
                     }
                 }
-                    /*
-                if ( $gsubcat === 'global' && array_key_exists('global', $payload) ) {
-                    $cattrs[$group][$gsubcat] = array_unique(array_merge($cattrs[$group][$gsubcat]??[], $payload[$gsubcat]));
-                } else if ( array_key_exists($gsubcat, $payload) ) {
-                    foreach ($payload[$gsubcat] as $k => $v) {
-                        if ( array_key_exists( $k, self::$template[$group][$gsubcat]) ) {
-                            $cattrs[$group][$gsubcat][$k] = array_unique(array_merge($cattrs[$group][$gsubcat][$k]??[], $v));
-                        }
-                    }
-                }
-                     */
             }
             break;
         } // switch
@@ -146,17 +149,6 @@ class UserSetting extends Model
                         $cattrs[$group][$gsubcat][$k] = array_unique(array_diff($cattrs[$group][$gsubcat][$k]??[], $v));
                     }
                 }
-                    /*
-                if ( $gsubcat === 'global' && array_key_exists('global', $payload) ) {
-                    $cattrs[$group][$gsubcat] = array_unique(array_diff($cattrs[$group][$gsubcat]??[], $payload[$gsubcat]));
-                } else if ( array_key_exists($gsubcat, $payload) ) {
-                    foreach ($payload[$gsubcat] as $k => $v) {
-                        if ( array_key_exists( $k, self::$template[$group][$gsubcat]) ) {
-                            $cattrs[$group][$gsubcat][$k] = array_unique(array_diff($cattrs[$group][$gsubcat][$k]??[], $v));
-                        }
-                    }
-                }
-                     */
             }
             break;
         } // switch
