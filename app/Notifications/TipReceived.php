@@ -28,7 +28,7 @@ class TipReceived extends Notification
         if ( array_key_exists('amount', $attrs) ) {
             $this->amount = $attrs['amount'];
         }
-        $this->settings = request()->user()->settings;
+        $this->settings = $resource->getPrimaryOwner()->settings;
     }
 
     public function via($notifiable)
@@ -36,7 +36,7 @@ class TipReceived extends Notification
         $channels =  ['database'];
         $exists = $this->settings->cattrs['notifications']['income']['new_tip'] ?? false;
         if ( $exists && is_array($exists) && in_array('email', $exists) ) {
-            $channels[] =  ['mail'];
+            $channels[] =  'mail';
         }
         return $channels;
     }

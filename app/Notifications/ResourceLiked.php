@@ -1,6 +1,8 @@
 <?php
 namespace App\Notifications;
 
+use Exception;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -21,18 +23,17 @@ class ResourceLiked extends Notification
     {
         $this->likeable = $likeable; // resource liked: Post, Comment, etc.
         $this->actor = $actor;
-        $this->settings = request()->user()->settings;
+        $this->settings = $likeable->getPrimaryOwner()->settings;
+        //$this->settings = $likeable->user->settings;
     }
 
     public function via($notifiable)
     {
         //return ['database', 'mail'];
         $channels =  ['database'];
-        // HERE TUESDAY
         $exists = $this->settings->cattrs['notifications']['posts']['new_like'] ?? false;
-        //dd($exists,  $this->settings->cattrs['notifications']['posts']['new_like'] ?? false);
         if ( $exists && is_array($exists) && in_array('email', $exists) ) {
-            $channels[] =  ['mail'];
+            $channels[] =  'mail';
         }
         return $channels;
     }

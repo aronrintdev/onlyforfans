@@ -239,6 +239,11 @@ class Post extends Model
         return new Collection([$this->user]);
     }
 
+    public function getPrimaryOwner(): User
+    {
+        return $this->user;
+    }
+
     // %%% --- Implement Purchaseable Interface ---
     #region Purchaseable
 
