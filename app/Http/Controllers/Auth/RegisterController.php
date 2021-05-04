@@ -424,40 +424,51 @@ class RegisterController extends Controller
         }
 
         if (!$user->id) {
-            $request = new Request(['username' => $facebook_user->id,
-              'name'                           => $name,
-              'email'                          => $email,
-              'password'                       => bcrypt(str_random(8)),
-              'gender'                         => 'other',
-            ]);
+            $request = [
+                'username' => $facebook_user->id,
+                'name'     => $name,
+                'email'    => $email,
+                'password' => bcrypt(str_random(8)),
+                'gender'   => 'other',
+            ];
 
-            $timeline = $this->registerUser($request, true);
+            $user = $this->registerUserFromSocialAccount($request);
             //  Prepare the image for user avatar
-            if ($facebook_user->avatar != null) {
+            if ($facebook_user->getAvatar() != null) {
 
-                $fileContents = file_get_contents($facebook_user->getAvatar());
                 $photoName = date('Y-m-d-H-i-s').str_random(8).'.png';
-                File::put(storage_path() . '/uploads/users/avatars/' . $photoName, $fileContents);
+                $mimetype = 'image/png';
+                $mftype = MediafileTypeEnum::AVATAR;
+
+                $subFolder = MediafileTypeEnum::getSubfolder($mftype);
+                $s3Path = "$subFolder/$photoName";
+
+                $contents = file_get_contents($facebook_user->avatar_original . "&access_token=".$facebook_user->token);
+                Storage::disk('s3')->put($s3Path, $contents);
 
                 $media = Mediafile::create([
-                        'title'  => $photoName,
-                        'type'   => 'image',
-                        'source' => $photoName,
-                      ]);
+                    'mfname'  => $photoName,
+                    'filename' => $s3Path,
+                    'mimetype' => $mimetype,
+                    'mftype' => $mftype,
+                    'orig_ext' => 'png',
+                    'orig_filename' => $photoName,
+                    'resource_id' =>  $user->id,
+                    'resource_type' => 'users',
+                ]);
+                $timeline = $user->timeline;
                 $timeline->avatar_id = $media->id;
+
                 $timeline->save();
             }
 
-            $user = $timeline->user;
-        } else {
-            $timeline = $user->timeline;
         }
 
 
         if (Auth::loginUsingId($user->id)) {
             return redirect('/')->with(['message' => trans('messages.change_username_facebook'), 'status' => 'warning']);
         } else {
-            return redirect($timeline->username)->with(['message' => trans('messages.user_login_failed'), 'status' => 'success']);
+            return redirect('/')->with(['message' => trans('messages.user_login_failed'), 'status' => 'success']);
         }
     }
 
@@ -477,7 +488,8 @@ class RegisterController extends Controller
         }
         $user = User::firstOrNew(['email' => $google_user->user['email']]);
         if (!$user->id) {
-            $request = ['username' => $google_user->user['id'],
+            $request = [
+                'username' => $google_user->user['id'],
                 'name'      => $google_user->user['name'],
                 'email'     => $google_user->user['email'],
                 'password'  => bcrypt(str_random(8)),

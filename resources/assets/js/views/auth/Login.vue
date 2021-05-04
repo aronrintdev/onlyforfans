@@ -52,7 +52,9 @@
         <hr class="h-line flex-grow-1" />
       </div>
       <div class="third-party-sign-in p-3 text-center">
-        <img src="/images/g-login-btn.png" alt="Google signin" @click="googleSignin" class="google" />
+        <img src="/images/facebook-login.png" alt="Facebook signin" @click="socialLogin('facebook')" class="social-icon facebook" />
+        <img src="/images/g-login-btn.png" alt="Google signin" @click="socialLogin('google')" class="social-icon" />
+        <img src="/images/twitter-login.png" alt="Twitter signin" @click="socialLogin('twitter')" class="social-icon" />
       </div>
     </b-card>
 
@@ -67,6 +69,11 @@
  * Login Page
  */
 import LinkBar from '../../components/staticPages/LinkBar'
+
+import '../../../static/images/g-login-btn.png'
+import '../../../static/images/facebook-login.png'
+import '../../../static/images/twitter-login.png'
+
 export default {
   name: 'login',
   components: {
@@ -106,8 +113,8 @@ export default {
         this.state = 'form'
       });
     },
-    googleSignin: function() {
-      window.location.href = '/google';
+    socialLogin: function(path) {
+      window.location.href = `/${path}`;
     }
   },
 }
@@ -127,11 +134,17 @@ export default {
   padding-bottom: 2em !important;
 
   img {
-    cursor: pointer;  
+    cursor: pointer; 
+    margin: 0 1em;
   }
-  .google {
+  .social-icon {
     width: 50px;
     height: 50px;
+
+    &.facebook {
+      width: 52px;
+      height: 52px;
+    }
   }
 }
 </style>
