@@ -51,9 +51,8 @@
         <div class="mx-3" v-text="$t('or')" />
         <hr class="h-line flex-grow-1" />
       </div>
-      <div class="3rd-party-sign-in p-3 text-center">
-        <!-- TODO: Add 3rd party sign ins -->
-        Sign in with 3rd party here.
+      <div class="third-party-sign-in p-3 text-center">
+        <img src="/images/g-login-btn.png" alt="Google signin" @click="googleSignin" class="google" />
       </div>
     </b-card>
 
@@ -107,6 +106,9 @@ export default {
         this.state = 'form'
       });
     },
+    googleSignin: function() {
+      window.location.href = '/google';
+    }
   },
 }
 </script>
@@ -117,6 +119,20 @@ export default {
 }
 .h-line {
   color: var('--gray');
+}
+.third-party-sign-in {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 2em !important;
+
+  img {
+    cursor: pointer;  
+  }
+  .google {
+    width: 50px;
+    height: 50px;
+  }
 }
 </style>
 

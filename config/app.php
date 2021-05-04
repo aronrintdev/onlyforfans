@@ -194,6 +194,7 @@ return [
         // \Theme\ThemeServiceProvider::class,
         Ayra\Theme\ThemeServiceProvider::class,
         // Zizaco\Entrust\EntrustServiceProvider::class,
+        Laravel\Socialite\SocialiteServiceProvider::class,
     ],
 
     /*
@@ -252,8 +253,8 @@ return [
         'Debugbar'  => Barryvdh\Debugbar\Facade::class,
         // 'Entrust'   => Zizaco\Entrust\EntrustFacade::class,
         'Purifier'  => Mews\Purifier\Facades\Purifier::class,
-        'LinkPreview' => LinkPreview\LinkPreview::class
-
+        'LinkPreview' => LinkPreview\LinkPreview::class,
+        'Socialite' => Laravel\Socialite\Facades\Socialite::class,
     ],
 
 ];
