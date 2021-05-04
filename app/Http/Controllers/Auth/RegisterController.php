@@ -477,7 +477,6 @@ class RegisterController extends Controller
         }
         $user = User::firstOrNew(['email' => $google_user->user['email']]);
         if (!$user->id) {
-            $request = new Request(['username' => $google_user->user['id'],
             $request = ['username' => $google_user->user['id'],
                 'name'      => $google_user->user['name'],
                 'email'     => $google_user->user['email'],
