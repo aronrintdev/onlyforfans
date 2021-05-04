@@ -87,7 +87,7 @@ class Webhook extends Model
             // Verification failed
             $webhook->status = Status::IGNORED;
             $webhook->save();
-            return response('Not authenticated', 401);
+            return response('error', 401);
         }
 
         $webhook->verified = true;
@@ -107,14 +107,14 @@ class Webhook extends Model
             $webhook->status = Status::ERROR;
             $webhook->notes['error'] = $e->getMessage();
             $webhook->save();
-            return response('', 500);
+            return response('error', 500);
         }
 
         $webhook->save();
 
         ProcessSegPayWebhook::dispatch($webhook);
 
-        return response(); // 200 response
+        return response('ok', 200); // 200 response
     }
 
     /**

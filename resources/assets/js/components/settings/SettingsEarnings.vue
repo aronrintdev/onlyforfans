@@ -26,6 +26,8 @@
 
     <b-card title="Transactions">
       <hr />
+      <TransactionsTable />
+
       <b-tabs card>
 
         <b-tab title="Credits" active>
@@ -74,8 +76,14 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import moment from 'moment'
+import TransactionsTable from './earnings/TransactionsTable'
 
 export default {
+  name: 'SettingsEarnings',
+
+  components: {
+    TransactionsTable,
+  },
 
   props: {
     session_user: null,

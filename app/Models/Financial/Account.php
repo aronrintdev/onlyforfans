@@ -120,6 +120,11 @@ class Account extends Model implements Ownable
     {
         return $this->morphTo();
     }
+
+    public function transactions()
+    {
+        return $this->hasMany(Transaction::class);
+    }
     #endregion
 
 
