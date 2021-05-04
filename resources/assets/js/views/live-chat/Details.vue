@@ -245,7 +245,10 @@
                     </div>
                     <div class="typing dot-pulse" style="display: none">...</div>
                   </div>
-                  <div class="conversation-footer" :class="messagePrice ? 'price-view': ''" v-if="!showAudioRec">
+                  <div
+                    class="conversation-footer"
+                    :class="messagePrice ? 'price-view': ''" v-if="!showAudioRec"
+                  >
                     <div v-if="messagePrice" class="price-to-view-header d-flex align-items-center justify-content-between">
                       <div class="price-to-view-title">
                         <svg viewBox="0 0 24 24">
@@ -330,8 +333,15 @@
                         </swiper-slide>
                       </swiper>
                     </div>
-                    <textarea placeholder="Type a message" name="text" rows="1" maxlength="10000"
-                      spellcheck="false" :value="newMessageText" @input="onInputNewMessage" @keydown="onCheckReturnKey"></textarea>
+                    <textarea
+                      placeholder="Type a message"
+                      name="text"
+                      rows="1"
+                      maxlength="10000"
+                      spellcheck="false"
+                      @keydown="onCheckReturnKey"
+                      @input="onInputNewMessage"
+                    ></textarea>
                     <div class="action-btns">
                       <div>
                         <!-- image -->
@@ -341,7 +351,6 @@
                           @change="onMediaChanged"
                           ref="mediaUpload"
                           multiple
-                          @click="activeMediaRef = $refs.mediaUpload;"
                         />
                         <label for="image-upload-btn" class="btn action-btn">
                           <svg id="icon-media" viewBox="0 0 24 24">
@@ -365,12 +374,13 @@
                           </svg>
                         </button>
                         <!-- Medis from vault -->
-                        <button class="btn action-btn" type="button" disabled>
+                        <button class="btn action-btn" type="button" @click="openVaultModal">
                           <svg id="icon-vault" viewBox="0 0 24 24">
                             <path
                               d="M20.33,5.69h0l-.9-1.35A3,3,0,0,0,16.93,3H7.07a3,3,0,0,0-2.5,1.34l-.9,1.35A4,4,0,0,0,3,7.91V18a3,3,0,0,0,3,3H18a3,3,0,0,0,3-3V7.91A4,4,0,0,0,20.33,5.69ZM6.24,5.45A1,1,0,0,1,7.07,5h9.86a1,1,0,0,1,.83.45l.37.55H5.87ZM19,18a1,1,0,0,1-1,1H6a1,1,0,0,1-1-1V8H19ZM9.5,12.75A1.25,1.25,0,1,0,8.25,11.5,1.25,1.25,0,0,0,9.5,12.75ZM7.93,17h8.14a.42.42,0,0,0,.3-.73L13.7,13.6l-2.55,2.55-1.7-1.7L7.63,16.27a.42.42,0,0,0,.3.73Z"
                               fill="#8a96a3"></path>
-                          </svg></button>
+                          </svg>
+                        </button>
                         <!-- message price -->
                         <button class="btn action-btn" :disabled="messagePrice" type="button" @click="openMessagePriceModal">
                           <svg id="icon-price" viewBox="0 0 24 24">
@@ -596,6 +606,77 @@
         </div>
       </div>
     </b-modal>
+    <b-modal v-if="selectedUser" hide-header centered hide-footer ref="vault-modal" title="Vault Modal">
+      <div class="block-modal vault-modal">
+        <h4>Vault</h4>
+        <div class="content">
+          <div class="vault-tags">
+            <button
+              class="btn tag"
+              :class="selectedVaultFilter === filterOption ? 'selected': ''"
+              @click="filterVaultFiles(filterOption)"
+              v-for="filterOption in vaultFilterOptions"
+              :key="filterOption"
+            >
+              <svg class="icon-done" viewBox="0 0 24 24">
+                <path d="M9 19.42l-5.71-5.71A1 1 0 0 1 3 13a1 1 0 0 1 1-1 1 1 0 0 1 .71.29L9 16.59l10.29-10.3A1 1 0 0 1 20 6a1 1 0 0 1 1 1 1 1 0 0 1-.29.71z"></path>
+              </svg>
+              <span>{{ filterOption }}</span>
+            </button>
+          </div>
+          <div class="text-center" v-if="isVaultLoading">
+            <b-spinner variant="secondary" label="Loading..." small></b-spinner>
+          </div>
+          <div class="gallery-list" v-if="!isVaultLoading && !vaultFiles.length">
+            <p class="empty">Nothing was found</p>
+          </div>
+          <div class="gallery-list" v-if="!isVaultLoading && vaultFiles.length">
+            <div class="img-wrapper" v-for="media in vaultFiles" :key="media.id">
+              <img v-preview:scope-a v-if="media.is_image" :src="media.filepath" :alt="media.mfname" />
+              <video v-if="media.is_video" @click="() => showMediaPopup(media)">
+                <source :src="media.filepath" type="video/mp4" />
+              </video>
+              <svg v-if="media.is_video" class="video-play-svg" viewBox="0 0 142.448 142.448" style="enable-background:new 0 0 142.448 142.448;">
+                <g>
+                  <path d="M142.411,68.9C141.216,31.48,110.968,1.233,73.549,0.038c-20.361-0.646-39.41,7.104-53.488,21.639
+                    C6.527,35.65-0.584,54.071,0.038,73.549c1.194,37.419,31.442,67.667,68.861,68.861c0.779,0.025,1.551,0.037,2.325,0.037
+                    c19.454,0,37.624-7.698,51.163-21.676C135.921,106.799,143.033,88.377,142.411,68.9z M111.613,110.336
+                    c-10.688,11.035-25.032,17.112-40.389,17.112c-0.614,0-1.228-0.01-1.847-0.029c-29.532-0.943-53.404-24.815-54.348-54.348
+                    c-0.491-15.382,5.122-29.928,15.806-40.958c10.688-11.035,25.032-17.112,40.389-17.112c0.614,0,1.228,0.01,1.847,0.029
+                    c29.532,0.943,53.404,24.815,54.348,54.348C127.91,84.76,122.296,99.306,111.613,110.336z"/>
+                  <path d="M94.585,67.086L63.001,44.44c-3.369-2.416-8.059-0.008-8.059,4.138v45.293
+                    c0,4.146,4.69,6.554,8.059,4.138l31.583-22.647C97.418,73.331,97.418,69.118,94.585,67.086z"/>
+                </g>
+              </svg>
+              <img v-if="media.mimetype.indexOf('audio/') > -1" src="/images/audio-thumb.png" alt="" @click="showMediaPopup(media)" />
+              <span class="timestamp">{{ moment(media.created_at).format('MMM DD') }}</span>
+              <div class="checkbox" @click="selectVaultFiles(media)">
+                <round-check-box
+                  :value="filesFromVault.findIndex(m => m.id === media.id) > -1"
+                  :key="filesFromVault.findIndex(m => m.id === media.id) > -1"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="action-btns">
+          <button class="link-btn" @click="closeVaultModal">Cancel</button>
+          <button class="link-btn" @click="addVaultFilestoMedias" :disabled="!filesFromVault.length">Add</button>
+        </div>
+      </div>
+    </b-modal>
+    <b-modal modal-class="media-modal" hide-header centered hide-footer ref="media-modal" title="Video/Audio Popup">
+      <div class="video-modal" v-if="popupMedia && popupMedia.is_video">
+        <video controls autoplay>
+          <source :src="popupMedia.filepath" type="video/mp4" />
+        </video>
+      </div>
+      <div class="audio-modal" v-if="popupMedia && popupMedia.mimetype.indexOf('audio/') > -1">
+        <audio controls autoplay>
+          <source :src="popupMedia.filepath" type="audio/mpeg" />
+        </audio>
+      </div>
+    </b-modal>
     <div :class="showVideoRec ? '' : 'd-none'" class="video-rec-wrapper">
       <h4>Record Video Message</h4>
       <video id="myVideo" playsinline class="video-js vjs-default-skin"></video>
@@ -660,7 +741,6 @@
         observer: true,
         observeParents: true,
       },
-      activeMediaRef: null,
       isDragListVisible: false,
       sortableMedias: [],
       applyBtnEnabled: false,
@@ -675,6 +755,17 @@
       showAudioRec: false,
       audioRecDuration: 0,
       audioRecInterval: undefined,
+      filesFromVault: [],
+      popupMedia: undefined,
+      vaultFiles: [],
+      isVaultLoading: false,
+      selectedVaultFilter: undefined,
+      vaultFilterOptions: [
+        'stories',
+        'posts',
+        'messages',
+        'vaultfolders',
+      ],
     }),
     mounted() {
       const self = this;
@@ -913,12 +1004,19 @@
         
         // Sending media files
         if (this.sortableMedias.length > 0) {
-          const files = this.sortableMedias.map(img => img.file);
           this.isSendingFiles = true;
           // const mediafilesLinks = [];
           const data = new FormData();
-          files.map((file) => {
-            data.append('mediafile[]', file);
+          const vaultfiles = [];
+          this.sortableMedias.map((media, index) => {
+            const { file, mftype, src } = media;
+            if (mftype !== 'vault') {
+              data.append('mediafile[]', file);
+              data.append('vaultfiles[]', null);
+            } else {
+              data.append('mediafile[]', null);
+              data.append('vaultfiles[]', file);
+            }
           });
           data.append('user_id', this.selectedUser.profile.id);
           if (this.newMessageText) {
@@ -1123,7 +1221,7 @@
           });
       },
       addNewMedia: function() {
-        this.activeMediaRef.click();
+        this.$refs.mediaUpload.click();
       },
       removeSortableMedia: function(index) {
         const newArr = this.sortableMedias.slice();
@@ -1289,7 +1387,7 @@
           },
           plugins: {
               record: {
-                  audio: false,
+                  audio: true,
                   video: true,
                   maxLength: 10,
                   displayMilliseconds: true,
@@ -1340,6 +1438,66 @@
           setTimeout(() => {
             self.hideAudioRec();
           }, 1000);
+        }
+      },
+      openVaultModal: function() {
+        this.$refs['vault-modal'].show();
+        this.isVaultLoading = true;
+        this.axios.get('/vaults/all-files')
+          .then(response => {
+            this.vaultFiles = response.data.mediafiles;
+            this.isVaultLoading = false;
+          })
+      },
+      closeVaultModal: function() {
+        this.filesFromVault = [];
+        this.$refs['vault-modal'].hide();
+      },
+      showMediaPopup: function(media) {
+        this.popupMedia = media;
+        this.$refs['media-modal'].show();
+      },
+      closeMediaPopup: function() {
+        this.popupMedia = undefined;
+        this.$refs['media-modal'].hide();
+      },
+      addVaultFilestoMedias: function() {
+        const self = this;
+        this.filesFromVault.forEach(file => {
+          self.sortableMedias.push({
+            src: file.filepath,
+            file: file.id,
+            type: file.mimetype,
+            mftype: 'vault',
+          });
+        });
+        this.closeVaultModal();
+      },
+      selectVaultFiles: function(mediafile) {
+        const idx = this.filesFromVault.findIndex(m => m.id === mediafile.id);
+        if (idx < 0) {
+          this.filesFromVault.push(mediafile);
+        } else {
+          this.filesFromVault.splice(idx, 1);
+        }
+      },
+      filterVaultFiles: function(filterOption) {
+        if (this.selectedVaultFilter === filterOption) {
+          this.selectedVaultFilter = undefined;
+          this.isVaultLoading = true;
+          this.axios.get(`/vaults/all-files`)
+            .then(response => {
+              this.vaultFiles = response.data.mediafiles;
+              this.isVaultLoading = false;
+            })
+        } else {
+          this.selectedVaultFilter = filterOption;
+          this.isVaultLoading = true;
+          this.axios.get(`/vaults/all-files?query=${filterOption}`)
+            .then(response => {
+              this.vaultFiles = response.data.mediafiles;
+              this.isVaultLoading = false;
+            })
         }
       }
     }

@@ -90,64 +90,66 @@
       <b-spinner variant="secondary" label="Loading..." small></b-spinner>
     </div>
     <div class="no-users" v-if="!users.length">Nothing was found</div>
-    <ul class="user-list" v-if="users.length">
-      <li v-for="user in users" :key="user.profile.id"
-        :class="selectedUser && selectedUser.profile.id === user.profile.id ? 'selected' : ''"
-      >
-        <router-link :to="`/messages/${user.profile.id}`">
-          <div class="user-content" :class="`user-${user.profile.id}`">
-            <div class="user-logo text-logo" v-if="!user.profile.avatar">
-              {{ getLogoFromName(user.profile.name) }}
-              <span :class="`status-holder status-holder-${user.profile.id}`"></span>
-            </div>
-            <div class="user-logo" v-if="user.profile.avatar">
-              <img :src="user.profile.avatar.filepath" alt="" />
-              <span :class="`status-holder status-holder-${user.profile.id}`"></span>
-            </div>
-            <div class="user-details">
-              <div class="user-details-row">
-                <div>
-                  <span class="username">{{ user.profile.display_name ? user.profile.display_name : user.profile.name }}</span>
+    <div class="user-list-container" v-if="users.length">
+      <ul class="user-list" >
+        <li v-for="user in users" :key="user.profile.id"
+          :class="selectedUser && selectedUser.profile.id === user.profile.id ? 'selected' : ''"
+        >
+          <router-link :to="`/messages/${user.profile.id}`">
+            <div class="user-content" :class="`user-${user.profile.id}`">
+              <div class="user-logo text-logo" v-if="!user.profile.avatar">
+                {{ getLogoFromName(user.profile.name) }}
+                <span :class="`status-holder status-holder-${user.profile.id}`"></span>
+              </div>
+              <div class="user-logo" v-if="user.profile.avatar">
+                <img :src="user.profile.avatar.filepath" alt="" />
+                <span :class="`status-holder status-holder-${user.profile.id}`"></span>
+              </div>
+              <div class="user-details">
+                <div class="user-details-row">
+                  <div>
+                    <span class="username">{{ user.profile.display_name ? user.profile.display_name : user.profile.name }}</span>
+                  </div>
+                  <b-dropdown class="filter-dropdown sidebar-more-dropdown" right>
+                    <template #button-content>
+                      <i class="fas fa-ellipsis-h" aria-hidden="true"></i>
+                    </template>
+                    <b-dropdown-item v-on:click.stop.prevent="clearMessages(user.profile)">
+                      Clear conversation
+                    </b-dropdown-item>
+                  </b-dropdown>
                 </div>
-                <b-dropdown class="filter-dropdown sidebar-more-dropdown" right>
-                  <template #button-content>
-                    <i class="fas fa-ellipsis-h" aria-hidden="true"></i>
-                  </template>
-                  <b-dropdown-item v-on:click.stop.prevent="clearMessages(user.profile)">
-                    Clear conversation
-                  </b-dropdown-item>
-                </b-dropdown>
-              </div>
-              <div
-                class="user-details-row"
-                :key="user.last_message.id"
-                v-if="!user.last_message.unread_messages_count"
-              >
-                <span class="last-message" v-if="!user.last_message.hasMediafile">{{ user.last_message.mcontent }}</span>
-                <span class="last-message" v-if="user.last_message.hasMediafile">
-                  <svg class="media-icon" viewBox="0 0 24 24">
-                    <path d="M18,3H6A3,3,0,0,0,3,6V18a3,3,0,0,0,3,3H18a3,3,0,0,0,3-3V6A3,3,0,0,0,18,3Zm1,15a1,1,0,0,1-1,1H6a1,1,0,0,1-1-1V6A1,1,0,0,1,6,5H18a1,1,0,0,1,1,1ZM9,10.5A1.5,1.5,0,1,0,7.5,9,1.5,1.5,0,0,0,9,10.5ZM14,13l-3,3L9,14,6.85,16.15a.47.47,0,0,0-.14.35.5.5,0,0,0,.5.5h9.58a.5.5,0,0,0,.5-.5.47.47,0,0,0-.14-.35Z"></path>
-                  </svg>
-                  &middot;
-                  {{ user.last_message.mcontent ? user.last_message.mcontent : 'media attachment' }}
-                </span>
-                <!-- Date  -->
-                <span class="last-message-date">{{ getFuzzyFormat(moment(user.last_message.created_at).fromNow(true)) }}</span>
-              </div>
-              <div
-                class="user-details-row is-unread"
-                :key="user.last_message.id"
-                v-if="user.last_message.unread_messages_count"
-              >
-                <span class="last-message">{{ `${user.last_message.unread_messages_count} new message${user.last_message.unread_messages_count > 1 ? 's' : ''}` }}</span>
-                <span class="last-message-date">{{ getFuzzyFormat(moment(user.last_message.created_at).fromNow(true)) }}</span>
+                <div
+                  class="user-details-row"
+                  :key="user.last_message.id"
+                  v-if="!user.last_message.unread_messages_count"
+                >
+                  <span class="last-message" v-if="!user.last_message.hasMediafile">{{ user.last_message.mcontent }}</span>
+                  <span class="last-message" v-if="user.last_message.hasMediafile">
+                    <svg class="media-icon" viewBox="0 0 24 24">
+                      <path d="M18,3H6A3,3,0,0,0,3,6V18a3,3,0,0,0,3,3H18a3,3,0,0,0,3-3V6A3,3,0,0,0,18,3Zm1,15a1,1,0,0,1-1,1H6a1,1,0,0,1-1-1V6A1,1,0,0,1,6,5H18a1,1,0,0,1,1,1ZM9,10.5A1.5,1.5,0,1,0,7.5,9,1.5,1.5,0,0,0,9,10.5ZM14,13l-3,3L9,14,6.85,16.15a.47.47,0,0,0-.14.35.5.5,0,0,0,.5.5h9.58a.5.5,0,0,0,.5-.5.47.47,0,0,0-.14-.35Z"></path>
+                    </svg>
+                    &middot;
+                    {{ user.last_message.mcontent ? user.last_message.mcontent : 'media attachment' }}
+                  </span>
+                  <!-- Date  -->
+                  <span class="last-message-date">{{ getFuzzyFormat(moment(user.last_message.created_at).fromNow(true)) }}</span>
+                </div>
+                <div
+                  class="user-details-row is-unread"
+                  :key="user.last_message.id"
+                  v-if="user.last_message.unread_messages_count"
+                >
+                  <span class="last-message">{{ `${user.last_message.unread_messages_count} new message${user.last_message.unread_messages_count > 1 ? 's' : ''}` }}</span>
+                  <span class="last-message-date">{{ getFuzzyFormat(moment(user.last_message.created_at).fromNow(true)) }}</span>
+                </div>
               </div>
             </div>
-          </div>
-          <div class="divider"></div>
-        </router-link>
-      </li>
-    </ul>
+            <div class="divider"></div>
+          </router-link>
+        </li>
+      </ul>
+    </div>
     <b-modal hide-header centered hide-footer ref="pin-to-list-modal" title="Pin To List Modal">
       <div class="block-modal pin-to-list-modal">
         <div class="header d-flex align-items-center">
