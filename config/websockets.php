@@ -28,6 +28,7 @@ return [
             'key' => env('PUSHER_APP_KEY'),
             'secret' => env('PUSHER_APP_SECRET'),
             'path' => env('PUSHER_APP_PATH'),
+            'encrypted' => env('WEBSOCKETS_ENCRYPTED', false),
             // 'host' => env('PUSHER_APP_HOST', 'http://localhost:8000'),
             'capacity' => null,
             'enable_client_messages' => true,
