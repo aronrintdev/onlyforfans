@@ -31,6 +31,8 @@ class MediafileTypeEnum extends SmartEnum implements Selectable {
             return 'posts';
         case MediafileTypeEnum::GALLERY:
             return 'gallery';
+        case MediafileTypeEnum::AVATAR:
+            return 'avatars';
         default:
             return 'default';
         }
