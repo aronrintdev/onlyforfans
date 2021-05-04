@@ -23,13 +23,17 @@ if (typeof window.Echo === 'undefined') {
     // key: 'c0277f01daca608700b8',
     cluster: process.env.MIX_PUSHER_APP_CLUSTER || window.pusherCluster,
     // cluster: 'us2'
-    wsHost: window.location.hostname,
-    host: window.location.hostname,
-    httpHost: window.location.hostname,
-    wsPort: 6001,
-    forceTLS: false,
+    host: process.env.MIX_WS_HOST || window.location.hostname,
+    httpHost: process.env.MIX_WS_HOST || window.location.hostname,
+
+    wsHost: process.env.MIX_WS_HOST || window.location.hostname,
+    wsPort: process.env.MIX_WS_PORT || 6001,
+    wssPort: process.env.MIX_WS_PORT || 6001,
+    forceTLS: process.env.MIX_PUSHER_FORCE_TLS || false,
+    encrypted: process.env.MIX_PUSHER_ENCRYPTED || false,
     disableStats: true,
-    // encrypted: true,
+    enabledTransports: ['ws'],
+    disabledTransports: ['sockjs', 'xhr_polling', 'xhr_streaming'],
   })
 }
 
