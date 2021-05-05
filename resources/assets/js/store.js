@@ -253,6 +253,9 @@ export default new Vuex.Store({
       } else {
         params.following = true // default
       }
+      if (Object.keys(filters).includes('stypes')) {
+        params.stypes = filters.stypes
+      }
       axios.get(route('stories.index'), { params })
         .then((response) => {
           commit('UPDATE_STORIES', response.data)
