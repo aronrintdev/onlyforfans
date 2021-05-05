@@ -20,6 +20,7 @@
             <br />
             AllFans • 1027 S. Rainbow Blvd. #119, Las Vegas, NV 89145
             <br />
+            <!-- %MATT: here is the flag dropdown
             <span class="dropup" style="margin-left: 20px">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="true">
                 <span> <span class="flag-icon flag-icon-us"></span> </span> <i class="fa fa-angle-down" aria-hidden="true"></i></a>
@@ -33,6 +34,7 @@
                 <li class=""><a href="#" class="switch-language" data-language="de"> <span class="flag-icon flag-icon-de"></span> German</a></li>
               </ul>
             </span>
+            -->
           </div>
         </div>
       </b-col>
