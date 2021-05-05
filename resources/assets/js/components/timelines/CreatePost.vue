@@ -292,7 +292,7 @@ li .selectable {
   margin: 0 !important;
 }
 
-.create_post-crate .dropzone textarea {
+.create_post-crate textarea {
   resize: none;
 }
 
