@@ -48,7 +48,6 @@
 .footer-description .fans-terms {
     padding-bottom: 10px;
     font-size: 14px;
-    font-family: 'Open Sans', sans-serif;
     font-weight: 400;
 }
 .dropup, .dropdown {
@@ -59,7 +58,6 @@
     text-decoration: none;
 }
 .footer-description .fans-terms a {
-    font-family: 'Open Sans', sans-serif;
     font-size: 14px;
     color: #249AF2;
     text-transform: capitalize;
