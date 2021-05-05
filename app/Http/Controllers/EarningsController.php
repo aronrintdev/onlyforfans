@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\Financial\TransactionTypeEnum;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
@@ -32,7 +33,9 @@ class EarningsController extends Controller
     {
         $user = Auth::user();
         $account = $user->getInternalAccount(Config::get('transactions.default'), Config::get('transactions.defaultCurrency'));
-        $query = $account->transactions()->orderBy('settled_at', 'desc');
+        $query = $account->transactions()->where('credit_amount', '>', 0)->orderBy('settled_at', 'desc')
+            ->whereIn('type', [ TransactionTypeEnum::SALE, TransactionTypeEnum::TIP, TransactionTypeEnum::SUBSCRIPTION ]);
+            
 
         $data = $query->paginate($request->input('take', Config::get('collections.max.transactions', 20)));
         return new TransactionCollection($data);

@@ -35,9 +35,9 @@ export default new Vuex.Store({
     stories: [], // Current open stories
     earnings: null,
     debits: null,
-    fanledgers: {},
-    ledgercredits: null,
-    ledgerdebits: null,
+    fanledgers: {},       // TODO: Deprecate
+    ledgercredits: null,  // TODO: Deprecate
+    ledgerdebits: null,   // TODO: Deprecate
     favorites: null,
     timeline: null,
     session_user: null,
