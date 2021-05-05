@@ -16,7 +16,10 @@
             <b-nav-item @click="setFeedType('photos')" :active="feedType==='photos'">Photos</b-nav-item>
             <b-nav-item @click="setFeedType('videos')" :active="feedType==='videos'">Videos</b-nav-item>
           </b-nav>
-          <article class="d-none d-md-block">
+          <article v-else>
+            <!-- empty placeholder to preserve justify arrangment in flex area -->
+          </article>
+          <article class="d-md-block">
             <div v-if="!is_homefeed" @click="renderTip" style="" class="btn">
               <div style="font-size: 1.2rem; margin-top: 0.1rem" class="text-primary tag-ctrl">$</div>
             </div>

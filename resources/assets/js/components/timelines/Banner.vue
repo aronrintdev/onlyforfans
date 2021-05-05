@@ -35,7 +35,7 @@
               {{ timeline.name }}
             </router-link>
             <span v-if="timeline.verified" class="verified-badge">
-              <b-icon icon="check-circle-fill" variant="success" font-scale="1"></b-icon>
+              <b-icon icon="check-circle-fill" variant="primary" font-scale="1"></b-icon>
             </span>
           </h2>
           <p class="avatar-mail my-0">

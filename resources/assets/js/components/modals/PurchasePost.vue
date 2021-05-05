@@ -8,7 +8,7 @@
       <section class="user-details">
         <div>
           <router-link :to="timelineUrl" title="" data-toggle="tooltip" data-placement="top" class="username">{{ post.user.name }}</router-link>
-          <span v-if="post.user.verified" class="verified-badge"><b-icon icon="check-circle-fill" variant="success" font-scale="1"></b-icon></span>
+          <span v-if="post.user.verified" class="verified-badge"><b-icon icon="check-circle-fill" variant="primary" font-scale="1"></b-icon></span>
         </div>
         <div>
           <router-link :to="timelineUrl" class="tag-username">@{{ post.timeline.slug }}</router-link>

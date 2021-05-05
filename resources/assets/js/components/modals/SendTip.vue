@@ -13,7 +13,7 @@
             {{ tippedTimeline.name }}
           </router-link>
           <span v-if="tippedTimeline.verified" class="verified-badge">
-            <b-icon icon="check-circle-fill" variant="success" font-scale="1" />
+            <b-icon icon="check-circle-fill" variant="primary" font-scale="1" />
           </span>
         </div>
         <div>
