@@ -92,6 +92,48 @@ class StoriesTest extends TestCase
     /**
      *  @group stories
      *  @group regression
+     *  @group here0505
+     */
+    public function test_can_list_stories_filtered_by_stype()
+    {
+        // %NOTE - seeder only has TEXT stories at this time (?)
+        $timeline = Timeline::has('stories', '>=', 1)->has('followers', '>=', 1)->firstOrFail();
+        $creator = $timeline->user;
+        $fan = $timeline->followers->first();
+
+        $payload = [
+            'filters' => [
+                'timeline_id' => $timeline->id,
+            ],
+            'stypes' => [StoryTypeEnum::PHOTO, StoryTypeEnum::TEXT],
+        ];
+        $response = $this->actingAs($fan)->ajaxJSON('GET', route('stories.index'), $payload);
+        $response->assertStatus(200);
+        $response->assertJsonStructure([
+            'data',
+            'links',
+            'meta' => [ 'current_page', 'from', 'last_page', 'path', 'per_page', 'to', 'total', ],
+        ]);
+        $content = json_decode($response->content());
+        $this->assertEquals(1, $content->meta->current_page);
+        $this->assertNotNull($content->data);
+        $storiesR = $content->data;
+        $this->assertGreaterThan(0, count($storiesR));
+
+        $nonTimelineStories = collect($storiesR)->filter( function($s) use(&$timeline) {
+            return $s->timeline_id !== $timeline->id;
+        });
+        $this->assertEquals(0, $nonTimelineStories->count(), 'Returned a story not on specified timeline');
+
+        $nonFilteredStories = collect($storiesR)->filter( function($s) use(&$timeline) {
+            return $s->stype !== StoryTypeEnum::PHOTO && $s->stype !== StoryTypeEnum::TEXT;
+        });
+        $this->assertEquals(0, $nonFilteredStories->count(), 'Returned a story not in specified filter');
+    }
+
+    /**
+     *  @group stories
+     *  @group regression
      */
     public function test_can_not_list_stories_on_unfollowed_timeline()
     {
