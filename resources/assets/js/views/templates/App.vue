@@ -7,15 +7,13 @@
         <router-view />
       </transition>
     </div>
+
     <Toaster />
+
     <EventUpdater />
-    <div class="footer">
-      <b-navbar variant="dark">
-        <b-nav-text class="text-light mx-auto">
-          &copy; {{ $DateTime().year }} All Fans. All rights reserved.
-        </b-nav-text>
-      </b-navbar>
-    </div>
+
+    <SiteFooter />
+
   </div>
 </template>
 
@@ -26,6 +24,7 @@ import VueScreenSize from 'vue-screen-size'
 import MainNavBar from '@components/common/MainNavbar'
 import EventUpdater from '@components/EventUpdater'
 import Toaster from '@components/Toaster'
+import SiteFooter from '@views/templates/SiteFooter'
 
 export default {
   name: 'App',
@@ -33,6 +32,7 @@ export default {
     MainNavBar,
     EventUpdater,
     Toaster,
+    SiteFooter,
   },
 
   mixins: [VueScreenSize.VueScreenSizeMixin],
@@ -117,3 +117,6 @@ export default {
   },
 }
 </script>
+
+<style lang="scss">
+</style>

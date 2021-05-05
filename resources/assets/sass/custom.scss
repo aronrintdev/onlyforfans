@@ -1,4 +1,7 @@
 
+$font-family-sans-serif:  "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif !default;
+$font-family-base:   $font-family-sans-serif !default;
+
 $theme-colors: (
   "gray-light": #f3f3f3,
   "white": #fff,
@@ -31,11 +34,10 @@ body {
 
 body {
   background-color: rgb(237, 242, 247) !important;
-  font-family: 'Open Sans', sans-serif;
+  font-family: 'Roboto', sans-serif;
 }
 
 body .btn {
-    font-family: 'Open Sans', sans-serif;
     font-size: 14px;
     text-transform: capitalize;
     outline: none !important;
