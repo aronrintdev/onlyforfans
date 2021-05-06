@@ -143,7 +143,6 @@ class UserSettingModelTest extends TestCase
      * @group settings-model
      * @group regression
      * @group here0429
-     * @group here0503
      */
     public function test_can_enable_and_disable_global_notification_setting()
     {
