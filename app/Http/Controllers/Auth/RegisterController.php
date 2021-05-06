@@ -527,7 +527,7 @@ class RegisterController extends Controller
         if (Auth::loginUsingId($user->id)) {
             return redirect('/')->with(['message' => trans('messages.change_username_google'), 'status' => 'warning']);
         } else {
-            return redirect($timeline->username)->with(['message' => trans('messages.user_login_failed'), 'status' => 'success']);
+            return redirect($user->username)->with(['message' => trans('messages.user_login_failed'), 'status' => 'success']);
         }
     }
 
@@ -541,34 +541,46 @@ class RegisterController extends Controller
     {
         $twitter_user = Socialite::with('twitter')->user();
 
-        $user = User::firstOrNew(['email' => $twitter_user->id.'@twitter.com']);
+        if (isset($twitter_user->email)) {
+            $email = $twitter_user->email;
+        } else {
+            $email = $twitter_user->id.'@twitter.com';
+        }
+        $user = User::firstOrNew(['email' => $email]);
         if (!$user->id) {
-            $request = new Request(['username'   => $twitter_user->id,
-              'name'                           => $twitter_user->name,
-              'email'                          => $twitter_user->id.'@twitter.com',
-              'password'                       => bcrypt(str_random(8)),
-              'gender'                         => 'other',
-            ]);
-            $timeline = $this->registerUser($request, true);
-            
-            if($timeline == false) {
-                return \redirect('login');
-            }
-              //  Prepare the image for user avatar
-            $avatar = Image::make($twitter_user->avatar_original);
+            $request = [
+                'username'   => $twitter_user->id,
+                'name'       => $twitter_user->name,
+                'email'      => $email,
+                'password'   => bcrypt(str_random(8)),
+                'gender'     => 'other',
+            ];
+            $user = $this->registerUserFromSocialAccount($request);
+
+            //  Prepare the image for user avatar
             $photoName = date('Y-m-d-H-i-s').str_random(8).'.png';
-            $avatar->save(storage_path().'/uploads/users/avatars/'.$photoName, 60);
+            $mimetype = 'image/png';
+            $mftype = MediafileTypeEnum::AVATAR;
+
+            $subFolder = MediafileTypeEnum::getSubfolder($mftype);
+            $s3Path = "$subFolder/$photoName";
+
+            $contents = file_get_contents(str_replace('http://','https://', $twitter_user->avatar_original));
+            Storage::disk('s3')->put($s3Path, $contents);
 
             $media = Mediafile::create([
-                      'title'  => $photoName,
-                      'type'   => 'image',
-                      'source' => $photoName,
-                    ]);
+                'mfname'  => $photoName,
+                'filename' => $s3Path,
+                'mimetype' => $mimetype,
+                'mftype' => $mftype,
+                'orig_ext' => 'png',
+                'orig_filename' => $photoName,
+                'resource_id' =>  $user->id,
+                'resource_type' => 'users',
+            ]);
+            $user->timeline->avatar_id = $media->id;
 
-            $timeline->avatar_id = $media->id;
-
-            $timeline->save();
-            $user = $timeline->user;
+            $user->timeline->save();
         }
 
         if (Auth::loginUsingId($user->id)) {
