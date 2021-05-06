@@ -333,6 +333,20 @@
                         </swiper-slide>
                       </swiper>
                     </div>
+                    <div class="scheduled-message-head" v-if="scheduledMessageDate">
+                      <div>
+                        <svg class="icon-schedule" viewBox="0 0 24 24">
+                          <path d="M19 3h-1V2a1 1 0 0 0-2 0v1H8V2a1 1 0 0 0-2 0v1H5a2 2 0 0 0-2 2v13a3 3 0 0 0 3 3h12a3 3 0 0 0 3-3V5a2 2 0 0 0-2-2zm0 15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V9h14zm0-11H5V5h14zM9.79 17.21a1 1 0 0 0 1.42 0l5-5a1 1 0 0 0 .29-.71 1 1 0 0 0-1-1 1 1 0 0 0-.71.29l-4.29 4.3-1.29-1.3a1 1 0 0 0-.71-.29 1 1 0 0 0-1 1 1 1 0 0 0 .29.71z"></path>
+                        </svg> 
+                        <span> Scheduled for&nbsp;</span>
+                        <strong>{{ moment(scheduledMessageDate).format('MMM DD, h:mm a') }}</strong>
+                      </div>
+                      <button class="btn close-btn" @click="clearSchedule">
+                        <svg class="icon-close" viewBox="0 0 24 24">
+                          <path d="M13.41 12l5.3-5.29A1 1 0 0 0 19 6a1 1 0 0 0-1-1 1 1 0 0 0-.71.29L12 10.59l-5.29-5.3A1 1 0 0 0 6 5a1 1 0 0 0-1 1 1 1 0 0 0 .29.71l5.3 5.29-5.3 5.29A1 1 0 0 0 5 18a1 1 0 0 0 1 1 1 1 0 0 0 .71-.29l5.29-5.3 5.29 5.3A1 1 0 0 0 18 19a1 1 0 0 0 1-1 1 1 0 0 0-.29-.71z"></path>
+                        </svg>
+                      </button>
+                    </div>
                     <textarea
                       placeholder="Type a message"
                       name="text"
@@ -379,6 +393,16 @@
                             <path
                               d="M20.33,5.69h0l-.9-1.35A3,3,0,0,0,16.93,3H7.07a3,3,0,0,0-2.5,1.34l-.9,1.35A4,4,0,0,0,3,7.91V18a3,3,0,0,0,3,3H18a3,3,0,0,0,3-3V7.91A4,4,0,0,0,20.33,5.69ZM6.24,5.45A1,1,0,0,1,7.07,5h9.86a1,1,0,0,1,.83.45l.37.55H5.87ZM19,18a1,1,0,0,1-1,1H6a1,1,0,0,1-1-1V8H19ZM9.5,12.75A1.25,1.25,0,1,0,8.25,11.5,1.25,1.25,0,0,0,9.5,12.75ZM7.93,17h8.14a.42.42,0,0,0,.3-.73L13.7,13.6l-2.55,2.55-1.7-1.7L7.63,16.27a.42.42,0,0,0,.3.73Z"
                               fill="#8a96a3"></path>
+                          </svg>
+                        </button>
+                        <!-- Schedule -->
+                        <button
+                          class="btn action-btn"
+                          type="button"
+                          @click="openScheduleMessageModal"
+                        >
+                          <svg class="icon-schedule" viewBox="0 0 24 24">
+                            <path d="M19 3h-1V2a1 1 0 0 0-2 0v1H8V2a1 1 0 0 0-2 0v1H5a2 2 0 0 0-2 2v13a3 3 0 0 0 3 3h12a3 3 0 0 0 3-3V5a2 2 0 0 0-2-2zm0 15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V9h14zm0-11H5V5h14zM9.79 17.21a1 1 0 0 0 1.42 0l5-5a1 1 0 0 0 .29-.71 1 1 0 0 0-1-1 1 1 0 0 0-.71.29l-4.29 4.3-1.29-1.3a1 1 0 0 0-.71-.29 1 1 0 0 0-1 1 1 1 0 0 0 .29.71z" fill="#8a96a3"></path>
                           </svg>
                         </button>
                         <!-- message price -->
@@ -677,6 +701,37 @@
         </audio>
       </div>
     </b-modal>
+    <b-modal modal-class="schedule-message-modal" hide-header centered hide-footer ref="schedule-message-modal">
+      <div class="block-modal">
+        <div class="header d-flex align-items-center">
+          <h4 class="pt-1 pb-1">SCHEDULED MESSAGES</h4>
+        </div>
+        <div class="content">
+          <b-form-datepicker
+            v-model="scheduledMessage.date"
+            class="mb-3 mt-1"
+            ref="schedule_date"
+            :state="scheduledMessage.date ? true : null"
+            :min="new Date()"
+          />
+          <b-form-timepicker
+            v-model="scheduledMessage.time"
+            :state="scheduledMessage.timeState"
+            class="mb-2"
+            locale="en"
+            @input="onChangeScheduledMessageTime"
+          ></b-form-timepicker>
+        </div>
+        <div class="d-flex align-items-center justify-content-end action-btns">
+          <button class="link-btn" @click="clearSchedule">Cancel</button>
+          <button
+            class="link-btn"
+            @click="applySchedule"
+            :disabled="!scheduledMessage.date || !scheduledMessage.time || !scheduledMessage.timeState"
+          >Apply</button>
+        </div>
+      </div>
+    </b-modal>
     <div :class="showVideoRec ? '' : 'd-none'" class="video-rec-wrapper">
       <h4>Record Video Message</h4>
       <video id="myVideo" playsinline class="video-js vjs-default-skin"></video>
@@ -766,6 +821,8 @@
         'messages',
         'vaultfolders',
       ],
+      scheduledMessage: {},
+      scheduledMessageDate: null,
     }),
     mounted() {
       const self = this;
@@ -1499,6 +1556,28 @@
               this.isVaultLoading = false;
             })
         }
+      },
+      openScheduleMessageModal: function() {
+        this.$refs['schedule-message-modal'].show();
+      },
+      applySchedule: function() {
+        this.scheduledMessageDate = moment(`${this.scheduledMessage.date} ${this.scheduledMessage.time}`).unix() * 1000;
+        this.$refs['schedule-message-modal'].hide();
+        this.scheduledMessage = {};
+      },
+      clearSchedule: function() {
+        this.scheduledMessageDate = undefined;
+        this.scheduledMessage = {};
+        this.$refs['schedule-message-modal'].hide();
+      },
+      onChangeScheduledMessageTime: function(event) {
+        this.scheduledMessage.timeState = true;
+        if (moment().format('YYYY-MM-DD') === this.$refs.schedule_date.value) {
+          if (moment().format('HH:mm:ss') > event) {
+            this.scheduledMessage.timeState = false;
+          }
+        }
+        this.scheduledMessage = { ...this.scheduledMessage };
       }
     }
   }
