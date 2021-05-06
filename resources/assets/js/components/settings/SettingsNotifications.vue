@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!isLoading">
+  <div v-if="!isLoading" class="component-settings_notification">
 
     <b-row>
       <b-col xl="9">
@@ -41,82 +41,44 @@
 
                       <b-form-group id="group-email-income">
                         <h5>Income</h5>
-                        <section class="d-flex align-items-start">
-                          <div>
-                            <b-form-checkbox id="email_new_tip" v-model="thisForm.by_email.income.new_tip" name="email_new_tip" size="lg"></b-form-checkbox>
-                          </div>
-                          <div>
-                            <label for="email_new_tip" class="ml-auto mb-0">New Tip</label>
-                            <p><small class="text-muted">Email whenever a new tip is received.</small></p>
-                          </div>
-                        </section>
-                        <section class="d-flex align-items-start">
-                          <div>
-                            <b-form-checkbox id="email_new_subscription" v-model="thisForm.by_email.income.new_subscription" name="email_new_subscription" size="lg"></b-form-checkbox>
-                          </div>
-                          <div>
-                            <label for="email_new_subscription" class="ml-auto mb-0">New Subscription</label>
-                            <p><small class="text-muted">Email on new subscriptions</small></p>
-                          </div>
-                        </section>
+                        <div>
+                          <b-form-checkbox id="email_new_tip" v-model="thisForm.by_email.income.new_tip" name="email_new_tip" size="lg">New Tip</b-form-checkbox>
+                          <p><small class="text-muted">Email whenever a new tip is received</small></p>
+                        </div>
+                        <div>
+                          <b-form-checkbox id="email_new_subscription" v-model="thisForm.by_email.income.new_subscription" name="email_new_subscription" size="lg">New Subscription</b-form-checkbox>
+                          <p><small class="text-muted">Email on new subscriptions</small></p>
+                        </div>
                       </b-form-group>
 
                       <hr />
 
                       <b-form-group id="group-email-post">
                         <h5>Posts</h5>
-                          <!--
-                        <section class="d-flex align-items-start">
-                          <div>
-                            <b-form-checkbox id="new_post_summary" v-model="thisForm.by_email.posts.new_post_summary" name="new_post_summary" size="lg"></b-form-checkbox>
-                          </div>
-                          <div>
-                            <label for="posts.new_post_summary" class="ml-auto mb-0">New Post Summary</label>
-                            <p><small class="text-muted">Email a summary of new posts.</small></p>
-                          </div>
-                        </section>
-                          -->
-                      <section class="d-flex align-items-start">
+                        <!--
                         <div>
-                          <b-form-checkbox id="new_comment" v-model="thisForm.by_email.posts.new_comment" name="new_comment" size="lg"></b-form-checkbox>
+                          <b-form-checkbox id="new_post_summary" v-model="thisForm.by_email.posts.new_post_summary" name="new_post_summary" size="lg">New Post Summary</b-form-checkbox>
+                          <p><small class="text-muted">Email a summary of new posts.</small></p>
+                        </div>
+                        -->
+                        <div>
+                          <b-form-checkbox id="new_like" v-model="thisForm.by_email.posts.new_like" name="new_like" size="lg">New Like</b-form-checkbox>
                         </div>
                         <div>
-                          <label for="posts.new_comment" class="ml-auto mb-0">New Like</label>
+                          <b-form-checkbox id="new_comment" v-model="thisForm.by_email.posts.new_comment" name="new_comment" size="lg">New Comment</b-form-checkbox>
                         </div>
-                      </section>
-                        <section class="d-flex align-items-start">
-                          <div>
-                            <b-form-checkbox id="new_post_summary" v-model="thisForm.by_email.posts.new_post_summary" name="new_post_summary" size="lg"></b-form-checkbox>
-                          </div>
-                          <div>
-                            <label for="posts.new_post_summary" class="ml-auto mb-0">New Post Summary</label>
-                            <p><small class="text-muted">Email a summary of new posts.</small></p>
-                          </div>
-                        </section>
                       </b-form-group>
 
                       <hr />
 
                       <b-form-group id="group-email-other">
                         <h5>Other</h5>
-                        <section class="d-flex align-items-start">
-                          <div>
-                            <b-form-checkbox id="new_stream" v-model="thisForm.by_email.other.new_stream" name="new_stream" size="lg"></b-form-checkbox>
-                          </div>
-                          <div>
-                            <label for="other.new_stream" class="ml-auto mb-0">New Stream</label>
-                            <p><small class="text-muted">Email ....</small></p>
-                          </div>
-                        </section>
-                        <section class="d-flex align-items-start">
-                          <div>
-                            <b-form-checkbox id="upcoming_stream_reminders" v-model="thisForm.by_email.other.upcoming_stream_reminders" name="upcoming_stream_reminders" size="lg"></b-form-checkbox>
-                          </div>
-                          <div>
-                            <label for="other.upcoming_stream_reminders" class="ml-auto mb-0">Upcoming Stream Reminders</label>
-                            <p><small class="text-muted">Email ....</small></p>
-                          </div>
-                        </section>
+                        <div>
+                          <b-form-checkbox id="new_stream" v-model="thisForm.by_email.other.new_stream" name="new_stream" size="lg">New Stream</b-form-checkbox>
+                        </div>
+                        <div>
+                          <b-form-checkbox id="upcoming_stream_reminders" v-model="thisForm.by_email.other.upcoming_stream_reminders" name="upcoming_stream_reminders" size="lg">Upcoming Stream Reminders</b-form-checkbox>
+                        </div>
                       </b-form-group>
                     </template>
 
@@ -147,46 +109,22 @@
 
                     <b-form-group id="group-site-income">
                       <h5>Income</h5>
-                      <section class="d-flex align-items-start">
-                        <div>
-                          <b-form-checkbox id="new_tip" v-model="thisForm.by_site.income.new_tip" name="new_tip" size="lg"></b-form-checkbox>
-                        </div>
-                        <div>
-                          <label for="income.new_tip" class="ml-auto mb-0">New Tip</label>
-                          <p><small class="text-muted">New tip is received.</small></p>
-                        </div>
-                      </section>
+                      <div>
+                        <b-form-checkbox id="new_tip" v-model="thisForm.by_site.income.new_tip" name="new_tip" size="lg">New Tip</b-form-checkbox>
+                        <p><small class="text-muted">Whenever a new tip is received</small></p>
+                      </div>
                     </b-form-group>
 
                     <hr />
 
                     <b-form-group id="group-site-post">
                       <h5>Posts</h5>
-                      <section class="d-flex align-items-start">
-                        <div>
-                          <b-form-checkbox id="new_post_summary" v-model="thisForm.by_site.posts.new_post_summary" name="new_post_summary" size="lg"></b-form-checkbox>
-                        </div>
-                        <div>
-                          <label for="posts.new_post_summary" class="ml-auto mb-0">New Post Summary</label>
-                          <p><small class="text-muted">Summary of new posts.</small></p>
-                        </div>
-                      </section>
-                      <section class="d-flex align-items-start">
-                        <div>
-                          <b-form-checkbox id="new_comment" v-model="thisForm.by_site.posts.new_comment" name="new_comment" size="lg"></b-form-checkbox>
-                        </div>
-                        <div>
-                          <label for="posts.new_comment" class="ml-auto mb-0">New Comment</label>
-                        </div>
-                      </section>
-                      <section class="d-flex align-items-start">
-                        <div>
-                          <b-form-checkbox id="new_like" v-model="thisForm.by_site.posts.new_like" name="new_like" size="lg"></b-form-checkbox>
-                        </div>
-                        <div>
-                          <label for="posts.new_like" class="ml-auto mb-0">New Like</label>
-                        </div>
-                      </section>
+                      <div>
+                        <b-form-checkbox id="new_comment" v-model="thisForm.by_site.posts.new_comment" name="new_comment" size="lg">New Comment</b-form-checkbox>
+                      </div>
+                      <div>
+                        <b-form-checkbox id="new_like" v-model="thisForm.by_site.posts.new_like" name="new_like" size="lg">New Like</b-form-checkbox>
+                      </div>
                     </b-form-group>
 
                     </template>
@@ -408,9 +346,18 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
-label {
-  margin-bottom: 0;
+<style lang="scss">
+body .custom-checkbox.b-custom-control-lg > label {
+    padding-top: 0.2rem;
+    font-size: 1.0rem;
+    line-height: 1.5;
 }
+// Adjust bootstrap checkbox: keep large checkbox, but decrease font size and adjust accordingly to center
+body .component-settings_notification {
+
+}
+</style
+
+<style lang="scss" scoped>
 </style>
 

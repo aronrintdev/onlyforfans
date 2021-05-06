@@ -28,7 +28,6 @@ class CommentReceived extends Notification
     {
         $channels =  ['database'];
         $exists = $this->settings->cattrs['notifications']['posts']['new_comment'] ?? false;
-        //dd('RC', $this->settings->cttrs, $exists?'T':'F');
         if ( $exists && is_array($exists) && in_array('email', $exists) ) {
             $isGlobalEmailEnabled = ($this->settings->cattrs['notifications']['global']['enabled'] ?? false)
                 ? in_array('email', $this->settings->cattrs['notifications']['global']['enabled'])
