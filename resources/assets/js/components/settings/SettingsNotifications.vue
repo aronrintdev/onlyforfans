@@ -65,6 +65,7 @@
 
                       <b-form-group id="group-email-post">
                         <h5>Posts</h5>
+                          <!--
                         <section class="d-flex align-items-start">
                           <div>
                             <b-form-checkbox id="new_post_summary" v-model="thisForm.by_email.posts.new_post_summary" name="new_post_summary" size="lg"></b-form-checkbox>
@@ -74,14 +75,24 @@
                             <p><small class="text-muted">Email a summary of new posts.</small></p>
                           </div>
                         </section>
+                          -->
                       <section class="d-flex align-items-start">
                         <div>
-                          <b-form-checkbox id="new_like" v-model="thisForm.by_email.posts.new_like" name="new_like" size="lg"></b-form-checkbox>
+                          <b-form-checkbox id="new_comment" v-model="thisForm.by_email.posts.new_comment" name="new_comment" size="lg"></b-form-checkbox>
                         </div>
                         <div>
-                          <label for="posts.new_like" class="ml-auto mb-0">New Like</label>
+                          <label for="posts.new_comment" class="ml-auto mb-0">New Like</label>
                         </div>
                       </section>
+                        <section class="d-flex align-items-start">
+                          <div>
+                            <b-form-checkbox id="new_post_summary" v-model="thisForm.by_email.posts.new_post_summary" name="new_post_summary" size="lg"></b-form-checkbox>
+                          </div>
+                          <div>
+                            <label for="posts.new_post_summary" class="ml-auto mb-0">New Post Summary</label>
+                            <p><small class="text-muted">Email a summary of new posts.</small></p>
+                          </div>
+                        </section>
                       </b-form-group>
 
                       <hr />
@@ -313,7 +324,7 @@ export default {
 
     this.thisForm.by_email.income.new_tip = this.user_settings.cattrs.notifications.income.new_tip?.includes('email') || false
     this.thisForm.by_email.income.new_subscription = this.user_settings.cattrs.notifications.income.new_subscription?.includes('email') || false
-    this.thisForm.by_email.posts.new_post_summary = this.user_settings.cattrs.notifications.posts.new_post_summary?.includes('email') || false
+    //this.thisForm.by_email.posts.new_post_summary = this.user_settings.cattrs.notifications.posts.new_post_summary?.includes('email') || false
     this.thisForm.by_email.posts.new_comment = this.user_settings.cattrs.notifications.posts.new_comment?.includes('email') || false
     this.thisForm.by_email.posts.new_like = this.user_settings.cattrs.notifications.posts.new_like?.includes('email') || false
     this.thisForm.by_email.campaigns.goal_achieved = this.user_settings.cattrs.notifications.campaigns?.goal_achieved?.includes('email') || false
@@ -325,7 +336,7 @@ export default {
 
     this.thisForm.by_site.income.new_tip = this.user_settings.cattrs.notifications.income.new_tip?.includes('site') || false
     this.thisForm.by_site.income.new_subscription = this.user_settings.cattrs.notifications.income.new_subscription?.includes('site') || false
-    this.thisForm.by_site.posts.new_post_summary = this.user_settings.cattrs.notifications.posts.new_post_summary?.includes('site') || false
+    //this.thisForm.by_site.posts.new_post_summary = this.user_settings.cattrs.notifications.posts.new_post_summary?.includes('site') || false
     this.thisForm.by_site.posts.new_comment = this.user_settings.cattrs.notifications.posts.new_comment?.includes('site') || false
     this.thisForm.by_site.posts.new_like = this.user_settings.cattrs.notifications.posts.new_like?.includes('site') || false
     this.thisForm.by_site.campaigns.goal_achieved = this.user_settings.cattrs.notifications.campaigns?.goal_achieved?.includes('site') || false
@@ -340,9 +351,11 @@ export default {
     this.$watch('thisForm.by_email.income.new_subscription', function (newVal) { 
       this.updateSetting('income', {new_subscription: ['email']}, newVal)
     })
+    /*
     this.$watch('thisForm.by_email.posts.new_post_summary', function (newVal) { 
       this.updateSetting('posts', {new_post_summary: ['email']}, newVal)
     })
+    */
     this.$watch('thisForm.by_email.posts.new_comment', function (newVal) { 
       this.updateSetting('posts', {new_comment: ['email']}, newVal)
     })
@@ -366,9 +379,11 @@ export default {
     this.$watch('thisForm.by_site.income.new_subscription', function (newVal) { 
       this.updateSetting('income', {new_subscription: ['site']}, newVal)
     })
+    /*
     this.$watch('thisForm.by_site.posts.new_post_summary', function (newVal) { 
       this.updateSetting('posts', {new_post_summary: ['site']}, newVal)
     })
+    */
     this.$watch('thisForm.by_site.posts.new_comment', function (newVal) { 
       this.updateSetting('posts', {new_comment: ['site']}, newVal)
     })

@@ -94,7 +94,7 @@ class UserSetting extends Model
                 //'returning_subscription' => [],
             ],
             'posts' => [ // subcat
-                'new_post_summary' => [],
+                //'new_post_summary' => [],
                 'new_comment' => [],
                 'new_like' => [],
             ],

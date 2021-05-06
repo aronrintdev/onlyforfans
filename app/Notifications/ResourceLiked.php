@@ -33,7 +33,12 @@ class ResourceLiked extends Notification
         $channels =  ['database'];
         $exists = $this->settings->cattrs['notifications']['posts']['new_like'] ?? false;
         if ( $exists && is_array($exists) && in_array('email', $exists) ) {
-            $channels[] =  'mail';
+            $isGlobalEmailEnabled = ($this->settings->cattrs['notifications']['global']['enabled'] ?? false)
+                ? in_array('email', $this->settings->cattrs['notifications']['global']['enabled'])
+                : false;
+            if ( $isGlobalEmailEnabled ) {
+                $channels[] =  'mail';
+            }
         }
         return $channels;
     }

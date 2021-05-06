@@ -62,7 +62,7 @@ class UsersController extends AppBaseController
 
         $userSetting = $user->settings;
 
-        $result = $userSetting->enable($group, $request->except(['foo']) );
+        $result = $userSetting->enable($group, $request->all() );
         //dd($request->all(), $result);
 
         $userSetting->refresh();
@@ -75,7 +75,7 @@ class UsersController extends AppBaseController
         $vrules = UserSetting::$vrules[$group];
         $request->validate($vrules);
         $userSetting = $user->settings;
-        $result = $userSetting->disable($group, $request->except(['foo']) );
+        $result = $userSetting->disable($group, $request->all() );
         $userSetting->refresh();
         return $userSetting;
     }
