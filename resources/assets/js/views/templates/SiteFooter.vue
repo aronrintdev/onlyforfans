@@ -16,7 +16,7 @@
             <a href="/blog" class="col-sm-2 col-2 col-lg-1 col-xs-12" style="margin-bottom:5px">Blog</a>
           </div>
           <div class="fans-terms text-center">
-            Copyright © 2021 <a href="http://fansplatform.mjmdesign.co">AllFans™</a>. All rights reserved.
+            Copyright © 2021 <a href="/">AllFans™</a>. All rights reserved.
             <br />
             AllFans • 1027 S. Rainbow Blvd. #119, Las Vegas, NV 89145
             <br />

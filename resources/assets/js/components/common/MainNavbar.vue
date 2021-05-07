@@ -1,7 +1,7 @@
 <template>
   <b-navbar :toggleable="mobile" variant="light" sticky class="bg-white" :class="{ 'pb-0': mobile }" >
     <b-navbar-brand :to="{ name: 'index' }" class="navbar-brand mr-5">
-      All Fans
+      <img src="/images/logos/allfans-logo-154x33.png" alt="All Fans Logo">
     </b-navbar-brand>
     <b-navbar-toggle target="nav-collapse" class="mb-2">
       <ProfileButton />

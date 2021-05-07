@@ -14,24 +14,36 @@ class CommentReceived extends Notification
     use Queueable;
 
     public $resource;
-    public $actor; // purchaser;
+    public $actor; // commenter;
+    protected $settings;
 
-    //public function __construct(Timeline $timeline, User $purchaser)
     public function __construct(Commentable $resource, User $actor, array $attrs=[])
     {
         $this->resource = $resource;
         $this->actor = $actor;
+        $this->settings = $resource->getPrimaryOwner()->settings; // resource ~= commentable
     }
 
     public function via($notifiable)
     {
-        return ['database', 'mail'];
+        $channels =  ['database'];
+        $exists = $this->settings->cattrs['notifications']['posts']['new_comment'] ?? false;
+        if ( $exists && is_array($exists) && in_array('email', $exists) ) {
+            $isGlobalEmailEnabled = ($this->settings->cattrs['notifications']['global']['enabled'] ?? false)
+                ? in_array('email', $this->settings->cattrs['notifications']['global']['enabled'])
+                : false;
+            if ( $isGlobalEmailEnabled ) {
+                $channels[] =  'mail';
+            }
+        }
+        return $channels;
     }
 
     public function toMail($notifiable)
     {
         return (new MailMessage)
-                    ->line($this->actor->name.' sent you a comment!');
+                    ->line('You received a comment from '.$this->actor->name)
+                    ->action('Notification Action', url('/'));
     }
 
     public function toArray($notifiable)

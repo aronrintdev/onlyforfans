@@ -16,4 +16,9 @@ interface Ownable {
      */
     public function isOwner(User $user) : bool;
 
+    /**
+     * Get a single owner, as required by most code
+     */
+    //public function getPrimaryOwner() : User; // %TODO %FIXME
+
 }

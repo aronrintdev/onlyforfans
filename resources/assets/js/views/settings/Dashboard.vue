@@ -58,13 +58,20 @@ export default {
         {
           name: 'General',
           to: { name: 'settings.general', params: {} },
-        }, {
+        }, 
+        {
           name: 'Profile',
           to: { name: 'settings.profile', params: {} },
-        }, {
+        }, 
+        {
+          name: 'Notifications',
+          to: { name: 'settings.notifications', params: {} },
+        }, 
+        {
           name: 'Privacy',
           to: { name: 'settings.privacy', params: {} },
-        }, {
+        }, 
+        {
           name: 'Security',
           to: { name: 'settings.security', params: {} },
         },
