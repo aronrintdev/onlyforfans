@@ -168,7 +168,6 @@ class RestCommentsTest extends TestCase
     /**
      *  @group comments
      *  @group regression
-     *  @group here0507
      */
     public function test_owner_can_view_own_comment()
     {

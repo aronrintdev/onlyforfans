@@ -63,11 +63,6 @@ class CommentsController extends AppBaseController
     {
         $this->authorize('view', $comment);
         return new CommentResource($comment);
-        /*
-        return response()->json([
-            'comment' => $comment,
-        ]);
-         */
     }
 
     public function store(Request $request)
