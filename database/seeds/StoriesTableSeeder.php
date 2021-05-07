@@ -6,6 +6,7 @@ use App\Enums\MediafileTypeEnum;
 use App\Libs\FactoryHelpers;
 use App\Models\Story;
 use App\Models\User;
+use App\Enums\StoryTypeEnum;
 
 class StoriesTableSeeder extends Seeder
 {
@@ -35,8 +36,9 @@ class StoriesTableSeeder extends Seeder
             collect(range(1,$count))->each( function() use(&$u) {
 
                 $stype = ($this->appEnv==='testing')
-                    ? 'text'
-                    : $this->faker->randomElement(['text','image','image']);
+                    ? StoryTypeEnum::TEXT
+                    : $this->faker->randomElement([StoryTypeEnum::TEXT, StoryTypeEnum::PHOTO, StoryTypeEnum::PHOTO]);
+                    //: $this->faker->randomElement(['text','image','image']);
 
                 $attrs = [
                     'content'     => $this->faker->text,

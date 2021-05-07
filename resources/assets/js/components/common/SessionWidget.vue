@@ -19,7 +19,7 @@
           <div class="avatar-details">
             <h2 class="avatar-name my-0">
               <a :href="`/${follower.username}`">{{ follower.name }}</a>
-              <span v-if="follower.verified" class="verified-badge"><b-icon icon="check-circle-fill" variant="success" font-scale="1"></b-icon></span>
+              <span v-if="follower.verified" class="verified-badge"><b-icon icon="check-circle-fill" variant="primary" font-scale="1"></b-icon></span>
             </h2>
             <p class="avatar-mail my-0">
               <a :href="`/${follower.username}`">@{{ follower.username }}</a>

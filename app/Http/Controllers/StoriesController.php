@@ -19,6 +19,7 @@ class StoriesController extends AppBaseController
 {
 
     // this is the general REST version. There should also be timelines/{timeline}/stories (?)
+    // %FIXME : remove filters...GET params are not nested
     public function index(Request $request)
     {
         $filters = [];
@@ -54,6 +55,14 @@ class StoriesController extends AppBaseController
                 break;
             default:
                 $query->where($k, $v);
+            }
+        }
+
+        if ( $request->has('stypes') ) {
+            if ( is_array($request->stypes) ) {
+                $query->whereIn('stype', $request->stypes);
+            } else {
+                $query->where('stype', $request->stypes);
             }
         }
 
