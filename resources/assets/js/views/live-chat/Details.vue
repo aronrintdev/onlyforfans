@@ -18,7 +18,7 @@
                         <span>{{ selectedUser.profile.display_name ? `${selectedUser.profile.display_name} (${selectedUser.profile.name})` : selectedUser.profile.name }}</span>
                       </div>
                       <div class="details" v-if="!messageSearchVisible">
-                        <div class="online-status" v-if="!selectedUser.profile.user.is_online && !!selectedUser.profile.user.last_logged">Last seen {{ moment(selectedUser.profile.user.last_logged).fromNow() }}
+                        <div class="online-status" v-if="!selectedUser.profile.user.is_online">Last seen {{ moment(selectedUser.profile.user.last_logged || selectedUser.profile.user.created_at).fromNow() }}
                         </div>
                         <div class="online-status" v-if="selectedUser.profile.user.is_online">
                           <i class="fa fa-circle" aria-hidden="true"></i>Available now
@@ -1013,6 +1013,9 @@
         _.orderBy(this.messages, ['date'], ['DESC']);
         this.messages = _.cloneDeep(this.messages);
         this.selectedUser = { ...this.selectedUser, messages: this.messages };
+        setTimeout(() => {
+          $('.conversation-list').animate({ scrollTop: $('.conversation-list')[0].scrollHeight }, 100);
+        }, 100);
       },
       getLogoFromName: function (username) {
         const names = username.split(' ');
@@ -1094,6 +1097,7 @@
           if (this.messagePrice) {
             data.append('tip_price', this.messagePrice);
           }
+          const self = this;
           this.axios.post('/chat-messages', data)
             .then((response) => {
               this.isSendingFiles = false;
@@ -1101,25 +1105,25 @@
               this.adjustTextareaSize();
               this.sortableMedias = [];
               this.messagePrice = undefined;
-              this.originMessages.unshift(response.data.message);
-              this.lastMessage = { ...response.data.message };
+              self.lastMessage = _.cloneDeep(response.data.message);
+              self.originMessages.unshift(self.lastMessage);
               this.groupMessages();
-              $('.conversation-list').animate({ scrollTop: $('.conversation-list')[0].scrollHeight }, 0);
             });
         } else if (this.newMessageText) {
+          const self = this;
           this.axios.post('/chat-messages', {
             message: this.newMessageText,
             tip_price: this.messagePrice,
             user_id: this.selectedUser.profile.id,
           })
             .then((response) => {
-              this.lastMessage = response.data.message;
-              this.originMessages.unshift(response.data.message);
-              this.groupMessages();
-              this.newMessageText = undefined;
-              this.adjustTextareaSize();
-              this.messagePrice = undefined;
-              $('.conversation-list').animate({ scrollTop: $('.conversation-list')[0].scrollHeight }, 0);
+              self.lastMessage = _.cloneDeep(response.data.message);
+              self.originMessages.unshift(self.lastMessage);
+              self.originMessages = _.cloneDeep(self.originMessages);
+              self.groupMessages();
+              self.newMessageText = undefined;
+              self.adjustTextareaSize();
+              self.messagePrice = undefined;
             });
         }
       },
