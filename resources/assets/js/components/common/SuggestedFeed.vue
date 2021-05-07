@@ -155,8 +155,13 @@ body .suggested_feed-crate {
 
   // hide active page so we only show navigation at top
   ul.pagenav-top {
-    li.page-item.active {
+    // Manually hide the numbered pages in nav, only show left (prev) and right (next) arrows
+    li.page-item {
       display: none;
+    }
+    li.page-item:first-child,
+    li.page-item:last-child {
+      display: list-item;
     }
     li.page-item .page-link {
       font-size: 1.5rem;
