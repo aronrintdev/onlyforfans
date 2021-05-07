@@ -697,6 +697,7 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
+     *  @group here0507
      */
     public function test_can_select_mediafile_from_vault_folder_to_attach_to_story_single_op()
     {
