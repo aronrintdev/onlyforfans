@@ -78,6 +78,13 @@ import VueSlider from 'vue-slider-component'
 import 'vue-slider-component/theme/default.css'
 Vue.component('VueSlider', VueSlider)
 
+/**
+ * vue-croppie
+ */
+import VueCroppie from 'vue-croppie';
+import 'croppie/croppie.css' // import the croppie css manually
+Vue.use(VueCroppie);
+
 // ---
 
 /**
