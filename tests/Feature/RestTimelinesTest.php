@@ -391,7 +391,6 @@ class TimelinesTest extends TestCase
     /**
      *  @group timelines
      *  @group regression
-     *  @group here0507
      */
     public function test_can_view_suggested_timelines()
     {
@@ -546,6 +545,7 @@ class TimelinesTest extends TestCase
     /**
      *  @group timelines
      *  @group regression
+     *  @group erik
      */
     public function test_can_subscribe_to_timeline()
     {
@@ -614,6 +614,7 @@ class TimelinesTest extends TestCase
     /**
      *  @group timelines
      *  @group regression
+     *  @group erik
      */
     public function test_can_unsubscribe_from_timeline()
     {
