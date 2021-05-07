@@ -240,16 +240,19 @@
                         </svg>
                       </button>
                     </div>
-                    <textarea
-                      placeholder="Type a message"
-                      name="text"
-                      rows="1"
-                      maxlength="10000"
-                      spellcheck="false"
-                      v-model="messageText"
-                      @keydown="onCheckReturnKey"
-                      @input="onInputNewMessage"
-                    ></textarea>
+                    <div class="multiline-textbox">
+                      <textarea
+                        placeholder="Type a message"
+                        name="text"
+                        rows="1"
+                        ref="new_message_text"
+                        maxlength="10000"
+                        spellcheck="false"
+                        v-model="newMessageText"
+                        @keydown="onCheckReturnKey"
+                        @input="onInputNewMessage"
+                      ></textarea>
+                    </div>
                     <div class="action-btns">
                       <div>
                         <!-- image -->
@@ -308,7 +311,7 @@
                           </svg>
                         </button>
                       </div>
-                      <button class="send-btn btn" :disabled="!(hasNewMessage || sortableMedias.length > 0)" type="button" @click="sendMessage">
+                      <button class="send-btn btn" :disabled="!(hasNewMessage || sortableMedias.length > 0) || selectedUsers.length < 1" type="button" @click="sendMessage">
                         <b-spinner v-if="isSendingFiles" small></b-spinner>
                         Send
                       </button>
@@ -810,6 +813,11 @@
         })
    
         Promise.all(promises).then(function() {
+          self.isSendingFiles = false;
+          self.newMessageText = undefined;
+          self.adjustTextareaSize();
+          self.sortableMedias = [];
+          self.messagePrice = undefined;
           if (self.selectedUsers.length > 1) {
             self.$router.push('/messages');
           } else {
@@ -836,11 +844,6 @@
       onFilterOptionChanged: function(option, value) {
         this.filterOptions[option] = value;
         this.filterOptions = { ...this.filterOptions };
-      },
-      onCheckReturnKey: function(e) {
-        if (e.ctrlKey && e.keyCode == 13) {
-          this.sendMessage();
-        }
       },
       openScheduleMessageModal: function() {
         this.$refs['schedule-message-modal'].show();
@@ -1137,6 +1140,7 @@
       },
       onInputNewMessage: function(e) {
         this.newMessageText = e.target.value;
+        this.adjustTextareaSize();
         if (this.newMessageText) {
           this.hasNewMessage = true;
         } else {
@@ -1151,6 +1155,14 @@
           }
         }
         this.scheduledMessage = { ...this.scheduledMessage };
+      },
+      adjustTextareaSize: function() {
+        const limit = 100;
+        const textarea = this.$refs.new_message_text;
+        if (textarea) {
+          textarea.style.height = '1px';
+          textarea.style.height = Math.min(textarea.scrollHeight, limit) + "px";
+        }
       }
     }
   }

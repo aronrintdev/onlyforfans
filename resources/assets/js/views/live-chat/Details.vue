@@ -98,7 +98,10 @@
                       </button>
                     </div>
                   </div>
-                  <div class="conversation-list">
+                  <div class="conversation-list-loading" v-if="!initialLoadingFinished">
+                    <b-spinner></b-spinner>
+                  </div>
+                  <div class="conversation-list" :class="!initialLoadingFinished ? 'overflow-hidden' : ''">
                     <div class="empty-messages" v-if="messages.length === 0">
                       Type a message below to start a conversation with {{ selectedUser.name }}
                     </div>
@@ -163,7 +166,6 @@
                                       </div>
                                     </div>
                                   </div>
-                                  <div class="text" v-if="message.messages[message.messages.length - 1].mcontent" :class="`message-${message.messages[message.messages.length - 1].id}`">{{ message.messages[message.messages.length - 1].mcontent }}</div>
                                 </div>
                                 <div v-if="!message.tip_price">
                                   <template v-for="msg in message.messages">
@@ -347,15 +349,19 @@
                         </svg>
                       </button>
                     </div>
-                    <textarea
-                      placeholder="Type a message"
-                      name="text"
-                      rows="1"
-                      maxlength="10000"
-                      spellcheck="false"
-                      @keydown="onCheckReturnKey"
-                      @input="onInputNewMessage"
-                    ></textarea>
+                    <div class="multiline-textbox">
+                      <textarea
+                        placeholder="Type a message"
+                        name="text"
+                        rows="1"
+                        ref="new_message_text"
+                        maxlength="10000"
+                        spellcheck="false"
+                        v-model="newMessageText"
+                        @keydown="onCheckReturnKey"
+                        @input="onInputNewMessage"
+                      ></textarea>
+                    </div>
                     <div class="action-btns">
                       <div>
                         <!-- image -->
@@ -482,7 +488,7 @@
         </div>
         <div class="action-btns">
           <button class="link-btn" @click="closeCustomNameModal">Cancel</button>
-          <button class="link-btn" @click="saveCustomName" :disabled="!userCustomName">Save</button>
+          <button class="link-btn" @click="saveCustomName">Save</button>
         </div>
       </div>
     </b-modal>
@@ -823,6 +829,7 @@
       ],
       scheduledMessage: {},
       scheduledMessageDate: null,
+      initialLoadingFinished: false,
     }),
     mounted() {
       const self = this;
@@ -830,6 +837,10 @@
       this.markAsRead();
       this.getMessages();
       this.findConversationList();
+      this.$Lazyload.$on('loaded', function (e) {
+        const diff = e.el.clientHeight > 400 ? e.el.clientHeight - 400 + 10 : 0;
+        $('.conversation-list').animate({ scrollTop: $('.conversation-list')[0].scrollTop + diff }, 0);
+      });
       // Echo.join(`user-status`)
       //   .joining((user) => {
       //     self.updateUserStatus(user.id, 1);
@@ -865,10 +876,6 @@
                 self.originMessages.unshift(message);
                 self.offset += 1;
                 self.groupMessages();
-                $('.conversation-list').animate({ scrollTop: $('.conversation-list')[0].scrollHeight }, 500);
-                this.$Lazyload.$once('loaded', function () {
-                  $('.conversation-list').animate({ scrollTop: $('.conversation-list')[0].scrollHeight }, 500);
-                });
                 self.markAsRead();
               } else {
                 self.lastMessage = { ...self.lastMessage, unread_messages_count: true };
@@ -881,6 +888,7 @@
         this.messages = [];
         this.originMessages = [];
         this.offset = 0;
+        this.initialLoadingFinished = false;
         this.newMessageText = undefined;
         this.markAsRead();
         this.getMessages();
@@ -953,8 +961,11 @@
       findConversationList: function() {
         setTimeout(() => {
             if (this.$el.querySelector('.conversation-list')) {
-              $('.conversation-list').animate({ scrollTop: $('.conversation-list')[0].scrollHeight }, 500);
+              $('.conversation-list').animate({ scrollTop: $('.conversation-list')[0].scrollHeight }, 0);
               this.$el.querySelector('.conversation-list').addEventListener('scroll', this.handleDebouncedScroll);
+              setTimeout(() => {
+                this.initialLoadingFinished = true;
+              }, 1000)
             } else {
               this.findConversationList();
             }
@@ -1042,6 +1053,7 @@
       },
       onInputNewMessage: function(e) {
         this.newMessageText = e.target.value;
+        this.adjustTextareaSize();
         if (this.newMessageText) {
           this.hasNewMessage = true;
         } else {
@@ -1086,14 +1098,13 @@
             .then((response) => {
               this.isSendingFiles = false;
               this.newMessageText = undefined;
+              this.adjustTextareaSize();
               this.sortableMedias = [];
+              this.messagePrice = undefined;
               this.originMessages.unshift(response.data.message);
               this.lastMessage = { ...response.data.message };
               this.groupMessages();
-              $('.conversation-list').animate({ scrollTop: $('.conversation-list')[0].scrollHeight }, 500);
-              this.$Lazyload.$once('loaded', function () {
-                $('.conversation-list').animate({ scrollTop: $('.conversation-list')[0].scrollHeight }, 500);
-              });
+              $('.conversation-list').animate({ scrollTop: $('.conversation-list')[0].scrollHeight }, 0);
             });
         } else if (this.newMessageText) {
           this.axios.post('/chat-messages', {
@@ -1106,7 +1117,9 @@
               this.originMessages.unshift(response.data.message);
               this.groupMessages();
               this.newMessageText = undefined;
-              $('.conversation-list').animate({ scrollTop: $('.conversation-list')[0].scrollHeight }, 500);
+              this.adjustTextareaSize();
+              this.messagePrice = undefined;
+              $('.conversation-list').animate({ scrollTop: $('.conversation-list')[0].scrollHeight }, 0);
             });
         }
       },
@@ -1189,6 +1202,19 @@
                 }
               };
               $(`.user-content.user-${this.selectedUser.profile.id} .username`).text(this.userCustomName);
+              this.closeCustomNameModal();
+            });
+        } else {
+          this.axios.post(`/chat-messages/${this.$route.params.id}/custom-name`, { name: '' })
+            .then(() => {
+              this.selectedUser = {
+                ...this.selectedUser,
+                profile: {
+                  ...this.selectedUser.profile,
+                  display_name: undefined,
+                }
+              };
+              $(`.user-content.user-${this.selectedUser.profile.id} .username`).text(this.selectedUser.profile.name);
               this.closeCustomNameModal();
             });
         }
@@ -1395,7 +1421,7 @@
         this.$refs['confirm-message-price-modal'].hide();
       },
       onCheckReturnKey: function(e) {
-        if (e.ctrlKey && e.keyCode == 13) {
+        if (e.ctrlKey && e.keyCode === 13) {
           this.sendMessage();
         }
       },
@@ -1578,6 +1604,14 @@
           }
         }
         this.scheduledMessage = { ...this.scheduledMessage };
+      },
+      adjustTextareaSize: function() {
+        const limit = 100;
+        const textarea = this.$refs.new_message_text;
+        if (textarea) {
+          textarea.style.height = '1px';
+          textarea.style.height = Math.min(textarea.scrollHeight, limit) + "px";
+        }
       }
     }
   }
