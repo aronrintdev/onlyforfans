@@ -880,6 +880,17 @@
               } else {
                 self.lastMessage = { ...self.lastMessage, unread_messages_count: true };
               }
+            })
+            .listen('MessageRemoveEvent', (e) => {
+              const idx = self.originMessages.findIndex(m => m.id === e.chatthread);
+              if (idx < 0) {
+                return;
+              }
+              if (e.sender.id === this.$route.params.id) {
+                self.originMessages.splice(idx, 1);
+                self.offset -= 1;
+                self.groupMessages();
+              }
             });
         }
       },
@@ -1407,15 +1418,17 @@
         this.$refs['unsend-message-modal'].hide();
       },
       unsendTipMessage: function() {
-        this.axios.delete(`/chat-messages/${this.$route.params.id}/threads/${this.unsendTipMessageId}`)
-          .then(() => {
-            this.closeUnsendMessageModal();
-            const newMessages = [...this.messages];
-            const idx = newMessages.findIndex(message => message.id === this.unsendTipMessageId);
-            newMessages.splice(idx, 1);
-            this.messages = newMessages;
-          });
-        this.unsendTipMessageId = undefined;
+        const self = this;
+        if (this.unsendTipMessageId) {
+          this.axios.delete(`/chat-messages/${this.$route.params.id}/threads/${this.unsendTipMessageId}`)
+            .then(() => {
+              const idx = self.originMessages.findIndex(message => message.id === self.unsendTipMessageId);
+              self.originMessages.splice(idx, 1);
+              self.originMessages = _.cloneDeep(self.originMessages);
+              self.groupMessages();
+              self.closeUnsendMessageModal();
+            });
+        }
       },
       openMessagePriceConfirmModal: function(value) {
         this.confirm_message_price = value;

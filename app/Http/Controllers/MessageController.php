@@ -10,6 +10,7 @@ use App\Models\Timeline;
 use App\Models\User;
 use App\Models\Mediafile;
 use App\Events\MessageSentEvent;
+use App\Events\MessageRemoveEvent;
 use App\Enums\MediafileTypeEnum;
 use function _\sortBy;
 use function _\orderBy;
@@ -472,8 +473,11 @@ class MessageController extends Controller
         return ["unread_messages_count" => count($unread_threads)];
     }
     public function removeThread(Request $request, $id, $threadId) {
+        $sessionUser = $request->user();
         $deleted = ChatThread::where('id', $threadId)->delete();
+        $receiver = User::where('id', $id)->get()->first();
         if ($deleted) {
+            broadcast(new MessageRemoveEvent($threadId, $sessionUser, $receiver))->toOthers();
             return;
         }
         abort(400);
