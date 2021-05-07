@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Resources\StoryCollection;
+use App\Http\Resources\Story as StoryResource;
 use App\Models\Mediafile;
 use App\Models\Setting;
 use App\Models\Story;
@@ -150,9 +151,12 @@ class StoriesController extends AppBaseController
     public function show(Request $request, Story $story)
     {
         $this->authorize('view', $story);
+        /*
         return response()->json([
             'story' => $story,
         ]);
+         */
+        return new StoryResource($story);
     }
 
     public function destroy(Request $request, Story $story)
