@@ -12,7 +12,7 @@ import UuidEncoder from 'uuid-encoder'
  * string encode(string uuid)
  * string decode(string str)
  */
-const encoder = new UuidEncoder('base64url')
+const encoder = new UuidEncoder('base62')
 
 Vue.mixin({
   computed: {

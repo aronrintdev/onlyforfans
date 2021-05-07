@@ -2,7 +2,7 @@
   <div class="app d-flex flex-column">
     <!-- Header -->
     <MainNavBar class="header" />
-    <div class="content p-3 flex-grow-1">
+    <div class="content flex-grow-1" :class="{ 'p-3': !mobile }">
       <transition name="quick-fade" mode="out-in">
         <router-view />
       </transition>
