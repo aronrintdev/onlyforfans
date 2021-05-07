@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
 use App\Http\Resources\TransactionCollection;
 use App\Models\Financial\Transaction;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class EarningsController extends Controller
 {
@@ -20,7 +22,65 @@ class EarningsController extends Controller
      */
     public function index(Request $request)
     {
-        //
+        $request->validate([
+            'from' => 'date',
+            'to' => 'date',
+        ]);
+
+        $from = $request->has('from') ? new Carbon($request->from) : Carbon::now()->subDays(30);
+        $to   = $request->has('to')   ? new Carbon($request->to)   : Carbon::now();
+
+        // Get summary items
+        $user = Auth::user();
+        $account = $user->getInternalAccount(Config::get('transactions.default'), Config::get('transactions.defaultCurrency'));
+        $credits = $account->transactions()
+            ->select('type', DB::raw('SUM(credit_amount) as total, COUNT(*) as count'))
+            ->where('credit_amount', '>', 0)->orderBy('settled_at', 'desc')
+            ->whereIn('type', [
+                TransactionTypeEnum::SALE,
+                TransactionTypeEnum::TIP,
+                TransactionTypeEnum::SUBSCRIPTION,
+            ])
+            ->whereBetween('settled_at', [ $from, $to ])
+            ->groupBy('type')
+            ->get();
+
+        $debits = $account->transactions()
+            ->select('type', DB::raw('SUM(debit_amount) as total, COUNT(*) as count'))
+            ->where('debit_amount', '>', 0)->orderBy('settled_at', 'desc')
+            ->whereIn('type', [
+                TransactionTypeEnum::FEE,
+                TransactionTypeEnum::CHARGEBACK,
+                TransactionTypeEnum::CHARGEBACK_PARTIAL,
+                TransactionTypeEnum::CREDIT,
+            ])
+            ->whereBetween('settled_at', [$from, $to])
+            ->groupBy('type')
+            ->get();
+
+        $credits->each(function($item, $key) {
+            $item['total'] = (int)$item['total'];
+        });
+
+        $debits->each(function ($item, $key) {
+            $item['total'] = (int)$item['total'];
+        });
+
+        return [
+            'credits' => [
+                TransactionTypeEnum::SALE => $credits->firstWhere('type', TransactionTypeEnum::SALE) ?? [ 'total' => 0, 'count' => 0 ],
+                TransactionTypeEnum::TIP => $credits->firstWhere('type', TransactionTypeEnum::TIP) ?? ['total' => 0, 'count' => 0],
+                TransactionTypeEnum::SUBSCRIPTION => $credits->firstWhere('type', TransactionTypeEnum::SUBSCRIPTION) ?? ['total' => 0, 'count' => 0],
+            ],
+            'debits' => [
+                TransactionTypeEnum::FEE => $debits->firstWhere('type', TransactionTypeEnum::FEE) ?? ['total' => 0, 'count' => 0],
+                TransactionTypeEnum::CHARGEBACK => $debits->firstWhere('type', TransactionTypeEnum::CHARGEBACK) ?? ['total' => 0, 'count' => 0],
+                TransactionTypeEnum::CHARGEBACK_PARTIAL => $debits->firstWhere('type', TransactionTypeEnum::CHARGEBACK_PARTIAL) ?? ['total' => 0, 'count' => 0],
+                TransactionTypeEnum::CREDIT => $debits->firstWhere('type', TransactionTypeEnum::CREDIT) ?? ['total' => 0, 'count' => 0],
+            ],
+            'from' => $from,
+            'to' => $to,
+        ];
     }
 
     /**
