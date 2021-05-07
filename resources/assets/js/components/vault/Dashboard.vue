@@ -179,7 +179,7 @@ export default {
         const isActive = b.pkid === this.currentFolderPKID;
         result.push({
           pkid: b.pkid,
-          text: b.name,
+          text: b.vfname,
           active: isActive,
         });
       }
