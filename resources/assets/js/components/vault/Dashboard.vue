@@ -282,7 +282,7 @@ export default {
       const payload = {
         vault_id: this.vault_pkid,
         parent_id: this.currentFolderPKID,
-        name: this.createForm.name,
+        vfname: this.createForm.name,
       };
       axios.post('/vaultfolders', payload).then( (response) => {
         console.log('response', { response });
