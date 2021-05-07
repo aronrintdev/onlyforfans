@@ -120,7 +120,6 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
-     *  @group here0507
      */
     public function test_can_store_text_only_post_on_my_timeline()
     {

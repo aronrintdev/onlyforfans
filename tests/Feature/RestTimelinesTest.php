@@ -391,6 +391,7 @@ class TimelinesTest extends TestCase
     /**
      *  @group timelines
      *  @group regression
+     *  @group here0507
      */
     public function test_can_view_suggested_timelines()
     {
@@ -404,7 +405,7 @@ class TimelinesTest extends TestCase
         $response = $this->actingAs($nonfan)->ajaxJSON('GET', route('timelines.suggested'), $payload);
         $response->assertStatus(200);
         $response->assertJsonStructure([
-            'timelines' => [0 => [ 'id', 'slug', 'name', 'about', 'verified', 'price', 'is_follow_for_free', 'cover', 'avatar', ] ]
+            'data' => [0 => [ 'id', 'slug', 'name', 'about', 'verified', 'price', 'is_follow_for_free', 'cover', 'avatar', ] ]
         ]);
         //$content = json_decode($response->content());
     }
