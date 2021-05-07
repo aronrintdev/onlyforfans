@@ -190,8 +190,6 @@ export default {
       return [{
         data: this.suggestions,
       }];
-      //this.$store.dispatch('getVaultfolder', this.currentFolderPKID);
-      //this.cancelCreateFolder();
     },
   },
 
@@ -276,7 +274,6 @@ export default {
         invitees: this.shareForm.invitees.map( o => { return { email: o } }),
       });
       console.log('response', { response });
-      //this.$store.dispatch('getVaultfolder', this.currentFolderPKID);
       this.cancelShareFiles();
     },
 
@@ -310,8 +307,6 @@ export default {
     getLink(e, mediafilePKID) {
       axios.get(`/mediafiles/${mediafilePKID}`).then( (response) => {
         console.log('response', { response });
-        //this.$store.dispatch('getVaultfolder', this.currentFolderPKID);
-        //this.cancelCreateFolder();
       });
     },
 
