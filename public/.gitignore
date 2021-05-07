@@ -1,5 +1,5 @@
-*
 !.gitignore
+!.gitkeep
 
 !.htaccess
 !favicon.ico

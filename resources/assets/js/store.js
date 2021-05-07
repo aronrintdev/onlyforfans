@@ -9,14 +9,18 @@ Vue.use(Vuex)
 const route = window.route
 
 // Modules
+import earningsModule from './store/earnings'
 import searchModule from './store/search'
 import paymentModule from './store/payments'
+import postsModule from './store/posts'
 import subscriptionsModule from './store/subscriptions'
 
 export default new Vuex.Store({
   modules: {
+    earnings: earningsModule,
     search: searchModule,
     payments: paymentModule,
+    posts: postsModule,
     subscriptions: subscriptionsModule,
   },
 
@@ -35,9 +39,9 @@ export default new Vuex.Store({
     stories: [], // Current open stories
     earnings: null,
     debits: null,
-    fanledgers: {},
-    ledgercredits: null,
-    ledgerdebits: null,
+    fanledgers: {},       // TODO: Deprecate
+    ledgercredits: null,  // TODO: Deprecate
+    ledgerdebits: null,   // TODO: Deprecate
     favorites: null,
     timeline: null,
     session_user: null,
@@ -252,6 +256,9 @@ export default new Vuex.Store({
         params.following = true
       } else {
         params.following = true // default
+      }
+      if (Object.keys(filters).includes('stypes')) {
+        params.stypes = filters.stypes
       }
       axios.get(route('stories.index'), { params })
         .then((response) => {

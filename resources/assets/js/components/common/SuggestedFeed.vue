@@ -1,6 +1,5 @@
 <template>
-  <div v-if="!isLoading" class="suggested_feed-crate tag-crate">
-
+  <div v-if="!isLoading" class="suggested_feed-crate tag-crate px-3">
 
     <section class="ctrl-top d-flex justify-content-between align-items-center">
       <h5 class="my-0 flex-grow-1">SUGGESTIONS</h5>
@@ -19,7 +18,6 @@
         v-on:page-click="pageClickHandler"
         hide-goto-end-buttons
         hide-ellipsis
-        limit="0"
       >
       </b-pagination>
     </section>
@@ -27,11 +25,11 @@
 
     <ul class="list-suggested list-group">
       <li v-for="(t, i) in rendered" :key="t.id || i" class="list-group-item">
-        <MiniProfile :timeline="t" />
+        <MiniProfile :timeline="t" class="mb-3" />
       </li>
     </ul>
     <b-pagination
-      class="pagenav-bottom my-0"
+      class="pagenav-bottom py-3 my-0"
       v-model="currentPage"
       :total-rows="totalRows"
       :per-page="perPage"
@@ -74,7 +72,7 @@ export default {
       freeOnly: false,
     },
 
-    perPage: 3,
+    perPage: 5,
     currentPage: 1,
   }),
 
@@ -122,7 +120,7 @@ export default {
 body .suggested_feed-crate {
 
   background-color: #fff;
-  padding: 0.5rem 0.5rem;
+  //padding: 0.5rem 0.5rem;
 
   .ctrl-top > * {
     padding: 0.8rem 0;
@@ -149,6 +147,10 @@ body .suggested_feed-crate {
     a {
       text-decoration: none;
     }
+  }
+
+  .list-group-item:last-child > .mb-3 {
+    margin-bottom: 0 !important;
   }
 
   // hide active page so we only show navigation at top

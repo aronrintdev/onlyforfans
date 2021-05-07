@@ -273,4 +273,9 @@ class Timeline extends Model implements Subscribable, Tippable, Reportable
         return new Collection([ $this->user ]);
     }
 
+    public function getPrimaryOwner(): User
+    {
+        return $this->user;
+    }
+
 }

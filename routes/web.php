@@ -164,13 +164,17 @@ Route::group(['middleware' => ['auth']], function () {
     //Route::get('/users-suggested', ['as'=>'users.suggested', 'uses' => 'UsersController@suggested']);
     Route::get('/users/me', ['as' => 'users.me', 'uses' => 'UsersController@me']);
     Route::get('/users/match', ['as'=>'users.match', 'uses' => 'UsersController@match']);
-    Route::patch('/users/{user}/settings', ['as'=>'users.updateSettings', 'uses' => 'UsersController@updateSettings']);
+    Route::patch('/users/{user}/settings/enable/{group}', ['as'=>'users.enableSetting', 'uses' => 'UsersController@enableSetting']); // turn on a single update within a group
+    Route::patch('/users/{user}/settings/disable/{group}', ['as'=>'users.disableSetting', 'uses' => 'UsersController@disableSetting']); // turn off a single update within a group
+    Route::patch('/users/{user}/settings', ['as'=>'users.updateSettingsBatch', 'uses' => 'UsersController@updateSettingsBatch']); // batch update one (or multiple) groups at a time
     Route::patch('/users/{user}/updatePassword', ['as'=>'users.updatePassword', 'uses' => 'UsersController@updatePassword']);
     Route::get('/users/{user}/settings', [
         'middleware' => 'spaMixedRoute',
         'as'=>'users.showSettings', 
         'uses' => 'UsersController@showSettings',
     ]);
+    Route::post('/users/avatar', ['uses' => 'UsersController@updateAvatar']);
+    Route::post('/users/cover', ['uses' => 'UsersController@updateCover']);
     Route::resource('users', 'UsersController', [ 'except' => [ 'create', 'edit', ] ]);
 
     // -- vaults:  --
@@ -243,14 +247,6 @@ Route::group(['prefix' => '/username'], function() {
         Route::delete('/rule', 'UsernameRulesController@destroy')->name('usernameRules.destroy');
     });
 });
-
-/*
-|--------------------------------------------------------------------------
-| Webhook
-|--------------------------------------------------------------------------
-*/
-
-Route::post('hook/receive', 'WebhooksController@receive')->name('webhook.receive');
 
 /*
 |--------------------------------------------------------------------------

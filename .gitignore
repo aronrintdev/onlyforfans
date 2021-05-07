@@ -110,3 +110,6 @@ composer.json-save
 database/seeds/RolesTableSeeder.php--save
 
 public/info.php
+public/bar.jpg
+public/themes
+public/themes/*

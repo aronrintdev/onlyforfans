@@ -64,6 +64,8 @@ whoami.php
 CMD-rsync-local.txt
 public/info.php
 
+notes.local.txt
+
 # JS Sandbox
 public/js/sandbox
 app/Http/Controllers/Site/SandboxController.php
