@@ -135,7 +135,7 @@
 
             <b-row>
               <b-col>
-                <b-form-group id="group-is_watermark_enabled" label="Follow for Free?" label-for="is_watermark_enabled">
+                <b-form-group id="group-is_watermark_enabled" label="Is Watermark Enabled?" label-for="is_watermark_enabled">
                   <b-form-checkbox
                     id="is_watermark_enabled"
                     v-model="formWatermark.is_watermark_enabled"

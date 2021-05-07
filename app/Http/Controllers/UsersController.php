@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Http\Resources\UserSetting as UserSettingResource;
 use App\Http\Resources\UserCollection;
 use App\Models\User;
+use App\Models\UserSetting;
 use App\Models\Fanledger;
 use App\Models\Country;
 use App\Models\Timeline;
@@ -52,7 +53,37 @@ class UsersController extends AppBaseController
         return response()->json([ ]);
     }
 
-    public function updateSettings(Request $request, User $user)
+    public function enableSetting(Request $request, User $user, string $group)  // single
+    {
+        $this->authorize('update', $user);
+        $vrules = UserSetting::$vrules[$group];
+        $request->validate($vrules);
+        //dd($request->all());
+
+        $userSetting = $user->settings;
+
+        $result = $userSetting->enable($group, $request->all() );
+        //dd($request->all(), $result);
+
+        $userSetting->refresh();
+        return $userSetting;
+    }
+
+    public function disableSetting(Request $request, User $user, string $group)  // single
+    {
+        $this->authorize('update', $user);
+        $vrules = UserSetting::$vrules[$group];
+        $request->validate($vrules);
+        $userSetting = $user->settings;
+        $result = $userSetting->disable($group, $request->all() );
+        $userSetting->refresh();
+        return $userSetting;
+    }
+
+    // %NOTE: this updates settings in 'batches'...so the request payload must contain all keys for a group such as 'privacy', 
+    // even if only one is actually changing
+    // %NOTE: in Users controller as the request param passed is User type
+    public function updateSettingsBatch(Request $request, User $user) // batch
     {
         $this->authorize('update', $user);
         $request->validate([
@@ -84,46 +115,13 @@ class UsersController extends AppBaseController
             $userSetting->fill($attrs);
 
             // handle cattrs
-            if ($request->hasAny($cattrsFields) ){
+            if ($request->hasAny($cattrsFields) ) {
                 $cattrs = $userSetting->cattrs; // 'pop'
                 foreach ($cattrsFields as $k) {
                     switch ($k) {
                     case 'blocked': // %FIXME: move to lib
                         if ( $request->has('blocked') ) {
-                            $byCountry = [];
-                            $byIP = [];
-                            $byUsername = [];
-                            foreach ( $request->blocked as $bobj) {
-                                $slug = trim($bobj['slug'] ?? '');
-                                $text = trim($bobj['text'] ?? '');
-                                do {
-                                    // country
-                                    $exists = Country::where('slug', $slug)->first();
-                                    if ( $exists ) { 
-                                        $byCountry[] = $slug;
-                                        break;
-                                    }
-                                    // user
-                                    $exists = User::where('username', $slug)->first();
-                                    if ( $exists ) {
-                                        $byUsername[] = $slug;
-                                        break;
-                                    }
-                                    // IP
-                                    if ( filter_var($text, FILTER_VALIDATE_IP) ) { // ip
-                                        $byIP[] = $text;
-                                        break;
-                                    }
-                                } while(0);
-                            }
-                            $blocked = $cattrs['blocked'] ?? [];
-                            $blocked['ips'] = $blocked['ips'] ?? [];
-                            $blocked['countries'] = $blocked['countries'] ?? [];
-                            $blocked['usernames'] = $blocked['usernames'] ?? [];
-                            array_push($blocked['ips'], ...$byIP);
-                            array_push($blocked['countries'], ...$byCountry);
-                            array_push($blocked['usernames'], ...$byUsername);
-                            $cattrs['blocked'] = array_map('array_unique', $blocked);
+                            $cattrs['blocked'] = UserSetting::parseBlockedBatched($request->blocked, $cattrs['blocked']);
                         }
                         break;
                     default:
@@ -134,7 +132,6 @@ class UsersController extends AppBaseController
             }
     
             $userSetting->save();
-
             return $userSetting;
         });
     

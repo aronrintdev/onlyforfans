@@ -1,5 +1,4 @@
 <?php
-
 namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -14,8 +13,112 @@ use App\Models\Session;
 
 class RestSettingTest extends TestCase
 {
+    use RefreshDatabase, WithFaker;
+
     /**
      *  @group settings
+     *  @group here0429
+     *  @group regression
+     */
+    public function test_can_update_single_notifications_setting_income_new_tip()
+    {
+        $timeline = Timeline::has('posts','>=',1)->first(); 
+        $user = $timeline->user;
+
+        $payload = [
+            'income' => [
+                'new_tip' => ['email', 'sms'],
+                //'new_tip' => ['email'],
+            ],
+        ];
+        $response = $this->actingAs($user)->ajaxJSON('PATCH', route('users.enableSetting', [$user->id, 'notifications']), $payload);
+        $response->assertStatus(200);
+
+        $content = json_decode($response->content());
+        //dd($content);
+        $this->assertObjectHasAttribute('notifications', $content->cattrs);
+        $this->assertObjectHasAttribute('income', $content->cattrs->notifications);
+        $this->assertObjectHasAttribute('new_tip', $content->cattrs->notifications->income);
+        $this->assertContains('email', $content->cattrs->notifications->income->new_tip);
+        $this->assertContains('sms', $content->cattrs->notifications->income->new_tip);
+        $this->assertNotContains('site', $content->cattrs->notifications->income->new_tip);
+        /*
+        $this->assertNotNull($content->post);
+        $postR = $content->post;
+        $this->assertNotNull($postR->description);
+        $this->assertEquals($payload['description'], $postR->description);
+         */
+    }
+
+    /**
+     *  @group settings
+     *  @group OFF-here0506
+     *  @group regression
+     */
+    public function test_can_update_single_notifications_setting_post_new_comment()
+    {
+        $timeline = Timeline::has('posts','>=',1)->first(); 
+        $user = $timeline->user;
+
+        $payload = [
+            'posts' => [
+                //'new_comment' => ['email', 'sms'],
+                'new_comment' => ['email'],
+            ],
+        ];
+        $response = $this->actingAs($user)->ajaxJSON('PATCH', route('users.enableSetting', [$user->id, 'notifications']), $payload);
+        $response->assertStatus(200);
+
+        $content = json_decode($response->content());
+        //dd($content);
+        $this->assertObjectHasAttribute('notifications', $content->cattrs);
+        $this->assertObjectHasAttribute('posts', $content->cattrs->notifications);
+        $this->assertObjectHasAttribute('new_comment', $content->cattrs->notifications->posts);
+        $this->assertContains('email', $content->cattrs->notifications->posts->new_comment);
+        $this->assertNotContains('site', $content->cattrs->notifications->posts->new_comment);
+    }
+
+    /**
+     *  @group settings
+     *  @group here0429
+     *  @group regression
+     */
+    public function test_can_toggle_global_email_notifications_setting()
+    {
+        $timeline = Timeline::has('posts','>=',1)->first(); 
+        $user = $timeline->user;
+
+        $payload = [
+            'global' => [
+                'enabled' => ['email'],
+            ],
+        ];
+        $response = $this->actingAs($user)->ajaxJSON('PATCH', route('users.enableSetting', [$user->id, 'notifications']), $payload);
+        $response->assertStatus(200);
+        $content = json_decode($response->content());
+        $this->assertObjectHasAttribute('notifications', $content->cattrs);
+        $this->assertObjectHasAttribute('global', $content->cattrs->notifications);
+        $this->assertObjectHasAttribute('enabled', $content->cattrs->notifications->global);
+        $this->assertContains('email', $content->cattrs->notifications->global->enabled);
+
+        $payload = [
+            'global' => [
+                'enabled' => ['email'],
+            ],
+        ];
+        $response = $this->actingAs($user)->ajaxJSON('PATCH', route('users.disableSetting', [$user->id, 'notifications']), $payload);
+        $response->assertStatus(200);
+        $content = json_decode($response->content());
+        $this->assertObjectHasAttribute('notifications', $content->cattrs);
+        $this->assertObjectHasAttribute('global', $content->cattrs->notifications);
+        $this->assertObjectHasAttribute('enabled', $content->cattrs->notifications->global);
+        $this->assertNotContains('email', $content->cattrs->notifications->global->enabled);
+    }
+
+    // ===============
+
+    /**
+     *  @group OFF-settings
      *  @group OFF-regression
      */
     public function test_can_index_creator_settings()
@@ -29,7 +132,7 @@ class RestSettingTest extends TestCase
 
 
     /**
-     *  @group settings
+     *  @group OFF-settings
      *  @group OFF-regression
      */
     public function test_can_index_fan_settings()
@@ -42,7 +145,7 @@ class RestSettingTest extends TestCase
 
 
     /**
-     *  @group settings
+     *  @group OFF-settings
      *  @group OFF-regression
      */
     public function test_can_creator_edit_name()
@@ -64,7 +167,7 @@ class RestSettingTest extends TestCase
 
 
     /**
-     *  @group settings
+     *  @group OFF-settings
      *  @group OFF-regression
      */
     public function test_can_creator_edit_username()
