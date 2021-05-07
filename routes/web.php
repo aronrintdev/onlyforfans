@@ -181,6 +181,7 @@ Route::group(['middleware' => ['auth']], function () {
         'as' => 'vault.dashboard',
         'uses' => 'VaultsController@dashboard'
     ]);
+    Route::get('/vaults/all-files', ['as'=>'vaults.getAllFiles', 'uses' => 'VaultsController@getAllFiles']);
     Route::get('/vaults/{vault}/getRootFolder', ['as'=>'vaults.getRootFolder', 'uses' => 'VaultsController@getRootFolder']);
     Route::patch('/vaults/{vault}/updateShares', ['as'=>'vaults.updateShares', 'uses' => 'VaultsController@updateShares']); // %FIXME: refactor to make consistent
     Route::resource('vaults', 'VaultsController', [
@@ -216,6 +217,9 @@ Route::patch('/chat-messages/{id}/unmute', ['as'=>'messages.unmute', 'uses' => '
 Route::post('/chat-messages/{id}/custom-name', ['as'=>'messages.customname', 'uses' => 'MessageController@setCustomName']);
 Route::get('/chat-messages/{id}/mediafiles', ['as'=>'messages.mediafiles', 'uses' => 'MessageController@listMediafiles']);
 Route::get('/unread-messages-count', ['as'=>'messages.unreadmessagescount', 'uses' => 'MessageController@getUnreadMessagesCount']);
+Route::delete('/chat-messages/{id}/threads/{threadId}', ['as'=>'messages.removethread', 'uses' => 'MessageController@removeThread']);
+Route::post('/chat-messages/{id}/threads/{threadId}/like', ['as'=>'messages.setlike', 'uses' => 'MessageController@setLike']);
+Route::post('/chat-messages/{id}/threads/{threadId}/unlike', ['as'=>'messages.setunlike', 'uses' => 'MessageController@setUnlike']);
 
 Route::resource('chat-messages', 'MessageController')->only([
     'index',
@@ -241,14 +245,6 @@ Route::group(['prefix' => '/username'], function() {
         Route::delete('/rule', 'UsernameRulesController@destroy')->name('usernameRules.destroy');
     });
 });
-
-/*
-|--------------------------------------------------------------------------
-| Webhook
-|--------------------------------------------------------------------------
-*/
-
-Route::post('hook/receive', 'WebhooksController@receive')->name('webhook.receive');
 
 /*
 |--------------------------------------------------------------------------

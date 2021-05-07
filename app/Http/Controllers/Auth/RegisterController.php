@@ -12,6 +12,7 @@ use App\Models\Timeline;
 use App\Models\User;
 use App\Models\Invite;
 use App\EnumsInviteTypeEnum;
+use App\Enums\MediafileTypeEnum;
 
 use File;
 use Illuminate\Foundation\Auth\RegistersUsers;
@@ -21,6 +22,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Redirect;
 use Intervention\Image\Facades\Image;
 use Laravel\Socialite\Facades\Socialite;
+use Illuminate\Support\Facades\Storage;
 use Theme;
 use Validator;
 
@@ -338,6 +340,45 @@ class RegisterController extends Controller
         }
     }
 
+    protected function registerUserFromSocialAccount($request)
+    {
+
+        //Create user record
+        $user = User::create([
+            'email'             => $request['email'],
+            'password'          => bcrypt($request['password']),
+            'verification_code' => str_random(30),
+            'remember_token'    => str_random(10),
+            'username'          => $request['username'],
+            'email_verified'    => 1,
+        ]);
+
+        if (Setting::get('birthday') == 'on' && $request['birthday'] != '') {
+            $user->settings->birthday = date('Y-m-d', strtotime($request['birthday']));
+            $user->settings->save();
+        }
+
+        if ($request['gender'] != '') {
+            $user->settings->gender = $request['gender'];
+            $user->settings->save();
+        }
+
+        if (Setting::get('city') == 'on' && $request['city'] != '') {
+            $user->settings->city = $request['city'];
+            $user->settings->save();
+        }
+
+        // Create timeline record for the user
+        $user->timeline()->create([
+            'name' => $request['name'],
+            'about' => '',
+        ]);
+  
+        return $user;
+           
+    }
+
+
     public function verifyEmail(Request $request)
     {
         $user = User::where('email', '=', $request->email)->where('verification_code', '=', $request->code)->first();
@@ -436,29 +477,39 @@ class RegisterController extends Controller
         }
         $user = User::firstOrNew(['email' => $google_user->user['email']]);
         if (!$user->id) {
-            $request = new Request(['username' => $google_user->user['id'],
-              'name'                           => $google_user->user['name'],
-              'email'                          => $google_user->user['email'],
-              'password'                       => bcrypt(str_random(8)),
-              'gender'                         => $user_gender,
-            ]);
-            $timeline = $this->registerUser($request, true);
+            $request = ['username' => $google_user->user['id'],
+                'name'      => $google_user->user['name'],
+                'email'     => $google_user->user['email'],
+                'password'  => bcrypt(str_random(8)),
+                'gender'    => $user_gender,
+            ];
+
+            $user = $this->registerUserFromSocialAccount($request);
 
             //  Prepare the image for user avatar
-            $avatar = Image::make($google_user->avatar_original);
             $photoName = date('Y-m-d-H-i-s').str_random(8).'.png';
-            $avatar->save(storage_path().'/uploads/users/avatars/'.$photoName, 60);
+            $mimetype = 'image/png';
+            $mftype = MediafileTypeEnum::AVATAR;
+
+            $subFolder = MediafileTypeEnum::getSubfolder($mftype);
+            $s3Path = "$subFolder/$photoName";
+
+            $contents = file_get_contents($google_user->avatar_original);
+            Storage::disk('s3')->put($s3Path, $contents);
 
             $media = Mediafile::create([
-                      'title'  => $photoName,
-                      'type'   => 'image',
-                      'source' => $photoName,
-                    ]);
+                'mfname'  => $photoName,
+                'filename' => $s3Path,
+                'mimetype' => $mimetype,
+                'mftype' => $mftype,
+                'orig_ext' => 'png',
+                'orig_filename' => $photoName,
+                'resource_id' =>  $user->id,
+                'resource_type' => 'users',
+            ]);
+            $user->timeline->avatar_id = $media->id;
 
-            $timeline->avatar_id = $media->id;
-
-            $timeline->save();
-            $user = $timeline->user;
+            $user->timeline->save();
         }
 
         if (Auth::loginUsingId($user->id)) {

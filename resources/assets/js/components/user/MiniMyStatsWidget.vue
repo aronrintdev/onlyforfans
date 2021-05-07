@@ -1,5 +1,6 @@
 <template>
-  <div v-if="!isLoading" class="session_widget-crate tag-crate">
+  <!-- %FIXME: duplciate of components/common/SessionWidget? -->
+  <div v-if="!isLoading" class="mini_my_stats_widget-crate tag-crate">
     <section>
       <b-card
         :img-src="timeline.cover.filepath"
@@ -26,7 +27,7 @@
             <h2 class="avatar-name my-0">
               <a :href="`/${timeline.slug}`">{{ timeline.name }}</a>
               <span v-if="timeline.verified" class="verified-badge"
-                ><b-icon icon="check-circle-fill" variant="success" font-scale="1"></b-icon
+                ><b-icon icon="check-circle-fill" variant="primary" font-scale="1"></b-icon
               ></span>
             </h2>
             <p class="avatar-mail my-0">

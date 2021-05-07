@@ -61,10 +61,32 @@ class VaultsController extends AppBaseController
     public function index(Request $request)
     {
         $sessionUser = Auth::user();
-        $vaults = Story::where('user_id', $sessionUser->id)->get();
+        $vaults = Vault::where('user_id', $sessionUser->id)->get();
         return response()->json([
             'sessionUser' => $sessionUser,
             'vaults' => $vaults,
+        ]);
+    }
+
+    public function getAllFiles(Request $request)
+    {
+        $sessionUser = Auth::user();
+        $query = $request->query('query');
+        $vaultfolders = Vaultfolder::with('mediafiles')
+            ->where('user_id', $sessionUser->id)
+            ->get();
+        $mediafiles = [];
+        $vaultfolders->each(function($vaultfolder) use(&$mediafiles, &$query) {
+            $vaultfolder->mediafiles()
+                ->where('resource_type', 'like', '%'.$query.'%')
+                ->get()
+                ->each(function($mediafile) use(&$mediafiles) {
+                array_push($mediafiles, $mediafile);
+            });
+            
+        });
+        return response()->json([
+            'mediafiles' => $mediafiles,
         ]);
     }
 

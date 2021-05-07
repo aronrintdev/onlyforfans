@@ -16,23 +16,26 @@
             <b-nav-item @click="setFeedType('photos')" :active="feedType==='photos'">Photos</b-nav-item>
             <b-nav-item @click="setFeedType('videos')" :active="feedType==='videos'">Videos</b-nav-item>
           </b-nav>
-          <article class="d-none d-md-block">
-            <div @click="renderTip" style="" class="btn">
+          <article v-else>
+            <!-- empty placeholder to preserve justify arrangment in flex area -->
+          </article>
+          <article class="d-md-block">
+            <div v-if="!is_homefeed" @click="renderTip" style="" class="btn">
               <div style="font-size: 1.2rem; margin-top: 0.1rem" class="text-primary tag-ctrl">$</div>
             </div>
-            <div style="margin-top: 0.3rem" class="btn">
+            <div v-if="!is_homefeed" style="margin-top: 0.3rem" class="btn">
               <b-icon icon="chat" font-scale="1.5" variant="primary" class="tag-ctrl" /> 
             </div>
-            <div @click="renderFollow" style="margin-top: 0.3rem" class="btn">
+            <div v-if="!is_homefeed" @click="renderFollow" style="margin-top: 0.3rem" class="btn">
               <b-icon :icon="timeline.is_following ? 'eye-fill' : 'eye'" font-scale="1.5" variant="primary" class="tag-ctrl" /> 
+            </div>
+            <div v-if="!is_homefeed" @click="toggleFavorite" style="margin-top: 0.3rem" class="btn">
+                <fa-icon v-if="isFavoritedByMe" fixed-width :icon="['fas', 'star']" class="clickable" style="font-size:1.2rem; color:#007bff" />
+                <fa-icon v-else fixed-width :icon="['far', 'star']" class="clickable" style="font-size:1.2rem; color:#007bff" />
             </div>
             <div @click="toggleGridLayout" style="margin-top: 0.3rem" class="btn">
               <b-icon icon="grid" scale="1.2" variant="primary"></b-icon>
             </div>
-            <div @click="toggleFavorite" style="margin-top: 0.3rem" class="btn">
-                <fa-icon v-if="isFavoritedByMe" fixed-width :icon="['fas', 'star']" class="clickable" style="font-size:1.2rem; color:#007bff" />
-                <fa-icon v-else fixed-width :icon="['far', 'star']" class="clickable" style="font-size:1.2rem; color:#007bff" />
-              </div>
             <b-dropdown no-caret ref="feedCtrls" variant="transparent" id="feed-ctrl-dropdown" class="tag-ctrl">
               <template #button-content>
                 <b-icon icon="filter" scale="1.5" variant="primary"></b-icon>
@@ -185,8 +188,8 @@ export default {
       this.updatePost(postId) 
     })
 
-    eventBus.$on('update-originator', () => {
-      console.log('components.timelines.PostFeed - eventBus.$on(update-originator)')
+    eventBus.$on('update-timelines', (timelineId) => {
+      this.$log.debug('components.timelines.PostFeed - eventBus.$on(update-timelines)')
       this.reloadFromFirstPage();
     })
 

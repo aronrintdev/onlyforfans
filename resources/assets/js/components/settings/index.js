@@ -14,6 +14,7 @@ import Profile from './SettingsProfile.vue'
 import Referrals from './SettingsReferrals.vue'
 import Security from './SettingsSecurity.vue'
 import Sessions from './SettingsSessions.vue'
+import Subscriptions from './SettingsSubscriptions.vue'
 
 export default {
   //Bookmarks,
@@ -28,4 +29,5 @@ export default {
   Referrals,
   Security,
   Sessions,
+  Subscriptions,
 }

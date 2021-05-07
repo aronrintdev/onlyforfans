@@ -190,18 +190,20 @@
 
 				&::-webkit-scrollbar-track
 				{
-					-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.1);
-					background-color: #FFFFFF;
+					-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.02);
+					background-color: transparent;
 				}
 				&::-webkit-scrollbar
 				{
-					width: 6px;
-					background-color: #FFFFFF;
+					width: 4px;
+					margin-right: -2px;
+					background-color: transparent;
 				}
 				&::-webkit-scrollbar-thumb
 				{
-					background-color: #E5E5E5;
+					background-color: #999;
 					border-radius: 5px;
+					opacity: 0.8;
 				}
 				.empty-messages {
 					text-align: center;
@@ -234,6 +236,7 @@
 				}
 				.message {
 					.user-logo {
+						min-width: 42px;
 						width: 42px;
 						height: 42px;
 						border-radius: 50%;
@@ -259,9 +262,6 @@
 							text-transform: uppercase;
 						}
 					}
-					.content {
-						flex: 1;
-					}
 					.text {
 						border-radius: 6px;
 						padding: 9px 12px;
@@ -269,6 +269,8 @@
 						font-weight: 300;
 						font-size: 16px;
 						line-height: 24px;
+						white-space: pre-wrap;
+						display: inline-block;
 					}
 					.time {
 						font-size: 11px;
@@ -279,6 +281,17 @@
 						display: flex;
 						align-items: center;
 						height: 14px;
+
+						.payment-state {
+							font-weight: 500;
+							font-size: 11px;
+							color: #8a96a3;
+						}
+						.fa-heart {
+							font-size: 14px;
+							margin-right: 5px;
+							color: #00aff0;
+						}
 					}
 					.received {
 						max-width: 75%;
@@ -286,9 +299,93 @@
 						align-items: flex-start;
 						margin: 8px 0;
 
+						.non-paid-message {
+							.non-paid-message-block {
+								background: url(../../../static/images/price-message-bg.png) no-repeat;
+								background-size: 100% 100%;
+								border-radius: 6px;
+							}
+							.text {
+								margin-top: 10px !important;
+							}
+							.lock-icon-wrapper {
+								position: relative;
+								height: 240px;
+								svg {
+									position: absolute;
+									top: 50%;
+									left: 50%;
+									transform: translate(-50%, -50%);
+									width: 64px;
+									fill: #8a96a3;
+									opacity: 0.25;
+								}
+							}
+							.b-purchase {
+								padding: 0 16px 16px;
+								.purchase-block {
+									border: 1px solid rgba(138, 150, 163, 0.25);
+									border-radius: 6px;
+									padding: 14px 16px 16px;
+								}
+								.content-icons {
+									display: flex;
+									align-items: center;
+									justify-content: space-between;
+
+									.media-count, .media-price {
+										display: flex;
+										align-items: center;
+									}
+									.media-icon {
+										display: flex;
+										align-items: center;
+										&:last-child .divide-dot {
+											display: none;
+										}
+									}
+
+									span {
+										font-size: 12px;
+										line-height: 14px;
+										color: #8a96a3;
+										margin-left: 4px;
+
+										&.divide-dot {
+											margin: 0 6px;
+										}
+									}	
+									svg {
+										width: 16px;
+										fill: #8a96a3;
+									}
+								}
+								.unlock-btn {
+									border: none;
+									padding: 9px 18px;
+									font-size: 14px;
+									color: #fefefe;
+									font-weight: 500;
+									background: #00aff0;
+									min-width: 78px;
+									transition: opacity .15s ease,background-color .15s ease,box-shadow .15s ease;
+									display: inline-block;
+									white-space: nowrap;
+									text-align: center;
+									width: 100%;
+									margin-top: 14px;
+								}
+							}
+						}
+						.chat-more-dropdown {
+							align-self: flex-end;
+							margin-bottom: 2.2em;
+							margin-left: 0.4em;
+						}
 						.text {
 							background: rgba(138,150,163,.12);
 							border-bottom-left-radius: 0;
+							margin-right: auto;
 						}
 						.image {
 							margin-bottom: 8px;
@@ -328,9 +425,40 @@
 							margin-left: auto;
 							background: rgb(218 237 255 / 53%);
 							border-bottom-right-radius: 0;
+							position: relative;
+							white-space: pre-wrap;
+
+							.icon-undo {
+								position: absolute;
+								bottom: 0;
+								right: 0;
+								transform: translate(40%, 5%);
+								width: 21px;
+								height: 21px;
+								border-radius: 50%;
+								background-color: #00aff0;
+								fill: #fff;
+								padding: 1px;
+								cursor: pointer;
+								&:hover {
+									background-color: #0091ea;
+								}
+							}
 						}
 						.time {
 							justify-content: flex-end;
+
+							.payment-state {
+								font-weight: 500;
+								font-size: 11px;
+								color: #8a96a3;
+							}
+							svg {
+								width: 18px;
+								fill: rgb(138, 150, 163);
+								margin: -2px 0 -2px 3px;
+								opacity: .7;
+							}
 						}
 						.image {
 							margin-bottom: 8px;
@@ -481,13 +609,118 @@
 			padding: 0 8px;
 			border-top: solid 1px rgba(138, 150, 163, 0.25);
 
+			&.price-view {
+				.action-btns > div {
+					background: rgba(0,175,240,.12);
+					border-radius: 8px;
+				}
+				.swiper-slider {
+					background: rgba(0,175,240,.12);
+				}
+				textarea {
+					background: rgba(0,175,240,.12);
+					border-bottom-right-radius: 8px;
+					border-bottom-left-radius: 8px;
+				}
+				.price-to-view-header {
+					margin-top: 8px;
+					border-top-right-radius: 8px;
+					border-top-left-radius: 8px;
+					background: rgba(0,175,240,.12);
+					padding: 8px;
+					
+					.price-to-view-title {
+						display: flex;
+						align-items: center;
+						font-weight: 500;
+
+						svg {
+							width: 20px;
+							fill: #00aff0;
+						}
+						span {
+							padding-left: 6px;
+    					font-size: 15px;
+						}
+					}
+					
+					.price-to-view-side {
+						display: flex;
+						align-items: center;
+						span {
+							margin-right: 12px;
+							font-size: 15px;
+							font-weight: 400;
+						}
+						svg {
+							width: 19px;
+							padding: 2px;
+							fill: #fff;
+							background: #00aff0;
+							border-radius: 50%;
+							cursor: pointer;
+						}
+					}
+				}
+			}
+
+			&.audio-recorder {
+				padding: 1em;
+
+				.audio-recorder-header {
+					display: flex;
+					align-items: center;
+					justify-content: space-between;
+					font-weight: 500;
+
+					.icon-voice {
+						width: 24px;
+						height: 24px;
+						fill: #00aff0;
+						margin-right: 4px;
+					}
+					.icon-close {
+						padding: 0;
+						svg {
+							width: 24px;
+							fill: #000;
+						}
+					}
+				}
+				.audio-recorder-content {
+					display: flex;
+					flex-direction: column;
+					align-items: center;
+					font-size: 24px;
+					.duration {
+						display: flex;
+						align-items: center;
+						margin: 0.3em 0 0.5em 4px;
+
+						span {
+							width: 40px;
+							&:first-child {
+								text-align: right;
+							}
+						}
+					}
+					.vue-audio-recorder,
+					.vue-audio-recorder:hover {
+						background-color: #00aff0;
+					}
+					.vue-audio-recorder.active {
+						background-color: #ef5350;
+					}
+				}
+			}
+
 			textarea {
 				overflow: hidden;
 				overflow-wrap: break-word;
 				height: 56px;
 				border: none;
 				border-radius: 0;
-				padding: 16px 8px;
+				padding: 10px 10px;
 				background: transparent;
 				resize: none;
 				max-height: 215px;

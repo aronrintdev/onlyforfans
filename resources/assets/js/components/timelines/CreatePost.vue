@@ -58,7 +58,7 @@
               </b-col>
               <b-col cols="12" md="4">
                 <ul class="list-inline d-flex justify-content-end mb-0 mt-3 mt-md-0">
-                  <li class="w-100 mx-0"><button @click="savePost()" class="btn btn-submit btn-success w-100">Post</button></li>
+                  <li class="w-100 mx-0"><button @click="savePost()" class="btn btn-submit btn-primary w-100">Post</button></li>
                 </ul>
               </b-col>
             </b-row>
@@ -292,7 +292,7 @@ li .selectable {
   margin: 0 !important;
 }
 
-.create_post-crate .dropzone textarea {
+.create_post-crate textarea {
   resize: none;
 }
 

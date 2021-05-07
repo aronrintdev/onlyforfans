@@ -1,12 +1,7 @@
 <template>
   <div class="col-md-4 col-sm-4 col-xs-4 messages-page-sidebar">
     <div class="top-bar" v-if="!userSearchVisible">
-      <div>
-        <router-link to="/">
-          <button class="btn" type="button">
-            <i class="fa fa-arrow-left" aria-hidden="true"></i>
-          </button> 
-        </router-link>
+      <div class="pl-2">
         <span class="top-bar-title">Messages</span>
       </div> 
       <div class="top-bar-action-btns">
@@ -95,53 +90,66 @@
       <b-spinner variant="secondary" label="Loading..." small></b-spinner>
     </div>
     <div class="no-users" v-if="!users.length">Nothing was found</div>
-    <ul class="user-list" v-if="users.length">
-      <li v-for="user in users" :key="user.profile.id"
-        :class="selectedUser && selectedUser.profile.id === user.profile.id ? 'selected' : ''"
-      >
-        <router-link :to="`/messages/${user.profile.id}`">
-          <div class="user-content" :class="`user-${user.profile.id}`">
-            <div class="user-logo text-logo" v-if="!user.profile.avatar">
-              {{ getLogoFromName(user.profile.name) }}
-              <span :class="`status-holder status-holder-${user.profile.id}`"></span>
-            </div>
-            <div class="user-logo" v-if="user.profile.avatar">
-              <img :src="user.profile.avatar.filepath" alt="" />
-              <span :class="`status-holder status-holder-${user.profile.id}`"></span>
-            </div>
-            <div class="user-details">
-              <div class="user-details-row">
-                <div>
-                  <span class="username">{{ user.profile.display_name ? user.profile.display_name : user.profile.name }}</span>
-                  <span class="user-id">{{ `@${user.profile.username}` }}</span>
+    <div class="user-list-container" v-if="users.length">
+      <ul class="user-list" >
+        <li v-for="user in users" :key="user.profile.id"
+          :class="selectedUser && selectedUser.profile.id === user.profile.id ? 'selected' : ''"
+        >
+          <router-link :to="`/messages/${user.profile.id}`">
+            <div class="user-content" :class="`user-${user.profile.id}`">
+              <div class="user-logo text-logo" v-if="!user.profile.avatar">
+                {{ getLogoFromName(user.profile.name) }}
+                <span :class="`status-holder status-holder-${user.profile.id}`"></span>
+              </div>
+              <div class="user-logo" v-if="user.profile.avatar">
+                <img :src="user.profile.avatar.filepath" alt="" />
+                <span :class="`status-holder status-holder-${user.profile.id}`"></span>
+              </div>
+              <div class="user-details">
+                <div class="user-details-row">
+                  <div>
+                    <span class="username">{{ user.profile.display_name ? user.profile.display_name : user.profile.name }}</span>
+                  </div>
+                  <b-dropdown class="filter-dropdown sidebar-more-dropdown" right>
+                    <template #button-content>
+                      <i class="fas fa-ellipsis-h" aria-hidden="true"></i>
+                    </template>
+                    <b-dropdown-item v-on:click.stop.prevent="clearMessages(user.profile)">
+                      Clear conversation
+                    </b-dropdown-item>
+                  </b-dropdown>
                 </div>
-                <!-- Close Button -->
-                <button class="close-btn btn" type="button" @click="clearMessages(user.profile)">
-                  <i class="fa fa-times" aria-hidden="true"></i>
-                </button>
-              </div>
-              <div
-                class="user-details-row"
-                :key="user.last_message.id"
-                :class="user.last_message.is_unread && user.last_message.receiver_id === session_user.id ? 'is-unread' : ''"
-              >
-                <span class="last-message" v-if="!user.last_message.hasMediafile">{{ user.last_message.mcontent }}</span>
-                <span class="last-message" v-if="user.last_message.hasMediafile">
-                  <svg class="media-icon" viewBox="0 0 24 24">
-                    <path d="M18,3H6A3,3,0,0,0,3,6V18a3,3,0,0,0,3,3H18a3,3,0,0,0,3-3V6A3,3,0,0,0,18,3Zm1,15a1,1,0,0,1-1,1H6a1,1,0,0,1-1-1V6A1,1,0,0,1,6,5H18a1,1,0,0,1,1,1ZM9,10.5A1.5,1.5,0,1,0,7.5,9,1.5,1.5,0,0,0,9,10.5ZM14,13l-3,3L9,14,6.85,16.15a.47.47,0,0,0-.14.35.5.5,0,0,0,.5.5h9.58a.5.5,0,0,0,.5-.5.47.47,0,0,0-.14-.35Z"></path>
-                  </svg>
-                  &middot;
-                  {{ user.last_message.mcontent ? user.last_message.mcontent : 'media attachment' }}
-                </span>
-                <!-- Date  -->
-                <span class="last-message-date">{{ moment(user.last_message.created_at).format('MMM DD, YYYY') }}</span>
+                <div
+                  class="user-details-row"
+                  :key="user.last_message.id"
+                  v-if="!user.last_message.unread_messages_count"
+                >
+                  <span class="last-message" v-if="!user.last_message.hasMediafile">{{ user.last_message.mcontent }}</span>
+                  <span class="last-message" v-if="user.last_message.hasMediafile">
+                    <svg class="media-icon" viewBox="0 0 24 24">
+                      <path d="M18,3H6A3,3,0,0,0,3,6V18a3,3,0,0,0,3,3H18a3,3,0,0,0,3-3V6A3,3,0,0,0,18,3Zm1,15a1,1,0,0,1-1,1H6a1,1,0,0,1-1-1V6A1,1,0,0,1,6,5H18a1,1,0,0,1,1,1ZM9,10.5A1.5,1.5,0,1,0,7.5,9,1.5,1.5,0,0,0,9,10.5ZM14,13l-3,3L9,14,6.85,16.15a.47.47,0,0,0-.14.35.5.5,0,0,0,.5.5h9.58a.5.5,0,0,0,.5-.5.47.47,0,0,0-.14-.35Z"></path>
+                    </svg>
+                    &middot;
+                    {{ user.last_message.mcontent ? user.last_message.mcontent : 'media attachment' }}
+                  </span>
+                  <!-- Date  -->
+                  <span class="last-message-date">{{ getFuzzyFormat(moment(user.last_message.created_at).fromNow(true)) }}</span>
+                </div>
+                <div
+                  class="user-details-row is-unread"
+                  :key="user.last_message.id"
+                  v-if="user.last_message.unread_messages_count"
+                >
+                  <span class="last-message">{{ `${user.last_message.unread_messages_count} new message${user.last_message.unread_messages_count > 1 ? 's' : ''}` }}</span>
+                  <span class="last-message-date">{{ getFuzzyFormat(moment(user.last_message.created_at).fromNow(true)) }}</span>
+                </div>
               </div>
             </div>
-          </div>
-          <div class="divider"></div>
-        </router-link>
-      </li>
-    </ul>
+            <div class="divider"></div>
+          </router-link>
+        </li>
+      </ul>
+    </div>
     <b-modal hide-header centered hide-footer ref="pin-to-list-modal" title="Pin To List Modal">
       <div class="block-modal pin-to-list-modal">
         <div class="header d-flex align-items-center">
@@ -247,16 +255,30 @@
       last_thread: function(newVal) {
         if (newVal) {
           
-          const index = this.users.findIndex(user => user.profile.id === newVal.sender_id);
-          const user = this.users[index];
-          let hasMediafile = false;
-          if (newVal.messages[0].mediafile) {
-            hasMediafile = true;
+          let index = this.users.findIndex(user => user.profile.id === newVal.sender_id);
+          if (index < 0) {
+            index = this.users.findIndex(user => user.profile.id === newVal.receiver_id);
           }
-          user.last_message = newVal.messages.pop();
-          user.last_message.receiver_id = newVal.receiver_id;
-          user.last_message.hasMediafile = hasMediafile;
-          this.users = [...this.users];
+          const user = this.users[index];
+          if (user) {
+            const count = user.last_message.unread_messages_count;
+            if (newVal.messages) {
+              user.last_message = newVal.messages.pop();
+              user.last_message.receiver_id = newVal.receiver_id;
+              let hasMediafile = false;
+              if (newVal.messages.length > 1 && newVal.messages[0].mediafile) {
+                hasMediafile = true;
+              }
+              user.last_message.hasMediafile = hasMediafile;
+            }
+            if (newVal.unread_messages_count) {
+              user.last_message.unread_messages_count = count ? count + 1 : 1;
+            } else {
+              user.last_message.unread_messages_count = 0;
+            }
+            this.users = [...this.users];
+            this.users[index] = user;
+          }
         }
       }
     },
@@ -321,14 +343,6 @@
         }
         return names[0].slice(0, 1) + names[1].slice(0, 1);
       },
-      clearMessages: function (receiver) {
-        this.axios.delete(`/chat-messages/${receiver.id}`)
-          .then(() => {
-            const idx = this.users.findIndex(user => user.profile.id === receiver.id);
-            this.users.splice(idx, 1);
-            this.$router.push('/messages');
-          })
-      },
       markAllAsRead: function() {
         this.axios.post('/chat-messages/mark-all-as-read');
       },
@@ -374,6 +388,52 @@
           newLists[idx].isPinned = false;
           this.lists = newLists;
         });
+      },
+      getFuzzyFormat: function(value) {
+        if (new RegExp(` seconds`).test(value) || new RegExp(`a minute`).test(value)) {
+          return '1m';
+        }
+        if (new RegExp(` minutes`).test(value)) {
+          return value.replace(` minutes`, `m`);
+        }
+        if (new RegExp(`an hour`).test(value)) {
+          return '1h';
+        }
+        if (new RegExp(` hours`).test(value)) {
+          return value.replace(` hours`, `h`);
+        }
+        if (new RegExp(`a day`).test(value)) {
+          return '1d';
+        }
+        if (new RegExp(` days`).test(value)) {
+          return value.replace(` days`, `d`);
+        }
+        if (new RegExp(`a week`).test(value)) {
+          return '1w';
+        }
+        if (new RegExp(` weeks`).test(value)) {
+          return value.replace(` weeks`, `w`);
+        }
+        if (new RegExp(`a month`).test(value)) {
+          return '1m';
+        }
+        if (new RegExp(` months`).test(value)) {
+          return value.replace(` months`, `m`);
+        }
+        if (new RegExp(` years`).test(value)) {
+          return value.replace(` years`, `y`);
+        }
+        if (new RegExp(`a year`).test(value)) {
+          return '1y';
+        }
+      },
+      clearMessages: function (receiver) {
+        this.axios.delete(`/chat-messages/${receiver.id}`)
+          .then(() => {
+            const idx = this.users.findIndex(user => user.profile.id === receiver.id);
+            this.users.splice(idx, 1);
+            this.$router.push('/messages');
+          })
       }
     }
   }

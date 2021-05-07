@@ -69,6 +69,20 @@ return [
             'engine' => null,
         ],
 
+        'financial' => [
+            'driver' => 'mysql',
+            'host' => env('DB_FINANCIAL_HOST', 'localhost'),
+            'port' => env('DB_FINANCIAL_PORT', '3306'),
+            'database' => env('DB_FINANCIAL_DATABASE', 'forge'),
+            'username' => env('DB_FINANCIAL_USERNAME', 'forge'),
+            'password' => env('DB_FINANCIAL_PASSWORD', ''),
+            'charset' => 'utf8',
+            'collation' => 'utf8_unicode_ci',
+            'prefix' => '',
+            'strict' => false,
+            'engine' => null,
+        ],
+
         'pgsql' => [
             'driver' => 'pgsql',
             'host' => env('DB_HOST', 'localhost'),
