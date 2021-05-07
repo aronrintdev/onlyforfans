@@ -1,7 +1,7 @@
 <template>
   <div v-if="!isLoading" id="view-vault_dashboard" class="row">
     <div class="col-sm-12">
-      <Dashboard
+      <VaultDashboardComponent
         :vault_pkid="myVault.id"
         :vaultfolder_pkid="vaultRootFolder.id"
       />
@@ -11,12 +11,12 @@
 
 <script>
 // Vaults Dashboard View
-import Dashboard from '@components/vault/Dashboard'
+import VaultDashboardComponent from '@components/vault/Dashboard'
 
 export default {
 
   components: {
-    Dashboard,
+    VaultDashboardComponent,
   },
 
   computed: {

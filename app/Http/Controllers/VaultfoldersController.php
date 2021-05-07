@@ -90,7 +90,6 @@ class VaultfoldersController extends AppBaseController
         });
 
         return response()->json([
-            'sessionUser' => $request->user(),
             'vaultfolder' => $vaultfolder,
             'breadcrumb' => $breadcrumb,
             'shares' => $shares,

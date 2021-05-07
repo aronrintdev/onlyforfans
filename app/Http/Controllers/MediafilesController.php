@@ -11,6 +11,7 @@ use Illuminate\Http\File;
 //use Illuminate\Http\UploadedFile;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Http\Resources\MediafileCollection;
+use App\Http\Resources\Mediafile as MediafileResource;
 use App\Models\User;
 use App\Models\Mediafile;
 use App\Enums\MediafileTypeEnum;
@@ -128,10 +129,7 @@ class MediafilesController extends AppBaseController
                 now()->addMinutes(5) // %FIXME: hardcoded
             );
         }
-        return response()->json([
-            'mediafile' => $mediafile,
-            'url' => $url,
-        ]);
+        return new MediafileResource($mediafile);
     }
 
     public function update(Request $request, $pkid)

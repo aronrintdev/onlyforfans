@@ -225,6 +225,7 @@ class UsersController extends AppBaseController
         ];
     }
 
+    // %FIXME: should this be in timeline controller instead (??)
     public function tip(Request $request, $id)
     {
         $sessionUser = Auth::user(); // sender of tip
