@@ -93,6 +93,13 @@ Vue.use(VueLazyload, {
 import VueRecord from '@codekraft-studio/vue-record';
 Vue.use(VueRecord);
 
+/**
+ * vue-croppie
+ */
+import VueCroppie from 'vue-croppie';
+import 'croppie/croppie.css' // import the croppie css manually
+Vue.use(VueCroppie);
+
 import 'swiper/swiper.min.css';
 import 'photoswipe/dist/photoswipe.css';
 import 'photoswipe/dist/default-skin/default-skin.css';
