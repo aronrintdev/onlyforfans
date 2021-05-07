@@ -168,6 +168,7 @@ class RestCommentsTest extends TestCase
     /**
      *  @group comments
      *  @group regression
+     *  @group here0507
      */
     public function test_owner_can_view_own_comment()
     {
@@ -176,11 +177,11 @@ class RestCommentsTest extends TestCase
         $response = $this->actingAs($creator)->ajaxJSON('GET', route('comments.show', $comment->id));
         $response->assertStatus(200);
         $content = json_decode($response->content());
-        $this->assertNotNull($content->comment);
-        $this->assertObjectHasAttribute('slug', $content->comment);
-        $this->assertObjectHasAttribute('description', $content->comment);
-        $this->assertNotNull($content->comment->slug);
-        $this->assertNotNull($content->comment->description);
+        $this->assertNotNull($content->data);
+        $this->assertObjectHasAttribute('slug', $content->data);
+        $this->assertObjectHasAttribute('description', $content->data);
+        $this->assertNotNull($content->data->slug);
+        $this->assertNotNull($content->data->description);
     }
 
     /**

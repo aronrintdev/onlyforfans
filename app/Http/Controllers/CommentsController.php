@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use App\Notifications\CommentReceived;
 use App\Http\Resources\CommentCollection;
+use App\Http\Resources\Comment as CommentResource;
 use App\Models\Comment;
 use App\Models\Post;
 use App\Models\User;
@@ -61,9 +62,12 @@ class CommentsController extends AppBaseController
     public function show(Request $request, Comment $comment)
     {
         $this->authorize('view', $comment);
+        return new CommentResource($comment);
+        /*
         return response()->json([
             'comment' => $comment,
         ]);
+         */
     }
 
     public function store(Request $request)
