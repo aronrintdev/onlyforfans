@@ -12,7 +12,7 @@
 
     <EventUpdater />
 
-    <SiteFooter />
+    <SiteFooter v-if="!isFooterHidden" />
 
   </div>
 </template>
@@ -64,6 +64,7 @@ export default {
   data: () => ({
     onlineMonitor: null,
     unreadMessagesCount: 0,
+    isFooterHidden: false,
   }),
 
   methods: {
@@ -107,6 +108,9 @@ export default {
   },
 
   mounted() {
+    if (this.$route.name.indexOf('messages') > -1) {
+      this.isFooterHidden = true;
+    }
     if (!this.session_user) {
       this.getMe();
       this.getUnreadMessagesCount();
