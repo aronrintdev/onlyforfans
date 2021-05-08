@@ -8,12 +8,13 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Resources\StoryCollection;
+use App\Http\Resources\Story as StoryResource;
 use App\Models\Mediafile;
 use App\Models\Setting;
 use App\Models\Story;
 use App\Models\Timeline;
 use App\Enums\MediafileTypeEnum;
-//use App\Enums\StoryTypeEnum; // generalize?
+use App\Enums\StoryTypeEnum;
 
 class StoriesController extends AppBaseController
 {
@@ -76,14 +77,19 @@ class StoriesController extends AppBaseController
 
         $vrules = [
             'attrs' => 'required',
-            'attrs.stype' => 'required|in:text,photo',
+            //'attrs.stype' => 'required|in:text,photo',
+            'attrs.stype' => 'in:'.StoryTypeEnum::getKeysCsv(), // %TODO : apply elsewhere
             //'timeline_id' => 'required|uuid|exists:timelines',
         ];
         if ( $request->has('mediafile') ) {
             if ( $request->hasFile('mediafile') ) {
-                $vrules['mediafile'] = 'required_if:attrs.stype,photo|file';
+                //$vrules['mediafile'] = 'required_if:attrs.stype,photo|file';
+                $vrules['mediafile'] = 'file|required_if:attrs.stype,'.StoryTypeEnum::PHOTO;
+                // %TODO VIDEO stype
             } else {
-                $vrules['mediafile'] = 'required_if:attrs.stype,photo|uuid|exists:mediafiles,id'; // must be fk to [mediafiles]
+                //$vrules['mediafile'] = 'required_if:attrs.stype,photo|uuid|exists:mediafiles,id'; // must be fk to [mediafiles]
+                $vrules['mediafile'] = 'uuid|exists:mediafiles,id|required_if:attrs.stype,'.StoryTypeEnum::PHOTO; // must be fk to [mediafiles]
+                // %TODO VIDEO stype
             }
         }
         
@@ -108,7 +114,7 @@ class StoriesController extends AppBaseController
                     'stype' => $request->attrs['stype'],
                 ]);
 
-                if ( $request->attrs['stype'] === 'photo' ) {
+                if ( $request->attrs['stype'] === StoryTypeEnum::PHOTO ) {
                     if ( $request->hasFile('mediafile') ) {
                         $file = $request->file('mediafile');
                         $subFolder = 'stories';
@@ -145,9 +151,12 @@ class StoriesController extends AppBaseController
     public function show(Request $request, Story $story)
     {
         $this->authorize('view', $story);
+        /*
         return response()->json([
             'story' => $story,
         ]);
+         */
+        return new StoryResource($story);
     }
 
     public function destroy(Request $request, Story $story)

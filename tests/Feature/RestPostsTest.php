@@ -899,6 +899,7 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group erik
      */
     // tests purchase itself, plus before and after access
     public function test_can_purchase_post()
@@ -971,6 +972,7 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group erik
      */
     public function test_owner_can_not_edit_a_priced_post_that_others_have_purchased()
     {
@@ -1010,6 +1012,7 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group erik
      */
     // priced: one-time-purchaseable, as opposed to subscribeable
     public function test_owner_can_not_delete_a_priced_post_that_others_have_purchased()

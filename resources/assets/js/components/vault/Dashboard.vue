@@ -179,7 +179,7 @@ export default {
         const isActive = b.pkid === this.currentFolderPKID;
         result.push({
           pkid: b.pkid,
-          text: b.name,
+          text: b.vfname,
           active: isActive,
         });
       }
@@ -190,8 +190,6 @@ export default {
       return [{
         data: this.suggestions,
       }];
-      //this.$store.dispatch('getVaultfolder', this.currentFolderPKID);
-      //this.cancelCreateFolder();
     },
   },
 
@@ -276,7 +274,6 @@ export default {
         invitees: this.shareForm.invitees.map( o => { return { email: o } }),
       });
       console.log('response', { response });
-      //this.$store.dispatch('getVaultfolder', this.currentFolderPKID);
       this.cancelShareFiles();
     },
 
@@ -285,7 +282,7 @@ export default {
       const payload = {
         vault_id: this.vault_pkid,
         parent_id: this.currentFolderPKID,
-        name: this.createForm.name,
+        vfname: this.createForm.name,
       };
       axios.post('/vaultfolders', payload).then( (response) => {
         console.log('response', { response });
@@ -310,8 +307,6 @@ export default {
     getLink(e, mediafilePKID) {
       axios.get(`/mediafiles/${mediafilePKID}`).then( (response) => {
         console.log('response', { response });
-        //this.$store.dispatch('getVaultfolder', this.currentFolderPKID);
-        //this.cancelCreateFolder();
       });
     },
 

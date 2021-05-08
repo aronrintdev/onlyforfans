@@ -17,7 +17,6 @@ class RestSettingTest extends TestCase
 
     /**
      *  @group settings
-     *  @group here0429
      *  @group regression
      */
     public function test_can_update_single_notifications_setting_income_new_tip()
@@ -52,7 +51,6 @@ class RestSettingTest extends TestCase
 
     /**
      *  @group settings
-     *  @group OFF-here0506
      *  @group regression
      */
     public function test_can_update_single_notifications_setting_post_new_comment()
@@ -80,7 +78,6 @@ class RestSettingTest extends TestCase
 
     /**
      *  @group settings
-     *  @group here0429
      *  @group regression
      */
     public function test_can_toggle_global_email_notifications_setting()
