@@ -39,6 +39,11 @@ class Comment extends Model implements Likeable, Commentable, Ownable
         return new Collection([ $this->user ]);
     }
 
+    public function getPrimaryOwner(): User
+    {
+        return $this->user;
+    }
+
     /* ------------------------------ Relations ----------------------------- */
     public function user()
     {

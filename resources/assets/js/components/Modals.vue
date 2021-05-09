@@ -31,6 +31,16 @@
     </b-modal>
 
     <b-modal
+      id="modal-crop"
+      size="lg"
+      title="Upload Avatar"
+      hide-footer
+      body-class="p-0"
+    >
+      <CropImage ref="cropImage" :session_user="session_user" :url="selectedUrl" :timelineId="selectedTimelineId" />
+    </b-modal>
+
+    <b-modal
       id="modal-post"
       size="xl"
       title="Post"
@@ -59,6 +69,7 @@
 import Vuex from 'vuex';
 import { eventBus } from '@/app'
 import FollowTimeline from '@components/modals/FollowTimeline.vue'
+import CropImage from '@components/modals/CropImage.vue'
 import PurchasePost from '@components/modals/PurchasePost.vue'
 import SendTip from '@components/modals/SendTip.vue'
 import PostDisplay from '@components/posts/Display'
@@ -69,6 +80,7 @@ export default {
 
   components: {
     FollowTimeline,
+    CropImage,
     PurchasePost,
     SendTip,
     PostDisplay,
@@ -84,10 +96,13 @@ export default {
       'modal-tip': 'sendTip',
       'modal-purchase-post': 'purchasePost',
       'modal-follow': 'followTimeline',
+      'modal-crop': 'cropImage',
       'modal-post': 'postDisplay',
       'modal-photo': 'ImageDisplay',
     },
     selectedTimeline: null,
+    selectedUrl: null,
+    selectedTimelineId: null,
     selectedResource: null,
     selectedResourceId: null,
     subscribeOnly: false,
@@ -108,6 +123,11 @@ export default {
             this.selectedTimeline = data.timeline
             this.subscribeOnly = false
             this.$bvModal.show('modal-follow')
+            break
+          case 'render-crop':
+            this.selectedUrl = data.url
+            this.selectedTimelineId = data.timelineId
+            this.$bvModal.show('modal-crop')
             break
           case 'render-subscribe':
             this.selectedTimeline = data.timeline

@@ -135,7 +135,7 @@
               </b-card-text>
             </b-tab>
 
-            <b-tab title="Toast">
+            <b-tab title="Push">
               <b-card-text>
               </b-card-text>
             </b-tab>

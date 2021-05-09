@@ -19,6 +19,8 @@ use App\Models\Country;
 use App\Models\Timeline;
 use App\Enums\PaymentTypeEnum;
 use App\Rules\MatchOldPassword;
+use App\Models\Mediafile;
+use App\Enums\MediafileTypeEnum;
 
 class UsersController extends AppBaseController
 {
@@ -138,6 +140,62 @@ class UsersController extends AppBaseController
         return new UserSettingResource($userSetting);
     }
 
+    public function updateAvatar(Request $request)
+    {
+        $sessionUser = $request->user();
+        $file = $request->file('avatar');
+
+        if (!$file)
+        {
+            abort(400);
+        }
+
+        $mediafile = Mediafile::create([
+            'resource_type' => 'avatar',
+            'filename' => $file->store('./avatars', 's3'),
+            'mfname' => $file->getClientOriginalName(),
+            'mftype' => MediafileTypeEnum::AVATAR,
+            'mimetype' => $file->getMimeType(),
+            'orig_filename' => $file->getClientOriginalName(),
+            'orig_ext' => $file->getClientOriginalExtension(),
+        ]);
+
+        $sessionUser->timeline->avatar_id = $mediafile->id;
+        $sessionUser->timeline->save();
+
+        return response()->json([
+            'avatar' => $mediafile
+        ]);
+    }
+
+    public function updateCover(Request $request)
+    {
+        $sessionUser = $request->user();
+        $file = $request->file('cover');
+
+        if (!$file)
+        {
+            abort(400);
+        }
+
+        $mediafile = Mediafile::create([
+            'resource_type' => 'cover',
+            'filename' => $file->store('./covers', 's3'),
+            'mfname' => $file->getClientOriginalName(),
+            'mftype' => MediafileTypeEnum::COVER,
+            'mimetype' => $file->getMimeType(),
+            'orig_filename' => $file->getClientOriginalName(),
+            'orig_ext' => $file->getClientOriginalExtension(),
+        ]);
+
+        $sessionUser->timeline->cover_id = $mediafile->id;
+        $sessionUser->timeline->save();
+
+        return response()->json([
+            'cover' => $mediafile
+        ]);
+    }
+
     public function me(Request $request)
     {
         $sessionUser = $request->user(); // sender of tip
@@ -167,6 +225,7 @@ class UsersController extends AppBaseController
         ];
     }
 
+    // %FIXME: should this be in timeline controller instead (??)
     public function tip(Request $request, $id)
     {
         $sessionUser = Auth::user(); // sender of tip

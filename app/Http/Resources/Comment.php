@@ -14,7 +14,7 @@ class Comment extends JsonResource
 
         return [
             'id' => $this->id,
-            //'slug' => $this->slug,
+            'slug' => $this->slug,
             'commentable_id' => $this->commentable_id,
             'commentable_type' => $this->commentable_type,
             'parent_id' => $this->parent_id,

@@ -24,7 +24,6 @@ class RestNotificationsTest extends TestCase
 
     /**
      *  @group notifications
-     *  @group here0429
      *  @group regression
      */
     public function test_sends_email_on_like_when_enabled_in_settings()
@@ -78,7 +77,6 @@ class RestNotificationsTest extends TestCase
 
     /**
      *  @group notifications
-     *  @group here0506
      *  @group regression
      */
     public function test_sends_email_on_comment_when_enabled_in_settings()
@@ -126,7 +124,6 @@ class RestNotificationsTest extends TestCase
 
     /**
      *  @group notifications
-     *  @group here0504
      *  @group regression
      */
     public function test_does_not_send_email_on_like_when_disabled_in_settings()
@@ -180,8 +177,6 @@ class RestNotificationsTest extends TestCase
 
     /**
      *  @group notifications
-     *  @group here0429
-     *  @group here0506
      *  @group OFF-regression
      */
     /*
