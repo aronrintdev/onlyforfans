@@ -10,6 +10,9 @@ use Illuminate\Support\Facades\Config;
  */
 class Model extends ModelsModel
 {
+
+    protected $connection = 'financial';
+
     protected $minTransactions = null;
 
     /**

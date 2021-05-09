@@ -48,7 +48,7 @@ class Transaction extends Model
         HasCurrency,
         HasFactory;
 
-    protected $table = 'financial_transactions';
+    protected $table = 'transactions';
 
     protected $forceCombV4Uuid = true;
 

@@ -70,7 +70,7 @@ return [
         ],
 
         'financial' => [
-            'driver' => 'mysql',
+            'driver' => env('DB_FINANCIAL_DRIVER', 'mysql'),
             'host' => env('DB_FINANCIAL_HOST', 'localhost'),
             'port' => env('DB_FINANCIAL_PORT', '3306'),
             'database' => env('DB_FINANCIAL_DATABASE', 'forge'),

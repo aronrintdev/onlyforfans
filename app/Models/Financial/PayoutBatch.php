@@ -27,8 +27,7 @@ class PayoutBatch extends Model
 
     /* -------------------------- Model Properties -------------------------- */
     #region Model Properties
-    protected $connection = 'financial';
-    protected $table      = 'payout_batches';
+    protected $table = 'payout_batches';
 
     protected $guarded = [];
 
