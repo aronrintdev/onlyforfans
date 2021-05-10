@@ -35,14 +35,36 @@ class TimelinesController extends AppBaseController
 {
     public function index(Request $request)
     {
+        if ( !$request->user()->isAdmin() ) {
+            abort(403); // only admin access for now
+        }
+
+        $request->validate([
+            // filters
+            'user_id' => 'uuid|exists:users,id',
+            'verified' => 'boolean',
+            'is_follow_for_free' => 'boolean',
+        ]);
+
+        $filters = $request->only([ 'user_id', 'verified', 'is_follow_for_free' ]) ?? [];
+
+        // Init query
         $query = User::query();
 
         // Apply filters
-        //  ~ %TODO
+        foreach ($filters as $key => $f) {
+            switch ($key) {
+            case 'verified':
+            case 'is_follow_for_free':
+                $query->where($key, true);
+                break;
+            default:
+                $query->where($key, $f);
+            }
+        }
 
-        return response()->json([
-            'users' => $query->get(),
-        ]);
+        $data = $query->paginate( $request->input('take', env('MAX_DEFAULT_PER_REQUEST', 10)) );
+        return new TimelineCollection($data);
     }
 
     public function show(Request $request, Timeline $timeline)

@@ -24,12 +24,19 @@ class VaultfoldersController extends AppBaseController
 {
     public function index(Request $request)
     {
-        $filters = $request->filters ?? [];
+        $request->validate([
+            // filters
+            'user_id' => 'uuid|exists:users,id',
+            'vault_id' => 'uuid|exists:vaults,id',
+            'parent_id' => 'exclude_if:parent_id,root|uuid|exists:vaultfolders,id',
+        ]);
+        $filters = $request->only(['user_id', 'vault_id', 'parent_id']) ?? [];
 
         if ( !$request->user()->isAdmin() ) {
             do {
+                // Check if permission to view the vault
                 if ( array_key_exists('vault_id', $filters) ) {
-                    $vault = Vault::findOrFail($request->filters['vault_id']);
+                    $vault = Vault::findOrFail($filters['vault_id']);
                     if ( $request->user()->can('view', $vault) ) {
                         break; // allowed
                     }
@@ -38,20 +45,20 @@ class VaultfoldersController extends AppBaseController
             } while(0);
         }
 
-        $query = Vaultfolder::query();
-        $query->with(['mediafiles', 'vfparent', 'vfchildren']);
+        // Init query
+        $query = Vaultfolder::query()->with(['mediafiles', 'vfparent', 'vfchildren']);
 
-        foreach ( $request->input('filters', []) as $k => $v ) {
+        foreach ($filters as $k => $f) {
             switch ($k) {
             case 'parent_id':
-                if ( is_null($v) || ($v==='root') ) {
+                if ( is_null($f) || ($f==='root') ) {
                     $query->isRoot();
                 } else {
-                    $query->isChildOf($v);
+                    $query->isChildOf($f);
                 }
                 break;
             default:
-                $query->where($k, $v);
+                $query->where($k, $f);
             }
         }
         $data = $query->paginate( $request->input('take', env('MAX_VAULTFOLDERS_PER_REQUEST', 10)) );
