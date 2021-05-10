@@ -53,16 +53,9 @@ class RestCommentsTest extends TestCase
     /**
      *  @group comments
      *  @group regression
-     *  @group here0510
      */
     public function test_admin_can_list_comments()
     {
-        /*
-        $timeline = Timeline::has('followers', '>=', 1)
-            ->whereHas('posts', function($q1) {
-                $q1->has('comments', '>=', 1)->where('type', PostTypeEnum::FREE);
-            })->firstOrFail();
-         */
         $post = Post::has('comments', '>=', 2)->where('type', PostTypeEnum::FREE)->firstOrFail();
         $commenter = $post->comments[0]->user;
         $timeline = $post->timeline;

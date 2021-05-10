@@ -25,15 +25,14 @@ class PostsController extends AppBaseController
     public function index(Request $request)
     {
         $request->validate([
-            'filters' => 'array',
-            'filters.timeline_id' => 'uuid|exists:timelines,id', // if admin only
-            'filters.user_id' => 'uuid|exists:users,id', // if admin only
+            // filters
+            'timeline_id' => 'uuid|exists:timelines,id', // if admin only
+            'user_id' => 'uuid|exists:users,id', // if admin only
         ]);
-
-        $filters = $request->filters ?? [];
+        $filters = $request->only(['timeline_id', 'user_id']) ?? [];
 
         // Init query
-        $query = Post::query();
+        $query = Post::query(); 
 
         // Check permissions
         if ( !$request->user()->isAdmin() ) {
@@ -45,11 +44,9 @@ class PostsController extends AppBaseController
         // Apply any filters
         foreach ($filters as $key => $f) {
             switch ($key) {
-                //case 'postable_id':
-                case 'timeline_id':
-                case 'user_id':
-                    $query->where($key, $f);
-                    break;
+            default:
+                $query->where($key, $f);
+                break;
             }
         }
 

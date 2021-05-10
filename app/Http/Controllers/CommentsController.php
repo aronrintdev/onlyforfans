@@ -26,10 +26,10 @@ class CommentsController extends AppBaseController
             'user_id' => 'uuid|exists:users,id', // if admin only
             'parent_id' => 'uuid|exists:comments,id',
         ]);
-
         $filters = $request->only(['post_id', 'user_id', 'parent_id']) ?? [];
 
-        $query = Comment::with('user', 'replies.user'); // Init query
+        // Init query
+        $query = Comment::with('user', 'replies.user'); 
 
         // Check permissions
         if ( !$request->user()->isAdmin() ) {

@@ -26,6 +26,7 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group here0510
      */
     // %TODO: filters, timelines (see posts I follow), etc
     public function test_can_list_posts()
