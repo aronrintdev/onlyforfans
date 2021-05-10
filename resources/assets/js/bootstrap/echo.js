@@ -32,7 +32,7 @@ if (typeof window.Echo === 'undefined') {
     forceTLS: process.env.MIX_PUSHER_FORCE_TLS || false,
     encrypted: process.env.MIX_PUSHER_ENCRYPTED || false,
     disableStats: true,
-    enabledTransports: ['ws'],
+    enabledTransports: ['ws', 'wss'],
     disabledTransports: ['sockjs', 'xhr_polling', 'xhr_streaming'],
   })
 }

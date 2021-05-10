@@ -29,7 +29,7 @@ return [
     |
     */
 
-    'default' => env('DB_CONNECTION', 'mysql'),
+    'default' => env('DB_CONNECTION', 'primary'),
 
     /*
     |--------------------------------------------------------------------------
@@ -55,8 +55,8 @@ return [
             'prefix' => '',
         ],
 
-        'mysql' => [
-            'driver' => 'mysql',
+        'primary' => [
+            'driver' => env('DB_DRIVER', 'mysql'),
             'host' => env('DB_HOST', 'localhost'),
             'port' => env('DB_PORT', '3306'),
             'database' => env('DB_DATABASE', 'forge'),
