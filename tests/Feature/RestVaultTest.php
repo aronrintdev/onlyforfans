@@ -40,9 +40,7 @@ class RestVaultTest extends TestCase
         $primaryVault = Vault::primary($creator)->first();
 
         $payload = [
-            'filters' => [
-                'vault_id' => $primaryVault->id,
-            ],
+            'vault_id' => $primaryVault->id,
         ];
         $response = $this->actingAs($creator)->ajaxJSON('GET', route('vaultfolders.index'), $payload);
         $response->assertStatus(200);
@@ -80,9 +78,7 @@ class RestVaultTest extends TestCase
         })->where('id', '<>', $creator->id)->first();
 
         $payload = [
-            'filters' => [
-                'vault_id' => $primaryVault->id,
-            ],
+            'vault_id' => $primaryVault->id,
         ];
         $response = $this->actingAs($nonfan)->ajaxJSON('GET', route('vaultfolders.index'), $payload);
         $response->assertStatus(403);
@@ -99,10 +95,8 @@ class RestVaultTest extends TestCase
         $primaryVault = Vault::primary($creator)->first();
 
         $payload = [
-            'filters' => [
-                'vault_id' => $primaryVault->id,
-                'parent_id' => 'root',
-            ],
+            'vault_id' => $primaryVault->id,
+            'parent_id' => 'root',
         ];
         $response = $this->actingAs($creator)->ajaxJSON('GET', route('vaultfolders.index'), $payload);
         $response->assertStatus(200);
