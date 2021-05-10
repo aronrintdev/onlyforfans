@@ -50,9 +50,7 @@ export default {
         return
       }
       this.$store.dispatch('getStories', {
-        filters: {
-          user_id: this.session_user.id,
-        },
+        user_id: this.session_user.id,
       })
     },
   },

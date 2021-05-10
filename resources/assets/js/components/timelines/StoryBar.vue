@@ -45,11 +45,9 @@ export default {
 
   created() {
     this.$store.dispatch('getStories', {
-      filters: {
-        //user_id: this.session_user.id,
-        following: true,
-        stypes: 'image', // %FIXME: should be 'photo' (ideally we use PHP ENUM?)
-      },
+      //user_id: this.session_user.id,
+      following: 1,
+      stypes: 'image', // %FIXME: should be 'photo' (ideally we use PHP ENUM?)
     })
   },
 
@@ -64,18 +62,6 @@ export default {
   },
 
   watch: {
-    /*
-    session_user (newVal, oldVal) {
-      if ( newVal.id && (newVal.id > 0) && !this.isLoadedHack ) {
-        this.$store.dispatch('getStories', { 
-          filters: {
-            user_id: newVal.id,
-          }
-        });
-        this.isLoadedHack = true;
-      }
-    },
-    */
   },
 
   components: {},
