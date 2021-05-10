@@ -213,57 +213,47 @@ class RegisterController extends Controller
         ])->render();
     }
 
-    protected function registerUser(Request $request, $socialLogin = false)
+    protected function registerUser(Request $request)
     {
 
         // %FIXME %TODO: use transaction
 
-        if (Setting::get('captcha') == 'on' && !$socialLogin) {
-            $validator = $this->validator($request->all(), true, $socialLogin);
+        if (Setting::get('captcha') == 'on') {
+            $validator = $this->validator($request->all(), true, false);
         } else {
-            $validator = $this->validator($request->all(), null, $socialLogin);
+            $validator = $this->validator($request->all(), null, false);
         }
 
         if ($validator->fails()) {    
             if ($request->ajax()) {
-                return response()->json(['status' => '201', 'err_result' => $validator->errors()->toArray()]);
+                return response()->json(['status' => 201, 'err_result' => $validator->errors()->toArray()]);
             }
             return false;
         }
 
-        if ($request->affiliate) {
-            $timeline = Timeline::where('username', $request->affiliate)->first();
-            $affiliate_id = $timeline->user->id;
-        } else {
-            $affiliate_id = null;
-        }
-
-        //Create timeline record for the user
-        $timeline = Timeline::create([
-            'username' => $request->username,
-            'name'     => $request->name,
-            'type'     => 'user',
-            'about'    => '',
-            ]);
         if(Setting::get('mail_verification') == 'off') {
             $mail_verification = 1;
         } else {
-            $mail_verification = null;
+            $mail_verification = 0;
         }
         //Create user record
         $user = User::create([
             'email'             => $request->email,
             'password'          => bcrypt($request->password),
-            'timeline_id'       => $timeline->id,
-            'gender'            => 'male',
-            'affiliate_id'      => $affiliate_id,
             'verification_code' => str_random(30),
+            'username'          => 'u'.time(),
             'remember_token'    => str_random(10),
             'email_verified'    => $mail_verification
-            ]);
+        ]);
+
         if (Setting::get('birthday') == 'on' && $request->birthday != '') {
             $user->birthday = date('Y-m-d', strtotime($request->birthday));
             $user->save();
+        }
+
+        if ($request->gender != '') {
+            $user->settings->gender = $request->gender;
+            $user->settings->save();
         }
 
         if (Setting::get('city') == 'on' && $request->city != '') {
@@ -271,21 +261,10 @@ class RegisterController extends Controller
             $user->save();
         }
 
-        $user->name = $timeline->name;
-        $user->email = $request->email;
-
-        //saving default settings to user settings
-        $user_settings = [
-          'user_id'               => $user->id,
-          'confirm_follow'        => Setting::get('confirm_follow'),
-          'follow_privacy'        => Setting::get('follow_privacy'),
-          'comment_privacy'       => Setting::get('comment_privacy'),
-          'timeline_post_privacy' => Setting::get('user_timeline_post_privacy'),
-          'post_privacy'          => Setting::get('post_privacy'),
-          'message_privacy'       => Setting::get('user_message_privacy'), ];
-
-        //Create a record in user settings table.
-        $userSettings = DB::table('user_settings')->insert($user_settings);
+        $user->timeline()->create([
+            'name' => $request->name,
+            'about' => '',
+        ]);
 
         if ($user) {
 
@@ -314,29 +293,21 @@ class RegisterController extends Controller
                 // [ ] how to tie [invites].updated_at to jobs (?)
             }
 
-            if ($socialLogin) {
-                return $timeline;
-            } else {
+            if (Setting::get('mail_verification') == 'on') {
+                Mail::send('emails.welcome', ['user' => $user], function ($m) use ($user) {
+                    $m->from(Setting::get('noreply_email'), Setting::get('site_name'));
 
-//                print_r(Setting::get('noreply_email'));
-//                print_r($user->email);
-//                print_r($user->name);
-                $chk = '';
-                if (Setting::get('mail_verification') == 'on') {
-                    $chk = 'on';
-                    Mail::send('emails.welcome', ['user' => $user], function ($m) use ($user) {
-                        $m->from(Setting::get('noreply_email'), Setting::get('site_name'));
-
-                        $m->to($user->email, $user->name)->subject('Welcome to '.Setting::get('site_name'));
-                    });
-                }
-
-                return response()->json([
-                    'status' => '200', 
-                    'message' => trans('auth.verify_email'),
-                ]);
-
+                    $m->to($user->email, $user->name)->subject('Welcome to '.Setting::get('site_name'));
+                });
             }
+
+            if (Auth::loginUsingId($user->id)) {
+                return response()->json(['status' => 201, 'user' => $user]);
+            } else {
+                abort(500);
+            }
+        } else {
+            abort(400);
         }
     }
 
