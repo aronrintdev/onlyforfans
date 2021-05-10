@@ -18,7 +18,7 @@
                         <span>{{ selectedUser.profile.display_name ? `${selectedUser.profile.display_name} (${selectedUser.profile.name})` : selectedUser.profile.name }}</span>
                       </div>
                       <div class="details" v-if="!messageSearchVisible">
-                        <div class="online-status" v-if="!selectedUser.profile.user.is_online && !!selectedUser.profile.user.last_logged">Last seen {{ moment(selectedUser.profile.user.last_logged).fromNow() }}
+                        <div class="online-status" v-if="!selectedUser.profile.user.is_online">Last seen {{ moment(selectedUser.profile.user.last_logged || selectedUser.profile.user.created_at).fromNow() }}
                         </div>
                         <div class="online-status" v-if="selectedUser.profile.user.is_online">
                           <i class="fa fa-circle" aria-hidden="true"></i>Available now
@@ -98,7 +98,10 @@
                       </button>
                     </div>
                   </div>
-                  <div class="conversation-list">
+                  <div class="conversation-list-loading" v-if="!initialLoadingFinished">
+                    <b-spinner></b-spinner>
+                  </div>
+                  <div class="conversation-list" :class="!initialLoadingFinished ? 'overflow-hidden' : ''">
                     <div class="empty-messages" v-if="messages.length === 0">
                       Type a message below to start a conversation with {{ selectedUser.name }}
                     </div>
@@ -163,7 +166,6 @@
                                       </div>
                                     </div>
                                   </div>
-                                  <div class="text" v-if="message.messages[message.messages.length - 1].mcontent" :class="`message-${message.messages[message.messages.length - 1].id}`">{{ message.messages[message.messages.length - 1].mcontent }}</div>
                                 </div>
                                 <div v-if="!message.tip_price">
                                   <template v-for="msg in message.messages">
@@ -333,15 +335,33 @@
                         </swiper-slide>
                       </swiper>
                     </div>
-                    <textarea
-                      placeholder="Type a message"
-                      name="text"
-                      rows="1"
-                      maxlength="10000"
-                      spellcheck="false"
-                      @keydown="onCheckReturnKey"
-                      @input="onInputNewMessage"
-                    ></textarea>
+                    <div class="scheduled-message-head" v-if="scheduledMessageDate">
+                      <div>
+                        <svg class="icon-schedule" viewBox="0 0 24 24">
+                          <path d="M19 3h-1V2a1 1 0 0 0-2 0v1H8V2a1 1 0 0 0-2 0v1H5a2 2 0 0 0-2 2v13a3 3 0 0 0 3 3h12a3 3 0 0 0 3-3V5a2 2 0 0 0-2-2zm0 15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V9h14zm0-11H5V5h14zM9.79 17.21a1 1 0 0 0 1.42 0l5-5a1 1 0 0 0 .29-.71 1 1 0 0 0-1-1 1 1 0 0 0-.71.29l-4.29 4.3-1.29-1.3a1 1 0 0 0-.71-.29 1 1 0 0 0-1 1 1 1 0 0 0 .29.71z"></path>
+                        </svg> 
+                        <span> Scheduled for&nbsp;</span>
+                        <strong>{{ moment(scheduledMessageDate).format('MMM DD, h:mm a') }}</strong>
+                      </div>
+                      <button class="btn close-btn" @click="clearSchedule">
+                        <svg class="icon-close" viewBox="0 0 24 24">
+                          <path d="M13.41 12l5.3-5.29A1 1 0 0 0 19 6a1 1 0 0 0-1-1 1 1 0 0 0-.71.29L12 10.59l-5.29-5.3A1 1 0 0 0 6 5a1 1 0 0 0-1 1 1 1 0 0 0 .29.71l5.3 5.29-5.3 5.29A1 1 0 0 0 5 18a1 1 0 0 0 1 1 1 1 0 0 0 .71-.29l5.29-5.3 5.29 5.3A1 1 0 0 0 18 19a1 1 0 0 0 1-1 1 1 0 0 0-.29-.71z"></path>
+                        </svg>
+                      </button>
+                    </div>
+                    <div class="multiline-textbox">
+                      <textarea
+                        placeholder="Type a message"
+                        name="text"
+                        rows="1"
+                        ref="new_message_text"
+                        maxlength="10000"
+                        spellcheck="false"
+                        v-model="newMessageText"
+                        @keydown="onCheckReturnKey"
+                        @input="onInputNewMessage"
+                      ></textarea>
+                    </div>
                     <div class="action-btns">
                       <div>
                         <!-- image -->
@@ -379,6 +399,16 @@
                             <path
                               d="M20.33,5.69h0l-.9-1.35A3,3,0,0,0,16.93,3H7.07a3,3,0,0,0-2.5,1.34l-.9,1.35A4,4,0,0,0,3,7.91V18a3,3,0,0,0,3,3H18a3,3,0,0,0,3-3V7.91A4,4,0,0,0,20.33,5.69ZM6.24,5.45A1,1,0,0,1,7.07,5h9.86a1,1,0,0,1,.83.45l.37.55H5.87ZM19,18a1,1,0,0,1-1,1H6a1,1,0,0,1-1-1V8H19ZM9.5,12.75A1.25,1.25,0,1,0,8.25,11.5,1.25,1.25,0,0,0,9.5,12.75ZM7.93,17h8.14a.42.42,0,0,0,.3-.73L13.7,13.6l-2.55,2.55-1.7-1.7L7.63,16.27a.42.42,0,0,0,.3.73Z"
                               fill="#8a96a3"></path>
+                          </svg>
+                        </button>
+                        <!-- Schedule -->
+                        <button
+                          class="btn action-btn"
+                          type="button"
+                          @click="openScheduleMessageModal"
+                        >
+                          <svg class="icon-schedule" viewBox="0 0 24 24">
+                            <path d="M19 3h-1V2a1 1 0 0 0-2 0v1H8V2a1 1 0 0 0-2 0v1H5a2 2 0 0 0-2 2v13a3 3 0 0 0 3 3h12a3 3 0 0 0 3-3V5a2 2 0 0 0-2-2zm0 15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V9h14zm0-11H5V5h14zM9.79 17.21a1 1 0 0 0 1.42 0l5-5a1 1 0 0 0 .29-.71 1 1 0 0 0-1-1 1 1 0 0 0-.71.29l-4.29 4.3-1.29-1.3a1 1 0 0 0-.71-.29 1 1 0 0 0-1 1 1 1 0 0 0 .29.71z" fill="#8a96a3"></path>
                           </svg>
                         </button>
                         <!-- message price -->
@@ -458,7 +488,7 @@
         </div>
         <div class="action-btns">
           <button class="link-btn" @click="closeCustomNameModal">Cancel</button>
-          <button class="link-btn" @click="saveCustomName" :disabled="!userCustomName">Save</button>
+          <button class="link-btn" @click="saveCustomName">Save</button>
         </div>
       </div>
     </b-modal>
@@ -677,6 +707,37 @@
         </audio>
       </div>
     </b-modal>
+    <b-modal modal-class="schedule-message-modal" hide-header centered hide-footer ref="schedule-message-modal">
+      <div class="block-modal">
+        <div class="header d-flex align-items-center">
+          <h4 class="pt-1 pb-1">SCHEDULED MESSAGES</h4>
+        </div>
+        <div class="content">
+          <b-form-datepicker
+            v-model="scheduledMessage.date"
+            class="mb-3 mt-1"
+            ref="schedule_date"
+            :state="scheduledMessage.date ? true : null"
+            :min="new Date()"
+          />
+          <b-form-timepicker
+            v-model="scheduledMessage.time"
+            :state="scheduledMessage.timeState"
+            class="mb-2"
+            locale="en"
+            @input="onChangeScheduledMessageTime"
+          ></b-form-timepicker>
+        </div>
+        <div class="d-flex align-items-center justify-content-end action-btns">
+          <button class="link-btn" @click="clearSchedule">Cancel</button>
+          <button
+            class="link-btn"
+            @click="applySchedule"
+            :disabled="!scheduledMessage.date || !scheduledMessage.time || !scheduledMessage.timeState"
+          >Apply</button>
+        </div>
+      </div>
+    </b-modal>
     <div :class="showVideoRec ? '' : 'd-none'" class="video-rec-wrapper">
       <h4>Record Video Message</h4>
       <video id="myVideo" playsinline class="video-js vjs-default-skin"></video>
@@ -766,6 +827,9 @@
         'messages',
         'vaultfolders',
       ],
+      scheduledMessage: {},
+      scheduledMessageDate: null,
+      initialLoadingFinished: false,
     }),
     mounted() {
       const self = this;
@@ -773,6 +837,10 @@
       this.markAsRead();
       this.getMessages();
       this.findConversationList();
+      this.$Lazyload.$on('loaded', function (e) {
+        const diff = e.el.clientHeight > 400 ? e.el.clientHeight - 400 + 10 : 0;
+        $('.conversation-list').animate({ scrollTop: $('.conversation-list')[0].scrollTop + diff }, 0);
+      });
       // Echo.join(`user-status`)
       //   .joining((user) => {
       //     self.updateUserStatus(user.id, 1);
@@ -808,13 +876,20 @@
                 self.originMessages.unshift(message);
                 self.offset += 1;
                 self.groupMessages();
-                $('.conversation-list').animate({ scrollTop: $('.conversation-list')[0].scrollHeight }, 500);
-                this.$Lazyload.$once('loaded', function () {
-                  $('.conversation-list').animate({ scrollTop: $('.conversation-list')[0].scrollHeight }, 500);
-                });
                 self.markAsRead();
               } else {
                 self.lastMessage = { ...self.lastMessage, unread_messages_count: true };
+              }
+            })
+            .listen('MessageRemoveEvent', (e) => {
+              const idx = self.originMessages.findIndex(m => m.id === e.chatthread);
+              if (idx < 0) {
+                return;
+              }
+              if (e.sender.id === this.$route.params.id) {
+                self.originMessages.splice(idx, 1);
+                self.offset -= 1;
+                self.groupMessages();
               }
             });
         }
@@ -824,6 +899,7 @@
         this.messages = [];
         this.originMessages = [];
         this.offset = 0;
+        this.initialLoadingFinished = false;
         this.newMessageText = undefined;
         this.markAsRead();
         this.getMessages();
@@ -896,8 +972,11 @@
       findConversationList: function() {
         setTimeout(() => {
             if (this.$el.querySelector('.conversation-list')) {
-              $('.conversation-list').animate({ scrollTop: $('.conversation-list')[0].scrollHeight }, 500);
+              $('.conversation-list').animate({ scrollTop: $('.conversation-list')[0].scrollHeight }, 0);
               this.$el.querySelector('.conversation-list').addEventListener('scroll', this.handleDebouncedScroll);
+              setTimeout(() => {
+                this.initialLoadingFinished = true;
+              }, 1000)
             } else {
               this.findConversationList();
             }
@@ -945,6 +1024,9 @@
         _.orderBy(this.messages, ['date'], ['DESC']);
         this.messages = _.cloneDeep(this.messages);
         this.selectedUser = { ...this.selectedUser, messages: this.messages };
+        setTimeout(() => {
+          $('.conversation-list').animate({ scrollTop: $('.conversation-list')[0].scrollHeight }, 100);
+        }, 100);
       },
       getLogoFromName: function (username) {
         const names = username.split(' ');
@@ -985,6 +1067,7 @@
       },
       onInputNewMessage: function(e) {
         this.newMessageText = e.target.value;
+        this.adjustTextareaSize();
         if (this.newMessageText) {
           this.hasNewMessage = true;
         } else {
@@ -1025,31 +1108,33 @@
           if (this.messagePrice) {
             data.append('tip_price', this.messagePrice);
           }
+          const self = this;
           this.axios.post('/chat-messages', data)
             .then((response) => {
               this.isSendingFiles = false;
               this.newMessageText = undefined;
+              this.adjustTextareaSize();
               this.sortableMedias = [];
-              this.originMessages.unshift(response.data.message);
-              this.lastMessage = { ...response.data.message };
+              this.messagePrice = undefined;
+              self.lastMessage = _.cloneDeep(response.data.message);
+              self.originMessages.unshift(self.lastMessage);
               this.groupMessages();
-              $('.conversation-list').animate({ scrollTop: $('.conversation-list')[0].scrollHeight }, 500);
-              this.$Lazyload.$once('loaded', function () {
-                $('.conversation-list').animate({ scrollTop: $('.conversation-list')[0].scrollHeight }, 500);
-              });
             });
         } else if (this.newMessageText) {
+          const self = this;
           this.axios.post('/chat-messages', {
             message: this.newMessageText,
             tip_price: this.messagePrice,
             user_id: this.selectedUser.profile.id,
           })
             .then((response) => {
-              this.lastMessage = response.data.message;
-              this.originMessages.unshift(response.data.message);
-              this.groupMessages();
-              this.newMessageText = undefined;
-              $('.conversation-list').animate({ scrollTop: $('.conversation-list')[0].scrollHeight }, 500);
+              self.lastMessage = _.cloneDeep(response.data.message);
+              self.originMessages.unshift(self.lastMessage);
+              self.originMessages = _.cloneDeep(self.originMessages);
+              self.groupMessages();
+              self.newMessageText = undefined;
+              self.adjustTextareaSize();
+              self.messagePrice = undefined;
             });
         }
       },
@@ -1132,6 +1217,19 @@
                 }
               };
               $(`.user-content.user-${this.selectedUser.profile.id} .username`).text(this.userCustomName);
+              this.closeCustomNameModal();
+            });
+        } else {
+          this.axios.post(`/chat-messages/${this.$route.params.id}/custom-name`, { name: '' })
+            .then(() => {
+              this.selectedUser = {
+                ...this.selectedUser,
+                profile: {
+                  ...this.selectedUser.profile,
+                  display_name: undefined,
+                }
+              };
+              $(`.user-content.user-${this.selectedUser.profile.id} .username`).text(this.selectedUser.profile.name);
               this.closeCustomNameModal();
             });
         }
@@ -1320,15 +1418,17 @@
         this.$refs['unsend-message-modal'].hide();
       },
       unsendTipMessage: function() {
-        this.axios.delete(`/chat-messages/${this.$route.params.id}/threads/${this.unsendTipMessageId}`)
-          .then(() => {
-            this.closeUnsendMessageModal();
-            const newMessages = [...this.messages];
-            const idx = newMessages.findIndex(message => message.id === this.unsendTipMessageId);
-            newMessages.splice(idx, 1);
-            this.messages = newMessages;
-          });
-        this.unsendTipMessageId = undefined;
+        const self = this;
+        if (this.unsendTipMessageId) {
+          this.axios.delete(`/chat-messages/${this.$route.params.id}/threads/${this.unsendTipMessageId}`)
+            .then(() => {
+              const idx = self.originMessages.findIndex(message => message.id === self.unsendTipMessageId);
+              self.originMessages.splice(idx, 1);
+              self.originMessages = _.cloneDeep(self.originMessages);
+              self.groupMessages();
+              self.closeUnsendMessageModal();
+            });
+        }
       },
       openMessagePriceConfirmModal: function(value) {
         this.confirm_message_price = value;
@@ -1338,7 +1438,7 @@
         this.$refs['confirm-message-price-modal'].hide();
       },
       onCheckReturnKey: function(e) {
-        if (e.ctrlKey && e.keyCode == 13) {
+        if (e.ctrlKey && e.keyCode === 13) {
           this.sendMessage();
         }
       },
@@ -1498,6 +1598,36 @@
               this.vaultFiles = response.data.mediafiles;
               this.isVaultLoading = false;
             })
+        }
+      },
+      openScheduleMessageModal: function() {
+        this.$refs['schedule-message-modal'].show();
+      },
+      applySchedule: function() {
+        this.scheduledMessageDate = moment(`${this.scheduledMessage.date} ${this.scheduledMessage.time}`).unix() * 1000;
+        this.$refs['schedule-message-modal'].hide();
+        this.scheduledMessage = {};
+      },
+      clearSchedule: function() {
+        this.scheduledMessageDate = undefined;
+        this.scheduledMessage = {};
+        this.$refs['schedule-message-modal'].hide();
+      },
+      onChangeScheduledMessageTime: function(event) {
+        this.scheduledMessage.timeState = true;
+        if (moment().format('YYYY-MM-DD') === this.$refs.schedule_date.value) {
+          if (moment().format('HH:mm:ss') > event) {
+            this.scheduledMessage.timeState = false;
+          }
+        }
+        this.scheduledMessage = { ...this.scheduledMessage };
+      },
+      adjustTextareaSize: function() {
+        const limit = 100;
+        const textarea = this.$refs.new_message_text;
+        if (textarea) {
+          textarea.style.height = '1px';
+          textarea.style.height = Math.min(textarea.scrollHeight, limit) + "px";
         }
       }
     }

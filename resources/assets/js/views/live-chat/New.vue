@@ -231,7 +231,7 @@
                         <svg class="icon-schedule" viewBox="0 0 24 24">
                           <path d="M19 3h-1V2a1 1 0 0 0-2 0v1H8V2a1 1 0 0 0-2 0v1H5a2 2 0 0 0-2 2v13a3 3 0 0 0 3 3h12a3 3 0 0 0 3-3V5a2 2 0 0 0-2-2zm0 15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V9h14zm0-11H5V5h14zM9.79 17.21a1 1 0 0 0 1.42 0l5-5a1 1 0 0 0 .29-.71 1 1 0 0 0-1-1 1 1 0 0 0-.71.29l-4.29 4.3-1.29-1.3a1 1 0 0 0-.71-.29 1 1 0 0 0-1 1 1 1 0 0 0 .29.71z"></path>
                         </svg> 
-                        <span> Scheduled for </span>
+                        <span> Scheduled for&nbsp;</span>
                         <strong>{{ moment(scheduledMessageDate).format('MMM DD, h:mm a') }}</strong>
                       </div>
                       <button class="btn close-btn" @click="clearSchedule">
@@ -240,16 +240,19 @@
                         </svg>
                       </button>
                     </div>
-                    <textarea
-                      placeholder="Type a message"
-                      name="text"
-                      rows="1"
-                      maxlength="10000"
-                      spellcheck="false"
-                      v-model="messageText"
-                      @keydown="onCheckReturnKey"
-                      @input="onInputNewMessage"
-                    ></textarea>
+                    <div class="multiline-textbox">
+                      <textarea
+                        placeholder="Type a message"
+                        name="text"
+                        rows="1"
+                        ref="new_message_text"
+                        maxlength="10000"
+                        spellcheck="false"
+                        v-model="newMessageText"
+                        @keydown="onCheckReturnKey"
+                        @input="onInputNewMessage"
+                      ></textarea>
+                    </div>
                     <div class="action-btns">
                       <div>
                         <!-- image -->
@@ -308,7 +311,7 @@
                           </svg>
                         </button>
                       </div>
-                      <button class="send-btn btn" :disabled="!(hasNewMessage || sortableMedias.length > 0)" type="button" @click="sendMessage">
+                      <button class="send-btn btn" :disabled="!(hasNewMessage || sortableMedias.length > 0) || selectedUsers.length < 1" type="button" @click="sendMessage">
                         <b-spinner v-if="isSendingFiles" small></b-spinner>
                         Send
                       </button>
@@ -477,13 +480,25 @@
           <b-form-datepicker
             v-model="scheduledMessage.date"
             class="mb-3 mt-1"
+            ref="schedule_date"
+            :state="scheduledMessage.date ? true : null"
             :min="new Date()"
           />
-          <b-form-timepicker v-model="scheduledMessage.time" class="mb-2" locale="en"></b-form-timepicker>
+          <b-form-timepicker
+            v-model="scheduledMessage.time"
+            :state="scheduledMessage.timeState"
+            class="mb-2"
+            locale="en"
+            @input="onChangeScheduledMessageTime"
+          ></b-form-timepicker>
         </div>
         <div class="d-flex align-items-center justify-content-end action-btns">
           <button class="link-btn" @click="clearSchedule">Cancel</button>
-          <button class="link-btn" @click="applySchedule" :disabled="!scheduledMessage.date || !scheduledMessage.time">Apply</button>
+          <button
+            class="link-btn"
+            @click="applySchedule"
+            :disabled="!scheduledMessage.date || !scheduledMessage.time || !scheduledMessage.timeState"
+          >Apply</button>
         </div>
       </div>
     </b-modal>
@@ -798,6 +813,11 @@
         })
    
         Promise.all(promises).then(function() {
+          self.isSendingFiles = false;
+          self.newMessageText = undefined;
+          self.adjustTextareaSize();
+          self.sortableMedias = [];
+          self.messagePrice = undefined;
           if (self.selectedUsers.length > 1) {
             self.$router.push('/messages');
           } else {
@@ -825,16 +845,11 @@
         this.filterOptions[option] = value;
         this.filterOptions = { ...this.filterOptions };
       },
-      onCheckReturnKey: function(e) {
-        if (e.ctrlKey && e.keyCode == 13) {
-          this.sendMessage();
-        }
-      },
       openScheduleMessageModal: function() {
         this.$refs['schedule-message-modal'].show();
       },
       applySchedule: function() {
-        this.scheduledMessageDate = moment().unix();
+        this.scheduledMessageDate = moment(`${this.scheduledMessage.date} ${this.scheduledMessage.time}`).unix() * 1000;
         this.$refs['schedule-message-modal'].hide();
         this.scheduledMessage = {};
       },
@@ -1125,12 +1140,30 @@
       },
       onInputNewMessage: function(e) {
         this.newMessageText = e.target.value;
+        this.adjustTextareaSize();
         if (this.newMessageText) {
           this.hasNewMessage = true;
         } else {
           this.hasNewMessage = false;
         }
       },
+      onChangeScheduledMessageTime: function(event) {
+        this.scheduledMessage.timeState = true;
+        if (moment().format('YYYY-MM-DD') === this.$refs.schedule_date.value) {
+          if (moment().format('HH:mm:ss') > event) {
+            this.scheduledMessage.timeState = false;
+          }
+        }
+        this.scheduledMessage = { ...this.scheduledMessage };
+      },
+      adjustTextareaSize: function() {
+        const limit = 100;
+        const textarea = this.$refs.new_message_text;
+        if (textarea) {
+          textarea.style.height = '1px';
+          textarea.style.height = Math.min(textarea.scrollHeight, limit) + "px";
+        }
+      }
     }
   }
 </script>

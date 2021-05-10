@@ -24,6 +24,15 @@
         <i class="fa fa-search" aria-hidden="true"></i>
       </button>
     </div>
+    <div class="user-search-bar contacts-filter">
+      <button class="btn" type="button" disabled>
+        <i class="fa fa-search" aria-hidden="true"></i>
+      </button>
+      <b-form-input :value="userSearchText" @input="onUserSearch" placeholder="Search people"></b-form-input>
+      <button v-if="userSearchText" class="btn" type="button" @click="clearContactsSearchbar">
+        <i class="fa fa-times" aria-hidden="true"></i>
+      </button>
+    </div>
     <div class="options-bar">
       <span class="selected-option">{{selectedOption}}</span>
       <b-dropdown class="filter-dropdown" id="user-filter-dropdown" right>
@@ -319,6 +328,13 @@
       },
       changeSearchbarVisible: function () {
         this.userSearchVisible = !this.userSearchVisible;
+        this.userSearchText = undefined;
+      },
+      clearContactsSearchbar: function () {
+        this.axios.get(`/chat-messages/contacts?sort=${this.optionValue}`)
+          .then((res) => {
+            this.users = res.data;
+          })
         this.userSearchText = undefined;
       },
       onUserSearch: function(value) {
