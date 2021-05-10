@@ -54,7 +54,7 @@ class AccountModelTest extends TestCase
             'id' => $account->id,
             'owner_id' => $user->id,
             'type' => AccountTypeEnum::INTERNAL
-        ]);
+        ], $this->getConnectionString());
     }
 
     /**
@@ -73,7 +73,7 @@ class AccountModelTest extends TestCase
             'id' => $account->id,
             'owner_id' => $user->id,
             'type' => AccountTypeEnum::INTERNAL
-        ]);
+        ], $this->getConnectionString());
 
         $accountId = $account->id;
 
@@ -124,7 +124,7 @@ class AccountModelTest extends TestCase
         $this->assertDatabaseHas($this->tableNames['account'], [
             'owner_id' => $user->id,
             'type' => AccountTypeEnum::INTERNAL
-        ]);
+        ], $this->getConnectionString());
 
         $internalAccount = $user->getInternalAccount($this->defaultSystem, $this->defaultCurrency);
 
@@ -134,7 +134,7 @@ class AccountModelTest extends TestCase
             'credit_amount' => 0,
             'debit_amount' => 100,
             'currency' => $this->defaultCurrency,
-        ]);
+        ], $this->getConnectionString());
 
         // Has to transaction
         $this->assertDatabaseHas($this->tableNames['transaction'], [
@@ -142,7 +142,7 @@ class AccountModelTest extends TestCase
             'credit_amount' => 100,
             'debit_amount' => 0,
             'currency' => $this->defaultCurrency,
-        ]);
+        ], $this->getConnectionString());
 
         $fromTransaction = Transaction::where('account_id', $inAccount->getKey())->latest()->first();
         $toTransaction = Transaction::where('account_id', $internalAccount->getKey())->latest()->first();
@@ -181,13 +181,13 @@ class AccountModelTest extends TestCase
             'credit_amount' => 0,
             'debit_amount' => 300,
             'currency' => $this->defaultCurrency,
-        ]);
+        ], $this->getConnectionString());
         $this->assertDatabaseHas($this->tableNames['transaction'], [
             'account_id' => $toAccount->getKey(),
             'credit_amount' => 300,
             'debit_amount' => 0,
             'currency' => $this->defaultCurrency,
-        ]);
+        ], $this->getConnectionString());
 
         $this->assertHasBalanceOf(700, $account);
 
@@ -281,7 +281,7 @@ class AccountModelTest extends TestCase
         $this->assertDatabaseHas($this->tableNames['systemOwner'], [
             'name' => 'platformFees',
             'system' => $this->defaultSystem,
-        ]);
+        ], $this->getConnectionString());
 
         $systemOwner = SystemOwner::where('name', 'platformFees')->where('system', $this->defaultSystem)->first();
 
@@ -289,6 +289,6 @@ class AccountModelTest extends TestCase
         $this->assertDatabaseHas($this->tableNames['account'], [
             'owner_id' => $systemOwner->getKey(),
             'type' => AccountTypeEnum::INTERNAL,
-        ]);
+        ], $this->getConnectionString());
     }
 }

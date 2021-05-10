@@ -78,7 +78,7 @@ class PurchaseableTest extends TestCase
             'type' => TransactionTypeEnum::SALE,
             'purchasable_id' => $post->getKey(),
             'purchasable_type' => $post->getMorphString(),
-        ]);
+        ], 'financial');
 
         Event::assertDispatched(ItemPurchased::class);
     }

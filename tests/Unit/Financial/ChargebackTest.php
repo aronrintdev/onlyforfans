@@ -85,28 +85,28 @@ class ChargebackTest extends TestCase
             'account_id' => $inAccount->getKey(),
             'type' => TransactionTypeEnum::CHARGEBACK,
             'credit_amount' => 1000,
-        ]);
+        ], $this->getConnectionString());
 
         // Chargeback from user internal account to in account
         $this->assertDatabaseHas($this->tableNames['transaction'], [
             'account_id' => $internalAccount->getKey(),
             'type' => TransactionTypeEnum::CHARGEBACK,
             'debit_amount' => 1000,
-        ]);
+        ], $this->getConnectionString());
 
         // Chargeback from creator to user internal account
         $this->assertDatabaseHas($this->tableNames['transaction'], [
             'account_id' => $internalAccount->getKey(),
             'type' => TransactionTypeEnum::CHARGEBACK,
             'credit_amount' => 1000,
-        ]);
+        ], $this->getConnectionString());
 
         // Chargeback from creator Account
         $this->assertDatabaseHas($this->tableNames['transaction'], [
             'account_id' => $creatorAccount->getKey(),
             'type' => TransactionTypeEnum::CHARGEBACK,
             'debit_amount' => 1000,
-        ]);
+        ], $this->getConnectionString());
 
         // Settle all balances
         AccountHelpers::settleAccounts([ $inAccount, $internalAccount, $creatorAccount, ]);
@@ -160,33 +160,33 @@ class ChargebackTest extends TestCase
             'account_id' => $platformFeesAccount->getKey(),
             'type' => TransactionTypeEnum::CHARGEBACK,
             'debit_amount' => 300,
-        ]);
+        ], $this->getConnectionString());
 
         // Tax Chargeback
         $this->assertDatabaseHas($this->tableNames['transaction'], [
             'account_id' => $taxAccount->getKey(),
             'type' => TransactionTypeEnum::CHARGEBACK,
             'debit_amount' => 50,
-        ]);
+        ], $this->getConnectionString());
 
         // Creator Chargeback
         $this->assertDatabaseHas($this->tableNames['transaction'], [
             'account_id' => $creatorAccount->getKey(),
             'type' => TransactionTypeEnum::CHARGEBACK,
             'debit_amount' => 1000,
-        ]);
+        ], $this->getConnectionString());
 
         // User Chargeback
         $this->assertDatabaseHas($this->tableNames['transaction'], [
             'account_id' => $internalAccount->getKey(),
             'type' => TransactionTypeEnum::CHARGEBACK,
             'debit_amount' => 1000,
-        ]);
+        ], $this->getConnectionString());
         $this->assertDatabaseHas($this->tableNames['transaction'], [
             'account_id' => $inAccount->getKey(),
             'type' => TransactionTypeEnum::CHARGEBACK,
             'credit_amount' => 1000,
-        ]);
+        ], $this->getConnectionString());
 
         // Settle balances
         AccountHelpers::settleAccounts([
@@ -237,27 +237,27 @@ class ChargebackTest extends TestCase
             'account_id' => $creatorAccount1->getKey(),
             'type' => TransactionTypeEnum::CHARGEBACK,
             'debit_amount' => 500,
-        ]);
+        ], $this->getConnectionString());
         $this->assertDatabaseHas($this->tableNames['transaction'], [
             'account_id' => $creatorAccount2->getKey(),
             'type' => TransactionTypeEnum::CHARGEBACK,
             'debit_amount' => 300,
-        ]);
+        ], $this->getConnectionString());
         $this->assertDatabaseHas($this->tableNames['transaction'], [
             'account_id' => $creatorAccount3->getKey(),
             'type' => TransactionTypeEnum::CHARGEBACK,
             'debit_amount' => 200,
-        ]);
+        ], $this->getConnectionString());
         $this->assertDatabaseHas($this->tableNames['transaction'], [
             'account_id' => $internalAccount->getKey(),
             'type' => TransactionTypeEnum::CHARGEBACK,
             'debit_amount' => 1000,
-        ]);
+        ], $this->getConnectionString());
         $this->assertDatabaseHas($this->tableNames['transaction'], [
             'account_id' => $inAccount->getKey(),
             'type' => TransactionTypeEnum::CHARGEBACK,
             'credit_amount' => 1000,
-        ]);
+        ], $this->getConnectionString());
 
         AccountHelpers::settleAccounts([
             $inAccount, $internalAccount, $creatorAccount1, $creatorAccount2, $creatorAccount3
@@ -320,27 +320,27 @@ class ChargebackTest extends TestCase
             'account_id' => $creatorAccount1->getKey(),
             'type' => TransactionTypeEnum::CHARGEBACK,
             'debit_amount' => 500,
-        ]);
+        ], $this->getConnectionString());
         $this->assertDatabaseHas($this->tableNames['transaction'], [
             'account_id' => $creatorAccount2->getKey(),
             'type' => TransactionTypeEnum::CHARGEBACK,
             'debit_amount' => 300,
-        ]);
+        ], $this->getConnectionString());
         $this->assertDatabaseHas($this->tableNames['transaction'], [
             'account_id' => $creatorAccount3->getKey(),
             'type' => TransactionTypeEnum::CHARGEBACK,
             'debit_amount' => 200,
-        ]);
+        ], $this->getConnectionString());
         $this->assertDatabaseHas($this->tableNames['transaction'], [
             'account_id' => $internalAccount->getKey(),
             'type' => TransactionTypeEnum::CHARGEBACK,
             'debit_amount' => 1000,
-        ]);
+        ], $this->getConnectionString());
         $this->assertDatabaseHas($this->tableNames['transaction'], [
             'account_id' => $inAccount->getKey(),
             'type' => TransactionTypeEnum::CHARGEBACK,
             'credit_amount' => 1000,
-        ]);
+        ], $this->getConnectionString());
 
         AccountHelpers::settleAccounts([
             $inAccount,
@@ -411,27 +411,27 @@ class ChargebackTest extends TestCase
             'account_id' => $creatorAccount1->getKey(),
             'type' => TransactionTypeEnum::CHARGEBACK,
             'debit_amount' => 500,
-        ]);
+        ], $this->getConnectionString());
         $this->assertDatabaseHas($this->tableNames['transaction'], [
             'account_id' => $creatorAccount2->getKey(),
             'type' => TransactionTypeEnum::CHARGEBACK,
             'debit_amount' => 300,
-        ]);
+        ], $this->getConnectionString());
         $this->assertDatabaseHas($this->tableNames['transaction'], [
             'account_id' => $creatorAccount3->getKey(),
             'type' => TransactionTypeEnum::CHARGEBACK,
             'debit_amount' => 200,
-        ]);
+        ], $this->getConnectionString());
         $this->assertDatabaseHas($this->tableNames['transaction'], [
             'account_id' => $internalAccount->getKey(),
             'type' => TransactionTypeEnum::CHARGEBACK,
             'debit_amount' => 1000,
-        ]);
+        ], $this->getConnectionString());
         $this->assertDatabaseHas($this->tableNames['transaction'], [
             'account_id' => $inAccount->getKey(),
             'type' => TransactionTypeEnum::CHARGEBACK,
             'credit_amount' => 1000,
-        ]);
+        ], $this->getConnectionString());
 
         AccountHelpers::settleAccounts([
             $inAccount,
@@ -507,32 +507,32 @@ class ChargebackTest extends TestCase
             'account_id' => $creatorAccount1->getKey(),
             'type' => TransactionTypeEnum::CHARGEBACK,
             'debit_amount' => 500,
-        ]);
+        ], $this->getConnectionString());
         $this->assertDatabaseHas($this->tableNames['transaction'], [
             'account_id' => $creatorAccount2->getKey(),
             'type' => TransactionTypeEnum::CHARGEBACK,
             'debit_amount' => 300,
-        ]);
+        ], $this->getConnectionString());
         $this->assertDatabaseHas($this->tableNames['transaction'], [
             'account_id' => $creatorAccount3->getKey(),
             'type' => TransactionTypeEnum::CHARGEBACK,
             'debit_amount' => 200,
-        ]);
+        ], $this->getConnectionString());
         $this->assertDatabaseHas($this->tableNames['transaction'], [
             'account_id' => $creatorAccount3->getKey(),
             'type' => TransactionTypeEnum::CHARGEBACK_PARTIAL,
             'credit_amount' => 100,
-        ]);
+        ], $this->getConnectionString());
         $this->assertDatabaseHas($this->tableNames['transaction'], [
             'account_id' => $internalAccount->getKey(),
             'type' => TransactionTypeEnum::CHARGEBACK,
             'debit_amount' => 900,
-        ]);
+        ], $this->getConnectionString());
         $this->assertDatabaseHas($this->tableNames['transaction'], [
             'account_id' => $inAccount->getKey(),
             'type' => TransactionTypeEnum::CHARGEBACK,
             'credit_amount' => 900,
-        ]);
+        ], $this->getConnectionString());
 
         AccountHelpers::settleAccounts([
             $inAccount,
@@ -739,7 +739,7 @@ class ChargebackTest extends TestCase
             'column' => 'can_make_transactions',
             'delta_before' => true,
             'delta_after' => false,
-        ]);
+        ], $this->getConnectionString());
 
         Event::assertDispatched(FinancialFlagRaised::class);
     }

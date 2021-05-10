@@ -13,7 +13,7 @@ class MakeFinancialTransactionFieldsNullable extends Migration
      */
     public function up()
     {
-        Schema::table('financial_transactions', function (Blueprint $table) {
+        Schema::connection('financial')->table('transactions', function (Blueprint $table) {
             $table->string('description')->nullable()->change();
             $table->json('metadata')->nullable()->change();
         });
@@ -26,7 +26,7 @@ class MakeFinancialTransactionFieldsNullable extends Migration
      */
     public function down()
     {
-        Schema::table('financial_transactions', function (Blueprint $table) {
+        Schema::connection('financial')->table('transactions', function (Blueprint $table) {
             $table->string('description')->change();
             $table->json('metadata')->change();
         });

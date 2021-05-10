@@ -22,7 +22,7 @@ class MoveFinancialTablesToNewDatabase extends Migration
 
         // Create and migrate data if it needs to be
         $this->updateTable($defaultConnection, $db, '', 'financial_accounts',                       'financial', $financialDB, $financialPrefix, 'accounts');
-        $this->updateTable($defaultConnection, $db, '', 'financial_currency_exchange_transactions', 'financial', $financialDB, $financialPrefix, 'currency_exchange_transaction');
+        $this->updateTable($defaultConnection, $db, '', 'financial_currency_exchange_transactions', 'financial', $financialDB, $financialPrefix, 'currency_exchange_transactions');
         $this->updateTable($defaultConnection, $db, '', 'financial_flags',                          'financial', $financialDB, $financialPrefix, 'flags');
         $this->updateTable($defaultConnection, $db, '', 'financial_system_owners',                  'financial', $financialDB, $financialPrefix, 'system_owners');
         $this->updateTable($defaultConnection, $db, '', 'financial_transaction_summaries',          'financial', $financialDB, $financialPrefix, 'transaction_summaries');
@@ -37,11 +37,20 @@ class MoveFinancialTablesToNewDatabase extends Migration
             $oldTable = $oldPrefix . $oldName;
             $newTable = $newPrefix . $newName;
             // If these are the same then their is no data to migrate
-            if ("$newDB.$newTable" === "$oldDB.$oldTable") {
+            if ("$newDB.$newTable" == "$oldDB.$oldTable") {
                 return;
             }
+            // dump('test', "$newDB.$newTable", "$oldDB.$oldTable", "$newDB.$newTable" == "$oldDB.$oldTable");
             if (!Schema::connection($newConnection)->hasTable($newTable)) {
-                DB::statement("create table `$newDB`.`$newTable` select * from `$oldDB`.`$oldTable`");
+                if (Config::get("database.connections.$oldConnection.driver") == 'sqlite') {
+                    if ($newDB === ':memory:') {
+                        DB::statement("create table `$newTable` as select * from `$oldTable`");
+                    } else {
+                        DB::statement("create table `$newDB`.`$newTable` as select * from `$oldDB`.`$oldTable`");
+                    }
+                } else {
+                    DB::statement("create table `$newDB`.`$newTable` select * from `$oldDB`.`$oldTable`");
+                }
             } else {
                 DB::statement("insert `$newDB`.`$newTable` select * from `$oldDB`.`$oldTable`");
             }
@@ -62,13 +71,13 @@ class MoveFinancialTablesToNewDatabase extends Migration
         $db = Config::get("database.connections.$defaultConnection.database");
 
         // Create and migrate data if it needs to be
-        $this->updateTable('financial', $financialDB, $financialPrefix, 'accounts',                      $defaultConnection, $db, '', 'financial_accounts');
-        $this->updateTable('financial', $financialDB, $financialPrefix, 'currency_exchange_transaction', $defaultConnection, $db, '', 'financial_currency_exchange_transactions');
-        $this->updateTable('financial', $financialDB, $financialPrefix, 'flags',                         $defaultConnection, $db, '', 'financial_flags');
-        $this->updateTable('financial', $financialDB, $financialPrefix, 'system_owners',                 $defaultConnection, $db, '', 'financial_system_owners');
-        $this->updateTable('financial', $financialDB, $financialPrefix, 'transaction_summaries',         $defaultConnection, $db, '', 'financial_transaction_summaries');
-        $this->updateTable('financial', $financialDB, $financialPrefix, 'transactions',                  $defaultConnection, $db, '', 'financial_transactions');
-        $this->updateTable('financial', $financialDB, $financialPrefix, 'segpay_calls',                  $defaultConnection, $db, '', 'segpay_calls');
-        $this->updateTable('financial', $financialDB, $financialPrefix, 'segpay_cards',                  $defaultConnection, $db, '', 'segpay_cards');
+        $this->updateTable('financial', $financialDB, $financialPrefix, 'accounts',                       $defaultConnection, $db, '', 'financial_accounts');
+        $this->updateTable('financial', $financialDB, $financialPrefix, 'currency_exchange_transactions', $defaultConnection, $db, '', 'financial_currency_exchange_transactions');
+        $this->updateTable('financial', $financialDB, $financialPrefix, 'flags',                          $defaultConnection, $db, '', 'financial_flags');
+        $this->updateTable('financial', $financialDB, $financialPrefix, 'system_owners',                  $defaultConnection, $db, '', 'financial_system_owners');
+        $this->updateTable('financial', $financialDB, $financialPrefix, 'transaction_summaries',          $defaultConnection, $db, '', 'financial_transaction_summaries');
+        $this->updateTable('financial', $financialDB, $financialPrefix, 'transactions',                   $defaultConnection, $db, '', 'financial_transactions');
+        $this->updateTable('financial', $financialDB, $financialPrefix, 'segpay_calls',                   $defaultConnection, $db, '', 'segpay_calls');
+        $this->updateTable('financial', $financialDB, $financialPrefix, 'segpay_cards',                   $defaultConnection, $db, '', 'segpay_cards');
     }
 }
