@@ -52,6 +52,7 @@ Route::post('/login', 'Auth\LoginController@login');
 /* -------------------------------- Register -------------------------------- */
 // Route::get('/register', 'Auth\RegisterController@register')->name('auth.register');
 Route::post('/register', 'Auth\RegisterController@registerUser');
+Route::post('/forgot-password', 'Auth\ForgotPasswordController@store');
 // Route::get('email/verify', 'Auth\RegisterController@verifyEmail');
 
 //main project register

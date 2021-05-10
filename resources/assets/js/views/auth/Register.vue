@@ -161,7 +161,12 @@ export default {
   }
 }
 .signup-btn {
-  padding: 10px 0;
+  height: 42px;
+  border: none;
+  font-size: 14px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 
   &:disabled {
     background: rgba(138,150,163,.75);
