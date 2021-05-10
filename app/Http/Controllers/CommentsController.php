@@ -49,7 +49,6 @@ class CommentsController extends AppBaseController
             switch ($key) {
             default:
                 $query->where($key, $f);
-                break;
             }
         }
 
