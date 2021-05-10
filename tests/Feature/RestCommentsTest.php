@@ -30,9 +30,7 @@ class RestCommentsTest extends TestCase
         $expectedCount = Comment::where('user_id', $creator->id)->count();
 
         $response = $this->actingAs($creator)->ajaxJSON('GET', route('comments.index'), [
-            'filters' => [
-                'user_id' => $creator->id,
-            ],
+            'user_id' => $creator->id,
         ]);
         $response->assertStatus(200);
         $response->assertJsonStructure([
@@ -55,16 +53,22 @@ class RestCommentsTest extends TestCase
     /**
      *  @group comments
      *  @group regression
+     *  @group here0510
      */
     public function test_admin_can_list_comments()
     {
+        /*
         $timeline = Timeline::has('followers', '>=', 1)
             ->whereHas('posts', function($q1) {
                 $q1->has('comments', '>=', 1)->where('type', PostTypeEnum::FREE);
             })->firstOrFail();
+         */
+        $post = Post::has('comments', '>=', 2)->where('type', PostTypeEnum::FREE)->firstOrFail();
+        $commenter = $post->comments[0]->user;
+        $timeline = $post->timeline;
         $creator = $timeline->user;
        
-        $expectedCount = Comment::where('user_id', $creator->id)->count();
+        $expectedCount = Comment::where('user_id', $commenter->id)->count();
 
         $admin = User::whereDoesntHave('followedtimelines', function($q1) use(&$timeline) {
             $q1->where('timelines.id', $timeline->id);
@@ -73,9 +77,7 @@ class RestCommentsTest extends TestCase
         $admin->refresh();
 
         $response = $this->actingAs($admin)->ajaxJSON('GET', route('comments.index'), [
-            'filters' => [
-                'user_id' => $creator->id,
-            ],
+            'user_id' => $commenter->id,
         ]);
         $response->assertJsonStructure([
             'data',
@@ -88,7 +90,9 @@ class RestCommentsTest extends TestCase
 
         $this->assertNotNull($content->data);
         $this->assertEquals($expectedCount, count($content->data));
-        $this->assertObjectHasAttribute('description', $content->data[0]);
+        if ( true || count($content->data) ) {
+            $this->assertObjectHasAttribute('description', $content->data[0]);
+        }
     }
 
     /**
@@ -107,9 +111,7 @@ class RestCommentsTest extends TestCase
         $expectedCount = Comment::where('user_id', $creator->id)->count();
 
         $response = $this->actingAs($fan)->ajaxJSON('GET', route('comments.index'), [
-            'filters' => [
-                'user_id' => $creator->id,
-            ],
+            'user_id' => $creator->id,
         ]);
         $response->assertStatus(200); // instead of 403, we just get our own comments back (filter is ignored)
         $response->assertJsonStructure([
