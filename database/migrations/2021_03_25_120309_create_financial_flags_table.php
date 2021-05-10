@@ -13,7 +13,7 @@ class CreateFinancialFlagsTable extends Migration
      */
     public function up()
     {
-        Schema::create('financial_flags', function (Blueprint $table) {
+        Schema::connection('financial')->create('flags', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->nullableUuidMorphs('model');
             $table->string('column')->nullable();
@@ -35,6 +35,6 @@ class CreateFinancialFlagsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('financial_flags');
+        Schema::connection('financial')->dropIfExists('flags');
     }
 }

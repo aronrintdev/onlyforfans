@@ -16,7 +16,7 @@ class UpdateFinancialAccounts extends Migration
      */
     public function up()
     {
-        Schema::table('financial_accounts', function (Blueprint $table) {
+        Schema::connection('financial')->table('accounts', function (Blueprint $table) {
             /**
              * The transaction system this account belongs to.
              */
@@ -41,26 +41,26 @@ class UpdateFinancialAccounts extends Migration
      */
     public function down()
     {
-        Schema::table('financial_accounts', function (Blueprint $table) {
-            if (Schema::hasColumn('financial_accounts', 'system')) {
+        Schema::connection('financial')->table('accounts', function (Blueprint $table) {
+            if (Schema::connection('financial')->hasColumn('accounts', 'system')) {
                 $table->dropColumn('system');
             }
-            if (Schema::hasColumn('financial_accounts', 'currency')) {
+            if (Schema::connection('financial')->hasColumn('accounts', 'currency')) {
                 $table->dropColumn('currency');
             }
-            if (Schema::hasColumn('financial_accounts', 'balance')) {
+            if (Schema::connection('financial')->hasColumn('accounts', 'balance')) {
                 $table->dropColumn('balance');
             }
-            if (Schema::hasColumn('financial_accounts', 'balance_last_updated_at')) {
+            if (Schema::connection('financial')->hasColumn('accounts', 'balance_last_updated_at')) {
                 $table->dropColumn('balance_last_updated_at');
             }
-            if (Schema::hasColumn('financial_accounts', 'pending')) {
+            if (Schema::connection('financial')->hasColumn('accounts', 'pending')) {
                 $table->dropColumn('pending');
             }
-            if (Schema::hasColumn('financial_accounts', 'pending_last_updated_at')) {
+            if (Schema::connection('financial')->hasColumn('accounts', 'pending_last_updated_at')) {
                 $table->dropColumn('pending_last_updated_at');
             }
-            if (Schema::hasColumn('financial_accounts', 'deleted_at')) {
+            if (Schema::connection('financial')->hasColumn('accounts', 'deleted_at')) {
                 $table->dropColumn('deleted_at');
             }
         });

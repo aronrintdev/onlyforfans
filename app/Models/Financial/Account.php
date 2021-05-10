@@ -76,7 +76,7 @@ class Account extends Model implements Ownable
         HasFactory,
         SoftDeletes;
 
-    protected $table = 'financial_accounts';
+    protected $table = 'accounts';
 
     protected $guarded = [
         'verified',

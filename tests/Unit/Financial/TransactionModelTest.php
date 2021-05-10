@@ -38,7 +38,7 @@ class FinancialTransactionModelTest extends TestCase
             'credit_amount' => 0,
             'debit_amount' => 1000,
             'settled_at' => null,
-        ]);
+        ], $this->getConnectionString());
 
         $this->assertDatabaseHas($this->tableNames['transaction'], [
             'id' => $transactions['credit']->getKey(),
@@ -46,7 +46,7 @@ class FinancialTransactionModelTest extends TestCase
             'credit_amount' => 1000,
             'debit_amount' => 0,
             'settled_at' => null,
-        ]);
+        ], $this->getConnectionString());
 
         Event::assertDispatched(UpdateAccountBalance::class, 2);
     }
@@ -75,21 +75,21 @@ class FinancialTransactionModelTest extends TestCase
         $this->assertDatabaseHas($this->tableNames['transaction'], [
             'account_id' => $accounts[1]->getKey(),
             'debit_amount' => 300,
-        ]);
+        ], $this->getConnectionString());
         $this->assertDatabaseHas($this->tableNames['transaction'], [
             'account_id' => $platformFeeAccount->getKey(),
             'credit_amount' => 300,
-        ]);
+        ], $this->getConnectionString());
 
         // Tax Transaction Set | 1000 * 0.05 = 50
         $this->assertDatabaseHas($this->tableNames['transaction'], [
             'account_id' => $accounts[1]->getKey(),
             'debit_amount' => 50,
-        ]);
+        ], $this->getConnectionString());
         $this->assertDatabaseHas($this->tableNames['transaction'], [
             'account_id' => $taxAccount->getKey(),
             'credit_amount' => 50,
-        ]);
+        ], $this->getConnectionString());
 
         // Make sure all account fee debit transactions are settled.
         $platformFeeDebitTransaction = Transaction::where('account_id', $accounts[1]->getKey())

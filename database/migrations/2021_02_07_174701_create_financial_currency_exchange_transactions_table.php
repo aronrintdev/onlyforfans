@@ -13,7 +13,7 @@ class CreateFinancialCurrencyExchangeTransactionsTable extends Migration
      */
     public function up()
     {
-        Schema::create('financial_currency_exchange_transactions', function (Blueprint $table) {
+        Schema::connection('financial')->create('currency_exchange_transactions', function (Blueprint $table) {
             $table->uuid('id')->primary();
             /**
              * User that initiated the transaction.
@@ -61,6 +61,6 @@ class CreateFinancialCurrencyExchangeTransactionsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('financial_currency_exchange_transactions');
+        Schema::connection('financial')->dropIfExists('currency_exchange_transactions');
     }
 }

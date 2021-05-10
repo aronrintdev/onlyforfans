@@ -46,7 +46,7 @@ class TruncateData extends Command
                 break;
         }
 
-        foreach ( $list as $t ) {
+        foreach ( $list['tables'] as $t ) {
             $this->info( ' - Truncate "'.$t.'"...');
             switch ($t) {
                 case 'mediafiles':
@@ -58,6 +58,11 @@ class TruncateData extends Command
                     DB::table($t)->truncate();
             }
         }
+        foreach($list['models'] as $m) {
+            $this->info(" - Truncate '$m' ..."  );
+            $m::truncate();
+        }
+
         DB::statement('SET FOREIGN_KEY_CHECKS=1;'); // enable
 
         /*
@@ -70,52 +75,66 @@ class TruncateData extends Command
     }
 
     private static $shareablesList = [
-        'financial_transactions',
-        'financial_transaction_summaries',
-        'financial_currency_exchange_transactions',
-        'financial_flags',
-        'shareables',
-        'subscriptions',
+        'models' => [
+            \App\Models\Financial\Transaction::class,
+            \App\Models\Financial\TransactionSummary::class,
+            \App\Models\Financial\Flag::class,
+        ],
+        'tables' => [
+            'shareables',
+            'subscriptions',
+        ],
+
     ];
 
     private static $truncateList = [
-        'favorites',
-        'model_has_permissions',
-        'model_has_roles',
-        'password_resets',
-        'role_has_permissions',
-        'sessions',
-        'settings',
-        'user_settings',
-        'websockets_statistics_entries',
-        // 'migrations',
-        'invites',
-        'jobs',
-        'links',
-        'locations',
-        'blockables',
-        'financial_accounts',
-        'financial_currency_exchange_transactions',
-        'financial_transactions',
-        'fanledgers',
-        'shareables',
-        'likeables',
-        'comments',
-        'mediafiles',
-        'stories',
+        'models' => [
+            \App\Models\Financial\Account::class,
+            \App\Models\Financial\AchAccount::class,
+            \App\Models\Financial\Flag::class,
+            \App\Models\Financial\PayoutBatch::class,
+            \App\Models\Financial\SegpayCall::class,
+            \App\Models\Financial\SegpayCard::class,
+            \App\Models\Financial\SystemOwner::class,
+            \App\Models\Financial\Transaction::class,
+            \App\Models\Financial\TransactionSummary::class,
+        ],
+        'tables' => [
+            'favorites',
+            'model_has_permissions',
+            'model_has_roles',
+            'password_resets',
+            'role_has_permissions',
+            'sessions',
+            'settings',
+            'user_settings',
+            'websockets_statistics_entries',
+            // 'migrations',
+            'invites',
+            'jobs',
+            'links',
+            'locations',
+            'blockables',
+            'fanledgers',
+            'shareables',
+            'likeables',
+            'comments',
+            'mediafiles',
+            'stories',
 
-        'user_settings',
-        'permissions',
-        'roles',
+            'user_settings',
+            'permissions',
+            'roles',
 
-        'vaultfolders',
-        'vaults',
+            'vaultfolders',
+            'vaults',
 
-        'posts',
-        'timelines',
-        'users',
+            'posts',
+            'timelines',
+            'users',
 
-        'username_rules',
+            'username_rules',
+        ],
     ];
 
 }

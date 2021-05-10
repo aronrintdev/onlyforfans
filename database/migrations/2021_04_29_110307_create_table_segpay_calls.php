@@ -13,7 +13,7 @@ class CreateTableSegpayCalls extends Migration
      */
     public function up()
     {
-        Schema::create('segpay_calls', function (Blueprint $table) {
+        Schema::connection('financial')->create('segpay_calls', function (Blueprint $table) {
             $table->uuid('id')->primary();
 
             $table->string('url')->nullable();
@@ -49,6 +49,6 @@ class CreateTableSegpayCalls extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('segpay_calls');
+        Schema::connection('financial')->dropIfExists('segpay_calls');
     }
 }

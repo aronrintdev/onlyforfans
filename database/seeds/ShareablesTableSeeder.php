@@ -114,6 +114,8 @@ class ShareablesTableSeeder extends Seeder
 
                         $paymentAccount = $follower->financialAccounts()->firstOrCreate([
                             'type' => AccountTypeEnum::IN,
+                            'system' => 'segpay',
+                            'currency' => 'USD',
                             'name' => "{$follower->username} Seeder Account",
                         ]);
                         $paymentAccount->verified = true;
@@ -152,6 +154,8 @@ class ShareablesTableSeeder extends Seeder
 
                 $paymentAccount = $follower->financialAccounts()->firstOrCreate([
                     'type' => AccountTypeEnum::IN,
+                    'system' => 'segpay',
+                    'currency' => 'USD',
                     'name' => "{$follower->username} Seeder Account",
                 ]);
                 $paymentAccount->verified = true;
