@@ -13,6 +13,7 @@ use App\Models\User;
 use App\Models\Comment;
 use App\Models\Mediafile;
 use App\Models\Post;
+use App\Models\Story;
 use App\Interfaces\Likeable;
 use App\Notifications\ResourceLiked;
 use App\Http\Resources\LikeableCollection;
@@ -27,6 +28,7 @@ class LikeablesController extends AppBaseController
             'likeable_type' => 'string|in: posts, comments, mediafiles',
             'liker_id' => 'uuid|exists:users,id', // if admin only
         ]);
+        $filters = $request->only(['likeable_type', 'likeable_id']) ?? [];
 
         // Init query
         //$query = LikeableModel::query();
@@ -34,22 +36,16 @@ class LikeablesController extends AppBaseController
 
         // Check permissions
         if ( !$request->user()->isAdmin() ) {
-
             // non-admin: only view own...
-            //$query->where('user_id', $request->user()->id); 
-            //$query->take(5);
-            /*
-            $query->whereHas('posts', function($q1) {
-                $q1->
-            });
-             */
             $query->whereHasMorph(
                 'likeable',
-                [Post::class, Comment::class],
+                [Post::class, Comment::class, Story::class],
                 function (Builder $q1, $type) use(&$request) {
                     switch ($type) {
                         case Post::class:
                         case Comment::class:
+                        case Story::class:
+                        case Mediafile::class:
                             $column = 'user_id';
                             break;
                         default:
@@ -58,41 +54,20 @@ class LikeablesController extends AppBaseController
                     $q1->where($column, $request->user()->id);
                 }
             );
-
-            //unset($filters['user_id']);
-
-            /*
-            if ( array_key_exists('post_id', $filters) ) {
-                $post = Post::find($filters['post_id']);
-                $this->authorize('update', $post); // non-admin must own post filtered on
-            }
-             */
         }
 
-        /*
         // Apply any filters
         foreach ($filters as $key => $f) {
-            // %TODO: subgroup under 'filters' (need to update axios.GET calls as well in Vue)
             switch ($key) {
-                case 'user_id':
-                case 'post_id':
-                case 'parent_id':
+                case 'likeable_type':
+                case 'likeable_id':
                     $query->where($key, $f);
                     break;
             }
         }
-         */
 
         $data = $query->paginate( $request->input('take', env('MAX_DEFAULT_PER_REQUEST', 10)) );
         return new LikeableCollection($data);
-
-        /*
-        $data = $query->get();
-        //dd($data);
-        return response()->json([
-            'likeables' => $data,
-        ]);
-         */
     }
 
     // %TODO: remove liker param and just use session user for liker (?)

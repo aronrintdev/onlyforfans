@@ -57,7 +57,6 @@ class SubscriptionsController extends Controller
             switch ($key) {
             case 'is_active':
                 if ($f) {
-//dd(array_keys($vrules), $filters);
                     $query->active();
                 } else {
                     $query->inactive();
@@ -71,9 +70,7 @@ class SubscriptionsController extends Controller
         $query->orderBy('created_at', 'desc');
 
         /*
-        $user = Auth::user();
-
-        $query = $user->subscriptions()->orderBy('created_at', 'desc');
+        $query = $request->user()->subscriptions()->orderBy('created_at', 'desc');
         if ($request->inactive) {
             $data = $query->inactive();
         } else {

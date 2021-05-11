@@ -19,6 +19,7 @@ class ShareablesTest extends TestCase
 
     /**
      *  @group TODO-shareables
+     *  @group OFF-regression
      */
     public function test_can_list_shareables()
     {
