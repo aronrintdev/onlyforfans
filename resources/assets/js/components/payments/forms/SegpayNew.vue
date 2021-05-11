@@ -63,7 +63,7 @@
           </b-col>
           <b-col cols="6">
             <b-form-group :label="$t('Security Code')" >
-              <b-form-input v-model="form.card.ccv" v-mask="'####'" :placeholder="$t('CVV')" pattern="\d*" />
+              <b-form-input v-model="form.card.cvv" v-mask="'####'" :placeholder="$t('CVV')" pattern="\d*" />
             </b-form-group>
           </b-col>
         </b-row>
@@ -192,11 +192,12 @@ export default {
             })
             this.$emit('success', 'faked')
             this.$emit('processing')
-            this.processing = true
             return
           }
 
-          window.segpay.sdk.completePayment({
+          console.log('onComplete')
+          this.$emit('processing')
+          const data = {
             sessionId: this.sessionId,
             packageId: this.packageId,
             customer: {
@@ -206,18 +207,19 @@ export default {
             card: {
               ...this.form.card,
             },
-          }, (result) => {
+          }
+          console.log({ data })
+          window.segpay.sdk.completePayment(data, (result) => {
+            console.log({ result })
             switch (result.status) {
               case 'GeneralErrors':
-                //
+                console.log({ result })
               break;
               case 'ValidationErrors':
-                //
+                console.log({ result })
               break;
               case 'Success':
                 this.$emit('success', result.purchases)
-                this.$emit('processing')
-                this.processing = true
               break;
             }
           })
@@ -260,6 +262,7 @@ export default {
           currency: this.currency,
         }).then(results => {
           this.sessionId = results.data.id
+          this.packageId = results.data.packageId
           this.pageId = results.data.pageId
           this.expirationDateTime = results.data.expirationDateTime
           resolve()

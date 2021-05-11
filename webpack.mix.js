@@ -4,6 +4,7 @@
 const mix = require('laravel-mix');
 const path = require('path');
 require('dotenv').config();
+require('laravel-mix-bundle-analyzer');
 // require('laravel-mix-alias');
 
 /*
@@ -60,6 +61,24 @@ mix.addWebpackLoaders([
   },
 ])
 
+// Extract Important libraries to own files for load speed
+mix.extract(['vue', 'vuex', 'axios', 'lodash'], 'public/js/vendor-1.js');
+mix.extract(['bootstrap-vue'], 'public/js/vendor-2.js');
+mix.extract(['@fortawesome'], 'public/js/vendor-3.js');
+mix.extract(['video.js', 'videojs-record'], 'public/js/vendor-4.js');
+
+// All other node_module libraries will end up in vendor.js
+mix.extract('public/js/vendor.js');
+
+if ( ! mix.inProduction()) {
+  mix.webpackConfig({
+    devtool: 'inline-source-map'
+  });
+  if (mix.isWatching()) {
+    mix.bundleAnalyzer({ openAnalyzer: false, generateStatsFile: true });
+  }
+}
+
 /**
  * App
  */
@@ -71,7 +90,7 @@ mix.js('resources/assets/js/app.js', 'public/js/app.js')
         i18n: '@intlify/vue-i18n-loader',
       },
     },
-  }).sourceMaps();
+  })
 
 /**
  * Guest App
