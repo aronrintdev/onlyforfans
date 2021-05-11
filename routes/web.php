@@ -53,6 +53,8 @@ Route::post('/login', 'Auth\LoginController@login');
 // Route::get('/register', 'Auth\RegisterController@register')->name('auth.register');
 Route::post('/register', 'Auth\RegisterController@registerUser');
 Route::post('/forgot-password', 'Auth\ForgotPasswordController@store');
+Route::post('/password/reset/{token}', 'Auth\ForgotPasswordController@checkResetToken');
+Route::post('/password/reset', 'Auth\ForgotPasswordController@resetPass');
 // Route::get('email/verify', 'Auth\RegisterController@verifyEmail');
 
 //main project register

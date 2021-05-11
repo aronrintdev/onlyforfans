@@ -2,7 +2,7 @@
   <div class="container w-100 d-flex flex-column mt-5">
     <b-card class="login-card mx-auto" no-body>
       <template #header>
-        <div class="h1 text-center" v-text="$t('signInHeader')" />
+        <div class="h2 text-center" v-text="$t('signInHeader')" />
         <div class="text-center">
           <div class="d-inline" v-text="$t('noAccountQuestion')" />
           <!-- TODO: Link to registration page -->

@@ -29,7 +29,11 @@ export const routes = [
     path: '/forgot-password',
     component: AuthViews.ForgotPassword,
   },
-
+  {
+    name: 'reset-password',
+    path: '/reset-password/:token',
+    component: AuthViews.ResetPassword,
+  },
   ...StaticPageRoutes,
 
   /**
