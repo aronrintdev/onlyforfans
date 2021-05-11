@@ -13,7 +13,7 @@ class TransactionSummary extends Model
     use UsesUuid,
         HasSystemByAccount;
 
-    protected $table = 'financial_transaction_summaries';
+    protected $table = 'transaction_summaries';
 
     /**
      * We should not be filling anything from the UI here, All UI interactions should be read-only.

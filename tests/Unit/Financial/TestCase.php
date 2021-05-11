@@ -30,6 +30,11 @@ class TestCase extends TestsTestCase
         $this->tableNames = $this->getTableNames();
     }
 
+    public function getConnectionString()
+    {
+        return 'financial';
+    }
+
     public function getTableNames()
     {
         return [

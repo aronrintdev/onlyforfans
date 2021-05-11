@@ -13,7 +13,7 @@ class CreateTableSegpayCards extends Migration
      */
     public function up()
     {
-        Schema::create('segpay_cards', function (Blueprint $table) {
+        Schema::connection('financial')->create('segpay_cards', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuidMorphs('owner');
             $table->string('token');
@@ -32,6 +32,6 @@ class CreateTableSegpayCards extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('segpay_cards');
+        Schema::connection('financial')->dropIfExists('segpay_cards');
     }
 }

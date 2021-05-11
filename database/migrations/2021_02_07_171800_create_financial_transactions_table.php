@@ -13,7 +13,7 @@ class CreateFinancialTransactionsTable extends Migration
      */
     public function up()
     {
-        Schema::create('financial_transactions', function (Blueprint $table) {
+        Schema::connection('financial')->create('transactions', function (Blueprint $table) {
             $table->uuid('id')->primary();
 
             /**
@@ -84,6 +84,6 @@ class CreateFinancialTransactionsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('financial_transactions');
+        Schema::connection('financial')->dropIfExists('transactions');
     }
 }

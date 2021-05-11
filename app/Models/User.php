@@ -28,6 +28,8 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
 {
     use HasRoles, HasFactory, Messagable, SoftDeletes, UsesUuid, MorphFunctions, Notifiable;
 
+    protected $connection = 'primary';
+
     protected $appends = [ 'name', 'avatar', 'cover', 'about', ];
     protected $guarded = [ 'id', 'created_at', 'updated_at' ];
     protected $hidden = [ 'email', 'password', 'remember_token', 'verification_code', 'timeline'];

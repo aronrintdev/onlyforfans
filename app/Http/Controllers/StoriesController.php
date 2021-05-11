@@ -23,47 +23,58 @@ class StoriesController extends AppBaseController
     // %FIXME : remove filters...GET params are not nested
     public function index(Request $request)
     {
-        $filters = [];
-        if ( !$request->has('filters') || empty($request->filters) ) {
-            $filters['following'] = true;
-        }  else {
-            $filters = $request->filters;
+        $vrules = [
+            'timeline_id' => 'uuid|exists:timelines,id',
+            'following' => 'boolean',
+        ];
+        if ( $request->has('stypes') ) {
+            if ( is_array($request->stypes) ) {
+                $vrules['stypes'] = 'array';
+                $vrules['stypes.*'] = 'in:'.StoryTypeEnum::getKeysCsv();
+            } else {
+                $vrules['stypes'] = 'in:'.StoryTypeEnum::getKeysCsv();
+            }
         }
 
+        $request->validate($vrules);
+        $filters = $request->only([ 'stypes', 'timeline_id', 'following' ]) ?? [];
+
+        // Init query
+        $query = Story::query()->with('mediafiles');
+
+        // Check permissions
         if ( !$request->user()->isAdmin() ) {
             do {
-                if ( array_key_exists('following', $filters) ) {
-                    break; // allowed
-                }
                 if ( array_key_exists('timeline_id', $filters) ) {
-                    $timeline = Timeline::findOrFail($request->filters['timeline_id']);
+                    $timeline = Timeline::findOrFail($filters['timeline_id']);
                     if ( $request->user()->can('indexStories', $timeline) ) { // should include followers & owner (!)
                         break; // allowed
                     }
+                } else {
+                    $filters['following'] = true; // non-admin: force to following only
+                    break; // allowed
                 }
                 abort(403); // none of the above match, therefore unauthorized
             } while(0);
         }
 
-        $query = Story::query()->with('mediafiles');
-
-        foreach ( $filters as $k => $v ) {
+        // Apply filters
+        foreach ( $filters as $k => $f ) {
             switch ($k) {
             case 'following':
                 $query->whereHas('timeline', function($q1) use(&$request) {
                     $q1->whereIn('id', $request->user()->followedtimelines->pluck('id'));
                 });
                 break;
+            case 'stypes':
+                if ( is_array($filters['stypes']) ) {
+                    $query->whereIn('stype', $filters['stypes']);
+                } else {
+                    $query->where('stype', $filters['stypes']);
+                }
+                break;
             default:
-                $query->where($k, $v);
-            }
-        }
-
-        if ( $request->has('stypes') ) {
-            if ( is_array($request->stypes) ) {
-                $query->whereIn('stype', $request->stypes);
-            } else {
-                $query->where('stype', $request->stypes);
+                $query->where($k, $f);
             }
         }
 

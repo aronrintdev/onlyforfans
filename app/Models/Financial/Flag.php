@@ -30,8 +30,7 @@ class Flag extends Model
 {
     use UsesUuid;
 
-
-    protected $table = 'financial_flags';
+    protected $table = 'flags';
 
     protected $guarded = [ 'handled', 'handled_by' ];
 

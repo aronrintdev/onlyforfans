@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Models\Story;
 use App\Models\Vault;
 
+use App\Http\Resources\VaultCollection;
 use App\Models\Invite;
 use App\Models\Mediafile;
 use App\Models\Vaultfolder;
@@ -60,12 +61,32 @@ class VaultsController extends AppBaseController
 
     public function index(Request $request)
     {
-        $sessionUser = Auth::user();
-        $vaults = Vault::where('user_id', $sessionUser->id)->get();
-        return response()->json([
-            'sessionUser' => $sessionUser,
-            'vaults' => $vaults,
+        $request->validate([
+            // filters
+            'user_id' => 'uuid|exists:users,id', // if admin only
         ]);
+        $filters = $request->only(['user_id']) ?? [];
+
+        // Init query
+        $query = Vault::query();
+
+        // Check permissions
+        if ( !$request->user()->isAdmin() ) {
+            // non-admin: can only view own comments
+            $query->where('user_id', $request->user()->id); 
+            unset($filters['user_id']);
+        }
+
+        // Apply filters
+        foreach ($filters as $key => $f) {
+            switch ($key) {
+            default:
+                $query->where($key, $f);
+            }
+        }
+
+        $data = $query->paginate( $request->input('take', env('MAX_DEFAULT_PER_REQUEST', 10)) );
+        return new VaultCollection($data);
     }
 
     public function getAllFiles(Request $request)

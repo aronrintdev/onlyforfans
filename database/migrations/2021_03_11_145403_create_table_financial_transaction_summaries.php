@@ -13,7 +13,7 @@ class CreateTableFinancialTransactionSummaries extends Migration
      */
     public function up()
     {
-        Schema::create('financial_transaction_summaries', function (Blueprint $table) {
+        Schema::connection('financial')->create('transaction_summaries', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('account_id');
             /**
@@ -72,6 +72,6 @@ class CreateTableFinancialTransactionSummaries extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('financial_transaction_summaries');
+        Schema::connection('financial')->dropIfExists('transaction_summaries');
     }
 }

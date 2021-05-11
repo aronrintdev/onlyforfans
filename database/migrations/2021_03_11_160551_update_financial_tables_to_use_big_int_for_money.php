@@ -13,11 +13,11 @@ class UpdateFinancialTablesToUseBigIntForMoney extends Migration
      */
     public function up()
     {
-        Schema::table('financial_accounts', function (Blueprint $table) {
+        Schema::connection('financial')->table('accounts', function (Blueprint $table) {
             $table->bigInteger('balance')->nullable()->change();
             $table->bigInteger('pending')->nullable()->change();
         });
-        Schema::table('financial_transactions', function (Blueprint $table) {
+        Schema::connection('financial')->table('transactions', function (Blueprint $table) {
             $table->unsignedBigInteger('credit_amount')->nullable()->change();
             $table->unsignedBigInteger('debit_amount')->nullable()->change();
             $table->bigInteger('balance')->nullable()->change();
@@ -31,11 +31,11 @@ class UpdateFinancialTablesToUseBigIntForMoney extends Migration
      */
     public function down()
     {
-        Schema::table('financial_accounts', function (Blueprint $table) {
+        Schema::connection('financial')->table('accounts', function (Blueprint $table) {
             $table->integer('balance')->nullable()->change();
             $table->integer('pending')->nullable()->change();
         });
-        Schema::table('financial_transactions', function (Blueprint $table) {
+        Schema::connection('financial')->table('transactions', function (Blueprint $table) {
             $table->unsignedInteger('credit_amount')->nullable()->change();
             $table->unsignedInteger('debit_amount')->nullable()->change();
             $table->unsignedInteger('balance')->nullable()->change();
