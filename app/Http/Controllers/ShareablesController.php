@@ -25,7 +25,16 @@ class ShareablesController extends AppBaseController
             'access_level' => 'string|in: default, premium',
             'shareable_type' => 'string|in: timelines, posts, mediafiles',
             'sharee_id' => 'uuid|exists:users,id', // if admin only
+            'is_approved' => 'boolean',
+            'access_level' => 'string:in:default,premium',
         ]);
+        $filters = $request->only([
+            'access_level',
+            'shareable_type',
+            'sharee_id',
+            'is_approved',
+            'access_level',
+        ]) ?? [];
 
         // Init query
         $query = ShareableModel::with(['sharee', 'shareable']);
@@ -61,11 +70,12 @@ class ShareablesController extends AppBaseController
         }
 
         // Apply any filters
-        if ( $request->has('shareable_type') ) {
-            $query->where('shareable_type', $request->shareable_type);
-        }
-        if ( $request->has('access_level') ) {
-            $query->where('access_level', $request->access_level);
+        foreach ($filters as $key => $f) {
+            switch ($key) {
+            default:
+                $query->where($key, $f);
+                break;
+            }
         }
 
         //$query->sort( $sortBy, ($sortDir==='asc' ?? 'desc') );

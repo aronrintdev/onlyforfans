@@ -123,6 +123,7 @@ class Post extends Model
         'meta' => 'array',
     ];
 
+    /*
     public function toArray()
     {
         $array = parent::toArray();
@@ -130,12 +131,13 @@ class Post extends Model
         $array['price_display'] = static::formatMoney($this->asMoney($array['price']));
         return $array;
     }
+     */
 
     //--------------------------------------------
     // %%% Relationships
     //--------------------------------------------
 
-    public function favoites()
+    public function favorites()
     {
         //return $this->morphMany(Favorite::class, 'favoritable')->withTimestamps();
         return $this->morphMany(Favorite::class, 'favoritable');
@@ -161,6 +163,11 @@ class Post extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function shareables()
+    {
+        return $this->morphMany(Shareable::class, 'shareable');
     }
 
     public function postable()
