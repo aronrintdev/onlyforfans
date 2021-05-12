@@ -4,6 +4,7 @@ namespace Database\Seeders;
 use DB;
 use Exception;
 use Carbon\Carbon;
+use App\Models\Mediafile;
 use App\Models\Post;
 use App\Models\User;
 //use App\Libs\UserMgr;
@@ -21,7 +22,7 @@ class FavoritesTableSeeder extends Seeder
     {
         $this->initSeederTraits('FavoritesTableSeeder'); // $this->{output, faker, appEnv}
 
-        // +++ Create ... +++
+        // +++ Favorite(v.) Posts ... +++
 
         $posts = Post::get();
 
@@ -54,6 +55,46 @@ class FavoritesTableSeeder extends Seeder
                     'user_id' => $o->id,
                     'favoritable_type' => 'posts',
                     'favoritable_id' => $p->id,
+                    'cattrs' => json_encode($customAttributes),
+                ]);
+            });
+
+            $iter++;
+        });
+
+        // +++ Favorite(v.) Mediafiles ... +++
+
+        $mediafiles = Mediafile::get();
+//dd('seeder', $mediafiles);
+
+        if ( $this->appEnv !== 'testing' ) {
+            $this->output->writeln("  - Favorites seeder: loaded ".$mediafiles->count()." mediafiles...");
+        }
+
+        $max = intVal($mediafiles->count() / 5); // do 20%
+
+        // Favorite mediafiles
+        $mediafiles->take($max)->each( function($m) {
+
+            static $iter = 1;
+
+            // --- user pool ---
+
+            $userPool = User::get();
+
+            // --- create some favorites ---
+
+            $max = $this->faker->numberBetween( 1, min($userPool->count()-1, 3) );
+            if ( $this->appEnv !== 'testing' ) {
+                $this->output->writeln("  - Creating $max favorites for mediafile ".$m->slug.", iter: $iter");
+            }
+
+            $userPool->take($max)->each( function($o) use(&$m) { // use 'take' so it's always the same users
+                $customAttributes = [ 'notes' => 'FavoritesTableSeeder.favorite_some_mediafiles' ];
+                $favorite = Favorite::create([
+                    'user_id' => $o->id,
+                    'favoritable_type' => 'mediafiles',
+                    'favoritable_id' => $m->id,
                     'cattrs' => json_encode($customAttributes),
                 ]);
             });

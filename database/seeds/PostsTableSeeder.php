@@ -27,11 +27,15 @@ class PostsTableSeeder extends Seeder
         [ 'width' => 300, 'height' => 300], // 1:1
     ];
 
+    protected $doS3Upload = false;
+
     public function run()
     {
         $this->initSeederTraits('PostsTableSeeder'); // $this->{output, faker, appEnv}
 
         Mail::fake();
+
+        $this->doS3Upload = ( $this->appEnv !== 'testing' );
 
         // +++ Create ... +++
 
@@ -100,7 +104,7 @@ class PostsTableSeeder extends Seeder
                         $mf = FactoryHelpers::createImage(
                             MediafileTypeEnum::POST,  // mftype
                             $post->id,  // resourceID
-                            true, // doS3Upload
+                            $this->doS3Upload, // true, // doS3Upload
                             [ 'width' => $imgDim['width'], 'height' => $imgDim['height'] ] // attrs
                         );
                     }
@@ -162,7 +166,7 @@ class PostsTableSeeder extends Seeder
     {
         static $max = [
             'testing' => [
-                'prob_post_has_image' => 0,
+                'prob_post_has_image' => 30, // 0,
                 'users' => 4,
                 'posts' => 7,
             ],

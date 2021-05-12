@@ -81,6 +81,9 @@ class FactoryHelpers {
     ) : ?Mediafile
     {
         $faker = Faker::create();
+if ($doS3Upload) {
+    //dd('STOP');
+}
 
         // https://loremflickr.com/320/240/paris,girl,kitten,puppy,beach,rave
         //$url = 'https://loremflickr.com/json/320/240/paris,girl,kitten,puppy,beach,rave';
