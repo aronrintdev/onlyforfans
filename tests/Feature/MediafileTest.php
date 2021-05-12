@@ -69,16 +69,6 @@ class MediafileTest extends TestCase
      */
     public function test_owner_can_list_mediafiles()
     {
-        /*
-        //dd ( Mediafile::where('resource_type','stories')->count() );
-        $query = User::query();
-        //$query->has('mediafiles', '>=', 1);
-        $query->has('posts.mediafiles', '>=', 1);
-        $query->has('timeline.stories.mediafiles', '>=', 1);
-        $userPool = $query->get();
-        dd($userPool->count());
-         */
-
         $owner = User::has('posts.mediafiles', '>=', 1)
             ->has('timeline.stories.mediafiles', '>=', 1)
             ->firstOrFail();
@@ -102,6 +92,28 @@ class MediafileTest extends TestCase
         $this->assertObjectHasAttribute('mfname', $content->data[0]);
         $this->assertObjectHasAttribute('mftype', $content->data[0]);
         //$this->assertEquals(MediafileTypeEnum::AVATAR, $content->data[0]->mftype);
+
+        // All resources returned are owned 
+        $ownedByCreator = collect($content->data)->reduce( function($acc, $item) use(&$owner) {
+            switch ( $item->resource_type ) {
+            case 'posts':
+                $resource = Post::findOrFail($item->resource_id);
+                break;
+            case 'stories':
+                $resource = Story::findOrFail($item->resource_id);
+                break;
+            case 'users':
+                $resource = User::findOrFail($item->resource_id);
+                break;
+            default:
+                throw new Exception('Unknown resource_type: '.$item->resource_type);
+            }
+            if ( $resource->getPrimaryOwner()->id === $owner->id ) {
+                $acc += 1;
+            }
+            return $acc;
+        }, 0);
+        $this->assertEquals(count($content->data), $ownedByCreator); 
     }
 
     /**
