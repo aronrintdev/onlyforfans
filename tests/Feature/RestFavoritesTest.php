@@ -52,17 +52,12 @@ class RestFavoritesTest extends TestCase
      */
     public function test_can_list_filtered_favorites()
     {
-        /*
-        //$favoriter = User::has('favorites','>=',1)->firstOrFail();
-        $favorites = Favorite::where('favoritable_type', 'mediafiles')->get();
-        $mediafiles = Mediafile::get();
-        //dd($mediafiles->toArray());
-         */
-
         $favoriter = User::whereHas('favorites', function($q1) {
             $q1->where('favoritable_type', 'mediafiles');
         })->firstOrFail();
-        $expectedCount = Favorite::where('user_id', $favoriter->id)->count();
+        $expectedCount = Favorite::where('user_id', $favoriter->id)
+            ->where('favoritable_type', 'mediafiles')
+            ->count();
 
         $response = $this->actingAs($favoriter)->ajaxJSON('GET', route('favorites.index'), [
             'favoritable_type' => 'mediafiles',
@@ -81,6 +76,14 @@ class RestFavoritesTest extends TestCase
         collect($content->data)->each( function($c) use(&$favoriter) { // all belong to owner
             $this->assertEquals($favoriter->id, $c->user_id);
         });
+
+        $returnedCount = collect($content->data)->reduce( function($acc, $item) use(&$favoriter) {
+            if ( ($item->user_id === $favoriter->id) && ($item->favoritable_type === 'mediafiles') ) {
+                $acc += 1;
+            }
+            return $acc;
+        }, 0);
+        $this->assertEquals(count($content->data), $returnedCount); 
     }
 
     /**
