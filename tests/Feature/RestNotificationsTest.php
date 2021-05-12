@@ -13,6 +13,7 @@ use Database\Seeders\TestDatabaseSeeder;
 
 use App\Notifications\ResourceLiked as NotifyResourceLiked;
 use App\Notifications\CommentReceived as NotifyCommentReceived;
+use App\Models\Post;
 use App\Models\User;
 use App\Models\Timeline;
 use App\Models\Notification;
@@ -21,6 +22,51 @@ use App\Enums\PostTypeEnum;
 class RestNotificationsTest extends TestCase
 {
     use RefreshDatabase, WithFaker;
+
+    /**
+     *  @group notifications
+     *  @group regression
+     *  @group here0512
+     */
+    public function test_owner_can_list_notifications()
+    {
+        $owner = User::has('notifications', '>=', 1)
+            ->firstOrFail();
+
+        $response = $this->actingAs($owner)->ajaxJSON('GET', route('notifications.index'), [
+            //'type' => 'ResourceLiked',
+        ]);
+        $response->assertStatus(200);
+        $content = json_decode($response->content());
+        $response->assertJsonStructure([
+            'data',
+            'links',
+            'meta' => [ 'current_page', 'from', 'last_page', 'path', 'per_page', 'to', 'total', ],
+        ]);
+        $this->assertEquals(1, $content->meta->current_page);
+
+        $this->assertNotNull($content->data);
+        $this->assertGreaterThan(0, count($content->data));
+        $this->assertObjectHasAttribute('type', $content->data[0]);
+        $this->assertObjectHasAttribute('notifiable_type', $content->data[0]);
+        $this->assertObjectHasAttribute('notifiable_id', $content->data[0]);
+
+        // All notifications returned are owned 
+        $ownedCount = collect($content->data)->reduce( function($acc, $item) use(&$owner) {
+            switch ( $item->notifiable_type ) {
+            case 'users':
+                $notifiable = User::findOrFail($item->notifiable_id);
+                break;
+            default:
+                throw new Exception('Unknown notifiable_type: '.$item->notifiable_type);
+            }
+            if ( $notifiable->id === $owner->id ) {
+                $acc += 1;
+            }
+            return $acc;
+        }, 0);
+        $this->assertEquals(count($content->data), $ownedCount); 
+    }
 
     /**
      *  @group notifications

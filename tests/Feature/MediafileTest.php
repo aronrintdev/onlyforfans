@@ -65,7 +65,6 @@ class MediafileTest extends TestCase
     /**
      *  @group mediafiles
      *  @group regression
-     *  @group here0512
      */
     public function test_owner_can_list_mediafiles()
     {
@@ -83,7 +82,6 @@ class MediafileTest extends TestCase
             'links',
             'meta' => [ 'current_page', 'from', 'last_page', 'path', 'per_page', 'to', 'total', ],
         ]);
-        $response->assertStatus(200);
         $this->assertEquals(1, $content->meta->current_page);
 
         $this->assertNotNull($content->data);
@@ -94,7 +92,7 @@ class MediafileTest extends TestCase
         //$this->assertEquals(MediafileTypeEnum::AVATAR, $content->data[0]->mftype);
 
         // All resources returned are owned 
-        $ownedByCreator = collect($content->data)->reduce( function($acc, $item) use(&$owner) {
+        $ownedCount = collect($content->data)->reduce( function($acc, $item) use(&$owner) {
             switch ( $item->resource_type ) {
             case 'posts':
                 $resource = Post::findOrFail($item->resource_id);
@@ -113,7 +111,7 @@ class MediafileTest extends TestCase
             }
             return $acc;
         }, 0);
-        $this->assertEquals(count($content->data), $ownedByCreator); 
+        $this->assertEquals(count($content->data), $ownedCount); 
     }
 
     /**
