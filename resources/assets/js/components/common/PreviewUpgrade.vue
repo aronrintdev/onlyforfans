@@ -50,12 +50,13 @@ export default {
   }),
 
   created() { 
-    this.$store.dispatch('getPreviewposts', { timelineId: this.timeline.id, limit: this.limit })
-
     eventBus.$on('update-posts', postId => {
-      console.log('components.common.PreviewUpgrade - eventBus.$on(update-posts)')
       this.updatePost(postId) 
     })
+  },
+
+  mounted() { 
+    this.$store.dispatch('getPreviewposts', { timelineId: this.timeline.id, limit: this.limit })
   },
 
   methods: { 
