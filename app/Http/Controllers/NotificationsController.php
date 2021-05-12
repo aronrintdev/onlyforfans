@@ -5,6 +5,7 @@ use DB;
 use Auth;
 use Exception;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use App\Models\Notification as NotificationModel;
 use App\Models\User;
@@ -17,29 +18,39 @@ class NotificationsController extends AppBaseController
     {
         $request->validate([
             'type' => 'string|in:ResourcePurchased,TipReceived,ResourceLiked,TimelineFollowed,TimelineSubscribed,CommentReceived',
-            //'purchaser_id' => 'uuid|exists:users,id',
         ]);
+        $filters = $request->only(['type']) ?? [];
 
-        $sessionUser = $request->user();
+        // Init query
         $query = NotificationModel::query();
 
-        if ( !$request->user()->isAdmin() ) { // Check permissions
-
-            // if non-admin, only return notifications owned by session user
-            $query->where('notifiable_type', 'users')->where('notifiable_id', $sessionUser->id);
+        // Check permissions
+        if ( !$request->user()->isAdmin() ) {
+            // non-admin: can only view own
+            $query->whereHasMorph(
+                'notifiable',
+                [User::class],
+                function (Builder $q1, $type) use(&$request) {
+                    switch ($type) {
+                    case User::class:
+                        //$query->where('notifiable_type', 'users')->where('notifiable_id', $request->user()->id);
+                        $q1->where('id', $request->user()->id);
+                        break;
+                    default:
+                        throw new Exception('Invalid morphable type for notifiable: '.$type);
+                    }
+                }
+            );
+            unset($filters['user_id']);
         }
 
-        // Apply any filters
+        // Apply filters
         if ( $request->has('type') ) {
             $query->where('type', 'App\\Notifications\\'.$request->type);
         }
 
         $data = $query->latest()->paginate( $request->input('take', env('MAX_DEFAULT_PER_REQUEST', 10)) );
         return new NotificationCollection($data);
-    }
-
-    public function dashboard(Request $request)
-    {
     }
 
 }

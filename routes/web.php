@@ -108,13 +108,6 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('/mediafiles/match', ['as'=>'mediafiles.match', 'uses' => 'MediafilesController@match']);
     Route::resource('mediafiles', 'MediafilesController', [ 'except' => [ 'create', 'edit', ] ]);
 
-    /*
-    Route::get('/notifications/dashboard', [
-        'middleware' => 'spaMixedRoute',
-        'as' => 'notifications.dashboard',
-        'uses' => 'NotificationsController@dashboard'
-    ]);
-     */
     Route::resource('notifications', 'NotificationsController', [ 'only' => [ 'index', ] ]);
 
     // -- posts: likeable | shareable | commentable | tippable | purchaseable | pinnable --

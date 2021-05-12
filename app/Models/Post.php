@@ -103,12 +103,18 @@ class Post extends Model
     public function getIsLikedByMeAttribute($value)
     {
         $sessionUser = Auth::user();
-        return $sessionUser ? $this->likes->contains($sessionUser->id) : false;
+        if ( !$sessionUser ) {
+            return false;
+        }
+        return $this->likes->contains($sessionUser->id);
     }
 
     public function getIsFavoritedByMeAttribute($value)
     {
         $sessionUser = Auth::user();
+        if ( !$sessionUser ) {
+            return false;
+        }
         $exists = Favorite::where('user_id', $sessionUser->id)
             ->where('favoritable_id', $this->id)
             ->where('favoritable_type', 'posts')
@@ -122,16 +128,6 @@ class Post extends Model
         'cattrs' => 'array',
         'meta' => 'array',
     ];
-
-    /*
-    public function toArray()
-    {
-        $array = parent::toArray();
-        // Localize Price
-        $array['price_display'] = static::formatMoney($this->asMoney($array['price']));
-        return $array;
-    }
-     */
 
     //--------------------------------------------
     // %%% Relationships
