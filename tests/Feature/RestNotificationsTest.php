@@ -26,7 +26,6 @@ class RestNotificationsTest extends TestCase
     /**
      *  @group notifications
      *  @group regression
-     *  @group here0512
      */
     public function test_owner_can_list_notifications()
     {
