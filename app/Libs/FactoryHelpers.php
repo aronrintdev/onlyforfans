@@ -92,9 +92,14 @@ if ($doS3Upload) {
         $height = $attrs['height'] ?? 240;
         $url = "https://loremflickr.com/json/$width/$height";
         $url .= '/'.$keyword;
-        $url .= '?random='.$faker->uuid;
-        $json = json_decode(file_get_contents($url));
-        $info = pathinfo($json->file);
+        if ($doS3Upload) {
+            $url .= '?random='.$faker->uuid;
+            $json = json_decode(file_get_contents($url));
+            $info = pathinfo($json->file);
+        } else {
+            $url .= '/'.$faker->uuid.'.png';
+            $info = pathinfo($url);
+        }
         $ext = $info['extension'];
         $fnameToStore = parse_filebase($info['basename']).'-'.$faker->randomNumber(6,true).'.'.$ext;
         $mimetype = (function($ext) {
