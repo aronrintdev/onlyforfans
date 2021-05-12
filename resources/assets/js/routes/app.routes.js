@@ -83,7 +83,8 @@ export const routes = [
 
   // Lists
   {
-    path: '/lists',
+    name: 'lists.dashboard',
+    path: '/lists/dashboard',
     component: lists.Dashboard,
     children:  listRoutes,
   },
