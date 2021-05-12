@@ -84,6 +84,7 @@ class ShareablesController extends AppBaseController
         return new ShareableCollection($data);
     }
 
+
     // list of users/timelines following session user
     public function indexFollowers(Request $request)
     {

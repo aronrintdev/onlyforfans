@@ -72,6 +72,73 @@ class ShareablesTest extends TestCase
         $this->assertEquals(count($content->data), $ownedByCreator); 
     }
 
+    /**
+     *  @group shareables
+     *  @group regression
+     */
+    public function test_creator_can_list_followers()
+    {
+        $timeline = Timeline::has('followers','>=',1)->firstOrFail();
+        $creator = $timeline->user;
+
+        $response = $this->actingAs($creator)->ajaxJSON('GET', route('shareables.indexFollowers'), [
+            //'user_id' => $creator->id,
+        ]);
+        $response->assertStatus(200);
+        $response->assertJsonStructure([
+            'data',
+            'links',
+            'meta' => [ 'current_page', 'from', 'last_page', 'path', 'per_page', 'to', 'total', ],
+        ]);
+
+        $content = json_decode($response->content());
+        //dd($content);
+        $this->assertEquals(1, $content->meta->current_page);
+        $this->assertNotNull($content->data);
+        $this->assertGreaterThan(0, count($content->data));
+
+        $followerCount = collect($content->data)->reduce( function($acc, $item) use(&$creator) {
+            if ( ($item->shareable_type === 'timelines') && ($item->shareable_id === $creator->timeline->id) ) {
+                $acc += 1;
+            }
+            return $acc;
+        }, 0);
+        $this->assertEquals(count($content->data), $followerCount); 
+    }
+
+    /**
+     *  @group shareables
+     *  @group regression
+     *  @group here0511
+     */
+    public function test_fan_can_list_following()
+    {
+        $fan = User::has('followedtimelines','>=',1)->firstOrFail();
+
+        $response = $this->actingAs($fan)->ajaxJSON('GET', route('shareables.indexFollowing'), [
+            //'user_id' => $creator->id,
+        ]);
+        $response->assertStatus(200);
+        $response->assertJsonStructure([
+            'data',
+            'links',
+            'meta' => [ 'current_page', 'from', 'last_page', 'path', 'per_page', 'to', 'total', ],
+        ]);
+
+        $content = json_decode($response->content());
+        $this->assertEquals(1, $content->meta->current_page);
+        $this->assertNotNull($content->data);
+        $this->assertGreaterThan(0, count($content->data));
+
+        $followingCount = collect($content->data)->reduce( function($acc, $item) use(&$fan) {
+            if ( ($item->shareable_type === 'timelines') && ($item->sharee_id === $fan->id) ) {
+                $acc += 1;
+            }
+            return $acc;
+        }, 0);
+        $this->assertEquals(count($content->data), $followingCount); 
+    }
+
     // ------------------------------
 
     protected function setUp() : void
