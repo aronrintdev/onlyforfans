@@ -12,6 +12,8 @@ class StoriesTableSeeder extends Seeder
 {
     use SeederTraits;
 
+    protected $doS3Upload = false;
+
     public function run()
     {
         $this->initSeederTraits('StoriesTableSeeder');
@@ -23,6 +25,8 @@ class StoriesTableSeeder extends Seeder
         if ( $this->appEnv !== 'testing' ) {
             $this->output->writeln("  - Users seeder: loaded ".$users->count()." users...");
         }
+
+        $this->doS3Upload = ( $this->appEnv !== 'testing' );
 
         $users->each( function($u) {
 
@@ -50,7 +54,7 @@ class StoriesTableSeeder extends Seeder
                 case 'text':
                     break;
                 case 'image':
-                    $mf = FactoryHelpers::createImage(MediafileTypeEnum::STORY, $story->id, true);
+                    $mf = FactoryHelpers::createImage(MediafileTypeEnum::STORY, $story->id, $this->doS3Upload);
                     break;
                 }
             });
