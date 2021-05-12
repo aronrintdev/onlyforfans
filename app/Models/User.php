@@ -89,6 +89,11 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
         return $this->hasOne(UserSetting::class);
     }
 
+    public function mediafiles()
+    {
+        return $this->morphMany(Mediafile::class, 'resource');
+    }
+
     public function sharedmediafiles()
     { // Mediafiles shared with me (??)
         return $this->morphedByMany(Mediafile::class, 'shareable', 'shareables', 'sharee_id')

@@ -39,10 +39,26 @@ class StoriesTableSeeder extends Seeder
 
             collect(range(1,$count))->each( function() use(&$u) {
 
+                /*
                 $stype = ($this->appEnv==='testing')
                     ? StoryTypeEnum::TEXT
                     : $this->faker->randomElement([StoryTypeEnum::TEXT, StoryTypeEnum::PHOTO, StoryTypeEnum::PHOTO]);
                     //: $this->faker->randomElement(['text','image','image']);
+                 */
+                if ( $this->appEnv==='testing' ) {
+                    $stype = $this->faker->randomElement([
+                        StoryTypeEnum::TEXT, 
+                        StoryTypeEnum::TEXT, 
+                        StoryTypeEnum::TEXT, 
+                        StoryTypeEnum::PHOTO,
+                    ]);
+                } else {
+                    $stype = $this->faker->randomElement([
+                        StoryTypeEnum::TEXT, 
+                        StoryTypeEnum::PHOTO, 
+                        StoryTypeEnum::PHOTO,
+                    ]);
+                }
 
                 $attrs = [
                     'content'     => $this->faker->text,

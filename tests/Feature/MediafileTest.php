@@ -17,6 +17,7 @@ use App\Libs\FactoryHelpers;
 use App\Models\User;
 use App\Models\Story;
 use App\Models\Timeline;
+use App\Models\Post;
 use App\Models\Mediafile;
 use App\Enums\MediafileTypeEnum;
 
@@ -59,6 +60,48 @@ class MediafileTest extends TestCase
         $this->assertObjectHasAttribute('mfname', $content->data[0]);
         $this->assertObjectHasAttribute('mftype', $content->data[0]);
         $this->assertEquals(MediafileTypeEnum::AVATAR, $content->data[0]->mftype);
+    }
+
+    /**
+     *  @group mediafiles
+     *  @group regression
+     *  @group here0512
+     */
+    public function test_owner_can_list_mediafiles()
+    {
+        /*
+        //dd ( Mediafile::where('resource_type','stories')->count() );
+        $query = User::query();
+        //$query->has('mediafiles', '>=', 1);
+        $query->has('posts.mediafiles', '>=', 1);
+        $query->has('timeline.stories.mediafiles', '>=', 1);
+        $userPool = $query->get();
+        dd($userPool->count());
+         */
+
+        $owner = User::has('posts.mediafiles', '>=', 1)
+            ->has('timeline.stories.mediafiles', '>=', 1)
+            ->firstOrFail();
+
+        $response = $this->actingAs($owner)->ajaxJSON('GET', route('mediafiles.index'), [
+            //'mftype' => MediafileTypeEnum::AVATAR,
+        ]);
+        $response->assertStatus(200);
+        $content = json_decode($response->content());
+        $response->assertJsonStructure([
+            'data',
+            'links',
+            'meta' => [ 'current_page', 'from', 'last_page', 'path', 'per_page', 'to', 'total', ],
+        ]);
+        $response->assertStatus(200);
+        $this->assertEquals(1, $content->meta->current_page);
+
+        $this->assertNotNull($content->data);
+        $this->assertGreaterThan(0, count($content->data));
+        //$this->assertEquals($expectedCount, count($content->data));
+        $this->assertObjectHasAttribute('mfname', $content->data[0]);
+        $this->assertObjectHasAttribute('mftype', $content->data[0]);
+        //$this->assertEquals(MediafileTypeEnum::AVATAR, $content->data[0]->mftype);
     }
 
     /**

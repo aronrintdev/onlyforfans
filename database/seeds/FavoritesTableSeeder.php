@@ -30,7 +30,7 @@ class FavoritesTableSeeder extends Seeder
             $this->output->writeln("  - Favorites seeder: loaded ".$posts->count()." posts...");
         }
 
-        $max = intVal($posts->count() / 3); // do 33%
+        $max = intval($posts->count() / 3); // do 33%
 
         $posts->take($max)->each( function($p) {
 
@@ -71,7 +71,7 @@ class FavoritesTableSeeder extends Seeder
             $this->output->writeln("  - Favorites seeder: loaded ".$mediafiles->count()." mediafiles...");
         }
 
-        $max = intVal($mediafiles->count() / 5); // do 20%
+        $max = intval($mediafiles->count() / 5); // do 20%
 
         // Favorite mediafiles
         $mediafiles->take($max)->each( function($m) {
