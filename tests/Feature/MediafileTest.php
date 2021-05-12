@@ -42,9 +42,7 @@ class MediafileTest extends TestCase
         $admin->refresh();
 
         $response = $this->actingAs($admin)->ajaxJSON('GET', route('mediafiles.index'), [
-            'filters' => [
-                'mftype' => MediafileTypeEnum::AVATAR,
-            ],
+            'mftype' => MediafileTypeEnum::AVATAR,
         ]);
         $response->assertJsonStructure([
             'data',
