@@ -19,14 +19,14 @@ class RestFavoritesTest extends TestCase
     /**
      *  @group favorites
      *  @group regression
+     *  @group here0512
      */
     public function test_can_list_favorites()
     {
         $favoriter = User::has('favorites','>=',1)->firstOrFail();
-        $expectedCount = Favorite::where('user_id', $favoriter->id)->count();
 
         $response = $this->actingAs($favoriter)->ajaxJSON('GET', route('favorites.index'), [
-            'user_id' => $favoriter->id,
+            //'user_id' => $favoriter->id,
         ]);
         $response->assertStatus(200);
         $response->assertJsonStructure([
@@ -38,7 +38,6 @@ class RestFavoritesTest extends TestCase
         $content = json_decode($response->content());
         $this->assertNotNull($content->data);
         $this->assertGreaterThan(0, count($content->data));
-        $this->assertEquals($expectedCount, count($content->data));
         collect($content->data)->each( function($c) use(&$favoriter) { // all belong to owner
             $this->assertEquals($favoriter->id, $c->user_id);
         });
