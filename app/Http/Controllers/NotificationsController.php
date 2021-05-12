@@ -53,8 +53,4 @@ class NotificationsController extends AppBaseController
         return new NotificationCollection($data);
     }
 
-    public function dashboard(Request $request)
-    {
-    }
-
 }
