@@ -109,7 +109,6 @@ class ShareablesTest extends TestCase
     /**
      *  @group shareables
      *  @group regression
-     *  @group here0511
      */
     public function test_fan_can_list_following()
     {

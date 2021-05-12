@@ -36,7 +36,7 @@ class LikeablesController extends AppBaseController
 
         // Check permissions
         if ( !$request->user()->isAdmin() ) {
-            // non-admin: only view own...
+            // non-admin: can only view own...
             $query->whereHasMorph(
                 'likeable',
                 [Post::class, Comment::class, Story::class],
@@ -59,10 +59,9 @@ class LikeablesController extends AppBaseController
         // Apply any filters
         foreach ($filters as $key => $f) {
             switch ($key) {
-                case 'likeable_type':
-                case 'likeable_id':
-                    $query->where($key, $f);
-                    break;
+            default:
+                $query->where($key, $f);
+                break;
             }
         }
 
