@@ -8,9 +8,22 @@
 
           <b-row>
             <b-col>
+              <FormTextInput 
+                ikey="firstname" 
+                v-model="formGeneral.firstname" 
+                :verrors="verrors" 
+              />
+              <!--
+                :isValid="(verrors && verrors.firstname) ? false : null" 
+              -->
+              <!--
               <b-form-group id="group-firstname" label="Full Name" label-for="firstname">
-                <b-form-input id="firstname" v-model="formGeneral.firstname" placeholder="Enter first name" ></b-form-input>
+                <b-form-input id="firstname" v-model="formGeneral.firstname" :state="false" placeholder="Enter first name" ></b-form-input>
+                <b-form-invalid-feedback id="input-live-feedback">
+                  Enter at least 3 letters
+                </b-form-invalid-feedback>
               </b-form-group>
+              -->
             </b-col>
             <b-col>
               <b-form-group id="group-lastname" label="Full Name" label-for="lastname">
@@ -159,6 +172,7 @@
 
 <script>
 //import Vuex from 'vuex';
+import FormTextInput from '@components/settings/FormTextInput';
 
 export default {
 
@@ -175,11 +189,15 @@ export default {
 
   data: () => ({
 
+    foo: 'foo init value',
+
     isEditing: {
-      formGeneral: false,
+      formGeneral: true,
       formSubscriptions: false,
       formLocalization: false,
     },
+
+    verrors: null,
 
     formGeneral: {
       firstname: null,
@@ -264,18 +282,25 @@ export default {
   methods: {
 
     async submitGeneral(e) {
-      const response = await axios.patch(`/users/${this.session_user.id}`, this.formGeneral);
-      this.isEditing.formGeneral = false;
+      try {
+        const response = await axios.patch(`/users/${this.session_user.id}`, this.formGeneral)
+        this.isEditing.formGeneral = false
+      } catch(err) {
+        console.log('here.error', {
+          err: err.response.data,
+        })
+        this.verrors = err.response.data.errors
+      }
     },
 
     async submitSubscriptions(e) {
-      const response = await axios.patch(`/users/${this.session_user.id}/settings`, this.formSubscriptions);
+      const response = await axios.patch(`/users/${this.session_user.id}/settings`, this.formSubscriptions)
       this.isEditing.formSubscriptions = false;
     },
 
     async submitLocalization(e) {
-      const response = await axios.patch(`/users/${this.session_user.id}/settings`, this.formLocalization);
-      this.isEditing.formLocalization = false;
+      const response = await axios.patch(`/users/${this.session_user.id}/settings`, this.formLocalization)
+      this.isEditing.formLocalization = false
     },
 
     onReset(e) {
@@ -284,6 +309,7 @@ export default {
   },
 
   components: {
+    FormTextInput,
   },
 }
 </script>
