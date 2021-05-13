@@ -232,7 +232,7 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
 
     public function getNameAttribute($value)
     {
-        return $this->timeline->name;
+        return $this->firstname;
     }
 
     public function getAvatarAttribute($value)

@@ -8,22 +8,19 @@
 
           <b-row>
             <b-col>
-              <b-form-group id="group-username" label="Username" label-for="username">
-                <b-form-input id="username" v-model="formGeneral.username" placeholder="Enter username" :disabled="true" ></b-form-input>
-              </b-form-group>
+              <FormTextInput ikey="firstname" v-model="formGeneral.firstname" :verrors="verrors" />
             </b-col>
             <b-col>
-              <b-form-group id="group-fullname" label="Full Name" label-for="fullname">
-                <b-form-input id="fullname" v-model="formGeneral.fullname" placeholder="Enter full name" ></b-form-input>
-              </b-form-group>
+              <FormTextInput ikey="lastname" v-model="formGeneral.lastname" :verrors="verrors" />
             </b-col>
           </b-row>
 
           <b-row>
             <b-col>
-              <b-form-group id="group-email" label="E-mail" label-for="email">
-                <b-form-input id="email" v-model="formGeneral.email" placeholder="Enter E-mail" ></b-form-input>
-              </b-form-group>
+              <FormTextInput ikey="username" v-model="formGeneral.username" :verrors="verrors" :disabled="true"/>
+            </b-col>
+            <b-col>
+              <FormTextInput ikey="email" v-model="formGeneral.email" :verrors="verrors" />
             </b-col>
           </b-row>
           </fieldset>
@@ -154,6 +151,7 @@
 
 <script>
 //import Vuex from 'vuex';
+import FormTextInput from '@components/settings/FormTextInput';
 
 export default {
 
@@ -170,16 +168,21 @@ export default {
 
   data: () => ({
 
+    foo: 'foo init value',
+
     isEditing: {
-      formGeneral: false,
+      formGeneral: true,
       formSubscriptions: false,
       formLocalization: false,
     },
 
+    verrors: null,
+
     formGeneral: {
-      username: '',
-      fullname: '',
-      email: '',
+      firstname: null,
+      lastname: null,
+      username: null,
+      email: null,
     },
     formSubscriptions: {
       is_follow_for_free: null,
@@ -226,8 +229,10 @@ export default {
 
   watch: {
       session_user(newVal) {
+        // %FIXME: is this necessary?
         this.formGeneral.username = newVal.username;
-        this.formGeneral.fullname = newVal.name;
+        this.formGeneral.firstname = newVal.firstname;
+        this.formGeneral.lastname = newVal.lastname;
         this.formGeneral.email = newVal.email;
       },
       user_settings(newVal) {
@@ -247,23 +252,34 @@ export default {
   },
 
   created() {
+    this.formGeneral.username = this.session_user.username || '';
+    this.formGeneral.firstname = this.session_user.firstname || '';
+    this.formGeneral.lastname = this.session_user.lastname || '';
+    this.formGeneral.email = this.session_user.email || '';
   },
 
   methods: {
 
     async submitGeneral(e) {
-      const response = await axios.patch(`/users/${this.session_user.id}/settings`, this.formGeneral);
-      this.isEditing.formGeneral = false;
+      try {
+        const response = await axios.patch(`/users/${this.session_user.id}`, this.formGeneral)
+        this.isEditing.formGeneral = false
+      } catch(err) {
+        console.log('here.error', {
+          err: err.response.data,
+        })
+        this.verrors = err.response.data.errors
+      }
     },
 
     async submitSubscriptions(e) {
-      const response = await axios.patch(`/users/${this.session_user.id}/settings`, this.formSubscriptions);
+      const response = await axios.patch(`/users/${this.session_user.id}/settings`, this.formSubscriptions)
       this.isEditing.formSubscriptions = false;
     },
 
     async submitLocalization(e) {
-      const response = await axios.patch(`/users/${this.session_user.id}/settings`, this.formLocalization);
-      this.isEditing.formLocalization = false;
+      const response = await axios.patch(`/users/${this.session_user.id}/settings`, this.formLocalization)
+      this.isEditing.formLocalization = false
     },
 
     onReset(e) {
@@ -272,6 +288,7 @@ export default {
   },
 
   components: {
+    FormTextInput,
   },
 }
 </script>

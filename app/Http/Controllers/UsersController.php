@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 use App\Http\Resources\UserSetting as UserSettingResource;
+use App\Http\Resources\User as UserResource;
 use App\Http\Resources\UserCollection;
 use App\Models\User;
 use App\Models\UserSetting;
@@ -30,6 +31,27 @@ class UsersController extends AppBaseController
         // Apply filters %TODO
         $data = $query->paginate( $request->input('take', env('MAX_DEFAULT_PER_REQUEST', 10)) );
         return new UserCollection($data);
+    }
+
+    public function update(Request $request, User $user)
+    {
+        $this->authorize('update', $user);
+
+        $request->validate([
+            'firstname' => 'required|sometimes|string',
+            'lastname' => 'required|sometimes|string',
+            'email' => 'required|sometimes|email',
+        ]);
+
+        $user->fill($request->only([
+            'firstname',
+            'lastname',
+            'email',
+        ]));
+
+        $user->save();
+
+        return new UserResource($user);
     }
 
     public function showSettings(Request $request, User $user)
