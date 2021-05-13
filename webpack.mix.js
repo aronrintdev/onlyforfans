@@ -59,23 +59,44 @@ mix.addWebpackLoaders([
     type: 'javascript/auto',
     loader: '@intlify/vue-i18n-loader'
   },
+  {
+    resourceQuery: /blockType=scss/,
+    type: 'javascript/auto',
+    use: [ 'vue-style-loader', 'css-loader', 'sass-loader'],
+  },
 ])
 
 // Extract Important libraries to own files for load speed
-mix.extract(['vue', 'vuex', 'axios', 'lodash'], 'public/js/vendor-1.js');
-mix.extract(['bootstrap-vue'], 'public/js/vendor-2.js');
-mix.extract(['@fortawesome'], 'public/js/vendor-3.js');
-mix.extract(['video.js', 'videojs-record'], 'public/js/vendor-4.js');
+mix.extract([
+  'vue',
+  'vuex',
+  'axios',
+  'lodash',
+], 'public/js/vendor-1.js');
+mix.extract([
+  'bootstrap-vue'
+], 'public/js/vendor-2.js');
+mix.extract([
+  '@fortawesome'
+], 'public/js/vendor-3.js');
+mix.extract([
+  'video.js',
+  'videojs-record'
+], 'public/js/vendor-4.js');
 
 // All other node_module libraries will end up in vendor.js
 mix.extract('public/js/vendor.js');
 
-if ( ! mix.inProduction()) {
-  mix.webpackConfig({
-    devtool: 'inline-source-map'
-  });
+if (mix.inProduction()) {
+  mix.bundleAnalyzer({ analyzerMode: 'static', reportFilename: '../analyzerReport.html', openAnalyzer: false, generateStatsFile: true });
+}
+
+if (!mix.inProduction()) {
+  mix.sourceMaps();
   if (mix.isWatching()) {
-    mix.bundleAnalyzer({ openAnalyzer: false, generateStatsFile: true });
+    if (!process.argv.includes('--hot')) {
+      mix.bundleAnalyzer({ openAnalyzer: false, generateStatsFile: true });
+    }
   }
 }
 
@@ -115,5 +136,3 @@ mix.js('resources/assets/js/admin.app.js', 'public/js/admin.app.js')
       },
     },
   })
-  // .extract(['vue', 'axios', 'pusher-js', 'laravel-echo', 'jquery', 'vuejs-logger'])
-  // .sourceMaps();
