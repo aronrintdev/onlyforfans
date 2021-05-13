@@ -548,8 +548,14 @@ class MessageController extends Controller
     public function removeScheduleThread(Request $request, $threadId) {
         $deleted = ChatThread::where('id', $threadId)->delete();
         if ($deleted) {
-            return;
+            return ['status' => 200];
         }
         abort(400);
+    }
+    public function editScheduleThread(Request $request, $threadId) {
+        $chatThread = ChatThread::where('id', $threadId)->first();
+        $chatThread->schedule_datetime = $request->input('schedule_datetime');
+        $chatThread->save();
+        return ['status' => 200];
     }
 }

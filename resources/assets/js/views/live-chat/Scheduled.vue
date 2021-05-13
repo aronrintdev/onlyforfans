@@ -112,6 +112,38 @@
         </div>
       </div>
     </b-modal>
+    <b-modal modal-class="schedule-message-modal" hide-header centered hide-footer ref="edit_confirm_modal">
+      <div class="block-modal">
+        <div class="header d-flex align-items-center">
+          <h4 class="pt-1 pb-1">SCHEDULED MESSAGES</h4>
+        </div>
+        <div class="content">
+          <b-form-datepicker
+            v-model="scheduledMessage.date"
+            :value="scheduledMessage.date"
+            class="mb-3 mt-1"
+            ref="schedule_date"
+            :state="scheduledMessage.date ? true : null"
+            :min="new Date()"
+          />
+          <b-form-timepicker
+            v-model="scheduledMessage.time"
+            :state="scheduledMessage.timeState"
+            class="mb-2"
+            locale="en"
+            @input="onChangeScheduledMessageTime"
+          ></b-form-timepicker>
+        </div>
+        <div class="d-flex align-items-center justify-content-end action-btns">
+          <button class="link-btn" @click="closeEditModal">Cancel</button>
+          <button
+            class="link-btn"
+            @click="confirmEdit"
+            :disabled="!scheduledMessage.date || !scheduledMessage.time || !scheduledMessage.timeState"
+          >Apply</button>
+        </div>
+      </div>
+    </b-modal>
   </div>
 </template>
 
@@ -131,6 +163,8 @@
       scheduled_messages: [],
       moment,
       deletingSchedule: undefined,
+      editingSchedule: undefined,
+      scheduledMessage: {}
     }),
     components: {
       MediaSlider,
@@ -150,8 +184,15 @@
       ...Vuex.mapGetters(['session_user']),
     },
     methods: {
-      editScheduleMsg: function() {
-
+      editScheduleMsg: function(message) {
+        this.editingSchedule = message;
+        const utcDate = moment.utc(message.schedule_datetime).toDate();
+        this.scheduledMessage = {
+          date: moment(utcDate).local().format('YYYY-MM-DD'),
+          time: moment(utcDate).local().format('HH:mm:ss'),
+          timeState: true,
+        };
+        this.$refs.edit_confirm_modal.show();
       },
       deleteScheduleMsg: function(message) {
         this.deletingSchedule = message;
@@ -167,9 +208,30 @@
             this.closeDeleteModal();
           });
       },
+      confirmEdit: function () {
+        if (this.scheduledMessage.date && this.scheduledMessage.time) {
+          const scheduledMessageDate = moment(`${this.scheduledMessage.date} ${this.scheduledMessage.time}`).unix() * 1000;
+          const data = {
+            schedule_datetime: moment(scheduledMessageDate).utc().format('YYYY-MM-DD HH:mm')
+          };
+          this.axios.patch(`/chat-messages/scheduled/${this.editingSchedule.id}`, data)
+            .then(() => {
+              const messages = [...this.scheduled_messages];
+              const idx = messages.findIndex(msg => msg.id === this.editingSchedule.id);
+              messages[idx].schedule_datetime = data.schedule_datetime;
+              this.scheduled_messages = messages;
+              this.closeEditModal();
+            });
+        }
+      },
       closeDeleteModal: function() {
         this.$refs.delete_confirm_modal.hide();
         this.deletingSchedule = undefined;
+      },
+      closeEditModal: function() {
+        this.$refs.edit_confirm_modal.hide();
+        this.editingSchedule = undefined;
+        this.scheduledMessage = {};
       },
       getLogoFromName: function (username) {
         const names = username.split(' ');
@@ -180,7 +242,16 @@
       },
       renderFull: function() {
 
-      }
+      },
+      onChangeScheduledMessageTime: function(event) {
+        this.scheduledMessage.timeState = true;
+        if (moment().format('YYYY-MM-DD') === this.$refs.schedule_date.value) {
+          if (moment().format('HH:mm:ss') > event) {
+            this.scheduledMessage.timeState = false;
+          }
+        }
+        this.scheduledMessage = { ...this.scheduledMessage };
+      },
     }
   }
 </script>
