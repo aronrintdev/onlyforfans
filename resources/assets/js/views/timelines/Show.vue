@@ -67,11 +67,13 @@ export default {
   },
 
   data: () => ({
-    timeline: {},
+    timeline: null,
     isGridLayout: false, // %FIXME: can this be set in created() so we have 1 source of truth ? (see PostFeed)
   }),
 
   created() {
+    this.load()
+
     eventBus.$on('update-timelines', (timelineId) => {
       if (timelineId === this.timeline.id) {
         this.load()
@@ -83,11 +85,7 @@ export default {
     })
   },
 
-  mounted() {
-    if (this.slug) {
-      this.load()
-    }
-  },
+  mounted() { },
 
   methods: {
     async load() {

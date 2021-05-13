@@ -21,6 +21,7 @@ class Kernel extends ConsoleKernel
         \App\Console\Commands\UpdateCanceledSubscriptions::class,
         \App\Console\Commands\UpdateMediafilesNullResource::class,
         \App\Console\Commands\UpdateSlugs::class,
+        \App\Console\Commands\SendScheduleMessages::class,
     ];
 
     /**
@@ -32,8 +33,8 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->command('subscription:update-canceled')->everyHour();
-
+        // $schedule->command('subscription:update-canceled')->everyHour();
+        $schedule->command('send:schdule-messages')->everyMinute()->appendOutputTo(storage_path('logs/publish_posts.log'))->runInBackground();
         // $schedule->command('publish:posts')
         //           ->everyMinute()->appendOutputTo(storage_path('logs/publish_posts.log'));
         // $schedule->command('expire:post')

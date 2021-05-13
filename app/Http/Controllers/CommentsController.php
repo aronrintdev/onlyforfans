@@ -15,43 +15,37 @@ use App\Models\User;
 
 class CommentsController extends AppBaseController
 {
+    // This method is used for listing comments outside the context of a post. For post's comments, 
+    // use posts.indexComments (which allows a follower to view comments that are not their own)
     // %TODO: refactor with scopes
     public function index(Request $request)
     {
         $request->validate([
-            'filters' => 'array',
-            'filters.post_id' => 'uuid|exists:posts,id', // if admin or post-owner only (per-post comments by fan use posts controller)
-            'filters.user_id' => 'uuid|exists:users,id', // if admin only
-            'filters.parent_id' => 'uuid|exists:comments,id',
+            // filters
+            'post_id' => 'uuid|exists:posts,id', // if admin or post-owner only (per-post comments by fan use posts controller)
+            'user_id' => 'uuid|exists:users,id', // if admin only
+            'parent_id' => 'uuid|exists:comments,id',
         ]);
-
-        $filters = $request->filters ?? [];
+        $filters = $request->only(['post_id', 'user_id', 'parent_id']) ?? [];
 
         // Init query
-        $query = Comment::with('user', 'replies.user');
+        $query = Comment::with('user', 'replies.user'); 
 
         // Check permissions
         if ( !$request->user()->isAdmin() ) {
-
-            // non-admin: only view own comments
-            $query->where('user_id', $request->user()->id); 
+            $query->where('user_id', $request->user()->id); // non-admin: can only view own...
             unset($filters['user_id']);
-
             if ( array_key_exists('post_id', $filters) ) {
                 $post = Post::find($filters['post_id']);
                 $this->authorize('update', $post); // non-admin must own post filtered on
             }
         }
 
-        // Apply any filters
+        // Apply filters
         foreach ($filters as $key => $f) {
-            // %TODO: subgroup under 'filters' (need to update axios.GET calls as well in Vue)
             switch ($key) {
-                case 'user_id':
-                case 'post_id':
-                case 'parent_id':
-                    $query->where($key, $f);
-                    break;
+            default:
+                $query->where($key, $f);
             }
         }
 

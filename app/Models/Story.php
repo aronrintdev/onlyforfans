@@ -89,4 +89,9 @@ class Story extends Model implements Likeable, Ownable
     {
         return new Collection([ $this->timeline->user ]);
     }
+
+    public function getPrimaryOwner(): User
+    {
+        return $this->timeline->user;
+    }
 }

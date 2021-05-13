@@ -49,5 +49,8 @@ class BroadcastServiceProvider extends ServiceProvider
         Broadcast::channel('{userId}-message',  function ($user) {
             return (Auth::check()) ? $user : false;
         });
+        Broadcast::channel('{userId}-message-published',  function ($user) {
+            return (Auth::check()) ? $user : false;
+        });
     }
 }

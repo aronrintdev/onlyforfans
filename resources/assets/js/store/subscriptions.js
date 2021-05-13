@@ -118,7 +118,7 @@ export const subscriptions = {
 
     getActive({ commit }, { page, limit }) {
       return new Promise((resolve, reject) => {
-        axios.get(route('subscriptions.index'), { params: { page: page, limit: limit }})
+        axios.get(route('subscriptions.index'), { params: { page: page, limit: limit, is_active: 1 } })
           .then(response => {
             commit('UPDATE_ACTIVE', response.data)
             resolve()
@@ -129,7 +129,7 @@ export const subscriptions = {
 
     getInactive({ commit }, { page, limit }) {
       return new Promise((resolve, reject) => {
-        axios.get(route('subscriptions.index'), { params: { page: page, limit: limit, inactive: 1 }})
+        axios.get(route('subscriptions.index'), { params: { page: page, limit: limit, is_active: 0 } })
           .then(response => {
             commit('UPDATE_INACTIVE', response.data)
             resolve()

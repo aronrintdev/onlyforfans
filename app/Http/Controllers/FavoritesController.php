@@ -20,15 +20,37 @@ class FavoritesController extends AppBaseController
             'user_id' => 'uuid|exists:users,id', // only admin can filter by user
             'favoritable_type' => 'string|alpha-dash|in:posts,mediafiles,timelines,stories',
         ]);
+        $filters = $request->only( ['user_id', 'favoritable_type'] ) ?? [];
 
         $query = Favorite::with(['user', 'favoritable']); // Init query
 
         // Check permissions
         if ( !$request->user()->isAdmin() ) {
-            // non-admin: can only view own 
+            // non-admin: can only view own ...
             $query->where('user_id', $request->user()->id); 
+            unset($filters['user_id']);
         }
 
+        // Apply any filters
+        foreach ($filters as $key => $f) {
+            switch ($key) {
+            case 'favoritable_type':
+                switch ($f) {
+                case 'timelines':
+                    $query->with(['favoritable.cover', 'favoritable.avatar']);
+                    break;
+                case 'mediafiles':
+                    $query->with(['favoritable.resource']); 
+                    break;
+                }
+                $query->where('favoritable_type', $f);
+                break;
+            default:
+                $query->where($key, $f);
+            }
+        }
+
+        /*
         if ( $request->has('favoritable_type') ) {
             switch ($request->favoritable_type) {
             case 'timelines':
@@ -40,6 +62,7 @@ class FavoritesController extends AppBaseController
             }
             $query->where('favoritable_type', $request->favoritable_type);
         }
+         */
 
         $data = $query->paginate( $request->input('take', env('MAX_DEFAULT_PER_REQUEST', 10)) );
         return new FavoriteCollection($data);

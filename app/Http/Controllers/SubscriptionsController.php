@@ -30,16 +30,55 @@ class SubscriptionsController extends Controller
      */
     public function index(Request $request)
     {
-        $user = Auth::user();
+        $vrules = [
+            // filters
+            'is_active' => 'boolean',
+            'subscribable_type' => 'string:in:timelines',
+            'subscribable_id' => 'uuid',
+            'user_id' => 'uuid|exists:users,id',
+            'account_id' => 'uuid',
+            'access_level' => 'string',
+        ];
+        $request->validate($vrules);
 
-        $query = $user->subscriptions()->orderBy('created_at', 'desc');
+        $filters = $request->only( (array_keys($vrules)) ) ?? [];
+
+        //$query = $user->subscriptions()->orderBy('created_at', 'desc');
+        $query = Subscription::query();
+
+        // Check permissions
+        if ( !$request->user()->isAdmin() ) {
+            $query->where('user_id', $request->user()->id); // non-admin: can only view own...
+            unset($filters['user_id']);
+        }
+
+        // Apply filters
+        foreach ($filters as $key => $f) {
+            switch ($key) {
+            case 'is_active':
+                if ($f) {
+                    $query->active();
+                } else {
+                    $query->inactive();
+                }
+                break;
+            default:
+                $query->where($key, $f);
+            }
+        }
+
+        $query->orderBy('created_at', 'desc');
+
+        /*
+        $query = $request->user()->subscriptions()->orderBy('created_at', 'desc');
         if ($request->inactive) {
             $data = $query->inactive();
         } else {
             $data = $query->active();
         }
-        $data = $query->paginate($this->take($request));
+         */
 
+        $data = $query->paginate($this->take($request));
         return new SubscriptionCollection($data);
     }
 

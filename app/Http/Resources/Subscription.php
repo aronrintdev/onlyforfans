@@ -13,14 +13,19 @@ class Subscription extends JsonResource
     {
         $data = [
             'id' => $this->id,
-            'type' => $this->subscribable_type,
+            'subscribable_type' => $this->subscribable_type,
+            'subscribable_id' => $this->subscribable_id,
+            'user_id' => $this->user_id,
             'period' => $this->period,
             'period_interval' => $this->period_interval,
             'price' => CastsMoney::doSerialize($this->price),
             'currency' => $this->currency,
             'access_level' => $this->access_level,
             'active' => $this->active,
-            'canceled' => $this->canceled_at,
+            'canceled_at' => $this->canceled_at,
+
+            'type' => $this->subscribable_type, // %FIXME: DEPRECATE, follow conventions setup elsehwere (use subscribable_type above)
+            'canceled' => $this->canceled_at, // %FIXME: DEPRECATE, follow conventions setup elsehwere
         ];
 
         if ( $this->isOwner(Auth::user()) ) {

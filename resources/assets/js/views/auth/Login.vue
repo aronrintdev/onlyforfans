@@ -2,7 +2,7 @@
   <div class="container w-100 d-flex flex-column mt-5">
     <b-card class="login-card mx-auto" no-body>
       <template #header>
-        <div class="h1 text-center" v-text="$t('signInHeader')" />
+        <div class="h2 text-center" v-text="$t('signInHeader')" />
         <div class="text-center">
           <div class="d-inline" v-text="$t('noAccountQuestion')" />
           <!-- TODO: Link to registration page -->
@@ -40,7 +40,7 @@
       </div>
 
       <div class="p-3">
-        <b-btn variant="primary" block @click="login" :disabled="state === 'loading'">
+        <b-btn variant="primary" class="cta-btn" block @click="login" :disabled="state === 'loading'">
           <span v-if="state === 'form'">{{ $t('signInButton') }}</span>
           <fa-icon v-else icon="spinner" spin />
         </b-btn>
@@ -126,6 +126,14 @@ export default {
 }
 .h-line {
   color: var('--gray');
+}
+.cta-btn {
+  height: 42px;
+  border: none;
+  font-size: 14px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 .third-party-sign-in {
   display: flex;

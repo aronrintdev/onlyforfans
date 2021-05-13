@@ -220,7 +220,8 @@ export default {
     },
 
     dropzoneOptions: {
-      url: '/mediafiles',
+      //url: '/mediafiles',
+      url: route('mediafiles.index'),
       paramName: 'mediafile',
       thumbnailHeight: 128,
       maxFilesize: 15.9,

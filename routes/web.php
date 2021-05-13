@@ -52,6 +52,9 @@ Route::post('/login', 'Auth\LoginController@login');
 /* -------------------------------- Register -------------------------------- */
 // Route::get('/register', 'Auth\RegisterController@register')->name('auth.register');
 Route::post('/register', 'Auth\RegisterController@registerUser');
+Route::post('/forgot-password', 'Auth\ForgotPasswordController@store');
+Route::post('/password/reset/{token}', 'Auth\ForgotPasswordController@checkResetToken');
+Route::post('/password/reset', 'Auth\ForgotPasswordController@resetPass');
 // Route::get('email/verify', 'Auth\RegisterController@verifyEmail');
 
 //main project register
@@ -105,13 +108,6 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('/mediafiles/match', ['as'=>'mediafiles.match', 'uses' => 'MediafilesController@match']);
     Route::resource('mediafiles', 'MediafilesController', [ 'except' => [ 'create', 'edit', ] ]);
 
-    /*
-    Route::get('/notifications/dashboard', [
-        'middleware' => 'spaMixedRoute',
-        'as' => 'notifications.dashboard',
-        'uses' => 'NotificationsController@dashboard'
-    ]);
-     */
     Route::resource('notifications', 'NotificationsController', [ 'only' => [ 'index', ] ]);
 
     // -- posts: likeable | shareable | commentable | tippable | purchaseable | pinnable --
@@ -209,6 +205,8 @@ Route::group(['middleware' => ['auth']], function () {
 //  -- messages --
 Route::get('/chat-messages/users', ['as'=>'messages.fetchusers', 'uses' => 'MessageController@fetchUsers']);
 Route::get('/chat-messages/contacts', ['as'=>'messages.fetchcontacts', 'uses' => 'MessageController@fetchContacts']);
+Route::get('/chat-messages/scheduled', ['as'=>'messages.fetchscheduled', 'uses' => 'MessageController@fetchScheduled']);
+Route::delete('/chat-messages/scheduled/{threadId}', ['as'=>'messages.removeschedule', 'uses' => 'MessageController@removeScheduleThread']);
 Route::get('/chat-messages/{id}', ['as'=>'messages.fetchcontact', 'uses' => 'MessageController@fetchcontact']);
 Route::delete('/chat-messages/{id}', ['as'=>'messages.clearcontact', 'uses' => 'MessageController@clearUser']);
 Route::post('/chat-messages/{id}/mark-as-read', ['as'=>'messages.markasread', 'uses' => 'MessageController@markAsRead']);

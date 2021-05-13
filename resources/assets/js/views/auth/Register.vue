@@ -2,7 +2,7 @@
   <div class="container w-100 d-flex flex-column mt-5">
     <b-card class="login-card mx-auto" no-body>
       <template #header>
-        <div class="h1 text-center" v-text="$t('signUpLink')" />
+        <div class="h2 text-center" v-text="$t('signUpLink')" />
         <div class="text-center">
           <div class="d-inline" v-text="$t('accountQuestion')" />
           <!-- TODO: Link to Login page -->
@@ -161,7 +161,12 @@ export default {
   }
 }
 .signup-btn {
-  padding: 10px 0;
+  height: 42px;
+  border: none;
+  font-size: 14px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 
   &:disabled {
     background: rgba(138,150,163,.75);

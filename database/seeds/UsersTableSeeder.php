@@ -14,11 +14,15 @@ class UsersTableSeeder extends Seeder
 {
     use SeederTraits;
 
+    protected $doS3Upload = false;
+
     public function run()
     {
         $this->initSeederTraits('UsersTableSeeder'); // $this->{output, faker, appEnv}
 
         // $adminRole = Role::where('name','admin')->firstOrFail();
+
+        $this->doS3Upload = ( $this->appEnv !== 'testing' );
 
         if ( $this->appEnv !== 'testing' ) { // if tests have pre-existing admins we'll need to make sure a random user chose is *not* an admin
 
@@ -105,8 +109,8 @@ class UsersTableSeeder extends Seeder
 
             if ( $this->appEnv !== 'testing' ) {
                 $this->output->writeln("Creating new user with avatar & cover: " . $u->name." (iter: $iter)");
-                $avatar = FactoryHelpers::createImage(MediafileTypeEnum::AVATAR, $u->id, true);
-                $cover = FactoryHelpers::createImage(MediafileTypeEnum::COVER, $u->id, true);
+                $avatar = FactoryHelpers::createImage(MediafileTypeEnum::AVATAR, $u->id, $this->doS3Upload);
+                $cover = FactoryHelpers::createImage(MediafileTypeEnum::COVER, $u->id, $this->doS3Upload);
             } else {
                 //$this->output->writeln("Creating new user without avatar & cover: " . $u->name." (iter: $iter)");
                 $avatar = null;

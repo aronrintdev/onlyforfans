@@ -110,7 +110,8 @@ export default {
     //  ~ https://github.com/rowanwins/vue-dropzone/blob/master/docs/src/pages/SendAdditionalParamsDemo.vue
     //  ~ https://www.dropzonejs.com/#config-autoProcessQueue
     dropzoneOptions: {
-      url: '/mediafiles',
+      //url: '/mediafiles',
+      url: route('mediafiles.index'),
       paramName: 'mediafile',
       //acceptedFiles: 'image/*, video/*, audio/*',
       maxFiles: null,

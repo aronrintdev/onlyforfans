@@ -44,6 +44,11 @@ export const routes = [
     component: liveChat.New,
   },
   {
+    name: 'messages.scheduled',
+    path: '/messages/schedule_message',
+    component: liveChat.Scheduled,
+  },
+  {
     name: 'messages.details',
     path: '/messages/:id',
     component: liveChat.Details,
@@ -83,7 +88,8 @@ export const routes = [
 
   // Lists
   {
-    path: '/lists',
+    name: 'lists.dashboard',
+    path: '/lists/dashboard',
     component: lists.Dashboard,
     children:  listRoutes,
   },

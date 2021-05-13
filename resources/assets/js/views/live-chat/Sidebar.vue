@@ -5,6 +5,9 @@
         <span class="top-bar-title">Messages</span>
       </div> 
       <div class="top-bar-action-btns">
+        <button class="btn" type="button" @click="goToScheduledMessage">
+          <font-awesome-icon :icon="['far', 'calendar-alt']" />
+        </button>
         <button class="btn" type="button" @click="changeSearchbarVisible">
           <i class="fa fa-search" aria-hidden="true"></i>
         </button>
@@ -450,6 +453,9 @@
             this.users.splice(idx, 1);
             this.$router.push('/messages');
           })
+      },
+      goToScheduledMessage: function () {
+        this.$router.push('/messages/schedule_message');
       }
     }
   }
