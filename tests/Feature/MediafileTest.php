@@ -17,6 +17,7 @@ use App\Libs\FactoryHelpers;
 use App\Models\User;
 use App\Models\Story;
 use App\Models\Timeline;
+use App\Models\Post;
 use App\Models\Mediafile;
 use App\Enums\MediafileTypeEnum;
 
@@ -34,16 +35,13 @@ class MediafileTest extends TestCase
      */
     public function test_admin_can_list_mediafiles()
     {
-        $expectedCount = Mediafile::where('mftype', MediafileTypeEnum::AVATAR)->count();
 
         $admin = User::first();
         $admin->assignRole('super-admin'); // upgrade to admin!
         $admin->refresh();
 
         $response = $this->actingAs($admin)->ajaxJSON('GET', route('mediafiles.index'), [
-            'filters' => [
-                'mftype' => MediafileTypeEnum::AVATAR,
-            ],
+            'mftype' => MediafileTypeEnum::AVATAR,
         ]);
         $response->assertJsonStructure([
             'data',
@@ -55,10 +53,62 @@ class MediafileTest extends TestCase
         $this->assertEquals(1, $content->meta->current_page);
 
         $this->assertNotNull($content->data);
-        $this->assertEquals($expectedCount, count($content->data));
+        $this->assertGreaterThan(0, count($content->data));
         $this->assertObjectHasAttribute('mfname', $content->data[0]);
         $this->assertObjectHasAttribute('mftype', $content->data[0]);
         $this->assertEquals(MediafileTypeEnum::AVATAR, $content->data[0]->mftype);
+    }
+
+    /**
+     *  @group mediafiles
+     *  @group regression
+     */
+    public function test_owner_can_list_mediafiles()
+    {
+        $owner = User::has('posts.mediafiles', '>=', 1)
+            ->has('timeline.stories.mediafiles', '>=', 1)
+            ->firstOrFail();
+
+        $response = $this->actingAs($owner)->ajaxJSON('GET', route('mediafiles.index'), [
+            //'mftype' => MediafileTypeEnum::AVATAR,
+        ]);
+        $response->assertStatus(200);
+        $content = json_decode($response->content());
+        $response->assertJsonStructure([
+            'data',
+            'links',
+            'meta' => [ 'current_page', 'from', 'last_page', 'path', 'per_page', 'to', 'total', ],
+        ]);
+        $this->assertEquals(1, $content->meta->current_page);
+
+        $this->assertNotNull($content->data);
+        $this->assertGreaterThan(0, count($content->data));
+        //$this->assertEquals($expectedCount, count($content->data));
+        $this->assertObjectHasAttribute('mfname', $content->data[0]);
+        $this->assertObjectHasAttribute('mftype', $content->data[0]);
+        //$this->assertEquals(MediafileTypeEnum::AVATAR, $content->data[0]->mftype);
+
+        // All resources returned are owned 
+        $ownedCount = collect($content->data)->reduce( function($acc, $item) use(&$owner) {
+            switch ( $item->resource_type ) {
+            case 'posts':
+                $resource = Post::findOrFail($item->resource_id);
+                break;
+            case 'stories':
+                $resource = Story::findOrFail($item->resource_id);
+                break;
+            case 'users':
+                $resource = User::findOrFail($item->resource_id);
+                break;
+            default:
+                throw new Exception('Unknown resource_type: '.$item->resource_type);
+            }
+            if ( $resource->getPrimaryOwner()->id === $owner->id ) {
+                $acc += 1;
+            }
+            return $acc;
+        }, 0);
+        $this->assertEquals(count($content->data), $ownedCount); 
     }
 
     /**

@@ -33,11 +33,8 @@ class CommentsController extends AppBaseController
 
         // Check permissions
         if ( !$request->user()->isAdmin() ) {
-
-            // non-admin: can only view own comments
-            $query->where('user_id', $request->user()->id); 
+            $query->where('user_id', $request->user()->id); // non-admin: can only view own...
             unset($filters['user_id']);
-
             if ( array_key_exists('post_id', $filters) ) {
                 $post = Post::find($filters['post_id']);
                 $this->authorize('update', $post); // non-admin must own post filtered on

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use DB;
 use Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Storage;
@@ -13,6 +14,8 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Http\Resources\MediafileCollection;
 use App\Http\Resources\Mediafile as MediafileResource;
 use App\Models\User;
+use App\Models\Post;
+use App\Models\Story;
 use App\Models\Mediafile;
 use App\Enums\MediafileTypeEnum;
 
@@ -22,13 +25,12 @@ class MediafilesController extends AppBaseController
     public function index(Request $request)
     {
         $request->validate([
-            'filters' => 'array',
-            //'filters.post_id' => 'uuid|exists:posts,id', // if admin or post-owner only (per-post comments by fan use posts controller)
-            'filters.user_id' => 'uuid|exists:users,id', // if admin only
-            'filters.mftype' => 'in:'.MediafileTypeEnum::getKeysCsv(), // %TODO : apply elsewhere
+            //'post_id' => 'uuid|exists:posts,id', // if admin or post-owner only (per-post comments by fan use posts controller)
+            'user_id' => 'uuid|exists:users,id', // if admin only
+            'mftype' => 'in:'.MediafileTypeEnum::getKeysCsv(), // %TODO : apply elsewhere
         ]);
 
-        $filters = $request->filters ?? [];
+        $filters = $request->only(['user_id', 'mftype' ]) ?? [];
 
         // Init query
         $query = Mediafile::query();
@@ -36,14 +38,34 @@ class MediafilesController extends AppBaseController
         // Check permissions
         if ( !$request->user()->isAdmin() ) {
 
-            // non-admin: only view own comments
-            $query->where('user_id', $request->user()->id); 
+            // non-admin: can only view own
+            $query->whereHasMorph(
+                'resource',
+                [Post::class, Story::class, User::class],
+                function (Builder $q1, $type) use(&$request) {
+                    switch ($type) {
+                    case Post::class:
+                        $q1->where('user_id', $request->user()->id);
+                        break;
+                    case Story::class:
+                        $column = 'timelines.user_id';
+                        $q1->whereHas('timeline', function($q2) use(&$request) {
+                            $q2->where('user_id', $request->user()->id);
+                        });
+                        break;
+                    case User::class:
+                        $q1->where('id', $request->user()->id);
+                        break;
+                    default:
+                        throw new Exception('Invalid morphable type for resource: '.$type);
+                    }
+                }
+            );
             unset($filters['user_id']);
         }
 
         // Apply any filters
         foreach ($filters as $key => $f) {
-            // %TODO: subgroup under 'filters' (need to update axios.GET calls as well in Vue)
             switch ($key) {
                 case 'mftype':
                 case 'user_id':

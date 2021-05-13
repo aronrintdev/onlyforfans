@@ -103,12 +103,18 @@ class Post extends Model
     public function getIsLikedByMeAttribute($value)
     {
         $sessionUser = Auth::user();
-        return $sessionUser ? $this->likes->contains($sessionUser->id) : false;
+        if ( !$sessionUser ) {
+            return false;
+        }
+        return $this->likes->contains($sessionUser->id);
     }
 
     public function getIsFavoritedByMeAttribute($value)
     {
         $sessionUser = Auth::user();
+        if ( !$sessionUser ) {
+            return false;
+        }
         $exists = Favorite::where('user_id', $sessionUser->id)
             ->where('favoritable_id', $this->id)
             ->where('favoritable_type', 'posts')
@@ -123,19 +129,11 @@ class Post extends Model
         'meta' => 'array',
     ];
 
-    public function toArray()
-    {
-        $array = parent::toArray();
-        // Localize Price
-        $array['price_display'] = static::formatMoney($this->asMoney($array['price']));
-        return $array;
-    }
-
     //--------------------------------------------
     // %%% Relationships
     //--------------------------------------------
 
-    public function favoites()
+    public function favorites()
     {
         //return $this->morphMany(Favorite::class, 'favoritable')->withTimestamps();
         return $this->morphMany(Favorite::class, 'favoritable');
@@ -161,6 +159,11 @@ class Post extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function shareables()
+    {
+        return $this->morphMany(Shareable::class, 'shareable');
     }
 
     public function postable()

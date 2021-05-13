@@ -90,7 +90,7 @@ export default {
 
   created() {
     this.getFavorites({ 
-      seller_id: this.session_user.id,
+      //seller_id: this.session_user.id,
       page: 1,
       take: this.perPage,
     })
@@ -103,7 +103,7 @@ export default {
 
     pageClickHandler(e, page) {
       this.getFavorites({ 
-        seller_id: this.session_user.id,
+        //seller_id: this.session_user.id,
         page: page,
         take: this.perPage,
       })

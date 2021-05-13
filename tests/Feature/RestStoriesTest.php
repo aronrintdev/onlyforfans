@@ -25,7 +25,6 @@ class StoriesTest extends TestCase
     /**
      *  @group stories
      *  @group regression
-     *  @group OFF-here0510
      */
     public function test_can_list_my_stories()
     {
@@ -57,7 +56,6 @@ class StoriesTest extends TestCase
     /**
      *  @group stories
      *  @group regression
-     *  @group here0510
      */
     public function test_can_list_stories_filtered_by_timeline()
     {
@@ -90,7 +88,6 @@ class StoriesTest extends TestCase
     /**
      *  @group stories
      *  @group regression
-     *  @group here0510
      */
     public function test_can_list_stories_filtered_by_stype()
     {
@@ -130,7 +127,6 @@ class StoriesTest extends TestCase
     /**
      *  @group stories
      *  @group regression
-     *  @group here0510
      */
     public function test_can_not_list_stories_on_unfollowed_timeline()
     {
@@ -150,7 +146,6 @@ class StoriesTest extends TestCase
     /**
      *  @group stories
      *  @group regression
-     *  @group here0510a
      */
     public function test_can_list_stories_on_followed_timelines()
     {
