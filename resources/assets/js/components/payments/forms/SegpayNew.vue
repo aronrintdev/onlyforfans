@@ -199,14 +199,22 @@ export default {
           this.$emit('processing')
           const data = {
             sessionId: this.sessionId,
-            packageId: this.packageId,
+            packageId: parseInt(this.packageId),
             customer: {
               ...this.form.customer,
               email: this.session_user.email,
             },
             card: {
               ...this.form.card,
+              expirationYear: parseInt(`20${this.form.card.expirationYear}`),
+              expirationMonth: parseInt(this.form.card.expirationMonth),
             },
+            billing: {
+              pricePointId: null,
+              currencyCode: this.currency,
+            },
+            item_type: this.type,
+            item_id: this.value.id,
           }
           console.log({ data })
           window.segpay.sdk.completePayment(data, (result) => {
