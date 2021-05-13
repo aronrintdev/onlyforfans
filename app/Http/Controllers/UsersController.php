@@ -40,11 +40,13 @@ class UsersController extends AppBaseController
         $request->validate([
             'firstname' => 'required|sometimes|string',
             'lastname' => 'required|sometimes|string',
+            'email' => 'required|sometimes|email',
         ]);
 
         $user->fill($request->only([
             'firstname',
             'lastname',
+            'email',
         ]));
 
         $user->save();

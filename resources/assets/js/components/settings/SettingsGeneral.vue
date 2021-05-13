@@ -8,40 +8,19 @@
 
           <b-row>
             <b-col>
-              <FormTextInput 
-                ikey="firstname" 
-                v-model="formGeneral.firstname" 
-                :verrors="verrors" 
-              />
-              <!--
-                :isValid="(verrors && verrors.firstname) ? false : null" 
-              -->
-              <!--
-              <b-form-group id="group-firstname" label="Full Name" label-for="firstname">
-                <b-form-input id="firstname" v-model="formGeneral.firstname" :state="false" placeholder="Enter first name" ></b-form-input>
-                <b-form-invalid-feedback id="input-live-feedback">
-                  Enter at least 3 letters
-                </b-form-invalid-feedback>
-              </b-form-group>
-              -->
+              <FormTextInput ikey="firstname" v-model="formGeneral.firstname" :verrors="verrors" />
             </b-col>
             <b-col>
-              <b-form-group id="group-lastname" label="Full Name" label-for="lastname">
-                <b-form-input id="lastname" v-model="formGeneral.lastname" placeholder="Enter last name" ></b-form-input>
-              </b-form-group>
+              <FormTextInput ikey="lastname" v-model="formGeneral.lastname" :verrors="verrors" />
             </b-col>
           </b-row>
 
           <b-row>
             <b-col>
-              <b-form-group id="group-username" label="Username" label-for="username">
-                <b-form-input id="username" v-model="formGeneral.username" placeholder="Enter username" :disabled="true" ></b-form-input>
-              </b-form-group>
+              <FormTextInput ikey="username" v-model="formGeneral.username" :verrors="verrors" :disabled="true"/>
             </b-col>
             <b-col>
-              <b-form-group id="group-email" label="E-mail" label-for="email">
-                <b-form-input id="email" v-model="formGeneral.email" placeholder="Enter E-mail" ></b-form-input>
-              </b-form-group>
+              <FormTextInput ikey="email" v-model="formGeneral.email" :verrors="verrors" />
             </b-col>
           </b-row>
           </fieldset>

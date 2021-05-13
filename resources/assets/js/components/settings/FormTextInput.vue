@@ -1,31 +1,19 @@
 <template>
   <b-form-group :id="groupID" label="Full Name" :label-for="ikey">
-    <!--
-    <input
-      v-bind:value="value"
-      v-on:input="$emit('input', $event.target.value)"
-      :id="ikey" 
-      :state="isValid" 
-      placeholder="Enter first name" 
-      type="text"
-      class="form-control"
-    >
-    -->
-    <b-form-input v-model="value" :state="isValid" placeholder="Enter first name"></b-form-input>
+    <b-form-input v-model="dvalue" :state="isValid" @update="doUpdate()" placeholder="Enter first name" :disabled="disabled"></b-form-input>
     <b-form-invalid-feedback id="input-live-feedback">{{ vmsg }}</b-form-invalid-feedback>
   </b-form-group>
 </template>
 
 <script>
-//import Vuex from 'vuex';
 
 export default {
 
   props: {
-    ikey: null,
+    ikey: null, // 'input key'
     value:  null,
     verrors: null,
-    //isValid: null,
+    disabled: false,
   },
 
   computed: {
@@ -36,36 +24,39 @@ export default {
       return `group-${this.ikey}`
     },
     isValid() {
-      return (this.verrors && this.verrors[this.ikey]) ? false : null
+      return (this.dverrors && this.dverrors[this.ikey]) ? false : null
     },
     vmsg() {
-      return (this.verrors && this.verrors[this.ikey]) ?  this.verrors[this.ikey][0]: ''
+      return (this.dverrors && this.dverrors[this.ikey]) ?  this.dverrors[this.ikey][0]: ''
     },
   },
 
   data: () => ({
-    //isValid: null,
+    dvalue: null,
+    dverrors: null,
   }),
 
   watch: {
-    value(v) {
-      this.$emit('input', this.value)
+    dvalue(v) {
+      this.$emit('input', this.dvalue)
     },
-    //this.$emit('post', this.post.id)
-  },
-
-  mounted() {
-  },
-
-  created() {
-    //this.formGeneral.email = this.session_user.email || '';
+    verrors(v) {
+      this.dverrors = v
+    },
   },
 
   methods: {
+    doUpdate() {
+      console.log('do update')
+      this.dverrors = null
+    }
   },
 
-  components: {
+  created() {
+    this.dvalue = this.value
+    this.dverrors = this.verrors
   },
+
 }
 </script>
 
