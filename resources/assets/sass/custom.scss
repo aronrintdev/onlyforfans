@@ -231,6 +231,7 @@ body .feed-crate.tag-grid-layout .superbox-post .carousel.slide .carousel-item {
 }
 
 .messages-page-sidebar .user-details-row > .sidebar-more-dropdown,
+.schedule-message-list .sidebar-more-dropdown,
 .chat-more-dropdown {
   overflow: visible !important;
   margin-right: -4px !important;
@@ -248,6 +249,18 @@ body .feed-crate.tag-grid-layout .superbox-post .carousel.slide .carousel-item {
       width: auto;
       margin: 0 5px;
       padding: 6px 8px;
+    }
+  }
+}
+
+.schedule-message-list .sidebar-more-dropdown {
+  .dropdown-menu {
+    width: 240px;
+    .dropdown-item {
+      padding: 8px;
+      margin: 3px 6px;
+      font-size: 16px;
+      line-height: 20px;
     }
   }
 }
@@ -411,4 +424,8 @@ body .feed-crate.tag-grid-layout .superbox-post .carousel.slide .carousel-item {
   font-size: 15px;
   font-weight: 400;
   line-height: 24px;
+}
+
+.schedule-message-list .carousel {
+  width: 100%;
 }

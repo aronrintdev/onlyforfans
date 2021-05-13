@@ -17,6 +17,7 @@ use function _\orderBy;
 use function _\filter;
 use function _\uniq;
 use function _\uniqBy;
+use Carbon\Carbon;
 
 class MessageController extends Controller
 {
@@ -129,12 +130,14 @@ class MessageController extends Controller
             $chatThreads = ChatThread::where(function($query) use(&$request, &$receiver) {
                     $sessionUser = $request->user();
                     $query->where('sender_id', $sessionUser->id)
-                        ->where('receiver_id', $receiver);
+                        ->where('receiver_id', $receiver)
+                        ->where('schedule_datetime', null);
                 })
                 ->orWhere(function($query) use(&$request, &$receiver) {
                     $sessionUser = $request->user();
                     $query->where('sender_id', $receiver)
-                        ->where('receiver_id', $sessionUser->id);
+                        ->where('receiver_id', $sessionUser->id)
+                        ->where('schedule_datetime', null);
                 })
                 ->orderBy('created_at', 'desc')
                 ->get();
@@ -154,6 +157,7 @@ class MessageController extends Controller
             $lastMessage->unread_messages_count = ChatThread::where('is_unread', 1)
                 ->where('sender_id', $receiver)
                 ->where('receiver_id', $sessionUser->id)
+                ->where('schedule_datetime', null)
                 ->get()->count();
             $lastMessage->receiver_id = $lastChatThread->receiver_id;
             $lastMessage->hasMediafile = $hasMediafile;
@@ -210,12 +214,14 @@ class MessageController extends Controller
             ->where(function($query) use(&$request, &$id) {
                 $sessionUser = $request->user();
                 $query->where('sender_id', $sessionUser->id)
-                    ->where('receiver_id',  $id);
+                    ->where('receiver_id',  $id)
+                    ->where('schedule_datetime', null);
             })
             ->orWhere(function($query) use(&$request, &$id) {
                 $sessionUser = $request->user();
                 $query->where('receiver_id', $sessionUser->id)
-                    ->where('sender_id',  $id);
+                    ->where('sender_id',  $id)
+                    ->where('schedule_datetime', null);
             })
             ->orderBy('created_at', 'DESC')
             ->skip($offset)
@@ -253,9 +259,12 @@ class MessageController extends Controller
         $sessionUser = $request->user();
         $receiver = User::where('id', $request->input('user_id'))->first();
 
+        $schedule_datetime = $request->input('schedule_datetime');
+
         $chatthread = $sessionUser->chatthreads()->create([
             'receiver_id' => $request->input('user_id'),
             'tip_price' => $request->input('tip_price'),
+            'schedule_datetime' => $schedule_datetime,
             'is_unread' => 1,
             'is_like' => 0,
         ]);
@@ -323,14 +332,19 @@ class MessageController extends Controller
             ]);
         }
 
-        $chatthread->messages = $chatthread->messages()->with('mediafile')->orderBy('mcounter', 'asc')->get();
 
-        broadcast(new MessageSentEvent($chatthread, $sessionUser, $receiver))->toOthers();
+        if (!$schedule_datetime) {
+            $chatthread->messages = $chatthread->messages()->with('mediafile')->orderBy('mcounter', 'asc')->get();
 
-        return [
-            'message' => $chatthread,
-        ];
+            broadcast(new MessageSentEvent($chatthread, $sessionUser, $receiver))->toOthers();
+
+            return [
+                'message' => $chatthread,
+            ];
+        }
+        return [];
     }
+
     public function clearUser(Request $request, $id)
     {
         $deleted = ChatThread::where(function($query) use(&$request, &$id) {
@@ -353,6 +367,7 @@ class MessageController extends Controller
         $sessionUser = $request->user();
         $chatthreads = ChatThread::where('sender_id', $id)
             ->where('receiver_id', $sessionUser->id)
+            ->where('schedule_datetime', null)
             ->get();
         $chatthreads->each(function($thread) {
             $thread->update(['is_unread' => 0]);
@@ -362,7 +377,9 @@ class MessageController extends Controller
     public function markAllAsRead(Request $request) {
         $sessionUser = $request->user();
 
-        $chatthreads = ChatThread::where('receiver_id', $sessionUser->id)->get();
+        $chatthreads = ChatThread::where('receiver_id', $sessionUser->id)
+            ->where('schedule_datetime', null)
+            ->get();
         $chatthreads->each(function($thread) {
             $thread->update(['is_unread' => 0]);
         });
@@ -372,12 +389,14 @@ class MessageController extends Controller
         $chatthreads = ChatThread::where(function($query) use(&$request, &$id) {
                 $sessionUser = $request->user();
                 $query->where('sender_id', $sessionUser->id)
-                    ->where('receiver_id', $id);
+                    ->where('receiver_id', $id)
+                    ->where('schedule_datetime', null);
             })
             ->orWhere(function($query) use(&$request, &$id) {
                 $sessionUser = $request->user();
                 $query->where('sender_id', $id)
-                    ->where('receiver_id', $sessionUser->id);
+                    ->where('receiver_id', $sessionUser->id)
+                    ->where('schedule_datetime', null);
             })
             ->get();
         $messages = [];
@@ -444,12 +463,14 @@ class MessageController extends Controller
         $chatthreads = ChatThread::where(function($query) use(&$request, &$receiver) {
                 $sessionUser = $request->user();
                 $query->where('sender_id', $sessionUser->id)
-                    ->where('receiver_id', $receiver);
+                    ->where('receiver_id', $receiver)
+                    ->where('schedule_datetime', null);
             })
             ->orWhere(function($query) use(&$request, &$receiver) {
                 $sessionUser = $request->user();
                 $query->where('sender_id', $receiver)
-                    ->where('receiver_id', $sessionUser->id);
+                    ->where('receiver_id', $sessionUser->id)
+                    ->where('schedule_datetime', null);
             })
             ->orderBy('created_at', 'desc')
             ->get();
@@ -468,7 +489,10 @@ class MessageController extends Controller
 
     public function getUnreadMessagesCount(Request $request) {
         $sessionUser = $request->user();
-        $unread_threads = ChatThread::where('receiver_id', $sessionUser->id)->where('is_unread', 1)->pluck('sender_id')->toArray();
+        $unread_threads = ChatThread::where('receiver_id', $sessionUser->id)
+            ->where('is_unread', 1)
+            ->where('schedule_datetime', null)
+            ->pluck('sender_id')->toArray();
         $unread_threads = uniq($unread_threads);
         return ["unread_messages_count" => count($unread_threads)];
     }
@@ -492,6 +516,38 @@ class MessageController extends Controller
     public function setUnlike(Request $request, $id, $threadId) {
         $updated = ChatThread::where('id', $threadId)->update(['is_like' => false]);
         if ($updated) {
+            return;
+        }
+        abort(400);
+    }
+    public function fetchScheduled(Request $request)
+    {
+        $sessionUser = $request->user();
+        $userSetting = $sessionUser->settings;
+        $cattrs = $userSetting->cattrs;
+        if ( !array_key_exists('blocked', $cattrs) ) {
+            $blockedUsers = [];
+        } else {
+            $blockedUsers = $cattrs['blocked']['usernames'];
+        }
+        $blockers = User::whereIn('username', $blockedUsers)->pluck('id')->toArray();
+
+        $chatThreads = ChatThread::with(['receiver'])
+            ->where('sender_id', $sessionUser->id)
+            ->whereNotIn('receiver_id', $blockers)
+            ->where('schedule_datetime', '>', date("Y-m-d H:i:s", strtotime(Carbon::now())))
+            ->get();
+
+        $chatThreads->each(function ($chatthread) {
+            $chatthread->messages = $chatthread->messages()->with('mediafile')->orderBy('mcounter', 'desc')->get();
+            $chatthread->profile = User::where('id', $chatthread->receiver_id)->first();
+        });
+
+        return $chatThreads->toArray(); 
+    }
+    public function removeScheduleThread(Request $request, $threadId) {
+        $deleted = ChatThread::where('id', $threadId)->delete();
+        if ($deleted) {
             return;
         }
         abort(400);
