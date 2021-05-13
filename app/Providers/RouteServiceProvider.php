@@ -41,8 +41,8 @@ class RouteServiceProvider extends ServiceProvider
     public function map()
     {
         $this->mapWebRoutes();
-
         $this->mapApiRoutes();
+        $this->mapWebhookRoutes();
     }
 
    /**
@@ -78,6 +78,19 @@ class RouteServiceProvider extends ServiceProvider
             'as'         => 'api.',
         ], function ($router) {
             require base_path('routes/api.php');
+        });
+    }
+
+    protected function mapWebhookRoutes()
+    {
+        Route::group([
+            'middleware' => ['webhook'],
+            'namespace' => $this->namespace,
+            'prefix' => '/hook',
+        ], function () {
+            Route::post('receive', 'WebhooksController@receive')->name('webhook.receive');
+            // SegPay //
+            Route::post('receive/segpay', 'WebhooksController@receiveSegpay')->name('webhook.receive.segpay');
         });
     }
 }

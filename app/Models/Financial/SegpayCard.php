@@ -76,7 +76,7 @@ class SegpayCard extends Model implements Ownable
         $card = SegpayCard::create([
             'owner_type' => $user->getMorphString(),
             'owner_id'   => $user->getKey(),
-            'token'      => $transaction->transactionId,
+            'token'      => $transaction->purchaseId,
             'nickname'   => $transaction->nickname ?? null,
             'card_type'  => $transaction->cardType,
             'last_4'     => $transaction->ccLast4,

@@ -2,25 +2,41 @@
 
 namespace App\Jobs;
 
-use App\Apis\Segpay\Enums\Action;
-use App\Apis\Segpay\Enums\TransactionType;
-use App\Apis\Segpay\Transaction;
 use Exception;
+use Money\MoneyParser;
 use App\Models\Webhook;
+use App\Events\TipFailed;
 use Illuminate\Support\Str;
 use Illuminate\Bus\Queueable;
+use App\Enums\PaymentTypeEnum;
+use App\Events\ItemSubscribed;
+use App\Events\PurchaseFailed;
+use App\Apis\Segpay\Enums\Stage as StageEnum;
+use App\Apis\Segpay\Transaction;
+use App\Apis\Segpay\Enums\Action;
+use App\Events\SubscriptionFailed;
+use App\Models\Traits\FormatMoney;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Queue\InteractsWithQueue;
-use App\Enums\WebhookStatusEnum as Status;
+use Illuminate\Support\Facades\Log;
 use App\Models\Financial\SegpayCall;
 use App\Models\Financial\SegpayCard;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Queue\InteractsWithQueue;
+use App\Apis\Segpay\Enums\TransactionType;
+use App\Enums\WebhookStatusEnum as Status;
+use App\Helpers\Purchasable;
+use App\Helpers\Subscribable;
+use App\Helpers\Tippable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Events\Dispatchable;
 
-class ProcessSegPayWebhook  implements ShouldQueue
+class ProcessSegPayWebhook implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable,
+    InteractsWithQueue,
+    Queueable,
+    SerializesModels,
+    FormatMoney;
 
     /**
      * Webhook instance
@@ -46,6 +62,8 @@ class ProcessSegPayWebhook  implements ShouldQueue
      */
     public function handle()
     {
+        Log::debug("Processing webhook {$this->webhook->id}");
+
         // Lock webhook so other jobs don't interfere
         DB::transaction(function () {
             $webhook = Webhook::lockForUpdate()->find($this->webhook->id);
@@ -54,7 +72,7 @@ class ProcessSegPayWebhook  implements ShouldQueue
             }
             try {
                 $transaction = new Transaction($webhook->body);
-                switch ($transaction->action) {
+                switch (Str::lower($transaction->action)) {
                     /** Inquiry */
                     case Action::PROBE:
                         $this->handleProbe($transaction);
@@ -158,10 +176,19 @@ class ProcessSegPayWebhook  implements ShouldQueue
      */
     private function handleAuth($transaction)
     {
-        if ($transaction->transactionType === TransactionType::SALE) {
+        if (Str::lower($transaction->transactionType) === TransactionType::SALE) {
             // Check for reference_id
             if (isset($transaction->reference_id)) {
                 $segpayCall = SegpayCall::find($transaction->reference_id);
+                $item = $segpayCall->resource;
+            } else {
+                if ($transaction->item_type === PaymentTypeEnum::PURCHASE) {
+                    $item = Purchasable::getPurchasableItem($transaction->item_id);
+                } else if ($transaction->item_type === PaymentTypeEnum::TIP) {
+                    $item = Tippable::getTippableItem($transaction->item_id);
+                } else if ($transaction->item_type === PaymentTypeEnum::SUBSCRIPTION) {
+                    $item = Subscribable::getSubscribableItem($transaction->item_id);
+                }
             }
 
 
@@ -172,18 +199,54 @@ class ProcessSegPayWebhook  implements ShouldQueue
                 $card = SegpayCard::createFromTransaction($transaction);
             }
 
-            // Create Access to resource if necessary
+            // Translate decimal price from segpay back to money type
+            $price = $this->parseMoneyDecimal($transaction->price, $transaction->currencyCode);
 
-            // Move to user internal account
-            $buyer = $card->getOwner()->first();
-            $card->account->moveToInternal($transaction->price);
+            // -- Purchase -- //
+            if ($transaction->item_type === PaymentTypeEnum::PURCHASE) {
+                try {
+                    $card->account->purchase($item, $price);
+                } catch (Exception $e) {
+                    Log::warning('Purchase Failed to process', ['e' => $e->__toString()]);
+                    PurchaseFailed::dispatch($item, $card->account);
+                }
+            }
 
-            // Move to resource internal account
+            // -- Tip -- //
+            if ($transaction->item_type === PaymentTypeEnum::TIP) {
+                try {
+                    $card->account->tip($item, $price, ['message' => $user_message ?? '']);
+                } catch (Exception $e) {
+                    Log::warning('Tip Failed to process', ['e' => $e->__toString()]);
+                    TipFailed::dispatch($item, $card->account);
+                }
+            }
+
+            // -- Subscription -- //
+            if ($transaction->item_type === PaymentTypeEnum::SUBSCRIPTION) {
+                if (Str::lower($transaction->stage) === StageEnum::INITIAL) {
+                    try {
+                        $card->account->createSubscription($item, $price, [
+                            'manual_charge' => false,
+                        ]);
+                        ItemSubscribed::dispatch($item, $this->account->owner);
+                    } catch (Exception $e) {
+                        Log::warning('Subscription Failed to be created', ['e' => $e->__toString()]);
+                        SubscriptionFailed::dispatch($this->item, $this->account);
+                    }
+                } else if (
+                    Str::lower($transaction->stage) === StageEnum::REBILL
+                    || Str::lower($transaction->stage) === StageEnum::CONVERSION
+                ) {
+                    // TODO: Update subscription
+                }
+
+            }
 
         } else if ($transaction->transactionType === TransactionType::CHARGE) {
-            // Chargeback
+            // TODO: Chargeback
         } else if ($transaction->transactionType === TransactionType::CREDIT) {
-            // Refund
+            // TODO: Refund
         }
     }
 

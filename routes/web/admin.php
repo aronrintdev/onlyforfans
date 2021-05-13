@@ -95,6 +95,10 @@ Route::group(['prefix' => '/admin', 'middleware' => ['auth', 'role:admin|super-a
     //Route::get('/themes', 'AdminController@themes');
     //Route::get('/change-theme/{name}', 'AdminController@changeTheme');
 
+
+    /* ------------------------------ Webhooks ------------------------------ */
+    Route::apiResource('webhooks', 'Admin\WebhooksController', ['only' => ['index']]);
+
 /*
     Route::group(['prefix' => '/users'], function () {
         Route::get('/', 'AdminController@showUsers')

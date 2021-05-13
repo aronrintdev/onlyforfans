@@ -213,8 +213,11 @@ export default {
               pricePointId: null,
               currencyCode: this.currency,
             },
-            item_type: this.type,
-            item_id: this.value.id,
+            userData: {
+              item_type: this.type,
+              item_id: this.value.id,
+              user_id: this.session_user.id,
+            },
           }
           console.log({ data })
           window.segpay.sdk.completePayment(data, (result) => {

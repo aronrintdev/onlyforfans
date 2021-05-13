@@ -22,6 +22,7 @@ class Kernel extends ConsoleKernel
         \App\Console\Commands\UpdateMediafilesNullResource::class,
         \App\Console\Commands\UpdateSlugs::class,
         \App\Console\Commands\SendScheduleMessages::class,
+        \App\Console\Commands\WebhooksDispatch::class,
     ];
 
     /**

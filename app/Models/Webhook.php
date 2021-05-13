@@ -36,11 +36,17 @@ class Webhook extends Model
 
     protected $forceCombV4Uuid = true;
 
+    protected $guarded = [];
+
     /** Property Casts */
     protected $casts = [
         'headers' => 'encrypted:collection', // Encrypting in case of sensitive information
         'body'    => 'encrypted:collection', // Encrypting in case of sensitive information
         'notes'   => 'encrypted:collection', // Encrypting in case of sensitive information
+    ];
+
+    protected $dates = [
+        'handled_at',
     ];
 
     /**
@@ -79,6 +85,7 @@ class Webhook extends Model
             'headers' => $request->headers->all(),
             'verified' => false,
             'body' => $request->all(),
+            'notes' => [],
             'status' => Status::UNHANDLED,
         ]);
 
@@ -105,7 +112,7 @@ class Webhook extends Model
             }
         } catch (Exception $e) {
             $webhook->status = Status::ERROR;
-            $webhook->notes['error'] = $e->getMessage();
+            $webhook->notes = ['error' => $e->getMessage()];
             $webhook->save();
             return response('error', 500);
         }
@@ -125,23 +132,20 @@ class Webhook extends Model
      */
     public function verifySegPay(Request $request): bool
     {
-        $validator = Validator::make($request->all(), [
-            'username' => 'required',
-            'password' => 'required',
-        ]);
-
-        if ($validator->fails()) {
+        if ($request->hasHeader('php-auth-user') === false || $request->hasHeader('php-auth-pw') === false) {
             Log::debug('Segpay Webhook Rejected, no username or password provided');
-            $this->notes['rejected'] = 'No username or password provided';
+            $this->notes = ['rejected' => 'No username or password provided' ];
+            $this->save();
             return false;
         }
 
         if (
-            $request->username !== Config::get('segpay.webhook.username')
-            || $request->password !== Config::get('segpay.webhook.password')
+            $request->header('php-auth-user') !== Config::get('segpay.webhook.username')
+            || $request->header('php-auth-pw') !== Config::get('segpay.webhook.password')
         ) {
             Log::debug('Segpay Webhook Rejected, incorrect username and password');
-            $this->notes['rejected'] = 'Incorrect username and password';
+            $this->notes = ['rejected' => 'Incorrect username and password'];
+            $this->save();
             return false;
         }
         return true;

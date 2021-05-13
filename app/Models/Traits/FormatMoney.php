@@ -3,6 +3,7 @@
 namespace App\Models\Traits;
 
 use Money\Money;
+use Money\Currency;
 use NumberFormatter;
 use Illuminate\Support\Facades\App;
 use Money\Currencies\ISOCurrencies;
@@ -10,6 +11,7 @@ use Money\Currencies\BitcoinCurrencies;
 use Money\Formatter\IntlMoneyFormatter;
 use Money\Formatter\BitcoinMoneyFormatter;
 use Money\Formatter\AggregateMoneyFormatter;
+use Money\Parser\IntlLocalizedDecimalParser;
 
 trait FormatMoney
 {
@@ -39,5 +41,14 @@ trait FormatMoney
         $numberFormatter = new NumberFormatter(App::currentLocale(), NumberFormatter::DECIMAL);
         $moneyFormatter = new IntlMoneyFormatter($numberFormatter, $currencies);
         return $moneyFormatter->format($money);
+    }
+
+    public static function parseMoneyDecimal($value, $currency): Money
+    {
+        $currencies = new ISOCurrencies();
+        $numberFormatter = new NumberFormatter(App::currentLocale(), NumberFormatter::CURRENCY);
+        $moneyParser = new IntlLocalizedDecimalParser($numberFormatter, $currencies);
+
+        return $moneyParser->parse($value, new Currency($currency));
     }
 }
