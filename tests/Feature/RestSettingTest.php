@@ -188,7 +188,6 @@ class RestSettingTest extends TestCase
     /**
      *  @group settings
      *  @group regression
-     *  @group here0513
      */
     public function test_can_batch_edit_settings_profile()
     {
@@ -238,7 +237,6 @@ class RestSettingTest extends TestCase
     /**
      *  @group settings
      *  @group regression
-     *  @group here0513
      */
     public function test_can_batch_validate_settings_profile()
     {
