@@ -99,6 +99,9 @@ Route::group(['prefix' => '/admin', 'middleware' => ['auth', 'role:admin|super-a
     /* ------------------------------ Webhooks ------------------------------ */
     Route::apiResource('webhooks', 'Admin\WebhooksController', ['only' => ['index']]);
 
+    /* ----------------------------- SegpayCalls ---------------------------- */
+    Route::apiResource('segpay-calls', 'Admin\SegpayCallsController', ['only' => ['index']]);
+
 /*
     Route::group(['prefix' => '/users'], function () {
         Route::get('/', 'AdminController@showUsers')

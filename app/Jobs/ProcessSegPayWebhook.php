@@ -31,6 +31,7 @@ use App\Apis\Segpay\Enums\TransactionType;
 use App\Enums\WebhookStatusEnum as Status;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use App\Apis\Segpay\Enums\Stage as StageEnum;
+use App\Models\Subscription;
 use Illuminate\Foundation\Events\Dispatchable;
 
 class ProcessSegPayWebhook implements ShouldQueue
@@ -213,7 +214,10 @@ class ProcessSegPayWebhook implements ShouldQueue
 
 
             // Check if user has CC account already
-            $card = SegpayCard::findByToken($transaction->purchaseId);
+            if (isset($transaction->octoken)) {
+                $card = SegpayCard::findByToken($transaction->octoken);
+                Log::debug('Processing from known card', [ 'card' => $card->id ]);
+            }
             if (!isset($card)) {
                 // Create new card and account for this.
                 $card = SegpayCard::createFromTransaction($transaction);
@@ -246,21 +250,28 @@ class ProcessSegPayWebhook implements ShouldQueue
             if ($transaction->item_type === PaymentTypeEnum::SUBSCRIPTION) {
                 if (Str::lower($transaction->stage) === StageEnum::INITIAL) {
                     try {
-                        $card->account->createSubscription($item, $price, [
+                        $subscription = $card->account->createSubscription($item, $price, [
                             'manual_charge' => false,
                         ]);
-                        ItemSubscribed::dispatch($item, $this->account->owner);
+                        $subscription->custom_attributes = [ 'segpay_reference' => $transaction->transactionId ];
+                        $subscription->process();
+
+                        ItemSubscribed::dispatch($item, $card->account->owner);
                     } catch (Exception $e) {
                         Log::warning('Subscription Failed to be created', ['e' => $e->__toString()]);
-                        SubscriptionFailed::dispatch($this->item, $this->account);
+                        SubscriptionFailed::dispatch($item, $card->account);
                     }
                 } else if (
                     Str::lower($transaction->stage) === StageEnum::REBILL
                     || Str::lower($transaction->stage) === StageEnum::CONVERSION
                 ) {
-                    // TODO: Update subscription
+                    $subscription = Subscription::where('custom_attributes->segpay_reference', $transaction->relatedTransactionId)->first();
+                    if (isset($subscription)) {
+                        $subscription->process();
+                    } else {
+                        // Can't Find subscription
+                    }
                 }
-
             }
 
         } else if ($transaction->transactionType === TransactionType::CHARGE) {

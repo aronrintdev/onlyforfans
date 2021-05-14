@@ -34,6 +34,7 @@ class AchAccount extends Model
 
     /* -------------------------- Model Properties -------------------------- */
     #region Model Properties
+    protected $connection = 'financial';
     protected $table = 'ach_accounts';
 
     protected $guarded = [];

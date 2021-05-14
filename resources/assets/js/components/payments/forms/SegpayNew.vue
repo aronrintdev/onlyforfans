@@ -82,11 +82,25 @@
         </b-row>
 
         <b-row>
+          <b-col cols="8">
+            <b-form-group :label="$t('nickname')">
+              <b-form-input v-model="form.nickname" />
+            </b-form-group>
+          </b-col>
+          <b-col cols="4" class="d-flex align-items-center">
+            <b-form-checkbox v-model="form.card_is_default">
+              {{ $t('isDefault') }}
+            </b-form-checkbox>
+          </b-col>
+        </b-row>
+
+        <b-row>
           <b-col cols="12">
             <b-btn block variant="success" @click="onComplete">
               {{ $t('Finish') }}
             </b-btn>
           </b-col>
+
         </b-row>
       </div>
     </b-skeleton-wrapper>
@@ -143,6 +157,8 @@ export default {
         expirationMonth: '',
         cvv: '',
       },
+      nickname: '',
+      card_is_default: true,
     },
 
     masks: {
@@ -217,6 +233,8 @@ export default {
               item_type: this.type,
               item_id: this.value.id,
               user_id: this.session_user.id,
+              nickname: this.form.nickname,
+              card_is_default: this.form.card_is_default ? '1' : '0',
             },
           }
           console.log({ data })
@@ -336,6 +354,8 @@ export default {
     "Postal Code": "Zip Code",
     "Finish": "Complete Transaction",
     "An Error Has Occurred": "An Error Has Occurred",
+    "nickname": "Save card name as",
+    "isDefault": "Save as default payment method"
   }
 }
 </i18n>

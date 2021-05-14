@@ -76,6 +76,7 @@ class Account extends Model implements Ownable
         HasFactory,
         SoftDeletes;
 
+    protected $connection = 'financial';
     protected $table = 'accounts';
 
     protected $guarded = [
@@ -584,7 +585,7 @@ class Account extends Model implements Ownable
         Subscribable $subscribable,
         $payment,
         $options = []
-    ): Collection
+    ): Subscription
     {
         // Check if already subscribed.
         if (
@@ -604,7 +605,7 @@ class Account extends Model implements Ownable
         }
 
         // Create Subscription Model
-        $subscription = Subscription::create([
+        return Subscription::create([
             'subscribable_id'   => $subscribable->getKey(),
             'subscribable_type' => $subscribable->getMorphString(),
             'user_id'           => $this->getOwner()->first()->getKey(),
@@ -618,23 +619,6 @@ class Account extends Model implements Ownable
             'access_level'      => $options['access_level'] ?? ShareableAccessLevelEnum::PREMIUM,
             'custom_attributes' => $options['custom_attributes'] ?? null,
             'metadata'          => $options['metadata'] ?? null,
-        ]);
-
-        // Make transaction
-        $transactions = $subscription->process();
-
-        if ($transactions) {
-            $subscribable->grantAccess(
-                $this->getOwner()->first(),
-                $options['access_level'] ?? ShareableAccessLevelEnum::PREMIUM,
-                $options['access_cattrs'] ?? [],
-                $options['access_meta'] ?? [],
-            );
-        }
-
-        return new Collection([
-            'subscription' => $subscription,
-            'transactions' => $transactions,
         ]);
     }
 

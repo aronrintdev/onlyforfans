@@ -198,6 +198,7 @@ class SegPayController extends Controller
             'dynamicDescription' => urlencode($description),
             'dynamicInitialAmount' => $item->formatMoneyDecimal($price),
         ];
+        $packageId = Config::get('segpay.packageId');
 
         if ($request->type === PaymentTypeEnum::SUBSCRIPTION) {
             $query = array_merge($query, [
@@ -205,6 +206,7 @@ class SegPayController extends Controller
                 'dynamicRecurringAmount'         => $item->formatMoneyDecimal($price),
                 'dynamicRecurringDurationInDays' => 30,
             ]);
+            $packageId = Config::get('segpay.dynamicPackageId');
         }
 
         $client = new Client();
@@ -218,7 +220,7 @@ class SegPayController extends Controller
             'id' => $segpay['id'],
             'pageId' => $segpay['pageId'],
             'expirationDateTime' => $segpay['expirationDateTime'],
-            'packageId' => Config::get('segpay.packageId'),
+            'packageId' => $packageId,
         ];
     }
 
@@ -256,11 +258,11 @@ class SegPayController extends Controller
         }
 
         if ($request->type === PaymentTypeEnum::PURCHASE) {
-            // TODO: Add purchase
+            $segpayCall = SegpayCall::confirmPurchase($account, $price, $item);
         }
 
         if ($request->type === PaymentTypeEnum::TIP) {
-            // TODO: Add tip
+            $segpayCall = SegpayCall::confirmTip($account, $price, $item);
         }
 
         if ($request->type === PaymentTypeEnum::SUBSCRIPTION) {
@@ -268,9 +270,9 @@ class SegPayController extends Controller
 
             // Verify subscription has not already been created
             if (
-                Auth::user()->subscriptions
+                Subscription::where('user_id', Auth::user()->getKey())
                     ->where('subscribable_id', $item->getKey())
-                    ->where('canceled', false)
+                    ->whereNotNull('canceled_at')
                     ->count() > 0
             ) {
                 abort(400, 'Already have subscription');
@@ -278,7 +280,7 @@ class SegPayController extends Controller
 
             // Verify not resubscribing within waiting period
             if (
-                Auth::user()->subscriptions
+                Subscription::where('user_id', Auth::user()->getKey())
                     ->where('subscribable_id', $item->getKey())
                     ->canceled()->where(
                         'canceled_at',
@@ -299,11 +301,12 @@ class SegPayController extends Controller
 
             // Send Segpay One click call
             $segpayCall = SegpayCall::confirmSubscription($account, $price, $subscription);
-            if(isset($segpayCall->failed_at)) {
-                abort(500, 'Error Processing Payment');
-            }
-            return;
         }
+
+        if (isset($segpayCall->failed_at)) {
+            abort(500, 'Error Processing Payment');
+        }
+        return;
     }
 
     /**
