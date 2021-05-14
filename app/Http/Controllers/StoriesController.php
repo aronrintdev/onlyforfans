@@ -88,7 +88,6 @@ class StoriesController extends AppBaseController
 
         $vrules = [
             'attrs' => 'required',
-            //'attrs.stype' => 'required|in:text,photo',
             'attrs.stype' => 'in:'.StoryTypeEnum::getKeysCsv(), // %TODO : apply elsewhere
             //'timeline_id' => 'required|uuid|exists:timelines',
         ];
