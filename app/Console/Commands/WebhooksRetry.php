@@ -8,21 +8,21 @@ use App\Models\Webhook;
 use Illuminate\Bus\Dispatcher;
 use Illuminate\Console\Command;
 
-class WebhooksDispatch extends Command
+class WebhooksRetry extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'webhooks:dispatch';
+    protected $signature = 'webhooks:retry {--id=}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Dispatches jobs for unhandled webhooks';
+    protected $description = 'Retries job for passed in webhook';
 
     /**
      * Create a new command instance.
@@ -41,7 +41,9 @@ class WebhooksDispatch extends Command
      */
     public function handle()
     {
-        Webhook::where('status', WebhookStatusEnum::UNHANDLED)->where('type', 'SegPay')->each(function(Webhook $webhook) {
+        Webhook::where('id', $this->option('id'))->where('type', 'SegPay')->each(function (Webhook $webhook) {
+            $webhook->status = WebhookStatusEnum::UNHANDLED;
+            $webhook->save();
             $this->info("Dispatching job for segpay webhook {$webhook->id}");
             app(Dispatcher::class)->dispatch(new ProcessSegPayWebhook($webhook));
             // ProcessSegPayWebhook::dispatch($webhook);

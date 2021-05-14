@@ -7,6 +7,7 @@ use Exception;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Bus\Dispatcher;
 use App\Models\Traits\UsesUuid;
 use App\Jobs\ProcessSegPayWebhook;
 use App\Enums\WebhookTypeEnum as Type;
@@ -119,7 +120,7 @@ class Webhook extends Model
 
         $webhook->save();
 
-        ProcessSegPayWebhook::dispatch($webhook);
+        app(Dispatcher::class)->dispatch(new ProcessSegPayWebhook($webhook));
 
         return response('ok', 200); // 200 response
     }

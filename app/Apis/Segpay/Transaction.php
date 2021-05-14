@@ -3,15 +3,13 @@
 namespace App\Apis\Segpay;
 
 use Illuminate\Support\Str;
-use Illuminate\Database\Eloquent\Concerns\HasAttributes;
-
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * Model of a SegPay transaction
  */
-class Transaction
+class Transaction extends Model
 {
-    use HasAttributes;
 
     /** cspell:disable */
     /**
@@ -215,7 +213,7 @@ class Transaction
     /**
      * Fill object
      */
-    public function fill(array $attributes, $fromHook = false)
+    public function fill($attributes, $fromHook = false)
     {
         foreach($attributes as $key => $value) {
             if (isset($this->hookMap[$key])) {

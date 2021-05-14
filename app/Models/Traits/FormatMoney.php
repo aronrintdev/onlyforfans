@@ -7,6 +7,7 @@ use Money\Currency;
 use NumberFormatter;
 use Illuminate\Support\Facades\App;
 use Money\Currencies\ISOCurrencies;
+use Money\Parser\DecimalMoneyParser;
 use Money\Currencies\BitcoinCurrencies;
 use Money\Formatter\IntlMoneyFormatter;
 use Money\Formatter\BitcoinMoneyFormatter;
@@ -23,7 +24,7 @@ trait FormatMoney
     public static function formatMoney(Money $money): string
     {
         $currencies = new ISOCurrencies();
-        $numberFormatter = new NumberFormatter(App::currentLocale(), NumberFormatter::CURRENCY);
+        $numberFormatter = new NumberFormatter(App::currentLocale() ?? 'en_US', NumberFormatter::CURRENCY);
         $intlFormatter = new IntlMoneyFormatter($numberFormatter, $currencies);
         $bitcoinFormatter = new BitcoinMoneyFormatter(7, new BitcoinCurrencies());
 
@@ -38,7 +39,7 @@ trait FormatMoney
     public static function formatMoneyDecimal(Money $money): string
     {
         $currencies = new ISOCurrencies();
-        $numberFormatter = new NumberFormatter(App::currentLocale(), NumberFormatter::DECIMAL);
+        $numberFormatter = new NumberFormatter(App::currentLocale() ?? 'en_US', NumberFormatter::DECIMAL);
         $moneyFormatter = new IntlMoneyFormatter($numberFormatter, $currencies);
         return $moneyFormatter->format($money);
     }
@@ -46,8 +47,12 @@ trait FormatMoney
     public static function parseMoneyDecimal($value, $currency): Money
     {
         $currencies = new ISOCurrencies();
-        $numberFormatter = new NumberFormatter(App::currentLocale(), NumberFormatter::CURRENCY);
-        $moneyParser = new IntlLocalizedDecimalParser($numberFormatter, $currencies);
+        // $numberFormatter = new NumberFormatter(App::currentLocale() ?? 'en_US', NumberFormatter::CURRENCY);
+        $moneyParser = new DecimalMoneyParser($currencies);
+
+        if (is_numeric($value)) {
+            $value = strval($value);
+        }
 
         return $moneyParser->parse($value, new Currency($currency));
     }

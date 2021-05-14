@@ -3,20 +3,25 @@
 namespace App\Jobs;
 
 use Exception;
+use Throwable;
 use Money\MoneyParser;
 use App\Models\Webhook;
 use App\Events\TipFailed;
+use App\Helpers\Tippable;
 use Illuminate\Support\Str;
+use App\Helpers\Purchasable;
+use App\Helpers\Subscribable;
 use Illuminate\Bus\Queueable;
 use App\Enums\PaymentTypeEnum;
 use App\Events\ItemSubscribed;
 use App\Events\PurchaseFailed;
-use App\Apis\Segpay\Enums\Stage as StageEnum;
+use Illuminate\Support\Carbon;
 use App\Apis\Segpay\Transaction;
 use App\Apis\Segpay\Enums\Action;
 use App\Events\SubscriptionFailed;
 use App\Models\Traits\FormatMoney;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
 use App\Models\Financial\SegpayCall;
 use App\Models\Financial\SegpayCard;
@@ -24,10 +29,8 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use App\Apis\Segpay\Enums\TransactionType;
 use App\Enums\WebhookStatusEnum as Status;
-use App\Helpers\Purchasable;
-use App\Helpers\Subscribable;
-use App\Helpers\Tippable;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use App\Apis\Segpay\Enums\Stage as StageEnum;
 use Illuminate\Foundation\Events\Dispatchable;
 
 class ProcessSegPayWebhook implements ShouldQueue
@@ -103,13 +106,30 @@ class ProcessSegPayWebhook implements ShouldQueue
                 }
             } catch (Exception $e) {
                 $webhook->status = Status::ERROR;
+                $webhook->handled_at = Carbon::now();
                 $webhook->notes = 'Error on execution: ' . $e->getMessage();
                 $webhook->save();
+                Log::error('Error on ProcessSegPayWebhook', [ 'message' => $e->getMessage(), 'stacktrace' => $e->getTraceAsString() ]);
                 return;
             }
             $webhook->status = Status::HANDLED;
+            $webhook->handled_at = Carbon::now();
             $webhook->save();
         });
+    }
+
+    /**
+     * Handle a job failure.
+     *
+     * @param  \Throwable  $exception
+     * @return void
+     */
+    public function failed(Throwable $exception)
+    {
+        Log::error('ProcessSegPayWebhook Failed', [
+            'message' => $exception->getMessage(),
+            'stacktrace' => $exception->getTraceAsString()
+        ]);
     }
 
     /**
