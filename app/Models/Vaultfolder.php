@@ -1,16 +1,15 @@
 <?php
-
 namespace App\Models;
 
 use Exception;
-use App\Models\Traits\SluggableTraits;
+use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Interfaces\Ownable;
 use App\Interfaces\Guidable;
 use App\Models\Traits\UsesUuid;
 use App\Traits\OwnableFunctions;
 use Cviebrock\EloquentSluggable\Sluggable;
-use Illuminate\Support\Collection;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\Traits\SluggableTraits;
 
 class Vaultfolder extends BaseModel implements Guidable, Ownable
 {
@@ -19,7 +18,6 @@ class Vaultfolder extends BaseModel implements Guidable, Ownable
     use HasFactory;
     use OwnableFunctions;
     use Sluggable;
-    use SluggableTraits;
 
     protected $table = 'vaultfolders';
 
@@ -130,14 +128,16 @@ class Vaultfolder extends BaseModel implements Guidable, Ownable
 
     public function sluggable(): array
     {
-        return ['slug' => [
-            'source' => ['name'],
-        ]];
-    }
+        return [
+            'slug' => [
+                'source' => ['name'],
+                /*
+                'method' => static function(string $string, string $separator): string {
+                    return strtolower(preg_replace('/[^a-z]+/i', $separator, $string));
+                },
+                 */
+            ]];
 
-    public function sluggableFields(): array
-    {
-        return ['name'];
     }
 
     // %%% --- Overrides in Model Traits (via BaseModel) ---
@@ -146,8 +146,8 @@ class Vaultfolder extends BaseModel implements Guidable, Ownable
     {
         $key = trim($key);
         switch ($key) {
-            default:
-                $key =  parent::_renderFieldKey($key);
+        default:
+        $key =  parent::_renderFieldKey($key);
         }
         return $key;
     }
@@ -156,8 +156,8 @@ class Vaultfolder extends BaseModel implements Guidable, Ownable
     {
         $key = trim($field);
         switch ($key) {
-            default:
-                return parent::renderField($field);
+        default:
+        return parent::renderField($field);
         }
     }
 

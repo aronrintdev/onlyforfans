@@ -108,7 +108,8 @@ class VaultfoldersController extends AppBaseController
     {
         $vrules = [
             'vault_id' => 'required|uuid|exists:vaults,id',
-            'vfname' => 'required|string',
+            'vfname' => 'required|alpha_dash|min:1',
+            // %TODO: prevent new folders on same level with duplicate names
         ];
 
         $attrs = [];
