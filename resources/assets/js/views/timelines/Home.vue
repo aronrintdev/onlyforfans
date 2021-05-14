@@ -15,7 +15,7 @@
             </article>
           </section>
 
-          <section class="row">
+          <section class="row" v-if="activeTab === 0">
             <main :class="mainClass">
               <CreatePost :session_user="session_user" :timeline="timeline" />
               <PostFeed :session_user="session_user" :timeline="timeline" :is_homefeed="true" />
@@ -34,6 +34,7 @@
             <main :class="mainClass">
               <CreatePost :session_user="session_user" :timeline="timeline" />
               <PostFeed
+                :key="activeTab"
                 :session_user="session_user"
                 :timeline="timeline"
                 :is_homefeed="true"
@@ -98,7 +99,7 @@ export default {
 
   data: () => ({
     isGridLayout: false, // %FIXME: can this be set in created() so we have 1 source of truth ? (see PostFeed)
-    activeTab: false,
+    activeTab: 0,
   }),
 
   created() {
