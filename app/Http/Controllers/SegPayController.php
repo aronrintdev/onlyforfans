@@ -179,8 +179,10 @@ class SegPayController extends Controller
         $price = MoneyCast::toMoney($request->price, $request->currency);
 
         // Validate Price
-        if (!$item->verifyPrice($price)) {
-            abort(400, 'Invalid Price');
+        if ($request->type !== PaymentTypeEnum::TIP) {
+            if (!$item->verifyPrice($price)) {
+                abort(400, 'Invalid Price');
+            }
         }
 
         // If environment variable is set, fake results
@@ -247,8 +249,10 @@ class SegPayController extends Controller
         }
 
         $price = MoneyCast::toMoney($request->price, $request->currency);
-        if (!$item->verifyPrice($price)) {
-            abort(400, 'Invalid Price');
+        if ($request->type !== PaymentTypeEnum::TIP) {
+            if (!$item->verifyPrice($price)) {
+                abort(400, 'Invalid Price');
+            }
         }
 
         $account = Account::with('resource')->find($request->method);
@@ -335,8 +339,10 @@ class SegPayController extends Controller
         }
 
         // Validate Price
-        if (!$item->verifyPrice($request->price)) {
-            abort(400, 'Invalid Price');
+        if ($request->type !== PaymentTypeEnum::TIP) {
+            if (!$item->verifyPrice($request->price)) {
+                abort(400, 'Invalid Price');
+            }
         }
 
         // Create Card
@@ -393,8 +399,10 @@ class SegPayController extends Controller
         }
 
         // Validate Price
-        if (!$item->verifyPrice($request->price)) {
-            abort(400, 'Invalid Price');
+        if ($request->type !== PaymentTypeEnum::TIP) {
+            if (!$item->verifyPrice($request->price)) {
+                abort(400, 'Invalid Price');
+            }
         }
 
         $account = Account::find($request->method);
