@@ -16,6 +16,20 @@
             </section>
           </template>
           <div>
+            <div class="scheduled-message-head" v-if="postScheduleDate">
+              <div>
+                <svg class="icon-schedule" viewBox="0 0 24 24">
+                  <path d="M19 3h-1V2a1 1 0 0 0-2 0v1H8V2a1 1 0 0 0-2 0v1H5a2 2 0 0 0-2 2v13a3 3 0 0 0 3 3h12a3 3 0 0 0 3-3V5a2 2 0 0 0-2-2zm0 15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V9h14zm0-11H5V5h14zM9.79 17.21a1 1 0 0 0 1.42 0l5-5a1 1 0 0 0 .29-.71 1 1 0 0 0-1-1 1 1 0 0 0-.71.29l-4.29 4.3-1.29-1.3a1 1 0 0 0-.71-.29 1 1 0 0 0-1 1 1 1 0 0 0 .29.71z"></path>
+                </svg> 
+                <span> Scheduled for&nbsp;</span>
+                <strong>{{ moment(postScheduleDate).local().format('MMM DD, h:mm a') }}</strong>
+              </div>
+              <button class="btn close-btn" @click="clearSchedule">
+                <svg class="icon-close" viewBox="0 0 24 24">
+                  <path d="M13.41 12l5.3-5.29A1 1 0 0 0 19 6a1 1 0 0 0-1-1 1 1 0 0 0-.71.29L12 10.59l-5.29-5.3A1 1 0 0 0 6 5a1 1 0 0 0-1 1 1 1 0 0 0 .29.71l5.3 5.29-5.3 5.29A1 1 0 0 0 5 18a1 1 0 0 0 1 1 1 1 0 0 0 .71-.29l5.29-5.3 5.29 5.3A1 1 0 0 0 18 19a1 1 0 0 0 1-1 1 1 0 0 0-.29-.71z"></path>
+                </svg>
+              </button>
+            </div>
             <div v-if="postType === 'price'" class="w-100">
               <PriceSelector v-if="postType === 'price'" v-model="price" class="mb-3" />
               <hr />
@@ -88,7 +102,7 @@
           ></b-form-timepicker>
         </div>
         <div class="d-flex align-items-center justify-content-end action-btns">
-          <button class="link-btn" @click="clearSchedule">Cancel</button>
+          <button class="link-btn" @click="closeSchedulePicker">Cancel</button>
           <button
             class="link-btn"
             @click="applySchedule"
@@ -102,6 +116,7 @@
 
 <script>
 import Vuex from 'vuex';
+import moment from 'moment';
 //import { eventBus } from '@/app';
 import vue2Dropzone from 'vue2-dropzone';
 import 'vue2-dropzone/dist/vue2Dropzone.min.css';
@@ -123,7 +138,7 @@ export default {
   },
 
   data: () => ({
-
+    moment,
     description: '',
     newPostId: null,
     selectedMedia: null, // 'pic',
@@ -157,6 +172,7 @@ export default {
       },
     },
     postSchedule: {},
+    postScheduleDate: null,
   }),
 
   methods: {
@@ -167,7 +183,8 @@ export default {
       this.newPostId = null;
       this.selectedMedia = 'pic';
       this.ptype = 'free';
-      this.price = 0
+      this.price = 0;
+      this.postScheduleDate = null;
     },
 
     async savePost() {
@@ -178,20 +195,25 @@ export default {
         type: this.postType,
         price: this.price,
         currency: this.currency,
+        schedule_datetime: moment(this.postScheduleDate).unix(),
       });
       this.$log.debug('savePost', { response });
       const json = response.data;
-      this.newPostId = json.post.id;
+      if (json.post) {
+        this.newPostId = json.post.id;
 
-      const queued = this.$refs.myVueDropzone.getQueuedFiles();
+        const queued = this.$refs.myVueDropzone.getQueuedFiles();
 
-      // (2) upload & attach the mediafiles
-      // %FIXME: if this fails, don't we have an orphaned post (?)
-      if ( queued.length ) {
-        this.$refs.myVueDropzone.processQueue(); // this will call dispatch after files uploaded
+        // (2) upload & attach the mediafiles
+        // %FIXME: if this fails, don't we have an orphaned post (?)
+        if ( queued.length ) {
+          this.$refs.myVueDropzone.processQueue(); // this will call dispatch after files uploaded
+        } else {
+          this.$log.debug('savePost: dispatching unshiftPostToTimeline...');
+          this.$store.dispatch('unshiftPostToTimeline', { newPostId: this.newPostId });
+          this.resetForm();
+        }
       } else {
-        this.$log.debug('savePost: dispatching unshiftPostToTimeline...');
-        this.$store.dispatch('unshiftPostToTimeline', { newPostId: this.newPostId });
         this.resetForm();
       }
     },
@@ -259,11 +281,15 @@ export default {
       this.postSchedule = { ...this.postSchedule };
     },
     clearSchedule() {
+      this.postScheduleDate = undefined;
+    },
+    closeSchedulePicker() {
       this.postSchedule = {};
       this.$refs.schedule_picker_modal.hide();
     },
     applySchedule() {
-      this.clearSchedule();
+      this.postScheduleDate = moment(`${this.postSchedule.date} ${this.postSchedule.time}`).utc().valueOf();
+      this.closeSchedulePicker();
     }
   },
 
@@ -294,7 +320,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 /*
 .dropzone, .dropzone * {
 box-sizing: border-box;
@@ -370,5 +396,45 @@ width: 128px;
 
 .b-icon.bi {
   vertical-align: middle;
+}
+.scheduled-message-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 36px !important;
+  padding: 6px;
+  border-radius: 6px;
+  margin: -0.6em 0 0.6em;
+  background: rgba(138,150,163,.12);
+
+  .icon-schedule {
+    fill: #00aff0;
+    margin-right: 6px;
+    width: 22px;
+  }
+  strong {
+    letter-spacing: -0.2px;
+  }
+  & > div {
+    font-size: 13px;
+    flex: 0 1 100%;
+    max-width: 100%;
+    display: flex;
+    align-items: center;
+  }
+  .close-btn {
+    padding: 2px;
+    background: #00aff0;
+    border: none;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .icon-close {
+      fill: #fefefe;
+      width: 18px;
+    }
+  }
 }
 </style>

@@ -535,7 +535,7 @@ class MessageController extends Controller
         $chatThreads = ChatThread::with(['receiver'])
             ->where('sender_id', $sessionUser->id)
             ->whereNotIn('receiver_id', $blockers)
-            ->where('schedule_datetime', '>', date("Y-m-d H:i:s", strtotime(Carbon::now())))
+            ->where('schedule_datetime', '>', Carbon::now('UTC')->timestamp)
             ->get();
 
         $chatThreads->each(function ($chatthread) {

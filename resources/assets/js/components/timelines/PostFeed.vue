@@ -375,8 +375,21 @@ export default {
 
     unshifted_timeline_post (newVal, oldVal) {
       this.$log.debug('PostFeed - watch:unshifted_timeline_post', { newVal, oldVal })
-      this.renderedItems.pop(); // pop the 'oldest' to keep pagination offset correct
-      this.renderedItems.unshift(newVal)
+      if (this.feedType !== 'schedule') {
+        if (!newVal.schedule_datetime) {
+          if (!this.isLastPage && this.renderedItems.length >= 5) {
+            this.renderedItems.pop();
+          }
+          this.renderedItems.unshift(newVal);
+        }
+      } else {
+        if (newVal.schedule_datetime) {
+          if (!this.isLastPage && this.renderedItems.length >= 5) {
+            this.renderedItems.pop();
+          }
+          this.renderedItems.unshift(newVal);
+        }
+      }
     },
 
     feeddata (newVal, oldVal) {

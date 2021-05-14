@@ -118,7 +118,6 @@ export default {
   watch: { },
   methods: {
     changeActiveTab(event) {
-      console.log('-- active tab:', event);
       this.activeTab = event;
     }
   }

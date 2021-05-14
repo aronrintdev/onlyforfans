@@ -331,8 +331,8 @@ class TimelinesController extends AppBaseController
         $query = Post::with('mediafiles', 'user')
             ->withCount(['comments', 'likes'])
             ->where('active', 1)
-            ->where('schedule_datetime', '>', date("Y-m-d H:i:s", strtotime(Carbon::now())));
-        $query->homeTimeline()->sort( $request->input('sortBy', 'default') );
+            ->where('schedule_datetime', '>', Carbon::now('UTC')->timestamp)
+            ->orderBy('created_at', 'desc');
         // %NOTE: we could also just remove post-query, as the feed will auto-update to fill length of page (?)
         $data = $query->paginate( $request->input('take', env('MAX_POSTS_PER_REQUEST', 10)) );
         return new PostCollection($data);
