@@ -171,7 +171,7 @@ Route::group(['middleware' => ['auth']], function () {
     ]);
     Route::post('/users/avatar', ['uses' => 'UsersController@updateAvatar']);
     Route::post('/users/cover', ['uses' => 'UsersController@updateCover']);
-    Route::resource('users', 'UsersController', [ 'except' => [ 'create', 'edit', ] ]);
+    Route::resource('users', 'UsersController', [ 'except' => [ 'create', 'edit', 'store' ] ]);
 
     // -- vaults:  --
     Route::get('/my-vault', [
