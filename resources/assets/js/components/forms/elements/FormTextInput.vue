@@ -1,7 +1,18 @@
 <template>
-  <b-form-group :id="groupID" label="Full Name" :label-for="ikey">
-    <b-form-input v-model="dvalue" :state="isValid" @update="doUpdate()" placeholder="Enter first name" :disabled="disabled"></b-form-input>
-    <b-form-invalid-feedback id="input-live-feedback">{{ vmsg }}</b-form-invalid-feedback>
+  <b-form-group :id="groupID" :label="label" :label-for="ikey">
+    <b-input-group class="mb-2 mr-sm-2 mb-sm-0">
+      <template v-if="itype==='currency'" #prepend>
+        <b-input-group-text>$</b-input-group-text>
+      </template>
+      <b-form-input 
+        v-model="dvalue" 
+        :state="isValid" 
+        @update="doUpdate()" 
+        :placeholder="placeholder" 
+        :disabled="disabled"
+      ></b-form-input>
+      <b-form-invalid-feedback id="input-live-feedback">{{ vmsg }}</b-form-invalid-feedback>
+    </b-input-group>
   </b-form-group>
 </template>
 
@@ -14,12 +25,15 @@ export default {
     value:  null,
     verrors: null,
     disabled: false,
+    label: '',
+    placeholder: '',
+    itype: { // 'input type' (text, currency, etc)
+      default: 'text',
+      type: String,
+    },
   },
 
   computed: {
-    isLoading() {
-      return !this.session_user || !this.user_settings
-    },
     groupID() {
       return `group-${this.ikey}`
     },
@@ -47,7 +61,6 @@ export default {
 
   methods: {
     doUpdate() {
-      console.log('do update')
       this.dverrors = null
     }
   },
