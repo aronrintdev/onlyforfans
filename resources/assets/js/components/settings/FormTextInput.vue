@@ -1,13 +1,18 @@
 <template>
   <b-form-group :id="groupID" :label="label" :label-for="ikey">
-    <b-form-input 
-      v-model="dvalue" 
-      :state="isValid" 
-      @update="doUpdate()" 
-      :placeholder="placeholder" 
-      :disabled="disabled"
-    ></b-form-input>
-    <b-form-invalid-feedback id="input-live-feedback">{{ vmsg }}</b-form-invalid-feedback>
+    <b-input-group class="mb-2 mr-sm-2 mb-sm-0">
+      <template v-if="itype==='currency'" #prepend>
+        <b-input-group-text>$</b-input-group-text>
+      </template>
+      <b-form-input 
+        v-model="dvalue" 
+        :state="isValid" 
+        @update="doUpdate()" 
+        :placeholder="placeholder" 
+        :disabled="disabled"
+      ></b-form-input>
+      <b-form-invalid-feedback id="input-live-feedback">{{ vmsg }}</b-form-invalid-feedback>
+    </b-input-group>
   </b-form-group>
 </template>
 
@@ -22,6 +27,10 @@ export default {
     disabled: false,
     label: '',
     placeholder: '',
+    itype: { // 'input type' (text, currency, etc)
+      default: 'text',
+      type: String,
+    },
   },
 
   computed: {
@@ -52,7 +61,6 @@ export default {
 
   methods: {
     doUpdate() {
-      console.log('do update')
       this.dverrors = null
     }
   },

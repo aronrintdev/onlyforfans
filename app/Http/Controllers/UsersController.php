@@ -112,6 +112,9 @@ class UsersController extends AppBaseController
         $this->authorize('update', $user);
         $request->validate([
             'subscriptions.price_per_1_months' => 'numeric',
+            'subscriptions.price_per_3_months' => 'numeric',
+            'subscriptions.price_per_6_months' => 'numeric',
+            'subscriptions.price_per_12_months' => 'numeric',
             'city' => 'string|min:2',
             'is_follow_for_free' => 'boolean',
             'blocked' => 'array',

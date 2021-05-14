@@ -6,23 +6,23 @@
         <b-form @submit.prevent="submitGeneral($event)" @reset="onReset">
           <fieldset :disabled="!isEditing.formGeneral">
 
-          <b-row>
-            <b-col>
-              <FormTextInput ikey="firstname" v-model="formGeneral.firstname" label="First Name" :verrors="verrors" />
-            </b-col>
-            <b-col>
-              <FormTextInput ikey="lastname" v-model="formGeneral.lastname" label="Last Name" :verrors="verrors" />
-            </b-col>
-          </b-row>
+            <b-row>
+              <b-col>
+                <FormTextInput ikey="firstname" v-model="formGeneral.firstname" label="First Name" :verrors="verrors" />
+              </b-col>
+              <b-col>
+                <FormTextInput ikey="lastname" v-model="formGeneral.lastname" label="Last Name" :verrors="verrors" />
+              </b-col>
+            </b-row>
 
-          <b-row>
-            <b-col>
-              <FormTextInput ikey="username" v-model="formGeneral.username" label="Username" :verrors="verrors" :disabled="true"/>
-            </b-col>
-            <b-col>
-              <FormTextInput ikey="email" v-model="formGeneral.email" label="E-mail" :verrors="verrors" />
-            </b-col>
-          </b-row>
+            <b-row>
+              <b-col>
+                <FormTextInput ikey="username" v-model="formGeneral.username" label="Username" :verrors="verrors" :disabled="true"/>
+              </b-col>
+              <b-col>
+                <FormTextInput ikey="email" v-model="formGeneral.email" label="E-mail" :verrors="verrors" />
+              </b-col>
+            </b-row>
           </fieldset>
 
           <b-row class="mt-3">
@@ -46,37 +46,25 @@
         <b-form @submit.prevent="submitSubscriptions($event)" @reset="onReset">
           <fieldset :disabled="!isEditing.formSubscriptions">
 
-          <b-row>
-            <b-col>
-              <FormCurrencyInput ikey="subscriptions.price_per_1_months" v-model="formSubscriptions.subscriptions.price_per_1_months" label="Subscription Price per Month" :verrors="verrors" />
-              <b-form-group id="group-price_per_3_months" label="Subscription Price per 3 Months" label-for="price_per_3_months">
-                <b-input-group prepend="$" class="mb-2 mr-sm-2 mb-sm-0">
-                  <b-form-input id="price_per_3_months" v-model="formSubscriptions.subscriptions.price_per_3_months" placeholder="Enter price per 3 months" ></b-form-input>
-                </b-input-group>
-              </b-form-group>
-              <b-form-group id="group-price_per_6_months" label="Subscription Price per 6 Months" label-for="price_per_6_months">
-                <b-input-group prepend="$" class="mb-2 mr-sm-2 mb-sm-0">
-                  <b-form-input id="price_per_6_months" v-model="formSubscriptions.subscriptions.price_per_6_months" placeholder="Enter price per 6 months" ></b-form-input>
-                </b-input-group>
-              </b-form-group>
-              <b-form-group id="group-price_per_12_months" label="Subscription Price per Year" label-for="price_per_12_months">
-                <b-input-group prepend="$" class="mb-2 mr-sm-2 mb-sm-0">
-                  <b-form-input id="price_per_12_months" v-model="formSubscriptions.subscriptions.price_per_12_months" placeholder="Enter price per year" ></b-form-input>
-                </b-input-group>
-              </b-form-group>
-            </b-col>
-            <b-col>
-              <b-form-group id="group-is_follow_for_free" label="Follow for Free?" label-for="is_follow_for_free">
-                <b-form-checkbox
-                  id="is_follow_for_free"
-                  v-model="formSubscriptions.is_follow_for_free"
-                  name="is_follow_for_free"
-                  value=1
-                  unchecked-value=0
-                  switch size="lg"></b-form-checkbox>
-              </b-form-group>
-            </b-col>
-          </b-row>
+            <b-row>
+              <b-col>
+                <FormTextInput itype="currency" ikey="subscriptions.price_per_1_months"  v-model="formSubscriptions.subscriptions.price_per_1_months"  label="Price per Month" :verrors="verrors" />
+                <FormTextInput itype="currency" ikey="subscriptions.price_per_3_months"  v-model="formSubscriptions.subscriptions.price_per_3_months"  label="Price per 3 Months" :verrors="verrors" />
+                <FormTextInput itype="currency" ikey="subscriptions.price_per_6_months"  v-model="formSubscriptions.subscriptions.price_per_6_months"  label="Price per 6 Months" :verrors="verrors" />
+                <FormTextInput itype="currency" ikey="subscriptions.price_per_12_months" v-model="formSubscriptions.subscriptions.price_per_12_months" label="Price per Year" :verrors="verrors" />
+              </b-col>
+              <b-col>
+                <b-form-group id="group-is_follow_for_free" label="Follow for Free?" label-for="is_follow_for_free">
+                  <b-form-checkbox
+                    id="is_follow_for_free"
+                    v-model="formSubscriptions.is_follow_for_free"
+                    name="is_follow_for_free"
+                    value=1
+                    unchecked-value=0
+                    switch size="lg"></b-form-checkbox>
+                </b-form-group>
+              </b-col>
+            </b-row>
           </fieldset>
 
           <b-row class="mt-3">
@@ -100,31 +88,35 @@
         <b-form @submit.prevent="submitLocalization($event)" @reset="onReset">
           <fieldset :disabled="!isEditing.formLocalization">
 
-          <b-row>
-            <b-col>
-              <b-form-group id="group-language" label="Language" label-for="language">
-                <b-form-input id="language" v-model="formLocalization.localization.language" placeholder="Enter language" ></b-form-input>
-              </b-form-group>
-            </b-col>
-            <b-col>
-              <b-form-group id="group-timezone" label="Time Zone" label-for="timezone">
-                <b-form-select v-model="formLocalization.localization.timezone" :options="options.timezones"></b-form-select>
-              </b-form-group>
-            </b-col>
-          </b-row>
+            <b-row>
+              <b-col>
+                <FormTextInput ikey="localization.language"  v-model="formLocalization.localization.language"  label="Enter Language" :verrors="verrors" />
+              </b-col>
+              <b-col>
+                <FormTextInput ikey="localization.timezone"  v-model="formLocalization.localization.timezone"  label="Time Zone" :verrors="verrors" />
+              </b-col>
+            </b-row>
 
-          <b-row>
-            <b-col>
-              <b-form-group id="group-country" label="Country" label-for="country">
-                <b-form-select v-model="formLocalization.localization.country" :options="options.countries"></b-form-select>
-              </b-form-group>
-            </b-col>
-            <b-col>
-              <b-form-group id="group-currency" label="Currency" label-for="currency">
-                <b-form-select v-model="formLocalization.localization.currency" :options="options.currencies"></b-form-select>
-              </b-form-group>
-            </b-col>
-          </b-row>
+            <b-row>
+              <b-col>
+                <FormSelectInput 
+                  ikey="localization.country"  
+                  v-model="formLocalization.localization.country" 
+                  label="Country" 
+                  :verrors="verrors" 
+                  :options="options.countries" 
+                />
+              </b-col>
+              <b-col>
+                <FormSelectInput 
+                  ikey="localization.currency"  
+                  v-model="formLocalization.localization.currency" 
+                  label="Currency" 
+                  :verrors="verrors" 
+                  :options="options.currencies" 
+                />
+              </b-col>
+            </b-row>
           </fieldset>
 
           <b-row class="mt-3">
@@ -146,9 +138,8 @@
 </template>
 
 <script>
-//import Vuex from 'vuex'
 import FormTextInput from '@components/settings/FormTextInput'
-import FormCurrencyInput from '@components/forms/elements/FormCurrencyInput'
+import FormSelectInput from '@components/forms/elements/FormSelectInput'
 
 export default {
 
@@ -225,24 +216,24 @@ export default {
   }),
 
   watch: {
-      session_user(newVal) {
-        // %FIXME: is this necessary?
-        this.formGeneral.username = newVal.username
-        this.formGeneral.firstname = newVal.firstname
-        this.formGeneral.lastname = newVal.lastname
-        this.formGeneral.email = newVal.email
-      },
-      user_settings(newVal) {
-        if ( newVal.cattrs.subscriptions ) {
-          this.formSubscriptions.subscriptions = newVal.cattrs.subscriptions
-        }
-        if ( newVal.hasOwnProperty('is_follow_for_free') ) {
-          this.formSubscriptions.is_follow_for_free = newVal.is_follow_for_free ? 1 : 0
-        }
-        if ( newVal.cattrs.localization ) {
-          this.formLocalization.localization = newVal.cattrs.localization
-        }
-      },
+    session_user(newVal) {
+      // %FIXME: is this necessary?
+      this.formGeneral.username = newVal.username
+      this.formGeneral.firstname = newVal.firstname
+      this.formGeneral.lastname = newVal.lastname
+      this.formGeneral.email = newVal.email
+    },
+    user_settings(newVal) {
+      if ( newVal.cattrs.subscriptions ) {
+        this.formSubscriptions.subscriptions = newVal.cattrs.subscriptions
+      }
+      if ( newVal.hasOwnProperty('is_follow_for_free') ) {
+        this.formSubscriptions.is_follow_for_free = newVal.is_follow_for_free ? 1 : 0
+      }
+      if ( newVal.cattrs.localization ) {
+        this.formLocalization.localization = newVal.cattrs.localization
+      }
+    },
   },
 
   mounted() {
@@ -301,7 +292,7 @@ export default {
 
   components: {
     FormTextInput,
-    FormCurrencyInput,
+    FormSelectInput,
   },
 }
 </script>

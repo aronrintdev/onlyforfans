@@ -1,15 +1,6 @@
 <template>
   <b-form-group :id="groupID" :label="label" :label-for="ikey">
-    <b-input-group prepend="$" class="mb-2 mr-sm-2 mb-sm-0">
-      <b-form-input 
-        v-model="dvalue" 
-        :state="isValid" 
-        @update="doUpdate()" 
-        :placeholder="placeholder" 
-        :disabled="disabled"
-      ></b-form-input>
-      <b-form-invalid-feedback id="input-live-feedback">{{ vmsg }}</b-form-invalid-feedback>
-    </b-input-group>
+    <b-form-select v-model="dvalue" :options="options"></b-form-select>
   </b-form-group>
 </template>
 
@@ -23,7 +14,7 @@ export default {
     verrors: null,
     disabled: false,
     label: '',
-    placeholder: '',
+    options: null,
   },
 
   computed: {
@@ -34,7 +25,7 @@ export default {
       return (this.dverrors && this.dverrors[this.ikey]) ? false : null
     },
     vmsg() {
-      return (this.dverrors && this.dverrors[this.ikey]) ?  this.dverrors[this.ikey][0] : ''
+      return (this.dverrors && this.dverrors[this.ikey]) ?  this.dverrors[this.ikey][0]: ''
     },
   },
 
@@ -54,7 +45,6 @@ export default {
 
   methods: {
     doUpdate() {
-      console.log('do update')
       this.dverrors = null
     }
   },
