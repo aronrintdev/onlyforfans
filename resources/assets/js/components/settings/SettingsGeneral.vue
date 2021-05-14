@@ -262,6 +262,7 @@ export default {
       try {
         const response = await axios.patch(`/users/${this.session_user.id}`, this.formGeneral)
         this.isEditing.formGeneral = false
+        this.verrors = null
       } catch(err) {
         this.verrors = err.response.data.errors
       }
@@ -271,6 +272,7 @@ export default {
       try {
         const response = await axios.patch(`/users/${this.session_user.id}/settings`, this.formSubscriptions)
         this.isEditing.formSubscriptions = false
+        this.verrors = null
       } catch(err) {
         this.verrors = err.response.data.errors
       }
@@ -280,6 +282,7 @@ export default {
       try { 
         const response = await axios.patch(`/users/${this.session_user.id}/settings`, this.formLocalization)
         this.isEditing.formLocalization = false
+        this.verrors = null
       } catch(err) {
         this.verrors = err.response.data.errors
       }
