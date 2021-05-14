@@ -2,13 +2,16 @@
 namespace App\Models;
 
 use Exception;
+use Illuminate\Support\Str;
 use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Validation\ValidationException;
 use App\Interfaces\Ownable;
 use App\Interfaces\Guidable;
 use App\Models\Traits\UsesUuid;
 use App\Traits\OwnableFunctions;
 use Cviebrock\EloquentSluggable\Sluggable;
+use Cviebrock\EloquentSluggable\Services\SlugService;
 use App\Models\Traits\SluggableTraits;
 
 class Vaultfolder extends BaseModel implements Guidable, Ownable
@@ -31,6 +34,26 @@ class Vaultfolder extends BaseModel implements Guidable, Ownable
         //'vfchildren',
         //'mediafiles',
     ];
+
+    //--------------------------------------------
+    // Boot
+    //--------------------------------------------
+    public static function boot()
+    {
+        parent::boot();
+        static::creating(function ($model) {
+            // subfolder unique name check: use parent_id & user_id
+            $slug = SlugService::createSlug(Vaultfolder::class, 'slug', $model->vfname);
+            $exists = Vaultfolder::where('user_id', $model->user_id)
+                ->where('parent_id', $model->parent_id)
+                ->where('vfname', $model->vfname)
+                //->where('slug', $slug) // can't use slug for this check as it's uniquified alrady
+                ->first();
+            if ($exists) {
+                throw ValidationException::withMessages(['vfname' => 'A folder with this name already exists, please choose a different name']);
+            }
+        });
+    }
 
     //--------------------------------------------
     // %%% Relationships

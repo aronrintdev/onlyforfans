@@ -103,7 +103,6 @@ class VaultfoldersController extends AppBaseController
         ]);
     }
 
-    // %FIXME: this should be in VaultController, an does the Vault policy (?)
     public function store(Request $request)
     {
         $vrules = [
