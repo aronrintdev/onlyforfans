@@ -5,6 +5,7 @@ use DB;
 use Auth;
 use Exception;
 use Throwable;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
@@ -80,7 +81,7 @@ class TimelinesController extends AppBaseController
     public function homefeed(Request $request)
     {
         $sessionUser = request()->user();
-        $query = Post::with('mediafiles', 'user')->withCount(['comments', 'likes'])->where('active', 1);
+        $query = Post::with('mediafiles', 'user')->withCount(['comments', 'likes'])->where('active', 1)->where('schedule_datetime', null);
         $query->homeTimeline()->sort( $request->input('sortBy', 'default') );
         // %NOTE: we could also just remove post-query, as the feed will auto-update to fill length of page (?)
         if ( $request->boolean('hideLocked') ) {
@@ -114,7 +115,7 @@ class TimelinesController extends AppBaseController
     {
         //$this->authorize('view', $timeline); // must be follower or subscriber
         //$filters = [];
-        $query = Post::with('mediafiles', 'user')->withCount(['comments', 'likes'])->where('active', 1);
+        $query = Post::with('mediafiles', 'user')->withCount(['comments', 'likes'])->where('active', 1)->where('schedule_datetime', null);
         $query->byTimeline($timeline->id)->sort( $request->input('sortBy', 'default') );
         $data = $query->paginate( $request->input('take', env('MAX_POSTS_PER_REQUEST', 10)) );
         return new PostCollection($data);
@@ -324,4 +325,16 @@ class TimelinesController extends AppBaseController
         ]);
     }
 
+    // Display my home scheduled timeline
+    public function homeScheduledfeed(Request $request)
+    {
+        $query = Post::with('mediafiles', 'user')
+            ->withCount(['comments', 'likes'])
+            ->where('active', 1)
+            ->where('schedule_datetime', '>', date("Y-m-d H:i:s", strtotime(Carbon::now())));
+        $query->homeTimeline()->sort( $request->input('sortBy', 'default') );
+        // %NOTE: we could also just remove post-query, as the feed will auto-update to fill length of page (?)
+        $data = $query->paginate( $request->input('take', env('MAX_POSTS_PER_REQUEST', 10)) );
+        return new PostCollection($data);
+    }
 }

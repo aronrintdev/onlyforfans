@@ -10,7 +10,7 @@
 
     <b-row>
       <b-col>
-        <section class="feed-ctrl my-3 px-2 py-2 d-flex flex-column flex-md-row justify-content-center justify-content-md-between">
+        <section v-if="!is_schedulefeed" class="feed-ctrl my-3 px-2 py-2 d-flex flex-column flex-md-row justify-content-center justify-content-md-between">
           <b-nav v-if="!is_homefeed" pills>
             <b-nav-item @click="setFeedType('default')" :active="feedType==='default'">All</b-nav-item>
             <b-nav-item @click="setFeedType('photos')" :active="feedType==='photos'">Photos</b-nav-item>
@@ -106,6 +106,7 @@ export default {
 
   props: {
     is_homefeed: null,
+    is_schedulefeed: null,
     session_user: null,
     timeline: null,
   },
@@ -175,6 +176,7 @@ export default {
   },
 
   created() {
+    this.feedType = this.is_schedulefeed ? 'schedule' : this.feedType;
     this.$store.dispatch('getFeeddata', { 
       feedType: this.feedType,
       timelineId: this.timelineId,  // only valid if not home feed

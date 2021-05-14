@@ -53,7 +53,7 @@
                   <li class="selectable select-location"><span><LocationPinIcon /></span> </li>
                   <li class="selectable select-emoji"><span><EmojiIcon /></span></li>
                   <li class="selectable select-timer"><span><TimerIcon /></span></li>
-                  <li class="selectable select-calendar"><span><CalendarIcon /></span></li>
+                  <li class="selectable select-calendar" @click="showSchedulePicker()"><span><CalendarIcon /></span></li>
                 </ul>
               </b-col>
               <b-col cols="12" md="4">
@@ -66,7 +66,37 @@
         </b-card>
       </div>
     </section>
-
+    <b-modal modal-class="schedule-message-modal" hide-header centered hide-footer ref="schedule_picker_modal">
+      <div class="block-modal">
+        <div class="header d-flex align-items-center">
+          <h4 class="pt-1 pb-1">SCHEDULED POST</h4>
+        </div>
+        <div class="content">
+          <b-form-datepicker
+            v-model="postSchedule.date"
+            class="mb-3 mt-1"
+            ref="schedule_date"
+            :state="postSchedule.date ? true : null"
+            :min="new Date()"
+          />
+          <b-form-timepicker
+            v-model="postSchedule.time"
+            :state="postSchedule.timeState"
+            class="mb-2"
+            locale="en"
+            @input="onChangePostScheduleTime"
+          ></b-form-timepicker>
+        </div>
+        <div class="d-flex align-items-center justify-content-end action-btns">
+          <button class="link-btn" @click="clearSchedule">Cancel</button>
+          <button
+            class="link-btn"
+            @click="applySchedule"
+            :disabled="!postSchedule.date || !postSchedule.time || !postSchedule.timeState"
+          >Apply</button>
+        </div>
+      </div>
+    </b-modal>
   </div>
 </template>
 
@@ -126,6 +156,7 @@ export default {
         'X-CSRF-TOKEN': document.head.querySelector('[name=csrf-token]').content,
       },
     },
+    postSchedule: {},
   }),
 
   methods: {
@@ -214,7 +245,26 @@ export default {
       this.$store.dispatch('unshiftPostToTimeline', { newPostId: this.newPostId });
       this.resetForm();
     },
-
+    showSchedulePicker() {
+      this.postSchedule = {};
+      this.$refs.schedule_picker_modal.show();
+    },
+    onChangePostScheduleTime(event) {
+      this.postSchedule.timeState = true;
+      if (moment().format('YYYY-MM-DD') === this.$refs.schedule_date.value) {
+        if (moment().format('HH:mm:ss') > event) {
+          this.postSchedule.timeState = false;
+        }
+      }
+      this.postSchedule = { ...this.postSchedule };
+    },
+    clearSchedule() {
+      this.postSchedule = {};
+      this.$refs.schedule_picker_modal.hide();
+    },
+    applySchedule() {
+      this.clearSchedule();
+    }
   },
 
   created() {

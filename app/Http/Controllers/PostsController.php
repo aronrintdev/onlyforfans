@@ -81,6 +81,7 @@ class PostsController extends AppBaseController
         $attrs['user_id'] = $timeline->user->id; // %FIXME: remove this field, redundant
         $attrs['active'] = $request->input('active', 1);
         $attrs['type'] = $request->input('type', PostTypeEnum::FREE);
+        $attrs['schedule_datetime'] = $request->input('schedule_datetime');
 
         $post = Post::create($attrs);
         if ( $request->has('mediafiles') ) {
@@ -90,6 +91,10 @@ class PostsController extends AppBaseController
             }
         }
         $post->refresh();
+
+        if ($request->input('schedule_datetime')) {
+            return response()->json([], 201);
+        }
 
         return response()->json([
             'post' => $post,

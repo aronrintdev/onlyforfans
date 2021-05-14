@@ -2,26 +2,53 @@
   <div v-if="!isLoading">
 
     <div class="container-xl" id="view-home_timeline">
+      <b-tabs
+        content-class="mt-3"
+        active-nav-item-class="active-navitem"
+        nav-class="navitem"
+        @input="changeActiveTab"
+      >
+        <b-tab title="Home" active>
+          <section class="row">
+            <article class="col-sm-12">
+              <StoryBar :session_user="session_user"></StoryBar>
+            </article>
+          </section>
 
-      <section class="row">
-        <article class="col-sm-12">
-          <StoryBar :session_user="session_user"></StoryBar>
-        </article>
-      </section>
+          <section class="row">
+            <main :class="mainClass">
+              <CreatePost :session_user="session_user" :timeline="timeline" />
+              <PostFeed :session_user="session_user" :timeline="timeline" :is_homefeed="true" />
+            </main>
+            <aside v-if="!isGridLayout" class="col-md-5 col-lg-4">
+              <MiniMyStatsWidget :session_user="session_user" :timeline="timeline" />
+              <!--
+              <SuggestedFeed :session_user="session_user" :timeline="timeline" class="mt-3" />
+              -->
+              <SuggestedFeed class="mt-3" />
+            </aside>
+          </section>
+        </b-tab>
+        <b-tab title="Queue">
+          <section class="row" v-if="activeTab === 1">
+            <main :class="mainClass">
+              <CreatePost :session_user="session_user" :timeline="timeline" />
+              <PostFeed
+                :session_user="session_user"
+                :timeline="timeline"
+                :is_homefeed="true"
+                :is_schedulefeed="true"
+              />
+            </main>
+            <aside v-if="!isGridLayout" class="col-md-5 col-lg-4">
+              <MiniMyStatsWidget :session_user="session_user" :timeline="timeline" />
+              <SuggestedFeed class="mt-3" />
+            </aside>
+          </section>
+        </b-tab>
+      </b-tabs>
 
-      <section class="row">
-        <main :class="mainClass">
-          <CreatePost :session_user="session_user" :timeline="timeline" />
-          <PostFeed :session_user="session_user" :timeline="timeline" :is_homefeed="true" />
-        </main>
-        <aside v-if="!isGridLayout" class="col-md-5 col-lg-4">
-          <MiniMyStatsWidget :session_user="session_user" :timeline="timeline" />
-          <!--
-          <SuggestedFeed :session_user="session_user" :timeline="timeline" class="mt-3" />
-          -->
-          <SuggestedFeed class="mt-3" />
-        </aside>
-      </section>
+      
 
     </div>
 
@@ -71,6 +98,7 @@ export default {
 
   data: () => ({
     isGridLayout: false, // %FIXME: can this be set in created() so we have 1 source of truth ? (see PostFeed)
+    activeTab: false,
   }),
 
   created() {
@@ -88,9 +116,34 @@ export default {
 
   mounted() { },
   watch: { },
-
+  methods: {
+    changeActiveTab(event) {
+      console.log('-- active tab:', event);
+      this.activeTab = event;
+    }
+  }
 }
 </script>
 
-<style scoped>
+<style>
+  .navitem.nav-tabs a.nav-link {
+    font-size: 19px;
+    font-weight: 500;
+    text-transform: uppercase;
+    margin-right: 16px;
+    padding: 4px 5px 10px;
+    background: transparent;
+    color: rgba(138,150,163,.7);
+  }
+  .navitem.nav-tabs a.active-navitem {
+    font-size: 19px;
+    font-weight: 500;
+    text-transform: uppercase;
+    margin-right: 16px;
+    color: black;
+    padding: 4px 5px 10px;
+    background: transparent;
+    border: none;
+    border-bottom: solid 2px #000;
+  }
 </style>
