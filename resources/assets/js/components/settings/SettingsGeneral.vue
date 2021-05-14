@@ -138,7 +138,7 @@
 </template>
 
 <script>
-import FormTextInput from '@components/settings/FormTextInput'
+import FormTextInput from '@components/forms/elements/FormTextInput'
 import FormSelectInput from '@components/forms/elements/FormSelectInput'
 
 export default {
