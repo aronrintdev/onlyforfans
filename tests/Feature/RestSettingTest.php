@@ -129,15 +129,11 @@ class RestSettingTest extends TestCase
             //'username' => $this->faker->userName,
             'email' => $this->faker->safeEmail,
         ];
-        //$response = $this->actingAs($user)->ajaxJSON('PATCH', route('users.updateSettingsBatch', [$user->id]), $payload);
         $response = $this->actingAs($user)->ajaxJSON('PATCH', route('users.update', [$user->id]), $payload);
         $response->assertStatus(200);
         $content = json_decode($response->content());
 
-        //$settings = $user->settings;
-        //$settings->refresh();
         $user2 = User::findOrFail($user->id);
-
         $this->assertEquals($payload['firstname'], $user2->firstname);
         $this->assertEquals($payload['lastname'], $user2->lastname);
         $this->assertEquals($payload['email'], $user2->email);
@@ -146,7 +142,6 @@ class RestSettingTest extends TestCase
     /**
      *  @group settings
      *  @group regression
-     *  @group here0513
      */
     public function test_can_batch_validate_settings_general()
     {
@@ -179,6 +174,81 @@ class RestSettingTest extends TestCase
         $user2 = User::findOrFail($user->id);
         $this->assertEquals($newLastname, $user2->lastname); // unchanged
         //$content = json_decode($response->content());
+
+        // Test empty required field (firstname)
+        $response = $this->actingAs($user)->ajaxJSON('PATCH', route('users.update', [$user->id]), [
+            'email' => 'bademail',
+        ]);
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors([
+            'email',
+        ]);
+    }
+
+    /**
+     *  @group settings
+     *  @group regression
+     *  @group here0513
+     */
+    public function test_can_batch_edit_settings_profile()
+    {
+        $timeline = Timeline::has('posts', '>=', 1)->has('followers', '>=', 1)->first();
+        $user = $timeline->user;
+
+        $payload = [
+            'about' => $this->faker->realText,
+            'country' => $this->faker->country,
+            'city' => $this->faker->city,
+            'gender' => $this->faker->randomElement(['male', 'female']),
+            'birthdate' => $this->faker->dateTimeThisCentury->format('Y-m-d'),
+            'weblinks' => [
+                'amazon' => $this->faker->url,
+                'website' => $this->faker->url,
+                'instagram' => $this->faker->url,
+            ],
+            //'email' => $this->faker->safeEmail,
+        ];
+        $response = $this->actingAs($user)->ajaxJSON('PATCH', route('users.updateSettingsBatch', [$user->id]), $payload);
+        $response->assertStatus(200);
+        $content = json_decode($response->content());
+
+        $settings = $user->settings;
+        $settings->refresh();
+        $this->assertEquals($payload['about'], $settings->about);
+        $this->assertEquals($payload['city'], $settings->city);
+        $this->assertEquals($payload['gender'], $settings->gender);
+        $this->assertEquals($payload['birthdate'], $settings->birthdate);
+        //dd( json_encode($settings->cattrs, JSON_PRETTY_PRINT) );
+        $this->assertEquals($payload['weblinks']['instagram'], $settings->cattrs['weblinks']['instagram'] ?? '');
+    }
+
+    /**
+     *  @group OFF-settings
+     *  @group OFF-regression
+     *  @group OFF-here0513
+     */
+    // %TODO %ERIK has moved out of settings...
+    public function test_can_batch_edit_settings_subscriptions()
+    {
+        $timeline = Timeline::has('posts', '>=', 1)->has('followers', '>=', 1)->first();
+        $user = $timeline->user;
+
+        $payload = [
+            'price_per_1_months' => $this->faker->numberBetween(500, 20000),
+        ];
+        $response = $this->actingAs($user)->ajaxJSON('PATCH', route('users.updateSettingsBatch', [$user->id]), $payload);
+        $response->assertStatus(200);
+        $content = json_decode($response->content());
+
+        /*
+        //$settings = $user->settings;
+        //$settings->refresh();
+        $user2 = User::findOrFail($user->id);
+
+        $this->assertEquals($payload['firstname'], $user2->firstname);
+        $this->assertEquals($payload['lastname'], $user2->lastname);
+        $this->assertEquals($payload['email'], $user2->email);
+         */
     }
 
     // ===============
