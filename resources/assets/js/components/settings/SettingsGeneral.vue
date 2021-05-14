@@ -8,19 +8,19 @@
 
           <b-row>
             <b-col>
-              <FormTextInput ikey="firstname" v-model="formGeneral.firstname" :verrors="verrors" />
+              <FormTextInput ikey="firstname" v-model="formGeneral.firstname" label="First Name" :verrors="verrors" />
             </b-col>
             <b-col>
-              <FormTextInput ikey="lastname" v-model="formGeneral.lastname" :verrors="verrors" />
+              <FormTextInput ikey="lastname" v-model="formGeneral.lastname" label="Last Name" :verrors="verrors" />
             </b-col>
           </b-row>
 
           <b-row>
             <b-col>
-              <FormTextInput ikey="username" v-model="formGeneral.username" :verrors="verrors" :disabled="true"/>
+              <FormTextInput ikey="username" v-model="formGeneral.username" label="Username" :verrors="verrors" :disabled="true"/>
             </b-col>
             <b-col>
-              <FormTextInput ikey="email" v-model="formGeneral.email" :verrors="verrors" />
+              <FormTextInput ikey="email" v-model="formGeneral.email" label="E-mail" :verrors="verrors" />
             </b-col>
           </b-row>
           </fieldset>
@@ -48,11 +48,7 @@
 
           <b-row>
             <b-col>
-              <b-form-group id="group-price_per_1_months" label="Subscription Price per Month" label-for="price_per_1_months">
-                <b-input-group prepend="$" class="mb-2 mr-sm-2 mb-sm-0">
-                  <b-form-input id="price_per_1_months" v-model="formSubscriptions.subscriptions.price_per_1_months" placeholder="Enter price per month" ></b-form-input>
-                </b-input-group>
-              </b-form-group>
+              <FormCurrencyInput ikey="subscriptions.price_per_1_months" v-model="formSubscriptions.subscriptions.price_per_1_months" label="Subscription Price per Month" :verrors="verrors" />
               <b-form-group id="group-price_per_3_months" label="Subscription Price per 3 Months" label-for="price_per_3_months">
                 <b-input-group prepend="$" class="mb-2 mr-sm-2 mb-sm-0">
                   <b-form-input id="price_per_3_months" v-model="formSubscriptions.subscriptions.price_per_3_months" placeholder="Enter price per 3 months" ></b-form-input>
@@ -150,8 +146,9 @@
 </template>
 
 <script>
-//import Vuex from 'vuex';
-import FormTextInput from '@components/settings/FormTextInput';
+//import Vuex from 'vuex'
+import FormTextInput from '@components/settings/FormTextInput'
+import FormCurrencyInput from '@components/forms/elements/FormCurrencyInput'
 
 export default {
 
@@ -230,20 +227,20 @@ export default {
   watch: {
       session_user(newVal) {
         // %FIXME: is this necessary?
-        this.formGeneral.username = newVal.username;
-        this.formGeneral.firstname = newVal.firstname;
-        this.formGeneral.lastname = newVal.lastname;
-        this.formGeneral.email = newVal.email;
+        this.formGeneral.username = newVal.username
+        this.formGeneral.firstname = newVal.firstname
+        this.formGeneral.lastname = newVal.lastname
+        this.formGeneral.email = newVal.email
       },
       user_settings(newVal) {
         if ( newVal.cattrs.subscriptions ) {
-          this.formSubscriptions.subscriptions = newVal.cattrs.subscriptions;
+          this.formSubscriptions.subscriptions = newVal.cattrs.subscriptions
         }
-        if ( newVal.is_follow_for_free ) {
-          this.formSubscriptions.is_follow_for_free = newVal.is_follow_for_free;
+        if ( newVal.hasOwnProperty('is_follow_for_free') ) {
+          this.formSubscriptions.is_follow_for_free = newVal.is_follow_for_free ? 1 : 0
         }
         if ( newVal.cattrs.localization ) {
-          this.formLocalization.localization = newVal.cattrs.localization;
+          this.formLocalization.localization = newVal.cattrs.localization
         }
       },
   },
@@ -252,10 +249,20 @@ export default {
   },
 
   created() {
-    this.formGeneral.username = this.session_user.username || '';
-    this.formGeneral.firstname = this.session_user.firstname || '';
-    this.formGeneral.lastname = this.session_user.lastname || '';
-    this.formGeneral.email = this.session_user.email || '';
+    this.formGeneral.username = this.session_user.username || ''
+    this.formGeneral.firstname = this.session_user.firstname || ''
+    this.formGeneral.lastname = this.session_user.lastname || ''
+    this.formGeneral.email = this.session_user.email || ''
+
+    if ( this.user_settings.cattrs.subscriptions ) {
+      this.formSubscriptions.subscriptions = this.user_settings.cattrs.subscriptions
+    }
+    if ( this.user_settings.hasOwnProperty('is_follow_for_free') ) {
+      this.formSubscriptions.is_follow_for_free = this.user_settings.is_follow_for_free ? 1 : 0
+    }
+    if ( this.user_settings.cattrs.localization ) {
+      this.formLocalization.localization = this.user_settings.cattrs.localization
+    }
   },
 
   methods: {
@@ -265,21 +272,26 @@ export default {
         const response = await axios.patch(`/users/${this.session_user.id}`, this.formGeneral)
         this.isEditing.formGeneral = false
       } catch(err) {
-        console.log('here.error', {
-          err: err.response.data,
-        })
         this.verrors = err.response.data.errors
       }
     },
 
     async submitSubscriptions(e) {
-      const response = await axios.patch(`/users/${this.session_user.id}/settings`, this.formSubscriptions)
-      this.isEditing.formSubscriptions = false;
+      try {
+        const response = await axios.patch(`/users/${this.session_user.id}/settings`, this.formSubscriptions)
+        this.isEditing.formSubscriptions = false
+      } catch(err) {
+        this.verrors = err.response.data.errors
+      }
     },
 
     async submitLocalization(e) {
-      const response = await axios.patch(`/users/${this.session_user.id}/settings`, this.formLocalization)
-      this.isEditing.formLocalization = false
+      try { 
+        const response = await axios.patch(`/users/${this.session_user.id}/settings`, this.formLocalization)
+        this.isEditing.formLocalization = false
+      } catch(err) {
+        this.verrors = err.response.data.errors
+      }
     },
 
     onReset(e) {
@@ -289,6 +301,7 @@ export default {
 
   components: {
     FormTextInput,
+    FormCurrencyInput,
   },
 }
 </script>
