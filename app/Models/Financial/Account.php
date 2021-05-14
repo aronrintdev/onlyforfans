@@ -3,13 +3,16 @@
 namespace App\Models\Financial;
 
 use LogicException;
-use App\Interfaces\Ownable;
+use App\Events\ItemTipped;
 
+use App\Interfaces\Ownable;
 use App\Models\Casts\Money;
+use App\Interfaces\Tippable;
+
 use App\Models\Subscription;
 use App\Events\ItemPurchased;
-
 use App\Interfaces\PricePoint;
+use Illuminate\Bus\Dispatcher;
 use Illuminate\Support\Carbon;
 use App\Models\Traits\UsesUuid;
 use App\Interfaces\Purchaseable;
@@ -29,8 +32,6 @@ use App\Jobs\Financial\UpdateAccountBalance;
 use App\Models\Financial\Traits\HasCurrency;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Enums\Financial\TransactionSummaryTypeEnum;
-use App\Events\ItemTipped;
-use App\Interfaces\Tippable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\InvalidCastException;
 use App\Models\Financial\Exceptions\AlreadyPurchasedException;
@@ -239,8 +240,8 @@ class Account extends Model implements Ownable
 
         $this->refresh();
 
-        UpdateAccountBalance::dispatch($this);
-        UpdateAccountBalance::dispatch($toAccount);
+        app(Dispatcher::class)->dispatch(new UpdateAccountBalance($this));
+        app(Dispatcher::class)->dispatch(new UpdateAccountBalance($toAccount));
         return new Collection([ 'debit' => $debitTransaction, 'credit' => $creditTransaction ]);
     }
 

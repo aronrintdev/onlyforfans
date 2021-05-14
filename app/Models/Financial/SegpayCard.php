@@ -24,7 +24,7 @@ class SegpayCard extends Model implements Ownable
     protected $guarded = [];
 
     protected $casts = [
-        'token' => 'encrypted', // purchase id from webhook
+        // 'token' => 'encrypted', // purchase id from webhook
         'card_type' => 'encrypted',
         'last_4' => 'encrypted',
     ];
@@ -57,7 +57,8 @@ class SegpayCard extends Model implements Ownable
      */
     public static function findByToken($token): ?SegpayCard
     {
-        return SegpayCard::where('token', Crypt::encryptString($token))->first();
+        // return SegpayCard::where('token', Crypt::encryptString($token))->first();
+        return SegpayCard::where('token', $token)->first();
     }
 
     /**
