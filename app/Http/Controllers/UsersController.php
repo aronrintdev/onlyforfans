@@ -120,6 +120,13 @@ class UsersController extends AppBaseController
             'blocked' => 'array',
             'message_with_tip_only' => 'boolean',
             'enable_message_with_tip_only_pay' => 'boolean',
+            'about' => 'string|nullable',
+            'country' => 'string|nullable',
+            'city' => 'string|nullable',
+            'gender' => 'in:male,female,other|nullable',
+            'birthdate' => 'date|nullable',
+            'weblinks' => 'array|nullable',
+            'weblinks.*' => 'url|nullable',
         ]);
         $request->request->remove('username'); // disallow username updates for now
 

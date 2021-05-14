@@ -195,7 +195,7 @@ class RestSettingTest extends TestCase
         $timeline = Timeline::has('posts', '>=', 1)->has('followers', '>=', 1)->first();
         $user = $timeline->user;
 
-        $payload = [
+        $payload1 = [
             'about' => $this->faker->realText,
             'country' => $this->faker->country,
             'city' => $this->faker->city,
@@ -208,18 +208,51 @@ class RestSettingTest extends TestCase
             ],
             //'email' => $this->faker->safeEmail,
         ];
-        $response = $this->actingAs($user)->ajaxJSON('PATCH', route('users.updateSettingsBatch', [$user->id]), $payload);
+        $response = $this->actingAs($user)->ajaxJSON('PATCH', route('users.updateSettingsBatch', [$user->id]), $payload1);
         $response->assertStatus(200);
         $content = json_decode($response->content());
 
         $settings = $user->settings;
         $settings->refresh();
-        $this->assertEquals($payload['about'], $settings->about);
-        $this->assertEquals($payload['city'], $settings->city);
-        $this->assertEquals($payload['gender'], $settings->gender);
-        $this->assertEquals($payload['birthdate'], $settings->birthdate);
+        $this->assertEquals($payload1['about'], $settings->about);
+        $this->assertEquals($payload1['city'], $settings->city);
+        $this->assertEquals($payload1['gender'], $settings->gender);
+        $this->assertEquals($payload1['birthdate'], $settings->birthdate);
         //dd( json_encode($settings->cattrs, JSON_PRETTY_PRINT) );
-        $this->assertEquals($payload['weblinks']['instagram'], $settings->cattrs['weblinks']['instagram'] ?? '');
+        $this->assertEquals($payload1['weblinks']['instagram'], $settings->cattrs['weblinks']['instagram'] ?? '');
+
+        $payload2 = [
+            'about' => $this->faker->realText,
+        ];
+        $response = $this->actingAs($user)->ajaxJSON('PATCH', route('users.updateSettingsBatch', [$user->id]), $payload2);
+        $response->assertStatus(200);
+
+        $settings = $user->settings;
+        $settings->refresh();
+        $this->assertEquals($payload2['about'], $settings->about);
+        $this->assertEquals($payload1['city'], $settings->city); // unchanged
+        $this->assertEquals($payload1['gender'], $settings->gender); // unchanged
+        $this->assertEquals($payload1['birthdate'], $settings->birthdate); // unchanged
+    }
+
+    /**
+     *  @group settings
+     *  @group regression
+     *  @group here0513
+     */
+    public function test_can_batch_validate_settings_profile()
+    {
+        $timeline = Timeline::has('posts', '>=', 1)->has('followers', '>=', 1)->first();
+        $user = $timeline->user;
+
+        $payload = [
+            'gender' => 'badgender',
+        ];
+        $response = $this->actingAs($user)->ajaxJSON('PATCH', route('users.updateSettingsBatch', [$user->id]), $payload);
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors([
+            'gender',
+        ]);
     }
 
     /**
