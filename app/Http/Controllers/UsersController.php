@@ -20,7 +20,7 @@ use App\Models\Country;
 use App\Models\Timeline;
 use App\Enums\PaymentTypeEnum;
 use App\Rules\MatchOldPassword;
-use App\Models\Mediafile;
+use App\Models\Diskmediafile;
 use App\Enums\MediafileTypeEnum;
 
 class UsersController extends AppBaseController
@@ -183,14 +183,31 @@ class UsersController extends AppBaseController
             abort(400);
         }
 
-        $mediafile = Mediafile::create([
-            'resource_type' => 'avatar',
-            'filename' => $file->store('./avatars', 's3'),
-            'mfname' => $file->getClientOriginalName(),
-            'mftype' => MediafileTypeEnum::AVATAR,
-            'mimetype' => $file->getMimeType(),
-            'orig_filename' => $file->getClientOriginalName(),
-            'orig_ext' => $file->getClientOriginalExtension(),
+        /*
+        //$mediafile = Mediafile::create([
+            //'resource_type' => 'avatar',
+            //'filename' => $file->store('./avatars', 's3'),
+            //'mfname' => $file->getClientOriginalName(),
+            //'mftype' => MediafileTypeEnum::AVATAR,
+            //'mimetype' => $file->getMimeType(),
+            //'orig_filename' => $file->getClientOriginalName(),
+            //'orig_ext' => $file->getClientOriginalExtension(),
+        //]);
+         */
+
+        $subFolder = $sessionUser->id;
+        $s3Path = $file->store($subFolder, 's3');
+
+        $mediafile = Diskmediafile::doCreate([
+            $s3Path,                             // $s3Filepath
+            $file->getClientOriginalName(),      // $mfname
+            MediafileTypeEnum::AVATAR,           // $mftype
+            $sessionUser,                        // $owner
+            $sessionUser->id,                    // $resourceID
+            'avatar',                            // $resourceType
+            $file->getMimeType(),                // $mimetype
+            $file->getClientOriginalName(),      // $origFilename
+            $file->getClientOriginalExtension(), // $origExt
         ]);
 
         $sessionUser->timeline->avatar_id = $mediafile->id;
@@ -211,14 +228,30 @@ class UsersController extends AppBaseController
             abort(400);
         }
 
-        $mediafile = Mediafile::create([
-            'resource_type' => 'cover',
-            'filename' => $file->store('./covers', 's3'),
-            'mfname' => $file->getClientOriginalName(),
-            'mftype' => MediafileTypeEnum::COVER,
-            'mimetype' => $file->getMimeType(),
-            'orig_filename' => $file->getClientOriginalName(),
-            'orig_ext' => $file->getClientOriginalExtension(),
+        /*
+        //$mediafile = Mediafile::create([
+            //'resource_type' => 'cover',
+            //'filename' => $file->store('./covers', 's3'),
+            //'mfname' => $file->getClientOriginalName(),
+            //'mftype' => MediafileTypeEnum::COVER,
+            //'mimetype' => $file->getMimeType(),
+            //'orig_filename' => $file->getClientOriginalName(),
+            //'orig_ext' => $file->getClientOriginalExtension(),
+        //]);
+         */
+        $subFolder = $sessionUser->id;
+        $s3Path = $file->store($subFolder, 's3');
+
+        $mediafile = Diskmediafile::doCreate([
+            $s3Path,                             // $s3Filepath
+            $file->getClientOriginalName(),      // $mfname
+            MediafileTypeEnum::COVER,            // $mftype
+            $sessionUser,                        // $owner
+            $sessionUser->id,                    // $resourceID
+            'cover',                             // $resourceType
+            $file->getMimeType(),                // $mimetype
+            $file->getClientOriginalName(),      // $origFilename
+            $file->getClientOriginalExtension(), // $origExt
         ]);
 
         $sessionUser->timeline->cover_id = $mediafile->id;

@@ -106,32 +106,32 @@ class MediafilesController extends AppBaseController
 
         try {
             /*
-            $mediafile = DB::transaction(function () use(&$file, &$request) {
-                $owner = $request->user(); // the orig. content OWNER
-                $subFolder = $owner->id;
-                //$s3Filename = $file->store('./'.$subFolder, 's3');
-                $s3Filename = $file->store($subFolder, 's3');
-                $mfname = $mfname ?? $file->getClientOriginalName();
-                $diskmediafile = Diskmediafile::create([
-                    'filename' => $s3Filename,
-                    'mimetype' => $file->getMimeType(),
-                    'owner_id' => $owner->id,
-                    'orig_filename' => $file->getClientOriginalName(),
-                    'orig_ext' => $file->getClientOriginalExtension(),
-                    'cattrs' => $request->input('cattrs') ?? null,
-                    'meta' => $request->input('meta') ?? null,
-                ]);
-                $mediafile = Mediafile::create([
-                    'diskmediafile_id' => $diskmediafile->id,
-                    'resource_id' => $request->resource_id,
-                    'resource_type' => $request->resource_type,
-                    'mfname' => $mfname,
-                    'mftype' => $request->mftype,
-                    'cattrs' => $request->input('cattrs') ?? null,
-                    'meta' => $request->input('meta') ?? null,
-                ]);
-                return $mediafile;
-            });
+            //$mediafile = DB::transaction(function () use(&$file, &$request) {
+                //$owner = $request->user(); // the orig. content OWNER
+                //$subFolder = $owner->id;
+                ////$s3Filename = $file->store('./'.$subFolder, 's3');
+                //$s3Filename = $file->store($subFolder, 's3');
+                //$mfname = $mfname ?? $file->getClientOriginalName();
+                //$diskmediafile = Diskmediafile::create([
+                    //'filename' => $s3Filename,
+                    //'mimetype' => $file->getMimeType(),
+                    //'owner_id' => $owner->id,
+                    //'orig_filename' => $file->getClientOriginalName(),
+                    //'orig_ext' => $file->getClientOriginalExtension(),
+                    //'cattrs' => $request->input('cattrs') ?? null,
+                    //'meta' => $request->input('meta') ?? null,
+                //]);
+                //$mediafile = Mediafile::create([
+                    //'diskmediafile_id' => $diskmediafile->id,
+                    //'resource_id' => $request->resource_id,
+                    //'resource_type' => $request->resource_type,
+                    //'mfname' => $mfname,
+                    //'mftype' => $request->mftype,
+                    //'cattrs' => $request->input('cattrs') ?? null,
+                    //'meta' => $request->input('meta') ?? null,
+                //]);
+                //return $mediafile;
+            //});
             */
 
             $owner = $request->user(); // the orig. content OWNER

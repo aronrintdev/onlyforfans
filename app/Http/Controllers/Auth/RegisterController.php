@@ -427,16 +427,16 @@ class RegisterController extends Controller
                     'png',                     // $origExt
                 ]);
                 /*
-                $media = Mediafile::create([
-                    'mfname'  => $photoName,
-                    'filename' => $s3Path,
-                    'mimetype' => $mimetype,
-                    'mftype' => $mftype,
-                    'orig_ext' => 'png',
-                    'orig_filename' => $photoName,
-                    'resource_id' =>  $user->id,
-                    'resource_type' => 'users',
-                ]);
+                //$media = Mediafile::create([
+                //    'mfname'  => $photoName,
+                //    'filename' => $s3Path,
+                //    'mimetype' => $mimetype,
+                //    'mftype' => $mftype,
+                //    'orig_ext' => 'png',
+                //    'orig_filename' => $photoName,
+                //    'resource_id' =>  $user->id,
+                //    'resource_type' => 'users',
+                //]);
                  */
                 $timeline = $user->timeline;
                 $timeline->avatar_id = $media->id;

@@ -114,14 +114,13 @@ if ($doS3Upload) {
             }
         })($ext);
 
-
         $dmf_attrs = [
             'mimetype' => $mimetype, // $file->getMimeType(),
             'orig_filename' => $fnameToStore, // $file->getClientOriginalName(),
             'orig_ext' => $ext, // $file->getClientOriginalExtension(),
             'resource_id' =>  null, // set below
             'resource_type' => null, // set below
-            'filename' => null, // set below
+            'filepath' => null, // set below
         ];
 
         $mfname = Str::slug($faker->catchPhrase,'-').'.'.$ext;
@@ -156,17 +155,31 @@ if ($doS3Upload) {
             // https://stackoverflow.com/questions/15076819/file-get-contents-ignoring-verify-peer-false
             $contents = file_get_contents($json->file);
             Storage::disk('s3')->put($s3Path, $contents);
-            $dmf_attrs['filename'] = $s3Path;
+            $dmf_attrs['filepath'] = $s3Path;
         } else {
-            $dmf_attrs['filename'] = $mf_attrs['mfname']; // dummy filename for testing, etc
+            $dmf_attrs['filepath'] = $mf_attrs['mfname']; // dummy filename/path for testing, etc
         }
 
-        $mediafile = DB::transaction(function () use($mf_attrs, $dmf_attrs) {
-            $diskmediafile = Diskmediafile::create($dmf_attrs);
-            $mf_attrs['diskmediafile_id'] = $diskmediafile->id;
-            $mediafile = Mediafile::create($mf_attrs);
-            return $mediafile;
-        });
+        $mediafile = Diskmediafile::doCreate([
+            $dmf_attrs['filepath'],        // $s3Filepath
+            $mf_attrs['mfname'],           // $mfname
+            $mf_attrs['mftype'],           // $mftype
+            $owner,                        // $owner
+            $dmf_attrs['resource_id'],     // $resourceID
+            $dmf_attrs['resource_type'],   // $resourceType
+            $dmf_attrs['mimetype'],        // $mimetype
+            $dmf_attrs['orig_filename'],   // $origFilename
+            $dmf_attrs['orig_ext'],        // $origExt
+        ]);
+
+        /*
+        //$mediafile = DB::transaction(function () use($mf_attrs, $dmf_attrs) {
+            //$diskmediafile = Diskmediafile::create($dmf_attrs);
+            //$mf_attrs['diskmediafile_id'] = $diskmediafile->id;
+            //$mediafile = Mediafile::create($mf_attrs);
+            //return $mediafile;
+        //});
+         */
 
         return $mediafile;
     }
