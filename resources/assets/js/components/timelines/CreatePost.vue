@@ -22,7 +22,7 @@
                   <path d="M19 3h-1V2a1 1 0 0 0-2 0v1H8V2a1 1 0 0 0-2 0v1H5a2 2 0 0 0-2 2v13a3 3 0 0 0 3 3h12a3 3 0 0 0 3-3V5a2 2 0 0 0-2-2zm0 15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V9h14zm0-11H5V5h14zM9.79 17.21a1 1 0 0 0 1.42 0l5-5a1 1 0 0 0 .29-.71 1 1 0 0 0-1-1 1 1 0 0 0-.71.29l-4.29 4.3-1.29-1.3a1 1 0 0 0-.71-.29 1 1 0 0 0-1 1 1 1 0 0 0 .29.71z"></path>
                 </svg> 
                 <span> Scheduled for&nbsp;</span>
-                <strong>{{ moment(postScheduleDate).local().format('MMM DD, h:mm a') }}</strong>
+                <strong>{{ moment(postScheduleDate * 1000).local().format('MMM DD, h:mm a') }}</strong>
               </div>
               <button class="btn close-btn" @click="clearSchedule">
                 <svg class="icon-close" viewBox="0 0 24 24">
@@ -80,44 +80,13 @@
         </b-card>
       </div>
     </section>
-    <b-modal modal-class="schedule-message-modal" hide-header centered hide-footer ref="schedule_picker_modal">
-      <div class="block-modal">
-        <div class="header d-flex align-items-center">
-          <h4 class="pt-1 pb-1">SCHEDULED POST</h4>
-        </div>
-        <div class="content">
-          <b-form-datepicker
-            v-model="postSchedule.date"
-            class="mb-3 mt-1"
-            ref="schedule_date"
-            :state="postSchedule.date ? true : null"
-            :min="new Date()"
-          />
-          <b-form-timepicker
-            v-model="postSchedule.time"
-            :state="postSchedule.timeState"
-            class="mb-2"
-            locale="en"
-            @input="onChangePostScheduleTime"
-          ></b-form-timepicker>
-        </div>
-        <div class="d-flex align-items-center justify-content-end action-btns">
-          <button class="link-btn" @click="closeSchedulePicker">Cancel</button>
-          <button
-            class="link-btn"
-            @click="applySchedule"
-            :disabled="!postSchedule.date || !postSchedule.time || !postSchedule.timeState"
-          >Apply</button>
-        </div>
-      </div>
-    </b-modal>
   </div>
 </template>
 
 <script>
 import Vuex from 'vuex';
 import moment from 'moment';
-//import { eventBus } from '@/app';
+import { eventBus } from '@/app';
 import vue2Dropzone from 'vue2-dropzone';
 import 'vue2-dropzone/dist/vue2Dropzone.min.css';
 import EmojiIcon from '@components/common/icons/EmojiIcon.vue';
@@ -171,7 +140,6 @@ export default {
         'X-CSRF-TOKEN': document.head.querySelector('[name=csrf-token]').content,
       },
     },
-    postSchedule: {},
     postScheduleDate: null,
   }),
 
@@ -195,7 +163,7 @@ export default {
         type: this.postType,
         price: this.price,
         currency: this.currency,
-        schedule_datetime: moment(this.postScheduleDate).unix(),
+        schedule_datetime: this.postScheduleDate,
       });
       this.$log.debug('savePost', { response });
       const json = response.data;
@@ -268,31 +236,20 @@ export default {
       this.resetForm();
     },
     showSchedulePicker() {
-      this.postSchedule = {};
-      this.$refs.schedule_picker_modal.show();
-    },
-    onChangePostScheduleTime(event) {
-      this.postSchedule.timeState = true;
-      if (moment().format('YYYY-MM-DD') === this.$refs.schedule_date.value) {
-        if (moment().format('HH:mm:ss') > event) {
-          this.postSchedule.timeState = false;
-        }
-      }
-      this.postSchedule = { ...this.postSchedule };
+      eventBus.$emit('open-modal', {
+        key: 'show-schedule-datetime',
+      })
     },
     clearSchedule() {
       this.postScheduleDate = undefined;
     },
-    closeSchedulePicker() {
-      this.postSchedule = {};
-      this.$refs.schedule_picker_modal.hide();
-    },
-    applySchedule() {
-      this.postScheduleDate = moment(`${this.postSchedule.date} ${this.postSchedule.time}`).utc().valueOf();
-      this.closeSchedulePicker();
-    }
   },
-
+  mounted() {
+    const self = this;
+    eventBus.$on('apply-schedule', function(data) {
+      self.postScheduleDate = data;
+    })
+  },
   created() {
     this.dropzoneConfigs = {
       pic: {
@@ -396,45 +353,5 @@ width: 128px;
 
 .b-icon.bi {
   vertical-align: middle;
-}
-.scheduled-message-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 36px !important;
-  padding: 6px;
-  border-radius: 6px;
-  margin: -0.6em 0 0.6em;
-  background: rgba(138,150,163,.12);
-
-  .icon-schedule {
-    fill: #00aff0;
-    margin-right: 6px;
-    width: 22px;
-  }
-  strong {
-    letter-spacing: -0.2px;
-  }
-  & > div {
-    font-size: 13px;
-    flex: 0 1 100%;
-    max-width: 100%;
-    display: flex;
-    align-items: center;
-  }
-  .close-btn {
-    padding: 2px;
-    background: #00aff0;
-    border: none;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    .icon-close {
-      fill: #fefefe;
-      width: 18px;
-    }
-  }
 }
 </style>

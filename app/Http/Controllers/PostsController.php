@@ -112,6 +112,7 @@ class PostsController extends AppBaseController
             'price' => 'sometimes|required|integer',
             'mediafiles' => 'array',
             'mediafiles.*.*' => 'integer|uuid|exists:mediafiles',
+            'schedule_datetime' => 'integer',
         ]);
 
 
@@ -133,6 +134,12 @@ class PostsController extends AppBaseController
             foreach ($request->mediafiles as $mfID) {
                 $cloned = Mediafile::find($mfID)->doClone('posts', $post->id);
                 $post->mediafiles()->save($cloned);
+            }
+        }
+
+        if ($request->has('schedule_datetime')) {
+            if ($request->schedule_datetime !== $post->schedule_datetime) {
+                $post->schedule_datetime = $request->schedule_datetime;
             }
         }
 

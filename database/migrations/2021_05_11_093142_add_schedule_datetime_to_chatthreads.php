@@ -15,7 +15,7 @@ class AddScheduleDatetimeToChatthreads extends Migration
     {
         Schema::table('chatthreads', function (Blueprint $table) {
             //
-            $table->string('schedule_datetime')->nullable();
+            $table->integer('schedule_datetime')->nullable();
         });
     }
 
