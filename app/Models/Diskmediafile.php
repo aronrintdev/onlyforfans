@@ -16,7 +16,8 @@ use App\Traits\OwnableFunctions;
 use Cviebrock\EloquentSluggable\Sluggable;
 use Intervention\Image\Facades\Image;
 
-class DiskMediafile extends BaseModel implements Guidable, Ownable, Cloneable
+//class DiskMediafile extends BaseModel implements Guidable, Ownable, Cloneable
+class DiskMediafile extends BaseModel implements Guidable, Ownable
 {
     use UsesUuid, SoftDeletes, HasFactory, OwnableFunctions, Sluggable, SluggableTraits;
 
@@ -84,6 +85,22 @@ class DiskMediafile extends BaseModel implements Guidable, Ownable, Cloneable
     //--------------------------------------------
     // %%% Methods
     //--------------------------------------------
+
+    // %%% --- Implement Ownable Interface ---
+
+    public function isOwner(User $user): bool {
+        return $this->owner_id === $user->id;
+    }
+
+    public function getOwner(): ?Collection
+    {
+        return new Collection( $this->owner->without(['avatar','cover']) );
+    }
+
+    public function getPrimaryOwner(): User
+    {
+        return $this->owner;
+    }
 
     // %%% --- Implement Sluggable Interface ---
 
@@ -165,7 +182,7 @@ class DiskMediafile extends BaseModel implements Guidable, Ownable, Cloneable
     }
 
     // creates diskmediafile and associated mediafile reference
-    public function doCreate(
+    public static function doCreate(
         $s3Filepath,
         $mfname, 
         $mftype, 
@@ -179,7 +196,19 @@ class DiskMediafile extends BaseModel implements Guidable, Ownable, Cloneable
         $meta=null
     ) 
     {
-        $mediafile = DB::transaction(function () use(&$mimetype, &$owner, $mfname, $mftype, $resourceType, $resouceID, $cattrs, $meta) {
+        $mediafile = DB::transaction(function () use(
+            &$mimetype, 
+            &$owner, 
+            $s3Filepath, 
+            $origFilename, 
+            $origExt,
+            $mfname, 
+            $mftype, 
+            $resourceType, 
+            $resourceID, 
+            $cattrs, 
+            $meta
+        ) {
             $subFolder = $owner->id;
             //$s3Filename = $file->store($subFolder, 's3');
             $diskmediafile = Diskmediafile::create([

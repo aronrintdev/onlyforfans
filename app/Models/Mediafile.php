@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Interfaces\Ownable;
 use App\Interfaces\Guidable;
-use App\Interfaces\Cloneable;
+//use App\Interfaces\Cloneable;
 use App\Models\Traits\UsesUuid;
 use App\Enums\MediafileTypeEnum;
 use App\Models\Traits\SluggableTraits;
@@ -15,7 +15,7 @@ use App\Traits\OwnableFunctions;
 use Cviebrock\EloquentSluggable\Sluggable;
 use Intervention\Image\Facades\Image;
 
-class Mediafile extends BaseModel implements Guidable, Ownable, Cloneable
+class Mediafile extends BaseModel implements Guidable, Ownable, 
 {
     use UsesUuid, SoftDeletes, HasFactory, OwnableFunctions, Sluggable, SluggableTraits;
 
@@ -189,6 +189,7 @@ class Mediafile extends BaseModel implements Guidable, Ownable, Cloneable
 
     // %%% --- Other ---
 
+    /*
     //  Shallow clone: copies/pastes the DB record, not the asset/file
     //  ~ cloning only allowed if new copy is associated with another resource (eg post)
     //  ~ see: https://trello.com/c/0fBcmPjq
@@ -200,6 +201,29 @@ class Mediafile extends BaseModel implements Guidable, Ownable, Cloneable
         ]);
         $cloned->save();
         return $cloned;
+    }
+     */
+
+    public function createReference(
+        int      $diskmediafileID, 
+        string   $resourceType,
+        int      $resourceID,
+        string   $mfname, 
+        string   $mftype,
+        array    $cattrs=null,
+        array    $meta=null
+    ) : ?Mediafile
+    {
+        $mediafile = Mediafile::create([
+            'diskmediafile_id' => $diskmediafileID,
+            'resource_id' => $resourceID,
+            'resource_type' => $resourceType,
+            'mfname' => $mfname,
+            'mftype' => $mftype,
+            'cattrs' => $cattrs,
+            'meta' => $meta,
+        ]);
+        return $mediafile;
     }
 
 }

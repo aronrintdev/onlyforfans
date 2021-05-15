@@ -9,6 +9,7 @@ use App\Models\ChatThread;
 use App\Models\Timeline;
 use App\Models\User;
 use App\Models\Mediafile;
+use App\Models\Diskmediafile;
 use App\Events\MessageSentEvent;
 use App\Events\MessageRemoveEvent;
 use App\Enums\MediafileTypeEnum;
@@ -279,15 +280,28 @@ class MessageController extends Controller
                     'mcounter' => $index,
                 ]);
                 if ($file) {
-                    $message->mediafile()->create([
-                        'resource_type' => 'messages',
-                        'filename' => $file->store('./galleries', 's3'),
-                        'mfname' => $file->getClientOriginalName(),
-                        'mftype' => MediafileTypeEnum::GALLERY,
-                        'mimetype' => $file->getMimeType(),
-                        'orig_filename' => $file->getClientOriginalName(),
-                        'orig_ext' => $file->getClientOriginalExtension(),
-                    ]);
+                    $subPath = './'.$sessionUser->id;
+                    $s3Path = $file->store($subPath, 's3');
+                    $mediafile = Diskmediafile::doCreate(
+                        $s3Path,                             // $s3Filepath
+                        $file->getClientOriginalName(),      // $mfname
+                        MediafileTypeEnum::GALLERY,          // $mftype
+                        $sessionUser,                        // $owner
+                        $message->id,                        // $resourceID
+                        'messages',                          // $resourceType
+                        $file->getMimeType(),                // $mimetype
+                        $file->getClientOriginalName(),      // $origFilename
+                        $file->getClientOriginalExtension(), // $origExt
+                    );
+//                    $message->mediafile()->create([
+//                        'resource_type' => 'messages',
+//                        'filename' => $filename,
+//                        'mfname' => $file->getClientOriginalName(),
+//                        'mftype' => MediafileTypeEnum::GALLERY,
+//                        'mimetype' => $file->getMimeType(),
+//                        'orig_filename' => $file->getClientOriginalName(),
+//                        'orig_ext' => $file->getClientOriginalExtension(),
+//                    ]);
                 }
                 $index++;
             }
@@ -307,15 +321,26 @@ class MessageController extends Controller
                 ]);
                 if ($file) {
                     $mediafile = MediaFile::where('id', $file)->get()->first();
-                    $message->mediafile()->create([
-                        'resource_type' => 'messages',
-                        'filename' => $mediafile->filename,
-                        'mfname' => $mediafile->mfname,
-                        'mftype' => $mediafile->mftype,
-                        'mimetype' => $mediafile->mimetype,
-                        'orig_filename' => $mediafile->orig_filename,
-                        'orig_ext' => $mediafile->orig_ext,
-                    ]);
+                    $diskmediafileID = $mediafile->diskmediafile_id;
+                    //$subPath = './'.$sessionUser->id;
+                    //$s3Path = $file->store($subPath, 's3');
+                    $mediafile = Mediafile::createReference(
+                        $diskmediafileID,    // $diskmediafileID
+                        $mediafile->resource_type, // $resourceType
+                        $mediafile->resource_id, // $resourceID
+                        $mediafile->mfname,  // $mfname
+                        $mediafile->mftype   // $mftype
+                    );
+//                    $mediafile = MediaFile::where('id', $file)->get()->first();
+//                    $message->mediafile()->create([
+//                        'resource_type' => 'messages',
+//                        'filename' => $mediafile->filename,
+//                        'mfname' => $mediafile->mfname,
+//                        'mftype' => $mediafile->mftype,
+//                        'mimetype' => $mediafile->mimetype,
+//                        'orig_filename' => $mediafile->orig_filename,
+//                        'orig_ext' => $mediafile->orig_ext,
+//                    ]);
                 }
                 $index++;
             }
