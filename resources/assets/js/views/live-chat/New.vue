@@ -653,7 +653,7 @@
       optionValue: undefined,
       directionValue: undefined,
       selectedUser: undefined,
-      messageText: undefined,
+      newMessageText: undefined,
       users: [],
       filteredUsers: [],
       selectedUsers: [],
