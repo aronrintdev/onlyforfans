@@ -1,11 +1,11 @@
 <?php
-
 namespace App\Http\Controllers\Auth;
 
 //use DB;
 use Illuminate\Support\Facades\DB;
 
 use App\Http\Controllers\Controller;
+use App\Models\DiskMediafile;
 use App\Models\Mediafile;
 use App\Models\Setting;
 use App\Models\Timeline;
@@ -409,7 +409,6 @@ class RegisterController extends Controller
 
                 $photoName = date('Y-m-d-H-i-s').str_random(8).'.png';
                 $mimetype = 'image/png';
-                $mftype = MediafileTypeEnum::AVATAR;
 
                 $subFolder = MediafileTypeEnum::getSubfolder($mftype);
                 $s3Path = "$subFolder/$photoName";
@@ -417,6 +416,18 @@ class RegisterController extends Controller
                 $contents = file_get_contents($facebook_user->avatar_original . "&access_token=".$facebook_user->token);
                 Storage::disk('s3')->put($s3Path, $contents);
 
+                $media = Diskmediafile::doCreate([
+                    $s3Path,                   // $s3Filepath
+                    $photoName,                // $mfname
+                    MediafileTypeEnum::AVATAR, // $mftype
+                    $user,                     // $owner
+                    $user->id,                 // $resourceID
+                    'users',                   // $resourceType
+                    $mimetype,                 // $mimetype
+                    $photoName,                // $origFilename
+                    'png',                     // $origExt
+                ]);
+                /*
                 $media = Mediafile::create([
                     'mfname'  => $photoName,
                     'filename' => $s3Path,
@@ -427,6 +438,7 @@ class RegisterController extends Controller
                     'resource_id' =>  $user->id,
                     'resource_type' => 'users',
                 ]);
+                 */
                 $timeline = $user->timeline;
                 $timeline->avatar_id = $media->id;
 

@@ -166,33 +166,36 @@ class DiskMediafile extends BaseModel implements Guidable, Ownable, Cloneable
 
     // creates diskmediafile and associated mediafile reference
     public function doCreate(
+        $s3Filepath,
         $mfname, 
         $mftype, 
-        $file, 
         $owner, 
-        $resource_type=null, 
-        $resource_id=null, 
+        $resourceType=null, 
+        $resourceID=null, 
+        $mimetype=null, 
+        $origFilename=null, 
+        $origExt=null, 
         $cattrs=null, 
         $meta=null
     ) 
     {
-        $mediafile = DB::transaction(function () use(&$file, &$owner, $mfname, $mftype, $resource_type, $resouce_id, $cattrs, $meta) {
+        $mediafile = DB::transaction(function () use(&$mimetype, &$owner, $mfname, $mftype, $resourceType, $resouceID, $cattrs, $meta) {
             $subFolder = $owner->id;
-            $newFilename = $file->store($subFolder, 's3');
+            //$s3Filename = $file->store($subFolder, 's3');
             $diskmediafile = Diskmediafile::create([
-                'filename' => $newFilename,
-                'mimetype' => $file->getMimeType(),
+                'filename' => $s3Filepath,
+                'mimetype' => $mimetype,
                 'owner_id' => $owner->id,
-                'orig_filename' => $file->getClientOriginalName(),
-                'orig_ext' => $file->getClientOriginalExtension(),
+                'orig_filename' => $origFilename,
+                'orig_ext' => $origExt,
                 'cattrs' => $cattrs,
                 'meta' => $meta,
             ]);
             $mediafile = Mediafile::create([
                 'diskmediafile_id' => $diskmediafile->id,
-                'resource_id' => $resource_id,
-                'resource_type' => $resource_type,
-                'mfname' => $mfname = $mfname ?? $file->getClientOriginalName(),
+                'resource_id' => $resourceID,
+                'resource_type' => $resourceType,
+                'mfname' => $mfname ?? $file->getClientOriginalName(),
                 'mftype' => $mftype,
                 'cattrs' => $cattrs,
                 'meta' => $meta,

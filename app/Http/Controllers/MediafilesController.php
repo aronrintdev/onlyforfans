@@ -17,6 +17,7 @@ use App\Models\User;
 use App\Models\Post;
 use App\Models\Story;
 use App\Models\Mediafile;
+use App\Models\Diskmediafile;
 use App\Enums\MediafileTypeEnum;
 
 class MediafilesController extends AppBaseController
@@ -83,7 +84,7 @@ class MediafilesController extends AppBaseController
     {
         $this->validate($request, [
             'mediafile' => 'required',
-            'mftype' => 'required|in:avatar,cover,post,story,vault',
+            'mftype' => 'required|in:'.MediafileTypeEnum::getKeysCsv(),
             'resource_type' => 'nullable|alpha-dash|in:comments,posts,stories,vaultfolders',
             'resource_id' => 'required_with:resource_type|uuid',
         ]);
@@ -104,24 +105,51 @@ class MediafilesController extends AppBaseController
         }
 
         try {
+            /*
             $mediafile = DB::transaction(function () use(&$file, &$request) {
-                $subFolder = MediafileTypeEnum::getSubfolder($request->mftype);
-                //$newFilename = $file->store('./'.$subFolder, 's3');
-                $newFilename = $file->store($subFolder, 's3');
+                $owner = $request->user(); // the orig. content OWNER
+                $subFolder = $owner->id;
+                //$s3Filename = $file->store('./'.$subFolder, 's3');
+                $s3Filename = $file->store($subFolder, 's3');
                 $mfname = $mfname ?? $file->getClientOriginalName();
-                $mediafile = Mediafile::create([
-                    'resource_id' => $request->resource_id,
-                    'resource_type' => $request->resource_type,
-                    'filename' => $newFilename,
-                    'mfname' => $mfname,
-                    'mftype' => $request->mftype,
-                    'meta' => $request->input('meta') ?? null,
+                $diskmediafile = Diskmediafile::create([
+                    'filename' => $s3Filename,
                     'mimetype' => $file->getMimeType(),
+                    'owner_id' => $owner->id,
                     'orig_filename' => $file->getClientOriginalName(),
                     'orig_ext' => $file->getClientOriginalExtension(),
+                    'cattrs' => $request->input('cattrs') ?? null,
+                    'meta' => $request->input('meta') ?? null,
+                ]);
+                $mediafile = Mediafile::create([
+                    'diskmediafile_id' => $diskmediafile->id,
+                    'resource_id' => $request->resource_id,
+                    'resource_type' => $request->resource_type,
+                    'mfname' => $mfname,
+                    'mftype' => $request->mftype,
+                    'cattrs' => $request->input('cattrs') ?? null,
+                    'meta' => $request->input('meta') ?? null,
                 ]);
                 return $mediafile;
             });
+            */
+
+            $owner = $request->user(); // the orig. content OWNER
+            $subFolder = $owner->id;
+            $s3path = $file->store($subFolder, 's3');
+            $mfname = $mfname ?? $file->getClientOriginalName();
+
+            $mediafile = Diskmediafile::doCreate([
+                $s3Path,                            // $s3Filepath
+                $mfname,                            // $mfname
+                $request->mftype,                   // $mftype
+                $owner,                             // $owner
+                $request->resource_id,              // $resourceID
+                $request->resource_type,            // $resourceType
+                $mimetype,                          // $mimetype
+                $file->getClientOriginalName(),     // $origFilename
+                $file->getClientOriginalExtension() // $origExt
+            ]);
         } catch (\Exception $e) {
             throw $e; // %FIXME: report error to user via browser message
         }

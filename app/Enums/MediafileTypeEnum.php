@@ -21,6 +21,7 @@ class MediafileTypeEnum extends SmartEnum implements Selectable {
         self::GALLERY => 'Gallery',
     ];
 
+    /*
     public static function getSubfolder($mftype) {
         switch ($mftype) {
         case MediafileTypeEnum::VAULT:
@@ -37,4 +38,5 @@ class MediafileTypeEnum extends SmartEnum implements Selectable {
             return 'default';
         }
     }
+     */
 }
