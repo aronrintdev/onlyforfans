@@ -150,7 +150,7 @@ class MediafileTest extends TestCase
         // Update or add avatars to some users for this test...
         $users = User::take(5)->get();
         $users->each( function($u) {
-            $avatar = FactoryHelpers::createImage(MediafileTypeEnum::AVATAR, null, false); //skip S3 upload
+            $avatar = FactoryHelpers::createImage($u, MediafileTypeEnum::AVATAR, null, false); //skip S3 upload
             $u->save();
         });
     }

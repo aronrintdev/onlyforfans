@@ -31,7 +31,9 @@ class MediafileModelTest extends TestCase
     {
         //$post = factory(Post::class)->make();
         $post = Post::firstOrFail();
+        $owner = $post->getPrimaryOwner();
         $mediafile = FactoryHelpers::createImage(
+            $owner,
             MediafileTypeEnum::POST, // string $mftype,
             $post->id, // string $resourceID
             true, // $doS3Upload
@@ -82,7 +84,7 @@ class MediafileModelTest extends TestCase
         // Update or add avatars to some users for this test...
         $users = User::take(5)->get();
         $users->each( function($u) {
-            $avatar = FactoryHelpers::createImage(MediafileTypeEnum::AVATAR, null, false); //skip S3 upload
+            $avatar = FactoryHelpers::createImage($u, MediafileTypeEnum::AVATAR, null, false); //skip S3 upload
             $u->save();
         });
     }

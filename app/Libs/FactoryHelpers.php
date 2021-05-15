@@ -5,6 +5,7 @@ use Exception;
 use App\Models\User;
 use App\Models\Timeline;
 use App\Models\Mediafile;
+use App\Models\DiskMediafile;
 use Illuminate\Support\Str;
 use Faker\Factory as Faker;
 
@@ -39,8 +40,8 @@ class FactoryHelpers {
         ]);
 
         if ( Config::get('app.env') !== 'testing' ) {
-            $avatar = self::createImage(MediafileTypeEnum::AVATAR, null, true);
-            $cover = self::createImage(MediafileTypeEnum::COVER, null, true);
+            $avatar = self::createImage($user, MediafileTypeEnum::AVATAR, null, true);
+            $cover = self::createImage($user, MediafileTypeEnum::COVER, null, true);
         } else {
             $avatar = null;
             $cover = null;
@@ -74,6 +75,7 @@ class FactoryHelpers {
 
     // Inserts a [mediafiles] record
     public static function createImage(
+        User $owner,
         string $mftype, 
         string $resourceID = null, 
         $doS3Upload=false,
@@ -112,30 +114,39 @@ if ($doS3Upload) {
             }
         })($ext);
 
-        $attrs = [
-            'mfname' => Str::slug($faker->catchPhrase,'-').'.'.$ext,
-            'mftype' => $mftype,
+
+        $dmf_attrs = [
             'mimetype' => $mimetype, // $file->getMimeType(),
             'orig_filename' => $fnameToStore, // $file->getClientOriginalName(),
             'orig_ext' => $ext, // $file->getClientOriginalExtension(),
+            'resource_id' =>  null, // set below
+            'resource_type' => null, // set below
+            'filename' => null, // set below
         ];
 
-        $subFolder = MediafileTypeEnum::getSubfolder($mftype);
+        $mfname = Str::slug($faker->catchPhrase,'-').'.'.$ext;
+        $mf_attrs = [
+            'diskmediafile_id' => null,
+            'mfname' => $mfname,
+            'mftype' => $mftype,
+        ];
+
+        $subFolder = $owner->id;
         $s3Path = "$subFolder/$fnameToStore";
 
         switch ($mftype) {
             case MediafileTypeEnum::COVER:
             case MediafileTypeEnum::AVATAR:
-                $attrs['resource_id'] =  $resourceID;
-                $attrs['resource_type'] = 'users';
+                $dmf_attrs['resource_id'] =  $resourceID;
+                $dmf_attrs['resource_type'] = 'users';
                 break;
             case MediafileTypeEnum::POST:
-                $attrs['resource_id'] =  $resourceID; // ie story_id: required for story type
-                $attrs['resource_type'] = 'posts';
+                $dmf_attrs['resource_id'] =  $resourceID; // ie story_id: required for story type
+                $dmf_attrs['resource_type'] = 'posts';
                 break;
             case MediafileTypeEnum::STORY:
-                $attrs['resource_id'] =  $resourceID; // ie story_id: required for story type
-                $attrs['resource_type'] = 'stories';
+                $dmf_attrs['resource_id'] =  $resourceID; // ie story_id: required for story type
+                $dmf_attrs['resource_type'] = 'stories';
                 break;
             default:
                 throw new Exception('media file type of ' . $mftype . ' not supported');
@@ -145,12 +156,17 @@ if ($doS3Upload) {
             // https://stackoverflow.com/questions/15076819/file-get-contents-ignoring-verify-peer-false
             $contents = file_get_contents($json->file);
             Storage::disk('s3')->put($s3Path, $contents);
-            $attrs['filename'] = $s3Path;
+            $dmf_attrs['filename'] = $s3Path;
         } else {
-            $attrs['filename'] = $attrs['mfname']; // dummy filename for testing, etc
+            $dmf_attrs['filename'] = $mf_attrs['mfname']; // dummy filename for testing, etc
         }
 
-        $mediafile = Mediafile::create($attrs);
+        $mediafile = DB::transaction(function () use($mf_attrs, $dmf_attrs) {
+            $diskmediafile = Diskmediafile::create($dmf_attrs);
+            $mf_attrs['diskmediafile_id'] = $diskmediafile->id;
+            $mediafile = Mediafile::create($mf_attrs);
+            return $mediafile;
+        });
 
         return $mediafile;
     }
