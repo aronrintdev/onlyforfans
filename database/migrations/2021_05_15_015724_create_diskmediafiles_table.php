@@ -14,7 +14,7 @@ class CreateDiskmediafilesTable extends Migration
             $table->uuid('owner_id');
             $table->foreign('owner_id')->references('id')->on('users');
 
-            $table->string('filename')->comment('Filename as stored, in S3 for ex');
+            $table->string('filepath')->comment('Filename/path as stored, in S3 for ex');
             $table->string('mimetype', 255)->nullable();
             $table->string('orig_ext', 15)->nullable();
             $table->string('orig_filename', 511);

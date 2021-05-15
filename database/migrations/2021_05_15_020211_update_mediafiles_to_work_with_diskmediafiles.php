@@ -9,18 +9,36 @@ class UpdateMediafilesToWorkWithDiskmediafiles extends Migration
     public function up()
     {
         Schema::table('mediafiles', function (Blueprint $table) {
-
             $table->uuid('diskmediafile_id')->nullable()->after('id'); // nullable for sqlite workaround
             $table->foreign('diskmediafile_id')->references('id')->on('diskmediafiles');
+        });
 
+        // workaround for sqlite
+        Schema::table('mediafiles', function (Blueprint $table) {
             $table->renameColumn('filename', 'deprecated_filename');
+        });
+        Schema::table('mediafiles', function(Blueprint $table) {
             $table->renameColumn('mimetype', 'deprecated_mimetype');
+        });
+        Schema::table('mediafiles', function(Blueprint $table) {
             $table->renameColumn('orig_ext', 'deprecated_orig_ext');
+        });
+        Schema::table('mediafiles', function(Blueprint $table) {
             $table->renameColumn('orig_filename', 'deprecated_orig_filename');
+        });
+        Schema::table('mediafiles', function(Blueprint $table) {
             $table->renameColumn('has_blur', 'deprecated_has_blur');
+        });
+        Schema::table('mediafiles', function(Blueprint $table) {
             $table->renameColumn('has_mid', 'deprecated_has_mid');
+        });
+        Schema::table('mediafiles', function(Blueprint $table) {
             $table->renameColumn('has_thumb', 'deprecated_has_thumb');
+        });
+        Schema::table('mediafiles', function(Blueprint $table) {
             $table->renameColumn('orig_size', 'deprecated_orig_size');
+        });
+        Schema::table('mediafiles', function(Blueprint $table) {
             $table->renameColumn('basename', 'deprecated_basename');
         });
     }
