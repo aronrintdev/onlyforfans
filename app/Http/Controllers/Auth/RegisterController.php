@@ -415,7 +415,7 @@ class RegisterController extends Controller
                 $contents = file_get_contents($facebook_user->avatar_original . "&access_token=".$facebook_user->token);
                 Storage::disk('s3')->put($s3Path, $contents);
 
-                $media = Diskmediafile::doCreate([
+                $media = Diskmediafile::doCreate(
                     $s3Path,                   // $s3Filepath
                     $photoName,                // $mfname
                     MediafileTypeEnum::AVATAR, // $mftype
@@ -425,7 +425,7 @@ class RegisterController extends Controller
                     $mimetype,                 // $mimetype
                     $photoName,                // $origFilename
                     'png',                     // $origExt
-                ]);
+                );
                 /*
                 //$media = Mediafile::create([
                 //    'mfname'  => $photoName,
@@ -487,7 +487,7 @@ class RegisterController extends Controller
             $contents = file_get_contents($google_user->avatar_original);
             Storage::disk('s3')->put($s3Path, $contents);
 
-            $media = Diskmediafile::doCreate([
+            $media = Diskmediafile::doCreate(
                 $s3Path,                   // $s3Filepath
                 $photoName,                // $mfname
                 MediafileTypeEnum::AVATAR, // $mftype
@@ -497,7 +497,7 @@ class RegisterController extends Controller
                 $mimetype,                 // $mimetype
                 $photoName,                // $origFilename
                 'png',                     // $origExt
-            ]);
+            );
 
             $user->timeline->avatar_id = $media->id;
             $user->timeline->save();
@@ -546,7 +546,7 @@ class RegisterController extends Controller
             $contents = file_get_contents(str_replace('http://','https://', $twitter_user->avatar_original));
             Storage::disk('s3')->put($s3Path, $contents);
 
-            $media = Diskmediafile::doCreate([
+            $media = Diskmediafile::doCreate(
                 $s3Path,                   // $s3Filepath
                 $photoName,                // $mfname
                 MediafileTypeEnum::AVATAR, // $mftype
@@ -556,7 +556,7 @@ class RegisterController extends Controller
                 $mimetype,                 // $mimetype
                 $photoName,                // $origFilename
                 'png',                     // $origExt
-            ]);
+            );
 
             $user->timeline->avatar_id = $media->id;
             $user->timeline->save();
