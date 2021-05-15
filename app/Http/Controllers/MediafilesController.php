@@ -139,7 +139,7 @@ class MediafilesController extends AppBaseController
             $s3path = $file->store($subFolder, 's3');
             $mfname = $mfname ?? $file->getClientOriginalName();
 
-            $mediafile = Diskmediafile::doCreate([
+            $mediafile = Diskmediafile::doCreate(
                 $s3Path,                            // $s3Filepath
                 $mfname,                            // $mfname
                 $request->mftype,                   // $mftype
@@ -149,7 +149,7 @@ class MediafilesController extends AppBaseController
                 $mimetype,                          // $mimetype
                 $file->getClientOriginalName(),     // $origFilename
                 $file->getClientOriginalExtension() // $origExt
-            ]);
+            );
         } catch (\Exception $e) {
             throw $e; // %FIXME: report error to user via browser message
         }

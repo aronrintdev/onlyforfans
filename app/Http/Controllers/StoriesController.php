@@ -129,7 +129,7 @@ class StoriesController extends AppBaseController
                         $file = $request->file('mediafile');
                         $subFolder = $sessionUser->id;
                         $newFilename = $file->store('./'.$subFolder, 's3'); // %FIXME: hardcoded
-                        $mediafile = Diskmediafile::doCreate([
+                        $mediafile = Diskmediafile::doCreate(
                             $s3Path,                             // $s3Filepath
                             $file->getClientOriginalName(),      // $mfname
                             MediafileTypeEnum::COVER,            // $mftype
@@ -139,7 +139,7 @@ class StoriesController extends AppBaseController
                             $file->getMimeType(),                // $mimetype
                             $file->getClientOriginalName(),      // $origFilename
                             $file->getClientOriginalExtension(), // $origExt
-                        ]);
+                        );
                         //$mediafile = Mediafile::create([
                         //    'resource_id' => $story->id,
                         //    'resource_type' => 'stories',

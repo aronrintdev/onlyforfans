@@ -198,7 +198,7 @@ class UsersController extends AppBaseController
         $subFolder = $sessionUser->id;
         $s3Path = $file->store($subFolder, 's3');
 
-        $mediafile = Diskmediafile::doCreate([
+        $mediafile = Diskmediafile::doCreate(
             $s3Path,                             // $s3Filepath
             $file->getClientOriginalName(),      // $mfname
             MediafileTypeEnum::AVATAR,           // $mftype
@@ -208,7 +208,7 @@ class UsersController extends AppBaseController
             $file->getMimeType(),                // $mimetype
             $file->getClientOriginalName(),      // $origFilename
             $file->getClientOriginalExtension(), // $origExt
-        ]);
+        );
 
         $sessionUser->timeline->avatar_id = $mediafile->id;
         $sessionUser->timeline->save();
@@ -242,7 +242,7 @@ class UsersController extends AppBaseController
         $subFolder = $sessionUser->id;
         $s3Path = $file->store($subFolder, 's3');
 
-        $mediafile = Diskmediafile::doCreate([
+        $mediafile = Diskmediafile::doCreate(
             $s3Path,                             // $s3Filepath
             $file->getClientOriginalName(),      // $mfname
             MediafileTypeEnum::COVER,            // $mftype
@@ -252,7 +252,7 @@ class UsersController extends AppBaseController
             $file->getMimeType(),                // $mimetype
             $file->getClientOriginalName(),      // $origFilename
             $file->getClientOriginalExtension(), // $origExt
-        ]);
+        );
 
         $sessionUser->timeline->cover_id = $mediafile->id;
         $sessionUser->timeline->save();
