@@ -160,7 +160,7 @@ if ($doS3Upload) {
             $dmf_attrs['filepath'] = $mf_attrs['mfname']; // dummy filename/path for testing, etc
         }
 
-        $mediafile = Diskmediafile::doCreate([
+        $mediafile = Diskmediafile::doCreate(
             $dmf_attrs['filepath'],        // $s3Filepath
             $mf_attrs['mfname'],           // $mfname
             $mf_attrs['mftype'],           // $mftype
@@ -170,7 +170,7 @@ if ($doS3Upload) {
             $dmf_attrs['mimetype'],        // $mimetype
             $dmf_attrs['orig_filename'],   // $origFilename
             $dmf_attrs['orig_ext'],        // $origExt
-        ]);
+        );
 
         /*
         //$mediafile = DB::transaction(function () use($mf_attrs, $dmf_attrs) {
