@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Resources\StoryCollection;
 use App\Http\Resources\Story as StoryResource;
-use App\Models\Mediafile;
+use App\Models\Diskmediafile;
 use App\Models\Setting;
 use App\Models\Story;
 use App\Models\Timeline;
@@ -127,20 +127,31 @@ class StoriesController extends AppBaseController
                 if ( $request->attrs['stype'] === StoryTypeEnum::PHOTO ) {
                     if ( $request->hasFile('mediafile') ) {
                         $file = $request->file('mediafile');
-                        $subFolder = 'stories';
+                        $subFolder = $sessionUser->id;
                         $newFilename = $file->store('./'.$subFolder, 's3'); // %FIXME: hardcoded
-                        $mediafile = Mediafile::create([
-                            'resource_id' => $story->id,
-                            'resource_type' => 'stories',
-                            'filename' => $newFilename,
-                            'mfname' => $mfname ?? $file->getClientOriginalName(),
-                            'mftype' => MediafileTypeEnum::STORY,
-                            'meta' => $request->input('attrs.foo') ?? null,
-                            'cattrs' => $request->input('attrs.bar') ?? null,
-                            'mimetype' => $file->getMimeType(),
-                            'orig_filename' => $file->getClientOriginalName(),
-                            'orig_ext' => $file->getClientOriginalExtension(),
+                        $mediafile = Diskmediafile::doCreate([
+                            $s3Path,                             // $s3Filepath
+                            $file->getClientOriginalName(),      // $mfname
+                            MediafileTypeEnum::COVER,            // $mftype
+                            $sessionUser,                        // $owner
+                            $sessionUser->id,                    // $resourceID
+                            'cover',                             // $resourceType
+                            $file->getMimeType(),                // $mimetype
+                            $file->getClientOriginalName(),      // $origFilename
+                            $file->getClientOriginalExtension(), // $origExt
                         ]);
+                        //$mediafile = Mediafile::create([
+                        //    'resource_id' => $story->id,
+                        //    'resource_type' => 'stories',
+                        //    'filename' => $newFilename,
+                        //    'mfname' => $mfname ?? $file->getClientOriginalName(),
+                        //    'mftype' => MediafileTypeEnum::STORY,
+                        //    'meta' => $request->input('attrs.foo') ?? null,
+                        //    'cattrs' => $request->input('attrs.bar') ?? null,
+                        //    'mimetype' => $file->getMimeType(),
+                        //    'orig_filename' => $file->getClientOriginalName(),
+                        //    'orig_ext' => $file->getClientOriginalExtension(),
+                        //]);
                     } else {
                         $src = Mediafile::find($request->mediafile);
                         $cloned = $src->doClone('stories', $story->id);
