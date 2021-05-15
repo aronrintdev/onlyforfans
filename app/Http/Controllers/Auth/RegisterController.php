@@ -6,7 +6,6 @@ use Illuminate\Support\Facades\DB;
 
 use App\Http\Controllers\Controller;
 use App\Models\DiskMediafile;
-use App\Models\Mediafile;
 use App\Models\Setting;
 use App\Models\Timeline;
 use App\Models\User;
@@ -410,7 +409,7 @@ class RegisterController extends Controller
                 $photoName = date('Y-m-d-H-i-s').str_random(8).'.png';
                 $mimetype = 'image/png';
 
-                $subFolder = MediafileTypeEnum::getSubfolder($mftype);
+                $subFolder = $user->id;
                 $s3Path = "$subFolder/$photoName";
 
                 $contents = file_get_contents($facebook_user->avatar_original . "&access_token=".$facebook_user->token);
@@ -441,12 +440,9 @@ class RegisterController extends Controller
                  */
                 $timeline = $user->timeline;
                 $timeline->avatar_id = $media->id;
-
                 $timeline->save();
             }
-
         }
-
 
         if (Auth::loginUsingId($user->id)) {
             return redirect('/')->with(['message' => trans('messages.change_username_facebook'), 'status' => 'warning']);
@@ -484,26 +480,26 @@ class RegisterController extends Controller
             //  Prepare the image for user avatar
             $photoName = date('Y-m-d-H-i-s').str_random(8).'.png';
             $mimetype = 'image/png';
-            $mftype = MediafileTypeEnum::AVATAR;
 
-            $subFolder = MediafileTypeEnum::getSubfolder($mftype);
+            $subFolder = $user->id;
             $s3Path = "$subFolder/$photoName";
 
             $contents = file_get_contents($google_user->avatar_original);
             Storage::disk('s3')->put($s3Path, $contents);
 
-            $media = Mediafile::create([
-                'mfname'  => $photoName,
-                'filename' => $s3Path,
-                'mimetype' => $mimetype,
-                'mftype' => $mftype,
-                'orig_ext' => 'png',
-                'orig_filename' => $photoName,
-                'resource_id' =>  $user->id,
-                'resource_type' => 'users',
+            $media = Diskmediafile::doCreate([
+                $s3Path,                   // $s3Filepath
+                $photoName,                // $mfname
+                MediafileTypeEnum::AVATAR, // $mftype
+                $user,                     // $owner
+                $user->id,                 // $resourceID
+                'users',                   // $resourceType
+                $mimetype,                 // $mimetype
+                $photoName,                // $origFilename
+                'png',                     // $origExt
             ]);
-            $user->timeline->avatar_id = $media->id;
 
+            $user->timeline->avatar_id = $media->id;
             $user->timeline->save();
         }
 
@@ -519,7 +515,7 @@ class RegisterController extends Controller
         return Socialite::driver('twitter')->redirect();
     }
 
-  // to get authenticate user data
+    // to get authenticate user data
     public function twitter()
     {
         $twitter_user = Socialite::with('twitter')->user();
@@ -543,26 +539,26 @@ class RegisterController extends Controller
             //  Prepare the image for user avatar
             $photoName = date('Y-m-d-H-i-s').str_random(8).'.png';
             $mimetype = 'image/png';
-            $mftype = MediafileTypeEnum::AVATAR;
 
-            $subFolder = MediafileTypeEnum::getSubfolder($mftype);
+            $subFolder = $user->id;
             $s3Path = "$subFolder/$photoName";
 
             $contents = file_get_contents(str_replace('http://','https://', $twitter_user->avatar_original));
             Storage::disk('s3')->put($s3Path, $contents);
 
-            $media = Mediafile::create([
-                'mfname'  => $photoName,
-                'filename' => $s3Path,
-                'mimetype' => $mimetype,
-                'mftype' => $mftype,
-                'orig_ext' => 'png',
-                'orig_filename' => $photoName,
-                'resource_id' =>  $user->id,
-                'resource_type' => 'users',
+            $media = Diskmediafile::doCreate([
+                $s3Path,                   // $s3Filepath
+                $photoName,                // $mfname
+                MediafileTypeEnum::AVATAR, // $mftype
+                $user,                     // $owner
+                $user->id,                 // $resourceID
+                'users',                   // $resourceType
+                $mimetype,                 // $mimetype
+                $photoName,                // $origFilename
+                'png',                     // $origExt
             ]);
-            $user->timeline->avatar_id = $media->id;
 
+            $user->timeline->avatar_id = $media->id;
             $user->timeline->save();
         }
 
