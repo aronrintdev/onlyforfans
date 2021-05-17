@@ -237,8 +237,19 @@ class Diskmediafile extends BaseModel implements Guidable, Ownable
         DB::table('mediafiles')->where('id', $mediafileID)->delete();
         if  ( $deleteFromDiskIfLast ) {
             $this->deleteAssets(); // S3, etc
-            $this->delete();
+            Mediafile::withTrashed()->where('diskmediafile_id', $this->id)->forceDelete();
+            //$this->delete();
+            $this->forceDelete();
         }
+    }
+
+    // Deletes assets (S3), all references ([mediafiles] records), and finally the [diskmediafiles] record itself
+    // USE WITH CAUTION!
+    public function forceDeleteAll()
+    {
+        $this->deleteAssets(); // S3, etc
+        Mediafile::withTrashed()->where('diskmediafile_id', $this->id)->forceDelete();
+        $this->forceDelete();
     }
 
     // set width to number and height to null to scale existing
@@ -289,7 +300,7 @@ class Diskmediafile extends BaseModel implements Guidable, Ownable
     //  ~ Typically there will only be a single video, but a video could have related images such as a preview
     //  ~ An image could have an associated thumb, blur, etc.
     //  ~ Should be called *before* a mediafile is hard-deleted
-    public function deleteAssets()
+    private function deleteAssets()
     {
         if ( $this->has_thumb ) {
             Storage::disk('s3')->delete($this->thumbFilename);

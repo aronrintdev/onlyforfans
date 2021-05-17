@@ -128,7 +128,7 @@ class StoriesController extends AppBaseController
                     if ( $request->hasFile('mediafile') ) {
                         $file = $request->file('mediafile');
                         $subFolder = $sessionUser->id;
-                        $s3path = $file->store('./'.$subFolder, 's3'); // %FIXME: hardcoded
+                        $s3Path = $file->store('./'.$subFolder, 's3'); // %FIXME: hardcoded
                         $mediafile = Diskmediafile::doCreate([
                             'owner_id'        => $sessionUser->id,
                             'filepath',       => $s3Path,

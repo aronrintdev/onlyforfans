@@ -135,7 +135,7 @@ class MediafileTest extends TestCase
         $this->assertNotNull($content->mediafile);
         $mediafile = $content->mediafile;
 
-        Storage::disk('s3')->assertExists($mediafile->filename);
+        Storage::disk('s3')->assertExists($mediafile->diskmediafile->filepath);
         $this->assertSame($filename, $mediafile->mfname);
         $this->assertSame(MediafileTypeEnum::AVATAR, $mediafile->mftype);
     }

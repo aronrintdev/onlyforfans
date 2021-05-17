@@ -163,7 +163,7 @@ if ($doS3Upload) {
         $mediafile = Diskmediafile::doCreate([
             'owner_id'       => $owner->id,
             'filepath'       => $dmf_attrs['filepath'],
-            'mimetype'       => $dmf_attrs['mimetype',
+            'mimetype'       => $dmf_attrs['mimetype'],
             'orig_filename'  => $dmf_attrs['orig_filename'],
             'orig_ext'       => $dmf_attrs['orig_ext'],
             'mfname'         => $mf_attrs['mfname'],
