@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 use Database\Seeders\TestDatabaseSeeder;
 
+use App\Models\Diskmediafile;
 use App\Models\Mediafile;
 use App\Models\Story;
 use App\Models\Timeline;
@@ -216,12 +217,13 @@ class StoriesTest extends TestCase
     /**
      *  @group stories
      *  @group regression
+     *  @group here0517
      */
     public function test_can_store_picture_story()
     {
         Storage::fake('s3');
 
-        $filename = $this->faker->slug;
+        $filename = $this->faker->slug.'.png';
         $owner = User::first();
         $file = UploadedFile::fake()->image($filename, 200, 200);
 
@@ -244,21 +246,22 @@ class StoriesTest extends TestCase
         $this->assertSame($attrs['content'], $storyR->content);
         $this->assertSame(StoryTypeEnum::PHOTO, $storyR->stype);
 
-        $story = Story::find($storyR->id);
+        $story = Story::with('mediafiles')->find($storyR->id);
         $this->assertNotNull($story);
         $this->assertSame(StoryTypeEnum::PHOTO, $storyR->stype);
         $this->assertEquals($owner->id, $story->timeline->user->id);
 
         // Should only be one as this is a new story
-        $mediafile = Mediafile::where('resource_type', 'stories')->where('resource_id', $story->id)->first();
-        $this->assertNotNull($mediafile);
-        Storage::disk('s3')->assertExists($mediafile->filename);
-        $this->assertSame($filename, $mediafile->mfname);
-        $this->assertSame(MediafileTypeEnum::STORY, $mediafile->mftype);
+        $mf = Mediafile::where('resource_type', 'stories')->where('resource_id', $story->id)->first();
+        $this->assertNotNull($mf);
+        $this->assertSame($filename, $mf->mfname);
+        $this->assertSame(MediafileTypeEnum::STORY, $mf->mftype);
+        Storage::disk('s3')->assertExists($mf->diskmediafile->filepath);
+        $this->assertSame($owner->id, $mf->diskmediafile->owner_id);
 
         // Test relations
-        $this->assertTrue( $story->mediafiles->contains($mediafile->id) );
-        $this->assertEquals( $story->id, $mediafile->resource->id );
+        $this->assertTrue( $story->mediafiles->contains($mf->id) );
+        $this->assertEquals( $story->id, $mf->resource->id );
     }
 
     /**
@@ -269,7 +272,7 @@ class StoriesTest extends TestCase
     {
         Storage::fake('s3');
 
-        $filename = $this->faker->slug;
+        $filename = $this->faker->slug.'.png';
         $owner = User::first();
         $file = UploadedFile::fake()->image($filename, 200, 200);
 

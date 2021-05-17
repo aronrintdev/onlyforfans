@@ -6,6 +6,7 @@ use Auth;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Resources\StoryCollection;
 use App\Http\Resources\Story as StoryResource;
@@ -127,18 +128,18 @@ class StoriesController extends AppBaseController
                 if ( $request->attrs['stype'] === StoryTypeEnum::PHOTO ) {
                     if ( $request->hasFile('mediafile') ) {
                         $file = $request->file('mediafile');
-                        $subFolder = $sessionUser->id;
+                        $subFolder = $request->user()->id;
                         $s3Path = $file->store('./'.$subFolder, 's3'); // %FIXME: hardcoded
                         $mediafile = Diskmediafile::doCreate([
-                            'owner_id'        => $sessionUser->id,
-                            'filepath',       => $s3Path,
+                            'owner_id'        => $request->user()->id,
+                            'filepath'        => $s3Path,
                             'mimetype'        => $file->getMimeType(),
                             'orig_filename'   => $file->getClientOriginalName(),
                             'orig_ext'        => $file->getClientOriginalExtension(),
                             'mfname'          => $file->getClientOriginalName(),
-                            'mftype'          => MediafileTypeEnum::COVER,
-                            'resource_id'     => $sessionUser->id,
-                            'resource_type'   => 'users',
+                            'mftype'          => MediafileTypeEnum::STORY,
+                            'resource_id'     => $story->id,
+                            'resource_type'   => 'stories',
                         ]);
                     } else {
                         $src = Mediafile::find($request->mediafile);
@@ -149,6 +150,10 @@ class StoriesController extends AppBaseController
                 return $story;
             });
         } catch (Exception $e) {
+             Log::error( json_encode([
+                 'msg' => 'StoriessController::store() - error',
+                 'emsg' => $e->getMessage(),
+             ]) );
             abort(400);
         }
 
