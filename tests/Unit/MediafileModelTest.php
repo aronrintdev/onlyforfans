@@ -42,12 +42,12 @@ class MediafileModelTest extends TestCase
         //dd('x', $dmf->toArray);
         $owner = User::firstOrFail();
 
-        $mfname = $this->faker->slug;
+        $mfname = $this->faker->slug.'.jpg';
         $file = UploadedFile::fake()->image($mfname, 200, 200);
         $subFolder = $owner->id;
         $s3Path = $file->store($subFolder, 's3');
 
-        $mf = Diskmediafile::doCreate([
+        $payload = [
             'owner_id'       => $owner->id,
             'filepath'       => $s3Path,
             'mimetype'       => $file->getMimeType(),
@@ -57,10 +57,11 @@ class MediafileModelTest extends TestCase
             'mftype'         => MediafileTypeEnum::COVER,
             'resource_id'    => $owner->id,
             'resource_type'  => 'users',
-        ]);
+        ];
+
+        $mf = Diskmediafile::doCreate($payload);
 
         $this->assertNotNull($mf);
-//dd($mf->toArray());
         Storage::disk('s3')->assertExists($mf->filename);
         //$this->assertTrue( Storage::disk('s3')->exists($mf->filename) );
 
@@ -68,11 +69,10 @@ class MediafileModelTest extends TestCase
         $this->assertSame('users', $mf->resource_type);
         $this->assertSame($owner->id, $mf->resource_id);
 
-        //$this->assertTrue( $mediafile->has_thumb );
-        //$this->assertTrue( Storage::disk('s3')->exists($mediafile->thumbFilename) );
-        //$this->assertTrue( $mediafile->has_mid );
-        //$this->assertTrue( Storage::disk('s3')->exists($mediafile->midFilename) );
-
+        $this->assertNotNull($mf->diskmediafile);
+        $this->assertSame($owner->id, $mf->diskmediafile->owner_id);
+        $this->assertNotNull($mf->diskmediafile->basename);
+        $this->assertSame($owner->id.'/'.$mf->diskmediafile->basename.'.'.$mf->diskmediafile->orig_ext, $mf->diskmediafile->filepath);
     }
 
     // ------------------------------
