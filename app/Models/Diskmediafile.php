@@ -74,12 +74,14 @@ class Diskmediafile extends BaseModel implements Guidable, Ownable
     // %DRY %FIXME: see attribute and appends
     public function scopeIsImage($query)
     {
-        return $query->whereIn('mimetype', ['image/jpeg', 'image/jpg', 'image/png']);
+        //return $query->whereIn('mimetype', ['image/jpeg', 'image/jpg', 'image/png']);
+        return $this->isImage();
     }
 
     public function scopeIsVideo($query)
     {
-        return $query->whereIn('mimetype', ['video/mp4', 'video/mpeg', 'video/ogg', 'video/quicktime']);
+        //return $query->whereIn('mimetype', ['video/mp4', 'video/mpeg', 'video/ogg', 'video/quicktime']);
+        return $this->isVideo();
     }
 
 
@@ -146,18 +148,43 @@ class Diskmediafile extends BaseModel implements Guidable, Ownable
 
     // %%% --- Other ---
 
+    // %FIXME use these throughout app DRY
+    static public $mimeImageTypes = [
+            'image/jpeg',
+            'image/png',
+            'image/gif',
+    ];
+    static public $mimeVideoTypes = [
+            'video/mp4',
+            'video/x-m4v',
+            'video/x-flv',
+            'video/quicktime',
+            'video/x-ms-wmv',
+            'video/x-matroska',
+            'video/ogg',
+    ];
+    static public $mimeAudioTypes = [
+            'audio/mpeg',
+            'audio/mp4',
+            'audio/ogg',
+            'audio/vnd.wav',
+    ];
+
     public function isImage(): bool
     {
+        $is = false;
         switch ( strtolower($this->mimetype) ) {
             case 'image/jpeg':
             case 'image/png':
             case 'image/gif':
-                return true;
+                $is = true;
+                break;
         }
-        return false;
+        return $is;
     }
     public function isVideo(): bool
     {
+        $is = false;
         switch ( strtolower($this->mimetype) ) {
             case 'video/mp4':
             case 'video/x-m4v':
@@ -166,20 +193,23 @@ class Diskmediafile extends BaseModel implements Guidable, Ownable
             case 'video/x-ms-wmv':
             case 'video/x-matroska':
             case 'video/ogg':
-                return true;
+                $is = true;
+                break;
         }
-        return false;
+        return $is;
     }
     public function isAudio(): bool
     {
+        $is = false;
         switch ( strtolower($this->mimetype) ) {
             case 'audio/mpeg':
             case 'audio/mp4':
             case 'audio/ogg':
             case 'audio/vnd.wav':
-                return true;
+                $is = true;
+                break;
         }
-        return false;
+        return $is;
     }
 
     // creates diskmediafile and associated mediafile reference

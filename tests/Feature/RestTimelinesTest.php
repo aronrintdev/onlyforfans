@@ -168,7 +168,9 @@ class TimelinesTest extends TestCase
         $timeline = Timeline::has('posts','>=',5)->has('followers','>=',1)->firstOrFail(); // assume non-admin (%FIXME)
 
         // Makes sure we have at least 1 free, 1 priced, and 1 subscibe-only post, then add some mediafiles to the posts...
-        $posts = Post::where('postable_type', 'timelines')->where('postable_id', $timeline->id)->latest()->take(3)->get();
+        $posts = Post::where('postable_type', 'timelines')
+            ->has('mediafiles', 0)
+            ->where('postable_id', $timeline->id)->latest()->take(3)->get();
 
         $freePost = $posts[0];
         $freePost->type = PostTypeEnum::FREE;
@@ -218,12 +220,18 @@ class TimelinesTest extends TestCase
         $this->assertNotNull($content->data);
         $this->assertGreaterThan(0, count($content->data));
         //dd($content);
+        $savedPostIDs = [
+            'free' => $freePost->id,
+            'priced' => $pricedPost->id,
+            'sub' => $subPost->id,
+        ];
         unset($freePost, $pricedPost, $subPost);
 
         $posts = collect($content->data);
 
-        $freePost = $posts->first( function($p) {
-            return $p->type === PostTypeEnum::FREE;
+        $freePost = $posts->first( function($p) use($savedPostIDs) {
+            //return $p->type === PostTypeEnum::FREE;
+            return $p->id === $savedPostIDs['free'];
         });
         $this->assertNotNull($freePost);
         $this->assertEquals(2, $freePost->mediafile_count);
@@ -231,8 +239,9 @@ class TimelinesTest extends TestCase
         $this->assertNotNull($freePost->mediafiles[0]);
         $this->assertNotNull($freePost->mediafiles[0]->filepath);
 
-        $pricedPost = $posts->first( function($p) {
-            return $p->type === PostTypeEnum::PRICED;
+        $pricedPost = $posts->first( function($p) use($savedPostIDs) {
+            //return $p->type === PostTypeEnum::PRICED;
+            return $p->id === $savedPostIDs['priced'];
         });
         $this->assertNotNull($pricedPost);
         $this->assertEquals(2, $pricedPost->mediafile_count);
@@ -240,8 +249,9 @@ class TimelinesTest extends TestCase
         $this->assertNotNull($pricedPost->mediafiles[0]);
         $this->assertNull($pricedPost->mediafiles[0]->filepath); // can't access media!
 
-        $subPost = $posts->first( function($p) {
-            return $p->type === PostTypeEnum::SUBSCRIBER;
+        $subPost = $posts->first( function($p) use($savedPostIDs) {
+            //return $p->type === PostTypeEnum::SUBSCRIBER;
+            return $p->id === $savedPostIDs['sub'];
         });
         $this->assertNotNull($subPost);
         $this->assertEquals(2, $subPost->mediafile_count);
@@ -255,6 +265,7 @@ class TimelinesTest extends TestCase
     /**
      *  @group timelines
      *  @group regression
+     *  @group here0517
      */
     public function test_fan_can_view_photos_only_feed()
     {
@@ -274,6 +285,7 @@ class TimelinesTest extends TestCase
 
         $response = $this->actingAs($fan)->ajaxJSON('GET', route('timelines.photos', $timeline->id), []);
         $response->assertStatus(200);
+        $content = json_decode($response->content());
         $response->assertJsonStructure([
             'data' => [ 
                 0 => [ 
@@ -300,7 +312,6 @@ class TimelinesTest extends TestCase
             'links',
             'meta',
         ]);
-        $content = json_decode($response->content());
         $mediafiles = collect($content->data);
         //dd($content);
     }

@@ -117,12 +117,19 @@ class Mediafile extends BaseModel implements Guidable, Ownable
     // %DRY %FIXME: see attribute and appends
     public function scopeIsImage($query)
     {
-        return $query->where('is_image', true);
+        //return $query->where('is_image', true);
+        return $this->whereHas('diskmediafile', function($q1) {
+            //$q1->whereIn('mimetype', ['image/jpeg', 'image/jpg', 'image/png']); // %FIXME DRY
+            $q1->whereIn('mimetype', Diskmediafile::$mimeImageTypes);
+        });
     }
 
     public function scopeIsVideo($query)
     {
-        return $query->where('is_video', true);
+        return $this->whereHas('diskmediafile', function($q1) {
+            //$q1->whereIn('mimetype', ['video/mp4', 'video/mpeg', 'video/ogg', 'video/quicktime']);
+            $q1->whereIn('mimetype', Diskmediafile::$mimeVideoTypes);
+        });
     }
 
 

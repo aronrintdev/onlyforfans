@@ -25,6 +25,7 @@ class MediafileModelTest extends TestCase
     /**
      * @group mediafile-model
      * @group regression
+     * @group here0517a
      */
     public function test_should_create_diskmediafile_and_reference_mediafile()
     {
@@ -61,10 +62,19 @@ class MediafileModelTest extends TestCase
         $this->assertSame('users', $mf->resource_type);
         $this->assertSame($owner->id, $mf->resource_id);
 
+        $this->assertTrue($mf->is_image);
+        $this->assertFalse($mf->is_video);
         $this->assertNotNull($mf->diskmediafile);
         $this->assertSame($owner->id, $mf->diskmediafile->owner_id);
         $this->assertNotNull($mf->diskmediafile->basename);
         $this->assertSame($owner->id.'/'.$mf->diskmediafile->basename.'.'.$mf->diskmediafile->orig_ext, $mf->diskmediafile->filepath);
+
+        $images = Mediafile::isImage()->get();
+        //$images = Mediafile::with('is_image')->where('is_image', true)->get();
+        //$images = Mediafile::get();
+        $this->assertNotNull($images);
+        $this->assertGreaterThan(0, $images->count());
+        //dd($images[0]->is_image);
     }
 
     /**
