@@ -24,6 +24,7 @@ class Kernel extends ConsoleKernel
         \App\Console\Commands\SendScheduleMessages::class,
         \App\Console\Commands\WebhooksDispatch::class,
         \App\Console\Commands\WebhooksRetry::class,
+        \App\Console\Commands\PublishScheduledPosts::class,
     ];
 
     /**
@@ -37,6 +38,7 @@ class Kernel extends ConsoleKernel
     {
         // $schedule->command('subscription:update-canceled')->everyHour();
         $schedule->command('send:schdule-messages')->everyMinute()->appendOutputTo(storage_path('logs/publish_posts.log'))->runInBackground();
+        $schedule->command('publish:schduled-posts')->everyMinute()->appendOutputTo(storage_path('logs/publish_posts.log'))->runInBackground();
         // $schedule->command('publish:posts')
         //           ->everyMinute()->appendOutputTo(storage_path('logs/publish_posts.log'));
         // $schedule->command('expire:post')

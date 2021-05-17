@@ -65,7 +65,7 @@ class CommentsController extends AppBaseController
             'post_id' => 'required|uuid|exists:posts,id',
             'user_id' => 'required|uuid|exists:users,id',
             'parent_id' => 'nullable|uuid|exists:comments,id',
-            'description' => 'required|string|min:3',
+            'description' => 'required|string|min:1',
         ]);
 
         $post = Post::find($request->post_id);
@@ -86,10 +86,10 @@ class CommentsController extends AppBaseController
 
     public function update(Request $request, Comment $comment)
     {
-        $this->authorize('update', $comment);
         $request->validate([
             'description' => 'required|string|min:1',
         ]);
+        $this->authorize('update', $comment);
         $attrs = $request->only([ 'description' ]);
         $comment->fill($attrs);
         $comment->save();

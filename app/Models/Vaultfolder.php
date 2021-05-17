@@ -1,16 +1,18 @@
 <?php
-
 namespace App\Models;
 
 use Exception;
-use App\Models\Traits\SluggableTraits;
+use Illuminate\Support\Str;
+use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Validation\ValidationException;
 use App\Interfaces\Ownable;
 use App\Interfaces\Guidable;
 use App\Models\Traits\UsesUuid;
 use App\Traits\OwnableFunctions;
 use Cviebrock\EloquentSluggable\Sluggable;
-use Illuminate\Support\Collection;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Cviebrock\EloquentSluggable\Services\SlugService;
+use App\Models\Traits\SluggableTraits;
 
 class Vaultfolder extends BaseModel implements Guidable, Ownable
 {
@@ -19,7 +21,6 @@ class Vaultfolder extends BaseModel implements Guidable, Ownable
     use HasFactory;
     use OwnableFunctions;
     use Sluggable;
-    use SluggableTraits;
 
     protected $table = 'vaultfolders';
 
@@ -33,6 +34,26 @@ class Vaultfolder extends BaseModel implements Guidable, Ownable
         //'vfchildren',
         //'mediafiles',
     ];
+
+    //--------------------------------------------
+    // Boot
+    //--------------------------------------------
+    public static function boot()
+    {
+        parent::boot();
+        static::creating(function ($model) {
+            // subfolder unique name check: use parent_id & user_id
+            $slug = SlugService::createSlug(Vaultfolder::class, 'slug', $model->vfname);
+            $exists = Vaultfolder::where('user_id', $model->user_id)
+                ->where('parent_id', $model->parent_id)
+                ->where('vfname', $model->vfname)
+                //->where('slug', $slug) // can't use slug for this check as it's uniquified alrady
+                ->first();
+            if ($exists) {
+                throw ValidationException::withMessages(['vfname' => 'A folder with this name already exists, please choose a different name']);
+            }
+        });
+    }
 
     //--------------------------------------------
     // %%% Relationships
@@ -130,14 +151,16 @@ class Vaultfolder extends BaseModel implements Guidable, Ownable
 
     public function sluggable(): array
     {
-        return ['slug' => [
-            'source' => ['name'],
-        ]];
-    }
+        return [
+            'slug' => [
+                'source' => ['name'],
+                /*
+                'method' => static function(string $string, string $separator): string {
+                    return strtolower(preg_replace('/[^a-z]+/i', $separator, $string));
+                },
+                 */
+            ]];
 
-    public function sluggableFields(): array
-    {
-        return ['name'];
     }
 
     // %%% --- Overrides in Model Traits (via BaseModel) ---
@@ -146,8 +169,8 @@ class Vaultfolder extends BaseModel implements Guidable, Ownable
     {
         $key = trim($key);
         switch ($key) {
-            default:
-                $key =  parent::_renderFieldKey($key);
+        default:
+        $key =  parent::_renderFieldKey($key);
         }
         return $key;
     }
@@ -156,8 +179,8 @@ class Vaultfolder extends BaseModel implements Guidable, Ownable
     {
         $key = trim($field);
         switch ($key) {
-            default:
-                return parent::renderField($field);
+        default:
+        return parent::renderField($field);
         }
     }
 

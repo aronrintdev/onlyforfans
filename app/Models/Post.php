@@ -86,6 +86,7 @@ class Post extends Model
 
     protected $guarded = [ 'id', 'created_at', 'updated_at' ];
     protected $appends = [ 'isLikedByMe', 'isFavoritedByMe', ];
+    protected $fillable = [ 'schedule_datetime', 'description', 'price', 'currency', 'user_id', 'active', 'type' ];
 
     public function sluggable(): array
     {

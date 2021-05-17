@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddScheduleDatetimeToChatthreads extends Migration
+class AddScheduleDatetimeToPosts extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class AddScheduleDatetimeToChatthreads extends Migration
      */
     public function up()
     {
-        Schema::table('chatthreads', function (Blueprint $table) {
+        Schema::table('posts', function (Blueprint $table) {
             //
             $table->integer('schedule_datetime')->nullable();
         });
@@ -26,7 +26,7 @@ class AddScheduleDatetimeToChatthreads extends Migration
      */
     public function down()
     {
-        Schema::table('chatthreads', function (Blueprint $table) {
+        Schema::table('posts', function (Blueprint $table) {
             //
             $table->dropColumn(['schedule_datetime']);
         });

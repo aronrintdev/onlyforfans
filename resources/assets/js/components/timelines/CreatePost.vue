@@ -16,6 +16,20 @@
             </section>
           </template>
           <div>
+            <div class="scheduled-message-head" v-if="postScheduleDate">
+              <div>
+                <svg class="icon-schedule" viewBox="0 0 24 24">
+                  <path d="M19 3h-1V2a1 1 0 0 0-2 0v1H8V2a1 1 0 0 0-2 0v1H5a2 2 0 0 0-2 2v13a3 3 0 0 0 3 3h12a3 3 0 0 0 3-3V5a2 2 0 0 0-2-2zm0 15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V9h14zm0-11H5V5h14zM9.79 17.21a1 1 0 0 0 1.42 0l5-5a1 1 0 0 0 .29-.71 1 1 0 0 0-1-1 1 1 0 0 0-.71.29l-4.29 4.3-1.29-1.3a1 1 0 0 0-.71-.29 1 1 0 0 0-1 1 1 1 0 0 0 .29.71z"></path>
+                </svg> 
+                <span> Scheduled for&nbsp;</span>
+                <strong>{{ moment(postScheduleDate * 1000).local().format('MMM DD, h:mm a') }}</strong>
+              </div>
+              <button class="btn close-btn" @click="clearSchedule">
+                <svg class="icon-close" viewBox="0 0 24 24">
+                  <path d="M13.41 12l5.3-5.29A1 1 0 0 0 19 6a1 1 0 0 0-1-1 1 1 0 0 0-.71.29L12 10.59l-5.29-5.3A1 1 0 0 0 6 5a1 1 0 0 0-1 1 1 1 0 0 0 .29.71l5.3 5.29-5.3 5.29A1 1 0 0 0 5 18a1 1 0 0 0 1 1 1 1 0 0 0 .71-.29l5.29-5.3 5.29 5.3A1 1 0 0 0 18 19a1 1 0 0 0 1-1 1 1 0 0 0-.29-.71z"></path>
+                </svg>
+              </button>
+            </div>
             <div v-if="postType === 'price'" class="w-100">
               <PriceSelector v-if="postType === 'price'" v-model="price" class="mb-3" />
               <hr />
@@ -53,7 +67,7 @@
                   <li class="selectable select-location"><span><LocationPinIcon /></span> </li>
                   <li class="selectable select-emoji"><span><EmojiIcon /></span></li>
                   <li class="selectable select-timer"><span><TimerIcon /></span></li>
-                  <li class="selectable select-calendar"><span><CalendarIcon /></span></li>
+                  <li class="selectable select-calendar" @click="showSchedulePicker()"><span><CalendarIcon /></span></li>
                 </ul>
               </b-col>
               <b-col cols="12" md="4">
@@ -66,13 +80,13 @@
         </b-card>
       </div>
     </section>
-
   </div>
 </template>
 
 <script>
 import Vuex from 'vuex';
-//import { eventBus } from '@/app';
+import moment from 'moment';
+import { eventBus } from '@/app';
 import vue2Dropzone from 'vue2-dropzone';
 import 'vue2-dropzone/dist/vue2Dropzone.min.css';
 import EmojiIcon from '@components/common/icons/EmojiIcon.vue';
@@ -93,7 +107,7 @@ export default {
   },
 
   data: () => ({
-
+    moment,
     description: '',
     newPostId: null,
     selectedMedia: null, // 'pic',
@@ -126,6 +140,7 @@ export default {
         'X-CSRF-TOKEN': document.head.querySelector('[name=csrf-token]').content,
       },
     },
+    postScheduleDate: null,
   }),
 
   methods: {
@@ -136,7 +151,8 @@ export default {
       this.newPostId = null;
       this.selectedMedia = 'pic';
       this.ptype = 'free';
-      this.price = 0
+      this.price = 0;
+      this.postScheduleDate = null;
     },
 
     async savePost() {
@@ -147,20 +163,25 @@ export default {
         type: this.postType,
         price: this.price,
         currency: this.currency,
+        schedule_datetime: this.postScheduleDate,
       });
       this.$log.debug('savePost', { response });
       const json = response.data;
-      this.newPostId = json.post.id;
+      if (json.post) {
+        this.newPostId = json.post.id;
 
-      const queued = this.$refs.myVueDropzone.getQueuedFiles();
+        const queued = this.$refs.myVueDropzone.getQueuedFiles();
 
-      // (2) upload & attach the mediafiles
-      // %FIXME: if this fails, don't we have an orphaned post (?)
-      if ( queued.length ) {
-        this.$refs.myVueDropzone.processQueue(); // this will call dispatch after files uploaded
+        // (2) upload & attach the mediafiles
+        // %FIXME: if this fails, don't we have an orphaned post (?)
+        if ( queued.length ) {
+          this.$refs.myVueDropzone.processQueue(); // this will call dispatch after files uploaded
+        } else {
+          this.$log.debug('savePost: dispatching unshiftPostToTimeline...');
+          this.$store.dispatch('unshiftPostToTimeline', { newPostId: this.newPostId });
+          this.resetForm();
+        }
       } else {
-        this.$log.debug('savePost: dispatching unshiftPostToTimeline...');
-        this.$store.dispatch('unshiftPostToTimeline', { newPostId: this.newPostId });
         this.resetForm();
       }
     },
@@ -214,9 +235,21 @@ export default {
       this.$store.dispatch('unshiftPostToTimeline', { newPostId: this.newPostId });
       this.resetForm();
     },
-
+    showSchedulePicker() {
+      eventBus.$emit('open-modal', {
+        key: 'show-schedule-datetime',
+      })
+    },
+    clearSchedule() {
+      this.postScheduleDate = undefined;
+    },
   },
-
+  mounted() {
+    const self = this;
+    eventBus.$on('apply-schedule', function(data) {
+      self.postScheduleDate = data;
+    })
+  },
   created() {
     this.dropzoneConfigs = {
       pic: {
@@ -244,7 +277,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 /*
 .dropzone, .dropzone * {
 box-sizing: border-box;

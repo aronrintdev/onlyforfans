@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 use App\Http\Resources\UserSetting as UserSettingResource;
+use App\Http\Resources\User as UserResource;
 use App\Http\Resources\UserCollection;
 use App\Models\User;
 use App\Models\UserSetting;
@@ -30,6 +31,27 @@ class UsersController extends AppBaseController
         // Apply filters %TODO
         $data = $query->paginate( $request->input('take', env('MAX_DEFAULT_PER_REQUEST', 10)) );
         return new UserCollection($data);
+    }
+
+    public function update(Request $request, User $user)
+    {
+        $this->authorize('update', $user);
+
+        $request->validate([
+            'firstname' => 'required|sometimes|string',
+            'lastname' => 'required|sometimes|string',
+            'email' => 'required|sometimes|email',
+        ]);
+
+        $user->fill($request->only([
+            'firstname',
+            'lastname',
+            'email',
+        ]));
+
+        $user->save();
+
+        return new UserResource($user);
     }
 
     public function showSettings(Request $request, User $user)
@@ -89,11 +111,22 @@ class UsersController extends AppBaseController
     {
         $this->authorize('update', $user);
         $request->validate([
+            'subscriptions.price_per_1_months' => 'numeric',
+            'subscriptions.price_per_3_months' => 'numeric|nullable',
+            'subscriptions.price_per_6_months' => 'numeric|nullable',
+            'subscriptions.price_per_12_months' => 'numeric|nullable',
             'city' => 'string|min:2',
             'is_follow_for_free' => 'boolean',
             'blocked' => 'array',
             'message_with_tip_only' => 'boolean',
             'enable_message_with_tip_only_pay' => 'boolean',
+            'about' => 'string|nullable',
+            'country' => 'string|nullable',
+            'city' => 'string|nullable',
+            'gender' => 'in:male,female,other|nullable',
+            'birthdate' => 'date|nullable',
+            'weblinks' => 'array|nullable',
+            'weblinks.*' => 'url|nullable',
         ]);
         $request->request->remove('username'); // disallow username updates for now
 
