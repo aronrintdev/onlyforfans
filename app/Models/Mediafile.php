@@ -69,6 +69,7 @@ class Mediafile extends BaseModel implements Guidable, Ownable
     // %FIXME: this should be consistent with getMidFilename, etc (ie not orig filename)
     public function getNameAttribute($value) {
         return $this->diskmediafile->orig_filename;
+        //return $this->mfname;
     }
 
     public function getMidFilenameAttribute($value) {
@@ -112,6 +113,18 @@ class Mediafile extends BaseModel implements Guidable, Ownable
     //--------------------------------------------
     // %%% Scopes
     //--------------------------------------------
+
+    // %DRY %FIXME: see attribute and appends
+    public function scopeIsImage($query)
+    {
+        return $query->where('is_image', true);
+    }
+
+    public function scopeIsVideo($query)
+    {
+        return $query->where('is_video', true);
+    }
+
 
     //--------------------------------------------
     // %%% Methods

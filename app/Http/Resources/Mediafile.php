@@ -20,7 +20,7 @@ class Mediafile extends JsonResource
 	        'basename' => $this->basename,
             'mfname' => $this->mfname,
             'filename' => $this->filename,
-            'filepath' => $hasAccess ? $this->filepath : null,
+            'filepath' => $hasAccess ? $this->diskmediafile->filepath : null,
             'midFilepath' => $hasAccess ? $this->midFilepath : null,
             'thumbFilepath' => $hasAccess ? $this->thumbFilepath : null,
             'blurFilepath' => !$hasAccess ? $this->blurFilepath : null,
