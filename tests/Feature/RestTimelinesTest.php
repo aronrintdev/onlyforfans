@@ -12,6 +12,7 @@ use App\Enums\PostTypeEnum;
 use App\Enums\PaymentTypeEnum;
 use App\Models\Fanledger;
 use App\Models\Post;
+use App\Models\Diskmediafile;
 use App\Models\Mediafile;
 use App\Models\Timeline;
 use App\Models\User;
@@ -160,13 +161,14 @@ class TimelinesTest extends TestCase
     /**
      *  @group timelines
      *  @group regression
+     *  @group here0517
      */
     public function test_fan_can_not_access_locked_content_via_feed()
     {
         $timeline = Timeline::has('posts','>=',5)->has('followers','>=',1)->firstOrFail(); // assume non-admin (%FIXME)
 
         // Makes sure we have at least 1 free, 1 priced, and 1 subscibe-only post, then add some mediafiles to the posts...
-        $posts = Post::where('postable_type', 'timelines')->where('postable_id', $timeline->id)->latest()->take(5)->get();
+        $posts = Post::where('postable_type', 'timelines')->where('postable_id', $timeline->id)->latest()->take(3)->get();
 
         $freePost = $posts[0];
         $freePost->type = PostTypeEnum::FREE;
@@ -253,7 +255,6 @@ class TimelinesTest extends TestCase
     /**
      *  @group timelines
      *  @group regression
-     *  @group here0330
      */
     public function test_fan_can_view_photos_only_feed()
     {
@@ -682,15 +683,17 @@ class TimelinesTest extends TestCase
     protected function attachMediafile(Post &$post, string $type='image') 
     {
         $fname = $this->faker->slug.'.jpg';
-        Mediafile::create([
-            'filename' => $fname,
-            'mfname' => $fname,
-            'mftype' => MediafileTypeEnum::POST,
-            'mimetype' => 'image/jpeg',
-            'orig_ext' => 'jpg',
-            'orig_filename' => $fname,
-            'resource_type' => 'posts',
-            'resource_id' => $post->id,
+        Diskmediafile::doCreate([
+                            'owner_id'        => $post->user->id,
+                            'filepath'        => $fname,
+                            'mimetype'        => 'image/jpeg',
+                            'orig_filename'   => $fname,
+                            'orig_ext'        => 'jpg',
+                            'mfname'          => $fname,
+                            'mftype'          => MediafileTypeEnum::POST,
+                            'resource_id'     => $post->id,
+                            'resource_type'   => 'posts',
+
         ]);
         return $post;
     }
