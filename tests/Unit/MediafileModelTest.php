@@ -24,15 +24,55 @@ class MediafileModelTest extends TestCase
 
     /**
      * @group mediafile-model
-     * @group OFF-here0515
+     * @group here0515
      */
-    public function test_should_create_mediafile_refrence_from_existing_diskmediafile()
+    public function test_should_create_mediafile_reference_from_existing_diskmediafile()
     {
+        Storage::fake('s3');
+
+        //$dmf = Diskmediafile::first();
+        //dd('x', $dmf->toArray);
+        $owner = User::firstOrFail();
+
+        $mfname = $this->faker->slug.'.jpg';
+        $file = UploadedFile::fake()->image($mfname, 200, 200);
+        $subFolder = $owner->id;
+        $s3Path = $file->store($subFolder, 's3');
+
+        $payload = [
+            'owner_id'       => $owner->id,
+            'filepath'       => $s3Path,
+            'mimetype'       => $file->getMimeType(),
+            'orig_filename'  => $file->getClientOriginalName(),
+            'orig_ext'       => $file->getClientOriginalExtension(),
+            'mfname'         => $mfname,
+            'mftype'         => MediafileTypeEnum::COVER,
+            'resource_id'    => $owner->id,
+            'resource_type'  => 'users',
+        ];
+
+        $mf = Diskmediafile::doCreate($payload);
+        $this->assertNotNull($mf);
+        Storage::disk('s3')->assertExists($mf->filename);
+
+        $mf2 = $mf->createReference(
+            'users',                   // string   $resourceType
+            $owner->id,                // int      $resourceID
+            'My avatar image',         // string   $mfname
+            MediafileTypeEnum::AVATAR, // string   $mftype
+        );
+        $this->assertNotNull($mf2);
+        $this->assertSame(MediafileTypeEnum::AVATAR, $mf2->mftype);
+        $this->assertSame('users', $mf2->resource_type);
+        $this->assertSame($owner->id, $mf2->resource_id);
+
+        $this->assertNotNull($mf2->diskmediafile);
+        $this->assertSame($owner->id, $mf2->diskmediafile->owner_id);
     }
 
     /**
      * @group mediafile-model
-     * @group here0515
+     * @group OFF-here0515
      */
     public function test_should_create_diskmediafile_and_reference_mediafile()
     {

@@ -205,9 +205,8 @@ class Mediafile extends BaseModel implements Guidable, Ownable
      */
 
     public function createReference(
-        int      $diskmediafileID, 
         string   $resourceType,
-        int      $resourceID,
+        string   $resourceID,
         string   $mfname, 
         string   $mftype,
         array    $cattrs=null,
@@ -215,7 +214,7 @@ class Mediafile extends BaseModel implements Guidable, Ownable
     ) : ?Mediafile
     {
         $mediafile = Mediafile::create([
-            'diskmediafile_id' => $diskmediafileID,
+            'diskmediafile_id' => $this->diskmediafile_id,
             'resource_id' => $resourceID,
             'resource_type' => $resourceType,
             'mfname' => $mfname,
