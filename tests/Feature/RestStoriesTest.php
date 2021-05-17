@@ -217,7 +217,6 @@ class StoriesTest extends TestCase
     /**
      *  @group stories
      *  @group regression
-     *  @group here0517
      */
     public function test_can_store_picture_story()
     {
