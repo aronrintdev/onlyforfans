@@ -2,6 +2,7 @@
 namespace App\Models;
 
 use DB;
+use Auth;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -206,13 +207,47 @@ class Diskmediafile extends BaseModel implements Guidable, Ownable
         return $mediafile; // %NOTE: returns the reference (!)
     }
 
+
+    // Create a reference from this diskmediafile
+    public function createReference(
+        string   $resourceType,
+        string   $resourceID,
+        string   $mfname, 
+        string   $mftype,
+        array    $cattrs=null,
+        array    $meta=null
+    ) : ?Mediafile
+    {
+        $mediafile = Mediafile::create([
+            'diskmediafile_id' => $this->id,
+            'resource_id' => $resourceID,
+            'resource_type' => $resourceType,
+            'mfname' => $mfname,
+            'mftype' => $mftype,
+            'cattrs' => $cattrs,
+            'meta' => $meta,
+        ]);
+        return $mediafile;
+    }
+
+    // Delete a reference to this diskmediafile
+    // %Caller must check permissions/ownership !
+    public function deleteReference($mediafileID, $deleteFromDiskIfLast=false)
+    {
+        DB::table('mediafiles')->where('id', $mediafileID)->delete();
+        if  ( $deleteFromDiskIfLast ) {
+            $this->deleteAssets(); // S3, etc
+            $this->delete();
+        }
+    }
+
     // set width to number and height to null to scale existing
     public function createThumbnail()
     {
         $WIDTH = 320;
         $url = Storage::disk('s3')->temporaryUrl( $this->filename, now()->addMinutes(10) );
-        $subFolder = MediafileTypeEnum::getSubfolder($this->mftype);
         $img = Image::make($url);
+        $subFolder = $this->owner_id;
         $s3Path = "$subFolder/thumb/".$this->basename.".jpg";
         $img->widen($WIDTH)->encode('jpg', 90);
         $contents = $img->stream();
@@ -225,8 +260,8 @@ class Diskmediafile extends BaseModel implements Guidable, Ownable
     {
         $WIDTH = 1280;
         $url = Storage::disk('s3')->temporaryUrl( $this->filename, now()->addMinutes(10) );
-        $subFolder = MediafileTypeEnum::getSubfolder($this->mftype);
         $img = Image::make($url);
+        $subFolder = $this->owner_id;
         $s3Path = "$subFolder/mid/".$this->basename.".jpg";
         $img->widen($WIDTH)->encode('jpg', 90);
         $contents = $img->stream();
@@ -240,8 +275,8 @@ class Diskmediafile extends BaseModel implements Guidable, Ownable
         $WIDTH = 320;
         $BLUR_STRENGTH = 90; // 0 ~ 100 http://image.intervention.io/api/blur
         $url = Storage::disk('s3')->temporaryUrl( $this->filename, now()->addMinutes(10) );
-        $subFolder = MediafileTypeEnum::getSubfolder($this->mftype);
         $img = Image::make($url);
+        $subFolder = $this->owner_id;
         $s3Path = "$subFolder/blur/".$this->basename.".jpg";
         $img->widen($WIDTH)->blur($BLUR_STRENGTH)->encode('jpg', 90);
         $contents = $img->stream();

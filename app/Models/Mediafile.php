@@ -204,25 +204,5 @@ class Mediafile extends BaseModel implements Guidable, Ownable
     }
      */
 
-    public function createReference(
-        string   $resourceType,
-        string   $resourceID,
-        string   $mfname, 
-        string   $mftype,
-        array    $cattrs=null,
-        array    $meta=null
-    ) : ?Mediafile
-    {
-        $mediafile = Mediafile::create([
-            'diskmediafile_id' => $this->diskmediafile_id,
-            'resource_id' => $resourceID,
-            'resource_type' => $resourceType,
-            'mfname' => $mfname,
-            'mftype' => $mftype,
-            'cattrs' => $cattrs,
-            'meta' => $meta,
-        ]);
-        return $mediafile;
-    }
 
 }

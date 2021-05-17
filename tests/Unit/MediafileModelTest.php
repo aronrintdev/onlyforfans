@@ -24,54 +24,7 @@ class MediafileModelTest extends TestCase
 
     /**
      * @group mediafile-model
-     * @group here0515
-     */
-    public function test_should_create_mediafile_reference_from_existing_diskmediafile()
-    {
-        Storage::fake('s3');
-
-        //$dmf = Diskmediafile::first();
-        //dd('x', $dmf->toArray);
-        $owner = User::firstOrFail();
-
-        $mfname = $this->faker->slug.'.jpg';
-        $file = UploadedFile::fake()->image($mfname, 200, 200);
-        $subFolder = $owner->id;
-        $s3Path = $file->store($subFolder, 's3');
-
-        $payload = [
-            'owner_id'       => $owner->id,
-            'filepath'       => $s3Path,
-            'mimetype'       => $file->getMimeType(),
-            'orig_filename'  => $file->getClientOriginalName(),
-            'orig_ext'       => $file->getClientOriginalExtension(),
-            'mfname'         => $mfname,
-            'mftype'         => MediafileTypeEnum::COVER,
-            'resource_id'    => $owner->id,
-            'resource_type'  => 'users',
-        ];
-
-        $mf = Diskmediafile::doCreate($payload);
-        $this->assertNotNull($mf);
-        Storage::disk('s3')->assertExists($mf->filename);
-
-        $mf2 = $mf->createReference(
-            'users',                   // string   $resourceType
-            $owner->id,                // int      $resourceID
-            'My avatar image',         // string   $mfname
-            MediafileTypeEnum::AVATAR, // string   $mftype
-        );
-        $this->assertNotNull($mf2);
-        $this->assertSame(MediafileTypeEnum::AVATAR, $mf2->mftype);
-        $this->assertSame('users', $mf2->resource_type);
-        $this->assertSame($owner->id, $mf2->resource_id);
-
-        $this->assertNotNull($mf2->diskmediafile);
-        $this->assertSame($owner->id, $mf2->diskmediafile->owner_id);
-    }
-
-    /**
-     * @group mediafile-model
+     * @group regression
      * @group OFF-here0515
      */
     public function test_should_create_diskmediafile_and_reference_mediafile()
@@ -114,6 +67,123 @@ class MediafileModelTest extends TestCase
         $this->assertNotNull($mf->diskmediafile->basename);
         $this->assertSame($owner->id.'/'.$mf->diskmediafile->basename.'.'.$mf->diskmediafile->orig_ext, $mf->diskmediafile->filepath);
     }
+
+    /**
+     * @group mediafile-model
+     * @group regression
+     * @group here0515
+     */
+    public function test_should_create_mediafile_reference_from_existing_diskmediafile()
+    {
+        Storage::fake('s3');
+
+        //$dmf = Diskmediafile::first();
+        //dd('x', $dmf->toArray);
+        $owner = User::firstOrFail();
+
+        $mfname = $this->faker->slug.'.jpg';
+        $file = UploadedFile::fake()->image($mfname, 200, 200);
+        $subFolder = $owner->id;
+        $s3Path = $file->store($subFolder, 's3');
+
+        $payload = [
+            'owner_id'       => $owner->id,
+            'filepath'       => $s3Path,
+            'mimetype'       => $file->getMimeType(),
+            'orig_filename'  => $file->getClientOriginalName(),
+            'orig_ext'       => $file->getClientOriginalExtension(),
+            'mfname'         => $mfname,
+            'mftype'         => MediafileTypeEnum::COVER,
+            'resource_id'    => $owner->id,
+            'resource_type'  => 'users',
+        ];
+
+        $mf = Diskmediafile::doCreate($payload);
+        $this->assertNotNull($mf);
+        Storage::disk('s3')->assertExists($mf->diskmediafile->filepath);
+        //Storage::disk('s3')->assertExists($mf->filename);
+
+        $mf2 = $mf->diskmediafile->createReference(
+            'users',                   // string   $resourceType
+            $owner->id,                // int      $resourceID
+            'My avatar image',         // string   $mfname
+            MediafileTypeEnum::AVATAR, // string   $mftype
+        );
+        $this->assertNotNull($mf2);
+        $this->assertEquals(MediafileTypeEnum::AVATAR, $mf2->mftype);
+        $this->assertEquals('users', $mf2->resource_type);
+        $this->assertEquals($owner->id, $mf2->resource_id);
+
+        $this->assertNotNull($mf2->diskmediafile);
+        $this->assertEquals($owner->id, $mf2->diskmediafile->owner_id);
+
+        $dmf = Diskmediafile::findOrFail($mf->diskmediafile_id);
+        $this->assertEquals(2, $dmf->mediafiles->count());
+    }
+
+    /**
+     * @group mediafile-model
+     * @group regression
+     * @group here0515
+     */
+    public function test_should_delete_mediafile_reference()
+    {
+        Storage::fake('s3');
+
+        $owner = User::firstOrFail();
+        $mfname = $this->faker->slug.'.jpg';
+        $file = UploadedFile::fake()->image($mfname, 200, 200);
+        $subFolder = $owner->id;
+        $s3Path = $file->store($subFolder, 's3');
+
+        $payload = [
+            'owner_id'       => $owner->id,
+            'filepath'       => $s3Path,
+            'mimetype'       => $file->getMimeType(),
+            'orig_filename'  => $file->getClientOriginalName(),
+            'orig_ext'       => $file->getClientOriginalExtension(),
+            'mfname'         => $mfname,
+            'mftype'         => MediafileTypeEnum::COVER,
+            'resource_id'    => $owner->id,
+            'resource_type'  => 'users',
+        ];
+
+        // Upload S3 content & create 1st reference
+        $mf1 = Diskmediafile::doCreate($payload);
+        $this->assertNotNull($mf1);
+        Storage::disk('s3')->assertExists($mf1->filename);
+        $mf1PKID = $mf1->id;
+        $dmf = Diskmediafile::findOrFail($mf1->diskmediafile_id);
+
+        // Create 2nd reference
+        $mf2 = $mf1->diskmediafile->createReference(
+            'users',                   // string   $resourceType
+            $owner->id,                // int      $resourceID
+            'My avatar image',         // string   $mfname
+            MediafileTypeEnum::AVATAR, // string   $mftype
+        );
+        $this->assertNotNull($mf2);
+        $mf2PKID = $mf2->id;
+        $dmf->refresh();
+        $this->assertEquals(2, $dmf->mediafiles->count());
+
+        // Remove 2nd (1/2) reference
+        $dmf->deleteReference($mf2->id);
+        $dmf->refresh();
+        $this->assertEquals(1, $dmf->mediafiles->count());
+        Storage::disk('s3')->assertExists($dmf->filepath);
+        unset($mf2);
+
+        // Remove 1st (2/2) reference, force S3 deletion
+        $origFilepath = $dmf->filepath;
+        $dmf->deleteReference($mf1->id, true);
+
+        $dmf->refresh();
+        $mf1 = Mediafile::find($mf1PKID);
+        $this->assertNull($mf1);
+        Storage::disk('s3')->assertMissing($origFilepath);
+    }
+
 
     // ------------------------------
 
