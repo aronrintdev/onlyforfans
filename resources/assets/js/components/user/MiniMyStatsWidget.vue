@@ -119,6 +119,7 @@ body .card.background .avatar-img {
 body .card.background .avatar-img img {
 }
 body .card.background img.card-img-top {
+  object-fit: cover;
   overflow: hidden;
   height: 120px;
 }
