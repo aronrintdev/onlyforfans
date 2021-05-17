@@ -38,7 +38,7 @@
                         </div>
                         <div>
                           <!-- Date  -->
-                          <span class="last-message-date">in {{ moment(scheduled_message.schedule_datetime).fromNow(true) }}</span>
+                          <span class="last-message-date">in {{ moment(scheduled_message.schedule_datetime * 1000).local().fromNow(true) }}</span>
                           <b-dropdown class="filter-dropdown sidebar-more-dropdown" right>
                             <template #button-content>
                               <i class="fas fa-ellipsis-h" aria-hidden="true"></i>
@@ -186,7 +186,7 @@
     methods: {
       editScheduleMsg: function(message) {
         this.editingSchedule = message;
-        const utcDate = moment.utc(message.schedule_datetime).toDate();
+        const utcDate = moment.utc(message.schedule_datetime * 1000).toDate();
         this.scheduledMessage = {
           date: moment(utcDate).local().format('YYYY-MM-DD'),
           time: moment(utcDate).local().format('HH:mm:ss'),
@@ -210,9 +210,9 @@
       },
       confirmEdit: function () {
         if (this.scheduledMessage.date && this.scheduledMessage.time) {
-          const scheduledMessageDate = moment(`${this.scheduledMessage.date} ${this.scheduledMessage.time}`).unix() * 1000;
+          const scheduledMessageDate = moment(`${this.scheduledMessage.date} ${this.scheduledMessage.time}`).utc().unix();
           const data = {
-            schedule_datetime: moment(scheduledMessageDate).utc().format('YYYY-MM-DD HH:mm')
+            schedule_datetime: scheduledMessageDate,
           };
           this.axios.patch(`/chat-messages/scheduled/${this.editingSchedule.id}`, data)
             .then(() => {

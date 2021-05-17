@@ -142,46 +142,48 @@ class MessageController extends Controller
                 ->orderBy('created_at', 'desc')
                 ->get();
             $lastChatThread = $chatThreads->first();
-            $messages = $lastChatThread->messages()->with('mediafile')->orderBy('mcounter', 'desc')->get();
-            $hasMediafile = false;
-            $messages->each(function($msg) use(&$hasMediafile) {
-                if (isset($msg->mediafile)) {
-                    $hasMediafile = true;
+            if ($lastChatThread) {
+                $messages = $lastChatThread->messages()->with('mediafile')->orderBy('mcounter', 'desc')->get();
+                $hasMediafile = false;
+                $messages->each(function($msg) use(&$hasMediafile) {
+                    if (isset($msg->mediafile)) {
+                        $hasMediafile = true;
+                    }
+                });
+                $lastMessage = $messages->first();
+                if (!isset($lastMessage)) {
+                    $lastMessage = (object)[];
                 }
-            });
-            $lastMessage = $messages->first();
-            if (!isset($lastMessage)) {
-                $lastMessage = (object)[];
-            }
-            $lastMessage->sender_id = $lastChatThread->sender_id;
-            $lastMessage->unread_messages_count = ChatThread::where('is_unread', 1)
-                ->where('sender_id', $receiver)
-                ->where('receiver_id', $sessionUser->id)
-                ->where('schedule_datetime', null)
-                ->get()->count();
-            $lastMessage->receiver_id = $lastChatThread->receiver_id;
-            $lastMessage->hasMediafile = $hasMediafile;
-            $user = Timeline::with(['user', 'avatar'])->where('user_id', $receiver)->first()->makeVisible(['user']);
-            $cattrs = $userSettings->cattrs;
-            if ( array_key_exists('display_name', $cattrs) ) {
-                if ( array_key_exists($receiver, $cattrs['display_name']) ) {
-                    $user->display_name = $cattrs['display_name'][$receiver];
+                $lastMessage->sender_id = $lastChatThread->sender_id;
+                $lastMessage->unread_messages_count = ChatThread::where('is_unread', 1)
+                    ->where('sender_id', $receiver)
+                    ->where('receiver_id', $sessionUser->id)
+                    ->where('schedule_datetime', null)
+                    ->get()->count();
+                $lastMessage->receiver_id = $lastChatThread->receiver_id;
+                $lastMessage->hasMediafile = $hasMediafile;
+                $user = Timeline::with(['user', 'avatar'])->where('user_id', $receiver)->first()->makeVisible(['user']);
+                $cattrs = $userSettings->cattrs;
+                if ( array_key_exists('display_name', $cattrs) ) {
+                    if ( array_key_exists($receiver, $cattrs['display_name']) ) {
+                        $user->display_name = $cattrs['display_name'][$receiver];
+                    }
                 }
-            }
-            if ( array_key_exists('muted', $cattrs) ) {
-                $index = array_search($receiver, $cattrs['muted']);
-                if ( $index !== false ) {
-                    $user->muted = true;
+                if ( array_key_exists('muted', $cattrs) ) {
+                    $index = array_search($receiver, $cattrs['muted']);
+                    if ( $index !== false ) {
+                        $user->muted = true;
+                    }
                 }
-            }
-            $user->username = $user->user->username;
-            $user->id = $user->user->id;
-            if ((isset($user->display_name) && preg_match("/{$searchText}/i", $user->display_name)) ||
-                (isset($user->name) && preg_match("/{$searchText}/i", $user->name))) {
-                array_push($contacts, [
-                    'last_message' => $lastMessage,
-                    'profile' => $user
-                ]);
+                $user->username = $user->user->username;
+                $user->id = $user->user->id;
+                if ((isset($user->display_name) && preg_match("/{$searchText}/i", $user->display_name)) ||
+                    (isset($user->name) && preg_match("/{$searchText}/i", $user->name))) {
+                    array_push($contacts, [
+                        'last_message' => $lastMessage,
+                        'profile' => $user
+                    ]);
+                }
             }
         }
 
@@ -540,7 +542,10 @@ class MessageController extends Controller
 
         $chatThreads->each(function ($chatthread) {
             $chatthread->messages = $chatthread->messages()->with('mediafile')->orderBy('mcounter', 'desc')->get();
-            $chatthread->profile = User::where('id', $chatthread->receiver_id)->first();
+            $user = Timeline::with(['user', 'avatar'])->where('user_id', $chatthread->receiver_id)->first()->makeVisible(['user']);
+            $user->username = $user->user->username;
+            $user->id = $user->user->id;
+            $chatthread->profile = $user;
         });
 
         return $chatThreads->toArray(); 
