@@ -154,7 +154,50 @@ class RestVaultTest extends TestCase
      *  @group vault
      *  @group regression
      */
-    public function test_can_not_create_a_new_vault_folder()
+    public function test_can_not_create_a_new_vault_folder_bad_param_422()
+    {
+        $creator = User::first();
+        $primaryVault = Vault::primary($creator)->first();
+        $rootFolder = Vaultfolder::isRoot()->where('vault_id', $primaryVault->id)->first();
+        $origNumChildren = $rootFolder->vfchildren->count();
+
+        $payload = [
+            'vault_id' => $primaryVault->id,
+            'parent_id' => $rootFolder->id,
+            'vfname' => $this->faker->slug.'/',
+        ];
+        $response = $this->actingAs($creator)->ajaxJSON('POST', route('vaultfolders.store'), $payload);
+        $response->assertStatus(422);
+    }
+
+    /**
+     *  @group vault
+     *  @group regression
+     */
+    public function test_can_not_create_a_new_vault_folder_with_same_name_422()
+    {
+        $creator = User::first();
+        $primaryVault = Vault::primary($creator)->first();
+        $rootFolder = Vaultfolder::isRoot()->where('vault_id', $primaryVault->id)->first();
+        $origNumChildren = $rootFolder->vfchildren->count();
+
+        $payload = [
+            'vault_id' => $primaryVault->id,
+            'parent_id' => $rootFolder->id,
+            'vfname' => $this->faker->slug,
+        ];
+        $response = $this->actingAs($creator)->ajaxJSON('POST', route('vaultfolders.store'), $payload);
+        $response->assertStatus(201);
+
+        $response = $this->actingAs($creator)->ajaxJSON('POST', route('vaultfolders.store'), $payload);
+        $response->assertStatus(422);
+    }
+
+    /**
+     *  @group vault
+     *  @group regression
+     */
+    public function test_can_not_create_a_new_vault_folder_403()
     {
         $creator = User::first();
         $primaryVault = Vault::primary($creator)->first();

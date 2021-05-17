@@ -87,8 +87,7 @@ class StoriesController extends AppBaseController
         $request['attrs'] = json_decode($request['attrs'], true); // decode 'complex' data
 
         $vrules = [
-            'attrs' => 'required',
-            //'attrs.stype' => 'required|in:text,photo',
+            'attrs' => 'required|array',
             'attrs.stype' => 'in:'.StoryTypeEnum::getKeysCsv(), // %TODO : apply elsewhere
             //'timeline_id' => 'required|uuid|exists:timelines',
         ];

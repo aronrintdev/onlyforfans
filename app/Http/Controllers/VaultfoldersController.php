@@ -103,12 +103,12 @@ class VaultfoldersController extends AppBaseController
         ]);
     }
 
-    // %FIXME: this should be in VaultController, an does the Vault policy (?)
     public function store(Request $request)
     {
         $vrules = [
             'vault_id' => 'required|uuid|exists:vaults,id',
-            'vfname' => 'required|string',
+            'vfname' => 'required|alpha_dash|min:1',
+            // %TODO: prevent new folders on same level with duplicate names
         ];
 
         $attrs = [];
