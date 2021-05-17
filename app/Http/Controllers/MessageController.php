@@ -282,26 +282,17 @@ class MessageController extends Controller
                 if ($file) {
                     $subPath = './'.$sessionUser->id;
                     $s3Path = $file->store($subPath, 's3');
-                    $mediafile = Diskmediafile::doCreate(
-                        $s3Path,                             // $s3Filepath
-                        $file->getClientOriginalName(),      // $mfname
-                        MediafileTypeEnum::GALLERY,          // $mftype
-                        $sessionUser,                        // $owner
-                        $message->id,                        // $resourceID
-                        'messages',                          // $resourceType
-                        $file->getMimeType(),                // $mimetype
-                        $file->getClientOriginalName(),      // $origFilename
-                        $file->getClientOriginalExtension(), // $origExt
-                    );
-//                    $message->mediafile()->create([
-//                        'resource_type' => 'messages',
-//                        'filename' => $filename,
-//                        'mfname' => $file->getClientOriginalName(),
-//                        'mftype' => MediafileTypeEnum::GALLERY,
-//                        'mimetype' => $file->getMimeType(),
-//                        'orig_filename' => $file->getClientOriginalName(),
-//                        'orig_ext' => $file->getClientOriginalExtension(),
-//                    ]);
+                    $mediafile = Diskmediafile::doCreate([
+                        'owner_id'        => $sessionUser,
+                        'filepath'        => $s3Path,
+                        'mimetype'        => $file->getMimeType(),
+                        'orig_filename'   => $file->getClientOriginalName(),
+                        'orig_ext'        => $file->getClientOriginalExtension(),
+                        'mfname'          => $file->getClientOriginalName(),
+                        'mftype'          => MediafileTypeEnum::GALLERY,
+                        'resource_id'     => $message->id,
+                        'resource_type'   => 'messages',
+                    ]);
                 }
                 $index++;
             }

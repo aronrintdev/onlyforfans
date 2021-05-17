@@ -11,6 +11,7 @@ class CreateDiskmediafilesTable extends Migration
         Schema::create('diskmediafiles', function (Blueprint $table) {
             $table->uuid('id')->primary();
 
+            $table->string('slug')->unique();
             $table->uuid('owner_id');
             $table->foreign('owner_id')->references('id')->on('users');
 

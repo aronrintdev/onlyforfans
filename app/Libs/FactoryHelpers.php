@@ -5,7 +5,7 @@ use Exception;
 use App\Models\User;
 use App\Models\Timeline;
 use App\Models\Mediafile;
-use App\Models\DiskMediafile;
+use App\Models\Diskmediafile;
 use Illuminate\Support\Str;
 use Faker\Factory as Faker;
 
@@ -118,14 +118,14 @@ if ($doS3Upload) {
             'mimetype' => $mimetype, // $file->getMimeType(),
             'orig_filename' => $fnameToStore, // $file->getClientOriginalName(),
             'orig_ext' => $ext, // $file->getClientOriginalExtension(),
-            'resource_id' =>  null, // set below
-            'resource_type' => null, // set below
             'filepath' => null, // set below
         ];
 
         $mfname = Str::slug($faker->catchPhrase,'-').'.'.$ext;
         $mf_attrs = [
             'diskmediafile_id' => null,
+            'resource_id' =>  null, // set below
+            'resource_type' => null, // set below
             'mfname' => $mfname,
             'mftype' => $mftype,
         ];
@@ -136,16 +136,16 @@ if ($doS3Upload) {
         switch ($mftype) {
             case MediafileTypeEnum::COVER:
             case MediafileTypeEnum::AVATAR:
-                $dmf_attrs['resource_id'] =  $resourceID;
-                $dmf_attrs['resource_type'] = 'users';
+                $mf_attrs['resource_id'] =  $resourceID;
+                $mf_attrs['resource_type'] = 'users';
                 break;
             case MediafileTypeEnum::POST:
-                $dmf_attrs['resource_id'] =  $resourceID; // ie story_id: required for story type
-                $dmf_attrs['resource_type'] = 'posts';
+                $mf_attrs['resource_id'] =  $resourceID; // ie story_id: required for story type
+                $mf_attrs['resource_type'] = 'posts';
                 break;
             case MediafileTypeEnum::STORY:
-                $dmf_attrs['resource_id'] =  $resourceID; // ie story_id: required for story type
-                $dmf_attrs['resource_type'] = 'stories';
+                $mf_attrs['resource_id'] =  $resourceID; // ie story_id: required for story type
+                $mf_attrs['resource_type'] = 'stories';
                 break;
             default:
                 throw new Exception('media file type of ' . $mftype . ' not supported');
@@ -160,17 +160,17 @@ if ($doS3Upload) {
             $dmf_attrs['filepath'] = $mf_attrs['mfname']; // dummy filename/path for testing, etc
         }
 
-        $mediafile = Diskmediafile::doCreate(
-            $dmf_attrs['filepath'],        // $s3Filepath
-            $mf_attrs['mfname'],           // $mfname
-            $mf_attrs['mftype'],           // $mftype
-            $owner,                        // $owner
-            $dmf_attrs['resource_id'],     // $resourceID
-            $dmf_attrs['resource_type'],   // $resourceType
-            $dmf_attrs['mimetype'],        // $mimetype
-            $dmf_attrs['orig_filename'],   // $origFilename
-            $dmf_attrs['orig_ext'],        // $origExt
-        );
+        $mediafile = Diskmediafile::doCreate([
+            'owner_id'       => $owner->id,
+            'filepath'       => $dmf_attrs['filepath'],
+            'mimetype'       => $dmf_attrs['mimetype',
+            'orig_filename'  => $dmf_attrs['orig_filename'],
+            'orig_ext'       => $dmf_attrs['orig_ext'],
+            'mfname'         => $mf_attrs['mfname'],
+            'mftype'         => $mf_attrs['mftype'],
+            'resource_id'    => $mf_attrs['resource_id'],
+            'resource_type'  => $mf_attrs['resource_type'],
+        ]);
 
         /*
         //$mediafile = DB::transaction(function () use($mf_attrs, $dmf_attrs) {

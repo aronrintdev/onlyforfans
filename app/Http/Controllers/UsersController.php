@@ -183,32 +183,20 @@ class UsersController extends AppBaseController
             abort(400);
         }
 
-        /*
-        //$mediafile = Mediafile::create([
-            //'resource_type' => 'avatar',
-            //'filename' => $file->store('./avatars', 's3'),
-            //'mfname' => $file->getClientOriginalName(),
-            //'mftype' => MediafileTypeEnum::AVATAR,
-            //'mimetype' => $file->getMimeType(),
-            //'orig_filename' => $file->getClientOriginalName(),
-            //'orig_ext' => $file->getClientOriginalExtension(),
-        //]);
-         */
-
         $subFolder = $sessionUser->id;
         $s3Path = $file->store($subFolder, 's3');
 
-        $mediafile = Diskmediafile::doCreate(
-            $s3Path,                             // $s3Filepath
-            $file->getClientOriginalName(),      // $mfname
-            MediafileTypeEnum::AVATAR,           // $mftype
-            $sessionUser,                        // $owner
-            $sessionUser->id,                    // $resourceID
-            'avatar',                            // $resourceType
-            $file->getMimeType(),                // $mimetype
-            $file->getClientOriginalName(),      // $origFilename
-            $file->getClientOriginalExtension(), // $origExt
-        );
+        $mediafile = Diskmediafile::doCreate([
+            'owner_id'         => $sessionUser,
+            'filepath'         => $s3Path,
+            'mimetype'         => $file->getMimeType(),
+            'orig_filename'    => $file->getClientOriginalName(),
+            'orig_ext'         => $file->getClientOriginalExtension(),
+            'mfname'           => $file->getClientOriginalName(),
+            'mftype'           => MediafileTypeEnum::AVATAR,
+            'resource_id'      => $sessionUser->id,
+            'resource_type'    => 'avatar',
+        ]);
 
         $sessionUser->timeline->avatar_id = $mediafile->id;
         $sessionUser->timeline->save();
@@ -242,17 +230,17 @@ class UsersController extends AppBaseController
         $subFolder = $sessionUser->id;
         $s3Path = $file->store($subFolder, 's3');
 
-        $mediafile = Diskmediafile::doCreate(
-            $s3Path,                             // $s3Filepath
-            $file->getClientOriginalName(),      // $mfname
-            MediafileTypeEnum::COVER,            // $mftype
-            $sessionUser,                        // $owner
-            $sessionUser->id,                    // $resourceID
-            'cover',                             // $resourceType
-            $file->getMimeType(),                // $mimetype
-            $file->getClientOriginalName(),      // $origFilename
-            $file->getClientOriginalExtension(), // $origExt
-        );
+        $mediafile = Diskmediafile::doCreate([
+            'owner_id'         => $sessionUser,
+            'filepath'         => $s3Path,
+            'mimetype'         => $file->getMimeType(),
+            'orig_filename'    => $file->getClientOriginalName(),
+            'orig_ext'         => $file->getClientOriginalExtension(),
+            'mfname'           => $file->getClientOriginalName(),
+            'mftype'           => MediafileTypeEnum::COVER,
+            'resource_id'      => $sessionUser->id,
+            'resource_type'    => 'cover',
+        ]);
 
         $sessionUser->timeline->cover_id = $mediafile->id;
         $sessionUser->timeline->save();

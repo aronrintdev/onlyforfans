@@ -16,8 +16,8 @@ use App\Traits\OwnableFunctions;
 use Cviebrock\EloquentSluggable\Sluggable;
 use Intervention\Image\Facades\Image;
 
-//class DiskMediafile extends BaseModel implements Guidable, Ownable, Cloneable
-class DiskMediafile extends BaseModel implements Guidable, Ownable
+//class Diskmediafile extends BaseModel implements Guidable, Ownable, Cloneable
+class Diskmediafile extends BaseModel implements Guidable, Ownable
 {
     use UsesUuid, SoftDeletes, HasFactory, OwnableFunctions, Sluggable, SluggableTraits;
 
@@ -182,56 +182,28 @@ class DiskMediafile extends BaseModel implements Guidable, Ownable
     }
 
     // creates diskmediafile and associated mediafile reference
-    public static function doCreate(
-        $s3Filepath,
-        $mfname, 
-        $mftype, 
-        $owner, 
-        $resourceType=null, 
-        $resourceID=null, 
-        $mimetype=null, 
-        $origFilename=null, 
-        $origExt=null, 
-        $cattrs=null, 
-        $meta=null
-    ) 
+    public static function doCreate(array $attrs) : Mediafile
     {
-        $mediafile = DB::transaction(function () use(
-            &$mimetype, 
-            &$owner, 
-            $s3Filepath, 
-            $origFilename, 
-            $origExt,
-            $mfname, 
-            $mftype, 
-            $resourceType, 
-            $resourceID, 
-            $cattrs, 
-            $meta
-        ) {
-            $subFolder = $owner->id;
-            //$s3Filename = $file->store($subFolder, 's3');
+        $mediafile = DB::transaction( function () use(&$attrs)  {
             $diskmediafile = Diskmediafile::create([
-                'filename' => $s3Filepath,
-                'mimetype' => $mimetype,
-                'owner_id' => $owner->id,
-                'orig_filename' => $origFilename,
-                'orig_ext' => $origExt,
-                'cattrs' => $cattrs,
-                'meta' => $meta,
+                'filepath' => $attrs['filepath'],
+                'mimetype' => $attrs['mimetype'],
+                'owner_id' => $attrs['owner_id'],
+                'orig_filename' => $attrs['orig_filename'],
+                'orig_ext' => $attrs['orig_ext'],
             ]);
             $mediafile = Mediafile::create([
                 'diskmediafile_id' => $diskmediafile->id,
-                'resource_id' => $resourceID,
-                'resource_type' => $resourceType,
-                'mfname' => $mfname ?? $file->getClientOriginalName(),
-                'mftype' => $mftype,
-                'cattrs' => $cattrs,
-                'meta' => $meta,
+                'resource_id' => $attrs['resource_id'],
+                'resource_type' => $attrs['resource_type'],
+                'mfname' => $attrs['mfname'],
+                'mftype' => $attrs['mftype'],
+                'cattrs' => $cattrs ?? null, // cattrs param will be applied to mediafile
+                'meta' => $meta ?? null, // meta param will be applied to mediafile
             ]);
             return $mediafile;
         });
-        return $mediafile;
+        return $mediafile; // %NOTE: returns the reference (!)
     }
 
     // set width to number and height to null to scale existing

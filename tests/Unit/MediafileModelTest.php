@@ -24,7 +24,7 @@ class MediafileModelTest extends TestCase
 
     /**
      * @group mediafile-model
-     * @group here0515
+     * @group OFF-here0515
      */
     public function test_should_create_mediafile_refrence_from_existing_diskmediafile()
     {
@@ -38,6 +38,8 @@ class MediafileModelTest extends TestCase
     {
         Storage::fake('s3');
 
+        //$dmf = Diskmediafile::first();
+        //dd('x', $dmf->toArray);
         $owner = User::firstOrFail();
 
         $mfname = $this->faker->slug;
@@ -45,34 +47,27 @@ class MediafileModelTest extends TestCase
         $subFolder = $owner->id;
         $s3Path = $file->store($subFolder, 's3');
 
-        $mediafile = Diskmediafile::doCreate(
-            $s3Path,                             // $s3Filepath
-            $mfname,                             // $mfname
-            MediafileTypeEnum::COVER,            // $mftype
-            $owner,                              // $owner
-            $owner->id,                          // $resourceID
-            'cover',                             // $resourceType
-            $file->getMimeType(),                // $mimetype
-            $file->getClientOriginalName(),      // $origFilename
-            $file->getClientOriginalExtension() // $origExt
-//        $s3Filepath,
-//        $mfname, 
-//        $mftype, 
-//        $owner, 
-//        $resourceType=null, 
-//        $resourceID=null, 
-//        $mimetype=null, 
-//        $origFilename=null, 
-//        $origExt=null, 
-//        $cattrs=null, 
-//        $meta=null
-        );
+        $mf = Diskmediafile::doCreate([
+            'owner_id'       => $owner->id,
+            'filepath'       => $s3Path,
+            'mimetype'       => $file->getMimeType(),
+            'orig_filename'  => $file->getClientOriginalName(),
+            'orig_ext'       => $file->getClientOriginalExtension(),
+            'mfname'         => $mfname,
+            'mftype'         => MediafileTypeEnum::COVER,
+            'resource_id'    => $owner->id,
+            'resource_type'  => 'users',
+        ]);
 
-        $this->assertNotNull($mediafile);
-        Storage::disk('s3')->assertExists($mediafile->filename);
-        //$this->assertTrue( Storage::disk('s3')->exists($mediafile->filename) );
+        $this->assertNotNull($mf);
+//dd($mf->toArray());
+        Storage::disk('s3')->assertExists($mf->filename);
+        //$this->assertTrue( Storage::disk('s3')->exists($mf->filename) );
 
-        $this->assertSame(MediafileTypeEnum::COVER, $mediafile->mftype);
+        $this->assertSame(MediafileTypeEnum::COVER, $mf->mftype);
+        $this->assertSame('users', $mf->resource_type);
+        $this->assertSame($owner->id, $mf->resource_id);
+
         //$this->assertTrue( $mediafile->has_thumb );
         //$this->assertTrue( Storage::disk('s3')->exists($mediafile->thumbFilename) );
         //$this->assertTrue( $mediafile->has_mid );

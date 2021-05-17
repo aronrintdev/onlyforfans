@@ -15,7 +15,7 @@ use App\Traits\OwnableFunctions;
 use Cviebrock\EloquentSluggable\Sluggable;
 use Intervention\Image\Facades\Image;
 
-class Mediafile extends BaseModel implements Guidable, Ownable, 
+class Mediafile extends BaseModel implements Guidable, Ownable 
 {
     use UsesUuid, SoftDeletes, HasFactory, OwnableFunctions, Sluggable, SluggableTraits;
 

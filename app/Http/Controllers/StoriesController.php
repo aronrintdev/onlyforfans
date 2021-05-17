@@ -128,30 +128,18 @@ class StoriesController extends AppBaseController
                     if ( $request->hasFile('mediafile') ) {
                         $file = $request->file('mediafile');
                         $subFolder = $sessionUser->id;
-                        $newFilename = $file->store('./'.$subFolder, 's3'); // %FIXME: hardcoded
-                        $mediafile = Diskmediafile::doCreate(
-                            $s3Path,                             // $s3Filepath
-                            $file->getClientOriginalName(),      // $mfname
-                            MediafileTypeEnum::COVER,            // $mftype
-                            $sessionUser,                        // $owner
-                            $sessionUser->id,                    // $resourceID
-                            'cover',                             // $resourceType
-                            $file->getMimeType(),                // $mimetype
-                            $file->getClientOriginalName(),      // $origFilename
-                            $file->getClientOriginalExtension(), // $origExt
-                        );
-                        //$mediafile = Mediafile::create([
-                        //    'resource_id' => $story->id,
-                        //    'resource_type' => 'stories',
-                        //    'filename' => $newFilename,
-                        //    'mfname' => $mfname ?? $file->getClientOriginalName(),
-                        //    'mftype' => MediafileTypeEnum::STORY,
-                        //    'meta' => $request->input('attrs.foo') ?? null,
-                        //    'cattrs' => $request->input('attrs.bar') ?? null,
-                        //    'mimetype' => $file->getMimeType(),
-                        //    'orig_filename' => $file->getClientOriginalName(),
-                        //    'orig_ext' => $file->getClientOriginalExtension(),
-                        //]);
+                        $s3path = $file->store('./'.$subFolder, 's3'); // %FIXME: hardcoded
+                        $mediafile = Diskmediafile::doCreate([
+                            'owner_id'        => $sessionUser->id,
+                            'filepath',       => $s3Path,
+                            'mimetype'        => $file->getMimeType(),
+                            'orig_filename'   => $file->getClientOriginalName(),
+                            'orig_ext'        => $file->getClientOriginalExtension(),
+                            'mfname'          => $file->getClientOriginalName(),
+                            'mftype'          => MediafileTypeEnum::COVER,
+                            'resource_id'     => $sessionUser->id,
+                            'resource_type'   => 'users',
+                        ]);
                     } else {
                         $src = Mediafile::find($request->mediafile);
                         $cloned = $src->doClone('stories', $story->id);
