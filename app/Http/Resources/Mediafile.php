@@ -25,6 +25,7 @@ class Mediafile extends JsonResource
             'thumbFilepath' => $hasAccess ? $this->thumbFilepath : null,
             'blurFilepath' => !$hasAccess ? $this->blurFilepath : null,
             'mftype' => $this->mftype,
+	        'is_primary' => $this->is_primary,
 	        'has_thumb' => $this->has_thumb,
 	        'has_mid' => $this->has_mid,
 	        'has_blur' => $this->has_blur,

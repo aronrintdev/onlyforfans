@@ -187,49 +187,6 @@ class Diskmediafile extends BaseModel implements Guidable, Ownable
 
     // %%% --- Other ---
 
-    /*
-    public function isImage(): bool
-    {
-        $is = false;
-        switch ( strtolower($this->mimetype) ) {
-            case 'image/jpeg':
-            case 'image/png':
-            case 'image/gif':
-                $is = true;
-                break;
-        }
-        return $is;
-    }
-    public function isVideo(): bool
-    {
-        $is = false;
-        switch ( strtolower($this->mimetype) ) {
-            case 'video/mp4':
-            case 'video/x-m4v':
-            case 'video/x-flv':
-            case 'video/quicktime':
-            case 'video/x-ms-wmv':
-            case 'video/x-matroska':
-            case 'video/ogg':
-                $is = true;
-                break;
-        }
-        return $is;
-    }
-    public function isAudio(): bool
-    {
-        $is = false;
-        switch ( strtolower($this->mimetype) ) {
-            case 'audio/mpeg':
-            case 'audio/mp4':
-            case 'audio/ogg':
-            case 'audio/vnd.wav':
-                $is = true;
-                break;
-        }
-        return $is;
-    }
-     */
 
     // creates diskmediafile and associated mediafile reference
     public static function doCreate(array $attrs) : Mediafile
@@ -244,6 +201,7 @@ class Diskmediafile extends BaseModel implements Guidable, Ownable
             ]);
             $mediafile = Mediafile::create([
                 'diskmediafile_id' => $diskmediafile->id,
+                'is_primary' => true, // only place this should be true
                 'resource_id' => $attrs['resource_id'],
                 'resource_type' => $attrs['resource_type'],
                 'mfname' => $attrs['mfname'],

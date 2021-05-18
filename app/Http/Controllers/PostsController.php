@@ -17,6 +17,7 @@ use App\Rules\InEnum;
 use App\Models\Comment;
 use App\Models\Timeline;
 use App\Models\Mediafile;
+use App\Models\Diskmediafile;
 use App\Enums\PostTypeEnum;
 use App\Enums\PaymentTypeEnum;
 
@@ -67,7 +68,7 @@ class PostsController extends AppBaseController
     {
         $request->validate([
             'timeline_id' => 'required|uuid|exists:timelines,id',
-            'mediafiles' => 'array',
+            'mediafiles' => 'array', // present when existing mediafile is attached (ie from vault)
             'mediafiles.*.*' => 'integer|uuid|exists:mediafiles',
         ]);
 
@@ -85,8 +86,16 @@ class PostsController extends AppBaseController
         $post = Post::create($attrs);
         if ( $request->has('mediafiles') ) {
             foreach ( $request->mediafiles as $mfID ) {
-                $cloned = Mediafile::find($mfID)->doClone('posts', $post->id);
-                $post->mediafiles()->save($cloned);
+                $refMF = Mediafile::where('resource_type', 'vaults')
+                    ->where('is_primary', true)
+                    ->findOrFail($mfID)
+                    ->diskmediafile->createReference(
+                        'posts',    // $resourceType
+                        $post->id,  // $resourceID
+                        'New Post', // $mfname - could be optionally passed as a query param %TODO
+                        MediafileTypeEnum::POST // $mftype
+                    );
+                //$post->mediafiles()->save($refMF);
             }
         }
         $post->refresh();
@@ -125,8 +134,19 @@ class PostsController extends AppBaseController
 
         if ($request->has('mediafiles')) {
             foreach ($request->mediafiles as $mfID) {
-                $cloned = Mediafile::find($mfID)->doClone('posts', $post->id);
-                $post->mediafiles()->save($cloned);
+                //$cloned = Mediafile::find($mfID)->doClone('posts', $post->id);
+                // %NOTE: rerquire src mediafile to be in vault
+                $refMF = Mediafile::where('resource_type', 'vaults')
+                    ->where('is_primary', true)
+                    ->findOrFail($mfID)
+                    ->diskmediafile->createReference(
+                        'posts',    // $resourceType
+                        $post->id,  // $resourceID
+                        'New Post', // $mfname - could be optionally passed as a query param %TODO
+                        MediafileTypeEnum::POST // $mftype
+                    );
+                //$post->mediafiles()->save($refMF);
+                $post->refresh();
             }
         }
 
@@ -150,7 +170,16 @@ class PostsController extends AppBaseController
         $this->authorize('update', $mediafile);
         $this->authorize('update', $mediafile->resource);
 
-        $mediafile->doClone('posts', $post->id);
+        //$mediafile->doClone('posts', $post->id);
+        $refMF = Mediafile::where('resource_type', 'vaults')
+            ->where('is_primary', true)
+            ->findOrFail($mediafile->id)->diskmediafile->createReference(
+                'posts',    // $resourceType
+                $post->id,  // $resourceID
+                'Attached File', // $mfname - could be optionally passed as a query param %TODO
+                MediafileTypeEnum::POST // $mftype
+            );
+        //$post->mediafiles()->save($refMF);
         $post->refresh();
 
         return response()->json([
