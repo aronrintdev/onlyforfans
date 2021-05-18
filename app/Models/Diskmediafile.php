@@ -25,6 +25,27 @@ class Diskmediafile extends BaseModel implements Guidable, Ownable
     protected $guarded = [ 'id', 'created_at', 'updated_at' ];
     public static $vrules = [];
 
+    static public $mimeImageTypes = [
+            'image/jpeg',
+            'image/png',
+            'image/gif',
+    ];
+    static public $mimeVideoTypes = [
+            'video/mp4',
+            'video/x-m4v',
+            'video/x-flv',
+            'video/quicktime',
+            'video/x-ms-wmv',
+            'video/x-matroska',
+            'video/ogg',
+    ];
+    static public $mimeAudioTypes = [
+            'audio/mpeg',
+            'audio/mp4',
+            'audio/ogg',
+            'audio/vnd.wav',
+    ];
+
     //--------------------------------------------
     // Boot
     //--------------------------------------------
@@ -67,6 +88,21 @@ class Diskmediafile extends BaseModel implements Guidable, Ownable
         'has_blur'  => 'bool',
     ];
 
+    public function getIsImageAttribute($value)
+    {
+        return in_array($this->mimetype, Diskmediafile::$mimeImageTypes);
+    }
+
+    public function getIsVideoAttribute($value)
+    {
+        return in_array($this->mimetype, Diskmediafile::$mimeVideoTypes);
+    }
+
+    public function getIsAudioAttribute($value)
+    {
+        return in_array($this->mimetype, Diskmediafile::$mimeAudioTypes);
+    }
+
     //--------------------------------------------
     // %%% Scopes
     //--------------------------------------------
@@ -74,14 +110,17 @@ class Diskmediafile extends BaseModel implements Guidable, Ownable
     // %DRY %FIXME: see attribute and appends
     public function scopeIsImage($query)
     {
-        //return $query->whereIn('mimetype', ['image/jpeg', 'image/jpg', 'image/png']);
-        return $this->isImage();
+        return $query->whereIn('mimetype', Diskmediafile::$mimeImageTypes);
     }
 
     public function scopeIsVideo($query)
     {
-        //return $query->whereIn('mimetype', ['video/mp4', 'video/mpeg', 'video/ogg', 'video/quicktime']);
-        return $this->isVideo();
+        return $query->whereIn('mimetype', Diskmediafile::$mimeVideoTypes);
+    }
+
+    public function scopeIsAudio($query)
+    {
+        return $query->whereIn('mimetype', Diskmediafile::$mimeAudioTypes);
     }
 
 
@@ -148,28 +187,7 @@ class Diskmediafile extends BaseModel implements Guidable, Ownable
 
     // %%% --- Other ---
 
-    // %FIXME use these throughout app DRY
-    static public $mimeImageTypes = [
-            'image/jpeg',
-            'image/png',
-            'image/gif',
-    ];
-    static public $mimeVideoTypes = [
-            'video/mp4',
-            'video/x-m4v',
-            'video/x-flv',
-            'video/quicktime',
-            'video/x-ms-wmv',
-            'video/x-matroska',
-            'video/ogg',
-    ];
-    static public $mimeAudioTypes = [
-            'audio/mpeg',
-            'audio/mp4',
-            'audio/ogg',
-            'audio/vnd.wav',
-    ];
-
+    /*
     public function isImage(): bool
     {
         $is = false;
@@ -211,6 +229,7 @@ class Diskmediafile extends BaseModel implements Guidable, Ownable
         }
         return $is;
     }
+     */
 
     // creates diskmediafile and associated mediafile reference
     public static function doCreate(array $attrs) : Mediafile

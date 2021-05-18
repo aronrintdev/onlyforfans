@@ -165,7 +165,7 @@ class TimelinesTest extends TestCase
      */
     public function test_fan_can_not_access_locked_content_via_feed()
     {
-        $timeline = Timeline::has('posts','>=',5)->has('followers','>=',1)->firstOrFail(); // assume non-admin (%FIXME)
+        $timeline = Timeline::has('posts','>=',7)->has('followers','>=',1)->firstOrFail(); // assume non-admin (%FIXME)
 
         // Makes sure we have at least 1 free, 1 priced, and 1 subscibe-only post, then add some mediafiles to the posts...
         $posts = Post::where('postable_type', 'timelines')

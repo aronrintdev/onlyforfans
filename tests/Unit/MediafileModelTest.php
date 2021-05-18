@@ -25,7 +25,7 @@ class MediafileModelTest extends TestCase
     /**
      * @group mediafile-model
      * @group regression
-     * @group here0517a
+     * @group here0517
      */
     public function test_should_create_diskmediafile_and_reference_mediafile()
     {
