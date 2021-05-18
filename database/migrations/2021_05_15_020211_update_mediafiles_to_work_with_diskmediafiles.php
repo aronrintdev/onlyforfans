@@ -19,6 +19,7 @@ class UpdateMediafilesToWorkWithDiskmediafiles extends Migration
 
             $table->nullableUuidMorphs('resource');
 
+            $table->boolean('is_primary')->default(false)->comment('True if this is the original mediafile associated with the disk image');
             $table->string('mfname')->comment('Mediafile name');
             $table->string('mftype', 63)->comment('Mediafile Type: Enumeration');
             $table->json('cattrs')->nullable()->comment('JSON-encoded custom attributes');
