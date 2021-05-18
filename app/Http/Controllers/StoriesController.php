@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Resources\StoryCollection;
 use App\Http\Resources\Story as StoryResource;
+use App\Models\Mediafile;
 use App\Models\Diskmediafile;
 use App\Models\Setting;
 use App\Models\Story;
@@ -127,6 +128,7 @@ class StoriesController extends AppBaseController
 
                 if ( $request->attrs['stype'] === StoryTypeEnum::PHOTO ) {
                     if ( $request->hasFile('mediafile') ) {
+                        // mediafile request param is of type FILE...see vrules above
                         $file = $request->file('mediafile');
                         $subFolder = $request->user()->id;
                         $s3Path = $file->store('./'.$subFolder, 's3'); // %FIXME: hardcoded
@@ -142,9 +144,21 @@ class StoriesController extends AppBaseController
                             'resource_type'   => 'stories',
                         ]);
                     } else {
+                        // mediafile request param is ID, referneces existing mediafile (in vault)...see vrules above
+                        /*
                         $src = Mediafile::find($request->mediafile);
                         $cloned = $src->doClone('stories', $story->id);
                         $story->mediafiles()->save($cloned);
+                         */
+                        $refMF = Mediafile::where('resource_type', 'vaultfolders')
+                            ->where('is_primary', true)
+                            ->findOrFail($request->mediafile)
+                            ->diskmediafile->createReference(
+                                'stories',    // $resourceType
+                                $story->id,  // $resourceID
+                                'New Story', // $mfname - could be optionally passed as a query param %TODO
+                                MediafileTypeEnum::STORY // $mftype
+                            );
                     }
                 }
                 return $story;

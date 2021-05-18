@@ -62,6 +62,7 @@ class MediafileModelTest extends TestCase
         $this->assertSame('users', $mf->resource_type);
         $this->assertSame($owner->id, $mf->resource_id);
 
+        $this->assertTrue($mf->is_primary);
         $this->assertTrue($mf->is_image);
         $this->assertFalse($mf->is_video);
         $this->assertNotNull($mf->diskmediafile);
@@ -80,6 +81,7 @@ class MediafileModelTest extends TestCase
     /**
      * @group mediafile-model
      * @group regression
+     * @group here0517
      */
     public function test_should_create_mediafile_reference_from_existing_diskmediafile()
     {
@@ -121,6 +123,7 @@ class MediafileModelTest extends TestCase
         $this->assertEquals(MediafileTypeEnum::AVATAR, $mf2->mftype);
         $this->assertEquals('users', $mf2->resource_type);
         $this->assertEquals($owner->id, $mf2->resource_id);
+        $this->assertFalse($mf2->is_primary);
 
         $this->assertNotNull($mf2->diskmediafile);
         $this->assertEquals($owner->id, $mf2->diskmediafile->owner_id);
