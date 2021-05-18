@@ -30,6 +30,7 @@ class Flag extends Model
 {
     use UsesUuid;
 
+    protected $connection = 'financial';
     protected $table = 'flags';
 
     protected $guarded = [ 'handled', 'handled_by' ];

@@ -3,13 +3,16 @@
 namespace App\Models\Financial;
 
 use LogicException;
-use App\Interfaces\Ownable;
+use App\Events\ItemTipped;
 
+use App\Interfaces\Ownable;
 use App\Models\Casts\Money;
+use App\Interfaces\Tippable;
+
 use App\Models\Subscription;
 use App\Events\ItemPurchased;
-
 use App\Interfaces\PricePoint;
+use Illuminate\Bus\Dispatcher;
 use Illuminate\Support\Carbon;
 use App\Models\Traits\UsesUuid;
 use App\Interfaces\Purchaseable;
@@ -29,8 +32,6 @@ use App\Jobs\Financial\UpdateAccountBalance;
 use App\Models\Financial\Traits\HasCurrency;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Enums\Financial\TransactionSummaryTypeEnum;
-use App\Events\ItemTipped;
-use App\Interfaces\Tippable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\InvalidCastException;
 use App\Models\Financial\Exceptions\AlreadyPurchasedException;
@@ -76,6 +77,7 @@ class Account extends Model implements Ownable
         HasFactory,
         SoftDeletes;
 
+    protected $connection = 'financial';
     protected $table = 'accounts';
 
     protected $guarded = [
@@ -238,8 +240,8 @@ class Account extends Model implements Ownable
 
         $this->refresh();
 
-        UpdateAccountBalance::dispatch($this);
-        UpdateAccountBalance::dispatch($toAccount);
+        app(Dispatcher::class)->dispatch(new UpdateAccountBalance($this));
+        app(Dispatcher::class)->dispatch(new UpdateAccountBalance($toAccount));
         return new Collection([ 'debit' => $debitTransaction, 'credit' => $creditTransaction ]);
     }
 
@@ -584,7 +586,7 @@ class Account extends Model implements Ownable
         Subscribable $subscribable,
         $payment,
         $options = []
-    ): Collection
+    ): Subscription
     {
         // Check if already subscribed.
         if (
@@ -604,7 +606,7 @@ class Account extends Model implements Ownable
         }
 
         // Create Subscription Model
-        $subscription = Subscription::create([
+        return Subscription::create([
             'subscribable_id'   => $subscribable->getKey(),
             'subscribable_type' => $subscribable->getMorphString(),
             'user_id'           => $this->getOwner()->first()->getKey(),
@@ -618,23 +620,6 @@ class Account extends Model implements Ownable
             'access_level'      => $options['access_level'] ?? ShareableAccessLevelEnum::PREMIUM,
             'custom_attributes' => $options['custom_attributes'] ?? null,
             'metadata'          => $options['metadata'] ?? null,
-        ]);
-
-        // Make transaction
-        $transactions = $subscription->process();
-
-        if ($transactions) {
-            $subscribable->grantAccess(
-                $this->getOwner()->first(),
-                $options['access_level'] ?? ShareableAccessLevelEnum::PREMIUM,
-                $options['access_cattrs'] ?? [],
-                $options['access_meta'] ?? [],
-            );
-        }
-
-        return new Collection([
-            'subscription' => $subscription,
-            'transactions' => $transactions,
         ]);
     }
 

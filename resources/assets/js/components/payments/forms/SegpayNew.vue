@@ -63,7 +63,7 @@
           </b-col>
           <b-col cols="6">
             <b-form-group :label="$t('Security Code')" >
-              <b-form-input v-model="form.card.ccv" v-mask="'####'" :placeholder="$t('CVV')" pattern="\d*" />
+              <b-form-input v-model="form.card.cvv" v-mask="'####'" :placeholder="$t('CVV')" pattern="\d*" />
             </b-form-group>
           </b-col>
         </b-row>
@@ -82,11 +82,25 @@
         </b-row>
 
         <b-row>
+          <b-col cols="8">
+            <b-form-group :label="$t('nickname')">
+              <b-form-input v-model="form.nickname" />
+            </b-form-group>
+          </b-col>
+          <b-col cols="4" class="d-flex align-items-center">
+            <b-form-checkbox v-model="form.card_is_default">
+              {{ $t('isDefault') }}
+            </b-form-checkbox>
+          </b-col>
+        </b-row>
+
+        <b-row>
           <b-col cols="12">
             <b-btn block variant="success" @click="onComplete">
               {{ $t('Finish') }}
             </b-btn>
           </b-col>
+
         </b-row>
       </div>
     </b-skeleton-wrapper>
@@ -143,6 +157,8 @@ export default {
         expirationMonth: '',
         cvv: '',
       },
+      nickname: '',
+      card_is_default: true,
     },
 
     masks: {
@@ -192,32 +208,47 @@ export default {
             })
             this.$emit('success', 'faked')
             this.$emit('processing')
-            this.processing = true
             return
           }
 
-          window.segpay.sdk.completePayment({
+          console.log('onComplete')
+          this.$emit('processing')
+          const data = {
             sessionId: this.sessionId,
-            packageId: this.packageId,
+            packageId: parseInt(this.packageId),
             customer: {
               ...this.form.customer,
               email: this.session_user.email,
             },
             card: {
               ...this.form.card,
+              expirationYear: parseInt(`20${this.form.card.expirationYear}`),
+              expirationMonth: parseInt(this.form.card.expirationMonth),
             },
-          }, (result) => {
+            billing: {
+              pricePointId: null,
+              currencyCode: this.currency,
+            },
+            userData: {
+              item_type: this.type,
+              item_id: this.value.id,
+              user_id: this.session_user.id,
+              nickname: this.form.nickname,
+              card_is_default: this.form.card_is_default ? '1' : '0',
+            },
+          }
+          console.log({ data })
+          window.segpay.sdk.completePayment(data, (result) => {
+            console.log({ result })
             switch (result.status) {
               case 'GeneralErrors':
-                //
+                console.log({ result })
               break;
               case 'ValidationErrors':
-                //
+                console.log({ result })
               break;
               case 'Success':
                 this.$emit('success', result.purchases)
-                this.$emit('processing')
-                this.processing = true
               break;
             }
           })
@@ -260,6 +291,7 @@ export default {
           currency: this.currency,
         }).then(results => {
           this.sessionId = results.data.id
+          this.packageId = results.data.packageId
           this.pageId = results.data.pageId
           this.expirationDateTime = results.data.expirationDateTime
           resolve()
@@ -322,6 +354,8 @@ export default {
     "Postal Code": "Zip Code",
     "Finish": "Complete Transaction",
     "An Error Has Occurred": "An Error Has Occurred",
+    "nickname": "Save card name as",
+    "isDefault": "Save as default payment method"
   }
 }
 </i18n>

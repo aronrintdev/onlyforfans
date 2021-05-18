@@ -32,7 +32,7 @@ class PaymentsController extends Controller
         $user = Auth::user();
 
         $accounts = $user->financialAccounts()->where('type', AccountTypeEnum::IN)->with('resource')
-            ->paginate($request->input('take', env('MAX_POSTS_PER_REQUEST', 10)));
+            ->paginate($request->input('take', 50));
 
         return new PaymentMethodCollection($accounts);
     }
@@ -46,14 +46,14 @@ class PaymentsController extends Controller
     public function setDefault(Request $request)
     {
         $request->validate([
-            'id' => 'required|uuid|exists:financial_accounts,id',
+            'id' => 'required|uuid',
         ]);
 
         $settings = Auth::user()->settings;
         $settings->cattrs = array_merge($settings->cattrs, [ 'default_payment_method' => $request->id ]);
         $settings->save();
         $accounts = Auth::user()->financialAccounts()->where('type', AccountTypeEnum::IN)->with('resource')
-            ->paginate($request->input('take', env('MAX_POSTS_PER_REQUEST', 10)));
+            ->paginate($request->input('take', 50));
         return new PaymentMethodCollection($accounts);
     }
 
@@ -66,7 +66,7 @@ class PaymentsController extends Controller
     public function remove(Request $request)
     {
         $request->validate([
-            'id' => 'required|uuid|exists:financial_accounts,id',
+            'id' => 'required|uuid',
         ]);
 
         $account = Account::find($request->id);
@@ -85,7 +85,7 @@ class PaymentsController extends Controller
             'type' => [ 'required', new InEnum(new PaymentTypeEnum()) ],
             'price' => 'required|integer',
             'currency' => 'required',
-            'method' => 'required|uuid|exists:financial_accounts,id',
+            'method' => 'required|uuid',
         ]);
 
         // Get payment account

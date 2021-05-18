@@ -13,6 +13,7 @@ class TransactionSummary extends Model
     use UsesUuid,
         HasSystemByAccount;
 
+    protected $connection = 'financial';
     protected $table = 'transaction_summaries';
 
     /**

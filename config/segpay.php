@@ -9,8 +9,13 @@ return [
     'reportingServicesUrl' => env('SEGPAY_SRS_URL', 'srs.segpay.com'),
     'userId' => env('SEGPAY_USER_ID'),
     'accessKey' => env('SEGPAY_ACCESS_KEY'),
+
     'packageId' => env('SEGPAY_PACKAGE_ID', '199225'),
     'pricePointId' => env('SEGPAY_PRICE_POINT_ID', '26943'),
+
+    'dynamicPackageId' => env('SEGPAY_DYNAMIC_PACKAGE_ID', '199373'),
+    'dynamicPricePointId' => env('SEGPAY_DYNAMIC_PRICE_POINT_ID', '27232'),
+
     'secret' => env('SEGPAY_SECRET_KEY', '95345D5827AEFC558525AD4878A46'),
 
     'baseDynamicOneClickServiceUrl' => env('SEGPAY_BASE_DYNAMIC_ONE_CLICK_SERVICE_URL', 'https://service.segpay.com/OneClickSales.asmx/SalesServiceDynamic'),

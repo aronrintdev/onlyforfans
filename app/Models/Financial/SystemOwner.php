@@ -13,6 +13,7 @@ class SystemOwner extends Model implements HasFinancialAccounts
     use UsesUuid,
         HasSystem;
 
+    protected $connection = 'financial';
     protected $table = 'system_owners';
 
     protected $guarded = [];

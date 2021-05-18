@@ -32,8 +32,6 @@ class WebhooksController extends Controller
      * @return void
      */
     public function receiveSegpay(Request $request) {
-        Log::debug('Segpay Webhook received', [ '$request' => $request ]);
-
         return Webhook::receiveSegPay($request);
     }
 }

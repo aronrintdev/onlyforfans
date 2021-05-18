@@ -63,10 +63,7 @@ export default {
 
     onConfirm() {
       this.$emit('processing')
-      /**
-       * TODO: Hook up to segpay system proper
-       */
-      this.axios.post(this.$apiRoute('payments.segpay.fake-confirmation'), {
+      this.axios.post(this.$apiRoute('payments.segpay.confirmation'), {
         item: this.value.id,
         type: this.type,
         price: this.price,
@@ -81,6 +78,23 @@ export default {
         this.$emit('stopProcessing')
       })
     },
+
+    fake() {
+      this.axios.post(this.$apiRoute('payments.segpay.fake-confirmation'), {
+        item: this.value.id,
+        type: this.type,
+        price: this.price,
+        currency: this.currency,
+        method: this.paymentMethod.id,
+        extra: this.extra,
+      }).then(response => {
+        this.$log.debug('PaymentConfirmation onConfirm')
+      }
+      ).catch(error => {
+        eventBus.$emit('error', { error, message: "An error has occurred", })
+        this.$emit('stopProcessing')
+      })
+    }
   },
 
   mounted() {
