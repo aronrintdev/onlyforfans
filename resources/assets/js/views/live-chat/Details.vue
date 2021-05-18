@@ -257,7 +257,7 @@
                           <path d="M19 3h-1V2a1 1 0 0 0-2 0v1H8V2a1 1 0 0 0-2 0v1H5a2 2 0 0 0-2 2v13a3 3 0 0 0 3 3h12a3 3 0 0 0 3-3V5a2 2 0 0 0-2-2zm0 15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V9h14zm0-11H5V5h14zM9.79 17.21a1 1 0 0 0 1.42 0l5-5a1 1 0 0 0 .29-.71 1 1 0 0 0-1-1 1 1 0 0 0-.71.29l-4.29 4.3-1.29-1.3a1 1 0 0 0-.71-.29 1 1 0 0 0-1 1 1 1 0 0 0 .29.71z"></path>
                         </svg> 
                         <span> Scheduled for&nbsp;</span>
-                        <strong>{{ moment(scheduledMessageDate).format('MMM DD, h:mm a') }}</strong>
+                        <strong>{{ moment(scheduledMessageDate * 1000).local().format('MMM DD, h:mm a') }}</strong>
                       </div>
                       <button class="btn close-btn" @click="clearSchedule">
                         <svg class="icon-close" viewBox="0 0 24 24">
@@ -405,6 +405,7 @@
                         <button
                           class="btn action-btn"
                           type="button"
+                          :disabled="scheduledMessageDate"
                           @click="openScheduleMessageModal"
                         >
                           <svg class="icon-schedule" viewBox="0 0 24 24">
@@ -917,7 +918,7 @@
         this.offset = 0;
         this.initialLoadingFinished = false;
         this.newMessageText = undefined;
-        this.scheduledMessageDate = undefined;
+        this.scheduledMessageDate = null;
         this.sortableMedias = [];
         this.markAsRead();
         this.getMessages();
@@ -1127,14 +1128,14 @@
             data.append('tip_price', this.messagePrice);
           }
           if (this.scheduledMessageDate) {
-            data.append('schedule_datetime', moment(this.scheduledMessageDate).utc().format('YYYY-MM-DD HH:mm'));
+            data.append('schedule_datetime', this.scheduledMessageDate);
           }
           const self = this;
           this.axios.post('/chat-messages', data)
             .then((response) => {
               self.isSendingFiles = false;
               self.newMessageText = undefined;
-              self.scheduledMessageDate = undefined;
+              self.scheduledMessageDate = null;
               self.adjustTextareaSize();
               self.sortableMedias = [];
               self.messagePrice = undefined;
@@ -1150,13 +1151,13 @@
             message: this.newMessageText,
             tip_price: this.messagePrice,
             user_id: this.selectedUser.profile.id,
-            schedule_datetime: this.scheduledMessageDate ? moment(this.scheduledMessageDate).utc().format('YYYY-MM-DD HH:mm') : null,
+            schedule_datetime: this.scheduledMessageDate,
           })
             .then((response) => {
               self.newMessageText = undefined;
               self.adjustTextareaSize();
               self.messagePrice = undefined;
-              self.scheduledMessageDate = undefined;
+              self.scheduledMessageDate = null;
               if (response.data.message) {
                 self.lastMessage = _.cloneDeep(response.data.message);
                 self.originMessages.unshift(self.lastMessage);
@@ -1632,12 +1633,12 @@
         this.$refs['schedule-message-modal'].show();
       },
       applySchedule: function() {
-        this.scheduledMessageDate = moment(`${this.scheduledMessage.date} ${this.scheduledMessage.time}`).unix() * 1000;
+        this.scheduledMessageDate = moment(`${this.scheduledMessage.date} ${this.scheduledMessage.time}`).utc().unix();
         this.$refs['schedule-message-modal'].hide();
         this.scheduledMessage = {};
       },
       clearSchedule: function() {
-        this.scheduledMessageDate = undefined;
+        this.scheduledMessageDate = null;
         this.scheduledMessage = {};
         this.$refs['schedule-message-modal'].hide();
       },

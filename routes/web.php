@@ -145,6 +145,7 @@ Route::group(['middleware' => ['auth']], function () {
     //Route::get('/timelines/home', ['as'=>'timelines.home', 'uses' => 'TimelinesController@home']); // special case of 'show'
     Route::get('/timelines/match', ['as'=>'timelines.match', 'uses' => 'TimelinesController@match']);
     Route::get('/timelines/home/feed', ['as'=>'timelines.homefeed', 'uses' => 'TimelinesController@homefeed']);
+    Route::get('/timelines/home/scheduled-feed', ['as'=>'timelines.homescheduledfeed', 'uses' => 'TimelinesController@homeScheduledfeed']);
     Route::get('/timelines/{timeline}/feed', ['as'=>'timelines.feed', 'uses' => 'TimelinesController@feed']);
     Route::get('/timelines/{timeline}/photos', ['as'=>'timelines.photos', 'uses' => 'TimelinesController@photos']); // photos feed
     Route::get('/timelines/{timeline}/videos', ['as'=>'timelines.videos', 'uses' => 'TimelinesController@videos']); // videos feed
@@ -207,6 +208,7 @@ Route::get('/chat-messages/users', ['as'=>'messages.fetchusers', 'uses' => 'Mess
 Route::get('/chat-messages/contacts', ['as'=>'messages.fetchcontacts', 'uses' => 'MessageController@fetchContacts']);
 Route::get('/chat-messages/scheduled', ['as'=>'messages.fetchscheduled', 'uses' => 'MessageController@fetchScheduled']);
 Route::delete('/chat-messages/scheduled/{threadId}', ['as'=>'messages.removeschedule', 'uses' => 'MessageController@removeScheduleThread']);
+Route::patch('/chat-messages/scheduled/{threadId}', ['as'=>'messages.editschedule', 'uses' => 'MessageController@editScheduleThread']);
 Route::get('/chat-messages/{id}', ['as'=>'messages.fetchcontact', 'uses' => 'MessageController@fetchcontact']);
 Route::delete('/chat-messages/{id}', ['as'=>'messages.clearcontact', 'uses' => 'MessageController@clearUser']);
 Route::post('/chat-messages/{id}/mark-as-read', ['as'=>'messages.markasread', 'uses' => 'MessageController@markAsRead']);

@@ -190,6 +190,9 @@ export default new Vuex.Store({
         case 'videos':
           url = route('timelines.videos', timelineId)
           break
+        case 'schedule':
+          url = `/timelines/home/scheduled-feed`
+          break
         default:
           url = isHomefeed ? `/timelines/home/feed` : `/timelines/${timelineId}/feed`
       }

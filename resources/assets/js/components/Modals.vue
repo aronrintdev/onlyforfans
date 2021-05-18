@@ -59,6 +59,16 @@
     >
       <ImageDisplay ref="ImageDisplay" :session_user="session_user" :mediafile="selectedResource" :is_feed="false" />
     </b-modal>
+    <b-modal
+      modal-class="schedule-message-modal"
+      hide-header
+      centered
+      hide-footer
+      id="modal-schedule-datetime"
+    >
+      <ScheduleDateTime ref="schedule_picker_modal" @apply="applySchedule" />
+    </b-modal>
+
   </div>
 </template>
 
@@ -74,6 +84,7 @@ import PurchasePost from '@components/modals/PurchasePost.vue'
 import SendTip from '@components/modals/SendTip.vue'
 import PostDisplay from '@components/posts/Display'
 import ImageDisplay from '@components/timelines/elements/ImageDisplay'
+import ScheduleDateTime from '@components/modals/ScheduleDateTime.vue'
 
 export default {
   name: 'Modals',
@@ -84,7 +95,8 @@ export default {
     PurchasePost,
     SendTip,
     PostDisplay,
-    ImageDisplay
+    ImageDisplay,
+    ScheduleDateTime
   },
 
   computed: {
@@ -99,6 +111,7 @@ export default {
       'modal-crop': 'cropImage',
       'modal-post': 'postDisplay',
       'modal-photo': 'ImageDisplay',
+      'modal-schedule-datetime': 'ScheduleDateTime',
     },
     selectedTimeline: null,
     selectedUrl: null,
@@ -146,6 +159,9 @@ export default {
             this.selectedResource = data.mediafile
             this.$bvModal.show('modal-photo')
             break
+          case 'show-schedule-datetime':
+            this.$bvModal.show('modal-schedule-datetime')
+            break
         }
       })
 
@@ -158,6 +174,9 @@ export default {
       })
 
     },
+    applySchedule: function(data) {
+      eventBus.$emit('apply-schedule', data)
+    }
   },
 
   created() {

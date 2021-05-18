@@ -69,7 +69,10 @@ class PostsController extends AppBaseController
     {
         $request->validate([
             'timeline_id' => 'required|uuid|exists:timelines,id',
-            'mediafiles' => 'array', // present when existing mediafile is attached (ie from vault)
+            'description' => 'required',
+            'type' => [ 'sometimes', 'required', new InEnum(new PostTypeEnum()) ],
+            'price' => 'sometimes|required|integer',
+            'mediafiles' => 'array',
             'mediafiles.*.*' => 'integer|uuid|exists:mediafiles',
         ]);
 
@@ -78,13 +81,16 @@ class PostsController extends AppBaseController
         $this->authorize('update', $timeline); // create post considered timeline update
 
         $attrs = $request->except('timeline_id'); // timeline_id is now postable
-        $attrs['postable_type'] = 'timelines'; // %FIXME: hardcoded
-        $attrs['postable_id'] = $timeline->id; // %FIXME: hardcoded
         $attrs['user_id'] = $timeline->user->id; // %FIXME: remove this field, redundant
         $attrs['active'] = $request->input('active', 1);
         $attrs['type'] = $request->input('type', PostTypeEnum::FREE);
+   
+        if ($request->input('schedule_datetime')) {
+            $attrs['schedule_datetime'] = $request->input('schedule_datetime');
+        }
 
-        $post = Post::create($attrs);
+        $post = $timeline->posts()->create($attrs);
+
         if ( $request->has('mediafiles') ) {
             foreach ( $request->mediafiles as $mfID ) {
                 $refMF = Mediafile::where('resource_type', 'vaultfolders')
@@ -115,6 +121,7 @@ class PostsController extends AppBaseController
             'price' => 'sometimes|required|integer',
             'mediafiles' => 'array',
             'mediafiles.*.*' => 'integer|uuid|exists:mediafiles',
+            'schedule_datetime' => 'integer',
         ]);
 
 
@@ -145,6 +152,12 @@ class PostsController extends AppBaseController
                         MediafileTypeEnum::POST // $mftype
                     );
                 $post->refresh();
+            }
+        }
+
+        if ($request->has('schedule_datetime')) {
+            if ($request->schedule_datetime !== $post->schedule_datetime) {
+                $post->schedule_datetime = $request->schedule_datetime;
             }
         }
 

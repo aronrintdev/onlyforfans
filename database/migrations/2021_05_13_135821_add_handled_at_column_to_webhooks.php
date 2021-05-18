@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddScheduleDatetimeToChatthreads extends Migration
+class AddHandledAtColumnToWebhooks extends Migration
 {
     /**
      * Run the migrations.
@@ -13,9 +13,8 @@ class AddScheduleDatetimeToChatthreads extends Migration
      */
     public function up()
     {
-        Schema::table('chatthreads', function (Blueprint $table) {
-            //
-            $table->integer('schedule_datetime')->nullable();
+        Schema::table('webhooks', function (Blueprint $table) {
+            $table->timestamp('handled_at')->nullable();
         });
     }
 
@@ -26,9 +25,8 @@ class AddScheduleDatetimeToChatthreads extends Migration
      */
     public function down()
     {
-        Schema::table('chatthreads', function (Blueprint $table) {
-            //
-            $table->dropColumn(['schedule_datetime']);
+        Schema::table('webhooks', function (Blueprint $table) {
+            $table->dropColumn('handled_at');
         });
     }
 }

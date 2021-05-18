@@ -44,6 +44,7 @@ class Post extends JsonResource
                 'likeCount' => $this->likes_count,
                 'commentCount' => $this->comments_count,
             ],
+            'schedule_datetime' => $this->schedule_datetime,
         ];
     }
 }

@@ -5,21 +5,8 @@
         Blog Items
       </div>
     </b-card>
-
-    <div class="mt-auto mb-3">
-      <LinkBar />
-    </div>
   </div>
 </template>
-
-<script>
-import LinkBar from './LinkBar'
-export default {
-  components: {
-    LinkBar
-  },
-}
-</script>
 
 <i18n lang="json5">
 {

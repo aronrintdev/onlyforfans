@@ -130,7 +130,26 @@
 			.user-list-container {
 				flex: 1;
 				overflow-y: auto;
+
+				&::-webkit-scrollbar-track
+				{
+					-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.02);
+					background-color: transparent;
+				}
+				&::-webkit-scrollbar
+				{
+					width: 4px;
+					margin-right: -2px;
+					background-color: transparent;
+				}
+				&::-webkit-scrollbar-thumb
+				{
+					background-color: rgba(97, 102, 107, 0.3);
+					border-radius: 5px;
+					opacity: 0.8;
+				}
 			}
+
 			.user-list {
 				list-style: none;
 				padding: 0;
@@ -267,7 +286,7 @@
 			}
 		}
 		.conversation-footer {
-			padding: 0 8px;
+			padding: 8px 8px 0;
 			border-top: solid 1px rgba(138, 150, 163, 0.25);
 
 			input[type="file"] {
@@ -423,10 +442,10 @@
 					background: rgba(0,175,240,.12);
 					border-bottom-right-radius: 8px;
 					border-bottom-left-radius: 8px;
-					padding: 8px;
+					padding: 0 8px 8px;
 				}
 				.price-to-view-header {
-					margin-top: 8px;
+					margin-top: 0;
 					border-top-right-radius: 8px;
 					border-top-left-radius: 8px;
 					background: rgba(0,175,240,.12);
@@ -517,50 +536,8 @@
 				}
 			}
 
-			.scheduled-message-head {
-				display: flex;
-				align-items: center;
-				justify-content: space-between;
-				height: 36px !important;
-				padding: 6px;
-				border-radius: 6px;
-				margin: 0.5em 0 -0.5em;
-				background: rgba(138,150,163,.12);
-
-				.icon-schedule {
-					fill: #00aff0;
-					margin-right: 6px;
-					width: 22px;
-				}
-				strong {
-					letter-spacing: -0.2px;
-				}
-				& > div {
-					font-size: 13px;
-					flex: 0 1 100%;
-					max-width: 100%;
-					display: flex;
-					align-items: center;
-				}
-				.close-btn {
-					padding: 2px;
-					background: #00aff0;
-					border: none;
-					border-radius: 50%;
-					display: flex;
-					align-items: center;
-					justify-content: center;
-
-					.icon-close {
-						fill: #fefefe;
-						width: 18px;
-					}
-				}
-				
-			}
-
 			.multiline-textbox {
-				padding: 12px 8px 4px;
+				padding: 4px;
 
 				textarea {
 					overflow-y: auto;
@@ -602,7 +579,7 @@
 			.action-btns {
 				display: flex;
 				align-items: center;
-				padding: 7px 0 9px;
+				padding: 6px 0 8px;
 				justify-content: space-between;
 
 				.action-btn {
@@ -679,5 +656,9 @@
 				padding-left: 0px;
 			}
 		}
+	}
+
+	.scheduled-message-head {
+		margin: 0 0 6px;
 	}
 }

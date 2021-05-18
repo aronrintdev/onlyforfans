@@ -4,17 +4,18 @@
     <b-row>
       <b-col>
         <div class="footer-description">
-          <div class="row" style="margin-bottom: 60px; text-align:center">
+          <LinkBar />
+          <!-- <div class="row" style="margin-bottom: 60px; text-align:center">
             <span class="col-sm-2 col-2 col-lg-2"></span>
-            <a href="/faq" class="col-sm-2 col-2 col-lg-1 col-xs-12" style="margin-bottom:5px">FAQ</a>
-            <a href="/support" class="col-sm-2 col-2 col-lg-1 col-xs-12" style="margin-bottom:5px">Support</a>
-            <a href="/terms-of-use" class="col-sm-2 col-2 col-lg-1 col-xs-12" style="margin-bottom:5px">Terms</a>
-            <a href="/privacy-policy" class="col-sm-2 col-2 col-lg-1 col-xs-12" style="margin-bottom:5px">Privacy</a>
-            <a href="/dmca" class="col-sm-2 col-2 col-lg-1 col-xs-12" style="margin-bottom:5px">DMCA</a>
-            <a href="/usc2257" class="col-sm-2 col-2 col-lg-1 col-xs-12" style="margin-bottom:5px">USC 2257</a>
-            <a href="/legal" class="col-sm-2 col-2 col-lg-1 col-xs-12" style="margin-bottom:5px">Legal</a>
-            <a href="/blog" class="col-sm-2 col-2 col-lg-1 col-xs-12" style="margin-bottom:5px">Blog</a>
-          </div>
+            <router-link :to="{ name: 'static.faq'}" class="col-sm-2 col-2 col-lg-1 col-xs-12" style="margin-bottom:5px">FAQ</router-link>
+            <router-link :to="{ name: 'static.support'}" class="col-sm-2 col-2 col-lg-1 col-xs-12" style="margin-bottom:5px">Support</router-link>
+            <router-link :to="{ name: 'static.terms' }" class="col-sm-2 col-2 col-lg-1 col-xs-12" style="margin-bottom:5px">Terms</router-link>
+            <router-link :to="{ name: 'static.privacy' }" class="col-sm-2 col-2 col-lg-1 col-xs-12" style="margin-bottom:5px">Privacy</router-link>
+            <router-link :to="{ name: 'static.dmca' }" class="col-sm-2 col-2 col-lg-1 col-xs-12" style="margin-bottom:5px">DMCA</router-link>
+            <router-link :to="{ name: 'static.usc2257' }" class="col-sm-2 col-2 col-lg-1 col-xs-12" style="margin-bottom:5px">USC 2257</router-link>
+            <router-link :to="{ name: 'static.legal' }" class="col-sm-2 col-2 col-lg-1 col-xs-12" style="margin-bottom:5px">Legal</router-link>
+            <router-link :to="{ name: 'static.blog' }" class="col-sm-2 col-2 col-lg-1 col-xs-12" style="margin-bottom:5px">Blog</router-link>
+          </div> -->
           <div class="fans-terms text-center">
             Copyright © 2021 <a href="/">AllFans™</a>. All rights reserved.
             <br />
@@ -42,6 +43,15 @@
 
   </div>
 </template>
+<script>
+import LinkBar from '@components/staticPages/LinkBar'
+export default {
+  name: 'SiteFooter',
+  components: {
+    LinkBar,
+  },
+}
+</script>
 
 <style lang="scss">
 .footer-description {

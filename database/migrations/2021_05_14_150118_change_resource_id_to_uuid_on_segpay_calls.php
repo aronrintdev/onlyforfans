@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddScheduleDatetimeToChatthreads extends Migration
+class ChangeResourceIdToUuidOnSegpayCalls extends Migration
 {
     /**
      * Run the migrations.
@@ -13,9 +13,8 @@ class AddScheduleDatetimeToChatthreads extends Migration
      */
     public function up()
     {
-        Schema::table('chatthreads', function (Blueprint $table) {
-            //
-            $table->integer('schedule_datetime')->nullable();
+        Schema::connection('financial')->table('segpay_calls', function (Blueprint $table) {
+            $table->uuid('resource_id')->nullable()->change();
         });
     }
 
@@ -26,9 +25,8 @@ class AddScheduleDatetimeToChatthreads extends Migration
      */
     public function down()
     {
-        Schema::table('chatthreads', function (Blueprint $table) {
-            //
-            $table->dropColumn(['schedule_datetime']);
+        Schema::connection('financial')->table('segpay_calls', function (Blueprint $table) {
+            $table->bigIncrements('resource_id')->nullable()->change();
         });
     }
 }

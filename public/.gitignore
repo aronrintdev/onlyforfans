@@ -6,3 +6,7 @@
 !index.php
 !robots.txt
 !web.config
+
+*.js
+*.js.map
+stats.json

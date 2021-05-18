@@ -105,6 +105,11 @@ export default {
         this.UPDATE_SCREEN_SIZE(screenSize)
       }
     },
+    $route: function(newVal) {
+      if (newVal.name.indexOf('messages') > -1) {
+        this.isFooterHidden = true;
+      }
+    }
   },
 
   mounted() {
