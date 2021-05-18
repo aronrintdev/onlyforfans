@@ -9,6 +9,7 @@ import settings from '@views/settings'
 import lists from '@views/lists'
 import notifications from '@views/notifications'
 import stories from '@views/stories'
+import statements from '@views/statements'
 import timelines from '@views/timelines'
 import users from '@views/users'
 import vaults from '@views/vaults'
@@ -84,6 +85,13 @@ export const routes = [
     path: '/settings',
     component: settings.Dashboard,
     children:  settingsRoutes,
+  },
+
+  // Statements
+  {
+    name: 'statements.dashboard',
+    path: '/statements',
+    component: statements.Dashboard,
   },
 
   // Lists

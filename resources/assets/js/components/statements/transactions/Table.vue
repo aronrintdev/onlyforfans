@@ -68,7 +68,7 @@ import moment from 'moment'
 import LoadingOverlay from '@components/common/LoadingOverlay'
 import PostDisplay from '@components/posts/Display'
 import UserAvatar from '@components/user/Avatar'
-import TransactionCard from './TransactionCard'
+import TransactionCard from './Card'
 
 export default {
   name: 'TransactionsTable',
@@ -82,8 +82,6 @@ export default {
 
   computed: {
     ...Vuex.mapState(['session_user', 'mobile', 'screenSize']),
-
-
 
     encoder() {
       return this.$newEncoder(this.encodeBase)
