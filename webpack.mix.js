@@ -59,11 +59,11 @@ mix.addWebpackLoaders([
     type: 'javascript/auto',
     loader: '@intlify/vue-i18n-loader'
   },
-  {
-    resourceQuery: /blockType=scss/,
-    type: 'javascript/auto',
-    use: [ 'vue-style-loader', 'css-loader', 'sass-loader'],
-  },
+  // {
+  //   resourceQuery: /blockType=scss/,
+  //   type: 'javascript/auto',
+  //   use: [ 'vue-style-loader', 'css-loader', 'sass-loader' ],
+  // },
 ])
 
 // Extract Important libraries to own files for load speed
