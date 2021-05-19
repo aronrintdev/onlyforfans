@@ -64,7 +64,7 @@ class Story extends Model implements Likeable, Ownable
 
     public function mediafiles()
     {
-        return $this->morphMany('App\Models\Mediafile', 'resource');
+        return $this->morphMany(Mediafile::class, 'resource');
     }
 
     public function timeline()
@@ -88,5 +88,10 @@ class Story extends Model implements Likeable, Ownable
     public function getOwner(): ?Collection
     {
         return new Collection([ $this->timeline->user ]);
+    }
+
+    public function getPrimaryOwner(): User
+    {
+        return $this->timeline->user;
     }
 }

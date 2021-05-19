@@ -1,7 +1,25 @@
 
+$font-family-sans-serif:  "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif !default;
+$font-family-base:   $font-family-sans-serif !default;
+
 $theme-colors: (
   "gray-light": #f3f3f3,
   "white": #fff,
+);
+
+$grid-breakpoints: (
+  xs: 0,
+  sm: 576px,
+  md: 768px,
+  lg: 992px,
+  xl: 1400px
+);
+
+$container-max-widths: (
+  sm: 540px,
+  md: 720px,
+  lg: 960px,
+  xl: 1340px
 );
 
 html,
@@ -16,17 +34,10 @@ body {
 
 body {
   background-color: rgb(237, 242, 247) !important;
-  font-family: 'Open Sans', sans-serif;
-}
-
-.tag-crate {
-  /*
-  border: solid 2px orange;
-  */
+  font-family: 'Roboto', sans-serif;
 }
 
 body .btn {
-    font-family: 'Open Sans', sans-serif;
     font-size: 14px;
     text-transform: capitalize;
     outline: none !important;
@@ -45,4 +56,417 @@ body .tag-clickable {
   width: 100%;
   display: flex;
   flex-direction: column;
+}
+
+body .tag-ctrl .btn:focus {
+  box-shadow: none;
+}
+
+/* %%% superbox-post overrides for grid layout (do here as may span multiple Vue scopes) */
+
+body .feed-crate .superbox-post .card-text {
+}
+body .feed-crate.tag-grid-layout .superbox-post .card-text {
+  /* Note that text will be hidden if in grid view and post has mediafiles */
+  -webkit-line-clamp: 12; /* manually adjusted so that the ellipsis will show in the grid height, but may not work in all circumstances ? */
+}
+
+body .feed-crate.tag-grid-layout .superbox-post .text-wrap {
+  height: 20rem;
+}
+
+body .feed-crate.tag-grid-layout .superbox-post .text-wrap.tag-has-mediafiles {
+  display: none; /* hide the text when in grid mode unless post is text-only */
+}
+
+/* In 'grid' view, normalize the height so that we don't get a variation messing up row alignment */
+body .feed-crate.tag-grid-layout .superbox-post .carousel.slide .carousel-item,
+body .feed-crate.tag-grid-layout .superbox-post .locked-content {
+  height: 20rem;
+}
+
+// Lists
+body #view-lists .list-component.tag-grid-layout  .superbox-post .carousel.slide .carousel-item {
+  video, img {
+    object-fit: cover;
+    height: 20rem;
+  }
+}
+
+// Main Timeline Feed
+body .feed-crate.tag-grid-layout .superbox-post .carousel.slide .carousel-item {
+  video, img {
+    object-fit: cover;
+    height: 20rem;
+  }
+}
+
+#user-filter-dropdown .btn,
+.filter-dropdown .btn,
+.filter-dropdown.show > .btn.dropdown-toggle,
+#more-dropdown .btn {
+  border: none;
+  background-color: transparent !important;
+  width: 24px;
+  height: 24px;
+  color: rgba(138,150,163,.75);
+  position: relative;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#user-filter-dropdown .btn:after,
+.filter-dropdown .btn:after,
+#more-dropdown .btn:after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 36px;
+  height: 36px;
+  transform: translate(-50%,-50%);
+  transition: opacity .15s;
+  pointer-events: none;
+  opacity: 0;
+  border-radius: 1000px;
+  background-color: #0091ea;
+  display: block;
+  border: none;
+  margin: 0;
+}
+#user-filter-dropdown .btn:hover,
+#user-filter-dropdown .btn:focus,
+.filter-dropdown .btn:hover,
+.filter-dropdown .btn:focus,
+#more-dropdown .btn:hover,
+#more-dropdown .btn:focus {
+  color: #0091ea;
+  box-shadow: none;
+}
+#user-filter-dropdown .btn:hover:after,
+.filter-dropdown .btn:hover:after,
+#more-dropdown .btn:hover:after {
+  opacity: 0.06;
+}
+#user-filter-dropdown .dropdown-item,
+#more-dropdown .dropdown-item {
+  padding-right: 0.8rem;
+  padding-left: 0.8rem;
+  margin: 0.8em 0.5em;
+  width: auto;
+  background-color: transparent;
+  transition: background-color .1s linear;
+} 
+.filter-dropdown .dropdown-item {
+  padding:0 8px;
+  margin: 0;
+}
+#user-filter-dropdown ul,
+.filter-dropdown ul,
+#more-dropdown ul {
+  left: 0.3em !important;
+  width: 250px;
+  padding-top: 5px;
+}
+.filter-dropdown ul a:hover {
+  color: #0091ea;
+  background: transparent;
+}
+#more-dropdown ul a:hover,
+.sidebar-more-dropdown ul a:hover {
+  color: #0091ea;
+  border-radius: 4px;
+  background-color: rgba(0,145,234,.06);
+}
+#user-filter-dropdown ul .block-item a:hover,
+.filter-dropdown ul .block-item a:hover,
+#more-dropdown ul .block-item a:hover {
+  color: #ff6060;
+  border-radius: 4px;
+  background-color: rgba(255,96,96,.06);
+}
+#user-filter-dropdown ul li a:focus,
+#user-filter-dropdown ul li a:active,
+.filter-dropdown ul li a:focus,
+.filter-dropdown ul li a:active,
+#more-dropdown ul li a:focus,
+#more-dropdown ul li a:active {
+  color: #0091ea;
+}
+#user-filter-dropdown ul .block-item a:hover,
+.filter-dropdown ul .block-item a:hover,
+#more-dropdown ul li .block-item a:hover {
+  background: transparent;
+  color: #ff6060;
+}
+.filter-dropdown .g-input__wrapper.b-input-radio__wrapper {
+  padding: 8px 8px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+}
+#user-filter-dropdown.filter-dropdown .g-input__wrapper.b-input-radio__wrapper {
+  padding: 0;
+  height: 32px;
+}
+.media-modal .modal-dialog {
+  max-width: 1000px;
+  
+  .modal-content {
+    background: transparent;
+    border: none;
+    outline: none;
+    overflow: hidden;
+  }
+  .video-modal video, .audio-modal audio {
+    width: 100%;
+    outline: none;
+    border-radius: 5px;
+	}
+  .audio-modal {
+    width: 600px;
+    margin: auto;
+  }
+}
+
+.messages-page-sidebar .user-details-row > .sidebar-more-dropdown,
+.schedule-message-list .sidebar-more-dropdown,
+.chat-more-dropdown {
+  overflow: visible !important;
+  margin-right: -4px !important;
+  .btn:after {
+    width: 28px;
+    height: 28px;
+  }
+  .dropdown-menu {
+    width: 180px;
+    padding: 5px 0;
+    font-size: 14px;
+    line-height: 18px;
+
+    .dropdown-item {
+      width: auto;
+      margin: 0 5px;
+      padding: 6px 8px;
+    }
+  }
+}
+
+.schedule-message-list .sidebar-more-dropdown {
+  .dropdown-menu {
+    width: 240px;
+    .dropdown-item {
+      padding: 8px;
+      margin: 3px 6px;
+      font-size: 16px;
+      line-height: 20px;
+    }
+  }
+}
+
+.chat-more-dropdown {
+  .dropdown-menu {
+    width: 140px;
+    margin-top: 0.9em;
+  }
+}
+
+.vault-modal.block-modal {
+  margin: -1em;
+  display: flex;
+  flex-direction: column;
+  height: 90vh;
+
+  h4 {
+    padding: 1em;
+    border-bottom: 1px solid rgba(138,150,163,.2);
+  }
+  .content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0.5em 1em 1em;
+
+    .vault-tags {
+      display: flex;
+      align-items: center;
+      margin-bottom: 1em;
+      
+      .tag {
+        background-color: rgba(138,150,163,.12);
+        font-size: 14px;
+        line-height: 15px;
+        text-transform: none;
+        font-weight: 400;
+        padding: 6px 12px;
+        border-radius: 1000px;
+        margin-right: 12px;
+        display: flex;
+        align-items: center;
+        height: 32px;
+        text-transform: capitalize;
+
+        .icon-done {
+          display: none;
+          margin: 0px 5px 0 -2px;
+          width: 18px;
+          fill: rgb(36, 37, 41);
+        }
+
+        &.selected {
+          background-color: rgba(138,150,163,.3);
+
+          .icon-done {
+            display: block;
+          }
+
+          &:hover {
+            color: #0091ea;
+            .icon-done {
+              fill: #0091ea;
+            }
+          }
+        }
+      }
+    }
+    .gallery-list {
+			display: flex;
+			flex-flow: row wrap;
+
+      .empty {
+        font-size: 18px;
+        font-weight: 500;
+        color: rgba(138,150,163,.7);
+        margin: auto;
+        padding: 10px 0;
+        text-align: center;
+      }
+	
+			.img-wrapper {
+				overflow: hidden !important;
+				width: calc(33.33% - 2px);
+				padding-top: calc(33.33% - 2px);
+				height: 0;
+				position: relative;
+				border: 1px solid transparent;
+
+        &:before {
+          content: "";
+          background: linear-gradient(#000,rgba(138,150,163,0));
+          position: absolute;
+          left: 0;
+          right: 0;
+          top: 0;
+          height: 50%;
+          pointer-events: none;
+          opacity: .25;
+          z-index: 1;
+        }
+	
+				img, video {
+					object-fit: cover;
+					width: 100%;
+					height: 100%;
+					position: absolute;
+					left: 50%;
+					top: 50%;
+					transform: translate(-50%, -50%);
+					cursor: pointer;
+				}
+				svg {
+					position: absolute;
+					top: 50%;
+					left: 50%;
+					transform: translate(-50%, -50%);
+					width: 50px;
+					pointer-events: none;
+					fill: #fff;
+				}
+				&:hover {
+					border: solid 1px #1a1a1a;
+				}
+        .timestamp {
+          position: absolute;
+          left: 8px;
+          top: 8px;
+          border-radius: 6px;
+          background-color: rgba(0,0,0,.25);
+          color: hsla(0,0%,99.6%,.75);
+          padding: 4px 6px;
+          font-size: 12px;
+          line-height: 16px;
+          z-index: 2;
+          display: flex;
+          font-weight: 500;
+        }
+        .checkbox {
+          right: 0;
+          top: 0;
+          width: 20px;
+          height: 20px;
+          padding: 10px;
+          position: absolute;
+          z-index: 2;
+          box-sizing: content-box;
+        }
+			}
+    }
+  }
+  .action-btns {
+    margin: 0;
+    border-top: 1px solid rgba(138,150,163,.2);
+    padding: 0.25rem;
+  }
+
+}
+
+#checkbox-tos + .custom-control-label {
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 24px;
+}
+
+.schedule-message-list .carousel {
+  width: 100%;
+}
+
+.scheduled-message-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 36px !important;
+  padding: 6px;
+  border-radius: 6px;
+  margin: -0.6em 0 0.6em;
+  background: rgba(138,150,163,.12);
+
+  .icon-schedule {
+    fill: #00aff0;
+    margin-right: 6px;
+    width: 22px;
+  }
+  strong {
+    letter-spacing: -0.2px;
+  }
+  & > div {
+    font-size: 13px;
+    flex: 0 1 100%;
+    max-width: 100%;
+    display: flex;
+    align-items: center;
+  }
+  .close-btn {
+    padding: 2px;
+    background: #00aff0;
+    border: none;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .icon-close {
+      fill: #fefefe;
+      width: 18px;
+    }
+  }
 }

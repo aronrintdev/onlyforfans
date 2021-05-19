@@ -55,9 +55,19 @@ export default {
           linkTo: { name: 'timeline.show', params: { slug: this.timeline.slug } }
         },
         {
+          label: 'My Vault',
+          icon: 'user',
+          linkTo: { name: 'vault.dashboard', params: { } },
+        },
+        {
           label: 'Settings',
           icon: 'cog',
           linkTo: { name: 'settings.general' }
+        },
+        {
+          label: 'Lists',
+          icon: 'cog',
+          linkTo: { name: 'lists.default' }
         },
       ]
 
@@ -72,14 +82,14 @@ export default {
         items.push({
           label: 'Earnings',
           icon: 'dollar-sign',
-          linkTo: { name: 'index' } // TODO: Add route when settings page is added
+          linkTo: { name: 'settings.earnings' }
         })
       }
       if (this.uiFlags.hasPaymentMethod === false) {
         items.push({
           label: 'Payment Method',
           icon: 'credit-card',
-          linkTo: { name: 'index' } // TODO: Add route when settings page is added
+          linkTo: { name: 'settings.payments' }
         })
       }
 
@@ -95,6 +105,8 @@ export default {
 
   methods: {
     logout() {
+      Echo.leave('user-status');
+      window.setLastSeenOfUser(0);
       this.axios.post('/logout').then(() => {
         window.location = '/login'
       })
@@ -108,8 +120,10 @@ export default {
   "en": {
     "Admin Dashboard": "Admin Dashboard",
     "My Profile": "My Profile",
+    "My Vault": "My Vault",
     "Settings": "Settings",
     "Payment Method": "Payment Method",
+    "Lists": "Lists",
     "Logout": "Logout",
   }
 }

@@ -20,6 +20,6 @@ class InvalidTransactionAmountException extends RuntimeException
         $this->amount = $amount;
         $this->model = $model;
 
-        $this->message = "Invalid Amount Specified for Transaction: [{$amount}].";
+        $this->message = "Invalid Amount Specified for Transaction: [{$amount->getAmount()}].";
     }
 }

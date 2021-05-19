@@ -1,0 +1,439 @@
+//messages-page-sidebar
+.messages-page-sidebar {
+	padding: 0px;
+	border-right: 1px solid #E6EAEE;
+	height: 100%;
+
+	.btn {
+		position: relative;
+		
+		&:hover, &:focus {
+			color: #0091ea;
+			outline: none;
+			box-shadow: none;
+		}
+		&:hover:after, &:focus:after {
+			opacity: 0.06;
+		}
+		&:after {
+			content: "";
+			position: absolute;
+			left: 50%;
+			top: 50%;
+			width: 36px;
+			height: 36px;
+			transform: translate(-50%,-50%);
+			transition: opacity .15s;
+			pointer-events: none;
+			opacity: 0;
+			border-radius: 1000px;
+			background-color: #0091ea;
+			display: block;
+		}
+	}
+	.user-logo {
+		width: 52px;
+		height: 52px;
+		margin-right: 16px;
+		position: relative;
+
+		img {
+			width: 100%;
+			height: 100%;
+			border-radius: 50%;
+			border: 2px solid #fff;
+		}
+		&.text-logo {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			color: #00aff0;
+			font-weight: 700;
+			font-size: 16px;
+			background: rgba(138,150,163,.12);
+			letter-spacing: 0;
+			text-transform: uppercase;
+		}
+		.status-holder {
+			position: absolute;
+			bottom: 2px;
+			right: 2px;
+			width: 14px;
+			height: 14px;
+			border: 2px solid #fff;
+			z-index: 2;
+			display: block;
+			background: #35d063;
+			border-radius: 50%;
+			display: none;
+
+			&.online {
+				display: block;
+			}
+		}
+	}
+	.top-bar {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 15px 4px 16px;
+		height: 56px;
+		border-bottom: 1px solid rgba(138,150,163,.25);
+		& > div {
+			display: flex;
+			align-items: center;
+		}
+		.btn {
+			height: 28px;
+			width: 28px;
+			padding: 4px;
+			margin: 0 8px;
+			min-height: 0;
+			position: relative;
+			
+			i {
+				font-size: 18px;
+				font-weight: 600;
+			}
+			svg {
+				width: 18px;
+				height: 18px;
+			}
+		}
+		.top-bar-title {
+			font-size: 19px;
+				font-weight: 600;
+			line-height: 1em;
+		}
+	}
+	.user-search-bar {
+		height: 56px;
+
+		&.contacts-filter {
+			background-color: #f6f7f8;
+			border-bottom: none;
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			padding: 10px 4px 11px;
+
+			.btn {
+				height: 28px;
+				width: 28px;
+				padding: 4px;
+				margin: 0 8px;
+				min-height: 0;
+				position: relative;
+				
+				i {
+					font-size: 18px;
+					font-weight: 600;
+					color: rgba(138,150,163,.7);
+				}
+				&:disabled {
+					i {
+						color: rgba(138,150,163,.7);
+						opacity: 1;
+					}
+				}
+			}
+		}
+
+		input {
+			flex: 1;
+			padding: 0;
+			border: none;
+			box-shadow: none;
+			background-color: transparent;
+		}
+		.btn {
+			i {
+				color: #0091ea;
+			}
+			&:disabled {
+				i {
+					color: lightgray;
+				}
+			}
+		}
+	}
+	.options-bar {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 16px;
+		
+		.selected-option {
+			text-transform: uppercase;
+			color: #8a96a3;
+			font-weight: 400;
+			font-size: 16px;
+		}
+		.sort-icon {
+			transform: none !important;
+			margin-left: auto;
+			position: relative;
+			width: 1em;
+			min-width: 1em;
+			display: inline-block;
+			fill: currentColor;
+			line-height: 1;
+			font-size: 24px;
+			margin: 0;
+			height: 1em;
+		}
+	}
+	.no-users {
+		font-size: 18px;
+		font-weight: 500;
+		color: rgba(138,150,163,.7);
+		margin: auto;
+		padding: 10px 0;
+		text-align: center;
+	}
+	.user-list-container {
+		height: calc(100% - 200px);
+		overflow: auto;
+
+		&::-webkit-scrollbar-track
+		{
+			-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.02);
+			background-color: transparent;
+		}
+		&::-webkit-scrollbar
+		{
+			width: 4px;
+			margin-right: -2px;
+			background-color: transparent;
+		}
+		&::-webkit-scrollbar-thumb
+		{
+			background-color: rgba(97, 102, 107, 0.3);
+			border-radius: 5px;
+			opacity: 0.8;
+		}
+
+		.user-list {
+			list-style: none;
+			padding: 0;
+	
+			li {
+				width: 100%;
+				cursor: pointer;
+				border-top: solid 1px transparent;
+	
+				&.selected { 
+					background: rgba(0,145,234,.06);
+					border-bottom: solid 1px rgba(138, 150, 163, 0.25);
+					.divider {
+						display: none;
+					}
+					&:hover {
+						.user-content {
+							background: transparent; 
+							border-radius: 0;
+						}
+					}
+				}
+				a {
+					text-decoration: none;
+				}
+				.divider {
+					margin-left: 84px;
+					height: 1px;
+					width: calc(100% - 84px);
+					background: rgba(138, 150, 163, 0.25);
+				}
+				.user-content {
+					display: flex;
+					align-items: center;
+					padding-left: 12px;
+					margin: 8px;
+					height: 64px;
+				}
+				&:hover {
+					.user-content {
+						background: rgba(0,145,234,.06);
+						border-radius: 8px;
+					}
+				}
+				
+				.user-details {
+					width: calc(100% - 70px);
+					padding: 0;
+					padding-right: 8px;
+					height: 100%;
+					display: flex;
+					justify-content: center;
+					flex-direction: column;
+					.username {
+						font-size: 16px;
+						line-height: 1em;
+						color: rgb(36, 37, 41);
+						font-weight: 600;
+					}
+					.user-id { 
+						font-size: 15px;
+						color:rgba(138, 150, 163, 0.75);
+					}
+					.close-btn {
+						font-size: 14px;
+						color: rgba(138, 150, 163);
+						width: auto;
+						height: 24px;
+						display: flex;
+						padding: 0 4px;
+						margin-right: -4px;
+						align-items: center;
+						justify-content: center;
+						i {
+							font-size: 14px;
+						}
+						&:after {
+							width: 24px;
+							height: 24px;
+						}
+					}
+					.last-message {
+						font-size: 14px;
+						color: rgba(138, 150, 163, 0.75);
+						overflow: hidden;
+						text-overflow: ellipsis;
+						white-space: nowrap;
+						flex: 1;
+						margin-right: 10px;
+	
+						.media-icon {
+							width: 16px;
+							height: 16px;
+							fill: currentColor;
+						}
+					}
+					.last-message-date {
+						font-size: 14px;
+							color: rgba(138, 150, 163, 0.75);
+					}
+				}
+			}
+		}
+	}
+	
+	.user-details-row {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding-bottom: 3px;
+		&.is-unread .last-message {
+			color: #242529 !important;
+			font-weight: 500;
+			font-style: italic;
+		}
+		.user-details-row:last-child {
+			padding-bottom: 0;
+		}
+		.round-badge {
+			width: 19px;
+			height: 19px;
+			border-radius: 50%;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-weight: 500;
+			font-size: 13px;
+			margin-right: -3px;
+		}
+		& > div {
+			white-space: nowrap;
+			text-overflow: ellipsis;
+			overflow: hidden;
+			margin-right: 8px;
+		}
+	}
+	.input-group {
+		padding: 15px;
+		padding-bottom: 15px;
+		margin-bottom: 0px;
+
+		.form-control {
+			height: 36px;
+			border-right: 0px;
+			box-shadow: none;
+			outline: none;
+			border-color: #DFE3E9;
+			border-radius: 4px;
+			border-top-right-radius: 0px;
+			border-bottom-right-radius: 0px;
+			border-bottom: solid 1px #1991EB;
+			margin-bottom: 0px;
+		}
+
+		.input-group-btn .btn {
+			height: 36px;
+			border-left: 0px;
+			background: none;
+			box-shadow: none;
+			outline: none;
+			border-color: #DFE3E9;
+			border-radius: 4px;
+			border-top-left-radius: 0px;
+			border-bottom-left-radius: 0px;
+
+			i {
+				color: #7F8FA4;
+				font-size: 16px;
+			}
+		}
+	}
+}
+.lists-group {
+	padding: 0 16px 16px;
+
+	.lists-group-slide {
+		width: auto;
+		margin-right: 8px;
+
+		&:last-child {
+			margin-right: 0;
+		}
+	}
+	.lists-item {
+		border-radius: 16px;
+		height: 32px;
+		width: auto;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		border: none;
+		font-size: 14px;
+		line-height: 1em;
+		text-transform: none;
+		font-weight: 400;
+		color: #242529;
+		padding: 8px 14px;
+		background-color: rgba(138,150,163,.12);
+		transition: background-color .1s,color .1s;
+		outline: none;
+
+		&.selected {
+			background-color: rgba(0,175,240,.25);
+		}
+		&:disabled {
+			opacity: .4;
+			pointer-events: none;
+		}
+		&:hover {
+			background-color: rgba(0,145,234,.18);
+			color: #0091ea;
+		}
+
+		&.lists-group-add {
+			width: 32px;
+			padding: 0;
+			svg {
+				width: 16px;
+				height: 16px;
+				fill: currentColor;
+			}
+		}
+	}
+}

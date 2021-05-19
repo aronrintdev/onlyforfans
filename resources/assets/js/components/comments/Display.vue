@@ -11,7 +11,7 @@
     </article>
 
     <div class="d-flex comment-ctrl mt-1">
-      <LikesButton :filled="isCommentLikedByMe" show-count :count="comment.like_count" @toggled="toggleLike()" />
+      <LikesButton :filled="isLikedByMe" show-count :count="comment.like_count" @toggled="toggleLike()" />
       <div class="mx-1">
         <b-icon icon="dot" font-scale="1" />
       </div>
@@ -76,9 +76,9 @@ export default {
 
   data: () => ({
 
-    isReplyFormVisible: false,
+    isLikedByMe: false,
 
-    isCommentLikedByMe: false, // base comment - %FIXME INIT
+    isReplyFormVisible: false,
 
     newCommentForm: {
       post_id: null,
@@ -127,6 +127,7 @@ export default {
     },
 
     // like/unlike this comment (base comment or reply)
+    /*
     toggleLike() {
       this.axios.patch(this.$apiRoute('comments.toggleLike', this.comment))
         .then(response => {
@@ -134,6 +135,27 @@ export default {
           this.isCommentLikedByMe = response.data.is_liked_by_session_user
           this.likeCount = response.data.like_count
         })
+    },
+     */
+    async toggleLike() { // for Comment
+      let response
+      if (this.isLikedByMe) {
+        // unlike
+        response = await axios.post(`/likeables/${this.session_user.id}`, {
+          _method: 'delete',
+          likeable_type: 'comments',
+          likeable_id: this.comment.id,
+        })
+        this.isLikedByMe = false
+      } else {
+        // like
+        response = await axios.put(`/likeables/${this.session_user.id}`, {
+          likeable_type: 'comments',
+          likeable_id: this.comment.id,
+        })
+        this.isLikedByMe = true
+      }
+      this.likeCount = response.data.like_count
     },
 
   },

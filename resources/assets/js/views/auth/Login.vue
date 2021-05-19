@@ -2,7 +2,7 @@
   <div class="container w-100 d-flex flex-column mt-5">
     <b-card class="login-card mx-auto" no-body>
       <template #header>
-        <div class="h1 text-center" v-text="$t('signInHeader')" />
+        <div class="h2 text-center" v-text="$t('signInHeader')" />
         <div class="text-center">
           <div class="d-inline" v-text="$t('noAccountQuestion')" />
           <!-- TODO: Link to registration page -->
@@ -40,7 +40,7 @@
       </div>
 
       <div class="p-3">
-        <b-btn variant="primary" block @click="login" :disabled="state === 'loading'">
+        <b-btn variant="primary" class="cta-btn" block @click="login" :disabled="state === 'loading'">
           <span v-if="state === 'form'">{{ $t('signInButton') }}</span>
           <fa-icon v-else icon="spinner" spin />
         </b-btn>
@@ -51,9 +51,10 @@
         <div class="mx-3" v-text="$t('or')" />
         <hr class="h-line flex-grow-1" />
       </div>
-      <div class="3rd-party-sign-in p-3 text-center">
-        <!-- TODO: Add 3rd party sign ins -->
-        Sign in with 3rd party here.
+      <div class="third-party-sign-in p-3 text-center">
+        <img src="/images/facebook-login.png" alt="Facebook signin" @click="socialLogin('facebook')" class="social-icon facebook" />
+        <img src="/images/g-login-btn.png" alt="Google signin" @click="socialLogin('google')" class="social-icon" />
+        <img src="/images/twitter-login.png" alt="Twitter signin" @click="socialLogin('twitter')" class="social-icon" />
       </div>
     </b-card>
 
@@ -68,6 +69,11 @@
  * Login Page
  */
 import LinkBar from '../../components/staticPages/LinkBar'
+
+import '../../../static/images/g-login-btn.png'
+import '../../../static/images/facebook-login.png'
+import '../../../static/images/twitter-login.png'
+
 export default {
   name: 'login',
   components: {
@@ -107,6 +113,9 @@ export default {
         this.state = 'form'
       });
     },
+    socialLogin: function(path) {
+      window.location.href = `/${path}`;
+    }
   },
 }
 </script>
@@ -117,6 +126,34 @@ export default {
 }
 .h-line {
   color: var('--gray');
+}
+.cta-btn {
+  height: 42px;
+  border: none;
+  font-size: 14px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.third-party-sign-in {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 2em !important;
+
+  img {
+    cursor: pointer; 
+    margin: 0 1em;
+  }
+  .social-icon {
+    width: 50px;
+    height: 50px;
+
+    &.facebook {
+      width: 52px;
+      height: 52px;
+    }
+  }
 }
 </style>
 

@@ -7,13 +7,21 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 use Database\Seeders\TestDatabaseSeeder;
 
-//use App\Enums\PostTypeEnum;
+use App\Enums\MediafileTypeEnum;
+use App\Enums\PostTypeEnum;
 use App\Enums\PaymentTypeEnum;
 use App\Models\Fanledger;
 use App\Models\Post;
+use App\Models\Mediafile;
 use App\Models\Timeline;
 use App\Models\User;
 
+/**
+ * @group feature
+ * @group timelines
+ *
+ * @package Tests\Feature
+ */
 class TimelinesTest extends TestCase
 {
     use RefreshDatabase, WithFaker;
@@ -21,7 +29,118 @@ class TimelinesTest extends TestCase
     /**
      *  @group timelines
      *  @group regression
-     *  %TODO: DEPRECATE, use FeedsController (?)
+     */
+    public function test_owner_can_view_home_feed()
+    {
+        //$timeline = Timeline::has('posts','>=',1)->has('followers','>=',1)->first(); // assume non-admin (%FIXME)
+
+        // get timeline that has both priced & subscriber posts
+        $timeline = Timeline::whereHas('posts', function($q1) {
+            $q1->whereIn('type', [PostTypeEnum::SUBSCRIBER, PostTypeEnum::PRICED]); // ?? this is OR not AND 
+        })->has('followers','>=',1)->firstOrFail();
+        $creator = $timeline->user;
+
+        $payload = [];
+        $response = $this->actingAs($creator)->ajaxJSON('GET', route('timelines.homefeed'), $payload);
+        $response->assertStatus(200);
+
+        $content = json_decode($response->content());
+        //dd($content);
+        $posts = collect($content->data);
+
+        $num = $posts->reduce( function($acc, $p) {
+            return ( $p->type!==PostTypeEnum::FREE) ? ($acc+1) : $acc;
+        }, 0);
+        $this->assertGreaterThan(0, $num, 'Feed should contain at least 1 non-free post');
+    }
+
+    /**
+     *  @group timelines
+     *  @group regression
+     */
+    public function test_owner_can_sort_home_feed_by_like_count()
+    {
+        $timeline = Timeline::whereHas('posts', function($q1) {
+            $q1->whereIn('type', [PostTypeEnum::SUBSCRIBER, PostTypeEnum::PRICED]); // ?? this is OR not AND 
+        })->has('followers','>=',1)->firstOrFail();
+        $creator = $timeline->user;
+
+        $payload = ['sortBy'=>'likes'];
+        $response = $this->actingAs($creator)->ajaxJSON('GET', route('timelines.homefeed'), $payload);
+        $response->assertStatus(200);
+
+        $content = json_decode($response->content());
+        $posts = collect($content->data);
+
+        $num = $posts->reduce( function($acc, $p) {
+            static $last = null;
+            if ( $last && ($p->stats->likeCount > $last->stats->likeCount) ) {
+                $acc += 1;
+            }
+            $last = $p;
+            return $acc;
+        }, 0);
+        $this->assertEquals(0, $num, 'Feed should not contain any out-of-order (non-sorted) posts by like count');
+    }
+
+    /**
+     *  @group timelines
+     *  @group regression
+     */
+    public function test_owner_can_sort_home_feed_by_comment_count()
+    {
+        $timeline = Timeline::whereHas('posts', function($q1) {
+            $q1->whereIn('type', [PostTypeEnum::SUBSCRIBER, PostTypeEnum::PRICED]); // ?? this is OR not AND 
+        })->has('followers','>=',1)->firstOrFail();
+        $creator = $timeline->user;
+
+        $payload = ['sortBy'=>'comments'];
+        $response = $this->actingAs($creator)->ajaxJSON('GET', route('timelines.homefeed'), $payload);
+        $response->assertStatus(200);
+
+        $content = json_decode($response->content());
+        $posts = collect($content->data);
+
+        $num = $posts->reduce( function($acc, $p) {
+            static $last = null;
+            if ( $last && ($p->stats->commentCount > $last->stats->commentCount) ) {
+                $acc += 1;
+            }
+            $last = $p;
+            return $acc;
+        }, 0);
+        $this->assertEquals(0, $num, 'Feed should not contain any out-of-order (non-sorted) posts by comment count');
+    }
+
+    /**
+     *  @group timelines
+     *  @group regression
+     */
+    public function test_owner_can_filter_home_feed_by_nonlocked()
+    {
+        // %FIXME: we aren't really guaranteed a timeine with non-accessible posts...
+        $timeline = Timeline::whereHas('posts', function($q1) {
+            $q1->whereIn('type', [PostTypeEnum::SUBSCRIBER, PostTypeEnum::PRICED]); // ?? this is OR not AND 
+        })->has('followers','>=',1)->firstOrFail();
+        $creator = $timeline->user;
+
+        //$payload = [];
+        $payload = ['hideLocked'=>'true'];
+        $response = $this->actingAs($creator)->ajaxJSON('GET', route('timelines.homefeed'), $payload);
+        $response->assertStatus(200);
+
+        $content = json_decode($response->content());
+        $posts = collect($content->data);
+
+        $num = $posts->reduce( function($acc, $p) {
+            return !$p->access ? ($acc+1) : $acc;
+        }, 0);
+        $this->assertEquals(0, $num, 'Feed should not contain any non-accessible posts');
+    }
+
+    /**
+     *  @group timelines
+     *  @group regression
      */
     public function test_owner_can_view_own_timeline_feed()
     {
@@ -42,6 +161,154 @@ class TimelinesTest extends TestCase
      *  @group timelines
      *  @group regression
      */
+    public function test_fan_can_not_access_locked_content_via_feed()
+    {
+        $timeline = Timeline::has('posts','>=',5)->has('followers','>=',1)->firstOrFail(); // assume non-admin (%FIXME)
+
+        // Makes sure we have at least 1 free, 1 priced, and 1 subscibe-only post, then add some mediafiles to the posts...
+        $posts = Post::where('postable_type', 'timelines')->where('postable_id', $timeline->id)->latest()->take(5)->get();
+
+        $freePost = $posts[0];
+        $freePost->type = PostTypeEnum::FREE;
+        $freePost->save();
+        $this->attachMediafile($freePost);
+        $this->attachMediafile($freePost);
+
+        $pricedPost = $posts[1];
+        $pricedPost->type = PostTypeEnum::PRICED;
+        $pricedPost->price = 3*100;
+        $pricedPost->save();
+        $this->attachMediafile($pricedPost);
+        $this->attachMediafile($pricedPost);
+
+        $subPost = $posts[2];
+        $subPost->type = PostTypeEnum::SUBSCRIBER;
+        $subPost->save();
+        $this->attachMediafile($subPost);
+        $this->attachMediafile($subPost);
+
+        //$posts = Post::with('mediafiles')->where('postable_type', 'timelines')->where('postable_id', $timeline->id)->latest()->take(5)->get();
+        //dd($posts);
+
+        $timeline = Timeline::has('posts','>=',1)->has('posts.mediafiles')->has('followers','>=',1)->firstOrFail(); // assume non-admin (%FIXME)
+        $creator = $timeline->user;
+        $nonfan = User::whereDoesntHave('followedtimelines', function($q1) use(&$timeline) {
+            $q1->where('timelines.id', $timeline->id);
+        })->where('id', '<>', $creator->id)->firstOrFail();
+        $this->assertFalse( $timeline->followers->contains( $nonfan->id ) );
+        $this->assertFalse( $nonfan->followedtimelines->contains( $timeline->id ) );
+
+        // Follow the timeline (default, not premium)
+        $response = $this->actingAs($nonfan)->ajaxJSON('PUT', route('timelines.follow', $timeline->id), ['sharee_id'=>$nonfan->id]);
+        $response->assertStatus(200);
+        $fan = $nonfan;
+        $fan->refresh();
+        $timeline->refresh();
+        $this->assertTrue( $timeline->followers->contains( $fan->id ) );
+        $this->assertTrue( $fan->followedtimelines->contains( $timeline->id ) );
+
+        // --
+
+        $response = $this->actingAs($fan)->ajaxJSON('GET', route('timelines.feed', $timeline->id), []);
+        $response->assertStatus(200);
+
+        $content = json_decode($response->content());
+        $this->assertNotNull($content->data);
+        $this->assertGreaterThan(0, count($content->data));
+        //dd($content);
+        unset($freePost, $pricedPost, $subPost);
+
+        $posts = collect($content->data);
+
+        $freePost = $posts->first( function($p) {
+            return $p->type === PostTypeEnum::FREE;
+        });
+        $this->assertNotNull($freePost);
+        $this->assertEquals(2, $freePost->mediafile_count);
+        $this->assertTrue($freePost->access);
+        $this->assertNotNull($freePost->mediafiles[0]);
+        $this->assertNotNull($freePost->mediafiles[0]->filepath);
+
+        $pricedPost = $posts->first( function($p) {
+            return $p->type === PostTypeEnum::PRICED;
+        });
+        $this->assertNotNull($pricedPost);
+        $this->assertEquals(2, $pricedPost->mediafile_count);
+        $this->assertFalse($pricedPost->access);
+        $this->assertNotNull($pricedPost->mediafiles[0]);
+        $this->assertNull($pricedPost->mediafiles[0]->filepath); // can't access media!
+
+        $subPost = $posts->first( function($p) {
+            return $p->type === PostTypeEnum::SUBSCRIBER;
+        });
+        $this->assertNotNull($subPost);
+        $this->assertEquals(2, $subPost->mediafile_count);
+        $this->assertFalse($subPost->access);
+        $this->assertNotNull($subPost->mediafiles[0]);
+        $this->assertNull($subPost->mediafiles[0]->filepath); // can't access media!
+
+        //dd($freePost, $pricedPost, $subPost);
+    }
+
+    /**
+     *  @group timelines
+     *  @group regression
+     *  @group here0330
+     */
+    public function test_fan_can_view_photos_only_feed()
+    {
+        $timeline = Timeline::has('posts','>=',5)->has('followers','>=',1)->firstOrFail();
+        $creator = $timeline->user;
+        $fan = $timeline->followers[0];
+
+        // Add some mediafiles (photos) to the posts...
+        $posts = Post::where('postable_type', 'timelines')->where('postable_id', $timeline->id)->latest()->take(5)->get();
+        $this->attachMediafile($posts[0]);
+        $this->attachMediafile($posts[0]);
+        $this->attachMediafile($posts[1]);
+        $this->attachMediafile($posts[2]);
+        $this->attachMediafile($posts[2]);
+        $this->attachMediafile($posts[2]);
+        $this->attachMediafile($posts[3]);
+
+        $response = $this->actingAs($fan)->ajaxJSON('GET', route('timelines.photos', $timeline->id), []);
+        $response->assertStatus(200);
+        $response->assertJsonStructure([
+            'data' => [ 
+                0 => [ 
+                    'slug', 
+                    'access', 
+                    'basename', 
+                    'mfname', 
+                    'mftype', 
+                    'filename', 
+                    'resource_id', 
+                    'resource_type', 
+                    'has_thumb', 
+                    'has_mid', 
+                    'has_blur', 
+                    'is_image', 
+                    'is_video', 
+                    'mimetype', 
+                    'filepath', 
+                    'thumbFilepath', 
+                    'midFilepath', 
+                    'blurFilepath', 
+                ],
+            ],
+            'links',
+            'meta',
+        ]);
+        $content = json_decode($response->content());
+        $mediafiles = collect($content->data);
+        //dd($content);
+    }
+
+
+    /**
+     *  @group timelines
+     *  @group regression
+     */
     public function test_owner_can_view_own_timeline()
     {
         $timeline = Timeline::has('posts','>=',1)->has('followers','>=',1)->first(); // assume non-admin (%FIXME)
@@ -52,21 +319,31 @@ class TimelinesTest extends TestCase
         $response->assertStatus(200);
 
         $content = json_decode($response->content());
-        $this->assertObjectHasAttribute('slug', $content->timeline);
-        $this->assertNotNull($content->timeline->slug);
-        $this->assertObjectHasAttribute('name', $content->timeline);
-        $this->assertNotNull($content->timeline->name);
-        $this->assertObjectHasAttribute('about', $content->timeline);
-        $this->assertNotNull($content->timeline->about);
-        $this->assertObjectHasAttribute('cover', $content->timeline);
-        $this->assertObjectHasAttribute('avatar', $content->timeline);
+        $this->assertObjectHasAttribute('slug', $content->data);
+        $this->assertNotNull($content->data->slug);
+        $this->assertObjectHasAttribute('name', $content->data);
+        $this->assertNotNull($content->data->name);
+        $this->assertObjectHasAttribute('about', $content->data);
+        $this->assertNotNull($content->data->about);
+        $this->assertObjectHasAttribute('cover', $content->data);
+        $this->assertObjectHasAttribute('avatar', $content->data);
+        $this->assertObjectHasAttribute('user', $content->data);
+        $this->assertNotNull($content->data->user->id);
 
-        $this->assertObjectNotHasAttribute('posts', $content->timeline);
-        $this->assertObjectNotHasAttribute('user', $content->timeline);
-        $this->assertObjectNotHasAttribute('followers', $content->timeline);
-        $this->assertObjectNotHasAttribute('subscribers', $content->timeline);
-        $this->assertObjectNotHasAttribute('ledgersales', $content->timeline);
-        $this->assertObjectNotHasAttribute('stories', $content->timeline);
+        $this->assertObjectHasAttribute('user', $content->data);
+        $this->assertObjectHasAttribute('id', $content->data->user);
+        // Only want user id
+        $this->assertObjectNotHasAttribute('username', $content->data->user);
+        $this->assertObjectNotHasAttribute('email', $content->data->user);
+        $this->assertObjectNotHasAttribute('password', $content->data->user);
+        $this->assertObjectNotHasAttribute('remember_token', $content->data->user);
+        $this->assertObjectNotHasAttribute('verification_code', $content->data->user);
+
+        $this->assertObjectNotHasAttribute('posts', $content->data);
+        $this->assertObjectNotHasAttribute('followers', $content->data);
+        $this->assertObjectNotHasAttribute('subscribers', $content->data);
+        $this->assertObjectNotHasAttribute('ledgersales', $content->data);
+        $this->assertObjectNotHasAttribute('stories', $content->data);
     }
 
     /**
@@ -86,20 +363,29 @@ class TimelinesTest extends TestCase
         $response->assertStatus(200);
 
         $content = json_decode($response->content());
-        $this->assertObjectHasAttribute('slug', $content->timeline);
-        $this->assertNotNull($content->timeline->slug);
-        $this->assertObjectHasAttribute('name', $content->timeline);
-        $this->assertNotNull($content->timeline->name);
-        $this->assertObjectHasAttribute('about', $content->timeline);
-        $this->assertNotNull($content->timeline->about);
-        $this->assertObjectHasAttribute('cover', $content->timeline);
-        $this->assertObjectHasAttribute('avatar', $content->timeline);
-        $this->assertObjectNotHasAttribute('posts', $content->timeline);
-        $this->assertObjectNotHasAttribute('user', $content->timeline);
-        $this->assertObjectNotHasAttribute('followers', $content->timeline);
-        $this->assertObjectNotHasAttribute('subscribers', $content->timeline);
-        $this->assertObjectNotHasAttribute('ledgersales', $content->timeline);
-        $this->assertObjectNotHasAttribute('stories', $content->timeline);
+        $this->assertObjectHasAttribute('slug', $content->data);
+        $this->assertNotNull($content->data->slug);
+        $this->assertObjectHasAttribute('name', $content->data);
+        $this->assertNotNull($content->data->name);
+        $this->assertObjectHasAttribute('about', $content->data);
+        $this->assertNotNull($content->data->about);
+
+        $this->assertObjectHasAttribute('user', $content->data);
+        $this->assertObjectHasAttribute('id', $content->data->user);
+        // Only want user id
+        $this->assertObjectNotHasAttribute('username', $content->data->user);
+        $this->assertObjectNotHasAttribute('email', $content->data->user);
+        $this->assertObjectNotHasAttribute('password', $content->data->user);
+        $this->assertObjectNotHasAttribute('remember_token', $content->data->user);
+        $this->assertObjectNotHasAttribute('verification_code', $content->data->user);
+
+        $this->assertObjectHasAttribute('cover', $content->data);
+        $this->assertObjectHasAttribute('avatar', $content->data);
+        $this->assertObjectNotHasAttribute('posts', $content->data);
+        $this->assertObjectNotHasAttribute('followers', $content->data);
+        $this->assertObjectNotHasAttribute('subscribers', $content->data);
+        $this->assertObjectNotHasAttribute('ledgersales', $content->data);
+        $this->assertObjectNotHasAttribute('stories', $content->data);
     }
 
     /**
@@ -118,7 +404,7 @@ class TimelinesTest extends TestCase
         $response = $this->actingAs($nonfan)->ajaxJSON('GET', route('timelines.suggested'), $payload);
         $response->assertStatus(200);
         $response->assertJsonStructure([
-            'timelines' => [0 => [ 'id', 'slug', 'name', 'about', 'verified', 'price', 'is_follow_for_free', 'cover', 'avatar', ] ]
+            'data' => [0 => [ 'id', 'slug', 'name', 'about', 'verified', 'price', 'is_follow_for_free', 'cover', 'avatar', ] ]
         ]);
         //$content = json_decode($response->content());
     }
@@ -224,8 +510,8 @@ class TimelinesTest extends TestCase
     }
 
     /**
-     *  @group timelines
-     *  @group regression
+     *  @group OFF-timelines
+     *  @group OFF-regression
      *  @group broken
      */
     public function test_blocked_can_not_follow_timeline()
@@ -259,7 +545,7 @@ class TimelinesTest extends TestCase
     /**
      *  @group timelines
      *  @group regression
-     *  @group here10
+     *  @group erik
      */
     public function test_can_subscribe_to_timeline()
     {
@@ -328,6 +614,7 @@ class TimelinesTest extends TestCase
     /**
      *  @group timelines
      *  @group regression
+     *  @group erik
      */
     public function test_can_unsubscribe_from_timeline()
     {
@@ -390,6 +677,22 @@ class TimelinesTest extends TestCase
 
     protected function tearDown() : void {
         parent::tearDown();
+    }
+
+    protected function attachMediafile(Post &$post, string $type='image') 
+    {
+        $fname = $this->faker->slug.'.jpg';
+        Mediafile::create([
+            'filename' => $fname,
+            'mfname' => $fname,
+            'mftype' => MediafileTypeEnum::POST,
+            'mimetype' => 'image/jpeg',
+            'orig_ext' => 'jpg',
+            'orig_filename' => $fname,
+            'resource_type' => 'posts',
+            'resource_id' => $post->id,
+        ]);
+        return $post;
     }
 }
 

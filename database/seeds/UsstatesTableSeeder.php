@@ -2,7 +2,6 @@
 namespace Database\Seeders;
 
 use DB;
-use Illuminate\Database\Seeder;
 use Illuminate\Database\Eloquent\Model;
         
 use Carbon\Carbon;
@@ -75,13 +74,6 @@ class UsstatesTableSeeder extends Seeder
         foreach ($sdata as $i => $obj) {
             Usstate::create($obj);
         }
-/*
-        DB::table('usstates')->insert($sdata);
-        DB::table('usstates') ->update([
-            'created_at' => $now,
-            'updated_at' => $now,
-        ]);
-*/
     }
 }
 

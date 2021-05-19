@@ -29,7 +29,7 @@
         rel="stylesheet">
 
         {{-- Style Sheets --}}
-        <link href="{{ mix('css/app.css') }}" rel="stylesheet">
+        <link href="{{ mix('/css/app.css') }}" rel="stylesheet">
 
         {{-- Routing --}}
         @routes()
@@ -39,10 +39,7 @@
         <div id="app"></div>
 
         {{-- Application JS --}}
+        @include('vendorjs')
         <script src="{{ mix('js/app.guest.js') }}"></script>
-    {{--
-        <script src="{{ mix('js/manifest.js') }}"></script>
-        <script src="{{ mix('js/vendor.js') }}"></script>
-        --}}
     </body>
 </html>

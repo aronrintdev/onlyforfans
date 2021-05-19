@@ -27,7 +27,7 @@ Vue.use(VueAxios, window.axios);
 import VueLogger from 'vuejs-logger';
 const options = {
     isEnabled: true,
-    logLevel : isProduction ? 'error' : 'warn',
+    logLevel : isProduction ? 'error' : 'debug',
     stringifyArguments : false,
     showLogLevel : true,
     showMethodName : !isProduction,
@@ -49,9 +49,9 @@ import WhenAvailable from './plugins/whenAvailable';
 Vue.use(WhenAvailable);
 
 //import BootstrapVue from 'bootstrap-vue' //Importing
-import { BootstrapVue, BootstrapVueIcons } from 'bootstrap-vue'
-Vue.use(BootstrapVue) // Telling Vue to use this in whole application
-Vue.use(BootstrapVueIcons)
+import { BootstrapVue, BootstrapVueIcons } from 'bootstrap-vue';
+Vue.use(BootstrapVue); // Telling Vue to use this in whole application
+Vue.use(BootstrapVueIcons);
 
 import VueAnime from 'vue-animejs';
 Vue.use(VueAnime);
@@ -70,12 +70,45 @@ Vue.use(VueTimeago, {
   */
 });
 
-import VueSlider from 'vue-slider-component'
-import 'vue-slider-component/theme/default.css'
-Vue.component('VueSlider', VueSlider)
+import Clipboard from 'v-clipboard'
+Vue.use(Clipboard)
 
-import VueTagsInput from '@johmun/vue-tags-input'
-Vue.component('VueTagsInput', VueTagsInput)
+import VueSlider from 'vue-slider-component';
+import 'vue-slider-component/theme/default.css';
+Vue.component('VueSlider', VueSlider);
+
+import VueTagsInput from '@johmun/vue-tags-input';
+Vue.component('VueTagsInput', VueTagsInput);
+
+import VueLazyload from 'vue-lazyload';
+const loadimage = require('./../static/images/loading.gif');
+
+Vue.use(VueLazyload, {
+  preLoad: 1.3,
+  error: loadimage,
+  loading: loadimage,
+  attempt: 1
+});
+
+import VueRecord from '@codekraft-studio/vue-record';
+Vue.use(VueRecord);
+
+/**
+ * vue-croppie
+ */
+import VueCroppie from 'vue-croppie';
+import 'croppie/croppie.css' // import the croppie css manually
+Vue.use(VueCroppie);
+
+import 'swiper/swiper.min.css';
+import 'photoswipe/dist/photoswipe.css';
+import 'photoswipe/dist/default-skin/default-skin.css';
+
+/**
+ * v-mask: https://github.com/probil/v-mask#readme
+ */
+import { VueMaskDirective } from 'v-mask';
+Vue.directive('mask', VueMaskDirective);
 
 /**
  * Next, we will create a fresh Vue application instance and attach it to
@@ -83,25 +116,19 @@ Vue.component('VueTagsInput', VueTagsInput)
  * or customize the JavaScript scaffolding to fit your unique needs.
  */
 
-Vue.component('main-navbar', require('./components/common/MainNavbar.vue').default);
-Vue.component('my-vault', require('./components/vault/Dashboard.vue').default);
-Vue.component('my-saved', require('./components/saved/Dashboard.vue').default);
+//Vue.component('main-navbar', require('./components/common/MainNavbar.vue').default);
+//Vue.component('my-vault', require('./components/vault/Dashboard.vue').default);
+//Vue.component('my-saved', require('./components/saved/Dashboard.vue').default);
 
 // converts from cents to dollars, and formats
 Vue.filter('niceCurrency', function (valueInCents) {
-  let value = valueInCents ? (valueInCents/100) : 0
-  value.toFixed(2)
-  return `$${value}`
-  /*
-      return new Intl.NumberFormat('en-US',
-        { style: 'currency', currency: 'USD' }
-      ).format(v);
-    */
-})
+  let value = valueInCents ? (valueInCents/100) : 0;
+  return value.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+});
 
 Vue.filter('niceGuid', function (v) {
-  return v.slice(-12)
-})
+  return v.slice(-12);
+});
 Vue.filter('enumPostType', function (k) {
   switch (k) {
     case 'free':
@@ -111,25 +138,25 @@ Vue.filter('enumPostType', function (k) {
     case 'paid':
       return 'Subscriber-Only'
   }
-})
+});
 // Assumes post as input
 Vue.filter('isSubscriberOnly', function (p) {
-  return p.type === 'paid'
-})
+  return p.type === 'paid';
+});
 Vue.filter('isPurchaseable', function (p) {
-  return p.type === 'price'
-})
+  return p.type === 'price';
+});
 
 export const eventBus = new Vue({ });
 
 // Localization translations
-import i18n from './i18n'
+import i18n from './i18n';
 
-import VueRouter from 'vue-router'
-Vue.use(VueRouter)
-import router from './routes/app.routes'
+import VueRouter from 'vue-router';
+Vue.use(VueRouter);
+import router from './routes/app.routes';
 
-import App from './views/templates/App.vue'
+import App from './views/templates/App.vue';
 
 const app = new Vue({
     router,

@@ -17,6 +17,7 @@ class MediafilePolicy extends BasePolicy
         'viewAny'     => 'permissionOnly',
         'view'        => 'isOwner:pass isBlockedByOwner:fail',
         'update'      => 'isOwner:pass',
+        'favorite'    => 'isOwner:pass isBlockedByOwner:fail',
         'delete'      => 'isOwner:pass',
         'restore'     => 'isOwner:pass',
         'forceDelete' => 'isOwner:pass',
@@ -24,12 +25,17 @@ class MediafilePolicy extends BasePolicy
         'tip'         => 'isBlockedByOwner:fail',
     ];
 
-    protected function view(User $user, Mediafile $mediafile)
+    public static function isViewable(User $user, Mediafile $mediafile)
     {
         switch ($mediafile->resource_type) {
 
-        case 'comments':
         case 'posts':
+            $alias = $mediafile->resource_type;
+            $model = Relation::getMorphedModel($alias);
+            $resource = (new $model)->where('id', $mediafile->resource_id)->first();
+            return $user->can('contentView', $resource); // %NOTE: contentView!
+
+        case 'comments':
         case 'stories':
             $alias = $mediafile->resource_type;
             $model = Relation::getMorphedModel($alias);
@@ -58,6 +64,12 @@ class MediafilePolicy extends BasePolicy
         default:
             return false;
         }
+
+    }
+
+    protected function view(User $user, Mediafile $mediafile)
+    {
+        return self::isViewable($user, $mediafile);
     }
 
     protected function doClone(User $user, Mediafile $mediafile)
@@ -68,5 +80,9 @@ class MediafilePolicy extends BasePolicy
     protected function create(User $user)
     {
         return true; // %TODO
+    }
+
+    protected function favorite(User $user, Mediafile $mediafile) {
+        return true;
     }
 }

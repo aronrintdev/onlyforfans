@@ -1,64 +1,90 @@
 <template>
-  <b-card no-body>
+  <b-card v-if="!isLoading" no-body>
 
     <b-card-header>
       <section class="user-avatar">
-        <a :href="timelineUrl"><b-img :src="post.user.avatar.filepath" :alt="post.user.name" :title="post.user.name"></b-img></a>
+        <router-link :to="timelineUrl"><b-img :src="post.user.avatar.filepath" :alt="post.user.name" :title="post.user.name"></b-img></router-link>
       </section>
       <section class="user-details">
         <div>
-          <a href="timelineUrl" title="" data-toggle="tooltip" data-placement="top" class="username">{{ post.user.name }}</a>
-          <span v-if="post.user.verified" class="verified-badge"><b-icon icon="check-circle-fill" variant="success" font-scale="1"></b-icon></span>
+          <router-link :to="timelineUrl" title="" data-toggle="tooltip" data-placement="top" class="username">{{ post.user.name }}</router-link>
+          <span v-if="post.user.verified" class="verified-badge"><b-icon icon="check-circle-fill" variant="primary" font-scale="1"></b-icon></span>
         </div>
         <div>
-          <a :href="timelineUrl" class="tag-username">@{{ post.timeline_slug }}</a>
+          <router-link :to="timelineUrl" class="tag-username">@{{ post.timeline.slug }}</router-link>
         </div>
       </section>
     </b-card-header>
 
-    <b-form @submit="purchasePost">
-      <b-card-body>
-        <p class="w-100 text-center m-0 tag-purchase_amount">{{ post.price | niceCurrency }}</p>
-      </b-card-body>
-      <b-card-footer>
-        <b-button type="submit" variant="warning" class="w-100">Purchase Post</b-button>
-      </b-card-footer>
-    </b-form>
-
+    <b-card-body>
+      <p class="w-100 text-center m-0 tag-purchase_amount">
+        Purchase post for {{ post.price_display || (post.price | niceCurrency) }}
+      </p>
+      <PurchaseForm
+        :value="post"
+        :price="post.price"
+        :currency="post.currency"
+        :display-price="post.price_display || (post.price | niceCurrency)"
+        class="mt-3"
+      />
+    </b-card-body>
   </b-card>
 </template>
 
 <script>
-import { eventBus } from '@/app'
+import PurchaseForm from '@components/payments/PurchaseForm'
 
 export default {
 
+  components: {
+    PurchaseForm,
+  },
+
   props: {
     session_user: null,
-    post: null,
+    post_id: null,
   },
 
   computed: {
+    isLoading() {
+      //return !this.post || !this.session_user || !this.timeline
+      return !this.post_id || !this.session_user || !this.post
+    },
     timelineUrl() {
       return `/${this.post.timeline.slug}`
     },
+    purchasesChannel() {
+      return `user.${this.session_user.id}.purchases`
+    },
   },
 
-  data: () => ({ }),
+  data: () => ({
+    post: null,
+    //timeline: null, // dynamically load from server based on post
+  }),
 
   methods: {
-
-    async purchasePost(e) {
-      e.preventDefault()
-      const response = await axios.put( route('posts.purchase', this.post.id) )
-      this.$bvModal.hide('modal-purchase_post')
-      this.$root.$bvToast.toast(`Post successfully purchased!`, {
-        toaster: 'b-toaster-top-center',
-        title: 'Success!',
-      })
-      eventBus.$emit('update-post', this.post.id)
+    init() {
+      this.$echo.private(this.purchasesChannel)
+        .listen('ItemPurchased', e => {
+          if (e.item_id === this.post.id) {
+            this.$bvModal.hide('modal-purchase-post')
+          }
+        })
     },
+  },
 
+
+  created() {
+    // Dynamically load the full post so we ensure we have the related timeline data
+    // (not guaranteed to be attached as a relation as this is ref'd from multiple components)
+    axios.get( route('posts.show', this.post_id) ).then( response => {
+      this.post = response.data.data
+    })
+  },
+
+  mounted() {
+    this.init()
   },
 
 }

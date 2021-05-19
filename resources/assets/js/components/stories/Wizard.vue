@@ -26,7 +26,7 @@
               <article v-if="s.stype==='text'">
                 {{ s.content }}
               </article>
-              <article v-if="s.stype==='photo'" v-bind:class="{ 'tag-image': s.stype==='photo' }">
+              <article v-if="s.stype==='image'" v-bind:class="{ 'tag-image': s.stype==='image' }">
                 <b-img fluid :src="s.mf_url" alt="story pic"></b-img>
               </article>
             </b-list-group-item>
@@ -39,7 +39,7 @@
                            v-on:set-color="setColor($event)"
                            v-on:do-cancel="step=steps.SELECT_STYPE"
                            ></text-story-form>
-          <photo-story-form v-if="stype==='photo'" 
+          <photo-story-form v-if="stype==='image'" 
                             v-bind:attrs="storyAttrs"
                             v-on:do-cancel="step=steps.SELECT_STYPE"
                             ></photo-story-form>
@@ -160,7 +160,7 @@ export default {
       switch ( this.stype ) {
         case 'text':
           break;
-        case 'photo':
+        case 'image':
           payload.append('mediafile', this.mediafile);
           break;
       } 
@@ -185,7 +185,7 @@ export default {
     },
 
     createPhotoStory(e) {
-      this.stype = 'photo';
+      this.stype = 'image';
       //this.step = this.steps.EDIT;
       //document.getElementById("fileUpload").click()
       this.$refs.fileUpload.click()
@@ -201,7 +201,7 @@ export default {
     },
 
     parseBackgroundColor(story) {
-      if ( story.stype==='photo' ) {
+      if ( story.stype==='image' ) {
         return '#fff';
       } else {
         return story.customAttributes?.['background-color'] || 'yellow';

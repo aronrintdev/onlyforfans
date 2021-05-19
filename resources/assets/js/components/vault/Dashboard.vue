@@ -1,5 +1,5 @@
 <template>
-  <div class="container-fluid vault-container">
+  <div v-if="!isLoading" class="container-fluid vault-container">
 
     <section class="row h-100">
 
@@ -146,11 +146,11 @@ export default {
   props: {
     vault_pkid: {
       required: true,
-      type: Number,
+      type: String,
     },
     vaultfolder_pkid: { // init value
       required: true,
-      type: Number,
+      type: String,
     },
   },
 
@@ -159,6 +159,10 @@ export default {
     ...Vuex.mapState(['vaultfolder']),
     ...Vuex.mapState(['breadcrumb']),
     ...Vuex.mapState(['shares']),
+
+    isLoading() {
+      return !this.vault_pkid || !this.vaultfolder_pkid
+    },
 
     mediafiles() {
       return this.vaultfolder.mediafiles;
@@ -175,7 +179,7 @@ export default {
         const isActive = b.pkid === this.currentFolderPKID;
         result.push({
           pkid: b.pkid,
-          text: b.name,
+          text: b.vfname,
           active: isActive,
         });
       }
@@ -186,8 +190,6 @@ export default {
       return [{
         data: this.suggestions,
       }];
-      //this.$store.dispatch('getVaultfolder', this.currentFolderPKID);
-      //this.cancelCreateFolder();
     },
   },
 
@@ -218,10 +220,11 @@ export default {
     },
 
     dropzoneOptions: {
-      url: '/mediafiles',
+      //url: '/mediafiles',
+      url: route('mediafiles.index'),
       paramName: 'mediafile',
       thumbnailHeight: 128,
-      maxFilesize: 3.9,
+      maxFilesize: 15.9,
       headers: { 
         'X-Requested-With': 'XMLHttpRequest', 
         'X-CSRF-TOKEN': document.head.querySelector('[name=csrf-token]').content,
@@ -272,7 +275,6 @@ export default {
         invitees: this.shareForm.invitees.map( o => { return { email: o } }),
       });
       console.log('response', { response });
-      //this.$store.dispatch('getVaultfolder', this.currentFolderPKID);
       this.cancelShareFiles();
     },
 
@@ -281,7 +283,7 @@ export default {
       const payload = {
         vault_id: this.vault_pkid,
         parent_id: this.currentFolderPKID,
-        name: this.createForm.name,
+        vfname: this.createForm.name,
       };
       axios.post('/vaultfolders', payload).then( (response) => {
         console.log('response', { response });
@@ -306,8 +308,6 @@ export default {
     getLink(e, mediafilePKID) {
       axios.get(`/mediafiles/${mediafilePKID}`).then( (response) => {
         console.log('response', { response });
-        //this.$store.dispatch('getVaultfolder', this.currentFolderPKID);
-        //this.cancelCreateFolder();
       });
     },
 

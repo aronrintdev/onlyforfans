@@ -2,27 +2,65 @@
 namespace App\Models;
 
 use Exception;
-use Eloquent as Model;
-use Illuminate\Support\Collection;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Cviebrock\EloquentSluggable\Sluggable;
-
-use App\Enums\PaymentTypeEnum;
-use App\Enums\ShareableAccessLevelEnum;
 use App\Interfaces\Ownable;
 use App\Interfaces\ShortUuid;
+use App\Enums\PaymentTypeEnum;
 use App\Interfaces\Reportable;
-use App\Interfaces\Purchaseable;
-use App\Models\Traits\UsesShortUuid;
-use App\Models\Traits\OwnableTraits;
-use App\Models\Traits\SluggableTraits;
+
 use App\Models\Traits\UsesUuid;
+use App\Interfaces\Purchaseable;
+use App\Models\Financial\Account;
+use Illuminate\Support\Collection;
+use App\Models\Traits\OwnableTraits;
+use App\Models\Traits\UsesShortUuid;
+use App\Models\Financial\Transaction;
+use App\Models\Traits\SluggableTraits;
+use App\Enums\ShareableAccessLevelEnum;
+use App\Interfaces\Subscribable;
+use App\Interfaces\Tippable;
+use App\Models\Casts\Money;
+use App\Models\Financial\Traits\HasCurrency;
+use App\Models\Traits\FormatMoney;
+use App\Models\Traits\ShareableTraits;
+use Cviebrock\EloquentSluggable\Sluggable;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Money\Currencies\ISOCurrencies;
 
-class Timeline extends Model implements Purchaseable, Ownable, Reportable
+/**
+ * Timeline Model
+ *
+ * @property string $id
+ * @property string $slug
+ * @property string $name
+ * @property string $about
+ * @property string $avatar_id
+ * @property string $cover_id
+ * @property bool   $verified
+ * @property bool   $is_follow_for_free
+ * @property \Money\Money $price
+ * @property string $currency
+ * @property array  $cattrs
+ * @property array  $meta
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @property \Carbon\Carbon $deleted_at
+ *
+ * @package App\Models
+ */
+class Timeline extends Model implements Subscribable, Tippable, Reportable
 {
-    use SoftDeletes, HasFactory, OwnableTraits, UsesUuid, Sluggable, SluggableTraits;
+    use SoftDeletes,
+        HasFactory,
+        OwnableTraits,
+        UsesUuid,
+        Sluggable,
+        SluggableTraits,
+        ShareableTraits,
+        FormatMoney,
+        HasCurrency;
 
+    //protected $appends = [ ];
     protected $keyType = 'string';
     protected $guarded = ['id', 'created_at', 'updated_at'];
     protected $hidden = ['user', 'posts', 'followers']; // %FIXME: why is this ness? timelines.show (route-model binding) loads these by default but should be lazy loading (?) %PSG
@@ -30,20 +68,41 @@ class Timeline extends Model implements Purchaseable, Ownable, Reportable
     protected $casts = [
         'name' => 'string',
         'about' => 'string',
+        'price' => Money::class,
         'cattrs' => 'array',
         'meta' => 'array',
     ];
 
+    //--------------------------------------------
+    // %%% Accessors/Mutators | Casts
+    //--------------------------------------------
+
     /*
-    // %FIXME: remove if not used
+    public function getAvatarAttribute($value)
+    {
+        return $this->avatar
+            ? $this->avatar
+            : (object) ['filepath' => url('user/avatar/default-' . $this->gender . '-avatar.png')];
+    }
+
+    public function getCoverAttribute($value)
+    {
+        return $this->cover
+            ? $this->cover
+            : (object) ['filepath' => url('user/avatar/default-' . $this->gender . '-cover.png')];
+            //: (object) ['filepath' => url('user/cover/default-' . $this->gender . '-cover.png')]; // %TODO %FIXME
+    }
+     */
+
+
     public function toArray()
     {
         $array = parent::toArray();
-        $array['cover_url'] = $this->cover()->get()->toArray();
-        $array['avatar_url'] = $this->avatar()->get()->toArray();
+        // Localize Price
+        $array['price_display'] = static::formatMoney($this->price);
         return $array;
     }
-     */
+
 
     public function sluggable(): array
     {
@@ -52,17 +111,21 @@ class Timeline extends Model implements Purchaseable, Ownable, Reportable
         ]];
     }
 
+    //--------------------------------------------
+    // %%% Relationships
+    //--------------------------------------------
+
     // includes subscribers (ie premium + default followers)
     public function followers()
     {
-        return $this->morphToMany('App\Models\User', 'shareable', 'shareables', 'shareable_id', 'sharee_id')
+        return $this->morphToMany(User::class, 'shareable', 'shareables', 'shareable_id', 'sharee_id')
             ->withPivot('access_level', 'shareable_type', 'sharee_id', 'is_approved', 'cattrs')
             ->withTimestamps();
     }
 
     public function subscribers()
     {
-        return $this->morphToMany('App\Models\User', 'shareable', 'shareables', 'shareable_id', 'sharee_id')
+        return $this->morphToMany(User::class, 'shareable', 'shareables', 'shareable_id', 'sharee_id')
             ->withPivot('access_level', 'shareable_type', 'sharee_id', 'is_approved', 'cattrs')
             ->where('access_level', 'premium')
             ->withTimestamps();
@@ -70,35 +133,55 @@ class Timeline extends Model implements Purchaseable, Ownable, Reportable
 
     public function ledgersales()
     {
-        return $this->morphMany('App\Models\Fanledger', 'purchaseable');
+        return $this->morphMany(Fanledger::class, 'purchaseable');
     }
 
     public function posts()
     {
-        return $this->morphMany('App\Models\Post', 'postable');
+        return $this->morphMany(Post::class, 'postable');
     }
 
     public function stories()
     {
-        return $this->hasMany('App\Models\Story');
+        return $this->hasMany(Story::class);
     }
 
     public function user()
-    {
-        return $this->belongsTo('App\Models\User');
+    { // timeline owner
+        return $this->belongsTo(User::class);
     }
 
     public function avatar()
     {
-        return $this->belongsTo('App\Models\Mediafile', 'avatar_id');
+        return $this->belongsTo(Mediafile::class, 'avatar_id');
     }
 
     public function cover()
     {
-        return $this->belongsTo('App\Models\Mediafile', 'cover_id');
+        return $this->belongsTo(Mediafile::class, 'cover_id');
     }
 
+    //--------------------------------------------
+    // %%% Scopes
+    //--------------------------------------------
+
+    /*
+    public function scopeSort($query, $sortBy, $sortDir='desc')
+    {
+        switch ($sortBy) {
+        case 'slug':
+        case 'created_at':
+            $query->orderBy($sortBy, $sortDir);
+            break;
+        default:
+            $query->latest();
+        }
+        return $query;
+    }
+     */
+
     // %%% --- Implement Purchaseable Interface ---
+    #region Purchasable
 
     public function receivePayment(
         string $fltype, // PaymentTypeEnum
@@ -141,6 +224,30 @@ class Timeline extends Model implements Purchaseable, Ownable, Reportable
         return $result ?? null;
     }
 
+    #endregion Purchasable
+
+    /* ---------------------------- Subscribable ---------------------------- */
+    #region Subscribable
+
+    public function verifyPrice($amount): bool
+    {
+        $amount = $this->asMoney($amount);
+        return $this->price->equals($amount);
+    }
+
+    public function getDescriptionNameString(): string
+    {
+        return "Timeline of {$this->name}";
+    }
+
+    public function getOwnerAccount(string $system, string $currency): Account
+    {
+        return $this->getOwner()->first()->getInternalAccount($system, $currency);
+    }
+
+    #endregion Subscribable
+
+
     // Is the user provided following my timeline (includes either premium or default)
     public function isUserFollowing(User $user): bool
     {
@@ -164,6 +271,11 @@ class Timeline extends Model implements Purchaseable, Ownable, Reportable
     public function getOwner(): ?Collection
     {
         return new Collection([ $this->user ]);
+    }
+
+    public function getPrimaryOwner(): User
+    {
+        return $this->user;
     }
 
 }

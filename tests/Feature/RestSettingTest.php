@@ -1,5 +1,4 @@
 <?php
-
 namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -9,89 +8,289 @@ use Tests\TestCase;
 use Database\Seeders\TestDatabaseSeeder;
 
 use App\Models\User;
+use App\Models\UserSetting;
 use App\Models\Timeline;
 use App\Models\Session;
 
 class RestSettingTest extends TestCase
 {
-    /**
-     *  @group settings
-     *  @group OFF-regression
-     */
-    public function test_can_index_creator_settings()
-    {
-        $timeline = Timeline::has('posts', '>=', 1)->has('followers', '>=', 1)->first();
-        $creator = $timeline->user;
-        $response = $this->actingAs($creator)->get('/'.$creator->username.'/settings/general');
-        $response->assertStatus(200);
-        $content = $response->content();
-    }
-
+    use RefreshDatabase, WithFaker;
 
     /**
      *  @group settings
-     *  @group OFF-regression
+     *  @group regression
      */
-    public function test_can_index_fan_settings()
+    public function test_can_update_single_notifications_setting_income_new_tip()
     {
-        $timeline = Timeline::has('posts', '>=', 1)->has('followers', '>=', 1)->first();
-        $fan = $timeline->followers[0];
-        $response = $this->actingAs($fan)->get('/'.$fan->username.'/settings/general');
-        $response->assertStatus(200);
-    }
+        $timeline = Timeline::has('posts','>=',1)->first(); 
+        $user = $timeline->user;
 
-
-    /**
-     *  @group settings
-     *  @group OFF-regression
-     */
-    public function test_can_creator_edit_name()
-    {
-        $timeline = Timeline::has('posts', '>=', 1)->has('followers', '>=', 1)->first();
-
-        $owner = $timeline->user;
-        $response = $this->actingAs($owner)
-            ->json('POST', '/'.$owner->username.'/settings/general', [
-                'username' => $owner->username,
-                'name' => 'New Name',
-                'email' => $owner->email,
-                '_token' => csrf_token()
-            ]);
-
+        $payload = [
+            'income' => [
+                'new_tip' => ['email', 'sms'],
+                //'new_tip' => ['email'],
+            ],
+        ];
+        $response = $this->actingAs($user)->ajaxJSON('PATCH', route('users.enableSetting', [$user->id, 'notifications']), $payload);
         $response->assertStatus(200);
 
+        $content = json_decode($response->content());
+        //dd($content);
+        $this->assertObjectHasAttribute('notifications', $content->cattrs);
+        $this->assertObjectHasAttribute('income', $content->cattrs->notifications);
+        $this->assertObjectHasAttribute('new_tip', $content->cattrs->notifications->income);
+        $this->assertContains('email', $content->cattrs->notifications->income->new_tip);
+        $this->assertContains('sms', $content->cattrs->notifications->income->new_tip);
+        $this->assertNotContains('site', $content->cattrs->notifications->income->new_tip);
+        /*
+        $this->assertNotNull($content->post);
+        $postR = $content->post;
+        $this->assertNotNull($postR->description);
+        $this->assertEquals($payload['description'], $postR->description);
+         */
     }
-
 
     /**
      *  @group settings
-     *  @group OFF-regression
+     *  @group regression
      */
-    public function test_can_creator_edit_username()
+    public function test_can_update_single_notifications_setting_post_new_comment()
     {
-    
-        $timeline = Timeline::has('posts', '>=', 1)->has('followers', '>=', 1)->first();
-        $owner = $timeline->user;
-        $response = $this->actingAs($owner)
-            ->json('POST', '/'.$owner->username.'/settings/general', [
-                'username' => 'test.user',
-                'name' => $owner->name,
-                'email' => $owner->email,
-                '_token' => csrf_token()
-            ]);
+        $timeline = Timeline::has('posts','>=',1)->first(); 
+        $user = $timeline->user;
 
+        $payload = [
+            'posts' => [
+                //'new_comment' => ['email', 'sms'],
+                'new_comment' => ['email'],
+            ],
+        ];
+        $response = $this->actingAs($user)->ajaxJSON('PATCH', route('users.enableSetting', [$user->id, 'notifications']), $payload);
         $response->assertStatus(200);
 
+        $content = json_decode($response->content());
+        //dd($content);
+        $this->assertObjectHasAttribute('notifications', $content->cattrs);
+        $this->assertObjectHasAttribute('posts', $content->cattrs->notifications);
+        $this->assertObjectHasAttribute('new_comment', $content->cattrs->notifications->posts);
+        $this->assertContains('email', $content->cattrs->notifications->posts->new_comment);
+        $this->assertNotContains('site', $content->cattrs->notifications->posts->new_comment);
     }
+
+    /**
+     *  @group settings
+     *  @group regression
+     */
+    public function test_can_toggle_global_email_notifications_setting()
+    {
+        $timeline = Timeline::has('posts','>=',1)->first(); 
+        $user = $timeline->user;
+
+        $payload = [
+            'global' => [
+                'enabled' => ['email'],
+            ],
+        ];
+        $response = $this->actingAs($user)->ajaxJSON('PATCH', route('users.enableSetting', [$user->id, 'notifications']), $payload);
+        $response->assertStatus(200);
+        $content = json_decode($response->content());
+        $this->assertObjectHasAttribute('notifications', $content->cattrs);
+        $this->assertObjectHasAttribute('global', $content->cattrs->notifications);
+        $this->assertObjectHasAttribute('enabled', $content->cattrs->notifications->global);
+        $this->assertContains('email', $content->cattrs->notifications->global->enabled);
+
+        $payload = [
+            'global' => [
+                'enabled' => ['email'],
+            ],
+        ];
+        $response = $this->actingAs($user)->ajaxJSON('PATCH', route('users.disableSetting', [$user->id, 'notifications']), $payload);
+        $response->assertStatus(200);
+        $content = json_decode($response->content());
+        $this->assertObjectHasAttribute('notifications', $content->cattrs);
+        $this->assertObjectHasAttribute('global', $content->cattrs->notifications);
+        $this->assertObjectHasAttribute('enabled', $content->cattrs->notifications->global);
+        $this->assertNotContains('email', $content->cattrs->notifications->global->enabled);
+    }
+
+    /**
+     *  @group settings
+     *  @group regression
+     */
+    // This actually updates [users]
+    public function test_can_batch_edit_settings_general()
+    {
+        $timeline = Timeline::has('posts', '>=', 1)->has('followers', '>=', 1)->first();
+        $user = $timeline->user;
+
+        $payload = [
+            'firstname' => $this->faker->firstName,
+            'lastname' => $this->faker->lastName,
+            //'username' => $this->faker->userName,
+            'email' => $this->faker->safeEmail,
+        ];
+        $response = $this->actingAs($user)->ajaxJSON('PATCH', route('users.update', [$user->id]), $payload);
+        $response->assertStatus(200);
+        $content = json_decode($response->content());
+
+        $user2 = User::findOrFail($user->id);
+        $this->assertEquals($payload['firstname'], $user2->firstname);
+        $this->assertEquals($payload['lastname'], $user2->lastname);
+        $this->assertEquals($payload['email'], $user2->email);
+    }
+
+    /**
+     *  @group settings
+     *  @group regression
+     */
+    public function test_can_batch_validate_settings_general()
+    {
+        $timeline = Timeline::has('posts', '>=', 1)->has('followers', '>=', 1)->first();
+        $user = $timeline->user;
+        $newLastname = $this->faker->lastName;
+
+        // Test empty required field (firstname)
+        $response = $this->actingAs($user)->ajaxJSON('PATCH', route('users.update', [$user->id]), [
+            'firstname' => '', // test required
+            'lastname' => $newLastname,
+            'email' => $this->faker->safeEmail,
+        ]);
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors([
+            'firstname',
+        ]);
+
+        // Update the new last name
+        $response = $this->actingAs($user)->ajaxJSON('PATCH', route('users.update', [$user->id]), [
+            'lastname' => $newLastname,
+        ]);
+        $response->assertStatus(200);
+
+        // Test unchanged if not present
+        $response = $this->actingAs($user)->ajaxJSON('PATCH', route('users.update', [$user->id]), [
+            'email' => $this->faker->safeEmail,
+        ]);
+        $response->assertStatus(200);
+        $user2 = User::findOrFail($user->id);
+        $this->assertEquals($newLastname, $user2->lastname); // unchanged
+        //$content = json_decode($response->content());
+
+        // Test empty required field (firstname)
+        $response = $this->actingAs($user)->ajaxJSON('PATCH', route('users.update', [$user->id]), [
+            'email' => 'bademail',
+        ]);
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors([
+            'email',
+        ]);
+    }
+
+    /**
+     *  @group settings
+     *  @group regression
+     */
+    public function test_can_batch_edit_settings_profile()
+    {
+        $timeline = Timeline::has('posts', '>=', 1)->has('followers', '>=', 1)->first();
+        $user = $timeline->user;
+
+        $payload1 = [
+            'about' => $this->faker->realText,
+            'country' => $this->faker->country,
+            'city' => $this->faker->city,
+            'gender' => $this->faker->randomElement(['male', 'female']),
+            'birthdate' => $this->faker->dateTimeThisCentury->format('Y-m-d'),
+            'weblinks' => [
+                'amazon' => $this->faker->url,
+                'website' => $this->faker->url,
+                'instagram' => $this->faker->url,
+            ],
+            //'email' => $this->faker->safeEmail,
+        ];
+        $response = $this->actingAs($user)->ajaxJSON('PATCH', route('users.updateSettingsBatch', [$user->id]), $payload1);
+        $response->assertStatus(200);
+        $content = json_decode($response->content());
+
+        $settings = $user->settings;
+        $settings->refresh();
+        $this->assertEquals($payload1['about'], $settings->about);
+        $this->assertEquals($payload1['city'], $settings->city);
+        $this->assertEquals($payload1['gender'], $settings->gender);
+        $this->assertEquals($payload1['birthdate'], $settings->birthdate);
+        //dd( json_encode($settings->cattrs, JSON_PRETTY_PRINT) );
+        $this->assertEquals($payload1['weblinks']['instagram'], $settings->cattrs['weblinks']['instagram'] ?? '');
+
+        $payload2 = [
+            'about' => $this->faker->realText,
+        ];
+        $response = $this->actingAs($user)->ajaxJSON('PATCH', route('users.updateSettingsBatch', [$user->id]), $payload2);
+        $response->assertStatus(200);
+
+        $settings = $user->settings;
+        $settings->refresh();
+        $this->assertEquals($payload2['about'], $settings->about);
+        $this->assertEquals($payload1['city'], $settings->city); // unchanged
+        $this->assertEquals($payload1['gender'], $settings->gender); // unchanged
+        $this->assertEquals($payload1['birthdate'], $settings->birthdate); // unchanged
+    }
+
+    /**
+     *  @group settings
+     *  @group regression
+     */
+    public function test_can_batch_validate_settings_profile()
+    {
+        $timeline = Timeline::has('posts', '>=', 1)->has('followers', '>=', 1)->first();
+        $user = $timeline->user;
+
+        $payload = [
+            'gender' => 'badgender',
+        ];
+        $response = $this->actingAs($user)->ajaxJSON('PATCH', route('users.updateSettingsBatch', [$user->id]), $payload);
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors([
+            'gender',
+        ]);
+    }
+
+    /**
+     *  @group OFF-settings
+     *  @group OFF-regression
+     *  @group OFF-here0513
+     */
+    // %TODO %ERIK has moved out of settings...
+    public function test_can_batch_edit_settings_subscriptions()
+    {
+        $timeline = Timeline::has('posts', '>=', 1)->has('followers', '>=', 1)->first();
+        $user = $timeline->user;
+
+        $payload = [
+            'price_per_1_months' => $this->faker->numberBetween(500, 20000),
+        ];
+        $response = $this->actingAs($user)->ajaxJSON('PATCH', route('users.updateSettingsBatch', [$user->id]), $payload);
+        $response->assertStatus(200);
+        $content = json_decode($response->content());
+
+        /*
+        //$settings = $user->settings;
+        //$settings->refresh();
+        $user2 = User::findOrFail($user->id);
+
+        $this->assertEquals($payload['firstname'], $user2->firstname);
+        $this->assertEquals($payload['lastname'], $user2->lastname);
+        $this->assertEquals($payload['email'], $user2->email);
+         */
+    }
+
+    // ===============
 
 
     /**
      *  @group settings
      *  @group OFF-regression
      */
-    public function test_can_creator_edit_email()
+    public function test_can_edit_email()
     {
-
         $timeline = Timeline::has('posts', '>=', 1)->has('followers', '>=', 1)->first();
         $owner = $timeline->user;
         $response = $this->actingAs($owner)
@@ -111,73 +310,7 @@ class RestSettingTest extends TestCase
      *  @group settings
      *  @group OFF-regression
      */
-    public function test_can_fan_edit_name()
-    {
-
-        $timeline = Timeline::has('posts', '>=', 1)->has('followers', '>=', 1)->first();
-        $fan = $timeline->followers[0];
-        $response = $this->actingAs($fan)
-            ->json('POST', '/'.$fan->username.'/settings/general', [
-                'username' => $fan->username,
-                'name' => 'New Name',
-                'email' => $fan->email,
-                '_token' => csrf_token()
-            ]);
-
-        $response->assertStatus(200);
-
-    }
-
-
-    /**
-     *  @group settings
-     *  @group OFF-regression
-     */
-    public function test_can_fan_edit_username()
-    {
-    
-        $timeline = Timeline::has('posts', '>=', 1)->has('followers', '>=', 1)->first();
-        $fan = $timeline->followers[0];
-        $response = $this->actingAs($fan)
-            ->json('POST', '/'.$fan->username.'/settings/general', [
-                'username' => 'test.user',
-                'name' => $fan->name,
-                'email' => $fan->email,
-                '_token' => csrf_token()
-            ]);
-
-        $response->assertStatus(200);
-
-    }
-
-
-    /**
-     *  @group settings
-     *  @group OFF-regression
-     */
-    public function test_can_fan_edit_email()
-    {
-
-        $timeline = Timeline::has('posts', '>=', 1)->has('followers', '>=', 1)->first();
-        $fan = $timeline->followers[0];
-        $response = $this->actingAs($fan)
-            ->json('POST', '/'.$fan->username.'/settings/general', [
-                'username' => $fan->username,
-                'name' => $fan->name,
-                'email' => 'test.user@email.com',
-                '_token' => csrf_token()
-            ]);
-
-        $response->assertStatus(200);
-
-    }
-
-
-    /**
-     *  @group settings
-     *  @group OFF-regression
-     */
-    public function test_can_creator_set_localization()
+    public function test_can_set_localization()
     {
 
         $timeline = Timeline::has('posts', '>=', 1)->has('followers', '>=', 1)->first();
@@ -199,30 +332,7 @@ class RestSettingTest extends TestCase
      *  @group settings
      *  @group OFF-regression
      */
-    public function test_can_fan_set_localization()
-    {
-
-        $timeline = Timeline::has('posts', '>=', 1)->has('followers', '>=', 1)->first();
-        $fan = $timeline->followers[0];
-        $response = $this->actingAs($fan)
-            ->json('POST', '/'.$fan->username.'/settings/localization', [
-                'timezone_id' => 15,
-                'country' => 'US',
-                'timezone' => 'GMT-05:00',
-                'currency' => 'EUR',
-                '_token' => csrf_token()
-            ]);
-
-        $response->assertStatus(200);
-
-    }
-
-
-    /**
-     *  @group settings
-     *  @group OFF-regression
-     */
-    public function test_can_creator_set_subscription_price()
+    public function test_can_set_subscription_price()
     {
         
         $timeline = Timeline::has('posts', '>=', 1)->has('followers', '>=', 1)->first();
@@ -258,7 +368,7 @@ class RestSettingTest extends TestCase
      *  @group settings
      *  @group OFF-regression
      */
-    public function test_can_creator_set_referral_rewards_enable()
+    public function test_can_enable_referral_rewards()
     {
 
         $timeline = Timeline::has('posts', '>=', 1)->has('followers', '>=', 1)->first();
@@ -282,7 +392,7 @@ class RestSettingTest extends TestCase
      *  @group settings
      *  @group OFF-regression
      */
-    public function test_can_creator_set_enable_or_disable_follow_for_free()
+    public function test_can_enable_or_disable_follow_for_free()
     {
 
         $timeline = Timeline::has('posts', '>=', 1)->has('followers', '>=', 1)->first();
@@ -315,107 +425,6 @@ class RestSettingTest extends TestCase
         $response->assertStatus(302);
     }
 
-    /**
-     *  @group settings
-     *  @group OFF-regression
-     */
-    public function test_can_creator_edit_profile()
-    {
-
-        $timeline = Timeline::has('posts', '>=', 1)->has('followers', '>=', 1)->first();
-        $creator = $timeline->user;
-
-        $response = $this->actingAs($creator)
-            ->json('POST', '/'.$creator->username.'/settings/profile', [
-                'about' => 'Distinctio aperiam quaerat sit sed. Sit iusto ea ut ea architecto quidem rerum. Aut sunt sed voluptatum nam sunt et quia.',
-                'country' => 'US',
-                'city' => 'Las Vegas',
-                'gender' => 'male',
-                'birthday' => '02/02/1990',
-                '_token' => csrf_token()
-            ]);
-
-        $response->assertStatus(200);
-
-        $response = $this->actingAs($creator)
-            ->json('POST', '/'.$creator->username.'/settings/profile', [
-                'about' => 'Distinctio aperiam quaerat sit sed. Sit iusto ea ut ea architecto quidem rerum. Aut sunt sed voluptatum nam sunt et quia.',
-                'country' => 'US',
-                'city' => 'Las Vegas',
-                'gender' => 'female',
-                'birthday' => '02/02/1990',
-                '_token' => csrf_token()
-            ]);
-
-        $response->assertStatus(200);
-
-        // Includes wishlist, website
-        $response = $this->actingAs($creator)
-            ->json('POST', '/'.$creator->username.'/settings/profile', [
-                'about' => 'Distinctio aperiam quaerat sit sed. Sit iusto ea ut ea architecto quidem rerum. Aut sunt sed voluptatum nam sunt et quia.',
-                'country' => 'US',
-                'city' => 'Las Vegas',
-                'gender' => 'female',
-                'birthday' => '02/02/1990',
-                'wishlist' => 'https://www.batz.com',
-                'website' => 'http://www.sauer.biz/et-excepturi-numquam-recusandae-quia-eum-saepe-veritatis-rerum.html',
-                '_token' => csrf_token()
-            ]);
-
-        $response->assertStatus(200);
-
-    }
-
-    /**
-     *  @group settings
-     *  @group OFF-regression
-     */
-    public function test_can_fan_edit_profile()
-    {
-
-        $timeline = Timeline::has('posts', '>=', 1)->has('followers', '>=', 1)->first();
-        $fan = $timeline->followers[0];
-
-        $response = $this->actingAs($fan)
-            ->json('POST', '/'.$fan->username.'/settings/profile', [
-                'about' => 'Distinctio aperiam quaerat sit sed. Sit iusto ea ut ea architecto quidem rerum. Aut sunt sed voluptatum nam sunt et quia.',
-                'country' => 'US',
-                'city' => 'Las Vegas',
-                'gender' => 'male',
-                'birthday' => '02/02/1990',
-                '_token' => csrf_token()
-            ]);
-
-        $response->assertStatus(200);
-
-        $response = $this->actingAs($fan)
-            ->json('POST', '/'.$fan->username.'/settings/profile', [
-                'about' => 'Distinctio aperiam quaerat sit sed. Sit iusto ea ut ea architecto quidem rerum. Aut sunt sed voluptatum nam sunt et quia.',
-                'country' => 'US',
-                'city' => 'Las Vegas',
-                'gender' => 'female',
-                'birthday' => '02/02/1990',
-                '_token' => csrf_token()
-            ]);
-
-        $response->assertStatus(200);
-
-        // Includes wishlist, website
-        $response = $this->actingAs($fan)
-            ->json('POST', '/'.$fan->username.'/settings/profile', [
-                'about' => 'Distinctio aperiam quaerat sit sed. Sit iusto ea ut ea architecto quidem rerum. Aut sunt sed voluptatum nam sunt et quia.',
-                'country' => 'US',
-                'city' => 'Las Vegas',
-                'gender' => 'female',
-                'birthday' => '02/02/1990',
-                'wishlist' => 'https://www.batz.com',
-                'website' => 'http://www.sauer.biz/et-excepturi-numquam-recusandae-quia-eum-saepe-veritatis-rerum.html',
-                '_token' => csrf_token()
-            ]);
-
-        $response->assertStatus(200);
-
-    }
 
 
     /**

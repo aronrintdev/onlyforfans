@@ -1,12 +1,12 @@
 <template>
-  <div v-if="!isLoading" class="crate tag-crate row mb-3 mx-0">
-    <section class="d-flex flex-wrap justify-content-between w-100">
+  <div v-if="!isLoading" class="crate tag-crate crate-story_bar row OFF-mb-3 mx-0">
+    <section class="d-flex flex-wrap justify-content-start w-100">
       <div @click="createStory()" class="story">
         <router-link :to="{ name: 'stories.dashboard' }">
           <b-icon icon="plus-circle" variant="primary" font-scale="2" />
         </router-link>
       </div>
-      <div v-for="story in stories" :key="story.id" class="mb-3 story">
+      <div v-for="story in stories" :key="story.id" class="ml-3 mb-3 story">
         <router-link :to="{ name: 'stories.player' }" class="box-story">
           <b-img
             v-if="story.stype === 'image'"
@@ -45,10 +45,9 @@ export default {
 
   created() {
     this.$store.dispatch('getStories', {
-      filters: {
-        //user_id: this.session_user.id,
-        following: true
-      },
+      //user_id: this.session_user.id,
+      following: 1,
+      stypes: 'image', // %FIXME: should be 'photo' (ideally we use PHP ENUM?)
     })
   },
 
@@ -63,18 +62,6 @@ export default {
   },
 
   watch: {
-    /*
-    session_user (newVal, oldVal) {
-      if ( newVal.id && (newVal.id > 0) && !this.isLoadedHack ) {
-        this.$store.dispatch('getStories', { 
-          filters: {
-            user_id: newVal.id,
-          }
-        });
-        this.isLoadedHack = true;
-      }
-    },
-    */
   },
 
   components: {},
@@ -85,9 +72,6 @@ export default {
 $size: 40px;
 $margin: 16px;
 .crate {
-  max-height: $size * 2 + $margin + 2px;
-  overflow-y: auto;
-
   .story {
     margin-left: $margin / 2;
     margin-right: $margin / 2;

@@ -71,10 +71,12 @@ bootstrap/cache/*
 # IDE Helper
 _ide_helper.php
 
+# Generated Reports
+analyzerReport.html
+
 dot-env.txt
 .*.swp
 *.vim
-CMD.txt
 
 __MACOSX
 
@@ -111,3 +113,7 @@ composer.json-save
 database/seeds/RolesTableSeeder.php--save
 
 public/info.php
+public/bar.jpg
+public/themes
+public/themes/*
+public/stats.json

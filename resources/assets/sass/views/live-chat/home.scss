@@ -1,0 +1,64 @@
+//messages-page
+.messages-page {
+	max-width: 1200px;
+	margin: auto;
+
+	.card-body {
+		padding: 0;
+		
+		.message-box {
+			border-top: 1px solid #E6EAEE;
+			// display: table;
+			display: -webkit-flex;
+			display: -ms-flexbox;
+			display: flex;
+			overflow: hidden;
+			margin: 0px !important;
+			width: 100%;
+			height: calc(100vh - 130px);
+
+			.message-col-8 {
+				padding: 0px;
+				display: flex;
+				flex-direction: column;
+				
+				.coversation-tree {
+					position: relative;
+					height: calc(100vh - 156px);
+					overflow: auto;
+				}
+				.conversations-start {
+					position: absolute;
+					top: 50%;
+					left: 50%;
+					width: max-content;
+					transform: translate(-50%, -50%);
+					text-align: center;
+					button {
+						border: none;
+						padding: 9px 18px;
+						font-size: 14px;
+						color: #fefefe;
+						font-weight: 500;
+						background: #00aff0;
+						min-width: 78px;
+						transition: opacity .15s ease,background-color .15s ease,box-shadow .15s ease;
+						display: inline-block;
+						white-space: nowrap;
+						text-align: center;
+						height: 48px;
+						width: 250px;
+						line-height: 1em;
+						border-radius: 24px;
+						text-transform: uppercase;
+					}
+					.conversations-start__title {
+						font-size: 24px;
+						font-weight: 500;
+						margin-bottom: 38px;
+					}
+				}
+			}
+		}
+	}
+}

@@ -2,33 +2,29 @@
 
 namespace App\Jobs\Financial;
 
-use App\Enums\Financial\AccountTypeEnum;
 use App\Models\Financial\Account;
-use App\Models\Financial\Transaction;
 
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
-use Illuminate\Support\Facades\DB;
 
-use Money\Currency;
-use Money\Money;
-
-class UpdateAccountBalance implements ShouldQueue
+class UpdateAccountBalance implements ShouldQueue, ShouldBeUnique
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
+    public $uniqueUntilStart = true;
+    public $tries = 4;
+    public $backoff = [ 5, 15, 60 ];
 
     /**
      * Account instance
      * @var \App\Models\Financial\Account
      */
     protected $account;
-
-    public $tries = 4;
-    public $backoff = [ 5, 15, 60 ];
 
     /**
      * Create a new job instance.
@@ -38,8 +34,16 @@ class UpdateAccountBalance implements ShouldQueue
      */
     public function __construct(Account $account)
     {
-        $this->account = $account;
+        $this->account = $account->withoutRelations();
         $this->onQueue('financial-transactions');
+    }
+
+    /**
+     * Job's lock id
+     */
+    public function uniqueId()
+    {
+        return $this->account->id;
     }
 
     /**
@@ -47,7 +51,9 @@ class UpdateAccountBalance implements ShouldQueue
      */
     public function middleware()
     {
-        return [new WithoutOverlapping($this->account->id)];
+        return [
+            (new WithoutOverlapping($this->uniqueId()))->dontRelease(),
+        ];
     }
 
     /**
@@ -57,39 +63,7 @@ class UpdateAccountBalance implements ShouldQueue
      */
     public function handle()
     {
-        DB::transaction(function() {
-            $account = Account::lockForUpdate()->find($this->account->getKey());
-            $currency = new Currency($account->currency);
-
-            // Process Pending Transactions
-            Transaction::where('account_id', $account->getKey())
-                ->whereNull('settled_at')
-                ->whereNull('failed_at')
-                ->with(['reference.account:type', 'account'])
-                ->orderBy('created_at')
-                ->lockForUpdate()
-                ->chunkById(10, function($transactions) {
-                    foreach($transactions as $transaction) {
-                        if ( // From Internal to Internal
-                            $transaction->reference->account->type === AccountTypeEnum::INTERNAL
-                            && $transaction->account->type === AccountTypeEnum::INTERNAL
-                        ) {
-                            // Calculate Fees and Taxes On this transaction
-                            $transaction->settleFees();
-                            $transaction->save();
-                        } else {
-                            $transaction->settleBalance();
-                            $transaction->save();
-                        }
-
-                    }
-                });
-
-            // Calculate balance and pending
-            $balance = new Money($account->balance, $currency);
-            $pending = new Money($account->pending, $currency);
-
-        });
+        $this->account->settleBalance();
     }
 
 

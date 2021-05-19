@@ -1,7 +1,7 @@
 <template>
   <b-navbar :toggleable="mobile" variant="light" sticky class="bg-white" :class="{ 'pb-0': mobile }" >
     <b-navbar-brand :to="{ name: 'index' }" class="navbar-brand mr-5">
-      All Fans
+      <img src="/images/logos/allfans-logo-154x33.png" alt="All Fans Logo">
     </b-navbar-brand>
     <b-navbar-toggle target="nav-collapse" class="mb-2">
       <ProfileButton />
@@ -14,8 +14,8 @@
 
     <ScrollCollapse v-if="mobile" ref="scrollCollapse" class="w-100" :full-open="searchOpen" :full-open-height="openHeight">
       <div class="d-flex flex-column justify-content-between h-100">
-        <SearchBar class="w-100 mt-3" mobile @opening="searchOpen = true" @closing="searchOpen = false" @scroll="onScroll" />
-        <NavButtons :mobile-style="mobile" class="w-100 mt-3" />
+        <SearchBar class="w-100 mt-3" :mobile="true" @opening="searchOpen = true" @closing="searchOpen = false" @scroll="onScroll" />
+        <NavButtons :mobile-style="mobile" :unread-messages-count="unread_messages_count" class="w-100 mt-3" />
       </div>
     </ScrollCollapse>
 
@@ -23,7 +23,7 @@
       <SearchBar />
     </b-navbar-nav>
     <b-navbar-nav v-if="!mobile" class="ml-auto">
-      <NavButtons class="mx-3" />
+      <NavButtons class="mx-3" :unread-messages-count="unread_messages_count" />
       <b-nav-item-dropdown
         id="profile-dropdown"
         toggle-class="nav-link-custom"
@@ -62,17 +62,12 @@ export default {
 
   props: {
     toggleMobileAt: { type: [String, Number], default: 'md', },
+    unreadMessagesCount: { type: Number, default: 0 },
   },
 
   computed: {
-    ...Vuex.mapGetters(['session_user']),
-    mobileWidth() {
-      if (typeof this.toggleMobileAt === 'number') {
-        return this.toggleMobileAt
-      }
-      return parseInt(getComputedStyle(document.documentElement)
-        .getPropertyValue(`--breakpoint-${this.toggleMobileAt}`).replace('px', ''))
-    },
+    ...Vuex.mapState([ 'mobile' ]),
+    ...Vuex.mapGetters(['session_user', 'unread_messages_count']),
     openHeight() {
       const height = this.$vssHeight - this.$el.clientHeight
       if(this.$refs['scrollCollapse']) {
@@ -86,7 +81,6 @@ export default {
   },
 
   data: () => ({
-    mobile: false,
     searchOpen: false,
     screenWidth: null,
   }),
@@ -100,13 +94,6 @@ export default {
   },
 
   watch: {
-    $vssWidth(value) {
-      if (value < this.mobileWidth) {
-        this.mobile = true
-      } else {
-        this.mobile = false
-      }
-    },
     mobile(value) {
       if (!value) {
         this.searchOpen = false
@@ -116,12 +103,6 @@ export default {
       this.$forceCompute('openHeight')
     }
   },
-
-  mounted() {
-    if (this.$vssWidth < this.mobileWidth) {
-      this.mobile = true
-    }
-  }
 
 }
 </script>

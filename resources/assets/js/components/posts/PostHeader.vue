@@ -25,7 +25,10 @@
           </span>
         </li>
         <li>
-          <timeago :datetime="post.created_at" :auto-update="60"></timeago>
+          <timeago :datetime="post.created_at" v-if="!post.schedule_datetime" :auto-update="60"></timeago>
+          <span v-if="post.schedule_datetime">
+            in {{ moment(post.schedule_datetime * 1000).fromNow(true) }}
+          </span>
           <span v-if="post.location" class="post-place">
             at
             <a target="_blank" :href="`/get-location/${post.location}`">
@@ -49,9 +52,9 @@
 
 <script>
 //import { eventBus } from '@/app'
+import moment from 'moment';
 
 export default {
-  components: { },
 
   props: {
     post: null,
@@ -71,16 +74,10 @@ export default {
   },
 
   data: () => ({
+    moment,
   }),
-
-  mounted() { },
-
-  created() {},
-
-  methods: { },
-
-  watch: { }
 }
+
 </script>
 
 <style scoped>
@@ -142,5 +139,7 @@ body .user-details ul > li {
 }
 .tag-debug {
   display: none;
+  /*
+   */
 }
 </style>

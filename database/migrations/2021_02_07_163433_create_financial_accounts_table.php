@@ -16,7 +16,7 @@ class CreateFinancialAccountsTable extends Migration
         /**
          * Fan Accounts Table should store the financial account information for a owner of the account.
          */
-        Schema::create('financial_accounts', function (Blueprint $table) {
+        Schema::connection('financial')->create('accounts', function (Blueprint $table) {
             $table->uuid('id')->primary();
             /**
              * The entity that owns the account. This will usually be a user, but may be a group, the site owner, or a
@@ -57,6 +57,6 @@ class CreateFinancialAccountsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('financial_accounts');
+        Schema::connection('financial')->dropIfExists('accounts');
     }
 }

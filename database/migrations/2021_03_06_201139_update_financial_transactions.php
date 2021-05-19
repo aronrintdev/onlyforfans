@@ -13,27 +13,27 @@ class UpdateFinancialTransactions extends Migration
      */
     public function up()
     {
-        Schema::table('financial_transactions', function (Blueprint $table) {
+        Schema::connection('financial')->table('transactions', function (Blueprint $table) {
             $table->renameColumn('account', 'account_id');
         });
 
-        Schema::table('financial_transactions', function (Blueprint $table) {
+        Schema::connection('financial')->table('transactions', function (Blueprint $table) {
             $table->renameColumn('reference', 'reference_id');
         });
 
-        if (Schema::hasColumn('financial_transactions', 'resource_type')) {
-            Schema::table('financial_transactions', function (Blueprint $table) {
+        if (Schema::connection('financial')->hasColumn('transactions', 'resource_type')) {
+            Schema::connection('financial')->table('transactions', function (Blueprint $table) {
                 $table->dropColumn('resource_type');
             });
         }
 
-        if (Schema::hasColumn('financial_transactions', 'resource_id')) {
-            Schema::table('financial_transactions', function (Blueprint $table) {
+        if (Schema::connection('financial')->hasColumn('transactions', 'resource_id')) {
+            Schema::connection('financial')->table('transactions', function (Blueprint $table) {
                 $table->dropColumn('resource_id');
             });
         }
 
-        Schema::table('financial_transactions', function (Blueprint $table) {
+        Schema::connection('financial')->table('transactions', function (Blueprint $table) {
             /**
              * Changing to ISO_4217 Currency code length
              * https://en.wikipedia.org/wiki/ISO_4217
@@ -43,7 +43,7 @@ class UpdateFinancialTransactions extends Migration
             $table->string('type')->nullable()->after('currency');
         });
 
-        Schema::table('financial_transactions',function (Blueprint $table) {
+        Schema::connection('financial')->table('transactions',function (Blueprint $table) {
             // Reference to access table
             $table->uuid('shareable_id')->nullable()->after('reference_id');
         });
@@ -57,32 +57,32 @@ class UpdateFinancialTransactions extends Migration
      */
     public function down()
     {
-        if (Schema::hasColumn('financial_transactions', 'account_id')) {
-            Schema::table('financial_transactions', function (Blueprint $table) {
+        if (Schema::connection('financial')->hasColumn('transactions', 'account_id')) {
+            Schema::connection('financial')->table('transactions', function (Blueprint $table) {
                 $table->renameColumn('account_id', 'account');
             });
         }
-        if (Schema::hasColumn('financial_transactions', 'reference_id')) {
-            Schema::table('financial_transactions', function (Blueprint $table) {
+        if (Schema::connection('financial')->hasColumn('transactions', 'reference_id')) {
+            Schema::connection('financial')->table('transactions', function (Blueprint $table) {
                 $table->renameColumn('reference_id', 'reference');
             });
         }
-        if (Schema::hasColumn('financial_transactions', 'type')) {
-            Schema::table('financial_transactions', function (Blueprint $table) {
+        if (Schema::connection('financial')->hasColumn('transactions', 'type')) {
+            Schema::connection('financial')->table('transactions', function (Blueprint $table) {
                 $table->dropColumn('type');
             });
         }
-        if (!Schema::hasColumn('financial_transactions', 'resource_type')) {
-            Schema::table('financial_transactions', function (Blueprint $table) {
+        if (!Schema::connection('financial')->hasColumn('transactions', 'resource_type')) {
+            Schema::connection('financial')->table('transactions', function (Blueprint $table) {
                 $table->nullableUuidMorphs('resource');
             });
         }
-        if (Schema::hasColumn('financial_transactions', 'shareable_id')) {
-            Schema::table('financial_transactions', function (Blueprint $table) {
+        if (Schema::connection('financial')->hasColumn('transactions', 'shareable_id')) {
+            Schema::connection('financial')->table('transactions', function (Blueprint $table) {
                 $table->dropColumn('shareable_id');
             });
         }
-        Schema::table('financial_transactions', function (Blueprint $table) {
+        Schema::connection('financial')->table('transactions', function (Blueprint $table) {
             $table->string('currency')->change();
         });
     }

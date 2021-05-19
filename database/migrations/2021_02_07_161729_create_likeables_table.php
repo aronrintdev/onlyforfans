@@ -14,6 +14,8 @@ class CreateLikeablesTable extends Migration
     public function up()
     {
         Schema::create('likeables', function (Blueprint $table) {
+            //$table->uuid('id')->primary();
+            $table->increments('id'); // just use integer as this is a join table and sync, etc may not work with UUID %PSG
             $table->uuid('likee_id')->comment('User who is doing the liking');
             $table->foreign('likee_id')->references('id')->on('users');
             $table->uuidMorphs('likeable');

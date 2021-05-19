@@ -18,21 +18,19 @@ use App\Models\Traits\UsesShortUuid;
 use Carbon\Carbon;
 use Spatie\Permission\Traits\HasRoles;
 use Cmgmyr\Messenger\Traits\Messagable;
-use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 
-class User extends Authenticatable implements PaymentSendable, Blockable, HasFinancialAccounts
+class User extends Authenticatable implements Blockable, HasFinancialAccounts
 {
-    use Notifiable, HasRoles, HasFactory, Messagable, SoftDeletes, UsesUuid, MorphFunctions;
+    use HasRoles, HasFactory, Messagable, SoftDeletes, UsesUuid, MorphFunctions, Notifiable;
 
-    protected $appends = [ 
-        'name', 
-        'avatar', 
-        'about', 
-    ];
+    protected $connection = 'primary';
+
+    protected $appends = [ 'name', 'avatar', 'cover', 'about', ];
     protected $guarded = [ 'id', 'created_at', 'updated_at' ];
     protected $hidden = [ 'email', 'password', 'remember_token', 'verification_code', 'timeline'];
     protected $dates = [ 'last_logged', ];
@@ -74,26 +72,8 @@ class User extends Authenticatable implements PaymentSendable, Blockable, HasFin
         });
     }
 
-    /*
-    public function toArray()
-    {
-        $array = parent::toArray();
-        // Removed, all attributes seem to still be set without needing this and it messes up setVisible()
-        // TODO: Remove this after confirming ui still gets what it needs.
-        // $timeline = $this->timeline->toArray();
-        // foreach ($timeline as $key => $value) {
-        //     if ($key != 'id') {
-        //         $array[$key] = $value;
-        //     }
-        // }
-        // $array['avatar'] = $this->avatar;
-        return $array;
-    }
-     */
 
-    /**
-     * Makes username a valid random username if it is null or empty.
-     */
+    // Makes username a valid random username if it is null or empty.
     public function checkUsername()
     {
         if (!isset($this->username) || $this->username === '') {
@@ -109,67 +89,77 @@ class User extends Authenticatable implements PaymentSendable, Blockable, HasFin
         return $this->hasOne(UserSetting::class);
     }
 
+    public function mediafiles()
+    {
+        return $this->morphMany(Mediafile::class, 'resource');
+    }
+
     public function sharedmediafiles()
     { // Mediafiles shared with me (??)
-        return $this->morphedByMany('App\Models\Mediafile', 'shareable', 'shareables', 'sharee_id')
+        return $this->morphedByMany(Mediafile::class, 'shareable', 'shareables', 'sharee_id')
             ->withTimestamps();
     }
 
     public function sharedvaultfolders()
     { // Vaultfolders shared with me (??)
-        return $this->morphedByMany('App\Models\Vaultfolder', 'shareable', 'shareables', 'sharee_id')
+        return $this->morphedByMany(Vaultfolder::class, 'shareable', 'shareables', 'sharee_id')
             ->withTimestamps();
+    }
+
+    public function favorites()
+    { 
+        return $this->hasMany(Favorite::class, 'user_id');
     }
 
     public function ledgersales()
     {
-        return $this->hasMany('App\Models\Fanledger', 'seller_id');
+        return $this->hasMany(Fanledger::class, 'seller_id');
     }
 
     public function ledgerpurchases()
     {
-        return $this->hasMany('App\Models\Fanledger', 'purchaser_id');
+        return $this->hasMany(Fanledger::class, 'purchaser_id');
     }
 
     public function timeline()
     {
-        return $this->hasOne('App\Models\Timeline');
+        return $this->hasOne(Timeline::class);
     }
 
     public function posts()
     {
-        return $this->hasMany('App\Models\Post', 'user_id');
+        return $this->hasMany(Post::class, 'user_id');
     }
 
     // timelines (users) I follow: premium *and* default subscribe (follow)
     public function followedtimelines()
     {
-        return $this->morphedByMany('App\Models\Timeline', 'shareable', 'shareables', 'sharee_id')
+        return $this->morphedByMany(Timeline::class, 'shareable', 'shareables', 'sharee_id')
             ->withPivot('access_level', 'shareable_type', 'sharee_id')->withTimestamps();
     }
 
     public function subscribedtimelines()
     {
-        return $this->morphedByMany('App\Models\Timeline', 'shareable', 'shareables', 'sharee_id')
+        return $this->morphedByMany(Timeline::class, 'shareable', 'shareables', 'sharee_id')
             ->where('access_level', 'premium')
             ->withPivot('access_level', 'shareable_type', 'sharee_id')->withTimestamps();
     }
 
     public function likedposts()
     {
-        return $this->morphedByMany('App\Models\Post', 'likeable', 'likeables', 'likee_id')
+        return $this->morphedByMany(Post::class, 'likeable', 'likeables', 'likee_id')
             ->withTimestamps();
     }
 
     // posts shared with me (by direct share or purchase on my part)
     public function sharedposts()
     {
-        return $this->morphedByMany('App\Models\Post', 'shareable', 'shareables', 'sharee_id')->withTimestamps();
+        return $this->morphedByMany(Post::class, 'shareable', 'shareables', 'sharee_id')->withTimestamps();
     }
 
     public function postsPinned()
     {
-        return $this->belongsToMany('App\Post', 'pinned_posts', 'user_id', 'post_id');
+        return $this->belongsToMany(Post::class, 'pinned_posts', 'user_id', 'post_id');
     }
 
     public function userList()
@@ -179,11 +169,9 @@ class User extends Authenticatable implements PaymentSendable, Blockable, HasFin
 
     public function own_pages()
     {
-        $admin_role_id = Role::where('name', '=', 'admin')->first();
+        $admin_role_id = Role::where('name', 'admin')->first();
         $own_pages = $this->pages()->where('role_id', $admin_role_id->id)->where('page_user.active', 1)->get();
-
         $result = $own_pages ? $own_pages : false;
-
         return $result;
     }
 
@@ -191,9 +179,7 @@ class User extends Authenticatable implements PaymentSendable, Blockable, HasFin
     {
         $admin_role_id = Role::where('name', '=', 'admin')->first();
         $own_groups = $this->groups()->where('role_id', $admin_role_id->id)->where('status', 'approved')->get();
-
         $result = $own_groups ? $own_groups : false;
-
         return $result;
     }
 
@@ -207,25 +193,19 @@ class User extends Authenticatable implements PaymentSendable, Blockable, HasFin
         return $this->belongsToMany('App\Group', 'group_user', 'user_id', 'group_id')->withPivot('role_id', 'status');
     }
 
-
     public function pageLikes()
     {
         return $this->belongsToMany('App\Page', 'page_likes', 'user_id', 'page_id');
     }
     
-    public function notifications()
-    {
-        return $this->hasMany('App\Models\Notification')->with('notified_from');
-    }
-
     public function vaults()
     {
-        return $this->hasMany('App\Models\Vault');
+        return $this->hasMany(Vault::class);
     }
 
     public function vaultfolders()
     {
-        return $this->hasMany('App\Models\Vaultfolder');
+        return $this->hasMany(Vaultfolder::class);
     }
 
     public function financialAccounts()
@@ -233,6 +213,10 @@ class User extends Authenticatable implements PaymentSendable, Blockable, HasFin
         return $this->morphMany(Account::class, 'owner');
     }
 
+    public function subscriptions()
+    {
+        return $this->hasMany(Subscription::class);
+    }
 
     //--------------------------------------------
     // %%% Accessors/Mutators | Casts
@@ -248,7 +232,7 @@ class User extends Authenticatable implements PaymentSendable, Blockable, HasFin
 
     public function getNameAttribute($value)
     {
-        return $this->timeline->name;
+        return $this->firstname;
     }
 
     public function getAvatarAttribute($value)
@@ -256,6 +240,14 @@ class User extends Authenticatable implements PaymentSendable, Blockable, HasFin
         return $this->timeline->avatar
             ? $this->timeline->avatar
             : (object) ['filepath' => url('user/avatar/default-' . $this->gender . '-avatar.png')];
+    }
+
+    public function getCoverAttribute($value)
+    {
+        return $this->timeline->cover
+            ? $this->timeline->cover
+            : (object) ['filepath' => url('user/avatar/default-' . $this->gender . '-cover.png')];
+            //: (object) ['filepath' => url('user/cover/default-' . $this->gender . '-cover.png')]; // %TODO %FIXME
     }
 
     public function getAboutAttribute($value)
@@ -282,13 +274,13 @@ class User extends Authenticatable implements PaymentSendable, Blockable, HasFin
 
     public function commentLikes()
     {
-        return $this->morphedByMany('App\Models\Comment', 'likeable', 'likeables', 'likee_id')
+        return $this->morphedByMany(Comment::class, 'likeable', 'likeables', 'likee_id')
             ->withTimestamps();
     }
 
     public function comments()
     {
-        return $this->hasMany('App\Models\Comment');
+        return $this->hasMany(Comment::class);
     }
 
     public function deleteOthers()
@@ -298,7 +290,6 @@ class User extends Authenticatable implements PaymentSendable, Blockable, HasFin
         $otherPosts = $this->timeline->posts()->where('user_id', '!=', $sessionUser->id)->get();
         foreach ($otherPosts as $otherPost) {
             $otherPost->users_liked()->detach();
-            //$otherPost->notifications_user()->detach();
             $otherPost->sharees()->detach();
             $otherPost->reports()->detach();
             $otherPost->users_tagged()->detach();
@@ -311,7 +302,6 @@ class User extends Authenticatable implements PaymentSendable, Blockable, HasFin
                 $comment->update(['parent_id' => null]);
                 $comment->delete();
             }
-            $otherPost->notifications()->delete();
             $otherPost->delete();
         }
     }
@@ -320,12 +310,12 @@ class User extends Authenticatable implements PaymentSendable, Blockable, HasFin
 
     public function blockedUsers()
     {
-        return $this->morphToMany('App\Models\User', 'blockable', 'blockables');
+        return $this->morphToMany(User::class, 'blockable', 'blockables');
     }
 
     public function blockedBy(): MorphToMany
     {
-        return $this->morphedByMany('App\Models\User', 'blockable', 'blockables');
+        return $this->morphedByMany(User::class, 'blockable', 'blockables');
     }
 
     // Checks if user is blocked by another user
@@ -422,8 +412,8 @@ class User extends Authenticatable implements PaymentSendable, Blockable, HasFin
             'earnings'         => $this->getSales(),
             'website'          => '', // %TODO
             'instagram'        => '', // %TODO
-            'city'             => $this->settings->city,
-            'country'          => $this->settings->country,
+            'city'             => (isset($this->settings)) ? $this->settings->city : null,
+            'country'          => (isset($this->settings)) ? $this->settings->country : null,
         ];
     }
 
@@ -433,8 +423,8 @@ class User extends Authenticatable implements PaymentSendable, Blockable, HasFin
         return $sales > 0;
     }
 
-
     /* ------------------------ HasFinancialAccounts ------------------------ */
+    #region HasFinancialAccounts
     public function getInternalAccount(string $system, string $currency): Account
     {
         $account = $this->financialAccounts()->where('system', $system)
@@ -467,6 +457,25 @@ class User extends Authenticatable implements PaymentSendable, Blockable, HasFin
         return $account;
     }
 
+    #endregion HasFinancialAccounts
+
+    /**
+     * A user can have many chatthreads
+     */
+    public function chatthreads()
+    {
+        return $this->hasMany(ChatThread::class, 'sender_id');
+    }
+
+    public function lists()
+    {
+        return $this->belongsToMany(Lists::class, 'list_user', 'user_id', 'list_id')->withTimestamps();
+    }
+
+    public function userlists()
+    {
+        return $this->hasMany(Lists::class, 'creator_id');
+    }
 }
 
     /*

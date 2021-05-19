@@ -1,5 +1,8 @@
 {
   "example-message": "This is an example message",
+  "nav": {
+    "prev": "Back"
+  },
   "online-interface": {
     "online": "Online Now",
     "away": "Away",

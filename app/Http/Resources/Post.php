@@ -1,9 +1,11 @@
 <?php
 namespace App\Http\Resources;
 
-use Illuminate\Http\Resources\Json\JsonResource;
 use App\Enums\PostTypeEnum;
+use App\Models\Casts\Money as CastsMoney;
 use App\Models\Post as PostModel;
+use Illuminate\Http\Resources\Json\JsonResource;
+use App\Http\Resources\Mediafile as MediafileResource;
 
 class Post extends JsonResource
 {
@@ -17,7 +19,8 @@ class Post extends JsonResource
             'id' => $this->id,
             'slug' => $this->slug,
             'type' => $this->type,
-            'price' => $this->price,
+            'price' => CastsMoney::doSerialize($this->price),
+            'price_display' => PostModel::formatMoney($this->price),
             'postable_id' => $this->postable_id,
             'postable_type' => $this->postable_type,
             'timeline_slug' => $this->timeline->slug, // needed for links
@@ -25,7 +28,8 @@ class Post extends JsonResource
 
             //'mediafiles' =>  $this->when($hasAccess, $this->mediafiles),
             // %TODO %NOTE vs above, we depend here on the caller not loading mediafiles relation where they shouldn't have access (eventually we want to send a blurred image in place when no access)
-            'mediafiles' =>  $this->whenLoaded('mediafiles'), 
+            //'mediafiles' =>  $this->whenLoaded('mediafiles'), 
+            'mediafiles' =>  MediafileResource::collection($this->whenLoaded('mediafiles')), 
             'mediafile_count' =>  $this->mediafiles->count(),
 
             'access' =>  $hasAccess,
@@ -35,11 +39,12 @@ class Post extends JsonResource
             //'mediafiles' =>  $this->when( $hasAccess, MediafileResource::collection($this->whenLoaded('mediafiles')) ), // ??
             'created_at' => $this->created_at,
             'stats' => [
-                //'isLikedByMe' => $sessionUser->likedposts->contains($this->id),
                 'isLikedByMe' => $this->isLikedByMe,
-                'likeCount' => $this->likes->count(),
-                'commentCount' => $this->comments->count(),
+                'isFavoritedByMe' => $this->isFavoritedByMe,
+                'likeCount' => $this->likes_count,
+                'commentCount' => $this->comments_count,
             ],
+            'schedule_datetime' => $this->schedule_datetime,
         ];
     }
 }

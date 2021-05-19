@@ -1,18 +1,193 @@
 <template>
-  <div class="w-100 mt-5">
-    Register Page
+  <div class="container w-100 d-flex flex-column mt-5">
+    <b-card class="login-card mx-auto" no-body>
+      <template #header>
+        <div class="h2 text-center" v-text="$t('signUpLink')" />
+        <div class="text-center">
+          <div class="d-inline" v-text="$t('accountQuestion')" />
+          <!-- TODO: Link to Login page -->
+          <router-link :to="{ name: 'login' }" v-text="$t('signInHeader')" />
+        </div>
+      </template>
+      <!-- SignUp Form -->
+      <div class="signup-form p-3">
+        <div v-if="verrors && verrors.message">
+          <b-alert variant="danger" v-text="verrors.message" show />
+        </div>
+        <b-form-group :invalid-feedback="verrors.email ? verrors.email : null" :state="verrors.email ? false : null">
+          <b-form-input
+            id="input-email"
+            v-model="form.email"
+            :placeholder="$t('email')"
+            :state="verrors.email ? false : null"
+            @focus="clearVerrors"
+          />
+        </b-form-group>
+        <b-form-group :invalid-feedback="verrors.password ? verrors.password : null" :state="verrors.password ? false : null">
+          <b-form-input
+            id="input-password"
+            type="password"
+            v-model="form.password"
+            :placeholder="$t('password')"
+            :state="verrors.password ? false : null"
+            @focus="clearVerrors"
+          />
+        </b-form-group>
+        <b-form-group :invalid-feedback="verrors.name ? verrors.name : null" :state="verrors.name ? false : null">
+          <b-form-input
+            id="input-name"
+            type="text"
+            v-model="form.name"
+            placeholder="Name"
+            :state="verrors.name ? false : null"
+            @focus="clearVerrors"
+          />
+        </b-form-group>
+        <b-form-group :invalid-feedback="verrors.tos ? verrors.tos : null" :state="verrors.tos ? false : null">
+          <b-form-checkbox
+            id="checkbox-tos"
+            v-model="form.tos"
+            name="checkbox-tos"
+            @focus="clearVerrors"
+          >
+            I agree to our Terms of Service and Privacy Policy, and confirm that I am at least 18 years old.
+          </b-form-checkbox>
+        </b-form-group>
+      </div>
+
+      <div class="p-3">
+        <b-btn class="signup-btn" variant="primary" block @click="signup" :disabled="state === 'loading' || !form.tos">
+          <span v-if="state === 'form'">{{ $t('signUpLink') }}</span>
+          <fa-icon v-else icon="spinner" spin />
+        </b-btn>
+      </div>
+
+      <div class="divider d-flex">
+        <hr class="h-line flex-grow-1" />
+        <div class="mx-3" v-text="$t('or')" />
+        <hr class="h-line flex-grow-1" />
+      </div>
+      <div class="third-party-sign-in p-3 text-center">
+        <img src="/images/facebook-login.png" alt="Facebook signin" @click="socialLogin('facebook')" class="social-icon facebook" />
+        <img src="/images/g-login-btn.png" alt="Google signin" @click="socialLogin('google')" class="social-icon" />
+        <img src="/images/twitter-login.png" alt="Twitter signin" @click="socialLogin('twitter')" class="social-icon" />
+      </div>
+    </b-card>
+
+    <div class="mt-auto mb-3">
+      <LinkBar />
+    </div>
   </div>
 </template>
 
 <script>
 /**
- * Register View
+ * Register Page
  */
+import LinkBar from '../../components/staticPages/LinkBar'
+
+import '../../../static/images/g-login-btn.png'
+import '../../../static/images/facebook-login.png'
+import '../../../static/images/twitter-login.png'
+
 export default {
-  //
+  name: 'login',
+  components: {
+    LinkBar,
+  },
+  data: () => ({
+    state: 'form', // form | loading
+    verrors: {}, // rendered validation Errors
+    form: {
+      email: '',
+      password: '',
+      name: '',
+      tos: null,
+    },
+  }),
+  methods: {
+    clearVerrors() {
+      this.verrors = {}
+    },
+    signup: function() {
+      this.state = 'loading'
+      this.axios.post('/register', this.form).then((response) => {
+        if (response.data.err_result) {
+          this.verrors = response.data.err_result;
+        } else {
+          window.location.href = '/';
+        }
+        this.state = 'form'
+      }).catch( e => {
+        const response = e.response
+        if (response.data && response.data.errors) {
+          this.verrors = response.data.errors // L8 convention is 'errors'
+        }
+        this.state = 'form'
+      });
+    },
+    socialLogin: function(path) {
+      window.location.href = `/${path}`;
+    }
+  },
 }
 </script>
 
 <style lang="scss" scoped>
+.login-card {
+  width: 500px;
+}
+.h-line {
+  color: var('--gray');
+}
+.third-party-sign-in {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 2em !important;
 
+  img {
+    cursor: pointer; 
+    margin: 0 1em;
+  }
+  .social-icon {
+    width: 50px;
+    height: 50px;
+
+    &.facebook {
+      width: 52px;
+      height: 52px;
+    }
+  }
+}
+.signup-btn {
+  height: 42px;
+  border: none;
+  font-size: 14px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+
+  &:disabled {
+    background: rgba(138,150,163,.75);
+    border-color: rgba(138,150,163,.75);
+    opacity: .4;
+    pointer-events: none;
+  }
+}
 </style>
+
+<i18n lang="json5">
+{
+  "en": {
+    "signInHeader": "Sign In",
+    "accountQuestion": "Already have an account?",
+    "signUpLink": "Sign Up",
+    "email": "Email",
+    "password": "Password",
+    "signInButton": "Sign In",
+    "forgotPasswordLink": "Forgot Password?",
+    "or": "or",
+  },
+}
+</i18n>

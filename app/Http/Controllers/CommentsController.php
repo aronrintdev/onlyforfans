@@ -6,50 +6,46 @@ use Exception;
 use Throwable;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
+use App\Notifications\CommentReceived;
 use App\Http\Resources\CommentCollection;
+use App\Http\Resources\Comment as CommentResource;
 use App\Models\Comment;
 use App\Models\Post;
 use App\Models\User;
 
 class CommentsController extends AppBaseController
 {
+    // This method is used for listing comments outside the context of a post. For post's comments, 
+    // use posts.indexComments (which allows a follower to view comments that are not their own)
     // %TODO: refactor with scopes
     public function index(Request $request)
     {
         $request->validate([
-            'filters' => 'array',
-            'filters.post_id' => 'uuid|exists:posts,id', // if admin or post-owner only (per-post comments by fan use posts controller)
-            'filters.user_id' => 'uuid|exists:users,id', // if admin only
-            'filters.parent_id' => 'uuid|exists:comments,id',
+            // filters
+            'post_id' => 'uuid|exists:posts,id', // if admin or post-owner only (per-post comments by fan use posts controller)
+            'user_id' => 'uuid|exists:users,id', // if admin only
+            'parent_id' => 'uuid|exists:comments,id',
         ]);
-
-        $filters = $request->filters ?? [];
+        $filters = $request->only(['post_id', 'user_id', 'parent_id']) ?? [];
 
         // Init query
-        $query = Comment::with('user', 'replies.user');
+        $query = Comment::with('user', 'replies.user'); 
 
         // Check permissions
         if ( !$request->user()->isAdmin() ) {
-
-            // non-admin: only view own comments
-            $query->where('user_id', $request->user()->id); 
+            $query->where('user_id', $request->user()->id); // non-admin: can only view own...
             unset($filters['user_id']);
-
             if ( array_key_exists('post_id', $filters) ) {
                 $post = Post::find($filters['post_id']);
                 $this->authorize('update', $post); // non-admin must own post filtered on
             }
         }
 
-        // Apply any filters
+        // Apply filters
         foreach ($filters as $key => $f) {
-            // %TODO: subgroup under 'filters' (need to update axios.GET calls as well in Vue)
             switch ($key) {
-                case 'user_id':
-                case 'post_id':
-                case 'parent_id':
-                    $query->where($key, $f);
-                    break;
+            default:
+                $query->where($key, $f);
             }
         }
 
@@ -60,9 +56,7 @@ class CommentsController extends AppBaseController
     public function show(Request $request, Comment $comment)
     {
         $this->authorize('view', $comment);
-        return response()->json([
-            'comment' => $comment,
-        ]);
+        return new CommentResource($comment);
     }
 
     public function store(Request $request)
@@ -71,7 +65,7 @@ class CommentsController extends AppBaseController
             'post_id' => 'required|uuid|exists:posts,id',
             'user_id' => 'required|uuid|exists:users,id',
             'parent_id' => 'nullable|uuid|exists:comments,id',
-            'description' => 'required|string|min:3',
+            'description' => 'required|string|min:1',
         ]);
 
         $post = Post::find($request->post_id);
@@ -82,6 +76,7 @@ class CommentsController extends AppBaseController
         $attrs['commentable_id'] = $post->id;
 
         $comment = Comment::create($attrs);
+        $post->user->notify(new CommentReceived($post, $request->user()));
         $comment->prepFor();
 
         return response()->json([
@@ -91,10 +86,10 @@ class CommentsController extends AppBaseController
 
     public function update(Request $request, Comment $comment)
     {
-        $this->authorize('update', $comment);
         $request->validate([
             'description' => 'required|string|min:1',
         ]);
+        $this->authorize('update', $comment);
         $attrs = $request->only([ 'description' ]);
         $comment->fill($attrs);
         $comment->save();
@@ -109,14 +104,6 @@ class CommentsController extends AppBaseController
         $this->authorize('delete', $comment);
         $comment->delete();
         return response()->json([]);
-    }
-
-    /**
-     * Toggle user like on this comment
-     * TODO: Complete this functionality
-     */
-    public function toggleLike(Request $request, Comment $comment) {
-        return $comment;
     }
 
 }

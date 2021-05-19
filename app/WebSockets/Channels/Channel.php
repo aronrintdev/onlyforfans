@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Websockets\Channels;
+namespace App\WebSockets\Channels;
 
-use BeyondCode\LaravelWebSockets\WebSockets\Channels\Channel as ParentClass;
-
-use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Str;
+
+use Ratchet\ConnectionInterface;
+use Illuminate\Support\Facades\Broadcast;
+use BeyondCode\LaravelWebSockets\WebSockets\Channels\Channel as ParentClass;
 
 class Channel extends ParentClass
 {

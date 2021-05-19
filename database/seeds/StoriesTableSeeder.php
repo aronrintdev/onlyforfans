@@ -1,14 +1,18 @@
 <?php
 namespace Database\Seeders;
 
+use Exception;
 use App\Enums\MediafileTypeEnum;
 use App\Libs\FactoryHelpers;
 use App\Models\Story;
 use App\Models\User;
+use App\Enums\StoryTypeEnum;
 
 class StoriesTableSeeder extends Seeder
 {
     use SeederTraits;
+
+    protected $doS3Upload = false;
 
     public function run()
     {
@@ -22,6 +26,8 @@ class StoriesTableSeeder extends Seeder
             $this->output->writeln("  - Users seeder: loaded ".$users->count()." users...");
         }
 
+        $this->doS3Upload = ( $this->appEnv !== 'testing' );
+
         $users->each( function($u) {
 
             static $iter = 1;
@@ -33,9 +39,26 @@ class StoriesTableSeeder extends Seeder
 
             collect(range(1,$count))->each( function() use(&$u) {
 
+                /*
                 $stype = ($this->appEnv==='testing')
-                    ? 'text'
-                    : $this->faker->randomElement(['text','image','image']);
+                    ? StoryTypeEnum::TEXT
+                    : $this->faker->randomElement([StoryTypeEnum::TEXT, StoryTypeEnum::PHOTO, StoryTypeEnum::PHOTO]);
+                    //: $this->faker->randomElement(['text','image','image']);
+                 */
+                if ( $this->appEnv==='testing' ) {
+                    $stype = $this->faker->randomElement([
+                        StoryTypeEnum::TEXT, 
+                        StoryTypeEnum::TEXT, 
+                        StoryTypeEnum::TEXT, 
+                        StoryTypeEnum::PHOTO,
+                    ]);
+                } else {
+                    $stype = $this->faker->randomElement([
+                        StoryTypeEnum::TEXT, 
+                        StoryTypeEnum::PHOTO, 
+                        StoryTypeEnum::PHOTO,
+                    ]);
+                }
 
                 $attrs = [
                     'content'     => $this->faker->text,
@@ -47,7 +70,7 @@ class StoriesTableSeeder extends Seeder
                 case 'text':
                     break;
                 case 'image':
-                    $mf = FactoryHelpers::createImage(MediafileTypeEnum::STORY, $story->id, true);
+                    $mf = FactoryHelpers::createImage(MediafileTypeEnum::STORY, $story->id, $this->doS3Upload);
                     break;
                 }
             });

@@ -39,6 +39,11 @@ class Comment extends Model implements Likeable, Commentable, Ownable
         return new Collection([ $this->user ]);
     }
 
+    public function getPrimaryOwner(): User
+    {
+        return $this->user;
+    }
+
     /* ------------------------------ Relations ----------------------------- */
     public function user()
     {
@@ -111,16 +116,14 @@ class Comment extends Model implements Likeable, Commentable, Ownable
                     'updated_at',
                 ]);
                 $this->user->setVisible([ 'id', 'username', 'name', 'avatar', ]);
-                if (
-                    $this->user->avatar instanceof Mediafile
-                ) {
+                if ( $this->user->avatar instanceof Mediafile) {
                     $this->user->avatar->setVisible([ 'slug', 'filepath', 'name', ]);
                 }
                 if ( $replyLevel > 0 || $replyLevel === 'all' ) {
                     // $this->replies = Comment::with(['user'])->withCount('likes')->withCount('replies')->where('commentable_id', $this->id)->get();
                     $this->replies = Comment::with(['user'])->withCount('likes')->withCount('replies')->where('parent_id', $this->id)->get();
                     foreach($this->replies as &$reply) {
-                        $reply->prepFor($view, ($replyLevel === 'all') ? $replyLevel : $replyLevel - 1);
+                        $reply->prepFor($view, ($replyLevel === 'all') ? $replyLevel : $replyLevel - 1); // %TODO : only allow 1 level of replies, simplify & remove recursion
                     }
                 }
             break;

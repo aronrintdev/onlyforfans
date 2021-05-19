@@ -61,18 +61,22 @@ class AppServiceProvider extends ServiceProvider
         Relation::morphMap([
             'comments'               => 'App\Models\Comment',
             'conversations'          => 'App\Models\Conversation',
+            //'favorites'              => 'App\Models\Favorite',
             'invites'                => 'App\Models\Invite',
             'links'                  => 'App\Models\Link',
             'locations'              => 'App\Models\Location',
             'mediafiles'             => 'App\Models\Mediafile',
-            'notifications'          => 'App\Models\Notification',
             'permissions'            => 'App\Models\Permission',
             'posts'                  => 'App\Models\Post',
             'roles'                  => 'App\Models\Role',
             'segpay_card'            => 'App\Models\Financial\SegpayCard',
             'sessions'               => 'App\Models\Session',
             'settings'               => 'App\Models\Setting',
+            'financial_accounts'     => 'App\Models\Financial\Account',
+            'financial_flags'        => 'App\Models\Financial\Flag',
+            'financial_summaries'    => 'App\Models\Financial\TransactionSummary',
             'financial_system_owner' => 'App\Models\Financial\SystemOwner',
+            'financial_transactions' => 'App\Models\Financial\Transaction',
             'stories'                => 'App\Models\Story',
             'subscriptions'          => 'App\Models\Subscription',
             'timelines'              => 'App\Models\Timeline',
@@ -81,6 +85,7 @@ class AppServiceProvider extends ServiceProvider
             'vaults'                 => 'App\Models\Vault',
             'vaultfolders'           => 'App\Models\Vaultfolder',
             'webhooks'               => 'App\Models\Webhook',
+            'messages'               => 'App\Models\Message',
         ]);
 
         Carbon::serializeUsing(function ($carbon) {

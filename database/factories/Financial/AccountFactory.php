@@ -7,7 +7,9 @@ use App\Models\User;
 use App\Models\Financial\Account;
 use Illuminate\Support\Facades\Config;
 use App\Enums\Financial\AccountTypeEnum;
+use App\Models\Financial\SegpayCard;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Collection;
 
 class AccountFactory extends Factory
 {
@@ -61,6 +63,23 @@ class AccountFactory extends Factory
         });
     }
 
+    public function withResource($resource)
+    {
+        return $this->state(function (array $attributes) use ($resource) {
+            return ['resource_id' => $resource];
+        });
+    }
+
+    public function withCard($card = null)
+    {
+        return $this->state(function (array $attributes) use ($card) {
+            return [
+                'resource_type' => $card ? $card->getMorphString() : app(SegpayCard::class)->getMorphString(),
+                'resource_id' => $card ? $card : SegpayCard::factory(),
+            ];
+        });
+    }
+
     /**
      * Create account name string
      *
@@ -100,7 +119,7 @@ class AccountFactory extends Factory
      *
      * @return  \Illuminate\Database\Eloquent\Factories\Factory
      */
-    public function asTypeIn()
+    public function asIn()
     {
         return $this->state(function (array $attributes) {
             return [ 'type' => AccountTypeEnum::IN, ];
@@ -112,7 +131,7 @@ class AccountFactory extends Factory
      *
      * @return  \Illuminate\Database\Eloquent\Factories\Factory
      */
-    public function asTypeInternal()
+    public function asInternal()
     {
         return $this->state(function (array $attributes) {
             return [ 'type' => AccountTypeEnum::INTERNAL, ];
@@ -124,7 +143,7 @@ class AccountFactory extends Factory
      *
      * @return  \Illuminate\Database\Eloquent\Factories\Factory
      */
-    public function asTypeOut()
+    public function asOut()
     {
         return $this->state(function (array $attributes) {
             return [ 'type' => AccountTypeEnum::OUT, ];
@@ -208,4 +227,21 @@ class AccountFactory extends Factory
             return [ 'can_make_transactions' => false, ];
         });
     }
+
+    /**
+     * Sets the owner to be the same as passed account
+     *
+     * @param Account $account
+     * @return  \Illuminate\Database\Eloquent\Factories\Factory
+     */
+    public function sameOwnerAs(Account $account)
+    {
+        return $this->state(function (array $attributes) use ($account) {
+            return [
+                'owner_type' => $account->getOwner()->first()->getMorphString(),
+                'owner_id' => $account->getOwner()->first()->getKey(),
+            ];
+        });
+    }
+
 }

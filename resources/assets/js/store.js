@@ -1,33 +1,32 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import axios from 'axios'
+import propSelect from '@helpers/propSelect'
 
 Vue.use(Vuex)
 
 // Routes from window, want to eventually deprecate and move to dedicated compiled routes
 const route = window.route
 
-// Helps select items from response result set
-// @param {Object} payload - response payload
-// @param {String} propertyName - name of property
-const propSelect = (payload, propertyName, type = 'array') => {
-  return payload.hasOwnProperty(propertyName)
-    ? payload[propertyName]
-    : payload.hasOwnProperty('data')
-      ? payload.data
-      : type === 'array'
-        ? [] : {}
-}
-
 // Modules
+import earningsModule from './store/earnings'
 import searchModule from './store/search'
+import paymentModule from './store/payments'
+import postsModule from './store/posts'
+import subscriptionsModule from './store/subscriptions'
 
 export default new Vuex.Store({
   modules: {
+    earnings: earningsModule,
     search: searchModule,
+    payments: paymentModule,
+    posts: postsModule,
+    subscriptions: subscriptionsModule,
   },
 
   state: {
+    mobile: false,
+    screenSize: 'xs',
     vault: {},
     vaultfolder: {},
     breadcrumb: [],
@@ -40,18 +39,28 @@ export default new Vuex.Store({
     stories: [], // Current open stories
     earnings: null,
     debits: null,
-    fanledgers: {},
-    ledgercredits: null,
-    ledgerdebits: null,
+    fanledgers: {},       // TODO: Deprecate
+    ledgercredits: null,  // TODO: Deprecate
+    ledgerdebits: null,   // TODO: Deprecate
+    favorites: null,
     timeline: null,
-    session_user: null, 
+    session_user: null,
     user_settings: null,
     login_sessions: [],
     uiFlags: [],
     unshifted_timeline_post: null,
+    unread_messages_count: 0,
   },
 
   mutations: {
+    UPDATE_MOBILE(state, payload) {
+      state.mobile = payload
+    },
+
+    UPDATE_SCREEN_SIZE(state, payload) {
+      state.screenSize = payload
+    },
+
     UPDATE_VAULT(state, payload) {
       state.vault = propSelect(payload, 'vault')
     },
@@ -98,6 +107,9 @@ export default new Vuex.Store({
     UPDATE_DEBITS(state, payload) {
       state.debits = propSelect(payload, 'debits')
     },
+    UPDATE_FAVORITES(state, payload) {
+      state.favorites = payload.hasOwnProperty('data') ? payload.data : {}
+    },
     UPDATE_TIMELINE(state, payload) {
       state.timeline = propSelect(payload, 'timeline')
     },
@@ -116,11 +128,14 @@ export default new Vuex.Store({
     UPDATE_UNSHIFTED_TIMELINE_POST(state, payload) {
       state.unshifted_timeline_post = propSelect(payload, 'post')
     },
+    UPDATE_UNREAD_MESSAGES_COUNT(state, payload) {
+      state.unread_messages_count = propSelect(payload, 'unread_messages_count')
+    },
   },
 
   actions: {
     getVault({ commit }, id) {
-      axios.get(route('valuts.show', { id }))
+      axios.get(route('vaults.show', { id }))
         .then((response) => {
           commit('UPDATE_VAULT', response.data)
         })
@@ -150,13 +165,40 @@ export default new Vuex.Store({
       })
     },
 
-    getFeeddata( { commit }, { timelineId, page, limit, isHomefeed } ) {
-      const url = isHomefeed 
-        ? `/timelines/home/feed?page=${page}&take=${limit}`
-        : `/timelines/${timelineId}/feed?page=${page}&take=${limit}`;
-      axios.get(url).then( (response) => {
+    getFeeddata( { commit }, { 
+      feedType='default', 
+      timelineId, 
+      isHomefeed,
+      page=1, 
+      limit, 
+      sortBy='latest', 
+      hideLocked=false,
+      hidePromotions=false,
+    }) {
+      const params = {
+        page,
+        take: limit,
+        sortBy,
+        hideLocked,
+        hidePromotions,
+      }
+      let url
+      switch (feedType) {
+        case 'photos':
+          url = route('timelines.photos', timelineId)
+          break
+        case 'videos':
+          url = route('timelines.videos', timelineId)
+          break
+        case 'schedule':
+          url = `/timelines/home/scheduled-feed`
+          break
+        default:
+          url = isHomefeed ? `/timelines/home/feed` : `/timelines/${timelineId}/feed`
+      }
+      axios.get(url, { params }).then( (response) => {
         commit('UPDATE_FEEDDATA', response);
-      });
+      })
     },
 
     getPreviewposts( { commit }, { timelineId, limit } ) {
@@ -199,16 +241,27 @@ export default new Vuex.Store({
       })
     },
 
-    getStories({ commit }, { filters }) {
+    getFavorites({ commit }, params ) {
+      const url = route(`favorites.index`);
+      axios.get(url, { params })
+        .then((response) => {
+          commit('UPDATE_FAVORITES', response)
+        })
+    },
+
+    getStories({ commit }, payload ) {
       //const username = this.state.session_user.username // Not used - This param will eventually be DEPRECATED
       // %FIXME
       const params = {}
-      if (Object.keys(filters).includes('timeline_id')) {
-        params.user_id = filters.timeline_id
-      } else if (Object.keys(filters).includes('following')) {
-        params.following = true
+      if (Object.keys(payload).includes('timeline_id')) {
+        params.user_id = payload.timeline_id
+      } else if (Object.keys(payload).includes('following')) {
+        params.following = 1
       } else {
-        params.following = true // default
+        params.following = 1 // default
+      }
+      if (Object.keys(payload).includes('stypes')) {
+        params.stypes = payload.stypes
       }
       axios.get(route('stories.index'), { params })
         .then((response) => {
@@ -259,12 +312,14 @@ export default new Vuex.Store({
     ledgerdebits:            state => state.ledgerdebits,
     earnings:                state => state.earnings,
     debits:                  state => state.debits,
+    favorites:               state => state.favorites,
     timeline:                state => state.timeline,
     unshifted_timeline_post: state => state.unshifted_timeline_post,
     session_user:            state => state.session_user,
     user_settings:           state => state.user_settings,
     login_sessions:          state => state.login_sessions,
     uiFlags:                 state => state.uiFlags,
+    unread_messages_count:   state => state.unread_messages_count,
     //children: state => state.vault.children, // Flat list
     //mediafiles: state => state.vault.mediafiles, // Flat list
   },

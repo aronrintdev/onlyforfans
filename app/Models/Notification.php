@@ -1,18 +1,21 @@
 <?php
-
 namespace App\Models;
 
-// use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Notifications\DatabaseNotification;
 
-use Illuminate\Database\Eloquent\SoftDeletes;
+//use App\Interfaces\ShortUuid;
+//use App\Models\Traits\UsesUuid;
+use Illuminate\Support\Collection;
+//use App\Models\Traits\UsesShortUuid;
 
-/**
- * Notification Model.
- *
- * TODO: This needs to be remade
- */
-class Notification extends Model
+class Notification extends DatabaseNotification
 {
-    use SoftDeletes;
-    protected $guarded = [ 'id', 'created_at', 'updated_at' ];
+    //--------------------------------------------
+    // Relations
+    //--------------------------------------------
+
+    public function users()
+    {
+        return $this->belongsTo(User::class, 'notifiable_id');
+    }
 }

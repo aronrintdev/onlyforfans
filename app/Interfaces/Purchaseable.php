@@ -1,12 +1,19 @@
 <?php
 namespace App\Interfaces;
 
+use Money\Money;
 use App\Models\User;
-use App\Enums\PaymentTypeEnum;
 use App\Models\Fanledger;
 
-interface Purchaseable {
-
+/**
+ * A Purchaseable Item
+ *
+ * @param Money $price
+ *
+ * @package App\Interfaces
+ */
+interface Purchaseable extends PaymentSendable, Shareable, CanFormatMoney
+{
     /**
      * @param  string  $type - PaymentTypeEnum
      */
@@ -16,5 +23,13 @@ interface Purchaseable {
         int $amountInCents,
         array $customAttributes = []
     ) : ?Fanledger;
+
+    /**
+     * Verifies if a price point if valid for purchasing this model
+     *
+     * @param int|Money $amount
+     * @return bool
+     */
+    public function verifyPrice($amount): bool;
 
 }

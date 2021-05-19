@@ -1,7 +1,7 @@
 <template>
   <div>
     <template v-if="$options.filters.isSubscriberOnly(post)">
-      <article class="locked-content d-flex justify-content-center align-items-center">
+      <article :style="backgroundImg" class="locked-content d-flex justify-content-center align-items-center">
         <div class="d-flex flex-column">
           <b-icon icon="lock-fill" font-scale="5" variant="light" />
           <b-button @click="renderSubscribe" class="mt-3" variant="primary">Subscribe</b-button>
@@ -9,9 +9,12 @@
       </article>
     </template>
     <template v-else>
-      <article class="locked-content d-flex position-relative justify-content-center align-items-center">
+      <article :style="backgroundImg" class="locked-content d-flex position-relative justify-content-center align-items-center">
         <div class="d-flex flex-column">
           <b-icon icon="lock-fill" font-scale="5" variant="light" class="mx-auto" />
+          <!--
+          <b-button @click="renderPurchasePost" class="mt-3" variant="primary">Unlock Post for {{ post.price_display || (post.price | niceCurrency) }}</b-button>
+          -->
           <b-button @click="renderPurchasePost" class="mt-3" variant="primary">Unlock Post for {{ post.price | niceCurrency }}</b-button>
           <div v-if="post.mediafile_count" class="mediafile-count text-white position-absolute"><b-icon icon="images" font-scale="1" variant="light" class="d-inline my-auto" /> {{ post.mediafile_count }}</div>
         </div>
@@ -31,16 +34,41 @@ export default {
   props: {
     post: null,
     session_user: null,
+    primary_mediafile: null,
   },
 
   computed: {
     isLoading() {
       return !this.post || !this.session_user
     },
+    /*
     timelineRoute() {
       return {
         name: 'timeline.show',
         params: { slug: this.post.timeline_slug }
+      }
+    },
+     */
+
+    /*
+    hasMediafiles() {
+      return this.post.mediafiles?.length > 0
+    },
+
+    primaryMediafile() {
+      return this.hasMediafiles ? this.post.mediafiles[0] : null
+    },
+     */
+
+    backgroundImg() {
+      if (this.primary_mediafile && this.primary_mediafile.has_blur) {
+        return {
+          '--background-image': `url(${this.primary_mediafile.blurFilepath})`,
+        }
+      } else {
+        return {
+          '--background-image': `url(/images/locked_post.png)`,
+        }
       }
     },
   },
@@ -48,11 +76,8 @@ export default {
   data: () => ({
   }),
 
-  mounted() { 
-  },
-
-  created() {
-  },
+  mounted() { },
+  created() { },
 
   methods: {
     renderPurchasePost() {
@@ -88,8 +113,9 @@ ul {
   right: 1rem;
 }
 .locked-content {
-  background: url('/images/locked_post.png') center center no-repeat !important;
-  background-size: auto;
+  background-image: var(--background-image);
+  background-position: center;
+  background-repeat: no-repeat;
   background-size: cover !important;
   min-height: 20rem;
 }

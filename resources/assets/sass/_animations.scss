@@ -1,0 +1,18 @@
+// Animation classes
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity .3s ease;
+}
+
+.quick-fade-enter-active,
+.quick-fade-leave-active {
+  transition: opacity .15s ease;
+}
+
+.fade-enter,
+.fade-leave-to,
+.quick-fade-enter,
+.quick-fade-leave-to {
+  opacity: 0;
+}

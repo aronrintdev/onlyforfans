@@ -29,7 +29,7 @@ return [
     |
     */
 
-    'default' => env('DB_CONNECTION', 'mysql'),
+    'default' => env('DB_CONNECTION', 'primary'),
 
     /*
     |--------------------------------------------------------------------------
@@ -55,8 +55,8 @@ return [
             'prefix' => '',
         ],
 
-        'mysql' => [
-            'driver' => 'mysql',
+        'primary' => [
+            'driver' => env('DB_DRIVER', 'mysql'),
             'host' => env('DB_HOST', 'localhost'),
             'port' => env('DB_PORT', '3306'),
             'database' => env('DB_DATABASE', 'forge'),
@@ -65,6 +65,20 @@ return [
             'charset' => 'utf8',
             'collation' => 'utf8_unicode_ci',
             'prefix' => '',
+            'strict' => false,
+            'engine' => null,
+        ],
+
+        'financial' => [
+            'driver' => env('DB_FINANCIAL_DRIVER', 'mysql'),
+            'host' => env('DB_FINANCIAL_HOST', 'localhost'),
+            'port' => env('DB_FINANCIAL_PORT', '3306'),
+            'database' => env('DB_FINANCIAL_DATABASE', 'forge'),
+            'username' => env('DB_FINANCIAL_USERNAME', 'forge'),
+            'password' => env('DB_FINANCIAL_PASSWORD', ''),
+            'charset' => 'utf8',
+            'collation' => 'utf8_unicode_ci',
+            'prefix' => env('DB_FINANCIAL_PREFIX', ''),
             'strict' => false,
             'engine' => null,
         ],

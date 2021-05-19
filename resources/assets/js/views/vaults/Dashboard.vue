@@ -1,7 +1,7 @@
 <template>
-  <div id="view-vault_dashboard" class="row">
+  <div v-if="!isLoading" id="view-vault_dashboard" class="row">
     <div class="col-sm-12">
-      <Dashboard
+      <VaultDashboardComponent
         :vault_pkid="myVault.id"
         :vaultfolder_pkid="vaultRootFolder.id"
       />
@@ -10,32 +10,39 @@
 </template>
 
 <script>
-/**
- * Vaults Dashboard View
- */
-import Dashboard from '@components/vault/Dashboard'
+// Vaults Dashboard View
+import VaultDashboardComponent from '@components/vault/Dashboard'
+
 export default {
+
   components: {
-    Dashboard,
+    VaultDashboardComponent,
   },
+
+  computed: {
+    isLoading() {
+      return !this.myVault || !this.vaultRootFolder
+    },
+  },
+
   data: () => ({
-    loading: true,
     myVault: null,
     vaultRootFolder: null,
   }),
+
   methods: {
     load() {
-      this.loading = true
       this.axios.get(this.$apiRoute('vault.dashboard'))
         .then(response => {
           this.myVault = response.data.myVault
           this.vaultRootFolder = response.data.vaultRootFolder
-          this.loading = false
         })
     },
   },
+
   created() {
     this.load()
-  }
+  },
+
 }
 </script>

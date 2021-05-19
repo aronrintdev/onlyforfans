@@ -1,0 +1,185 @@
+//messages-page
+.messages-page {
+	max-width: 1200px;
+	margin: 0 auto 12px;
+
+	.card-body {
+		padding: 0;
+		min-height: calc(100vh - 160px);
+		
+		.top-bar {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			padding: 15px 4px 16px;
+			height: 56px;
+			border-bottom: 1px solid rgba(138,150,163,.25);
+			& > div {
+				display: flex;
+				align-items: center;
+			}
+			.btn {
+				height: 28px;
+				width: 28px;
+				padding: 4px;
+				margin: 0 8px;
+				min-height: 0;
+				position: relative;
+				
+				i {
+					font-size: 18px;
+					font-weight: 600;
+				}
+			}
+			.top-bar-title {
+				font-size: 19px;
+					font-weight: 600;
+				line-height: 1em;
+			}
+		}
+		.gallery-content {
+			height: calc(100vh - 210px);
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
+		.gallery-content .empty {
+			font-size: 18px;
+			font-weight: 500;
+			color: rgba(138,150,163,.7);
+			margin: auto;
+		}
+		.schedule-message-list {
+			display: flex;
+			flex-flow: row wrap;
+			width: 100%;
+			max-width: 800px;
+			list-style: none;
+			padding: 0px 18px 18px;
+
+			& > li {
+				width: 100%;
+				margin: 20px 0 5px;
+			}
+
+			.user-content {
+				display: flex;
+				align-items: center;
+				margin-bottom: 14px;
+
+				.user-details {
+					flex: 1;
+
+					.user-details-row {
+						display: flex;
+						align-items: center;
+						justify-content: space-between;
+
+						.username {
+							font-size: 16px;
+							line-height: 20px;
+							font-weight: 500;
+						}
+
+						.last-message-date {
+							margin-right: 8px;
+							font-size: 14px;
+ 	  	 				color: #8a96a3;
+						}
+						.userId {
+							font-size: 14px;
+ 	  	 				color: #8a96a3;
+						}
+						.price {
+							color: #8a96a3;
+							display: flex;
+							align-items: center;						
+							span {
+								margin-right: 5px;
+								font-size: 14px;
+								line-height: 16px;
+							}
+							svg {
+								width: 16px;
+								height: 16px;
+								fill: currentColor;
+							}
+						}
+					}
+				}
+			}
+
+			.user-text-row {
+				border-bottom: 1px solid rgba(138,150,163,.2);
+				padding-bottom: 5px;
+
+				& > div {
+					display: flex;
+					align-items: center;
+					justify-content: space-between;
+					margin-bottom: 5px;
+
+					svg {
+						width: 18px;
+						height: 18px;
+						fill: rgba(138,150,163,.7);
+					}
+				}
+
+				& > .position-relative {
+					margin: 12px 0;
+					overflow: hidden;
+					border-radius: 6px;
+				}
+
+				audio {
+					width: 100%;
+			    margin-bottom: 5px;
+				}
+			}
+	
+			.user-logo {
+				width: 52px;
+				height: 52px;
+				margin-right: 16px;
+				position: relative;
+		
+				img {
+					width: 100%;
+					height: 100%;
+					border-radius: 50%;
+					border: 2px solid #fff;
+				}
+				&.text-logo {
+					display: flex;
+					align-items: center;
+					justify-content: center;
+					color: #00aff0;
+					font-weight: 700;
+					font-size: 16px;
+					background: rgba(138,150,163,.12);
+					letter-spacing: 0;
+					text-transform: uppercase;
+				}
+				.status-holder {
+					position: absolute;
+					bottom: 2px;
+					right: 2px;
+					width: 14px;
+					height: 14px;
+					border: 2px solid #fff;
+					z-index: 2;
+					display: block;
+					background: #35d063;
+					border-radius: 50%;
+					display: none;
+		
+					&.online {
+						display: block;
+					}
+				}
+			}
+
+		}
+	}
+}

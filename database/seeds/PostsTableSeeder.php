@@ -2,8 +2,10 @@
 namespace Database\Seeders;
 
 use DB;
+use Exception;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Mail;
 use Carbon\Carbon;
 
 use App\Models\User;
@@ -17,10 +19,23 @@ class PostsTableSeeder extends Seeder
     use SeederTraits;
 
     protected static $MIN_POSTS = 4;
+    protected static $IMAGE_SIZES = [
+        [ 'width' => 320, 'height' => 180 ], // 16:9
+        [ 'width' => 320, 'height' => 240 ], // 4:3
+        [ 'width' => 300, 'height' => 200], // 3:2
+        [ 'width' => 200, 'height' => 300], // 2:3
+        [ 'width' => 300, 'height' => 300], // 1:1
+    ];
+
+    protected $doS3Upload = false;
 
     public function run()
     {
         $this->initSeederTraits('PostsTableSeeder'); // $this->{output, faker, appEnv}
+
+        Mail::fake();
+
+        $this->doS3Upload = ( $this->appEnv !== 'testing' );
 
         // +++ Create ... +++
 
@@ -63,23 +78,36 @@ class PostsTableSeeder extends Seeder
                 );
                  */
 
+                $ts = $this->faker->dateTimeBetween($startDate = '-5 years', $endDate = 'now');
+
                 $attrs = [
                     'postable_type' => 'timelines',
                     'postable_id'   => $u->timeline->id,
                     'description'   => $this->faker->text.' ('.$ptype.')',
                     'user_id'       => $u->id,
                     'type'          => $ptype,
+                    'created_at'    => $ts,
+                    'updated_at'    => $ts,
                 ];
 
                 if ( $ptype === PostTypeEnum::PRICED ) {
-                    $attrs['price'] = $this->faker->randomFloat(2, 1, 300);
+                    $attrs['price'] = $this->faker->randomFloat(0, 100, 1000);
                 }
 
                 $post = Post::factory()->create($attrs);
                 //$u->timeline->posts()->save($post);
 
                 if ( $this->faker->boolean($this->getMax('prob_post_has_image')) ) { // % post has image
-                    $mf = FactoryHelpers::createImage(MediafileTypeEnum::POST, $post->id, true);
+                    $numberOfImages = $this->faker->randomElement([1,1,1,2,3]); // multiple images per post
+                    for ( $i = 0 ; $i < $numberOfImages ; $i++ ) {
+                        $imgDim = $this->faker->randomElement(self::$IMAGE_SIZES);
+                        $mf = FactoryHelpers::createImage(
+                            MediafileTypeEnum::POST,  // mftype
+                            $post->id,  // resourceID
+                            $this->doS3Upload, // true, // doS3Upload
+                            [ 'width' => $imgDim['width'], 'height' => $imgDim['height'] ] // attrs
+                        );
+                    }
                 }
 
                 // Set a realistic post date
@@ -138,7 +166,7 @@ class PostsTableSeeder extends Seeder
     {
         static $max = [
             'testing' => [
-                'prob_post_has_image' => 0,
+                'prob_post_has_image' => 30, // 0,
                 'users' => 4,
                 'posts' => 7,
             ],

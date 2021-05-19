@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Timeline;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class TimelineFactory extends Factory
@@ -14,6 +15,7 @@ class TimelineFactory extends Factory
         $isFollowForFree = $this->faker->boolean(70);
 
         return [
+            'user_id'  => User::factory(),
             'name'     => $this->faker->name,
             'about'    => $this->faker->text,
             'verified' => 1,

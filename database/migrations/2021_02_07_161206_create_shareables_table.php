@@ -6,14 +6,11 @@ use Illuminate\Support\Facades\Schema;
 
 class CreateShareablesTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
     public function up()
     {
         Schema::create('shareables', function (Blueprint $table) {
+            //$table->uuid('id')->primary();
+            $table->increments('id'); // just use integer as this is a join table and sync, etc may not work with UUID %PSG
             $table->uuid('user_id')->nullable()->comment('User that is sharing the resource');
             $table->uuid('sharee_id')->nullable()->comment('User with whom resource is being shared with');
             $table->nullableUuidMorphs('shareable');
@@ -28,11 +25,6 @@ class CreateShareablesTable extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
     public function down()
     {
         Schema::dropIfExists('shareables');

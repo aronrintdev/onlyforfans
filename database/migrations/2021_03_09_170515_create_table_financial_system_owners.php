@@ -13,7 +13,7 @@ class CreateTableFinancialSystemOwners extends Migration
      */
     public function up()
     {
-        Schema::create('financial_system_owners', function (Blueprint $table) {
+        Schema::connection('financial')->create('system_owners', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('name');
             $table->string('system');
@@ -28,6 +28,6 @@ class CreateTableFinancialSystemOwners extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('financial_system_owners');
+        Schema::connection('financial')->dropIfExists('system_owners');
     }
 }

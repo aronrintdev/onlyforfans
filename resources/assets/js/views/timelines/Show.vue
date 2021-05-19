@@ -1,7 +1,7 @@
 <template>
   <div v-if="!isLoading">
 
-    <div class="container" id="view-show_timeline">
+    <div class="container-xl" id="view-show_timeline">
 
       <section class="row">
         <article class="col-sm-12">
@@ -10,33 +10,18 @@
       </section>
 
       <section class="row">
-        <aside class="col-md-5 col-lg-4">
+        <aside v-if="!isGridLayout" class="col-md-5 col-lg-4">
           <FollowCtrl :session_user="session_user" :timeline="timeline" />
           <PreviewUpgrade :session_user="session_user" :timeline="timeline" />
         </aside>
-        <main class="col-md-7 col-lg-8">
+        <main :class="mainClass">
           <PostFeed :session_user="session_user" :timeline="timeline" :is_homefeed="false" />
         </main>
       </section>
 
     </div>
 
-    <!-- %FIXME: DRY vs Home -->
-    <b-modal id="modal-tip" size="sm" title="Send a Tip" hide-footer body-class="p-0">
-      <SendTip :session_user="session_user" :timeline="timeline" />
-    </b-modal>
-
-    <b-modal id="modal-purchase_post" size="sm" title="Purchase Post" hide-footer body-class="p-0">
-      <PurchasePost :session_user="session_user" :post="selectedPost" />
-    </b-modal>
-
-    <b-modal id="modal-follow" title="Follow" hide-footer body-class="p-0">
-      <FollowTimeline :session_user="session_user" :timeline="timeline" />
-    </b-modal>
-
-    <b-modal id="modal-post" title="Post" hide-footer body-class="p-0">
-      <PostDisplay :session_user="session_user" :post="selectedPost" />
-    </b-modal>
+    <Modals />
 
   </div>
 </template>
@@ -49,10 +34,7 @@ import StoryBar from '@components/timelines/StoryBar.vue'
 import Banner from '@components/timelines/Banner.vue'
 import FollowCtrl from '@components/common/FollowCtrl.vue'
 import PreviewUpgrade from '@components/common/PreviewUpgrade.vue'
-import FollowTimeline from '@components/modals/FollowTimeline.vue'
-import PurchasePost from '@components/modals/PurchasePost.vue'
-import SendTip from '@components/modals/SendTip.vue'
-import PostDisplay from '@components/posts/Display'
+import Modals from '@components/Modals'
 
 export default {
   components: {
@@ -61,10 +43,7 @@ export default {
     Banner,
     FollowCtrl,
     PreviewUpgrade,
-    FollowTimeline,
-    PurchasePost,
-    SendTip,
-    PostDisplay,
+    Modals,
   },
 
   props: {
@@ -74,6 +53,14 @@ export default {
   computed: {
     ...Vuex.mapGetters(['session_user']),
 
+    mainClass() {
+      return {
+        'col-md-7': !this.isGridLayout,
+        'col-lg-8': !this.isGridLayout,
+        'col-md-12': this.isGridLayout, // full-width
+      }
+    },
+
     isLoading() {
       return !this.slug || !this.timeline
     }
@@ -81,52 +68,28 @@ export default {
 
   data: () => ({
     timeline: null,
-    selectedPost: null,
+    isGridLayout: false, // %FIXME: can this be set in created() so we have 1 source of truth ? (see PostFeed)
   }),
 
   created() {
+    this.load()
 
-    eventBus.$on('open-modal', ({ key, data }) => {
-      console.log('views/timelines/Show.on(open-modal)', {
-        key, data,
-      });
-      switch(key) {
-        case 'render-purchase-post':
-          this.selectedPost = data.post
-          this.$bvModal.show('modal-purchase_post')
-          break
-        case 'render-follow':
-        case 'render-subscribe':
-          this.selectedTimeline = data.timeline
-          this.$bvModal.show('modal-follow')
-          break
-        case 'render-tip':
-          //this.selectedTimelineId = data.timeline_id // %TODO
-          this.$bvModal.show('modal-tip')
-          break
-        case 'show-post':
-          this.selectedPost = data.post
-          this.$bvModal.show('modal-post')
-          break
+    eventBus.$on('update-timelines', (timelineId) => {
+      if (timelineId === this.timeline.id) {
+        this.load()
       }
     })
 
-    eventBus.$on('update-timeline', () => {
-      console.log('views.timelines.Show - eventBus.$on(update-timeline)')
-      this.load() 
+    eventBus.$on('set-feed-layout',  isGridLayout  => {
+      this.isGridLayout = isGridLayout
     })
   },
 
-  mounted() {
-    if (this.slug) {
-      this.load()
-    }
-    //if (!this.session_user) { }
-  },
+  mounted() { },
 
   methods: {
     async load() {
-      try { 
+      try {
         const response = await this.axios.get(this.$apiRoute('timelines.show', { timeline: this.slug }))
         this.timeline = response.data.data
       } catch (error) {

@@ -23,7 +23,7 @@ class CommentPolicy extends BasePolicy
 
     protected function view(User $user, Comment $comment)
     {
-        return $user->can('view', $comment->post); // %FIXME: this should be tested, was throwing 500
+        return $user->can('indexComments', $comment->post); // %FIXME: this should be tested, was throwing 500
     }
 
     protected function like(User $user, Comment $comment)

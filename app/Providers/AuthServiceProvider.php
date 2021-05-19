@@ -4,6 +4,8 @@ namespace App\Providers;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use App\Interfaces\Likeable;
+use App\Models\Financial\Account;
+use App\Models\Subscription;
 use App\Models\Timeline;
 use App\Models\Vaultfolder;
 
@@ -15,12 +17,14 @@ class AuthServiceProvider extends ServiceProvider
      * @var array
      */
     protected $policies = [
-        Comment::class     => \App\Policies\CommentPolicy::class,
-        Likeable::class    => \App\Policies\LikeablePolicy::class,
-        Post::class        => \App\Policies\PostPolicy::class,
-        Timeline::class    => \App\Policies\TimelinePolicy::class,
-        Vault::class       => \App\Policies\VaultPolicy::class,
-        Vaultfolder::class => \App\Policies\VaultfolderPolicy::class,
+        Account::class      => \App\Policies\Financial\AccountPolicy::class,
+        Comment::class      => \App\Policies\CommentPolicy::class,
+        Likeable::class     => \App\Policies\LikeablePolicy::class,
+        Post::class         => \App\Policies\PostPolicy::class,
+        Subscription::class => \App\Policies\SubscriptionPolicy::class,
+        Timeline::class     => \App\Policies\TimelinePolicy::class,
+        Vault::class        => \App\Policies\VaultPolicy::class,
+        Vaultfolder::class  => \App\Policies\VaultfolderPolicy::class,
     ];
 
     /**
