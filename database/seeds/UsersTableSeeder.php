@@ -123,7 +123,7 @@ class UsersTableSeeder extends Seeder
             $timeline->avatar_id = $avatar->id ?? null;
             $timeline->cover_id = $cover->id ?? null;
             $timeline->is_follow_for_free = $isFollowForFree;
-            $timeline->price = $isFollowForFree ? 0 : $this->faker->randomFloat(2, 1, 300);
+            $timeline->price = $isFollowForFree ? 0 : $this->faker->numberBetween(300, 4000);
             $timeline->save();
             $isFollowForFree = !$isFollowForFree; // toggle so we get at least one of each
 
