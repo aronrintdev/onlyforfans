@@ -19,8 +19,23 @@ export default {
   }),
 
   methods: {
+    ...Vuex.mapActions([
+      'payments/updateSavedPaymentMethods',
+    ]),
+
     init() {
       this.purchases()
+      this.events()
+    },
+
+    async events() {
+      await this.waitFor('session_user')
+      const channel = `user.${this.session_user.id}.events`
+      this.$echo.private(channel)
+        .listen('PaymentMethodAdded', e => {
+          this.$log.debug('Event', { channel, event: 'PaymentMethodAdded', e })
+          this['payments/updateSavedPaymentMethods']()
+        })
     },
 
     async purchases() {

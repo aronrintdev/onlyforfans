@@ -9,18 +9,18 @@ Vue.use(Vuex)
 const route = window.route
 
 // Modules
-import earningsModule from './store/earnings'
 import searchModule from './store/search'
 import paymentModule from './store/payments'
 import postsModule from './store/posts'
+import statementsModule from './store/statements'
 import subscriptionsModule from './store/subscriptions'
 
 export default new Vuex.Store({
   modules: {
-    earnings: earningsModule,
     search: searchModule,
     payments: paymentModule,
     posts: postsModule,
+    statements: statementsModule,
     subscriptions: subscriptionsModule,
   },
 

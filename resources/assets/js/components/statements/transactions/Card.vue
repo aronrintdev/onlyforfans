@@ -34,7 +34,7 @@
 import UserAvatar from '@components/user/Avatar'
 
 export default {
-  name: 'Transaction Card',
+  name: 'TransactionCard',
 
   components: {
     UserAvatar,

@@ -91,7 +91,7 @@ class PostsTableSeeder extends Seeder
                 ];
 
                 if ( $ptype === PostTypeEnum::PRICED ) {
-                    $attrs['price'] = $this->faker->randomFloat(0, 100, 1000);
+                    $attrs['price'] = $this->faker->numberBetween(300, 4000);
                 }
 
                 $post = Post::factory()->create($attrs);

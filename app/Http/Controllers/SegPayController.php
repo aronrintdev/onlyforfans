@@ -2,33 +2,35 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\Financial\AccountTypeEnum;
 use Carbon\Carbon;
+use App\Rules\InEnum;
 use GuzzleHttp\Client;
+use Illuminate\Support\Str;
+use App\Interfaces\Tippable;
+use App\Models\Subscription;
 use Illuminate\Http\Request;
+use InvalidArgumentException;
 use App\Enums\PaymentTypeEnum;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Config;
-use App\Helpers\Tippable as TippableHelpers;
-use App\Helpers\Purchasable as PurchasableHelpers;
-use App\Helpers\Subscribable as SubscribableHelpers;
+use App\Jobs\FakeSegpayPayment;
 use App\Interfaces\Purchaseable;
 use App\Interfaces\Subscribable;
-use App\Interfaces\Tippable;
-use App\Jobs\FakeSegpayPayment;
 use App\Models\Financial\Account;
-use App\Models\Financial\SegpayCard;
-use App\Rules\InEnum;
-use Symfony\Component\HttpKernel\Exception\HttpException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use App\Models\Casts\Money as MoneyCast;
 use App\Models\Financial\SegpayCall;
-use App\Models\Subscription;
-use Illuminate\Contracts\Container\BindingResolutionException;
-use InvalidArgumentException;
-use Carbon\Exceptions\InvalidCastException;
-use Carbon\Exceptions\InvalidIntervalException;
+use App\Models\Financial\SegpayCard;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Config;
+use App\Enums\Financial\AccountTypeEnum;
+use App\Events\PaymentMethodAdded;
+use App\Models\Casts\Money as MoneyCast;
 use GuzzleHttp\Exception\GuzzleException;
+use Carbon\Exceptions\InvalidCastException;
+use App\Helpers\Tippable as TippableHelpers;
+use Carbon\Exceptions\InvalidIntervalException;
+use App\Helpers\Purchasable as PurchasableHelpers;
+use App\Helpers\Subscribable as SubscribableHelpers;
+use Symfony\Component\HttpKernel\Exception\HttpException;
+use Illuminate\Contracts\Container\BindingResolutionException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Finder\Exception\DirectoryNotFoundException;
 
 class SegPayController extends Controller
@@ -139,6 +141,70 @@ class SegPayController extends Controller
         }
         $hash = hash_hmac('sha256', $body, $secret, false);
         $url .= "&REF1={$hash}";
+
+        return $url;
+    }
+
+
+    public function generateOneClickSubscriptionPageUrl(Request $request)
+    {
+        $request->validate([
+            'item' => 'required|uuid',
+            'price' => 'required',
+            'currency' => 'required',
+            'method' => 'required|uuid',
+        ]);
+
+        $item = SubscribableHelpers::getSubscribableItem($request->item);
+        if (!isset($item)) {
+            abort(400, 'Bad type or item');
+        }
+
+        $price = MoneyCast::toMoney($request->price, $request->currency);
+        if (!$item->verifyPrice($price)) {
+            abort(400, 'Invalid Price');
+        }
+
+        $account = Account::with('resource')->find($request->method);
+        if (!isset($account) || !isset($account->resource)) {
+            abort('400', 'Bad account');
+        }
+
+        $price = $item->formatMoneyDecimal($item->price);
+        $period = 30;
+
+        $client = new Client();
+        $response = $client->request('GET', Config::get('segpay.dynamicTransUrl'), [
+            'query' => ['value' => $price,],
+        ]);
+
+        $priceEncode = simplexml_load_string($response->getBody(), 'SimpleXMLElement', LIBXML_NOCDATA)->__toString();
+
+        $client = new Client();
+        $response = $client->request('GET', Config::get('segpay.dynamicRecurringUrl'), [
+            'query' => [
+                'MerchantID' => Config::get('segpay.merchantId'),
+                'InitialAmount' => $price,
+                'InitialLength' => $period,
+                'RecurringAmount' => $price,
+                'RecurringLength' => $period,
+            ],
+            'auth' => [Config::get('segpay.userId'), Config::get('segpay.accessKey') ],
+        ]);
+
+        $dynamicPricingId = Str::replace('"', '', $response->getBody()->__toString());
+
+        $baseUrl = Config::get('segpay.secure') ? 'https://' : 'http://';
+        $baseUrl .= Config::get('segpay.baseOneClickUrl');
+        $packageId = Config::get('segpay.dynamicPackageId');
+        $pricePointId = Config::get('segpay.dynamicPricePointId');
+        $xEticketid = "{$packageId}:{$pricePointId}";
+
+        $userId = Auth::user()->getKey();
+        $description = urlencode(Config::get('segpay.description.subscription', 'All Fans Subscription'));
+        $token = $account->resource->token;
+
+        $url = "{$baseUrl}?x-eticketId={$xEticketid}&amount={$price}&dynamictrans={$priceEncode}&dynamicdesc={$description}&DynamicPricingID={$dynamicPricingId}&OCToken={$token}&user_id={$userId}&type=subscription&item_id={$item->id}";
 
         return $url;
     }
@@ -370,6 +436,8 @@ class SegPayController extends Controller
         $account->verified = true;
         $account->can_make_transactions = true;
         $account->save();
+
+        PaymentMethodAdded::dispatch($account, $user->getKey());
 
         // Dispatch Event
         FakeSegpayPayment::dispatch($item, $account, $request->type, $request->price);

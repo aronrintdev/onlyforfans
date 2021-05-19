@@ -5,6 +5,7 @@
     "Blockables",
     "CSRF",
     "Castable",
+    "Chargebacks",
     "Cmgmyr",
     "Cviebrock",
     "Deletable",

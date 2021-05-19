@@ -42,11 +42,6 @@ export default [
     children: childRoutes.subscriptions,
   },
   {
-    name: 'settings.earnings',
-    component: settings.Earnings,
-    path: 'earnings',
-  },
-  {
     name: 'settings.payouts',
     component: settings.Payouts,
     path: 'payouts',

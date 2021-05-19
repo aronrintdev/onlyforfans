@@ -8,6 +8,8 @@ Route::group(['prefix' => '/payment'], function () {
     Route::group(['prefix' => '/segpay'], function () {
         Route::post('/generate-url', 'SegPayController@generatePayPageUrl');
         Route::post('/payment-session', 'SegPayController@getPaymentSession')->name('payments.segpay.getPaymentSession');
+        
+        Route::post('/subscription-url', 'SegPayController@generateOneClickSubscriptionPageUrl')->name('payments.segpay.getSubscriptionUrl');
 
         Route::post('/fake', 'SegPayController@fake')->name('payments.segpay.fake');
         Route::post('/fake-confirmation', 'SegPayController@fakeConfirmation')->name('payments.segpay.fake-confirmation');

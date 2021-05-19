@@ -3,7 +3,6 @@
  */
 
 //import Bookmarks from './SettingsBookmarks.vue'
-import Earnings from './SettingsEarnings.vue'
 import General from './SettingsGeneral.vue'
 import MySubscriptions from './MySubscriptions.vue'
 import Notifications from './SettingsNotifications.vue'
@@ -18,7 +17,6 @@ import Subscriptions from './SettingsSubscriptions.vue'
 
 export default {
   //Bookmarks,
-  Earnings,
   General,
   MySubscriptions,
   Notifications,

@@ -90,11 +90,6 @@ export default {
       }
 
       routes.push({
-        name: 'Earnings',
-        to: { name: 'settings.earnings', params: {} },
-      })
-
-      routes.push({
         name: 'Payouts',
         to: { name: 'settings.payouts', params: {} },
       })
