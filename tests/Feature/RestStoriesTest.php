@@ -347,13 +347,13 @@ class StoriesTest extends TestCase
 
         // remove any existing likes by fan...
         DB::table('likeables')
-            ->where('likee_id', $fan->id)
+            ->where('liker_id', $fan->id)
             ->where('likeable_type', 'stories')
             ->where('likeable_id', $story->id)
             ->delete();
 
         // LIKE the story
-        $response = $this->actingAs($fan)->ajaxJSON('PUT', route('likeables.update', $fan->id), [ // fan->likee
+        $response = $this->actingAs($fan)->ajaxJSON('PUT', route('likeables.update', $fan->id), [ 
             'likeable_type' => 'stories',
             'likeable_id' => $story->id,
         ]);

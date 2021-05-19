@@ -11,8 +11,8 @@ trait LikeableTraits
      */
     public function likes()
     {
-        //return $this->morphToMany(User::class, 'likeable', 'likeables', 'likee_id')->withTimestamps();
-        return $this->morphToMany(User::class, 'likeable', 'likeables', 'likeable_id', 'likee_id')->withTimestamps();
+        //return $this->morphToMany(User::class, 'likeable', 'likeables', 'liker_id')->withTimestamps();
+        return $this->morphToMany(User::class, 'likeable', 'likeables', 'likeable_id', 'liker_id')->withTimestamps();
     }
 
     /**

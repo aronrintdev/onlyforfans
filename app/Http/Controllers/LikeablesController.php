@@ -113,7 +113,7 @@ class LikeablesController extends AppBaseController
         ]);
     }
 
-    // %FIXME: not really REST-ful (ie likee param should be likeable, but not sure that makes sense in the UI)
+    // %FIXME: not really REST-ful (ie liker param should be likeable, but not sure that makes sense in the UI)
     // ~ https://stackoverflow.com/questions/299628/is-an-entity-body-allowed-for-an-http-delete-request
     public function destroy(Request $request, User $liker)
     {

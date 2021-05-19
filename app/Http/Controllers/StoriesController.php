@@ -229,9 +229,6 @@ class StoriesController extends AppBaseController
         $storiesA = $stories->map( function($item, $iter) {
             $a = $item->toArray();
             if ( count($item->mediafiles) ) {
-                //$fn = $item->mediafiles[0]->filename;
-                //$a['mf_filename'] = $fn;
-                //$a['mf_url'] = Storage::disk('s3')->url($fn); // %FIXME: use model attribute
                 $a['mf_filename'] = $item->mediafiles[0]->name;
                 $a['mf_url'] = $item->mediafiles[0]->filepath;
             }

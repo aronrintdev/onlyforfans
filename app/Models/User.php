@@ -147,7 +147,7 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
 
     public function likedposts()
     {
-        return $this->morphedByMany(Post::class, 'likeable', 'likeables', 'likee_id')
+        return $this->morphedByMany(Post::class, 'likeable', 'likeables', 'liker_id')
             ->withTimestamps();
     }
 
@@ -274,7 +274,7 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
 
     public function commentLikes()
     {
-        return $this->morphedByMany(Comment::class, 'likeable', 'likeables', 'likee_id')
+        return $this->morphedByMany(Comment::class, 'likeable', 'likeables', 'liker_id')
             ->withTimestamps();
     }
 
