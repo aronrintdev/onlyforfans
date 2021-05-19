@@ -6,15 +6,11 @@ use Illuminate\Support\Facades\Schema;
 
 class CreatePostsTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
     public function up()
     {
         Schema::create('posts', function (Blueprint $table) {
             $table->uuid('id')->primary();
+            $table->string('slug')->unique();
             $table->uuid('user_id');
             $table->uuidMorphs('postable');
             $table->text('description');
@@ -22,6 +18,7 @@ class CreatePostsTable extends Migration
             $table->string('type');
             $table->unsignedInteger('price')->default(0);
             $table->string('currency')->default('USD');
+            $table->integer('schedule_datetime')->nullable()->comment('Optional date-time at which to publish the post');
             $table->json('cattrs')->nullable()->comment('JSON-encoded custom attributes');
             $table->json('meta')->nullable()->comment('JSON-encoded meta attributes');
             $table->timestamps();
@@ -29,11 +26,6 @@ class CreatePostsTable extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
     public function down()
     {
         Schema::dropIfExists('posts');
