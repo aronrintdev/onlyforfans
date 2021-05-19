@@ -26,7 +26,7 @@ class ChangeResourceIdToUuidOnSegpayCalls extends Migration
     public function down()
     {
         Schema::connection('financial')->table('segpay_calls', function (Blueprint $table) {
-            $table->bigIncrements('resource_id')->nullable()->change();
+            $table->bigInteger('resource_id')->nullable()->change();
         });
     }
 }
