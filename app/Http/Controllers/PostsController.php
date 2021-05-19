@@ -67,14 +67,19 @@ class PostsController extends AppBaseController
 
     public function store(Request $request)
     {
-        $request->validate([
+        $vrules = [
             'timeline_id' => 'required|uuid|exists:timelines,id',
-            'description' => 'required',
             'type' => [ 'sometimes', 'required', new InEnum(new PostTypeEnum()) ],
             'price' => 'sometimes|required|integer',
             'mediafiles' => 'array',
             'mediafiles.*.*' => 'integer|uuid|exists:mediafiles',
-        ]);
+        ];
+
+        if ( !$request->has('mediafiles') ) {
+            $vrules['description'] = 'string'; // %FIXME: can't make this required in this case as mediafiles may be attached in subsequent call
+        }
+
+        $request->validate($vrules);
 
         $timeline = Timeline::find($request->timeline_id); // timeline being posted on
 
