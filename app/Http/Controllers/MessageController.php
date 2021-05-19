@@ -27,10 +27,12 @@ class MessageController extends Controller
         $this->request = $request;
         $this->middleware('auth');
     }
+
     public function index()
     {
         return ChatThread::with('sender', 'receiver')->get();
     }
+
     public function fetchUsers(Request $request)
     {
         $sessionUser = $request->user();
@@ -208,6 +210,7 @@ class MessageController extends Controller
         }
         return $contacts; 
     }
+
     public function fetchcontact(Request $request, $id) {
         $sessionUser = $request->user();
 
@@ -522,6 +525,7 @@ class MessageController extends Controller
         $unread_threads = uniq($unread_threads);
         return ["unread_messages_count" => count($unread_threads)];
     }
+
     public function removeThread(Request $request, $id, $threadId) {
         $sessionUser = $request->user();
         $deleted = ChatThread::where('id', $threadId)->delete();
@@ -532,6 +536,7 @@ class MessageController extends Controller
         }
         abort(400);
     }
+
     public function setLike(Request $request, $id, $threadId) {
         $updated = ChatThread::where('id', $threadId)->update(['is_like' => true]);
         if ($updated) {
@@ -539,6 +544,7 @@ class MessageController extends Controller
         }
         abort(400);
     }
+
     public function setUnlike(Request $request, $id, $threadId) {
         $updated = ChatThread::where('id', $threadId)->update(['is_like' => false]);
         if ($updated) {
@@ -546,6 +552,7 @@ class MessageController extends Controller
         }
         abort(400);
     }
+
     public function fetchScheduled(Request $request)
     {
         $sessionUser = $request->user();
@@ -574,6 +581,7 @@ class MessageController extends Controller
 
         return $chatThreads->toArray(); 
     }
+
     public function removeScheduleThread(Request $request, $threadId) {
         $deleted = ChatThread::where('id', $threadId)->delete();
         if ($deleted) {
@@ -581,10 +589,12 @@ class MessageController extends Controller
         }
         abort(400);
     }
+
     public function editScheduleThread(Request $request, $threadId) {
         $chatThread = ChatThread::where('id', $threadId)->first();
         $chatThread->schedule_datetime = $request->input('schedule_datetime');
         $chatThread->save();
         return ['status' => 200];
     }
+
 }
