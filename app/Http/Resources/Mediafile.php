@@ -20,11 +20,12 @@ class Mediafile extends JsonResource
 	        'basename' => $this->basename,
             'mfname' => $this->mfname,
             'filename' => $this->filename,
-            'filepath' => $hasAccess ? $this->filepath : null,
+            'filepath' => $hasAccess ? $this->filepath : null, // full S3 URL %NOTE
             'midFilepath' => $hasAccess ? $this->midFilepath : null,
             'thumbFilepath' => $hasAccess ? $this->thumbFilepath : null,
             'blurFilepath' => !$hasAccess ? $this->blurFilepath : null,
             'mftype' => $this->mftype,
+	        'is_primary' => $this->is_primary,
 	        'has_thumb' => $this->has_thumb,
 	        'has_mid' => $this->has_mid,
 	        'has_blur' => $this->has_blur,

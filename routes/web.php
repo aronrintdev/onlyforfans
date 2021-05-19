@@ -170,8 +170,8 @@ Route::group(['middleware' => ['auth']], function () {
         'as'=>'users.showSettings', 
         'uses' => 'UsersController@showSettings',
     ]);
-    Route::post('/users/avatar', ['uses' => 'UsersController@updateAvatar']);
-    Route::post('/users/cover', ['uses' => 'UsersController@updateCover']);
+    Route::post('/users/avatar', ['as' => 'users.updateAvatar', 'uses' => 'UsersController@updateAvatar']);
+    Route::post('/users/cover', ['as' => 'users.updateCover', 'uses' => 'UsersController@updateCover']);
     Route::resource('users', 'UsersController', [ 'except' => [ 'create', 'edit', 'store' ] ]);
 
     // -- vaults:  --

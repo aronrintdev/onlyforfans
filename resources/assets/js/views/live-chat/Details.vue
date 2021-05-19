@@ -777,6 +777,7 @@
     data: () => ({
       selectedUser: undefined,
       users: [],
+      messages: [],
       loading: true,
       moment: moment,
       messageSearchVisible: false,
@@ -1012,13 +1013,16 @@
         response.data.messages.forEach(message => {
           let videos = 0, audios = 0, images = 0;
           message.messages.map(msg => {
-            if (msg.mediafile && msg.mediafile.mimetype.indexOf('video/') > -1) {
+            //if (msg.mediafile && msg.mediafile.mimetype.indexOf('video/') > -1) {
+            if (msg.mediafile && msg.mediafile.is_video) {
               videos++;
             }
-            if (msg.mediafile && msg.mediafile.mimetype.indexOf('audio/') > -1) {
+            //if (msg.mediafile && msg.mediafile.mimetype.indexOf('audio/') > -1) {
+            if (msg.mediafile && msg.mediafile.is_audio) {
               audios++;
             }
-            if (msg.mediafile && msg.mediafile.mimetype.indexOf('image/') > -1) {
+            //if (msg.mediafile && msg.mediafile.mimetype.indexOf('image/') > -1) {
+            if (msg.mediafile && msg.mediafile.is_image) {
               images++;
             }
           });
@@ -1114,7 +1118,6 @@
             const { file, mftype, src } = media;
             if (mftype !== 'vault') {
               data.append('mediafile[]', file);
-              data.append('vaultfiles[]', null);
             } else {
               data.append('mediafile[]', null);
               data.append('vaultfiles[]', file);

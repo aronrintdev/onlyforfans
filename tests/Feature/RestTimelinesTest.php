@@ -12,6 +12,7 @@ use App\Enums\PostTypeEnum;
 use App\Enums\PaymentTypeEnum;
 use App\Models\Fanledger;
 use App\Models\Post;
+use App\Models\Diskmediafile;
 use App\Models\Mediafile;
 use App\Models\Timeline;
 use App\Models\User;
@@ -160,29 +161,42 @@ class TimelinesTest extends TestCase
     /**
      *  @group timelines
      *  @group regression
+     *  @group here0519
      */
     public function test_fan_can_not_access_locked_content_via_feed()
     {
         $timeline = Timeline::has('posts','>=',5)->has('followers','>=',1)->firstOrFail(); // assume non-admin (%FIXME)
 
         // Makes sure we have at least 1 free, 1 priced, and 1 subscibe-only post, then add some mediafiles to the posts...
-        $posts = Post::where('postable_type', 'timelines')->where('postable_id', $timeline->id)->latest()->take(5)->get();
+        /*
+        $posts = Post::where('postable_type', 'timelines')
+            ->has('mediafiles', 0)
+            ->where('postable_id', $timeline->id)->take(3)->get();
+         */
+        $posts = Post::where('postable_type', 'timelines')->has('mediafiles', 0)->take(3)->get();
 
+        // Setup posts for this test specifically...
         $freePost = $posts[0];
         $freePost->type = PostTypeEnum::FREE;
+        $freePost->postable_id = $timeline->id;
+        $freePost->postable_type = 'timelines';
         $freePost->save();
         $this->attachMediafile($freePost);
         $this->attachMediafile($freePost);
 
         $pricedPost = $posts[1];
         $pricedPost->type = PostTypeEnum::PRICED;
-        $pricedPost->price = 3*100;
+        $pricedPost->postable_id = $timeline->id;
+        $pricedPost->postable_type = 'timelines';
+        $pricedPost->price = 7*100;
         $pricedPost->save();
         $this->attachMediafile($pricedPost);
         $this->attachMediafile($pricedPost);
 
         $subPost = $posts[2];
         $subPost->type = PostTypeEnum::SUBSCRIBER;
+        $subPost->postable_id = $timeline->id;
+        $subPost->postable_type = 'timelines';
         $subPost->save();
         $this->attachMediafile($subPost);
         $this->attachMediafile($subPost);
@@ -216,31 +230,48 @@ class TimelinesTest extends TestCase
         $this->assertNotNull($content->data);
         $this->assertGreaterThan(0, count($content->data));
         //dd($content);
+        $savedPostIDs = [
+            'free' => $freePost->id,
+            'priced' => $pricedPost->id,
+            'sub' => $subPost->id,
+        ];
         unset($freePost, $pricedPost, $subPost);
 
         $posts = collect($content->data);
 
-        $freePost = $posts->first( function($p) {
-            return $p->type === PostTypeEnum::FREE;
+        /*
+        $freePost = $posts->first( function($p) use($savedPostIDs) {
+            //return $p->type === PostTypeEnum::FREE;
+            return $p->id === $savedPostIDs['free'];
         });
+         */
+        $freePost = $posts->firstWhere('id', $savedPostIDs['free']);
         $this->assertNotNull($freePost);
         $this->assertEquals(2, $freePost->mediafile_count);
         $this->assertTrue($freePost->access);
         $this->assertNotNull($freePost->mediafiles[0]);
         $this->assertNotNull($freePost->mediafiles[0]->filepath);
 
-        $pricedPost = $posts->first( function($p) {
-            return $p->type === PostTypeEnum::PRICED;
+        /*
+        $pricedPost = $posts->first( function($p) use($savedPostIDs) {
+            //return $p->type === PostTypeEnum::PRICED;
+            return $p->id === $savedPostIDs['priced'];
         });
+         */
+        $pricedPost = $posts->firstWhere('id', $savedPostIDs['priced']);
         $this->assertNotNull($pricedPost);
         $this->assertEquals(2, $pricedPost->mediafile_count);
         $this->assertFalse($pricedPost->access);
         $this->assertNotNull($pricedPost->mediafiles[0]);
         $this->assertNull($pricedPost->mediafiles[0]->filepath); // can't access media!
 
-        $subPost = $posts->first( function($p) {
-            return $p->type === PostTypeEnum::SUBSCRIBER;
+        /*
+        $subPost = $posts->first( function($p) use($savedPostIDs) {
+            //return $p->type === PostTypeEnum::SUBSCRIBER;
+            return $p->id === $savedPostIDs['sub'];
         });
+         */
+        $subPost = $posts->firstWhere('id', $savedPostIDs['sub']);
         $this->assertNotNull($subPost);
         $this->assertEquals(2, $subPost->mediafile_count);
         $this->assertFalse($subPost->access);
@@ -253,7 +284,6 @@ class TimelinesTest extends TestCase
     /**
      *  @group timelines
      *  @group regression
-     *  @group here0330
      */
     public function test_fan_can_view_photos_only_feed()
     {
@@ -273,6 +303,7 @@ class TimelinesTest extends TestCase
 
         $response = $this->actingAs($fan)->ajaxJSON('GET', route('timelines.photos', $timeline->id), []);
         $response->assertStatus(200);
+        $content = json_decode($response->content());
         $response->assertJsonStructure([
             'data' => [ 
                 0 => [ 
@@ -299,7 +330,6 @@ class TimelinesTest extends TestCase
             'links',
             'meta',
         ]);
-        $content = json_decode($response->content());
         $mediafiles = collect($content->data);
         //dd($content);
     }
@@ -682,15 +712,17 @@ class TimelinesTest extends TestCase
     protected function attachMediafile(Post &$post, string $type='image') 
     {
         $fname = $this->faker->slug.'.jpg';
-        Mediafile::create([
-            'filename' => $fname,
-            'mfname' => $fname,
-            'mftype' => MediafileTypeEnum::POST,
-            'mimetype' => 'image/jpeg',
-            'orig_ext' => 'jpg',
-            'orig_filename' => $fname,
-            'resource_type' => 'posts',
-            'resource_id' => $post->id,
+        Diskmediafile::doCreate([
+                            'owner_id'        => $post->user->id,
+                            'filepath'        => $fname,
+                            'mimetype'        => 'image/jpeg',
+                            'orig_filename'   => $fname,
+                            'orig_ext'        => 'jpg',
+                            'mfname'          => $fname,
+                            'mftype'          => MediafileTypeEnum::POST,
+                            'resource_id'     => $post->id,
+                            'resource_type'   => 'posts',
+
         ]);
         return $post;
     }

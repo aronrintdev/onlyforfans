@@ -87,5 +87,12 @@ mvim A-HERE.txt routes/web.php tests app/Http/Controllers resources/views resour
 $ php artisan setmf:basenames
 $ php artisan make:thumbs 300
 $ php artisan make:blurs 300
-$ 
-$ 
+
+----
+mysqldump to backup both main & financial database
+
+delete tables in main database
+delete tablesi in financial database
+
+php artisan migrate
+

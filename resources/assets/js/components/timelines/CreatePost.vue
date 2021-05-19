@@ -125,7 +125,7 @@ export default {
     //  ~ https://www.dropzonejs.com/#config-autoProcessQueue
     dropzoneOptions: {
       //url: '/mediafiles',
-      url: route('mediafiles.index'),
+      url: route('mediafiles.store'),
       paramName: 'mediafile',
       //acceptedFiles: 'image/*, video/*, audio/*',
       maxFiles: null,

@@ -9,6 +9,7 @@ use App\Models\ChatThread;
 use App\Models\Timeline;
 use App\Models\User;
 use App\Models\Mediafile;
+use App\Models\Diskmediafile;
 use App\Events\MessageSentEvent;
 use App\Events\MessageRemoveEvent;
 use App\Enums\MediafileTypeEnum;
@@ -256,8 +257,21 @@ class MessageController extends Controller
             'currentUser' => $request->user()
         ];
     }
+
     public function store(Request $request)
     {
+        //dd($request->all());
+        $vrules = [
+            'user_id' => 'required|uuid|exists:users,id', // reciever of message
+            'tip_price' => 'numeric',
+            'schedule_datetime' => 'nullable|date',
+        ];
+        if ( $request->has('vaultfiles') ) {
+            $vrules['vaultfiles'] = 'array';
+            $vrules['vaultfiles.*'] = 'uuid|exists:mediafiles,id'; // fk id array to mediafiles (in vault)
+        }
+        $request->validate($vrules);
+
         $sessionUser = $request->user();
         $receiver = User::where('id', $request->input('user_id'))->first();
 
@@ -275,20 +289,24 @@ class MessageController extends Controller
         $vaultfiles = $request->input('vaultfiles');
         if ($mediafiles) {
             $index = 1;
-            foreach ($mediafiles as $file) {
+            foreach ($mediafiles as $mf) {
                 $message = $chatthread->messages()->create([
                     'mcontent' => '',
                     'mcounter' => $index,
                 ]);
-                if ($file) {
-                    $message->mediafile()->create([
-                        'resource_type' => 'messages',
-                        'filename' => $file->store('./galleries', 's3'),
-                        'mfname' => $file->getClientOriginalName(),
-                        'mftype' => MediafileTypeEnum::GALLERY,
-                        'mimetype' => $file->getMimeType(),
-                        'orig_filename' => $file->getClientOriginalName(),
-                        'orig_ext' => $file->getClientOriginalExtension(),
+                if ($mf) {
+                    $subPath = './'.$sessionUser->id;
+                    $s3Path = $mf->store($subPath, 's3');
+                    $mediafile = Diskmediafile::doCreate([
+                        'owner_id'        => $sessionUser->id,
+                        'filepath'        => $s3Path,
+                        'mimetype'        => $mf->getMimeType(),
+                        'orig_filename'   => $mf->getClientOriginalName(),
+                        'orig_ext'        => $mf->getClientOriginalExtension(),
+                        'mfname'          => $mf->getClientOriginalName(),
+                        'mftype'          => MediafileTypeEnum::GALLERY,
+                        'resource_id'     => $message->id,
+                        'resource_type'   => 'messages',
                     ]);
                 }
                 $index++;
@@ -302,22 +320,21 @@ class MessageController extends Controller
             }
         } else if ($vaultfiles) {
             $index = 1;
-            foreach ($vaultfiles as $file) {
+            foreach ($vaultfiles as $mfPKID) {
                 $message = $chatthread->messages()->create([
                     'mcontent' => '',
                     'mcounter' => $index,
                 ]);
-                if ($file) {
-                    $mediafile = MediaFile::where('id', $file)->get()->first();
-                    $message->mediafile()->create([
-                        'resource_type' => 'messages',
-                        'filename' => $mediafile->filename,
-                        'mfname' => $mediafile->mfname,
-                        'mftype' => $mediafile->mftype,
-                        'mimetype' => $mediafile->mimetype,
-                        'orig_filename' => $mediafile->orig_filename,
-                        'orig_ext' => $mediafile->orig_ext,
-                    ]);
+                if ($mfPKID) {
+                    $srcMediafile = Mediafile::where('resource_type', 'vaultfolders')
+                                    ->where('is_primary', true)
+                                    ->findOrFail($mfPKID);
+                    $refMediafile = $srcMediafile->diskmediafile->createReference(
+                        'messages',    // $resourceType
+                        $message->id,  // $resourceID
+                        'New Message', // $mfname - could be optionally passed as a query param %TODO
+                        MediafileTypeEnum::GALLERY // $mftype
+                    );
                 }
                 $index++;
             }
@@ -365,6 +382,7 @@ class MessageController extends Controller
         }
         abort(400);
     }
+
     public function markAsRead(Request $request, $id) {
         $sessionUser = $request->user();
         $chatthreads = ChatThread::where('sender_id', $id)
@@ -376,6 +394,7 @@ class MessageController extends Controller
         });
         return ['status' => 200];
     }
+
     public function markAllAsRead(Request $request) {
         $sessionUser = $request->user();
 
@@ -387,6 +406,7 @@ class MessageController extends Controller
         });
         return ['status' => 200];
     }
+
     public function filterMessages(Request $request, $id) {
         $chatthreads = ChatThread::where(function($query) use(&$request, &$id) {
                 $sessionUser = $request->user();
@@ -412,6 +432,7 @@ class MessageController extends Controller
         }, $messages);
         return $messages;
     }
+
     public function mute(Request $request, $id) {
         $sessionUser = $request->user();
         $userSetting = $sessionUser->settings;
@@ -427,6 +448,7 @@ class MessageController extends Controller
         $userSetting->save();
         return;
     }
+
     public function unmute(Request $request, $id) {
         $sessionUser = $request->user();
         $userSetting = $sessionUser->settings;
@@ -444,6 +466,7 @@ class MessageController extends Controller
         $userSetting->save();
         return;
     }
+
     public function setCustomName(Request $request, $id) {
         $sessionUser = $request->user();
         $userSetting = $sessionUser->settings;
@@ -461,6 +484,7 @@ class MessageController extends Controller
         $userSetting->save();
         return;
     }
+
     public function listMediafiles(Request $request, $receiver) {
         $chatthreads = ChatThread::where(function($query) use(&$request, &$receiver) {
                 $sessionUser = $request->user();
