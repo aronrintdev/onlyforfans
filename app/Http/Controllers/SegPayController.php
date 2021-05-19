@@ -20,6 +20,7 @@ use App\Models\Financial\SegpayCard;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
 use App\Enums\Financial\AccountTypeEnum;
+use App\Events\PaymentMethodAdded;
 use App\Models\Casts\Money as MoneyCast;
 use GuzzleHttp\Exception\GuzzleException;
 use Carbon\Exceptions\InvalidCastException;
@@ -435,6 +436,8 @@ class SegPayController extends Controller
         $account->verified = true;
         $account->can_make_transactions = true;
         $account->save();
+
+        PaymentMethodAdded::dispatch($account, $user->getKey());
 
         // Dispatch Event
         FakeSegpayPayment::dispatch($item, $account, $request->type, $request->price);

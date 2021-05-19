@@ -10,6 +10,7 @@ use App\Events\TipFailed;
 use App\Helpers\Tippable;
 use Illuminate\Support\Str;
 use App\Helpers\Purchasable;
+use App\Models\Subscription;
 use App\Helpers\Subscribable;
 use Illuminate\Bus\Queueable;
 use App\Enums\PaymentTypeEnum;
@@ -25,13 +26,13 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
 use App\Models\Financial\SegpayCall;
 use App\Models\Financial\SegpayCard;
+use App\Events\PaymentMethodAdded;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use App\Apis\Segpay\Enums\TransactionType;
 use App\Enums\WebhookStatusEnum as Status;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use App\Apis\Segpay\Enums\Stage as StageEnum;
-use App\Models\Subscription;
 use Illuminate\Foundation\Events\Dispatchable;
 
 class ProcessSegPayWebhook implements ShouldQueue
@@ -221,6 +222,7 @@ class ProcessSegPayWebhook implements ShouldQueue
             if (!isset($card)) {
                 // Create new card and account for this.
                 $card = SegpayCard::createFromTransaction($transaction);
+                PaymentMethodAdded::dispatch($card->account, $card->getOwner()->first()->getKey());
             }
 
             // Translate decimal price from segpay back to money type
