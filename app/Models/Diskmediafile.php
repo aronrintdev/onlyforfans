@@ -263,7 +263,7 @@ class Diskmediafile extends BaseModel implements Guidable, Ownable
     public function createThumbnail()
     {
         $WIDTH = 320;
-        $url = Storage::disk('s3')->temporaryUrl( $this->filename, now()->addMinutes(10) );
+        $url = Storage::disk('s3')->temporaryUrl( $this->filepath, now()->addMinutes(10) );
         $img = Image::make($url);
         $subFolder = $this->owner_id;
         $s3Path = "$subFolder/thumb/".$this->basename.".jpg";
@@ -277,7 +277,7 @@ class Diskmediafile extends BaseModel implements Guidable, Ownable
     public function createMid()
     {
         $WIDTH = 1280;
-        $url = Storage::disk('s3')->temporaryUrl( $this->filename, now()->addMinutes(10) );
+        $url = Storage::disk('s3')->temporaryUrl( $this->filepath, now()->addMinutes(10) );
         $img = Image::make($url);
         $subFolder = $this->owner_id;
         $s3Path = "$subFolder/mid/".$this->basename.".jpg";
@@ -292,7 +292,7 @@ class Diskmediafile extends BaseModel implements Guidable, Ownable
     {
         $WIDTH = 320;
         $BLUR_STRENGTH = 90; // 0 ~ 100 http://image.intervention.io/api/blur
-        $url = Storage::disk('s3')->temporaryUrl( $this->filename, now()->addMinutes(10) );
+        $url = Storage::disk('s3')->temporaryUrl( $this->filepath, now()->addMinutes(10) );
         $img = Image::make($url);
         $subFolder = $this->owner_id;
         $s3Path = "$subFolder/blur/".$this->basename.".jpg";
@@ -321,7 +321,7 @@ class Diskmediafile extends BaseModel implements Guidable, Ownable
             Storage::disk('s3')->delete($this->blurFilename);
             $this->has_blur = false;
         }
-        Storage::disk('s3')->delete($this->filename);
+        Storage::disk('s3')->delete($this->filepath);
         $this->save();
     }
 }
