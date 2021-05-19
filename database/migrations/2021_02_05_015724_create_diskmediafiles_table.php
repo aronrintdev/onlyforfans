@@ -12,7 +12,7 @@ class CreateDiskmediafilesTable extends Migration
             $table->uuid('id')->primary();
 
             $table->string('slug')->unique();
-            $table->uuid('owner_id');
+            $table->uuid('owner_id')->comment('FKID to [users]');
             $table->foreign('owner_id')->references('id')->on('users');
 
             $table->string('filepath')->comment('Filename/path as stored, in S3 for ex');
