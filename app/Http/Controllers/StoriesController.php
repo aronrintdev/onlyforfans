@@ -145,11 +145,6 @@ class StoriesController extends AppBaseController
                         ]);
                     } else {
                         // mediafile request param is ID, referneces existing mediafile (in vault)...see vrules above
-                        /*
-                        $src = Mediafile::find($request->mediafile);
-                        $cloned = $src->doClone('stories', $story->id);
-                        $story->mediafiles()->save($cloned);
-                         */
                         $refMF = Mediafile::where('resource_type', 'vaultfolders')
                             ->where('is_primary', true)
                             ->findOrFail($request->mediafile)

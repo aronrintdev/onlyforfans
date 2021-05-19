@@ -124,7 +124,6 @@ class PostsController extends AppBaseController
             'schedule_datetime' => 'integer',
         ]);
 
-
         $post->fill($request->only([
             'description',
         ])); // %TODO

@@ -187,7 +187,7 @@ class UsersController extends AppBaseController
         $s3Path = $file->store($subFolder, 's3');
 
         $mediafile = Diskmediafile::doCreate([
-            'owner_id'         => $sessionUser,
+            'owner_id'         => $sessionUser->id,
             'filepath'         => $s3Path,
             'mimetype'         => $file->getMimeType(),
             'orig_filename'    => $file->getClientOriginalName(),
@@ -216,22 +216,11 @@ class UsersController extends AppBaseController
             abort(400);
         }
 
-        /*
-        //$mediafile = Mediafile::create([
-            //'resource_type' => 'cover',
-            //'filename' => $file->store('./covers', 's3'),
-            //'mfname' => $file->getClientOriginalName(),
-            //'mftype' => MediafileTypeEnum::COVER,
-            //'mimetype' => $file->getMimeType(),
-            //'orig_filename' => $file->getClientOriginalName(),
-            //'orig_ext' => $file->getClientOriginalExtension(),
-        //]);
-         */
         $subFolder = $sessionUser->id;
         $s3Path = $file->store($subFolder, 's3');
 
         $mediafile = Diskmediafile::doCreate([
-            'owner_id'         => $sessionUser,
+            'owner_id'         => $sessionUser->id,
             'filepath'         => $s3Path,
             'mimetype'         => $file->getMimeType(),
             'orig_filename'    => $file->getClientOriginalName(),
