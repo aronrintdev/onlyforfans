@@ -168,25 +168,35 @@ class TimelinesTest extends TestCase
         $timeline = Timeline::has('posts','>=',5)->has('followers','>=',1)->firstOrFail(); // assume non-admin (%FIXME)
 
         // Makes sure we have at least 1 free, 1 priced, and 1 subscibe-only post, then add some mediafiles to the posts...
+        /*
         $posts = Post::where('postable_type', 'timelines')
             ->has('mediafiles', 0)
-            ->where('postable_id', $timeline->id)->latest()->take(3)->get();
+            ->where('postable_id', $timeline->id)->take(3)->get();
+         */
+        $posts = Post::where('postable_type', 'timelines')->has('mediafiles', 0)->take(3)->get();
 
+        // Setup posts for this test specifically...
         $freePost = $posts[0];
         $freePost->type = PostTypeEnum::FREE;
+        $freePost->postable_id = $timeline->id;
+        $freePost->postable_type = 'timelines';
         $freePost->save();
         $this->attachMediafile($freePost);
         $this->attachMediafile($freePost);
 
         $pricedPost = $posts[1];
         $pricedPost->type = PostTypeEnum::PRICED;
-        $pricedPost->price = 3*100;
+        $pricedPost->postable_id = $timeline->id;
+        $pricedPost->postable_type = 'timelines';
+        $pricedPost->price = 7*100;
         $pricedPost->save();
         $this->attachMediafile($pricedPost);
         $this->attachMediafile($pricedPost);
 
         $subPost = $posts[2];
         $subPost->type = PostTypeEnum::SUBSCRIBER;
+        $subPost->postable_id = $timeline->id;
+        $subPost->postable_type = 'timelines';
         $subPost->save();
         $this->attachMediafile($subPost);
         $this->attachMediafile($subPost);
