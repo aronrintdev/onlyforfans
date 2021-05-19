@@ -1118,7 +1118,6 @@
             const { file, mftype, src } = media;
             if (mftype !== 'vault') {
               data.append('mediafile[]', file);
-              //data.append('vaultfiles[]', null);
             } else {
               data.append('mediafile[]', null);
               data.append('vaultfiles[]', file);
