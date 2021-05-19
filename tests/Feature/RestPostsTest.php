@@ -18,6 +18,7 @@ use App\Models\User;
 use App\Enums\MediafileTypeEnum;
 use App\Enums\PaymentTypeEnum;
 use App\Enums\PostTypeEnum;
+use Illuminate\Support\Facades\Config;
 
 class RestPostsTest extends TestCase
 {
@@ -904,6 +905,8 @@ class RestPostsTest extends TestCase
     // tests purchase itself, plus before and after access
     public function test_can_purchase_post()
     {
+        $this->assertTrue(Config::get('segpay.fake'), 'Your SEGPAY_FAKE .env variable is not set to true.');
+
         $timeline = Timeline::has('followers', '>=', 1)
             ->whereHas('posts', function($q1) {
                 $q1->where('type', PostTypeEnum::PRICED);
@@ -916,7 +919,8 @@ class RestPostsTest extends TestCase
             'timeline_id' => $timeline->id,
             'description' => $this->faker->realText,
             'type' => PostTypeEnum::PRICED,
-            'price' => $this->faker->randomNumber(3),
+            'price' => 1000, // $10
+            'currency' => 'USD'
         ];
         $response = $this->actingAs($creator)->ajaxJSON('POST', route('posts.store'), $payload);
         $response->assertStatus(201);
