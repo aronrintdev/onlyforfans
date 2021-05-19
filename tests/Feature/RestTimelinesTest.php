@@ -161,7 +161,6 @@ class TimelinesTest extends TestCase
     /**
      *  @group timelines
      *  @group regression
-     *  @group here0519
      */
     public function test_fan_can_not_access_locked_content_via_feed()
     {
