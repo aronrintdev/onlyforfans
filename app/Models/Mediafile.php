@@ -20,7 +20,7 @@ class Mediafile extends BaseModel implements Guidable, Ownable
     use UsesUuid, SoftDeletes, HasFactory, OwnableFunctions, Sluggable, SluggableTraits;
 
     protected $guarded = [ 'id', 'created_at', 'updated_at' ];
-    protected $appends = ['filepath', 'name', 'is_image', 'is_video'];
+    protected $appends = ['filepath', 'name', 'mimetype', 'is_image', 'is_audio', 'is_video'];
     public static $vrules = [];
 
     //--------------------------------------------
@@ -50,6 +50,11 @@ class Mediafile extends BaseModel implements Guidable, Ownable
         'cattrs'    => 'array',
         'meta'      => 'array',
     ];
+
+    public function getMimetypeAttribute($value)
+    {
+        return $this->diskmediafile->mimetype;
+    }
 
     public function getIsImageAttribute($value)
     {

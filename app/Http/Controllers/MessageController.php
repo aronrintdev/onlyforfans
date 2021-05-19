@@ -260,13 +260,16 @@ class MessageController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
+        $vrules = [
             'user_id' => 'required|uuid|exists:users,id', // reciever of message
             'tip_price' => 'numeric',
-            'schedule_datetime' => 'date',
-            'vaultfiles' => 'array',
-            'vaultfiles.*' => 'uuid|exists:mediafiles,id', // fk id array to mediafiles (in vault)
-        ]);
+            'schedule_datetime' => 'nullable|date',
+        ];
+        if ( $request->has('vaultfiles') ) {
+            $vrules['vaultfiles'] = 'array';
+            $vrules['vaultfiles.*'] = 'uuid|exists:mediafiles,id'; // fk id array to mediafiles (in vault)
+        }
+        $request->validate($vrules);
 
         $sessionUser = $request->user();
         $receiver = User::where('id', $request->input('user_id'))->first();
