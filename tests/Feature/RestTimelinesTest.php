@@ -161,11 +161,11 @@ class TimelinesTest extends TestCase
     /**
      *  @group timelines
      *  @group regression
-     *  @group here0517
+     *  @group here0519
      */
     public function test_fan_can_not_access_locked_content_via_feed()
     {
-        $timeline = Timeline::has('posts','>=',7)->has('followers','>=',1)->firstOrFail(); // assume non-admin (%FIXME)
+        $timeline = Timeline::has('posts','>=',5)->has('followers','>=',1)->firstOrFail(); // assume non-admin (%FIXME)
 
         // Makes sure we have at least 1 free, 1 priced, and 1 subscibe-only post, then add some mediafiles to the posts...
         $posts = Post::where('postable_type', 'timelines')
@@ -229,30 +229,39 @@ class TimelinesTest extends TestCase
 
         $posts = collect($content->data);
 
+        /*
         $freePost = $posts->first( function($p) use($savedPostIDs) {
             //return $p->type === PostTypeEnum::FREE;
             return $p->id === $savedPostIDs['free'];
         });
+         */
+        $freePost = $posts->firstWhere('id', $savedPostIDs['free']);
         $this->assertNotNull($freePost);
         $this->assertEquals(2, $freePost->mediafile_count);
         $this->assertTrue($freePost->access);
         $this->assertNotNull($freePost->mediafiles[0]);
         $this->assertNotNull($freePost->mediafiles[0]->filepath);
 
+        /*
         $pricedPost = $posts->first( function($p) use($savedPostIDs) {
             //return $p->type === PostTypeEnum::PRICED;
             return $p->id === $savedPostIDs['priced'];
         });
+         */
+        $pricedPost = $posts->firstWhere('id', $savedPostIDs['priced']);
         $this->assertNotNull($pricedPost);
         $this->assertEquals(2, $pricedPost->mediafile_count);
         $this->assertFalse($pricedPost->access);
         $this->assertNotNull($pricedPost->mediafiles[0]);
         $this->assertNull($pricedPost->mediafiles[0]->filepath); // can't access media!
 
+        /*
         $subPost = $posts->first( function($p) use($savedPostIDs) {
             //return $p->type === PostTypeEnum::SUBSCRIBER;
             return $p->id === $savedPostIDs['sub'];
         });
+         */
+        $subPost = $posts->firstWhere('id', $savedPostIDs['sub']);
         $this->assertNotNull($subPost);
         $this->assertEquals(2, $subPost->mediafile_count);
         $this->assertFalse($subPost->access);
@@ -265,7 +274,6 @@ class TimelinesTest extends TestCase
     /**
      *  @group timelines
      *  @group regression
-     *  @group here0517
      */
     public function test_fan_can_view_photos_only_feed()
     {

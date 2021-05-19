@@ -121,7 +121,7 @@ class PostsTableSeeder extends Seeder
                 /*
                 // LIKES - Select random users to like this post...
                 $likers = FactoryHelpers::parseRandomSubset($users, 20);
-                $likee = $u;
+                $liker = $u;
                 $likers->each( function($liker) use(&$post) {
                     if ( !$post->users_liked->contains($liker->id) ) {
                         $post->users_liked()->attach($liker->id);
