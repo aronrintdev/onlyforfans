@@ -260,6 +260,7 @@ class MessageController extends Controller
 
     public function store(Request $request)
     {
+        //dd($request->all());
         $vrules = [
             'user_id' => 'required|uuid|exists:users,id', // reciever of message
             'tip_price' => 'numeric',
