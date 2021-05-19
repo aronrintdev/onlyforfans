@@ -143,6 +143,70 @@ class SegPayController extends Controller
         return $url;
     }
 
+
+    public function generateOneClickSubscriptionPageUrl(Request $request)
+    {
+        $request->validate([
+            'item' => 'required|uuid',
+            'price' => 'required',
+            'currency' => 'required',
+            'method' => 'required|uuid',
+        ]);
+
+        $item = SubscribableHelpers::getSubscribableItem($request->item);
+        if (!isset($item)) {
+            abort(400, 'Bad type or item');
+        }
+
+        $price = MoneyCast::toMoney($request->price, $request->currency);
+        if (!$item->verifyPrice($price)) {
+            abort(400, 'Invalid Price');
+        }
+
+        $account = Account::with('resource')->find($request->method);
+        if (!isset($account) || !isset($account->resource)) {
+            abort('400', 'Bad account');
+        }
+
+        $price = $item->formatMoneyDecimal($item->price);
+        $period = 30;
+
+        $client = new Client();
+        $response = $client->request('GET', Config::get('segpay.dynamicTransUrl'), [
+            'query' => ['value' => $price,],
+        ]);
+
+        $priceEncode = simplexml_load_string($response->getBody(), 'SimpleXMLElement', LIBXML_NOCDATA)->__toString();
+
+        $client = new Client();
+        $response = $client->request('GET', Config::get('segpay.dynamicRecurringUrl'), [
+            'query' => [
+                'MerchantID' => Config::get('segpay.merchantId'),
+                'InitialAmount' => $price,
+                'InitialLength' => $period,
+                'RecurringAmount' => $price,
+                'RecurringLength' => $period,
+            ],
+            'auth' => [Config::get('segpay.userId'), Config::get('segpay.accessKey') ],
+        ]);
+
+        $dynamicPricingId = $response->getBody()->__toString();
+
+        // $baseUrl = Config::get('segpay.secure') ? 'https://' : 'http://';
+        $baseUrl = Config::get('segpay.baseOneClickDynamicUrl');
+        $packageId = Config::get('segpay.dynamicPackageId');
+        $pricePointId = Config::get('segpay.dynamicPricePointId');
+        $xEticketid = "{$packageId}:{$pricePointId}";
+
+        $userId = Auth::user()->getKey();
+        $description = urlencode(Config::get('segpay.description.subscription', 'All Fans Subscription'));
+        $token = $account->resource->token;
+
+        $url = "{$baseUrl}?eticketId={$xEticketid}&amount={$price}&dynamictrans={$priceEncode}&dynamicdesc={$description}&DynamicPricingID={$dynamicPricingId}&OCToken={$token}&user_id={$userId}&type=subscription&item_id={$item->id}";
+
+        return $url;
+    }
+
     #endregion PayPageUrl Generation
 
 
