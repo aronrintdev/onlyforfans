@@ -5,7 +5,7 @@ return [
     'mode' => env('SEGPAY_MODE', 'development'),
 
     'baseUrl' => env('SEGPAY_BASE_URL', 'secure2.segpay.com/billing/poset.cgi'),
-    'baseOneClickUrl' => env('SEGPAY_BASE_ONE_CLICK_URL', 'secure2.segpay.com/billingOneClick.aspx'),
+    'baseOneClickUrl' => env('SEGPAY_BASE_ONE_CLICK_URL', 'secure2.segpay.com/billing/OneClick.aspx'),
 
     'baseOneClickDynamicUrl' => env('SEGPAY_BASE_ONE_CLICK_DYNAMIC_URL', 'https://service.segpay.com/OneClickSales.asmx/SalesServiceDynamic'),
 
