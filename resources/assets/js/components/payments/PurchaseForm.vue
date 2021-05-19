@@ -44,16 +44,17 @@
 import { eventBus } from '@/app'
 import _ from 'lodash'
 import Vuex from 'vuex'
-import FromNew from './forms/New'
+import FormNew from './forms/New'
 import PaymentConfirmation from './forms/PaymentConfirmation'
 import PayWithForm from './PayWithForm'
 import SavedPaymentMethodList from './SavedPaymentMethodsList'
 import LoadingOverlay from '@components/common/LoadingOverlay'
+import SubscriptionIFrame from './forms/SegpaySubscriptionIFrame'
 
 export default {
   name: 'PurchaseForm',
   components: {
-    FromNew,
+    FormNew,
     PaymentConfirmation,
     PayWithForm,
     SavedPaymentMethodList,
@@ -85,7 +86,8 @@ export default {
   },
 
   data: () => ({
-    loadedForm: FromNew,
+    subscriptionMustIFrame: true,
+    loadedForm: FormNew,
     selectedPaymentMethod: {},
     loading: true,
     processing: false,
@@ -108,13 +110,17 @@ export default {
     },
 
     loadNewForm() {
-      this.loadedForm = FromNew
+      this.loadedForm = FormNew
       this.selectedPaymentMethod = { id: 'new' }
     },
 
     loadPayWithForm(paymentMethod) {
       this.selectedPaymentMethod = paymentMethod
-      this.loadedForm = PaymentConfirmation
+      if (this.subscriptionMustIFrame && this.type === 'subscription') {
+        this.loadedForm = SubscriptionIFrame
+      } else {
+        this.loadedForm = PaymentConfirmation
+      }
     },
 
     onProcessing() {

@@ -71,6 +71,12 @@ export default {
         },
       ]
 
+      items.push({
+        label: 'statements',
+        icon: 'receipt',
+        linkTo: { name: 'statements.dashboard' },
+      })
+
       if (this.uiFlags.isCreator && !this.uiFlags.hasBanking) {
         items.push({
           label: 'Banking',
@@ -122,6 +128,7 @@ export default {
     "My Profile": "My Profile",
     "My Vault": "My Vault",
     "Settings": "Settings",
+    "statements": "Statements",
     "Payment Method": "Payment Method",
     "Lists": "Lists",
     "Logout": "Logout",

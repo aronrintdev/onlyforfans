@@ -66,6 +66,11 @@ class EarningsController extends Controller
             $item['total'] = (int)$item['total'];
         });
 
+        $chargeback = $debits->firstWhere('type', TransactionTypeEnum::CHARGEBACK) ?? ['total' => 0, 'count' => 0];
+        $chargebackPartial = $debits->firstWhere('type', TransactionTypeEnum::CHARGEBACK_PARTIAL) ?? ['total' => 0, 'count' => 0];
+        $chargeback['total'] += $chargebackPartial['total'];
+        $chargeback['count'] += $chargebackPartial['count'];
+
         return [
             'credits' => [
                 TransactionTypeEnum::SALE => $credits->firstWhere('type', TransactionTypeEnum::SALE) ?? [ 'total' => 0, 'count' => 0 ],
@@ -74,8 +79,7 @@ class EarningsController extends Controller
             ],
             'debits' => [
                 TransactionTypeEnum::FEE => $debits->firstWhere('type', TransactionTypeEnum::FEE) ?? ['total' => 0, 'count' => 0],
-                TransactionTypeEnum::CHARGEBACK => $debits->firstWhere('type', TransactionTypeEnum::CHARGEBACK) ?? ['total' => 0, 'count' => 0],
-                TransactionTypeEnum::CHARGEBACK_PARTIAL => $debits->firstWhere('type', TransactionTypeEnum::CHARGEBACK_PARTIAL) ?? ['total' => 0, 'count' => 0],
+                TransactionTypeEnum::CHARGEBACK => $chargeback,
                 TransactionTypeEnum::CREDIT => $debits->firstWhere('type', TransactionTypeEnum::CREDIT) ?? ['total' => 0, 'count' => 0],
             ],
             'from' => $from,
