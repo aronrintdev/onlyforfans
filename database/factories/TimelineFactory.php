@@ -20,7 +20,7 @@ class TimelineFactory extends Factory
             'about'    => $this->faker->text,
             'verified' => 1,
             'is_follow_for_free' => $isFollowForFree,
-            'price' => $isFollowForFree ? 0.00 : $this->faker->randomFloat(2, 1, 300),
+            'price' => $isFollowForFree ? 0.00 : $this->faker->numberBetween(300, 4000),
         ];
     }
 }
