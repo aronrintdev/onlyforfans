@@ -73,8 +73,8 @@ class Mediafile extends BaseModel implements Guidable, Ownable
 
     // %FIXME: this should be consistent with getMidFilename, etc (ie not orig filename)
     public function getNameAttribute($value) {
-        return $this->diskmediafile->orig_filename;
-        //return $this->mfname;
+        //return $this->diskmediafile->orig_filename;
+        return $this->mfname;
     }
 
     public function getMidFilenameAttribute($value) {
@@ -93,7 +93,7 @@ class Mediafile extends BaseModel implements Guidable, Ownable
     }
 
     public function getFilepathAttribute($value) {
-        return !empty($this->diskmediafile->filename) ? Storage::disk('s3')->url($this->diskmediafile->filename) : null;
+        return !empty($this->diskmediafile->filepath) ? Storage::disk('s3')->url($this->diskmediafile->filepath) : null;
         //return !empty($this->filename) ? Storage::disk('s3')->temporaryUrl( $this->filename, now()->addMinutes(5) ) : null;
     }
 
