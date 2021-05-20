@@ -25,14 +25,15 @@ class MessagesTableSeeder extends Seeder
             $this->output->writeln("  - Messages seeder: loaded ".$posts->count()." posts...");
         }
 
-        $senderCount = $this->faker->numberBetween(5, 12); // number of senders
+        //$senderCount = $this->faker->numberBetween(2, 4); // number of senders
+        $senderCount = 3;
 
-        $senders = User::take($senderCount)->get();
+        $senders = User::has('timeline')->take($senderCount)->get();
 
         $senders->each( function($s) {
 
             $threadCount = $this->faker->numberBetween(1, 3); // number of receivers *per* sender (ie threads)
-            $receivers = User::take($threadCount)->where('id', '<>', $s->id)->get();
+            $receivers = User::has('timeline')->take($threadCount)->where('id', '<>', $s->id)->get();
 
             $receivers->each( function($r) use(&$s) {
                 $chatthread = $s->chatthreads()->create([

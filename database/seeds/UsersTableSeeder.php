@@ -159,7 +159,7 @@ class UsersTableSeeder extends Seeder
     {
         static $max = [
             'testing' => [
-                'users' => 7,
+                'users' => 12,
             ],
             'local' => [
                 'users' => 50,
