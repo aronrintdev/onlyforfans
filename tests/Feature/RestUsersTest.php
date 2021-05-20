@@ -115,7 +115,6 @@ class RestUsersTest extends TestCase
     /**
      *  @group users
      *  @group regression
-     *  @group here
      */
     public function test_user_can_get_session()
     {

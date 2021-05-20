@@ -27,10 +27,12 @@ class MessageController extends Controller
         $this->request = $request;
         $this->middleware('auth');
     }
+
     public function index()
     {
         return ChatThread::with('sender', 'receiver')->get();
     }
+
     public function fetchUsers(Request $request)
     {
         $sessionUser = $request->user();
@@ -208,52 +210,55 @@ class MessageController extends Controller
         }
         return $contacts; 
     }
-    public function fetchcontact(Request $request, $id) {
+
+    // fetches a specific convo between session user and user specified by $id
+    public function fetchcontact(Request $request, $contactPKID) {
         $sessionUser = $request->user();
 
         $offset = $request->query('offset');
         $limit = $request->query('limit');
         $chatthreads = ChatThread::with(['receiver'])
-            ->where(function($query) use(&$request, &$id) {
+            ->where(function($query) use(&$request, $contactPKID) {
                 $sessionUser = $request->user();
                 $query->where('sender_id', $sessionUser->id)
-                    ->where('receiver_id',  $id)
+                    ->where('receiver_id',  $contactPKID)
                     ->where('schedule_datetime', null);
             })
-            ->orWhere(function($query) use(&$request, &$id) {
+            ->orWhere(function($query) use(&$request, $contactPKID) {
                 $sessionUser = $request->user();
                 $query->where('receiver_id', $sessionUser->id)
-                    ->where('sender_id',  $id)
+                    ->where('sender_id',  $contactPKID)
                     ->where('schedule_datetime', null);
             })
             ->orderBy('created_at', 'DESC')
             ->skip($offset)
             ->take($limit)
             ->get();
+
         $chatthreads->each(function($chatthread) {
             $chatthread->messages = $chatthread->messages()->with('mediafile')->orderBy('mcounter', 'asc')->get();
         });
-        $user = Timeline::with(['user', 'avatar'])->where('user_id', $id)->first()->makeVisible(['user']);
-        $user->username = $user->user->username;
+        $timeline = Timeline::with(['user', 'avatar'])->where('user_id', $contactPKID)->first()->makeVisible(['user']);
+        $timeline->username = $timeline->user->username;
         $userSetting = $sessionUser->settings;
         $cattrs = $userSetting->cattrs;
         if ( array_key_exists('display_name', $cattrs) ) {
-            if ( array_key_exists($id, $cattrs['display_name']) ) {
-                $user->display_name = $cattrs['display_name'][$id];
+            if ( array_key_exists($contactPKID, $cattrs['display_name']) ) {
+                $timeline->display_name = $cattrs['display_name'][$contactPKID];
             }
         }
         if ( array_key_exists('muted', $cattrs) ) {
-            $index = array_search($id, $cattrs['muted']);
+            $index = array_search($contactPKID, $cattrs['muted']);
             if ( $index !== false ) {
-                $user->muted = true;
+                $timeline->muted = true;
             }
         }
-        $lists = DB::table('list_user')->where('user_id', $id)->get();
-        $user->hasLists = sizeof($lists) > 0;
-        $user->id = $user->user->id;
+        $lists = DB::table('list_user')->where('user_id', $contactPKID)->get();
+        $timeline->hasLists = sizeof($lists) > 0;
+        $timeline->id = $timeline->user->id; // %NOTE: we are actually passing the user pkid as the timeline pkid
         return [
             'messages' => $chatthreads,
-            'profile' => $user,
+            'profile' => $timeline,
             'currentUser' => $request->user()
         ];
     }
@@ -264,7 +269,7 @@ class MessageController extends Controller
         $vrules = [
             'user_id' => 'required|uuid|exists:users,id', // reciever of message
             'tip_price' => 'numeric',
-            'schedule_datetime' => 'nullable|date',
+            'schedule_datetime' => 'nullable|numeric', // sent as epoch time
         ];
         if ( $request->has('vaultfiles') ) {
             $vrules['vaultfiles'] = 'array';
@@ -288,6 +293,7 @@ class MessageController extends Controller
         $mediafiles = $request->file('mediafile');
         $vaultfiles = $request->input('vaultfiles');
         if ($mediafiles) {
+            // Media / File via upload form
             $index = 1;
             foreach ($mediafiles as $mf) {
                 $message = $chatthread->messages()->create([
@@ -319,6 +325,7 @@ class MessageController extends Controller
                 ]);
             }
         } else if ($vaultfiles) {
+            // Media / File pulled from vault
             $index = 1;
             foreach ($vaultfiles as $mfPKID) {
                 $message = $chatthread->messages()->create([
@@ -346,11 +353,11 @@ class MessageController extends Controller
                 ]);
             }
         } else {
+            // Simple text message with no media
             $chatthread->messages()->create([
                 'mcontent' => $request->input('message'),
             ]);
         }
-
 
         if (!$schedule_datetime) {
             $chatthread->messages = $chatthread->messages()->with('mediafile')->orderBy('mcounter', 'asc')->get();
@@ -522,6 +529,7 @@ class MessageController extends Controller
         $unread_threads = uniq($unread_threads);
         return ["unread_messages_count" => count($unread_threads)];
     }
+
     public function removeThread(Request $request, $id, $threadId) {
         $sessionUser = $request->user();
         $deleted = ChatThread::where('id', $threadId)->delete();
@@ -532,6 +540,7 @@ class MessageController extends Controller
         }
         abort(400);
     }
+
     public function setLike(Request $request, $id, $threadId) {
         $updated = ChatThread::where('id', $threadId)->update(['is_like' => true]);
         if ($updated) {
@@ -539,6 +548,7 @@ class MessageController extends Controller
         }
         abort(400);
     }
+
     public function setUnlike(Request $request, $id, $threadId) {
         $updated = ChatThread::where('id', $threadId)->update(['is_like' => false]);
         if ($updated) {
@@ -546,6 +556,7 @@ class MessageController extends Controller
         }
         abort(400);
     }
+
     public function fetchScheduled(Request $request)
     {
         $sessionUser = $request->user();
@@ -574,6 +585,7 @@ class MessageController extends Controller
 
         return $chatThreads->toArray(); 
     }
+
     public function removeScheduleThread(Request $request, $threadId) {
         $deleted = ChatThread::where('id', $threadId)->delete();
         if ($deleted) {
@@ -581,10 +593,12 @@ class MessageController extends Controller
         }
         abort(400);
     }
+
     public function editScheduleThread(Request $request, $threadId) {
         $chatThread = ChatThread::where('id', $threadId)->first();
         $chatThread->schedule_datetime = $request->input('schedule_datetime');
         $chatThread->save();
         return ['status' => 200];
     }
+
 }
