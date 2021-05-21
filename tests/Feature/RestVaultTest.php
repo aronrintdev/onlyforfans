@@ -707,7 +707,7 @@ class RestVaultTest extends TestCase
             'type' => PostTypeEnum::FREE,
             'timeline_id' => $timeline->id,
             'description' => $this->faker->realText,
-            'mediafiles' => [$mediafile->id],
+            'mediafiles' => [$mediafile->id], // %NOTE: sends array
         ];
         $response = $this->actingAs($owner)->ajaxJSON('POST', route('posts.store'), $payload);
         $response->assertStatus(201);
@@ -1044,7 +1044,6 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
-     *  @group OFF-here
      */
     public function test_select_mediafiles_in_vaultfolder_to_share_with_registered_user()
     {

@@ -68,7 +68,6 @@ class RestSubscriptionssTest extends TestCase
     /**
      *  @group subscriptions
      *  @group regression
-     *  @group OFF-here0511
      */
     public function test_owner_can_list_active_subscriptions()
     {
@@ -97,7 +96,6 @@ class RestSubscriptionssTest extends TestCase
     /**
      *  @group subscriptions
      *  @group regression
-     *  @group OFF-here0511
      */
     public function test_owner_can_list_inactive_subscriptions()
     {

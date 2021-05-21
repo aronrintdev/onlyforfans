@@ -19,7 +19,6 @@ class RestFavoritesTest extends TestCase
     /**
      *  @group favorites
      *  @group regression
-     *  @group here0512
      */
     public function test_can_list_favorites()
     {

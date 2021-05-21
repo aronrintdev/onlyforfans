@@ -6,15 +6,11 @@ use Illuminate\Support\Facades\Schema;
 
 class CreateStoriesTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
     public function up()
     {
         Schema::create('stories', function (Blueprint $table) {
             $table->uuid('id')->primary();
+            $table->string('slug')->unique();
             $table->uuid('timeline_id')->nullable();
             $table->string('stype')->comment('Enum: Story type');
             $table->json('content')->nullable()->comment('JSON-encoded content attributes');
@@ -25,11 +21,6 @@ class CreateStoriesTable extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
     public function down()
     {
         Schema::dropIfExists('stories');

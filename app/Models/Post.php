@@ -74,7 +74,8 @@ class Post extends Model
             // %TODO: should ref count these (?), or N/A as we are cloning (ie ref count always 1)?
             foreach ($model->mediafiles as $o) {
                 //Storage::disk('s3')->delete($o->filename); // Remove from S3  -> moved to Mediafile model
-                $o->delete();
+                //$o->delete();
+                $o->diskmediafile->deleteReference($o->id);
             }
             foreach ($model->comments as $o) {
                 $o->delete();

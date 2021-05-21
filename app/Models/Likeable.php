@@ -19,7 +19,7 @@ class Likeable extends Model
 
     public function liker()
     { 
-        return $this->belongsTo(User::class, 'likee_id'); // %FIXME: mis-named column should be liker_id AF-269
+        return $this->belongsTo(User::class, 'liker_id'); // %FIXME: mis-named column should be liker_id AF-269
     }
 
     /*

@@ -6,15 +6,11 @@ use Illuminate\Support\Facades\Schema;
 
 class CreateTimelinesTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
     public function up()
     {
         Schema::create('timelines', function (Blueprint $table) {
             $table->uuid('id')->primary();
+            $table->string('slug')->unique();
             $table->uuid('user_id');
             $table->foreign('user_id')->references('id')->on('users');
 
@@ -33,11 +29,6 @@ class CreateTimelinesTable extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
     public function down()
     {
         Schema::dropIfExists('timelines');

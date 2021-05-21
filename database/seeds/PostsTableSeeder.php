@@ -102,6 +102,7 @@ class PostsTableSeeder extends Seeder
                     for ( $i = 0 ; $i < $numberOfImages ; $i++ ) {
                         $imgDim = $this->faker->randomElement(self::$IMAGE_SIZES);
                         $mf = FactoryHelpers::createImage(
+                            $post->getPrimaryOwner(),
                             MediafileTypeEnum::POST,  // mftype
                             $post->id,  // resourceID
                             $this->doS3Upload, // true, // doS3Upload
@@ -120,7 +121,7 @@ class PostsTableSeeder extends Seeder
                 /*
                 // LIKES - Select random users to like this post...
                 $likers = FactoryHelpers::parseRandomSubset($users, 20);
-                $likee = $u;
+                $liker = $u;
                 $likers->each( function($liker) use(&$post) {
                     if ( !$post->users_liked->contains($liker->id) ) {
                         $post->users_liked()->attach($liker->id);

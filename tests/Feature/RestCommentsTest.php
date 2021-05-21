@@ -436,7 +436,7 @@ class RestCommentsTest extends TestCase
 
         // remove any existing likes by fan...
         $likeable = DB::table('likeables')
-            ->where('likee_id', $fan->id)
+            ->where('liker_id', $fan->id)
             ->where('likeable_type', 'comments')
             ->where('likeable_id', $comment->id)
             ->first();
@@ -459,12 +459,12 @@ class RestCommentsTest extends TestCase
         $this->assertEquals($comment->id, $commentR->id);
 
         $likeable = DB::table('likeables')
-            ->where('likee_id', $fan->id)
+            ->where('liker_id', $fan->id)
             ->where('likeable_type', 'comments')
             ->where('likeable_id', $commentR->id)
             ->first();
         $this->assertNotNull($likeable);
-        $this->assertEquals($fan->id, $likeable->likee_id);
+        $this->assertEquals($fan->id, $likeable->liker_id);
         $this->assertEquals('comments', $likeable->likeable_type);
         $this->assertEquals($commentR->id, $likeable->likeable_id);
 
@@ -473,11 +473,11 @@ class RestCommentsTest extends TestCase
             'likeable_type' => 'comments',
             'likeable_id' => $comment->id,
         ];
-        $response = $this->actingAs($fan)->ajaxJSON('DELETE', route('likeables.destroy', $fan->id), $payload); // fan->likee
+        $response = $this->actingAs($fan)->ajaxJSON('DELETE', route('likeables.destroy', $fan->id), $payload);
         $response->assertStatus(200);
 
         $likeable = DB::table('likeables')
-            ->where('likee_id', $fan->id)
+            ->where('liker_id', $fan->id)
             ->where('likeable_type', 'comments')
             ->where('likeable_id', $commentR->id)
             ->first();

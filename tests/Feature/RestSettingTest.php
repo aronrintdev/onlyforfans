@@ -256,7 +256,6 @@ class RestSettingTest extends TestCase
     /**
      *  @group OFF-settings
      *  @group OFF-regression
-     *  @group OFF-here0513
      */
     // %TODO %ERIK has moved out of settings...
     public function test_can_batch_edit_settings_subscriptions()

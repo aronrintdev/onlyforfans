@@ -135,7 +135,7 @@ class MediafileTest extends TestCase
         $this->assertNotNull($content->mediafile);
         $mediafile = $content->mediafile;
 
-        Storage::disk('s3')->assertExists($mediafile->filename);
+        Storage::disk('s3')->assertExists($mediafile->diskmediafile->filepath);
         $this->assertSame($filename, $mediafile->mfname);
         $this->assertSame(MediafileTypeEnum::AVATAR, $mediafile->mftype);
     }
@@ -150,7 +150,7 @@ class MediafileTest extends TestCase
         // Update or add avatars to some users for this test...
         $users = User::take(5)->get();
         $users->each( function($u) {
-            $avatar = FactoryHelpers::createImage(MediafileTypeEnum::AVATAR, null, false); //skip S3 upload
+            $avatar = FactoryHelpers::createImage($u, MediafileTypeEnum::AVATAR, null, false); //skip S3 upload
             $u->save();
         });
     }

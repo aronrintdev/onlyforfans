@@ -754,7 +754,6 @@
 <script>
   import moment from 'moment';
   import _ from 'lodash';
-  import { Swiper, SwiperSlide, directive } from 'vue-awesome-swiper';
   import PhotoSwipe from 'photoswipe/dist/photoswipe';
   import PhotoSwipeUI from 'photoswipe/dist/photoswipe-ui-default';
   import createPreviewDirective from 'vue-photoswipe-directive';
@@ -777,6 +776,7 @@
     data: () => ({
       selectedUser: undefined,
       users: [],
+      messages: [],
       loading: true,
       moment: moment,
       messageSearchVisible: false,
@@ -926,15 +926,12 @@
       }
     },
     components: {
-      Swiper,
-      SwiperSlide,
       draggable,
       'radio-group-box': RadioGroupBox,
       'round-check-box': RoundCheckBox,
       'chat-sidebar': Sidebar,
     },
     directives: {
-      swiper: directive,
       preview: createPreviewDirective({
           showAnimationDuration: 0,
           bgOpacity: 0.75
@@ -1012,13 +1009,16 @@
         response.data.messages.forEach(message => {
           let videos = 0, audios = 0, images = 0;
           message.messages.map(msg => {
-            if (msg.mediafile && msg.mediafile.mimetype.indexOf('video/') > -1) {
+            //if (msg.mediafile && msg.mediafile.mimetype.indexOf('video/') > -1) {
+            if (msg.mediafile && msg.mediafile.is_video) {
               videos++;
             }
-            if (msg.mediafile && msg.mediafile.mimetype.indexOf('audio/') > -1) {
+            //if (msg.mediafile && msg.mediafile.mimetype.indexOf('audio/') > -1) {
+            if (msg.mediafile && msg.mediafile.is_audio) {
               audios++;
             }
-            if (msg.mediafile && msg.mediafile.mimetype.indexOf('image/') > -1) {
+            //if (msg.mediafile && msg.mediafile.mimetype.indexOf('image/') > -1) {
+            if (msg.mediafile && msg.mediafile.is_image) {
               images++;
             }
           });
@@ -1114,7 +1114,6 @@
             const { file, mftype, src } = media;
             if (mftype !== 'vault') {
               data.append('mediafile[]', file);
-              data.append('vaultfiles[]', null);
             } else {
               data.append('mediafile[]', null);
               data.append('vaultfiles[]', file);

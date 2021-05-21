@@ -17,6 +17,7 @@ use App\Models\User;
 use App\Models\Post;
 use App\Models\Story;
 use App\Models\Mediafile;
+use App\Models\Diskmediafile;
 use App\Enums\MediafileTypeEnum;
 
 class MediafilesController extends AppBaseController
@@ -83,7 +84,7 @@ class MediafilesController extends AppBaseController
     {
         $this->validate($request, [
             'mediafile' => 'required',
-            'mftype' => 'required|in:avatar,cover,post,story,vault',
+            'mftype' => 'required|in:'.MediafileTypeEnum::getKeysCsv(),
             'resource_type' => 'nullable|alpha-dash|in:comments,posts,stories,vaultfolders',
             'resource_id' => 'required_with:resource_type|uuid',
         ]);
@@ -104,24 +105,22 @@ class MediafilesController extends AppBaseController
         }
 
         try {
-            $mediafile = DB::transaction(function () use(&$file, &$request) {
-                $subFolder = MediafileTypeEnum::getSubfolder($request->mftype);
-                //$newFilename = $file->store('./'.$subFolder, 's3');
-                $newFilename = $file->store($subFolder, 's3');
-                $mfname = $mfname ?? $file->getClientOriginalName();
-                $mediafile = Mediafile::create([
-                    'resource_id' => $request->resource_id,
-                    'resource_type' => $request->resource_type,
-                    'filename' => $newFilename,
-                    'mfname' => $mfname,
-                    'mftype' => $request->mftype,
-                    'meta' => $request->input('meta') ?? null,
-                    'mimetype' => $file->getMimeType(),
-                    'orig_filename' => $file->getClientOriginalName(),
-                    'orig_ext' => $file->getClientOriginalExtension(),
-                ]);
-                return $mediafile;
-            });
+            $owner = $request->user(); // the orig. content OWNER
+            $subFolder = $owner->id;
+            $s3Path = $file->store($subFolder, 's3');
+            $mfname = $mfname ?? $file->getClientOriginalName();
+
+            $mediafile = Diskmediafile::doCreate([
+                'owner_id'      => $owner->id,
+                'filepath'      => $s3Path,
+                'mimetype'      => $file->getMimeType(),
+                'orig_filename' => $file->getClientOriginalName(),
+                'orig_ext'      => $file->getClientOriginalExtension(),
+                'mfname'        => $mfname,
+                'mftype'        => $request->mftype,
+                'resource_id'   => $request->resource_id,
+                'resource_type' => $request->resource_type,
+            ]);
         } catch (\Exception $e) {
             throw $e; // %FIXME: report error to user via browser message
         }

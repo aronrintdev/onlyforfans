@@ -147,7 +147,7 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
 
     public function likedposts()
     {
-        return $this->morphedByMany(Post::class, 'likeable', 'likeables', 'likee_id')
+        return $this->morphedByMany(Post::class, 'likeable', 'likeables', 'liker_id')
             ->withTimestamps();
     }
 
@@ -237,14 +237,14 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
 
     public function getAvatarAttribute($value)
     {
-        return $this->timeline->avatar
+        return ($this->timeline && $this->timeline->avatar)
             ? $this->timeline->avatar
             : (object) ['filepath' => url('user/avatar/default-' . $this->gender . '-avatar.png')];
     }
 
     public function getCoverAttribute($value)
     {
-        return $this->timeline->cover
+        return ($this->timeline && $this->timeline->cover)
             ? $this->timeline->cover
             : (object) ['filepath' => url('user/avatar/default-' . $this->gender . '-cover.png')];
             //: (object) ['filepath' => url('user/cover/default-' . $this->gender . '-cover.png')]; // %TODO %FIXME
@@ -252,7 +252,7 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
 
     public function getAboutAttribute($value)
     {
-        return $this->timeline->about ? $this->timeline->about : null;
+        return ($this->timeline && $this->timeline->about) ? $this->timeline->about : null;
     }
 
     // ---
@@ -274,7 +274,7 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
 
     public function commentLikes()
     {
-        return $this->morphedByMany(Comment::class, 'likeable', 'likeables', 'likee_id')
+        return $this->morphedByMany(Comment::class, 'likeable', 'likeables', 'liker_id')
             ->withTimestamps();
     }
 

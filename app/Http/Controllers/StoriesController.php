@@ -6,10 +6,12 @@ use Auth;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Resources\StoryCollection;
 use App\Http\Resources\Story as StoryResource;
 use App\Models\Mediafile;
+use App\Models\Diskmediafile;
 use App\Models\Setting;
 use App\Models\Story;
 use App\Models\Timeline;
@@ -126,30 +128,41 @@ class StoriesController extends AppBaseController
 
                 if ( $request->attrs['stype'] === StoryTypeEnum::PHOTO ) {
                     if ( $request->hasFile('mediafile') ) {
+                        // mediafile request param is of type FILE...see vrules above
                         $file = $request->file('mediafile');
-                        $subFolder = 'stories';
-                        $newFilename = $file->store('./'.$subFolder, 's3'); // %FIXME: hardcoded
-                        $mediafile = Mediafile::create([
-                            'resource_id' => $story->id,
-                            'resource_type' => 'stories',
-                            'filename' => $newFilename,
-                            'mfname' => $mfname ?? $file->getClientOriginalName(),
-                            'mftype' => MediafileTypeEnum::STORY,
-                            'meta' => $request->input('attrs.foo') ?? null,
-                            'cattrs' => $request->input('attrs.bar') ?? null,
-                            'mimetype' => $file->getMimeType(),
-                            'orig_filename' => $file->getClientOriginalName(),
-                            'orig_ext' => $file->getClientOriginalExtension(),
+                        $subFolder = $request->user()->id;
+                        $s3Path = $file->store('./'.$subFolder, 's3'); // %FIXME: hardcoded
+                        $mediafile = Diskmediafile::doCreate([
+                            'owner_id'        => $request->user()->id,
+                            'filepath'        => $s3Path,
+                            'mimetype'        => $file->getMimeType(),
+                            'orig_filename'   => $file->getClientOriginalName(),
+                            'orig_ext'        => $file->getClientOriginalExtension(),
+                            'mfname'          => $file->getClientOriginalName(),
+                            'mftype'          => MediafileTypeEnum::STORY,
+                            'resource_id'     => $story->id,
+                            'resource_type'   => 'stories',
                         ]);
                     } else {
-                        $src = Mediafile::find($request->mediafile);
-                        $cloned = $src->doClone('stories', $story->id);
-                        $story->mediafiles()->save($cloned);
+                        // mediafile request param is ID, referneces existing mediafile (in vault)...see vrules above
+                        $refMF = Mediafile::where('resource_type', 'vaultfolders')
+                            ->where('is_primary', true)
+                            ->findOrFail($request->mediafile)
+                            ->diskmediafile->createReference(
+                                'stories',    // $resourceType
+                                $story->id,  // $resourceID
+                                'New Story', // $mfname - could be optionally passed as a query param %TODO
+                                MediafileTypeEnum::STORY // $mftype
+                            );
                     }
                 }
                 return $story;
             });
         } catch (Exception $e) {
+             Log::error( json_encode([
+                 'msg' => 'StoriessController::store() - error',
+                 'emsg' => $e->getMessage(),
+             ]) );
             abort(400);
         }
 
@@ -216,9 +229,8 @@ class StoriesController extends AppBaseController
         $storiesA = $stories->map( function($item, $iter) {
             $a = $item->toArray();
             if ( count($item->mediafiles) ) {
-                $fn = $item->mediafiles[0]->filename;
-                $a['mf_filename'] = $fn;
-                $a['mf_url'] = Storage::disk('s3')->url($fn); // %FIXME: use model attribute
+                $a['mf_filename'] = $item->mediafiles[0]->name;
+                $a['mf_url'] = $item->mediafiles[0]->filepath;
             }
             return $a;
         });

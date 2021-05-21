@@ -755,7 +755,7 @@ class RestPostsTest extends TestCase
 
         // remove any existing likes by fan...
         DB::table('likeables')
-            ->where('likee_id', $fan->id)
+            ->where('liker_id', $fan->id)
             ->where('likeable_type', 'posts')
             ->where('likeable_id', $post->id)
             ->delete();
@@ -765,7 +765,7 @@ class RestPostsTest extends TestCase
             'likeable_type' => 'posts',
             'likeable_id' => $post->id,
         ];
-        $response = $this->actingAs($fan)->ajaxJSON('PUT', route('likeables.update', $fan->id), $payload); // fan->likee
+        $response = $this->actingAs($fan)->ajaxJSON('PUT', route('likeables.update', $fan->id), $payload);
         $response->assertStatus(200);
 
         $content = json_decode($response->content());
@@ -775,12 +775,12 @@ class RestPostsTest extends TestCase
         $this->assertEquals($post->id, $postR->id);
 
         $likeable = DB::table('likeables')
-            ->where('likee_id', $fan->id)
+            ->where('liker_id', $fan->id)
             ->where('likeable_type', 'posts')
             ->where('likeable_id', $postR->id)
             ->first();
         $this->assertNotNull($likeable);
-        $this->assertEquals($fan->id, $likeable->likee_id);
+        $this->assertEquals($fan->id, $likeable->liker_id);
         $this->assertEquals('posts', $likeable->likeable_type);
         $this->assertEquals($postR->id, $likeable->likeable_id);
 
@@ -789,11 +789,11 @@ class RestPostsTest extends TestCase
             'likeable_type' => 'posts',
             'likeable_id' => $post->id,
         ];
-        $response = $this->actingAs($fan)->ajaxJSON('DELETE', route('likeables.destroy', $fan->id), $payload); // fan->likee
+        $response = $this->actingAs($fan)->ajaxJSON('DELETE', route('likeables.destroy', $fan->id), $payload);
         $response->assertStatus(200);
 
         $likeable = DB::table('likeables')
-            ->where('likee_id', $fan->id)
+            ->where('liker_id', $fan->id)
             ->where('likeable_type', 'posts')
             ->where('likeable_id', $postR->id)
             ->first();
@@ -822,7 +822,7 @@ class RestPostsTest extends TestCase
             'likeable_type' => 'posts',
             'likeable_id' => $post->id,
         ];
-        $response = $this->actingAs($nonfan)->ajaxJSON('PUT', route('likeables.update', $nonfan->id), $payload); // fan->likee
+        $response = $this->actingAs($nonfan)->ajaxJSON('PUT', route('likeables.update', $nonfan->id), $payload);
         $response->assertStatus(200);
     }
 
@@ -844,7 +844,7 @@ class RestPostsTest extends TestCase
             'likeable_type' => 'posts',
             'likeable_id' => $post->id,
         ];
-        $response = $this->actingAs($creator)->ajaxJSON('PUT', route('likeables.update', $creator->id), $payload); // fan->likee
+        $response = $this->actingAs($creator)->ajaxJSON('PUT', route('likeables.update', $creator->id), $payload); 
         $response->assertStatus(200);
 
         // LIKE the post (priced)
@@ -853,7 +853,7 @@ class RestPostsTest extends TestCase
             'likeable_type' => 'posts',
             'likeable_id' => $post->id,
         ];
-        $response = $this->actingAs($creator)->ajaxJSON('PUT', route('likeables.update', $creator->id), $payload); // fan->likee
+        $response = $this->actingAs($creator)->ajaxJSON('PUT', route('likeables.update', $creator->id), $payload); 
         $response->assertStatus(200);
 
         // LIKE the post (subcribe-only)
@@ -862,7 +862,7 @@ class RestPostsTest extends TestCase
             'likeable_type' => 'posts',
             'likeable_id' => $post->id,
         ];
-        $response = $this->actingAs($creator)->ajaxJSON('PUT', route('likeables.update', $creator->id), $payload); // fan->likee
+        $response = $this->actingAs($creator)->ajaxJSON('PUT', route('likeables.update', $creator->id), $payload); 
         $response->assertStatus(200);
 
     }

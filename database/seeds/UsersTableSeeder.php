@@ -109,8 +109,18 @@ class UsersTableSeeder extends Seeder
 
             if ( $this->appEnv !== 'testing' ) {
                 $this->output->writeln("Creating new user with avatar & cover: " . $u->name." (iter: $iter)");
-                $avatar = FactoryHelpers::createImage(MediafileTypeEnum::AVATAR, $u->id, $this->doS3Upload);
-                $cover = FactoryHelpers::createImage(MediafileTypeEnum::COVER, $u->id, $this->doS3Upload);
+                $avatar = FactoryHelpers::createImage(
+                    $u,
+                    MediafileTypeEnum::AVATAR, 
+                    $u->id, 
+                    $this->doS3Upload
+                );
+                $cover = FactoryHelpers::createImage(
+                    $u,
+                    MediafileTypeEnum::COVER, 
+                    $u->id, 
+                    $this->doS3Upload
+                );
             } else {
                 //$this->output->writeln("Creating new user without avatar & cover: " . $u->name." (iter: $iter)");
                 $avatar = null;
@@ -149,7 +159,7 @@ class UsersTableSeeder extends Seeder
     {
         static $max = [
             'testing' => [
-                'users' => 7,
+                'users' => 12,
             ],
             'local' => [
                 'users' => 50,

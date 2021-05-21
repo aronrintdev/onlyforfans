@@ -15,7 +15,7 @@ class Likeable extends JsonResource
             //'id' => $this->id,
             'likeable_id' => $this->likeable_id,
             'likeable_type' => $this->likeable_type,
-            'liker_id' => $this->likee_id, // %FIXME: mis-named column should be liker_id AF-269
+            'liker_id' => $this->liker_id,
             'liker' => $this->whenLoaded('liker'),
             //'likeable' => PostResource($this->whenLoaded('likeable')),
             'likeable' => $this->whenLoaded('likeable'),

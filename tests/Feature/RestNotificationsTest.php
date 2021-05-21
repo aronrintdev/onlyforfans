@@ -101,7 +101,7 @@ class RestNotificationsTest extends TestCase
 
         // remove any existing likes by fan...
         DB::table('likeables')
-            ->where('likee_id', $fan->id)
+            ->where('liker_id', $fan->id)
             ->where('likeable_type', 'posts')
             ->where('likeable_id', $post->id)
             ->delete();
@@ -111,7 +111,7 @@ class RestNotificationsTest extends TestCase
             'likeable_type' => 'posts',
             'likeable_id' => $post->id,
         ];
-        $response = $this->actingAs($fan)->ajaxJSON('PUT', route('likeables.update', $fan->id), $payload); // fan->likee
+        $response = $this->actingAs($fan)->ajaxJSON('PUT', route('likeables.update', $fan->id), $payload); 
         $response->assertStatus(200);
         $creator->refresh();
 
@@ -200,7 +200,7 @@ class RestNotificationsTest extends TestCase
 
         // remove any existing likes by fan...
         DB::table('likeables')
-            ->where('likee_id', $fan->id)
+            ->where('liker_id', $fan->id)
             ->where('likeable_type', 'posts')
             ->where('likeable_id', $post->id)
             ->delete();
@@ -210,7 +210,7 @@ class RestNotificationsTest extends TestCase
             'likeable_type' => 'posts',
             'likeable_id' => $post->id,
         ];
-        $response = $this->actingAs($fan)->ajaxJSON('PUT', route('likeables.update', $fan->id), $payload); // fan->likee
+        $response = $this->actingAs($fan)->ajaxJSON('PUT', route('likeables.update', $fan->id), $payload); 
         $response->assertStatus(200);
         $creator->refresh();
 

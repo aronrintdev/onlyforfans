@@ -6,17 +6,13 @@ use Illuminate\Support\Facades\Schema;
 
 class CreateBlockablesTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
     public function up()
     {
         Schema::create('blockables', function (Blueprint $table) {
             /**
              * User blocking resource
              */
+            $table->increments('id'); // just use integer as this is a join table and sync, etc may not work with UUID %PSG
             $table->uuid('user_id')->comment('User blocking resource');
             $table->foreign('user_id')->references('id')->on('users');
 
@@ -30,11 +26,6 @@ class CreateBlockablesTable extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
     public function down()
     {
         Schema::dropIfExists('blockables');

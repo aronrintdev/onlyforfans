@@ -70,7 +70,12 @@ class StoriesTableSeeder extends Seeder
                 case 'text':
                     break;
                 case 'image':
-                    $mf = FactoryHelpers::createImage(MediafileTypeEnum::STORY, $story->id, $this->doS3Upload);
+                    $mf = FactoryHelpers::createImage(
+                        $story->getPrimaryOwner(),
+                        MediafileTypeEnum::STORY, 
+                        $story->id, 
+                        $this->doS3Upload
+                    );
                     break;
                 }
             });

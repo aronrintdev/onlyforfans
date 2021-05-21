@@ -30,7 +30,7 @@ class DeleteMediafileAssets extends Command
             if ( !$mf->trashed() ) {
                 throw new Exception('not trashed!');
             }
-            $mf->deleteAssets();
+            $mf->diskmediafile->forceDeleteAll();
             /*
             try {
             } catch (Exception $e) {
