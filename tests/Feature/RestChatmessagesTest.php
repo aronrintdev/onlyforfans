@@ -22,7 +22,7 @@ class RestChatmessagesTest extends TestCase
 
     /**
      *  @group chatmessages
-     *  @group DEPRECATED-regression
+     *  @group OFF-regression
      *  @group here0521
      */
     public function test_can_index_chatmessages()
@@ -32,7 +32,9 @@ class RestChatmessagesTest extends TestCase
         $sessionUser = User::has('chatthreads')->firstOrFail();
         $this->assertFalse($sessionUser->isAdmin());
 
-        $payload = [ ];
+        $payload = [ 
+            'take' => 100,
+        ];
         $response = $this->actingAs($sessionUser)->ajaxJSON( 'GET', route('chatmessages.index', $payload) );
 
         $response->assertStatus(200);
@@ -55,6 +57,15 @@ class RestChatmessagesTest extends TestCase
         ]);
         //dd($content);
         //dd($content->messages);
+
+        // Check no messages from threads in which I am not a participant
+        $chatmessages = collect($content->data);
+        $num = $chatmessages->reduce( function($acc, $cm) use(&$sessionUser) {
+            $chatmessage = Chatmessage::find($cm->id);
+            $this->assertNotNull($chatmessage);
+            return ($chatmessage->chatthread->participants->contains($sessionUser->id)) ? $acc : ($acc+1);
+        }, 0);
+        $this->assertEquals(0, $num, 'Found chatmessage in thread in which session user is not a participant (of '.$content->meta->total.' total messages)');
     }
 
 

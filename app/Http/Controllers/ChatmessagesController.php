@@ -31,19 +31,18 @@ class ChatmessagesController extends AppBaseController
         if ( !$request->user()->isAdmin() ) {
             //$query->where('user_id', $request->user()->id); // non-admin: can only view own...
             //unset($filters['user_id']);
+
+            $query->whereHas('chatthread.participants', function($q1) use(&$request) {
+                $q1->where('user_id', $request->user()->id); // limit to threads where session user is a participant
+            });
+
             if ( array_key_exists('chatthread_id', $filters) ) {
                 $chatthread = Chatthread::findOrFail($filters['chatthread_id']);
                 $this->authorize('view', $chatthread);
             }
             if ( array_key_exists('sender_id', $filters) ) {
-                $query->whereHas('chatthread.participants', function($q1) {
-                    $q1->where('user_id', $request->user()->id); // limit to threads where session user is a participant
-                });
             }
             if ( array_key_exists('participant_id', $filters) ) {
-                $query->whereHas('chatthread.participants', function($q1) {
-                    $q1->where('user_id', $request->user()->id); // limit to threads where session user is a participant
-                });
             }
         }
 
