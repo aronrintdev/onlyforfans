@@ -100,7 +100,10 @@ import VueCroppie from 'vue-croppie';
 import 'croppie/croppie.css' // import the croppie css manually
 Vue.use(VueCroppie);
 
-import 'swiper/swiper.min.css';
+import VueAwesomeSwiper from 'vue-awesome-swiper';
+import 'swiper/css/swiper.css';
+Vue.use(VueAwesomeSwiper);
+
 import 'photoswipe/dist/photoswipe.css';
 import 'photoswipe/dist/default-skin/default-skin.css';
 

@@ -754,7 +754,6 @@
 <script>
   import moment from 'moment';
   import _ from 'lodash';
-  import { Swiper, SwiperSlide, directive } from 'vue-awesome-swiper';
   import PhotoSwipe from 'photoswipe/dist/photoswipe';
   import PhotoSwipeUI from 'photoswipe/dist/photoswipe-ui-default';
   import createPreviewDirective from 'vue-photoswipe-directive';
@@ -927,15 +926,12 @@
       }
     },
     components: {
-      Swiper,
-      SwiperSlide,
       draggable,
       'radio-group-box': RadioGroupBox,
       'round-check-box': RoundCheckBox,
       'chat-sidebar': Sidebar,
     },
     directives: {
-      swiper: directive,
       preview: createPreviewDirective({
           showAnimationDuration: 0,
           bgOpacity: 0.75
