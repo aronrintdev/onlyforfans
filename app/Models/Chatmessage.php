@@ -19,6 +19,15 @@ class Chatmessage extends Model implments UuidId
         return $this->belongsTo(ChatThread::class, 'messagable_id');
     }
 
+    public function sender()
+    {
+        return $this->belongsTo(User::class, 'sender_id');
+    }
+
+    //--------------------------------------------
+    // %%% Relationships
+    //--------------------------------------------
+
     public function mediafile()
     {
         return $this->morphOne(Mediafile::class, 'resource');

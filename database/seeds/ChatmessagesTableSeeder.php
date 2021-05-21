@@ -7,22 +7,22 @@ use DB;
 use Exception;
 use Carbon\Carbon;
 
-use App\Models\User;
-use App\Models\ChatThread;
-use App\Models\Message;
 use App\Libs\UuidGenerator;
 use App\Libs\FactoryHelpers;
+use App\Models\User;
+use App\Models\Chatthread;
+use App\Models\Chatmessage;
 
-class MessagesTableSeeder extends Seeder
+class ChatmessagesTableSeeder extends Seeder
 {
     use SeederTraits;
 
     public function run()
     {
-        $this->initSeederTraits('MessagesTableSeeder'); // $this->{output, faker, appEnv}
+        $this->initSeederTraits('ChatmessagesTableSeeder'); // $this->{output, faker, appEnv}
 
         if ( $this->appEnv !== 'testing' ) {
-            $this->output->writeln("  - Messages seeder: loaded ".$posts->count()." posts...");
+            $this->output->writeln("  - Chatmessages seeder: loaded ".$posts->count()." posts...");
         }
 
         //$senderCount = $this->faker->numberBetween(2, 4); // number of senders
@@ -36,6 +36,11 @@ class MessagesTableSeeder extends Seeder
             $receivers = User::has('timeline')->take($threadCount)->where('id', '<>', $s->id)->get();
 
             $receivers->each( function($r) use(&$s) {
+                $msgCount = $this->faker->numberBetween(1, 5);
+                for ( $i = 0 ; $i < $msgCount ; $i++ ) {
+                    $s->sendChatmessage($r, $this->faker->realText);
+                }
+                /*
                 $chatthread = $s->chatthreads()->create([
                     'receiver_id' => $r->id,
                     //'tip_price' => $request->input('tip_price'),
@@ -47,6 +52,7 @@ class MessagesTableSeeder extends Seeder
                         'mcontent' => $this->faker->realText,
                     ]);
                 }
+                 */
             });
 
 

@@ -218,6 +218,26 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
         return $this->hasMany(Subscription::class);
     }
 
+    public function receivedmessages()
+    {
+        return $this->hasMany(Chatmessages::class, 'receiver_id');
+    }
+
+    public function sentmessages()
+    {
+        return $this->hasMany(Chatmessages::class, 'sender_id');
+    }
+
+//    public function lists()
+//    {
+//        return $this->belongsToMany(Lists::class, 'list_user', 'user_id', 'list_id')->withTimestamps();
+//    }
+//
+//    public function userlists()
+//    {
+//        return $this->hasMany(Lists::class, 'creator_id');
+//    }
+
     //--------------------------------------------
     // %%% Accessors/Mutators | Casts
     //--------------------------------------------
@@ -459,23 +479,13 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
 
     #endregion HasFinancialAccounts
 
-    /**
-     * A user can have many chatthreads
-     */
-    public function chatthreads()
+    // %%% --- Misc. ---
+
+    public function sendChatmessage(User $receiver, string $mcontents, int $deliverAt=null)
     {
-        return $this->hasMany(ChatThread::class, 'sender_id');
+        $chatthread = Chatthread::where('origin
     }
 
-    public function lists()
-    {
-        return $this->belongsToMany(Lists::class, 'list_user', 'user_id', 'list_id')->withTimestamps();
-    }
-
-    public function userlists()
-    {
-        return $this->hasMany(Lists::class, 'creator_id');
-    }
 }
 
     /*

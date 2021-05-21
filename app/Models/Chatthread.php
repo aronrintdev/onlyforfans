@@ -14,21 +14,6 @@ class Chatthread extends Model implements UuidId
 
     protected $guarded = [ 'id', 'created_at', 'updated_at' ];
 
-    public function sender()
-    {
-        return $this->belongsTo(User::class, 'sender_id');
-    }
-
-    public function receiver()
-    {
-        return $this->belongsTo(User::class, 'receiver_id');
-    }
-
-    public function messages()
-    {
-        return $this->morphMany(Message::class, 'messagable');
-    }
-
     //--------------------------------------------
     // %%% Accessors/Mutators | Casts
     //--------------------------------------------
@@ -39,8 +24,19 @@ class Chatthread extends Model implements UuidId
 
     public function messages()
     {
-        return $this->hasMany(Chatmessage::class);
+        return $this->hasMany(Message::class);
     }
+
+    public function originator()
+    {
+        return $this->belongsTo(User::class, 'sender_id');
+    }
+
+    public function participants() // ie receivers, readers, etc; should include originator
+    {
+        return $this->belongsToMany(User::class, 'user_id');
+    }
+
 
     //--------------------------------------------
     // %%% Methods
