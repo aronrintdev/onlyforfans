@@ -8,7 +8,7 @@ use Illuminate\Support\Collection;
 use App\Interfaces\UuidId;
 use App\Models\Traits\UsesUuid;
 
-class Chatmessage extends Model implments UuidId
+class Chatmessage extends Model implements UuidId
 {
     use UsesUuid;
 
@@ -16,7 +16,7 @@ class Chatmessage extends Model implments UuidId
 
     public function chatthread()
     {
-        return $this->belongsTo(ChatThread::class, 'messagable_id');
+        return $this->belongsTo(ChatThread::class);
     }
 
     public function sender()

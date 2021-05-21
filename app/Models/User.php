@@ -218,6 +218,11 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
         return $this->hasMany(Subscription::class);
     }
 
+    public function chatthreads() // ie threads this user 'participates' in
+    {
+        return $this->belongsToMany(Chatthread::class, 'chatthread_user', 'user_id', 'chatthread_id');
+    }
+
     public function receivedmessages()
     {
         return $this->hasMany(Chatmessages::class, 'receiver_id');

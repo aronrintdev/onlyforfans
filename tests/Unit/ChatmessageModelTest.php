@@ -33,15 +33,32 @@ class ChatmessageModelTest extends TestCase
      */
     public function test_should_get_chatmessages()
     {
-        $messages = Chatmessages::get();
-        dd($messages);
+        $messages = Chatmessage::get();
+        //$this->assertObjectHasAttribute('description', $content->data); // can see contents
+        $this->assertGreaterThan(0, $messages->count());
+        $this->assertNotNull($messages[0]);
+        $this->assertNotNull($messages[0]->mcontent);
+        $this->assertNotNull($messages[0]->chatthread_id);
+        $this->assertNotNull($messages[0]->sender_id);
+
+        $this->assertNotNull($messages[0]->sender);
+        $this->assertNotNull($messages[0]->sender->id);
+
+        $this->assertNotNull($messages[0]->chatthread);
+        $this->assertNotNull($messages[0]->chatthread->id);
+//dd($messages[0]);
+        //$this->assertObjectHasAttribute('chatthread_id', $messages[0]);
+        //$this->assertObjectHasAttribute('sender_id', $messages[0]);
+        //$this->assertObjectHasAttribute('deliver_at', $messages[0]);
+        //dd($messages->keys());
+        //dd($messages->toArray());
     }
 
     /**
      * @group chatmessage-model
      * @group OFF-regression
      */
-    public function test_should_start_chat()
+    public function test_can_start_chat()
     {
         //dd($images[0]->is_image);
         /*
