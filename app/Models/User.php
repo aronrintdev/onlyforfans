@@ -481,10 +481,6 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
 
     // %%% --- Misc. ---
 
-    public function sendChatmessage(User $receiver, string $mcontents, int $deliverAt=null)
-    {
-        $chatthread = Chatthread::where('origin
-    }
 
 }
 

@@ -12,8 +12,6 @@ class CreateChatmessagesV2Table extends Migration
         Schema::create('chatmessages', function (Blueprint $table) {
             $table->uuid('id')->primary();
 
-            $table->unsignedInteger('mcounter')->default(1);
-
             $table->uuid('chatthread_id');
             $table->foreign('chatthread_id')->references('id')->on('chatthreads');
 
