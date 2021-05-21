@@ -21,40 +21,47 @@ class ChatmessagesTableSeeder extends Seeder
     {
         $this->initSeederTraits('ChatmessagesTableSeeder'); // $this->{output, faker, appEnv}
 
+        //$senderCount = $this->faker->numberBetween(2, 4); // number of senders
+        $originatorCount = 3;
+
         if ( $this->appEnv !== 'testing' ) {
-            $this->output->writeln("  - Chatmessages seeder: loaded ".$posts->count()." posts...");
+            $this->output->writeln("  - Chatmessages seeder: loaded ".$originatorCount." originators...");
         }
 
-        //$senderCount = $this->faker->numberBetween(2, 4); // number of senders
-        $senderCount = 3;
+        $originators = User::has('timeline')->take($originatorCount)->get();
 
-        $senders = User::has('timeline')->take($senderCount)->get();
+        $originators->each( function($o) {
 
-        $senders->each( function($s) {
+            $threadCount = $this->faker->numberBetween(1, 3); // number of receivers *per* originator (ie threads)
+            $receivers = User::has('timeline')->take($threadCount)->where('id', '<>', $o->id)->get();
 
-            $threadCount = $this->faker->numberBetween(1, 3); // number of receivers *per* sender (ie threads)
-            $receivers = User::has('timeline')->take($threadCount)->where('id', '<>', $s->id)->get();
+            // %TODO: add group chats
+            $receivers->each( function($r) use(&$o) {
+                //dump('ts', $ts->toDateTimeString());
 
-            $receivers->each( function($r) use(&$s) {
-                $msgCount = $this->faker->numberBetween(1, 5);
-                for ( $i = 0 ; $i < $msgCount ; $i++ ) {
-                    $s->sendChatmessage($r, $this->faker->realText);
-                }
-                /*
-                $chatthread = $s->chatthreads()->create([
-                    'receiver_id' => $r->id,
-                    //'tip_price' => $request->input('tip_price'),
-                    //'schedule_datetime' => $schedule_datetime,
+                $chatthread = Chatthread::create([
+                    'originator_id' => $o->id,
                 ]);
-                $msgCount = $this->faker->numberBetween(1, 5);
+
+                $chatthread->participants()->attach($r->id);
+
+                $ts = new Carbon( $this->faker->dateTimeBetween($startDate = '-2 years', $endDate = '-1 months') );
+                $msgCount = $this->faker->numberBetween(3, 15);
+
+                $senderID = $o->id; // init sender
                 for ( $i = 0 ; $i < $msgCount ; $i++ ) {
-                    $chatthread->messages()->create([
+                    $m = Chatmessage::create([
+                        'chatthread_id' => $chatthread->id,
+                        'sender_id' => $senderID,
                         'mcontent' => $this->faker->realText,
                     ]);
+                    $m->created_at = $ts;
+                    $m->updated_at = $ts;
+                    $m->save();
+                    $ts->addMinutes( $this->faker->numberBetween(1,70) );
+                    $senderID = $this->faker->randomElement([ $o->id, $r->id ]); // so it looksl like a back-and-forth conversation
                 }
-                 */
             });
-
 
         });
 

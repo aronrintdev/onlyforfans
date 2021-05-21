@@ -42,19 +42,21 @@ class Chatthread extends Model implements UuidId
     // %%% Methods
     //--------------------------------------------
 
-    public static function startChat(User $sender)
+    public static function startChat(User $originator) : Chatthread
     {
         // %TODO: use transaction
         $chatthread = Chatthread::create([
-            'originator_id' => $sender->id,
+            'originator_id' => $originator->id,
         ]);
-        $chatthread->addParticipants($sender);
+        $chatthread->addParticipants($originator);
         //$chatthread->sendMessage($sender, $mcontent); // do in caller
+        return $chatthread;
     }
 
     public function addParticipant(User $participant)
     {
         $this->participants()->attach($participant->id);
+        return $this;
     }
 
     // %TODO: handle mediafiles
@@ -64,6 +66,7 @@ class Chatthread extends Model implements UuidId
               'sender_id' => $sender->id,
               'mcontent' => $mcontent,
         ]);
+        return $this;
     }
 
 }
