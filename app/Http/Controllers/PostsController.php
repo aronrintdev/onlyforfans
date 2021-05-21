@@ -120,6 +120,10 @@ class PostsController extends AppBaseController
     {
         $this->authorize('update', $post);
 
+        if ($post->sharees()->count() > 0) {
+            abort(403, 'Post has sharees');
+        }
+
         $request->validate([
             'description' => 'required',
             'type' => [ 'sometimes', 'required', new InEnum(new PostTypeEnum()) ],
@@ -203,6 +207,9 @@ class PostsController extends AppBaseController
     public function destroy(Request $request, Post $post)
     {
         $this->authorize('delete', $post);
+        if ($post->sharees()->count() > 0 ) {
+            abort(403, 'Post has sharees');
+        }
         $post->delete();
         return response()->json([]);
     }

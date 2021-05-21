@@ -6,31 +6,33 @@ use Auth;
 use Exception;
 use Throwable;
 use Carbon\Carbon;
-use Illuminate\Http\Request;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Log;
-
-use App\Http\Resources\MediafileCollection;
-use App\Http\Resources\PostCollection;
-use App\Http\Resources\TimelineCollection;
-use App\Http\Resources\Timeline as TimelineResource;
+use App\Models\Post;
+use App\Models\User;
 use App\Libs\FeedMgr;
+
 use App\Libs\UserMgr;
-
-use App\Notifications\TimelineFollowed;
-use App\Notifications\TimelineSubscribed;
-use App\Notifications\TipReceived;
-
 use App\Models\Setting;
 use App\Models\Timeline;
 use App\Models\Fanledger;
 use App\Models\Mediafile;
-use App\Models\Post;
-use App\Models\User;
-
-use App\Enums\PaymentTypeEnum;
-use App\Enums\MediafileTypeEnum;
 use App\Enums\PostTypeEnum;
+
+use App\Models\Subscription;
+use Illuminate\Http\Request;
+use App\Enums\PaymentTypeEnum;
+
+use App\Enums\MediafileTypeEnum;
+use App\Notifications\TipReceived;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
+use App\Http\Resources\PostCollection;
+use App\Notifications\TimelineFollowed;
+
+use App\Notifications\TimelineSubscribed;
+use App\Http\Resources\TimelineCollection;
+use App\Http\Resources\MediafileCollection;
+use App\Http\Resources\Timeline as TimelineResource;
+use Illuminate\Validation\UnauthorizedException;
 
 class TimelinesController extends AppBaseController
 {
@@ -293,6 +295,55 @@ class TimelinesController extends AppBaseController
             'timeline' => $timeline,
             'subscriber_count' => $timeline->subscribers->count(),
         ]);
+    }
+
+    /**
+     * Unsubscribes user from a timeline.
+     * @param Request $request
+     * @param Timeline $timeline
+     * @return Response
+     */
+    public function unsubscribe(Request $request, Timeline $timeline)
+    {
+        $this->authorize('follow', $timeline);
+
+        $user = Auth::user();
+
+        if ($request->has('subscription_id')) {
+            $subscription = Subscription::find($request->subscription_id);
+            if ($subscription->user_id !== $user->getKey()) {
+                throw new UnauthorizedException('User is not authorized to cancel subscription');
+            }
+
+        } else {
+            $subscription = Subscription::where('user_id', $user->getKey())
+                ->where('subscribable_id', $timeline->getKey())
+                ->active()->first();
+        }
+
+        if (!isset($subscription)) {
+            return [
+                'message' => 'No subscriptions to cancel',
+            ];
+        }
+
+        if (isset($subscription->canceled_at)) {
+            return [
+                'message' => 'Subscription has already been canceled',
+                'endsAt' => $subscription->next_payment_at,
+                'daysRemaining' => $subscription->next_payment_at->diffInDays(Carbon::now()),
+                'timeline' => new TimelineResource($timeline),
+            ];
+        }
+
+        $subscription->cancel();
+
+        return [
+            'message' => 'Unsubscribed',
+            'endsAt' => $subscription->next_payment_at,
+            'daysRemaining' => $subscription->next_payment_at->diffInDays(Carbon::now()),
+            'timeline' => new TimelineResource($timeline),
+        ];
     }
 
     public function tip(Request $request, Timeline $timeline)

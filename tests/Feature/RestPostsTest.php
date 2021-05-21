@@ -1,24 +1,28 @@
 <?php
 namespace Tests\Feature;
 
+use DB;
+use Tests\TestCase;
+use App\Models\Post;
+use App\Models\User;
+use App\Models\Timeline;
+use App\Models\Fanledger;
+
+use App\Models\Mediafile;
+use Illuminate\Http\File;
+use App\Enums\PostTypeEnum;
+use App\Events\ItemPurchased;
+use App\Enums\PaymentTypeEnum;
+use App\Events\PurchaseFailed;
+use App\Enums\MediafileTypeEnum;
+use App\Models\Financial\SegpayCard;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Storage;
+use Database\Seeders\TestDatabaseSeeder;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Http\File;
-use Illuminate\Support\Facades\Storage;
-use DB;
-
-use Tests\TestCase;
-use Database\Seeders\TestDatabaseSeeder;
-use App\Models\Fanledger;
-use App\Models\Mediafile;
-use App\Models\Post;
-use App\Models\Timeline;
-use App\Models\User;
-use App\Enums\MediafileTypeEnum;
-use App\Enums\PaymentTypeEnum;
-use App\Enums\PostTypeEnum;
-use Illuminate\Support\Facades\Config;
 
 class RestPostsTest extends TestCase
 {
@@ -936,33 +940,61 @@ class RestPostsTest extends TestCase
         $this->assertObjectNotHasAttribute('description', $content->data); // ...can't see contents
         $this->assertObjectNotHasAttribute('mediafiles', $content->data);
 
+        $cardNickname = $this->faker->realText(20);
+
         $payload = [
-            'sharee_id' => $fan->id,
+            // 'sharee_id' => $fan->id,
+            'item'     => $post->getKey(),
+            'type'     => PaymentTypeEnum::PURCHASE,
+            'price'    => $post->price->getAmount(),
+            'currency' => $post->currency,
+            'last_4'   => '1111',
+            'brand'    => 'visa',
+            'nickname' => $cardNickname,
         ];
-        $response = $this->actingAs($fan)->ajaxJSON('PUT', route('posts.purchase', $post->id), $payload);
+
+        $events = Event::fake([
+            ItemPurchased::class,
+            PurchaseFailed::class
+        ]);
+        $response = $this->actingAs($fan)->ajaxJSON('POST', route('payments.segpay.fake'), $payload);
         $response->assertStatus(200);
+
+        // ItemPurchased will update client with websocket event
+        Event::assertDispatched(ItemPurchased::class);
+        Event::assertNotDispatched(PurchaseFailed::class);
 
         $content = json_decode($response->content());
 
-        // Check ledger
-        //$fanledger = Fanledger::where('fltype', PaymentTypeEnum::PURCHASE)->latest()->first();
-        $fanledger = Fanledger::where('fltype', PaymentTypeEnum::PURCHASE)
-            ->where('purchaseable_type', 'posts')
-            ->where('purchaseable_id', $content->post->id)
-            ->where('seller_id', $creator->id)
-            ->where('purchaser_id', $fan->id)
-            ->first();
-        $this->assertNotNull($fanledger);
-        $this->assertEquals(1, $fanledger->qty);
-        $this->assertEquals($post->price, $fanledger->base_unit_cost_in_cents);
-        $this->assertEquals(PaymentTypeEnum::PURCHASE, $fanledger->fltype);
-        $this->assertEquals($fan->id, $fanledger->purchaser_id);
-        $this->assertEquals($creator->id, $fanledger->seller_id);
-        $this->assertEquals('posts', $fanledger->purchaseable_type);
-        $this->assertEquals($post->id, $fanledger->purchaseable_id);
-        $this->assertTrue( $post->sharees->contains( $fan->id ) );
-        $this->assertTrue( $post->ledgersales->contains( $fanledger->id ) );
-        $this->assertTrue( $fan->ledgerpurchases->contains( $fanledger->id ) );
+        // Check transactions ledger
+
+        // Card was created
+        $card = SegpayCard::where('owner_id', $fan->getKey())->where('nickname', $cardNickname)->first();
+        $this->assertNotNull($card);
+
+        // Amount from Card
+        $this->assertDatabaseHas('transactions', [
+            'account_id' => $card->account->getKey(),
+            'debit_amount' => $post->price->getAmount(),
+        ], 'financial');
+
+        // Amount from fan to creator
+        $this->assertDatabaseHas('transactions', [
+            'account_id' => $fan->getInternalAccount('segpay', 'USD')->getKey(),
+            'debit_amount' => $post->price->getAmount(),
+            'purchasable_id' => $post->getKey(),
+        ], 'financial');
+
+        // Amount to creator from fan
+        $this->assertDatabaseHas('transactions', [
+            'account_id' => $creator->getInternalAccount('segpay', 'USD')->getKey(),
+            'credit_amount' => $post->price->getAmount(),
+            'purchasable_id' => $post->getKey(),
+        ], 'financial');
+
+        // Fan has access
+        $post->refresh();
+        $this->assertTrue($post->sharees->contains($fan->id));
 
         // Check access (after: should be allowed)
         $response = $this->actingAs($fan)->ajaxJSON('GET', route('posts.show', $post->id));
@@ -974,12 +1006,16 @@ class RestPostsTest extends TestCase
 
 
     /**
+     * Refers to editing the content of a post that other have purchased. To avoid bait and switch by creators
+     *
      *  @group posts
      *  @group regression
      *  @group erik
      */
-    public function test_owner_can_not_edit_a_priced_post_that_others_have_purchased()
+    public function test_owner_can_not_edit_content_of_a_priced_post_that_others_have_purchased()
     {
+        $this->assertTrue(Config::get('segpay.fake'), 'Your SEGPAY_FAKE .env variable is not set to true.');
+
         $timeline = Timeline::has('followers', '>=', 1)
             ->whereHas('posts', function($q1) {
                 $q1->where('type', PostTypeEnum::PRICED);
@@ -998,12 +1034,32 @@ class RestPostsTest extends TestCase
         $response->assertStatus(201);
         $content = json_decode($response->content());
 
+        $post = Post::find($content->post->id);
+        $this->assertNotNull($post);
+
         // Fan purchases post resulting in a share...
+        $cardNickname = $this->faker->realText(20);
         $payload = [
-            'sharee_id' => $fan->id,
+            // 'sharee_id' => $fan->id,
+            'item'     => $post->getKey(),
+            'type'     => PaymentTypeEnum::PURCHASE,
+            'price'    => $post->price->getAmount(),
+            'currency' => $post->currency,
+            'last_4'   => '1111',
+            'brand'    => 'visa',
+            'nickname' => $cardNickname,
         ];
-        $response = $this->actingAs($fan)->ajaxJSON('PUT', route('posts.purchase', $content->post->id), $payload);
+
+        $events = Event::fake([
+            ItemPurchased::class,
+            PurchaseFailed::class
+        ]);
+        $response = $this->actingAs($fan)->ajaxJSON('POST', route('payments.segpay.fake'), $payload);
         $response->assertStatus(200);
+
+        // ItemPurchased will update client with websocket event
+        Event::assertDispatched(ItemPurchased::class);
+        Event::assertNotDispatched(PurchaseFailed::class);
 
         // Owner attempts update
         $payload = [
@@ -1021,6 +1077,8 @@ class RestPostsTest extends TestCase
     // priced: one-time-purchaseable, as opposed to subscribeable
     public function test_owner_can_not_delete_a_priced_post_that_others_have_purchased()
     {
+        $this->assertTrue(Config::get('segpay.fake'), 'Your SEGPAY_FAKE .env variable is not set to true.');
+
         $timeline = Timeline::has('followers', '>=', 1)
             ->whereHas('posts', function($q1) {
                 $q1->where('type', PostTypeEnum::PRICED);
@@ -1038,13 +1096,32 @@ class RestPostsTest extends TestCase
         $response = $this->actingAs($creator)->ajaxJSON('POST', route('posts.store'), $payload);
         $response->assertStatus(201);
         $content = json_decode($response->content());
+        $post = Post::find($content->post->id);
+        $this->assertNotNull($post);
 
         // Fan purchases post resulting in a share...
+        $cardNickname = $this->faker->realText(20);
         $payload = [
-            'sharee_id' => $fan->id,
+            // 'sharee_id' => $fan->id,
+            'item'     => $post->getKey(),
+            'type'     => PaymentTypeEnum::PURCHASE,
+            'price'    => $post->price->getAmount(),
+            'currency' => $post->currency,
+            'last_4'   => '1111',
+            'brand'    => 'visa',
+            'nickname' => $cardNickname,
         ];
-        $response = $this->actingAs($fan)->ajaxJSON('PUT', route('posts.purchase', $content->post->id), $payload);
+
+        $events = Event::fake([
+            ItemPurchased::class,
+            PurchaseFailed::class
+        ]);
+        $response = $this->actingAs($fan)->ajaxJSON('POST', route('payments.segpay.fake'), $payload);
         $response->assertStatus(200);
+
+        // ItemPurchased will update client with websocket event
+        Event::assertDispatched(ItemPurchased::class);
+        Event::assertNotDispatched(PurchaseFailed::class);
 
         // Owner attempts delete
         $response = $this->actingAs($creator)->ajaxJSON('DELETE', route('posts.destroy', $content->post->id));

@@ -437,7 +437,7 @@ class SegPayController extends Controller
         $account->can_make_transactions = true;
         $account->save();
 
-        PaymentMethodAdded::dispatch($account, $user->getKey());
+        PaymentMethodAdded::dispatch($account, $user);
 
         // Dispatch Event
         FakeSegpayPayment::dispatch($item, $account, $request->type, $request->price);
