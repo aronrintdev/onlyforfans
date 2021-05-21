@@ -52,4 +52,31 @@ class ChatthreadsController extends AppBaseController
         $data = $query->paginate( $request->input('take', env('MAX_DEFAULT_PER_REQUEST', 10)) );
         return new ChatthreadCollection($data);
     }
+
+    public function store(Request $request) 
+    {
+        $request->validate([
+            'originator_id' => 'required|uuid|exists:users,id',
+            'participants' => 'required|array',
+            'participants.*' => 'uuid|exists:users,id',
+        ]);
+        $originator = User::find($request->originator_id);
+        $chatthread = Chatthread::startChat($originator);
+
+        foreach ($request->participants as $pkid) {
+            $chatthread->addParticipant($pkid);
+        }
+
+        return ( new ChatthreadResource($chatthread) )->response()->setStatusCode(201);
+    }
+
+    public function sendMessage(Request $request, Chatthread $chatthread)
+    {
+        $request->validate([
+            'mcontents' => 'required|string',
+        ]);
+        $chatmessage = $chatthread->sendMessage($request->user()->id, $request->mcontents);
+        return new ChatmessageResource($chatmessage);
+    }
+
 }

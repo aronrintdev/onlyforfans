@@ -67,7 +67,7 @@ class ChatmessageModelTest extends TestCase
         $this->assertNotNull($chatthread->originator);
         $this->assertEquals($originator->id, $chatthread->originator->id);
 
-        $chatthread->addParticipant($receiver);
+        $chatthread->addParticipant($receiver->id);
         $chatthread->refresh();
         $this->assertEquals(2, $chatthread->participants->count());
         $this->assertEquals(0, $chatthread->chatmessages->count());

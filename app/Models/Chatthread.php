@@ -48,24 +48,23 @@ class Chatthread extends Model implements UuidId
         $chatthread = Chatthread::create([
             'originator_id' => $originator->id,
         ]);
-        $chatthread->addParticipant($originator);
+        $chatthread->addParticipant($originator->id);
         return $chatthread;
     }
 
-    public function addParticipant(User $participant)
+    public function addParticipant($participantID)
     {
-        $this->participants()->attach($participant->id);
+        $this->participants()->attach($participantID);
         return $this;
     }
 
     // %TODO: handle mediafiles
-    public function sendMessage(User $sender, string $mcontent, int $deliverAt=null)
+    public function sendMessage(User $sender, string $mcontent, int $deliverAt=null) : Chatmessage
     {
-        $this->chatmessages()->create([
+        return $this->chatmessages()->create([
               'sender_id' => $sender->id,
               'mcontent' => $mcontent,
         ]);
-        return $this;
     }
 
 }

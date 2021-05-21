@@ -23,7 +23,6 @@ class RestChatthreadsTest extends TestCase
     /**
      *  @group chatthreads
      *  @group OFF-regression
-     *  @group here0521
      */
     public function test_can_index_chatthreads()
     {
@@ -36,7 +35,6 @@ class RestChatthreadsTest extends TestCase
             'take' => 100,
         ];
         $response = $this->actingAs($sessionUser)->ajaxJSON( 'GET', route('chatthreads.index', $payload) );
-
         $response->assertStatus(200);
         $content = json_decode($response->content());
         //dd($content);
@@ -63,6 +61,36 @@ class RestChatthreadsTest extends TestCase
         $this->assertEquals(0, $num, 'Found thread in which session user is not a participant (of '.$content->meta->total.' total threads)');
     }
 
+    /**
+     *  @group chatthreads
+     *  @group OFF-regression
+     *  @group here0521
+     */
+    public function test_can_create_chat_thread_with_selected_participants()
+    {
+        // %TODO
+        $originator = User::doesntHave('chatthreads')->firstOrFail();
+        $participants = User::doesntHave('chatthreads')->where('id', '<>', $originator->id)->take(3)->get();
+        $this->assertGreaterThan(0, $participants->count());
+
+        $payload = [
+            'originator_id' => $originator->id,
+            'participants' => $participants->pluck('id')->toArray(),
+        ];
+        $response = $this->actingAs($originator)->ajaxJSON( 'POST', route('chatthreads.store', $payload) );
+        $content = json_decode($response->content());
+        //dd($content);
+        $response->assertStatus(201);
+    }
+
+    /**
+     *  @group chatthreads
+     *  @group OFF-regression
+     */
+    public function test_can_send_message()
+    {
+        // %TODO
+    }
 
     // ------------------------------
 

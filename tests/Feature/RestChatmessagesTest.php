@@ -23,12 +23,9 @@ class RestChatmessagesTest extends TestCase
     /**
      *  @group chatmessages
      *  @group OFF-regression
-     *  @group here0521
      */
     public function test_can_index_chatmessages()
     {
-        //$originator = User::doesntHave('chatthreads')->firstOrFail();
-        //$receiver = User::doesntHave('chatthreads')->where('id', '<>', $originator->id)->firstOrFail();
         $sessionUser = User::has('chatthreads')->firstOrFail();
         $this->assertFalse($sessionUser->isAdmin());
 
