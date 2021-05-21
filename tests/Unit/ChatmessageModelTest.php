@@ -57,10 +57,8 @@ class ChatmessageModelTest extends TestCase
         $originator = User::doesntHave('chatthreads')->firstOrFail();
         $receiver = User::doesntHave('chatthreads')->where('id', '<>', $originator->id)->firstOrFail();
         $this->assertEquals(0, $originator->chatthreads->count());
-        //$this->assertEquals(0, $originator->receivedmessages->count());
         $this->assertEquals(0, $originator->sentmessages->count());
         $this->assertEquals(0, $receiver->chatthreads->count());
-        //$this->assertEquals(0, $receiver->receivedmessages->count());
         $this->assertEquals(0, $receiver->sentmessages->count());
 
         $chatthread = Chatthread::startChat($originator);
@@ -75,17 +73,28 @@ class ChatmessageModelTest extends TestCase
         $this->assertEquals(2, $chatthread->participants->count());
         $this->assertEquals(0, $chatthread->chatmessages->count());
 
-        $chatthread->sendMessage($originator, $this->faker->realText);
+        $msgs = [];
+
+        // send 1st message
+        $msgs[] = $msg = $this->faker->realText;
+        $chatthread->sendMessage($originator, $msg);
         $chatthread->refresh();
         $this->assertEquals(1, $chatthread->chatmessages->count());
 
-        //dd($images[0]->is_image);
-        /*
-                $chatthread = Chatthread::startChat($s)->addParticipant($r); // $s is 'originator'
-                for ( $i = 0 ; $i < $msgCount ; $i++ ) {
-                    $chatthread->sendMessage($r, $this->faker->realText);
-                }
-         */
+        // send 2nd message
+        $msgs[] = $msg = $this->faker->realText;
+        $chatthread->sendMessage($originator, $msg);
+        $chatthread->refresh();
+        $originator->refresh();
+        $receiver->refresh();
+        $this->assertEquals(2, $chatthread->chatmessages->count());
+
+        $this->assertEquals(2, $originator->sentmessages->count());
+        $this->assertEquals(0, $receiver->sentmessages->count());
+        $this->assertEquals(2, $receiver->chatthreads()->firstWhere('chatthread_id', $chatthread->id)->chatmessages->count());
+        $this->assertEquals($msgs[0], $receiver->chatthreads()->firstWhere('chatthread_id', $chatthread->id)->chatmessages[0]->mcontent);
+        $this->assertEquals($msgs[1], $receiver->chatthreads()->firstWhere('chatthread_id', $chatthread->id)->chatmessages[1]->mcontent);
+
     }
 
     // ------------------------------
