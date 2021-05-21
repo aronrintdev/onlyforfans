@@ -50,7 +50,6 @@ class ChatmessageModelTest extends TestCase
     /**
      * @group chatmessage-model
      * @group OFF-regression
-     * @group here0521
      */
     public function test_can_start_chat()
     {

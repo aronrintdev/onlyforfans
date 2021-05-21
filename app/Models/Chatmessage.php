@@ -5,12 +5,14 @@ use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 
+use App\Interfaces\Ownable;
 use App\Interfaces\UuidId;
+use App\Models\Traits\OwnableTraits;
 use App\Models\Traits\UsesUuid;
 
-class Chatmessage extends Model implements UuidId
+class Chatmessage extends Model implements UuidId, Ownable
 {
-    use UsesUuid;
+    use UsesUuid, OwnableTraits;
 
     protected $guarded = [ 'id', 'created_at', 'updated_at' ];
 
@@ -32,4 +34,19 @@ class Chatmessage extends Model implements UuidId
     {
         return $this->morphOne(Mediafile::class, 'resource');
     }
+
+    //--------------------------------------------
+    // %%% Methods
+    //--------------------------------------------
+
+    public function getOwner(): ?Collection
+    {
+        return new Collection([$this->sender]);
+    }
+
+    public function getPrimaryOwner(): User
+    {
+        return $this->sender;
+    }
+
 }
