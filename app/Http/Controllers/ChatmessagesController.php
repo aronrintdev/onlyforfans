@@ -23,7 +23,7 @@ class ChatmessagesController extends AppBaseController
             'participant_id' => 'uuid|exists:users,id',
             'is_flagged' => 'boolean',
         ]);
-        $filters = $request->only(['chatthread_id', 'sender_id', 'is_flagged']) ?? [];
+        $filters = $request->only(['chatthread_id', 'sender_id', 'participant_id', 'is_flagged']) ?? [];
 
         $query = Chatmessage::query(); // Init query
 
