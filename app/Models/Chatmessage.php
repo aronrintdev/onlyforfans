@@ -1,25 +1,22 @@
 <?php
 namespace App\Models;
 
+use Exception;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
+
+use App\Interfaces\UuidId;
 use App\Models\Traits\UsesUuid;
 
-class Message extends Model
+class Chatmessage extends Model implments UuidId
 {
     use UsesUuid;
 
     protected $guarded = [ 'id', 'created_at', 'updated_at' ];
 
-    // We can assume [messages] will always belong to a chat thread (other messsages can use other tables)
     public function chatthread()
     {
         return $this->belongsTo(ChatThread::class, 'messagable_id');
-    }
-
-    // Redundant -> %TODO deprecate
-    public function messagable()
-    {
-        return $this->morphTo();
     }
 
     public function mediafile()

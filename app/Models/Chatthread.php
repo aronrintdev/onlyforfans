@@ -1,15 +1,17 @@
 <?php
-
 namespace App\Models;
 
+use Exception;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
+
+use App\Interfaces\UuidId;
 use App\Models\Traits\UsesUuid;
 
-class ChatThread extends Model
+class Chatthread extends Model implements UuidId
 {
     use UsesUuid;
 
-    protected $table = 'chatthreads';
     protected $guarded = [ 'id', 'created_at', 'updated_at' ];
 
     public function sender()
@@ -26,4 +28,22 @@ class ChatThread extends Model
     {
         return $this->morphMany(Message::class, 'messagable');
     }
+
+    //--------------------------------------------
+    // %%% Accessors/Mutators | Casts
+    //--------------------------------------------
+
+    //--------------------------------------------
+    // %%% Relationships
+    //--------------------------------------------
+
+    public function messages()
+    {
+        return $this->hasMany(Chatmessage::class);
+    }
+
+    //--------------------------------------------
+    // %%% Methods
+    //--------------------------------------------
+
 }
