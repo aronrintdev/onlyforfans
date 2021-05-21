@@ -222,7 +222,7 @@ class ProcessSegPayWebhook implements ShouldQueue
             if (!isset($card)) {
                 // Create new card and account for this.
                 $card = SegpayCard::createFromTransaction($transaction);
-                PaymentMethodAdded::dispatch($card->account, $card->getOwner()->first()->getKey());
+                PaymentMethodAdded::dispatch($card->account, $card->getOwner()->first());
             }
 
             // Translate decimal price from segpay back to money type
@@ -255,7 +255,7 @@ class ProcessSegPayWebhook implements ShouldQueue
                         $subscription = $card->account->createSubscription($item, $price, [
                             'manual_charge' => false,
                         ]);
-                        $subscription->custom_attributes = [ 'segpay_reference' => $transaction->transactionId ];
+                        $subscription->custom_attributes = [ 'segpay_reference' => $transaction->transactionId, 'segpay_purchase_id' => $transaction->purchaseId ];
                         $subscription->process();
 
                         ItemSubscribed::dispatch($item, $card->account->owner);

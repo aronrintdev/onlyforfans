@@ -3,10 +3,13 @@
 namespace App\Apis\Segpay;
 
 use Exception;
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Support\Facades\Config;
+use Psr\Http\Message\ResponseInterface;
 
 /**
- * Api for Segpay integration
+ * Api for SegPay Reporting Services (SRS) integration
  */
 class Api
 {
@@ -111,25 +114,47 @@ class Api
     /**
      * Send Request
      */
-    public function send()
+    public function send($endpoint, $options = [])
     {
-        $url = $this->urlBuilder();
+        $url = $this->urlBuilder($endpoint);
+        $method = $options['method'] ?? 'GET';
+        $query = $options['query'] ?? [];
+
+        $client = new Client();
+        return $client->request($method, $url, [ 'query' => array_merge([
+            'UserID' => $this->userId,
+            'UserAccessKey' => $this->accessKey,
+        ], $query) ]);
     }
 
-
+    /**
+     * Cancel a subscription by purchaseId
+     *
+     * Possible Responses:
+     * - Success
+     * - Subscription not active, cancel failed
+     * - PurchaseId/MerchantId mismatch
+     * - Invalid Merchant
+     * - Missing Parameter
+     *
+     * @param string $purchaseId
+     * @param string|null $cancelReason
+     * @return ResponseInterface
+     * @throws GuzzleException
+     */
+    public static function cancelSubscription($purchaseId, $cancelReason = null) {
+        $api = new Api();
+        return $api->send('ADM.asmx/CancelMembership', [ 'query' => [ 'PurchaseId' => $purchaseId, 'CancelReason' => $cancelReason ] ]);
+    }
 
     /**
      * Create Url string
      */
-    private function urlBuilder(): string
+    private function urlBuilder($endpoint = ''): string
     {
         $url = $this->secure ? 'https://' : 'http://';
         $url .= $this->baseUrl;
-        $url .= '?';
-        // $url .= $this->accessVariable . '=' . $this->userId;
-        foreach ($this->queryArguments as $key => $value) {
-            $url .= '&' . $key . '=' . $value;
-        }
+        $url .= '/' . $endpoint;
         return $url;
     }
 

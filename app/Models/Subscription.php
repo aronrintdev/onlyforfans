@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Apis\Segpay\Api;
 use Money\Money;
 use Carbon\Carbon;
 use InvalidArgumentException;
@@ -122,6 +123,17 @@ class Subscription extends Model implements Ownable
     }
 
     /**
+     * Only return not canceled subscriptions
+     *
+     * @param  Builder  $query
+     * @return Builder
+     */
+    public function scopeNotCanceled($query)
+    {
+        return $query->whereNull('canceled_at');
+    }
+
+    /**
      * Return only due subscriptions
      *
      * @param  Builder  $query
@@ -160,6 +172,10 @@ class Subscription extends Model implements Ownable
         // if ( is segpay subscription ) {
         //     Call SRS cancel account
         // }
+        if (isset($this->custom_attributes['segpay_purchase_id'])) {
+            $response = Api::cancelSubscription($this->custom_attributes['segpay_purchase_id']);
+            // TODO: Check response message from cancel
+        }
 
         // Check if passed next bill date
         $this->canceled_at = Carbon::now();
@@ -298,7 +314,7 @@ class Subscription extends Model implements Ownable
         if (isset($this->next_payment_at) === false) {
             return true;
         }
-        return $this->next_payment_at->greaterThanOrEqualTo(Carbon::now());
+        return $this->next_payment_at->lessThanOrEqualTo(Carbon::now());
     }
 
     #endregion Verification
