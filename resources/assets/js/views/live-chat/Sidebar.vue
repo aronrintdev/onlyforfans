@@ -199,7 +199,6 @@
 <script>
   import moment from 'moment';
   import _ from 'lodash';
-  import { Swiper, SwiperSlide, directive } from 'vue-awesome-swiper';
   import Vuex from 'vuex';
 
   import RadioGroupBox from '@components/radioGroupBox';
@@ -232,13 +231,8 @@
       },
     }),
     components: {
-      Swiper,
-      SwiperSlide,
       'radio-group-box': RadioGroupBox,
       'round-check-box': RoundCheckBox,
-    },
-    directives: {
-      swiper: directive,
     },
     mounted() {
       this.axios.get('/lists')
