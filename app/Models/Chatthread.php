@@ -54,7 +54,7 @@ class Chatthread extends Model implements UuidId
 
     public function addParticipant($participantID)
     {
-        $this->participants()->attach($participantID);
+        $this->participants()->attach($participantID); // originator is already added
         return $this;
     }
 

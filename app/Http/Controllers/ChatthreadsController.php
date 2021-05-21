@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use App\Http\Resources\ChatthreadCollection;
 use App\Http\Resources\Chatthread as ChatthreadResource;
+//use App\Http\Resources\ChatmessageCollection;
+use App\Http\Resources\Chatmessage as ChatmessageResource;
 use App\Models\Chatmessage;
 use App\Models\Chatthread;
 use App\Models\User;
@@ -50,8 +52,7 @@ class ChatthreadsController extends AppBaseController
         }
 
         $data = $query->paginate( $request->input('take', env('MAX_DEFAULT_PER_REQUEST', 10)) );
-        return new ChatthreadCollection($data);
-    }
+        return new ChatthreadCollection($data); }
 
     public function store(Request $request) 
     {
@@ -67,7 +68,8 @@ class ChatthreadsController extends AppBaseController
             $chatthread->addParticipant($pkid);
         }
 
-        return ( new ChatthreadResource($chatthread) )->response()->setStatusCode(201);
+        //return ( new ChatthreadResource($chatthread) )->response()->setStatusCode(201);
+        return new ChatthreadResource($chatthread);
     }
 
     public function sendMessage(Request $request, Chatthread $chatthread)
@@ -75,7 +77,7 @@ class ChatthreadsController extends AppBaseController
         $request->validate([
             'mcontents' => 'required|string',
         ]);
-        $chatmessage = $chatthread->sendMessage($request->user()->id, $request->mcontents);
+        $chatmessage = $chatthread->sendMessage($request->user(), $request->mcontents);
         return new ChatmessageResource($chatmessage);
     }
 
