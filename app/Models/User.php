@@ -223,14 +223,9 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
         return $this->belongsToMany(Chatthread::class, 'chatthread_user', 'user_id', 'chatthread_id');
     }
 
-    public function receivedmessages()
-    {
-        return $this->hasMany(Chatmessages::class, 'receiver_id');
-    }
-
     public function sentmessages()
     {
-        return $this->hasMany(Chatmessages::class, 'sender_id');
+        return $this->hasMany(Chatmessage::class, 'sender_id');
     }
 
 //    public function lists()

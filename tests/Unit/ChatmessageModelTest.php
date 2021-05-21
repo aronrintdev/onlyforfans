@@ -28,8 +28,7 @@ class ChatmessageModelTest extends TestCase
 
     /**
      * @group chatmessage-model
-     * @group OFF-regression
-     * @group here0520
+     * @group regression
      */
     public function test_should_get_chatmessages()
     {
@@ -46,20 +45,40 @@ class ChatmessageModelTest extends TestCase
 
         $this->assertNotNull($messages[0]->chatthread);
         $this->assertNotNull($messages[0]->chatthread->id);
-//dd($messages[0]);
-        //$this->assertObjectHasAttribute('chatthread_id', $messages[0]);
-        //$this->assertObjectHasAttribute('sender_id', $messages[0]);
-        //$this->assertObjectHasAttribute('deliver_at', $messages[0]);
-        //dd($messages->keys());
-        //dd($messages->toArray());
     }
 
     /**
      * @group chatmessage-model
      * @group OFF-regression
+     * @group here0521
      */
     public function test_can_start_chat()
     {
+        $originator = User::doesntHave('chatthreads')->firstOrFail();
+        $receiver = User::doesntHave('chatthreads')->where('id', '<>', $originator->id)->firstOrFail();
+        $this->assertEquals(0, $originator->chatthreads->count());
+        //$this->assertEquals(0, $originator->receivedmessages->count());
+        $this->assertEquals(0, $originator->sentmessages->count());
+        $this->assertEquals(0, $receiver->chatthreads->count());
+        //$this->assertEquals(0, $receiver->receivedmessages->count());
+        $this->assertEquals(0, $receiver->sentmessages->count());
+
+        $chatthread = Chatthread::startChat($originator);
+        $this->assertNotNull($chatthread);
+        $this->assertNotNull($chatthread->id);
+        $this->assertEquals(1, $chatthread->participants->count());
+        $this->assertNotNull($chatthread->originator);
+        $this->assertEquals($originator->id, $chatthread->originator->id);
+
+        $chatthread->addParticipant($receiver);
+        $chatthread->refresh();
+        $this->assertEquals(2, $chatthread->participants->count());
+        $this->assertEquals(0, $chatthread->chatmessages->count());
+
+        $chatthread->sendMessage($originator, $this->faker->realText);
+        $chatthread->refresh();
+        $this->assertEquals(1, $chatthread->chatmessages->count());
+
         //dd($images[0]->is_image);
         /*
                 $chatthread = Chatthread::startChat($s)->addParticipant($r); // $s is 'originator'

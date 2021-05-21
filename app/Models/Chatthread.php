@@ -24,12 +24,12 @@ class Chatthread extends Model implements UuidId
 
     public function chatmessages()
     {
-        return $this->hasMany(Message::class);
+        return $this->hasMany(Chatmessage::class);
     }
 
     public function originator()
     {
-        return $this->belongsTo(User::class, 'sender_id');
+        return $this->belongsTo(User::class);
     }
 
     public function participants() // ie receivers, readers, etc; should include originator
@@ -48,8 +48,7 @@ class Chatthread extends Model implements UuidId
         $chatthread = Chatthread::create([
             'originator_id' => $originator->id,
         ]);
-        $chatthread->addParticipants($originator);
-        //$chatthread->sendMessage($sender, $mcontent); // do in caller
+        $chatthread->addParticipant($originator);
         return $chatthread;
     }
 
