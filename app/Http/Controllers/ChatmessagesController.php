@@ -27,6 +27,10 @@ class ChatmessagesController extends AppBaseController
 
         $query = Chatmessage::query(); // Init query
 
+        // %NOTE: this method only returns delivered messages! ...use separate api endpoint
+        //   for all messages or messages to be delivered
+        $query->where('is_delivered', true); 
+
         // Check permissions
         if ( !$request->user()->isAdmin() ) {
             //$query->where('user_id', $request->user()->id); // non-admin: can only view own...

@@ -22,9 +22,9 @@ class RestChatmessagesTest extends TestCase
 
     /**
      *  @group chatmessages
-     *  @group OFF-regression
+     *  @group regression
      */
-    public function test_can_index_chatmessages()
+    public function test_can_list_chatmessages()
     {
         $sessionUser = User::has('chatthreads')->firstOrFail();
         $this->assertFalse($sessionUser->isAdmin());
@@ -45,8 +45,10 @@ class RestChatmessagesTest extends TestCase
                     'sender_id', 
                     'mcontent', 
                     'deliver_at', 
+                    'is_delivered', 
                     'is_read', 
                     'is_flagged', 
+                    'created_at', 
                 ],
             ],
             'links',
@@ -63,8 +65,13 @@ class RestChatmessagesTest extends TestCase
             return ($chatmessage->chatthread->participants->contains($sessionUser->id)) ? $acc : ($acc+1);
         }, 0);
         $this->assertEquals(0, $num, 'Found chatmessage in thread in which session user is not a participant (of '.$content->meta->total.' total messages)');
-    }
 
+        // Make sure all messages are 'delivered'
+        $num = $chatmessages->reduce( function($acc, $cm) {
+            return (!$chatmessage->is_delivered) ? $acc : ($acc+1);
+        }, 0);
+        $this->assertEquals(0, $num, 'Found chatmessage in thread which is not marked "delivered"');
+    }
 
     // ------------------------------
 

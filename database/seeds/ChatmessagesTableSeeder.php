@@ -45,19 +45,45 @@ class ChatmessagesTableSeeder extends Seeder
 
                 $chatthread->participants()->attach($r->id);
 
-                $ts = new Carbon( $this->faker->dateTimeBetween($startDate = '-2 years', $endDate = '-1 months') );
-                $msgCount = $this->faker->numberBetween(3, 15);
+                $msgCount = $this->faker->numberBetween(3, 17);
 
                 $senderID = $o->id; // init sender
                 for ( $i = 0 ; $i < $msgCount ; $i++ ) {
-                    $m = Chatmessage::create([
-                        'chatthread_id' => $chatthread->id,
-                        'sender_id' => $senderID,
-                        'mcontent' => $this->faker->realText,
-                    ]);
-                    $m->created_at = $ts;
-                    $m->updated_at = $ts;
-                    $m->save();
+                    $isScheduled = $this->faker->boolean(25);
+                    if ($isScheduled) {
+                        $now = Carbon::now();
+                        $isDeliveredByNow = $this->faker->boolean(50);
+                        if ( $isDeliveredByNow ) {
+                            $deliverAt = $now->subDays( $this->faker->numberBetween(1,5) );
+                            $ts = $deliverAt;
+                            $isDelivered = true;
+                        } else {
+                            $deliverAt = $now->addDays( $this->faker->numberBetween(1,7) );
+                            $ts = $now->subDays( $this->faker->numberBetween(1,7) );
+                            $isDelivered = false;
+                        }
+                        //Carbon( $this->faker->dateTimeBetween($startDate = '-2 years', $endDate = '-1 months') );
+                        $m = Chatmessage::create([
+                            'chatthread_id' => $chatthread->id,
+                            'sender_id' => $senderID,
+                            'mcontent' => $this->faker->realText,
+                            'is_delivered' => $isDelivered,
+                            'deliver_at' => $deliverAt,
+                        ]);
+                        $m->created_at = $ts;
+                        $m->updated_at = $ts;
+                        $m->save();
+                    } else {
+                        $ts = new Carbon( $this->faker->dateTimeBetween($startDate = '-2 years', $endDate = '-1 months') );
+                        $m = Chatmessage::create([
+                            'chatthread_id' => $chatthread->id,
+                            'sender_id' => $senderID,
+                            'mcontent' => $this->faker->realText,
+                        ]);
+                        $m->created_at = $ts;
+                        $m->updated_at = $ts;
+                        $m->save();
+                    }
                     $ts->addMinutes( $this->faker->numberBetween(1,70) );
                     $senderID = $this->faker->randomElement([ $o->id, $r->id ]); // so it looksl like a back-and-forth conversation
                 }

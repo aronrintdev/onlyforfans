@@ -1,13 +1,14 @@
 <?php
 namespace Tests\Feature;
 
+use Carbon\Carbon;
+use DB;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Http\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Config;
-use DB;
 
 use Tests\TestCase;
 use Database\Seeders\TestDatabaseSeeder;
@@ -22,9 +23,9 @@ class RestChatthreadsTest extends TestCase
 
     /**
      *  @group chatthreads
-     *  @group OFF-regression
+     *  @group regression
      */
-    public function test_can_index_chatthreads()
+    public function test_can_list_chatthreads()
     {
         //$originator = User::doesntHave('chatthreads')->firstOrFail();
         //$receiver = User::doesntHave('chatthreads')->where('id', '<>', $originator->id)->firstOrFail();
@@ -43,6 +44,7 @@ class RestChatthreadsTest extends TestCase
             'data' => [
                 0 => [
                     'originator_id', 
+                    'created_at', 
                 ],
             ],
             'links',
@@ -63,7 +65,7 @@ class RestChatthreadsTest extends TestCase
 
     /**
      *  @group chatthreads
-     *  @group OFF-regression
+     *  @group regression
      */
     public function test_can_create_chat_thread_with_selected_participants()
     {
@@ -90,7 +92,7 @@ class RestChatthreadsTest extends TestCase
 
     /**
      *  @group chatthreads
-     *  @group OFF-regression
+     *  @group regression
      *  @group here0521
      */
     public function test_can_send_message()
@@ -112,6 +114,7 @@ class RestChatthreadsTest extends TestCase
 
         // send some messages
 
+        $msgs = [];
         $msgs[] = $msg = $this->faker->realText;
         $payload = [
             $content->data->id, // chatthread_id
@@ -134,9 +137,117 @@ class RestChatthreadsTest extends TestCase
         $this->assertEquals(2, $chatthread->chatmessages->count());
         $this->assertEquals((1+$otherParticipants->count()), $chatthread->participants->count());
         $this->assertTrue($chatthread->participants->contains($originator->id));
-        $this->assertTrue($chatthread->participants->contains($otherParticipants[0]->id)); // %TODO reduce op
-        // [ ] check message contents w/ reduce
+        $this->assertTrue($chatthread->participants->contains($otherParticipants[0]->id));
 
+        // Check no messages from threads in which I am not a participant
+        $num = $otherParticipants->reduce( function($acc, $p) use(&$chatthread) {
+            return ( $chatthread->participants->contains($p->id) ) ? $acc : ($acc+1);
+        }, 0);
+        $this->assertEquals(0, $num, 'Found participant that was not included in the chatthread');
+
+        $this->assertEquals($msgs[0], $chatthread->chatmessages[0]->mcontent);
+        $this->assertEquals($msgs[1], $chatthread->chatmessages[1]->mcontent);
+    }
+
+    /**
+     *  @group chatthreads
+     *  @group regression
+     */
+    public function test_participant_can_view_chatthread()
+    {
+        $chatthread = Chatthread::has('chatmessages')->firstOrFail();
+        $participant = $chatthreads->participants[0];
+        $response = $this->actingAs($participant)->ajaxJSON( 'GET', route('chatthread.show', $chatthread->id) );
+        $response->assertStatus(200);
+        $response->assertJsonStructure([
+            'data' => [
+                'chatthread_id', 
+                'sender_id', 
+                'mcontent', 
+                'deliver_at', 
+                'is_delivered', 
+                'is_read', 
+                'is_flagged', 
+                'created_at', 
+            ],
+        ]);
+    }
+
+    /**
+     *  @group chatthreads
+     *  @group regression
+     */
+    public function test_nonparticipant_can_not_view_chatthread()
+    {
+        $chatthread = Chatthread::has('chatmessages')->firstOrFail();
+        $nonparticipant = User::doesntHave('chatthreads')->firstOrFail();
+        $response = $this->actingAs($nonparticipant)->ajaxJSON( 'GET', route('chatthread.show', $chatthread->id) );
+        $response->assertStatus(403);
+    }
+
+
+    /**
+     *  @group chatthreads
+     *  @group regression
+     *  @group here0521
+     */
+    public function test_can_schedule_message()
+    {
+        // create chat
+        $originator = User::doesntHave('chatthreads')->firstOrFail();
+        $otherParticipants = User::doesntHave('chatthreads')->where('id', '<>', $originator->id)->take(3)->get();
+        $this->assertGreaterThan(0, $otherParticipants->count());
+
+        $payload = [
+            'originator_id' => $originator->id,
+            'participants' => $otherParticipants->pluck('id')->toArray(),
+        ];
+        $response = $this->actingAs($originator)->ajaxJSON( 'POST', route('chatthreads.store', $payload) );
+        $content = json_decode($response->content());
+        //dd($content);
+        $response->assertStatus(201);
+        $chatthreadPKID = $content->data->id;
+
+        // schedule a message for delivery in 1 day
+
+        $now = Carbon::now();
+        $msgs[] = $msg = $this->faker->realText;
+        $payload = [
+            $content->data->id, // chatthread_id
+            'mcontents' => $msg,
+            'deliver_at' => $now->addDays(1),
+        ];
+        $response = $this->actingAs($originator)->ajaxJSON( 'POST', route('chatthreads.scheduleMessage', $payload) );
+        $response->assertStatus(201);
+        $content = json_decode($response->content());
+        $scheduledMessagePKID = $content->data->id;
+
+        $scheduledMessage = Chatmessage::find($scheduledMessagePKID);
+        $this->assertNotNull($scheduledMessage);
+        $this->assertFalse($scheduledMessage->is_delivered);
+        $this->assertGreaterThan($now->timestamp, $scheduledMessage->deliver_at->timestamp); // %TODO CHECKME
+        $this->assertEquals($payload['deliver_at']->timestamp, $scheduledMessage->deliver_at->timestamp); // %TODO CHECKME
+
+        // index should not return scheduled message pre-delivery
+        $payload = [ 
+            'take' => 100,
+            'chatthread_id' => $chatthreadPKID,
+        ];
+        $response = $this->actingAs($sessionUser)->ajaxJSON( 'GET', route('chatthreads.index', $payload) );
+        $response->assertStatus(200);
+        $content = json_decode($response->content());
+
+        $num = $content->data->reduce( function($acc, $m) use($scheduledMessagePKID) {
+            return ( $m->id !== $scheduledMessagePKID) ) ? $acc : ($acc+1);
+        }, 0);
+        $this->assertEquals(0, $num, 'Scheduled message was returned by message list call');
+
+        //HERE
+        // --
+
+        //$chatthread = Chatthread::find($chatthreadPKID);
+        //$this->assertNotNull($chatthread);
+        //$this->assertEquals(1, $chatthread->chatmessages->count());
 
     }
 

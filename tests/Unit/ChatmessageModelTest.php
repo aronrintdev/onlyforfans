@@ -49,7 +49,7 @@ class ChatmessageModelTest extends TestCase
 
     /**
      * @group chatmessage-model
-     * @group OFF-regression
+     * @group regression
      */
     public function test_can_start_chat()
     {
@@ -93,6 +93,34 @@ class ChatmessageModelTest extends TestCase
         $this->assertEquals(2, $receiver->chatthreads()->firstWhere('chatthread_id', $chatthread->id)->chatmessages->count());
         $this->assertEquals($msgs[0], $receiver->chatthreads()->firstWhere('chatthread_id', $chatthread->id)->chatmessages[0]->mcontent);
         $this->assertEquals($msgs[1], $receiver->chatthreads()->firstWhere('chatthread_id', $chatthread->id)->chatmessages[1]->mcontent);
+
+    }
+
+    /**
+     * @group chatmessage-model
+     * @group regression
+     * @group here0521
+     */
+    public function test_can_schedule_message()
+    {
+        $originator = User::doesntHave('chatthreads')->firstOrFail();
+        $receiver = User::doesntHave('chatthreads')->where('id', '<>', $originator->id)->firstOrFail();
+
+        $chatthread = Chatthread::startChat($originator);
+        $this->assertNotNull($chatthread);
+
+        $chatthread->addParticipant($receiver->id);
+        $chatthread->refresh();
+
+        $msgs = [];
+
+        // send 1st message
+        $msgs[] = $msg = $this->faker->realText;
+        $chatthread->scheduleMessage($originator, $msg);
+        $chatthread->refresh();
+        $this->assertEquals(1, $chatthread->chatmessages->count());
+        $this->assertFalse($chatthread->chatmessages[0]->is_delivered);
+        $this->assertEquals($chatthread->chatmessages[0]->deliver_at);
 
     }
 

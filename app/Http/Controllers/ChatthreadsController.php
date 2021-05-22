@@ -27,7 +27,6 @@ class ChatthreadsController extends AppBaseController
         $filters = $request->only(['originator_id', 'participant_id', 'is_tip_required']) ?? [];
 
         $query = Chatthread::query(); // Init query
-        $query->where('is_delivered', true);
 
         // Check permissions
         if ( !$request->user()->isAdmin() ) {
