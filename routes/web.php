@@ -79,8 +79,9 @@ Route::group(['middleware' => ['auth']], function () {
 
     // -- chatthreads --
     Route::post('/chatthreads/{chatthread}/sendMessage', ['as'=>'chatthreads.sendMessage', 'uses' => 'ChatthreadsController@sendMessage']);
+    Route::post('/chatthreads/{chatthread}/scheduleMessage', ['as'=>'chatthreads.scheduleMessage', 'uses' => 'ChatthreadsController@scheduleMessage']);
     Route::resource('chatthreads', 'ChatthreadsController', [
-        'only' => [ 'index', 'store' ],
+        'only' => [ 'index', 'show', 'store' ],
     ]);
 
     // -- comments: likeable --

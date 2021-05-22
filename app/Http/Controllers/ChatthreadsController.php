@@ -27,6 +27,7 @@ class ChatthreadsController extends AppBaseController
         $filters = $request->only(['originator_id', 'participant_id', 'is_tip_required']) ?? [];
 
         $query = Chatthread::query(); // Init query
+        $query->where('is_delivered', true);
 
         // Check permissions
         if ( !$request->user()->isAdmin() ) {
@@ -52,7 +53,14 @@ class ChatthreadsController extends AppBaseController
         }
 
         $data = $query->paginate( $request->input('take', env('MAX_DEFAULT_PER_REQUEST', 10)) );
-        return new ChatthreadCollection($data); }
+        return new ChatthreadCollection($data); 
+    }
+
+    public function show(Request $request, $chatthread) 
+    {
+        $this->authorize('view', $chatthread);
+        return new ChatthreadResource($chatthread);
+    }
 
     public function store(Request $request) 
     {
@@ -68,7 +76,6 @@ class ChatthreadsController extends AppBaseController
             $chatthread->addParticipant($pkid);
         }
 
-        //return ( new ChatthreadResource($chatthread) )->response()->setStatusCode(201);
         return new ChatthreadResource($chatthread);
     }
 
@@ -78,6 +85,16 @@ class ChatthreadsController extends AppBaseController
             'mcontents' => 'required|string',
         ]);
         $chatmessage = $chatthread->sendMessage($request->user(), $request->mcontents);
+        return new ChatmessageResource($chatmessage);
+    }
+
+    public function scheduleMessage(Request $request, Chatthread $chatthread)
+    {
+        $request->validate([
+            'mcontents' => 'required|string',
+            'deliver_at' => 'required|datetime',
+        ]);
+        $chatmessage = $chatthread->scheduleMessage($request->user(), $request->mcontents, $request->deliver_at);
         return new ChatmessageResource($chatmessage);
     }
 
