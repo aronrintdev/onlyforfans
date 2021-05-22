@@ -39,6 +39,16 @@ class Chatmessage extends Model implements UuidId, Ownable
     // %%% Methods
     //--------------------------------------------
 
+    public function deliver()
+    {
+        // deliver this (scheduled) message (ie, 'unschedule' ?)
+    }
+
+    public static function deliverScheduled($take=null)
+    {
+        // deliver all (scheduled) messages if delivery date has passed
+    }
+
     public function getOwner(): ?Collection
     {
         return new Collection([$this->sender]);

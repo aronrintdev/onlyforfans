@@ -25,6 +25,7 @@ class Chatthread extends Model implements UuidId
     public function chatmessages()
     {
         return $this->hasMany(Chatmessage::class);
+        //return $this->hasMany(Chatmessage::class)->where('is_delivered', true);
     }
 
     public function originator()
@@ -59,11 +60,21 @@ class Chatthread extends Model implements UuidId
     }
 
     // %TODO: handle mediafiles
-    public function sendMessage(User $sender, string $mcontent, int $deliverAt=null) : Chatmessage
+    public function sendMessage(User $sender, string $mcontent) : Chatmessage
     {
         return $this->chatmessages()->create([
               'sender_id' => $sender->id,
               'mcontent' => $mcontent,
+        ]);
+    }
+
+    public function scheduleMessage(User $sender, string $mcontent, int $deliverAt) : Chatmessage
+    {
+        return $this->chatmessages()->create([
+              'sender_id' => $sender->id,
+              'mcontent' => $mcontent,
+              'is_delivered' => false,
+              'deliver_at' => Carbon::createFromTimestamp($deliverAt),
         ]);
     }
 

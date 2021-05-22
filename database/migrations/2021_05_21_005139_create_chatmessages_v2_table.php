@@ -18,11 +18,9 @@ class CreateChatmessagesV2Table extends Migration
             $table->uuid('sender_id');
             $table->foreign('sender_id')->references('id')->on('users');
 
-            //$table->uuid('receiver_id');
-            //$table->foreign('receiver_id')->references('id')->on('users');
-
             $table->longtext('mcontent');
-            $table->unsignedInteger('deliver_at')->nullable()->comment('If non-null, message is not delivered until date provided (in UNIX epoch time GMT adjusted to receivers local timezone)');
+            $table->datetime('deliver_at')->nullable()->comment('If non-null, message is not delivered until date provided');
+            $table->boolean('is_delivered')->default(true);
             $table->boolean('is_read')->default(false);
             $table->boolean('is_flagged')->default(false)->comment('True if message was flagged by *receiver*, details in cattrs');
 
