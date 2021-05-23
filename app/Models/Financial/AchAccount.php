@@ -37,7 +37,7 @@ class AchAccount extends Model
     protected $connection = 'financial';
     protected $table = 'ach_accounts';
 
-    protected $guarded = [];
+    protected $guarded = [ 'metadata' ];
 
     protected $casts = [
         'routing_number' => 'encrypted',

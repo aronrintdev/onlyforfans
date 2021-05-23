@@ -87,6 +87,8 @@ class EarningsController extends Controller
         ];
     }
 
+
+    
     /**
      * Earning Transactions for an account
      *
