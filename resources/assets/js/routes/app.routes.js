@@ -94,6 +94,12 @@ export const routes = [
     component: statements.Dashboard,
   },
 
+  {
+    name: 'statements.ach.new',
+    path: '/statements/ach/new',
+    component: statements.NewAchAccount,
+  },
+
   // Lists
   {
     name: 'lists.dashboard',
