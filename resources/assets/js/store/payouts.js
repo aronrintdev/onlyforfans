@@ -45,9 +45,9 @@ export const payouts = {
      */
     bankFromRoutingNumber({ commit }, routingNumber) {
       return new Promise((resolve, reject) => {
-        axios.get(`https://www.routingnumbers.info/api/data.json?rn=${routingNumber}`)
+        fetch(`https://www.routingnumbers.info/api/data.json?rn=${routingNumber}`)
           .then(response => {
-            resolve(response.data)
+            resolve(response.json())
           })
           .catch(err => reject(err))
       })

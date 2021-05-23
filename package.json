@@ -51,6 +51,7 @@
     "animejs": "^3.2.1",
     "bootstrap-sass": "^3.4.1",
     "bootstrap-vue": "^2.20.1",
+    "country-list": "^2.2.0",
     "currency-codes": "^2.1.0",
     "gsap": "^3.6.0",
     "i18n": "^0.13.2",
