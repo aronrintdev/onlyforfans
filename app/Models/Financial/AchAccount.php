@@ -3,7 +3,10 @@
 namespace App\Models\Financial;
 
 use App\Models\User;
+use App\Interfaces\Ownable;
 use App\Models\Traits\UsesUuid;
+use Illuminate\Support\Collection;
+use App\Models\Traits\OwnableTraits;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -26,9 +29,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  *
  * @package App\Models\Financial
  */
-class AchAccount extends Model
+class AchAccount extends Model implements Ownable
 {
     use UsesUuid,
+        OwnableTraits,
         HasFactory,
         SoftDeletes;
 
@@ -42,6 +46,7 @@ class AchAccount extends Model
     protected $casts = [
         'routing_number' => 'encrypted',
         'account_number' => 'encrypted',
+        'metadata'       => 'array',
     ];
 
     #endregion Model Properties
@@ -49,6 +54,16 @@ class AchAccount extends Model
 
     /* ---------------------------- Relationships --------------------------- */
     #region Relationships
+
+    public function account()
+    {
+        return $this->morphOne(Account::class, 'resource');
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 
     #endregion Relationships
     /* ---------------------------------------------------------------------- */
@@ -58,4 +73,12 @@ class AchAccount extends Model
 
     #endregion Functions
     /* ---------------------------------------------------------------------- */
+
+    /* ------------------------------- Ownable ------------------------------ */
+    public function getOwner(): ?Collection
+    {
+        return new Collection([ $this->user ]);
+    }
+
+
 }

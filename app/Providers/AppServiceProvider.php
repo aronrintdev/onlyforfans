@@ -73,6 +73,7 @@ class AppServiceProvider extends ServiceProvider
             'sessions'               => 'App\Models\Session',
             'settings'               => 'App\Models\Setting',
             'financial_accounts'     => 'App\Models\Financial\Account',
+            'financial_ach_account'  => 'App\Models\Financial\AchAccount',
             'financial_flags'        => 'App\Models\Financial\Flag',
             'financial_summaries'    => 'App\Models\Financial\TransactionSummary',
             'financial_system_owner' => 'App\Models\Financial\SystemOwner',
