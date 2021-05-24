@@ -37,14 +37,10 @@
         <b-form-group
           :label="$t('form.beneficiary_name.label')"
         >
-          <b-form-input v-model="form.beneficiary_name" />
+          <b-form-input v-model="form.beneficiary_name" :placeholder="$t('form.beneficiary_name.placeholder')" />
         </b-form-group>
 
-        <b-form-group
-          :label="$t('form.residence_country.label')"
-        >
-          <b-form-select v-model="form.residence_country" :options="countryList"  />
-        </b-form-group>
+        <CountrySelectInput v-model="form.residence_country" :label="$t('form.residence_country.label')" />
         <hr class="d-block d-md-none" />
       </b-col>
 
@@ -53,7 +49,13 @@
           :label="$t('form.routing_number.label')"
         >
           <div class="position-relative">
-            <b-form-input v-model="form.routing_number" v-mask="'#########'" inputmode="numeric" pattern="[0-9]*" />
+            <b-form-input
+              v-model="form.routing_number"
+              :placeholder="$t('form.routing_number.placeholder')"
+              v-mask="'#########'"
+              inputmode="numeric"
+              pattern="[0-9]*"
+            />
             <div
               v-if="routingNumberWarning"
               class="bank-warning text-warning"
@@ -76,24 +78,30 @@
         <b-form-group
           :label="$t('form.account_number.label')"
         >
-          <b-form-input v-model="form.account_number" inputmode="numeric" pattern="[0-9]*" />
+          <b-form-input
+            v-model="form.account_number"
+            v-mask="numericMask"
+            :placeholder="$t('form.account_number.placeholder')"
+            inputmode="numeric"
+            pattern="[0-9]*"
+          />
         </b-form-group>
 
         <b-form-group
           :label="$t('form.bank_name.label')"
         >
           <div class="position-relative">
-            <b-form-input v-model="form.bank_name"/>
+            <b-form-input
+              v-model="form.bank_name"
+              :placeholder="$t('form.bank_name.placeholder')"
+              :disabled="form.routing_number.length < 9"
+            />
             <fa-icon v-if="bankGuessProcessing" class="input-spinner" icon="spinner" spin />
           </div>
 
         </b-form-group>
 
-        <b-form-group
-          :label="$t('form.bank_country.label')"
-        >
-          <b-form-select v-model="form.bank_country" :options="countryList" />
-        </b-form-group>
+        <CountrySelectInput v-model="form.bank_country" :label="$t('form.bank_country.label')" />
       </b-col>
     </b-row>
 
@@ -107,7 +115,6 @@
             <fa-icon icon="plus" fixed-width />
             {{ $t('form.submit') }}
           </span>
-          
         </b-btn>
       </b-col>
     </b-row>
@@ -122,24 +129,21 @@
 import { eventBus } from '@/app'
 import _ from 'lodash'
 import Vuex from 'vuex'
-import countryList from 'country-list'
+import CountrySelectInput from '@components/forms/elements/CountrySelectInput'
+import { numericMask } from '@helpers/masks'
 
 export default {
   name: "NewAch",
 
+  components: {
+    CountrySelectInput,
+  },
+
   computed: {
     ...Vuex.mapState([ 'mobile' ]),
-
-    countryList() {
-      var list = _.sortBy(countryList.getData().map(o => ({ value: o.code, text: o.name })), 'text')
-      return [
-        { value: 'US', text: "United States of America" },
-        { value: 'CA', text: 'Canada' },
-        { value: 'UK', text: 'United Kingdom of Great Britain and Northern Ireland' },
-        { html: '<hr></hr>', value: 'space', disabled: true },
-        ...list,
-      ]
-    },
+    numericMask() {
+      return numericMask
+    }
   },
 
   data: () => ({
@@ -246,16 +250,20 @@ export default {
       },
       "beneficiary_name": {
         "label": "Name of Beneficiary",
+        "placeholder": " "
       },
       "bank_name": {
-        "label": "Bank Name"
+        "label": "Bank Name",
+        "placeholder": " ",
       },
       "routing_number": {
         "label": "Routing Number",
+        "placeholder": " ",
         "warningTooltip": "We were unable to look up this routing number. Please double check that it is correct before adding this account."
       },
       "account_number": {
-        "label": "Account Number"
+        "label": "Account Number",
+        "placeholder": " ",
       },
       "bank_country": {
         "label": "Bank Country of Origin"

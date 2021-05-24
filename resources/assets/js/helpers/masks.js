@@ -16,7 +16,12 @@ export const shortYearMask = value => {
   ]
 }
 
+export const numericMask = (value = '') => {
+  return Array(value.length).fill(/[0-9]/)
+}
+
 export default {
   monthMask,
+  numericMask,
   shortYearMask,
 }
