@@ -157,8 +157,8 @@ class RestChatthreadsTest extends TestCase
     {
         $chatthread = Chatthread::has('chatmessages')->firstOrFail();
         $participant = $chatthread->participants[0];
-        //dd( $chatthread->participants->pluck('username'), $participant->username, $chatthread->participants->contains($participant->id) ? 'yes' : 'no');
         $response = $this->actingAs($participant)->ajaxJSON( 'GET', route('chatthreads.show', $chatthread->id) );
+        $content = json_decode($response->content());
         $response->assertStatus(200);
         $response->assertJsonStructure([
             'data' => [
@@ -170,6 +170,12 @@ class RestChatthreadsTest extends TestCase
                 'created_at', 
             ],
         ]);
+
+        // Make sure no scheduled but undelivered messages are returned
+        $num = collect($content->data->chatmessages)->reduce( function($acc, $cm) {
+            return $cm->is_delivered ? $acc : ($acc+1); // expect is_delivered to be TRUE
+        }, 0);
+        $this->assertEquals(0, $num, 'Found chatmessage in thread which is not marked "delivered"');
     }
 
     /**
@@ -188,8 +194,8 @@ class RestChatthreadsTest extends TestCase
     /**
      *  @group chatthreads
      *  @group regression
-     *  @group here0524
      */
+    // Test returning messages by both chathreads.show + chatmessages.index w/ filter
     public function test_can_schedule_message()
     {
         // create chat
@@ -217,7 +223,6 @@ class RestChatthreadsTest extends TestCase
             'mcontents' => $msg,
             'deliver_at' => $tomorrow->timestamp,
         ];
-//dd( $now->timestamp, ($now->addDays(3))->timestamp, $payload['deliver_at']);
         $response = $this->actingAs($originator)->ajaxJSON( 'POST', route('chatthreads.scheduleMessage', $payload) );
         $content = json_decode($response->content());
         //dd($payload, $content);
@@ -230,27 +235,54 @@ class RestChatthreadsTest extends TestCase
         $this->assertGreaterThan($now->timestamp, (new Carbon($scheduledMessage->deliver_at))->timestamp); // %TODO CHECKME
         //$this->assertEquals($payload['deliver_at']->timestamp, new Carbon($scheduledMessage->deliver_at)->timestamp); // %TODO CHECKME
 
-        // index should not return scheduled message pre-delivery
-        $payload = [ 
-            'take' => 100,
-            'chatthread_id' => $chatthreadPKID,
-        ];
-        $response = $this->actingAs($originator)->ajaxJSON( 'GET', route('chatthreads.index', $payload) );
+        // Should not return scheduled message pre-delivery
+        $response = $this->actingAs($originator)->ajaxJSON( 'GET', route('chatthreads.show', $chatthreadPKID) );
         $response->assertStatus(200);
         $content = json_decode($response->content());
+        $num = collect($content->data->chatmessages)->reduce( function($acc, $m) use($scheduledMessagePKID) {
+            return ( $m->id !== $scheduledMessagePKID ) ? $acc : ($acc+1);
+        }, 0);
+        $this->assertEquals(0, $num, 'Scheduled but not yet delivered message was returned by message list call');
+        $num = collect($content->data->chatmessages)->reduce( function($acc, $cm) { // Make sure all messages are 'delivered'
+            return $cm->is_delivered ? $acc : ($acc+1); // expect is_delivered to be TRUE
+        }, 0);
+        $this->assertEquals(0, $num, 'Found chatmessage in thread which is not marked "delivered"');
 
+        // [ ] Invoking deliver does not yet deliver the message
+        $chatthread = Chatthread::findOrFail($chatthreadPKID);
+        $scheduledMessage->deliverScheduled();
+        $chatthread->refresh();
+        $scheduledMessage->refresh();
+        $response = $this->actingAs($originator)->ajaxJSON( 'GET', route('chatthreads.show', $chatthreadPKID) );
+        $response->assertStatus(200);
+        $content = json_decode($response->content());
+        $num = collect($content->data->chatmessages)->reduce( function($acc, $m) use($scheduledMessagePKID) {
+            return ( $m->id !== $scheduledMessagePKID ) ? $acc : ($acc+1);
+        }, 0);
+        $this->assertEquals(0, $num, 'Scheduled but not yet delivered message was returned by message list call');
+
+        // ] Manually change date to fake delivery date passed, re-infoke deliver, message should now be visible
+        $yesterday = new Carbon('yesterday');
+        $scheduledMessage->rescheduleMessage($yesterday->timestamp);
+        $chatthread->refresh();
+        $scheduledMessage->refresh();
+        $scheduledMessage->deliverScheduled();
+        $chatthread->refresh();
+        $scheduledMessage->refresh();
+
+        //$payload = [ 'take' => 100, 'chatthread_id' => $chatthreadPKID ];
+        //$response = $this->actingAs($originator)->ajaxJSON( 'GET', route('chatthreads.index', $payload) );
+        $response = $this->actingAs($originator)->ajaxJSON( 'GET', route('chatthreads.show', $chatthreadPKID) );
+        $response->assertStatus(200);
+        $content = json_decode($response->content());
+        //dd($content);
+        /*
         $num = collect($content->data)->reduce( function($acc, $m) use($scheduledMessagePKID) {
             return ( $m->id !== $scheduledMessagePKID ) ? $acc : ($acc+1);
         }, 0);
-        $this->assertEquals(0, $num, 'Scheduled message was returned by message list call');
-
-        //HERE
-        // --
-
-        //$chatthread = Chatthread::find($chatthreadPKID);
-        //$this->assertNotNull($chatthread);
-        //$this->assertEquals(1, $chatthread->chatmessages->count());
-
+         */
+        $this->assertTrue( $scheduledMessage->is_delivered );
+        $this->assertTrue( collect($content->data->chatmessages)->contains('id', $scheduledMessage->id) );
     }
 
     // ------------------------------

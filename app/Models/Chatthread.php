@@ -25,8 +25,8 @@ class Chatthread extends Model implements UuidId
 
     public function chatmessages()
     {
-        return $this->hasMany(Chatmessage::class);
-        //return $this->hasMany(Chatmessage::class)->where('is_delivered', true);
+        // %NOTE only return delivered
+        return $this->hasMany(Chatmessage::class)->where('is_delivered', true);
     }
 
     public function originator()
@@ -78,5 +78,6 @@ class Chatthread extends Model implements UuidId
               'deliver_at' => Carbon::createFromTimestamp($deliverAt),
         ]);
     }
+
 
 }

@@ -18,7 +18,7 @@ class ChatmessagesController extends AppBaseController
     {
         $request->validate([
             // filters
-            'chatthread_id' => 'uuid|exists:chathreads,id',
+            'chatthread_id' => 'uuid|exists:chatthreads,id',
             'sender_id' => 'uuid|exists:users,id',
             'participant_id' => 'uuid|exists:users,id',
             'is_flagged' => 'boolean',
