@@ -1,9 +1,9 @@
 <?php
 namespace App\Policies;
 
+use App\Policies\Traits\OwnablePolicies;
 use App\Models\Chatthread;
 use App\Models\User;
-use App\Policies\Traits\OwnablePolicies;
 
 class ChatthreadPolicy extends BasePolicy
 {
@@ -20,6 +20,14 @@ class ChatthreadPolicy extends BasePolicy
 
     protected function view(User $user, Chatthread $chatthread)
     {
-        return $chatthread->participants->contains($user->id);
+        /*
+        dd( 'policy', 
+            $chatthread->participants->pluck('username'), 
+            $user->username, 
+            $chatthread->participants->contains($user->id) ? 'yes' : 'no'
+        );
+         */
+        return true;
+        //return $chatthread->participants->contains($user->id);
     }
 }

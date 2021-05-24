@@ -16,6 +16,9 @@ class Chatthread extends JsonResource
             'id' => $this->id,
             'originator_id' => $this->originator_id,
             'is_tip_required' => $this->is_tip_required,
+            'chatmessages' => $this->chatmessages,
+            'participants' => $this->participants,
+            'originator' => $this->originator,
             'created_at' => $this->created_at,
         ];
     }

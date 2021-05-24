@@ -55,8 +55,16 @@ class ChatthreadsController extends AppBaseController
         return new ChatthreadCollection($data); 
     }
 
-    public function show(Request $request, $chatthread) 
+    public function show(Request $request, Chatthread $chatthread) 
     {
+        /*
+        $sessionUser = $request->user();
+        dd( 'ctrl', 
+            $chatthread->participants->pluck('username'), 
+            $sessionUser->username, 
+            $chatthread->participants->contains($sessionUser->id) ? 'yes' : 'no'
+        );
+         */
         $this->authorize('view', $chatthread);
         return new ChatthreadResource($chatthread);
     }

@@ -152,22 +152,22 @@ class RestChatthreadsTest extends TestCase
     /**
      *  @group chatthreads
      *  @group regression
+     *  @group here0524
      */
     public function test_participant_can_view_chatthread()
     {
         $chatthread = Chatthread::has('chatmessages')->firstOrFail();
-        $participant = $chatthreads->participants[0];
-        $response = $this->actingAs($participant)->ajaxJSON( 'GET', route('chatthread.show', $chatthread->id) );
+        $participant = $chatthread->participants[0];
+        //dd( $chatthread->participants->pluck('username'), $participant->username, $chatthread->participants->contains($participant->id) ? 'yes' : 'no');
+        $response = $this->actingAs($participant)->ajaxJSON( 'GET', route('chatthreads.show', $chatthread->id) );
         $response->assertStatus(200);
         $response->assertJsonStructure([
             'data' => [
-                'chatthread_id', 
-                'sender_id', 
-                'mcontent', 
-                'deliver_at', 
-                'is_delivered', 
-                'is_read', 
-                'is_flagged', 
+                'originator_id', 
+                'is_tip_required', 
+                'chatmessages', 
+                'originator', 
+                'participants', 
                 'created_at', 
             ],
         ]);
