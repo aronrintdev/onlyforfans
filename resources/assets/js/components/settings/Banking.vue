@@ -6,10 +6,10 @@
 
 <script>
 /**
- * Settings Payouts Page
+ * Settings Banking Page
  */
 export default {
-  name: 'Payouts',
+  name: 'Banking',
 
 }
 </script>
@@ -17,7 +17,7 @@ export default {
 <i18n lang="json5" scoped>
 {
   "en": {
-    "title": "Payout Accounts"
+    "title": "Banking"
   }
 }
 </i18n>

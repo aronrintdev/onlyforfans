@@ -1,5 +1,5 @@
 /**
- * js/store/payouts.js
+ * js/store/banking.js
  * Vuex store module for payout items
  */
 import Vue from 'vue'
@@ -7,7 +7,7 @@ import _ from 'lodash'
 import axios from 'axios'
 
 
-export const payouts = {
+export const banking = {
   namespaced: true,
 
   state: () => ({
@@ -56,4 +56,4 @@ export const payouts = {
   },
 }
 
-export default payouts
+export default banking

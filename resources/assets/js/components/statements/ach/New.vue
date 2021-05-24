@@ -166,7 +166,7 @@ export default {
   }),
 
   methods: {
-    ...Vuex.mapActions('payouts', [ 'bankFromRoutingNumber' ]),
+    ...Vuex.mapActions('banking', [ 'bankFromRoutingNumber' ]),
 
     submit() {
       this.processing = true
