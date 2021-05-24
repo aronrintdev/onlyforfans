@@ -99,7 +99,8 @@ class ChatthreadsController extends AppBaseController
     {
         $request->validate([
             'mcontents' => 'required|string',
-            'deliver_at' => 'required|datetime',
+            //'deliver_at' => 'required|date',
+            'deliver_at' => 'required|numeric',
         ]);
         $chatmessage = $chatthread->scheduleMessage($request->user(), $request->mcontents, $request->deliver_at);
         return new ChatmessageResource($chatmessage);

@@ -20,14 +20,6 @@ class ChatthreadPolicy extends BasePolicy
 
     protected function view(User $user, Chatthread $chatthread)
     {
-        /*
-        dd( 'policy', 
-            $chatthread->participants->pluck('username'), 
-            $user->username, 
-            $chatthread->participants->contains($user->id) ? 'yes' : 'no'
-        );
-         */
-        return true;
-        //return $chatthread->participants->contains($user->id);
+        return $chatthread->participants->contains($user->id);
     }
 }

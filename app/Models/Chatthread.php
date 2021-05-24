@@ -2,6 +2,7 @@
 namespace App\Models;
 
 use Exception;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 

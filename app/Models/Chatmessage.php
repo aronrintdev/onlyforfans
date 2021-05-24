@@ -16,6 +16,19 @@ class Chatmessage extends Model implements UuidId, Ownable
 
     protected $guarded = [ 'id', 'created_at', 'updated_at' ];
 
+    //--------------------------------------------
+    // %%% Accessors/Mutators | Casts
+    //--------------------------------------------
+
+    protected $casts = [
+        'cattrs'       => 'array',
+        'is_delivered' => 'boolean',
+    ];
+
+    //--------------------------------------------
+    // %%% Relationships
+    //--------------------------------------------
+
     public function chatthread()
     {
         return $this->belongsTo(ChatThread::class);
@@ -25,10 +38,6 @@ class Chatmessage extends Model implements UuidId, Ownable
     {
         return $this->belongsTo(User::class, 'sender_id');
     }
-
-    //--------------------------------------------
-    // %%% Relationships
-    //--------------------------------------------
 
     public function mediafile()
     {
