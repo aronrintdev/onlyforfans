@@ -68,7 +68,7 @@ class RestChatmessagesTest extends TestCase
 
         // Make sure all messages are 'delivered'
         $num = $chatmessages->reduce( function($acc, $cm) {
-            return (!$chatmessage->is_delivered) ? $acc : ($acc+1);
+            return $cm->is_delivered ? $acc : ($acc+1); // expect is_delivered to be TRUE
         }, 0);
         $this->assertEquals(0, $num, 'Found chatmessage in thread which is not marked "delivered"');
     }

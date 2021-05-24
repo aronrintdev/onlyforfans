@@ -18,6 +18,7 @@ class Chatmessage extends JsonResource
             'sender_id' => $this->sender_id,
             'mcontent' => $this->mcontent,
             'deliver_at' => $this->deliver_at,
+            'is_delivered' => $this->is_delivered,
             'is_read' => $this->is_read,
             'is_flagged' => $this->is_flagged,
             //'cattrs' => $this->cattrs,

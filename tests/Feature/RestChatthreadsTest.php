@@ -238,7 +238,7 @@ class RestChatthreadsTest extends TestCase
         $content = json_decode($response->content());
 
         $num = $content->data->reduce( function($acc, $m) use($scheduledMessagePKID) {
-            return ( $m->id !== $scheduledMessagePKID) ) ? $acc : ($acc+1);
+            return ( $m->id !== $scheduledMessagePKID ) ? $acc : ($acc+1);
         }, 0);
         $this->assertEquals(0, $num, 'Scheduled message was returned by message list call');
 
