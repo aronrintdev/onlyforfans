@@ -51,12 +51,12 @@ class UsersTableSeeder extends Seeder
                     'email_verified' => 1,
                 ],
                 [
-                    'name' => 'Jeremy F',
-                    'username' => 'jeremeyf',
-                    'email' => 'jeremy.fall@contentmarketingleads.com',
+                    'name' => 'Niko A',
+                    'username' => 'nikoa',
+                    'email' => 'nikoanzai@gmail.com',
                     'gender' => 'male',
-                    'city' => 'Las Vegas',
-                    'country' => 'US',
+                    'city' => 'Tokyo',
+                    'country' => 'Japan',
                     'is_follow_for_free' => 1, // if not free need to set price as well
                     'password' => bcrypt('foo-123'), // secret
                     'email_verified' => 1,
