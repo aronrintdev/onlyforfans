@@ -80,13 +80,13 @@ body .feed-crate.tag-grid-layout .superbox-post .text-wrap.tag-has-mediafiles {
 }
 
 /* In 'grid' view, normalize the height so that we don't get a variation messing up row alignment */
-body .feed-crate.tag-grid-layout .superbox-post .carousel.slide .carousel-item,
+body .feed-crate.tag-grid-layout .superbox-post .media-slider .slide,
 body .feed-crate.tag-grid-layout .superbox-post .locked-content {
   height: 20rem;
 }
 
 // Lists
-body #view-lists .list-component.tag-grid-layout  .superbox-post .carousel.slide .carousel-item {
+body #view-lists .list-component.tag-grid-layout  .superbox-post .media-slider .slide {
   video, img {
     object-fit: cover;
     height: 20rem;
@@ -94,7 +94,7 @@ body #view-lists .list-component.tag-grid-layout  .superbox-post .carousel.slide
 }
 
 // Main Timeline Feed
-body .feed-crate.tag-grid-layout .superbox-post .carousel.slide .carousel-item {
+body .feed-crate.tag-grid-layout .superbox-post .media-slider .slide {
   video, img {
     object-fit: cover;
     height: 20rem;
