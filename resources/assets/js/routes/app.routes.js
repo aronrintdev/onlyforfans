@@ -5,6 +5,7 @@ import VueRouter from 'vue-router'
 import ErrorViews from '@views/errors'
 import StaticPageRoutes from './staticPages.routes'
 
+import banking from '@views/banking'
 import settings from '@views/settings'
 import lists from '@views/lists'
 import notifications from '@views/notifications'
@@ -95,9 +96,9 @@ export const routes = [
   },
 
   {
-    name: 'statements.ach.new',
-    path: '/statements/ach/new',
-    component: statements.NewAchAccount,
+    name: 'banking.accounts.new',
+    path: '/banking/accounts/new',
+    component: banking.New,
   },
 
   // Lists

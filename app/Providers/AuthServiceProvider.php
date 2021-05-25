@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use App\Interfaces\Likeable;
 use App\Models\Financial\Account;
+use App\Models\Financial\AchAccount;
 use App\Models\Subscription;
 use App\Models\Timeline;
 use App\Models\Vaultfolder;
@@ -18,6 +19,7 @@ class AuthServiceProvider extends ServiceProvider
      */
     protected $policies = [
         Account::class      => \App\Policies\Financial\AccountPolicy::class,
+        AchAccount::class   => \App\Policies\Financial\AchAccountPolicy::class,
         Comment::class      => \App\Policies\CommentPolicy::class,
         Likeable::class     => \App\Policies\LikeablePolicy::class,
         Post::class         => \App\Policies\PostPolicy::class,

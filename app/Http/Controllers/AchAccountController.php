@@ -2,14 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\Financial\AccountTypeEnum;
-use App\Enums\Financial\AchAccountBankTypeEnum;
 use App\Rules\InEnum;
 use Illuminate\Http\Request;
 use App\Models\Financial\AchAccount;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
+use App\Enums\Financial\AccountTypeEnum;
 use App\Enums\Financial\AchAccountTypeEnum;
 use App\Http\Resources\AchAccountCollection;
+use App\Enums\Financial\AchAccountBankTypeEnum;
 use App\Http\Resources\AchAccount as AchAccountResource;
 
 /**
@@ -84,24 +85,37 @@ class AchAccountController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  AchAccount  $achAccount
+     * @param  AchAccount  $bank_account
      * @return \Illuminate\Http\Response
      */
-    public function show(AchAccount $achAccount)
+    public function show(AchAccount $bank_account)
     {
-        $this->authorize('view', $achAccount);
+        $this->authorize('view', $bank_account);
 
-        return new AchAccountResource($achAccount);
+        return new AchAccountResource($bank_account);
+    }
+
+    public function setDefault(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|uuid',
+        ]);
+
+        $settings = Auth::user()->settings;
+        $settings->cattrs = array_merge($settings->cattrs, [ 'default_payout_method' => $request->id ]);
+        $settings->save();
+
+        return [];
     }
 
     /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  AchAccount  $achAccount
+     * @param  AchAccount  $bank_account
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, AchAccount $achAccount)
+    public function update(Request $request, AchAccount $bank_account)
     {
         //
     }
@@ -109,14 +123,14 @@ class AchAccountController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  AchAccount  $achAccount
+     * @param  AchAccount  $bank_account
      * @return \Illuminate\Http\Response
      */
-    public function destroy(AchAccount $achAccount)
+    public function destroy(AchAccount $bank_account)
     {
-        $this->authorize('destroy', $achAccount);
+        $this->authorize('delete', $bank_account);
 
-        $achAccount->delete();
+        $bank_account->delete();
 
         return [];
     }
@@ -125,14 +139,14 @@ class AchAccountController extends Controller
      * Force remove a Ach Account from the DB. This should only be able to be done
      *  by admins.
      *
-     * @param AchAccount $achAccount
+     * @param AchAccount $bank_account
      * @return \Illuminate\Http\Response
      */
-    public function forceDelete(AchAccount $achAccount)
+    public function forceDelete(AchAccount $bank_account)
     {
-        $this->authorize('forceDelete');
+        $this->authorize('forceDelete', $bank_account);
 
-        $achAccount->forceDelete();
+        $bank_account->forceDelete();
 
         return [];
     }

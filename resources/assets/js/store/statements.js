@@ -7,6 +7,8 @@ import _ from 'lodash'
 import axios from 'axios'
 import propSelect from '@helpers/propSelect'
 
+const route = window.route
+
 export const statements = {
   namespaced: true,
 
@@ -86,7 +88,7 @@ export const statements = {
     },
     getTransactions({ commit }, { page, limit }) {
       return new Promise((resolve, reject) => {
-        axios.get(this.$apiRoute('earnings.transactions'), { params: { take: this.take, page: this.page } })
+        axios.get(route('earnings.transactions'), { params: { take: this.take, page: this.page } })
           .then(response => {
             commit('UPDATE_TRANSACTIONS', response.data)
             resolve(response)

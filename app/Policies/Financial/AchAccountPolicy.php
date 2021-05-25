@@ -1,13 +1,16 @@
 <?php
 
-namespace App\Financial\Policies;
+namespace App\Policies\Financial;
 
 use App\Models\User;
 use App\Policies\BasePolicy;
 use App\Models\Financial\AchAccount;
+use App\Policies\Traits\OwnablePolicies;
 
 class AchAccountPolicy extends BasePolicy
 {
+    use OwnablePolicies;
+
     protected $policies = [
         'viewAny'     => 'permissionOnly',
         'view'        => 'isOwner:pass',

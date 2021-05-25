@@ -1,19 +1,17 @@
 <template>
   <div class="container">
     <b-card>
-      <New />
+      <NewForm />
     </b-card>
   </div>
 </template>
 
 <script>
-import New from '@components/statements/ach/New'
-
+import NewForm from '@components/banking/accounts/New'
 export default {
-  name: 'NewAchAccount',
-
+  name: 'NewBankingAccount',
   components: {
-    New,
-  }
+    NewForm,
+  },
 }
 </script>
