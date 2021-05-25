@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class AchAccount extends JsonResource
@@ -15,10 +16,13 @@ class AchAccount extends JsonResource
      */
     public function toArray($request)
     {
+        $default = Auth::user()->settings->cattrs['default_payout_method'];
+
         return [
             'id'                    => $this->getKey(),
             'account_id'            => $this->account->getKey(),
             'type'                  => $this->type,
+            'default'               => $this->getKey() === $default ? true : false,
             'name'                  => $this->name,
             'beneficiary_name'      => $this->beneficiary_name,
             'bank_name'             => $this->bank_name,

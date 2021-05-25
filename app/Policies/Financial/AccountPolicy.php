@@ -5,9 +5,12 @@ namespace App\Policies\Financial;
 use App\Models\User;
 use App\Policies\BasePolicy;
 use App\Models\Financial\Account;
+use App\Policies\Traits\OwnablePolicies;
 
 class AccountPolicy extends BasePolicy
 {
+    use OwnablePolicies;
+
     protected $policies = [
         'viewAny'     => 'permissionOnly',
         'view'        => 'isOwner:pass',

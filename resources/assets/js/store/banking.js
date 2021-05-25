@@ -3,21 +3,31 @@
  * Vuex store module for payout items
  */
 import Vue from 'vue'
-import _ from 'lodash'
+import _, { reject } from 'lodash'
 import axios from 'axios'
+import propSelect from '@helpers/propSelect'
 
+const route = window.route
 
 export const banking = {
   namespaced: true,
 
+  /* --------------------------------- STATE -------------------------------- */
   state: () => ({
-    accounts: {},
+    accounts: [],
   }),
 
+  /* -------------------------------- GETTERS ------------------------------- */
   getters: {},
 
-  mutations: {},
+  /* ------------------------------- MUTATIONS ------------------------------ */
+  mutations: {
+    UPDATE_ACCOUNTS(state, payload) {
+      state.accounts = propSelect(payload, 'accounts')
+    }
+  },
 
+  /* -------------------------------- ACTIONS ------------------------------- */
   actions: {
     /**
      * Retrieves bank information from routingnumbers.info api
@@ -52,6 +62,39 @@ export const banking = {
           .catch(err => reject(err))
       })
     },
+
+    removeAccount({ dispatch }, id) {
+      return new Promise((resolve, reject) => {
+        axios.delete(route('bank-accounts.destroy', { bank_account: id }))
+          .then(response => {
+            dispatch('updateAccounts', { page: 1, take: 20 })
+              .then(response => resolve(response))
+              .catch(error => reject(error))
+          })
+          .catch(error => reject(error))
+      })
+    },
+
+    setDefault({ dispatch }, id) {
+      return new Promise((resolve, reject) => {
+        axios.put(route('bank-accounts.set-default'), { id })
+          .then(response => {
+            dispatch('updateAccounts', { page: 1, take: 20 })
+              .then(response => resolve(response))
+              .catch(error => reject(error))
+          }).catch(error => reject(error))
+      })
+    },
+
+    updateAccounts({ commit }, { page = 1, take = 20 }) {
+      return new Promise((resolve, reject) => {
+        axios.get(route('bank-accounts.index'), { params: { page, take } })
+          .then(response => {
+            commit('UPDATE_ACCOUNTS', response.data)
+            resolve(response)
+          }).catch(error => reject(error))
+      })
+    }
 
   },
 }
