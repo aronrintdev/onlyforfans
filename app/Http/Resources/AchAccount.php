@@ -16,7 +16,7 @@ class AchAccount extends JsonResource
      */
     public function toArray($request)
     {
-        $default = Auth::user()->settings->cattrs['default_payout_method'];
+        $default = Auth::user()->settings->cattrs['default_payout_method'] ?? null;
 
         return [
             'id'                    => $this->getKey(),
