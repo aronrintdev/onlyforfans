@@ -31,7 +31,7 @@ class AchAccountController extends Controller
         $query = AchAccount::orderBy('created_at');
 
         // viewAny permission for admins only
-        if ($request->user()->cannot('viewAny', AchAccount::class) || $request->has('mine')) {
+        if ($request->user()->cannot('viewAny', AchAccount::class) || $request->missing('all')) {
             $query = $query->where('user_id', $request->user()->getKey());
         }
 

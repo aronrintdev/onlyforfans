@@ -30,9 +30,7 @@ class AchAccountSeeder extends Seeder
                 $this->output->writeln(" - ( {$iter} / {$userCount} ) - Creating {$count} ach accounts for user {$user->username}");
             }
 
-            for ($i = 0; $i <= $count; $i++) {
-                AchAccount::factory()->forUser($user)->create();
-            }
+            AchAccount::factory($count)->forUser($user)->create();
 
             $iter++;
         });
