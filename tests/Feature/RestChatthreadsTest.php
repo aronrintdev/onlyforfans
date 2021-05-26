@@ -66,6 +66,34 @@ class RestChatthreadsTest extends TestCase
     /**
      *  @group chatthreads
      *  @group regression
+     *  @group here0525
+     */
+    public function test_can_list_chatthreads_for_single_participant()
+    {
+        $sessionUser = User::has('chatthreads')->firstOrFail();
+        $this->assertFalse($sessionUser->isAdmin());
+
+        $payload = [ 
+            'participant_id' => $sessionUser->id,
+            'take' => 100,
+        ];
+        $response = $this->actingAs($sessionUser)->ajaxJSON( 'GET', route('chatthreads.index', $payload) );
+        $response->assertStatus(200);
+        $content = json_decode($response->content());
+
+        // Check no threads in which I am not a participant
+        $chatthreads = collect($content->data);
+        $num = $chatthreads->reduce( function($acc, $cm) use(&$sessionUser) {
+            $chatthread = Chatthread::find($cm->id);
+            $this->assertNotNull($chatthread);
+            return ($chatthread->participants->contains($sessionUser->id)) ? $acc : ($acc+1);
+        }, 0);
+        $this->assertEquals(0, $num, 'Found thread in which session user is not a participant (of '.$content->meta->total.' total threads)');
+    }
+
+    /**
+     *  @group chatthreads
+     *  @group regression
      */
     public function test_can_create_chat_thread_with_selected_participants()
     {
