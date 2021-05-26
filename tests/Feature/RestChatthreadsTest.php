@@ -66,7 +66,6 @@ class RestChatthreadsTest extends TestCase
     /**
      *  @group chatthreads
      *  @group regression
-     *  @group here0525
      */
     public function test_can_list_chatthreads_for_single_participant()
     {

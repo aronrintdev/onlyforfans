@@ -27,6 +27,7 @@ class DatabaseSeeder extends Seeder
             LikeablesTableSeeder::class,
             TipsTableSeeder::class,
             RandomTimestampSeeder::class,
+            ChatmessagesTableSeeder::class,
         ]);
     }
 
