@@ -73,6 +73,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('/blockables/match', ['as'=>'blockables.match', 'uses' => 'BlockablesController@match']);
 
     // -- chatmessages --
+    Route::get('/unread-messages-count', ['as'=>'messages.unreadmessagescount', 'uses' => 'MessageController@getUnreadMessagesCount']);
     Route::resource('chatmessages', 'ChatmessagesController', [
         'only' => [ 'index', ],
     ]);
