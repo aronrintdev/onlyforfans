@@ -6,6 +6,7 @@ import ErrorViews from '@views/errors'
 import StaticPageRoutes from './staticPages.routes'
 
 import settings from '@views/settings'
+import LivechatDashboard from '@views/live-chat/Dashboard'
 import lists from '@views/lists'
 import notifications from '@views/notifications'
 import stories from '@views/stories'
@@ -16,9 +17,10 @@ import vaults from '@views/vaults'
 import search from '@views/search'
 import posts from '@views/posts'
 import payments from '@views/payments'
-import liveChat from '@views/live-chat'
+//import livechat from '@views/live-chat/components'
 
 import settingsRoutes from './settings.routes'
+import livechatRoutes from './livechat.routes'
 import listRoutes from './list.routes'
 //import notificationsRoutes from './notifications.routes'
 
@@ -34,31 +36,16 @@ export const routes = [
     component: search.Home,
     props: true,
   },
+
+  // Live Chat
   {
-    name: 'messages.home',
+    component: LivechatDashboard,
+    //name: 'livechat.dashboard', // was 'home'
+    //path: '/messages',
     path: '/messages',
-    component: liveChat.Home,
+    children: livechatRoutes,
   },
-  {
-    name: 'messages.new',
-    path: '/messages/new',
-    component: liveChat.New,
-  },
-  {
-    name: 'messages.scheduled',
-    path: '/messages/schedule_message',
-    component: liveChat.Scheduled,
-  },
-  {
-    name: 'messages.details',
-    path: '/messages/:id',
-    component: liveChat.Details,
-  },
-  {
-    name: 'messages.gallery',
-    path: '/messages/:id/gallery',
-    component: liveChat.Gallery,
-  },
+
   // Timelines
   {
     name: 'timelines.home',
