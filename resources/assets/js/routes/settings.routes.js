@@ -42,7 +42,7 @@ export default [
     children: childRoutes.subscriptions,
   },
   {
-    name: 'settings.Banking',
+    name: 'settings.banking',
     component: settings.Banking,
     path: 'banking',
   },

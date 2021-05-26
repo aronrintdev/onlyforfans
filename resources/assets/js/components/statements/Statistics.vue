@@ -43,13 +43,13 @@
 
 <script>
 /**
- * Earnings Balances
+ * Earnings Statistics
  */
 import Vuex from 'vuex'
 import CollapseGroupItem from '@components/common/CollapseGroupItem'
 
 export default {
-  name: 'Balances',
+  name: 'Statistics',
 
   components: {
     CollapseGroupItem,
@@ -94,7 +94,7 @@ export default {
 <i18n lang="json5" scoped>
 {
   "en": {
-    "title": "Balances",
+    "title": "Statistics",
     "credits": "Earnings",
     "subscription": "Subscriptions",
     "sale": "Sales",

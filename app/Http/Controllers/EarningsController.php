@@ -87,8 +87,19 @@ class EarningsController extends Controller
         ];
     }
 
+    public function balances(Request $request)
+    {
+        $account = $request->user()->getInternalAccount(
+            Config::get('transactions.default'),
+            Config::get('transactions.defaultCurrency')
+        );
 
-    
+        return [
+            'available' => $account->balance,
+            'pending' => $account->pending,
+        ];
+    }
+
     /**
      * Earning Transactions for an account
      *
@@ -101,7 +112,6 @@ class EarningsController extends Controller
         $account = $user->getInternalAccount(Config::get('transactions.default'), Config::get('transactions.defaultCurrency'));
         $query = $account->transactions()->where('credit_amount', '>', 0)->orderBy('settled_at', 'desc')
             ->whereIn('type', [ TransactionTypeEnum::SALE, TransactionTypeEnum::TIP, TransactionTypeEnum::SUBSCRIPTION ]);
-            
 
         $data = $query->paginate($request->input('take', Config::get('collections.max.transactions', 20)));
         return new TransactionCollection($data);
