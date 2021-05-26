@@ -89,20 +89,20 @@ class ChatthreadsController extends AppBaseController
     public function sendMessage(Request $request, Chatthread $chatthread)
     {
         $request->validate([
-            'mcontents' => 'required|string',
+            'mcontent' => 'required|string',
         ]);
-        $chatmessage = $chatthread->sendMessage($request->user(), $request->mcontents);
+        $chatmessage = $chatthread->sendMessage($request->user(), $request->mcontent);
         return new ChatmessageResource($chatmessage);
     }
 
     public function scheduleMessage(Request $request, Chatthread $chatthread)
     {
         $request->validate([
-            'mcontents' => 'required|string',
+            'mcontent' => 'required|string',
             //'deliver_at' => 'required|date',
             'deliver_at' => 'required|numeric',
         ]);
-        $chatmessage = $chatthread->scheduleMessage($request->user(), $request->mcontents, $request->deliver_at);
+        $chatmessage = $chatthread->scheduleMessage($request->user(), $request->mcontent, $request->deliver_at);
         return new ChatmessageResource($chatmessage);
     }
 
