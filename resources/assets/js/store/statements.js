@@ -15,6 +15,14 @@ export const statements = {
   /* --------------------------------- STATE -------------------------------- */
   state: () => ({
     /**
+     * Creator Balances
+     */
+    balances: {
+      available: { amount: 0, currency: 'USD' },
+      pending: { amount: 0, currency: 'USD' },
+    },
+
+    /**
      * Summarized Totals
      */
     totals: {
@@ -66,6 +74,9 @@ export const statements = {
 
   /* ------------------------------- MUTATIONS ------------------------------ */
   mutations: {
+    UPDATE_BALANCES(state, payload) {
+      state.balances = payload
+    },
     UPDATE_TOTALS(state, payload) {
       state.totals = payload
     },
@@ -86,6 +97,18 @@ export const statements = {
           .catch(err => reject(err))
       })
     },
+
+    getBalances({ commit }) {
+      return new Promise((resolve, reject) => {
+        axios.get(route('earnings.balances'))
+          .then(response => {
+            commit('UPDATE_BALANCES', response.data)
+            resolve(response)
+          })
+          .catch(error => reject(error))
+      })
+    },
+
     getTransactions({ commit }, { page, limit }) {
       return new Promise((resolve, reject) => {
         axios.get(route('earnings.transactions'), { params: { take: this.take, page: this.page } })

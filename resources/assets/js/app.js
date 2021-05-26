@@ -123,32 +123,7 @@ Vue.directive('mask', VueMaskDirective);
 //Vue.component('my-vault', require('./components/vault/Dashboard.vue').default);
 //Vue.component('my-saved', require('./components/saved/Dashboard.vue').default);
 
-// converts from cents to dollars, and formats
-Vue.filter('niceCurrency', function (valueInCents) {
-  let value = valueInCents ? (valueInCents/100) : 0;
-  return value.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
-});
-
-Vue.filter('niceGuid', function (v) {
-  return v.slice(-12);
-});
-Vue.filter('enumPostType', function (k) {
-  switch (k) {
-    case 'free':
-      return 'Free'
-    case 'price':
-      return 'Purchase-Only'
-    case 'paid':
-      return 'Subscriber-Only'
-  }
-});
-// Assumes post as input
-Vue.filter('isSubscriberOnly', function (p) {
-  return p.type === 'paid';
-});
-Vue.filter('isPurchaseable', function (p) {
-  return p.type === 'price';
-});
+require('./bootstrap/filters')
 
 export const eventBus = new Vue({ });
 

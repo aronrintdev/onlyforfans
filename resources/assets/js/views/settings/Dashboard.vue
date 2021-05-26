@@ -91,7 +91,7 @@ export default {
 
       routes.push({
         name: 'Banking',
-        to: { name: 'settings.Banking', params: {} },
+        to: { name: 'settings.banking', params: {} },
       })
 
       routes.push({
