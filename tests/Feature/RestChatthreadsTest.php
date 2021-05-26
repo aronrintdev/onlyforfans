@@ -145,7 +145,7 @@ class RestChatthreadsTest extends TestCase
         $msgs[] = $msg = $this->faker->realText;
         $payload = [
             $content->data->id, // chatthread_id
-            'mcontents' => $msg,
+            'mcontent' => $msg,
         ];
         $response = $this->actingAs($originator)->ajaxJSON( 'POST', route('chatthreads.sendMessage', $payload) );
         $response->assertStatus(201);
@@ -153,7 +153,7 @@ class RestChatthreadsTest extends TestCase
         $msgs[] = $msg = $this->faker->realText;
         $payload = [
             $content->data->id, // chatthread_id
-            'mcontents' => $msg,
+            'mcontent' => $msg,
         ];
         $response = $this->actingAs($otherParticipants[0])->ajaxJSON( 'POST', route('chatthreads.sendMessage', $payload) );
         $response->assertStatus(201);
@@ -247,7 +247,7 @@ class RestChatthreadsTest extends TestCase
         $msgs[] = $msg = $this->faker->realText;
         $payload = [
             $content->data->id, // chatthread_id
-            'mcontents' => $msg,
+            'mcontent' => $msg,
             'deliver_at' => $tomorrow->timestamp,
         ];
         $response = $this->actingAs($originator)->ajaxJSON( 'POST', route('chatthreads.scheduleMessage', $payload) );
