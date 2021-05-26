@@ -23,6 +23,7 @@ export default [
     component: livechat.ShowThread,
     name: 'chatthreads.show',
     path: ':id',
+    props: true,
   },
   {
     component: livechat.CreateThread,

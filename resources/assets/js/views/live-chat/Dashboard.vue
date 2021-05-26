@@ -10,14 +10,34 @@
     <section class="row">
 
       <aside class="col-md-3 col-lg-2">
-        My Threads
-        <ul>
-          <li v-for="(ct, idx) in chatthreads" :key="ct.id">
+
+        <div>
+          Messages
+        </div>
+
+        <div>
+          Search
+        </div>
+
+        <div>
+          Unread First
+        </div>
+
+        <div>
+        <b-list-group>
+          <b-list-group-item
+            v-for="(ct, idx) in chatthreads"
+            :key="ct.id"
+            :to="link(ct.id)"
+            :active="false"
+            class=""
+          >
             <div>{{ ct.id }}</div>
             <div>{{ ct.chatmessages[0].mcontent || "none" }}</div>
             <div>{{ ct.chatmessages.length }}</div>
-          </li>
-        </ul>
+          </b-list-group-item>
+        </b-list-group>
+      </div>
       </aside>
 
       <main class="col-md-9 col-lg-10">
@@ -49,7 +69,7 @@ export default {
     },
 
     routes() {
-      var routes = [
+      let routes = [
         {
           name: 'ListScheduled',
           to: { name: 'chatmessages.scheduled', params: {} },
@@ -70,7 +90,7 @@ export default {
 
       routes = routes.map(route => ({
         ...route,
-        active: this.checkActive(route)
+        active: this.isActiveRoute(route)
       }))
 
       return routes
@@ -101,6 +121,12 @@ export default {
       'getMe',
     ]),
 
+    link(id) {
+      //return { name: 'chatthreads.show', params: }
+      return { name: 'chatthreads.show', params: { id: id } }
+    },
+
+
     async getChatthreads() {
       const params = {
         page: this.currentPage, 
@@ -108,11 +134,11 @@ export default {
         participant_id: this.session_user.id,
       }
       const response = await axios.get( this.$apiRoute('chatthreads.index'), { params } )
-      this.chatthreads = response.data
+      this.chatthreads = response.data.data
       this.meta = response.meta
     },
 
-    checkActive(route) {
+    isActiveRoute(route) {
       if (this.$router.currentRoute.name === route.to.name) {
         return true
       }
@@ -122,6 +148,10 @@ export default {
         }
       }
       return false
+    },
+
+    getRouteByName(name) {
+      return this.routes.find(r => r.name === name)
     },
 
   }, // methods
