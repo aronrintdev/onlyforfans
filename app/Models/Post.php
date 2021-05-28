@@ -301,9 +301,18 @@ class Post extends Model
         return $result ?? null;
     }
 
-    public function verifyPrice($amount): bool
+    /**
+     * Required by Purchaseable, Checks if price if valid
+     *
+     * @param int|Money $amount
+     * @param string $currency
+     * @return bool
+     */
+    public function verifyPrice($amount, $currency = 'USD'): bool
     {
-        $amount = $this->asMoney($amount);
+        if (!$amount instanceof Money) {
+            $amount = CastsMoney::toMoney($amount, $currency);
+        }
         return $this->price->equals($amount);
     }
 

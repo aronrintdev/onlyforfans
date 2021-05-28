@@ -28,8 +28,9 @@ interface Purchaseable extends PaymentSendable, Shareable, CanFormatMoney
      * Verifies if a price point if valid for purchasing this model
      *
      * @param int|Money $amount
+     * @param string $currency
      * @return bool
      */
-    public function verifyPrice($amount): bool;
+    public function verifyPrice($amount, $currency = 'USD'): bool;
 
 }

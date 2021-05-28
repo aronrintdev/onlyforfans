@@ -22,6 +22,7 @@
       </p>
       <PurchaseForm
         :value="post"
+        item-type="post"
         :price="post.price"
         :currency="post.currency"
         :display-price="post.price_display || (post.price | niceCurrency)"

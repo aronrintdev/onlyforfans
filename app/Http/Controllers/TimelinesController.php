@@ -22,17 +22,21 @@ use Illuminate\Http\Request;
 use App\Enums\PaymentTypeEnum;
 
 use App\Enums\MediafileTypeEnum;
+use App\Payments\PaymentGateway;
+use App\Models\Financial\Account;
 use App\Notifications\TipReceived;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
+
+use App\Models\Financial\SegpayCall;
 use App\Http\Resources\PostCollection;
 use App\Notifications\TimelineFollowed;
-
+use App\Models\Casts\Money as CastsMoney;
 use App\Notifications\TimelineSubscribed;
 use App\Http\Resources\TimelineCollection;
 use App\Http\Resources\MediafileCollection;
-use App\Http\Resources\Timeline as TimelineResource;
 use Illuminate\Validation\UnauthorizedException;
+use App\Http\Resources\Timeline as TimelineResource;
 
 class TimelinesController extends AppBaseController
 {
@@ -237,64 +241,32 @@ class TimelinesController extends AppBaseController
         ]);
     }
 
-    public function subscribe(Request $request, Timeline $timeline)
+    public function subscribe(Request $request, Timeline $timeline, PaymentGateway $paymentGateway)
     {
         $this->authorize('follow', $timeline);
 
         $request->validate([
-            'sharee_id' => 'required|uuid|exists:users,id',
+            'account_id' => 'required|uuid',
+            'amount' => 'required|numeric',
+            'currency' => 'required',
         ]);
 
-        $sessionUser = $request->user();
-        $subscriber = $sessionUser;
-        if ( $request->sharee_id != $subscriber->id ) {
-            abort(403);
+        $price = CastsMoney::toMoney($request->amount, $request->currency);
+
+        $account = Account::with('resource')->find($request->account_id);
+        $this->authorize('subscribe', $account);
+
+        // Verify subscription has not already been created
+        if (Subscription::isSubscribed($request->user(), $timeline)) {
+            abort(400, 'Already have subscription');
         }
 
-        list($timeline, $isSubscribed) = DB::transaction( function() use(&$timeline, &$subscriber, &$request) {
-            $cattrs = [];
-            if ( $request->has('notes') ) {
-                $cattrs['notes'] = $request->notes;
-            }
+        // Verify not resubscribing within waiting period
+        if (Subscription::canResubscribe($request->user(), $timeline)) {
+            abort(400, 'Too soon to resubscribe');
+        }
 
-            $existingFollowing = $timeline->followers->contains($subscriber->id); // currently following?
-            $existingSubscribed = $timeline->subscribers->contains($subscriber->id); // currently subscribed?
-
-            if ( $existingSubscribed ) {
-                // unsubscribe & unfollow
-                $timeline->followers()->detach($subscriber->id);
-                $isSubscribed = false;
-            } else {
-                if ( $existingFollowing ) {
-                    // upgrade from follow to subscribe => remove existing (covers 'upgrade') case
-                    $timeline->followers()->detach($subscriber->id); 
-                } // otherwise, just a direct subscription...
-                $timeline->followers()->attach($subscriber->id, [
-                    'shareable_type' => 'timelines',
-                    'shareable_id' => $timeline->id,
-                    'is_approved' => 1, // %FIXME
-                    'access_level' => 'premium',
-                    'cattrs' => json_encode($cattrs), // %FIXME: add a observer function?
-                ]); //
-                $timeline->receivePayment(
-                    PaymentTypeEnum::SUBSCRIPTION,
-                    $request->user(),
-                    $timeline->price,
-                    $cattrs,
-                );
-                $isSubscribed = true;
-            }
-            return [$timeline, $isSubscribed];
-        });
-
-        $timeline->user->notify(new TimelineSubscribed($timeline, $subscriber));
-
-        $timeline->refresh();
-        return response()->json([
-            'is_subscribed' => $isSubscribed,
-            'timeline' => $timeline,
-            'subscriber_count' => $timeline->subscribers->count(),
-        ]);
+        return $paymentGateway->subscribe($account, $timeline, $price);
     }
 
     /**
@@ -346,34 +318,22 @@ class TimelinesController extends AppBaseController
         ];
     }
 
-    public function tip(Request $request, Timeline $timeline)
+    public function tip(Request $request, Timeline $timeline, PaymentGateway $paymentGateway)
     {
+        $this->authorize('tip', $timeline);
+
         $request->validate([
-            'base_unit_cost_in_cents' => 'required|numeric',
+            'account_id' => 'required|uuid',
+            'amount' => 'required|numeric',
+            'currency' => 'required',
         ]);
 
-        $cattrs = [];
-        if ( $request->has('notes') ) {
-            $cattrs['notes'] = $request->notes;
-        }
+        $price = CastsMoney::toMoney($request->amount, $request->currency);
 
-        try {
-            $timeline->receivePayment(
-                PaymentTypeEnum::TIP,
-                $request->user(), // sender
-                $request->base_unit_cost_in_cents,
-                $cattrs,
-            );
-        } catch(Exception | Throwable $e) {
-            return response()->json([ 'message'=>$e->getMessage() ], 400);
-        }
+        $account = Account::with('resource')->find($request->account_id);
+        $this->authorize('purchase', $account);
 
-        $timeline->user->notify(new TipReceived($timeline, $request->user(), ['amount'=>$request->base_user_cost_in_cents]));
-
-        $timeline->refresh();
-        return response()->json([
-            'timeline' => $timeline,
-        ]);
+        return $paymentGateway->tip($account, $timeline, $price);
     }
 
     // Display my home scheduled timeline

@@ -110,18 +110,36 @@ Route::group(['middleware' => ['auth']], function () {
 
     Route::resource('notifications', 'NotificationsController', [ 'only' => [ 'index', ] ]);
 
+    /* -------------------------------- Posts ------------------------------- */
     // -- posts: likeable | shareable | commentable | tippable | purchaseable | pinnable --
-    Route::get('/posts/match', ['as'=>'posts.match', 'uses' => 'PostsController@match']);
-    Route::put('/posts/{post}/tip', ['as'=>'posts.tip', 'uses' => 'PostsController@tip']);
-    Route::put('/posts/{post}/purchase', ['as'=>'posts.purchase', 'uses' => 'PostsController@purchase']);
-    Route::patch('/posts/{post}/attachMediafile/{mediafile}', ['as'=>'posts.attachMediafile', 'uses' => 'PostsController@attachMediafile']);
-    Route::get('/posts/{post}/index-comments', ['as'=>'posts.indexComments', 'uses' => 'PostsController@indexComments']);
-    Route::resource('posts', 'PostsController', [ 
-        'except' => [ 'create', 'edit', ],
-    ]);
+    #region Posts
+    Route::group(['prefix' => '/posts'], function () {
+        Route::get('/match', 'PostsController@match')
+            ->name('posts.match');
 
-    // -- sessions:  --
+        // tippable
+        Route::put('/{post}/tip', 'PostsController@tip')
+            ->name('posts.tip');
+
+        // purchaseable
+        Route::put('/{post}/purchase', 'PostsController@purchase')
+            ->name('posts.purchase');
+
+        Route::patch('/{post}/attachMediafile/{mediafile}', 'PostsController@attachMediafile')
+            ->name('posts.attachMediafile');
+
+        Route::get('/{post}/index-comments', 'PostsController@indexComments')
+            ->name('posts.indexComments');
+
+    });
+    Route::apiResource('posts', 'PostsController');
+    #endregion Posts
+
+    /* ------------------------------ Sessions ------------------------------ */
+    #region Sessions
     Route::resource('sessions', 'SessionsController', [ 'only' => [ 'index' ] ]);
+
+    #endregion Sessions
 
     // -- stories:  --
     Route::get('/stories/player', ['as' => 'stories.player', 'uses' => 'SpaController@index']);
@@ -141,6 +159,7 @@ Route::group(['middleware' => ['auth']], function () {
     ]);
 
     // -- timelines: tippable | subscribeable | followable --
+    #region Timelines
     Route::get('/timelines-suggested', ['as'=>'timelines.suggested', 'uses' => 'TimelinesController@suggested']); // %FIXME: refactor: use index(?)
     //Route::get('/timelines/home', ['as'=>'timelines.home', 'uses' => 'TimelinesController@home']); // special case of 'show'
     Route::get('/timelines/match', ['as'=>'timelines.match', 'uses' => 'TimelinesController@match']);
@@ -150,16 +169,19 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('/timelines/{timeline}/photos', ['as'=>'timelines.photos', 'uses' => 'TimelinesController@photos']); // photos feed
     Route::get('/timelines/{timeline}/videos', ['as'=>'timelines.videos', 'uses' => 'TimelinesController@videos']); // videos feed
     Route::get('/timelines/{timeline}/preview-posts', ['as'=>'timelines.previewPosts', 'uses' => 'TimelinesController@previewPosts']);
+
     Route::put('/timelines/{timeline}/tip', ['as'=>'timelines.tip', 'uses' => 'TimelinesController@tip']);
+
     Route::put('/timelines/{timeline}/follow', ['as'=>'timelines.follow', 'uses' => 'TimelinesController@follow']);
 
-    // TODO: Deprecate, use purchase endpoints instead
     Route::put('/timelines/{timeline}/subscribe', ['as'=>'timelines.subscribe', 'uses' => 'TimelinesController@subscribe']);
 
     Route::put('/timelines/{timeline}/unsubscribe', ['as' => 'timelines.unsubscribe', 'uses' => 'TimelinesController@unsubscribe']);
     Route::resource('timelines', 'TimelinesController', [
         'only' => ['index', 'show'],
     ]);
+
+    #endregion Timelines
 
     // -- users: messageable --
     //Route::get('/users-suggested', ['as'=>'users.suggested', 'uses' => 'UsersController@suggested']);
@@ -171,7 +193,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::patch('/users/{user}/updatePassword', ['as'=>'users.updatePassword', 'uses' => 'UsersController@updatePassword']);
     Route::get('/users/{user}/settings', [
         'middleware' => 'spaMixedRoute',
-        'as'=>'users.showSettings', 
+        'as'=>'users.showSettings',
         'uses' => 'UsersController@showSettings',
     ]);
     Route::post('/users/avatar', ['as' => 'users.updateAvatar', 'uses' => 'UsersController@updateAvatar']);

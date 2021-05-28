@@ -2,24 +2,27 @@
 
 namespace App\Models;
 
-use App\Apis\Segpay\Api;
 use Money\Money;
 use Carbon\Carbon;
+use LogicException;
+use App\Apis\Segpay\Api;
+use App\Interfaces\Ownable;
 use InvalidArgumentException;
 use App\Models\Traits\UsesUuid;
 use App\Interfaces\Subscribable;
 use App\Models\Financial\Account;
 use Illuminate\Support\Collection;
+use App\Models\Traits\OwnableTraits;
+use Illuminate\Support\Facades\Config;
 use App\Enums\Financial\AccountTypeEnum;
 use App\Models\Casts\Money as CastsMoney;
 use Illuminate\Database\Eloquent\Builder;
 use Carbon\Exceptions\InvalidCastException;
 use App\Enums\Financial\TransactionTypeEnum;
-use App\Interfaces\Ownable;
 use App\Models\Financial\Traits\HasCurrency;
-use App\Models\Traits\OwnableTraits;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Carbon\Exceptions\InvalidIntervalException;
+use Illuminate\Database\Eloquent\InvalidCastException as EloquentInvalidCastException;
 
 /**
  * Subscription model
@@ -304,6 +307,37 @@ class Subscription extends Model implements Ownable
 
     /* ---------------------------- Verifications --------------------------- */
     #region Verifications
+
+    /**
+     * Checks if user is currently subscribed to a subscribable item
+     *
+     * @param User $user
+     * @param Subscribable $subscribable
+     * @return bool
+     */
+    public static function isSubscribed(User $user, Subscribable $subscribable): bool
+    {
+        return Subscription::where('user_id', $user->getKey())
+            ->where('subscribable_type', $subscribable->getMorphString())
+            ->where('subscribable_id', $subscribable->getKey())
+            ->whereNotNull('canceled_at')
+            ->count() > 0;
+    }
+
+    public static function canResubscribe(User $user, Subscribable $subscribable): bool
+    {
+        return Subscription::where('user_id', $user->getKey())
+            ->where('subscribable_type', $subscribable->getMorphString())
+            ->where('subscribable_id', $subscribable->getKey())
+            ->canceled()->where(
+                'canceled_at',
+                '<=',
+                Carbon::now()->subtract(
+                    Config::get('subscriptions.resubscribeWaitPeriod.unit'),
+                    Config::get('subscriptions.resubscribeWaitPeriod.interval')
+                )
+            )->count() > 0;
+    }
 
     /**
      * Checks if the subscription is due to be renewed

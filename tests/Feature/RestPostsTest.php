@@ -15,11 +15,12 @@ use App\Events\ItemPurchased;
 use App\Enums\PaymentTypeEnum;
 use App\Events\PurchaseFailed;
 use App\Enums\MediafileTypeEnum;
-use App\Models\Financial\SegpayCard;
 use Illuminate\Http\UploadedFile;
+use App\Models\Financial\SegpayCard;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Storage;
+use App\Enums\Financial\AccountTypeEnum;
 use Database\Seeders\TestDatabaseSeeder;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -940,24 +941,17 @@ class RestPostsTest extends TestCase
         $this->assertObjectNotHasAttribute('description', $content->data); // ...can't see contents
         $this->assertObjectNotHasAttribute('mediafiles', $content->data);
 
-        $cardNickname = $this->faker->realText(20);
-
-        $payload = [
-            // 'sharee_id' => $fan->id,
-            'item'     => $post->getKey(),
-            'type'     => PaymentTypeEnum::PURCHASE,
-            'price'    => $post->price->getAmount(),
-            'currency' => $post->currency,
-            'last_4'   => '1111',
-            'brand'    => 'visa',
-            'nickname' => $cardNickname,
-        ];
-
         $events = Event::fake([
             ItemPurchased::class,
             PurchaseFailed::class
         ]);
-        $response = $this->actingAs($fan)->ajaxJSON('POST', route('payments.segpay.fake'), $payload);
+        $account = $fan->financialAccounts()->where('type', AccountTypeEnum::IN)->with('resource')->first();
+        $payload = [
+            'account_id' => $account->getKey(),
+            'amount'     => $post->price->getAmount(),
+            'currency'   => $post->currency,
+        ];
+        $response = $this->actingAs($fan)->ajaxJSON('PUT', route('posts.purchase', ['post' => $post->id]), $payload);
         $response->assertStatus(200);
 
         // ItemPurchased will update client with websocket event
@@ -968,13 +962,9 @@ class RestPostsTest extends TestCase
 
         // Check transactions ledger
 
-        // Card was created
-        $card = SegpayCard::where('owner_id', $fan->getKey())->where('nickname', $cardNickname)->first();
-        $this->assertNotNull($card);
-
         // Amount from Card
         $this->assertDatabaseHas('transactions', [
-            'account_id' => $card->account->getKey(),
+            'account_id' => $account->getKey(),
             'debit_amount' => $post->price->getAmount(),
         ], 'financial');
 
@@ -1037,24 +1027,17 @@ class RestPostsTest extends TestCase
         $post = Post::find($content->post->id);
         $this->assertNotNull($post);
 
-        // Fan purchases post resulting in a share...
-        $cardNickname = $this->faker->realText(20);
-        $payload = [
-            // 'sharee_id' => $fan->id,
-            'item'     => $post->getKey(),
-            'type'     => PaymentTypeEnum::PURCHASE,
-            'price'    => $post->price->getAmount(),
-            'currency' => $post->currency,
-            'last_4'   => '1111',
-            'brand'    => 'visa',
-            'nickname' => $cardNickname,
-        ];
-
         $events = Event::fake([
             ItemPurchased::class,
             PurchaseFailed::class
         ]);
-        $response = $this->actingAs($fan)->ajaxJSON('POST', route('payments.segpay.fake'), $payload);
+        $account = $fan->financialAccounts()->where('type', AccountTypeEnum::IN)->with('resource')->first();
+        $payload = [
+            'account_id' => $account->getKey(),
+            'amount'     => $post->price->getAmount(),
+            'currency'   => $post->currency,
+        ];
+        $response = $this->actingAs($fan)->ajaxJSON('PUT', route('posts.purchase', ['post' => $post->id]), $payload);
         $response->assertStatus(200);
 
         // ItemPurchased will update client with websocket event
@@ -1099,24 +1082,17 @@ class RestPostsTest extends TestCase
         $post = Post::find($content->post->id);
         $this->assertNotNull($post);
 
-        // Fan purchases post resulting in a share...
-        $cardNickname = $this->faker->realText(20);
-        $payload = [
-            // 'sharee_id' => $fan->id,
-            'item'     => $post->getKey(),
-            'type'     => PaymentTypeEnum::PURCHASE,
-            'price'    => $post->price->getAmount(),
-            'currency' => $post->currency,
-            'last_4'   => '1111',
-            'brand'    => 'visa',
-            'nickname' => $cardNickname,
-        ];
-
         $events = Event::fake([
             ItemPurchased::class,
             PurchaseFailed::class
         ]);
-        $response = $this->actingAs($fan)->ajaxJSON('POST', route('payments.segpay.fake'), $payload);
+        $account = $fan->financialAccounts()->where('type', AccountTypeEnum::IN)->with('resource')->first();
+        $payload = [
+            'account_id' => $account->getKey(),
+            'amount'     => $post->price->getAmount(),
+            'currency'   => $post->currency,
+        ];
+        $response = $this->actingAs($fan)->ajaxJSON('PUT', route('posts.purchase', [ 'post' => $post->id ]), $payload);
         $response->assertStatus(200);
 
         // ItemPurchased will update client with websocket event

@@ -3,13 +3,13 @@ namespace Tests\Feature;
 
 use DB;
 use Tests\TestCase;
+use App\Models\Post;
 use App\Models\User;
 use App\Models\Timeline;
 use App\Models\Fanledger;
-use App\Models\Post;
-use App\Models\Diskmediafile;
 use App\Models\Mediafile;
 use App\Enums\PostTypeEnum;
+use App\Models\Diskmediafile;
 use App\Enums\PaymentTypeEnum;
 use App\Events\ItemSubscribed;
 use App\Enums\MediafileTypeEnum;
@@ -17,6 +17,7 @@ use App\Events\SubscriptionFailed;
 use App\Models\Financial\SegpayCard;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Config;
+use App\Enums\Financial\AccountTypeEnum;
 use Database\Seeders\TestDatabaseSeeder;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -606,23 +607,17 @@ class TimelinesTest extends TestCase
         //$response = $this->actingAs($fan)->ajaxJSON('GET', route('timelines.show', $timeline->user->username));
         $response->assertStatus(200); // was 403 but see TODO above
 
-        $cardNickname = $this->faker->realText(20);
-
-        $payload = [
-            'item'     => $timeline->getKey(),
-            'type'     => PaymentTypeEnum::SUBSCRIPTION,
-            'price'    => $timeline->price->getAmount(),
-            'currency' => $timeline->currency,
-            'last_4'   => '1111',
-            'brand'    => 'visa',
-            'nickname' => $cardNickname,
-        ];
-
         $events = Event::fake([
             ItemSubscribed::class,
             SubscriptionFailed::class
         ]);
-        $response = $this->actingAs($fan)->ajaxJSON('POST', route('payments.segpay.fake'), $payload);
+        $account = $fan->financialAccounts()->where('type', AccountTypeEnum::IN)->with('resource')->first();
+        $payload = [
+            'account_id' => $account->getKey(),
+            'amount'     => $timeline->price->getAmount(),
+            'currency'   => $timeline->currency,
+        ];
+        $response = $this->actingAs($fan)->ajaxJSON('PUT', route('timelines.subscribe', ['timeline' => $timeline->id]), $payload);
         $response->assertStatus(200);
 
         Event::assertDispatched(ItemSubscribed::class);
@@ -630,12 +625,9 @@ class TimelinesTest extends TestCase
 
         // Check transactions ledger
 
-        // Card was created
-        $card = SegpayCard::where('owner_id', $fan->getKey())->where('nickname', $cardNickname)->first();
-        $this->assertNotNull($card);
         // Amount from Card
         $this->assertDatabaseHas('transactions', [
-            'account_id' => $card->account->getKey(),
+            'account_id' => $account->getKey(),
             'debit_amount' => $timeline->price->getAmount(),
         ], 'financial');
 
@@ -709,7 +701,13 @@ class TimelinesTest extends TestCase
             ItemSubscribed::class,
             SubscriptionFailed::class,
         ]);
-        $response = $this->actingAs($fan)->ajaxJSON('POST', route('payments.segpay.fake'), $payload);
+        $account = $fan->financialAccounts()->where('type', AccountTypeEnum::IN)->with('resource')->first();
+        $payload = [
+            'account_id' => $account->getKey(),
+            'amount'     => $timeline->price->getAmount(),
+            'currency'   => $timeline->currency,
+        ];
+        $response = $this->actingAs($fan)->ajaxJSON('PUT', route('timelines.subscribe', ['timeline' => $timeline->id]), $payload);
         $response->assertStatus(200);
 
         // ItemPurchased will update client with websocket event

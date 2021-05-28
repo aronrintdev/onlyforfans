@@ -36,16 +36,20 @@ export default {
   },
   props: {
     value: { type: Object, default: () => ({}) },
+    itemType: { type: String, default: '' },
     paymentMethod: { type: Object, default: () => ({}) },
     price: { type: Number, default: 0 },
     currency: { type: String, default: 'USD' },
-    type: { type: String, default: 'purchase' },
-    priceDisplay: { type: String, default: () => '$0.00' },
+    type: { type: String, default: 'purchase' }, // purchase | tip | subscribe
     extra: { type: Object, default: () => ({})},
   },
 
   computed: {
     ...Vuex.mapState(['session_user']),
+
+    priceDisplay() {
+      return this.$options.filters.niceCurrency(this.price, this.currency)
+    },
 
     purchasesChannel() {
       return `user.${this.session_user.id}.purchases`
@@ -63,38 +67,37 @@ export default {
 
     onConfirm() {
       this.$emit('processing')
-      this.axios.post(this.$apiRoute('payments.segpay.confirmation'), {
-        item: this.value.id,
-        type: this.type,
-        price: this.price,
-        currency: this.currency,
-        method: this.paymentMethod.id,
-        extra: this.extra,
-      }).then(response => {
-        this.$log.debug('PaymentConfirmation onConfirm')
+      var route = ``
+      switch(this.itemType) {
+        case 'post': case 'posts':
+          route = this.$apiRoute(`posts.${this.type}`, { post: this.value })
+          break
+        case 'timeline': case 'timelines':
+          route = this.$apiRoute(`timelines.${this.type}`, { timeline: this.value })
+          break
+        default:
+          route = this.$apiRoute(`${this.itemType}.${this.type}`, { [this.itemType]: this.value })
+          break
       }
-      ).catch(error => {
+      if (route === '') {
+        this.$nextTick(() => {
+          eventBus.$emit('error', { message: "Invalid Item type", })
+          this.$emit('stopProcessing')
+        })
+        return
+      }
+
+      this.axios.put(route, {
+        account_id: this.paymentMethod.id,
+        amount: this.price,
+        currency: this.currency,
+      }).then(response => {
+        this.$log.debug('PaymentConfirmation onConfirm', { response })
+      }).catch(error => {
         eventBus.$emit('error', { error, message: "An error has occurred", })
         this.$emit('stopProcessing')
       })
     },
-
-    fake() {
-      this.axios.post(this.$apiRoute('payments.segpay.fake-confirmation'), {
-        item: this.value.id,
-        type: this.type,
-        price: this.price,
-        currency: this.currency,
-        method: this.paymentMethod.id,
-        extra: this.extra,
-      }).then(response => {
-        this.$log.debug('PaymentConfirmation onConfirm')
-      }
-      ).catch(error => {
-        eventBus.$emit('error', { error, message: "An error has occurred", })
-        this.$emit('stopProcessing')
-      })
-    }
   },
 
   mounted() {
