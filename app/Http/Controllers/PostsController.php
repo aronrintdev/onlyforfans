@@ -5,22 +5,33 @@ use DB;
 use Auth;
 use Exception;
 use Throwable;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Http\Request;
-use App\Http\Resources\Post as PostResource;
-use App\Http\Resources\PostCollection;
-use App\Notifications\TipReceived;
-use App\Notifications\ResourcePurchased;
-use App\Models\Favorite;
 use App\Models\Post;
 use App\Rules\InEnum;
 use App\Models\Comment;
+use App\Models\Favorite;
 use App\Models\Timeline;
 use App\Models\Mediafile;
-use App\Models\Diskmediafile;
 use App\Enums\PostTypeEnum;
+use Illuminate\Http\Request;
+use App\Models\Diskmediafile;
+use InvalidArgumentException;
 use App\Enums\PaymentTypeEnum;
 use App\Enums\MediafileTypeEnum;
+use App\Payments\PaymentGateway;
+use App\Models\Financial\Account;
+use App\Notifications\TipReceived;
+use Illuminate\Support\Facades\Log;
+use App\Models\Financial\SegpayCall;
+use App\Http\Resources\PostCollection;
+use App\Notifications\ResourcePurchased;
+use App\Models\Casts\Money as CastsMoney;
+use App\Http\Resources\Post as PostResource;
+use App\Models\Financial\Exceptions\InvalidFinancialSystemException;
+use App\Models\Financial\Exceptions\Account\IncorrectTypeException;
+use Money\Exception\UnknownCurrencyException;
+use Illuminate\Auth\Access\AuthorizationException;
+use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class PostsController extends AppBaseController
 {
@@ -226,63 +237,58 @@ class PostsController extends AppBaseController
         return new PostResource($post);
     }
 
-    public function tip(Request $request, Post $post)
+    /**
+     * Tips a post
+     *
+     * @param Request $request
+     * @param Post $post
+     * @return void
+     */
+    public function tip(Request $request, Post $post, PaymentGateway $paymentGateway)
     {
         $this->authorize('tip', $post);
 
         $request->validate([
-            'base_unit_cost_in_cents' => 'required|numeric',
+            'account_id' => 'required|uuid',
+            'amount' => 'required|numeric',
+            'currency' => 'required',
         ]);
 
-        $cattrs = [];
-        if ( $request->has('notes') ) {
-            $cattrs['notes'] = $request->notes;
-        }
+        $price = CastsMoney::toMoney($request->amount, $request->currency);
 
-        try {
-            $post->receivePayment(
-                PaymentTypeEnum::TIP,
-                $request->user(), // sender of tip
-                $request->base_unit_cost_in_cents,
-                $cattrs,
-            );
-        } catch(Exception | Throwable $e){
-            return response()->json(['message'=>$e->getMessage()], 400);
-        }
+        $account = Account::with('resource')->find($request->account_id);
+        $this->authorize('purchase', $account);
 
-        $post->user->notify(new TipReceived($post, $request->user(), ['amount'=>$request->base_unit_cost_in_cents]));
-
-        return response()->json([
-            'post' => $post,
-        ]);
+        return $paymentGateway->tip($account, $post, $price);
     }
 
-    // %TODO: check if already purchased? -> return error
-    public function purchase(Request $request, Post $post)
+    /**
+     * Purchase a post
+     *
+     * @param Request $request
+     * @param Post $post
+     * @param PaymentGateway $paymentGateway
+     * @return array
+     */
+    public function purchase(Request $request, Post $post, PaymentGateway $paymentGateway)
     {
         $this->authorize('purchase', $post);
-        $purchaser = $request->user();
-        $cattrs = [ 'notes' => $request->note ?? '' ];
-        try {
-            $post->receivePayment(
-                PaymentTypeEnum::PURCHASE,
-                $purchaser, // payment *sender*
-                $post->price,
-                $cattrs
-            );
-            $purchaser->sharedposts()->attach($post->id, [
-                'cattrs' => json_encode($cattrs ?? []),
-            ]);
-        } catch(Exception | Throwable $e) {
-            throw $e;
-            return response()->json(['message'=>$e->getMessage()], 400);
+
+        $request->validate([
+            'account_id' => 'required|uuid',
+            'amount' => 'required|numeric',
+            'currency' => 'required',
+        ]);
+
+        $price = CastsMoney::toMoney($request->amount, $request->currency);
+        if ($post->verifyPrice($price) === false) {
+            abort(400, 'Invalid Price');
         }
 
-        $post->user->notify(new ResourcePurchased($post, $purchaser, ['amount'=>$post->price]));
+        $account = Account::with('resource')->find($request->account_id);
+        $this->authorize('purchase', $account);
 
-        return response()->json([
-            'post' => $post ?? null,
-        ]);
+        return $paymentGateway->purchase($account, $post, $price);
     }
 
     public function indexComments(Request $request, Post $post)

@@ -18,6 +18,7 @@ class AchAccountPolicy extends BasePolicy
         'delete'      => 'isOwner:pass:fail',
         'restore'     => 'isOwner:pass:fail',
         'forceDelete' => 'permissionOnly',
+        'withdraw'    => 'isOwner:pass:fail',
     ];
 
     protected function create(User $user)

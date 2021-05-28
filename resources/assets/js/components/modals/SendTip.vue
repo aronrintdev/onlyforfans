@@ -55,6 +55,7 @@
       <b-card-body v-if="step === 'payment'">
         <PurchaseForm
           :value="payload.resource"
+          :item-type="payload.resource_type"
           :price="formPayload.amount"
           :currency="'USD'"
           type="tip"

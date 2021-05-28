@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\Setting;
+use App\Payments\PaymentGateway;
 use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\App;
@@ -88,6 +89,10 @@ class AppServiceProvider extends ServiceProvider
             'webhooks'               => 'App\Models\Webhook',
             'messages'               => 'App\Models\Message',
         ]);
+
+        App::singleton(PaymentGateway::class, function($app) {
+            return new PaymentGateway();
+        });
 
         Carbon::serializeUsing(function ($carbon) {
             return $carbon->toISOString();
