@@ -4,12 +4,14 @@ namespace App\Http\Controllers;
 use DB;
 use Exception;
 use Throwable;
+use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use App\Http\Resources\ChatthreadCollection;
 use App\Http\Resources\Chatthread as ChatthreadResource;
 //use App\Http\Resources\ChatmessageCollection;
 use App\Http\Resources\Chatmessage as ChatmessageResource;
+use App\Events\MessageSentEvent;
 use App\Models\Chatmessage;
 use App\Models\Chatthread;
 use App\Models\User;
@@ -92,6 +94,7 @@ class ChatthreadsController extends AppBaseController
             'mcontent' => 'required|string',
         ]);
         $chatmessage = $chatthread->sendMessage($request->user(), $request->mcontent);
+        broadcast( new MessageSentEvent($chatmessage) )->toOthers();
         return new ChatmessageResource($chatmessage);
     }
 
