@@ -85,18 +85,18 @@ export default {
 
     async storeChatmessage() {
       const params = {
-        page: this.currentPage, 
-        take: this.perPage,
-        chatthread_id: chatthreadID,
+        mcontent: this.mcontent,
       }
-      const response = await axios.post( this.$apiRoute('chatthreads.sendMessage'), { params } )
+      const response = await axios.post( this.$apiRoute('chatthreads.sendMessage', this.id), { params } )
     },
 
     async getChatmessages(chatthreadID) {
       const params = {
-        mcontent: this.mcontent,
+        page: this.currentPage, 
+        take: this.perPage,
+        chatthread_id: chatthreadID,
       }
-      const response = await axios.get( this.$apiRoute('chatthreads.sendMessage'), { params } )
+      const response = await axios.get( this.$apiRoute('chatmessages.index'), { params } )
       this.chatmessages = response.data.data
       this.meta = response.meta
     },
@@ -106,11 +106,9 @@ export default {
   watch: {
 
     id (newValue, oldValue) {
-
       if ( newValue && (newValue!==oldValue) ) {
         this.getChatmessages(newValue)
       }
-
     },
 
   }, // watch
