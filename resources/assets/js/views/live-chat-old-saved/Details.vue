@@ -247,10 +247,7 @@
                     </div>
                     <div class="typing dot-pulse" style="display: none">...</div>
                   </div>
-                  <div
-                    class="conversation-footer"
-                    :class="messagePrice ? 'price-view': ''" v-if="!showAudioRec"
-                  >
+                  <div class="conversation-footer" :class="messagePrice ? 'price-view': ''" v-if="!showAudioRec" >
                     <div class="scheduled-message-head" v-if="scheduledMessageDate">
                       <div>
                         <svg class="icon-schedule" viewBox="0 0 24 24">
