@@ -369,7 +369,8 @@ class MessageController extends Controller
             ];
         }
         return [];
-    }
+
+    } // store()
 
     public function clearUser(Request $request, $id)
     {

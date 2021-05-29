@@ -248,6 +248,7 @@ class RestCommentsTest extends TestCase
     /**
      *  @group comments
      *  @group regression
+     *  @group here0528a
      */
     public function test_follower_can_create_comment_on_timeline_post()
     {

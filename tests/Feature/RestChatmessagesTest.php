@@ -7,6 +7,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Http\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Event;
 use DB;
 
 use Tests\TestCase;
@@ -76,7 +77,6 @@ class RestChatmessagesTest extends TestCase
     /**
      *  @group chatmessages
      *  @group regression
-     *  @group here0524
      */
     public function test_can_list_chatmessages_filtered_by_thread()
     {

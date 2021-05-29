@@ -8,6 +8,7 @@ use Illuminate\Support\Collection;
 
 use App\Interfaces\UuidId;
 use App\Models\Traits\UsesUuid;
+//use App\Models\Traits\UsesShortUuid;
 
 class Chatthread extends Model implements UuidId
 {

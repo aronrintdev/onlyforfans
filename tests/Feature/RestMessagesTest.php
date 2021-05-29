@@ -7,6 +7,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Http\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Event;
 use DB;
 
 use Tests\TestCase;
@@ -122,7 +123,6 @@ class RestMessagesTest extends TestCase
     /**
      *  @group messages
      *  @group DEPRECATED-regression
-     *  @group here0519
      */
     public function test_can_send_chat_message()
     {
