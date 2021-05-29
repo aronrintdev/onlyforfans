@@ -55,7 +55,7 @@
           <b-button variant="link" class="clickme_to-set-price" :disabled="false" @click="doSomething('set-price')">
             <fa-icon :icon="['fas', 'dollar-sign']" class="clickable" fixed-width size="2x" />
           </b-button>
-          <b-button type="submit" variant="primary" :disabled="false">Send</b-button>
+          <b-button type="submit" variant="primary" class="clickme_to-submit_message ml-auto" :disabled="false">SEND</b-button>
         </div>
       </b-form>
 
@@ -74,7 +74,7 @@ export default {
 
   props: {
     session_user: null,
-    id: null,
+    id: null, // the chatthread PKID
   },
 
   computed: {
@@ -104,7 +104,17 @@ export default {
   created() { 
   },
 
-  mounted() { },
+  mounted() { 
+    const channel = `private-chatthreads.${this.id}`
+    Echo.channel(channel).listen('MessageSentEvent', e => {
+            console.log('echo', e.chattmessage);
+    })
+      /*
+    Echo.private(channel).listen('MessageSentEvent', e => {
+            console.log('echo', e.chattmessage);
+    })
+       */
+  },
 
   methods: {
 
@@ -434,6 +444,9 @@ export default {
 }
 textarea {
   border: none;
+}
+button.clickme_to-submit_message {
+  width: 9rem;
 }
 </style>
 
