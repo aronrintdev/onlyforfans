@@ -18,6 +18,7 @@ class Chatthread extends JsonResource
             'is_tip_required' => $this->is_tip_required,
             //'chatmessages' => $this->chatmessages,
             'chatmessages' => $this->chatmessages()->latest()->take(1)->get(), // limit to 1, for preview only, save bw
+            'msg_count' => $this->chatmessages()->count(),
             'participants' => $this->participants,
             'originator' => $this->originator,
             'created_at' => $this->created_at,
