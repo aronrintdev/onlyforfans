@@ -20,30 +20,33 @@
           </div>
         </article>
 
-        <div>
+        <section class="d-none">
           Search
-        </div>
+        </section>
 
-        <div>
+        <section>
           Unread First
-        </div>
+        </section>
 
-        <div>
-        <b-list-group>
-          <b-list-group-item
-            v-for="(ct, idx) in chatthreads"
-            :key="ct.id"
-            :to="link(ct.id)"
-            :active="isActiveThread(ct.id)"
-            class=""
-          >
-            <div>Participants ID: {{ ct.id }}</div>
-            <div>Thread ID: {{ ct.id }}</div>
-            <div>Preview: {{ ct.chatmessages[0].mcontent || "none" }}</div>
-            <div>Message Count: {{ ct.msg_count }}</div>
-          </b-list-group-item>
-        </b-list-group>
-      </div>
+        <section>
+          <b-list-group>
+            <b-list-group-item
+              v-for="(ct, idx) in chatthreads"
+              :key="ct.id"
+              :to="link(ct.id)"
+              :active="isActiveThread(ct.id)"
+              :data-ct_id="ct.id"
+              class="px-2"
+            >
+              <PreviewThread 
+                :session_user="session_user"
+                :user="participants(ct)"
+                :chatthread="ct"
+              />
+            </b-list-group-item>
+          </b-list-group>
+        </section>
+
       </aside>
 
       <main class="col-md-8 col-lg-9">
@@ -60,15 +63,25 @@
 <script>
 import Vuex from 'vuex'
 import moment from 'moment'
+import PreviewThread from '@views/live-chat/components/PreviewThread'
 
 export default {
   name: 'LivechatDashboard',
 
   components: {
+    PreviewThread,
   },
 
   computed: {
     ...Vuex.mapGetters(['session_user']),
+
+    activeThreadId() {
+      return this.$route.params.id
+    },
+
+    activeThread() {
+      return this.chatthreads.find( ct => ct.id === this.activeThreadId )
+    },
 
     isLoading() {
       return !this.session_user || !this.chatthreads
@@ -128,16 +141,17 @@ export default {
     ]),
 
     link(id) {
-      //return { name: 'chatthreads.show', params: }
       return { name: 'chatthreads.show', params: { id: id } }
     },
 
+    participants(chatthread) { // other than session user
+      // pop() because right now we only support 1-on-1 conversations (no group chats)
+      return chatthread.participants.filter( u => u.id !== this.session_user.id ).pop()
+    },
+
     isActiveThread(id) {
-      console.log('active', {
-        id: id,
-        'route': this.$route.params.id,
-      })
-      return id === this.$route.params.id
+      //return id === this.$route.params.id
+      return id === this.activeThreadId
     },
 
     doSomething() {
@@ -198,7 +212,7 @@ export default {
   //align-items: center;
   //justify-content: space-between;
   //padding: 15px 4px 16px;
-    border-bottom: 1px solid rgba(138,150,163,.25);
+  border-bottom: 1px solid rgba(138,150,163,.25);
 }
 
 body {
