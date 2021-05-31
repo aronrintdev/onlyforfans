@@ -1,17 +1,18 @@
 <?php
-
 namespace App\Providers;
 
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
-use App\Broadcasting\UserEventsChannel;
-use App\Broadcasting\UserStatusChannel;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Broadcast;
-use App\Broadcasting\UserPurchasesChannel;
 use Illuminate\Broadcasting\BroadcastManager;
 use Illuminate\Contracts\Foundation\Application;
+
+use App\Broadcasting\UserPurchasesChannel;
+use App\Broadcasting\UserEventsChannel;
+use App\Broadcasting\UserStatusChannel;
+use App\Models\Chatthread;
 
 class BroadcastServiceProvider extends ServiceProvider
 {
@@ -38,12 +39,21 @@ class BroadcastServiceProvider extends ServiceProvider
 
         Broadcast::routes();
 
+        // %NOTE: channel authorization is done here instead of routes/channels.php
+        //  ~ https://laravel.com/docs/8.x/broadcasting#defining-authorization-callbacks
+        //  ~ https://mattstauffer.com/blog/introducing-laravel-echo/
         Broadcast::channel('user.status.{userId}'   , UserStatusChannel::class);
         Broadcast::channel('user.{userId}.purchases', UserPurchasesChannel::class);
         Broadcast::channel('user.{userId}.events'   , UserEventsChannel::class);
 
-        Broadcast::channel('chat-typing', function ($user) {
-            return (Auth::check()) ? $user : false;
+        // private-chatthreads.{chatthreadId} ??
+        Broadcast::channel('chatthreads.{chatthreadId}', function($sessionUser, Chatthread $chatthread) {
+            //dd('provider.abc.1');
+            return true; // %TODO %FIXME
+        });
+
+        Broadcast::channel('chat-typing', function ($sessionUser) {
+            return (Auth::check()) ? $sessionUser : false;
         });
 
         //Broadcast::channel('{userId}-message',  function ($user) {

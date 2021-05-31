@@ -27,6 +27,11 @@ class MessageSentEvent  implements ShouldBroadcast
 
     public function broadcastOn()
     {
-        return new PrivateChannel('chatthreads.'.$this->chatmessage->chathread->id);
+        return new PrivateChannel('chatthreads.'.$this->chatmessage->chatthread->id);
+    }
+
+    public function broadcastAs()
+    {
+        return 'chatmessage.sent';
     }
 }
