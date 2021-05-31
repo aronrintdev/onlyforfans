@@ -32,9 +32,10 @@
             :active="false"
             class=""
           >
-            <div>{{ ct.id }}</div>
-            <div>{{ ct.chatmessages[0].mcontent || "none" }}</div>
-            <div>{{ ct.chatmessages.length }}</div>
+            <div>Participants ID: {{ ct.id }}</div>
+            <div>Thread ID: {{ ct.id }}</div>
+            <div>Preview: {{ ct.chatmessages[0].mcontent || "none" }}</div>
+            <div>Message Count: {{ ct.msg_count }}</div>
           </b-list-group-item>
         </b-list-group>
       </div>

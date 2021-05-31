@@ -10,9 +10,9 @@
 
     <section>
 
-      <b-list-group>
+      <b-list-group class="tag-messages">
         <b-list-group-item
-          v-for="(cm, idx) in chatmessages"
+          v-for="(cm, idx) in chatmessages.slice().reverse()"
           :key="cm.id"
           class=""
         >
@@ -106,9 +106,26 @@ export default {
 
   mounted() { 
     const channel = `private-chatthreads.${this.id}`
-    Echo.channel(channel).listen('MessageSentEvent', e => {
-            console.log('echo', e.chattmessage);
+    //const eventName = `MessageSentEvent`
+    console.log(`live-chat/components/ShowThread::mounted`, {
+      channel: channel,
+      //eventName: eventName,
     })
+    this.$echo.private(channel).listen('.chatmessage.sent', e => {
+      console.log(`live-chat/components/ShowThread::echo.listen`, {
+        channel: channel,
+        msg: e.chattmessage
+      })
+    })
+      /*
+    Echo.private(channel).listen('MessageSentEvent', e => {
+      console.log(`live-chat/components/ShowThread::echo.listen`, {
+        channel: channel,
+        //eventName: eventName,
+        msg: e.chattmessage
+      })
+    })
+       */
       /*
     Echo.private(channel).listen('MessageSentEvent', e => {
             console.log('echo', e.chattmessage);
@@ -123,10 +140,13 @@ export default {
     //]),
 
     async sendMessage(e) {
+      console.log('live-chat.components.ShowThread::sendMessage().A')
       const params = {
         mcontent: this.newMessageForm.mcontent,
       }
       const response = await axios.post( this.$apiRoute('chatthreads.sendMessage', this.id), params )
+      console.log('live-chat.components.ShowThread::sendMessage().B')
+      this.newMessageForm.mcontent = null
     },
 
     async getChatmessages(chatthreadID) {

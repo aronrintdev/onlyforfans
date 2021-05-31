@@ -8,6 +8,7 @@
  * allows your team to easily build robust real-time web applications.
  */
 
+// https://laravel.com/docs/8.x/broadcasting#client-side-installation
 import Vue from 'vue'
 import Pusher from 'pusher-js'
 import Echo from 'laravel-echo'
