@@ -17,6 +17,28 @@ class Chatthread extends Model implements UuidId
     protected $guarded = [ 'id', 'created_at', 'updated_at' ];
 
     //--------------------------------------------
+    // Boot
+    //--------------------------------------------
+
+    public static function boot()
+    {
+        parent::boot();
+
+        static::created(function ($model) {
+            // add originator as a participant
+            $model->participants()->attach($model->originator_id);
+        });
+
+        /*
+        static::deleting(function ($model) {
+            foreach ($model->vaultfolders as $o) {
+                $o->delete();
+            }
+        });
+         */
+    }
+
+    //--------------------------------------------
     // %%% Accessors/Mutators | Casts
     //--------------------------------------------
 

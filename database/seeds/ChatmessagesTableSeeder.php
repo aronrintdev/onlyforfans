@@ -21,6 +21,14 @@ class ChatmessagesTableSeeder extends Seeder
     {
         $this->initSeederTraits('ChatmessagesTableSeeder'); // $this->{output, faker, appEnv}
 
+        if ( 0 ) {
+            DB::table('chatthread_user')->truncate();
+            DB::table('chatmessages')->truncate();
+            //DB::table('chatthreads')->truncate();
+            DB::table('chatthreads')->delete();
+            dd('truncate done');
+        }
+
         //$senderCount = $this->faker->numberBetween(2, 4); // number of senders
         $originatorCount = 3;
 
@@ -33,9 +41,8 @@ class ChatmessagesTableSeeder extends Seeder
         $originators->each( function($o) {
 
             $threadCount = $this->faker->numberBetween(1, 3); // number of receivers *per* originator (ie threads)
-            $receivers = User::has('timeline')->take($threadCount)->where('id', '<>', $o->id)->get();
+            $receivers = User::has('timeline')->where('id', '<>', $o->id)->take($threadCount)->get();
 
-            // %TODO: add group chats
             $receivers->each( function($r) use(&$o) {
                 //dump('ts', $ts->toDateTimeString());
 
@@ -45,11 +52,11 @@ class ChatmessagesTableSeeder extends Seeder
 
                 $chatthread->participants()->attach($r->id);
 
-                $msgCount = $this->faker->numberBetween(3, 17);
+                $msgCount = $this->faker->numberBetween(1, 15);
 
                 $senderID = $o->id; // init sender
                 for ( $i = 0 ; $i < $msgCount ; $i++ ) {
-                    $isScheduled = $this->faker->boolean(25);
+                    $isScheduled = $this->faker->boolean(20);
                     if ($isScheduled) {
                         $now = Carbon::now();
                         $isDeliveredByNow = $this->faker->boolean(50);
@@ -85,7 +92,7 @@ class ChatmessagesTableSeeder extends Seeder
                         $m->save();
                     }
                     $ts->addMinutes( $this->faker->numberBetween(1,70) );
-                    $senderID = $this->faker->randomElement([ $o->id, $r->id ]); // so it looksl like a back-and-forth conversation
+                    $senderID = $this->faker->randomElement([ $o->id, $r->id ]); // so it looks like a back-and-forth conversation
                 }
             });
 
