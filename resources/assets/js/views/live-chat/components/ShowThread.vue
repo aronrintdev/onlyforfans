@@ -38,22 +38,22 @@
         </div>
         <div class="form-ctrl d-flex">
           <b-button variant="link" class="clickme_to-attach_files" @click="doSomething">
-            <fa-icon :icon="['far', 'file-alt']" class="clickable" fixed-width size="2x" />
+            <fa-icon :icon="['far', 'file-alt']" class="clickable fa-lg" fixed-width />
           </b-button>
           <b-button variant="link" class="clickme_to-record_video" @click="doSomething('record-video')">
-            <fa-icon :icon="['fas', 'video']" class="clickable" fixed-width size="2x" />
+            <fa-icon :icon="['fas', 'video']" class="clickable fa-lg" fixed-width />
           </b-button>
           <b-button variant="link" class="clickme_to-record_audio" @click="doSomething('record-audio')">
-            <fa-icon :icon="['fas', 'microphone']" class="clickable" fixed-width size="2x" />
+            <fa-icon :icon="['fas', 'microphone']" class="clickable fa-lg" fixed-width />
           </b-button>
           <b-button variant="link" class="clickme_to-select_vault_file" @click="doSomething('select-vault-file')">
-            <fa-icon :icon="['fas', 'archive']" class="clickable" fixed-width size="2x" />
+            <fa-icon :icon="['fas', 'archive']" class="clickable fa-lg" fixed-width />
           </b-button>
           <b-button variant="link" class="clickme_to-set_scheduled" :disabled="false" @click="doSomething('set-scheduled')">
-            <fa-icon :icon="['far', 'calendar-alt']" class="clickable" fixed-width size="2x" />
+            <fa-icon :icon="['far', 'calendar-alt']" class="clickable fa-lg" fixed-width />
           </b-button>
           <b-button variant="link" class="clickme_to-set-price" :disabled="false" @click="doSomething('set-price')">
-            <fa-icon :icon="['fas', 'dollar-sign']" class="clickable" fixed-width size="2x" />
+            <fa-icon :icon="['fas', 'dollar-sign']" class="clickable fa-lg" fixed-width />
           </b-button>
           <b-button type="submit" variant="primary" class="clickme_to-submit_message ml-auto" :disabled="false">SEND</b-button>
         </div>
@@ -81,7 +81,7 @@ export default {
     //...Vuex.mapGetters(['session_user']),
 
     isLoading() {
-      return !this.session_user || !this.chatmessages
+      return !this.session_user || !this.id || !this.chatmessages
     },
 
   },
@@ -105,6 +105,8 @@ export default {
   },
 
   mounted() { 
+    this.getChatmessages(this.id)
+
     const channel = `private-chatthreads.${this.id}`
     //const eventName = `MessageSentEvent`
     console.log(`live-chat/components/ShowThread::mounted`, {
@@ -459,6 +461,15 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+body {
+  .btn-link:hover {
+    text-decoration: none;
+  }
+  .btn:focus, .btn.focus {
+    box-shadow: none;
+  }
+}
+
 .conversation-footer {
   background-color: #fff;
 }

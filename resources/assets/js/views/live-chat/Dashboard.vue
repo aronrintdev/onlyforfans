@@ -1,19 +1,24 @@
 <template>
-  <div v-if="!isLoading" class="container-fluid" id="view-livechat">
-
-    <section class="row">
-      <article class="col-sm-12">
-        Live Chat Dashboard
-      </article>
-    </section>
+  <div v-if="!isLoading" class="container-xl" id="view-livechat">
 
     <section class="row">
 
-      <aside class="col-md-3 col-lg-2">
+      <aside class="col-md-4 col-lg-3">
 
-        <div>
-          Messages
-        </div>
+        <article class="top-bar d-flex justify-content-between">
+          <h4>Messages</h4>
+          <div class="d-flex">
+            <b-button variant="link" class="clickme_to-search_messages" @click="doSomething">
+              <fa-icon :icon="['fas', 'search']" class="clickable fa-lg" />
+            </b-button>
+            <b-button variant="link" class="clickme_to-schedule_message" @click="doSomething">
+              <fa-icon :icon="['far', 'calendar-alt']" class="clickable fa-lg" />
+            </b-button>
+            <b-button variant="link" class="clickme_to-send_message" @click="doSomething">
+              <fa-icon :icon="['fas', 'plus']" class="clickable fa-lg" />
+            </b-button>
+          </div>
+        </article>
 
         <div>
           Search
@@ -29,7 +34,7 @@
             v-for="(ct, idx) in chatthreads"
             :key="ct.id"
             :to="link(ct.id)"
-            :active="false"
+            :active="isActiveThread(ct.id)"
             class=""
           >
             <div>Participants ID: {{ ct.id }}</div>
@@ -41,7 +46,7 @@
       </div>
       </aside>
 
-      <main class="col-md-9 col-lg-10">
+      <main class="col-md-8 col-lg-9">
         <transition mode="out-in" name="quick-fade">
           <router-view :session_user="session_user" />
         </transition>
@@ -127,6 +132,17 @@ export default {
       return { name: 'chatthreads.show', params: { id: id } }
     },
 
+    isActiveThread(id) {
+      console.log('active', {
+        id: id,
+        'route': this.$route.params.id,
+      })
+      return id === this.$route.params.id
+    },
+
+    doSomething() {
+      // stub placeholder for impl
+    },
 
     async getChatthreads() {
       const params = {
@@ -177,6 +193,22 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.top-bar {
+  //display: flex;
+  //align-items: center;
+  //justify-content: space-between;
+  //padding: 15px 4px 16px;
+    border-bottom: 1px solid rgba(138,150,163,.25);
+}
+
+body {
+  .btn-link:hover {
+    text-decoration: none;
+  }
+  .btn:focus, .btn.focus {
+    box-shadow: none;
+  }
+}
 </style>
 
 <style lang="scss">
