@@ -86,21 +86,18 @@ class StoriesController extends AppBaseController
 
     public function store(Request $request)
     {
-        $request['attrs'] = json_decode($request['attrs'], true); // decode 'complex' data
-
         $vrules = [
-            'attrs' => 'required|array',
-            'attrs.stype' => 'in:'.StoryTypeEnum::getKeysCsv(), // %TODO : apply elsewhere
+            'stype' => 'in:'.StoryTypeEnum::getKeysCsv(), // %TODO : apply elsewhere
             //'timeline_id' => 'required|uuid|exists:timelines',
         ];
         if ( $request->has('mediafile') ) {
             if ( $request->hasFile('mediafile') ) {
                 //$vrules['mediafile'] = 'required_if:attrs.stype,photo|file';
-                $vrules['mediafile'] = 'file|required_if:attrs.stype,'.StoryTypeEnum::PHOTO;
+                $vrules['mediafile'] = 'file|required_if:stype,'.StoryTypeEnum::PHOTO;
                 // %TODO VIDEO stype
             } else {
-                //$vrules['mediafile'] = 'required_if:attrs.stype,photo|uuid|exists:mediafiles,id'; // must be fk to [mediafiles]
-                $vrules['mediafile'] = 'uuid|exists:mediafiles,id|required_if:attrs.stype,'.StoryTypeEnum::PHOTO; // must be fk to [mediafiles]
+                //$vrules['mediafile'] = 'required_if:stype,photo|uuid|exists:mediafiles,id'; // must be fk to [mediafiles]
+                $vrules['mediafile'] = 'uuid|exists:mediafiles,id|required_if:stype,'.StoryTypeEnum::PHOTO; // must be fk to [mediafiles]
                 // %TODO VIDEO stype
             }
         }
@@ -119,14 +116,14 @@ class StoriesController extends AppBaseController
 
                 $story = Story::create([
                     'timeline_id' => $timeline->id,
-                    'content' => $request->attrs['content'] ?? null,
+                    'content' => $request->content ?? null,
                     'cattrs' => [
-                        'background-color' => array_key_exists('bgcolor', $request->attrs) ? $request->attrs['bgcolor'] : '#fff',
+                        'background-color' => isset($request->bgcolor) ? $request->bgcolor : '#fff',
                     ],
-                    'stype' => $request->attrs['stype'],
+                    'stype' => $request->stype,
                 ]);
 
-                if ( $request->attrs['stype'] === StoryTypeEnum::PHOTO ) {
+                if ( $request->stype === StoryTypeEnum::PHOTO ) {
                     if ( $request->hasFile('mediafile') ) {
                         // mediafile request param is of type FILE...see vrules above
                         $file = $request->file('mediafile');
