@@ -211,7 +211,7 @@ class SegpayCall extends Model
 
         $this->processed_at = Carbon::now();
         $this->save();
-        return;
+        return $this;
     }
 
     #endregion Functions

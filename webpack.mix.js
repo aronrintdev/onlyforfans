@@ -5,6 +5,7 @@ const mix = require('laravel-mix');
 const path = require('path');
 require('dotenv').config();
 require('laravel-mix-bundle-analyzer');
+require('mix-env-file');
 // require('laravel-mix-alias');
 
 /*
@@ -17,6 +18,11 @@ require('laravel-mix-bundle-analyzer');
  | file for the application as well as bundling up all the JS files.
  |
  */
+
+/**
+ * Use env file passed in from command
+ */
+mix.env(process.env.ENV_FILE);
 
 /**
  * Alias to reduce clutter of `../..`s in js and vue imports
