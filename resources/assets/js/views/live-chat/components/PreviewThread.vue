@@ -2,15 +2,17 @@
   <div>
 
     <section class="d-flex align-items-center">
-      <b-avatar :src="user.avatar.filepath" :alt="user.name" />
+      <b-avatar :src="user.avatar.filepath" size="3rem" :alt="user.name" />
       <div class="pl-2">
-        <h5 class="my-0">{{ user.username }}</h5>
+        <p class="my-0">
+          <span><strong>{{ user.username }}</strong></span>
+          <span class="msg-count"><em><small>({{ chatthread.msg_count }})</small></em></span>
+        </p>
         <p class="msg-snippet mb-0 text-truncate">{{ chatthread.chatmessages[0].mcontent || '' }}</p>
-        <div class="msg-count">({{ chatthread.msg_count }})</div>
       </div>
       <div class="pl-2 tag-ctrl ml-auto">
-        <fa-icon :icon="['fas', 'ellipsis-h']" class="clickable OFF-fa-lg" />
-        <div>10d</div>
+        <fa-icon :icon="['fas', 'ellipsis-h']" class="clickable fa-sm" />
+        <div><small>10d</small></div>
       </div>
     </section>
 
@@ -70,12 +72,8 @@ body {
   }
 }
 .msg-snippet {
-  width: 12rem;
+  width: 15rem;
   font-size: 14px;
-}
-.msg-count {
-  font-size: 12px;
-  text-style: italic;
 }
 </style>
 

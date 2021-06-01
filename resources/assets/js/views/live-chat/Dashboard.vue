@@ -1,34 +1,70 @@
 <template>
-  <div v-if="!isLoading" class="container-xl" id="view-livechat">
+  <div v-if="!isLoading" class="container-xl px-3 py-3" id="view-livechat">
 
     <section class="row">
 
-      <aside class="col-md-4 col-lg-3">
+      <aside class="col-md-5 col-lg-4">
 
         <article class="top-bar d-flex justify-content-between">
           <h4>Messages</h4>
           <div class="d-flex">
             <b-button variant="link" class="clickme_to-search_messages" @click="doSomething">
-              <fa-icon :icon="['fas', 'search']" class="clickable fa-lg" />
+              <fa-icon :icon="['fas', 'search']" class="fa-lg" />
             </b-button>
             <b-button variant="link" class="clickme_to-schedule_message" @click="doSomething">
-              <fa-icon :icon="['far', 'calendar-alt']" class="clickable fa-lg" />
+              <fa-icon :icon="['far', 'calendar-alt']" class="fa-lg" />
             </b-button>
             <b-button variant="link" class="clickme_to-send_message" @click="doSomething">
-              <fa-icon :icon="['fas', 'plus']" class="clickable fa-lg" />
+              <fa-icon :icon="['fas', 'plus']" class="fa-lg" />
             </b-button>
           </div>
         </article>
 
-        <section class="d-none">
+        <article class="d-none">
           Search
-        </section>
+        </article>
 
-        <section>
-          Unread First
-        </section>
+        <article class="chatthread-sort OFF-py-3 d-flex justify-content-between align-items-center">
+          <p class="my-0">Unread First</p>
+          <div class="">
+            <b-dropdown variant="link" size="sm" class="" no-caret>
+              <template #button-content>
+                <fa-icon :icon="['fas', 'filter']" class="fa-lg" />
+              </template>
+              <b-dropdown-item-button>Action</b-dropdown-item-button>
+              <b-dropdown-item-button>Another action</b-dropdown-item-button>
+              <b-dropdown-item-button>Something else here...</b-dropdown-item-button>
+            </b-dropdown>
+            <b-dropdown variant="link" size="sm" class="" no-caret>
+              <template #button-content>
+                <fa-icon :icon="['fas', 'sort-amount-down']" class="fa-lg" />
+              </template>
+              <b-dropdown-form>
+                <b-form-group label="">
+                  <b-form-radio v-model="sortBy" size="sm" name="sort-posts-by" value="recent">Recent</b-form-radio>
+                  <b-form-radio v-model="sortBy" size="sm" name="sort-posts-by" value="unread-first">Unread First</b-form-radio>
+                  <b-form-radio v-model="sortBy" size="sm" name="sort-posts-by" value="oldest-unread-first">Oldest Unread First</b-form-radio>
+                </b-form-group>
+                <b-dropdown-divider></b-dropdown-divider>
+                <b-form-group label="">
+                  <b-dropdown-item-button>Mark All as Read</b-dropdown-item-button>
+                </b-form-group>
+              </b-dropdown-form>
+            </b-dropdown>
+          </div>
+        </article>
 
-        <section>
+        <article class="chatthread-filters OFF-py-3 d-flex justify-content-between align-items-center">
+           <b-button pill variant="outline-primary">All</b-button>
+           <b-button pill variant="outline-primary">Unread</b-button>
+           <b-button pill variant="outline-primary">Subscribers</b-button>
+           <b-button pill variant="outline-primary">Button</b-button>
+           <b-button pill variant="outline-primary">
+              <fa-icon :icon="['fas', 'plus']" class="fa-lg" />
+           </b-button>
+        </article>
+
+        <article class="chatthread-list">
           <b-list-group>
             <b-list-group-item
               v-for="(ct, idx) in chatthreads"
@@ -45,11 +81,11 @@
               />
             </b-list-group-item>
           </b-list-group>
-        </section>
+        </article>
 
       </aside>
 
-      <main class="col-md-8 col-lg-9">
+      <main class="col-md-7 col-lg-8">
         <transition mode="out-in" name="quick-fade">
           <router-view :session_user="session_user" />
         </transition>
@@ -207,6 +243,10 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+#view-livechat {
+  background-color: #fff;
+}
+
 .top-bar {
   //display: flex;
   //align-items: center;
@@ -215,15 +255,16 @@ export default {
   border-bottom: 1px solid rgba(138,150,163,.25);
 }
 
-body {
-  .btn-link:hover {
-    text-decoration: none;
-  }
-  .btn:focus, .btn.focus {
-    box-shadow: none;
-  }
-}
 </style>
 
 <style lang="scss">
+body #view-livechat {
+  .btn-link:hover {
+    text-decoration: none;
+  }
+  .btn-link:focus, .btn-link.focus, .btn:focus, .btn.focus {
+    box-shadow: none !important;
+    text-decoration: none !important;
+  }
+}
 </style>
