@@ -2,13 +2,15 @@
   <div>
 
     <section class="d-flex align-items-center">
-      <b-avatar :src="user.avatar.filepath" size="3rem" :alt="user.name" />
-      <div class="pl-2">
+      <b-avatar :src="participant.avatar.filepath" size="3rem" :alt="participant.name" />
+      <div class="participant-info pl-2">
         <p class="my-0">
-          <span><strong>{{ user.username }}</strong></span>
+          <span><strong>{{ participant.username }}</strong></span>
           <span class="msg-count"><em><small>({{ chatthread.msg_count }})</small></em></span>
         </p>
-        <p class="msg-snippet mb-0 text-truncate">{{ chatthread.chatmessages[0].mcontent || '' }}</p>
+        <div class="wrap-msg-snippet">
+          <span class="msg-snippet mb-0 OFF-text-truncate">{{ chatthread.chatmessages[0].mcontent || '' }}</span>
+        </div>
       </div>
       <div class="pl-2 tag-ctrl ml-auto">
         <fa-icon :icon="['fas', 'ellipsis-h']" class="clickable fa-sm" />
@@ -27,14 +29,14 @@ export default {
 
   props: {
     session_user: null,
-    user: null,
+    participant: null,
     chatthread: null,
   },
 
   computed: {
 
     isLoading() {
-      return !this.session_user || !this.user || !this.chatthread
+      return !this.session_user || !this.participant || !this.chatthread
     },
 
   },
@@ -71,9 +73,20 @@ body {
     box-shadow: none;
   }
 }
-.msg-snippet {
-  width: 15rem;
-  font-size: 14px;
+.participant-info {
+  width: calc(100% - 70px);
+  overflow: hidden;
+
+  .msg-snippet {
+    display: block;
+    font-size: 14px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+    margin-right: 10px;
+    word-wrap: break-word;
+  }
 }
 </style>
 
