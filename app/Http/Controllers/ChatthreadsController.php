@@ -52,8 +52,27 @@ class ChatthreadsController extends AppBaseController
                 $query->where($key, $v);
             }
         }
+        switch ($request->sortBy) {
+        case 'recent':
+            $query->orderBy('updated_at', 'desc');
+            break;
+        case 'unread-first':
+            $query->whereHas('chatmessages', function($q1) {
+                $q1->where('is_read', 0);
+            });
+            $query->orderBy('updated_at', 'desc');
+            break;
+        case 'oldest-unread-first':
+            $query->whereHas('chatmessages', function($q1) {
+                $q1->where('is_read', 0);
+            });
+            $query->orderBy('updated_at', 'asc');
+            break;
+        default:
+            $query->latest();
+        }
 
-        $data = $query->latest()->paginate( $request->input('take', env('MAX_DEFAULT_PER_REQUEST', 10)) );
+        $data = $query->paginate( $request->input('take', env('MAX_DEFAULT_PER_REQUEST', 10)) );
         return new ChatthreadCollection($data); 
     }
 
