@@ -172,10 +172,10 @@ class RestMessagesTest extends TestCase
                 $q2->where('receiver_id', $sessionUser->id)->where('sender_id', $contact->id);
             })->get();
 
-        dd(
-            $cts->toArray()
-            //$cts[0]->messages->toArray(),
-        );
+        // dd(
+        //     $cts->toArray()
+        //     //$cts[0]->messages->toArray(),
+        // );
     }
 
     // ------------------------------

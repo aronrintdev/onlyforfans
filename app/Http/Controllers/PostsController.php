@@ -1,10 +1,6 @@
 <?php
 namespace App\Http\Controllers;
 
-use DB;
-use Auth;
-use Exception;
-use Throwable;
 use App\Models\Post;
 use App\Rules\InEnum;
 use App\Models\Comment;
@@ -13,25 +9,12 @@ use App\Models\Timeline;
 use App\Models\Mediafile;
 use App\Enums\PostTypeEnum;
 use Illuminate\Http\Request;
-use App\Models\Diskmediafile;
-use InvalidArgumentException;
-use App\Enums\PaymentTypeEnum;
 use App\Enums\MediafileTypeEnum;
 use App\Payments\PaymentGateway;
 use App\Models\Financial\Account;
-use App\Notifications\TipReceived;
-use Illuminate\Support\Facades\Log;
-use App\Models\Financial\SegpayCall;
 use App\Http\Resources\PostCollection;
-use App\Notifications\ResourcePurchased;
 use App\Models\Casts\Money as CastsMoney;
 use App\Http\Resources\Post as PostResource;
-use App\Models\Financial\Exceptions\InvalidFinancialSystemException;
-use App\Models\Financial\Exceptions\Account\IncorrectTypeException;
-use Money\Exception\UnknownCurrencyException;
-use Illuminate\Auth\Access\AuthorizationException;
-use Symfony\Component\HttpKernel\Exception\HttpException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class PostsController extends AppBaseController
 {
