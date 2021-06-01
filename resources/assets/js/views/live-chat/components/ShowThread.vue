@@ -1,9 +1,32 @@
 <template>
   <div v-if="!isLoading">
 
-    <section>
-      <div>Chat Title</div>
-      <div>Last seen | Gallery | Search</div>
+    <section class="chatthread-header">
+      <div class="d-flex align-items-center">
+        <b-button to="/messages" variant="link" class="" @click="doSomething">
+          <fa-icon :icon="['fas', 'arrow-left']" class="fa-lg" />
+        </b-button>
+        <p class="m-0"><strong>{{ participant.username }}</strong></p>
+      </div>
+      <div class="d-flex align-items-center">
+        <p class="my-0 mx-2">Last Seen</p>
+        <div>|</div>
+        <b-button variant="link" class="" @click="doSomething">
+          <fa-icon :icon="['far', 'star']" class="fa-lg" />
+        </b-button>
+        <div>|</div>
+        <b-button variant="link" class="" @click="doSomething">
+          <fa-icon :icon="['far', 'bell']" class="fa-lg" />
+        </b-button>
+        <div>|</div>
+        <b-button variant="link" class="" @click="doSomething">
+          <fa-icon :icon="['far', 'image']" class="fa-lg" />
+        </b-button>
+        <div>|</div>
+        <b-button variant="link" class="" @click="doSomething">
+          <fa-icon :icon="['fas', 'search']" class="fa-lg" />
+        </b-button>
+      </div>
     </section>
 
     <hr />
@@ -74,6 +97,7 @@ export default {
 
   props: {
     session_user: null,
+    participant: null,
     id: null, // the chatthread PKID
   },
 

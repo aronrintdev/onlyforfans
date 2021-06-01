@@ -5,7 +5,7 @@
 
       <aside class="col-md-5 col-lg-4">
 
-        <article class="top-bar d-flex justify-content-between">
+        <article class="top-bar d-flex justify-content-between align-items-center">
           <h4>Messages</h4>
           <div class="d-flex">
             <b-button variant="link" class="clickme_to-search_messages" @click="doSomething">
@@ -24,17 +24,9 @@
           Search
         </article>
 
-        <article class="chatthread-sort OFF-py-3 d-flex justify-content-between align-items-center">
+        <article class="chatthread-sort py-3 d-flex justify-content-between align-items-center">
           <p class="my-0">Unread First</p>
           <div class="">
-            <b-dropdown variant="link" size="sm" class="" no-caret>
-              <template #button-content>
-                <fa-icon :icon="['fas', 'filter']" class="fa-lg" />
-              </template>
-              <b-dropdown-item-button>Action</b-dropdown-item-button>
-              <b-dropdown-item-button>Another action</b-dropdown-item-button>
-              <b-dropdown-item-button>Something else here...</b-dropdown-item-button>
-            </b-dropdown>
             <b-dropdown variant="link" size="sm" class="" no-caret>
               <template #button-content>
                 <fa-icon :icon="['fas', 'sort-amount-down']" class="fa-lg" />
@@ -54,12 +46,11 @@
           </div>
         </article>
 
-        <article class="chatthread-filters OFF-py-3 d-flex justify-content-between align-items-center">
-           <b-button pill variant="outline-primary">All</b-button>
-           <b-button pill variant="outline-primary">Unread</b-button>
-           <b-button pill variant="outline-primary">Subscribers</b-button>
-           <b-button pill variant="outline-primary">Button</b-button>
-           <b-button pill variant="outline-primary">
+        <article class="chatthread-filters py-3 d-flex OFF-justify-content-between align-items-center">
+           <b-button pill variant="outline-primary" class="mx-1">All</b-button>
+           <b-button pill variant="outline-primary" class="mx-1">Unread</b-button>
+           <b-button pill variant="outline-primary" class="mx-1">Subscribers</b-button>
+           <b-button pill variant="outline-primary" class="mx-1">
               <fa-icon :icon="['fas', 'plus']" class="fa-lg" />
            </b-button>
         </article>
@@ -76,7 +67,7 @@
             >
               <PreviewThread 
                 :session_user="session_user"
-                :user="participants(ct)"
+                :participant="participants(ct)"
                 :chatthread="ct"
               />
             </b-list-group-item>
@@ -87,7 +78,10 @@
 
       <main class="col-md-7 col-lg-8">
         <transition mode="out-in" name="quick-fade">
-          <router-view :session_user="session_user" />
+          <router-view 
+            :session_user="session_user" 
+            :participant="participants(activeThread)"
+          />
         </transition>
       </main>
 
@@ -157,6 +151,8 @@ export default {
 
     moment: moment,
 
+    sortBy: null, // %TODO
+
     chatthreads: null,
     meta: null,
     perPage: 10,
@@ -182,7 +178,9 @@ export default {
 
     participants(chatthread) { // other than session user
       // pop() because right now we only support 1-on-1 conversations (no group chats)
-      return chatthread.participants.filter( u => u.id !== this.session_user.id ).pop()
+      return chatthread
+        ?  chatthread.participants.filter( u => u.id !== this.session_user.id ).pop()
+        : null
     },
 
     isActiveThread(id) {
@@ -199,6 +197,9 @@ export default {
         page: this.currentPage, 
         take: this.perPage,
         participant_id: this.session_user.id,
+      }
+      if ( this.sortBy ) {
+        params.sortBy = this.sortBy
       }
       const response = await axios.get( this.$apiRoute('chatthreads.index'), { params } )
       this.chatthreads = response.data.data
