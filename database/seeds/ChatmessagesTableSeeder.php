@@ -52,12 +52,13 @@ class ChatmessagesTableSeeder extends Seeder
 
                 $chatthread->participants()->attach($r->id);
 
-                $msgCount = $this->faker->numberBetween(1, 15);
+                $msgCount = $this->faker->numberBetween(1, 18);
 
                 $senderID = $o->id; // init sender
                 for ( $i = 0 ; $i < $msgCount ; $i++ ) {
                     $isScheduled = $this->faker->boolean(20);
                     if ($isScheduled) {
+                        // Pre-schedules messages (some may be marked delivered)
                         $now = Carbon::now();
                         $isDeliveredByNow = $this->faker->boolean(50);
                         if ( $isDeliveredByNow ) {
@@ -81,11 +82,13 @@ class ChatmessagesTableSeeder extends Seeder
                         $m->updated_at = $ts;
                         $m->save();
                     } else {
+                        // 'Instantanious' Messages
                         $ts = new Carbon( $this->faker->dateTimeBetween($startDate = '-2 years', $endDate = '-1 months') );
                         $m = Chatmessage::create([
                             'chatthread_id' => $chatthread->id,
                             'sender_id' => $senderID,
                             'mcontent' => $this->faker->realText,
+                            'is_read' => $this->faker->boolean(60),
                         ]);
                         $m->created_at = $ts;
                         $m->updated_at = $ts;

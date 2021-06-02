@@ -27,6 +27,20 @@ class Chatmessage extends Model implements UuidId, Ownable
     ];
 
     //--------------------------------------------
+    // Boot
+    //--------------------------------------------
+
+    public static function boot()
+    {
+        parent::boot();
+
+        static::created(function ($model) {
+            // set the 'updated_at' in corresponding thread
+            $model->chatthread->touch();
+        });
+    }
+
+    //--------------------------------------------
     // %%% Relationships
     //--------------------------------------------
 

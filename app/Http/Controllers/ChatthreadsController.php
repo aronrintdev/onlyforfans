@@ -25,8 +25,8 @@ class ChatthreadsController extends AppBaseController
             'originator_id' => 'uuid|exists:users,id',
             'participant_id' => 'uuid|exists:users,id',
             'is_tip_required' => 'boolean',
+            'is_unread' => 'boolean',
         ]);
-
 
         // Filters
         $filters = $request->only(['originator_id', 'participant_id', 'is_tip_required']) ?? [];
@@ -62,7 +62,7 @@ class ChatthreadsController extends AppBaseController
                 break;
             case 'is_unread':
                 $query->whereHas('chatmessages', function($q1) {
-                    $q1->where('is_read', 0); // apply filter
+                    $q1->where('is_read', $v); // apply filter
                 });
                 break;
             default:

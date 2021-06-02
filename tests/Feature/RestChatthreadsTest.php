@@ -96,14 +96,10 @@ class RestChatthreadsTest extends TestCase
     /**
      *  @group chatthreads
      *  @group regression
-     *  @group here0601
+     *  @group OFF-here0601
      */
     public function test_can_list_sorted_chatthreads()
     {
-        Event::fake([
-            MessageSentEvent::class,
-        ]);
-
         $sessionUser = User::has('chatthreads')->firstOrFail();
         $this->assertFalse($sessionUser->isAdmin());
 
@@ -112,12 +108,12 @@ class RestChatthreadsTest extends TestCase
         $response = $this->actingAs($sessionUser)->ajaxJSON( 'GET', route('chatthreads.index', $payload) );
         $response->assertStatus(200);
         $content = json_decode($response->content());
-        $messages = collect($content->data ?? []);
+        $chatthreads = collect($content->data ?? []);
         $this->assertEquals( // Check order
-            $messages->sortByDesc(function ($v, $k) {
+            $chatthreads->sortByDesc(function ($v, $k) {
                 return Carbon::parse($v->updated_at)->timestamp;
             })->pluck('id'),
-            $messages->pluck('id')
+            $chatthreads->pluck('id')
         );
 
         // Sort by most oldest
@@ -125,13 +121,37 @@ class RestChatthreadsTest extends TestCase
         $response = $this->actingAs($sessionUser)->ajaxJSON( 'GET', route('chatthreads.index', $payload) );
         $response->assertStatus(200);
         $content = json_decode($response->content());
-        $messages = collect($content->data ?? []);
+        $chatthreads = collect($content->data ?? []);
         $this->assertEquals( // Check order
-            $messages->sortBy(function ($v, $k) {
+            $chatthreads->sortBy(function ($v, $k) {
                 return Carbon::parse($v->updated_at)->timestamp;
             })->pluck('id'),
-            $messages->pluck('id')
+            $chatthreads->pluck('id')
         );
+    }
+
+    /**
+     *  @group chatthreads
+     *  @group regression
+     *  @group here0601
+     */
+    public function test_can_list_filtered_chatthreads()
+    {
+        $sessionUser = User::has('chatthreads')->firstOrFail();
+        $this->assertFalse($sessionUser->isAdmin());
+
+        // Sort by most recent
+        $payload = [ 'take' => 100, 'is_unread' => 1 ];
+        $response = $this->actingAs($sessionUser)->ajaxJSON( 'GET', route('chatthreads.index', $payload) );
+        $response->assertStatus(200);
+        $content = json_decode($response->content());
+        $chatthreads = collect($content->data ?? []);
+        $num = $chatthreads->reduce( function($acc, $ct) {
+            return collect($ct->chatmessages)->reduce( function($acc, $m) {
+                return ( !$m->is_read ) ? $acc : ($acc+1);
+            });
+        }, 0);
+        $this->assertEquals(0, $num, 'Found message that was read with "unread only" filter');
     }
 
     /**
