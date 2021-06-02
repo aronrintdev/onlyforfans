@@ -12,6 +12,17 @@ class Chatthread extends JsonResource
         $model = ChatthreadModel::find($this->id);
         $hasAccess = $sessionUser->can('view', $model);
 
+        $otherUser = $this->participants->filter( function($u) use(&$sessionUser) {
+            return $u->id !== $sessionUser->id;
+        })->first();
+        /*
+        dd(
+            $this->participants->pluck('username'),
+            $sessionUser->username,
+            $otherUser->username,
+        );
+         */
+
         return [
             'id' => $this->id,
             'originator_id' => $this->originator_id,
@@ -21,9 +32,15 @@ class Chatthread extends JsonResource
             'msg_count' => $this->chatmessages()->count(),
             'has_unread' => $this->chatmessages()->where('is_read',0)->count() > 0,
             'participants' => $this->participants,
+            'has_subscriber' => $sessionUser->timeline->subscribers->contains($otherUser->id), // non-session user participant is a subscriber of session user
             'originator' => $this->originator,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
+
+        // %NOTE: in the current usage scenario, there are only 2 participants in a chat, 
+        // the 'originator' (1st sender), and one another user. Thus 'has_subscriber' 
+        // simply indicates if the 'other user' is a subscriber to the session user's 
+        // timeline or not 
     }
 }

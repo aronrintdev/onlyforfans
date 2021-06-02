@@ -485,58 +485,58 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
 }
 
     /*
-    public function getOthersSettings($username)
-    {
-        $timeline = Timeline::where('username', $username)->first();
-        $user = self::where('timeline_id', $timeline->id)->first();
-        $result = DB::table('user_settings')->where('user_id', $user->id)->first();
-
-        return $result;
-    }
-    public function getUserPrivacySettings($loginId, $others_id)
-    {
-        $timeline_post_privacy = '';
-        $timeline_post = '';
-        $user_post = '';
-        $result = '';
-
-        $live_user_settings = $this->getUserSettings($others_id);
-
-        if ($live_user_settings) {
-            $timeline_post_privacy = $live_user_settings->timeline_post_privacy;
-            $user_post_privacy = $live_user_settings->post_privacy;
-        }
-
-        //start $this if block is for timeline post privacy settings
-        if ($loginId != $others_id) {
-            if ($timeline_post_privacy != null && $timeline_post_privacy == 'only_follow') {
-                $isFollower = $this->chkMyFollower($others_id, $loginId);
-                if ($isFollower) {
-                    $timeline_post = true;
-                }
-            } elseif ($timeline_post_privacy != null && $timeline_post_privacy == 'everyone') {
-                $timeline_post = true;
-            } elseif ($timeline_post_privacy != null && $timeline_post_privacy == 'nobody') {
-                $timeline_post = false;
-            }
-
-            //start $this if block is for user post privacy settings
-            if ($user_post_privacy != null && $user_post_privacy == 'only_follow') {
-                $isFollower = $this->chkMyFollower($others_id, $loginId);
-                if ($isFollower) {
-                    $user_post = 'user';
-                }
-            } elseif ($user_post_privacy != null && $user_post_privacy == 'everyone') {
-                $user_post = 'user';
-            }
-        } else {
-            $timeline_post = true;
-            $user_post = 'user';
-        }
-        //End
-        $result = $timeline_post . '-' . $user_post;
-
-        return $result;
-    }
+//    public function getOthersSettings($username)
+//    {
+//        $timeline = Timeline::where('username', $username)->first();
+//        $user = self::where('timeline_id', $timeline->id)->first();
+//        $result = DB::table('user_settings')->where('user_id', $user->id)->first();
+//
+//        return $result;
+//    }
+//    public function getUserPrivacySettings($loginId, $others_id)
+//    {
+//        $timeline_post_privacy = '';
+//        $timeline_post = '';
+//        $user_post = '';
+//        $result = '';
+//
+//        $live_user_settings = $this->getUserSettings($others_id);
+//
+//        if ($live_user_settings) {
+//            $timeline_post_privacy = $live_user_settings->timeline_post_privacy;
+//            $user_post_privacy = $live_user_settings->post_privacy;
+//        }
+//
+//        //start $this if block is for timeline post privacy settings
+//        if ($loginId != $others_id) {
+//            if ($timeline_post_privacy != null && $timeline_post_privacy == 'only_follow') {
+//                $isFollower = $this->chkMyFollower($others_id, $loginId);
+//                if ($isFollower) {
+//                    $timeline_post = true;
+//                }
+//            } elseif ($timeline_post_privacy != null && $timeline_post_privacy == 'everyone') {
+//                $timeline_post = true;
+//            } elseif ($timeline_post_privacy != null && $timeline_post_privacy == 'nobody') {
+//                $timeline_post = false;
+//            }
+//
+//            //start $this if block is for user post privacy settings
+//            if ($user_post_privacy != null && $user_post_privacy == 'only_follow') {
+//                $isFollower = $this->chkMyFollower($others_id, $loginId);
+//                if ($isFollower) {
+//                    $user_post = 'user';
+//                }
+//            } elseif ($user_post_privacy != null && $user_post_privacy == 'everyone') {
+//                $user_post = 'user';
+//            }
+//        } else {
+//            $timeline_post = true;
+//            $user_post = 'user';
+//        }
+//        //End
+//        $result = $timeline_post . '-' . $user_post;
+//
+//        return $result;
+//    }
      */
 

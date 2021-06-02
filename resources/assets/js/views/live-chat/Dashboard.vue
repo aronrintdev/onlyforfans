@@ -50,10 +50,10 @@
         </article>
 
         <article class="chatthread-filters py-3 d-flex OFF-justify-content-between align-items-center">
-           <b-button @click="clearFilters()" pill variant="outline-primary" class="mx-1">All</b-button>
-           <b-button @click="toggleFilter('is_unread')" pill :variant="Object.keys(this.filters).includes('is_unread') ? 'primary' : 'outline-primary'" class="mx-1">Unread</b-button>
-           <b-button @click="toggleFilter('is_subscriber')" pill variant="outline-primary" class="mx-1">Subscribers</b-button>
-           <b-button pill variant="outline-primary" class="mx-1">
+           <b-button @click="clearFilters()" pill variant="outline-info" class="mx-1">All</b-button>
+           <b-button @click="toggleFilter('is_unread')" pill :variant="Object.keys(this.filters).includes('is_unread') ? 'info' : 'outline-info'" class="mx-1">Unread</b-button>
+           <b-button @click="toggleFilter('is_subscriber')" pill variant="outline-info" class="mx-1">Subscribers</b-button>
+           <b-button pill variant="outline-info" class="mx-1">
               <fa-icon :icon="['fas', 'plus']" class="fa-lg" />
            </b-button>
         </article>
@@ -324,5 +324,12 @@ body #view-livechat {
     box-shadow: none !important;
     text-decoration: none !important;
   }
+  // disable BS4's hover effect as it's indistinguishable from 'pressed' state
+  .chatthread-filters .btn:hover {
+    color: inherit !important;
+    background-color: inherit !important;
+    border-color: inherit !important;
+  }
 }
+
 </style>

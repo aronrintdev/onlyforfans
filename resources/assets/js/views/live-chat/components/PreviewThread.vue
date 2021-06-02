@@ -7,6 +7,7 @@
         <p class="my-0">
           <span class="msg-username" v-bind:class="{ 'tag-unread': chatthread.has_unread}">{{ participant.username }}</span>
           <span class="msg-count"><em><small>({{ chatthread.msg_count }})</small></em></span>
+          <span v-if="chatthread.has_subscriber">*</span>
         </p>
         <div class="wrap-msg-snippet">
           <span class="msg-snippet mb-0 OFF-text-truncate">{{ chatthread.chatmessages[0].mcontent || '' }}</span>
