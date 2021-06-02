@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\Setting;
+use App\Payments\PaymentGateway;
 use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\App;
@@ -73,6 +74,7 @@ class AppServiceProvider extends ServiceProvider
             'sessions'               => 'App\Models\Session',
             'settings'               => 'App\Models\Setting',
             'financial_accounts'     => 'App\Models\Financial\Account',
+            'financial_ach_account'  => 'App\Models\Financial\AchAccount',
             'financial_flags'        => 'App\Models\Financial\Flag',
             'financial_summaries'    => 'App\Models\Financial\TransactionSummary',
             'financial_system_owner' => 'App\Models\Financial\SystemOwner',
@@ -87,6 +89,10 @@ class AppServiceProvider extends ServiceProvider
             'webhooks'               => 'App\Models\Webhook',
             'messages'               => 'App\Models\Message',
         ]);
+
+        App::singleton(PaymentGateway::class, function($app) {
+            return new PaymentGateway();
+        });
 
         Carbon::serializeUsing(function ($carbon) {
             return $carbon->toISOString();

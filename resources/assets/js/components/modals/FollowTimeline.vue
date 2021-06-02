@@ -34,6 +34,7 @@
       <b-card-body v-if="step === 'payment'" key="payment">
         <PurchaseForm
           :value="timeline"
+          item-type="timeline"
           :price="timeline.price"
           :currency="'USD'"
           type="subscription"

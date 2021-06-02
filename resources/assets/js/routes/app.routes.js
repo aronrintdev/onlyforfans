@@ -5,6 +5,7 @@ import VueRouter from 'vue-router'
 import ErrorViews from '@views/errors'
 import StaticPageRoutes from './staticPages.routes'
 
+import banking from '@views/banking'
 import settings from '@views/settings'
 import LivechatDashboard from '@views/live-chat/Dashboard'
 import lists from '@views/lists'
@@ -79,6 +80,12 @@ export const routes = [
     name: 'statements.dashboard',
     path: '/statements',
     component: statements.Dashboard,
+  },
+
+  {
+    name: 'banking.accounts.new',
+    path: '/banking/accounts/new',
+    component: banking.New,
   },
 
   // Lists

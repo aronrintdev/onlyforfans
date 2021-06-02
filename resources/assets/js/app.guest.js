@@ -6,7 +6,7 @@
 
 const isProduction = process.env.NODE_ENV === 'production';
 
-import store from './store';
+import store from './store/guest';
 
 require('./bootstrap');
 require('./bootstrap/fontAwesome');

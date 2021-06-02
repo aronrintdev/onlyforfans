@@ -187,26 +187,25 @@ class StoriesTest extends TestCase
         $timeline = Timeline::has('stories', '>=', 1)->has('followers', '>=', 1)->first();
         $owner = $timeline->user;
 
-        $attrs = [
-            'stype' => StoryTypeEnum::TEXT,
-            'bgcolor' => 'blue',
-            'content' => $this->faker->realText,
-            //'timeline_id' => $timeline->id,
-        ];
+        $stype = StoryTypeEnum::TEXT;
+        $bgcolor = 'blue';
+        $content = $this->faker->realText;
 
         $payload = [
-            'attrs' => json_encode($attrs),
+            'stype' => $stype,
+            'bgcolor' => $bgcolor,
+            'content' => $content,
         ];
         $response = $this->actingAs($owner)->ajaxJSON('POST', route('stories.store'), $payload);
 
         $response->assertStatus(201);
 
-        $content = json_decode($response->content());
-        $this->assertNotNull($content->story);
-        $storyR = $content->story;
+        $responseContent = json_decode($response->content());
+        $this->assertNotNull($responseContent->story);
+        $storyR = $responseContent->story;
 
-        $this->assertSame($attrs['content'], $storyR->content);
-        $this->assertSame($attrs['stype'], $storyR->stype);
+        $this->assertSame($content, $storyR->content);
+        $this->assertSame($stype, $storyR->stype);
 
         $story = Story::find($storyR->id);
         $this->assertNotNull($story);
@@ -226,23 +225,22 @@ class StoriesTest extends TestCase
         $owner = User::first();
         $file = UploadedFile::fake()->image($filename, 200, 200);
 
-        $attrs = [
-            'stype' => StoryTypeEnum::PHOTO,
-            'content' => $this->faker->realText,
-        ];
+        $stype = StoryTypeEnum::PHOTO;
+        $content = $this->faker->realText;
 
         $payload = [
-            'attrs' => json_encode($attrs),
+            'stype' => $stype,
+            'content' => $content,
             'mediafile' => $file,
         ];
         $response = $this->actingAs($owner)->ajaxJSON('POST', route('stories.store'), $payload);
         $response->assertStatus(201);
 
-        $content = json_decode($response->content());
-        $this->assertNotNull($content->story);
-        $storyR = $content->story;
+        $responseContent = json_decode($response->content());
+        $this->assertNotNull($responseContent->story);
+        $storyR = $responseContent->story;
 
-        $this->assertSame($attrs['content'], $storyR->content);
+        $this->assertSame($content, $storyR->content);
         $this->assertSame(StoryTypeEnum::PHOTO, $storyR->stype);
 
         $story = Story::with('mediafiles')->find($storyR->id);
@@ -275,13 +273,9 @@ class StoriesTest extends TestCase
         $owner = User::first();
         $file = UploadedFile::fake()->image($filename, 200, 200);
 
-        $attrs = [
+        $payload = [
             'stype' => StoryTypeEnum::PHOTO,
             'content' => $this->faker->realText,
-        ];
-
-        $payload = [
-            'attrs' => json_encode($attrs),
             'mediafile' => $file,
         ];
         $response = $this->actingAs($owner)->ajaxJSON('POST', route('stories.store'), $payload);
@@ -314,13 +308,9 @@ class StoriesTest extends TestCase
         $nonowner = User::where('id', '<>', $owner->id)->first();
         $file = UploadedFile::fake()->image($filename, 200, 200);
 
-        $attrs = [
+        $payload = [
             'stype' => StoryTypeEnum::PHOTO,
             'content' => $this->faker->realText,
-        ];
-
-        $payload = [
-            'attrs' => json_encode($attrs),
             'mediafile' => $file,
         ];
         $response = $this->actingAs($owner)->ajaxJSON('POST', route('stories.store'), $payload);

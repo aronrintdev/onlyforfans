@@ -7,11 +7,21 @@ import _ from 'lodash'
 import axios from 'axios'
 import propSelect from '@helpers/propSelect'
 
+const route = window.route
+
 export const statements = {
   namespaced: true,
 
   /* --------------------------------- STATE -------------------------------- */
   state: () => ({
+    /**
+     * Creator Balances
+     */
+    balances: {
+      available: { amount: 0, currency: 'USD' },
+      pending: { amount: 0, currency: 'USD' },
+    },
+
     /**
      * Summarized Totals
      */
@@ -64,6 +74,9 @@ export const statements = {
 
   /* ------------------------------- MUTATIONS ------------------------------ */
   mutations: {
+    UPDATE_BALANCES(state, payload) {
+      state.balances = payload
+    },
     UPDATE_TOTALS(state, payload) {
       state.totals = payload
     },
@@ -84,9 +97,21 @@ export const statements = {
           .catch(err => reject(err))
       })
     },
+
+    getBalances({ commit }) {
+      return new Promise((resolve, reject) => {
+        axios.get(route('earnings.balances'))
+          .then(response => {
+            commit('UPDATE_BALANCES', response.data)
+            resolve(response)
+          })
+          .catch(error => reject(error))
+      })
+    },
+
     getTransactions({ commit }, { page, limit }) {
       return new Promise((resolve, reject) => {
-        axios.get(this.$apiRoute('earnings.transactions'), { params: { take: this.take, page: this.page } })
+        axios.get(route('earnings.transactions'), { params: { take: this.take, page: this.page } })
           .then(response => {
             commit('UPDATE_TRANSACTIONS', response.data)
             resolve(response)

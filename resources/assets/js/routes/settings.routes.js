@@ -40,9 +40,9 @@ export default [
     children: childRoutes.subscriptions,
   },
   {
-    name: 'settings.payouts',
-    component: settings.Payouts,
-    path: 'payouts',
+    name: 'settings.banking',
+    component: settings.Banking,
+    path: 'banking',
   },
   {
     name: 'settings.sessions',

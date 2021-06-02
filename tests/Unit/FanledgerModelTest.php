@@ -10,15 +10,17 @@ use DB;
 use Database\Seeders\TestDatabaseSeeder;
 use App\Models\Fanledger;
 
+/**
+ * @deprecated
+ */
 class FanledgerModelTest extends TestCase
 {
 
     use RefreshDatabase, WithFaker;
 
     /**
+     * @deprecated
      * @group fanledger-model
-     * @group OFF-regression
-     * @group erik
      */
     public function test_ledger_should_have_from_and_to_account_relations()
     {

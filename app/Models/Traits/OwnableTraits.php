@@ -17,7 +17,7 @@ trait OwnableTraits
     {
         return $this instanceof Ownable
             ? $this->getOwner()->contains(function ($value, $key) use ($user) {
-                return $value->getKey() === $user->getKey();
+                return isset($value) ? $value->getKey() === $user->getKey() : false;
             })
             : false;
     }

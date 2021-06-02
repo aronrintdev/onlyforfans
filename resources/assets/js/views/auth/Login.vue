@@ -1,5 +1,5 @@
 <template>
-  <div class="container w-100 d-flex flex-column mt-5">
+  <div class="container w-100 d-flex flex-column mt-5 px-0">
     <b-card class="login-card mx-auto" no-body>
       <template #header>
         <div class="h2 text-center" v-text="$t('signInHeader')" />
@@ -122,7 +122,8 @@ export default {
 
 <style lang="scss" scoped>
 .login-card {
-  width: 500px;
+  width: 100%;
+  max-width: 500px;
 }
 .h-line {
   color: var('--gray');

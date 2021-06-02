@@ -1,10 +1,12 @@
 /**
  * js/assets/components/statements/index
  */
-import Balances from './Balances.vue'
+import Balance from './Balance.vue'
+import Statistics from './Statistics.vue'
 import Transactions from './Transactions'
 
 export default {
-  Balances,
+  Balance,
+  Statistics,
   Transactions,
 }

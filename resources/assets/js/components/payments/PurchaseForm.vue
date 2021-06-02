@@ -24,6 +24,7 @@
           :extra="extra"
           :payment-method="selectedPaymentMethod"
           :value="value"
+          :item-type="itemType"
           :price="price"
           :currency="currency"
           :price-display="displayPrice"
@@ -64,6 +65,8 @@ export default {
   props: {
     /** Item being purchased */
     value: { type: Object, default: () => ({}) },
+    /** What type of item is being purchased, ( post, timeline ) */
+    itemType: { type: String, default: ''},
     /** Price as integer */
     price: { type: Number, default: 0 },
     /** Price currency */

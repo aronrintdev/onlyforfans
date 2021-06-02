@@ -11,6 +11,7 @@ const route = window.route
 // Modules
 import searchModule from './store/search'
 import paymentModule from './store/payments'
+import bankingModule from './store/banking'
 import postsModule from './store/posts'
 import statementsModule from './store/statements'
 import subscriptionsModule from './store/subscriptions'
@@ -19,6 +20,7 @@ export default new Vuex.Store({
   modules: {
     search: searchModule,
     payments: paymentModule,
+    banking: bankingModule,
     posts: postsModule,
     statements: statementsModule,
     subscriptions: subscriptionsModule,

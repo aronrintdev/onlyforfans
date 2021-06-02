@@ -90,8 +90,8 @@ export default {
       }
 
       routes.push({
-        name: 'Payouts',
-        to: { name: 'settings.payouts', params: {} },
+        name: 'Banking',
+        to: { name: 'settings.banking', params: {} },
       })
 
       routes.push({
@@ -180,7 +180,7 @@ export default {
     "Payment Methods": "Payment Methods",
     "Earnings": "Earnings",
     "My Subscriptions": "My Subscriptions",
-    "Payouts": "Payouts",
+    "Banking": "Banking",
     "Login Sessions": "Login Sessions",
     "Referrals": "Referrals",
     "Bookmarks": "Bookmarks",

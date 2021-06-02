@@ -197,17 +197,7 @@ export default {
       this.formValidate().then(() => {
         this.loadSegPaySdk().then(() => {
           if (this.sessionId === 'faked') {
-            this.axios.post(this.$apiRoute('payments.segpay.fake'), {
-              item: this.value.id,
-              type: this.type,
-              price: this.price,
-              currency: this.currency,
-              last_4: this.form.card.number.slice(-4),
-              brand: this.$refs.brandIcon.brand,
-              extra: this.extra,
-            })
-            this.$emit('success', 'faked')
-            this.$emit('processing')
+            eventBus.$emit('error', { message: "Invalid System Mode", })
             return
           }
 

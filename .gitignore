@@ -50,6 +50,7 @@ Thumbs.db
 *.flv
 *.mov
 *.wmv
+
 .env
 .env.testing
 .env.production

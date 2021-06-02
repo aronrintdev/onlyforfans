@@ -150,12 +150,10 @@ export default {
     async shareStory() {
       //const url = `/${this.dtoUser.username}/stories`;
       let payload = new FormData();
-      const json = JSON.stringify({
-        stype: this.stype,
-        bgcolor: this.storyAttrs.color || null,
-        content: this.storyAttrs.contents,
-      });
-      payload.append('attrs', json);
+      // const json = JSON.stringify();
+      payload.append('stype', this.stype);
+      payload.append('bgcolor', this.storyAttrs.color || null);
+      payload.append('content', this.storyAttrs.contents);
 
       switch ( this.stype ) {
         case 'text':

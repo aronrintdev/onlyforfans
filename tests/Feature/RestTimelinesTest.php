@@ -2,20 +2,25 @@
 namespace Tests\Feature;
 
 use DB;
+use Tests\TestCase;
+use App\Models\Post;
+use App\Models\User;
+use App\Models\Timeline;
+use App\Models\Fanledger;
+use App\Models\Mediafile;
+use App\Enums\PostTypeEnum;
+use App\Models\Diskmediafile;
+use App\Enums\PaymentTypeEnum;
+use App\Events\ItemSubscribed;
+use App\Enums\MediafileTypeEnum;
+use App\Events\SubscriptionFailed;
+use App\Models\Financial\SegpayCard;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Config;
+use App\Enums\Financial\AccountTypeEnum;
+use Database\Seeders\TestDatabaseSeeder;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
-use Database\Seeders\TestDatabaseSeeder;
-
-use App\Enums\MediafileTypeEnum;
-use App\Enums\PostTypeEnum;
-use App\Enums\PaymentTypeEnum;
-use App\Models\Fanledger;
-use App\Models\Post;
-use App\Models\Diskmediafile;
-use App\Models\Mediafile;
-use App\Models\Timeline;
-use App\Models\User;
 
 /**
  * @group feature
@@ -578,6 +583,8 @@ class TimelinesTest extends TestCase
      */
     public function test_can_subscribe_to_timeline()
     {
+        $this->assertTrue(Config::get('segpay.fake'), 'Your SEGPAY_FAKE .env variable is not set to true.');
+
         $timeline = Timeline::has('posts','>=',1)->has('followers','>=',1)->first(); // includes subscribers
         $creator = $timeline->user;
 
@@ -600,40 +607,52 @@ class TimelinesTest extends TestCase
         //$response = $this->actingAs($fan)->ajaxJSON('GET', route('timelines.show', $timeline->user->username));
         $response->assertStatus(200); // was 403 but see TODO above
 
+        $events = Event::fake([
+            ItemSubscribed::class,
+            SubscriptionFailed::class
+        ]);
+        $account = $fan->financialAccounts()->where('type', AccountTypeEnum::IN)->with('resource')->first();
         $payload = [
-            'sharee_id' => $fan->id,
-            'notes'=>'test_can_subscribe_to_timeline',
+            'account_id' => $account->getKey(),
+            'amount'     => $timeline->price->getAmount(),
+            'currency'   => $timeline->currency,
         ];
-        $response = $this->actingAs($fan)->ajaxJSON('PUT', route('timelines.subscribe', $timeline->id), $payload);
+        $response = $this->actingAs($fan)->ajaxJSON('PUT', route('timelines.subscribe', ['timeline' => $timeline->id]), $payload);
         $response->assertStatus(200);
 
-        $content = json_decode($response->content());
-        $this->assertNotNull($content->timeline);
-        $this->assertEquals($timeline->id, $content->timeline->id);
-        $this->assertTrue( $content->is_subscribed );
-        $this->assertEquals( $origSubscriberCount+1, $content->subscriber_count );
+        Event::assertDispatched(ItemSubscribed::class);
+        Event::assertNotDispatched(SubscriptionFailed::class);
 
+        // Check transactions ledger
+
+        // Amount from Card
+        $this->assertDatabaseHas('transactions', [
+            'account_id' => $account->getKey(),
+            'debit_amount' => $timeline->price->getAmount(),
+        ], 'financial');
+
+        // Amount from fan to creator
+        $this->assertDatabaseHas('transactions', [
+            'account_id' => $fan->getInternalAccount('segpay', 'USD')->getKey(),
+            'debit_amount' => $timeline->price->getAmount(),
+            'purchasable_id' => $timeline->getKey(),
+        ], 'financial');
+
+        // Amount to creator from fan
+        $this->assertDatabaseHas('transactions', [
+            'account_id' => $creator->getInternalAccount('segpay', 'USD')->getKey(),
+            'credit_amount' => $timeline->price->getAmount(),
+            'purchasable_id' => $timeline->getKey(),
+        ], 'financial');
+
+        // Fan has access
         $timeline->refresh();
         $this->assertEquals('premium', $timeline->followers->find($fan->id)->pivot->access_level);
         $this->assertEquals('timelines', $timeline->followers->find($fan->id)->pivot->shareable_type);
         $this->assertTrue( $timeline->followers->contains( $fan->id ) );
-        $this->assertTrue( $fan->followedtimelines->contains( $content->timeline->id ) );
+        $this->assertTrue( $fan->followedtimelines->contains( $timeline->id ) );
         $this->assertTrue( $timeline->subscribers->contains( $fan->id ) );
-        $this->assertTrue( $fan->subscribedtimelines->contains( $content->timeline->id ) );
-        $this->assertTrue( $content->is_subscribed );
-
-        // Check ledger
-        $fanledger = Fanledger::where('fltype', PaymentTypeEnum::SUBSCRIPTION)
-            ->where('purchaseable_type', 'timelines')
-            ->where('purchaseable_id', $timeline->id)
-            ->where('seller_id', $creator->id)
-            ->where('purchaser_id', $fan->id)
-            ->first();
-        $this->assertNotNull($fanledger);
-        $this->assertEquals(1, $fanledger->qty);
-        $this->assertEquals(intval($timeline->price), $fanledger->base_unit_cost_in_cents);
-        $this->assertTrue( $timeline->ledgersales->contains( $fanledger->id ) );
-        $this->assertTrue( $fan->ledgerpurchases->contains( $fanledger->id ) );
+        $this->assertTrue( $fan->subscribedtimelines->contains( $timeline->id ) );
 
         // Check access (after: should be allowed)
         $response = $this->actingAs($fan)->ajaxJSON('GET', route('timelines.show', $timeline->slug));
@@ -647,12 +666,15 @@ class TimelinesTest extends TestCase
      */
     public function test_can_unsubscribe_from_timeline()
     {
+        $this->assertTrue(Config::get('segpay.fake'), 'Your SEGPAY_FAKE .env variable is not set to true.');
+
         $timeline = Timeline::has('posts','>=',1)->has('followers','>=',1)->first(); // includes subscribers
         $creator = $timeline->user;
 
         // Make sure creator's timeline is paid-only
         $timeline->is_follow_for_free = false;
-        $timeline->price = $this->faker->randomNumber(3);
+        $timeline->price = $this->faker->numberBetween(300, 4000);
+        $timeline->currency = 'USD';
         $timeline->save();
         $timeline->refresh();
 
@@ -661,39 +683,72 @@ class TimelinesTest extends TestCase
             $q1->where('timelines.id', $timeline->id);
         })->where('id', '<>', $creator->id)->first();
 
+        $cardNickname = $this->faker->realText(20);
+
         // Subscribe
         $payload = [
-            'sharee_id' => $fan->id,
-            'notes'=>'test_can_unsubscribe_from_timeline',
+            // 'sharee_id' => $fan->id,
+            'item'     => $timeline->getKey(),
+            'type'     => PaymentTypeEnum::SUBSCRIPTION,
+            'price'    => $timeline->price->getAmount(),
+            'currency' => $timeline->currency,
+            'last_4'   => '1111',
+            'brand'    => 'visa',
+            'nickname' => $cardNickname,
         ];
-        $response = $this->actingAs($fan)->ajaxJSON('PUT', route('timelines.subscribe', $timeline->id), $payload);
+
+        $events = Event::fake([
+            ItemSubscribed::class,
+            SubscriptionFailed::class,
+        ]);
+        $account = $fan->financialAccounts()->where('type', AccountTypeEnum::IN)->with('resource')->first();
+        $payload = [
+            'account_id' => $account->getKey(),
+            'amount'     => $timeline->price->getAmount(),
+            'currency'   => $timeline->currency,
+        ];
+        $response = $this->actingAs($fan)->ajaxJSON('PUT', route('timelines.subscribe', ['timeline' => $timeline->id]), $payload);
         $response->assertStatus(200);
 
-        $content = json_decode($response->content());
-        $this->assertNotNull($content->timeline);
-        $this->assertTrue( $content->is_subscribed );
+        // ItemPurchased will update client with websocket event
+        Event::assertDispatched(ItemSubscribed::class);
+        Event::assertNotDispatched(SubscriptionFailed::class);
+
         $timeline->refresh();
         $origSubscriberCount = $timeline->subscribers->count();
 
         // Check access (after subscribe: should be allowed)
         $response = $this->actingAs($fan)->ajaxJSON('GET', route('timelines.show', $timeline->slug));
         $response->assertStatus(200);
+        $content = json_decode($response->content());
+        $this->assertNotNull($content->data);
+        $this->assertEquals($timeline->id, $content->data->id);
+        $this->assertTrue($content->data->is_subscribed);
 
         // Unsubscribe
-        $response = $this->actingAs($fan)->ajaxJSON('PUT', route('timelines.subscribe', $timeline->id), $payload);
+        $response = $this->actingAs($fan)->ajaxJSON('PUT', route('timelines.unsubscribe', $timeline->id), $payload);
         $response->assertStatus(200);
 
         $content = json_decode($response->content());
+        $this->assertNotNull($content->daysRemaining);
+
+        // Should still have access until time remaining is up.
         $this->assertNotNull($content->timeline);
         $this->assertEquals($timeline->id, $content->timeline->id);
-        $this->assertFalse( $content->is_subscribed );
-        $this->assertEquals( $origSubscriberCount-1, $content->subscriber_count );
+        $this->assertTrue($content->timeline->is_subscribed);
 
+        // Time travel
+        $this->travel($content->daysRemaining + 1)->days();
+        // Run subscription checking script
+        $this->artisan('subscription:update-canceled');
+
+        // Check for removed from access
         $timeline->refresh();
-        $this->assertFalse( $timeline->followers->contains( $fan->id ) );
-        $this->assertFalse( $fan->followedtimelines->contains( $content->timeline->id ) );
+        $fan->refresh();
         $this->assertFalse( $timeline->subscribers->contains( $fan->id ) );
         $this->assertFalse( $fan->subscribedtimelines->contains( $content->timeline->id ) );
+
+        $this->travelBack();
     }
 
     // ------------------------------

@@ -71,19 +71,21 @@ export default {
         },
       ]
 
+
+
       items.push({
         label: 'statements',
         icon: 'receipt',
         linkTo: { name: 'statements.dashboard' },
       })
 
-      if (this.uiFlags.isCreator && !this.uiFlags.hasBanking) {
+      // if (this.uiFlags.isCreator && !this.uiFlags.hasBanking) {
         items.push({
           label: 'Banking',
           icon: 'university',
-          linkTo: { name: 'index' } // TODO: Add route when settings page is added
+          linkTo: { name: 'settings.banking' }
         })
-      }
+      // }
       if (this.uiFlags.isCreator && this.uiFlags.hasEarnings) {
         items.push({
           label: 'Earnings',

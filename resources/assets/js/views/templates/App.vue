@@ -112,7 +112,9 @@ export default {
     }
   },
 
-  mounted() {
+
+
+  created() {
     if (this.$route.name.indexOf('messages') > -1) {
       this.isFooterHidden = true;
     }
@@ -121,7 +123,7 @@ export default {
       this.getUnreadMessagesCount();
     }
     if (this.$vssWidth < this.mobileWidth) {
-      this.mobile = true
+      this.UPDATE_MOBILE(true)
     }
   },
 }

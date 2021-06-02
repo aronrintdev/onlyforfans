@@ -766,12 +766,9 @@ class RestVaultTest extends TestCase
 
         // --- Create a free story with image from vault ---
 
-        $attrs = [
+        $payload = [
             'stype' => StoryTypeEnum::PHOTO,
             'content' => $this->faker->realText,
-        ];
-        $payload = [
-            'attrs' => json_encode($attrs),
             'mediafile' => $mediafile->id,
         ];
         $response = $this->actingAs($owner)->ajaxJSON('POST', route('stories.store'), $payload);
