@@ -102,5 +102,4 @@ class Chatthread extends Model implements UuidId
         ]);
     }
 
-
 }

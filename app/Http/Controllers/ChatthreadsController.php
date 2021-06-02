@@ -20,12 +20,15 @@ class ChatthreadsController extends AppBaseController
 {
     public function index(Request $request)
     {
+        $sessionUser = $request->user();
+
         $request->validate([
             // filters
             'originator_id' => 'uuid|exists:users,id',
             'participant_id' => 'uuid|exists:users,id',
             'is_tip_required' => 'boolean',
             'is_unread' => 'boolean',
+            'is_subscriber' => 'boolean',
         ]);
 
         // Filters
@@ -36,6 +39,7 @@ class ChatthreadsController extends AppBaseController
             // booleans
             'is_tip_required',
             'is_unread',
+            'is_subscriber',
         ]) ?? [];
 
         if ( $request->has('sortBy') ) { // UI may imply these filters when sorting
@@ -52,7 +56,7 @@ class ChatthreadsController extends AppBaseController
         // Check permissions, restrict to session user if non-admin
         if ( !$request->user()->isAdmin() ) {
             $query->whereHas('participants', function($q1) use(&$request) {
-                $q1->where('user_id', $request->user()->id); // limit to threads where session user is a participant
+                $q1->where('users.id', $request->user()->id); // limit to threads where session user is a participant
             });
         }
 
@@ -64,7 +68,7 @@ class ChatthreadsController extends AppBaseController
                 break;
             case 'participant_id':
                 $query->whereHas('participants', function($q1) use($v) {
-                    $q1->where('user_id', $v);
+                    $q1->where('users.id', $v);
                 });
                 break;
             case 'is_unread':
@@ -74,8 +78,10 @@ class ChatthreadsController extends AppBaseController
                 });
                 break;
             case 'is_subscriber': // %TODO
-                $query->whereHas('participants', function($q1) use($v) {
-                    $q1->where('user_id', $v);
+                $query->whereHas('participants', function($q1) use(&$sessionUser) {
+                    $q1->whereHas('subscribedtimelines', function($q2) use(&$sessionUser) {
+                        $q2->where('timelines.id', $sessionUser->timeline->id);
+                    });
                 });
                 break;
             default:

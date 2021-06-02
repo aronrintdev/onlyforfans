@@ -52,7 +52,7 @@
         <article class="chatthread-filters py-3 d-flex OFF-justify-content-between align-items-center">
            <b-button @click="clearFilters()" pill variant="outline-info" class="mx-1">All</b-button>
            <b-button @click="toggleFilter('is_unread')" pill :variant="Object.keys(this.filters).includes('is_unread') ? 'info' : 'outline-info'" class="mx-1">Unread</b-button>
-           <b-button @click="toggleFilter('is_subscriber')" pill variant="outline-info" class="mx-1">Subscribers</b-button>
+           <b-button @click="toggleFilter('is_subscriber')" pill :variant="Object.keys(this.filters).includes('is_subscriber') ? 'info' : 'outline-info'" class="mx-1">Subscribers</b-button>
            <b-button pill variant="outline-info" class="mx-1">
               <fa-icon :icon="['fas', 'plus']" class="fa-lg" />
            </b-button>
@@ -207,7 +207,7 @@ export default {
       let params = {
         page: this.currentPage, 
         take: this.perPage,
-        participant_id: this.session_user.id,
+        //participant_id: this.session_user.id,
       }
       params = { ...params, ...this.filters }
       console.log('getChatthreads', {
