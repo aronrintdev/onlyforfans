@@ -19,6 +19,7 @@ class Chatthread extends JsonResource
             //'chatmessages' => $this->chatmessages,
             'chatmessages' => $this->chatmessages()->latest()->take(1)->get(), // limit to 1, for preview only, save bw
             'msg_count' => $this->chatmessages()->count(),
+            'has_unread' => $this->chatmessages()->where('is_read',0)->count() > 0,
             'participants' => $this->participants,
             'originator' => $this->originator,
             'created_at' => $this->created_at,

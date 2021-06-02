@@ -5,16 +5,16 @@
       <b-avatar :src="participant.avatar.filepath" size="3rem" :alt="participant.name" />
       <div class="participant-info pl-2">
         <p class="my-0">
-          <span><strong>{{ participant.username }}</strong></span>
+          <span class="msg-username" v-bind:class="{ 'tag-unread': chatthread.has_unread}">{{ participant.username }}</span>
           <span class="msg-count"><em><small>({{ chatthread.msg_count }})</small></em></span>
         </p>
         <div class="wrap-msg-snippet">
           <span class="msg-snippet mb-0 OFF-text-truncate">{{ chatthread.chatmessages[0].mcontent || '' }}</span>
         </div>
+        <small><timeago :converterOptions="{addSuffix: false}" :datetime="chatthread.updated_at" :auto-update="60" /></small>
       </div>
       <div class="pl-2 tag-ctrl ml-auto">
         <fa-icon :icon="['fas', 'ellipsis-h']" class="clickable fa-sm" />
-        <div><small>10d</small></div>
       </div>
     </section>
 
@@ -71,6 +71,9 @@ body {
   }
   .btn:focus, .btn.focus {
     box-shadow: none;
+  }
+  .msg-username.tag-unread {
+    font-weight: bold;
   }
 }
 .participant-info {

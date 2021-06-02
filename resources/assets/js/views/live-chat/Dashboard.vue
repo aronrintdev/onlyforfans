@@ -27,7 +27,7 @@
         <article class="chatthread-sort py-3 d-flex justify-content-between align-items-center">
           <p class="my-0">Unread First</p>
           <div class="">
-            <b-dropdown variant="link" size="sm" class="" no-caret>
+            <b-dropdown ref="sortCtrls" variant="link" size="sm" class="" no-caret>
               <template #button-content>
                 <fa-icon :icon="['fas', 'sort-amount-down']" class="fa-lg" />
               </template>
@@ -158,6 +158,12 @@ export default {
     perPage: 10,
     currentPage: 1,
 
+    renderedItems: [],
+    renderedPages: [], // track so we don't re-load same page (set of messages) more than 1x
+
+    isLastMsgVisible: false, // was: lastPostVisible
+    isMoreLoading: true,
+
   }), // data
 
   created() { 
@@ -222,6 +228,29 @@ export default {
       return this.routes.find(r => r.name === name)
     },
 
+    // additional page loads
+    // see: https://peachscript.github.io/vue-infinite-loading/guide/#installation
+    loadNextPage() {
+      if ( !this.isMoreLoading && !this.isLoading && (this.nextPage <= this.lastPage) ) {
+        this.isMoreLoading = true;
+        this.$log.debug('loadNextPage', { current: this.currentPage, last: this.lastPage, next: this.nextPage });
+        this.getChatthreads()
+      }
+    },
+
+    // may adjust filters, but always reloads from page 1
+    reloadFromFirstPage() {
+      this.doReset()
+      this.getChatthreads()
+    },
+
+    doReset() {
+      this.renderedPages = []
+      this.renderedItems = []
+      this.isLastMsgVisible = false
+      this.isMoreLoading = true
+    },
+
   }, // methods
 
   watch: {
@@ -233,9 +262,17 @@ export default {
     session_user(value) {
       if (value) {
         if (!this.chatthreads) { // initial load only, depends on sesssion user (synchronous)
-          this.getChatthreads()
+          console.log('live-chat/Dashboard - watch session_user: reloadFromFirstPage()')
+          //this.getChatthreads()
+          this.reloadFromFirstPage()
         }
       }
+    },
+
+    sortBy (newVal) {
+      console.log('live-chat/Dashboard - watch sortBy : reloadFromFirstPage()')
+      this.$refs.sortCtrls.hide(true)
+      this.reloadFromFirstPage()
     },
 
   }, // watch

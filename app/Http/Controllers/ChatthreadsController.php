@@ -35,7 +35,7 @@ class ChatthreadsController extends AppBaseController
             switch ($request->sortBy) {
             case 'unread-first':
             case 'oldest-unread-first':
-                $filters['is_unread'] = true;
+                $filters['is_read'] = 0;
                 break;
             }
         }
@@ -56,12 +56,12 @@ class ChatthreadsController extends AppBaseController
                 $query->where('originator_id', $v);
                 break;
             case 'participant_id':
-                $query->whereHas('participants', function($q1) use($key, $v) {
+                $query->whereHas('participants', function($q1) use($v) {
                     $q1->where('user_id', $v);
                 });
                 break;
-            case 'is_unread':
-                $query->whereHas('chatmessages', function($q1) {
+            case 'is_read':
+                $query->whereHas('chatmessages', function($q1) use($v) {
                     $q1->where('is_read', $v); // apply filter
                 });
                 break;
