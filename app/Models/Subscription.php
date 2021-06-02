@@ -192,6 +192,16 @@ class Subscription extends Model implements Ownable
         return;
     }
 
+    public function reactivate()
+    {
+        $transactions = $this->process();
+        if (isset($transactions)) {
+            $this->canceled_at = null;
+            $this->save();
+        }
+        return $transactions;
+    }
+
     /**
      * Process a subscription transaction
      *
@@ -209,7 +219,7 @@ class Subscription extends Model implements Ownable
         }
 
         if ($this->account->type === AccountTypeEnum::IN) {
-            $this->account->moveToInternal($this->price);
+            $inTransactions = $this->account->moveToInternal($this->price);
             $transactions = $this->account->getInternalAccount()->moveTo(
                 $this->subscribable->getOwnerAccount($this->account->system, $this->account->currency),
                 $this->price,
@@ -261,11 +271,13 @@ class Subscription extends Model implements Ownable
                 $options['access_meta'] ?? [],
             );
 
+            if (isset($inTransactions)) {
+                $transactions['inTransactions'] = $inTransactions;
+            }
+
             return $transactions;
         }
         return false;
-
-
     }
 
     /**
