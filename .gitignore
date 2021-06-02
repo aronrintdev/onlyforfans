@@ -52,6 +52,7 @@ Thumbs.db
 *.wmv
 .env
 .env.testing
+.env.production
 composer.lock
 vendor/
 storage/app/s3
