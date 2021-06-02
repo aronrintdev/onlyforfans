@@ -23,6 +23,7 @@ class Chatmessage extends JsonResource
             'is_flagged' => $this->is_flagged,
             //'cattrs' => $this->cattrs,
             'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
         ];
     }
 }

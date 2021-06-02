@@ -96,6 +96,47 @@ class RestChatthreadsTest extends TestCase
     /**
      *  @group chatthreads
      *  @group regression
+     *  @group here0601
+     */
+    public function test_can_list_sorted_chatthreads()
+    {
+        Event::fake([
+            MessageSentEvent::class,
+        ]);
+
+        $sessionUser = User::has('chatthreads')->firstOrFail();
+        $this->assertFalse($sessionUser->isAdmin());
+
+        // Sort by most recent
+        $payload = [ 'take' => 100, 'sortBy' => 'recent' ];
+        $response = $this->actingAs($sessionUser)->ajaxJSON( 'GET', route('chatthreads.index', $payload) );
+        $response->assertStatus(200);
+        $content = json_decode($response->content());
+        $messages = collect($content->data ?? []);
+        $this->assertEquals( // Check order
+            $messages->sortByDesc(function ($v, $k) {
+                return Carbon::parse($v->updated_at)->timestamp;
+            })->pluck('id'),
+            $messages->pluck('id')
+        );
+
+        // Sort by most oldest
+        $payload = [ 'take' => 100, 'sortBy' => 'oldest' ];
+        $response = $this->actingAs($sessionUser)->ajaxJSON( 'GET', route('chatthreads.index', $payload) );
+        $response->assertStatus(200);
+        $content = json_decode($response->content());
+        $messages = collect($content->data ?? []);
+        $this->assertEquals( // Check order
+            $messages->sortBy(function ($v, $k) {
+                return Carbon::parse($v->updated_at)->timestamp;
+            })->pluck('id'),
+            $messages->pluck('id')
+        );
+    }
+
+    /**
+     *  @group chatthreads
+     *  @group regression
      */
     public function test_can_create_chat_thread_with_selected_participants()
     {

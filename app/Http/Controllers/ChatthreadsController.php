@@ -26,11 +26,23 @@ class ChatthreadsController extends AppBaseController
             'participant_id' => 'uuid|exists:users,id',
             'is_tip_required' => 'boolean',
         ]);
+
+
+        // Filters
         $filters = $request->only(['originator_id', 'participant_id', 'is_tip_required']) ?? [];
+
+        if ( $request->has('sortBy') ) { // UI may imply these filters when sorting
+            switch ($request->sortBy) {
+            case 'unread-first':
+            case 'oldest-unread-first':
+                $filters['is_unread'] = true;
+                break;
+            }
+        }
 
         $query = Chatthread::query(); // Init query
 
-        // Check permissions
+        // Check permissions, restrict to session user if non-admin
         if ( !$request->user()->isAdmin() ) {
             $query->whereHas('participants', function($q1) use(&$request) {
                 $q1->where('user_id', $request->user()->id); // limit to threads where session user is a participant
@@ -48,28 +60,27 @@ class ChatthreadsController extends AppBaseController
                     $q1->where('user_id', $v);
                 });
                 break;
+            case 'is_unread':
+                $query->whereHas('chatmessages', function($q1) {
+                    $q1->where('is_read', 0); // apply filter
+                });
+                break;
             default:
                 $query->where($key, $v);
             }
         }
+
+        // Sorting
         switch ($request->sortBy) {
-        case 'recent':
-            $query->orderBy('updated_at', 'desc');
-            break;
-        case 'unread-first':
-            $query->whereHas('chatmessages', function($q1) {
-                $q1->where('is_read', 0);
-            });
-            $query->orderBy('updated_at', 'desc');
-            break;
+        case 'oldest':
         case 'oldest-unread-first':
-            $query->whereHas('chatmessages', function($q1) {
-                $q1->where('is_read', 0);
-            });
             $query->orderBy('updated_at', 'asc');
             break;
+        case 'recent':
+        case 'unread-first':
         default:
-            $query->latest();
+            $query->orderBy('updated_at', 'desc');
+            //$query->latest();
         }
 
         $data = $query->paginate( $request->input('take', env('MAX_DEFAULT_PER_REQUEST', 10)) );
@@ -113,7 +124,13 @@ class ChatthreadsController extends AppBaseController
             'mcontent' => 'required|string',
         ]);
         $chatmessage = $chatthread->sendMessage($request->user(), $request->mcontent);
-        broadcast( new MessageSentEvent($chatmessage) )->toOthers();
+        try {
+            broadcast( new MessageSentEvent($chatmessage) )->toOthers();
+        } catch( Exception $e ) {
+            Log::warning('ChatthreadsController::sendMessage().broadcast', [
+                'msg' => $e->getMessage(),
+            ]);
+        }
         return new ChatmessageResource($chatmessage);
     }
 

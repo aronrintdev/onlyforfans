@@ -95,9 +95,20 @@ class ChatmessagesTableSeeder extends Seeder
                     $senderID = $this->faker->randomElement([ $o->id, $r->id ]); // so it looks like a back-and-forth conversation
                 }
             });
-
         });
 
-    }
+        // 'touch' the 'updated_at' column for all theads based on latest messeage
+        $chatthreads = Chatthread::get();
+        $chatthreads->each( function($ct) {
+            //$latestMsg = $ct->chatmessages->where('is_delivered', true)->orderBy('created_at', 'desc')->first();
+            $latestMsg = Chatmessage::where('chatthread_id', $ct->id)
+                ->where('is_delivered', true)
+                ->latest()->first();
+            DB::table('chatthreads')->where('id', $ct->id)->update([
+                'updated_at' => $latestMsg->created_at,
+            ]);
+        });
+
+    } // run()
 
 }
