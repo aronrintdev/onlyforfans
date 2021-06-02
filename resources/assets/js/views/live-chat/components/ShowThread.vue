@@ -131,7 +131,8 @@ export default {
   mounted() { 
     this.getChatmessages(this.id)
 
-    const channel = `private-chatthreads.${this.id}`
+    //const channel = `private-chatthreads.${this.id}`
+    const channel = `chatthreads.${this.id}`
     //const eventName = `MessageSentEvent`
     console.log(`live-chat/components/ShowThread::mounted`, {
       channel: channel,

@@ -12,6 +12,7 @@ class Chatthread extends JsonResource
         $model = ChatthreadModel::find($this->id);
         $hasAccess = $sessionUser->can('view', $model);
 
+        // Other participant who is not session user
         $otherUser = $this->participants->filter( function($u) use(&$sessionUser) {
             return $u->id !== $sessionUser->id;
         })->first();

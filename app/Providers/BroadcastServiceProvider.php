@@ -47,7 +47,7 @@ class BroadcastServiceProvider extends ServiceProvider
         Broadcast::channel('user.{userId}.events'   , UserEventsChannel::class);
 
         // private-chatthreads.{chatthreadId} ??
-        Broadcast::channel('chatthreads.{chatthreadId}', function($sessionUser, Chatthread $chatthread) {
+        Broadcast::channel('chatthreads.{chatthread}', function($sessionUser, Chatthread $chatthread) {
             //dd('provider.abc.1');
             return true; // %TODO %FIXME
         });
