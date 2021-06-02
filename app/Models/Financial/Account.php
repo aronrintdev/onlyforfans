@@ -159,7 +159,10 @@ class Account extends Model implements Ownable
     }
 
     /**
-     * Move funds from one account to another, returns debit and credit transactions in collection
+     * Move funds from one account to another, returns debit and credit transactions in collection  
+     *   **Remember:**  
+     *   `'credit' => 'money subtracted from account'`  
+     *   `'debit'  => 'money added to account'`  
      *
      * @return  Collection  [ 'debit' => debit Transaction, 'credit' => credit Transaction ]
      */
@@ -507,7 +510,7 @@ class Account extends Model implements Ownable
 
         // Move funds to internal account first if this is a in account
         if ($this->type === AccountTypeEnum::IN) {
-            $this->moveToInternal($amount);
+            $inTransactions = $this->moveToInternal($amount);
             $internalAccount = $this->getInternalAccount();
             return $internalAccount->purchase(
                 $purchaseable,
@@ -540,6 +543,10 @@ class Account extends Model implements Ownable
 
         ItemPurchased::dispatch($purchaseable, $this->getOwner()->first());
 
+        if (isset($inTransactions)) {
+            $transactions['inTransaction'] = $inTransactions;
+        }
+
         return $transactions;
     }
 
@@ -553,7 +560,7 @@ class Account extends Model implements Ownable
 
         // Move funds to internal account first if this is a in account
         if ($this->type === AccountTypeEnum::IN) {
-            $this->moveToInternal($amount);
+            $inTransactions = $this->moveToInternal($amount);
             $internalAccount = $this->getInternalAccount();
             return $internalAccount->tip($tippable, $amount, array_merge($customAttributes, [ 'ignoreBalance' => true ]));
         }
@@ -566,6 +573,10 @@ class Account extends Model implements Ownable
         ]);
 
         ItemTipped::dispatch($tippable, $this->getOwner()->first());
+
+        if (isset($inTransactions)) {
+            $transactions['inTransaction'] = $inTransactions;
+        }
 
         return $transactions;
     }

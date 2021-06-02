@@ -35,6 +35,10 @@ class Flag extends Model
 
     protected $guarded = [ 'handled', 'handled_by' ];
 
+    protected $casts = [
+        'notes' => 'collection',
+    ];
+
     /* ---------------------------- Relationships --------------------------- */
     #region Relationships
     public function model()
@@ -68,10 +72,11 @@ class Flag extends Model
     /**
      * Mark flag as being handled
      */
-    public function handle(): void
+    public function handle($notes): void
     {
         $this->handled = true;
         $this->handled_by = Auth::user();
+        $this->notes;
         $this->save();
     }
 
