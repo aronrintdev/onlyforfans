@@ -34,8 +34,11 @@
               <b-dropdown-form>
                 <b-form-group label="">
                   <b-form-radio v-model="sortBy" size="sm" name="sort-posts-by" value="recent">Recent</b-form-radio>
+                  <b-form-radio v-model="sortBy" size="sm" name="sort-posts-by" value="oldest">Oldest</b-form-radio>
+                  <!--
                   <b-form-radio v-model="sortBy" size="sm" name="sort-posts-by" value="unread-first">Unread First</b-form-radio>
                   <b-form-radio v-model="sortBy" size="sm" name="sort-posts-by" value="oldest-unread-first">Oldest Unread First</b-form-radio>
+                  -->
                 </b-form-group>
                 <b-dropdown-divider></b-dropdown-divider>
                 <b-form-group label="">
@@ -47,9 +50,9 @@
         </article>
 
         <article class="chatthread-filters py-3 d-flex OFF-justify-content-between align-items-center">
-           <b-button pill variant="outline-primary" class="mx-1">All</b-button>
-           <b-button pill variant="outline-primary" class="mx-1">Unread</b-button>
-           <b-button pill variant="outline-primary" class="mx-1">Subscribers</b-button>
+           <b-button @click="clearFilters()" pill variant="outline-primary" class="mx-1">All</b-button>
+           <b-button @click="toggleFilter('is_unread')" pill :variant="Object.keys(this.filters).includes('is_unread') ? 'primary' : 'outline-primary'" class="mx-1">Unread</b-button>
+           <b-button @click="toggleFilter('is_subscriber')" pill variant="outline-primary" class="mx-1">Subscribers</b-button>
            <b-button pill variant="outline-primary" class="mx-1">
               <fa-icon :icon="['fas', 'plus']" class="fa-lg" />
            </b-button>
@@ -164,6 +167,8 @@ export default {
     isLastMsgVisible: false, // was: lastPostVisible
     isMoreLoading: true,
 
+    filters: {},
+
   }), // data
 
   created() { 
@@ -199,11 +204,16 @@ export default {
     },
 
     async getChatthreads() {
-      const params = {
+      let params = {
         page: this.currentPage, 
         take: this.perPage,
         participant_id: this.session_user.id,
       }
+      params = { ...params, ...this.filters }
+      console.log('getChatthreads', {
+        filters: this.filters,
+        params: params,
+      })
       if ( this.sortBy ) {
         params.sortBy = this.sortBy
       }
@@ -222,10 +232,6 @@ export default {
         }
       }
       return false
-    },
-
-    getRouteByName(name) {
-      return this.routes.find(r => r.name === name)
     },
 
     // additional page loads
@@ -249,6 +255,20 @@ export default {
       this.renderedItems = []
       this.isLastMsgVisible = false
       this.isMoreLoading = true
+    },
+
+    // toggles a 'boolean' filter
+    toggleFilter(k) { // keeps any filters set prior, adds new one
+      if ( Object.keys(this.filters).includes(k) ) {
+        delete this.filters[k]
+      } else {
+        this.filters[k] = 1
+      }
+      this.reloadFromFirstPage()
+    },
+
+    clearFilters() {
+      this.filters = {}
     },
 
   }, // methods

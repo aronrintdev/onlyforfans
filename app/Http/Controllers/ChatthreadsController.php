@@ -29,13 +29,20 @@ class ChatthreadsController extends AppBaseController
         ]);
 
         // Filters
-        $filters = $request->only(['originator_id', 'participant_id', 'is_tip_required']) ?? [];
+        $filters = $request->only([
+            // values
+            'originator_id', 
+            'participant_id', 
+            // booleans
+            'is_tip_required',
+            'is_unread',
+        ]) ?? [];
 
         if ( $request->has('sortBy') ) { // UI may imply these filters when sorting
             switch ($request->sortBy) {
             case 'unread-first':
             case 'oldest-unread-first':
-                $filters['is_read'] = 0;
+                $filters['is_unread'] = 1;
                 break;
             }
         }
@@ -60,9 +67,15 @@ class ChatthreadsController extends AppBaseController
                     $q1->where('user_id', $v);
                 });
                 break;
-            case 'is_read':
+            case 'is_unread':
+                $v = $v ? 0 : 1; // invert: is_unread -> is_read
                 $query->whereHas('chatmessages', function($q1) use($v) {
                     $q1->where('is_read', $v); // apply filter
+                });
+                break;
+            case 'is_subscriber': // %TODO
+                $query->whereHas('participants', function($q1) use($v) {
+                    $q1->where('user_id', $v);
                 });
                 break;
             default:
