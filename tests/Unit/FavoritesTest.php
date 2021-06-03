@@ -13,7 +13,7 @@ use App\Models\Favorite;
 use App\Models\Post;
 use App\Models\User;
 
-class FavoriteableTest extends TestCase
+class FavoritesTest extends TestCase
 {
 
     use RefreshDatabase, WithFaker;

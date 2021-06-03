@@ -10,7 +10,7 @@ use App\Models\Mediafile;
 use App\Models\User;
 use App\Models\Timeline;
 
-class UpdateMediafilesNullresource extends Command
+class UpdateMediafilesNullResource extends Command
 {
     protected $signature = 'update:mediafiles_null_resource';
 
