@@ -119,3 +119,5 @@ public/bar.jpg
 public/themes
 public/themes/*
 public/stats.json
+
+npmrc--hide
