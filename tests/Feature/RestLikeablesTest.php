@@ -1,22 +1,23 @@
 <?php
 namespace Tests\Feature;
 
-use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Exception;
 use Tests\TestCase;
-use Database\Seeders\TestDatabaseSeeder;
+use App\Models\Post;
+use App\Models\User;
 
 //use App\Enums\PostTypeEnum;
 //use App\Enums\PaymentTypeEnum;
-use App\Models\Comment;
-use App\Models\Mediafile;
-use App\Models\Post;
 use App\Models\Story;
-use App\Models\Timeline;
-use App\Models\User;
+use App\Models\Comment;
 use App\Models\Likeable;
+use App\Models\Timeline;
+use App\Models\Mediafile;
+use Database\Seeders\TestDatabaseSeeder;
+use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 
-class LikeablesTest extends TestCase
+class RestLikeablesTest extends TestCase
 {
     use RefreshDatabase, WithFaker;
 

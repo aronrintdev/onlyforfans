@@ -240,10 +240,30 @@ class ProcessSegPayWebhook implements ShouldQueue
      */
     private function handleAuth($transaction)
     {
+
+
+
         // ---------------------------------- SALE ---------------------------------- //
         if (Str::lower($transaction->transactionType) === TransactionType::SALE) {
             // Check for reference_id
             $item = $this->getItem($transaction);
+
+            // Handle Failed Transactions
+            if (Str::lower($transaction->approved) === 'no') {
+                $account = User::find($transaction->user_id)->getInternalAccount('segpay', $transaction->currencyCode);
+                if ($transaction->item_type === PaymentTypeEnum::PURCHASE) {
+                    PurchaseFailed::dispatch($item, $account, 'Not Approved');
+                    return ['message' => 'Purchase not approved'];
+                }
+                if ($transaction->item_type === PaymentTypeEnum::TIP) {
+                    TipFailed::dispatch($item, $account, 'Not Approved');
+                    return ['message' => 'Purchase not approved'];
+                }
+                if ($transaction->item_type === PaymentTypeEnum::SUBSCRIPTION) {
+                    SubscriptionFailed::dispatch($item, $account, 'Not Approved');
+                    return ['message' => 'Purchase not approved'];
+                }
+            }
 
             // Check if user has CC account already
             if (isset($transaction->octoken)) {

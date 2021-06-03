@@ -159,7 +159,7 @@ export default {
 
     onProcessing() {
       this.processing = true
-      this.waiting = setTimeout(onProcessingTimeout, this.maxProcessingWaitTime)
+      this.waiting = setTimeout(this.onProcessingTimeout, this.maxProcessingWaitTime)
     },
 
     onStopProcessing() {

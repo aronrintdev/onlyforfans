@@ -19,7 +19,7 @@ use App\Models\User;
 use App\Enums\StoryTypeEnum;
 use App\Enums\MediafileTypeEnum;
 
-class StoriesTest extends TestCase
+class RestStoriesTest extends TestCase
 {
     use RefreshDatabase, WithFaker;
 
