@@ -133,31 +133,9 @@ export default {
 
     //const channel = `private-chatthreads.${this.id}`
     const channel = `chatthreads.${this.id}`
-    //const eventName = `MessageSentEvent`
-    console.log(`live-chat/components/ShowThread::mounted`, {
-      channel: channel,
-      //eventName: eventName,
-    })
     this.$echo.private(channel).listen('.chatmessage.sent', e => {
-      console.log(`live-chat/components/ShowThread::echo.listen`, {
-        channel: channel,
-        msg: e.chattmessage
-      })
+      this.chatmessages.unshift(e.chatmessage)
     })
-      /*
-    Echo.private(channel).listen('MessageSentEvent', e => {
-      console.log(`live-chat/components/ShowThread::echo.listen`, {
-        channel: channel,
-        //eventName: eventName,
-        msg: e.chattmessage
-      })
-    })
-       */
-      /*
-    Echo.private(channel).listen('MessageSentEvent', e => {
-            console.log('echo', e.chattmessage);
-    })
-       */
   },
 
   methods: {
@@ -167,12 +145,10 @@ export default {
     //]),
 
     async sendMessage(e) {
-      console.log('live-chat.components.ShowThread::sendMessage().A')
       const params = {
         mcontent: this.newMessageForm.mcontent,
       }
       const response = await axios.post( this.$apiRoute('chatthreads.sendMessage', this.id), params )
-      console.log('live-chat.components.ShowThread::sendMessage().B')
       this.newMessageForm.mcontent = null
     },
 
