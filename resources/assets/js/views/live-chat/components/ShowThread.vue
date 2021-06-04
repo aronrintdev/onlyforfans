@@ -39,8 +39,8 @@
           :key="cm.id"
           class=""
         >
-              <div v-if="isDateBreak(cm, idx)" class="msg-grouping-day-divider"><span>{{ moment(cm.created_at).format('MMM DD, YYYY') }}</span></div>
-          <section class="crate">
+          <section v-if="isDateBreak(cm, idx)" class="msg-grouping-day-divider"><span>{{ moment(cm.created_at).format('MMM DD, YYYY') }}</span></section>
+          <section class="crate" :class="cm.sender_id===session_user.id ? 'tag-session_user' : 'tag-other_user'">
             <article class="box">
               <div class="msg-content">{{ cm.mcontent }}</div>
               <div class="msg-timestamp">{{ moment(cm.created_at).format('h:mm A') }}</div>
@@ -496,9 +496,7 @@ body {
 
       .crate {
         display: flex;
-        justify-content: flex-end;
         max-width: 75%;
-        margin-left: auto;
 
         .box {
           .msg-content {
@@ -517,11 +515,21 @@ body {
         } // box
       } // crate
 
+      .crate.tag-session_user {
+         justify-content: flex-end;
+         margin-left: auto;
+         margin-right: 0;
+      }
+
+      .crate.tag-other_user {
+         justify-content: flex-start;
+         margin-left: 0;
+         margin-right: auto;
+      }
+
     }
 
     .msg-grouping-day-divider {
-      //position: absolute;
-      //position: relative;
       font-size: 11px;
       line-height: 15px;
       text-align: center;
