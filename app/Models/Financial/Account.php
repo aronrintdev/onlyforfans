@@ -566,11 +566,11 @@ class Account extends Model implements Ownable
         }
 
         // Payment funds movement
-        $transactions = $this->moveTo($tippable->getOwnerAccount($this->system, $this->currency), $amount, [
+        $transactions = $this->moveTo($tippable->getOwnerAccount($this->system, $this->currency), $amount, array_merge($customAttributes, [
             'purchasable' => $tippable,
             'type' => TransactionTypeEnum::TIP,
             'description' => "Tip to {$tippable->getDescriptionNameString()} {$tippable->getKey()}"
-        ]);
+        ]));
 
         ItemTipped::dispatch($tippable, $this->getOwner()->first());
 
