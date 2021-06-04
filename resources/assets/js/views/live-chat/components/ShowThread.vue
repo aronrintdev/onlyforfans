@@ -7,6 +7,22 @@
           <fa-icon :icon="['fas', 'arrow-left']" class="fa-lg" />
         </b-button>
         <p class="m-0"><strong>{{ participant.username }}</strong></p>
+        <b-dropdown id="ctrls-participants" variant="link" size="sm" class="ml-auto" right no-caret>
+          <template #button-content>
+            <fa-icon :icon="['fas', 'ellipsis-h']" class="fa-sm" />
+          </template>
+          <b-dropdown-item>Add to / remove from list</b-dropdown-item>
+          <b-dropdown-item>Give user a discount</b-dropdown-item>
+          <b-dropdown-item>Delete conversation</b-dropdown-item>
+          <b-dropdown-item>Rename @{{ participant.username }}</b-dropdown-item>
+          <b-dropdown-divider></b-dropdown-divider>
+          <b-dropdown-item>Hide chat</b-dropdown-item>
+          <b-dropdown-item>Mute notifications</b-dropdown-item>
+          <b-dropdown-divider></b-dropdown-divider>
+          <b-dropdown-item>Restrict @{{ participant.username }}</b-dropdown-item>
+          <b-dropdown-item>Block @{{ participant.username }}</b-dropdown-item>
+          <b-dropdown-item>Report @{{ participant.username }}</b-dropdown-item>
+        </b-dropdown>
       </div>
       <div class="d-flex align-items-center">
         <p class="my-0 mx-2">Last Seen</p>
@@ -537,7 +553,7 @@ body {
     box-shadow: none;
   }
 
-  .list-group {
+  .list-group.tag-messages {
 
     overflow-y: scroll;
 
