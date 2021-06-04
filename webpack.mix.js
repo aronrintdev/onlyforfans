@@ -94,7 +94,12 @@ mix.extract([
 mix.extract('public/js/vendor.js');
 
 if (mix.inProduction()) {
-  mix.bundleAnalyzer({ analyzerMode: 'static', reportFilename: '../analyzerReport.html', openAnalyzer: false, generateStatsFile: true });
+  mix.bundleAnalyzer({
+    analyzerMode: 'static',
+    reportFilename: '../storage/app/analyzerReport.html',
+    openAnalyzer: false,
+    generateStatsFile: true,
+  });
 }
 
 if (!mix.inProduction()) {

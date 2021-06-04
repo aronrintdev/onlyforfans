@@ -63,8 +63,10 @@ Route::group(['prefix' => '/admin', 'middleware' => ['auth', 'role:admin|super-a
     });
 
 
-    Route::get('/', 'Admin\DashboardController@index');
-    // Route::get('/', 'AdminController@dashboard');
+    Route::get('/analyzer-report', 'Admin\DashboardController@analyzerReport')
+        ->name('admin.analyzer-report');
+    Route::get('/', 'Admin\DashboardController@index')
+        ->name('admin.dashboard');
 
     //Route::get('/general-settings', 'AdminController@generalSettings');
     //Route::post('/general-settings', 'AdminController@updateGeneralSettings');
