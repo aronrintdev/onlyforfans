@@ -35,19 +35,25 @@
 
       <b-list-group class="tag-messages">
         <b-list-group-item
-          v-for="(cm, idx) in chatmessages.slice().reverse()"
+          v-for="(cm, idx) in chatmessages"
           :key="cm.id"
           class=""
         >
-          <div>{{ cm.mcontent }}</div>
+              <div v-if="isDateBreak(cm, idx)" class="msg-grouping-day-divider"><span>{{ moment(cm.created_at).format('MMM DD, YYYY') }}</span></div>
+          <section class="crate">
+            <article class="box">
+              <div class="msg-content">{{ cm.mcontent }}</div>
+              <div class="msg-timestamp">{{ moment(cm.created_at).format('h:mm A') }}</div>
+            </article>
+          </section>
         </b-list-group-item>
       </b-list-group>
     </section>
 
 
-    <section class="conversation-footer p-3">
+    <section class="conversation-footer mt-3 OFF-p-3">
 
-      <b-form @submit.prevent="sendMessage($event)">
+      <b-form class="store-chatmessage" @submit.prevent="sendMessage($event)">
         <div>
           <b-form-group id="newMessage-group-1" class="">
             <b-form-textarea
@@ -134,7 +140,7 @@ export default {
     //const channel = `private-chatthreads.${this.id}`
     const channel = `chatthreads.${this.id}`
     this.$echo.private(channel).listen('.chatmessage.sent', e => {
-      this.chatmessages.unshift(e.chatmessage)
+      this.chatmessages.push(e.chatmessage)
     })
   },
 
@@ -143,6 +149,15 @@ export default {
     //...Vuex.mapActions([
     //'getMe',
     //]),
+
+    isDateBreak(cm, idx) {
+      if (idx===0) {
+        return true
+      }
+      const current = moment(this.chatmessages[idx].created_at);
+      const last = moment(this.chatmessages[idx-1].created_at,);
+      return !current.isSame(last, 'date')
+    },
 
     async sendMessage(e) {
       const params = {
@@ -159,7 +174,7 @@ export default {
         chatthread_id: chatthreadID,
       }
       const response = await axios.get( this.$apiRoute('chatmessages.index'), { params } )
-      this.chatmessages = response.data.data
+      this.chatmessages = response.data.data.slice().reverse() // %NOTE: reverse order here for display!
       this.meta = response.meta
     },
 
@@ -469,13 +484,71 @@ body {
   .btn:focus, .btn.focus {
     box-shadow: none;
   }
+
+  .list-group {
+
+    overflow-y: scroll;
+
+    .list-group-item {
+
+       border: none;
+       padding: 0.5rem 1.25rem;
+
+      .crate {
+        display: flex;
+        justify-content: flex-end;
+        max-width: 75%;
+        margin-left: auto;
+
+        .box {
+          .msg-content {
+            margin-left: auto;
+            background: rgba(218,237,255,.53);
+            border-radius: 5px;
+            padding: 9px 12px;
+            color: #1a1a1a;
+          }
+          .msg-timestamp {
+            font-size: 11px;
+            color: #8a96a3;
+            text-align: right;
+          }
+
+        } // box
+      } // crate
+
+    }
+
+    .msg-grouping-day-divider {
+      //position: absolute;
+      //position: relative;
+      font-size: 11px;
+      line-height: 15px;
+      text-align: center;
+      color: #8a96a3;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 10px;
+      span {
+        padding: 0 10px;
+      }
+      &:after, &:before {
+        content: '';
+        display: block;
+        flex: 1;
+        height: 1px;
+        background: rgba(138,150,163,.2);
+      }
+    }
+
+  }
+
 }
 
 .conversation-footer {
   background-color: #fff;
-}
-textarea {
-  border: none;
+  border-top: solid 1px rgba(138,150,163,.25);
 }
 button.clickme_to-submit_message {
   width: 9rem;
@@ -483,4 +556,12 @@ button.clickme_to-submit_message {
 </style>
 
 <style lang="scss">
+body {
+  form.store-chatmessage {
+    textarea.form-control {
+      border: none;
+      //padding: 0;
+    }
+  }
+}
 </style>

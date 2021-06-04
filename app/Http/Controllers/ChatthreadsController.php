@@ -144,7 +144,8 @@ class ChatthreadsController extends AppBaseController
         ]);
         $chatmessage = $chatthread->sendMessage($request->user(), $request->mcontent);
         try {
-            broadcast( new MessageSentEvent($chatmessage) )->toOthers();
+            //broadcast( new MessageSentEvent($chatmessage) )->toOthers();
+            MessageSentEvent::dispatch($chatmessage);
         } catch( Exception $e ) {
             Log::warning('ChatthreadsController::sendMessage().broadcast', [
                 'msg' => $e->getMessage(),
