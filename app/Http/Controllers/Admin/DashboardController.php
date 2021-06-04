@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
+use Illuminate\Support\Facades\Storage;
+
 class DashboardController extends Controller
 {
     protected $permissionPath = 'admin.dashboard.';
@@ -10,5 +12,12 @@ class DashboardController extends Controller
     {
         $this->authorizePermission('view');
         return view('admin.dashboard');
+    }
+
+    public function analyzerReport()
+    {
+        $this->authorizePermission('analyzer-report');
+
+        return Storage::disk('local')->get('analyzerReport.html');
     }
 }
