@@ -22,9 +22,9 @@ waitforcancel() {
 }
 
 php artisan serve & \
-php artisan queue:work & \
+php artisan queue:listen & \
+php artisan queue:listen --queue=financial-summaries-urgent,financial-summaries-high,financial-summaries-mid,financial-summaries-low & \
 php artisan websockets:serve & \
-# npm install && \
 npm run hot
 
 waitforcancel

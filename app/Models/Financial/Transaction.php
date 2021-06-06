@@ -118,7 +118,61 @@ class Transaction extends Model
         return $this->hasOne(Transaction::class, 'reference_id');
     }
 
-    #endregion
+    #endregion Relationships
+
+    /* ------------------------------- Scopes ------------------------------- */
+    #region Scopes
+
+    /**
+     * Only transactions within a range
+     * ```
+     * $transactions->inRange([ 'from' => '', 'to' => '' ])->get();
+     * ```
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param array $range [ 'from' => Carbon, 'to' => Carbon ]
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeInRange($query, $range)
+    {
+        return $query->where('created_at', '>=', $range['from'])
+            ->where('created_at', '<', $range['to']);
+    }
+
+    /**
+     * Transactions that have been settled.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeSettled($query)
+    {
+        return $query->whereNotNull('settled_at');
+    }
+
+    /**
+     * Transactions that have failed.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeFailed($query)
+    {
+        return $query->whereNotNull('failed_at');
+    }
+
+    /**
+     * Transactions that are pending settling.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopePending($query)
+    {
+        return $query->whereNull('settled_at')->whereNull('failed_at');
+    }
+
+    #endregion Scopes
 
     /* ------------------------------ Functions ----------------------------- */
     #region Functions

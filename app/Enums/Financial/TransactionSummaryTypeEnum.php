@@ -7,6 +7,7 @@ use App\Enums\SmartEnum;
 class TransactionSummaryTypeEnum extends SmartEnum
 {
     const DAILY   = 'daily';
+    const WEEKLY  = 'weekly';
     const MONTHLY = 'monthly';
     const YEARLY  = 'yearly';
     const CUSTOM  = 'custom';
@@ -14,6 +15,7 @@ class TransactionSummaryTypeEnum extends SmartEnum
 
     public static $keymap = [
         self::DAILY   => 'Daily',
+        self::WEEKLY  => 'Weekly',
         self::MONTHLY => 'Monthly',
         self::YEARLY  => 'Yearly',
         self::CUSTOM  => 'Custom',

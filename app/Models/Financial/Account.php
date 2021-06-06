@@ -278,9 +278,9 @@ class Account extends Model implements Ownable
                 ->where('account_id', $this->getKey())
                 ->whereNotNull('settled_at');
 
-            $lastSummary = TransactionSummary::lastFinalized($this)->with('to')->first();
+            $lastSummary = TransactionSummary::lastFinalized($this)->with('to_transaction')->first();
             if (isset($lastSummary)) {
-                $query = $query->where('settled_at', '>', $lastSummary->to->settled_at);
+                $query = $query->where('settled_at', '>', $lastSummary->to_transaction->settled_at);
             }
             $balance = $this->asMoney($query->value('amount'));
             if (isset($lastSummary)) {
@@ -346,7 +346,7 @@ class Account extends Model implements Ownable
             // Check if summary needs to be made
             $query = Transaction::where('account_id', $this->getKey())->whereNotNull('settled_at');
             if (isset($lastSummary)) {
-                $query = $query->where('settled_at', '>', $lastSummary->to->settled_at);
+                $query = $query->where('settled_at', '>', $lastSummary->to_transaction->settled_at);
             }
             $count = $query->count();
             $summarizeAt = new Collection(Config::get('transactions.summarizeAt'));

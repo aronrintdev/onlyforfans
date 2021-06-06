@@ -42,17 +42,17 @@ class TransactionSummary extends Model
     #region Relationships
     public function account()
     {
-        return $this->hasOne(Account::class);
+        return $this->belongsTo(Account::class);
     }
 
-    public function from()
+    public function from_transaction()
     {
-        return $this->hasOne(Transaction::class, 'from_transaction_id');
+        return $this->belongsTo(Transaction::class, 'from_transaction_id');
     }
 
-    public function to()
+    public function to_transaction()
     {
-        return $this->hasOne(Transaction::class, 'to_transaction_id');
+        return $this->belongsTo(Transaction::class, 'to_transaction_id');
     }
 
     public function latestSettled()
