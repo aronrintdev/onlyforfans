@@ -28,12 +28,13 @@
         <section v-for="(story, index) in renderedStories" :key="index">
           <div v-if="current == index" :style="cssDisplay" class="display-area bg-blur">
             <div class="bg-blur"></div>
-            <div class="crate-content">
-              <article v-if="renderedStories[index].stype === 'text'" class="h-100 v-wrap">
-                <p class="h4 text-center v-box">{{ renderedStories[index].content }}</p>
+            <div v-touch:swipe.top="handleSwipeUp" class="crate-content">
+              <article v-if="story.stype === 'text'" class="h-100 v-wrap">
+                <p class="h4 text-center v-box">{{ story.content }}</p>
               </article>
-              <article v-else-if="renderedStories[index].stype === 'image'" class="h-100">
+              <article v-else-if="story.stype === 'image'" class="h-100">
                 <img :src="story.mediafiles[0].filepath" class="OFF-img-fluid OFF-h-100" />
+                <see-more v-if="story.swipe_up_link" :link="story.swipe_up_link"></see-more>
               </article>
             </div>
           </div>
@@ -53,8 +54,13 @@
  * Story Player
  */
 import _ from 'lodash'
+import SeeMore from './SeeMore.vue'
 
 export default {
+  components: {
+    seeMore: SeeMore
+  },
+
   props: {
     username: { type: String, default: '' },
     stories: { type: Array, default: () => [] },
@@ -174,6 +180,13 @@ export default {
       this.renderedStories.forEach((story, index) => {
         this.timelineAnimation.remove(this.$refs[`nav-${story.id}`][0])
       })
+    },
+
+    handleSwipeUp() {
+      const link = this.renderedStories[this.current].swipe_up_link
+      if (link) {
+        this.$emit('open-see-more-link')
+      }
     },
   },
 

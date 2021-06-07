@@ -78,9 +78,7 @@
         </div>
 
         <div v-if="step===steps.PREVIEW" class="step-preview mx-auto">
-          <div id="preview">
-            <img v-if="imgPreviewUrl" :src="imgPreviewUrl" class="img-fluid" />
-          </div>
+          <photo-story-preview v-if="imgPreviewUrl" :imgPreviewUrl="imgPreviewUrl" :attrs="storyAttrs"></photo-story-preview>
         </div>
 
       </main>
@@ -94,6 +92,7 @@ import { eventBus } from '@/app';
 import TextStoryForm from './TextStoryForm.vue';
 import TextStoryPreview from './TextStoryPreview.vue';
 import PhotoStoryForm from './PhotoStoryForm.vue';
+import PhotoStoryPreview from './PhotoStoryPreview.vue';
 
 export default {
 
@@ -116,8 +115,9 @@ export default {
     show: true,
 
     storyAttrs: {
-      contents: '',
       color: '#fff',
+      contents: '',
+      link: '',
     },
     mediafile: null, // the photo
 
@@ -150,10 +150,10 @@ export default {
     async shareStory() {
       //const url = `/${this.dtoUser.username}/stories`;
       let payload = new FormData();
-      // const json = JSON.stringify();
       payload.append('stype', this.stype);
       payload.append('bgcolor', this.storyAttrs.color || null);
       payload.append('content', this.storyAttrs.contents);
+      payload.append('link', this.storyAttrs.link);
 
       switch ( this.stype ) {
         case 'text':
@@ -211,6 +211,7 @@ export default {
     textStoryForm: TextStoryForm,
     textStoryPreview: TextStoryPreview,
     photoStoryForm: PhotoStoryForm,
+    photoStoryPreview: PhotoStoryPreview,
   },
 }
 </script>
@@ -230,17 +231,6 @@ export default {
 }
 .clickme_to-create:hover {
   cursor: pointer;
-}
-
-#preview {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-#preview img {
-  max-width: 100%;
-  max-height: 500px;
 }
 
 /* Small devices (landscape phones, 576px and up) */
