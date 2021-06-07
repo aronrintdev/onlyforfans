@@ -16,6 +16,8 @@ class TransactionSummary extends Model
     protected $connection = 'financial';
     protected $table = 'transaction_summaries';
 
+    protected $forceCombV4Uuid = true;
+
     /**
      * We should not be filling anything from the UI here, All UI interactions should be read-only.
      */

@@ -2,17 +2,19 @@
 
 namespace App\Jobs;
 
-use App\Models\Financial\Account;
-use App\Models\Financial\Transaction;
-use App\Models\Financial\TransactionSummary;
 use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
+use App\Models\Financial\Account;
+use App\Models\Financial\Transaction;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Queue\InteractsWithQueue;
+use App\Models\Financial\TransactionSummary;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
+use App\Enums\Financial\TransactionSummaryTypeEnum;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
-use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Carbon;
 
 class CreateTransactionSummary implements ShouldQueue, ShouldBeUnique
 {
@@ -68,7 +70,7 @@ class CreateTransactionSummary implements ShouldQueue, ShouldBeUnique
      */
     public function handle()
     {
-        if ($this->batch()->cancelled()) {
+        if ($this->batch() !== null && $this->batch()->cancelled()) {
             return;
         }
 
@@ -79,11 +81,23 @@ class CreateTransactionSummary implements ShouldQueue, ShouldBeUnique
 
         // Check if this summary has already been created
         if (
+            $this->type !== TransactionSummaryTypeEnum::BUNDLE &&
             TransactionSummary::where('account_id', $this->account->getKey())
                 ->where('type', $this->type)->where('from', $this->range['from'])
                 ->where('to', $this->range['to'])->exists()
         ) {
             return;
+        }
+
+        if ($this->type === TransactionSummaryTypeEnum::BUNDLE) {
+            $latestSummary = $this->account->transactionSummaries()->orderBy('to', 'desc')->first();
+            if (isset($latestSummary)) {
+                $this->range['from'] = $latestSummary->to;
+            } else {
+                $this->range['from'] = $this->account->transactions()
+                    ->settled()->orderBy('created_at', 'asc')->first()->created_at;
+            }
+            $this->range['to'] = Carbon::now();
         }
 
         $summary = TransactionSummary::create([
@@ -95,16 +109,30 @@ class CreateTransactionSummary implements ShouldQueue, ShouldBeUnique
 
         $query = $this->account->transactions()->inRange($this->range)->settled();
 
+        //
+        // TODO: Make this more efficient by combining as many queries as possible into one.
+        //
+
         $summary->transactions_count = $query->count();
+        $summary->credit_count       = (clone $query)->where('credit_amount', '>', 0)->count();
+        $summary->debit_count        = (clone $query)->where('debit_amount',  '>', 0)->count();
         $summary->credit_sum         = $query->sum('credit_amount');
         $summary->debit_sum          = $query->sum('debit_amount');
-        $summary->credit_average     = round($query->avg('credit_amount'), 0, PHP_ROUND_HALF_EVEN);
-        $summary->debit_average      = round($query->avg('debit_amount'),  0, PHP_ROUND_HALF_EVEN);
+        $summary->credit_average     = round(
+            (clone $query)->where('credit_amount', '>', 0)->avg('credit_amount'),
+            0,
+            PHP_ROUND_HALF_EVEN
+        );
+        $summary->debit_average      = round(
+            (clone $query)->where('debit_amount',  '>', 0)->avg('debit_amount'),
+            0,
+            PHP_ROUND_HALF_EVEN
+        );
 
-        $firstTrans = $query->orderBy('created_at', 'asc')->first();
+        $firstTrans = (clone $query)->orderBy('created_at', 'asc')->first();
         $summary->from_transaction_id = $firstTrans->getKey();
 
-        $lastTrans = $query->orderBy('created_at', 'desc')->first();
+        $lastTrans = (clone $query)->orderBy('created_at', 'desc')->first();
         $summary->to_transaction_id = $lastTrans->getKey();
 
         $summary->balance = $lastTrans->balance;

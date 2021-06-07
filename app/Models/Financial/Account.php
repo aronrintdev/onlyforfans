@@ -127,6 +127,11 @@ class Account extends Model implements Ownable
     {
         return $this->hasMany(Transaction::class);
     }
+
+    public function transactionSummaries()
+    {
+        return $this->hasMany(TransactionSummary::class);
+    }
     #endregion
 
 
@@ -353,7 +358,7 @@ class Account extends Model implements Ownable
             $priority = $summarizeAt->sortBy('count')->firstWhere('count', '>=', $count);
             if (isset($priority) && $count >= $priority['count']) {
                 $queue = Config::get('transactions.summarizeQueue');
-                CreateTransactionSummary::dispatch($this, TransactionSummaryTypeEnum::BUNDLE, 'Transaction Count')
+                CreateTransactionSummary::dispatch($this, TransactionSummaryTypeEnum::BUNDLE, [ 'from' => '', 'to' => '' ])
                     ->onQueue("{$queue}-{$priority}");
             }
         });
