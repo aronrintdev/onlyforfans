@@ -117,6 +117,7 @@ class StoriesController extends AppBaseController
                 $story = Story::create([
                     'timeline_id' => $timeline->id,
                     'content' => $request->content ?? null,
+                    'swipe_up_link' => $request->link ?? null,
                     'cattrs' => [
                         'background-color' => isset($request->bgcolor) ? $request->bgcolor : '#fff',
                     ],
