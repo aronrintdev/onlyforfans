@@ -159,7 +159,7 @@ export default {
   computed: {
 
     isLoading() {
-      return !this.session_user || !this.id || !this.chatmessages
+      return !this.session_user || !this.participant || !this.id || !this.chatmessages
     },
 
     isScheduled() {

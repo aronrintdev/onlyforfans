@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!isLoading" class="container-xl px-3 py-3" id="view-livechat">
+  <div v-if="!isLoading" class="container-xl px-3 py-3" id="view-createthread">
 
     <section class="row">
 
@@ -14,7 +14,7 @@
             <b-button variant="link" class="clickme_to-schedule_message" @click="doSomething">
               <fa-icon :icon="['far', 'calendar-alt']" class="fa-lg" />
             </b-button>
-            <b-button variant="link" class="clickme_to-send_message" :to="linkCreateThread()">
+            <b-button variant="link" class="clickme_to-send_message" @click="doSomething">
               <fa-icon :icon="['fas', 'plus']" class="fa-lg" />
             </b-button>
           </div>
@@ -24,7 +24,7 @@
           Search
         </article>
 
-        <article class="chatthread-sort py-3 d-flex justify-content-between align-items-center">
+        <article class="mycontacts-sort py-3 d-flex justify-content-between align-items-center">
           <p class="my-0">{{ sortBy | ucfirst }}</p>
           <div class="">
             <b-dropdown ref="sortCtrls" variant="link" size="sm" class="" no-caret>
@@ -35,10 +35,6 @@
                 <b-form-group label="">
                   <b-form-radio v-model="sortBy" size="sm" name="sort-posts-by" value="recent">Recent</b-form-radio>
                   <b-form-radio v-model="sortBy" size="sm" name="sort-posts-by" value="oldest">Oldest</b-form-radio>
-                  <!--
-                  <b-form-radio v-model="sortBy" size="sm" name="sort-posts-by" value="unread-first">Unread First</b-form-radio>
-                  <b-form-radio v-model="sortBy" size="sm" name="sort-posts-by" value="oldest-unread-first">Oldest Unread First</b-form-radio>
-                  -->
                 </b-form-group>
                 <b-dropdown-divider></b-dropdown-divider>
                 <b-form-group label="">
@@ -49,7 +45,7 @@
           </div>
         </article>
 
-        <article class="chatthread-filters py-3 d-flex OFF-justify-content-between align-items-center">
+        <article class="mycontacts-filters py-3 d-flex OFF-justify-content-between align-items-center">
           <b-button @click="clearFilters()" pill variant="outline-info" class="mx-1">All</b-button>
           <b-button @click="toggleFilter('is_unread')" pill :variant="Object.keys(this.filters).includes('is_unread') ? 'info' : 'outline-info'" class="mx-1">Unread</b-button>
           <b-button @click="toggleFilter('is_subscriber')" pill :variant="Object.keys(this.filters).includes('is_subscriber') ? 'info' : 'outline-info'" class="mx-1">Subscribers</b-button>
@@ -58,20 +54,19 @@
           </b-button>
         </article>
 
-        <article class="chatthread-list">
+        <article class="tag-debug contact-list">
           <b-list-group>
             <b-list-group-item
-              v-for="(ct, idx) in chatthreads"
-              :key="ct.id"
-              :to="linkChatthread(ct.id)"
-              :active="isActiveThread(ct.id)"
-              :data-ct_id="ct.id"
+              v-for="(c, idx) in mycontacts"
+              :key="c.id"
+              :to="link(c.id)"
+              :active="isActiveContact(c.id)"
+              :data-ct_id="c.id"
               class="px-2"
             >
-              <PreviewThread 
+              <PreviewContact 
                 :session_user="session_user"
-                :participant="participants(ct)"
-                :chatthread="ct"
+                :contact="c"
               />
             </b-list-group-item>
           </b-list-group>
@@ -80,12 +75,10 @@
       </aside>
 
       <main class="col-md-7 col-lg-8">
-        <transition mode="out-in" name="quick-fade">
-          <router-view 
-            :session_user="session_user" 
-            :participant="participants(activeThread)"
+          <CreateThreadForm 
+            :session_user="session_user"
+            :contacts="selectedContacts"
           />
-        </transition>
       </main>
 
     </section>
@@ -96,29 +89,29 @@
 <script>
 import Vuex from 'vuex'
 import moment from 'moment'
-import PreviewThread from '@views/live-chat/components/PreviewThread'
+import CreateThreadForm from '@views/live-chat/components/CreateThreadForm'
 import PreviewContact from '@views/live-chat/components/PreviewContact'
 
 export default {
-  name: 'LivechatDashboard',
+  name: 'CreateThread',
 
   components: {
-    PreviewThread,
+    CreateThreadForm,
     PreviewContact,
   },
 
   computed: {
     ...Vuex.mapGetters(['session_user']),
 
-    activeThreadId() {
-      return this.$route.params.id
+    activeContactId() {
+      return 1;
     },
-    activeThread() {
-      return this.chatthreads.find( ct => ct.id === this.activeThreadId )
+    activeContact() {
+      return this.mycontacts.find( ct => ct.id === this.activeContactId )
     },
 
     isLoading() {
-      return !this.session_user || !this.chatthreads
+      return !this.session_user || !this.mycontacts
     },
 
 
@@ -130,7 +123,12 @@ export default {
 
     sortBy: 'recent',
 
-    chatthreads: null,
+    mycontacts: [
+      { id: 1, name: 'foo' }, 
+      { id: 2, name: 'bar' }, 
+    ],
+
+    selectedContacts: [ ],
 
     meta: null,
     perPage: 10,
@@ -158,19 +156,8 @@ export default {
       'getMe',
     ]),
 
-    linkChatthread(id) {
-      return { name: 'chatthreads.show', params: { id: id } }
-    },
-    linkCreateThread() {
-      return { name: 'chatthreads.create' }
-    },
-
-
-    participants(chatthread) { // other than session user
-      // pop() because right now we only support 1-on-1 conversations (no group chats)
-      return chatthread
-        ? chatthread.participants.filter( u => u.id !== this.session_user.id ).pop()
-        : null
+    link(id) {
+      return { name: 'mycontacts.show', params: { id: id } }
     },
 
     isActiveThread(id) {
@@ -184,22 +171,22 @@ export default {
       // stub placeholder for impl
     },
 
-    async getChatthreads() {
+    async getContacts() {
       let params = {
         page: this.currentPage, 
         take: this.perPage,
         //participant_id: this.session_user.id,
       }
       params = { ...params, ...this.filters }
-      console.log('getChatthreads', {
+      console.log('getContacts', {
         filters: this.filters,
         params: params,
       })
       if ( this.sortBy ) {
         params.sortBy = this.sortBy
       }
-      const response = await axios.get( this.$apiRoute('chatthreads.index'), { params } )
-      this.chatthreads = response.data.data
+      const response = await axios.get( this.$apiRoute('mycontacts.index'), { params } )
+      this.mycontacts = response.data.data
       this.meta = response.meta
     },
 
@@ -209,14 +196,14 @@ export default {
       if ( !this.isMoreLoading && !this.isLoading && (this.nextPage <= this.lastPage) ) {
         this.isMoreLoading = true;
         this.$log.debug('loadNextPage', { current: this.currentPage, last: this.lastPage, next: this.nextPage });
-        this.getChatthreads()
+        this.getContacts()
       }
     },
 
     // may adjust filters, but always reloads from page 1
     reloadFromFirstPage() {
       this.doReset()
-      this.getChatthreads()
+      this.getContacts()
     },
 
     doReset() {
@@ -246,16 +233,15 @@ export default {
 
     session_user(value) {
       if (value) {
-        if (!this.chatthreads) { // initial load only, depends on sesssion user (synchronous)
-          console.log('live-chat/Dashboard - watch session_user: reloadFromFirstPage()')
-          //this.getChatthreads()
+        if (!this.mycontacts) { // initial load only, depends on sesssion user (synchronous)
+          console.log('live-chat/CreateThread - watch session_user: reloadFromFirstPage()')
           this.reloadFromFirstPage()
         }
       }
     },
 
     sortBy (newVal) {
-      console.log('live-chat/Dashboard - watch sortBy : reloadFromFirstPage()')
+      console.log('live-chat/CreateThread - watch sortBy : reloadFromFirstPage()')
       this.$refs.sortCtrls.hide(true)
       this.reloadFromFirstPage()
     },
@@ -267,10 +253,10 @@ export default {
 
 <style lang="scss" scoped>
 body {
-  #view-livechat {
+  #view-create-thread {
     background-color: #fff;
 
-    .chatthread-list .list-group-item.active {
+    .mycontacts-list .list-group-item.active {
       background: rgba(0,145,234,.06);
       color: inherit;
       border-top: none;
@@ -282,10 +268,6 @@ body {
   }
 
   .top-bar {
-    //display: flex;
-    //align-items: center;
-    //justify-content: space-between;
-    //padding: 15px 4px 16px;
     border-bottom: 1px solid rgba(138,150,163,.25);
   }
 
@@ -297,9 +279,7 @@ body {
 </style>
 
 <style lang="scss">
-body #view-livechat {
-  .chatthread-filters {
-  }
+body #view-createthread {
 }
 
 </style>

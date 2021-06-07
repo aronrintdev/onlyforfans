@@ -9,11 +9,13 @@ export default [
     name: 'chatmessages.scheduled',
     path: 'scheduled',
   },
+  /*
   {
     component: livechat.CreateThread,
     name: 'chatthreads.create',
     path: 'new',
   },
+  */
   {
     component: livechat.Gallery,
     name: 'chatthreads.gallery',

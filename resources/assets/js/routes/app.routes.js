@@ -7,7 +7,6 @@ import StaticPageRoutes from './staticPages.routes'
 
 import banking from '@views/banking'
 import settings from '@views/settings'
-import LivechatDashboard from '@views/live-chat/Dashboard'
 import lists from '@views/lists'
 import notifications from '@views/notifications'
 import stories from '@views/stories'
@@ -20,8 +19,11 @@ import posts from '@views/posts'
 import payments from '@views/payments'
 //import livechat from '@views/live-chat/components'
 
-import settingsRoutes from './settings.routes'
+import LivechatDashboard from '@views/live-chat/Dashboard'
+import LivechatCreateThread from '@views/live-chat/CreateThread'
 import livechatRoutes from './livechat.routes'
+
+import settingsRoutes from './settings.routes'
 import listRoutes from './list.routes'
 //import notificationsRoutes from './notifications.routes'
 
@@ -40,9 +42,13 @@ export const routes = [
 
   // Live Chat
   {
+    component: LivechatCreateThread,
+    name: 'chatthreads.create',
+    path: '/messages/new',
+  },
+  {
     component: LivechatDashboard,
-    //name: 'livechat.dashboard', // was 'home'
-    //path: '/messages',
+    //name: 'chatthreads.dashboard',
     path: '/messages',
     children: livechatRoutes,
   },

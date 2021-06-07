@@ -18,11 +18,11 @@ Vue.filter('niceCurrency', function (value, currency = 'USD') {
   let formatter = new Intl.NumberFormat(navigator.languages, { style: 'currency', currency })
 
   return formatter.format(value / currencyModifier)
-});
+})
 
 Vue.filter('niceGuid', function (v) {
-  return v.slice(-12);
-});
+  return v.slice(-12)
+})
 
 Vue.filter('enumPostType', function (k) {
   switch (k) {
@@ -33,14 +33,18 @@ Vue.filter('enumPostType', function (k) {
     case 'paid':
       return 'Subscriber-Only'
   }
-});
+})
 
 // Assumes post as input
 Vue.filter('isSubscriberOnly', function (p) {
-  return p.type === 'paid';
-});
+  return p.type === 'paid'
+})
 
 Vue.filter('isPurchaseable', function (p) {
-  return p.type === 'price';
-});
+  return p.type === 'price'
+})
+
+Vue.filter('ucfirst', function(str) {
+  return str.charAt(0).toUpperCase() + str.slice(1)
+})
 
