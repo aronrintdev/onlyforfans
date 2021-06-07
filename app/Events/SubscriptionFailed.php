@@ -40,7 +40,7 @@ class SubscriptionFailed implements ShouldBroadcast
      *
      * @return void
      */
-    public function __construct(Subscribable $item, Account $account, string $message)
+    public function __construct(Subscribable $item, Account $account, string $message = '')
     {
         $this->item    = $item->withoutRelations();
         $this->account = $account->withoutRelations();
