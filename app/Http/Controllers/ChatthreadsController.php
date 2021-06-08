@@ -128,7 +128,7 @@ class ChatthreadsController extends AppBaseController
             'originator_id' => 'required|uuid|exists:users,id',
             'participants' => 'required|array', // %FIXME: rename to 'recipients' for clairty
             'participants.*' => 'uuid|exists:users,id',
-            'mcontent' => 'string',
+            'mcontent' => 'string', // optional first message content
         ]);
         $originator = User::find($request->originator_id);
 
@@ -136,6 +136,10 @@ class ChatthreadsController extends AppBaseController
         foreach ($request->participants as $pkid) {
             $ct = Chatthread::startChat($originator);
             $ct->addParticipant($pkid);
+            if ( $request->has('mcontent') ) { // if included send the first message
+                $ct->sendMessage($request->user(), $request->mcontent);
+            }
+            $ct->refresh();
             $chatthreads->push($ct);
         }
 
