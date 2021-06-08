@@ -12,7 +12,7 @@
                   <div class="coversation-tree">
                     <div class="conversations-start">
                       <div class="conversations-start__title">Select any Conversation or send a New Message</div>
-                       <router-link to="/messages/new"><button>New Message</button></router-link>
+                      <router-link to="/messages/new"><button>New Message</button></router-link>
                     </div>
                   </div>
                 </div>
@@ -26,17 +26,17 @@
 </template>
 
 <script>
-  import Sidebar from './Sidebar';
-  /**
-   * Messages Dashboard View
-   */
-  export default {
-    components: {
-      'chat-sidebar': Sidebar
-    },
-  }
+import Sidebar from './Sidebar';
+/**
+ * Messages Dashboard View
+ */
+export default {
+  components: {
+    'chat-sidebar': Sidebar
+  },
+}
 </script>
 
 <style lang="scss" scoped>
-  @import "../../../sass/views/live-chat/home.scss";
+@import "../../../sass/views/live-chat/home.scss";
 </style>

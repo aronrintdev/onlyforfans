@@ -1,6 +1,4 @@
-/**
- * js/routes/settings.routes.js
- */
+// js/routes/settings.routes.js
 
 import settings from '@components/settings'
 import childRoutes from './settings'

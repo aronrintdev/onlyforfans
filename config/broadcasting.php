@@ -29,6 +29,21 @@ return [
 
     'connections' => [
 
+        'pusher' => [
+            'driver' => 'app',
+            'key' => env('PUSHER_APP_KEY'),
+            'secret' => env('PUSHER_APP_SECRET'),
+            'app_id' => env('PUSHER_APP_ID'),
+            'options' => [
+                // 'cluster' => env('PUSHER_APP_CLUSTER'),
+                'encrypted' => false,
+                'host' => env('PUSHER_APP_HOST', 'localhost'),
+                'port' => env('PUSHER_APP_PORT', 6001),
+                'scheme' => env('PUSHER_APP_SCHEME', 'http'),
+                'debug' => env('PUSHER_APP_DEBUG', false),
+            ],
+        ],
+
         'app' => [
             'driver' => 'app',
             'key' => env('PUSHER_APP_KEY'),
