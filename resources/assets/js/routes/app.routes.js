@@ -17,7 +17,11 @@ import vaults from '@views/vaults'
 import search from '@views/search'
 import posts from '@views/posts'
 import payments from '@views/payments'
-import liveChat from '@views/live-chat'
+//import livechat from '@views/live-chat/components'
+
+import LivechatDashboard from '@views/live-chat/Dashboard'
+import LivechatCreateThread from '@views/live-chat/CreateThread'
+import livechatRoutes from './livechat.routes'
 
 import settingsRoutes from './settings.routes'
 import listRoutes from './list.routes'
@@ -35,31 +39,20 @@ export const routes = [
     component: search.Home,
     props: true,
   },
+
+  // Live Chat
   {
-    name: 'messages.home',
-    path: '/messages',
-    component: liveChat.Home,
-  },
-  {
-    name: 'messages.new',
+    component: LivechatCreateThread,
+    name: 'chatthreads.create',
     path: '/messages/new',
-    component: liveChat.New,
   },
   {
-    name: 'messages.scheduled',
-    path: '/messages/schedule_message',
-    component: liveChat.Scheduled,
+    component: LivechatDashboard,
+    //name: 'chatthreads.dashboard',
+    path: '/messages',
+    children: livechatRoutes,
   },
-  {
-    name: 'messages.details',
-    path: '/messages/:id',
-    component: liveChat.Details,
-  },
-  {
-    name: 'messages.gallery',
-    path: '/messages/:id/gallery',
-    component: liveChat.Gallery,
-  },
+
   // Timelines
   {
     name: 'timelines.home',

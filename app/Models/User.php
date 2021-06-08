@@ -131,6 +131,11 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
         return $this->hasMany(Post::class, 'user_id');
     }
 
+    public function mycontacts()
+    {
+        return $this->belongsToMany(User::class, 'mycontacts', 'owner_id', 'contact_id');
+    }
+
     // timelines (users) I follow: premium *and* default subscribe (follow)
     public function followedtimelines()
     {
@@ -217,6 +222,26 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
     {
         return $this->hasMany(Subscription::class);
     }
+
+    public function chatthreads() // ie threads this user 'participates' in
+    {
+        return $this->belongsToMany(Chatthread::class, 'chatthread_user', 'user_id', 'chatthread_id');
+    }
+
+    public function sentmessages()
+    {
+        return $this->hasMany(Chatmessage::class, 'sender_id');
+    }
+
+//    public function lists()
+//    {
+//        return $this->belongsToMany(Lists::class, 'list_user', 'user_id', 'list_id')->withTimestamps();
+//    }
+//
+//    public function userlists()
+//    {
+//        return $this->hasMany(Lists::class, 'creator_id');
+//    }
 
     //--------------------------------------------
     // %%% Accessors/Mutators | Casts
@@ -459,78 +484,64 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
 
     #endregion HasFinancialAccounts
 
-    /**
-     * A user can have many chatthreads
-     */
-    public function chatthreads()
-    {
-        return $this->hasMany(ChatThread::class, 'sender_id');
-    }
+    // %%% --- Misc. ---
 
-    public function lists()
-    {
-        return $this->belongsToMany(Lists::class, 'list_user', 'user_id', 'list_id')->withTimestamps();
-    }
 
-    public function userlists()
-    {
-        return $this->hasMany(Lists::class, 'creator_id');
-    }
 }
 
     /*
-    public function getOthersSettings($username)
-    {
-        $timeline = Timeline::where('username', $username)->first();
-        $user = self::where('timeline_id', $timeline->id)->first();
-        $result = DB::table('user_settings')->where('user_id', $user->id)->first();
-
-        return $result;
-    }
-    public function getUserPrivacySettings($loginId, $others_id)
-    {
-        $timeline_post_privacy = '';
-        $timeline_post = '';
-        $user_post = '';
-        $result = '';
-
-        $live_user_settings = $this->getUserSettings($others_id);
-
-        if ($live_user_settings) {
-            $timeline_post_privacy = $live_user_settings->timeline_post_privacy;
-            $user_post_privacy = $live_user_settings->post_privacy;
-        }
-
-        //start $this if block is for timeline post privacy settings
-        if ($loginId != $others_id) {
-            if ($timeline_post_privacy != null && $timeline_post_privacy == 'only_follow') {
-                $isFollower = $this->chkMyFollower($others_id, $loginId);
-                if ($isFollower) {
-                    $timeline_post = true;
-                }
-            } elseif ($timeline_post_privacy != null && $timeline_post_privacy == 'everyone') {
-                $timeline_post = true;
-            } elseif ($timeline_post_privacy != null && $timeline_post_privacy == 'nobody') {
-                $timeline_post = false;
-            }
-
-            //start $this if block is for user post privacy settings
-            if ($user_post_privacy != null && $user_post_privacy == 'only_follow') {
-                $isFollower = $this->chkMyFollower($others_id, $loginId);
-                if ($isFollower) {
-                    $user_post = 'user';
-                }
-            } elseif ($user_post_privacy != null && $user_post_privacy == 'everyone') {
-                $user_post = 'user';
-            }
-        } else {
-            $timeline_post = true;
-            $user_post = 'user';
-        }
-        //End
-        $result = $timeline_post . '-' . $user_post;
-
-        return $result;
-    }
+//    public function getOthersSettings($username)
+//    {
+//        $timeline = Timeline::where('username', $username)->first();
+//        $user = self::where('timeline_id', $timeline->id)->first();
+//        $result = DB::table('user_settings')->where('user_id', $user->id)->first();
+//
+//        return $result;
+//    }
+//    public function getUserPrivacySettings($loginId, $others_id)
+//    {
+//        $timeline_post_privacy = '';
+//        $timeline_post = '';
+//        $user_post = '';
+//        $result = '';
+//
+//        $live_user_settings = $this->getUserSettings($others_id);
+//
+//        if ($live_user_settings) {
+//            $timeline_post_privacy = $live_user_settings->timeline_post_privacy;
+//            $user_post_privacy = $live_user_settings->post_privacy;
+//        }
+//
+//        //start $this if block is for timeline post privacy settings
+//        if ($loginId != $others_id) {
+//            if ($timeline_post_privacy != null && $timeline_post_privacy == 'only_follow') {
+//                $isFollower = $this->chkMyFollower($others_id, $loginId);
+//                if ($isFollower) {
+//                    $timeline_post = true;
+//                }
+//            } elseif ($timeline_post_privacy != null && $timeline_post_privacy == 'everyone') {
+//                $timeline_post = true;
+//            } elseif ($timeline_post_privacy != null && $timeline_post_privacy == 'nobody') {
+//                $timeline_post = false;
+//            }
+//
+//            //start $this if block is for user post privacy settings
+//            if ($user_post_privacy != null && $user_post_privacy == 'only_follow') {
+//                $isFollower = $this->chkMyFollower($others_id, $loginId);
+//                if ($isFollower) {
+//                    $user_post = 'user';
+//                }
+//            } elseif ($user_post_privacy != null && $user_post_privacy == 'everyone') {
+//                $user_post = 'user';
+//            }
+//        } else {
+//            $timeline_post = true;
+//            $user_post = 'user';
+//        }
+//        //End
+//        $result = $timeline_post . '-' . $user_post;
+//
+//        return $result;
+//    }
      */
 

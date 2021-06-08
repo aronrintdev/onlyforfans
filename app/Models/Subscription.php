@@ -82,14 +82,38 @@ class Subscription extends Model implements Ownable
         'price' => CastsMoney::class,
     ];
 
+    //--------------------------------------------
+    // Boot
+    //--------------------------------------------
+
+    public static function boot()
+    {
+        parent::boot();
+
+        static::created(function ($model) {
+            if ( $model->subscribable_type === 'timelines' ) {
+                // add to subcribee's contacts
+                $mc1 = Mycontact::create([
+                    'owner_id' => $model->user_id, // subcribee
+                    'contact_id' => $model->subscribable->user->id, // subcriber
+                ]);
+                // add to subcriber's contacts
+                $mc2 = Mycontact::create([
+                    'owner_id' => $model->subscribable->user->id, // subcriber
+                    'contact_id' => $model->user_id, // subcribee
+                ]);
+            }
+        });
+    }
+
     /* --------------------------- Relationships ---------------------------- */
     #region Relationships
-    public function subscribable()
+    public function subscribable() // %PSG -> %ERIK : is this the person (timeline) who 'owns' (receiveds) the subscripton? (subscribEE)?
     {
         return $this->morphTo();
     }
 
-    public function user()
+    public function user() // %PSG -> %ERIK : is this the person doing the subscribing (subscribER)?
     {
         return $this->belongsTo(User::class);
     }

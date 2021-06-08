@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Events;
 
 use Illuminate\Broadcasting\Channel;
@@ -10,38 +9,41 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-use App\Models\ChatThread;
+use App\Models\Chatthread;
+use App\Models\Chatmessage;
 use App\Models\User;
 
 class MessageSentEvent  implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $message;
-    public $sender;
-    public $receiver;
+    public $chatmessage;
 
-    /**
-     * Create a new event instance.
-     *
-     * @return void
-     */
-    public function __construct(ChatThread $chatthread, User $sender, User $receiver)
+    public function __construct(Chatmessage $chatmessage)
     {
-        $json = json_encode($chatthread);
-        $this->message = $json;
-        $this->sender = $sender;
-        $this->receiver = $receiver;
+        $this->chatmessage = $chatmessage;
     }
 
-
-    /**
-     * Get the channels the event should broadcast on.
-     *
-     * @return \Illuminate\Broadcasting\Channel|array
-     */
     public function broadcastOn()
     {
-        return new PrivateChannel($this->receiver->id.'-message');
+        return new PrivateChannel('chatthreads.'.$this->chatmessage->chatthread->id);
     }
+
+    public function broadcastAs()
+    {
+        return 'chatmessage.sent';
+    }
+
+    /*
+    public function broadcastWith()
+    {
+        return [
+            'msg' => $this->chatmessage->mcontent,
+            'chatthread_id' => $this->chatmessage->chatthread_id,
+            'created_at' => $this->chatmessage->created_at,
+            'sender_id' => $this->chatmessage->sender->id,
+            'sender_name' => $this->chatmessage->sender->name,
+        ];
+    }
+     */
 }

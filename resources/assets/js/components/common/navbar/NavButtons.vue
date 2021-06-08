@@ -78,7 +78,7 @@ export default {
           {
             name: 'Messages',
             icon: 'envelope',
-            to: { name: 'messages.home' },
+            to: { name: 'livechat.default' },
             // alerts: 10000,
           },
         ]

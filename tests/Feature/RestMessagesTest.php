@@ -7,6 +7,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Http\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Event;
 use DB;
 
 use Tests\TestCase;
@@ -22,7 +23,7 @@ class RestMessagesTest extends TestCase
 
     /**
      *  @group messages
-     *  @group regression
+     *  @group DEPRECATED-regression
      *  @group OFF-here0519
      */
     public function test_can_fetch_contacts()
@@ -63,7 +64,7 @@ class RestMessagesTest extends TestCase
 
     /**
      *  @group messages
-     *  @group regression
+     *  @group DEPRECATED-regression
      *  @group OFF-here0519
      */
     public function test_can_fetch_messages_from_single_contact()
@@ -121,8 +122,7 @@ class RestMessagesTest extends TestCase
 
     /**
      *  @group messages
-     *  @group regression
-     *  @group here0519
+     *  @group DEPRECATED-regression
      */
     public function test_can_send_chat_message()
     {
