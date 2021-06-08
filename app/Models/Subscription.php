@@ -250,8 +250,8 @@ class Subscription extends Model implements Ownable
                 [
                     'ignoreBalance'    => true,
                     'type'             => TransactionTypeEnum::SUBSCRIPTION,
-                    'purchasable_type' => $this->subscribable->getMorphString(),
-                    'purchasable_id'   => $this->subscribable->getKey(),
+                    'resource_type' => $this->subscribable->getMorphString(),
+                    'resource_id'   => $this->subscribable->getKey(),
                     'metadata'         => ['subscription' => $this->getKey()],
                 ]
             );
@@ -276,8 +276,8 @@ class Subscription extends Model implements Ownable
                 $this->price,
                 [
                     'type'             => TransactionTypeEnum::SUBSCRIPTION,
-                    'purchasable_type' => $this->subscribable->getMorphString(),
-                    'purchasable_id'   => $this->subscribable->getKey(),
+                    'resource_type' => $this->subscribable->getMorphString(),
+                    'resource_id'   => $this->subscribable->getKey(),
                     'metadata'         => ['subscription' => $this->getKey()],
                 ]
             );
