@@ -164,7 +164,8 @@ class ShareablesTableSeeder extends Seeder
 
                 Event::fakeFor(function () use (&$paymentAccount, &$timeline, &$follower, $customAttributes) {
                     try {
-                        $paymentAccount->createSubscription($timeline, $timeline->price, ShareableAccessLevelEnum::PREMIUM, $customAttributes);
+                        $subscription = $paymentAccount->createSubscription($timeline, $timeline->price, ShareableAccessLevelEnum::PREMIUM, $customAttributes);
+                        $subscription->process();
                         $timeline->user->notify(new TimelineSubscribedNotify($timeline, $follower, ['amount' => \App\Models\Casts\Money::doSerialize($timeline->price)]));
                     } catch (RuntimeException $e) {
                         //throw $e;
