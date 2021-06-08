@@ -85,10 +85,6 @@ mix.extract([
 mix.extract([
   '@fortawesome'
 ], 'public/js/vendor-3.js');
-mix.extract([
-  'video.js',
-  'videojs-record'
-], 'public/js/vendor-4.js');
 
 // All other node_module libraries will end up in vendor.js
 mix.extract('public/js/vendor.js');
