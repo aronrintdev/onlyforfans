@@ -127,6 +127,11 @@ class Account extends Model implements Ownable
     {
         return $this->hasMany(Transaction::class);
     }
+
+    public function transactionSummaries()
+    {
+        return $this->hasMany(TransactionSummary::class);
+    }
     #endregion
 
 
@@ -278,9 +283,9 @@ class Account extends Model implements Ownable
                 ->where('account_id', $this->getKey())
                 ->whereNotNull('settled_at');
 
-            $lastSummary = TransactionSummary::lastFinalized($this)->with('to')->first();
+            $lastSummary = TransactionSummary::lastFinalized($this)->with('to_transaction')->first();
             if (isset($lastSummary)) {
-                $query = $query->where('settled_at', '>', $lastSummary->to->settled_at);
+                $query = $query->where('settled_at', '>', $lastSummary->to_transaction->settled_at);
             }
             $balance = $this->asMoney($query->value('amount'));
             if (isset($lastSummary)) {
@@ -346,14 +351,14 @@ class Account extends Model implements Ownable
             // Check if summary needs to be made
             $query = Transaction::where('account_id', $this->getKey())->whereNotNull('settled_at');
             if (isset($lastSummary)) {
-                $query = $query->where('settled_at', '>', $lastSummary->to->settled_at);
+                $query = $query->where('settled_at', '>', $lastSummary->to_transaction->settled_at);
             }
             $count = $query->count();
             $summarizeAt = new Collection(Config::get('transactions.summarizeAt'));
             $priority = $summarizeAt->sortBy('count')->firstWhere('count', '>=', $count);
             if (isset($priority) && $count >= $priority['count']) {
                 $queue = Config::get('transactions.summarizeQueue');
-                CreateTransactionSummary::dispatch($this, TransactionSummaryTypeEnum::BUNDLE, 'Transaction Count')
+                CreateTransactionSummary::dispatch($this, TransactionSummaryTypeEnum::BUNDLE, [ 'from' => '', 'to' => '' ])
                     ->onQueue("{$queue}-{$priority}");
             }
         });
@@ -566,11 +571,11 @@ class Account extends Model implements Ownable
         }
 
         // Payment funds movement
-        $transactions = $this->moveTo($tippable->getOwnerAccount($this->system, $this->currency), $amount, [
+        $transactions = $this->moveTo($tippable->getOwnerAccount($this->system, $this->currency), $amount, array_merge($customAttributes, [
             'purchasable' => $tippable,
             'type' => TransactionTypeEnum::TIP,
             'description' => "Tip to {$tippable->getDescriptionNameString()} {$tippable->getKey()}"
-        ]);
+        ]));
 
         ItemTipped::dispatch($tippable, $this->getOwner()->first());
 

@@ -28,7 +28,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
  *
  * @package Tests\Feature
  */
-class TimelinesTest extends TestCase
+class RestTimelinesTest extends TestCase
 {
     use RefreshDatabase, WithFaker;
 

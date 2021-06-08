@@ -56,6 +56,29 @@ return [
                 'port' => env('PUSHER_APP_PORT', 6001),
                 'scheme' => env('PUSHER_APP_SCHEME', 'http'),
                 'debug' => env('PUSHER_APP_DEBUG', false),
+                'curl_options' => [
+                    CURLOPT_SSL_VERIFYHOST => env('PUSHER_SSL_VERIFYHOST', 0),
+                    CURLOPT_SSL_VERIFYPEER => env('PUSHER_SSL_VERIFYPEER', 0),
+                ],
+            ],
+        ],
+
+        'pusher' => [
+            'driver' => 'app',
+            'key' => env('PUSHER_APP_KEY'),
+            'secret' => env('PUSHER_APP_SECRET'),
+            'app_id' => env('PUSHER_APP_ID'),
+            'options' => [
+                'cluster' => 'us1',
+                'encrypted' => false,
+                'host' => env('PUSHER_APP_HOST', 'localhost'),
+                'port' => env('PUSHER_APP_PORT', 6001),
+                'scheme' => env('PUSHER_APP_SCHEME', 'http'),
+                'debug' => env('PUSHER_APP_DEBUG', false),
+                'curl_options' => [
+                    CURLOPT_SSL_VERIFYHOST => env('PUSHER_SSL_VERIFYHOST', 0),
+                    CURLOPT_SSL_VERIFYPEER => env('PUSHER_SSL_VERIFYPEER', 0),
+                ],
             ],
         ],
 

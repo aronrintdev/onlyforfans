@@ -71,6 +71,12 @@ import 'croppie/croppie.css' // import the croppie css manually
 Vue.use(VueCroppie);
 
 /**
+ * vue2-touch-events
+ */
+import Vue2TouchEvents from 'vue2-touch-events';
+Vue.use(Vue2TouchEvents);
+
+/**
  * Loading localization translations
  */
 import i18n from './i18n'

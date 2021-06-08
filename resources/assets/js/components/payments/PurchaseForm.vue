@@ -51,11 +51,13 @@ import PayWithForm from './PayWithForm'
 import SavedPaymentMethodList from './SavedPaymentMethodsList'
 import LoadingOverlay from '@components/common/LoadingOverlay'
 import SubscriptionIFrame from './forms/SegpaySubscriptionIFrame'
+import LongRunningTransactionToast from './LongRunningTransactionToast'
 
 export default {
   name: 'PurchaseForm',
   components: {
     FormNew,
+    LongRunningTransactionToast,
     PaymentConfirmation,
     PayWithForm,
     SavedPaymentMethodList,
@@ -94,7 +96,7 @@ export default {
     selectedPaymentMethod: {},
     loading: true,
     processing: false,
-    maxProcessingWaitTime: 10 * 1000, // 10s
+    maxProcessingWaitTime: 20 * 1000, // 20s
     waiting: null,
   }),
 
@@ -126,14 +128,38 @@ export default {
       }
     },
 
+    onProcessingTimeout() {
+      this.processing = false
+
+      // Close Modal
+      this.$bvModal.hide('modal-purchase-post')
+      this.$bvModal.hide('modal-tip')
+      this.$bvModal.hide('modal-follow')
+
+      const h = this.$createElement
+
+      const vNodesMsg = h(
+        'b-media',
+        { props: { verticalAlign: 'center' } },
+        [
+          h('template', { slot: 'aside' }, [
+            h('fa-icon', { props: { icon: 'exclamation-triangle', size: '2x' } }),
+          ]),
+          this.$t('overTimeToast.message'),
+        ]
+      )
+
+      this.$root.$bvToast.toast([ vNodesMsg ], {
+        title: this.$t('overTimeToast.title'),
+        toaster: 'b-toaster-top-center',
+        solid: true,
+        variant: 'warning',
+      })
+    },
+
     onProcessing() {
       this.processing = true
-      this.waiting = setTimeout(() => {
-        this.processing = false
-
-        // TODO: Display better error message
-        this.$root.$bvToast.toast('Transaction has been processing for a long time', { variant: 'danger' })
-      }, this.maxProcessingWaitTime)
+      this.waiting = setTimeout(this.onProcessingTimeout, this.maxProcessingWaitTime)
     },
 
     onStopProcessing() {
@@ -221,7 +247,11 @@ export default {
 <i18n lang="json5" scoped>
 {
   "en": {
-    "processing": "Processing",
+    "processing": "Processing your transaction, this may take a moment",
+    "overTimeToast": {
+      "message": "This transaction has been processing for a long time, we will update you when it is complete",
+      "title": "Long Running Transaction"
+    }
   }
 }
 </i18n>

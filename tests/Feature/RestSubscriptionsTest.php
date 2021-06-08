@@ -12,7 +12,7 @@ use App\Models\User;
 use App\Models\Subscription;
 //use App\Enums\PostTypeEnum;
 
-class RestSubscriptionssTest extends TestCase
+class RestSubscriptionsTest extends TestCase
 {
     use RefreshDatabase, WithFaker;
 

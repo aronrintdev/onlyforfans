@@ -27,6 +27,7 @@ export default new Vuex.Store({
   },
 
   state: {
+    iconStyle: 'fas',
     mobile: false,
     screenSize: 'xs',
     vault: {},
@@ -55,6 +56,10 @@ export default new Vuex.Store({
   },
 
   mutations: {
+    UPDATE_ICON_STYLE(state, payload) {
+      state.iconStyle = payload
+    },
+
     UPDATE_MOBILE(state, payload) {
       state.mobile = payload
     },

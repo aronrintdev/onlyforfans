@@ -18,6 +18,7 @@ class Story extends JsonResource
             'stype' => $this->stype,
             'timeline_id' => $this->timeline_id,
             'content' =>  $this->when($hasAccess, $this->content),
+            'swipe_up_link' => $this->swipe_up_link,
             'mediafiles' =>  $this->when($hasAccess, $this->mediafiles),
             'created_at' => $this->created_at,
         ];

@@ -19,11 +19,11 @@ class CreateTableFinancialTransactionSummaries extends Migration
             /**
              * Transaction this summary starts at
              */
-            $table->uuid('from_transaction_id');
+            $table->uuid('from_transaction_id')->nullable();
             /**
              * Transaction this summary ends at
              */
-            $table->uuid('to_transaction_id');
+            $table->uuid('to_transaction_id')->nullable();
 
             /**
              * Type of summary this is. I.E Daily, Monthly, Yearly

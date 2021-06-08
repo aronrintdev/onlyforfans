@@ -19,7 +19,7 @@ use App\Models\User;
 use App\Enums\StoryTypeEnum;
 use App\Enums\MediafileTypeEnum;
 
-class StoriesTest extends TestCase
+class RestStoriesTest extends TestCase
 {
     use RefreshDatabase, WithFaker;
 
@@ -190,11 +190,13 @@ class StoriesTest extends TestCase
         $stype = StoryTypeEnum::TEXT;
         $bgcolor = 'blue';
         $content = $this->faker->realText;
+        $link = 'google.com';
 
         $payload = [
             'stype' => $stype,
             'bgcolor' => $bgcolor,
             'content' => $content,
+            'link' => $link,
         ];
         $response = $this->actingAs($owner)->ajaxJSON('POST', route('stories.store'), $payload);
 
@@ -206,6 +208,7 @@ class StoriesTest extends TestCase
 
         $this->assertSame($content, $storyR->content);
         $this->assertSame($stype, $storyR->stype);
+        $this->assertSame($link, $storyR->swipe_up_link);
 
         $story = Story::find($storyR->id);
         $this->assertNotNull($story);

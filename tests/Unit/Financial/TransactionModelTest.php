@@ -19,7 +19,7 @@ use App\Models\Financial\Exceptions\TransactionAlreadySettled;
  *
  * @package Tests\Unit\Financial
  */
-class FinancialTransactionModelTest extends TestCase
+class TransactionModelTest extends TestCase
 {
     use RefreshDatabase;
 

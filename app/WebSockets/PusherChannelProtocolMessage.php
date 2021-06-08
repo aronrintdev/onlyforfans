@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Websockets;
+namespace App\WebSockets;
 
 use BeyondCode\LaravelWebSockets\WebSockets\Messages\PusherChannelProtocolMessage as ParentClass;
 
