@@ -10,9 +10,13 @@ use App\Http\Resources\MycontactCollection;
 use App\Http\Resources\Mycontact as MycontactResource;
 use App\Models\Mycontact;
 use App\Models\User;
+use Illuminate\Auth\Access\AuthorizationException;
 
 class MycontactsController extends AppBaseController
 {
+    /**
+     *
+     */
     public function index(Request $request)
     {
         $request->validate([
@@ -41,6 +45,53 @@ class MycontactsController extends AppBaseController
 
         $data = $query->latest()->paginate( $request->input('take', env('MAX_DEFAULT_PER_REQUEST', 10)) );
         return new MycontactCollection($data);
+    }
+
+    /**
+     * Store new Mycontact
+     *
+     * @param Request $request
+     */
+    public function store(Request $request)
+    {
+        $this->authorize('store', Mycontact::class);
+
+        // TODO: store
+    }
+
+    /**
+     * Update existing Mycontact
+     *
+     * @param Mycontact $mycontact
+     */
+    public function update(Mycontact $mycontact)
+    {
+        $this->authorize('update', $mycontact);
+
+        // TODO: update
+    }
+
+    /**
+     * Show existing Mycontact
+     *
+     * @param Mycontact $mycontact
+     */
+    public function show(Mycontact $mycontact)
+    {
+        $this->authorize('view', $mycontact);
+        return new MycontactResource($mycontact);
+    }
+
+    /**
+     * Delete existing Mycontact
+     *
+     * @param Mycontact $mycontact
+     */
+    public function delete(Mycontact $mycontact)
+    {
+        $this->authorize('delete', $mycontact);
+        $mycontact->delete();
+        return;
     }
 
 }

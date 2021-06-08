@@ -86,9 +86,7 @@ Route::group(['middleware' => ['auth']], function () {
     ]);
 
     // -- mycontacts --
-    Route::resource('mycontacts', 'MycontactsController', [
-        'only' => [ 'index', ],
-    ]);
+    Route::apiResource('mycontacts', 'MycontactsController');
 
     // -- comments: likeable --
     Route::get('/comments/match', ['as'=>'comments.match', 'uses' => 'CommentsController@match']);
