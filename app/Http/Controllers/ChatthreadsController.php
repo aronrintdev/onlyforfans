@@ -120,21 +120,28 @@ class ChatthreadsController extends AppBaseController
         return new ChatthreadResource($chatthread);
     }
 
+    // %HERE
+    // %NOTE: May create more than a single chatthread
     public function store(Request $request) 
     {
         $request->validate([
             'originator_id' => 'required|uuid|exists:users,id',
-            'participants' => 'required|array',
+            'participants' => 'required|array', // %FIXME: rename to 'recipients' for clairty
             'participants.*' => 'uuid|exists:users,id',
+            'mcontent' => 'string',
         ]);
         $originator = User::find($request->originator_id);
-        $chatthread = Chatthread::startChat($originator);
 
+        $chatthreads = collect();
         foreach ($request->participants as $pkid) {
-            $chatthread->addParticipant($pkid);
+            $ct = Chatthread::startChat($originator);
+            $ct->addParticipant($pkid);
+            $chatthreads->push($ct);
         }
 
-        return new ChatthreadResource($chatthread);
+        return response()->json([
+            'chatthreads' => $chatthreads,
+        ], 201);
     }
 
     public function sendMessage(Request $request, Chatthread $chatthread)
