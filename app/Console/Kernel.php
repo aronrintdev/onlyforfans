@@ -25,6 +25,7 @@ class Kernel extends ConsoleKernel
         \App\Console\Commands\WebhooksDispatch::class,
         \App\Console\Commands\WebhooksRetry::class,
         \App\Console\Commands\PublishScheduledPosts::class,
+        \App\Console\Commands\PopulateContacts::class,
     ];
 
     /**
