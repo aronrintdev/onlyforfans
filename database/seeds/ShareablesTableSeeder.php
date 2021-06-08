@@ -26,8 +26,8 @@ use App\Events\AccessRevoked;
 use App\Events\ItemPurchased;
 use App\Jobs\Financial\UpdateAccountBalance;
 use App\Models\Financial\Account;
-use App\Notifications\TimelineFollowed;
-use App\Notifications\TimelineSubscribed;
+use App\Notifications\TimelineFollowed as TimelineFollowedNotify;
+use App\Notifications\TimelineSubscribed as TimelineSubscribedNotify;
 use App\Notifications\ResourcePurchased;
 use Symfony\Component\Console\Output\ConsoleOutput;
 
@@ -98,7 +98,7 @@ class ShareablesTableSeeder extends Seeder
                     //'created_at' => $ts,
                     //'updated_at' => $ts,
                 ]);
-                $timeline->user->notify(new TimelineFollowed($timeline, $follower));
+                $timeline->user->notify(new TimelineFollowedNotify($timeline, $follower));
 
                 // --- purchase some posts ---
 
@@ -139,7 +139,7 @@ class ShareablesTableSeeder extends Seeder
                 }
             });
 
-            // --- Select some for upgrades ---
+            // --- Select some for upgrades (ie to subscribe / "premium" follow) ---
 
             $timeline->refresh();
             $followers = $timeline->followers;
@@ -165,7 +165,7 @@ class ShareablesTableSeeder extends Seeder
                 Event::fakeFor(function () use (&$paymentAccount, &$timeline, &$follower, $customAttributes) {
                     try {
                         $paymentAccount->createSubscription($timeline, $timeline->price, ShareableAccessLevelEnum::PREMIUM, $customAttributes);
-                        $timeline->user->notify(new TimelineSubscribed($timeline, $follower, ['amount' => \App\Models\Casts\Money::doSerialize($timeline->price)]));
+                        $timeline->user->notify(new TimelineSubscribedNotify($timeline, $follower, ['amount' => \App\Models\Casts\Money::doSerialize($timeline->price)]));
                     } catch (RuntimeException $e) {
                         //throw $e;
                         $exceptionClass = class_basename($e);

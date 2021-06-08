@@ -26,6 +26,7 @@ class ChatmessagesTableSeeder extends Seeder
             DB::table('chatmessages')->truncate();
             //DB::table('chatthreads')->truncate();
             DB::table('chatthreads')->delete();
+            DB::table('mycontacts')->delete();
             dd('truncate done');
         }
 
