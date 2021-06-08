@@ -16,6 +16,7 @@ use Database\Seeders\TestDatabaseSeeder;
 use App\Models\User;
 use App\Models\Chatthread;
 use App\Models\Chatmessage;
+use App\Models\Mycontact;
 
 class RestChatmessagesTest extends TestCase
 {
@@ -104,6 +105,32 @@ class RestChatmessagesTest extends TestCase
             return $cm->is_delivered ? $acc : ($acc+1); // expect is_delivered to be TRUE
         }, 0);
         $this->assertEquals(0, $num, 'Found chatmessage in thread which is not marked "delivered"');
+    }
+
+    /**
+     *  @group chatmessages
+     *  @group regression
+     *  @group here0607
+     */
+    public function test_can_list_mycontacts()
+    {
+        $sessionUser = User::has('mycontacts')->firstOrFail();
+        $this->assertFalse($sessionUser->isAdmin());
+
+        $payload = [ 'take' => 100 ];
+        $response = $this->actingAs($sessionUser)->ajaxJSON( 'GET', route('mycontacts.index', $payload) );
+
+        $response->assertStatus(200);
+        $content = json_decode($response->content());
+
+        $mycontacts = collect($content->data);
+        $this->assertGreaterThan(0, $mycontacts->count());
+
+        // Check all mycontacts belong to session user
+        $num = $mycontacts->reduce( function($acc, $mc) use(&$sessionUser) {
+            return ($mc->owner_id===$sessionUser->id) ? $acc : ($acc+1);
+        }, 0);
+        $this->assertEquals(0, $num, 'Found contact in results that does not belong to session user');
     }
 
     // ------------------------------

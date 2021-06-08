@@ -131,6 +131,11 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
         return $this->hasMany(Post::class, 'user_id');
     }
 
+    public function mycontacts()
+    {
+        return $this->belongsToMany(User::class, 'mycontacts', 'owner_id', 'contact_id');
+    }
+
     // timelines (users) I follow: premium *and* default subscribe (follow)
     public function followedtimelines()
     {

@@ -85,6 +85,11 @@ Route::group(['middleware' => ['auth']], function () {
         'only' => [ 'index', 'show', 'store' ],
     ]);
 
+    // -- mycontacts --
+    Route::resource('mycontacts', 'MycontactsController', [
+        'only' => [ 'index', ],
+    ]);
+
     // -- comments: likeable --
     Route::get('/comments/match', ['as'=>'comments.match', 'uses' => 'CommentsController@match']);
     Route::resource('comments', 'CommentsController', [ 'except' => ['create','edit'] ]);

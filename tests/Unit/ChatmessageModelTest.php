@@ -18,6 +18,7 @@ use App\Models\User;
 use App\Models\Chatthread;
 use App\Models\Chatmessage;
 use App\Models\Post;
+use App\Models\Mycontact;
 use App\Models\Mediafile;
 use App\Models\Diskmediafile;
 use App\Enums\MediafileTypeEnum;
@@ -99,7 +100,6 @@ class ChatmessageModelTest extends TestCase
     /**
      * @group chatmessage-model
      * @group regression
-     * @group here0521
      */
     public function test_can_schedule_message()
     {
@@ -122,6 +122,26 @@ class ChatmessageModelTest extends TestCase
         $this->assertFalse($chatthread->chatmessages[0]->is_delivered);
         $this->assertEquals($chatthread->chatmessages[0]->deliver_at);
 
+    }
+
+    /**
+     * @group chatmessage-model
+     * @group regression
+     * @group here0607
+     */
+    public function test_should_get_mycontacts()
+    {
+        $mycontacts = Mycontact::get();
+        $this->assertGreaterThan(0, $mycontacts->count());
+        $this->assertNotNull($mycontacts[0]);
+        $this->assertNotNull($mycontacts[0]->contact_id);
+        $this->assertNotNull($mycontacts[0]->owner_id);
+
+        $this->assertNotNull($mycontacts[0]->owner);
+        $this->assertNotNull($mycontacts[0]->owner->id);
+
+        $this->assertNotNull($mycontacts[0]->contact);
+        $this->assertNotNull($mycontacts[0]->contact->id);
     }
 
     // ------------------------------
