@@ -3,13 +3,13 @@
 
     <section class="d-flex align-items-center">
       <b-avatar :src="avatarSrc" size="3rem" :alt="contact.name" />
-      <div class="contact-info pl-2">
+      <b-link :to="link(contact.id)" class="contact-info pl-2">
         <p class="my-0">
           <span class="msg-username">{{ contact.username || contact.name}}</span>
         </p>
-      </div>
+      </b-link>
       <div class="pl-2 tag-ctrl ml-auto">
-        <fa-icon :icon="['fas', 'ellipsis-h']" class="clickable fa-sm" />
+        <b-form-checkbox v-model="isSelected" @change="selectContact(contact.id)"></b-form-checkbox>
       </div>
     </section>
 
@@ -42,13 +42,27 @@ export default {
 
     moment: moment,
 
+    isSelected: false,
+
   }), // data
 
   created() { },
 
   mounted() { },
 
-  methods: { }, // methods
+  methods: { 
+    link(id) {
+      return { name: 'mycontacts.show', params: { id: id } }
+    },
+
+    selectContact(contact) {
+      this.$emit('select-contact', {
+        contact: contact, 
+        isSelected: this.isSelected,
+      })
+    },
+  }, // methods
+
 
   watch: { }, // watch
 
@@ -59,7 +73,7 @@ export default {
 
 <style lang="scss" scoped>
 body {
-  .btn-link:hover {
+  a, .btn-link:hover {
     text-decoration: none;
   }
   .btn:focus, .btn.focus {

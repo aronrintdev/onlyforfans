@@ -248,7 +248,6 @@ export default {
       if (value) {
         if (!this.chatthreads) { // initial load only, depends on sesssion user (synchronous)
           console.log('live-chat/Dashboard - watch session_user: reloadFromFirstPage()')
-          //this.getChatthreads()
           this.reloadFromFirstPage()
         }
       }

@@ -126,6 +126,7 @@ class ChatmessageModelTest extends TestCase
 
     /**
      * @group chatmessage-model
+     * @group mycontacts
      * @group regression
      * @group here0607
      */

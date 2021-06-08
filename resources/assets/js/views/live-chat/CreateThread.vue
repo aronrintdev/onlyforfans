@@ -1,21 +1,15 @@
 <template>
-  <div v-if="!isLoading" class="container-xl px-3 py-3" id="view-createthread">
+  <div v-if="!isLoading" class="container-xl px-3 py-3" id="view-create-thread">
 
     <section class="row">
 
       <aside class="col-md-5 col-lg-4">
 
         <article class="top-bar d-flex justify-content-between align-items-center">
-          <h4>Messages</h4>
+          <h4>Contacts</h4>
           <div class="d-flex">
             <b-button variant="link" class="clickme_to-search_messages" @click="doSomething">
               <fa-icon :icon="['fas', 'search']" class="fa-lg" />
-            </b-button>
-            <b-button variant="link" class="clickme_to-schedule_message" @click="doSomething">
-              <fa-icon :icon="['far', 'calendar-alt']" class="fa-lg" />
-            </b-button>
-            <b-button variant="link" class="clickme_to-send_message" @click="doSomething">
-              <fa-icon :icon="['fas', 'plus']" class="fa-lg" />
             </b-button>
           </div>
         </article>
@@ -47,26 +41,25 @@
 
         <article class="mycontacts-filters py-3 d-flex OFF-justify-content-between align-items-center">
           <b-button @click="clearFilters()" pill variant="outline-info" class="mx-1">All</b-button>
-          <b-button @click="toggleFilter('is_unread')" pill :variant="Object.keys(this.filters).includes('is_unread') ? 'info' : 'outline-info'" class="mx-1">Unread</b-button>
           <b-button @click="toggleFilter('is_subscriber')" pill :variant="Object.keys(this.filters).includes('is_subscriber') ? 'info' : 'outline-info'" class="mx-1">Subscribers</b-button>
           <b-button pill variant="outline-info" class="mx-1">
             <fa-icon :icon="['fas', 'plus']" class="fa-lg" />
           </b-button>
         </article>
 
-        <article class="tag-debug contact-list">
+        <article class="contact-list">
           <b-list-group>
             <b-list-group-item
               v-for="(c, idx) in mycontacts"
               :key="c.id"
-              :to="link(c.id)"
-              :active="isActiveContact(c.id)"
               :data-ct_id="c.id"
               class="px-2"
             >
               <PreviewContact 
                 :session_user="session_user"
-                :contact="c"
+                :contact="c.contact"
+                v-on:select-contact="selectContact($event)"
+                v-model="selectedContacts[c.id]"
               />
             </b-list-group-item>
           </b-list-group>
@@ -103,13 +96,6 @@ export default {
   computed: {
     ...Vuex.mapGetters(['session_user']),
 
-    activeContactId() {
-      return 1;
-    },
-    activeContact() {
-      return this.mycontacts.find( ct => ct.id === this.activeContactId )
-    },
-
     isLoading() {
       return !this.session_user || !this.mycontacts
     },
@@ -123,11 +109,10 @@ export default {
 
     sortBy: 'recent',
 
-    mycontacts: [
-      { id: 1, name: 'foo' }, 
-      { id: 2, name: 'bar' }, 
-    ],
+    mycontacts: null,
 
+    // %FIXME: Not sure how to propagate this down and back up to an array of custom form components, see:
+    // https://vuejs.org/v2/guide/components.html#Using-v-model-on-Components
     selectedContacts: [ ],
 
     meta: null,
@@ -156,19 +141,21 @@ export default {
       'getMe',
     ]),
 
-    link(id) {
-      return { name: 'mycontacts.show', params: { id: id } }
-    },
-
-    isActiveThread(id) {
-      return id === this.activeThreadId
-    },
-    isActiveContact(id) {
-      return id === this.activeContactId
-    },
-
     doSomething() {
       // stub placeholder for impl
+    },
+
+    selectContact({ contact, isSelected }) {
+      // contact is the user pkid
+      console.log('CreateThread: selected contact', {
+        contact: contact,
+        isSelected: isSelected,
+      })
+      if ( !isSelected ) {
+        this.selectedContacts = this.selectedContacts.filter( iter => iter !== contact )
+      } else {
+        this.selectedContacts.push(contact)
+      }
     },
 
     async getContacts() {
@@ -255,16 +242,6 @@ export default {
 body {
   #view-create-thread {
     background-color: #fff;
-
-    .mycontacts-list .list-group-item.active {
-      background: rgba(0,145,234,.06);
-      color: inherit;
-      border-top: none;
-      border-left: 1px solid rgba(138,150,163,.25);
-      border-right: 1px solid rgba(138,150,163,.25);
-      border-bottom: 1px solid rgba(138,150,163,.25);
-    }
-
   }
 
   .top-bar {

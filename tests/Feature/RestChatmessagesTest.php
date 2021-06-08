@@ -109,6 +109,7 @@ class RestChatmessagesTest extends TestCase
 
     /**
      *  @group chatmessages
+     *  @group mycontacts
      *  @group regression
      *  @group here0607
      */
