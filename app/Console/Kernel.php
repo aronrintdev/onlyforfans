@@ -52,7 +52,7 @@ class Kernel extends ConsoleKernel
             ])->then(function (Batch $batch) {
                 Log::info('Summarize Daily Transactions Finished');
             })->name('Summarize Daily Transactions')->onQueue("$queue-low");
-        })->daily();
+        })->dailyAt('0:01');
 
         $schedule->call(function () {
             $queue = Config::get('transactions.summarizeQueue');
@@ -61,7 +61,7 @@ class Kernel extends ConsoleKernel
             ])->then(function (Batch $batch) {
                 Log::info('Summarize Weekly Transactions Finished');
             })->name('Summarize Weekly Transactions')->onQueue("$queue-low");
-        })->weekly();
+        })->weeklyOn(0, '0:01');
 
         $schedule->call(function () {
             $queue = Config::get('transactions.summarizeQueue');
@@ -70,7 +70,7 @@ class Kernel extends ConsoleKernel
             ])->then(function (Batch $batch) {
                 Log::info('Summarize Monthly Transactions Finished');
             })->name('Summarize Monthly Transactions')->onQueue("$queue-low");
-        })->monthly();
+        })->monthlyOn(1, '0:01');
 
         $schedule->call(function () {
             $queue = Config::get('transactions.summarizeQueue');
@@ -79,7 +79,7 @@ class Kernel extends ConsoleKernel
             ])->then(function (Batch $batch) {
                 Log::info('Summarize Yearly Transactions Finished');
             })->name('Summarize Yearly Transactions')->onQueue("$queue-low");
-        })->yearly();
+        })->yearlyOn(1, 1, '0:01');
 
         // $schedule->command('subscription:update-canceled')->everyHour();
         $schedule->command('send:schdule-messages')->everyMinute()->appendOutputTo(storage_path('logs/publish_posts.log'))->runInBackground();

@@ -40,7 +40,7 @@ class TipFailed implements ShouldBroadcast
      *
      * @return void
      */
-    public function __construct(Tippable $item, Account $account, string $message)
+    public function __construct(Tippable $item, Account $account, string $message = '')
     {
         $this->item    = $item->withoutRelations();
         $this->account = $account->withoutRelations();
