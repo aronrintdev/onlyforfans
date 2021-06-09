@@ -71,6 +71,7 @@
           <CreateThreadForm 
             :session_user="session_user"
             :contacts="selectedContacts"
+            v-on:create-chatthread="createChatthread($event)"
           />
       </main>
 
@@ -113,7 +114,7 @@ export default {
 
     // %FIXME: Not sure how to propagate this down and back up to an array of custom form components, see:
     // https://vuejs.org/v2/guide/components.html#Using-v-model-on-Components
-    selectedContacts: [ ],
+    selectedContacts: [],
 
     meta: null,
     perPage: 10,
@@ -175,6 +176,32 @@ export default {
       const response = await axios.get( this.$apiRoute('mycontacts.index'), { params } )
       this.mycontacts = response.data.data
       this.meta = response.meta
+    },
+
+    async createChatthread({ 
+      mcontent = null,
+      is_scheduled = false,
+      deliver_at_string = null,
+      deliver_at = null,
+    }) {
+      const params = {
+        originator_id: this.session_user.id,
+        participants: this.selectedContacts,
+      }
+
+      if ( mcontent ) {
+        params.mcontent = mcontent
+      }
+      if ( is_scheduled ) {
+        params.is_scheduled = true
+        params.deliver_at_string = deliver_at_string
+        params.deliver_at = deliver_at
+      }
+
+      console.log('createChatthread', { params: params })
+
+      let response
+      response = await axios.post( this.$apiRoute('chatthreads.store'), params )
     },
 
     // additional page loads

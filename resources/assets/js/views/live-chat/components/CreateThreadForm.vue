@@ -17,6 +17,7 @@
     <MessageForm 
       :session_user="session_user" 
       chatthread_id="new" 
+      v-on="$listeners"
     />
 
   </div>
@@ -56,6 +57,7 @@ export default {
   },
 
   methods: {
+
 
     doSomething() {
       // stub placeholder for impl
