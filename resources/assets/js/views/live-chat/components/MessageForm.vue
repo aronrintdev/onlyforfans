@@ -131,7 +131,7 @@ export default {
         //   that's where the selectedContact data resides
         params.is_scheduled = this.isScheduled
         if ( this.isScheduled ) {
-          params.deliver_at_string = `${this.newMessageForm.deliver_at.date} ${this.newMessageForm.deliver_at.time}`
+          //params.deliver_at_string = `${this.newMessageForm.deliver_at.date} ${this.newMessageForm.deliver_at.time}`
           params.deliver_at = this.deliverAtTimestamp
         }
         this.$emit('create-chatthread', params)
@@ -140,7 +140,7 @@ export default {
       } else if ( this.isScheduled ) {
 
         // 'send' a pre-scheduled message (on an existing thread)
-        params.deliver_at_string = `${this.newMessageForm.deliver_at.date} ${this.newMessageForm.deliver_at.time}`
+        //params.deliver_at_string = `${this.newMessageForm.deliver_at.date} ${this.newMessageForm.deliver_at.time}`
         params.deliver_at = this.deliverAtTimestamp
         response = await axios.post( this.$apiRoute('chatthreads.scheduleMessage', this.chatthread_id), params )
         this.clearForm()

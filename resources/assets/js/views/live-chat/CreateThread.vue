@@ -180,7 +180,6 @@ export default {
     async createChatthread({ 
       mcontent = null,
       is_scheduled = false,
-      deliver_at_string = null,
       deliver_at = null,
     }) {
       const params = {
@@ -193,7 +192,6 @@ export default {
       }
       if ( is_scheduled ) {
         params.is_scheduled = true
-        params.deliver_at_string = deliver_at_string
         params.deliver_at = deliver_at
       }
 
@@ -202,7 +200,7 @@ export default {
 
       this.selectedContacts = [] 
       this.$router.push({ name: 'chatthreads.dashboard' })
-      // %TODO: clear MessageForm...can we just re-render the CreateThreadForm component to accomplish this?
+      // %FIXME: clear MessageForm...can we just re-render the CreateThreadForm component to accomplish this?
 
     }, // createChatthread()
 

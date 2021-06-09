@@ -157,6 +157,7 @@ class RestChatthreadsTest extends TestCase
     /**
      *  @group chatthreads
      *  @group regression
+     *  @group here0608
      */
     public function test_can_create_chat_thread_with_selected_participants()
     {
@@ -169,14 +170,11 @@ class RestChatthreadsTest extends TestCase
             'participants' => $participants->pluck('id')->toArray(),
         ];
         $response = $this->actingAs($originator)->ajaxJSON( 'POST', route('chatthreads.store', $payload) );
-        //$content = json_decode($response->content());
+        $content = json_decode($response->content());
         $response->assertStatus(201);
         $response->assertJsonStructure([
-            'data' => [
-                    'id', 
-                    'originator_id', 
-                    'is_tip_required', 
-                    'created_at', 
+            'chatthreads' => [
+                0 => [ 'id', 'originator_id', 'is_tip_required', 'created_at' ],
             ],
         ]);
     }
@@ -214,6 +212,7 @@ class RestChatthreadsTest extends TestCase
         $this->assertEquals( $recipients->count(), count($content->chatthreads) );
         $chatthreadPKID = $content->chatthreads[0]->id; // first & only thread
         $chatthread = Chatthread::find($chatthreadPKID);
+        $this->assertEquals(0, $chatthread->chatmessages->count()); // no messages on thread yet
 
         // send some messages to the thread
 
@@ -362,7 +361,6 @@ class RestChatthreadsTest extends TestCase
     /**
      *  @group chatthreads
      *  @group regression
-     *  @group here0608
      */
     public function test_should_create_thread_with_included_first_message_content()
     {
@@ -381,7 +379,7 @@ class RestChatthreadsTest extends TestCase
         $payload = [
             'originator_id' => $originator->id,
             'participants' => $recipients->pluck('id')->toArray(),
-            'mcontent' => $this->faker->realText,
+            'mcontent' => $this->faker->realText, // send content, will create initial message for thread
         ];
         $response = $this->actingAs($originator)->ajaxJSON( 'POST', route('chatthreads.store', $payload) );
         $content = json_decode($response->content());
@@ -397,6 +395,51 @@ class RestChatthreadsTest extends TestCase
         $this->assertNotNull($chatthread);
         $this->assertEquals($payload['mcontent'], $chatthread->chatmessages[0]->mcontent);
     }
+
+    /**
+     *  @group chatthreads
+     *  @group regression
+     */
+    public function test_should_create_thread_with_included_first_message_content_pre_scheduled()
+    {
+        Event::fake([
+            MessageSentEvent::class,
+        ]);
+
+        // create chat
+        $originator = User::doesntHave('chatthreads')->firstOrFail();
+
+        $recipients = User::doesntHave('chatthreads')->where('id', '<>', $originator->id)->take(1)->get();
+        $this->assertGreaterThan(0, $recipients->count());
+
+        // --- Create a chatthread ---
+
+        $now = Carbon::now();
+        $tomorrow = new Carbon('tomorrow');
+        $payload = [
+            'originator_id' => $originator->id,
+            'participants' => $recipients->pluck('id')->toArray(),
+            'mcontent' => $this->faker->realText, // send content, will create initial message for thread
+            'deliver_at' => $tomorrow->timestamp,
+        ];
+        $response = $this->actingAs($originator)->ajaxJSON( 'POST', route('chatthreads.store', $payload) );
+        $content = json_decode($response->content());
+        $response->assertJsonStructure([
+            'chatthreads' => [ // note: returns an array!
+                0 => ['id', 'originator_id', 'created_at' ],
+            ],
+        ]);
+        $response->assertStatus(201);
+        $this->assertEquals( $recipients->count(), count($content->chatthreads) );
+        $chatthreadPKID = $content->chatthreads[0]->id; // first & only thread
+        $chatthread = Chatthread::find($chatthreadPKID);
+        $this->assertNotNull($chatthread);
+        $this->assertEquals(0, $chatthread->chatmessages->count()); // should not be visible yet
+
+        $scheduledMsg = Chatmessage::where('chatthread_id', $chatthreadPKID)->first();
+        $this->assertNotNull($scheduledMsg);
+        $this->assertEquals($payload['mcontent'], $scheduledMsg->mcontent);
+    } 
 
     /**
      *  @group chatthreads
@@ -460,7 +503,7 @@ class RestChatthreadsTest extends TestCase
         $content = json_decode($response->content());
         //dd($content);
         $response->assertStatus(201);
-        $chatthreadPKID = $content->data->id;
+        $chatthreadPKID = $content->chatthreads[0]->id;
 
         // schedule a message for delivery in 1 day
 
@@ -468,7 +511,7 @@ class RestChatthreadsTest extends TestCase
         $tomorrow = new Carbon('tomorrow');
         $msgs[] = $msg = $this->faker->realText;
         $payload = [
-            $content->data->id, // chatthread_id
+            $chatthreadPKID,
             'mcontent' => $msg,
             'deliver_at' => $tomorrow->timestamp,
         ];
