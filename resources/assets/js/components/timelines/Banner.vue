@@ -8,7 +8,7 @@
     >
       <input type="file" id="cover-upload-btn" class="file-input" @change="onCoverChange" />
       <label v-if="uploadCoverVisible" for="cover-upload-btn" class="btn photo-btn">
-        <b-icon icon="camera-fill" scale="1.5" variant="light"></b-icon>
+        <fa-icon icon="camera" size="2x" />
       </label>
       <div class="overlay" />
       <b-dropdown no-caret variant="transparent" id="profile-ctrl-dropdown" class="tag-ctrl">
@@ -36,7 +36,7 @@
       />
       <input type="file" id="avatar-upload-btn" class="file-input" @change="onAvatarChange" />
       <label v-if="uploadAvatarVisible" for="avatar-upload-btn" class="btn photo-btn">
-        <b-icon icon="camera-fill" scale="1.5" variant="light"></b-icon>
+        <fa-icon icon="camera" size="2x" />
       </label>
     </section>
 
@@ -48,7 +48,7 @@
               {{ timeline.name }}
             </router-link>
             <span v-if="timeline.verified" class="verified-badge">
-              <b-icon icon="check-circle-fill" variant="primary" font-scale="1"></b-icon>
+              <fa-icon icon="check-circle" class="text-primary" />
             </span>
           </h2>
           <p class="avatar-mail my-0">

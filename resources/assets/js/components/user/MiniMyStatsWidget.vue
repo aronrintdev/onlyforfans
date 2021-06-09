@@ -26,16 +26,18 @@
           <div class="avatar-details">
             <h2 class="avatar-name my-0">
               <a :href="`/${timeline.slug}`">{{ timeline.name }}</a>
-              <span v-if="timeline.verified" class="verified-badge"
-                ><b-icon icon="check-circle-fill" variant="primary" font-scale="1"></b-icon
-              ></span>
+              <span v-if="timeline.verified" class="verified-badge">
+                <fa-icon icon="check-circle" class="text-primary" />
+              </span>
             </h2>
             <p class="avatar-mail my-0">
               <a :href="`/${timeline.slug}`">@{{ timeline.slug }}</a>
             </p>
           </div>
           <div class="go-live">
-            <span><b-icon icon="broadcast-pin" variant="primary" font-scale="2"></b-icon></span>
+            <span>
+              <fa-icon icon="podcast" class="text-primary" size="2x" />
+            </span>
           </div>
         </div>
 

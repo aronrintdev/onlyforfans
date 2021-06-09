@@ -19,7 +19,7 @@
           </li>
           <li>
             <b-button @click="renderTip" :disabled="timeline.is_owner" variant="primary" class="w-100 mt-3">
-              <span>$ Send Tip</span>
+              <span>Send Tip</span>
             </b-button>
           </li>
         </ul>
@@ -29,8 +29,8 @@
           <li>Instagram: <a :href="timeline.userstats.instagram" class="tag-instagram">{{ timeline.userstats.instagram }}</a></li>
         </ul>
         <ul class="list-unstyled list-details">
-          <li><span><b-icon icon="geo-fill" variant="default"></b-icon> {{ timeline.userstats.city }}</span></li>
-          <li><span><b-icon icon="globe" variant="default"></b-icon> {{ timeline.userstats.country }}</span></li>
+          <li><span><fa-icon icon="map-pin" /> {{ timeline.userstats.city }}</span></li>
+          <li><span><fa-icon icon="globe" /> {{ timeline.userstats.country }}</span></li>
         </ul>
       </b-card-text>
     </b-card>
