@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\PayoutBatch;
+use App\Models\Financial\PayoutBatch;
 use Illuminate\Http\Request;
 
 class PayoutBatchController extends Controller
@@ -13,16 +13,6 @@ class PayoutBatchController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function index()
-    {
-        //
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
     {
         //
     }
@@ -41,7 +31,7 @@ class PayoutBatchController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\PayoutBatch  $payoutBatch
+     * @param  PayoutBatch  $payoutBatch
      * @return \Illuminate\Http\Response
      */
     public function show(PayoutBatch $payoutBatch)
@@ -50,21 +40,10 @@ class PayoutBatchController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\PayoutBatch  $payoutBatch
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(PayoutBatch $payoutBatch)
-    {
-        //
-    }
-
-    /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\PayoutBatch  $payoutBatch
+     * @param  PayoutBatch  $payoutBatch
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, PayoutBatch $payoutBatch)
@@ -75,7 +54,7 @@ class PayoutBatchController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\PayoutBatch  $payoutBatch
+     * @param  PayoutBatch  $payoutBatch
      * @return \Illuminate\Http\Response
      */
     public function destroy(PayoutBatch $payoutBatch)

@@ -76,6 +76,7 @@ class AppServiceProvider extends ServiceProvider
             'financial_accounts'     => 'App\Models\Financial\Account',
             'financial_ach_account'  => 'App\Models\Financial\AchAccount',
             'financial_flags'        => 'App\Models\Financial\Flag',
+            'payout_batches'         => 'App\Models\Financial\PayoutBatch',
             'financial_summaries'    => 'App\Models\Financial\TransactionSummary',
             'financial_system_owner' => 'App\Models\Financial\SystemOwner',
             'financial_transactions' => 'App\Models\Financial\Transaction',
