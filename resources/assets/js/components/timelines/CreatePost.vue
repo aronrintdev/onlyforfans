@@ -55,19 +55,43 @@
           </div>
           <template #footer>
             <b-row>
-              <b-col cols="12" md="8" class="d-flex">
+              <b-col cols="12" md="8" class="post-create-footer-ctrl d-flex">
                 <ul class="list-inline d-flex mb-0 OFF-border-right">
-                  <li><label id="clickme_to-select" class=""><b-icon icon="file-earmark" variant="secondary" font-scale="1.5"></b-icon></label></li>
-                  <li @click="takePicture()" class="selectable select-pic"><b-icon icon="image" :variant="selectedMedia==='pic' ? 'primary' : 'secondary'" font-scale="1.5"></b-icon></li>
-                  <li @click="recordVideo()" class="selectable select-video"><b-icon icon="camera-video" :variant="selectedMedia==='video' ? 'primary' : 'secondary'" font-scale="1.5"></b-icon></li>
-                  <li @click="recordAudio()" class="selectable select-audio"><b-icon icon="mic" :variant="selectedMedia==='audio' ? 'primary' : 'secondary'" font-scale="1.5"></b-icon></li>
+                  <li>
+                    <label id="clickme_to-select">
+                      <fa-icon :icon="['far', 'file-upload']" class="text-secondary" />
+                    </label>
+                  </li>
+                  <li @click="takePicture()" class="selectable select-pic">
+                    <fa-icon :icon="['far', 'image']" :class="selectedMedia==='pic' ? 'text-primary' : 'text-secondary'" />
+                  </li>
+                  <li @click="recordVideo()" class="selectable select-video">
+                    <fa-icon :icon="['far', 'video']" :class="selectedMedia==='video' ? 'text-primary' : 'text-secondary'" />
+                  </li>
+                  <li @click="recordAudio()" class="selectable select-audio">
+                    <fa-icon :icon="['far', 'microphone']" :class="selectedMedia==='audio' ? 'text-primary' : 'text-secondary'" />
+                  </li>
                 </ul>
                 <div class="border-right"></div>
                 <ul class="list-inline d-flex mb-0">
+                  <!--
                   <li class="selectable select-location"><span><LocationPinIcon /></span> </li>
                   <li class="selectable select-emoji"><span><EmojiIcon /></span></li>
                   <li class="selectable select-timer"><span><TimerIcon /></span></li>
                   <li class="selectable select-calendar" @click="showSchedulePicker()"><span><CalendarIcon /></span></li>
+                  -->
+                  <li class="selectable select-location">
+                    <fa-icon :icon="['far', 'map-pin']" class="text-secondary" />
+                  </li>
+                  <li class="selectable select-emoji">
+                    <fa-icon :icon="['far', 'smile']" class="text-secondary" />
+                  </li>
+                  <li class="selectable select-timer">
+                    <fa-icon :icon="['far', 'clock']" class="text-secondary" />
+                  </li>
+                  <li class="selectable select-calendar" @click="showSchedulePicker()">
+                    <fa-icon :icon="['far', 'calendar-alt']" class="text-secondary" />
+                  </li>
                 </ul>
               </b-col>
               <b-col cols="12" md="4">
@@ -353,5 +377,9 @@ width: 128px;
 
 .b-icon.bi {
   vertical-align: middle;
+}
+
+.post-create-footer-ctrl {
+  font-size: 1.5rem;
 }
 </style>

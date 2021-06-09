@@ -3,7 +3,7 @@
     <section class="d-flex flex-wrap justify-content-start w-100">
       <div @click="createStory()" class="story">
         <router-link :to="{ name: 'stories.dashboard' }">
-          <fa-icon class="mt-1" icon="plus-circle" size="2x" />
+          <fa-icon class="mt-1" :icon="['far', 'plus-circle']" size="2x" />
         </router-link>
       </div>
       <div v-for="story in stories" :key="story.id" class="ml-3 mb-3 story">

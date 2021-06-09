@@ -4,9 +4,9 @@
     <section class="ctrl-top d-flex justify-content-between align-items-center">
       <h5 class="my-0 flex-grow-1">SUGGESTIONS</h5>
       <span @click="getDataset" class="tag-clickable sync">
-        <fa-icon icon="sync" />
+        <fa-icon icon="sync" class="text-primary" />
       </span>
-      <span @click="toggleFree" class="tag-clickable filter" :class="filters.freeOnly ? 'text-success' : ''">
+      <span @click="toggleFree" class="tag-clickable filter" :class="filters.freeOnly ? 'text-success' : 'text-primary'">
         <fa-icon icon="dollar-sign" />
       </span>
       <b-pagination

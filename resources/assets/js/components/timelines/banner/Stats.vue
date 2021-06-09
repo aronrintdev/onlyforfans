@@ -9,7 +9,7 @@
     >
       <span>
         {{ stats[item.stat] }}
-        <b-icon :icon="item.icon" variant="default" />
+        <fa-icon :icon="item.icon" />
       </span>
     </li>
   </ul>
@@ -36,22 +36,22 @@ export default {
       {
         stat: 'post_count',
         tooltip: 'Posts',
-        icon: 'favorites-fill',
+        icon: 'pen',
       },
       {
         stat: 'follower_count',
         tooltip: 'Followers',
-        icon: 'people-fill',
+        icon: 'user-friends',
       },
       {
         stat: 'like_count',
         tooltip: 'Likes',
-        icon: 'heart-fill',
+        icon: 'heart',
       },
       {
         stat: 'following_count',
         tooltip: 'Following',
-        icon: 'person-check-fill',
+        icon: 'user-check',
       },
     ],
   }),
