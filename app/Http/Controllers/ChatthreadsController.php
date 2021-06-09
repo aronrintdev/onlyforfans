@@ -128,7 +128,8 @@ class ChatthreadsController extends AppBaseController
             'originator_id' => 'required|uuid|exists:users,id',
             'participants' => 'required|array', // %FIXME: rename to 'recipients' for clairty
             'participants.*' => 'uuid|exists:users,id',
-            'mcontent' => 'string', // optional first message content
+            'mcontent' => 'string|required_with:deliver_at', // optional first message content
+            'deliver_at' => 'numeric', // optional to pre-schedule delivery of message if present
         ]);
         $originator = User::find($request->originator_id);
 
@@ -137,7 +138,11 @@ class ChatthreadsController extends AppBaseController
             $ct = Chatthread::startChat($originator);
             $ct->addParticipant($pkid);
             if ( $request->has('mcontent') ) { // if included send the first message
-                $ct->sendMessage($request->user(), $request->mcontent);
+                if ( $request->has('deliver_at') ) {
+                    $ct->scheduleMessage($request->user(), $request->mcontent, $request->deliver_at);
+                } else {
+                    $ct->sendMessage($request->user(), $request->mcontent);
+                }
             }
             $ct->refresh();
             $chatthreads->push($ct);
