@@ -57,8 +57,8 @@ return [
                 'scheme' => env('PUSHER_APP_SCHEME', 'http'),
                 'debug' => env('PUSHER_APP_DEBUG', false),
                 'curl_options' => [
-                    CURLOPT_SSL_VERIFYHOST => env('PUSHER_SSL_VERIFYHOST', 0),
-                    CURLOPT_SSL_VERIFYPEER => env('PUSHER_SSL_VERIFYPEER', 0),
+                    81 => env('PUSHER_SSL_VERIFYHOST', 0), // define('CURLOPT_SSL_VERIFYHOST', 81); WARNING: needed due to tests not loading php-curl library
+                    64 => env('PUSHER_SSL_VERIFYPEER', 0), // define('CURLOPT_SSL_VERIFYPEER', 64);
                 ],
             ],
         ],
@@ -76,8 +76,8 @@ return [
                 'scheme' => env('PUSHER_APP_SCHEME', 'http'),
                 'debug' => env('PUSHER_APP_DEBUG', false),
                 'curl_options' => [
-                    CURLOPT_SSL_VERIFYHOST => env('PUSHER_SSL_VERIFYHOST', 0),
-                    CURLOPT_SSL_VERIFYPEER => env('PUSHER_SSL_VERIFYPEER', 0),
+                    81 => env('PUSHER_SSL_VERIFYHOST', 0), // define('CURLOPT_SSL_VERIFYHOST', 81);
+                    64 => env('PUSHER_SSL_VERIFYPEER', 0), // define('CURLOPT_SSL_VERIFYPEER', 64);
                 ],
             ],
         ],

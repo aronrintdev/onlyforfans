@@ -108,9 +108,11 @@ class ChatmessagesTableSeeder extends Seeder
             $latestMsg = Chatmessage::where('chatthread_id', $ct->id)
                 ->where('is_delivered', true)
                 ->latest()->first();
-            DB::table('chatthreads')->where('id', $ct->id)->update([
-                'updated_at' => $latestMsg->created_at,
-            ]);
+            if ( $latestMsg ) {
+                DB::table('chatthreads')->where('id', $ct->id)->update([
+                    'updated_at' => $latestMsg->created_at,
+                ]);
+            }
         });
 
     } // run()

@@ -120,19 +120,38 @@ export default {
   methods: {
 
     async sendMessage(e) {
-      // %TODO If 'new' needs to create a new chatthread first, or call an API that combines chatthreads.store with sendMessage in one ajax call
+      let response
       const params = {
         mcontent: this.newMessageForm.mcontent,
       }
-      let response
-      if ( this.isScheduled ) {
-        params.deliver_at_string = `${this.newMessageForm.deliver_at.date} ${this.newMessageForm.deliver_at.time}`
+
+      if ( this.chatthread_id === 'new' ) {
+
+        // %NOTE - Creating a new thread, delegate to parent template (CreateThreadForm), as
+        //   that's where the selectedContact data resides
+        params.is_scheduled = this.isScheduled
+        if ( this.isScheduled ) {
+          //params.deliver_at_string = `${this.newMessageForm.deliver_at.date} ${this.newMessageForm.deliver_at.time}`
+          params.deliver_at = this.deliverAtTimestamp
+        }
+        this.$emit('create-chatthread', params)
+        this.clearForm() // %FIXME: how to confirm success before clearing form (?)
+
+      } else if ( this.isScheduled ) {
+
+        // 'send' a pre-scheduled message (on an existing thread)
+        //params.deliver_at_string = `${this.newMessageForm.deliver_at.date} ${this.newMessageForm.deliver_at.time}`
         params.deliver_at = this.deliverAtTimestamp
         response = await axios.post( this.$apiRoute('chatthreads.scheduleMessage', this.chatthread_id), params )
+        this.clearForm()
+
       } else {
+
+        // send an immediate message (on an existing thread)
         response = await axios.post( this.$apiRoute('chatthreads.sendMessage', this.chatthread_id), params )
+        this.clearForm()
       }
-      this.clearForm()
+
     },
 
     clearForm() {

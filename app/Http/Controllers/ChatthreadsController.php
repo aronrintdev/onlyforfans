@@ -120,21 +120,37 @@ class ChatthreadsController extends AppBaseController
         return new ChatthreadResource($chatthread);
     }
 
+    // %HERE
+    // %NOTE: May create more than a single chatthread
     public function store(Request $request) 
     {
         $request->validate([
             'originator_id' => 'required|uuid|exists:users,id',
-            'participants' => 'required|array',
+            'participants' => 'required|array', // %FIXME: rename to 'recipients' for clairty
             'participants.*' => 'uuid|exists:users,id',
+            'mcontent' => 'string|required_with:deliver_at', // optional first message content
+            'deliver_at' => 'numeric', // optional to pre-schedule delivery of message if present
         ]);
         $originator = User::find($request->originator_id);
-        $chatthread = Chatthread::startChat($originator);
 
+        $chatthreads = collect();
         foreach ($request->participants as $pkid) {
-            $chatthread->addParticipant($pkid);
+            $ct = Chatthread::startChat($originator);
+            $ct->addParticipant($pkid);
+            if ( $request->has('mcontent') ) { // if included send the first message
+                if ( $request->has('deliver_at') ) {
+                    $ct->scheduleMessage($request->user(), $request->mcontent, $request->deliver_at);
+                } else {
+                    $ct->sendMessage($request->user(), $request->mcontent);
+                }
+            }
+            $ct->refresh();
+            $chatthreads->push($ct);
         }
 
-        return new ChatthreadResource($chatthread);
+        return response()->json([
+            'chatthreads' => $chatthreads,
+        ], 201);
     }
 
     public function sendMessage(Request $request, Chatthread $chatthread)
