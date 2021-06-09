@@ -48,7 +48,7 @@ export const routes = [
   },
   {
     component: LivechatDashboard,
-    //name: 'chatthreads.dashboard',
+    name: 'chatthreads.dashboard',
     path: '/messages',
     children: livechatRoutes,
   },
