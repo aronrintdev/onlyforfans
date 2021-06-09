@@ -23,7 +23,9 @@ class PayoutGatewayTest extends TestCase
     protected $connectionName = 'financial';
 
     /**
-     * Rest request of payout
+     * Rest request of payout'
+     *
+     * @group regression
      */
     public function test_can_request_a_payout()
     {
@@ -44,6 +46,8 @@ class PayoutGatewayTest extends TestCase
 
     /**
      * Rest request of payout
+     *
+     * @group regression
      */
     public function test_cannot_request_payout_higher_than_balance()
     {
