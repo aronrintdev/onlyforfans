@@ -16,7 +16,7 @@
     </div>
     <div class="d-flex justify-content-between align-items-center">
       <div>
-        <b-btn v-if="value.purchasable_type === 'posts'" variant="outline-primary" @click="$emit('preview', value)" >
+        <b-btn v-if="value.resource_type === 'posts'" variant="outline-primary" @click="$emit('preview', value)" >
           <fa-icon icon="external-link-alt" />
         </b-btn>
       </div>

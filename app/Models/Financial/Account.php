@@ -211,16 +211,16 @@ class Account extends Model implements Ownable
                 'currency' => $fromAccount->currency,
                 'description' => $options['description'] ?? null,
                 'type' => $options['type'] ?? TransactionTypeEnum::PAYMENT,
-                'purchasable_id' => isset($options['purchasable_id'])
-                    ? $options['purchasable_id']
-                    : (isset($options['purchasable'])
-                        ? $options['purchasable']->getKey()
+                'resource_id' => isset($options['resource_id'])
+                    ? $options['resource_id']
+                    : (isset($options['resource'])
+                        ? $options['resource']->getKey()
                         : null
                     ),
-                'purchasable_type' => isset($options['purchasable_type'])
-                    ? $options['purchasable_type']
-                    : (isset($options['purchasable'])
-                        ? $options['purchasable']->getMorphString()
+                'resource_type' => isset($options['resource_type'])
+                    ? $options['resource_type']
+                    : (isset($options['resource'])
+                        ? $options['resource']->getMorphString()
                         : null
                     ),
                 'metadata' => $options['metadata'] ?? null,
@@ -438,10 +438,10 @@ class Account extends Model implements Ownable
                 $roleBackTransactions->push(
                     $transaction->chargeback($this->asMoney(0)->subtract($remainingAmount))
                 );
-                if (isset($transaction->purchasable_id)) {
+                if (isset($transaction->resource_id)) {
                     // Revoke access to item for every owner of chargeback account
                     $this->getOwner()->each(function ($owner) use ($transaction) {
-                        $transaction->purchasable->revokeAccess($owner, 'chargeback');
+                        $transaction->resource->revokeAccess($owner, 'chargeback');
                     });
                 }
             }
@@ -452,10 +452,10 @@ class Account extends Model implements Ownable
                 $roleBackTransactions->push(
                     $transaction->chargeback()
                 );
-                if (isset($transaction->purchasable_id)) {
+                if (isset($transaction->resource_id)) {
                     // Revoke access to item for every owner of chargeback account
                     $this->getOwner()->each(function ($owner) use ($transaction) {
-                        $transaction->purchasable->revokeAccess($owner, 'chargeback');
+                        $transaction->resource->revokeAccess($owner, 'chargeback');
                     });
                 }
             }
@@ -532,7 +532,7 @@ class Account extends Model implements Ownable
             $purchaseable->getOwnerAccount($this->system, $this->currency),
             $amount,
             array_merge($transactionAttributes, [
-                'purchasable' => $purchaseable,
+                'resource' => $purchaseable,
                 'type' => TransactionTypeEnum::SALE,
                 'description' => "Purchase of {$purchaseable->getDescriptionNameString()} {$purchaseable->getKey()}"
         ]));
@@ -572,7 +572,7 @@ class Account extends Model implements Ownable
 
         // Payment funds movement
         $transactions = $this->moveTo($tippable->getOwnerAccount($this->system, $this->currency), $amount, array_merge($customAttributes, [
-            'purchasable' => $tippable,
+            'resource' => $tippable,
             'type' => TransactionTypeEnum::TIP,
             'description' => "Tip to {$tippable->getDescriptionNameString()} {$tippable->getKey()}"
         ]));
