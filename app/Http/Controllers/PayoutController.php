@@ -20,7 +20,7 @@ class PayoutController extends Controller
      * @param Request $request
      * @return Response
      */
-    public function requestPayout(Request $request, PayoutGateway $payoutGateway)
+    public function request(Request $request, PayoutGateway $payoutGateway)
     {
         $request->validate([
             'account_id' => 'required|uuid',
@@ -31,7 +31,7 @@ class PayoutController extends Controller
         $outAccount = Account::find($request->account_id);
         $this->authorize('payout', $outAccount);
 
-        $internalAccount = $request->user()->getInternalAccount();
+        $internalAccount = $outAccount->getInternalAccount();
 
         // Verify available balance
         $amount = Money::toMoney($request->amount, $request->currency);

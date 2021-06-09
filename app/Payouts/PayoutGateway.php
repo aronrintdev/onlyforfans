@@ -17,7 +17,7 @@ class PayoutGateway implements PayoutGatewayContract
         try {
             switch($to->resource_type) {
                 case AchAccount::getMorphStringStatic():
-                    $this->achAccountRequest($from, $to, $amount);
+                    return $this->achAccountRequest($from, $to, $amount);
                     break;
             }
             return [
