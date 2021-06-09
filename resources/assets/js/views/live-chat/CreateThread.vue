@@ -70,7 +70,6 @@
       <main class="col-md-7 col-lg-8">
           <CreateThreadForm 
             :session_user="session_user"
-            :contacts="selectedContacts"
             v-on:create-chatthread="createChatthread($event)"
           />
       </main>
@@ -199,10 +198,13 @@ export default {
       }
 
       console.log('createChatthread', { params: params })
+      const response = await axios.post( this.$apiRoute('chatthreads.store'), params )
 
-      let response
-      response = await axios.post( this.$apiRoute('chatthreads.store'), params )
-    },
+      this.selectedContacts = [] 
+      this.$router.push({ name: 'chatthreads.dashboard' })
+      // %TODO: clear MessageForm...can we just re-render the CreateThreadForm component to accomplish this?
+
+    }, // createChatthread()
 
     // additional page loads
     // see: https://peachscript.github.io/vue-infinite-loading/guide/#installation

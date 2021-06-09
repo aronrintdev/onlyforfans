@@ -135,6 +135,7 @@ export default {
           params.deliver_at = this.deliverAtTimestamp
         }
         this.$emit('create-chatthread', params)
+        this.clearForm() // %FIXME: how to confirm success before clearing form (?)
 
       } else if ( this.isScheduled ) {
 
@@ -142,14 +143,15 @@ export default {
         params.deliver_at_string = `${this.newMessageForm.deliver_at.date} ${this.newMessageForm.deliver_at.time}`
         params.deliver_at = this.deliverAtTimestamp
         response = await axios.post( this.$apiRoute('chatthreads.scheduleMessage', this.chatthread_id), params )
+        this.clearForm()
 
       } else {
 
         // send an immediate message (on an existing thread)
         response = await axios.post( this.$apiRoute('chatthreads.sendMessage', this.chatthread_id), params )
+        this.clearForm()
       }
 
-      this.clearForm()
     },
 
     clearForm() {
