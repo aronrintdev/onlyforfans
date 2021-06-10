@@ -46,7 +46,7 @@ class Chatmessage extends Model implements UuidId, Ownable
 
     public function chatthread()
     {
-        return $this->belongsTo(ChatThread::class);
+        return $this->belongsTo(Chatthread::class);
     }
 
     public function sender()
