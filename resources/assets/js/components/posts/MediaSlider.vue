@@ -20,7 +20,7 @@
           <source :src="mf.filepath" type="video/mp4" />
         </video>
         <img
-          v-preview:[imageScope]="scope"
+          v-preview:[imageScope]="imageScope"
           v-if="mf.is_image"
           class="d-block"
           :src="use_mid && mf.has_mid ? mf.midFilepath : mf.filepath"
