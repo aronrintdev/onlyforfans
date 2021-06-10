@@ -27,6 +27,9 @@ class RestMycontactsTest extends TestCase
         $this->nonOwner = User::factory()->create();
     }
 
+    /**
+     * @group regression
+     */
     public function test_can_create()
     {
         $payload = [
@@ -66,6 +69,7 @@ class RestMycontactsTest extends TestCase
     }
 
     /**
+     * @group regression
      * @depends test_can_create
      */
     public function test_owner_can_update()
@@ -95,6 +99,7 @@ class RestMycontactsTest extends TestCase
     }
 
     /**
+     * @group regression
      * @depends test_owner_can_update
      */
     public function test_non_owner_cannot_update()
@@ -111,6 +116,7 @@ class RestMycontactsTest extends TestCase
     }
 
     /**
+     * @group regression
      * @depends test_can_create
      */
     public function test_owner_can_delete()
@@ -123,6 +129,7 @@ class RestMycontactsTest extends TestCase
     }
 
     /**
+     * @group regression
      * @depends test_owner_can_delete
      */
     public function test_non_owner_cannot_delete()
