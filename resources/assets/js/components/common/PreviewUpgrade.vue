@@ -123,14 +123,10 @@ export default {
 .locked-content {
 }
 .tag-thumb {
-  width: 90px;
+  width: 100%;
   height: 90px;
   background-image: var(--background-image);
-  /*
-  background-position: center;
-  background-repeat: no-repeat;
-   */
-  background-size: cover !important;
+  background-size: cover;
 }
 .tag-icon {
   position: absolute;
