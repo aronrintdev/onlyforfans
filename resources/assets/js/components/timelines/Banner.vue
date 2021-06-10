@@ -8,7 +8,7 @@
     >
       <input type="file" id="cover-upload-btn" class="file-input" @change="onCoverChange" />
       <label v-if="uploadCoverVisible" for="cover-upload-btn" class="btn photo-btn">
-        <fa-icon icon="camera" size="2x" />
+        <fa-icon :icon="['far', 'camera']" size="2x" class="text-white" />
       </label>
       <div class="overlay" />
       <b-dropdown no-caret variant="transparent" id="profile-ctrl-dropdown" class="tag-ctrl">
@@ -36,7 +36,7 @@
       />
       <input type="file" id="avatar-upload-btn" class="file-input" @change="onAvatarChange" />
       <label v-if="uploadAvatarVisible" for="avatar-upload-btn" class="btn photo-btn">
-        <fa-icon icon="camera" size="2x" />
+        <fa-icon :icon="['far', 'camera']" size="2x" class="text-white" />
       </label>
     </section>
 
@@ -158,6 +158,7 @@ header.masthead {
   padding-bottom: 12rem;
   position: relative;
   background-color: #343a40;
+  background-position: center;
   background-size: cover;
   padding-top: 8rem;
   padding-bottom: 8rem;
