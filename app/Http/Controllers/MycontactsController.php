@@ -1,21 +1,21 @@
 <?php
 namespace App\Http\Controllers;
 
-use DB;
-use Exception;
-use Throwable;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use App\Http\Resources\MycontactCollection;
 use App\Http\Resources\Mycontact as MycontactResource;
 use App\Models\Mycontact;
 use App\Models\User;
-use Illuminate\Auth\Access\AuthorizationException;
 
+/**
+ * Mycontacts Resource Controller
+ * @package App\Http\Controllers
+ */
 class MycontactsController extends AppBaseController
 {
     /**
-     *
+     * Fetch list of contacts with filter
      */
     public function index(Request $request)
     {
@@ -51,24 +51,55 @@ class MycontactsController extends AppBaseController
      * Store new Mycontact
      *
      * @param Request $request
+     * @return MycontactResource
      */
     public function store(Request $request)
     {
         $this->authorize('store', Mycontact::class);
 
-        // TODO: store
+        $request->validate([
+            'contact_id' => 'required|uuid|exists:users,id',
+            'alias'      => 'nullable|string|max:255',
+            'cattrs'     => 'nullable|json',
+            'meta'       => 'nullable|json',
+        ]);
+
+        $mycontact = Mycontact::create(array_merge(
+            [ 'owner_id' => $request->user()->getKey() ],
+            $request->all(),
+        ));
+
+        return new MycontactResource($mycontact);
     }
 
     /**
      * Update existing Mycontact
      *
+     * @param Request   $request
      * @param Mycontact $mycontact
+     * @return MycontactResource
      */
-    public function update(Mycontact $mycontact)
+    public function update(Request $request, Mycontact $mycontact)
     {
         $this->authorize('update', $mycontact);
 
-        // TODO: update
+        $request->validate([
+            'alias'  => 'nullable|string|max:255',
+            'cattrs' => 'nullable|json',
+            'meta'   => 'nullable|json',
+        ]);
+
+        $fields = ['alias', 'cattrs', 'meta'];
+
+        foreach($fields as $field) {
+            if ($request->has($field)) {
+                $mycontact->{$field} = $request->input($field);
+            }
+        }
+
+        $mycontact->save();
+
+        return new MycontactResource($mycontact);
     }
 
     /**
@@ -87,7 +118,7 @@ class MycontactsController extends AppBaseController
      *
      * @param Mycontact $mycontact
      */
-    public function delete(Mycontact $mycontact)
+    public function destroy(Mycontact $mycontact)
     {
         $this->authorize('delete', $mycontact);
         $mycontact->delete();

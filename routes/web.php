@@ -86,6 +86,9 @@ Route::group(['middleware' => ['auth']], function () {
     ]);
 
     // -- mycontacts --
+    // apiResource Routes:
+    // https://laravel.com/docs/8.x/controllers#actions-handled-by-resource-controller
+    // https://laravel.com/docs/8.x/controllers#api-resource-routes
     Route::apiResource('mycontacts', 'MycontactsController');
 
     // -- comments: likeable --
