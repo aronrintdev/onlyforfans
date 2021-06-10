@@ -18,7 +18,7 @@
       <div v-if="isNavVisible" class="swiper-pagination" slot="pagination"></div>
     </swiper>
     <div v-if="isNavVisible" class="mediafile-count text-white position-absolute">
-      <b-icon icon="images" font-scale="1" variant="light" class="d-inline my-auto" />
+      <fa-icon icon="images" class="d-inline my-auto" />
       {{ mediafiles.length }}
     </div>
   </div>
