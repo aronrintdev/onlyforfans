@@ -1,10 +1,7 @@
 <?php
 namespace App\Http\Controllers;
 
-use DB;
 use Exception;
-use Throwable;
-use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use App\Http\Resources\ChatthreadCollection;
@@ -18,6 +15,12 @@ use App\Models\User;
 
 class ChatthreadsController extends AppBaseController
 {
+
+    /**
+     * 
+     * @param Request $request
+     * @return ChatthreadCollection
+     */
     public function index(Request $request)
     {
         $sessionUser = $request->user();
@@ -106,7 +109,13 @@ class ChatthreadsController extends AppBaseController
         return new ChatthreadCollection($data); 
     }
 
-    public function show(Request $request, Chatthread $chatthread) 
+    /**
+     *
+     * @param Request $request
+     * @param Chatthread $chatthread
+     * @return ChatthreadResource
+     */
+    public function show(Request $request, Chatthread $chatthread)
     {
         /*
         $sessionUser = $request->user();
@@ -122,7 +131,12 @@ class ChatthreadsController extends AppBaseController
 
     // %HERE
     // %NOTE: May create more than a single chatthread
-    public function store(Request $request) 
+    /**
+     * Stores a new chatthread
+     *
+     * @param Request
+     */
+    public function store(Request $request)
     {
         $request->validate([
             'originator_id' => 'required|uuid|exists:users,id',
@@ -135,8 +149,17 @@ class ChatthreadsController extends AppBaseController
 
         $chatthreads = collect();
         foreach ($request->participants as $pkid) {
-            $ct = Chatthread::startChat($originator);
-            $ct->addParticipant($pkid);
+            // Check if chat with participant already exits
+            $ct = $originator->chatthreads()->whereHas('participants', function ($query) use($pkid) {
+                $query->where('user_id', $pkid);
+            })->first();
+
+            // Start new chat thread if one is not found
+            if (!isset($ct)) {
+                $ct = Chatthread::startChat($originator);
+                $ct->addParticipant($pkid);
+            }
+
             if ( $request->has('mcontent') ) { // if included send the first message
                 if ( $request->has('deliver_at') ) {
                     $ct->scheduleMessage($request->user(), $request->mcontent, $request->deliver_at);
@@ -153,6 +176,12 @@ class ChatthreadsController extends AppBaseController
         ], 201);
     }
 
+    /**
+     *
+     * @param Request $request
+     * @param Chatthread $chatthread
+     * @return ChatmessageResource
+     */
     public function sendMessage(Request $request, Chatthread $chatthread)
     {
         $request->validate([
@@ -170,6 +199,12 @@ class ChatthreadsController extends AppBaseController
         return new ChatmessageResource($chatmessage);
     }
 
+    /**
+     *
+     * @param Request $request
+     * @param Chatthread $chatthread
+     * @return ChatmessageResource
+     */
     public function scheduleMessage(Request $request, Chatthread $chatthread)
     {
         $request->validate([
