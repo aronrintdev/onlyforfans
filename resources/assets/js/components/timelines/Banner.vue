@@ -158,6 +158,7 @@ header.masthead {
   padding-bottom: 12rem;
   position: relative;
   background-color: #343a40;
+  background-position: center;
   background-size: cover;
   padding-top: 8rem;
   padding-bottom: 8rem;
