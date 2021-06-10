@@ -31,8 +31,8 @@
       :busy="transactionsLoading"
       :current-page="page"
     >
-      <template #cell(purchasable)="data">
-        <b-btn v-if="data.item.purchasable_type === 'posts'" variant="outline-primary" @click="preview(data.item)" >
+      <template #cell(resource)="data">
+        <b-btn v-if="data.item.resource_type === 'posts'" variant="outline-primary" @click="preview(data.item)" >
           <fa-icon icon="external-link-alt" />
         </b-btn>
       </template>
@@ -130,10 +130,10 @@ export default {
           key: 'type',
           label: this.$t('table.label.type')
         }, {
-          key: 'purchasable_type',
+          key: 'resource_type',
           label: this.$t('table.label.itemType'),
         }, {
-          key: 'purchasable',
+          key: 'resource',
           label: this.$t('table.label.view'),
         }, {
           key: 'purchaser',
@@ -185,10 +185,10 @@ export default {
         })
     },
     preview(item) {
-      if (item.purchasable_type === 'posts') {
+      if (item.resource_type === 'posts') {
         this.previewOpen = true
         this.previewLoading = true
-        this.getPost(item.purchasable_id)
+        this.getPost(item.resource_id)
           .then(post => {
             this.previewItem = post
             this.previewLoading = false

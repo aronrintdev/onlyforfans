@@ -30,8 +30,8 @@ use App\Models\Financial\Exceptions\TransactionAlreadySettled;
  * @property string       $type
  * @property string       $description
  * @property string       $reference_id
- * @property string       $purchasable_type
- * @property string       $purchasable_id
+ * @property string       $resource_type
+ * @property string       $resource_id
  * @property array        $metadata
  * @property Carbon       $settled_at
  * @property Carbon       $failed_at
@@ -108,7 +108,7 @@ class Transaction extends Model
         return $this->belongsTo(Account::class);
     }
 
-    public function purchasable()
+    public function resource()
     {
         return $this->morphTo();
     }

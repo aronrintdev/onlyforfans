@@ -70,7 +70,7 @@
       <main class="col-md-7 col-lg-8">
           <CreateThreadForm 
             :session_user="session_user"
-            :contacts="selectedContacts"
+            v-on:create-chatthread="createChatthread($event)"
           />
       </main>
 
@@ -113,7 +113,7 @@ export default {
 
     // %FIXME: Not sure how to propagate this down and back up to an array of custom form components, see:
     // https://vuejs.org/v2/guide/components.html#Using-v-model-on-Components
-    selectedContacts: [ ],
+    selectedContacts: [],
 
     meta: null,
     perPage: 10,
@@ -176,6 +176,33 @@ export default {
       this.mycontacts = response.data.data
       this.meta = response.meta
     },
+
+    async createChatthread({ 
+      mcontent = null,
+      is_scheduled = false,
+      deliver_at = null,
+    }) {
+      const params = {
+        originator_id: this.session_user.id,
+        participants: this.selectedContacts,
+      }
+
+      if ( mcontent ) {
+        params.mcontent = mcontent
+      }
+      if ( is_scheduled ) {
+        params.is_scheduled = true
+        params.deliver_at = deliver_at
+      }
+
+      console.log('createChatthread', { params: params })
+      const response = await axios.post( this.$apiRoute('chatthreads.store'), params )
+
+      this.selectedContacts = [] 
+      this.$router.push({ name: 'chatthreads.dashboard' })
+      // %FIXME: clear MessageForm...can we just re-render the CreateThreadForm component to accomplish this?
+
+    }, // createChatthread()
 
     // additional page loads
     // see: https://peachscript.github.io/vue-infinite-loading/guide/#installation

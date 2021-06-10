@@ -233,9 +233,11 @@ export default {
     }
 
     img {
+      max-width: 100%;
       height: 100%;
       display: block;
       margin: auto;
+      object-fit: cover;
     }
   }
 

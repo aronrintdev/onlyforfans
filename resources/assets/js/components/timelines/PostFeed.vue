@@ -20,25 +20,25 @@
             <!-- empty placeholder to preserve justify arrangment in flex area -->
           </article>
           <article class="d-md-block">
-            <div v-if="!is_homefeed" @click="renderTip" style="" class="btn">
-              <div style="font-size: 1.2rem; margin-top: 0.1rem" class="text-primary tag-ctrl">$</div>
+            <div v-if="!is_homefeed" @click="renderTip" class="btn">
+              <fa-icon icon="dollar-sign" class="tag-ctrl text-primary" />
             </div>
-            <div v-if="!is_homefeed" style="margin-top: 0.3rem" class="btn">
-              <b-icon icon="chat" font-scale="1.5" variant="primary" class="tag-ctrl" /> 
+            <div v-if="!is_homefeed" class="btn">
+              <fa-icon :icon="['far', 'comment']" class="tag-ctrl text-primary" />
             </div>
-            <div v-if="!is_homefeed" @click="renderFollow" style="margin-top: 0.3rem" class="btn">
-              <b-icon :icon="timeline.is_following ? 'eye-fill' : 'eye'" font-scale="1.5" variant="primary" class="tag-ctrl" /> 
+            <div v-if="!is_homefeed" @click="renderFollow" class="btn">
+              <fa-icon :icon="timeline.is_following ? 'eye' : ['far', 'eye']" class="tag-ctrl text-primary" /> 
             </div>
-            <div v-if="!is_homefeed" @click="toggleFavorite" style="margin-top: 0.3rem" class="btn">
-                <fa-icon v-if="isFavoritedByMe" fixed-width :icon="['fas', 'star']" class="clickable" style="font-size:1.2rem; color:#007bff" />
-                <fa-icon v-else fixed-width :icon="['far', 'star']" class="clickable" style="font-size:1.2rem; color:#007bff" />
+            <div v-if="!is_homefeed" @click="toggleFavorite"class="btn">
+                <fa-icon v-if="isFavoritedByMe" fixed-width :icon="['fas', 'star']" class="clickable text-primary" />
+                <fa-icon v-else fixed-width :icon="['far', 'star']" class="clickable text-primary" />
             </div>
-            <div @click="toggleGridLayout" style="margin-top: 0.3rem" class="btn">
-              <b-icon icon="grid" scale="1.2" variant="primary"></b-icon>
+            <div @click="toggleGridLayout" class="btn">
+              <fa-icon :icon="['far', 'grip-horizontal']" class="text-primary" />
             </div>
             <b-dropdown no-caret ref="feedCtrls" variant="transparent" id="feed-ctrl-dropdown" class="tag-ctrl">
               <template #button-content>
-                <b-icon icon="filter" scale="1.5" variant="primary"></b-icon>
+                <fa-icon :icon="['far', 'filter']" class="text-primary" style="font-size: 1.2rem;" />
               </template>
               <b-dropdown-form>
                 <b-form-group label="">
@@ -408,6 +408,9 @@ export default {
   background: #fff;
   border: solid #a5a5a5 1px;
   border-radius: 3px;
+}
+.feed-ctrl .btn {
+  font-size: 1.2rem;
 }
 .tag-debug {
   display: none;

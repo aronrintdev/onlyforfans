@@ -120,4 +120,4 @@ public/themes
 public/themes/*
 public/stats.json
 
-npmrc--hide
+dot-npmrc--hide

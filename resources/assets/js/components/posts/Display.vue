@@ -24,7 +24,7 @@
             </b-dropdown>
           </div>
           <div @click="renderFull" v-if="is_feed" class="p-2 btn">
-              <b-icon icon="arrows-angle-expand" variant="primary" font-scale="1.2" />
+            <fa-icon icon="expand-alt" class="text-primary" size="2x" />
           </div>
         </section>
       </template>

@@ -55,7 +55,8 @@ class TruncateData extends Command
                     });
                     break;
                 default:
-                    DB::table($t)->truncate();
+                    //DB::table($t)->truncate();
+                    DB::table($t)->delete();
             }
         }
         foreach($list['models'] as $m) {
@@ -100,7 +101,12 @@ class TruncateData extends Command
             \App\Models\Financial\TransactionSummary::class,
         ],
         'tables' => [
+            'websockets_statistics_entries',
             'favorites',
+            'mycontacts',
+            'notifications',
+            'purchasable_price_points',
+            'subscriptions',
             'model_has_permissions',
             'model_has_roles',
             'password_resets',
@@ -119,6 +125,7 @@ class TruncateData extends Command
             'shareables',
             'likeables',
             'comments',
+            'diskmediafiles',
             'mediafiles',
             'stories',
 
@@ -134,6 +141,8 @@ class TruncateData extends Command
             'users',
 
             'username_rules',
+            'countries',
+            'usstates',
         ],
     ];
 

@@ -1,6 +1,7 @@
 <?php
 namespace Tests\Unit;
 
+use Carbon\Carbon;
 use DB;
 use App;
 use Illuminate\Http\UploadedFile;
@@ -114,14 +115,19 @@ class ChatmessageModelTest extends TestCase
 
         $msgs = [];
 
-        // send 1st message
+        // schedule 1st message
+        $now = Carbon::now();
+        $tomorrow = new Carbon('tomorrow');
         $msgs[] = $msg = $this->faker->realText;
-        $chatthread->scheduleMessage($originator, $msg);
+        $chatthread->scheduleMessage($originator, $msg, $tomorrow->timestamp);
         $chatthread->refresh();
-        $this->assertEquals(1, $chatthread->chatmessages->count());
-        $this->assertFalse($chatthread->chatmessages[0]->is_delivered);
-        $this->assertEquals($chatthread->chatmessages[0]->deliver_at);
 
+        $this->assertEquals(0, $chatthread->chatmessages->count()); // shouldn't be visible
+
+        $chatmessages = Chatmessage::where('chatthread_id', $chatthread->id)->get();
+        $this->assertEquals(1, $chatmessages->count());
+        $this->assertFalse($chatmessages[0]->is_delivered);
+        $this->assertEquals($tomorrow, $chatmessages[0]->deliver_at);
     }
 
     /**
