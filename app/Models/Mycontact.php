@@ -5,6 +5,7 @@ use App\Interfaces\Ownable;
 use App\Models\Traits\UsesUuid;
 use Illuminate\Support\Collection;
 use App\Models\Traits\OwnableTraits;
+use Laravel\Scout\Searchable;
 
 /**
  * @property string $id         | uuid
@@ -23,7 +24,8 @@ use App\Models\Traits\OwnableTraits;
 class Mycontact extends Model implements Ownable
 {
     use UsesUuid,
-        OwnableTraits;
+        OwnableTraits,
+        Searchable;
 
     protected $guarded = [ 'created_at', 'updated_at' ];
 
@@ -38,6 +40,55 @@ class Mycontact extends Model implements Ownable
     ];
 
     #endregion Casts
+    //------------------------------------------------------------------------//
+
+    //------------------------------------------------------------------------//
+    //                               Searchable                               //
+    //------------------------------------------------------------------------//
+    #region Searchable
+    /**
+     * Name of the search index associated with this model
+     * @return string
+     */
+    public function searchableAs()
+    {
+        return "mycontacts_index";
+    }
+
+    /**
+     * Get value used to index the model
+     * @return mixed
+     */
+    public function getScoutKey()
+    {
+        return $this->getKey();
+    }
+
+    /**
+     * Get key name used to index the model
+     * @return string
+     */
+    public function getScoutKeyName()
+    {
+        return 'id';
+    }
+
+    /**
+     * What model information gets stored in the search index
+     * @return array
+     */
+    public function toSearchableArray()
+    {
+        return [
+            'name'     => $this->contact->timeline->name,
+            'slug'     => $this->contact->timeline->slug,
+            'username' => $this->contact->username,
+            'alias'    => $this->alias,
+            'owner_id' => $this->owner_id,
+        ];
+    }
+
+    #endregion Searchable
     //------------------------------------------------------------------------//
 
     //------------------------------------------------------------------------//
