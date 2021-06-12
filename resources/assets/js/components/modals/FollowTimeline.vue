@@ -8,7 +8,9 @@
       <section class="user-details">
         <div>
           <router-link :to="timelineUrl" title="" data-toggle="tooltip" data-placement="top" class="username">{{ timeline.name }}</router-link>
-          <span v-if="timeline.verified" class="verified-badge"><b-icon icon="check-circle-fill" variant="primary" font-scale="1"></b-icon></span>
+          <span v-if="timeline.verified" class="verified-badge">
+            <fa-icon icon="check-circle" class="text-primary" />
+          </span>
         </div>
         <div>
           <router-link :to="timelineUrl" class="tag-username">@{{ timeline.slug }}</router-link>
