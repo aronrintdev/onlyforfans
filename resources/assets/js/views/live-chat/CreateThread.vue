@@ -6,12 +6,8 @@
       <aside class="col-md-5 col-lg-4">
 
         <article class="top-bar d-flex justify-content-between align-items-center">
-          <h4>Contacts</h4>
-          <div class="d-flex">
-            <b-button variant="link" class="clickme_to-search_messages" @click="doSomething">
-              <fa-icon :icon="['fas', 'search']" class="fa-lg" />
-            </b-button>
-          </div>
+          <h4 class="mr-3">Contacts</h4>
+          <SearchInput v-model="searchQuery" />
         </article>
 
         <article class="d-none">
@@ -47,28 +43,47 @@
           </b-button>
         </article>
 
-        <article class="contact-list">
-          <b-list-group>
+        <article class="contact-list position-relative">
+          <b-list-group v-if="showSearchResults">
             <b-list-group-item
-              v-for="(c, idx) in mycontacts"
-              :key="c.id"
-              :data-ct_id="c.id"
+              v-for="contact in searchResults"
+              :key="contact.id"
+              :data-ct_id="contact.id"
               class="px-2"
             >
-              <PreviewContact 
+              <PreviewContact
                 :session_user="session_user"
-                :contact="c.contact"
+                :contact="contact.contact"
                 v-on:select-contact="selectContact($event)"
-                v-model="selectedContacts[c.id]"
+                v-model="selectedContacts[contact.id]"
               />
             </b-list-group-item>
+            <b-list-group-item v-if="searchResults.length === 0" class="text-center">
+              {{ $t('search.no-results', { search: searchQuery }) }}
+            </b-list-group-item>
+          </b-list-group>
+          <b-list-group v-else>
+            <b-list-group-item
+              v-for="contact in mycontacts"
+              :key="contact.id"
+              :data-ct_id="contact.id"
+              class="px-2"
+            >
+              <PreviewContact
+                :session_user="session_user"
+                :contact="contact.contact"
+                v-on:select-contact="selectContact($event)"
+                v-model="selectedContacts[contact.id]"
+              />
+            </b-list-group-item>
+            <LoadingOverlay :loading="searchQuery !== ''" :text="$t('search.searching')" />
           </b-list-group>
         </article>
 
       </aside>
 
       <main class="col-md-7 col-lg-8">
-          <CreateThreadForm 
+          <CreateThreadForm
             :session_user="session_user"
             v-on:create-chatthread="createChatthread($event)"
           />
@@ -80,10 +95,15 @@
 </template>
 
 <script>
+/**
+ * resources/assets/js/views/live-chat/CrateThread.vue
+ */
 import Vuex from 'vuex'
 import moment from 'moment'
 import CreateThreadForm from '@views/live-chat/components/CreateThreadForm'
 import PreviewContact from '@views/live-chat/components/PreviewContact'
+import SearchInput from '@components/common/search/HorizontalOpenInput'
+import LoadingOverlay from '@components/common/LoadingOverlay'
 
 export default {
   name: 'CreateThread',
@@ -91,6 +111,8 @@ export default {
   components: {
     CreateThreadForm,
     PreviewContact,
+    SearchInput,
+    LoadingOverlay,
   },
 
   computed: {
@@ -125,12 +147,20 @@ export default {
     isLastVisible: false, // was: lastPostVisible
     isMoreLoading: true,
 
+    // Search Items
+    searchQuery: '',
+    isSearching: false,
+    showSearchResults: false,
+    searchResults: [],
+    searchDebounceDuration: 500,
+
     filters: {},
 
   }), // data
 
-  created() { 
+  created() {
     this.getMe()
+    this.doSearch = _.debounce(this._doSearch, this.searchDebounceDuration);
   },
 
   mounted() { },
@@ -140,10 +170,6 @@ export default {
     ...Vuex.mapActions([
       'getMe',
     ]),
-
-    doSomething() {
-      // stub placeholder for impl
-    },
 
     selectContact({ contact, isSelected }) {
       // contact is the user pkid
@@ -160,7 +186,7 @@ export default {
 
     async getContacts() {
       let params = {
-        page: this.currentPage, 
+        page: this.currentPage,
         take: this.perPage,
         //participant_id: this.session_user.id,
       }
@@ -177,7 +203,7 @@ export default {
       this.meta = response.meta
     },
 
-    async createChatthread({ 
+    async createChatthread({
       mcontent = null,
       is_scheduled = false,
       deliver_at = null,
@@ -198,7 +224,7 @@ export default {
       console.log('createChatthread', { params: params })
       const response = await axios.post( this.$apiRoute('chatthreads.store'), params )
 
-      this.selectedContacts = [] 
+      this.selectedContacts = []
       this.$router.push({ name: 'chatthreads.dashboard' })
       // %FIXME: clear MessageForm...can we just re-render the CreateThreadForm component to accomplish this?
 
@@ -241,9 +267,34 @@ export default {
       this.filters = {}
     },
 
+    _doSearch() {
+      this.isSearching = true
+      this.axios.get(this.$apiRoute('mycontacts.search'), { params: { q: this.searchQuery } })
+        .then(response => {
+          if (this.searchQuery !== '') {
+            this.searchResults = response.data.data
+            this.showSearchResults = true
+          }
+          this.isSearching = false
+        })
+        .catch(error => {
+          eventBus.$emit('error', { error, message: this.$t('search.error') })
+          this.showSearchResults = false
+          this.isSearching = false
+        })
+    },
   }, // methods
 
   watch: {
+
+    searchQuery(value) {
+      if (value === '') {
+        this.showSearchResults = false
+        this.searchResults = []
+      } else {
+        this.doSearch()
+      }
+    },
 
     session_user(value) {
       if (value) {
@@ -287,3 +338,15 @@ body #view-createthread {
 }
 
 </style>
+
+<i18n lang="json5">
+{
+  "en": {
+    "search": {
+      "error": "An Error has occurred during your search. Please try again later.",
+      "no-results": "No contacts found for search \"{search}\"",
+      "searching": "Searching"
+    }
+  }
+}
+</i18n>
