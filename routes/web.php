@@ -89,6 +89,8 @@ Route::group(['middleware' => ['auth']], function () {
     // apiResource Routes:
     // https://laravel.com/docs/8.x/controllers#actions-handled-by-resource-controller
     // https://laravel.com/docs/8.x/controllers#api-resource-routes
+    Route::get('/mycontacts/search', 'MycontactsController@search')
+        ->name('mycontacts.search');
     Route::apiResource('mycontacts', 'MycontactsController');
 
     // -- comments: likeable --

@@ -80,6 +80,7 @@ class Mycontact extends Model implements Ownable
     public function toSearchableArray()
     {
         return [
+            'id'       => $this->getKey(),
             'name'     => $this->contact->timeline->name,
             'slug'     => $this->contact->timeline->slug,
             'username' => $this->contact->username,
