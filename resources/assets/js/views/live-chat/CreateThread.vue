@@ -7,7 +7,7 @@
 
         <article class="top-bar d-flex justify-content-between align-items-center">
           <h4 class="mr-3">Contacts</h4>
-          <SearchInput v-model="searchQuery" />
+          <SearchInput v-model="searchQuery" size="lg" openLeft />
         </article>
 
         <article class="d-none">

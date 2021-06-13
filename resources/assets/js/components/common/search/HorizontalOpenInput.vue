@@ -1,25 +1,48 @@
 <template>
-  <div class=" w-100 d-flex position-relative">
+  <div
+    class="w-100 d-flex position-relative search-component"
+    :class="[
+      {
+        'no-borders': !borders,
+        open
+      },
+      `border-${variant}`
+    ]"
+  >
     <b-btn
-      :variant="`outline-${variant}`"
+      :variant="borders ? `outline-${variant}` : 'link'"
       @click="onSearchClick"
       class="search-button"
-      :class="{
-        'ml-auto': openDirection === 'left',
-        'mr-auto': openDirection === 'right',
+      :class="[{
+        'ml-auto': openLeft,
+        'border-bottom': !borders && open,
         'open': open
-      }"
+      }, `border-${variant}`]"
     >
-      <fa-icon icon="search" size="lg" />
+      <fa-icon v-if="size" icon="search" :size="size" />
+      <fa-icon v-else icon="search" />
     </b-btn>
-    <CollapseTransition dimension="width">
-      <div v-if="open" class="d-flex">
-        <b-input ref="input" class="search-input" :class="`border-${variant}`" :value="value" @input="value => $emit('input', value )" />
-        <b-btn class="search-close" :variant="`outline-${variant}`" @click="onCloseClick">
-          <fa-icon icon="times" size="lg" />
-        </b-btn>
-      </div>
-    </CollapseTransition>
+    <div class="w-100">
+     <CollapseTransition dimension="width">
+        <div v-if="open" class="d-flex">
+          <b-input
+            ref="input"
+            class="search-input"
+            :class="[{ 'border-bottom': !borders && open }, `border-${variant}`]"
+            :value="value" @input="value => $emit('input', value )"
+          />
+          <b-btn
+            class="search-close"
+            :class="[{ 'border-bottom': !borders && open }, `border-${variant}`]"
+            :variant="borders ? `outline-${variant}` : 'link'"
+            @click="onCloseClick"
+          >
+            <fa-icon v-if="size" icon="times" :size="size" />
+            <fa-icon v-else icon="times" />
+          </b-btn>
+        </div>
+      </CollapseTransition>
+    </div>
   </div>
 </template>
 
@@ -38,13 +61,16 @@ export default {
   },
 
   props: {
+    borders: { type: Boolean, default: false },
+
     variant: { type: String, default: 'primary' },
     /**
      * What direction the search input will open.
      * `left` will have button right aligned and open to the left.
      * `right`
      */
-    openDirection: { type: String, default: 'left' },
+    openLeft: { type: Boolean, default: false },
+    size: { type: String, default: null },
 
     value: { type: String, default: ''},
   },
@@ -84,6 +110,22 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.no-borders {
+  .search-button {
+    border: 0;
+    &.open {
+      border-radius: 50% 0 0 0;
+    }
+  }
+  .search-input {
+    border: 0;
+  }
+  .search-close {
+    border: 0;
+    border-radius: 0 50% 0 0;
+  }
+  transition: border-bottom 0.3s ease-in-out;
+}
 
 .search-button {
   &.open {
