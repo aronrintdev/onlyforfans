@@ -9,42 +9,44 @@
           <router-link :to="{ name: 'register' }" v-text="$t('signUpLink')" />
         </div>
       </template>
-      <!-- Login Form -->
-      <div class="login-form p-3">
-        <div v-if="verrors && verrors.message">
-          <b-alert variant="danger" v-text="verrors.message" show />
+      <b-form @submit.prevent="login">
+        <!-- Login Form -->
+        <div class="login-form p-3">
+          <div v-if="verrors && verrors.message">
+            <b-alert variant="danger" v-text="verrors.message" show />
+          </div>
+          <b-form-group :invalid-feedback="verrors.email ? verrors.email[0] : null" :state="verrors.email ? false : null">
+            <b-form-input
+              id="input-email"
+              v-model="form.email"
+              :placeholder="$t('email')"
+              :state="verrors.email ? false : null"
+              @focus="clearVerrors"
+            />
+          </b-form-group>
+          <b-form-group :invalid-feedback="verrors.password ? verrors.password[0] : null" :state="verrors.password ? false : null">
+            <b-form-input
+              id="input-password"
+              type="password"
+              v-model="form.password"
+              :placeholder="$t('password')"
+              :state="verrors.password ? false : null"
+              @focus="clearVerrors"
+            />
+          </b-form-group>
+          <div class="text-right">
+            <!-- TODO: Link to forgot password page -->
+            <router-link :to="{ name: 'forgot-password' }" v-text="$t('forgotPasswordLink')" />
+          </div>
         </div>
-        <b-form-group :invalid-feedback="verrors.email ? verrors.email[0] : null" :state="verrors.email ? false : null">
-          <b-form-input
-            id="input-email"
-            v-model="form.email"
-            :placeholder="$t('email')"
-            :state="verrors.email ? false : null"
-            @focus="clearVerrors"
-          />
-        </b-form-group>
-        <b-form-group :invalid-feedback="verrors.password ? verrors.password[0] : null" :state="verrors.password ? false : null">
-          <b-form-input
-            id="input-password"
-            type="password"
-            v-model="form.password"
-            :placeholder="$t('password')"
-            :state="verrors.password ? false : null"
-            @focus="clearVerrors"
-          />
-        </b-form-group>
-        <div class="text-right">
-          <!-- TODO: Link to forgot password page -->
-          <router-link :to="{ name: 'forgot-password' }" v-text="$t('forgotPasswordLink')" />
-        </div>
-      </div>
 
-      <div class="p-3">
-        <b-btn variant="primary" class="cta-btn" block @click="login" :disabled="state === 'loading'">
-          <span v-if="state === 'form'">{{ $t('signInButton') }}</span>
-          <fa-icon v-else icon="spinner" spin />
-        </b-btn>
-      </div>
+        <div class="p-3">
+          <b-btn type="submit" variant="primary" class="cta-btn" block :disabled="state === 'loading'">
+            <span v-if="state === 'form'">{{ $t('signInButton') }}</span>
+            <fa-icon v-else icon="spinner" spin />
+          </b-btn>
+        </div>
+      </b-form>
 
       <div class="divider d-flex">
         <hr class="h-line flex-grow-1" />
