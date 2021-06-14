@@ -16,7 +16,9 @@
           <b-button @click="renderPurchasePost" class="mt-3" variant="primary">Unlock Post for {{ post.price_display || (post.price | niceCurrency) }}</b-button>
           -->
           <b-button @click="renderPurchasePost" class="mt-3" variant="primary">Unlock Post for {{ post.price | niceCurrency }}</b-button>
-          <div v-if="post.mediafile_count" class="mediafile-count text-white position-absolute"><b-icon icon="images" font-scale="1" variant="light" class="d-inline my-auto" /> {{ post.mediafile_count }}</div>
+          <div v-if="post.mediafile_count" class="mediafile-count text-white position-absolute">
+            <fa-icon icon="images" class="d-inline my-auto" /> {{ post.mediafile_count }}
+          </div>
         </div>
       </article>
     </template>

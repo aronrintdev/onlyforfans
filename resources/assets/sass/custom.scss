@@ -470,3 +470,37 @@ body .feed-crate.tag-grid-layout .superbox-post .media-slider {
     }
   }
 }
+
+// PhotoSwipe
+.pswp {
+  .pswp__top-bar {
+    background-color: transparent !important;
+  }
+  .pswp__button--share {
+    display: none;
+  }
+  .pswp__caption {
+    display: none;
+  }
+}
+
+// Swiper
+.media-slider-swiper {
+  .swiper-button-next:after,
+  .swiper-button-prev:after {
+    display: none;
+  }
+
+  .swiper-button-next {
+    right: 20px;
+    color: #fff;
+  }
+  .swiper-button-prev {
+    left: 20px;
+    color: #fff;
+  }
+
+  .swiper-pagination-bullet {
+    background: #fff;
+  }
+}
