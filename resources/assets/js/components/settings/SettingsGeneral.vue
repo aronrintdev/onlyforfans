@@ -229,8 +229,7 @@ export default {
       this.formSubscriptions.is_follow_for_free = this.user_settings.is_follow_for_free ? 1 : 0
     }
     if ( this.user_settings.cattrs.localization ) {
-      console.log(' this.user_settings.cattrs ',  this.user_settings.cattrs );
-      this.formLocalization = this.user_settings.cattrs.localization
+      this.formLocalization.localization = this.user_settings.cattrs.localization
     }
   },
 
@@ -241,7 +240,6 @@ export default {
       this.isSubmitting.formGeneral = true
 
       try {
-        console.log('this.formGeneral', this.formGeneral)
         const response = await axios.patch(`/users/${this.session_user.id}`, this.formGeneral)
         this.verrors = null
 
