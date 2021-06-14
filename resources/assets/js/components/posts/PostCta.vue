@@ -11,7 +11,7 @@
     <template v-else>
       <article :style="backgroundImg" class="locked-content d-flex position-relative justify-content-center align-items-center">
         <div class="d-flex flex-column">
-          <b-icon icon="lock-fill" font-scale="5" variant="light" class="mx-auto" />
+          <fa-icon icon="lock" class="text-light" size="5x" />
           <!--
           <b-button @click="renderPurchasePost" class="mt-3" variant="primary">Unlock Post for {{ post.price_display || (post.price | niceCurrency) }}</b-button>
           -->
