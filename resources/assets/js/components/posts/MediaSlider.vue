@@ -103,7 +103,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-$media-height: calc(100vh - 100px);
+$media-height: calc(100vh - 300px);
 
 .media-slider {
   img {
@@ -127,42 +127,5 @@ $media-height: calc(100vh - 100px);
   bottom: 0.5rem;
   right: 1rem;
   z-index: 1;
-}
-</style>
-
-<!-- PhotoSwipe & swiper styles -->
-<style lang="scss">
-// PhotoSwipe
-.pswp {
-  .pswp__top-bar {
-    background-color: transparent;
-  }
-  .pswp__button--share {
-    display: none;
-  }
-  .pswp__caption {
-    display: none;
-  }
-}
-
-// Swiper
-.media-slider-swiper {
-  .swiper-button-next:after,
-  .swiper-button-prev:after {
-    display: none;
-  }
-
-  .swiper-button-next {
-    right: 20px;
-    color: #fff;
-  }
-  .swiper-button-prev {
-    left: 20px;
-    color: #fff;
-  }
-
-  .swiper-pagination-bullet {
-    background: #fff;
-  }
 }
 </style>
