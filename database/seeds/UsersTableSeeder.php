@@ -81,6 +81,17 @@ class UsersTableSeeder extends Seeder
                     'country' => 'US',
                     'is_follow_for_free' => 1, // if not free need to set price as well
                 ],
+                [
+                    'name' => 'Fujio H',
+                    'username' => 'fujioh',
+                    'email' => 'harouf@outlook.com',
+                    'gender' => 'male',
+                    'city' => 'Tokyo',
+                    'country' => 'Japan',
+                    'is_follow_for_free' => 1, // if not free need to set price as well
+                    'password' => bcrypt('foo-123'), // secret
+                    'email_verified' => 1,
+                ],
             ];
 
             $this->output->writeln("  - Creating admin users...");
