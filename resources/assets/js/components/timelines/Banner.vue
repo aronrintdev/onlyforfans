@@ -13,7 +13,7 @@
       <div class="overlay" />
       <b-dropdown no-caret variant="transparent" id="profile-ctrl-dropdown" class="tag-ctrl">
         <template #button-content>
-          <b-icon icon="filter-left" font-scale="2" variant="light"></b-icon>
+          <fa-icon :icon="['far', 'bars']" size="2x" class="text-white" />
         </template>
         <b-dropdown-item>First Action</b-dropdown-item>
         <b-dropdown-item>Second Action</b-dropdown-item>

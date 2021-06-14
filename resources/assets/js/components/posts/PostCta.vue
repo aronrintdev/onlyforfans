@@ -2,8 +2,8 @@
   <div>
     <template v-if="$options.filters.isSubscriberOnly(post)">
       <article :style="backgroundImg" class="locked-content d-flex justify-content-center align-items-center">
-        <div class="d-flex flex-column">
-          <b-icon icon="lock-fill" font-scale="5" variant="light" />
+        <div class="d-flex flex-column align-items-center">
+          <fa-icon icon="lock" class="text-light" size="5x" />
           <b-button @click="renderSubscribe" class="mt-3" variant="primary">Subscribe</b-button>
         </div>
       </article>
