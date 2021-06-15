@@ -236,11 +236,6 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
         return $result;
     }
 
-    public function pageLikes()
-    {
-        return $this->belongsToMany('App\Page', 'page_likes', 'user_id', 'page_id');
-    }
-
     public function vaults()
     {
         return $this->hasMany(Vault::class);
