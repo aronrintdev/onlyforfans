@@ -244,11 +244,6 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
         return $result;
     }
 
-    public function payment()
-    {
-        return $this->hasOne('App\Payment');
-    }
-
     public function groups()
     {
         return $this->belongsToMany('App\Group', 'group_user', 'user_id', 'group_id')->withPivot('role_id', 'status');
