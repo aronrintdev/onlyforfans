@@ -414,10 +414,12 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
         return $this->roles()->pluck('name')->contains('super-admin');
     }
 
+
     // total sales in cents
     public function getSales() : int
     {
-        return Fanledger::where('seller_id', $this->id)->sum('total_amount');
+        // TODO: Hook up to earnings controller
+        return 0;
     }
 
 
@@ -433,7 +435,7 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
             'follower_count'   => $timeline->followers->count(),
             'following_count'  => $timeline->user->followedtimelines->count(),
             'subscribed_count' => 0, // %TODO $sessionUser->timeline->subscribed->count()
-            'earnings'         => $this->getSales(),
+            'earnings'         => '', // TODO: Hook up to earnings controller
             'website'          => '', // %TODO
             'instagram'        => '', // %TODO
             'city'             => (isset($this->settings)) ? $this->settings->city : null,
