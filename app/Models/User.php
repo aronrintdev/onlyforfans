@@ -228,14 +228,6 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
         return $this->belongsToMany('App\UserListType', 'user_lists', 'user_id', 'list_type_id');
     }
 
-    public function own_pages()
-    {
-        $admin_role_id = Role::where('name', 'admin')->first();
-        $own_pages = $this->pages()->where('role_id', $admin_role_id->id)->where('page_user.active', 1)->get();
-        $result = $own_pages ? $own_pages : false;
-        return $result;
-    }
-
     public function vaults()
     {
         return $this->hasMany(Vault::class);
