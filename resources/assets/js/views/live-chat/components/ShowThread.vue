@@ -39,9 +39,7 @@
           <fa-icon :icon="['far', 'image']" class="fa-lg" />
         </b-button>
         <div>|</div>
-        <b-button variant="link" class="" @click="doSomething">
-          <fa-icon :icon="['fas', 'search']" class="fa-lg" />
-        </b-button>
+        <SearchInput v-model="searchQuery" />
       </div>
     </section>
 
@@ -66,9 +64,9 @@
       </b-list-group>
     </section>
 
-    <MessageForm 
-      :session_user="session_user" 
-      :chatthread_id="id" 
+    <MessageForm
+      :session_user="session_user"
+      :chatthread_id="id"
     />
 
   </div>
@@ -78,6 +76,7 @@
 //import Vuex from 'vuex'
 import moment from 'moment'
 import MessageForm from '@views/live-chat/components/MessageForm'
+import SearchInput from '@components/common/search/HorizontalOpenInput'
 
 export default {
   //name: 'LivechatDashboard',
@@ -105,12 +104,14 @@ export default {
     perPage: 10,
     currentPage: 1,
 
+    searchQuery: '',
+
   }), // data
 
-  created() { 
+  created() {
   },
 
-  mounted() { 
+  mounted() {
     this.getChatmessages(this.id)
     const channel = `chatthreads.${this.id}`
     this.$echo.private(channel).listen('.chatmessage.sent', e => {
@@ -131,7 +132,7 @@ export default {
 
     async getChatmessages(chatthreadID) {
       const params = {
-        page: this.currentPage, 
+        page: this.currentPage,
         take: this.perPage,
         chatthread_id: chatthreadID,
       }
@@ -156,8 +157,9 @@ export default {
 
   }, // watch
 
-  components: { 
+  components: {
     MessageForm,
+    SearchInput,
   },
 
 }

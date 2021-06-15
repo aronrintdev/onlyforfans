@@ -8,9 +8,7 @@
         <article class="top-bar d-flex justify-content-between align-items-center">
           <h4>Messages</h4>
           <div class="d-flex">
-            <b-button variant="link" class="clickme_to-search_messages" @click="doSomething">
-              <fa-icon :icon="['fas', 'search']" class="fa-lg" />
-            </b-button>
+            <SearchInput v-model="searchQuery" openLeft size="lg" />
             <b-button variant="link" class="clickme_to-schedule_message" @click="doSomething">
               <fa-icon :icon="['far', 'calendar-alt']" class="fa-lg" />
             </b-button>
@@ -98,6 +96,7 @@ import Vuex from 'vuex'
 import moment from 'moment'
 import PreviewThread from '@views/live-chat/components/PreviewThread'
 import PreviewContact from '@views/live-chat/components/PreviewContact'
+import SearchInput from '@components/common/search/HorizontalOpenInput'
 
 export default {
   name: 'LivechatDashboard',
@@ -105,6 +104,7 @@ export default {
   components: {
     PreviewThread,
     PreviewContact,
+    SearchInput,
   },
 
   computed: {
@@ -143,6 +143,8 @@ export default {
     isMoreLoading: true,
 
     filters: {},
+
+    searchQuery: '',
 
   }), // data
 

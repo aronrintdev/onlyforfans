@@ -51,11 +51,16 @@ Thumbs.db
 *.mov
 *.wmv
 
+# Env files
 .env
 .env.testing
 .env.production
+
+# Composer Files / Folder
 composer.lock
 vendor/
+
+# Laravel Storeage Folder
 storage/app/s3
 storage/framework/views
 storage/framework/*
@@ -67,6 +72,11 @@ storage/app/public
 storage/logs
 storage/debugbar
 
+# Meilisearch
+meilisearch
+data.ms/
+
+# Cache Files
 bootstrap/cache/services.php
 bootstrap/cache/*
 

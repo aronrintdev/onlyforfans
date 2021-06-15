@@ -1,5 +1,6 @@
 #!/bin/bash
 
+### ctrl-c Trap ###
 trap quitjobs INT
 quitjobs() {
   echo ""
@@ -10,6 +11,7 @@ quitjobs() {
   exit
 }
 
+### Wait for cancceled trap loop ###
 scriptCancelled="false"
 waitforcancel() {
   while :
@@ -21,10 +23,23 @@ waitforcancel() {
   done
 }
 
+### Starting Laravel Server ###
 php artisan serve & \
+
+### Starting Laravel Queue Workers ###
 php artisan queue:listen --tries=3 --backoff=3 & \
 php artisan queue:listen --queue=financial-summaries-urgent,financial-summaries-high,financial-summaries-mid,financial-summaries-low --tries=3 --backoff=3 & \
+
+### Starting Websockets Server ###
 php artisan websockets:serve & \
+
+### Starting Meilisearch Server ###
+./meilisearch &
+
+### Import Searchable Models ###
+php artisan scout:import "App\Models\Mycontact"
+
+### Run webpack hot server ###
 npm run hot
 
 waitforcancel

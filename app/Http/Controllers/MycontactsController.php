@@ -16,6 +16,9 @@ class MycontactsController extends AppBaseController
 {
     /**
      * Fetch list of contacts with filter
+     *
+     * @param Request $request
+     * @return MycontactCollection
      */
     public function index(Request $request)
     {
@@ -44,6 +47,22 @@ class MycontactsController extends AppBaseController
         }
 
         $data = $query->latest()->paginate( $request->input('take', env('MAX_DEFAULT_PER_REQUEST', 10)) );
+        return new MycontactCollection($data);
+    }
+
+    /**
+     * Simple search
+     *
+     * @param Request $request
+     * @return MycontactCollection
+     */
+    public function search(Request $request)
+    {
+        $searchQuery = $request->input('query') ?? $request->input('q');
+
+        $data = Mycontact::search($searchQuery)->where('owner_id', $request->user()->getKey())
+            ->paginate($request->input('take', env('MAX_DEFAULT_PER_REQUEST', 10)));
+
         return new MycontactCollection($data);
     }
 
