@@ -173,18 +173,8 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
     }
 
     public function favorites()
-    { 
+    {
         return $this->hasMany(Favorite::class, 'user_id');
-    }
-
-    public function ledgersales()
-    {
-        return $this->hasMany(Fanledger::class, 'seller_id');
-    }
-
-    public function ledgerpurchases()
-    {
-        return $this->hasMany(Fanledger::class, 'purchaser_id');
     }
 
     public function timeline()
