@@ -236,19 +236,6 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
         return $result;
     }
 
-    public function own_groups()
-    {
-        $admin_role_id = Role::where('name', '=', 'admin')->first();
-        $own_groups = $this->groups()->where('role_id', $admin_role_id->id)->where('status', 'approved')->get();
-        $result = $own_groups ? $own_groups : false;
-        return $result;
-    }
-
-    public function groups()
-    {
-        return $this->belongsToMany('App\Group', 'group_user', 'user_id', 'group_id')->withPivot('role_id', 'status');
-    }
-
     public function pageLikes()
     {
         return $this->belongsToMany('App\Page', 'page_likes', 'user_id', 'page_id');
@@ -469,20 +456,6 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
             }
         }
         return $result;
-    }
-
-    public function is_groupAdmin($user_id, $group_id)
-    {
-        $admin_role_id = Role::where('name', 'admin')->first();
-        $groupUser = $this->groups()->where('group_id', $group_id)->where('user_id', $user_id)->where('role_id', $admin_role_id->id)->where('status', 'approved')->first();
-        return $groupUser ? true : false;
-    }
-
-    public function is_groupMember($user_id, $group_id)
-    {
-        $admin_role_id = Role::where('name', 'admin')->first();
-        $groupMember = $this->groups()->where('group_id', $group_id)->where('user_id', $user_id)->where('role_id', '!=', $admin_role_id->id)->where('status', 'approved')->first();
-        return $groupMember ? true : false;
     }
 
     // total sales in cents
