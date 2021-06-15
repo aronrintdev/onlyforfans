@@ -1,11 +1,9 @@
 <template>
   <div v-if="!isLoading">
-
     <b-card title="Privacy">
       <b-card-text>
         <b-form @submit.prevent="submitPrivacy($event)" @reset="onReset">
-          <fieldset :disabled="!isEditing.formPrivacy">
-
+          <fieldset :disabled="isSubmitting.formPrivacy">
             <table class="w-100 table">
               <tr>
                 <td class="align-middle">
@@ -40,21 +38,17 @@
                 </td>
               </tr>
             </table>
-
           </fieldset>
-
           <b-row class="mt-3">
             <b-col>
-              <div v-if="isEditing.formPrivacy" class="w-100 d-flex justify-content-end">
-                <b-button class="w-25" @click.prevent="isEditing.formPrivacy=false" variant="outline-secondary">Cancel</b-button>
-                <b-button class="w-25 ml-3" type="submit" variant="primary">Save</b-button>
-              </div>
-              <div v-else class="w-100 d-flex justify-content-end">
-                <b-button @click.prevent="isEditing.formPrivacy=true" class="w-25" variant="warning">Edit</b-button>
+              <div class="w-100 d-flex justify-content-end">
+                <b-button class="w-25 ml-3" type="submit" variant="primary">
+                  <b-spinner v-if="isSubmitting.formPrivacy" small />&nbsp;
+                  Save
+                </b-button>
               </div>
             </b-col>
           </b-row>
-
         </b-form>
       </b-card-text>
     </b-card>
@@ -62,68 +56,63 @@
     <b-card title="Blocked">
       <b-card-text>
         <b-form @submit.prevent="submitBlocked($event)" @reset="onReset">
-          <fieldset>
-
+          <fieldset :disabled="isSubmitting.formBlocked">
             <b-row>
               <b-col>
-
                 <vue-tags-input
-                  v-if="isEditing.formBlocked"
+                  v-if="isSubmitting.formBlocked"
                   v-model="blockedItem"
                   :tags="formBlocked.blocked"
                   :autocomplete-items="autocompleteItems"
                   @tags-changed="handleUpdatedTags"
-                  />
+                />
 
-                  <div v-else class="accordion" role="tablist">
-                    <section class="mb-3">
-                      <b-button block v-b-toggle.accordion-ips variant="light">IPs</b-button>
-                      <b-collapse id="accordion-ips" accordion="my-accordion" role="tabpanel">
-                        <ul class="list-blocked list-unstyled">
-                          <li v-for="(b,idx) in blocked.ips || []" :key="idx"> {{ b }}
-                            <span @click="unblock(b)" class="unblock ml-1"><b-icon icon="x-circle-fill" variant="danger" font-scale="1"></b-icon></span>
-                          </li>
-                        </ul>
-                      </b-collapse>
-                    </section>
-                    <section class="mb-3">
-                      <b-button block v-b-toggle.accordion-countries variant="light">Countries</b-button>
-                      <b-collapse id="accordion-countries" accordion="my-accordion" role="tabpanel">
-                        <ul class="list-blocked list-unstyled">
-                          <li v-for="(b,idx) in blocked.countries || []"> {{ b }}
-                            <span @click="unblock(b)" class="unblock ml-1"><b-icon icon="x-circle-fill" variant="danger" font-scale="1"></b-icon></span>
-                          </li>
-                        </ul>
-                      </b-collapse>
-                    </section>
-                    <section class="mb-3">
-                      <b-button block v-b-toggle.accordion-users variant="light">Users</b-button>
-                      <b-collapse id="accordion-users" accordion="my-accordion" role="tabpanel">
-                        <ul class="list-blocked list-unstyled">
-                          <li v-for="(b,idx) in blocked.usernames || []"> {{ b }}
-                            <span @click="unblock(b)" class="unblock ml-1"><b-icon icon="x-circle-fill" variant="danger" font-scale="1"></b-icon></span>
-                          </li>
-                        </ul>
-                      </b-collapse>
-                    </section>
-                  </div>
+                <div v-else class="accordion" role="tablist">
+                  <section class="mb-3">
+                    <b-button block v-b-toggle.accordion-ips variant="light">IPs</b-button>
+                    <b-collapse id="accordion-ips" accordion="my-accordion" role="tabpanel">
+                      <ul class="list-blocked list-unstyled">
+                        <li v-for="(b,idx) in blocked.ips || []" :key="idx"> {{ b }}
+                          <span @click="unblock(b)" class="unblock ml-1"><b-icon icon="x-circle-fill" variant="danger" font-scale="1"></b-icon></span>
+                        </li>
+                      </ul>
+                    </b-collapse>
+                  </section>
+                  <section class="mb-3">
+                    <b-button block v-b-toggle.accordion-countries variant="light">Countries</b-button>
+                    <b-collapse id="accordion-countries" accordion="my-accordion" role="tabpanel">
+                      <ul class="list-blocked list-unstyled">
+                        <li v-for="(b,idx) in blocked.countries || []"> {{ b }}
+                          <span @click="unblock(b)" class="unblock ml-1"><b-icon icon="x-circle-fill" variant="danger" font-scale="1"></b-icon></span>
+                        </li>
+                      </ul>
+                    </b-collapse>
+                  </section>
+                  <section class="mb-3">
+                    <b-button block v-b-toggle.accordion-users variant="light">Users</b-button>
+                    <b-collapse id="accordion-users" accordion="my-accordion" role="tabpanel">
+                      <ul class="list-blocked list-unstyled">
+                        <li v-for="(b,idx) in blocked.usernames || []"> {{ b }}
+                          <span @click="unblock(b)" class="unblock ml-1"><b-icon icon="x-circle-fill" variant="danger" font-scale="1"></b-icon></span>
+                        </li>
+                      </ul>
+                    </b-collapse>
+                  </section>
+                </div>
               </b-col>
             </b-row>
-
           </fieldset>
 
           <b-row class="mt-3">
             <b-col>
-              <div v-if="isEditing.formBlocked" class="w-100 d-flex justify-content-end">
-                <b-button class="w-25" @click.prevent="isEditing.formBlocked=false" variant="outline-secondary">Cancel</b-button>
-                <b-button class="w-25 ml-3" type="submit" variant="primary">Save</b-button>
-              </div>
-              <div v-else class="w-100 d-flex justify-content-end">
-                <b-button @click.prevent="isEditing.formBlocked=true" class="w-25" variant="warning">Edit</b-button>
+              <div class="w-100 d-flex justify-content-end">
+                <b-button class="w-25 ml-3" type="submit" variant="primary">
+                  <b-spinner v-if="isSubmitting.formBlocked" small />&nbsp;
+                  Save
+                </b-button>
               </div>
             </b-col>
           </b-row>
-
         </b-form>
       </b-card-text>
     </b-card>
@@ -131,8 +120,7 @@
     <b-card title="Watermark">
       <b-card-text>
         <b-form @submit.prevent="submitWatermark($event)" @reset="onReset">
-          <fieldset :disabled="!isEditing.formWatermark">
-
+          <fieldset :disabled="isSubmitting.formWatermark">
             <b-row>
               <b-col>
                 <b-form-group id="group-is_watermark_enabled" label="Is Watermark Enabled?" label-for="is_watermark_enabled">
@@ -146,25 +134,21 @@
                 </b-form-group>
               </b-col>
             </b-row>
-
           </fieldset>
 
           <b-row class="mt-3">
             <b-col>
-              <div v-if="isEditing.formWatermark" class="w-100 d-flex justify-content-end">
-                <b-button class="w-25" @click.prevent="isEditing.formWatermark=false" variant="outline-secondary">Cancel</b-button>
-                <b-button class="w-25 ml-3" type="submit" variant="primary">Save</b-button>
-              </div>
-              <div v-else class="w-100 d-flex justify-content-end">
-                <b-button @click.prevent="isEditing.formWatermark=true" class="w-25" variant="warning">Edit</b-button>
+              <div class="w-100 d-flex justify-content-end">
+                <b-button class="w-25 ml-3" type="submit" variant="primary">
+                  <b-spinner v-if="isSubmitting.formWatermark" small />&nbsp;
+                  Save
+                </b-button>
               </div>
             </b-col>
           </b-row>
-
         </b-form>
       </b-card-text>
     </b-card>
-
   </div>
 </template>
 
@@ -188,8 +172,7 @@ export default {
   },
 
   data: () => ({
-
-    isEditing: {
+    isSubmitting: {
       formPrivacy: false,
       formBlocked: false,
       formWatermark: false,
@@ -224,12 +207,9 @@ export default {
         { value: 'followees', text: 'People I Follow' },
       ],
     },
-
-
   }),
 
   methods: {
-
     handleUpdatedTags(newTags) {
       this.autocompleteItems = []
       this.formBlocked.blocked = newTags
@@ -252,18 +232,24 @@ export default {
     },
 
     async submitPrivacy(e) {
+      this.isSubmitting.formPrivacy = true
       const response = await axios.patch(`/users/${this.session_user.id}/settings`, this.formPrivacy)
-      this.isEditing.formPrivacy = false
+      this.onSuccess()
+      this.isSubmitting.formPrivacy = false
     },
     async submitBlocked(e) {
+      this.isSubmitting.formBlocked = true
       const response = await axios.patch(`/users/${this.session_user.id}/settings`, this.formBlocked)
       this.$store.dispatch('getUserSettings', { userId: this.session_user.id })
-      this.isEditing.formBlocked = false
+      this.onSuccess()
+      this.isSubmitting.formBlocked = false
       this.formBlocked.blocked = []
     },
     async submitWatermark(e) {
+      this.isSubmitting.formWatermark = true
       const response = await axios.patch(`/users/${this.session_user.id}/settings`, this.formWatermark)
-      this.isEditing.formWatermark = false
+      this.onSuccess()
+      this.isSubmitting.formWatermark = false
     },
     async unblock(slug) {
       const response = await axios.delete(`/blockables/${this.session_user.id}/unblock/${slug}`)
@@ -272,6 +258,14 @@ export default {
 
     onReset(e) {
       e.preventDefault()
+    },
+
+    onSuccess() {
+      this.$root.$bvToast.toast('Privacy settings have been updated successfully!', {
+        toaster: 'b-toaster-top-center',
+        title: 'Success',
+        variant: 'success',
+      })
     },
   },
 

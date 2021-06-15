@@ -14,7 +14,7 @@
     <transition name="quick-fade" mode="out-in">
       <b-card-footer>
         <b-button @click="crop" :disabled="isProcessing" variant="primary" class="w-100">
-          <b-spinner v-if="isProcessing" small></b-spinner>
+          <b-spinner v-if="isProcessing" small></b-spinner>&nbsp;
           Done
         </b-button>
       </b-card-footer>

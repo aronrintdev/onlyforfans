@@ -80,13 +80,13 @@ body .feed-crate.tag-grid-layout .superbox-post .text-wrap.tag-has-mediafiles {
 }
 
 /* In 'grid' view, normalize the height so that we don't get a variation messing up row alignment */
-body .feed-crate.tag-grid-layout .superbox-post .media-slider .slide,
+body .feed-crate.tag-grid-layout .superbox-post .media-slider,
 body .feed-crate.tag-grid-layout .superbox-post .locked-content {
   height: 20rem;
 }
 
 // Lists
-body #view-lists .list-component.tag-grid-layout  .superbox-post .media-slider .slide {
+body #view-lists .list-component.tag-grid-layout  .superbox-post .media-slider {
   video, img {
     object-fit: cover;
     height: 20rem;
@@ -94,7 +94,7 @@ body #view-lists .list-component.tag-grid-layout  .superbox-post .media-slider .
 }
 
 // Main Timeline Feed
-body .feed-crate.tag-grid-layout .superbox-post .media-slider .slide {
+body .feed-crate.tag-grid-layout .superbox-post .media-slider {
   video, img {
     object-fit: cover;
     height: 20rem;
@@ -468,5 +468,39 @@ body .feed-crate.tag-grid-layout .superbox-post .media-slider .slide {
       fill: #fefefe;
       width: 18px;
     }
+  }
+}
+
+// PhotoSwipe
+.pswp {
+  .pswp__top-bar {
+    background-color: transparent !important;
+  }
+  .pswp__button--share {
+    display: none;
+  }
+  .pswp__caption {
+    display: none;
+  }
+}
+
+// Swiper
+.media-slider-swiper {
+  .swiper-button-next:after,
+  .swiper-button-prev:after {
+    display: none;
+  }
+
+  .swiper-button-next {
+    right: 20px;
+    color: #fff;
+  }
+  .swiper-button-prev {
+    left: 20px;
+    color: #fff;
+  }
+
+  .swiper-pagination-bullet {
+    background: #fff;
   }
 }

@@ -21,7 +21,7 @@
             v-text="post.user.name"
           />
           <span v-if="post.user.verified" class="verified-badge">
-            <b-icon icon="check-circle-fill" variant="success" font-scale="1" />
+            <fa-icon icon="check-circle" class="text-primary" />
           </span>
         </li>
         <li>

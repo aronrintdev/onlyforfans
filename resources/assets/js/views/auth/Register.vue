@@ -10,57 +10,59 @@
         </div>
       </template>
       <!-- SignUp Form -->
-      <div class="signup-form p-3">
-        <div v-if="verrors && verrors.message">
-          <b-alert variant="danger" v-text="verrors.message" show />
+      <b-form @submit.prevent="signup">
+        <div class="signup-form p-3">
+          <div v-if="verrors && verrors.message">
+            <b-alert variant="danger" v-text="verrors.message" show />
+          </div>
+          <b-form-group :invalid-feedback="verrors.email ? verrors.email : null" :state="verrors.email ? false : null">
+            <b-form-input
+              id="input-email"
+              v-model="form.email"
+              :placeholder="$t('email')"
+              :state="verrors.email ? false : null"
+              @focus="clearVerrors"
+            />
+          </b-form-group>
+          <b-form-group :invalid-feedback="verrors.password ? verrors.password : null" :state="verrors.password ? false : null">
+            <b-form-input
+              id="input-password"
+              type="password"
+              v-model="form.password"
+              :placeholder="$t('password')"
+              :state="verrors.password ? false : null"
+              @focus="clearVerrors"
+            />
+          </b-form-group>
+          <b-form-group :invalid-feedback="verrors.name ? verrors.name : null" :state="verrors.name ? false : null">
+            <b-form-input
+              id="input-name"
+              type="text"
+              v-model="form.name"
+              placeholder="Name"
+              :state="verrors.name ? false : null"
+              @focus="clearVerrors"
+            />
+          </b-form-group>
+          <b-form-group :invalid-feedback="verrors.tos ? verrors.tos : null" :state="verrors.tos ? false : null">
+            <b-form-checkbox
+              id="checkbox-tos"
+              v-model="form.tos"
+              name="checkbox-tos"
+              @focus="clearVerrors"
+            >
+              I agree to our Terms of Service and Privacy Policy, and confirm that I am at least 18 years old.
+            </b-form-checkbox>
+          </b-form-group>
         </div>
-        <b-form-group :invalid-feedback="verrors.email ? verrors.email : null" :state="verrors.email ? false : null">
-          <b-form-input
-            id="input-email"
-            v-model="form.email"
-            :placeholder="$t('email')"
-            :state="verrors.email ? false : null"
-            @focus="clearVerrors"
-          />
-        </b-form-group>
-        <b-form-group :invalid-feedback="verrors.password ? verrors.password : null" :state="verrors.password ? false : null">
-          <b-form-input
-            id="input-password"
-            type="password"
-            v-model="form.password"
-            :placeholder="$t('password')"
-            :state="verrors.password ? false : null"
-            @focus="clearVerrors"
-          />
-        </b-form-group>
-        <b-form-group :invalid-feedback="verrors.name ? verrors.name : null" :state="verrors.name ? false : null">
-          <b-form-input
-            id="input-name"
-            type="text"
-            v-model="form.name"
-            placeholder="Name"
-            :state="verrors.name ? false : null"
-            @focus="clearVerrors"
-          />
-        </b-form-group>
-        <b-form-group :invalid-feedback="verrors.tos ? verrors.tos : null" :state="verrors.tos ? false : null">
-          <b-form-checkbox
-            id="checkbox-tos"
-            v-model="form.tos"
-            name="checkbox-tos"
-            @focus="clearVerrors"
-          >
-            I agree to our Terms of Service and Privacy Policy, and confirm that I am at least 18 years old.
-          </b-form-checkbox>
-        </b-form-group>
-      </div>
 
-      <div class="p-3">
-        <b-btn class="signup-btn" variant="primary" block @click="signup" :disabled="state === 'loading' || !form.tos">
-          <span v-if="state === 'form'">{{ $t('signUpLink') }}</span>
-          <fa-icon v-else icon="spinner" spin />
-        </b-btn>
-      </div>
+        <div class="p-3">
+          <b-btn type="submit" class="signup-btn" variant="primary" block :disabled="state === 'loading' || !form.tos">
+            <span v-if="state === 'form'">{{ $t('signUpLink') }}</span>
+            <fa-icon v-else icon="spinner" spin />
+          </b-btn>
+        </div>
+      </b-form>
 
       <div class="divider d-flex">
         <hr class="h-line flex-grow-1" />

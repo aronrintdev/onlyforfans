@@ -2,21 +2,23 @@
   <div>
     <template v-if="$options.filters.isSubscriberOnly(post)">
       <article :style="backgroundImg" class="locked-content d-flex justify-content-center align-items-center">
-        <div class="d-flex flex-column">
-          <b-icon icon="lock-fill" font-scale="5" variant="light" />
+        <div class="d-flex flex-column align-items-center">
+          <fa-icon icon="lock" class="text-light" size="5x" />
           <b-button @click="renderSubscribe" class="mt-3" variant="primary">Subscribe</b-button>
         </div>
       </article>
     </template>
     <template v-else>
       <article :style="backgroundImg" class="locked-content d-flex position-relative justify-content-center align-items-center">
-        <div class="d-flex flex-column">
-          <b-icon icon="lock-fill" font-scale="5" variant="light" class="mx-auto" />
+        <div class="d-flex flex-column align-items-center">
+          <fa-icon icon="lock" class="text-light" size="5x" />
           <!--
           <b-button @click="renderPurchasePost" class="mt-3" variant="primary">Unlock Post for {{ post.price_display || (post.price | niceCurrency) }}</b-button>
           -->
           <b-button @click="renderPurchasePost" class="mt-3" variant="primary">Unlock Post for {{ post.price | niceCurrency }}</b-button>
-          <div v-if="post.mediafile_count" class="mediafile-count text-white position-absolute"><b-icon icon="images" font-scale="1" variant="light" class="d-inline my-auto" /> {{ post.mediafile_count }}</div>
+          <div v-if="post.mediafile_count" class="mediafile-count text-white position-absolute">
+            <fa-icon icon="images" class="d-inline my-auto" /> {{ post.mediafile_count }}
+          </div>
         </div>
       </article>
     </template>

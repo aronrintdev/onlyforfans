@@ -4,7 +4,7 @@
     <b-card title="Edit Profile">
       <b-card-text>
         <b-form @submit.prevent="submitProfile($event)" @reset="onReset">
-          <fieldset :disabled="!isEditing.formProfile">
+          <fieldset :disabled="isSubmitting.formProfile">
 
             <b-row>
               <b-col>
@@ -64,12 +64,11 @@
 
           <b-row class="mt-3">
             <b-col>
-              <div v-if="isEditing.formProfile" class="w-100 d-flex justify-content-end">
-                <b-button class="w-25" @click.prevent="isEditing.formProfile=false" variant="outline-secondary">Cancel</b-button>
-                <b-button class="w-25 ml-3" type="submit" variant="primary">Save</b-button>
-              </div>
-              <div v-else class="w-100 d-flex justify-content-end">
-                <b-button @click.prevent="isEditing.formProfile=true" class="w-25" variant="warning">Edit</b-button>
+              <div class="w-100 d-flex justify-content-end">
+                <b-button :disabled="isSubmitting.formProfile" class="w-25 ml-3" type="submit" variant="primary">
+                  <b-spinner v-if="isSubmitting.formProfile" small />&nbsp;
+                  Save
+                </b-button>
               </div>
             </b-col>
           </b-row>
@@ -82,10 +81,9 @@
 </template>
 
 <script>
-//import Vuex from 'vuex';
+import Vuex from 'vuex';
 
 export default {
-
   props: {
     session_user: null,
     user_settings: null,
@@ -98,8 +96,7 @@ export default {
   },
 
   data: () => ({
-
-    isEditing: {
+    isSubmitting: {
       formProfile: false,
     },
 
@@ -127,29 +124,33 @@ export default {
 
   }),
 
-  watch: {
-    user_settings(newVal) {
-      this.formProfile.gender = newVal.gender;
-      this.formProfile.country = newVal.country;
-      this.formProfile.city = newVal.city;
-      this.formProfile.birthdate = newVal.birthdate;
-      this.formProfile.about = newVal.about;
-      if ( newVal.cattrs.weblinks ) {
-        this.formProfile.weblinks = newVal.cattrs.weblinks;
-      }
-    },
-  },
-
   mounted() {
   },
 
   created() {
+    this.formProfile.about = this.user_settings.about
+    this.formProfile.country = this.user_settings.country
+    this.formProfile.city = this.user_settings.city
+    this.formProfile.gender = this.user_settings.gender
+    this.formProfile.birthdate = this.user_settings.birthdate
   },
 
   methods: {
+    ...Vuex.mapActions(['getUserSettings']),
+
     async submitProfile(e) {
-      const response = await axios.patch(`/users/${this.session_user.id}/settings`, this.formProfile);
-      this.isEditing.formProfile = false;
+      this.isSubmitting.formProfile = true
+      const response = await axios.patch(`/users/${this.session_user.id}/settings`, this.formProfile)
+
+      // re-load user settings
+      this.getUserSettings({ userId: this.session_user.id })
+
+      this.$root.$bvToast.toast('Profile settings have been updated successfully!', {
+        toaster: 'b-toaster-top-center',
+        title: 'Success',
+        variant: 'success',
+      })
+      this.isSubmitting.formProfile = false
     },
 
     onReset(e) {
