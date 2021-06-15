@@ -269,11 +269,6 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
         return $this->hasMany(Comment::class);
     }
 
-    public function events()
-    {
-        return $this->belongsToMany('App\Event', 'event_user', 'user_id', 'event_id');
-    }
-
 //    public function lists()
 //    {
 //        return $this->belongsToMany(Lists::class, 'list_user', 'user_id', 'list_id')->withTimestamps();
@@ -413,36 +408,10 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
     #endregion Can Own
     /* ---------------------------------------------------------------------- */
 
-    public function get_eventuser($id)
-    {
-        return $this->events()->where('events.id', $id)->first();
-    }
 
     public function isAdmin() : bool
     {
         return $this->roles()->pluck('name')->contains('super-admin');
-    }
-
-    public function is_eventadmin($user_id, $event_id) {
-        $chk_isadmin = Event::where('id', $event_id)->where('user_id', $user_id)->first();
-
-        $result = $chk_isadmin ? true : false;
-
-        return $result;
-    }
-
-    public function getEvents()
-    {
-        $result = [];
-        $guestevents =  $this->events()->get();
-        if ($guestevents) {
-            foreach ($guestevents as $guestevent) {
-                if (!$this->is_eventadmin(Auth::user()->id, $guestevent->id)) {
-                    array_push($result, $guestevent);
-                }
-            }
-        }
-        return $result;
     }
 
     // total sales in cents
