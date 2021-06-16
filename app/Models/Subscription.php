@@ -23,6 +23,8 @@ use App\Models\Financial\Traits\HasCurrency;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Carbon\Exceptions\InvalidIntervalException;
 use Illuminate\Database\Eloquent\InvalidCastException as EloquentInvalidCastException;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 /**
  * Subscription model
@@ -91,33 +93,48 @@ class Subscription extends Model implements Ownable
         parent::boot();
 
         static::created(function ($model) {
-            if ( $model->subscribable_type === 'timelines' ) {
-                // add to subcribee's contacts
-                $mc1 = Mycontact::create([
-                    'owner_id' => $model->user_id, // subcribee
-                    'contact_id' => $model->subscribable->user->id, // subcriber
-                ]);
-                // add to subcriber's contacts
-                $mc2 = Mycontact::create([
-                    'owner_id' => $model->subscribable->user->id, // subcriber
-                    'contact_id' => $model->user_id, // subcribee
-                ]);
+            if ( $model->subscribable_type === Timeline::getMorphStringStatic() ) {
+                // Add Contacts for subscribee and subscriber
+                // Note: addContacts function prevents duplicates in Mycontacts
+                Mycontact::addContacts(new Collection([
+                    $model->user,
+                    $model->subscribable->getOwner()->first(),
+                ]));
             }
         });
     }
 
     /* --------------------------- Relationships ---------------------------- */
     #region Relationships
-    public function subscribable() // %PSG -> %ERIK : is this the person (timeline) who 'owns' (receiveds) the subscripton? (subscribEE)?
+
+    /**
+     * The item being subscribed to. e.i. Timeline
+     * @return MorphTo
+     *
+     * %PSG -> %ERIK : is this the person (timeline) who 'owns' (receiveds) the subscripton? (subscribEE)?
+     * %Erik : No, this is the item being subscribed to.
+     */
+    public function subscribable() 
     {
         return $this->morphTo();
     }
 
-    public function user() // %PSG -> %ERIK : is this the person doing the subscribing (subscribER)?
+    /**
+     * The user who is subscribing to the subscribable item
+     * @return BelongsTo
+     *
+     * %PSG -> %ERIK : is this the person doing the subscribing (subscribER)?
+     * %Erik : Yes, this is the subscriber.
+     */
+    public function user()
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * The financial account that is being used for subscription payments
+     * @return BelongsTo
+     */
     public function account()
     {
         return $this->belongsTo(Account::class);
@@ -385,6 +402,16 @@ class Subscription extends Model implements Ownable
             return true;
         }
         return $this->next_payment_at->lessThanOrEqualTo(Carbon::now());
+    }
+
+    public function isActive(): bool
+    {
+        return (bool)$this->active;
+    }
+
+    public function isCanceled(): bool
+    {
+        return !isset($this->canceled_at);
     }
 
     #endregion Verification

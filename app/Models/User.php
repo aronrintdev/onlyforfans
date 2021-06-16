@@ -23,21 +23,82 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Scout\Searchable;
 
+/**
+ * @property string      $id              `uuid` | `unique`
+ * @property string      $email           email address | `unique`
+ * @property string      $username        `unique`
+ * @property string      $firstname       User defined First Name
+ * @property string      $lastname        User defined Last Name
+ * @property string      $password        Password Hash
+ * @property string      $remember_token  Laravel remember token
+ * @property bool        $email_verified  If email has been verified
+ * @property bool        $is_online       If user is currently online
+ * @property Carbon|null $last_logged     Last login time of user
+ * @property Carbon      $created_at
+ * @property Carbon      $updated_at
+ * @property Carbon|null $deleted_at
+ *
+ * @package App\Models
+ */
 class User extends Authenticatable implements Blockable, HasFinancialAccounts
 {
-    use HasRoles, HasFactory, Messagable, SoftDeletes, UsesUuid, MorphFunctions, Notifiable;
+    use HasRoles,
+        HasFactory,
+        Messagable,
+        SoftDeletes,
+        UsesUuid,
+        MorphFunctions,
+        Notifiable,
+        Searchable;
 
+    /* ---------------------------------------------------------------------- */
+    /*                            Model Properties                            */
+    /* ---------------------------------------------------------------------- */
+    #region Model Properties
     protected $connection = 'primary';
 
-    protected $appends = [ 'name', 'avatar', 'cover', 'about', ];
-    protected $guarded = [ 'id', 'created_at', 'updated_at' ];
-    protected $hidden = [ 'email', 'password', 'remember_token', 'verification_code', 'timeline'];
-    protected $dates = [ 'last_logged', ];
+    protected $appends = [
+        'name',
+        'avatar',
+        'cover',
+        'about',
+    ];
 
-    //--------------------------------------------
-    // Boot
-    //--------------------------------------------
+    protected $guarded = [
+        'id',
+        'password',
+        'remember_token',
+        'verification_code',
+        'email_verified',
+        'created_at',
+        'updated_at',
+    ];
+
+    protected $hidden = [
+        'email',
+        'password',
+        'remember_token',
+        'verification_code',
+        'timeline'
+    ];
+
+    protected $dates = [
+        'last_logged',
+    ];
+
+    #endregion Model Properties
+    /* ---------------------------------------------------------------------- */
+
+    /* ---------------------------------------------------------------------- */
+    /*                                  Boot                                  */
+    /* ---------------------------------------------------------------------- */
+    #region Boot
+    /**
+     * Laravel Boot function
+     * @return void
+     */
     public static function boot()
     {
         parent::boot();
@@ -72,6 +133,9 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
         });
     }
 
+    #endregion Boot
+    /* ---------------------------------------------------------------------- */
+
 
     // Makes username a valid random username if it is null or empty.
     public function checkUsername()
@@ -81,9 +145,11 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
         }
     }
 
-    //--------------------------------------------
-    // %%% Relationships
-    //--------------------------------------------
+
+    /* ---------------------------------------------------------------------- */
+    /*                              Relationships                             */
+    /* ---------------------------------------------------------------------- */
+    #region Relationships
 
     public function settings() {
         return $this->hasOne(UserSetting::class);
@@ -107,18 +173,8 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
     }
 
     public function favorites()
-    { 
+    {
         return $this->hasMany(Favorite::class, 'user_id');
-    }
-
-    public function ledgersales()
-    {
-        return $this->hasMany(Fanledger::class, 'seller_id');
-    }
-
-    public function ledgerpurchases()
-    {
-        return $this->hasMany(Fanledger::class, 'purchaser_id');
     }
 
     public function timeline()
@@ -172,37 +228,6 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
         return $this->belongsToMany('App\UserListType', 'user_lists', 'user_id', 'list_type_id');
     }
 
-    public function own_pages()
-    {
-        $admin_role_id = Role::where('name', 'admin')->first();
-        $own_pages = $this->pages()->where('role_id', $admin_role_id->id)->where('page_user.active', 1)->get();
-        $result = $own_pages ? $own_pages : false;
-        return $result;
-    }
-
-    public function own_groups()
-    {
-        $admin_role_id = Role::where('name', '=', 'admin')->first();
-        $own_groups = $this->groups()->where('role_id', $admin_role_id->id)->where('status', 'approved')->get();
-        $result = $own_groups ? $own_groups : false;
-        return $result;
-    }
-
-    public function payment()
-    {
-        return $this->hasOne('App\Payment');
-    }
-
-    public function groups()
-    {
-        return $this->belongsToMany('App\Group', 'group_user', 'user_id', 'group_id')->withPivot('role_id', 'status');
-    }
-
-    public function pageLikes()
-    {
-        return $this->belongsToMany('App\Page', 'page_likes', 'user_id', 'page_id');
-    }
-    
     public function vaults()
     {
         return $this->hasMany(Vault::class);
@@ -233,19 +258,34 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
         return $this->hasMany(Chatmessage::class, 'sender_id');
     }
 
+    public function commentLikes()
+    {
+        return $this->morphedByMany(Comment::class, 'likeable', 'likeables', 'liker_id')
+            ->withTimestamps();
+    }
+
+    public function comments()
+    {
+        return $this->hasMany(Comment::class);
+    }
+
 //    public function lists()
 //    {
 //        return $this->belongsToMany(Lists::class, 'list_user', 'user_id', 'list_id')->withTimestamps();
 //    }
-//
+
 //    public function userlists()
 //    {
 //        return $this->hasMany(Lists::class, 'creator_id');
 //    }
 
-    //--------------------------------------------
-    // %%% Accessors/Mutators | Casts
-    //--------------------------------------------
+    #endregion Relationships
+    /* ---------------------------------------------------------------------- */
+
+    /* ---------------------------------------------------------------------- */
+    /*                       Accessors/Mutators | Casts                       */
+    /* ---------------------------------------------------------------------- */
+    #region Accessors/Mutators | Casts
 
     // https://stackoverflow.com/questions/30226496/how-to-cast-eloquent-pivot-parameters
     /* %PSG: could not get this to work, just do 'manually' in controller or other calling code
@@ -280,6 +320,59 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
         return ($this->timeline && $this->timeline->about) ? $this->timeline->about : null;
     }
 
+    #endregion Accessors/Mutators | Casts
+    /* ---------------------------------------------------------------------- */
+
+    /* ---------------------------------------------------------------------- */
+    /*                               Searchable                               */
+    /* ---------------------------------------------------------------------- */
+    #region Searchable
+
+    /**
+     * Name of the search index associated with this model
+     * @return string
+     */
+    public function searchableAs()
+    {
+        return "users_index";
+    }
+
+    /**
+     * Get value used to index the model
+     * @return mixed
+     */
+    public function getScoutKey()
+    {
+        return $this->getKey();
+    }
+
+    /**
+     * Get key name used to index the model
+     * @return string
+     */
+    public function getScoutKeyName()
+    {
+        return 'id';
+    }
+
+    /**
+     * What model information gets stored in the search index
+     * @return array
+     */
+    public function toSearchableArray()
+    {
+        return [
+            'name'     => $this->timeline->name,
+            'slug'     => $this->timeline->slug,
+            'username' => $this->username,
+            'email'    => $this->email,
+            'id'       => $this->getKey(),
+        ];
+    }
+
+    #endregion Searchable
+    /* ---------------------------------------------------------------------- */
+
     // ---
 
     public function getUserSettings($user_id)
@@ -295,17 +388,6 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
     public function deleteUserSettings($user_id)
     {
         return DB::table('user_settings')->where('user_id', $user_id)->delete();
-    }
-
-    public function commentLikes()
-    {
-        return $this->morphedByMany(Comment::class, 'likeable', 'likeables', 'liker_id')
-            ->withTimestamps();
-    }
-
-    public function comments()
-    {
-        return $this->hasMany(Comment::class);
     }
 
     public function deleteOthers()
@@ -331,7 +413,10 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
         }
     }
 
-    // --- Blockable ---
+    /* ---------------------------------------------------------------------- */
+    /*                                Blockable                               */
+    /* ---------------------------------------------------------------------- */
+    #region Blockable
 
     public function blockedUsers()
     {
@@ -354,7 +439,13 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
         $resource->blockedBy()->save($this);
     }
 
-    // --- %%Can Own ---
+    #endregion Blockable
+    /* ---------------------------------------------------------------------- */
+
+    /* ---------------------------------------------------------------------- */
+    /*                                 Can Own                                */
+    /* ---------------------------------------------------------------------- */
+    #region Can Own
 
     // Check if user owns an ownable resource
     public function isOwner(Ownable $resource): bool
@@ -364,61 +455,21 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
         });
     }
 
-    public function events()
-    {
-        return $this->belongsToMany('App\Event', 'event_user', 'user_id', 'event_id');
-    }
+    #endregion Can Own
+    /* ---------------------------------------------------------------------- */
 
-    public function get_eventuser($id)
-    {
-        return $this->events()->where('events.id', $id)->first();
-    }
 
     public function isAdmin() : bool
     {
         return $this->roles()->pluck('name')->contains('super-admin');
     }
 
-    public function is_eventadmin($user_id, $event_id) {
-        $chk_isadmin = Event::where('id', $event_id)->where('user_id', $user_id)->first();
-
-        $result = $chk_isadmin ? true : false;
-
-        return $result;
-    }
-
-    public function getEvents()
-    {
-        $result = [];
-        $guestevents =  $this->events()->get();
-        if ($guestevents) {
-            foreach ($guestevents as $guestevent) {
-                if (!$this->is_eventadmin(Auth::user()->id, $guestevent->id)) {
-                    array_push($result, $guestevent);
-                }
-            }
-        }
-        return $result;
-    }
-
-    public function is_groupAdmin($user_id, $group_id)
-    {
-        $admin_role_id = Role::where('name', 'admin')->first();
-        $groupUser = $this->groups()->where('group_id', $group_id)->where('user_id', $user_id)->where('role_id', $admin_role_id->id)->where('status', 'approved')->first();
-        return $groupUser ? true : false;
-    }
-
-    public function is_groupMember($user_id, $group_id)
-    {
-        $admin_role_id = Role::where('name', 'admin')->first();
-        $groupMember = $this->groups()->where('group_id', $group_id)->where('user_id', $user_id)->where('role_id', '!=', $admin_role_id->id)->where('status', 'approved')->first();
-        return $groupMember ? true : false;
-    }
 
     // total sales in cents
     public function getSales() : int
     {
-        return Fanledger::where('seller_id', $this->id)->sum('total_amount');
+        // TODO: Hook up to earnings controller
+        return 0;
     }
 
 
@@ -434,7 +485,7 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
             'follower_count'   => $timeline->followers->count(),
             'following_count'  => $timeline->user->followedtimelines->count(),
             'subscribed_count' => 0, // %TODO $sessionUser->timeline->subscribed->count()
-            'earnings'         => $this->getSales(),
+            'earnings'         => '', // TODO: Hook up to earnings controller
             'website'          => '', // %TODO
             'instagram'        => '', // %TODO
             'city'             => (isset($this->settings)) ? $this->settings->city : null,
@@ -448,7 +499,9 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
         return $sales > 0;
     }
 
-    /* ------------------------ HasFinancialAccounts ------------------------ */
+    /* ---------------------------------------------------------------------- */
+    /*                          HasFinancialAccounts                          */
+    /* ---------------------------------------------------------------------- */
     #region HasFinancialAccounts
     public function getInternalAccount(string $system, string $currency): Account
     {
@@ -483,6 +536,7 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
     }
 
     #endregion HasFinancialAccounts
+    /* ---------------------------------------------------------------------- */
 
     // %%% --- Misc. ---
 

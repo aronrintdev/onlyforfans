@@ -37,6 +37,10 @@ php artisan websockets:serve & \
 ./meilisearch &
 
 ### Import Searchable Models ###
+php artisan scout:import "App\Models\User"
+php artisan scout:import "App\Models\Timeline"
+php artisan scout:import "App\Models\Post"
+php artisan scout:import "App\Models\Story"
 php artisan scout:import "App\Models\Mycontact"
 
 ### Run webpack hot server ###

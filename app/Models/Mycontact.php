@@ -27,7 +27,17 @@ class Mycontact extends Model implements Ownable
         OwnableTraits,
         Searchable;
 
-    protected $guarded = [ 'created_at', 'updated_at' ];
+    //------------------------------------------------------------------------//
+    //                            Model Properties                            //
+    // ---------------------------------------------------------------------- //
+    #region Model Properties
+
+    protected $guarded = [
+        'created_at',
+        'updated_at'
+    ];
+
+    #endregion Model Properties
 
     //------------------------------------------------------------------------//
     //                       Accessors/Mutators | Casts                       //
@@ -35,11 +45,80 @@ class Mycontact extends Model implements Ownable
     #region Casts
 
     protected $casts = [
-        'cattrs'    => 'array',
-        'meta'      => 'array',
+        'cattrs' => 'array',
+        'meta'   => 'array',
     ];
 
     #endregion Casts
+    //------------------------------------------------------------------------//
+
+    //------------------------------------------------------------------------//
+    //                              Relationships                             //
+    //------------------------------------------------------------------------//
+    #region Relationships
+    /*
+    public function shareable() {
+        return $this->morphTo();
+    }
+     */
+
+    public function contact()
+    {
+        return $this->belongsTo(User::class, 'contact_id');
+    }
+
+    public function owner()
+    {
+        return $this->belongsTo(User::class, 'owner_id');
+    }
+
+    #endregion Relationships
+    //------------------------------------------------------------------------//
+
+    //------------------------------------------------------------------------//
+    //                                Functions                               //
+    //------------------------------------------------------------------------//
+    #region Functions
+
+
+    /**
+     * Adds contacts for each user in collection to each user in collection if
+     * they don't already have that user as a contact.
+     *
+     * Warning: this is O(n^2), don't hold up web requests with big collections.
+     *
+     * @param   Collection  $users  Collection of users
+     * @param   User        $forUser  Optional if you only want to add contacts to a specific user
+     * @return  Collection  Collection of mycontacts
+     */
+    public static function addContacts(Collection $users, User $forUser = null)
+    {
+        $mycontacts = new Collection();
+
+        if (isset($forUser)) {
+            $users->each(function ($user) use (&$mycontacts, $forUser) {
+                $mycontacts->push(Mycontact::firstOrCreate([
+                    'owner_id' => $forUser->getKey(),
+                    'contact_id' => $user->getKey(),
+                ]));
+            });
+        } else {
+            $users->each(function ($owner) use (&$mycontacts, $users) {
+                $users->each(function ($contact) use (&$mycontacts, $owner) {
+                    if ($owner->getKey() !== $contact->getKey()) {
+                        $mycontacts->push(Mycontact::firstOrCreate([
+                            'owner_id' => $owner->getKey(),
+                            'contact_id' => $contact->getKey(),
+                        ]));
+                    }
+                });
+            });
+        }
+
+        return $mycontacts;
+    }
+
+    #endregion Functions
     //------------------------------------------------------------------------//
 
     //------------------------------------------------------------------------//
@@ -90,29 +169,6 @@ class Mycontact extends Model implements Ownable
     }
 
     #endregion Searchable
-    //------------------------------------------------------------------------//
-
-    //------------------------------------------------------------------------//
-    //                              Relationships                             //
-    //------------------------------------------------------------------------//
-    #region Relationships
-    /*
-    public function shareable() {
-        return $this->morphTo();
-    }
-     */
-
-    public function contact()
-    {
-        return $this->belongsTo(User::class, 'contact_id');
-    }
-
-    public function owner()
-    {
-        return $this->belongsTo(User::class, 'owner_id');
-    }
-
-    #endregion Relationships
     //------------------------------------------------------------------------//
 
     //------------------------------------------------------------------------//
