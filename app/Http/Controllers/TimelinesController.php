@@ -15,19 +15,20 @@ use App\Models\Setting;
 use App\Models\Timeline;
 use App\Models\Fanledger;
 use App\Models\Mediafile;
-use App\Enums\PostTypeEnum;
+use App\Models\Mycontact;
 
+use App\Enums\PostTypeEnum;
 use App\Models\Subscription;
 use Illuminate\Http\Request;
-use App\Enums\PaymentTypeEnum;
 
+use App\Enums\PaymentTypeEnum;
 use App\Enums\MediafileTypeEnum;
 use App\Payments\PaymentGateway;
 use App\Models\Financial\Account;
 use App\Notifications\TipReceived;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Log;
 
+use Illuminate\Support\Facades\Log;
 use App\Models\Financial\SegpayCall;
 use App\Http\Resources\PostCollection;
 use App\Notifications\TimelineFollowed;
@@ -229,6 +230,12 @@ class TimelinesController extends AppBaseController
                 'cattrs' => json_encode($cattrs),
             ]); //
             $isFollowing = true;
+
+            // Add message contacts if they don't already exist
+            Mycontact::addContacts(new Collection([
+                $follower,
+                $timeline->getOwner()->first(),
+            ]));
         }
 
         $timeline->user->notify(new TimelineFollowed($timeline, $follower));
