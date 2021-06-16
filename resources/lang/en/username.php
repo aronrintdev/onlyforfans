@@ -10,7 +10,7 @@ return [
     'invalid' => 'That username is invalid',
 
     'default' => [
-        'word' => 'Your username may not not be the word :rule',
+        'word' => 'Your username may not be the word :rule',
         'regex' => 'Your username may not contain the word :rule',
     ],
     'custom' => [
