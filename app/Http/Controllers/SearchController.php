@@ -24,10 +24,9 @@ class SearchController extends Controller
         $params = $request->all();
         $query = $params['query'] ?? $params['q'];
 
-        // TODO: Dummy Data Like search | Replace with real search engine
-        $timelines = Timeline::where('name', 'LIKE', '%'. $query . '%')->paginate( $request->input('take', 10) );
-        $posts     = Post::where('description', 'LIKE', '%' . $query . '%')->paginate( $request->input('take', 10) );
-        $stories   = Story::where('content', 'LIKE', '%' . $query . '%')->paginate( $request->input('take', 10) );
+        $timelines = Timeline::search($query)->paginate( $request->input('take', 10) );
+        $posts     = Post::search($query)->paginate( $request->input('take', 10) );
+        $stories   = Story::search($query)->paginate( $request->input('take', 10) );
         return [
             'timelines' => new TimelineCollection($timelines),
             'posts' => new PostCollection($posts),

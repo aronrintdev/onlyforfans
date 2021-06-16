@@ -25,6 +25,7 @@ use App\Models\Traits\ShareableTraits;
 use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Laravel\Scout\Searchable;
 use Money\Currencies\ISOCurrencies;
 
 /**
@@ -58,7 +59,8 @@ class Timeline extends Model implements Subscribable, Tippable, Reportable
         SluggableTraits,
         ShareableTraits,
         FormatMoney,
-        HasCurrency;
+        HasCurrency,
+        Searchable;
 
     //protected $appends = [ ];
     protected $keyType = 'string';
@@ -225,6 +227,55 @@ class Timeline extends Model implements Subscribable, Tippable, Reportable
     }
 
     #endregion Purchasable
+
+    /* ---------------------------------------------------------------------- */
+    /*                               Searchable                               */
+    /* ---------------------------------------------------------------------- */
+    #region Searchable
+
+    /**
+     * Name of the search index associated with this model
+     * @return string
+     */
+    public function searchableAs()
+    {
+        return "timelines_index";
+    }
+
+    /**
+     * Get value used to index the model
+     * @return mixed
+     */
+    public function getScoutKey()
+    {
+        return $this->getKey();
+    }
+
+    /**
+     * Get key name used to index the model
+     * @return string
+     */
+    public function getScoutKeyName()
+    {
+        return 'id';
+    }
+
+    /**
+     * What model information gets stored in the search index
+     * @return array
+     */
+    public function toSearchableArray()
+    {
+        return [
+            'name'     => $this->name,
+            'slug'     => $this->slug,
+            'username' => $this->user->username,
+            'id'       => $this->getKey(),
+        ];
+    }
+
+    #endregion Searchable
+    /* ---------------------------------------------------------------------- */
 
     /* ---------------------------- Subscribable ---------------------------- */
     #region Subscribable

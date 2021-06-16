@@ -13,6 +13,7 @@ use App\Models\Traits\SluggableTraits;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection;
+use Laravel\Scout\Searchable;
 
 class Story extends Model implements Likeable, Ownable
 {
@@ -23,6 +24,7 @@ class Story extends Model implements Likeable, Ownable
     use Sluggable;
     use SluggableTraits;
     use OwnableTraits;
+    use Searchable;
 
     protected $guarded = [
         'id',
@@ -71,6 +73,55 @@ class Story extends Model implements Likeable, Ownable
     {
         return $this->belongsTo('App\Models\Timeline');
     }
+
+    /* ---------------------------------------------------------------------- */
+    /*                               Searchable                               */
+    /* ---------------------------------------------------------------------- */
+    #region Searchable
+
+    /**
+     * Name of the search index associated with this model
+     * @return string
+     */
+    public function searchableAs()
+    {
+        return "stories_index";
+    }
+
+    /**
+     * Get value used to index the model
+     * @return mixed
+     */
+    public function getScoutKey()
+    {
+        return $this->getKey();
+    }
+
+    /**
+     * Get key name used to index the model
+     * @return string
+     */
+    public function getScoutKeyName()
+    {
+        return 'id';
+    }
+
+    /**
+     * What model information gets stored in the search index
+     * @return array
+     */
+    public function toSearchableArray()
+    {
+        return [
+            'name'    => $this->timeline->name,
+            'slug'    => $this->slug,
+            'content' => $this->content,
+            'id'      => $this->getKey(),
+        ];
+    }
+
+    #endregion Searchable
+    /* ---------------------------------------------------------------------- */
 
     //--------------------------------------------
     // Overrides

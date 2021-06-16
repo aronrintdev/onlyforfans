@@ -323,6 +323,56 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
     #endregion Accessors/Mutators | Casts
     /* ---------------------------------------------------------------------- */
 
+    /* ---------------------------------------------------------------------- */
+    /*                               Searchable                               */
+    /* ---------------------------------------------------------------------- */
+    #region Searchable
+
+    /**
+     * Name of the search index associated with this model
+     * @return string
+     */
+    public function searchableAs()
+    {
+        return "users_index";
+    }
+
+    /**
+     * Get value used to index the model
+     * @return mixed
+     */
+    public function getScoutKey()
+    {
+        return $this->getKey();
+    }
+
+    /**
+     * Get key name used to index the model
+     * @return string
+     */
+    public function getScoutKeyName()
+    {
+        return 'id';
+    }
+
+    /**
+     * What model information gets stored in the search index
+     * @return array
+     */
+    public function toSearchableArray()
+    {
+        return [
+            'name'     => $this->timeline->name,
+            'slug'     => $this->timeline->slug,
+            'username' => $this->username,
+            'email'    => $this->email,
+            'id'       => $this->getKey(),
+        ];
+    }
+
+    #endregion Searchable
+    /* ---------------------------------------------------------------------- */
+
     // ---
 
     public function getUserSettings($user_id)
