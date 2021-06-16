@@ -15,7 +15,7 @@
           <div v-if="verrors && verrors.message">
             <b-alert variant="danger" v-text="verrors.message" show />
           </div>
-          <b-form-group :invalid-feedback="verrors.email ? verrors.email : null" :state="verrors.email ? false : null">
+          <b-form-group :invalid-feedback="verrors.email ? verrors.email[0] : null" :state="verrors.email ? false : null">
             <b-form-input
               id="input-email"
               v-model="form.email"
@@ -24,7 +24,7 @@
               @focus="clearVerrors"
             />
           </b-form-group>
-          <b-form-group :invalid-feedback="verrors.password ? verrors.password : null" :state="verrors.password ? false : null">
+          <b-form-group :invalid-feedback="verrors.password ? verrors.password[0] : null" :state="verrors.password ? false : null">
             <b-form-input
               id="input-password"
               type="password"
@@ -34,17 +34,22 @@
               @focus="clearVerrors"
             />
           </b-form-group>
-          <b-form-group :invalid-feedback="verrors.name ? verrors.name : null" :state="verrors.name ? false : null">
-            <b-form-input
-              id="input-name"
-              type="text"
-              v-model="form.name"
-              placeholder="Name"
-              :state="verrors.name ? false : null"
-              @focus="clearVerrors"
-            />
+          <b-form-group
+            :invalid-feedback="verrors.username ? verrors.username[0] : null"
+            :state="verrors.username ? false : null"
+          >
+            <b-input-group prepend="@">
+              <b-form-input
+                id="input-username"
+                type="text"
+                v-model="form.username"
+                placeholder="Username"
+                :state="verrors.username ? false : null"
+                @focus="clearVerrors"
+              />
+            </b-input-group>
           </b-form-group>
-          <b-form-group :invalid-feedback="verrors.tos ? verrors.tos : null" :state="verrors.tos ? false : null">
+          <b-form-group :invalid-feedback="verrors.tos ? verrors.tos[0] : null" :state="verrors.tos ? false : null">
             <b-form-checkbox
               id="checkbox-tos"
               v-model="form.tos"
@@ -57,7 +62,7 @@
         </div>
 
         <div class="p-3">
-          <b-btn type="submit" class="signup-btn" variant="primary" block :disabled="state === 'loading' || !form.tos">
+          <b-btn type="submit" class="cta-btn" variant="primary" block :disabled="state === 'loading' || !form.tos">
             <span v-if="state === 'form'">{{ $t('signUpLink') }}</span>
             <fa-icon v-else icon="spinner" spin />
           </b-btn>
@@ -69,10 +74,20 @@
         <div class="mx-3" v-text="$t('or')" />
         <hr class="h-line flex-grow-1" />
       </div>
-      <div class="third-party-sign-in p-3 text-center">
-        <img src="/images/facebook-login.png" alt="Facebook signin" @click="socialLogin('facebook')" class="social-icon facebook" />
-        <img src="/images/g-login-btn.png" alt="Google signin" @click="socialLogin('google')" class="social-icon" />
-        <img src="/images/twitter-login.png" alt="Twitter signin" @click="socialLogin('twitter')" class="social-icon" />
+      
+      <div class="p-3 mb-3">
+        <b-btn class="cta-btn social-btn facebook" block @click="socialLogin('facebook')">
+          <fa-icon :icon="['fab', 'facebook-f']" class="mr-2" />
+          <span>{{ $t('continueWithFacebook') }}</span>
+        </b-btn>
+        <b-btn class="cta-btn social-btn google" block @click="socialLogin('google')">
+          <fa-icon :icon="['fab', 'google']" class="mr-2" />
+          <span>{{ $t('continueWithGoogle') }}</span>
+        </b-btn>
+        <b-btn class="cta-btn social-btn twitter" block @click="socialLogin('twitter')">
+          <fa-icon :icon="['fab', 'twitter']" class="mr-2" />
+          <span>{{ $t('continueWithTwitter') }}</span>
+        </b-btn>
       </div>
     </b-card>
 
@@ -103,7 +118,7 @@ export default {
     form: {
       email: '',
       password: '',
-      name: '',
+      username: '',
       tos: null,
     },
   }),
@@ -142,27 +157,8 @@ export default {
 .h-line {
   color: var('--gray');
 }
-.third-party-sign-in {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding-bottom: 2em !important;
 
-  img {
-    cursor: pointer; 
-    margin: 0 1em;
-  }
-  .social-icon {
-    width: 50px;
-    height: 50px;
-
-    &.facebook {
-      width: 52px;
-      height: 52px;
-    }
-  }
-}
-.signup-btn {
+.cta-btn {
   height: 42px;
   border: none;
   font-size: 14px;
@@ -176,6 +172,10 @@ export default {
     opacity: .4;
     pointer-events: none;
   }
+
+  &.facebook { background-color: #3B5998; }
+  &.google { background-color: #dd4b39; }
+  &.twitter { background-color: #55ACEE; }
 }
 </style>
 
@@ -190,6 +190,9 @@ export default {
     "signInButton": "Sign In",
     "forgotPasswordLink": "Forgot Password?",
     "or": "or",
+    "continueWithFacebook": "Continue With Facebook",
+    "continueWithGoogle": "Continue With Google",
+    "continueWithTwitter": "Continue With Twitter"
   },
 }
 </i18n>
