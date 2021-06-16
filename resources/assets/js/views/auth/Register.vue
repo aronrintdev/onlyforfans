@@ -51,7 +51,7 @@
               name="checkbox-tos"
               @focus="clearVerrors"
             >
-              I agree to our Terms of Service and Privacy Policy, and confirm that I am at least 18 years old.
+              I agree to the Terms of Service and Privacy Policy and confirm that I am at least 18 years old.
             </b-form-checkbox>
           </b-form-group>
         </div>
@@ -93,7 +93,7 @@ import '../../../static/images/facebook-login.png'
 import '../../../static/images/twitter-login.png'
 
 export default {
-  name: 'login',
+  name: 'register',
   components: {
     LinkBar,
   },
