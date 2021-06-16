@@ -259,6 +259,7 @@ return [
     'change_username_google'             => 'Google doesn\'t provide username, so please change your temporary username',
     'change_username_twitter'            => 'Twitter doesn\'t provide email, so please change your temporary email',
     'change_username_linkedin'           => 'linkedin doesn\'t provide username, so please change your temporary username',
+    'tos_required'                       => 'You must agree to our Terms & Conditions.',
 
 
     /*

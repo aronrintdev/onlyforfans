@@ -71,17 +71,17 @@ class RegisterController extends Controller
     protected function validator(array $data, $captcha = null, $socialLogin = false)
     {
         $messages = [
-            'no_admin' => 'The name admin is restricted for :attribute',
-            'tos.required' => 'You must agree to our Terms & Conditions.'
+            'no_admin' => trans('validation.no_admin'),
+            'tos.required' => trans('messages.tos_required')
         ];
         $rules = [
             'email'     => 'required|email|max:255|unique:users',
-            'name'      => 'max:255',
+            // 'name'      => 'max:255',
             // 'gender'    => 'required',
-            'name'  => 'required|max:25|min:2|unique:timelines|no_admin',
-            'username'  => [ 'max:25|min:5|unique:timelines|no_admin', new \App\Rules\ValidUsername ],
+            // 'name'  => 'required|max:25|min:2|unique:timelines|no_admin',
+            'username'  => [ 'max:25', 'min:5', 'unique:users', 'no_admin', new \App\Rules\ValidUsername ],
             'password'  => 'required|min:6',
-            'affiliate' => 'exists:timelines,username',
+            // 'affiliate' => 'exists:timelines,username',
         ];
         
         if (!$socialLogin) {
@@ -225,7 +225,7 @@ class RegisterController extends Controller
 
         if ($validator->fails()) {    
             if ($request->ajax()) {
-                return response()->json(['status' => 201, 'err_result' => $validator->errors()->toArray()]);
+                return response()->json(['err_result' => $validator->errors()->toArray()]);
             }
             return false;
         }
@@ -240,7 +240,7 @@ class RegisterController extends Controller
             'email'             => $request->email,
             'password'          => bcrypt($request->password),
             'verification_code' => str_random(30),
-            'username'          => 'u'.time(),
+            'username'          => $request->username,
             'remember_token'    => str_random(10),
             'email_verified'    => $mail_verification
         ]);
@@ -261,7 +261,7 @@ class RegisterController extends Controller
         }
 
         $user->timeline()->create([
-            'name' => $request->name,
+            'name' => $request->username,
             'about' => '',
         ]);
 
@@ -301,7 +301,7 @@ class RegisterController extends Controller
             }
 
             if (Auth::loginUsingId($user->id)) {
-                return response()->json(['status' => 201, 'user' => $user]);
+                return response()->json(['user' => $user], 201);
             } else {
                 abort(500);
             }
