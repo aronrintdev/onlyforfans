@@ -41,9 +41,6 @@ Route::get('account/google', 'Auth\RegisterController@google');
 Route::get('twitter', 'Auth\RegisterController@twitterRedirect');
 Route::get('account/twitter', 'Auth\RegisterController@twitter');
 
-Route::get('linkedin', 'Auth\RegisterController@linkedinRedirect');
-Route::get('account/linkedin', 'Auth\RegisterController@linkedin');
-
 /* ---------------------------------- Login --------------------------------- */
 // Route::get('/login', 'Auth\LoginController@getLogin');
 Route::post('/login', 'Auth\LoginController@login');
