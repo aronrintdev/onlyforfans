@@ -78,7 +78,7 @@ class RegisterController extends Controller
             'email'     => 'required|email|max:255|unique:users',
             // 'name'      => 'max:255',
             // 'gender'    => 'required',
-            // 'name'  => 'required|max:25|min:2|unique:timelines|no_admin',
+            'name'  => 'required|max:25|min:2|unique:timelines|no_admin',
             'username'  => [ 'max:25', 'min:5', 'unique:users', 'no_admin', new \App\Rules\ValidUsername ],
             'password'  => 'required|min:6',
             // 'affiliate' => 'exists:timelines,username',
@@ -159,7 +159,7 @@ class RegisterController extends Controller
         }
 
         $user->timeline()->create([
-            'name' => $request->username,
+            'name' => $request->name,
             'about' => '',
         ]);
 
@@ -194,7 +194,7 @@ class RegisterController extends Controller
                 Mail::send('emails.welcome', ['user' => $user], function ($m) use ($user) {
                     $m->from(Setting::get('noreply_email'), Setting::get('site_name'));
 
-                    $m->to($user->email, $user->name)->subject('Welcome to '.Setting::get('site_name'));
+                    $m->to($user->email, $user->timeline->name)->subject('Welcome to '.Setting::get('site_name'));
                 });
             }
 
