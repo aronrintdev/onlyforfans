@@ -35,6 +35,19 @@
             />
           </b-form-group>
           <b-form-group
+            :invalid-feedback="verrors.name ? verrors.name[0] : null"
+            :state="verrors.name ? false : null"
+          >
+            <b-form-input
+              id="input-name"
+              type="text"
+              v-model="form.name"
+              placeholder="Name"
+              :state="verrors.name ? false : null"
+              @focus="clearVerrors"
+            />
+          </b-form-group>
+          <b-form-group
             :invalid-feedback="verrors.username ? verrors.username[0] : null"
             :state="verrors.username ? false : null"
           >
@@ -43,7 +56,7 @@
                 id="input-username"
                 type="text"
                 v-model="form.username"
-                placeholder="Username"
+                placeholder="Username (optional)"
                 :state="verrors.username ? false : null"
                 @focus="clearVerrors"
               />
@@ -118,6 +131,7 @@ export default {
     form: {
       email: '',
       password: '',
+      name: '',
       username: '',
       tos: null,
     },
