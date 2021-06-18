@@ -3,7 +3,7 @@
   <div v-if="!isLoading" class="mini_my_stats_widget-crate tag-crate">
     <section>
       <b-card
-        :img-src="timeline.cover.filepath"
+        :img-src="coverImage"
         :img-alt="timeline.name"
         img-top
         tag="article"
@@ -15,7 +15,7 @@
               thumbnail
               rounded="circle"
               class="w-100 h-100"
-              :src="timeline.avatar.filepath"
+              :src="avatarImage"
               :alt="timeline.name"
               :title="timeline.name"
             ></b-img>
@@ -89,6 +89,14 @@ export default {
     stats() {
       return this.timeline.userstats
     },
+
+    coverImage() {
+      return this.timeline.cover ? this.timeline.cover.filepath : '/images/locked_post.png';
+    },
+
+    avatarImage() {
+      return this.timeline.avatar ? this.timeline.avatar.filepath : '/images/default_avatar.svg';
+    }
   },
 
   data: () => ({}),
