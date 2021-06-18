@@ -105,7 +105,7 @@ class UsernameRule extends Model
         }
         do {
             $username = $faker->bothify($rule);
-        } while (Timeline::where('username')->count() > 0);
+        } while (User::where('username')->count() > 0);
         return $username;
     }
 
