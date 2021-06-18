@@ -362,8 +362,8 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
     public function toSearchableArray()
     {
         return [
-            'name'     => $this->timeline->name,
-            'slug'     => $this->timeline->slug,
+            'name'     => isset($this->timeline) ? $this->timeline->name : '',
+            'slug'     => isset($this->timeline) ? $this->timeline->slug : '',
             'username' => $this->username,
             'email'    => $this->email,
             'id'       => $this->getKey(),
