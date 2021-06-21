@@ -6,6 +6,7 @@ use App\Interfaces\Ownable;
 use App\Interfaces\ShortUuid;
 use App\Enums\PaymentTypeEnum;
 use App\Interfaces\Reportable;
+use Illuminate\Support\Facades\Log;
 
 use App\Models\Traits\UsesUuid;
 use App\Interfaces\Purchaseable;
@@ -79,23 +80,19 @@ class Timeline extends Model implements Subscribable, Tippable, Reportable
     // %%% Accessors/Mutators | Casts
     //--------------------------------------------
 
-    /*
-    public function getAvatarAttribute($value)
-    {
-        return $this->avatar
-            ? $this->avatar
-            : (object) ['filepath' => url('user/avatar/default-' . $this->gender . '-avatar.png')];
-    }
+    // public function getAvatarAttribute($value)
+    // {
+    //     $isNull = is_null($value);
+    //     Log::info("avatar attribute: {$value} {$isNull}");
+    //     return is_null($value) ? (object)['filepath' => url('/images/default_avatar.svg')] : $value;
+    //         // : (object) ['filepath' => url('user/avatar/default-' . $this->gender . '-avatar.png')];
+    // }
 
-    public function getCoverAttribute($value)
-    {
-        return $this->cover
-            ? $this->cover
-            : (object) ['filepath' => url('user/avatar/default-' . $this->gender . '-cover.png')];
-            //: (object) ['filepath' => url('user/cover/default-' . $this->gender . '-cover.png')]; // %TODO %FIXME
-    }
-     */
-
+    // public function getCoverAttribute($value)
+    // {
+    //     return is_null($value) ? (object)['filepath' => url('/images/locked_post.png')] : $value;
+    //         //: (object) ['filepath' => url('user/cover/default-' . $this->gender . '-cover.png')]; // %TODO %FIXME
+    // }
 
     public function toArray()
     {
