@@ -68,10 +68,10 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
 
     protected $guarded = [
         'id',
-        'password',
+        // 'password',
         'remember_token',
         'verification_code',
-        'email_verified',
+        // 'email_verified',
         'created_at',
         'updated_at',
     ];
@@ -304,14 +304,15 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
     {
         return ($this->timeline && $this->timeline->avatar)
             ? $this->timeline->avatar
-            : (object) ['filepath' => url('user/avatar/default-' . $this->gender . '-avatar.png')];
+            : (object) ['filepath' => url('/images/default_avatar.svg')];
+            // : (object) ['filepath' => url('user/avatar/default-' . $this->gender . '-avatar.png')];
     }
 
     public function getCoverAttribute($value)
     {
         return ($this->timeline && $this->timeline->cover)
             ? $this->timeline->cover
-            : (object) ['filepath' => url('user/avatar/default-' . $this->gender . '-cover.png')];
+            : (object) ['filepath' => url('/images/locked_post.png')];
             //: (object) ['filepath' => url('user/cover/default-' . $this->gender . '-cover.png')]; // %TODO %FIXME
     }
 
