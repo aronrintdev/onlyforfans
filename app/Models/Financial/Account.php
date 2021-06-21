@@ -134,6 +134,29 @@ class Account extends Model implements Ownable
     }
     #endregion
 
+    /* ------------------------------- Scopes ------------------------------- */
+    #region Scopes
+
+    public function scopeType($query, $type)
+    {
+        return $query->where('type', $type);
+    }
+
+    public function scopeIsIn($query)
+    {
+        return $query->type(AccountTypeEnum::IN);
+    }
+    public function scopeIsInternal($query)
+    {
+        return $query->type(AccountTypeEnum::INTERNAL);
+    }
+    public function scopeIsOut($query)
+    {
+        return $query->type(AccountTypeEnum::OUT);
+    }
+
+    #endregion Scopes
+    /* ---------------------------------------------------------------------- */
 
     /* ------------------------------ Functions ----------------------------- */
     #region Functions

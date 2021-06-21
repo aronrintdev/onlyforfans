@@ -2,6 +2,7 @@
 namespace App\Models;
 
 use App\Enums\Financial\AccountTypeEnum;
+use App\Enums\ShareableAccessLevelEnum;
 use DB;
 use Auth;
 
@@ -23,6 +24,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use InvalidArgumentException;
 use Laravel\Scout\Searchable;
 
 /**
@@ -199,10 +201,27 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
             ->withPivot('access_level', 'shareable_type', 'sharee_id')->withTimestamps();
     }
 
+    public function followedForFreeTimelines()
+    {
+        return $this->morphedByMany(Timeline::class, 'shareable', 'shareables', 'sharee_id')
+            ->where('access_level', ShareableAccessLevelEnum::DEFAULT)
+            ->withPivot('access_level', 'shareable_type', 'sharee_id')->withTimestamps();
+    }
+
+    /**
+     * Posts user has purchased premium access to
+     */
+    public function purchasedPosts()
+    {
+        return $this->morphedByMany(Post::class, 'shareable', 'shareables', 'sharee_id')
+            ->where('access_level', ShareableAccessLevelEnum::PREMIUM)
+            ->withPivot('access_level', 'shareable_type', 'sharee_id')->withTimestamps();
+    }
+
     public function subscribedtimelines()
     {
         return $this->morphedByMany(Timeline::class, 'shareable', 'shareables', 'sharee_id')
-            ->where('access_level', 'premium')
+            ->where('access_level', ShareableAccessLevelEnum::PREMIUM)
             ->withPivot('access_level', 'shareable_type', 'sharee_id')->withTimestamps();
     }
 

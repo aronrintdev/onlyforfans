@@ -1,12 +1,10 @@
 <?php
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Facades\Log;
+use App\Models\Mycontact;
 use Illuminate\Http\Request;
 use App\Http\Resources\MycontactCollection;
 use App\Http\Resources\Mycontact as MycontactResource;
-use App\Models\Mycontact;
-use App\Models\User;
 
 /**
  * Mycontacts Resource Controller
@@ -24,9 +22,25 @@ class MycontactsController extends AppBaseController
     {
         $request->validate([
             // filters
-            'owner_id' => 'uuid|exists:users,id',
+            'owner_id'                => 'uuid|exists:users,id',
+            'is_subscriber'           => 'boolean',
+            'is_follower'             => 'boolean',
+            'is_cancelled_subscriber' => 'boolean',
+            'is_expired_subscriber'   => 'boolean',
+            'has_purchased_post'      => 'boolean',
+            'has_tipped'              => 'boolean',
         ]);
-        $filters = $request->only(['owner_id']) ?? [];
+        $filters = $request->only([
+            'owner_id',
+            'is_subscriber',
+            'is_follower',
+            'is_cancelled_subscriber',
+            'is_expired_subscriber',
+            'has_purchased_post',
+            'has_tipped',
+        ]) ?? [];
+
+        $sessionUser = $request->user();
 
         $query = Mycontact::query(); // Init query
 
@@ -41,8 +55,71 @@ class MycontactsController extends AppBaseController
         // Apply filters
         foreach ($filters as $key => $v) {
             switch ($key) {
-            default:
-                $query->where($key, $v);
+                case 'is_subscriber':
+                    $query->whereHas('contact', function ($q1) use (&$sessionUser) {
+                        $q1->whereHas('subscribedtimelines', function ($q2) use (&$sessionUser) {
+                            $q2->where('timelines.id', $sessionUser->timeline->id);
+                        });
+                    });
+                    break;
+                case 'is_follower':
+                    $query->whereHas('contact', function ($q1) use (&$sessionUser) {
+                        $q1->whereHas('followedForFreeTimelines', function ($q2) use (&$sessionUser) {
+                            $q2->where('timelines.id', $sessionUser->timeline->id);
+                        });
+                    });
+                    break;
+                case 'is_cancelled_subscriber':
+                    $query->whereHas('contact', function ($qContact) use (&$sessionUser) {
+                        $qContact->whereHas('timeline', function ($qTimeline) use (&$sessionUser) {
+                            $qTimeline->whereHas('subscriptions', function ($qSubscriptions) use (&$sessionUser) {
+                                $qSubscriptions->where('user_id', $sessionUser->id)->canceled()
+                                    ->where('created_at', function($q2) use (&$sessionUser) {
+                                        $q2->select('created_at')->where('user_id', $sessionUser->id)
+                                            ->orderByDesc('created_at')->limit(1);
+                                    });
+                            });
+                        });
+                    });
+                    break;
+                case 'is_expired_subscriber':
+                    $query->whereHas('contact', function ($qContact) use (&$sessionUser) {
+                        $qContact->whereHas('timeline', function ($qTimeline) use (&$sessionUser) {
+                            $qTimeline->whereHas('subscriptions', function ($qSubscriptions) use (&$sessionUser) {
+                                $qSubscriptions->where('user_id', $sessionUser->id)->expired()
+                                    ->where('created_at', function ($q2) use (&$sessionUser) {
+                                        $q2->select('created_at')->where('user_id', $sessionUser->id)
+                                        ->orderByDesc('created_at')->limit(1);
+                                    });
+                            });
+                        });
+                    });
+                    break;
+
+                case 'has_purchased_post':
+                    $query->whereHas('contact', function ($qContact) use (&$sessionUser) {
+                        $qContact->whereHas('purchasedPosts', function ($qPurchasedPosts) use (&$sessionUser) {
+                            $qPurchasedPosts->where('user_id', $sessionUser->id);
+                        });
+                    });
+                    break;
+
+                case 'has_tipped':
+                    $query->whereHas('contact', function ($qContact) use (&$sessionUser) {
+                        $qContact->whereHas('financialAccounts', function ($qFinancialAccounts) use (&$sessionUser) {
+                            $qFinancialAccounts->isInternal()->whereHas('transactions', function ($qTransactions) use (&$sessionUser) {
+                                $qTransactions->isTip()->isDebit()->whereHas('reference', function ($qReference) use(&$sessionUser) {
+                                    $qReference->whereHas('account', function ($qAccount) use(&$sessionUser) {
+                                        $qAccount->where('owner_id', $sessionUser->id);
+                                    });
+                                });
+                            });
+                        });
+                    });
+                    break;
+
+                default:
+                    $query->where($key, $v);
             }
         }
 

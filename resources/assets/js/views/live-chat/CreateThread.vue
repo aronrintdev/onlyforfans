@@ -6,18 +6,81 @@
       <aside class="col-md-5 col-lg-4">
 
         <article class="top-bar d-flex justify-content-between align-items-center">
-          <h4 class="mr-3">Contacts</h4>
-          <SearchInput v-model="searchQuery" size="lg" openLeft />
+          <div class="h4" v-text="$t('title')" />
         </article>
 
-        <article class="d-none">
-          Search
-        </article>
+        <article class="mycontacts-sort py-3 d-flex flex-column justify-content-between align-items-center">
+          <div class="search d-flex align-items-center mb-2 w-100">
+            <label for="create-thread-search" v-text="$t('search.label')" class="text-nowrap mr-2 mb-0" />
+            <b-input ref="searchInput" id="create-thread-search" v-model="searchQuery" class="flex-grow-1" />
+            <b-btn variant="link" @click="$refs.searchInput.$el.focus()">
+              <fa-icon icon="search" size="lg" />
+            </b-btn>
+          </div>
 
-        <article class="mycontacts-sort py-3 d-flex justify-content-between align-items-center">
-          <p class="my-0">{{ sortBy | ucfirst }}</p>
-          <div class="">
-            <b-dropdown ref="sortCtrls" variant="link" size="sm" class="" no-caret>
+          <div class="d-flex w-100">
+
+            <article class="py-3 d-flex flex-wrap align-items-center flex-grow-1">
+              <FilterSelect
+                v-for="filter in quickAccessFiltersList"
+                :key="filter.key"
+                :label="filter.label"
+                :selected="selectedFilter === filter.key"
+                selectedVariant="secondary"
+                variant="light"
+                @selected="() => {
+                  filter.callback()
+                  selectedFilter = filter.key
+                }"
+                class="mx-1 my-1"
+              />
+              <FilterSelect
+                no-selected-icon
+                variant="light"
+                selectedVariant="secondary"
+                @selected="filterAdd"
+              >
+                <fa-icon :icon="['fas', 'plus']" />
+              </FilterSelect>
+            </article>
+
+            <b-dropdown
+              ref="filterControls"
+              class="filter-controls"
+              variant="link"
+              size="sm"
+              right
+              no-caret
+            >
+              <template #button-content>
+                <fa-icon icon="filter" />
+              </template>
+              <b-dropdown-item
+                v-for="filter in availableFilters"
+                :key="filter.key"
+                :active="filter.key === selectedFilter"
+                @click="() => {
+                  filter.callback()
+                  selectedFilter = filter.key
+                }"
+              >
+                <fa-icon
+                  :style="{ opacity: filter.always || inQuickAccessFilters(filter) ? '100%': '0' }"
+                  icon="check"
+                  class="mx-2"
+                  size="lg"
+                  fixed-width
+                />
+                {{ filter.label }}
+              </b-dropdown-item>
+              <b-dropdown-divider />
+              <b-dropdown-item>
+                <fa-icon icon="plus" class="text-success mx-2" size="lg" fixed-width />
+                {{ $t('filters.add') }}
+              </b-dropdown-item>
+            </b-dropdown>
+
+            <b-dropdown ref="sortCtrls" variant="link" size="sm" right no-caret>
               <template #button-content>
                 <fa-icon :icon="['fas', 'sort-amount-down']" class="fa-lg" />
               </template>
@@ -26,57 +89,48 @@
                   <b-form-radio v-model="sortBy" size="sm" name="sort-posts-by" value="recent">Recent</b-form-radio>
                   <b-form-radio v-model="sortBy" size="sm" name="sort-posts-by" value="oldest">Oldest</b-form-radio>
                 </b-form-group>
-                <b-dropdown-divider></b-dropdown-divider>
-                <b-form-group label="">
-                  <b-dropdown-item-button>Mark All as Read</b-dropdown-item-button>
-                </b-form-group>
               </b-dropdown-form>
             </b-dropdown>
           </div>
         </article>
 
-        <article class="mycontacts-filters py-3 d-flex OFF-justify-content-between align-items-center">
-          <b-button @click="clearFilters()" pill variant="outline-info" class="mx-1">All</b-button>
-          <b-button @click="toggleFilter('is_subscriber')" pill :variant="Object.keys(this.filters).includes('is_subscriber') ? 'info' : 'outline-info'" class="mx-1">Subscribers</b-button>
-          <b-button pill variant="outline-info" class="mx-1">
-            <fa-icon :icon="['fas', 'plus']" class="fa-lg" />
-          </b-button>
-        </article>
-
         <article class="contact-list position-relative">
-          <b-list-group v-if="showSearchResults">
+          <div class="mb-2 d-flex justify-content-end align-items-center">
+            <span
+              v-if="contactsSelectedLength > 0"
+              class="text-muted mr-3"
+              v-text="$t('selectedCount', { count: contactsSelectedLength })"
+            />
+
+            <label for="select-all" v-text="$t('selectAll')" class="mr-2 mb-0" />
+            <b-form-checkbox
+              id="select-all"
+              v-model="selectAll"
+              :value="true"
+              :indeterminate="selectIndeterminate"
+              inline
+              class="mr-2 mb-1"
+              size="lg"
+            >
+            </b-form-checkbox>
+          </div>
+
+          <b-list-group>
             <b-list-group-item
-              v-for="contact in searchResults"
+              v-for="contact in renderedItems"
               :key="contact.id"
               :data-ct_id="contact.id"
               class="px-2"
             >
-              <PreviewContact
-                :session_user="session_user"
-                :contact="contact.contact"
-                v-on:select-contact="selectContact($event)"
-                v-model="selectedContacts[contact.id]"
-              />
+              <PreviewContact :contact="contact" @input="onContactInput" />
             </b-list-group-item>
-            <b-list-group-item v-if="searchResults.length === 0" class="text-center">
+            <LoadingOverlay :loading="isSearching" :text="$t('search.searching')" />
+            <b-list-group-item v-if="showSearchResults && searchResultsLength === 0" class="text-center">
               {{ $t('search.no-results', { search: searchQuery }) }}
             </b-list-group-item>
-          </b-list-group>
-          <b-list-group v-else>
-            <b-list-group-item
-              v-for="contact in mycontacts"
-              :key="contact.id"
-              :data-ct_id="contact.id"
-              class="px-2"
-            >
-              <PreviewContact
-                :session_user="session_user"
-                :contact="contact.contact"
-                v-on:select-contact="selectContact($event)"
-                v-model="selectedContacts[contact.id]"
-              />
+            <b-list-group-item v-else-if="renderedItems.length === 0" class="text-center">
+              {{ $t('search.no-results', { search: searchQuery }) }}
             </b-list-group-item>
-            <LoadingOverlay :loading="searchQuery !== ''" :text="$t('search.searching')" />
           </b-list-group>
         </article>
 
@@ -98,11 +152,15 @@
 /**
  * resources/assets/js/views/live-chat/CrateThread.vue
  */
+import Vue from 'vue'
 import Vuex from 'vuex'
 import moment from 'moment'
+import _ from 'lodash'
+
 import CreateThreadForm from '@views/live-chat/components/CreateThreadForm'
+import FilterSelect from './components/FilterSelect.vue'
 import PreviewContact from '@views/live-chat/components/PreviewContact'
-import SearchInput from '@components/common/search/HorizontalOpenInput'
+
 import LoadingOverlay from '@components/common/LoadingOverlay'
 
 export default {
@@ -110,9 +168,9 @@ export default {
 
   components: {
     CreateThreadForm,
-    PreviewContact,
-    SearchInput,
+    FilterSelect,
     LoadingOverlay,
+    PreviewContact,
   },
 
   computed: {
@@ -122,6 +180,65 @@ export default {
       return !this.session_user || !this.mycontacts
     },
 
+    availableFilters() {
+      return [
+        {
+          key: 'all',
+          always: true,
+          label: this.$t('filters.all'),
+          callback: this.setFilter,
+        }, {
+          key: 'subscribers',
+          label: this.$t('filters.subscribers'),
+          callback: () => this.setFilter('is_subscriber'),
+        }, {
+          key: 'followers',
+          label: this.$t('filters.followers'),
+          callback: () => this.setFilter('is_follower'),
+        }, {
+          key: 'canceled',
+          label: this.$t('filters.canceled'),
+          callback: () => this.setFilter('is_cancelled_subscriber'),
+        }, {
+          key: 'expired',
+          label: this.$t('filters.expired'),
+          callback: () => this.setFilter('is_expired_subscriber'),
+        }, {
+          key: 'purchasers',
+          label: this.$t('filters.purchasers'),
+          callback: () => this.setFilter('has_purchased_post'),
+        }, {
+          key: 'tippers',
+          label: this.$t('filters.tippers'),
+          callback: () => this.setFilter('has_tipped'),
+        },
+      ]
+    },
+
+    quickAccessFiltersList() {
+      return _.filter(this.availableFilters, o => (
+        o.always || this.inQuickAccessFilters(o) || o.key === this.selectedFilter
+      ))
+    },
+
+    contactsSelectedLength() {
+      return _.filter(this.mycontacts, o => (o.selected)).length
+    },
+
+    contactsLength() {
+      return Object.keys(this.mycontacts).length
+    },
+
+    searchResultsLength() {
+      return Object.keys(this.searchResults).length
+    },
+
+    renderedItems() {
+      if (this.showSearchResults) {
+        return _.filter(this.mycontacts, o => _.indexOf(this.searchResults, o.id) > -1)
+      }
+      return this.mycontacts
+    }
 
   }, // computed()
 
@@ -131,17 +248,16 @@ export default {
 
     sortBy: 'recent',
 
-    mycontacts: null,
+    mycontacts: {},
 
     // %FIXME: Not sure how to propagate this down and back up to an array of custom form components, see:
     // https://vuejs.org/v2/guide/components.html#Using-v-model-on-Components
-    selectedContacts: [],
+    // selectedContacts: [],
 
     meta: null,
     perPage: 10,
     currentPage: 1,
 
-    renderedItems: [],
     renderedPages: [], // track so we don't re-load same page (set of messages) more than 1x
 
     isLastVisible: false, // was: lastPostVisible
@@ -153,6 +269,15 @@ export default {
     showSearchResults: false,
     searchResults: [],
     searchDebounceDuration: 500,
+
+    selectAll: false,
+    selectIndeterminate: false,
+
+    selectedFilter: 'all',
+    quickAccessFilters: [
+      'subscribers',
+      'followers',
+    ],
 
     filters: {},
 
@@ -166,21 +291,24 @@ export default {
   mounted() { },
 
   methods: {
-
     ...Vuex.mapActions([
       'getMe',
     ]),
 
-    selectContact({ contact, isSelected }) {
-      // contact is the user pkid
-      console.log('CreateThread: selected contact', {
-        contact: contact,
-        isSelected: isSelected,
-      })
-      if ( !isSelected ) {
-        this.selectedContacts = this.selectedContacts.filter( iter => iter !== contact )
-      } else {
-        this.selectedContacts.push(contact)
+    onContactInput(value) {
+      Vue.set(this.mycontacts, value.id, value)
+      const selected = _.filter(this.mycontacts, o => (o.selected)).length
+
+      if ( this.contactsSelectedLength < this.contactsLength ) {
+        this.selectIndeterminate = true
+      }
+      if ( this.contactsSelectedLength === this.contactsLength ) {
+        this.selectIndeterminate = false
+        this.selectAll = true
+      }
+      if (this.contactsSelectedLength === 0) {
+        this.selectIndeterminate = false
+        this.selectAll = false
       }
     },
 
@@ -191,7 +319,7 @@ export default {
         //participant_id: this.session_user.id,
       }
       params = { ...params, ...this.filters }
-      console.log('getContacts', {
+      this.$log.debug('getContacts', {
         filters: this.filters,
         params: params,
       })
@@ -199,7 +327,17 @@ export default {
         params.sortBy = this.sortBy
       }
       const response = await axios.get( this.$apiRoute('mycontacts.index'), { params } )
-      this.mycontacts = response.data.data
+
+      const selected = _.keys(this.filters).length > 0 ? true : false
+
+      this.mycontacts = _.keyBy(response.data.data.map(o => ({ ...o, selected })), 'id')
+
+      if (selected) {
+        this.selectAll = true
+        this.selectIndeterminate = false
+      } else {
+        this.selectAll = false
+      }
       this.meta = response.meta
     },
 
@@ -210,7 +348,7 @@ export default {
     }) {
       const params = {
         originator_id: this.session_user.id,
-        participants: this.selectedContacts,
+        participants: _.filter(this.participants, selected).map(o => (o.id)),
       }
 
       if ( mcontent ) {
@@ -221,10 +359,9 @@ export default {
         params.deliver_at = deliver_at
       }
 
-      console.log('createChatthread', { params: params })
+      this.$log.debug('createChatthread', { params: params })
       const response = await axios.post( this.$apiRoute('chatthreads.store'), params )
 
-      this.selectedContacts = []
       this.$router.push({ name: 'chatthreads.dashboard' })
       // %FIXME: clear MessageForm...can we just re-render the CreateThreadForm component to accomplish this?
 
@@ -253,6 +390,21 @@ export default {
       this.isMoreLoading = true
     },
 
+    //
+    // Filters
+    //
+    filterAdd() {
+      //
+    },
+
+    setFilter(k) {
+      this.clearFilters()
+      if(k) {
+        this.filters[k] = 1
+      }
+      this.reloadFromFirstPage()
+    },
+
     // toggles a 'boolean' filter
     toggleFilter(k) { // keeps any filters set prior, adds new one
       if ( Object.keys(this.filters).includes(k) ) {
@@ -267,12 +419,23 @@ export default {
       this.filters = {}
     },
 
+    inQuickAccessFilters(filter) {
+      if (typeof filter === 'string') {
+        return _.indexOf(this.quickAccessFilters, filter) > -1
+      }
+      return _.indexOf(this.quickAccessFilters, filter.key) > -1
+    },
+
+    //
+    // Search
+    //
     _doSearch() {
       this.isSearching = true
       this.axios.get(this.$apiRoute('mycontacts.search'), { params: { q: this.searchQuery } })
         .then(response => {
           if (this.searchQuery !== '') {
-            this.searchResults = response.data.data
+            this.mycontacts = { ...this.mycontacts, ..._.keyBy(response.data.data, 'id') }
+            this.searchResults = response.data.data.map(o => o.id)
             this.showSearchResults = true
           }
           this.isSearching = false
@@ -296,17 +459,38 @@ export default {
       }
     },
 
+    selectAll(value) {
+      if (this.contactsLength === 0) {
+        return
+      }
+
+      if (this.selectIndeterminate || !value) {
+        for(var index in this.mycontacts) {
+          Vue.set(this.mycontacts, index, { ...this.mycontacts[index], selected: false })
+        }
+        this.$nextTick(() => {
+          this.selectIndeterminate = false
+          this.selectAll = false
+        })
+        return
+      }
+
+      for(var index in this.mycontacts) {
+        Vue.set(this.mycontacts, index, { ...this.mycontacts[index], selected: true })
+      }
+    },
+
     session_user(value) {
       if (value) {
-        if (!this.mycontacts) { // initial load only, depends on sesssion user (synchronous)
-          console.log('live-chat/CreateThread - watch session_user: reloadFromFirstPage()')
+        if (this.contactsLength === 0) { // initial load only, depends on sesssion user (synchronous)
+          this.$log.debug('live-chat/CreateThread - watch session_user: reloadFromFirstPage()')
           this.reloadFromFirstPage()
         }
       }
     },
 
     sortBy (newVal) {
-      console.log('live-chat/CreateThread - watch sortBy : reloadFromFirstPage()')
+      this.$log.debug('live-chat/CreateThread - watch sortBy : reloadFromFirstPage()')
       this.$refs.sortCtrls.hide(true)
       this.reloadFromFirstPage()
     },
@@ -328,6 +512,12 @@ body {
 
 }
 
+.filter-controls {
+  ::v-deep .dropdown-item {
+    padding-left: 0;
+  }
+}
+
 .tag-debug {
   border: solid orange 1px;
 }
@@ -342,11 +532,28 @@ body #view-createthread {
 <i18n lang="json5">
 {
   "en": {
+    "filters": {
+      "add": "Add New Filter",
+      "all": "All",
+      "canceled": "Canceled Subscribers",
+      "expired": "Expired Subscribers",
+      "followers": "Followers",
+      "purchasers": "Post Purchasers",
+      "subscribers": "Subscribers",
+      "tippers": "Tippers"
+    },
     "search": {
       "error": "An Error has occurred during your search. Please try again later.",
+      "label": "Send to:",
       "no-results": "No contacts found for search \"{search}\"",
       "searching": "Searching"
-    }
+    },
+    "selectAll": "Select All",
+    "selectedCount": "({count} Selected)",
+    "sort": {
+      "alphabetical": "name"
+    },
+    "title": "New Message"
   }
 }
 </i18n>

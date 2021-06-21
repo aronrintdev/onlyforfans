@@ -95,7 +95,6 @@
 import Vuex from 'vuex'
 import moment from 'moment'
 import PreviewThread from '@views/live-chat/components/PreviewThread'
-import PreviewContact from '@views/live-chat/components/PreviewContact'
 import SearchInput from '@components/common/search/HorizontalOpenInput'
 
 export default {
@@ -103,7 +102,6 @@ export default {
 
   components: {
     PreviewThread,
-    PreviewContact,
     SearchInput,
   },
 
