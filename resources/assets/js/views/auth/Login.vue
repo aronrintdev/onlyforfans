@@ -53,10 +53,20 @@
         <div class="mx-3" v-text="$t('or')" />
         <hr class="h-line flex-grow-1" />
       </div>
-      <div class="third-party-sign-in p-3 text-center">
-        <img src="/images/facebook-login.png" alt="Facebook signin" @click="socialLogin('facebook')" class="social-icon facebook" />
-        <img src="/images/g-login-btn.png" alt="Google signin" @click="socialLogin('google')" class="social-icon" />
-        <img src="/images/twitter-login.png" alt="Twitter signin" @click="socialLogin('twitter')" class="social-icon" />
+
+      <div class="p-3 mb-3">
+        <b-btn class="cta-btn social-btn facebook" block @click="socialLogin('facebook')">
+          <fa-icon :icon="['fab', 'facebook-f']" class="mr-2" />
+          <span>{{ $t('continueWithFacebook') }}</span>
+        </b-btn>
+        <b-btn class="cta-btn social-btn google" block @click="socialLogin('google')">
+          <fa-icon :icon="['fab', 'google']" class="mr-2" />
+          <span>{{ $t('continueWithGoogle') }}</span>
+        </b-btn>
+        <b-btn class="cta-btn social-btn twitter" block @click="socialLogin('twitter')">
+          <fa-icon :icon="['fab', 'twitter']" class="mr-2" />
+          <span>{{ $t('continueWithTwitter') }}</span>
+        </b-btn>
       </div>
     </b-card>
 
@@ -137,26 +147,10 @@ export default {
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-}
-.third-party-sign-in {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding-bottom: 2em !important;
 
-  img {
-    cursor: pointer; 
-    margin: 0 1em;
-  }
-  .social-icon {
-    width: 50px;
-    height: 50px;
-
-    &.facebook {
-      width: 52px;
-      height: 52px;
-    }
-  }
+  &.facebook { background-color: #3B5998; }
+  &.google { background-color: #dd4b39; }
+  &.twitter { background-color: #55ACEE; }
 }
 </style>
 
@@ -171,6 +165,9 @@ export default {
     "signInButton": "Sign In",
     "forgotPasswordLink": "Forgot Password?",
     "or": "or",
+    "continueWithFacebook": "Continue With Facebook",
+    "continueWithGoogle": "Continue With Google",
+    "continueWithTwitter": "Continue With Twitter"
   },
 }
 </i18n>
