@@ -79,6 +79,7 @@
 <script>
 import Vuex from 'vuex'
 import moment from 'moment'
+import _ from 'lodash'
 import PreviewThread from '@views/live-chat/components/PreviewThread'
 import SearchInput from '@components/common/search/HorizontalOpenInput'
 import Search from '@views/live-chat/components/Search'
@@ -265,8 +266,9 @@ export default {
     },
 
     selectedFilter(value) {
-      if (typeof this.availableFilters[value].callback === 'function') {
-        this.availableFilters[value].callback()
+      const index = _.findIndex(this.availableFilters, o => o.key === value)
+      if (index > -1 && typeof this.availableFilters[index].callback === 'function') {
+        this.availableFilters[index].callback()
       }
     },
 

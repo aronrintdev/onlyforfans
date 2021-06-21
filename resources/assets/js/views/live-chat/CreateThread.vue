@@ -94,6 +94,14 @@
               </b-dropdown-form>
             </b-dropdown>
           </div>
+
+          <!-- Extra Filters Collapse -->
+          <b-collapse v-model="showExtraFilters">
+            <div class="my-2">
+              Extra filters go here
+            </div>
+          </b-collapse>
+
         </article>
 
         <article class="contact-list position-relative">
@@ -283,6 +291,8 @@ export default {
       'followers',
     ],
 
+    showExtraFilters: false,
+
     filters: {},
 
   }), // data
@@ -404,6 +414,11 @@ export default {
       this.clearFilters()
       if(k) {
         this.filters[k] = 1
+      }
+      if (Object.keys(this.filters).length > 0) {
+        this.showExtraFilters = true
+      } else {
+        this.showExtraFilters = false
       }
       this.reloadFromFirstPage()
     },
