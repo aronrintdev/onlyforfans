@@ -40,6 +40,9 @@ Vue.use(VueAxios, window.axios);
 import VueI18n from 'vue-i18n';
 Vue.use(VueI18n);
 
+import { VueReCaptcha } from 'vue-recaptcha-v3';
+Vue.use(VueReCaptcha, { siteKey: process.env.MIX_RECAPTCHAV3_SITEKEY });
+
 import ForceCompute from './plugins/forceCompute';
 Vue.use(ForceCompute);
 
