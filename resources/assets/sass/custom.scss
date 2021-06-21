@@ -504,3 +504,6 @@ body .feed-crate.tag-grid-layout .superbox-post .media-slider {
     background: #fff;
   }
 }
+
+// Hide Google Recaptcha Badge
+.grecaptcha-badge { visibility: hidden !important; }
