@@ -1,23 +1,24 @@
 <template>
 
-  <div v-if="!isLoading">
+  <div v-if="!isLoading" class="d-flex flex-column">
 
     <section class="chatthread-header">
       <div class="d-flex align-items-center">
         <b-button to="/messages" variant="link" class="" @click="doSomething">
           <fa-icon :icon="['fas', 'arrow-left']" class="fa-lg" />
         </b-button>
-        <p class="m-0"><strong>Select one or more receipients from contacts</strong></p>
+        <p class="m-0"><strong>Select one or more recipients from contacts</strong></p>
       </div>
     </section>
 
     <hr />
 
     <!-- %FIXME DRY -->
-    <MessageForm 
-      :session_user="session_user" 
-      chatthread_id="new" 
+    <MessageForm
+      :session_user="session_user"
+      chatthread_id="new"
       v-on="$listeners"
+      class="flex-grow-1"
     />
 
   </div>

@@ -1,17 +1,17 @@
 <template>
-  <div>
+  <b-list-group-item class="cursor-pointer" @click="onClicked">
     <section class="d-flex align-items-center">
       <b-avatar :src="avatarSrc" size="3rem" :alt="contact.contact.name" />
-      <b-link :to="link(contact.id)" class="contact-info pl-2">
+      <div class="contact-info pl-2">
         <p class="my-0">
           <span class="msg-username">{{ contact.alias || contact.contact.username || contact.contact.name}}</span>
         </p>
-      </b-link>
-      <div class="pl-2 tag-ctrl ml-auto">
-        <b-form-checkbox size="lg" :checked="contact.selected" :value="true" @change="onSelect" />
+      </div>
+      <div class="pl-2 tag-ctrl ml-auto" :style="{ pointerEvents: 'none' }">
+        <b-form-checkbox ref="checkbox" size="lg" :checked="contact.selected" :value="true" @change="onSelect" />
       </div>
     </section>
-  </div>
+  </b-list-group-item>
 </template>
 
 <script>
@@ -55,8 +55,15 @@ export default {
   mounted() { },
 
   methods: {
+    /**
+     * TODO: Deprecate, this functionality is better suited for a modal
+     */
     link(id) {
       return { name: 'mycontacts.show', params: { id: id } }
+    },
+
+    onClicked() {
+      this.onSelect(!this.contact.selected)
     },
 
     onSelect(value) {

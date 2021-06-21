@@ -5,55 +5,44 @@
 
       <aside class="col-md-5 col-lg-4">
 
-        <article class="top-bar d-flex justify-content-between align-items-center">
+        <article class="top-bar d-flex justify-content-between align-items-center mb-3">
           <h4>Messages</h4>
           <div class="d-flex">
-            <SearchInput v-model="searchQuery" openLeft size="lg" />
             <b-button variant="link" class="clickme_to-schedule_message" @click="doSomething">
               <fa-icon :icon="['far', 'calendar-alt']" class="fa-lg" />
             </b-button>
             <b-button variant="link" class="clickme_to-send_message" :to="linkCreateThread()">
-              <fa-icon :icon="['fas', 'plus']" class="fa-lg" />
+              <fa-icon :icon="['fas', 'plus']" size="lg" />
             </b-button>
           </div>
         </article>
 
-        <article class="d-none">
-          Search
-        </article>
-
-        <article class="chatthread-sort py-3 d-flex justify-content-between align-items-center">
-          <p class="my-0">{{ sortBy | ucfirst }}</p>
-          <div class="">
-            <b-dropdown ref="sortCtrls" variant="link" size="sm" class="" no-caret>
-              <template #button-content>
-                <fa-icon :icon="['fas', 'sort-amount-down']" class="fa-lg" />
-              </template>
-              <b-dropdown-form>
-                <b-form-group label="">
-                  <b-form-radio v-model="sortBy" size="sm" name="sort-posts-by" value="recent">Recent</b-form-radio>
-                  <b-form-radio v-model="sortBy" size="sm" name="sort-posts-by" value="oldest">Oldest</b-form-radio>
-                  <!--
-                  <b-form-radio v-model="sortBy" size="sm" name="sort-posts-by" value="unread-first">Unread First</b-form-radio>
-                  <b-form-radio v-model="sortBy" size="sm" name="sort-posts-by" value="oldest-unread-first">Oldest Unread First</b-form-radio>
-                  -->
-                </b-form-group>
-                <b-dropdown-divider></b-dropdown-divider>
-                <b-form-group label="">
-                  <b-dropdown-item-button>Mark All as Read</b-dropdown-item-button>
-                </b-form-group>
-              </b-dropdown-form>
-            </b-dropdown>
-          </div>
-        </article>
+        <Search v-model="searchQuery" :label="$t('search.label')" />
 
         <article class="chatthread-filters py-3 d-flex OFF-justify-content-between align-items-center">
-          <b-button @click="clearFilters()" pill variant="outline-info" class="mx-1">All</b-button>
-          <b-button @click="toggleFilter('is_unread')" pill :variant="Object.keys(this.filters).includes('is_unread') ? 'info' : 'outline-info'" class="mx-1">Unread</b-button>
-          <b-button @click="toggleFilter('is_subscriber')" pill :variant="Object.keys(this.filters).includes('is_subscriber') ? 'info' : 'outline-info'" class="mx-1">Subscribers</b-button>
-          <b-button pill variant="outline-info" class="mx-1">
-            <fa-icon :icon="['fas', 'plus']" class="fa-lg" />
-          </b-button>
+          <!-- Filters/View -->
+          <span class="mr-2" v-text="$t('filters.label')" />
+          <b-form-select v-model="selectedFilter" :options="selectFilters" />
+
+          <b-dropdown ref="sortCtrls" variant="link" size="sm" class="" no-caret right>
+            <template #button-content>
+              <fa-icon :icon="['fas', 'sort-amount-down']" class="fa-lg" />
+            </template>
+            <b-dropdown-form>
+              <b-form-group label="">
+                <b-form-radio v-model="sortBy" size="sm" name="sort-posts-by" value="recent">Recent</b-form-radio>
+                <b-form-radio v-model="sortBy" size="sm" name="sort-posts-by" value="oldest">Oldest</b-form-radio>
+                <!--
+                <b-form-radio v-model="sortBy" size="sm" name="sort-posts-by" value="unread-first">Unread First</b-form-radio>
+                <b-form-radio v-model="sortBy" size="sm" name="sort-posts-by" value="oldest-unread-first">Oldest Unread First</b-form-radio>
+                -->
+              </b-form-group>
+              <b-dropdown-divider></b-dropdown-divider>
+              <b-form-group label="">
+                <b-dropdown-item-button>Mark All as Read</b-dropdown-item-button>
+              </b-form-group>
+            </b-dropdown-form>
+          </b-dropdown>
         </article>
 
         <article class="chatthread-list">
@@ -66,7 +55,7 @@
               :data-ct_id="ct.id"
               class="px-2"
             >
-              <PreviewThread 
+              <PreviewThread
                 :session_user="session_user"
                 :participant="participants(ct)"
                 :chatthread="ct"
@@ -96,6 +85,7 @@ import Vuex from 'vuex'
 import moment from 'moment'
 import PreviewThread from '@views/live-chat/components/PreviewThread'
 import SearchInput from '@components/common/search/HorizontalOpenInput'
+import Search from '@views/live-chat/components/Search'
 
 export default {
   name: 'LivechatDashboard',
@@ -103,6 +93,7 @@ export default {
   components: {
     PreviewThread,
     SearchInput,
+    Search,
   },
 
   computed: {
@@ -113,6 +104,28 @@ export default {
     },
     activeThread() {
       return this.chatthreads.find( ct => ct.id === this.activeThreadId )
+    },
+
+    availableFilters() {
+      return [
+        {
+          key: 'all',
+          label: this.$t('filters.labels.all'),
+          callback: this.clearFilters
+        }, {
+          key: 'unread',
+          label: this.$t('filters.labels.unread'),
+          callback: () => this.toggleFilter('is_unread'),
+        }, {
+          key: 'subscribers',
+          label: this.$t('filters.labels.subscribers'),
+          callback: () => this.toggleFilter('is_subscriber'),
+        }
+      ]
+    },
+
+    selectFilters() {
+      return this.availableFilters.map(o => ({ value: o.key, text: o.label }))
     },
 
     isLoading() {
@@ -141,6 +154,8 @@ export default {
     isMoreLoading: true,
 
     filters: {},
+
+    selectedFilter: 'all',
 
     searchQuery: '',
 
@@ -253,6 +268,12 @@ export default {
       }
     },
 
+    selectedFilter(value) {
+      if (typeof this.availableFilters[value].callback === 'function') {
+        this.availableFilters[value].callback()
+      }
+    },
+
     sortBy (newVal) {
       console.log('live-chat/Dashboard - watch sortBy : reloadFromFirstPage()')
       this.$refs.sortCtrls.hide(true)
@@ -302,3 +323,21 @@ body #view-livechat {
 }
 
 </style>
+
+<i18n lang="json5">
+{
+  "en": {
+    "filters": {
+      "label": "View:",
+      "labels": {
+        "all": "All",
+        "subscribers": "Subscribers",
+        "unread": "Unread"
+      },
+    },
+    "search": {
+      "label": "Search:"
+    }
+  }
+}
+</i18n>

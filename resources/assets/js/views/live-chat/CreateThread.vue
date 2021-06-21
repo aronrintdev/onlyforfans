@@ -1,22 +1,20 @@
 <template>
   <div v-if="!isLoading" class="container-xl px-3 py-3" id="view-create-thread">
 
-    <section class="row">
+    <section class="row h-100">
 
       <aside class="col-md-5 col-lg-4">
 
         <article class="top-bar d-flex justify-content-between align-items-center">
           <div class="h4" v-text="$t('title')" />
+          <b-btn variant="link" :to="{ name: 'chatthreads.dashboard' }">
+            <fa-icon icon="arrow-left" fixed-width size="lg" />
+            <span v-text="$t('nav.return')" />
+          </b-btn>
         </article>
 
         <article class="mycontacts-sort pt-3 d-flex flex-column justify-content-between align-items-center">
-          <div class="search d-flex align-items-center mb-2 w-100">
-            <label for="create-thread-search" v-text="$t('search.label')" class="text-nowrap mr-2 mb-0" />
-            <b-input ref="searchInput" id="create-thread-search" v-model="searchQuery" class="flex-grow-1" />
-            <b-btn variant="link" @click="$refs.searchInput.$el.focus()">
-              <fa-icon icon="search" size="lg" />
-            </b-btn>
-          </div>
+          <Search v-model="searchQuery" :label="$t('search.label')" />
 
           <div class="d-flex pt-3 pb-2 w-100">
             <!-- Quick Filters Buttons -->
@@ -54,7 +52,9 @@
               no-caret
             >
               <template #button-content>
-                <fa-icon icon="filter" />
+                <b-badge show class="alert-primary" :style="{ fontSize: '100%' }">
+                  <span class="mr-2" v-text="$t('filter.label')" /> <fa-icon icon="filter" />
+                </b-badge>
               </template>
               <b-dropdown-item
                 v-for="filter in availableFilters"
@@ -105,33 +105,33 @@
               v-text="$t('selectedCount', { count: contactsSelectedLength })"
             />
 
-            <label for="select-all" v-text="$t('selectAll')" class="mr-2 mb-0 select-none" />
+            <label for="select-all" v-text="$t('selectAll')" class="cursor-pointer select-none mr-2 mb-0" />
             <b-form-checkbox
               id="select-all"
               v-model="selectAll"
               :value="true"
               :indeterminate="selectIndeterminate"
               inline
-              class="mr-2 mb-1"
+              class="cursor-pointer mr-2 mb-1"
               size="lg"
             />
           </div>
 
           <b-list-group>
-            <b-list-group-item
+            <PreviewContact
               v-for="contact in renderedItems"
               :key="contact.id"
               :data-ct_id="contact.id"
               class="px-2"
-            >
-              <PreviewContact :contact="contact" @input="onContactInput" />
-            </b-list-group-item>
+              :contact="contact"
+              @input="onContactInput"
+            />
             <LoadingOverlay :loading="isSearching" :text="$t('search.searching')" />
-            <b-list-group-item v-if="showSearchResults && searchResultsLength === 0" class="text-center">
+            <b-list-group-item v-if="showSearchResults && Object.keys(renderedItems).length === 0" class="text-center">
               {{ $t('search.no-results', { search: searchQuery }) }}
             </b-list-group-item>
-            <b-list-group-item v-else-if="renderedItems.length === 0" class="text-center">
-              {{ $t('search.no-results', { search: searchQuery }) }}
+            <b-list-group-item v-else-if="Object.keys(renderedItems).length === 0" class="text-center">
+              {{ $t('no-results') }}
             </b-list-group-item>
           </b-list-group>
         </article>
@@ -139,14 +139,14 @@
       </aside>
 
       <main class="col-md-7 col-lg-8">
-          <CreateThreadForm
-            :session_user="session_user"
-            v-on:create-chatthread="createChatthread($event)"
-          />
+        <CreateThreadForm
+          :session_user="session_user"
+          v-on:create-chatthread="createChatthread($event)"
+          class="h-100"
+        />
       </main>
 
     </section>
-
   </div>
 </template>
 
@@ -162,6 +162,7 @@ import _ from 'lodash'
 import CreateThreadForm from '@views/live-chat/components/CreateThreadForm'
 import FilterSelect from './components/FilterSelect.vue'
 import PreviewContact from '@views/live-chat/components/PreviewContact'
+import Search from '@views/live-chat/components/Search'
 
 import LoadingOverlay from '@components/common/LoadingOverlay'
 
@@ -173,6 +174,7 @@ export default {
     FilterSelect,
     LoadingOverlay,
     PreviewContact,
+    Search,
   },
 
   computed: {
@@ -533,6 +535,9 @@ body #view-createthread {
 <i18n lang="json5">
 {
   "en": {
+    "filter": {
+      "label": "Filters"
+    },
     "filters": {
       "add": "Add New Filter",
       "all": "All",
@@ -543,6 +548,10 @@ body #view-createthread {
       "subscribers": "Subscribers",
       "tippers": "Tippers"
     },
+    "nav": {
+      "return": "Back"
+    },
+    "no-results": "No Results",
     "search": {
       "error": "An Error has occurred during your search. Please try again later.",
       "label": "Send to:",
