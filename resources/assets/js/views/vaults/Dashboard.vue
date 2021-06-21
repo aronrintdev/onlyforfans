@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!isLoading" id="view-vault_dashboard" class="row">
+  <div v-if="!isLoading" id="view-vault_dashboard" class="row w-100">
     <div class="col-sm-12">
       <VaultDashboardComponent
         :vault_pkid="myVault.id"

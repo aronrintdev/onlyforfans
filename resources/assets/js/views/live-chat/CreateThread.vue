@@ -9,7 +9,7 @@
           <div class="h4" v-text="$t('title')" />
         </article>
 
-        <article class="mycontacts-sort py-3 d-flex flex-column justify-content-between align-items-center">
+        <article class="mycontacts-sort pt-3 d-flex flex-column justify-content-between align-items-center">
           <div class="search d-flex align-items-center mb-2 w-100">
             <label for="create-thread-search" v-text="$t('search.label')" class="text-nowrap mr-2 mb-0" />
             <b-input ref="searchInput" id="create-thread-search" v-model="searchQuery" class="flex-grow-1" />
@@ -18,9 +18,9 @@
             </b-btn>
           </div>
 
-          <div class="d-flex w-100">
-
-            <article class="py-3 d-flex flex-wrap align-items-center flex-grow-1">
+          <div class="d-flex pt-3 pb-2 w-100">
+            <!-- Quick Filters Buttons -->
+            <article class="d-flex flex-wrap align-items-center flex-grow-1">
               <FilterSelect
                 v-for="filter in quickAccessFiltersList"
                 :key="filter.key"
@@ -44,6 +44,7 @@
               </FilterSelect>
             </article>
 
+            <!-- Filters Dropdown -->
             <b-dropdown
               ref="filterControls"
               class="filter-controls"
@@ -80,6 +81,7 @@
               </b-dropdown-item>
             </b-dropdown>
 
+            <!-- Sort Control Dropdown -->
             <b-dropdown ref="sortCtrls" variant="link" size="sm" right no-caret>
               <template #button-content>
                 <fa-icon :icon="['fas', 'sort-amount-down']" class="fa-lg" />
@@ -95,14 +97,15 @@
         </article>
 
         <article class="contact-list position-relative">
+          <!-- Select All -->
           <div class="mb-2 d-flex justify-content-end align-items-center">
             <span
               v-if="contactsSelectedLength > 0"
-              class="text-muted mr-3"
+              class="text-muted mr-3 select-none"
               v-text="$t('selectedCount', { count: contactsSelectedLength })"
             />
 
-            <label for="select-all" v-text="$t('selectAll')" class="mr-2 mb-0" />
+            <label for="select-all" v-text="$t('selectAll')" class="mr-2 mb-0 select-none" />
             <b-form-checkbox
               id="select-all"
               v-model="selectAll"
@@ -111,8 +114,7 @@
               inline
               class="mr-2 mb-1"
               size="lg"
-            >
-            </b-form-checkbox>
+            />
           </div>
 
           <b-list-group>
@@ -385,7 +387,6 @@ export default {
 
     doReset() {
       this.renderedPages = []
-      this.renderedItems = []
       this.isLastVisible = false
       this.isMoreLoading = true
     },

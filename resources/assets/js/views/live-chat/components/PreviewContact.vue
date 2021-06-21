@@ -1,6 +1,5 @@
 <template>
   <div>
-
     <section class="d-flex align-items-center">
       <b-avatar :src="avatarSrc" size="3rem" :alt="contact.contact.name" />
       <b-link :to="link(contact.id)" class="contact-info pl-2">
@@ -12,7 +11,6 @@
         <b-form-checkbox size="lg" :checked="contact.selected" :value="true" @change="onSelect" />
       </div>
     </section>
-
   </div>
 </template>
 

@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="w-100">
     <Player v-if="!loading" :username="username" :stories="stories" />
   </div>
 </template>

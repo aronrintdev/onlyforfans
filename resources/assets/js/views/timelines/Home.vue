@@ -1,60 +1,51 @@
 <template>
-  <div v-if="!isLoading">
+  <div  v-if="!isLoading" class="container-xl" id="view-home_timeline">
+    <b-tabs
+      content-class="mt-3"
+      active-nav-item-class="active-navitem"
+      nav-class="navitem"
+      @input="changeActiveTab"
+    >
+      <b-tab title="Home" active>
+        <section class="row">
+          <article class="col-sm-12">
+            <StoryBar :session_user="session_user"></StoryBar>
+          </article>
+        </section>
 
-    <div class="container-xl" id="view-home_timeline">
-      <b-tabs
-        content-class="mt-3"
-        active-nav-item-class="active-navitem"
-        nav-class="navitem"
-        @input="changeActiveTab"
-      >
-        <b-tab title="Home" active>
-          <section class="row">
-            <article class="col-sm-12">
-              <StoryBar :session_user="session_user"></StoryBar>
-            </article>
-          </section>
-
-          <section class="row" v-if="activeTab === 0">
-            <main :class="mainClass">
-              <CreatePost :session_user="session_user" :timeline="timeline" />
-              <PostFeed :session_user="session_user" :timeline="timeline" :is_homefeed="true" />
-            </main>
-            <aside v-if="!isGridLayout" class="col-md-5 col-lg-4">
-              <MiniMyStatsWidget :session_user="session_user" :timeline="timeline" />
-              <!--
-              <SuggestedFeed :session_user="session_user" :timeline="timeline" class="mt-3" />
-              -->
-              <SuggestedFeed class="mt-3" />
-            </aside>
-          </section>
-        </b-tab>
-        <b-tab title="Queue">
-          <section class="row" v-if="activeTab === 1">
-            <main :class="mainClass">
-              <CreatePost :session_user="session_user" :timeline="timeline" />
-              <PostFeed
-                :key="activeTab"
-                :session_user="session_user"
-                :timeline="timeline"
-                :is_homefeed="true"
-                :is_schedulefeed="true"
-              />
-            </main>
-            <aside v-if="!isGridLayout" class="col-md-5 col-lg-4">
-              <MiniMyStatsWidget :session_user="session_user" :timeline="timeline" />
-              <SuggestedFeed class="mt-3" />
-            </aside>
-          </section>
-        </b-tab>
-      </b-tabs>
-
-      
-
-    </div>
-
-    <Modals />
-
+        <section class="row" v-if="activeTab === 0">
+          <main :class="mainClass">
+            <CreatePost :session_user="session_user" :timeline="timeline" />
+            <PostFeed :session_user="session_user" :timeline="timeline" :is_homefeed="true" />
+          </main>
+          <aside v-if="!isGridLayout" class="col-md-5 col-lg-4">
+            <MiniMyStatsWidget :session_user="session_user" :timeline="timeline" />
+            <!--
+            <SuggestedFeed :session_user="session_user" :timeline="timeline" class="mt-3" />
+            -->
+            <SuggestedFeed class="mt-3" />
+          </aside>
+        </section>
+      </b-tab>
+      <b-tab title="Queue">
+        <section class="row" v-if="activeTab === 1">
+          <main :class="mainClass">
+            <CreatePost :session_user="session_user" :timeline="timeline" />
+            <PostFeed
+              :key="activeTab"
+              :session_user="session_user"
+              :timeline="timeline"
+              :is_homefeed="true"
+              :is_schedulefeed="true"
+            />
+          </main>
+          <aside v-if="!isGridLayout" class="col-md-5 col-lg-4">
+            <MiniMyStatsWidget :session_user="session_user" :timeline="timeline" />
+            <SuggestedFeed class="mt-3" />
+          </aside>
+        </section>
+      </b-tab>
+    </b-tabs>
   </div>
 </template>
 
@@ -66,7 +57,6 @@ import StoryBar from '@components/timelines/StoryBar.vue';
 import CreatePost from '@components/timelines/CreatePost.vue';
 import MiniMyStatsWidget from '@components/user/MiniMyStatsWidget.vue';
 import SuggestedFeed from '@components/common/SuggestedFeed.vue';
-import Modals from '@components/Modals'
 
 export default {
   components: {
@@ -75,7 +65,6 @@ export default {
     CreatePost,
     MiniMyStatsWidget,
     SuggestedFeed,
-    Modals,
   },
 
   computed: {

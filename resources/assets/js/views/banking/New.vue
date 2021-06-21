@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div class="container-xl">
     <b-card>
       <NewForm />
     </b-card>

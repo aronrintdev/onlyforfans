@@ -1,12 +1,14 @@
 <template>
   <b-badge
     :variant="selected ? selectedVariant : variant"
+    :active="selected"
     :pill="pill"
     href="#"
-    class="filter-select text-nowrap cursor-pointer"
+    class="filter-select text-nowrap cursor-pointer select-none"
     @click="onClick"
+    :style="{ fontSize: '90%' }"
   >
-    <fa-icon v-if="selected && !noSelectedIcon" :icon="selectedIcon" fixed-width />
+    <!-- <fa-icon v-if="selected && !noSelectedIcon" :icon="selectedIcon" fixed-width /> -->
     <slot>
       {{ label }}
     </slot>
