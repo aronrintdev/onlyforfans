@@ -18,7 +18,7 @@
           <b-form-textarea
             v-model="newMessageForm.mcontent"
             placeholder="Type a message..."
-            rows="4"
+            :rows="mobile ? 2 : 3"
             max-rows="6"
             spellcheck="false"
           ></b-form-textarea>
@@ -75,6 +75,7 @@
 </template>
 
 <script>
+import Vuex from 'vuex'
 import moment from 'moment'
 
 export default {
@@ -85,6 +86,7 @@ export default {
   },
 
   computed: {
+    ...Vuex.mapState([ 'mobile' ]),
 
     isLoading() {
       return !this.session_user

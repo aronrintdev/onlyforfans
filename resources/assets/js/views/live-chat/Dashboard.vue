@@ -1,7 +1,7 @@
 <template>
   <div v-if="!isLoading" class="container-xl px-3 py-3" id="view-livechat">
 
-    <section class="row">
+    <section class="row h-100">
 
       <aside class="col-md-5 col-lg-4">
 
@@ -47,20 +47,16 @@
 
         <article class="chatthread-list">
           <b-list-group>
-            <b-list-group-item
-              v-for="(ct, idx) in chatthreads"
+            <PreviewThread
+              v-for="ct in chatthreads"
               :key="ct.id"
               :to="linkChatthread(ct.id)"
               :active="isActiveThread(ct.id)"
               :data-ct_id="ct.id"
               class="px-2"
-            >
-              <PreviewThread
-                :session_user="session_user"
-                :participant="participants(ct)"
-                :chatthread="ct"
-              />
-            </b-list-group-item>
+              :participant="participants(ct)"
+              :chatthread="ct"
+            />
           </b-list-group>
         </article>
 
@@ -68,8 +64,8 @@
 
       <main class="col-md-7 col-lg-8">
         <transition mode="out-in" name="quick-fade">
-          <router-view 
-            :session_user="session_user" 
+          <router-view
+            :session_user="session_user"
             :participant="participants(activeThread)"
           />
         </transition>

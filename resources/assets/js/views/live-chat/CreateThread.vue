@@ -352,7 +352,7 @@ export default {
     }) {
       const params = {
         originator_id: this.session_user.id,
-        participants: _.filter(this.participants, selected).map(o => (o.id)),
+        participants: _.filter(this.mycontacts, p => p.selected).map(o => (o.contact.id)),
       }
 
       if ( mcontent ) {

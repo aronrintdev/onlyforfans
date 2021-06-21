@@ -1,5 +1,8 @@
 <template>
-  <div>
+  <b-list-group-item
+    :to="to"
+    :active="active"
+  >
 
     <section class="d-flex align-items-center">
       <b-avatar :src="participant.avatar.filepath" size="3rem" :alt="participant.name" />
@@ -19,22 +22,24 @@
       </div>
     </section>
 
-  </div>
+  </b-list-group-item>
 </template>
 
 <script>
-//import Vuex from 'vuex'
+import Vuex from 'vuex'
 import moment from 'moment'
 
 export default {
 
   props: {
-    session_user: null,
+    active: { type: Boolean, default: false },
+    to: null,
     participant: null,
     chatthread: null,
   },
 
   computed: {
+    ...Vuex.mapState([ 'session_user' ]),
 
     isLoading() {
       return !this.session_user || !this.participant || !this.chatthread
