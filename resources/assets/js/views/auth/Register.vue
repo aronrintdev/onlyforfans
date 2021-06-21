@@ -140,9 +140,14 @@ export default {
     clearVerrors() {
       this.verrors = {}
     },
-    signup: function() {
+    async signup() {
+      await this.$recaptchaLoaded();
+
+      // Execute reCAPTCHA with action "register".
+      const token = await this.$recaptcha('register');
+
       this.state = 'loading'
-      this.axios.post('/register', this.form).then((response) => {
+      this.axios.post('/register', { ...this.form, 'g-recaptcha-response': token }).then((response) => {
         if (response.data.err_result) {
           this.verrors = response.data.err_result;
         } else {

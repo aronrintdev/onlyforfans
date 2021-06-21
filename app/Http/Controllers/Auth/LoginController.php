@@ -49,6 +49,7 @@ class LoginController extends Controller
             //$this->username() => 'required|string',
             'email' => 'required',
             'password' => 'required',
+            'g-recaptcha-response' => 'required|recaptchav3:login,0.5'
         ]);
 
         $user = User::where('email', $request->email)->first();
