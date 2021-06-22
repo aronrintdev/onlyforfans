@@ -1,8 +1,13 @@
 <template>
   <div>
-    <div class="img-wrap position-relative">
-      <img class="OFF-img-fluid" :src="mediafile.filepath" />
-      <b-form-checkbox position-absolute ref="checkbox" size="lg" :checked="mediafile.selected" :value="true" @change="onSelect" />
+    <div class="img-box position-relative">
+      <img :class=" mediafile.selected ? 'tag-selected' : ''" :src="mediafile.filepath" />
+      <div class="render-date">
+        <p class="m-0">{{  moment(mediafile.created_at).format('MMMM D') }}</p>
+      </div>
+      <div class="select-file">
+        <b-form-checkbox ref="checkbox" size="lg" :checked="mediafile.selected" :value="true" @change="onSelect" />
+      </div>
     </div>
     <span>{{ mediafile.orig_filename }}</span>
   </div>
@@ -19,7 +24,6 @@ export default {
 
   props: {
     mediafile: { type: Object, default: () => ({ mediafile: {} })},
-    //selected: { type: Boolean, default: false },
   },
 
   computed: {
@@ -65,8 +69,8 @@ console.log('onSelect')
 
 <style lang="scss" scoped>
 body {
-  .img-wrap {
-    padding-top: calc(25% - 2px);
+  .img-box {
+    padding-top: calc(85% - 2px);
     img {
       object-fit: cover;
       width: 100%;
@@ -74,6 +78,28 @@ body {
       position: absolute;
       top: 0;
       left: 0;
+    }
+    img.tag-selected {
+      filter: brightness(50%);
+    }
+    .render-date {
+      position: absolute;
+      top: 5px;
+      left: 5px;
+      border-radius: 5px;
+      background: #535353;
+      opacity: 0.7;
+      padding: 0.3rem;
+      p {
+        opacity: 1;
+        color: #fff;
+        font-size: 11px;
+      }
+    }
+    .select-file {
+      position: absolute;
+      top: 0;
+      right: 0;
     }
   }
 }

@@ -92,7 +92,7 @@
       <main class="col-md-9 OFF-d-flex OFF-align-items-center">
 
         <!-- +++ File Thumbnails +++ -->
-        <section class="row">
+        <section class="row mb-3">
           <div class="col-sm-12">
             <vue-dropzone 
               ref="myVueDropzone" 
@@ -106,10 +106,15 @@
 
         <!-- +++ File List +++ -->
         <b-row>
-          <b-col class="mb-5" cols="12" md="4" v-for="(mf) in mediafiles" :key="mf.id" role="button">
+          <b-col>
+            <b-button @click="shareSelected()" variant="primary">Add To</b-button>
+          </b-col>
+        </b-row>
+        <b-row :no-gutters="true">
+          <b-col class="OFF-mb-5" cols="12" md="3" v-for="(mf) in mediafiles" :key="mf.id" role="button">
             <PreviewFile
               :data-mf_id="mf.id"
-              class="px-2"
+              class="p-1"
               :mediafile="mf"
               @input="onPreviewFileInput"
             />
@@ -119,6 +124,32 @@
       </main>
 
     </section>
+
+    <b-modal
+      id="modal-share-file"
+      size="lg"
+      title="Follow"
+      hide-footer
+      body-class="p-0"
+    >
+      <div>
+        <b-list-group>
+          <b-list-group-item>
+            Modal
+          </b-list-group-item>
+          <b-list-group-item>
+            Send in New Post
+          </b-list-group-item>
+          <b-list-group-item>
+            Send in New Story
+          </b-list-group-item>
+          <b-list-group-item>
+            Send in New Message
+          </b-list-group-item>
+        </b-list-group>
+      </div>
+    </b-modal>
+
   </div>
 </template>
 
@@ -228,6 +259,10 @@ export default {
   },
 
   methods: {
+    shareSelected() {
+      console.log('shareSelected')
+      this.$bvModal.show('modal-share-file')
+    },
 
     onPreviewFileInput(value) {
       Vue.set(this.mediafiles, value.id, value)
