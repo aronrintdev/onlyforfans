@@ -297,6 +297,10 @@ class Subscription extends Model implements Ownable
                 $options['access_meta'] ?? [],
             );
 
+            if (isset($inTransactions)) {
+                $transactions['inTransactions'] = $inTransactions;
+            }
+
             return $transactions;
         } else if ($this->account->type === AccountTypeEnum::INTERNAL) {
             $transactions = $this->account->moveTo(
@@ -322,10 +326,6 @@ class Subscription extends Model implements Ownable
                 $options['access_cattrs'] ?? [],
                 $options['access_meta'] ?? [],
             );
-
-            if (isset($inTransactions)) {
-                $transactions['inTransactions'] = $inTransactions;
-            }
 
             return $transactions;
         }

@@ -315,8 +315,10 @@ class ProcessSegPayWebhook implements ShouldQueue
                         ]);
                         $subscription->custom_attributes = [ 'segpay_reference' => $transaction->transactionId, 'segpay_purchase_id' => $transaction->purchaseId ];
                         $transactions = $subscription->process();
-                        $transactions['inTransactions']['debit']->metadata = ['segpay_transaction_id' => $transaction->transactionId];
-                        $transactions['inTransactions']['debit']->save();
+                        if ($transactions->has('inTransactions')) {
+                            $transactions['inTransactions']['debit']->metadata = ['segpay_transaction_id' => $transaction->transactionId];
+                            $transactions['inTransactions']['debit']->save();
+                        }
 
                         ItemSubscribed::dispatch($item, $card->account->owner);
                         return ['message' => 'Subscription Initial transaction processed'];
@@ -332,8 +334,10 @@ class ProcessSegPayWebhook implements ShouldQueue
                     $subscription = Subscription::where('custom_attributes->segpay_reference', $transaction->relatedTransactionId)->first();
                     if (isset($subscription)) {
                         $transactions = $subscription->process();
-                        $transactions['inTransactions']['debit']->metadata = ['segpay_transaction_id' => $transaction->transactionId];
-                        $transactions['inTransactions']['debit']->save();
+                        if ($transactions->has('inTransactions')) {
+                            $transactions['inTransactions']['debit']->metadata = ['segpay_transaction_id' => $transaction->transactionId];
+                            $transactions['inTransactions']['debit']->save();
+                        }
 
                         return ['message' => 'Subscription rebill processed'];
                     } else {
