@@ -144,6 +144,8 @@ export default {
     price: 0,
     currency: 'USD',
 
+    vaultfile_ids: [], // content added from vault, not disk: should create new references, *not* new S3 content!
+
     // ref:
     //  ~ https://github.com/rowanwins/vue-dropzone/blob/master/docs/src/pages/SendAdditionalParamsDemo.vue
     //  ~ https://www.dropzonejs.com/#config-autoProcessQueue
@@ -220,7 +222,7 @@ export default {
       this.selectedMedia = this.selectedMedia!=='audio' ? 'audio' : null
     },
 
-    // for dropzone
+    // Dropzone: 'Modify the request and add addtional parameters to request before sending'
     sendingEvent(file, xhr, formData) {
       this.$log.debug('sendingEvent', { file, formData, xhr });
       if ( !this.newPostId ) {
@@ -229,6 +231,12 @@ export default {
       formData.append('resource_id', this.newPostId);
       formData.append('resource_type', 'posts');
       formData.append('mftype', 'post');
+      if ( this.vaultfile_ids.includes(file.id) ) {
+        console.log(`Creating reference for ${file.id}...`)
+        formData.append('diskmediafile_id', ...)
+      } else {
+        console.log(`Creating content for ${file.id}...`)
+      }
     },
 
     // for dropzone
@@ -278,18 +286,17 @@ export default {
     console.log('components/timelines/CreatePost', {
       route_params: this.$route.params,
     })
+    // Retrieve any 'pre-loaded' mediafiles, and add to dropzone...be sure to tag as 'ref-only' or something
+    // %FIXME: stub code here only takes 1st 3, need to call to pull down the specific list pass via vue route params
     const response = axios.get(this.$apiRoute('mediafiles.index'), {
       params: {
         take: 3,
       },
     }).then( response => {
-      console.log('mediafiles.index response', {
-        response,
-        data: response.data,
-      })
       response.data.data.forEach( mf => {
         // https://rowanwins.github.io/vue-dropzone/docs/dist/#/manual
-        var file = { size: mf.orig_size, name: mf.slug, type: mf.mimetype }
+        const file = { size: mf.orig_size, name: mf.id, type: mf.mimetype }
+        this.vaultfile_ids.push(mf.id)
         this.$refs.myVueDropzone.manuallyAddFile(file, mf.filepath)
       })
     })
@@ -326,20 +333,20 @@ export default {
 <style lang="scss" scoped>
 /*
 .dropzone, .dropzone * {
-box-sizing: border-box;
+  box-sizing: border-box;
 }
 .vue-dropzone {
-border: 2px solid #e5e5e5;
-font-family: Arial,sans-serif;
-letter-spacing: .2px;
-color: #777;
-transition: .2s linear;
+  border: 2px solid #e5e5e5;
+  font-family: Arial,sans-serif;
+  letter-spacing: .2px;
+  color: #777;
+  transition: .2s linear;
 }
 .dropzone {
-min-height: 150px;
-border: 2px solid rgba(0, 0, 0, 0.3);
-background: white;
-padding: 20px 20px;
+  min-height: 150px;
+  border: 2px solid rgba(0, 0, 0, 0.3);
+  background: white;
+  padding: 20px 20px;
 }
                                */
 
@@ -378,7 +385,7 @@ li .selectable {
 
 /*
 .create_post-crate .dropzone .dz-image img {
-width: 128px;
+  width: 128px;
 }
  */
 
