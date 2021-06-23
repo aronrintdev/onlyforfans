@@ -36,27 +36,41 @@ export const contacts = {
       },
       subscribers: {
         key: 'subscribers',
-        rules: [ 'is_subscriber' ],
+        rules: ['is_subscriber'],
+        extraFilters: [
+          'totalSpent'
+          // 'subscribed-over'
+        ],
       },
       followers: {
         key: 'followers',
-        rules: [ 'is_follower' ],
+        rules: ['is_follower'],
+        // extraFilters: [ 'following-for' ],
       },
       canceled: {
         key: 'canceled',
-        rules: [ 'is_cancelled_subscriber' ],
+        rules: ['is_cancelled_subscriber'],
+        // extraFilters: [ 'cancelled-ago' ],
       },
       expired: {
         key: 'expired',
-        rules: [ 'is_expired_subscriber' ],
+        rules: ['is_expired_subscriber'],
+        // extraFilters: [ 'expired-ago' ],
       },
       purchasers: {
         key: 'purchasers',
-        rules: [ 'has_purchased_post' ],
+        rules: ['has_purchased_post'],
+        extraFilters: [
+          'totalSpent'
+        ]
       },
       tippers: {
         key: 'tippers',
-        rules: [ 'has_tipped' ],
+        rules: ['has_tipped'],
+        extraFilters: [
+          'totalSpent',
+          // 'totalTipped',
+        ]
       },
     },
 

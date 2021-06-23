@@ -54,6 +54,11 @@
                   <span class="mr-2" v-text="$t('filter.label')" /> <fa-icon icon="filter" />
                 </b-badge>
               </template>
+
+              <b-dropdown-header>
+                Apply Filter
+              </b-dropdown-header>
+
               <b-dropdown-item
                 v-for="filter in filters"
                 :key="filter.key"
@@ -77,23 +82,42 @@
             </b-dropdown>
 
             <!-- Sort Control Dropdown -->
-            <b-dropdown ref="sortCtrls" variant="link" size="sm" right no-caret>
+            <b-dropdown ref="sortCtrls" class="filter-controls" variant="link" size="sm" right no-caret>
               <template #button-content>
                 <fa-icon :icon="['fas', 'sort-amount-down']" class="fa-lg" />
               </template>
-              <b-dropdown-form>
-                <b-form-group label="">
-                  <b-form-radio v-model="sortBy" size="sm" name="sort-posts-by" value="recent">Recent</b-form-radio>
-                  <b-form-radio v-model="sortBy" size="sm" name="sort-posts-by" value="oldest">Oldest</b-form-radio>
-                </b-form-group>
-              </b-dropdown-form>
+
+              <b-dropdown-header>
+                Sort By
+              </b-dropdown-header>
+
+              <b-dropdown-item :active="sortBy === 'recent'" @click="sortBy = 'recent'" >
+                <fa-icon icon="sort-up" fixed-width class="mx-2" size="lg" />
+                Recently Added
+              </b-dropdown-item>
+              <b-dropdown-item :active="sortBy === 'oldest'" @click="sortBy = 'oldest'" >
+                <fa-icon icon="sort-down" fixed-width class="mx-2" size="lg" />
+                Oldest Added
+              </b-dropdown-item>
             </b-dropdown>
           </div>
 
           <!-- Extra Filters Collapse -->
-          <b-collapse v-model="showExtraFilters">
-            <div class="my-2">
-              Extra filters go here
+          <b-collapse :visible="!!extraFilters" class="w-100">
+            <div class="my-2 w-100 d-flex flex-column">
+              <div v-for="item in extraFilters" :key="item" class="w-100 d-flex">
+                <!-- TODO: hookup proper components for each extra filter -->
+                <div v-if="item === 'totalSpent'" class="w-100 d-flex align-items-center">
+                  <b-form-checkbox />
+                  <label for="total-spent" class="text-nowrap mb-0 mr-2">Total Spent:</label>
+                  <b-input-group prepend="$" size="sm" class="flex-grow-1">
+                    <b-form-input id="total-spent" size="sm" />
+                  </b-input-group>
+                </div>
+              </div>
+              <b-btn variant="primary" size="sm" class="mt-2 ml-auto">
+                <fa-icon icon="filter" class="mr-1" /> Apply
+              </b-btn>
             </div>
           </b-collapse>
 
@@ -217,6 +241,10 @@ export default {
       return Object.keys(this.renderedItems).length
     },
 
+    extraFilters() {
+      return this.filters[this.selectedFilter].extraFilters
+    },
+
     searchResultsCount() {
       return Object.keys(this.searchResults).length
     },
@@ -254,8 +282,6 @@ export default {
 
     // Loading
     isLoadingContacts: false,
-
-    showExtraFilters: false,
 
     // Selection Flags
     selectAll: false,
