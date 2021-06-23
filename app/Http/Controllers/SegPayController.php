@@ -204,7 +204,7 @@ class SegPayController extends Controller
         $description = urlencode(Config::get('segpay.description.subscription', 'All Fans Subscription'));
         $token = $account->resource->token;
 
-        $url = "{$baseUrl}?x-eticketId={$xEticketid}&amount={$price}&dynamictrans={$priceEncode}&dynamicdesc={$description}&DynamicPricingID={$dynamicPricingId}&OCToken={$token}&user_id={$userId}&type=subscription&item_id={$item->id}";
+        $url = "{$baseUrl}?x-eticketId={$xEticketid}&amount={$price}&dynamictrans={$priceEncode}&dynamicdesc={$description}&DynamicPricingID={$dynamicPricingId}&OCToken={$token}&user_id={$userId}&item_type=subscription&item_id={$item->id}";
 
         return $url;
     }
