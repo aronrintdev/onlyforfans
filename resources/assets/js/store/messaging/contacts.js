@@ -86,7 +86,6 @@ export const contacts = {
       const filterList = state.cache[cacheKey][page]
       // Return filter of contacts
       return filterList.map(o => state.contacts[o])
-      return _.filter(state.contacts, o => contains(filterList, o.id))
     },
 
     /** Gets filtered object for a filter, take, sort containing all pages loaded */
@@ -103,7 +102,6 @@ export const contacts = {
       filterList = _.flatten(filterList)
       // Return filter of contacts
       return filterList.map(o => state.contacts[o])
-      return _.filter(state.contacts, o => contains(filterList, o.id))
     },
 
     /** List of pinned filters */
