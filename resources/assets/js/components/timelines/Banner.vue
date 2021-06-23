@@ -4,7 +4,7 @@
       @mouseenter="toggleUploadCover(true)"
       @mouseleave="toggleUploadCover(false)"
       class="masthead text-white text-center"
-      v-bind:style="{ backgroundImage: 'url(' + timeline.cover.filepath + ')' }"
+      v-bind:style="{ backgroundImage: 'url(' + session_user.cover.filepath + ')' }"
     >
       <input type="file" id="cover-upload-btn" class="file-input" @change="onCoverChange" />
       <label v-if="uploadCoverVisible" for="cover-upload-btn" class="btn photo-btn">
@@ -30,7 +30,7 @@
         thumbnail
         rounded="circle"
         class="w-100 h-100"
-        :src="timeline.avatar.filepath"
+        :src="session_user.avatar.filepath"
         :alt="timeline.name"
         :title="timeline.name"
       />

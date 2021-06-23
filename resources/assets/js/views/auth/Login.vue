@@ -105,24 +105,31 @@ export default {
       this.verrors = {}
     },
 
-    login() {
-      this.state = 'loading'
-      this.axios.post('/login', this.form).then((response) => {
+    async login() {
+      await this.$recaptchaLoaded();
+
+      // Execute reCAPTCHA with action "login".
+      const token = await this.$recaptcha('login');
+
+      console.log('recaptcha token: ', token);
+
+      this.state = 'loading';
+      this.axios.post('/login', { ...this.form, 'g-recaptcha-response': token }).then((response) => {
         if (response.data.redirect) {
           console.log('success', { 
             redirect: response.data 
           });
-          window.location = response.data.redirect
+          window.location = response.data.redirect;
         } else {
           // %TODO
         }
-        this.state = 'form'
+        this.state = 'form';
       }).catch( e => {
-        const response = e.response
+        const response = e.response;
         if (response.data && response.data.errors) {
-          this.verrors = response.data.errors // L8 convention is 'errors'
+          this.verrors = response.data.errors; // L8 convention is 'errors'
         }
-        this.state = 'form'
+        this.state = 'form';
       });
     },
     socialLogin: function(path) {
