@@ -187,6 +187,9 @@ class Diskmediafile extends BaseModel implements Guidable, Ownable
 
     // %%% --- Other ---
 
+    public function renderUrl() {
+        return !empty($this->filepath) ? Storage::disk('s3')->url($this->filepath) : null;
+    }
 
     // creates diskmediafile and associated mediafile reference
     public static function doCreate(array $attrs) : Mediafile

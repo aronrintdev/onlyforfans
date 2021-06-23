@@ -86,6 +86,11 @@ class Mediafile extends BaseModel implements Guidable, Ownable
         return $this->diskmediafile->is_audio;
     }
 
+    public function getOrigSizeAttribute($value)
+    {
+        return $this->diskmediafile->orig_size;
+    }
+
     public function getGuidAttribute($value)
     {
         return $this->id;
