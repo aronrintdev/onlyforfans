@@ -111,7 +111,7 @@
           </b-col>
         </b-row>
         <b-row :no-gutters="true">
-          <b-col class="OFF-mb-5" cols="12" md="3" v-for="(mf) in mediafiles" :key="mf.id" role="button">
+          <b-col cols="12" md="3" v-for="(mf) in mediafiles" :key="mf.id" role="button">
             <PreviewFile
               :data-mf_id="mf.id"
               class="p-1"
@@ -147,7 +147,7 @@
             Send in New Message
           </b-list-group-item>
         </b-list-group>
-        <b-button @click="shareSelected()" variant="primary">Share</b-button>
+        <b-button @click="sendSelected()" variant="primary">Share</b-button>
       </div>
     </b-modal>
 
@@ -209,6 +209,10 @@ export default {
         data: this.suggestions,
       }]
     },
+
+    selectedMediafiles() {
+      return _.filter(this.mediafiles, o => (o.selected))
+    },
   },
 
   data: () => ({
@@ -250,9 +254,6 @@ export default {
 
   }), // data
 
-  mounted() {
-  },
-
   created() {
     this.currentFolderPKID = this.vaultfolder_pkid
     this.$store.dispatch('getVault', this.vault_pkid)
@@ -261,13 +262,13 @@ export default {
 
   methods: {
 
-
-    shareSelected() {
-      console.log('shareSelected')
+    sendSelected() {
+      // send (share) selected files to a post, story, or message
+      console.log('sendSelected')
       this.$router.replace({
         name: 'index', 
         params: {
-          mediafile_ids: [1,2,3,4],
+          mediafile_ids: this.selectedMediafiles.map( ({id}) => id )
         },
       });
     },
@@ -278,7 +279,7 @@ export default {
     },
 
     onPreviewFileInput(value) {
-      Vue.set(this.mediafiles, value.id, value)
+      Vue.set(this.mediafiles, value.id, value) // Sets .selected on mediafiles array depending on child form component's action
       const numSelected = _.filter(this.mediafiles, o => (o.selected)).length
       console.log('OnPreviewFileInput, post set', {
         value: value,
@@ -286,56 +287,13 @@ export default {
         numSelected,
       })
 
-      /*
-      if ( this.contactsSelectedLength < this.contactsLength ) {
-      this.selectIndeterminate = true
-      }
-      if ( this.contactsSelectedLength === this.contactsLength ) {
-      this.selectIndeterminate = false
-      this.selectAll = true
-      }
-      if (this.contactsSelectedLength === 0) {
-      this.selectIndeterminate = false
-      this.selectAll = false
-      }
-       */
     },
 
-    /*
-      async getContacts() {
-      let params = {
-      page: this.currentPage,
-      take: this.perPage,
-        //participant_id: this.session_user.id,
-      }
-      params = { ...params, ...this.filters }
-      this.$log.debug('getContacts', {
-      filters: this.filters,
-      params: params,
-      })
-      if ( this.sortBy ) {
-      params.sortBy = this.sortBy
-      }
-      const response = await axios.get( this.$apiRoute('mycontacts.index'), { params } )
 
-      const selected = _.keys(this.filters).length > 0 ? true : false
-
-      this.mycontacts = _.keyBy(response.data.data.map(o => ({ ...o, selected })), 'id')
-
-      if (selected) {
-      this.selectAll = true
-      this.selectIndeterminate = false
-      } else {
-      this.selectAll = false
-      }
-      this.meta = response.meta
-      },
-     */
-
-        // In share mode, has the user selected this item to be shared
-        isSelectedToShare({shareable_type, shareable_id}) {
-          return this.shareForm.selectedToShare.some( o => o.shareable_type === shareable_type && o.shareable_id === shareable_id )
-        },
+    // In share mode, has the user selected this item to be shared
+    isSelectedToShare({shareable_type, shareable_id}) {
+      return this.shareForm.selectedToShare.some( o => o.shareable_type === shareable_type && o.shareable_id === shareable_id )
+    },
 
     // In non-share mode, is this item shared
     isShared(resourceType, resourceId) {
@@ -461,29 +419,72 @@ export default {
   },
 }
 /*
-        <b-row>
-              <b-col v-for="(mf) in mediafiles" :key="mf.guid" 
-                                 role="button" 
-                                 v-bind:class="{ 'tag-shared': isShareMode && isSelectedToShare({shareable_type: 'mediafiles', shareable_id: mf.id}) }"
-                                 >
-                                   <div class="position-relative">
-                                    <img class="OFF-img-fluid" height="64" :src="mf.filepath" />
-                                    <b-form-checkbox ref="checkbox" size="lg" :checked="contact.selected" :value="true" @change="onSelect" />
-                                   </div>
-                                   <span>{{ mf.orig_filename }}</span>
-                                   <span v-if="isShared('mediafiles', mf.id)"><b-icon icon="share"></b-icon></span>
-                                   <span v-if="isShareMode"><button @click="toggleSelectedToShare($event, 'mediafiles', mf.id)" type="button" class="btn btn-link ml-3">Share</button></span>
-                                 </b-col>
-                               </b-row>
-          <b-list-group-item v-for="(vf, index) in children" :key="vf.guid" 
-            @click="doNav($event, vf.id)"
-            role="button" 
-            v-bind:class="{ 'tag-shared': isShareMode && isSelectedToShare({shareable_type: 'vaultfolders', shareable_id: vf.id}) }"
-          >
-            {{ vf.name }} 
-            <span v-if="isShared('vaultfolders', vf.id)"><b-icon icon="share"></b-icon></span>
-            <span v-if="isShareMode"><button @click="toggleSelectedToShare($event, 'vaultfolders', vf.id)" type="button" class="btn btn-link ml-3">Share</button></span>
-          </b-list-group-item>
+      <b-row>
+        <b-col v-for="(mf) in mediafiles" :key="mf.guid" 
+          role="button" 
+          v-bind:class="{ 'tag-shared': isShareMode && isSelectedToShare({shareable_type: 'mediafiles', shareable_id: mf.id}) }"
+        >
+          <div class="position-relative">
+            <img class="OFF-img-fluid" height="64" :src="mf.filepath" />
+            <b-form-checkbox ref="checkbox" size="lg" :checked="contact.selected" :value="true" @change="onSelect" />
+          </div>
+          <span>{{ mf.orig_filename }}</span>
+          <span v-if="isShared('mediafiles', mf.id)"><b-icon icon="share"></b-icon></span>
+          <span v-if="isShareMode"><button @click="toggleSelectedToShare($event, 'mediafiles', mf.id)" type="button" class="btn btn-link ml-3">Share</button></span>
+        </b-col>
+      </b-row>
+      <b-list-group-item v-for="(vf, index) in children" :key="vf.guid" 
+        @click="doNav($event, vf.id)"
+        role="button" 
+        v-bind:class="{ 'tag-shared': isShareMode && isSelectedToShare({shareable_type: 'vaultfolders', shareable_id: vf.id}) }"
+      >
+        {{ vf.name }} 
+        <span v-if="isShared('vaultfolders', vf.id)"><b-icon icon="share"></b-icon></span>
+        <span v-if="isShareMode"><button @click="toggleSelectedToShare($event, 'vaultfolders', vf.id)" type="button" class="btn btn-link ml-3">Share</button></span>
+      </b-list-group-item>
+ */
+/*
+      if ( this.contactsSelectedLength < this.contactsLength ) {
+      this.selectIndeterminate = true
+      }
+      if ( this.contactsSelectedLength === this.contactsLength ) {
+      this.selectIndeterminate = false
+      this.selectAll = true
+      }
+      if (this.contactsSelectedLength === 0) {
+      this.selectIndeterminate = false
+      this.selectAll = false
+      }
+ */
+/*
+      async getContacts() {
+      let params = {
+      page: this.currentPage,
+      take: this.perPage,
+        //participant_id: this.session_user.id,
+      }
+      params = { ...params, ...this.filters }
+      this.$log.debug('getContacts', {
+      filters: this.filters,
+      params: params,
+      })
+      if ( this.sortBy ) {
+      params.sortBy = this.sortBy
+      }
+      const response = await axios.get( this.$apiRoute('mycontacts.index'), { params } )
+
+      const selected = _.keys(this.filters).length > 0 ? true : false
+
+      this.mycontacts = _.keyBy(response.data.data.map(o => ({ ...o, selected })), 'id')
+
+      if (selected) {
+      this.selectAll = true
+      this.selectIndeterminate = false
+      } else {
+      this.selectAll = false
+      }
+      this.meta = response.meta
+      },
  */
 </script>
 

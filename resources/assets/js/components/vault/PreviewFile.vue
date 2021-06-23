@@ -45,12 +45,12 @@ export default {
 
   methods: {
     onClicked() {
-console.log('onClicked')
+      console.log('onClicked')
       this.onSelect(!this.mediafile.selected)
     },
 
     onSelect(value) {
-console.log('onSelect')
+      console.log('onSelect')
       if (value) {
         this.$emit('input', { ...this.mediafile, selected: true })
       } else {

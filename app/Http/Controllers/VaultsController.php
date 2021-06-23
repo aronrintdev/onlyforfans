@@ -89,6 +89,7 @@ class VaultsController extends AppBaseController
         return new VaultCollection($data);
     }
 
+    /* DEPRECATED
     public function getAllFiles(Request $request)
     {
         $sessionUser = Auth::user();
@@ -110,6 +111,7 @@ class VaultsController extends AppBaseController
             'mediafiles' => $mediafiles,
         ]);
     }
+     */
 
     public function show(Request $request, $pkid)
     {

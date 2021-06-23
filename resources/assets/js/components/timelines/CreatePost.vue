@@ -144,7 +144,7 @@ export default {
     price: 0,
     currency: 'USD',
 
-    vaultfile_ids: [], // content added from vault, not disk: should create new references, *not* new S3 content!
+    mediafileIdsFromVault: [], // content added from vault, not disk: should create new references, *not* new S3 content!
 
     // ref:
     //  ~ https://github.com/rowanwins/vue-dropzone/blob/master/docs/src/pages/SendAdditionalParamsDemo.vue
@@ -182,6 +182,7 @@ export default {
     },
 
     async savePost() {
+      console.log('CreatePost::savePost()')
       // (1) create the post
       const response = await axios.post(this.$apiRoute('posts.store'), {
         timeline_id: this.timeline.id,
@@ -190,40 +191,50 @@ export default {
         price: this.price,
         currency: this.currency,
         schedule_datetime: this.postScheduleDate,
-      });
-      this.$log.debug('savePost', { response });
+      })
+      this.$log.debug('savePost', { response })
       const json = response.data;
       if (json.post) {
-        this.newPostId = json.post.id;
+        this.newPostId = json.post.id
 
-        const queued = this.$refs.myVueDropzone.getQueuedFiles();
+        const queued = this.$refs.myVueDropzone.getQueuedFiles()
 
-        // (2) upload & attach the mediafiles
+        // (2) upload & attach the mediafiles (in dropzone queue)
         // %FIXME: if this fails, don't we have an orphaned post (?)
+        // %NOTE: files added manually don't seem to be put into the queue, thus sendingEvent won't be called for them (?)
         if ( queued.length ) {
-          this.$refs.myVueDropzone.processQueue(); // this will call dispatch after files uploaded
+          console.log('CreatePost::savePost() - process queue', {
+            queued,
+          })
+          this.$refs.myVueDropzone.processQueue() // this will call dispatch after files uploaded
         } else {
-          this.$log.debug('savePost: dispatching unshiftPostToTimeline...');
-          this.$store.dispatch('unshiftPostToTimeline', { newPostId: this.newPostId });
-          this.resetForm();
+          console.log('CreatePost::savePost() - nothing queued')
+          this.$log.debug('savePost: dispatching unshiftPostToTimeline...')
+          this.$store.dispatch('unshiftPostToTimeline', { newPostId: this.newPostId })
+          this.resetForm()
         }
+
+        // (3) create any mediaifle references, ex from selected files in vault
+        this.mediafileIdsFromVault.forEach( mfid => {
+          axios.post(this.$apiRoute('mediafiles.store'), {
+            mediafile_id: mfid,
+            resource_id: json.post.id,
+            resource_type: 'posts',
+            mftype: 'post',
+          })
+          // %TODO: check failure case
+        })
+        this.mediafileIdsFromVault = [] // empty array (we could remove individually inside the loop)
+        this.$router.replace({'query': null}) // clear mediafile router params from URL
+
       } else {
         this.resetForm();
       }
     },
 
-    takePicture() { // %TODO
-      this.selectedMedia = this.selectedMedia!=='pic' ? 'pic' : null
-    },
-    recordVideo() { // %TODO
-      this.selectedMedia = this.selectedMedia!=='video' ? 'video' : null
-    },
-    recordAudio() { // %TODO
-      this.selectedMedia = this.selectedMedia!=='audio' ? 'audio' : null
-    },
-
     // Dropzone: 'Modify the request and add addtional parameters to request before sending'
     sendingEvent(file, xhr, formData) {
+      // %NOTE: file.name is the mediafile PKID
       this.$log.debug('sendingEvent', { file, formData, xhr });
       if ( !this.newPostId ) {
         throw new Error('Cancel upload, invalid post id');
@@ -231,11 +242,12 @@ export default {
       formData.append('resource_id', this.newPostId);
       formData.append('resource_type', 'posts');
       formData.append('mftype', 'post');
-      if ( this.vaultfile_ids.includes(file.id) ) {
-        console.log(`Creating reference for ${file.id}...`)
-        formData.append('diskmediafile_id', ...)
+      if ( this.mediafileIdsFromVault.includes(file.name) ) {
+        // %NOTE: files added manually not added to queue so this code will never execute (?)
+        //console.log(`Creating reference for mediafile id: ${file.name}...`)
+        //formData.append('mediafile_id', file.name)
       } else {
-        console.log(`Creating content for ${file.id}...`)
+        console.log(`Creating content for mediafile id: ${file.name}...`)
       }
     },
 
@@ -267,6 +279,17 @@ export default {
       this.$store.dispatch('unshiftPostToTimeline', { newPostId: this.newPostId });
       this.resetForm();
     },
+
+    takePicture() { // %TODO
+      this.selectedMedia = this.selectedMedia!=='pic' ? 'pic' : null
+    },
+    recordVideo() { // %TODO
+      this.selectedMedia = this.selectedMedia!=='video' ? 'video' : null
+    },
+    recordAudio() { // %TODO
+      this.selectedMedia = this.selectedMedia!=='audio' ? 'audio' : null
+    },
+
     showSchedulePicker() {
       eventBus.$emit('open-modal', {
         key: 'show-schedule-datetime',
@@ -286,17 +309,20 @@ export default {
     console.log('components/timelines/CreatePost', {
       route_params: this.$route.params,
     })
+    const mediafileIds = this.$route.params.mediafile_ids
+    //this.mediafileIdsFromVault.push(mf.id)
     // Retrieve any 'pre-loaded' mediafiles, and add to dropzone...be sure to tag as 'ref-only' or something
     // %FIXME: stub code here only takes 1st 3, need to call to pull down the specific list pass via vue route params
     const response = axios.get(this.$apiRoute('mediafiles.index'), {
       params: {
         take: 3,
+        mediafile_ids: mediafileIds,
       },
     }).then( response => {
       response.data.data.forEach( mf => {
         // https://rowanwins.github.io/vue-dropzone/docs/dist/#/manual
         const file = { size: mf.orig_size, name: mf.id, type: mf.mimetype }
-        this.vaultfile_ids.push(mf.id)
+        this.mediafileIdsFromVault.push(mf.id)
         this.$refs.myVueDropzone.manuallyAddFile(file, mf.filepath)
       })
     })
