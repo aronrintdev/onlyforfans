@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers;
 
+use App\Enums\ShareableAccessLevelEnum;
 use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
@@ -27,22 +28,24 @@ class ChatthreadsController extends AppBaseController
 
         $request->validate([
             // filters
-            'originator_id' => 'uuid|exists:users,id',
-            'participant_id' => 'uuid|exists:users,id',
+            'originator_id'   => 'uuid|exists:users,id',
+            'participant_id'  => 'uuid|exists:users,id',
             'is_tip_required' => 'boolean',
-            'is_unread' => 'boolean',
-            'is_subscriber' => 'boolean',
+            'is_unread'       => 'boolean',
+            'is_subscriber'   => 'boolean',
+            'is_following'    => 'boolean',
         ]);
 
         // Filters
         $filters = $request->only([
             // values
-            'originator_id', 
-            'participant_id', 
+            'originator_id',
+            'participant_id',
             // booleans
             'is_tip_required',
             'is_unread',
             'is_subscriber',
+            'is_following',
         ]) ?? [];
 
         if ( $request->has('sortBy') ) { // UI may imply these filters when sorting
@@ -84,6 +87,14 @@ class ChatthreadsController extends AppBaseController
                 $query->whereHas('participants', function($q1) use(&$sessionUser) {
                     $q1->whereHas('subscribedtimelines', function($q2) use(&$sessionUser) {
                         $q2->where('timelines.id', $sessionUser->timeline->id);
+                    });
+                });
+                break;
+            case 'is_following':
+                $query->whereHas('participants', function($q1) use(&$sessionUser) {
+                    $q1->whereHas('followedtimelines', function($q2) use(&$sessionUser) {
+                        $q2->where('timelines.id', $sessionUser->timeline->id)
+                            ->where('access_level', ShareableAccessLevelEnum::DEFAULT);
                     });
                 });
                 break;

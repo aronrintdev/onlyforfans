@@ -1,65 +1,73 @@
 <template>
-  <div>
-
+  <b-list-group-item class="cursor-pointer" @click="onClicked">
     <section class="d-flex align-items-center">
-      <b-avatar :src="avatarSrc" size="3rem" :alt="contact.name" />
-      <b-link :to="link(contact.id)" class="contact-info pl-2">
+      <b-avatar :src="avatarSrc" size="3rem" :alt="contact.contact.name" />
+      <div class="contact-info pl-2">
         <p class="my-0">
-          <span class="msg-username">{{ contact.username || contact.name}}</span>
+          <span class="msg-username">{{ contact.alias || contact.contact.username || contact.contact.name}}</span>
         </p>
-      </b-link>
-      <div class="pl-2 tag-ctrl ml-auto">
-        <b-form-checkbox v-model="isSelected" @change="selectContact(contact.id)"></b-form-checkbox>
+      </div>
+      <div class="pl-2 tag-ctrl ml-auto" :style="{ pointerEvents: 'none' }">
+        <b-form-checkbox ref="checkbox" size="lg" :checked="contact.selected" :value="true" @change="onSelect" />
       </div>
     </section>
-
-  </div>
+  </b-list-group-item>
 </template>
 
 <script>
+/**
+ * resources/assets/js/views/live-chat/components/PreviewContact.vue
+ */
+import Vuex from 'vuex'
 import moment from 'moment'
 
 export default {
+  name: 'PreviewContract',
+
+  model: {
+    prop: 'contact',
+  },
 
   props: {
-    session_user: null,
-    contact: null,
+    contact: { type: Object, default: () => ({ contact: {} })},
+    selected: { type: Boolean, default: false },
   },
 
   computed: {
+    ...Vuex.mapState([ 'session_user' ]),
 
     isLoading() {
       return !this.session_user || !this.contact
     },
 
     avatarSrc() {
-      return this.contact.avatar?.filepath || ''
+      return this.contact.contact.avatar?.filepath || ''
     }
 
   },
 
   data: () => ({
-
     moment: moment,
-
-    isSelected: false,
-
   }), // data
 
   created() { },
 
   mounted() { },
 
-  methods: { 
+  methods: {
+    /**
+     * TODO: Deprecate, this functionality is better suited for a modal
+     */
     link(id) {
       return { name: 'mycontacts.show', params: { id: id } }
     },
 
-    selectContact(contact) {
-      this.$emit('select-contact', {
-        contact: contact, 
-        isSelected: this.isSelected,
-      })
+    onClicked() {
+      this.onSelect(!this.contact.selected)
+    },
+
+    onSelect(value) {
+      this.$emit('input', { ...this.contact, selected: value })
     },
   }, // methods
 
@@ -98,7 +106,4 @@ body {
     word-wrap: break-word;
   }
 }
-</style>
-
-<style lang="scss">
 </style>

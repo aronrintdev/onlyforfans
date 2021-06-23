@@ -172,6 +172,26 @@ class Transaction extends Model
         return $query->whereNull('settled_at')->whereNull('failed_at');
     }
 
+    public function scopeIsDebit($query)
+    {
+        return $query->where('debit_amount', '>', 0);
+    }
+
+    public function scopeIsCredit($query)
+    {
+        return $query->where('credit_amount', '>', 0);
+    }
+
+    public function scopeType($query, $type)
+    {
+        return $query->where('type', $type);
+    }
+
+    public function scopeIsTip($query)
+    {
+        return $query->type(TransactionTypeEnum::TIP);
+    }
+
     #endregion Scopes
 
     /* ------------------------------ Functions ----------------------------- */

@@ -1,27 +1,21 @@
 <template>
-  <div v-if="!isLoading">
+  <div v-if="!isLoading" class="container-xl" id="view-show_timeline">
 
-    <div class="container-xl" id="view-show_timeline">
+    <section class="row">
+      <article class="col-sm-12">
+        <Banner :session_user="session_user" :timeline="timeline" :follower="timeline.user" />
+      </article>
+    </section>
 
-      <section class="row">
-        <article class="col-sm-12">
-          <Banner :session_user="session_user" :timeline="timeline" :follower="timeline.user" />
-        </article>
-      </section>
-
-      <section class="row">
-        <aside v-if="!isGridLayout" class="col-md-5 col-lg-4">
-          <FollowCtrl :session_user="session_user" :timeline="timeline" />
-          <PreviewUpgrade :session_user="session_user" :timeline="timeline" />
-        </aside>
-        <main :class="mainClass">
-          <PostFeed :session_user="session_user" :timeline="timeline" :is_homefeed="false" />
-        </main>
-      </section>
-
-    </div>
-
-    <Modals />
+    <section class="row">
+      <aside v-if="!isGridLayout" class="col-md-5 col-lg-4">
+        <FollowCtrl :session_user="session_user" :timeline="timeline" />
+        <PreviewUpgrade :session_user="session_user" :timeline="timeline" />
+      </aside>
+      <main :class="mainClass">
+        <PostFeed :session_user="session_user" :timeline="timeline" :is_homefeed="false" />
+      </main>
+    </section>
 
   </div>
 </template>
@@ -34,7 +28,6 @@ import StoryBar from '@components/timelines/StoryBar.vue'
 import Banner from '@components/timelines/Banner.vue'
 import FollowCtrl from '@components/common/FollowCtrl.vue'
 import PreviewUpgrade from '@components/common/PreviewUpgrade.vue'
-import Modals from '@components/Modals'
 
 export default {
   components: {
@@ -43,7 +36,6 @@ export default {
     Banner,
     FollowCtrl,
     PreviewUpgrade,
-    Modals,
   },
 
   props: {

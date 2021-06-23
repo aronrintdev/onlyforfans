@@ -3,7 +3,7 @@
 
     <section class="row">
 
-      <main class="col-md-9 col-lg-9">
+      <main class="col-md-9 col-lg-9 mx-auto">
         <b-card >
 
           <h1>Notifications</h1>
