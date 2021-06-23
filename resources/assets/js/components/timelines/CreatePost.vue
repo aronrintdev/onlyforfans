@@ -268,12 +268,34 @@ export default {
       this.postScheduleDate = undefined;
     },
   },
+
   mounted() {
     const self = this;
     eventBus.$on('apply-schedule', function(data) {
       self.postScheduleDate = data;
     })
+
+    console.log('components/timelines/CreatePost', {
+      route_params: this.$route.params,
+    })
+    const response = axios.get(this.$apiRoute('mediafiles.index'), {
+      params: {
+        take: 3,
+      },
+    }).then( response => {
+      console.log('mediafiles.index response', {
+        response,
+        data: response.data,
+      })
+      response.data.data.forEach( mf => {
+        // https://rowanwins.github.io/vue-dropzone/docs/dist/#/manual
+        var file = { size: mf.orig_size, name: mf.slug, type: mf.mimetype }
+        this.$refs.myVueDropzone.manuallyAddFile(file, mf.filepath)
+      })
+    })
+
   },
+
   created() {
     this.dropzoneConfigs = {
       pic: {

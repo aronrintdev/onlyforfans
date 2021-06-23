@@ -107,7 +107,7 @@
         <!-- +++ File List +++ -->
         <b-row>
           <b-col>
-            <b-button @click="shareSelected()" variant="primary">Add To</b-button>
+            <b-button @click="renderShareForm()" variant="primary">Add To</b-button>
           </b-col>
         </b-row>
         <b-row :no-gutters="true">
@@ -147,6 +147,7 @@
             Send in New Message
           </b-list-group-item>
         </b-list-group>
+        <b-button @click="shareSelected()" variant="primary">Share</b-button>
       </div>
     </b-modal>
 
@@ -259,8 +260,20 @@ export default {
   },
 
   methods: {
+
+
     shareSelected() {
       console.log('shareSelected')
+      this.$router.replace({
+        name: 'index', 
+        params: {
+          mediafile_ids: [1,2,3,4],
+        },
+      });
+    },
+
+    renderShareForm() {
+      console.log('renderShareForm')
       this.$bvModal.show('modal-share-file')
     },
 

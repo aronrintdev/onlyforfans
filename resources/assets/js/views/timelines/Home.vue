@@ -49,8 +49,6 @@
         </b-tab>
       </b-tabs>
 
-      
-
     </div>
 
     <Modals />
