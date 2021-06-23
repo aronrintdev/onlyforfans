@@ -22,17 +22,15 @@
               <FilterSelect
                 v-for="filter in quickAccessFiltersList"
                 :key="filter.key"
-                :label="filter.label"
+                :label="filtersLabel(filter.key)"
                 :selected="selectedFilter === filter.key"
                 selectedVariant="secondary"
                 variant="light"
-                @selected="() => {
-                  filter.callback()
-                  selectedFilter = filter.key
-                }"
+                @selected=" selectedFilter = filter.key"
                 class="mx-1 my-1"
               />
               <FilterSelect
+                v-if="showAddFilter"
                 no-selected-icon
                 variant="light"
                 selectedVariant="secondary"
@@ -57,25 +55,22 @@
                 </b-badge>
               </template>
               <b-dropdown-item
-                v-for="filter in availableFilters"
+                v-for="filter in filters"
                 :key="filter.key"
                 :active="filter.key === selectedFilter"
-                @click="() => {
-                  filter.callback()
-                  selectedFilter = filter.key
-                }"
+                @click="selectedFilter = filter.key"
               >
                 <fa-icon
-                  :style="{ opacity: filter.always || inQuickAccessFilters(filter) ? '100%': '0' }"
-                  icon="check"
+                  :style="{ opacity: inQuickAccessFilters(filter) ? '100%': '0' }"
+                  icon="thumbtack"
                   class="mx-2"
                   size="lg"
                   fixed-width
                 />
-                {{ filter.label }}
+                {{ filtersLabel(filter.key) }}
               </b-dropdown-item>
-              <b-dropdown-divider />
-              <b-dropdown-item>
+              <b-dropdown-divider v-if="showAddFilter" />
+              <b-dropdown-item v-if="showAddFilter">
                 <fa-icon icon="plus" class="text-success mx-2" size="lg" fixed-width />
                 {{ $t('filters.add') }}
               </b-dropdown-item>
@@ -108,9 +103,9 @@
           <!-- Select All -->
           <div class="mb-2 d-flex justify-content-end align-items-center">
             <span
-              v-if="contactsSelectedLength > 0"
+              v-if="selectedContactsCount > 0"
               class="text-muted mr-3 select-none"
-              v-text="$t('selectedCount', { count: contactsSelectedLength })"
+              v-text="$t('selectedCount', { count: selectedContactsCount })"
             />
 
             <label for="select-all" v-text="$t('selectAll')" class="cursor-pointer select-none mr-2 mb-0" />
@@ -134,11 +129,12 @@
               :contact="contact"
               @input="onContactInput"
             />
+            <LoadingOverlay :loading="isLoadingContacts" />
             <LoadingOverlay :loading="isSearching" :text="$t('search.searching')" />
-            <b-list-group-item v-if="showSearchResults && Object.keys(renderedItems).length === 0" class="text-center">
+            <b-list-group-item v-if="showSearchResults && renderedItemsCount === 0" class="text-center">
               {{ $t('search.no-results', { search: searchQuery }) }}
             </b-list-group-item>
-            <b-list-group-item v-else-if="Object.keys(renderedItems).length === 0" class="text-center">
+            <b-list-group-item v-else-if="renderedItemsCount === 0" class="text-center">
               {{ $t('no-results') }}
             </b-list-group-item>
           </b-list-group>
@@ -164,13 +160,15 @@
  */
 import Vue from 'vue'
 import Vuex from 'vuex'
-import moment from 'moment'
 import _ from 'lodash'
+import { eventBus } from '@/app'
 
 import CreateThreadForm from '@views/live-chat/components/CreateThreadForm'
 import FilterSelect from './components/FilterSelect.vue'
 import PreviewContact from '@views/live-chat/components/PreviewContact'
 import Search from '@views/live-chat/components/Search'
+
+import contains from '@helpers/contains'
 
 import LoadingOverlay from '@components/common/LoadingOverlay'
 
@@ -185,95 +183,83 @@ export default {
     Search,
   },
 
+  /* ------------------------------------------------------------------------ */
+  /*                                 COMPUTED                                 */
+  /* ------------------------------------------------------------------------ */
   computed: {
     ...Vuex.mapGetters(['session_user']),
+    ...Vuex.mapState('messaging/contacts', [
+      'contacts', 'cache', 'pinned', 'filters',
+    ]),
+    ...Vuex.mapGetters('messaging/contacts', [
+      'contactsCount',
+      'getContactsFor',
+      'getAllPagesContacts',
+      'pinnedFilters',
+      'selectedContacts',
+      'selectedContactsCount',
+    ]),
 
     isLoading() {
-      return !this.session_user || !this.mycontacts
-    },
-
-    availableFilters() {
-      return [
-        {
-          key: 'all',
-          always: true,
-          label: this.$t('filters.all'),
-          callback: this.setFilter,
-        }, {
-          key: 'subscribers',
-          label: this.$t('filters.subscribers'),
-          callback: () => this.setFilter('is_subscriber'),
-        }, {
-          key: 'followers',
-          label: this.$t('filters.followers'),
-          callback: () => this.setFilter('is_follower'),
-        }, {
-          key: 'canceled',
-          label: this.$t('filters.canceled'),
-          callback: () => this.setFilter('is_cancelled_subscriber'),
-        }, {
-          key: 'expired',
-          label: this.$t('filters.expired'),
-          callback: () => this.setFilter('is_expired_subscriber'),
-        }, {
-          key: 'purchasers',
-          label: this.$t('filters.purchasers'),
-          callback: () => this.setFilter('has_purchased_post'),
-        }, {
-          key: 'tippers',
-          label: this.$t('filters.tippers'),
-          callback: () => this.setFilter('has_tipped'),
-        },
-      ]
+      return !this.session_user
     },
 
     quickAccessFiltersList() {
-      return _.filter(this.availableFilters, o => (
+      return _.filter(this.filters, o => (
         o.always || this.inQuickAccessFilters(o) || o.key === this.selectedFilter
       ))
     },
 
-    contactsSelectedLength() {
-      return _.filter(this.mycontacts, o => (o.selected)).length
+    renderedItemsCount() {
+      if (!this.renderedItems) {
+        return 0
+      }
+      return Object.keys(this.renderedItems).length
     },
 
-    contactsLength() {
-      return Object.keys(this.mycontacts).length
-    },
-
-    searchResultsLength() {
+    searchResultsCount() {
       return Object.keys(this.searchResults).length
     },
 
     renderedItems() {
       if (this.showSearchResults) {
-        return _.filter(this.mycontacts, o => _.indexOf(this.searchResults, o.id) > -1)
+        return _.filter(this.contacts, o => contains(this.searchResults, o.id))
       }
-      return this.mycontacts
-    }
+      return this.getAllPagesContacts(this.currentPageObject)
+    },
+
+    currentPageObject() {
+      return {
+        filter: this.selectedFilter,
+        page: this.currentPage,
+        take: this.perPage,
+        sort: this.sortBy,
+      }
+    },
 
   }, // computed()
 
+  /* ------------------------------------------------------------------------ */
+  /*                                   DATA                                   */
+  /* ------------------------------------------------------------------------ */
   data: () => ({
+    // Content Switches
+    showAddFilter: false,
 
-    moment: moment,
-
-    sortBy: 'recent',
-
-    mycontacts: {},
-
-    // %FIXME: Not sure how to propagate this down and back up to an array of custom form components, see:
-    // https://vuejs.org/v2/guide/components.html#Using-v-model-on-Components
-    // selectedContacts: [],
-
-    meta: null,
-    perPage: 10,
+    // List State
     currentPage: 1,
+    perPage: 10,
+    sortBy: 'recent',
+    selectedFilter: 'all',
 
-    renderedPages: [], // track so we don't re-load same page (set of messages) more than 1x
+    // Loading
+    isLoadingContacts: false,
 
-    isLastVisible: false, // was: lastPostVisible
-    isMoreLoading: true,
+    showExtraFilters: false,
+
+    // Selection Flags
+    selectAll: false,
+    selectIndeterminate: false,
 
     // Search Items
     searchQuery: '',
@@ -281,78 +267,98 @@ export default {
     showSearchResults: false,
     searchResults: [],
     searchDebounceDuration: 500,
-
-    selectAll: false,
-    selectIndeterminate: false,
-
-    selectedFilter: 'all',
-    quickAccessFilters: [
-      'subscribers',
-      'followers',
-    ],
-
-    showExtraFilters: false,
-
-    filters: {},
-
   }), // data
 
   created() {
     this.getMe()
+    // Create debounced method
     this.doSearch = _.debounce(this._doSearch, this.searchDebounceDuration);
   },
 
   mounted() { },
 
+  /* ------------------------------------------------------------------------ */
+  /*                                  METHODS                                 */
+  /* ------------------------------------------------------------------------ */
   methods: {
     ...Vuex.mapActions([
       'getMe',
     ]),
+    ...Vuex.mapMutations('messaging/contacts', [
+      'UPDATE_CONTACT',
+      'SAVE_CONTACTS_LIST',
+      'UNSELECT_ALL',
+      'SELECT_CONTACTS',
+    ]),
+    ...Vuex.mapActions('messaging/contacts', [
+      'loadContacts',
+    ]),
+
+    filterAdd() {
+      // TODO: Adding of filters
+    },
+
+    filtersLabel(key) {
+      if (this.filters[this.selectedFilter].name) {
+        return this.filters[this.selectedFilter].name
+      }
+      return this.$t(`filters.${key}`)
+    },
 
     onContactInput(value) {
-      Vue.set(this.mycontacts, value.id, value)
-      const selected = _.filter(this.mycontacts, o => (o.selected)).length
+      this.UPDATE_CONTACT(value)
 
-      if ( this.contactsSelectedLength < this.contactsLength ) {
+      if ( this.selectedContactsCount < this.renderedItemsCount ) {
         this.selectIndeterminate = true
       }
-      if ( this.contactsSelectedLength === this.contactsLength ) {
+      if ( this.selectedContactsCount === this.renderedItemsCount ) {
         this.selectIndeterminate = false
         this.selectAll = true
       }
-      if (this.contactsSelectedLength === 0) {
+      if (this.selectedContactsCount === 0) {
         this.selectIndeterminate = false
         this.selectAll = false
       }
     },
 
-    async getContacts() {
-      let params = {
-        page: this.currentPage,
-        take: this.perPage,
-        //participant_id: this.session_user.id,
-      }
-      params = { ...params, ...this.filters }
+    /**
+     * attempts to load set of contacts if not in items set is not in cache
+     * @param {Bool} force - Forces the set to load from server, even if set is in cache
+     */
+    getContacts(force = false) {
       this.$log.debug('getContacts', {
-        filters: this.filters,
-        params: params,
+        pageObject: this.currentPageObject,
+        cached: this.getContactsFor(this.currentPageObject)
       })
-      if ( this.sortBy ) {
-        params.sortBy = this.sortBy
+      if (this.getContactsFor(this.currentPageObject) != null && !force) {
+        // Page is already loaded in cache
+        this.isLoadingContacts = false
+        this.$nextTick(() => this.filterLoadSelection())
+        return
       }
-      const response = await axios.get( this.$apiRoute('mycontacts.index'), { params } )
 
-      const selected = _.keys(this.filters).length > 0 ? true : false
-
-      this.mycontacts = _.keyBy(response.data.data.map(o => ({ ...o, selected })), 'id')
-
-      if (selected) {
-        this.selectAll = true
-        this.selectIndeterminate = false
-      } else {
-        this.selectAll = false
+      if (this.isLoadingContacts) {
+        return
       }
-      this.meta = response.meta
+
+      // Load more contacts
+      this.isLoadingContacts = true
+      this.loadContacts(this.currentPageObject)
+        .then(() => {
+          this.isLoadingContacts = false
+          this.$nextTick(() => {
+            // Make sure these computed properties are up to date after vuex has loaded data
+            this.$forceCompute('renderedItems')
+            this.$forceCompute('renderedItemsCount')
+
+            // Select All on next tick
+            this.$nextTick(() => this.filterLoadSelection())
+          })
+        })
+        .catch(error => {
+          eventBus.$emit('error', { error, message: this.$t('error') })
+          this.isLoadingContacts = false
+        })
     },
 
     async createChatthread({
@@ -360,9 +366,31 @@ export default {
       is_scheduled = false,
       deliver_at = null,
     }) {
+      var error = false
+
+      if ( this.selectedContactsCount === 0 ) {
+        eventBus.$emit('popWarning', {
+          title: this.$t('warnings.noContactSelectedTitle'),
+          message: this.$t('warnings.noContactSelected')
+        })
+        error = true
+      }
+
+      if (!mcontent) {
+        eventBus.$emit('popWarning', {
+          title: this.$t('warnings.noContentTitle'),
+          message: this.$t('warnings.noContent')
+        })
+        error = true
+      }
+
+      if (error) {
+        return
+      }
+
       const params = {
         originator_id: this.session_user.id,
-        participants: _.filter(this.mycontacts, p => p.selected).map(o => (o.contact.id)),
+        participants: this.selectedContacts.map(o => o.contact_id),
       }
 
       if ( mcontent ) {
@@ -384,64 +412,22 @@ export default {
     // additional page loads
     // see: https://peachscript.github.io/vue-infinite-loading/guide/#installation
     loadNextPage() {
-      if ( !this.isMoreLoading && !this.isLoading && (this.nextPage <= this.lastPage) ) {
-        this.isMoreLoading = true;
+      if ( !this.isLoading && (this.nextPage <= this.lastPage) ) {
         this.$log.debug('loadNextPage', { current: this.currentPage, last: this.lastPage, next: this.nextPage });
         this.getContacts()
       }
     },
 
-    // may adjust filters, but always reloads from page 1
     reloadFromFirstPage() {
-      this.doReset()
+      this.currentPage = 1
       this.getContacts()
-    },
-
-    doReset() {
-      this.renderedPages = []
-      this.isLastVisible = false
-      this.isMoreLoading = true
-    },
-
-    //
-    // Filters
-    //
-    filterAdd() {
-      //
-    },
-
-    setFilter(k) {
-      this.clearFilters()
-      if(k) {
-        this.filters[k] = 1
-      }
-      if (Object.keys(this.filters).length > 0) {
-        this.showExtraFilters = true
-      } else {
-        this.showExtraFilters = false
-      }
-      this.reloadFromFirstPage()
-    },
-
-    // toggles a 'boolean' filter
-    toggleFilter(k) { // keeps any filters set prior, adds new one
-      if ( Object.keys(this.filters).includes(k) ) {
-        delete this.filters[k]
-      } else {
-        this.filters[k] = 1
-      }
-      this.reloadFromFirstPage()
-    },
-
-    clearFilters() {
-      this.filters = {}
     },
 
     inQuickAccessFilters(filter) {
       if (typeof filter === 'string') {
-        return _.indexOf(this.quickAccessFilters, filter) > -1
+        return contains(this.pinned, filter)
       }
-      return _.indexOf(this.quickAccessFilters, filter.key) > -1
+      return contains(this.pinned, filter.key)
     },
 
     //
@@ -452,9 +438,15 @@ export default {
       this.axios.get(this.$apiRoute('mycontacts.search'), { params: { q: this.searchQuery } })
         .then(response => {
           if (this.searchQuery !== '') {
-            this.mycontacts = { ...this.mycontacts, ..._.keyBy(response.data.data, 'id') }
+            this.SAVE_CONTACTS_LIST(response.data)
             this.searchResults = response.data.data.map(o => o.id)
             this.showSearchResults = true
+            this.$nextTick(() => {
+              this.selectIndeterminate = false
+              this.selectAll = true
+              this.UNSELECT_ALL()
+              this.SELECT_CONTACTS(this.renderedItems)
+            })
           }
           this.isSearching = false
         })
@@ -464,28 +456,47 @@ export default {
           this.isSearching = false
         })
     },
+
+    filterLoadSelection() {
+      if (this.selectedFilter === 'all') {
+        this.selectAll = false
+        return
+      }
+      this.selectIndeterminate = false
+      this.selectAll = true
+      this.UNSELECT_ALL()
+      this.SELECT_CONTACTS(this.renderedItems)
+    },
+
   }, // methods
 
+  /* ------------------------------------------------------------------------ */
+  /*                                   WATCH                                  */
+  /* ------------------------------------------------------------------------ */
   watch: {
 
     searchQuery(value) {
+      // If cleared then unset search results
       if (value === '') {
         this.showSearchResults = false
         this.searchResults = []
+        this.$nextTick(() => this.filterLoadSelection())
       } else {
+        // Debounced search
         this.doSearch()
       }
     },
 
     selectAll(value) {
-      if (this.contactsLength === 0) {
+      if (this.contactsCount === 0) {
         return
       }
 
+      // If some items are selected
+      //   (selectIndeterminate = true and selectAll = false) then unselect all
+      //   items and unset indeterminate and select all next tick
       if (this.selectIndeterminate || !value) {
-        for(var index in this.mycontacts) {
-          Vue.set(this.mycontacts, index, { ...this.mycontacts[index], selected: false })
-        }
+        this.UNSELECT_ALL()
         this.$nextTick(() => {
           this.selectIndeterminate = false
           this.selectAll = false
@@ -493,21 +504,27 @@ export default {
         return
       }
 
-      for(var index in this.mycontacts) {
-        Vue.set(this.mycontacts, index, { ...this.mycontacts[index], selected: true })
-      }
+      // Select all renderedItems
+      this.UNSELECT_ALL()
+      this.SELECT_CONTACTS(this.renderedItems)
+    },
+
+    selectedFilter(value) {
+      // New filter was selected, load it's contents from the first page
+      this.reloadFromFirstPage()
     },
 
     session_user(value) {
       if (value) {
-        if (this.contactsLength === 0) { // initial load only, depends on sesssion user (synchronous)
+         // initial load only, depends on session user (synchronous)
+        if (this.contactsCount === 0) {
           this.$log.debug('live-chat/CreateThread - watch session_user: reloadFromFirstPage()')
           this.reloadFromFirstPage()
         }
       }
     },
 
-    sortBy (newVal) {
+    sortBy(newVal) {
       this.$log.debug('live-chat/CreateThread - watch sortBy : reloadFromFirstPage()')
       this.$refs.sortCtrls.hide(true)
       this.reloadFromFirstPage()
@@ -550,6 +567,7 @@ body #view-createthread {
 <i18n lang="json5">
 {
   "en": {
+    "error": "An Error occurred while loading your contacts",
     "filter": {
       "label": "Filters"
     },
@@ -578,7 +596,13 @@ body #view-createthread {
     "sort": {
       "alphabetical": "name"
     },
-    "title": "New Message"
+    "title": "New Message",
+    "warnings": {
+      "noContactSelected": "Please select at least one contact from your list of contacts.",
+      "noContactSelectedTitle": "No Contacts Selected",
+      "noContent": "Please provide a message to send.",
+      "noContentTitle": "No Message"
+    }
   }
 }
 </i18n>

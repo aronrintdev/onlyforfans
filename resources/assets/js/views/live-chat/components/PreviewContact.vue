@@ -67,11 +67,7 @@ export default {
     },
 
     onSelect(value) {
-      if (value) {
-        this.$emit('input', { ...this.contact, selected: true })
-      } else {
-        this.$emit('input', { ...this.contact, selected: false })
-      }
+      this.$emit('input', { ...this.contact, selected: value })
     },
   }, // methods
 

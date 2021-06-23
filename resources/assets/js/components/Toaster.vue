@@ -22,6 +22,7 @@ export default {
   methods: {
     init() {
       this.errors()
+      this.warnings()
       this.purchases()
       this.events()
     },
@@ -29,7 +30,21 @@ export default {
     errors() {
       eventBus.$on('error', ({ error, message }) => {
         this.$log.error(error)
-        this.popToast(message, { variant: 'danger', title: this.$t('errorTitle') })
+        this.popToast(message, {
+          variant: 'danger',
+          title: this.$t('errorTitle'),
+          toaster: 'b-toaster-top-center',
+        })
+      })
+    },
+
+    warnings() {
+      eventBus.$on('popWarning', ({ message, title }) => {
+        this.popToast(message, {
+          variant: 'warning',
+          title: title || this.$t('warningTitle'),
+          toaster: 'b-toaster-top-center',
+        })
       })
     },
 
@@ -137,7 +152,8 @@ export default {
 <i18n lang="json5" scoped>
 {
   "en": {
-    "errorTitle": "An Error Has Occurred"
+    "errorTitle": "An Error Has Occurred",
+    "warningTitle": "Warning"
   }
 }
 </i18n>
