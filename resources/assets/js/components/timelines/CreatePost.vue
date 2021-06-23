@@ -306,26 +306,24 @@ export default {
       self.postScheduleDate = data;
     })
 
-    console.log('components/timelines/CreatePost', {
-      route_params: this.$route.params,
-    })
-    const mediafileIds = this.$route.params.mediafile_ids
-    //this.mediafileIdsFromVault.push(mf.id)
-    // Retrieve any 'pre-loaded' mediafiles, and add to dropzone...be sure to tag as 'ref-only' or something
-    // %FIXME: stub code here only takes 1st 3, need to call to pull down the specific list pass via vue route params
-    const response = axios.get(this.$apiRoute('mediafiles.index'), {
-      params: {
-        take: 3,
-        mediafile_ids: mediafileIds,
-      },
-    }).then( response => {
-      response.data.data.forEach( mf => {
-        // https://rowanwins.github.io/vue-dropzone/docs/dist/#/manual
-        const file = { size: mf.orig_size, name: mf.id, type: mf.mimetype }
-        this.mediafileIdsFromVault.push(mf.id)
-        this.$refs.myVueDropzone.manuallyAddFile(file, mf.filepath)
+    const mediafileIds = this.$route.params.mediafile_ids || []
+    if ( mediafileIds.length ) {
+      //this.mediafileIdsFromVault.push(mf.id)
+      // Retrieve any 'pre-loaded' mediafiles, and add to dropzone...be sure to tag as 'ref-only' or something
+      // %FIXME: stub code here only takes 1st 3, need to call to pull down the specific list pass via vue route params
+      const response = axios.get(this.$apiRoute('mediafiles.index'), {
+        params: {
+          mediafile_ids: mediafileIds,
+        },
+      }).then( response => {
+        response.data.data.forEach( mf => {
+          // https://rowanwins.github.io/vue-dropzone/docs/dist/#/manual
+          const file = { size: mf.orig_size, name: mf.id, type: mf.mimetype }
+          this.mediafileIdsFromVault.push(mf.id)
+          this.$refs.myVueDropzone.manuallyAddFile(file, mf.filepath)
+        })
       })
-    })
+    }
 
   },
 
