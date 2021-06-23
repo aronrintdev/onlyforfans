@@ -123,7 +123,21 @@ class MycontactsController extends AppBaseController
             }
         }
 
-        $data = $query->latest()->paginate( $request->input('take', env('MAX_DEFAULT_PER_REQUEST', 10)) );
+        if ($request->has('sortBy')) {
+            switch($request->input('sortBy')) {
+                // Oldest first
+                case 'oldest':
+                    $query->oldest();
+                    break;
+                // Newest first
+                case 'recent':
+                default:
+                    $query->latest();
+                    break;
+            }
+        }
+
+        $data = $query->paginate( $request->input('take', env('MAX_DEFAULT_PER_REQUEST', 10)) );
         return new MycontactCollection($data);
     }
 
