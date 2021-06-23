@@ -1,5 +1,5 @@
 <template>
-  <section v-if="!isLoading" class="conversation-footer mt-3">
+  <section v-if="!isLoading" class="conversation-footer mt-3 d-flex flex-column">
 
     <div class="scheduled-message-head" v-if="isScheduled">
       <div>
@@ -12,13 +12,13 @@
       </b-button>
     </div>
 
-    <b-form class="store-chatmessage" @submit.prevent="sendMessage($event)">
+    <b-form class="store-chatmessage mt-auto" @submit.prevent="sendMessage($event)">
       <div>
         <b-form-group id="newMessage-group-1" class="">
           <b-form-textarea
             v-model="newMessageForm.mcontent"
             placeholder="Type a message..."
-            rows="2"
+            :rows="mobile ? 2 : 3"
             max-rows="6"
             spellcheck="false"
           ></b-form-textarea>
@@ -75,6 +75,7 @@
 </template>
 
 <script>
+import Vuex from 'vuex'
 import moment from 'moment'
 
 export default {
@@ -85,6 +86,7 @@ export default {
   },
 
   computed: {
+    ...Vuex.mapState([ 'mobile' ]),
 
     isLoading() {
       return !this.session_user

@@ -199,6 +199,17 @@ class Subscription extends Model implements Ownable
         return $query->where('active', false);
     }
 
+    /**
+     * Items that are not canceled that are due for payment by a day or more
+     *
+     * @param  Builder  $query
+     * @return Builder
+     */
+    public function scopeExpired($query)
+    {
+        return $query->notCanceled()->where('next_payment_at', '<=', Carbon::now()->addDay());
+    }
+
     #endregion Scopes
 
 

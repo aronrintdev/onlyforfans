@@ -1,77 +1,62 @@
 <template>
   <div v-if="!isLoading" class="container-xl px-3 py-3" id="view-livechat">
 
-    <section class="row">
+    <section class="row h-100">
 
       <aside class="col-md-5 col-lg-4">
 
-        <article class="top-bar d-flex justify-content-between align-items-center">
+        <article class="top-bar d-flex justify-content-between align-items-center mb-3">
           <h4>Messages</h4>
           <div class="d-flex">
-            <SearchInput v-model="searchQuery" openLeft size="lg" />
             <b-button variant="link" class="clickme_to-schedule_message" @click="doSomething">
               <fa-icon :icon="['far', 'calendar-alt']" class="fa-lg" />
             </b-button>
             <b-button variant="link" class="clickme_to-send_message" :to="linkCreateThread()">
-              <fa-icon :icon="['fas', 'plus']" class="fa-lg" />
+              <fa-icon :icon="['fas', 'plus']" size="lg" />
             </b-button>
           </div>
         </article>
 
-        <article class="d-none">
-          Search
-        </article>
-
-        <article class="chatthread-sort py-3 d-flex justify-content-between align-items-center">
-          <p class="my-0">{{ sortBy | ucfirst }}</p>
-          <div class="">
-            <b-dropdown ref="sortCtrls" variant="link" size="sm" class="" no-caret>
-              <template #button-content>
-                <fa-icon :icon="['fas', 'sort-amount-down']" class="fa-lg" />
-              </template>
-              <b-dropdown-form>
-                <b-form-group label="">
-                  <b-form-radio v-model="sortBy" size="sm" name="sort-posts-by" value="recent">Recent</b-form-radio>
-                  <b-form-radio v-model="sortBy" size="sm" name="sort-posts-by" value="oldest">Oldest</b-form-radio>
-                  <!--
-                  <b-form-radio v-model="sortBy" size="sm" name="sort-posts-by" value="unread-first">Unread First</b-form-radio>
-                  <b-form-radio v-model="sortBy" size="sm" name="sort-posts-by" value="oldest-unread-first">Oldest Unread First</b-form-radio>
-                  -->
-                </b-form-group>
-                <b-dropdown-divider></b-dropdown-divider>
-                <b-form-group label="">
-                  <b-dropdown-item-button>Mark All as Read</b-dropdown-item-button>
-                </b-form-group>
-              </b-dropdown-form>
-            </b-dropdown>
-          </div>
-        </article>
+        <Search v-model="searchQuery" :label="$t('search.label')" />
 
         <article class="chatthread-filters py-3 d-flex OFF-justify-content-between align-items-center">
-          <b-button @click="clearFilters()" pill variant="outline-info" class="mx-1">All</b-button>
-          <b-button @click="toggleFilter('is_unread')" pill :variant="Object.keys(this.filters).includes('is_unread') ? 'info' : 'outline-info'" class="mx-1">Unread</b-button>
-          <b-button @click="toggleFilter('is_subscriber')" pill :variant="Object.keys(this.filters).includes('is_subscriber') ? 'info' : 'outline-info'" class="mx-1">Subscribers</b-button>
-          <b-button pill variant="outline-info" class="mx-1">
-            <fa-icon :icon="['fas', 'plus']" class="fa-lg" />
-          </b-button>
+          <!-- Filters/View -->
+          <span class="mr-2" v-text="$t('filters.label')" />
+          <b-form-select v-model="selectedFilter" :options="selectFilters" />
+
+          <b-dropdown ref="sortCtrls" variant="link" size="sm" class="" no-caret right>
+            <template #button-content>
+              <fa-icon :icon="['fas', 'sort-amount-down']" class="fa-lg" />
+            </template>
+            <b-dropdown-form>
+              <b-form-group label="">
+                <b-form-radio v-model="sortBy" size="sm" name="sort-posts-by" value="recent">Recent</b-form-radio>
+                <b-form-radio v-model="sortBy" size="sm" name="sort-posts-by" value="oldest">Oldest</b-form-radio>
+                <!--
+                <b-form-radio v-model="sortBy" size="sm" name="sort-posts-by" value="unread-first">Unread First</b-form-radio>
+                <b-form-radio v-model="sortBy" size="sm" name="sort-posts-by" value="oldest-unread-first">Oldest Unread First</b-form-radio>
+                -->
+              </b-form-group>
+              <b-dropdown-divider></b-dropdown-divider>
+              <b-form-group label="">
+                <b-dropdown-item-button>Mark All as Read</b-dropdown-item-button>
+              </b-form-group>
+            </b-dropdown-form>
+          </b-dropdown>
         </article>
 
         <article class="chatthread-list">
           <b-list-group>
-            <b-list-group-item
-              v-for="(ct, idx) in chatthreads"
+            <PreviewThread
+              v-for="ct in chatthreads"
               :key="ct.id"
               :to="linkChatthread(ct.id)"
               :active="isActiveThread(ct.id)"
               :data-ct_id="ct.id"
               class="px-2"
-            >
-              <PreviewThread 
-                :session_user="session_user"
-                :participant="participants(ct)"
-                :chatthread="ct"
-              />
-            </b-list-group-item>
+              :participant="participants(ct)"
+              :chatthread="ct"
+            />
           </b-list-group>
         </article>
 
@@ -79,8 +64,8 @@
 
       <main class="col-md-7 col-lg-8">
         <transition mode="out-in" name="quick-fade">
-          <router-view 
-            :session_user="session_user" 
+          <router-view
+            :session_user="session_user"
             :participant="participants(activeThread)"
           />
         </transition>
@@ -94,17 +79,18 @@
 <script>
 import Vuex from 'vuex'
 import moment from 'moment'
+import _ from 'lodash'
 import PreviewThread from '@views/live-chat/components/PreviewThread'
-import PreviewContact from '@views/live-chat/components/PreviewContact'
 import SearchInput from '@components/common/search/HorizontalOpenInput'
+import Search from '@views/live-chat/components/Search'
 
 export default {
   name: 'LivechatDashboard',
 
   components: {
     PreviewThread,
-    PreviewContact,
     SearchInput,
+    Search,
   },
 
   computed: {
@@ -115,6 +101,28 @@ export default {
     },
     activeThread() {
       return this.chatthreads.find( ct => ct.id === this.activeThreadId )
+    },
+
+    availableFilters() {
+      return [
+        {
+          key: 'all',
+          label: this.$t('filters.labels.all'),
+          callback: this.clearFilters
+        }, {
+          key: 'unread',
+          label: this.$t('filters.labels.unread'),
+          callback: () => this.toggleFilter('is_unread'),
+        }, {
+          key: 'subscribers',
+          label: this.$t('filters.labels.subscribers'),
+          callback: () => this.toggleFilter('is_subscriber'),
+        }
+      ]
+    },
+
+    selectFilters() {
+      return this.availableFilters.map(o => ({ value: o.key, text: o.label }))
     },
 
     isLoading() {
@@ -143,6 +151,8 @@ export default {
     isMoreLoading: true,
 
     filters: {},
+
+    selectedFilter: 'all',
 
     searchQuery: '',
 
@@ -255,6 +265,13 @@ export default {
       }
     },
 
+    selectedFilter(value) {
+      const index = _.findIndex(this.availableFilters, o => o.key === value)
+      if (index > -1 && typeof this.availableFilters[index].callback === 'function') {
+        this.availableFilters[index].callback()
+      }
+    },
+
     sortBy (newVal) {
       console.log('live-chat/Dashboard - watch sortBy : reloadFromFirstPage()')
       this.$refs.sortCtrls.hide(true)
@@ -304,3 +321,21 @@ body #view-livechat {
 }
 
 </style>
+
+<i18n lang="json5">
+{
+  "en": {
+    "filters": {
+      "label": "View:",
+      "labels": {
+        "all": "All",
+        "subscribers": "Subscribers",
+        "unread": "Unread"
+      },
+    },
+    "search": {
+      "label": "Search:"
+    }
+  }
+}
+</i18n>

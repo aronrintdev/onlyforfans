@@ -145,18 +145,15 @@ class RegisterController extends Controller
         ]);
 
         if (Setting::get('birthday') == 'on' && $request->birthday != '') {
-            $user->birthday = date('Y-m-d', strtotime($request->birthday));
-            $user->save();
+            $user->settings()->update([ 'birthday' => date('Y-m-d', strtotime($request->birthday)) ]);
         }
 
         if ($request->gender != '') {
-            $user->settings->gender = $request->gender;
-            $user->settings->save();
+            $user->settings()->update([ 'gender' => $request->gender ]);
         }
 
         if (Setting::get('city') == 'on' && $request->city != '') {
-            $user->city = $request->city;
-            $user->save();
+            $user->settings()->update([ 'city' => $request->city ]);
         }
 
         $user->timeline()->create([
@@ -223,18 +220,15 @@ class RegisterController extends Controller
         ]);
 
         if (Setting::get('birthday') == 'on' && $request['birthday'] != '') {
-            $user->settings->birthday = date('Y-m-d', strtotime($request['birthday']));
-            $user->settings->save();
+            $user->settings()->update([ 'birthday' => date('Y-m-d', strtotime($request['birthday'])) ]);
         }
 
         if ($request['gender'] != '') {
-            $user->settings->gender = $request['gender'];
-            $user->settings->save();
+            $user->settings()->update([ 'gender' => $request['gender'] ]);
         }
 
         if (Setting::get('city') == 'on' && $request['city'] != '') {
-            $user->settings->city = $request['city'];
-            $user->settings->save();
+            $user->settings()->update([ 'city' => $request['city'] ]);
         }
 
         // Create timeline record for the user
@@ -325,9 +319,8 @@ class RegisterController extends Controller
                     'resource_id'   => $user->id,
                     'resource_type' => 'users',
                 ]);
-                $timeline = $user->timeline;
-                $timeline->avatar_id = $media->id;
-                $timeline->save();
+                // $user->timeline->avatar_id = $media->id;
+                $user->timeline()->update([ 'avatar_id' => $media->id ]);
             }
         }
 
@@ -386,8 +379,8 @@ class RegisterController extends Controller
                 'resource_type' => 'users',
             ]);
 
-            $user->timeline->avatar_id = $media->id;
-            $user->timeline->save();
+            // $user->timeline->avatar_id = $media->id;
+            $user->timeline()->update([ 'avatar_id' => $media->id ]);
         }
 
         if (Auth::loginUsingId($user->id)) {
@@ -445,8 +438,8 @@ class RegisterController extends Controller
                 'resource_type' => 'users',
             ]);
 
-            $user->timeline->avatar_id = $media->id;
-            $user->timeline->save();
+            // $user->timeline->avatar_id = $media->id;
+            $user->timeline()->update([ 'avatar_id' => $media->id ]);
         }
 
         if (Auth::loginUsingId($user->id)) {

@@ -26,6 +26,7 @@ use App\Models\Traits\ShareableTraits;
 use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Laravel\Scout\Searchable;
 use Money\Currencies\ISOCurrencies;
 
@@ -122,12 +123,26 @@ class Timeline extends Model implements Subscribable, Tippable, Reportable
             ->withTimestamps();
     }
 
+    /**
+     * Active subscribers to this timeline
+     * @return MorphToMany
+     */
     public function subscribers()
     {
         return $this->morphToMany(User::class, 'shareable', 'shareables', 'shareable_id', 'sharee_id')
             ->withPivot('access_level', 'shareable_type', 'sharee_id', 'is_approved', 'cattrs')
             ->where('access_level', 'premium')
             ->withTimestamps();
+    }
+
+    /**
+     * The subscriptions for this timeline. This includes failed and canceled subscriptions
+     *
+     * @return MorphToMany
+     */
+    public function subscriptions()
+    {
+        return $this->morphMany(Subscription::class, 'subscribable');
     }
 
     public function ledgersales()

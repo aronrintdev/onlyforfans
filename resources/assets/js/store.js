@@ -15,6 +15,7 @@ import bankingModule from './store/banking'
 import postsModule from './store/posts'
 import statementsModule from './store/statements'
 import subscriptionsModule from './store/subscriptions'
+import messagingModule from './store/messaging'
 
 export default new Vuex.Store({
   modules: {
@@ -24,6 +25,7 @@ export default new Vuex.Store({
     posts: postsModule,
     statements: statementsModule,
     subscriptions: subscriptionsModule,
+    messaging: messagingModule,
   },
 
   state: {

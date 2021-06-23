@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!isLoading">
+  <div v-if="!isLoading" class="h-100 d-flex flex-column">
 
     <section class="chatthread-header">
       <div class="d-flex align-items-center">
@@ -25,7 +25,7 @@
         </b-dropdown>
       </div>
       <div class="d-flex align-items-center">
-        <p class="my-0 mx-2">Last Seen</p>
+        <p class="my-0 mx-2 text-nowrap">Last Seen</p>
         <div>|</div>
         <b-button variant="link" class="" @click="doSomething">
           <fa-icon :icon="['far', 'star']" class="fa-lg" />
@@ -45,13 +45,13 @@
 
     <hr />
 
-    <section>
+    <section class="flex-grow-1">
 
-      <b-list-group class="tag-messages">
+      <b-list-group class="tag-messages h-100">
         <b-list-group-item
           v-for="(cm, idx) in chatmessages"
           :key="cm.id"
-          class=""
+          :class="{ 'mt-auto': idx === 0 }"
         >
           <section v-if="isDateBreak(cm, idx)" class="msg-grouping-day-divider"><span>{{ moment(cm.created_at).format('MMM DD, YYYY') }}</span></section>
           <section class="crate" :class="cm.sender_id===session_user.id ? 'tag-session_user' : 'tag-other_user'">

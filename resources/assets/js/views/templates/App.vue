@@ -2,11 +2,13 @@
   <div class="app d-flex flex-column">
     <!-- Header -->
     <MainNavBar class="header" />
-    <div class="content flex-grow-1" :class="{ 'p-3': !mobile }">
+    <div class="content flex-grow-1 d-flex" :class="{ 'p-3': !mobile }">
       <transition name="quick-fade" mode="out-in">
         <router-view />
       </transition>
     </div>
+
+    <Modals />
 
     <Toaster />
 
@@ -21,18 +23,21 @@
 import _ from 'lodash'
 import Vuex from 'vuex';
 import VueScreenSize from 'vue-screen-size'
-import MainNavBar from '@components/common/MainNavbar'
+
 import EventUpdater from '@components/EventUpdater'
-import Toaster from '@components/Toaster'
+import MainNavBar from '@components/common/MainNavbar'
+import Modals from '@components/Modals'
 import SiteFooter from '@views/templates/SiteFooter'
+import Toaster from '@components/Toaster'
 
 export default {
   name: 'App',
   components: {
-    MainNavBar,
     EventUpdater,
-    Toaster,
+    MainNavBar,
+    Modals,
     SiteFooter,
+    Toaster,
   },
 
   mixins: [VueScreenSize.VueScreenSizeMixin],

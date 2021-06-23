@@ -54,3 +54,7 @@ $cursors: map-merge(
     cursor: $value !important;
   }
 }
+
+.select-none {
+  user-select: none;
+}
