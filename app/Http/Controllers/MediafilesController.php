@@ -87,6 +87,7 @@ class MediafilesController extends AppBaseController
             'mftype' => 'required|in:'.MediafileTypeEnum::getKeysCsv(),
             'resource_type' => 'nullable|alpha-dash|in:comments,posts,stories,vaultfolders',
             'resource_id' => 'required_with:resource_type|uuid',
+            'diskmediafile_id' => 'uuid|exists:diskmediafiles,id',
         ]);
 
         $file = $request->file('mediafile');
@@ -105,22 +106,35 @@ class MediafilesController extends AppBaseController
         }
 
         try {
-            $owner = $request->user(); // the orig. content OWNER
-            $subFolder = $owner->id;
-            $s3Path = $file->store($subFolder, 's3');
             $mfname = $mfname ?? $file->getClientOriginalName();
 
-            $mediafile = Diskmediafile::doCreate([
-                'owner_id'      => $owner->id,
-                'filepath'      => $s3Path,
-                'mimetype'      => $file->getMimeType(),
-                'orig_filename' => $file->getClientOriginalName(),
-                'orig_ext'      => $file->getClientOriginalExtension(),
-                'mfname'        => $mfname,
-                'mftype'        => $request->mftype,
-                'resource_id'   => $request->resource_id,
-                'resource_type' => $request->resource_type,
-            ]);
+            if ( $request->has('diskmediafile_id') ) {
+                // create a reference to an existing [diskmediafile] record
+                $diskmediafile = Diskmediafile::find($request->diskmediafile_id);
+                $diskmediafile->createReference(
+                    $request->resource_type,   // string   $resourceType
+                    $request->resource_id,     // int      $resourceID
+                    $mfname,                   // string   $mfname
+                    $request->mftype           // string   $mftype
+                );
+            } else {
+                // create a new [diskmediafiles] record
+                $owner = $request->user(); // the orig. content OWNER
+                $subFolder = $owner->id;
+                $s3Path = $file->store($subFolder, 's3');
+    
+                $mediafile = Diskmediafile::doCreate([
+                    'owner_id'      => $owner->id,
+                    'filepath'      => $s3Path,
+                    'mimetype'      => $file->getMimeType(),
+                    'orig_filename' => $file->getClientOriginalName(),
+                    'orig_ext'      => $file->getClientOriginalExtension(),
+                    'mfname'        => $mfname,
+                    'mftype'        => $request->mftype,
+                    'resource_id'   => $request->resource_id,
+                    'resource_type' => $request->resource_type,
+                ]);
+            }
         } catch (\Exception $e) {
             throw $e; // %FIXME: report error to user via browser message
         }
