@@ -88,3 +88,9 @@ mvim A-HERE.txt routes/web.php tests app/Http/Controllers resources/views resour
 $ php artisan make:thumbs 300
 $ php artisan make:blurs 300
 
+%%% new
+$ sudo supervisorctl restart queue-work:*
+...or...
+$ sudo supervisorctl
+
+$ sh ./install-env.sh 

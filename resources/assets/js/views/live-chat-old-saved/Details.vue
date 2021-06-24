@@ -1109,6 +1109,7 @@
           const vaultfiles = [];
           this.sortableMedias.map((media, index) => {
             const { file, mftype, src } = media;
+            // %PSG: if vault, append as vaultfiles[] array, otherwise as mediafiles[] array
             if (mftype !== 'vault') {
               data.append('mediafile[]', file);
             } else {
@@ -1568,8 +1569,7 @@
       openVaultModal: function() {
         this.$refs['vault-modal'].show();
         this.isVaultLoading = true;
-        this.axios.get('/vaults/all-files')
-          .then(response => {
+        this.axios.get('/vaults/all-files').then(response => {
             this.vaultFiles = response.data.mediafiles;
             this.isVaultLoading = false;
           })

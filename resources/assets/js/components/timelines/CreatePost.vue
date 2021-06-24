@@ -144,6 +144,8 @@ export default {
     price: 0,
     currency: 'USD',
 
+    mediafileIdsFromVault: [], // content added from vault, not disk: should create new references, *not* new S3 content!
+
     // ref:
     //  ~ https://github.com/rowanwins/vue-dropzone/blob/master/docs/src/pages/SendAdditionalParamsDemo.vue
     //  ~ https://www.dropzonejs.com/#config-autoProcessQueue
@@ -180,6 +182,7 @@ export default {
     },
 
     async savePost() {
+      console.log('CreatePost::savePost()')
       // (1) create the post
       const response = await axios.post(this.$apiRoute('posts.store'), {
         timeline_id: this.timeline.id,
@@ -188,40 +191,51 @@ export default {
         price: this.price,
         currency: this.currency,
         schedule_datetime: this.postScheduleDate,
-      });
-      this.$log.debug('savePost', { response });
+      })
+      this.$log.debug('savePost', { response })
       const json = response.data;
       if (json.post) {
-        this.newPostId = json.post.id;
+        this.newPostId = json.post.id
+        const queued = this.$refs.myVueDropzone.getQueuedFiles()
 
-        const queued = this.$refs.myVueDropzone.getQueuedFiles();
-
-        // (2) upload & attach the mediafiles
+        // (2) upload & attach the mediafiles (in dropzone queue)
         // %FIXME: if this fails, don't we have an orphaned post (?)
+        // %NOTE: files added manually don't seem to be put into the queue, thus sendingEvent won't be called for them (?)
         if ( queued.length ) {
-          this.$refs.myVueDropzone.processQueue(); // this will call dispatch after files uploaded
-        } else {
-          this.$log.debug('savePost: dispatching unshiftPostToTimeline...');
-          this.$store.dispatch('unshiftPostToTimeline', { newPostId: this.newPostId });
-          this.resetForm();
+          console.log('CreatePost::savePost() - process queue', {
+            queued,
+          })
+          this.$refs.myVueDropzone.processQueue() // this will call dispatch after files uploaded
+        } 
+
+        // (3) create any mediaifle references, ex from selected files in vault
+        this.mediafileIdsFromVault.forEach( async mfid => {
+          await axios.post(this.$apiRoute('mediafiles.store'), {
+            mediafile_id: mfid,
+            resource_id: json.post.id,
+            resource_type: 'posts',
+            mftype: 'post',
+          })
+          // %TODO: check failure case
+        })
+        this.mediafileIdsFromVault = [] // empty array (we could remove individually inside the loop)
+        this.$router.replace({'query': null}) // clear mediafile router params from URL
+        // ^^^ throwing error 'NavigationDuplicated: Avoided redundant navigation to current location: "/"' ?
+
+        if ( !queued.length ) {
+          console.log('CreatePost::savePost() - nothing queued')
+          this.$store.dispatch('unshiftPostToTimeline', { newPostId: this.newPostId })
+          this.resetForm()
         }
+
       } else {
         this.resetForm();
       }
     },
 
-    takePicture() { // %TODO
-      this.selectedMedia = this.selectedMedia!=='pic' ? 'pic' : null
-    },
-    recordVideo() { // %TODO
-      this.selectedMedia = this.selectedMedia!=='video' ? 'video' : null
-    },
-    recordAudio() { // %TODO
-      this.selectedMedia = this.selectedMedia!=='audio' ? 'audio' : null
-    },
-
-    // for dropzone
+    // Dropzone: 'Modify the request and add addtional parameters to request before sending'
     sendingEvent(file, xhr, formData) {
+      // %NOTE: file.name is the mediafile PKID
       this.$log.debug('sendingEvent', { file, formData, xhr });
       if ( !this.newPostId ) {
         throw new Error('Cancel upload, invalid post id');
@@ -254,11 +268,21 @@ export default {
       if ( !this.newPostId ) {
         return
       }
-      this.$log.debug('queueCompleteEvent', { });
-      this.$log.debug('queueCompleteEvent: dispatching unshiftPostToTimeline...');
+      console.log('queueCompleteEvent', { });
       this.$store.dispatch('unshiftPostToTimeline', { newPostId: this.newPostId });
       this.resetForm();
     },
+
+    takePicture() { // %TODO
+      this.selectedMedia = this.selectedMedia!=='pic' ? 'pic' : null
+    },
+    recordVideo() { // %TODO
+      this.selectedMedia = this.selectedMedia!=='video' ? 'video' : null
+    },
+    recordAudio() { // %TODO
+      this.selectedMedia = this.selectedMedia!=='audio' ? 'audio' : null
+    },
+
     showSchedulePicker() {
       eventBus.$emit('open-modal', {
         key: 'show-schedule-datetime',
@@ -268,12 +292,32 @@ export default {
       this.postScheduleDate = undefined;
     },
   },
+
   mounted() {
     const self = this;
     eventBus.$on('apply-schedule', function(data) {
       self.postScheduleDate = data;
     })
-  },
+
+    const mediafileIds = this.$route.params.mediafile_ids || []
+    if ( mediafileIds.length ) {
+      // Retrieve any 'pre-loaded' mediafiles, and add to dropzone...be sure to tag as 'ref-only' or something
+      const response = axios.get(this.$apiRoute('mediafiles.index'), {
+        params: {
+          mediafile_ids: mediafileIds,
+        },
+      }).then( response => {
+        response.data.data.forEach( mf => {
+          // https://rowanwins.github.io/vue-dropzone/docs/dist/#/manual
+          const file = { size: mf.orig_size, name: mf.id, type: mf.mimetype }
+          this.mediafileIdsFromVault.push(mf.id)
+          this.$refs.myVueDropzone.manuallyAddFile(file, mf.filepath)
+        })
+      })
+    }
+
+  }, // mounted
+
   created() {
     this.dropzoneConfigs = {
       pic: {
@@ -304,20 +348,20 @@ export default {
 <style lang="scss" scoped>
 /*
 .dropzone, .dropzone * {
-box-sizing: border-box;
+  box-sizing: border-box;
 }
 .vue-dropzone {
-border: 2px solid #e5e5e5;
-font-family: Arial,sans-serif;
-letter-spacing: .2px;
-color: #777;
-transition: .2s linear;
+  border: 2px solid #e5e5e5;
+  font-family: Arial,sans-serif;
+  letter-spacing: .2px;
+  color: #777;
+  transition: .2s linear;
 }
 .dropzone {
-min-height: 150px;
-border: 2px solid rgba(0, 0, 0, 0.3);
-background: white;
-padding: 20px 20px;
+  min-height: 150px;
+  border: 2px solid rgba(0, 0, 0, 0.3);
+  background: white;
+  padding: 20px 20px;
 }
                                */
 
@@ -356,7 +400,7 @@ li .selectable {
 
 /*
 .create_post-crate .dropzone .dz-image img {
-width: 128px;
+  width: 128px;
 }
  */
 
