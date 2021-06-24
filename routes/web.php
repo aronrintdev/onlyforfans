@@ -143,9 +143,6 @@ Route::group(['middleware' => ['auth']], function () {
         Route::put('/{post}/purchase', 'PostsController@purchase')
             ->name('posts.purchase');
 
-        Route::patch('/{post}/attachMediafile/{mediafile}', 'PostsController@attachMediafile')
-            ->name('posts.attachMediafile');
-
         Route::get('/{post}/index-comments', 'PostsController@indexComments')
             ->name('posts.indexComments');
 
