@@ -62,6 +62,7 @@ class MediafileTest extends TestCase
     /**
      *  @group mediafiles
      *  @group regression
+     *  @group june24
      */
     public function test_owner_can_list_mediafiles()
     {
@@ -150,7 +151,7 @@ class MediafileTest extends TestCase
         // Update or add avatars to some users for this test...
         $users = User::take(5)->get();
         $users->each( function($u) {
-            $avatar = FactoryHelpers::createImage($u, MediafileTypeEnum::AVATAR, null, false); //skip S3 upload
+            $avatar = FactoryHelpers::createImage($u, MediafileTypeEnum::AVATAR, $u->id, false); //skip S3 upload
             $u->save();
         });
     }

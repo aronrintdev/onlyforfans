@@ -140,7 +140,7 @@ if ($doS3Upload) {
                 $mf_attrs['resource_type'] = 'users';
                 break;
             case MediafileTypeEnum::POST:
-                $mf_attrs['resource_id'] =  $resourceID; // ie story_id: required for story type
+                $mf_attrs['resource_id'] =  $resourceID; // ie post_id: required for story type
                 $mf_attrs['resource_type'] = 'posts';
                 break;
             case MediafileTypeEnum::STORY:
