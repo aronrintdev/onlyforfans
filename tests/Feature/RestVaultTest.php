@@ -602,7 +602,7 @@ class RestVaultTest extends TestCase
             'resource_id' => $post->id,
         ];
         $response = $this->actingAs($owner)->ajaxJSON('POST', route('mediafiles.store'), $payload);
-        $response->assertStatus(200);
+        $response->assertStatus(201);
 
         // --
 
@@ -672,7 +672,7 @@ class RestVaultTest extends TestCase
             'resource_type' => 'posts',
             'resource_id' => $post->id,
         ];
-        $response = $this->actingAs($owner)->ajaxJSON('POST', route('mediafiles.store'), $payload);
+        $response = $this->actingAs($postOwner)->ajaxJSON('POST', route('mediafiles.store'), $payload);
         $response->assertStatus(403);
 
         // --- Try to attach image to post as mediafile owner (but not post owner) ---
@@ -683,7 +683,7 @@ class RestVaultTest extends TestCase
             'resource_type' => 'posts',
             'resource_id' => $post->id,
         ];
-        $response = $this->actingAs($owner)->ajaxJSON('POST', route('mediafiles.store'), $payload);
+        $response = $this->actingAs($postOwner)->ajaxJSON('POST', route('mediafiles.store'), $payload);
         $response->assertStatus(403);
     }
 
