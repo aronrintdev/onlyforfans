@@ -6,7 +6,7 @@
       <aside class="col-md-5 col-lg-4">
 
         <article class="top-bar d-flex justify-content-between align-items-center mb-3">
-          <h4>Messages</h4>
+          <div class="h4" v-text="$t('header')" />
           <div class="d-flex">
             <b-button variant="link" class="clickme_to-schedule_message" @click="doSomething">
               <fa-icon :icon="['far', 'calendar-alt']" class="fa-lg" />
@@ -24,31 +24,16 @@
           <span class="mr-2" v-text="$t('filters.label')" />
           <b-form-select v-model="selectedFilter" :options="selectFilters" />
 
-          <b-dropdown ref="sortCtrls" variant="link" size="sm" class="" no-caret right>
-            <template #button-content>
-              <fa-icon :icon="['fas', 'sort-amount-down']" class="fa-lg" />
-            </template>
-            <b-dropdown-form>
-              <b-form-group label="">
-                <b-form-radio v-model="sortBy" size="sm" name="sort-posts-by" value="recent">Recent</b-form-radio>
-                <b-form-radio v-model="sortBy" size="sm" name="sort-posts-by" value="oldest">Oldest</b-form-radio>
-                <!--
-                <b-form-radio v-model="sortBy" size="sm" name="sort-posts-by" value="unread-first">Unread First</b-form-radio>
-                <b-form-radio v-model="sortBy" size="sm" name="sort-posts-by" value="oldest-unread-first">Oldest Unread First</b-form-radio>
-                -->
-              </b-form-group>
-              <b-dropdown-divider></b-dropdown-divider>
-              <b-form-group label="">
-                <b-dropdown-item-button @click="markAllRead">Mark All as Read</b-dropdown-item-button>
-              </b-form-group>
-            </b-dropdown-form>
-          </b-dropdown>
+          <SortControl v-model="sortBy" />
+        </article>
+        <article class="d-flex">
+          <b-btn variant="link" class="ml-auto" @click="markAllRead">Mark All as Read</b-btn>
         </article>
 
         <article class="chatthread-list">
           <b-list-group>
             <PreviewThread
-              v-for="ct in chatthreads"
+              v-for="ct in renderedThreads"
               :key="ct.id"
               :to="linkChatthread(ct.id)"
               :active="isActiveThread(ct.id)"
@@ -57,6 +42,9 @@
               :participant="participants(ct)"
               :chatthread="ct"
             />
+            <b-list-group-item v-if="renderedThreads.length === 0" class="text-center">
+              {{ showSearchResults ? $t('no-items-search', { query: searchQuery }) : $t('no-items') }}
+            </b-list-group-item>
           </b-list-group>
         </article>
 
@@ -77,20 +65,26 @@
 </template>
 
 <script>
+/**
+ * resources/assets/js/views/live-chat/Dashboard.vue
+ */
 import Vuex from 'vuex'
 import moment from 'moment'
 import _ from 'lodash'
+import { eventBus } from '@/app'
 import PreviewThread from '@views/live-chat/components/PreviewThread'
 import SearchInput from '@components/common/search/HorizontalOpenInput'
 import Search from '@views/live-chat/components/Search'
+import SortControl from '@views/live-chat/components/SortControl'
 
 export default {
-  name: 'LivechatDashboard',
+  name: 'LiveChatDashboard',
 
   components: {
     PreviewThread,
     SearchInput,
     Search,
+    SortControl,
   },
 
   computed: {
@@ -108,7 +102,10 @@ export default {
         {
           key: 'all',
           label: this.$t('filters.labels.all'),
-          callback: this.clearFilters
+          callback: () => {
+            this.clearFilters()
+            this.reloadFromFirstPage()
+          }
         }, {
           key: 'unread',
           label: this.$t('filters.labels.unread'),
@@ -119,6 +116,13 @@ export default {
           callback: () => this.toggleFilter('is_subscriber'),
         }
       ]
+    },
+
+    renderedThreads() {
+      if (this.showSearchResults) {
+        return this.searchResults
+      }
+      return this.chatthreads || []
     },
 
     selectFilters() {
@@ -155,11 +159,16 @@ export default {
     selectedFilter: 'all',
 
     searchQuery: '',
+    showSearchResults: false,
+    searchResults: [],
+    searchDebounceDuration: 500,
 
   }), // data
 
   created() { 
     this.getMe()
+    // Create debounced method
+    this.doSearch = _.debounce(this._doSearch, this.searchDebounceDuration);
   },
 
   mounted() { },
@@ -203,7 +212,7 @@ export default {
         //participant_id: this.session_user.id,
       }
       params = { ...params, ...this.filters }
-      console.log('getChatthreads', {
+      this.$log.debug('getChatthreads', {
         filters: this.filters,
         params: params,
       })
@@ -264,14 +273,41 @@ export default {
       this.filters = {}
     },
 
+    _doSearch() {
+      this.isSearching = true
+      this.axios.get(this.$apiRoute('chatthreads.search'), { params: { q: this.searchQuery} })
+        .then(response => {
+          if (this.searchQuery !== '') {
+            this.searchResults = response.data.data
+            this.showSearchResults = true
+          }
+        })
+        .catch(error => {
+          eventBus.$emit('error', { error, message: this.$t('search.error') })
+          this.showSearchResults = false
+          this.isSearching = false
+        })
+    }
+
   }, // methods
 
   watch: {
 
+    searchQuery(value) {
+      // If cleared then unset search results
+      if (value === '') {
+        this.showSearchResults = false
+        this.searchResults = []
+      } else {
+        // Debounced search
+        this.doSearch()
+      }
+    },
+
     session_user(value) {
       if (value) {
         if (!this.chatthreads) { // initial load only, depends on sesssion user (synchronous)
-          console.log('live-chat/Dashboard - watch session_user: reloadFromFirstPage()')
+          this.$log.debug('live-chat/Dashboard - watch session_user: reloadFromFirstPage()')
           this.reloadFromFirstPage()
         }
       }
@@ -285,8 +321,7 @@ export default {
     },
 
     sortBy (newVal) {
-      console.log('live-chat/Dashboard - watch sortBy : reloadFromFirstPage()')
-      this.$refs.sortCtrls.hide(true)
+      this.$log.debug('live-chat/Dashboard - watch sortBy : reloadFromFirstPage()')
       this.reloadFromFirstPage()
     },
 
@@ -325,23 +360,12 @@ body {
   }
 
 }
-
-.tag-debug {
-  border: solid orange 1px;
-}
-</style>
-
-<style lang="scss">
-body #view-livechat {
-  .chatthread-filters {
-  }
-}
-
 </style>
 
 <i18n lang="json5">
 {
   "en": {
+    "header": "Messages",
     "filters": {
       "label": "View:",
       "labels": {
@@ -350,6 +374,8 @@ body #view-livechat {
         "unread": "Unread"
       },
     },
+    "no-items": "No Chat Threads",
+    "no-items-search": "No Chat Threads Found for \"{query}\"",
     "search": {
       "label": "Search:"
     }

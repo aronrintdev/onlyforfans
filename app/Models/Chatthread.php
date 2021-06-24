@@ -3,16 +3,17 @@ namespace App\Models;
 
 use Exception;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Collection;
-
 use App\Interfaces\UuidId;
+use Laravel\Scout\Searchable;
+
 use App\Models\Traits\UsesUuid;
+use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\Model;
 //use App\Models\Traits\UsesShortUuid;
 
 class Chatthread extends Model implements UuidId
 {
-    use UsesUuid;
+    use UsesUuid, Searchable;
 
     protected $guarded = [ 'id', 'created_at', 'updated_at' ];
 
@@ -66,6 +67,53 @@ class Chatthread extends Model implements UuidId
     #endregion Relationships
     //------------------------------------------------------------------------//
 
+    //------------------------------------------------------------------------//
+    // %%% Searchable
+    //------------------------------------------------------------------------//
+    #region Searchable
+    /**
+     * Name of the search index associated with this model
+     * @return string
+     */
+    public function searchableAs()
+    {
+        return "chatthread_index";
+    }
+
+    /**
+     * Get value used to index the model
+     * @return mixed
+     */
+    public function getScoutKey()
+    {
+        return $this->getKey();
+    }
+
+    /**
+     * Get key name used to index the model
+     * @return string
+     */
+    public function getScoutKeyName()
+    {
+        return 'id';
+    }
+
+    /**
+     * What model information gets stored in the search index
+     * @return array
+     */
+    public function toSearchableArray()
+    {
+        return [
+            'id'           => $this->getKey(),
+            'participants' => $this->participants->map(function($item, $key) { return $item->id; } )->all(),
+            'participantUsernames' => $this->participants->map(function($item, $key) { return $item->username; } )->all(),
+            'participantNames' => $this->participants->map(function($item, $key) { return $item->timeline->name; } )->all(),
+        ];
+    }
+
+    #endregion Searchable
+    //------------------------------------------------------------------------//
 
     //------------------------------------------------------------------------//
     // %%% Methods
