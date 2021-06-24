@@ -97,8 +97,7 @@ class MediafilesController extends AppBaseController
             'mediafile' => 'required_without:mediafile_id', // upload content/diskmediafile to s3
             'mediafile_id' => 'uuid|exists:mediafiles,id', // create a mediafile 'reference' to existing diskmediafile
             'mftype' => 'required|in:'.MediafileTypeEnum::getKeysCsv(),
-            //'resource_type' => 'nullable|alpha-dash|in:comments,posts,stories,vaultfolders',
-            'resource_type' => 'nullable|alpha-dash|in:vaultfolders',
+            'resource_type' => 'nullable|alpha-dash|in:comments,posts,stories,vaultfolders',
             'resource_id' => 'required_with:resource_type|uuid',
         ]);
 
@@ -108,11 +107,12 @@ class MediafilesController extends AppBaseController
         if ( $request->has('resource_type') ) {
             $alias = $request->resource_type;
             $model = Relation::getMorphedModel($alias);
-            $refResource = (new $model)->where('id', $request->resource_id)->first();
-            if ( empty($refResource) ) {
+            $resource = (new $model)->where('id', $request->resource_id)->first();
+            if ( empty($resource) ) {
                 abort(404);
             }
-            if ( $request->user()->cannot('update', $refResource) ) {
+            if ( $request->user()->cannot('update', $resource) ) {
+                // can not update associated resource (eg, post, message, etc)
                 abort(403);
             }
         }
@@ -123,13 +123,7 @@ class MediafilesController extends AppBaseController
                 // Create a reference to an existing [diskmediafile] record, via the mediafile_id in request param
                 $mediafile = Mediafile::find($request->mediafile_id);
 
-                // require mediafile to be in vault (?)
-                if ( empty($mediafile->resource) ) {
-                    abort(400, 'mediafiles.store-reference: original (source) mediafile must have associated resource');
-                }
-                $this->authorize('update', $post);
                 $this->authorize('update', $mediafile);
-                $this->authorize('update', $mediafile->resource); // orig (source) mediafile
 
                 $mfname = $request->input('mfname', $mediafile->mfname);
                 //$diskmediafile = Diskmediafile::find($request->diskmediafile_id);
