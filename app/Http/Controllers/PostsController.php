@@ -170,34 +170,6 @@ class PostsController extends AppBaseController
         ]);
     }
 
-    public function attachMediafile(Request $request, Post $post, Mediafile $mediafile)
-    {
-        // require mediafile to be in vault (?)
-        if ( empty($mediafile->resource) ) {
-            abort(400, 'source file must have associated resource');
-        }
-        if ( $mediafile->resource_type !== 'vaultfolders' ) {
-            abort(400, 'source file associated resource type must be vaultfolder');
-        }
-        $this->authorize('update', $post);
-        $this->authorize('update', $mediafile);
-        $this->authorize('update', $mediafile->resource);
-
-        $refMF = Mediafile::where('resource_type', 'vaultfolders')
-            ->where('is_primary', true)
-            ->findOrFail($mediafile->id)->diskmediafile->createReference(
-                'posts',    // $resourceType
-                $post->id,  // $resourceID
-                'Attached File', // $mfname - could be optionally passed as a query param %TODO
-                MediafileTypeEnum::POST // $mftype
-            );
-        $post->refresh();
-
-        return response()->json([
-            'post' => $post,
-        ]);
-    }
-
     public function destroy(Request $request, Post $post)
     {
         $this->authorize('delete', $post);

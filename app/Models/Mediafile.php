@@ -179,15 +179,18 @@ class Mediafile extends BaseModel implements Guidable, Ownable
         }
     }
 
-    public function getOwner(): ?Collection
+    public function getOwner(): Collection
     {
+        if ( !$this->resource ) {
+            return new Collection();
+        }
         //dd('Mediafile', $this->resource->getOwner()); // , $this->toArray());
         switch ($this->resource_type) {
         case 'users':
             //dd('here 0422', $this->resource);
             return new Collection($this->resource->without(['avatar','cover'])); // owner is the user 
         default:
-            return $this->resource ? $this->resource->getOwner() : null;
+            return $this->resource->getOwner();
         }
     }
 

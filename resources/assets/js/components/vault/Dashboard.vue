@@ -288,7 +288,7 @@ export default {
           this.$router.replace({ name: 'index', params });
           break;
         case 'message':
-          this.$router.replace({ name: 'index', params });
+          this.$router.replace({ name: 'chatthreads.create', params });
           break;
       }
     },
@@ -304,7 +304,6 @@ export default {
 
     clearSelected() {
       console.log('clearSelected')
-      //this.mediafiles = _.keyBy(this.mediafiles.map(o => ({ ...o, selected: false })), 'id')
       this.mediafiles = _.mapValues( this.mediafiles, o => ({ ...o, selected: false }) )
     },
 

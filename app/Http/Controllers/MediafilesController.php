@@ -40,7 +40,7 @@ class MediafilesController extends AppBaseController
         $query = Mediafile::query();
 
         // Check permissions
-        if ( false && !$request->user()->isAdmin() ) {
+        if ( !$request->user()->isAdmin() ) {
 
             // non-admin: can only view own
             $query->whereHasMorph(
@@ -112,6 +112,7 @@ class MediafilesController extends AppBaseController
                 abort(404);
             }
             if ( $request->user()->cannot('update', $resource) ) {
+                // can not update associated resource (eg, post, message, etc)
                 abort(403);
             }
         }
@@ -121,6 +122,9 @@ class MediafilesController extends AppBaseController
             if ( $request->has('mediafile_id') ) {
                 // Create a reference to an existing [diskmediafile] record, via the mediafile_id in request param
                 $mediafile = Mediafile::find($request->mediafile_id);
+
+                $this->authorize('update', $mediafile);
+
                 $mfname = $request->input('mfname', $mediafile->mfname);
                 //$diskmediafile = Diskmediafile::find($request->diskmediafile_id);
                 $mediafile->diskmediafile->createReference(
