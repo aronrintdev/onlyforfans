@@ -521,17 +521,6 @@ class MessageController extends Controller
         return $mediafiles;
     }
 
-    public function getUnreadMessagesCount(Request $request) {
-        $sessionUser = $request->user();
-        //$unread_threads = ChatThread::where('receiver_id', $sessionUser->id)
-        //    ->where('is_unread', 1)
-        //    ->where('schedule_datetime', null)
-        //    ->pluck('sender_id')->toArray();
-        //$unread_threads = uniq($unread_threads);
-        //return ["unread_messages_count" => count($unread_threads)];
-        return ["unread_messages_count" => 1]; // %PSG temp workaround while this controller is deprecated
-    }
-
     public function removeThread(Request $request, $id, $threadId) {
         $sessionUser = $request->user();
         $deleted = ChatThread::where('id', $threadId)->delete();

@@ -73,8 +73,8 @@ export default {
   }),
 
   methods: {
-    ...Vuex.mapActions(['getMe']),
-    ...Vuex.mapMutations([ 'UPDATE_MOBILE', 'UPDATE_SCREEN_SIZE', 'UPDATE_UNREAD_MESSAGES_COUNT' ]),
+    ...Vuex.mapActions(['getMe', 'getUnreadMessagesCount']),
+    ...Vuex.mapMutations([ 'UPDATE_MOBILE', 'UPDATE_SCREEN_SIZE' ]),
     startOnlineMonitor() {
       if (this.session_user) {
         this.onlineMonitor = this.$echo.join(`user.status.${this.session_user.id}`)
@@ -84,14 +84,6 @@ export default {
           });
       }
     },
-    getUnreadMessagesCount: function() {
-      this.axios.get('/unread-messages-count')
-        .then((res) => {
-          this.UPDATE_UNREAD_MESSAGES_COUNT({
-            unread_messages_count: res.data.unread_messages_count,
-          });
-        });
-    }
   },
 
   watch: {

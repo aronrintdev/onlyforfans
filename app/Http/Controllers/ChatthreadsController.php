@@ -121,6 +121,71 @@ class ChatthreadsController extends AppBaseController
     }
 
     /**
+     * @param Request $request
+     * @return array Total unread count for the current user
+     */
+    public function getTotalUnreadCount(Request $request)
+    {
+        $userId = $request->user()->id;
+
+        $chatthreads = Chatthread::whereHas('participants', function($q) use($userId) {
+            $q->where('users.id', $userId);
+        })->get();
+
+        $total = 0;
+        foreach ($chatthreads as $ct) {
+            $count = $ct->chatmessages()->where([
+                ['is_read', '=', 0],
+                ['sender_id', '<>', $userId]
+            ])->count();
+            $total += $count;
+        }
+
+        return response()->json(
+            ['total_unread_count' => $total]
+        );
+    }
+
+    /**
+     * @param Request $request
+     */
+    public function markAllRead(Request $request)
+    {
+        $userId = $request->user()->id;
+
+        $chatthreads = Chatthread::whereHas('participants', function($q) use($userId) {
+            $q->where('users.id', $userId);
+        })->get();
+
+        foreach ($chatthreads as $ct) {
+            $ct->chatmessages()->where([
+                ['is_read', '=', 0],
+                ['sender_id', '<>', $userId]
+            ])->update(['is_read' => 1]);
+        }
+
+        http_response_code(200);
+    }
+
+    /**
+     * @param Request $request
+     * @param Chatthread $chatthreadd count for the current user
+     */
+    public function markRead(Request $request, Chatthread $chatthread)
+    {
+        $userId = $request->user()->id;
+
+        $this->authorize('edit', $chatthread);
+
+        $chatthread->chatmessages()->where([
+            ['is_read', '=', 0],
+            ['sender_id', '<>', $userId]
+        ])->update(['is_read' => 1]);
+
+        http_response_code(200);
+    }
+
+    /**
      *
      * @param Request $request
      * @param Chatthread $chatthread
