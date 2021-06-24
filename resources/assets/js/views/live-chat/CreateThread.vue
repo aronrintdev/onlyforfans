@@ -82,24 +82,7 @@
             </b-dropdown>
 
             <!-- Sort Control Dropdown -->
-            <b-dropdown ref="sortCtrls" class="filter-controls" variant="link" size="sm" right no-caret>
-              <template #button-content>
-                <fa-icon :icon="['fas', 'sort-amount-down']" class="fa-lg" />
-              </template>
-
-              <b-dropdown-header>
-                Sort By
-              </b-dropdown-header>
-
-              <b-dropdown-item :active="sortBy === 'recent'" @click="sortBy = 'recent'" >
-                <fa-icon icon="sort-up" fixed-width class="mx-2" size="lg" />
-                Recently Added
-              </b-dropdown-item>
-              <b-dropdown-item :active="sortBy === 'oldest'" @click="sortBy = 'oldest'" >
-                <fa-icon icon="sort-down" fixed-width class="mx-2" size="lg" />
-                Oldest Added
-              </b-dropdown-item>
-            </b-dropdown>
+            <SortControl v-model="sortBy" />
           </div>
 
           <!-- Extra Filters Collapse -->
@@ -190,6 +173,7 @@ import CreateThreadForm from '@views/live-chat/components/CreateThreadForm'
 import FilterSelect from './components/FilterSelect.vue'
 import PreviewContact from '@views/live-chat/components/PreviewContact'
 import Search from '@views/live-chat/components/Search'
+import SortControl from '@views/live-chat/components/SortControl'
 
 import contains from '@helpers/contains'
 
@@ -204,6 +188,7 @@ export default {
     LoadingOverlay,
     PreviewContact,
     Search,
+    SortControl,
   },
 
   /* ------------------------------------------------------------------------ */
@@ -551,7 +536,6 @@ export default {
 
     sortBy(newVal) {
       this.$log.debug('live-chat/CreateThread - watch sortBy : reloadFromFirstPage()')
-      this.$refs.sortCtrls.hide(true)
       this.reloadFromFirstPage()
     },
 
@@ -570,16 +554,6 @@ body {
     border-bottom: 1px solid rgba(138,150,163,.25);
   }
 
-}
-
-.filter-controls {
-  ::v-deep .dropdown-item {
-    padding-left: 0;
-  }
-}
-
-.tag-debug {
-  border: solid orange 1px;
 }
 </style>
 
