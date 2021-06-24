@@ -40,7 +40,7 @@ class MediafilesController extends AppBaseController
         $query = Mediafile::query();
 
         // Check permissions
-        if ( false && !$request->user()->isAdmin() ) {
+        if ( !$request->user()->isAdmin() ) {
 
             // non-admin: can only view own
             $query->whereHasMorph(

@@ -75,6 +75,7 @@ class MediafileTest extends TestCase
         ]);
         $response->assertStatus(200);
         $content = json_decode($response->content());
+        //dd($content);
         $response->assertJsonStructure([
             'data',
             'links',
@@ -94,18 +95,24 @@ class MediafileTest extends TestCase
             switch ( $item->resource_type ) {
             case 'posts':
                 $resource = Post::findOrFail($item->resource_id);
+                if ( $resource->getPrimaryOwner()->id === $owner->id ) {
+                    $acc += 1;
+                }
                 break;
             case 'stories':
                 $resource = Story::findOrFail($item->resource_id);
+                if ( $resource->getPrimaryOwner()->id === $owner->id ) {
+                    $acc += 1;
+                }
                 break;
             case 'users':
                 $resource = User::findOrFail($item->resource_id);
+                if ( $resource->id === $owner->id ) {
+                    $acc += 1;
+                }
                 break;
             default:
                 throw new Exception('Unknown resource_type: '.$item->resource_type);
-            }
-            if ( $resource->getPrimaryOwner()->id === $owner->id ) {
-                $acc += 1;
             }
             return $acc;
         }, 0);
