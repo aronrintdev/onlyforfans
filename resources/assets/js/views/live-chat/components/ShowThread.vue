@@ -73,7 +73,7 @@
 </template>
 
 <script>
-//import Vuex from 'vuex'
+import Vuex from 'vuex'
 import moment from 'moment'
 import MessageForm from '@views/live-chat/components/MessageForm'
 import SearchInput from '@components/common/search/HorizontalOpenInput'
@@ -113,6 +113,7 @@ export default {
 
   mounted() {
     this.getChatmessages(this.id)
+    this.markRead(this.id)
     const channel = `chatthreads.${this.id}`
     this.$echo.private(channel).listen('.chatmessage.sent', e => {
       this.chatmessages.push(e.chatmessage)
@@ -120,6 +121,7 @@ export default {
   },
 
   methods: {
+    ...Vuex.mapActions(['getUnreadMessagesCount']),
 
     isDateBreak(cm, idx) {
       if (idx===0) {
@@ -141,6 +143,13 @@ export default {
       this.meta = response.meta
     },
 
+    async markRead(chatthreadID) {
+      await axios.post(this.$apiRoute('chatthreads.markRead', chatthreadID))
+
+      // reload total unread count
+      this.getUnreadMessagesCount()
+    },
+
     doSomething() {
       // stub placeholder for impl
     },
@@ -152,6 +161,7 @@ export default {
     id (newValue, oldValue) {
       if ( newValue && (newValue!==oldValue) ) {
         this.getChatmessages(newValue)
+        this.markRead(newValue)
       }
     },
 

@@ -138,7 +138,7 @@ export default new Vuex.Store({
       state.unshifted_timeline_post = propSelect(payload, 'post')
     },
     UPDATE_UNREAD_MESSAGES_COUNT(state, payload) {
-      state.unread_messages_count = propSelect(payload, 'unread_messages_count')
+      state.unread_messages_count = propSelect(payload, 'total_unread_count')
     },
   },
 
@@ -290,6 +290,12 @@ export default new Vuex.Store({
         commit('UPDATE_SESSION_USER', response.data)
         commit('UPDATE_TIMELINE', response.data)
         commit('UPDATE_UI_FLAGS', response.data)
+      })
+    },
+
+    getUnreadMessagesCount({ commit }) {
+      axios.get(route('chatthreads.totalUnreadCount')).then((response) => {
+        commit('UPDATE_UNREAD_MESSAGES_COUNT', response.data)
       })
     },
 

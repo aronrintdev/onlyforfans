@@ -26,6 +26,9 @@
 
           <SortControl v-model="sortBy" />
         </article>
+        <article class="d-flex">
+          <b-btn variant="link" class="ml-auto" @click="markAllRead">Mark All as Read</b-btn>
+        </article>
 
         <article class="chatthread-list">
           <b-list-group>
@@ -85,7 +88,7 @@ export default {
   },
 
   computed: {
-    ...Vuex.mapGetters(['session_user']),
+    ...Vuex.mapGetters(['session_user', 'getUnreadMessagesCount']),
 
     activeThreadId() {
       return this.$route.params.id
@@ -221,6 +224,18 @@ export default {
       this.meta = response.meta
     },
 
+    async markAllRead() {
+      await axios.post( this.$apiRoute('chatthreads.markAllRead') )
+
+      // reset unread count for all threads
+      this.chatthreads.forEach(thread => {
+        thread.unread_count = 0
+      })
+
+      // reload total unread count
+      this.getUnreadMessagesCount()
+    },
+
     // additional page loads
     // see: https://peachscript.github.io/vue-infinite-loading/guide/#installation
     loadNextPage() {
@@ -309,6 +324,11 @@ export default {
       this.$log.debug('live-chat/Dashboard - watch sortBy : reloadFromFirstPage()')
       this.reloadFromFirstPage()
     },
+
+    activeThreadId(newVal) {
+      const activeThread = this.chatthreads.find( ct => ct.id === newVal )
+      activeThread.unread_count = 0
+    }
 
   }, // watch
 

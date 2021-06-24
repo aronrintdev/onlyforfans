@@ -37,6 +37,7 @@ class Mediafile extends JsonResource
             'resource' => $this->whenLoaded('resource'),
             'resource_id' => $this->resource_id,
             'resource_type' => $this->resource_type,
+            'orig_size' => $this->diskmediafile->orig_size,
             'created_at' => $this->created_at,
         ];
     }

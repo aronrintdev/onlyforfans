@@ -29,9 +29,10 @@ import listRoutes from './list.routes'
 
 export const routes = [
   {
-    name: 'index',
+    name: 'index', // %TODO: should be named 'home' or 'feed.home'
     path: '/',
     component: timelines.Home,
+    props: true,
   },
   {
     name: 'search.home',

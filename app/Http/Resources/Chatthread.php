@@ -31,7 +31,10 @@ class Chatthread extends JsonResource
             //'chatmessages' => $this->chatmessages,
             'chatmessages' => $this->chatmessages()->latest()->take(1)->get(), // limit to 1, for preview only, save bw
             'msg_count' => $this->chatmessages()->count(),
-            'has_unread' => $this->chatmessages()->where('is_read',0)->count() > 0,
+            'unread_count' => $this->chatmessages()->where([
+                ['is_read', '=', 0],
+                ['sender_id', '<>', $sessionUser->id]
+            ])->count(),
             'participants' => $this->participants,
             'has_subscriber' => $sessionUser->timeline->subscribers->contains($otherUser->id), // non-session user participant is a subscriber of session user
             'originator' => $this->originator,

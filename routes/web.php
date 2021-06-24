@@ -70,13 +70,15 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('/blockables/match', ['as'=>'blockables.match', 'uses' => 'BlockablesController@match']);
 
     // -- chatmessages --
-    Route::get('/unread-messages-count', ['as'=>'messages.unreadmessagescount', 'uses' => 'MessageController@getUnreadMessagesCount']);
     Route::resource('chatmessages', 'ChatmessagesController', [
         'only' => [ 'index', ],
     ]);
 
     // -- chatthreads --
+    Route::get('/chatthreads/totalUnreadCount', ['as'=>'chatthreads.totalUnreadCount', 'uses' => 'ChatthreadsController@getTotalUnreadCount']);
+    Route::post('/chatthreads/markAllRead', ['as'=>'chatthreads.markAllRead', 'uses' => 'ChatthreadsController@markAllRead']);
     Route::post('/chatthreads/{chatthread}/sendMessage', ['as'=>'chatthreads.sendMessage', 'uses' => 'ChatthreadsController@sendMessage']);
+    Route::post('/chatthreads/{chatthread}/markRead', ['as'=>'chatthreads.markRead', 'uses' => 'ChatthreadsController@markRead']);
     Route::post('/chatthreads/{chatthread}/scheduleMessage', ['as'=>'chatthreads.scheduleMessage', 'uses' => 'ChatthreadsController@scheduleMessage']);
     Route::get('/chatthreads/search', 'ChatthreadsController@search')->name('chatthreads.search');
     Route::resource('chatthreads', 'ChatthreadsController', [
@@ -225,7 +227,7 @@ Route::group(['middleware' => ['auth']], function () {
         'as' => 'vault.dashboard',
         'uses' => 'VaultsController@dashboard'
     ]);
-    Route::get('/vaults/all-files', ['as'=>'vaults.getAllFiles', 'uses' => 'VaultsController@getAllFiles']);
+    //Route::get('/vaults/all-files', ['as'=>'vaults.getAllFiles', 'uses' => 'VaultsController@getAllFiles']); DEPRECATED - use .index route 
     Route::get('/vaults/{vault}/getRootFolder', ['as'=>'vaults.getRootFolder', 'uses' => 'VaultsController@getRootFolder']);
     Route::patch('/vaults/{vault}/updateShares', ['as'=>'vaults.updateShares', 'uses' => 'VaultsController@updateShares']); // %FIXME: refactor to make consistent
     Route::resource('vaults', 'VaultsController', [
@@ -264,7 +266,6 @@ Route::group(['middleware' => ['auth']], function () {
 //Route::patch('/chat-messages/{id}/unmute', ['as'=>'messages.unmute', 'uses' => 'MessageController@unmute']);
 //Route::post('/chat-messages/{id}/custom-name', ['as'=>'messages.customname', 'uses' => 'MessageController@setCustomName']);
 //Route::get('/chat-messages/{id}/mediafiles', ['as'=>'messages.mediafiles', 'uses' => 'MessageController@listMediafiles']);
-//Route::get('/unread-messages-count', ['as'=>'messages.unreadmessagescount', 'uses' => 'MessageController@getUnreadMessagesCount']);
 //Route::delete('/chat-messages/{id}/threads/{threadId}', ['as'=>'messages.removethread', 'uses' => 'MessageController@removeThread']);
 //Route::post('/chat-messages/{id}/threads/{threadId}/like', ['as'=>'messages.setlike', 'uses' => 'MessageController@setLike']);
 //Route::post('/chat-messages/{id}/threads/{threadId}/unlike', ['as'=>'messages.setunlike', 'uses' => 'MessageController@setUnlike']);
