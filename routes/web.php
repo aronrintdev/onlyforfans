@@ -78,6 +78,7 @@ Route::group(['middleware' => ['auth']], function () {
     // -- chatthreads --
     Route::post('/chatthreads/{chatthread}/sendMessage', ['as'=>'chatthreads.sendMessage', 'uses' => 'ChatthreadsController@sendMessage']);
     Route::post('/chatthreads/{chatthread}/scheduleMessage', ['as'=>'chatthreads.scheduleMessage', 'uses' => 'ChatthreadsController@scheduleMessage']);
+    Route::get('/chatthreads/search', 'ChatthreadsController@search')->name('chatthreads.search');
     Route::resource('chatthreads', 'ChatthreadsController', [
         'only' => [ 'index', 'show', 'store' ],
     ]);

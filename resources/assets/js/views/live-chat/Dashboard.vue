@@ -48,7 +48,7 @@
         <article class="chatthread-list">
           <b-list-group>
             <PreviewThread
-              v-for="ct in chatthreads"
+              v-for="ct in renderedThreads"
               :key="ct.id"
               :to="linkChatthread(ct.id)"
               :active="isActiveThread(ct.id)"
@@ -57,6 +57,9 @@
               :participant="participants(ct)"
               :chatthread="ct"
             />
+            <b-list-group-item v-if="renderedThreads.length === 0" class="text-center">
+              {{ showSearchResults ? $t('no-items-search', { query: searchQuery }) : $t('no-items') }}
+            </b-list-group-item>
           </b-list-group>
         </article>
 
@@ -77,15 +80,19 @@
 </template>
 
 <script>
+/**
+ * resources/assets/js/views/live-chat/Dashboard.vue
+ */
 import Vuex from 'vuex'
 import moment from 'moment'
 import _ from 'lodash'
+import { eventBus } from '@/app'
 import PreviewThread from '@views/live-chat/components/PreviewThread'
 import SearchInput from '@components/common/search/HorizontalOpenInput'
 import Search from '@views/live-chat/components/Search'
 
 export default {
-  name: 'LivechatDashboard',
+  name: 'LiveChatDashboard',
 
   components: {
     PreviewThread,
@@ -119,6 +126,13 @@ export default {
           callback: () => this.toggleFilter('is_subscriber'),
         }
       ]
+    },
+
+    renderedThreads() {
+      if (this.showSearchResults) {
+        return this.searchResults
+      }
+      return this.chatthreads || []
     },
 
     selectFilters() {
@@ -155,11 +169,16 @@ export default {
     selectedFilter: 'all',
 
     searchQuery: '',
+    showSearchResults: false,
+    searchResults: [],
+    searchDebounceDuration: 500,
 
   }), // data
 
   created() { 
     this.getMe()
+    // Create debounced method
+    this.doSearch = _.debounce(this._doSearch, this.searchDebounceDuration);
   },
 
   mounted() { },
@@ -252,9 +271,36 @@ export default {
       this.filters = {}
     },
 
+    _doSearch() {
+      this.isSearching = true
+      this.axios.get(this.$apiRoute('chatthreads.search'), { params: { q: this.searchQuery} })
+        .then(response => {
+          if (this.searchQuery !== '') {
+            this.searchResults = response.data.data
+            this.showSearchResults = true
+          }
+        })
+        .catch(error => {
+          eventBus.$emit('error', { error, message: this.$t('search.error') })
+          this.showSearchResults = false
+          this.isSearching = false
+        })
+    }
+
   }, // methods
 
   watch: {
+
+    searchQuery(value) {
+      // If cleared then unset search results
+      if (value === '') {
+        this.showSearchResults = false
+        this.searchResults = []
+      } else {
+        // Debounced search
+        this.doSearch()
+      }
+    },
 
     session_user(value) {
       if (value) {
@@ -333,6 +379,8 @@ body #view-livechat {
         "unread": "Unread"
       },
     },
+    "no-items": "No Chat Threads",
+    "no-items-search": "No Chat Threads Found for \"{query}\"",
     "search": {
       "label": "Search:"
     }

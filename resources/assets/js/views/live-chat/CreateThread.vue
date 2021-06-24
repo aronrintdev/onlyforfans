@@ -182,7 +182,6 @@
 /**
  * resources/assets/js/views/live-chat/CrateThread.vue
  */
-import Vue from 'vue'
 import Vuex from 'vuex'
 import _ from 'lodash'
 import { eventBus } from '@/app'

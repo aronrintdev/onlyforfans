@@ -117,7 +117,23 @@ class ChatthreadsController extends AppBaseController
         }
 
         $data = $query->paginate( $request->input('take', env('MAX_DEFAULT_PER_REQUEST', 10)) );
-        return new ChatthreadCollection($data); 
+        return new ChatthreadCollection($data);
+    }
+
+    /**
+     * Simple search
+     *
+     * @param Request $request
+     * @return ChatthreadCollection
+     */
+    public function search(Request $request)
+    {
+        $searchQuery = $request->input('query') ?? $request->input('q');
+
+        $data = Chatthread::search($searchQuery)->where('participants', $request->user()->getKey())
+            ->paginate($request->input('take', env('MAX_DEFAULT_PER_REQUEST', 10)));
+
+        return new ChatthreadCollection($data);
     }
 
     /**
