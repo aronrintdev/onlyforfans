@@ -547,6 +547,7 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
+     *  @group june24
      */
     // Creates post in first API call, then attaches selected mediafile in a second API call
     public function test_can_select_mediafile_from_vault_folder_to_attach_to_post_by_attach()
@@ -594,7 +595,13 @@ class RestVaultTest extends TestCase
         $postR = $content->post;
         $post = Post::findOrFail($postR->id);
 
-        $response = $this->actingAs($owner)->ajaxJSON('PATCH', route('posts.attachMediafile', [$post->id, $mediafile->id]));
+        $payload = [
+            'mftype' => MediafileTypeEnum::VAULT,
+            'mediafile_id' => $mediafile->id, // the presence of this field is what tells controller method to create a reference, not upload content
+            'resource_type' => 'posts',
+            'resource_id' => $post->id,
+        ];
+        $response = $this->actingAs($owner)->ajaxJSON('POST', route('mediafiles.store'), $payload);
         $response->assertStatus(200);
 
         // --
@@ -615,6 +622,7 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
+     *  @group june24
      */
     // Given one user who owns a vault + mediafile, and a different user who owns a timeline/post, 
     // neither user should be able to attach the mediafile to the post
@@ -657,11 +665,25 @@ class RestVaultTest extends TestCase
         $post = Post::findOrFail($content->post->id);
 
         // --- Try to attach image to post as post owner (but not mediafile owner) ---
-        $response = $this->actingAs($postOwner)->ajaxJSON('PATCH', route('posts.attachMediafile', [$post->id, $mediafile->id]));
+        //$response = $this->actingAs($postOwner)->ajaxJSON('PATCH', route('posts.attachMediafile', [$post->id, $mediafile->id]));
+        $payload = [
+            'mftype' => MediafileTypeEnum::POST,
+            'mediafile_id' => $mediafile->id,
+            'resource_type' => 'posts',
+            'resource_id' => $post->id,
+        ];
+        $response = $this->actingAs($owner)->ajaxJSON('POST', route('mediafiles.store'), $payload);
         $response->assertStatus(403);
 
         // --- Try to attach image to post as mediafile owner (but not post owner) ---
-        $response = $this->actingAs($mediafileowner)->ajaxJSON('PATCH', route('posts.attachMediafile', [$post->id, $mediafile->id]));
+        //$response = $this->actingAs($mediafileowner)->ajaxJSON('PATCH', route('posts.attachMediafile', [$post->id, $mediafile->id]));
+        $payload = [
+            'mftype' => MediafileTypeEnum::POST,
+            'mediafile_id' => $mediafile->id,
+            'resource_type' => 'posts',
+            'resource_id' => $post->id,
+        ];
+        $response = $this->actingAs($owner)->ajaxJSON('POST', route('mediafiles.store'), $payload);
         $response->assertStatus(403);
     }
 

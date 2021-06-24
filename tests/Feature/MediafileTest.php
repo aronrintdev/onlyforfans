@@ -62,7 +62,6 @@ class MediafileTest extends TestCase
     /**
      *  @group mediafiles
      *  @group regression
-     *  @group june24
      */
     public function test_owner_can_list_mediafiles()
     {
