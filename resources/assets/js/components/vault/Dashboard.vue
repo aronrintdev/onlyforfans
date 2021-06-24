@@ -106,8 +106,8 @@
 
         <!-- +++ File List +++ -->
         <b-row>
-          <b-col>
-            <b-button @click="renderShareForm()" variant="primary">Add To</b-button>
+          <b-col class="list-item-content d-flex justify-content-between align-items-center">
+            <b-button v-if="this.selectedMediafiles.length" @click="renderShareForm()" variant="primary">Add To</b-button>
           </b-col>
         </b-row>
         <b-row :no-gutters="true">
@@ -128,26 +128,31 @@
     <b-modal
       id="modal-share-file"
       size="lg"
-      title="Follow"
+      title="Share Files"
       hide-footer
       body-class="p-0"
     >
       <div>
         <b-list-group>
           <b-list-group-item>
-            Modal
+            <b-button @click="sendSelected('post')" variant="link" class="text-decoration-none">
+              <fa-icon :icon="['far', 'plus-square']" fixed-width class="mx-2" size="lg" />
+              Send in New Post
+            </b-button>
           </b-list-group-item>
           <b-list-group-item>
-            Send in New Post
+            <b-button @click="sendSelected('story')" variant="link" class="text-decoration-none">
+              <fa-icon :icon="['far', 'plus-square']" fixed-width class="mx-2" size="lg" />
+              Send in New Story
+            </b-button>
           </b-list-group-item>
           <b-list-group-item>
-            Send in New Story
-          </b-list-group-item>
-          <b-list-group-item>
-            Send in New Message
+            <b-button @click="sendSelected('message')" variant="link" class="text-decoration-none">
+              <fa-icon :icon="['far', 'plus-square']" fixed-width class="mx-2" size="lg" />
+              Send in New Message
+            </b-button>
           </b-list-group-item>
         </b-list-group>
-        <b-button @click="sendSelected()" variant="primary">Share</b-button>
       </div>
     </b-modal>
 
@@ -262,15 +267,26 @@ export default {
 
   methods: {
 
-    sendSelected() {
+    sendSelected(resourceType) {
       // send (share) selected files to a post, story, or message
-      console.log('sendSelected')
-      this.$router.replace({
-        name: 'index', 
-        params: {
+      console.log('sendSelected', {
+        resourceType,
+      })
+      const params = {
           mediafile_ids: this.selectedMediafiles.map( ({id}) => id )
-        },
-      });
+      }
+
+      switch (resourceType) {
+        case 'story':
+          this.$router.replace({ name: 'index', params });
+          break;
+        case 'post':
+          this.$router.replace({ name: 'index', params });
+          break;
+        case 'message':
+          this.$router.replace({ name: 'index', params });
+          break;
+      }
     },
 
     renderShareForm() {
