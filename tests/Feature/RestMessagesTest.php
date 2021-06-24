@@ -199,7 +199,6 @@ class RestMessagesTest extends TestCase
 [/] GET|HEAD      | chat-messages/{id}                           | messages.fetchcontact              | App\Http\Controllers\MessageController@fetchcontact
 [ ] GET|HEAD      | chat-messages/{id}/mediafiles                | messages.mediafiles                | App\Http\Controllers\MessageController@listMediafiles
 [ ] GET|HEAD      | chat-messages/{id}/search                    | messages.filtermessages            | App\Http\Controllers\MessageController@filterMessages
-[ ] GET|HEAD      | unread-messages-count                        | messages.unreadmessagescount       | App\Http\Controllers\MessageController@getUnreadMessagesCount
 
 [ ] POST          | chat-messages                                | chat-messages.store                | App\Http\Controllers\MessageController@store
 [ ] POST          | chat-messages/mark-all-as-read               | messages.markallasread             | App\Http\Controllers\MessageController@markAllAsRead

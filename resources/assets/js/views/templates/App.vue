@@ -85,10 +85,10 @@ export default {
       }
     },
     getUnreadMessagesCount: function() {
-      this.axios.get('/unread-messages-count')
+      this.axios.get('/chatthreads/total-unread-count')
         .then((res) => {
           this.UPDATE_UNREAD_MESSAGES_COUNT({
-            unread_messages_count: res.data.unread_messages_count,
+            unread_messages_count: res.data.total_unread_count,
           });
         });
     }
