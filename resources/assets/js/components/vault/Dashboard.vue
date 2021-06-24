@@ -82,9 +82,7 @@
 
         <h4>Invites</h4>
         <ul v-if="shareForm.invitees.length">
-          <li v-for="(i) in shareForm.invitees">
-            {{ i }}
-          </li>
+          <li v-for="(i) in shareForm.invitees">{{ i }}</li>
         </ul>
 
       </aside>
@@ -92,7 +90,7 @@
       <main class="col-md-9 OFF-d-flex OFF-align-items-center">
 
         <!-- +++ File Thumbnails +++ -->
-        <section class="row mb-3">
+        <section class="row">
           <div class="col-sm-12">
             <vue-dropzone 
               ref="myVueDropzone" 
@@ -105,8 +103,14 @@
         </section>
 
         <!-- +++ File List +++ -->
-        <b-row>
+        <b-row class="py-3">
           <b-col class="list-item-content d-flex justify-content-between align-items-center">
+            <div v-if="this.selectedMediafiles.length">
+              <b-button @click="clearSelected()" variant="link" class="text-decoration-none">
+                <fa-icon :icon="['fas', 'times']" class="fa-lg" />
+              </b-button>
+              <span class="ml-3">{{ this.selectedMediafiles.length }} selected</span>
+            </div>
             <b-button v-if="this.selectedMediafiles.length" @click="renderShareForm()" variant="primary">Add To</b-button>
           </b-col>
         </b-row>
@@ -224,7 +228,7 @@ export default {
 
     showCreateForm: false,
 
-    mediafiles: {},
+    mediafiles: {}, // %FIXME: use array not keyed object!
 
     createForm: {
       name: '',
@@ -296,15 +300,13 @@ export default {
 
     onPreviewFileInput(value) {
       Vue.set(this.mediafiles, value.id, value) // Sets .selected on mediafiles array depending on child form component's action
-      const numSelected = _.filter(this.mediafiles, o => (o.selected)).length
-      console.log('OnPreviewFileInput, post set', {
-        value: value,
-        mediafiles: this.mediafiles,
-        numSelected,
-      })
-
     },
 
+    clearSelected() {
+      console.log('clearSelected')
+      //this.mediafiles = _.keyBy(this.mediafiles.map(o => ({ ...o, selected: false })), 'id')
+      this.mediafiles = _.mapValues( this.mediafiles, o => ({ ...o, selected: false }) )
+    },
 
     // In share mode, has the user selected this item to be shared
     isSelectedToShare({shareable_type, shareable_id}) {
@@ -505,7 +507,16 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.tag-shared {
-  background-color: pink;
+body {
+  .tag-shared {
+    background-color: pink;
+  }
+
+  .vault-container {
+    background: #fff;
+  }
+  .vue-dropzone {
+    background: #ccdfeb;
+  }
 }
 </style>
