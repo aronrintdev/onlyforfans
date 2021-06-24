@@ -18,7 +18,7 @@
             data-toggle="tooltip"
             data-placement="top"
             class="username"
-            v-text="post.user.name"
+            v-text="post.timeline.name"
           />
           <span v-if="post.user.verified" class="verified-badge">
             <fa-icon icon="check-circle" class="text-primary" />
