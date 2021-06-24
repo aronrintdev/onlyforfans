@@ -176,6 +176,26 @@ class RestChatthreadsTest extends TestCase
      *  @group chatthreads
      *  @group regression
      */
+    public function test_can_mark_all_messages_read_for_a_user()
+    {
+        $chatthread = Chatthread::whereHas('chatmessages', function($q) {
+            $q->where('is_read', 0);
+        })->firstOrFail();
+        $participant = $chatthread->participants[0];
+
+        $response = $this->actingAs($participant)->ajaxJSON('POST', route('chatthreads.markAllRead'));
+
+        $response->assertStatus(200);
+        $response->assertTrue($chatthread->chatmessages()->where([
+            ['is_read', '=', 0],
+            ['sender_id', '<>', $participant->id]
+        ])->count() == 0);
+    }
+
+    /**
+     *  @group chatthreads
+     *  @group regression
+     */
     public function test_can_mark_messages_read_for_a_thread()
     {
         $chatthread = Chatthread::whereHas('chatmessages', function($q) {
@@ -186,7 +206,10 @@ class RestChatthreadsTest extends TestCase
         $response = $this->actingAs($participant)->ajaxJSON('POST', route('chatthreads.markRead', $chatthread));
 
         $response->assertStatus(200);
-        $response->assertTrue($chatthread->chatmessages()->where('is_read', 0)->count() == 0);
+        $response->assertTrue($chatthread->chatmessages()->where([
+            ['is_read', '=', 0],
+            ['sender_id', '<>', $participant->id]
+        ])->count() == 0);
     }
 
     /**

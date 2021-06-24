@@ -39,7 +39,7 @@
               </b-form-group>
               <b-dropdown-divider></b-dropdown-divider>
               <b-form-group label="">
-                <b-dropdown-item-button>Mark All as Read</b-dropdown-item-button>
+                <b-dropdown-item-button @click="markAllRead">Mark All as Read</b-dropdown-item-button>
               </b-form-group>
             </b-dropdown-form>
           </b-dropdown>
@@ -94,7 +94,7 @@ export default {
   },
 
   computed: {
-    ...Vuex.mapGetters(['session_user']),
+    ...Vuex.mapGetters(['session_user', 'getUnreadMessagesCount']),
 
     activeThreadId() {
       return this.$route.params.id
@@ -213,6 +213,18 @@ export default {
       const response = await axios.get( this.$apiRoute('chatthreads.index'), { params } )
       this.chatthreads = response.data.data
       this.meta = response.meta
+    },
+
+    async markAllRead() {
+      await axios.post( this.$apiRoute('chatthreads.markAllRead') )
+
+      // reset unread count for all threads
+      this.chatthreads.forEach(thread => {
+        thread.unread_count = 0
+      })
+
+      // reload total unread count
+      this.getUnreadMessagesCount()
     },
 
     // additional page loads
