@@ -124,7 +124,8 @@ class ChatthreadsController extends AppBaseController
      * @param Request $request
      * @return array Total unread count for the current user
      */
-    public function getTotalUnreadCount(Request $request) {
+    public function getTotalUnreadCount(Request $request)
+    {
         $userId = $request->user()->id;
 
         $chatthreads = Chatthread::whereHas('participants', function($q) use($userId) {
@@ -140,6 +141,19 @@ class ChatthreadsController extends AppBaseController
         return response()->json(
             ['total_unread_count' => $total]
         );
+    }
+
+    /**
+     * @param Request $request
+     * @return array Total unread count for the current user
+     */
+    public function markRead(Request $request, Chatthread $chatthread)
+    {
+        $this->authorize('edit', $chatthread);
+
+        $chatthread->chatmessages()->where('is_read', 0)->update(['is_read' => 1]);
+
+        http_response_code(200);
     }
 
     /**

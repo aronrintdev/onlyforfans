@@ -166,11 +166,27 @@ class RestChatthreadsTest extends TestCase
         $participant = $chatthread->participants[0];
 
         $response = $this->actingAs($participant)->ajaxJSON('GET', route('chatthreads.totalUnreadCount'));
-
-        $response->assertStatus(200);
         $content = json_decode($response->content());
 
+        $response->assertStatus(200);
         $response->assertTrue($content->total_unread_count > 0);
+    }
+
+    /**
+     *  @group chatthreads
+     *  @group regression
+     */
+    public function test_can_mark_messages_read_for_a_thread()
+    {
+        $chatthread = Chatthread::whereHas('chatmessages', function($q) {
+            $q->where('is_read', 0);
+        })->firstOrFail();
+        $participant = $chatthread->participants[0];
+
+        $response = $this->actingAs($participant)->ajaxJSON('POST', route('chatthreads.markRead', $chatthread));
+
+        $response->assertStatus(200);
+        $response->assertTrue($chatthread->chatmessages()->where('is_read', 0)->count() == 0);
     }
 
     /**

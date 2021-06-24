@@ -278,6 +278,11 @@ export default {
       this.reloadFromFirstPage()
     },
 
+    activeThreadId(newVal) {
+      const activeThread = this.chatthreads.find( ct => ct.id === newVal )
+      activeThread.unread_count = 0
+    }
+
   }, // watch
 
 }
