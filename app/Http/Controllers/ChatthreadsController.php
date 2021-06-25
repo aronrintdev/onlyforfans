@@ -12,6 +12,7 @@ use App\Http\Resources\Chatmessage as ChatmessageResource;
 use App\Events\MessageSentEvent;
 use App\Models\Chatmessage;
 use App\Models\Chatthread;
+use App\Models\Mycontact;
 use App\Models\User;
 
 class ChatthreadsController extends AppBaseController
@@ -245,6 +246,14 @@ class ChatthreadsController extends AppBaseController
             $ct = $originator->chatthreads()->whereHas('participants', function ($query) use($pkid) {
                 $query->where('user_id', $pkid);
             })->first();
+
+            // Add participant to originator mycontacts if they are not already there
+            if ($originator->mycontacts()->where('contact_id', $pkid)->doesntExist()) {
+                Mycontact::create([
+                    'owner_id' => $originator->id,
+                    'contact_id' => $pkid,
+                ]);
+            }
 
             // Start new chat thread if one is not found
             if (!isset($ct)) {
