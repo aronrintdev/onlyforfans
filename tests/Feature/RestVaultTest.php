@@ -547,7 +547,6 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
-     *  @group june24
      */
     // Creates post in first API call, then attaches selected mediafile in a second API call (associates as a reference)
     public function test_can_select_mediafile_from_vault_folder_to_attach_to_post_by_attach()
@@ -623,7 +622,6 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
-     *  @group june24
      */
     // Given one user who owns a vault + mediafile, and a different user who owns a timeline/post, 
     // neither user should be able to attach the mediafile to the post
@@ -691,7 +689,6 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
-     *  @group june24
      */
     // Creates story in first API call, then attaches selected mediafile in a second API call (associates as a reference)
     public function test_can_select_mediafile_from_vault_folder_to_attach_to_story_by_attach()
