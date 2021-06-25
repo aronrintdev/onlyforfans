@@ -169,7 +169,7 @@ class RestChatthreadsTest extends TestCase
         $content = json_decode($response->content());
 
         $response->assertStatus(200);
-        $response->assertTrue($content->total_unread_count > 0);
+        $this->assertTrue($content->total_unread_count > 0);
     }
 
     /**
@@ -186,7 +186,7 @@ class RestChatthreadsTest extends TestCase
         $response = $this->actingAs($participant)->ajaxJSON('POST', route('chatthreads.markAllRead'));
 
         $response->assertStatus(200);
-        $response->assertTrue($chatthread->chatmessages()->where([
+        $this->assertTrue($chatthread->chatmessages()->where([
             ['is_read', '=', 0],
             ['sender_id', '<>', $participant->id]
         ])->count() == 0);
@@ -203,10 +203,10 @@ class RestChatthreadsTest extends TestCase
         })->firstOrFail();
         $participant = $chatthread->participants[0];
 
-        $response = $this->actingAs($participant)->ajaxJSON('POST', route('chatthreads.markRead', $chatthread));
+        $response = $this->actingAs($participant)->ajaxJSON('POST', route('chatthreads.markRead', $chatthread->id));
 
         $response->assertStatus(200);
-        $response->assertTrue($chatthread->chatmessages()->where([
+        $this->assertTrue($chatthread->chatmessages()->where([
             ['is_read', '=', 0],
             ['sender_id', '<>', $participant->id]
         ])->count() == 0);
