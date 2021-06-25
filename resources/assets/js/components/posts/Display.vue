@@ -13,7 +13,7 @@
         <section class="d-flex align-items-center">
           <div v-if="session_user.id === post.user.id" class="post-ctrl mr-2">
             <b-dropdown id="dropdown-1" right text="" class="m-md-2" variant="outline-dark">
-              <b-dropdown-item @click="editPost()">
+              <b-dropdown-item @click="showEditPost">
                 <fa-icon icon="edit" fixed-width class="mr-2" />
                 Edit
               </b-dropdown-item>
@@ -40,7 +40,7 @@
       <template v-else>
         <PostCta :post="post" :session_user="session_user" :primary_mediafile="primaryMediafile" />
       </template>
-
+    
       <template #footer>
         <PostFooter :post="post" :session_user="session_user" />
       </template>
@@ -126,10 +126,8 @@ export default {
         }
       }
     },
-
-    editPost() {
-      const is = this.session_user.id === this.post.user.id // Check permissions
-      this.$router.push({ name: 'posts.edit', params: { slug: this.post.slug, post: this.post } })
+    showEditPost() {
+      eventBus.$emit('open-modal', { key: 'edit-post', data: { post: this.post } })
     },
 
     deletePost() {
@@ -157,7 +155,6 @@ ul {
   overflow: hidden;
   max-height: 18rem;
   text-overflow: ellipsis;
-
   display: -webkit-box;
   -webkit-line-clamp: 5;
   -webkit-box-orient: vertical;
