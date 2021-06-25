@@ -61,7 +61,7 @@ class Chatthread extends Model implements UuidId
 
     public function participants() // ie receivers, readers, etc; should include originator
     {
-        return $this->belongsToMany(User::class, 'chatthread_user', 'chatthread_id', 'user_id');
+        return $this->belongsToMany(User::class, 'chatthread_user', 'chatthread_id', 'user_id')->withPivot('is_muted');
     }
 
     #endregion Relationships
