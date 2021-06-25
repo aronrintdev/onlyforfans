@@ -23,7 +23,7 @@ class StoriesTableSeeder extends Seeder
         $users = User::get();
 
         if ( $this->appEnv !== 'testing' ) {
-            $this->output->writeln("  - Users seeder: loaded ".$users->count()." users...");
+            $this->output->writeln("  - Stories seeder: loaded ".$users->count()." users...");
         }
 
         $this->doS3Upload = ( $this->appEnv !== 'testing' );

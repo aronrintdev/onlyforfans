@@ -147,6 +147,10 @@ if ($doS3Upload) {
                 $mf_attrs['resource_id'] =  $resourceID; // ie story_id: required for story type
                 $mf_attrs['resource_type'] = 'stories';
                 break;
+            case MediafileTypeEnum::VAULT:
+                $mf_attrs['resource_id'] =  $resourceID;
+                $mf_attrs['resource_type'] = 'vaultfolders';
+                break;
             default:
                 throw new Exception('media file type of ' . $mftype . ' not supported');
         }
