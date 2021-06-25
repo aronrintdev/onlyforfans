@@ -549,7 +549,7 @@ class RestVaultTest extends TestCase
      *  @group regression
      *  @group june24
      */
-    // Creates post in first API call, then attaches selected mediafile in a second API call
+    // Creates post in first API call, then attaches selected mediafile in a second API call (associates as a reference)
     public function test_can_select_mediafile_from_vault_folder_to_attach_to_post_by_attach()
     {
         Storage::fake('s3');
@@ -596,7 +596,8 @@ class RestVaultTest extends TestCase
         $post = Post::findOrFail($postR->id);
 
         $payload = [
-            'mftype' => MediafileTypeEnum::VAULT,
+            //'mftype' => MediafileTypeEnum::VAULT,
+            'mftype' => MediafileTypeEnum::POST,
             'mediafile_id' => $mediafile->id, // the presence of this field is what tells controller method to create a reference, not upload content
             'resource_type' => 'posts',
             'resource_id' => $post->id,
@@ -690,6 +691,101 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
+     *  @group june24
+     */
+    // Creates story in first API call, then attaches selected mediafile in a second API call (associates as a reference)
+    public function test_can_select_mediafile_from_vault_folder_to_attach_to_story_by_attach()
+    {
+        Storage::fake('s3');
+
+        $timeline = Timeline::has('stories', '>=', 1)->has('followers', '>=', 1)->first();
+        $owner = $timeline->user;
+        $fan = $timeline->followers[0];
+
+        // --- Upload image to vault ---
+        $filename = $this->faker->slug;
+        $file = UploadedFile::fake()->image($filename, 200, 200);
+
+        $primaryVault = Vault::primary($owner)->first();
+        $vaultfolder = Vaultfolder::isRoot()->where('vault_id', $primaryVault->id)->first(); // root
+
+        $payload = [
+            'mftype' => MediafileTypeEnum::VAULT,
+            'mediafile' => $file,
+            'resource_type' => 'vaultfolders',
+            'resource_id' => $vaultfolder->id,
+        ];
+        $response = $this->actingAs($owner)->ajaxJSON('POST', route('mediafiles.store'), $payload);
+        $response->assertStatus(201);
+        $content = json_decode($response->content());
+        $this->assertNotNull($content->mediafile);
+        $mediafile = Mediafile::find($content->mediafile->id);
+        $this->assertNotNull($mediafile);
+        $this->assertTrue( $vaultfolder->mediafiles->contains($mediafile->id) );
+
+        // --- Create a new story with image from vault ---
+
+        $stype = StoryTypeEnum::PHOTO;
+        $bgcolor = 'blue';
+        $content = $this->faker->realText;
+
+        $payload = [
+            'stype' => $stype,
+            'bgcolor' => $bgcolor,
+            'content' => $content,
+        ];
+        $response = $this->actingAs($owner)->ajaxJSON('POST', route('stories.store'), $payload);
+        $response->assertStatus(201);
+        $content = json_decode($response->content());
+        $this->assertNotNull($content->story);
+        $storyR = $content->story;
+        $story = Story::findOrFail($storyR->id);
+
+        // --- Create a free post with image from vault ---
+
+        //$filename = $this->faker->slug;
+        //$file = UploadedFile::fake()->image($filename, 200, 200);
+        $payload = [
+            'type' => PostTypeEnum::FREE,
+            'timeline_id' => $timeline->id,
+            'description' => $this->faker->realText,
+        ];
+        $response = $this->actingAs($owner)->ajaxJSON('POST', route('posts.store'), $payload);
+        $response->assertStatus(201);
+        $content = json_decode($response->content());
+        $this->assertNotNull($content->post);
+        $postR = $content->post;
+        $post = Post::findOrFail($postR->id);
+
+        $payload = [
+            'mftype' => MediafileTypeEnum::STORY,
+            'mediafile_id' => $mediafile->id, // the presence of this field is what tells controller method to create a reference, not upload content
+            'resource_type' => 'stories',
+            'resource_id' => $story->id,
+        ];
+        $response = $this->actingAs($owner)->ajaxJSON('POST', route('mediafiles.store'), $payload);
+        $response->assertStatus(201);
+
+        // --
+
+        $timeline->refresh();
+        $owner->refresh();
+        $story->refresh();
+        $mediafile = $story->mediafiles->shift();
+        $this->assertNotNull($mediafile, 'No mediafiles attached to story');
+
+        $response = $this->actingAs($fan)->ajaxJSON('GET', route('stories.show', $story->id));
+        $response->assertStatus(200);
+
+        $response = $this->actingAs($fan)->ajaxJSON('GET', route('mediafiles.show', $mediafile->id));
+        $response->assertStatus(200);
+    }
+
+    // -----
+
+    /**
+     *  @group vault
+     *  @group regression
      */
     // Creates post and attaches selected mediafile in a single API call
     public function test_can_select_mediafile_from_vault_folder_to_attach_to_post_single_op()
@@ -752,7 +848,6 @@ class RestVaultTest extends TestCase
         $response = $this->actingAs($fan)->ajaxJSON('GET', route('mediafiles.show', $mediafile->id));
         $response->assertStatus(200);
     }
-
     /**
      *  @group vault
      *  @group regression

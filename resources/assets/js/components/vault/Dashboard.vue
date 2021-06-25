@@ -282,7 +282,7 @@ export default {
 
       switch (resourceType) {
         case 'story':
-          this.$router.replace({ name: 'index', params });
+          this.$router.replace({ name: 'stories.dashboard', params });
           break;
         case 'post':
           this.$router.replace({ name: 'index', params });

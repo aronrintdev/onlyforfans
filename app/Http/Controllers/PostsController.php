@@ -91,6 +91,8 @@ class PostsController extends AppBaseController
         $post = $timeline->posts()->create($attrs);
 
         if ( $request->has('mediafiles') ) {
+            // %FIXME: if this is indeed used by the Vue client code, we should change/refactor it to 
+            // instead upload using POST mediafiles.store calls that follow this posts.store
             foreach ( $request->mediafiles as $mfID ) {
                 $refMF = Mediafile::where('resource_type', 'vaultfolders')
                     ->where('is_primary', true)
