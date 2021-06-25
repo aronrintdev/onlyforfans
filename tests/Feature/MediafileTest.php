@@ -121,6 +121,46 @@ class MediafileTest extends TestCase
     /**
      *  @group mediafiles
      *  @group regression
+     *  @group june0625
+     */
+    public function test_owner_can_list_mediafiles_in_vault()
+    {
+        $owner = User::has('vaultfolders.mediafiles', '>=', 1)->firstOrFail();
+
+        $response = $this->actingAs($owner)->ajaxJSON('GET', route('mediafiles.index'), [
+            'mftype' => MediafileTypeEnum::VAULT,
+            'take' => 1000, // should be more than enough (test DB is small)
+        ]);
+        $response->assertStatus(200);
+        $content = json_decode($response->content());
+        //dd($content);
+        $response->assertJsonStructure([
+            'data',
+            'links',
+            'meta' => [ 'current_page', 'from', 'last_page', 'path', 'per_page', 'to', 'total', ],
+        ]);
+        $this->assertEquals(1, $content->meta->current_page);
+
+        $this->assertNotNull($content->data);
+        $this->assertGreaterThan(0, count($content->data));
+        //$this->assertEquals($expectedCount, count($content->data));
+        $this->assertObjectHasAttribute('mfname', $content->data[0]);
+        $this->assertObjectHasAttribute('mftype', $content->data[0]);
+        $this->assertEquals(MediafileTypeEnum::VAULT, $content->data[0]->mftype);
+
+        // All resources returned are owned and of mftype 'vault'
+        $ownedCount = collect($content->data)->reduce( function($acc, $item) use(&$owner) {
+            if ( $item->resource_type==='vaultfolders' && $item->mftype===MediafileTypeEnum::VAULT ) {
+                $acc += 1;
+            }
+            return $acc;
+        }, 0);
+        $this->assertEquals(count($content->data), $ownedCount); 
+    }
+
+    /**
+     *  @group mediafiles
+     *  @group regression
      *  @group june0624
      */
     public function test_can_store_mediafile()

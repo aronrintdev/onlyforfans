@@ -37,7 +37,7 @@ class MediafilesTableSeeder extends Seeder
         $users->each( function($u) {
             static $iter = 1;
 
-            if ( $this->faker->boolean(30) ) {
+            if ( ($iter > 5) && $this->faker->boolean(30) ) {
                 return false; // no vault files for this user
             }
 
