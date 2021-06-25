@@ -121,6 +121,7 @@ class MediafileTest extends TestCase
     /**
      *  @group mediafiles
      *  @group regression
+     *  @group june0624
      */
     public function test_can_store_mediafile()
     {
@@ -145,6 +146,8 @@ class MediafileTest extends TestCase
         Storage::disk('s3')->assertExists($mediafile->diskmediafile->filepath);
         $this->assertSame($filename, $mediafile->mfname);
         $this->assertSame(MediafileTypeEnum::AVATAR, $mediafile->mftype);
+        $this->assertNotNull($mediafile->diskmediafile->orig_size);
+        $this->assertGreaterThan(0, $mediafile->diskmediafile->orig_size);
     }
 
     // ------------------------------
