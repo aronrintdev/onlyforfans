@@ -48,21 +48,20 @@
     </b-card>
     <b-modal
       v-model="showDeleteConfirmation"
-      header-bg-variant="danger"
-      header-text-variant="light"
-      ok-variant="danger"
-      size="sm"
-      @ok="deletePost()"
+      size="md"
+      hide-footer
+      title="Delete Post"
     >
       <template #modal-title>
-        <fa-icon icon="trash" fixed-width />
         {{ $t('delete.confirmation.title') }}
       </template>
-      <div class="text-center" v-text="$t('delete.confirmation.message')" />
-      <template #modal-ok>
-        <fa-icon icon="trash" fixed-width />
-        {{ $t('delete.confirmation.ok') }}
-      </template>
+      <div class="text-left" v-text="$t('delete.confirmation.message')" />
+      <div class="mt-2 text-right">
+        <b-btn variant="success" @click="deletePost">
+          <fa-icon icon="trash" fixed-width />
+          {{ $t('delete.confirmation.ok') }}
+        </b-btn>
+      </div>
     </b-modal>
   </div>
 </template>
