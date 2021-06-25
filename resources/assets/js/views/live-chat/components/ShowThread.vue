@@ -31,8 +31,9 @@
           <fa-icon :icon="['far', 'star']" class="fa-lg" />
         </b-button>
         <div>|</div>
-        <b-button variant="link" class="" @click="doSomething">
-          <fa-icon :icon="['far', 'bell']" class="fa-lg" />
+        <b-button variant="link" class="" @click="toggleMute">
+          <fa-icon v-if="!isMuted" :icon="['far', 'bell']" class="fa-lg" title="Notifications ON" />
+          <fa-icon v-if="isMuted" :icon="['far', 'bell-slash']" class="fa-lg muted" title="Notifications OFF" />
         </b-button>
         <div>|</div>
         <b-button variant="link" class="" @click="doSomething">
@@ -100,6 +101,7 @@ export default {
     moment: moment,
 
     chatmessages: null,
+    isMuted: false,
     meta: null,
     perPage: 10,
     currentPage: 1,
@@ -112,6 +114,7 @@ export default {
   },
 
   mounted() {
+    this.getMuteStatus(this.id)
     this.getChatmessages(this.id)
     this.markRead(this.id)
     const channel = `chatthreads.${this.id}`
@@ -150,6 +153,37 @@ export default {
       this.getUnreadMessagesCount()
     },
 
+    async getMuteStatus(chatthreadID) {
+      try {
+        const response = await axios.get( this.$apiRoute('chatthreads.getMuteStatus', chatthreadID) )
+        this.isMuted = response.data.is_muted;
+      } catch (err) {
+        if (err.response.status === 403) {
+          // FIXME: remove or uncomment. commented for now, since it's disruptive
+          // this.$root.$bvToast.toast('You do not have permission to view this thread!', {
+          //   toaster: 'b-toaster-top-center',
+          //   title: 'Error',
+          //   variant: 'danger',
+          // })
+        }
+      }
+    },
+
+    async toggleMute() {
+      try {
+        await axios.post(this.$apiRoute('chatthreads.toggleMute', this.id), { is_muted: !this.isMuted })
+        this.isMuted = !this.isMuted;
+      } catch (err) {
+        if (err.response.status === 403) {
+          this.$root.$bvToast.toast('You do not have permission to update this thread!', {
+            toaster: 'b-toaster-top-center',
+            title: 'Error',
+            variant: 'danger',
+          })
+        }
+      }
+    },
+
     doSomething() {
       // stub placeholder for impl
     },
@@ -159,9 +193,10 @@ export default {
   watch: {
 
     id (newValue, oldValue) {
-      if ( newValue && (newValue!==oldValue) ) {
+      if ( newValue && (newValue !== oldValue) ) {
         this.getChatmessages(newValue)
         this.markRead(newValue)
+        this.getMuteStatus(newValue)
       }
     },
 
@@ -510,6 +545,10 @@ body {
       }
     }
 
+  }
+
+  .muted {
+    opacity: 50%;
   }
 
 }

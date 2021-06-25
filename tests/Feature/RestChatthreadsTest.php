@@ -133,7 +133,6 @@ class RestChatthreadsTest extends TestCase
     /**
      *  @group FIXME-chatthreads
      *  @group regression
-     *  @group here-fixme
      */
     public function test_can_list_filtered_chatthreads()
     {
@@ -215,7 +214,6 @@ class RestChatthreadsTest extends TestCase
     /**
      *  @group chatthreads
      *  @group regression
-     *  @group here0608
      */
     public function test_can_create_chat_thread_with_selected_participants()
     {
