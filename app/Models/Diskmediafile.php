@@ -59,6 +59,14 @@ class Diskmediafile extends BaseModel implements Guidable, Ownable
                 $model->basename = $parsedbase;
             }
         });
+
+        static::created(function ($model) {
+            if ( Storage::disk('s3')->exists($model->filepath) ) {
+                $model->orig_size = Storage::disk('s3')->size($model->filepath);
+                $model->save();
+            }
+        });
+
     }
 
     //--------------------------------------------

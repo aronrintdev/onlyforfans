@@ -91,6 +91,8 @@ class PostsController extends AppBaseController
         $post = $timeline->posts()->create($attrs);
 
         if ( $request->has('mediafiles') ) {
+            // %FIXME: if this is indeed used by the Vue client code, we should change/refactor it to 
+            // instead upload using POST mediafiles.store calls that follow this posts.store
             foreach ( $request->mediafiles as $mfID ) {
                 $refMF = Mediafile::where('resource_type', 'vaultfolders')
                     ->where('is_primary', true)
@@ -164,34 +166,6 @@ class PostsController extends AppBaseController
         }
 
         $post->save();
-
-        return response()->json([
-            'post' => $post,
-        ]);
-    }
-
-    public function attachMediafile(Request $request, Post $post, Mediafile $mediafile)
-    {
-        // require mediafile to be in vault (?)
-        if ( empty($mediafile->resource) ) {
-            abort(400, 'source file must have associated resource');
-        }
-        if ( $mediafile->resource_type !== 'vaultfolders' ) {
-            abort(400, 'source file associated resource type must be vaultfolder');
-        }
-        $this->authorize('update', $post);
-        $this->authorize('update', $mediafile);
-        $this->authorize('update', $mediafile->resource);
-
-        $refMF = Mediafile::where('resource_type', 'vaultfolders')
-            ->where('is_primary', true)
-            ->findOrFail($mediafile->id)->diskmediafile->createReference(
-                'posts',    // $resourceType
-                $post->id,  // $resourceID
-                'Attached File', // $mfname - could be optionally passed as a query param %TODO
-                MediafileTypeEnum::POST // $mftype
-            );
-        $post->refresh();
 
         return response()->json([
             'post' => $post,

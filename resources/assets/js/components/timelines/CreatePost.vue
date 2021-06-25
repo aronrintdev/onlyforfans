@@ -211,7 +211,7 @@ export default {
         // (3) create any mediaifle references, ex from selected files in vault
         this.mediafileIdsFromVault.forEach( async mfid => {
           await axios.post(this.$apiRoute('mediafiles.store'), {
-            mediafile_id: mfid,
+            mediafile_id: mfid, // the presence of this field is what tells controller method to create a reference, not upload content
             resource_id: json.post.id,
             resource_type: 'posts',
             mftype: 'post',

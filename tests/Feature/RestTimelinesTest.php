@@ -185,8 +185,8 @@ class RestTimelinesTest extends TestCase
         $freePost->postable_id = $timeline->id;
         $freePost->postable_type = 'timelines';
         $freePost->save();
-        $this->attachMediafile($freePost);
-        $this->attachMediafile($freePost);
+        $this->associateMediafile($freePost);
+        $this->associateMediafile($freePost);
 
         $pricedPost = $posts[1];
         $pricedPost->type = PostTypeEnum::PRICED;
@@ -194,16 +194,16 @@ class RestTimelinesTest extends TestCase
         $pricedPost->postable_type = 'timelines';
         $pricedPost->price = 7*100;
         $pricedPost->save();
-        $this->attachMediafile($pricedPost);
-        $this->attachMediafile($pricedPost);
+        $this->associateMediafile($pricedPost);
+        $this->associateMediafile($pricedPost);
 
         $subPost = $posts[2];
         $subPost->type = PostTypeEnum::SUBSCRIBER;
         $subPost->postable_id = $timeline->id;
         $subPost->postable_type = 'timelines';
         $subPost->save();
-        $this->attachMediafile($subPost);
-        $this->attachMediafile($subPost);
+        $this->associateMediafile($subPost);
+        $this->associateMediafile($subPost);
 
         //$posts = Post::with('mediafiles')->where('postable_type', 'timelines')->where('postable_id', $timeline->id)->latest()->take(5)->get();
         //dd($posts);
@@ -297,13 +297,13 @@ class RestTimelinesTest extends TestCase
 
         // Add some mediafiles (photos) to the posts...
         $posts = Post::where('postable_type', 'timelines')->where('postable_id', $timeline->id)->latest()->take(5)->get();
-        $this->attachMediafile($posts[0]);
-        $this->attachMediafile($posts[0]);
-        $this->attachMediafile($posts[1]);
-        $this->attachMediafile($posts[2]);
-        $this->attachMediafile($posts[2]);
-        $this->attachMediafile($posts[2]);
-        $this->attachMediafile($posts[3]);
+        $this->associateMediafile($posts[0]);
+        $this->associateMediafile($posts[0]);
+        $this->associateMediafile($posts[1]);
+        $this->associateMediafile($posts[2]);
+        $this->associateMediafile($posts[2]);
+        $this->associateMediafile($posts[2]);
+        $this->associateMediafile($posts[3]);
 
         $response = $this->actingAs($fan)->ajaxJSON('GET', route('timelines.photos', $timeline->id), []);
         $response->assertStatus(200);
@@ -763,7 +763,7 @@ class RestTimelinesTest extends TestCase
         parent::tearDown();
     }
 
-    protected function attachMediafile(Post &$post, string $type='image') 
+    protected function associateMediafile(Post &$post, string $type='image') 
     {
         $fname = $this->faker->slug.'.jpg';
         Diskmediafile::doCreate([

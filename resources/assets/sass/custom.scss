@@ -101,6 +101,18 @@ body .feed-crate.tag-grid-layout .superbox-post .media-slider {
   }
 }
 
+.superbox-post .dropdown-toggle {
+  border: none;
+  display: flex;
+  align-items: center;
+}
+.superbox-post .dropdown-toggle::after {
+  margin-top: 0.2em;
+  border-top: 0.6em solid;
+  border-right: 0.4em solid transparent;
+  border-left: 0.4em solid transparent;
+}
+
 #user-filter-dropdown .btn,
 .filter-dropdown .btn,
 .filter-dropdown.show > .btn.dropdown-toggle,

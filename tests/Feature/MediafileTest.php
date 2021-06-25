@@ -74,6 +74,7 @@ class MediafileTest extends TestCase
         ]);
         $response->assertStatus(200);
         $content = json_decode($response->content());
+        //dd($content);
         $response->assertJsonStructure([
             'data',
             'links',
@@ -93,18 +94,24 @@ class MediafileTest extends TestCase
             switch ( $item->resource_type ) {
             case 'posts':
                 $resource = Post::findOrFail($item->resource_id);
+                if ( $resource->getPrimaryOwner()->id === $owner->id ) {
+                    $acc += 1;
+                }
                 break;
             case 'stories':
                 $resource = Story::findOrFail($item->resource_id);
+                if ( $resource->getPrimaryOwner()->id === $owner->id ) {
+                    $acc += 1;
+                }
                 break;
             case 'users':
                 $resource = User::findOrFail($item->resource_id);
+                if ( $resource->id === $owner->id ) {
+                    $acc += 1;
+                }
                 break;
             default:
                 throw new Exception('Unknown resource_type: '.$item->resource_type);
-            }
-            if ( $resource->getPrimaryOwner()->id === $owner->id ) {
-                $acc += 1;
             }
             return $acc;
         }, 0);
@@ -114,6 +121,7 @@ class MediafileTest extends TestCase
     /**
      *  @group mediafiles
      *  @group regression
+     *  @group june0624
      */
     public function test_can_store_mediafile()
     {
@@ -138,6 +146,8 @@ class MediafileTest extends TestCase
         Storage::disk('s3')->assertExists($mediafile->diskmediafile->filepath);
         $this->assertSame($filename, $mediafile->mfname);
         $this->assertSame(MediafileTypeEnum::AVATAR, $mediafile->mftype);
+        $this->assertNotNull($mediafile->diskmediafile->orig_size);
+        $this->assertGreaterThan(0, $mediafile->diskmediafile->orig_size);
     }
 
     // ------------------------------
@@ -150,7 +160,7 @@ class MediafileTest extends TestCase
         // Update or add avatars to some users for this test...
         $users = User::take(5)->get();
         $users->each( function($u) {
-            $avatar = FactoryHelpers::createImage($u, MediafileTypeEnum::AVATAR, null, false); //skip S3 upload
+            $avatar = FactoryHelpers::createImage($u, MediafileTypeEnum::AVATAR, $u->id, false); //skip S3 upload
             $u->save();
         });
     }
