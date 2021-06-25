@@ -141,24 +141,13 @@ class StoriesController extends AppBaseController
                             'resource_id'     => $story->id,
                             'resource_type'   => 'stories',
                         ]);
-                    } else {
-                        // mediafile request param is ID, referneces existing mediafile (in vault)...see vrules above
-                        $refMF = Mediafile::where('resource_type', 'vaultfolders')
-                            ->where('is_primary', true)
-                            ->findOrFail($request->mediafile)
-                            ->diskmediafile->createReference(
-                                'stories',    // $resourceType
-                                $story->id,  // $resourceID
-                                'New Story', // $mfname - could be optionally passed as a query param %TODO
-                                MediafileTypeEnum::STORY // $mftype
-                            );
                     }
                 }
                 return $story;
             });
         } catch (Exception $e) {
              Log::error( json_encode([
-                 'msg' => 'StoriessController::store() - error',
+                 'msg' => 'StoriesController::store() - error',
                  'emsg' => $e->getMessage(),
              ]) );
             abort(400);
