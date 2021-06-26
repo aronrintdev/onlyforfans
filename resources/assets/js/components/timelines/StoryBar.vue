@@ -2,7 +2,7 @@
   <div v-if="!isLoading" class="crate tag-crate crate-story_bar row OFF-mb-3 mx-0">
     <section class="d-flex flex-wrap justify-content-start w-100">
       <div class="story">
-        <b-form-file @change="handleSelect" ref="fileInput" v-model="selectedFile" class="OFF-d-none"></b-form-file>
+        <b-form-file @change="handleSelect" ref="fileInput" v-model="selectedFile" class="d-none"></b-form-file>
         <div @click="selectFile">
           <fa-icon class="mt-1" :icon="['far', 'plus-circle']" size="2x" />
         </div>

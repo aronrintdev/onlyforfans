@@ -25,16 +25,17 @@
           </div>
         </nav>
 
-        <section v-for="(story, index) in renderedStories" :key="index">
+        <section v-for="(s, index) in renderedStories" :key="index">
           <div v-if="current == index" :style="cssDisplay" class="display-area bg-blur">
+            <h5>{{ storyteller }}</h5>
             <div class="bg-blur"></div>
             <div v-touch:swipe.top="handleSwipeUp" class="crate-content">
-              <article v-if="story.stype === 'text'" class="h-100 v-wrap">
-                <p class="h4 text-center v-box">{{ story.content }}</p>
+              <article v-if="s.stype === 'text'" class="h-100 v-wrap">
+                <p class="h4 text-center v-box">{{ s.content }}</p>
               </article>
-              <article v-else-if="story.stype === 'image'" class="h-100">
-                <img :src="story.mediafiles[0].filepath" class="OFF-img-fluid OFF-h-100" />
-                <see-more v-if="story.swipe_up_link" :link="story.swipe_up_link"></see-more>
+              <article v-else-if="s.stype === 'image'" class="h-100">
+                <img :src="s.mediafiles[0].filepath" class="OFF-img-fluid OFF-h-100" />
+                <see-more v-if="s.swipe_up_link" :link="s.swipe_up_link"></see-more>
               </article>
             </div>
           </div>
@@ -50,9 +51,6 @@
 </template>
 
 <script>
-/**
- * Story Player
- */
 import _ from 'lodash'
 import SeeMore from './SeeMore.vue'
 
@@ -62,6 +60,7 @@ export default {
   },
 
   props: {
+    storyteller: { type: String, default: '' },
     username: { type: String, default: '' },
     stories: { type: Array, default: () => [] },
     maxStories: { type: Number, default: 15 },
@@ -69,7 +68,7 @@ export default {
 
   data: () => ({
     current: 0,
-    play: true,
+    play: false, // true,
     speed: 3000,
     timelineAnimation: null,
     speedOptions: [
@@ -118,16 +117,28 @@ export default {
       }
       return this.stories
     },
+
   },
 
   methods: {
     doNav(direction) {
+      console.log(`doNav() - ${direction} - ${this.current}/${this.stories.length}`)
       switch (direction) {
         case 'previous':
-          this.goTo(this.current - 1)
+          if ( (this.current-1) < 0 ) {
+            console.log(`doNav() - emit prev-story-timeline`)
+            this.$emit('prev-story-timeline', { foo: 'bar'} )
+          } else {
+            this.goTo(this.current - 1)
+          }
           break
         case 'next':
-          this.goTo(this.current + 1)
+          if ( (this.current+1) >= this.stories.length ) {
+            console.log(`doNav() - emit next-story-timeline`)
+            this.$emit('next-story-timeline', { foo: 'bar'} )
+          } else {
+            this.goTo(this.current + 1)
+          }
           break
       }
     },
