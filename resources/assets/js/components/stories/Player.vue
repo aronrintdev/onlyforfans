@@ -1,5 +1,5 @@
 <template>
-  <div class="container-fluid supercrate-player">
+  <div v-if="!isLoading" class="container-fluid supercrate-player">
     <section class="row">
       <aside class="col-md-3 tag-debug">
         <h2>My Story Views</h2>
@@ -33,7 +33,7 @@
               <article v-if="s.stype === 'text'" class="h-100 v-wrap">
                 <p class="h4 text-center v-box">{{ s.content }}</p>
               </article>
-              <article v-else-if="s.stype === 'image'" class="h-100">
+              <article v-else-if="s.stype === 'image' && s.mediafiles" class="h-100">
                 <img :src="s.mediafiles[0].filepath" class="OFF-img-fluid OFF-h-100" />
                 <see-more v-if="s.swipe_up_link" :link="s.swipe_up_link"></see-more>
               </article>
@@ -96,6 +96,9 @@ export default {
   }),
 
   computed: {
+    isLoading() {
+      return !this.storyteller || !this.stories || !this.username
+    },
     cssNav() {
       return {
         //'--bg-color': this.bgColor,
@@ -104,7 +107,10 @@ export default {
       }
     },
     cssDisplay() {
-      if (this.renderedStories[this.current].mediafiles[0]) {
+      console.log ('renderedStories', {
+        renderedStories: this.renderedStories 
+      })
+      if (this.renderedStories.length && this.renderedStories[0].mediafiles && this.renderedStories[this.current].mediafiles[0]) {
         return {
           '--background-image': `url(${this.renderedStories[this.current].mediafiles[0].filepath})`,
         }

@@ -26,7 +26,6 @@ export default {
   data: () => ({
     timelineIndex: 0,
     timelines: [],
-    loading: true,
   }),
 
   computed: {
@@ -62,9 +61,15 @@ export default {
   },
 
   created() {
-    const response = axios.get( this.$apiRoute('timelines.myFollowedStories')).then ( response => {
-      this.timelines = response.data.data
-    })
+    if ( this.$route.query.timeline && this.$route.query.timeline === 'me' ) {
+      const response = axios.get( this.$apiRoute('timelines.myStories')).then ( response => {
+        this.timelines = response.data.data
+      })
+    } else {
+      const response = axios.get( this.$apiRoute('timelines.myFollowedStories')).then ( response => {
+        this.timelines = response.data.data
+      })
+    }
   },
 
   components: {
