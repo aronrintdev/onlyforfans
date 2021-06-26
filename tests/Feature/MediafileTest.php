@@ -121,7 +121,6 @@ class MediafileTest extends TestCase
     /**
      *  @group mediafiles
      *  @group regression
-     *  @group june0625
      */
     public function test_owner_can_list_mediafiles_in_vault()
     {
