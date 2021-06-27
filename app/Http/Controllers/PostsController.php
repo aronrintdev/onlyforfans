@@ -64,7 +64,8 @@ class PostsController extends AppBaseController
         $vrules = [
             'timeline_id' => 'required|uuid|exists:timelines,id',
             'type' => [ 'sometimes', 'required', new InEnum(new PostTypeEnum()) ],
-            'price' => 'sometimes|required|integer',
+            'price_for_subscribers' => 'sometimes|required|integer',
+            'price_for_followers' => 'sometimes|required|integer',
             'mediafiles' => 'array',
             'mediafiles.*.*' => 'integer|uuid|exists:mediafiles',
         ];
