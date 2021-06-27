@@ -21,6 +21,13 @@
           </b-list-group-item>
         </b-list-group>
 
+        <TreeItem
+          class="item"
+          :item="demoData"
+          @make-folder="makeFolder"
+          @add-item="addItem"
+        />
+
         <hr />
 
         <ul class="list-unstyled ctrl">
@@ -43,7 +50,7 @@
 
         <b-form @submit="shareFiles" v-if="true">
 
-          <div class="autosuggest-container">
+          <div v-if="selectedMediafiles.length" class="autosuggest-container">
             <b-form-group>
               <b-form-input
                 id="invite-email"
@@ -53,6 +60,7 @@
                 placeholder="Enter email to invite..."
               ></b-form-input>
             </b-form-group>
+            <!--
             <b-form-group>
               <vue-autosuggest
                 v-model="query"
@@ -67,12 +75,16 @@
                 </div>
               </vue-autosuggest>
             </b-form-group>
+            -->
           </div>
 
-          <b-button type="submit" variant="primary">Share Selected</b-button>
+          <b-button v-if="selectedMediafiles.length" type="submit" variant="primary">Share Selected</b-button>
+          <!--
           <b-button @click="cancelShareFiles" type="cancel" variant="secondary">Cancel</b-button>
+          -->
         </b-form>
 
+        <!--
         <h4>Shares</h4>
         <ul v-if="shareForm.sharees.length">
           <li v-for="(se) in shareForm.sharees">
@@ -84,6 +96,7 @@
         <ul v-if="shareForm.invitees.length">
           <li v-for="(i) in shareForm.invitees">{{ i }}</li>
         </ul>
+        -->
 
       </aside>
 
@@ -170,6 +183,7 @@ import vue2Dropzone from 'vue2-dropzone';
 import { VueAutosuggest } from 'vue-autosuggest'; // https://github.com/darrenjennings/vue-autosuggest#examples
 import 'vue2-dropzone/dist/vue2Dropzone.min.css';
 import PreviewFile from '@components/vault/PreviewFile'
+import TreeItem from '@components/vault/TreeItem'
 
 export default {
 
@@ -226,6 +240,29 @@ export default {
 
   data: () => ({
 
+    demoData: {
+      name: "My Tree",
+      children: [
+        { name: "hello" },
+        { name: "wat" },
+        {
+          name: "child folder",
+          children: [
+            {
+              name: "child folder",
+              children: [{ name: "hello" }, { name: "wat" }]
+            },
+            { name: "hello" },
+            { name: "wat" },
+            {
+              name: "child folder",
+              children: [{ name: "hello" }, { name: "wat" }]
+            }
+          ]
+        }
+      ]
+    },
+
     showCreateForm: false,
 
     mediafiles: {}, // %FIXME: use array not keyed object!
@@ -270,6 +307,12 @@ export default {
   },
 
   methods: {
+
+    // from Vue tree demo (TreeItem aka VaultNavigation)
+    makeFolder() {
+    },
+    addItem() {
+    },
 
     sendSelected(resourceType) {
       // send (share) selected files to a post, story, or message
@@ -432,6 +475,7 @@ export default {
   components: {
     vueDropzone: vue2Dropzone,
     VueAutosuggest,
+    TreeItem,
     PreviewFile,
   },
 }

@@ -25,9 +25,15 @@
           </div>
         </nav>
 
-        <section v-for="(s, index) in renderedStories" :key="index">
+        <section v-for="(s, index) in renderedStories" :key="`story-${s.id}`">
           <div v-if="current == index" :style="cssDisplay" class="display-area bg-blur">
-            <h5>{{ storyteller }}</h5>
+            <h6 class="tag-creator">{{ storyteller }}
+              <p>DEBUG:</p>
+              <ul>
+                <li>story index: {{index+1}}/{{renderedStories.length}}</li>
+                <li>current story ID: {{s.id}}</li>
+              </ul>
+            </h6>
             <div class="bg-blur"></div>
             <div v-touch:swipe.top="handleSwipeUp" class="crate-content">
               <article v-if="s.stype === 'text'" class="h-100 v-wrap">
@@ -61,7 +67,7 @@ export default {
 
   props: {
     storyteller: { type: String, default: '' },
-    username: { type: String, default: '' },
+    username: { type: String, default: '' }, // session user (?)
     stories: { type: Array, default: () => [] },
     maxStories: { type: Number, default: 15 },
   },
@@ -237,6 +243,11 @@ export default {
 .display-area {
   position: relative;
   height: 70vh;
+
+  .tag-creator {
+    position: absolute;
+    z-index: 1000;
+  }
 
   & > .crate-content {
     position: absolute;

@@ -1,5 +1,12 @@
 <template>
   <div v-if="!isLoading" class="w-100">
+    <div>
+      <p>DEBUG:</p>
+      <ul>
+        <li>timeline index: {{timelineIndex+1}}/{{timelines.length}}</li>
+        <li>current timeline ID: {{currentTimeline.name || ''}} ({{currentTimeline.id}})</li>
+      </ul>
+    </div>
     <Player 
       @next-story-timeline="nextStoryTimeline"
       @prev-story-timeline="prevStoryTimeline"
@@ -10,11 +17,8 @@
 </template>
 
 <script>
-/**
- * Stories Player View
- */
-import Player from '@components/stories/Player'
 import Vuex from 'vuex'
+import Player from '@components/stories/Player'
 
 export default {
   name: 'StoriesPlayer',
@@ -37,12 +41,13 @@ export default {
     },
 
     stories() {
-      console.log(`stories.computed`)
       return this.timelines[this.timelineIndex]?.stories || []
     },
     storyteller() {
-      console.log(`storyteller.computed`)
       return this.timelines[this.timelineIndex]?.name || null
+    },
+    currentTimeline() {
+      return this.timelines[this.timelineIndex] || null
     },
   },
 
