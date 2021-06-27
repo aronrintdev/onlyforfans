@@ -28,8 +28,17 @@
             </svg>
           </button>
         </div>
-        <div v-if="type === 'price'" class="w-100">
-          <PriceSelector v-if="type === 'price'" v-model="price" class="mb-3" />
+        <div v-if="type === 'price'" class="d-flex w-100">
+          <PriceSelector
+            class="mb-3 mr-5"
+            :label="$t('priceForFollowers')"
+            v-model="priceForFreeFollowers"
+          />
+          <PriceSelector
+            class="mb-3"
+            :label="$t('priceForSubscribers')"
+            v-model="priceForPaidSubscribers"
+          />
           <hr />
         </div>
         <textarea v-model="description" rows="8" class="w-100"></textarea>
@@ -95,7 +104,8 @@ export default {
       if (!this.loading) {
         return this.post.description !== this.description
           || this.post.type !== this.type
-          || this.post.price !== this.price
+          || this.post.price_for_followers !== this.priceForFreeFollowers
+          || this.post.price_for_subscribers !== this.priceForPaidSubscribers
           || this.post.schedule_datetime !== this.schedule_datetime
       }
       return false
@@ -105,7 +115,8 @@ export default {
     loading: false,
     description: '',
     type: 'free',
-    price: 0,
+    priceForFreeFollowers: 0,
+    priceForPaidSubscribers: 0,
     currency: 'USD',
     ptypes: [
       { text: 'Free', value: 'free' },
@@ -120,7 +131,8 @@ export default {
     fillFromProp() {
       this.description = this.post.description
       this.type = this.post.type
-      this.price = this.post.price
+      this.priceForFreeFollowers = this.post.price_for_followers
+      this.priceForPaidSubscribers = this.post.price_for_subscribers
       // this.currency = this.post.currency
       this.schedule_datetime = this.post.schedule_datetime
     },
@@ -135,7 +147,8 @@ export default {
       this.axios.patch(this.$apiRoute('posts.update', { post: this.post.slug }), {
         description: this.description,
         type: this.type,
-        price: this.price,
+        price_for_subscribers: this.priceForPaidSubscribers,
+        price_for_followers: this.priceForFreeFollowers,
         currency: this.currency,
         schedule_datetime: this.schedule_datetime,
       }).then(response => {
@@ -195,7 +208,9 @@ textarea,
     "save": {
       "button": "Save",
       "error": "An error has occurred while attempting to save this post. Please try again later."
-    }
+    },
+    "priceForFollowers": "Price for free followers",
+    "priceForSubscribers": "Price for paid subscribers",
   }
 }
 </i18n>

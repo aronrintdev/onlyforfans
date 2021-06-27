@@ -33,13 +33,11 @@
             <div v-if="postType === 'price'" class="w-100 d-flex">
               <PriceSelector
                 class="mb-3 mr-5"
-                v-if="postType === 'price'"
                 :label="$t('priceForFollowers')"
                 v-model="priceForFreeFollowers"
               />
               <PriceSelector
                 class="mb-3"
-                v-if="postType === 'price'"
                 :label="$t('priceForSubscribers')"
                 v-model="priceForPaidSubscribers"
               />
