@@ -153,7 +153,7 @@ export default {
         schedule_datetime: this.schedule_datetime,
       }).then(response => {
         this.loading = false
-        eventBus.$emit('update-post', this.post.id)
+        eventBus.$emit('update-posts', this.post.id)
         this.exit()
       }).catch(error => {
         eventBus.$emit('error', { error, message: this.$t('save.error') })
