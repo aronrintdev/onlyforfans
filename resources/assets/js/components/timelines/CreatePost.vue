@@ -30,8 +30,19 @@
                 </svg>
               </button>
             </div>
-            <div v-if="postType === 'price'" class="w-100">
-              <PriceSelector v-if="postType === 'price'" v-model="price" class="mb-3" />
+            <div v-if="postType === 'price'" class="w-100 d-flex">
+              <PriceSelector
+                class="mb-3 mr-5"
+                v-if="postType === 'price'"
+                :label="$t('priceForFollowers')"
+                v-model="priceForFreeFollowers"
+              />
+              <PriceSelector
+                class="mb-3"
+                v-if="postType === 'price'"
+                :label="$t('priceForSubscribers')"
+                v-model="priceForPaidSubscribers"
+              />
               <hr />
             </div>
 
@@ -141,7 +152,8 @@ export default {
       { text: 'By Purchase', value: 'price' },
       { text: 'Subscriber-Only', value: 'paid' },
     ],
-    price: 0,
+    priceForPaidSubscribers: 0,
+    priceForFreeFollowers: 0,
     currency: 'USD',
 
     mediafileIdsFromVault: [], // content added from vault, not disk: should create new references, *not* new S3 content!
@@ -177,7 +189,8 @@ export default {
       this.newPostId = null;
       this.selectedMedia = 'pic';
       this.ptype = 'free';
-      this.price = 0;
+      this.priceForPaidSubscribers = 0;
+      this.priceForFreeFollowers = 0;
       this.postScheduleDate = null;
     },
 
@@ -188,7 +201,8 @@ export default {
         timeline_id: this.timeline.id,
         description: this.description,
         type: this.postType,
-        price: this.price,
+        price_for_subscribers: this.priceForPaidSubscribers,
+        price_for_followers: this.priceForFreeFollowers,
         currency: this.currency,
         schedule_datetime: this.postScheduleDate,
       })
@@ -427,3 +441,12 @@ li .selectable {
   font-size: 1.5rem;
 }
 </style>
+
+<i18n lang="json5" scoped>
+{
+  "en": {
+    "priceForFollowers": "Price for free followers",
+    "priceForSubscribers": "Price for paid subscribers",
+  }
+}
+</i18n>
