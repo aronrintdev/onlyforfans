@@ -32,7 +32,7 @@
           <PriceSelector
             class="mb-3 mr-5"
             :label="$t('priceForFollowers')"
-            v-model="priceForFreeFollowers"
+            v-model="price"
           />
           <PriceSelector
             class="mb-3"
@@ -104,7 +104,7 @@ export default {
       if (!this.loading) {
         return this.post.description !== this.description
           || this.post.type !== this.type
-          || this.post.price_for_followers !== this.priceForFreeFollowers
+          || this.post.price !== this.price
           || this.post.price_for_subscribers !== this.priceForPaidSubscribers
           || this.post.schedule_datetime !== this.schedule_datetime
       }
@@ -115,7 +115,7 @@ export default {
     loading: false,
     description: '',
     type: 'free',
-    priceForFreeFollowers: 0,
+    price: 0,
     priceForPaidSubscribers: 0,
     currency: 'USD',
     ptypes: [
@@ -131,7 +131,7 @@ export default {
     fillFromProp() {
       this.description = this.post.description
       this.type = this.post.type
-      this.priceForFreeFollowers = this.post.price_for_followers
+      this.price = this.post.price
       this.priceForPaidSubscribers = this.post.price_for_subscribers
       // this.currency = this.post.currency
       this.schedule_datetime = this.post.schedule_datetime
@@ -147,8 +147,8 @@ export default {
       this.axios.patch(this.$apiRoute('posts.update', { post: this.post.slug }), {
         description: this.description,
         type: this.type,
+        price: this.price,
         price_for_subscribers: this.priceForPaidSubscribers,
-        price_for_followers: this.priceForFreeFollowers,
         currency: this.currency,
         schedule_datetime: this.schedule_datetime,
       }).then(response => {

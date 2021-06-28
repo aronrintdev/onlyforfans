@@ -34,7 +34,7 @@
               <PriceSelector
                 class="mb-3 mr-5"
                 :label="$t('priceForFollowers')"
-                v-model="priceForFreeFollowers"
+                v-model="price"
               />
               <PriceSelector
                 class="mb-3"
@@ -150,8 +150,8 @@ export default {
       { text: 'By Purchase', value: 'price' },
       { text: 'Subscriber-Only', value: 'paid' },
     ],
+    price: 0,
     priceForPaidSubscribers: 0,
-    priceForFreeFollowers: 0,
     currency: 'USD',
 
     mediafileIdsFromVault: [], // content added from vault, not disk: should create new references, *not* new S3 content!
@@ -187,8 +187,8 @@ export default {
       this.newPostId = null;
       this.selectedMedia = 'pic';
       this.ptype = 'free';
+      this.price = 0;
       this.priceForPaidSubscribers = 0;
-      this.priceForFreeFollowers = 0;
       this.postScheduleDate = null;
     },
 
@@ -199,8 +199,8 @@ export default {
         timeline_id: this.timeline.id,
         description: this.description,
         type: this.postType,
+        price: this.price,
         price_for_subscribers: this.priceForPaidSubscribers,
-        price_for_followers: this.priceForFreeFollowers,
         currency: this.currency,
         schedule_datetime: this.postScheduleDate,
       })

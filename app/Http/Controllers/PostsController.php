@@ -64,8 +64,8 @@ class PostsController extends AppBaseController
         $vrules = [
             'timeline_id' => 'required|uuid|exists:timelines,id',
             'type' => [ 'sometimes', 'required', new InEnum(new PostTypeEnum()) ],
+            'price' => 'sometimes|required|integer',
             'price_for_subscribers' => 'sometimes|required|integer',
-            'price_for_followers' => 'sometimes|required|integer',
             'mediafiles' => 'array',
             'mediafiles.*.*' => 'integer|uuid|exists:mediafiles',
         ];
@@ -124,8 +124,8 @@ class PostsController extends AppBaseController
         $request->validate([
             'description' => 'required',
             'type' => [ 'sometimes', 'required', new InEnum(new PostTypeEnum()) ],
+            'price' => 'sometimes|required|integer',
             'price_for_subscribers' => 'sometimes|required|integer',
-            'price_for_followers' => 'sometimes|required|integer',
             'mediafiles' => 'array',
             'mediafiles.*.*' => 'integer|uuid|exists:mediafiles',
             'schedule_datetime' => 'nullable|integer',
@@ -139,9 +139,9 @@ class PostsController extends AppBaseController
             $post->type = $request->type;
         }
 
-        if ($request->has('price_for_followers')) {
-            if ($request->price_for_followers !== $post->price_for_followers) {
-                $post->price_for_followers = $request->price_for_followers;
+        if ($request->has('price')) {
+            if ($request->price !== $post->price) {
+                $post->price = $request->price;
             }
         }
 
