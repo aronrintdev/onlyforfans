@@ -14,8 +14,6 @@ class AddPricesForFollowersAndSubscribersToPosts extends Migration
     public function up()
     {
         Schema::table('posts', function (Blueprint $table) {
-            $table->dropColumn('price');
-            $table->unsignedInteger('price_for_followers')->default(0);
             $table->unsignedInteger('price_for_subscribers')->default(0);
         });
     }
@@ -28,8 +26,7 @@ class AddPricesForFollowersAndSubscribersToPosts extends Migration
     public function down()
     {
         Schema::table('posts', function (Blueprint $table) {
-            $table->dropColumn(['price_for_followers', 'price_for_subscribers']);
-            $table->unsignedInteger('price')->default(0);
+            $table->dropColumn('price_for_subscribers');
         });
     }
 }
