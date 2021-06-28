@@ -9,10 +9,10 @@ use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Broadcasting\BroadcastManager;
 use Illuminate\Contracts\Foundation\Application;
 
+use App\Broadcasting\ChatthreadChannel;
 use App\Broadcasting\UserPurchasesChannel;
 use App\Broadcasting\UserEventsChannel;
 use App\Broadcasting\UserStatusChannel;
-use App\Models\Chatthread;
 
 class BroadcastServiceProvider extends ServiceProvider
 {
@@ -47,10 +47,7 @@ class BroadcastServiceProvider extends ServiceProvider
         Broadcast::channel('user.{userId}.events'   , UserEventsChannel::class);
 
         // private-chatthreads.{chatthreadId} ??
-        Broadcast::channel('chatthreads.{chatthread}', function($sessionUser, Chatthread $chatthread) {
-            //dd('provider.abc.1');
-            return true; // %TODO %FIXME
-        });
+        Broadcast::channel('chatthreads.{chatthread}', ChatthreadChannel::class);
 
         Broadcast::channel('chat-typing', function ($sessionUser) {
             return (Auth::check()) ? $sessionUser : false;

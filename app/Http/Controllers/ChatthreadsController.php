@@ -60,6 +60,8 @@ class ChatthreadsController extends AppBaseController
 
         $query = Chatthread::query(); // Init query
 
+        // AF-353 Fixes
+        // TODO: Change how this check works so that admins still get there own threads if originator_id is not specified.
         // Check permissions, restrict to session user if non-admin
         if ( !$request->user()->isAdmin() ) {
             $query->whereHas('participants', function($q1) use(&$request) {

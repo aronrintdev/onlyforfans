@@ -76,6 +76,7 @@
 
 <script>
 import Vuex from 'vuex'
+import _ from 'lodash'
 import moment from 'moment'
 
 export default {
@@ -102,6 +103,10 @@ export default {
         : null
     },
 
+    channelName() {
+      return `chatthreads.${this.chatthread_id}`
+    }
+
   },
 
   data: () => ({
@@ -115,7 +120,9 @@ export default {
 
   }), // data
 
-  created() { },
+  created() {
+    this.isTyping = _.throttle(this._isTyping, 1000)
+  },
 
   mounted() { },
 
@@ -150,6 +157,18 @@ export default {
       } else {
 
         // send an immediate message (on an existing thread)
+        const message = {
+          chatthread_id: this.chatthread_id,
+          mcontent: this.newMessageForm.mcontent,
+          sender_id: this.session_user.id,
+          is_delivered: true,
+          created_at: this.moment().toISOString(),
+          updated_at: this.moment().toISOString(),
+        }
+        this.$log.debug('messageForm sendMessage', { message })
+        this.$echo.join(this.channelName).whisper('sendMessage', { message })
+        this.$emit('sendMessage', message)
+
         response = await axios.post( this.$apiRoute('chatthreads.sendMessage', this.chatthread_id), params )
         this.clearForm()
       }
@@ -181,9 +200,26 @@ export default {
       this.$refs['schedule-message-modal'].show();
     },
 
+    _isTyping() {
+      this.$echo.join(this.channelName)
+        .whisper('typing', {
+          name: this.session_user.name || this.session_user.username
+        })
+    },
+
   }, // methods
 
-  watch: { }, // watch
+  watch: {
+    'newMessageForm.mcontent': function(value) {
+      if (
+        this.newMessageForm.deliver_at.date === undefined || this.newMessageForm.deliver_at.date === null
+        && this.newMessageForm.time === undefined || this.newMessageForm.time === null
+      ) {
+        this.isTyping()
+      }
+    },
+
+  }, // watch
 
   components: { },
 

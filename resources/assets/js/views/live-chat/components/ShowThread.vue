@@ -65,22 +65,33 @@
       </b-list-group>
     </section>
 
+    <TypingIndicator :threadId="id" />
+
     <MessageForm
       :session_user="session_user"
       :chatthread_id="id"
+      @sendMessage="addTempMessage"
     />
 
   </div>
 </template>
 
 <script>
+/**
+ * resources/assets/js/views/live-chat/components/ShowThread.vue
+ */
+import Vue from 'vue'
 import Vuex from 'vuex'
+import _ from 'lodash'
 import moment from 'moment'
+
+
 import MessageForm from '@views/live-chat/components/MessageForm'
 import SearchInput from '@components/common/search/HorizontalOpenInput'
+import TypingIndicator from './TypingIndicator.vue'
 
 export default {
-  //name: 'LivechatDashboard',
+  name: 'ShowThread',
 
   props: {
     session_user: null,
@@ -93,6 +104,10 @@ export default {
     isLoading() {
       return !this.session_user || !this.participant || !this.id || !this.chatmessages
     },
+
+    channelName() {
+      return `chatthreads.${this.id}`
+    }
 
   },
 
@@ -117,21 +132,55 @@ export default {
     this.getMuteStatus(this.id)
     this.getChatmessages(this.id)
     this.markRead(this.id)
-    const channel = `chatthreads.${this.id}`
-    this.$echo.private(channel).listen('.chatmessage.sent', e => {
-      this.chatmessages.push(e.chatmessage)
-    })
+    this.$log.debug('ShowThread Mounted', { channelName: this.channelName })
+    this.$echo.join(this.channelName)
+      .listen('.chatmessage.sent', e => {
+        this.$log.debug('.chatmessage.sent', { e })
+        this.addMessage(e.chatmessage)
+      })
+      .listenForWhisper('sendMessage', e => {
+        this.$log.debug('sendMessage whisper received', { e })
+        this.addTempMessage(e.message)
+      })
   },
 
   methods: {
     ...Vuex.mapActions(['getUnreadMessagesCount']),
 
+    /**
+     * Add official message from db, overwrite temp message if necessary
+     */
+    addMessage(message) {
+      var replaced = false
+      for (var i in this.chatmessages) {
+        if (
+          this.chatmessages[i].temp &&
+          this.chatmessages[i].sender_id === message.sender_id &&
+          this.chatmessages[i].mcontent === message.mcontent
+        ) {
+          Vue.set(this.chatmessages, i, message)
+          replaced = true
+        }
+      }
+      if (!replaced) {
+        this.chatmessages.push(message)
+      }
+    },
+
+    /**
+     * Quickly add a temp message to data set while official one is processed in db
+     */
+    addTempMessage(message) {
+      // Quickly add a temp message from websockets whisper
+      this.chatmessages.push({ id: moment().valueOf(), temp: true, ...message })
+    },
+
     isDateBreak(cm, idx) {
-      if (idx===0) {
+      if (idx === 0) {
         return true
       }
       const current = moment(this.chatmessages[idx].created_at);
-      const last = moment(this.chatmessages[idx-1].created_at,);
+      const last = moment(this.chatmessages[idx - 1].created_at,);
       return !current.isSame(last, 'date')
     },
 
@@ -205,6 +254,7 @@ export default {
   components: {
     MessageForm,
     SearchInput,
+    TypingIndicator,
   },
 
 }
