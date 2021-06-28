@@ -64,11 +64,6 @@ class Vault extends BaseModel implements Guidable, Ownable
         return $this->hasMany(Vaultfolder::class);
     }
 
-    public function getRootFolder()
-    {
-        return $this->vaultfolders()->whereNull('parent_id')->first();
-    }
-
     public function getOwner(): ?Collection
     {
         return new Collection([ $this->user ]);
@@ -170,6 +165,11 @@ class Vault extends BaseModel implements Guidable, Ownable
     public function isRoot() : bool
     {
         return is_null($this->parent_id);
+    }
+
+    public function getRootFolder() : ?Vaultfolder
+    {
+        return $this->vaultfolders()->whereNull('parent_id')->first();
     }
 
 }
