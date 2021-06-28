@@ -77,8 +77,10 @@ Route::group(['middleware' => ['auth']], function () {
     // -- chatthreads --
     Route::get('/chatthreads/totalUnreadCount', ['as'=>'chatthreads.totalUnreadCount', 'uses' => 'ChatthreadsController@getTotalUnreadCount']);
     Route::post('/chatthreads/markAllRead', ['as'=>'chatthreads.markAllRead', 'uses' => 'ChatthreadsController@markAllRead']);
-    Route::post('/chatthreads/{chatthread}/sendMessage', ['as'=>'chatthreads.sendMessage', 'uses' => 'ChatthreadsController@sendMessage']);
     Route::post('/chatthreads/{chatthread}/markRead', ['as'=>'chatthreads.markRead', 'uses' => 'ChatthreadsController@markRead']);
+    Route::get('/chatthreads/{chatthread}/getMuteStatus', ['as'=>'chatthreads.getMuteStatus', 'uses' => 'ChatthreadsController@getMuteStatus']);
+    Route::post('/chatthreads/{chatthread}/toggleMute', ['as'=>'chatthreads.toggleMute', 'uses' => 'ChatthreadsController@toggleMute']);
+    Route::post('/chatthreads/{chatthread}/sendMessage', ['as'=>'chatthreads.sendMessage', 'uses' => 'ChatthreadsController@sendMessage']);
     Route::post('/chatthreads/{chatthread}/scheduleMessage', ['as'=>'chatthreads.scheduleMessage', 'uses' => 'ChatthreadsController@scheduleMessage']);
     Route::get('/chatthreads/search', 'ChatthreadsController@search')->name('chatthreads.search');
     Route::resource('chatthreads', 'ChatthreadsController', [

@@ -186,18 +186,65 @@ class ChatthreadsController extends AppBaseController
 
     /**
      * @param Request $request
-     * @param Chatthread $chatthreadd count for the current user
+     * @param Chatthread $chatthread
      */
     public function markRead(Request $request, Chatthread $chatthread)
     {
         $userId = $request->user()->id;
 
-        $this->authorize('edit', $chatthread);
+        $this->authorize('view', $chatthread);
 
         $chatthread->chatmessages()->where([
             ['is_read', '=', 0],
             ['sender_id', '<>', $userId]
         ])->update(['is_read' => 1]);
+
+        http_response_code(200);
+    }
+
+    /**
+     * @param Request $request
+     * @param Chatthread $chatthread
+     */
+    public function getMuteStatus(Request $request, Chatthread $chatthread)
+    {
+        $this->authorize('view', $chatthread);
+
+        $sessionUser = $request->user();
+        $participant = $chatthread->participants()->find($sessionUser->id);
+
+        if (!$participant) {
+            // user is not part of the chatthread, so abort
+            abort(403);
+        }
+
+        return response()->json([
+            'is_muted' => $participant->pivot->is_muted,
+        ]);
+    }
+
+    /**
+     * @param Request $request
+     * @param Chatthread $chatthread
+     */
+    public function toggleMute(Request $request, Chatthread $chatthread)
+    {
+        $request->validate([
+            'is_muted' => 'required|boolean',
+        ]);
+
+        $this->authorize('view', $chatthread);
+
+        $sessionUser = $request->user();
+        $participant = $chatthread->participants()->find($sessionUser->id);
+
+        if (!$participant) {
+            // user is not part of the chatthread, so abort
+            abort(403);
+        }
+
+        $participant->pivot->is_muted = $request->is_muted;
+        $participant->pivot->save();
 
         http_response_code(200);
     }
