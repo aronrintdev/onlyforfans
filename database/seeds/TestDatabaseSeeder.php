@@ -31,6 +31,7 @@ class TestDatabaseSeeder extends ParentSeeder
             FavoritesTableSeeder::class,
             LikeablesTableSeeder::class,
             ChatmessagesTableSeeder::class,
+            MediafilesTableSeeder::class,
             //TipsTableSeeder::class,
         ]);
     }

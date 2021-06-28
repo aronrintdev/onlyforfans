@@ -103,6 +103,7 @@ class VaultfoldersController extends AppBaseController
         ]);
     }
 
+    // Creates a new subfolder
     public function store(Request $request)
     {
         $vrules = [
@@ -111,6 +112,7 @@ class VaultfoldersController extends AppBaseController
             // %TODO: prevent new folders on same level with duplicate names
         ];
 
+        // %TODO: refactor to vault or vaultfolder model
         $attrs = [];
         if ( $request->has('parent_id') && !is_null($request->parent_id) ) {
             $vrules['parent_id'] = 'required|uuid|exists:vaultfolders,id';

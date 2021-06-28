@@ -180,7 +180,7 @@ class Vaultfolder extends BaseModel implements Guidable, Ownable
         $key = trim($field);
         switch ($key) {
         default:
-        return parent::renderField($field);
+            return parent::renderField($field);
         }
     }
 
@@ -196,5 +196,21 @@ class Vaultfolder extends BaseModel implements Guidable, Ownable
     public function isRootFolder(): bool
     {
         return empty($this->parent_id);
+    }
+
+    public function getSubTree() : ?array
+    {
+        $subTree = [
+            'id' => $this->id,
+            'name' => $this->vfname,
+            'slug' => $this->slug,
+            'parent_id' => $this->parent_id,
+            'children' => [],
+        ];
+        $children = Vaultfolder::where('parent_id', $this->id)->get(); // subfolders
+        $children->each( function($vf) use(&$subTree) {
+            $subTree['children'][] = $vf->getSubTree();
+        });
+        return $subTree;
     }
 }
