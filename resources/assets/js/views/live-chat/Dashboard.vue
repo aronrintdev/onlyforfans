@@ -1,7 +1,7 @@
 <template>
   <div v-if="!isLoading" class="container-xl px-3 py-3" id="view-livechat">
 
-    <section class="row h-100">
+    <section class="row h-100" style="max-height: 100%;">
 
       <aside class="col-md-5 col-lg-4">
 
@@ -50,9 +50,10 @@
 
       </aside>
 
-      <main class="col-md-7 col-lg-8">
-        <transition mode="out-in" name="quick-fade">
+      <main class="col-md-7 col-lg-8 h-100" style="max-height: 100%;">
+        <transition mode="out-in" name="quick-fade" :key="activeThreadId">
           <router-view
+            :key="activeThreadId"
             :session_user="session_user"
             :participant="participants(activeThread)"
           />
@@ -336,29 +337,29 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-body {
-  #view-livechat {
-    background-color: #fff;
+#view-livechat {
+  background-color: #fff;
 
-    .chatthread-list .list-group-item.active {
-      background: rgba(0,145,234,.06);
-      color: inherit;
-      border-top: none;
-      border-left: 1px solid rgba(138,150,163,.25);
-      border-right: 1px solid rgba(138,150,163,.25);
-      border-bottom: 1px solid rgba(138,150,163,.25);
-    }
+  max-height: 80vh;
+  overflow: hidden;
 
-  }
-
-  .top-bar {
-    //display: flex;
-    //align-items: center;
-    //justify-content: space-between;
-    //padding: 15px 4px 16px;
+  .chatthread-list .list-group-item.active {
+    background: rgba(0,145,234,.06);
+    color: inherit;
+    border-top: none;
+    border-left: 1px solid rgba(138,150,163,.25);
+    border-right: 1px solid rgba(138,150,163,.25);
     border-bottom: 1px solid rgba(138,150,163,.25);
   }
 
+}
+
+.top-bar {
+  //display: flex;
+  //align-items: center;
+  //justify-content: space-between;
+  //padding: 15px 4px 16px;
+  border-bottom: 1px solid rgba(138,150,163,.25);
 }
 </style>
 
