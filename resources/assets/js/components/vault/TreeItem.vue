@@ -4,7 +4,7 @@
       <fa-icon :icon="isOpen ? ['fas', 'caret-down'] : ['fas', 'caret-right']" fixed-width class="OFF-mx-2" />
     </span>
     <span :class="{bold: true, active: currentFolderId===item.id}" @dblclick="makeFolder">
-      <span @click="doNav(item)" class="node-name">{{ item.name }} ( {{ item.id.substring(24) }} )</span>
+      <span @click="doNav(item)" class="node-name">{{ item.name }}</span>
     </span>
     <ul v-show="isOpen" class="pl-3">
       <TreeItem
