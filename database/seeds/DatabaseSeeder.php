@@ -30,6 +30,7 @@ class DatabaseSeeder extends Seeder
             TipsTableSeeder::class,
             RandomTimestampSeeder::class,
             ChatmessagesTableSeeder::class,
+            MediafilesTableSeeder::class,
         ]);
     }
 

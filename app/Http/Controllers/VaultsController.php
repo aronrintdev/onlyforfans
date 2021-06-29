@@ -117,8 +117,11 @@ class VaultsController extends AppBaseController
     {
         $sessionUser = Auth::user();
         $vault = Vault::where('id', $pkid)->where('user_id', $sessionUser->id)->first();
+        $rootFolder = $vault->getRootFolder();
+
         return response()->json([
             'vault' => $vault,
+            'foldertree' => $rootFolder->getSubTree(),
         ]);
     }
 

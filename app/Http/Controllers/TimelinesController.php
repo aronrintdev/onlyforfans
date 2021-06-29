@@ -355,4 +355,25 @@ class TimelinesController extends AppBaseController
         $data = $query->paginate( $request->input('take', env('MAX_POSTS_PER_REQUEST', 10)) );
         return new PostCollection($data);
     }
+
+    // returns a list of stories grouped by followed timeline (ignores timeline if it has no active stories)
+    public function myFollowedStories(Request $request)
+    {
+        // %TODO: split *stories* within timeline into seen and unseen?
+        $query = Timeline::with('stories.mediafiles')
+                         ->whereIn('id', $request->user()->followedtimelines->pluck('id'));
+        $query->orderBy('created_at', 'desc');
+        $data = $query->get();
+        return new TimelineCollection($data);
+    }
+
+    // same as above except just mine
+    public function myStories(Request $request)
+    {
+        // %TODO: split *stories* within timeline into seen and unseen?
+        $query = Timeline::where('user_id', $request->user()->id);
+        $query->orderBy('created_at', 'desc');
+        $data = $query->get();
+        return new TimelineCollection($data);
+    }
 }

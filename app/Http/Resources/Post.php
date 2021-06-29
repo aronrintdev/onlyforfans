@@ -21,6 +21,8 @@ class Post extends JsonResource
             'type' => $this->type,
             'price' => CastsMoney::doSerialize($this->price),
             'price_display' => PostModel::formatMoney($this->price),
+            'price_for_subscribers' => CastsMoney::doSerialize($this->price_for_subscribers),
+            'price_display_for_subscribers' => PostModel::formatMoney($this->price_for_subscribers),
             'postable_id' => $this->postable_id,
             'postable_type' => $this->postable_type,
             'timeline_slug' => $this->timeline->slug, // needed for links

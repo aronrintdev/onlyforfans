@@ -30,8 +30,17 @@
                 </svg>
               </button>
             </div>
-            <div v-if="postType === 'price'" class="w-100">
-              <PriceSelector v-if="postType === 'price'" v-model="price" class="mb-3" />
+            <div v-if="postType === 'price'" class="w-100 d-flex">
+              <PriceSelector
+                class="mb-3 mr-5"
+                :label="$t('priceForFollowers')"
+                v-model="price"
+              />
+              <PriceSelector
+                class="mb-3"
+                :label="$t('priceForSubscribers')"
+                v-model="priceForPaidSubscribers"
+              />
               <hr />
             </div>
 
@@ -142,6 +151,7 @@ export default {
       { text: 'Subscriber-Only', value: 'paid' },
     ],
     price: 0,
+    priceForPaidSubscribers: 0,
     currency: 'USD',
 
     mediafileIdsFromVault: [], // content added from vault, not disk: should create new references, *not* new S3 content!
@@ -178,6 +188,7 @@ export default {
       this.selectedMedia = 'pic';
       this.ptype = 'free';
       this.price = 0;
+      this.priceForPaidSubscribers = 0;
       this.postScheduleDate = null;
     },
 
@@ -189,6 +200,7 @@ export default {
         description: this.description,
         type: this.postType,
         price: this.price,
+        price_for_subscribers: this.priceForPaidSubscribers,
         currency: this.currency,
         schedule_datetime: this.postScheduleDate,
       })
@@ -427,3 +439,12 @@ li .selectable {
   font-size: 1.5rem;
 }
 </style>
+
+<i18n lang="json5" scoped>
+{
+  "en": {
+    "priceForFollowers": "Price for free followers",
+    "priceForSubscribers": "Price for paid subscribers",
+  }
+}
+</i18n>
