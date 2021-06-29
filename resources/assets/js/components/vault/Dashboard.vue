@@ -1,17 +1,16 @@
 <template>
-  <div v-if="!isLoading" class="container-fluid vault-container">
+  <div v-if="!isLoading" class="container-fluid vault-container h-100">
 
-    <section class="row h-100">
+    <b-row class="pt-2">
+      <b-col>
+        <h2 class="my-1">My Vault</h2>
+        <hr class="my-0"/>
+      </b-col>
+    </b-row>
 
-      <aside class="col-md-3">
+    <b-row class="mt-3">
 
-        <h2 class="my-3">My Vault</h2>
-
-        <hr />
-
-        <b-breadcrumb>
-          <b-breadcrumb-item v-for="(bc, index) in breadcrumbNav" :key="bc.pkid" @click="doNav(bc.pkid)" :active="bc.active">{{ bc.text }}</b-breadcrumb-item>
-        </b-breadcrumb>
+      <aside class="col-md-3 d-none d-lg-block">
 
         <ul class="folder-nav pl-0">
           <TreeItem
@@ -57,7 +56,7 @@
 
           <b-button v-if="selectedMediafiles.length" type="submit" variant="primary">Share Selected</b-button>
           <!--
-          <b-button @click="cancelShareFiles" type="cancel" variant="secondary">Cancel</b-button>
+          < b-button @click="cancelShareFiles" type="cancel" variant="secondary">Cancel</b-button>
           -->
         </b-form>
 
@@ -77,7 +76,7 @@
 
       </aside>
 
-      <main class="col-md-9 OFF-d-flex OFF-align-items-center">
+      <main class="col-md-9">
 
         <!-- +++ File Thumbnails / Dropzone File Uploader +++ -->
         <b-row v-if="isUploaderVisible">
@@ -92,22 +91,25 @@
           </b-col>
         </b-row>
 
-        <!-- +++ Minor Nav -->
+        <!-- +++ Minor Nav +++ -->
         <b-row class="py-3">
-          <b-col class="minor-nav">
-            <section v-if="this.selectedMediafiles.length" class="minor-nav d-flex justify-content-between align-items-center">
-              <div>
-                <b-button @click="clearSelected()" variant="link" class="text-decoration-none">
-                  <fa-icon :icon="['fas', 'times']" class="fa-lg" />
-                </b-button>
-                <span class="ml-3">{{ this.selectedMediafiles.length }} selected</span>
+
+          <b-col>
+            <section class="d-md-flex justify-content-between align-items-center">
+
+              <b-breadcrumb class="pl-0 my-0">
+                <b-breadcrumb-item v-for="(bc, index) in breadcrumbNav" :key="bc.pkid" @click="doNav(bc.pkid)" :active="bc.active">{{ bc.text }}</b-breadcrumb-item>
+              </b-breadcrumb>
+        
+              <div v-if="this.selectedMediafiles.length" class="d-flex align-items-center">
+                <span class="mr-5">{{ this.selectedMediafiles.length }} selected</span>
+                <div>
+                  <b-button @click="renderShareForm()" variant="primary">Add To</b-button>
+                  <b-button @click="clearSelected()" variant="warning">Clear All</b-button>
+                </div>
               </div>
-              <div>
-                <b-button v-if="this.selectedMediafiles.length" @click="renderShareForm()" variant="primary">Add To</b-button>
-              </div>
-            </section>
-            <section v-else class="minor-nav d-flex justify-content-between align-items-center">
-              <div>
+
+              <div v-else>
                 <b-button variant="link" class="" @click="isUploaderVisible=!isUploaderVisible">
                   <fa-icon :icon="['fas', 'upload']" size="lg" />
                 </b-button>
@@ -115,6 +117,7 @@
                   <fa-icon :icon="['fas', 'plus']" size="lg" />
                 </b-button>
               </div>
+
             </section>
           </b-col>
         </b-row>
@@ -130,11 +133,15 @@
               class="p-1" 
             />
           </b-col>
+          <b-col v-for="(vf) in children" :key="vf.id" cols="12" md="3" role="button">
+            <b-img fluid @click="doNav(vf.id)" src="/images/tmp-placeholders/folder-icon.jpg" :alt="`Folder ${vf.slug}`"></b-img>
+            <div class="text-center">{{ vf.name }}</div>
+          </b-col>
         </b-row>
 
       </main>
 
-    </section>
+    </b-row>
 
     <b-modal id="modal-share-file" size="lg" title="Share Files" hide-footer body-class="p-0" >
       <div>
@@ -247,6 +254,7 @@ export default {
     selectedMediafiles() { // selected via checkbox
       return _.filter(this.mediafiles, o => (o.selected))
     },
+
   },
 
   data: () => ({
@@ -570,6 +578,16 @@ export default {
 
 <style lang="scss" scoped>
 body {
+  .vault-container .breadcrumb {
+    background-color: #fff;
+    border-radius: 0;
+  }
+  .vault-container .breadcrumb .breadcrumb-item {
+    font-size: 1.2rem;
+  }
+  .vault-container .breadcrumb .breadcrumb-item.active {
+    color: #212529;
+  }
   ul.folder-nav {
     list-style: none;
   }
