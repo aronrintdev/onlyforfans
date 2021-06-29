@@ -10,17 +10,23 @@
     >
 
       <template v-if="true || mediafile.access">
-        <img v-if="mediafile.is_image" 
-          class="d-block"
-          :src="(use_mid && mediafile.has_mid) ? mediafile.midFilepath : mediafile.filepath"
-          :alt="mediafile.mfname" >
-        <MediaSlider v-else-if="mediafile.is_video" 
-          :mediafiles="[mediafile]" 
-          :session_user="session_user" 
-          :use_mid="use_mid" />
-      </template>
-      <template v-else-if="mediafile.resource_type==='posts'">
-        <PostCta :post="mediafile.resource" :session_user="session_user" :primary_mediafile="mediafile" />
+        <b-row>
+          <b-col cols="8">
+            <b-img v-if="mediafile.is_image" 
+              fluid
+              class="d-block"
+              :src="(use_mid && mediafile.has_mid) ? mediafile.midFilepath : mediafile.filepath"
+              :alt="mediafile.mfname">
+            </b-img>
+            <MediaSlider v-else-if="mediafile.is_video" 
+              :mediafiles="[mediafile]" 
+              :session_user="session_user" 
+              :use_mid="use_mid" />
+          </b-col>
+          <b-col cols="4">
+            <pre> {{ JSON.stringify(this.stats, null, 2) }} </pre>
+          </b-col>
+        </b-row>
       </template>
 
       <template footer>
@@ -51,10 +57,16 @@ export default {
   },
 
   data: () => ({
-    likeCount: 0, // %FIXME INIT
+    stats: null,
   }),
 
   methods: {
+  },
+
+  created() {
+    this.axios.get(this.$apiRoute('mediafiles.diskStats', this.mediafile.id)).then(response => {
+      this.stats = response.data.stats
+    })
   },
 
   components: {
