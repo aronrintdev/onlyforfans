@@ -53,7 +53,7 @@ class MycontactsController extends AppBaseController
         $usersQuery = User::query();
 
         // Check permissions
-        if ( !$request->user()->isAdmin() ) {
+        if ( !($request->user()->isAdmin() && $request->has('owner_id')) ) {
             $query->where('owner_id', $request->user()->id); // limit to my own
             unset($filters['owner_id']);
         }
