@@ -31,7 +31,6 @@
           <div v-if="selectedMediafiles.length" class="autosuggest-container">
             <b-form-group>
               <b-form-input
-                id="invite-email"
                 v-model="inviteeInput"
                 v-on:keydown.enter.prevent="addInvite"
                 type="text"
@@ -123,11 +122,12 @@
         <!-- +++ List/Grid Display of Files +++ -->
         <b-row :no-gutters="true">
           <b-col cols="12" md="3" v-for="(mf) in mediafiles" :key="mf.id" role="button">
-            <PreviewFile
-              :data-mf_id="mf.id"
-              class="p-1"
-              :mediafile="mf"
-              @input="onPreviewFileInput"
+            <PreviewFile 
+              :data-mf_id="mf.id" 
+              :mediafile="mf" 
+              @input="onPreviewFileInput" 
+              @render-lightbox="renderLightbox" 
+              class="p-1" 
             />
           </b-col>
         </b-row>
@@ -161,11 +161,10 @@
       </div>
     </b-modal>
 
-    <b-modal id="modal-create-folder" v-model="isCreateFolderModalVisible" size="lg" title="Create Folder" body-class="OFF-p-0" >
+    <b-modal id="modal-create-folder" v-model="isCreateFolderModalVisible" size="lg" title="Create Folder" body-class="">
       <b-form @submit.prevent="storeFolder">
           <b-form-group>
-            <b-form-input
-              id="folder-name"
+            <b-form-input id="folder-name"
               v-model="createForm.name"
               type="text"
               placeholder="Enter new folder name"
@@ -179,6 +178,10 @@
         </template>
     </b-modal>
 
+    <b-modal v-model="isMediaLightboxModalVisible" id="modal-media-lightbox" title="" hide-footer body-class="p-0" size="xl">
+      <MediaLightbox :session_user="session_user" :mediafile="lightboxSelection" />
+    </b-modal>
+
   </div>
 </template>
 
@@ -189,11 +192,13 @@ import vue2Dropzone from 'vue2-dropzone';
 import { VueAutosuggest } from 'vue-autosuggest'; // https://github.com/darrenjennings/vue-autosuggest#examples
 import 'vue2-dropzone/dist/vue2Dropzone.min.css';
 import PreviewFile from '@components/vault/PreviewFile'
+import MediaLightbox from '@components/vault/MediaLightbox'
 import TreeItem from '@components/vault/TreeItem'
 
 export default {
 
   props: {
+    session_user: null,
     vault_pkid: {
       required: true,
       type: String,
@@ -211,7 +216,7 @@ export default {
     ...Vuex.mapState(['shares']),
 
     isLoading() {
-      return !this.vault_pkid || !this.vaultfolder_pkid || !this.vault || !this.vaultfolder || !this.foldertree
+      return !this.vault_pkid || !this.vaultfolder_pkid || !this.vault || !this.vaultfolder || !this.foldertree || !this.session_user
     },
 
     parent() {
@@ -239,7 +244,7 @@ export default {
       }]
     },
 
-    selectedMediafiles() {
+    selectedMediafiles() { // selected via checkbox
       return _.filter(this.mediafiles, o => (o.selected))
     },
   },
@@ -253,6 +258,9 @@ export default {
     isCreateFolderModalVisible: false,
 
     mediafiles: {}, // %FIXME: use array not keyed object!
+
+    lightboxSelection: null,
+    isMediaLightboxModalVisible: false,
 
     createForm: {
       name: '',
@@ -287,17 +295,6 @@ export default {
 
   }), // data
 
-  created() {
-    this.currentFolderId = this.vaultfolder_pkid
-    //this.$store.dispatch('getVault', this.vault_pkid)
-    this.axios.get(route('vaults.show', { id: this.vault_pkid })).then((response) => {
-      console.log('vaults.show', { response } )
-      this.vault = response.data.vault
-      this.foldertree = response.data.foldertree || null
-      this.$store.dispatch('getVaultfolder', this.vaultfolder_pkid)
-    })
-  },
-
   methods: {
 
     // from Vue tree demo (TreeItem aka VaultNavigation)
@@ -327,6 +324,14 @@ export default {
           this.$router.replace({ name: 'chatthreads.create', params });
           break;
       }
+    },
+
+    renderLightbox(mediafile) {
+      console.log('renderLightbox', {
+        mediafile,
+      })
+      this.lightboxSelection = mediafile
+      this.isMediaLightboxModalVisible = true
     },
 
     renderShareForm() {
@@ -467,6 +472,17 @@ export default {
 
   },
 
+  created() {
+    this.currentFolderId = this.vaultfolder_pkid
+    //this.$store.dispatch('getVault', this.vault_pkid)
+    this.axios.get(route('vaults.show', { id: this.vault_pkid })).then((response) => {
+      console.log('vaults.show', { response } )
+      this.vault = response.data.vault
+      this.foldertree = response.data.foldertree || null
+      this.$store.dispatch('getVaultfolder', this.vaultfolder_pkid)
+    })
+  },
+
   watch: {
     vaultfolder (newVal, oldVal) {
       const selected = false
@@ -479,6 +495,7 @@ export default {
     VueAutosuggest,
     TreeItem,
     PreviewFile,
+    MediaLightbox,
   },
 }
 /*

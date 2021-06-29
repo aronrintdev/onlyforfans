@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="img-box position-relative">
-      <img :class=" mediafile.selected ? 'tag-selected' : ''" :src="mediafile.filepath" />
+      <img @click="$emit('render-lightbox', mediafile)" :class="mediafile.selected ? 'tag-selected' : ''" :src="mediafile.filepath" />
       <div class="render-date">
         <p class="m-0">{{  moment(mediafile.created_at).format('MMMM D') }}</p>
       </div>
