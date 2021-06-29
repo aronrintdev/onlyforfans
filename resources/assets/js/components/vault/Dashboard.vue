@@ -307,16 +307,12 @@ export default {
 
     // from Vue tree demo (TreeItem aka VaultNavigation)
     makeFolder() {
-      console.log('makeFolder')
     },
     addItem() {
     },
 
     sendSelected(resourceType) {
       // send (share) selected files to a post, story, or message
-      console.log('sendSelected', {
-        resourceType,
-      })
       const params = {
           mediafile_ids: this.selectedMediafiles.map( ({id}) => id )
       }
@@ -335,15 +331,11 @@ export default {
     },
 
     renderLightbox(mediafile) {
-      console.log('renderLightbox', {
-        mediafile,
-      })
       this.lightboxSelection = mediafile
       this.isMediaLightboxModalVisible = true
     },
 
     renderShareForm() {
-      console.log('renderShareForm')
       this.$bvModal.show('modal-share-file')
     },
 
@@ -352,7 +344,6 @@ export default {
     },
 
     clearSelected() {
-      console.log('clearSelected')
       this.mediafiles = _.mapValues( this.mediafiles, o => ({ ...o, selected: false }) )
     },
 
@@ -384,7 +375,6 @@ export default {
         sharees: this.shareForm.sharees.map( o => { return { sharee_id: o.id } }),
         invitees: this.shareForm.invitees.map( o => { return { email: o } }),
       })
-      console.log('response', { response })
       this.cancelShareFiles()
     },
 
@@ -415,8 +405,10 @@ export default {
         parent_id: this.currentFolderId,
         vfname: this.createForm.name,
       }
-      const response = axios.post('/vaultfolders', payload)
-      console.log('response', { response })
+      const postResponse = await this.axios.post('/vaultfolders', payload)
+      const showResponse = await this.axios.get(route('vaults.show', { id: this.vault_pkid }))
+      this.vault = showResponse.data.vault
+      this.foldertree = showResponse.data.foldertree || null
       this.$store.dispatch('getVaultfolder', this.currentFolderId)
       this.cancelCreateFolder()
     },
@@ -441,9 +433,6 @@ export default {
 
     // Preload the mediafiles in the current folder (pwd)
     async doNav(vaultfolderId) {
-      console.log('doNav', {
-        vaultfolderId,
-      })
       this.currentFolderId = vaultfolderId
       this.$store.dispatch('getVaultfolder', vaultfolderId)
     },
@@ -451,7 +440,6 @@ export default {
     // ---
 
     addSharee(sharee) {
-      console.log('addSharee', { sharee })
       this.shareForm.sharees.push(sharee.item)
       this.query = ''
       this.suggestions = []
@@ -484,7 +472,6 @@ export default {
     this.currentFolderId = this.vaultfolder_pkid
     //this.$store.dispatch('getVault', this.vault_pkid)
     this.axios.get(route('vaults.show', { id: this.vault_pkid })).then((response) => {
-      console.log('vaults.show', { response } )
       this.vault = response.data.vault
       this.foldertree = response.data.foldertree || null
       this.$store.dispatch('getVaultfolder', this.vaultfolder_pkid)
