@@ -217,6 +217,43 @@ class MediafilesController extends AppBaseController
 
     }
 
+    // Get stats on related media
+    public function diskStats(Mediafile $mediafile) 
+    {
+        $this->authorize('update', $mediafile);
+
+        $dmf = Diskmediafile::find($mediafile->diskmediafile_id);
+
+        if ($dmf) {
+            $stats = [
+                'disk' => [
+                    'owner' => $dmf->owner->name,
+                    'mimetype' => $dmf->mimetype,
+                    'ext' => $dmf->orig_ext,
+                    'filename' => $dmf->orig_filename,
+                    'size' => $dmf->orig_size,
+                    'created_at' => $dmf->created_at,
+                ],
+                'refs' => [],
+            ];
+            $dmf->mediafiles->each( function($mf) use(&$stats) {
+                $stats['refs'][] = [
+                    'id' => $mf->id,
+                    'name' => $mf->mfname,
+                    'mftype' => $mf->mftype,
+                    'num_sharees' => $mf->sharees->count(),
+                    'resource_type' => $mf->resource_type,
+                    'resource_name' => $mf->resource->slug,
+                    'num_resource_likes' => $mf->resource->likes ? $mf->resource->likes->count() : '-',
+                ];
+            });
+        }
+
+        return response()->json([ 
+            'stats' => $stats ?? [],
+        ]);
+    }
+
 
     /*
     public function destroy($pkid)
