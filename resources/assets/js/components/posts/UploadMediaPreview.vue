@@ -23,17 +23,17 @@
           </button>
         </div>
         <button class="btn confirm-btn" @click="confirmImgsSort">
-          <fa-icon :icon="['far', 'times']" class="text-white" size="md" />
+          <fa-icon :icon="['far', 'times']" class="text-white" size="sm" />
         </button>
       </div>
     </div>
-    <swiper ref="mySwiper" :options="swiperOptions" :key="mediafiles.length">
+    <swiper ref="mySwiper" :options="swiperOptions">
       <swiper-slide class="slide">
         <div v-if="!isDragListVisible">
           <div class="swiper-image-wrapper" v-for="(media, index) in mediafiles" :key="index">
             <img v-preview:scope-a class="swiper-lazy" :src="media.src" />
             <button class="btn btn-primary icon-close">
-              <fa-icon :icon="['far', 'times']" class="text-white" size="md" />
+              <fa-icon :icon="['far', 'times']" class="text-white" size="sm" />
             </button>
           </div>
           <button class="btn btn-secondary btn-lg mr-3 slide-btn" @click="isDragListVisible = true">
@@ -74,11 +74,28 @@ export default {
       lazy: true,
       slidesPerView: 'auto',
       observer: true,
-      observeParents: true,
+      freeMode: true,
+      freeModeMomentum: true,
+      mousewheel: true,
+      watchOverflow: true,
+      spaceBetween: true,
+      watchSlidesVisibility: true,
     },
     isDragListVisible: false,
     applyBtnEnabled: false,
   }),
+  computed: {
+    swiper() {
+      return this.$refs.mySwiper.$swiper;
+    }
+  },
+  watch: {
+    mediafiles: function() {
+      setTimeout(() => {
+        this.swiper.update();
+      }, 500);
+    }
+  },
   methods: {
     onSelectSortableMedia: function(index, status) {
       const newArr = this.mediafiles.slice();
