@@ -46,23 +46,26 @@
 
     <hr />
 
-    <section class="flex-grow-1">
-
-      <b-list-group class="tag-messages h-100">
-        <b-list-group-item
-          v-for="(cm, idx) in chatmessages"
-          :key="cm.id"
-          :class="{ 'mt-auto': idx === 0 }"
-        >
-          <section v-if="isDateBreak(cm, idx)" class="msg-grouping-day-divider"><span>{{ moment(cm.created_at).format('MMM DD, YYYY') }}</span></section>
-          <section class="crate" :class="cm.sender_id===session_user.id ? 'tag-session_user' : 'tag-other_user'">
-            <article class="box">
-              <div class="msg-content">{{ cm.mcontent }}</div>
-              <div class="msg-timestamp">{{ moment(cm.created_at).format('h:mm A') }}</div>
-            </article>
-          </section>
-        </b-list-group-item>
-      </b-list-group>
+    <section class="messages flex-fill">
+      <b-list-group-item
+        v-for="(cm, idx) in chatmessages"
+        :key="cm.id"
+        v-observe-visibility="idx === chatmessages.length - 1 ? endVisible : false"
+      >
+        <section v-if="isDateBreak(cm, idx)" class="msg-grouping-day-divider"><span>{{ moment(cm.created_at).format('MMM DD, YYYY') }}</span></section>
+        <section class="crate" :class="cm.sender_id===session_user.id ? 'session_user' : 'other_user'">
+          <article class="box">
+            <div class="msg-content">{{ cm.mcontent }}</div>
+            <div class="msg-timestamp">{{ moment(cm.created_at).format('h:mm A') }}</div>
+          </article>
+        </section>
+      </b-list-group-item>
+      <b-list-group-item v-if="isLastPage">
+        <section class="msg-grouping-day-divider">
+          <span v-text="$t('startOfThread')" />
+        </section>
+      </b-list-group-item>
+      <div class="mt-auto"> </div>
     </section>
 
     <TypingIndicator :threadId="id" />
@@ -115,11 +118,15 @@ export default {
 
     moment: moment,
 
-    chatmessages: null,
+    chatmessages: [],
     isMuted: false,
     meta: null,
     perPage: 10,
     currentPage: 1,
+
+    isLastPage: false,
+    moreLoading: false,
+    isEndVisible: false,
 
     searchQuery: '',
 
@@ -175,13 +182,27 @@ export default {
       this.chatmessages.push({ id: moment().valueOf(), temp: true, ...message })
     },
 
+    endVisible(isVisible) {
+      this.$log.debug('endVisible', { isVisible })
+      this.isEndVisible = isVisible
+      if (isVisible && !this.moreLoading && !this.isLastPage) {
+        this.loadNextPage()
+      }
+    },
+
+    loadNextPage() {
+      this.currentPage += 1
+      this.moreLoading = true
+      this.getChatmessages()
+    },
+
     isDateBreak(cm, idx) {
-      if (idx === 0) {
+      if (idx === this.chatmessages.length - 1) {
         return true
       }
       const current = moment(this.chatmessages[idx].created_at);
-      const last = moment(this.chatmessages[idx - 1].created_at,);
-      return !current.isSame(last, 'date')
+      const next = moment(this.chatmessages[idx + 1].created_at,);
+      return !current.isSame(next, 'date')
     },
 
     async getChatmessages(chatthreadID) {
@@ -191,8 +212,16 @@ export default {
         chatthread_id: chatthreadID,
       }
       const response = await axios.get( this.$apiRoute('chatmessages.index'), { params } )
-      this.chatmessages = response.data.data.slice().reverse() // %NOTE: reverse order here for display!
+      // this.chatmessages = response.data.data.slice().reverse() // %NOTE: reverse order here for display!
+      this.chatmessages = [
+        ...this.chatmessages ,
+        ...response.data.data,
+      ]
       this.meta = response.meta
+      this.moreLoading = false
+      if ( response.data.meta.last_page === response.data.meta.current_page ) {
+        this.isLastPage = true
+      }
     },
 
     async markRead(chatthreadID) {
@@ -522,90 +551,92 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-body {
-  .btn-link:hover {
-    text-decoration: none;
-  }
-  .btn:focus, .btn.focus {
-    box-shadow: none;
-  }
+.btn-link:hover {
+  text-decoration: none;
+}
+.btn:focus, .btn.focus {
+  box-shadow: none;
+}
 
-  .list-group.tag-messages {
+.messages {
+  height: 100%;
+  width: 100%;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column-reverse;
 
-    overflow-y: scroll;
+  .list-group-item {
 
-    .list-group-item {
+      border: none;
+      padding: 0.5rem 1.25rem;
 
-       border: none;
-       padding: 0.5rem 1.25rem;
-
-      .crate {
-        display: flex;
-        max-width: 75%;
-
-        .box {
-          .msg-content {
-            margin-left: auto;
-            background: rgba(218,237,255,.53);
-            border-radius: 5px;
-            padding: 9px 12px;
-            color: #1a1a1a;
-          }
-          .msg-timestamp {
-            font-size: 11px;
-            color: #8a96a3;
-            text-align: right;
-          }
-
-        } // box
-      } // crate
-
-      .crate.tag-session_user {
-         justify-content: flex-end;
-         margin-left: auto;
-         margin-right: 0;
-      }
-
-      .crate.tag-other_user {
-         justify-content: flex-start;
-         margin-left: 0;
-         margin-right: auto;
-      }
-
-    }
-
-    .msg-grouping-day-divider {
-      font-size: 11px;
-      line-height: 15px;
-      text-align: center;
-      color: #8a96a3;
+    .crate {
       display: flex;
-      justify-content: center;
-      align-items: center;
-      margin-bottom: 10px;
-      span {
-        padding: 0 10px;
-      }
-      &:after, &:before {
-        content: '';
-        display: block;
-        flex: 1;
-        height: 1px;
-        background: rgba(138,150,163,.2);
-      }
+      max-width: 75%;
+
+      .box {
+        .msg-content {
+          margin-left: auto;
+          background: rgba(218,237,255,.53);
+          border-radius: 5px;
+          padding: 9px 12px;
+          color: #1a1a1a;
+        }
+        .msg-timestamp {
+          font-size: 11px;
+          color: #8a96a3;
+          text-align: right;
+        }
+
+      } // box
+    } // crate
+
+    .crate.session_user {
+        justify-content: flex-end;
+        margin-left: auto;
+        margin-right: 0;
+    }
+
+    .crate.other_user {
+        justify-content: flex-start;
+        margin-left: 0;
+        margin-right: auto;
     }
 
   }
 
-  .muted {
-    opacity: 50%;
+  .msg-grouping-day-divider {
+    font-size: 11px;
+    line-height: 15px;
+    text-align: center;
+    color: #8a96a3;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 10px;
+    span {
+      padding: 0 10px;
+    }
+    &:after, &:before {
+      content: '';
+      display: block;
+      flex: 1;
+      height: 1px;
+      background: rgba(138,150,163,.2);
+    }
   }
 
 }
 
-</style>
-
-<style lang="scss">
-body {
+.muted {
+  opacity: 50%;
 }
 </style>
+
+<i18n lang="json5" scoped>
+{
+  "en": {
+    "startOfThread": "Beginning of Messages"
+  }
+}
+</i18n>

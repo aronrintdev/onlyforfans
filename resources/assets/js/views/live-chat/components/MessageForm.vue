@@ -1,5 +1,5 @@
 <template>
-  <section v-if="!isLoading" class="conversation-footer mt-3 d-flex flex-column">
+  <section v-if="!isLoading" class="conversation-footer d-flex flex-column">
 
     <div class="scheduled-message-head" v-if="isScheduled">
       <div>
