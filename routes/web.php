@@ -127,6 +127,7 @@ Route::group(['middleware' => ['auth']], function () {
     // -- mediafiles: likeable | shareable | commentable (?) | tippable | purchaseable --
     //Route::post('/mediafiles/{mediafile}/doClone', ['as'=>'mediafiles.doClone', 'uses' => 'MediafilesController@doClone']);
     Route::get('/mediafiles/match', ['as'=>'mediafiles.match', 'uses' => 'MediafilesController@match']);
+    Route::get('/mediafiles/disk-stats/{mediafile}', ['as'=>'mediafiles.diskStats', 'uses' => 'MediafilesController@diskStats']);
     Route::resource('mediafiles', 'MediafilesController', [ 'except' => [ 'create', 'edit', ] ]);
 
     Route::resource('notifications', 'NotificationsController', [ 'only' => [ 'index', ] ]);
