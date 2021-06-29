@@ -142,11 +142,11 @@ export default {
     this.$log.debug('ShowThread Mounted', { channelName: this.channelName })
     this.$echo.join(this.channelName)
       .listen('.chatmessage.sent', e => {
-        this.$log.debug('.chatmessage.sent', { e })
+        this.$log.debug('Event Received: .chatmessage.sent', { e })
         this.addMessage(e.chatmessage)
       })
       .listenForWhisper('sendMessage', e => {
-        this.$log.debug('sendMessage whisper received', { e })
+        this.$log.debug('Whisper Received: sendMessage', { e })
         this.addTempMessage(e.message)
       })
   },
@@ -158,6 +158,7 @@ export default {
      * Add official message from db, overwrite temp message if necessary
      */
     addMessage(message) {
+      this.$log.debug('ShowThread addMessage', { message })
       var replaced = false
       for (var i in this.chatmessages) {
         if (
@@ -165,12 +166,18 @@ export default {
           this.chatmessages[i].sender_id === message.sender_id &&
           this.chatmessages[i].mcontent === message.mcontent
         ) {
+          this.$log.debug('ShowThread addMessage replaced message', { i, message: this.chatmessages[i] })
           Vue.set(this.chatmessages, i, message)
           replaced = true
+          break;
         }
       }
+      this.$log.debug('ShowThread addMessage', { replaced })
       if (!replaced) {
-        this.chatmessages.push(message)
+        this.chatmessages = [
+          message,
+          ...this.chatmessages,
+        ]
       }
     },
 
@@ -178,8 +185,11 @@ export default {
      * Quickly add a temp message to data set while official one is processed in db
      */
     addTempMessage(message) {
-      // Quickly add a temp message from websockets whisper
-      this.chatmessages.push({ id: moment().valueOf(), temp: true, ...message })
+      this.$log.debug('ShowThread addTempMessage', { message })
+      this.chatmessages = [
+        { id: moment().valueOf(), temp: true, ...message },
+        ...this.chatmessages,
+      ]
     },
 
     endVisible(isVisible) {
@@ -212,10 +222,17 @@ export default {
         chatthread_id: chatthreadID,
       }
       const response = await axios.get( this.$apiRoute('chatmessages.index'), { params } )
-      // this.chatmessages = response.data.data.slice().reverse() // %NOTE: reverse order here for display!
+
+      // Filter out any messages that we already have
+      const newMessages = _.filter(response.data.data, incoming => (
+        _.findIndex(this.chatmessages, message => message.id === incoming.id) === -1
+      ))
+
+      this.$log.debug('getChatmessages', { newMessages })
+
       this.chatmessages = [
-        ...this.chatmessages ,
-        ...response.data.data,
+        ...this.chatmessages,
+        ...newMessages,
       ]
       this.meta = response.meta
       this.moreLoading = false
