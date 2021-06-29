@@ -1,5 +1,5 @@
 <template>
-  <div class="container-fluid supercrate-player">
+  <div v-if="!isLoading" class="container-fluid supercrate-player">
     <section class="row">
       <aside class="col-md-3 tag-debug">
         <h2>My Story Views</h2>
@@ -25,16 +25,23 @@
           </div>
         </nav>
 
-        <section v-for="(story, index) in renderedStories" :key="index">
+        <section v-for="(s, index) in renderedStories" :key="`story-${s.id}`">
           <div v-if="current == index" :style="cssDisplay" class="display-area bg-blur">
+            <h6 class="tag-creator">{{ storyteller }}
+              <p>DEBUG:</p>
+              <ul>
+                <li>story index: {{index+1}}/{{renderedStories.length}}</li>
+                <li>current story ID: {{s.id}}</li>
+              </ul>
+            </h6>
             <div class="bg-blur"></div>
             <div v-touch:swipe.top="handleSwipeUp" class="crate-content">
-              <article v-if="story.stype === 'text'" class="h-100 v-wrap">
-                <p class="h4 text-center v-box">{{ story.content }}</p>
+              <article v-if="s.stype === 'text'" class="h-100 v-wrap">
+                <p class="h4 text-center v-box">{{ s.content }}</p>
               </article>
-              <article v-else-if="story.stype === 'image'" class="h-100">
-                <img :src="story.mediafiles[0].filepath" class="OFF-img-fluid OFF-h-100" />
-                <see-more v-if="story.swipe_up_link" :link="story.swipe_up_link"></see-more>
+              <article v-else-if="s.stype === 'image' && s.mediafiles" class="h-100">
+                <img :src="s.mediafiles[0].filepath" class="OFF-img-fluid OFF-h-100" />
+                <see-more v-if="s.swipe_up_link" :link="s.swipe_up_link"></see-more>
               </article>
             </div>
           </div>
@@ -50,9 +57,6 @@
 </template>
 
 <script>
-/**
- * Story Player
- */
 import _ from 'lodash'
 import SeeMore from './SeeMore.vue'
 
@@ -62,14 +66,15 @@ export default {
   },
 
   props: {
-    username: { type: String, default: '' },
+    storyteller: { type: String, default: '' },
+    username: { type: String, default: '' }, // session user (?)
     stories: { type: Array, default: () => [] },
     maxStories: { type: Number, default: 15 },
   },
 
   data: () => ({
     current: 0,
-    play: true,
+    play: false, // true,
     speed: 3000,
     timelineAnimation: null,
     speedOptions: [
@@ -97,6 +102,9 @@ export default {
   }),
 
   computed: {
+    isLoading() {
+      return !this.storyteller || !this.stories || !this.username
+    },
     cssNav() {
       return {
         //'--bg-color': this.bgColor,
@@ -105,7 +113,10 @@ export default {
       }
     },
     cssDisplay() {
-      if (this.renderedStories[this.current].mediafiles[0]) {
+      console.log ('renderedStories', {
+        renderedStories: this.renderedStories 
+      })
+      if (this.renderedStories.length && this.renderedStories[0].mediafiles && this.renderedStories[this.current].mediafiles[0]) {
         return {
           '--background-image': `url(${this.renderedStories[this.current].mediafiles[0].filepath})`,
         }
@@ -118,16 +129,28 @@ export default {
       }
       return this.stories
     },
+
   },
 
   methods: {
     doNav(direction) {
+      console.log(`doNav() - ${direction} - ${this.current}/${this.stories.length}`)
       switch (direction) {
         case 'previous':
-          this.goTo(this.current - 1)
+          if ( (this.current-1) < 0 ) {
+            console.log(`doNav() - emit prev-story-timeline`)
+            this.$emit('prev-story-timeline', { foo: 'bar'} )
+          } else {
+            this.goTo(this.current - 1)
+          }
           break
         case 'next':
-          this.goTo(this.current + 1)
+          if ( (this.current+1) >= this.stories.length ) {
+            console.log(`doNav() - emit next-story-timeline`)
+            this.$emit('next-story-timeline', { foo: 'bar'} )
+          } else {
+            this.goTo(this.current + 1)
+          }
           break
       }
     },
@@ -220,6 +243,11 @@ export default {
 .display-area {
   position: relative;
   height: 70vh;
+
+  .tag-creator {
+    position: absolute;
+    z-index: 1000;
+  }
 
   & > .crate-content {
     position: absolute;

@@ -12,6 +12,7 @@ use App\Http\Resources\Chatmessage as ChatmessageResource;
 use App\Events\MessageSentEvent;
 use App\Models\Chatmessage;
 use App\Models\Chatthread;
+use App\Models\Mycontact;
 use App\Models\User;
 
 class ChatthreadsController extends AppBaseController
@@ -59,8 +60,14 @@ class ChatthreadsController extends AppBaseController
 
         $query = Chatthread::query(); // Init query
 
-        // Check permissions, restrict to session user if non-admin
-        if ( !$request->user()->isAdmin() ) {
+        // If user is admin and originator or participant ids are not specified then can perform query where user is
+        // not a part of the participants
+        if (
+            !(
+                $request->user()->isAdmin() &&
+                ($request->has('originator_id') || $request->has('participant_id'))
+            )
+        ) {
             $query->whereHas('participants', function($q1) use(&$request) {
                 $q1->where('users.id', $request->user()->id); // limit to threads where session user is a participant
             });
@@ -185,18 +192,65 @@ class ChatthreadsController extends AppBaseController
 
     /**
      * @param Request $request
-     * @param Chatthread $chatthreadd count for the current user
+     * @param Chatthread $chatthread
      */
     public function markRead(Request $request, Chatthread $chatthread)
     {
         $userId = $request->user()->id;
 
-        $this->authorize('edit', $chatthread);
+        $this->authorize('view', $chatthread);
 
         $chatthread->chatmessages()->where([
             ['is_read', '=', 0],
             ['sender_id', '<>', $userId]
         ])->update(['is_read' => 1]);
+
+        http_response_code(200);
+    }
+
+    /**
+     * @param Request $request
+     * @param Chatthread $chatthread
+     */
+    public function getMuteStatus(Request $request, Chatthread $chatthread)
+    {
+        $this->authorize('view', $chatthread);
+
+        $sessionUser = $request->user();
+        $participant = $chatthread->participants()->find($sessionUser->id);
+
+        if (!$participant) {
+            // user is not part of the chatthread, so abort
+            abort(403);
+        }
+
+        return response()->json([
+            'is_muted' => $participant->pivot->is_muted,
+        ]);
+    }
+
+    /**
+     * @param Request $request
+     * @param Chatthread $chatthread
+     */
+    public function toggleMute(Request $request, Chatthread $chatthread)
+    {
+        $request->validate([
+            'is_muted' => 'required|boolean',
+        ]);
+
+        $this->authorize('view', $chatthread);
+
+        $sessionUser = $request->user();
+        $participant = $chatthread->participants()->find($sessionUser->id);
+
+        if (!$participant) {
+            // user is not part of the chatthread, so abort
+            abort(403);
+        }
+
+        $participant->pivot->is_muted = $request->is_muted;
+        $participant->pivot->save();
 
         http_response_code(200);
     }
@@ -245,6 +299,14 @@ class ChatthreadsController extends AppBaseController
             $ct = $originator->chatthreads()->whereHas('participants', function ($query) use($pkid) {
                 $query->where('user_id', $pkid);
             })->first();
+
+            // Add participant to originator mycontacts if they are not already there
+            if ($originator->mycontacts()->where('contact_id', $pkid)->doesntExist()) {
+                Mycontact::create([
+                    'owner_id' => $originator->id,
+                    'contact_id' => $pkid,
+                ]);
+            }
 
             // Start new chat thread if one is not found
             if (!isset($ct)) {

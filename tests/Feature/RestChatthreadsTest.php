@@ -133,7 +133,6 @@ class RestChatthreadsTest extends TestCase
     /**
      *  @group FIXME-chatthreads
      *  @group regression
-     *  @group here-fixme
      */
     public function test_can_list_filtered_chatthreads()
     {
@@ -169,7 +168,7 @@ class RestChatthreadsTest extends TestCase
         $content = json_decode($response->content());
 
         $response->assertStatus(200);
-        $response->assertTrue($content->total_unread_count > 0);
+        $this->assertTrue($content->total_unread_count > 0);
     }
 
     /**
@@ -186,7 +185,7 @@ class RestChatthreadsTest extends TestCase
         $response = $this->actingAs($participant)->ajaxJSON('POST', route('chatthreads.markAllRead'));
 
         $response->assertStatus(200);
-        $response->assertTrue($chatthread->chatmessages()->where([
+        $this->assertTrue($chatthread->chatmessages()->where([
             ['is_read', '=', 0],
             ['sender_id', '<>', $participant->id]
         ])->count() == 0);
@@ -203,10 +202,10 @@ class RestChatthreadsTest extends TestCase
         })->firstOrFail();
         $participant = $chatthread->participants[0];
 
-        $response = $this->actingAs($participant)->ajaxJSON('POST', route('chatthreads.markRead', $chatthread));
+        $response = $this->actingAs($participant)->ajaxJSON('POST', route('chatthreads.markRead', $chatthread->id));
 
         $response->assertStatus(200);
-        $response->assertTrue($chatthread->chatmessages()->where([
+        $this->assertTrue($chatthread->chatmessages()->where([
             ['is_read', '=', 0],
             ['sender_id', '<>', $participant->id]
         ])->count() == 0);
@@ -215,7 +214,49 @@ class RestChatthreadsTest extends TestCase
     /**
      *  @group chatthreads
      *  @group regression
-     *  @group here0608
+     */
+    public function test_can_toggle_mute_status_for_a_thread()
+    {
+        $sessionUser = User::has('chatthreads')->firstOrFail();
+        $chatthread = $sessionUser->chatthreads[0];
+
+        $payload = [
+            'is_muted' => true,
+        ];
+        $response = $this->actingAs($sessionUser)->ajaxJSON('POST', route('chatthreads.toggleMute', $chatthread->id), $payload);
+        $response->assertStatus(200);
+        $this->assertEquals(1, $chatthread->participants()->find($sessionUser->id)->pivot->is_muted);
+
+        $payload = [
+            'is_muted' => false,
+        ];
+        $response = $this->actingAs($sessionUser)->ajaxJSON('POST', route('chatthreads.toggleMute', $chatthread->id), $payload);
+        $response->assertStatus(200);
+        $this->assertEquals(0, $chatthread->participants()->find($sessionUser->id)->pivot->is_muted);
+    }
+
+    /**
+     *  @group chatthreads
+     *  @group regression
+     */
+    public function test_can_get_mute_status_for_a_thread()
+    {
+        $sessionUser = User::has('chatthreads')->firstOrFail();
+        $chatthread = $sessionUser->chatthreads[0];
+
+        $payload = [
+            'is_muted' => true,
+        ];
+        $this->actingAs($sessionUser)->ajaxJSON('POST', route('chatthreads.toggleMute', $chatthread->id), $payload);
+        $response = $this->actingAs($sessionUser)->ajaxJSON('GET', route('chatthreads.getMuteStatus', $chatthread->id));
+        $response->assertStatus(200);
+        $content = json_decode($response->content());
+        $this->assertEquals(1, $content->is_muted);
+    }
+
+    /**
+     *  @group chatthreads
+     *  @group regression
      */
     public function test_can_create_chat_thread_with_selected_participants()
     {

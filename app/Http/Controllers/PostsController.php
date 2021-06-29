@@ -65,6 +65,7 @@ class PostsController extends AppBaseController
             'timeline_id' => 'required|uuid|exists:timelines,id',
             'type' => [ 'sometimes', 'required', new InEnum(new PostTypeEnum()) ],
             'price' => 'sometimes|required|integer',
+            'price_for_subscribers' => 'sometimes|required|integer',
             'mediafiles' => 'array',
             'mediafiles.*.*' => 'integer|uuid|exists:mediafiles',
         ];
@@ -124,9 +125,10 @@ class PostsController extends AppBaseController
             'description' => 'required',
             'type' => [ 'sometimes', 'required', new InEnum(new PostTypeEnum()) ],
             'price' => 'sometimes|required|integer',
+            'price_for_subscribers' => 'sometimes|required|integer',
             'mediafiles' => 'array',
             'mediafiles.*.*' => 'integer|uuid|exists:mediafiles',
-            'schedule_datetime' => 'integer',
+            'schedule_datetime' => 'nullable|integer',
         ]);
 
         $post->fill($request->only([
@@ -140,6 +142,12 @@ class PostsController extends AppBaseController
         if ($request->has('price')) {
             if ($request->price !== $post->price) {
                 $post->price = $request->price;
+            }
+        }
+
+        if ($request->has('price_for_subscribers')) {
+            if ($request->price_for_subscribers !== $post->price_for_subscribers) {
+                $post->price_for_subscribers = $request->price_for_subscribers;
             }
         }
 

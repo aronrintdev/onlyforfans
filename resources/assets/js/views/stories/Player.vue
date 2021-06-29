@@ -1,74 +1,84 @@
 <template>
-  <div class="w-100">
-    <Player v-if="!loading" :username="username" :stories="stories" />
+  <div v-if="!isLoading" class="w-100">
+    <div>
+      <p>DEBUG:</p>
+      <ul>
+        <li>timeline index: {{timelineIndex+1}}/{{timelines.length}}</li>
+        <li>current timeline ID: {{currentTimeline.name || ''}} ({{currentTimeline.id}})</li>
+      </ul>
+    </div>
+    <Player 
+      @next-story-timeline="nextStoryTimeline"
+      @prev-story-timeline="prevStoryTimeline"
+      :storyteller="storyteller" 
+      :username="session_user.username" 
+      :stories="stories" />
   </div>
 </template>
 
 <script>
-/**
- * Stories Player View
- */
-import Player from '@components/stories/Player'
 import Vuex from 'vuex'
+import Player from '@components/stories/Player'
 
 export default {
   name: 'StoriesPlayer',
-  components: {
-    Player,
-  },
-
 
   props: {
     slug: { type: String, default: '' },
   },
 
   data: () => ({
-    // stories: [],
-    loading: true,
+    timelineIndex: 0,
+    timelines: [],
   }),
 
   computed: {
-    ...Vuex.mapState(['stories', 'session_user']),
-    username() {
-      return (this.session_user) ? this.session_user.username : ''
-    }
+    //...Vuex.mapState(['stories', 'session_user']),
+    ...Vuex.mapState(['session_user']),
+
+    isLoading() {
+      return !this.session_user || !this.stories
+    },
+
+    stories() {
+      return this.timelines[this.timelineIndex]?.stories || []
+    },
+    storyteller() {
+      return this.timelines[this.timelineIndex]?.name || null
+    },
+    currentTimeline() {
+      return this.timelines[this.timelineIndex] || null
+    },
   },
 
   methods: {
-    load() {
-      // this.$log.debug('Loading Story', { slug: this.slug })
-      // this.loading = true
-      // this.axios.get(this.$apiRoute('stories.show', { story: this.slug }))
-      //   .then(response => {
-      //     this.$log.debug('Finished Loading Story', { response })
-      //     this.stories = [ response.data.story ]
-      //     this.loading = false
-      //   })
-      this.loading = true
-      if (!this.session_user) {
-        setTimeout(this.load, 50)
-        return
-      }
-      this.$store.dispatch('getStories', {
-        user_id: this.session_user.id,
-      })
+    nextStoryTimeline() {
+      console.log(`nextStoryTimeline() - ${this.timelineIndex} `)
+      this.timelineIndex += 1
+    },
+    prevStoryTimeline() {
+      console.log(`prevStoryTimeline() - ${this.timelineIndex} `)
+      this.timelineIndex -= 1
     },
   },
 
   watch: {
-    stories(value) {
-      if (value && value.length > 0) {
-        this.loading = false
-      }
+  },
+
+  created() {
+    if ( this.$route.query.timeline && this.$route.query.timeline === 'me' ) {
+      const response = axios.get( this.$apiRoute('timelines.myStories')).then ( response => {
+        this.timelines = response.data.data
+      })
+    } else {
+      const response = axios.get( this.$apiRoute('timelines.myFollowedStories')).then ( response => {
+        this.timelines = response.data.data
+      })
     }
   },
 
-  mounted() {
-    if (!this.stories || this.stories.length === 0) {
-      this.load()
-    } else {
-      this.loading = false
-    }
+  components: {
+    Player,
   },
 
 }

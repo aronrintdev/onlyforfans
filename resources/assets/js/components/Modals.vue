@@ -69,6 +69,15 @@
       <ScheduleDateTime ref="schedule_picker_modal" @apply="applySchedule" />
     </b-modal>
 
+    <b-modal
+      id="edit-post"
+      size="lg"
+      hide-header
+      hide-footer
+      body-class="p-0"
+    >
+      <EditPost ref="editPost" :post="selectedResource" />
+    </b-modal>
   </div>
 </template>
 
@@ -85,6 +94,7 @@ import SendTip from '@components/modals/SendTip.vue'
 import PostDisplay from '@components/posts/Display'
 import ImageDisplay from '@components/timelines/elements/ImageDisplay'
 import ScheduleDateTime from '@components/modals/ScheduleDateTime.vue'
+import EditPost from '@components/modals/EditPost.vue'
 
 export default {
   name: 'Modals',
@@ -96,7 +106,8 @@ export default {
     SendTip,
     PostDisplay,
     ImageDisplay,
-    ScheduleDateTime
+    ScheduleDateTime,
+    EditPost
   },
 
   computed: {
@@ -112,6 +123,7 @@ export default {
       'modal-post': 'postDisplay',
       'modal-photo': 'ImageDisplay',
       'modal-schedule-datetime': 'ScheduleDateTime',
+      'edit-post': 'editPost',
     },
     selectedTimeline: null,
     selectedUrl: null,
@@ -161,6 +173,10 @@ export default {
             break
           case 'show-schedule-datetime':
             this.$bvModal.show('modal-schedule-datetime')
+            break
+          case 'edit-post':
+            this.selectedResource = data.post
+            this.$bvModal.show('edit-post')
             break
         }
       })

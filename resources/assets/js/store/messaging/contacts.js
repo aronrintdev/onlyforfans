@@ -38,35 +38,51 @@ export const contacts = {
         key: 'subscribers',
         rules: ['is_subscriber'],
         extraFilters: [
-          'totalSpent'
+          'totalSpent',
+          'include_non_contacts',
           // 'subscribed-over'
         ],
       },
       followers: {
         key: 'followers',
-        rules: ['is_follower'],
+        rules: [
+          'is_follower',
+          'include_non_contacts',
+        ],
         // extraFilters: [ 'following-for' ],
       },
       canceled: {
         key: 'canceled',
-        rules: ['is_cancelled_subscriber'],
+        rules: [
+          'is_cancelled_subscriber',
+          'include_non_contacts',
+        ],
         // extraFilters: [ 'cancelled-ago' ],
       },
       expired: {
         key: 'expired',
-        rules: ['is_expired_subscriber'],
+        rules: [
+          'is_expired_subscriber',
+          'include_non_contacts',
+        ],
         // extraFilters: [ 'expired-ago' ],
       },
       purchasers: {
         key: 'purchasers',
-        rules: ['has_purchased_post'],
+        rules: [
+          'has_purchased_post',
+          'include_non_contacts',
+        ],
         extraFilters: [
           'totalSpent'
         ]
       },
       tippers: {
         key: 'tippers',
-        rules: ['has_tipped'],
+        rules: [
+          'has_tipped',
+          'include_non_contacts',
+        ],
         extraFilters: [
           'totalSpent',
           // 'totalTipped',
@@ -128,6 +144,10 @@ export const contacts = {
   },
 
   mutations: {
+    CLEAR_CACHE(state, payload) {
+      state.cache = {}
+    },
+
     UPDATE_CONTACTS_PAGE(state, { data, page, take, filter, sort }) {
       // Filters besides 'all' should select all by default
       const selected = filter !== 'all' ? true : false
@@ -170,6 +190,12 @@ export const contacts = {
   },
 
   actions: {
+    clearCache({ commit }) {
+      return new Promise((resolve, reject) => {
+        commit('CLEAR_CACHE')
+        resolve()
+      })
+    },
     loadContacts({ state, commit }, { page, take, filter, sort }) {
       return new Promise((resolve, reject) => {
         let params = { page, take }

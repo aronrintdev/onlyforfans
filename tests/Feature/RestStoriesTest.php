@@ -147,7 +147,59 @@ class RestStoriesTest extends TestCase
     /**
      *  @group stories
      *  @group regression
+     *  @group june0625
      */
+    public function test_can_list_grouped_stories_on_followed_timelines()
+    {
+        $timeline = Timeline::has('stories', '>=', 1)->has('followers', '>=', 1)->firstOrFail();
+        $creator = $timeline->user;
+        $fan = $timeline->followers->first();
+
+        $payload = [ ];
+        $response = $this->actingAs($fan)->ajaxJSON('GET', route('timelines.myFollowedStories'), $payload);
+        $content = json_decode($response->content());
+        $response->assertStatus(200);
+        //dd($content);
+        $response->assertJsonStructure([
+            'data' => [ 
+                0 => [
+                    'id',
+                    'slug',
+                    'name',
+                    'price',
+                    'avatar',
+                    'is_follow_for_free',
+                    'stories',
+                    //'stories' => [
+                        //'mediafiles',
+                    //],
+                    'is_owner',
+                    'is_following',
+                    'is_subscribed',
+                    'created_at',
+                ],
+            ],
+        ]);
+        /*
+        $this->assertEquals(1, $content->meta->current_page);
+        $this->assertNotNull($content->data);
+        $storiesR = $content->data;
+        $this->assertGreaterThan(0, count($storiesR));
+
+        $storiesOnTimelineNotFollowedByFan = collect($storiesR)->filter( function($s) use(&$fan) {
+            $story = Story::find($s->id);
+            return !$story->timeline->followers->contains($fan->id);
+        });
+        $this->assertEquals(0, $storiesOnTimelineNotFollowedByFan->count(), 'Returned a story on a timeline not followed by fan');
+         */
+    }
+
+    /**
+     *  @group stories
+     *  @group regression
+     */
+    // %NOTE: %PSG 20210625: this is actually not what we want for the story bar...as ideally we
+    // want the stories returned with some kind of timeline grouping structure (?)
     public function test_can_list_stories_on_followed_timelines()
     {
         $timeline = Timeline::has('stories', '>=', 1)->has('followers', '>=', 1)->firstOrFail();

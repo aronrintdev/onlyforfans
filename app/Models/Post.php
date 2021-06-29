@@ -90,7 +90,7 @@ class Post extends Model
 
     protected $guarded = [ 'id', 'created_at', 'updated_at' ];
     protected $appends = [ 'isLikedByMe', 'isFavoritedByMe', ];
-    protected $fillable = [ 'schedule_datetime', 'description', 'price', 'currency', 'user_id', 'active', 'type' ];
+    protected $fillable = [ 'schedule_datetime', 'description', 'price', 'price_for_subscribers', 'currency', 'user_id', 'active', 'type' ];
 
     public function sluggable(): array
     {
@@ -129,6 +129,7 @@ class Post extends Model
 
     protected $casts = [
         'price' => CastsMoney::class,
+        'price_for_subscribers' => CastsMoney::class,
         // 'price' => CastsPricePoint::class, // Uses current price point or 0
         'cattrs' => 'array',
         'meta' => 'array',

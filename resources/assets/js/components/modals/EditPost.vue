@@ -1,5 +1,6 @@
+
 <template>
-  <div class="container">
+  <div class="container p-0">
     <b-card header-tag="header" footer-tag="footer" class="position-relative">
       <template #header>
         <section class="d-flex">
@@ -11,9 +12,7 @@
           </div>
         </section>
       </template>
-
       <LoadingOverlay :loading="loading" />
-
       <div>
         <div class="scheduled-message-head" v-if="schedule_datetime">
           <div>
@@ -29,21 +28,28 @@
             </svg>
           </button>
         </div>
-        <div v-if="type === 'price'" class="w-100">
-          <PriceSelector v-if="type === 'price'" v-model="price" class="mb-3" />
+        <div v-if="type === 'price'" class="d-flex w-100">
+          <PriceSelector
+            class="mb-3 mr-5"
+            :label="$t('priceForFollowers')"
+            v-model="price"
+          />
+          <PriceSelector
+            class="mb-3"
+            :label="$t('priceForSubscribers')"
+            v-model="priceForPaidSubscribers"
+          />
           <hr />
         </div>
-
         <textarea v-model="description" rows="8" class="w-100"></textarea>
       </div>
-
       <template #footer>
         <b-row>
           <b-col cols="4" md="4" class="d-flex">
             <ul class="list-inline d-flex mb-0">
               <li
                 class="selectable select-calendar"
-                v-if="rawPost && rawPost.schedule_datetime"
+                v-if="post && post.schedule_datetime"
                 @click="showSchedulePicker()"
               >
                 <span><CalendarIcon /></span>
@@ -60,7 +66,6 @@
                 <fa-icon icon="undo" fixed-width class="mr-1" />
                 {{ $t('revert.button') }}
               </b-btn>
-
               <b-btn variant="success" :disabled="!changed" @click="save">
                 <fa-icon icon="save" fixed-width class="mr-1" />
                 {{ $t('save.button') }}
@@ -70,120 +75,93 @@
         </b-row>
       </template>
     </b-card>
-    <Modals />
   </div>
 </template>
-
 <script>
 /**
  * js/views/posts/Edit
  *
- * Edit Post Page
+ * Edit Post View
  */
 import moment from 'moment'
-
 import { eventBus } from '@/app'
 import PriceSelector from '@components/common/PriceSelector'
 import LoadingOverlay from '@components/common/LoadingOverlay'
 import CalendarIcon from '@components/common/icons/CalendarIcon.vue'
-import Modals from '@components/Modals'
 
 export default {
   name: "EditPost",
-
   components: {
     LoadingOverlay,
     PriceSelector,
     CalendarIcon,
-    Modals,
   },
-
   props: {
-    slug: { type: String, default: '' },
     post: { type: Object, default: () => ({}) },
   },
-
   computed: {
     changed() {
       if (!this.loading) {
-        return this.rawPost.description !== this.description
-          || this.rawPost.type !== this.type
-          || this.rawPost.price !== this.price
-          || this.rawPost.schedule_datetime !== this.schedule_datetime
+        return this.post.description !== this.description
+          || this.post.type !== this.type
+          || this.post.price !== this.price
+          || this.post.price_for_subscribers !== this.priceForPaidSubscribers
+          || this.post.schedule_datetime !== this.schedule_datetime
       }
       return false
     }
   },
-
   data: () => ({
-    loading: true,
-
+    loading: false,
     description: '',
     type: 'free',
     price: 0,
+    priceForPaidSubscribers: 0,
     currency: 'USD',
-
     ptypes: [
       { text: 'Free', value: 'free' },
       { text: 'By Purchase', value: 'price' },
       { text: 'Subscriber-Only', value: 'paid' },
     ],
-
-    rawPost: {},
     postSchedule: {},
     moment,
     schedule_datetime: null,
   }),
-
   methods: {
-    init() {
-      this.axios.get(this.$apiRoute('posts.show', { post: this.slug }))
-        .then(response => {
-          this.rawPost = response.data.data || response.data.post || response.data
-          this.fillFromProp()
-          this.loading = false
-        })
-        .catch(error => eventBus.$emit('error', { error, message: this.$t('loading.error') }))
-    },
-
     fillFromProp() {
-      this.description = this.rawPost.description
-      this.type = this.rawPost.type
-      this.price = this.rawPost.price
-      // this.currency = this.rawPost.currency
-      this.schedule_datetime = this.rawPost.schedule_datetime
+      this.description = this.post.description
+      this.type = this.post.type
+      this.price = this.post.price
+      this.priceForPaidSubscribers = this.post.price_for_subscribers
+      // this.currency = this.post.currency
+      this.schedule_datetime = this.post.schedule_datetime
     },
-
     discard(e) {
       this.exit()
     },
-
     revert(e) {
       this.fillFromProp()
     },
-
     save(e) {
       this.loading = true
-      this.axios.patch(this.$apiRoute('posts.update', { post: this.slug }), {
+      this.axios.patch(this.$apiRoute('posts.update', { post: this.post.slug }), {
         description: this.description,
         type: this.type,
         price: this.price,
+        price_for_subscribers: this.priceForPaidSubscribers,
         currency: this.currency,
         schedule_datetime: this.schedule_datetime,
       }).then(response => {
         this.loading = false
-        eventBus.$emit('update-post', this.rawPost.id)
+        eventBus.$emit('update-posts', this.post.id)
         this.exit()
       }).catch(error => {
         eventBus.$emit('error', { error, message: this.$t('save.error') })
         this.loading = false
       })
     },
-
     exit() {
-      this.$router.go(-1)
-        || this.$router.push({ name: 'timeline.show', params: { slug: this.rawPost.timeline.slug } })
-        || this.$router.push({ name: 'index' })
+      this.$bvModal.hide('edit-post');
     },
     clearSchedule() {
       this.schedule_datetime = undefined
@@ -194,9 +172,7 @@ export default {
       })
     },
   },
-
   mounted() {
-    this.init()
     this.fillFromProp()
     const self = this
     eventBus.$on('apply-schedule', function(data) {
@@ -205,7 +181,6 @@ export default {
   },
 }
 </script>
-
 <style lang="scss" scoped>
 textarea,
 .dropzone,
@@ -217,7 +192,6 @@ textarea,
   cursor: pointer;
 }
 </style>
-
 <i18n lang="json5" scoped>
 {
   "en": {
@@ -226,7 +200,7 @@ textarea,
       "error": "An error has occurred while attempting to load this post. Please return to the previous page and try again later."
     },
     "discard": {
-      "button": "Discard"
+      "button": "Close"
     },
     "revert": {
       "button": "Revert"
@@ -234,7 +208,9 @@ textarea,
     "save": {
       "button": "Save",
       "error": "An error has occurred while attempting to save this post. Please try again later."
-    }
+    },
+    "priceForFollowers": "Price for free followers",
+    "priceForSubscribers": "Price for paid subscribers",
   }
 }
 </i18n>

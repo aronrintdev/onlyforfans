@@ -9,7 +9,7 @@ use Illuminate\Database\Seeder as ParentSeeder;
 class TestDatabaseSeeder extends ParentSeeder
 {
     /** Will run in all environments */
-    protected $environments = [ 'all' ];
+    protected $environments = [ 'testing' ];
 
     public function run()
     {
@@ -31,6 +31,7 @@ class TestDatabaseSeeder extends ParentSeeder
             FavoritesTableSeeder::class,
             LikeablesTableSeeder::class,
             ChatmessagesTableSeeder::class,
+            MediafilesTableSeeder::class,
             //TipsTableSeeder::class,
         ]);
     }

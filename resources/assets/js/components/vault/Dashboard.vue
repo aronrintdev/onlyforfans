@@ -1,58 +1,42 @@
 <template>
-  <div v-if="!isLoading" class="container-fluid vault-container">
+  <div v-if="!isLoading" class="container-fluid vault-container h-100">
 
-    <section class="row h-100">
+    <b-row class="pt-2">
+      <b-col>
+        <h2 class="my-1">My Vault</h2>
+        <hr class="my-0"/>
+      </b-col>
+    </b-row>
 
-      <aside class="col-md-3">
+    <b-row class="mt-3">
 
-        <h2 class="my-3">My Vault</h2>
+      <aside class="col-md-3 d-none d-lg-block">
 
-        <hr />
-
-        <b-breadcrumb>
-          <b-breadcrumb-item v-for="(bc, index) in breadcrumbNav" :key="bc.pkid" @click="doNav($event, bc.pkid)" :active="bc.active">{{ bc.text }}</b-breadcrumb-item>
-        </b-breadcrumb>
-
-        <!-- +++ Breadcrumb Nav +++ -->
-        <b-list-group>
-          <b-list-group-item v-for="(vf, index) in children" :key="vf.guid" @click="doNav($event, vf.id)" role="button">
-            {{ vf.name }} 
-            <span v-if="isShared('vaultfolders', vf.id)"><b-icon icon="share"></b-icon></span>
-          </b-list-group-item>
-        </b-list-group>
-
-        <hr />
-
-        <ul class="list-unstyled ctrl">
-          <li v-if="!showCreateForm"><b-button @click="showCreateForm=true" variant="link">New Folder</b-button></li>
+        <ul class="folder-nav pl-0">
+          <TreeItem
+            class="item"
+            :item="foldertree"
+            :currentFolderId="currentFolderId"
+            @make-folder="makeFolder"
+            @add-item="addItem"
+            @do-nav="doNav"
+          />
         </ul>
 
-        <b-form @submit="storeFolder" v-if="showCreateForm">
-          <b-form-group>
-            <b-form-input
-              id="folder-name"
-              v-model="createForm.name"
-              type="text"
-              placeholder="Enter new folder name"
-              required
-            ></b-form-input>
-          </b-form-group>
-          <b-button type="submit" variant="primary">Create Folder</b-button>
-          <b-button @click="cancelCreateFolder" type="cancel" variant="secondary">Cancel</b-button>
-        </b-form>
+        <hr />
 
         <b-form @submit="shareFiles" v-if="true">
 
-          <div class="autosuggest-container">
+          <div v-if="selectedMediafiles.length" class="autosuggest-container">
             <b-form-group>
               <b-form-input
-                id="invite-email"
                 v-model="inviteeInput"
                 v-on:keydown.enter.prevent="addInvite"
                 type="text"
                 placeholder="Enter email to invite..."
               ></b-form-input>
             </b-form-group>
+            <!--
             <b-form-group>
               <vue-autosuggest
                 v-model="query"
@@ -67,12 +51,16 @@
                 </div>
               </vue-autosuggest>
             </b-form-group>
+            -->
           </div>
 
-          <b-button type="submit" variant="primary">Share Selected</b-button>
-          <b-button @click="cancelShareFiles" type="cancel" variant="secondary">Cancel</b-button>
+          <b-button v-if="selectedMediafiles.length" type="submit" variant="primary">Share Selected</b-button>
+          <!--
+          < b-button @click="cancelShareFiles" type="cancel" variant="secondary">Cancel</b-button>
+          -->
         </b-form>
 
+        <!--
         <h4>Shares</h4>
         <ul v-if="shareForm.sharees.length">
           <li v-for="(se) in shareForm.sharees">
@@ -84,14 +72,15 @@
         <ul v-if="shareForm.invitees.length">
           <li v-for="(i) in shareForm.invitees">{{ i }}</li>
         </ul>
+        -->
 
       </aside>
 
-      <main class="col-md-9 OFF-d-flex OFF-align-items-center">
+      <main class="col-md-9">
 
-        <!-- +++ File Thumbnails +++ -->
-        <section class="row">
-          <div class="col-sm-12">
+        <!-- +++ File Thumbnails / Dropzone File Uploader +++ -->
+        <b-row v-if="isUploaderVisible">
+          <b-col>
             <vue-dropzone 
               ref="myVueDropzone" 
               id="dropzone" 
@@ -99,43 +88,62 @@
               v-on:vdropzone-sending="sendingEvent"
               v-on:vdropzone-success="successEvent"
             ></vue-dropzone>
-          </div>
-        </section>
-
-        <!-- +++ File List +++ -->
-        <b-row class="py-3">
-          <b-col class="list-item-content d-flex justify-content-between align-items-center">
-            <div v-if="this.selectedMediafiles.length">
-              <b-button @click="clearSelected()" variant="link" class="text-decoration-none">
-                <fa-icon :icon="['fas', 'times']" class="fa-lg" />
-              </b-button>
-              <span class="ml-3">{{ this.selectedMediafiles.length }} selected</span>
-            </div>
-            <b-button v-if="this.selectedMediafiles.length" @click="renderShareForm()" variant="primary">Add To</b-button>
           </b-col>
         </b-row>
+
+        <!-- +++ Minor Nav +++ -->
+        <b-row class="py-3">
+
+          <b-col>
+            <section class="d-md-flex justify-content-between align-items-center">
+
+              <b-breadcrumb class="pl-0 my-0">
+                <b-breadcrumb-item v-for="(bc, index) in breadcrumbNav" :key="bc.pkid" @click="doNav(bc.pkid)" :active="bc.active">{{ bc.text }}</b-breadcrumb-item>
+              </b-breadcrumb>
+        
+              <div v-if="this.selectedMediafiles.length" class="d-flex align-items-center">
+                <span class="mr-5">{{ this.selectedMediafiles.length }} selected</span>
+                <div>
+                  <b-button @click="renderShareForm()" variant="primary">Add To</b-button>
+                  <b-button @click="clearSelected()" variant="warning">Clear All</b-button>
+                </div>
+              </div>
+
+              <div v-else>
+                <b-button variant="link" class="" @click="isUploaderVisible=!isUploaderVisible">
+                  <fa-icon :icon="['fas', 'upload']" size="lg" />
+                </b-button>
+                <b-button variant="link" class="" @click="renderNewFolderForm">
+                  <fa-icon :icon="['fas', 'plus']" size="lg" />
+                </b-button>
+              </div>
+
+            </section>
+          </b-col>
+        </b-row>
+
+        <!-- +++ List/Grid Display of Files +++ -->
         <b-row :no-gutters="true">
           <b-col cols="12" md="3" v-for="(mf) in mediafiles" :key="mf.id" role="button">
-            <PreviewFile
-              :data-mf_id="mf.id"
-              class="p-1"
-              :mediafile="mf"
-              @input="onPreviewFileInput"
+            <PreviewFile 
+              :data-mf_id="mf.id" 
+              :mediafile="mf" 
+              @input="onPreviewFileInput" 
+              @render-lightbox="renderLightbox" 
+              class="p-1" 
             />
+          </b-col>
+          <b-col v-for="(vf) in children" :key="vf.id" cols="12" md="3" role="button">
+            <b-img fluid @click="doNav(vf.id)" src="/images/tmp-placeholders/folder-icon.jpg" :alt="`Folder ${vf.slug}`"></b-img>
+            <div class="text-center">{{ vf.name }}</div>
           </b-col>
         </b-row>
 
       </main>
 
-    </section>
+    </b-row>
 
-    <b-modal
-      id="modal-share-file"
-      size="lg"
-      title="Share Files"
-      hide-footer
-      body-class="p-0"
-    >
+    <b-modal id="modal-share-file" size="lg" title="Share Files" hide-footer body-class="p-0" >
       <div>
         <b-list-group>
           <b-list-group-item>
@@ -160,6 +168,27 @@
       </div>
     </b-modal>
 
+    <b-modal id="modal-create-folder" v-model="isCreateFolderModalVisible" size="lg" title="Create Folder" body-class="">
+      <b-form @submit.prevent="storeFolder">
+          <b-form-group>
+            <b-form-input id="folder-name"
+              v-model="createForm.name"
+              type="text"
+              placeholder="Enter new folder name"
+              required
+            ></b-form-input>
+          </b-form-group>
+        </b-form>
+        <template #modal-footer>
+          <b-button @click="storeFolder" variant="primary">Create Folder</b-button>
+          <b-button @click="isCreateFolderModalVisible=false" type="cancel" variant="secondary">Cancel</b-button>
+        </template>
+    </b-modal>
+
+    <b-modal v-model="isMediaLightboxModalVisible" id="modal-media-lightbox" title="" hide-footer body-class="p-0" size="xl">
+      <MediaLightbox :session_user="session_user" :mediafile="lightboxSelection" />
+    </b-modal>
+
   </div>
 </template>
 
@@ -170,10 +199,13 @@ import vue2Dropzone from 'vue2-dropzone';
 import { VueAutosuggest } from 'vue-autosuggest'; // https://github.com/darrenjennings/vue-autosuggest#examples
 import 'vue2-dropzone/dist/vue2Dropzone.min.css';
 import PreviewFile from '@components/vault/PreviewFile'
+import MediaLightbox from '@components/vault/MediaLightbox'
+import TreeItem from '@components/vault/TreeItem'
 
 export default {
 
   props: {
+    session_user: null,
     vault_pkid: {
       required: true,
       type: String,
@@ -185,13 +217,13 @@ export default {
   },
 
   computed: {
-    ...Vuex.mapState(['vault']),
+    //...Vuex.mapState(['vault']),
     ...Vuex.mapState(['vaultfolder']),
     ...Vuex.mapState(['breadcrumb']),
     ...Vuex.mapState(['shares']),
 
     isLoading() {
-      return !this.vault_pkid || !this.vaultfolder_pkid
+      return !this.vault_pkid || !this.vaultfolder_pkid || !this.vault || !this.vaultfolder || !this.foldertree || !this.session_user
     },
 
     parent() {
@@ -203,7 +235,7 @@ export default {
     breadcrumbNav() {
       const result = []
       for ( let b of this.breadcrumb ) {
-        const isActive = b.pkid === this.currentFolderPKID
+        const isActive = b.pkid === this.currentFolderId
         result.push({
           pkid: b.pkid,
           text: b.vfname,
@@ -219,24 +251,32 @@ export default {
       }]
     },
 
-    selectedMediafiles() {
+    selectedMediafiles() { // selected via checkbox
       return _.filter(this.mediafiles, o => (o.selected))
     },
+
   },
 
   data: () => ({
 
-    showCreateForm: false,
+    vault: null,
+    foldertree: null,
+
+    isUploaderVisible: false,
+    isCreateFolderModalVisible: false,
 
     mediafiles: {}, // %FIXME: use array not keyed object!
+
+    lightboxSelection: null,
+    isMediaLightboxModalVisible: false,
 
     createForm: {
       name: '',
       //vault_id: this.vault_pkid,
-      //parent_id: this.currentFolderPKID,
+      //parent_id: this.currentFolderId,
     },
 
-    currentFolderPKID: null,
+    currentFolderId: null,
 
     inviteeInput: '',
 
@@ -263,19 +303,16 @@ export default {
 
   }), // data
 
-  created() {
-    this.currentFolderPKID = this.vaultfolder_pkid
-    this.$store.dispatch('getVault', this.vault_pkid)
-    this.$store.dispatch('getVaultfolder', this.vaultfolder_pkid)
-  },
-
   methods: {
+
+    // from Vue tree demo (TreeItem aka VaultNavigation)
+    makeFolder() {
+    },
+    addItem() {
+    },
 
     sendSelected(resourceType) {
       // send (share) selected files to a post, story, or message
-      console.log('sendSelected', {
-        resourceType,
-      })
       const params = {
           mediafile_ids: this.selectedMediafiles.map( ({id}) => id )
       }
@@ -293,8 +330,12 @@ export default {
       }
     },
 
+    renderLightbox(mediafile) {
+      this.lightboxSelection = mediafile
+      this.isMediaLightboxModalVisible = true
+    },
+
     renderShareForm() {
-      console.log('renderShareForm')
       this.$bvModal.show('modal-share-file')
     },
 
@@ -303,7 +344,6 @@ export default {
     },
 
     clearSelected() {
-      console.log('clearSelected')
       this.mediafiles = _.mapValues( this.mediafiles, o => ({ ...o, selected: false }) )
     },
 
@@ -335,28 +375,9 @@ export default {
         sharees: this.shareForm.sharees.map( o => { return { sharee_id: o.id } }),
         invitees: this.shareForm.invitees.map( o => { return { email: o } }),
       })
-      console.log('response', { response })
       this.cancelShareFiles()
     },
 
-    storeFolder(e) {
-      e.preventDefault()
-      const payload = {
-        vault_id: this.vault_pkid,
-        parent_id: this.currentFolderPKID,
-        vfname: this.createForm.name,
-      }
-      axios.post('/vaultfolders', payload).then( (response) => {
-        console.log('response', { response })
-        this.$store.dispatch('getVaultfolder', this.currentFolderPKID)
-        this.cancelCreateFolder()
-      })
-    },
-
-    cancelCreateFolder() {
-      this.showCreateForm = false
-      this.createForm.name = ''
-    },
     cancelShareFiles() {
       //this.isShareMode = false
       this.shareForm.sharees = []
@@ -366,34 +387,59 @@ export default {
       this.inviteeInput = ''
     },
 
-    //getLink(e, mediafilePKID) {
-    //  axios.get(`/mediafiles/${mediafilePKID}`).then( (response) => {
+
+    // --- New Vault Folder Form methods ---
+    renderNewFolderForm() {
+      this.isCreateFolderModalVisible = true
+    },
+
+    cancelCreateFolder() {
+      this.isCreateFolderModalVisible = false
+      this.createForm.name = ''
+    },
+
+    async storeFolder(e) {
+      e.preventDefault()
+      const payload = {
+        vault_id: this.vault_pkid,
+        parent_id: this.currentFolderId,
+        vfname: this.createForm.name,
+      }
+      const postResponse = await this.axios.post('/vaultfolders', payload)
+      const showResponse = await this.axios.get(route('vaults.show', { id: this.vault_pkid }))
+      this.vault = showResponse.data.vault
+      this.foldertree = showResponse.data.foldertree || null
+      this.$store.dispatch('getVaultfolder', this.currentFolderId)
+      this.cancelCreateFolder()
+    },
+
+    //getLink(e, mediafileId) {
+    //  axios.get(`/mediafiles/${mediafileId}`).then( (response) => {
     //    console.log('response', { response })
     //  })
     //},
 
     // for dropzone
     sendingEvent(file, xhr, formData) {
-      formData.append('resource_id', this.currentFolderPKID)
+      formData.append('resource_id', this.currentFolderId)
       formData.append('resource_type', 'vaultfolders')
       formData.append('mftype', 'vault')
     },
 
     // for dropzone
     successEvent(file, response) {
-      this.$store.dispatch('getVaultfolder', this.currentFolderPKID)
+      this.$store.dispatch('getVaultfolder', this.currentFolderId)
     },
 
     // Preload the mediafiles in the current folder (pwd)
-    async doNav(e, vaultfolderPKID) {
-      this.currentFolderPKID = vaultfolderPKID
-      this.$store.dispatch('getVaultfolder', vaultfolderPKID)
+    async doNav(vaultfolderId) {
+      this.currentFolderId = vaultfolderId
+      this.$store.dispatch('getVaultfolder', vaultfolderId)
     },
 
     // ---
 
     addSharee(sharee) {
-      console.log('addSharee', { sharee })
       this.shareForm.sharees.push(sharee.item)
       this.query = ''
       this.suggestions = []
@@ -422,6 +468,16 @@ export default {
 
   },
 
+  created() {
+    this.currentFolderId = this.vaultfolder_pkid
+    //this.$store.dispatch('getVault', this.vault_pkid)
+    this.axios.get(route('vaults.show', { id: this.vault_pkid })).then((response) => {
+      this.vault = response.data.vault
+      this.foldertree = response.data.foldertree || null
+      this.$store.dispatch('getVaultfolder', this.vaultfolder_pkid)
+    })
+  },
+
   watch: {
     vaultfolder (newVal, oldVal) {
       const selected = false
@@ -432,7 +488,9 @@ export default {
   components: {
     vueDropzone: vue2Dropzone,
     VueAutosuggest,
+    TreeItem,
     PreviewFile,
+    MediaLightbox,
   },
 }
 /*
@@ -507,6 +565,19 @@ export default {
 
 <style lang="scss" scoped>
 body {
+  .vault-container .breadcrumb {
+    background-color: #fff;
+    border-radius: 0;
+  }
+  .vault-container .breadcrumb .breadcrumb-item {
+    font-size: 1.2rem;
+  }
+  .vault-container .breadcrumb .breadcrumb-item.active {
+    color: #212529;
+  }
+  ul.folder-nav {
+    list-style: none;
+  }
   .tag-shared {
     background-color: pink;
   }

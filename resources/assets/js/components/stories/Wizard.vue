@@ -1,5 +1,5 @@
 <template>
-  <div class="container-fluid wizard-container">
+  <div v-if="!isLoading" class="container-fluid wizard-container">
 
     <section class="row h-100">
 
@@ -35,51 +35,78 @@
 
         <div v-if="step===steps.EDIT || step===steps.PREVIEW" class="step-edit">
           <text-story-form v-if="stype==='text'" 
-                           v-bind:attrs="storyAttrs"
-                           v-on:set-color="setColor($event)"
-                           v-on:do-cancel="step=steps.SELECT_STYPE"
-                           ></text-story-form>
+            v-bind:attrs="storyAttrs"
+            v-on:set-color="setColor($event)"
+            v-on:do-cancel="step=steps.SELECT_STYPE"
+          ></text-story-form>
           <photo-story-form v-if="stype==='image'" 
-                            v-bind:attrs="storyAttrs"
-                            v-on:do-cancel="step=steps.SELECT_STYPE"
-                            ></photo-story-form>
+            v-bind:attrs="storyAttrs"
+            v-on:do-cancel="step=steps.SELECT_STYPE"
+          ></photo-story-form>
         </div>
 
       </aside>
 
-      <main class="col-md-9 d-flex align-items-center">
-        <div v-if="step===steps.SELECT_STYPE" class="step-select_stype mx-auto">
-          <section class="row">
-            <article class="col-md-6">
-              <input ref="fileUpload" type="file" @change="selectMediafile" hidden>
-              <div @click="createPhotoStory()" class="clickme_to-create tag-photo tag-bg-cyan text-center d-flex">
-                <div class="align-self-center">
-                  <b-icon icon="camera" font-scale="4"></b-icon>
-                  <h6 class="mt-1">Create a Photo Story</h6>
+      <main class="col-md-9">
+        <div class="d-flex OFF-align-items-center">
+          <div v-if="step===steps.SELECT_STYPE" class="step-select_stype mx-auto">
+            <section class="row">
+              <article class="col-md-6">
+                <input ref="fileUpload" type="file" @change="selectMediafile" hidden>
+                <div @click="createPhotoStory()" class="clickme_to-create tag-photo tag-bg-cyan text-center d-flex">
+                  <div class="align-self-center">
+                    <b-icon icon="camera" font-scale="4"></b-icon>
+                    <h6 class="mt-1">Create a Photo Story</h6>
+                  </div>
                 </div>
-              </div>
-            </article>
-            <article class="col-md-6">
-              <div @click="createTextStory()" class="clickme_to-create tag-text tag-bg-pink text-center d-flex">
-                <div class="align-self-center">
-                  <b-icon icon="type" font-scale="4"></b-icon>
-                  <h6>Create a Text Story</h6>
+              </article>
+              <article class="col-md-6">
+                <div @click="createTextStory()" class="clickme_to-create tag-text tag-bg-pink text-center d-flex">
+                  <div class="align-self-center">
+                    <b-icon icon="type" font-scale="4"></b-icon>
+                    <h6>Create a Text Story</h6>
+                  </div>
                 </div>
-              </div>
-            </article>
-          </section>
+              </article>
+            </section>
+          </div>
+
+          <div v-if="step===steps.EDIT" class="step-edit w-100">
+            <text-story-preview 
+              v-if="stype==='text'" 
+              v-bind:attrs="storyAttrs" 
+            ></text-story-preview>
+          </div>
+
+          <div v-if="step===steps.PREVIEW" class="step-preview mx-auto">
+            <photo-story-preview v-if="imgPreviewUrl" :imgPreviewUrl="imgPreviewUrl" :attrs="storyAttrs"></photo-story-preview>
+          </div>
         </div>
 
-        <div v-if="step===steps.EDIT" class="step-edit w-100">
-          <text-story-preview 
-                                      v-if="stype==='text'" 
-                                      v-bind:attrs="storyAttrs" 
-                                      ></text-story-preview>
+        <div>
+          <b-button variant="primary" class="" @click="selectFromVault">Select from Vault</b-button>
         </div>
 
-        <div v-if="step===steps.PREVIEW" class="step-preview mx-auto">
-          <photo-story-preview v-if="imgPreviewUrl" :imgPreviewUrl="imgPreviewUrl" :attrs="storyAttrs"></photo-story-preview>
-        </div>
+        <b-modal
+          id="modal-select-vaultfile"
+          size="lg"
+          title="Vault Files"
+          hide-footer
+          body-class="p-0"
+        >
+          <b-row>
+            <b-col>
+              Vault files
+            </b-col>
+          </b-row>
+
+          <b-row>
+            <b-col v-for="mf in mediafiles" :key="mf.id" col-md="3">
+              <ImageDisplay :mediafile="mf" :session_user="session_user" :use_mid="true" />
+            </b-col>
+          </b-row>
+
+        </b-modal>
 
       </main>
 
@@ -88,11 +115,13 @@
 </template>
 
 <script>
+import Vuex from 'vuex'
 import { eventBus } from '@/app';
-import TextStoryForm from './TextStoryForm.vue';
-import TextStoryPreview from './TextStoryPreview.vue';
-import PhotoStoryForm from './PhotoStoryForm.vue';
-import PhotoStoryPreview from './PhotoStoryPreview.vue';
+import TextStoryForm from '@components/stories/TextStoryForm.vue';
+import TextStoryPreview from '@components/stories/TextStoryPreview.vue';
+import PhotoStoryForm from '@components/stories/PhotoStoryForm.vue';
+import PhotoStoryPreview from '@components/stories/PhotoStoryPreview.vue';
+import ImageDisplay from '@components/timelines/elements/ImageDisplay'
 
 export default {
 
@@ -108,11 +137,17 @@ export default {
   },
 
   computed: {
+    ...Vuex.mapState([ 'session_user' ]),
+
+    isLoading() {
+      return !this.session_user || !this.stories || !this.dtoUser
+    },
   },
 
   data: () => ({
 
     show: true,
+    mediafiles: [],
 
     storyAttrs: {
       color: '#fff',
@@ -147,6 +182,15 @@ export default {
 
 
   methods: {
+    async selectFromVault() {
+      const params = {
+        mftype: 'vault',
+      }
+      const response = await axios.get( this.$apiRoute('mediafiles.index'), { params } )
+      this.mediafiles = response.data.data
+      this.$bvModal.show('modal-select-vaultfile')
+    },
+
     async shareStory() {
       //const url = `/${this.dtoUser.username}/stories`;
       let payload = new FormData();
@@ -208,6 +252,7 @@ export default {
 
   },
   components: {
+    ImageDisplay,
     textStoryForm: TextStoryForm,
     textStoryPreview: TextStoryPreview,
     photoStoryForm: PhotoStoryForm,

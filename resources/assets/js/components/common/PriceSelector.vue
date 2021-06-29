@@ -1,7 +1,7 @@
 <template>
   <div class="d-flex flex-column">
     <b-form-group
-      :label="$t('label')"
+      :label="label || $t('label')"
       :state="valid"
       :invalid-feedback="validationMessage"
     >
@@ -56,6 +56,7 @@ export default {
     minorMark:  { type: Number, default: 500 },
     majorMark:  { type: Number, default: 1000 },
     currency:   { type: String, default: 'USD' },
+    label:      { type: String },
   },
 
   computed: {
