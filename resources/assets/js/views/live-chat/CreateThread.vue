@@ -550,6 +550,11 @@ export default {
 body {
   #view-create-thread {
     background-color: #fff;
+
+    .contact-list .list-group {
+      height: calc(100vh - 320px);
+      overflow: auto;
+    }
   }
 
   .top-bar {

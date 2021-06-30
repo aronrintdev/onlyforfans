@@ -254,6 +254,7 @@ export default {
         this.isMuted = response.data.is_muted;
       } catch (err) {
         if (err.response.status === 403) {
+          console.error('Cannot get mute status of the thread because user doesn\'t have permission!')
           // FIXME: remove or uncomment. commented for now, since it's disruptive
           // this.$root.$bvToast.toast('You do not have permission to view this thread!', {
           //   toaster: 'b-toaster-top-center',

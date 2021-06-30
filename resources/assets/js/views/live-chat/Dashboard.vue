@@ -327,8 +327,10 @@ export default {
     },
 
     activeThreadId(newVal) {
-      const activeThread = this.chatthreads.find( ct => ct.id === newVal )
-      activeThread.unread_count = 0
+      if (newVal) {
+        const activeThread = this.chatthreads.find( ct => ct.id === newVal )
+        activeThread.unread_count = 0
+      }
     }
 
   }, // watch
@@ -340,7 +342,7 @@ export default {
 #view-livechat {
   background-color: #fff;
 
-  max-height: 80vh;
+  max-height: calc(100vh - 100px);
   overflow: hidden;
 
   .chatthread-list .list-group-item.active {
