@@ -49,12 +49,6 @@ return [
 
     'connections' => [
 
-        'sqlite' => [
-            'driver' => 'sqlite',
-            'database' => env('DB_DATABASE', database_path('database.sqlite')),
-            'prefix' => '',
-        ],
-
         'primary' => [
             'driver' => env('DB_DRIVER', 'mysql'),
             'host' => env('DB_HOST', 'localhost'),
@@ -95,6 +89,29 @@ return [
             'schema' => 'public',
             'sslmode' => 'prefer',
         ],
+
+        // testing DB setup
+        'sqlite' => [
+            'driver' => 'sqlite',
+            'database' => env('DB_DATABASE', database_path('database.sqlite')),
+            'prefix' => '',
+        ],
+
+        // ref: https://chrisduell.com/speeding-up-unit-tests-in-php
+        // $ php artisan migrate:refresh --seed --database="template" --env="testing"
+        // For test migration only (sqlite file)
+        'template' => [
+            'driver' => 'sqlite',
+            'database' => __DIR__.'/../database/template.sqlite',
+            'prefix' => ''
+        ],
+        /*
+        'testing' => [
+            'driver' => 'sqlite',
+            'database' => __DIR__.'/../database/tmp4test.sqlite',
+            'prefix' => ''
+        ],
+         */
 
     ],
 
