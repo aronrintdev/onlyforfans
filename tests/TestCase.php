@@ -17,16 +17,33 @@ abstract class TestCase extends BaseTestCase
         return $app;
     }
 
-     public function ajaxJSON($method, $uri, array $data=[]) {
-         return $this->json($method,$uri,$data,[
-             'HTTP_X-Requested-With' => 'XMLHttpRequest',
-             //'Accept' => 'application/json',
-             ]);
+    protected static $isSetup = false;
+
+    protected function setUp() : void
+    {
+        if ( !self::$isSetup ) {
+            $this->setupDatabase();
+            self::$isSetup = true;
+         }
+
+        parent::setUp();
+
+    }
+
+    public function ajaxJSON($method, $uri, array $data=[]) {
+        return $this->json($method,$uri,$data,[
+            'HTTP_X-Requested-With' => 'XMLHttpRequest',
+            //'Accept' => 'application/json',
+        ]);
          /*
          return $this->withHeaders([
              'X-Requested-With' => 'XMLHttpRequest',
              'X-Accept' => 'application/json',
          ])->json($method,$uri,$data);
           */
-     }
+    }
+    public function setupDatabase() {
+        exec('rm '.__DIR__.'/../database/tmp4test.sqlite');
+        exec('cp '.__DIR__.'/../database/template.sqlite '.__DIR__.'/../database/tmp4test.sqlite');
+    }
 }
