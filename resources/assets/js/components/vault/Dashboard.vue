@@ -379,7 +379,12 @@ export default {
       this.fileInput = null // form input
       if ( this.$route.params.context === 'storybar' ) {
         //this.$route.params = null %TODO: clear ?
-        this.$router.push('/')
+        this.$router.replace({ 
+          name: 'index', 
+          params: {
+            toast: { title: 'New story successfully added!' },
+          },
+        })
       }
     },
 

@@ -139,6 +139,13 @@ export default {
     const response = axios.get( this.$apiRoute('timelines.myFollowedStories')).then ( response => {
       this.timelines = response.data.data
     })
+    if ( this.$route.params.toast ) {
+      this.$root.$bvToast.toast(this.$route.params.toast.title || 'Success', {
+        title: 'Stories',
+        toaster: 'b-toaster-top-center',
+        variant: 'success',
+      })
+    }
   },
 
   watch: {
