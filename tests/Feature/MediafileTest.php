@@ -2,12 +2,13 @@
 namespace Tests\Feature;
 
 use DB;
+use Exception;
 
 use Illuminate\Http\File;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+//use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Database\Seeders\TestDatabaseSeeder;
 
@@ -19,6 +20,7 @@ use App\Models\Story;
 use App\Models\Timeline;
 use App\Models\Post;
 use App\Models\Mediafile;
+use App\Models\Vaultfolder;
 use App\Enums\MediafileTypeEnum;
 
 // see: https://laravel.com/docs/5.4/http-tests#testing-file-uploads
@@ -27,7 +29,8 @@ use App\Enums\MediafileTypeEnum;
 // https://stackoverflow.com/questions/34455410/error-executing-putobject-on-aws-upload-fails
 class MediafileTest extends TestCase
 {
-    use RefreshDatabase, WithFaker;
+    use WithFaker;
+    //use RefreshDatabase;
 
     /**
      *  @group mediafiles
@@ -106,6 +109,12 @@ class MediafileTest extends TestCase
                 break;
             case 'users':
                 $resource = User::findOrFail($item->resource_id);
+                if ( $resource->id === $owner->id ) {
+                    $acc += 1;
+                }
+                break;
+            case 'vaultfolders':
+                $resource = Vaultfolder::findOrFail($item->resource_id);
                 if ( $resource->id === $owner->id ) {
                     $acc += 1;
                 }
@@ -194,7 +203,7 @@ class MediafileTest extends TestCase
     protected function setUp() : void
     {
         parent::setUp();
-        $this->seed(TestDatabaseSeeder::class);
+        //$this->seed(TestDatabaseSeeder::class);
 
         // Update or add avatars to some users for this test...
         $users = User::take(5)->get();

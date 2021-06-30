@@ -6,7 +6,7 @@ use App\Enums\ShareableAccessLevelEnum;
 use App\Models\Post;
 use App\Models\PurchasablePricePoint;
 use Illuminate\Contracts\Container\BindingResolutionException;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+//use Illuminate\Foundation\Testing\RefreshDatabase;
 use SebastianBergmann\RecursionContext\InvalidArgumentException;
 use PHPUnit\Framework\ExpectationFailedException;
 use PHPUnit\Framework\IncompleteTestError;
@@ -24,8 +24,6 @@ use Throwable;
  */
 class PurchasablePricePointModelTest extends TestCase
 {
-    use RefreshDatabase;
-
 
     /**
      * getDefaultFor() works

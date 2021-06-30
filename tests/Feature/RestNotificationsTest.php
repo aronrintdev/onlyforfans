@@ -2,7 +2,7 @@
 namespace Tests\Feature;
 
 use DB;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+//use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\Notification as NotificationFacade;
 //use Illuminate\Support\Facades\Mail;
@@ -21,7 +21,8 @@ use App\Enums\PostTypeEnum;
 
 class RestNotificationsTest extends TestCase
 {
-    use RefreshDatabase, WithFaker;
+    //use RefreshDatabase;
+    use WithFaker;
 
     /**
      *  @group notifications
@@ -279,7 +280,7 @@ class RestNotificationsTest extends TestCase
     protected function setUp() : void
     {
         parent::setUp();
-        $this->seed(TestDatabaseSeeder::class);
+        //$this->seed(TestDatabaseSeeder::class);
     }
 
     protected function tearDown() : void {

@@ -7,7 +7,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+//use Illuminate\Foundation\Testing\RefreshDatabase;
 use Database\Seeders\TestDatabaseSeeder;
 use Tests\TestCase;
 use App\Libs\FactoryHelpers;
@@ -20,7 +20,7 @@ use App\Enums\MediafileTypeEnum;
 
 class MediafileModelTest extends TestCase
 {
-    use WithFaker, RefreshDatabase;
+    use WithFaker;
 
     /**
      * @group mediafile-model

@@ -8,7 +8,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+//use Illuminate\Foundation\Testing\RefreshDatabase;
 use Database\Seeders\TestDatabaseSeeder;
 use Tests\TestCase;
 use Ramsey\Uuid\Uuid;
@@ -26,7 +26,7 @@ use App\Enums\MediafileTypeEnum;
 
 class ChatmessageModelTest extends TestCase
 {
-    use WithFaker, RefreshDatabase;
+    use WithFaker;
 
     /**
      * @group chatmessage-model
@@ -161,7 +161,7 @@ class ChatmessageModelTest extends TestCase
             return;
         }
 
-        $this->seed(TestDatabaseSeeder::class);
+        //$this->seed(TestDatabaseSeeder::class);
     }
 
     protected function tearDown() : void {

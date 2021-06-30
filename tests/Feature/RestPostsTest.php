@@ -23,11 +23,11 @@ use Illuminate\Support\Facades\Storage;
 use App\Enums\Financial\AccountTypeEnum;
 use Database\Seeders\TestDatabaseSeeder;
 use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+//use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class RestPostsTest extends TestCase
 {
-    use RefreshDatabase, WithFaker;
+    use WithFaker;
 
     /**
      *  @group posts
@@ -1123,7 +1123,7 @@ class RestPostsTest extends TestCase
     protected function setUp() : void
     {
         parent::setUp();
-        $this->seed(TestDatabaseSeeder::class);
+        //$this->seed(TestDatabaseSeeder::class);
     }
 
     protected function tearDown() : void {

@@ -4,7 +4,7 @@ namespace Tests\Feature;
 use Auth;
 use DB;
 use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+//use Illuminate\Foundation\Testing\RefreshDatabase;
 
 use Tests\TestCase;
 use Database\Seeders\TestDatabaseSeeder;
@@ -13,7 +13,7 @@ use App\Models\User;
 
 class RestUsersTest extends TestCase
 {
-    use RefreshDatabase, WithFaker;
+    use WithFaker;
 
     /**
      *  @group users
@@ -164,7 +164,7 @@ class RestUsersTest extends TestCase
     protected function setUp() : void
     {
         parent::setUp();
-        $this->seed(TestDatabaseSeeder::class);
+        //$this->seed(TestDatabaseSeeder::class);
     }
 
     protected function tearDown() : void {
