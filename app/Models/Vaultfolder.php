@@ -6,6 +6,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Interfaces\Ownable;
 use App\Interfaces\Guidable;
 use App\Models\Traits\UsesUuid;
@@ -16,14 +17,9 @@ use App\Models\Traits\SluggableTraits;
 
 class Vaultfolder extends BaseModel implements Guidable, Ownable
 {
-    use UsesUuid;
-    use SluggableTraits;
-    use HasFactory;
-    use OwnableFunctions;
-    use Sluggable;
+    use UsesUuid, SluggableTraits, HasFactory, OwnableFunctions, Sluggable, SoftDeletes;
 
     protected $table = 'vaultfolders';
-
     protected $guarded = ['id', 'created_at', 'updated_at'];
 
     public static $vrules = [];

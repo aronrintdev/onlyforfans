@@ -17,6 +17,7 @@ use App\Models\Vault;
 use App\Models\Vaultfolder;
 
 use App\Enums\InviteTypeEnum;
+use App\Enums\MediafileTypeEnum;
 use App\Mail\VaultfolderShared;
 
 // $request->validate([ 'vf_id' => 'required', ]);
@@ -145,14 +146,20 @@ class VaultfoldersController extends AppBaseController
     public function storeByShare(Request $request)
     {
         $vrules = [
-            'vault_ids' => 'required|array', // receipient vault (could be more than one)
-            'vault_ids.*' => 'required|uuid|exists:vaults,id',
+            'vault_ids' => 'required_without:user_ids|array', // receipient vault (could be more than one)
+            'vault_ids.*' => 'required_without:user_ids|uuid|exists:vaults,id',
+            'user_ids' => 'required_without:vault_ids|array',
+            'user_ids.*' => 'required_without:vault_ids|uuid|exists:users,id',
             'mediafile_ids' => 'required|array',
             'mediafile_ids.*' => 'required|uuid|exists:mediafiles,id',
         ];
 
-        $dstVaults = Vault::whereIn($request->vault_ids)->get();
-        $mediafiles = Mediafile::whereIn($request->mediafile_ids)->get();
+        if ( $request->has('vault_ids') ) {
+            $dstVaults = Vault::whereIn('id', $request->vault_ids)->get();
+        } else {
+            $dstVaults = Vault::whereIn('user_id', $request->user_ids)->get();
+        }
+        $mediafiles = Mediafile::whereIn('id', $request->mediafile_ids)->get();
 
         // %TODO: DB transaction per user (??) 
         $vaultfolderIds = [];
@@ -170,13 +177,23 @@ class VaultfoldersController extends AppBaseController
                 'user_id' => $v->user_id,
                 'parent_id' => $rf->id,
                 'vfname' => $vfname,
+                'is_pending_approval' => 1, // %NOTE!
+                'cattrs' => [
+                    'shared_by' => [
+                        'username' => $request->user()->username,
+                        'user_id' => $request->user()->id,
+                    ],
+                    'notes' => [
+                        // %TODO
+                    ],
+                ],
             ]);
             $vaultfolderIds[] = $vaultfolder->id;
 
             // create mediafile references in new subfolder
             $mediafiles->each( function($mf) use(&$vaultfolder) {
                 $mf->diskmediafile->createReference(
-                    'vaultfolders'             // string   $resourceType
+                    'vaultfolders',            // string   $resourceType
                     $vaultfolder->id,          // int      $resourceID
                     $mf->mfname,               // string   $mfname
                     MediafileTypeEnum::VAULT   // string   $mftype
