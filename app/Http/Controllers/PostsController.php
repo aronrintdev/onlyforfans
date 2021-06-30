@@ -258,7 +258,9 @@ class PostsController extends AppBaseController
 
     public function indexComments(Request $request, Post $post)
     {
+dump('----PostsC.indexComments.A');
         $this->authorize('indexComments', $post);
+dump('----PostsC.indexComments.B');
         //$filters = $request->input('filters', []);
         $comments = Comment::with(['user'])
             ->withCount('likes')

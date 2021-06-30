@@ -209,6 +209,7 @@ class RestCommentsTest extends TestCase
     /**
      *  @group comments
      *  @group regression
+     *  @group june28
      */
     public function test_nonfollower_can_not_list_timeline_comments()
     {
@@ -220,6 +221,10 @@ class RestCommentsTest extends TestCase
         $nonfan = User::whereDoesntHave('followedtimelines', function($q1) use(&$timeline) {
             $q1->where('timelines.id', $timeline->id);
         })->where('id', '<>', $creator->id)->first();
+dump('HERE', 'creator', $creator->username, 'nonfan', $nonfan->username);
+        $this->assertFalse( $timeline->followers->contains( $nonfan->id ) );
+        $this->assertFalse( $timeline->user_id == $nonfan->id );
+
         $post = $timeline->posts()->where('type', PostTypeEnum::FREE)->has('comments','>=',1)->first();
 
         $response = $this->actingAs($nonfan)->ajaxJSON('GET', route('posts.indexComments', $post->id));
@@ -240,7 +245,6 @@ class RestCommentsTest extends TestCase
         })->where('id', '<>', $creator->id)->first();
         $this->assertFalse( $timeline->followers->contains( $nonfan->id ) );
 
-        $post = $timeline->posts()->has('comments','>=',1)->first();
         $comment = $post->comments()->where('user_id', '<>', $nonfan->id)->first();
         $response = $this->actingAs($nonfan)->ajaxJSON('GET', route('comments.show', $comment->id));
         $response->assertStatus(403);
@@ -249,7 +253,6 @@ class RestCommentsTest extends TestCase
     /**
      *  @group comments
      *  @group regression
-     *  @group here0528a
      */
     public function test_follower_can_create_comment_on_timeline_post()
     {
