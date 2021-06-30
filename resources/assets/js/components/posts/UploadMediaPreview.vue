@@ -1,9 +1,9 @@
 <template>
-  <div class="swiper-slider" v-if="mediafiles.length > 0">
+  <div class="swiper-slider" v-if="files.length > 0">
     <div v-if="isDragListVisible">
-      <draggable class="sort-change-div" v-model="mediafiles" :group="'column.components'" handle=".handle"
+      <draggable class="sort-change-div" v-model="files" :group="'column.components'" handle=".handle"
         ghost-class="ghost">
-        <div v-for="(element, index) in mediafiles" :key="index" class="drag-element">
+        <div v-for="(element, index) in files" :key="index" class="drag-element">
           <div class="img-wrapper">
             <img v-if="element.type.indexOf('image/') > -1" :src="element.src" alt="" />
             <span v-if="!element.selected" class="unchecked-circle" @click="onSelectMediafile(index, true)"></span>
@@ -17,20 +17,20 @@
       </draggable>
       <div class="sort-action-btns">
         <div>
-          <button :disabled="!applyBtnEnabled" class="btn arrows-btn" @click="applyMediafilesSort">
-            <fa-icon :icon="['far', 'chevron-left']" class="mr-1 text-white" size="lg" />
-            <fa-icon :icon="['far', 'chevron-right']" class="text-white" size="lg" />
+          <button :disabled="!applyBtnEnabled" class="btn btn-secondary btn-sm h-100 mb-3" @click="applyMediafilesSort">
+            <fa-icon :icon="['far', 'chevron-left']" class="mr-2 text-white" size="sm" />
+            <fa-icon :icon="['far', 'chevron-right']" class="text-white" size="sm" />
           </button>
         </div>
-        <button class="btn confirm-btn" @click="confirmMediafilesSort">
-          <fa-icon :icon="['far', 'times']" class="text-white" size="sm" />
+        <button class="btn btn-primary p-2 border-0" @click="confirmMediafilesSort">
+          <fa-icon :icon="['far', 'check']" class="text-white" size="lg" />
         </button>
       </div>
     </div>
     <swiper ref="mySwiper" :options="swiperOptions">
       <swiper-slide class="slide">
         <div v-if="!isDragListVisible">
-          <div class="swiper-image-wrapper" v-for="(media, index) in mediafiles" :key="index">
+          <div class="swiper-image-wrapper" v-for="(media, index) in files" :key="index">
             <img v-preview:scope-a class="swiper-lazy" :src="media.src" />
             <button class="btn btn-primary icon-close" @click="removeMediafile(index)">
               <fa-icon :icon="['far', 'times']" class="text-white" size="sm" />
@@ -70,6 +70,7 @@ export default {
       }, PhotoSwipe, PhotoSwipeUI)
   },
   data: () => ({
+    files: [],
     swiperOptions: {
       lazy: true,
       slidesPerView: 'auto',
@@ -91,6 +92,7 @@ export default {
   },
   watch: {
     mediafiles() {
+      this.files = [...this.mediafiles];
       setTimeout(() => {
         this.swiper.update();
       }, 500);
@@ -98,7 +100,7 @@ export default {
   },
   methods: {
     onSelectMediafile(index, status) {
-      const temp = [...this.mediafiles];
+      const temp = [...this.files];
       temp[index].selected = status;
       const sortedTemp = _.orderBy(temp, ['order'], ['asc']);
       let order = 0;
@@ -109,11 +111,11 @@ export default {
           temp[idx].order = order;
         }
       });
-      this.$emit('change', temp);
+      this.files = temp;
       this.applyBtnEnabled = true;
     },
     applyMediafilesSort() {
-      const temp = [...this.mediafiles];
+      const temp = [...this.files];
       const sortedTemp = _.orderBy(temp, ['order'], ['asc']);
       sortedTemp.forEach(item => {
         item.order = undefined;
@@ -127,7 +129,7 @@ export default {
       this.isDragListVisible = false;
     },
     removeMediafile(index) {
-      const temp = [...this.mediafiles];
+      const temp = [...this.files];
       temp.splice(index, 1);
       this.$emit('change', temp);
     },
@@ -250,38 +252,6 @@ export default {
     display: flex;
     align-items: center;
     justify-content: center;
-
-    svg {
-      fill: #00aff0;
-      width: 20px;
-      height: 20px;
-    }
-    &:disabled {
-      svg {
-        fill: rgba(138,150,163,.7);
-        pointer-events: none;
-      }
-    }
-    &.arrows-btn {
-      background: transparent;
-      padding: 0;
-      margin: 0;
-    }
-    &.confirm-btn {
-      width: 48px;
-      height: 48px;
-      border-radius: 1000px;
-      border: none;
-      background: #00aff0;
-      color: #fff;
-
-      svg {
-        font-size: 24px;
-        width: 1em;
-        height: 1em;
-        fill: #fff;
-      }
-    }
   }
 }
 .swiper-slider {
