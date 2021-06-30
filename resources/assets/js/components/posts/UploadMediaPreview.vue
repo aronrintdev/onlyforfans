@@ -6,9 +6,9 @@
         <div v-for="(element, index) in mediafiles" :key="index" class="drag-element">
           <div class="img-wrapper">
             <img v-if="element.type.indexOf('image/') > -1" :src="element.src" alt="" />
-            <span v-if="!element.selected" class="unchecked-circle" @click="onSelectSortableMedia(index, true)"></span>
+            <span v-if="!element.selected" class="unchecked-circle" @click="onSelectMediafile(index, true)"></span>
             <span v-if="element.selected" class="bg-primary checked-circle"
-              @click="onSelectSortableMedia(index, false)">{{element.order}}</span>
+              @click="onSelectMediafile(index, false)">{{element.order}}</span>
           </div>
           <div class="handle">
             <fa-icon :icon="['fas', 'grip-horizontal']" class="mr-1 text-secondary" size="lg" />
@@ -17,12 +17,12 @@
       </draggable>
       <div class="sort-action-btns">
         <div>
-          <button :disabled="!applyBtnEnabled" class="btn arrows-btn" @click="applyMediasSort">
+          <button :disabled="!applyBtnEnabled" class="btn arrows-btn" @click="applyMediafilesSort">
             <fa-icon :icon="['far', 'chevron-left']" class="mr-1 text-white" size="lg" />
             <fa-icon :icon="['far', 'chevron-right']" class="text-white" size="lg" />
           </button>
         </div>
-        <button class="btn confirm-btn" @click="confirmImgsSort">
+        <button class="btn confirm-btn" @click="confirmMediafilesSort">
           <fa-icon :icon="['far', 'times']" class="text-white" size="sm" />
         </button>
       </div>
@@ -32,7 +32,7 @@
         <div v-if="!isDragListVisible">
           <div class="swiper-image-wrapper" v-for="(media, index) in mediafiles" :key="index">
             <img v-preview:scope-a class="swiper-lazy" :src="media.src" />
-            <button class="btn btn-primary icon-close">
+            <button class="btn btn-primary icon-close" @click="removeMediafile(index)">
               <fa-icon :icon="['far', 'times']" class="text-white" size="sm" />
             </button>
           </div>
@@ -79,7 +79,7 @@ export default {
       mousewheel: true,
       watchOverflow: true,
       spaceBetween: true,
-      watchSlidesVisibility: true,
+      watchSlidesVisibility: true,  
     },
     isDragListVisible: false,
     applyBtnEnabled: false,
@@ -90,40 +90,40 @@ export default {
     }
   },
   watch: {
-    mediafiles: function() {
+    mediafiles() {
       setTimeout(() => {
         this.swiper.update();
       }, 500);
     }
   },
   methods: {
-    onSelectSortableMedia: function(index, status) {
-      const newArr = this.mediafiles.slice();
-      newArr[index].selected = status;
-      const sortedArr = _.orderBy(newArr, ['order'], ['asc']);
+    onSelectMediafile(index, status) {
+      const temp = [...this.mediafiles];
+      temp[index].selected = status;
+      const sortedTemp = _.orderBy(temp, ['order'], ['asc']);
       let order = 0;
-      sortedArr.forEach(item => {
+      sortedTemp.forEach(item => {
         if (item.selected) { 
           order++;
-          const idx = newArr.findIndex(it => it.src === item.src);
-          newArr[idx].order = order;
+          const idx = temp.findIndex(it => it.src === item.src);
+          temp[idx].order = order;
         }
       });
-      this.mediafiles = newArr;
+      this.$emit('change', temp);
       this.applyBtnEnabled = true;
     },
-    applyMediasSort: function() {
-      const newArr = this.mediafiles.slice();
-      const sortedArr = _.orderBy(newArr, ['order'], ['asc']);
-      sortedArr.forEach(item => {
+    applyMediafilesSort() {
+      const temp = [...this.mediafiles];
+      const sortedTemp = _.orderBy(temp, ['order'], ['asc']);
+      sortedTemp.forEach(item => {
         item.order = undefined;
         item.selected = undefined;
       });
-      this.mediafiles = sortedArr;
+      this.$emit('change', sortedTemp);
       this.applyBtnEnabled = false;
     },
-    confirmImgsSort: function() {
-      this.applyMediasSort();
+    confirmMediafilesSort() {
+      this.applyMediafilesSort();
       this.isDragListVisible = false;
     },
     removeMediafile(index) {
