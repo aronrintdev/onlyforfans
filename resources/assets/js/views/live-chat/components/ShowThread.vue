@@ -46,41 +46,55 @@
 
     <hr />
 
-    <section class="flex-grow-1">
-
-      <b-list-group class="tag-messages h-100">
-        <b-list-group-item
-          v-for="(cm, idx) in chatmessages"
-          :key="cm.id"
-          :class="{ 'mt-auto': idx === 0 }"
-        >
-          <section v-if="isDateBreak(cm, idx)" class="msg-grouping-day-divider"><span>{{ moment(cm.created_at).format('MMM DD, YYYY') }}</span></section>
-          <section class="crate" :class="cm.sender_id===session_user.id ? 'tag-session_user' : 'tag-other_user'">
-            <article class="box">
-              <div class="msg-content">{{ cm.mcontent }}</div>
-              <div class="msg-timestamp">{{ moment(cm.created_at).format('h:mm A') }}</div>
-            </article>
-          </section>
-        </b-list-group-item>
-      </b-list-group>
+    <section class="messages flex-fill">
+      <b-list-group-item
+        v-for="(cm, idx) in chatmessages"
+        :key="cm.id"
+        v-observe-visibility="idx === chatmessages.length - 1 ? endVisible : false"
+      >
+        <section v-if="isDateBreak(cm, idx)" class="msg-grouping-day-divider"><span>{{ moment(cm.created_at).format('MMM DD, YYYY') }}</span></section>
+        <section class="crate" :class="cm.sender_id===session_user.id ? 'session_user' : 'other_user'">
+          <article class="box">
+            <div class="msg-content">{{ cm.mcontent }}</div>
+            <div class="msg-timestamp">{{ moment(cm.created_at).format('h:mm A') }}</div>
+          </article>
+        </section>
+      </b-list-group-item>
+      <b-list-group-item v-if="isLastPage">
+        <section class="msg-grouping-day-divider">
+          <span v-text="$t('startOfThread')" />
+        </section>
+      </b-list-group-item>
+      <div class="mt-auto"> </div>
     </section>
+
+    <TypingIndicator :threadId="id" />
 
     <MessageForm
       :session_user="session_user"
       :chatthread_id="id"
+      @sendMessage="addTempMessage"
     />
 
   </div>
 </template>
 
 <script>
+/**
+ * resources/assets/js/views/live-chat/components/ShowThread.vue
+ */
+import Vue from 'vue'
 import Vuex from 'vuex'
+import _ from 'lodash'
 import moment from 'moment'
+
+
 import MessageForm from '@views/live-chat/components/MessageForm'
 import SearchInput from '@components/common/search/HorizontalOpenInput'
+import TypingIndicator from './TypingIndicator.vue'
 
 export default {
-  //name: 'LivechatDashboard',
+  name: 'ShowThread',
 
   props: {
     session_user: null,
@@ -94,17 +108,25 @@ export default {
       return !this.session_user || !this.participant || !this.id || !this.chatmessages
     },
 
+    channelName() {
+      return `chatthreads.${this.id}`
+    }
+
   },
 
   data: () => ({
 
     moment: moment,
 
-    chatmessages: null,
+    chatmessages: [],
     isMuted: false,
     meta: null,
     perPage: 10,
     currentPage: 1,
+
+    isLastPage: false,
+    moreLoading: false,
+    isEndVisible: false,
 
     searchQuery: '',
 
@@ -117,22 +139,80 @@ export default {
     this.getMuteStatus(this.id)
     this.getChatmessages(this.id)
     this.markRead(this.id)
-    const channel = `chatthreads.${this.id}`
-    this.$echo.private(channel).listen('.chatmessage.sent', e => {
-      this.chatmessages.push(e.chatmessage)
-    })
+    this.$log.debug('ShowThread Mounted', { channelName: this.channelName })
+    this.$echo.join(this.channelName)
+      .listen('.chatmessage.sent', e => {
+        this.$log.debug('Event Received: .chatmessage.sent', { e })
+        this.addMessage(e.chatmessage)
+      })
+      .listenForWhisper('sendMessage', e => {
+        this.$log.debug('Whisper Received: sendMessage', { e })
+        this.addTempMessage(e.message)
+      })
   },
 
   methods: {
     ...Vuex.mapActions(['getUnreadMessagesCount']),
 
+    /**
+     * Add official message from db, overwrite temp message if necessary
+     */
+    addMessage(message) {
+      this.$log.debug('ShowThread addMessage', { message })
+      var replaced = false
+      for (var i in this.chatmessages) {
+        if (
+          this.chatmessages[i].temp &&
+          this.chatmessages[i].sender_id === message.sender_id &&
+          this.chatmessages[i].mcontent === message.mcontent
+        ) {
+          this.$log.debug('ShowThread addMessage replaced message', { i, message: this.chatmessages[i] })
+          Vue.set(this.chatmessages, i, message)
+          replaced = true
+          break;
+        }
+      }
+      this.$log.debug('ShowThread addMessage', { replaced })
+      if (!replaced) {
+        this.chatmessages = [
+          message,
+          ...this.chatmessages,
+        ]
+      }
+    },
+
+    /**
+     * Quickly add a temp message to data set while official one is processed in db
+     */
+    addTempMessage(message) {
+      this.$log.debug('ShowThread addTempMessage', { message })
+      this.chatmessages = [
+        { id: moment().valueOf(), temp: true, ...message },
+        ...this.chatmessages,
+      ]
+    },
+
+    endVisible(isVisible) {
+      this.$log.debug('endVisible', { isVisible })
+      this.isEndVisible = isVisible
+      if (isVisible && !this.moreLoading && !this.isLastPage) {
+        this.loadNextPage()
+      }
+    },
+
+    loadNextPage() {
+      this.currentPage += 1
+      this.moreLoading = true
+      this.getChatmessages()
+    },
+
     isDateBreak(cm, idx) {
-      if (idx===0) {
+      if (idx === this.chatmessages.length - 1) {
         return true
       }
       const current = moment(this.chatmessages[idx].created_at);
-      const last = moment(this.chatmessages[idx-1].created_at,);
-      return !current.isSame(last, 'date')
+      const next = moment(this.chatmessages[idx + 1].created_at,);
+      return !current.isSame(next, 'date')
     },
 
     async getChatmessages(chatthreadID) {
@@ -142,8 +222,23 @@ export default {
         chatthread_id: chatthreadID,
       }
       const response = await axios.get( this.$apiRoute('chatmessages.index'), { params } )
-      this.chatmessages = response.data.data.slice().reverse() // %NOTE: reverse order here for display!
+
+      // Filter out any messages that we already have
+      const newMessages = _.filter(response.data.data, incoming => (
+        _.findIndex(this.chatmessages, message => message.id === incoming.id) === -1
+      ))
+
+      this.$log.debug('getChatmessages', { newMessages })
+
+      this.chatmessages = [
+        ...this.chatmessages,
+        ...newMessages,
+      ]
       this.meta = response.meta
+      this.moreLoading = false
+      if ( response.data.meta.last_page === response.data.meta.current_page ) {
+        this.isLastPage = true
+      }
     },
 
     async markRead(chatthreadID) {
@@ -159,6 +254,7 @@ export default {
         this.isMuted = response.data.is_muted;
       } catch (err) {
         if (err.response.status === 403) {
+          console.error('Cannot get mute status of the thread because user doesn\'t have permission!')
           // FIXME: remove or uncomment. commented for now, since it's disruptive
           // this.$root.$bvToast.toast('You do not have permission to view this thread!', {
           //   toaster: 'b-toaster-top-center',
@@ -205,6 +301,7 @@ export default {
   components: {
     MessageForm,
     SearchInput,
+    TypingIndicator,
   },
 
 }
@@ -472,90 +569,92 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-body {
-  .btn-link:hover {
-    text-decoration: none;
-  }
-  .btn:focus, .btn.focus {
-    box-shadow: none;
-  }
+.btn-link:hover {
+  text-decoration: none;
+}
+.btn:focus, .btn.focus {
+  box-shadow: none;
+}
 
-  .list-group.tag-messages {
+.messages {
+  height: 100%;
+  width: 100%;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column-reverse;
 
-    overflow-y: scroll;
+  .list-group-item {
 
-    .list-group-item {
+      border: none;
+      padding: 0.5rem 1.25rem;
 
-       border: none;
-       padding: 0.5rem 1.25rem;
-
-      .crate {
-        display: flex;
-        max-width: 75%;
-
-        .box {
-          .msg-content {
-            margin-left: auto;
-            background: rgba(218,237,255,.53);
-            border-radius: 5px;
-            padding: 9px 12px;
-            color: #1a1a1a;
-          }
-          .msg-timestamp {
-            font-size: 11px;
-            color: #8a96a3;
-            text-align: right;
-          }
-
-        } // box
-      } // crate
-
-      .crate.tag-session_user {
-         justify-content: flex-end;
-         margin-left: auto;
-         margin-right: 0;
-      }
-
-      .crate.tag-other_user {
-         justify-content: flex-start;
-         margin-left: 0;
-         margin-right: auto;
-      }
-
-    }
-
-    .msg-grouping-day-divider {
-      font-size: 11px;
-      line-height: 15px;
-      text-align: center;
-      color: #8a96a3;
+    .crate {
       display: flex;
-      justify-content: center;
-      align-items: center;
-      margin-bottom: 10px;
-      span {
-        padding: 0 10px;
-      }
-      &:after, &:before {
-        content: '';
-        display: block;
-        flex: 1;
-        height: 1px;
-        background: rgba(138,150,163,.2);
-      }
+      max-width: 75%;
+
+      .box {
+        .msg-content {
+          margin-left: auto;
+          background: rgba(218,237,255,.53);
+          border-radius: 5px;
+          padding: 9px 12px;
+          color: #1a1a1a;
+        }
+        .msg-timestamp {
+          font-size: 11px;
+          color: #8a96a3;
+          text-align: right;
+        }
+
+      } // box
+    } // crate
+
+    .crate.session_user {
+        justify-content: flex-end;
+        margin-left: auto;
+        margin-right: 0;
+    }
+
+    .crate.other_user {
+        justify-content: flex-start;
+        margin-left: 0;
+        margin-right: auto;
     }
 
   }
 
-  .muted {
-    opacity: 50%;
+  .msg-grouping-day-divider {
+    font-size: 11px;
+    line-height: 15px;
+    text-align: center;
+    color: #8a96a3;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 10px;
+    span {
+      padding: 0 10px;
+    }
+    &:after, &:before {
+      content: '';
+      display: block;
+      flex: 1;
+      height: 1px;
+      background: rgba(138,150,163,.2);
+    }
   }
 
 }
 
-</style>
-
-<style lang="scss">
-body {
+.muted {
+  opacity: .5;
 }
 </style>
+
+<i18n lang="json5" scoped>
+{
+  "en": {
+    "startOfThread": "Beginning of Messages"
+  }
+}
+</i18n>

@@ -301,6 +301,7 @@ export default {
       'SELECT_CONTACTS',
     ]),
     ...Vuex.mapActions('messaging/contacts', [
+      'clearCache',
       'loadContacts',
     ]),
 
@@ -415,6 +416,7 @@ export default {
       const response = await axios.post( this.$apiRoute('chatthreads.store'), params )
 
       this.$router.push({ name: 'chatthreads.dashboard' })
+      this.clearCache()
       // %FIXME: clear MessageForm...can we just re-render the CreateThreadForm component to accomplish this?
 
     }, // createChatthread()
@@ -548,6 +550,11 @@ export default {
 body {
   #view-create-thread {
     background-color: #fff;
+
+    .contact-list .list-group {
+      height: calc(100vh - 320px);
+      overflow: auto;
+    }
   }
 
   .top-bar {
@@ -555,12 +562,6 @@ body {
   }
 
 }
-</style>
-
-<style lang="scss">
-body #view-createthread {
-}
-
 </style>
 
 <i18n lang="json5">
