@@ -60,7 +60,11 @@
               <div class="dz-custom-content">
                 <textarea v-model="description" rows="8" class="w-100"></textarea>
               </div>
-              <UploadMediaPreview :mediafiles="mediafiles" @change="changeMediafiles" />
+              <UploadMediaPreview
+                :mediafiles="mediafiles"
+                @change="changeMediafiles"
+                @openFileUpload="openDropzone"
+              />
             </vue-dropzone>
           </div>
           <template #footer>
@@ -313,6 +317,9 @@ export default {
     },
     changeMediafiles(data) {
       this.mediafiles = [...data];
+    },
+    openDropzone() {
+      this.$refs.myVueDropzone.dropzone.hiddenFileInput.click();
     }
   },
 

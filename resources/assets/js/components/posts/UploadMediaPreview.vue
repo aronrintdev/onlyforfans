@@ -40,7 +40,7 @@
             <fa-icon :icon="['far', 'chevron-left']" class="mr-1 text-white" size="lg" />
             <fa-icon :icon="['far', 'chevron-right']" class="text-white" size="lg" />
           </button>
-          <button class="btn btn-secondary btn-lg slide-btn">
+          <button class="btn btn-secondary btn-lg slide-btn" @click="openFileUpload">
             <fa-icon :icon="['far', 'plus']"  size="lg" class="mx-1 text-white" />
           </button>
         </div>
@@ -131,6 +131,9 @@ export default {
       temp.splice(index, 1);
       this.$emit('change', temp);
     },
+    openFileUpload() {
+      this.$emit('openFileUpload');
+    }
   }
 }
 </script>
