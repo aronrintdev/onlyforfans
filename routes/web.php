@@ -238,6 +238,7 @@ Route::group(['middleware' => ['auth']], function () {
 
     // -- vaultfolders: shareable | purchaseable --
     Route::get('/vaultfolders/match', ['as'=>'vaultfolders.match', 'uses' => 'VaultfoldersController@match']);
+    Route::post('/vaultfolders/storeByShare', ['as'=>'vaultfolders.storeByShare', 'uses' => 'VaultfoldersController@storeByShare']);
     Route::post('/vaultfolders/{vaultfolder}/share', ['as'=>'vaultfolders.share', 'uses' => 'VaultfoldersController@share']);
     Route::resource('vaultfolders', 'VaultfoldersController', [ ]);
 

@@ -140,6 +140,55 @@ class VaultfoldersController extends AppBaseController
         ], 201);
     }
 
+
+    // Create a new subfolder under *root* of recipient, fill with list of vault files selected by sender
+    public function storeByShare(Request $request)
+    {
+        $vrules = [
+            'vault_ids' => 'required|array', // receipient vault (could be more than one)
+            'vault_ids.*' => 'required|uuid|exists:vaults,id',
+            'mediafile_ids' => 'required|array',
+            'mediafile_ids.*' => 'required|uuid|exists:mediafiles,id',
+        ];
+
+        $dstVaults = Vault::whereIn($request->vault_ids)->get();
+        $mediafiles = Mediafile::whereIn($request->mediafile_ids)->get();
+
+        // %TODO: DB transaction per user (??) 
+        $vaultfolderIds = [];
+        $dstVaults->each( function($v) use(&$request, &$mediafiles, &$vaultfolderIds) {
+
+            //$this->authorize('update', $vault); // %TODO!
+
+            $vfname = 'shared-from--'.$request->user()->username.'--'.substr(str_shuffle(MD5(microtime())), 0, 6);
+
+            $rf = $v->getRootFolder(); // get root folder
+
+            // create new subfolder
+            $vaultfolder = Vaultfolder::create([
+                'vault_id' => $v->id,
+                'user_id' => $v->user_id,
+                'parent_id' => $rf->id,
+                'vfname' => $vfname,
+            ]);
+            $vaultfolderIds[] = $vaultfolder->id;
+
+            // create mediafile references in new subfolder
+            $mediafiles->each( function($mf) use(&$vaultfolder) {
+                $mf->diskmediafile->createReference(
+                    'vaultfolders'             // string   $resourceType
+                    $vaultfolder->id,          // int      $resourceID
+                    $mf->mfname,               // string   $mfname
+                    MediafileTypeEnum::VAULT   // string   $mftype
+                );
+            });
+        });
+
+        return response()->json([
+            'vaultfolder_ids' => $vaultfolderIds,
+        ], 201);
+    }
+
     public function update(Request $request, Vaultfolder $vaultfolder)
     {
         $this->authorize('update', $vaultfolder);
