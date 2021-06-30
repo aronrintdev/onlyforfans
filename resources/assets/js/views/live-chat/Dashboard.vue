@@ -342,7 +342,7 @@ export default {
 #view-livechat {
   background-color: #fff;
 
-  max-height: calc(100vh - 100px);
+  height: calc(100vh - 100px);
   overflow: hidden;
 
   .chatthread-list .list-group-item.active {
