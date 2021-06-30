@@ -356,7 +356,7 @@ export default {
       const stype = 'image'
       let payload = new FormData()
       payload.append('stype', stype) // %FIXME: hardcoded
-      payload.append('bgcolor', null)
+      payload.append('bgcolor', "#fff")
       payload.append('content', '') // this.storyAttrs.contents
       payload.append('link', null) // this.storyAttrs.link)
 

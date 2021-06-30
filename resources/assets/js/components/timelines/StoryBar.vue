@@ -28,14 +28,14 @@
     </b-modal>
 
     <!-- Form modal for image preview before saving to story -->
-    <b-modal v-model="isSaveToStoryFormModalVisible" id="modal-save-to-story-form" size="lg" title="Save to Story" body-class="p-0">
+    <b-modal v-model="isPreviewModalVisible" id="modal-save-to-story-form" size="lg" title="Save to Story" body-class="p-0">
       <div>
         <b-img fluid :src="selectedDiskfileUrl"></b-img>
       </div>
       <template #modal-footer>
         <div class="w-100">
-          <b-button variant="warning" size="sm" class="float-right" @click="isSaveToStoryFormModalVisible=false">Cancel</b-button>
-          <b-button variant="primary" size="sm" class="float-right" @click="storeStory">Save</b-button>
+          <b-button variant="warning" size="sm" @click="isPreviewModalVisible=false">Cancel</b-button>
+          <b-button variant="primary" size="sm" @click="storeStory('image')">Save</b-button>
         </div>
       </template>
     </b-modal>
@@ -63,13 +63,13 @@ export default {
     timelines : null,
 
     isLoadedHack: false, // hack to prevent multiple loads due to session_user loads
-    isSaveToStoryFormModalVisible: false,
+    isPreviewModalVisible: false,
     isSelectFileModalVisible: false,
 
     // Story form input values...
     //   put inside a form JSON??
     fileInput: null, // form input
-    stype: 'text',
+    //stype: 'text',
     storyAttrs: {
       color: '#fff',
       contents: '',
@@ -78,20 +78,6 @@ export default {
 
     selectedDiskfileUrl: null,
   }),
-
-  created() {
-    /*
-    this.$store.dispatch('getStories', {
-      //user_id: this.session_user.id,
-      following: 1,
-      stypes: 'image', // %FIXME: should be 'photo' (ideally we use PHP ENUM?)
-    })
-     */
-    // %NOTE: we don't really need the stories here, just the timelines that have stories 
-    const response = axios.get( this.$apiRoute('timelines.myFollowedStories')).then ( response => {
-      this.timelines = response.data.data
-    })
-  },
 
   methods: {
     selectFromFiles() {
@@ -105,18 +91,18 @@ export default {
       const file = e.target.files[0]
       this.selectedDiskfileUrl = URL.createObjectURL(file)
       //this.$bvModal.show('modal-select-file', { })
-      this.isSaveToStoryFormModalVisible = true
+      this.isPreviewModalVisible = true
     },
 
     // API to create a new story record (ie 'update story timeline') in the database for this user's timeline
-    async storeStory() {
+    async storeStory(stype) {
       let payload = new FormData()
-      payload.append('stype', this.stype)
-      payload.append('bgcolor', this.storyAttrs.color || null)
+      payload.append('stype', stype)
+      payload.append('bgcolor', this.storyAttrs.color || "#fff")
       payload.append('content', this.storyAttrs.contents)
-      payload.append('link', this.storyAttrs.link)
+      payload.append('link', this.storyAttrs.link || null)
 
-      switch ( this.stype ) {
+      switch ( stype ) {
         case 'text':
           break
         case 'image':
@@ -129,7 +115,8 @@ export default {
           'Content-Type': 'application/json',
         }
       })
-      this.isSaveToStoryFormModalVisible = false
+      this.isPreviewModalVisible = false
+      this.isSelectFileModalVisible = false
       this.fileInput = null // form input
     },
 
@@ -138,6 +125,20 @@ export default {
         ? story.customAttributes['background-color']
         : 'yellow'
     },
+  },
+
+  created() {
+    /*
+    this.$store.dispatch('getStories', {
+      //user_id: this.session_user.id,
+      following: 1,
+      stypes: 'image', // %FIXME: should be 'photo' (ideally we use PHP ENUM?)
+    })
+     */
+    // %NOTE: we don't really need the stories here, just the timelines that have stories 
+    const response = axios.get( this.$apiRoute('timelines.myFollowedStories')).then ( response => {
+      this.timelines = response.data.data
+    })
   },
 
   watch: {
