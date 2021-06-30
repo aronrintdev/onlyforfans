@@ -647,7 +647,7 @@ export default {
 }
 
 .muted {
-  opacity: 50%;
+  opacity: .5;
 }
 </style>
 
