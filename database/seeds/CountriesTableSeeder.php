@@ -14,9 +14,8 @@ class CountriesTableSeeder extends Seeder
     {
         $now = Carbon::now();
 
-        Model::unguard();
+        //Model::unguard();
         DB::table('countries')->delete();
-        Model::reguard();
 
         $sdata = [
                 [ 'country_name'=>'Canada', 'country_code'=>'CA', 'ctype'=>'country' ],
@@ -30,6 +29,7 @@ class CountriesTableSeeder extends Seeder
         foreach ($sdata as $i => $obj) {
             Country::create($obj);
         }
+        //Model::reguard();
     }
 }
 
