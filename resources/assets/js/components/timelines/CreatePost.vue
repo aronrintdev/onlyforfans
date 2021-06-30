@@ -60,7 +60,7 @@
               <div class="dz-custom-content">
                 <textarea v-model="description" rows="8" class="w-100"></textarea>
               </div>
-              <UploadMediaPreview :mediafiles="mediafiles" />
+              <UploadMediaPreview :mediafiles="mediafiles" @change="changeMediafiles" />
             </vue-dropzone>
           </div>
           <template #footer>
@@ -311,6 +311,9 @@ export default {
     clearSchedule() {
       this.postScheduleDate = undefined;
     },
+    changeMediafiles(data) {
+      this.mediafiles = [...data];
+    }
   },
 
   mounted() {

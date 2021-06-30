@@ -126,6 +126,11 @@ export default {
       this.applyMediasSort();
       this.isDragListVisible = false;
     },
+    removeMediafile(index) {
+      const temp = [...this.mediafiles];
+      temp.splice(index, 1);
+      this.$emit('change', temp);
+    },
   }
 }
 </script>
