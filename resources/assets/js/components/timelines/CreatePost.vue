@@ -43,8 +43,6 @@
               />
               <hr />
             </div>
-
-            <textarea v-model="description" rows="8" class="w-100"></textarea>
             <vue-dropzone
               ref="myVueDropzone"
               id="dropzone"
@@ -59,7 +57,14 @@
               v-on:vdropzone-queue-complete="queueCompleteEvent"
               class="dropzone"
             >
-              <!-- <label id="clickme_to-select" class="">Browse</label> -->
+              <div class="dz-custom-content">
+                <textarea v-model="description" rows="8" class="w-100"></textarea>
+              </div>
+              <UploadMediaPreview
+                :mediafiles="mediafiles"
+                @change="changeMediafiles"
+                @openFileUpload="openDropzone"
+              />
             </vue-dropzone>
           </div>
           <template #footer>
@@ -127,7 +132,8 @@ import LocationPinIcon from '@components/common/icons/LocationPinIcon.vue';
 import TimerIcon from '@components/common/icons/TimerIcon.vue';
 import CalendarIcon from '@components/common/icons/CalendarIcon.vue';
 
-import PriceSelector from '@components/common/PriceSelector'
+import PriceSelector from '@components/common/PriceSelector';
+import UploadMediaPreview from '@components/posts/UploadMediaPreview';
 
 export default {
 
@@ -177,6 +183,7 @@ export default {
       },
     },
     postScheduleDate: null,
+    mediafiles: [],
   }),
 
   methods: {
@@ -259,6 +266,11 @@ export default {
 
     // for dropzone
     addedEvent(file) {
+      this.mediafiles.push({
+        src: URL.createObjectURL(file),
+        file,
+        type: file.type,
+      });
       this.$log.debug('addedEvent')
     },
     removedEvent(file, error, xhr) {
@@ -303,6 +315,12 @@ export default {
     clearSchedule() {
       this.postScheduleDate = undefined;
     },
+    changeMediafiles(data) {
+      this.mediafiles = [...data];
+    },
+    openDropzone() {
+      this.$refs.myVueDropzone.dropzone.hiddenFileInput.click();
+    }
   },
 
   mounted() {
@@ -353,6 +371,7 @@ export default {
     PriceSelector,
     vueDropzone: vue2Dropzone,
     EmojiIcon, LocationPinIcon, TimerIcon, CalendarIcon,
+    UploadMediaPreview,
   },
 }
 </script>
