@@ -110,7 +110,12 @@
               </b-col>
               <b-col cols="12" md="4">
                 <ul class="list-inline d-flex justify-content-end mb-0 mt-3 mt-md-0">
-                  <li class="w-100 mx-0"><button @click="savePost()" class="btn btn-submit btn-primary w-100">Post</button></li>
+                  <li class="w-100 mx-0">
+                    <button :disabled="postBtnDisabled || posting" @click="savePost()" class="btn btn-submit btn-primary w-100">
+                      <span v-if="posting" class="text-white spinner-border spinner-border-sm pr-2" role="status" aria-hidden="true"></span>
+                      Post
+                    </button>
+                  </li>
                 </ul>
               </b-col>
             </b-row>
@@ -184,8 +189,14 @@ export default {
     },
     postScheduleDate: null,
     mediafiles: [],
+    postBtnDisabled: true,
+    posting: false,
   }),
-
+  watch: {
+    description(newVal) {
+      this.postBtnDisabled = !newVal;
+    }
+  },
   methods: {
 
     resetForm() {
@@ -200,6 +211,7 @@ export default {
     },
 
     async savePost() {
+      this.posting = true;
       console.log('CreatePost::savePost()')
       // (1) create the post
       const response = await axios.post(this.$apiRoute('posts.store'), {
@@ -228,27 +240,33 @@ export default {
         } 
 
         // (3) create any mediaifle references, ex from selected files in vault
-        this.mediafileIdsFromVault.forEach( async mfid => {
-          await axios.post(this.$apiRoute('mediafiles.store'), {
-            mediafile_id: mfid, // the presence of this field is what tells controller method to create a reference, not upload content
-            resource_id: json.post.id,
-            resource_type: 'posts',
-            mftype: 'post',
+        if (this.mediafileIdsFromVault.length > 0) {
+          this.mediafileIdsFromVault.forEach( async mfid => {
+            await axios.post(this.$apiRoute('mediafiles.store'), {
+              mediafile_id: mfid, // the presence of this field is what tells controller method to create a reference, not upload content
+              resource_id: json.post.id,
+              resource_type: 'posts',
+              mftype: 'post',
+            })
+            // %TODO: check failure case
           })
-          // %TODO: check failure case
-        })
-        this.mediafileIdsFromVault = [] // empty array (we could remove individually inside the loop)
-        this.$router.replace({'query': null}) // clear mediafile router params from URL
+          this.mediafileIdsFromVault = [] // empty array (we could remove individually inside the loop)
+          this.$router.replace({'query': null}) // clear mediafile router params from URL
+        }
         // ^^^ throwing error 'NavigationDuplicated: Avoided redundant navigation to current location: "/"' ?
 
         if ( !queued.length ) {
           console.log('CreatePost::savePost() - nothing queued')
           this.$store.dispatch('unshiftPostToTimeline', { newPostId: this.newPostId })
           this.resetForm()
+          this.mediafiles = []
+          this.posting = false
         }
 
       } else {
         this.resetForm();
+        this.mediafiles = [];
+        this.posting = false;
       }
     },
 
@@ -295,6 +313,8 @@ export default {
       console.log('queueCompleteEvent', { });
       this.$store.dispatch('unshiftPostToTimeline', { newPostId: this.newPostId });
       this.resetForm();
+      this.mediafiles = [];
+      this.posting = false;
     },
 
     takePicture() { // %TODO

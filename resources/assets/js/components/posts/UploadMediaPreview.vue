@@ -87,14 +87,14 @@ export default {
   }),
   computed: {
     swiper() {
-      return this.$refs.mySwiper.$swiper;
+      return this.$refs.mySwiper && this.$refs.mySwiper.$swiper;
     }
   },
   watch: {
     mediafiles() {
       this.files = [...this.mediafiles];
       setTimeout(() => {
-        this.swiper.update();
+        this.swiper?.update();
       }, 500);
     }
   },
