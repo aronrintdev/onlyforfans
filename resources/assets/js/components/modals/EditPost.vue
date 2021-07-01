@@ -59,7 +59,7 @@
           </b-col>
           <b-col cols="8" md="8" class="d-flex justify-content-end">
             <div class="d-flex">
-              <b-btn variant="primary" :disabled="!changed" @click="save">
+              <b-btn class="px-3" variant="primary" :disabled="!changed" @click="save">
                 {{ $t('save.button') }}
               </b-btn>
             </div>
