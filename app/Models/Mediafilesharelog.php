@@ -3,6 +3,7 @@ namespace App\Models;
 
 use DB;
 use Auth;
+use Exception;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -21,8 +22,21 @@ class Mediafilesharelog extends BaseModel
     public static $vrules = [];
 
     //--------------------------------------------
+    // Boot
+    //--------------------------------------------
+    public static function boot()
+    {
+        parent::boot();
+        static::deleting(function ($model) {
+            throw new Exception('Can not delele a log record (mediafilesharelogs)');
+        });
+    }
+
+    //--------------------------------------------
     // %%% Relationships
     //--------------------------------------------
+
+    // %NOTE: one [mediafilesharelog] record *per* src mediafile shared (vs per src vaultfolder)
 
     public function sharer() { // user who did the sharing (sender)
         return $this->belongsTo(User::class, 'sharer_id');
@@ -32,8 +46,16 @@ class Mediafilesharelog extends BaseModel
         return $this->belongsTo(User::class, 'sharee_id');
     }
 
-    public function vaultfolder() { // new vaultfolder created for sharee to hold shared content (files)
-        return $this->belongsTo(Vaultfolder::class, 'vaultfolder_id');
+    public function dstvaultfolder() { // new vaultfolder created for sharee to hold shared content (files)
+        return $this->belongsTo(Vaultfolder::class, 'dstvaultfolder_id');
+    }
+
+    public function srcmediafile() {
+        return $this->belongsTo(Mediaifle::class, 'srcmediafile_id');
+    }
+
+    public function dstmediafile() {
+        return $this->belongsTo(Mediaifle::class, 'dstmediafile_id');
     }
 
     //--------------------------------------------

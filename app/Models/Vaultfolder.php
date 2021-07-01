@@ -55,34 +55,35 @@ class Vaultfolder extends BaseModel implements Guidable, Ownable
     // %%% Relationships
     //--------------------------------------------
 
-    public function vault()
-    {
+    public function vault() {
         return $this->belongsTo('App\Models\Vault');
     }
 
-    public function mediafiles()
-    {
+    public function mediafiles() {
         return $this->morphMany(Mediafile::class, 'resource');
     }
 
-    public function vfparent()
-    {
+    public function vfparent() {
         return $this->belongsTo(Vaultfolder::class, 'parent_id');
     }
 
-    public function vfchildren()
-    {
+    public function vfchildren() {
         return $this->hasMany(Vaultfolder::class, 'parent_id');
     }
 
-    public function sharees()
-    {
+    public function sharees() {
         return $this->morphToMany(User::class, 'shareable', 'shareables', 'shareable_id', 'sharee_id');
     }
 
-    public function getOwner(): ?Collection
-    {
-        return $this->vault->getOwner();
+    // List of mediafilesharelogs associated with this vaultfolder as a *destiation* of a share action 
+    //  ~ each share action creates its own new vaultfolder
+    //  ~ if this vaultfolder was *not* created as a result of share, then this is NULL or empty collection
+    public function mediafilesharelogs() {
+        return $this->hasMany(Mediafilesharelog::class, 'dstvaultfolder_id');
+    }
+
+    public function isSharePlaceholderFolder() { // this vaultfolder was created as a *result* (dst) of a share
+        return $this->mediafilesharelogs->count();
     }
 
     //--------------------------------------------
@@ -209,4 +210,10 @@ class Vaultfolder extends BaseModel implements Guidable, Ownable
         });
         return $subTree;
     }
+
+    public function getOwner(): ?Collection
+    {
+        return $this->vault->getOwner();
+    }
+
 }

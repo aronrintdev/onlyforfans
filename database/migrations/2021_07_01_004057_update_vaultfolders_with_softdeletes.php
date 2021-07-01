@@ -16,7 +16,7 @@ class UpdateVaultfoldersWithSoftdeletes extends Migration
     public function down()
     {
         Schema::table('vaultfolders', function (Blueprint $table) {
-            //
+            $table->dropSoftDeletes();
         });
     }
 }

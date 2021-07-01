@@ -288,6 +288,14 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
         return $this->hasMany(Comment::class);
     }
 
+    public function mediafilesharesSent() { // logs
+        return $this->hasMany(Mediafilesharelog::class, 'sharer_id');
+    }
+
+    public function mediafilesharesReceived() { // logs
+        return $this->hasMany(Mediafilesharelog::class, 'sharee_id');
+    }
+
 //    public function lists()
 //    {
 //        return $this->belongsToMany(Lists::class, 'list_user', 'user_id', 'list_id')->withTimestamps();
