@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 
+use App\Notifications\VaultfileShareSent;
 use App\Http\Resources\VaultfolderCollection;
 use App\Models\Invite;
 use App\Models\Mediafile;
@@ -165,61 +166,57 @@ class VaultfoldersController extends AppBaseController
         }
         $mediafiles = Mediafile::whereIn('id', $request->mediafile_ids)->get();
 
-        // %TODO: DB transaction per user (??) 
         $vaultfolderIds = [];
+
         $dstVaults->each( function($v) use(&$request, &$mediafiles, &$vaultfolderIds) {
 
             //$this->authorize('update', $vault); // %TODO!
 
-            $vfname = 'shared-from-'.$request->user()->username.'-'.substr(str_shuffle(MD5(microtime())), 0, 6);
+            DB::transaction(function() use (&$request, &$mediafiles, &$vaultfolderIds, &$v) {
 
-            $rf = $v->getRootFolder(); // get root folder
+                $vfname = 'shared-from-'.$request->user()->username.'-'.substr(str_shuffle(MD5(microtime())), 0, 6);
 
-            // create new subfolder (dst)
-            $vaultfolder = Vaultfolder::create([
-                'vault_id' => $v->id,
-                'user_id' => $v->user_id,
-                'parent_id' => $rf->id,
-                'vfname' => $vfname,
-                'is_pending_approval' => 1, // %NOTE! // %FIXME: redundant? can reference from log table?
-                'cattrs' => [
-                    'shared_by' => [
-                        'username' => $request->user()->username, // can get from mediafilesharelog (?) %TODO
-                        'user_id' => $request->user()->id,
-                    ],
-                ],
-            ]);
-            $vaultfolderIds[] = $vaultfolder->id;
+                $rf = $v->getRootFolder(); // get root folder
 
-            // %TODO: move this to approve step by receiver! - also improves performance as if multiple receivers
-            //   the copies are staggered per reciever vs all at once
-            $mediafiles->each( function($mf) use(&$request, &$vaultfolder, &$v) {
-                /*
-                $mf->diskmediafile->createReference(
-                    'vaultfolders',            // string   $resourceType
-                    $vaultfolder->id,          // int      $resourceID
-                    $mf->mfname,               // string   $mfname
-                    MediafileTypeEnum::VAULT   // string   $mftype
-                );
-                 */
-                // Create logs for the share...
-                $mediafilesharelog = Mediafilesharelog::create([
-                    'sharer_id' => $request->user()->id,
-                    'sharee_id' => $v->user_id,
-                    'srcmediafile_id' => $mf->id,
-                    'dstmediafile_id' => null, // set when approved by reciever
-                    'dstvaultfolder_id' => $vaultfolder->id,
-                    'mfsl_status' => MediafilesharelogStatusEnum::PENDING,
-                    'is_approved' => false,
+                // create new subfolder (dst)
+                $vaultfolder = Vaultfolder::create([
+                    'vault_id' => $v->id,
+                    'user_id' => $v->user_id, // receiver
+                    'parent_id' => $rf->id,
+                    'vfname' => $vfname,
+                    'is_pending_approval' => 1, // %NOTE! // %FIXME: redundant? can reference from log table?
                     'cattrs' => [
-                        'notes' => '', // %TODO
+                        'shared_by' => [
+                            'username' => $request->user()->username, // can get from mediafilesharelog (?) %TODO
+                            'user_id' => $request->user()->id,
+                        ],
                     ],
                 ]);
-            });
+                $vaultfolderIds[] = $vaultfolder->id;
+
+                // Create logs for the share...mediafile refs are created upon receiver approval
+                $mediafiles->each( function($mf) use(&$request, &$vaultfolder, &$v) {
+                    $mediafilesharelog = Mediafilesharelog::create([
+                        'sharer_id' => $request->user()->id,
+                        'sharee_id' => $v->user_id,
+                        'srcmediafile_id' => $mf->id,
+                        'dstmediafile_id' => null, // set when approved by reciever
+                        'dstvaultfolder_id' => $vaultfolder->id,
+                        'mfsl_status' => MediafilesharelogStatusEnum::PENDING,
+                        'is_approved' => false,
+                        'cattrs' => [
+                            'notes' => '', // %TODO
+                        ],
+                    ]);
+                });
+
+                $v->user->notify( new VaultfileShareSent($vaultfolder, $request->user()) );
+
+            }); // DB::transaction()
+
         });
 
         return response()->json([
-            'vaultfolder' => $vaultfolder,
             'vaultfolder_ids' => $vaultfolderIds,
         ], 201);
     }
@@ -339,4 +336,4 @@ class VaultfoldersController extends AppBaseController
 
 }
 
-                //$request->user()->sharedvaultfolders()->syncWithoutDetaching($vaultfolder->id); // do share %TODO: need to do when they register (!)
+//$request->user()->sharedvaultfolders()->syncWithoutDetaching($vaultfolder->id); // do share %TODO: need to do when they register (!)
