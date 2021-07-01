@@ -5,7 +5,7 @@
         ghost-class="ghost">
         <div v-for="(element, index) in files" :key="index" class="drag-element">
           <div class="img-wrapper">
-            <img v-if="element.type.indexOf('image/') > -1" :src="element.src" alt="" />
+            <img v-if="element.type.indexOf('image/') > -1" :src="element.filepath" alt="" />
             <span v-if="!element.selected" class="unchecked-circle" @click="onSelectMediafile(index, true)"></span>
             <span v-if="element.selected" class="bg-primary checked-circle"
               @click="onSelectMediafile(index, false)">{{element.order}}</span>
@@ -31,7 +31,7 @@
       <swiper-slide class="slide">
         <div v-if="!isDragListVisible">
           <div class="swiper-image-wrapper" v-for="(media, index) in files" :key="index">
-            <img v-preview:scope-a class="swiper-lazy" :src="media.src" />
+            <img v-preview:scope-a class="swiper-lazy" :src="media.filepath" />
             <button class="btn btn-primary icon-close" @click="removeMediafile(index)">
               <fa-icon :icon="['far', 'times']" class="text-white" size="sm" />
             </button>
@@ -87,14 +87,14 @@ export default {
   }),
   computed: {
     swiper() {
-      return this.$refs.mySwiper.$swiper;
+      return this.$refs.mySwiper && this.$refs.mySwiper.$swiper;
     }
   },
   watch: {
     mediafiles() {
       this.files = [...this.mediafiles];
       setTimeout(() => {
-        this.swiper.update();
+        this.swiper?.update();
       }, 500);
     }
   },
@@ -107,7 +107,7 @@ export default {
       sortedTemp.forEach(item => {
         if (item.selected) { 
           order++;
-          const idx = temp.findIndex(it => it.src === item.src);
+          const idx = temp.findIndex(it => it.filepath === item.filepath);
           temp[idx].order = order;
         }
       });
