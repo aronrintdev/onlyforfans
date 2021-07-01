@@ -238,7 +238,10 @@ Route::group(['middleware' => ['auth']], function () {
 
     // -- vaultfolders: shareable | purchaseable --
     Route::get('/vaultfolders/match', ['as'=>'vaultfolders.match', 'uses' => 'VaultfoldersController@match']);
-    Route::post('/vaultfolders/{vaultfolder}/share', ['as'=>'vaultfolders.share', 'uses' => 'VaultfoldersController@share']);
+    Route::post('/vaultfolders/storeByShare', ['as'=>'vaultfolders.storeByShare', 'uses' => 'VaultfoldersController@storeByShare']);
+    Route::post('/vaultfolders/{vaultfolder}/share', ['as'=>'vaultfolders.share', 'uses' => 'VaultfoldersController@share']); // ?? still used? PSG 20210701
+    Route::post('/vaultfolders/{vaultfolder}/approveShare', ['as'=>'vaultfolders.approveShare', 'uses' => 'VaultfoldersController@approveShare']);
+    Route::post('/vaultfolders/{vaultfolder}/declineShare', ['as'=>'vaultfolders.declineShare', 'uses' => 'VaultfoldersController@declineShare']);
     Route::resource('vaultfolders', 'VaultfoldersController', [ ]);
 
     // -- misc --

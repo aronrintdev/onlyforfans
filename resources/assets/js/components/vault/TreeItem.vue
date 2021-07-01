@@ -1,7 +1,7 @@
 <template>
   <li class="tag-tree-node"> 
     <span @click="doToggle(item)">
-      <fa-icon :icon="isOpen ? ['fas', 'caret-down'] : ['fas', 'caret-right']" fixed-width class="OFF-mx-2" />
+      <fa-icon :icon="isOpen ? ['fas', 'caret-down'] : ['fas', 'caret-right']" fixed-width class="" />
     </span>
     <span :class="{bold: true, active: currentFolderId===item.id}" @dblclick="makeFolder">
       <span @click="doNav(item)" class="node-name">{{ item.name }}</span>
@@ -48,7 +48,7 @@ export default {
   },
 
   methods: {
-    doNav(item) {
+    doNav(item) { // item is a vaultfolder
       this.isOpen = true
       this.$emit('do-nav', item.id)
     },
