@@ -75,6 +75,7 @@
       hide-header
       hide-footer
       body-class="p-0"
+      no-close-on-backdrop
     >
       <EditPost ref="editPost" :post="selectedResource" />
     </b-modal>

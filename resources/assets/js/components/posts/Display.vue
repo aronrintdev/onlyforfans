@@ -49,19 +49,22 @@
     <b-modal
       v-model="showDeleteConfirmation"
       size="md"
-      hide-footer
       title="Delete Post"
     >
       <template #modal-title>
         {{ $t('delete.confirmation.title') }}
       </template>
-      <div class="text-left" v-text="$t('delete.confirmation.message')" />
-      <div class="mt-2 text-right">
-        <b-btn variant="success" @click="deletePost">
-          <fa-icon icon="trash" fixed-width />
-          {{ $t('delete.confirmation.ok') }}
-        </b-btn>
-      </div>
+      <div class="my-2 text-left" v-text="$t('delete.confirmation.message')" />
+      <template #modal-footer>
+        <div class="text-right">
+          <b-btn class="px-3 mr-1" variant="secondary" @click="showDeleteConfirmation=false">
+            {{ $t('delete.confirmation.cancel') }}
+          </b-btn>
+          <b-btn class="px-3" variant="danger" @click="deletePost">
+            {{ $t('delete.confirmation.ok') }}
+          </b-btn>
+        </div>
+      </template>
     </b-modal>
   </div>
 </template>
@@ -203,9 +206,10 @@ ul {
   "en": {
     "delete": {
       "confirmation": {
-        "title": "Delete Post?",
+        "title": "Confirm delete",
         "message": "Are you sure you want to delete this post?",
-        "ok": "Delete Post"
+        "ok": "Delete Post",
+        "cancel": "Cancel"
       }
     }
   }
