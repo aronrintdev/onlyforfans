@@ -5,10 +5,11 @@
       <template #header>
         <section class="d-flex">
           <div class="my-auto mr-3">
-            <div class="h6 mb-0" v-text="$t('title')" />
+            <div class="h5 mb-0" v-text="$t('title')" />
           </div>
-          <div class="post_create-ctrl d-flex flex-grow-1">
+          <div class="post_create-ctrl d-flex align-items-center flex-grow-1">
             <b-form-select id="post-type" class="w-auto ml-auto" v-model="type" :options="ptypes" required />
+            <button type="button" @click="discard" aria-label="Close" class="close ml-3">×</button>
           </div>
         </section>
       </template>
@@ -58,16 +59,7 @@
           </b-col>
           <b-col cols="8" md="8" class="d-flex justify-content-end">
             <div class="d-flex">
-              <b-btn variant="secondary" @click="discard" class="ml-auto mr-3">
-                <fa-icon icon="times" fixed-width class="mr-1" />
-                {{ $t('discard.button') }}
-              </b-btn>
-              <b-btn v-if="changed" variant="secondary" @click="revert" class="mr-3" >
-                <fa-icon icon="undo" fixed-width class="mr-1" />
-                {{ $t('revert.button') }}
-              </b-btn>
-              <b-btn variant="success" :disabled="!changed" @click="save">
-                <fa-icon icon="save" fixed-width class="mr-1" />
+              <b-btn variant="primary" :disabled="!changed" @click="save">
                 {{ $t('save.button') }}
               </b-btn>
             </div>
@@ -139,9 +131,6 @@ export default {
     discard(e) {
       this.exit()
     },
-    revert(e) {
-      this.fillFromProp()
-    },
     save(e) {
       this.loading = true
       this.axios.patch(this.$apiRoute('posts.update', { post: this.post.slug }), {
@@ -191,6 +180,11 @@ textarea,
   font-size: 18px;
   cursor: pointer;
 }
+button.close {
+  padding: 1rem;
+  margin: -1rem -1rem -1rem auto;
+  line-height: 1em;
+}
 </style>
 <i18n lang="json5" scoped>
 {
@@ -198,12 +192,6 @@ textarea,
     "title": "Edit Post",
     "loading": {
       "error": "An error has occurred while attempting to load this post. Please return to the previous page and try again later."
-    },
-    "discard": {
-      "button": "Close"
-    },
-    "revert": {
-      "button": "Revert"
     },
     "save": {
       "button": "Save",
