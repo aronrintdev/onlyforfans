@@ -51,11 +51,11 @@ class Mediafilesharelog extends BaseModel
     }
 
     public function srcmediafile() {
-        return $this->belongsTo(Mediaifle::class, 'srcmediafile_id');
+        return $this->belongsTo(Mediafile::class, 'srcmediafile_id');
     }
 
     public function dstmediafile() {
-        return $this->belongsTo(Mediaifle::class, 'dstmediafile_id');
+        return $this->belongsTo(Mediafile::class, 'dstmediafile_id');
     }
 
     //--------------------------------------------

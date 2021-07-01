@@ -29,6 +29,7 @@ class Vaultfolder extends BaseModel implements Guidable, Ownable
         //'vfparent',
         //'vfchildren',
         //'mediafiles',
+        'mediafile_count',
     ];
 
     //--------------------------------------------
@@ -116,14 +117,15 @@ class Vaultfolder extends BaseModel implements Guidable, Ownable
         return $breadcrumb;
     }
 
-    public function getNameAttribute($value)
-    {
-        return $this->vfname;
+    public function getNameAttribute($value) { return $this->vfname;
     }
 
-    public function getPathAttribute($value)
-    {
+    public function getPathAttribute($value) {
         return $this->vfname; // %TODO: get full path back to root
+    }
+
+    public function getMediafileCountAttribute($value) {
+        return $this->mediafiles->count();
     }
 
     //--------------------------------------------

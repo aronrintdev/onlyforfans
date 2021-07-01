@@ -73,7 +73,9 @@ class VaultfoldersController extends AppBaseController
     {
         $this->authorize('view', $vaultfolder);
 
-        $vaultfolder->load('vfchildren', 'vfparent', 'mediafiles');
+        $vaultfolder->load(['vfchildren', 'vfparent', 'mediafiles', 'sharees', 'mediafilesharelogs']);
+        //$vaultfolder->load(['vfchildren', 'vfparent', 'mediafiles']);
+
         $breadcrumb = $vaultfolder->getBreadcrumb();
         $shares = collect();
         $vaultfolder->mediafiles->each( function($vf) use(&$shares) {
@@ -111,7 +113,7 @@ class VaultfoldersController extends AppBaseController
     {
         $vrules = [
             'vault_id' => 'required|uuid|exists:vaults,id',
-            'vfname' => 'required|alpha_dash|min:1',
+            'vfname' => 'required|string|min:1',
             // %TODO: prevent new folders on same level with duplicate names
         ];
 
@@ -191,7 +193,7 @@ class VaultfoldersController extends AppBaseController
 
             // %TODO: move this to approve step by receiver! - also improves performance as if multiple receivers
             //   the copies are staggered per reciever vs all at once
-            $mediafiles->each( function($mf) use(&$vaultfolder) {
+            $mediafiles->each( function($mf) use(&$request, &$vaultfolder, &$v) {
                 /*
                 $mf->diskmediafile->createReference(
                     'vaultfolders',            // string   $resourceType
@@ -207,7 +209,7 @@ class VaultfoldersController extends AppBaseController
                     'srcmediafile_id' => $mf->id,
                     'dstmediafile_id' => null, // set when approved by reciever
                     'dstvaultfolder_id' => $vaultfolder->id,
-                    'mfls_status' => MediafilesharelogStatus::PENDING,
+                    'mfsl_status' => MediafilesharelogStatusEnum::PENDING,
                     'is_approved' => false,
                     'cattrs' => [
                         'notes' => '', // %TODO
@@ -217,7 +219,7 @@ class VaultfoldersController extends AppBaseController
         });
 
         return response()->json([
-            'vaultfolder' => vaultfolder,
+            'vaultfolder' => $vaultfolder,
             'vaultfolder_ids' => $vaultfolderIds,
         ], 201);
     }
@@ -233,22 +235,27 @@ class VaultfoldersController extends AppBaseController
         $dstMediafileIds = [];
         $vaultfolder->mediafilesharelogs->each( function($mfsl) use(&$vaultfolder, &$dstMediafileIds) {
             $srcMediafile = $mfsl->srcmediafile;
-            // %TODO: if not exists log an error
-            $dstMediafileIds[] = $srcMediafile->diskmediafile->createReference(
+            if ( !$srcMediafile ) {
+                Log::warning( 'vaultfolders.approveShare - could not find srcMediafile: '.json_encode($mfsl) );
+                return false;
+            }
+            $dstMf = $srcMediafile->diskmediafile->createReference(
                 'vaultfolders',            // string   $resourceType
                 $vaultfolder->id,          // int      $resourceID
                 $srcMediafile->mfname,     // string   $mfname
                 MediafileTypeEnum::VAULT   // string   $mftype
             );
-            $mfsl->mfls_status = MediafilesharelogStatus::APPROVED;
+            $mfsl->mfsl_status = MediafilesharelogStatusEnum::APPROVED;
+            $mfsl->dstmediafile_id = $dstMf->id;
             $mfsl->save();
+            $dstMediafileIds[] = $dstMf->id;
         });
 
         $vaultfolder->is_pending_approval = 0;
         $vaultfolder->save();
 
         return response()->json([
-            'vaultfolder' => vaultfolder,
+            'vaultfolder' => $vaultfolder,
             'mediafile_ids' => $dstMediafileIds, // dst created post approval
         ], 200);
     }
@@ -258,7 +265,7 @@ class VaultfoldersController extends AppBaseController
         $srcMediafileIds = [];
         $vaultfolder->mediafilesharelogs->each( function($mfsl) use(&$vaultfolder, &$srcMediafileIds) {
             $srcMediafileIds[] = $srcMediafile->id;
-            $mfsl->mfls_status = MediafilesharelogStatus::DECLINED;
+            $mfsl->mfsl_status = MediafilesharelogStatusEnum::DECLINED;
             $mfsl->save();
         });
         $vaultfolder->delete(); // should do soft delete (NOTE we keep the reference [mediafilesharelogs].dstvaultfolder_id ?)

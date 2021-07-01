@@ -225,10 +225,14 @@
     </b-modal>
 
     <!-- 'Lightbox' modal for image preview when clicking on a file in the vault grid/list -->
-    <b-modal v-model="isApproveSharedModalVisible" title="Approve Shared Vault Files" hide-footer body-class="p-0" size="xl">
-        <p>The user {{ sharer(vfToApprove) }} has shared {{ vfToApprove.mediafiles.length }} files with you...</p>
-        <b-button variant="warning" @click="approveShared(vf, true)">Accept</b-button>
-        <b-button variant="danger" @click="approveShared(vf, false)">Reject</b-button>
+    <b-modal v-model="isApproveSharedModalVisible" title="Approve Shared Vault Files" size="xl">
+      <p>The user {{ strSharerName }} has shared {{ strSharedMfCount }} files with you...</p>
+      <template #modal-footer>
+        <div class="w-100">
+          <b-button variant="danger" @click="declineShared(selectedVfToApprove)">Reject</b-button>
+          <b-button variant="warning" @click="approveShared(selectedVfToApprove)">Accept</b-button>
+        </div>
+      </template #modal-footer>
     </b-modal>
 
 
@@ -269,12 +273,23 @@ export default {
       return !this.vault_pkid || !this.vaultfolder_pkid || !this.vault || !this.vaultfolder || !this.foldertree || !this.session_user
     },
 
+    strSharerName() {
+      return this.selectedVfToApprove?.cattrs?.shared_by?.username || 'Unknown'
+    },
+    strSharedMfCount() {
+      //return this.selectedVfToApprove?.mediafile_count || '--'
+      return this.selectedVfToApprove?.mediafilesharelogs?.length || '--'
+    },
+
+
     parent() {
       return this.vaultfolder.vfparent
     },
-    children() {
+
+    children() { // ie, child folders (not files)
       return this.vaultfolder.vfchildren
     },
+
     breadcrumbNav() {
       const result = []
       for ( let b of this.breadcrumb ) {
@@ -316,9 +331,9 @@ export default {
     isCreateFolderModalVisible: false,
     isSaveToStoryModalVisible: false,
     isMediaLightboxModalVisible: false,
-    isApproveSharedModalVisible: true,
+    isApproveSharedModalVisible: false,
 
-    vfToApprove: null,
+    selectedVfToApprove: null,
 
     lightboxSelection: null,
 
@@ -423,11 +438,6 @@ export default {
     renderLightbox(mediafile) {
       this.lightboxSelection = mediafile
       this.isMediaLightboxModalVisible = true
-    },
-
-    renderApproveSharedModal(vf) {
-      this.isApproveSharedModalVisible = true
-      this.vfToApprove = vf
     },
 
     renderShareForm() {
@@ -569,7 +579,7 @@ export default {
         //field: 'name',
       }
       const response = await axios.get( this.$apiRoute('users.match'), { params } )
-      this.suggestions = response.data
+      this.suggestions = response.data.filter( o => o.id !== this.session_user.id ) // exclude session user
     },
 
     // This is what the <input/> value is set to when you are selecting a suggestion
@@ -580,22 +590,29 @@ export default {
     focusMe(e) {
     },
 
-    async approveShared(vf, isApproved) {
-      let response
-      if ( isApproved ) {
-        response = await this.axios.patch( route('vaultfolders.update', { id: vf.id }), { is_pending_approval: 0 })
-      } else {
-        // soft delete
-        response = await this.axios.patch( route('vaultfolders.delete', { id: vf.id }) )
-      }
+    async renderApproveSharedModal(vf) {
+      // %TODO: call to get full details
+      const response = await this.axios.get(route('vaultfolders.show', { id: vf.id }))
+      this.isApproveSharedModalVisible = true
+      this.selectedVfToApprove = response.data.vaultfolder
+    },
+
+    async approveShared(vf) {
+      //const response = await this.axios.patch( route('vaultfolders.update', { id: vf.id }), { is_pending_approval: 0 })
+      const response = await this.axios.post( route('vaultfolders.approveShare', { id: vf.id }) )
+      this.$store.dispatch( 'getVaultfolder', this.currentFolderId )
+      this.selectedVfToApprove = null // selection
+      this.isApproveSharedModalVisible = false
+    },
+
+    async declineShared(vf) {
+      // soft delete
+      //response = await this.axios.patch( route('vaultfolders.delete', { id: vf.id }) )
+      const response = await this.axios.post( route('vaultfolders.declineShare', { id: vf.id }) )
       this.$store.dispatch('getVaultfolder', this.currentFolderId)
-      this.vfToApprove = null // selection
+      this.selectedVfToApprove = null // selection
+      this.isApproveSharedModalVisible = false
     },
-
-    sharer(vf) {
-      return vf.cattrs?.shared_by?.username || 'Unknown'
-    },
-
 
   },
 
@@ -701,6 +718,16 @@ export default {
       },
  */
 </script>
+
+<style lang="scss" >
+body {
+    .autosuggest__results ul {
+      padding-left: 1rem;
+      margin-top: 2rem;
+      list-style: none !important;
+    }
+}
+</style>
 
 <style lang="scss" scoped>
 body {
