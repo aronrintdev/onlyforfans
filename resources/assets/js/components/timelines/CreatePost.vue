@@ -232,15 +232,10 @@ export default {
         // (2) upload & attach the mediafiles (in dropzone queue)
         // %FIXME: if this fails, don't we have an orphaned post (?)
         // %NOTE: files added manually don't seem to be put into the queue, thus sendingEvent won't be called for them (?)
-        if ( queued.length ) {
-          console.log('CreatePost::savePost() - process queue', {
-            queued,
-          })
-          this.$refs.myVueDropzone.processQueue() // this will call dispatch after files uploaded
-        } 
+        
 
         // (3) create any mediaifle references, ex from selected files in vault
-        if (this.mediafileIdsFromVault.length > 0) {
+        if (this.mediafileIdsFromVault.length) {
           this.mediafileIdsFromVault.forEach( async mfid => {
             await axios.post(this.$apiRoute('mediafiles.store'), {
               mediafile_id: mfid, // the presence of this field is what tells controller method to create a reference, not upload content
@@ -251,9 +246,13 @@ export default {
             // %TODO: check failure case
           })
           this.mediafileIdsFromVault = [] // empty array (we could remove individually inside the loop)
-          this.$router.replace({'query': null}) // clear mediafile router params from URL
-        }
-        // ^^^ throwing error 'NavigationDuplicated: Avoided redundant navigation to current location: "/"' ?
+          this.$router.replace({'query': null}).catch(()=>{}); // clear mediafile router params from URL
+        } else if (queued.length) {
+          console.log('CreatePost::savePost() - process queue', {
+            queued,
+          })
+          this.$refs.myVueDropzone.processQueue() // this will call dispatch after files uploaded
+        } 
 
         if ( !queued.length ) {
           console.log('CreatePost::savePost() - nothing queued')
@@ -284,11 +283,14 @@ export default {
 
     // for dropzone
     addedEvent(file) {
-      this.mediafiles.push({
-        src: URL.createObjectURL(file),
-        file,
-        type: file.type,
-      });
+      if (!file.filepath) {
+        this.mediafiles.push({
+          ...file,
+          filepath: URL.createObjectURL(file),
+        });
+      } else {
+        this.mediafiles.push(file);
+      }
       this.$log.debug('addedEvent')
     },
     removedEvent(file, error, xhr) {
@@ -359,7 +361,7 @@ export default {
       }).then( response => {
         response.data.data.forEach( mf => {
           // https://rowanwins.github.io/vue-dropzone/docs/dist/#/manual
-          const file = { size: mf.orig_size, name: mf.id, type: mf.mimetype }
+          const file = { size: mf.orig_size, name: mf.id, type: mf.mimetype, filepath: mf.filepath }
           this.mediafileIdsFromVault.push(mf.id)
           this.$refs.myVueDropzone.manuallyAddFile(file, mf.filepath)
         })
