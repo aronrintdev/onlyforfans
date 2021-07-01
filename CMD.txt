@@ -71,6 +71,9 @@ $ php artisan db:seed --class=TestDatabaseSeeder
 # Run all seeds in dev/staging/demo env (eg localhost, .env)
 $ php artisan db:seed --class=DatabaseSeeder
 
+%%% Clear route cache...may need to run this post-deployment
+$ php artisan route:cache
+
 %%% Tinker
 $ php artisan tinker
 >>> error_reporting(E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED)

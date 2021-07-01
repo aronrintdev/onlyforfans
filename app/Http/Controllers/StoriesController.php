@@ -87,19 +87,16 @@ class StoriesController extends AppBaseController
     public function store(Request $request)
     {
         $vrules = [
-            'stype' => 'in:'.StoryTypeEnum::getKeysCsv(), // %TODO : apply elsewhere
+            'stype' => 'in:'.StoryTypeEnum::getKeysCsv(),
             //'timeline_id' => 'required|uuid|exists:timelines',
         ];
-        if ( $request->has('mediafile') ) {
-            if ( $request->hasFile('mediafile') ) {
-                //$vrules['mediafile'] = 'required_if:attrs.stype,photo|file';
-                $vrules['mediafile'] = 'file|required_if:stype,'.StoryTypeEnum::PHOTO;
-                // %TODO VIDEO stype
-            } else {
-                //$vrules['mediafile'] = 'required_if:stype,photo|uuid|exists:mediafiles,id'; // must be fk to [mediafiles]
-                $vrules['mediafile'] = 'uuid|exists:mediafiles,id|required_if:stype,'.StoryTypeEnum::PHOTO; // must be fk to [mediafiles]
-                // %TODO VIDEO stype
-            }
+        if ( $request->has('mediafile_id') ) {
+            $vrules['mediafile_id'] = 'uuid|exists:mediafiles,id';
+            $vrules['stype'] = 'string|in:'.StoryTypeEnum::PHOTO;
+        } else if ( $request->hasFile('mediafile') ) {
+            //$vrules['mediafile'] = 'required_if:attrs.stype,photo|file';
+            $vrules['mediafile'] = 'file|required_if:stype,'.StoryTypeEnum::PHOTO;
+            // %TODO VIDEO stype
         }
         
         $this->validate($request, $vrules);
@@ -119,13 +116,23 @@ class StoriesController extends AppBaseController
                     'content' => $request->content ?? null,
                     'swipe_up_link' => $request->link ?? null,
                     'cattrs' => [
-                        'background-color' => isset($request->bgcolor) ? $request->bgcolor : '#fff',
+                        'background-color' => $request->bgcolor ?? '#fff',
                     ],
                     'stype' => $request->stype,
                 ]);
 
                 if ( $request->stype === StoryTypeEnum::PHOTO ) {
-                    if ( $request->hasFile('mediafile') ) {
+                    if ( $request->has('mediafile_id') ) {
+                        // add to story timeline using a file from the vault
+                        $mediafile = Mediafile::find($request->mediafile_id);
+                        $this->authorize('update', $mediafile);
+                        $mediafile->diskmediafile->createReference(
+                            'stories',                                      // string   $resourceType
+                            $story->id,                                     // int      $resourceID
+                            $request->input('mfname', $mediafile->mfname),  // string   $mfname
+                            MediafileTypeEnum::STORY                        // string   $mftype
+                        );
+                    } else if ( $request->hasFile('mediafile') ) {
                         // mediafile request param is of type FILE...see vrules above
                         $file = $request->file('mediafile');
                         $subFolder = $request->user()->id;

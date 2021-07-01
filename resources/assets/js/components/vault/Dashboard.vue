@@ -143,22 +143,23 @@
 
     </b-row>
 
+    <!-- Modal for selecting where to 'send' the selected files: to the story (max 1 file), to a post, or to a message -->
     <b-modal id="modal-share-file" size="lg" title="Share Files" hide-footer body-class="p-0" >
       <div>
         <b-list-group>
-          <b-list-group-item>
+          <b-list-group-item v-if="sendChannels.includes('post')">
             <b-button @click="sendSelected('post')" variant="link" class="text-decoration-none">
               <fa-icon :icon="['far', 'plus-square']" fixed-width class="mx-2" size="lg" />
               Send in New Post
             </b-button>
           </b-list-group-item>
-          <b-list-group-item>
-            <b-button @click="sendSelected('story')" variant="link" class="text-decoration-none">
+          <b-list-group-item v-if="sendChannels.includes('story')">
+            <b-button :disabled="selectedMediafiles.length>1" @click="sendSelected('story')" variant="link" class="text-decoration-none">
               <fa-icon :icon="['far', 'plus-square']" fixed-width class="mx-2" size="lg" />
               Send in New Story
             </b-button>
           </b-list-group-item>
-          <b-list-group-item>
+          <b-list-group-item v-if="sendChannels.includes('message')">
             <b-button @click="sendSelected('message')" variant="link" class="text-decoration-none">
               <fa-icon :icon="['far', 'plus-square']" fixed-width class="mx-2" size="lg" />
               Send in New Message
@@ -168,6 +169,7 @@
       </div>
     </b-modal>
 
+    <!-- Form modal for creating a new sub-folder under the current folder -->
     <b-modal id="modal-create-folder" v-model="isCreateFolderModalVisible" size="lg" title="Create Folder" body-class="">
       <b-form @submit.prevent="storeFolder">
           <b-form-group>
@@ -185,8 +187,22 @@
         </template>
     </b-modal>
 
+    <!-- 'Lightbox' modal for image preview when clicking on a file in the vault grid/list -->
     <b-modal v-model="isMediaLightboxModalVisible" id="modal-media-lightbox" title="" hide-footer body-class="p-0" size="xl">
       <MediaLightbox :session_user="session_user" :mediafile="lightboxSelection" />
+    </b-modal>
+
+    <!-- Form modal for image preview before saving to story (%FIXME DRY: see StoryBar.vue) -->
+    <b-modal v-model="isSaveToStoryFormModalVisible" id="modal-save-to-story-form" size="lg" title="Save to Story" body-class="p-0">
+      <div>
+        <b-img fluid :src="selectedMediafiles.length ? selectedMediafiles[0].filepath : null"></b-img>
+      </div>
+      <template #modal-footer>
+        <div class="w-100">
+          <b-button variant="warning" size="sm" @click="isSaveToStoryFormModalVisible=false">Cancel</b-button>
+          <b-button variant="primary" size="sm" @click="sendSelected('story')">Save</b-button>
+        </div>
+      </template>
     </b-modal>
 
   </div>
@@ -260,12 +276,16 @@ export default {
   data: () => ({
 
     vault: null,
-    foldertree: null,
+    foldertree: null, // the nav tree data structure
+    mediafiles: {}, // %FIXME: use array not keyed object!
+
+    // By default we can send to story, post, or message...may be overridden if this 'page' is 
+    // loaded in another context (hack for mvp)
+    sendChannels: ['story', 'post', 'message'],
 
     isUploaderVisible: false,
     isCreateFolderModalVisible: false,
-
-    mediafiles: {}, // %FIXME: use array not keyed object!
+    isSaveToStoryFormModalVisible: false,
 
     lightboxSelection: null,
     isMediaLightboxModalVisible: false,
@@ -319,14 +339,52 @@ export default {
 
       switch (resourceType) {
         case 'story':
-          this.$router.replace({ name: 'stories.dashboard', params });
+          this.storeStory()
           break;
         case 'post':
-          this.$router.replace({ name: 'index', params });
+          this.$router.replace({ name: 'index', params })
           break;
         case 'message':
-          this.$router.replace({ name: 'chatthreads.create', params });
+          this.$router.replace({ name: 'chatthreads.create', params })
           break;
+      }
+    },
+
+    // API to update a new story in the database for this user's timeline
+    // %NOTE: can only send 1 file per new story 
+    async storeStory() {
+      const stype = 'image'
+      let payload = new FormData()
+      payload.append('stype', stype) // %FIXME: hardcoded
+      payload.append('bgcolor', "#fff")
+      payload.append('content', '') // this.storyAttrs.contents
+      payload.append('link', null) // this.storyAttrs.link)
+
+      switch ( stype ) {
+        case 'text':
+          break
+        case 'image':
+          if ( this.selectedMediafiles.length ) {
+            payload.append('mediafile_id', this.selectedMediafiles[0].id)
+          }
+          break
+      } 
+
+      const response = await axios.post( this.$apiRoute('stories.store'), payload, {
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      })
+      this.isSaveToStoryFormModalVisible = false
+      this.fileInput = null // form input
+      if ( this.$route.params.context === 'storybar' ) {
+        //this.$route.params = null %TODO: clear ?
+        this.$router.replace({ 
+          name: 'index', 
+          params: {
+            toast: { title: 'New story successfully added!' },
+          },
+        })
       }
     },
 
@@ -476,6 +534,14 @@ export default {
       this.foldertree = response.data.foldertree || null
       this.$store.dispatch('getVaultfolder', this.vaultfolder_pkid)
     })
+
+    if ( this.$route.params.context ) {
+      switch( this.$route.params.context ) {
+        case 'storybar':
+          this.sendChannels = ['story']
+          break
+      }
+    }
   },
 
   watch: {
