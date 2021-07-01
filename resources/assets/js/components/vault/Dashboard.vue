@@ -273,14 +273,14 @@ export default {
       return !this.vault_pkid || !this.vaultfolder_pkid || !this.vault || !this.vaultfolder || !this.foldertree || !this.session_user
     },
 
-    strSharerName() {
+    strSharerName() { // format string for sharer name
       return this.selectedVfToApprove?.cattrs?.shared_by?.username || 'Unknown'
     },
-    strSharedMfCount() {
+
+    strSharedMfCount() { // format string for number of files shared
       //return this.selectedVfToApprove?.mediafile_count || '--'
       return this.selectedVfToApprove?.mediafilesharelogs?.length || '--'
     },
-
 
     parent() {
       return this.vaultfolder.vfparent
@@ -492,6 +492,7 @@ export default {
         mediafile_ids: this.selectedMediafiles.map( o => o.id ),
       }
       const response = await axios.post( this.$apiRoute('vaultfolders.storeByShare'), payload )
+      this.isShareFilesModalVisible = false
       this.cancelShareFiles()
       this.clearSelected()
     },
