@@ -158,7 +158,9 @@
           <div class="share-list">
             <div v-if="shareForm.sharees.length">
               <span v-for="(se) in shareForm.sharees" class="tag-sharee mr-3">
-                <b-badge variant="info" class="p-2">{{ se.label }} <fa-icon :icon="['far', 'times']" /></b-badge>
+                <b-badge variant="info" class="p-2">{{ se.label }} 
+                  <span @click="removeSharee(se)" role="button"><fa-icon :icon="['far', 'times']" /></span>
+                </b-badge>
               </span>
             </div>
           </div>
@@ -171,7 +173,7 @@
 
           <template #modal-footer>
             <div class="w-100">
-              <b-button variant="warning" size="sm" @click="isShareFilesModalVisible=false">Cancel</b-button>
+              <b-button variant="warning" size="sm" @click="hideShareForm">Cancel</b-button>
               <b-button variant="primary" size="sm" @click="shareSelectedFiles">Share</b-button>
             </div>
           </template>
@@ -486,6 +488,10 @@ export default {
     renderShareForm() {
       this.isShareFilesModalVisible = true
     },
+    hideShareForm() {
+      this.isShareFilesModalVisible = false
+      this.shareForm.sharees = []
+    },
 
     renderSendForm() {
       this.isSendFilesModalVisible = true
@@ -646,10 +652,17 @@ export default {
     // ---
 
     addSharee(sharee) {
-      console.log('addSharee')
-      this.shareForm.sharees.push(sharee.item)
+      //console.log('addSharee', { sharee, })
+      if ( !this.shareForm.sharees.some(o => o.id === sharee.item.id) ) { // check not already added
+        this.shareForm.sharees.push(sharee.item)
+      }
+      //  this.shareForm.sharees.push(sharee.item)
       this.query = ''
       this.suggestions = []
+    },
+
+    removeSharee(sharee) {
+      this.shareForm.sharees = this.shareForm.sharees.filter( o => o.id !== sharee.id )
     },
 
     addInvite(e) {
