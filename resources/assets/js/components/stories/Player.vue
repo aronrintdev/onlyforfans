@@ -113,9 +113,7 @@ export default {
       }
     },
     cssDisplay() {
-      console.log ('renderedStories', {
-        renderedStories: this.renderedStories 
-      })
+      //console.log ('renderedStories', { renderedStories: this.renderedStories })
       if (this.renderedStories.length && this.renderedStories[0].mediafiles && this.renderedStories[this.current].mediafiles[0]) {
         return {
           '--background-image': `url(${this.renderedStories[this.current].mediafiles[0].filepath})`,
@@ -159,8 +157,7 @@ export default {
     goTo(index) {
       this.timelineAnimation.pause()
 
-      index =
-        index < 0
+      index = index < 0
           ? this.renderedStories.length - 1
           : index >= this.renderedStories.length
           ? 0
@@ -194,7 +191,10 @@ export default {
         autoplay: this.play,
         duration: this.speed,
         easing: 'linear',
-        loop: true,
+        loop: false,
+        complete: function() {
+          console.log('$anime - complete callback')
+        },
       })
       this.addTimelineElements()
     },
