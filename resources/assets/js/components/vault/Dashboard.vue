@@ -93,7 +93,7 @@
               :mediafile="mf" 
               @input="onPreviewFileInput" 
               @render-lightbox="renderLightbox" 
-              class="p-1 tag-file" 
+              class="OFF-p-1 tag-file" 
             />
             <p class="text-center truncate m-0">{{ mf.mfname }}</p>
           </b-col>
@@ -613,7 +613,7 @@ export default {
       this.$store.dispatch('getVaultfolder', this.currentFolderId)
       this.selectedVfToDelete = null
       this.isDeleteFolderModalVisible = false
-      this.$root.$bvToast.toast( `Deleted folder ( Total of ${deleteResponse.number_of_items_deleted} items deleted)` )
+      this.$root.$bvToast.toast( `Deleted folder ( Total of ${deleteResponse.data.number_of_items_deleted} items deleted)` )
     },
 
     //getLink(e, mediafileId) {
