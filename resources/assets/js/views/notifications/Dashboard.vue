@@ -68,6 +68,13 @@
               </b-card-text>
             </b-tab>
 
+            <b-tab data-filter="messages">
+              <template #title> <fa-icon fixed-width icon="envelope" /> Messages</template>
+              <b-card-text>
+                <NotifyList filter="messages" :session_user="session_user" />
+              </b-card-text>
+            </b-tab>
+
           </b-tabs>
         </b-card>
 
