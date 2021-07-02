@@ -56,7 +56,18 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.breadcrumb {
+  background-color: #fff;
+  border-radius: 0;
+}
+.breadcrumb .breadcrumb-item {
+  font-size: 1.2rem;
+}
+.breadcrumb .breadcrumb-item.active {
+  color: #212529;
+}
+</style>
 
 <i18n lang="json5" scoped>
 {
