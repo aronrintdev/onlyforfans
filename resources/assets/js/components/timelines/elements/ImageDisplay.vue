@@ -105,15 +105,16 @@ export default {
       }
     },
 
-    renderFull() {
-      // %FIXME: currently hardcoded for mediafiles that belong to *posts*
-      if (this.mediafile.access) {
-        eventBus.$emit('open-modal', { key: 'show-photo', data: { mediafile: this.mediafile } })
+    async renderFull() {
+      const response = await axios.get( route('posts.show', this.mediafile.resource_id) );
+      const post = response.data.data
+      if (post.access) {
+        eventBus.$emit('open-modal', { key: 'show-post', data: { post } })
       } else {
-        if ( this.$options.filters.isSubscriberOnly(this.mediafile.resource) ) {
+        if ( this.$options.filters.isSubscriberOnly(post) ) {
           eventBus.$emit('open-modal', { key: 'render-subscribe', data: { timeline: this.timeline } })
-        } else if ( this.$options.filters.isPurchaseable(this.mediafile.resource) ) {
-          eventBus.$emit('open-modal', { key: 'render-purchase-post', data: { post: this.mediafile.resource } })
+        } else if ( this.$options.filters.isPurchaseable(post) ) {
+          eventBus.$emit('open-modal', { key: 'render-purchase-post', data: { post } })
         }
       }
     },

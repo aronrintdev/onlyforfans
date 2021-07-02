@@ -92,6 +92,9 @@
                   <li @click="recordAudio()" class="selectable select-audio">
                     <fa-icon :icon="['far', 'microphone']" :class="selectedMedia==='audio' ? 'text-primary' : 'text-secondary'" />
                   </li>
+                  <li @click="uploadFromVault()" class="selectable select-audio">
+                    <fa-icon :icon="['far', 'archive']" :class="selectedMedia==='audio' ? 'text-primary' : 'text-secondary'" />
+                  </li>
                 </ul>
                 <div class="border-right"></div>
                 <ul class="list-inline d-flex mb-0">
@@ -339,6 +342,11 @@ export default {
     },
     recordAudio() { // %TODO
       this.selectedMedia = this.selectedMedia!=='audio' ? 'audio' : null
+    },
+
+    uploadFromVault() {
+      // %FIXME: should add full upload from vault feature instead of redirecting
+      this.$router.push({ name: 'vault.dashboard' })
     },
 
     showSchedulePicker() {
