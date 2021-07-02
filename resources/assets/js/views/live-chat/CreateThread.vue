@@ -145,6 +145,15 @@
               {{ $t('no-results') }}
             </b-list-group-item>
           </b-list-group>
+
+          <b-pagination
+            v-model="currentPage"
+            :total-rows="contactsCount"
+            :per-page="perPage"
+            aria-controls="threads-list"
+            v-on:page-click="pageClickHandler"
+            class="mt-3"
+          ></b-pagination>
         </article>
 
       </aside>
@@ -421,13 +430,10 @@ export default {
 
     }, // createChatthread()
 
-    // additional page loads
-    // see: https://peachscript.github.io/vue-infinite-loading/guide/#installation
-    loadNextPage() {
-      if ( !this.isLoading && (this.nextPage <= this.lastPage) ) {
-        this.$log.debug('loadNextPage', { current: this.currentPage, last: this.lastPage, next: this.nextPage });
-        this.getContacts()
-      }
+    pageClickHandler(e, page) {
+      this.currentPage = page
+      this.clearCache()
+      this.getContacts()
     },
 
     reloadFromFirstPage() {
@@ -551,8 +557,8 @@ body {
   #view-create-thread {
     background-color: #fff;
 
-    .contact-list .list-group {
-      height: calc(100vh - 320px);
+    .contact-list {
+      height: calc(100vh - 280px);
       overflow: auto;
     }
   }
