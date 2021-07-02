@@ -69,6 +69,7 @@ export default {
 
 <style lang="scss" scoped>
 body {
+  /*
   .img-box {
     padding-top: calc(85% - 2px);
     img {
@@ -102,5 +103,6 @@ body {
       right: 0;
     }
   }
+  */
 }
 </style>

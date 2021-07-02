@@ -84,7 +84,7 @@
         </b-row>
 
         <!-- +++ List/Grid Display of Files & Folders +++ -->
-        <b-row :no-gutters="true">
+        <b-row :no-gutters="false">
 
           <!-- Files -->
           <b-col cols="12" md="3" v-for="(mf) in mediafiles" :key="mf.id" role="button" class="mb-2">
@@ -99,17 +99,17 @@
           </b-col>
 
           <!-- Vaultfolders -->
-          <b-col v-for="(vf) in children" :key="vf.id" cols="12" md="3">
+          <b-col v-for="(vf) in children" :key="vf.id" cols="12" md="3" class="mb-2">
             <div v-if="vf.is_pending_approval" class="tag-folder tag-shared">
-              <b-img fluid @click="renderApproveSharedModal(vf)" src="/images/icons/folder-icon.png" class="folder tag-pending-approval" role="button" :alt="`Folder ${vf.slug}`"></b-img>
+              <b-img fluid @click="renderApproveSharedModal(vf)" src="/images/icons/folder-icon.png" class="folder tag-pending-approval d-block mx-auto" role="button" :alt="`Folder ${vf.slug}`"></b-img>
             </div>
-            <div v-else class="tag-folder">
-              <b-img fluid @click="doNav(vf.id)" src="/images/icons/folder-icon.png" role="button" :alt="`Folder ${vf.slug}`"></b-img>
+            <div v-else class="tag-folder img-box">
+              <b-img fluid @click="doNav(vf.id)" src="/images/icons/folder-icon.png" class="folder d-block mx-auto" role="button" :alt="`Folder ${vf.slug}`"></b-img>
               <div class="file-count">
                 <b-badge variant="warning" class="p-2">{{ vf.mediafiles.length + vf.vfchildren.length }}</b-badge>
               </div>
               <div @click="renderDeleteFolderForm(vf)" class="clickme_to-delete" role="button">
-                <fa-icon :icon="['fas', 'trash']" class="text-danger" />
+                <fa-icon :icon="['fas', 'trash']" size="lg" class="text-danger" />
               </div>
             </div>
             <p class="text-center truncate m-0">{{ vf.name }}</p>
@@ -807,10 +807,42 @@ export default {
 <style lang="scss" >
 body {
     .autosuggest__results ul {
-      padding-left: 1rem;
       margin-top: 2rem;
       list-style: none !important;
     }
+  .img-box {
+    padding-top: calc(85% - 2px);
+    img {
+      object-fit: cover;
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+    img.tag-selected {
+      filter: brightness(50%);
+    }
+    .render-date {
+      position: absolute;
+      top: 5px;
+      left: 5px;
+      border-radius: 5px;
+      background: #535353;
+      opacity: 0.7;
+      padding: 0.3rem;
+      p {
+        opacity: 1;
+        color: #fff;
+        font-size: 11px;
+      }
+    }
+    .select-file {
+      position: absolute;
+      top: 0;
+      right: 0;
+    }
+  }
 }
 </style>
 
@@ -835,18 +867,23 @@ body {
 
   .vault-container {
     background: #fff;
+    .tag-folder {
+      //border: solid #b5b5bf 3px;
+      background: #f5f5f5;
+      border-radius: 5px;
+    }
     .tag-folder img.tag-pending-approval {
       border: solid orange 2px;
     }
     .tag-folder .file-count {
       position: absolute;
-      top: 0.3rem;
-      left: 0.3rem;
+      top: 0.7rem;
+      left: 1.5rem;
     }
     .tag-folder .clickme_to-delete {
       position: absolute;
-      top: 0.3rem;
-      right: 0.3rem;
+      top: 0.7rem;
+      right: 1.5rem;
     }
   }
 
