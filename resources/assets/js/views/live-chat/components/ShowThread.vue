@@ -46,27 +46,32 @@
 
     <hr />
 
-    <section class="messages flex-fill">
-      <b-list-group-item
-        v-for="(cm, idx) in chatmessages"
-        :key="cm.id"
-        v-observe-visibility="idx === chatmessages.length - 1 ? endVisible : false"
-      >
-        <section v-if="isDateBreak(cm, idx)" class="msg-grouping-day-divider"><span>{{ moment(cm.created_at).format('MMM DD, YYYY') }}</span></section>
-        <section class="crate" :class="cm.sender_id===session_user.id ? 'session_user' : 'other_user'">
-          <article class="box">
-            <div class="msg-content">{{ cm.mcontent }}</div>
-            <div class="msg-timestamp">{{ moment(cm.created_at).format('h:mm A') }}</div>
-          </article>
-        </section>
-      </b-list-group-item>
-      <b-list-group-item v-if="isLastPage">
-        <section class="msg-grouping-day-divider">
-          <span v-text="$t('startOfThread')" />
-        </section>
-      </b-list-group-item>
-      <div class="mt-auto"> </div>
-    </section>
+    <transition name="quick-fade" mode="out-in">
+      <section v-if="vaultSelectionOpen" key="vaultSelect" class="vault-selection flex-fill">
+        <VaultSelector @close="vaultSelectionOpen = false" />
+      </section>
+      <section v-else key="messages" class="messages flex-fill">
+        <b-list-group-item
+          v-for="(cm, idx) in chatmessages"
+          :key="cm.id"
+          v-observe-visibility="idx === chatmessages.length - 1 ? endVisible : false"
+        >
+          <section v-if="isDateBreak(cm, idx)" class="msg-grouping-day-divider"><span>{{ moment(cm.created_at).format('MMM DD, YYYY') }}</span></section>
+          <section class="crate" :class="cm.sender_id===session_user.id ? 'session_user' : 'other_user'">
+            <article class="box">
+              <div class="msg-content">{{ cm.mcontent }}</div>
+              <div class="msg-timestamp">{{ moment(cm.created_at).format('h:mm A') }}</div>
+            </article>
+          </section>
+        </b-list-group-item>
+        <b-list-group-item v-if="isLastPage">
+          <section class="msg-grouping-day-divider">
+            <span v-text="$t('startOfThread')" />
+          </section>
+        </b-list-group-item>
+        <div class="mt-auto"> </div>
+      </section>
+    </transition>
 
     <TypingIndicator :threadId="id" />
 
@@ -74,6 +79,7 @@
       :session_user="session_user"
       :chatthread_id="id"
       @sendMessage="addTempMessage"
+      @toggleVaultSelect="vaultSelectionOpen = !vaultSelectionOpen"
     />
 
   </div>
@@ -91,7 +97,8 @@ import moment from 'moment'
 
 import MessageForm from '@views/live-chat/components/MessageForm'
 import SearchInput from '@components/common/search/HorizontalOpenInput'
-import TypingIndicator from './TypingIndicator.vue'
+import TypingIndicator from './TypingIndicator'
+import VaultSelector from './VaultSelector'
 
 export default {
   name: 'ShowThread',
@@ -129,6 +136,8 @@ export default {
     isEndVisible: false,
 
     searchQuery: '',
+
+    vaultSelectionOpen: false,
 
   }), // data
 
@@ -254,6 +263,7 @@ export default {
         this.isMuted = response.data.is_muted;
       } catch (err) {
         if (err.response.status === 403) {
+          console.error('Cannot get mute status of the thread because user doesn\'t have permission!')
           // FIXME: remove or uncomment. commented for now, since it's disruptive
           // this.$root.$bvToast.toast('You do not have permission to view this thread!', {
           //   toaster: 'b-toaster-top-center',
@@ -301,6 +311,7 @@ export default {
     MessageForm,
     SearchInput,
     TypingIndicator,
+    VaultSelector,
   },
 
 }
@@ -575,6 +586,12 @@ export default {
   box-shadow: none;
 }
 
+.vault-selection {
+  height: 100%;
+  width: 100%;
+  overflow-y: auto;
+}
+
 .messages {
   height: 100%;
   width: 100%;
@@ -646,7 +663,7 @@ export default {
 }
 
 .muted {
-  opacity: 50%;
+  opacity: .5;
 }
 </style>
 

@@ -35,6 +35,12 @@
             </template>
             <template v-else>comment</template>
           </template>
+          <template v-if="n.type==='App\\Notifications\\MessageReceived'">sent you a 
+            <template v-if="n.data.resource_type==='chatmessages'">
+              <router-link :to="{ name: 'chatthreads.show', params: { id: n.data.resource_slug } }">message</router-link>
+            </template>
+            <template v-else>message</template>
+          </template>
         </p>
         <small>{{ moment(n.created_at).format('MMM DD, YYYY') }}</small>
         <hr class="mt-2 mb-3" />
@@ -88,6 +94,8 @@ export default {
           return 'TipReceived'
         case 'comments':
           return 'CommentReceived'
+        case 'messages':
+          return 'MessageReceived'
         case 'none':
         default:
           return null
@@ -107,6 +115,8 @@ export default {
           return 'Tips'
         case 'comments':
           return 'Comments'
+        case 'messages':
+          return 'Messages'
         case 'none':
         default:
           return 'All'

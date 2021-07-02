@@ -13,12 +13,19 @@
 
     <hr />
 
+    <transition name="quick-fade" mode="out-in">
+      <section v-if="vaultSelectionOpen" class="vault-selection flex-fill">
+        <VaultSelector @close="vaultSelectionOpen = false" />
+      </section>
+    </transition>
+
     <!-- %FIXME DRY -->
     <MessageForm
       :session_user="session_user"
       chatthread_id="new"
       v-on="$listeners"
-      class="flex-grow-1"
+      class="mt-auto"
+      @toggleVaultSelect="vaultSelectionOpen = !vaultSelectionOpen"
     />
 
   </div>
@@ -27,6 +34,7 @@
 <script>
 import moment from 'moment'
 import MessageForm from '@views/live-chat/components/MessageForm'
+import VaultSelector from './VaultSelector'
 
 export default {
 
@@ -43,8 +51,9 @@ export default {
   },
 
   data: () => ({
-
     moment: moment,
+
+    vaultSelectionOpen: false,
 
   }), // data
 
@@ -68,8 +77,9 @@ export default {
 
   watch: { },
 
-  components: { 
+  components: {
     MessageForm,
+    VaultSelector,
   },
 
 }

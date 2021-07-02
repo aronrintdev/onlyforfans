@@ -2,8 +2,8 @@
   <div v-if="!isLoading" class="crate tag-crate crate-story_bar row OFF-mb-3 mx-0">
     <section class="d-flex flex-wrap justify-content-start w-100">
       <div class="story">
-        <b-form-file @change="handleSelect" ref="fileInput" v-model="selectedFile" class="d-none"></b-form-file>
-        <div @click="selectFile">
+        <b-form-file @change="handleDiskSelect" ref="fileInput" v-model="fileInput" class="d-none"></b-form-file>
+        <div @click="isSelectFileModalVisible=true">
           <fa-icon class="mt-1" :icon="['far', 'plus-circle']" size="2x" />
         </div>
       </div>
@@ -19,14 +19,23 @@
       </div>
     </section>
 
-    <b-modal v-model="isSelectFileModalVisible" id="modal-select-file" size="lg" title="Save to Story" body-class="p-0">
+    <!-- Modal for selecting file from disk vs vault -->
+    <b-modal v-model="isSelectFileModalVisible" id="modal-select-file" size="lg" title="Select Picture or Video" hide-footer>
       <div>
-        <b-img fluid :src="url"></b-img>
+          <b-button variant="primary" class="" @click="selectFromFiles">Select from Files</b-button>
+          <b-button variant="primary" class="" :to="{ name: 'vault.dashboard', params: { context: 'storybar' } }">Select from Vault</b-button>
+      </div>
+    </b-modal>
+
+    <!-- Form modal for image preview before saving to story -->
+    <b-modal v-model="isPreviewModalVisible" id="modal-save-to-story-form" size="lg" title="Save to Story" body-class="p-0">
+      <div>
+        <b-img fluid :src="selectedDiskfileUrl"></b-img>
       </div>
       <template #modal-footer>
         <div class="w-100">
-          <b-button variant="warning" size="sm" class="float-right" @click="isSelectFileModalVisible=false">Cancel</b-button>
-          <b-button variant="primary" size="sm" class="float-right" @click="shareStory">Save</b-button>
+          <b-button variant="warning" size="sm" @click="isPreviewModalVisible=false">Cancel</b-button>
+          <b-button variant="primary" size="sm" @click="storeStory('image')">Save</b-button>
         </div>
       </template>
     </b-modal>
@@ -51,20 +60,72 @@ export default {
   },
 
   data: () => ({
-    url: null,
     timelines : null,
-    isSelectFileModalVisible: false,
-    isLoadedHack: false, // hack to prevent multiple loads due to session_user loads
-    selectedFile: null,
 
-    // put inside a form?
-    stype: 'text',
+    isLoadedHack: false, // hack to prevent multiple loads due to session_user loads
+    isPreviewModalVisible: false,
+    isSelectFileModalVisible: false,
+
+    // Story form input values...
+    //   put inside a form JSON??
+    fileInput: null, // form input
+    //stype: 'text',
     storyAttrs: {
       color: '#fff',
       contents: '',
       link: '',
     },
+
+    selectedDiskfileUrl: null,
   }),
+
+  methods: {
+    selectFromFiles() {
+      this.$refs.fileInput.$el.childNodes[0].click()
+    },
+    selectFromVault() {
+    },
+
+    handleDiskSelect(e) {
+      console.log('handleDiskSelect')
+      const file = e.target.files[0]
+      this.selectedDiskfileUrl = URL.createObjectURL(file)
+      //this.$bvModal.show('modal-select-file', { })
+      this.isPreviewModalVisible = true
+    },
+
+    // API to create a new story record (ie 'update story timeline') in the database for this user's timeline
+    async storeStory(stype) {
+      let payload = new FormData()
+      payload.append('stype', stype)
+      payload.append('bgcolor', this.storyAttrs.color || "#fff")
+      payload.append('content', this.storyAttrs.contents)
+      payload.append('link', this.storyAttrs.link || null)
+
+      switch ( stype ) {
+        case 'text':
+          break
+        case 'image':
+          payload.append('mediafile', this.fileInput)
+          break
+      } 
+
+      const response = await axios.post(`/stories`, payload, {
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      })
+      this.isPreviewModalVisible = false
+      this.isSelectFileModalVisible = false
+      this.fileInput = null // form input
+    },
+
+    bgColor(story) {
+      return Object.keys(story).includes('background-color')
+        ? story.customAttributes['background-color']
+        : 'yellow'
+    },
+  },
 
   created() {
     /*
@@ -78,53 +139,13 @@ export default {
     const response = axios.get( this.$apiRoute('timelines.myFollowedStories')).then ( response => {
       this.timelines = response.data.data
     })
-  },
-
-  methods: {
-    selectFile() {
-      console.log('selectFile')
-      this.$refs.fileInput.$el.childNodes[0].click()
-    },
-
-    handleSelect(e) {
-      console.log('handleSelect')
-      const file = e.target.files[0]
-      this.url = URL.createObjectURL(file)
-      //this.url = URL.createObjectURL(this.selectedFile)
-      //this.$bvModal.show('modal-select-file', { })
-      this.isSelectFileModalVisible = true
-    },
-
-    async shareStory() {
-      //const url = `/${this.dtoUser.username}/stories`;
-      let payload = new FormData();
-      payload.append('stype', this.stype);
-      payload.append('bgcolor', this.storyAttrs.color || null);
-      payload.append('content', this.storyAttrs.contents);
-      payload.append('link', this.storyAttrs.link);
-
-      switch ( this.stype ) {
-        case 'text':
-          break;
-        case 'image':
-          payload.append('mediafile', this.selectedFile);
-          break;
-      } 
-
-      const response = await axios.post(`/stories`, payload, {
-        headers: {
-          'Content-Type': 'application/json',
-        }
-      });
-      this.isSelectFileModalVisible = false
-      this.selectedFile = null
-    },
-
-    bgColor(story) {
-      return Object.keys(story).includes('background-color')
-        ? story.customAttributes['background-color']
-        : 'yellow'
-    },
+    if ( this.$route.params.toast ) {
+      this.$root.$bvToast.toast(this.$route.params.toast.title || 'Success', {
+        title: 'Stories',
+        toaster: 'b-toaster-top-center',
+        variant: 'success',
+      })
+    }
   },
 
   watch: {

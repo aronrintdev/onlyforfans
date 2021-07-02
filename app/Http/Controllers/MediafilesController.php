@@ -3,6 +3,7 @@ namespace App\Http\Controllers;
 
 use DB;
 use Auth;
+use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -217,6 +218,33 @@ class MediafilesController extends AppBaseController
 
     }
 
+    // deletes a single mediafile (reference)
+    public function destroy(Request $request, Mediafile $mediafile)
+    {
+        $this->authorize('delete', $mediafile);
+        $mediafile->diskmediafile->deleteReference($mediafile->id, false);
+        return response()->json([], 204);
+    }
+
+    public function batchDestroy(Request $request)
+    {
+        $this->validate($request, [
+            'mediafile_ids' => 'required|array',
+            'mediafile_ids.*' => 'uuid|exists:mediafiles,id',
+        ]);
+        $mediafiles = Mediafile::whereIn('id', $request->mediafile_ids);
+        $mediafiles->each( function($mf) {
+            try {
+                $this->authorize('delete', $mf);
+                $mf->diskmediafile->deleteReference($mf->id, false);
+            } catch (Exception $e) {
+                Log::warning('mediafiles.batchDestroy - Could not delete mediafile with pkid = '.$mf->id.' : '.$e->getMessage());
+                abort(403);
+            }
+        });
+        return response()->json([], 204);
+    }
+
     // Get stats on related media
     public function diskStats(Mediafile $mediafile) 
     {
@@ -249,32 +277,10 @@ class MediafilesController extends AppBaseController
             });
         }
 
-        return response()->json([ 
+        return response()->json([
             'stats' => $stats ?? [],
         ]);
     }
-
-
-    /*
-    public function destroy($pkid)
-    {
-        $sessionUser = Auth::user();
-
-        $obj = Mediafile::find($pkid);
-        if ( empty($obj) ) {
-            throw new ModelNotFoundException('Could not find mediafile with pkid '.$pkid);
-        }
-        $msg = 'There was a problem...'; // default
-
-        if ( !$obj->isDeletable() ) {
-            $msg = 'Delete not permitted on media file with guid: '.$obj->renderField('guid');
-        } else {
-            $obj->deleteMF();
-            $msg = 'Media file with guid '.$obj->renderField('guid').' successfully deleted';
-        }
-        return back()->with('message',$msg);
-    }
-     */
 
 }
 

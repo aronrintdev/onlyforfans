@@ -1,13 +1,13 @@
 <template>
-  <div v-if="!isLoading" class="w-100">
+  <div v-if="!isLoading" class="view-stories-player w-100">
     <div>
       <p>DEBUG:</p>
       <ul>
         <li>timeline index: {{timelineIndex+1}}/{{timelines.length}}</li>
-        <li>current timeline ID: {{currentTimeline.name || ''}} ({{currentTimeline.id}})</li>
+        <li>current timeline ID: {{currentTimeline.name}} ({{currentTimeline.id}})</li>
       </ul>
     </div>
-    <Player 
+    <PlayerComponent
       @next-story-timeline="nextStoryTimeline"
       @prev-story-timeline="prevStoryTimeline"
       :storyteller="storyteller" 
@@ -18,7 +18,7 @@
 
 <script>
 import Vuex from 'vuex'
-import Player from '@components/stories/Player'
+import PlayerComponent from '@components/stories/Player'
 
 export default {
   name: 'StoriesPlayer',
@@ -29,7 +29,7 @@ export default {
 
   data: () => ({
     timelineIndex: 0,
-    timelines: [],
+    timelines: null
   }),
 
   computed: {
@@ -37,28 +37,28 @@ export default {
     ...Vuex.mapState(['session_user']),
 
     isLoading() {
-      return !this.session_user || !this.stories
+      return !this.session_user || !this.stories || !this.timelines
     },
 
     stories() {
-      return this.timelines[this.timelineIndex]?.stories || []
+      return this.timelines ? this.timelines[this.timelineIndex].stories : []
     },
     storyteller() {
-      return this.timelines[this.timelineIndex]?.name || null
+      return this.timelines ? this.timelines[this.timelineIndex].name : null
     },
     currentTimeline() {
-      return this.timelines[this.timelineIndex] || null
+      return this.timelines ? this.timelines[this.timelineIndex] : null
     },
   },
 
   methods: {
     nextStoryTimeline() {
-      console.log(`nextStoryTimeline() - ${this.timelineIndex} `)
-      this.timelineIndex += 1
+      this.timelineIndex = Math.min(this.timelines.length-1, this.timelineIndex+1) // can't next past last timeline
+      console.log(`nextStoryTimeline() - timelineIndex: ${this.timelineIndex} `)
     },
     prevStoryTimeline() {
-      console.log(`prevStoryTimeline() - ${this.timelineIndex} `)
-      this.timelineIndex -= 1
+      this.timelineIndex = Math.max(0, this.timelineIndex-1) // can't prev before first timeline
+      console.log(`prevStoryTimeline() - timelineIndex: ${this.timelineIndex} `)
     },
   },
 
@@ -66,6 +66,7 @@ export default {
   },
 
   created() {
+    console.log('views/stories/Player::created()')
     if ( this.$route.query.timeline && this.$route.query.timeline === 'me' ) {
       const response = axios.get( this.$apiRoute('timelines.myStories')).then ( response => {
         this.timelines = response.data.data
@@ -78,7 +79,7 @@ export default {
   },
 
   components: {
-    Player,
+    PlayerComponent,
   },
 
 }

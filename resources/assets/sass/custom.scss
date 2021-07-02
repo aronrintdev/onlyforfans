@@ -519,3 +519,14 @@ body .feed-crate.tag-grid-layout .superbox-post .media-slider {
 
 // Hide Google Recaptcha Badge
 .grecaptcha-badge { visibility: hidden !important; }
+
+// Post Form Dropzone
+.dropzone.vue-dropzone .dz-message {
+  margin: 0 !important;
+}
+.dropzone.dz-started.vue-dropzone .dz-message {
+  display: block;
+}
+.dropzone.dz-started.vue-dropzone .dz-preview {
+  display: none;
+}

@@ -73,8 +73,8 @@ export default {
   },
 
   data: () => ({
-    current: 0,
-    play: false, // true,
+    current: 0, // index from 0
+    play: true,
     speed: 3000,
     timelineAnimation: null,
     speedOptions: [
@@ -113,9 +113,7 @@ export default {
       }
     },
     cssDisplay() {
-      console.log ('renderedStories', {
-        renderedStories: this.renderedStories 
-      })
+      //console.log ('renderedStories', { renderedStories: this.renderedStories })
       if (this.renderedStories.length && this.renderedStories[0].mediafiles && this.renderedStories[this.current].mediafiles[0]) {
         return {
           '--background-image': `url(${this.renderedStories[this.current].mediafiles[0].filepath})`,
@@ -134,12 +132,13 @@ export default {
 
   methods: {
     doNav(direction) {
-      console.log(`doNav() - ${direction} - ${this.current}/${this.stories.length}`)
+      console.log(`doNav() - ${direction} - ${this.current+1}/${this.stories.length}`)
       switch (direction) {
         case 'previous':
           if ( (this.current-1) < 0 ) {
             console.log(`doNav() - emit prev-story-timeline`)
             this.$emit('prev-story-timeline', { foo: 'bar'} )
+            this.current = 0
           } else {
             this.goTo(this.current - 1)
           }
@@ -148,6 +147,7 @@ export default {
           if ( (this.current+1) >= this.stories.length ) {
             console.log(`doNav() - emit next-story-timeline`)
             this.$emit('next-story-timeline', { foo: 'bar'} )
+            this.current = 0
           } else {
             this.goTo(this.current + 1)
           }
@@ -157,8 +157,7 @@ export default {
     goTo(index) {
       this.timelineAnimation.pause()
 
-      index =
-        index < 0
+      index = index < 0
           ? this.renderedStories.length - 1
           : index >= this.renderedStories.length
           ? 0
@@ -192,7 +191,10 @@ export default {
         autoplay: this.play,
         duration: this.speed,
         easing: 'linear',
-        loop: true,
+        loop: false,
+        complete: function() {
+          console.log('$anime - complete callback')
+        },
       })
       this.addTimelineElements()
     },

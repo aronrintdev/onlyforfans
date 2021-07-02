@@ -46,6 +46,15 @@
               {{ showSearchResults ? $t('no-items-search', { query: searchQuery }) : $t('no-items') }}
             </b-list-group-item>
           </b-list-group>
+
+          <b-pagination
+            v-model="currentPage"
+            :total-rows="totalRows"
+            :per-page="perPage"
+            aria-controls="threads-list"
+            v-on:page-click="pageClickHandler"
+            class="mt-3"
+          ></b-pagination>
         </article>
 
       </aside>
@@ -132,6 +141,10 @@ export default {
 
     isLoading() {
       return !this.session_user || !this.chatthreads
+    },
+
+    totalRows() {
+      return this.meta ? this.meta.total : 1
     },
 
 
@@ -222,7 +235,7 @@ export default {
       }
       const response = await axios.get( this.$apiRoute('chatthreads.index'), { params } )
       this.chatthreads = response.data.data
-      this.meta = response.meta
+      this.meta = response.data.meta
     },
 
     async markAllRead() {
@@ -237,14 +250,9 @@ export default {
       this.getUnreadMessagesCount()
     },
 
-    // additional page loads
-    // see: https://peachscript.github.io/vue-infinite-loading/guide/#installation
-    loadNextPage() {
-      if ( !this.isMoreLoading && !this.isLoading && (this.nextPage <= this.lastPage) ) {
-        this.isMoreLoading = true;
-        this.$log.debug('loadNextPage', { current: this.currentPage, last: this.lastPage, next: this.nextPage });
-        this.getChatthreads()
-      }
+    pageClickHandler(e, page) {
+      this.currentPage = page
+      this.getChatthreads()
     },
 
     // may adjust filters, but always reloads from page 1
@@ -327,8 +335,10 @@ export default {
     },
 
     activeThreadId(newVal) {
-      const activeThread = this.chatthreads.find( ct => ct.id === newVal )
-      activeThread.unread_count = 0
+      if (newVal) {
+        const activeThread = this.chatthreads.find( ct => ct.id === newVal )
+        activeThread.unread_count = 0
+      }
     }
 
   }, // watch
@@ -340,16 +350,20 @@ export default {
 #view-livechat {
   background-color: #fff;
 
-  max-height: 80vh;
-  overflow: hidden;
+  height: calc(100vh - 100px);
 
-  .chatthread-list .list-group-item.active {
-    background: rgba(0,145,234,.06);
-    color: inherit;
-    border-top: none;
-    border-left: 1px solid rgba(138,150,163,.25);
-    border-right: 1px solid rgba(138,150,163,.25);
-    border-bottom: 1px solid rgba(138,150,163,.25);
+  .chatthread-list {
+    height: calc(100vh - 350px);
+    overflow: auto;
+
+    .list-group-item.active {
+      background: rgba(0,145,234,.06);
+      color: inherit;
+      border-top: none;
+      border-left: 1px solid rgba(138,150,163,.25);
+      border-right: 1px solid rgba(138,150,163,.25);
+      border-bottom: 1px solid rgba(138,150,163,.25);
+    }
   }
 
 }

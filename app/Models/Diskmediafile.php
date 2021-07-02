@@ -26,24 +26,24 @@ class Diskmediafile extends BaseModel implements Guidable, Ownable
     public static $vrules = [];
 
     static public $mimeImageTypes = [
-            'image/jpeg',
-            'image/png',
-            'image/gif',
+        'image/jpeg',
+        'image/png',
+        'image/gif',
     ];
     static public $mimeVideoTypes = [
-            'video/mp4',
-            'video/x-m4v',
-            'video/x-flv',
-            'video/quicktime',
-            'video/x-ms-wmv',
-            'video/x-matroska',
-            'video/ogg',
+        'video/mp4',
+        'video/x-m4v',
+        'video/x-flv',
+        'video/quicktime',
+        'video/x-ms-wmv',
+        'video/x-matroska',
+        'video/ogg',
     ];
     static public $mimeAudioTypes = [
-            'audio/mpeg',
-            'audio/mp4',
-            'audio/ogg',
-            'audio/vnd.wav',
+        'audio/mpeg',
+        'audio/mp4',
+        'audio/ogg',
+        'audio/vnd.wav',
     ];
 
     //--------------------------------------------
@@ -166,8 +166,8 @@ class Diskmediafile extends BaseModel implements Guidable, Ownable
     {
         $key = trim($key);
         switch ($key) {
-            default:
-                $key =  parent::_renderFieldKey($key);
+        default:
+        $key =  parent::_renderFieldKey($key);
         }
         return $key;
     }
@@ -176,11 +176,11 @@ class Diskmediafile extends BaseModel implements Guidable, Ownable
     {
         $key = trim($field);
         switch ($key) {
-            case 'meta':
-            case 'cattrs':
-                return json_encode($this->{$key});
-            default:
-                return parent::renderField($field);
+        case 'meta':
+        case 'cattrs':
+            return json_encode($this->{$key});
+        default:
+            return parent::renderField($field);
         }
     }
 
@@ -251,13 +251,50 @@ class Diskmediafile extends BaseModel implements Guidable, Ownable
     // %Caller must check permissions/ownership !
     public function deleteReference($mediafileID, $deleteFromDiskIfLast=false)
     {
-        DB::table('mediafiles')->where('id', $mediafileID)->delete();
-        if  ( $deleteFromDiskIfLast ) {
-            $this->deleteAssets(); // S3, etc
-            Mediafile::withTrashed()->where('diskmediafile_id', $this->id)->forceDelete();
-            //$this->delete();
-            $this->forceDelete();
-        }
+        DB::transaction(function () use($mediafileID, $deleteFromDiskIfLast) { 
+
+            $sessionUser = Auth::user();
+
+            $mediafile = Mediafile::find($mediafileID);
+
+            // Clean up the logs as src...
+            $mfShareLogs = Mediafilesharelog::where('srcmediafile_id', $mediafile->id)->get();
+            $mfShareLogs->each( function($mfsl) use(&$sessionUser) {
+                $meta = $mfsl->meta;
+                if ( !array_key_exists('logs', $meta??[]) ) {
+                    $meta['logs'] = []; // init
+                }
+                $meta['logs'][] = 'Src mediafile '.$mfsl->srcmediafile_id.' soft deleted by user '.$sessionUser->id;
+                $mfsl->meta = $meta; 
+                // assumes soft mediafile delete, otherwise we need to set FKID to NULL
+                $mfsl->save();
+            });
+
+            // Clean up the logs as dst...
+            $mfShareLogs = Mediafilesharelog::where('dstmediafile_id', $mediafile->id)->get();
+            $mfShareLogs->each( function($mfsl) use(&$sessionUser) {
+                $meta = $mfsl->meta;
+                if ( !array_key_exists('logs', $meta??[]) ) {
+                    $meta['logs'] = []; // init
+                }
+                $meta['logs'][] = 'Dst mediafile '.$mfsl->dstmediafile_id.' soft deleted by user '.$sessionUser->id;
+                $mfsl->meta = $meta;
+                // assumes soft mediafile delete, otherwise we need to set FKID to NULL
+                $mfsl->save();
+            });
+
+            $mediafile->delete();
+
+            // ---
+
+            $refCount = Mediafile::where('diskmediafile_id', $this->id)->count();
+            if  ( $deleteFromDiskIfLast && ($refCount > 0) ) {
+                $this->deleteAssets(); // S3, etc
+                Mediafile::withTrashed()->where('diskmediafile_id', $this->id)->forceDelete();
+                //$this->delete();
+                $this->forceDelete();
+            }
+        });
     }
 
     // Deletes assets (S3), all references ([mediafiles] records), and finally the [diskmediafiles] record itself
