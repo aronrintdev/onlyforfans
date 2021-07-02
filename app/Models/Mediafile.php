@@ -27,19 +27,24 @@ class Mediafile extends BaseModel implements Guidable, Ownable
     // %%% Relationships
     //--------------------------------------------
 
-    public function resource()
-    {
+    public function resource() {
         return $this->morphTo();
     }
 
-    public function sharees()
-    {
+    public function sharees() {
         return $this->morphToMany(User::class, 'shareable', 'shareables', 'shareable_id', 'sharee_id');
     }
 
-    public function diskmediafile()
-    {
+    public function diskmediafile() {
         return $this->belongsTo(Diskmediafile::class);
+    }
+
+    public function mediafilesharelogsAsSrc() {
+        return $this->hasMany(Mediafilesharelog::class, 'srcmediafile_id');
+    }
+
+    public function mediafilesharelogsAsDst() {
+        return $this->hasMany(Mediafilesharelog::class, 'dstmediafile_id');
     }
 
     //--------------------------------------------
