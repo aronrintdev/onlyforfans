@@ -7,6 +7,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Log;
 use App\Interfaces\Ownable;
 use App\Interfaces\Guidable;
 use App\Models\Traits\UsesUuid;
@@ -30,6 +31,7 @@ class Vaultfolder extends BaseModel implements Guidable, Ownable
         //'vfchildren',
         //'mediafiles',
         'mediafile_count',
+        'vfchildren_count',
     ];
 
     //--------------------------------------------
@@ -128,6 +130,10 @@ class Vaultfolder extends BaseModel implements Guidable, Ownable
         return $this->mediafiles->count();
     }
 
+    public function getVfchildrenCountAttribute($value) {
+        return $this->vfchildren->count();
+    }
+
     //--------------------------------------------
     // Scopes
     //--------------------------------------------
@@ -216,6 +222,38 @@ class Vaultfolder extends BaseModel implements Guidable, Ownable
     public function getOwner(): ?Collection
     {
         return $this->vault->getOwner();
+    }
+
+    public function recursiveDelete()
+    {
+        // for debug...
+        static $level = 0;
+        $level += 1; 
+        if ($level > 10) {
+            //dd("DEBUG recursiveDelete() - max levels reached ".$level);
+            throw new \Exception("DEBUG recursiveDelete() - max levels reached ".$level);
+        }
+
+        static $numberOfItemsDeleted = 0;
+
+        // Invoke on all sub-folders (recursive)
+        $this->vfchildren->each ( function($vfc) use(&$numberOfItemsDeleted) {
+            $numberOfItemsDeleted += $vfc->recursiveDelete();
+            $vfc->delete();
+            $numberOfItemsDeleted += 1; // for vfc
+        });
+
+        // Delete all files in this folder
+        $this->mediafiles->each( function($mf) use(&$numberOfItemsDeleted) {
+            try {
+                $mf->diskmediafile->deleteReference($mf->id, false);
+                $numberOfItemsDeleted += 1;
+            } catch (Exception $e) {
+                Log::warning('vaultfolder.model - Could not delete mediafile with pkid = '.$mf->id.' in vaultfolder = '.$this->id. ' : '.$e->getMessage());
+            }
+        });
+
+        return $numberOfItemsDeleted;
     }
 
 }
