@@ -252,7 +252,8 @@ class Diskmediafile extends BaseModel implements Guidable, Ownable
     public function deleteReference($mediafileID, $deleteFromDiskIfLast=false)
     {
         DB::table('mediafiles')->where('id', $mediafileID)->delete();
-        if  ( $deleteFromDiskIfLast ) {
+        $refCount = Mediafile::where('diskmediafile_id', $this->id)->count();
+        if  ( $deleteFromDiskIfLast && ($refCount > 0) ) {
             $this->deleteAssets(); // S3, etc
             Mediafile::withTrashed()->where('diskmediafile_id', $this->id)->forceDelete();
             //$this->delete();

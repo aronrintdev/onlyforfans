@@ -60,11 +60,13 @@
               </b-breadcrumb>
         
               <div v-if="this.selectedMediafiles.length" class="d-flex align-items-center">
-                <span class="mr-5">{{ this.selectedMediafiles.length }} selected</span>
-                <div>
-                  <b-button @click="renderSendForm()" variant="primary">Add To</b-button>
-                  <b-button @click="renderShareForm()" variant="primary">Share</b-button>
-                  <b-button @click="clearSelected()" variant="warning">Clear All</b-button>
+                <div class="mr-2">{{ this.selectedMediafiles.length }} selected</div>
+                <div class="mr-2"><b-button @click="clearSelected()" variant="warning">Clear Selection</b-button></div>
+                <div class="mr-5"><b-button @click="selectAll()" variant="secondary">Select All</b-button></div>
+                <div class="">
+                  <b-button @click="renderSendForm()" variant="primary" class="mr-1">Add To</b-button>
+                  <b-button @click="renderShareForm()" variant="primary" class="mr-1">Share</b-button>
+                  <b-button @click="renderDeleteForm()" variant="danger" class="mr-1">Delete</b-button>
                 </div>
               </div>
 
@@ -83,23 +85,24 @@
 
         <!-- +++ List/Grid Display of Files +++ -->
         <b-row :no-gutters="true">
-          <b-col cols="12" md="3" v-for="(mf) in mediafiles" :key="mf.id" role="button">
+          <b-col cols="12" md="3" v-for="(mf) in mediafiles" :key="mf.id" role="button" class="mb-2">
             <PreviewFile 
               :data-mf_id="mf.id" 
               :mediafile="mf" 
               @input="onPreviewFileInput" 
               @render-lightbox="renderLightbox" 
-              class="p-1" 
+              class="p-1 tag-file" 
             />
+            <p class="text-center truncate m-0">{{ mf.mfname }}</p>
           </b-col>
           <b-col v-for="(vf) in children" :key="vf.id" cols="12" md="3" role="button">
-            <div v-if="vf.is_pending_approval">
+            <div v-if="vf.is_pending_approval" class="tag-folder">
               <b-img fluid @click="renderApproveSharedModal(vf)" src="/images/tmp-placeholders/folder-icon.jpg" class="tag-folder tag-pending-approval":alt="`Folder ${vf.slug}`"></b-img>
             </div>
             <div v-else>
               <b-img fluid @click="doNav(vf.id)" src="/images/tmp-placeholders/folder-icon.jpg" class="tag-folder" :alt="`Folder ${vf.slug}`"></b-img>
             </div>
-            <div class="text-center">{{ vf.name }}</div>
+            <p class="text-center truncate m-0">{{ vf.name }}</p>
           </b-col>
         </b-row>
 
@@ -155,7 +158,7 @@
           <template #modal-footer>
             <div class="w-100">
               <b-button variant="warning" size="sm" @click="isShareFilesModalVisible=false">Cancel</b-button>
-              <b-button variant="primary" size="sm" @click="shareFiles">Share</b-button>
+              <b-button variant="primary" size="sm" @click="shareSelectedFiles">Share</b-button>
             </div>
           </template>
 
@@ -186,6 +189,20 @@
           </b-list-group-item>
         </b-list-group>
       </div>
+    </b-modal>
+
+    <!-- Modal for deleting selected files or folders -->
+    <b-modal v-model="isDeleteFilesModalVisible" size="lg" title="Delete Files" >
+        <p>Please confirm you really want to delete the following {{ selectedMediafiles.length }} files...</p>
+        <b-list-group class="delete-list">
+          <b-list-group-item v-for="(mf) in selectedMediafiles" :key="mf.id">{{ mf.mfname }}</b-list-group-item>
+        </b-list-group>
+        <template #modal-footer>
+          <div class="w-100">
+            <b-button variant="secondary" size="sm" @click="isDeleteFilesModalVisible=false">Cancel</b-button>
+            <b-button variant="danger" size="sm" @click="deleteSelectedFiles">Yes Delete</b-button>
+          </div>
+        </template>
     </b-modal>
 
     <!-- Form modal for creating a new sub-folder under the current folder -->
@@ -328,6 +345,7 @@ export default {
     isUploaderVisible: false,
     isSendFilesModalVisible: false,
     isShareFilesModalVisible: false,
+    isDeleteFilesModalVisible: false,
     isCreateFolderModalVisible: false,
     isSaveToStoryModalVisible: false,
     isMediaLightboxModalVisible: false,
@@ -441,7 +459,6 @@ export default {
     },
 
     renderShareForm() {
-      console.log('renderShareForm()')
       this.isShareFilesModalVisible = true
     },
 
@@ -449,10 +466,17 @@ export default {
       this.isSendFilesModalVisible = true
     },
 
+    renderDeleteForm() {
+      this.isDeleteFilesModalVisible = true
+    },
+
     onPreviewFileInput(value) {
       Vue.set(this.mediafiles, value.id, value) // Sets .selected on mediafiles array depending on child form component's action
     },
 
+    selectAll() {
+      this.mediafiles = _.mapValues( this.mediafiles, o => ({ ...o, selected: true }) )
+    },
     clearSelected() {
       this.mediafiles = _.mapValues( this.mediafiles, o => ({ ...o, selected: false }) )
     },
@@ -478,7 +502,7 @@ export default {
     },
 
     // Share selected files to other user(s)...injects selected files into receipent's vault in a new subfolder
-    async shareFiles(e) {
+    async shareSelectedFiles(e) {
       // this.selectedMediafiles
       /*
       const response = await axios.patch(`/vaults/${this.vault_pkid}/update-shares`, {
@@ -506,6 +530,15 @@ export default {
       this.inviteeInput = ''
     },
 
+    async deleteSelectedFiles(e) {
+      const payload = { 
+        mediafile_ids: this.selectedMediafiles.map( o => o.id ),
+      }
+      const response = await axios.post( this.$apiRoute('mediafiles.batchDestroy'), payload )
+      this.isDeleteFilesModalVisible = false
+      this.$store.dispatch('getVaultfolder', this.currentFolderId)
+      this.clearSelected()
+    },
 
     // --- New Vault Folder Form methods ---
     renderNewFolderForm() {
@@ -754,12 +787,25 @@ body {
     img.tag-folder.tag-pending-approval {
       border: solid orange 2px;
     }
+
   }
   .vue-dropzone {
     background: #ccdfeb;
   }
   .share-list .tag-sharee {
     font-size: 1.2rem;
+  }
+
+  .truncate {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+   }
+  .tag-file .truncate {
+    width: 200px;
+  }
+  .tag-folder .truncate {
+    width: 200px;
   }
 }
 </style>
