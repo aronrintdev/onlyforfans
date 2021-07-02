@@ -31,7 +31,7 @@
       <swiper-slide class="slide">
         <div v-if="!isDragListVisible">
           <div class="swiper-image-wrapper" v-for="(media, index) in files" :key="index">
-            <img v-preview:scope-a class="swiper-lazy" :src="media.src" />
+            <img v-preview:scope-a class="swiper-lazy" :src="media.src || media.filepath" />
             <button class="btn btn-primary icon-close" @click="removeMediafile(index)">
               <fa-icon :icon="['far', 'times']" class="text-white" size="sm" />
             </button>
@@ -57,18 +57,22 @@ import draggable from 'vuedraggable';
 
 export default {
   name: "UploadMediaPreview",
+
   props: {
     mediafiles: Array,
   },
+
   components: {
     draggable,
   },
+
   directives: {
     preview: createPreviewDirective({
         showAnimationDuration: 0,
         bgOpacity: 0.75
       }, PhotoSwipe, PhotoSwipeUI)
   },
+
   data: () => ({
     files: [],
     swiperOptions: {
@@ -85,19 +89,31 @@ export default {
     isDragListVisible: false,
     applyBtnEnabled: false,
   }),
+
   computed: {
     swiper() {
       return this.$refs.mySwiper.$swiper;
+    },
+  },
+
+  mounted() {
+    if (this.mediafiles) {
+      this.files = [...this.mediafiles];
+      this.$nextTick(() => {
+        this.swiper.update()
+      })
     }
   },
+
   watch: {
     mediafiles() {
       this.files = [...this.mediafiles];
-      setTimeout(() => {
-        this.swiper.update();
-      }, 500);
-    }
+      this.$nextTick(() => {
+        this.swiper.update()
+      })
+    },
   },
+
   methods: {
     onSelectMediafile(index, status) {
       const temp = [...this.files];
@@ -114,6 +130,7 @@ export default {
       this.files = temp;
       this.applyBtnEnabled = true;
     },
+
     applyMediafilesSort() {
       const temp = [...this.files];
       const sortedTemp = _.orderBy(temp, ['order'], ['asc']);
@@ -124,19 +141,22 @@ export default {
       this.$emit('change', sortedTemp);
       this.applyBtnEnabled = false;
     },
+
     confirmMediafilesSort() {
       this.applyMediafilesSort();
       this.isDragListVisible = false;
     },
+
     removeMediafile(index) {
       const temp = [...this.files];
       temp.splice(index, 1);
       this.$emit('change', temp);
     },
+
     openFileUpload() {
       this.$emit('openFileUpload');
-    }
-  }
+    },
+  },
 }
 </script>
 
