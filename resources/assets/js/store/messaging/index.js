@@ -35,6 +35,11 @@ export const messaging = {
     //   },
     // }
     threads: {},
+
+    /**
+     * Selected Media files for the message form
+     */
+    selectedMediafiles: [],
   }),
 
   getters: {},
@@ -58,6 +63,31 @@ export const messaging = {
     UPDATE_MESSAGE(state, message) {
       prepThread(state, message.chatthread_id)
       Vue.set(state.threads[message.chatthread_id].messages, message.id, message)
+    },
+
+    /** Pushes mediafile or array of mediafiles onto selectedMediafiles */
+    ADD_SELECTED_MEDIAFILES(state, payload) {
+      if (!payload) {
+        return
+      }
+      // If property id is set this is single mediafile
+      if (payload['id']) {
+        state.selectedMediafiles.push(payload)
+        return
+      }
+      for (var item of payload) {
+        state.selectedMediafiles.push(item)
+      }
+    },
+
+    /** Sets the selected media files */
+    UPDATE_SELECTED_MEDIAFILES(state, payload) {
+      state.selectedMediafiles = payload
+    },
+
+    /** Clears out the selected media files */
+    CLEAR_SELECTED_MEDIAFILES(state) {
+      state.selectedMediafiles = []
     },
   },
 

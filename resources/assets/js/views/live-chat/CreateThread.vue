@@ -262,7 +262,7 @@ export default {
     currentPage: 1,
     perPage: 10,
     sortBy: 'recent',
-    selectedFilter: 'all',
+    selectedFilter: '',
 
     // Loading
     isLoadingContacts: false,
@@ -281,6 +281,10 @@ export default {
 
   created() {
     this.getMe()
+    this.CLEAR_CACHE()
+    this.$nextTick(() => {
+      this.selectedFilter = 'all'
+    })
     // Create debounced method
     this.doSearch = _.debounce(this._doSearch, this.searchDebounceDuration);
   },
@@ -295,6 +299,7 @@ export default {
       'getMe',
     ]),
     ...Vuex.mapMutations('messaging/contacts', [
+      'CLEAR_CACHE',
       'UPDATE_CONTACT',
       'SAVE_CONTACTS_LIST',
       'UNSELECT_ALL',
@@ -310,6 +315,9 @@ export default {
     },
 
     filtersLabel(key) {
+      if (this.selectedFilter === '') {
+        return this.$t('filters.all')
+      }
       if (this.filters[this.selectedFilter].name) {
         return this.filters[this.selectedFilter].name
       }
@@ -522,8 +530,10 @@ export default {
     },
 
     selectedFilter(value) {
-      // New filter was selected, load it's contents from the first page
-      this.reloadFromFirstPage()
+      if (value !== '') {
+        // New filter was selected, load it's contents from the first page
+        this.reloadFromFirstPage()
+      }
     },
 
     session_user(value) {
