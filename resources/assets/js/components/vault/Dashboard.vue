@@ -100,8 +100,11 @@
 
           <!-- Vaultfolders -->
           <b-col v-for="(vf) in children" :key="vf.id" cols="12" md="3" class="mb-2">
-            <div v-if="vf.is_pending_approval" class="tag-folder tag-shared">
-              <b-img fluid @click="renderApproveSharedModal(vf)" src="/images/icons/folder-icon.png" class="folder tag-pending-approval d-block mx-auto" role="button" :alt="`Folder ${vf.slug}`"></b-img>
+            <div v-if="vf.is_pending_approval" class="tag-folder img-box tag-shared tag-pending-approval">
+              <b-img fluid @click="renderApproveSharedModal(vf)" src="/images/icons/folder-icon.png" class="folder d-block mx-auto" role="button" :alt="`Folder ${vf.slug}`"></b-img>
+              <div class="icon-pending-approval" style="font-size: 3rem;">
+                <fa-icon :icon="['fas', 'share-alt']" class="text-primary" />
+              </div>
             </div>
             <div v-else class="tag-folder img-box">
               <b-img fluid @click="doNav(vf.id)" src="/images/icons/folder-icon.png" class="folder d-block mx-auto" role="button" :alt="`Folder ${vf.slug}`"></b-img>
@@ -872,8 +875,8 @@ body {
       background: #f5f5f5;
       border-radius: 5px;
     }
-    .tag-folder img.tag-pending-approval {
-      border: solid orange 2px;
+    .tag-folder.tag-pending-approval {
+      border: solid orange 3px;
     }
     .tag-folder .file-count {
       position: absolute;
@@ -884,6 +887,11 @@ body {
       position: absolute;
       top: 0.7rem;
       right: 1.5rem;
+    }
+    .tag-folder .icon-pending-approval {
+      position: absolute;
+      top: 45%;
+      right: 50%;
     }
   }
 
