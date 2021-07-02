@@ -25,49 +25,7 @@
 
         <hr />
 
-        <b-form @submit="shareFiles" v-if="true">
-
-          <div v-if="selectedMediafiles.length" class="autosuggest-container">
-            <b-form-group>
-              <b-form-input
-                v-model="inviteeInput"
-                v-on:keydown.enter.prevent="addInvite"
-                type="text"
-                placeholder="Enter email to invite..."
-              ></b-form-input>
-            </b-form-group>
-            <!--
-            <b-form-group>
-              <vue-autosuggest
-                v-model="query"
-                :suggestions="filteredOptions"
-                @focus="focusMe"
-                @input="getMatches"
-                @selected="addSharee"
-                :get-suggestion-value="getSuggestionValue"
-                :input-props="{id:'autosuggest__input', class: 'form-control', placeholder:'Enter user to share with...'}">
-                <div slot-scope="{suggestion}" style="display: flex; align-items: center;">
-                  <div style="{ display: 'flex' }">{{suggestion.item.label}}</div>
-                </div>
-              </vue-autosuggest>
-            </b-form-group>
-            -->
-          </div>
-
-          <b-button v-if="selectedMediafiles.length" type="submit" variant="primary">Share Selected</b-button>
-          <!--
-          < b-button @click="cancelShareFiles" type="cancel" variant="secondary">Cancel</b-button>
-          -->
-        </b-form>
-
         <!--
-        <h4>Shares</h4>
-        <ul v-if="shareForm.sharees.length">
-          <li v-for="(se) in shareForm.sharees">
-            {{ se.label }}
-          </li>
-        </ul>
-
         <h4>Invites</h4>
         <ul v-if="shareForm.invitees.length">
           <li v-for="(i) in shareForm.invitees">{{ i }}</li>
@@ -102,10 +60,13 @@
               </b-breadcrumb>
         
               <div v-if="this.selectedMediafiles.length" class="d-flex align-items-center">
-                <span class="mr-5">{{ this.selectedMediafiles.length }} selected</span>
-                <div>
-                  <b-button @click="renderShareForm()" variant="primary">Add To</b-button>
-                  <b-button @click="clearSelected()" variant="warning">Clear All</b-button>
+                <div class="mr-2">{{ this.selectedMediafiles.length }} selected</div>
+                <div class="mr-2"><b-button @click="clearSelected()" variant="warning">Clear Selection</b-button></div>
+                <div class="mr-5"><b-button @click="selectAll()" variant="secondary">Select All</b-button></div>
+                <div class="">
+                  <b-button @click="renderSendForm()" variant="primary" class="mr-1">Add To</b-button>
+                  <b-button @click="renderShareForm()" variant="primary" class="mr-1">Share</b-button>
+                  <b-button @click="renderDeleteForm()" variant="danger" class="mr-1">Delete</b-button>
                 </div>
               </div>
 
@@ -124,18 +85,24 @@
 
         <!-- +++ List/Grid Display of Files +++ -->
         <b-row :no-gutters="true">
-          <b-col cols="12" md="3" v-for="(mf) in mediafiles" :key="mf.id" role="button">
+          <b-col cols="12" md="3" v-for="(mf) in mediafiles" :key="mf.id" role="button" class="mb-2">
             <PreviewFile 
               :data-mf_id="mf.id" 
               :mediafile="mf" 
               @input="onPreviewFileInput" 
               @render-lightbox="renderLightbox" 
-              class="p-1" 
+              class="p-1 tag-file" 
             />
+            <p class="text-center truncate m-0">{{ mf.mfname }}</p>
           </b-col>
           <b-col v-for="(vf) in children" :key="vf.id" cols="12" md="3" role="button">
-            <b-img fluid @click="doNav(vf.id)" src="/images/tmp-placeholders/folder-icon.jpg" :alt="`Folder ${vf.slug}`"></b-img>
-            <div class="text-center">{{ vf.name }}</div>
+            <div v-if="vf.is_pending_approval" class="tag-folder">
+              <b-img fluid @click="renderApproveSharedModal(vf)" src="/images/tmp-placeholders/folder-icon.jpg" class="tag-folder tag-pending-approval":alt="`Folder ${vf.slug}`"></b-img>
+            </div>
+            <div v-else>
+              <b-img fluid @click="doNav(vf.id)" src="/images/tmp-placeholders/folder-icon.jpg" class="tag-folder" :alt="`Folder ${vf.slug}`"></b-img>
+            </div>
+            <p class="text-center truncate m-0">{{ vf.name }}</p>
           </b-col>
         </b-row>
 
@@ -143,22 +110,78 @@
 
     </b-row>
 
-    <b-modal id="modal-share-file" size="lg" title="Share Files" hide-footer body-class="p-0" >
+    <!-- Modal for sharing selected files or folders to one or more users (ie manager -> creators) -->
+    <b-modal v-model="isShareFilesModalVisible" size="lg" title="Share Files" >
+      <b-form>
+
+          <div class="autosuggest-container">
+              <!--
+            <b-form-group>
+              <b-form-input
+                v-model="inviteeInput"
+                v-on:keydown.enter.prevent="addInvite"
+                type="text"
+                placeholder="Enter names of creators you manage..."
+              ></b-form-input>
+            </b-form-group>
+              -->
+            <b-form-group>
+              <vue-autosuggest
+                v-model="query"
+                :suggestions="filteredOptions"
+                @focus="focusMe"
+                @input="getMatches"
+                @selected="addSharee"
+                :get-suggestion-value="getSuggestionValue"
+                :input-props="{id:'autosuggest__input', class: 'form-control', placeholder:'Enter user to share with...'}">
+                <div slot-scope="{suggestion}" style="display: flex; align-items: center;">
+                  <div style="{ display: 'flex' }">{{suggestion.item.label}}</div>
+                </div>
+              </vue-autosuggest>
+            </b-form-group>
+          </div>
+
+          <div class="share-list">
+            <div v-if="shareForm.sharees.length">
+              <span v-for="(se) in shareForm.sharees" class="tag-sharee mr-3">
+                <b-badge variant="info" class="p-2">{{ se.label }} <fa-icon :icon="['far', 'times']" /></b-badge>
+              </span>
+            </div>
+          </div>
+
+          <!--
+          <b-button type="submit" variant="primary">Share Selected</b-button>
+          < b-button @click="cancelShareFiles" type="cancel" variant="secondary">Cancel</b-button>
+          -->
+        </b-form>
+
+          <template #modal-footer>
+            <div class="w-100">
+              <b-button variant="warning" size="sm" @click="isShareFilesModalVisible=false">Cancel</b-button>
+              <b-button variant="primary" size="sm" @click="shareSelectedFiles">Share</b-button>
+            </div>
+          </template>
+
+    </b-modal>
+
+
+    <!-- Modal for selecting where to 'send' the selected files: to the story (max 1 file), to a post, or to a message -->
+    <b-modal v-model="isSendFilesModalVisible" size="lg" title="Send Files" hide-footer body-class="p-0" >
       <div>
         <b-list-group>
-          <b-list-group-item>
+          <b-list-group-item v-if="sendChannels.includes('post')">
             <b-button @click="sendSelected('post')" variant="link" class="text-decoration-none">
               <fa-icon :icon="['far', 'plus-square']" fixed-width class="mx-2" size="lg" />
               Send in New Post
             </b-button>
           </b-list-group-item>
-          <b-list-group-item>
-            <b-button @click="sendSelected('story')" variant="link" class="text-decoration-none">
+          <b-list-group-item v-if="sendChannels.includes('story')">
+            <b-button :disabled="selectedMediafiles.length>1" @click="sendSelected('story')" variant="link" class="text-decoration-none">
               <fa-icon :icon="['far', 'plus-square']" fixed-width class="mx-2" size="lg" />
               Send in New Story
             </b-button>
           </b-list-group-item>
-          <b-list-group-item>
+          <b-list-group-item v-if="sendChannels.includes('message')">
             <b-button @click="sendSelected('message')" variant="link" class="text-decoration-none">
               <fa-icon :icon="['far', 'plus-square']" fixed-width class="mx-2" size="lg" />
               Send in New Message
@@ -168,6 +191,21 @@
       </div>
     </b-modal>
 
+    <!-- Modal for deleting selected files or folders -->
+    <b-modal v-model="isDeleteFilesModalVisible" size="lg" title="Delete Files" >
+        <p>Please confirm you really want to delete the following {{ selectedMediafiles.length }} files...</p>
+        <b-list-group class="delete-list">
+          <b-list-group-item v-for="(mf) in selectedMediafiles" :key="mf.id">{{ mf.mfname }}</b-list-group-item>
+        </b-list-group>
+        <template #modal-footer>
+          <div class="w-100">
+            <b-button variant="secondary" size="sm" @click="isDeleteFilesModalVisible=false">Cancel</b-button>
+            <b-button variant="danger" size="sm" @click="deleteSelectedFiles">Yes Delete</b-button>
+          </div>
+        </template>
+    </b-modal>
+
+    <!-- Form modal for creating a new sub-folder under the current folder -->
     <b-modal id="modal-create-folder" v-model="isCreateFolderModalVisible" size="lg" title="Create Folder" body-class="">
       <b-form @submit.prevent="storeFolder">
           <b-form-group>
@@ -185,9 +223,35 @@
         </template>
     </b-modal>
 
+    <!-- 'Lightbox' modal for image preview when clicking on a file in the vault grid/list -->
     <b-modal v-model="isMediaLightboxModalVisible" id="modal-media-lightbox" title="" hide-footer body-class="p-0" size="xl">
       <MediaLightbox :session_user="session_user" :mediafile="lightboxSelection" />
     </b-modal>
+
+    <!-- Form modal for image preview before saving to story (%FIXME DRY: see StoryBar.vue) -->
+    <b-modal v-model="isSaveToStoryModalVisible" id="modal-save-to-story-form" size="lg" title="Save to Story" body-class="p-0">
+      <div>
+        <b-img fluid :src="selectedMediafiles.length ? selectedMediafiles[0].filepath : null"></b-img>
+      </div>
+      <template #modal-footer>
+        <div class="w-100">
+          <b-button variant="warning" size="sm" @click="isSaveToStoryModalVisible=false">Cancel</b-button>
+          <b-button variant="primary" size="sm" @click="sendSelected('story')">Save</b-button>
+        </div>
+      </template>
+    </b-modal>
+
+    <!-- 'Lightbox' modal for image preview when clicking on a file in the vault grid/list -->
+    <b-modal v-model="isApproveSharedModalVisible" title="Approve Shared Vault Files" size="xl">
+      <p>The user {{ strSharerName }} has shared {{ strSharedMfCount }} files with you...</p>
+      <template #modal-footer>
+        <div class="w-100">
+          <b-button variant="danger" @click="declineShared(selectedVfToApprove)">Reject</b-button>
+          <b-button variant="warning" @click="approveShared(selectedVfToApprove)">Accept</b-button>
+        </div>
+      </template #modal-footer>
+    </b-modal>
+
 
   </div>
 </template>
@@ -226,12 +290,23 @@ export default {
       return !this.vault_pkid || !this.vaultfolder_pkid || !this.vault || !this.vaultfolder || !this.foldertree || !this.session_user
     },
 
+    strSharerName() { // format string for sharer name
+      return this.selectedVfToApprove?.cattrs?.shared_by?.username || 'Unknown'
+    },
+
+    strSharedMfCount() { // format string for number of files shared
+      //return this.selectedVfToApprove?.mediafile_count || '--'
+      return this.selectedVfToApprove?.mediafilesharelogs?.length || '--'
+    },
+
     parent() {
       return this.vaultfolder.vfparent
     },
-    children() {
+
+    children() { // ie, child folders (not files)
       return this.vaultfolder.vfchildren
     },
+
     breadcrumbNav() {
       const result = []
       for ( let b of this.breadcrumb ) {
@@ -260,15 +335,25 @@ export default {
   data: () => ({
 
     vault: null,
-    foldertree: null,
-
-    isUploaderVisible: false,
-    isCreateFolderModalVisible: false,
-
+    foldertree: null, // the nav tree data structure
     mediafiles: {}, // %FIXME: use array not keyed object!
 
-    lightboxSelection: null,
+    // By default we can send to story, post, or message...may be overridden if this 'page' is 
+    // loaded in another context (hack for mvp)
+    sendChannels: ['story', 'post', 'message'],
+
+    isUploaderVisible: false,
+    isSendFilesModalVisible: false,
+    isShareFilesModalVisible: false,
+    isDeleteFilesModalVisible: false,
+    isCreateFolderModalVisible: false,
+    isSaveToStoryModalVisible: false,
     isMediaLightboxModalVisible: false,
+    isApproveSharedModalVisible: false,
+
+    selectedVfToApprove: null,
+
+    lightboxSelection: null,
 
     createForm: {
       name: '',
@@ -306,7 +391,7 @@ export default {
   methods: {
 
     // from Vue tree demo (TreeItem aka VaultNavigation)
-    makeFolder() {
+    makeFolder() { // %FIXME ?? redudant?
     },
     addItem() {
     },
@@ -319,14 +404,52 @@ export default {
 
       switch (resourceType) {
         case 'story':
-          this.$router.replace({ name: 'stories.dashboard', params });
+          this.storeStory()
           break;
         case 'post':
-          this.$router.replace({ name: 'index', params });
+          this.$router.replace({ name: 'index', params })
           break;
         case 'message':
-          this.$router.replace({ name: 'chatthreads.create', params });
+          this.$router.replace({ name: 'chatthreads.create', params })
           break;
+      }
+    },
+
+    // API to update a new story in the database for this user's timeline
+    // %NOTE: can only send 1 file per new story 
+    async storeStory() {
+      const stype = 'image'
+      let payload = new FormData()
+      payload.append('stype', stype) // %FIXME: hardcoded
+      payload.append('bgcolor', "#fff")
+      payload.append('content', '') // this.storyAttrs.contents
+      payload.append('link', null) // this.storyAttrs.link)
+
+      switch ( stype ) {
+        case 'text':
+          break
+        case 'image':
+          if ( this.selectedMediafiles.length ) {
+            payload.append('mediafile_id', this.selectedMediafiles[0].id)
+          }
+          break
+      } 
+
+      const response = await axios.post( this.$apiRoute('stories.store'), payload, {
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      })
+      this.isSaveToStoryModalVisible = false
+      this.fileInput = null // form input
+      if ( this.$route.params.context === 'storybar' ) {
+        //this.$route.params = null %TODO: clear ?
+        this.$router.replace({ 
+          name: 'index', 
+          params: {
+            toast: { title: 'New story successfully added!' },
+          },
+        })
       }
     },
 
@@ -336,13 +459,24 @@ export default {
     },
 
     renderShareForm() {
-      this.$bvModal.show('modal-share-file')
+      this.isShareFilesModalVisible = true
+    },
+
+    renderSendForm() {
+      this.isSendFilesModalVisible = true
+    },
+
+    renderDeleteForm() {
+      this.isDeleteFilesModalVisible = true
     },
 
     onPreviewFileInput(value) {
       Vue.set(this.mediafiles, value.id, value) // Sets .selected on mediafiles array depending on child form component's action
     },
 
+    selectAll() {
+      this.mediafiles = _.mapValues( this.mediafiles, o => ({ ...o, selected: true }) )
+    },
     clearSelected() {
       this.mediafiles = _.mapValues( this.mediafiles, o => ({ ...o, selected: false }) )
     },
@@ -367,15 +501,24 @@ export default {
       }
     },
 
-    async shareFiles(e) {
-      e.preventDefault()
-      //const response = await axios.patch(`/vaults/${this.vault_pkid}/update-shares`, this.shareForm)
+    // Share selected files to other user(s)...injects selected files into receipent's vault in a new subfolder
+    async shareSelectedFiles(e) {
+      // this.selectedMediafiles
+      /*
       const response = await axios.patch(`/vaults/${this.vault_pkid}/update-shares`, {
         shareables: this.shareForm.selectedToShare,
         sharees: this.shareForm.sharees.map( o => { return { sharee_id: o.id } }),
         invitees: this.shareForm.invitees.map( o => { return { email: o } }),
       })
+       */
+      const payload = { 
+        user_ids: this.shareForm.sharees.map( o => o.id ),
+        mediafile_ids: this.selectedMediafiles.map( o => o.id ),
+      }
+      const response = await axios.post( this.$apiRoute('vaultfolders.storeByShare'), payload )
+      this.isShareFilesModalVisible = false
       this.cancelShareFiles()
+      this.clearSelected()
     },
 
     cancelShareFiles() {
@@ -387,6 +530,15 @@ export default {
       this.inviteeInput = ''
     },
 
+    async deleteSelectedFiles(e) {
+      const payload = { 
+        mediafile_ids: this.selectedMediafiles.map( o => o.id ),
+      }
+      const response = await axios.post( this.$apiRoute('mediafiles.batchDestroy'), payload )
+      this.isDeleteFilesModalVisible = false
+      this.$store.dispatch('getVaultfolder', this.currentFolderId)
+      this.clearSelected()
+    },
 
     // --- New Vault Folder Form methods ---
     renderNewFolderForm() {
@@ -440,6 +592,7 @@ export default {
     // ---
 
     addSharee(sharee) {
+      console.log('addSharee')
       this.shareForm.sharees.push(sharee.item)
       this.query = ''
       this.suggestions = []
@@ -454,8 +607,13 @@ export default {
     },
 
     async getMatches(text) {
-      const response = await axios.get(`/users/match?term=${text}&field=email`)
-      this.suggestions = response.data
+      const params = {
+        term: text,
+        field: 'username',
+        //field: 'name',
+      }
+      const response = await axios.get( this.$apiRoute('users.match'), { params } )
+      this.suggestions = response.data.filter( o => o.id !== this.session_user.id ) // exclude session user
     },
 
     // This is what the <input/> value is set to when you are selecting a suggestion
@@ -464,6 +622,30 @@ export default {
     },
 
     focusMe(e) {
+    },
+
+    async renderApproveSharedModal(vf) {
+      // %TODO: call to get full details
+      const response = await this.axios.get(route('vaultfolders.show', { id: vf.id }))
+      this.isApproveSharedModalVisible = true
+      this.selectedVfToApprove = response.data.vaultfolder
+    },
+
+    async approveShared(vf) {
+      //const response = await this.axios.patch( route('vaultfolders.update', { id: vf.id }), { is_pending_approval: 0 })
+      const response = await this.axios.post( route('vaultfolders.approveShare', { id: vf.id }) )
+      this.$store.dispatch( 'getVaultfolder', this.currentFolderId )
+      this.selectedVfToApprove = null // selection
+      this.isApproveSharedModalVisible = false
+    },
+
+    async declineShared(vf) {
+      // soft delete
+      //response = await this.axios.patch( route('vaultfolders.delete', { id: vf.id }) )
+      const response = await this.axios.post( route('vaultfolders.declineShare', { id: vf.id }) )
+      this.$store.dispatch('getVaultfolder', this.currentFolderId)
+      this.selectedVfToApprove = null // selection
+      this.isApproveSharedModalVisible = false
     },
 
   },
@@ -476,6 +658,14 @@ export default {
       this.foldertree = response.data.foldertree || null
       this.$store.dispatch('getVaultfolder', this.vaultfolder_pkid)
     })
+
+    if ( this.$route.params.context ) {
+      switch( this.$route.params.context ) {
+        case 'storybar':
+          this.sendChannels = ['story']
+          break
+      }
+    }
   },
 
   watch: {
@@ -563,6 +753,16 @@ export default {
  */
 </script>
 
+<style lang="scss" >
+body {
+    .autosuggest__results ul {
+      padding-left: 1rem;
+      margin-top: 2rem;
+      list-style: none !important;
+    }
+}
+</style>
+
 <style lang="scss" scoped>
 body {
   .vault-container .breadcrumb {
@@ -584,9 +784,28 @@ body {
 
   .vault-container {
     background: #fff;
+    img.tag-folder.tag-pending-approval {
+      border: solid orange 2px;
+    }
+
   }
   .vue-dropzone {
     background: #ccdfeb;
+  }
+  .share-list .tag-sharee {
+    font-size: 1.2rem;
+  }
+
+  .truncate {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+   }
+  .tag-file .truncate {
+    width: 200px;
+  }
+  .tag-folder .truncate {
+    width: 200px;
   }
 }
 </style>

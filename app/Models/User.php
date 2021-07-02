@@ -288,6 +288,14 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
         return $this->hasMany(Comment::class);
     }
 
+    public function mediafilesharesSent() { // logs
+        return $this->hasMany(Mediafilesharelog::class, 'sharer_id');
+    }
+
+    public function mediafilesharesReceived() { // logs
+        return $this->hasMany(Mediafilesharelog::class, 'sharee_id');
+    }
+
 //    public function lists()
 //    {
 //        return $this->belongsToMany(Lists::class, 'list_user', 'user_id', 'list_id')->withTimestamps();
@@ -316,7 +324,15 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
 
     public function getNameAttribute($value)
     {
-        return $this->firstname;
+        if ( $this->firstname && $this->lastname ) {
+            return $this->firstname.' '.$this->lastname;
+        } else if ( $this->timeline->name ) {
+            return $this->timeline->name;
+        } else if ( $this->firstname ) {
+            return $this->firstname;
+        } else { 
+            return $this->username;
+        }
     }
 
     public function getAvatarAttribute($value)

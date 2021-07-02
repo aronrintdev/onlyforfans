@@ -6,6 +6,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Interfaces\Ownable;
 use App\Interfaces\Guidable;
 use App\Models\Traits\UsesUuid;
@@ -16,14 +17,9 @@ use App\Models\Traits\SluggableTraits;
 
 class Vaultfolder extends BaseModel implements Guidable, Ownable
 {
-    use UsesUuid;
-    use SluggableTraits;
-    use HasFactory;
-    use OwnableFunctions;
-    use Sluggable;
+    use UsesUuid, SluggableTraits, HasFactory, OwnableFunctions, Sluggable, SoftDeletes;
 
     protected $table = 'vaultfolders';
-
     protected $guarded = ['id', 'created_at', 'updated_at'];
 
     public static $vrules = [];
@@ -33,6 +29,7 @@ class Vaultfolder extends BaseModel implements Guidable, Ownable
         //'vfparent',
         //'vfchildren',
         //'mediafiles',
+        'mediafile_count',
     ];
 
     //--------------------------------------------
@@ -59,34 +56,35 @@ class Vaultfolder extends BaseModel implements Guidable, Ownable
     // %%% Relationships
     //--------------------------------------------
 
-    public function vault()
-    {
+    public function vault() {
         return $this->belongsTo('App\Models\Vault');
     }
 
-    public function mediafiles()
-    {
+    public function mediafiles() {
         return $this->morphMany(Mediafile::class, 'resource');
     }
 
-    public function vfparent()
-    {
+    public function vfparent() {
         return $this->belongsTo(Vaultfolder::class, 'parent_id');
     }
 
-    public function vfchildren()
-    {
+    public function vfchildren() {
         return $this->hasMany(Vaultfolder::class, 'parent_id');
     }
 
-    public function sharees()
-    {
+    public function sharees() {
         return $this->morphToMany(User::class, 'shareable', 'shareables', 'shareable_id', 'sharee_id');
     }
 
-    public function getOwner(): ?Collection
-    {
-        return $this->vault->getOwner();
+    // List of mediafilesharelogs associated with this vaultfolder as a *destiation* of a share action 
+    //  ~ each share action creates its own new vaultfolder
+    //  ~ if this vaultfolder was *not* created as a result of share, then this is NULL or empty collection
+    public function mediafilesharelogs() {
+        return $this->hasMany(Mediafilesharelog::class, 'dstvaultfolder_id');
+    }
+
+    public function isSharePlaceholderFolder() { // this vaultfolder was created as a *result* (dst) of a share
+        return $this->mediafilesharelogs->count();
     }
 
     //--------------------------------------------
@@ -119,14 +117,15 @@ class Vaultfolder extends BaseModel implements Guidable, Ownable
         return $breadcrumb;
     }
 
-    public function getNameAttribute($value)
-    {
-        return $this->vfname;
+    public function getNameAttribute($value) { return $this->vfname;
     }
 
-    public function getPathAttribute($value)
-    {
+    public function getPathAttribute($value) {
         return $this->vfname; // %TODO: get full path back to root
+    }
+
+    public function getMediafileCountAttribute($value) {
+        return $this->mediafiles->count();
     }
 
     //--------------------------------------------
@@ -213,4 +212,10 @@ class Vaultfolder extends BaseModel implements Guidable, Ownable
         });
         return $subTree;
     }
+
+    public function getOwner(): ?Collection
+    {
+        return $this->vault->getOwner();
+    }
+
 }

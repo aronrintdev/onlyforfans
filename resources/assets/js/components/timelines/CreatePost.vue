@@ -30,6 +30,13 @@
                 </svg>
               </button>
             </div>
+            <div class="alert alert-secondary py-1 px-2" role="alert" v-if="expirationPeriod">
+              <fa-icon :icon="['far', 'hourglass-half']" class="text-primary mr-1" />
+              Post will expire in <strong>{{ expirationPeriod > 1 ? `${expirationPeriod} days` : `1 day` }}</strong>
+              <button type="button" class="close" data-dismiss="alert" aria-label="Close" @click="expirationPeriod=null">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
             <div v-if="postType === 'price'" class="w-100 d-flex">
               <PriceSelector
                 class="mb-3 mr-5"
@@ -103,6 +110,9 @@
                   <li class="selectable select-timer">
                     <fa-icon :icon="['far', 'clock']" class="text-secondary" />
                   </li>
+                  <li class="selectable select-expire-date" :disabled="expirationPeriod" @click="showExpirationPicker()">
+                    <fa-icon :icon="['far', 'hourglass-half']" class="text-secondary" />
+                  </li>
                   <li class="selectable select-calendar" @click="showSchedulePicker()">
                     <fa-icon :icon="['far', 'calendar-alt']" class="text-secondary" />
                   </li>
@@ -110,7 +120,12 @@
               </b-col>
               <b-col cols="12" md="4">
                 <ul class="list-inline d-flex justify-content-end mb-0 mt-3 mt-md-0">
-                  <li class="w-100 mx-0"><button @click="savePost()" class="btn btn-submit btn-primary w-100">Post</button></li>
+                  <li class="w-100 mx-0">
+                    <button :disabled="postBtnDisabled || posting" @click="savePost()" class="btn btn-submit btn-primary w-100">
+                      <span v-if="posting" class="text-white spinner-border spinner-border-sm pr-2" role="status" aria-hidden="true"></span>
+                      Post
+                    </button>
+                  </li>
                 </ul>
               </b-col>
             </b-row>
@@ -184,8 +199,15 @@ export default {
     },
     postScheduleDate: null,
     mediafiles: [],
+    postBtnDisabled: true,
+    posting: false,
+    expirationPeriod: null,
   }),
-
+  watch: {
+    description(newVal) {
+      this.postBtnDisabled = !newVal;
+    }
+  },
   methods: {
 
     resetForm() {
@@ -197,9 +219,11 @@ export default {
       this.price = 0;
       this.priceForPaidSubscribers = 0;
       this.postScheduleDate = null;
+      this.expirationPeriod = null;
     },
 
     async savePost() {
+      this.posting = true;
       console.log('CreatePost::savePost()')
       // (1) create the post
       const response = await axios.post(this.$apiRoute('posts.store'), {
@@ -220,35 +244,40 @@ export default {
         // (2) upload & attach the mediafiles (in dropzone queue)
         // %FIXME: if this fails, don't we have an orphaned post (?)
         // %NOTE: files added manually don't seem to be put into the queue, thus sendingEvent won't be called for them (?)
-        if ( queued.length ) {
+        
+
+        // (3) create any mediaifle references, ex from selected files in vault
+        if (this.mediafileIdsFromVault.length) {
+          this.mediafileIdsFromVault.forEach( async mfid => {
+            await axios.post(this.$apiRoute('mediafiles.store'), {
+              mediafile_id: mfid, // the presence of this field is what tells controller method to create a reference, not upload content
+              resource_id: json.post.id,
+              resource_type: 'posts',
+              mftype: 'post',
+            })
+            // %TODO: check failure case
+          })
+          this.mediafileIdsFromVault = [] // empty array (we could remove individually inside the loop)
+          this.$router.replace({'query': null}).catch(()=>{}); // clear mediafile router params from URL
+        } else if (queued.length) {
           console.log('CreatePost::savePost() - process queue', {
             queued,
           })
           this.$refs.myVueDropzone.processQueue() // this will call dispatch after files uploaded
         } 
 
-        // (3) create any mediaifle references, ex from selected files in vault
-        this.mediafileIdsFromVault.forEach( async mfid => {
-          await axios.post(this.$apiRoute('mediafiles.store'), {
-            mediafile_id: mfid, // the presence of this field is what tells controller method to create a reference, not upload content
-            resource_id: json.post.id,
-            resource_type: 'posts',
-            mftype: 'post',
-          })
-          // %TODO: check failure case
-        })
-        this.mediafileIdsFromVault = [] // empty array (we could remove individually inside the loop)
-        this.$router.replace({'query': null}) // clear mediafile router params from URL
-        // ^^^ throwing error 'NavigationDuplicated: Avoided redundant navigation to current location: "/"' ?
-
         if ( !queued.length ) {
           console.log('CreatePost::savePost() - nothing queued')
           this.$store.dispatch('unshiftPostToTimeline', { newPostId: this.newPostId })
           this.resetForm()
+          this.mediafiles = []
+          this.posting = false
         }
 
       } else {
         this.resetForm();
+        this.mediafiles = [];
+        this.posting = false;
       }
     },
 
@@ -266,11 +295,14 @@ export default {
 
     // for dropzone
     addedEvent(file) {
-      this.mediafiles.push({
-        src: URL.createObjectURL(file),
-        file,
-        type: file.type,
-      });
+      if (!file.filepath) {
+        this.mediafiles.push({
+          ...file,
+          filepath: URL.createObjectURL(file),
+        });
+      } else {
+        this.mediafiles.push(file);
+      }
       this.$log.debug('addedEvent')
     },
     removedEvent(file, error, xhr) {
@@ -295,6 +327,8 @@ export default {
       console.log('queueCompleteEvent', { });
       this.$store.dispatch('unshiftPostToTimeline', { newPostId: this.newPostId });
       this.resetForm();
+      this.mediafiles = [];
+      this.posting = false;
     },
 
     takePicture() { // %TODO
@@ -320,13 +354,21 @@ export default {
     },
     openDropzone() {
       this.$refs.myVueDropzone.dropzone.hiddenFileInput.click();
-    }
+    },
+    showExpirationPicker() {
+      eventBus.$emit('open-modal', {
+        key: 'expiration-period',
+      })
+    },
   },
 
   mounted() {
     const self = this;
     eventBus.$on('apply-schedule', function(data) {
       self.postScheduleDate = data;
+    })
+    eventBus.$on('set-expiration-period', function(data) {
+      self.expirationPeriod = data;
     })
 
     const mediafileIds = this.$route.params.mediafile_ids || []
@@ -339,7 +381,7 @@ export default {
       }).then( response => {
         response.data.data.forEach( mf => {
           // https://rowanwins.github.io/vue-dropzone/docs/dist/#/manual
-          const file = { size: mf.orig_size, name: mf.id, type: mf.mimetype }
+          const file = { size: mf.orig_size, name: mf.id, type: mf.mimetype, filepath: mf.filepath }
           this.mediafileIdsFromVault.push(mf.id)
           this.$refs.myVueDropzone.manuallyAddFile(file, mf.filepath)
         })
@@ -408,8 +450,14 @@ export default {
   border: none;
 }
 
-li .selectable {
+li.selectable {
   cursor: pointer;
+}
+
+li.selectable[disabled] {
+  cursor: default;
+  pointer-events: none;
+  opacity: 0.6;
 }
 
 .create_post-crate .dropzone.dz-started .dz-message {

@@ -325,6 +325,7 @@ class UsersController extends AppBaseController
         }) );
 
     }
+
     public function updateLastSeen(Request $request) {
         $sessionUser = $request -> user();
         $status = $request -> input('status');

@@ -130,6 +130,7 @@ Route::group(['middleware' => ['auth']], function () {
     //Route::post('/mediafiles/{mediafile}/doClone', ['as'=>'mediafiles.doClone', 'uses' => 'MediafilesController@doClone']);
     Route::get('/mediafiles/match', ['as'=>'mediafiles.match', 'uses' => 'MediafilesController@match']);
     Route::get('/mediafiles/disk-stats/{mediafile}', ['as'=>'mediafiles.diskStats', 'uses' => 'MediafilesController@diskStats']);
+    Route::post('/mediafiles/batch-destroy', ['as'=>'mediafiles.batchDestroy', 'uses' => 'MediafilesController@batchDestroy']);
     Route::resource('mediafiles', 'MediafilesController', [ 'except' => [ 'create', 'edit', ] ]);
 
     Route::resource('notifications', 'NotificationsController', [ 'only' => [ 'index', ] ]);
@@ -238,7 +239,10 @@ Route::group(['middleware' => ['auth']], function () {
 
     // -- vaultfolders: shareable | purchaseable --
     Route::get('/vaultfolders/match', ['as'=>'vaultfolders.match', 'uses' => 'VaultfoldersController@match']);
-    Route::post('/vaultfolders/{vaultfolder}/share', ['as'=>'vaultfolders.share', 'uses' => 'VaultfoldersController@share']);
+    Route::post('/vaultfolders/storeByShare', ['as'=>'vaultfolders.storeByShare', 'uses' => 'VaultfoldersController@storeByShare']);
+    Route::post('/vaultfolders/{vaultfolder}/share', ['as'=>'vaultfolders.share', 'uses' => 'VaultfoldersController@share']); // ?? still used? PSG 20210701
+    Route::post('/vaultfolders/{vaultfolder}/approveShare', ['as'=>'vaultfolders.approveShare', 'uses' => 'VaultfoldersController@approveShare']);
+    Route::post('/vaultfolders/{vaultfolder}/declineShare', ['as'=>'vaultfolders.declineShare', 'uses' => 'VaultfoldersController@declineShare']);
     Route::resource('vaultfolders', 'VaultfoldersController', [ ]);
 
     // -- misc --
