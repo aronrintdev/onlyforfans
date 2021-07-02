@@ -79,6 +79,16 @@
     >
       <EditPost ref="editPost" :post="selectedResource" />
     </b-modal>
+    
+    <b-modal
+      title="Expiration Period"
+      id="expiration-period"
+      hide-footer
+      size="md"
+      body-class="p-0"
+    >
+      <ExpirationPeriod ref="expirationPeriod" />
+    </b-modal>
   </div>
 </template>
 
@@ -96,6 +106,7 @@ import PostDisplay from '@components/posts/Display'
 import ImageDisplay from '@components/timelines/elements/ImageDisplay'
 import ScheduleDateTime from '@components/modals/ScheduleDateTime.vue'
 import EditPost from '@components/modals/EditPost.vue'
+import ExpirationPeriod from '@components/modals/ExpirationPeriod.vue'
 
 export default {
   name: 'Modals',
@@ -108,7 +119,8 @@ export default {
     PostDisplay,
     ImageDisplay,
     ScheduleDateTime,
-    EditPost
+    EditPost,
+    ExpirationPeriod
   },
 
   computed: {
@@ -125,6 +137,7 @@ export default {
       'modal-photo': 'ImageDisplay',
       'modal-schedule-datetime': 'ScheduleDateTime',
       'edit-post': 'editPost',
+      'expiration-period': 'expirationPeriod',
     },
     selectedTimeline: null,
     selectedUrl: null,
@@ -178,6 +191,9 @@ export default {
           case 'edit-post':
             this.selectedResource = data.post
             this.$bvModal.show('edit-post')
+            break
+          case 'expiration-period':
+            this.$bvModal.show('expiration-period')
             break
         }
       })

@@ -30,6 +30,13 @@
                 </svg>
               </button>
             </div>
+            <div class="alert alert-secondary py-1 px-2" role="alert" v-if="expirationPeriod">
+              <fa-icon :icon="['far', 'hourglass-half']" class="text-primary mr-1" />
+              Post will expire in <strong>{{ expirationPeriod > 1 ? `${expirationPeriod} days` : `1 day` }}</strong>
+              <button type="button" class="close" data-dismiss="alert" aria-label="Close" @click="expirationPeriod=null">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
             <div v-if="postType === 'price'" class="w-100 d-flex">
               <PriceSelector
                 class="mb-3 mr-5"
@@ -102,6 +109,9 @@
                   </li>
                   <li class="selectable select-timer">
                     <fa-icon :icon="['far', 'clock']" class="text-secondary" />
+                  </li>
+                  <li class="selectable select-expire-date" :disabled="expirationPeriod" @click="showExpirationPicker()">
+                    <fa-icon :icon="['far', 'hourglass-half']" class="text-secondary" />
                   </li>
                   <li class="selectable select-calendar" @click="showSchedulePicker()">
                     <fa-icon :icon="['far', 'calendar-alt']" class="text-secondary" />
@@ -191,6 +201,7 @@ export default {
     mediafiles: [],
     postBtnDisabled: true,
     posting: false,
+    expirationPeriod: null,
   }),
   watch: {
     description(newVal) {
@@ -208,6 +219,7 @@ export default {
       this.price = 0;
       this.priceForPaidSubscribers = 0;
       this.postScheduleDate = null;
+      this.expirationPeriod = null;
     },
 
     async savePost() {
@@ -342,13 +354,21 @@ export default {
     },
     openDropzone() {
       this.$refs.myVueDropzone.dropzone.hiddenFileInput.click();
-    }
+    },
+    showExpirationPicker() {
+      eventBus.$emit('open-modal', {
+        key: 'expiration-period',
+      })
+    },
   },
 
   mounted() {
     const self = this;
     eventBus.$on('apply-schedule', function(data) {
       self.postScheduleDate = data;
+    })
+    eventBus.$on('set-expiration-period', function(data) {
+      self.expirationPeriod = data;
     })
 
     const mediafileIds = this.$route.params.mediafile_ids || []
@@ -430,8 +450,14 @@ export default {
   border: none;
 }
 
-li .selectable {
+li.selectable {
   cursor: pointer;
+}
+
+li.selectable[disabled] {
+  cursor: default;
+  pointer-events: none;
+  opacity: 0.6;
 }
 
 .create_post-crate .dropzone.dz-started .dz-message {
