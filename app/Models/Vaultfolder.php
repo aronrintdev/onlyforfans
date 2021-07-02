@@ -2,6 +2,7 @@
 namespace App\Models;
 
 use Exception;
+use Auth;
 use Illuminate\Support\Str;
 use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -81,7 +82,7 @@ class Vaultfolder extends BaseModel implements Guidable, Ownable
     // List of mediafilesharelogs associated with this vaultfolder as a *destiation* of a share action 
     //  ~ each share action creates its own new vaultfolder
     //  ~ if this vaultfolder was *not* created as a result of share, then this is NULL or empty collection
-    public function mediafilesharelogs() {
+    public function mediafilesharelogs() { // %FIXME: suffix with AsDst, like in Mediafile model
         return $this->hasMany(Mediafilesharelog::class, 'dstvaultfolder_id');
     }
 
@@ -236,9 +237,25 @@ class Vaultfolder extends BaseModel implements Guidable, Ownable
 
         static $numberOfItemsDeleted = 0;
 
+        $sessionUser = Auth::user();
+
         // Invoke on all sub-folders (recursive)
-        $this->vfchildren->each ( function($vfc) use(&$numberOfItemsDeleted) {
+        $this->vfchildren->each ( function($vfc) use(&$numberOfItemsDeleted, &$sessionUser) {
             $numberOfItemsDeleted += $vfc->recursiveDelete();
+
+            // Clean up the logs..
+            $mfShareLogs = Mediafilesharelog::where('dstvaultfolder_id', $vfc->id)->get();
+            $mfShareLogs->each( function($mfsl) use(&$sessionUser) {
+                $meta = $mfsl->meta;
+                if ( !array_key_exists('logs', $meta??[]) ) {
+                    $meta['logs'] = []; // init
+                }
+                $meta['logs'][] = 'Dst vaultfile '.$mfsl->dstvaultfile_id.' soft deleted by user '.$sessionUser->id;
+                $mfsl->meta = $meta; 
+                // assumes soft vaultfile delete, otherwise we need to set FKID to NULL
+                $mfsl->save();
+            });
+
             $vfc->delete();
             $numberOfItemsDeleted += 1; // for vfc
         });

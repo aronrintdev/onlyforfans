@@ -308,7 +308,7 @@ class VaultfoldersController extends AppBaseController
 
         return response()->json([
             'number_of_items_deleted' => $numberOfItemsDeleted,
-        ], 204);
+        ], 200);
     }
 
     // ---

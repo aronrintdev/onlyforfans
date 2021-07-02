@@ -257,9 +257,9 @@ class Diskmediafile extends BaseModel implements Guidable, Ownable
 
             $mediafile = Mediafile::find($mediafileID);
 
-            // Clean up the logs..
-            $mfSrcLogs = Mediafilesharelog::where('srcmediafile_id', $mediafile->id)->get();
-            $mfSrcLogs->each( function($mfsl) use(&$sessionUser) {
+            // Clean up the logs as src...
+            $mfShareLogs = Mediafilesharelog::where('srcmediafile_id', $mediafile->id)->get();
+            $mfShareLogs->each( function($mfsl) use(&$sessionUser) {
                 $meta = $mfsl->meta;
                 if ( !array_key_exists('logs', $meta??[]) ) {
                     $meta['logs'] = []; // init
@@ -270,8 +270,9 @@ class Diskmediafile extends BaseModel implements Guidable, Ownable
                 $mfsl->save();
             });
 
-            $mfDstLogs = Mediafilesharelog::where('dstmediafile_id', $mediafile->id)->get();
-            $mfDstLogs->each( function($mfsl) use(&$sessionUser) {
+            // Clean up the logs as dst...
+            $mfShareLogs = Mediafilesharelog::where('dstmediafile_id', $mediafile->id)->get();
+            $mfShareLogs->each( function($mfsl) use(&$sessionUser) {
                 $meta = $mfsl->meta;
                 if ( !array_key_exists('logs', $meta??[]) ) {
                     $meta['logs'] = []; // init
