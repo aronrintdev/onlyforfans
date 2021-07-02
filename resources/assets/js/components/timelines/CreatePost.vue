@@ -103,6 +103,9 @@
                   <li class="selectable select-timer">
                     <fa-icon :icon="['far', 'clock']" class="text-secondary" />
                   </li>
+                  <li class="selectable select-expire-date" @click="showExpirationPicker()">
+                    <fa-icon :icon="['far', 'hourglass-half']" class="text-secondary" />
+                  </li>
                   <li class="selectable select-calendar" @click="showSchedulePicker()">
                     <fa-icon :icon="['far', 'calendar-alt']" class="text-secondary" />
                   </li>
@@ -342,7 +345,12 @@ export default {
     },
     openDropzone() {
       this.$refs.myVueDropzone.dropzone.hiddenFileInput.click();
-    }
+    },
+    showExpirationPicker() {
+      eventBus.$emit('open-modal', {
+        key: 'expiration-period',
+      })
+    },
   },
 
   mounted() {
