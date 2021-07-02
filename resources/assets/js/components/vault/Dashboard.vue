@@ -101,10 +101,10 @@
           <!-- Vaultfolders -->
           <b-col v-for="(vf) in children" :key="vf.id" cols="12" md="3">
             <div v-if="vf.is_pending_approval" class="tag-folder tag-shared">
-              <b-img fluid @click="renderApproveSharedModal(vf)" src="/images/tmp-placeholders/folder-icon.jpg" class="folder tag-pending-approval" role="button" :alt="`Folder ${vf.slug}`"></b-img>
+              <b-img fluid @click="renderApproveSharedModal(vf)" src="/images/icons/folder-icon.png" class="folder tag-pending-approval" role="button" :alt="`Folder ${vf.slug}`"></b-img>
             </div>
             <div v-else class="tag-folder">
-              <b-img fluid @click="doNav(vf.id)" src="/images/tmp-placeholders/folder-icon.jpg" role="button" :alt="`Folder ${vf.slug}`"></b-img>
+              <b-img fluid @click="doNav(vf.id)" src="/images/icons/folder-icon.png" role="button" :alt="`Folder ${vf.slug}`"></b-img>
               <div class="file-count">
                 <b-badge variant="warning" class="p-2">{{ vf.mediafiles.length + vf.vfchildren.length }}</b-badge>
               </div>
