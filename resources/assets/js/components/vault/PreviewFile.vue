@@ -69,38 +69,5 @@ export default {
 
 <style lang="scss" scoped>
 body {
-  .img-box {
-    padding-top: calc(85% - 2px);
-    img {
-      object-fit: cover;
-      width: 100%;
-      height: 100%;
-      position: absolute;
-      top: 0;
-      left: 0;
-    }
-    img.tag-selected {
-      filter: brightness(50%);
-    }
-    .render-date {
-      position: absolute;
-      top: 5px;
-      left: 5px;
-      border-radius: 5px;
-      background: #535353;
-      opacity: 0.7;
-      padding: 0.3rem;
-      p {
-        opacity: 1;
-        color: #fff;
-        font-size: 11px;
-      }
-    }
-    .select-file {
-      position: absolute;
-      top: 0;
-      right: 0;
-    }
-  }
 }
 </style>

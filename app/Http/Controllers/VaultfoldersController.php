@@ -301,8 +301,14 @@ class VaultfoldersController extends AppBaseController
         if ( $vaultfolder->isRootFolder() ) {
             abort(400);
         }
+
+        $numberOfItemsDeleted = $vaultfolder->recursiveDelete();
         $vaultfolder->delete();
-        return response()->json([]);
+        $numberOfItemsDeleted += 1; // for top vaultfolder
+
+        return response()->json([
+            'number_of_items_deleted' => $numberOfItemsDeleted,
+        ], 200);
     }
 
     // ---

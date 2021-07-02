@@ -73,8 +73,8 @@ export default {
   },
 
   data: () => ({
-    current: 0,
-    play: false, // true,
+    current: 0, // index from 0
+    play: true,
     speed: 3000,
     timelineAnimation: null,
     speedOptions: [
@@ -134,12 +134,13 @@ export default {
 
   methods: {
     doNav(direction) {
-      console.log(`doNav() - ${direction} - ${this.current}/${this.stories.length}`)
+      console.log(`doNav() - ${direction} - ${this.current+1}/${this.stories.length}`)
       switch (direction) {
         case 'previous':
           if ( (this.current-1) < 0 ) {
             console.log(`doNav() - emit prev-story-timeline`)
             this.$emit('prev-story-timeline', { foo: 'bar'} )
+            this.current = 0
           } else {
             this.goTo(this.current - 1)
           }
@@ -148,6 +149,7 @@ export default {
           if ( (this.current+1) >= this.stories.length ) {
             console.log(`doNav() - emit next-story-timeline`)
             this.$emit('next-story-timeline', { foo: 'bar'} )
+            this.current = 0
           } else {
             this.goTo(this.current + 1)
           }
