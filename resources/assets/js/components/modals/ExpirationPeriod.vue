@@ -24,6 +24,8 @@
 </template>
 
 <script>
+import { eventBus } from '@/app';
+
 export default {
   name: "ExpirationPeriod",
   data: () => ({
@@ -34,10 +36,11 @@ export default {
       this.$bvModal.hide('expiration-period');
     },
     changeExpirationPeriod(e) {
-      this.exiprationPeriod = e.target.value;
+      this.exiprationPeriod = parseInt(e.target.value, 10);
     },
     save() {
       // Save period
+      eventBus.$emit('set-expiration-period', this.exiprationPeriod);
       this.exit();
     }
   },

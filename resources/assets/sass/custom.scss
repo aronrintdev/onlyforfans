@@ -521,8 +521,8 @@ body .feed-crate.tag-grid-layout .superbox-post .media-slider {
 .grecaptcha-badge { visibility: hidden !important; }
 
 // Post Form Dropzone
-.dropzone .dz-message {
-  margin: 0;
+.dropzone.vue-dropzone .dz-message {
+  margin: 0 !important;
 }
 .dropzone.dz-started.vue-dropzone .dz-message {
   display: block;
