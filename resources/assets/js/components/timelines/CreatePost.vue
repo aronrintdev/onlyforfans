@@ -234,6 +234,7 @@ export default {
         price_for_subscribers: this.priceForPaidSubscribers,
         currency: this.currency,
         schedule_datetime: this.postScheduleDate,
+        expiration_period: this.expirationPeriod,
       })
       this.$log.debug('savePost', { response })
       const json = response.data;

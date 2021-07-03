@@ -15,6 +15,7 @@ use App\Models\Financial\Account;
 use App\Http\Resources\PostCollection;
 use App\Models\Casts\Money as CastsMoney;
 use App\Http\Resources\Post as PostResource;
+use Carbon\Carbon;
 
 class PostsController extends AppBaseController
 {
@@ -68,6 +69,7 @@ class PostsController extends AppBaseController
             'price_for_subscribers' => 'sometimes|required|integer',
             'mediafiles' => 'array',
             'mediafiles.*.*' => 'integer|uuid|exists:mediafiles',
+            'expiration_period' => 'nullable|integer',
         ];
 
         if ( !$request->has('mediafiles') ) {
@@ -87,6 +89,10 @@ class PostsController extends AppBaseController
    
         if ($request->input('schedule_datetime')) {
             $attrs['schedule_datetime'] = $request->input('schedule_datetime');
+        }
+           
+        if ($request->input('expiration_period')) {
+            $attrs['expire_at'] = Carbon::now('UTC')->addDays($request->input('expiration_period'));
         }
 
         $post = $timeline->posts()->create($attrs);
