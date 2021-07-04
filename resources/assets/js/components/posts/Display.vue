@@ -11,6 +11,10 @@
       <template #header>
         <PostHeader :post="post" :session_user="session_user"/>
         <section class="d-flex align-items-center">
+          <div class="expire_at" v-if="post.expire_at">
+            <span class="text-secondary">{{ expireFromNow }}</span>
+            <fa-icon :icon="['far', 'hourglass-half']" class="text-secondary ml-1 mr-2" />
+          </div>
           <div v-if="session_user.id === post.user.id" class="post-ctrl mr-2">
             <b-dropdown id="dropdown-1" right text="" class="m-md-2" variant="outline-dark">
               <b-dropdown-item @click="showEditPost">
@@ -71,6 +75,7 @@
 
 <script>
 import Vuex from 'vuex'
+import moment from 'moment'
 import { eventBus } from '@/app'
 import PostHeader from './PostHeader'
 import PostFooter from './PostFooter'
@@ -104,6 +109,9 @@ export default {
     },
     isLoading() {
       return !this.post || !this.session_user
+    },
+    expireFromNow() {
+      return moment.utc(this.post.expire_at).local().fromNow(true);
     },
   },
 

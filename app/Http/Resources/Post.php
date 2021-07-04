@@ -47,6 +47,7 @@ class Post extends JsonResource
                 'commentCount' => $this->comments_count,
             ],
             'schedule_datetime' => $this->schedule_datetime,
+            'expire_at' => $this->expire_at,
         ];
     }
 }
