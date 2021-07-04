@@ -239,6 +239,7 @@ class MediafilesController extends AppBaseController
                 $mf->diskmediafile->deleteReference($mf->id, false);
             } catch (Exception $e) {
                 Log::warning('mediafiles.batchDestroy - Could not delete mediafile with pkid = '.$mf->id.' : '.$e->getMessage());
+                abort(403);
             }
         });
         return response()->json([], 204);

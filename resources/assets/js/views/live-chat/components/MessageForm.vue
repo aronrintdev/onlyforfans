@@ -12,6 +12,20 @@
       </b-button>
     </div>
 
+    <!-- Photo Store display -->
+    <div class="d-block w-100" v-if="selectedMediafiles.length > 0">
+      <div class="d-flex">
+        <b-btn variant="link" size="sm" class="ml-auto" @click="onClearFiles">
+          {{ $t('clearFiles') }}
+        </b-btn>
+      </div>
+      <UploadMediaPreview
+        :mediafiles="selectedMediafiles"
+        @change="changeMediafiles"
+        @openFileUpload="openDropzone"
+      />
+    </div>
+
     <b-form class="store-chatmessage mt-auto" @submit.prevent="sendMessage($event)">
       <div>
         <b-form-group id="newMessage-group-1" class="">
@@ -34,7 +48,7 @@
         <b-button variant="link" class="clickme_to-record_audio" @click="doSomething('record-audio')">
           <fa-icon :icon="['fas', 'microphone']" class="clickable fa-lg" fixed-width />
         </b-button>
-        <b-button variant="link" class="clickme_to-select_vault_file" @click="doSomething('select-vault-file')">
+        <b-button variant="link" class="clickme_to-select_vault_file" @click="toggleVaultSelect()">
           <fa-icon :icon="['fas', 'archive']" class="clickable fa-lg" fixed-width />
         </b-button>
         <b-button variant="link" class="clickme_to-set_scheduled" :disabled="false" @click="openScheduleMessageModal('set-scheduled')">
@@ -78,8 +92,14 @@
 import Vuex from 'vuex'
 import _ from 'lodash'
 import moment from 'moment'
+import UploadMediaPreview from '@components/posts/UploadMediaPreview'
 
 export default {
+  name: 'MessageForm',
+
+  components: {
+    UploadMediaPreview,
+  },
 
   props: {
     session_user: null,
@@ -88,6 +108,9 @@ export default {
 
   computed: {
     ...Vuex.mapState([ 'mobile' ]),
+    ...Vuex.mapState('messaging', [
+      'selectedMediafiles'
+    ]),
 
     isLoading() {
       return !this.session_user
@@ -127,6 +150,21 @@ export default {
   mounted() { },
 
   methods: {
+    ...Vuex.mapMutations('messaging', [
+      'UPDATE_SELECTED_MEDIAFILES',
+      'CLEAR_SELECTED_MEDIAFILES',
+    ]),
+    changeMediafiles(data) {
+      this.UPDATE_SELECTED_MEDIAFILES([...data])
+    },
+
+    openDropzone() {
+      // TODO: ADD dropzone file Uploading
+    },
+
+    onClearFiles() {
+      this.CLEAR_SELECTED_MEDIAFILES()
+    },
 
     async sendMessage(e) {
       let response
@@ -200,6 +238,10 @@ export default {
       this.$refs['schedule-message-modal'].show();
     },
 
+    toggleVaultSelect() {
+      this.$emit('toggleVaultSelect')
+    },
+
     _isTyping() {
       this.$echo.join(this.channelName)
         .whisper('typing', {
@@ -221,7 +263,7 @@ export default {
 
   }, // watch
 
-  components: { },
+
 
 }
 </script>
@@ -254,3 +296,11 @@ body {
   }
 }
 </style>
+
+<i18n lang="json5" scoped>
+{
+  "en": {
+    "clearFiles": "Clear Images"
+  }
+}
+</i18n>

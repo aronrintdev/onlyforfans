@@ -2,11 +2,13 @@
 namespace App\Models;
 
 use Exception;
+use Auth;
 use Illuminate\Support\Str;
 use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Log;
 use App\Interfaces\Ownable;
 use App\Interfaces\Guidable;
 use App\Models\Traits\UsesUuid;
@@ -30,6 +32,7 @@ class Vaultfolder extends BaseModel implements Guidable, Ownable
         //'vfchildren',
         //'mediafiles',
         'mediafile_count',
+        'vfchildren_count',
     ];
 
     //--------------------------------------------
@@ -79,7 +82,7 @@ class Vaultfolder extends BaseModel implements Guidable, Ownable
     // List of mediafilesharelogs associated with this vaultfolder as a *destiation* of a share action 
     //  ~ each share action creates its own new vaultfolder
     //  ~ if this vaultfolder was *not* created as a result of share, then this is NULL or empty collection
-    public function mediafilesharelogs() {
+    public function mediafilesharelogs() { // %FIXME: suffix with AsDst, like in Mediafile model
         return $this->hasMany(Mediafilesharelog::class, 'dstvaultfolder_id');
     }
 
@@ -126,6 +129,10 @@ class Vaultfolder extends BaseModel implements Guidable, Ownable
 
     public function getMediafileCountAttribute($value) {
         return $this->mediafiles->count();
+    }
+
+    public function getVfchildrenCountAttribute($value) {
+        return $this->vfchildren->count();
     }
 
     //--------------------------------------------
@@ -216,6 +223,54 @@ class Vaultfolder extends BaseModel implements Guidable, Ownable
     public function getOwner(): ?Collection
     {
         return $this->vault->getOwner();
+    }
+
+    public function recursiveDelete()
+    {
+        // for debug...
+        static $level = 0;
+        $level += 1; 
+        if ($level > 10) {
+            //dd("DEBUG recursiveDelete() - max levels reached ".$level);
+            throw new \Exception("DEBUG recursiveDelete() - max levels reached ".$level);
+        }
+
+        static $numberOfItemsDeleted = 0;
+
+        $sessionUser = Auth::user();
+
+        // Invoke on all sub-folders (recursive)
+        $this->vfchildren->each ( function($vfc) use(&$numberOfItemsDeleted, &$sessionUser) {
+            $numberOfItemsDeleted += $vfc->recursiveDelete();
+
+            // Clean up the logs..
+            $mfShareLogs = Mediafilesharelog::where('dstvaultfolder_id', $vfc->id)->get();
+            $mfShareLogs->each( function($mfsl) use(&$sessionUser) {
+                $meta = $mfsl->meta;
+                if ( !array_key_exists('logs', $meta??[]) ) {
+                    $meta['logs'] = []; // init
+                }
+                $meta['logs'][] = 'Dst vaultfile '.$mfsl->dstvaultfile_id.' soft deleted by user '.$sessionUser->id;
+                $mfsl->meta = $meta; 
+                // assumes soft vaultfile delete, otherwise we need to set FKID to NULL
+                $mfsl->save();
+            });
+
+            $vfc->delete();
+            $numberOfItemsDeleted += 1; // for vfc
+        });
+
+        // Delete all files in this folder
+        $this->mediafiles->each( function($mf) use(&$numberOfItemsDeleted) {
+            try {
+                $mf->diskmediafile->deleteReference($mf->id, false);
+                $numberOfItemsDeleted += 1;
+            } catch (Exception $e) {
+                Log::warning('vaultfolder.model - Could not delete mediafile with pkid = '.$mf->id.' in vaultfolder = '.$this->id. ' : '.$e->getMessage());
+            }
+        });
+
+        return $numberOfItemsDeleted;
     }
 
 }

@@ -14,6 +14,7 @@ use App\Models\Chatmessage;
 use App\Models\Chatthread;
 use App\Models\Mycontact;
 use App\Models\User;
+use App\Notifications\MessageReceived;
 
 class ChatthreadsController extends AppBaseController
 {
@@ -345,6 +346,19 @@ class ChatthreadsController extends AppBaseController
         try {
             //broadcast( new MessageSentEvent($chatmessage) )->toOthers();
             MessageSentEvent::dispatch($chatmessage);
+
+            // send notification
+            foreach($chatthread->participants as $participant) {
+                // don't send notification to myself
+                if ($participant->id == $request->user()->id) {
+                    continue;
+                }
+
+                // check is_muted pivot field ON/OFF state
+                if (!$participant->pivot->is_muted) {
+                    $participant->notify( new MessageReceived($chatmessage, $request->user()) );
+                }
+            }
         } catch( Exception $e ) {
             Log::warning('ChatthreadsController::sendMessage().broadcast', [
                 'msg' => $e->getMessage(),

@@ -83,27 +83,41 @@
           </b-col>
         </b-row>
 
-        <!-- +++ List/Grid Display of Files +++ -->
-        <b-row :no-gutters="true">
+        <!-- +++ List/Grid Display of Files & Folders +++ -->
+        <b-row :no-gutters="false">
+
+          <!-- Files -->
           <b-col cols="12" md="3" v-for="(mf) in mediafiles" :key="mf.id" role="button" class="mb-2">
             <PreviewFile 
               :data-mf_id="mf.id" 
               :mediafile="mf" 
               @input="onPreviewFileInput" 
               @render-lightbox="renderLightbox" 
-              class="p-1 tag-file" 
+              class="OFF-p-1 tag-file" 
             />
             <p class="text-center truncate m-0">{{ mf.mfname }}</p>
           </b-col>
-          <b-col v-for="(vf) in children" :key="vf.id" cols="12" md="3" role="button">
-            <div v-if="vf.is_pending_approval" class="tag-folder">
-              <b-img fluid @click="renderApproveSharedModal(vf)" src="/images/tmp-placeholders/folder-icon.jpg" class="tag-folder tag-pending-approval":alt="`Folder ${vf.slug}`"></b-img>
+
+          <!-- Vaultfolders -->
+          <b-col v-for="(vf) in children" :key="vf.id" cols="12" md="3" class="mb-2">
+            <div v-if="vf.is_pending_approval" class="tag-folder img-box tag-shared tag-pending-approval">
+              <b-img fluid @click="renderApproveSharedModal(vf)" src="/images/icons/folder-icon.png" class="folder d-block mx-auto" role="button" :alt="`Folder ${vf.slug}`"></b-img>
+              <div class="icon-pending-approval" style="font-size: 3rem;">
+                <fa-icon :icon="['fas', 'share-alt']" class="text-primary" />
+              </div>
             </div>
-            <div v-else>
-              <b-img fluid @click="doNav(vf.id)" src="/images/tmp-placeholders/folder-icon.jpg" class="tag-folder" :alt="`Folder ${vf.slug}`"></b-img>
+            <div v-else class="tag-folder img-box">
+              <b-img fluid @click="doNav(vf.id)" src="/images/icons/folder-icon.png" class="folder d-block mx-auto" role="button" :alt="`Folder ${vf.slug}`"></b-img>
+              <div class="file-count">
+                <b-badge variant="warning" class="p-2">{{ vf.mediafiles.length + vf.vfchildren.length }}</b-badge>
+              </div>
+              <div @click="renderDeleteFolderForm(vf)" class="clickme_to-delete" role="button">
+                <fa-icon :icon="['fas', 'trash']" size="lg" class="text-danger" />
+              </div>
             </div>
             <p class="text-center truncate m-0">{{ vf.name }}</p>
           </b-col>
+
         </b-row>
 
       </main>
@@ -144,7 +158,9 @@
           <div class="share-list">
             <div v-if="shareForm.sharees.length">
               <span v-for="(se) in shareForm.sharees" class="tag-sharee mr-3">
-                <b-badge variant="info" class="p-2">{{ se.label }} <fa-icon :icon="['far', 'times']" /></b-badge>
+                <b-badge variant="info" class="p-2">{{ se.label }} 
+                  <span @click="removeSharee(se)" role="button"><fa-icon :icon="['far', 'times']" /></span>
+                </b-badge>
               </span>
             </div>
           </div>
@@ -157,7 +173,7 @@
 
           <template #modal-footer>
             <div class="w-100">
-              <b-button variant="warning" size="sm" @click="isShareFilesModalVisible=false">Cancel</b-button>
+              <b-button variant="warning" size="sm" @click="hideShareForm">Cancel</b-button>
               <b-button variant="primary" size="sm" @click="shareSelectedFiles">Share</b-button>
             </div>
           </template>
@@ -206,7 +222,7 @@
     </b-modal>
 
     <!-- Form modal for creating a new sub-folder under the current folder -->
-    <b-modal id="modal-create-folder" v-model="isCreateFolderModalVisible" size="lg" title="Create Folder" body-class="">
+    <b-modal id="modal-create-folder" v-model="isCreateFolderModalVisible" size="lg" title="Create Folder" >
       <b-form @submit.prevent="storeFolder">
           <b-form-group>
             <b-form-input id="folder-name"
@@ -221,6 +237,15 @@
           <b-button @click="storeFolder" variant="primary">Create Folder</b-button>
           <b-button @click="isCreateFolderModalVisible=false" type="cancel" variant="secondary">Cancel</b-button>
         </template>
+    </b-modal>
+
+    <!-- Form modal for deleting a sub-folder and *all* contents  -->
+    <b-modal id="modal-delete-folder" v-model="isDeleteFolderModalVisible" size="lg" title="Delete Folder" >
+      <p>Are you sure you want to permanently delete this folder and all the files it contains, including subfolders & their contents?</p>
+      <template #modal-footer>
+        <b-button @click="deleteFolder" variant="danger">Delete Folder and All Contents</b-button>
+        <b-button @click="hideDeleteFolderForm" type="cancel" variant="secondary">Cancel</b-button>
+      </template>
     </b-modal>
 
     <!-- 'Lightbox' modal for image preview when clicking on a file in the vault grid/list -->
@@ -347,11 +372,13 @@ export default {
     isShareFilesModalVisible: false,
     isDeleteFilesModalVisible: false,
     isCreateFolderModalVisible: false,
+    isDeleteFolderModalVisible: false,
     isSaveToStoryModalVisible: false,
     isMediaLightboxModalVisible: false,
     isApproveSharedModalVisible: false,
 
     selectedVfToApprove: null,
+    selectedVfToDelete: null,
 
     lightboxSelection: null,
 
@@ -461,6 +488,10 @@ export default {
     renderShareForm() {
       this.isShareFilesModalVisible = true
     },
+    hideShareForm() {
+      this.isShareFilesModalVisible = false
+      this.shareForm.sharees = []
+    },
 
     renderSendForm() {
       this.isSendFilesModalVisible = true
@@ -519,6 +550,7 @@ export default {
       this.isShareFilesModalVisible = false
       this.cancelShareFiles()
       this.clearSelected()
+      this.$root.$bvToast.toast( `Successfully shared ${payload.mediafile_ids.length} files)` )
     },
 
     cancelShareFiles() {
@@ -538,11 +570,22 @@ export default {
       this.isDeleteFilesModalVisible = false
       this.$store.dispatch('getVaultfolder', this.currentFolderId)
       this.clearSelected()
+      this.$root.$bvToast.toast( `Successfully deleted ${payload.mediafile_ids.length} files)` )
     },
 
     // --- New Vault Folder Form methods ---
     renderNewFolderForm() {
       this.isCreateFolderModalVisible = true
+    },
+
+    renderDeleteFolderForm(vf) {
+      // %TODO: make an api call to get a *recursive* count of all files & folders contained under the folder to be deleted!!
+      this.selectedVfToDelete = vf
+      this.isDeleteFolderModalVisible = true
+    },
+    hideDeleteFolderForm(vf) {
+      this.selectedVfToDelete = null
+      this.isDeleteFolderModalVisible = false
     },
 
     cancelCreateFolder() {
@@ -557,12 +600,29 @@ export default {
         parent_id: this.currentFolderId,
         vfname: this.createForm.name,
       }
-      const postResponse = await this.axios.post('/vaultfolders', payload)
-      const showResponse = await this.axios.get(route('vaults.show', { id: this.vault_pkid }))
+      const postResponse = await this.axios.post( this.$apiRoute('vaultfolders.store'), payload )
+
+      // refresh
+      const showResponse = await this.axios.get( this.$apiRoute('vaults.show', { id: this.vault_pkid }) )
       this.vault = showResponse.data.vault
       this.foldertree = showResponse.data.foldertree || null
       this.$store.dispatch('getVaultfolder', this.currentFolderId)
       this.cancelCreateFolder()
+      this.$root.$bvToast.toast('Successfully created folder')
+    },
+
+    async deleteFolder(e) {
+      e.preventDefault()
+      const deleteResponse = await this.axios.delete( this.$apiRoute('vaultfolders.destroy', { id: this.selectedVfToDelete.id }) )
+
+      // refresh
+      const showResponse = await this.axios.get( this.$apiRoute('vaults.show', { id: this.vault_pkid }) )
+      this.vault = showResponse.data.vault
+      this.foldertree = showResponse.data.foldertree || null
+      this.$store.dispatch('getVaultfolder', this.currentFolderId)
+      this.selectedVfToDelete = null
+      this.isDeleteFolderModalVisible = false
+      this.$root.$bvToast.toast( `Deleted folder ( Total of ${deleteResponse.data.number_of_items_deleted} items deleted)` )
     },
 
     //getLink(e, mediafileId) {
@@ -592,10 +652,17 @@ export default {
     // ---
 
     addSharee(sharee) {
-      console.log('addSharee')
-      this.shareForm.sharees.push(sharee.item)
+      //console.log('addSharee', { sharee, })
+      if ( !this.shareForm.sharees.some(o => o.id === sharee.item.id) ) { // check not already added
+        this.shareForm.sharees.push(sharee.item)
+      }
+      //  this.shareForm.sharees.push(sharee.item)
       this.query = ''
       this.suggestions = []
+    },
+
+    removeSharee(sharee) {
+      this.shareForm.sharees = this.shareForm.sharees.filter( o => o.id !== sharee.id )
     },
 
     addInvite(e) {
@@ -756,10 +823,42 @@ export default {
 <style lang="scss" >
 body {
     .autosuggest__results ul {
-      padding-left: 1rem;
       margin-top: 2rem;
       list-style: none !important;
     }
+  .img-box {
+    padding-top: calc(85% - 2px);
+    img {
+      object-fit: cover;
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+    img.tag-selected {
+      filter: brightness(50%);
+    }
+    .render-date {
+      position: absolute;
+      top: 5px;
+      left: 5px;
+      border-radius: 5px;
+      background: #535353;
+      opacity: 0.7;
+      padding: 0.3rem;
+      p {
+        opacity: 1;
+        color: #fff;
+        font-size: 11px;
+      }
+    }
+    .select-file {
+      position: absolute;
+      top: 0;
+      right: 0;
+    }
+  }
 }
 </style>
 
@@ -784,11 +883,31 @@ body {
 
   .vault-container {
     background: #fff;
-    img.tag-folder.tag-pending-approval {
-      border: solid orange 2px;
+    .tag-folder {
+      //border: solid #b5b5bf 3px;
+      background: #f5f5f5;
+      border-radius: 5px;
     }
-
+    .tag-folder.tag-pending-approval {
+      border: solid orange 3px;
+    }
+    .tag-folder .file-count {
+      position: absolute;
+      top: 0.7rem;
+      left: 1.5rem;
+    }
+    .tag-folder .clickme_to-delete {
+      position: absolute;
+      top: 0.7rem;
+      right: 1.5rem;
+    }
+    .tag-folder .icon-pending-approval {
+      position: absolute;
+      top: 45%;
+      right: 50%;
+    }
   }
+
   .vue-dropzone {
     background: #ccdfeb;
   }

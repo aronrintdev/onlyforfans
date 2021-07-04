@@ -145,6 +145,15 @@
               {{ $t('no-results') }}
             </b-list-group-item>
           </b-list-group>
+
+          <b-pagination
+            v-model="currentPage"
+            :total-rows="contactsCount"
+            :per-page="perPage"
+            aria-controls="threads-list"
+            v-on:page-click="pageClickHandler"
+            class="mt-3"
+          ></b-pagination>
         </article>
 
       </aside>
@@ -262,7 +271,7 @@ export default {
     currentPage: 1,
     perPage: 10,
     sortBy: 'recent',
-    selectedFilter: 'all',
+    selectedFilter: '',
 
     // Loading
     isLoadingContacts: false,
@@ -281,6 +290,10 @@ export default {
 
   created() {
     this.getMe()
+    this.CLEAR_CACHE()
+    this.$nextTick(() => {
+      this.selectedFilter = 'all'
+    })
     // Create debounced method
     this.doSearch = _.debounce(this._doSearch, this.searchDebounceDuration);
   },
@@ -295,6 +308,7 @@ export default {
       'getMe',
     ]),
     ...Vuex.mapMutations('messaging/contacts', [
+      'CLEAR_CACHE',
       'UPDATE_CONTACT',
       'SAVE_CONTACTS_LIST',
       'UNSELECT_ALL',
@@ -310,6 +324,9 @@ export default {
     },
 
     filtersLabel(key) {
+      if (this.selectedFilter === '') {
+        return this.$t('filters.all')
+      }
       if (this.filters[this.selectedFilter].name) {
         return this.filters[this.selectedFilter].name
       }
@@ -421,13 +438,10 @@ export default {
 
     }, // createChatthread()
 
-    // additional page loads
-    // see: https://peachscript.github.io/vue-infinite-loading/guide/#installation
-    loadNextPage() {
-      if ( !this.isLoading && (this.nextPage <= this.lastPage) ) {
-        this.$log.debug('loadNextPage', { current: this.currentPage, last: this.lastPage, next: this.nextPage });
-        this.getContacts()
-      }
+    pageClickHandler(e, page) {
+      this.currentPage = page
+      this.clearCache()
+      this.getContacts()
     },
 
     reloadFromFirstPage() {
@@ -522,8 +536,10 @@ export default {
     },
 
     selectedFilter(value) {
-      // New filter was selected, load it's contents from the first page
-      this.reloadFromFirstPage()
+      if (value !== '') {
+        // New filter was selected, load it's contents from the first page
+        this.reloadFromFirstPage()
+      }
     },
 
     session_user(value) {
@@ -551,8 +567,8 @@ body {
   #view-create-thread {
     background-color: #fff;
 
-    .contact-list .list-group {
-      height: calc(100vh - 320px);
+    .contact-list {
+      height: calc(100vh - 280px);
       overflow: auto;
     }
   }
