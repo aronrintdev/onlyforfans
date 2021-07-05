@@ -21,6 +21,7 @@ class RestCommentsTest extends TestCase
     /**
      *  @group comments
      *  @group regression
+     *  @group regression-base
      */
     // should return only comments for which session user is the author
     // %TODO: filters, timelines (see comments I have valid access to), etc
@@ -52,6 +53,7 @@ class RestCommentsTest extends TestCase
     /**
      *  @group comments
      *  @group regression
+     *  @group regression-base
      */
     public function test_admin_can_list_comments()
     {
@@ -59,7 +61,6 @@ class RestCommentsTest extends TestCase
         $commenter = $post->comments[0]->user;
         $timeline = $post->timeline;
         $creator = $timeline->user;
-       
 
         $admin = User::whereDoesntHave('followedtimelines', function($q1) use(&$timeline) {
             $q1->where('timelines.id', $timeline->id);
@@ -70,6 +71,7 @@ class RestCommentsTest extends TestCase
         $response = $this->actingAs($admin)->ajaxJSON('GET', route('comments.index'), [
             'user_id' => $commenter->id,
         ]);
+        $admin->removeRole('super-admin'); // revert (else future tests will fail)
         $response->assertJsonStructure([
             'data',
             'links',
@@ -89,6 +91,7 @@ class RestCommentsTest extends TestCase
     /**
      *  @group comments
      *  @group regression
+     *  @group regression-base
      */
     public function test_nonowner_can_not_list_comments()
     {
@@ -135,6 +138,7 @@ class RestCommentsTest extends TestCase
     /**
      *  @group comments
      *  @group regression
+     *  @group regression-base
      */
      // should return only comments for which session user is the author
     public function test_nonadmin_can_not_list_general_comments()
@@ -160,6 +164,7 @@ class RestCommentsTest extends TestCase
     /**
      *  @group comments
      *  @group regression
+     *  @group regression-base
      */
     public function test_owner_can_view_own_comment()
     {
@@ -178,6 +183,7 @@ class RestCommentsTest extends TestCase
     /**
      *  @group comments
      *  @group regression
+     *  @group regression-base
      */
     public function test_follower_can_list_timeline_comments()
     {
@@ -209,7 +215,8 @@ class RestCommentsTest extends TestCase
     /**
      *  @group comments
      *  @group regression
-     *  @group june28
+     *  @group regression-base
+     *  @group july02
      */
     public function test_nonfollower_can_not_list_timeline_comments()
     {
@@ -221,7 +228,6 @@ class RestCommentsTest extends TestCase
         $nonfan = User::whereDoesntHave('followedtimelines', function($q1) use(&$timeline) {
             $q1->where('timelines.id', $timeline->id);
         })->where('id', '<>', $creator->id)->first();
-dump('HERE', 'creator', $creator->username, 'nonfan', $nonfan->username);
         $this->assertFalse( $timeline->followers->contains( $nonfan->id ) );
         $this->assertFalse( $timeline->user_id == $nonfan->id );
 
@@ -234,6 +240,7 @@ dump('HERE', 'creator', $creator->username, 'nonfan', $nonfan->username);
     /**
      *  @group comments
      *  @group regression
+     *  @group regression-base
      */
     public function test_nonfollower_can_not_view_comment_on_timeline_post()
     {
@@ -253,6 +260,7 @@ dump('HERE', 'creator', $creator->username, 'nonfan', $nonfan->username);
     /**
      *  @group comments
      *  @group regression
+     *  @group regression-base
      */
     public function test_follower_can_create_comment_on_timeline_post()
     {
@@ -302,6 +310,7 @@ dump('HERE', 'creator', $creator->username, 'nonfan', $nonfan->username);
     /**
      *  @group comments
      *  @group regression
+     *  @group regression-base
      */
     public function test_nonfollower_can_not_create_comment_on_timeline_post()
     {
@@ -327,6 +336,7 @@ dump('HERE', 'creator', $creator->username, 'nonfan', $nonfan->username);
     /**
      *  @group comments
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_edit_own_comment()
     {
@@ -349,6 +359,7 @@ dump('HERE', 'creator', $creator->username, 'nonfan', $nonfan->username);
     /**
      *  @group comments
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_not_edit_nonowned_comment()
     {
@@ -366,6 +377,7 @@ dump('HERE', 'creator', $creator->username, 'nonfan', $nonfan->username);
     /**
      *  @group comments
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_delete_own_comment()
     {
@@ -380,6 +392,7 @@ dump('HERE', 'creator', $creator->username, 'nonfan', $nonfan->username);
     /**
      *  @group comments
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_not_delete_nonowned_comment()
     {
@@ -395,6 +408,7 @@ dump('HERE', 'creator', $creator->username, 'nonfan', $nonfan->username);
     /**
      *  @group comments
      *  @group regression
+     *  @group regression-base
      */
     public function test_owner_can_delete_followers_comment_on_own_post()
     {
@@ -426,6 +440,7 @@ dump('HERE', 'creator', $creator->username, 'nonfan', $nonfan->username);
     /**
      *  @group comments
      *  @group regression
+     *  @group regression-base
      */
     public function test_follower_can_like_then_unlike_comment_on_timeline_post()
     {
@@ -492,6 +507,7 @@ dump('HERE', 'creator', $creator->username, 'nonfan', $nonfan->username);
     /**
      *  @group comments
      *  @group regression
+     *  @group regression-base
      */
     public function test_nonfollower_can_not_like_comment_on_timeline_post()
     {
