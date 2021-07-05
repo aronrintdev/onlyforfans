@@ -159,6 +159,27 @@ class RestVaultTest extends TestCase
      *  @group regression
      *  @group regression-base
      */
+    public function test_can_create_a_new_vault_folder_with_space_in_name()
+    {
+        $creator = User::first();
+        $primaryVault = Vault::primary($creator)->first();
+        $rootFolder = Vaultfolder::isRoot()->where('vault_id', $primaryVault->id)->first();
+        $origNumChildren = $rootFolder->vfchildren->count();
+
+        $payload = [
+            'vault_id' => $primaryVault->id,
+            'parent_id' => $rootFolder->id,
+            'vfname' => $this->faker->slug.' '.$this->faker->slug,
+        ];
+        $response = $this->actingAs($creator)->ajaxJSON('POST', route('vaultfolders.store'), $payload);
+        $response->assertStatus(201);
+    }
+
+    /**
+     *  @group vault
+     *  @group regression
+     *  @group regression-base
+     */
     public function test_can_not_create_a_new_vault_folder_bad_param_422()
     {
         $creator = User::first();
@@ -171,6 +192,18 @@ class RestVaultTest extends TestCase
             'parent_id' => $rootFolder->id,
             'vfname' => $this->faker->slug.'/',
         ];
+        $response = $this->actingAs($creator)->ajaxJSON('POST', route('vaultfolders.store'), $payload);
+        $response->assertStatus(422);
+
+        $payload['vfname']= $this->faker->slug.'_';
+        $response = $this->actingAs($creator)->ajaxJSON('POST', route('vaultfolders.store'), $payload);
+        $response->assertStatus(422);
+
+        //$payload['vfname']= $this->faker->slug.' ';
+        //$response = $this->actingAs($creator)->ajaxJSON('POST', route('vaultfolders.store'), $payload);
+        //$response->assertStatus(422);
+
+        $payload['vfname']= $this->faker->slug.'@';
         $response = $this->actingAs($creator)->ajaxJSON('POST', route('vaultfolders.store'), $payload);
         $response->assertStatus(422);
     }
