@@ -58,6 +58,7 @@ class RestFavoritesTest extends TestCase
             ->count();
 
         $response = $this->actingAs($favoriter)->ajaxJSON('GET', route('favorites.index'), [
+            'take' => 1000, // much > number of seeds to effectively return all
             'favoritable_type' => 'mediafiles',
         ]);
         $response->assertStatus(200);
@@ -68,6 +69,7 @@ class RestFavoritesTest extends TestCase
         ]);
 
         $content = json_decode($response->content());
+        //dd($content);
         $this->assertNotNull($content->data);
         $this->assertGreaterThan(0, count($content->data));
         $this->assertEquals($expectedCount, count($content->data));
