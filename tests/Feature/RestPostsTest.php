@@ -3,26 +3,31 @@ namespace Tests\Feature;
 
 use DB;
 use Tests\TestCase;
+
+use Illuminate\Http\File;
+use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Http\UploadedFile;
+use Database\Seeders\TestDatabaseSeeder;
+
+use App\Events\ItemPurchased;
+use App\Events\PurchaseFailed;
+
+use App\Enums\Financial\AccountTypeEnum;
+use App\Enums\PostTypeEnum;
+use App\Enums\MediafileTypeEnum;
+use App\Enums\PaymentTypeEnum;
+
+use App\Models\Financial\SegpayCard;
+use App\Models\Mediafile;
 use App\Models\Post;
 use App\Models\User;
 use App\Models\Timeline;
 use App\Models\Fanledger;
-
-use App\Models\Mediafile;
-use Illuminate\Http\File;
-use App\Enums\PostTypeEnum;
-use App\Events\ItemPurchased;
-use App\Enums\PaymentTypeEnum;
-use App\Events\PurchaseFailed;
-use App\Enums\MediafileTypeEnum;
-use Illuminate\Http\UploadedFile;
-use App\Models\Financial\SegpayCard;
-use Illuminate\Support\Facades\Event;
-use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\Storage;
-use App\Enums\Financial\AccountTypeEnum;
-use Database\Seeders\TestDatabaseSeeder;
-use Illuminate\Foundation\Testing\WithFaker;
+use App\Models\Likeable;
+use App\Models\Comment;
 //use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class RestPostsTest extends TestCase
@@ -374,18 +379,57 @@ class RestPostsTest extends TestCase
      *  @group posts
      *  @group regression
      *  @group regression-base
+     *  @group july05
      */
     public function test_owner_can_delete_free_post()
     {
         $timeline = Timeline::has('followers', '>=', 1)
             ->whereHas('posts', function($q1) {
                 $q1->where('type', PostTypeEnum::FREE);
-            })->first();
+            })->firstOrFail();
         $creator = $timeline->user;
-        $post = $timeline->posts->where('type', PostTypeEnum::FREE)->first();
+        $this->assertNotNull($creator);
+
+        $post = Post::where('postable_type', 'timelines')
+            ->where('postable_id', $timeline->id)
+            ->has('likes','>',0)
+            ->has('comments','>',0)
+            ->has('mediafiles','>',0)
+            ->doesntHave('sharees')
+            ->firstorFail();
+        $numLikes = Likeable::where('likeable_type', 'posts')->where('likeable_id', $post->id)->count();
+        $this->assertGreaterThan(0, $numLikes);
+        $numComments = Comment::where('commentable_type', 'posts')->where('commentable_id', $post->id)->count();
+        $this->assertGreaterThan(0, $numComments);
+        $numMediafiles = Mediafile::where('resource_type', 'posts')->where('resource_id', $post->id)->count();
+        $this->assertGreaterThan(0, $numMediafiles);
 
         $response = $this->actingAs($creator)->ajaxJSON('DELETE', route('posts.destroy', $post->id));
         $response->assertStatus(200);
+
+        $exists = Post::find($post->id);
+        $this->assertNull($exists); // deleted
+
+        // Test relation cleanup
+        $numLikes = Likeable::where('likeable_type', 'posts')->where('likeable_id', $post->id)->count();
+        $this->assertEquals(0, $numLikes);
+        $numComments = Comment::where('commentable_type', 'posts')->where('commentable_id', $post->id)->count();
+        $this->assertEquals(0, $numComments);
+        $numMediafiles = Mediafile::where('resource_type', 'posts')->where('resource_id', $post->id)->count();
+        $this->assertEquals(0, $numMediafiles);
+
+        // ---
+
+        $timeline2 = Timeline::find($timeline->id);
+        $this->assertNotNull($timeline);
+        $this->assertNotNull($timeline->user);
+
+        // %TODO: test
+        //  ~ related likes cleaned up
+        //  ~ commments cleaned up
+        //  ~  etc
+        $bad = Timeline::doesntHave('user')->get(); // make sure no users got deleted (ie no timelines w/o corresponding user)
+        $this->assertEquals(0, $bad->count());
     }
 
     /**
@@ -399,7 +443,10 @@ class RestPostsTest extends TestCase
             ->whereHas('posts', function($q1) {
                 $q1->where('type', PostTypeEnum::FREE);
             })->firstOrFail();
+        $this->assertNotNull($timeline);
+        //dd($timeline);
         $creator = $timeline->user;
+        $this->assertNotNull($creator);
         $post = $timeline->posts->where('type', PostTypeEnum::FREE)->first();
         $fan = $timeline->followers[0];
         $response = $this->actingAs($fan)->ajaxJSON('GET', route('posts.show', $post->id));
@@ -418,6 +465,8 @@ class RestPostsTest extends TestCase
                 $q1->where('type', PostTypeEnum::FREE);
             })->firstOrFail();
         $creator = $timeline->user;
+        $this->assertNotNull($creator);
+
         $post = $timeline->posts->where('type', PostTypeEnum::FREE)->first();
         $nonfan = User::whereDoesntHave('followedtimelines', function($q1) use(&$timeline) {
             $q1->where('timelines.id', $timeline->id);
@@ -431,6 +480,7 @@ class RestPostsTest extends TestCase
      *  @group posts
      *  @group regression
      *  @group regression-base
+     *  @group OFF-july05
      */
     public function test_subscriber_can_view_subcribe_only_post_on_my_timeline()
     {
@@ -441,6 +491,7 @@ class RestPostsTest extends TestCase
                 $q1->where('type', PostTypeEnum::SUBSCRIBER);
             })->firstOrFail();
         $creator = $timeline->user;
+        $this->assertNotNull($creator);
         $fan = $timeline->subscribers[0];
 
         // --
@@ -892,6 +943,7 @@ class RestPostsTest extends TestCase
      *  @group posts
      *  @group regression
      *  @group regression-base
+     *  @group erik
      */
     public function test_can_send_tip_on_post()
     {
@@ -904,7 +956,6 @@ class RestPostsTest extends TestCase
             'base_unit_cost_in_cents' => $this->faker->randomNumber(3),
         ];
         $response = $this->actingAs($fan)->ajaxJSON('PUT', route('posts.tip', $post->id), $payload);
-
         $response->assertStatus(200);
 
         $content = json_decode($response->content());
