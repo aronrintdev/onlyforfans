@@ -257,14 +257,16 @@ class RestVaultTest extends TestCase
      *  @group vault
      *  @group regression
      *  @group regression-base
+     *  @group OFF-july05
      */
     public function test_can_navigate_my_vault_folders()
     {
         $creator = User::first();
         $primaryVault = Vault::primary($creator)->first();
         $rootFolder = Vaultfolder::isRoot()->where('vault_id', $primaryVault->id)->first();
+        $this->assertNotNull($rootFolder);
 
-        $this->assertEquals(0, $rootFolder->vfchildren->count(), 'Root should not have any subfolders');
+        $this->assertGreaterThan(0, $rootFolder->vfchildren->count(), 'Root should have at last one subfolder post-creation (boot code)');
         $this->assertNull($rootFolder->vfparent, 'Root should have null parent');
 
         // set cwf via api call
@@ -510,6 +512,7 @@ class RestVaultTest extends TestCase
      *  @group vault
      *  @group regression
      *  @group regression-base
+     *  @group july05
      */
     public function test_can_upload_multiple_image_files_to_my_vault_folder()
     {
@@ -523,6 +526,9 @@ class RestVaultTest extends TestCase
 
         $primaryVault = Vault::primary($owner)->first();
         $vaultfolder = Vaultfolder::isRoot()->where('vault_id', $primaryVault->id)->first(); // root
+        $this->assertEquals($owner->id, $vaultfolder->user_id);
+
+        $preCount = Mediafile::where('resource_type', 'vaultfolders')->where('resource_id', $vaultfolder->id)->count();
 
         $payload = [
             'mftype' => MediafileTypeEnum::VAULT,
@@ -531,6 +537,9 @@ class RestVaultTest extends TestCase
             'resource_id' => $vaultfolder->id,
         ];
         $response = $this->actingAs($owner)->ajaxJSON('POST', route('mediafiles.store'), $payload);
+        $content = json_decode($response->content());
+        $uploadedMfIds = [];
+        $uploadedMfIds[] = $content->mediafile->id;
         $response->assertStatus(201);
 
         $payload = [
@@ -540,14 +549,24 @@ class RestVaultTest extends TestCase
             'resource_id' => $vaultfolder->id,
         ];
         $response = $this->actingAs($owner)->ajaxJSON('POST', route('mediafiles.store'), $payload);
+        $content = json_decode($response->content());
+        //$mfId2 = $content->mediafile->id;
+        $uploadedMfIds[] = $content->mediafile->id;
         $response->assertStatus(201);
 
-        $mediafiles = Mediafile::where('resource_type', 'vaultfolders')->get();
+        //$mediafiles = Mediafile::where('resource_type', 'vaultfolders')->where('resource_id', $vaultfolder->id)->get();
+        $mediafiles = Mediafile::where('resource_type', 'vaultfolders')
+            ->where('resource_id', $vaultfolder->id)
+            ->whereIn('id', $uploadedMfIds)
+            ->get();
         $this->assertNotNull($mediafiles);
         $this->assertEquals(2, $mediafiles->count());
+        //$this->assertEquals($preCount+2, $mediafiles->count());
 
         $mf1 = $mediafiles->shift();
         Storage::disk('s3')->assertExists($mf1->filename);
+//dd($filename1, $filename2, $mediafiles->toArray());
+//dd($filename1, $filename2, $mf1->toArray(), $mf2->toArray());
         $this->assertSame($filename1, $mf1->mfname);
         $this->assertSame(MediafileTypeEnum::VAULT, $mf1->mftype);
 
