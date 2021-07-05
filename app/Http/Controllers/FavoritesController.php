@@ -35,13 +35,10 @@ class FavoritesController extends AppBaseController
         foreach ($filters as $key => $f) {
             switch ($key) {
             case 'favoritable_type':
-                switch ($f) {
-                case 'timelines':
+                if ( $f==='timelines' ) {
                     $query->with(['favoritable.cover', 'favoritable.avatar']);
-                    break;
-                case 'mediafiles':
+                } else if ( $f==='mediafiles' ) {
                     $query->with(['favoritable.resource']); 
-                    break;
                 }
                 $query->where('favoritable_type', $f);
                 break;
