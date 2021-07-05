@@ -19,7 +19,7 @@
             <div class="alert alert-secondary py-1 px-2" role="alert" v-if="scheduled_at" @click="showSchedulePicker()">
               <fa-icon size="lg" :icon="['far', 'calendar-check']" class="text-primary mr-1" />
               <span>Scheduled for</span>
-              <button type="button" class="close" data-dismiss="alert" aria-label="Close" @click="scheduled_at=null">
+              <button type="button" class="close" data-dismiss="alert" aria-label="Close" @click="closeSchedulePicker">
                 <span aria-hidden="true">&times;</span>
               </button>
               <strong class="float-right mr-3">{{ moment.utc(scheduled_at).local().format('MMM DD, h:mm a') }}</strong>
@@ -363,6 +363,10 @@ export default {
         key: 'expiration-period',
       })
     },
+    closeSchedulePicker(e) {
+      this.scheduled_at = null;
+      e.stopPropagation();
+    }
   },
 
   mounted() {

@@ -135,7 +135,7 @@ class PostsController extends AppBaseController
             'price_for_subscribers' => 'sometimes|required|integer',
             'mediafiles' => 'array',
             'mediafiles.*.*' => 'integer|uuid|exists:mediafiles',
-            'schedule_datetime' => 'nullable|integer',
+            'schedule_datetime' => 'nullable|date',
         ]);
 
         $post->fill($request->only([

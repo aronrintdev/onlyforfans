@@ -66,7 +66,7 @@
       hide-footer
       body-class="p-0"
     >
-      <ScheduleDateTime ref="schedule_picker_modal" :scheduled_at="scheduled_at" />
+      <ScheduleDateTime ref="schedule_picker_modal" :scheduled_at="scheduled_at" :for_edit="is_for_edit" />
     </b-modal>
 
     <b-modal
@@ -147,6 +147,7 @@ export default {
     subscribeOnly: false,
     modalPayload: null,
     scheduled_at: null,
+    is_for_edit: null,
   }),
 
   methods: {
@@ -188,6 +189,7 @@ export default {
             break
           case 'show-schedule-datetime':
             this.scheduled_at = data.scheduled_at;
+            this.is_for_edit = data.is_for_edit;
             this.$bvModal.show('modal-schedule-datetime')
             break
           case 'edit-post':

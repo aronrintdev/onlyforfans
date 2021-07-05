@@ -43,6 +43,10 @@ export default {
     scheduled_at: {
       type: Object,
       required: false,
+    },
+    for_edit: {
+      type: Boolean,
+      required: false,
     }
   },
   data: () => ({ selectedDateTime: {} }),
@@ -68,7 +72,11 @@ export default {
     },
     apply() {
       const date = moment(`${this.selectedDateTime.date} ${this.selectedDateTime.time}`).utc();
-      eventBus.$emit('apply-schedule', date);
+      if (this.for_edit) {
+        eventBus.$emit('edit-apply-schedule', date);
+      } else {
+        eventBus.$emit('apply-schedule', date);
+      }
       this.closePicker();
     }
   },
