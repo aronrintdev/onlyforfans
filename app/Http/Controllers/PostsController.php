@@ -70,6 +70,7 @@ class PostsController extends AppBaseController
             'mediafiles' => 'array',
             'mediafiles.*.*' => 'integer|uuid|exists:mediafiles',
             'expiration_period' => 'nullable|integer',
+            'schedule_datetime' => 'sometimes|date',
         ];
 
         if ( !$request->has('mediafiles') ) {
