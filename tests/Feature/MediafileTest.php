@@ -35,6 +35,7 @@ class MediafileTest extends TestCase
     /**
      *  @group mediafiles
      *  @group regression
+     *  @group regression-base
      */
     public function test_admin_can_list_mediafiles()
     {
@@ -51,6 +52,7 @@ class MediafileTest extends TestCase
             'links',
             'meta' => [ 'current_page', 'from', 'last_page', 'path', 'per_page', 'to', 'total', ],
         ]);
+        $admin->removeRole('super-admin'); // revert (else future tests will fail)
         $response->assertStatus(200);
         $content = json_decode($response->content());
         $this->assertEquals(1, $content->meta->current_page);
@@ -65,6 +67,8 @@ class MediafileTest extends TestCase
     /**
      *  @group mediafiles
      *  @group regression
+     *  @group regression-base
+     *  @group july02
      */
     public function test_owner_can_list_mediafiles()
     {
@@ -115,7 +119,7 @@ class MediafileTest extends TestCase
                 break;
             case 'vaultfolders':
                 $resource = Vaultfolder::findOrFail($item->resource_id);
-                if ( $resource->id === $owner->id ) {
+                if ( $resource->getPrimaryOwner()->id === $owner->id ) {
                     $acc += 1;
                 }
                 break;
@@ -130,6 +134,7 @@ class MediafileTest extends TestCase
     /**
      *  @group mediafiles
      *  @group regression
+     *  @group regression-base
      */
     public function test_owner_can_list_mediafiles_in_vault()
     {
@@ -169,6 +174,7 @@ class MediafileTest extends TestCase
     /**
      *  @group mediafiles
      *  @group regression
+     *  @group regression-base
      *  @group june0624
      */
     public function test_can_store_mediafile()

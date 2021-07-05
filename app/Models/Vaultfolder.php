@@ -225,6 +225,12 @@ class Vaultfolder extends BaseModel implements Guidable, Ownable
         return $this->vault->getOwner();
     }
 
+    public function getPrimaryOwner(): ?User
+    {
+        $owners =  $this->getOwner();
+        return ( $owners && ($owners->count()>0) ) ? $owners[0] : null;
+    }
+
     public function recursiveDelete()
     {
         // for debug...
