@@ -25,6 +25,7 @@ class MediafileModelTest extends TestCase
     /**
      * @group mediafile-model
      * @group regression
+     * @group regression-base
      */
     public function test_should_create_diskmediafile_and_reference_mediafile()
     {
@@ -80,6 +81,7 @@ class MediafileModelTest extends TestCase
     /**
      * @group mediafile-model
      * @group regression
+     * @group regression-base
      */
     public function test_should_create_mediafile_reference_from_existing_diskmediafile()
     {
@@ -133,6 +135,7 @@ class MediafileModelTest extends TestCase
     /**
      * @group mediafile-model
      * @group regression
+     * @group regression-base
      */
     public function test_should_delete_mediafile_reference()
     {

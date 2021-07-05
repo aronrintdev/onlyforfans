@@ -32,6 +32,7 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_list_all_of_my_vault_folders()
     {
@@ -67,6 +68,7 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_not_list_other_non_shared_vault_folders()
     {
@@ -87,6 +89,7 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_list_my_root_level_vault_folders()
     {
@@ -125,6 +128,7 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_create_a_new_vault_folder()
     {
@@ -153,6 +157,7 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_not_create_a_new_vault_folder_bad_param_422()
     {
@@ -173,6 +178,7 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_not_create_a_new_vault_folder_with_same_name_422()
     {
@@ -196,6 +202,7 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_not_create_a_new_vault_folder_403()
     {
@@ -216,6 +223,7 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_navigate_my_vault_folders()
     {
@@ -281,6 +289,7 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_update_my_vault_folder()
     {
@@ -339,6 +348,7 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_delete_my_non_root_vault_folder()
     {
@@ -374,6 +384,7 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
+     *  @group regression-base
      */
     public function test_nonowner_can_not_delete_my_vault_folder()
     {
@@ -406,6 +417,7 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_not_delete_my_root_vault_folder()
     {
@@ -421,6 +433,7 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_upload_single_image_file_to_my_vault_folder()
     {
@@ -463,6 +476,7 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_upload_multiple_image_files_to_my_vault_folder()
     {
@@ -521,6 +535,7 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
+     *  @group regression-base
      */
     public function test_nonowner_can_not_upload_image_to_my_vault_folder()
     {
@@ -547,6 +562,7 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
+     *  @group regression-base
      */
     // Creates post in first API call, then attaches selected mediafile in a second API call (associates as a reference)
     public function test_can_select_mediafile_from_vault_folder_to_attach_to_post_by_attach()
@@ -622,6 +638,7 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
+     *  @group regression-base
      */
     // Given one user who owns a vault + mediafile, and a different user who owns a timeline/post, 
     // neither user should be able to attach the mediafile to the post
@@ -689,6 +706,7 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
+     *  @group regression-base
      */
     // Creates story in first API call, then attaches selected mediafile in a second API call (associates as a reference)
     public function test_can_select_mediafile_from_vault_folder_to_attach_to_story_by_attach()
@@ -783,6 +801,7 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
+     *  @group regression-base
      */
     // Creates post and attaches selected mediafile in a single API call
     public function test_can_select_mediafile_from_vault_folder_to_attach_to_post_single_op()
@@ -848,6 +867,7 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_select_mediafile_from_vault_folder_to_attach_to_story_single_op()
     {
@@ -957,6 +977,7 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
+     *  @group regression-base
      */
     public function test_select_vault_folder_to_share_via_signup_invite_to_non_registered_user_via_email()
     {
@@ -1027,6 +1048,7 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
+     *  @group regression-base
      */
     public function test_select_subset_of_mediafiles_in_vaultfolder_to_share_via_signup_invite_to_non_registered_user_via_email()
     {
@@ -1092,6 +1114,7 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
+     *  @group regression-base
      */
     public function test_select_vaultfolder_to_share_with_registered_user()
     {
@@ -1155,6 +1178,7 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
+     *  @group regression-base
      */
     public function test_select_mediafiles_in_vaultfolder_to_share_with_registered_user()
     {
@@ -1237,6 +1261,7 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
+     *  @group regression-base
      *  @group todo (?)
      */
     /*

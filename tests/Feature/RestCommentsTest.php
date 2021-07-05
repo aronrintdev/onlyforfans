@@ -216,7 +216,6 @@ class RestCommentsTest extends TestCase
      *  @group comments
      *  @group regression
      *  @group regression-base
-     *  @group july02
      */
     public function test_nonfollower_can_not_list_timeline_comments()
     {

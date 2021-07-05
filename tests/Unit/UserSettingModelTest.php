@@ -35,6 +35,7 @@ class UserSettingModelTest extends TestCase
     /**
      * @group settings-model
      * @group regression
+     * @group regression-base
      */
     public function test_can_enable_and_disable_notification_settings()
     {
@@ -140,6 +141,7 @@ class UserSettingModelTest extends TestCase
     /**
      * @group settings-model
      * @group regression
+     * @group regression-base
      */
     public function test_can_enable_and_disable_global_notification_setting()
     {

@@ -25,6 +25,7 @@ class RestChatmessagesTest extends TestCase
     /**
      *  @group chatmessages
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_list_chatmessages()
     {
@@ -78,6 +79,7 @@ class RestChatmessagesTest extends TestCase
     /**
      *  @group chatmessages
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_list_chatmessages_filtered_by_thread()
     {
@@ -111,6 +113,7 @@ class RestChatmessagesTest extends TestCase
      *  @group chatmessages
      *  @group mycontacts
      *  @group regression
+     *  @group regression-base
      *  @group here0607
      */
     public function test_can_list_mycontacts()

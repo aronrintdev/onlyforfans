@@ -32,6 +32,7 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group regression-base
      */
     // %TODO: filters, timelines (see posts I follow), etc
     public function test_can_list_posts()
@@ -66,7 +67,7 @@ class RestPostsTest extends TestCase
 
     /**
      *  @group posts
-     *  @group regression
+     *  @group regression-base
      */
     public function test_owner_can_view_own_post()
     {
@@ -100,7 +101,7 @@ class RestPostsTest extends TestCase
 
     /**
      *  @group posts
-     *  @group regression
+     *  @group regression-base
      */
     public function test_can_view_followed_timelines_post()
     {
@@ -126,6 +127,7 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_store_text_only_post_on_my_timeline()
     {
@@ -150,6 +152,7 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_create_a_post_on_my_timeline_of_type_purchaseable_and_set_a_price()
     {
@@ -175,6 +178,7 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group regression-base
      */
     public function test_nonowner_can_not_store_post_on_my_timeline()
     {
@@ -193,6 +197,7 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_store_post_with_single_image_on_my_timeline()
     {
@@ -242,6 +247,7 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_store_post_with_multiple_images_on_my_timeline()
     {
@@ -313,6 +319,7 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group regression-base
      *  [ ] can not delete a PRICED post that others have purchased
      *  [ ] can edit/delete any post if no one has purchased (ie ledger balance of 0)
      */
@@ -342,6 +349,7 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group regression-base
      */
     public function test_nonowner_can_non_edit_free_post()
     {
@@ -365,6 +373,7 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group regression-base
      */
     public function test_owner_can_delete_free_post()
     {
@@ -382,6 +391,7 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group regression-base
      */
     public function test_follower_can_view_free_post_on_my_timeline()
     {
@@ -399,6 +409,7 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group regression-base
      */
     public function test_nonfollower_can_view_free_post_on_my_timeline()
     {
@@ -419,6 +430,7 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group regression-base
      */
     public function test_subscriber_can_view_subcribe_only_post_on_my_timeline()
     {
@@ -488,6 +500,7 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group regression-base
      */
     public function test_nonsubscribed_follower_can_not_view_subcribe_only_post_content_on_my_timeline()
     {
@@ -559,6 +572,7 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group regression-base
      */
     public function test_follower_can_view_image_of_free_post_on_my_timeline()
     {
@@ -611,6 +625,7 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group regression-base
      */
     public function test_nonfollower_can_view_image_of_free_post_on_my_timeline()
     {
@@ -669,6 +684,7 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_update_my_post()
     {
@@ -714,6 +730,7 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_destroy_my_post()
     {
@@ -743,6 +760,7 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group regression-base
      */
     public function test_timeline_follower_can_like_then_unlike_post()
     {
@@ -804,6 +822,7 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group regression-base
      */
     public function test_timeline_nonfollower_can_like_post()
     {
@@ -830,6 +849,7 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group regression-base
      */
     public function test_timeline_owner_can_like_own_post()
     {
@@ -871,6 +891,7 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_send_tip_on_post()
     {
@@ -905,6 +926,7 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group regression-base
      *  @group erik
      */
     // tests purchase itself, plus before and after access
@@ -1000,6 +1022,7 @@ class RestPostsTest extends TestCase
      *
      *  @group posts
      *  @group regression
+     *  @group regression-base
      *  @group erik
      */
     public function test_owner_can_not_edit_content_of_a_priced_post_that_others_have_purchased()
@@ -1055,6 +1078,7 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group regression-base
      *  @group erik
      */
     // priced: one-time-purchaseable, as opposed to subscribeable

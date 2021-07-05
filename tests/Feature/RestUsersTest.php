@@ -18,6 +18,7 @@ class RestUsersTest extends TestCase
     /**
      *  @group users
      *  @group regression
+     *  @group regression-base
      */
     public function test_admin_can_list_users()
     {
@@ -35,6 +36,7 @@ class RestUsersTest extends TestCase
             'links',
             'meta' => [ 'current_page', 'from', 'last_page', 'path', 'per_page', 'to', 'total', ],
         ]);
+        $admin->removeRole('super-admin'); // revert (else future tests will fail)
         $response->assertStatus(200);
         $content = json_decode($response->content());
         $this->assertEquals(1, $content->meta->current_page);
@@ -47,6 +49,7 @@ class RestUsersTest extends TestCase
     /**
      *  @group users
      *  @group regression
+     *  @group regression-base
      */
     public function test_user_can_view_settings()
     {
@@ -63,6 +66,7 @@ class RestUsersTest extends TestCase
     /**
      *  @group users
      *  @group regression
+     *  @group regression-base
      */
     public function test_user_can_login()
     {
@@ -75,6 +79,7 @@ class RestUsersTest extends TestCase
     /**
      *  @group users
      *  @group regression
+     *  @group regression-base
      */
     public function test_user_cant_login_with_wrong_credientials()
     {
@@ -87,6 +92,7 @@ class RestUsersTest extends TestCase
     /**
      *  @group users
      *  @group regression
+     *  @group regression-base
      */
     public function test_user_can_change_password()
     {
@@ -115,6 +121,7 @@ class RestUsersTest extends TestCase
     /**
      *  @group users
      *  @group regression
+     *  @group regression-base
      */
     public function test_user_can_get_session()
     {
@@ -143,6 +150,7 @@ class RestUsersTest extends TestCase
     /**
      *  @group users
      *  @group regression
+     *  @group regression-base
      */
     public function test_admin_can_matchsearch_users()
     {
@@ -155,6 +163,7 @@ class RestUsersTest extends TestCase
             'term' => $creator->email,
         ];
         $response = $this->actingAs($creator)->ajaxJSON('GET', route('users.match', $admin->id), $payload);
+        $admin->removeRole('super-admin'); // revert (else future tests will fail)
         $response->assertStatus(200);
     }
 

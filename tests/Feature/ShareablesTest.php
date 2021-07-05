@@ -21,6 +21,7 @@ class ShareablesTest extends TestCase
     /**
      *  @group shareables
      *  @group regression
+     *  @group regression-base
      */
     public function test_owner_can_list_shareables()
     {
@@ -75,6 +76,7 @@ class ShareablesTest extends TestCase
     /**
      *  @group shareables
      *  @group regression
+     *  @group regression-base
      */
     public function test_creator_can_list_followers()
     {
@@ -109,6 +111,7 @@ class ShareablesTest extends TestCase
     /**
      *  @group shareables
      *  @group regression
+     *  @group regression-base
      */
     public function test_fan_can_list_following()
     {

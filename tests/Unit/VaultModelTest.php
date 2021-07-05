@@ -26,6 +26,7 @@ class VaultModelTest extends TestCase
     /**
      * @group vdev
      * @group regression
+     * @group regression-base
      */
     public function test_can_get_vault_subfolder_tree()
     {

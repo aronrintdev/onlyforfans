@@ -31,6 +31,7 @@ class ChatmessageModelTest extends TestCase
     /**
      * @group chatmessage-model
      * @group regression
+     * @group regression-base
      */
     public function test_should_get_chatmessages()
     {
@@ -52,6 +53,7 @@ class ChatmessageModelTest extends TestCase
     /**
      * @group chatmessage-model
      * @group regression
+     * @group regression-base
      */
     public function test_can_start_chat()
     {
@@ -101,6 +103,7 @@ class ChatmessageModelTest extends TestCase
     /**
      * @group chatmessage-model
      * @group regression
+     * @group regression-base
      */
     public function test_can_schedule_message()
     {
@@ -134,6 +137,7 @@ class ChatmessageModelTest extends TestCase
      * @group chatmessage-model
      * @group mycontacts
      * @group regression
+     * @group regression-base
      * @group here0607
      */
     public function test_should_get_mycontacts()

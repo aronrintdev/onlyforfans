@@ -24,6 +24,7 @@ class RestLikeablesTest extends TestCase
     /**
      *  @group likeables
      *  @group regression
+     *  @group regression-base
      */
     public function test_owner_can_list_likeables()
     {

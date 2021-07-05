@@ -19,6 +19,7 @@ class RestFavoritesTest extends TestCase
     /**
      *  @group favorites
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_list_favorites()
     {
@@ -45,6 +46,7 @@ class RestFavoritesTest extends TestCase
     /**
      *  @group favorites
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_list_filtered_favorites()
     {
@@ -85,6 +87,7 @@ class RestFavoritesTest extends TestCase
     /**
      *  @group favorites
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_add_favorite()
     {
@@ -107,6 +110,7 @@ class RestFavoritesTest extends TestCase
     /**
      *  @group favorites
      *  @group regression
+     *  @group regression-base
      */
     // should return only favorites for which session user is the owner
     public function test_nonadmin_can_not_list_general_favorites()
@@ -123,6 +127,7 @@ class RestFavoritesTest extends TestCase
     /**
      *  @group favorites
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_view_own_favorite()
     {
@@ -141,6 +146,7 @@ class RestFavoritesTest extends TestCase
     /**
      *  @group favorites
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_delete_own_favorite()
     {
@@ -155,6 +161,7 @@ class RestFavoritesTest extends TestCase
     /**
      *  @group favorites
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_remove_own_favorite()
     {
@@ -172,6 +179,7 @@ class RestFavoritesTest extends TestCase
     /**
      *  @group favorites
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_not_delete_nonowned_favorite()
     {

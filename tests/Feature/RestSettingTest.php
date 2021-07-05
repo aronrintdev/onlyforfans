@@ -19,6 +19,7 @@ class RestSettingTest extends TestCase
     /**
      *  @group settings
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_update_single_notifications_setting_income_new_tip()
     {
@@ -53,6 +54,7 @@ class RestSettingTest extends TestCase
     /**
      *  @group settings
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_update_single_notifications_setting_post_new_comment()
     {
@@ -80,6 +82,7 @@ class RestSettingTest extends TestCase
     /**
      *  @group settings
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_toggle_global_email_notifications_setting()
     {
@@ -116,6 +119,7 @@ class RestSettingTest extends TestCase
     /**
      *  @group settings
      *  @group regression
+     *  @group regression-base
      */
     // This actually updates [users]
     public function test_can_batch_edit_settings_general()
@@ -142,6 +146,7 @@ class RestSettingTest extends TestCase
     /**
      *  @group settings
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_batch_validate_settings_general()
     {
@@ -188,6 +193,7 @@ class RestSettingTest extends TestCase
     /**
      *  @group settings
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_batch_edit_settings_profile()
     {
@@ -237,6 +243,7 @@ class RestSettingTest extends TestCase
     /**
      *  @group settings
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_batch_validate_settings_profile()
     {
