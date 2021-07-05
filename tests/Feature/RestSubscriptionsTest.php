@@ -98,6 +98,8 @@ class RestSubscriptionsTest extends TestCase
      *  @group subscriptions
      *  @group regression
      *  @group regression-base
+     *  @group erik
+     // Erik maybe call api to cancel a subscripion before testing for it (within the code below)
      */
     public function test_owner_can_list_inactive_subscriptions()
     {

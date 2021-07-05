@@ -30,7 +30,7 @@ class RestUsersTest extends TestCase
         $admin->refresh();
 
         $expectedCount = User::count();
-        $response = $this->actingAs($admin)->ajaxJSON('GET', route('users.index'), [ ]);
+        $response = $this->actingAs($admin)->ajaxJSON('GET', route('users.index'), [ 'take'=>1000 ]);
         $response->assertJsonStructure([
             'data',
             'links',
@@ -67,12 +67,16 @@ class RestUsersTest extends TestCase
      *  @group users
      *  @group regression
      *  @group regression-base
+     *  @group fujio
      */
     public function test_user_can_login()
     {
         $user = User::first();
         $payload = [ 'email' => $user->email, 'password' => 'foo-123' ];
+        $payload['g-recaptcha-response'] = 'foo';
         $response = $this->ajaxJSON('POST', '/login', $payload);
+        $content = json_decode($response->content());
+        //dd($content);
         $response->assertStatus(200);
     }
 
@@ -80,6 +84,7 @@ class RestUsersTest extends TestCase
      *  @group users
      *  @group regression
      *  @group regression-base
+     *  @group fujio
      */
     public function test_user_cant_login_with_wrong_credientials()
     {
@@ -93,6 +98,7 @@ class RestUsersTest extends TestCase
      *  @group users
      *  @group regression
      *  @group regression-base
+     *  @group fujio
      */
     public function test_user_can_change_password()
     {

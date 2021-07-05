@@ -460,6 +460,7 @@ class RestTimelinesTest extends TestCase
      *  @group timelines
      *  @group regression
      *  @group regression-base
+     *  @group erik
      */
     public function test_can_send_tip_to_timeline()
     {

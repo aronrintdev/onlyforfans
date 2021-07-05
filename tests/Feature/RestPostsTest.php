@@ -379,7 +379,6 @@ class RestPostsTest extends TestCase
      *  @group posts
      *  @group regression
      *  @group regression-base
-     *  @group july05
      */
     public function test_owner_can_delete_free_post()
     {
@@ -480,7 +479,6 @@ class RestPostsTest extends TestCase
      *  @group posts
      *  @group regression
      *  @group regression-base
-     *  @group OFF-july05
      */
     public function test_subscriber_can_view_subcribe_only_post_on_my_timeline()
     {
