@@ -38,6 +38,8 @@ use App\Models\Traits\ShareableTraits;
 use Laravel\Scout\Searchable;
 use Money\Money as Money;
 
+use App\Models\Likeable as LikeableModel;
+
 class Post extends Model
     implements
         UuidId,
@@ -82,9 +84,8 @@ class Post extends Model
             foreach ($model->comments as $o) {
                 $o->delete();
             }
-            foreach ($model->likes as $o) {
-                $o->delete();
-            }
+            // delete the Likeables, not the 'likes' relation, which is actually the liker (user) !!
+            $likeables = LikeableModel::where('likeable_type', 'posts')->where('likeable_id', $model->id)->delete();
         });
     }
 
