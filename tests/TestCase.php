@@ -56,8 +56,10 @@ abstract class TestCase extends BaseTestCase
             // use File:copy(?)
             //  ~ see : https://laracasts.com/discuss/channels/laravel/unittest-with-pre-seeded-database-and-persistent-content
 
-            exec('rm '.__DIR__.'/../database/tmp4test.sqlite');
-            exec('cp '.__DIR__.'/../database/template.sqlite '.__DIR__.'/../database/tmp4test.sqlite');
+            //exec('rm '.__DIR__.'/../database/tmp4test.sqlite');
+            //exec('cp '.__DIR__.'/../database/template.sqlite '.__DIR__.'/../database/tmp4test.sqlite');
+            exec('cp '.__DIR__.'/../database/template.sqlite '.__DIR__.'/../storage/logs/tmp4test.sqlite');
+            //exec('chmod 777 '.__DIR__.'/../database/tmp4test.sqlite');
         } else {
             //$this->output->writeln('setupDatabase -- seed memory database...');
             dump('setupDatabase -- migrate memory database...');
