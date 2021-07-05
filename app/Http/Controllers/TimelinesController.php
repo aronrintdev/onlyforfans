@@ -367,7 +367,7 @@ class TimelinesController extends AppBaseController
         $query = Post::with('mediafiles', 'user')
             ->withCount(['comments', 'likes'])
             ->where('active', 1)
-            ->where('schedule_datetime', '>', Carbon::now('UTC')->timestamp)
+            ->where('schedule_datetime', '>', Carbon::now('UTC'))
             ->where(function ($query) {
                 $query->where('expire_at', '>', Carbon::now('UTC'))
                       ->orWhere('expire_at', null);

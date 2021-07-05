@@ -16,22 +16,16 @@
             </section>
           </template>
           <div>
-            <div class="scheduled-message-head" v-if="postScheduleDate">
-              <div>
-                <svg class="icon-schedule" viewBox="0 0 24 24">
-                  <path d="M19 3h-1V2a1 1 0 0 0-2 0v1H8V2a1 1 0 0 0-2 0v1H5a2 2 0 0 0-2 2v13a3 3 0 0 0 3 3h12a3 3 0 0 0 3-3V5a2 2 0 0 0-2-2zm0 15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V9h14zm0-11H5V5h14zM9.79 17.21a1 1 0 0 0 1.42 0l5-5a1 1 0 0 0 .29-.71 1 1 0 0 0-1-1 1 1 0 0 0-.71.29l-4.29 4.3-1.29-1.3a1 1 0 0 0-.71-.29 1 1 0 0 0-1 1 1 1 0 0 0 .29.71z"></path>
-                </svg> 
-                <span> Scheduled for&nbsp;</span>
-                <strong>{{ moment(postScheduleDate * 1000).local().format('MMM DD, h:mm a') }}</strong>
-              </div>
-              <button class="btn close-btn" @click="clearSchedule">
-                <svg class="icon-close" viewBox="0 0 24 24">
-                  <path d="M13.41 12l5.3-5.29A1 1 0 0 0 19 6a1 1 0 0 0-1-1 1 1 0 0 0-.71.29L12 10.59l-5.29-5.3A1 1 0 0 0 6 5a1 1 0 0 0-1 1 1 1 0 0 0 .29.71l5.3 5.29-5.3 5.29A1 1 0 0 0 5 18a1 1 0 0 0 1 1 1 1 0 0 0 .71-.29l5.29-5.3 5.29 5.3A1 1 0 0 0 18 19a1 1 0 0 0 1-1 1 1 0 0 0-.29-.71z"></path>
-                </svg>
+            <div class="alert alert-secondary py-1 px-2" role="alert" v-if="scheduled_at" @click="showSchedulePicker()">
+              <fa-icon size="lg" :icon="['far', 'calendar-check']" class="text-primary mr-1" />
+              <span>Scheduled for</span>
+              <button type="button" class="close" data-dismiss="alert" aria-label="Close" @click="closeSchedulePicker">
+                <span aria-hidden="true">&times;</span>
               </button>
+              <strong class="float-right mr-3">{{ moment.utc(scheduled_at).local().format('MMM DD, h:mm a') }}</strong>
             </div>
             <div class="alert alert-secondary py-1 px-2" role="alert" v-if="expirationPeriod">
-              <fa-icon :icon="['far', 'hourglass-half']" class="text-primary mr-1" />
+              <fa-icon size="lg" :icon="['far', 'hourglass-half']" class="text-primary mr-1" />
               Post will expire in <strong>{{ expirationPeriod > 1 ? `${expirationPeriod} days` : `1 day` }}</strong>
               <button type="button" class="close" data-dismiss="alert" aria-label="Close" @click="expirationPeriod=null">
                 <span aria-hidden="true">&times;</span>
@@ -116,8 +110,8 @@
                   <li class="selectable select-expire-date" :disabled="expirationPeriod" @click="showExpirationPicker()">
                     <fa-icon :icon="['far', 'hourglass-half']" class="text-secondary" />
                   </li>
-                  <li class="selectable select-calendar" @click="showSchedulePicker()">
-                    <fa-icon :icon="['far', 'calendar-alt']" class="text-secondary" />
+                  <li class="selectable select-calendar" :disabled="scheduled_at" @click="showSchedulePicker()">
+                    <fa-icon :icon="['far', 'calendar-check']" class="text-secondary" />
                   </li>
                 </ul>
               </b-col>
@@ -200,7 +194,7 @@ export default {
         'X-CSRF-TOKEN': document.head.querySelector('[name=csrf-token]').content,
       },
     },
-    postScheduleDate: null,
+    scheduled_at: null,
     mediafiles: [],
     postBtnDisabled: true,
     posting: false,
@@ -221,7 +215,7 @@ export default {
       this.ptype = 'free';
       this.price = 0;
       this.priceForPaidSubscribers = 0;
-      this.postScheduleDate = null;
+      this.scheduled_at = null;
       this.expirationPeriod = null;
     },
 
@@ -236,7 +230,7 @@ export default {
         price: this.price,
         price_for_subscribers: this.priceForPaidSubscribers,
         currency: this.currency,
-        schedule_datetime: this.postScheduleDate,
+        schedule_datetime: this.scheduled_at?.toDate(),
         expiration_period: this.expirationPeriod,
       })
       this.$log.debug('savePost', { response })
@@ -353,10 +347,10 @@ export default {
     showSchedulePicker() {
       eventBus.$emit('open-modal', {
         key: 'show-schedule-datetime',
+        data: {
+          scheduled_at: this.scheduled_at,
+        }
       })
-    },
-    clearSchedule() {
-      this.postScheduleDate = undefined;
     },
     changeMediafiles(data) {
       this.mediafiles = [...data];
@@ -369,12 +363,16 @@ export default {
         key: 'expiration-period',
       })
     },
+    closeSchedulePicker(e) {
+      this.scheduled_at = null;
+      e.stopPropagation();
+    }
   },
 
   mounted() {
     const self = this;
     eventBus.$on('apply-schedule', function(data) {
-      self.postScheduleDate = data;
+      self.scheduled_at = data;
     })
     eventBus.$on('set-expiration-period', function(data) {
       self.expirationPeriod = data;

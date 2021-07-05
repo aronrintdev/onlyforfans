@@ -26,8 +26,8 @@
         </li>
         <li>
           <timeago :datetime="post.created_at" v-if="!post.schedule_datetime" :auto-update="60"></timeago>
-          <span v-if="post.schedule_datetime">
-            in {{ moment(post.schedule_datetime * 1000).fromNow(true) }}
+          <span v-if="post.schedule_datetime" :key="scheduleDatetimeKey">
+            in {{ moment.utc(post.schedule_datetime).local().fromNow(true) }}
           </span>
           <span v-if="post.location" class="post-place">
             at
@@ -75,7 +75,17 @@ export default {
 
   data: () => ({
     moment,
+    scheduleDatetimeKey: 0,
+    scheduleDatetimeTimer: null,
   }),
+  mounted() {
+    this.scheduleDatetimeTimer = setInterval(() => {
+      this.scheduleDatetimeKey++;
+    }, 60000); // 60s
+  },
+  beforeDestroy() {
+    clearInterval(this.scheduleDatetimeTimer);
+  }
 }
 
 </script>
