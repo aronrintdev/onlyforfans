@@ -372,10 +372,10 @@ class RestChatthreadsTest extends TestCase
 
         // create chat
         $originator = User::doesntHave('chatthreads')->firstOrFail();
-
-        $recipients = User::doesntHave('chatthreads')->where('id', '<>', $originator->id)->take($MAX)->get();
-        $this->assertGreaterThan(0, $recipients->count());
-        $this->assertEquals( $MAX, $recipients->count() );
+        $recipients = User::where('id', '<>', $originator->id)->take($MAX)->get();
+        $this->assertGreaterThan(2, $recipients->count());
+        $this->assertLessThanOrEqual( $MAX, $recipients->count() );
+        $numberOfParticipantsExcludingOriginator = $recipients->count();
 
         // --- Create a chatthread ---
 
@@ -392,12 +392,16 @@ class RestChatthreadsTest extends TestCase
         ]);
         //dd($content);
         $response->assertStatus(201);
-        $this->assertEquals( $MAX, count($content->chatthreads) ); // check # of threads created
+        $this->assertEquals( $numberOfParticipantsExcludingOriginator, count($content->chatthreads) ); // check # of threads created
 
         $chatthreads = Chatthread::whereIn('id', collect($content->chatthreads)->pluck('id'))->get();
         $this->assertTrue( $chatthreads->contains($content->chatthreads[0]->id) ); // sanity check
-        $this->assertTrue( $chatthreads->contains($content->chatthreads[1]->id) ); // sanity check
-        $this->assertTrue( $chatthreads->contains($content->chatthreads[2]->id) ); // sanity check
+        if ( count($content->chatthreads) > 1 ) {
+            $this->assertTrue( $chatthreads->contains($content->chatthreads[1]->id) ); // sanity check
+        }
+        if ( count($content->chatthreads) > 2 ) {
+            $this->assertTrue( $chatthreads->contains($content->chatthreads[2]->id) ); // sanity check
+        }
 
         // --- Send messages ---
         $msgs = [];
