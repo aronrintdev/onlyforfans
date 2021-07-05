@@ -62,7 +62,6 @@ class PostPolicy extends BasePolicy
         case PostTypeEnum::FREE:
             $is = $post->timeline->followers->count()
                 && $post->timeline->followers->contains($user->id);
-            dump('policy', $user->username, 'is', $is?'Y':'N');
             return $post->timeline->followers->count()
                 && $post->timeline->followers->contains($user->id);
         case PostTypeEnum::SUBSCRIBER:
