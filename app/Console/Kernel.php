@@ -83,7 +83,7 @@ class Kernel extends ConsoleKernel
         })->yearlyOn(1, 1, '0:01');
 
         // $schedule->command('subscription:update-canceled')->everyHour();
-        $schedule->command('send:schdule-messages')->everyMinute()->appendOutputTo(storage_path('logs/publish_posts.log'))->runInBackground();
+        // $schedule->command('send:schdule-messages')->everyMinute()->appendOutputTo(storage_path('logs/publish_posts.log'))->runInBackground();
         $schedule->command('publish:schduled-posts')->everyMinute()->appendOutputTo(storage_path('logs/publish_posts.log'))->runInBackground();
         // $schedule->command('publish:posts')
         //           ->everyMinute()->appendOutputTo(storage_path('logs/publish_posts.log'));
