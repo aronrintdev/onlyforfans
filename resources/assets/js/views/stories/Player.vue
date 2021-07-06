@@ -4,15 +4,19 @@
       @next-story-timeline="nextStoryTimeline"
       @prev-story-timeline="prevStoryTimeline"
       :storyteller="storyteller" 
-      :username="session_user.username" 
-      :stories="stories" />
-    <div>
+      :session_user="session_user" 
+      :stories="stories" 
+      :avatar="avatar" 
+    />
+
+    <div class="d-none">
       <p>DEBUG:</p>
       <ul>
         <li>timeline index: {{timelineIndex+1}}/{{timelines.length}}</li>
         <li>current timeline ID: {{currentTimeline.name}} ({{currentTimeline.id}})</li>
       </ul>
     </div>
+
   </div>
 </template>
 
@@ -42,6 +46,9 @@ export default {
 
     stories() {
       return this.timelines ? this.timelines[this.timelineIndex].stories : []
+    },
+    avatar() {
+      return this.timelines ? this.timelines[this.timelineIndex].avatar : null
     },
     storyteller() {
       return this.timelines ? this.timelines[this.timelineIndex].name : null
