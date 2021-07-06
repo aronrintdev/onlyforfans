@@ -1,5 +1,11 @@
 <template>
   <div v-if="!isLoading" class="view-stories-player w-100">
+    <PlayerComponent
+      @next-story-timeline="nextStoryTimeline"
+      @prev-story-timeline="prevStoryTimeline"
+      :storyteller="storyteller" 
+      :username="session_user.username" 
+      :stories="stories" />
     <div>
       <p>DEBUG:</p>
       <ul>
@@ -7,12 +13,6 @@
         <li>current timeline ID: {{currentTimeline.name}} ({{currentTimeline.id}})</li>
       </ul>
     </div>
-    <PlayerComponent
-      @next-story-timeline="nextStoryTimeline"
-      @prev-story-timeline="prevStoryTimeline"
-      :storyteller="storyteller" 
-      :username="session_user.username" 
-      :stories="stories" />
   </div>
 </template>
 

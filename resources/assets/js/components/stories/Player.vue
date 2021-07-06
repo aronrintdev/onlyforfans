@@ -1,58 +1,60 @@
 <template>
   <div v-if="!isLoading" class="container-fluid supercrate-player">
-    <section class="row">
-      <aside class="col-md-3 tag-debug">
-        <h2>My Story Views</h2>
-        <hr />
-        <div class="mb-3">
+
+    <b-row>
+      <b-col>
+        <div class="position-relative">
+          <nav :style="cssNav" class="m-0">
+            <div v-for="(s, index) in renderedStories" :key="`header-${s.id}`" class="cursor-pointer" @click="goTo(index)">
+              <div :ref="`nav-${s.id}`" />
+            </div>
+          </nav>
+          <section v-for="(s, index) in renderedStories" :key="`story-${s.id}`">
+            <div v-if="current==index" :style="cssDisplay" class="display-area OFF-bg-blur">
+              <h6 class="tag-creator">{{ storyteller }}
+                <ul>
+                  <li>story index: {{index+1}}/{{renderedStories.length}}</li>
+                  <li>current story ID: {{s.id}}</li>
+                </ul>
+              </h6>
+              <div class="bg-blur"></div>
+              <div v-touch:swipe.top="handleSwipeUp" class="crate-content">
+                <article v-if="s.stype === 'text'" class="h-100 v-wrap">
+                  <p class="h4 text-center v-box">{{ s.content }}</p>
+                </article>
+                <article v-else-if="s.stype === 'image' && s.mediafiles" class="h-100">
+                  <img :src="s.mediafiles[0].filepath" class="OFF-img-fluid OFF-h-100" />
+                  <see-more v-if="s.swipe_up_link" :link="s.swipe_up_link"></see-more>
+                </article>
+              </div>
+            </div>
+          </section>
+
+          <section class="my-3 d-flex justify-content-between">
+            <b-btn @click="doNav('previous')" class="">Previous</b-btn>
+            <b-btn @click="doNav('next')" class="">Next</b-btn>
+          </section>
+        </div>
+      </b-col>
+
+    </b-row>
+
+    <hr />
+
+    <b-row>
+      <b-col class="tag-debug">
+        <div>
+        </div>
+        <div>
           <b-form-checkbox v-model="play">Auto Play</b-form-checkbox>
         </div>
-        <div class="mb-3">
+        <div>
           Auto Play Speed
           <VueSlider :data="speedOptions" v-model="speed" hideLabel />
         </div>
-      </aside>
+      </b-col>
+    </b-row>
 
-      <main class="col-md-9 tag-debug">
-        <nav :style="cssNav">
-          <div
-            v-for="(story, index) in renderedStories"
-            :key="`header-${story.id}`"
-            class="cursor-pointer"
-            @click="goTo(index)"
-          >
-            <div :ref="`nav-${story.id}`" />
-          </div>
-        </nav>
-
-        <section v-for="(s, index) in renderedStories" :key="`story-${s.id}`">
-          <div v-if="current == index" :style="cssDisplay" class="display-area bg-blur">
-            <h6 class="tag-creator">{{ storyteller }}
-              <p>DEBUG:</p>
-              <ul>
-                <li>story index: {{index+1}}/{{renderedStories.length}}</li>
-                <li>current story ID: {{s.id}}</li>
-              </ul>
-            </h6>
-            <div class="bg-blur"></div>
-            <div v-touch:swipe.top="handleSwipeUp" class="crate-content">
-              <article v-if="s.stype === 'text'" class="h-100 v-wrap">
-                <p class="h4 text-center v-box">{{ s.content }}</p>
-              </article>
-              <article v-else-if="s.stype === 'image' && s.mediafiles" class="h-100">
-                <img :src="s.mediafiles[0].filepath" class="OFF-img-fluid OFF-h-100" />
-                <see-more v-if="s.swipe_up_link" :link="s.swipe_up_link"></see-more>
-              </article>
-            </div>
-          </div>
-        </section>
-
-        <section class="my-3 d-flex justify-content-between">
-          <b-btn @click="doNav('previous')" class="">Previous</b-btn>
-          <b-btn @click="doNav('next')" class="">Next</b-btn>
-        </section>
-      </main>
-    </section>
   </div>
 </template>
 
@@ -158,10 +160,10 @@ export default {
       this.timelineAnimation.pause()
 
       index = index < 0
-          ? this.renderedStories.length - 1
-          : index >= this.renderedStories.length
-          ? 0
-          : index
+        ? this.renderedStories.length - 1
+        : index >= this.renderedStories.length
+        ? 0
+        : index
       this.current = index
       this.timelineAnimation.seek(this.getTimelineSeek(index))
 
@@ -247,62 +249,69 @@ export default {
   height: 70vh;
 
   .tag-creator {
+    color: #fff;
     position: absolute;
+    top: 1.5rem;
+    left: 1rem;
     z-index: 1000;
   }
 
-  & > .crate-content {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-
-    p {
-      margin: auto;
-    }
-
-    img {
-      max-width: 100%;
+    & > .crate-content {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
       height: 100%;
-      display: block;
-      margin: auto;
-      object-fit: cover;
+
+      p {
+        margin: auto;
+      }
+
+      img {
+        max-width: 100%;
+        height: 100%;
+        display: block;
+        margin: auto;
+        object-fit: cover;
+      }
     }
-  }
 
-  & > .bg-blur {
-    opacity: 0.4;
-    background-image: var(--background-image);
+    & > .bg-blur {
+      opacity: 0.82;
+      //background-image: var(--background-image);
+      background: #010101;
 
-    filter: blur(8px);
-    -webkit-filter: blur(8px);
+      //filter: blur(8px);
+      //-webkit-filter: blur(8px);
 
-    width: 100%;
-    height: 100%;
+      width: 100%;
+      height: 100%;
 
-    /* Center and scale the image nicely */
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: cover;
-  }
+      /* Center and scale the image nicely */
+        //background-position: center;
+      //background-repeat: no-repeat;
+      //background-size: cover;
+    }
 }
 
 nav {
-  margin: 1rem 0;
+  height: 0.3rem;
+  position: absolute;
+  top: 0.3rem;
+  left: 0;
+  z-index: 200;
   box-sizing: border-box;
   display: grid;
-  grid-column-gap: 1em;
+  grid-column-gap: 0.2rem;
   grid-template-columns: var(--grid-template-columns);
   width: 100%;
-  height: 0.7em;
 
-  & > div {
-    background: rgba(0, 0, 0, 0.25);
+  & > div.cursor-pointer {
+    background: rgba(255, 255, 255, 0.55);
     height: 100%;
 
     & > div {
-      background: black;
+      background: white;
       height: 100%;
       width: 0%;
     }
@@ -310,24 +319,24 @@ nav {
 }
 
 /* Vertical centering, from https://stackoverflow.com/questions/396145/how-to-vertically-center-a-div-for-all-browsers */
-.v-wrap {
-  height: 100%;
-  text-align: center;
-  white-space: nowrap;
+  .v-wrap {
+    height: 100%;
+    text-align: center;
+    white-space: nowrap;
 
-  &:before {
-    content: '';
+    &:before {
+      content: '';
+      display: inline-block;
+      vertical-align: middle;
+      width: 0;
+      /*might want to tweak this. .25em for extra white space */
+        height: 100%;
+    }
+  }
+
+  .v-box {
     display: inline-block;
     vertical-align: middle;
-    width: 0;
-    /*might want to tweak this. .25em for extra white space */
-    height: 100%;
+    white-space: normal;
   }
-}
-
-.v-box {
-  display: inline-block;
-  vertical-align: middle;
-  white-space: normal;
-}
 </style>
