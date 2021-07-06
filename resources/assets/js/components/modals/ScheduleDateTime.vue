@@ -1,33 +1,34 @@
 <template>
-  <div class="block-modal">
-    <div class="header d-flex align-items-center">
-      <h4 class="pt-1 pb-1">SCHEDULED POST</h4>
-    </div>
-    <div class="content">
+  <b-card no-body>
+    <div class="py-4 px-3">
       <b-form-datepicker
-        v-model="postSchedule.date"
-        class="mb-3 mt-1"
+        v-model="selectedDateTime.date"
+        class="mb-3"
         ref="schedule_date"
-        :state="postSchedule.date ? true : null"
+        :state="selectedDateTime.date ? true : null"
         :min="new Date()"
       />
       <b-form-timepicker
-        v-model="postSchedule.time"
-        :state="postSchedule.timeState"
-        class="mb-2"
+        v-model="selectedDateTime.time"
+        :state="selectedDateTime.timeState"
         locale="en"
         @input="onChangePostScheduleTime"
       ></b-form-timepicker>
     </div>
-    <div class="d-flex align-items-center justify-content-end action-btns">
-      <button class="link-btn" @click="closeSchedulePicker">Cancel</button>
-      <button
-        class="link-btn"
-        @click="applySchedule"
-        :disabled="!postSchedule.date || !postSchedule.time || !postSchedule.timeState"
-      >Apply</button>
-    </div>
-  </div>
+    <b-card-footer>
+      <div class="text-right">
+        <b-btn class="px-3 mr-1" variant="secondary" @click="closePicker">{{ $t('action_btns.cancel') }}</b-btn>
+        <b-btn
+          class="px-3"
+          variant="primary"
+          :disabled="!selectedDateTime.date || !selectedDateTime.time || !selectedDateTime.timeState"
+          @click="apply"
+        >
+          {{ $t('action_btns.apply') }}
+        </b-btn>
+      </div>
+    </b-card-footer>
+  </b-card>
 </template>
 
 <script>
@@ -35,37 +36,60 @@
 // event: @apply
 
 import moment from 'moment';
+import { eventBus } from '@/app';
 
 export default {
-  data: () => ({
-    moment,
-    postSchedule: {},
-  }),
-  mounted: function() {
-    this.postSchedule = {};
+  props: {
+    scheduled_at: {
+      type: Object,
+      required: false,
+    },
+    for_edit: {
+      type: Boolean,
+      required: false,
+    }
+  },
+  data: () => ({ selectedDateTime: {} }),
+  mounted() {
+    this.selectedDateTime = {
+      date: moment.utc(this.scheduled_at ?? moment.utc()).local().format('YYYY-MM-DD'),
+      time: moment.utc(this.scheduled_at ?? moment.utc()).local().format('HH:mm:ss'),
+      timeState: true,
+    };
   },
   methods: {
     onChangePostScheduleTime(event) {
-      this.postSchedule.timeState = true;
+      this.selectedDateTime.timeState = true;
       if (moment().format('YYYY-MM-DD') === this.$refs.schedule_date.value) {
         if (moment().format('HH:mm:ss') > event) {
-          this.postSchedule.timeState = false;
+          this.selectedDateTime.timeState = false;
         }
       }
-      this.postSchedule = { ...this.postSchedule };
+      this.selectedDateTime = { ...this.selectedDateTime };
     },
-    closeSchedulePicker() {
+    closePicker() {
       this.$bvModal.hide('modal-schedule-datetime');
     },
-    applySchedule() {
-      const postScheduleDate = moment(`${this.postSchedule.date} ${this.postSchedule.time}`).utc().unix();
-      this.closeSchedulePicker();
-      this.$emit('apply', postScheduleDate);
+    apply() {
+      const date = moment(`${this.selectedDateTime.date} ${this.selectedDateTime.time}`).utc();
+      if (this.for_edit) {
+        eventBus.$emit('edit-apply-schedule', date);
+      } else {
+        eventBus.$emit('apply-schedule', date);
+      }
+      this.closePicker();
     }
   },
 }
 </script>
 
-<style lang="scss" scoped>
-
-</style>
+<i18n lang="json5" scoped>
+{
+  "en": {
+    "action_btns": {
+      "apply": "Apply",
+      "cancel": "Cancel"
+    },
+  }
+}
+</i18n>
