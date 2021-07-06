@@ -26,6 +26,8 @@ class UsersTableSeeder extends Seeder
 
         if ( $this->appEnv !== 'testing' ) { // if tests have pre-existing admins we'll need to make sure a random user chose is *not* an admin
 
+            $this->output->writeln("  - Creating admin users...");
+
             // +++ Create admin users +++
             $manualUsers = [
                 [
@@ -170,7 +172,7 @@ class UsersTableSeeder extends Seeder
     {
         static $max = [
             'testing' => [
-                'users' => 12,
+                'users' => 18,
             ],
             'local' => [
                 'users' => 50,

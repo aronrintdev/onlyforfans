@@ -4,7 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Mycontact;
 use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+//use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 
@@ -15,7 +15,7 @@ use Tests\TestCase;
  */
 class RestMycontactsTest extends TestCase
 {
-    use RefreshDatabase, WithFaker;
+    use WithFaker;
 
     private $owner;
     private $nonOwner;
@@ -29,6 +29,7 @@ class RestMycontactsTest extends TestCase
 
     /**
      * @group regression
+     * @group regression-base
      */
     public function test_can_create()
     {
@@ -70,6 +71,7 @@ class RestMycontactsTest extends TestCase
 
     /**
      * @group regression
+     * @group regression-base
      * @depends test_can_create
      */
     public function test_owner_can_update()
@@ -100,6 +102,7 @@ class RestMycontactsTest extends TestCase
 
     /**
      * @group regression
+     * @group regression-base
      * @depends test_owner_can_update
      */
     public function test_non_owner_cannot_update()
@@ -117,6 +120,7 @@ class RestMycontactsTest extends TestCase
 
     /**
      * @group regression
+     * @group regression-base
      * @depends test_can_create
      */
     public function test_owner_can_delete()
@@ -130,6 +134,7 @@ class RestMycontactsTest extends TestCase
 
     /**
      * @group regression
+     * @group regression-base
      * @depends test_owner_can_delete
      */
     public function test_non_owner_cannot_delete()

@@ -112,9 +112,15 @@ class VaultfoldersController extends AppBaseController
     // Creates a new subfolder
     public function store(Request $request)
     {
+        //dd($request->all());
         $vrules = [
             'vault_id' => 'required|uuid|exists:vaults,id',
-            'vfname' => 'required|string|min:1',
+            //'vfname' => 'required|string|min:1',
+            'vfname' => [
+                'required',
+                'min:1', 
+                'regex:/^[a-zA-Z0-9\s\-]+$/',
+            ],
             // %TODO: prevent new folders on same level with duplicate names
         ];
 
@@ -130,7 +136,7 @@ class VaultfoldersController extends AppBaseController
 
         $vault = Vault::find($request->vault_id);
         $attrs['vault_id'] = $request->vault_id;
-        $attrs['vfname'] = $request->vfname;
+        $attrs['vfname'] = trim($request->vfname);
         $attrs['user_id'] = $request->user()->id;
         $this->authorize('update', $vault);
         /*

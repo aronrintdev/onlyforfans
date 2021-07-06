@@ -7,7 +7,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+//use Illuminate\Foundation\Testing\RefreshDatabase;
 use Database\Seeders\TestDatabaseSeeder;
 use Tests\TestCase;
 use App\Libs\FactoryHelpers;
@@ -20,11 +20,12 @@ use App\Enums\MediafileTypeEnum;
 
 class MediafileModelTest extends TestCase
 {
-    use WithFaker, RefreshDatabase;
+    use WithFaker;
 
     /**
      * @group mediafile-model
      * @group regression
+     * @group regression-base
      */
     public function test_should_create_diskmediafile_and_reference_mediafile()
     {
@@ -80,6 +81,7 @@ class MediafileModelTest extends TestCase
     /**
      * @group mediafile-model
      * @group regression
+     * @group regression-base
      */
     public function test_should_create_mediafile_reference_from_existing_diskmediafile()
     {
@@ -121,7 +123,7 @@ class MediafileModelTest extends TestCase
         $this->assertEquals(MediafileTypeEnum::AVATAR, $mf2->mftype);
         $this->assertEquals('users', $mf2->resource_type);
         $this->assertEquals($owner->id, $mf2->resource_id);
-        $this->assertFalse($mf2->is_primary);
+        $this->assertFalse(!!$mf2->is_primary);
 
         $this->assertNotNull($mf2->diskmediafile);
         $this->assertEquals($owner->id, $mf2->diskmediafile->owner_id);
@@ -133,6 +135,7 @@ class MediafileModelTest extends TestCase
     /**
      * @group mediafile-model
      * @group regression
+     * @group regression-base
      */
     public function test_should_delete_mediafile_reference()
     {

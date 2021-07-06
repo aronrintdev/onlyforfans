@@ -60,7 +60,7 @@ class TipsTableSeeder extends Seeder
             $this->output->writeln("  - Tips seeder: loaded " . $timelines->count() . " timelines...");
         }
 
-        $timelines->take(25)->each( function($t) { // do max 25
+        $timelines->take(17)->each( function($t) {
 
             static $iter = 1;
 
@@ -68,7 +68,7 @@ class TipsTableSeeder extends Seeder
             //$ts = $this->faker->dateTimeBetween($startDate = '-5 years', $endDate = 'now');
             $t->followers->each( function(User $follower) use(&$t) {
                 if ( $this->faker->numberBetween(0,10) < 5 ) {
-                    return; // skip: only N/10 processed
+                    return false; // skip: only N/10 processed
                 }
 
                 $paymentAccount = $follower->financialAccounts()->firstOrCreate([
@@ -96,7 +96,7 @@ class TipsTableSeeder extends Seeder
                 }, $this->eventsToDelayOnPurchase);
 
                 // Tip some posts...
-                $posts = $t->posts->take( $this->faker->numberBetween(0,5) );
+                $posts = $t->posts->take( $this->faker->numberBetween(0,3) );
                 $posts->each( function($p) use(&$paymentAccount, &$follower) {
                     Event::fakeFor(function() use (&$paymentAccount, &$p, &$follower ) {
                         if ( $this->appEnv !== 'testing' ) {
