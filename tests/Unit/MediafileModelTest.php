@@ -123,7 +123,7 @@ class MediafileModelTest extends TestCase
         $this->assertEquals(MediafileTypeEnum::AVATAR, $mf2->mftype);
         $this->assertEquals('users', $mf2->resource_type);
         $this->assertEquals($owner->id, $mf2->resource_id);
-        $this->assertFalse($mf2->is_primary);
+        $this->assertFalse(!!$mf2->is_primary);
 
         $this->assertNotNull($mf2->diskmediafile);
         $this->assertEquals($owner->id, $mf2->diskmediafile->owner_id);
