@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Models\POST;
+use App\Models\Post;
 use Illuminate\Console\Command;
 use Carbon\Carbon;
 
