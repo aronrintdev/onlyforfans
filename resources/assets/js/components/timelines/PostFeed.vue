@@ -60,10 +60,10 @@
 
     <section class="row">
       <article
-        v-for="(feedItem, index) in renderedItems"
+        v-for="(feedItem, index) in listItems"
         :key="feedItem.id"
         :class="feedClass"
-        v-observe-visibility="index === renderedItems.length - 1 ? endPostVisible : false"
+        v-observe-visibility="index === listItems.length - 1 ? endPostVisible : false"
       >
         <div class="tag-debug">INDEX: {{ index }}</div>
         <ImageDisplay v-if="feedType==='photos' || feedType==='videos'"
@@ -149,6 +149,12 @@ export default {
     isLastPage() {
       return this.feeddata.meta.current_page === this.feeddata.meta.last_page
     },
+    listItems() {
+      if (this.is_schedulefeed) {
+        return this.renderedItems.filter(it => it.schedule_datetime !== null);
+      }
+      return this.renderedItems.filter(it => it.schedule_datetime === null);
+    }
   },
 
   data: () => ({

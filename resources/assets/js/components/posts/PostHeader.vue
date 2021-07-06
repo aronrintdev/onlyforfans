@@ -51,7 +51,7 @@
 </template>
 
 <script>
-//import { eventBus } from '@/app'
+import { eventBus } from '@/app'
 import moment from 'moment';
 
 export default {
@@ -80,7 +80,11 @@ export default {
   }),
   mounted() {
     this.scheduleDatetimeTimer = setInterval(() => {
-      this.scheduleDatetimeKey++;
+      this.scheduleDatetimeKey = moment.utc(this.post.schedule_datetime).diff(moment.utc(), 'minutes');
+      if (this.scheduleDatetimeKey < 1) {
+        eventBus.$emit('update-posts', this.post.id);
+        clearInterval(this.scheduleDatetimeTimer);
+      }
     }, 60000); // 60s
   },
   beforeDestroy() {
