@@ -257,7 +257,6 @@ class RestVaultTest extends TestCase
      *  @group vault
      *  @group regression
      *  @group regression-base
-     *  @group OFF-july05
      */
     public function test_can_navigate_my_vault_folders()
     {
@@ -278,11 +277,11 @@ class RestVaultTest extends TestCase
         $this->assertEquals($rootFolder->id, $cwf->id, 'Current working folder (root) pkid should match root');
         $this->assertNull($cwf->vfparent, 'Current working folder (root) should not have null parent');
         $this->assertNotNull($cwf->vfchildren, 'Current working folder (root) should not have children (subfolders) attribute');
-        $this->assertEquals(0, count($cwf->vfchildren), 'Current working folder should not have any subfolders');
 
         // ---
 
-        // make a subfolder
+        // create a new subfolder
+        $preSubFolderCount = $rootFolder->vfchildren->count();
         $payload = [
             'vault_id' => $cwf->vault_id, // $primaryVault->id,
             'parent_id' => $cwf->id, // $rootFolder->id,
@@ -297,8 +296,8 @@ class RestVaultTest extends TestCase
         $rootFolder->load('vfchildren');
 
         // test cwf children, expect subfolder
-        $this->assertEquals(1, $rootFolder->vfchildren->count(), 'Root should have 1 subfolder');
-        $this->assertTrue($rootFolder->vfchildren->contains($childVaultfolderR->id), 'Root subfolders should include the one just created');
+        $this->assertEquals($preSubFolderCount+1, $rootFolder->vfchildren->count(), 'Root should have 1 additional subfolder');
+        $this->assertTrue($rootFolder->vfchildren->contains($childVaultfolderR->id), "Root's subfolders should include the one just created");
 
         // refresh 'cwf' via api call
         $response = $this->actingAs($creator)->ajaxJSON('GET', route('vaultfolders.show', $cwf->id));
@@ -307,7 +306,7 @@ class RestVaultTest extends TestCase
         $this->assertNotNull($content->vaultfolder);
         $cwf = $content->vaultfolder;
         $this->assertEquals($rootFolder->id, $cwf->id, 'Current working folder should still be root');
-        $this->assertEquals(1, count($cwf->vfchildren), 'Current working folder should have 1 subfolder');
+        $this->assertEquals($preSubFolderCount+1, count($cwf->vfchildren), 'Current working folder should have 1 additional subfolder');
 
         // cd to subfolder
         $response = $this->actingAs($creator)->ajaxJSON('GET', route('vaultfolders.show', $cwf->vfchildren[0]->id));
@@ -315,6 +314,7 @@ class RestVaultTest extends TestCase
         $content = json_decode($response->content());
         $this->assertNotNull($content->vaultfolder);
         $cwf = $content->vaultfolder;
+        $this->assertEquals(0, count($cwf->vfchildren), 'Newly created current working folder should not have any subfolders');
 
         // test cwf parent, expect root
         $this->assertEquals($rootFolder->id, $cwf->parent_id, 'Current working folder parent should be root');
@@ -512,7 +512,6 @@ class RestVaultTest extends TestCase
      *  @group vault
      *  @group regression
      *  @group regression-base
-     *  @group july05
      */
     public function test_can_upload_multiple_image_files_to_my_vault_folder()
     {
@@ -920,6 +919,7 @@ class RestVaultTest extends TestCase
      *  @group vault
      *  @group regression
      *  @group regression-base
+     *  @group july05
      */
     public function test_can_select_mediafile_from_vault_folder_to_attach_to_story_single_op()
     {
@@ -929,7 +929,7 @@ class RestVaultTest extends TestCase
         $owner = $timeline->user;
         $fan = $timeline->followers[0];
 
-        // --- Upload image to vault ---
+        // --- Upload image file to vault ---
         $filename = $this->faker->slug;
         $file = UploadedFile::fake()->image($filename, 200, 200);
 
@@ -955,20 +955,22 @@ class RestVaultTest extends TestCase
         $payload = [
             'stype' => StoryTypeEnum::PHOTO,
             'content' => $this->faker->realText,
-            'mediafile' => $mediafile->id,
+            'mediafile_id' => $mediafile->id,
         ];
         $response = $this->actingAs($owner)->ajaxJSON('POST', route('stories.store'), $payload);
         $response->assertStatus(201);
         $content = json_decode($response->content());
         $this->assertNotNull($content->story);
         $storyR = $content->story;
-        $story = Story::findOrFail($storyR->id);
+
+        $story = Story::find($storyR->id);
+        $this->assertNotNull($story);
 
         // --
 
         $timeline->refresh();
         $owner->refresh();
-        $story->refresh();
+
         $mediafile = $story->mediafiles->shift();
         $this->assertNotNull($mediafile, 'No mediafiles attached to story');
 
