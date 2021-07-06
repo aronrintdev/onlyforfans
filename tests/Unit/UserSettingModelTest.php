@@ -3,7 +3,7 @@ namespace Tests\Unit;
 
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+//use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
 use DB;
 use Database\Seeders\TestDatabaseSeeder;
@@ -14,7 +14,7 @@ use App\Models\UserSetting;
 
 class UserSettingModelTest extends TestCase
 {
-    use RefreshDatabase, WithFaker;
+    use WithFaker;
 
     /**
      * @group OFF
@@ -35,6 +35,7 @@ class UserSettingModelTest extends TestCase
     /**
      * @group settings-model
      * @group regression
+     * @group regression-base
      */
     public function test_can_enable_and_disable_notification_settings()
     {
@@ -140,6 +141,7 @@ class UserSettingModelTest extends TestCase
     /**
      * @group settings-model
      * @group regression
+     * @group regression-base
      */
     public function test_can_enable_and_disable_global_notification_setting()
     {
@@ -174,7 +176,7 @@ class UserSettingModelTest extends TestCase
     protected function setUp() : void
     {
         parent::setUp();
-        $this->seed(TestDatabaseSeeder::class);
+        //$this->seed(TestDatabaseSeeder::class);
     }
 
     protected function tearDown() : void {

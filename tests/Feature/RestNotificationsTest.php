@@ -2,7 +2,7 @@
 namespace Tests\Feature;
 
 use DB;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+//use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\Notification as NotificationFacade;
 //use Illuminate\Support\Facades\Mail;
@@ -21,11 +21,13 @@ use App\Enums\PostTypeEnum;
 
 class RestNotificationsTest extends TestCase
 {
-    use RefreshDatabase, WithFaker;
+    //use RefreshDatabase;
+    use WithFaker;
 
     /**
      *  @group notifications
      *  @group regression
+     *  @group regression-base
      */
     public function test_owner_can_list_notifications()
     {
@@ -70,6 +72,7 @@ class RestNotificationsTest extends TestCase
     /**
      *  @group notifications
      *  @group regression
+     *  @group regression-base
      */
     public function test_sends_email_on_like_when_enabled_in_settings()
     {
@@ -123,6 +126,7 @@ class RestNotificationsTest extends TestCase
     /**
      *  @group notifications
      *  @group regression
+     *  @group regression-base
      */
     public function test_sends_email_on_comment_when_enabled_in_settings()
     {
@@ -170,6 +174,7 @@ class RestNotificationsTest extends TestCase
     /**
      *  @group notifications
      *  @group regression
+     *  @group regression-base
      */
     public function test_does_not_send_email_on_like_when_disabled_in_settings()
     {
@@ -279,7 +284,7 @@ class RestNotificationsTest extends TestCase
     protected function setUp() : void
     {
         parent::setUp();
-        $this->seed(TestDatabaseSeeder::class);
+        //$this->seed(TestDatabaseSeeder::class);
     }
 
     protected function tearDown() : void {

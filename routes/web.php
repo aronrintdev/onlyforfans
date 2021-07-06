@@ -139,20 +139,15 @@ Route::group(['middleware' => ['auth']], function () {
     // -- posts: likeable | shareable | commentable | tippable | purchaseable | pinnable --
     #region Posts
     Route::group(['prefix' => '/posts'], function () {
-        Route::get('/match', 'PostsController@match')
-            ->name('posts.match');
+        Route::get('/match', 'PostsController@match')->name('posts.match');
 
         // tippable
-        Route::put('/{post}/tip', 'PostsController@tip')
-            ->name('posts.tip');
+        Route::put('/{post}/tip', 'PostsController@tip')->name('posts.tip');
 
         // purchaseable
-        Route::put('/{post}/purchase', 'PostsController@purchase')
-            ->name('posts.purchase');
+        Route::put('/{post}/purchase', 'PostsController@purchase')->name('posts.purchase');
 
-        Route::get('/{post}/index-comments', 'PostsController@indexComments')
-            ->name('posts.indexComments');
-
+        Route::get('/{post}/index-comments', 'PostsController@indexComments')->name('posts.indexComments');
     });
     Route::apiResource('posts', 'PostsController');
     #endregion Posts

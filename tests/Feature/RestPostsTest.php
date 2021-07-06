@@ -3,35 +3,41 @@ namespace Tests\Feature;
 
 use DB;
 use Tests\TestCase;
+
+use Illuminate\Http\File;
+use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Http\UploadedFile;
+use Database\Seeders\TestDatabaseSeeder;
+
+use App\Events\ItemPurchased;
+use App\Events\PurchaseFailed;
+
+use App\Enums\Financial\AccountTypeEnum;
+use App\Enums\PostTypeEnum;
+use App\Enums\MediafileTypeEnum;
+use App\Enums\PaymentTypeEnum;
+
+use App\Models\Financial\SegpayCard;
+use App\Models\Mediafile;
 use App\Models\Post;
 use App\Models\User;
 use App\Models\Timeline;
 use App\Models\Fanledger;
-
-use App\Models\Mediafile;
-use Illuminate\Http\File;
-use App\Enums\PostTypeEnum;
-use App\Events\ItemPurchased;
-use App\Enums\PaymentTypeEnum;
-use App\Events\PurchaseFailed;
-use App\Enums\MediafileTypeEnum;
-use Illuminate\Http\UploadedFile;
-use App\Models\Financial\SegpayCard;
-use Illuminate\Support\Facades\Event;
-use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\Storage;
-use App\Enums\Financial\AccountTypeEnum;
-use Database\Seeders\TestDatabaseSeeder;
-use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Models\Likeable;
+use App\Models\Comment;
+//use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class RestPostsTest extends TestCase
 {
-    use RefreshDatabase, WithFaker;
+    use WithFaker;
 
     /**
      *  @group posts
      *  @group regression
+     *  @group regression-base
      */
     // %TODO: filters, timelines (see posts I follow), etc
     public function test_can_list_posts()
@@ -66,7 +72,7 @@ class RestPostsTest extends TestCase
 
     /**
      *  @group posts
-     *  @group regression
+     *  @group regression-base
      */
     public function test_owner_can_view_own_post()
     {
@@ -100,7 +106,7 @@ class RestPostsTest extends TestCase
 
     /**
      *  @group posts
-     *  @group regression
+     *  @group regression-base
      */
     public function test_can_view_followed_timelines_post()
     {
@@ -126,6 +132,7 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_store_text_only_post_on_my_timeline()
     {
@@ -150,6 +157,7 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_create_a_post_on_my_timeline_of_type_purchaseable_and_set_a_price()
     {
@@ -175,6 +183,7 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group regression-base
      */
     public function test_nonowner_can_not_store_post_on_my_timeline()
     {
@@ -193,6 +202,7 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_store_post_with_single_image_on_my_timeline()
     {
@@ -242,6 +252,7 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_store_post_with_multiple_images_on_my_timeline()
     {
@@ -313,6 +324,7 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group regression-base
      *  [ ] can not delete a PRICED post that others have purchased
      *  [ ] can edit/delete any post if no one has purchased (ie ledger balance of 0)
      */
@@ -342,6 +354,7 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group regression-base
      */
     public function test_nonowner_can_non_edit_free_post()
     {
@@ -365,23 +378,63 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group regression-base
      */
     public function test_owner_can_delete_free_post()
     {
         $timeline = Timeline::has('followers', '>=', 1)
             ->whereHas('posts', function($q1) {
                 $q1->where('type', PostTypeEnum::FREE);
-            })->first();
+            })->firstOrFail();
         $creator = $timeline->user;
-        $post = $timeline->posts->where('type', PostTypeEnum::FREE)->first();
+        $this->assertNotNull($creator);
+
+        $post = Post::where('postable_type', 'timelines')
+            ->where('postable_id', $timeline->id)
+            ->has('likes','>',0)
+            ->has('comments','>',0)
+            ->has('mediafiles','>',0)
+            ->doesntHave('sharees')
+            ->firstorFail();
+        $numLikes = Likeable::where('likeable_type', 'posts')->where('likeable_id', $post->id)->count();
+        $this->assertGreaterThan(0, $numLikes);
+        $numComments = Comment::where('commentable_type', 'posts')->where('commentable_id', $post->id)->count();
+        $this->assertGreaterThan(0, $numComments);
+        $numMediafiles = Mediafile::where('resource_type', 'posts')->where('resource_id', $post->id)->count();
+        $this->assertGreaterThan(0, $numMediafiles);
 
         $response = $this->actingAs($creator)->ajaxJSON('DELETE', route('posts.destroy', $post->id));
         $response->assertStatus(200);
+
+        $exists = Post::find($post->id);
+        $this->assertNull($exists); // deleted
+
+        // Test relation cleanup
+        $numLikes = Likeable::where('likeable_type', 'posts')->where('likeable_id', $post->id)->count();
+        $this->assertEquals(0, $numLikes);
+        $numComments = Comment::where('commentable_type', 'posts')->where('commentable_id', $post->id)->count();
+        $this->assertEquals(0, $numComments);
+        $numMediafiles = Mediafile::where('resource_type', 'posts')->where('resource_id', $post->id)->count();
+        $this->assertEquals(0, $numMediafiles);
+
+        // ---
+
+        $timeline2 = Timeline::find($timeline->id);
+        $this->assertNotNull($timeline);
+        $this->assertNotNull($timeline->user);
+
+        // %TODO: test
+        //  ~ related likes cleaned up
+        //  ~ commments cleaned up
+        //  ~  etc
+        $bad = Timeline::doesntHave('user')->get(); // make sure no users got deleted (ie no timelines w/o corresponding user)
+        $this->assertEquals(0, $bad->count());
     }
 
     /**
      *  @group posts
      *  @group regression
+     *  @group regression-base
      */
     public function test_follower_can_view_free_post_on_my_timeline()
     {
@@ -389,7 +442,10 @@ class RestPostsTest extends TestCase
             ->whereHas('posts', function($q1) {
                 $q1->where('type', PostTypeEnum::FREE);
             })->firstOrFail();
+        $this->assertNotNull($timeline);
+        //dd($timeline);
         $creator = $timeline->user;
+        $this->assertNotNull($creator);
         $post = $timeline->posts->where('type', PostTypeEnum::FREE)->first();
         $fan = $timeline->followers[0];
         $response = $this->actingAs($fan)->ajaxJSON('GET', route('posts.show', $post->id));
@@ -399,6 +455,7 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group regression-base
      */
     public function test_nonfollower_can_view_free_post_on_my_timeline()
     {
@@ -407,6 +464,8 @@ class RestPostsTest extends TestCase
                 $q1->where('type', PostTypeEnum::FREE);
             })->firstOrFail();
         $creator = $timeline->user;
+        $this->assertNotNull($creator);
+
         $post = $timeline->posts->where('type', PostTypeEnum::FREE)->first();
         $nonfan = User::whereDoesntHave('followedtimelines', function($q1) use(&$timeline) {
             $q1->where('timelines.id', $timeline->id);
@@ -419,6 +478,7 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group regression-base
      */
     public function test_subscriber_can_view_subcribe_only_post_on_my_timeline()
     {
@@ -429,6 +489,7 @@ class RestPostsTest extends TestCase
                 $q1->where('type', PostTypeEnum::SUBSCRIBER);
             })->firstOrFail();
         $creator = $timeline->user;
+        $this->assertNotNull($creator);
         $fan = $timeline->subscribers[0];
 
         // --
@@ -488,6 +549,7 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group regression-base
      */
     public function test_nonsubscribed_follower_can_not_view_subcribe_only_post_content_on_my_timeline()
     {
@@ -559,6 +621,7 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group regression-base
      */
     public function test_follower_can_view_image_of_free_post_on_my_timeline()
     {
@@ -611,6 +674,7 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group regression-base
      */
     public function test_nonfollower_can_view_image_of_free_post_on_my_timeline()
     {
@@ -669,6 +733,7 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_update_my_post()
     {
@@ -714,6 +779,7 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_destroy_my_post()
     {
@@ -743,6 +809,7 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group regression-base
      */
     public function test_timeline_follower_can_like_then_unlike_post()
     {
@@ -804,6 +871,7 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group regression-base
      */
     public function test_timeline_nonfollower_can_like_post()
     {
@@ -830,6 +898,7 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group regression-base
      */
     public function test_timeline_owner_can_like_own_post()
     {
@@ -871,6 +940,8 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group regression-base
+     *  @group erik
      */
     public function test_can_send_tip_on_post()
     {
@@ -883,7 +954,6 @@ class RestPostsTest extends TestCase
             'base_unit_cost_in_cents' => $this->faker->randomNumber(3),
         ];
         $response = $this->actingAs($fan)->ajaxJSON('PUT', route('posts.tip', $post->id), $payload);
-
         $response->assertStatus(200);
 
         $content = json_decode($response->content());
@@ -905,6 +975,7 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group regression-base
      *  @group erik
      */
     // tests purchase itself, plus before and after access
@@ -1000,6 +1071,7 @@ class RestPostsTest extends TestCase
      *
      *  @group posts
      *  @group regression
+     *  @group regression-base
      *  @group erik
      */
     public function test_owner_can_not_edit_content_of_a_priced_post_that_others_have_purchased()
@@ -1055,6 +1127,7 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group regression-base
      *  @group erik
      */
     // priced: one-time-purchaseable, as opposed to subscribeable
@@ -1123,7 +1196,7 @@ class RestPostsTest extends TestCase
     protected function setUp() : void
     {
         parent::setUp();
-        $this->seed(TestDatabaseSeeder::class);
+        //$this->seed(TestDatabaseSeeder::class);
     }
 
     protected function tearDown() : void {

@@ -2,12 +2,13 @@
 namespace Tests\Feature;
 
 use DB;
+use Exception;
 
 use Illuminate\Http\File;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+//use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Database\Seeders\TestDatabaseSeeder;
 
@@ -19,6 +20,7 @@ use App\Models\Story;
 use App\Models\Timeline;
 use App\Models\Post;
 use App\Models\Mediafile;
+use App\Models\Vaultfolder;
 use App\Enums\MediafileTypeEnum;
 
 // see: https://laravel.com/docs/5.4/http-tests#testing-file-uploads
@@ -27,11 +29,13 @@ use App\Enums\MediafileTypeEnum;
 // https://stackoverflow.com/questions/34455410/error-executing-putobject-on-aws-upload-fails
 class MediafileTest extends TestCase
 {
-    use RefreshDatabase, WithFaker;
+    use WithFaker;
+    //use RefreshDatabase;
 
     /**
      *  @group mediafiles
      *  @group regression
+     *  @group regression-base
      */
     public function test_admin_can_list_mediafiles()
     {
@@ -48,6 +52,7 @@ class MediafileTest extends TestCase
             'links',
             'meta' => [ 'current_page', 'from', 'last_page', 'path', 'per_page', 'to', 'total', ],
         ]);
+        $admin->removeRole('super-admin'); // revert (else future tests will fail)
         $response->assertStatus(200);
         $content = json_decode($response->content());
         $this->assertEquals(1, $content->meta->current_page);
@@ -62,6 +67,7 @@ class MediafileTest extends TestCase
     /**
      *  @group mediafiles
      *  @group regression
+     *  @group regression-base
      */
     public function test_owner_can_list_mediafiles()
     {
@@ -110,6 +116,12 @@ class MediafileTest extends TestCase
                     $acc += 1;
                 }
                 break;
+            case 'vaultfolders':
+                $resource = Vaultfolder::findOrFail($item->resource_id);
+                if ( $resource->getPrimaryOwner()->id === $owner->id ) {
+                    $acc += 1;
+                }
+                break;
             default:
                 throw new Exception('Unknown resource_type: '.$item->resource_type);
             }
@@ -121,6 +133,7 @@ class MediafileTest extends TestCase
     /**
      *  @group mediafiles
      *  @group regression
+     *  @group regression-base
      */
     public function test_owner_can_list_mediafiles_in_vault()
     {
@@ -160,6 +173,7 @@ class MediafileTest extends TestCase
     /**
      *  @group mediafiles
      *  @group regression
+     *  @group regression-base
      *  @group june0624
      */
     public function test_can_store_mediafile()
@@ -194,7 +208,7 @@ class MediafileTest extends TestCase
     protected function setUp() : void
     {
         parent::setUp();
-        $this->seed(TestDatabaseSeeder::class);
+        //$this->seed(TestDatabaseSeeder::class);
 
         // Update or add avatars to some users for this test...
         $users = User::take(5)->get();

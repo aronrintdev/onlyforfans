@@ -26,6 +26,7 @@ class PayoutGatewayTest extends TestCase
      * Rest request of payout'
      *
      * @group regression
+     * @group regression-financial
      */
     public function test_can_request_a_payout()
     {
@@ -48,6 +49,7 @@ class PayoutGatewayTest extends TestCase
      * Rest request of payout
      *
      * @group regression
+     * @group regression-financial
      */
     public function test_cannot_request_payout_higher_than_balance()
     {
