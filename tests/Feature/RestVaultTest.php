@@ -408,6 +408,7 @@ class RestVaultTest extends TestCase
         $this->assertTrue($rootFolder->vfchildren->contains($subfolderR->id), 'Root should now contain newly created subfolder');
 
         // delete the subfolder
+        throw new \Exception('fixme...this needs to delete all sub-folders as well as all file contents within this and subfolders!!');
         $response = $this->actingAs($creator)->ajaxJSON('DELETE', route('vaultfolders.destroy', $subfolderR->id));
         $response->assertStatus(200);
         $rootFolder->refresh();
