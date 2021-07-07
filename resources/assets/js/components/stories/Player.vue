@@ -18,7 +18,7 @@
     </b-sidebar>
 
     <b-row>
-      <b-col>
+      <b-col class="px-0">
         <div class="position-relative">
 
           <nav :style="cssNav" class="m-0">
@@ -39,6 +39,7 @@
               </div>
 
               <div v-b-toggle.sidebar-settings class="clickme_to-toggle_settings" role="button"><fa-icon icon="cog" size="2x" class="text-light" /></div>
+              <div class="clickme_to-close_player" role="button"><router-link to="/"><fa-icon icon="times" size="2x" class="text-light" /></router-link></div>
 
               <div class="nav-arrows w-100 px-1 px-sm-5 d-flex justify-content-between">
                 <div @click="doNav('previous')" class="" role="button"><fa-icon icon="angle-left" size="3x" class="text-light OFF-ml-auto" /></div>
@@ -88,7 +89,7 @@ export default {
 
   data: () => ({
     currentIndex: 0, // index from 0
-    play: true,
+    play: false,// true,
     speed: 3000,
     timelineAnimation: null,
     speedOptions: [
@@ -263,7 +264,7 @@ export default {
 <style lang="scss" scoped>
 .display-area {
   position: relative;
-  height: 80vh;
+  height: 100vh;
 
   .tag-creator {
     color: #fff;
@@ -294,9 +295,10 @@ export default {
   }
 
   .bg-blur {
-    opacity: 0.82;
+    opacity: 0.99;
+    //opacity: 0.82;
     //background-image: var(--background-image);
-    background: #010101;
+    background: #1f1f1f;
 
     //filter: blur(8px);
     //-webkit-filter: blur(8px);
@@ -320,7 +322,13 @@ export default {
 .clickme_to-toggle_settings {
   position: absolute;
   top: 1.3rem;
-  right: 1rem;
+  right: 4rem;
+  z-index: 200;
+}
+.clickme_to-close_player {
+  position: absolute;
+  top: 1.3rem;
+  right: 1.5rem;
   z-index: 200;
 }
 

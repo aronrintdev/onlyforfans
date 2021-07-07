@@ -93,5 +93,13 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+body {
+  .view-stories-player {
+    position: absolute;
+    top:0;
+    left:0;
+    z-index:2000;
+  }
+}
 
 </style>
