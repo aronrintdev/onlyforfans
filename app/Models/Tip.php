@@ -13,7 +13,6 @@ use App\Models\Financial\Account;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use App\Enums\SubscriptionPeriodEnum;
-use Illuminate\Database\Eloquent\Model;
 use App\Enums\Financial\AccountTypeEnum;
 use App\Models\Casts\Money as CastsMoney;
 use App\Enums\Financial\TransactionTypeEnum;
@@ -91,17 +90,17 @@ class Tip extends Model implements Messagable
 
     public function account()
     {
-        return $this->hasOne(Account::class);
+        return $this->belongsTo(Account::class);
     }
 
     public function sender()
     {
-        return $this->hasOne(User::class, 'sender_id');
+        return $this->belongsTo(User::class, 'sender_id');
     }
 
     public function receiver()
     {
-        return $this->hasOne(User::class, 'receiver_id');
+        return $this->belongsTo(User::class, 'receiver_id');
     }
 
     public function tippable()
@@ -189,7 +188,7 @@ class Tip extends Model implements Messagable
         }
 
         $transactions = $this->account->getInternalAccount()->moveTo(
-            $this->receiver->getOwnerAccount($this->account->system, $this->account->currency),
+            $this->receiver->getInternalAccount($this->account->system, $this->account->currency),
             $this->amount,
             [
                 'ignoreBalance'    => $ignoreBalance,
