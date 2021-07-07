@@ -4,7 +4,7 @@
       @mouseenter="toggleUploadCover(true)"
       @mouseleave="toggleUploadCover(false)"
       class="masthead text-white text-center"
-      v-bind:style="{ backgroundImage: 'url(' + session_user.cover.filepath + ')' }"
+      v-bind:style="{ backgroundImage: 'url(' + coverImage + ')' }"
     >
       <input type="file" id="cover-upload-btn" class="file-input" @change="onCoverChange" />
       <label v-if="uploadCoverVisible" for="cover-upload-btn" class="btn photo-btn">
@@ -30,7 +30,7 @@
         thumbnail
         rounded="circle"
         class="w-100 h-100"
-        :src="session_user.avatar.filepath"
+        :src="avatarImage"
         :alt="timeline.name"
         :title="timeline.name"
       />
@@ -90,6 +90,16 @@ export default {
     isLoading() {
       return !this.session_user || !this.timeline
     },
+
+    coverImage() {
+      const { cover } = this.timeline
+      return cover ? cover.filepath : '/images/locked_post.png'
+    },
+
+    avatarImage() {
+      const { avatar } = this.timeline
+      return avatar ? avatar.filepath : '/images/default_avatar.svg'
+    }
   },
 
   data: () => ({

@@ -100,7 +100,7 @@ export default {
     if (this.mediafiles) {
       this.files = [...this.mediafiles];
       this.$nextTick(() => {
-        this.swiper.update()
+        this.swiper?.update()
       })
     }
   },
@@ -109,7 +109,7 @@ export default {
     mediafiles() {
       this.files = [...this.mediafiles];
       this.$nextTick(() => {
-        this.swiper.update()
+        this.swiper?.update()
       })
     },
   },

@@ -8,7 +8,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+//use Illuminate\Foundation\Testing\RefreshDatabase;
 use Database\Seeders\TestDatabaseSeeder;
 use Tests\TestCase;
 use Ramsey\Uuid\Uuid;
@@ -26,11 +26,12 @@ use App\Enums\MediafileTypeEnum;
 
 class ChatmessageModelTest extends TestCase
 {
-    use WithFaker, RefreshDatabase;
+    use WithFaker;
 
     /**
      * @group chatmessage-model
      * @group regression
+     * @group regression-base
      */
     public function test_should_get_chatmessages()
     {
@@ -52,6 +53,7 @@ class ChatmessageModelTest extends TestCase
     /**
      * @group chatmessage-model
      * @group regression
+     * @group regression-base
      */
     public function test_can_start_chat()
     {
@@ -101,6 +103,7 @@ class ChatmessageModelTest extends TestCase
     /**
      * @group chatmessage-model
      * @group regression
+     * @group regression-base
      */
     public function test_can_schedule_message()
     {
@@ -134,6 +137,7 @@ class ChatmessageModelTest extends TestCase
      * @group chatmessage-model
      * @group mycontacts
      * @group regression
+     * @group regression-base
      * @group here0607
      */
     public function test_should_get_mycontacts()
@@ -161,7 +165,7 @@ class ChatmessageModelTest extends TestCase
             return;
         }
 
-        $this->seed(TestDatabaseSeeder::class);
+        //$this->seed(TestDatabaseSeeder::class);
     }
 
     protected function tearDown() : void {

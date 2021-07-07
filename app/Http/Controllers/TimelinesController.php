@@ -89,7 +89,14 @@ class TimelinesController extends AppBaseController
     public function homefeed(Request $request)
     {
         $sessionUser = request()->user();
-        $query = Post::with('mediafiles', 'user')->withCount(['comments', 'likes'])->where('active', 1)->where('schedule_datetime', null);
+        $query = Post::with('mediafiles', 'user')
+                    ->withCount(['comments', 'likes'])
+                    ->where('active', 1)
+                    ->where('schedule_datetime', null)
+                    ->where(function ($query) {
+                        $query->where('expire_at', '>', Carbon::now('UTC'))
+                              ->orWhere('expire_at', null);
+                    });
         $query->homeTimeline()->sort( $request->input('sortBy', 'default') );
         // %NOTE: we could also just remove post-query, as the feed will auto-update to fill length of page (?)
         if ( $request->boolean('hideLocked') ) {
@@ -123,7 +130,14 @@ class TimelinesController extends AppBaseController
     {
         //$this->authorize('view', $timeline); // must be follower or subscriber
         //$filters = [];
-        $query = Post::with('mediafiles', 'user')->withCount(['comments', 'likes'])->where('active', 1)->where('schedule_datetime', null);
+        $query = Post::with('mediafiles', 'user')
+                    ->withCount(['comments', 'likes'])
+                    ->where('active', 1)
+                    ->where('schedule_datetime', null)
+                    ->where(function ($query) {
+                        $query->where('expire_at', '>', Carbon::now('UTC'))
+                              ->orWhere('expire_at', null);
+                    });
         $query->byTimeline($timeline->id)->sort( $request->input('sortBy', 'default') );
         $data = $query->paginate( $request->input('take', env('MAX_POSTS_PER_REQUEST', 10)) );
         return new PostCollection($data);
@@ -190,7 +204,11 @@ class TimelinesController extends AppBaseController
             ->has('mediafiles')
             ->withCount('comments')->orderBy('comments_count', 'desc')
             //->withCount('likes')->orderBy('likes_count', 'desc')
-            ->where('active', 1);
+            ->where('active', 1)
+            ->where(function ($query) {
+                $query->where('expire_at', '>', Carbon::now('UTC'))
+                      ->orWhere('expire_at', null);
+            });
         $query->where('postable_type', 'timelines')->where('postable_id', $timeline->id);
         $data = $query->take($TAKE)->latest()->get();
         return new PostCollection($data);
@@ -361,7 +379,11 @@ class TimelinesController extends AppBaseController
         $query = Post::with('mediafiles', 'user')
             ->withCount(['comments', 'likes'])
             ->where('active', 1)
-            ->where('schedule_datetime', '>', Carbon::now('UTC')->timestamp)
+            ->where('schedule_datetime', '>', Carbon::now('UTC'))
+            ->where(function ($query) {
+                $query->where('expire_at', '>', Carbon::now('UTC'))
+                      ->orWhere('expire_at', null);
+            })
             ->orderBy('created_at', 'desc');
         // %NOTE: we could also just remove post-query, as the feed will auto-update to fill length of page (?)
         $data = $query->paginate( $request->input('take', env('MAX_POSTS_PER_REQUEST', 10)) );

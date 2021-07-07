@@ -2,23 +2,66 @@
 namespace Tests\Unit;
 
 use DB;
-use Tests\TestCase;
-use App\Models\User;
-use App\Models\Vault;
-use Ramsey\Uuid\Uuid;
-use App\Models\Mediafile;
-use App\Models\Vaultfolder;
-use App\Enums\MediafileTypeEnum;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+//use Illuminate\Foundation\Testing\RefreshDatabase;
+
+//use Database\Seeders\TestDatabaseSeeder;
+use Database\Seeders\TestMinimalDatabaseSeeder;
+use Ramsey\Uuid\Uuid;
+use Tests\TestCase;
+
+use App\Models\User;
+use App\Models\Vault;
+use App\Models\Mediafile;
+use App\Models\Vaultfolder;
+use App\Enums\MediafileTypeEnum;
 
 class VaultModelTest extends TestCase
 {
+    //use RefreshDatabase;
+    use WithFaker;
 
-    private $_deleteList;
-    private static $_persist = false;
+    /**
+     * @group vdev
+     * @group regression
+     * @group regression-base
+     */
+    public function test_can_get_vault_subfolder_tree()
+    {
+        $vault = Vault::has('vaultfolders')->firstOrFail();
+
+        $rootFolder = $vault->getRootFolder();
+        //dump('rootFolder1', $rootFolder);
+
+        // --
+
+        // Create some subfolders
+        $attrs = [
+            'vault_id' => $vault->id,
+            'user_id' => $rootFolder->user_id,
+        ];
+
+        $attrs['parent_id'] = $rootFolder->id;
+        $attrs['vfname'] = $this->faker->slug;
+        $new = Vaultfolder::create($attrs);
+
+        $attrs['parent_id'] = $new->id;
+        $attrs['vfname'] = $this->faker->slug;
+        $new = Vaultfolder::create($attrs);
+
+        $rootFolder2 = Vaultfolder::with('vfchildren')->whereNull('parent_id')->where('vault_id', $vault->id)->firstorFail();
+
+        // --
+
+        $rootFolder->refresh();
+        $subTree = $rootFolder->getSubTree();
+        //dd('subTree', $subTree);
+
+        //dd($rootFolder);
+
+    }
 
     /**
      * @group vdev
@@ -74,15 +117,10 @@ class VaultModelTest extends TestCase
 
     protected function setUp() : void {
         parent::setUp();
-        $this->_deleteList = collect();
+        //$this->seed(TestMinimalDatabaseSeeder::class);
     }
+
     protected function tearDown() : void {
-        if ( !self::$_persist ) {
-            while ( $this->_deleteList->count() > 0 ) {
-                $obj = $this->_deleteList->pop();
-                $obj->delete();
-            }
-        }
         parent::tearDown();
     }
 

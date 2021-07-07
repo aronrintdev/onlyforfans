@@ -4,7 +4,7 @@ namespace Tests\Unit;
 use Tests\TestCase;
 use DB;
 use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+//use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Database\Seeders\TestDatabaseSeeder;
@@ -16,7 +16,7 @@ use App\Models\User;
 class FavoritesTest extends TestCase
 {
 
-    use RefreshDatabase, WithFaker;
+    use WithFaker;
 
     /**
      * @group favoritable-model
@@ -50,7 +50,7 @@ class FavoritesTest extends TestCase
     protected function setUp() : void
     {
         parent::setUp();
-        $this->seed(TestDatabaseSeeder::class);
+        //$this->seed(TestDatabaseSeeder::class);
     }
 
     protected function tearDown() : void {

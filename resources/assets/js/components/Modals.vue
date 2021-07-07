@@ -60,13 +60,13 @@
       <ImageDisplay ref="ImageDisplay" :session_user="session_user" :mediafile="selectedResource" :is_feed="false" />
     </b-modal>
     <b-modal
-      modal-class="schedule-message-modal"
-      hide-header
-      centered
-      hide-footer
+      title="Scheduled Post"
       id="modal-schedule-datetime"
+      size="md"
+      hide-footer
+      body-class="p-0"
     >
-      <ScheduleDateTime ref="schedule_picker_modal" @apply="applySchedule" />
+      <ScheduleDateTime ref="schedule_picker_modal" :scheduled_at="scheduled_at" :for_edit="is_for_edit" />
     </b-modal>
 
     <b-modal
@@ -146,6 +146,8 @@ export default {
     selectedResourceId: null,
     subscribeOnly: false,
     modalPayload: null,
+    scheduled_at: null,
+    is_for_edit: null,
   }),
 
   methods: {
@@ -186,6 +188,8 @@ export default {
             this.$bvModal.show('modal-photo')
             break
           case 'show-schedule-datetime':
+            this.scheduled_at = data.scheduled_at;
+            this.is_for_edit = data.is_for_edit;
             this.$bvModal.show('modal-schedule-datetime')
             break
           case 'edit-post':
@@ -207,9 +211,6 @@ export default {
       })
 
     },
-    applySchedule: function(data) {
-      eventBus.$emit('apply-schedule', data)
-    }
   },
 
   created() {

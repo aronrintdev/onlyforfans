@@ -22,6 +22,7 @@ class Vaultfolder extends JsonResource
             //'sharees' =>  $this->sharees,
             //'mediafilesharelogs' =>  $this->mediafilesharelogs,
             'mediafile_count' =>  $this->mediafile_count,
+            'vfchildren_count' =>  $this->vfchildren_count,
             'created_at' => $this->created_at,
         ];
     }

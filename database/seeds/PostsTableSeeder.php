@@ -47,10 +47,12 @@ class PostsTableSeeder extends Seeder
 
             // $u is the user who will own the post being created (ie, as well as timeline associated with the post)...
 
-            $count = $this->faker->numberBetween(self::$MIN_POSTS, $this->getMax('posts'));
+            $max = $this->getMax('posts');
+            $count = $this->faker->numberBetween(self::$MIN_POSTS, $max);
 
-            if ( $this->appEnv !== 'testing' ) {
-                $this->output->writeln("  - Creating $count posts for user ".$u->name." (iter: $iter)");
+            if ( true || $this->appEnv !== 'testing' ) {
+                $userCount = $users->count();
+                $this->output->writeln("  - Creating $count posts for user ".$u->name." (iter: $iter/$userCount)");
             }
 
             collect(range(0,$count))->each( function() use(&$users, &$u) { // Post generation loop

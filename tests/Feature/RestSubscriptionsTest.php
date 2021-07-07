@@ -2,7 +2,7 @@
 namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+//use Illuminate\Foundation\Testing\RefreshDatabase;
 use DB;
 
 use Tests\TestCase;
@@ -14,11 +14,11 @@ use App\Models\Subscription;
 
 class RestSubscriptionsTest extends TestCase
 {
-    use RefreshDatabase, WithFaker;
+    use WithFaker;
 
     /**
      *  @group subscriptions
-     *  @group regression
+     *  @group regression-base
      */
     public function test_owner_can_list_subscriptions()
     {
@@ -68,6 +68,7 @@ class RestSubscriptionsTest extends TestCase
     /**
      *  @group subscriptions
      *  @group regression
+     *  @group regression-base
      */
     public function test_owner_can_list_active_subscriptions()
     {
@@ -96,6 +97,9 @@ class RestSubscriptionsTest extends TestCase
     /**
      *  @group subscriptions
      *  @group regression
+     *  @group regression-base
+     *  @group erik
+     // Erik maybe call api to cancel a subscripion before testing for it (within the code below)
      */
     public function test_owner_can_list_inactive_subscriptions()
     {
@@ -127,7 +131,7 @@ class RestSubscriptionsTest extends TestCase
     protected function setUp() : void
     {
         parent::setUp();
-        $this->seed(TestDatabaseSeeder::class);
+        //$this->seed(TestDatabaseSeeder::class);
     }
 
     protected function tearDown() : void {

@@ -1,58 +1,72 @@
 <template>
   <div v-if="!isLoading" class="container-fluid supercrate-player">
-    <section class="row">
-      <aside class="col-md-3 tag-debug">
-        <h2>My Story Views</h2>
-        <hr />
-        <div class="mb-3">
-          <b-form-checkbox v-model="play">Auto Play</b-form-checkbox>
-        </div>
-        <div class="mb-3">
+
+    <b-sidebar id="sidebar-settings" title="Story Settings" left shadow width="40rem">
+      <div class="px-3 py-2">
+        <div>
           Auto Play Speed
           <VueSlider :data="speedOptions" v-model="speed" hideLabel />
         </div>
-      </aside>
+        <div>
+          <b-form-checkbox v-model="play">Auto Play</b-form-checkbox>
+        </div>
+        <ul class="tag-debug">
+          <li>story index: {{currentIndex+1}}/{{renderedStories.length}}</li>
+          <li>current story ID: {{currentStory.id}}</li>
+        </ul>
+      </div>
+    </b-sidebar>
 
-      <main class="col-md-9 tag-debug">
-        <nav :style="cssNav">
-          <div
-            v-for="(story, index) in renderedStories"
-            :key="`header-${story.id}`"
-            class="cursor-pointer"
-            @click="goTo(index)"
-          >
-            <div :ref="`nav-${story.id}`" />
-          </div>
-        </nav>
+    <b-row>
+      <b-col class="px-0">
+        <div class="position-relative">
 
-        <section v-for="(s, index) in renderedStories" :key="`story-${s.id}`">
-          <div v-if="current == index" :style="cssDisplay" class="display-area bg-blur">
-            <h6 class="tag-creator">{{ storyteller }}
-              <p>DEBUG:</p>
-              <ul>
-                <li>story index: {{index+1}}/{{renderedStories.length}}</li>
-                <li>current story ID: {{s.id}}</li>
-              </ul>
-            </h6>
-            <div class="bg-blur"></div>
-            <div v-touch:swipe.top="handleSwipeUp" class="crate-content">
-              <article v-if="s.stype === 'text'" class="h-100 v-wrap">
-                <p class="h4 text-center v-box">{{ s.content }}</p>
-              </article>
-              <article v-else-if="s.stype === 'image' && s.mediafiles" class="h-100">
-                <img :src="s.mediafiles[0].filepath" class="OFF-img-fluid OFF-h-100" />
-                <see-more v-if="s.swipe_up_link" :link="s.swipe_up_link"></see-more>
-              </article>
+          <nav :style="cssNav" class="m-0">
+            <div v-for="(s, iter) in renderedStories" :key="`header-${s.id}`" class="cursor-pointer" @click="goTo(iter)">
+              <div class="tag-target" :ref="`nav-${s.id}`" />
             </div>
-          </div>
-        </section>
+          </nav>
 
-        <section class="my-3 d-flex justify-content-between">
-          <b-btn @click="doNav('previous')" class="">Previous</b-btn>
-          <b-btn @click="doNav('next')" class="">Next</b-btn>
-        </section>
-      </main>
-    </section>
+          <section v-for="(s, iter) in renderedStories" :key="`story-${s.id}`">
+            <article v-if="currentIndex==iter" :style="cssDisplay" class="display-area">
+
+              <div class="tag-creator d-flex align-items-center">
+                <b-avatar v-if="avatar" :src="avatar.filepath" class="mr-2" size="2.5rem" />
+                <div>
+                  <h6 class="m-0">{{ storyteller }}</h6>
+                  <small class="text-muted m-0"><timeago :datetime="s.created_at" /></small>
+                </div>
+              </div>
+
+              <div v-b-toggle.sidebar-settings class="clickme_to-toggle_settings" role="button"><fa-icon icon="cog" size="2x" class="text-light" /></div>
+              <div class="clickme_to-close_player" role="button"><router-link to="/"><fa-icon icon="times" size="2x" class="text-light" /></router-link></div>
+
+              <div class="nav-arrows w-100 px-1 px-sm-5 d-flex justify-content-between">
+                <div @click="doNav('previous')" class="" role="button"><fa-icon icon="angle-left" size="3x" class="text-light OFF-ml-auto" /></div>
+                <div @click="doNav('next')" class="" role="button"><fa-icon icon="angle-right" size="3x" class="text-light OFF-mr-auto" /></div>
+              </div>
+
+              <div class="bg-blur"></div>
+
+              <div v-touch:swipe.top="handleSwipeUp" class="crate-content">
+                <article v-if="s.stype === 'text'" class="h-100 v-wrap">
+                  <p class="h4 text-center v-box">{{ s.content }}</p>
+                </article>
+                <article v-else-if="s.stype === 'image' && s.mediafiles" class="h-100">
+                  <img :src="s.mediafiles[0].filepath" class="OFF-img-fluid OFF-h-100" />
+                  <see-more v-if="s.swipe_up_link" :link="s.swipe_up_link"></see-more>
+                </article>
+              </div>
+
+
+            </article>
+          </section>
+
+        </div>
+      </b-col>
+
+    </b-row>
+
   </div>
 </template>
 
@@ -67,14 +81,15 @@ export default {
 
   props: {
     storyteller: { type: String, default: '' },
-    username: { type: String, default: '' }, // session user (?)
+    session_user: { type: Object, default: null },
     stories: { type: Array, default: () => [] },
     maxStories: { type: Number, default: 15 },
+    avatar: null,
   },
 
   data: () => ({
-    current: 0,
-    play: false, // true,
+    currentIndex: 0, // index from 0
+    play: false,// true,
     speed: 3000,
     timelineAnimation: null,
     speedOptions: [
@@ -103,7 +118,7 @@ export default {
 
   computed: {
     isLoading() {
-      return !this.storyteller || !this.stories || !this.username
+      return !this.storyteller || !this.stories || !this.session_user
     },
     cssNav() {
       return {
@@ -113,12 +128,10 @@ export default {
       }
     },
     cssDisplay() {
-      console.log ('renderedStories', {
-        renderedStories: this.renderedStories 
-      })
-      if (this.renderedStories.length && this.renderedStories[0].mediafiles && this.renderedStories[this.current].mediafiles[0]) {
+      //console.log ('renderedStories', { renderedStories: this.renderedStories })
+      if (this.renderedStories.length && this.renderedStories[0].mediafiles && this.renderedStories[this.currentIndex].mediafiles[0]) {
         return {
-          '--background-image': `url(${this.renderedStories[this.current].mediafiles[0].filepath})`,
+          '--background-image': `url(${this.renderedStories[this.currentIndex].mediafiles[0].filepath})`,
         }
       }
       return {}
@@ -130,40 +143,46 @@ export default {
       return this.stories
     },
 
+    currentStory() {
+      return this.stories.length ? this.stories[this.currentIndex] : null
+    }
+
   },
 
   methods: {
     doNav(direction) {
-      console.log(`doNav() - ${direction} - ${this.current}/${this.stories.length}`)
+      console.log(`doNav() - ${direction} - ${this.currentIndex+1}/${this.stories.length}`)
       switch (direction) {
         case 'previous':
-          if ( (this.current-1) < 0 ) {
+          if ( (this.currentIndex-1) < 0 ) {
             console.log(`doNav() - emit prev-story-timeline`)
             this.$emit('prev-story-timeline', { foo: 'bar'} )
+            this.currentIndex = 0
           } else {
-            this.goTo(this.current - 1)
+            this.goTo(this.currentIndex - 1)
           }
           break
         case 'next':
-          if ( (this.current+1) >= this.stories.length ) {
+          if ( (this.currentIndex+1) >= this.stories.length ) {
             console.log(`doNav() - emit next-story-timeline`)
             this.$emit('next-story-timeline', { foo: 'bar'} )
+            this.currentIndex = 0
           } else {
-            this.goTo(this.current + 1)
+            this.goTo(this.currentIndex + 1)
           }
           break
       }
     },
+
     goTo(index) {
       this.timelineAnimation.pause()
 
-      index =
-        index < 0
-          ? this.renderedStories.length - 1
-          : index >= this.renderedStories.length
-          ? 0
-          : index
-      this.current = index
+      index = index < 0
+        ? this.renderedStories.length - 1
+        : index >= this.renderedStories.length
+        ? 0
+        : index
+      this.currentIndex = index
       this.timelineAnimation.seek(this.getTimelineSeek(index))
 
       if (this.play) {
@@ -181,7 +200,7 @@ export default {
           targets: this.$refs[`nav-${story.id}`][0],
           width: '100%',
           changeBegin: (a) => {
-            this.current = index
+            this.currentIndex = index
           },
         })
       })
@@ -192,7 +211,10 @@ export default {
         autoplay: this.play,
         duration: this.speed,
         easing: 'linear',
-        loop: true,
+        loop: false,
+        complete: function() {
+          console.log('$anime - complete callback')
+        },
       })
       this.addTimelineElements()
     },
@@ -206,7 +228,7 @@ export default {
     },
 
     handleSwipeUp() {
-      const link = this.renderedStories[this.current].swipe_up_link
+      const link = this.renderedStories[this.currentIndex].swipe_up_link
       if (link) {
         this.$emit('open-see-more-link')
       }
@@ -242,14 +264,17 @@ export default {
 <style lang="scss" scoped>
 .display-area {
   position: relative;
-  height: 70vh;
+  height: 100vh;
 
   .tag-creator {
+    color: #fff;
     position: absolute;
-    z-index: 1000;
+    top: 1.5rem;
+    left: 1rem;
+    z-index: 200;
   }
 
-  & > .crate-content {
+  .crate-content {
     position: absolute;
     top: 0;
     left: 0;
@@ -269,38 +294,62 @@ export default {
     }
   }
 
-  & > .bg-blur {
-    opacity: 0.4;
-    background-image: var(--background-image);
+  .bg-blur {
+    opacity: 0.99;
+    //opacity: 0.82;
+    //background-image: var(--background-image);
+    background: #1f1f1f;
 
-    filter: blur(8px);
-    -webkit-filter: blur(8px);
+    //filter: blur(8px);
+    //-webkit-filter: blur(8px);
 
     width: 100%;
     height: 100%;
 
     /* Center and scale the image nicely */
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: cover;
+    //background-position: center;
+    //background-repeat: no-repeat;
+    //background-size: cover;
   }
 }
 
+.nav-arrows {
+  position: absolute;
+  top: 45%;
+  left: 0;
+  z-index: 500;
+}
+.clickme_to-toggle_settings {
+  position: absolute;
+  top: 1.3rem;
+  right: 4rem;
+  z-index: 200;
+}
+.clickme_to-close_player {
+  position: absolute;
+  top: 1.3rem;
+  right: 1.5rem;
+  z-index: 200;
+}
+
 nav {
-  margin: 1rem 0;
+  height: 0.3rem;
+  position: absolute;
+  top: 0.3rem;
+  left: 0;
+  z-index: 200;
   box-sizing: border-box;
   display: grid;
-  grid-column-gap: 1em;
+  grid-column-gap: 0.2rem;
   grid-template-columns: var(--grid-template-columns);
   width: 100%;
-  height: 0.7em;
 
-  & > div {
-    background: rgba(0, 0, 0, 0.25);
+  .cursor-pointer {
+    background: rgba(255, 255, 255, 0.55);
     height: 100%;
 
-    & > div {
-      background: black;
+    .tag-target {
+      background: white;
       height: 100%;
       width: 0%;
     }

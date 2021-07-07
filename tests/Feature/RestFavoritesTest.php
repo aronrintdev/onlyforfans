@@ -2,7 +2,7 @@
 namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+//use Illuminate\Foundation\Testing\RefreshDatabase;
 use DB;
 
 use Tests\TestCase;
@@ -14,11 +14,12 @@ use App\Models\User;
 
 class RestFavoritesTest extends TestCase
 {
-    use RefreshDatabase, WithFaker;
+    use WithFaker;
 
     /**
      *  @group favorites
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_list_favorites()
     {
@@ -45,6 +46,7 @@ class RestFavoritesTest extends TestCase
     /**
      *  @group favorites
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_list_filtered_favorites()
     {
@@ -56,6 +58,7 @@ class RestFavoritesTest extends TestCase
             ->count();
 
         $response = $this->actingAs($favoriter)->ajaxJSON('GET', route('favorites.index'), [
+            'take' => 1000, // much > number of seeds to effectively return all
             'favoritable_type' => 'mediafiles',
         ]);
         $response->assertStatus(200);
@@ -66,6 +69,7 @@ class RestFavoritesTest extends TestCase
         ]);
 
         $content = json_decode($response->content());
+        //dd($content);
         $this->assertNotNull($content->data);
         $this->assertGreaterThan(0, count($content->data));
         $this->assertEquals($expectedCount, count($content->data));
@@ -85,6 +89,7 @@ class RestFavoritesTest extends TestCase
     /**
      *  @group favorites
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_add_favorite()
     {
@@ -107,6 +112,7 @@ class RestFavoritesTest extends TestCase
     /**
      *  @group favorites
      *  @group regression
+     *  @group regression-base
      */
     // should return only favorites for which session user is the owner
     public function test_nonadmin_can_not_list_general_favorites()
@@ -123,6 +129,7 @@ class RestFavoritesTest extends TestCase
     /**
      *  @group favorites
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_view_own_favorite()
     {
@@ -141,6 +148,7 @@ class RestFavoritesTest extends TestCase
     /**
      *  @group favorites
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_delete_own_favorite()
     {
@@ -155,6 +163,7 @@ class RestFavoritesTest extends TestCase
     /**
      *  @group favorites
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_remove_own_favorite()
     {
@@ -172,6 +181,7 @@ class RestFavoritesTest extends TestCase
     /**
      *  @group favorites
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_not_delete_nonowned_favorite()
     {
@@ -188,7 +198,7 @@ class RestFavoritesTest extends TestCase
     protected function setUp() : void
     {
         parent::setUp();
-        $this->seed(TestDatabaseSeeder::class);
+        //$this->seed(TestDatabaseSeeder::class);
     }
 
     protected function tearDown() : void {

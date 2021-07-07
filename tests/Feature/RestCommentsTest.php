@@ -2,7 +2,7 @@
 namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+//use Illuminate\Foundation\Testing\RefreshDatabase;
 use DB;
 
 use Tests\TestCase;
@@ -15,11 +15,13 @@ use App\Enums\PostTypeEnum;
 
 class RestCommentsTest extends TestCase
 {
-    use RefreshDatabase, WithFaker;
+    use WithFaker;
+    //use RefreshDatabase;
 
     /**
      *  @group comments
      *  @group regression
+     *  @group regression-base
      */
     // should return only comments for which session user is the author
     // %TODO: filters, timelines (see comments I have valid access to), etc
@@ -51,6 +53,7 @@ class RestCommentsTest extends TestCase
     /**
      *  @group comments
      *  @group regression
+     *  @group regression-base
      */
     public function test_admin_can_list_comments()
     {
@@ -58,7 +61,6 @@ class RestCommentsTest extends TestCase
         $commenter = $post->comments[0]->user;
         $timeline = $post->timeline;
         $creator = $timeline->user;
-       
 
         $admin = User::whereDoesntHave('followedtimelines', function($q1) use(&$timeline) {
             $q1->where('timelines.id', $timeline->id);
@@ -69,6 +71,7 @@ class RestCommentsTest extends TestCase
         $response = $this->actingAs($admin)->ajaxJSON('GET', route('comments.index'), [
             'user_id' => $commenter->id,
         ]);
+        $admin->removeRole('super-admin'); // revert (else future tests will fail)
         $response->assertJsonStructure([
             'data',
             'links',
@@ -88,6 +91,7 @@ class RestCommentsTest extends TestCase
     /**
      *  @group comments
      *  @group regression
+     *  @group regression-base
      */
     public function test_nonowner_can_not_list_comments()
     {
@@ -134,6 +138,7 @@ class RestCommentsTest extends TestCase
     /**
      *  @group comments
      *  @group regression
+     *  @group regression-base
      */
      // should return only comments for which session user is the author
     public function test_nonadmin_can_not_list_general_comments()
@@ -159,6 +164,7 @@ class RestCommentsTest extends TestCase
     /**
      *  @group comments
      *  @group regression
+     *  @group regression-base
      */
     public function test_owner_can_view_own_comment()
     {
@@ -177,6 +183,7 @@ class RestCommentsTest extends TestCase
     /**
      *  @group comments
      *  @group regression
+     *  @group regression-base
      */
     public function test_follower_can_list_timeline_comments()
     {
@@ -208,6 +215,7 @@ class RestCommentsTest extends TestCase
     /**
      *  @group comments
      *  @group regression
+     *  @group regression-base
      */
     public function test_nonfollower_can_not_list_timeline_comments()
     {
@@ -219,6 +227,9 @@ class RestCommentsTest extends TestCase
         $nonfan = User::whereDoesntHave('followedtimelines', function($q1) use(&$timeline) {
             $q1->where('timelines.id', $timeline->id);
         })->where('id', '<>', $creator->id)->first();
+        $this->assertFalse( $timeline->followers->contains( $nonfan->id ) );
+        $this->assertFalse( $timeline->user_id == $nonfan->id );
+
         $post = $timeline->posts()->where('type', PostTypeEnum::FREE)->has('comments','>=',1)->first();
 
         $response = $this->actingAs($nonfan)->ajaxJSON('GET', route('posts.indexComments', $post->id));
@@ -228,6 +239,7 @@ class RestCommentsTest extends TestCase
     /**
      *  @group comments
      *  @group regression
+     *  @group regression-base
      */
     public function test_nonfollower_can_not_view_comment_on_timeline_post()
     {
@@ -239,7 +251,6 @@ class RestCommentsTest extends TestCase
         })->where('id', '<>', $creator->id)->first();
         $this->assertFalse( $timeline->followers->contains( $nonfan->id ) );
 
-        $post = $timeline->posts()->has('comments','>=',1)->first();
         $comment = $post->comments()->where('user_id', '<>', $nonfan->id)->first();
         $response = $this->actingAs($nonfan)->ajaxJSON('GET', route('comments.show', $comment->id));
         $response->assertStatus(403);
@@ -248,7 +259,7 @@ class RestCommentsTest extends TestCase
     /**
      *  @group comments
      *  @group regression
-     *  @group here0528a
+     *  @group regression-base
      */
     public function test_follower_can_create_comment_on_timeline_post()
     {
@@ -298,6 +309,7 @@ class RestCommentsTest extends TestCase
     /**
      *  @group comments
      *  @group regression
+     *  @group regression-base
      */
     public function test_nonfollower_can_not_create_comment_on_timeline_post()
     {
@@ -323,6 +335,7 @@ class RestCommentsTest extends TestCase
     /**
      *  @group comments
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_edit_own_comment()
     {
@@ -345,6 +358,7 @@ class RestCommentsTest extends TestCase
     /**
      *  @group comments
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_not_edit_nonowned_comment()
     {
@@ -362,6 +376,7 @@ class RestCommentsTest extends TestCase
     /**
      *  @group comments
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_delete_own_comment()
     {
@@ -376,6 +391,7 @@ class RestCommentsTest extends TestCase
     /**
      *  @group comments
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_not_delete_nonowned_comment()
     {
@@ -391,6 +407,7 @@ class RestCommentsTest extends TestCase
     /**
      *  @group comments
      *  @group regression
+     *  @group regression-base
      */
     public function test_owner_can_delete_followers_comment_on_own_post()
     {
@@ -422,6 +439,7 @@ class RestCommentsTest extends TestCase
     /**
      *  @group comments
      *  @group regression
+     *  @group regression-base
      */
     public function test_follower_can_like_then_unlike_comment_on_timeline_post()
     {
@@ -488,6 +506,7 @@ class RestCommentsTest extends TestCase
     /**
      *  @group comments
      *  @group regression
+     *  @group regression-base
      */
     public function test_nonfollower_can_not_like_comment_on_timeline_post()
     {
@@ -517,7 +536,7 @@ class RestCommentsTest extends TestCase
     protected function setUp() : void
     {
         parent::setUp();
-        $this->seed(TestDatabaseSeeder::class);
+        //$this->seed(TestDatabaseSeeder::class);
     }
 
     protected function tearDown() : void {

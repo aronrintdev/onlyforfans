@@ -2,12 +2,9 @@
 
 namespace App\Console\Commands;
 
-use App\Models\POST;
+use App\Models\Post;
 use Illuminate\Console\Command;
 use Carbon\Carbon;
-use App\Models\User;
-use App\Events\MessageSentEvent;
-use App\Events\MessagePublishedEvent;
 
 class PublishScheduledPosts extends Command
 {
@@ -42,13 +39,13 @@ class PublishScheduledPosts extends Command
      */
     public function handle()
     {
-        $now = Carbon::now('UTC')->timestamp;
-
-        $posts = POST::where('schedule_datetime', $now)->get();
+        $posts = POST::whereDate('schedule_datetime', '=', Carbon::now('UTC')->toDateString())
+                    ->whereTime('schedule_datetime', '=', Carbon::now('UTC')->format('H:i').':00')
+                    ->get();
         if ($posts !== null) {
             $posts->each(function($post) {
                 $post->schedule_datetime = null;
-                $post->created_at = date("Y-m-d H:i:s", strtotime(Carbon::now('UTC')));
+                $post->created_at = Carbon::now('UTC');
                 
                 $post->save();
             });

@@ -4,7 +4,7 @@ namespace Tests\Unit;
 use Tests\TestCase;
 
 use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+//use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
@@ -21,7 +21,7 @@ use App\Models\User;
 
 class FeedModelTest extends TestCase
 {
-    use RefreshDatabase, WithFaker;
+    use WithFaker;
 
     protected $timeline;
     protected $creator;
@@ -206,7 +206,7 @@ class FeedModelTest extends TestCase
     protected function setUp() : void
     {
         parent::setUp();
-        $this->seed(TestDatabaseSeeder::class);
+        //$this->seed(TestDatabaseSeeder::class);
 
         $timeline = Timeline::has('posts','>=',1)
             ->has('subscribers','>=',1)
