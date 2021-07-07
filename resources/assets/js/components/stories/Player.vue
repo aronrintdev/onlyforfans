@@ -49,10 +49,10 @@
               <div class="bg-blur"></div>
 
               <div v-touch:swipe.top="handleSwipeUp" class="crate-content">
-                <article v-if="s.stype === 'text'" class="h-100 v-wrap">
-                  <p class="h4 text-center v-box">{{ s.content }}</p>
+                <article v-if="s.stype==='text'" class="h-100 v-wrap">
+                  <p class="h4 text-center v-box text-white w-75">{{ s.content }}</p>
                 </article>
-                <article v-else-if="s.stype === 'image' && s.mediafiles" class="h-100">
+                <article v-else-if="s.stype==='image' && s.mediafiles" class="h-100">
                   <img :src="s.mediafiles[0].filepath" class="OFF-img-fluid OFF-h-100" />
                   <see-more v-if="s.swipe_up_link" :link="s.swipe_up_link"></see-more>
                 </article>
