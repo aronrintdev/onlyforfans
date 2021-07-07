@@ -2,12 +2,12 @@
 
 namespace App\Payments;
 
+use Money\Money;
+use App\Models\Tip;
 use App\Interfaces\Purchaseable;
 use App\Interfaces\Subscribable;
-use App\Interfaces\Tippable;
 use App\Models\Financial\Account;
 use App\Models\Financial\Exceptions\InvalidFinancialSystemException;
-use Money\Money;
 
 /**
  * Payment Gateway switcher class
@@ -26,11 +26,11 @@ class PaymentGateway implements PaymentGatewayContract
         }
     }
 
-    public function tip(Account $account, Tippable $item, Money $price)
+    public function tip(Account $account, Tip $tip, Money $price)
     {
         switch ($account->system) {
             case 'segpay':
-                return (new SegpayPaymentGateway)->tip($account, $item, $price);
+                return (new SegpayPaymentGateway)->tip($account, $tip, $price);
             default:
                 throw new InvalidFinancialSystemException($account->system, $account);
         }

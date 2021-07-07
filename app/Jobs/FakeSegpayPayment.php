@@ -75,7 +75,8 @@ class FakeSegpayPayment implements ShouldQueue
 
         if ($this->type === PaymentTypeEnum::TIP) {
             try {
-                $this->account->tip($this->item, $this->price, [ 'message' => $this->extra['message'] ?? '' ]);
+                $this->item->process(true, [ 'account_id' => $this->account->id ]);
+                // $this->account->tip($this->item, $this->price, [ 'message' => $this->extra['message'] ?? '' ]);
             } catch (Exception $e) {
                 Log::warning('Tip Failed to process', ['e' => $e->__toString()]);
                 TipFailed::dispatch($this->item, $this->account);

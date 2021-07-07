@@ -129,6 +129,28 @@ class Chatthread extends Model implements UuidId
         return $chatthread;
     }
 
+    /**
+     * Finds or creates a new chatthread for two users
+     * @param User $originator
+     * @param User $participant
+     * @return Chatthread
+     */
+    public static function findOrCreateDirectChat(User $originator, User $participant)
+    {
+        $cts = $originator->chatthreads()->whereHas('participants', function ($query) use ($participant) {
+            $query->where('user_id', $participant->id);
+        })->withCount('participants')->get();
+
+        // Where is only these 2 participants
+        $ct = $cts->where('participants_count', 2)->first();
+
+        if (!isset($ct)) {
+            $ct = static::startChat($originator);
+            $ct->addParticipant($participant->id);
+        }
+        return $ct;
+    }
+
     public function addParticipant($participantID)
     {
         $this->participants()->attach($participantID); // originator is already added
@@ -136,11 +158,12 @@ class Chatthread extends Model implements UuidId
     }
 
     // %TODO: handle mediafiles
-    public function sendMessage(User $sender, string $mcontent) : Chatmessage
+    public function sendMessage(User $sender, string $mcontent, Collection $cattrs) : Chatmessage
     {
         return $this->chatmessages()->create([
               'sender_id' => $sender->id,
-              'mcontent' => $mcontent,
+              'mcontent'  => $mcontent,
+              'cattrs'    => $cattrs,
         ]);
     }
 

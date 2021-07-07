@@ -6,28 +6,29 @@ use Auth;
 use Exception;
 use Throwable;
 use Carbon\Carbon;
+use App\Models\Tip;
 use App\Models\Post;
 use App\Models\User;
-use App\Libs\FeedMgr;
 
+use App\Libs\FeedMgr;
 use App\Libs\UserMgr;
 use App\Models\Setting;
 use App\Models\Timeline;
 use App\Models\Fanledger;
 use App\Models\Mediafile;
-use App\Models\Mycontact;
 
+use App\Models\Mycontact;
 use App\Enums\PostTypeEnum;
 use App\Models\Subscription;
-use Illuminate\Http\Request;
 
+use Illuminate\Http\Request;
 use App\Enums\PaymentTypeEnum;
 use App\Enums\MediafileTypeEnum;
 use App\Payments\PaymentGateway;
 use App\Models\Financial\Account;
 use App\Notifications\TipReceived;
-use Illuminate\Support\Collection;
 
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use App\Models\Financial\SegpayCall;
 use App\Http\Resources\PostCollection;
@@ -340,7 +341,18 @@ class TimelinesController extends AppBaseController
         $account = Account::with('resource')->find($request->account_id);
         $this->authorize('purchase', $account);
 
-        return $paymentGateway->tip($account, $timeline, $price);
+        $tip = Tip::create([
+            'sender_id'       => $request->user()->getKey(),
+            'receiver_id'     => $timeline->getOwner()->first()->getKey(),
+            'account_id'      => $account->getKey(),
+            'currency'        => $request->currency,
+            'amount'          => $request->amount,
+            'period'          => $request->period ?? 'single',
+            'period_interval' => $request->period_interval ?? 1,
+            'message'         => $request->message ?? null,
+        ]);
+
+        return $paymentGateway->tip($account, $tip, $price);
     }
 
     // Display my home scheduled timeline
