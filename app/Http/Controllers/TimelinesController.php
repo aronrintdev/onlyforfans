@@ -6,6 +6,7 @@ use Auth;
 use Exception;
 use Throwable;
 use Carbon\Carbon;
+
 use App\Models\Post;
 use App\Models\User;
 use App\Libs\FeedMgr;
@@ -382,9 +383,13 @@ class TimelinesController extends AppBaseController
     public function myFollowedStories(Request $request)
     {
         // %TODO: split *stories* within timeline into seen and unseen?
-        $query = Timeline::with('stories.mediafiles')
-                         ->whereIn('id', $request->user()->followedtimelines->pluck('id'));
-        $query->orderBy('created_at', 'desc');
+        $query = Timeline::with(['stories' => function($q1) {
+            $q1->orderBy('created_at', 'desc');
+        }]);
+        $query->with('stories.mediafiles');
+        //$query = Timeline::with('stories.mediafiles');
+        $query->whereIn('id', $request->user()->followedtimelines->pluck('id'));
+        //$query->orderBy('created_at', 'desc');
         $data = $query->get();
         return new TimelineCollection($data);
     }

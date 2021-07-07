@@ -34,6 +34,7 @@ class Kernel extends ConsoleKernel
         \App\Console\Commands\PopulateContacts::class,
         \App\Console\Commands\PushTestEvent::class,
         \App\Console\Commands\SetmfSize::class,
+        \App\Console\Commands\SetTimestamps::class,
     ];
 
     /**
