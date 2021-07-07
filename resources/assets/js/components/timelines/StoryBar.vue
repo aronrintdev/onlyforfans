@@ -10,13 +10,6 @@
         </div>
       </div>
 
-      <!-- My stories avatar -->
-      <div class="ml-3 pr-3 mb-3 story my-story">
-        <router-link :to="{ name: 'stories.player', query: { timeline: 'me' } }" class="box-story">
-          <b-img v-b-popover.hover.top="{variant: 'info', content: 'My stories'}" rounded="circle" class="p-0" :src="session_user.avatar.filepath" alt="My avatar" />
-        </router-link>
-      </div>
-
       <!-- Followed creators' stories avatar -->
       <div v-for="tl in timelines" :key="tl.id" class="ml-3 mb-3 story">
         <router-link :to="{ name: 'stories.player', params: { timeline_id: tl.id } }" class="box-story">
@@ -178,9 +171,6 @@ export default {
 $size: 40px;
 $margin: 16px;
 .crate {
-  .my-story {
-    border-right: solid 2px #3a3a3a;
-  }
   .story {
     margin-left: $margin / 2;
     margin-right: $margin / 2;
