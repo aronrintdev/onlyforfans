@@ -81,7 +81,7 @@ export default {
   mounted() {
     this.scheduleDatetimeTimer = setInterval(() => {
       this.scheduleDatetimeKey = moment.utc(this.post.schedule_datetime).diff(moment.utc(), 'minutes');
-      if (this.scheduleDatetimeKey < 1) {
+      if (this.scheduleDatetimeKey < 0) {
         eventBus.$emit('update-posts', this.post.id);
         clearInterval(this.scheduleDatetimeTimer);
       }
