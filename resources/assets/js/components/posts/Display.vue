@@ -25,6 +25,10 @@
                 <fa-icon icon="trash" fixed-width class="mr-2" />
                 Delete
               </b-dropdown-item>
+              <b-dropdown-item @click="showCopyToClipboardModal = true">
+                <fa-icon :icon="['fa', 'link']" fixed-width class="mr-2" />
+                Copy link
+              </b-dropdown-item>
             </b-dropdown>
           </div>
           <div @click="renderFull" v-if="is_feed" class="p-2 btn">
@@ -66,6 +70,31 @@
           </b-btn>
           <b-btn class="px-3" variant="danger" @click="deletePost">
             {{ $t('delete.confirmation.ok') }}
+          </b-btn>
+        </div>
+      </template>
+    </b-modal>
+    <b-modal
+      v-model="showCopyToClipboardModal"
+      size="md"
+    >
+      <template #modal-title>
+        {{ $t('copytoclipboard.title') }}
+      </template>
+      <div class="my-2 text-left" v-text="postFullUrl" />
+      <template #modal-footer>
+        <div class="text-right">
+          <b-btn class="px-3 mr-1" variant="secondary" @click="showCopyToClipboardModal=false">
+            {{ $t('copytoclipboard.cancel') }}
+          </b-btn>
+          <b-btn
+            class="px-3"
+            variant="primary"
+            v-clipboard:copy="postFullUrl"
+            v-clipboard:success="onCopySuccess"
+            v-clipboard:error="onCopyError"
+          >
+            {{ $t('copytoclipboard.ok') }}
           </b-btn>
         </div>
       </template>
@@ -113,10 +142,14 @@ export default {
     expireFromNow() {
       return moment.utc(this.post.expire_at).local().fromNow(true);
     },
+    postFullUrl() {
+      return `${window.location.origin}/posts/${this.post.slug}`;
+    }
   },
 
   data: () => ({
     showDeleteConfirmation: false,
+    showCopyToClipboardModal: false,
   }),
 
   mounted() { },
@@ -147,6 +180,14 @@ export default {
       }
       this.$emit('delete-post', this.post.id)
     },
+    onCopySuccess() {
+      alert("Copy to Clipboard has been succeed");
+      this.showCopyToClipboardModal = false;
+    },
+    onCopyError() {
+      this.showCopyToClipboardModal = false;
+      alert("Copy to Clipboard has been failed. Please try again later.");
+    }
   },
 
   watch: { },
@@ -219,6 +260,11 @@ ul {
         "ok": "Delete Post",
         "cancel": "Cancel"
       }
+    },
+    "copytoclipboard": {
+      "title": "Copy link of the post",
+      "ok": "Copy",
+      "cancel": "Cancel"
     }
   }
 }
