@@ -253,6 +253,28 @@ class Tip extends Model implements Messagable
     /* ---------------------------------------------------------------------- */
 
     /* ---------------------------------------------------------------------- */
+    /*                               Messagable                               */
+    /* ---------------------------------------------------------------------- */
+    #region Messagable
+
+    public function getMessagableArray(): array
+    {
+        return [
+            'id'        => $this->id,
+            'type'      => 'tip',
+            'amount'    => $this->amount,
+            'message'   => $this->message,
+            'sender'    => $this->sender,
+            'receiver'  => $this->receiver,
+            'item'      => $this->tippable,
+            'item_type' => $this->tippable ? $this->tippable->getMorphString() : null,
+        ];
+    }
+
+    #endregion Messagable
+    /* ---------------------------------------------------------------------- */
+
+    /* ---------------------------------------------------------------------- */
     /*                              Verifications                             */
     /* ---------------------------------------------------------------------- */
     #region Verifications

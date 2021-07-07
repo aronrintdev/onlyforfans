@@ -8,5 +8,5 @@ namespace App\Interfaces;
  */
 interface Messagable
 {
-    //
+    public function getMessagableArray(): array;
 }

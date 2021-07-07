@@ -362,12 +362,15 @@ class TimelinesController extends AppBaseController
         $tip = Tip::create([
             'sender_id'       => $request->user()->getKey(),
             'receiver_id'     => $timeline->getOwner()->first()->getKey(),
+            'tippable_type'   => $timeline->getMorphString(),
+            'tippable_id'     => $timeline->getKey(),
             'account_id'      => $account->getKey(),
             'currency'        => $request->currency,
             'amount'          => $request->amount,
             'period'          => $request->period ?? 'single',
             'period_interval' => $request->period_interval ?? 1,
             'message'         => $request->message ?? null,
+
         ]);
 
         return $paymentGateway->tip($account, $tip, $price);

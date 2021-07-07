@@ -235,6 +235,8 @@ class PostsController extends AppBaseController
         $tip = Tip::create([
             'sender_id'       => $request->user()->getKey(),
             'receiver_id'     => $post->getOwner()->first()->getKey(),
+            'tippable_type'   => $post->getMorphString(),
+            'tippable_id'     => $post->getKey(),
             'account_id'      => $account->getKey(),
             'currency'        => $request->currency,
             'amount'          => $request->amount,
