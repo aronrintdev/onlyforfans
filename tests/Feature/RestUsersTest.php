@@ -10,6 +10,7 @@ use Tests\TestCase;
 use Database\Seeders\TestDatabaseSeeder;
 use App\Models\Timeline;
 use App\Models\User;
+use Lunaweb\RecaptchaV3\Facades\RecaptchaV3;
 
 class RestUsersTest extends TestCase
 {
@@ -72,11 +73,13 @@ class RestUsersTest extends TestCase
     public function test_user_can_login()
     {
         $user = User::first();
-        $payload = [ 'email' => $user->email, 'password' => 'foo-123' ];
-        $payload['g-recaptcha-response'] = 'foo';
+        $test_token = 'test';
+        RecaptchaV3::shouldReceive('verify')
+            ->with($test_token, 'login')
+            ->once()
+            ->andReturn(0.5);
+        $payload = [ 'email' => $user->email, 'password' => 'foo-123', 'g-recaptcha-response' => $test_token];
         $response = $this->ajaxJSON('POST', '/login', $payload);
-        $content = json_decode($response->content());
-        //dd($content);
         $response->assertStatus(200);
     }
 
@@ -89,7 +92,12 @@ class RestUsersTest extends TestCase
     public function test_user_cant_login_with_wrong_credientials()
     {
         $user = User::first();
-        $payload = [ 'email' => $user->email, 'password' => 'blahblah' ];
+        $test_token = 'test';
+        RecaptchaV3::shouldReceive('verify')
+            ->with($test_token, 'login')
+            ->once()
+            ->andReturn(0.5);
+        $payload = [ 'email' => $user->email, 'password' => 'blahblah', 'g-recaptcha-response' => $test_token];
         $response = $this->ajaxJSON('POST', '/login', $payload);
         $response->assertUnauthorized(); // 401
     }
@@ -114,12 +122,22 @@ class RestUsersTest extends TestCase
         Auth::logout();
 
         // Test login with old password
-        $payload = [ 'email' => $creator->email, 'password' => $oldPassword ];
+        $test_token = 'test';
+        RecaptchaV3::shouldReceive('verify')
+            ->with($test_token, 'login')
+            ->once()
+            ->andReturn(0.5);
+        $payload = [ 'email' => $creator->email, 'password' => $oldPassword, 'g-recaptcha-response' => $test_token ];
         $response = $this->ajaxJSON('POST', '/login', $payload);
         $response->assertUnauthorized(); // 401
 
         // Test login with new password
-        $payload = [ 'email' => $creator->email, 'password' => $newPassword ];
+        $test_token = 'test2';
+        RecaptchaV3::shouldReceive('verify')
+            ->with($test_token, 'login')
+            ->once()
+            ->andReturn(0.5);
+        $payload = [ 'email' => $creator->email, 'password' => $newPassword, 'g-recaptcha-response' => $test_token ];
         $response = $this->ajaxJSON('POST', '/login', $payload);
         $response->assertStatus(200);
     }

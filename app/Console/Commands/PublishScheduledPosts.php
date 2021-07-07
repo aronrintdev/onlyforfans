@@ -39,7 +39,9 @@ class PublishScheduledPosts extends Command
      */
     public function handle()
     {
-        $posts = POST::whereDate('schedule_datetime', '=', Carbon::now('UTC')->toDateString())->get();
+        $posts = POST::whereDate('schedule_datetime', '=', Carbon::now('UTC')->toDateString())
+                    ->whereTime('schedule_datetime', '=', Carbon::now('UTC')->format('H:i').':00')
+                    ->get();
         if ($posts !== null) {
             $posts->each(function($post) {
                 $post->schedule_datetime = null;
