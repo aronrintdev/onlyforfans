@@ -116,7 +116,9 @@ export default {
       this.price = this.post.price
       this.priceForPaidSubscribers = this.post.price_for_subscribers
       // this.currency = this.post.currency
-      this.schedule_datetime = moment.utc(this.post.schedule_datetime)
+      if (this.post.schedule_datetime) {
+        this.schedule_datetime = moment.utc(this.post.schedule_datetime)
+      }
     },
     discard(e) {
       this.exit()
