@@ -16,6 +16,7 @@ use App\Enums\SubscriptionPeriodEnum;
 use App\Enums\Financial\AccountTypeEnum;
 use App\Models\Casts\Money as CastsMoney;
 use App\Enums\Financial\TransactionTypeEnum;
+use App\Events\ItemTipped;
 use App\Models\Financial\Traits\HasCurrency;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -219,6 +220,10 @@ class Tip extends Model implements Messagable
             Log::warning('Tip->process()::sendMessage().broadcast Failed', [
                 'msg' => $e->getMessage(),
             ]);
+        }
+
+        if (isset($this->tippable)) {
+            ItemTipped::dispatch($this->tippable, $this->sender);
         }
 
         return $transactions;
