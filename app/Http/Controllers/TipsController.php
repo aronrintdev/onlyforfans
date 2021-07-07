@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Helpers\Tippable;
+use App\Helpers\Tippable as TippableHelper;
 use App\Models\Financial\Account;
 use App\Models\Tip;
 use App\Payments\PaymentGateway;
@@ -39,7 +39,7 @@ class TipsController extends Controller
         ]);
 
         if ($request->has('tippable_id')) {
-            $tippableItem = Tippable::getTippableItem($request->tippable_id);
+            $tippableItem = TippableHelper::getTippableItem($request->tippable_id);
             if (!isset($tippableItem)) {
                 abort(422, 'tippable_id not found');
             }
@@ -126,7 +126,7 @@ class TipsController extends Controller
             abort('422', 'Account does not exist');
         }
 
-        return $paymentGateway->tip($account, $tip->tippable, $tip->amount);
+        return $paymentGateway->tip($account, $tip, $tip->amount);
     }
 
 
