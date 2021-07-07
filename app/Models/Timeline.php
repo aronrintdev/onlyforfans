@@ -341,4 +341,10 @@ class Timeline extends Model implements Subscribable, Tippable, Reportable
         return $this->user;
     }
 
+    public function getLatestStory() : ?Story
+    {
+        $stories = Story::select(['id','slug','created_at'])->where('timeline_id', $this->id)->orderBy('created_at', 'desc')->get();
+        return ($stories->count()>0) ? $stories[0] : null;
+    }
+
 }

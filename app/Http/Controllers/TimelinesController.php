@@ -6,6 +6,7 @@ use Auth;
 use Exception;
 use Throwable;
 use Carbon\Carbon;
+
 use App\Models\Post;
 use App\Models\User;
 use App\Libs\FeedMgr;
@@ -381,20 +382,57 @@ class TimelinesController extends AppBaseController
     // returns a list of stories grouped by followed timeline (ignores timeline if it has no active stories)
     public function myFollowedStories(Request $request)
     {
+        $followingIds = $request->user()->followedtimelines->pluck('id');
+
         // %TODO: split *stories* within timeline into seen and unseen?
-        $query = Timeline::with('stories.mediafiles')
-                         ->whereIn('id', $request->user()->followedtimelines->pluck('id'));
-        $query->orderBy('created_at', 'desc');
-        $data = $query->get();
+        $queryF = Timeline::has('stories')->with([
+            'stories' => function($q1) {
+                $q1->orderBy('created_at', 'desc'); // sort stories relation by latest
+            }, 
+            'stories.mediafiles',
+            'avatar'
+        ]);
+        $queryF->whereIn('id', $followingIds);
+        $following = $queryF->get();
+        $following = $following->sortByDesc( function($t) {
+            return $t->getLatestStory()->created_at; // sort timelines by latest story
+        });
+
+        // Prepend my stories so my avatar is always first
+        $queryMe = Timeline::where('user_id', $request->user()->id);
+        $queryMe = $queryMe->with([
+            'stories' => function($q1) {
+                $q1->orderBy('created_at', 'desc'); // sort stories relation by latest
+            }, 
+            'stories.mediafiles',
+            'avatar'
+        ]);
+        $me = $queryMe->first();
+
+        $following->prepend($me);
+        $data = $following->values()->all();
+
         return new TimelineCollection($data);
     }
 
     // same as above except just mine
     public function myStories(Request $request)
     {
+        /*
         // %TODO: split *stories* within timeline into seen and unseen?
         $query = Timeline::where('user_id', $request->user()->id);
         $query->orderBy('created_at', 'desc');
+        $data = $query->get();
+        return new TimelineCollection($data);
+         */
+        $query = Timeline::where('user_id', $request->user()->id);
+        $query = $query->with([
+            'stories' => function($q1) {
+                $q1->orderBy('created_at', 'desc'); // sort stories relation by latest
+            }, 
+            'stories.mediafiles',
+            'avatar'
+        ]);
         $data = $query->get();
         return new TimelineCollection($data);
     }

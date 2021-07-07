@@ -1,6 +1,7 @@
 <?php
 namespace Database\Seeders;
 
+use App;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Database\Seeder as ParentSeeder;
@@ -13,8 +14,9 @@ class TestDatabaseSeeder extends ParentSeeder
 
     public function run()
     {
+        throw new \Excetion('DEPRECATED - use DatabaseSeeder instead');
         $output = new ConsoleOutput();
-        //$output->writeln('Running Test DB seeder...');
+        $output->writeln('Running Test DB seeder...');
 
         $this->call([
             CountriesTableSeeder::class,

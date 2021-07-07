@@ -4,6 +4,7 @@ namespace Database\Seeders;
 use Illuminate\Support\Facades\DB;
 use App\Libs\FactoryHelpers;
 use App\Models\Notification;
+use App\Models\Timeline;
 use App\Models\Post;
 use App\Models\Comment;
 use App\Models\Likeable;
@@ -16,6 +17,28 @@ class RandomTimestampSeeder extends Seeder
     public function run()
     {
         $this->initSeederTraits('RandomTimestampSeeder'); // $this->{output, faker, appEnv}
+
+        // [timelines]
+        $timelines = Timeline::get();
+        $max = $timelines->count();
+        $timelines->each( function($t) use($max) {
+            static $iter = 1;
+            $this->output->writeln("  - Updating timelines timestamps $iter / $max");
+            $ts = $this->faker->dateTimeBetween($startDate = '-5 years', $endDate = '-1 years');
+            $t->created_at = $ts;
+            $t->updated_at = $ts;
+            $t->save();
+
+            // [stories]
+            $this->output->writeln("    ~ Updating timeline's stories ...");
+            $t->stories->each( function($s) use($ts) {
+                $ts2 = $this->faker->dateTimeBetween($ts, $endDate = 'now');
+                $s->created_at = $ts2;
+                $s->updated_at = $ts2;
+                $s->save();
+            });
+            $iter++;
+        });
 
         // [notifications]
         $notifications = Notification::get();

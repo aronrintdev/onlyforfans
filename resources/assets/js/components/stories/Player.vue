@@ -11,7 +11,7 @@
           <b-form-checkbox v-model="play">Auto Play</b-form-checkbox>
         </div>
         <ul class="tag-debug">
-          <li>story index: {{currentIndex+1}}/{{renderedStories.length}}</li>
+          <li>story index: {{currentIndex+1}}/{{stories.length}}</li>
           <li>current story ID: {{currentStory.id}}</li>
         </ul>
       </div>
@@ -22,12 +22,12 @@
         <div class="position-relative">
 
           <nav :style="cssNav" class="m-0">
-            <div v-for="(s, iter) in renderedStories" :key="`header-${s.id}`" class="cursor-pointer" @click="goTo(iter)">
+            <div v-for="(s, iter) in stories" :key="`header-${s.id}`" class="cursor-pointer" @click="goTo(iter)">
               <div class="tag-target" :ref="`nav-${s.id}`" />
             </div>
           </nav>
 
-          <section v-for="(s, iter) in renderedStories" :key="`story-${s.id}`">
+          <section v-for="(s, iter) in stories" :key="`story-${s.id}`">
             <article v-if="currentIndex==iter" :style="cssDisplay" class="display-area">
 
               <div class="tag-creator d-flex align-items-center">
@@ -49,10 +49,10 @@
               <div class="bg-blur"></div>
 
               <div v-touch:swipe.top="handleSwipeUp" class="crate-content">
-                <article v-if="s.stype === 'text'" class="h-100 v-wrap">
-                  <p class="h4 text-center v-box">{{ s.content }}</p>
+                <article v-if="s.stype==='text'" class="h-100 v-wrap">
+                  <p class="h4 text-center v-box text-white w-75">{{ s.content }}</p>
                 </article>
-                <article v-else-if="s.stype === 'image' && s.mediafiles" class="h-100">
+                <article v-else-if="s.stype==='image' && s.mediafiles" class="h-100">
                   <img :src="s.mediafiles[0].filepath" class="OFF-img-fluid OFF-h-100" />
                   <see-more v-if="s.swipe_up_link" :link="s.swipe_up_link"></see-more>
                 </article>
@@ -124,24 +124,26 @@ export default {
       return {
         //'--bg-color': this.bgColor,
         //'--height': this.height + 'px',
-        '--grid-template-columns': `repeat(${this.renderedStories.length}, 1fr)`,
+        '--grid-template-columns': `repeat(${this.stories.length}, 1fr)`,
       }
     },
     cssDisplay() {
-      //console.log ('renderedStories', { renderedStories: this.renderedStories })
-      if (this.renderedStories.length && this.renderedStories[0].mediafiles && this.renderedStories[this.currentIndex].mediafiles[0]) {
+      //console.log ('stories', { stories: this.stories })
+      if (this.stories.length && this.stories[0].mediafiles && this.stories[this.currentIndex].mediafiles[0]) {
         return {
-          '--background-image': `url(${this.renderedStories[this.currentIndex].mediafiles[0].filepath})`,
+          '--background-image': `url(${this.stories[this.currentIndex].mediafiles[0].filepath})`,
         }
       }
       return {}
     },
-    renderedStories() {
+    /*
+    stories() {
       if (this.stories.length > this.maxStories) {
         return _.slice(this.stories, 0, this.maxStories)
       }
       return this.stories
     },
+     */
 
     currentStory() {
       return this.stories.length ? this.stories[this.currentIndex] : null
@@ -151,7 +153,7 @@ export default {
 
   methods: {
     doNav(direction) {
-      console.log(`doNav() - ${direction} - ${this.currentIndex+1}/${this.stories.length}`)
+      console.log(`doNav() - ${direction}, index=${this.currentIndex} - ${this.currentIndex+1}/${this.stories.length}`)
       switch (direction) {
         case 'previous':
           if ( (this.currentIndex-1) < 0 ) {
@@ -160,6 +162,7 @@ export default {
             this.currentIndex = 0
           } else {
             this.goTo(this.currentIndex - 1)
+            console.log(`doNav() - decrement index`)
           }
           break
         case 'next':
@@ -168,21 +171,37 @@ export default {
             this.$emit('next-story-timeline', { foo: 'bar'} )
             this.currentIndex = 0
           } else {
+            console.log(`doNav() - increment index`)
             this.goTo(this.currentIndex + 1)
           }
           break
       }
     },
 
+    // sets this.currentIndex
     goTo(index) {
       this.timelineAnimation.pause()
 
+      console.log(`goTo() - index = ${index}`)
+      if ( index < 0 ) {
+        console.log(`goTo() - min out`)
+        this.currentIndex = 0 // min out at first index
+      } else if ( index >= this.stories.length ) {
+        console.log(`goTo() - max out`)
+        this.currentIndex = this.stories.length-1 // max out at last index
+      } else {
+        console.log(`goTo() - assign`)
+        this.currentIndex = index
+      }
+        /*
       index = index < 0
-        ? this.renderedStories.length - 1
-        : index >= this.renderedStories.length
+        ? this.stories.length - 1
+        : index >= this.stories.length
         ? 0
         : index
       this.currentIndex = index
+         */
+
       this.timelineAnimation.seek(this.getTimelineSeek(index))
 
       if (this.play) {
@@ -191,11 +210,11 @@ export default {
     },
 
     getTimelineSeek(index) {
-      return (index / this.renderedStories.length) * this.timelineAnimation.duration
+      return (index / this.stories.length) * this.timelineAnimation.duration
     },
 
     addTimelineElements() {
-      this.renderedStories.forEach((story, index) => {
+      this.stories.forEach((story, index) => {
         this.timelineAnimation.add({
           targets: this.$refs[`nav-${story.id}`][0],
           width: '100%',
@@ -222,13 +241,13 @@ export default {
     removeTimeline() {
       this.timelineAnimation.pause()
       this.timelineAnimation.restart()
-      this.renderedStories.forEach((story, index) => {
+      this.stories.forEach((story, index) => {
         this.timelineAnimation.remove(this.$refs[`nav-${story.id}`][0])
       })
     },
 
     handleSwipeUp() {
-      const link = this.renderedStories[this.currentIndex].swipe_up_link
+      const link = this.stories[this.currentIndex].swipe_up_link
       if (link) {
         this.$emit('open-see-more-link')
       }
@@ -237,6 +256,7 @@ export default {
 
   watch: {
     play(value) {
+      console.log('=== watch play()')
       if (value) {
         this.timelineAnimation.play()
       } else {
@@ -244,6 +264,7 @@ export default {
       }
     },
     speed() {
+      console.log('=== watch speed()')
       const progress = this.timelineAnimation.currentTime / this.timelineAnimation.duration
       this.removeTimeline()
       this.createTimeline()
@@ -256,6 +277,7 @@ export default {
   },
 
   mounted() {
+    console.log('=== mounted()')
     this.createTimeline()
   },
 }

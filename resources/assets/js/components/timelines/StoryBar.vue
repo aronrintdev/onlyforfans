@@ -1,22 +1,28 @@
 <template>
   <div v-if="!isLoading" class="crate tag-crate crate-story_bar row OFF-mb-3 mx-0">
     <section class="d-flex flex-wrap justify-content-start w-100">
+
+      <!-- Add to story icon form -->
       <div class="story">
         <b-form-file @change="handleDiskSelect" ref="fileInput" v-model="fileInput" class="d-none"></b-form-file>
         <div @click="isSelectFileModalVisible=true">
           <fa-icon class="mt-1" :icon="['far', 'plus-circle']" size="2x" />
         </div>
       </div>
-      <div class="ml-3 pr-3 mb-3 story my-story">
-        <router-link :to="{ name: 'stories.player', query: { timeline: 'me' } }" class="box-story">
-          <b-img rounded="circle" class="p-0" :src="session_user.avatar.filepath" alt="My avatar" />
-        </router-link>
-      </div>
+
+      <!-- Followed creators' stories avatar -->
       <div v-for="tl in timelines" :key="tl.id" class="ml-3 mb-3 story">
-        <router-link :to="{ name: 'stories.player' }" class="box-story">
-          <b-img rounded="circle" class="p-0" :src="tl.avatar.filepath" alt="Story owner's avatar" />
+        <router-link :to="{ name: 'stories.player', params: { timeline_id: tl.id } }" class="box-story">
+          <b-img v-b-popover.hover.top="{variant: 'info', content: tl.slug}" rounded="circle" class="p-0" :src="tl.avatar.filepath" alt="Story owner's avatar" />
         </router-link>
+        <!--
+        <div>
+          <pre>{{ tl.slug }}</pre>
+          <pre>{{ JSON.stringify(tl.stories.map( s => ({ id: s.id, slug: s.slug, created: s.created_at }) )[0], null, 2) }}</pre>
+        </div>
+        -->
       </div>
+
     </section>
 
     <!-- Modal for selecting file from disk vs vault -->
@@ -118,6 +124,12 @@ export default {
       this.isPreviewModalVisible = false
       this.isSelectFileModalVisible = false
       this.fileInput = null // form input
+
+      this.$root.$bvToast.toast('Story successfully uploaded!', {
+        toaster: 'b-toaster-top-center',
+        title: 'Success',
+        variant: 'success',
+      })
     },
 
     bgColor(story) {
@@ -159,9 +171,6 @@ export default {
 $size: 40px;
 $margin: 16px;
 .crate {
-  .my-story {
-    border-right: solid 2px #3a3a3a;
-  }
   .story {
     margin-left: $margin / 2;
     margin-right: $margin / 2;
