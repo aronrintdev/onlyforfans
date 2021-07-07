@@ -383,14 +383,13 @@ class TimelinesController extends AppBaseController
     public function myFollowedStories(Request $request)
     {
         // %TODO: split *stories* within timeline into seen and unseen?
-        $query = Timeline::with(['stories' => function($q1) {
-            $q1->orderBy('created_at', 'desc');
-        }]);
-        $query->with('stories.mediafiles');
         //$query = Timeline::with('stories.mediafiles');
+        $query = Timeline::has('stories')->with(['stories.mediafiles', 'avatar']);
         $query->whereIn('id', $request->user()->followedtimelines->pluck('id'));
-        //$query->orderBy('created_at', 'desc');
         $data = $query->get();
+        $data = $data->sortByDesc( function($t) {
+            return $t->getLatestStory()->created_at;
+        })->values()->all();
         return new TimelineCollection($data);
     }
 
