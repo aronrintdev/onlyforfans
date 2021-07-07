@@ -7,7 +7,7 @@
       @input="changeActiveTab"
     >
       <b-tab title="Home" active>
-        <section class="row">
+        <section class="row mb-2">
           <article class="col-sm-12">
             <StoryBar :session_user="session_user"></StoryBar>
           </article>
