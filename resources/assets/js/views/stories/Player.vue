@@ -73,12 +73,13 @@ export default {
   },
 
   created() {
-    console.log('views/stories/Player::created()')
     if ( this.$route.query.timeline && this.$route.query.timeline === 'me' ) {
+      console.log('views/stories/Player::created() - me')
       const response = axios.get( this.$apiRoute('timelines.myStories')).then ( response => {
         this.timelines = response.data.data
       })
     } else {
+      console.log('views/stories/Player::created() - following')
       const response = axios.get( this.$apiRoute('timelines.myFollowedStories')).then ( response => {
         this.timelines = response.data.data
       })

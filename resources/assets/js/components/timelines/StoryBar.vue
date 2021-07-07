@@ -118,6 +118,12 @@ export default {
       this.isPreviewModalVisible = false
       this.isSelectFileModalVisible = false
       this.fileInput = null // form input
+
+      this.$root.$bvToast.toast('Story successfully uploaded!', {
+        toaster: 'b-toaster-top-center',
+        title: 'Success',
+        variant: 'success',
+      })
     },
 
     bgColor(story) {
@@ -137,6 +143,8 @@ export default {
      */
     // %NOTE: we don't really need the stories here, just the timelines that have stories 
     const response = axios.get( this.$apiRoute('timelines.myFollowedStories')).then ( response => {
+      //this.timelines = response.data.data
+      console.log(response.data)
       this.timelines = response.data.data
     })
     if ( this.$route.params.toast ) {
