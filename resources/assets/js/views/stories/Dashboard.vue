@@ -7,9 +7,6 @@
 </template>
 
 <script>
-/**
- * Stories Dashboard View
- */
 import Wizard from '@components/stories/Wizard'
 
 export default {

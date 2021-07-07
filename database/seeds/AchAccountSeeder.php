@@ -19,6 +19,10 @@ class AchAccountSeeder extends Seeder
     public function run()
     {
         $this->initSeederTraits('PaymentMethodsSeeder');
+        if ($this->appEnv === 'testing') {
+            $this->output->writeln("  - SKIPPING for test env due to 'locked' issue");
+            return; // %FIXME
+        }
 
         $userCount = User::count();
         $iter = 1;

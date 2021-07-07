@@ -17,7 +17,7 @@ use App\Enums\ShareableAccessLevelEnum;
 use App\Events\AccessGranted;
 use App\Events\AccessRevoked;
 use App\Events\ItemPurchased;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+//use Illuminate\Foundation\Testing\RefreshDatabase;
 use RuntimeException;
 
 /**
@@ -31,7 +31,7 @@ use RuntimeException;
  */
 class PurchaseableTest extends TestCase
 {
-    use RefreshDatabase;
+    //use RefreshDatabase;
 
     /* ------------------------------- Posts -------------------------------- */
     #region Posts

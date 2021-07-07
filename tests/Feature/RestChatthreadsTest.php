@@ -4,7 +4,7 @@ namespace Tests\Feature;
 use Carbon\Carbon;
 use DB;
 use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+//use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Http\File;
 use Illuminate\Support\Facades\Storage;
@@ -22,11 +22,12 @@ use App\Models\Chatmessage;
 
 class RestChatthreadsTest extends TestCase
 {
-    use RefreshDatabase, WithFaker;
+    use WithFaker;
 
     /**
      *  @group chatthreads
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_list_chatthreads()
     {
@@ -69,6 +70,7 @@ class RestChatthreadsTest extends TestCase
     /**
      *  @group chatthreads
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_list_chatthreads_for_single_participant()
     {
@@ -96,6 +98,7 @@ class RestChatthreadsTest extends TestCase
     /**
      *  @group chatthreads
      *  @group regression
+     *  @group regression-base
      *  @group OFF-here0601
      */
     public function test_can_list_sorted_chatthreads()
@@ -133,6 +136,7 @@ class RestChatthreadsTest extends TestCase
     /**
      *  @group FIXME-chatthreads
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_list_filtered_chatthreads()
     {
@@ -156,6 +160,7 @@ class RestChatthreadsTest extends TestCase
     /**
      *  @group chatthreads
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_get_total_unread_message_count()
     {
@@ -174,6 +179,7 @@ class RestChatthreadsTest extends TestCase
     /**
      *  @group chatthreads
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_mark_all_messages_read_for_a_user()
     {
@@ -194,6 +200,7 @@ class RestChatthreadsTest extends TestCase
     /**
      *  @group chatthreads
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_mark_messages_read_for_a_thread()
     {
@@ -214,6 +221,7 @@ class RestChatthreadsTest extends TestCase
     /**
      *  @group chatthreads
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_toggle_mute_status_for_a_thread()
     {
@@ -238,6 +246,7 @@ class RestChatthreadsTest extends TestCase
     /**
      *  @group chatthreads
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_get_mute_status_for_a_thread()
     {
@@ -257,6 +266,7 @@ class RestChatthreadsTest extends TestCase
     /**
      *  @group chatthreads
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_create_chat_thread_with_selected_participants()
     {
@@ -281,6 +291,7 @@ class RestChatthreadsTest extends TestCase
     /**
      *  @group chatthreads
      *  @group regression
+     *  @group regression-base
      */
     public function test_should_create_thread_with_originator_plus_single_recipient_and_send_message()
     {
@@ -349,6 +360,7 @@ class RestChatthreadsTest extends TestCase
     /**
      *  @group chatthreads
      *  @group regression
+     *  @group regression-base
      */
     public function test_should_create_multiple_threads_with_originator_on_all_and_single_recipient_per_and_send_message()
     {
@@ -360,10 +372,10 @@ class RestChatthreadsTest extends TestCase
 
         // create chat
         $originator = User::doesntHave('chatthreads')->firstOrFail();
-
-        $recipients = User::doesntHave('chatthreads')->where('id', '<>', $originator->id)->take($MAX)->get();
-        $this->assertGreaterThan(0, $recipients->count());
-        $this->assertEquals( $MAX, $recipients->count() );
+        $recipients = User::where('id', '<>', $originator->id)->take($MAX)->get();
+        $this->assertGreaterThan(2, $recipients->count());
+        $this->assertLessThanOrEqual( $MAX, $recipients->count() );
+        $numberOfParticipantsExcludingOriginator = $recipients->count();
 
         // --- Create a chatthread ---
 
@@ -380,12 +392,16 @@ class RestChatthreadsTest extends TestCase
         ]);
         //dd($content);
         $response->assertStatus(201);
-        $this->assertEquals( $MAX, count($content->chatthreads) ); // check # of threads created
+        $this->assertEquals( $numberOfParticipantsExcludingOriginator, count($content->chatthreads) ); // check # of threads created
 
         $chatthreads = Chatthread::whereIn('id', collect($content->chatthreads)->pluck('id'))->get();
         $this->assertTrue( $chatthreads->contains($content->chatthreads[0]->id) ); // sanity check
-        $this->assertTrue( $chatthreads->contains($content->chatthreads[1]->id) ); // sanity check
-        $this->assertTrue( $chatthreads->contains($content->chatthreads[2]->id) ); // sanity check
+        if ( count($content->chatthreads) > 1 ) {
+            $this->assertTrue( $chatthreads->contains($content->chatthreads[1]->id) ); // sanity check
+        }
+        if ( count($content->chatthreads) > 2 ) {
+            $this->assertTrue( $chatthreads->contains($content->chatthreads[2]->id) ); // sanity check
+        }
 
         // --- Send messages ---
         $msgs = [];
@@ -460,6 +476,7 @@ class RestChatthreadsTest extends TestCase
     /**
      *  @group chatthreads
      *  @group regression
+     *  @group regression-base
      */
     public function test_should_create_thread_with_included_first_message_content()
     {
@@ -498,6 +515,7 @@ class RestChatthreadsTest extends TestCase
     /**
      *  @group chatthreads
      *  @group regression
+     *  @group regression-base
      */
     public function test_should_create_thread_with_included_first_message_content_pre_scheduled()
     {
@@ -543,6 +561,7 @@ class RestChatthreadsTest extends TestCase
     /**
      *  @group chatthreads
      *  @group regression
+     *  @group regression-base
      */
     public function test_participant_can_view_chatthread()
     {
@@ -572,6 +591,7 @@ class RestChatthreadsTest extends TestCase
     /**
      *  @group chatthreads
      *  @group regression
+     *  @group regression-base
      */
     public function test_nonparticipant_can_not_view_chatthread()
     {
@@ -585,6 +605,7 @@ class RestChatthreadsTest extends TestCase
     /**
      *  @group chatthreads
      *  @group regression
+     *  @group regression-base
      */
     // Test returning messages by both chathreads.show + chatmessages.index w/ filter
     public function test_can_schedule_message()
@@ -681,7 +702,7 @@ class RestChatthreadsTest extends TestCase
     protected function setUp() : void
     {
         parent::setUp();
-        $this->seed(TestDatabaseSeeder::class);
+        //$this->seed(TestDatabaseSeeder::class);
     }
 
     protected function tearDown() : void {
