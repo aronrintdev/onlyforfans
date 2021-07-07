@@ -19,7 +19,7 @@
 
       <!-- Followed creators' stories avatar -->
       <div v-for="tl in timelines" :key="tl.id" class="ml-3 mb-3 story">
-        <router-link :to="{ name: 'stories.player' }" class="box-story">
+        <router-link :to="{ name: 'stories.player', params: { timeline_id: tl.id } }" class="box-story">
           <b-img v-b-popover.hover.top="{variant: 'info', content: tl.slug}" rounded="circle" class="p-0" :src="tl.avatar.filepath" alt="Story owner's avatar" />
         </router-link>
         <!--

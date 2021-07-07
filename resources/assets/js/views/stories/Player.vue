@@ -82,6 +82,9 @@ export default {
       console.log('views/stories/Player::created() - following')
       const response = axios.get( this.$apiRoute('timelines.myFollowedStories')).then ( response => {
         this.timelines = response.data.data
+        if ( this.$route.params.timeline_id ) {
+          this.timelineIndex = this.timelines.findIndex( t => t.id === this.$route.params.timeline_id )
+        }
       })
     }
   },
