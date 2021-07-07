@@ -20,6 +20,7 @@ class TimelinePolicy extends BasePolicy
         'forceDelete' => 'isOwner:pass',
         'follow'      => 'isOwner:pass isBlockedByOwner:fail',
         'like'        => 'isOwner:pass isBlockedByOwner:fail',
+        'tip'         => 'isOwner:fail isBlockedByOwner:fail',
         'favorite'    => 'isOwner:pass isBlockedByOwner:fail',
         'indexStories' => 'isOwner:pass isBlockedByOwner:fail',
     ];
@@ -37,6 +38,11 @@ class TimelinePolicy extends BasePolicy
     protected function like(User $user, Timeline $resource)
     {
         return $resource->followers->contains($user->id);;
+    }
+
+    protected function tip(User $user, Timeline $resource)
+    {
+        return true;
     }
 
     protected function indexStories(User $user, Timeline $resource)
