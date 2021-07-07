@@ -32,22 +32,10 @@ class SetTimestamps extends Command
         $this->info( '%%% Is env local?: '.($isEnvLocal?'true':'false') );
         $this->info( '%%% Is env testing?: '.($isEnvTesting?'true':'false') );
         if ( $dbName !== 'fansplat_dev_test' && !$isEnvTesting ) {
-            //throw new Exception('Environment not in whitelist: '.App::environment());
+            throw new Exception('Environment not in whitelist: '.App::environment());
         }
 
         $model = $userId = $this->argument('model');
-
-        /*
-        $M = "App\\Models\\".$model;
-        $count = $M::count();
-        $this->info( ' - Setting '.$count.' timestamps in model "'.$M.'"...');
-        $objs = $M::get();
-        $objs->each( function($o) {
-            $o->slug = null;
-            $o->save();
-        });
-        //DB::table($t)
-         */
 
         // [timelines]
         $timelines = Timeline::get();
@@ -60,6 +48,7 @@ class SetTimestamps extends Command
             $t->updated_at = $ts;
             $t->save();
 
+            // [stories]
             $this->output->writeln("    ~ Updating timeline's stories ...");
             $t->stories->each( function($s) use($ts) {
                 $ts2 = $this->faker->dateTimeBetween($ts, $endDate = 'now');
@@ -70,7 +59,6 @@ class SetTimestamps extends Command
             $iter++;
         });
 
-        // [stories]
     }
 
 }
