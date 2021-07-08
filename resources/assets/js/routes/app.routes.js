@@ -157,7 +157,7 @@ export const routes = [
   // Posts
   {
     name: 'posts.show',
-    path: '/posts/:slug',
+    path: '/posts/:slug/details',
     component: posts.Show,
     props: true,
   },
