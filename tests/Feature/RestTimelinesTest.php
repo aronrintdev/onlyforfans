@@ -684,14 +684,14 @@ class RestTimelinesTest extends TestCase
         $this->assertDatabaseHas('transactions', [
             'account_id' => $fan->getInternalAccount('segpay', 'USD')->getKey(),
             'debit_amount' => $timeline->price->getAmount(),
-            'purchasable_id' => $timeline->getKey(),
+            'resource_id' => $timeline->getKey(),
         ], 'financial');
 
         // Amount to creator from fan
         $this->assertDatabaseHas('transactions', [
             'account_id' => $creator->getInternalAccount('segpay', 'USD')->getKey(),
             'credit_amount' => $timeline->price->getAmount(),
-            'purchasable_id' => $timeline->getKey(),
+            'resource_id' => $timeline->getKey(),
         ], 'financial');
 
         // Fan has access
