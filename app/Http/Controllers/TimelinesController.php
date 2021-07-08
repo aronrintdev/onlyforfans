@@ -392,7 +392,7 @@ class TimelinesController extends AppBaseController
             'stories.mediafiles',
             'avatar'
         ]);
-        $queryF->whereIn('id', $followingIds);
+        $queryF->whereIn('id', $followingIds); // comment out to test
         $following = $queryF->get();
         $following = $following->sortByDesc( function($t) {
             return $t->getLatestStory()->created_at; // sort timelines by latest story
@@ -418,6 +418,7 @@ class TimelinesController extends AppBaseController
     // same as above except just mine
     public function myStories(Request $request)
     {
+        // %TODO: DEPRECATE
         /*
         // %TODO: split *stories* within timeline into seen and unseen?
         $query = Timeline::where('user_id', $request->user()->id);
