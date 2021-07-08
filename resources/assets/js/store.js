@@ -57,6 +57,7 @@ export default new Vuex.Store({
     uiFlags: [],
     unshifted_timeline_post: null,
     unread_messages_count: 0,
+    queue_metadata: {},
   },
 
   mutations: {
@@ -95,6 +96,9 @@ export default new Vuex.Store({
     },
     UPDATE_FEEDDATA(state, payload) {
       state.feeddata = payload.hasOwnProperty('data') ? payload.data : {}
+    },
+    UPDATE_QUEUE_METADATA(state, payload) {
+      state.queue_metadata = payload.hasOwnProperty('data') ? payload.data.meta : {}
     },
     UPDATE_PREVIEWPOSTS(state, payload) {
       state.previewposts = payload.hasOwnProperty('data') ? payload.data : {}
@@ -208,6 +212,9 @@ export default new Vuex.Store({
           url = isHomefeed ? `/timelines/home/feed` : `/timelines/${timelineId}/feed`
       }
       axios.get(url, { params }).then( (response) => {
+        if (feedType === 'schedule') {
+          commit('UPDATE_QUEUE_METADATA', response);
+        }
         commit('UPDATE_FEEDDATA', response);
       })
     },
@@ -312,6 +319,19 @@ export default new Vuex.Store({
         commit('UPDATE_LOGIN_SESSIONS', response)
       })
     },
+    
+    getQueueMetadata( { commit } ) {
+      const params = {
+        page: 1,
+        take: 5,
+        sortBy: 'latest',
+        hideLocked: false,
+        hidePromotions: false,
+      }
+      axios.get(`/timelines/home/scheduled-feed`, { params }).then( (response) => {
+        commit('UPDATE_QUEUE_METADATA', response);
+      })
+    },
   },
 
   getters: {
@@ -337,6 +357,7 @@ export default new Vuex.Store({
     login_sessions:          state => state.login_sessions,
     uiFlags:                 state => state.uiFlags,
     unread_messages_count:   state => state.unread_messages_count,
+    queue_metadata:          state => state.queue_metadata,
     //children: state => state.vault.children, // Flat list
     //mediafiles: state => state.vault.mediafiles, // Flat list
   },

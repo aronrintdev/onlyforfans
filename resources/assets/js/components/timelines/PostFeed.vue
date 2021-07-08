@@ -193,7 +193,7 @@ export default {
 
     eventBus.$on('update-posts', postId => {
       console.log('components.timelines.PostFeed - eventBus.$on(update-posts)')
-      this.updatePost(postId) 
+      this.updatePost(postId)
     })
 
     eventBus.$on('update-timelines', (timelineId) => {
@@ -303,8 +303,9 @@ export default {
     //   https://vuejs.org/v2/guide/list.html#Array-Change-Detection
     //   https://vuejs.org/v2/guide/reactivity.html#For-Arrays
     async updatePost(postId) {
+      const idx = this.renderedItems.findIndex( ri => ri.id === postId );
+      this.$store.dispatch('getQueueMetadata');
       const response = await axios.get( route('posts.show', postId) );
-      const idx = this.renderedItems.findIndex( ri => ri.id === postId )
       //this.renderedItems[idx] = response.data.data
       this.$set(this.renderedItems, idx, response.data.data)
     },
@@ -347,6 +348,7 @@ export default {
         hideLocked: this.hideLocked, 
         hidePromotions: this.hidePromotions,
       })
+      this.$store.dispatch('getQueueMetadata')
     },
 
     doReset() {
@@ -390,6 +392,7 @@ export default {
         }
       } else {
         if (newVal.schedule_datetime) {
+          this.$store.dispatch('getQueueMetadata');
           if (!this.isLastPage && this.renderedItems.length >= 5) {
             this.renderedItems.pop();
           }
