@@ -14,16 +14,22 @@
       <swiper ref="mySwiper" :options="swiperOptions" class="">
         <swiper-slide v-for="tl in timelines" :key="tl.id" class="story slide tag-followed_timeline">
 
-        <router-link :to="{ name: 'stories.player', params: { timeline_id: tl.id } }" class="box-story">
-          <b-img v-b-popover.hover.top="{variant: 'info', content: tl.slug}" rounded="circle" class="p-0" :src="tl.avatar.filepath" alt="Story owner's avatar" />
-        </router-link>
-        <!--
-        <div>
-          <pre>{{ tl.slug }}</pre>
-          <pre>{{ JSON.stringify(tl.stories.map( s => ({ id: s.id, slug: s.slug, created: s.created_at }) )[0], null, 2) }}</pre>
-        </div>
-        -->
-
+          <router-link :to="{ name: 'stories.player', params: { timeline_id: tl.id } }" class="box-story">
+            <b-img 
+              v-b-popover.hover.top="{variant: 'info', content: tl.slug}" 
+              rounded="circle" 
+              :src="tl.avatar.filepath" 
+              :class="{ 'my-story-avatar': isMyTimeline(tl) }"
+              class="p-0" 
+              alt="Story owner's avatar" 
+            />
+          </router-link>
+          <!--
+          <div>
+            <pre>{{ tl.slug }}</pre>
+            <pre>{{ JSON.stringify(tl.stories.map( s => ({ id: s.id, slug: s.slug, created: s.created_at }) )[0], null, 2) }}</pre>
+          </div>
+          -->
         </swiper-slide>
       </swiper>
 
@@ -67,6 +73,7 @@ export default {
     isLoading() {
       return !this.session_user || !this.timelines
     },
+
   },
 
   data: () => ({
@@ -91,7 +98,7 @@ export default {
     swiperOptions: {
       //lazy: true,
       slidesPerView: 'auto', // 'auto',
-      spaceBetween: 20,
+      spaceBetween: 12,
       //lazy: true,
       //slidesPerView: 'auto',
       //observer: true,
@@ -158,6 +165,10 @@ export default {
         ? story.customAttributes['background-color']
         : 'yellow'
     },
+
+    isMyTimeline(tl) {
+      return this.session_user.id === tl.user.id
+    },
   },
 
   created() {
@@ -204,6 +215,9 @@ body .crate-story_bar {
   .box-story img {
     width: 40px;
     height: 40px;
+  }
+  .box-story img.my-story-avatar {
+    border: solid cyan 2px;
   }
 
   /*
