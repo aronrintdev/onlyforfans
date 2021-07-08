@@ -474,7 +474,7 @@ export default {
         this.$router.replace({ 
           name: 'index', 
           params: {
-            toast: { title: 'New story successfully added!' },
+            toast: { title: 'New story successfully added!', variant: 'success' },
           },
         })
       }
@@ -550,7 +550,7 @@ export default {
       this.isShareFilesModalVisible = false
       this.cancelShareFiles()
       this.clearSelected()
-      this.$root.$bvToast.toast( `Successfully shared ${payload.mediafile_ids.length} files)` )
+      this.$root.$bvToast.toast( `Successfully shared ${payload.mediafile_ids.length} files)`, {toaster: 'b-toaster-top-center', variant: 'success'} )
     },
 
     cancelShareFiles() {
@@ -570,7 +570,7 @@ export default {
       this.isDeleteFilesModalVisible = false
       this.$store.dispatch('getVaultfolder', this.currentFolderId)
       this.clearSelected()
-      this.$root.$bvToast.toast( `Successfully deleted ${payload.mediafile_ids.length} files)` )
+      this.$root.$bvToast.toast( `Successfully deleted ${payload.mediafile_ids.length} files)`, {toaster: 'b-toaster-top-center', variant: 'success'} )
     },
 
     // --- New Vault Folder Form methods ---
@@ -608,7 +608,7 @@ export default {
       this.foldertree = showResponse.data.foldertree || null
       this.$store.dispatch('getVaultfolder', this.currentFolderId)
       this.cancelCreateFolder()
-      this.$root.$bvToast.toast('Successfully created folder')
+      this.$root.$bvToast.toast('Successfully created folder', {toaster: 'b-toaster-top-center', variant: 'success'})
     },
 
     async deleteFolder(e) {
@@ -622,7 +622,7 @@ export default {
       this.$store.dispatch('getVaultfolder', this.currentFolderId)
       this.selectedVfToDelete = null
       this.isDeleteFolderModalVisible = false
-      this.$root.$bvToast.toast( `Deleted folder ( Total of ${deleteResponse.data.number_of_items_deleted} items deleted)` )
+      this.$root.$bvToast.toast( `Deleted folder ( Total of ${deleteResponse.data.number_of_items_deleted} items deleted)`, {toaster: 'b-toaster-top-center', variant: 'success'} )
     },
 
     //getLink(e, mediafileId) {

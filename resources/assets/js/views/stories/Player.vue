@@ -73,16 +73,13 @@ export default {
   },
 
   created() {
-    console.log('views/stories/Player::created()')
-    if ( this.$route.query.timeline && this.$route.query.timeline === 'me' ) {
-      const response = axios.get( this.$apiRoute('timelines.myStories')).then ( response => {
-        this.timelines = response.data.data
-      })
-    } else {
-      const response = axios.get( this.$apiRoute('timelines.myFollowedStories')).then ( response => {
-        this.timelines = response.data.data
-      })
-    }
+    const response = axios.get( this.$apiRoute('timelines.myFollowedStories')).then ( response => {
+      this.timelines = response.data.data
+      // if specific timeline is provided via the route, navigate directly to it, otherwise start from index 0
+      if ( this.$route.params.timeline_id ) {
+        this.timelineIndex = this.timelines.findIndex( t => t.id === this.$route.params.timeline_id )
+      }
+    })
   },
 
   components: {

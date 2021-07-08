@@ -7,7 +7,7 @@
       @input="changeActiveTab"
     >
       <b-tab title="Home" active>
-        <section class="row">
+        <section class="row mb-2">
           <article class="col-sm-12">
             <StoryBar :session_user="session_user"></StoryBar>
           </article>
@@ -27,7 +27,7 @@
           </aside>
         </section>
       </b-tab>
-      <b-tab title="Queue">
+      <b-tab :title="`Queue(${queue_metadata.total? queue_metadata.total : 0})`">
         <section class="row" v-if="activeTab === 1">
           <main :class="mainClass">
             <CreatePost :session_user="session_user" :timeline="timeline" />
@@ -71,6 +71,7 @@ export default {
     ...Vuex.mapGetters([
       'session_user',
       'timeline',
+      'queue_metadata'
     ]),
 
     mainClass() {
@@ -92,6 +93,9 @@ export default {
   }),
 
   created() {
+    // To get queue posts meta data
+    this.$store.dispatch('getQueueMetadata')
+
     eventBus.$on('update-timelines', (timelineId) => {
       if (timelineId === this.timeline.id) {
         this.load()

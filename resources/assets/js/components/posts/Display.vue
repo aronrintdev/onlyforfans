@@ -16,7 +16,7 @@
             <fa-icon :icon="['far', 'hourglass-half']" class="text-secondary ml-1 mr-2" />
           </div>
           <div v-if="session_user.id === post.user.id" class="post-ctrl mr-2">
-            <b-dropdown id="dropdown-1" right text="" class="m-md-2" variant="outline-dark">
+            <b-dropdown right text="" class="m-md-2 post-header-menu" variant="outline-dark">
               <b-dropdown-item @click="showEditPost">
                 <fa-icon icon="edit" fixed-width class="mr-2" />
                 Edit
@@ -24,6 +24,33 @@
               <b-dropdown-item @click="showDeleteConfirmation = true">
                 <fa-icon icon="trash" fixed-width class="mr-2" />
                 Delete
+              </b-dropdown-item>
+              <b-dropdown-item @click="showCopyToClipboardModal = true">
+                <fa-icon :icon="['fa', 'link']" fixed-width class="mr-2" />
+                Copy link
+              </b-dropdown-item>
+              <b-dropdown-item>
+                <ShareNetwork
+                  network="facebook"
+                  :url="postFullUrl"
+                  title="AllFans Post"
+                  :description="post.description"
+                  hashtags="allfans,mjmdesign"
+                >
+                  <fa-icon :icon="['fab', 'facebook-square']" fixed-width class="mr-2" />
+                  Facebook Share
+                </ShareNetwork>
+              </b-dropdown-item>
+              <b-dropdown-item>
+                <ShareNetwork
+                  network="twitter"
+                  :url="postFullUrl"
+                  :title="post.description"
+                  hashtags="allfans,mjmdesign"
+                >
+                  <fa-icon :icon="['fab', 'twitter-square']" fixed-width class="mr-2" />
+                  Twitter Share
+                </ShareNetwork>
               </b-dropdown-item>
             </b-dropdown>
           </div>
@@ -66,6 +93,31 @@
           </b-btn>
           <b-btn class="px-3" variant="danger" @click="deletePost">
             {{ $t('delete.confirmation.ok') }}
+          </b-btn>
+        </div>
+      </template>
+    </b-modal>
+    <b-modal
+      v-model="showCopyToClipboardModal"
+      size="md"
+    >
+      <template #modal-title>
+        {{ $t('copytoclipboard.title') }}
+      </template>
+      <div class="my-2 text-left" v-text="postFullUrl" />
+      <template #modal-footer>
+        <div class="text-right">
+          <b-btn class="px-3 mr-1" variant="secondary" @click="showCopyToClipboardModal=false">
+            {{ $t('copytoclipboard.cancel') }}
+          </b-btn>
+          <b-btn
+            class="px-3"
+            variant="primary"
+            v-clipboard:copy="postFullUrl"
+            v-clipboard:success="onCopySuccess"
+            v-clipboard:error="onCopyError"
+          >
+            {{ $t('copytoclipboard.ok') }}
           </b-btn>
         </div>
       </template>
@@ -113,10 +165,14 @@ export default {
     expireFromNow() {
       return moment.utc(this.post.expire_at).local().fromNow(true);
     },
+    postFullUrl() {
+      return `${window.location.origin}/posts/${this.post.slug}/details`;
+    }
   },
 
   data: () => ({
     showDeleteConfirmation: false,
+    showCopyToClipboardModal: false,
   }),
 
   mounted() { },
@@ -147,6 +203,14 @@ export default {
       }
       this.$emit('delete-post', this.post.id)
     },
+    onCopySuccess() {
+      alert("Copy to Clipboard has been succeed");
+      this.showCopyToClipboardModal = false;
+    },
+    onCopyError() {
+      this.showCopyToClipboardModal = false;
+      alert("Copy to Clipboard has been failed. Please try again later.");
+    }
   },
 
   watch: { },
@@ -219,6 +283,11 @@ ul {
         "ok": "Delete Post",
         "cancel": "Cancel"
       }
+    },
+    "copytoclipboard": {
+      "title": "Copy link of the post",
+      "ok": "Copy",
+      "cancel": "Cancel"
     }
   }
 }

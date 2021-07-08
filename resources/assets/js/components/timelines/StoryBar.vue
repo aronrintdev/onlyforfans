@@ -1,22 +1,38 @@
 <template>
-  <div v-if="!isLoading" class="crate tag-crate crate-story_bar row OFF-mb-3 mx-0">
-    <section class="d-flex flex-wrap justify-content-start w-100">
-      <div class="story">
+  <div v-if="!isLoading" class="crate-story_bar mx-0">
+    <section class="d-flex OFF-flex-wrap justify-content-start w-100">
+
+      <!-- Add to story icon form -->
+      <div class="story tag-ctrls mr-3">
         <b-form-file @change="handleDiskSelect" ref="fileInput" v-model="fileInput" class="d-none"></b-form-file>
         <div @click="isSelectFileModalVisible=true">
           <fa-icon class="mt-1" :icon="['far', 'plus-circle']" size="2x" />
         </div>
       </div>
-      <div class="ml-3 pr-3 mb-3 story my-story">
-        <router-link :to="{ name: 'stories.player', query: { timeline: 'me' } }" class="box-story">
-          <b-img rounded="circle" class="p-0" :src="session_user.avatar.filepath" alt="My avatar" />
-        </router-link>
-      </div>
-      <div v-for="tl in timelines" :key="tl.id" class="ml-3 mb-3 story">
-        <router-link :to="{ name: 'stories.player' }" class="box-story">
-          <b-img rounded="circle" class="p-0" :src="tl.avatar.filepath" alt="Story owner's avatar" />
-        </router-link>
-      </div>
+
+      <!-- Followed creators' stories avatar -->
+      <swiper ref="mySwiper" :options="swiperOptions" class="">
+        <swiper-slide v-for="tl in timelines" :key="tl.id" class="story slide tag-followed_timeline">
+
+          <router-link :to="{ name: 'stories.player', params: { timeline_id: tl.id } }" class="box-story">
+            <b-img 
+              v-b-popover.hover.top="{variant: 'info', content: tl.slug}" 
+              rounded="circle" 
+              :src="tl.avatar.filepath" 
+              :class="{ 'my-story-avatar': isMyTimeline(tl) }"
+              class="p-0" 
+              alt="Story owner's avatar" 
+            />
+          </router-link>
+          <!--
+          <div>
+            <pre>{{ tl.slug }}</pre>
+            <pre>{{ JSON.stringify(tl.stories.map( s => ({ id: s.id, slug: s.slug, created: s.created_at }) )[0], null, 2) }}</pre>
+          </div>
+          -->
+        </swiper-slide>
+      </swiper>
+
     </section>
 
     <!-- Modal for selecting file from disk vs vault -->
@@ -57,6 +73,7 @@ export default {
     isLoading() {
       return !this.session_user || !this.timelines
     },
+
   },
 
   data: () => ({
@@ -77,6 +94,23 @@ export default {
     },
 
     selectedDiskfileUrl: null,
+
+    swiperOptions: {
+      //lazy: true,
+      slidesPerView: 'auto', // 'auto',
+      spaceBetween: 12,
+      //lazy: true,
+      //slidesPerView: 'auto',
+      //observer: true,
+      //observeParents: true,
+      //observer: true,
+      //freeMode: true,
+      //freeModeMomentum: true,
+      //mousewheel: true,
+      //watchOverflow: true,
+      //width: 1300,
+      //watchSlidesVisibility: true,
+    },
   }),
 
   methods: {
@@ -118,12 +152,22 @@ export default {
       this.isPreviewModalVisible = false
       this.isSelectFileModalVisible = false
       this.fileInput = null // form input
+
+      this.$root.$bvToast.toast('Story successfully uploaded!', {
+        toaster: 'b-toaster-top-center',
+        title: 'Success',
+        variant: 'success',
+      })
     },
 
     bgColor(story) {
       return Object.keys(story).includes('background-color')
         ? story.customAttributes['background-color']
         : 'yellow'
+    },
+
+    isMyTimeline(tl) {
+      return this.session_user.id === tl.user.id
     },
   },
 
@@ -156,32 +200,43 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-$size: 40px;
-$margin: 16px;
-.crate {
-  .my-story {
-    border-right: solid 2px #3a3a3a;
-  }
-  .story {
-    margin-left: $margin / 2;
-    margin-right: $margin / 2;
-    margin-bottom: $margin;
+//$size: 40px;
+//$margin: 16px;
+body .crate-story_bar {
+
+  .story.slide {
+    width: 50px !important;
   }
 
   .b-icon {
-    height: $size;
+    //height: $size;
   }
 
   .box-story img {
-    width: $size;
-    height: $size;
+    width: 40px;
+    height: 40px;
+  }
+  .box-story img.my-story-avatar {
+    border: solid cyan 2px;
   }
 
+  /*
   .box-story .tag-colorfill {
-    width: $size;
-    height: $size;
+    //width: $size;
+    //height: $size;
     display: block;
     border-radius: 50%;
   }
+   */
+}
+</style>
+
+<style lang="scss">
+body {
+  .crate-story_bar .swiper-container {
+    margin-left: 0;
+    margin-right: 0;
+  }
+
 }
 </style>
