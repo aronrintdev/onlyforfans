@@ -72,8 +72,9 @@ class RestSubscriptionsTest extends TestCase
      */
     public function test_owner_can_list_active_subscriptions()
     {
-        $creator = User::has('subscriptions','>=',1)->firstOrFail();
-        $timeline = $creator->timeline;
+        $creator = User::whereHas('subscriptions', function($query) {
+            return $query->active();
+        })->firstOrFail();
 
         $response = $this->actingAs($creator)->ajaxJSON('GET', route('subscriptions.index'), [
             'is_active' => 1,
@@ -84,6 +85,7 @@ class RestSubscriptionsTest extends TestCase
         $this->assertEquals(1, $content->meta->current_page);
         $this->assertNotNull($content->data);
         $this->assertGreaterThan(0, count($content->data));
+
         // All resources returned are owned by creator
         $nonActive = collect($content->data)->reduce( function($acc, $item) use(&$creator) {
             if ( !$item->active) {
@@ -91,7 +93,7 @@ class RestSubscriptionsTest extends TestCase
             }
             return $acc;
         }, 0);
-        $this->assertEquals(0, $nonActive); 
+        $this->assertEquals(0, $nonActive);
     }
 
     /**

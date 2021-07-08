@@ -320,7 +320,7 @@ class ChatthreadsController extends AppBaseController
                 if ( $request->has('deliver_at') ) {
                     $ct->scheduleMessage($request->user(), $request->mcontent, $request->deliver_at);
                 } else {
-                    $ct->sendMessage($request->user(), $request->mcontent);
+                    $ct->sendMessage($request->user(), $request->mcontent, new Collection());
                 }
             }
             $ct->refresh();

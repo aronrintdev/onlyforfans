@@ -158,8 +158,11 @@ class Chatthread extends Model implements UuidId
     }
 
     // %TODO: handle mediafiles
-    public function sendMessage(User $sender, string $mcontent, Collection $cattrs) : Chatmessage
+    public function sendMessage(User $sender, string $mcontent, Collection $cattrs = null) : Chatmessage
     {
+        if (!isset($cattrs)) {
+            $cattrs = new Collection();
+        }
         return $this->chatmessages()->create([
               'sender_id' => $sender->id,
               'mcontent'  => $mcontent,
