@@ -530,3 +530,11 @@ body .feed-crate.tag-grid-layout .superbox-post .media-slider {
 .dropzone.dz-started.vue-dropzone .dz-preview {
   display: none;
 }
+
+// Post Menu Dropdown
+.post-header-menu .dropdown-item a,
+.post-header-menu .dropdown-item a:hover {
+  font-weight: 400;
+  color: #212529;
+  text-decoration: none;
+}

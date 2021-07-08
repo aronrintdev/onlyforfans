@@ -16,7 +16,7 @@
             <fa-icon :icon="['far', 'hourglass-half']" class="text-secondary ml-1 mr-2" />
           </div>
           <div v-if="session_user.id === post.user.id" class="post-ctrl mr-2">
-            <b-dropdown id="dropdown-1" right text="" class="m-md-2" variant="outline-dark">
+            <b-dropdown right text="" class="m-md-2 post-header-menu" variant="outline-dark">
               <b-dropdown-item @click="showEditPost">
                 <fa-icon icon="edit" fixed-width class="mr-2" />
                 Edit
@@ -28,6 +28,28 @@
               <b-dropdown-item @click="showCopyToClipboardModal = true">
                 <fa-icon :icon="['fa', 'link']" fixed-width class="mr-2" />
                 Copy link
+              </b-dropdown-item>
+              <b-dropdown-item>
+                <ShareNetwork
+                  network="facebook"
+                  :url="postFullUrl"
+                  title="AllFans Post"
+                  :description="post.description"
+                >
+                  <fa-icon :icon="['fab', 'facebook-square']" fixed-width class="mr-2" />
+                  Facebook Share
+                </ShareNetwork>
+              </b-dropdown-item>
+              <b-dropdown-item>
+                <ShareNetwork
+                  network="twitter"
+                  :url="postFullUrl"
+                  title="AllFans Post"
+                  :description="post.description"
+                >
+                  <fa-icon :icon="['fab', 'twitter-square']" fixed-width class="mr-2" />
+                  Twitter Share
+                </ShareNetwork>
               </b-dropdown-item>
             </b-dropdown>
           </div>
