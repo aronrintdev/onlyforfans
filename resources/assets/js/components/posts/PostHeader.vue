@@ -85,7 +85,7 @@ export default {
         eventBus.$emit('update-posts', this.post.id);
         clearInterval(this.scheduleDatetimeTimer);
       }
-    }, 60000); // 60s
+    }, 10000); // 10s
   },
   beforeDestroy() {
     clearInterval(this.scheduleDatetimeTimer);
