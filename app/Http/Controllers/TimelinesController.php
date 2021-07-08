@@ -387,7 +387,7 @@ class TimelinesController extends AppBaseController
         // %TODO: split *stories* within timeline into seen and unseen?
         $queryF = Timeline::has('stories')->with([
             'stories' => function($q1) {
-                $q1->orderBy('created_at', 'desc'); // sort stories relation by latest
+                $q1->orderBy('created_at', 'asc'); // sort stories relation oldest first
             }, 
             'stories.mediafiles',
             'avatar'
@@ -395,14 +395,14 @@ class TimelinesController extends AppBaseController
         $queryF->whereIn('id', $followingIds); // comment out to test
         $following = $queryF->get();
         $following = $following->sortByDesc( function($t) {
-            return $t->getLatestStory()->created_at; // sort timelines by latest story
+            return $t->getLatestStory()->created_at; // sort timelines (epics) by latest story
         });
 
         // Prepend my stories so my avatar is always first
         $queryMe = Timeline::where('user_id', $request->user()->id);
         $queryMe = $queryMe->with([
             'stories' => function($q1) {
-                $q1->orderBy('created_at', 'desc'); // sort stories relation by latest
+                $q1->orderBy('created_at', 'asc'); // sort stories relation oldest first
             }, 
             'stories.mediafiles',
             'avatar'
