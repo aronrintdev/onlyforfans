@@ -9,7 +9,7 @@
       :avatar="avatar" 
     />
 
-    <div class="d-none">
+    <div class="OFF-d-none">
       <p>DEBUG:</p>
       <ul>
         <li>timeline index: {{timelineIndex+1}}/{{timelines.length}}</li>
@@ -45,7 +45,7 @@ export default {
     },
 
     stories() {
-      return this.timelines ? this.timelines[this.timelineIndex].stories : []
+      return this.timelines ? this.timelines[this.timelineIndex].stories : null
     },
     avatar() {
       return this.timelines ? this.timelines[this.timelineIndex].avatar : null
@@ -61,11 +61,11 @@ export default {
   methods: {
     nextStoryTimeline() {
       this.timelineIndex = Math.min(this.timelines.length-1, this.timelineIndex+1) // can't next past last timeline
-      console.log(`nextStoryTimeline() - timelineIndex: ${this.timelineIndex} `)
+      console.log(`views/stories/Player.vue::nextStoryTimeline() - timelineIndex: ${this.timelineIndex} `)
     },
     prevStoryTimeline() {
       this.timelineIndex = Math.max(0, this.timelineIndex-1) // can't prev before first timeline
-      console.log(`prevStoryTimeline() - timelineIndex: ${this.timelineIndex} `)
+      console.log(`views/stories/Player.vue::prevStoryTimeline() - timelineIndex: ${this.timelineIndex} `)
     },
   },
 
