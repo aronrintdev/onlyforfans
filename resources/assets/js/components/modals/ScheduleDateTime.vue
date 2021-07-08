@@ -52,16 +52,17 @@ export default {
   data: () => ({ selectedDateTime: {} }),
   mounted() {
     this.selectedDateTime = {
-      date: moment.utc(this.scheduled_at ?? moment.utc()).local().format('YYYY-MM-DD'),
-      time: moment.utc(this.scheduled_at ?? moment.utc()).local().format('HH:mm:ss'),
+      date: moment.utc(this.scheduled_at ?? moment.utc().add(1, 'hours')).local().format('YYYY-MM-DD'),
+      time: moment.utc(this.scheduled_at ?? moment.utc().add(1, 'hours')).local().format('HH:mm:ss'),
       timeState: true,
     };
   },
   methods: {
     onChangePostScheduleTime(event) {
       this.selectedDateTime.timeState = true;
-      if (moment().format('YYYY-MM-DD') === this.$refs.schedule_date.value) {
-        if (moment().format('HH:mm:ss') > event) {
+      var minTime = moment.utc().add(1, 'hours').local();
+      if (minTime.format('YYYY-MM-DD') === this.$refs.schedule_date.value) {
+        if (minTime.format('HH:mm:ss') > event) {
           this.selectedDateTime.timeState = false;
         }
       }
