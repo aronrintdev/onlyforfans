@@ -1076,14 +1076,14 @@ class RestPostsTest extends TestCase
         $this->assertDatabaseHas('transactions', [
             'account_id' => $fan->getInternalAccount('segpay', 'USD')->getKey(),
             'debit_amount' => $post->price->getAmount(),
-            'purchasable_id' => $post->getKey(),
+            'resource_id' => $post->getKey(),
         ], 'financial');
 
         // Amount to creator from fan
         $this->assertDatabaseHas('transactions', [
             'account_id' => $creator->getInternalAccount('segpay', 'USD')->getKey(),
             'credit_amount' => $post->price->getAmount(),
-            'purchasable_id' => $post->getKey(),
+            'resource_id' => $post->getKey(),
         ], 'financial');
 
         // Fan has access

@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8"/>
+        <title>Test Documentation</title>
+        <style>
+            body {
+                text-rendering: optimizeLegibility;
+                font-variant-ligatures: common-ligatures;
+                font-kerning: normal;
+                margin-left: 2em;
+            }
+
+            body > ul > li {
+                font-family: Source Serif Pro, PT Sans, Trebuchet MS, Helvetica, Arial;
+                font-size: 2em;
+            }
+
+            h2 {
+                font-family: Tahoma, Helvetica, Arial;
+                font-size: 3em;
+            }
+
+            ul {
+                list-style: none;
+                margin-bottom: 1em;
+            }
+        </style>
+    </head>
+    <body>
+        <h2 id="Tests\Feature\MediafileTest">Mediafile (Tests\Feature\Mediafile)</h2>
+        <ul>
+            <li style="color: #555753;">✓ Admin can list mediafiles</li>
+            <li style="color: #555753;">✓ Owner can list mediafiles</li>
+            <li style="color: #555753;">✓ Owner can list mediafiles in vault</li>
+            <li style="color: #555753;">✓ Can store mediafile</li>
+        </ul>
+        <h2 id="Tests\Feature\RestChatmessagesTest">Rest Chatmessages (Tests\Feature\RestChatmessages)</h2>
+        <ul>
+            <li style="color: #555753;">✓ Can list chatmessages</li>
+            <li style="color: #555753;">✓ Can list chatmessages filtered by thread</li>
+            <li style="color: #555753;">✓ Can list mycontacts</li>
+        </ul>
+        <h2 id="Tests\Feature\RestChatthreadsTest">Rest Chatthreads (Tests\Feature\RestChatthreads)</h2>
+        <ul>
+            <li style="color: #555753;">✓ Can list chatthreads</li>
+            <li style="color: #555753;">✓ Can list chatthreads for single participant</li>
+            <li style="color: #555753;">✓ Can list sorted chatthreads</li>
+            <li style="color: #555753;">✓ Can list filtered chatthreads</li>
+            <li style="color: #555753;">✓ Can get total unread message count</li>
+            <li style="color: #555753;">✓ Can mark all messages read for a user</li>
+            <li style="color: #555753;">✓ Can mark messages read for a thread</li>
+            <li style="color: #555753;">✓ Can toggle mute status for a thread</li>
+            <li style="color: #555753;">✓ Can get mute status for a thread</li>
+            <li style="color: #555753;">✓ Can create chat thread with selected participants</li>
+            <li style="color: #555753;">✓ Should create thread with originator plus single recipient and send message</li>
+            <li style="color: #555753;">✓ Should create multiple threads with originator on all and single recipient per and send message</li>
+            <li style="color: #555753;">✓ Should create thread with included first message content</li>
+            <li style="color: #555753;">✓ Should create thread with included first message content pre scheduled</li>
+            <li style="color: #555753;">✓ Participant can view chatthread</li>
+            <li style="color: #555753;">✓ Nonparticipant can not view chatthread</li>
+            <li style="color: #555753;">✓ Can schedule message</li>
+        </ul>
+        <h2 id="Tests\Feature\RestCommentsTest">Rest Comments (Tests\Feature\RestComments)</h2>
+        <ul>
+            <li style="color: #555753;">✓ Owner can list comments</li>
+            <li style="color: #555753;">✓ Admin can list comments</li>
+            <li style="color: #555753;">✓ Nonowner can not list comments</li>
+            <li style="color: #555753;">✓ Nonadmin can not list general comments</li>
+            <li style="color: #555753;">✓ Owner can view own comment</li>
+            <li style="color: #555753;">✓ Follower can list timeline comments</li>
+            <li style="color: #555753;">✓ Nonfollower can not list timeline comments</li>
+            <li style="color: #555753;">✓ Nonfollower can not view comment on timeline post</li>
+            <li style="color: #555753;">✓ Follower can create comment on timeline post</li>
+            <li style="color: #555753;">✓ Nonfollower can not create comment on timeline post</li>
+            <li style="color: #555753;">✓ Can edit own comment</li>
+            <li style="color: #555753;">✓ Can not edit nonowned comment</li>
+            <li style="color: #555753;">✓ Can delete own comment</li>
+            <li style="color: #555753;">✓ Can not delete nonowned comment</li>
+            <li style="color: #555753;">✓ Owner can delete followers comment on own post</li>
+            <li style="color: #555753;">✓ Follower can like then unlike comment on timeline post</li>
+            <li style="color: #555753;">✓ Nonfollower can not like comment on timeline post</li>
+        </ul>
+        <h2 id="Tests\Feature\RestFavoritesTest">Rest Favorites (Tests\Feature\RestFavorites)</h2>
+        <ul>
+            <li style="color: #555753;">✓ Can list favorites</li>
+            <li style="color: #555753;">✓ Can list filtered favorites</li>
+            <li style="color: #555753;">✓ Can add favorite</li>
+            <li style="color: #555753;">✓ Nonadmin can not list general favorites</li>
+            <li style="color: #555753;">✓ Can view own favorite</li>
+            <li style="color: #555753;">✓ Can delete own favorite</li>
+            <li style="color: #555753;">✓ Can remove own favorite</li>
+            <li style="color: #555753;">✓ Can not delete nonowned favorite</li>
+        </ul>
+        <h2 id="Tests\Feature\RestLikeablesTest">Rest Likeables (Tests\Feature\RestLikeables)</h2>
+        <ul>
+            <li style="color: #555753;">✓ Owner can list likeables</li>
+        </ul>
+        <h2 id="Tests\Feature\RestMycontactsTest">Rest Mycontacts (Tests\Feature\RestMycontacts)</h2>
+        <ul>
+            <li style="color: #555753;">✓ Can create</li>
+            <li style="color: #555753;">✓ Owner can update</li>
+            <li style="color: #555753;">✓ Non owner cannot update</li>
+            <li style="color: #555753;">✓ Owner can delete</li>
+            <li style="color: #555753;">✓ Non owner cannot delete</li>
+        </ul>
+        <h2 id="Tests\Feature\RestNotificationsTest">Rest Notifications (Tests\Feature\RestNotifications)</h2>
+        <ul>
+            <li style="color: #555753;">✓ Owner can list notifications</li>
+            <li style="color: #555753;">✓ Sends email on like when enabled in settings</li>
+            <li style="color: #555753;">✓ Sends email on comment when enabled in settings</li>
+            <li style="color: #555753;">✓ Does not send email on like when disabled in settings</li>
+        </ul>
+        <h2 id="Tests\Feature\RestPostsTest">Rest Posts (Tests\Feature\RestPosts)</h2>
+        <ul>
+            <li style="color: #555753;">✓ Can list posts</li>
+            <li style="color: #555753;">✓ Owner can view own post</li>
+            <li style="color: #555753;">✓ Can view followed timelines post</li>
+            <li style="color: #555753;">✓ Can store text only post on my timeline</li>
+            <li style="color: #555753;">✓ Can create a post on my timeline of type purchaseable and set a price</li>
+            <li style="color: #555753;">✓ Nonowner can not store post on my timeline</li>
+            <li style="color: #555753;">✓ Can store post with single image on my timeline</li>
+            <li style="color: #555753;">✓ Can store post with multiple images on my timeline</li>
+            <li style="color: #555753;">✓ Owner can edit free post</li>
+            <li style="color: #555753;">✓ Nonowner can non edit free post</li>
+            <li style="color: #555753;">✓ Owner can delete free post</li>
+            <li style="color: #555753;">✓ Follower can view free post on my timeline</li>
+            <li style="color: #555753;">✓ Nonfollower can view free post on my timeline</li>
+            <li style="color: #555753;">✓ Subscriber can view subcribe only post on my timeline</li>
+            <li style="color: #555753;">✓ Nonsubscribed follower can not view subcribe only post content on my timeline</li>
+            <li style="color: #555753;">✓ Follower can view image of free post on my timeline</li>
+            <li style="color: #555753;">✓ Nonfollower can view image of free post on my timeline</li>
+            <li style="color: #ef2929;">❌ Can update my post</li>
+            <li style="color: #555753;">✓ Can destroy my post</li>
+            <li style="color: #555753;">✓ Timeline follower can like then unlike post</li>
+            <li style="color: #555753;">✓ Timeline nonfollower can like post</li>
+            <li style="color: #555753;">✓ Timeline owner can like own post</li>
+            <li style="color: #ef2929;">❌ Can send tip on post</li>
+            <li style="color: #ef2929;">❌ Can purchase post</li>
+            <li style="color: #555753;">✓ Owner can not edit content of a priced post that others have purchased</li>
+            <li style="color: #555753;">✓ Owner can not delete a priced post that others have purchased</li>
+        </ul>
+        <h2 id="Tests\Feature\RestSettingTest">Rest Setting (Tests\Feature\RestSetting)</h2>
+        <ul>
+            <li style="color: #555753;">✓ Can update single notifications setting income new tip</li>
+            <li style="color: #555753;">✓ Can update single notifications setting post new comment</li>
+            <li style="color: #555753;">✓ Can toggle global email notifications setting</li>
+            <li style="color: #555753;">✓ Can batch edit settings general</li>
+            <li style="color: #555753;">✓ Can batch validate settings general</li>
+            <li style="color: #555753;">✓ Can batch edit settings profile</li>
+            <li style="color: #555753;">✓ Can batch validate settings profile</li>
+        </ul>
+        <h2 id="Tests\Feature\RestStoriesTest">Rest Stories (Tests\Feature\RestStories)</h2>
+        <ul>
+            <li style="color: #555753;">✓ Can list my stories</li>
+            <li style="color: #555753;">✓ Can list stories filtered by timeline</li>
+            <li style="color: #555753;">✓ Can list stories filtered by stype</li>
+            <li style="color: #555753;">✓ Can not list stories on unfollowed timeline</li>
+            <li style="color: #555753;">✓ Can list grouped stories on followed timelines</li>
+            <li style="color: #555753;">✓ Can list stories on followed timelines</li>
+            <li style="color: #555753;">✓ Can store text story</li>
+            <li style="color: #555753;">✓ Can store picture story</li>
+            <li style="color: #555753;">✓ Owner can delete picture story</li>
+            <li style="color: #555753;">✓ Nonowner can not delete picture story</li>
+            <li style="color: #555753;">✓ Can like then unlike viewable story</li>
+            <li style="color: #555753;">✓ Can not like unviewable story</li>
+        </ul>
+        <h2 id="Tests\Feature\RestSubscriptionsTest">Rest Subscriptions (Tests\Feature\RestSubscriptions)</h2>
+        <ul>
+            <li style="color: #555753;">✓ Owner can list subscriptions</li>
+            <li style="color: #ef2929;">❌ Owner can list active subscriptions</li>
+            <li style="color: #555753;">✓ Owner can list inactive subscriptions</li>
+        </ul>
+        <h2 id="Tests\Feature\RestTimelinesTest">Rest Timelines (Tests\Feature\RestTimelines)</h2>
+        <ul>
+            <li style="color: #555753;">✓ Owner can view home feed</li>
+            <li style="color: #555753;">✓ Owner can sort home feed by like count</li>
+            <li style="color: #555753;">✓ Owner can sort home feed by comment count</li>
+            <li style="color: #555753;">✓ Owner can filter home feed by nonlocked</li>
+            <li style="color: #555753;">✓ Owner can view own timeline feed</li>
+            <li style="color: #555753;">✓ Fan can not access locked content via feed</li>
+            <li style="color: #555753;">✓ Fan can view photos only feed</li>
+            <li style="color: #555753;">✓ Owner can view own timeline</li>
+            <li style="color: #555753;">✓ Owner can view another timeline</li>
+            <li style="color: #555753;">✓ Can view suggested timelines</li>
+            <li style="color: #ef2929;">❌ Can send tip to timeline</li>
+            <li style="color: #555753;">✓ Can follow timeline</li>
+            <li style="color: #555753;">✓ Can unfollow timeline</li>
+            <li style="color: #ef2929;">❌ Can subscribe to timeline</li>
+            <li style="color: #555753;">✓ Can unsubscribe from timeline</li>
+        </ul>
+        <h2 id="Tests\Feature\RestUsersTest">Rest Users (Tests\Feature\RestUsers)</h2>
+        <ul>
+            <li style="color: #555753;">✓ Admin can list users</li>
+            <li style="color: #555753;">✓ User can view settings</li>
+            <li style="color: #555753;">✓ User can login</li>
+            <li style="color: #555753;">✓ User cant login with wrong credientials</li>
+            <li style="color: #ef2929;">❌ User can change password</li>
+            <li style="color: #555753;">✓ User can get session</li>
+            <li style="color: #555753;">✓ Admin can matchsearch users</li>
+        </ul>
+        <h2 id="Tests\Feature\RestVaultTest">Rest Vault (Tests\Feature\RestVault)</h2>
+        <ul>
+            <li style="color: #555753;">✓ Can list all of my vault folders</li>
+            <li style="color: #555753;">✓ Can not list other non shared vault folders</li>
+            <li style="color: #555753;">✓ Can list my root level vault folders</li>
+            <li style="color: #555753;">✓ Can create a new vault folder</li>
+            <li style="color: #555753;">✓ Can create a new vault folder with space in name</li>
+            <li style="color: #555753;">✓ Can not create a new vault folder bad param 422</li>
+            <li style="color: #555753;">✓ Can not create a new vault folder with same name 422</li>
+            <li style="color: #555753;">✓ Can not create a new vault folder 403</li>
+            <li style="color: #555753;">✓ Can navigate my vault folders</li>
+            <li style="color: #555753;">✓ Can update my vault folder</li>
+            <li style="color: #ef2929;">❌ Can delete my non root vault folder</li>
+            <li style="color: #555753;">✓ Nonowner can not delete my vault folder</li>
+            <li style="color: #555753;">✓ Can not delete my root vault folder</li>
+            <li style="color: #555753;">✓ Can upload single image file to my vault folder</li>
+            <li style="color: #555753;">✓ Can upload multiple image files to my vault folder</li>
+            <li style="color: #555753;">✓ Nonowner can not upload image to my vault folder</li>
+            <li style="color: #555753;">✓ Can select mediafile from vault folder to attach to post by attach</li>
+            <li style="color: #555753;">✓ Nonowner can not select vault folder mediafile to attach to post by attach</li>
+            <li style="color: #555753;">✓ Can select mediafile from vault folder to attach to story by attach</li>
+            <li style="color: #555753;">✓ Can select mediafile from vault folder to attach to post single op</li>
+            <li style="color: #555753;">✓ Can select mediafile from vault folder to attach to story single op</li>
+            <li style="color: #555753;">✓ Select vault folder to share via signup invite to non registered user via email</li>
+            <li style="color: #555753;">✓ Select subset of mediafiles in vaultfolder to share via signup invite to non registered user via email</li>
+            <li style="color: #555753;">✓ Select vaultfolder to share with registered user</li>
+            <li style="color: #555753;">✓ Select mediafiles in vaultfolder to share with registered user</li>
+        </ul>
+        <h2 id="Tests\Feature\ShareablesTest">Shareables (Tests\Feature\Shareables)</h2>
+        <ul>
+            <li style="color: #555753;">✓ Owner can list shareables</li>
+            <li style="color: #555753;">✓ Creator can list followers</li>
+            <li style="color: #555753;">✓ Fan can list following</li>
+        </ul>
+        <h2 id="Tests\Unit\ChatmessageModelTest">Chatmessage Model (Tests\Unit\ChatmessageModel)</h2>
+        <ul>
+            <li style="color: #555753;">✓ Should get chatmessages</li>
+            <li style="color: #ef2929;">❌ Can start chat</li>
+            <li style="color: #555753;">✓ Can schedule message</li>
+            <li style="color: #555753;">✓ Should get mycontacts</li>
+        </ul>
+        <h2 id="Tests\Unit\MediafileModelTest">Mediafile Model (Tests\Unit\MediafileModel)</h2>
+        <ul>
+            <li style="color: #555753;">✓ Should create diskmediafile and reference mediafile</li>
+            <li style="color: #555753;">✓ Should create mediafile reference from existing diskmediafile</li>
+            <li style="color: #ef2929;">❌ Should delete mediafile reference</li>
+        </ul>
+        <h2 id="Tests\Unit\UserSettingModelTest">User Setting Model (Tests\Unit\UserSettingModel)</h2>
+        <ul>
+            <li style="color: #555753;">✓ Can enable and disable notification settings</li>
+            <li style="color: #555753;">✓ Can enable and disable global notification setting</li>
+        </ul>
+        <h2 id="Tests\Unit\VaultModelTest">Vault Model (Tests\Unit\VaultModel)</h2>
+        <ul>
+            <li style="color: #ef2929;">❌ Can get vault subfolder tree</li>
+        </ul>
+    </body>
+</html>
