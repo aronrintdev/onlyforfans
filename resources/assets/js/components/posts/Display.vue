@@ -35,6 +35,7 @@
                   :url="postFullUrl"
                   title="AllFans Post"
                   :description="post.description"
+                  hashtags="allfans,mjmdesign"
                 >
                   <fa-icon :icon="['fab', 'facebook-square']" fixed-width class="mr-2" />
                   Facebook Share
@@ -44,8 +45,8 @@
                 <ShareNetwork
                   network="twitter"
                   :url="postFullUrl"
-                  title="AllFans Post"
-                  :description="post.description"
+                  :title="post.description"
+                  hashtags="allfans,mjmdesign"
                 >
                   <fa-icon :icon="['fab', 'twitter-square']" fixed-width class="mr-2" />
                   Twitter Share
@@ -165,7 +166,7 @@ export default {
       return moment.utc(this.post.expire_at).local().fromNow(true);
     },
     postFullUrl() {
-      return `${window.location.origin}/posts/${this.post.slug}`;
+      return `${window.location.origin}/posts/${this.post.slug}/details`;
     }
   },
 
