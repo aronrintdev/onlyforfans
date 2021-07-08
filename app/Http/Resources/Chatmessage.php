@@ -15,8 +15,8 @@ class Chatmessage extends JsonResource
         $hasAccess = $sessionUser->can('view', $model);
 
         $attachments = new Collection();
-        if ($this->cattrs) {
-            if ($this->cattrs['tip_id']) {
+        if (isset($this->cattrs)) {
+            if (isset($this->cattrs['tip_id'])) {
                 $attachments->push(
                     Tip::find($this->cattrs['tip_id'])->getMessagableArray()
                 );
