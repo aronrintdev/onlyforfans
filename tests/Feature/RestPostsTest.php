@@ -739,9 +739,9 @@ class RestPostsTest extends TestCase
      */
     public function test_can_update_my_post()
     {
-        $timeline = Timeline::has('posts','>=',1)->first(); 
+        $timeline = Timeline::whereHas('posts')->first();
         $creator = $timeline->user;
-        $post = $timeline->posts[0];
+        $post = $timeline->posts()->where('price', 0)->first();
 
         $payload = [
             'description' => 'updated text',

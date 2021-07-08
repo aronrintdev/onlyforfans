@@ -125,7 +125,7 @@ class PostsController extends AppBaseController
     {
         $this->authorize('update', $post);
 
-        if ($post->sharees()->count() > 0) {
+        if ($post->price->isPositive() && $post->sharees()->count() > 0) {
             abort(403, 'Post has sharees');
         }
 
