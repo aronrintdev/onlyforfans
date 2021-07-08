@@ -3,35 +3,22 @@
 namespace App\Http\Controllers;
 
 use Carbon\Carbon;
+use App\Models\Tip;
 use App\Rules\InEnum;
 use GuzzleHttp\Client;
 use Illuminate\Support\Str;
 use App\Interfaces\Tippable;
-use App\Models\Subscription;
 use Illuminate\Http\Request;
-use InvalidArgumentException;
 use App\Enums\PaymentTypeEnum;
-use App\Jobs\FakeSegpayPayment;
 use App\Interfaces\Purchaseable;
 use App\Interfaces\Subscribable;
 use App\Models\Financial\Account;
-use App\Models\Financial\SegpayCall;
-use App\Models\Financial\SegpayCard;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
-use App\Enums\Financial\AccountTypeEnum;
-use App\Events\PaymentMethodAdded;
 use App\Models\Casts\Money as MoneyCast;
-use GuzzleHttp\Exception\GuzzleException;
-use Carbon\Exceptions\InvalidCastException;
 use App\Helpers\Tippable as TippableHelpers;
-use Carbon\Exceptions\InvalidIntervalException;
 use App\Helpers\Purchasable as PurchasableHelpers;
 use App\Helpers\Subscribable as SubscribableHelpers;
-use Symfony\Component\HttpKernel\Exception\HttpException;
-use Illuminate\Contracts\Container\BindingResolutionException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\Finder\Exception\DirectoryNotFoundException;
 
 class SegPayController extends Controller
 {
@@ -305,7 +292,8 @@ class SegPayController extends Controller
             return PurchasableHelpers::getPurchasableItem($request->item);
         }
         if ($request->type === PaymentTypeEnum::TIP) {
-            return TippableHelpers::getTippableItem($request->item);
+            return Tip::find($request->item);
+            // return TippableHelpers::getTippableItem($request->item);
         }
         if ($request->type === PaymentTypeEnum::SUBSCRIPTION) {
             return SubscribableHelpers::getSubscribableItem($request->item);

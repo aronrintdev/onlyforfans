@@ -22,7 +22,7 @@ class Chatmessage extends Model implements UuidId, Ownable
     //--------------------------------------------
 
     protected $casts = [
-        'cattrs'       => 'array',
+        'cattrs'       => 'collection',
         'is_delivered' => 'boolean',
     ];
 

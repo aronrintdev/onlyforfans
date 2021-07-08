@@ -19,14 +19,10 @@ class AchAccountSeeder extends Seeder
     public function run()
     {
         $this->initSeederTraits('PaymentMethodsSeeder');
-        if ($this->appEnv === 'testing') {
-            $this->output->writeln("  - SKIPPING for test env due to 'locked' issue");
-            return; // %FIXME
-        }
 
         $userCount = User::count();
         $iter = 1;
-        User::cursor()->each(function($user) use (&$iter, $userCount) {
+        User::get()->each(function($user) use (&$iter, $userCount) {
 
             $count = $this->faker->numberBetween(self::$MIN, self::$MAX);
 

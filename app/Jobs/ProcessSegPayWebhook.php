@@ -4,18 +4,19 @@ namespace App\Jobs;
 
 use Exception;
 use Throwable;
+use App\Models\Tip;
 use App\Models\User;
+
 use App\Models\Webhook;
-
 use App\Events\TipFailed;
-use App\Helpers\Tippable;
 
+use App\Helpers\Tippable;
 use Illuminate\Support\Str;
 use App\Helpers\Purchasable;
 use App\Models\Subscription;
 use App\Helpers\Subscribable;
-use Illuminate\Bus\Queueable;
 
+use Illuminate\Bus\Queueable;
 use App\Enums\PaymentTypeEnum;
 use App\Events\ItemSubscribed;
 use App\Events\PurchaseFailed;
@@ -25,8 +26,8 @@ use App\Apis\Segpay\Transaction;
 use App\Apis\Segpay\Enums\Action;
 use App\Events\PaymentMethodAdded;
 use App\Events\SubscriptionFailed;
-use App\Models\Traits\FormatMoney;
 
+use App\Models\Traits\FormatMoney;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
@@ -38,11 +39,11 @@ use App\Enums\ShareableAccessLevelEnum;
 use Illuminate\Queue\InteractsWithQueue;
 use App\Apis\Segpay\Enums\TransactionType;
 use App\Enums\WebhookStatusEnum as Status;
-use Illuminate\Contracts\Queue\ShouldQueue;
 
+use Illuminate\Contracts\Queue\ShouldQueue;
 use App\Apis\Segpay\Enums\Stage as StageEnum;
-use App\Models\Financial\Transaction as FinancialTransaction;
 use Illuminate\Foundation\Events\Dispatchable;
+use App\Models\Financial\Transaction as FinancialTransaction;
 
 /**
  * Processes a webhook that was received from Segpay
@@ -296,7 +297,8 @@ class ProcessSegPayWebhook implements ShouldQueue
             // ----------------------------------- TIP ---------------------------------- //
             if ($transaction->item_type === PaymentTypeEnum::TIP) {
                 try {
-                    $transactions = $card->account->tip($item, $price, ['message' => $user_message ?? '']);
+                    $transactions = $item->process(true, ['account_id' => $card->account->id]);
+                    // $transactions = $card->account->tip($item, $price, ['message' => $user_message ?? '']);
                     $transactions['inTransactions']['debit']->metadata = ['segpay_transaction_id' => $transaction->transactionId];
                     $transactions['inTransactions']['debit']->save();
                 } catch (Exception $e) {
@@ -450,7 +452,8 @@ class ProcessSegPayWebhook implements ShouldQueue
             if ($transaction->item_type === PaymentTypeEnum::PURCHASE) {
                 return Purchasable::getPurchasableItem($transaction->item_id);
             } else if ($transaction->item_type === PaymentTypeEnum::TIP) {
-                return Tippable::getTippableItem($transaction->item_id);
+                return Tip::find($transaction->item_id);
+                // return Tippable::getTippableItem($transaction->item_id);
             } else if ($transaction->item_type === PaymentTypeEnum::SUBSCRIPTION) {
                 return Subscribable::getSubscribableItem($transaction->item_id);
             }

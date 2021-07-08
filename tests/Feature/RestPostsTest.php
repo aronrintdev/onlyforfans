@@ -4,30 +4,32 @@ namespace Tests\Feature;
 use DB;
 use Tests\TestCase;
 
+use App\Models\Post;
+use App\Models\User;
+use App\Models\Comment;
+use App\Models\Likeable;
+use App\Models\Timeline;
+use App\Events\TipFailed;
+use App\Models\Fanledger;
+
+use App\Models\Mediafile;
 use Illuminate\Http\File;
-use Illuminate\Foundation\Testing\WithFaker;
+
+use App\Events\ItemTipped;
+use App\Enums\PostTypeEnum;
+use App\Events\ItemPurchased;
+use App\Enums\PaymentTypeEnum;
+use App\Events\PurchaseFailed;
+use App\Enums\MediafileTypeEnum;
+use Illuminate\Http\UploadedFile;
+use App\Models\Financial\SegpayCard;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Http\UploadedFile;
-use Database\Seeders\TestDatabaseSeeder;
-
-use App\Events\ItemPurchased;
-use App\Events\PurchaseFailed;
-
 use App\Enums\Financial\AccountTypeEnum;
-use App\Enums\PostTypeEnum;
-use App\Enums\MediafileTypeEnum;
-use App\Enums\PaymentTypeEnum;
-
-use App\Models\Financial\SegpayCard;
-use App\Models\Mediafile;
-use App\Models\Post;
-use App\Models\User;
-use App\Models\Timeline;
-use App\Models\Fanledger;
-use App\Models\Likeable;
-use App\Models\Comment;
+use App\Models\Tip;
+use Database\Seeders\TestDatabaseSeeder;
+use Illuminate\Foundation\Testing\WithFaker;
 //use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class RestPostsTest extends TestCase
@@ -945,31 +947,62 @@ class RestPostsTest extends TestCase
      */
     public function test_can_send_tip_on_post()
     {
-        $timeline = Timeline::has('posts','>=',1)->has('followers','>=',1)->first(); // assume non-admin (%FIXME)
+        $this->assertTrue(Config::get('segpay.fake'), 'Your SEGPAY_FAKE .env variable is not set to true.');
+
+        $timeline = Timeline::has('posts', '>=', 1)->has('followers', '>=', 1)->first(); // assume non-admin (%FIXME)
         $creator = $timeline->user;
         $post = $timeline->posts[0];
         $fan = $timeline->followers[0];
 
+        $events = Event::fake([
+            ItemTipped::class,
+            TipFailed::class,
+        ]);
+
+        $account = $fan->financialAccounts()->where('type', AccountTypeEnum::IN)->with('resource')->first();
         $payload = [
-            'base_unit_cost_in_cents' => $this->faker->randomNumber(3),
+            'amount' => $this->faker->numberBetween(1, 20) * 500,
+            'currency' => 'USD',
+            'account_id' => $account->getKey(),
+            'message' => $this->faker->text(),
         ];
         $response = $this->actingAs($fan)->ajaxJSON('PUT', route('posts.tip', $post->id), $payload);
         $response->assertStatus(200);
 
-        $content = json_decode($response->content());
-        $postR = $content->post;
+        // ItemPurchased will update client with websocket event
+        Event::assertDispatched(ItemTipped::class);
+        Event::assertNotDispatched(TipFailed::class);
 
-        $fanledger = Fanledger::where('fltype', PaymentTypeEnum::TIP)->latest()->first();
-        $this->assertNotNull($fanledger);
-        $this->assertEquals(1, $fanledger->qty);
-        $this->assertEquals($payload['base_unit_cost_in_cents'], $fanledger->base_unit_cost_in_cents);
-        $this->assertEquals(PaymentTypeEnum::TIP, $fanledger->fltype);
-        $this->assertEquals($fan->id, $fanledger->purchaser_id);
-        $this->assertEquals($creator->id, $fanledger->seller_id);
-        $this->assertEquals('posts', $fanledger->purchaseable_type);
-        $this->assertEquals($post->id, $fanledger->purchaseable_id);
-        $this->assertTrue( $post->ledgersales->contains( $fanledger->id ) );
-        $this->assertTrue( $fan->ledgerpurchases->contains( $fanledger->id ) );
+        $content = json_decode($response->content());
+
+        // Tip was added to the database
+        $this->assertDatabaseHas(Tip::getTableName(), [
+            'sender_id'   => $fan->getKey(),
+            'receiver_id' => $creator->getKey(),
+            'tippable_id' => $post->getKey(),
+            'account_id'  => $account->getKey(),
+            'message'     => $payload['message'],
+            'amount'      => $payload['amount'],
+        ]);
+
+        // Amount from Card
+        $this->assertDatabaseHas('transactions', [
+            'account_id'   => $account->getKey(),
+            'debit_amount' => $payload['amount'],
+        ], 'financial');
+
+        // Amount from fan to creator
+        $this->assertDatabaseHas('transactions', [
+            'account_id'   => $fan->getInternalAccount('segpay', 'USD')->getKey(),
+            'debit_amount' => $payload['amount'],
+        ], 'financial');
+
+        // Amount to creator from fan
+        $this->assertDatabaseHas('transactions', [
+            'account_id'    => $creator->getInternalAccount('segpay', 'USD')->getKey(),
+            'credit_amount' => $payload['amount'],
+        ], 'financial');
+
     }
 
     /**

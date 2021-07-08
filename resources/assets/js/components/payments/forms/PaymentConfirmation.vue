@@ -91,6 +91,9 @@ export default {
         account_id: this.paymentMethod.id,
         amount: this.price,
         currency: this.currency,
+        message: this.extra
+          ? this.extra.message ? this.extra.message : null
+          : null,
       }).then(response => {
         this.$log.debug('PaymentConfirmation onConfirm', { response })
       }).catch(error => {

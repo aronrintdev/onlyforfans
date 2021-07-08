@@ -201,48 +201,66 @@ export default {
             return
           }
 
-          console.log('onComplete')
           this.$emit('processing')
-          const data = {
-            sessionId: this.sessionId,
-            packageId: parseInt(this.packageId),
-            customer: {
-              ...this.form.customer,
-              email: this.session_user.email,
-            },
-            card: {
-              ...this.form.card,
-              expirationYear: parseInt(`20${this.form.card.expirationYear}`),
-              expirationMonth: parseInt(this.form.card.expirationMonth),
-            },
-            billing: {
-              pricePointId: null,
-              currencyCode: this.currency,
-            },
-            userData: {
-              item_type: this.type,
-              item_id: this.value.id,
-              user_id: this.session_user.id,
-              nickname: this.form.nickname,
-              card_is_default: this.form.card_is_default ? '1' : '0',
-            },
+
+          if (this.type === 'tip') {
+            // Create tip model first to send to Segpay
+            this.axios.post(this.$apiRoute('tips.store'), {
+              tippable_id: this.value.id,
+              amount: this.amount,
+              currency: this.currency,
+              message: this.extra ? this.extra.message : null,
+            }).then(response => {
+              this.completePayment('tip', response.data.id)
+            }).catch(error => {
+              this.$emit('error', error)
+              eventBus.$emit('error', { message: this.$t('error'), })
+            })
+          } else {
+            this.completePayment()
           }
-          console.log({ data })
-          window.segpay.sdk.completePayment(data, (result) => {
-            console.log({ result })
-            switch (result.status) {
-              case 'GeneralErrors':
-                console.log({ result })
-              break;
-              case 'ValidationErrors':
-                console.log({ result })
-              break;
-              case 'Success':
-                this.$emit('success', result.purchases)
-              break;
-            }
-          })
         })
+      })
+    },
+
+    completePayment(type, itemId) {
+      const data = {
+        sessionId: this.sessionId,
+        packageId: parseInt(this.packageId),
+        customer: {
+          ...this.form.customer,
+          email: this.session_user.email,
+        },
+        card: {
+          ...this.form.card,
+          expirationYear: parseInt(`20${this.form.card.expirationYear}`),
+          expirationMonth: parseInt(this.form.card.expirationMonth),
+        },
+        billing: {
+          pricePointId: null,
+          currencyCode: this.currency,
+        },
+        userData: {
+          item_type: type || this.type,
+          item_id: itemId || this.value.id,
+          user_id: this.session_user.id,
+          nickname: this.form.nickname,
+          card_is_default: this.form.card_is_default ? '1' : '0',
+        },
+      }
+      window.segpay.sdk.completePayment(data, (result) => {
+        this.$log.debug('completePayment', { result })
+        switch (result.status) {
+          case 'GeneralErrors':
+            this.$log.debug('GeneralErrors', { result })
+          break;
+          case 'ValidationErrors':
+            this.$log.debug('ValidationErrors', { result })
+          break;
+          case 'Success':
+            this.$emit('Success', result.purchases)
+          break;
+        }
       })
     },
 
@@ -345,7 +363,8 @@ export default {
     "Finish": "Complete Transaction",
     "An Error Has Occurred": "An Error Has Occurred",
     "nickname": "Save card name as",
-    "isDefault": "Save as default payment method"
+    "isDefault": "Save as default payment method",
+    "error": "There was an error processing your payment."
   }
 }
 </i18n>

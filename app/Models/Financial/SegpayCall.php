@@ -14,6 +14,7 @@ use App\Interfaces\Tippable;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
 use App\Models\Casts\Money as MoneyCast;
+use App\Models\Tip;
 use App\Models\Traits\UsesUuid;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Support\Facades\Log;
@@ -110,10 +111,10 @@ class SegpayCall extends Model
         return $segpayCall->send();
     }
 
-    public static function confirmTip(Account $account, Money $price, Tippable $tippable)
+    public static function confirmTip(Account $account, Money $price, Tip $tip)
     {
         // Verify not already processing this subscription
-        if (static::where('resource_id', $tippable->getKey())->processing()->count() > 0) {
+        if (static::where('resource_id', $tip->getKey())->processing()->count() > 0) {
             return false;
         }
 
@@ -124,8 +125,8 @@ class SegpayCall extends Model
             'currency' => $price->getCurrency()->getCode(),
             'user_id' => Auth::user()->getKey(),
             'account_id' => $account->getKey(),
-            'resource_type' => $tippable->getMorphString(),
-            'resource_id' => $tippable->getKey(),
+            'resource_type' => $tip->getMorphString(),
+            'resource_id' => $tip->getKey(),
         ]);
 
         $packageId = Config::get('segpay.packageId');
@@ -138,7 +139,7 @@ class SegpayCall extends Model
             'dynamicdesc' => urlencode(Config::get('segpay.description.tip')),
             'OCToken' => $account->resource->token,
             'item_type' => PaymentTypeEnum::TIP,
-            'item_id' => $tippable->getKey(),
+            'item_id' => $tip->getKey(),
             'user_id' => Auth::user()->getKey(),
             'reference_id' => $segpayCall->getKey(),
         ];
