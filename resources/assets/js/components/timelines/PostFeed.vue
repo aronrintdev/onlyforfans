@@ -151,9 +151,9 @@ export default {
     },
     listItems() {
       if (this.is_schedulefeed) {
-        return this.renderedItems.filter(it => it.schedule_datetime !== null);
+        return this.renderedItems.filter(it => Boolean(it.schedule_datetime));
       }
-      return this.renderedItems.filter(it => it.schedule_datetime === null);
+      return this.renderedItems.filter(it => !it.schedule_datetime);
     }
   },
 
