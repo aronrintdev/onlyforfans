@@ -27,7 +27,7 @@
           </aside>
         </section>
       </b-tab>
-      <b-tab :title="`Queue(${queue_metadata.total? queue_metadata.total : 0})`">
+      <b-tab :title="`Queue (${queue_metadata.total? queue_metadata.total : 0})`">
         <section class="row" v-if="activeTab === 1">
           <main :class="mainClass">
             <CreatePost :session_user="session_user" :timeline="timeline" />
