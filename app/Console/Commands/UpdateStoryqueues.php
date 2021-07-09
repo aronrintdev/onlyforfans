@@ -52,7 +52,7 @@ class UpdateStoryqueues extends Command
                             'viewer_id' => $f->id,
                             'story_id' => $s->id,
                             'timeline_id' => $t->id,
-                            'created_at' => $s->created_at,
+                            'created_at' => $s->created_at, // %NOTE: use create date of *story* (!)
                             'updated_at' => $s->created_at,
                         ]);
                 });
