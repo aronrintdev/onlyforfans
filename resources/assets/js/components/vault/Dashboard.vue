@@ -208,16 +208,14 @@
     </b-modal>
 
     <!-- Modal for deleting selected files or folders -->
-    <b-modal v-model="isDeleteFilesModalVisible" size="lg" title="Delete Files" >
-        <p>Please confirm you really want to delete the following {{ selectedMediafiles.length }} files...</p>
+    <b-modal v-model="isDeleteFilesModalVisible" size="lg" title="Confirm Delete" >
+        <p>Are you sure you want to delete the following {{ selectedMediafiles.length }} files...</p>
         <b-list-group class="delete-list">
           <b-list-group-item v-for="(mf) in selectedMediafiles" :key="mf.id">{{ mf.mfname }}</b-list-group-item>
         </b-list-group>
         <template #modal-footer>
-          <div class="w-100">
-            <b-button variant="secondary" size="sm" @click="isDeleteFilesModalVisible=false">Cancel</b-button>
-            <b-button variant="danger" size="sm" @click="deleteSelectedFiles">Yes Delete</b-button>
-          </div>
+            <b-button variant="secondary" @click="isDeleteFilesModalVisible=false">Cancel</b-button>
+            <b-button variant="danger" @click="deleteSelectedFiles">Delete Files</b-button>
         </template>
     </b-modal>
 
@@ -240,11 +238,11 @@
     </b-modal>
 
     <!-- Form modal for deleting a sub-folder and *all* contents  -->
-    <b-modal id="modal-delete-folder" v-model="isDeleteFolderModalVisible" size="lg" title="Delete Folder" >
-      <p>Are you sure you want to permanently delete this folder and all the files it contains, including subfolders & their contents?</p>
+    <b-modal id="modal-delete-folder" v-model="isDeleteFolderModalVisible" size="lg" title="Confirm Delete" >
+      <p class="m-0">Are you sure you want to permanently delete this folder and all the files it contains, including subfolders & their contents?</p>
       <template #modal-footer>
-        <b-button @click="deleteFolder" variant="danger">Delete Folder and All Contents</b-button>
         <b-button @click="hideDeleteFolderForm" type="cancel" variant="secondary">Cancel</b-button>
+        <b-button @click="deleteFolder" variant="danger">Delete Folder and All Contents</b-button>
       </template>
     </b-modal>
 
