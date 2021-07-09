@@ -4,11 +4,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection;
 
-use App\Models\Traits\UsesUuid;
-
 class Storyqueue extends Model
 {
-    use UsesUuid, HasFactory, SoftDeletes;
+    use SoftDeletes;
 
     protected $guarded = [ 'id', 'created_at', 'updated_at', ];
 
