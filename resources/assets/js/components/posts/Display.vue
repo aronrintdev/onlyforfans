@@ -57,6 +57,9 @@
           <div @click="renderFull" v-if="is_feed" class="p-2 btn">
             <fa-icon icon="expand-alt" class="text-primary" size="2x" />
           </div>
+          <b-btn v-if="displayClose" variant="link" class="text-secondary" @click="$emit('close')">
+            <fa-icon icon="times" />
+          </b-btn>
         </section>
       </template>
 
@@ -147,6 +150,7 @@ export default {
     session_user: null,
     use_mid: { type: Boolean, default: false }, // use mid-sized images instead of full
     is_feed: { type: Boolean, default: true }, // is in context of a feed?
+    displayClose: { type: Boolean, default: false }, // Display a close button in right corner of title?
   },
 
   computed: {
