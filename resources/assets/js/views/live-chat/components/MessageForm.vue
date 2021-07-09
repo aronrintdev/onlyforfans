@@ -39,25 +39,63 @@
         </b-form-group>
       </div>
       <div class="form-ctrl d-flex">
-        <b-button variant="link" class="clickme_to-attach_files" @click="doSomething">
+        <b-btn
+          variant="link"
+          class="clickme_to-attach_files"
+          v-b-tooltip.hover
+          title="Attach Files"
+          @click="doSomething"
+        >
           <fa-icon :icon="['far', 'file-alt']" class="clickable fa-lg" fixed-width />
-        </b-button>
-        <b-button variant="link" class="clickme_to-record_video" @click="doSomething('record-video')">
+        </b-btn>
+        <b-btn
+          variant="link"
+          class="clickme_to-record_video"
+          v-b-tooltip.hover
+          title="Record Video"
+          @click="doSomething('record-video')"
+        >
           <fa-icon :icon="['fas', 'video']" class="clickable fa-lg" fixed-width />
-        </b-button>
-        <b-button variant="link" class="clickme_to-record_audio" @click="doSomething('record-audio')">
+        </b-btn>
+        <b-btn
+          variant="link"
+          class="clickme_to-record_audio"
+          v-b-tooltip.hover
+          title="Record Audio"
+          @click="doSomething('record-audio')"
+        >
           <fa-icon :icon="['fas', 'microphone']" class="clickable fa-lg" fixed-width />
-        </b-button>
-        <b-button variant="link" class="clickme_to-select_vault_file" @click="toggleVaultSelect()">
+        </b-btn>
+        <b-btn
+          variant="link"
+          class="clickme_to-select_vault_file"
+          v-b-tooltip.hover
+          title="Attach Files From Your Vault"
+          @click="toggleVaultSelect()"
+        >
           <fa-icon :icon="['fas', 'archive']" class="clickable fa-lg" fixed-width />
-        </b-button>
-        <b-button variant="link" class="clickme_to-set_scheduled" :disabled="false" @click="openScheduleMessageModal('set-scheduled')">
+        </b-btn>
+        <b-btn
+          variant="link"
+          class="clickme_to-set_scheduled"
+          v-b-tooltip.hover
+          title="Schedule Post To Be Sent At"
+          :disabled="false"
+          @click="openScheduleMessageModal('set-scheduled')"
+        >
           <fa-icon :icon="['far', 'calendar-alt']" class="clickable fa-lg" fixed-width />
-        </b-button>
-        <b-button variant="link" class="clickme_to-set-price" :disabled="false" @click="doSomething('set-price')">
+        </b-btn>
+        <b-btn
+          variant="link"
+          class="clickme_to-set-price"
+          v-b-tooltip.hover
+          title="Set Message Unlock Price"
+          :disabled="false"
+          @click="doSomething('set-price')"
+        >
           <fa-icon :icon="['fas', 'dollar-sign']" class="clickable fa-lg" fixed-width />
-        </b-button>
-        <b-button type="submit" variant="primary" class="clickme_to-submit_message ml-auto" :disabled="false">SEND</b-button>
+        </b-btn>
+        <b-btn type="submit" variant="primary" class="clickme_to-submit_message ml-auto" :disabled="false">SEND</b-btn>
       </div>
     </b-form>
 
