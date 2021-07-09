@@ -49,7 +49,7 @@ class Shareable extends Model
                     ->where('timeline_id', $model->shareable_id)
                     ->get();
                 foreach ($storyqueues as $sq) {
-                    $sq->forceDelete(); // %NOTE hard delete
+                    $sq->delete();
                 }
                 break;
             }

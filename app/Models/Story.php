@@ -53,7 +53,7 @@ class Story extends Model implements Likeable, Ownable
         static::deleting(function ($model) {
             // Delete any storyqueue relations for this story...
             foreach ($model->storyqueues as $sq) {
-                $sq->forceDelete(); // $NOTE hard delete
+                $sq->delete();
             }
         });
     }
