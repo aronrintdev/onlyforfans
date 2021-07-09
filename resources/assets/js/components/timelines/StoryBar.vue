@@ -86,7 +86,6 @@ export default {
     // Story form input values...
     //   put inside a form JSON??
     fileInput: null, // form input
-    //stype: 'text',
     storyAttrs: {
       color: '#fff',
       contents: '',
@@ -96,20 +95,8 @@ export default {
     selectedDiskfileUrl: null,
 
     swiperOptions: {
-      //lazy: true,
       slidesPerView: 'auto', // 'auto',
       spaceBetween: 12,
-      //lazy: true,
-      //slidesPerView: 'auto',
-      //observer: true,
-      //observeParents: true,
-      //observer: true,
-      //freeMode: true,
-      //freeModeMomentum: true,
-      //mousewheel: true,
-      //watchOverflow: true,
-      //width: 1300,
-      //watchSlidesVisibility: true,
     },
   }),
 
@@ -145,9 +132,7 @@ export default {
       } 
 
       const response = await axios.post(`/stories`, payload, {
-        headers: {
-          'Content-Type': 'application/json',
-        }
+        headers: { 'Content-Type': 'application/json' }
       })
       this.isPreviewModalVisible = false
       this.isSelectFileModalVisible = false
@@ -161,9 +146,7 @@ export default {
     },
 
     bgColor(story) {
-      return Object.keys(story).includes('background-color')
-        ? story.customAttributes['background-color']
-        : 'yellow'
+      return Object.keys(story).includes('background-color') ? story.customAttributes['background-color'] : 'yellow'
     },
 
     isMyTimeline(tl) {
