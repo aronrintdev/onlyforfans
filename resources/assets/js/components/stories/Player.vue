@@ -50,7 +50,7 @@
 
               <div v-touch:swipe.top="handleSwipeUp" class="crate-content">
                 <article v-if="s.stype==='text'" class="h-100 v-wrap">
-                  <p class="h4 text-center v-box text-white w-75">{{ s.content }}</p>
+                  <VueMarkdown class="h4 text-center v-box text-white w-75" :source="s.content || ''" />
                 </article>
                 <article v-else-if="s.stype==='image' && s.mediafiles" class="h-100">
                   <img :src="s.mediafiles[0].filepath" class="OFF-img-fluid OFF-h-100" />
@@ -74,9 +74,13 @@
 import _ from 'lodash'
 import SeeMore from './SeeMore.vue'
 
+/** https://github.com/adapttive/vue-markdown/ */
+import VueMarkdown from '@adapttive/vue-markdown'
+
 export default {
   components: {
-    seeMore: SeeMore
+    seeMore: SeeMore,
+    VueMarkdown,
   },
 
   props: {

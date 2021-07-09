@@ -64,7 +64,9 @@
 
       <template v-if="post.access">
         <div :class="{ 'tag-has-mediafiles': hasMediafiles }" class="py-3 text-wrap">
-          <b-card-text class="px-3 mb-0 tag-post_desc">{{ post.description }}</b-card-text>
+          <b-card-text class="px-3 mb-0 tag-post_desc">
+            <VueMarkdown :source="post.description || ''" />
+          </b-card-text>
         </div>
         <article v-if="hasMediafiles">
           <MediaSlider :mediafiles="post.mediafiles" :session_user="session_user" :use_mid="use_mid" />
@@ -136,12 +138,16 @@ import PostFooter from './PostFooter'
 import PostCta from './PostCta'
 import MediaSlider from './MediaSlider'
 
+/** https://github.com/adapttive/vue-markdown/ */
+import VueMarkdown from '@adapttive/vue-markdown'
+
 export default {
   components: {
     PostHeader,
     PostFooter,
     PostCta,
     MediaSlider,
+    VueMarkdown,
   },
 
   props: {

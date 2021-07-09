@@ -10,6 +10,14 @@
         </div>
         <VueMarkdown v-if="value.mcontent" class="msg-content" :source="value.mcontent || ''" />
         <div class="msg-timestamp">
+          <span
+            v-if="value.attachments.length > 0 && value.attachments[0].type === 'tip'"
+            class="mr-1"
+            v-b-tooltip.hover
+            :title="$t('tipTimestampTooltip')"
+          >
+            <fa-icon icon="dollar-sign" />
+          </span>
           {{ moment(value.created_at).format('h:mm A') }}
         </div>
       </article>
@@ -121,6 +129,8 @@ export default {
 
 <i18n lang="json5" scoped>
 {
-  "en": {}
+  "en": {
+    "tipTimestampTooltip": "This message contains financial transaction information"
+  }
 }
 </i18n>
