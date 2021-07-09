@@ -72,15 +72,10 @@
             <b-row>
               <b-col cols="12" md="8" class="post-create-footer-ctrl d-flex">
                 <ul class="list-inline d-flex mb-0 OFF-border-right">
-                  <li>
-                    <label id="clickme_to-select">
-                      <fa-icon :icon="['far', 'file-upload']" class="text-secondary" />
-                    </label>
-                  </li>
-                  <li @click="takePicture()" class="selectable select-pic">
+                  <li id="clickme_to-select" class="selectable select-pic">
                     <fa-icon :icon="['far', 'image']" :class="selectedMedia==='pic' ? 'text-primary' : 'text-secondary'" />
                   </li>
-                  <li @click="recordVideo()" class="selectable select-video">
+                  <li v-if="!isIOS9Plus" @click="recordVideo()" class="selectable select-video">
                     <fa-icon :icon="['far', 'video']" :class="selectedMedia==='video' ? 'text-primary' : 'text-secondary'" />
                   </li>
                   <li @click="recordAudio()" class="selectable select-audio">
@@ -98,15 +93,6 @@
                   <li class="selectable select-timer"><span><TimerIcon /></span></li>
                   <li class="selectable select-calendar" @click="showSchedulePicker()"><span><CalendarIcon /></span></li>
                   -->
-                  <li class="selectable select-location">
-                    <fa-icon :icon="['far', 'map-pin']" class="text-secondary" />
-                  </li>
-                  <li class="selectable select-emoji">
-                    <fa-icon :icon="['far', 'smile']" class="text-secondary" />
-                  </li>
-                  <li class="selectable select-timer">
-                    <fa-icon :icon="['far', 'clock']" class="text-secondary" />
-                  </li>
                   <li class="selectable select-expire-date" :disabled="expirationPeriod" @click="showExpirationPicker()">
                     <fa-icon :icon="['far', 'hourglass-half']" class="text-secondary" />
                   </li>
@@ -136,6 +122,8 @@
 <script>
 import Vuex from 'vuex';
 import moment from 'moment';
+import { isIOS, osVersion } from 'mobile-device-detect';
+
 import { eventBus } from '@/app';
 import vue2Dropzone from 'vue2-dropzone';
 import 'vue2-dropzone/dist/vue2Dropzone.min.css';
@@ -155,6 +143,9 @@ export default {
   },
 
   computed: {
+    isIOS9Plus() {
+      return isIOS && parseInt(osVersion.split('.')[0]) >= 9;
+    }
   },
 
   data: () => ({
@@ -405,7 +396,7 @@ export default {
         })
       })
     }
-
+    $('.dz-hidden-input').attr('capture', 'capture');
   }, // mounted
 
   created() {
