@@ -240,6 +240,7 @@ class RestStoriesTest extends TestCase
      *  @group stories
      *  @group regression
      *  @group regression-base
+     *  @group july08
      */
     public function test_can_store_text_story()
     {
@@ -273,12 +274,16 @@ class RestStoriesTest extends TestCase
         $this->assertNotNull($story);
         $this->assertSame($story->content, $storyR->content);
         $this->assertSame(StoryTypeEnum::TEXT, $storyR->stype);
+
+        $this->assertNotNull($story->storyqueues);
+        $this->assertEquals($story->timeline->followers->count(), $story->storyqueues->count());
     }
 
     /**
      *  @group stories
      *  @group regression
      *  @group regression-base
+     *  @group july08
      */
     public function test_can_store_picture_story()
     {
@@ -322,6 +327,9 @@ class RestStoriesTest extends TestCase
         // Test relations
         $this->assertTrue( $story->mediafiles->contains($mf->id) );
         $this->assertEquals( $story->id, $mf->resource->id );
+
+        $this->assertNotNull($story->storyqueues);
+        $this->assertEquals($story->timeline->followers->count(), $story->storyqueues->count());
     }
 
     /**

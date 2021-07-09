@@ -9,7 +9,7 @@ class CreateStoryqueuesTable extends Migration
     public function up()
     {
         Schema::create('storyqueues', function (Blueprint $table) {
-            $table->uuid('id')->primary();
+            $table->increments('id'); // just use integer as this is a join table and sync, etc may not work with UUID %PSG (eg, if we need to use query builder insert instead of Eloquent)
 
             $table->uuid('story_id')->comment("FK - Story which log entry applies to");
             $table->foreign('story_id')->references('id')->on('stories');
