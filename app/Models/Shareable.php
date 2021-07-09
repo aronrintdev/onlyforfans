@@ -32,8 +32,8 @@ class Shareable extends Model
                         'viewer_id' => $model->sharee_id,
                         'story_id' => $s->id,
                         'timeline_id' => $s->timeline->id,
-                        'created_at' => $model->created_at,
-                        'updated_at' => $model->created_at,
+                        'created_at' => $s->created_at, // %NOTE: use the created date of the *story* here (!)
+                        'updated_at' => $s->updated_at,
                     ];
                 });
                 DB::table('storyqueues')->insert($attrs);
