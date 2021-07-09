@@ -15,6 +15,7 @@ use App\Models\Chatthread;
 use App\Models\Mycontact;
 use App\Models\User;
 use App\Notifications\MessageReceived;
+use Illuminate\Support\Collection;
 
 class ChatthreadsController extends AppBaseController
 {
@@ -319,7 +320,7 @@ class ChatthreadsController extends AppBaseController
                 if ( $request->has('deliver_at') ) {
                     $ct->scheduleMessage($request->user(), $request->mcontent, $request->deliver_at);
                 } else {
-                    $ct->sendMessage($request->user(), $request->mcontent);
+                    $ct->sendMessage($request->user(), $request->mcontent, new Collection());
                 }
             }
             $ct->refresh();
@@ -342,7 +343,7 @@ class ChatthreadsController extends AppBaseController
         $request->validate([
             'mcontent' => 'required|string',
         ]);
-        $chatmessage = $chatthread->sendMessage($request->user(), $request->mcontent);
+        $chatmessage = $chatthread->sendMessage($request->user(), $request->mcontent, new Collection());
         try {
             //broadcast( new MessageSentEvent($chatmessage) )->toOthers();
             MessageSentEvent::dispatch($chatmessage);

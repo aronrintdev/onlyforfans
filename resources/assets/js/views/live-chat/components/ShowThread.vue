@@ -51,19 +51,13 @@
         <VaultSelector @close="vaultSelectionOpen = false" />
       </section>
       <section v-else key="messages" class="messages flex-fill">
-        <b-list-group-item
+        <Message
           v-for="(cm, idx) in chatmessages"
           :key="cm.id"
+          :value="cm"
+          :isDateBreak="isDateBreak(cm, idx)"
           v-observe-visibility="idx === chatmessages.length - 1 ? endVisible : false"
-        >
-          <section v-if="isDateBreak(cm, idx)" class="msg-grouping-day-divider"><span>{{ moment(cm.created_at).format('MMM DD, YYYY') }}</span></section>
-          <section class="crate" :class="cm.sender_id===session_user.id ? 'session_user' : 'other_user'">
-            <article class="box">
-              <div class="msg-content">{{ cm.mcontent }}</div>
-              <div class="msg-timestamp">{{ moment(cm.created_at).format('h:mm A') }}</div>
-            </article>
-          </section>
-        </b-list-group-item>
+        />
         <b-list-group-item v-if="isLastPage">
           <section class="msg-grouping-day-divider">
             <span v-text="$t('startOfThread')" />
@@ -99,6 +93,7 @@ import MessageForm from '@views/live-chat/components/MessageForm'
 import SearchInput from '@components/common/search/HorizontalOpenInput'
 import TypingIndicator from './TypingIndicator'
 import VaultSelector from './VaultSelector'
+import Message from './Message.vue'
 
 export default {
   name: 'ShowThread',
@@ -308,6 +303,7 @@ export default {
   }, // watch
 
   components: {
+    Message,
     MessageForm,
     SearchInput,
     TypingIndicator,

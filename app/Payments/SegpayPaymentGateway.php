@@ -2,20 +2,20 @@
 
 namespace App\Payments;
 
-use App\Enums\Financial\AccountTypeEnum;
+use Money\Money;
+use App\Models\Tip;
 use App\Enums\PaymentTypeEnum;
-use App\Interfaces\Tippable;
+use Illuminate\Support\Carbon;
 use App\Jobs\FakeSegpayPayment;
 use App\Interfaces\Purchaseable;
 use App\Interfaces\Subscribable;
 use App\Models\Financial\Account;
-use App\Models\Financial\Exceptions\Account\IncorrectTypeException;
-use App\Models\Financial\SegpayCall;
-use App\Models\Financial\Exceptions\InvalidFinancialSystemException;
-use Money\Money;
 use Illuminate\Support\Facades\App;
+use App\Models\Financial\SegpayCall;
 use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Carbon;
+use App\Enums\Financial\AccountTypeEnum;
+use App\Models\Financial\Exceptions\Account\IncorrectTypeException;
+use App\Models\Financial\Exceptions\InvalidFinancialSystemException;
 
 /**
  *
@@ -53,18 +53,18 @@ class SegpayPaymentGateway implements PaymentGatewayContract
      * Handle a tip with a known Segpay card account
      *
      * @param Account $account
-     * @param Tippable $item
+     * @param Tip $item
      * @param Money $price
      * @return array
      */
-    public function tip(Account $account, Tippable $item, Money $price)
+    public function tip(Account $account, Tip $tip, Money $price)
     {
         $this->validateAccount($account);
         if (Config::get('segpay.fake') && App::environment() != 'production') {
-            return $this->fakeTip($account, $item, $price);
+            return $this->fakeTip($account, $tip, $price);
         }
 
-        $segpayCall = SegpayCall::confirmTip($account, $price, $item);
+        $segpayCall = SegpayCall::confirmTip($account, $price, $tip);
 
         return [
             'success' => isset($segpayCall->failed_at) ? false : true,
@@ -146,10 +146,10 @@ class SegpayPaymentGateway implements PaymentGatewayContract
      * @param Money $price
      * @return array
      */
-    private function fakeTip(Account $account, Tippable $item, Money $price)
+    private function fakeTip(Account $account, Tip $tip, Money $price)
     {
         // Dispatch Faked Event
-        FakeSegpayPayment::dispatch($item, $account, PaymentTypeEnum::TIP, $price);
+        FakeSegpayPayment::dispatch($tip, $account, PaymentTypeEnum::TIP, $price);
         return [
             'success' => true,
             'faked' => true,

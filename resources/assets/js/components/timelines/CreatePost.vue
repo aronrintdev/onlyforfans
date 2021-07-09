@@ -328,10 +328,11 @@ export default {
       this.$store.dispatch('getQueueMetadata');
       // Show notification if scheduled post is succesfully created
       if (this.scheduled_at) {
-        this.$root.$bvToast.toast('', {
-          title: 'New scheduled post is created.',
-          variant: 'success',
-          toaster: 'b-toaster-top-center',
+        this.$root.$bvToast.toast('New scheduled post is created.', {
+          title: 'Success!',
+          variant: 'primary',
+          solid: true,
+          toaster: 'b-toaster-top-right',
         })
       }
       this.resetForm();
@@ -408,12 +409,6 @@ export default {
   }, // mounted
 
   created() {
-    this.$root.$bvToast.toast('New scheduled post is created.', {
-      title: 'Success!',
-      variant: 'primary',
-      solid: true,
-      toaster: 'b-toaster-top-right',
-    })
     this.dropzoneConfigs = {
       pic: {
         availFileTypes: 'image/*', // csv format

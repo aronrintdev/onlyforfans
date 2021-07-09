@@ -38,7 +38,7 @@
           <p class="text-center"><small><span v-if="renderDetails">{{ renderDetails }}</span></small></p>
 
           <textarea
-            v-model="formPayload.notes"
+            v-model="formPayload.message"
             cols="60"
             rows="5"
             class="w-100"
@@ -57,14 +57,13 @@
           :value="payload.resource"
           :item-type="payload.resource_type"
           :price="formPayload.amount"
-          :currency="'USD'"
+          :currency="formPayload.currency"
           type="tip"
           :display-price="formPayload.amount | niceCurrency"
-          :extra="{ notes: formPayload.notes}"
+          :extra="{ message: formPayload.message }"
           class="mt-3"
         />
       </b-card-body>
-
     </transition>
   </b-card>
 </template>
@@ -125,7 +124,8 @@ export default {
     LEDGER_CONFIG,
     formPayload: {
       amount: LEDGER_CONFIG.MIN_TIP_IN_CENTS,
-      notes: '',
+      currency: 'USD',
+      message: '',
     },
   }),
 
@@ -133,30 +133,9 @@ export default {
 
   methods: {
 
-    async sendTip(e) {
+    sendTip(e) {
       e.preventDefault()
       this.step = 'payment'
-
-      // const { resource, resource_type } = this.payload 
-      // let url
-      // switch (resource_type) {
-      //   case 'posts':
-      //     url = route('posts.tip', resource.id) // tip post (resource)
-      //     break
-      //   case 'timelines':
-      //   default:
-      //     url = route('timelines.tip', resource.id) // tip timeline (resource)
-      // }
-      // const response = await axios.put(url, {
-      //   base_unit_cost_in_cents: this.formPayload.amount,
-      //   notes: this.formPayload.notes || '',
-      // })
-      // this.$bvModal.hide('modal-tip')
-      // this.$root.$bvToast.toast(`Tip sent to ${this.tippedTimeline.slug}`, {
-      //   toaster: 'b-toaster-top-center',
-      //   title: 'Success!',
-      // })
-      // eventBus.$emit('update-originator')
     },
 
   },
@@ -192,3 +171,9 @@ body .user-details .tag-username {
   text-transform: capitalize;
 }
 </style>
+
+<i18n lang="json5" scoped>
+{
+  "en": {}
+}
+</i18n>

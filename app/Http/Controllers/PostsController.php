@@ -15,6 +15,7 @@ use App\Models\Financial\Account;
 use App\Http\Resources\PostCollection;
 use App\Models\Casts\Money as CastsMoney;
 use App\Http\Resources\Post as PostResource;
+use App\Models\Tip;
 use Carbon\Carbon;
 
 class PostsController extends AppBaseController
@@ -124,7 +125,7 @@ class PostsController extends AppBaseController
     {
         $this->authorize('update', $post);
 
-        if ($post->sharees()->count() > 0) {
+        if ($post->price->isPositive() && $post->sharees()->count() > 0) {
             abort(403, 'Post has sharees');
         }
 
@@ -231,7 +232,20 @@ class PostsController extends AppBaseController
         $account = Account::with('resource')->find($request->account_id);
         $this->authorize('purchase', $account);
 
-        return $paymentGateway->tip($account, $post, $price);
+        $tip = Tip::create([
+            'sender_id'       => $request->user()->getKey(),
+            'receiver_id'     => $post->getOwner()->first()->getKey(),
+            'tippable_type'   => $post->getMorphString(),
+            'tippable_id'     => $post->getKey(),
+            'account_id'      => $account->getKey(),
+            'currency'        => $request->currency,
+            'amount'          => $request->amount,
+            'period'          => $request->period ?? 'single',
+            'period_interval' => $request->period_interval ?? 1,
+            'message'         => $request->message ?? null,
+        ]);
+
+        return $paymentGateway->tip($account, $tip, $price);
     }
 
     /**

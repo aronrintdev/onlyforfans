@@ -28,9 +28,11 @@ use App\Events\AccessRevoked;
 use App\Events\ItemPurchased;
 use App\Jobs\Financial\UpdateAccountBalance;
 use App\Models\Financial\Account;
+use App\Models\Tip;
 use App\Notifications\TimelineFollowed;
 use App\Notifications\TimelineSubscribed;
 use App\Notifications\TipReceived;
+use App\Payments\PaymentGateway;
 use Symfony\Component\Console\Output\ConsoleOutput;
 
 class TipsTableSeeder extends Seeder
@@ -86,7 +88,20 @@ class TipsTableSeeder extends Seeder
                     }
                     try {
                         $tipAmount = $this->faker->numberBetween(1, 20) * 500;
-                        $paymentAccount->tip($t, $tipAmount, ['ignoreBalance' => true, 'metadata' => ['notes' => 'TipsTableSeeder.tip_a_timeline'] ]);
+                        $tip = Tip::create([
+                            'sender_id'       => $follower->getKey(),
+                            'receiver_id'     => $t->getOwner()->first()->getKey(),
+                            'tippable_type'   => $t->getMorphString(),
+                            'tippable_id'     => $t->getKey(),
+                            'account_id'      => $paymentAccount->getKey(),
+                            'currency'        => 'USD',
+                            'amount'          => $tipAmount,
+                            'period'          => 'single',
+                            'period_interval' => 1,
+                            'message'         => null,
+                        ]);
+                        $paymentGateway = new PaymentGateway();
+                        $paymentGateway->tip($paymentAccount, $tip, $tip->amount);
                     } catch (RuntimeException $e) {
                         $exceptionClass = class_basename($e);
                         if ($this->appEnv !== 'testing') {
@@ -104,7 +119,20 @@ class TipsTableSeeder extends Seeder
                         }
                         try {
                             $tipAmount = $this->faker->numberBetween(1, 20) * 500;
-                            $paymentAccount->tip($p, $tipAmount, ['ignoreBalance' => true, 'metadata' => ['notes' => 'TipsTableSeeder.tip_a_post']]);
+                            $tip = Tip::create([
+                                'sender_id'       => $follower->getKey(),
+                                'receiver_id'     => $p->getOwner()->first()->getKey(),
+                                'tippable_type'   => $p->getMorphString(),
+                                'tippable_id'     => $p->getKey(),
+                                'account_id'      => $paymentAccount->getKey(),
+                                'currency'        => 'USD',
+                                'amount'          => $tipAmount,
+                                'period'          => 'single',
+                                'period_interval' => 1,
+                                'message'         => null,
+                            ]);
+                            $paymentGateway = new PaymentGateway();
+                            $paymentGateway->tip($paymentAccount, $tip, $tip->amount);
                         } catch (RuntimeException $e) {
                             $exceptionClass = class_basename($e);
                             if ($this->appEnv !== 'testing') {
@@ -127,7 +155,7 @@ class TipsTableSeeder extends Seeder
             $this->output->writeln("-------------------------");
         }
         $count = Account::where('owner_type', '!=', 'financial_system_owner')->count();
-        Account::where('owner_type', '!=', 'financial_system_owner')->cursor()->each(function ($account) use ($count) {
+        Account::where('owner_type', '!=', 'financial_system_owner')->get()->each(function ($account) use ($count) {
             static $iter = 1;
             if ($this->appEnv !== 'testing') {
                 $this->output->writeln("({$iter} of {$count}): Updating Balance for {$account->name}");

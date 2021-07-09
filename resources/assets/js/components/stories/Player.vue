@@ -12,7 +12,7 @@
         </div>
         <ul class="tag-debug">
           <li>story index: {{currentIndex+1}}/{{stories.length}}</li>
-          <li>current story ID: {{currentStory.id}}</li>
+          <li>current story ID: {{currentStoryId}}</li>
         </ul>
       </div>
     </b-sidebar>
@@ -28,7 +28,7 @@
           </nav>
 
           <section v-for="(s, iter) in stories" :key="`story-${s.id}`">
-            <article v-if="currentIndex==iter" :style="cssDisplay" class="display-area">
+            <article v-if="currentIndex===iter" :style="cssDisplay" class="display-area">
 
               <div class="tag-creator d-flex align-items-center">
                 <b-avatar v-if="avatar" :src="avatar.filepath" class="mr-2" size="2.5rem" />
@@ -89,8 +89,8 @@ export default {
 
   data: () => ({
     currentIndex: 0, // index from 0
-    play: false,// true,
-    speed: 3000,
+    play: false,
+    speed: 900, // 3000,
     timelineAnimation: null,
     speedOptions: [
       {
@@ -136,17 +136,9 @@ export default {
       }
       return {}
     },
-    /*
-    stories() {
-      if (this.stories.length > this.maxStories) {
-        return _.slice(this.stories, 0, this.maxStories)
-      }
-      return this.stories
-    },
-     */
 
-    currentStory() {
-      return this.stories.length ? this.stories[this.currentIndex] : null
+    currentStoryId() {
+      return this.stories.length ? this.stories[this.currentIndex].id : null
     }
 
   },
@@ -190,18 +182,9 @@ export default {
         console.log(`goTo() - max out`)
         this.currentIndex = this.stories.length-1 // max out at last index
       } else {
-        console.log(`goTo() - assign`)
+        console.log(`goTo() - assign this.currentIndex to index = ${index}`)
         this.currentIndex = index
       }
-        /*
-      index = index < 0
-        ? this.stories.length - 1
-        : index >= this.stories.length
-        ? 0
-        : index
-      this.currentIndex = index
-         */
-
       this.timelineAnimation.seek(this.getTimelineSeek(index))
 
       if (this.play) {
@@ -214,18 +197,22 @@ export default {
     },
 
     addTimelineElements() {
-      this.stories.forEach((story, index) => {
+      console.log('=== addTimlineElements()')
+      this.stories.forEach((s, idx) => {
         this.timelineAnimation.add({
-          targets: this.$refs[`nav-${story.id}`][0],
+          targets: this.$refs[`nav-${s.id}`][0], // affects class .tag-target
           width: '100%',
           changeBegin: (a) => {
-            this.currentIndex = index
+            //console.log(`addTimlineElements().callback - idx = ${idx}`)
+            //this.currentIndex = idx
           },
         })
       })
     },
 
     createTimeline() {
+      console.log('=== createTimeline()')
+      const _this = this
       this.timelineAnimation = this.$anime.timeline({
         autoplay: this.play,
         duration: this.speed,
@@ -233,16 +220,18 @@ export default {
         loop: false,
         complete: function() {
           console.log('$anime - complete callback')
+          _this.doNav('next') // should advance to next timeline (emit event to parent component)
         },
       })
       this.addTimelineElements()
     },
 
     removeTimeline() {
+      console.log('=== removeTimeline()')
       this.timelineAnimation.pause()
       this.timelineAnimation.restart()
-      this.stories.forEach((story, index) => {
-        this.timelineAnimation.remove(this.$refs[`nav-${story.id}`][0])
+      this.stories.forEach((s, idx) => {
+        this.timelineAnimation.remove(this.$refs[`nav-${s.id}`][0]) // affects class .tag-target
       })
     },
 
@@ -274,6 +263,12 @@ export default {
         this.timelineAnimation.play()
       }
     },
+    stories() {
+      console.log('=== watch stories()')
+      //this.removeTimeline()
+      //this.createTimeline()
+      //this.addTimelineElements()
+    }
   },
 
   mounted() {

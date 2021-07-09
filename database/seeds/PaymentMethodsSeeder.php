@@ -16,13 +16,8 @@ class PaymentMethodsSeeder extends Seeder
     {
         $this->initSeederTraits('PaymentMethodsSeeder');
 
-        if ($this->appEnv === 'testing') {
-            $this->output->writeln("  - SKIPPING for test env due to 'locked' issue");
-            return; // %FIXME
-        }
-
         $iter = 1;
-        User::cursor()->each(function($user) use (&$iter) {
+        User::get()->each(function($user) use (&$iter) {
 
             $count = $this->faker->numberBetween(self::$MIN, self::$MAX);
 

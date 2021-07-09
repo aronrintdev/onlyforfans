@@ -83,6 +83,7 @@ class AppServiceProvider extends ServiceProvider
             'stories'                => 'App\Models\Story',
             'subscriptions'          => 'App\Models\Subscription',
             'timelines'              => 'App\Models\Timeline',
+            'tips'                   => 'App\Models\Tip',
             'users'                  => 'App\Models\User',
             'usernameRules'          => 'App\Models\UsernameRule',
             'vaults'                 => 'App\Models\Vault',
