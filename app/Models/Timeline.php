@@ -154,6 +154,10 @@ class Timeline extends Model implements Subscribable, Tippable, Reportable
         return $this->hasMany(Story::class);
     }
 
+    public function storyqueues() {
+        return $this->hasMany(Storyqueue::class);
+    }
+
     public function user() { // timeline owner
         return $this->belongsTo(User::class);
     }
