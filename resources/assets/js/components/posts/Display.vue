@@ -33,9 +33,8 @@
                 <ShareNetwork
                   network="facebook"
                   :url="postFullUrl"
-                  title="AllFans Post"
-                  :description="post.description"
-                  hashtags="allfans,mjmdesign"
+                  title="AllFans"
+                  hashtags="allfans"
                 >
                   <fa-icon :icon="['fab', 'facebook-square']" fixed-width class="mr-2" />
                   Facebook Share
@@ -44,9 +43,9 @@
               <b-dropdown-item>
                 <ShareNetwork
                   network="twitter"
+                  title="AllFans"
                   :url="postFullUrl"
-                  :title="post.description"
-                  hashtags="allfans,mjmdesign"
+                  hashtags="allfans"
                 >
                   <fa-icon :icon="['fab', 'twitter-square']" fixed-width class="mr-2" />
                   Twitter Share
