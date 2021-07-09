@@ -33,6 +33,7 @@ class Story extends Model implements Likeable, Ownable
         parent::boot();
 
         static::created(function ($model) {
+            //$this->insertStoryqueues();
             // As this is a new story, we don't need to worry about 24 hour filtering...
             $followers = $model->timeline->followers ?? collect();
             $attrs = [];
