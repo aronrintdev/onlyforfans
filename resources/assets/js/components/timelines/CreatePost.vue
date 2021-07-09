@@ -266,10 +266,7 @@ export default {
 
         if ( !queued.length ) {
           console.log('CreatePost::savePost() - nothing queued')
-          this.$store.dispatch('unshiftPostToTimeline', { newPostId: this.newPostId })
-          this.resetForm()
-          this.mediafiles = []
-          this.posting = false
+          this.createCompleted();
         }
 
       } else {
@@ -323,7 +320,20 @@ export default {
         return
       }
       console.log('queueCompleteEvent', { });
+      this.createCompleted();
+    },
+
+    createCompleted() {
       this.$store.dispatch('unshiftPostToTimeline', { newPostId: this.newPostId });
+      this.$store.dispatch('getQueueMetadata');
+      // Show notification if scheduled post is succesfully created
+      if (this.scheduled_at) {
+        this.$root.$bvToast.toast('', {
+          title: 'New scheduled post is created.',
+          variant: 'success',
+          toaster: 'b-toaster-top-center',
+        })
+      }
       this.resetForm();
       this.mediafiles = [];
       this.posting = false;
@@ -398,6 +408,12 @@ export default {
   }, // mounted
 
   created() {
+    this.$root.$bvToast.toast('New scheduled post is created.', {
+      title: 'Success!',
+      variant: 'primary',
+      solid: true,
+      toaster: 'b-toaster-top-right',
+    })
     this.dropzoneConfigs = {
       pic: {
         availFileTypes: 'image/*', // csv format

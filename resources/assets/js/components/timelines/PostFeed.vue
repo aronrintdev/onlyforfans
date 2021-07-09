@@ -392,7 +392,6 @@ export default {
         }
       } else {
         if (newVal.schedule_datetime) {
-          this.$store.dispatch('getQueueMetadata');
           if (!this.isLastPage && this.renderedItems.length >= 5) {
             this.renderedItems.pop();
           }
