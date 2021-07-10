@@ -2,6 +2,7 @@
 namespace App\Models;
 
 use DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection;
 
@@ -34,24 +35,82 @@ class Storyqueue extends Model
     //--------------------------------------------
 
     // https://stackoverflow.com/questions/43282161/get-most-recent-row-with-group-by-and-laravel
+    // %FIXME: rename
     public static function viewableQueue(User $viewer) : Collection
     {
-        $storyqueues = Storyqueue::with('timeline')->select(DB::raw('sq.*'))
-            ->from(DB::raw('(SELECT * FROM storyqueues ORDER BY created_at DESC) sq'))
+        /*
+        $storyqueues = Storyqueue::with('timeline', 'story')->select(DB::raw('sq.*'))
+            ->from(DB::raw('(SELECT * FROM storyqueues where viewer_id="'.$viewer->id.'" ORDER BY created_at DESC) sq')) // %FIXME: sql injection defense!
             ->where('viewer_id', $viewer->id)
             ->whereNull('viewed_at')
             ->withTrashed()->whereNull('sq.deleted_at') // won't work without this (??)
             ->groupBy('sq.timeline_id')
+            ->orderBy('sq.created_at', 'desc')
+            //->orderBy('sq.created_at', 'asc')
             ->get();
+        //dd($storyqueues->toArray());
+        return $storyqueues;
+         */
+
+        // (1) get a unique grouped set of timelines
+        $storyqueues = Storyqueue::with('timeline', 'story')
+            ->where('viewer_id', $viewer->id)->whereNull('viewed_at')
+            //->groupBy('timeline_id')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        /*
+        $storyqueues = $storyqueues->sortByDesc( function($sq) use(&$viewer) {
+
+            $stories = Storyqueue::select(['id','created_at'])
+                ->where('timeline_id', $this->id)
+                //->where('viewer_id', $viewer->id)
+                ->orderBy('created_at', 'desc')->get();
+            return ($stories->count()>0) ? $stories[0] : null;
+
+            //return $sq->timeline->getLatestStory($viewer)->created_at; // sort by latest story slide in the timeline
+        });
+         */
+        //dd($storyqueues->toArray());
         return $storyqueues;
     }
 
     public static function viewableTimelines(User $viewer) : Collection
     {
         $storyqueues = Storyqueue::viewableQueue($viewer);
+        $timelines = $storyqueues->reduce( function($acc, $sq) {
+            static $selected = [];
+            if ( !in_array($sq->timeline_id, $selected) ) {
+                $selected[] = $sq->timeline_id;
+                $acc->push($sq->timeline->makeVisible('user')->load(['user', 'avatar', 'storyqueues']));
+            }
+            return $acc;
+        }, collect());
+        /*
         $timelines = $storyqueues->map( function($sq) {
-            return $sq->timeline;
+            static $selected = [];
+            if ( !in_array($sq->timeline_id, $selected) ) {
+                $selected[] = $sq->timeline_id;
+                return $sq->timeline;
+            } else {
+                return false;
+            }
         });
+         */
+        /*
+        $timelines = $storyqueues->map( function($sq) use(&$viewer) {
+            $tl =  $sq->timeline->makeVisible(['user'])->load([
+                'avatar', 
+                //'stories', 
+                'user',
+                'storyqueues' => function($q1) use(&$viewer) {
+                    $q1->where('viewer_id', $viewer->id);
+                },
+            ]); // %TODO: cleanup, don't need user (just user_id)
+            return $tl;
+        });
+         */
+        Log::info('here ...'.json_encode($timelines->toArray(), JSON_PRETTY_PRINT));
         return $timelines;
     }
 }

@@ -336,9 +336,13 @@ class Timeline extends Model implements Subscribable, Tippable, Reportable
         return $this->user;
     }
 
-    public function getLatestStory() : ?Story
+    public function getLatestStory(User $viewer) : ?Storyqueue
     {
-        $stories = Story::select(['id','slug','created_at'])->where('timeline_id', $this->id)->orderBy('created_at', 'desc')->get();
+        //$stories = Story::select(['id','slug','created_at'])->where('timeline_id', $this->id)->orderBy('created_at', 'desc')->get();
+        $stories = Storyqueue::select(['id','created_at'])
+            ->where('timeline_id', $this->id)
+            //->where('viewer_id', $viewer->id)
+            ->orderBy('created_at', 'desc')->get();
         return ($stories->count()>0) ? $stories[0] : null;
     }
 

@@ -13,7 +13,6 @@
       <!-- Followed creators' stories avatar -->
       <swiper ref="mySwiper" :options="swiperOptions" class="">
         <swiper-slide v-for="tl in timelines" :key="tl.id" class="story slide tag-followed_timeline">
-
           <router-link :to="{ name: 'stories.player', params: { timeline_id: tl.id } }" class="box-story">
             <b-img 
               v-b-popover.hover.top="{variant: 'info', content: tl.slug}" 
@@ -24,14 +23,29 @@
               alt="Story owner's avatar" 
             />
           </router-link>
-          <!--
-          <div>
-            <pre>{{ tl.slug }}</pre>
-            <pre>{{ JSON.stringify(tl.stories.map( s => ({ id: s.id, slug: s.slug, created: s.created_at }) )[0], null, 2) }}</pre>
-          </div>
-          -->
         </swiper-slide>
       </swiper>
+
+      <!--
+      <div ref="mySwiper" :options="swiperOptions" class="">
+        <div v-for="tl in timelines" :key="tl.id" class="story OFF-slide tag-followed_timeline">
+          <router-link :to="{ name: 'stories.player', params: { timeline_id: tl.id } }" class="box-story">
+            <b-img 
+              v-b-popover.hover.top="{variant: 'info', content: tl.slug}" 
+              rounded="circle" 
+              :src="tl.avatar.filepath" 
+              :class="{ 'my-story-avatar': isMyTimeline(tl) }"
+              class="p-0" 
+              alt="Story owner's avatar" 
+            />
+          </router-link>
+          <div>
+            <pre>{{ tl.slug }}</pre>
+            <pre>{{ JSON.stringify(tl.storyqueues.map( sq => ({ timeline_id: tl.id, story_id: sq.story_id, created: sq.created_at }) ), null, 2) }}</pre>
+          </div>
+        </div>
+      </div>
+      -->
 
     </section>
 
@@ -97,6 +111,7 @@ export default {
     swiperOptions: {
       slidesPerView: 'auto', // 'auto',
       spaceBetween: 12,
+      //direction: 'vertical',
     },
   }),
 

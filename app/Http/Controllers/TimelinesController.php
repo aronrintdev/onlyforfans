@@ -31,6 +31,7 @@ use App\Models\Mediafile;
 use App\Models\Mycontact;
 use App\Models\Post;
 use App\Models\Setting;
+use App\Models\Storyqueue;
 use App\Models\Subscription;
 use App\Models\Timeline;
 use App\Models\Tip;
@@ -393,9 +394,38 @@ class TimelinesController extends AppBaseController
         return new PostCollection($data);
     }
 
-    // returns a list of stories grouped by followed timeline (ignores timeline if it has no active stories)
+    // %TODO: move to stories controller
+    public function myActiveStoryTimelines(Request $request)
+    {
+        // %NOTE: if a story is in my queue, then  'follow' is already implied (ie that DB work is done inherent in [storyqueues]
+        $daysWindow = env('STORY_WINDOW_DAYS', 10000);
+        $storyqueues = Storyqueue::where('viewer_id', $request->user()->id)
+            ->whereNull('viewed_at')
+            ->where('created_at', '>=', Carbon::now()->subDays($daysWindow))
+            ->get();
+
+
+        // [ ] filter the above to return a list of unique timeline_ids, with the unqiue timeline_id selected by being the one with the latest storyqueue/story in its grouping
+        $storyqueues = Storyqueue::distinct('timeline_id')
+            ->where('viewer_id', $request->user()->id)
+            ->whereNull('viewed_at')
+            ->where('created_at', '>=', Carbon::now()->subDays($daysWindow))
+            ->orderBy('created_at', 'desc')
+            ->get();
+        dd($storyqueues);
+
+        $queryF = Timeline::with(['avatar']);
+        $queryF->whereIn('id', $followingIds); // comment out to test
+        $following = $queryF->get();
+        $following = $following->sortByDesc( function($t) {
+            return $t->getLatestStory()->created_at; // sort timelines (epics) by latest story
+        });
+    }
+
+    // returns a list of followed timelines with associated story groupings (ignores timeline if it has no active stories)
     public function myFollowedStories(Request $request)
     {
+if (0) {
         $followingIds = $request->user()->followedtimelines->pluck('id');
 
         // %TODO: split *stories* within timeline into seen and unseen?
@@ -425,8 +455,14 @@ class TimelinesController extends AppBaseController
 
         $following->prepend($me);
         $data = $following->values()->all();
+} else {
 
-        return new TimelineCollection($data);
+        $data = Storyqueue::viewableTimelines($request->user());
+}
+        return response()->json([
+            'data' => $data,
+        ]);
+        //return new TimelineCollection($data);
     }
 
 }
