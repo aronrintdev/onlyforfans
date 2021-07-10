@@ -23,7 +23,58 @@ class StoryModelTest extends TestCase
      * @group story-model
      * @group july09
      */
-    public function test_my_active_story_timelines()
+    public function test_basic_ts_integrity()
+    {
+        $stories = Story::get();
+        $stories->each( function($s) {
+            $s->storyqueues->each( function($sq) use(&$s) {
+                $this->assertEquals($s->timeline->id, $sq->timeline->id);
+                $this->assertEquals($s->created_at, $sq->created_at);
+            });
+        });
+    }
+
+    /**
+     * @group story-model
+     * @group OFF-july09
+     */
+    public function test_viewable_timelines()
+    {
+        $daysWindow = env('STORY_WINDOW_DAYS', 10000);
+        $dummyTimeline = Timeline::has('storyqueues','>=',1)->has('followers','>=',1)->first();
+        $creator = $dummyTimeline->user;
+        $fan = $dummyTimeline->followers->first();
+        unset($dummyTimeline); // only used to get a meaningful creator and fan
+
+        //--
+
+        $timelines = Storyqueue::viewableTimelines($fan);
+        //dd('storyqueues', $storyqueues->toArray());
+
+        $seenTimelines = collect();
+        $timelines->each( function($t) use($daysWindow, &$fan, &$seenTimelines) {
+            static $lastTimeline = null;
+
+            $this->assertFalse( $seenTimelines->contains($t->id) ); // ensure unique list
+            $seenTimelines->push($t->id);
+
+            if ( !empty($lastTimeline) ) {
+                $thisTlLatestStory = $t->storyqueues()->orderBy('created_at', 'desc')->first();
+                $lastTlLatestStory = $lastTimeline->storyqueues()->orderBy('created_at', 'desc')->first();
+                //$thisTlLatestStory = $t->stories()->orderBy('created_at', 'desc')->first();
+                //$lastTlLatestStory = $lastTimeline->stories()->orderBy('created_at', 'desc')->first();
+                $this->assertLessThan($lastTlLatestStory->created_at->timestamp, $thisTlLatestStory->created_at->timestamp);
+            }
+            $lastTimeline = $t;
+
+        });
+    }
+
+    /**
+     * @group story-model
+     * @group july09
+     */
+    public function test_viewable_queue()
     {
         $daysWindow = env('STORY_WINDOW_DAYS', 10000);
         $dummyTimeline = Timeline::has('storyqueues','>=',1)->has('followers','>=',1)->first();
@@ -52,6 +103,7 @@ class StoryModelTest extends TestCase
         $storyqueues->each( function($sq) use($daysWindow, &$fan, &$seenTimelines) {
             $this->assertFalse( $seenTimelines->contains($sq->timeline_id) ); // ensure unique list
             $seenTimelines->push($sq->timeline_id);
+            static $lastTimeline = null;
 
             // Get the lastest storyqueue on the iter'd sq's timeline, verify it's the same as returned
             // by the group-by above
@@ -63,6 +115,16 @@ class StoryModelTest extends TestCase
                 ->first();
 
             $this->assertEquals($latestSQ->id, $sq->id);
+
+            $t = $sq->timeline;
+            if ( !empty($lastTimeline) ) {
+                $thisTlLatestStory = $t->storyqueues()->orderBy('created_at', 'desc')->first();
+                $lastTlLatestStory = $lastTimeline->storyqueues()->orderBy('created_at', 'desc')->first();
+                //$thisTlLatestStory = $t->stories()->orderBy('created_at', 'desc')->first();
+                //$lastTlLatestStory = $lastTimeline->stories()->orderBy('created_at', 'desc')->first();
+                $this->assertLessThan($lastTlLatestStory->created_at->timestamp, $thisTlLatestStory->created_at->timestamp);
+            }
+            $lastTimeline = $t;
             /*
             if ( $latestSQ->id !== $sq->id ) {
                 $list = Storyqueue::where('viewer_id', $fan->id)
