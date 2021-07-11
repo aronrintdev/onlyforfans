@@ -82,7 +82,7 @@
                     <fa-icon :icon="['far', 'microphone']" :class="selectedMedia==='audio' ? 'text-primary' : 'text-secondary'" />
                   </li>
                   <li @click="uploadFromVault()" class="selectable select-audio">
-                    <fa-icon :icon="['far', 'archive']" :class="selectedMedia==='audio' ? 'text-primary' : 'text-secondary'" />
+                    <fa-icon :icon="['far', 'archive']" :class="selectedMedia==='vault' ? 'text-primary' : 'text-secondary'" />
                   </li>
                 </ul>
                 <div class="border-right"></div>
@@ -116,11 +116,11 @@
         </b-card>
       </div>
     </section>
+    <VideoRecorder v-if="showVideoRec" @close="showVideoRec=false; selectedMedia=null" />
   </div>
 </template>
 
 <script>
-import Vuex from 'vuex';
 import moment from 'moment';
 import { isIOS, osVersion } from 'mobile-device-detect';
 
@@ -134,6 +134,7 @@ import CalendarIcon from '@components/common/icons/CalendarIcon.vue';
 
 import PriceSelector from '@components/common/PriceSelector';
 import UploadMediaPreview from '@components/posts/UploadMediaPreview';
+import VideoRecorder from '@components/videoRecorder';
 
 export default {
 
@@ -190,6 +191,7 @@ export default {
     postBtnDisabled: true,
     posting: false,
     expirationPeriod: null,
+    showVideoRec: false,
   }),
   watch: {
     description(newVal) {
@@ -336,12 +338,14 @@ export default {
     },
     recordVideo() { // %TODO
       this.selectedMedia = this.selectedMedia!=='video' ? 'video' : null
+      this.showVideoRec = true
     },
     recordAudio() { // %TODO
       this.selectedMedia = this.selectedMedia!=='audio' ? 'audio' : null
     },
 
     uploadFromVault() {
+      this.selectedMedia = this.selectedMedia!=='vault' ? 'vault' : null
       // %FIXME: should add full upload from vault feature instead of redirecting
       this.$router.push({ name: 'vault.dashboard' })
     },
@@ -423,6 +427,7 @@ export default {
     vueDropzone: vue2Dropzone,
     EmojiIcon, LocationPinIcon, TimerIcon, CalendarIcon,
     UploadMediaPreview,
+    VideoRecorder,
   },
 }
 </script>
