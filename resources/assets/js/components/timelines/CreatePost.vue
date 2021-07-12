@@ -383,6 +383,12 @@ export default {
     eventBus.$on('set-expiration-period', function(data) {
       self.expirationPeriod = data;
     })
+    eventBus.$on('video-rec-complete', function(data) {
+      self.showVideoRec = false;
+      const mediafiles = [...self.mediafiles];
+      mediafiles.push(data);
+      self.mediafiles = mediafiles;
+    })
 
     const mediafileIds = this.$route.params.mediafile_ids || []
     if ( mediafileIds.length ) {

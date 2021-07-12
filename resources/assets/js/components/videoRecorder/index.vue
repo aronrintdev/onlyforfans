@@ -90,12 +90,11 @@
 
 <script>
 import videojs from 'video.js';
-
 // Required libraries for video record
 import RecordRTC from 'recordrtc';
 import Record from 'videojs-record/dist/videojs.record.js';
 import TsEBMLEngine from 'videojs-record/dist/plugins/videojs.record.ts-ebml.js';
-
+import { eventBus } from '@/app';
 
 export default {
   data: () => ({
@@ -125,6 +124,7 @@ export default {
           maxLength: 10,
           displayMilliseconds: true,
           debug: true,
+          convertEngine: 'ts-ebml'
         }
       }
     };
@@ -134,11 +134,10 @@ export default {
 
     const self = this;
     this.player.on('finishRecord', function() {
-      // self.sortableMedias.push({
-      //   src: URL.createObjectURL(self.player.recordedData),
-      //   file: self.player.recordedData,
-      //   type: 'video/mp4',
-      // });
+      eventBus.$emit('video-rec-complete', {
+        ...self.player.recordedData,
+        filepath: URL.createObjectURL(self.player.recordedData),
+      });
       self.isRecording = false;
       self.player.record().stopDevice();
       self.closeVideoRec();
