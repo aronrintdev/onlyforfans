@@ -42,7 +42,7 @@
         <b-col>
           <p><small class="text-muted">Offer a free trial or a discounted subscription on your profile for a limited number of new or already expired subscribers.</small></p>
           <div class="w-100 d-flex justify-content-center">
-            <b-button class="w-25 ml-3" variant="primary">Start Promotion Campaign</b-button>
+            <b-button @click="startPromotionCampaign" class="w-25 ml-3" variant="primary">Start Promotion Campaign</b-button>
           </div>
         </b-col>
       </b-row>
@@ -52,6 +52,7 @@
 
 <script>
 import Vuex from 'vuex'
+import { eventBus } from '@/app'
 import FormTextInput from '@components/forms/elements/FormTextInput'
 
 export default {
@@ -124,6 +125,12 @@ export default {
       }
 
       this.isSubmitting.formSubscriptions = false
+    },
+
+    startPromotionCampaign() {
+      eventBus.$emit('open-modal', {
+        key: 'modal-promotion-campaign',
+      })
     },
 
     onReset(e) {

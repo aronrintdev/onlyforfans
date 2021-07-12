@@ -59,6 +59,7 @@
     >
       <ImageDisplay ref="ImageDisplay" :session_user="session_user" :mediafile="selectedResource" :is_feed="false" />
     </b-modal>
+
     <b-modal
       title="Scheduled Post"
       id="modal-schedule-datetime"
@@ -79,7 +80,7 @@
     >
       <EditPost ref="editPost" :post="selectedResource" />
     </b-modal>
-    
+
     <b-modal
       title="Expiration Period"
       id="expiration-period"
@@ -88,6 +89,16 @@
       body-class="p-0"
     >
       <ExpirationPeriod ref="expirationPeriod" />
+    </b-modal>
+
+    <b-modal
+      title="Start Promotion Campaign"
+      id="modal-promotion-campaign"
+      hide-footer
+      size="lg"
+      body-class="p-0"
+    >
+      <PromotionCampaign ref="promotionCampaign" />
     </b-modal>
   </div>
 </template>
@@ -107,6 +118,7 @@ import ImageDisplay from '@components/timelines/elements/ImageDisplay'
 import ScheduleDateTime from '@components/modals/ScheduleDateTime.vue'
 import EditPost from '@components/modals/EditPost.vue'
 import ExpirationPeriod from '@components/modals/ExpirationPeriod.vue'
+import PromotionCampaign from '@components/modals/PromotionCampaign.vue'
 
 export default {
   name: 'Modals',
@@ -120,7 +132,8 @@ export default {
     ImageDisplay,
     ScheduleDateTime,
     EditPost,
-    ExpirationPeriod
+    ExpirationPeriod,
+    PromotionCampaign,
   },
 
   computed: {
@@ -138,6 +151,7 @@ export default {
       'modal-schedule-datetime': 'ScheduleDateTime',
       'edit-post': 'editPost',
       'expiration-period': 'expirationPeriod',
+      'modal-promotion-campaign': 'promotionCampaign',
     },
     selectedTimeline: null,
     selectedUrl: null,
@@ -198,6 +212,9 @@ export default {
             break
           case 'expiration-period':
             this.$bvModal.show('expiration-period')
+            break
+          case 'modal-promotion-campaign':
+            this.$bvModal.show('modal-promotion-campaign')
             break
         }
       })
