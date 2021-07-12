@@ -11,11 +11,30 @@
     </div>
     <div class="d-flex justify-content-between align-items-end video-rec-bottom-bar">
       <div class="text-center video-duration" v-if="isRecording">
-        {{ currentTime.mins >= 10 ? currentTime.mins : `0${currentTime.mins}` }} : {{ currentTime.secs >= 10 ? currentTime.secs : `0${currentTime.secs}` }}
+        {{ currentTime.mins >= 10 ? currentTime.mins : `0${currentTime.mins}` }}:
+        {{ currentTime.secs >= 10 ? currentTime.secs : `0${currentTime.secs}` }}
       </div>
-      <b-button variant="secondary" class="border-0 icon-audio">
-        <fa-icon :icon="['far', 'microphone']" fixed-width class="text-white" />
-      </b-button>
+      <b-dropdown
+        id="audio-input-devices"
+        dropup
+        text="Drop-Up"
+        :disabled="audioDevices.length < 2"
+        variant="secondary"
+        class="border-0 icon-audio"
+      >
+        <template #button-content>
+          <fa-icon :icon="['far', 'microphone']" fixed-width class="text-white" />
+        </template>
+        <b-dropdown-item @click="changeAudioInput(undefined)">Disable Microphone</b-dropdown-item>
+        <b-dropdown-item
+          v-for="(device, index) in audioDevices"
+          :key="index"
+          @click="changeAudioInput(device.deviceId)"
+        >
+          {{ device.label }}
+        </b-dropdown-item>
+      </b-dropdown>
+      
       <div class="icon-record-wrapper">
         <svg
           class="progress-ring"
@@ -45,9 +64,25 @@
           <fa-icon :icon="['fas', 'stop']" fixed-width class="text-primary icon-stop" />
         </div>
       </div>
-      <b-button variant="secondary" class="border-0 icon-video" disabled>
-        <fa-icon :icon="['far', 'video']" fixed-width class="text-white" />
-      </b-button>
+      <b-dropdown
+        id="video-input-devices"
+        dropup
+        text="Drop-Up"
+        variant="secondary"
+        :disabled="videoDevices.length < 2"
+        class="border-0 icon-video"
+      >
+        <template #button-content>
+          <fa-icon :icon="['far', 'video']" fixed-width class="text-white" />
+        </template>
+        <b-dropdown-item
+          v-for="(device, index) in videoDevices"
+          :key="index"
+          @click="changeVideoInput(device.deviceId)"
+        >
+          {{ device.label }}
+        </b-dropdown-item>
+      </b-dropdown>
     </div>
     <video id="myVideo" playsinline class="video-js"></video>
   </div>
@@ -71,6 +106,8 @@ export default {
       secs: 0
     },
     videoRecLimit: 10,
+    audioDevices: [],
+    videoDevices: [],
   }),
   mounted() {
     // Initialize video recorder
@@ -106,6 +143,17 @@ export default {
       self.player.record().stopDevice();
       self.closeVideoRec();
     });
+
+    this.player.one('deviceReady', function() {
+      self.player.record().enumerateDevices();
+    });
+
+    this.player.on('enumerateReady', function() {
+      const devices = self.player.record().devices;
+      self.audioDevices = devices.filter(device => device.kind === 'audioinput');
+      self.videoDevices = devices.filter(device => device.kind === 'videoinput');
+    });
+
     this.player.on('deviceError', function(e) {
       const errorMsg = self.player.deviceErrorCode.message;
       self.$root.$bvToast.toast(errorMsg, {
@@ -116,6 +164,7 @@ export default {
         toaster: 'b-toaster-top-center',
       });
     });
+
     this.player.on('progressRecord', function(e) {
       const current = self.player.record().getCurrentTime();
       self.currentTime = {
@@ -156,6 +205,12 @@ export default {
         strokeDasharray: `${circumference} ${circumference}`,
         strokeDashoffset: `${offset}`,
       });
+    },
+    changeAudioInput(deviceId) {
+      this.player.record().setAudioInput(deviceId);
+    },
+    changeVideoInput(deviceId) {
+      this.player.record().setVideoInput(deviceId);
     }
   },
 }
@@ -264,13 +319,14 @@ export default {
         }
       }
     }
-    .icon-video,
-    .icon-audio {
-      line-height: 1;
-      padding: 0.9em;
-      svg {
-        width: 20px;
-        height: 20px;
+    .icon-video button,
+    .icon-audio button {
+      line-height: 1.3;
+      font-size: 22px;
+      padding: 10px;
+
+      &::after {
+        display: none;
       }
     }
   }
@@ -289,6 +345,11 @@ export default {
 <style>
 .myVideo-dimensions.vjs-fluid {
   padding-top: 100vh;
+}
+
+#audio-input-devices .dropdown-menu,
+#video-input-devices .dropdown-menu {
+  bottom: unset;
 }
 </style>
 
