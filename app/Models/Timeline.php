@@ -29,6 +29,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Laravel\Scout\Searchable;
 use Money\Currencies\ISOCurrencies;
+use Carbon\Carbon;
 
 /**
  * Timeline Model
@@ -339,11 +340,24 @@ class Timeline extends Model implements Subscribable, Tippable, Reportable
     public function getLatestStory(User $viewer) : ?Storyqueue
     {
         //$stories = Story::select(['id','slug','created_at'])->where('timeline_id', $this->id)->orderBy('created_at', 'desc')->get();
+        $daysWindow = env('STORY_WINDOW_DAYS', 10000);
         $stories = Storyqueue::select(['id','created_at'])
             ->where('timeline_id', $this->id)
             //->where('viewer_id', $viewer->id)
             ->orderBy('created_at', 'desc')->get();
         return ($stories->count()>0) ? $stories[0] : null;
+    }
+
+    // Has the viewer seen all 'active' slides in this timeline's story (?)
+    public function isEntireStoryViewedByUser(User $viewer) : bool
+    {
+        $daysWindow = env('STORY_WINDOW_DAYS', 10000);
+        $notViewedCount = Storyqueue::where('timeline_id', $this->id)
+            ->where('viewer_id', $viewer->id)
+            ->whereNull('viewed_at')
+            ->where('created_at','>=',Carbon::now()->subDays($daysWindow))
+            ->count();
+        return ( $notViewedCount === 0 );
     }
 
 }

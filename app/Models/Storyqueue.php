@@ -5,6 +5,7 @@ use DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection;
+use Carbon\Carbon;
 
 class Storyqueue extends Model
 {
@@ -52,10 +53,12 @@ class Storyqueue extends Model
         return $storyqueues;
          */
 
-        // (1) get a unique grouped set of timelines
+        // (1) get storyqueues for this user as viewer latest to oldest (whether viewed or not !)
+        $daysWindow = env('STORY_WINDOW_DAYS', 10000);
         $storyqueues = Storyqueue::with('timeline', 'story')
-            ->where('viewer_id', $viewer->id)->whereNull('viewed_at')
-            //->groupBy('timeline_id')
+            ->where('viewer_id', $viewer->id)
+            ->where('created_at','>=',Carbon::now()->subDays($daysWindow))
+            //->whereNull('viewed_at')
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -78,6 +81,28 @@ class Storyqueue extends Model
     public static function viewableTimelines(User $viewer) : Collection
     {
         $storyqueues = Storyqueue::viewableQueue($viewer);
+
+        // filter into 2 groups:
+        //   (1) at least one unviewed slide
+        //   (2) all slides in timeline story viewed
+
+        $atLeast1UnviewedSlide = collect();
+        $allSlidesViewed = collect();
+        $selected = [];
+        foreach ( $storyqueues as $sq ) {
+            if ( in_array($sq->timeline_id, $selected) ) {
+                continue;
+            }
+            if ($sq->timeline->isEntireStoryViewedByUser($viewer) ) {
+                $allSlidesViewed->push($sq->timeline->makeVisible('user')->load(['user', 'avatar', 'storyqueues']));
+            } else {
+                $atLeast1UnviewedSlide->push($sq->timeline->makeVisible('user')->load(['user', 'avatar', 'storyqueues']));
+            }
+            $selected[] = $sq->timeline_id;
+        }
+        $atLeast1UnviewedSlide->merge($allSlidesViewed); // collections of 'timelines'
+        $timelines = $atLeast1UnviewedSlide;
+        /*
         $timelines = $storyqueues->reduce( function($acc, $sq) {
             static $selected = [];
             if ( !in_array($sq->timeline_id, $selected) ) {
@@ -86,6 +111,8 @@ class Storyqueue extends Model
             }
             return $acc;
         }, collect());
+         */
+
         /*
         $timelines = $storyqueues->map( function($sq) {
             static $selected = [];
