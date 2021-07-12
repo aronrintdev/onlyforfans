@@ -5,7 +5,10 @@
         ghost-class="ghost">
         <div v-for="(element, index) in files" :key="index" class="drag-element">
           <div class="img-wrapper">
-            <img v-if="element.type.indexOf('image/') > -1" :src="element.filepath" alt="" />
+            <img v-if="element.type.indexOf('image/') > -1" :src="element.filepath || element.src" alt="" />
+            <video v-if="element.type.indexOf('video/') > -1">
+              <source :src="element.filepath" :type="element.type" />
+            </video>
             <span v-if="!element.selected" class="unchecked-circle" @click="onSelectMediafile(index, true)"></span>
             <span v-if="element.selected" class="bg-primary checked-circle"
               @click="onSelectMediafile(index, false)">{{element.order}}</span>
@@ -31,7 +34,10 @@
       <swiper-slide class="slide">
         <div v-if="!isDragListVisible">
           <div class="swiper-image-wrapper" v-for="(media, index) in files" :key="index">
-            <img v-preview:scope-a class="swiper-lazy" :src="media.filepath || media.src" />
+            <img v-preview:scope-a class="swiper-lazy" :src="media.filepath || media.src" v-if="media.type.indexOf('image/') > -1" />
+            <video v-preview:scope-a class="swiper-lazy" v-if="media.type.indexOf('video/') > -1">
+              <source :src="media.filepath" :type="media.type" />
+            </video>
             <button class="btn btn-primary icon-close" @click="removeMediafile(index)">
               <fa-icon :icon="['far', 'times']" class="text-white" size="sm" />
             </button>

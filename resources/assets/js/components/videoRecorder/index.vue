@@ -133,13 +133,13 @@ export default {
     this.player.record().getDevice(); 
 
     const self = this;
-    this.player.on('finishRecord', function() {
+    this.player.on('finishConvert', function() {
       eventBus.$emit('video-rec-complete', {
-        ...self.player.recordedData,
-        filepath: URL.createObjectURL(self.player.recordedData),
+        type: self.player.convertedData.type,
+        name: self.player.convertedData.name,
+        filepath: URL.createObjectURL(self.player.convertedData),
       });
       self.isRecording = false;
-      self.player.record().stopDevice();
       self.closeVideoRec();
     });
 

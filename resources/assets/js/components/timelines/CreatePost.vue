@@ -285,7 +285,8 @@ export default {
     addedEvent(file) {
       if (!file.filepath) {
         this.mediafiles.push({
-          ...file,
+          type: file.type,
+          name: file.name,
           filepath: URL.createObjectURL(file),
         });
       } else {
