@@ -5,7 +5,7 @@
       @prev-story-timeline="prevStoryTimeline"
       :storyteller="storyteller" 
       :session_user="session_user" 
-      :stories="stories" 
+      :timeline="currentTimeline" 
       :avatar="avatar" 
     />
 
@@ -37,16 +37,16 @@ export default {
   }),
 
   computed: {
-    //...Vuex.mapState(['stories', 'session_user']),
     ...Vuex.mapState(['session_user']),
 
     isLoading() {
-      return !this.session_user || !this.stories || !this.timelines
+      //return !this.session_user || !this.stories || !this.timelines
+      return !this.session_user || !this.timelines
     },
 
-    stories() {
-      return this.timelines ? this.timelines[this.timelineIndex].stories : null
-    },
+    //stories() {
+    //return this.timelines ? this.timelines[this.timelineIndex].stories : null
+    //},
     avatar() {
       return this.timelines ? this.timelines[this.timelineIndex].avatar : null
     },
@@ -69,16 +69,14 @@ export default {
     },
   },
 
-  watch: {
-  },
-
   created() {
     const response = axios.get( this.$apiRoute('timelines.myFollowedStories')).then ( response => {
-      this.timelines = response.data.data
+      const timelines = response.data.data
       // if specific timeline is provided via the route, navigate directly to it, otherwise start from index 0
       if ( this.$route.params.timeline_id ) {
-        this.timelineIndex = this.timelines.findIndex( t => t.id === this.$route.params.timeline_id )
+        this.timelineIndex = timelines.findIndex( t => t.id === this.$route.params.timeline_id )
       }
+      this.timelines = timelines // set last (and after timelineIndex is set) to avoid loading issues (%NOTE)
     })
   },
 
@@ -98,5 +96,4 @@ body {
     z-index:2000;
   }
 }
-
 </style>

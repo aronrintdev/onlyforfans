@@ -3,16 +3,18 @@
 
     <b-sidebar id="sidebar-settings" title="Story Settings" left shadow width="40rem">
       <div class="px-3 py-2">
+          <!--
         <div>
           Auto Play Speed
           <VueSlider :data="speedOptions" v-model="speed" hideLabel />
         </div>
+          -->
         <div>
           <b-form-checkbox v-model="play">Auto Play</b-form-checkbox>
         </div>
         <ul class="tag-debug">
-          <li>story index: {{currentIndex+1}}/{{stories.length}}</li>
-          <li>current story ID: {{currentStoryId}}</li>
+          <li>slide index: {{currentIndex+1}}/{{slides.length}}</li>
+          <li>current slide ID: {{currentSlideId}}</li>
         </ul>
       </div>
     </b-sidebar>
@@ -22,12 +24,12 @@
         <div class="position-relative">
 
           <nav :style="cssNav" class="m-0">
-            <div v-for="(s, iter) in stories" :key="`header-${s.id}`" class="cursor-pointer" @click="goTo(iter)">
-              <div class="tag-target" :ref="`nav-${s.id}`" />
+            <div v-for="(s, iter) in slides" :key="`header-${s.id}`" class="cursor-pointer" @click="goTo(iter)">
+              <div :style="cssCurrentProgress" class="tag-target" :class="{ 'played': (currentIndex>iter), 'playing': (currentIndex===iter) }" :ref="`nav-${s.id}`" />
             </div>
           </nav>
 
-          <section v-for="(s, iter) in stories" :key="`story-${s.id}`">
+          <section v-for="(s, iter) in slides" :key="`slide-${s.id}`">
             <article v-if="currentIndex===iter" :style="cssDisplay" class="display-area">
 
               <div class="tag-creator d-flex align-items-center">
@@ -71,97 +73,100 @@
 </template>
 
 <script>
+// A 'slide' is an individual 'story' in the database...
+// However 'story' should actually refer to the entire story timeline, composed
+// of multiple slides
 import _ from 'lodash'
-import SeeMore from './SeeMore.vue'
+import SeeMore from './SeeMore.vue' // for swipe-up functionality
 
 export default {
-  components: {
-    seeMore: SeeMore
-  },
 
   props: {
     storyteller: { type: String, default: '' },
     session_user: { type: Object, default: null },
-    stories: { type: Array, default: () => [] },
-    maxStories: { type: Number, default: 15 },
+    timeline: null,
     avatar: null,
   },
 
   data: () => ({
-    currentIndex: 0, // index from 0
-    play: false,
-    speed: 900, // 3000,
-    timelineAnimation: null,
-    speedOptions: [
-      {
-        label: 'Very Slow',
-        value: 10000,
-      },
-      {
-        label: 'Slow',
-        value: 4000,
-      },
-      {
-        label: 'Normal',
-        value: 3000,
-      },
-      {
-        label: 'Fast',
-        value: 2000,
-      },
-      {
-        label: 'Very Fast',
-        value: 1000,
-      },
-    ],
+    slides: null,
+    currentIndex: null, // slide index from 0
+    slideDelta: 0, // %FIXME
+
+    playerInterval: null, // instace of setInterval
+
+    // slide player controls
+    play: true,
   }),
 
   computed: {
     isLoading() {
-      return !this.storyteller || !this.stories || !this.session_user
+      return !this.timeline || !this.storyteller || !this.slides || !this.session_user
+    },
+
+    cssCurrentProgress() {
+      return {
+        '--current-progress': `${this.slideDelta}%`,
+      }
     },
     cssNav() {
       return {
         //'--bg-color': this.bgColor,
         //'--height': this.height + 'px',
-        '--grid-template-columns': `repeat(${this.stories.length}, 1fr)`,
+        '--grid-template-columns': `repeat(${this.slides.length}, 1fr)`,
       }
     },
     cssDisplay() {
-      //console.log ('stories', { stories: this.stories })
-      if (this.stories.length && this.stories[0].mediafiles && this.stories[this.currentIndex].mediafiles[0]) {
+      //console.log ('slides', { slides: this.slides })
+      if (this.slides.length && this.slides[0].mediafiles && this.slides[this.currentIndex].mediafiles[0]) {
         return {
-          '--background-image': `url(${this.stories[this.currentIndex].mediafiles[0].filepath})`,
+          '--background-image': `url(${this.slides[this.currentIndex].mediafiles[0].filepath})`,
         }
       }
       return {}
     },
 
-    currentStoryId() {
-      return this.stories.length ? this.stories[this.currentIndex].id : null
+    currentSlideId() {
+      return this.slides.length ? this.slides[this.currentIndex].id : null
     }
 
   },
 
   methods: {
+    async markSlideAsViewed(slide) {
+      const payload = {
+        viewer_id: this.session_user.id,
+        story_id: slide.id,
+      }
+      console.log('markSlideAsViewed', {
+        payload,
+      })
+      const response = await axios.post(`/stories/markViewed`, payload)
+    },
+
     doNav(direction) {
-      console.log(`doNav() - ${direction}, index=${this.currentIndex} - ${this.currentIndex+1}/${this.stories.length}`)
+      if ( !this.slides || !this.slides.length || this.currentIndex===null ) {
+        return
+      }
+      console.log(`doNav() - ${direction}, index=${this.currentIndex} - ${this.currentIndex+1}/${this.slides.length}`)
       switch (direction) {
         case 'previous':
           if ( (this.currentIndex-1) < 0 ) {
             console.log(`doNav() - emit prev-story-timeline`)
             this.$emit('prev-story-timeline', { foo: 'bar'} )
             this.currentIndex = 0
+            this.slideDelta = 0
           } else {
             this.goTo(this.currentIndex - 1)
             console.log(`doNav() - decrement index`)
           }
           break
         case 'next':
-          if ( (this.currentIndex+1) >= this.stories.length ) {
+          if ( (this.currentIndex+1) >= this.slides.length ) {
             console.log(`doNav() - emit next-story-timeline`)
             this.$emit('next-story-timeline', { foo: 'bar'} )
             this.currentIndex = 0
+            this.slideDelta = 0
           } else {
             console.log(`doNav() - increment index`)
             this.goTo(this.currentIndex + 1)
@@ -172,71 +177,29 @@ export default {
 
     // sets this.currentIndex
     goTo(index) {
-      this.timelineAnimation.pause()
 
       console.log(`goTo() - index = ${index}`)
       if ( index < 0 ) {
         console.log(`goTo() - min out`)
         this.currentIndex = 0 // min out at first index
-      } else if ( index >= this.stories.length ) {
+        this.slideDelta = 0
+      } else if ( index >= this.slides.length ) {
         console.log(`goTo() - max out`)
-        this.currentIndex = this.stories.length-1 // max out at last index
+        this.currentIndex = this.slides.length-1 // max out at last index
+        this.slideDelta = 0
       } else {
         console.log(`goTo() - assign this.currentIndex to index = ${index}`)
         this.currentIndex = index
+        this.slideDelta = 0
       }
-      this.timelineAnimation.seek(this.getTimelineSeek(index))
+      this.markSlideAsViewed(this.slides[this.currentIndex])
 
       if (this.play) {
-        this.timelineAnimation.play()
       }
-    },
-
-    getTimelineSeek(index) {
-      return (index / this.stories.length) * this.timelineAnimation.duration
-    },
-
-    addTimelineElements() {
-      console.log('=== addTimlineElements()')
-      this.stories.forEach((s, idx) => {
-        this.timelineAnimation.add({
-          targets: this.$refs[`nav-${s.id}`][0], // affects class .tag-target
-          width: '100%',
-          changeBegin: (a) => {
-            //console.log(`addTimlineElements().callback - idx = ${idx}`)
-            //this.currentIndex = idx
-          },
-        })
-      })
-    },
-
-    createTimeline() {
-      console.log('=== createTimeline()')
-      const _this = this
-      this.timelineAnimation = this.$anime.timeline({
-        autoplay: this.play,
-        duration: this.speed,
-        easing: 'linear',
-        loop: false,
-        complete: function() {
-          console.log('$anime - complete callback')
-          _this.doNav('next') // should advance to next timeline (emit event to parent component)
-        },
-      })
-      this.addTimelineElements()
-    },
-
-    removeTimeline() {
-      console.log('=== removeTimeline()')
-      this.timelineAnimation.pause()
-      this.timelineAnimation.restart()
-      this.stories.forEach((s, idx) => {
-        this.timelineAnimation.remove(this.$refs[`nav-${s.id}`][0]) // affects class .tag-target
-      })
     },
 
     handleSwipeUp() {
-      const link = this.stories[this.currentIndex].swipe_up_link
+      const link = this.slides[this.currentIndex].swipe_up_link
       if (link) {
         this.$emit('open-see-more-link')
       }
@@ -246,35 +209,57 @@ export default {
   watch: {
     play(value) {
       console.log('=== watch play()')
-      if (value) {
-        this.timelineAnimation.play()
-      } else {
-        this.timelineAnimation.pause()
-      }
     },
-    speed() {
-      console.log('=== watch speed()')
-      const progress = this.timelineAnimation.currentTime / this.timelineAnimation.duration
-      this.removeTimeline()
-      this.createTimeline()
-      this.timelineAnimation.pause()
-      this.timelineAnimation.seek(progress * this.timelineAnimation.duration)
-      if (this.play) {
-        this.timelineAnimation.play()
-      }
-    },
-    stories() {
-      console.log('=== watch stories()')
-      //this.removeTimeline()
-      //this.createTimeline()
-      //this.addTimelineElements()
-    }
   },
 
   mounted() {
-    console.log('=== mounted()')
-    this.createTimeline()
+    this.playerInterval = setInterval( () => {
+      if (this.slideDelta >= 100) {
+        this.doNav('next')
+      } else {
+        this.slideDelta += 1
+      }
+    }, 10)
   },
+
+  created() {
+    console.log('=== created()')
+    const params = {
+      timeline_id: this.timeline.id,
+      viewer_id: this.session_user.id,
+    }
+    const response = axios.get( this.$apiRoute('stories.getSlides'), { params } ).then ( response => {
+      console.log('=== created().getSlides response...', {
+        response,
+      })
+      const slides = response.data.stories
+      const currentIndex = response.data.currentIndex || 0
+
+      console.log('=== created().getSlides response...', {
+        slides: slides[0],
+        currentIndex,
+      })
+
+      //// if specific timeline is provided via the route, navigate directly to it, otherwise start from index 0
+      //if ( this.$route.params.timeline_id ) {
+      //this.timelineIndex = timelines.findIndex( t => t.id === this.$route.params.timeline_id )
+      //}
+      this.slides = slides // set last (and after timelineIndex is set) to avoid loading issues (%NOTE)
+      this.currentIndex = currentIndex
+
+      this.markSlideAsViewed(this.slides[this.currentIndex])
+      //this.$nextTick( () => this.initAnimation() )
+    })
+  },
+
+  beforeDestroy() {
+    clearInterval(this.playerInterval);
+  },
+
+  components: {
+    seeMore: SeeMore
+  },
+
 }
 </script>
 
@@ -369,6 +354,14 @@ nav {
       background: white;
       height: 100%;
       width: 0%;
+    }
+    .tag-target.played {
+      width: 100%;
+    }
+
+    .tag-target.playing {
+      background: pink;
+      width: var(--current-progress);
     }
   }
 }
