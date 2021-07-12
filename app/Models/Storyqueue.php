@@ -94,14 +94,20 @@ class Storyqueue extends Model
                 continue;
             }
             if ($sq->timeline->isEntireStoryViewedByUser($viewer) ) {
-                $allSlidesViewed->push($sq->timeline->makeVisible('user')->load(['user', 'avatar', 'storyqueues']));
+                $tmp = $sq->timeline->makeVisible('user')->load(['user', 'avatar', 'storyqueues']);
+                $tmp->allViewed = true;
+                $allSlidesViewed->push($tmp);
+                //$allSlidesViewed->push($sq->timeline->makeVisible('user')->load(['user', 'avatar', 'storyqueues']));
             } else {
-                $atLeast1UnviewedSlide->push($sq->timeline->makeVisible('user')->load(['user', 'avatar', 'storyqueues']));
+                $tmp = $sq->timeline->makeVisible('user')->load(['user', 'avatar', 'storyqueues']);
+                $tmp->allViewed = false;
+                $atLeast1UnviewedSlide->push($tmp);
+                //$atLeast1UnviewedSlide->push($sq->timeline->makeVisible('user')->load(['user', 'avatar', 'storyqueues']));
             }
             $selected[] = $sq->timeline_id;
         }
-        $atLeast1UnviewedSlide->merge($allSlidesViewed); // collections of 'timelines'
-        $timelines = $atLeast1UnviewedSlide;
+        $timelines = ( $atLeast1UnviewedSlide->merge($allSlidesViewed) ); // ->all(); // collections of 'timelines'
+        //$timelines = $atLeast1UnviewedSlide;
         /*
         $timelines = $storyqueues->reduce( function($acc, $sq) {
             static $selected = [];

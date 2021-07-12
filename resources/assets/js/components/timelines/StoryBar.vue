@@ -18,7 +18,7 @@
               v-b-popover.hover.top="{variant: 'info', content: tl.slug}" 
               rounded="circle" 
               :src="tl.avatar.filepath" 
-              :class="{ 'my-story-avatar': isMyTimeline(tl) }"
+              :class="{ 'my-story-avatar': isMyTimeline(tl), 'all-viewed': tl.allViewed }"
               class="p-0" 
               alt="Story owner's avatar" 
             />
@@ -170,13 +170,6 @@ export default {
   },
 
   created() {
-    /*
-    this.$store.dispatch('getStories', {
-      //user_id: this.session_user.id,
-      following: 1,
-      stypes: 'image', // %FIXME: should be 'photo' (ideally we use PHP ENUM?)
-    })
-     */
     // %NOTE: we don't really need the stories here, just the timelines that have stories 
     const response = axios.get( this.$apiRoute('timelines.myFollowedStories')).then ( response => {
       this.timelines = response.data.data
@@ -213,6 +206,12 @@ body .crate-story_bar {
   .box-story img {
     width: 40px;
     height: 40px;
+  }
+  .box-story img {
+    border: solid orange 2px;
+  }
+  .box-story img.all-viewed {
+    border: solid green 2px;
   }
   .box-story img.my-story-avatar {
     border: solid cyan 2px;

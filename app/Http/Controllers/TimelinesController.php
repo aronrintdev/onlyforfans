@@ -425,40 +425,7 @@ class TimelinesController extends AppBaseController
     // returns a list of followed timelines with associated story groupings (ignores timeline if it has no active stories)
     public function myFollowedStories(Request $request)
     {
-if (0) {
-        $followingIds = $request->user()->followedtimelines->pluck('id');
-
-        // %TODO: split *stories* within timeline into seen and unseen?
-        $queryF = Timeline::has('stories')->with([
-            'stories' => function($q1) {
-                $q1->orderBy('created_at', 'asc'); // sort stories relation oldest first
-            }, 
-            'stories.mediafiles',
-            'avatar'
-        ]);
-        $queryF->whereIn('id', $followingIds); // comment out to test
-        $following = $queryF->get();
-        $following = $following->sortByDesc( function($t) {
-            return $t->getLatestStory()->created_at; // sort timelines (epics) by latest story
-        });
-
-        // Prepend my stories so my avatar is always first
-        $queryMe = Timeline::where('user_id', $request->user()->id);
-        $queryMe = $queryMe->with([
-            'stories' => function($q1) {
-                $q1->orderBy('created_at', 'asc'); // sort stories relation oldest first
-            }, 
-            'stories.mediafiles',
-            'avatar'
-        ]);
-        $me = $queryMe->first();
-
-        $following->prepend($me);
-        $data = $following->values()->all();
-} else {
-
         $data = Storyqueue::viewableTimelines($request->user());
-}
         return response()->json([
             'data' => $data,
         ]);
