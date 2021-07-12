@@ -161,6 +161,8 @@ Route::group(['middleware' => ['auth']], function () {
     // -- stories:  --
     Route::get('/stories/player', ['as' => 'stories.player', 'uses' => 'SpaController@index']);
     Route::get('/stories/match', ['as'=>'stories.match', 'uses' => 'StoriesController@match']);
+    Route::get('/stories/getSlides', ['as'=>'stories.getSlides', 'uses' => 'StoriesController@getSlides']);
+    Route::post('/stories/markViewed', ['as'=>'stories.markViewed', 'uses' => 'StoriesController@markViewed']);
     Route::get('/stories/dashboard', [
         'middleware' => 'spaMixedRoute',
         'as' => 'stories.dashboard',

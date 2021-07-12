@@ -8,12 +8,16 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
+
+use Carbon\Carbon;
+
 use App\Http\Resources\StoryCollection;
 use App\Http\Resources\Story as StoryResource;
 use App\Models\Mediafile;
 use App\Models\Diskmediafile;
 use App\Models\Setting;
 use App\Models\Story;
+use App\Models\Storyqueue;
 use App\Models\Timeline;
 use App\Enums\MediafileTypeEnum;
 use App\Enums\StoryTypeEnum;
@@ -236,6 +240,53 @@ class StoriesController extends AppBaseController
                 'username' => $request->user()->timeline->username,
             ],
         ];
+    }
+
+    public function getSlides(Request $request)
+    {
+        $vrules = [
+            'viewer_id' => 'required|uuid|exists:users,id',
+            'timeline_id' => 'required|uuid|exists:timelines,id',
+        ];
+        $this->validate($request, $vrules);
+        
+        $daysWindow = env('STORY_WINDOW_DAYS', 10000);
+        $storyqueues = Storyqueue::with(['story.mediafiles'])
+            ->where('viewer_id', $request->viewer_id)
+            ->where('timeline_id', $request->timeline_id)
+            ->where('created_at','>=',Carbon::now()->subDays($daysWindow))
+            ->orderBy('created_at', 'asc') // sort slides relation oldest first
+            ->get();
+        $currentIndex = 0;
+        $stories = $storyqueues->map( function($sq) use(&$currentIndex) {
+            if ( $sq->viewed_at !== null ) {
+                $currentIndex +=1;
+            }
+            return $sq->story;
+        });
+        return response()->json([
+            'stories' => $stories,
+            'currentIndex' => $currentIndex,
+        ]);
+    }
+
+    public function markViewed(Request $request)
+    {
+        $this->validate($request, [
+            'viewer_id' => 'required|uuid|exists:users,id',
+            'story_id' => 'required|uuid|exists:storyqueues,story_id',
+            //'story_id' => 'required|uuid|exists:stories,id',
+        ]);
+        $sq = Storyqueue::where('viewer_id', $request->viewer_id)
+            ->where('story_id', $request->story_id)
+            ->first();
+        if ($sq) {
+            $sq->viewed_at = Carbon::now();
+            $sq->save();
+        } else {
+            // %TODO log error
+        }
+        return response()->json([ 'storyqueue' => $sq ]);
     }
 
 }

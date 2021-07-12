@@ -340,7 +340,7 @@ class Timeline extends Model implements Subscribable, Tippable, Reportable
     public function getLatestStory(User $viewer) : ?Storyqueue
     {
         //$stories = Story::select(['id','slug','created_at'])->where('timeline_id', $this->id)->orderBy('created_at', 'desc')->get();
-        $daysWindow = env('STORY_WINDOW_DAYS', 10000);
+        //$daysWindow = env('STORY_WINDOW_DAYS', 10000);
         $stories = Storyqueue::select(['id','created_at'])
             ->where('timeline_id', $this->id)
             //->where('viewer_id', $viewer->id)
