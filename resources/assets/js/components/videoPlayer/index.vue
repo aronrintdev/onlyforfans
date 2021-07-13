@@ -41,9 +41,8 @@ export default {
       },
       () => {
         // prevent swipe conflict
-        // this.player
-        //   .getChild("controlBar")
-        //   .el_.addEventListener("pointerdown", (e) => e.stopPropagation());
+        this.getChild("controlBar")
+          .el_.addEventListener("pointerdown", (e) => e.stopPropagation());
       }
     ).ready(function () {
       this.src({ type: self.source.type, src: self.source.filepath });
