@@ -34,8 +34,8 @@
       <swiper-slide class="slide">
         <div v-if="!isDragListVisible">
           <div class="swiper-image-wrapper" v-for="(media, index) in files" :key="index">
-            <img v-preview:scope-a class="swiper-lazy" :src="media.filepath || media.src" v-if="media.type.indexOf('image/') > -1" />
-            <video v-preview:scope-a class="swiper-lazy" v-if="media.type.indexOf('video/') > -1">
+            <img @click="openPhotoSwipe(index)" class="swiper-lazy" :src="media.filepath || media.src" v-if="media.type.indexOf('image/') > -1" />
+            <video @click="openPhotoSwipe(index)" class="swiper-lazy" v-if="media.type.indexOf('video/') > -1">
               <source :src="media.filepath" :type="media.type" />
             </video>
             <button class="btn btn-primary icon-close" @click="removeMediafile(index)">
@@ -56,10 +56,10 @@
 </template>
 
 <script>
-import PhotoSwipe from 'photoswipe/dist/photoswipe';
-import PhotoSwipeUI from 'photoswipe/dist/photoswipe-ui-default';
-import createPreviewDirective from 'vue-photoswipe-directive';
+import { Vue } from 'vue-property-decorator';
 import draggable from 'vuedraggable';
+
+import VideoPlayer from "@components/videoPlayer";
 
 export default {
   name: "UploadMediaPreview",
@@ -70,13 +70,6 @@ export default {
 
   components: {
     draggable,
-  },
-
-  directives: {
-    preview: createPreviewDirective({
-        showAnimationDuration: 0,
-        bgOpacity: 0.75
-      }, PhotoSwipe, PhotoSwipeUI)
   },
 
   data: () => ({
@@ -162,6 +155,30 @@ export default {
     openFileUpload() {
       this.$emit('openFileUpload');
     },
+    openPhotoSwipe(index) {
+      this.$Pswp.open({
+        items: this.files.map(file => {
+          if (file.type.indexOf('video/') > -1) {
+            return ({
+              html: new Vue({
+                  ...VideoPlayer,
+                  propsData: {
+                    source: file
+                  }
+                }).$mount().$el,
+            })
+          }
+          return ({
+            src: file.filepath,
+          })
+        }),
+        options: {
+          index,
+          showAnimationDuration: 0,
+          bgOpacity: 0.75
+        },
+      });
+    }
   },
 }
 </script>
