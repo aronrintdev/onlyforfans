@@ -384,11 +384,12 @@ export default {
     eventBus.$on('set-expiration-period', function(data) {
       self.expirationPeriod = data;
     })
-    eventBus.$on('video-rec-complete', function(data) {
+    eventBus.$on('video-rec-complete', function(file) {
       self.showVideoRec = false;
-      const mediafiles = [...self.mediafiles];
-      mediafiles.push(data);
-      self.mediafiles = mediafiles;
+      if (self.$refs.myVueDropzone) {
+        self.$refs.myVueDropzone.addFile(file);
+      }
+      // self.$refs.myVueDropzone.manuallyAddFile(data, data.filepath);
     })
 
     const mediafileIds = this.$route.params.mediafile_ids || []

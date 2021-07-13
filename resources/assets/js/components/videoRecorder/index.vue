@@ -134,11 +134,7 @@ export default {
 
     const self = this;
     this.player.on('finishConvert', function() {
-      eventBus.$emit('video-rec-complete', {
-        type: self.player.convertedData.type,
-        name: self.player.convertedData.name,
-        filepath: URL.createObjectURL(self.player.convertedData),
-      });
+      eventBus.$emit('video-rec-complete', self.player.convertedData);
       self.isRecording = false;
       self.closeVideoRec();
     });
