@@ -7,6 +7,8 @@
       :session_user="session_user" 
       :timeline="currentTimeline" 
       :avatar="avatar" 
+      :slides="slides" 
+      :slideIndexInit="slideIndex" 
     />
 
     <div class="OFF-d-none">
@@ -25,15 +27,15 @@ import Vuex from 'vuex'
 import PlayerComponent from '@components/stories/Player'
 
 export default {
-  name: 'StoriesPlayer',
-
   props: {
     slug: { type: String, default: '' },
   },
 
   data: () => ({
-    timelineIndex: 0,
-    timelines: null
+    timelineIndex: null, // current timeline being played
+    timelines: null, // a timeline (story) consists of many slides
+    slideIndex: null, // current slide being played
+    slides: null,
   }),
 
   computed: {
@@ -41,12 +43,9 @@ export default {
 
     isLoading() {
       //return !this.session_user || !this.stories || !this.timelines
-      return !this.session_user || !this.timelines
+      return !this.session_user || !this.timelines || (this.timelineIndex===null) || !this.slides || (this.slideIndex===null)
     },
 
-    //stories() {
-    //return this.timelines ? this.timelines[this.timelineIndex].stories : null
-    //},
     avatar() {
       return this.timelines ? this.timelines[this.timelineIndex].avatar : null
     },
@@ -62,28 +61,46 @@ export default {
     nextStoryTimeline() {
       this.timelineIndex = Math.min(this.timelines.length-1, this.timelineIndex+1) // can't next past last timeline
       console.log(`views/stories/Player.vue::nextStoryTimeline() - timelineIndex: ${this.timelineIndex} `)
+      this.getSlides()
     },
     prevStoryTimeline() {
       this.timelineIndex = Math.max(0, this.timelineIndex-1) // can't prev before first timeline
       console.log(`views/stories/Player.vue::prevStoryTimeline() - timelineIndex: ${this.timelineIndex} `)
+      this.getSlides()
     },
+
+    getSlides() {
+      const params = {
+        timeline_id: this.timelines[this.timelineIndex].id,
+        viewer_id: this.session_user.id,
+      }
+      axios.get( this.$apiRoute('stories.getSlides'), { params } ).then ( response => {
+        this.slides = response.data.stories // set last (and after timelineIndex is set) to avoid loading issues (%NOTE)
+        this.slideIndex = response.data.slideIndex || 0
+        //this.$nextTick( () => this.initAnimation() )
+      })
+    }
   },
 
   created() {
-    const response = axios.get( this.$apiRoute('timelines.myFollowedStories')).then ( response => {
+    axios.get( this.$apiRoute('timelines.myFollowedStories')).then ( response => {
+      // Load all the timelines to be played (without slides)
       const timelines = response.data.data
       // if specific timeline is provided via the route, navigate directly to it, otherwise start from index 0
-      if ( this.$route.params.timeline_id ) {
-        this.timelineIndex = timelines.findIndex( t => t.id === this.$route.params.timeline_id )
-      }
+      this.timelineIndex = this.$route.params.timeline_id 
+        ? timelines.findIndex( t => t.id === this.$route.params.timeline_id )
+        : 0
       this.timelines = timelines // set last (and after timelineIndex is set) to avoid loading issues (%NOTE)
+      this.getSlides()
     })
+
   },
 
   components: {
     PlayerComponent,
   },
 
+  name: 'StoriesPlayer',
 }
 </script>
 
