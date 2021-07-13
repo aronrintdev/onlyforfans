@@ -131,7 +131,6 @@ export default {
     },
 
     currentSlideId() {
-      console.log(this.slides)
       return (this.slides && this.slides.length && (this.slideIndex!==null)) ? this.slides[this.slideIndex].id : null
     }
 
@@ -143,7 +142,6 @@ export default {
         viewer_id: this.session_user.id,
         story_id: slide.id,
       }
-      console.log('markSlideAsViewed', { payload })
       const response = await axios.post(`/stories/markViewed`, payload)
     },
 
@@ -151,27 +149,22 @@ export default {
       if ( !this.slides || !this.slides.length || this.slideIndex===null ) {
         return
       }
-      console.log(`doNav() - ${direction}, index=${this.slideIndex} - ${this.slideIndex+1}/${this.slides.length}`)
       switch (direction) {
         case 'previous':
           if ( (this.slideIndex-1) < 0 ) {
-            console.log(`doNav() - emit prev-story-timeline`)
             this.$emit('prev-story-timeline', { foo: 'bar'} )
             this.slideIndex = 0
             this.slideViewedDuration = 0
           } else {
             this.goTo(this.slideIndex - 1)
-            console.log(`doNav() - decrement index`)
           }
           break
         case 'next':
           if ( (this.slideIndex+1) >= this.slides.length ) {
-            console.log(`doNav() - emit next-story-timeline`)
             this.$emit('next-story-timeline', { foo: 'bar'} )
             this.slideIndex = 0
             this.slideViewedDuration = 0
           } else {
-            console.log(`doNav() - increment index`)
             this.goTo(this.slideIndex + 1)
           }
           break
@@ -181,17 +174,13 @@ export default {
     // sets this.slideIndex
     goTo(index) {
 
-      console.log(`goTo() - index = ${index}`)
       if ( index < 0 ) {
-        console.log(`goTo() - min out`)
         this.slideIndex = 0 // min out at first index
         this.slideViewedDuration = 0
       } else if ( index >= this.slides.length ) {
-        console.log(`goTo() - max out`)
         this.slideIndex = this.slides.length-1 // max out at last index
         this.slideViewedDuration = 0
       } else {
-        console.log(`goTo() - assign this.slideIndex to index = ${index}`)
         this.slideIndex = index
         this.slideViewedDuration = 0
       }
@@ -237,7 +226,6 @@ export default {
 
   watch: {
     isPlaying(value) {
-      console.log('=== watch isPlaying()')
       if (value) {
         this.startPlayback()
       } else { 
@@ -247,7 +235,6 @@ export default {
   },
 
   mounted() {
-    console.log('=== mounted()')
     this.slideIndex = this.slideIndexInit
     if ( this.slides && this.slides.length ) {
       this.markSlideAsViewed(this.slides[this.slideIndex])

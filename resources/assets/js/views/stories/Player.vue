@@ -61,12 +61,10 @@ export default {
   methods: {
     nextStoryTimeline() {
       this.timelineIndex = Math.min(this.timelines.length-1, this.timelineIndex+1) // can't next past last timeline
-      console.log(`views/stories/Player.vue::nextStoryTimeline() - timelineIndex: ${this.timelineIndex} `)
       this.getSlides()
     },
     prevStoryTimeline() {
       this.timelineIndex = Math.max(0, this.timelineIndex-1) // can't prev before first timeline
-      console.log(`views/stories/Player.vue::prevStoryTimeline() - timelineIndex: ${this.timelineIndex} `)
       this.getSlides()
     },
 
