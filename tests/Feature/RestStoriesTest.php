@@ -152,7 +152,6 @@ class RestStoriesTest extends TestCase
      *  @group stories
      *  @group regression
      *  @group regression-base
-     *  @group june0625
      */
     public function test_can_list_grouped_stories_on_followed_timelines()
     {
@@ -174,13 +173,13 @@ class RestStoriesTest extends TestCase
                     'price',
                     'avatar',
                     'is_follow_for_free',
-                    'stories',
+                    'storyqueues',
                     //'stories' => [
                         //'mediafiles',
                     //],
-                    'is_owner',
-                    'is_following',
-                    'is_subscribed',
+                    //'is_owner',
+                    //'is_following',
+                    //'is_subscribed',
                     'created_at',
                 ],
             ],
