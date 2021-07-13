@@ -270,6 +270,13 @@ class StoriesController extends AppBaseController
                 }
                 return $sq->story;
             });
+
+            // If the entire set of timeline's viewable stories is viewed, set slideIndex to 0
+            // so the user can actually re-view them if they so choose
+            $timeline = Timeline::findOrFail($request->timeline_id);
+            if ( $timeline->isEntireStoryViewedByUser($request->viewer_id) ) {
+                $slideIndex = 0;
+            }
         }
 
         return response()->json([

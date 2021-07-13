@@ -349,11 +349,11 @@ class Timeline extends Model implements Subscribable, Tippable, Reportable
     }
 
     // Has the viewer seen all 'active' slides in this timeline's story (?)
-    public function isEntireStoryViewedByUser(User $viewer) : bool
+    public function isEntireStoryViewedByUser($viewerId) : bool
     {
         $daysWindow = env('STORY_WINDOW_DAYS', 10000);
         $notViewedCount = Storyqueue::where('timeline_id', $this->id)
-            ->where('viewer_id', $viewer->id)
+            ->where('viewer_id', $viewerId)
             ->whereNull('viewed_at')
             ->where('created_at','>=',Carbon::now()->subDays($daysWindow))
             ->count();

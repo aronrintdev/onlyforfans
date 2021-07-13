@@ -39,41 +39,14 @@ class Storyqueue extends Model
     // %FIXME: rename
     public static function viewableQueue(User $viewer) : Collection
     {
-        /*
-        $storyqueues = Storyqueue::with('timeline', 'story')->select(DB::raw('sq.*'))
-            ->from(DB::raw('(SELECT * FROM storyqueues where viewer_id="'.$viewer->id.'" ORDER BY created_at DESC) sq')) // %FIXME: sql injection defense!
-            ->where('viewer_id', $viewer->id)
-            ->whereNull('viewed_at')
-            ->withTrashed()->whereNull('sq.deleted_at') // won't work without this (??)
-            ->groupBy('sq.timeline_id')
-            ->orderBy('sq.created_at', 'desc')
-            //->orderBy('sq.created_at', 'asc')
-            ->get();
-        //dd($storyqueues->toArray());
-        return $storyqueues;
-         */
-
         // (1) get storyqueues for this user as viewer latest to oldest (whether viewed or not !)
         $daysWindow = env('STORY_WINDOW_DAYS', 10000);
         $storyqueues = Storyqueue::with('timeline', 'story')
             ->where('viewer_id', $viewer->id)
             ->where('created_at','>=',Carbon::now()->subDays($daysWindow))
-            //->whereNull('viewed_at')
             ->orderBy('created_at', 'desc')
             ->get();
 
-        /*
-        $storyqueues = $storyqueues->sortByDesc( function($sq) use(&$viewer) {
-
-            $stories = Storyqueue::select(['id','created_at'])
-                ->where('timeline_id', $this->id)
-                //->where('viewer_id', $viewer->id)
-                ->orderBy('created_at', 'desc')->get();
-            return ($stories->count()>0) ? $stories[0] : null;
-
-            //return $sq->timeline->getLatestStory($viewer)->created_at; // sort by latest story slide in the timeline
-        });
-         */
         //dd($storyqueues->toArray());
         return $storyqueues;
     }
@@ -86,23 +59,21 @@ class Storyqueue extends Model
         //   (1) at least one unviewed slide
         //   (2) all slides in timeline story viewed
 
-        $atLeast1UnviewedSlide = collect();
-        $allSlidesViewed = collect();
+        $atLeast1UnviewedSlide = collect(); // list of timelines
+        $allSlidesViewed = collect(); // list of timelines
         $selected = [];
         foreach ( $storyqueues as $sq ) {
             if ( in_array($sq->timeline_id, $selected) ) {
                 continue;
             }
-            if ($sq->timeline->isEntireStoryViewedByUser($viewer) ) {
-                $tmp = $sq->timeline->makeVisible('user')->load(['user', 'avatar', 'storyqueues']);
-                $tmp->allViewed = true;
-                $allSlidesViewed->push($tmp);
-                //$allSlidesViewed->push($sq->timeline->makeVisible('user')->load(['user', 'avatar', 'storyqueues']));
+            if ($sq->timeline->isEntireStoryViewedByUser($viewer->id) ) {
+                $tmpTL = $sq->timeline->makeVisible('user')->load(['user', 'avatar', 'storyqueues']);
+                $tmpTL->allViewed = true;
+                $allSlidesViewed->push($tmpTL);
             } else {
-                $tmp = $sq->timeline->makeVisible('user')->load(['user', 'avatar', 'storyqueues']);
-                $tmp->allViewed = false;
-                $atLeast1UnviewedSlide->push($tmp);
-                //$atLeast1UnviewedSlide->push($sq->timeline->makeVisible('user')->load(['user', 'avatar', 'storyqueues']));
+                $tmpTL = $sq->timeline->makeVisible('user')->load(['user', 'avatar', 'storyqueues']);
+                $tmpTL->allViewed = false;
+                $atLeast1UnviewedSlide->push($tmpTL);
             }
             $selected[] = $sq->timeline_id;
         }
@@ -115,43 +86,8 @@ class Storyqueue extends Model
 
         $timelines = ( $atLeast1UnviewedSlide->merge($allSlidesViewed) ); // ->all(); // collections of 'timelines'
         $timelines->prepend($me);
-        //$timelines = $atLeast1UnviewedSlide;
-        /*
-        $timelines = $storyqueues->reduce( function($acc, $sq) {
-            static $selected = [];
-            if ( !in_array($sq->timeline_id, $selected) ) {
-                $selected[] = $sq->timeline_id;
-                $acc->push($sq->timeline->makeVisible('user')->load(['user', 'avatar', 'storyqueues']));
-            }
-            return $acc;
-        }, collect());
-         */
 
-        /*
-        $timelines = $storyqueues->map( function($sq) {
-            static $selected = [];
-            if ( !in_array($sq->timeline_id, $selected) ) {
-                $selected[] = $sq->timeline_id;
-                return $sq->timeline;
-            } else {
-                return false;
-            }
-        });
-         */
-        /*
-        $timelines = $storyqueues->map( function($sq) use(&$viewer) {
-            $tl =  $sq->timeline->makeVisible(['user'])->load([
-                'avatar', 
-                //'stories', 
-                'user',
-                'storyqueues' => function($q1) use(&$viewer) {
-                    $q1->where('viewer_id', $viewer->id);
-                },
-            ]); // %TODO: cleanup, don't need user (just user_id)
-            return $tl;
-        });
-         */
-        Log::info('here ...'.json_encode($timelines->toArray(), JSON_PRETTY_PRINT));
+        //Log::info('here ...'.json_encode($timelines->toArray(), JSON_PRETTY_PRINT)); // for debug
         return $timelines;
     }
 }
