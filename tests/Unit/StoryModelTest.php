@@ -20,8 +20,8 @@ use App\Enums\MediafileTypeEnum;
 class StoryModelTest extends TestCase
 {
     /**
-     * @group story-model
-     * @group here0713
+     * @group OFF-story-model
+     * @group OFF-here0713
      */
     public function test_storyqueue_exists_for_owner()
     {
