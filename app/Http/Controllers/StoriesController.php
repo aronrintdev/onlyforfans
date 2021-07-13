@@ -172,11 +172,6 @@ class StoriesController extends AppBaseController
     public function show(Request $request, Story $story)
     {
         $this->authorize('view', $story);
-        /*
-        return response()->json([
-            'story' => $story,
-        ]);
-         */
         return new StoryResource($story);
     }
 
@@ -190,7 +185,6 @@ class StoriesController extends AppBaseController
             $mf->delete();
         });
         $story->delete();
-
         return response()->json([]);
     }
 
@@ -213,7 +207,6 @@ class StoriesController extends AppBaseController
             'username' => $request->user()->username,
         ];
         \View::share('g_php2jsVars',$this->_php2jsVars);
-
         return view('stories.player', [
             'sessionUser' => $request->user(),
             'stories' => $storiesA,
@@ -257,16 +250,16 @@ class StoriesController extends AppBaseController
             ->where('created_at','>=',Carbon::now()->subDays($daysWindow))
             ->orderBy('created_at', 'asc') // sort slides relation oldest first
             ->get();
-        $currentIndex = 0;
-        $stories = $storyqueues->map( function($sq) use(&$currentIndex) {
+        $slideIndex = 0;
+        $stories = $storyqueues->map( function($sq) use(&$slideIndex) {
             if ( $sq->viewed_at !== null ) {
-                $currentIndex +=1;
+                $slideIndex +=1;
             }
             return $sq->story;
         });
         return response()->json([
             'stories' => $stories,
-            'currentIndex' => $currentIndex,
+            'slideIndex' => $slideIndex,
         ]);
     }
 

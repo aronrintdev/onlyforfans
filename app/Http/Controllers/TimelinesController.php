@@ -395,6 +395,7 @@ class TimelinesController extends AppBaseController
     }
 
     // %TODO: move to stories controller
+    // %TODO: DEPRECATED?
     public function myActiveStoryTimelines(Request $request)
     {
         // %NOTE: if a story is in my queue, then  'follow' is already implied (ie that DB work is done inherent in [storyqueues]
@@ -403,7 +404,6 @@ class TimelinesController extends AppBaseController
             ->whereNull('viewed_at')
             ->where('created_at', '>=', Carbon::now()->subDays($daysWindow))
             ->get();
-
 
         // [ ] filter the above to return a list of unique timeline_ids, with the unqiue timeline_id selected by being the one with the latest storyqueue/story in its grouping
         $storyqueues = Storyqueue::distinct('timeline_id')
