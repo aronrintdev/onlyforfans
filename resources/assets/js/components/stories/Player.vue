@@ -19,12 +19,14 @@
       <b-col class="px-0">
         <div class="position-relative">
 
+          <!--
           <div class="d-none">
             <ul class="tag-debug">
               <li>slide index: {{slideIndex+1}}/{{slides.length}}</li>
               <li>current slide ID: {{currentSlideId}}</li>
             </ul>
           </div>
+          -->
 
           <nav :style="cssNav" class="m-0">
             <div v-for="(s, iter) in slides" :key="`header-${s.id}`" class="cursor-pointer" @click="goTo(iter)">
@@ -112,7 +114,7 @@ export default {
 
   computed: {
     isLoading() {
-      return !this.timeline || !this.storyteller || !this.slides || !this.session_user
+      return !this.timeline || !this.storyteller || !this.slides || !this.session_user || (this.slideIndexInit===null)
     },
 
     cssCurrentProgress() {
@@ -129,7 +131,8 @@ export default {
     },
 
     currentSlideId() {
-      return this.slides.length ? this.slides[this.slideIndex].id : null
+      console.log(this.slides)
+      return (this.slides && this.slides.length && (this.slideIndex!==null)) ? this.slides[this.slideIndex].id : null
     }
 
   },
@@ -244,13 +247,12 @@ export default {
   },
 
   mounted() {
-    this.startPlayback()
-  },
-
-  created() {
-    console.log('=== created()')
+    console.log('=== mounted()')
     this.slideIndex = this.slideIndexInit
-    this.markSlideAsViewed(this.slides[this.slideIndex])
+    if ( this.slides && this.slides.length ) {
+      this.markSlideAsViewed(this.slides[this.slideIndex])
+      this.startPlayback()
+    }
   },
 
   beforeDestroy() {

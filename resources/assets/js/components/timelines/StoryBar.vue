@@ -191,16 +191,10 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-//$size: 40px;
-//$margin: 16px;
 body .crate-story_bar {
 
   .story.slide {
     width: 50px !important;
-  }
-
-  .b-icon {
-    //height: $size;
   }
 
   .box-story img {
@@ -217,14 +211,6 @@ body .crate-story_bar {
     border: solid cyan 2px;
   }
 
-  /*
-  .box-story .tag-colorfill {
-    //width: $size;
-    //height: $size;
-    display: block;
-    border-radius: 50%;
-  }
-   */
 }
 </style>
 

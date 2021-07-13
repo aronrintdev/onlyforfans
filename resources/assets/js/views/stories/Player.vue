@@ -11,6 +11,7 @@
       :slideIndexInit="slideIndex" 
     />
 
+    <!--
     <div class="OFF-d-none">
       <p>DEBUG:</p>
       <ul>
@@ -18,6 +19,7 @@
         <li>current timeline ID: {{currentTimeline.name}} ({{currentTimeline.id}})</li>
       </ul>
     </div>
+    -->
 
   </div>
 </template>
