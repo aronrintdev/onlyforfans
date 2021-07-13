@@ -83,8 +83,8 @@ export default {
   },
 
   created() {
+    // Load all the timelines to be played (without slides)
     axios.get( this.$apiRoute('timelines.myFollowedStories')).then ( response => {
-      // Load all the timelines to be played (without slides)
       const timelines = response.data.data
       // if specific timeline is provided via the route, navigate directly to it, otherwise start from index 0
       this.timelineIndex = this.$route.params.timeline_id 

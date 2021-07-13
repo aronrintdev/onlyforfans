@@ -10,7 +10,7 @@
         </div>
           -->
         <div>
-          <b-form-checkbox v-model="play">Auto Play</b-form-checkbox>
+          <b-form-checkbox v-model="isPlaying">Auto Play</b-form-checkbox>
         </div>
         <ul class="tag-debug">
           <li>slide index: {{slideIndex+1}}/{{slides.length}}</li>
@@ -30,7 +30,7 @@
           </nav>
 
           <section v-for="(s, iter) in slides" :key="`slide-${s.id}`">
-            <article v-if="slideIndex===iter" :style="cssDisplay" class="display-area">
+            <article v-if="slideIndex===iter" :style="cssDisplay" class="display-area" v-touch:start="touchStartHandler" v-touch:end="touchEndHandler">
 
               <div class="tag-creator d-flex align-items-center">
                 <b-avatar v-if="avatar" :src="avatar.filepath" class="mr-2" size="2.5rem" />
@@ -55,12 +55,14 @@
                   <p class="h4 text-center v-box text-white w-75">{{ s.content }}</p>
                 </article>
                 <article v-else-if="s.stype==='image' && s.mediafiles" class="h-100">
-                  <img :src="s.mediafiles[0].filepath" class="OFF-img-fluid OFF-h-100" />
+                  <img v-if="s.mediafiles[0].is_image" :src="s.mediafiles[0].filepath" class="OFF-img-fluid OFF-h-100" />
+                  <video v-if="s.mediafiles[0].is_video" autoplay="autoplay" class="OFF-d-block">
+                    <source :src="s.mediafiles[0].filepath" type="video/webm" />
+                    <source :src="s.mediafiles[0].filepath" type="video/mp4" />
+                  </video>
                   <see-more v-if="s.swipe_up_link" :link="s.swipe_up_link"></see-more>
                 </article>
               </div>
-
-
             </article>
           </section>
 
@@ -97,10 +99,10 @@ export default {
     //slides: null,
     slideIndex: null,
 
-    playerInterval: null, // instace of setInterval
+    playerIntervalObj: null, // instace of setInterval
 
     // slide player controls
-    play: true,
+    isPlaying: true,
   }),
 
   computed: {
@@ -187,7 +189,7 @@ export default {
       }
       this.markSlideAsViewed(this.slides[this.slideIndex])
 
-      if (this.play) {
+      if (this.isPlaying) {
       }
     },
 
@@ -197,60 +199,59 @@ export default {
         this.$emit('open-see-more-link')
       }
     },
+
+
+    startPlayback() {
+      if ( this.playerIntervalObj!==null ) {
+        clearInterval(this.playerIntervalObj);
+      }
+      this.playerIntervalObj = setInterval( () => {
+        if (this.slideViewedDuration >= 100) {
+          this.doNav('next')
+        } else {
+          this.slideViewedDuration += 1
+        }
+      }, this.INTERVAL_DELTA)
+    },
+
+    stopPlayback() {
+      clearInterval(this.playerIntervalObj);
+      this.playerIntervalObj = null
+    },
+
+    touchStartHandler() {
+      this.stopPlayback()
+    },
+    touchEndHandler() {
+      this.startPlayback()
+    },
+
   },
 
   watch: {
-    play(value) {
-      console.log('=== watch play()')
+    isPlaying(value) {
+      console.log('=== watch isPlaying()')
+      if (value) {
+        this.startPlayback()
+      } else { 
+        this.stopPlayback()
+      }
     },
   },
 
   mounted() {
-    this.playerInterval = setInterval( () => {
-      if (this.slideViewedDuration >= 100) {
-        this.doNav('next')
-      } else {
-        this.slideViewedDuration += 1
-      }
-    }, this.INTERVAL_DELTA)
+    this.startPlayback()
   },
 
   created() {
     console.log('=== created()')
     this.slideIndex = this.slideIndexInit
     this.markSlideAsViewed(this.slides[this.slideIndex])
-    /*
-    const params = {
-      timeline_id: this.timeline.id,
-      viewer_id: this.session_user.id,
-    }
-    const response = axios.get( this.$apiRoute('stories.getSlides'), { params } ).then ( response => {
-      console.log('=== created().getSlides response...', {
-        response,
-      })
-      const slides = response.data.stories
-      const slideIndex = response.data.slideIndex || 0
-
-      console.log('=== created().getSlides response...', {
-        slides: slides[0],
-        slideIndex,
-      })
-
-      //// if specific timeline is provided via the route, navigate directly to it, otherwise start from index 0
-      //if ( this.$route.params.timeline_id ) {
-      //this.timelineIndex = timelines.findIndex( t => t.id === this.$route.params.timeline_id )
-      //}
-      this.slides = slides // set last (and after timelineIndex is set) to avoid loading issues (%NOTE)
-      this.slideIndex = slideIndex
-
-      this.markSlideAsViewed(this.slides[this.slideIndex])
-      //this.$nextTick( () => this.initAnimation() )
-    })
-     */
   },
 
   beforeDestroy() {
-    clearInterval(this.playerInterval);
+    this.stopPlayback()
+    //clearInterval(this.playerIntervalObj);
   },
 
   components: {
@@ -284,7 +285,7 @@ export default {
       margin: auto;
     }
 
-    img {
+    img, video {
       max-width: 100%;
       height: 100%;
       display: block;
