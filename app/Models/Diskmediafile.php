@@ -38,6 +38,7 @@ class Diskmediafile extends BaseModel implements Guidable, Ownable
         'video/x-ms-wmv',
         'video/x-matroska',
         'video/ogg',
+        'video/webm',
     ];
     static public $mimeAudioTypes = [
         'audio/mpeg',

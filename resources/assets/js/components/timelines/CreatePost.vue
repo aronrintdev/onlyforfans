@@ -104,7 +104,7 @@
               <b-col cols="12" md="4">
                 <ul class="list-inline d-flex justify-content-end mb-0 mt-3 mt-md-0">
                   <li class="w-100 mx-0">
-                    <button :disabled="postBtnDisabled || posting" @click="savePost()" class="btn btn-submit btn-primary w-100">
+                    <button :disabled="posting" @click="savePost()" class="btn btn-submit btn-primary w-100">
                       <span v-if="posting" class="text-white spinner-border spinner-border-sm pr-2" role="status" aria-hidden="true"></span>
                       Post
                     </button>
@@ -188,16 +188,10 @@ export default {
     },
     scheduled_at: null,
     mediafiles: [],
-    postBtnDisabled: true,
     posting: false,
     expirationPeriod: null,
     showVideoRec: false,
   }),
-  watch: {
-    description(newVal) {
-      this.postBtnDisabled = !newVal;
-    }
-  },
   methods: {
 
     resetForm() {
@@ -384,11 +378,12 @@ export default {
     eventBus.$on('set-expiration-period', function(data) {
       self.expirationPeriod = data;
     })
-    eventBus.$on('video-rec-complete', function(data) {
+    eventBus.$on('video-rec-complete', function(file) {
       self.showVideoRec = false;
-      const mediafiles = [...self.mediafiles];
-      mediafiles.push(data);
-      self.mediafiles = mediafiles;
+      if (self.$refs.myVueDropzone) {
+        self.$refs.myVueDropzone.addFile(file);
+      }
+      // self.$refs.myVueDropzone.manuallyAddFile(data, data.filepath);
     })
 
     const mediafileIds = this.$route.params.mediafile_ids || []
@@ -407,7 +402,6 @@ export default {
         })
       })
     }
-    $('.dz-hidden-input').attr('capture', 'capture');
   }, // mounted
 
   created() {
