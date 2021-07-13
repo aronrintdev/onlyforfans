@@ -5,40 +5,41 @@ use DB;
 use Auth;
 use Exception;
 use Throwable;
-use Carbon\Carbon;
-use App\Models\Tip;
-use App\Models\Post;
-use App\Models\User;
-
-use App\Libs\FeedMgr;
-use App\Libs\UserMgr;
-use App\Models\Setting;
-use App\Models\Timeline;
-use App\Models\Fanledger;
-use App\Models\Mediafile;
-
-use App\Models\Mycontact;
-use App\Enums\PostTypeEnum;
-use App\Models\Subscription;
 
 use Illuminate\Http\Request;
-use App\Enums\PaymentTypeEnum;
-use App\Enums\MediafileTypeEnum;
-use App\Payments\PaymentGateway;
-use App\Models\Financial\Account;
-use App\Notifications\TipReceived;
-
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
-use App\Models\Financial\SegpayCall;
-use App\Http\Resources\PostCollection;
+use Illuminate\Validation\UnauthorizedException;
+
+use Carbon\Carbon;
+
+use App\Payments\PaymentGateway;
+
 use App\Notifications\TimelineFollowed;
-use App\Models\Casts\Money as CastsMoney;
-use App\Notifications\TimelineSubscribed;
+use App\Notifications\TipReceived;
+//use App\Notifications\TimelineSubscribed;
+
+use App\Http\Resources\PostCollection;
 use App\Http\Resources\TimelineCollection;
 use App\Http\Resources\MediafileCollection;
-use Illuminate\Validation\UnauthorizedException;
 use App\Http\Resources\Timeline as TimelineResource;
+
+use App\Models\Financial\Account;
+use App\Models\Casts\Money as CastsMoney;
+use App\Models\Financial\SegpayCall;
+use App\Models\Mediafile;
+use App\Models\Mycontact;
+use App\Models\Post;
+use App\Models\Setting;
+use App\Models\Storyqueue;
+use App\Models\Subscription;
+use App\Models\Timeline;
+use App\Models\Tip;
+use App\Models\User;
+
+use App\Enums\PostTypeEnum;
+use App\Enums\PaymentTypeEnum;
+use App\Enums\MediafileTypeEnum;
 
 class TimelinesController extends AppBaseController
 {
@@ -393,62 +394,15 @@ class TimelinesController extends AppBaseController
         return new PostCollection($data);
     }
 
-    // returns a list of stories grouped by followed timeline (ignores timeline if it has no active stories)
+    // returns a list of followed timelines with associated story groupings (ignores timeline if it has no active stories)
+    // %TODO DEPRECATE (?)
     public function myFollowedStories(Request $request)
     {
-        $followingIds = $request->user()->followedtimelines->pluck('id');
-
-        // %TODO: split *stories* within timeline into seen and unseen?
-        $queryF = Timeline::has('stories')->with([
-            'stories' => function($q1) {
-                $q1->orderBy('created_at', 'asc'); // sort stories relation oldest first
-            }, 
-            'stories.mediafiles',
-            'avatar'
+        $data = Storyqueue::viewableTimelines($request->user());
+        return response()->json([
+            'data' => $data,
         ]);
-        $queryF->whereIn('id', $followingIds); // comment out to test
-        $following = $queryF->get();
-        $following = $following->sortByDesc( function($t) {
-            return $t->getLatestStory()->created_at; // sort timelines (epics) by latest story
-        });
-
-        // Prepend my stories so my avatar is always first
-        $queryMe = Timeline::where('user_id', $request->user()->id);
-        $queryMe = $queryMe->with([
-            'stories' => function($q1) {
-                $q1->orderBy('created_at', 'asc'); // sort stories relation oldest first
-            }, 
-            'stories.mediafiles',
-            'avatar'
-        ]);
-        $me = $queryMe->first();
-
-        $following->prepend($me);
-        $data = $following->values()->all();
-
-        return new TimelineCollection($data);
+        //return new TimelineCollection($data);
     }
 
-    // same as above except just mine
-    public function myStories(Request $request)
-    {
-        // %TODO: DEPRECATE
-        /*
-        // %TODO: split *stories* within timeline into seen and unseen?
-        $query = Timeline::where('user_id', $request->user()->id);
-        $query->orderBy('created_at', 'desc');
-        $data = $query->get();
-        return new TimelineCollection($data);
-         */
-        $query = Timeline::where('user_id', $request->user()->id);
-        $query = $query->with([
-            'stories' => function($q1) {
-                $q1->orderBy('created_at', 'desc'); // sort stories relation by latest
-            }, 
-            'stories.mediafiles',
-            'avatar'
-        ]);
-        $data = $query->get();
-        return new TimelineCollection($data);
-    }
 }

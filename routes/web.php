@@ -161,6 +161,8 @@ Route::group(['middleware' => ['auth']], function () {
     // -- stories:  --
     Route::get('/stories/player', ['as' => 'stories.player', 'uses' => 'SpaController@index']);
     Route::get('/stories/match', ['as'=>'stories.match', 'uses' => 'StoriesController@match']);
+    Route::get('/stories/getSlides', ['as'=>'stories.getSlides', 'uses' => 'StoriesController@getSlides']);
+    Route::post('/stories/markViewed', ['as'=>'stories.markViewed', 'uses' => 'StoriesController@markViewed']);
     Route::get('/stories/dashboard', [
         'middleware' => 'spaMixedRoute',
         'as' => 'stories.dashboard',
@@ -179,7 +181,6 @@ Route::group(['middleware' => ['auth']], function () {
     #region Timelines
     Route::get('/timelines-suggested', ['as'=>'timelines.suggested', 'uses' => 'TimelinesController@suggested']); // %FIXME: refactor: use index(?)
     Route::get('/timelines/my-followed-stories', ['as'=>'timelines.myFollowedStories', 'uses' => 'TimelinesController@myFollowedStories']);
-    Route::get('/timelines/my-stories', ['as'=>'timelines.myStories', 'uses' => 'TimelinesController@myStories']);
     //Route::get('/timelines/home', ['as'=>'timelines.home', 'uses' => 'TimelinesController@home']); // special case of 'show'
     Route::get('/timelines/match', ['as'=>'timelines.match', 'uses' => 'TimelinesController@match']);
     Route::get('/timelines/home/feed', ['as'=>'timelines.homefeed', 'uses' => 'TimelinesController@homefeed']);

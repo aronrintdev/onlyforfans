@@ -24,7 +24,7 @@ class RandomTimestampSeeder extends Seeder
         $timelines->each( function($t) use($max) {
             static $iter = 1;
             $this->output->writeln("  - Updating timelines timestamps $iter / $max");
-            $ts = $this->faker->dateTimeBetween($startDate = '-5 years', $endDate = '-1 years');
+            $ts = $this->faker->dateTimeBetween($startDate = '-2 years', $endDate = '-1 months');
             $t->created_at = $ts;
             $t->updated_at = $ts;
             $t->save();
@@ -36,6 +36,11 @@ class RandomTimestampSeeder extends Seeder
                 $s->created_at = $ts2;
                 $s->updated_at = $ts2;
                 $s->save();
+                $s->storyqueues->each( function($sq) use($ts2) {
+                    $sq->created_at = $ts2;
+                    $sq->updated_at = $ts2;
+                    $sq->save();
+                });
             });
             $iter++;
         });

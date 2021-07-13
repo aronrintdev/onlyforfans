@@ -29,6 +29,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Laravel\Scout\Searchable;
 use Money\Currencies\ISOCurrencies;
+use Carbon\Carbon;
 
 /**
  * Timeline Model
@@ -116,8 +117,7 @@ class Timeline extends Model implements Subscribable, Tippable, Reportable
     //--------------------------------------------
 
     // includes subscribers (ie premium + default followers)
-    public function followers()
-    {
+    public function followers() {
         return $this->morphToMany(User::class, 'shareable', 'shareables', 'shareable_id', 'sharee_id')
             ->withPivot('access_level', 'shareable_type', 'sharee_id', 'is_approved', 'cattrs')
             ->withTimestamps();
@@ -127,8 +127,7 @@ class Timeline extends Model implements Subscribable, Tippable, Reportable
      * Active subscribers to this timeline
      * @return MorphToMany
      */
-    public function subscribers()
-    {
+    public function subscribers() {
         return $this->morphToMany(User::class, 'shareable', 'shareables', 'shareable_id', 'sharee_id')
             ->withPivot('access_level', 'shareable_type', 'sharee_id', 'is_approved', 'cattrs')
             ->where('access_level', 'premium')
@@ -140,38 +139,35 @@ class Timeline extends Model implements Subscribable, Tippable, Reportable
      *
      * @return MorphToMany
      */
-    public function subscriptions()
-    {
+    public function subscriptions() {
         return $this->morphMany(Subscription::class, 'subscribable');
     }
 
-    public function ledgersales()
-    {
+    public function ledgersales() {
         return $this->morphMany(Fanledger::class, 'purchaseable');
     }
 
-    public function posts()
-    {
+    public function posts() {
         return $this->morphMany(Post::class, 'postable');
     }
 
-    public function stories()
-    {
+    public function stories() {
         return $this->hasMany(Story::class);
     }
 
-    public function user()
-    { // timeline owner
+    public function storyqueues() {
+        return $this->hasMany(Storyqueue::class);
+    }
+
+    public function user() { // timeline owner
         return $this->belongsTo(User::class);
     }
 
-    public function avatar()
-    {
+    public function avatar() {
         return $this->belongsTo(Mediafile::class, 'avatar_id');
     }
 
-    public function cover()
-    {
+    public function cover() {
         return $this->belongsTo(Mediafile::class, 'cover_id');
     }
 
@@ -341,10 +337,27 @@ class Timeline extends Model implements Subscribable, Tippable, Reportable
         return $this->user;
     }
 
-    public function getLatestStory() : ?Story
+    public function getLatestStory(User $viewer) : ?Storyqueue
     {
-        $stories = Story::select(['id','slug','created_at'])->where('timeline_id', $this->id)->orderBy('created_at', 'desc')->get();
+        //$stories = Story::select(['id','slug','created_at'])->where('timeline_id', $this->id)->orderBy('created_at', 'desc')->get();
+        //$daysWindow = env('STORY_WINDOW_DAYS', 10000);
+        $stories = Storyqueue::select(['id','created_at'])
+            ->where('timeline_id', $this->id)
+            //->where('viewer_id', $viewer->id)
+            ->orderBy('created_at', 'desc')->get();
         return ($stories->count()>0) ? $stories[0] : null;
+    }
+
+    // Has the viewer seen all 'active' slides in this timeline's story (?)
+    public function isEntireStoryViewedByUser($viewerId) : bool
+    {
+        $daysWindow = env('STORY_WINDOW_DAYS', 10000);
+        $notViewedCount = Storyqueue::where('timeline_id', $this->id)
+            ->where('viewer_id', $viewerId)
+            ->whereNull('viewed_at')
+            ->where('created_at','>=',Carbon::now()->subDays($daysWindow))
+            ->count();
+        return ( $notViewedCount === 0 );
     }
 
 }
