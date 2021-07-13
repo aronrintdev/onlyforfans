@@ -407,7 +407,6 @@ export default {
         })
       })
     }
-    $('.dz-hidden-input').attr('capture', 'capture');
   }, // mounted
 
   created() {
