@@ -106,7 +106,15 @@ class Storyqueue extends Model
             }
             $selected[] = $sq->timeline_id;
         }
+
+        // Prepend my stories so my avatar is always first
+        $me = Timeline::with(['avatar', 'storyqueues'])
+            ->where('user_id', request()->user()->id)
+            ->first();
+        $me->makeVisible('user')->load(['user']);
+
         $timelines = ( $atLeast1UnviewedSlide->merge($allSlidesViewed) ); // ->all(); // collections of 'timelines'
+        $timelines->prepend($me);
         //$timelines = $atLeast1UnviewedSlide;
         /*
         $timelines = $storyqueues->reduce( function($acc, $sq) {
