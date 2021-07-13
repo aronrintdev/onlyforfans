@@ -394,35 +394,8 @@ class TimelinesController extends AppBaseController
         return new PostCollection($data);
     }
 
-    // %TODO: move to stories controller
-    // %TODO: DEPRECATED?
-    public function myActiveStoryTimelines(Request $request)
-    {
-        // %NOTE: if a story is in my queue, then  'follow' is already implied (ie that DB work is done inherent in [storyqueues]
-        $daysWindow = env('STORY_WINDOW_DAYS', 10000);
-        $storyqueues = Storyqueue::where('viewer_id', $request->user()->id)
-            ->whereNull('viewed_at')
-            ->where('created_at', '>=', Carbon::now()->subDays($daysWindow))
-            ->get();
-
-        // [ ] filter the above to return a list of unique timeline_ids, with the unqiue timeline_id selected by being the one with the latest storyqueue/story in its grouping
-        $storyqueues = Storyqueue::distinct('timeline_id')
-            ->where('viewer_id', $request->user()->id)
-            ->whereNull('viewed_at')
-            ->where('created_at', '>=', Carbon::now()->subDays($daysWindow))
-            ->orderBy('created_at', 'desc')
-            ->get();
-        dd($storyqueues);
-
-        $queryF = Timeline::with(['avatar']);
-        $queryF->whereIn('id', $followingIds); // comment out to test
-        $following = $queryF->get();
-        $following = $following->sortByDesc( function($t) {
-            return $t->getLatestStory()->created_at; // sort timelines (epics) by latest story
-        });
-    }
-
     // returns a list of followed timelines with associated story groupings (ignores timeline if it has no active stories)
+    // %TODO DEPRECATE (?)
     public function myFollowedStories(Request $request)
     {
         $data = Storyqueue::viewableTimelines($request->user());

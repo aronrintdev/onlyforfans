@@ -235,6 +235,7 @@ class StoriesController extends AppBaseController
         ];
     }
 
+    // session user does not have storyqueues for own story..either use if-else or add these to storyqueues (?)
     public function getSlides(Request $request)
     {
         $vrules = [
@@ -242,21 +243,35 @@ class StoriesController extends AppBaseController
             'timeline_id' => 'required|uuid|exists:timelines,id',
         ];
         $this->validate($request, $vrules);
-        
+
         $daysWindow = env('STORY_WINDOW_DAYS', 10000);
-        $storyqueues = Storyqueue::with(['story.mediafiles'])
-            ->where('viewer_id', $request->viewer_id)
-            ->where('timeline_id', $request->timeline_id)
-            ->where('created_at','>=',Carbon::now()->subDays($daysWindow))
-            ->orderBy('created_at', 'asc') // sort slides relation oldest first
-            ->get();
-        $slideIndex = 0;
-        $stories = $storyqueues->map( function($sq) use(&$slideIndex) {
-            if ( $sq->viewed_at !== null ) {
-                $slideIndex +=1;
-            }
-            return $sq->story;
-        });
+        $sessionUser = $request->user();
+
+        if ( $request->timeline_id === $sessionUser->timeline->id ) {
+            // get stories directly
+            $stories = Story::with(['mediafiles'])
+                ->where('timeline_id', $request->timeline_id)
+                ->where('created_at','>=',Carbon::now()->subDays($daysWindow))
+                ->orderBy('created_at', 'asc') // sort slides relation oldest first
+                ->get();
+            $slideIndex = 0; // always 0 for session user (viewing own stories)
+        } else {
+            // get stories via storyqueues for user
+            $storyqueues = Storyqueue::with(['story.mediafiles'])
+                ->where('viewer_id', $request->viewer_id)
+                ->where('timeline_id', $request->timeline_id)
+                ->where('created_at','>=',Carbon::now()->subDays($daysWindow))
+                ->orderBy('created_at', 'asc') // sort slides relation oldest first
+                ->get();
+            $slideIndex = 0;
+            $stories = $storyqueues->map( function($sq) use(&$slideIndex) {
+                if ( $sq->viewed_at !== null ) {
+                    $slideIndex +=1;
+                }
+                return $sq->story;
+            });
+        }
+
         return response()->json([
             'stories' => $stories,
             'slideIndex' => $slideIndex,
