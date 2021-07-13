@@ -1,14 +1,9 @@
 <template>
   <div v-if="!isLoading" class="container-fluid supercrate-player">
 
+    <!--
     <b-sidebar id="sidebar-settings" title="Story Settings" left shadow width="40rem">
       <div class="px-3 py-2">
-          <!--
-        <div>
-          Auto Play Speed
-          <VueSlider :data="speedOptions" v-model="speed" hideLabel />
-        </div>
-          -->
         <div>
           <b-form-checkbox v-model="isPlaying">Auto Play</b-form-checkbox>
         </div>
@@ -18,10 +13,18 @@
         </ul>
       </div>
     </b-sidebar>
+    -->
 
     <b-row>
       <b-col class="px-0">
         <div class="position-relative">
+
+          <div class="d-none">
+            <ul class="tag-debug">
+              <li>slide index: {{slideIndex+1}}/{{slides.length}}</li>
+              <li>current slide ID: {{currentSlideId}}</li>
+            </ul>
+          </div>
 
           <nav :style="cssNav" class="m-0">
             <div v-for="(s, iter) in slides" :key="`header-${s.id}`" class="cursor-pointer" @click="goTo(iter)">
@@ -40,12 +43,14 @@
                 </div>
               </div>
 
+              <!--
               <div v-b-toggle.sidebar-settings class="clickme_to-toggle_settings" role="button"><fa-icon icon="cog" size="2x" class="text-light" /></div>
+              -->
               <div class="clickme_to-close_player" role="button"><router-link to="/"><fa-icon icon="times" size="2x" class="text-light" /></router-link></div>
 
               <div class="nav-arrows w-100 px-1 px-sm-5 d-flex justify-content-between">
-                <div @click="doNav('previous')" class="" role="button"><fa-icon icon="angle-left" size="3x" class="text-light OFF-ml-auto" /></div>
-                <div @click="doNav('next')" class="" role="button"><fa-icon icon="angle-right" size="3x" class="text-light OFF-mr-auto" /></div>
+                <div @click="doNav('previous')" class="clickme_to-prev_slide" role="button"><fa-icon icon="angle-left"  size="3x" class="text-light" /></div>
+                <div @click="doNav('next')"     class="clickme_to-next_slide" role="button"><fa-icon icon="angle-right" size="3x" class="text-light" /></div>
               </div>
 
               <div class="bg-blur"></div>
@@ -55,7 +60,7 @@
                   <p class="h4 text-center v-box text-white w-75">{{ s.content }}</p>
                 </article>
                 <article v-else-if="s.stype==='image' && s.mediafiles" class="h-100">
-                  <img v-if="s.mediafiles[0].is_image" :src="s.mediafiles[0].filepath" class="OFF-img-fluid OFF-h-100" />
+                  <img v-if="s.mediafiles[0].is_image" :src="s.mediafiles[0].filepath" />
                   <video v-if="s.mediafiles[0].is_video" autoplay="autoplay" class="OFF-d-block">
                     <source :src="s.mediafiles[0].filepath" type="video/webm" />
                     <source :src="s.mediafiles[0].filepath" type="video/mp4" />
@@ -200,7 +205,6 @@ export default {
       }
     },
 
-
     startPlayback() {
       if ( this.playerIntervalObj!==null ) {
         clearInterval(this.playerIntervalObj);
@@ -251,7 +255,6 @@ export default {
 
   beforeDestroy() {
     this.stopPlayback()
-    //clearInterval(this.playerIntervalObj);
   },
 
   components: {
@@ -313,11 +316,21 @@ export default {
   }
 }
 
+#sidebar-settings {
+  z-index: 600;
+}
 .nav-arrows {
   position: absolute;
   top: 45%;
+  //bottom: 0;
   left: 0;
   z-index: 500;
+  /*
+  .clickme_to-next_slide, .clickme_to-prev_slide {
+    width: 45%;
+    height: 90vh;
+  }
+    */
 }
 .clickme_to-toggle_settings {
   position: absolute;

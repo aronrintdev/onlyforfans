@@ -42,7 +42,6 @@ export default {
     ...Vuex.mapState(['session_user']),
 
     isLoading() {
-      //return !this.session_user || !this.stories || !this.timelines
       return !this.session_user || !this.timelines || (this.timelineIndex===null) || !this.slides || (this.slideIndex===null)
     },
 
