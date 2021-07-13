@@ -2,12 +2,15 @@
 namespace Tests\Feature;
 
 use DB;
+use App\Models\Tip;
 use Tests\TestCase;
 use App\Models\Post;
 use App\Models\User;
 use App\Models\Timeline;
+use App\Events\TipFailed;
 use App\Models\Fanledger;
 use App\Models\Mediafile;
+use App\Events\ItemTipped;
 use App\Enums\PostTypeEnum;
 use App\Models\Diskmediafile;
 use App\Enums\PaymentTypeEnum;
@@ -468,27 +471,54 @@ class RestTimelinesTest extends TestCase
         $creator = $timeline->user;
         $fan = $timeline->followers[0];
 
+        $events = Event::fake([
+            ItemTipped::class,
+            TipFailed::class,
+        ]);
+
+        $account = $fan->financialAccounts()->where('type', AccountTypeEnum::IN)->with('resource')->first();
         $payload = [
-            'base_unit_cost_in_cents' => $this->faker->randomNumber(3),
+            'amount' => $this->faker->numberBetween(1, 20) * 500,
+            'currency' => 'USD',
+            'account_id' => $account->getKey(),
+            'message' => $this->faker->text(),
         ];
         $response = $this->actingAs($fan)->ajaxJSON('PUT', route('timelines.tip', $timeline->id), $payload);
-
         $response->assertStatus(200);
 
-        $content = json_decode($response->content());
-        $timelineR = $content->timeline;
+        // ItemPurchased will update client with websocket event
+        Event::assertDispatched(ItemTipped::class);
+        Event::assertNotDispatched(TipFailed::class);
 
-        $fanledger = Fanledger::where('fltype', PaymentTypeEnum::TIP)
-            ->where('purchaseable_type', 'timelines')
-            ->where('purchaseable_id', $timeline->id)
-            ->where('seller_id', $creator->id)
-            ->where('purchaser_id', $fan->id)
-            ->first();
-        $this->assertNotNull($fanledger);
-        $this->assertEquals(1, $fanledger->qty);
-        $this->assertEquals($payload['base_unit_cost_in_cents'], $fanledger->base_unit_cost_in_cents);
-        $this->assertTrue( $timeline->ledgersales->contains( $fanledger->id ) );
-        $this->assertTrue( $fan->ledgerpurchases->contains( $fanledger->id ) );
+        $content = json_decode($response->content());
+
+        // Tip was added to the database
+        $this->assertDatabaseHas(Tip::getTableName(), [
+            'sender_id'   => $fan->getKey(),
+            'receiver_id' => $creator->getKey(),
+            'tippable_id' => $timeline->getKey(),
+            'account_id'  => $account->getKey(),
+            'message'     => $payload['message'],
+            'amount'      => $payload['amount'],
+        ]);
+
+        // Amount from Card
+        $this->assertDatabaseHas('transactions', [
+            'account_id'   => $account->getKey(),
+            'debit_amount' => $payload['amount'],
+        ], 'financial');
+
+        // Amount from fan to creator
+        $this->assertDatabaseHas('transactions', [
+            'account_id'   => $fan->getInternalAccount('segpay', 'USD')->getKey(),
+            'debit_amount' => $payload['amount'],
+        ], 'financial');
+
+        // Amount to creator from fan
+        $this->assertDatabaseHas('transactions', [
+            'account_id'    => $creator->getInternalAccount('segpay', 'USD')->getKey(),
+            'credit_amount' => $payload['amount'],
+        ], 'financial');
     }
 
     /**
@@ -654,14 +684,14 @@ class RestTimelinesTest extends TestCase
         $this->assertDatabaseHas('transactions', [
             'account_id' => $fan->getInternalAccount('segpay', 'USD')->getKey(),
             'debit_amount' => $timeline->price->getAmount(),
-            'purchasable_id' => $timeline->getKey(),
+            'resource_id' => $timeline->getKey(),
         ], 'financial');
 
         // Amount to creator from fan
         $this->assertDatabaseHas('transactions', [
             'account_id' => $creator->getInternalAccount('segpay', 'USD')->getKey(),
             'credit_amount' => $timeline->price->getAmount(),
-            'purchasable_id' => $timeline->getKey(),
+            'resource_id' => $timeline->getKey(),
         ], 'financial');
 
         // Fan has access

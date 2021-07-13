@@ -59,7 +59,7 @@
 
               <div v-touch:swipe.top="handleSwipeUp" class="crate-content">
                 <article v-if="s.stype==='text'" class="h-100 v-wrap">
-                  <p class="h4 text-center v-box text-white w-75">{{ s.content }}</p>
+                  <VueMarkdown class="h4 text-center v-box text-white w-75" :source="s.content || ''" />
                 </article>
                 <article v-else-if="s.stype==='image' && s.mediafiles" class="h-100">
                   <img v-if="s.mediafiles[0].is_image" :src="s.mediafiles[0].filepath" />
@@ -87,6 +87,7 @@
 // of multiple slides
 import _ from 'lodash'
 import SeeMore from './SeeMore.vue' // for swipe-up functionality
+import VueMarkdown from '@adapttive/vue-markdown'
 
 export default {
 
@@ -247,7 +248,8 @@ export default {
   },
 
   components: {
-    seeMore: SeeMore
+    seeMore: SeeMore,
+    VueMarkdown,
   },
 
 }

@@ -72,22 +72,17 @@
             <b-row>
               <b-col cols="12" md="8" class="post-create-footer-ctrl d-flex">
                 <ul class="list-inline d-flex mb-0 OFF-border-right">
-                  <li>
-                    <label id="clickme_to-select">
-                      <fa-icon :icon="['far', 'file-upload']" class="text-secondary" />
-                    </label>
-                  </li>
-                  <li @click="takePicture()" class="selectable select-pic">
+                  <li id="clickme_to-select" class="selectable select-pic">
                     <fa-icon :icon="['far', 'image']" :class="selectedMedia==='pic' ? 'text-primary' : 'text-secondary'" />
                   </li>
-                  <li @click="recordVideo()" class="selectable select-video">
+                  <li v-if="!isIOS9Plus" @click="recordVideo()" class="selectable select-video">
                     <fa-icon :icon="['far', 'video']" :class="selectedMedia==='video' ? 'text-primary' : 'text-secondary'" />
                   </li>
                   <li @click="recordAudio()" class="selectable select-audio">
                     <fa-icon :icon="['far', 'microphone']" :class="selectedMedia==='audio' ? 'text-primary' : 'text-secondary'" />
                   </li>
                   <li @click="uploadFromVault()" class="selectable select-audio">
-                    <fa-icon :icon="['far', 'archive']" :class="selectedMedia==='audio' ? 'text-primary' : 'text-secondary'" />
+                    <fa-icon :icon="['far', 'archive']" :class="selectedMedia==='vault' ? 'text-primary' : 'text-secondary'" />
                   </li>
                 </ul>
                 <div class="border-right"></div>
@@ -98,15 +93,6 @@
                   <li class="selectable select-timer"><span><TimerIcon /></span></li>
                   <li class="selectable select-calendar" @click="showSchedulePicker()"><span><CalendarIcon /></span></li>
                   -->
-                  <li class="selectable select-location">
-                    <fa-icon :icon="['far', 'map-pin']" class="text-secondary" />
-                  </li>
-                  <li class="selectable select-emoji">
-                    <fa-icon :icon="['far', 'smile']" class="text-secondary" />
-                  </li>
-                  <li class="selectable select-timer">
-                    <fa-icon :icon="['far', 'clock']" class="text-secondary" />
-                  </li>
                   <li class="selectable select-expire-date" :disabled="expirationPeriod" @click="showExpirationPicker()">
                     <fa-icon :icon="['far', 'hourglass-half']" class="text-secondary" />
                   </li>
@@ -118,7 +104,7 @@
               <b-col cols="12" md="4">
                 <ul class="list-inline d-flex justify-content-end mb-0 mt-3 mt-md-0">
                   <li class="w-100 mx-0">
-                    <button :disabled="postBtnDisabled || posting" @click="savePost()" class="btn btn-submit btn-primary w-100">
+                    <button :disabled="posting" @click="savePost()" class="btn btn-submit btn-primary w-100">
                       <span v-if="posting" class="text-white spinner-border spinner-border-sm pr-2" role="status" aria-hidden="true"></span>
                       Post
                     </button>
@@ -130,12 +116,14 @@
         </b-card>
       </div>
     </section>
+    <VideoRecorder v-if="showVideoRec" @close="showVideoRec=false; selectedMedia=null" />
   </div>
 </template>
 
 <script>
-import Vuex from 'vuex';
 import moment from 'moment';
+import { isIOS, osVersion } from 'mobile-device-detect';
+
 import { eventBus } from '@/app';
 import vue2Dropzone from 'vue2-dropzone';
 import 'vue2-dropzone/dist/vue2Dropzone.min.css';
@@ -146,6 +134,7 @@ import CalendarIcon from '@components/common/icons/CalendarIcon.vue';
 
 import PriceSelector from '@components/common/PriceSelector';
 import UploadMediaPreview from '@components/posts/UploadMediaPreview';
+import VideoRecorder from '@components/videoRecorder';
 
 export default {
 
@@ -155,6 +144,9 @@ export default {
   },
 
   computed: {
+    isIOS9Plus() {
+      return isIOS && parseInt(osVersion.split('.')[0]) >= 9;
+    }
   },
 
   data: () => ({
@@ -196,15 +188,10 @@ export default {
     },
     scheduled_at: null,
     mediafiles: [],
-    postBtnDisabled: true,
     posting: false,
     expirationPeriod: null,
+    showVideoRec: false,
   }),
-  watch: {
-    description(newVal) {
-      this.postBtnDisabled = !newVal;
-    }
-  },
   methods: {
 
     resetForm() {
@@ -266,10 +253,7 @@ export default {
 
         if ( !queued.length ) {
           console.log('CreatePost::savePost() - nothing queued')
-          this.$store.dispatch('unshiftPostToTimeline', { newPostId: this.newPostId })
-          this.resetForm()
-          this.mediafiles = []
-          this.posting = false
+          this.createCompleted();
         }
 
       } else {
@@ -295,7 +279,8 @@ export default {
     addedEvent(file) {
       if (!file.filepath) {
         this.mediafiles.push({
-          ...file,
+          type: file.type,
+          name: file.name,
           filepath: URL.createObjectURL(file),
         });
       } else {
@@ -323,7 +308,21 @@ export default {
         return
       }
       console.log('queueCompleteEvent', { });
+      this.createCompleted();
+    },
+
+    createCompleted() {
       this.$store.dispatch('unshiftPostToTimeline', { newPostId: this.newPostId });
+      this.$store.dispatch('getQueueMetadata');
+      // Show notification if scheduled post is succesfully created
+      if (this.scheduled_at) {
+        this.$root.$bvToast.toast('New scheduled post is created.', {
+          title: 'Success!',
+          variant: 'primary',
+          solid: true,
+          toaster: 'b-toaster-top-right',
+        })
+      }
       this.resetForm();
       this.mediafiles = [];
       this.posting = false;
@@ -334,12 +333,14 @@ export default {
     },
     recordVideo() { // %TODO
       this.selectedMedia = this.selectedMedia!=='video' ? 'video' : null
+      this.showVideoRec = true
     },
     recordAudio() { // %TODO
       this.selectedMedia = this.selectedMedia!=='audio' ? 'audio' : null
     },
 
     uploadFromVault() {
+      this.selectedMedia = this.selectedMedia!=='vault' ? 'vault' : null
       // %FIXME: should add full upload from vault feature instead of redirecting
       this.$router.push({ name: 'vault.dashboard' })
     },
@@ -377,6 +378,13 @@ export default {
     eventBus.$on('set-expiration-period', function(data) {
       self.expirationPeriod = data;
     })
+    eventBus.$on('video-rec-complete', function(file) {
+      self.showVideoRec = false;
+      if (self.$refs.myVueDropzone) {
+        self.$refs.myVueDropzone.addFile(file);
+      }
+      // self.$refs.myVueDropzone.manuallyAddFile(data, data.filepath);
+    })
 
     const mediafileIds = this.$route.params.mediafile_ids || []
     if ( mediafileIds.length ) {
@@ -394,7 +402,6 @@ export default {
         })
       })
     }
-
   }, // mounted
 
   created() {
@@ -421,6 +428,7 @@ export default {
     vueDropzone: vue2Dropzone,
     EmojiIcon, LocationPinIcon, TimerIcon, CalendarIcon,
     UploadMediaPreview,
+    VideoRecorder,
   },
 }
 </script>

@@ -79,6 +79,17 @@ class Tip extends Model implements Messagable
         'last_payment_at',
     ];
 
+    protected static function booted()
+    {
+        static::creating(function ($model) {
+            if (!isset($model->custom_attributes)) {
+                $model->custom_attributes = new Collection();
+            }
+            if (!isset($model->metadata)) {
+                $model->metadata = new Collection();
+            }
+        });
+    }
 
 
     #endregion Model Properties

@@ -12,3 +12,4 @@
 *.js
 *.js.map
 stats.json
+testResults.html

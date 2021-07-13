@@ -69,6 +69,9 @@ class Post extends Model
     public static function boot()
     {
         parent::boot();
+        static::created(function($model){
+            $model->slug = $model->id;
+        });
         static::deleting(function ($model) {
             /*
             if (!$model->canBeDeleted()) {
@@ -97,7 +100,8 @@ class Post extends Model
     {
         return [
             'slug' => [
-                'source' => [ 'description' ]
+                'source' => [ 'description', 'id' ],
+                'onUpdate'=> true
             ]
         ];
     }
