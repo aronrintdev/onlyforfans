@@ -57,8 +57,8 @@
             cx="35"
             cy="35" />
         </svg>
-        <div class="icon-record" v-if="!isRecording" @click="startVideoRec">
-          <fa-icon :icon="['far', 'record-vinyl']" fixed-width class="text-danger icon-rec" />
+        <div class="icon-record" v-if="!isRecording" :disabled="!isDeviceReady" @click="startVideoRec">
+          <fa-icon :icon="['far', 'scrubber']" fixed-width class="text-danger icon-rec" />
         </div>
         <div class="icon-record"  v-if="isRecording" @click="stopRec">
           <fa-icon :icon="['fas', 'stop']" fixed-width class="text-primary icon-stop" />
@@ -93,7 +93,6 @@ import videojs from 'video.js';
 // Required libraries for video record
 import RecordRTC from 'recordrtc';
 import Record from 'videojs-record/dist/videojs.record.js';
-import TsEBMLEngine from 'videojs-record/dist/plugins/videojs.record.ts-ebml.js';
 import { eventBus } from '@/app';
 
 export default {
@@ -104,9 +103,10 @@ export default {
       mins: 0,
       secs: 0
     },
-    videoRecLimit: 10,
+    videoRecLimit: 900,
     audioDevices: [],
     videoDevices: [],
+    isDeviceReady: false,
   }),
   mounted() {
     // Initialize video recorder
@@ -121,10 +121,9 @@ export default {
         record: {
           audio: true,
           video: true,
-          maxLength: 10,
+          maxLength: this.videoRecLimit, // 15mins
           displayMilliseconds: true,
           debug: true,
-          convertEngine: 'ts-ebml'
         }
       }
     };
@@ -133,14 +132,17 @@ export default {
     this.player.record().getDevice(); 
 
     const self = this;
-    this.player.on('finishConvert', function() {
-      eventBus.$emit('video-rec-complete', self.player.convertedData);
+    this.player.on('finishRecord', function() {
+      eventBus.$emit('video-rec-complete', self.player.recordedData);
       self.isRecording = false;
-      self.closeVideoRec();
+      setTimeout(() => {
+        self.closeVideoRec();
+      }, 500);
     });
 
     this.player.one('deviceReady', function() {
       self.player.record().enumerateDevices();
+      self.isDeviceReady = true;
     });
 
     this.player.on('enumerateReady', function() {
