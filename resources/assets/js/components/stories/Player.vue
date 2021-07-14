@@ -1,34 +1,41 @@
 <template>
   <div v-if="!isLoading" class="container-fluid supercrate-player">
 
+    <!--
     <b-sidebar id="sidebar-settings" title="Story Settings" left shadow width="40rem">
       <div class="px-3 py-2">
         <div>
-          Auto Play Speed
-          <VueSlider :data="speedOptions" v-model="speed" hideLabel />
-        </div>
-        <div>
-          <b-form-checkbox v-model="play">Auto Play</b-form-checkbox>
+          <b-form-checkbox v-model="isPlaying">Auto Play</b-form-checkbox>
         </div>
         <ul class="tag-debug">
-          <li>story index: {{currentIndex+1}}/{{stories.length}}</li>
-          <li>current story ID: {{currentStoryId}}</li>
+          <li>slide index: {{slideIndex+1}}/{{slides.length}}</li>
+          <li>current slide ID: {{currentSlideId}}</li>
         </ul>
       </div>
     </b-sidebar>
+    -->
 
     <b-row>
       <b-col class="px-0">
         <div class="position-relative">
 
+          <!--
+          <div class="d-none">
+            <ul class="tag-debug">
+              <li>slide index: {{slideIndex+1}}/{{slides.length}}</li>
+              <li>current slide ID: {{currentSlideId}}</li>
+            </ul>
+          </div>
+          -->
+
           <nav :style="cssNav" class="m-0">
-            <div v-for="(s, iter) in stories" :key="`header-${s.id}`" class="cursor-pointer" @click="goTo(iter)">
-              <div class="tag-target" :ref="`nav-${s.id}`" />
+            <div v-for="(s, iter) in slides" :key="`header-${s.id}`" class="cursor-pointer" @click="goTo(iter)">
+              <div :style="cssCurrentProgress" class="tag-target" :class="{ 'played': (slideIndex>iter), 'playing': (slideIndex===iter) }" :ref="`nav-${s.id}`" />
             </div>
           </nav>
 
-          <section v-for="(s, iter) in stories" :key="`story-${s.id}`">
-            <article v-if="currentIndex===iter" :style="cssDisplay" class="display-area">
+          <section v-for="(s, iter) in slides" :key="`slide-${s.id}`">
+            <article v-if="slideIndex===iter" :style="cssDisplay" class="display-area" v-touch:start="touchStartHandler" v-touch:end="touchEndHandler">
 
               <div class="tag-creator d-flex align-items-center">
                 <b-avatar v-if="avatar" :src="avatar.filepath" class="mr-2" size="2.5rem" />
@@ -38,12 +45,14 @@
                 </div>
               </div>
 
+              <!--
               <div v-b-toggle.sidebar-settings class="clickme_to-toggle_settings" role="button"><fa-icon icon="cog" size="2x" class="text-light" /></div>
+              -->
               <div class="clickme_to-close_player" role="button"><router-link to="/"><fa-icon icon="times" size="2x" class="text-light" /></router-link></div>
 
               <div class="nav-arrows w-100 px-1 px-sm-5 d-flex justify-content-between">
-                <div @click="doNav('previous')" class="" role="button"><fa-icon icon="angle-left" size="3x" class="text-light OFF-ml-auto" /></div>
-                <div @click="doNav('next')" class="" role="button"><fa-icon icon="angle-right" size="3x" class="text-light OFF-mr-auto" /></div>
+                <div @click="doNav('previous')" class="clickme_to-prev_slide" role="button"><fa-icon icon="angle-left"  size="3x" class="text-light" /></div>
+                <div @click="doNav('next')"     class="clickme_to-next_slide" role="button"><fa-icon icon="angle-right" size="3x" class="text-light" /></div>
               </div>
 
               <div class="bg-blur"></div>
@@ -53,12 +62,14 @@
                   <VueMarkdown class="h4 text-center v-box text-white w-75" :source="s.content || ''" />
                 </article>
                 <article v-else-if="s.stype==='image' && s.mediafiles" class="h-100">
-                  <img :src="s.mediafiles[0].filepath" class="OFF-img-fluid OFF-h-100" />
+                  <img v-if="s.mediafiles[0].is_image" :src="s.mediafiles[0].filepath" />
+                  <video v-if="s.mediafiles[0].is_video" autoplay="autoplay" class="OFF-d-block">
+                    <source :src="s.mediafiles[0].filepath" type="video/webm" />
+                    <source :src="s.mediafiles[0].filepath" type="video/mp4" />
+                  </video>
                   <see-more v-if="s.swipe_up_link" :link="s.swipe_up_link"></see-more>
                 </article>
               </div>
-
-
             </article>
           </section>
 
@@ -71,214 +82,176 @@
 </template>
 
 <script>
+// A 'slide' is an individual 'story' in the database...
+// However 'story' should actually refer to the entire story timeline, composed
+// of multiple slides
 import _ from 'lodash'
-import SeeMore from './SeeMore.vue'
-
-/** https://github.com/adapttive/vue-markdown/ */
+import SeeMore from './SeeMore.vue' // for swipe-up functionality
 import VueMarkdown from '@adapttive/vue-markdown'
 
 export default {
-  components: {
-    seeMore: SeeMore,
-    VueMarkdown,
-  },
 
   props: {
     storyteller: { type: String, default: '' },
     session_user: { type: Object, default: null },
-    stories: { type: Array, default: () => [] },
-    maxStories: { type: Number, default: 15 },
+    timeline: null,
     avatar: null,
+    slides: null,
+    slideIndexInit: null,
   },
 
   data: () => ({
-    currentIndex: 0, // index from 0
-    play: false,
-    speed: 900, // 3000,
-    timelineAnimation: null,
-    speedOptions: [
-      {
-        label: 'Very Slow',
-        value: 10000,
-      },
-      {
-        label: 'Slow',
-        value: 4000,
-      },
-      {
-        label: 'Normal',
-        value: 3000,
-      },
-      {
-        label: 'Fast',
-        value: 2000,
-      },
-      {
-        label: 'Very Fast',
-        value: 1000,
-      },
-    ],
+    INTERVAL_DELTA: 35, // milliseconds...smaller the number the faster the playback
+    slideViewedDuration: 0, // %FIXME
+
+    //slides: null,
+    slideIndex: null,
+
+    playerIntervalObj: null, // instace of setInterval
+
+    // slide player controls
+    isPlaying: true,
   }),
 
   computed: {
     isLoading() {
-      return !this.storyteller || !this.stories || !this.session_user
+      return !this.timeline || !this.storyteller || !this.slides || !this.session_user || (this.slideIndexInit===null)
+    },
+
+    cssCurrentProgress() {
+      return { '--current-progress': `${this.slideViewedDuration}%` }
     },
     cssNav() {
-      return {
-        //'--bg-color': this.bgColor,
-        //'--height': this.height + 'px',
-        '--grid-template-columns': `repeat(${this.stories.length}, 1fr)`,
-      }
+      return { '--grid-template-columns': `repeat(${this.slides.length}, 1fr)` }
     },
     cssDisplay() {
-      //console.log ('stories', { stories: this.stories })
-      if (this.stories.length && this.stories[0].mediafiles && this.stories[this.currentIndex].mediafiles[0]) {
-        return {
-          '--background-image': `url(${this.stories[this.currentIndex].mediafiles[0].filepath})`,
-        }
+      if (this.slides.length && this.slides[0].mediafiles && this.slides[this.slideIndex].mediafiles[0]) {
+        return { '--background-image': `url(${this.slides[this.slideIndex].mediafiles[0].filepath})` }
       }
       return {}
     },
 
-    currentStoryId() {
-      return this.stories.length ? this.stories[this.currentIndex].id : null
+    currentSlideId() {
+      return (this.slides && this.slides.length && (this.slideIndex!==null)) ? this.slides[this.slideIndex].id : null
     }
 
   },
 
   methods: {
+    async markSlideAsViewed(slide) {
+      const payload = {
+        viewer_id: this.session_user.id,
+        story_id: slide.id,
+      }
+      const response = await axios.post(`/stories/markViewed`, payload)
+    },
+
     doNav(direction) {
-      console.log(`doNav() - ${direction}, index=${this.currentIndex} - ${this.currentIndex+1}/${this.stories.length}`)
+      if ( !this.slides || !this.slides.length || this.slideIndex===null ) {
+        return
+      }
       switch (direction) {
         case 'previous':
-          if ( (this.currentIndex-1) < 0 ) {
-            console.log(`doNav() - emit prev-story-timeline`)
+          if ( (this.slideIndex-1) < 0 ) {
             this.$emit('prev-story-timeline', { foo: 'bar'} )
-            this.currentIndex = 0
+            this.slideIndex = 0
+            this.slideViewedDuration = 0
           } else {
-            this.goTo(this.currentIndex - 1)
-            console.log(`doNav() - decrement index`)
+            this.goTo(this.slideIndex - 1)
           }
           break
         case 'next':
-          if ( (this.currentIndex+1) >= this.stories.length ) {
-            console.log(`doNav() - emit next-story-timeline`)
+          if ( (this.slideIndex+1) >= this.slides.length ) {
             this.$emit('next-story-timeline', { foo: 'bar'} )
-            this.currentIndex = 0
+            this.slideIndex = 0
+            this.slideViewedDuration = 0
           } else {
-            console.log(`doNav() - increment index`)
-            this.goTo(this.currentIndex + 1)
+            this.goTo(this.slideIndex + 1)
           }
           break
       }
     },
 
-    // sets this.currentIndex
+    // sets this.slideIndex
     goTo(index) {
-      this.timelineAnimation.pause()
 
-      console.log(`goTo() - index = ${index}`)
       if ( index < 0 ) {
-        console.log(`goTo() - min out`)
-        this.currentIndex = 0 // min out at first index
-      } else if ( index >= this.stories.length ) {
-        console.log(`goTo() - max out`)
-        this.currentIndex = this.stories.length-1 // max out at last index
+        this.slideIndex = 0 // min out at first index
+        this.slideViewedDuration = 0
+      } else if ( index >= this.slides.length ) {
+        this.slideIndex = this.slides.length-1 // max out at last index
+        this.slideViewedDuration = 0
       } else {
-        console.log(`goTo() - assign this.currentIndex to index = ${index}`)
-        this.currentIndex = index
+        this.slideIndex = index
+        this.slideViewedDuration = 0
       }
-      this.timelineAnimation.seek(this.getTimelineSeek(index))
+      this.markSlideAsViewed(this.slides[this.slideIndex])
 
-      if (this.play) {
-        this.timelineAnimation.play()
+      if (this.isPlaying) {
       }
-    },
-
-    getTimelineSeek(index) {
-      return (index / this.stories.length) * this.timelineAnimation.duration
-    },
-
-    addTimelineElements() {
-      console.log('=== addTimlineElements()')
-      this.stories.forEach((s, idx) => {
-        this.timelineAnimation.add({
-          targets: this.$refs[`nav-${s.id}`][0], // affects class .tag-target
-          width: '100%',
-          changeBegin: (a) => {
-            //console.log(`addTimlineElements().callback - idx = ${idx}`)
-            //this.currentIndex = idx
-          },
-        })
-      })
-    },
-
-    createTimeline() {
-      console.log('=== createTimeline()')
-      const _this = this
-      this.timelineAnimation = this.$anime.timeline({
-        autoplay: this.play,
-        duration: this.speed,
-        easing: 'linear',
-        loop: false,
-        complete: function() {
-          console.log('$anime - complete callback')
-          _this.doNav('next') // should advance to next timeline (emit event to parent component)
-        },
-      })
-      this.addTimelineElements()
-    },
-
-    removeTimeline() {
-      console.log('=== removeTimeline()')
-      this.timelineAnimation.pause()
-      this.timelineAnimation.restart()
-      this.stories.forEach((s, idx) => {
-        this.timelineAnimation.remove(this.$refs[`nav-${s.id}`][0]) // affects class .tag-target
-      })
     },
 
     handleSwipeUp() {
-      const link = this.stories[this.currentIndex].swipe_up_link
+      const link = this.slides[this.slideIndex].swipe_up_link
       if (link) {
         this.$emit('open-see-more-link')
       }
     },
+
+    startPlayback() {
+      if ( this.playerIntervalObj!==null ) {
+        clearInterval(this.playerIntervalObj);
+      }
+      this.playerIntervalObj = setInterval( () => {
+        if (this.slideViewedDuration >= 100) {
+          this.doNav('next')
+        } else {
+          this.slideViewedDuration += 1
+        }
+      }, this.INTERVAL_DELTA)
+    },
+
+    stopPlayback() {
+      clearInterval(this.playerIntervalObj);
+      this.playerIntervalObj = null
+    },
+
+    touchStartHandler() {
+      this.stopPlayback()
+    },
+    touchEndHandler() {
+      this.startPlayback()
+    },
+
   },
 
   watch: {
-    play(value) {
-      console.log('=== watch play()')
+    isPlaying(value) {
       if (value) {
-        this.timelineAnimation.play()
-      } else {
-        this.timelineAnimation.pause()
+        this.startPlayback()
+      } else { 
+        this.stopPlayback()
       }
     },
-    speed() {
-      console.log('=== watch speed()')
-      const progress = this.timelineAnimation.currentTime / this.timelineAnimation.duration
-      this.removeTimeline()
-      this.createTimeline()
-      this.timelineAnimation.pause()
-      this.timelineAnimation.seek(progress * this.timelineAnimation.duration)
-      if (this.play) {
-        this.timelineAnimation.play()
-      }
-    },
-    stories() {
-      console.log('=== watch stories()')
-      //this.removeTimeline()
-      //this.createTimeline()
-      //this.addTimelineElements()
-    }
   },
 
   mounted() {
-    console.log('=== mounted()')
-    this.createTimeline()
+    this.slideIndex = this.slideIndexInit
+    if ( this.slides && this.slides.length ) {
+      this.markSlideAsViewed(this.slides[this.slideIndex])
+      this.startPlayback()
+    }
   },
+
+  beforeDestroy() {
+    this.stopPlayback()
+  },
+
+  components: {
+    seeMore: SeeMore,
+    VueMarkdown,
+  },
+
 }
 </script>
 
@@ -306,7 +279,7 @@ export default {
       margin: auto;
     }
 
-    img {
+    img, video {
       max-width: 100%;
       height: 100%;
       display: block;
@@ -334,11 +307,21 @@ export default {
   }
 }
 
+#sidebar-settings {
+  z-index: 600;
+}
 .nav-arrows {
   position: absolute;
   top: 45%;
+  //bottom: 0;
   left: 0;
   z-index: 500;
+  /*
+  .clickme_to-next_slide, .clickme_to-prev_slide {
+    width: 45%;
+    height: 90vh;
+  }
+    */
 }
 .clickme_to-toggle_settings {
   position: absolute;
@@ -373,6 +356,14 @@ nav {
       background: white;
       height: 100%;
       width: 0%;
+    }
+    .tag-target.played {
+      width: 100%;
+    }
+
+    .tag-target.playing {
+      background: pink;
+      width: var(--current-progress);
     }
   }
 }

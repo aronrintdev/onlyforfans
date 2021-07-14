@@ -35,6 +35,7 @@ class Kernel extends ConsoleKernel
         \App\Console\Commands\PushTestEvent::class,
         \App\Console\Commands\SetmfSize::class,
         \App\Console\Commands\SetTimestamps::class,
+        \App\Console\Commands\UpdateStoryqueues::class,
     ];
 
     /**

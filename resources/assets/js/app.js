@@ -115,6 +115,8 @@ Vue.use(VueAwesomeSwiper);
 
 import 'photoswipe/dist/photoswipe.css';
 import 'photoswipe/dist/default-skin/default-skin.css';
+import Photoswipe from 'vue-pswipe';
+Vue.use(Photoswipe);
 
 /**
  * v-mask: https://github.com/probil/v-mask#readme

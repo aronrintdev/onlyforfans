@@ -13,11 +13,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Vault extends BaseModel implements Guidable, Ownable
 {
-    use UsesUuid;
-    use HasFactory;
-    use OwnableFunctions;
-    use Sluggable;
-    use SluggableTraits;
+    use UsesUuid, HasFactory, OwnableFunctions, Sluggable, SluggableTraits;
 
     protected $guarded = ['id', 'created_at', 'updated_at'];
     public static $vrules = [];

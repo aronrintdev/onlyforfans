@@ -13,7 +13,22 @@
       <!-- Followed creators' stories avatar -->
       <swiper ref="mySwiper" :options="swiperOptions" class="">
         <swiper-slide v-for="tl in timelines" :key="tl.id" class="story slide tag-followed_timeline">
+          <router-link :to="{ name: 'stories.player', params: { timeline_id: tl.id } }" class="box-story">
+            <b-img 
+              v-b-popover.hover.top="{variant: 'info', content: tl.slug}" 
+              rounded="circle" 
+              :src="tl.avatar.filepath" 
+              :class="{ 'my-story-avatar': isMyTimeline(tl), 'all-viewed': tl.allViewed }"
+              class="p-0" 
+              alt="Story owner's avatar" 
+            />
+          </router-link>
+        </swiper-slide>
+      </swiper>
 
+      <!--
+      <div ref="mySwiper" :options="swiperOptions" class="">
+        <div v-for="tl in timelines" :key="tl.id" class="story OFF-slide tag-followed_timeline">
           <router-link :to="{ name: 'stories.player', params: { timeline_id: tl.id } }" class="box-story">
             <b-img 
               v-b-popover.hover.top="{variant: 'info', content: tl.slug}" 
@@ -24,14 +39,13 @@
               alt="Story owner's avatar" 
             />
           </router-link>
-          <!--
           <div>
             <pre>{{ tl.slug }}</pre>
-            <pre>{{ JSON.stringify(tl.stories.map( s => ({ id: s.id, slug: s.slug, created: s.created_at }) )[0], null, 2) }}</pre>
+            <pre>{{ JSON.stringify(tl.storyqueues.map( sq => ({ timeline_id: tl.id, story_id: sq.story_id, created: sq.created_at }) ), null, 2) }}</pre>
           </div>
-          -->
-        </swiper-slide>
-      </swiper>
+        </div>
+      </div>
+      -->
 
     </section>
 
@@ -86,7 +100,6 @@ export default {
     // Story form input values...
     //   put inside a form JSON??
     fileInput: null, // form input
-    //stype: 'text',
     storyAttrs: {
       color: '#fff',
       contents: '',
@@ -96,20 +109,9 @@ export default {
     selectedDiskfileUrl: null,
 
     swiperOptions: {
-      //lazy: true,
       slidesPerView: 'auto', // 'auto',
       spaceBetween: 12,
-      //lazy: true,
-      //slidesPerView: 'auto',
-      //observer: true,
-      //observeParents: true,
-      //observer: true,
-      //freeMode: true,
-      //freeModeMomentum: true,
-      //mousewheel: true,
-      //watchOverflow: true,
-      //width: 1300,
-      //watchSlidesVisibility: true,
+      //direction: 'vertical',
     },
   }),
 
@@ -145,9 +147,7 @@ export default {
       } 
 
       const response = await axios.post(`/stories`, payload, {
-        headers: {
-          'Content-Type': 'application/json',
-        }
+        headers: { 'Content-Type': 'application/json' }
       })
       this.isPreviewModalVisible = false
       this.isSelectFileModalVisible = false
@@ -161,9 +161,7 @@ export default {
     },
 
     bgColor(story) {
-      return Object.keys(story).includes('background-color')
-        ? story.customAttributes['background-color']
-        : 'yellow'
+      return Object.keys(story).includes('background-color') ? story.customAttributes['background-color'] : 'yellow'
     },
 
     isMyTimeline(tl) {
@@ -172,13 +170,6 @@ export default {
   },
 
   created() {
-    /*
-    this.$store.dispatch('getStories', {
-      //user_id: this.session_user.id,
-      following: 1,
-      stypes: 'image', // %FIXME: should be 'photo' (ideally we use PHP ENUM?)
-    })
-     */
     // %NOTE: we don't really need the stories here, just the timelines that have stories 
     const response = axios.get( this.$apiRoute('timelines.myFollowedStories')).then ( response => {
       this.timelines = response.data.data
@@ -200,34 +191,26 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-//$size: 40px;
-//$margin: 16px;
 body .crate-story_bar {
 
   .story.slide {
     width: 50px !important;
   }
 
-  .b-icon {
-    //height: $size;
-  }
-
   .box-story img {
     width: 40px;
     height: 40px;
+  }
+  .box-story img {
+    border: solid orange 2px;
+  }
+  .box-story img.all-viewed {
+    border: solid green 2px;
   }
   .box-story img.my-story-avatar {
     border: solid cyan 2px;
   }
 
-  /*
-  .box-story .tag-colorfill {
-    //width: $size;
-    //height: $size;
-    display: block;
-    border-radius: 50%;
-  }
-   */
 }
 </style>
 

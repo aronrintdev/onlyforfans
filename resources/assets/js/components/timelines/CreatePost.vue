@@ -50,6 +50,7 @@
               :options="dropzoneOptions"
               :include-styling=true
               :useCustomSlot=true
+              :duplicateCheck=true
               v-on:vdropzone-file-added="addedEvent"
               v-on:vdropzone-removed-file="removedEvent"
               v-on:vdropzone-sending="sendingEvent"
@@ -64,6 +65,7 @@
               <UploadMediaPreview
                 :mediafiles="mediafiles"
                 @change="changeMediafiles"
+                @remove="removeMediafile"
                 @openFileUpload="openDropzone"
               />
             </vue-dropzone>
@@ -82,7 +84,7 @@
                     <fa-icon :icon="['far', 'microphone']" :class="selectedMedia==='audio' ? 'text-primary' : 'text-secondary'" />
                   </li>
                   <li @click="uploadFromVault()" class="selectable select-audio">
-                    <fa-icon :icon="['far', 'archive']" :class="selectedMedia==='audio' ? 'text-primary' : 'text-secondary'" />
+                    <fa-icon :icon="['far', 'archive']" :class="selectedMedia==='vault' ? 'text-primary' : 'text-secondary'" />
                   </li>
                 </ul>
                 <div class="border-right"></div>
@@ -104,7 +106,7 @@
               <b-col cols="12" md="4">
                 <ul class="list-inline d-flex justify-content-end mb-0 mt-3 mt-md-0">
                   <li class="w-100 mx-0">
-                    <button :disabled="postBtnDisabled || posting" @click="savePost()" class="btn btn-submit btn-primary w-100">
+                    <button :disabled="posting" @click="savePost()" class="btn btn-submit btn-primary w-100">
                       <span v-if="posting" class="text-white spinner-border spinner-border-sm pr-2" role="status" aria-hidden="true"></span>
                       Post
                     </button>
@@ -116,11 +118,11 @@
         </b-card>
       </div>
     </section>
+    <VideoRecorder v-if="showVideoRec" @close="showVideoRec=false; selectedMedia=null" />
   </div>
 </template>
 
 <script>
-import Vuex from 'vuex';
 import moment from 'moment';
 import { isIOS, osVersion } from 'mobile-device-detect';
 
@@ -134,6 +136,7 @@ import CalendarIcon from '@components/common/icons/CalendarIcon.vue';
 
 import PriceSelector from '@components/common/PriceSelector';
 import UploadMediaPreview from '@components/posts/UploadMediaPreview';
+import VideoRecorder from '@components/videoRecorder';
 
 export default {
 
@@ -180,6 +183,7 @@ export default {
       clickable: '#clickme_to-select',
       maxFilesize: 15.9,
       addRemoveLinks: true,
+      removeType: 'client',
       headers: {
         'X-Requested-With': 'XMLHttpRequest',
         'X-CSRF-TOKEN': document.head.querySelector('[name=csrf-token]').content,
@@ -187,15 +191,10 @@ export default {
     },
     scheduled_at: null,
     mediafiles: [],
-    postBtnDisabled: true,
     posting: false,
     expirationPeriod: null,
+    showVideoRec: false,
   }),
-  watch: {
-    description(newVal) {
-      this.postBtnDisabled = !newVal;
-    }
-  },
   methods: {
 
     resetForm() {
@@ -283,7 +282,8 @@ export default {
     addedEvent(file) {
       if (!file.filepath) {
         this.mediafiles.push({
-          ...file,
+          type: file.type,
+          name: file.name,
           filepath: URL.createObjectURL(file),
         });
       } else {
@@ -335,12 +335,14 @@ export default {
     },
     recordVideo() { // %TODO
       this.selectedMedia = this.selectedMedia!=='video' ? 'video' : null
+      this.showVideoRec = true
     },
     recordAudio() { // %TODO
       this.selectedMedia = this.selectedMedia!=='audio' ? 'audio' : null
     },
 
     uploadFromVault() {
+      this.selectedMedia = this.selectedMedia!=='vault' ? 'vault' : null
       // %FIXME: should add full upload from vault feature instead of redirecting
       this.$router.push({ name: 'vault.dashboard' })
     },
@@ -355,6 +357,14 @@ export default {
     },
     changeMediafiles(data) {
       this.mediafiles = [...data];
+    },
+    removeMediafile(index) {
+      const file = this.$refs.myVueDropzone.dropzone.files[index];
+      if (file) {
+        this.$refs.myVueDropzone.removeFile(file);
+        this.mediafiles.splice(index, 1);
+        this.mediafiles = [...this.mediafiles];
+      }
     },
     openDropzone() {
       this.$refs.myVueDropzone.dropzone.hiddenFileInput.click();
@@ -378,6 +388,13 @@ export default {
     eventBus.$on('set-expiration-period', function(data) {
       self.expirationPeriod = data;
     })
+    eventBus.$on('video-rec-complete', function(file) {
+      self.showVideoRec = false;
+      if (self.$refs.myVueDropzone) {
+        self.$refs.myVueDropzone.addFile(file);
+      }
+      // self.$refs.myVueDropzone.manuallyAddFile(data, data.filepath);
+    })
 
     const mediafileIds = this.$route.params.mediafile_ids || []
     if ( mediafileIds.length ) {
@@ -395,7 +412,6 @@ export default {
         })
       })
     }
-    $('.dz-hidden-input').attr('capture', 'capture');
   }, // mounted
 
   created() {
@@ -422,6 +438,7 @@ export default {
     vueDropzone: vue2Dropzone,
     EmojiIcon, LocationPinIcon, TimerIcon, CalendarIcon,
     UploadMediaPreview,
+    VideoRecorder,
   },
 }
 </script>

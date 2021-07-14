@@ -384,9 +384,12 @@ class RestVaultTest extends TestCase
      *  @group vault
      *  @group regression
      *  @group regression-base
+     *  @group here0713
      */
     public function test_can_delete_my_non_root_vault_folder()
     {
+        Storage::fake('s3');
+
         $creator = User::first();
         $primaryVault = Vault::primary($creator)->first();
         $rootFolder = Vaultfolder::isRoot()->where('vault_id', $primaryVault->id)->first();
@@ -401,20 +404,75 @@ class RestVaultTest extends TestCase
         $response->assertStatus(201);
         $content = json_decode($response->content());
         $this->assertNotNull($content->vaultfolder);
-        $subfolderR = $content->vaultfolder;
-        $rootFolder->refresh();
-        $exists = Vaultfolder::find($subfolderR->id);
+        $sf1 = $content->vaultfolder;
+        $exists = Vaultfolder::find($sf1->id);
         $this->assertNotNull($exists);
-        $this->assertTrue($rootFolder->vfchildren->contains($subfolderR->id), 'Root should now contain newly created subfolder');
+        $sf1 = $exists;
+        $sf2 = $exists; // assign object to sf1
+        $rootFolder->refresh();
+        $this->assertTrue($rootFolder->vfchildren->contains($sf1->id), 'Root should now contain newly created subfolder');
 
-        // delete the subfolder
-        throw new \Exception('fixme...this needs to delete all sub-folders as well as all file contents within this and subfolders!!');
-        $response = $this->actingAs($creator)->ajaxJSON('DELETE', route('vaultfolders.destroy', $subfolderR->id));
+        // make a 2nd subfolder under first
+        $payload = [
+            'vault_id' => $rootFolder->vault_id,
+            'parent_id' => $sf1->id,
+            'vfname' => $this->faker->slug,
+        ];
+        $response = $this->actingAs($creator)->ajaxJSON('POST', route('vaultfolders.store'), $payload);
+        $response->assertStatus(201);
+        $content = json_decode($response->content());
+        $this->assertNotNull($content->vaultfolder);
+        $sf2 = $content->vaultfolder;
+        $exists = Vaultfolder::find($sf2->id);
+        $this->assertNotNull($exists);
+        $sf2 = $exists; // assign object to sf2
+        $rootFolder->refresh();
+        $this->assertFalse($rootFolder->vfchildren->contains($sf2->id), 'Root should NOT contain newly-created 2nd subfolder');
+        $this->assertTrue($sf1->vfchildren->contains($sf2->id), '1st subfolder should contain newly-created 2nd subfolder');
+
+        // Upload a file to 1st subfolder
+        $file = UploadedFile::fake()->image($this->faker->slug, 200, 200);
+        $payload = [
+            'mftype' => MediafileTypeEnum::VAULT,
+            'mediafile' => $file,
+            'resource_type' => 'vaultfolders',
+            'resource_id' => $sf1->id,
+        ];
+        $response = $this->actingAs($creator)->ajaxJSON('POST', route('mediafiles.store'), $payload);
+        $response->assertStatus(201);
+        $content = json_decode($response->content());
+        $this->assertNotNull($content->mediafile);
+        $mf1 = $content->mediafile;
+
+        // Upload a file to 2nd subfolder
+        $file = UploadedFile::fake()->image($this->faker->slug, 200, 200);
+        $payload = [
+            'mftype' => MediafileTypeEnum::VAULT,
+            'mediafile' => $file,
+            'resource_type' => 'vaultfolders',
+            'resource_id' => $sf2->id,
+        ];
+        $response = $this->actingAs($creator)->ajaxJSON('POST', route('mediafiles.store'), $payload);
+        $response->assertStatus(201);
+        $content = json_decode($response->content());
+        $this->assertNotNull($content->mediafile);
+        $mf2 = $content->mediafile;
+
+        // delete the first subfolder
+        $response = $this->actingAs($creator)->ajaxJSON('DELETE', route('vaultfolders.destroy', $sf1->id));
         $response->assertStatus(200);
         $rootFolder->refresh();
-        $exists = Vaultfolder::find($subfolderR->id);
+        $this->assertFalse($rootFolder->vfchildren->contains($sf1->id), 'Root should not contain deleted subfolder');
+
+        $exists = Vaultfolder::find($sf1->id);
         $this->assertNull($exists);
-        $this->assertFalse($rootFolder->vfchildren->contains($subfolderR->id), 'Root should not contain deleted subfolder');
+        $exists = Vaultfolder::find($sf2->id);
+        $this->assertNull($exists);
+
+        $exists = Mediafile::find($mf1->id);
+        $this->assertNull($exists);
+        $exists = Mediafile::find($mf2->id);
+        $this->assertNull($exists);
     }
 
     /**

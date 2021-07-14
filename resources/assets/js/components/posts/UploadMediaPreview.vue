@@ -5,7 +5,10 @@
         ghost-class="ghost">
         <div v-for="(element, index) in files" :key="index" class="drag-element">
           <div class="img-wrapper">
-            <img v-if="element.type.indexOf('image/') > -1" :src="element.filepath" alt="" />
+            <img v-if="element.type.indexOf('image/') > -1" :src="element.filepath || element.src" alt="" />
+            <video v-if="element.type.indexOf('video/') > -1">
+              <source :src="element.filepath" :type="element.type" />
+            </video>
             <span v-if="!element.selected" class="unchecked-circle" @click="onSelectMediafile(index, true)"></span>
             <span v-if="element.selected" class="bg-primary checked-circle"
               @click="onSelectMediafile(index, false)">{{element.order}}</span>
@@ -27,11 +30,14 @@
         </button>
       </div>
     </div>
-    <swiper ref="mySwiper" :options="swiperOptions">
+    <swiper ref="mySwiper" :options="swiperOptions" :key="files.length">
       <swiper-slide class="slide">
         <div v-if="!isDragListVisible">
           <div class="swiper-image-wrapper" v-for="(media, index) in files" :key="index">
-            <img v-preview:scope-a class="swiper-lazy" :src="media.filepath || media.src" />
+            <img @click="openPhotoSwipe(index)" class="swiper-lazy" :src="media.filepath || media.src" v-if="media.type.indexOf('image/') > -1" />
+            <video @click="openPhotoSwipe(index)" class="swiper-lazy" v-if="media.type.indexOf('video/') > -1">
+              <source :src="media.filepath" :type="media.type" />
+            </video>
             <button class="btn btn-primary icon-close" @click="removeMediafile(index)">
               <fa-icon :icon="['far', 'times']" class="text-white" size="sm" />
             </button>
@@ -50,10 +56,10 @@
 </template>
 
 <script>
-import PhotoSwipe from 'photoswipe/dist/photoswipe';
-import PhotoSwipeUI from 'photoswipe/dist/photoswipe-ui-default';
-import createPreviewDirective from 'vue-photoswipe-directive';
+import { Vue } from 'vue-property-decorator';
 import draggable from 'vuedraggable';
+
+import VideoPlayer from "@components/videoPlayer";
 
 export default {
   name: "UploadMediaPreview",
@@ -66,17 +72,12 @@ export default {
     draggable,
   },
 
-  directives: {
-    preview: createPreviewDirective({
-        showAnimationDuration: 0,
-        bgOpacity: 0.75
-      }, PhotoSwipe, PhotoSwipeUI)
-  },
-
   data: () => ({
     files: [],
     swiperOptions: {
-      lazy: true,
+      lazy: {
+        loadPrevNext: true
+      },
       slidesPerView: 'auto',
       observer: true,
       freeMode: true,
@@ -109,7 +110,9 @@ export default {
     mediafiles() {
       this.files = [...this.mediafiles];
       this.$nextTick(() => {
-        this.swiper?.update()
+        $('.swiper-lazy').on('load', () => {
+          this.$refs.mySwiper.updateSwiper();
+        })
       })
     },
   },
@@ -148,14 +151,36 @@ export default {
     },
 
     removeMediafile(index) {
-      const temp = [...this.files];
-      temp.splice(index, 1);
-      this.$emit('change', temp);
+      this.$emit('remove', index);
     },
 
     openFileUpload() {
       this.$emit('openFileUpload');
     },
+    openPhotoSwipe(index) {
+      this.$Pswp.open({
+        items: this.files.map(file => {
+          if (file.type.indexOf('video/') > -1) {
+            return ({
+              html: new Vue({
+                  ...VideoPlayer,
+                  propsData: {
+                    source: file
+                  }
+                }).$mount().$el,
+            })
+          }
+          return ({
+            src: file.filepath,
+          })
+        }),
+        options: {
+          index,
+          showAnimationDuration: 0,
+          bgOpacity: 0.75
+        },
+      });
+    }
   },
 }
 </script>
