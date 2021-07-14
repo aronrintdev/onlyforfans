@@ -60,23 +60,23 @@
 
     <!-- Form modal for story preview (incl. image) before saving -->
     <b-modal v-model="isPreviewModalVisible" id="modal-save-to-story-form" size="lg" title="Save to Story" body-class="OFF-p-0">
-      <b-form v-on:submit.prevent>
-        <b-form-group label="Story Text" label-for="story-contents-1">
-          <b-form-textarea id="story-contents" v-model="storyAttrs.contents" placeholder="Enter text for your new story..." rows="5" ></b-form-textarea>
-        </b-form-group>
-        <b-form-group label="Swipe Link" label-for="swipe-up-link">
-          <b-form-input id="swipe-up-link" type="url" v-model="storyAttrs.link" :state="urlState" placeholder="Optional swipe-up link..."></b-form-input>
-        </b-form-group>
-      </b-form>
-      <section class="d-flex">
-        <div>
+      <section class="OFF-d-flex">
+        <div class="box-image-preview text-center">
           <b-img v-if="storyAttrs.selectedMediafileId" fluid :src="selectedFileUrl"></b-img>
           <b-img v-else-if="fileInput" fluid :src="selectedFileUrl"></b-img>
         </div>
       </section>
+      <b-form v-on:submit.prevent class="mt-3">
+        <b-form-group v-if="!storyAttrs.selectedMediafileId && !fileInput" label="Story Text" label-for="story-contents-1">
+          <b-form-textarea id="story-contents" v-model="storyAttrs.contents" placeholder="Enter text for your new story..." rows="5" ></b-form-textarea>
+        </b-form-group>
+        <b-form-group label='"Swipe Up" Link (optional)' label-for="swipe-up-link">
+          <b-form-input id="swipe-up-link" type="url" v-model="storyAttrs.link" :state="urlState" placeholder="http://"></b-form-input>
+        </b-form-group>
+      </b-form>
       <template #modal-footer>
-        <b-button variant="warning" size="sm" @click="isPreviewModalVisible=false">Cancel</b-button>
-        <b-button variant="primary" size="sm" @click="storeStory()">Save</b-button>
+        <b-button variant="warning" @click="isPreviewModalVisible=false">Cancel</b-button>
+        <b-button variant="primary" @click="storeStory()">Save</b-button>
       </template>
     </b-modal>
 
@@ -133,6 +133,8 @@ export default {
 
   methods: {
     selectTextOnly() {
+      this.selectedFileUrl = null 
+      this.storyAttrs.selectedMediafileId = null
       this.isSelectFileModalVisible = false
       this.isPreviewModalVisible = true
     },
@@ -231,8 +233,6 @@ export default {
     if ( this.$route.params.context ) {
       switch( this.$route.params.context ) {
         case 'vault-via-storybar': // we got here from the vault, likely with a mediafile to attach to some action
-          this.isSelectFileModalVisible = false
-          this.isPreviewModalVisible = true
           const mediafileIds = this.$route.params.mediafile_ids || []
           if ( mediafileIds.length ) {
             const response = axios.get(this.$apiRoute('mediafiles.index'), {
@@ -244,6 +244,8 @@ export default {
                 this.storyAttrs.selectedMediafileId = mf.id // basically just take the last if multiple
                 this.selectedFileUrl = mf.filepath
               })
+              this.isSelectFileModalVisible = false
+              this.isPreviewModalVisible = true
             })
           }
           //this.sendChannels = ['story']
@@ -254,6 +256,18 @@ export default {
   },
 
   watch: {
+    isPreviewModalVisible(v) {
+      console.log(`isPreviewModalVisible() ${v}`)
+      if (!v) {
+        this.resetStoryForm()
+      }
+    },
+    isSelectFileModalVisible(v) {
+      console.log(`isSelectFileModalVisible() ${v}`)
+      if (v) {
+        this.resetStoryForm()
+      }
+    },
   },
 
   components: {},
@@ -281,6 +295,7 @@ body .crate-story_bar {
     border: solid cyan 2px;
   }
 
+
 }
 </style>
 
@@ -291,5 +306,8 @@ body {
     margin-right: 0;
   }
 
+  .box-image-preview img {
+    height: 450px;
+  }
 }
 </style>
