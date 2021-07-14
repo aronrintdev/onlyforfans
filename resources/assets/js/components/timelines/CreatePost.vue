@@ -50,6 +50,7 @@
               :options="dropzoneOptions"
               :include-styling=true
               :useCustomSlot=true
+              :duplicateCheck=true
               v-on:vdropzone-file-added="addedEvent"
               v-on:vdropzone-removed-file="removedEvent"
               v-on:vdropzone-sending="sendingEvent"
@@ -64,6 +65,7 @@
               <UploadMediaPreview
                 :mediafiles="mediafiles"
                 @change="changeMediafiles"
+                @remove="removeMediafile"
                 @openFileUpload="openDropzone"
               />
             </vue-dropzone>
@@ -181,6 +183,7 @@ export default {
       clickable: '#clickme_to-select',
       maxFilesize: 15.9,
       addRemoveLinks: true,
+      removeType: 'client',
       headers: {
         'X-Requested-With': 'XMLHttpRequest',
         'X-CSRF-TOKEN': document.head.querySelector('[name=csrf-token]').content,
@@ -355,6 +358,14 @@ export default {
     },
     changeMediafiles(data) {
       this.mediafiles = [...data];
+    },
+    removeMediafile(index) {
+      const file = this.$refs.myVueDropzone.dropzone.files[index];
+      if (file) {
+        this.$refs.myVueDropzone.removeFile(file);
+        this.mediafiles.splice(index, 1);
+        this.mediafiles = [...this.mediafiles];
+      }
     },
     openDropzone() {
       this.$refs.myVueDropzone.dropzone.hiddenFileInput.click();

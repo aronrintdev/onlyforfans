@@ -30,7 +30,7 @@
         </button>
       </div>
     </div>
-    <swiper ref="mySwiper" :options="swiperOptions">
+    <swiper ref="mySwiper" :options="swiperOptions" :key="files.length">
       <swiper-slide class="slide">
         <div v-if="!isDragListVisible">
           <div class="swiper-image-wrapper" v-for="(media, index) in files" :key="index">
@@ -75,7 +75,9 @@ export default {
   data: () => ({
     files: [],
     swiperOptions: {
-      lazy: true,
+      lazy: {
+        loadPrevNext: true
+      },
       slidesPerView: 'auto',
       observer: true,
       freeMode: true,
@@ -108,7 +110,9 @@ export default {
     mediafiles() {
       this.files = [...this.mediafiles];
       this.$nextTick(() => {
-        this.swiper?.update()
+        $('.swiper-lazy').on('load', () => {
+          this.$refs.mySwiper.updateSwiper();
+        })
       })
     },
   },
@@ -147,9 +151,7 @@ export default {
     },
 
     removeMediafile(index) {
-      const temp = [...this.files];
-      temp.splice(index, 1);
-      this.$emit('change', temp);
+      this.$emit('remove', index);
     },
 
     openFileUpload() {
