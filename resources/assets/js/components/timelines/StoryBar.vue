@@ -50,27 +50,28 @@
     </section>
 
     <!-- Modal for selecting file from disk vs vault -->
-    <b-modal v-model="isSelectFileModalVisible" id="modal-select-file" size="lg" title="Select Picture or Video" >
-      <form v-on:submit.prevent>
-        <b-form-textarea class="story-contents" v-model="storyAttrs.contents" placeholder="Enter text for your new story..." rows="5" ></b-form-textarea>
-        <b-form-input class="swipe-up-link" type="url" v-model="storyAttrs.link" :state="urlState" placeholder="Optional swipe-up link..."></b-form-input>
-      </form>
-      <template #modal-footer>
-        <b-button variant="primary" class="" @click="selectFromFiles">Select from Files</b-button>
-        <b-button variant="primary" class="" :to="{ name: 'vault.dashboard', params: { context: 'storybar' } }">Select from Vault</b-button>
-      </template>
+    <b-modal v-model="isSelectFileModalVisible" id="modal-select-file" size="lg" title="Select Story Type" hide-footer >
+      <div>
+        <b-button block variant="primary" class="" @click="selectFromFiles">Select from Files</b-button>
+        <b-button block variant="primary" class="" :to="{ name: 'vault.dashboard', params: { context: 'storybar' } }">Select from Vault</b-button>
+        <b-button block variant="primary" class="" @click="selectTextOnly">Text-Only Story</b-button>
+      </div>
     </b-modal>
 
     <!-- Form modal for story preview (incl. image) before saving -->
-    <b-modal v-model="isPreviewModalVisible" id="modal-save-to-story-form" size="lg" title="Save to Story" body-class="p-0">
+    <b-modal v-model="isPreviewModalVisible" id="modal-save-to-story-form" size="lg" title="Save to Story" body-class="OFF-p-0">
+      <b-form v-on:submit.prevent>
+        <b-form-group label="Story Text" label-for="story-contents-1">
+          <b-form-textarea id="story-contents" v-model="storyAttrs.contents" placeholder="Enter text for your new story..." rows="5" ></b-form-textarea>
+        </b-form-group>
+        <b-form-group label="Swipe Link" label-for="swipe-up-link">
+          <b-form-input id="swipe-up-link" type="url" v-model="storyAttrs.link" :state="urlState" placeholder="Optional swipe-up link..."></b-form-input>
+        </b-form-group>
+      </b-form>
       <section class="d-flex">
         <div>
           <b-img v-if="storyAttrs.selectedMediafileId" fluid :src="selectedFileUrl"></b-img>
           <b-img v-else-if="fileInput" fluid :src="selectedFileUrl"></b-img>
-        </div>
-        <div>
-          <p class="m-0" v-if="storyAttrs.contents">Contents: {{ storyAttrs.contents }}</p>
-          <p class="m-0" v-if="storyAttrs.link">Swipe Link: {{ storyAttrs.link }}</p>
         </div>
       </section>
       <template #modal-footer>
@@ -113,8 +114,8 @@ export default {
 
     // Story form input values...
     //   put inside a form JSON??
-    fileInput: null, // form input
-    storyAttrs: {
+    fileInput: null, // file form input
+    storyAttrs: { // for form
       color: '#fff',
       contents: '',
       link: '',
@@ -131,9 +132,15 @@ export default {
   }),
 
   methods: {
+    selectTextOnly() {
+      this.isSelectFileModalVisible = false
+      this.isPreviewModalVisible = true
+    },
+
     selectFromFiles() {
       this.$refs.fileInput.$el.childNodes[0].click()
     },
+
     selectFromVault() {
       // %TODO...right now we are 'hacking' this by redirecting (routing) to vault, selecting files, then routing back here...
     },
@@ -143,12 +150,14 @@ export default {
       const file = e.target.files[0]
       this.selectedFileUrl = URL.createObjectURL(file)
       //this.$bvModal.show('modal-select-file', { })
+      this.isSelectFileModalVisible = false
       this.isPreviewModalVisible = true
     },
 
     resetStoryForm() {
       // reset form input
       this.fileInput = null 
+      this.selectedFileUrl = null 
       this.storyAttrs.selectedMediafileId = null
       this.storyAttrs.color = '#fff'
       this.storyAttrs.contents = ''
@@ -216,6 +225,7 @@ export default {
     if ( this.$route.params.context ) {
       switch( this.$route.params.context ) {
         case 'vault-via-storybar': // we got here from the vault, likely with a mediafile to attach to some action
+          this.isSelectFileModalVisible = false
           this.isPreviewModalVisible = true
           const mediafileIds = this.$route.params.mediafile_ids || []
           if ( mediafileIds.length ) {

@@ -39,7 +39,9 @@ export default {
 
   computed: {
     urlState() {
-      if (!this.attrs.link) return null
+      if (!this.attrs.link) {
+        return null
+      }
       return validateUrl(this.attrs.link)
     }
   },
