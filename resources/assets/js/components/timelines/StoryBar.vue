@@ -52,8 +52,8 @@
     <!-- Modal for selecting file from disk vs vault -->
     <b-modal v-model="isSelectFileModalVisible" id="modal-select-file" size="lg" title="Select Story Type" hide-footer >
       <div>
-        <b-button block variant="primary" class="" @click="selectFromFiles">Select from Files</b-button>
-        <b-button block variant="primary" class="" :to="{ name: 'vault.dashboard', params: { context: 'storybar' } }">Select from Vault</b-button>
+        <b-button block variant="primary" class="" @click="selectFromFiles">Select File From disk</b-button>
+        <b-button block variant="primary" class="" :to="{ name: 'vault.dashboard', params: { context: 'storybar' } }">Select File From Vault</b-button>
         <b-button block variant="primary" class="" @click="selectTextOnly">Text-Only Story</b-button>
       </div>
     </b-modal>
@@ -76,7 +76,7 @@
       </section>
       <template #modal-footer>
         <b-button variant="warning" size="sm" @click="isPreviewModalVisible=false">Cancel</b-button>
-        <b-button variant="primary" size="sm" @click="storeStory('image')">Save</b-button>
+        <b-button variant="primary" size="sm" @click="storeStory()">Save</b-button>
       </template>
     </b-modal>
 
@@ -165,25 +165,25 @@ export default {
     },
 
     // API to create a new story record (ie 'update story timeline') in the database for this user's timeline
-    async storeStory(stype) {
+    async storeStory() {
+
+      // Setup payload for request
       let payload = new FormData()
-      payload.append('stype', stype)
       payload.append('bgcolor', this.storyAttrs.color || "#fff")
       payload.append('content', this.storyAttrs.contents)
       payload.append('link', this.storyAttrs.link || null)
 
-      switch ( stype ) {
-        case 'text':
-          break
-        case 'image':
-          if ( this.storyAttrs.selectedMediafileId ) {
-            payload.append('mediafile_id', this.storyAttrs.selectedMediafileId)
-          } else if (this.fileInput) {
-            payload.append('mediafile', this.fileInput)
-          }
-          break
-      } 
+      let stype = 'text' // default, if vault or diskfile is attached set to 'image' below
+      if ( this.storyAttrs.selectedMediafileId ) {
+        payload.append('mediafile_id', this.storyAttrs.selectedMediafileId)
+        stype = 'image'
+      } else if (this.fileInput) {
+        payload.append('mediafile', this.fileInput)
+        stype = 'image'
+      }
+      payload.append('stype', this.storyAttrs.stype)
 
+      // Story POST request
       const response = await axios.post(`/stories`, payload, {
         headers: { 'Content-Type': 'application/json' }
       })
