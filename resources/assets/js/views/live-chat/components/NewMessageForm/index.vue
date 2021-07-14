@@ -214,10 +214,14 @@ export default {
       if (!file.filepath) {
         this.ADD_SELECTED_MEDIAFILES({
           ...file,
+          type: file.type,
           filepath: URL.createObjectURL(file),
         })
       } else {
-        this.ADD_SELECTED_MEDIAFILES(file)
+        this.ADD_SELECTED_MEDIAFILES({
+          ...file,
+          type: file.type,
+        })
       }
     },
 
