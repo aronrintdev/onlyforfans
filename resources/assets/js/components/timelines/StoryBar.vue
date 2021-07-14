@@ -118,7 +118,7 @@ export default {
     storyAttrs: { // for form
       color: '#fff',
       contents: '',
-      link: '',
+      link: null,
       selectedMediafileId: null, // if selected from vault
     },
 
@@ -161,7 +161,7 @@ export default {
       this.storyAttrs.selectedMediafileId = null
       this.storyAttrs.color = '#fff'
       this.storyAttrs.contents = ''
-      this.storyAttrs.link = ''
+      this.storyAttrs.link = null
     },
 
     // API to create a new story record (ie 'update story timeline') in the database for this user's timeline
@@ -171,7 +171,9 @@ export default {
       let payload = new FormData()
       payload.append('bgcolor', this.storyAttrs.color || "#fff")
       payload.append('content', this.storyAttrs.contents)
-      payload.append('link', this.storyAttrs.link || null)
+      if ( this.storyAttrs.link ) {
+        payload.append('link', this.storyAttrs.link)
+      }
 
       let stype = 'text' // default, if vault or diskfile is attached set to 'image' below
       if ( this.storyAttrs.selectedMediafileId ) {
@@ -181,15 +183,19 @@ export default {
         payload.append('mediafile', this.fileInput)
         stype = 'image'
       }
-      payload.append('stype', this.storyAttrs.stype)
+      payload.append('stype', stype)
 
       // Story POST request
-      const response = await axios.post(`/stories`, payload, {
+      await axios.post(`/stories`, payload, {
         headers: { 'Content-Type': 'application/json' }
       })
       this.isPreviewModalVisible = false
       this.isSelectFileModalVisible = false
       this.resetStoryForm()
+
+      // update story bar
+      const response = await axios.get( this.$apiRoute('timelines.myFollowedStories') )
+      this.timelines = response.data.data
 
       this.$root.$bvToast.toast('Story successfully uploaded!', {
         toaster: 'b-toaster-top-center',
@@ -209,7 +215,7 @@ export default {
 
   created() {
     // %NOTE: we don't really need the stories here, just the timelines that have stories 
-    const response = axios.get( this.$apiRoute('timelines.myFollowedStories')).then ( response => {
+    axios.get( this.$apiRoute('timelines.myFollowedStories')).then ( response => {
       this.timelines = response.data.data
     })
     if ( this.$route.params.toast ) {
