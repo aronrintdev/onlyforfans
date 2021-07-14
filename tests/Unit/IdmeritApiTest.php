@@ -15,11 +15,17 @@ class IdmeritApiTest extends TestCase
      * @group idmerit-api
      * @group here0714
      */
-    public function test_one()
+    public function test_get_token()
     {
         $api = IdMeritApi::create();
         $response = $api->getToken();
-        dd( $response );
+        $this->assertEquals( 200, $response->status() );
+        $json = $response->json();
+        //dd( $json );
+        $this->assertArrayHasKey('access_token', $json);
+        $this->assertArrayHasKey('token_type', $json);
+        $this->assertArrayHasKey('expires_in', $json);
+        //dd( $response );
     }
 
     /**

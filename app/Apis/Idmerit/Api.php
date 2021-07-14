@@ -56,7 +56,21 @@ class Api
         if ( !$clientId || !$clientSecret ) {
             throw new Exception('Missing ID or secret');
         }
-        $response = Http::withBasicAuth($clientId, $clientSecret)->post($url);
+        //$response = Http::dd()->withBasicAuth($clientId, $clientSecret)->post($url);
+        $response = Http::asForm()->withBasicAuth($clientId, $clientSecret)
+          ->post($url, [
+              'grant_type' => 'client_credentials',
+              'scope' => 'idmvalidate',
+          ]);
+        /*
+        $response = Http::withHeaders([
+            'Content-Type' => 'application/x-www-form-urlencoded',
+        ])->withBasicAuth($clientId, $clientSecret)
+          ->post($url, [
+              'grant_type' => 'client_credentials',
+              'scope' => 'idmvalidate',
+          ]);
+        */
         return $response;
     }
 
