@@ -152,7 +152,6 @@ class RestStoriesTest extends TestCase
      *  @group stories
      *  @group regression
      *  @group regression-base
-     *  @group june0625
      */
     public function test_can_list_grouped_stories_on_followed_timelines()
     {
@@ -174,13 +173,13 @@ class RestStoriesTest extends TestCase
                     'price',
                     'avatar',
                     'is_follow_for_free',
-                    'stories',
+                    'storyqueues',
                     //'stories' => [
                         //'mediafiles',
                     //],
-                    'is_owner',
-                    'is_following',
-                    'is_subscribed',
+                    //'is_owner',
+                    //'is_following',
+                    //'is_subscribed',
                     'created_at',
                 ],
             ],
@@ -240,6 +239,7 @@ class RestStoriesTest extends TestCase
      *  @group stories
      *  @group regression
      *  @group regression-base
+     *  @group july08
      */
     public function test_can_store_text_story()
     {
@@ -273,12 +273,16 @@ class RestStoriesTest extends TestCase
         $this->assertNotNull($story);
         $this->assertSame($story->content, $storyR->content);
         $this->assertSame(StoryTypeEnum::TEXT, $storyR->stype);
+
+        $this->assertNotNull($story->storyqueues);
+        $this->assertEquals($story->timeline->followers->count(), $story->storyqueues->count());
     }
 
     /**
      *  @group stories
      *  @group regression
      *  @group regression-base
+     *  @group july08
      */
     public function test_can_store_picture_story()
     {
@@ -322,6 +326,9 @@ class RestStoriesTest extends TestCase
         // Test relations
         $this->assertTrue( $story->mediafiles->contains($mf->id) );
         $this->assertEquals( $story->id, $mf->resource->id );
+
+        $this->assertNotNull($story->storyqueues);
+        $this->assertEquals($story->timeline->followers->count(), $story->storyqueues->count());
     }
 
     /**

@@ -65,7 +65,19 @@ class StoriesTableSeeder extends Seeder
                     'stype'       => $stype,
                     'timeline_id' => $u->timeline->id,
                 ];
-                $story = Story::factory()->create($attrs);
+                $story = Story::create($attrs);
+
+                // update to 'realistic' timestamps...
+                $ts = $this->faker->dateTimeBetween($startDate='-3 months', $endDate='now');
+                $story->created_at = $ts;
+                $story->updated_at = $ts;
+                $story->save();
+                $story->storyqueues->each( function($sq) use($ts) {
+                    $sq->created_at = $ts;
+                    $sq->updated_at = $ts;
+                    $sq->save();
+                });
+
                 switch ($stype) {
                 case 'text':
                     break;

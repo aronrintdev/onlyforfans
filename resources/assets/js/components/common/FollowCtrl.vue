@@ -23,7 +23,7 @@
             </b-button>
           </li>
         </ul>
-        <p>{{ timeline.about }}</p>
+        <VueMarkdown :source="timeline.about || ''" />
         <ul class="list-unstyled">
           <li>Website: <a :href="timeline.userstats.website" class="tag-website">{{ timeline.userstats.website }}</a></li>
           <li>Instagram: <a :href="timeline.userstats.instagram" class="tag-instagram">{{ timeline.userstats.instagram }}</a></li>
@@ -40,6 +40,9 @@
 <script>
 import Vuex from 'vuex';
 import { eventBus } from '@/app'
+
+/** https://github.com/adapttive/vue-markdown/ */
+import VueMarkdown from '@adapttive/vue-markdown'
 
 export default {
 
@@ -89,7 +92,9 @@ export default {
     },
   },
 
-  components: { },
+  components: {
+    VueMarkdown,
+  },
 }
 </script>
 

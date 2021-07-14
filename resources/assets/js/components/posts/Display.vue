@@ -56,12 +56,17 @@
           <div @click="renderFull" v-if="is_feed" class="p-2 btn">
             <fa-icon icon="expand-alt" class="text-primary" size="2x" />
           </div>
+          <b-btn v-if="displayClose" variant="link" class="text-secondary" @click="$emit('close')">
+            <fa-icon icon="times" />
+          </b-btn>
         </section>
       </template>
 
       <template v-if="post.access">
         <div :class="{ 'tag-has-mediafiles': hasMediafiles }" class="py-3 text-wrap">
-          <b-card-text class="px-3 mb-0 tag-post_desc">{{ post.description }}</b-card-text>
+          <b-card-text class="px-3 mb-0 tag-post_desc">
+            <VueMarkdown :source="post.description || ''" />
+          </b-card-text>
         </div>
         <article v-if="hasMediafiles">
           <MediaSlider :mediafiles="post.mediafiles" :session_user="session_user" :use_mid="use_mid" />
@@ -133,12 +138,16 @@ import PostFooter from './PostFooter'
 import PostCta from './PostCta'
 import MediaSlider from './MediaSlider'
 
+/** https://github.com/adapttive/vue-markdown/ */
+import VueMarkdown from '@adapttive/vue-markdown'
+
 export default {
   components: {
     PostHeader,
     PostFooter,
     PostCta,
     MediaSlider,
+    VueMarkdown,
   },
 
   props: {
@@ -146,6 +155,7 @@ export default {
     session_user: null,
     use_mid: { type: Boolean, default: false }, // use mid-sized images instead of full
     is_feed: { type: Boolean, default: true }, // is in context of a feed?
+    displayClose: { type: Boolean, default: false }, // Display a close button in right corner of title?
   },
 
   computed: {

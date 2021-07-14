@@ -5,23 +5,19 @@
     </section>
     <section class="crate" :class="value.sender_id === session_user.id ? 'session_user' : 'other_user'">
       <article class="box">
-        <div class="msg-content">
-          <div v-if="value.attachments" class="attachments">
-            <div v-for="item in value.attachments" :key="item.id">
-              <div v-if="item.type === 'tip'">
-                <div class="h4">
-                  {{ item.sender.name || item.sender.username }} sent a tip of {{ item.amount | niceCurrency }}
-                </div>
-                <div v-if="item.message">
-                  <div class="text-muted text-sm">Message from {{ item.sender.name || item.sender.username }}:</div>
-                  <div v-text="item.message" />
-                </div>
-              </div>
-            </div>
-          </div>
-          {{ value.mcontent }}
+        <div v-if="value.attachments" class="attachments">
+          <Attachment v-for="item in value.attachments" :key="item.id" :value="item" />
         </div>
+        <VueMarkdown v-if="value.mcontent" class="msg-content" :source="value.mcontent || ''" />
         <div class="msg-timestamp">
+          <span
+            v-if="value.attachments.length > 0 && value.attachments[0].type === 'tip'"
+            class="mr-1"
+            v-b-tooltip.hover
+            :title="$t('tipTimestampTooltip')"
+          >
+            <fa-icon icon="dollar-sign" />
+          </span>
           {{ moment(value.created_at).format('h:mm A') }}
         </div>
       </article>
@@ -35,11 +31,18 @@
  */
 import Vuex from 'vuex'
 import moment from 'moment'
+import Attachment from './Attachment'
+
+/** https://github.com/adapttive/vue-markdown/ */
+import VueMarkdown from '@adapttive/vue-markdown'
 
 export default {
   name: 'Message',
 
-  components: {},
+  components: {
+    Attachment,
+    VueMarkdown,
+  },
 
   props: {
     isDateBreak: { type: Boolean, default: false },
@@ -126,6 +129,8 @@ export default {
 
 <i18n lang="json5" scoped>
 {
-  "en": {}
+  "en": {
+    "tipTimestampTooltip": "This message contains financial transaction information"
+  }
 }
 </i18n>

@@ -6,19 +6,149 @@ use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
+use Carbon\Carbon;
 use Tests\TestCase;
 use Ramsey\Uuid\Uuid;
 
-use App\Models\Timeline;
 use App\Models\Mediafile;
 use App\Models\Story;
+use App\Models\Storyqueue;
+use App\Models\Timeline;
+use App\Models\User;
 use App\Enums\MediafileTypeEnum;
 
 class StoryModelTest extends TestCase
 {
     /**
+     * @group OFF-story-model
+     * @group OFF-here0713
+     */
+    public function test_storyqueue_exists_for_owner()
+    {
+    }
+
+    /**
      * @group story-model
-     * @group OFF-july07
+     */
+    public function test_basic_ts_integrity()
+    {
+        $stories = Story::get();
+        $stories->each( function($s) {
+            $s->storyqueues->each( function($sq) use(&$s) {
+                $this->assertEquals($s->timeline->id, $sq->timeline->id);
+                $this->assertEquals($s->created_at, $sq->created_at);
+            });
+        });
+    }
+
+    /**
+     * @group story-model
+     * @group july09
+     */
+    public function test_viewable_timelines()
+    {
+        $daysWindow = env('STORY_WINDOW_DAYS', 10000);
+        $dummyTimeline = Timeline::has('storyqueues','>=',1)->has('followers','>=',1)->first();
+        $creator = $dummyTimeline->user;
+        $fan = $dummyTimeline->followers->first();
+        unset($dummyTimeline); // only used to get a meaningful creator and fan
+
+        //--
+
+        $timelines = Storyqueue::viewableTimelines($fan);
+        //dd('storyqueues', $storyqueues->toArray());
+
+        $seenTimelines = collect();
+        $timelines->each( function($t) use($daysWindow, &$fan, &$seenTimelines) {
+            static $lastTimeline = null;
+
+            $this->assertFalse( $seenTimelines->contains($t->id) ); // ensure unique list
+            $seenTimelines->push($t->id);
+
+            if ( !empty($lastTimeline) ) {
+                $thisTlLatestStory = $t->storyqueues()->orderBy('created_at', 'desc')->first();
+                $lastTlLatestStory = $lastTimeline->storyqueues()->orderBy('created_at', 'desc')->first();
+                //$thisTlLatestStory = $t->stories()->orderBy('created_at', 'desc')->first();
+                //$lastTlLatestStory = $lastTimeline->stories()->orderBy('created_at', 'desc')->first();
+                $this->assertLessThan($lastTlLatestStory->created_at->timestamp, $thisTlLatestStory->created_at->timestamp);
+            }
+            $lastTimeline = $t;
+
+        });
+    }
+
+    /**
+     * @group story-model
+     * @group july09
+     */
+    public function test_viewable_queue()
+    {
+        $daysWindow = env('STORY_WINDOW_DAYS', 10000);
+        $dummyTimeline = Timeline::has('storyqueues','>=',1)->has('followers','>=',1)->first();
+        $creator = $dummyTimeline->user;
+        $fan = $dummyTimeline->followers->first();
+        unset($dummyTimeline); // only used to get a meaningful creator and fan
+
+        //--
+
+        //dd($storyqueues->toArray());
+
+        $storyqueues = Storyqueue::viewableQueue($fan);
+        /*
+        $storyqueues = Storyqueue::with('timeline')->select(DB::raw('sq.*'))
+            ->from(DB::raw('(SELECT * FROM storyqueues ORDER BY created_at DESC) sq'))
+            ->where('viewer_id', $fan->id)
+            ->whereNull('viewed_at')
+            ->withTrashed()->whereNull('sq.deleted_at') // won't work without this (??)
+            ->groupBy('sq.timeline_id')
+            ->get();
+            //->pluck('timeline');
+         */
+        //dd('storyqueues', $storyqueues->toArray());
+
+        $seenTimelines = collect();
+        $storyqueues->each( function($sq) use($daysWindow, &$fan, &$seenTimelines) {
+            //$this->assertFalse( $seenTimelines->contains($sq->timeline_id) ); // ensure unique list
+            //$seenTimelines->push($sq->timeline_id);
+            //static $lastTimeline = null;
+
+            // Get the lastest storyqueue on the iter'd sq's timeline, verify it's the same as returned
+            // by the group-by above
+            $latestSQ = Storyqueue::where('viewer_id', $fan->id)
+                ->where('timeline_id', $sq->timeline_id)
+                ->whereNull('viewed_at')
+                ->where('created_at', '>=', Carbon::now()->subDays($daysWindow))
+                ->orderBy('created_at', 'desc')
+                ->first();
+
+            //$this->assertEquals($latestSQ->id, $sq->id);
+
+            $t = $sq->timeline;
+            if ( !empty($lastTimeline) ) {
+                $thisTlLatestStory = $t->storyqueues()->orderBy('created_at', 'desc')->first();
+                $lastTlLatestStory = $lastTimeline->storyqueues()->orderBy('created_at', 'desc')->first();
+                //$thisTlLatestStory = $t->stories()->orderBy('created_at', 'desc')->first();
+                //$lastTlLatestStory = $lastTimeline->stories()->orderBy('created_at', 'desc')->first();
+                $this->assertLessThan($lastTlLatestStory->created_at->timestamp, $thisTlLatestStory->created_at->timestamp);
+            }
+            $lastTimeline = $t;
+            /*
+            if ( $latestSQ->id !== $sq->id ) {
+                $list = Storyqueue::where('viewer_id', $fan->id)
+                    ->where('timeline_id', $sq->timeline_id)
+                    ->whereNull('viewed_at')
+                    ->where('created_at', '>=', Carbon::now()->subDays($daysWindow))
+                    ->orderBy('created_at', 'desc')
+                    ->get();
+                dd('list', $list->toArray(), 'latest', $latestSQ->toArray(), 'sq', $sq->toArray());
+                //dd($latestSQ->toArray(), $sq->toArray());
+            }
+             */
+        });
+    }
+
+    /**
+     * @group OFF-story-model
      */
     public function test_latest_story_by_timeline()
     {
@@ -28,8 +158,7 @@ class StoryModelTest extends TestCase
     }
 
     /**
-     * @group story-model
-     * @group july07
+     * @group OFF-story-model
      */
     public function test_story_sort()
     {
@@ -85,20 +214,6 @@ class StoryModelTest extends TestCase
         });
         */
     }
-
-    /**
-     * @group story-model
-     */
-    public function test_debug()
-    {
-        $mediafile = Mediafile::find(4);
-        //$f = $s->mediafiles->first()->filename;
-        $f = $mediafile->filename;
-        //$s = Storage::disk('s3')->get($f);
-        $s = Storage::disk('s3')->url($f);
-        //$s = Storage::disk('s3')->get($s->mediafiles->first()->filename);
-    }
-
 
     /**
      * @group OFF-mfdev
