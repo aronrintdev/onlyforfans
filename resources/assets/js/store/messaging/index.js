@@ -40,6 +40,8 @@ export const messaging = {
      * Selected Media files for the message form
      */
     selectedMediafiles: [],
+
+    uploadsVaultFolder: null,
   }),
 
   getters: {},
@@ -70,8 +72,8 @@ export const messaging = {
       if (!payload) {
         return
       }
-      // If property id is set this is single mediafile
-      if (payload['id']) {
+      // If property id or filepath is set this is single mediafile
+      if (payload['id'] || payload['filepath']) {
         state.selectedMediafiles.push(payload)
         return
       }
@@ -83,6 +85,14 @@ export const messaging = {
     /** Sets the selected media files */
     UPDATE_SELECTED_MEDIAFILES(state, payload) {
       state.selectedMediafiles = payload
+    },
+
+    REMOVE_SELECTED_MEDIAFILE_BY_INDEX(state, index) {
+      Vue.delete(state.selectedMediafiles, index)
+    },
+
+    UPDATE_UPLOADS_VAULT_FOLDER(state, payload) {
+      state.uploadsVaultFolder = payload
     },
 
     /** Clears out the selected media files */
@@ -107,6 +117,20 @@ export const messaging = {
           .catch(error => reject(error))
       })
     },
+    getUploadsVaultFolder({ commit, state }) {
+      return new Promise((resolve, reject) => {
+        if (state.uploadsVaultFolder) {
+          resolve(state.uploadsVaultFolder)
+          return
+        }
+        axios.get(route('vaultfolders.uploads-folder', { type: 'message' }))
+          .then(response => {
+            commit('UPDATE_UPLOADS_VAULT_FOLDER', response.data)
+            resolve(state.uploadsVaultFolder)
+          })
+          .catch(error => reject(error))
+      })
+    }
   },
 }
 

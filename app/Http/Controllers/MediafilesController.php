@@ -98,7 +98,7 @@ class MediafilesController extends AppBaseController
             'mediafile' => 'required_without:mediafile_id', // upload content/diskmediafile to s3
             'mediafile_id' => 'uuid|exists:mediafiles,id', // create a mediafile 'reference' to existing diskmediafile
             'mftype' => 'required|in:'.MediafileTypeEnum::getKeysCsv(),
-            'resource_type' => 'nullable|alpha-dash|in:comments,posts,stories,vaultfolders',
+            'resource_type' => 'nullable|alpha-dash|in:comments,posts,stories,vaultfolders,chatmessages',
             'resource_id' => 'required_with:resource_type|uuid',
         ]);
 

@@ -33,7 +33,6 @@ export default {
         this.popToast(message, {
           variant: 'danger',
           title: this.$t('errorTitle'),
-          toaster: 'b-toaster-top-center',
         })
       })
     },
@@ -43,7 +42,12 @@ export default {
         this.popToast(message, {
           variant: 'warning',
           title: title || this.$t('warningTitle'),
-          toaster: 'b-toaster-top-center',
+        })
+      })
+      eventBus.$on('validation', ({ message, title }) => {
+        this.popToast(message, {
+          variant: 'danger',
+          title: title || this.$t('validationTitle'),
         })
       })
     },
@@ -55,7 +59,6 @@ export default {
         .listen('ItemPurchased', (e) => {
           this.$log.debug('Toast Event', { channel, event: 'ItemPurchased', e })
           this.popToast(`Post successfully purchased!`, {
-            toaster: 'b-toaster-top-center',
             title: 'Success!',
             variant: 'success'
           })
@@ -63,7 +66,6 @@ export default {
         .listen('ItemSubscribed', (e) => {
           this.$log.debug('Toast Event', { channel, event: 'ItemSubscribed', e })
           this.popToast(`Subscription was successful!`, {
-            toaster: 'b-toaster-top-center',
             title: 'Success!',
             variant: 'success'
           })
@@ -71,7 +73,6 @@ export default {
         .listen('ItemTipped', (e) => {
           this.$log.debug('Toast Event', { channel, event: 'ItemTipped', e })
           this.popToast(`Tip was successful!`, {
-            toaster: 'b-toaster-top-center',
             title: 'Success!',
             variant: 'success'
           })
@@ -79,7 +80,6 @@ export default {
         .listen('PurchasedFailed', (e) => {
           this.$log.debug('Toast Event', { channel, event: 'PurchasedFailed', e })
           this.popToast(`There was an issue while attempting to complete your purchase.`, {
-            toaster: 'b-toaster-top-center',
             title: 'Payment Failure!',
             variant: 'danger'
           })
@@ -87,7 +87,6 @@ export default {
         .listen('SubscriptionFailed', (e) => {
           this.$log.debug('Toast Event', { channel, event: 'SubscriptionFailed', e })
           this.popToast(`There was an issue while attempting to complete your subscription.`, {
-            toaster: 'b-toaster-top-center',
             title: 'Payment Failure!',
             variant: 'danger'
           })
@@ -95,7 +94,6 @@ export default {
         .listen('TipFailed', (e) => {
           this.$log.debug('Toast Event', { channel, event: 'TipFailed', e })
           this.popToast(`There was an issue while attempting to complete your tip.`, {
-            toaster: 'b-toaster-top-center',
             title: 'Payment Failure!',
             variant: 'danger'
           })
@@ -153,6 +151,7 @@ export default {
 {
   "en": {
     "errorTitle": "An Error Has Occurred",
+    "validationTitle": "Validation Error",
     "warningTitle": "Warning"
   }
 }

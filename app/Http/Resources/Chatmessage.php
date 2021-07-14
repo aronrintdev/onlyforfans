@@ -23,6 +23,12 @@ class Chatmessage extends JsonResource
             }
         }
 
+        foreach($this->mediafiles as $mediafile) {
+            $attachments->push(
+                $mediafile->getMessagableArray()
+            );
+        }
+
         return [
             'id' => $this->id,
             'chatthread_id' => $this->chatthread_id,
