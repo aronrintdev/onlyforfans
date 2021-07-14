@@ -4,24 +4,25 @@ namespace App\Http\Controllers;
 use DB;
 use Auth;
 use Exception;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Storage;
-
-use App\Notifications\VaultfileShareSent;
-use App\Http\Resources\VaultfolderCollection;
-use App\Models\Invite;
-use App\Models\Mediafile;
-use App\Models\Mediafilesharelog;
 use App\Models\User;
 use App\Models\Vault;
-use App\Models\Vaultfolder;
+use App\Models\Invite;
+use App\Models\Mediafile;
 
+use App\Models\Vaultfolder;
+use Illuminate\Support\Str;
+use Illuminate\Http\Request;
 use App\Enums\InviteTypeEnum;
-use App\Enums\MediafileTypeEnum;
-use App\Enums\MediafilesharelogStatusEnum;
 use App\Mail\VaultfolderShared;
+use App\Enums\MediafileTypeEnum;
+use App\Models\Mediafilesharelog;
+use Illuminate\Support\Facades\Log;
+
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
+use App\Notifications\VaultfileShareSent;
+use App\Enums\MediafilesharelogStatusEnum;
+use App\Http\Resources\VaultfolderCollection;
 
 // $request->validate([ 'vf_id' => 'required', ]);
 class VaultfoldersController extends AppBaseController
@@ -344,6 +345,42 @@ class VaultfoldersController extends AppBaseController
         return response()->json([
             'sharees' => $sharees,
         ]);
+    }
+
+    /**
+     * Finds or creates and returns the uploads folder for a requested type
+     *
+     * @param Request $request
+     * @return Response
+     */
+    public function uploadsFolder(Request $request, string $type)
+    {
+        if ($request->user()->isAdmin() && $request->has('user_id')) {
+            $user = User::find($request->user_id);
+        } else {
+            $user = $request->user();
+        }
+
+        $vaultFolder = Vault::primary($user)->first()->getRootFolder()
+            ->vfchildren()->where('cattrs->storageFor', $type)
+            ->first();
+
+        if (!isset($vaultFolder)) {
+            $vault = Vault::primary($user)->first();
+            $this->authorize('update', $vault);
+
+            $folderName = Str::ucfirst($type) . ' Uploads';
+
+            $vaultFolder = VaultFolder::create([
+                'user_id' => $user->getKey(),
+                'parent_id' => $vault->getRootFolder()->getKey(),
+                'vault_id' => $vault->getKey(),
+                'vfname' => $folderName,
+                'cattrs' => [ 'storageFor' => $type ],
+            ]);
+        }
+
+        return $vaultFolder;
     }
 
 }

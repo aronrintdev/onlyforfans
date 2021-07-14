@@ -50,7 +50,10 @@ Vue.use(WhenAvailable);
 
 //import BootstrapVue from 'bootstrap-vue' //Importing
 import { BootstrapVue, BootstrapVueIcons } from 'bootstrap-vue';
-Vue.use(BootstrapVue); // Telling Vue to use this in whole application
+ // Telling Vue to use this in whole application
+Vue.use(BootstrapVue, {
+  BToast: { toaster: 'b-toaster-top-center'},
+});
 Vue.use(BootstrapVueIcons);
 
 import VueAnime from 'vue-animejs';

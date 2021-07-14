@@ -1,23 +1,22 @@
 <template>
-  <b-list-group-item>
+  <b-list-group-item v-if="shown">
     <section v-if="isDateBreak" class="msg-grouping-day-divider">
       <span>{{ moment(value.created_at).format('MMM DD, YYYY') }}</span>
     </section>
     <section class="crate" :class="value.sender_id === session_user.id ? 'session_user' : 'other_user'">
       <article class="box">
-        <div v-if="value.attachments" class="attachments">
-          <Attachment v-for="item in value.attachments" :key="item.id" :value="item" />
-        </div>
+        <Attachments :attachments="value.attachments" />
         <VueMarkdown v-if="value.mcontent" class="msg-content" :source="value.mcontent || ''" />
         <div class="msg-timestamp">
           <span
-            v-if="value.attachments.length > 0 && value.attachments[0].type === 'tip'"
+            v-if="value.attachments && value.attachments.length > 0 && value.attachments[0].type === 'tip'"
             class="mr-1"
             v-b-tooltip.hover
             :title="$t('tipTimestampTooltip')"
           >
             <fa-icon icon="dollar-sign" />
           </span>
+          <fa-icon v-if="value.is_read" icon="check" />
           {{ moment(value.created_at).format('h:mm A') }}
         </div>
       </article>
@@ -31,7 +30,7 @@
  */
 import Vuex from 'vuex'
 import moment from 'moment'
-import Attachment from './Attachment'
+import Attachments from './Attachments'
 
 /** https://github.com/adapttive/vue-markdown/ */
 import VueMarkdown from '@adapttive/vue-markdown'
@@ -40,7 +39,7 @@ export default {
   name: 'Message',
 
   components: {
-    Attachment,
+    Attachments,
     VueMarkdown,
   },
 
@@ -51,6 +50,10 @@ export default {
 
   computed: {
     ...Vuex.mapState( ['session_user'] ),
+
+    shown() {
+      return this.value.mcontent || this.value.attachments.length > 0
+    },
   },
 
   data: () => ({
@@ -72,10 +75,14 @@ export default {
 
   .crate {
     display: flex;
-    max-width: 75%;
+    max-width: 100%;
 
     .box {
+      max-width: 100%;
+      display: flex;
+      flex-direction: column;
       .msg-content {
+        width: auto;
         margin-left: auto;
         background: rgba(218,237,255,.53);
         border-radius: 5px;
@@ -95,12 +102,14 @@ export default {
       justify-content: flex-end;
       margin-left: auto;
       margin-right: 0;
+      padding-left: 5rem;
   }
 
   .crate.other_user {
       justify-content: flex-start;
       margin-left: 0;
       margin-right: auto;
+      padding-right: 5rem;
   }
 
 }

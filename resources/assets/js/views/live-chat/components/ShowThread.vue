@@ -58,6 +58,7 @@
           :isDateBreak="isDateBreak(cm, idx)"
           v-observe-visibility="idx === chatmessages.length - 1 ? endVisible : false"
         />
+        <b-list-group-item class="load-more" v-observe-visibility="endVisible"> </b-list-group-item>
         <b-list-group-item v-if="isLastPage">
           <section class="msg-grouping-day-divider">
             <span v-text="$t('startOfThread')" />
@@ -89,7 +90,7 @@ import _ from 'lodash'
 import moment from 'moment'
 
 
-import MessageForm from '@views/live-chat/components/MessageForm'
+import MessageForm from '@views/live-chat/components/NewMessageForm'
 import SearchInput from '@components/common/search/HorizontalOpenInput'
 import TypingIndicator from './TypingIndicator'
 import VaultSelector from './VaultSelector'

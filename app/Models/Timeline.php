@@ -360,4 +360,14 @@ class Timeline extends Model implements Subscribable, Tippable, Reportable
         return ( $notViewedCount === 0 );
     }
 
+    // No viewable stories within last time period 'window'
+    public function isStoryqueueEmpty() : bool
+    {
+        $daysWindow = env('STORY_WINDOW_DAYS', 10000);
+        $activeCount = Story::where('timeline_id', $this->id)
+            ->where('created_at','>=',Carbon::now()->subDays($daysWindow))
+            ->count();
+        return ( !$activeCount );
+    }
+
 }

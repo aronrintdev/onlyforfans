@@ -1,7 +1,7 @@
 <?php
 namespace App\Policies;
 
-
+use App\Models\Chatmessage;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use App\Models\User;
 use App\Models\Mediafile;
@@ -60,6 +60,14 @@ class MediafilePolicy extends BasePolicy
                 return true;
             }
             return false;
+
+        case 'chatmessages':
+            $message = Chatmessage::find($mediafile->resource_id);
+            $isInThread = $message->chatthread->participants->contains($user->id);
+            if ( $isInThread ) {
+                return true;
+            }
+            // TODO: Add switch for paid vs free messages.
 
         default:
             return false;

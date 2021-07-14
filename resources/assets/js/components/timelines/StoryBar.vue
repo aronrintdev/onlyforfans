@@ -26,7 +26,7 @@
         </swiper-slide>
       </swiper>
 
-      <!--
+      <!-- DEBUG code
       <div ref="mySwiper" :options="swiperOptions" class="">
         <div v-for="tl in timelines" :key="tl.id" class="story OFF-slide tag-followed_timeline">
           <router-link :to="{ name: 'stories.player', params: { timeline_id: tl.id } }" class="box-story">
@@ -50,23 +50,33 @@
     </section>
 
     <!-- Modal for selecting file from disk vs vault -->
-    <b-modal v-model="isSelectFileModalVisible" id="modal-select-file" size="lg" title="Select Picture or Video" hide-footer>
+    <b-modal v-model="isSelectFileModalVisible" id="modal-select-file" size="lg" title="Select Story Type" hide-footer >
       <div>
-          <b-button variant="primary" class="" @click="selectFromFiles">Select from Files</b-button>
-          <b-button variant="primary" class="" :to="{ name: 'vault.dashboard', params: { context: 'storybar' } }">Select from Vault</b-button>
+        <b-button block variant="primary" class="" @click="selectFromFiles">Select File From disk</b-button>
+        <b-button block variant="primary" class="" :to="{ name: 'vault.dashboard', params: { context: 'storybar' } }">Select File From Vault</b-button>
+        <b-button block variant="primary" class="" @click="selectTextOnly">Text-Only Story</b-button>
       </div>
     </b-modal>
 
-    <!-- Form modal for image preview before saving to story -->
-    <b-modal v-model="isPreviewModalVisible" id="modal-save-to-story-form" size="lg" title="Save to Story" body-class="p-0">
-      <div>
-        <b-img fluid :src="selectedDiskfileUrl"></b-img>
-      </div>
-      <template #modal-footer>
-        <div class="w-100">
-          <b-button variant="warning" size="sm" @click="isPreviewModalVisible=false">Cancel</b-button>
-          <b-button variant="primary" size="sm" @click="storeStory('image')">Save</b-button>
+    <!-- Form modal for story preview (incl. image) before saving -->
+    <b-modal v-model="isPreviewModalVisible" id="modal-save-to-story-form" size="lg" title="Save to Story" body-class="OFF-p-0">
+      <section class="OFF-d-flex">
+        <div class="box-image-preview text-center">
+          <b-img v-if="storyAttrs.selectedMediafileId" fluid :src="selectedFileUrl"></b-img>
+          <b-img v-else-if="fileInput" fluid :src="selectedFileUrl"></b-img>
         </div>
+      </section>
+      <b-form v-on:submit.prevent class="mt-3">
+        <b-form-group v-if="!storyAttrs.selectedMediafileId && !fileInput" label="Story Text" label-for="story-contents-1">
+          <b-form-textarea id="story-contents" v-model="storyAttrs.contents" placeholder="Enter text for your new story..." rows="5" ></b-form-textarea>
+        </b-form-group>
+        <b-form-group label='"Swipe Up" Link (optional)' label-for="swipe-up-link">
+          <b-form-input id="swipe-up-link" type="url" v-model="storyAttrs.link" :state="urlState" placeholder="http://"></b-form-input>
+        </b-form-group>
+      </b-form>
+      <template #modal-footer>
+        <b-button variant="warning" @click="isPreviewModalVisible=false">Cancel</b-button>
+        <b-button variant="primary" @click="storeStory()">Save</b-button>
       </template>
     </b-modal>
 
@@ -75,6 +85,7 @@
 
 <script>
 import Vuex from 'vuex'
+import validateUrl from '@helpers/validateUrl';
 
 export default {
   props: {
@@ -88,6 +99,10 @@ export default {
       return !this.session_user || !this.timelines
     },
 
+    urlState() {
+      return this.storyAttrs.link ? validateUrl(this.storyAttrs.link) : null
+    }
+
   },
 
   data: () => ({
@@ -99,14 +114,15 @@ export default {
 
     // Story form input values...
     //   put inside a form JSON??
-    fileInput: null, // form input
-    storyAttrs: {
+    fileInput: null, // file form input
+    storyAttrs: { // for form
       color: '#fff',
       contents: '',
-      link: '',
+      link: null,
+      selectedMediafileId: null, // if selected from vault
     },
 
-    selectedDiskfileUrl: null,
+    selectedFileUrl: null,
 
     swiperOptions: {
       slidesPerView: 'auto', // 'auto',
@@ -116,42 +132,72 @@ export default {
   }),
 
   methods: {
+    selectTextOnly() {
+      this.selectedFileUrl = null 
+      this.storyAttrs.selectedMediafileId = null
+      this.isSelectFileModalVisible = false
+      this.isPreviewModalVisible = true
+    },
+
     selectFromFiles() {
       this.$refs.fileInput.$el.childNodes[0].click()
     },
+
     selectFromVault() {
+      // %TODO...right now we are 'hacking' this by redirecting (routing) to vault, selecting files, then routing back here...
     },
 
     handleDiskSelect(e) {
       console.log('handleDiskSelect')
       const file = e.target.files[0]
-      this.selectedDiskfileUrl = URL.createObjectURL(file)
+      this.selectedFileUrl = URL.createObjectURL(file)
       //this.$bvModal.show('modal-select-file', { })
+      this.isSelectFileModalVisible = false
       this.isPreviewModalVisible = true
     },
 
+    resetStoryForm() {
+      // reset form input
+      this.fileInput = null 
+      this.selectedFileUrl = null 
+      this.storyAttrs.selectedMediafileId = null
+      this.storyAttrs.color = '#fff'
+      this.storyAttrs.contents = ''
+      this.storyAttrs.link = null
+    },
+
     // API to create a new story record (ie 'update story timeline') in the database for this user's timeline
-    async storeStory(stype) {
+    async storeStory() {
+
+      // Setup payload for request
       let payload = new FormData()
-      payload.append('stype', stype)
       payload.append('bgcolor', this.storyAttrs.color || "#fff")
       payload.append('content', this.storyAttrs.contents)
-      payload.append('link', this.storyAttrs.link || null)
+      if ( this.storyAttrs.link ) {
+        payload.append('link', this.storyAttrs.link)
+      }
 
-      switch ( stype ) {
-        case 'text':
-          break
-        case 'image':
-          payload.append('mediafile', this.fileInput)
-          break
-      } 
+      let stype = 'text' // default, if vault or diskfile is attached set to 'image' below
+      if ( this.storyAttrs.selectedMediafileId ) {
+        payload.append('mediafile_id', this.storyAttrs.selectedMediafileId)
+        stype = 'image'
+      } else if (this.fileInput) {
+        payload.append('mediafile', this.fileInput)
+        stype = 'image'
+      }
+      payload.append('stype', stype)
 
-      const response = await axios.post(`/stories`, payload, {
+      // Story POST request
+      await axios.post(`/stories`, payload, {
         headers: { 'Content-Type': 'application/json' }
       })
       this.isPreviewModalVisible = false
       this.isSelectFileModalVisible = false
-      this.fileInput = null // form input
+      this.resetStoryForm()
+
+      // update story bar
+      const response = await axios.get( this.$apiRoute('timelines.myFollowedStories') )
+      this.timelines = response.data.data
 
       this.$root.$bvToast.toast('Story successfully uploaded!', {
         toaster: 'b-toaster-top-center',
@@ -171,7 +217,7 @@ export default {
 
   created() {
     // %NOTE: we don't really need the stories here, just the timelines that have stories 
-    const response = axios.get( this.$apiRoute('timelines.myFollowedStories')).then ( response => {
+    axios.get( this.$apiRoute('timelines.myFollowedStories')).then ( response => {
       this.timelines = response.data.data
     })
     if ( this.$route.params.toast ) {
@@ -183,7 +229,45 @@ export default {
     }
   },
 
+  mounted() { 
+    if ( this.$route.params.context ) {
+      switch( this.$route.params.context ) {
+        case 'vault-via-storybar': // we got here from the vault, likely with a mediafile to attach to some action
+          const mediafileIds = this.$route.params.mediafile_ids || []
+          if ( mediafileIds.length ) {
+            const response = axios.get(this.$apiRoute('mediafiles.index'), {
+              params: {
+                mediafile_ids: mediafileIds,
+              },
+            }).then( response => {
+              response.data.data.forEach( mf => {
+                this.storyAttrs.selectedMediafileId = mf.id // basically just take the last if multiple
+                this.selectedFileUrl = mf.filepath
+              })
+              this.isSelectFileModalVisible = false
+              this.isPreviewModalVisible = true
+            })
+          }
+          //this.sendChannels = ['story']
+          //this.sendAction = 'storybar'
+          break
+      }
+    }
+  },
+
   watch: {
+    isPreviewModalVisible(v) {
+      console.log(`isPreviewModalVisible() ${v}`)
+      if (!v) {
+        this.resetStoryForm()
+      }
+    },
+    isSelectFileModalVisible(v) {
+      console.log(`isSelectFileModalVisible() ${v}`)
+      if (v) {
+        this.resetStoryForm()
+      }
+    },
   },
 
   components: {},
@@ -211,6 +295,7 @@ body .crate-story_bar {
     border: solid cyan 2px;
   }
 
+
 }
 </style>
 
@@ -221,5 +306,8 @@ body {
     margin-right: 0;
   }
 
+  .box-image-preview img {
+    height: 450px;
+  }
 }
 </style>

@@ -109,7 +109,7 @@ export default {
   },
 
   mounted() { },
-  watch: { },
+
   methods: {
     changeActiveTab(event) {
       this.activeTab = event;
