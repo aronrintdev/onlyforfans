@@ -74,11 +74,17 @@ export const messaging = {
       }
       // If property id or filepath is set this is single mediafile
       if (payload['id'] || payload['filepath']) {
-        state.selectedMediafiles.push(payload)
+        state.selectedMediafiles.push({
+          ...payload,
+          type: payload.type || payload.mimetype,
+        })
         return
       }
       for (var item of payload) {
-        state.selectedMediafiles.push(item)
+        state.selectedMediafiles.push({
+          ...item,
+          type: item.type || item.mimetype,
+        })
       }
     },
 
