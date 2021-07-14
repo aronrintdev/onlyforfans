@@ -232,7 +232,6 @@ export default {
         // (2) upload & attach the mediafiles (in dropzone queue)
         // %FIXME: if this fails, don't we have an orphaned post (?)
         // %NOTE: files added manually don't seem to be put into the queue, thus sendingEvent won't be called for them (?)
-        
 
         // (3) create any mediaifle references, ex from selected files in vault
         if (this.mediafileIdsFromVault.length) {
@@ -396,22 +395,29 @@ export default {
       // self.$refs.myVueDropzone.manuallyAddFile(data, data.filepath);
     })
 
-    const mediafileIds = this.$route.params.mediafile_ids || []
-    if ( mediafileIds.length ) {
-      // Retrieve any 'pre-loaded' mediafiles, and add to dropzone...be sure to tag as 'ref-only' or something
-      const response = axios.get(this.$apiRoute('mediafiles.index'), {
-        params: {
-          mediafile_ids: mediafileIds,
-        },
-      }).then( response => {
-        response.data.data.forEach( mf => {
-          // https://rowanwins.github.io/vue-dropzone/docs/dist/#/manual
-          const file = { size: mf.orig_size, name: mf.id, type: mf.mimetype, filepath: mf.filepath }
-          this.mediafileIdsFromVault.push(mf.id)
-          this.$refs.myVueDropzone.manuallyAddFile(file, mf.filepath)
-        })
-      })
+    if ( this.$route.params.context ) {
+      switch( this.$route.params.context ) {
+        case 'vault-via-postcreate': // we got here from the vault, likely with mediafiles to attach to a new post
+          const mediafileIds = this.$route.params.mediafile_ids || []
+          if ( mediafileIds.length ) {
+            // Retrieve any 'pre-loaded' mediafiles, and add to dropzone...be sure to tag as 'ref-only' or something
+            const response = axios.get(this.$apiRoute('mediafiles.index'), {
+              params: {
+                mediafile_ids: mediafileIds,
+              },
+            }).then( response => {
+              response.data.data.forEach( mf => {
+                // https://rowanwins.github.io/vue-dropzone/docs/dist/#/manual
+                const file = { size: mf.orig_size, name: mf.id, type: mf.mimetype, filepath: mf.filepath }
+                this.mediafileIdsFromVault.push(mf.id)
+                this.$refs.myVueDropzone.manuallyAddFile(file, mf.filepath)
+              })
+            })
+          }
+          break
+      } // switch
     }
+
   }, // mounted
 
   created() {

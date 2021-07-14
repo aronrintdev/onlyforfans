@@ -92,7 +92,7 @@ class StoriesController extends AppBaseController
     {
         $vrules = [
             'stype' => 'in:'.StoryTypeEnum::getKeysCsv(),
-            //'timeline_id' => 'required|uuid|exists:timelines',
+            //'link' => 'url', // Laravel's validation rule requires 'http' to be part of string, which we don't require
         ];
         if ( $request->has('mediafile_id') ) {
             $vrules['mediafile_id'] = 'uuid|exists:mediafiles,id';
@@ -108,22 +108,24 @@ class StoriesController extends AppBaseController
         // policy check is redundant as a story is always created on session user's
         //   timeline, however in the future we may be more flexible, or support
         //   multiple timelines which will require request->timeline_id
-        //$timeline = Timeline::find($request->user()->timeline_id);
         $timeline = $request->user()->timeline;
         $this->authorize('update', $timeline);
 
         try {
             $story = DB::transaction(function () use(&$request, &$timeline) {
 
-                $story = Story::create([
+                $attrs = [
                     'timeline_id' => $timeline->id,
                     'content' => $request->content ?? null,
-                    'swipe_up_link' => $request->link ?? null,
                     'cattrs' => [
                         'background-color' => $request->bgcolor ?? '#fff',
                     ],
                     'stype' => $request->stype,
-                ]);
+                ];
+                if ( $request->has('link') ) {
+                    $attrs['swipe_up_link'] = preg_replace("(^https?://)", "", $request->link ); // strip off protocol
+                }
+                $story = Story::create($attrs);
 
                 if ( $request->stype === StoryTypeEnum::PHOTO ) {
                     if ( $request->has('mediafile_id') ) {

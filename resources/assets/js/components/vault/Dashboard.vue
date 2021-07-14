@@ -364,6 +364,7 @@ export default {
     // By default we can send to story, post, or message...may be overridden if this 'page' is 
     // loaded in another context (hack for mvp)
     sendChannels: ['story', 'post', 'message'],
+    sendAction: null,
 
     isUploaderVisible: false,
     isSendFilesModalVisible: false,
@@ -429,15 +430,23 @@ export default {
 
       switch (resourceType) {
         case 'story':
-          this.storeStory()
-          break;
+          if ( this.sendAction === 'storybar' ) {
+            params.context = 'vault-via-storybar'
+            this.$router.replace({ name: 'index', params })
+          } else {
+            this.storeStory()
+          }
+          break
         case 'post':
+          params.context = 'vault-via-postcreate'
           this.$router.replace({ name: 'index', params })
-          break;
+          break
         case 'message':
           this.$router.replace({ name: 'chatthreads.create', params })
-          break;
+          break
       }
+      this.sendChannels =  ['story', 'post', 'message']
+      this.sendAction =  null
     },
 
     // API to update a new story in the database for this user's timeline
@@ -724,10 +733,12 @@ export default {
       this.$store.dispatch('getVaultfolder', this.vaultfolder_pkid)
     })
 
+    // act on any special context params passed from Vue router
     if ( this.$route.params.context ) {
       switch( this.$route.params.context ) {
-        case 'storybar':
+        case 'storybar': // we got here from the storybar, so instead of sending the story directly, return to story bar (!)
           this.sendChannels = ['story']
+          this.sendAction = 'storybar'
           break
       }
     }

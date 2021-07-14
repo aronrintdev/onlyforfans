@@ -5,7 +5,7 @@
     <b-sidebar id="sidebar-settings" title="Story Settings" left shadow width="40rem">
       <div class="px-3 py-2">
         <div>
-          <b-form-checkbox v-model="isPlaying">Auto Play</b-form-checkbox>
+          <b-form-checkbox v-model="isAutoplay">Auto Play</b-form-checkbox>
         </div>
         <ul class="tag-debug">
           <li>slide index: {{slideIndex+1}}/{{slides.length}}</li>
@@ -35,7 +35,11 @@
           </nav>
 
           <section v-for="(s, iter) in slides" :key="`slide-${s.id}`">
-            <article v-if="slideIndex===iter" :style="cssDisplay" class="display-area" v-touch:start="touchStartHandler" v-touch:end="touchEndHandler">
+            <article v-if="slideIndex===iter" 
+              :style="cssDisplay" class="display-area" 
+              v-touch:start="handleTouchStart" v-touch:end="handleTouchEnd"
+              v-touch:swipe.bottom="handleSwipeDown"
+            >
 
               <div class="tag-creator d-flex align-items-center">
                 <b-avatar v-if="avatar" :src="avatar.filepath" class="mr-2" size="2.5rem" />
@@ -102,15 +106,13 @@ export default {
 
   data: () => ({
     INTERVAL_DELTA: 35, // milliseconds...smaller the number the faster the playback
-    slideViewedDuration: 0, // %FIXME
+    slideViewedDuration: 0, // interval counter, range 0 to 100; also used to fill in progress bar during auto-playback (could use a better name for this)
 
-    //slides: null,
     slideIndex: null,
 
-    playerIntervalObj: null, // instace of setInterval
-
     // slide player controls
-    isPlaying: true,
+    isAutoplay: true,
+    playerIntervalObj: null, // instace of setInterval
   }),
 
   computed: {
@@ -187,15 +189,6 @@ export default {
       }
       this.markSlideAsViewed(this.slides[this.slideIndex])
 
-      if (this.isPlaying) {
-      }
-    },
-
-    handleSwipeUp() {
-      const link = this.slides[this.slideIndex].swipe_up_link
-      if (link) {
-        this.$emit('open-see-more-link')
-      }
     },
 
     startPlayback() {
@@ -216,17 +209,35 @@ export default {
       this.playerIntervalObj = null
     },
 
-    touchStartHandler() {
+    handleTouchStart() {
+      //console.log('handleTouchStart()')
       this.stopPlayback()
     },
-    touchEndHandler() {
-      this.startPlayback()
+    handleTouchEnd() {
+      //console.log('handleTouchEnd()')
+      if (this.isAutoplay) {
+        this.startPlayback()
+      }
+    },
+
+    handleSwipeUp() {
+      //console.log('handleSwipeUp()')
+      const link = this.slides[this.slideIndex].swipe_up_link
+      if (link) {
+        this.stopPlayback()
+        this.$emit('open-see-more-link')
+      }
+    },
+    handleSwipeDown() {
+      //console.log('handleSwipeDown()')
+      this.stopPlayback()
+      this.$router.push({ name: 'index' }) // return to home feed/storybar (close player)
     },
 
   },
 
   watch: {
-    isPlaying(value) {
+    isAutoplay(value) {
       if (value) {
         this.startPlayback()
       } else { 
@@ -239,7 +250,9 @@ export default {
     this.slideIndex = this.slideIndexInit
     if ( this.slides && this.slides.length ) {
       this.markSlideAsViewed(this.slides[this.slideIndex])
-      this.startPlayback()
+      if (this.isAutoplay) {
+        this.startPlayback()
+      }
     }
   },
 
