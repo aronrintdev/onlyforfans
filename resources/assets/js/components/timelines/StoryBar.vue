@@ -26,7 +26,7 @@
         </swiper-slide>
       </swiper>
 
-      <!--
+      <!-- DEBUG code
       <div ref="mySwiper" :options="swiperOptions" class="">
         <div v-for="tl in timelines" :key="tl.id" class="story OFF-slide tag-followed_timeline">
           <router-link :to="{ name: 'stories.player', params: { timeline_id: tl.id } }" class="box-story">
@@ -50,23 +50,32 @@
     </section>
 
     <!-- Modal for selecting file from disk vs vault -->
-    <b-modal v-model="isSelectFileModalVisible" id="modal-select-file" size="lg" title="Select Picture or Video" hide-footer>
-      <div>
-          <b-button variant="primary" class="" @click="selectFromFiles">Select from Files</b-button>
-          <b-button variant="primary" class="" :to="{ name: 'vault.dashboard', params: { context: 'storybar' } }">Select from Vault</b-button>
-      </div>
+    <b-modal v-model="isSelectFileModalVisible" id="modal-select-file" size="lg" title="Select Picture or Video" >
+      <form v-on:submit.prevent>
+        <b-form-textarea class="story-contents" v-model="storyAttrs.contents" placeholder="Enter text for your new story..." rows="5" ></b-form-textarea>
+        <b-form-input class="swipe-up-link" type="url" v-model="storyAttrs.link" :state="urlState" placeholder="Optional swipe-up link..."></b-form-input>
+      </form>
+      <template #modal-footer>
+        <b-button variant="primary" class="" @click="selectFromFiles">Select from Files</b-button>
+        <b-button variant="primary" class="" :to="{ name: 'vault.dashboard', params: { context: 'storybar' } }">Select from Vault</b-button>
+      </template>
     </b-modal>
 
-    <!-- Form modal for image preview before saving to story -->
+    <!-- Form modal for story preview (incl. image) before saving -->
     <b-modal v-model="isPreviewModalVisible" id="modal-save-to-story-form" size="lg" title="Save to Story" body-class="p-0">
-      <div>
-        <b-img fluid :src="selectedDiskfileUrl"></b-img>
-      </div>
-      <template #modal-footer>
-        <div class="w-100">
-          <b-button variant="warning" size="sm" @click="isPreviewModalVisible=false">Cancel</b-button>
-          <b-button variant="primary" size="sm" @click="storeStory('image')">Save</b-button>
+      <section class="d-flex">
+        <div>
+          <b-img v-if="storyAttrs.selectedMediafileId" fluid :src="selectedFileUrl"></b-img>
+          <b-img v-else-if="fileInput" fluid :src="selectedFileUrl"></b-img>
         </div>
+        <div>
+          <p class="m-0" v-if="storyAttrs.contents">Contents: {{ storyAttrs.contents }}</p>
+          <p class="m-0" v-if="storyAttrs.link">Swipe Link: {{ storyAttrs.link }}</p>
+        </div>
+      </section>
+      <template #modal-footer>
+        <b-button variant="warning" size="sm" @click="isPreviewModalVisible=false">Cancel</b-button>
+        <b-button variant="primary" size="sm" @click="storeStory('image')">Save</b-button>
       </template>
     </b-modal>
 
@@ -75,6 +84,7 @@
 
 <script>
 import Vuex from 'vuex'
+import validateUrl from '@helpers/validateUrl';
 
 export default {
   props: {
@@ -87,6 +97,10 @@ export default {
     isLoading() {
       return !this.session_user || !this.timelines
     },
+
+    urlState() {
+      return this.storyAttrs.link ? validateUrl(this.storyAttrs.link) : null
+    }
 
   },
 
@@ -104,9 +118,10 @@ export default {
       color: '#fff',
       contents: '',
       link: '',
+      selectedMediafileId: null, // if selected from vault
     },
 
-    selectedDiskfileUrl: null,
+    selectedFileUrl: null,
 
     swiperOptions: {
       slidesPerView: 'auto', // 'auto',
@@ -120,14 +135,24 @@ export default {
       this.$refs.fileInput.$el.childNodes[0].click()
     },
     selectFromVault() {
+      // %TODO...right now we are 'hacking' this by redirecting (routing) to vault, selecting files, then routing back here...
     },
 
     handleDiskSelect(e) {
       console.log('handleDiskSelect')
       const file = e.target.files[0]
-      this.selectedDiskfileUrl = URL.createObjectURL(file)
+      this.selectedFileUrl = URL.createObjectURL(file)
       //this.$bvModal.show('modal-select-file', { })
       this.isPreviewModalVisible = true
+    },
+
+    resetStoryForm() {
+      // reset form input
+      this.fileInput = null 
+      this.storyAttrs.selectedMediafileId = null
+      this.storyAttrs.color = '#fff'
+      this.storyAttrs.contents = ''
+      this.storyAttrs.link = ''
     },
 
     // API to create a new story record (ie 'update story timeline') in the database for this user's timeline
@@ -142,7 +167,11 @@ export default {
         case 'text':
           break
         case 'image':
-          payload.append('mediafile', this.fileInput)
+          if ( this.storyAttrs.selectedMediafileId ) {
+            payload.append('mediafile_id', this.storyAttrs.selectedMediafileId)
+          } else if (this.fileInput) {
+            payload.append('mediafile', this.fileInput)
+          }
           break
       } 
 
@@ -151,7 +180,7 @@ export default {
       })
       this.isPreviewModalVisible = false
       this.isSelectFileModalVisible = false
-      this.fileInput = null // form input
+      this.resetStoryForm()
 
       this.$root.$bvToast.toast('Story successfully uploaded!', {
         toaster: 'b-toaster-top-center',
@@ -180,6 +209,31 @@ export default {
         toaster: 'b-toaster-top-center',
         variant: 'success',
       })
+    }
+  },
+
+  mounted() { 
+    if ( this.$route.params.context ) {
+      switch( this.$route.params.context ) {
+        case 'vault-via-storybar': // we got here from the vault, likely with a mediafile to attach to some action
+          this.isPreviewModalVisible = true
+          const mediafileIds = this.$route.params.mediafile_ids || []
+          if ( mediafileIds.length ) {
+            const response = axios.get(this.$apiRoute('mediafiles.index'), {
+              params: {
+                mediafile_ids: mediafileIds,
+              },
+            }).then( response => {
+              response.data.data.forEach( mf => {
+                this.storyAttrs.selectedMediafileId = mf.id // basically just take the last if multiple
+                this.selectedFileUrl = mf.filepath
+              })
+            })
+          }
+          //this.sendChannels = ['story']
+          //this.sendAction = 'storybar'
+          break
+      }
     }
   },
 
