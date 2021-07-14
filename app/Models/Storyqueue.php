@@ -66,6 +66,9 @@ class Storyqueue extends Model
             if ( in_array($sq->timeline_id, $selected) ) {
                 continue;
             }
+            if ( $sq->timeline->isStoryqueueEmpty() ) {
+                continue;
+            }
             if ($sq->timeline->isEntireStoryViewedByUser($viewer->id) ) {
                 $tmpTL = $sq->timeline->makeVisible('user')->load(['user', 'avatar', 'storyqueues']);
                 $tmpTL->allViewed = true;
