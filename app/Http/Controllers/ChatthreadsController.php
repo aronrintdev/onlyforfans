@@ -1,21 +1,22 @@
 <?php
 namespace App\Http\Controllers;
 
-use App\Enums\ShareableAccessLevelEnum;
 use Exception;
-use Illuminate\Support\Facades\Log;
+use App\Models\User;
+use App\Models\Mediafile;
+use App\Models\Mycontact;
+use App\Models\Chatthread;
+use App\Models\Chatmessage;
+//use App\Http\Resources\ChatmessageCollection;
 use Illuminate\Http\Request;
+use App\Events\MessageSentEvent;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
+use App\Notifications\MessageReceived;
+use App\Enums\ShareableAccessLevelEnum;
 use App\Http\Resources\ChatthreadCollection;
 use App\Http\Resources\Chatthread as ChatthreadResource;
-//use App\Http\Resources\ChatmessageCollection;
 use App\Http\Resources\Chatmessage as ChatmessageResource;
-use App\Events\MessageSentEvent;
-use App\Models\Chatmessage;
-use App\Models\Chatthread;
-use App\Models\Mycontact;
-use App\Models\User;
-use App\Notifications\MessageReceived;
-use Illuminate\Support\Collection;
 
 class ChatthreadsController extends AppBaseController
 {
@@ -287,11 +288,12 @@ class ChatthreadsController extends AppBaseController
     public function store(Request $request)
     {
         $request->validate([
-            'originator_id' => 'required|uuid|exists:users,id',
-            'participants' => 'required|array', // %FIXME: rename to 'recipients' for clairty
+            'originator_id'  => 'required|uuid|exists:users,id',
+            'participants'   => 'required|array', // %FIXME: rename to 'recipients' for clairty
             'participants.*' => 'uuid|exists:users,id',
-            'mcontent' => 'string|required_with:deliver_at', // optional first message content
-            'deliver_at' => 'numeric', // optional to pre-schedule delivery of message if present
+            'mcontent'       => 'string|required_with:deliver_at', // optional first message content
+            'attachments'    => 'array',
+            'deliver_at'     => 'numeric', // optional to pre-schedule delivery of message if present
         ]);
         $originator = User::find($request->originator_id);
 
@@ -341,9 +343,26 @@ class ChatthreadsController extends AppBaseController
     public function sendMessage(Request $request, Chatthread $chatthread)
     {
         $request->validate([
-            'mcontent' => 'required|string',
+            'mcontent' => 'required_without:attachments',
+            'attachments' => 'array',
+            'files' => 'array',
         ]);
-        $chatmessage = $chatthread->sendMessage($request->user(), $request->mcontent, new Collection());
+        // Create new chat message
+        $chatmessage = $chatthread->sendMessage($request->user(), $request->mcontent ?? '', new Collection());
+
+        if ($request->has('attachments')) {
+            foreach ($request->attachments as $attachment) {
+                if ($attachment['diskmediafile_id']) {
+                    Mediafile::find($attachment['id'])->diskmediafile->createReference(
+                        $chatmessage->getMorphString(), // string   $resourceType
+                        $chatmessage->getKey(),         // int      $resourceID
+                        $attachment['mfname'],          // string   $mfname
+                        'messages'                      // string   $mftype
+                    );
+                }
+            }
+        }
+
         try {
             //broadcast( new MessageSentEvent($chatmessage) )->toOthers();
             MessageSentEvent::dispatch($chatmessage);
@@ -383,6 +402,17 @@ class ChatthreadsController extends AppBaseController
         ]);
         $chatmessage = $chatthread->scheduleMessage($request->user(), $request->mcontent, $request->deliver_at);
         return new ChatmessageResource($chatmessage);
+    }
+
+    /**
+     * Create and put message in draft status,This will allow for attachments to be given to it.
+     * @param Request $request
+     * @param Chatthread $chatthread
+     * @return ChatmessageResource
+     */
+    public function draft(Request $request, Chatthread $chatthread)
+    {
+        //
     }
 
 }

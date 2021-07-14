@@ -238,6 +238,8 @@ Route::group(['middleware' => ['auth']], function () {
     Route::post('/vaultfolders/{vaultfolder}/share', ['as'=>'vaultfolders.share', 'uses' => 'VaultfoldersController@share']); // ?? still used? PSG 20210701
     Route::post('/vaultfolders/{vaultfolder}/approveShare', ['as'=>'vaultfolders.approveShare', 'uses' => 'VaultfoldersController@approveShare']);
     Route::post('/vaultfolders/{vaultfolder}/declineShare', ['as'=>'vaultfolders.declineShare', 'uses' => 'VaultfoldersController@declineShare']);
+    Route::get('/vaultfolders/uploads/{type}', 'VaultfoldersController@uploadsFolder')
+        ->name('vaultfolders.uploads-folder');
     Route::resource('vaultfolders', 'VaultfoldersController', [ ]);
 
     // -- misc --

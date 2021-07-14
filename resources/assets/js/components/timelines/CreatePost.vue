@@ -323,7 +323,6 @@ export default {
           title: 'Success!',
           variant: 'primary',
           solid: true,
-          toaster: 'b-toaster-top-right',
         })
       }
       this.resetForm();

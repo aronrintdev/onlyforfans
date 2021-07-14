@@ -1,20 +1,20 @@
 <template>
-  <div>
-    <component :is="component" :value="value" />
-  </div>
+  <component :is="component" :value="value" />
 </template>
 
 <script>
 /**
- * resources/assets/js/views/live-chat/components/Attachment/index.vue
+ * resources/assets/js/views/live-chat/components/Attachments/Item.vue
  */
 import Vuex from 'vuex'
+import MediaImage from './Image'
 import Tip from './Tip'
 
 export default {
-  name: 'Attachment',
+  name: 'Item',
 
   components: {
+    MediaImage,
     Tip,
   },
 
@@ -26,6 +26,9 @@ export default {
     component() {
       if (this.value.type === 'tip') {
         return 'Tip'
+      }
+      if (this.value.is_image) {
+        return 'MediaImage'
       }
     },
   },

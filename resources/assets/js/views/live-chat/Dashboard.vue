@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!isLoading" class="container-xl px-3 py-3" id="view-livechat">
+  <div v-if="!isLoading" class="container-fluid px-3 py-3" id="view-livechat">
 
     <section class="row h-100" style="max-height: 100%;">
 

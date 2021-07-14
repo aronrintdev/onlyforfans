@@ -10,12 +10,14 @@ use App\Interfaces\Guidable;
 //use App\Interfaces\Cloneable;
 use App\Models\Traits\UsesUuid;
 use App\Enums\MediafileTypeEnum;
+use App\Http\Resources\Mediafile as ResourcesMediafile;
+use App\Interfaces\Messagable;
 use App\Models\Traits\SluggableTraits;
 use App\Traits\OwnableFunctions;
 use Cviebrock\EloquentSluggable\Sluggable;
 use Intervention\Image\Facades\Image;
 
-class Mediafile extends BaseModel implements Guidable, Ownable 
+class Mediafile extends BaseModel implements Guidable, Ownable, Messagable
 {
     use UsesUuid, SoftDeletes, HasFactory, OwnableFunctions, Sluggable, SluggableTraits;
 
@@ -243,6 +245,20 @@ class Mediafile extends BaseModel implements Guidable, Ownable
     {
         return $this->mfname;
     }
+
+    /* ---------------------------------------------------------------------- */
+    /*                               Messagable                               */
+    /* ---------------------------------------------------------------------- */
+    #region Messagable
+
+    public function getMessagableArray()
+    {
+        return new ResourcesMediafile($this);
+    }
+
+    #endregion Messagable
+    /* ---------------------------------------------------------------------- */
+
 
     // %%% --- Other ---
 

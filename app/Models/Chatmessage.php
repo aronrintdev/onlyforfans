@@ -1,8 +1,6 @@
 <?php
 namespace App\Models;
 
-use Exception;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 
 use Carbon\Carbon;
@@ -57,6 +55,11 @@ class Chatmessage extends Model implements UuidId, Ownable
     public function mediafile()
     {
         return $this->morphOne(Mediafile::class, 'resource');
+    }
+
+    public function mediafiles()
+    {
+        return $this->morphMany(Mediafile::class, 'resource');
     }
 
     //--------------------------------------------
