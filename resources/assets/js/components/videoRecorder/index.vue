@@ -93,7 +93,6 @@ import videojs from 'video.js';
 // Required libraries for video record
 import RecordRTC from 'recordrtc';
 import Record from 'videojs-record/dist/videojs.record.js';
-import TsEBMLEngine from 'videojs-record/dist/plugins/videojs.record.ts-ebml.js';
 import { eventBus } from '@/app';
 
 export default {
@@ -124,7 +123,6 @@ export default {
           maxLength: 10,
           displayMilliseconds: true,
           debug: true,
-          convertEngine: 'ts-ebml'
         }
       }
     };
@@ -133,8 +131,8 @@ export default {
     this.player.record().getDevice(); 
 
     const self = this;
-    this.player.on('finishConvert', function() {
-      eventBus.$emit('video-rec-complete', self.player.convertedData);
+    this.player.on('finishRecord', function() {
+      eventBus.$emit('video-rec-complete', self.player.recordedData);
       self.isRecording = false;
       self.closeVideoRec();
     });

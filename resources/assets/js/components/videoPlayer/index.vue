@@ -40,9 +40,6 @@ export default {
         controls: true,
       },
       () => {
-        // prevent swipe conflict
-        this.getChild("controlBar")
-          .el_.addEventListener("pointerdown", (e) => e.stopPropagation());
       }
     ).ready(function () {
       this.src({ type: self.source.type, src: self.source.filepath });
