@@ -49,35 +49,41 @@ class Api
        return $_this;
     }
 
-    public function getToken() {
+
+    public function issueToken() 
+    {
         $url = $this->endpoints['token']['url'];
         $clientId = env('IDMERIT_CLIENT_ID', null);
         $clientSecret = env('IDMERIT_CLIENT_SECRET', null);
         if ( !$clientId || !$clientSecret ) {
             throw new Exception('Missing ID or secret');
         }
-        //$response = Http::dd()->withBasicAuth($clientId, $clientSecret)->post($url);
         $response = Http::asForm()->withBasicAuth($clientId, $clientSecret)
           ->post($url, [
               'grant_type' => 'client_credentials',
               'scope' => 'idmvalidate',
           ]);
-        /*
-        $response = Http::withHeaders([
-            'Content-Type' => 'application/x-www-form-urlencoded',
-        ])->withBasicAuth($clientId, $clientSecret)
-          ->post($url, [
-              'grant_type' => 'client_credentials',
-              'scope' => 'idmvalidate',
-          ]);
-        */
+        $json = $response->json();
+        if ( !array_key_exists('access_token', $json) ) {
+            throw new Exception('issueToken() - could not retrieve token');
+        }
+        $this->token = $json['access_token']; // set token
+        return $response; // return response
+    }
+
+    public function doVerify($userAttrs)
+    {
+        $url = $this->endpoints['verify']['url'];
+        $response = Http::withToken($this->token)->post($url, $userAttrs);
         return $response;
     }
 
-    public function doVerify(User $user) {
+    public function checkVerify(User $user) 
+    {
     }
 
-    public function checkVerify(User $user) {
+    public function getToken() {
+        return $this->token;
     }
 
 }

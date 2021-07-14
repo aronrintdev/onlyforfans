@@ -13,12 +13,12 @@ class IdmeritApiTest extends TestCase
 {
     /**
      * @group idmerit-api
-     * @group here0714
+     * @group OFF-here0714
      */
-    public function test_get_token()
+    public function test_should_get_token()
     {
         $api = IdMeritApi::create();
-        $response = $api->getToken();
+        $response = $api->issueToken();
         $this->assertEquals( 200, $response->status() );
         $json = $response->json();
         //dd( $json );
@@ -26,6 +26,42 @@ class IdmeritApiTest extends TestCase
         $this->assertArrayHasKey('token_type', $json);
         $this->assertArrayHasKey('expires_in', $json);
         //dd( $response );
+    }
+
+    /**
+     * @group idmerit-api
+     * @group here0714
+     */
+    public function test_should_send_verify_request()
+    {
+        $userAttrs = [
+	        "mobile" => "+94777878905",
+	        "name" => "Dilshan Edirisuriya",
+	        "country" => "LK",
+	        "requestID" => "additional information",
+	        "dateOfBirth" => "19901231",
+	        //"callbackURL": "https://devapp.idmvalidate.com/verify/endpoint/success"
+        ];
+        $api = IdMeritApi::create();
+        $response = $api->issueToken();
+        $this->assertEquals( 200, $response->status() );
+
+        $response = $api->doVerify($userAttrs);
+        //dd( $response );
+        $this->assertEquals( 200, $response->status() );
+        $json = $response->json();
+        $this->assertArrayHasKey('requestID', $json);
+        $this->assertArrayHasKey('callbackURL', $json);
+        $this->assertArrayHasKey('uniqueID', $json);
+        $this->assertArrayHasKey('status', $json);
+        $this->assertArrayHasKey('documentType', $json);
+        $this->assertArrayHasKey('barcodeType', $json);
+        $this->assertArrayHasKey('skipBarcode', $json);
+        $this->assertArrayHasKey('skipLiveness', $json);
+        $this->assertArrayHasKey('qrCode', $json);
+        $this->assertArrayHasKey('redirectURL', $json);
+        $this->assertEquals('in_progress', $json['status']);
+        //dd($json);
     }
 
     /**
