@@ -34,10 +34,13 @@
       <swiper-slide class="slide">
         <div v-if="!isDragListVisible">
           <div class="swiper-image-wrapper" v-for="(media, index) in files" :key="index">
-            <img @click="openPhotoSwipe(index)" class="swiper-lazy" :src="media.filepath || media.src" v-if="media.type.indexOf('image/') > -1" />
-            <video @click="openPhotoSwipe(index)" class="swiper-lazy" v-if="media.type.indexOf('video/') > -1">
-              <source :src="media.filepath" :type="media.type" />
-            </video>
+            <img @click="openPhotoSwipe(index)" class="swiper-lazy" :src="media.filepath || media.src" v-if="media.type && media.type.indexOf('image/') > -1" />
+            <div class="swiper-lazy video" @click="openPhotoSwipe(index)" v-if="media.type && media.type.indexOf('video/') > -1">
+              <video>
+                <source :src="media.filepath" :type="media.type" />
+              </video>
+              <fa-icon :icon="['far', 'play-circle']" class="text-white icon-play" />
+            </div>
             <button class="btn btn-primary icon-close" @click="removeMediafile(index)">
               <fa-icon :icon="['far', 'times']" class="text-white" size="sm" />
             </button>
@@ -324,11 +327,36 @@ export default {
     border-radius: 10px;
     margin-right: 8px;
     width: auto;
+    overflow: hidden;
     object-fit: contain;
-  }
-  audio.swiper-lazy {
-    width: 300px;
-    outline: none;
+    cursor: pointer;
+
+    &.video {
+      position: relative;
+
+      &::before {
+        content: "";
+        display: block;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.2);
+        position: absolute;
+        top: 0;
+        left: 0;
+      }
+
+      video {
+        height: 100%;
+      }
+
+      .icon-play {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 34px;
+      }
+    }
   }
   .swiper-image-wrapper {
     position: relative;

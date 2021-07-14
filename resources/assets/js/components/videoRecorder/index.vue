@@ -103,7 +103,7 @@ export default {
       mins: 0,
       secs: 0
     },
-    videoRecLimit: 900,
+    videoRecLimit: 600,
     audioDevices: [],
     videoDevices: [],
     isDeviceReady: false,
@@ -293,15 +293,24 @@ export default {
       .icon-record {
         position: relative;
         z-index: 2;
-        width: 50px;
-        height: 50px;
+        width: 40px;
+        height: 40px;
         line-height: 1;
         cursor: pointer;
         transition: all 0.3s ease;
 
+        &[disabled] {
+          pointer-events: none;
+        }
+
         .icon-rec {
           width: 100%;
           height: 100%;
+
+          &:hover {
+            transform: scale(1.1);
+            opacity: 0.9;
+          }
         }
 
         .icon-stop {
@@ -310,10 +319,6 @@ export default {
           margin: 25%;
         }
 
-        &:hover {
-          transform: scale(1.1);
-          opacity: 0.9;
-        }
       }
     }
     .icon-video button,
