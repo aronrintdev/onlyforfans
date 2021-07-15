@@ -71,15 +71,20 @@ class Api
         return $response; // return response
     }
 
-    public function doVerify($userAttrs)
+    public function doVerify(array $attrs)
     {
         $url = $this->endpoints['verify']['url'];
-        $response = Http::withToken($this->token)->post($url, $userAttrs);
+        $response = Http::withToken($this->token)->post($url, $attrs);
         return $response;
     }
 
-    public function checkVerify(User $user) 
+    public function checkVerify(string $uniqueID) 
     {
+        $url = $this->endpoints['status']['url']."/$uniqueID";
+        $response = Http::withToken($this->token)
+            ->withHeaders([ 'Content-Type' => 'application/json' ])
+            ->get($url);
+        return $response;
     }
 
     public function getToken() {

@@ -13,7 +13,7 @@ class IdmeritApiTest extends TestCase
 {
     /**
      * @group idmerit-api
-     * @group OFF-here0714
+     // do not add to regression tests!
      */
     public function test_should_get_token()
     {
@@ -30,7 +30,7 @@ class IdmeritApiTest extends TestCase
 
     /**
      * @group idmerit-api
-     * @group here0714
+     // do not add to regression tests!
      */
     public function test_should_send_verify_request()
     {
@@ -45,6 +45,8 @@ class IdmeritApiTest extends TestCase
         $api = IdMeritApi::create();
         $response = $api->issueToken();
         $this->assertEquals( 200, $response->status() );
+
+        // --
 
         $response = $api->doVerify($userAttrs);
         //dd( $response );
@@ -61,21 +63,81 @@ class IdmeritApiTest extends TestCase
         $this->assertArrayHasKey('qrCode', $json);
         $this->assertArrayHasKey('redirectURL', $json);
         $this->assertEquals('in_progress', $json['status']);
+        $this->assertNotNull($json['uniqueID']);
         //dd($json);
     }
 
     /**
-     * @group story-model
+     * @group idmerit-api
+     * @group here0714
+     // do not add to regression tests!
+     // %NOTE: Assumes the 'hardcoded' unique IDs already exist in our test sandbox!
      */
-    public function test_basic_ts_integrity()
+    public function test_should_poll_verify_request_status()
     {
-        $stories = Story::get();
-        $stories->each( function($s) {
-            $s->storyqueues->each( function($sq) use(&$s) {
-                $this->assertEquals($s->timeline->id, $sq->timeline->id);
-                $this->assertEquals($s->created_at, $sq->created_at);
-            });
-        });
+        $api = IdMeritApi::create();
+        $response = $api->issueToken();
+        $this->assertEquals( 200, $response->status() );
+
+        // --
+
+        $uniqueIDs = [
+            'passed' => 'da8dc894-e7ee-4d64-a9de-8351deec324b',
+            'failed' => '0057899f-443d-4623-9d4e-f621ba6663d8',
+            'pending' => 'a8a60ca5-432e-4363-86b5-5bd91231b60b',
+        ];
+
+        // -- Test pending --
+
+        $response = $api->checkVerify($uniqueIDs['pending']);
+        $this->assertEquals( 200, $response->status() );
+        $json = $response->json();
+
+        $this->assertArrayHasKey('status', $json);
+        $this->assertArrayHasKey('requestId', $json);
+        $this->assertArrayHasKey('identifier', $json);
+        $this->assertArrayHasKey('name', $json);
+        $this->assertArrayHasKey('dateOfBirth', $json);
+        $this->assertArrayHasKey('documentType', $json);
+        $this->assertArrayHasKey('country', $json);
+        $this->assertArrayHasKey('scanImage', $json);
+        $this->assertArrayHasKey('selfieImage', $json);
+        $this->assertArrayHasKey('mobile', $json);
+        $this->assertArrayHasKey('countryCode', $json);
+        $this->assertArrayHasKey('requestedTime', $json);
+        $this->assertArrayHasKey('validatedTime', $json);
+        $this->assertArrayHasKey('faceMatches', $json);
+        $this->assertArrayHasKey('liveness', $json);
+        $this->assertArrayHasKey('documentScore', $json);
+        $this->assertArrayHasKey('riskFactor', $json);
+        $this->assertArrayHasKey('nameScore', $json);
+        $this->assertArrayHasKey('latitude', $json);
+        $this->assertArrayHasKey('longitude', $json);
+        $this->assertArrayHasKey('userAgent', $json);
+        $this->assertArrayHasKey('dobScore', $json);
+        $this->assertArrayHasKey('deviceId', $json);
+        $this->assertArrayHasKey('barcodeMap', $json);
+
+        $this->assertEquals('in_progress', $json['status']);
+
+        // -- Test failed --
+
+        $response = $api->checkVerify($uniqueIDs['failed']);
+        $this->assertEquals( 200, $response->status() );
+        $json = $response->json();
+        $this->assertEquals('failed', $json['status']);
+
+
+        // -- Test passed/verified --
+
+        $response = $api->checkVerify($uniqueIDs['passed']);
+        $this->assertEquals( 200, $response->status() );
+        $json = $response->json();
+        $this->assertEquals('verified', $json['status']);
+
+
+        //dd($json);
     }
 
 }
+
