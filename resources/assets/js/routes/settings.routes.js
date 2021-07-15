@@ -54,6 +54,11 @@ export default [
     component: settings.Referrals,
     path: 'referrals',
   },
+  {
+    name: 'settings.verify',
+    component: settings.Verify,
+    path: 'verify',
+  },
   /*
   {
     name: 'settings.bookmarks',
