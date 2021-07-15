@@ -27,7 +27,6 @@
         <div v-else> <!-- follow or subscribe -->
           <div v-if="!userCampaign">
             <p>Get Full Access for {{ timeline.price_display || (timeline.price | niceCurrency) }} monthly premium subscription!</p>
-            <b-button @click="doSubscribe" variant="primary" class="w-100 mb-3">Subscribe for Full Access</b-button>
           </div>
           <b-row v-if="userCampaign">
             <b-col class="mt-3">
@@ -35,9 +34,13 @@
               <h5 v-if="userCampaign.type === 'discount'">Limited offer - {{ userCampaign.discount_percent }} % off for 31 days!</h5>
               <p><small class="text-muted">For {{ campaignAudience }} • ends {{ campaignExpDate }} • left {{ userCampaign.subscriber_count }}</small></p>
               <p v-if="userCampaign.message">Message from {{ timeline.name }}: <i>{{ userCampaign.message }}</i></p>
-              <b-button @click="doSubscribe" variant="primary" class="w-100 mb-3">Subscribe for Full Access</b-button>
             </b-col>
           </b-row>
+          <b-button @click="doSubscribe" variant="primary" class="w-100 mb-3">Subscribe for Full Access</b-button>
+          <template v-if="!subscribe_only">
+            <p>...or follow this creator for free to see limited content</p>
+            <b-button @click="doFollow" variant="primary" class="w-100 mb-3">Follow for Free</b-button>
+          </template>
         </div>
       </b-card-body>
       <b-card-body v-if="step === 'payment'" key="payment">
