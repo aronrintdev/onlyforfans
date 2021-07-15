@@ -4,7 +4,7 @@
 
       <b-row>
         <b-col>
-          <h2 class="card-title mb-1"><span class="tag-title">Followers</span> ({{ totalRows }})</h2>
+          <h2 class="card-title mt-3 mb-1"><span class="tag-title">Followers</span> ({{ totalRows }})</h2>
           <small class="text-muted">Fans who are following or subscribed to my feed</small>
         </b-col>
       </b-row>

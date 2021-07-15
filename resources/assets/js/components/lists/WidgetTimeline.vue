@@ -5,7 +5,7 @@
 
     <b-card-body class="py-1">
 
-      <div class="last-seen">Last seen TBD</div>
+      <div class="last-seen">Last seen {{ moment(timeline.updated_at).format('MMM D') }}</div>
 
       <div class="banner-ctrl ">
         <b-dropdown no-caret right ref="bannerCtrls" variant="transparent" id="banner-ctrl-dropdown" class="tag-ctrl"> 
@@ -35,9 +35,9 @@
 
       <slot></slot>
 
-      <div>
-        <small v-if="access_level==='premium'" class="text-muted">subscribed since {{ moment(created_at).format('MMM DD, YYYY') }}</small>
-        <small v-else class="text-muted">following for free since {{ moment(created_at).format('MMM DD, YYYY') }}</small>
+      <div class="mt-2 mb-2">
+        <small v-if="access_level==='premium'" class="text-muted">Subscribed since {{ moment(created_at).format('MMM DD, YYYY') }}</small>
+        <small v-else class="text-muted">Following for free since {{ moment(created_at).format('MMM DD, YYYY') }}</small>
       </div>
 
     </b-card-body>

@@ -4,7 +4,7 @@
 
       <b-row>
         <b-col>
-          <h2 class="card-title mb-1"><span class="tag-title">Following</span> ({{ totalRows }})</h2>
+          <h2 class="card-title mt-3 mb-1"><span class="tag-title">Following</span> ({{ totalRows }})</h2>
           <small class="text-muted">Creators who I am following or subscribed to</small>
         </b-col>
       </b-row>
@@ -20,10 +20,10 @@
           <WidgetTimeline :session_user="session_user" :timeline="s.shareable" :access_level="s.access_level" :created_at="s.created_at">
             <b-card-text class="mb-2"><fa-icon fixed-width :icon="['far', 'star']" class="clickable" style="color:#007bff" /> Add to favorites</b-card-text>
 
-            <b-button variant="outline-primary">Message</b-button>
-            <b-button @click="renderTip(s.shareable, 'timelines')" variant="outline-success">Send Tip</b-button>
-            <b-button v-if="s.access_level==='default'" @click="renderSubscribe(s.shareable)" variant="outline-info">Premium Access</b-button>
-            <b-button @click="renderCancel(s.shareable, s.access_level)" variant="outline-warning">Cancel</b-button>
+            <b-button variant="primary"><fa-icon fixed-width :icon="['far', 'envelope']" /> Message</b-button>
+            <b-button @click="renderTip(s.shareable, 'timelines')" variant="success"><fa-icon fixed-width :icon="['far', 'dollar-sign']" /> Send Tip</b-button>
+            <b-button v-if="s.access_level==='default'" @click="renderSubscribe(s.shareable)" variant="info"><fa-icon fixed-width :icon="['far', 'box-full']" /> Premium</b-button>
+            <b-button @click="renderCancel(s.shareable, s.access_level)" variant="warning"><fa-icon fixed-width :icon="['far', 'power-off']" /> Cancel</b-button>
           </WidgetTimeline>
           <!-- <pre> Access Level: {{ s.access_level }} {{ JSON.stringify(s, null, "\t") }} </pre> -->
         </b-col>
