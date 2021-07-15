@@ -291,8 +291,8 @@ class ChatthreadsController extends AppBaseController
             'originator_id'  => 'required|uuid|exists:users,id',
             'participants'   => 'required|array', // %FIXME: rename to 'recipients' for clairty
             'participants.*' => 'uuid|exists:users,id',
-            'mcontent'       => 'string|required_with:deliver_at', // optional first message content
-            'attachments'    => 'array',
+            'mcontent'       => 'string',  // optional first message content
+            'attachments'    => 'array',   // optional first message attachments
             'deliver_at'     => 'numeric', // optional to pre-schedule delivery of message if present
         ]);
         $originator = User::find($request->originator_id);
@@ -318,12 +318,14 @@ class ChatthreadsController extends AppBaseController
                 $ct->addParticipant($pkid);
             }
 
-            if ( $request->has('mcontent') ) { // if included send the first message
+            if ( $request->has('mcontent') || $request->has('attachments') ) { // if included send the first message
                 if ( $request->has('deliver_at') ) {
-                    $ct->scheduleMessage($request->user(), $request->mcontent, $request->deliver_at);
+                    $message = $ct->scheduleMessage($request->user(), $request->mcontent ?? '', $request->deliver_at);
                 } else {
-                    $ct->sendMessage($request->user(), $request->mcontent, new Collection());
+                    $message = $ct->sendMessage($request->user(), $request->mcontent ?? '', new Collection());
                 }
+                \Log::debug('ChatthreadsController store new message loop', [ 'has attachments' => $request->has('attachments') ]);
+                $this->addAttachments($request, $message);
             }
             $ct->refresh();
             $chatthreads->push($ct);
@@ -350,18 +352,7 @@ class ChatthreadsController extends AppBaseController
         // Create new chat message
         $chatmessage = $chatthread->sendMessage($request->user(), $request->mcontent ?? '', new Collection());
 
-        if ($request->has('attachments')) {
-            foreach ($request->attachments as $attachment) {
-                if ($attachment['diskmediafile_id']) {
-                    Mediafile::find($attachment['id'])->diskmediafile->createReference(
-                        $chatmessage->getMorphString(), // string   $resourceType
-                        $chatmessage->getKey(),         // int      $resourceID
-                        $attachment['mfname'],          // string   $mfname
-                        'messages'                      // string   $mftype
-                    );
-                }
-            }
-        }
+        $this->addAttachments($request, $chatmessage);
 
         try {
             //broadcast( new MessageSentEvent($chatmessage) )->toOthers();
@@ -396,11 +387,13 @@ class ChatthreadsController extends AppBaseController
     public function scheduleMessage(Request $request, Chatthread $chatthread)
     {
         $request->validate([
-            'mcontent' => 'required|string',
+            'mcontent' => 'required_without:attachments|string',
+            'attachments' => 'array',
             //'deliver_at' => 'required|date',
             'deliver_at' => 'required|numeric',
         ]);
         $chatmessage = $chatthread->scheduleMessage($request->user(), $request->mcontent, $request->deliver_at);
+        $this->addAttachments($request, $chatmessage);
         return new ChatmessageResource($chatmessage);
     }
 
@@ -413,6 +406,22 @@ class ChatthreadsController extends AppBaseController
     public function draft(Request $request, Chatthread $chatthread)
     {
         //
+    }
+
+    private function addAttachments(Request $request, Chatmessage $chatmessage)
+    {
+        if ($request->has('attachments')) {
+            foreach ($request->attachments as $attachment) {
+                if ($attachment['diskmediafile_id']) {
+                    Mediafile::find($attachment['id'])->diskmediafile->createReference(
+                        $chatmessage->getMorphString(), // string   $resourceType
+                        $chatmessage->getKey(),         // int      $resourceID
+                        $attachment['mfname'],          // string   $mfname
+                        'messages'                      // string   $mftype
+                    );
+                }
+            }
+        }
     }
 
 }

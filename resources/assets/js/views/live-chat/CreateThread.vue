@@ -391,6 +391,7 @@ export default {
 
     async createChatthread({
       mcontent = null,
+      attachments = null,
       is_scheduled = false,
       deliver_at = null,
     }) {
@@ -423,6 +424,9 @@ export default {
 
       if ( mcontent ) {
         params.mcontent = mcontent
+      }
+      if (attachments) {
+        params.attachments = attachments
       }
       if ( is_scheduled ) {
         params.is_scheduled = true
