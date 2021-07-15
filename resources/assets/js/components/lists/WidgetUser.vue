@@ -35,11 +35,12 @@
         </b-card-sub-title>
       </div>
 
-      <b-card-text class="mb-2"><fa-icon fixed-width icon="star" style="color:#007bff" /> Add to favorites</b-card-text>
+      <b-card-text class="mb-2"><fa-icon fixed-width :icon="['far', 'star']" style="color:#007bff" /> Add to favorites</b-card-text>
 
-      <b-button variant="outline-primary">Message</b-button>
-      <b-button variant="outline-danger">Restrict</b-button>
-      <b-button variant="outline-warning">Discount</b-button>
+      <b-button variant="primary"><fa-icon fixed-width :icon="['far', 'envelope']" /> Message</b-button>
+      <b-button variant="warning"><fa-icon fixed-width :icon="['far', 'badge-percent']" /> Discount</b-button>
+      <b-button variant="danger"><fa-icon fixed-width :icon="['far', 'ban']" /> Restrict</b-button>
+      <b-button variant="primary"><fa-icon fixed-width :icon="['far', 'pencil']" /> Add Notes</b-button>
       <div>
         <small v-if="access_level==='premium'" class="text-muted">subscribed since {{ moment(created_at).format('MMM DD, YYYY') }}</small>
         <small v-else class="text-muted">following for free since {{ moment(created_at).format('MMM DD, YYYY') }}</small>
