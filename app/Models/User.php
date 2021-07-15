@@ -300,6 +300,11 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
         return $this->hasMany(Storyqueue::class, 'viewer_id');
     }
 
+    public function campaign()
+    {
+        return $this->hasOne(Campaign::class);
+    }
+
 //    public function lists()
 //    {
 //        return $this->belongsToMany(Lists::class, 'list_user', 'user_id', 'list_id')->withTimestamps();

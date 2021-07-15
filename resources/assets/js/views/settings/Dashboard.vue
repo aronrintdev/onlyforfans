@@ -82,6 +82,11 @@ export default {
         to: { name: 'settings.payments', params: {} },
       })
 
+      routes.push({
+        name: 'Subscription and promotions',
+        to: { name: 'settings.subscription', params: {} },
+      })
+
       if (this.subscriptionCount.active > 0 || this.subscriptionCount.inactive > 0) {
         routes.push({
           name: 'My Subscriptions',
@@ -180,6 +185,7 @@ export default {
     "Payment Methods": "Payment Methods",
     "Earnings": "Earnings",
     "My Subscriptions": "My Subscriptions",
+    "Subscription and promotions": "Subscription and promotions",
     "Banking": "Banking",
     "Login Sessions": "Login Sessions",
     "Referrals": "Referrals",

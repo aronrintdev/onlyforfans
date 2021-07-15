@@ -158,6 +158,12 @@ Route::group(['middleware' => ['auth']], function () {
 
     #endregion Sessions
 
+    /* ------------------------------ Campaigns ------------------------------ */
+    Route::get('/campaigns/active', ['as'=>'campaigns.active', 'uses' => 'CampaignsController@active']);
+    Route::get('/campaigns/{creator}', ['as'=>'campaigns.showActive', 'uses' => 'CampaignsController@showActive']);
+    Route::post('/campaigns/stop', ['as'=>'campaigns.stop', 'uses' => 'CampaignsController@stop']);
+    Route::resource('campaigns', 'CampaignsController', [ 'only' => [ 'store' ] ]);
+
     // -- stories:  --
     Route::get('/stories/player', ['as' => 'stories.player', 'uses' => 'SpaController@index']);
     Route::get('/stories/match', ['as'=>'stories.match', 'uses' => 'StoriesController@match']);

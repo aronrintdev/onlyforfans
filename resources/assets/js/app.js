@@ -138,6 +138,15 @@ import VueSocialSharing from 'vue-social-sharing'
 Vue.use(VueSocialSharing);
 
 /**
+ * vue-plyr
+ */
+import VuePlyr from 'vue-plyr'
+import 'vue-plyr/dist/vue-plyr.css'
+Vue.use(VuePlyr, {
+  plyr: {}
+});
+
+/**
  * Next, we will create a fresh Vue application instance and attach it to
  * the page. Then, you may begin adding components to this application
  * or customize the JavaScript scaffolding to fit your unique needs.

@@ -7,6 +7,7 @@ import General from './SettingsGeneral.vue'
 import MySubscriptions from './MySubscriptions.vue'
 import Notifications from './SettingsNotifications.vue'
 import Payments from './SettingsPayments.vue'
+import Subscription from './SettingsSubscription.vue'
 import Banking from './Banking.vue'
 import Privacy from './SettingsPrivacy.vue'
 import Profile from './SettingsProfile.vue'
@@ -21,6 +22,7 @@ export default {
   MySubscriptions,
   Notifications,
   Payments,
+  Subscription,
   Banking,
   Privacy,
   Profile,

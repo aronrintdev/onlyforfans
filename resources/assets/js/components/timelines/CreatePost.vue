@@ -69,6 +69,11 @@
                 @openFileUpload="openDropzone"
               />
             </vue-dropzone>
+            <AudioRecorder
+              v-if="showAudioRec"
+              @close="showAudioRec=false;selectedMedia=null"
+              @complete="audioRecordFinished"
+            />
           </div>
           <template #footer>
             <b-row>
@@ -77,7 +82,7 @@
                   <li id="clickme_to-select" class="selectable select-pic">
                     <fa-icon :icon="['far', 'image']" :class="selectedMedia==='pic' ? 'text-primary' : 'text-secondary'" />
                   </li>
-                  <li v-if="!isIOS9Plus" @click="recordVideo()" class="selectable select-video">
+                  <li v-if="!isIOS9PlusAndAndroid" @click="recordVideo()" class="selectable select-video">
                     <fa-icon :icon="['far', 'video']" :class="selectedMedia==='video' ? 'text-primary' : 'text-secondary'" />
                   </li>
                   <li @click="recordAudio()" class="selectable select-audio">
@@ -102,6 +107,12 @@
                     <fa-icon :icon="['far', 'calendar-check']" class="text-secondary" />
                   </li>
                 </ul>
+                <div class="border-right"></div>
+                <ul class="list-inline d-flex mb-0">
+                  <li @click="showCampaignModal()" class="selectable select-pic" title="Start Promotional Campaign">
+                    <fa-icon :icon="['far', 'hand-holding-usd']" class="text-secondary" />
+                  </li>
+                </ul>
               </b-col>
               <b-col cols="12" md="4">
                 <ul class="list-inline d-flex justify-content-end mb-0 mt-3 mt-md-0">
@@ -124,7 +135,7 @@
 
 <script>
 import moment from 'moment';
-import { isIOS, osVersion } from 'mobile-device-detect';
+import { isAndroid, isIOS, osVersion } from 'mobile-device-detect';
 
 import { eventBus } from '@/app';
 import vue2Dropzone from 'vue2-dropzone';
@@ -137,6 +148,7 @@ import CalendarIcon from '@components/common/icons/CalendarIcon.vue';
 import PriceSelector from '@components/common/PriceSelector';
 import UploadMediaPreview from '@components/posts/UploadMediaPreview';
 import VideoRecorder from '@components/videoRecorder';
+import AudioRecorder from '@components/audioRecorder';
 
 export default {
 
@@ -146,8 +158,8 @@ export default {
   },
 
   computed: {
-    isIOS9Plus() {
-      return isIOS && parseInt(osVersion.split('.')[0]) >= 9;
+    isIOS9PlusAndAndroid() {
+      return (isIOS && parseInt(osVersion.split('.')[0]) >= 9) || isAndroid;
     }
   },
 
@@ -194,6 +206,7 @@ export default {
     posting: false,
     expirationPeriod: null,
     showVideoRec: false,
+    showAudioRec: false,
   }),
   methods: {
 
@@ -338,6 +351,7 @@ export default {
     },
     recordAudio() { // %TODO
       this.selectedMedia = this.selectedMedia!=='audio' ? 'audio' : null
+      this.showAudioRec = true
     },
 
     uploadFromVault() {
@@ -376,7 +390,18 @@ export default {
     closeSchedulePicker(e) {
       this.scheduled_at = null;
       e.stopPropagation();
-    }
+    },
+    audioRecordFinished(file) {
+      if (this.$refs.myVueDropzone) {
+        this.$refs.myVueDropzone.addFile(file);
+      }
+    },
+
+    showCampaignModal() {
+      eventBus.$emit('open-modal', {
+        key: 'modal-promotion-campaign',
+      })
+    },
   },
 
   mounted() {
@@ -445,6 +470,7 @@ export default {
     EmojiIcon, LocationPinIcon, TimerIcon, CalendarIcon,
     UploadMediaPreview,
     VideoRecorder,
+    AudioRecorder,
   },
 }
 </script>

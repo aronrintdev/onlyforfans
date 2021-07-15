@@ -31,6 +31,7 @@ class Mediafile extends JsonResource
 	        'has_blur' => $this->has_blur,
 	        'is_image' => $this->is_image,
 	        'is_video' => $this->is_video,
+            'is_audio' => $this->is_audio,
             'mimetype' => $this->mimetype,
             'orig_ext' => $this->orig_ext,
             'orig_filename' => $this->orig_filename,
