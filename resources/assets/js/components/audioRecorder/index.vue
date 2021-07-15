@@ -62,7 +62,7 @@
           <fa-icon :icon="['fas', 'stop']" fixed-width class="text-primary icon-stop" />
         </div>
       </div>
-      <div>&nbsp;</div>
+      <div class="empty"></div>
     </div>
     <audio id="myAudio" class="video-js vjs-default-skin invisible"></audio>
   </div>
@@ -155,7 +155,6 @@ export default {
     });
 
     this.player.on('deviceReady', function() {
-      console.log('------------ device ready;');
       self.player.record().enumerateDevices();
       self.isDeviceReady = true;
     });
@@ -229,6 +228,7 @@ export default {
   position: relative;
   border: 1px solid rgb(85 85 85 / 28%);
   border-radius: 3px;
+  margin-top: 10px;
 
   .audio-recorder-header {
     padding: 10px;
@@ -275,7 +275,6 @@ export default {
 
     .icon-record-wrapper {
       position: relative;
-      margin-right: 32px;
 
       .progress-ring {
         position: absolute;
@@ -322,16 +321,10 @@ export default {
       }
     }
 
-    .icon-audio button {
-      line-height: 1.3;
-      font-size: 22px;
-      padding: 10px;
-
-      &::after {
-        display: none;
-      }
+    .empty {
+      width: 41px;
+      height: 41px;
     }
-
   }
 }
 </style>
