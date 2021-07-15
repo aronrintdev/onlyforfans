@@ -82,7 +82,7 @@
                   <li id="clickme_to-select" class="selectable select-pic">
                     <fa-icon :icon="['far', 'image']" :class="selectedMedia==='pic' ? 'text-primary' : 'text-secondary'" />
                   </li>
-                  <li v-if="!isIOS9Plus" @click="recordVideo()" class="selectable select-video">
+                  <li v-if="!isIOS9PlusAndAndroid" @click="recordVideo()" class="selectable select-video">
                     <fa-icon :icon="['far', 'video']" :class="selectedMedia==='video' ? 'text-primary' : 'text-secondary'" />
                   </li>
                   <li @click="recordAudio()" class="selectable select-audio">
@@ -135,7 +135,7 @@
 
 <script>
 import moment from 'moment';
-import { isIOS, osVersion } from 'mobile-device-detect';
+import { isAndroid, isIOS, osVersion } from 'mobile-device-detect';
 
 import { eventBus } from '@/app';
 import vue2Dropzone from 'vue2-dropzone';
@@ -158,8 +158,8 @@ export default {
   },
 
   computed: {
-    isIOS9Plus() {
-      return isIOS && parseInt(osVersion.split('.')[0]) >= 9;
+    isIOS9PlusAndAndroid() {
+      return (isIOS && parseInt(osVersion.split('.')[0]) >= 9) || isAndroid;
     }
   },
 
