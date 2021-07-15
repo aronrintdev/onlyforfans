@@ -42,15 +42,33 @@
         <b-col>
           <p><small class="text-muted">Offer a free trial or a discounted subscription on your profile for a limited number of new or already expired subscribers.</small></p>
           <div class="w-100 d-flex justify-content-center">
-            <b-button @click="startPromotionCampaign" class="w-25 ml-3" variant="primary">Start Promotion Campaign</b-button>
+            <b-button @click="startCampaign" class="w-25 ml-3" variant="primary">Start Promotion Campaign</b-button>
           </div>
         </b-col>
       </b-row>
+
+      <b-row v-if="activeCampaign">
+        <b-col class="mt-3">
+          <h5 v-if="activeCampaign.type === 'trial'">Limited offer - Free trial for {{ activeCampaign.trial_days }} days!</h5>
+          <h5 v-if="activeCampaign.type === 'discount'">Limited offer - {{ activeCampaign.discount_percent }} % off for 31 days!</h5>
+          <p><small class="text-muted">For {{ campaignAudience }} • ends {{ campaignExpDate }} • left {{ activeCampaign.subscriber_count }}</small></p>
+          <b-button @click="showStopModal" class="w-25 ml-3" variant="primary">Stop Promotion</b-button>
+        </b-col>
+      </b-row>
     </b-card>
+
+    <b-modal id="modal-stop-campaign" v-model="isStopModalVisible" size="md" title="Stop Promotion Campaign" >
+      <p>Are you sure you want to stop your profile promotion campaign?</p>
+      <template #modal-footer>
+        <b-button @click="hideStopModal" type="cancel" variant="secondary">Cancel</b-button>
+        <b-button @click="stopCampaign" variant="danger">Stop Campaign</b-button>
+      </template>
+    </b-modal>
   </div>
 </template>
 
 <script>
+import moment from 'moment'
 import Vuex from 'vuex'
 import { eventBus } from '@/app'
 import FormTextInput from '@components/forms/elements/FormTextInput'
@@ -65,6 +83,37 @@ export default {
     isLoading() {
       return !this.session_user || !this.user_settings
     },
+
+    campaignAudience() {
+      if (this.activeCampaign) {
+        const { has_new: hasNew, has_expired: hasExpired } = this.activeCampaign
+
+        if (hasNew && hasExpired) {
+          return 'new & expired subscribers'
+        }
+
+        if (hasNew) {
+          return 'new subscribers'
+        }
+
+        if (hasExpired) {
+          return 'expired subscribers'
+        }
+      }
+
+      return null
+    },
+
+    campaignExpDate() {
+      if (this.activeCampaign) {
+        const { created_at: createdAt, offer_days: offerDays } = this.activeCampaign
+        const startDate = moment(createdAt)
+        const expDate = startDate.add(offerDays, 'days')
+        return expDate.format('MMM D')
+      }
+
+      return null
+    }
   },
 
   data: () => ({
@@ -85,6 +134,8 @@ export default {
       },
     },
 
+    activeCampaign: null,
+    isStopModalVisible: false,
   }),
 
   watch: {
@@ -108,6 +159,12 @@ export default {
     if ( this.user_settings.hasOwnProperty('is_follow_for_free') ) {
       this.formSubscriptions.is_follow_for_free = this.user_settings.is_follow_for_free ? 1 : 0
     }
+
+    eventBus.$on('campaign-updated', campaign => {
+      this.activeCampaign = campaign
+    })
+
+    this.getActiveCampaign()
   },
 
   methods: {
@@ -127,10 +184,29 @@ export default {
       this.isSubmitting.formSubscriptions = false
     },
 
-    startPromotionCampaign() {
+    async getActiveCampaign() {
+      const response = await axios.get(this.$apiRoute('campaigns.active'))
+      this.activeCampaign = response.data.data
+    },
+
+    startCampaign() {
       eventBus.$emit('open-modal', {
         key: 'modal-promotion-campaign',
       })
+    },
+
+    showStopModal() {
+      this.isStopModalVisible = true
+    },
+
+    hideStopModal() {
+      this.isStopModalVisible = false
+    },
+
+    async stopCampaign() {
+      await axios.post(this.$apiRoute('campaigns.stop'))
+      this.activeCampaign = null
+      this.hideStopModal()
     },
 
     onReset(e) {

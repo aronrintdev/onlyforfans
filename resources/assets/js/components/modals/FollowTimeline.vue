@@ -25,12 +25,19 @@
           <b-button v-else @click="doFollow" variant="danger" class="w-100">Click to Unfollow</b-button>
         </div>
         <div v-else> <!-- follow or subscribe -->
-          <p>Get Full Access for {{ timeline.price_display || (timeline.price | niceCurrency) }} monthly premium subscription!</p>
-          <b-button @click="doSubscribe" variant="primary" class="w-100 mb-3">Subscribe for Full Access</b-button>
-          <template v-if="!subscribe_only">
-            <p>...or follow this creator for free to see limited content</p>
-            <b-button @click="doFollow" variant="primary" class="w-100 mb-3">Follow for Free</b-button>
-          </template>
+          <div v-if="!userCampaign">
+            <p>Get Full Access for {{ timeline.price_display || (timeline.price | niceCurrency) }} monthly premium subscription!</p>
+            <b-button @click="doSubscribe" variant="primary" class="w-100 mb-3">Subscribe for Full Access</b-button>
+          </div>
+          <b-row v-if="userCampaign">
+            <b-col class="mt-3">
+              <h5 v-if="userCampaign.type === 'trial'">Limited offer - Free trial for {{ userCampaign.trial_days }} days!</h5>
+              <h5 v-if="userCampaign.type === 'discount'">Limited offer - {{ userCampaign.discount_percent }} % off for 31 days!</h5>
+              <p><small class="text-muted">For {{ campaignAudience }} • ends {{ campaignExpDate }} • left {{ userCampaign.subscriber_count }}</small></p>
+              <p v-if="userCampaign.message">Message from {{ timeline.name }}: <i>{{ userCampaign.message }}</i></p>
+              <b-button @click="doSubscribe" variant="primary" class="w-100 mb-3">Subscribe for Full Access</b-button>
+            </b-col>
+          </b-row>
         </div>
       </b-card-body>
       <b-card-body v-if="step === 'payment'" key="payment">
@@ -49,6 +56,7 @@
 </template>
 
 <script>
+import moment from 'moment'
 import { eventBus } from '@/app'
 import PurchaseForm from '@components/payments/PurchaseForm'
 
@@ -68,6 +76,41 @@ export default {
     timelineUrl() {
       return `/${this.timeline.slug}`
     },
+
+    campaignAudience() {
+      if (this.userCampaign) {
+        const { has_new: hasNew, has_expired: hasExpired } = this.userCampaign
+
+        if (hasNew && hasExpired) {
+          return 'new & expired subscribers'
+        }
+
+        if (hasNew) {
+          return 'new subscribers'
+        }
+
+        if (hasExpired) {
+          return 'expired subscribers'
+        }
+      }
+
+      return null
+    },
+
+    campaignExpDate() {
+      if (this.userCampaign) {
+        const { created_at: createdAt, offer_days: offerDays } = this.userCampaign
+        const startDate = moment(createdAt)
+        const expDate = startDate.add(offerDays, 'days')
+        return expDate.format('MMM D')
+      }
+
+      return null
+    }
+  },
+
+  created() {
+    this.getUserCampaign()
   },
 
   mounted() {
@@ -77,6 +120,7 @@ export default {
   data: () => ({
     /** 'initial' | 'payment' */
     step: 'initial',
+    userCampaign: null,
   }),
 
   methods: {
@@ -122,6 +166,11 @@ export default {
       // eventBus.$emit('update-originator') // %ERIK use this
       // eventBus.$emit('update-timeline', this.timeline.id)
       // eventBus.$emit('update-feed') // updates feed being viewed
+    },
+
+    async getUserCampaign() {
+      const response = await this.axios.get(route('campaigns.showActive', this.timeline.user.id))
+      this.userCampaign = response.data.data
     },
 
   },

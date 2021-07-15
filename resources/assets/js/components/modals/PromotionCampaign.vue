@@ -1,4 +1,3 @@
-
 <template>
   <b-form @submit="onSubmit">
     <b-card no-body>
@@ -8,8 +7,8 @@
       </b-card-header>
       <b-card-body>
         <b-form-group label="">
-          <b-form-radio v-model="campaignType" value="first_month">First month discount</b-form-radio>
-          <b-form-radio v-model="campaignType" value="free_trial">Free trial</b-form-radio>
+          <b-form-radio v-model="campaignType" value="discount">First month discount</b-form-radio>
+          <b-form-radio v-model="campaignType" value="trial">Free trial</b-form-radio>
         </b-form-group>
         <b-row>
           <b-col>
@@ -18,7 +17,7 @@
           </b-col>
           <b-col>
             <label for="offer-limit">Offer expiration</label>
-            <b-form-select id="offer-expiration" class="" v-model="offerExpiration" :options="offerExpOptions" required />
+            <b-form-select id="offer-days" class="" v-model="offerDays" :options="offerDaysOptions" required />
           </b-col>
         </b-row>
         <b-row class="mt-3">
@@ -28,7 +27,7 @@
           </b-col>
           <b-col v-if="isFreeTrial">
             <label for="offer-limit">Free trial period</label>
-            <b-form-select id="trial-period" class="" v-model="trialPeriod" :options="trialPeriodOptions" required />
+            <b-form-select id="trial-days" class="" v-model="trialDays" :options="trialDaysOptions" required />
           </b-col>
         </b-row>
         <b-form-group class="flex-fill mt-4">
@@ -37,7 +36,7 @@
       </b-card-body>
       <b-card-footer>
         <div class="text-right">
-          <b-btn class="px-3 mr-1" variant="secondary" @click="onCancel">
+          <b-btn class="px-3 mr-1" variant="secondary" @click="hideModal">
             {{ $t('action_btns.cancel') }}
           </b-btn>
           <b-btn class="px-3" variant="primary" type="submit">
@@ -50,23 +49,23 @@
 </template>
 
 <script>
-import { eventBus } from '@/app';
+import { eventBus } from '@/app'
 
 export default {
   name: 'PromotionCampaign',
 
   data: () => ({
-    hasNewSubscribers: false,
+    hasNewSubscribers: true,
     hasExpiredSubscribers: false,
-    campaignType: 'first_month',
+    campaignType: 'discount',
     offerLimit: 10,
-    offerExpiration: 7,
+    offerDays: 7,
     discountPercent: 5,
-    trialPeriod: 7,
+    trialDays: 7,
     message: '',
 
     offerLimitOptions: [
-      { text: 'No limits', value: 0 },
+      { text: 'No limits', value: -1 },
       { text: '1 subscriber', value: 1 },
       { text: '2 subscribers', value: 2 },
       { text: '3 subscribers', value: 3 },
@@ -87,7 +86,7 @@ export default {
       { text: '90 subscribers', value: 90 },
       { text: '100 subscribers', value: 100 },
     ],
-    offerExpOptions: [
+    offerDaysOptions: [
       { text: 'No expiration', value: 0 },
       { text: '1 day', value: 1 },
       { text: '2 days', value: 2 },
@@ -102,7 +101,7 @@ export default {
       { text: '20 days', value: 20 },
       { text: '30 days', value: 30 },
     ],
-    trialPeriodOptions: [
+    trialDaysOptions: [
       { text: '1 day', value: 1 },
       { text: '2 days', value: 2 },
       { text: '3 days', value: 3 },
@@ -128,20 +127,32 @@ export default {
 
   computed: {
     isFreeTrial() {
-      return this.campaignType === 'free_trial'
+      return this.campaignType === 'trial'
     }
   },
 
   methods: {
-    onCancel() {
+    hideModal() {
       this.$bvModal.hide('modal-promotion-campaign')
     },
 
     onSubmit(e) {
       e.preventDefault()
 
-      this.axios.post(this.$apiRoute('users.startCampaign')).then(response => {
-        // TODO: add campaign calling
+      const formData = {
+        type: this.campaignType,
+        has_new: this.hasNewSubscribers,
+        has_expired: this.hasExpiredSubscribers,
+        subscriber_count: this.offerLimit,
+        offer_days: this.offerDays,
+        discount_percent: this.discountPercent,
+        trial_days: this.trialDays,
+        message: this.message,
+      }
+
+      this.axios.post(this.$apiRoute('campaigns.store'), formData).then(response => {
+        eventBus.$emit('campaign-updated', response.data.data)
+        this.hideModal()
       })
     },
   },
