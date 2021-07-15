@@ -1,23 +1,30 @@
 <template>
-  <b-list-group-item v-if="shown">
-    <section v-if="isDateBreak" class="msg-grouping-day-divider">
+  <b-list-group-item class="message" v-if="shown">
+    <section v-if="isDateBreak" class="grouping-day-divider">
       <span>{{ moment(value.created_at).format('MMM DD, YYYY') }}</span>
     </section>
     <section class="crate" :class="value.sender_id === session_user.id ? 'session_user' : 'other_user'">
       <article class="box">
         <Attachments :attachments="value.attachments" />
-        <VueMarkdown v-if="value.mcontent" class="msg-content" :source="value.mcontent || ''" />
-        <div class="msg-timestamp">
+        <VueMarkdown v-if="value.mcontent" class="content" :source="value.mcontent || ''" />
+        <div
+          class="timestamp d-flex align-items-center"
+          :class="value.sender_id === session_user.id ? 'flex-row-reverse' : 'flex-row'"
+        >
+          <div class="mx-1">
+            {{ moment(value.created_at).format('h:mm A') }}
+          </div>
           <span
             v-if="value.attachments && value.attachments.length > 0 && value.attachments[0].type === 'tip'"
-            class="mr-1"
+            class="mx-1"
             v-b-tooltip.hover
             :title="$t('tipTimestampTooltip')"
           >
-            <fa-icon icon="dollar-sign" />
+            <fa-icon icon="dollar-sign" fixed-width />
           </span>
-          <fa-icon v-if="value.is_read" icon="check" />
-          {{ moment(value.created_at).format('h:mm A') }}
+          <span v-if="value.is_read" v-b-tooltip.hover :title="$t('seen')" class="mx-1">
+            <fa-icon icon="check" fixed-width />
+          </span>
         </div>
       </article>
     </section>
@@ -69,7 +76,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.list-group-item {
+.message {
     border: none;
     padding: 0.5rem 1.25rem;
 
@@ -81,40 +88,52 @@ export default {
       max-width: 100%;
       display: flex;
       flex-direction: column;
-      .msg-content {
+      .content {
         width: auto;
-        margin-left: auto;
         background: rgba(218,237,255,.53);
         border-radius: 5px;
         padding: 9px 12px;
         color: #1a1a1a;
       }
-      .msg-timestamp {
+      .timestamp {
         font-size: 11px;
         color: #8a96a3;
         text-align: right;
       }
 
     } // box
-  } // crate
 
-  .crate.session_user {
+    &.session_user {
       justify-content: flex-end;
       margin-left: auto;
       margin-right: 0;
       padding-left: 5rem;
-  }
 
-  .crate.other_user {
+      .content {
+        margin-left: auto;
+      }
+      .timestamp {
+        text-align: right;
+      }
+    }
+
+    &.other_user {
       justify-content: flex-start;
       margin-left: 0;
       margin-right: auto;
       padding-right: 5rem;
+      .content {
+        margin-right: auto;
+      }
+      .timestamp {
+        text-align: left;
+      }
   }
 
+  } // crate
 }
 
-.msg-grouping-day-divider {
+.grouping-day-divider {
   font-size: 11px;
   line-height: 15px;
   text-align: center;
@@ -139,6 +158,7 @@ export default {
 <i18n lang="json5" scoped>
 {
   "en": {
+    "seen": "Seen",
     "tipTimestampTooltip": "This message contains financial transaction information"
   }
 }

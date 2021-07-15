@@ -1,62 +1,45 @@
 <template>
   <div class="swiper-slider" v-if="files.length > 0">
-    <div v-if="isDragListVisible">
-      <draggable
-        class="sort-change-div"
-        v-model="files"
-        :group="'column.components'"
-        handle=".handle"
-        ghost-class="ghost"
-      >
-        <div v-for="(element, index) in files" :key="index" class="drag-element">
-          <div class="img-wrapper">
-            <img v-if="element.type.indexOf('image/') > -1" :src="element.filepath" alt="" />
-            <span
-              v-if="!element.selected"
-              class="unchecked-circle"
-              @click="onSelectMediafile(index, true)"
-            />
-            <span
-              v-if="element.selected"
-              class="bg-primary checked-circle"
-              @click="onSelectMediafile(index, false)"
-            >
-              {{element.order}}
-            </span>
-          </div>
-          <div class="handle">
-            <fa-icon :icon="['fas', 'grip-horizontal']" class="mr-1 text-secondary" size="lg" />
-          </div>
-        </div>
-      </draggable>
-    </div>
     <swiper ref="mySwiper" :options="swiperOptions">
       <swiper-slide class="slide">
-        <div v-if="!isDragListVisible">
-          <div class="swiper-image-wrapper" v-for="(media, index) in files" :key="index">
+        <div>
+          <div v-observe-visibility="onFirstVisible"> </div>
+          <div
+            class="swiper-image-wrapper"
+            v-for="(media, index) in files"
+            :key="index"
+          >
             <img v-preview:scope-a class="swiper-lazy" :src="media.filepath || media.src" />
           </div>
+          <div v-observe-visibility="onLastVisible"> </div>
         </div>
       </swiper-slide>
     </swiper>
+    <transition name="indicator-fade-prev">
+      <div v-if="!firstVisible" class="indicator prev" @click="onClickPrev">
+        <fa-icon icon="chevron-left" />
+      </div>
+    </transition>
+    <transition name="indicator-fade-next">
+      <div v-if="!lastVisible" class="indicator next" @click="onClickNext">
+        <fa-icon icon="chevron-right" />
+      </div>
+    </transition>
   </div>
 </template>
 
 <script>
+import _ from 'lodash'
+import Vue from 'vue'
 import PhotoSwipe from 'photoswipe/dist/photoswipe';
 import PhotoSwipeUI from 'photoswipe/dist/photoswipe-ui-default';
 import createPreviewDirective from 'vue-photoswipe-directive';
-import draggable from 'vuedraggable';
 
 export default {
   name: "PreviewSlider",
 
   props: {
     mediafiles: { type: Array, default: () => ([]) },
-  },
-
-  components: {
-    draggable,
   },
 
   directives: {
@@ -81,6 +64,8 @@ export default {
     },
     isDragListVisible: false,
     applyBtnEnabled: false,
+    firstVisible: true,
+    lastVisible: false,
   }),
 
   computed: {
@@ -108,6 +93,22 @@ export default {
   },
 
   methods: {
+    onClickPrev() {
+      this.$refs.mySwiper.swiperInstance.slideTo(0, 400, false)
+    },
+
+    onClickNext() {
+      this.$refs.mySwiper.swiperInstance.slideTo(this.files.length, 400, false)
+    },
+
+    onFirstVisible(isVisible) {
+      this.firstVisible = isVisible
+    },
+
+    onLastVisible(isVisible) {
+      this.lastVisible = isVisible
+    },
+
     onSelectMediafile(index, status) {
       const temp = [...this.files];
       temp[index].selected = status;
@@ -129,6 +130,7 @@ export default {
 
 <style lang="scss" scoped>
 .swiper-slider {
+  position: relative;
   padding: 12px 8px 8px;
 
   & > div {
@@ -175,4 +177,53 @@ export default {
     }
   }
 }
+
+.indicator {
+  position: absolute;
+  top: 41%;
+  background-color: var(--light, white);
+  border-radius: .5rem;
+  padding: .5rem;
+  cursor: pointer;
+
+  z-index: 2;
+  &.prev {
+    left: 1rem;
+  }
+  &.next {
+    right: 1rem;
+  }
+}
+
+.indicator-fade-prev-enter-active,
+.indicator-fade-next-enter-active {
+  transition: all .2s ease;
+}
+
+.indicator-fade-prev-enter-to,
+.indicator-fade-next-enter-to {
+  opacity: 75%;
+}
+
+.indicator-fade-prev-leave-active,
+.indicator-fade-next-leave-active {
+  transition: all .2s ease;
+}
+.indicator-fade-prev-enter,
+.indicator-fade-next-enter,
+.indicator-fade-prev-leave-to,
+.indicator-fade-next-leave-to {
+  opacity: 0;
+}
+
+.indicator-fade-prev-enter,
+.indicator-fade-prev-leave-to {
+  transform: translateX(-10px);
+}
+
+.indicator-fade-next-enter,
+.indicator-fade-next-leave-to {
+  transform: translateX(10px);
+}
+
 </style>

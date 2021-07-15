@@ -58,3 +58,22 @@ $cursors: map-merge(
 .select-none {
   user-select: none;
 }
+
+// Font Utilities
+
+$font-size-utilities: () !default;
+$font-size-utilities: map-merge(( // General
+    "tiny":    50%,
+    "smaller": 90%,
+    "normal":  100%,
+    "larger":  110%,
+    "huge":    150%,
+  ),
+  $font-size-utilities
+);
+
+@each $key, $value in $font-size-utilities {
+  .font-size-#{$key} {
+    font-size: $value !important;
+  }
+}
