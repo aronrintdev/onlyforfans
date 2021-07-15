@@ -1,19 +1,18 @@
 <template>
-  <div class="video-rec-wrapper">
-    <div class="d-flex justify-content-between align-items-center video-rec-top-bar">
-      <div class="p-1 border-0 icon-video">
-        <fa-icon :icon="['far', 'video']" fixed-width class="text-white" />
+  <div class="audio-recorder">
+    <div class="d-flex justify-content-between align-items-center audio-recorder-header">
+      <div class="d-flex align-items-center icon-microphone">
+        <fa-icon :icon="['far', 'microphone']" class="text-primary mr-2" />
+        <span class="title">{{ $t('title') }}</span>
       </div>
-      <h4>{{ $t('title') }}</h4>
-      <b-button variant="outline-primary" class="p-1 border-0 icon-close" @click="closeVideoRec">
-        <fa-icon :icon="['fal', 'times']" fixed-width class="text-white" />
+      <b-button variant="outline-primary" class="p-1 border-0 icon-close" @click="closeAudioRec">
+        <fa-icon :icon="['fal', 'times']" fixed-width class="text-dark" />
       </b-button>
     </div>
-    <div class="d-flex justify-content-between align-items-end video-rec-bottom-bar">
-      <div class="text-center video-duration" v-if="isRecording">
-        {{ currentTime.mins >= 10 ? currentTime.mins : `0${currentTime.mins}` }}:
-        {{ currentTime.secs >= 10 ? currentTime.secs : `0${currentTime.secs}` }}
-      </div>
+    <div class="text-center duration">
+      {{ `${this.currentTime.mins >= 10 ? this.currentTime.mins : '0' + this.currentTime.mins}:${this.currentTime.secs >= 10 ? this.currentTime.secs : '0' + this.currentTime.secs}` }}
+    </div>
+    <div class="d-flex justify-content-between align-items-center audio-recorder-content">
       <b-dropdown
         id="audio-input-devices"
         dropup
@@ -34,57 +33,38 @@
           {{ device.label }}
         </b-dropdown-item>
       </b-dropdown>
-      
       <div class="icon-record-wrapper">
         <svg
           class="progress-ring"
-          width="70"
-          height="70">
+          width="64"
+          height="64">
           <circle
             class="progress-meter"
-            stroke="white"
+            stroke="#007bff"
             stroke-width="3"
             fill="transparent"
-            r="32"
-            cx="35"
-            cy="35" />
+            r="29"
+            cx="32"
+            cy="32" />
           <circle
             class="progress-value"
-            stroke="white"
+            stroke="#007bff"
             stroke-width="3"
             fill="transparent"
-            r="32"
-            cx="35"
-            cy="35" />
+            r="29"
+            cx="32"
+            cy="32" />
         </svg>
-        <div class="icon-record" v-if="!isRecording" :disabled="!isDeviceReady" @click="startVideoRec">
+        <div class="icon-record" v-if="!isRecording" :disabled="!isDeviceReady" @click="startRec">
           <fa-icon :icon="['far', 'scrubber']" fixed-width class="text-danger icon-rec" />
         </div>
         <div class="icon-record"  v-if="isRecording" @click="stopRec">
           <fa-icon :icon="['fas', 'stop']" fixed-width class="text-primary icon-stop" />
         </div>
       </div>
-      <b-dropdown
-        id="video-input-devices"
-        dropup
-        text="Drop-Up"
-        variant="secondary"
-        :disabled="videoDevices.length < 2"
-        class="border-0 icon-video"
-      >
-        <template #button-content>
-          <fa-icon :icon="['far', 'video']" fixed-width class="text-white" />
-        </template>
-        <b-dropdown-item
-          v-for="(device, index) in videoDevices"
-          :key="index"
-          @click="changeVideoInput(device.deviceId)"
-        >
-          {{ device.label }}
-        </b-dropdown-item>
-      </b-dropdown>
+      <div>&nbsp;</div>
     </div>
-    <video id="myVideo" playsinline class="video-js"></video>
+    <audio id="myAudio" class="video-js vjs-default-skin invisible"></audio>
   </div>
 </template>
 
@@ -92,55 +72,90 @@
 import videojs from 'video.js';
 // Required libraries for video record
 import RecordRTC from 'recordrtc';
+import 'webrtc-adapter';
+import WaveSurfer from 'wavesurfer.js';
+import MicrophonePlugin from 'wavesurfer.js/dist/plugin/wavesurfer.microphone.js';
+WaveSurfer.microphone = MicrophonePlugin;
+
+import videojs_wavesurfer_css from 'videojs-wavesurfer/dist/css/videojs.wavesurfer.css';
+import Wavesurfer from 'videojs-wavesurfer/dist/videojs.wavesurfer.js';
+
 import Record from 'videojs-record/dist/videojs.record.js';
-import { eventBus } from '@/app';
 
 export default {
   data: () => ({
+    audioRecInterval: null,
+    audioDevices: [],
+    recLimit: 60,
     player: null,
     isRecording: false,
+    isDeviceReady: false,
     currentTime: {
       mins: 0,
       secs: 0
     },
-    videoRecLimit: 600,
-    audioDevices: [],
-    videoDevices: [],
-    isDeviceReady: false,
   }),
+  computed: {
+    formattedRecTime() {
+      return `${this.currentTime.mins >= 10 ? this.currentTime.mins : '0' + this.currentTime.mins}:${this.currentTime.secs >= 10 ? this.currentTime.secs : '0' + this.currentTime.secs}`;
+    }
+  },
   mounted() {
-    // Initialize video recorder
     const options = {
-      controls: false,
-      fluid: true,
+      controls: true,
       bigPlayButton: false,
-      controlBar: {
-        volumePanel: false
-      },
+      width: 600,
+      height: 300,
+      fluid: false,
       plugins: {
-        record: {
-          audio: true,
-          video: true,
-          maxLength: this.videoRecLimit, // 15mins
+        wavesurfer: {
+          backend: 'WebAudio',
+          waveColor: 'black',
+          progressColor: '#2E732D',
           displayMilliseconds: true,
           debug: true,
+          cursorWidth: 1,
+          hideScrollbar: true,
+          responsive: true,
+          plugins: [
+              // enable microphone plugin
+              WaveSurfer.microphone.create({
+                  bufferSize: 4096,
+                  numberOfInputChannels: 1,
+                  numberOfOutputChannels: 1,
+                  constraints: {
+                      video: false,
+                      audio: true
+                  }
+              })
+          ]
+        },
+        record: {
+          audio: true,
+          video: false,
+          maxLength: this.recLimit,
+          displayMilliseconds: true,
+          debug: true
         }
       }
     };
-    this.player = videojs('myVideo', options, function() {});
-    // check video/audio input devices
-    this.player.record().getDevice(); 
 
     const self = this;
+    this.player = videojs('myAudio', options, function() {
+      self.$nextTick(() => {
+        self.player.record().getDevice();
+      }, 500)
+    });
+    
     this.player.on('finishRecord', function() {
-      eventBus.$emit('video-rec-complete', self.player.recordedData);
-      self.isRecording = false;
-      setTimeout(() => {
-        self.closeVideoRec();
-      }, 500);
+      self.$emit('complete', self.player.recordedData);
+      self.$nextTick(() => {
+        self.closeAudioRec();
+      });
     });
 
-    this.player.one('deviceReady', function() {
+    this.player.on('deviceReady', function() {
+      console.log('------------ device ready;');
       self.player.record().enumerateDevices();
       self.isDeviceReady = true;
     });
@@ -148,7 +163,6 @@ export default {
     this.player.on('enumerateReady', function() {
       const devices = self.player.record().devices;
       self.audioDevices = devices.filter(device => device.kind === 'audioinput');
-      self.videoDevices = devices.filter(device => device.kind === 'videoinput');
     });
 
     this.player.on('deviceError', function(e) {
@@ -163,30 +177,30 @@ export default {
     });
 
     this.player.on('progressRecord', function(e) {
-      const current = self.player.record().getCurrentTime();
+      const current = self.player.record().streamDuration;
       self.currentTime = {
         mins: parseInt(current / 60, 10),
         secs: parseInt(current, 10) % 60,
       };
-      self.setProgress(current / self.videoRecLimit);
+      self.setProgress(current / self.recLimit);
     });
 
     // Close video rec modal when click toast close icon
     this.$root.$on('bv::toast:hidden', (event) => {
       if (event.componentId === 'record-alert') {
-        self.closeVideoRec();
+        self.closeAudioRec();
       }
     });
 
-    // Init progress bar of record icon
     this.setProgress(0);
   },
   methods: {
-    closeVideoRec() {
+    closeAudioRec() {
+      this.isRecording = false;
       if (this.player) this.player.record().destroy();
       this.$emit('close');
     },
-    startVideoRec() {
+    startRec() {
       this.player.record().start();
       this.isRecording = true;
     },
@@ -206,68 +220,62 @@ export default {
     changeAudioInput(deviceId) {
       this.player.record().setAudioInput(deviceId);
     },
-    changeVideoInput(deviceId) {
-      this.player.record().setVideoInput(deviceId);
-    }
   },
 }
 </script>
 
-<style lang="scss">
-.video-rec-wrapper {
-	position: fixed;
-	top: 0;
-	left: 0;
-	width: 100%;
-	height: 100%;
-  z-index: 1050;
+<style lang="scss" scoped>
+.audio-recorder {
+  position: relative;
+  border: 1px solid rgb(85 85 85 / 28%);
+  border-radius: 3px;
 
-  &::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 0;
-    bottom: 0;
-    background: rgba(0,0,0,.5) linear-gradient(rgba(0,0,0,.4),rgba(0,0,0,.24) 23%,rgba(0,0,0,.12) 42%,rgba(0,0,0,.06) 56%,rgba(0,0,0,.05) 63%,rgba(0,0,0,.06) 70%,rgba(0,0,0,.12) 84%,rgba(0,0,0,.24));
-    z-index: 1;
-    pointer-events: none;
-  }
+  .audio-recorder-header {
+    padding: 10px;
 
-  .video-rec-top-bar {
-    position: absolute;
-    top: 15px;
-    left: 20px;
-    right: 20px;
-    z-index: 3;
- 
-    h4 {
-      color: #fff;
-      font-size: 18px;
+    .title {
+      color: #000;
+      font-size: 16px;
       text-transform: uppercase;
       text-align: center;
       letter-spacing: 1px;
       margin: 0;
+      font-weight: 500;
     }
 
-    .icon-close, .icon-video {
+    .icon-close, .icon-microphone {
       line-height: 1;
       svg {
-        width: 24px;
-        height: 24px;
+        width: 20px;
+        height: 20px;
+      }
+    }
+
+    .icon-close:hover svg {
+      color: #fff !important;
+    }
+  }
+
+  .duration {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+
+    span {
+      width: 40px;
+      &:first-child {
+        text-align: right;
       }
     }
   }
 
- .video-rec-bottom-bar {
-    position: absolute;
-    left: 120px;
-    right: 120px;
-    z-index: 3;
-    bottom: 25px;
-  
+  .audio-recorder-content {
+    padding: 20px;
+
     .icon-record-wrapper {
       position: relative;
+      margin-right: 32px;
 
       .progress-ring {
         position: absolute;
@@ -276,7 +284,7 @@ export default {
         left: 50%;
         transform: translate(-50%, -50%);
         .progress-meter {
-          opacity: 0.3;
+          opacity: 0.2;
         }
         .progress-value {
           transition: 0.35s stroke-dashoffset;
@@ -291,37 +299,29 @@ export default {
         }
       }
       .icon-record {
+        width: 32px;
+        height: 32px;
         position: relative;
         z-index: 2;
-        width: 40px;
-        height: 40px;
-        line-height: 1;
         cursor: pointer;
-        transition: all 0.3s ease;
 
         &[disabled] {
           pointer-events: none;
         }
 
-        .icon-rec {
+        svg {
           width: 100%;
           height: 100%;
 
-          &:hover {
-            transform: scale(1.1);
-            opacity: 0.9;
+          &.icon-stop {
+            width: 60%;
+            height: 60%;
+            margin: 20%;
           }
         }
-
-        .icon-stop {
-          width: 50%;
-          height: 50%;
-          margin: 25%;
-        }
-
       }
     }
-    .icon-video button,
+
     .icon-audio button {
       line-height: 1.3;
       font-size: 22px;
@@ -331,34 +331,39 @@ export default {
         display: none;
       }
     }
-  }
-  
-}
 
-.video-duration {
-  position: absolute;
-  top: -50px;
-  width: 100%;
-  color: #fff;
-  font-size: 20px;
+  }
 }
 </style>
 
-<style>
-.myVideo-dimensions.vjs-fluid {
-  padding-top: 100vh;
-}
+<style lang="scss">
+  .vue-audio-recorder span {
+    display: none;
+  }
+  .vue-audio-recorder .dropdown-menu {
+    bottom: unset;
+  }
 
-#audio-input-devices .dropdown-menu,
-#video-input-devices .dropdown-menu {
-  bottom: unset;
-}
+  .audio-recorder-content {
+    .icon-audio button {
+      line-height: 1.3;
+      font-size: 18px;
+      padding: 8px;
+
+      &::after {
+        display: none;
+      }
+    }
+  }
+  .myAudio-dimensions {
+    height: 0;
+  }
 </style>
 
 <i18n lang="json5" scoped>
 {
   "en": {
-    "title": "Record Video",
+    "title": "RECORDING AUDIO",
     "warningTitle": "Warning!"
   }
 }

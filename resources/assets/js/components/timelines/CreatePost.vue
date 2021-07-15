@@ -69,6 +69,11 @@
                 @openFileUpload="openDropzone"
               />
             </vue-dropzone>
+            <AudioRecorder
+              v-if="showAudioRec"
+              @close="showAudioRec=false;selectedMedia=null"
+              @complete="audioRecordFinished"
+            />
           </div>
           <template #footer>
             <b-row>
@@ -137,6 +142,7 @@ import CalendarIcon from '@components/common/icons/CalendarIcon.vue';
 import PriceSelector from '@components/common/PriceSelector';
 import UploadMediaPreview from '@components/posts/UploadMediaPreview';
 import VideoRecorder from '@components/videoRecorder';
+import AudioRecorder from '@components/audioRecorder';
 
 export default {
 
@@ -194,6 +200,7 @@ export default {
     posting: false,
     expirationPeriod: null,
     showVideoRec: false,
+    showAudioRec: false,
   }),
   methods: {
 
@@ -338,6 +345,7 @@ export default {
     },
     recordAudio() { // %TODO
       this.selectedMedia = this.selectedMedia!=='audio' ? 'audio' : null
+      this.showAudioRec = true
     },
 
     uploadFromVault() {
@@ -376,6 +384,11 @@ export default {
     closeSchedulePicker(e) {
       this.scheduled_at = null;
       e.stopPropagation();
+    },
+    audioRecordFinished(file) {
+      if (this.$refs.myVueDropzone) {
+        this.$refs.myVueDropzone.addFile(file);
+      }
     }
   },
 
@@ -445,6 +458,7 @@ export default {
     EmojiIcon, LocationPinIcon, TimerIcon, CalendarIcon,
     UploadMediaPreview,
     VideoRecorder,
+    AudioRecorder,
   },
 }
 </script>

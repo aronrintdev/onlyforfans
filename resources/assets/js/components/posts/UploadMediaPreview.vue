@@ -1,5 +1,5 @@
 <template>
-  <div class="swiper-slider" v-if="files.length > 0">
+  <div class="swiper-slider">
     <div v-if="isDragListVisible">
       <draggable class="sort-change-div" v-model="files" :group="'column.components'" handle=".handle"
         ghost-class="ghost">
@@ -30,14 +30,17 @@
         </button>
       </div>
     </div>
-    <swiper ref="mySwiper" :options="swiperOptions" :key="files.length">
+    <swiper ref="mySwiper" :options="swiperOptions" v-if="files.length">
       <swiper-slide class="slide">
         <div v-if="!isDragListVisible">
           <div class="swiper-image-wrapper" v-for="(media, index) in files" :key="index">
-            <img @click="openPhotoSwipe(index)" class="swiper-lazy" :src="media.filepath || media.src" v-if="media.type.indexOf('image/') > -1" />
-            <video @click="openPhotoSwipe(index)" class="swiper-lazy" v-if="media.type.indexOf('video/') > -1">
-              <source :src="media.filepath" :type="media.type" />
-            </video>
+            <img @click="openPhotoSwipe(index)" class="swiper-lazy" :src="media.filepath || media.src" v-if="media.type && media.type.indexOf('image/') > -1" />
+            <div class="swiper-lazy video" @click="openPhotoSwipe(index)" v-if="media.type && media.type.indexOf('video/') > -1">
+              <video>
+                <source :src="media.filepath" :type="media.type" />
+              </video>
+              <fa-icon :icon="['far', 'play-circle']" class="text-white icon-play" />
+            </div>
             <button class="btn btn-primary icon-close" @click="removeMediafile(index)">
               <fa-icon :icon="['far', 'times']" class="text-white" size="sm" />
             </button>
@@ -52,6 +55,14 @@
         </div>
       </swiper-slide>
     </swiper>
+    <div class="audio-file-viewer" v-if="audioFiles.length">
+      <div class="audio" v-for="(audio, index) in audioFiles" :key="index">
+        <audio controls>
+          <source :src="audio.filepath" type="audio/webm" />
+          <source :src="audio.filepath" type="audio/mpeg" />
+        </audio>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -74,6 +85,7 @@ export default {
 
   data: () => ({
     files: [],
+    audioFiles: [],
     swiperOptions: {
       lazy: {
         loadPrevNext: true
@@ -99,7 +111,8 @@ export default {
 
   mounted() {
     if (this.mediafiles) {
-      this.files = [...this.mediafiles];
+      this.files = this.mediafiles.filter(file => file.type && file.type.indexOf('audio/') < -1);
+      this.audioFiles = this.mediafiles.filter(file => file.type && file.type.indexOf('audio/') > -1);
       this.$nextTick(() => {
         this.swiper?.update()
       })
@@ -108,7 +121,8 @@ export default {
 
   watch: {
     mediafiles() {
-      this.files = [...this.mediafiles];
+      this.files = this.mediafiles.filter(file => file.type && file.type.indexOf('audio/') < 0);
+      this.audioFiles = this.mediafiles.filter(file => file.type && file.type.indexOf('audio/') > -1);
       this.$nextTick(() => {
         $('.swiper-lazy').on('load', () => {
           this.$refs.mySwiper.updateSwiper();
@@ -300,7 +314,7 @@ export default {
   }
 }
 .swiper-slider {
-  padding: 12px 8px 8px;
+  padding: 0;
 
   & > div {
     display: flex;
@@ -324,11 +338,36 @@ export default {
     border-radius: 10px;
     margin-right: 8px;
     width: auto;
+    overflow: hidden;
     object-fit: contain;
-  }
-  audio.swiper-lazy {
-    width: 300px;
-    outline: none;
+    cursor: pointer;
+
+    &.video {
+      position: relative;
+
+      &::before {
+        content: "";
+        display: block;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.2);
+        position: absolute;
+        top: 0;
+        left: 0;
+      }
+
+      video {
+        height: 100%;
+      }
+
+      .icon-play {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 34px;
+      }
+    }
   }
   .swiper-image-wrapper {
     position: relative;
@@ -342,6 +381,18 @@ export default {
 
       svg {
         width: 1em;
+      }
+    }
+  }
+  .audio-file-viewer {
+    flex-flow: wrap;
+
+    .audio {
+      width: 100%;
+      margin-top: 10px;
+      
+      audio {
+        width: 100%;
       }
     }
   }
