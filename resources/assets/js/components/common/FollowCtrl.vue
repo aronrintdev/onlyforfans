@@ -14,7 +14,7 @@
           </li>
           <li v-else >
             <b-button @click="renderFollow" :disabled="timeline.is_owner" variant="primary" class="w-100 mt-3">
-              <span>Follow For Free</span>
+              <span>Follow</span>
             </b-button>
           </li>
           <li>

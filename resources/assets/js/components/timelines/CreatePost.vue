@@ -107,6 +107,12 @@
                     <fa-icon :icon="['far', 'calendar-check']" class="text-secondary" />
                   </li>
                 </ul>
+                <div class="border-right"></div>
+                <ul class="list-inline d-flex mb-0">
+                  <li @click="showCampaignModal()" class="selectable select-pic" title="Start Promotional Campaign">
+                    <fa-icon :icon="['far', 'hand-holding-usd']" class="text-secondary" />
+                  </li>
+                </ul>
               </b-col>
               <b-col cols="12" md="4">
                 <ul class="list-inline d-flex justify-content-end mb-0 mt-3 mt-md-0">
@@ -389,7 +395,13 @@ export default {
       if (this.$refs.myVueDropzone) {
         this.$refs.myVueDropzone.addFile(file);
       }
-    }
+    },
+
+    showCampaignModal() {
+      eventBus.$emit('open-modal', {
+        key: 'modal-promotion-campaign',
+      })
+    },
   },
 
   mounted() {

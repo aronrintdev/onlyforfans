@@ -35,6 +35,11 @@ export default [
     path: 'payment-methods',
   },
   {
+    name: 'settings.subscription',
+    component: settings.Subscription,
+    path: 'subscription',
+  },
+  {
     component: settings.MySubscriptions,
     path: 'my-subscriptions',
     children: childRoutes.subscriptions,
