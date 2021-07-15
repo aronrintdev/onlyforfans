@@ -69,9 +69,6 @@ class Post extends Model
     public static function boot()
     {
         parent::boot();
-        static::created(function($model){
-            $model->slug = $model->id;
-        });
         static::deleting(function ($model) {
             /*
             if (!$model->canBeDeleted()) {
@@ -93,15 +90,14 @@ class Post extends Model
     }
 
     protected $guarded = [ 'id', 'created_at', 'updated_at' ];
-    protected $appends = [ 'isLikedByMe', 'isFavoritedByMe', ];
+    protected $appends = [ 'isLikedByMe', 'isFavoritedByMe', 'customSlug' ];
     protected $fillable = [ 'schedule_datetime', 'description', 'price', 'price_for_subscribers', 'currency', 'user_id', 'active', 'type', 'expire_at' ];
 
     public function sluggable(): array
     {
         return [
             'slug' => [
-                'source' => [ 'description', 'id' ],
-                'onUpdate'=> true
+                'source' => ['description', 'customSlug']
             ]
         ];
     }
@@ -130,6 +126,11 @@ class Post extends Model
             ->where('favoritable_type', 'posts')
             ->first();
         return $exists ? true : false;
+    }
+
+    public function getCustomSlugAttribute()
+    {
+        return date('Y-m-d-H-i-s');
     }
 
     protected $casts = [
