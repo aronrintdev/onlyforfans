@@ -35,16 +35,18 @@ class IdmeritApiTest extends TestCase
     public function test_should_send_verify_request()
     {
         $userAttrs = [
-	        "mobile" => "+94777878905",
-	        "name" => "Dilshan Edirisuriya",
-	        "country" => "LK",
-	        "requestID" => "additional information",
-	        "dateOfBirth" => "19901231",
-	        //"callbackURL": "https://devapp.idmvalidate.com/verify/endpoint/success"
+	        'mobile' => '+94777878905',
+	        'name' => 'Dilshan Edirisuriya',
+	        'country' => 'LK',
+	        'requestID' => 'additional information',
+	        'dateOfBirth' => '19901231',
+	        //'callbackURL': 'https://devapp.idmvalidate.com/verify/endpoint/success'
         ];
         $api = IdMeritApi::create();
-        $response = $api->issueToken();
-        $this->assertEquals( 200, $response->status() );
+        if ( !$api->hasToken ) {
+            $response = $api->issueToken();
+            $this->assertEquals( 200, $response->status() );
+        }
 
         // --
 
@@ -76,8 +78,10 @@ class IdmeritApiTest extends TestCase
     public function test_should_poll_verify_request_status()
     {
         $api = IdMeritApi::create();
-        $response = $api->issueToken();
-        $this->assertEquals( 200, $response->status() );
+        if ( !$api->hasToken ) {
+            $response = $api->issueToken();
+            $this->assertEquals( 200, $response->status() );
+        }
 
         // --
 

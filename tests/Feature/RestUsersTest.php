@@ -191,6 +191,30 @@ class RestUsersTest extends TestCase
         $response->assertStatus(200);
     }
 
+    /**
+     *  @group users
+     *  @group regression
+     *  @group regression-base
+     *  @group here0715
+     */
+    public function test_should_send_verify_request_for_user()
+    {
+        $timeline = Timeline::has('followers', '>=', 1)->firstOrFail();
+        $creator = $timeline->user;
+        $usPhone = $faker->numberBetween(101, 999).'555'.$faker->numberBetween(0000, 9990);
+        $payload = [
+	        'mobile' => $usPhone,
+            'firstname' => $faker->firstName,
+            'lastname' => $faker->lastName,
+	        'country' => 'US',
+	        'dob' => $faker->date($format='Y-m-d', $max='2000-01-15'),
+        ];
+        $response = $this->actingAs($creator)->ajaxJSON('POST', route('users.verify-request', $payload);
+        $content = json_decode($response->content());
+        $response->assertStatus(200);
+        dd($content);
+    }
+
 
     // ------------------------------
 
