@@ -356,6 +356,7 @@ class UsersController extends AppBaseController
             'country' => 'required|string|size:2',
             'dob' => 'required|date',
         ]);
+        // %TODO: put on queue (?)
         $vr = Verifyrequest::verifyUser($user, $request->all());
         return response()->json( $vr );
     }
