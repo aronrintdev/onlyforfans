@@ -45,6 +45,7 @@ class Diskmediafile extends BaseModel implements Guidable, Ownable
         'audio/mp4',
         'audio/ogg',
         'audio/vnd.wav',
+        'audio/webm',
     ];
 
     //--------------------------------------------

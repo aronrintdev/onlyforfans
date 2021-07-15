@@ -41,7 +41,7 @@
               </video>
               <fa-icon :icon="['far', 'play-circle']" class="text-white icon-play" />
             </div>
-            <button class="btn btn-primary icon-close" @click="removeMediafile(index)">
+            <button class="btn btn-primary icon-close" @click="removeMediafile(media)">
               <fa-icon :icon="['far', 'times']" class="text-white" size="sm" />
             </button>
           </div>
@@ -57,10 +57,16 @@
     </swiper>
     <div class="audio-file-viewer" v-if="audioFiles.length">
       <div class="audio" v-for="(audio, index) in audioFiles" :key="index">
-        <audio controls>
-          <source :src="audio.filepath" type="audio/webm" />
-          <source :src="audio.filepath" type="audio/mpeg" />
-        </audio>
+        <vue-plyr>
+          <audio controls playsinline>
+            <source :src="audio.filepath" type="audio/webm" />
+            <source :src="audio.filepath" type="audio/mp3" />
+            <source :src="audio.filepath" type="audio/ogg" />
+          </audio>
+        </vue-plyr>
+        <button class="btn btn-primary icon-close" @click="removeAudiofile(audio)">
+          <fa-icon :icon="['far', 'times']" class="text-white" size="sm" />
+        </button>
       </div>
     </div>
   </div>
@@ -164,8 +170,9 @@ export default {
       this.isDragListVisible = false;
     },
 
-    removeMediafile(index) {
-      this.$emit('remove', index);
+    removeMediafile(mediafile) {
+      const idx = this.mediafiles.findIndex(file => file.type === mediafile.type && file.filepath === mediafile.filepath);
+      this.$emit('remove', idx);
     },
 
     openFileUpload() {
@@ -194,7 +201,11 @@ export default {
           bgOpacity: 0.75
         },
       });
-    }
+    },
+    removeAudiofile(audiofile) {
+      const idx = this.mediafiles.findIndex(file => file.type === audiofile.type && file.filepath === audiofile.filepath);
+      this.$emit('remove', idx);
+    },
   },
 }
 </script>
@@ -390,9 +401,24 @@ export default {
     .audio {
       width: 100%;
       margin-top: 10px;
-      
+      position: relative;
+
       audio {
         width: 100%;
+      }
+
+      .icon-close {
+        position: absolute;
+        top: 0;
+        right: 10px;
+        transform: translate(50%, -50%);
+        line-height: 1;
+        padding: 3px;
+
+        svg {
+          width: 14px;
+          height: 14px;
+        }
       }
     }
   }

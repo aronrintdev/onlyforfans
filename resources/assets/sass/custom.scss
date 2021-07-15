@@ -538,3 +538,22 @@ body .feed-crate.tag-grid-layout .superbox-post .media-slider {
   color: #212529;
   text-decoration: none;
 }
+
+// Vue-plyr custom style
+.plyr--audio {
+  margin: 0 10px 10px;
+  border-radius: 8px;
+
+  &.plyr--full-ui input[type=range] {
+    color: #007bff !important;
+  }
+
+  .plyr__controls {
+    background: #e9ecef !important;
+  }
+  .plyr__control.plyr__tab-focus,
+  .plyr__control:hover, 
+  .plyr__control[aria-expanded=true] {
+    background-color: #007bff !important;
+  }
+}

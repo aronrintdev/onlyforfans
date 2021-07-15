@@ -135,6 +135,7 @@ class MediafilesController extends AppBaseController
                     $request->mftype           // string   $mftype
                 );
             } else {
+                var_dump($file->getMimeType());
                 // Upload contents of file to S3 & create a new [diskmediafiles] record
                 $owner = $request->user(); // the orig. content OWNER
                 $subFolder = $owner->id;
@@ -144,7 +145,7 @@ class MediafilesController extends AppBaseController
                 $mediafile = Diskmediafile::doCreate([
                     'owner_id'      => $owner->id,
                     'filepath'      => $s3Path,
-                    'mimetype'      => $file->getMimeType(),
+                    'mimetype'      => $file->getClientMimeType(),
                     'orig_filename' => $file->getClientOriginalName(),
                     'orig_ext'      => $file->getClientOriginalExtension(),
                     'mfname'        => $mfname,
