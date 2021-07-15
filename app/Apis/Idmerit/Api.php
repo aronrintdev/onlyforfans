@@ -17,9 +17,8 @@ class Api
 {
     protected $endpoints = null;
     protected $token = null;
-    //protected $base = null;
 
-    private function __construct() {
+    private function __construct(string $token=null) {
         if (App::environment(['local', 'testing', 'staging'])) {
             $base = 'https://sandbox.idmvalidate.com';
         } else {
@@ -38,17 +37,20 @@ class Api
                 'url' => "$base/verify",
             ],
         ];
-        //$this->base = $base;
+        if ( !empty($token) ) {
+            $this->token = $token;
+        } else {
+            $this->issueToken(); // call api to generate token and save it
+        }
     }
 
-    public static function create(array $config=[]) {
+    public static function create(string $token=null) {
        static $_this = null;
         if ( is_null($_this) ) {
-            $_this = new Api();
+            $_this = new Api($token);
         }
        return $_this;
     }
-
 
     public function issueToken() 
     {
@@ -89,6 +91,9 @@ class Api
 
     public function getToken() {
         return $this->token;
+    }
+    public function hasToken() {
+        return !empty($this->token);
     }
 
 }
