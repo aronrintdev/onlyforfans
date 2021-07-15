@@ -21,6 +21,7 @@ use App\Models\Timeline;
 use App\Enums\PaymentTypeEnum;
 use App\Rules\MatchOldPassword;
 use App\Models\Diskmediafile;
+use App\Models\Veirfyrequest;
 use App\Enums\MediafileTypeEnum;
 
 class UsersController extends AppBaseController
@@ -338,5 +339,24 @@ class UsersController extends AppBaseController
         }
         $sessionUser->save();
         return ['status' => 200];
+    }
+
+    public function requestVerify(Request $request)
+    {
+        // %FIXME: make sure the name they type in matches the name in our database?
+        // %FIXME: try - catch
+
+        $sessionUser = $request->user();
+        $user = $sessionUser;
+
+        $request->validate([
+            'mobile' => 'required|digits:10', // assume US for now & Vue client strips out extra chars
+            'firstname' => 'required|string',
+            'lastname' => 'required|string',
+            'country' => 'required|string|size:2',
+            'dob' => 'required|date',
+        ]);
+        $vr = Verifyrequest::verifyUser($user, $request->all());
+        return response()->json( $vr );
     }
 }
