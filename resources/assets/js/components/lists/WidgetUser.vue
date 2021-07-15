@@ -5,8 +5,6 @@
 
     <b-card-body class="py-1">
 
-      <div class="last-seen">Last seen TBD</div>
-
       <div class="banner-ctrl ">
         <b-dropdown no-caret right ref="bannerCtrls" variant="transparent" id="banner-ctrl-dropdown" class="tag-ctrl"> 
           <template #button-content>
@@ -21,7 +19,7 @@
       </div>
 
       <div class="avatar-img">
-        <router-link :to="{ name: 'timeline.show', params: { slug: user.username } }">
+        <router-link :to="{ name: 'timeline.show', params: { slug } }">
           <b-img thumbnail rounded="circle" class="w-100 h-100" :src="user.avatar.filepath" :alt="user.username" :title="user.name" />
         </router-link>
       </div>
@@ -29,11 +27,11 @@
 
       <div class="sharee-id">
         <b-card-title class="mb-1">
-          <router-link :to="{ name: 'timeline.show', params: { slug: user.username } }">{{ user.name }}</router-link>
+          <router-link :to="{ name: 'timeline.show', params: { slug } }">{{ user.name }}</router-link>
           <fa-icon v-if="access_level==='premium'" fixed-width :icon="['fas', 'rss-square']" style="color:#138496; font-size: 16px;" />
         </b-card-title>
         <b-card-sub-title class="mb-1">
-          <router-link :to="{ name: 'timeline.show', params: { slug: user.username } }">@{{ user.username }}</router-link>
+          <router-link :to="{ name: 'timeline.show', params: { slug } }">@{{ user.username }}</router-link>
         </b-card-sub-title>
       </div>
 
@@ -61,7 +59,8 @@ export default {
 
   props: {
     session_user: null,
-    user: null, // eg: the follower, or favorited user
+    user: null, // eg: the follower, or favorited user,
+    slug: null,
     access_level: null,
     created_at: null,
   },

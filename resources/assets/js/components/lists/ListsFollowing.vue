@@ -16,6 +16,7 @@
       <b-row class="mt-3">
         <b-col lg="4" v-for="(s,idx) in shareables" :key="s.id" > 
           <!-- %NOTE: s is the [shareables] record, s.shareable is the related, 'morhped', 'shareable' object (eg timelines) -->
+          <!-- %NOTE: we're using WidgetTimeline here because you're following a timeline, not a user directly -->
           <WidgetTimeline :session_user="session_user" :timeline="s.shareable" :access_level="s.access_level" :created_at="s.created_at">
             <b-card-text class="mb-2"><fa-icon fixed-width :icon="['far', 'star']" class="clickable" style="color:#007bff" /> Add to favorites</b-card-text>
 

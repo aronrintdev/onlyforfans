@@ -19,6 +19,7 @@ class Shareable extends JsonResource
             'shareable_type' => $this->shareable_type,
             'sharee_id' => $this->sharee_id,
             'sharee' => $this->whenLoaded('sharee'),
+            'sharee_slug' => $this->whenLoaded('sharee')->timeline->slug,
             'shareable' => $this->whenLoaded('shareable'),
             'created_at' => $this->created_at,
         ];
