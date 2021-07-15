@@ -58,7 +58,7 @@
     <div class="audio-file-viewer" v-if="audioFiles.length">
       <div class="audio" v-for="(audio, index) in audioFiles" :key="index">
         <vue-plyr>
-          <audio controls crossorigin playsinline>
+          <audio controls playsinline>
             <source :src="audio.filepath" type="audio/webm" />
             <source :src="audio.filepath" type="audio/mp3" />
             <source :src="audio.filepath" type="audio/ogg" />
@@ -410,7 +410,7 @@ export default {
       .icon-close {
         position: absolute;
         top: 0;
-        right: 0;
+        right: 10px;
         transform: translate(50%, -50%);
         line-height: 1;
         padding: 3px;
