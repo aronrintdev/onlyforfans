@@ -3,7 +3,7 @@
 
     <section class="row h-100">
 
-      <aside class="col-md-5 col-lg-4">
+      <aside class="col-md-5 col-lg-4" :class="mobile ? '' : 'panel'">
 
         <article class="top-bar d-flex justify-content-between align-items-center">
           <div class="h4" v-text="$t('title')" />
@@ -204,6 +204,7 @@ export default {
   /*                                 COMPUTED                                 */
   /* ------------------------------------------------------------------------ */
   computed: {
+    ...Vuex.mapState(['mobile']),
     ...Vuex.mapGetters(['session_user']),
     ...Vuex.mapState('messaging/contacts', [
       'contacts', 'cache', 'pinned', 'filters',
@@ -567,20 +568,21 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-body {
-  #view-create-thread {
-    background-color: #fff;
+#view-create-thread {
+  background-color: #fff;
 
-    .contact-list {
-      height: calc(100vh - 280px);
-      overflow: auto;
-    }
+  .contact-list {
+    height: calc(100vh - 280px);
+    overflow: auto;
   }
+}
 
-  .top-bar {
-    border-bottom: 1px solid rgba(138,150,163,.25);
-  }
+.panel {
+  max-width: 30rem;
+}
 
+.top-bar {
+  border-bottom: 1px solid rgba(138,150,163,.25);
 }
 </style>
 
