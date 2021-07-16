@@ -341,6 +341,9 @@ class UsersController extends AppBaseController
         return ['status' => 200];
     }
 
+    // --- Identity Verification ---
+
+    // Send a request for identity verification (starts the process)
     public function requestVerify(Request $request)
     {
         // %FIXME: make sure the name they type in matches the name in our database?
@@ -361,6 +364,30 @@ class UsersController extends AppBaseController
         $attrs = $request->except(['mobile']);
         $attrs['mobile'] = '+1'.$request->mobile; // append US country code %FIXME
         $vr = Verifyrequest::verifyUser($user, $attrs);
+        return response()->json( $vr );
+    }
+
+    // Manyally check status of a pending request
+    public function checkVerifyStatus(Request $request)
+    {
+        $sessionUser = $request->user();
+        $user = $sessionUser;
+        $vr = Verifyrequest::checkStatus($user);
+
+        /*
+        $request->validate([
+            'mobile' => 'required|digits:10', // assume US (w/o country code) for now & Vue client strips out extra chars
+            'firstname' => 'required|string',
+            'lastname' => 'required|string',
+            //'country' => 'required|string|size:2',
+            //'dob' => 'required|date',
+        ]);
+         */
+        // %TODO: put on queue (?)
+
+        //$attrs = $request->except(['mobile']);
+        //$attrs['mobile'] = '+1'.$request->mobile; // append US country code %FIXME
+        //$vr = Verifyrequest::checkStatus($user);
         return response()->json( $vr );
     }
 }
