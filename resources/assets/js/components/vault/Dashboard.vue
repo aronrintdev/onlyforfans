@@ -48,6 +48,16 @@
             ></vue-dropzone>
           </b-col>
         </b-row>
+        
+        <!-- Audio Recorder -->
+        <b-row v-if="showAudioRec">
+          <b-col>
+            <AudioRecorder
+              @close="showAudioRec=false;"
+              @complete="file => recordCompleted(file, true)"
+            />
+          </b-col>
+        </b-row>
 
         <!-- +++ Minor Nav +++ -->
         <b-row class="py-3">
@@ -74,7 +84,7 @@
                 <b-button variant="link" class="" @click="recordVideo">
                   <fa-icon :icon="['fas', 'video']" size="lg" />
                 </b-button>
-                <b-button variant="link" class="">
+                <b-button variant="link" class="" @click="recordAudio">
                   <fa-icon :icon="['fas', 'microphone']" size="lg" />
                 </b-button>
                 <b-button variant="link" class="" @click="isUploaderVisible=!isUploaderVisible">
@@ -283,7 +293,7 @@
     </b-modal>
 
     <!-- Video Recorder -->
-    <VideoRecorder v-if="showVideoRec" @close="showVideoRec=false;" @complete="videoRecCompleted" />
+    <VideoRecorder v-if="showVideoRec" @close="showVideoRec=false;" @complete="recordCompleted" />
   </div>
 </template>
 
@@ -297,6 +307,7 @@ import PreviewFile from '@components/vault/PreviewFile'
 import MediaLightbox from '@components/vault/MediaLightbox'
 import TreeItem from '@components/vault/TreeItem'
 import VideoRecorder from '@components/videoRecorder'
+import AudioRecorder from '@components/audioRecorder'
 
 export default {
 
@@ -423,6 +434,7 @@ export default {
 
     showVideoRec: false,
     fileUploading: false,
+    showAudioRec: false,
   }), // data
 
   methods: {
@@ -737,15 +749,23 @@ export default {
       this.showVideoRec = true
     },
 
-    async videoRecCompleted(file) {
-      this.showVideoRec = false;
+    recordAudio() {
+      this.showAudioRec = true
+    },
+
+    async recordCompleted(file, is_audio) {
+      if (is_audio) {
+        this.showAudioRec = false;
+      } else {
+        this.showVideoRec = false;
+      }
       this.fileUploading = true;
       let payload = new FormData();
       payload.append('resource_id', this.currentFolderId);
       payload.append('resource_type', 'vaultfolders');
       payload.append('mftype', 'vault');
-      payload.append('mfname', `video-${new Date().valueOf()}.webm`);
       payload.append('mediafile', file);
+      payload.append('mfname', `${is_audio ? 'audio' : 'video'}-${new Date().valueOf()}.webm`);
       const response = await this.axios.post(route('mediafiles.index'), payload, {
         headers: { 
           'X-Requested-With': 'XMLHttpRequest', 
@@ -791,6 +811,7 @@ export default {
     PreviewFile,
     MediaLightbox,
     VideoRecorder,
+    AudioRecorder,
   },
 }
 /*
@@ -879,7 +900,7 @@ body {
       top: 0;
       left: 0;
     }
-    img.tag-selected {
+    .tag-selected {
       filter: brightness(50%);
     }
     .render-date {

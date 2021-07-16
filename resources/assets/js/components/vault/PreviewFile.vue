@@ -19,6 +19,13 @@
           <fa-icon :icon="['fas', 'play']" class="text-white icon-play" />
         </div>
       </div>
+      <div
+        @click="$emit('render-lightbox', mediafile)"
+        v-if="mediafile.is_audio"
+        :class="mediafile.selected ? 'tag-selected audio' : 'audio'"
+      >
+        <fa-icon :icon="['fas', 'file-audio']" />
+      </div>
       <div class="render-date">
         <p class="m-0">{{  moment(mediafile.created_at).format('MMMM D') }}</p>
       </div>
@@ -129,7 +136,42 @@ export default {
   }
 
   &:hover .icon-video {
-    background: #0091ea;
+    background: #007bff;
+  }
+}
+
+.audio {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(#00000025,rgba(138,150,163,0), #00000010);
+
+  &.tag-selected::before {
+    content: '';
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+  }
+
+  svg {
+    width: 50px;
+    height: 50px;
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  &:hover {
+    svg {
+      color: #007bff;
+    }
   }
 }
 </style>
