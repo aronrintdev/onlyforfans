@@ -4,7 +4,7 @@
       <b-card-text>
 
         <section>
-          <p v-if="verifiedStatus==='none'">Please provide your legal name and a mobile phone number. You will receive a verification text from the "ID Merit" Service. Follow the instructions and once complete check this page again to review your status.</p>
+          <p v-if="verifiedStatus==='none'">Please provide your full legal name and a mobile phone number. You will receive a verification text from the "ID Merit" Service. Follow the instructions and once complete check this page again to review your status.</p>
           <p v-else-if="verifiedStatus==='pending'">Your identity verification request was successfully submitted and is pending review</p>
           <p v-else-if="verifiedStatus==='rejected'">Unfortunately we could't successfully complete the identity verification process. Please contact support.</p>
           <p v-else-if="verifiedStatus==='verified'">Congratulations! You are now verified. Please complete your sign-up by 
