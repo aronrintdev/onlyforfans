@@ -3,7 +3,7 @@
 
     <section class="row h-100" style="max-height: 100%;">
 
-      <aside class="col-md-5 col-lg-4">
+      <aside class="col-md-5 col-lg-4" :class="mobile ? '' : 'panel'">
 
         <article class="top-bar d-flex justify-content-between align-items-center mb-3">
           <div class="h4" v-text="$t('header')" />
@@ -66,6 +66,19 @@
             :session_user="session_user"
             :participant="participants(activeThread)"
           />
+          <div v-if="!activeThreadId" class="d-flex h-100 align-items-center justify-content-around">
+            <div class="d-flex flex-column">
+              <div class="h4 font-weight-bold mb-4">
+                {{ $t('callToAction') }}
+              </div>
+              <div class="d-flex justify-content-around">
+                <b-btn variant="primary" size="lg" :to="linkCreateThread()" class="font-size-larger">
+                  <fa-icon icon="plus" />
+                  {{ $t('newMessage') }}
+                </b-btn>
+              </div>
+            </div>
+          </div>
         </transition>
       </main>
 
@@ -98,6 +111,7 @@ export default {
   },
 
   computed: {
+    ...Vuex.mapState(['mobile']),
     ...Vuex.mapGetters(['session_user', 'getUnreadMessagesCount']),
 
     activeThreadId() {
@@ -368,6 +382,10 @@ export default {
 
 }
 
+.panel {
+  max-width: 30rem;
+}
+
 .top-bar {
   //display: flex;
   //align-items: center;
@@ -389,6 +407,8 @@ export default {
         "unread": "Unread"
       },
     },
+    "callToAction": "Select a Conversation or Send a New Message",
+    "newMessage": "New Message",
     "no-items": "No Chat Threads",
     "no-items-search": "No Chat Threads Found for \"{query}\"",
     "search": {

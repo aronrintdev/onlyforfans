@@ -71,7 +71,6 @@ class IdmeritApiTest extends TestCase
 
     /**
      * @group idmerit-api
-     * @group here0714
      // do not add to regression tests!
      // %NOTE: Assumes the 'hardcoded' unique IDs already exist in our test sandbox!
      */
