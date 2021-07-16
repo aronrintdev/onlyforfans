@@ -98,7 +98,6 @@ class Verifyrequest extends Model
                 'vrequest_raw_response' => $json,
             ];
             $vr->cattrs = $cattrs;
-            //$vr->last_checked_at = 
             $vr->callback_url = $json['callbackURL'] ?? null;
             $vr->qrcode = $json['qrCode'] ?? null;
             $vr->service_guid = $json['uniqueID'] ?? null;
@@ -170,6 +169,8 @@ class Verifyrequest extends Model
             $json['created_at'] = $now;
             $cattrs['check_verify_status_response'][] = $json;
             $vr->cattrs = $cattrs;
+
+            $vr->last_checked_at = $now;
 
             switch ( $json['status'] ?? null ) {
             case 'verified':
