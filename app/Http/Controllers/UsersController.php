@@ -21,7 +21,7 @@ use App\Models\Timeline;
 use App\Enums\PaymentTypeEnum;
 use App\Rules\MatchOldPassword;
 use App\Models\Diskmediafile;
-use App\Models\Veirfyrequest;
+use App\Models\Verifyrequest;
 use App\Enums\MediafileTypeEnum;
 
 class UsersController extends AppBaseController
@@ -350,14 +350,17 @@ class UsersController extends AppBaseController
         $user = $sessionUser;
 
         $request->validate([
-            'mobile' => 'required|digits:10', // assume US for now & Vue client strips out extra chars
+            'mobile' => 'required|digits:10', // assume US (w/o country code) for now & Vue client strips out extra chars
             'firstname' => 'required|string',
             'lastname' => 'required|string',
-            'country' => 'required|string|size:2',
-            'dob' => 'required|date',
+            //'country' => 'required|string|size:2',
+            //'dob' => 'required|date',
         ]);
         // %TODO: put on queue (?)
-        $vr = Verifyrequest::verifyUser($user, $request->all());
+
+        $attrs = $request->except(['mobile']);
+        $attrs['mobile'] = '+1'.$request->mobile; // append US country code %FIXME
+        $vr = Verifyrequest::verifyUser($user, $attrs);
         return response()->json( $vr );
     }
 }

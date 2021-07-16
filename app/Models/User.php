@@ -87,7 +87,9 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
         'password',
         'remember_token',
         'verification_code',
-        'timeline'
+        'timeline',
+        'real_firstname',
+        'real_lastname',
     ];
 
     protected $dates = [

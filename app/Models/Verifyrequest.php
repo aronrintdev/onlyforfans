@@ -58,8 +58,8 @@ class Verifyrequest extends Model
             $userAttrs = [
 	            'mobile' => $attrs['mobile'], // '+94777878905',
 	            'name' => $attrs['firstname'].' '.$attrs['lastname'], // 'Dilshan Edirisuriya',
-	            'country' => $attrs['country'], // 'LK',
-	            'dateOfBirth' => $attrs['dob'], // '19901231',
+	            'country' => $attrs['country'] ?? null, // 'LK',
+	            'dateOfBirth' => $attrs['dob'] ?? null, // '19901231',
 	            'requestID' => $vr->id,
 	            'callbackURL' => null,
 	            //'callbackURL': 'https://devapp.idmvalidate.com/verify/endpoint/success'
@@ -71,18 +71,18 @@ class Verifyrequest extends Model
             $response = $api->doVerify($userAttrs);
 
             $status = $response->status();
+            $json = $response->json();
             if ($status !== 200) {
                 throw new Exception('Verify service returned non-200 status: '.$status);
             }
-            $json = $response->json();
 
             $cattrs = [
                 'request_raw_response' => $json,
             ];
             $vr->cattrs = $cattrs;
             //$vr->last_checked_at = 
-            $vr->callback_url = $json->callbackURL;
-            $vr->qrcode = $json->qrCode;
+            $vr->callback_url = $json['callbackURL'];
+            $vr->qrcode = $json['qrCode'];
             switch ( $json['status'] ) { // %NOTE - specific to IDMERIT
             case 'in_progress':
                 $vr->vstatus = VerifyStatusTypeEnum::PENDING;
@@ -103,7 +103,8 @@ class Verifyrequest extends Model
                 'src' => 'App/Models/Verifyreqeust::verifyUser()',
                 'message' => $e->getMessage(),
                 'userId' => $userId,
-                'userAttrs' => $userAttrs,
+                'userAttrs' => $userAttrs ?? 'not-set',
+                'json' => $json,
             ]) );
             throw $e;
         }
