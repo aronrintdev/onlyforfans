@@ -129,7 +129,7 @@
         </b-card>
       </div>
     </section>
-    <VideoRecorder v-if="showVideoRec" @close="showVideoRec=false; selectedMedia=null" />
+    <VideoRecorder v-if="showVideoRec" @close="showVideoRec=false; selectedMedia=null" @complete="videoRecCompleted" />
   </div>
 </template>
 
@@ -402,6 +402,13 @@ export default {
         key: 'modal-promotion-campaign',
       })
     },
+
+    videoRecCompleted(file) {
+      this.showVideoRec = false;
+      if (this.$refs.myVueDropzone) {
+        this.$refs.myVueDropzone.addFile(file);
+      }
+    },
   },
 
   mounted() {
@@ -411,13 +418,6 @@ export default {
     })
     eventBus.$on('set-expiration-period', function(data) {
       self.expirationPeriod = data;
-    })
-    eventBus.$on('video-rec-complete', function(file) {
-      self.showVideoRec = false;
-      if (self.$refs.myVueDropzone) {
-        self.$refs.myVueDropzone.addFile(file);
-      }
-      // self.$refs.myVueDropzone.manuallyAddFile(data, data.filepath);
     })
 
     if ( this.$route.params.context ) {

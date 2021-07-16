@@ -11,17 +11,19 @@
 
       <template v-if="true || mediafile.access">
         <b-row>
-          <b-col cols="8">
-            <b-img v-if="mediafile.is_image" 
-              fluid
-              class="d-block"
-              :src="(use_mid && mediafile.has_mid) ? mediafile.midFilepath : mediafile.filepath"
-              :alt="mediafile.mfname">
-            </b-img>
-            <MediaSlider v-else-if="mediafile.is_video" 
-              :mediafiles="[mediafile]" 
-              :session_user="session_user" 
-              :use_mid="use_mid" />
+          <b-col cols="8" class="d-flex align-items-center justify-content-center">
+            <div class="w-100">
+              <b-img v-if="mediafile.is_image" 
+                fluid
+                class="d-block w-100"
+                :src="(use_mid && mediafile.has_mid) ? mediafile.midFilepath : mediafile.filepath"
+                :alt="mediafile.mfname">
+              </b-img>
+              <MediaSlider v-else-if="!mediafile.is_image" 
+                :mediafiles="[mediafile]" 
+                :session_user="session_user" 
+                :use_mid="use_mid" />
+            </div>
           </b-col>
           <b-col cols="4">
             <pre> {{ JSON.stringify(this.stats, null, 2) }} </pre>
