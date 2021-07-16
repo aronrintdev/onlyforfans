@@ -663,6 +663,7 @@ export default {
 
     // for dropzone
     sendingEvent(file, xhr, formData) {
+      this.fileUploading = true
       formData.append('resource_id', this.currentFolderId)
       formData.append('resource_type', 'vaultfolders')
       formData.append('mftype', 'vault')
@@ -670,6 +671,7 @@ export default {
 
     // for dropzone
     successEvent(file, response) {
+      this.fileUploading = false
       this.$store.dispatch('getVaultfolder', this.currentFolderId)
     },
 
