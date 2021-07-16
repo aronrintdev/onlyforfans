@@ -1,7 +1,24 @@
 <template>
   <div>
     <div class="img-box position-relative">
-      <img @click="$emit('render-lightbox', mediafile)" :class="mediafile.selected ? 'tag-selected' : ''" :src="mediafile.filepath" />
+      <img
+        @click="$emit('render-lightbox', mediafile)"
+        v-if="mediafile.is_image"
+        :class="mediafile.selected ? 'tag-selected' : ''"
+        :src="mediafile.filepath"
+      />
+      <div
+        @click="$emit('render-lightbox', mediafile)"
+        :class="mediafile.selected ? 'tag-selected video' : 'video'"
+        v-if="mediafile.is_video"
+      >
+        <video>
+          <source :src="`${mediafile.filepath}#t=2`" :type="mediafile.mimetype" />
+        </video>
+        <div class="icon-video">
+          <fa-icon :icon="['fas', 'play']" class="text-white icon-play" />
+        </div>
+      </div>
       <div class="render-date">
         <p class="m-0">{{  moment(mediafile.created_at).format('MMMM D') }}</p>
       </div>
@@ -68,6 +85,51 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-body {
+.video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+
+  &::before {
+    content: "";
+    display: block;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.3);
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+
+  video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .icon-video {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 10px 9px 10px 11px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.5);
+    transition: background-color 0.1s ease;
+    width: 36px;
+    height: 36px;
+  }
+
+  .icon-play {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  &:hover .icon-video {
+    background: #0091ea;
+  }
 }
 </style>

@@ -71,6 +71,12 @@
               </div>
 
               <div v-else>
+                <b-button variant="link" class="" @click="recordVideo">
+                  <fa-icon :icon="['fas', 'video']" size="lg" />
+                </b-button>
+                <b-button variant="link" class="">
+                  <fa-icon :icon="['fas', 'microphone']" size="lg" />
+                </b-button>
                 <b-button variant="link" class="" @click="isUploaderVisible=!isUploaderVisible">
                   <fa-icon :icon="['fas', 'upload']" size="lg" />
                 </b-button>
@@ -84,41 +90,42 @@
         </b-row>
 
         <!-- +++ List/Grid Display of Files & Folders +++ -->
-        <b-row :no-gutters="false">
+        <b-overlay :show="fileUploading" spinner-variant="primary" rounded="sm">
+          <b-row :no-gutters="false">
 
-          <!-- Files -->
-          <b-col cols="12" md="3" v-for="(mf) in mediafiles" :key="mf.id" role="button" class="mb-2">
-            <PreviewFile 
-              :data-mf_id="mf.id" 
-              :mediafile="mf" 
-              @input="onPreviewFileInput" 
-              @render-lightbox="renderLightbox" 
-              class="OFF-p-1 tag-file" 
-            />
-            <p class="text-center truncate m-0">{{ mf.mfname }}</p>
-          </b-col>
+            <!-- Files -->
+            <b-col cols="12" md="3" v-for="(mf) in mediafiles" :key="mf.id" role="button" class="mb-2">
+              <PreviewFile 
+                :data-mf_id="mf.id" 
+                :mediafile="mf" 
+                @input="onPreviewFileInput" 
+                @render-lightbox="renderLightbox" 
+                class="OFF-p-1 tag-file" 
+              />
+              <p class="text-center truncate m-0">{{ mf.mfname }}</p>
+            </b-col>
 
-          <!-- Vaultfolders -->
-          <b-col v-for="(vf) in children" :key="vf.id" cols="12" md="3" class="mb-2">
-            <div v-if="vf.is_pending_approval" class="tag-folder img-box tag-shared tag-pending-approval">
-              <b-img fluid @click="renderApproveSharedModal(vf)" src="/images/icons/folder-icon.png" class="folder d-block mx-auto" role="button" :alt="`Folder ${vf.slug}`"></b-img>
-              <div class="icon-pending-approval" style="font-size: 3rem;">
-                <fa-icon :icon="['fas', 'share-alt']" class="text-primary" />
+            <!-- Vaultfolders -->
+            <b-col v-for="(vf) in children" :key="vf.id" cols="12" md="3" class="mb-2">
+              <div v-if="vf.is_pending_approval" class="tag-folder img-box tag-shared tag-pending-approval">
+                <b-img fluid @click="renderApproveSharedModal(vf)" src="/images/icons/folder-icon.png" class="folder d-block mx-auto" role="button" :alt="`Folder ${vf.slug}`"></b-img>
+                <div class="icon-pending-approval" style="font-size: 3rem;">
+                  <fa-icon :icon="['fas', 'share-alt']" class="text-primary" />
+                </div>
               </div>
-            </div>
-            <div v-else class="tag-folder img-box">
-              <b-img fluid @click="doNav(vf.id)" src="/images/icons/folder-icon.png" class="folder d-block mx-auto" role="button" :alt="`Folder ${vf.slug}`"></b-img>
-              <div class="file-count">
-                <b-badge variant="warning" class="p-2">{{ vf.mediafiles.length + vf.vfchildren.length }}</b-badge>
+              <div v-else class="tag-folder img-box">
+                <b-img fluid @click="doNav(vf.id)" src="/images/icons/folder-icon.png" class="folder d-block mx-auto" role="button" :alt="`Folder ${vf.slug}`"></b-img>
+                <div class="file-count">
+                  <b-badge variant="warning" class="p-2">{{ vf.mediafiles.length + vf.vfchildren.length }}</b-badge>
+                </div>
+                <div @click="renderDeleteFolderForm(vf)" class="clickme_to-delete" role="button">
+                  <fa-icon :icon="['fas', 'trash']" size="lg" class="text-danger" />
+                </div>
               </div>
-              <div @click="renderDeleteFolderForm(vf)" class="clickme_to-delete" role="button">
-                <fa-icon :icon="['fas', 'trash']" size="lg" class="text-danger" />
-              </div>
-            </div>
-            <p class="text-center truncate m-0">{{ vf.name }}</p>
-          </b-col>
-
-        </b-row>
+              <p class="text-center truncate m-0">{{ vf.name }}</p>
+            </b-col>
+          </b-row>
+        </b-overlay>
 
       </main>
 
@@ -275,7 +282,8 @@
       </template #modal-footer>
     </b-modal>
 
-
+    <!-- Video Recorder -->
+    <VideoRecorder v-if="showVideoRec" @close="showVideoRec=false;" @complete="videoRecCompleted" />
   </div>
 </template>
 
@@ -288,6 +296,7 @@ import 'vue2-dropzone/dist/vue2Dropzone.min.css';
 import PreviewFile from '@components/vault/PreviewFile'
 import MediaLightbox from '@components/vault/MediaLightbox'
 import TreeItem from '@components/vault/TreeItem'
+import VideoRecorder from '@components/videoRecorder'
 
 export default {
 
@@ -412,6 +421,8 @@ export default {
       },
     },
 
+    showVideoRec: false,
+    fileUploading: false,
   }), // data
 
   methods: {
@@ -722,6 +733,28 @@ export default {
       this.isApproveSharedModalVisible = false
     },
 
+    recordVideo() { // %TODO
+      this.showVideoRec = true
+    },
+
+    async videoRecCompleted(file) {
+      this.showVideoRec = false;
+      this.fileUploading = true;
+      let payload = new FormData();
+      payload.append('resource_id', this.currentFolderId);
+      payload.append('resource_type', 'vaultfolders');
+      payload.append('mftype', 'vault');
+      payload.append('mfname', `video-${new Date().valueOf()}.webm`);
+      payload.append('mediafile', file);
+      const response = await this.axios.post(route('mediafiles.index'), payload, {
+        headers: { 
+          'X-Requested-With': 'XMLHttpRequest', 
+          'X-CSRF-TOKEN': document.head.querySelector('[name=csrf-token]').content,
+        },
+      });
+      this.$store.dispatch('getVaultfolder', this.currentFolderId);
+      this.fileUploading = false;
+    },
   },
 
   created() {
@@ -757,6 +790,7 @@ export default {
     TreeItem,
     PreviewFile,
     MediaLightbox,
+    VideoRecorder,
   },
 }
 /*

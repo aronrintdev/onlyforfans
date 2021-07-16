@@ -133,7 +133,7 @@ export default {
 
     const self = this;
     this.player.on('finishRecord', function() {
-      eventBus.$emit('video-rec-complete', self.player.recordedData);
+      self.$emit('complete', self.player.recordedData);
       self.isRecording = false;
       setTimeout(() => {
         self.closeVideoRec();
