@@ -370,6 +370,11 @@ class UsersController extends AppBaseController
         $attrs['mobile'] = '+1'.$request->mobile; // append US country code (required by ID Merit) %FIXME hardcoded to US
         $vr = Verifyrequest::verifyUser($user, $attrs);
 
+        // Store real name (keep in mind not yet verified!)
+        $user->real_firstname = $request->firstname;
+        $user->real_lastname = $request->lastname;
+        $user->save();
+
         $user->notify( new IdentityVerificationRequestSent($vr, $user) );
 
         return response()->json( $vr );
