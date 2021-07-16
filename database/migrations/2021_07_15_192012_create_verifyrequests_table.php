@@ -24,6 +24,7 @@ class CreateVerifyrequestsTable extends Migration
 
             $table->text('callback_url')->nullable();
             $table->longtext('qrcode')->nullable();
+            $table->longtext('notes')->nullable();
 
             $table->json('cattrs')->nullable()->comment("JSON-encoded custom attributes");
             $table->json('meta')->nullable()->comment("JSON-encoded meta attributes");

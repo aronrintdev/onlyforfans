@@ -83,7 +83,7 @@ class Verifyrequest extends Model
             //$vr->last_checked_at = 
             $vr->callback_url = $json->callbackURL;
             $vr->qrcode = $json->qrCode;
-            switch ( json('status'] ) { // %NOTE - specific to IDMERIT
+            switch ( $json['status'] ) { // %NOTE - specific to IDMERIT
             case 'in_progress':
                 $vr->vstatus = VerifyStatusTypeEnum::PENDING;
                 break;
@@ -101,7 +101,7 @@ class Verifyrequest extends Model
         } catch (Exception $e) {
             Log::error( json_encode([
                 'src' => 'App/Models/Verifyreqeust::verifyUser()',
-                'message' => $e->getMessage();
+                'message' => $e->getMessage(),
                 'userId' => $userId,
                 'userAttrs' => $userAttrs,
             ]) );
