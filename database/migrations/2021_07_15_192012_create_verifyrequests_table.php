@@ -12,7 +12,9 @@ class CreateVerifyrequestsTable extends Migration
     public function up()
     {
         Schema::create('verifyrequests', function (Blueprint $table) {
-            $table->uuid('id')->primary();
+            $table->increments('id'); // use integer as so we can utilize Laravel's 'latestOfMany' when defining a relation (!)
+            $table->string('guid')->unique()->comment('GUID to identify request in our app');
+            $table->string('service_guid', 511)->nullable()->comment('GUID to identify request in remote service cloud/DB');
 
             $table->string('vservice')->nullable();
             $table->string('vstatus')->nullable()->comment('Can be null if we create record before sending request');

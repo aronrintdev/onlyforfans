@@ -9,7 +9,7 @@ class UpdateUsersWithIsIdentityVerifiedField extends Migration
     public function up()
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->uuid('verifyrequest_id')->nullable()->after('username')->comment("FK - latest [verifyrequest] record if any");
+            $table->unsignedInteger('verifyrequest_id')->nullable()->after('username')->comment("FK - latest [verifyrequest] record if any");
             //$table->foreign('verifyrequest_id')->references('id')->on('verifyrequests');
         });
     }
