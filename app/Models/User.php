@@ -314,8 +314,8 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
 
     // https://laravel.com/docs/8.x/eloquent-relationships#has-one-of-many
     public function verifyrequest() {
-        //return $this->hasOne(Verifyrequest::class, 'requester_id')->latestOfMany();
-        return $this->hasOne(Verifyrequest::class, 'requester_id')->ofMany('created_at', 'max');
+        return $this->hasOne(Verifyrequest::class, 'requester_id')->latestOfMany();
+        //return $this->hasOne(Verifyrequest::class, 'requester_id')->ofMany('created_at', 'max');
     }
 
 //    public function lists()
