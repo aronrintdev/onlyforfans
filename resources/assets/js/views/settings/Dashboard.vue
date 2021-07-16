@@ -75,6 +75,10 @@ export default {
           name: 'Security',
           to: { name: 'settings.security', params: {} },
         },
+        {
+          name: 'Verification',
+          to: { name: 'settings.verify', params: {} },
+        },
       ]
 
       routes.push({

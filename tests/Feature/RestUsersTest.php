@@ -32,14 +32,23 @@ class RestUsersTest extends TestCase
 
         $expectedCount = User::count();
         $response = $this->actingAs($admin)->ajaxJSON('GET', route('users.index'), [ 'take'=>1000 ]);
+        $response->assertStatus(200);
+        $content = json_decode($response->content());
         $response->assertJsonStructure([
-            'data',
+            'data' => [
+                0 => [
+                    'id', 
+                    'email', 
+                    'username', 
+                    'firstname', 
+                    'lastname', 
+                    'created_at', 
+                ],
+            ],
             'links',
             'meta' => [ 'current_page', 'from', 'last_page', 'path', 'per_page', 'to', 'total', ],
         ]);
         $admin->removeRole('super-admin'); // revert (else future tests will fail)
-        $response->assertStatus(200);
-        $content = json_decode($response->content());
         $this->assertEquals(1, $content->meta->current_page);
 
         $this->assertNotNull($content->data);
@@ -189,6 +198,30 @@ class RestUsersTest extends TestCase
         $response = $this->actingAs($creator)->ajaxJSON('GET', route('users.match', $admin->id), $payload);
         $admin->removeRole('super-admin'); // revert (else future tests will fail)
         $response->assertStatus(200);
+    }
+
+    /**
+     *  @group NO-users
+     *  @group NO-regression
+     *  @group NO-regression-base
+     *  @group here0715
+     */
+    public function test_should_send_verify_request_for_user()
+    {
+        $timeline = Timeline::has('followers', '>=', 1)->firstOrFail();
+        $creator = $timeline->user;
+        $usPhone = $faker->numberBetween(101, 999).'555'.$faker->numberBetween(0000, 9990);
+        $payload = [
+	        'mobile' => $usPhone,
+            'firstname' => $faker->firstName,
+            'lastname' => $faker->lastName,
+	        'country' => 'US',
+	        'dob' => $faker->date($format='Y-m-d', $max='2000-01-15'),
+        ];
+        $response = $this->actingAs($creator)->ajaxJSON('POST', route('users.verify-request', $payload));
+        $content = json_decode($response->content());
+        $response->assertStatus(200);
+        dd($content);
     }
 
 
