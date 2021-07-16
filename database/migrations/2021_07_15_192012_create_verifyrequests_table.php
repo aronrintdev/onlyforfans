@@ -32,6 +32,7 @@ class CreateVerifyrequestsTable extends Migration
             $table->json('meta')->nullable()->comment("JSON-encoded meta attributes");
 
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
