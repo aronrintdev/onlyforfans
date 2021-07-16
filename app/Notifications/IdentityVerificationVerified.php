@@ -20,19 +20,18 @@ class IdentityVerificationVerified extends Notification
         $this->requester = $requester;
     }
 
-    public function via($notifiable)
-    {
+    public function via($notifiable) {
         return ['database', 'mail'];
     }
 
-    public function toMail($notifiable)
-    {
+    public function toMail($notifiable) {
+        $url = url('/settings/verify');
         return (new MailMessage)
-                    ->line('Congratulations! Your identity verification is complete. Please follow the link below to continue setting up your account to receive payments!');
+                ->line('Congratulations! Your identity verification is complete. Please follow the link below to continue setting up your account to receive payments!')
+                ->action('Get Paid!', $url);
     }
 
-    public function toArray($notifiable)
-    {
+    public function toArray($notifiable) {
         return [
             'guid' => $this->vr->guid,
             'vstatus' => $this->vr->vstatus ?? 'none',

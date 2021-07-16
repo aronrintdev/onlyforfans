@@ -20,19 +20,16 @@ class IdentityVerificationRequestSent extends Notification
         $this->requester = $requester;
     }
 
-    public function via($notifiable)
-    {
+    public function via($notifiable) {
         return ['database', 'mail'];
     }
 
-    public function toMail($notifiable)
-    {
+    public function toMail($notifiable) {
         return (new MailMessage)
-                    ->line('Your identity verification request has been received. Please look for a text on your phone for the next step in the process');
+                ->line('Your identity verification request has been received. Please look for a text on your phone to complete the final step in the process.');
     }
 
-    public function toArray($notifiable)
-    {
+    public function toArray($notifiable) {
         return [
             'guid' => $this->vr->guid,
             'vstatus' => $this->vr->vstatus ?? 'none',

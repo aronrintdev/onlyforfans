@@ -5,6 +5,7 @@ use DB;
 use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 use Carbon\Carbon;
 use Ramsey\Uuid\Uuid;
@@ -15,6 +16,8 @@ use App\Enums\VerifyStatusTypeEnum;
 
 class Verifyrequest extends Model
 {
+    use SoftDeletes;
+
     protected $guarded = [ 'id', 'created_at', 'updated_at', ];
 
     //--------------------------------------------
@@ -91,7 +94,8 @@ class Verifyrequest extends Model
 
             $json['created_at'] = $now;
             $cattrs = [
-                'request_raw_response' => $json,
+                'vrequest_raw_request' => $userAttrs,
+                'vrequest_raw_response' => $json,
             ];
             $vr->cattrs = $cattrs;
             //$vr->last_checked_at = 

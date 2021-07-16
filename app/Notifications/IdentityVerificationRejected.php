@@ -15,24 +15,21 @@ class IdentityVerificationRejected extends Notification
     public $vr;
     public $requester;
 
-    public function __construct(Verifyrequest $vr, User $requester) {
+    public function __construct(Verifyrequest $vr, User $requester) { 
         $this->vr = $vr;
         $this->requester = $requester;
     }
 
-    public function via($notifiable)
-    {
+    public function via($notifiable) {
         return ['database', 'mail'];
     }
 
-    public function toMail($notifiable)
-    {
+    public function toMail($notifiable) {
         return (new MailMessage)
                     ->line('Your identity verification could not be processed. Please contact AllFans support');
     }
 
-    public function toArray($notifiable)
-    {
+    public function toArray($notifiable) {
         return [
             'guid' => $this->vr->guid,
             'vstatus' => $this->vr->vstatus ?? 'none',
