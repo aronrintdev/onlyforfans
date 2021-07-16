@@ -1,40 +1,53 @@
 <template>
   <div v-if="!isLoading">
-    <b-card title="Verification" class="mb-3">
+    <b-card title="ID Verification" class="mb-3">
       <b-card-text>
 
         <section>
-          <b-form @submit.prevent>
+          <p v-if="verifiedStatus==='none'">Please provide your legal name and a mobile phone number. You will receive a verification text from the "ID Merit" Service. Follow the instructions and once complete check this page again to review your status.</p>
+          <p v-else-if="verifiedStatus==='pending'">Your identity verification request was successfully submitted and is pending review</p>
+        </section>
+
+
+        <section v-if="verifiedStatus==='none'">
+
+          <hr />
+          <b-form id="form-send-verify-request" @submit.prevent>
 
             <b-form-row>
               <b-form-group class="col-sm-6" label="First Name" label-for="firstname">
-                <b-form-input id="firstname" v-model="form.firstname" required ></b-form-input>
+                <b-form-input id="firstname" v-model="form.firstname" required />
               </b-form-group>
               <b-form-group class="col-sm-6" label="Last Name" label-for="lastname">
-                <b-form-input id="lastname" v-model="form.lastname" required ></b-form-input>
+                <b-form-input id="lastname" v-model="form.lastname" required />
               </b-form-group>
             </b-form-row>
             <b-form-row>
-              <b-form-group class="col-sm-6" label="Mobile Phone" label-for="mobile">
-                <b-form-input id="mobile" v-model="form.mobile" required ></b-form-input>
+              <b-form-group class="col-sm-6" label="Mobile Phone" label-for="mobile" >
+                <b-form-input id="mobile" v-model="form.mobile" required inputmode="numeric" pattern="[0-9]*" v-mask="'(###) ###-####'" />
               </b-form-group>
             </b-form-row>
             <!--
             <b-form-row>
               <b-form-group class="col-sm-4" label="Country" label-for="country">
-                <b-form-select id="country" v-model="form.country" :options="options.countries" required ></b-form-select>
+                <b-form-select id="country" v-model="form.country" :options="options.countries" required  />
               </b-form-group>
             </b-form-row>
             <b-form-row>
               <b-form-group class="col-sm-4" label="Date of Birth" label-for="dob">
-                <b-form-datepicker id="dob" v-model="form.dob"></b-form-datepicker>
+                <b-form-datepicker id="dob" v-model="form.dob" />
               </b-form-group>
               -->
             </b-form-row>
 
             <b-form-row class="mt-3">
-              <b-col class="col-sm-1">
-                <b-button @click="requestVerify" type="submit" variant="primary" class="w-100">Submit</b-button>
+              <b-col class="col-sm-12">
+                <b-button @click="requestVerify" type="submit" variant="primary" class="clickme_to-submit OFF-w-100" :disabled="isProcessing">
+                  <span v-if="!isProcessing">Submit</span>
+                  <span v-else>
+                      Sending... <fa-icon class="input-spinner" icon="spinner" spin />
+                    </span>
+                </b-button>
               </b-col>
             </b-form-row>
 
@@ -43,8 +56,40 @@
 
         <hr />
 
-        <section>
-          Status: {{ verifiedStatus }}
+        <section class="d-flex align-items-center">
+          <p class="mb-0">Status:</p>
+          <h5 class="mb-0 ml-1"><b-badge :variant="statusBadgeVariant" class="p-2">{{ renderStatus }}</b-badge></h5> 
+        </section>
+
+        <section v-if="renderError" class="mt-3">
+          <p class="mb-0 text-danger">There was a problem with your request</p>
+        </section>
+
+        <section v-if="verifiedStatus==='pending'" class="mt-3">
+          <hr />
+          <b-form id="form-send-check-status-request" @submit.prevent>
+            <b-form-row class="mt-3">
+              <b-col class="col-sm-12">
+                <b-button @click="checkStatus" type="submit" variant="primary" class="clickme_to-submit OFF-w-100" :disabled="isProcessing">
+                  <span v-if="!isProcessing">Check Status</span>
+                  <span v-else>
+                      Sending... <fa-icon class="input-spinner" icon="spinner" spin />
+                    </span>
+                </b-button>
+              </b-col>
+            </b-form-row>
+
+          </b-form>
+        </section>
+
+        <!-- ++++ -->
+
+        <section class="mt-5">
+          <hr />
+          DEBUG INFO
+          <ul>
+            <li>raw status: {{ verifiedStatus }}</li>
+          </ul>
         </section>
 
       </b-card-text>
@@ -71,26 +116,47 @@ export default {
 
     verifiedStatus() {
       if ( !this.session_user ) {
-        return '';
+        return 'none'
       }
-      switch (this.session_user.verified_status) {
+      return this.session_user.verified_status || 'none'
+    },
+
+    renderStatus() {
+      switch (this.verifiedStatus) {
         case 'none':
-          return 'Pre-Apply';
+          return 'Pre-Apply'
         case 'pending':
-          return 'Pending';
+          return 'Pending'
         case 'verified':
-          return 'Verified';
+          return 'Verified'
         case 'rejected':
-          return 'Rejected';
+          return 'Rejected'
         default:
-          return 'Unknown';
+          return 'Unknown'
       }
     },
+
+    statusBadgeVariant() {
+      switch (this.verifiedStatus) {
+        case 'pending':
+          return 'warning'
+        case 'verified':
+          return 'success'
+        case 'rejected':
+          return 'danger'
+        case 'none':
+        default:
+          return 'light'
+      }
+    }
   },
 
   watch: { },
 
   data: () => ({
+
+    isProcessing: false,
+    renderError: false,
 
     form: {
       mobile: null,
@@ -119,19 +185,52 @@ export default {
     },
 
     async requestVerify() {
+      this.renderError = false
       //const countryCodeForUS = '1'
+      this.isProcessing = true
       const payload = {
         //mobile: countryCodeForUS + this.form.mobile.replace(/\D/g,''), // only send digits, prepend US country code
         mobile: this.form.mobile.replace(/\D/g,''), // only send digits, prepend US country code
         firstname: this.form.firstname,
         lastname: this.form.lastname,
       }
-      const response1 = await axios.post( this.$apiRoute('users.requestVerify'), payload )
-      const response2 = await this.getMe()
+      try { 
+        await axios.post( this.$apiRoute('users.requestVerify'), payload )
+        this.$root.$bvToast.toast('Request successfully sent!', { toaster:'b-toaster-top-center', title:'Success', variant:'success' })
+        await this.getMe()
+      } catch (err) {
+        console.log('SettingsVerify::checkStatus()', { err })
+        this.renderError = true
+      }
+      this.isProcessing = false
       this.resetForm()
 
-      // %TODO: handle failure cases?
+      // %FIXME %TODO: handle failure cases?
 
+    },
+
+    async checkStatus() {
+      this.renderError = false
+      this.isProcessing = true
+      const payload = { }
+      try { 
+        await axios.post( this.$apiRoute('users.checkVerifyStatus'), payload )
+        await this.getMe()
+      } catch (err) {
+        console.log('SettingsVerify::checkStatus()', { err })
+        this.renderError = true
+      }
+      this.isProcessing = false
+
+      // %FIXME %TODO: handle failure cases?
+    },
+  },
+
+  watch: {
+    verifiedStatus(val) {
+      if ( val==='verified' ) {
+        this.$root.$bvToast.toast('Your account has been successfully verified...congratulations!', { toaster:'b-toaster-top-center', title:'Success', variant:'success' })
+      }
     },
   },
 
@@ -144,4 +243,7 @@ export default {
 </script>
 
 <style scoped>
+.clickme_to-submit {
+  width: 9rem;
+}
 </style>
