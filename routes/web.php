@@ -187,6 +187,7 @@ Route::group(['middleware' => ['auth']], function () {
     #region Timelines
     Route::get('/timelines-suggested', ['as'=>'timelines.suggested', 'uses' => 'TimelinesController@suggested']); // %FIXME: refactor: use index(?)
     Route::get('/timelines/my-followed-stories', ['as'=>'timelines.myFollowedStories', 'uses' => 'TimelinesController@myFollowedStories']);
+    Route::get('/timelines/public-feed', ['as'=>'timelines.publicfeed', 'uses' => 'TimelinesController@publicFeed']);
     //Route::get('/timelines/home', ['as'=>'timelines.home', 'uses' => 'TimelinesController@home']); // special case of 'show'
     Route::get('/timelines/match', ['as'=>'timelines.match', 'uses' => 'TimelinesController@match']);
     Route::get('/timelines/home/feed', ['as'=>'timelines.homefeed', 'uses' => 'TimelinesController@homefeed']);
