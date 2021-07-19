@@ -139,12 +139,12 @@ class MediafilesController extends AppBaseController
                 $owner = $request->user(); // the orig. content OWNER
                 $subFolder = $owner->id;
                 $s3Path = $file->store($subFolder, 's3');
-                $mfname = $mfname ?? $file->getClientOriginalName();
+                $mfname = $request->input('mfname') ?? $file->getClientOriginalName();
     
                 $mediafile = Diskmediafile::doCreate([
                     'owner_id'      => $owner->id,
                     'filepath'      => $s3Path,
-                    'mimetype'      => $file->getMimeType(),
+                    'mimetype'      => $file->getClientMimeType(),
                     'orig_filename' => $file->getClientOriginalName(),
                     'orig_ext'      => $file->getClientOriginalExtension(),
                     'mfname'        => $mfname,

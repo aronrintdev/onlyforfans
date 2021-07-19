@@ -35,6 +35,11 @@ export default [
     path: 'payment-methods',
   },
   {
+    name: 'settings.subscription',
+    component: settings.Subscription,
+    path: 'subscription',
+  },
+  {
     component: settings.MySubscriptions,
     path: 'my-subscriptions',
     children: childRoutes.subscriptions,
@@ -53,6 +58,11 @@ export default [
     name: 'settings.referrals',
     component: settings.Referrals,
     path: 'referrals',
+  },
+  {
+    name: 'settings.verify',
+    component: settings.Verify,
+    path: 'verify',
   },
   /*
   {

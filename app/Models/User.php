@@ -27,6 +27,8 @@ use Illuminate\Notifications\Notifiable;
 use InvalidArgumentException;
 use Laravel\Scout\Searchable;
 
+use App\Enums\VerifyStatusTypeEnum;
+
 /**
  * @property string      $id              `uuid` | `unique`
  * @property string      $email           email address | `unique`
@@ -66,6 +68,8 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
         'avatar',
         'cover',
         'about',
+        'is_verified',
+        'verified_status',
     ];
 
     protected $guarded = [
@@ -83,7 +87,9 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
         'password',
         'remember_token',
         'verification_code',
-        'timeline'
+        'timeline',
+        'real_firstname',
+        'real_lastname',
     ];
 
     protected $dates = [
@@ -108,6 +114,12 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
             $model->checkUsername();
             $model->remember_token = str_random(10);
             $model->verification_code = str_random(10);
+            if ( empty($model->firstname) ) {
+                $model->firstname = $model->real_firstname;
+            }
+            if ( empty($model->lastname) ) {
+                $model->lastname = $model->real_lastname;
+            }
         });
         self::created(function ($model) {
             UserSetting::create([
@@ -300,6 +312,17 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
         return $this->hasMany(Storyqueue::class, 'viewer_id');
     }
 
+    // https://laravel.com/docs/8.x/eloquent-relationships#has-one-of-many
+    public function verifyrequest() 
+    {
+        return $this->hasOne(Verifyrequest::class, 'requester_id')->latestOfMany();
+    }
+
+    public function campaign()
+    {
+        return $this->hasOne(Campaign::class);
+    }
+
 //    public function lists()
 //    {
 //        return $this->belongsToMany(Lists::class, 'list_user', 'user_id', 'list_id')->withTimestamps();
@@ -325,6 +348,17 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
         'sharedposts.pivot.meta' => 'array',
     ];
      */
+
+    public function getIsVerifiedAttribute($value) {
+        return $this->verifyrequest && ($this->verifyrequest->vstatus===VerifyStatusTypeEnum::VERIFIED);
+    }
+
+    public function getVerifiedStatusAttribute($value) {
+        if ( !$this->verifyrequest ) {
+            return VerifyStatusTypeEnum::NONE;
+        } 
+        return $this->verifyrequest->vstatus;
+    }
 
     public function getNameAttribute($value)
     {

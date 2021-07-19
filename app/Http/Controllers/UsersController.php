@@ -10,6 +10,10 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
+use App\Notifications\IdentityVerificationRequestSent;
+use App\Notifications\IdentityVerificationVerified;
+use App\Notifications\IdentityVerificationRejected;
+
 use App\Http\Resources\UserSetting as UserSettingResource;
 use App\Http\Resources\User as UserResource;
 use App\Http\Resources\UserCollection;
@@ -18,10 +22,12 @@ use App\Models\UserSetting;
 use App\Models\Fanledger;
 use App\Models\Country;
 use App\Models\Timeline;
-use App\Enums\PaymentTypeEnum;
 use App\Rules\MatchOldPassword;
 use App\Models\Diskmediafile;
+use App\Models\Verifyrequest;
 use App\Enums\MediafileTypeEnum;
+use App\Enums\PaymentTypeEnum;
+use App\Enums\VerifyStatusTypeEnum;
 
 class UsersController extends AppBaseController
 {
@@ -338,5 +344,54 @@ class UsersController extends AppBaseController
         }
         $sessionUser->save();
         return ['status' => 200];
+    }
+
+    // --- Identity Verification ---
+
+    // Send a request for identity verification (starts the process)
+    public function requestVerify(Request $request)
+    {
+        // %FIXME: make sure the name they type in matches the name in our database?
+        // %FIXME: try - catch
+        // %TODO: put on queue (?)
+
+        $sessionUser = $request->user();
+        $user = $sessionUser;
+
+        $request->validate([
+            'mobile' => 'required|digits:10', // assume US (w/o country code) for now & Vue client strips out extra chars
+            'firstname' => 'required|string',
+            'lastname' => 'required|string',
+            //'country' => 'required|string|size:2',
+            //'dob' => 'required|date',
+        ]);
+
+        $attrs = $request->except(['mobile']);
+        $attrs['mobile'] = '+1'.$request->mobile; // append US country code (required by ID Merit) %FIXME hardcoded to US
+        $vr = Verifyrequest::verifyUser($user, $attrs);
+
+        // Store real name (keep in mind not yet verified!)
+        $user->real_firstname = $request->firstname;
+        $user->real_lastname = $request->lastname;
+        $user->save();
+
+        $user->notify( new IdentityVerificationRequestSent($vr, $user) );
+
+        return response()->json( $vr );
+    }
+
+    // Manually check status of a pending request
+    // %TODO: put on queue (?)
+    public function checkVerifyStatus(Request $request)
+    {
+        $sessionUser = $request->user();
+        $user = $sessionUser;
+        $vr = Verifyrequest::checkStatus($user);
+        if ( $vr->vstatus ===  VerifyStatusTypeEnum::VERIFIED ) {
+            $user->notify( new IdentityVerificationVerified($vr, $user) );
+        } else if ( $vr->vstatus ===  VerifyStatusTypeEnum::REJECTED ) {
+            $user->notify( new IdentityVerificationRejected($vr, $user) );
+        }
+        return response()->json( $vr );
     }
 }
