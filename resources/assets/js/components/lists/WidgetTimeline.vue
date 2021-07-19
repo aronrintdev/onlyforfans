@@ -24,11 +24,13 @@
       </div>
 
       <div class="shareable-id">
-        <b-card-title class="mb-1">
+        <b-card-title class="mb-1 subscriber-card">
           <router-link :to="{ name: 'timeline.show', params: { slug: timeline.slug } }">{{ timeline.name }}</router-link>
-          <b-badge v-if="access_level==='premium'" variant='info'>
-            Premium
-          </b-badge>
+          <span v-if="access_level==='premium'" class="subscriber">
+            <b-badge variant='info'>
+              Subscriber
+            </b-badge>
+          </span>
         </b-card-title>
         <b-card-sub-title class="mb-1">
           <router-link :to="{ name: 'timeline.show', params: { slug: timeline.slug } }">@{{ timeline.slug }}</router-link>
@@ -94,6 +96,15 @@ export default {
 <style lang="scss" scoped>
 .clickable {
   cursor: pointer;
+}
+.subscriber {
+  margin-left: 15px;
+  font-size: 18px;
+}
+.subscriber-card {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
 }
 </style>
 
