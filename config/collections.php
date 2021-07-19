@@ -13,6 +13,12 @@ return [
      * Max allowed pagination take per request for a resource
      */
     'defaultMax' => $default,
+    'size' => [
+        'default' => $default,
+        'small'   => $small,
+        'mid'     => $mid,
+        'large'   => $large,
+    ],
     'max' => [
         'ach_accounts'  => env('MAX_ACH_ACCOUNTS_PER_REQUEST' , $mid  ),
         'posts'         => env('MAX_POSTS_PER_REQUEST'        , $small),
