@@ -30,8 +30,8 @@
       <div class="sharee-id">
         <b-card-title class="mb-1">
           <router-link :to="{ name: 'timeline.show', params: { slug } }">{{ user.name }}</router-link>
-          <b-badge v-if="access_level==='premium'" variant='success'>
-            <span v-text="'Premium'" />
+          <b-badge v-if="access_level==='premium'" variant='info'>
+            Premium
           </b-badge>
         </b-card-title>
         <b-card-sub-title class="mb-1">
