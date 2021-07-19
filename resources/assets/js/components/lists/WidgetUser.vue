@@ -14,9 +14,9 @@
           </template>
           <b-dropdown-item v-clipboard="getTimelineUrl(user)">Copy link to profile</b-dropdown-item>
           <b-dropdown-divider></b-dropdown-divider>
-          <b-dropdown-item @click="doRestrict(user)">Restrict</b-dropdown-item>
-          <b-dropdown-item @click="doBlock(user)">Block</b-dropdown-item>
-          <b-dropdown-item @click="doReport(user)">Report</b-dropdown-item>
+          <b-dropdown-item disabled @click="doRestrict(user)">Restrict</b-dropdown-item>
+          <b-dropdown-item disabled @click="doBlock(user)">Block</b-dropdown-item>
+          <b-dropdown-item disabled @click="doReport(user)">Report</b-dropdown-item>
         </b-dropdown>
       </div>
 
@@ -37,13 +37,13 @@
         </b-card-sub-title>
       </div>
 
-      <b-card-text v-if="notes" class="mt-2 mb-2">{{ notes }}</b-card-text>
+      <b-card-text v-if="notes" class="mt-2 mb-2"><pre>{{ notes }}</pre></b-card-text>
 
       <b-card-text class="mb-2"><fa-icon fixed-width :icon="['far', 'star']" style="color:#007bff" /> Add to favorites</b-card-text>
 
       <b-button variant="primary"><fa-icon fixed-width :icon="['far', 'envelope']" /> Message</b-button>
-      <b-button variant="warning"><fa-icon fixed-width :icon="['far', 'badge-percent']" /> Discount</b-button>
-      <b-button variant="danger"><fa-icon fixed-width :icon="['far', 'ban']" /> Restrict</b-button>
+      <b-button disabled variant="primary"><fa-icon fixed-width :icon="['far', 'badge-percent']" /> Discount</b-button>
+      <b-button disabled variant="primary"><fa-icon fixed-width :icon="['far', 'ban']" /> Restrict</b-button>
       <b-button variant="primary" @click="showNotesModal"><fa-icon fixed-width :icon="['far', 'pencil']" /> {{ notesButtonCaption }}</b-button>
       <div class="mt-2 mb-2">
         <small v-if="access_level==='premium'" class="text-muted">Subscribed since {{ moment(created_at).format('MMM DD, YYYY') }}</small>
@@ -70,11 +70,13 @@
         </div>
       </div>
       <b-form-group class="flex-fill mt-3">
-        <b-form-input v-model="notesInput" placeholder="Notes" />
+        <b-form-textarea v-model="notesInput" placeholder="Notes" maxlength="500" rows="4" />
+        <small class="text-muted float-right mt-1">{{ notesInput.length }} / 500</small>
       </b-form-group>
       <template #modal-footer>
+        <b-button v-if="notes" @click="clearNotes" type="cancel" variant="danger">Clear</b-button>
         <b-button @click="hideNotesModal" type="cancel" variant="secondary">Cancel</b-button>
-        <b-button @click="saveNote" :disabled="!notesInput" variant="primary">Save</b-button>
+        <b-button @click="saveNotes" :disabled="!notesInput" variant="primary">Save</b-button>
       </template>
     </b-modal>
 
@@ -144,8 +146,20 @@ export default {
       this.isNotesModalVisible = false
     },
 
-    saveNote() {
+    handleNotesChange(value) {
+      if (value.length > 10) {
+        this.notesInput = this.notesInput.substring(0, 10)
+      }
+    },
+
+    saveNotes() {
       this.notes = this.notesInput
+      this.hideNotesModal()
+    },
+
+    clearNotes() {
+      this.notes = ''
+      this.notesInput = ''
       this.hideNotesModal()
     },
   },
@@ -160,6 +174,11 @@ export default {
 <style lang="scss" scoped>
 .clickable {
   cursor: pointer;
+}
+
+pre {
+  font-family: inherit;
+  font-size: inherit;
 }
 
 #modal-notes {
@@ -184,6 +203,10 @@ export default {
     width: 60px;
     height: 60px;
     margin-right: 10px;
+  }
+
+  button {
+    width: 6rem;
   }
 }
 </style>

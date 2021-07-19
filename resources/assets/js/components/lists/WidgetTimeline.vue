@@ -14,7 +14,7 @@
           </template>
           <b-dropdown-item v-clipboard="getTimelineUrl(timeline)">Copy link to profile</b-dropdown-item>
           <b-dropdown-divider></b-dropdown-divider>
-          <b-dropdown-item @click="doReport(timeline)">Report</b-dropdown-item>
+          <b-dropdown-item disabled @click="doReport(timeline)">Report</b-dropdown-item>
         </b-dropdown>
       </div>
       <div class="avatar-img">

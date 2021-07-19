@@ -18,12 +18,12 @@
           <!-- %NOTE: s is the [shareables] record, s.shareable is the related, 'morhped', 'shareable' object (eg timelines) -->
           <!-- %NOTE: we're using WidgetTimeline here because you're following a timeline, not a user directly -->
           <WidgetTimeline :session_user="session_user" :timeline="s.shareable" :access_level="s.access_level" :created_at="s.created_at">
-            <b-card-text class="mb-2"><fa-icon fixed-width :icon="['far', 'star']" class="clickable" style="color:#007bff" /> Add to favorites</b-card-text>
+            <b-card-text @click="handleFavorite" class="mb-2 clickable"><fa-icon fixed-width :icon="['far', 'star']" style="color:#007bff" /> Add to favorites</b-card-text>
 
             <b-button variant="primary"><fa-icon fixed-width :icon="['far', 'envelope']" /> Message</b-button>
-            <b-button @click="renderTip(s.shareable, 'timelines')" variant="success"><fa-icon fixed-width :icon="['far', 'dollar-sign']" /> Send Tip</b-button>
-            <b-button v-if="s.access_level==='default'" @click="renderSubscribe(s.shareable)" variant="info"><fa-icon fixed-width :icon="['far', 'box-full']" /> Premium</b-button>
-            <b-button @click="renderCancel(s.shareable, s.access_level)" variant="warning"><fa-icon fixed-width :icon="['far', 'power-off']" /> Cancel</b-button>
+            <b-button @click="renderTip(s.shareable, 'timelines')" variant="primary"><fa-icon fixed-width :icon="['far', 'dollar-sign']" /> Send Tip</b-button>
+            <b-button v-if="s.access_level==='default'" @click="renderSubscribe(s.shareable)" variant="primary"><fa-icon fixed-width :icon="['far', 'box-full']" /> Premium</b-button>
+            <b-button @click="renderCancel(s.shareable, s.access_level)" variant="primary"><fa-icon fixed-width :icon="['far', 'power-off']" /> Cancel</b-button>
           </WidgetTimeline>
           <!-- <pre> Access Level: {{ s.access_level }} {{ JSON.stringify(s, null, "\t") }} </pre> -->
         </b-col>
@@ -140,6 +140,9 @@ export default {
 
     doReset() {
       this.currentPage = 1
+    },
+
+    handleFavorite() {
     },
 
     /*
