@@ -3,8 +3,8 @@
     <section class="row">
       <main class="col-12">
         <PublicPostFeed :mediafiles="mediafiles" @loadMore="loadMore" />
-        <div class="text-center py-5 m-5" v-if="loading">
-          <b-spinner style="width: 3rem; height: 3rem;"></b-spinner>
+        <div class="text-center" v-if="loading">
+          <b-spinner class="loading"></b-spinner>
         </div>
       </main>
     </section>
@@ -52,3 +52,21 @@ export default {
   }
 }
 </script>
+
+<style lang="scss" scoped>
+.loading {
+  width: 2.5em;
+  height: 2.5em;
+  margin: 5em;
+}
+@media (max-width: 767px) {
+  #view-explore .col-12 {
+    padding: 5px;
+  }
+  .loading {
+    width: 2em;
+    height: 2em;
+    margin: 4em;
+  }
+}
+</style>

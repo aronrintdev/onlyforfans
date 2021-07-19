@@ -106,7 +106,7 @@ export default {
           return 'float-left';
         }
       }
-      return '';
+      return 'float-left';
     },
     loadMore(isVisible) {
       if (isVisible) {
@@ -122,6 +122,12 @@ export default {
   max-width: 1170px;
   margin: auto;
   height: auto !important;
+
+  &::after {
+    content: '';
+    display: block;
+    clear: both;
+  }
 
   & > div {
     position: relative !important;
@@ -200,6 +206,26 @@ export default {
 
   .icon-images .icon {
     transform: scaleX(-1);
+  }
+
+  @media (max-width: 767px) {
+    .item {
+      width: calc(33.3% - 2px);
+      margin: 1px;
+
+      &.video {
+        &.video-lg {
+          width: calc(66.6% - 2px);
+        }
+      }
+    }
+    .icon-video, .icon-images {
+      top: 8px;
+      right: 8px;
+      width: 18px;
+      height: 18px;
+      z-index: 2;
+    }
   }
 
 }
