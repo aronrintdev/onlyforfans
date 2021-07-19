@@ -15,7 +15,7 @@ const route = window.route
  */
 const prepThread = function (state, threadId) {
   if (typeof state.threads[threadId] === 'undefined') {
-    state.threads[threadId] = { meta: {}, messages: {} }
+    state.threads[threadId] = { meta: {}, messages: {}, gallery: {}, galleryMeta: {} }
   }
 }
 
@@ -27,11 +27,15 @@ export const messaging = {
   },
 
   state: () => ({
+    // Threads Structure
     // threads: {
     //   'threadId': {
     //     messages: {
     //       'messageId': {},
     //     },
+    //     gallery: {},
+    //     meta: {},
+    //     galleryMeta: {},
     //   },
     // }
     threads: {},
@@ -44,9 +48,46 @@ export const messaging = {
     uploadsVaultFolder: null,
   }),
 
-  getters: {},
+  getters: {
+    galleryItems: state => threadId => {
+      if (!state.threads[threadId] || !state.threads[threadId].gallery) {
+        return []
+      }
+      return _.orderBy(state.threads[threadId].gallery, 'created_at', 'desc')
+    },
+    meta: state => threadId => {
+      if (!state.threads[threadId] || !state.threads[threadId].meta) {
+        return {}
+      }
+      return state.threads[threadId].meta
+    },
+    galleryMeta: state => threadId => {
+      if (!state.threads[threadId] || !state.threads[threadId].galleryMeta) {
+        return {}
+      }
+      return state.threads[threadId].galleryMeta
+    },
+  },
 
   mutations: {
+
+    UPDATE_GALLERY(state, { threadId, payload }) {
+      console.log('UPDATE_GALLERY', { threadId, payload })
+      prepThread(state, threadId)
+      if (payload.meta) {
+        state.threads[threadId].galleryMeta = payload.meta || {}
+      }
+
+      // Add media files to threads object
+      state.threads[threadId].gallery = {
+        ...state.threads[threadId].gallery,
+        ..._.keyBy(payload.data.map(
+          o => ({ ...o, meta: { page: payload.meta ? payload.meta.current_page : 0 } })),
+          'id'
+        ),
+      }
+    },
+
     UPDATE_MESSAGES(state, { threadId, page, take, payload }) {
       prepThread(state, threadId)
       // Save Metadata from call
@@ -108,7 +149,19 @@ export const messaging = {
   },
 
   actions: {
+    getGallery({ commit }, { chatthread, page, take }) {
+      console.log('getMessages', {chatthread, page, take})
+      return new Promise((resolve, reject) => {
+        axios.get(route('chatthreads.gallery', chatthread), {
+          params: { take, page }
+        }).then(response => {
+          commit('UPDATE_GALLERY', { threadId: chatthread, payload: response.data })
+          resolve(response.data)
+        }).catch(error => reject(error))
+      })
+    },
     getMessages({ commit }, threadId, { page, take }) {
+      console.log('getMessages', {threadId, page, take})
       return new Promise((resolve, reject) => {
         axios.get(route('chatmessages.index'), { params: {} })
           .then(response => {

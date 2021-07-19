@@ -4,13 +4,16 @@ namespace App\Http\Controllers;
 use DB;
 use Exception;
 use Throwable;
-use Illuminate\Support\Facades\Log;
+use App\Models\User;
+use App\Models\Mediafile;
+use App\Models\Chatthread;
+use App\Models\Chatmessage;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Config;
+use App\Http\Resources\MediafileCollection;
 use App\Http\Resources\ChatmessageCollection;
 use App\Http\Resources\Chatmessage as ChatmessageResource;
-use App\Models\Chatmessage;
-use App\Models\Chatthread;
-use App\Models\User;
 
 class ChatmessagesController extends AppBaseController
 {
@@ -73,6 +76,28 @@ class ChatmessagesController extends AppBaseController
 
         $data = $query->latest()->paginate( $request->input('take', env('MAX_DEFAULT_PER_REQUEST', 10)) );
         return new ChatmessageCollection($data);
+    }
+
+    /**
+     * Return a paginated list of images that are in a chatthread
+     * @param Request $request
+     * @return void
+     */
+    public function gallery(Request $request, Chatthread $chatthread)
+    {
+        // $request->validate([
+        //     'chatthread_id' => 'required|uuid|exists:chatthreads,id',
+        // ]);
+
+        $this->authorize('view', $chatthread);
+
+        $query = Mediafile::whereHasMorph('resource', Chatmessage::class, function($q1) use ($chatthread) {
+            $q1->where('chatthread_id', $chatthread->getKey());
+        });
+
+        $data = $query->latest()->paginate($request->input('take', Config::get('collections.size.mid', 20)));
+
+        return new MediafileCollection($data);
     }
 
 

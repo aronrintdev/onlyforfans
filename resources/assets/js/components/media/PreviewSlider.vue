@@ -98,7 +98,7 @@ export default {
     },
 
     onClickNext() {
-      this.$refs.mySwiper.swiperInstance.slideTo(this.files.length, 400, false)
+      this.$refs.mySwiper.swiperInstance.slideTo(this.files.length + 1, 400, false)
     },
 
     onFirstVisible(isVisible) {
