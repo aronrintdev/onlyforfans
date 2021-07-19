@@ -65,6 +65,7 @@
             :key="activeThreadId"
             :session_user="session_user"
             :participant="participants(activeThread)"
+            :timeline="activeThread.timeline"
           />
           <div v-if="!activeThreadId" class="d-flex h-100 align-items-center justify-content-around">
             <div class="d-flex flex-column">
