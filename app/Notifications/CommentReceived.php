@@ -6,8 +6,9 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-use NotificationChannels\SendGrid\SendGridChannel;
-use Illuminate\Notifications\Messages\SendGridMessage;
+//use NotificationChannels\SendGrid\SendGridChannel;
+//use Illuminate\Notifications\Messages\SendGridMessage;
+use App\Channels\SendgridChannel;
 use App\Models\Comment;
 use App\Models\User;
 use App\Interfaces\Commentable;
@@ -27,10 +28,11 @@ class CommentReceived extends Notification
         $this->settings = $resource->getPrimaryOwner()->settings; // resource ~= commentable
     }
 
+    // see: https://medium.com/@sirajul.anik/laravel-notifications-part-2-creating-a-custom-notification-channel-6b0eb0d81294
     public function via($notifiable)
     {
         //$channels =  ['database', SendGridChannel::class, ];
-        $channels =  ['database', 'sendgrid'];
+        $channels =  ['database', \App\Channels\SendgridChannel::class];
         /* %TODO: uncomment and use SendGridChannel
         $exists = $this->settings->cattrs['notifications']['posts']['new_comment'] ?? false;
         if ( $exists && is_array($exists) && in_array('email', $exists) ) {
@@ -52,8 +54,37 @@ class CommentReceived extends Notification
             ->action('Notification Action', url('/'));
     }
 
-    public function toSendGrid($notifiable)
+    public function toSendgrid($notifiable)
     {
+
+        return [
+            'foo' => 'bar',
+        ];
+        /*
+        return (new SendGridMessage('d-c81aa70638ac40f5a33579bf425aa591'))
+            ->payload($data)
+            ->from('info@allfans.com', 'AllFans Support')
+            //->to('receiver1@example.com', 'Example Receiver');
+            ->to('peter+campaign-goal-template-active@peltronic.com', 'Peter Receiver');
+         */
+    }
+
+    public function toArray($notifiable)
+    {
+        return [
+            'resource_type' => $this->resource->getTable(),
+            'resource_id' => $this->resource->id,
+            'resource_slug' => $this->resource->slug,
+            'actor' => [ // commenter
+                'username' => $this->actor->username,
+                'name' => $this->actor->name,
+                'avatar' => $this->actor->avatar->filepath ?? null,
+            ],
+        ];
+    }
+}
+
+        /*
         $data = [
             'first_name' => $this->actor->firstname,
             'last_name' => $this->actor->lastname,
@@ -73,25 +104,4 @@ class CommentReceived extends Notification
                 ]
             ]
         ];
-
-        return (new SendGridMessage('d-c81aa70638ac40f5a33579bf425aa591'))
-            ->payload($data)
-            ->from('info@allfans.com', 'AllFans Support')
-            //->to('receiver1@example.com', 'Example Receiver');
-            ->to('peter+campaign-goal-template-active@peltronic.com', 'Peter Receiver');
-    }
-
-    public function toArray($notifiable)
-    {
-        return [
-            'resource_type' => $this->resource->getTable(),
-            'resource_id' => $this->resource->id,
-            'resource_slug' => $this->resource->slug,
-            'actor' => [ // commenter
-                'username' => $this->actor->username,
-                'name' => $this->actor->name,
-                'avatar' => $this->actor->avatar->filepath ?? null,
-            ],
-        ];
-    }
-}
+         */
