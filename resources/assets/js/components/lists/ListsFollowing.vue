@@ -18,7 +18,11 @@
           <!-- %NOTE: s is the [shareables] record, s.shareable is the related, 'morhped', 'shareable' object (eg timelines) -->
           <!-- %NOTE: we're using WidgetTimeline here because you're following a timeline, not a user directly -->
           <WidgetTimeline :session_user="session_user" :timeline="s.shareable" :access_level="s.access_level" :created_at="s.created_at">
-            <b-card-text @click="handleFavorite" class="mb-2 clickable"><fa-icon fixed-width :icon="['far', 'star']" style="color:#007bff" /> Add to favorites</b-card-text>
+            <b-card-text @click="handleFavorite(s.shareable_id)" class="mb-2 clickable">
+              <fa-icon v-if="s.is_favorited" fixed-width :icon="['fas', 'star']" style="color:#007bff" />
+              <fa-icon v-else fixed-width :icon="['far', 'star']" style="color:#007bff" />
+              Add to favorites
+            </b-card-text>
 
             <b-button variant="primary"><fa-icon fixed-width :icon="['far', 'envelope']" /> Message</b-button>
             <b-button @click="renderTip(s.shareable, 'timelines')" variant="primary"><fa-icon fixed-width :icon="['far', 'dollar-sign']" /> Send Tip</b-button>
@@ -110,6 +114,7 @@ export default {
       if (this.sort.dir) {
         params.sortDir = this.sort.dir
       }
+      params.isFollowing = true;
 
       axios.get( route('shareables.indexFollowing'), { params } ).then( response => {
         this.shareables = response.data.data
@@ -142,7 +147,31 @@ export default {
       this.currentPage = 1
     },
 
-    handleFavorite() {
+    handleFavorite(id) {
+      const temp = this.shareables.map(s => {
+        if (s.shareable_id === id) {
+          this.toggleFavorite(s.is_favorited, id);
+          s.is_favorited = s.is_favorited ? 0 : 1;
+        }
+        return s;
+      });
+
+      this.shareables = temp;
+    },
+
+    async toggleFavorite(isFavorited, id) {
+      let response
+      if (isFavorited) { // remove
+        response = await axios.post(`/favorites/remove`, {
+          favoritable_type: 'timelines',
+          favoritable_id: id,
+        })
+      } else { // add
+        response = await axios.post(`/favorites`, {
+          favoritable_type: 'timelines',
+          favoritable_id: id,
+        })
+      }
     },
 
     /*

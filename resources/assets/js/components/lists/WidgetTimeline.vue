@@ -26,7 +26,9 @@
       <div class="shareable-id">
         <b-card-title class="mb-1">
           <router-link :to="{ name: 'timeline.show', params: { slug: timeline.slug } }">{{ timeline.name }}</router-link>
-          <fa-icon v-if="access_level==='premium'" fixed-width :icon="['fas', 'rss-square']" style="color:#138496; font-size: 16px;" />
+          <b-badge v-if="access_level==='premium'" variant='success'>
+            <span v-text="'Premium'" />
+          </b-badge>
         </b-card-title>
         <b-card-sub-title class="mb-1">
           <router-link :to="{ name: 'timeline.show', params: { slug: timeline.slug } }">@{{ timeline.slug }}</router-link>

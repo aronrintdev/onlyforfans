@@ -30,7 +30,9 @@
       <div class="sharee-id">
         <b-card-title class="mb-1">
           <router-link :to="{ name: 'timeline.show', params: { slug } }">{{ user.name }}</router-link>
-          <fa-icon v-if="access_level==='premium'" fixed-width :icon="['fas', 'rss-square']" style="color:#138496; font-size: 16px;" />
+          <b-badge v-if="access_level==='premium'" variant='success'>
+            <span v-text="'Premium'" />
+          </b-badge>
         </b-card-title>
         <b-card-sub-title class="mb-1">
           <router-link :to="{ name: 'timeline.show', params: { slug } }">@{{ user.username }}</router-link>
@@ -39,7 +41,11 @@
 
       <b-card-text v-if="notes" class="mt-2 mb-2"><pre>{{ notes }}</pre></b-card-text>
 
-      <b-card-text class="mb-2"><fa-icon fixed-width :icon="['far', 'star']" style="color:#007bff" /> Add to favorites</b-card-text>
+      <b-card-text class="mb-2 clickable" @click="toggleFavorite">
+        <fa-icon v-if="isFavoritedByMe" fixed-width :icon="['fas', 'star']" style="color:#007bff" />
+        <fa-icon v-else fixed-width :icon="['far', 'star']" style="color:#007bff" />
+        Add to favorites
+      </b-card-text>
 
       <b-button variant="primary"><fa-icon fixed-width :icon="['far', 'envelope']" /> Message</b-button>
       <b-button disabled variant="primary"><fa-icon fixed-width :icon="['far', 'badge-percent']" /> Discount</b-button>
@@ -92,10 +98,12 @@ export default {
 
   props: {
     session_user: null,
+    timeline_id: null,
     user: null, // eg: the follower, or favorited user,
     slug: null,
     access_level: null,
     created_at: null,
+    is_favorited: null,
   },
 
   computed: {
@@ -117,6 +125,8 @@ export default {
     isNotesModalVisible: false,
     notes: '',
     notesInput: '',
+
+    isFavoritedByMe: false, // is timeline/feed a favorite
   }),
 
   methods: {
@@ -162,9 +172,28 @@ export default {
       this.notesInput = ''
       this.hideNotesModal()
     },
+
+    async toggleFavorite() {
+      let response
+      if (this.isFavoritedByMe) { // remove
+        response = await axios.post(`/favorites/remove`, {
+          favoritable_type: 'timelines',
+          favoritable_id: this.timeline_id,
+        })
+        this.isFavoritedByMe = false
+      } else { // add
+        response = await axios.post(`/favorites`, {
+          favoritable_type: 'timelines',
+          favoritable_id: this.timeline_id,
+        })
+        this.isFavoritedByMe = true
+      }
+    },
   },
 
-  mounted() { },
+  mounted() {
+    this.isFavoritedByMe = this.is_favorited;
+  },
   created() { },
   components: { },
 

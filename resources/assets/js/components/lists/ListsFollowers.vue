@@ -16,7 +16,7 @@
       <b-row class="mt-2">
         <b-col lg="4" v-for="(s,idx) in shareables" :key="s.id" > 
           <!-- %NOTE: we're using WidgetUser here because users, not the timelines are following me -->
-          <WidgetUser :session_user="session_user" :user="s.sharee" :slug="s.sharee_timeline_slug" :access_level="s.access_level" :created_at="s.created_at" />
+          <WidgetUser :session_user="session_user" :user="s.sharee" :timeline_id="s.sharee_timeline_id" :slug="s.sharee_timeline_slug" :access_level="s.access_level" :created_at="s.created_at" :is_favorited="s.is_favorited" />
         </b-col>
       </b-row>
 
@@ -97,6 +97,7 @@ export default {
       if (this.sort.dir) {
         params.sortDir = this.sort.dir
       }
+      params.isFollowers = true;
 
       axios.get( route('shareables.indexFollowers'), { params } ).then( response => {
         this.shareables = response.data.data

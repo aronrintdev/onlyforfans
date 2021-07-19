@@ -10,6 +10,13 @@ class Shareable extends JsonResource
     public function toArray($request)
     {
         $sessionUser = $request->user();
+        $is_favorited = null;
+
+        if (isset($request->isFollowers)) {
+            $is_favorited = count($this->whenLoaded('sharee')->timeline->favorites->where('user_id', $this->whenLoaded('shareable')->user_id));
+        } else if (isset($request->isFollowing)) {
+            $is_favorited = count($this->whenLoaded('shareable')->favorites->where('user_id', $this->sharee_id));
+        }
 
         return [
             //'id' => $this->id,
@@ -22,6 +29,7 @@ class Shareable extends JsonResource
             'sharee_timeline_id' => $this->whenLoaded('sharee')->timeline->id,
             'sharee_timeline_slug' => $this->whenLoaded('sharee')->timeline->slug,
             'shareable' => $this->whenLoaded('shareable'),
+            'is_favorited' => $is_favorited,
             'created_at' => $this->created_at,
         ];
     }
