@@ -3,6 +3,9 @@
     <section class="row">
       <main class="col-12">
         <PublicPostFeed :mediafiles="mediafiles" @loadMore="loadMore" />
+        <div class="text-center py-5 m-5" v-if="loading">
+          <b-spinner style="width: 3rem; height: 3rem;"></b-spinner>
+        </div>
       </main>
     </section>
   </div>
@@ -19,6 +22,7 @@ export default {
   data: () => ({
     page: 1,
     mediafiles: [],
+    loading: false,
   }),
 
   mounted() {
@@ -27,6 +31,7 @@ export default {
   },
   methods: {
     async fetchFeed(page) {
+      this.loading = true;
       const response = await axios.get(route('timelines.publicfeed'), {
         params: {
           page,
@@ -38,6 +43,7 @@ export default {
         mediaCount: post.mediafiles.length,
       }));
       this.mediafiles = this.mediafiles.concat(mediafiles);
+      this.loading = false;
     },
     loadMore() {
       this.page += 1;

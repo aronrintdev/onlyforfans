@@ -1,7 +1,13 @@
 <template>
   <div class="w-100">
     <div v-masonry transition-duration="0" item-selector=".item" class="masonry-container">
-      <div v-masonry-tile class="item" :class="mf.classList" v-for="(mf, index) in files" :key="index">
+      <div
+        v-masonry-tile class="item"
+        :class="mf.classList"
+        v-for="(mf, index) in files"
+        :key="index"
+        v-observe-visibility="index === files.length - 1 ? loadMore : false"
+      >
         <div class="media-wrapper" v-if="mf.is_image">
           <img
             :src="mf.filepath"
@@ -21,7 +27,6 @@
         </div>
       </div>
     </div>
-    <button @click="loadMore">Load More</button>
   </div>
 </template>
 
@@ -103,8 +108,10 @@ export default {
       }
       return '';
     },
-    loadMore() {
-      this.$emit('loadMore');
+    loadMore(isVisible) {
+      if (isVisible) {
+        this.$emit('loadMore');
+      }
     }
   }
 }
