@@ -36,9 +36,13 @@
           <fa-icon v-if="isMuted" :icon="['far', 'bell-slash']" fixed-width class="fa-lg muted" title="Notifications OFF" />
         </b-button>
         <div>|</div>
-        <b-button variant="link" class="" @click="toggleGallery">
+        <b-button variant="link" class="" @click="toggleGallery" v-b-tooltip:hover :title="$t('tooltips.gallery')">
           <fa-icon :icon="showGallery ? ['fas', 'image'] : ['far', 'image']" class="fa-lg" />
         </b-button>
+        <div>|</div>
+        <b-btn variant="link" @click="tip" v-b-tooltip:hover :title="$t('tooltips.tip')">
+          <fa-icon icon="dollar-sign" fixed-width />
+        </b-btn>
         <div>|</div>
         <SearchInput v-model="searchQuery" />
       </div>
@@ -88,6 +92,7 @@
 /**
  * resources/assets/js/views/live-chat/components/ShowThread.vue
  */
+import { eventBus } from '@/app'
 import Vue from 'vue'
 import Vuex from 'vuex'
 import _ from 'lodash'
@@ -107,6 +112,7 @@ export default {
   props: {
     session_user: null,
     participant: null,
+    timeline: null,
     id: null, // the chatthread PKID
   },
 
@@ -302,6 +308,16 @@ export default {
           })
         }
       }
+    },
+
+    tip() {
+      eventBus.$emit('open-modal', {
+        key: 'render-tip',
+        data: {
+          resource: this.timeline,
+          resource_type: 'timelines',
+        },
+      })
     },
 
     doSomething() {
@@ -691,7 +707,11 @@ export default {
 <i18n lang="json5" scoped>
 {
   "en": {
-    "startOfThread": "Beginning of Messages"
+    "startOfThread": "Beginning of Messages",
+    "tooltips": {
+      "gallery": "View Gallery of Media",
+      "tip": "Send Tip"
+    }
   }
 }
 </i18n>

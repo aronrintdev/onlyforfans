@@ -18,6 +18,7 @@ class User extends JsonResource
             'is_verified' => $this->is_verified,
             'verified_status' => $this->verified_status,
             'created_at' => $this->created_at,
+            'timeline' => $this->timeline,
         ];
     }
 }
