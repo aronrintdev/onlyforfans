@@ -78,6 +78,27 @@ class ChatmessagesController extends AppBaseController
         return new ChatmessageCollection($data);
     }
 
+
+    public function search(Request $request)
+    {
+        $request->validate([
+            'chatthread' => 'required|uuid|exists:chatthreads,id',
+            'q'          => 'required_without:query',
+            'query'      => 'required_without:q',
+        ]);
+
+        $chatthread = Chatthread::find($request->chatthread);
+
+        $this->authorize('view', $chatthread);
+
+        $query = $request->input('q') ?? $request->input('query');
+
+        $data = Chatmessage::search($query)->where('chatthread_id', $chatthread->id)
+            ->paginate($request->input('take', Config::get('collections.size.mid', 20) ));
+
+        return new ChatmessageCollection($data);
+    }
+
     /**
      * Return a paginated list of images that are in a chatthread
      * @param Request $request

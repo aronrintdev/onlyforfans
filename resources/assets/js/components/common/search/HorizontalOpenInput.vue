@@ -15,7 +15,6 @@
       class="search-button"
       :class="[{
         'ml-auto': openLeft,
-        'border-bottom': !borders && open,
         'open': open
       }, `border-${variant}`]"
     >
