@@ -7,7 +7,7 @@
         v-for="(mf, index) in files"
         :key="index"
         v-observe-visibility="index === files.length - 1 ? loadMore : false"
-        @click="openPost(mf.post)"
+        @click="openPost(mf.post, index)"
       >
         <div class="media-wrapper" v-if="mf.is_image" >
           <img
@@ -44,6 +44,7 @@ export default {
 
   data: () => ({
     files: [],
+    currentIndex: 0,
   }),
 
   mounted() {
@@ -116,8 +117,49 @@ export default {
         this.$emit('loadMore');
       }
     },
-    openPost(p) {
-      eventBus.$emit('open-modal', { key: 'show-post', data: { post: p } })
+    openPost(p, index) {
+      this.currentIndex = index;
+      eventBus.$off('post-modal-actions');
+      eventBus.$emit('open-modal', { key: 'show-post', data: { post: p, showArrows: true } });
+      eventBus.$on('post-modal-actions', this.moveNextPrevPost);
+    },
+    async moveNextPrevPost(action) {
+      if (action === 'prev' && this.currentIndex > 0) {
+        if (this.files.length > this.currentIndex + 1) {
+          eventBus.$emit('open-modal', { key: 'show-post', data: { post: this.files[this.currentIndex - 1].post, showArrows: true } })
+          this.currentIndex -= 1
+        } else {
+          const response = await axios.get(route('timelines.publicfeed'), {
+            params: {
+              page: this.currentIndex,
+              take: 1,
+            }
+          });
+          if (response.data.data.length) {
+            const newpost = response.data.data[0];
+            eventBus.$emit('open-modal', { key: 'show-post', data: { post: newpost, showArrows: true } })
+            this.currentIndex -= 1
+          }
+        }
+      }
+      if (action === 'next') {
+        if (this.files.length > this.currentIndex + 1) {
+          eventBus.$emit('open-modal', { key: 'show-post', data: { post: this.files[this.currentIndex + 1].post, showArrows: true } })
+          this.currentIndex += 1
+        } else {
+          const response = await axios.get(route('timelines.publicfeed'), {
+            params: {
+              page: this.currentIndex + 2,
+              take: 1,
+            }
+          });
+          if (response.data.data.length) {
+            const newpost = response.data.data[0];
+            eventBus.$emit('open-modal', { key: 'show-post', data: { post: newpost, showArrows: true } })
+            this.currentIndex += 1
+          }
+        }
+      }
     }
   }
 }
