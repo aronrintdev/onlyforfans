@@ -56,10 +56,24 @@ class CommentReceived extends Notification
 
     public function toSendgrid($notifiable)
     {
+//dd('toSendgrid notifiable', $notifiable);
 
-        return [
-            'foo' => 'bar',
+        $data = [
+            'template_id' => 'd-8bc8911ea1424d8591e0ba05f92476f1',
+            'to' => [
+                'email' => $notifiable->email,
+                'name' => $notifiable->name, // 'display name'
+            ],
+            'dtdata' => [
+                'sender_name' => $this->actor->name,
+                'receiver_name' => $notifiable->name,
+                'preview' => $this->resource->slug,
+                'privacy_url' => url('/privacy'),
+                'manage_preferences_url' => url( route('users.showSettings', $notifiable->username) ),
+                'unsubscribe_url' => url( route('users.showSettings', $notifiable->username) ),
+            ],
         ];
+        return $data;
         /*
         return (new SendGridMessage('d-c81aa70638ac40f5a33579bf425aa591'))
             ->payload($data)
