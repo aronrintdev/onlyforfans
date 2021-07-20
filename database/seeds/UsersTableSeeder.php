@@ -33,6 +33,8 @@ class UsersTableSeeder extends Seeder
                 [
                     'name' => 'Peter G',
                     'username' => 'peter',
+                    'real_firstname' => 'Peter',
+                    'real_lastname' => 'G',
                     'email' => 'peter@peltronic.com',
                     'gender' => 'male',
                     'city' => 'Las Vegas',
@@ -43,6 +45,8 @@ class UsersTableSeeder extends Seeder
                 ],
                 [
                     'name' => 'Erik H',
+                    'real_firstname' => 'Erik',
+                    'real_lastname' => 'H',
                     'username' => 'erikh',
                     'email' => 'erik@hattervigsoftwaresolutions.com',
                     'gender' => 'male',
@@ -54,6 +58,8 @@ class UsersTableSeeder extends Seeder
                 ],
                 [
                     'name' => 'Niko A',
+                    'real_firstname' => 'Niko',
+                    'real_lastname' => 'A',
                     'username' => 'nikoa',
                     'email' => 'nikoanzai@gmail.com',
                     'gender' => 'male',
@@ -65,6 +71,8 @@ class UsersTableSeeder extends Seeder
                 ],
                 [
                     'name' => 'Matt M',
+                    'real_firstname' => 'Matt',
+                    'real_lastname' => 'M',
                     'username' => 'mattm',
                     'email' => 'matt@mjmwebdesign.com',
                     'gender' => 'male',
@@ -76,6 +84,8 @@ class UsersTableSeeder extends Seeder
                 ],
                 [
                     'name' => 'Chad J',
+                    'real_firstname' => 'Chad',
+                    'real_lastname' => 'J',
                     'username' => 'chadj',
                     'email' => 'realchadjohnson@gmail.com',
                     'gender' => 'male',
@@ -85,6 +95,8 @@ class UsersTableSeeder extends Seeder
                 ],
                 [
                     'name' => 'Fujio H',
+                    'real_firstname' => 'Fujio',
+                    'real_lastname' => 'H',
                     'username' => 'fujioh',
                     'email' => 'harouf@outlook.com',
                     'gender' => 'male',

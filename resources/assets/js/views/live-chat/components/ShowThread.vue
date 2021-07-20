@@ -3,7 +3,7 @@
 
     <section class="chatthread-header">
       <div class="d-flex align-items-center">
-        <b-button to="/messages" variant="link" class="" @click="doSomething">
+        <b-button variant="link" class="" @click="onBackClicked">
           <fa-icon :icon="['fas', 'arrow-left']" class="fa-lg" />
         </b-button>
         <p class="m-0"><strong>{{ participant.username }}</strong></p>
@@ -32,13 +32,17 @@
         </b-button>
         <div>|</div>
         <b-button variant="link" class="" @click="toggleMute">
-          <fa-icon v-if="!isMuted" :icon="['far', 'bell']" class="fa-lg" title="Notifications ON" />
-          <fa-icon v-if="isMuted" :icon="['far', 'bell-slash']" class="fa-lg muted" title="Notifications OFF" />
+          <fa-icon v-if="!isMuted" :icon="['far', 'bell']" fixed-width class="fa-lg" title="Notifications ON" />
+          <fa-icon v-if="isMuted" :icon="['far', 'bell-slash']" fixed-width class="fa-lg muted" title="Notifications OFF" />
         </b-button>
         <div>|</div>
-        <b-button variant="link" class="" @click="doSomething">
-          <fa-icon :icon="['far', 'image']" class="fa-lg" />
+        <b-button variant="link" class="" @click="toggleGallery" v-b-tooltip:hover :title="$t('tooltips.gallery')">
+          <fa-icon :icon="showGallery ? ['fas', 'image'] : ['far', 'image']" class="fa-lg" />
         </b-button>
+        <div>|</div>
+        <b-btn variant="link" @click="tip" v-b-tooltip:hover :title="$t('tooltips.tip')">
+          <fa-icon icon="dollar-sign" fixed-width />
+        </b-btn>
         <div>|</div>
         <SearchInput v-model="searchQuery" />
       </div>
@@ -49,6 +53,9 @@
     <transition name="quick-fade" mode="out-in">
       <section v-if="vaultSelectionOpen" key="vaultSelect" class="vault-selection flex-fill">
         <VaultSelector @close="vaultSelectionOpen = false" />
+      </section>
+      <section v-if="showGallery" key="gallery" class="gallery flex-fill">
+        <Gallery :threadId="id" @close="showGallery = false" />
       </section>
       <section v-else key="messages" class="messages flex-fill">
         <Message
@@ -71,6 +78,7 @@
     <TypingIndicator :threadId="id" />
 
     <MessageForm
+       v-if="!showGallery"
       :session_user="session_user"
       :chatthread_id="id"
       @sendMessage="addTempMessage"
@@ -84,6 +92,7 @@
 /**
  * resources/assets/js/views/live-chat/components/ShowThread.vue
  */
+import { eventBus } from '@/app'
 import Vue from 'vue'
 import Vuex from 'vuex'
 import _ from 'lodash'
@@ -95,6 +104,7 @@ import SearchInput from '@components/common/search/HorizontalOpenInput'
 import TypingIndicator from './TypingIndicator'
 import VaultSelector from './VaultSelector'
 import Message from './Message.vue'
+import Gallery from './Gallery'
 
 export default {
   name: 'ShowThread',
@@ -102,6 +112,7 @@ export default {
   props: {
     session_user: null,
     participant: null,
+    timeline: null,
     id: null, // the chatthread PKID
   },
 
@@ -132,6 +143,8 @@ export default {
     isEndVisible: false,
 
     searchQuery: '',
+
+    showGallery: false,
 
     vaultSelectionOpen: false,
 
@@ -270,6 +283,18 @@ export default {
       }
     },
 
+    onBackClicked() {
+      if (this.showGallery) {
+        this.showGallery = false
+        return
+      }
+      this.$router.push({name: 'chatthreads.dashboard'})
+    },
+
+    toggleGallery() {
+      this.showGallery = !this.showGallery
+    },
+
     async toggleMute() {
       try {
         await axios.post(this.$apiRoute('chatthreads.toggleMute', this.id), { is_muted: !this.isMuted })
@@ -283,6 +308,16 @@ export default {
           })
         }
       }
+    },
+
+    tip() {
+      eventBus.$emit('open-modal', {
+        key: 'render-tip',
+        data: {
+          resource: this.timeline,
+          resource_type: 'timelines',
+        },
+      })
     },
 
     doSomething() {
@@ -304,6 +339,7 @@ export default {
   }, // watch
 
   components: {
+    Gallery,
     Message,
     MessageForm,
     SearchInput,
@@ -588,7 +624,11 @@ export default {
   width: 100%;
   overflow-y: auto;
 }
-
+.gallery {
+  height: 100%;
+  width: 100%;
+  overflow-y: auto;
+}
 .messages {
   height: 100%;
   width: 100%;
@@ -667,7 +707,11 @@ export default {
 <i18n lang="json5" scoped>
 {
   "en": {
-    "startOfThread": "Beginning of Messages"
+    "startOfThread": "Beginning of Messages",
+    "tooltips": {
+      "gallery": "View Gallery of Media",
+      "tip": "Send Tip"
+    }
   }
 }
 </i18n>

@@ -133,6 +133,10 @@ export default {
   } // crate
 }
 
+.content ::v-deep p {
+  margin-bottom: 0;
+}
+
 .grouping-day-divider {
   font-size: 11px;
   line-height: 15px;

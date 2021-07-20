@@ -74,6 +74,8 @@ Route::group(['middleware' => ['auth']], function () {
         'only' => [ 'index', ],
     ]);
 
+    Route::get('/chatthreads/{chatthread}/gallery', 'ChatmessagesController@gallery')->name('chatthreads.gallery');
+
     // -- chatthreads --
     Route::get('/chatthreads/totalUnreadCount', ['as'=>'chatthreads.totalUnreadCount', 'uses' => 'ChatthreadsController@getTotalUnreadCount']);
     Route::post('/chatthreads/markAllRead', ['as'=>'chatthreads.markAllRead', 'uses' => 'ChatthreadsController@markAllRead']);
@@ -187,6 +189,7 @@ Route::group(['middleware' => ['auth']], function () {
     #region Timelines
     Route::get('/timelines-suggested', ['as'=>'timelines.suggested', 'uses' => 'TimelinesController@suggested']); // %FIXME: refactor: use index(?)
     Route::get('/timelines/my-followed-stories', ['as'=>'timelines.myFollowedStories', 'uses' => 'TimelinesController@myFollowedStories']);
+    Route::get('/timelines/public-feed', ['as'=>'timelines.publicfeed', 'uses' => 'TimelinesController@publicFeed']);
     //Route::get('/timelines/home', ['as'=>'timelines.home', 'uses' => 'TimelinesController@home']); // special case of 'show'
     Route::get('/timelines/match', ['as'=>'timelines.match', 'uses' => 'TimelinesController@match']);
     Route::get('/timelines/home/feed', ['as'=>'timelines.homefeed', 'uses' => 'TimelinesController@homefeed']);
@@ -213,6 +216,8 @@ Route::group(['middleware' => ['auth']], function () {
     //Route::get('/users-suggested', ['as'=>'users.suggested', 'uses' => 'UsersController@suggested']);
     Route::get('/users/me', ['as' => 'users.me', 'uses' => 'UsersController@me']);
     Route::get('/users/match', ['as'=>'users.match', 'uses' => 'UsersController@match']);
+    Route::post('/users/request-verify', ['as'=>'users.requestVerify', 'uses' => 'UsersController@requestVerify']);
+    Route::post('/users/check-verify-status', ['as'=>'users.checkVerifyStatus', 'uses' => 'UsersController@checkVerifyStatus']);
     Route::patch('/users/{user}/settings/enable/{group}', ['as'=>'users.enableSetting', 'uses' => 'UsersController@enableSetting']); // turn on a single update within a group
     Route::patch('/users/{user}/settings/disable/{group}', ['as'=>'users.disableSetting', 'uses' => 'UsersController@disableSetting']); // turn off a single update within a group
     Route::patch('/users/{user}/settings', ['as'=>'users.updateSettingsBatch', 'uses' => 'UsersController@updateSettingsBatch']); // batch update one (or multiple) groups at a time

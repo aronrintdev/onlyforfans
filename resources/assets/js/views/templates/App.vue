@@ -84,6 +84,13 @@ export default {
           });
       }
     },
+
+    updateScreenSize(value) {
+      var screenSize = _.findKey(this.screenSizes, i => (i === _.max(_.filter(this.screenSizes, size => ( value >= size )))))
+      if (screenSize !== this.screenSize) {
+        this.UPDATE_SCREEN_SIZE(screenSize)
+      }
+    },
   },
 
   watch: {
@@ -97,10 +104,7 @@ export default {
       if (this.mobile !== mobile) {
         this.UPDATE_MOBILE(mobile)
       }
-      var screenSize = _.findKey(this.screenSizes, i => (i === _.max(_.filter(this.screenSizes, size => ( value >= size )))))
-      if (screenSize !== this.screenSize) {
-        this.UPDATE_SCREEN_SIZE(screenSize)
-      }
+      this.updateScreenSize(value)
     },
     $route: function(newVal) {
       if (newVal.name.indexOf('messages') > -1) {
@@ -109,7 +113,9 @@ export default {
     }
   },
 
-
+  mounted() {
+    this.updateScreenSize(this.$vssWidth)
+  },
 
   created() {
     if (this.$route.name.indexOf('messages') > -1) {

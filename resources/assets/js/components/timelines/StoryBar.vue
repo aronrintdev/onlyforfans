@@ -71,7 +71,7 @@
           <b-form-textarea id="story-contents" v-model="storyAttrs.contents" placeholder="Enter text for your new story..." rows="5" ></b-form-textarea>
         </b-form-group>
         <b-form-group label='"Swipe Up" Link (optional)' label-for="swipe-up-link">
-          <b-form-input id="swipe-up-link" type="url" v-model="storyAttrs.link" :state="urlState" placeholder="http://"></b-form-input>
+          <b-form-input id="swipe-up-link" type="url" v-model="storyAttrs.link" :state="urlState" placeholder="http://example.com"></b-form-input>
         </b-form-group>
       </b-form>
       <template #modal-footer>
