@@ -8,10 +8,11 @@ use App\Interfaces\Ownable;
 use App\Interfaces\UuidId;
 use App\Models\Traits\OwnableTraits;
 use App\Models\Traits\UsesUuid;
+use Laravel\Scout\Searchable;
 
 class Chatmessage extends Model implements UuidId, Ownable
 {
-    use UsesUuid, OwnableTraits;
+    use UsesUuid, OwnableTraits, Searchable;
 
     protected $guarded = [ 'id', 'created_at', 'updated_at' ];
 
@@ -61,6 +62,44 @@ class Chatmessage extends Model implements UuidId, Ownable
     {
         return $this->morphMany(Mediafile::class, 'resource');
     }
+
+    /* ---------------------------------------------------------------------- */
+    /*                               Searchable                               */
+    /* ---------------------------------------------------------------------- */
+    #region Searchable
+
+    public function searchableAs()
+    {
+        return "chatmessage_index";
+    }
+
+    public function getScoutKey()
+    {
+        return $this->getKey();
+    }
+
+    public function getScoutKeyName()
+    {
+        return 'id';
+    }
+
+    /**
+     * What model information gets stored in the search index
+     * @return array
+     */
+    public function toSearchableArray()
+    {
+        return [
+            'id' => $this->getKey(),
+            'chatthread_id' => $this->chatthread_id,
+            'mcontent' => $this->mcontent,
+            'is_delivered' => $this->is_delivered,
+        ];
+    }
+
+    #endregion Searchable
+    /* ---------------------------------------------------------------------- */
+
 
     //--------------------------------------------
     // %%% Methods

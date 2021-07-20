@@ -57,22 +57,16 @@
       <section v-if="showGallery" key="gallery" class="gallery flex-fill">
         <Gallery :threadId="id" @close="showGallery = false" />
       </section>
-      <section v-else key="messages" class="messages flex-fill">
-        <Message
-          v-for="(cm, idx) in chatmessages"
-          :key="cm.id"
-          :value="cm"
-          :isDateBreak="isDateBreak(cm, idx)"
-          v-observe-visibility="idx === chatmessages.length - 1 ? endVisible : false"
-        />
-        <b-list-group-item class="load-more" v-observe-visibility="endVisible"> </b-list-group-item>
-        <b-list-group-item v-if="isLastPage">
-          <section class="msg-grouping-day-divider">
-            <span v-text="$t('startOfThread')" />
-          </section>
-        </b-list-group-item>
-        <div class="mt-auto"> </div>
-      </section>
+      <MessageDisplay
+        v-else
+        :items="searchResults === null ? chatmessages: searchResults"
+        :isLastPage="isLastPage"
+        :isSearch="searchResults !== null"
+        :searchQuery="searchQuery"
+        key="messages"
+        class="flex-fill"
+        @endVisible="endVisible"
+      />
     </transition>
 
     <TypingIndicator :threadId="id" />
@@ -103,11 +97,20 @@ import MessageForm from '@views/live-chat/components/NewMessageForm'
 import SearchInput from '@components/common/search/HorizontalOpenInput'
 import TypingIndicator from './TypingIndicator'
 import VaultSelector from './VaultSelector'
-import Message from './Message.vue'
+import MessageDisplay from './MessageDisplay'
 import Gallery from './Gallery'
 
 export default {
   name: 'ShowThread',
+
+  components: {
+    Gallery,
+    MessageDisplay,
+    MessageForm,
+    SearchInput,
+    TypingIndicator,
+    VaultSelector,
+  },
 
   props: {
     session_user: null,
@@ -143,6 +146,12 @@ export default {
     isEndVisible: false,
 
     searchQuery: '',
+    // Search Loading is object keyed by the query being searched. This makes it so that we know if multiple searches
+    // are loading if the server response is slow
+    searchLoading: {},
+    searchResults: null,
+
+    debounceAmount: 500, // 0.5s
 
     showGallery: false,
 
@@ -151,6 +160,7 @@ export default {
   }), // data
 
   created() {
+    this.search = _.debounce(this._search, this.debounceAmount)
   },
 
   mounted() {
@@ -320,6 +330,27 @@ export default {
       })
     },
 
+    /**
+     * Do search request on server
+     */
+    _search(query) {
+      if (this.searchLoading[query]) {
+        return
+      }
+      this.searchLoading[query] = true
+      this.axios.get(this.$apiRoute('chatmessages.search'), { params: { q: query, chatthread: this.id } })
+        .then(response => {
+          this.searchResults = response.data.data
+        })
+        .catch(error => {
+          eventBus.$emit(error, { error, message: this.$t('search.error') })
+        })
+        .finally(() => {
+          // Remove loading for this query
+          delete this.searchLoading[query]
+        })
+    },
+
     doSomething() {
       // stub placeholder for impl
     },
@@ -327,6 +358,10 @@ export default {
   }, // methods
 
   watch: {
+
+    debounceAmount(value) {
+      this.search = _.debounce(this._search, value)
+    },
 
     id (newValue, oldValue) {
       if ( newValue && (newValue !== oldValue) ) {
@@ -336,16 +371,15 @@ export default {
       }
     },
 
-  }, // watch
+    searchQuery(value) {
+      if (value === '') {
+        this.searchResults = null
+        return
+      }
+      this.search(value)
+    },
 
-  components: {
-    Gallery,
-    Message,
-    MessageForm,
-    SearchInput,
-    TypingIndicator,
-    VaultSelector,
-  },
+  }, // watch
 
 }
 
@@ -516,19 +550,6 @@ export default {
   //        }, 1000);
   //      }
   //    },
-  //    openVaultModal: function() {
-  //      this.$refs['vault-modal'].show();
-  //      this.isVaultLoading = true;
-  //      this.axios.get('/vaults/all-files')
-  //        .then(response => {
-  //          this.vaultFiles = response.data.mediafiles;
-  //          this.isVaultLoading = false;
-  //        })
-  //    },
-  //    closeVaultModal: function() {
-  //      this.filesFromVault = [];
-  //      this.$refs['vault-modal'].hide();
-  //    },
   //    showMediaPopup: function(media) {
   //      this.popupMedia = media;
   //      this.$refs['media-modal'].show();
@@ -536,45 +557,6 @@ export default {
   //    closeMediaPopup: function() {
   //      this.popupMedia = undefined;
   //      this.$refs['media-modal'].hide();
-  //    },
-  //    addVaultFilestoMedias: function() {
-  //      const self = this;
-  //      this.filesFromVault.forEach(file => {
-  //        self.sortableMedias.push({
-  //          src: file.filepath,
-  //          file: file.id,
-  //          type: file.mimetype,
-  //          mftype: 'vault',
-  //        });
-  //      });
-  //      this.closeVaultModal();
-  //    },
-  //    selectVaultFiles: function(mediafile) {
-  //      const idx = this.filesFromVault.findIndex(m => m.id === mediafile.id);
-  //      if (idx < 0) {
-  //        this.filesFromVault.push(mediafile);
-  //      } else {
-  //        this.filesFromVault.splice(idx, 1);
-  //      }
-  //    },
-  //    filterVaultFiles: function(filterOption) {
-  //      if (this.selectedVaultFilter === filterOption) {
-  //        this.selectedVaultFilter = undefined;
-  //        this.isVaultLoading = true;
-  //        this.axios.get(`/vaults/all-files`)
-  //          .then(response => {
-  //            this.vaultFiles = response.data.mediafiles;
-  //            this.isVaultLoading = false;
-  //          })
-  //      } else {
-  //        this.selectedVaultFilter = filterOption;
-  //        this.isVaultLoading = true;
-  //        this.axios.get(`/vaults/all-files?query=${filterOption}`)
-  //          .then(response => {
-  //            this.vaultFiles = response.data.mediafiles;
-  //            this.isVaultLoading = false;
-  //          })
-  //      }
   //    },
   //    onChangeScheduledMessageTime: function(event) {
   //      this.scheduledMessage.timeState = true;
@@ -589,25 +571,6 @@ export default {
   //      if (e.ctrlKey && e.keyCode === 13) {
   //        this.sendMessage();
   //      }
-  //    },
-  //
-  //    // %TODO: new message activity (typing) to alert particpants that a new sender is typing...
-  //    onInputNewMessage: function(e) {
-  //      this.newMessageText = e.target.value;
-  //      this.adjustTextareaSize();
-  //      if (this.newMessageText) {
-  //        this.hasNewMessage = true;
-  //      } else {
-  //        this.hasNewMessage = false;
-  //      }
-  //      let channel = Echo.join(`chat-typing`);
-  //      setTimeout(() => {
-  //        channel.whisper('typing', {
-  //          typing: true,
-  //          from: this.session_user.id,
-  //          to: this.$route.params.id
-  //        })
-  //      }, 300);
   //    },
 </script>
 
@@ -629,75 +592,7 @@ export default {
   width: 100%;
   overflow-y: auto;
 }
-.messages {
-  height: 100%;
-  width: 100%;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column-reverse;
 
-  .list-group-item {
-
-      border: none;
-      padding: 0.5rem 1.25rem;
-
-    .crate {
-      display: flex;
-      max-width: 75%;
-
-      .box {
-        .msg-content {
-          margin-left: auto;
-          background: rgba(218,237,255,.53);
-          border-radius: 5px;
-          padding: 9px 12px;
-          color: #1a1a1a;
-        }
-        .msg-timestamp {
-          font-size: 11px;
-          color: #8a96a3;
-          text-align: right;
-        }
-
-      } // box
-    } // crate
-
-    .crate.session_user {
-        justify-content: flex-end;
-        margin-left: auto;
-        margin-right: 0;
-    }
-
-    .crate.other_user {
-        justify-content: flex-start;
-        margin-left: 0;
-        margin-right: auto;
-    }
-
-  }
-
-  .msg-grouping-day-divider {
-    font-size: 11px;
-    line-height: 15px;
-    text-align: center;
-    color: #8a96a3;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-bottom: 10px;
-    span {
-      padding: 0 10px;
-    }
-    &:after, &:before {
-      content: '';
-      display: block;
-      flex: 1;
-      height: 1px;
-      background: rgba(138,150,163,.2);
-    }
-  }
-
-}
 
 .muted {
   opacity: .5;
@@ -707,7 +602,6 @@ export default {
 <i18n lang="json5" scoped>
 {
   "en": {
-    "startOfThread": "Beginning of Messages",
     "tooltips": {
       "gallery": "View Gallery of Media",
       "tip": "Send Tip"
