@@ -55,6 +55,9 @@ class UsersController extends AppBaseController
             'email',
         ]));
 
+        $updateSettings['has_allowed_nsfw'] = $request->hasAllowedNSFW;
+        $user->settings->update($updateSettings);
+
         $user->save();
 
         return new UserResource($user);
