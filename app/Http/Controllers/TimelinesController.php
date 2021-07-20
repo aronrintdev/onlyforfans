@@ -405,4 +405,24 @@ class TimelinesController extends AppBaseController
         //return new TimelineCollection($data);
     }
 
+    // returns Photos & Videos from free posts in a randomized way.
+    public function publicFeed(Request $request)
+    {
+        $user = Auth::user();
+
+        $query = Post::with('mediafiles')
+            ->where('active', 1)
+            ->where('type', 'free')
+            ->where('user_id', '!=', $user->id)
+            ->where('schedule_datetime', null)
+            ->where(function ($query) {
+                $query->where('expire_at', '>', Carbon::now('UTC'))
+                      ->orWhere('expire_at', null);
+            })
+            ->has('mediafiles', '>' , 0)
+            ->orderBy('created_at', 'desc');
+        // %NOTE: we could also just remove post-query, as the feed will auto-update to fill length of page (?)
+        $data = $query->paginate( $request->input('take', 18) );
+        return new PostCollection($data);
+    }
 }

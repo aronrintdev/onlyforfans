@@ -47,7 +47,21 @@
       hide-footer
       body-class="p-0"
     >
+      <div
+        class="post-nav-arrows left"
+        v-if="showPostArrows"
+        @click="postModalAction('prev')"
+      >
+        <fa-icon :icon="['far', 'chevron-left']" size="lg" class="text-white" />
+      </div>
       <PostDisplay ref="postDisplay" :session_user="session_user" :post="selectedResource" :is_feed="false" />
+      <div
+        class="post-nav-arrows right"
+        v-if="showPostArrows"
+        @click="postModalAction('next')"
+      >
+        <fa-icon :icon="['far', 'chevron-right']" size="lg" class="text-white" />
+      </div>
     </b-modal>
 
     <b-modal
@@ -162,6 +176,7 @@ export default {
     modalPayload: null,
     scheduled_at: null,
     is_for_edit: null,
+    showPostArrows: false,
   }),
 
   methods: {
@@ -195,6 +210,7 @@ export default {
             break
           case 'show-post':
             this.selectedResource = data.post
+            this.showPostArrows = data.showArrows
             this.$bvModal.show('modal-post')
             break
           case 'show-photo':
@@ -228,6 +244,9 @@ export default {
       })
 
     },
+    postModalAction(action) {
+      eventBus.$emit('post-modal-actions', action);
+    }
   },
 
   created() {
@@ -237,6 +256,31 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.post-nav-arrows {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  top: calc(50vh - 90px);
+  transform: translateY(-50%);
+  border-radius: 50%;
+  cursor: pointer;
 
+  &:active {
+    svg {
+      color: rgba(255, 255, 255, 0.3) !important;
+    }
+  }
+
+  &.left {
+    left: -100px;
+  }
+  &.right {
+    right: -100px;
+  }
+  svg {
+    width: 100%;
+    height: 100%;
+  }
+}
 </style>
 
