@@ -67,7 +67,7 @@ export default {
           {
             name: 'Discover',
             icon: 'compass',
-            to: { name: 'index' },
+            to: { name: 'timelines.explore' },
           },
           {
             name: 'Notifications',
