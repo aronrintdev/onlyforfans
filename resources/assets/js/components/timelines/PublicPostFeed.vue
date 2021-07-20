@@ -1,14 +1,15 @@
 <template>
   <div class="w-100">
-    <div v-masonry transition-duration="0" item-selector=".item" class="masonry-container">
+    <div v-masonry transition-duration="0" item-selector=".item" class="masonry-container" >
       <div
         v-masonry-tile class="item"
         :class="mf.classList"
         v-for="(mf, index) in files"
         :key="index"
         v-observe-visibility="index === files.length - 1 ? loadMore : false"
+        @click="openPost(mf.post)"
       >
-        <div class="media-wrapper" v-if="mf.is_image">
+        <div class="media-wrapper" v-if="mf.is_image" >
           <img
             :src="mf.filepath"
             :alt="mf.name"
@@ -17,7 +18,7 @@
             <fa-icon :icon="['fas', 'images']" class="text-white icon" />
           </div>
         </div>
-        <div class="media-wrapper" v-if="mf.is_video">
+        <div class="media-wrapper" v-if="mf.is_video" >
           <video>
             <source :src="`${mf.filepath}#t=2`" :type="mf.mimetype" />
           </video>
@@ -31,6 +32,8 @@
 </template>
 
 <script>
+import { eventBus } from '@/app'
+
 export default {
   props: {
     mediafiles: {
@@ -112,6 +115,9 @@ export default {
       if (isVisible) {
         this.$emit('loadMore');
       }
+    },
+    openPost(p) {
+      eventBus.$emit('open-modal', { key: 'show-post', data: { post: p } })
     }
   }
 }
@@ -146,7 +152,7 @@ export default {
       display: block;
       width: 100%;
       height: 100%;
-      background-color: rgba(0, 0, 0, 0.1);
+      // background-color: rgba(0, 0, 0, 0.1);
       position: absolute;
       top: 0;
       left: 0;

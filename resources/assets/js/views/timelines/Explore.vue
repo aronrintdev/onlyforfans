@@ -37,10 +37,11 @@ export default {
           page,
         }
       });
-      const posts = response.data.data.filter(dt => dt.mediafiles.length > 0);
+      const posts = response.data.data.filter(dt => dt.mediafile_count > 0);
       const mediafiles = posts.map(post => ({
         ...post.mediafiles[0],
-        mediaCount: post.mediafiles.length,
+        mediaCount: post.mediafile_count,
+        post,
       }));
       this.mediafiles = this.mediafiles.concat(mediafiles);
       this.loading = false;
@@ -69,4 +70,12 @@ export default {
     margin: 4em;
   }
 }
+</style>
+
+<style lang="scss">
+  #modal-post {
+    .media-slider .v-photoswipe-thumbnail {
+      pointer-events: none;
+    }
+  }
 </style>
