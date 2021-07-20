@@ -15,7 +15,11 @@
     </b-list-group-item>
     <div class="mt-auto"> </div>
     <div v-if="items.length === 0" class="d-flex w-100 h-100 align-items-center justify-content-center">
-      <div class="h4" v-text="isSearch ? $t('noSearchResults', {query: searchQuery}) : $t('noResults')" />
+      <div v-if="loading" class="h4 d-flex flex-column justify-content-center align-items-center">
+        <fa-icon icon="spinner" spin class="mb-3" />
+        {{ $t('loading') }}
+      </div>
+      <div v-else class="h4" v-text="isSearch ? $t('noSearchResults', {query: searchQuery}) : $t('noResults')" />
     </div>
   </section>
 </template>
@@ -40,6 +44,7 @@ export default {
     isLastPage: { type: Boolean, default: false },
     isSearch: { type: Boolean, default: false },
     items: { type: Array, default: () => ([]) },
+    loading: { type: Boolean, default: false },
     searchQuery: { type: String, default: '' },
   },
 
@@ -143,6 +148,7 @@ export default {
 <i18n lang="json5" scoped>
 {
   "en": {
+    "loading": "Loading",
     "noSearchResults": "No results for \"{query}\"",
     "noResults": "No messages in this thread",
     "startOfThread": "Beginning of Conversation"

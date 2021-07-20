@@ -2,7 +2,10 @@
 // SASS variables
 //
 
-@import "~bootstrap/scss/variables";
-
 // Bootstrap overwrite variables here
 
+$brand: #ff3399;
+
+$theme-colors: (
+  "brand": $brand
+);

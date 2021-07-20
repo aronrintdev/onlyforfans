@@ -16,6 +16,8 @@
     <!-- %NOTE: this is the *generated* CSS file -->
     <link href="{{ mix('/css/app.css') }}" rel="stylesheet">
 
+    <link rel="prefetch" as="image" href="/images/logos/allfans-logo-154x33.png" />
+
     <!-- Static Data -->
     <script>
         const myUserId = '{{ Auth::user()->id }}';

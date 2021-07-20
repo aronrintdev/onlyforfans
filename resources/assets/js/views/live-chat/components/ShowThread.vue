@@ -60,6 +60,7 @@
       <MessageDisplay
         v-else
         :items="searchResults === null ? chatmessages: searchResults"
+        :loading="moreLoading"
         :isLastPage="isLastPage"
         :isSearch="searchResults !== null"
         :searchQuery="searchQuery"
