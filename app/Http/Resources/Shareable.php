@@ -19,7 +19,7 @@ class Shareable extends JsonResource
         }
 
         return [
-            //'id' => $this->id,
+            'id' => $this->id,
             'shareable_id' => $this->shareable_id,
             'is_approved' => $this->is_approved,
             'access_level' => $this->access_level,
@@ -30,6 +30,7 @@ class Shareable extends JsonResource
             'sharee_timeline_slug' => $this->whenLoaded('sharee')->timeline->slug,
             'shareable' => $this->whenLoaded('shareable'),
             'is_favorited' => $is_favorited,
+            'notes' => $this->notes,
             'created_at' => $this->created_at,
         ];
     }

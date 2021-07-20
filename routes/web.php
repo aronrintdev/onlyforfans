@@ -179,8 +179,9 @@ Route::group(['middleware' => ['auth']], function () {
     // -- shareables:  --
     Route::get('/shareables/indexFollowers', ['as' => 'shareables.indexFollowers', 'uses' => 'ShareablesController@indexFollowers']);
     Route::get('/shareables/indexFollowing', ['as' => 'shareables.indexFollowing', 'uses' => 'ShareablesController@indexFollowing']);
+    Route::put('/shareables/{shareable}/clearnotes', ['as' => 'shareables.clearnotes', 'uses' => 'ShareablesController@clearnotes']);
     Route::resource('shareables', 'ShareablesController', [
-        'only' => [ 'index', ],
+        'only' => [ 'index', 'update'],
     ]);
 
     // -- timelines: tippable | subscribeable | followable --

@@ -82,9 +82,9 @@
         <small class="text-muted float-right mt-1">{{ notesInput.length }} / 500</small>
       </b-form-group>
       <template #modal-footer>
-        <b-button v-if="notes" @click="clearNotes" type="cancel" variant="danger">Clear</b-button>
+        <b-button v-if="notes" @click="clearNotes(shareable_id)" type="cancel" variant="danger">Clear</b-button>
         <b-button @click="hideNotesModal" type="cancel" variant="secondary">Cancel</b-button>
-        <b-button @click="saveNotes" :disabled="!notesInput" variant="primary">Save</b-button>
+        <b-button @click="saveNotes(shareable_id)" :disabled="!notesInput" variant="primary">Save</b-button>
       </template>
     </b-modal>
 
@@ -106,6 +106,8 @@ export default {
     access_level: null,
     created_at: null,
     is_favorited: null,
+    shareable_id: null,
+    current_notes: null,
   },
 
   computed: {
@@ -164,15 +166,35 @@ export default {
       }
     },
 
-    saveNotes() {
+    async saveNotes(id) {
+      let isEdit = false
+      if (this.notes) isEdit = true
+      else isEdit = false
       this.notes = this.notesInput
+      const response = await this.axios.patch(`/shareables/${id}`, {
+        notes: this.notes,
+      });
       this.hideNotesModal()
+
+      const msg = isEdit ? 'Notes was successfully updated.' : 'Notes was successfully added.'
+      this.$root.$bvToast.toast(msg, {
+        toaster: 'b-toaster-top-center',
+        title: 'Success!',
+        variant: 'success',
+      })
     },
 
-    clearNotes() {
+    async clearNotes(id) {
       this.notes = ''
       this.notesInput = ''
+      const response = await this.axios.put(`/shareables/${id}/clearnotes`);
       this.hideNotesModal()
+
+      this.$root.$bvToast.toast('Notes was successfully removed.', {
+        toaster: 'b-toaster-top-center',
+        title: 'Success!',
+        variant: 'success',
+      })
     },
 
     async toggleFavorite() {
@@ -195,6 +217,8 @@ export default {
 
   mounted() {
     this.isFavoritedByMe = this.is_favorited;
+    this.notes = this.current_notes || '';
+    this.notesInput = this.notes;
   },
   created() { },
   components: { },
