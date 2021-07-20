@@ -86,6 +86,8 @@ _ide_helper.php
 # Generated Reports
 analyzerReport.html
 
+dev-server-deploy.sh
+
 dot-env.txt
 .*.swp
 *.vim
