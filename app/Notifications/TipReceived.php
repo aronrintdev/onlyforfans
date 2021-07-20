@@ -5,6 +5,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+
 use App\Channels\SendgridChannel;
 use App\Models\Timeline;
 use App\Models\Post;
@@ -14,14 +15,13 @@ use App\Interfaces\Tippable;
 
 class TipReceived extends Notification
 {
-    use Queueable;
+    use NotifyTraits, Queueable;
 
     public $resource;
     public $actor; // purchaser;
     public $amount;
     protected $settings;
 
-    //public function __construct(Timeline $timeline, User $purchaser)
     public function __construct(Tippable $resource, User $actor, array $attrs=[]) {
         $this->resource = $resource;
         $this->actor = $actor;
@@ -32,14 +32,10 @@ class TipReceived extends Notification
     }
 
     public function via($notifiable) {
-        $channels =  ['database', \App\Channels\SendgridChannel::class]; // DEBUG only
-        /*
         $channels =  ['database'];
-        $exists = $this->settings->cattrs['notifications']['income']['new_tip'] ?? false;
-        if ( $exists && is_array($exists) && in_array('email', $exists) ) {
-            $channels[] =  'mail';
+        if ( $this->isMailChannelEnabled('tip-received', $this->settings) ) {
+            $channels[] = $this->getMailChannel();
         }
-         */
         return $channels;
     }
 

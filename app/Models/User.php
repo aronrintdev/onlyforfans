@@ -360,6 +360,7 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
         return $this->verifyrequest->vstatus;
     }
 
+    // %NOTE: Use this as the 'display name'. 'Real name' fields will hold the real name
     public function getNameAttribute($value)
     {
         if ( $this->firstname && $this->lastname ) {

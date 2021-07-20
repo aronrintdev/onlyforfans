@@ -12,6 +12,7 @@ use App\Apis\Sendgrid\Api as SendgridApi;
 class SendgridApiTest extends TestCase
 {
     static private $isSandbox = false;
+
     /**
      * @group idmerit-api
      * @group OFF-here0719

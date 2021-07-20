@@ -19,6 +19,7 @@ class Api
     private static $fromEmail = 'info@allfans.com';
     private static $fromName = 'AllFans NoReply';
 
+
     public static function send(string $templateID, array $attrs, $isSandbox=false) 
     {
         $email = new Mail();
@@ -26,11 +27,6 @@ class Api
         $email->setFrom(self::$fromEmail, self::$fromName);
         $email->addTo( $attrs['to']['email'], $attrs['to']['name']??null );
         //$email->addTo( 'peter+receiver@peltronic.com', 'Example Receiver');
-
-        //$dtdata = [
-            //'display_name' => 'Joe Displayname',
-            //'amount' => '$33.33',
-        //];
 
         if ( array_key_exists('subject', $attrs) && !empty($attrs['subject']) ) {
             $email->setSubject($attrs['subject']);
@@ -41,7 +37,11 @@ class Api
             $email->addDynamicTemplateDatas( $attrs['dtdata'] );
         }
 
-        if ($isSandbox) {
+        $FORCE_SANDBOX = env('DEBUG_ENABLE_SENDGRID_SANDBOX_MODE', false);
+        if ($FORCE_SANDBOX || $isSandbox) {
+            if ($FORCE_SANDBOX) {
+                dump('WARNING SANDBOX FORCE-ENABLED!');
+            }
             $email->enableSandBoxMode();
         }
         //$email->disableSandBoxMode();

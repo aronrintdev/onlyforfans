@@ -15,7 +15,7 @@ use App\Interfaces\Commentable;
 
 class CommentReceived extends Notification
 {
-    use Queueable;
+    use NotifyTraits, Queueable;
 
     public $resource;
     public $actor; // commenter;
@@ -32,7 +32,7 @@ class CommentReceived extends Notification
     public function via($notifiable)
     {
         //$channels =  ['database', SendGridChannel::class, ];
-        $channels =  ['database', \App\Channels\SendgridChannel::class];
+        //$channels =  ['database', \App\Channels\SendgridChannel::class];
         /* %TODO: uncomment and use SendGridChannel
         $exists = $this->settings->cattrs['notifications']['posts']['new_comment'] ?? false;
         if ( $exists && is_array($exists) && in_array('email', $exists) ) {
@@ -44,6 +44,10 @@ class CommentReceived extends Notification
             }
         }
          */
+        $channels =  ['database'];
+        if ( $this->isMailChannelEnabled('tip-received', $this->settings) ) {
+            $channels[] = $this->getMailChannel();
+        }
         return $channels;
     }
 
