@@ -48,7 +48,7 @@
         </b-card-body>
 
         <b-card-footer>
-          <b-button type="submit" variant="warning" class="w-100">Send Tip</b-button>
+          <b-button type="submit" variant="primary" class="w-100">Send Tip</b-button>
         </b-card-footer>
       </b-form>
 
