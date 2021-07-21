@@ -1,5 +1,8 @@
 <template>
   <div class="app d-flex flex-column">
+    <transition name="quick-fade" mode="out-in">
+      <SiteLoading v-if="loading" key="loading" />
+    </transition>
     <!-- Header -->
     <MainNavBar class="header" />
     <div class="content flex-grow-1 d-flex" :class="{ 'p-3': !mobile }">
@@ -15,7 +18,6 @@
     <EventUpdater />
 
     <SiteFooter v-if="!isFooterHidden" />
-
   </div>
 </template>
 
@@ -28,6 +30,7 @@ import EventUpdater from '@components/EventUpdater'
 import MainNavBar from '@components/common/MainNavbar'
 import Modals from '@components/Modals'
 import SiteFooter from '@views/templates/SiteFooter'
+import SiteLoading from '@components/common/SiteLoading'
 import Toaster from '@components/Toaster'
 
 export default {
@@ -37,6 +40,7 @@ export default {
     MainNavBar,
     Modals,
     SiteFooter,
+    SiteLoading,
     Toaster,
   },
 
@@ -67,6 +71,8 @@ export default {
   },
 
   data: () => ({
+    // If full app is loading
+    loading: false,
     onlineMonitor: null,
     unreadMessagesCount: 0,
     isFooterHidden: false,
@@ -97,6 +103,7 @@ export default {
     session_user(value) {
       if (value) {
         this.startOnlineMonitor()
+        this.loading = false
       }
     },
     $vssWidth(value) {
@@ -122,6 +129,7 @@ export default {
       this.isFooterHidden = true;
     }
     if (!this.session_user) {
+      this.loading = true
       this.getMe();
       this.getUnreadMessagesCount();
     }

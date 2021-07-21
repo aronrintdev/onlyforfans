@@ -50,16 +50,17 @@
 
     <hr />
 
-    <transition name="quick-fade" mode="out-in">
-      <section v-if="vaultSelectionOpen" key="vaultSelect" class="vault-selection flex-fill">
+    <transition-group name="quick-fade" mode="out-in" class="flex-fill scroll-wrapper">
+      <section v-if="vaultSelectionOpen" key="vaultSelect" class="vault-selection">
         <VaultSelector @close="vaultSelectionOpen = false" />
       </section>
-      <section v-if="showGallery" key="gallery" class="gallery flex-fill">
+      <section v-else-if="showGallery" key="gallery" class="gallery flex-fill">
         <Gallery :threadId="id" @close="showGallery = false" />
       </section>
       <MessageDisplay
         v-else
         :items="searchResults === null ? chatmessages: searchResults"
+        :loading="moreLoading"
         :isLastPage="isLastPage"
         :isSearch="searchResults !== null"
         :searchQuery="searchQuery"
@@ -67,14 +68,15 @@
         class="flex-fill"
         @endVisible="endVisible"
       />
-    </transition>
+    </transition-group>
 
     <TypingIndicator :threadId="id" />
 
     <MessageForm
-       v-if="!showGallery"
+      v-if="!showGallery"
       :session_user="session_user"
       :chatthread_id="id"
+      :vaultOpen="vaultSelectionOpen"
       @sendMessage="addTempMessage"
       @toggleVaultSelect="vaultSelectionOpen = !vaultSelectionOpen"
     />
@@ -582,15 +584,18 @@ export default {
   box-shadow: none;
 }
 
+.scroll-wrapper {
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
 .vault-selection {
   height: 100%;
   width: 100%;
-  overflow-y: auto;
 }
 .gallery {
   height: 100%;
   width: 100%;
-  overflow-y: auto;
 }
 
 

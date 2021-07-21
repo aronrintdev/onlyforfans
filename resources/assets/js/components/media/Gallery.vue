@@ -4,7 +4,13 @@
       <div v-text="noItems" />
     </div>
 
-    <Thumbnail v-for="item in items" :key="item.id" :value="item" class="item mb-3" @click="onItemClick" />
+    <Thumbnail
+      v-for="(item, index) in items"
+      :key="item.id"
+      :value="item"
+      class="item mb-3"
+      @click="o => onItemClick({ ...o, index })"
+    />
   </b-card-group>
 </template>
 
@@ -13,9 +19,13 @@
  * Gallery view for a list of media files
  * resources/assets/js/components/media/Gallery.vue
  */
+import Vue from 'vue'
 import Vuex from 'vuex'
 
 import Thumbnail from './Thumbnail'
+import AudioPlayer from '@components/audioPlayer'
+import VideoPlayer from '@components/videoPlayer'
+
 
 export default {
   name: 'Gallery',
@@ -56,8 +66,40 @@ export default {
   }),
 
   methods: {
-    onItemClick({ e, value }) {
+    onItemClick({ e, value, index }) {
       this.previewOpen = true
+      this.$Pswp.open({
+        items: this.items.map(file => {
+          if (file.mimetype.indexOf('video/') > -1) {
+            return ({
+              html: new Vue({
+                ...VideoPlayer,
+                propsData: {
+                  source: file
+                }
+              }).$mount().$el,
+            })
+          }
+          if (file.is_audio) {
+            return ({
+              html: new Vue({
+                ...AudioPlayer,
+                propsData: {
+                  source: file
+                }
+              }).$mount().$el,
+            })
+          }
+          return ({
+            src: file.filepath,
+          })
+        }),
+        options: {
+          index,
+          showAnimationDuration: 0,
+          bgOpacity: 0.75
+        },
+      })
     }
   },
 
