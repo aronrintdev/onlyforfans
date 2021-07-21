@@ -45,6 +45,7 @@ export default {
 
   data: () => ({
     loading: false,
+    lastVisible: false,
   }),
 
   methods: {
@@ -52,6 +53,7 @@ export default {
     ...Vuex.mapActions('messaging', [ 'getGallery' ]),
 
     onLastVisible(isVisible) {
+      this.lastVisible = isVisible
       if (isVisible && this.isNextPage()) {
         this.nextPage()
       }
@@ -89,20 +91,24 @@ export default {
         return
       }
       this.loading = true
-      console.log('nextPage', typeof this.page())
       const page = typeof this.page() === 'undefined' ? 0 : this.page()
       if (page > 0 && page > this.totalPages()) {
         return
       }
-      console.log('nextPage', page)
       this.getGallery({ chatthread: this.threadId, page: page + 1, take: 20 })
         .then((data) => {
           this.$forceCompute('items')
-          this.loading = false
         })
         .catch(error => {
           eventBus.$emit('error', { error, message: this.$t('error') })
+        })
+        .finally(() => {
           this.loading = false
+          this.$nextTick(() => {
+            if (this.lastVisible && this.isNextPage) {
+              this.nextPage()
+            }
+          })
         })
     },
 
