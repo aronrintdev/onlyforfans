@@ -50,8 +50,8 @@
       <b-row v-if="activeCampaign">
         <b-col class="mt-3">
           <h5 v-if="activeCampaign.type === 'trial'">Limited offer - Free trial for {{ activeCampaign.trial_days }} days!</h5>
-          <h5 v-if="activeCampaign.type === 'discount'">Limited offer - {{ activeCampaign.discount_percent }} % off for 31 days!</h5>
-          <p><small class="text-muted">For {{ campaignAudience }} • ends {{ campaignExpDate }} • left {{ activeCampaign.subscriber_count }}</small></p>
+          <h5 v-if="activeCampaign.type === 'discount'">Limited offer - {{ activeCampaign.discount_percent }}% off for 31 days!</h5>
+          <p><small class="text-muted">For {{ campaignAudience }} • ends {{ campaignExpDate }} • {{ activeCampaign.subscriber_count }} left</small></p>
           <b-button @click="showStopModal" class="w-25 ml-3" variant="primary">Stop Promotion</b-button>
         </b-col>
       </b-row>

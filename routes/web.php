@@ -70,7 +70,9 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('/blockables/match', ['as'=>'blockables.match', 'uses' => 'BlockablesController@match']);
 
     // -- chatmessages --
-    Route::resource('chatmessages', 'ChatmessagesController', [
+    Route::get('/chatmessages/search', 'ChatmessagesController@search')
+        ->name('chatmessages.search');
+    Route::apiResource('chatmessages', 'ChatmessagesController', [
         'only' => [ 'index', ],
     ]);
 
@@ -181,8 +183,9 @@ Route::group(['middleware' => ['auth']], function () {
     // -- shareables:  --
     Route::get('/shareables/indexFollowers', ['as' => 'shareables.indexFollowers', 'uses' => 'ShareablesController@indexFollowers']);
     Route::get('/shareables/indexFollowing', ['as' => 'shareables.indexFollowing', 'uses' => 'ShareablesController@indexFollowing']);
+    Route::put('/shareables/{shareable}/clearnotes', ['as' => 'shareables.clearnotes', 'uses' => 'ShareablesController@clearnotes']);
     Route::resource('shareables', 'ShareablesController', [
-        'only' => [ 'index', ],
+        'only' => [ 'index', 'update'],
     ]);
 
     // -- timelines: tippable | subscribeable | followable --
