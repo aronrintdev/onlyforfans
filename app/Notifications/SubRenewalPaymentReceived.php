@@ -1,4 +1,3 @@
-
 <?php
 namespace App\Notifications;
 
@@ -34,7 +33,9 @@ class SubRenewalPaymentReceived extends Notification
     public function via($notifiable)
     {
         $channels =  ['database'];
-        $channels[] = $this->getMailChannel();
+        if ( $this->isMailChannelEnabled('new-sub-payment-received', $this->settings) ) {
+            $channels[] = $this->getMailChannel();
+        }
         return $channels;
     }
 
@@ -71,8 +72,11 @@ class SubRenewalPaymentReceived extends Notification
     public function toArray($notifiable)
     {
         return [
+            'resource_type' => $this->resource->getTable(),
+            'resource_id' => $this->resource->id,
+            'resource_slug' => $this->resource->slug,
             'amount' => $this->amount->getAmount(),
-            'actor' => [ // commenter
+            'actor' => [
                 'username' => $this->actor->username,
                 'name' => $this->actor->name,
                 'avatar' => $this->actor->avatar->filepath ?? null,

@@ -33,7 +33,9 @@ class NewSubPaymentReceived extends Notification
     public function via($notifiable)
     {
         $channels =  ['database'];
-        $channels[] = $this->getMailChannel();
+        if ( $this->isMailChannelEnabled('new-sub-payment-received', $this->settings) ) {
+            $channels[] = $this->getMailChannel();
+        }
         return $channels;
     }
 
