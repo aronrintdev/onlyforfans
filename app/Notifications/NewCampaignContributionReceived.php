@@ -26,7 +26,7 @@ class NewCampaignContributionReceived extends Notification
         if ( array_key_exists('amount', $attrs) ) {
             $this->amount = $attrs['amount']; // %FIXME
         }
-        $this->settings = $campaign->getPrimaryOwner()->settings; // actor = User
+        $this->settings = $campaign->getPrimaryOwner()->settings;
     }
 
     public function via($notifiable)

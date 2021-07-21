@@ -65,11 +65,17 @@ trait NotifyTraits {
         case 'new-campaign-contribution-received':
             $is = $settings->cattrs['notifications']['campaigns']['new_contribution'] ?? false;
             break;
+        case 'campaign-goal-reached':
+            $is = $settings->cattrs['notifications']['campaigns']['goal_reached'] ?? false;
+            break;
         case 'new-message-received':
             $is = $settings->cattrs['notifications']['messages']['new_message'] ?? false;
             break;
         case 'new-sub-payment-received':
             $is = $settings->cattrs['notifications']['subscriptions']['new_payment'] ?? false;
+            break;
+        case 'new-referral-received':
+            $is = $settings->cattrs['notifications']['referrals']['new_referral'] ?? false;
             break;
         default:
         }

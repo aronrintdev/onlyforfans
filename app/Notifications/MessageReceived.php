@@ -14,7 +14,7 @@ class NewMessageReceived extends Notification
 {
     use NotifyTraits, Queueable;
 
-    public $message;
+    public $message; // [chatmessages] record
     public $sender;
     protected $settings;
 
@@ -25,7 +25,7 @@ class NewMessageReceived extends Notification
         if ( array_key_exists('amount', $attrs) ) {
             $this->amount = $attrs['amount']; // %FIXME
         }
-        $this->settings = $message->getPrimaryOwner()->settings;
+        $this->settings = $message->getPrimaryOwner()->settings; // should be the sender
     }
 
     public function via($notifiable)
@@ -40,9 +40,9 @@ class NewMessageReceived extends Notification
     public function toMail($notifiable)
     {
         return (new MailMessage)
-            ->line("Hi Joe Receiver,")
+            ->line("Hi ".$notifible->name)
             ->line("You have 1 new unread message from ".$this->sender->name)
-            ->line("Hi Joe, just wanted to drop a quick hello and say...")
+            ->line($this->message->mcontent)
             ->action("Reply", $this->getUrl('reply_to_message', ['chatthread_id' => $message->chatthread_id]));
     }
 
