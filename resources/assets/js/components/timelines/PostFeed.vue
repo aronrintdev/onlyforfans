@@ -29,7 +29,7 @@
             <div v-if="!is_homefeed" @click="renderFollow" class="btn">
               <fa-icon :icon="timeline.is_following ? 'eye' : ['far', 'eye']" class="tag-ctrl text-primary" /> 
             </div>
-            <div v-if="!is_homefeed" @click="toggleFavorite"class="btn">
+            <div v-if="!is_homefeed" @click="toggleFavorite" class="btn">
                 <fa-icon v-if="isFavoritedByMe" fixed-width :icon="['fas', 'star']" class="clickable text-primary" />
                 <fa-icon v-else fixed-width :icon="['far', 'star']" class="clickable text-primary" />
             </div>
@@ -175,6 +175,7 @@ export default {
   }),
 
   mounted() {
+    this.isFavoritedByMe = this.timeline.is_favorited;
     // window.addEventListener('scroll', this.onScroll)
   },
   beforeDestroy() {
