@@ -14,7 +14,7 @@ class SendgridApiTest extends TestCase
     static private $isSandbox = false;
 
     /**
-     * @group idmerit-api
+     * @group sendgrid-api-unit
      * @group OFF-here0719
      */
     public function test_should_send_email()
