@@ -18,13 +18,13 @@ class TipReceived extends Notification
     use NotifyTraits, Queueable;
 
     public $resource;
-    public $actor; // purchaser;
+    public $actor; // the sender (user who purchased the tip)
     public $amount;
     protected $settings;
 
     public function __construct(Tippable $resource, User $actor, array $attrs=[]) {
         $this->resource = $resource;
-        $this->actor = $actor;
+        $this->actor = $actor; 
         if ( array_key_exists('amount', $attrs) ) {
             $this->amount = $attrs['amount'];
         }
@@ -69,7 +69,7 @@ class TipReceived extends Notification
             'resource_id' => $this->resource->id,
             'resource_slug' => $this->resource->slug,
             'amount' => $this->amount ?? null,
-            'actor' => [ // purchaser
+            'actor' => [
                 'username' => $this->actor->username,
                 'name' => $this->actor->name,
                 'avatar' => $this->actor->avatar->filepath ?? null,

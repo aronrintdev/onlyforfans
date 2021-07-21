@@ -15,78 +15,50 @@ use App\Models\User;
 use App\Models\Post;
 use App\Models\Tip;
 
+// Send mail via laravel native, not SendGrid:
+// $ DEBUG_BYPASS_SENDGRID_MAIL_NOTIFY=true php artisan test --group="lib-notification-unit"
+
 class NotificationTest extends TestCase
 {
     /**
      * @group lib-notification-unit
-     * @group notify-via-sendgrid-unit
-     * @group OFF-here0719
-     // do not add to regression tests!
+     * @group regression
+     * @group regression-unit
      */
     public function test_should_notify_tip_received()
     {
-        //Notification::fake();
+        Notification::fake(); // this should bypass sending mail, even to SendGrid (?)
 
         $tip = Tip::where('tippable_type', 'posts')->first(); // the 'tip'
         $post = $tip->tippable; // the 'tippable'
-        $sender = User::first();
-        $result = Notification::send( $sender, new TipReceived($post, $post->timeline->user, ['amount'=>$tip->amount]) );
-        //dd($result);
+        $sender = $tip->sender;
+        $receiver = $tip->receiver;
 
-        /*
-        dump('info', 
-            'tip:', $tip->toArray(), 
-            'sender:', $sender->toArray(), 
-            'post (tippable)', $post->toArray()
+        $result = Notification::send( $receiver, new TipReceived($post, $sender, ['amount'=>$tip->amount]) );
+
+        Notification::assertSentTo(
+            [$receiver], TipReceived::class
         );
-        */
-        $this->assertTrue(true);
-
-        //Notification::assertSentTo(
-            //[$post->timeline->user], TipReceived::class
-        //);
     }
 
     /**
-     * @group lib-notification
-     * @group OFF-notify-via-sendgrid-unit
-     * @group OFF-here0719
-     * @group here0719
-     // do not add to regression tests!
+     * @group lib-notification-unit
+     * @group regression
+     * @group regression-unit
      */
     public function test_should_notify_comment_received()
     {
-        //Notification::fake();
+        Notification::fake();
 
         $comment = Comment::first();
         $sender = $comment->user;
         $receiver = $comment->post->timeline->user;
-//dd($sender);
-
-        dump('info', 'receiver: '.$receiver->name, 'sender: '.$sender->name, 'comment: '.$comment->id);
 
         Notification::send( $receiver, new CommentReceived($comment, $sender));
 
-        $this->assertTrue(true);
-
-        /*
         Notification::assertSentTo(
             [$receiver], CommentReceived::class
         );
-         */
-
-        /*
-        $api = IdMeritApi::create();
-        $response = $api->issueToken();
-        $this->assertEquals( 200, $response->status() );
-        $json = $response->json();
-        //dd( $json );
-        $this->assertArrayHasKey('access_token', $json);
-        $this->assertArrayHasKey('token_type', $json);
-        $this->assertArrayHasKey('expires_in', $json);
-        //dd( $response );
-         */
     }
 
 }
-
