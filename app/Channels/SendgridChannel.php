@@ -12,8 +12,6 @@ class SendgridChannel
 {
     public function send($notifiable, Notification $notification)
     {
-        $isSandbox = env('IS_SENDGRID_SANDBOX_ENABLED', false);
-
         $mdata = $notification->toSendgrid($notifiable);
 
         if ( !array_key_exists('template_id', $mdata) ) {
@@ -30,8 +28,12 @@ class SendgridChannel
             //'subject' => 'Subject Override Ex',
             'to' => $mdata['to'],
             'dtdata' => $mdata['dtdata'] ?? [],
-        ], $isSandbox);
-        //dd($response);
+        ]);
+
+        $isSandbox = env('DEBUG_ENABLE_SENDGRID_SANDBOX_MODE', false);
+        if ( $response->statusCode() != ($isSandbox?200:202) ) {
+            throw new Exception( 'SendgridChannel returned status code '.$response->statusCode().', ('.serialize($response).')' );
+        }
 
         return $response;
     }

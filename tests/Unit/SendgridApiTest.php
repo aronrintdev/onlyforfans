@@ -11,8 +11,6 @@ use App\Apis\Sendgrid\Api as SendgridApi;
 
 class SendgridApiTest extends TestCase
 {
-    static private $isSandbox = false;
-
     /**
      * @group sendgrid-api-unit
      * @group OFF-here0719
@@ -29,8 +27,9 @@ class SendgridApiTest extends TestCase
                 'display_name' => 'Joe Displayname', 
                 'amount' => '$17.19',
             ],
-        ], self::$isSandbox);
-        $this->assertEquals( self::$isSandbox?200:202, $response->statusCode() );
+        ]);
+        $isSandbox = env('DEBUG_ENABLE_SENDGRID_SANDBOX_MODE', false);
+        $this->assertEquals( $isSandbox?200:202, $response->statusCode() );
     }
 
 }

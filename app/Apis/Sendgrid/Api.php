@@ -19,7 +19,7 @@ class Api
     private static $fromEmail = 'info@allfans.com';
     private static $fromName = 'AllFans NoReply';
 
-    public static function send(string $templateID, array $attrs, $isSandbox=false) 
+    public static function send(string $templateID, array $attrs)
     {
         $slugs2IDs = self::getSlugs2IDs();
         if ( array_key_exists($templateID, $slugs2IDs) ) {
@@ -47,11 +47,9 @@ class Api
             $email->addDynamicTemplateDatas( $attrs['dtdata'] );
         }
 
-        $FORCE_SANDBOX = env('DEBUG_ENABLE_SENDGRID_SANDBOX_MODE', false);
-        if ($FORCE_SANDBOX || $isSandbox) {
-            if ($FORCE_SANDBOX) {
-                dump('WARNING SANDBOX FORCE-ENABLED!');
-            }
+        $isSandbox = env('DEBUG_ENABLE_SENDGRID_SANDBOX_MODE', false);
+        if ($isSandbox) {
+            dump('SendGrid - WARNING SANDBOX ENABLED!');
             $email->enableSandBoxMode();
         }
         //$email->disableSandBoxMode();

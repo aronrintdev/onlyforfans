@@ -30,7 +30,8 @@ class NotificationTest extends TestCase
         $tip = Tip::where('tippable_type', 'posts')->first(); // the 'tip'
         $post = $tip->tippable; // the 'tippable'
         $sender = User::first();
-        Notification::send( $sender, new TipReceived($post, $post->timeline->user, ['amount'=>$tip->amount]) );
+        $result = Notification::send( $sender, new TipReceived($post, $post->timeline->user, ['amount'=>$tip->amount]) );
+        //dd($result);
 
         /*
         dump('info', 
@@ -38,14 +39,14 @@ class NotificationTest extends TestCase
             'sender:', $sender->toArray(), 
             'post (tippable)', $post->toArray()
         );
-        *?
+        */
         $this->assertTrue(true);
 
         //Notification::assertSentTo(
             //[$post->timeline->user], TipReceived::class
         //);
-
     }
+
     /**
      * @group lib-notification
      * @group OFF-notify-via-sendgrid-unit
