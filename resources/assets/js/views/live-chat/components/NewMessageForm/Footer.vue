@@ -51,7 +51,7 @@ export default {
           key: 'uploadFiles',
           class: 'upload-files',
           onClick: (e) => this.$emit('attachFiles', e),
-          icon: this.isSelected('uploadFiles') ? ['fas', 'file-alt'] : ['far', 'file-alt'],
+          icon: this.isSelected('uploadFiles') ? ['fas', 'image'] : ['far', 'image'],
           selected: this.isSelected('uploadFiles'),
           tooltip: this.$t('tooltips.uploadFiles'),
         }, {
@@ -129,10 +129,10 @@ export default {
   "en": {
     "send": "SEND",
     "tooltips": {
-      "uploadFiles": "Attach Files",
+      "uploadFiles": "Add Photo",
       "recordVideo": "Record Video",
       "recordAudio": "Record Audio",
-      "vaultSelect": "Attach Files From Your Vault",
+      "vaultSelect": "Add Photo From Your Vault",
       "openScheduleMessage": "Schedule Message To Be Sent At",
       "setPrice": "Set Message Unlock Price",
     },
