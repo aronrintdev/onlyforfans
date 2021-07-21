@@ -13,6 +13,7 @@ use App\Models\Post;
 use App\Models\Timeline;
 use App\Models\Mediafile;
 use App\Models\User;
+use App\Models\Shareable;
 
 class ShareablesTest extends TestCase
 {
@@ -139,6 +140,28 @@ class ShareablesTest extends TestCase
             return $acc;
         }, 0);
         $this->assertEquals(count($content->data), $followingCount); 
+    }
+
+    public function test_user_can_add_notes()
+    {
+        $user = User::first();
+        $shareable = Shareable::first();
+
+        $response = $this->actingAs($user)->ajaxJSON('PATCH', route('shareables.update', $shareable->id), [
+            'notes' => 'test',
+        ]);
+
+        $response->assertStatus(200);
+    }
+
+    public function test_user_can_clear_notes()
+    {
+        $user = User::first();
+        $shareable = Shareable::first();
+
+        $response = $this->actingAs($user)->ajaxJSON('PUT', route('shareables.clearnotes', $shareable->id));
+
+        $response->assertStatus(200);
     }
 
     // ------------------------------

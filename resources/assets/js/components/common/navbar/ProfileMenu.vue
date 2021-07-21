@@ -67,7 +67,7 @@ export default {
         {
           label: 'Lists',
           icon: 'cog',
-          linkTo: { name: 'lists.default' }
+          linkTo: { name: 'lists.favorites' }
         },
       ]
 

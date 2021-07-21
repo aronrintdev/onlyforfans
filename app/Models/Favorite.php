@@ -39,6 +39,11 @@ class Favorite extends Model implements UuidId, Ownable
         return $this->belongsTo(User::class);
     }
 
+    public function timeline()
+    {
+        return $this->belongsTo(Timeline::class);
+    }
+
     //--------------------------------------------
     // %%% Methods
     //--------------------------------------------
