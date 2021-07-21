@@ -87,11 +87,11 @@ class Api
             'email-verified'                                           => 'd-02356e4d3fd64beaa85c859368736a98', // [ ]
 
             // notifications
-            'subscription-renewal-payment-received'                    => 'd-bf035ec8004c404ba4c8234eef7604a1', // [ ]
-            'new-campaign-contribution-received'                       => 'd-d1a9c281d0fa47479d55cabe10f1d02d', // [ ]
-            'subscription-payment-received-from-returning-subscriber'  => 'd-016e550f714d418ea3f75df590734664', // [ ]
-            'new-message-received'                                     => 'd-98578442ff154fda906f51e6db3f5286', // [ ]
             'new-subscription-payment-received'                        => 'd-57056459a9644d579284f149bc1862b5', // [ ]
+            'subscription-renewal-payment-received'                    => 'd-bf035ec8004c404ba4c8234eef7604a1', // [ ]
+            'subscription-payment-received-from-returning-subscriber'  => 'd-016e550f714d418ea3f75df590734664', // [ ]
+            'new-campaign-contribution-received'                       => 'd-d1a9c281d0fa47479d55cabe10f1d02d', // [ ]
+            'new-message-received'                                     => 'd-98578442ff154fda906f51e6db3f5286', // [ ]
             'new-referral-received'                                    => 'd-0fc75cd7a59148a0a84a82611d3a5973', // [ ]
             'campaign-goal-reached'                                    => 'd-a24f3ec1d11f4bd2b71ba2b9faf30609', // [ ]
             'new-tip-received'                                         => 'd-d2220b0b64a442958aad5bdf99dd58e3', // [ ]
