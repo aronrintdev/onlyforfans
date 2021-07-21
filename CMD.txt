@@ -111,3 +111,8 @@ $ php artisan test --group regression-base
 $ php artisan test --group regression-financial
 $ php artisan test --group regression
 
+
+# Sendgrid email test
+
+
+$ DEBUG_FORCE_ENABLE_MAIL_NOTIFY=true DEBUG_BYPASS_SENDGRID_MAIL_NOTIFY=false DEBUG_ENABLE_SENDGRID_SANDBOX_MODE=false DEBUG_OVERRIDE_TO_EMAIL_FOR_SENDGRID="peter@peltronic.com" php artisan test --group="notify-via-sendgrid-unit"
