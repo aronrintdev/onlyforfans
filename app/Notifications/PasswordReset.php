@@ -34,7 +34,7 @@ class PasswordReset extends Notification
         return (new MailMessage)
             ->line('Hi '.$this->actor->name)
             ->line('Please click the link below within 24 hours to reset your password.')
-            ->action('Notification Action', $this->getUrl('password_reset'));
+            ->action('Reset Password', $this->getUrl('password_reset'));
     }
 
     public function toSendgrid($notifiable)

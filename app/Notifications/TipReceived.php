@@ -55,12 +55,12 @@ class TipReceived extends Notification
                 'sender_name' => $this->actor->name,
                 'amount' => nice_currency($this->amount->getAmount()),
 
-                'home_url' => $this->getUrl('home'),
+                'referral_url' => $this->getUrl('referrals'),
                 'login_url' => $this->getUrl('login'),
+                'home_url' => $this->getUrl('home'),
                 'privacy_url' => $this->getUrl('privacy'),
                 'manage_preferences_url' => $this->getUrl('manage_preferences', ['username' => $notifiable->username]),
                 'unsubscribe_url' => $this->getUrl('unsubscribe', ['username' => $notifiable->username]),
-                'referral_url' => $this->getUrl('referrals'),
             ],
         ];
     }

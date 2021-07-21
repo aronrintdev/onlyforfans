@@ -40,7 +40,7 @@ class CommentReceived extends Notification
     {
         return (new MailMessage)
             ->line('You received a comment from '.$this->actor->name)
-            ->action('Notification Action', url('/'));
+            ->action('Read Comment', url('/'));
     }
 
     public function toSendgrid($notifiable)
