@@ -15,7 +15,7 @@ trait NotifyTraits {
         }
     }
 
-    protected function isMailChannelEnabled(string $notifySlug) : bool
+    protected function isMailChannelEnabled(string $notifySlug, $settings) : bool
     {
         if ( env('DEBUG_FORCE_ENABLE_MAIL_NOTIFY', false) ) { 
             // overrides any user settings to always send email
@@ -25,16 +25,16 @@ trait NotifyTraits {
         $is = false; // default to false, possibly set to true below
         switch ($notifySlug) {
         case 'tip-received':
-            $exists = $this->settings->cattrs['notifications']['income']['new_tip'] ?? false;
+            $exists = $settings->cattrs['notifications']['income']['new_tip'] ?? false;
             if ( $exists && is_array($exists) && in_array('email', $exists) ) {
                 $is = true;
             }
             break;
         case 'comment-received':
-            $exists = $this->settings->cattrs['notifications']['posts']['new_comment'] ?? false;
+            $exists = $settings->cattrs['notifications']['posts']['new_comment'] ?? false;
             if ( $exists && is_array($exists) && in_array('email', $exists) ) {
-                $isGlobalEmailEnabled = ($this->settings->cattrs['notifications']['global']['enabled'] ?? false)
-                    ? in_array('email', $this->settings->cattrs['notifications']['global']['enabled'])
+                $isGlobalEmailEnabled = ($settings->cattrs['notifications']['global']['enabled'] ?? false)
+                    ? in_array('email', $settings->cattrs['notifications']['global']['enabled'])
                     : false;
                 if ( $isGlobalEmailEnabled ) {
                     $channels[] =  'mail';

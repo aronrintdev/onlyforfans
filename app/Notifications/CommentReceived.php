@@ -31,19 +31,6 @@ class CommentReceived extends Notification
     // see: https://medium.com/@sirajul.anik/laravel-notifications-part-2-creating-a-custom-notification-channel-6b0eb0d81294
     public function via($notifiable)
     {
-        //$channels =  ['database', SendGridChannel::class, ];
-        //$channels =  ['database', \App\Channels\SendgridChannel::class];
-        /* %TODO: uncomment and use SendGridChannel
-        $exists = $this->settings->cattrs['notifications']['posts']['new_comment'] ?? false;
-        if ( $exists && is_array($exists) && in_array('email', $exists) ) {
-            $isGlobalEmailEnabled = ($this->settings->cattrs['notifications']['global']['enabled'] ?? false)
-                ? in_array('email', $this->settings->cattrs['notifications']['global']['enabled'])
-                : false;
-            if ( $isGlobalEmailEnabled ) {
-                $channels[] =  'mail';
-            }
-        }
-         */
         $channels =  ['database'];
         if ( $this->isMailChannelEnabled('tip-received', $this->settings) ) {
             $channels[] = $this->getMailChannel();
@@ -60,10 +47,9 @@ class CommentReceived extends Notification
 
     public function toSendgrid($notifiable)
     {
-//dd('toSendgrid notifiable', $notifiable);
 
         $data = [
-            'template_id' => 'd-8bc8911ea1424d8591e0ba05f92476f1',
+            'template_id' => 'new-comment-received',
             'to' => [
                 'email' => $notifiable->email,
                 'name' => $notifiable->name, // 'display name'
@@ -72,6 +58,8 @@ class CommentReceived extends Notification
                 'sender_name' => $this->actor->name,
                 'receiver_name' => $notifiable->name,
                 'preview' => $this->resource->slug,
+                'home_url' => url('/'),
+                'referral_url' => url('/referrals'),
                 'privacy_url' => url('/privacy'),
                 'manage_preferences_url' => url( route('users.showSettings', $notifiable->username) ),
                 'unsubscribe_url' => url( route('users.showSettings', $notifiable->username) ),

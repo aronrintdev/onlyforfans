@@ -46,21 +46,21 @@ class TipReceived extends Notification
 
     public function toSendgrid($notifiable) {
         return [
-            'foo' => 'bar',
-        ];
-        /*
-        return [
-            'resource_type' => $this->resource->getTable(),
-            'resource_id' => $this->resource->id,
-            'resource_slug' => $this->resource->slug,
-            'amount' => $this->amount ?? null,
-            'actor' => [ // purchaser
-                'username' => $this->actor->username,
-                'name' => $this->actor->name,
-                'avatar' => $this->actor->avatar->filepath ?? null,
+            'template_id' => 'new-tip-received',
+            'to' => [
+                'email' => $notifiable->email,
+                'name' => $notifiable->name, // 'display name'
+            ],
+            'dtdata' => [
+                'sender_name' => $this->actor->name,
+                'amount' => nice_currency($this->amount->getAmount()),
+                'home_url' => url('/'),
+                'referral_url' => url('/referrals'),
+                'privacy_url' => url('/privacy'),
+                'manage_preferences_url' => url( route('users.showSettings', $notifiable->username) ),
+                'unsubscribe_url' => url( route('users.showSettings', $notifiable->username) ),
             ],
         ];
-         */
     }
 
     public function toArray($notifiable) {

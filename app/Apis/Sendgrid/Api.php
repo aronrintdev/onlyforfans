@@ -19,14 +19,24 @@ class Api
     private static $fromEmail = 'info@allfans.com';
     private static $fromName = 'AllFans NoReply';
 
-
     public static function send(string $templateID, array $attrs, $isSandbox=false) 
     {
+        $slugs2IDs = self::getSlugs2IDs();
+        if ( array_key_exists($templateID, $slugs2IDs) ) {
+            // If it's a key in the template array, it's a slug used to lookup the actual SendGrid ID,
+            // otherwise it's the raw ID
+            $templateID = $slugs2IDs[$templateID];
+        }
         $email = new Mail();
         $email->setTemplateId($templateID);
         $email->setFrom(self::$fromEmail, self::$fromName);
+
+        if ( env('DEBUG_OVERRIDE_TO_EMAIL_FOR_SENDGRID', false) ) {
+            $attrs['to']['email'] = env('DEBUG_OVERRIDE_TO_EMAIL_FOR_SENDGRID');
+            $attrs['to']['name'] = 'TEST Recepient';
+            //$email->addTo( 'peter+receiver@peltronic.com', 'Example Receiver');
+        }
         $email->addTo( $attrs['to']['email'], $attrs['to']['name']??null );
-        //$email->addTo( 'peter+receiver@peltronic.com', 'Example Receiver');
 
         if ( array_key_exists('subject', $attrs) && !empty($attrs['subject']) ) {
             $email->setSubject($attrs['subject']);
@@ -68,8 +78,25 @@ class Api
         return $response;
     }
 
-    private static function setTemplates() {
+    private static function getSlugs2IDs() {
         return [
+            // basic-site-functions
+            'password-reset'                                           => 'd-fdb56b7baf2e4425b75a08de3b7d31d0', // [ ]
+            'id-verification-approved'                                 => 'd-22e9d23524af4edca5e88050c3c89cce', // [ ]
+            'password-changed-confirmation'                            => 'd-da5cbea0203f49a9b840ac0fc25d3db7', // [ ]
+            'email-verified'                                           => 'd-02356e4d3fd64beaa85c859368736a98', // [ ]
+            'id-verification-pending'                                  => 'd-ea0736e507534c8e8986947b1c2ddbb6', // [ ]
+
+            // notifications
+            'subscription-renewal-payment-received'                    => 'd-bf035ec8004c404ba4c8234eef7604a1', // [ ]
+            'new-campaign-contribution-received'                       => 'd-d1a9c281d0fa47479d55cabe10f1d02d', // [ ]
+            'subscription-payment-received-from-returning-subscriber'  => 'd-016e550f714d418ea3f75df590734664', // [ ]
+            'new-message-received'                                     => 'd-98578442ff154fda906f51e6db3f5286', // [ ]
+            'new-subscription-payment-received'                        => 'd-57056459a9644d579284f149bc1862b5', // [ ]
+            'new-referral-received'                                    => 'd-0fc75cd7a59148a0a84a82611d3a5973', // [ ]
+            'campaign-goal-reached'                                    => 'd-a24f3ec1d11f4bd2b71ba2b9faf30609', // [ ]
+            'new-tip-received'                                         => 'd-d2220b0b64a442958aad5bdf99dd58e3', // [ ]
+            'new-comment-received'                                     => 'd-8bc8911ea1424d8591e0ba05f92476f1', // [ ]
         ];
     }
 
