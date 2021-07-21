@@ -5,6 +5,29 @@ use App\Channels\SendgridChannel;
 
 trait NotifyTraits {
 
+    protected function getUrl($slug, $attrs=null) 
+    {
+        switch ($slug) {
+        case 'login':
+            return url('/login');
+        case 'privacy':
+            return url('/privacy');
+        case 'manage_preferences':
+            return url( route('users.showSettings', $attrs['username']) );
+        case 'unsubscribe':
+            return url( route('users.showSettings', $attrs['username']) );
+        case 'referrals':
+            return url('/referrals'); 
+        case 'verify':
+            return url('/settings/verify'); 
+        case 'password_reset':
+            return url( route('password.reset', $attrs['token']) );
+        case 'home':
+        default:
+            return url('/');
+        }
+    }
+
     protected function getMailChannel() 
     {
         if ( env('DEBUG_BYPASS_SENDGRID_MAIL_NOTIFY', false) ) { 
