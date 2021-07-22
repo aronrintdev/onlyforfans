@@ -11,6 +11,7 @@ use App\Interfaces\Blockable;
 use App\Interfaces\HasFinancialAccounts;
 use App\Interfaces\ShortUuid;
 use App\Models\Traits\UsesUuid;
+use App\Notifications\PasswordReset as PasswordResetNotification;
 
 use App\Interfaces\PaymentSendable;
 use App\Models\Financial\Account;
@@ -615,6 +616,10 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
 
     // %%% --- Misc. ---
 
+    // https://laravel.com/docs/8.x/passwords#reset-email-customization
+    public function sendPasswordResetNotification($token) {
+        $this->notify( new PasswordResetNotification($user, ['token'=>$token]) );
+    }
 
 }
 
