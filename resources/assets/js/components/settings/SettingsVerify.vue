@@ -30,7 +30,7 @@
                 <b-form-input id="mobile" v-model="form.mobile" required inputmode="numeric" pattern="[0-9]*" v-mask="'(###) ###-####'" />
               </b-form-group>
             </b-form-row>
-            <b-form-row>
+            <!-- <b-form-row>
               <b-form-group class="col-sm-6 ">
                 <b-form-checkbox
                   :disabled="!session_user.is_verified"
@@ -39,7 +39,7 @@
                   Enable NSFW
                 </b-form-checkbox>
               </b-form-group>
-            </b-form-row>
+            </b-form-row> -->
             <!--
             <b-form-row>
               <b-form-group class="col-sm-4" label="Country" label-for="country">
