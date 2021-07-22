@@ -61,7 +61,7 @@ class MessageReceived extends Notification
                 'message_preview' => $this->message->mcontent,
                 'number_of_messages' => 1,
 
-                'reply_url' => $this->getUrl('reply_to_message', ['chatthread_id' => $message->chatthread_id]),
+                'reply_url' => $this->getUrl('reply_to_message', ['chatthread_id' => $this->message->chatthread_id]),
                 'referral_url' => $this->getUrl('referrals'),
                 'home_url' => $this->getUrl('home'),
                 'privacy_url' => $this->getUrl('privacy'),

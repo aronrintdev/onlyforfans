@@ -16,10 +16,12 @@ class PasswordReset extends Notification
     public $actor;
     protected $settings;
 
-    public function __construct(User $actor)
+    // %TODO %FIXME: pass in model object for PasswordReset?
+    public function __construct(User $actor, array $attrs=[])
     {
         $this->actor = $actor;
         $this->settings = $actor->settings; // actor = User
+        $this->token = $attrs['token'];
     }
 
     public function via($notifiable)
@@ -49,7 +51,7 @@ class PasswordReset extends Notification
                 'user_name' => $this->actor->name,
 
                 'home_url' => $this->getUrl('home'),
-                'password_reset_url' => $this->getUrl('password_reset'),
+                'password_reset_url' => $this->getUrl('password_reset', ['token'=>$this->token]),
                 'privacy_url' => $this->getUrl('privacy'),
                 'manage_preferences_url' => $this->getUrl('manage_preferences', ['username' => $notifiable->username]),
                 'unsubscribe_url' => $this->getUrl('unsubscribe', ['username' => $notifiable->username]),

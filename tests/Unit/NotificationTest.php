@@ -45,14 +45,14 @@ use App\Models\Verifyrequest;
 use App\Enums\VerifyStatusTypeEnum;
 
 // Send mail via laravel native, not SendGrid:
-// $ DEBUG_BYPASS_SENDGRID_MAIL_NOTIFY=true php artisan test --group="lib-notification-unit"
+// $ DEBUG_BYPASS_SENDGRID_MAIL_NOTIFY=true php artisan test --group="lib-notification-unit-fake"
 
 class NotificationTest extends TestCase
 {
     use WithFaker;
 
     /**
-     * @group lib-notification-unit
+     * @group lib-notification-unit-fake
      * @group regression
      * @group regression-unit
      */
@@ -76,7 +76,7 @@ class NotificationTest extends TestCase
     }
 
     /**
-     * @group lib-notification-unit
+     * @group lib-notification-unit-fake
      * @group regression
      * @group regression-unit
      */
@@ -89,7 +89,7 @@ class NotificationTest extends TestCase
     }
 
     /**
-     * @group lib-notification-unit
+     * @group lib-notification-unit-fake
      * @group regression
      * @group regression-unit
      */
@@ -108,7 +108,7 @@ class NotificationTest extends TestCase
     }
 
     /**
-     * @group lib-notification-unit
+     * @group lib-notification-unit-fake
      * @group regression
      * @group regression-unit
      */
@@ -127,7 +127,7 @@ class NotificationTest extends TestCase
     }
 
     /**
-     * @group lib-notification-unit
+     * @group lib-notification-unit-fake
      * @group regression
      * @group regression-unit
      */
@@ -143,7 +143,7 @@ class NotificationTest extends TestCase
     }
 
     /**
-     * @group lib-notification-unit
+     * @group lib-notification-unit-fake
      * @group regression
      * @group regression-unit
      */
@@ -159,7 +159,7 @@ class NotificationTest extends TestCase
     }
 
     /**
-     * @group lib-notification-unit
+     * @group lib-notification-unit-fake
      * @group regression
      * @group regression-unit
      */
@@ -175,7 +175,7 @@ class NotificationTest extends TestCase
     }
 
     /**
-     * @group lib-notification-unit
+     * @group lib-notification-unit-fake
      * @group regression
      * @group regression-unit
      */
@@ -192,7 +192,7 @@ class NotificationTest extends TestCase
     }
 
     /**
-     * @group lib-notification-unit
+     * @group lib-notification-unit-fake
      * @group regression
      * @group regression-unit
      */
@@ -208,7 +208,7 @@ class NotificationTest extends TestCase
     }
 
     /**
-     * @group lib-notification-unit
+     * @group lib-notification-unit-fake
      * @group regression
      * @group regression-unit
      */
@@ -222,7 +222,7 @@ class NotificationTest extends TestCase
 
 
     /**
-     * @group lib-notification-unit
+     * @group lib-notification-unit-fake
      * @group regression
      * @group regression-unit
      */
@@ -235,7 +235,7 @@ class NotificationTest extends TestCase
     }
 
     /**
-     * @group lib-notification-unit
+     * @group lib-notification-unit-fake
      * @group regression
      * @group regression-unit
      */
@@ -243,21 +243,19 @@ class NotificationTest extends TestCase
     {
         Notification::fake();
         $user = User::first();
-        $result = Notification::send( $user, new PasswordReset($user) );
+        $result = Notification::send( $user, new PasswordReset($user, ['token'=>$this->faker->uuid]) );
         Notification::assertSentTo( [$user], PasswordReset::class );
     }
 
     /**
-     * @group lib-notification-unit
+     * @group lib-notification-unit-fake
      * @group regression
      * @group regression-unit
      */
     public function test_should_notify_id_verification_pending()
     {
         Notification::fake();
-
         $user = User::first();
-
         $vr = Verifyrequest::create([
             'service_guid' => $this->faker->uuid,
             'vservice' => 'fake-service',
@@ -265,23 +263,19 @@ class NotificationTest extends TestCase
             'requester_id' => $user->id,
             'last_checked_at' => '2021-07-17 01:48:49',
         ]);
-
         Notification::send( $user, new IdentityVerificationRequestSent($vr, $user));
-
         Notification::assertSentTo( [$user], IdentityVerificationRequestSent::class );
     }
 
     /**
-     * @group lib-notification-unit
+     * @group lib-notification-unit-fake
      * @group regression
      * @group regression-unit
      */
     public function test_should_notify_id_verification_verified()
     {
         Notification::fake();
-
         $user = User::first();
-
         $vr = Verifyrequest::create([
             'service_guid' => $this->faker->uuid,
             'vservice' => 'fake-service',
@@ -289,23 +283,19 @@ class NotificationTest extends TestCase
             'requester_id' => $user->id,
             'last_checked_at' => '2021-07-17 01:48:49',
         ]);
-
         Notification::send( $user, new IdentityVerificationVerified($vr, $user));
-
         Notification::assertSentTo( [$user], IdentityVerificationVerified::class );
     }
 
     /**
-     * @group lib-notification-unit
+     * @group lib-notification-unit-fake
      * @group regression
      * @group regression-unit
      */
     public function test_should_notify_id_verification_rejected()
     {
         Notification::fake();
-
         $user = User::first();
-
         $vr = Verifyrequest::create([
             'service_guid' => $this->faker->uuid,
             'vservice' => 'fake-service',
@@ -313,9 +303,7 @@ class NotificationTest extends TestCase
             'requester_id' => $user->id,
             'last_checked_at' => '2021-07-17 01:48:49',
         ]);
-
         Notification::send( $user, new IdentityVerificationRejected($vr, $user));
-
         Notification::assertSentTo( [$user], IdentityVerificationRejected::class );
     }
 
