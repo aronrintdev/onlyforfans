@@ -55,9 +55,6 @@ class UsersController extends AppBaseController
             'email',
         ]));
 
-        $updateSettings['has_allowed_nsfw'] = $request->hasAllowedNSFW;
-        $user->settings->update($updateSettings);
-
         $user->save();
 
         return new UserResource($user);
@@ -377,6 +374,9 @@ class UsersController extends AppBaseController
         $user->real_firstname = $request->firstname;
         $user->real_lastname = $request->lastname;
         $user->save();
+
+        $updateSettings['has_allowed_nsfw'] = $request->hasAllowedNSFW;
+        $user->settings->update($updateSettings);
 
         $user->notify( new IdentityVerificationRequestSent($vr, $user) );
 

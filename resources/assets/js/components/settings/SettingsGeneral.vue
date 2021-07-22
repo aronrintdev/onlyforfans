@@ -25,13 +25,6 @@
 
           <b-row class="mt-3">
             <b-col>
-              <b-form-checkbox
-                v-model="formGeneral.hasAllowedNSFW"
-              >
-                Enable NSFW
-              </b-form-checkbox>
-            </b-col>
-            <b-col>
               <div class="w-100 d-flex justify-content-end">
                 <b-button :disabled="isSubmitting.formGeneral" class="w-25 ml-3" type="submit" variant="primary">
                   <b-spinner v-if="isSubmitting.formGeneral" small />&nbsp;
@@ -124,7 +117,6 @@ export default {
       lastname: null,
       username: null,
       email: null,
-      hasAllowedNSFW: false,
     },
     formLocalization: {
       localization: { // cattrs
@@ -175,7 +167,6 @@ export default {
     this.formGeneral.firstname = this.session_user.firstname || ''
     this.formGeneral.lastname = this.session_user.lastname || ''
     this.formGeneral.email = this.session_user.email || ''
-    this.formGeneral.hasAllowedNSFW = Boolean(this.user_settings.has_allowed_nsfw)
 
     if ( this.user_settings.cattrs.localization ) {
       this.formLocalization.localization = this.user_settings.cattrs.localization

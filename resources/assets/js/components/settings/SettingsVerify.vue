@@ -30,6 +30,16 @@
                 <b-form-input id="mobile" v-model="form.mobile" required inputmode="numeric" pattern="[0-9]*" v-mask="'(###) ###-####'" />
               </b-form-group>
             </b-form-row>
+            <b-form-row>
+              <b-form-group class="col-sm-6 ">
+                <b-form-checkbox
+                  :disabled="!session_user.is_verified"
+                  v-model="form.hasAllowedNSFW"
+                >
+                  Enable NSFW
+                </b-form-checkbox>
+              </b-form-group>
+            </b-form-row>
             <!--
             <b-form-row>
               <b-form-group class="col-sm-4" label="Country" label-for="country">
@@ -40,8 +50,8 @@
               <b-form-group class="col-sm-4" label="Date of Birth" label-for="dob">
                 <b-form-datepicker id="dob" v-model="form.dob" />
               </b-form-group>
-              -->
             </b-form-row>
+              -->
 
             <b-form-row class="mt-3">
               <b-col class="col-sm-12">
@@ -112,7 +122,7 @@ export default {
 
   computed: {
     isLoading() {
-      return !this.session_user
+      return !this.session_user && !this.user_settings
     },
 
     ...Vuex.mapGetters(['session_user', 'user_settings']),
@@ -165,6 +175,7 @@ export default {
       mobile: null,
       firstname: null,
       lastname: null,
+      hasAllowedNSFW: false,
       //country: null,
       //dob: null,
     },
@@ -179,6 +190,7 @@ export default {
   methods: {
     ...Vuex.mapActions([
       'getMe',
+      'getUserSettings',
     ]),
 
     resetForm() {
@@ -196,11 +208,13 @@ export default {
         mobile: this.form.mobile.replace(/\D/g,''), // only send digits, prepend US country code
         firstname: this.form.firstname,
         lastname: this.form.lastname,
+        hasAllowedNSFW: this.form.hasAllowedNSFW,
       }
       try { 
         await axios.post( this.$apiRoute('users.requestVerify'), payload )
         this.$root.$bvToast.toast('Request successfully sent!', { toaster:'b-toaster-top-center', title:'Success', variant:'success' })
         await this.getMe()
+        await this.getUserSettings({ userId: this.session_user.id })
       } catch (err) {
         console.log('SettingsVerify::checkStatus()', { err })
         this.renderError = true
@@ -238,6 +252,7 @@ export default {
   },
 
   created() {
+    this.form.hasAllowedNSFW = Boolean(this.user_settings.has_allowed_nsfw)
     this.getMe()
   },
 
