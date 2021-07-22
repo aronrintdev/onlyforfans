@@ -47,25 +47,6 @@ use App\Enums\VerifyStatusTypeEnum;
 // Send mail via laravel native, not SendGrid:
 // $ DEBUG_BYPASS_SENDGRID_MAIL_NOTIFY=true php artisan test --group="lib-notification-unit"
 
-/*
-[/] password-reset
-[/] password-changed-confirmation
-[/] id-verification-pending
-[/] id-verification-approved
-[/] id-verification-rejected
-[/] email-verified
-
-[/] new-subscription-payment-received
-[/] subscription-renewal-payment-received
-[/] subscription-payment-received-from-returning-subscriber
-[o] new-campaign-contribution-received
-[o] campaign-goal-reached
-[o] new-referral-received
-[/] new-message-received
-[/] new-tip-received
-[/] new-comment-received
- */
-
 class NotificationTest extends TestCase
 {
     use WithFaker;
@@ -95,26 +76,20 @@ class NotificationTest extends TestCase
     }
 
     /**
-     * @group OFF-lib-notification-unit
+     * @group lib-notification-unit
      * @group regression
      * @group regression-unit
      */
     public function test_should_notify_new_referral_received()
     {
-        $this->assertTrue(false, 'to-be-implemented');
-            /*
         Notification::fake();
-        $campaign = Campaign::first();
-        $actor = $timeline->followers->first(); // fan
-        $receiver = $campaign->creator; // creator
-        $amount = Money::USD( $this->faker->numberBetween(1, 20) * 500 ); // %FIXME: should be associated with campaign?
-        $result = Notification::send( $receiver, new NewCampaignContributionReceived($campaign, $actor, ['amount'=>$amount]) );
-        Notification::assertSentTo( [$receiver], NewCampaignContributionReceived::class );
-             */
+        $this->assertTrue(false, 'to-be-implemented');
+        //$result = Notification::send( $receiver, new NewReferralReceived($referral, $sender) );
+        //Notification::assertSentTo( [$receiver], NewReferralReceived::class );
     }
 
     /**
-     * @group OFF-lib-notification-unit
+     * @group lib-notification-unit
      * @group regression
      * @group regression-unit
      */
@@ -124,16 +99,16 @@ class NotificationTest extends TestCase
             /*
         Notification::fake();
         $campaign = Campaign::first();
-        $actor = $timeline->followers->first(); // fan
+        $sender = $timeline->followers->first(); // fan
         $receiver = $campaign->creator; // creator
         $amount = Money::USD( $this->faker->numberBetween(1, 20) * 500 ); // %FIXME: should be associated with campaign?
-        $result = Notification::send( $receiver, new NewCampaignContributionReceived($campaign, $actor, ['amount'=>$amount]) );
+        $result = Notification::send( $receiver, new NewCampaignContributionReceived($campaign, $sender, ['amount'=>$amount]) );
         Notification::assertSentTo( [$receiver], NewCampaignContributionReceived::class );
              */
     }
 
     /**
-     * @group OFF-lib-notification-unit
+     * @group lib-notification-unit
      * @group regression
      * @group regression-unit
      */
@@ -143,10 +118,10 @@ class NotificationTest extends TestCase
             /*
         Notification::fake();
         $campaign = Campaign::first();
-        $actor = $timeline->followers->first(); // fan
+        $sender = $timeline->followers->first(); // fan
         $receiver = $campaign->creator; // creator
         $amount = Money::USD( $this->faker->numberBetween(1, 20) * 500 ); // %FIXME: should be associated with campaign?
-        $result = Notification::send( $receiver, new NewCampaignContributionReceived($campaign, $actor, ['amount'=>$amount]) );
+        $result = Notification::send( $receiver, new NewCampaignContributionReceived($campaign, $sender, ['amount'=>$amount]) );
         Notification::assertSentTo( [$receiver], NewCampaignContributionReceived::class );
              */
     }
@@ -160,10 +135,10 @@ class NotificationTest extends TestCase
     {
         Notification::fake();
         $timeline = Timeline::has('followers', '>=', 1)->first(); // subscribable
-        $actor = $timeline->followers->first(); // fan
+        $sender = $timeline->followers->first(); // fan
         $receiver = $timeline->user; // creator
         $amount = Money::USD( $this->faker->numberBetween(1, 20) * 500 );
-        $result = Notification::send( $receiver, new SubRenewalPaymentReceived($timeline, $actor, ['amount'=>$amount]) );
+        $result = Notification::send( $receiver, new SubRenewalPaymentReceived($timeline, $sender, ['amount'=>$amount]) );
         Notification::assertSentTo( [$receiver], SubRenewalPaymentReceived::class );
     }
 
@@ -176,10 +151,10 @@ class NotificationTest extends TestCase
     {
         Notification::fake();
         $timeline = Timeline::has('followers', '>=', 1)->first(); // subscribable
-        $actor = $timeline->followers->first(); // fan
+        $sender = $timeline->followers->first(); // fan
         $receiver = $timeline->user; // creator
         $amount = Money::USD( $this->faker->numberBetween(1, 20) * 500 );
-        $result = Notification::send( $receiver, new SubRenewalPaymentReceivedReturningSubscriber($timeline, $actor, ['amount'=>$amount]) );
+        $result = Notification::send( $receiver, new SubRenewalPaymentReceivedReturningSubscriber($timeline, $sender, ['amount'=>$amount]) );
         Notification::assertSentTo( [$receiver], SubRenewalPaymentReceivedReturningSubscriber::class );
     }
 
@@ -192,10 +167,10 @@ class NotificationTest extends TestCase
     {
         Notification::fake();
         $timeline = Timeline::has('followers', '>=', 1)->first(); // subscribable
-        $actor = $timeline->followers->first(); // fan
+        $sender = $timeline->followers->first(); // fan
         $receiver = $timeline->user; // creator
         $amount = Money::USD( $this->faker->numberBetween(1, 20) * 500 );
-        $result = Notification::send( $receiver, new NewSubPaymentReceived($timeline, $actor, ['amount'=>$amount]) );
+        $result = Notification::send( $receiver, new NewSubPaymentReceived($timeline, $sender, ['amount'=>$amount]) );
         Notification::assertSentTo( [$receiver], NewSubPaymentReceived::class );
     }
 
