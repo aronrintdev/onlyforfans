@@ -1,7 +1,12 @@
 <template>
   <div v-if="!isLoading">
 
-    <b-card title="Favorites">
+    <b-card>
+      <b-row>
+        <b-col>
+          <h2 class="card-title mt-1 mb-3"><span class="tag-title">Favorites</span></h2>
+        </b-col>
+      </b-row>
       <b-card-text>
         <div>
           <b-tabs content-class="mt-3">

@@ -145,6 +145,7 @@ body .list-component {
       .card-img-top {
         overflow: hidden;
         height: 120px;
+        object-fit: cover;
       }
     }
 

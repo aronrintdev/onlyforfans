@@ -35,6 +35,12 @@ export const routes = [
     props: true,
   },
   {
+    name: 'timelines.explore',
+    path: '/explore',
+    component: timelines.Explore,
+    props: true,
+  },
+  {
     name: 'search.home',
     path: '/search',
     component: search.Home,
@@ -98,7 +104,7 @@ export const routes = [
   // Lists
   {
     name: 'lists.dashboard',
-    path: '/lists/dashboard',
+    path: '/lists',
     component: lists.Dashboard,
     children:  listRoutes,
   },

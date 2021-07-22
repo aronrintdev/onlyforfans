@@ -41,7 +41,6 @@ export default {
   computed: {
     ...Vuex.mapGetters([
       'session_user',
-      'timeline',
     ]),
 
     showNames() {
@@ -62,12 +61,12 @@ export default {
           {
             name: 'Fans',
             icon: 'users',
-            to: { name: 'timeline.followers', params: { slug: (this.timeline ? this.timeline.slug : ''), } },
+            to: { name: 'lists.followers' },
           },
           {
             name: 'Discover',
             icon: 'compass',
-            to: { name: 'index' },
+            to: { name: 'timelines.explore' },
           },
           {
             name: 'Notifications',

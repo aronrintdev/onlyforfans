@@ -80,6 +80,9 @@ data.ms/
 bootstrap/cache/services.php
 bootstrap/cache/*
 
+# Scripts
+dev-server-deploy.sh
+
 # IDE Helper
 _ide_helper.php
 

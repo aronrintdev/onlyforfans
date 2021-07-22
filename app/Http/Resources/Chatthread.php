@@ -36,6 +36,7 @@ class Chatthread extends JsonResource
                 ['sender_id', '<>', $sessionUser->id]
             ])->count(),
             'participants' => $this->participants,
+            'timeline' => isset($otherUser) && isset($otherUser->timeline) ? $otherUser->timeline : null,
             'has_subscriber' => $otherUser ? $sessionUser->timeline->subscribers->contains($otherUser->id) : false, // non-session user participant is a subscriber of session user
             'originator' => $this->originator,
             'created_at' => $this->created_at,

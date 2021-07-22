@@ -70,9 +70,13 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('/blockables/match', ['as'=>'blockables.match', 'uses' => 'BlockablesController@match']);
 
     // -- chatmessages --
-    Route::resource('chatmessages', 'ChatmessagesController', [
+    Route::get('/chatmessages/search', 'ChatmessagesController@search')
+        ->name('chatmessages.search');
+    Route::apiResource('chatmessages', 'ChatmessagesController', [
         'only' => [ 'index', ],
     ]);
+
+    Route::get('/chatthreads/{chatthread}/gallery', 'ChatmessagesController@gallery')->name('chatthreads.gallery');
 
     // -- chatthreads --
     Route::get('/chatthreads/totalUnreadCount', ['as'=>'chatthreads.totalUnreadCount', 'uses' => 'ChatthreadsController@getTotalUnreadCount']);
@@ -179,14 +183,16 @@ Route::group(['middleware' => ['auth']], function () {
     // -- shareables:  --
     Route::get('/shareables/indexFollowers', ['as' => 'shareables.indexFollowers', 'uses' => 'ShareablesController@indexFollowers']);
     Route::get('/shareables/indexFollowing', ['as' => 'shareables.indexFollowing', 'uses' => 'ShareablesController@indexFollowing']);
+    Route::put('/shareables/{shareable}/clearnotes', ['as' => 'shareables.clearnotes', 'uses' => 'ShareablesController@clearnotes']);
     Route::resource('shareables', 'ShareablesController', [
-        'only' => [ 'index', ],
+        'only' => [ 'index', 'update'],
     ]);
 
     // -- timelines: tippable | subscribeable | followable --
     #region Timelines
     Route::get('/timelines-suggested', ['as'=>'timelines.suggested', 'uses' => 'TimelinesController@suggested']); // %FIXME: refactor: use index(?)
     Route::get('/timelines/my-followed-stories', ['as'=>'timelines.myFollowedStories', 'uses' => 'TimelinesController@myFollowedStories']);
+    Route::get('/timelines/public-feed', ['as'=>'timelines.publicfeed', 'uses' => 'TimelinesController@publicFeed']);
     //Route::get('/timelines/home', ['as'=>'timelines.home', 'uses' => 'TimelinesController@home']); // special case of 'show'
     Route::get('/timelines/match', ['as'=>'timelines.match', 'uses' => 'TimelinesController@match']);
     Route::get('/timelines/home/feed', ['as'=>'timelines.homefeed', 'uses' => 'TimelinesController@homefeed']);

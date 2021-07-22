@@ -4,17 +4,22 @@
     <div class="scheduled-message-head" v-if="isScheduled">
       <div>
         <fa-icon :icon="['fas', 'schedule']" class="fa-lg" fixed-width />
-        <span> Scheduled for</span>
-        <strong>{{ moment(deliverAtTimestamp * 1000).local().format('MMM DD, h:mm a') }}</strong>
+        <span> Scheduled for </span>
+        <strong>{{ moment(deliverAtTimestamp).local().format('MMM DD, h:mm a') }}</strong>
       </div>
       <b-button variant="link" class="clickme_to-cancel" @click="clearScheduled">
         <fa-icon :icon="['fas', 'close']" class="clickable fa-lg" fixed-width />
       </b-button>
     </div>
 
-
-
     <b-form class="store-chatmessage mt-auto" @submit.prevent="sendMessage($event)">
+      <AudioRecorder
+        v-if="showAudioRec"
+        class="mb-3"
+        @close="showAudioRec=false"
+        @complete="audioRecordFinished"
+      />
+
       <VueDropzone
         ref="myVueDropzone"
         id="dropzone"
@@ -59,35 +64,28 @@
 
       <!-- Bottom Toolbar -->
       <Footer
-        @vaultSelect="toggleVaultSelect()"
-        @openScheduleMessage="openScheduleMessageModal('set-scheduled')"
+        :selected="selectedOptions"
+        @vaultSelect="toggleVaultSelect"
+        @openScheduleMessage="openScheduleMessageModal"
+        @recordAudio="recordAudio"
+        @recordVideo="recordVideo"
       />
     </b-form>
 
-    <b-modal id="schedule-message-modal" hide-header centered hide-footer ref="schedule-message-modal">
-      <div class="block-modal">
-        <div class="header d-flex align-items-center">
-          <h4 class="pt-1 pb-1">SCHEDULED MESSAGES</h4>
-        </div>
-        <div class="content">
-          <b-form-datepicker
-            v-model="newMessageForm.deliver_at.date"
-            :state="newMessageForm.deliver_at.date ? true : null"
-            :min="new Date()"
-          />
-          <b-form-timepicker
-            v-model="newMessageForm.deliver_at.time"
-            :state="newMessageForm.deliver_at.time ? true : null"
-          ></b-form-timepicker>
-        </div>
-        <div class="d-flex align-items-center justify-content-end action-btns">
-          <button class="link-btn" @click="clearScheduled">Cancel</button>
-          <button class="link-btn" @click="setScheduled" >Apply</button>
-        </div>
-      </div>
+    <VideoRecorder
+      v-if="showVideoRec"
+      @close="showVideoRec = false"
+      @complete="videoRecCompleted"
+    />
+
+    <b-modal v-model="scheduleMessageOpen" body-class="p-0" hide-header centered hide-footer>
+      <ScheduleDateTime
+        :scheduled_at="newMessageForm.deliver_at"
+        @apply-schedule="date => newMessageForm.deliver_at = date"
+        @edit-apply-schedule="date => newMessageForm.deliver_at = date"
+        @close="scheduleMessageOpen = false"
+      />
     </b-modal>
-
-
   </section>
 </template>
 
@@ -99,21 +97,28 @@ import moment from 'moment'
 
 import VueDropzone from 'vue2-dropzone'
 
+import ScheduleDateTime from '@components/modals/ScheduleDateTime'
 import UploadMediaPreview from '@components/posts/UploadMediaPreview'
 import Footer from './Footer'
+import VideoRecorder from '@components/videoRecorder';
+import AudioRecorder from '@components/audioRecorder';
 
 export default {
   name: 'NewMessageForm',
 
   components: {
+    AudioRecorder,
     Footer,
+    ScheduleDateTime,
     UploadMediaPreview,
+    VideoRecorder,
     VueDropzone,
   },
 
   props: {
     session_user: null,
     chatthread_id: null,
+    vaultOpen: { type: Boolean, default: false },
   },
 
   computed: {
@@ -129,7 +134,7 @@ export default {
 
     deliverAtTimestamp() {
       return this.isScheduled
-        ? moment( `${this.newMessageForm.deliver_at.date} ${this.newMessageForm.deliver_at.time}` ).utc().unix()
+        ? moment(this.newMessageForm.deliver_at).utc().unix()
         : null
     },
 
@@ -138,7 +143,7 @@ export default {
     },
 
     isScheduled() {
-      return this.newMessageForm.deliver_at.date && this.newMessageForm.deliver_at.time
+      return this.newMessageForm.deliver_at !== null
     },
 
     dropzoneOptions() {
@@ -160,6 +165,24 @@ export default {
       }
     },
 
+    selectedOptions() {
+      var selected = []
+      if (this.vaultOpen) {
+        selected.push('vaultSelect')
+      }
+      if (this.scheduleMessageOpen) {
+        selected.push('openScheduleMessage')
+      }
+      if (this.showVideoRec) {
+        selected.push('recordVideo')
+      }
+      if (this.showAudioRec) {
+        selected.push('recordAudio')
+      }
+
+      return selected
+    }
+
   },
 
   data: () => ({
@@ -168,8 +191,12 @@ export default {
 
     newMessageForm: {
       mcontent: '',
-      deliver_at: { date: null, time: null },
+      deliver_at: null,
     },
+
+    scheduleMessageOpen: false,
+    showVideoRec: false,
+    showAudioRec: false,
 
     // If client is sending message
     sending: false,
@@ -223,9 +250,12 @@ export default {
           type: file.type,
         })
       }
+      this.$nextTick(() => this.$forceUpdate())
     },
 
-    onDropzoneRemoved() {},
+    onDropzoneRemoved() {
+      //
+    },
 
     /** Add to Dropzone formData */
     onDropzoneSending(file, xhr, formData) {
@@ -356,8 +386,7 @@ export default {
     },
 
     clearScheduled: function() {
-      this.newMessageForm.deliver_at.date = null
-      this.newMessageForm.deliver_at.time = null
+      this.newMessageForm.deliver_at = null
       this.$bvModal.hide('schedule-message-modal')
     },
 
@@ -365,12 +394,34 @@ export default {
       // stub placeholder for impl
     },
 
-    openScheduleMessageModal: function() {
-      this.$refs['schedule-message-modal'].show();
+    openScheduleMessageModal() {
+      this.scheduleMessageOpen = true
     },
 
     toggleVaultSelect() {
       this.$emit('toggleVaultSelect')
+    },
+
+    recordAudio() {
+      this.showAudioRec = !this.showAudioRec
+    },
+
+    audioRecordFinished(file) {
+      this.showAudioRec = false
+      if (this.$refs.myVueDropzone) {
+        this.$refs.myVueDropzone.addFile(file);
+      }
+    },
+
+    recordVideo() {
+      this.showVideoRec = !this.showVideoRec
+    },
+
+    videoRecCompleted(file) {
+      this.showVideoRec = false;
+      if (this.$refs.myVueDropzone) {
+        this.$refs.myVueDropzone.addFile(file);
+      }
     },
 
     _isTyping() {
@@ -384,11 +435,10 @@ export default {
 
   watch: {
     'newMessageForm.mcontent': function(value) {
-      if (
-        this.newMessageForm.deliver_at.date === undefined || this.newMessageForm.deliver_at.date === null
-        && this.newMessageForm.time === undefined || this.newMessageForm.time === null
-      ) {
-        this.isTyping()
+      if (this.newMessageForm.deliver_at === undefined || this.newMessageForm.deliver_at === null) {
+        if (value) {
+          this.isTyping()
+        }
       }
     },
 

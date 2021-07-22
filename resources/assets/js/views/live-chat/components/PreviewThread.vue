@@ -1,5 +1,6 @@
 <template>
   <b-list-group-item
+    v-if="participant"
     :to="to"
     :active="active"
   >

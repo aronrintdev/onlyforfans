@@ -1,9 +1,9 @@
 <template>
   <div v-if="!isLoading" class="container-fluid px-3 py-3" id="view-livechat">
 
-    <section class="row h-100" style="max-height: 100%;">
+    <section class="row flex-nowrap h-100 w-100" style="max-height: 100%;">
 
-      <aside class="col-md-5 col-lg-4" :class="mobile ? '' : 'panel'">
+      <aside class="col-md-5 col-lg-4 col-xl-2" :class="mobile ? '' : 'panel'">
 
         <article class="top-bar d-flex justify-content-between align-items-center mb-3">
           <div class="h4" v-text="$t('header')" />
@@ -59,12 +59,13 @@
 
       </aside>
 
-      <main class="col-md-7 col-lg-8 h-100" style="max-height: 100%;">
+      <main class="col-md-7 col-lg-8 col-xl-10 h-100" style="max-height: 100%;">
         <transition mode="out-in" name="quick-fade" :key="activeThreadId">
           <router-view
             :key="activeThreadId"
             :session_user="session_user"
             :participant="participants(activeThread)"
+            :timeline="activeThread ? activeThread.timeline : null"
           />
           <div v-if="!activeThreadId" class="d-flex h-100 align-items-center justify-content-around">
             <div class="d-flex flex-column">
