@@ -24,7 +24,7 @@ class NewCampaignContributionReceived extends Notification
         $this->campaign = $campaign;
         $this->actor = $actor;
         if ( array_key_exists('amount', $attrs) ) {
-            $this->amount = $attrs['amount']; // %FIXME
+            $this->amount = $attrs['amount']->getAmount(); // %FIXME
         }
         $this->settings = $campaign->getPrimaryOwner()->settings;
     }
@@ -41,7 +41,7 @@ class NewCampaignContributionReceived extends Notification
     public function toMail($notifiable)
     {
         return (new MailMessage)
-            ->line("You received a campaign contribution in the amount of: ".$this->amount->getAmount())
+            ->line("You received a campaign contribution in the amount of: ".$this->amount)
             ->line("From user: Stan Contributer")
             ->line("If you haven't already: Don't forget to go to the referral section to copy and share your code with others. You'll earn up to 5% of their total sales!")
             ->action("Share Referral!", $this->getUrl('referrals'));
@@ -57,7 +57,7 @@ class NewCampaignContributionReceived extends Notification
             ],
             'dtdata' => [
                 'contributor_name' => $this->actor->name,
-                'amount' => nice_currency($this->amount->getAmount()),
+                'amount' => nice_currency($this->amount)
 
                 'referral_url' => $this->getUrl('referrals'),
                 'home_url' => $this->getUrl('home'),
@@ -72,7 +72,7 @@ class NewCampaignContributionReceived extends Notification
     {
         return [
             'campaign_id' => $this->campaign->id,
-            'amount' => $this->amount->getAmount(),
+            'amount' => $this->amount,
             'actor' => [
                 'username' => $this->actor->username,
                 'name' => $this->actor->name,

@@ -16,7 +16,7 @@ class PasswordChanged extends Notification
     public $actor;
     protected $settings;
 
-    public function __construct(User $user)
+    public function __construct(User $actor)
     {
         $this->actor = $actor;
         $this->settings = $actor->settings; // actor = User

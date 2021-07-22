@@ -49,7 +49,6 @@ class SendgridApiTest extends TestCase
 
     /**
      * @group sendgrid-api-unit
-     * @group here0721
      * @group NO-regression
      */
     public function test_should_notify_tip_received()
@@ -79,24 +78,123 @@ class SendgridApiTest extends TestCase
      */
     public function test_should_notify_comment_received()
     {
-        //Notification::fake();
-
         $comment = Comment::first();
         $sender = $comment->user;
         $receiver = $comment->post->timeline->user;
-//dd($sender);
 
         dump('info', 'receiver: '.$receiver->name, 'sender: '.$sender->name, 'comment: '.$comment->id);
 
-        Notification::send( $receiver, new CommentReceived($comment, $sender));
+        $result = Notification::send( $receiver, new CommentReceived($comment, $sender));
 
-        $this->assertTrue(true);
+        $this->assertNull($result);
 
-        /*
-        Notification::assertSentTo(
-            [$receiver], CommentReceived::class
+    }
+
+    /**
+     * @group sendgrid-api-unit
+     * @group NO-regression
+     */
+    public function test_should_notify_id_verification_pending()
+    {
+        $user = User::first();
+
+        $vr = Verifyrequest::create([
+            'service_guid' => $this->faker->uuid,
+            'vservice' => 'fake-service',
+            'vstatus' => VerifyStatusTypeEnum::PENDING,
+            'requester_id' => $user->id,
+            'last_checked_at' => '2021-07-17 01:48:49',
+        ]);
+
+        Notification::send( $user, new IdentityVerificationPending($vr, $user));
+        $this->assertNull($result);
+
+        dump('info', 
+            ['requester' => $user->name??'-'],
+            'verifyrequest', [
+                'id' => $vr->id,
+                'status' => $vr->vstatus,
+            ],
         );
-         */
+    }
+
+    /**
+     * @group sendgrid-api-unit
+     * @group NO-regression
+     */
+    public function test_should_notify_id_verification_approved()
+    {
+        $user = User::first();
+
+        $vr = Verifyrequest::create([
+            'service_guid' => $this->faker->uuid,
+            'vservice' => 'fake-service',
+            'vstatus' => VerifyStatusTypeEnum::VERIFIED,
+            'requester_id' => $user->id,
+            'last_checked_at' => '2021-07-17 01:48:49',
+        ]);
+
+        Notification::send( $user, new IdentityVerificationVerified($vr, $user));
+        $this->assertNull($result);
+
+        dump('info', 
+            ['requester' => $user->name??'-'],
+            'verifyrequest', [
+                'id' => $vr->id,
+                'status' => $vr->vstatus,
+            ],
+        );
+    }
+
+    /**
+     * @group sendgrid-api-unit
+     * @group NO-regression
+     */
+    public function test_should_notify_id_verification_rejected()
+    {
+        $user = User::first();
+
+        $vr = Verifyrequest::create([
+            'service_guid' => $this->faker->uuid,
+            'vservice' => 'fake-service',
+            'vstatus' => VerifyStatusTypeEnum::REJECTED,
+            'requester_id' => $user->id,
+            'last_checked_at' => '2021-07-17 01:48:49',
+        ]);
+
+        Notification::send( $user, new IdentityVerificationRejected($vr, $user));
+        $this->assertNull($result);
+
+        dump('info', 
+            ['requester' => $user->name??'-'],
+            'verifyrequest', [
+                'id' => $vr->id,
+                'status' => $vr->vstatus,
+            ],
+        );
+    }
+
+    /**
+     * @group sendgrid-api-unit
+     * @group NO-regression
+     */
+    public function test_should_notify_password_reset()
+    {
+        $user = User::first();
+
+
+        Notification::send( $user, new IdentityVerificationRejected($vr, $user));
+        $this->assertNull($result);
+
+        dump('info', 
+            ['requester' => $user->name??'-'],
+            'verifyrequest', [
+                'id' => $vr->id,
+                'status' => $vr->vstatus,
+            ],
+        );
+    }
+}
 
         /*
         $api = IdMeritApi::create();
@@ -109,6 +207,3 @@ class SendgridApiTest extends TestCase
         $this->assertArrayHasKey('expires_in', $json);
         //dd( $response );
          */
-    }
-}
-

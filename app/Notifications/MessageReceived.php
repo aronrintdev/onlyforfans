@@ -10,7 +10,7 @@ use App\Channels\SendgridChannel;
 use App\Models\User;
 use App\Models\Chatmessage;
 
-class NewMessageReceived extends Notification
+class MessageReceived extends Notification
 {
     use NotifyTraits, Queueable;
 

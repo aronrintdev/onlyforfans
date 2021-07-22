@@ -22,7 +22,7 @@ class CampaignGoalReached extends Notification
     {
         $this->campaign = $campaign;
         if ( array_key_exists('amount', $attrs) ) {
-            $this->amount = $attrs['amount']; // %FIXME
+            $this->amount = $attrs['amount']->getAmount(); // %FIXME
         }
         $this->settings = $campaign->getPrimaryOwner()->settings;
     }
@@ -39,7 +39,7 @@ class CampaignGoalReached extends Notification
     public function toMail($notifiable)
     {
         return (new MailMessage)
-            ->line("Congrats! Your campaign reached it's goal in the amount of: ".$this->amount->getAmount())
+            ->line("Congrats! Your campaign reached it's goal in the amount of: ".$this->amount)
             ->line("If you haven't already: Don't forget to go to the referral section to copy and share your code with others. You'll earn up to 5% of their total sales!");
     }
 
@@ -53,7 +53,7 @@ class CampaignGoalReached extends Notification
             ],
             'dtdata' => [
                 'user_name' => $this->notifiable->name,
-                'amount' => nice_currency($this->amount->getAmount()),
+                'amount' => nice_currency($this->amount)
 
                 'referral_url' => $this->getUrl('referrals'),
                 'home_url' => $this->getUrl('home'),
@@ -68,7 +68,7 @@ class CampaignGoalReached extends Notification
     {
         return [
             'campaign_id' => $this->campaign->id,
-            'amount' => $this->amount->getAmount(),
+            'amount' => $this->amount,
             'user_name' => $this->notifiable->name,
         ];
     }
