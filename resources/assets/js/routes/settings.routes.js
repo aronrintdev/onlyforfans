@@ -77,6 +77,11 @@ export default [
     path: 'subscriptions',
   },
   {
+    name: 'settings.staffmembers',
+    component: settings.StaffMembers,
+    path: 'staff-members',
+  },
+  {
     name: 'settings.default',
     component: settings.General,
     path: '',

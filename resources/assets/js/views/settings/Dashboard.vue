@@ -123,6 +123,11 @@ export default {
         to: { name: 'settings.subscriptions', params: {} },
       })
 
+      routes.push({
+        name: 'Managers',
+        to: { name: 'settings.staffmembers', params: {} },
+      })
+
       routes = routes.map(route => ({
         ...route,
         active: this.checkActive(route)
