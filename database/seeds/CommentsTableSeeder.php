@@ -42,7 +42,8 @@ class CommentsTableSeeder extends Seeder
                          'user_id'     => $commenter->id,
                          //'parent_id'   => null, // %TODO: nested comments
                      ]);
-                     $post->user->notify(new CommentReceived($post, $commenter));
+                     // %PSG: Disable as this will trigger SendGrid emails
+                     //$post->user->notify(new CommentReceived($post, $commenter)); Will trigger SendGrid email!
                  });
              });
         });

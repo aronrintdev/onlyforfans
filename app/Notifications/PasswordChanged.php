@@ -7,41 +7,47 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 use App\Channels\SendgridChannel;
-
 use App\Models\User;
-use App\Models\Verifyrequest;
 
-class IdentityVerificationRejected extends Notification
+class PasswordChanged extends Notification
 {
     use NotifyTraits, Queueable;
 
-    public $vr;
-    public $requester;
+    public $actor;
+    protected $settings;
 
-    public function __construct(Verifyrequest $vr, User $requester) { 
-        $this->vr = $vr;
-        $this->requester = $requester;
+    public function __construct(User $actor)
+    {
+        $this->actor = $actor;
+        $this->settings = $actor->settings; // actor = User
     }
 
-    public function via($notifiable) {
+    public function via($notifiable)
+    {
         $channels =  ['database'];
-        $channels[] = $this->getMailChannel(); // verification rejected should always be enabled!
+        $channels[] = $this->getMailChannel();
         return $channels;
     }
 
-    public function toMail($notifiable) {
+    public function toMail($notifiable)
+    {
         return (new MailMessage)
-                    ->line('Your identity verification could not be processed. Please contact AllFans support');
+            ->line('Hi '.$this->actor->name)
+            ->line('This email is to confirm your recent password change. No further action is necessary.')
+            ->line('If you did not recently change your password, please contact our support team.');
     }
 
-    public function toSendgrid($notifiable) {
+    public function toSendgrid($notifiable)
+    {
         return [
-            'template_id' => 'id-verification-rejected',
+            'template_id' => 'password-changed-confirmation',
             'to' => [
                 'email' => $notifiable->email,
                 'name' => $notifiable->name, // 'display name'
             ],
             'dtdata' => [
+                'user_name' => $this->actor->name,
+
                 'home_url' => $this->getUrl('home'),
                 'login_url' => $this->getUrl('login'),
                 'privacy_url' => $this->getUrl('privacy'),
@@ -51,14 +57,13 @@ class IdentityVerificationRejected extends Notification
         ];
     }
 
-    public function toArray($notifiable) {
+    public function toArray($notifiable)
+    {
         return [
-            'guid' => $this->vr->guid,
-            'vstatus' => $this->vr->vstatus ?? 'none',
-            'requester' => [ // person being verified
-                'username' => $this->requester->username,
-                'name' => $this->requester->name,
-                'avatar' => $this->requester->avatar->filepath ?? null,
+            'actor' => [ // commenter
+                'username' => $this->actor->username,
+                'name' => $this->actor->name,
+                'avatar' => $this->actor->avatar->filepath ?? null,
             ],
         ];
     }

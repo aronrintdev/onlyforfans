@@ -18,6 +18,13 @@ if (!function_exists('nice_bool')) {
     }
 }
 
+if (!function_exists('nice_currency')) {
+    // isCents: is amount in cents or in decimal-dollars (assumes USD!)
+    function nice_currency($str, $isCents=true) : string {
+        $val = $isCents ? ( intval($str)/100 ) : ( intval($str) );
+        return '$'.number_format($val, 2, '.',',');
+    }
+}
 
 if (!function_exists('parse_filebase')) {
     function parse_filebase(string $filepath) : ?string

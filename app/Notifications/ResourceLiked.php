@@ -47,7 +47,7 @@ class ResourceLiked extends Notification
     {
         return (new MailMessage)
                     ->line('You received a like from '.$this->actor->name)
-                    ->action('Notification Action', url('/'));
+                    ->action('View Like', url('/'));
     }
 
     public function toArray($notifiable)
