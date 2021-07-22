@@ -49,8 +49,8 @@ class EmailVerified extends Notification
             'dtdata' => [
                 'user_name' => $this->actor->name,
 
+                'login_url' => $this->getUrl('login'),
                 'home_url' => $this->getUrl('home'),
-                'password_reset_url' => $this->getUrl('password_reset'),
                 'privacy_url' => $this->getUrl('privacy'),
                 'manage_preferences_url' => $this->getUrl('manage_preferences', ['username' => $notifiable->username]),
                 'unsubscribe_url' => $this->getUrl('unsubscribe', ['username' => $notifiable->username]),

@@ -12,8 +12,8 @@ use App\Apis\IdMerit\Api as IdMeritApi;
 class IdmeritApiTest extends TestCase
 {
     /**
-     * @group idmerit-api
-     // do not add to regression tests!
+     * @group idmerit-api-unit
+     * @group NO-regression
      */
     public function test_should_get_token()
     {
@@ -29,8 +29,8 @@ class IdmeritApiTest extends TestCase
     }
 
     /**
-     * @group idmerit-api
-     // do not add to regression tests!
+     * @group idmerit-api-unit
+     * @group NO-regression
      */
     public function test_should_send_verify_request()
     {
@@ -70,8 +70,8 @@ class IdmeritApiTest extends TestCase
     }
 
     /**
-     * @group idmerit-api
-     // do not add to regression tests!
+     * @group idmerit-api-unit
+     * @group NO-regression
      // %NOTE: Assumes the 'hardcoded' unique IDs already exist in our test sandbox!
      */
     public function test_should_poll_verify_request_status()

@@ -76,6 +76,7 @@ $ php artisan route:cache
 
 %%% Tinker
 $ php artisan tinker
+$ php artisan tinker --env="testing"
 >>> error_reporting(E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED)
 
 %%%
