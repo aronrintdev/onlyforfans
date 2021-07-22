@@ -147,7 +147,7 @@ export default {
       const token = await this.$recaptcha('register');
 
       this.state = 'loading'
-      this.axios.post('/register', { ...this.form, 'g-recaptcha-response': token }).then((response) => {
+      this.axios.post('/register', { ...this.form, ref: this.$route.query.ref, 'g-recaptcha-response': token }).then((response) => {
         if (response.data.err_result) {
           this.verrors = response.data.err_result;
         } else {

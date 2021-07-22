@@ -10,6 +10,7 @@ use App\Models\Setting;
 use App\Models\Timeline;
 use App\Models\User;
 use App\Models\Invite;
+use App\Models\Referral;
 use App\EnumsInviteTypeEnum;
 use App\Enums\MediafileTypeEnum;
 
@@ -186,6 +187,14 @@ class RegisterController extends Controller
                 // -> itype
                 // -> custom_attributes
                 // [ ] how to tie [invites].updated_at to jobs (?)
+            }
+
+            if ($request->has('ref')) {
+                Referral::create([
+                    'user_id' => $request->ref,
+                    'referral_id' => $user->timeline->id,
+                    'referral_type' => 'timelines',
+                ]);
             }
 
             if (Setting::get('mail_verification') == 'on') {
