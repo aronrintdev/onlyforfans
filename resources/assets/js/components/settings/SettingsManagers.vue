@@ -7,7 +7,7 @@
             <div class="h3 text-center">Managers</div>
             <b-button variant="primary" class="px-4" @click="isNewManager=true">Invite Manager</b-button>
           </div>
-          <staff-member-table :items="managers" />
+          <staff-member-table :items="managers" :metadata="metadata" />
         </b-card-text>
       </b-card>
     </div>
@@ -18,46 +18,6 @@
 <script>
 import StaffMemberTable from './StaffMemberTable';
 import StaffInvite from './StaffInvite';
-
-const MockData = [
-  {
-    id: 1, 
-    name: 'John Doe',
-    email: 'john.doe@email.com',
-    active: 1,
-    role: 'Admin',
-    last_login_at: '2021-07-15T18:03:02.000000Z',
-    actions: null,
-  },
-  {
-    id: 2, 
-    name: 'Smith Jane',
-    email: 'smith.jane@email.com',
-    active: 1,
-    role: 'Staff',
-    last_login_at: '2021-06-15T18:03:02.000000Z',
-    actions: null,
-  },
-  {
-    id: 3, 
-    name: 'Walter Pick',
-    email: 'walter.pick@email.com',
-    active: 0,
-    role: 'Staff',
-    last_login_at: '2021-07-21T18:03:02.000000Z',
-    actions: null,
-  },
-  {
-    id: 4, 
-    name: 'Michael Johnson',
-    email: 'michael.johnson@email.com',
-    active: 0,
-    pending: 1,
-    role: 'Staff',
-    last_login_at: '2021-07-11T18:03:02.000000Z',
-    actions: null,
-  }
-]
 
 export default {
   props: {
@@ -70,9 +30,19 @@ export default {
   },
 
   data: () => ({
-    managers: MockData,
+    managers: [],
+    metadata: {},
     isNewManager: false,
   }),
+
+  mounted() {
+    // Get managers list of current login user
+    axios.get(this.$apiRoute('staff.indexManagers'))
+      .then(response => {
+        this.managers = response.data.data;
+        this.metadata = response.data.meta;
+      })
+  },
 
   methods: {
     inviteSent(data) {

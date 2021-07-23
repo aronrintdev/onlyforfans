@@ -10,8 +10,6 @@ class Staff extends Model
 {
     use UsesUuid, HasFactory;
 
-    public $table = 'staffs';
-
     protected $guarded = [ 'id', 'created_at', 'updated_at' ];
 
     //--------------------------------------------

@@ -124,7 +124,7 @@
     }
 
     .force-width-gmail {
-      min-width:600px;
+      max-width:600px;
       height: 0px !important;
       line-height: 1px !important;
       font-size: 1px !important;

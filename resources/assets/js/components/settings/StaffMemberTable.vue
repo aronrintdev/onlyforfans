@@ -1,6 +1,9 @@
 <template>
   <div>
-    <b-table hover class="staff-members-table" :items="members" :fields="fields" :current-page="currentPage">
+    <b-table hover class="staff-members-table" :items="members" :fields="fields" show-empty :current-page="currentPage">
+      <template #empty="scope">
+        <div class="p-5 text-center"><i>There is no active or invited accounts yet</i></div>
+      </template>
       <template #cell(active)="data">
         <b-badge variant="info" v-if="data.item.pending">Invited</b-badge>
         <b-badge variant="success" v-else-if="data.item.active">Active</b-badge>
@@ -19,9 +22,9 @@
       </template>
     </b-table>
     <b-pagination
-      v-model="currentPage"
-      :total-rows="totalRows"
-      :per-page="perPage"
+      v-model="metadata.current_page"
+      :total-rows="metadata.total"
+      :per-page="metadata.per_page"
       aria-controls="staff-members-table"
       v-on:page-click="pageClickHandler">
     </b-pagination>
@@ -34,6 +37,7 @@
   export default {
     props: {
       items: { type: Array, default: () => ([])},
+      metadata: { type: Object, default: {} },
     },
 
     computed: {

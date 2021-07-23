@@ -363,6 +363,13 @@ Route::delete('/lists/{id}/users/{userId}', 'ListsController@removeUserFromList'
 Route::post('/lists/{id}/pin', 'ListsController@addToPin')->name('lists.addtopin');
 Route::delete('/lists/{id}/pin', 'ListsController@removeFromPin')->name('lists.removefrompin');
 
+/*
+  Staff
+ */
+Route::get('/staff-members/managers', ['as'=>'staff.indexManagers', 'uses' => 'StaffController@indexManagers']);
+Route::get('/staff-members/staff', ['as'=>'staff.indexStaff', 'uses' => 'StaffController@indexStaffMembers']);
+
+
 /**
  * Single Page application catch all undefined routes
  * Laravel router will first try to match static resources, then specific routes, then finally this.
