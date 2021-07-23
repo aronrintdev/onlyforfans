@@ -1,14 +1,14 @@
 <template>
-  <b-container fluid v-if="!isLoading" class="admin-container bg-dark">
+  <b-container fluid v-if="!isLoading" class="admin-container">
 
-    <nav class="sb-topnav navbar navbar-expand navbar-dark OFF-bg-dark">
+    <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
       <a class="navbar-brand ps-3" href="index.html">AllFans Admin</a>
       <!-- Sidebar Toggle-->
       <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!"></button>
     </nav>
 
     <b-row>
-      <aside class="col-3">
+      <aside class="bg-dark col-3">
         Sidebar
         <b-nav vertical class="OFF-w-25">
           <b-nav-item active>Active</b-nav-item>
@@ -70,11 +70,31 @@ export default {
 </script>
 
 <style lang="scss">
+$nav-height: 56px;
 body { 
-  .admin-container {
-    background-color: #212832;
-    height: 100vh;
 
+  background-color: #fff !important;
+
+  .sb-topnav {
+    position: fixed;
+    top: 0;
+    right: 0;
+    left: 0;
+    z-index: 1030;
+    padding-left: 0;
+    height: $nav-height;
+  }
+  main {
+    position: relative;
+    top: $nav-height;
+    height: calc(100vh - #{$nav-height});
+    color: var(--dark);
+  }
+  aside {
+    position: relative;
+    top: $nav-height;
+    //height: calc(100vh - 56px);
+    height: calc(100vh - #{$nav-height});
     color: rgba(255, 255, 255, 0.25);
   }
 }
