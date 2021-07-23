@@ -1,42 +1,39 @@
 <template>
   <b-container fluid v-if="!isLoading" class="admin-container">
 
-    <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
-      <a class="navbar-brand ps-3" href="index.html">AllFans Admin</a>
-      <!-- Sidebar Toggle-->
-      <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!"></button>
-    </nav>
+    <MainNavbar class="header" />
 
     <b-row>
-      <aside class="bg-dark col-3">
-        Sidebar
-        <b-nav vertical class="OFF-w-25">
-          <b-nav-item active>Active</b-nav-item>
-          <b-nav-item>Link</b-nav-item>
-          <b-nav-item>Another Link</b-nav-item>
-          <b-nav-item disabled>Disabled</b-nav-item>
-        </b-nav>
+
+      <aside class="bg-dark col-sm-2">
+        <MajorNav />
       </aside>
-      <main class="col-9">
-        Main
+
+      <main class="col-sm-10">
+        <router-view />
+        <!-- HERE -->
       </main>
+
     </b-row>
+
   </b-container>
 </template>
 
 <script>
 import Vuex from 'vuex';
 
+import MainNavbar from '@components/admin/common/MainNavbar'
+import MajorNav from '@components/admin/common/MajorNav'
 //import EventUpdater from '@components/EventUpdater'
-//import MainNavBar from '@components/common/MainNavbar'
 //import SiteFooter from '@views/templates/SiteFooter'
 //import Toaster from '@components/Toaster'
 
 export default {
   name: 'AdminApp',
   components: {
+    MainNavbar,
+    MajorNav,
     //EventUpdater,
-    //MainNavBar,
     //SiteFooter,
     //Toaster,
   },
@@ -87,14 +84,14 @@ body {
   main {
     position: relative;
     top: $nav-height;
-    height: calc(100vh - #{$nav-height});
+    min-height: calc(100vh - #{$nav-height});
     color: var(--dark);
   }
   aside {
     position: relative;
     top: $nav-height;
     //height: calc(100vh - 56px);
-    height: calc(100vh - #{$nav-height});
+    min-height: calc(100vh - #{$nav-height});
     color: rgba(255, 255, 255, 0.25);
   }
 }

@@ -36,6 +36,10 @@ const options = {
 };
 Vue.use(VueLogger, options);
 
+require('./bootstrap/filters')
+
+export const eventBus = new Vue({ });
+
 import VueI18n from 'vue-i18n';
 Vue.use(VueI18n);
 
@@ -87,13 +91,13 @@ import i18n from './i18n'
 
 import VueRouter from 'vue-router';
 Vue.use(VueRouter);
-import adminRouter from './routes/admin.routes';
+import router from './routes/admin.routes';
 
 import AdminApp from './views/templates/Admin.vue';
 
 const app = new Vue({
-    adminRouter,
-    i18n,
-    //store,
-    render: h => h(AdminApp),
+  router,
+  i18n,
+  //store,
+  render: h => h(AdminApp),
 }).$mount('#app');

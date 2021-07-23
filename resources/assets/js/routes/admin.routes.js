@@ -1,15 +1,20 @@
 import VueRouter from 'vue-router'
 import ErrorViews from '@views/errors'
 
+import admin from '@views/admin'
+
 export const adminRoutes = [
-  /*
   {
-    name: 'admin', // %TODO: should be named 'home' or 'feed.home'
+    name: 'home', // %TODO: should be named 'home' or 'feed.home'
     path: '/admin',
     component: admin.Home,
-    props: true,
+    //props: true,
   },
-  */
+  {
+    name: 'user-management', // %TODO: should be named 'home' or 'feed.home'
+    path: '/admin/user-management',
+    component: admin.UserManagement,
+  },
 
   /**
    * 404, catch all unknowns
