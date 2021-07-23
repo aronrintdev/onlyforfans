@@ -127,8 +127,36 @@ class Account extends Model implements Ownable
     {
         return $this->hasMany(Transaction::class);
     }
+
+    public function transactionSummaries()
+    {
+        return $this->hasMany(TransactionSummary::class);
+    }
     #endregion
 
+    /* ------------------------------- Scopes ------------------------------- */
+    #region Scopes
+
+    public function scopeType($query, $type)
+    {
+        return $query->where('type', $type);
+    }
+
+    public function scopeIsIn($query)
+    {
+        return $query->type(AccountTypeEnum::IN);
+    }
+    public function scopeIsInternal($query)
+    {
+        return $query->type(AccountTypeEnum::INTERNAL);
+    }
+    public function scopeIsOut($query)
+    {
+        return $query->type(AccountTypeEnum::OUT);
+    }
+
+    #endregion Scopes
+    /* ---------------------------------------------------------------------- */
 
     /* ------------------------------ Functions ----------------------------- */
     #region Functions
@@ -159,7 +187,10 @@ class Account extends Model implements Ownable
     }
 
     /**
-     * Move funds from one account to another, returns debit and credit transactions in collection
+     * Move funds from one account to another, returns debit and credit transactions in collection  
+     *   **Remember:**  
+     *   `'credit' => 'money subtracted from account'`  
+     *   `'debit'  => 'money added to account'`  
      *
      * @return  Collection  [ 'debit' => debit Transaction, 'credit' => credit Transaction ]
      */
@@ -203,16 +234,16 @@ class Account extends Model implements Ownable
                 'currency' => $fromAccount->currency,
                 'description' => $options['description'] ?? null,
                 'type' => $options['type'] ?? TransactionTypeEnum::PAYMENT,
-                'purchasable_id' => isset($options['purchasable_id'])
-                    ? $options['purchasable_id']
-                    : (isset($options['purchasable'])
-                        ? $options['purchasable']->getKey()
+                'resource_id' => isset($options['resource_id'])
+                    ? $options['resource_id']
+                    : (isset($options['resource'])
+                        ? $options['resource']->getKey()
                         : null
                     ),
-                'purchasable_type' => isset($options['purchasable_type'])
-                    ? $options['purchasable_type']
-                    : (isset($options['purchasable'])
-                        ? $options['purchasable']->getMorphString()
+                'resource_type' => isset($options['resource_type'])
+                    ? $options['resource_type']
+                    : (isset($options['resource'])
+                        ? $options['resource']->getMorphString()
                         : null
                     ),
                 'metadata' => $options['metadata'] ?? null,
@@ -275,9 +306,9 @@ class Account extends Model implements Ownable
                 ->where('account_id', $this->getKey())
                 ->whereNotNull('settled_at');
 
-            $lastSummary = TransactionSummary::lastFinalized($this)->with('to')->first();
+            $lastSummary = TransactionSummary::lastFinalized($this)->with('to_transaction')->first();
             if (isset($lastSummary)) {
-                $query = $query->where('settled_at', '>', $lastSummary->to->settled_at);
+                $query = $query->where('settled_at', '>', $lastSummary->to_transaction->settled_at);
             }
             $balance = $this->asMoney($query->value('amount'));
             if (isset($lastSummary)) {
@@ -343,14 +374,14 @@ class Account extends Model implements Ownable
             // Check if summary needs to be made
             $query = Transaction::where('account_id', $this->getKey())->whereNotNull('settled_at');
             if (isset($lastSummary)) {
-                $query = $query->where('settled_at', '>', $lastSummary->to->settled_at);
+                $query = $query->where('settled_at', '>', $lastSummary->to_transaction->settled_at);
             }
             $count = $query->count();
             $summarizeAt = new Collection(Config::get('transactions.summarizeAt'));
             $priority = $summarizeAt->sortBy('count')->firstWhere('count', '>=', $count);
             if (isset($priority) && $count >= $priority['count']) {
                 $queue = Config::get('transactions.summarizeQueue');
-                CreateTransactionSummary::dispatch($this, TransactionSummaryTypeEnum::BUNDLE, 'Transaction Count')
+                CreateTransactionSummary::dispatch($this, TransactionSummaryTypeEnum::BUNDLE, [ 'from' => '', 'to' => '' ])
                     ->onQueue("{$queue}-{$priority}");
             }
         });
@@ -430,10 +461,10 @@ class Account extends Model implements Ownable
                 $roleBackTransactions->push(
                     $transaction->chargeback($this->asMoney(0)->subtract($remainingAmount))
                 );
-                if (isset($transaction->purchasable_id)) {
+                if (isset($transaction->resource_id)) {
                     // Revoke access to item for every owner of chargeback account
                     $this->getOwner()->each(function ($owner) use ($transaction) {
-                        $transaction->purchasable->revokeAccess($owner, 'chargeback');
+                        $transaction->resource->revokeAccess($owner, 'chargeback');
                     });
                 }
             }
@@ -444,10 +475,10 @@ class Account extends Model implements Ownable
                 $roleBackTransactions->push(
                     $transaction->chargeback()
                 );
-                if (isset($transaction->purchasable_id)) {
+                if (isset($transaction->resource_id)) {
                     // Revoke access to item for every owner of chargeback account
                     $this->getOwner()->each(function ($owner) use ($transaction) {
-                        $transaction->purchasable->revokeAccess($owner, 'chargeback');
+                        $transaction->resource->revokeAccess($owner, 'chargeback');
                     });
                 }
             }
@@ -507,7 +538,7 @@ class Account extends Model implements Ownable
 
         // Move funds to internal account first if this is a in account
         if ($this->type === AccountTypeEnum::IN) {
-            $this->moveToInternal($amount);
+            $inTransactions = $this->moveToInternal($amount);
             $internalAccount = $this->getInternalAccount();
             return $internalAccount->purchase(
                 $purchaseable,
@@ -524,7 +555,7 @@ class Account extends Model implements Ownable
             $purchaseable->getOwnerAccount($this->system, $this->currency),
             $amount,
             array_merge($transactionAttributes, [
-                'purchasable' => $purchaseable,
+                'resource' => $purchaseable,
                 'type' => TransactionTypeEnum::SALE,
                 'description' => "Purchase of {$purchaseable->getDescriptionNameString()} {$purchaseable->getKey()}"
         ]));
@@ -540,6 +571,10 @@ class Account extends Model implements Ownable
 
         ItemPurchased::dispatch($purchaseable, $this->getOwner()->first());
 
+        if (isset($inTransactions)) {
+            $transactions['inTransaction'] = $inTransactions;
+        }
+
         return $transactions;
     }
 
@@ -553,19 +588,23 @@ class Account extends Model implements Ownable
 
         // Move funds to internal account first if this is a in account
         if ($this->type === AccountTypeEnum::IN) {
-            $this->moveToInternal($amount);
+            $inTransactions = $this->moveToInternal($amount);
             $internalAccount = $this->getInternalAccount();
             return $internalAccount->tip($tippable, $amount, array_merge($customAttributes, [ 'ignoreBalance' => true ]));
         }
 
         // Payment funds movement
-        $transactions = $this->moveTo($tippable->getOwnerAccount($this->system, $this->currency), $amount, [
-            'purchasable' => $tippable,
+        $transactions = $this->moveTo($tippable->getOwnerAccount($this->system, $this->currency), $amount, array_merge($customAttributes, [
+            'resource' => $tippable,
             'type' => TransactionTypeEnum::TIP,
             'description' => "Tip to {$tippable->getDescriptionNameString()} {$tippable->getKey()}"
-        ]);
+        ]));
 
         ItemTipped::dispatch($tippable, $this->getOwner()->first());
+
+        if (isset($inTransactions)) {
+            $transactions['inTransaction'] = $inTransactions;
+        }
 
         return $transactions;
     }

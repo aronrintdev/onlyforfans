@@ -18,16 +18,17 @@
             data-toggle="tooltip"
             data-placement="top"
             class="username"
-            v-text="post.user.name"
+            v-text="post.timeline.name"
+            @click.native="hidePostModal"
           />
           <span v-if="post.user.verified" class="verified-badge">
-            <b-icon icon="check-circle-fill" variant="success" font-scale="1" />
+            <fa-icon icon="check-circle" class="text-primary" />
           </span>
         </li>
         <li>
           <timeago :datetime="post.created_at" v-if="!post.schedule_datetime" :auto-update="60"></timeago>
-          <span v-if="post.schedule_datetime">
-            in {{ moment(post.schedule_datetime * 1000).fromNow(true) }}
+          <span v-if="post.schedule_datetime" :key="scheduleDatetimeKey">
+            in {{ moment.utc(post.schedule_datetime).local().fromNow(true) }}
           </span>
           <span v-if="post.location" class="post-place">
             at
@@ -51,7 +52,7 @@
 </template>
 
 <script>
-//import { eventBus } from '@/app'
+import { eventBus } from '@/app'
 import moment from 'moment';
 
 export default {
@@ -75,7 +76,26 @@ export default {
 
   data: () => ({
     moment,
+    scheduleDatetimeKey: 0,
+    scheduleDatetimeTimer: null,
   }),
+  mounted() {
+    this.scheduleDatetimeTimer = setInterval(() => {
+      this.scheduleDatetimeKey = moment.utc(this.post.schedule_datetime).diff(moment.utc(), 'minutes');
+      if (this.scheduleDatetimeKey < 0) {
+        eventBus.$emit('update-posts', this.post.id);
+        clearInterval(this.scheduleDatetimeTimer);
+      }
+    }, 10000); // 10s
+  },
+  beforeDestroy() {
+    clearInterval(this.scheduleDatetimeTimer);
+  },
+  methods: {
+    hidePostModal() {
+      this.$bvModal.hide('modal-post');
+    }
+  }
 }
 
 </script>

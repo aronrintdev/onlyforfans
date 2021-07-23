@@ -36,6 +36,10 @@ const options = {
 };
 Vue.use(VueLogger, options);
 
+require('./bootstrap/filters')
+
+export const eventBus = new Vue({ });
+
 import VueI18n from 'vue-i18n';
 Vue.use(VueI18n);
 
@@ -71,15 +75,29 @@ import 'croppie/croppie.css' // import the croppie css manually
 Vue.use(VueCroppie);
 
 /**
+ * vue2-touch-events
+ */
+import Vue2TouchEvents from 'vue2-touch-events';
+Vue.use(Vue2TouchEvents);
+
+/**
  * Loading localization translations
  */
 import i18n from './i18n'
 
 // Admin Components
-require('./components/admin');
+//require('./components/admin');
 // Vue.component('main-navbar', require('./components/common/MainNavbar.vue').default);
 
+import VueRouter from 'vue-router';
+Vue.use(VueRouter);
+import router from './routes/admin.routes';
+
+import AdminApp from './views/templates/Admin.vue';
+
 const app = new Vue({
-    i18n,
-    el: '#app',
-});
+  router,
+  i18n,
+  //store,
+  render: h => h(AdminApp),
+}).$mount('#app');

@@ -3,7 +3,7 @@ namespace Tests\Feature;
 
 use DB;
 use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+//use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Http\File;
 use Illuminate\Support\Facades\Storage;
@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 use Database\Seeders\TestDatabaseSeeder;
 
+use App\Models\Diskmediafile;
 use App\Models\Mediafile;
 use App\Models\Story;
 use App\Models\Timeline;
@@ -18,13 +19,14 @@ use App\Models\User;
 use App\Enums\StoryTypeEnum;
 use App\Enums\MediafileTypeEnum;
 
-class StoriesTest extends TestCase
+class RestStoriesTest extends TestCase
 {
-    use RefreshDatabase, WithFaker;
+    use WithFaker;
 
     /**
      *  @group stories
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_list_my_stories()
     {
@@ -56,6 +58,7 @@ class StoriesTest extends TestCase
     /**
      *  @group stories
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_list_stories_filtered_by_timeline()
     {
@@ -88,6 +91,7 @@ class StoriesTest extends TestCase
     /**
      *  @group stories
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_list_stories_filtered_by_stype()
     {
@@ -127,6 +131,7 @@ class StoriesTest extends TestCase
     /**
      *  @group stories
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_not_list_stories_on_unfollowed_timeline()
     {
@@ -146,7 +151,60 @@ class StoriesTest extends TestCase
     /**
      *  @group stories
      *  @group regression
+     *  @group regression-base
      */
+    public function test_can_list_grouped_stories_on_followed_timelines()
+    {
+        $timeline = Timeline::has('stories', '>=', 1)->has('followers', '>=', 1)->firstOrFail();
+        $creator = $timeline->user;
+        $fan = $timeline->followers->first();
+
+        $payload = [ ];
+        $response = $this->actingAs($fan)->ajaxJSON('GET', route('timelines.myFollowedStories'), $payload);
+        $content = json_decode($response->content());
+        $response->assertStatus(200);
+        //dd($content);
+        $response->assertJsonStructure([
+            'data' => [ 
+                0 => [
+                    'id',
+                    'slug',
+                    'name',
+                    'price',
+                    'avatar',
+                    'is_follow_for_free',
+                    'storyqueues',
+                    //'stories' => [
+                        //'mediafiles',
+                    //],
+                    //'is_owner',
+                    //'is_following',
+                    //'is_subscribed',
+                    'created_at',
+                ],
+            ],
+        ]);
+        /*
+        $this->assertEquals(1, $content->meta->current_page);
+        $this->assertNotNull($content->data);
+        $storiesR = $content->data;
+        $this->assertGreaterThan(0, count($storiesR));
+
+        $storiesOnTimelineNotFollowedByFan = collect($storiesR)->filter( function($s) use(&$fan) {
+            $story = Story::find($s->id);
+            return !$story->timeline->followers->contains($fan->id);
+        });
+        $this->assertEquals(0, $storiesOnTimelineNotFollowedByFan->count(), 'Returned a story on a timeline not followed by fan');
+         */
+    }
+
+    /**
+     *  @group stories
+     *  @group regression
+     *  @group regression-base
+     */
+    // %NOTE: %PSG 20210625: this is actually not what we want for the story bar...as ideally we
+    // want the stories returned with some kind of timeline grouping structure (?)
     public function test_can_list_stories_on_followed_timelines()
     {
         $timeline = Timeline::has('stories', '>=', 1)->has('followers', '>=', 1)->firstOrFail();
@@ -180,106 +238,115 @@ class StoriesTest extends TestCase
     /**
      *  @group stories
      *  @group regression
+     *  @group regression-base
+     *  @group july08
      */
     public function test_can_store_text_story()
     {
         $timeline = Timeline::has('stories', '>=', 1)->has('followers', '>=', 1)->first();
         $owner = $timeline->user;
 
-        $attrs = [
-            'stype' => StoryTypeEnum::TEXT,
-            'bgcolor' => 'blue',
-            'content' => $this->faker->realText,
-            //'timeline_id' => $timeline->id,
-        ];
+        $stype = StoryTypeEnum::TEXT;
+        $bgcolor = 'blue';
+        $content = $this->faker->realText;
+        $link = 'google.com';
 
         $payload = [
-            'attrs' => json_encode($attrs),
+            'stype' => $stype,
+            'bgcolor' => $bgcolor,
+            'content' => $content,
+            'link' => $link,
         ];
         $response = $this->actingAs($owner)->ajaxJSON('POST', route('stories.store'), $payload);
 
         $response->assertStatus(201);
 
-        $content = json_decode($response->content());
-        $this->assertNotNull($content->story);
-        $storyR = $content->story;
+        $responseContent = json_decode($response->content());
+        $this->assertNotNull($responseContent->story);
+        $storyR = $responseContent->story;
 
-        $this->assertSame($attrs['content'], $storyR->content);
-        $this->assertSame($attrs['stype'], $storyR->stype);
+        $this->assertSame($content, $storyR->content);
+        $this->assertSame($stype, $storyR->stype);
+        $this->assertSame($link, $storyR->swipe_up_link);
 
         $story = Story::find($storyR->id);
         $this->assertNotNull($story);
         $this->assertSame($story->content, $storyR->content);
         $this->assertSame(StoryTypeEnum::TEXT, $storyR->stype);
+
+        $this->assertNotNull($story->storyqueues);
+        $this->assertEquals($story->timeline->followers->count(), $story->storyqueues->count());
     }
 
     /**
      *  @group stories
      *  @group regression
+     *  @group regression-base
+     *  @group july08
      */
     public function test_can_store_picture_story()
     {
         Storage::fake('s3');
 
-        $filename = $this->faker->slug;
+        $filename = $this->faker->slug.'.png';
         $owner = User::first();
         $file = UploadedFile::fake()->image($filename, 200, 200);
 
-        $attrs = [
-            'stype' => StoryTypeEnum::PHOTO,
-            'content' => $this->faker->realText,
-        ];
+        $stype = StoryTypeEnum::PHOTO;
+        $content = $this->faker->realText;
 
         $payload = [
-            'attrs' => json_encode($attrs),
+            'stype' => $stype,
+            'content' => $content,
             'mediafile' => $file,
         ];
         $response = $this->actingAs($owner)->ajaxJSON('POST', route('stories.store'), $payload);
         $response->assertStatus(201);
 
-        $content = json_decode($response->content());
-        $this->assertNotNull($content->story);
-        $storyR = $content->story;
+        $responseContent = json_decode($response->content());
+        $this->assertNotNull($responseContent->story);
+        $storyR = $responseContent->story;
 
-        $this->assertSame($attrs['content'], $storyR->content);
+        $this->assertSame($content, $storyR->content);
         $this->assertSame(StoryTypeEnum::PHOTO, $storyR->stype);
 
-        $story = Story::find($storyR->id);
+        $story = Story::with('mediafiles')->find($storyR->id);
         $this->assertNotNull($story);
         $this->assertSame(StoryTypeEnum::PHOTO, $storyR->stype);
         $this->assertEquals($owner->id, $story->timeline->user->id);
 
         // Should only be one as this is a new story
-        $mediafile = Mediafile::where('resource_type', 'stories')->where('resource_id', $story->id)->first();
-        $this->assertNotNull($mediafile);
-        Storage::disk('s3')->assertExists($mediafile->filename);
-        $this->assertSame($filename, $mediafile->mfname);
-        $this->assertSame(MediafileTypeEnum::STORY, $mediafile->mftype);
+        $mf = Mediafile::where('resource_type', 'stories')->where('resource_id', $story->id)->first();
+        $this->assertNotNull($mf);
+        $this->assertSame($filename, $mf->mfname);
+        $this->assertSame(MediafileTypeEnum::STORY, $mf->mftype);
+        Storage::disk('s3')->assertExists($mf->diskmediafile->filepath);
+        $this->assertSame($owner->id, $mf->diskmediafile->owner_id);
 
         // Test relations
-        $this->assertTrue( $story->mediafiles->contains($mediafile->id) );
-        $this->assertEquals( $story->id, $mediafile->resource->id );
+        $this->assertTrue( $story->mediafiles->contains($mf->id) );
+        $this->assertEquals( $story->id, $mf->resource->id );
+
+        $this->assertNotNull($story->storyqueues);
+        $this->assertEquals($story->timeline->followers->count(), $story->storyqueues->count());
     }
 
     /**
      *  @group stories
      *  @group regression
+     *  @group regression-base
      */
     public function test_owner_can_delete_picture_story()
     {
         Storage::fake('s3');
 
-        $filename = $this->faker->slug;
+        $filename = $this->faker->slug.'.png';
         $owner = User::first();
         $file = UploadedFile::fake()->image($filename, 200, 200);
 
-        $attrs = [
+        $payload = [
             'stype' => StoryTypeEnum::PHOTO,
             'content' => $this->faker->realText,
-        ];
-
-        $payload = [
-            'attrs' => json_encode($attrs),
             'mediafile' => $file,
         ];
         $response = $this->actingAs($owner)->ajaxJSON('POST', route('stories.store'), $payload);
@@ -302,6 +369,7 @@ class StoriesTest extends TestCase
     /**
      *  @group stories
      *  @group regression
+     *  @group regression-base
      */
     public function test_nonowner_can_not_delete_picture_story()
     {
@@ -312,13 +380,9 @@ class StoriesTest extends TestCase
         $nonowner = User::where('id', '<>', $owner->id)->first();
         $file = UploadedFile::fake()->image($filename, 200, 200);
 
-        $attrs = [
+        $payload = [
             'stype' => StoryTypeEnum::PHOTO,
             'content' => $this->faker->realText,
-        ];
-
-        $payload = [
-            'attrs' => json_encode($attrs),
             'mediafile' => $file,
         ];
         $response = $this->actingAs($owner)->ajaxJSON('POST', route('stories.store'), $payload);
@@ -335,6 +399,7 @@ class StoriesTest extends TestCase
     /**
      *  @group stories
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_like_then_unlike_viewable_story()
     {
@@ -345,13 +410,13 @@ class StoriesTest extends TestCase
 
         // remove any existing likes by fan...
         DB::table('likeables')
-            ->where('likee_id', $fan->id)
+            ->where('liker_id', $fan->id)
             ->where('likeable_type', 'stories')
             ->where('likeable_id', $story->id)
             ->delete();
 
         // LIKE the story
-        $response = $this->actingAs($fan)->ajaxJSON('PUT', route('likeables.update', $fan->id), [ // fan->likee
+        $response = $this->actingAs($fan)->ajaxJSON('PUT', route('likeables.update', $fan->id), [ 
             'likeable_type' => 'stories',
             'likeable_id' => $story->id,
         ]);
@@ -361,6 +426,7 @@ class StoriesTest extends TestCase
     /**
      *  @group stories
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_not_like_unviewable_story()
     {
@@ -384,7 +450,7 @@ class StoriesTest extends TestCase
     protected function setUp() : void
     {
         parent::setUp();
-        $this->seed(TestDatabaseSeeder::class);
+        //$this->seed(TestDatabaseSeeder::class);
     }
 
     protected function tearDown() : void {

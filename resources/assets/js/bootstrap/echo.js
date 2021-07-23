@@ -8,6 +8,7 @@
  * allows your team to easily build robust real-time web applications.
  */
 
+// https://laravel.com/docs/8.x/broadcasting#client-side-installation
 import Vue from 'vue'
 import Pusher from 'pusher-js'
 import Echo from 'laravel-echo'
@@ -17,24 +18,39 @@ if (typeof window.Pusher === 'undefined') {
 }
 
 if (typeof window.Echo === 'undefined') {
-  window.Echo = new Echo({
-    broadcaster: 'pusher',
-    key: process.env.MIX_PUSHER_APP_KEY || window.pusherKey,
-    // key: 'c0277f01daca608700b8',
-    cluster: process.env.MIX_PUSHER_APP_CLUSTER || window.pusherCluster,
-    // cluster: 'us2'
-    host: process.env.MIX_WS_HOST || window.location.hostname,
-    httpHost: process.env.MIX_WS_HOST || window.location.hostname,
+  var options = {}
+  if (process.env.NODE_ENV === 'production') {
+    options = {
+      broadcaster: 'pusher',
+      key: process.env.MIX_PUSHER_APP_KEY || window.pusherKey,
+      host: process.env.MIX_WS_HOST || window.location.hostname,
+      httpHost: process.env.MIX_WS_HOST || window.location.hostname,
 
-    wsHost: process.env.MIX_WS_HOST || window.location.hostname,
-    wsPort: process.env.MIX_WS_PORT || 6001,
-    wssPort: process.env.MIX_WS_PORT || 6001,
-    forceTLS: process.env.MIX_PUSHER_FORCE_TLS || false,
-    encrypted: process.env.MIX_PUSHER_ENCRYPTED || false,
-    disableStats: true,
-    enabledTransports: ['ws', 'wss'],
-    disabledTransports: ['sockjs', 'xhr_polling', 'xhr_streaming'],
-  })
+      wsHost: process.env.MIX_WS_HOST || window.location.hostname,
+      wsPort: process.env.MIX_WS_PORT || 6001,
+      wssPort: process.env.MIX_WS_PORT || 6001,
+      forceTLS: process.env.MIX_PUSHER_FORCE_TLS || false,
+      encrypted: process.env.MIX_PUSHER_ENCRYPTED || false,
+      disableStats: true,
+      enabledTransports: ['ws', 'wss'],
+      disabledTransports: ['sockjs', 'xhr_polling', 'xhr_streaming'],
+    }
+  } else {
+    options = {
+      broadcaster: 'pusher',
+      key: process.env.MIX_PUSHER_APP_KEY || window.pusherKey,
+      host: window.location.hostname,
+      httpHost: window.location.hostname,
+      wsHost: process.env.MIX_WS_HOST || window.location.hostname,
+      wsPort: process.env.MIX_WS_PORT || 6001,
+      forceTLS: false,
+      encrypted: false,
+      disableStats: true,
+      enabledTransports: ['ws'],
+      disabledTransports: ['sockjs', 'xhr_polling', 'xhr_streaming'],
+    }
+  }
+  window.Echo = new Echo(options)
 }
 
 window.setLastSeenOfUser = function (status) {

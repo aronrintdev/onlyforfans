@@ -66,6 +66,11 @@ class EarningsController extends Controller
             $item['total'] = (int)$item['total'];
         });
 
+        $chargeback = $debits->firstWhere('type', TransactionTypeEnum::CHARGEBACK) ?? ['total' => 0, 'count' => 0];
+        $chargebackPartial = $debits->firstWhere('type', TransactionTypeEnum::CHARGEBACK_PARTIAL) ?? ['total' => 0, 'count' => 0];
+        $chargeback['total'] += $chargebackPartial['total'];
+        $chargeback['count'] += $chargebackPartial['count'];
+
         return [
             'credits' => [
                 TransactionTypeEnum::SALE => $credits->firstWhere('type', TransactionTypeEnum::SALE) ?? [ 'total' => 0, 'count' => 0 ],
@@ -74,12 +79,24 @@ class EarningsController extends Controller
             ],
             'debits' => [
                 TransactionTypeEnum::FEE => $debits->firstWhere('type', TransactionTypeEnum::FEE) ?? ['total' => 0, 'count' => 0],
-                TransactionTypeEnum::CHARGEBACK => $debits->firstWhere('type', TransactionTypeEnum::CHARGEBACK) ?? ['total' => 0, 'count' => 0],
-                TransactionTypeEnum::CHARGEBACK_PARTIAL => $debits->firstWhere('type', TransactionTypeEnum::CHARGEBACK_PARTIAL) ?? ['total' => 0, 'count' => 0],
+                TransactionTypeEnum::CHARGEBACK => $chargeback,
                 TransactionTypeEnum::CREDIT => $debits->firstWhere('type', TransactionTypeEnum::CREDIT) ?? ['total' => 0, 'count' => 0],
             ],
             'from' => $from,
             'to' => $to,
+        ];
+    }
+
+    public function balances(Request $request)
+    {
+        $account = $request->user()->getInternalAccount(
+            Config::get('transactions.default'),
+            Config::get('transactions.defaultCurrency')
+        );
+
+        return [
+            'available' => $account->balance,
+            'pending' => $account->pending,
         ];
     }
 
@@ -95,7 +112,6 @@ class EarningsController extends Controller
         $account = $user->getInternalAccount(Config::get('transactions.default'), Config::get('transactions.defaultCurrency'));
         $query = $account->transactions()->where('credit_amount', '>', 0)->orderBy('settled_at', 'desc')
             ->whereIn('type', [ TransactionTypeEnum::SALE, TransactionTypeEnum::TIP, TransactionTypeEnum::SUBSCRIPTION ]);
-            
 
         $data = $query->paginate($request->input('take', Config::get('collections.max.transactions', 20)));
         return new TransactionCollection($data);

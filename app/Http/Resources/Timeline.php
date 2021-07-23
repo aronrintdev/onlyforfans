@@ -26,6 +26,8 @@ class Timeline extends JsonResource
             'cover' => $this->cover,
             'description' =>  $this->when($hasAccess, $this->description),
             'mediafiles' =>  $this->when($hasAccess, $this->mediafiles),
+            'stories' =>  $this->when($hasAccess, $this->stories),
+            //'storyqueues' =>  $this->when($hasAccess, $this->storyqueues), // if included, limit to viewers?
             'user' => [
                 'id' => $this->user_id,
             ],
@@ -33,6 +35,7 @@ class Timeline extends JsonResource
             'is_owner' => $sessionUser->id === $this->user->id,
             'is_following' => $this->followers->contains($sessionUser->id),
             'is_subscribed' => $this->subscribers->contains($sessionUser->id),
+            'is_favorited' => count($this->favorites->where('user_id', $sessionUser->id)),
             // https://laravel.com/docs/8.x/eloquent-resources#conditional-relationships
             //'mediafiles' =>  $this->when( $hasAccess, MediafileResource::collection($this->whenLoaded('mediafiles')) ), // ??
             'created_at' => $this->created_at,

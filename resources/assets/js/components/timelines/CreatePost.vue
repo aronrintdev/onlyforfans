@@ -16,32 +16,41 @@
             </section>
           </template>
           <div>
-            <div class="scheduled-message-head" v-if="postScheduleDate">
-              <div>
-                <svg class="icon-schedule" viewBox="0 0 24 24">
-                  <path d="M19 3h-1V2a1 1 0 0 0-2 0v1H8V2a1 1 0 0 0-2 0v1H5a2 2 0 0 0-2 2v13a3 3 0 0 0 3 3h12a3 3 0 0 0 3-3V5a2 2 0 0 0-2-2zm0 15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V9h14zm0-11H5V5h14zM9.79 17.21a1 1 0 0 0 1.42 0l5-5a1 1 0 0 0 .29-.71 1 1 0 0 0-1-1 1 1 0 0 0-.71.29l-4.29 4.3-1.29-1.3a1 1 0 0 0-.71-.29 1 1 0 0 0-1 1 1 1 0 0 0 .29.71z"></path>
-                </svg> 
-                <span> Scheduled for&nbsp;</span>
-                <strong>{{ moment(postScheduleDate * 1000).local().format('MMM DD, h:mm a') }}</strong>
-              </div>
-              <button class="btn close-btn" @click="clearSchedule">
-                <svg class="icon-close" viewBox="0 0 24 24">
-                  <path d="M13.41 12l5.3-5.29A1 1 0 0 0 19 6a1 1 0 0 0-1-1 1 1 0 0 0-.71.29L12 10.59l-5.29-5.3A1 1 0 0 0 6 5a1 1 0 0 0-1 1 1 1 0 0 0 .29.71l5.3 5.29-5.3 5.29A1 1 0 0 0 5 18a1 1 0 0 0 1 1 1 1 0 0 0 .71-.29l5.29-5.3 5.29 5.3A1 1 0 0 0 18 19a1 1 0 0 0 1-1 1 1 0 0 0-.29-.71z"></path>
-                </svg>
+            <div class="alert alert-secondary py-1 px-2" role="alert" v-if="scheduled_at" @click="showSchedulePicker()">
+              <fa-icon size="lg" :icon="['far', 'calendar-check']" class="text-primary mr-1" />
+              <span>Scheduled for</span>
+              <button type="button" class="close" data-dismiss="alert" aria-label="Close" @click="closeSchedulePicker">
+                <span aria-hidden="true">&times;</span>
+              </button>
+              <strong class="float-right mr-3">{{ moment.utc(scheduled_at).local().format('MMM DD, h:mm a') }}</strong>
+            </div>
+            <div class="alert alert-secondary py-1 px-2" role="alert" v-if="expirationPeriod">
+              <fa-icon size="lg" :icon="['far', 'hourglass-half']" class="text-primary mr-1" />
+              Post will expire in <strong>{{ expirationPeriod > 1 ? `${expirationPeriod} days` : `1 day` }}</strong>
+              <button type="button" class="close" data-dismiss="alert" aria-label="Close" @click="expirationPeriod=null">
+                <span aria-hidden="true">&times;</span>
               </button>
             </div>
-            <div v-if="postType === 'price'" class="w-100">
-              <PriceSelector v-if="postType === 'price'" v-model="price" class="mb-3" />
+            <div v-if="postType === 'price'" class="w-100 d-flex">
+              <PriceSelector
+                class="mb-3 mr-5"
+                :label="$t('priceForFollowers')"
+                v-model="price"
+              />
+              <PriceSelector
+                class="mb-3"
+                :label="$t('priceForSubscribers')"
+                v-model="priceForPaidSubscribers"
+              />
               <hr />
             </div>
-
-            <textarea v-model="description" rows="8" class="w-100"></textarea>
             <vue-dropzone
               ref="myVueDropzone"
               id="dropzone"
               :options="dropzoneOptions"
               :include-styling=true
               :useCustomSlot=true
+              :duplicateCheck=true
               v-on:vdropzone-file-added="addedEvent"
               v-on:vdropzone-removed-file="removedEvent"
               v-on:vdropzone-sending="sendingEvent"
@@ -50,29 +59,69 @@
               v-on:vdropzone-queue-complete="queueCompleteEvent"
               class="dropzone"
             >
-              <!-- <label id="clickme_to-select" class="">Browse</label> -->
+              <div class="dz-custom-content">
+                <textarea v-model="description" rows="8" class="w-100"></textarea>
+              </div>
+              <UploadMediaPreview
+                :mediafiles="mediafiles"
+                @change="changeMediafiles"
+                @remove="removeMediafile"
+                @openFileUpload="openDropzone"
+              />
             </vue-dropzone>
+            <AudioRecorder
+              v-if="showAudioRec"
+              @close="showAudioRec=false;selectedMedia=null"
+              @complete="audioRecordFinished"
+            />
           </div>
           <template #footer>
             <b-row>
-              <b-col cols="12" md="8" class="d-flex">
+              <b-col cols="12" md="8" class="post-create-footer-ctrl d-flex">
                 <ul class="list-inline d-flex mb-0 OFF-border-right">
-                  <li><label id="clickme_to-select" class=""><b-icon icon="file-earmark" variant="secondary" font-scale="1.5"></b-icon></label></li>
-                  <li @click="takePicture()" class="selectable select-pic"><b-icon icon="image" :variant="selectedMedia==='pic' ? 'primary' : 'secondary'" font-scale="1.5"></b-icon></li>
-                  <li @click="recordVideo()" class="selectable select-video"><b-icon icon="camera-video" :variant="selectedMedia==='video' ? 'primary' : 'secondary'" font-scale="1.5"></b-icon></li>
-                  <li @click="recordAudio()" class="selectable select-audio"><b-icon icon="mic" :variant="selectedMedia==='audio' ? 'primary' : 'secondary'" font-scale="1.5"></b-icon></li>
+                  <li id="clickme_to-select" class="selectable select-pic">
+                    <fa-icon :icon="['far', 'image']" :class="selectedMedia==='pic' ? 'text-primary' : 'text-secondary'" />
+                  </li>
+                  <li v-if="!isIOS9PlusAndAndroid" @click="recordVideo()" class="selectable select-video">
+                    <fa-icon :icon="['far', 'video']" :class="selectedMedia==='video' ? 'text-primary' : 'text-secondary'" />
+                  </li>
+                  <li @click="recordAudio()" class="selectable select-audio">
+                    <fa-icon :icon="['far', 'microphone']" :class="selectedMedia==='audio' ? 'text-primary' : 'text-secondary'" />
+                  </li>
+                  <li @click="uploadFromVault()" class="selectable select-audio">
+                    <fa-icon :icon="['far', 'archive']" :class="selectedMedia==='vault' ? 'text-primary' : 'text-secondary'" />
+                  </li>
                 </ul>
                 <div class="border-right"></div>
                 <ul class="list-inline d-flex mb-0">
+                  <!--
                   <li class="selectable select-location"><span><LocationPinIcon /></span> </li>
                   <li class="selectable select-emoji"><span><EmojiIcon /></span></li>
                   <li class="selectable select-timer"><span><TimerIcon /></span></li>
                   <li class="selectable select-calendar" @click="showSchedulePicker()"><span><CalendarIcon /></span></li>
+                  -->
+                  <li class="selectable select-expire-date" :disabled="expirationPeriod" @click="showExpirationPicker()">
+                    <fa-icon :icon="['far', 'hourglass-half']" class="text-secondary" />
+                  </li>
+                  <li class="selectable select-calendar" :disabled="scheduled_at" @click="showSchedulePicker()">
+                    <fa-icon :icon="['far', 'calendar-check']" class="text-secondary" />
+                  </li>
+                </ul>
+                <div class="border-right"></div>
+                <ul class="list-inline d-flex mb-0">
+                  <li @click="showCampaignModal()" class="selectable select-pic" title="Start Promotional Campaign">
+                    <fa-icon :icon="['far', 'hand-holding-usd']" class="text-secondary" />
+                  </li>
                 </ul>
               </b-col>
               <b-col cols="12" md="4">
                 <ul class="list-inline d-flex justify-content-end mb-0 mt-3 mt-md-0">
-                  <li class="w-100 mx-0"><button @click="savePost()" class="btn btn-submit btn-primary w-100">Post</button></li>
+                  <li class="w-100 mx-0">
+                    <button :disabled="posting" @click="savePost()" class="btn btn-submit btn-primary w-100">
+                      <span v-if="posting" class="text-white spinner-border spinner-border-sm pr-2" role="status" aria-hidden="true"></span>
+                      Post
+                    </button>
+                  </li>
                 </ul>
               </b-col>
             </b-row>
@@ -80,12 +129,14 @@
         </b-card>
       </div>
     </section>
+    <VideoRecorder v-if="showVideoRec" @close="showVideoRec=false; selectedMedia=null" @complete="videoRecCompleted" />
   </div>
 </template>
 
 <script>
-import Vuex from 'vuex';
 import moment from 'moment';
+import { isAndroid, isIOS, osVersion } from 'mobile-device-detect';
+
 import { eventBus } from '@/app';
 import vue2Dropzone from 'vue2-dropzone';
 import 'vue2-dropzone/dist/vue2Dropzone.min.css';
@@ -94,7 +145,10 @@ import LocationPinIcon from '@components/common/icons/LocationPinIcon.vue';
 import TimerIcon from '@components/common/icons/TimerIcon.vue';
 import CalendarIcon from '@components/common/icons/CalendarIcon.vue';
 
-import PriceSelector from '@components/common/PriceSelector'
+import PriceSelector from '@components/common/PriceSelector';
+import UploadMediaPreview from '@components/posts/UploadMediaPreview';
+import VideoRecorder from '@components/videoRecorder';
+import AudioRecorder from '@components/audioRecorder';
 
 export default {
 
@@ -104,6 +158,9 @@ export default {
   },
 
   computed: {
+    isIOS9PlusAndAndroid() {
+      return (isIOS && parseInt(osVersion.split('.')[0]) >= 9) || isAndroid;
+    }
   },
 
   data: () => ({
@@ -118,14 +175,17 @@ export default {
       { text: 'Subscriber-Only', value: 'paid' },
     ],
     price: 0,
+    priceForPaidSubscribers: 0,
     currency: 'USD',
+
+    mediafileIdsFromVault: [], // content added from vault, not disk: should create new references, *not* new S3 content!
 
     // ref:
     //  ~ https://github.com/rowanwins/vue-dropzone/blob/master/docs/src/pages/SendAdditionalParamsDemo.vue
     //  ~ https://www.dropzonejs.com/#config-autoProcessQueue
     dropzoneOptions: {
       //url: '/mediafiles',
-      url: route('mediafiles.index'),
+      url: route('mediafiles.store'),
       paramName: 'mediafile',
       //acceptedFiles: 'image/*, video/*, audio/*',
       maxFiles: null,
@@ -135,14 +195,19 @@ export default {
       clickable: '#clickme_to-select',
       maxFilesize: 15.9,
       addRemoveLinks: true,
+      removeType: 'client',
       headers: {
         'X-Requested-With': 'XMLHttpRequest',
         'X-CSRF-TOKEN': document.head.querySelector('[name=csrf-token]').content,
       },
     },
-    postScheduleDate: null,
+    scheduled_at: null,
+    mediafiles: [],
+    posting: false,
+    expirationPeriod: null,
+    showVideoRec: false,
+    showAudioRec: false,
   }),
-
   methods: {
 
     resetForm() {
@@ -152,52 +217,70 @@ export default {
       this.selectedMedia = 'pic';
       this.ptype = 'free';
       this.price = 0;
-      this.postScheduleDate = null;
+      this.priceForPaidSubscribers = 0;
+      this.scheduled_at = null;
+      this.expirationPeriod = null;
     },
 
     async savePost() {
+      this.posting = true;
+      console.log('CreatePost::savePost()')
       // (1) create the post
       const response = await axios.post(this.$apiRoute('posts.store'), {
         timeline_id: this.timeline.id,
         description: this.description,
         type: this.postType,
         price: this.price,
+        price_for_subscribers: this.priceForPaidSubscribers,
         currency: this.currency,
-        schedule_datetime: this.postScheduleDate,
-      });
-      this.$log.debug('savePost', { response });
+        schedule_datetime: this.scheduled_at?.toDate(),
+        expiration_period: this.expirationPeriod,
+      })
+      this.$log.debug('savePost', { response })
       const json = response.data;
       if (json.post) {
-        this.newPostId = json.post.id;
+        this.newPostId = json.post.id
+        const queued = this.$refs.myVueDropzone.getQueuedFiles()
 
-        const queued = this.$refs.myVueDropzone.getQueuedFiles();
-
-        // (2) upload & attach the mediafiles
+        // (2) upload & attach the mediafiles (in dropzone queue)
         // %FIXME: if this fails, don't we have an orphaned post (?)
-        if ( queued.length ) {
-          this.$refs.myVueDropzone.processQueue(); // this will call dispatch after files uploaded
-        } else {
-          this.$log.debug('savePost: dispatching unshiftPostToTimeline...');
-          this.$store.dispatch('unshiftPostToTimeline', { newPostId: this.newPostId });
-          this.resetForm();
+        // %NOTE: files added manually don't seem to be put into the queue, thus sendingEvent won't be called for them (?)
+
+        // (3) create any mediaifle references, ex from selected files in vault
+        if (this.mediafileIdsFromVault.length) {
+          this.mediafileIdsFromVault.forEach( async mfid => {
+            await axios.post(this.$apiRoute('mediafiles.store'), {
+              mediafile_id: mfid, // the presence of this field is what tells controller method to create a reference, not upload content
+              resource_id: json.post.id,
+              resource_type: 'posts',
+              mftype: 'post',
+            })
+            // %TODO: check failure case
+          })
+          this.mediafileIdsFromVault = [] // empty array (we could remove individually inside the loop)
+          this.$router.replace({'query': null}).catch(()=>{}); // clear mediafile router params from URL
+        } else if (queued.length) {
+          console.log('CreatePost::savePost() - process queue', {
+            queued,
+          })
+          this.$refs.myVueDropzone.processQueue() // this will call dispatch after files uploaded
+        } 
+
+        if ( !queued.length ) {
+          console.log('CreatePost::savePost() - nothing queued')
+          this.createCompleted();
         }
+
       } else {
         this.resetForm();
+        this.mediafiles = [];
+        this.posting = false;
       }
     },
 
-    takePicture() { // %TODO
-      this.selectedMedia = this.selectedMedia!=='pic' ? 'pic' : null
-    },
-    recordVideo() { // %TODO
-      this.selectedMedia = this.selectedMedia!=='video' ? 'video' : null
-    },
-    recordAudio() { // %TODO
-      this.selectedMedia = this.selectedMedia!=='audio' ? 'audio' : null
-    },
-
-    // for dropzone
+    // Dropzone: 'Modify the request and add addtional parameters to request before sending'
     sendingEvent(file, xhr, formData) {
+      // %NOTE: file.name is the mediafile PKID
       this.$log.debug('sendingEvent', { file, formData, xhr });
       if ( !this.newPostId ) {
         throw new Error('Cancel upload, invalid post id');
@@ -209,6 +292,15 @@ export default {
 
     // for dropzone
     addedEvent(file) {
+      if (!file.filepath) {
+        this.mediafiles.push({
+          type: file.type,
+          name: file.name,
+          filepath: URL.createObjectURL(file),
+        });
+      } else {
+        this.mediafiles.push(file);
+      }
       this.$log.debug('addedEvent')
     },
     removedEvent(file, error, xhr) {
@@ -230,26 +322,129 @@ export default {
       if ( !this.newPostId ) {
         return
       }
-      this.$log.debug('queueCompleteEvent', { });
-      this.$log.debug('queueCompleteEvent: dispatching unshiftPostToTimeline...');
-      this.$store.dispatch('unshiftPostToTimeline', { newPostId: this.newPostId });
-      this.resetForm();
+      console.log('queueCompleteEvent', { });
+      this.createCompleted();
     },
+
+    createCompleted() {
+      this.$store.dispatch('unshiftPostToTimeline', { newPostId: this.newPostId });
+      this.$store.dispatch('getQueueMetadata');
+      // Show notification if scheduled post is succesfully created
+      if (this.scheduled_at) {
+        this.$root.$bvToast.toast('New scheduled post is created.', {
+          title: 'Success!',
+          variant: 'primary',
+          solid: true,
+        })
+      }
+      this.resetForm();
+      this.mediafiles = [];
+      this.posting = false;
+    },
+
+    takePicture() { // %TODO
+      this.selectedMedia = this.selectedMedia!=='pic' ? 'pic' : null
+    },
+    recordVideo() { // %TODO
+      this.selectedMedia = this.selectedMedia!=='video' ? 'video' : null
+      this.showVideoRec = true
+    },
+    recordAudio() { // %TODO
+      this.selectedMedia = this.selectedMedia!=='audio' ? 'audio' : null
+      this.showAudioRec = true
+    },
+
+    uploadFromVault() {
+      this.selectedMedia = this.selectedMedia!=='vault' ? 'vault' : null
+      // %FIXME: should add full upload from vault feature instead of redirecting
+      this.$router.push({ name: 'vault.dashboard' })
+    },
+
     showSchedulePicker() {
       eventBus.$emit('open-modal', {
         key: 'show-schedule-datetime',
+        data: {
+          scheduled_at: this.scheduled_at,
+        }
       })
     },
-    clearSchedule() {
-      this.postScheduleDate = undefined;
+    changeMediafiles(data) {
+      this.mediafiles = [...data];
+    },
+    removeMediafile(index) {
+      const file = this.$refs.myVueDropzone.dropzone.files[index];
+      if (file) {
+        this.$refs.myVueDropzone.removeFile(file);
+        this.mediafiles.splice(index, 1);
+        this.mediafiles = [...this.mediafiles];
+      }
+    },
+    openDropzone() {
+      this.$refs.myVueDropzone.dropzone.hiddenFileInput.click();
+    },
+    showExpirationPicker() {
+      eventBus.$emit('open-modal', {
+        key: 'expiration-period',
+      })
+    },
+    closeSchedulePicker(e) {
+      this.scheduled_at = null;
+      e.stopPropagation();
+    },
+    audioRecordFinished(file) {
+      if (this.$refs.myVueDropzone) {
+        this.$refs.myVueDropzone.addFile(file);
+      }
+    },
+
+    showCampaignModal() {
+      eventBus.$emit('open-modal', {
+        key: 'modal-promotion-campaign',
+      })
+    },
+
+    videoRecCompleted(file) {
+      this.showVideoRec = false;
+      if (this.$refs.myVueDropzone) {
+        this.$refs.myVueDropzone.addFile(file);
+      }
     },
   },
+
   mounted() {
     const self = this;
     eventBus.$on('apply-schedule', function(data) {
-      self.postScheduleDate = data;
+      self.scheduled_at = data;
     })
-  },
+    eventBus.$on('set-expiration-period', function(data) {
+      self.expirationPeriod = data;
+    })
+
+    if ( this.$route.params.context ) {
+      switch( this.$route.params.context ) {
+        case 'vault-via-postcreate': // we got here from the vault, likely with mediafiles to attach to a new post
+          const mediafileIds = this.$route.params.mediafile_ids || []
+          if ( mediafileIds.length ) {
+            // Retrieve any 'pre-loaded' mediafiles, and add to dropzone...be sure to tag as 'ref-only' or something
+            const response = axios.get(this.$apiRoute('mediafiles.index'), {
+              params: {
+                mediafile_ids: mediafileIds,
+              },
+            }).then( response => {
+              response.data.data.forEach( mf => {
+                // https://rowanwins.github.io/vue-dropzone/docs/dist/#/manual
+                const file = { size: mf.orig_size, name: mf.id, type: mf.mimetype, filepath: mf.filepath }
+                this.mediafileIdsFromVault.push(mf.id)
+                this.$refs.myVueDropzone.manuallyAddFile(file, mf.filepath)
+              })
+            })
+          }
+          break
+      } // switch
+    }
+
+  }, // mounted
+
   created() {
     this.dropzoneConfigs = {
       pic: {
@@ -273,6 +468,9 @@ export default {
     PriceSelector,
     vueDropzone: vue2Dropzone,
     EmojiIcon, LocationPinIcon, TimerIcon, CalendarIcon,
+    UploadMediaPreview,
+    VideoRecorder,
+    AudioRecorder,
   },
 }
 </script>
@@ -280,20 +478,20 @@ export default {
 <style lang="scss" scoped>
 /*
 .dropzone, .dropzone * {
-box-sizing: border-box;
+  box-sizing: border-box;
 }
 .vue-dropzone {
-border: 2px solid #e5e5e5;
-font-family: Arial,sans-serif;
-letter-spacing: .2px;
-color: #777;
-transition: .2s linear;
+  border: 2px solid #e5e5e5;
+  font-family: Arial,sans-serif;
+  letter-spacing: .2px;
+  color: #777;
+  transition: .2s linear;
 }
 .dropzone {
-min-height: 150px;
-border: 2px solid rgba(0, 0, 0, 0.3);
-background: white;
-padding: 20px 20px;
+  min-height: 150px;
+  border: 2px solid rgba(0, 0, 0, 0.3);
+  background: white;
+  padding: 20px 20px;
 }
                                */
 
@@ -309,8 +507,14 @@ padding: 20px 20px;
   border: none;
 }
 
-li .selectable {
+li.selectable {
   cursor: pointer;
+}
+
+li.selectable[disabled] {
+  cursor: default;
+  pointer-events: none;
+  opacity: 0.6;
 }
 
 .create_post-crate .dropzone.dz-started .dz-message {
@@ -332,7 +536,7 @@ li .selectable {
 
 /*
 .create_post-crate .dropzone .dz-image img {
-width: 128px;
+  width: 128px;
 }
  */
 
@@ -354,4 +558,17 @@ width: 128px;
 .b-icon.bi {
   vertical-align: middle;
 }
+
+.post-create-footer-ctrl {
+  font-size: 1.5rem;
+}
 </style>
+
+<i18n lang="json5" scoped>
+{
+  "en": {
+    "priceForFollowers": "Price for free followers",
+    "priceForSubscribers": "Price for paid subscribers",
+  }
+}
+</i18n>

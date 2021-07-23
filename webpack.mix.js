@@ -5,6 +5,7 @@ const mix = require('laravel-mix');
 const path = require('path');
 require('dotenv').config();
 require('laravel-mix-bundle-analyzer');
+require('mix-env-file');
 // require('laravel-mix-alias');
 
 /*
@@ -17,6 +18,11 @@ require('laravel-mix-bundle-analyzer');
  | file for the application as well as bundling up all the JS files.
  |
  */
+
+/**
+ * Use env file passed in from command
+ */
+mix.env(process.env.ENV_FILE);
 
 /**
  * Alias to reduce clutter of `../..`s in js and vue imports
@@ -79,16 +85,17 @@ mix.extract([
 mix.extract([
   '@fortawesome'
 ], 'public/js/vendor-3.js');
-mix.extract([
-  'video.js',
-  'videojs-record'
-], 'public/js/vendor-4.js');
 
 // All other node_module libraries will end up in vendor.js
 mix.extract('public/js/vendor.js');
 
 if (mix.inProduction()) {
-  mix.bundleAnalyzer({ analyzerMode: 'static', reportFilename: '../analyzerReport.html', openAnalyzer: false, generateStatsFile: true });
+  mix.bundleAnalyzer({
+    analyzerMode: 'static',
+    reportFilename: '../storage/app/analyzerReport.html',
+    openAnalyzer: false,
+    generateStatsFile: true,
+  });
 }
 
 if (!mix.inProduction()) {
@@ -129,6 +136,7 @@ mix.js('resources/assets/js/app.guest.js', 'public/js/app.guest.js')
  * Admin App
  */
 mix.js('resources/assets/js/admin.app.js', 'public/js/admin.app.js')
+  .sass('resources/assets/sass/admin/admin.scss', 'public/css/admin.css')
   .vue({
     options: {
       loaders: {

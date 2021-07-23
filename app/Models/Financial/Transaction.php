@@ -17,27 +17,26 @@ use App\Models\Financial\Traits\HasSystemByAccount;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Models\Financial\Exceptions\FeesTooHighException;
 use App\Models\Financial\Exceptions\TransactionAlreadySettled;
-use App\Models\Financial\Exceptions\TransactionNotSettledException;
 
 /**
  * Financial Transaction Model
  *
- * @property string $id
- * @property string $account_id
+ * @property string       $id
+ * @property string       $account_id
  * @property \Money\Money $credit_amount
  * @property \Money\Money $debit_amount
  * @property \Money\Money $balance
- * @property \Money\Money $currency
- * @property string $type
- * @property string $description
- * @property string $reference_id
- * @property string $purchasable_type
- * @property string $purchasable_id
- * @property array  $metadata
- * @property \Carbon\Carbon $settled_at
- * @property \Carbon\Carbon $failed_at
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
+ * @property string       $currency
+ * @property string       $type
+ * @property string       $description
+ * @property string       $reference_id
+ * @property string       $resource_type
+ * @property string       $resource_id
+ * @property array        $metadata
+ * @property Carbon       $settled_at
+ * @property Carbon       $failed_at
+ * @property Carbon       $created_at
+ * @property Carbon       $updated_at
  *
  * @package App\Models\Financial
  */
@@ -109,7 +108,7 @@ class Transaction extends Model
         return $this->belongsTo(Account::class);
     }
 
-    public function purchasable()
+    public function resource()
     {
         return $this->morphTo();
     }
@@ -119,7 +118,81 @@ class Transaction extends Model
         return $this->hasOne(Transaction::class, 'reference_id');
     }
 
-    #endregion
+    #endregion Relationships
+
+    /* ------------------------------- Scopes ------------------------------- */
+    #region Scopes
+
+    /**
+     * Only transactions within a range
+     * ```
+     * $transactions->inRange([ 'from' => '', 'to' => '' ])->get();
+     * ```
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param array $range [ 'from' => Carbon, 'to' => Carbon ]
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeInRange($query, $range)
+    {
+        return $query->where('created_at', '>=', $range['from'])
+            ->where('created_at', '<', $range['to']);
+    }
+
+    /**
+     * Transactions that have been settled.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeSettled($query)
+    {
+        return $query->whereNotNull('settled_at');
+    }
+
+    /**
+     * Transactions that have failed.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeFailed($query)
+    {
+        return $query->whereNotNull('failed_at');
+    }
+
+    /**
+     * Transactions that are pending settling.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopePending($query)
+    {
+        return $query->whereNull('settled_at')->whereNull('failed_at');
+    }
+
+    public function scopeIsDebit($query)
+    {
+        return $query->where('debit_amount', '>', 0);
+    }
+
+    public function scopeIsCredit($query)
+    {
+        return $query->where('credit_amount', '>', 0);
+    }
+
+    public function scopeType($query, $type)
+    {
+        return $query->where('type', $type);
+    }
+
+    public function scopeIsTip($query)
+    {
+        return $query->type(TransactionTypeEnum::TIP);
+    }
+
+    #endregion Scopes
 
     /* ------------------------------ Functions ----------------------------- */
     #region Functions

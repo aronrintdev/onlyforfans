@@ -60,13 +60,14 @@ class LikeablesTableSeeder extends Seeder
                 $t->posts->random($max)->each( function($p) use(&$f, $now) {
                     DB::table('likeables')->insert([
                         //'id' => Str::uuid(),
-                        'likee_id' => $f->id,
+                        'liker_id' => $f->id,
                         'likeable_type' => 'posts',
                         'likeable_id' => $p->id,
                         'created_at' => $now,
                         'updated_at' => $now,
                     ]);
-                    $p->user->notify(new ResourceLiked($p, $f));
+                    // %PSG: Disable as this will trigger SendGrid emails
+                    //$p->user->notify(new ResourceLiked($p, $f));
                 });
             });
 

@@ -64,6 +64,9 @@ whoami.php
 CMD-rsync-local.txt
 public/info.php
 
+meilisearch
+data.ms
+
 notes.local.txt
 
 # JS Sandbox

@@ -24,6 +24,7 @@
           :extra="extra"
           :payment-method="selectedPaymentMethod"
           :value="value"
+          :item-type="itemType"
           :price="price"
           :currency="currency"
           :price-display="displayPrice"
@@ -44,16 +45,19 @@
 import { eventBus } from '@/app'
 import _ from 'lodash'
 import Vuex from 'vuex'
-import FromNew from './forms/New'
+import FormNew from './forms/New'
 import PaymentConfirmation from './forms/PaymentConfirmation'
 import PayWithForm from './PayWithForm'
 import SavedPaymentMethodList from './SavedPaymentMethodsList'
 import LoadingOverlay from '@components/common/LoadingOverlay'
+import SubscriptionIFrame from './forms/SegpaySubscriptionIFrame'
+import LongRunningTransactionToast from './LongRunningTransactionToast'
 
 export default {
   name: 'PurchaseForm',
   components: {
-    FromNew,
+    FormNew,
+    LongRunningTransactionToast,
     PaymentConfirmation,
     PayWithForm,
     SavedPaymentMethodList,
@@ -63,6 +67,8 @@ export default {
   props: {
     /** Item being purchased */
     value: { type: Object, default: () => ({}) },
+    /** What type of item is being purchased, ( post, timeline ) */
+    itemType: { type: String, default: ''},
     /** Price as integer */
     price: { type: Number, default: 0 },
     /** Price currency */
@@ -85,11 +91,12 @@ export default {
   },
 
   data: () => ({
-    loadedForm: FromNew,
+    subscriptionMustIFrame: true,
+    loadedForm: FormNew,
     selectedPaymentMethod: {},
     loading: true,
     processing: false,
-    maxProcessingWaitTime: 10 * 1000, // 10s
+    maxProcessingWaitTime: 20 * 1000, // 20s
     waiting: null,
   }),
 
@@ -108,23 +115,51 @@ export default {
     },
 
     loadNewForm() {
-      this.loadedForm = FromNew
+      this.loadedForm = FormNew
       this.selectedPaymentMethod = { id: 'new' }
     },
 
     loadPayWithForm(paymentMethod) {
       this.selectedPaymentMethod = paymentMethod
-      this.loadedForm = PaymentConfirmation
+      if (this.subscriptionMustIFrame && this.type === 'subscription') {
+        this.loadedForm = SubscriptionIFrame
+      } else {
+        this.loadedForm = PaymentConfirmation
+      }
+    },
+
+    onProcessingTimeout() {
+      this.processing = false
+
+      // Close Modal
+      this.$bvModal.hide('modal-purchase-post')
+      this.$bvModal.hide('modal-tip')
+      this.$bvModal.hide('modal-follow')
+
+      const h = this.$createElement
+
+      const vNodesMsg = h(
+        'b-media',
+        { props: { verticalAlign: 'center' } },
+        [
+          h('template', { slot: 'aside' }, [
+            h('fa-icon', { props: { icon: 'exclamation-triangle', size: '2x' } }),
+          ]),
+          this.$t('overTimeToast.message'),
+        ]
+      )
+
+      this.$root.$bvToast.toast([ vNodesMsg ], {
+        title: this.$t('overTimeToast.title'),
+        toaster: 'b-toaster-top-center',
+        solid: true,
+        variant: 'warning',
+      })
     },
 
     onProcessing() {
       this.processing = true
-      this.waiting = setTimeout(() => {
-        this.processing = false
-
-        // TODO: Display better error message
-        this.$root.$bvToast.toast('Transaction has been processing for a long time', { variant: 'danger' })
-      }, this.maxProcessingWaitTime)
+      this.waiting = setTimeout(this.onProcessingTimeout, this.maxProcessingWaitTime)
     },
 
     onStopProcessing() {
@@ -212,7 +247,11 @@ export default {
 <i18n lang="json5" scoped>
 {
   "en": {
-    "processing": "Processing",
+    "processing": "Processing your transaction, this may take a moment",
+    "overTimeToast": {
+      "message": "This transaction has been processing for a long time, we will update you when it is complete",
+      "title": "Long Running Transaction"
+    }
   }
 }
 </i18n>

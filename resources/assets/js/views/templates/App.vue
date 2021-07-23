@@ -1,19 +1,23 @@
 <template>
   <div class="app d-flex flex-column">
+    <transition name="quick-fade" mode="out-in">
+      <SiteLoading v-if="loading" key="loading" />
+    </transition>
     <!-- Header -->
     <MainNavBar class="header" />
-    <div class="content flex-grow-1" :class="{ 'p-3': !mobile }">
+    <div class="content flex-grow-1 d-flex" :class="{ 'p-3': !mobile }">
       <transition name="quick-fade" mode="out-in">
         <router-view />
       </transition>
     </div>
+
+    <Modals />
 
     <Toaster />
 
     <EventUpdater />
 
     <SiteFooter v-if="!isFooterHidden" />
-
   </div>
 </template>
 
@@ -21,18 +25,23 @@
 import _ from 'lodash'
 import Vuex from 'vuex';
 import VueScreenSize from 'vue-screen-size'
-import MainNavBar from '@components/common/MainNavbar'
+
 import EventUpdater from '@components/EventUpdater'
-import Toaster from '@components/Toaster'
+import MainNavBar from '@components/common/MainNavbar'
+import Modals from '@components/Modals'
 import SiteFooter from '@views/templates/SiteFooter'
+import SiteLoading from '@components/common/SiteLoading'
+import Toaster from '@components/Toaster'
 
 export default {
   name: 'App',
   components: {
-    MainNavBar,
     EventUpdater,
-    Toaster,
+    MainNavBar,
+    Modals,
     SiteFooter,
+    SiteLoading,
+    Toaster,
   },
 
   mixins: [VueScreenSize.VueScreenSizeMixin],
@@ -62,14 +71,16 @@ export default {
   },
 
   data: () => ({
+    // If full app is loading
+    loading: false,
     onlineMonitor: null,
     unreadMessagesCount: 0,
     isFooterHidden: false,
   }),
 
   methods: {
-    ...Vuex.mapActions(['getMe']),
-    ...Vuex.mapMutations([ 'UPDATE_MOBILE', 'UPDATE_SCREEN_SIZE', 'UPDATE_UNREAD_MESSAGES_COUNT' ]),
+    ...Vuex.mapActions(['getMe', 'getUnreadMessagesCount']),
+    ...Vuex.mapMutations([ 'UPDATE_MOBILE', 'UPDATE_SCREEN_SIZE' ]),
     startOnlineMonitor() {
       if (this.session_user) {
         this.onlineMonitor = this.$echo.join(`user.status.${this.session_user.id}`)
@@ -79,20 +90,20 @@ export default {
           });
       }
     },
-    getUnreadMessagesCount: function() {
-      this.axios.get('/unread-messages-count')
-        .then((res) => {
-          this.UPDATE_UNREAD_MESSAGES_COUNT({
-            unread_messages_count: res.data.unread_messages_count,
-          });
-        });
-    }
+
+    updateScreenSize(value) {
+      var screenSize = _.findKey(this.screenSizes, i => (i === _.max(_.filter(this.screenSizes, size => ( value >= size )))))
+      if (screenSize !== this.screenSize) {
+        this.UPDATE_SCREEN_SIZE(screenSize)
+      }
+    },
   },
 
   watch: {
     session_user(value) {
       if (value) {
         this.startOnlineMonitor()
+        this.loading = false
       }
     },
     $vssWidth(value) {
@@ -100,10 +111,7 @@ export default {
       if (this.mobile !== mobile) {
         this.UPDATE_MOBILE(mobile)
       }
-      var screenSize = _.findKey(this.screenSizes, i => (i === _.max(_.filter(this.screenSizes, size => ( value >= size )))))
-      if (screenSize !== this.screenSize) {
-        this.UPDATE_SCREEN_SIZE(screenSize)
-      }
+      this.updateScreenSize(value)
     },
     $route: function(newVal) {
       if (newVal.name.indexOf('messages') > -1) {
@@ -113,15 +121,20 @@ export default {
   },
 
   mounted() {
+    this.updateScreenSize(this.$vssWidth)
+  },
+
+  created() {
     if (this.$route.name.indexOf('messages') > -1) {
       this.isFooterHidden = true;
     }
     if (!this.session_user) {
+      this.loading = true
       this.getMe();
       this.getUnreadMessagesCount();
     }
     if (this.$vssWidth < this.mobileWidth) {
-      this.mobile = true
+      this.UPDATE_MOBILE(true)
     }
   },
 }

@@ -2,12 +2,19 @@
   <div class="card card-default">
     <div class="card-header">Preview</div>
     <div v-bind:style="{ backgroundColor: attrs.color }" class="card-body">
-      {{ attrs.contents }}
+      <VueMarkdown :source="attrs.contents || ''" />
+      <see-more v-if="linkValid" :link="attrs.link"></see-more>
     </div>
   </div>
 </template>
 
 <script>
+import validateUrl from '@helpers/validateUrl'
+import SeeMore from './SeeMore.vue'
+
+/** https://github.com/adapttive/vue-markdown/ */
+import VueMarkdown from '@adapttive/vue-markdown'
+
 export default {
   mounted() {
 
@@ -17,6 +24,12 @@ export default {
     'attrs',
   ],
 
+  computed: {
+    linkValid() {
+      return validateUrl(this.attrs.link)
+    }
+  },
+
   data: () => ({
   }),
 
@@ -24,6 +37,8 @@ export default {
   },
 
   components: {
+    seeMore: SeeMore,
+    VueMarkdown,
   },
 }
 </script>

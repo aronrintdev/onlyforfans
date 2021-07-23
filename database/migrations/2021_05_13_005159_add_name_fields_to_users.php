@@ -9,8 +9,8 @@ class AddNameFieldsToUsers extends Migration
     public function up()
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string('lastname')->nullable()->after('username');
-            $table->string('firstname')->nullable()->after('username');
+            $table->string('lastname')->nullable()->after('username')->comment('Serves as user display/stage name');
+            $table->string('firstname')->nullable()->after('username')->comment('Serves as user display/stage name');
         });
     }
 

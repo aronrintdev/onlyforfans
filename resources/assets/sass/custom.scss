@@ -29,6 +29,7 @@ body {
 }
 
 .app {
+  position: relative;
   min-height: 100vh;
 }
 
@@ -80,13 +81,13 @@ body .feed-crate.tag-grid-layout .superbox-post .text-wrap.tag-has-mediafiles {
 }
 
 /* In 'grid' view, normalize the height so that we don't get a variation messing up row alignment */
-body .feed-crate.tag-grid-layout .superbox-post .carousel.slide .carousel-item,
+body .feed-crate.tag-grid-layout .superbox-post .media-slider,
 body .feed-crate.tag-grid-layout .superbox-post .locked-content {
   height: 20rem;
 }
 
 // Lists
-body #view-lists .list-component.tag-grid-layout  .superbox-post .carousel.slide .carousel-item {
+body #view-lists .list-component.tag-grid-layout  .superbox-post .media-slider {
   video, img {
     object-fit: cover;
     height: 20rem;
@@ -94,11 +95,23 @@ body #view-lists .list-component.tag-grid-layout  .superbox-post .carousel.slide
 }
 
 // Main Timeline Feed
-body .feed-crate.tag-grid-layout .superbox-post .carousel.slide .carousel-item {
+body .feed-crate.tag-grid-layout .superbox-post .media-slider {
   video, img {
     object-fit: cover;
     height: 20rem;
   }
+}
+
+.superbox-post .dropdown-toggle {
+  border: none;
+  display: flex;
+  align-items: center;
+}
+.superbox-post .dropdown-toggle::after {
+  margin-top: 0.2em;
+  border-top: 0.6em solid;
+  border-right: 0.4em solid transparent;
+  border-left: 0.4em solid transparent;
 }
 
 #user-filter-dropdown .btn,
@@ -468,5 +481,80 @@ body .feed-crate.tag-grid-layout .superbox-post .carousel.slide .carousel-item {
       fill: #fefefe;
       width: 18px;
     }
+  }
+}
+
+// PhotoSwipe
+.pswp {
+  .pswp__top-bar {
+    background-color: transparent !important;
+  }
+  .pswp__button--share {
+    display: none;
+  }
+  .pswp__caption {
+    display: none;
+  }
+}
+
+// Swiper
+.media-slider-swiper {
+  .swiper-button-next:after,
+  .swiper-button-prev:after {
+    display: none;
+  }
+
+  .swiper-button-next {
+    right: 20px;
+    color: #fff;
+  }
+  .swiper-button-prev {
+    left: 20px;
+    color: #fff;
+  }
+
+  .swiper-pagination-bullet {
+    background: #fff;
+  }
+}
+
+// Hide Google Recaptcha Badge
+.grecaptcha-badge { visibility: hidden !important; }
+
+// Post Form Dropzone
+.dropzone.vue-dropzone .dz-message {
+  margin: 0 !important;
+}
+.dropzone.dz-started.vue-dropzone .dz-message {
+  display: block;
+}
+.dropzone.dz-started.vue-dropzone .dz-preview {
+  display: none;
+}
+
+// Post Menu Dropdown
+.post-header-menu .dropdown-item a,
+.post-header-menu .dropdown-item a:hover {
+  font-weight: 400;
+  color: #212529;
+  text-decoration: none;
+}
+
+// Vue-plyr custom style
+.plyr--audio {
+  margin: 0 10px 10px;
+  border-radius: 8px;
+
+  &.plyr--full-ui input[type=range] {
+    color: #007bff !important;
+  }
+
+  .plyr__controls {
+    background: #e9ecef !important;
+  }
+  .plyr__control.plyr__tab-focus,
+  .plyr__control:hover, 
+  .plyr__control[aria-expanded=true] {
+    background-color: #007bff !important;
   }
 }

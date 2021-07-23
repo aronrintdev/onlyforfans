@@ -64,7 +64,7 @@
                   {{ timeline.name }}
                 </router-link>
                 <span v-if="timeline.verified" class="verified-badge">
-                  <b-icon icon="check-circle-fill" variant="primary" font-scale="1" />
+                  <fa-icon icon="check-circle" class="text-primary" />
                 </span>
               </h2>
               <p class="avatar-mail my-0">

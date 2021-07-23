@@ -63,10 +63,23 @@ class AccountFactory extends Factory
         });
     }
 
+    public function forUser(User $user)
+    {
+        return $this->state(function (array $attributes) use ($user) {
+            return [
+                'owner_type' => $user->getMorphString(),
+                'owner_id' => $user->getKey(),
+            ];
+        });
+    }
+
     public function withResource($resource)
     {
         return $this->state(function (array $attributes) use ($resource) {
-            return ['resource_id' => $resource];
+            return [
+                'resource_type' => $resource->getMorphString(),
+                'resource_id' => $resource->getKey(),
+            ];
         });
     }
 

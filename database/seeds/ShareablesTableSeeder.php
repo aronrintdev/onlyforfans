@@ -26,8 +26,8 @@ use App\Events\AccessRevoked;
 use App\Events\ItemPurchased;
 use App\Jobs\Financial\UpdateAccountBalance;
 use App\Models\Financial\Account;
-use App\Notifications\TimelineFollowed;
-use App\Notifications\TimelineSubscribed;
+use App\Notifications\TimelineFollowed as TimelineFollowedNotify;
+use App\Notifications\TimelineSubscribed as TimelineSubscribedNotify;
 use App\Notifications\ResourcePurchased;
 use Symfony\Component\Console\Output\ConsoleOutput;
 
@@ -98,7 +98,8 @@ class ShareablesTableSeeder extends Seeder
                     //'created_at' => $ts,
                     //'updated_at' => $ts,
                 ]);
-                $timeline->user->notify(new TimelineFollowed($timeline, $follower));
+                // %PSG: Disable as this will trigger SendGrid emails
+                //$timeline->user->notify(new TimelineFollowedNotify($timeline, $follower));
 
                 // --- purchase some posts ---
 
@@ -125,7 +126,8 @@ class ShareablesTableSeeder extends Seeder
                         Event::fakeFor(function() use (&$paymentAccount, &$post, &$follower, $customAttributes) {
                             try {
                                 $paymentAccount->purchase($post, $post->price, ShareableAccessLevelEnum::PREMIUM, $customAttributes);
-                                $post->user->notify(new ResourcePurchased($post, $follower, ['amount'=>\App\Models\Casts\Money::doSerialize($post->price)]));
+                                // %PSG: Disable as this will trigger SendGrid emails
+                                //$post->user->notify(new ResourcePurchased($post, $follower, ['amount'=>\App\Models\Casts\Money::doSerialize($post->price)]));
                             } catch (RuntimeException $e) {
                                 //throw $e;
                                 $exceptionClass = class_basename($e);
@@ -139,7 +141,7 @@ class ShareablesTableSeeder extends Seeder
                 }
             });
 
-            // --- Select some for upgrades ---
+            // --- Select some for upgrades (ie to subscribe / "premium" follow) ---
 
             $timeline->refresh();
             $followers = $timeline->followers;
@@ -164,8 +166,10 @@ class ShareablesTableSeeder extends Seeder
 
                 Event::fakeFor(function () use (&$paymentAccount, &$timeline, &$follower, $customAttributes) {
                     try {
-                        $paymentAccount->createSubscription($timeline, $timeline->price, ShareableAccessLevelEnum::PREMIUM, $customAttributes);
-                        $timeline->user->notify(new TimelineSubscribed($timeline, $follower, ['amount' => \App\Models\Casts\Money::doSerialize($timeline->price)]));
+                        $subscription = $paymentAccount->createSubscription($timeline, $timeline->price, ShareableAccessLevelEnum::PREMIUM, $customAttributes);
+                        $subscription->process();
+                        // %PSG: Disable as this will trigger SendGrid emails
+                        //$timeline->user->notify(new TimelineSubscribedNotify($timeline, $follower, ['amount' => \App\Models\Casts\Money::doSerialize($timeline->price)]));
                     } catch (RuntimeException $e) {
                         //throw $e;
                         $exceptionClass = class_basename($e);
@@ -188,7 +192,7 @@ class ShareablesTableSeeder extends Seeder
             $this->output->writeln("-------------------------");
         }
         $count = Account::where('owner_type', '!=', 'financial_system_owner')->count();
-        Account::where('owner_type', '!=', 'financial_system_owner')->cursor()->each(function($account) use ($count) {
+        Account::where('owner_type', '!=', 'financial_system_owner')->get()->each(function($account) use ($count) {
             static $iter = 1;
             if ($this->appEnv !== 'testing') {
                 $this->output->writeln("({$iter} of {$count}): Updating Balance for {$account->name}");

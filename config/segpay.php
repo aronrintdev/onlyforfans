@@ -3,12 +3,21 @@
 return [
     'secure' => true,
     'mode' => env('SEGPAY_MODE', 'development'),
+
     'baseUrl' => env('SEGPAY_BASE_URL', 'secure2.segpay.com/billing/poset.cgi'),
-    'baseOneClickUrl' => env('SEGPAY_BASE_ONE_CLICK_URL', 'secure2.segpay.com/billingOneClick.aspx'),
+    'baseOneClickUrl' => env('SEGPAY_BASE_ONE_CLICK_URL', 'secure2.segpay.com/billing/OneClick.aspx'),
+
+    'baseOneClickDynamicUrl' => env('SEGPAY_BASE_ONE_CLICK_DYNAMIC_URL', 'https://service.segpay.com/OneClickSales.asmx/SalesServiceDynamic'),
+
     'dynamicTransUrl' => env('SEGPAY_DYNAMIC_PRICE_URL', 'https://srs.segpay.com/PricingHash/PricingHash.svc/GetDynamicTrans'),
+    'dynamicRecurringUrl' => env('SEGPAY_DYNAMIC_RECURRING_URL', 'https://srs.segpay.com/MerchantServices/DynamicRecurring'),
+
     'reportingServicesUrl' => env('SEGPAY_SRS_URL', 'srs.segpay.com'),
-    'userId' => env('SEGPAY_USER_ID'),
-    'accessKey' => env('SEGPAY_ACCESS_KEY'),
+
+    'userId' => env('SEGPAY_SRS_USER_ID'),
+    'accessKey' => env('SEGPAY_SRS_ACCESS_KEY'),
+
+    'merchantId' => env('SEGPAY_MERCHANT_ID', '21956'),
 
     'packageId' => env('SEGPAY_PACKAGE_ID', '199225'),
     'pricePointId' => env('SEGPAY_PRICE_POINT_ID', '26943'),

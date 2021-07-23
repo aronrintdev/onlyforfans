@@ -47,10 +47,12 @@ class PostsTableSeeder extends Seeder
 
             // $u is the user who will own the post being created (ie, as well as timeline associated with the post)...
 
-            $count = $this->faker->numberBetween(self::$MIN_POSTS, $this->getMax('posts'));
+            $max = $this->getMax('posts');
+            $count = $this->faker->numberBetween(self::$MIN_POSTS, $max);
 
-            if ( $this->appEnv !== 'testing' ) {
-                $this->output->writeln("  - Creating $count posts for user ".$u->name." (iter: $iter)");
+            if ( true || $this->appEnv !== 'testing' ) {
+                $userCount = $users->count();
+                $this->output->writeln("  - Creating $count posts for user ".$u->name." (iter: $iter/$userCount)");
             }
 
             collect(range(0,$count))->each( function() use(&$users, &$u) { // Post generation loop
@@ -91,7 +93,7 @@ class PostsTableSeeder extends Seeder
                 ];
 
                 if ( $ptype === PostTypeEnum::PRICED ) {
-                    $attrs['price'] = $this->faker->randomFloat(0, 100, 1000);
+                    $attrs['price'] = $this->faker->numberBetween(300, 4000);
                 }
 
                 $post = Post::factory()->create($attrs);
@@ -102,6 +104,7 @@ class PostsTableSeeder extends Seeder
                     for ( $i = 0 ; $i < $numberOfImages ; $i++ ) {
                         $imgDim = $this->faker->randomElement(self::$IMAGE_SIZES);
                         $mf = FactoryHelpers::createImage(
+                            $post->getPrimaryOwner(),
                             MediafileTypeEnum::POST,  // mftype
                             $post->id,  // resourceID
                             $this->doS3Upload, // true, // doS3Upload
@@ -120,7 +123,7 @@ class PostsTableSeeder extends Seeder
                 /*
                 // LIKES - Select random users to like this post...
                 $likers = FactoryHelpers::parseRandomSubset($users, 20);
-                $likee = $u;
+                $liker = $u;
                 $likers->each( function($liker) use(&$post) {
                     if ( !$post->users_liked->contains($liker->id) ) {
                         $post->users_liked()->attach($liker->id);

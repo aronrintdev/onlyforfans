@@ -42,7 +42,8 @@ $ echo "" > storage/logs/laravel.log; vendor/bin/phpunit  -d memory_limit=-1 --t
 $ echo "" > storage/logs/laravel.log; php -n vendor/bin/phpunit  -d memory_limit=-1 --testdox  --group regression
 $ echo "" > storage/logs/laravel.log; php -n -dextension=intl.so vendor/bin/phpunit  -d memory_limit=-1 --testdox  --group regression
 
-$ php artisan test  --group regression
+$ php artisan test --group=regression
+$ php artisan test --group regression
 $ php -n artisan test  --group regression
 
 # stress testing...
@@ -70,8 +71,12 @@ $ php artisan db:seed --class=TestDatabaseSeeder
 # Run all seeds in dev/staging/demo env (eg localhost, .env)
 $ php artisan db:seed --class=DatabaseSeeder
 
+%%% Clear route cache...may need to run this post-deployment
+$ php artisan route:cache
+
 %%% Tinker
 $ php artisan tinker
+$ php artisan tinker --env="testing"
 >>> error_reporting(E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED)
 
 %%%
@@ -84,8 +89,33 @@ find app resources/views resources/assets \( -name "*.php" -o -name "*.vue" \) |
 mvim A-HERE.txt routes/web.php tests app/Http/Controllers resources/views resources/assets/js/
 
 %%% cron/queue scripts
-$ php artisan setmf:basenames
+#$ php artisan setmf:basenames
 $ php artisan make:thumbs 300
 $ php artisan make:blurs 300
-$ 
-$ 
+
+%%% new
+$ sudo supervisorctl restart queue-work:*
+...or...
+$ sudo supervisorctl
+
+$ sh ./install-env.sh 
+
+%%% 20210628.PSG
+
+# Create and seed a template DB
+$ \rm database/template.sqlite; touch database/template.sqlite; DB_DATABASE="database/template.sqlite" DB_FINANCIAL_DATABASE="database/template.sqlite"   php artisan migrate:refresh --seed --database="template" --env="testing"
+$ chmod 666 database/*.sqlite
+
+# Run tests
+$  echo "" > storage/logs/laravel.log; php -n   -dextension=intl.so  vendor/bin/phpunit -v  -d memory_limit=-1   --testdox  --group=comments
+$ php artisan test --group regression-base
+$ php artisan test --group regression-financial
+$ php artisan test --group regression
+
+
+# Sendgrid email test
+
+
+$ DEBUG_FORCE_ENABLE_MAIL_NOTIFY=true DEBUG_BYPASS_SENDGRID_MAIL_NOTIFY=false DEBUG_ENABLE_SENDGRID_SANDBOX_MODE=false DEBUG_OVERRIDE_TO_EMAIL_FOR_SENDGRID="peter@peltronic.com" php artisan test --group="notify-via-sendgrid-unit"
+
+$ DEBUG_FORCE_ENABLE_MAIL_NOTIFY=true DEBUG_BYPASS_SENDGRID_MAIL_NOTIFY=false DEBUG_ENABLE_SENDGRID_SANDBOX_MODE=true DEBUG_OVERRIDE_TO_EMAIL_FOR_SENDGRID="peter@peltronic.com" php artisan test --group="notify-via-sendgrid-unit"

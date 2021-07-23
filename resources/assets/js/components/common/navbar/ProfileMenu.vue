@@ -67,17 +67,25 @@ export default {
         {
           label: 'Lists',
           icon: 'cog',
-          linkTo: { name: 'lists.default' }
+          linkTo: { name: 'lists.favorites' }
         },
       ]
 
-      if (this.uiFlags.isCreator && !this.uiFlags.hasBanking) {
+
+
+      items.push({
+        label: 'statements',
+        icon: 'receipt',
+        linkTo: { name: 'statements.dashboard' },
+      })
+
+      // if (this.uiFlags.isCreator && !this.uiFlags.hasBanking) {
         items.push({
           label: 'Banking',
           icon: 'university',
-          linkTo: { name: 'index' } // TODO: Add route when settings page is added
+          linkTo: { name: 'settings.banking' }
         })
-      }
+      // }
       if (this.uiFlags.isCreator && this.uiFlags.hasEarnings) {
         items.push({
           label: 'Earnings',
@@ -122,6 +130,7 @@ export default {
     "My Profile": "My Profile",
     "My Vault": "My Vault",
     "Settings": "Settings",
+    "statements": "Statements",
     "Payment Method": "Payment Method",
     "Lists": "Lists",
     "Logout": "Logout",

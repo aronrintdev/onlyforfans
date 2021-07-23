@@ -177,6 +177,31 @@ class ShareablesController extends AppBaseController
         return new ShareableCollection($data);
     }
 
+    public function update(Request $request, ShareableModel $shareable) {
+        $this->authorize('update', $shareable);
+
+        $request->validate([
+            'notes' => 'required|sometimes|string',
+        ]);
+
+        $shareable->fill($request->only([
+            'notes',
+        ]));
+
+        $shareable->save();
+
+        return $shareable;
+    }
+
+    public function clearnotes(Request $request, ShareableModel $shareable) {
+        $this->authorize('clearnotes', $shareable);
+
+        $update['notes'] = null;
+        $shareable->update($update);
+
+        return $shareable;
+    }
+
 
     /*
     public function index(Request $request)

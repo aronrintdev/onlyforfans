@@ -1,214 +1,287 @@
 <template>
-  <div class="container-fluid supercrate-player">
-    <section class="row">
-      <aside class="col-md-3 tag-debug">
-        <h2>My Story Views</h2>
-        <hr />
-        <div class="mb-3">
-          <b-form-checkbox v-model="play">Auto Play</b-form-checkbox>
-        </div>
-        <div class="mb-3">
-          Auto Play Speed
-          <VueSlider :data="speedOptions" v-model="speed" hideLabel />
-        </div>
-      </aside>
+  <div v-if="!isLoading" class="container-fluid supercrate-player">
 
-      <main class="col-md-9 tag-debug">
-        <nav :style="cssNav">
-          <div
-            v-for="(story, index) in renderedStories"
-            :key="`header-${story.id}`"
-            class="cursor-pointer"
-            @click="goTo(index)"
-          >
-            <div :ref="`nav-${story.id}`" />
+    <!--
+    <b-sidebar id="sidebar-settings" title="Story Settings" left shadow width="40rem">
+      <div class="px-3 py-2">
+        <div>
+          <b-form-checkbox v-model="isAutoplay">Auto Play</b-form-checkbox>
+        </div>
+        <ul class="tag-debug">
+          <li>slide index: {{slideIndex+1}}/{{slides.length}}</li>
+          <li>current slide ID: {{currentSlideId}}</li>
+        </ul>
+      </div>
+    </b-sidebar>
+    -->
+
+    <b-row>
+      <b-col class="px-0">
+        <div class="position-relative">
+
+          <!--
+          <div class="d-none">
+            <ul class="tag-debug">
+              <li>slide index: {{slideIndex+1}}/{{slides.length}}</li>
+              <li>current slide ID: {{currentSlideId}}</li>
+            </ul>
           </div>
-        </nav>
+          -->
 
-        <section v-for="(story, index) in renderedStories" :key="index">
-          <div v-if="current == index" :style="cssDisplay" class="display-area bg-blur">
-            <div class="bg-blur"></div>
-            <div class="crate-content">
-              <article v-if="renderedStories[index].stype === 'text'" class="h-100 v-wrap">
-                <p class="h4 text-center v-box">{{ renderedStories[index].content }}</p>
-              </article>
-              <article v-else-if="renderedStories[index].stype === 'image'" class="h-100">
-                <img :src="story.mediafiles[0].filepath" class="OFF-img-fluid OFF-h-100" />
-              </article>
+          <nav :style="cssNav" class="m-0">
+            <div v-for="(s, iter) in slides" :key="`header-${s.id}`" class="cursor-pointer" @click="goTo(iter)">
+              <div :style="cssCurrentProgress" class="tag-target" :class="{ 'played': (slideIndex>iter), 'playing': (slideIndex===iter) }" :ref="`nav-${s.id}`" />
             </div>
-          </div>
-        </section>
+          </nav>
 
-        <section class="my-3 d-flex justify-content-between">
-          <b-btn @click="doNav('previous')" class="">Previous</b-btn>
-          <b-btn @click="doNav('next')" class="">Next</b-btn>
-        </section>
-      </main>
-    </section>
+          <section v-for="(s, iter) in slides" :key="`slide-${s.id}`">
+            <article v-if="slideIndex===iter" 
+              :style="cssDisplay" class="display-area" 
+              v-touch:start="handleTouchStart" v-touch:end="handleTouchEnd"
+              v-touch:swipe.bottom="handleSwipeDown"
+            >
+
+              <div class="tag-creator d-flex align-items-center">
+                <b-avatar v-if="avatar" :src="avatar.filepath" class="mr-2" size="2.5rem" />
+                <div>
+                  <h6 class="m-0">{{ storyteller }}</h6>
+                  <small class="text-muted m-0"><timeago :datetime="s.created_at" /></small>
+                </div>
+              </div>
+
+              <!--
+              <div v-b-toggle.sidebar-settings class="clickme_to-toggle_settings" role="button"><fa-icon icon="cog" size="2x" class="text-light" /></div>
+              -->
+              <div class="clickme_to-close_player" role="button"><router-link to="/"><fa-icon icon="times" size="2x" class="text-light" /></router-link></div>
+
+              <div class="nav-arrows w-100 px-1 px-sm-5 d-flex justify-content-between">
+                <div @click="doNav('previous')" class="clickme_to-prev_slide" role="button"><fa-icon icon="angle-left"  size="3x" class="text-light" /></div>
+                <div @click="doNav('next')"     class="clickme_to-next_slide" role="button"><fa-icon icon="angle-right" size="3x" class="text-light" /></div>
+              </div>
+
+              <div class="bg-blur"></div>
+
+              <div v-touch:swipe.top="handleSwipeUp" class="crate-content">
+                <article v-if="s.stype==='text'" class="h-100 v-wrap">
+                  <VueMarkdown class="h4 text-center v-box text-white w-75" :source="s.content || ''" />
+                </article>
+                <article v-else-if="s.stype==='image' && s.mediafiles" class="h-100">
+                  <img v-if="s.mediafiles[0].is_image" :src="s.mediafiles[0].filepath" />
+                  <video v-if="s.mediafiles[0].is_video" autoplay="autoplay" class="OFF-d-block">
+                    <source :src="s.mediafiles[0].filepath" type="video/webm" />
+                    <source :src="s.mediafiles[0].filepath" type="video/mp4" />
+                  </video>
+                  <see-more v-if="s.swipe_up_link" :link="s.swipe_up_link"></see-more>
+                </article>
+              </div>
+            </article>
+          </section>
+
+        </div>
+      </b-col>
+
+    </b-row>
+
   </div>
 </template>
 
 <script>
-/**
- * Story Player
- */
+// A 'slide' is an individual 'story' in the database...
+// However 'story' should actually refer to the entire story timeline, composed
+// of multiple slides
 import _ from 'lodash'
+import SeeMore from './SeeMore.vue' // for swipe-up functionality
+import VueMarkdown from '@adapttive/vue-markdown'
 
 export default {
+
   props: {
-    username: { type: String, default: '' },
-    stories: { type: Array, default: () => [] },
-    maxStories: { type: Number, default: 15 },
+    storyteller: { type: String, default: '' },
+    session_user: { type: Object, default: null },
+    timeline: null,
+    avatar: null,
+    slides: null,
+    slideIndexInit: null,
   },
 
   data: () => ({
-    current: 0,
-    play: true,
-    speed: 3000,
-    timelineAnimation: null,
-    speedOptions: [
-      {
-        label: 'Very Slow',
-        value: 10000,
-      },
-      {
-        label: 'Slow',
-        value: 4000,
-      },
-      {
-        label: 'Normal',
-        value: 3000,
-      },
-      {
-        label: 'Fast',
-        value: 2000,
-      },
-      {
-        label: 'Very Fast',
-        value: 1000,
-      },
-    ],
+    INTERVAL_DELTA: 35, // milliseconds...smaller the number the faster the playback
+    slideViewedDuration: 0, // interval counter, range 0 to 100; also used to fill in progress bar during auto-playback (could use a better name for this)
+
+    slideIndex: null,
+
+    // slide player controls
+    isAutoplay: true,
+    playerIntervalObj: null, // instace of setInterval
   }),
 
   computed: {
+    isLoading() {
+      return !this.timeline || !this.storyteller || !this.slides || !this.session_user || (this.slideIndexInit===null)
+    },
+
+    cssCurrentProgress() {
+      return { '--current-progress': `${this.slideViewedDuration}%` }
+    },
     cssNav() {
-      return {
-        //'--bg-color': this.bgColor,
-        //'--height': this.height + 'px',
-        '--grid-template-columns': `repeat(${this.renderedStories.length}, 1fr)`,
-      }
+      return { '--grid-template-columns': `repeat(${this.slides.length}, 1fr)` }
     },
     cssDisplay() {
-      if (this.renderedStories[this.current].mediafiles[0]) {
-        return {
-          '--background-image': `url(${this.renderedStories[this.current].mediafiles[0].filepath})`,
-        }
+      if (this.slides.length && this.slides[0].mediafiles && this.slides[this.slideIndex].mediafiles[0]) {
+        return { '--background-image': `url(${this.slides[this.slideIndex].mediafiles[0].filepath})` }
       }
       return {}
     },
-    renderedStories() {
-      if (this.stories.length > this.maxStories) {
-        return _.slice(this.stories, 0, this.maxStories)
-      }
-      return this.stories
-    },
+
+    currentSlideId() {
+      return (this.slides && this.slides.length && (this.slideIndex!==null)) ? this.slides[this.slideIndex].id : null
+    }
+
   },
 
   methods: {
+    async markSlideAsViewed(slide) {
+      const payload = {
+        viewer_id: this.session_user.id,
+        story_id: slide.id,
+      }
+      const response = await axios.post(`/stories/markViewed`, payload)
+    },
+
     doNav(direction) {
+      if ( !this.slides || !this.slides.length || this.slideIndex===null ) {
+        return
+      }
       switch (direction) {
         case 'previous':
-          this.goTo(this.current - 1)
+          if ( (this.slideIndex-1) < 0 ) {
+            this.$emit('prev-story-timeline', { foo: 'bar'} )
+            this.slideIndex = 0
+            this.slideViewedDuration = 0
+          } else {
+            this.goTo(this.slideIndex - 1)
+          }
           break
         case 'next':
-          this.goTo(this.current + 1)
+          if ( (this.slideIndex+1) >= this.slides.length ) {
+            this.$emit('next-story-timeline', { foo: 'bar'} )
+            this.slideIndex = 0
+            this.slideViewedDuration = 0
+          } else {
+            this.goTo(this.slideIndex + 1)
+          }
           break
       }
     },
+
+    // sets this.slideIndex
     goTo(index) {
-      this.timelineAnimation.pause()
 
-      index =
-        index < 0
-          ? this.renderedStories.length - 1
-          : index >= this.renderedStories.length
-          ? 0
-          : index
-      this.current = index
-      this.timelineAnimation.seek(this.getTimelineSeek(index))
+      if ( index < 0 ) {
+        this.slideIndex = 0 // min out at first index
+        this.slideViewedDuration = 0
+      } else if ( index >= this.slides.length ) {
+        this.slideIndex = this.slides.length-1 // max out at last index
+        this.slideViewedDuration = 0
+      } else {
+        this.slideIndex = index
+        this.slideViewedDuration = 0
+      }
+      this.markSlideAsViewed(this.slides[this.slideIndex])
 
-      if (this.play) {
-        this.timelineAnimation.play()
+    },
+
+    startPlayback() {
+      if ( this.playerIntervalObj!==null ) {
+        clearInterval(this.playerIntervalObj);
+      }
+      this.playerIntervalObj = setInterval( () => {
+        if (this.slideViewedDuration >= 100) {
+          this.doNav('next')
+        } else {
+          this.slideViewedDuration += 1
+        }
+      }, this.INTERVAL_DELTA)
+    },
+
+    stopPlayback() {
+      clearInterval(this.playerIntervalObj);
+      this.playerIntervalObj = null
+    },
+
+    handleTouchStart() {
+      //console.log('handleTouchStart()')
+      this.stopPlayback()
+    },
+    handleTouchEnd() {
+      //console.log('handleTouchEnd()')
+      if (this.isAutoplay) {
+        this.startPlayback()
       }
     },
 
-    getTimelineSeek(index) {
-      return (index / this.renderedStories.length) * this.timelineAnimation.duration
+    handleSwipeUp() {
+      //console.log('handleSwipeUp()')
+      const link = this.slides[this.slideIndex].swipe_up_link
+      if (link) {
+        this.stopPlayback()
+        this.$emit('open-see-more-link')
+      }
+    },
+    handleSwipeDown() {
+      //console.log('handleSwipeDown()')
+      this.stopPlayback()
+      this.$router.push({ name: 'index' }) // return to home feed/storybar (close player)
     },
 
-    addTimelineElements() {
-      this.renderedStories.forEach((story, index) => {
-        this.timelineAnimation.add({
-          targets: this.$refs[`nav-${story.id}`][0],
-          width: '100%',
-          changeBegin: (a) => {
-            this.current = index
-          },
-        })
-      })
-    },
-
-    createTimeline() {
-      this.timelineAnimation = this.$anime.timeline({
-        autoplay: this.play,
-        duration: this.speed,
-        easing: 'linear',
-        loop: true,
-      })
-      this.addTimelineElements()
-    },
-
-    removeTimeline() {
-      this.timelineAnimation.pause()
-      this.timelineAnimation.restart()
-      this.renderedStories.forEach((story, index) => {
-        this.timelineAnimation.remove(this.$refs[`nav-${story.id}`][0])
-      })
-    },
   },
 
   watch: {
-    play(value) {
+    isAutoplay(value) {
       if (value) {
-        this.timelineAnimation.play()
-      } else {
-        this.timelineAnimation.pause()
-      }
-    },
-    speed() {
-      const progress = this.timelineAnimation.currentTime / this.timelineAnimation.duration
-      this.removeTimeline()
-      this.createTimeline()
-      this.timelineAnimation.pause()
-      this.timelineAnimation.seek(progress * this.timelineAnimation.duration)
-      if (this.play) {
-        this.timelineAnimation.play()
+        this.startPlayback()
+      } else { 
+        this.stopPlayback()
       }
     },
   },
 
   mounted() {
-    this.createTimeline()
+    this.slideIndex = this.slideIndexInit
+    if ( this.slides && this.slides.length ) {
+      this.markSlideAsViewed(this.slides[this.slideIndex])
+      if (this.isAutoplay) {
+        this.startPlayback()
+      }
+    }
   },
+
+  beforeDestroy() {
+    this.stopPlayback()
+  },
+
+  components: {
+    seeMore: SeeMore,
+    VueMarkdown,
+  },
+
 }
 </script>
 
 <style lang="scss" scoped>
 .display-area {
   position: relative;
-  height: 70vh;
+  height: 100vh;
 
-  & > .crate-content {
+  .tag-creator {
+    color: #fff;
+    position: absolute;
+    top: 1.5rem;
+    left: 1rem;
+    z-index: 200;
+  }
+
+  .crate-content {
     position: absolute;
     top: 0;
     left: 0;
@@ -219,47 +292,91 @@ export default {
       margin: auto;
     }
 
-    img {
+    img, video {
+      max-width: 100%;
       height: 100%;
       display: block;
       margin: auto;
+      object-fit: cover;
     }
   }
 
-  & > .bg-blur {
-    opacity: 0.4;
-    background-image: var(--background-image);
+  .bg-blur {
+    opacity: 0.99;
+    //opacity: 0.82;
+    //background-image: var(--background-image);
+    background: #1f1f1f;
 
-    filter: blur(8px);
-    -webkit-filter: blur(8px);
+    //filter: blur(8px);
+    //-webkit-filter: blur(8px);
 
     width: 100%;
     height: 100%;
 
     /* Center and scale the image nicely */
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: cover;
+    //background-position: center;
+    //background-repeat: no-repeat;
+    //background-size: cover;
   }
 }
 
+#sidebar-settings {
+  z-index: 600;
+}
+.nav-arrows {
+  position: absolute;
+  top: 45%;
+  //bottom: 0;
+  left: 0;
+  z-index: 500;
+  /*
+  .clickme_to-next_slide, .clickme_to-prev_slide {
+    width: 45%;
+    height: 90vh;
+  }
+    */
+}
+.clickme_to-toggle_settings {
+  position: absolute;
+  top: 1.3rem;
+  right: 4rem;
+  z-index: 200;
+}
+.clickme_to-close_player {
+  position: absolute;
+  top: 1.3rem;
+  right: 1.5rem;
+  z-index: 200;
+}
+
 nav {
-  margin: 1rem 0;
+  height: 0.3rem;
+  position: absolute;
+  top: 0.3rem;
+  left: 0;
+  z-index: 200;
   box-sizing: border-box;
   display: grid;
-  grid-column-gap: 1em;
+  grid-column-gap: 0.2rem;
   grid-template-columns: var(--grid-template-columns);
   width: 100%;
-  height: 0.7em;
 
-  & > div {
-    background: rgba(0, 0, 0, 0.25);
+  .cursor-pointer {
+    background: rgba(255, 255, 255, 0.55);
     height: 100%;
 
-    & > div {
-      background: black;
+    .tag-target {
+      background: white;
       height: 100%;
       width: 0%;
+    }
+    .tag-target.played {
+      width: 100%;
+    }
+
+    .tag-target.playing {
+      background: pink;
+      width: var(--current-progress);
     }
   }
 }

@@ -1,47 +1,74 @@
 <template>
-  <div class="position-relative">
-    <b-carousel
-      id="carousel-1"
-      v-model="slide"
-      :interval="0"
-      :controls="isNavVisible"
-      indicators
-      background="#ababab"
-      style="text-shadow: 1px 1px 2px #333;"
-      @sliding-start="onSlideStart"
-      @sliding-end="onSlideEnd"
-    >
-
-      <b-carousel-slide v-for="(mf, idx) in mediafiles" :key="mf.id">
-        <template #img>
-          <!--
-          <b-embed v-if="mf.is_video" type="video" controls poster="poster.png" class="d-block">
-            <source :src="mf.filepath" type="video/webm">
-            <source :src="mf.filepath" type="video/mp4">
-          </b-embed>
-          -->
+  <div class="media-slider">
+    <div v-if="!hasMultipleImages">
+      <video v-if="mediafiles[0].is_video" controls="controls" poster="poster.png" class="d-block">
+        <source :src="mediafiles[0].filepath" type="video/webm" />
+        <source :src="mediafiles[0].filepath" type="video/mp4" />
+      </video>
+      <img
+        v-preview
+        v-if="mediafiles[0].is_image"
+        class="d-block"
+        :src="use_mid && mediafiles[0].has_mid ? mediafiles[0].midFilepath : mediafiles[0].filepath"
+        :alt="mediafiles[0].mfname"
+      />
+      <vue-plyr v-if="mediafiles[0].is_audio">
+        <audio controls playsinline>
+          <source :src="mediafiles[0].filepath" type="audio/webm" />
+          <source :src="mediafiles[0].filepath" type="audio/mp3" />
+          <source :src="mediafiles[0].filepath" type="audio/ogg" />
+        </audio>
+      </vue-plyr>
+    </div>
+    <div class="position-relative">
+      <swiper v-if="hasMultipleImages" class="media-slider-swiper" :options="swiperOptions">
+        <swiper-slide class="slide" v-for="mf in visualMediafiles" :key="mf.id">
           <video v-if="mf.is_video" controls="controls" poster="poster.png" class="d-block">
-            <source :src="mf.filepath" type="video/webm">
-            <source :src="mf.filepath" type="video/mp4">
+            <source :src="mf.filepath" type="video/webm" />
+            <source :src="mf.filepath" type="video/mp4" />
           </video>
-          <img v-if="mf.is_image"
+          <img
+            v-preview:[imageScope]="imageScope"
+            v-if="mf.is_image"
             class="d-block"
-            :src="(use_mid && mf.has_mid) ? mf.midFilepath : mf.filepath"
+            :src="use_mid && mf.has_mid ? mf.midFilepath : mf.filepath"
             :alt="mf.mfname"
-          >
-        </template>
-      </b-carousel-slide>
-
-    </b-carousel>
-    <div v-if="isNavVisible" class="mediafile-count text-white position-absolute"><b-icon icon="images" font-scale="1" variant="light" class="d-inline my-auto" /> {{ mediafiles.length }}</div>
+          />
+        </swiper-slide>
+        <div class="swiper-button-prev" slot="button-prev">
+          <fa-icon icon="chevron-circle-left" size="2x" color="text-primary" />
+        </div>
+        <div class="swiper-button-next" slot="button-next">
+          <fa-icon icon="chevron-circle-right" size="2x" color="text-primary" />
+        </div>
+        <div class="swiper-pagination" slot="pagination"></div>
+      </swiper>
+      <div v-if="hasMultipleImages" class="mediafile-count text-white position-absolute">
+        <fa-icon icon="images" class="d-inline my-auto" />
+        {{ visualMediafiles.length }}
+      </div>
+    </div>
+    <div class="audio-preview" v-if="hasMultipleImages">
+      <template v-for="(audiofile, index) in mediafiles">
+        <vue-plyr class="mx-2" v-if="audiofile.is_audio" :key="index">
+          <audio controls playsinline>
+            <source :src="audiofile.filepath" type="audio/webm" />
+            <source :src="audiofile.filepath" type="audio/mp3" />
+            <source :src="audiofile.filepath" type="audio/ogg" />
+          </audio>
+        </vue-plyr>
+      </template>
+    </div>
   </div>
 </template>
 
 <script>
+import PhotoSwipe from 'photoswipe/dist/photoswipe'
+import PhotoSwipeUI from 'photoswipe/dist/photoswipe-ui-default'
+import createPreviewDirective from 'vue-photoswipe-directive'
 import { eventBus } from '@/app'
 
 export default {
-
   props: {
     //post: null,
     //mediafile_count: null, // was post.mediafile_count
@@ -50,63 +77,82 @@ export default {
     use_mid: { type: Boolean, default: false }, // use mid-sized images instead of full
   },
 
+  directives: {
+    preview: createPreviewDirective(
+      {
+        showAnimationDuration: 0,
+        hideAnimationDuration: 0,
+        bgOpacity: 0.5,
+      },
+      PhotoSwipe,
+      PhotoSwipeUI
+    ),
+  },
+
   computed: {
-    isLoading() {
-      return !this.mediafiles || !this.session_user
+    visualMediafiles() {
+      return this.mediafiles.filter(file => !file.is_audio)
     },
-    isNavVisible() {
-      return this.mediafiles.length > 1
+    hasMultipleImages() {
+      return this.mediafiles.filter(file => !file.is_audio).length > 1
+    },
+    imageScope() {
+      return this.mediafiles[0].resource_id
     }
   },
 
   data: () => ({
-        slide: 0,
-        sliding: null
+    swiperOptions: {
+      lazy: true,
+      slidesPerView: 'auto',
+      observer: true,
+      observeParents: true,
+      navigation: {
+        nextEl: '.swiper-button-next',
+        prevEl: '.swiper-button-prev',
+      },
+      pagination: {
+        el: '.swiper-pagination',
+      },
+    },
   }),
 
-  methods: {
+  methods: {},
 
-    onSlideStart(slide) {
-      this.sliding = true
-    },
-
-    onSlideEnd(slide) {
-      this.sliding = false
-    },
-  },
-
-  mounted() { },
-  created() { },
-  watch: { },
-  components: { },
+  mounted() {},
+  created() {},
+  watch: {},
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
+$media-height: calc(100vh - 300px);
+
+.media-slider {
+  img {
+    height: $media-height;
+    object-fit: cover;
+    width: 100%;
+  }
+
+  video {
+    // TODO: adjust when adding videos
+    height: $media-height;
+    object-fit: contain;
+    width: 100%;
+  }
+}
 
 .mediafile-count {
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: 0 6px;
+  border-radius: 6px;
   bottom: 0.5rem;
   right: 1rem;
+  z-index: 1;
 }
 
-/* default settings for single feed view - for grid view these
-are overriddent in custom.scss */
-body .carousel.slide .carousel-item video {
-  object-fit: contain;
-  width: 100%;
-}
-body .carousel.slide .carousel-item img {
-  object-fit: contain;
-  width: 100%;
-}
-body .carousel.slide .carousel-item.active {
-  display: flex;
-}
-body .carousel.slide .carousel-item {
-  flex-direction: column;
-  flex-wrap: wrap;
-  align-items: flex-middle;
-}
-body .carousel.slide .carousel-item .embed-responsive{
+.audio-preview {
+  margin-top: 10px;
 }
 </style>

@@ -7,6 +7,9 @@
 !robots.txt
 !web.config
 
+!images/**
+
 *.js
 *.js.map
 stats.json
+testResults.html

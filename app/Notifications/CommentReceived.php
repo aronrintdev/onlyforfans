@@ -5,13 +5,15 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+
+use App\Channels\SendgridChannel;
 use App\Models\Comment;
 use App\Models\User;
 use App\Interfaces\Commentable;
 
 class CommentReceived extends Notification
 {
-    use Queueable;
+    use NotifyTraits, Queueable;
 
     public $resource;
     public $actor; // commenter;
@@ -24,17 +26,12 @@ class CommentReceived extends Notification
         $this->settings = $resource->getPrimaryOwner()->settings; // resource ~= commentable
     }
 
+    // see: https://medium.com/@sirajul.anik/laravel-notifications-part-2-creating-a-custom-notification-channel-6b0eb0d81294
     public function via($notifiable)
     {
         $channels =  ['database'];
-        $exists = $this->settings->cattrs['notifications']['posts']['new_comment'] ?? false;
-        if ( $exists && is_array($exists) && in_array('email', $exists) ) {
-            $isGlobalEmailEnabled = ($this->settings->cattrs['notifications']['global']['enabled'] ?? false)
-                ? in_array('email', $this->settings->cattrs['notifications']['global']['enabled'])
-                : false;
-            if ( $isGlobalEmailEnabled ) {
-                $channels[] =  'mail';
-            }
+        if ( $this->isMailChannelEnabled('tip-received', $this->settings) ) {
+            $channels[] = $this->getMailChannel();
         }
         return $channels;
     }
@@ -42,8 +39,33 @@ class CommentReceived extends Notification
     public function toMail($notifiable)
     {
         return (new MailMessage)
-                    ->line('You received a comment from '.$this->actor->name)
-                    ->action('Notification Action', url('/'));
+            ->line('You received a comment from '.$this->actor->name)
+            ->action('Read Comment', url('/'));
+    }
+
+    public function toSendgrid($notifiable)
+    {
+
+        $data = [
+            'template_id' => 'new-comment-received',
+            'to' => [
+                'email' => $notifiable->email,
+                'name' => $notifiable->name, // 'display name'
+            ],
+            'dtdata' => [
+                'sender_name' => $this->actor->name,
+                'receiver_name' => $notifiable->name,
+                'preview' => $this->resource->slug,
+
+                'home_url' => $this->getUrl('home'),
+                'login_url' => $this->getUrl('login'),
+                'privacy_url' => $this->getUrl('privacy'),
+                'manage_preferences_url' => $this->getUrl('manage_preferences', ['username' => $notifiable->username]),
+                'unsubscribe_url' => $this->getUrl('unsubscribe', ['username' => $notifiable->username]),
+                'referral_url' => $this->getUrl('referrals'),
+            ],
+        ];
+        return $data;
     }
 
     public function toArray($notifiable)

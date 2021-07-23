@@ -4,20 +4,22 @@ namespace Tests\Feature;
 use Auth;
 use DB;
 use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+//use Illuminate\Foundation\Testing\RefreshDatabase;
 
 use Tests\TestCase;
 use Database\Seeders\TestDatabaseSeeder;
 use App\Models\Timeline;
 use App\Models\User;
+use Lunaweb\RecaptchaV3\Facades\RecaptchaV3;
 
 class RestUsersTest extends TestCase
 {
-    use RefreshDatabase, WithFaker;
+    use WithFaker;
 
     /**
      *  @group users
      *  @group regression
+     *  @group regression-base
      */
     public function test_admin_can_list_users()
     {
@@ -29,14 +31,24 @@ class RestUsersTest extends TestCase
         $admin->refresh();
 
         $expectedCount = User::count();
-        $response = $this->actingAs($admin)->ajaxJSON('GET', route('users.index'), [ ]);
+        $response = $this->actingAs($admin)->ajaxJSON('GET', route('users.index'), [ 'take'=>1000 ]);
+        $response->assertStatus(200);
+        $content = json_decode($response->content());
         $response->assertJsonStructure([
-            'data',
+            'data' => [
+                0 => [
+                    'id', 
+                    'email', 
+                    'username', 
+                    'firstname', 
+                    'lastname', 
+                    'created_at', 
+                ],
+            ],
             'links',
             'meta' => [ 'current_page', 'from', 'last_page', 'path', 'per_page', 'to', 'total', ],
         ]);
-        $response->assertStatus(200);
-        $content = json_decode($response->content());
+        $admin->removeRole('super-admin'); // revert (else future tests will fail)
         $this->assertEquals(1, $content->meta->current_page);
 
         $this->assertNotNull($content->data);
@@ -47,6 +59,7 @@ class RestUsersTest extends TestCase
     /**
      *  @group users
      *  @group regression
+     *  @group regression-base
      */
     public function test_user_can_view_settings()
     {
@@ -63,11 +76,18 @@ class RestUsersTest extends TestCase
     /**
      *  @group users
      *  @group regression
+     *  @group regression-base
+     *  @group fujio
      */
     public function test_user_can_login()
     {
         $user = User::first();
-        $payload = [ 'email' => $user->email, 'password' => 'foo-123' ];
+        $test_token = 'test';
+        RecaptchaV3::shouldReceive('verify')
+            ->with($test_token, 'login')
+            ->once()
+            ->andReturn(0.5);
+        $payload = [ 'email' => $user->email, 'password' => 'foo-123', 'g-recaptcha-response' => $test_token];
         $response = $this->ajaxJSON('POST', '/login', $payload);
         $response->assertStatus(200);
     }
@@ -75,11 +95,18 @@ class RestUsersTest extends TestCase
     /**
      *  @group users
      *  @group regression
+     *  @group regression-base
+     *  @group fujio
      */
     public function test_user_cant_login_with_wrong_credientials()
     {
         $user = User::first();
-        $payload = [ 'email' => $user->email, 'password' => 'blahblah' ];
+        $test_token = 'test';
+        RecaptchaV3::shouldReceive('verify')
+            ->with($test_token, 'login')
+            ->once()
+            ->andReturn(0.5);
+        $payload = [ 'email' => $user->email, 'password' => 'blahblah', 'g-recaptcha-response' => $test_token];
         $response = $this->ajaxJSON('POST', '/login', $payload);
         $response->assertUnauthorized(); // 401
     }
@@ -87,6 +114,8 @@ class RestUsersTest extends TestCase
     /**
      *  @group users
      *  @group regression
+     *  @group regression-base
+     *  @group fujio
      */
     public function test_user_can_change_password()
     {
@@ -102,12 +131,22 @@ class RestUsersTest extends TestCase
         Auth::logout();
 
         // Test login with old password
-        $payload = [ 'email' => $creator->email, 'password' => $oldPassword ];
+        $test_token = 'test';
+        RecaptchaV3::shouldReceive('verify')
+            ->with($test_token, 'login')
+            ->once()
+            ->andReturn(0.5);
+        $payload = [ 'email' => $creator->email, 'password' => $oldPassword, 'g-recaptcha-response' => $test_token ];
         $response = $this->ajaxJSON('POST', '/login', $payload);
         $response->assertUnauthorized(); // 401
 
         // Test login with new password
-        $payload = [ 'email' => $creator->email, 'password' => $newPassword ];
+        $test_token = 'test2';
+        RecaptchaV3::shouldReceive('verify')
+            ->with($test_token, 'login')
+            ->once()
+            ->andReturn(0.5);
+        $payload = [ 'email' => $creator->email, 'password' => $newPassword, 'g-recaptcha-response' => $test_token ];
         $response = $this->ajaxJSON('POST', '/login', $payload);
         $response->assertStatus(200);
     }
@@ -115,7 +154,7 @@ class RestUsersTest extends TestCase
     /**
      *  @group users
      *  @group regression
-     *  @group here
+     *  @group regression-base
      */
     public function test_user_can_get_session()
     {
@@ -144,6 +183,7 @@ class RestUsersTest extends TestCase
     /**
      *  @group users
      *  @group regression
+     *  @group regression-base
      */
     public function test_admin_can_matchsearch_users()
     {
@@ -156,7 +196,32 @@ class RestUsersTest extends TestCase
             'term' => $creator->email,
         ];
         $response = $this->actingAs($creator)->ajaxJSON('GET', route('users.match', $admin->id), $payload);
+        $admin->removeRole('super-admin'); // revert (else future tests will fail)
         $response->assertStatus(200);
+    }
+
+    /**
+     *  @group NO-users
+     *  @group NO-regression
+     *  @group NO-regression-base
+     *  @group here0715
+     */
+    public function test_should_send_verify_request_for_user()
+    {
+        $timeline = Timeline::has('followers', '>=', 1)->firstOrFail();
+        $creator = $timeline->user;
+        $usPhone = $faker->numberBetween(101, 999).'555'.$faker->numberBetween(0000, 9990);
+        $payload = [
+	        'mobile' => $usPhone,
+            'firstname' => $faker->firstName,
+            'lastname' => $faker->lastName,
+	        'country' => 'US',
+	        'dob' => $faker->date($format='Y-m-d', $max='2000-01-15'),
+        ];
+        $response = $this->actingAs($creator)->ajaxJSON('POST', route('users.verify-request', $payload));
+        $content = json_decode($response->content());
+        $response->assertStatus(200);
+        dd($content);
     }
 
 
@@ -165,7 +230,7 @@ class RestUsersTest extends TestCase
     protected function setUp() : void
     {
         parent::setUp();
-        $this->seed(TestDatabaseSeeder::class);
+        //$this->seed(TestDatabaseSeeder::class);
     }
 
     protected function tearDown() : void {

@@ -1,6 +1,4 @@
-/**
- * js/routes/settings.routes.js
- */
+// js/routes/settings.routes.js
 
 import settings from '@components/settings'
 import childRoutes from './settings'
@@ -37,19 +35,19 @@ export default [
     path: 'payment-methods',
   },
   {
+    name: 'settings.subscription',
+    component: settings.Subscription,
+    path: 'subscription',
+  },
+  {
     component: settings.MySubscriptions,
     path: 'my-subscriptions',
     children: childRoutes.subscriptions,
   },
   {
-    name: 'settings.earnings',
-    component: settings.Earnings,
-    path: 'earnings',
-  },
-  {
-    name: 'settings.payouts',
-    component: settings.Payouts,
-    path: 'payouts',
+    name: 'settings.banking',
+    component: settings.Banking,
+    path: 'banking',
   },
   {
     name: 'settings.sessions',
@@ -60,6 +58,11 @@ export default [
     name: 'settings.referrals',
     component: settings.Referrals,
     path: 'referrals',
+  },
+  {
+    name: 'settings.verify',
+    component: settings.Verify,
+    path: 'verify',
   },
   /*
   {

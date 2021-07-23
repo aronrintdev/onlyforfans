@@ -1,31 +1,45 @@
 <?php
 namespace Tests\Feature;
 
-use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Http\File;
-use Illuminate\Support\Facades\Storage;
 use DB;
-
 use Tests\TestCase;
-use Database\Seeders\TestDatabaseSeeder;
-use App\Models\Fanledger;
-use App\Models\Mediafile;
+
 use App\Models\Post;
-use App\Models\Timeline;
 use App\Models\User;
-use App\Enums\MediafileTypeEnum;
-use App\Enums\PaymentTypeEnum;
+use App\Models\Comment;
+use App\Models\Likeable;
+use App\Models\Timeline;
+use App\Events\TipFailed;
+use App\Models\Fanledger;
+
+use App\Models\Mediafile;
+use Illuminate\Http\File;
+
+use App\Events\ItemTipped;
 use App\Enums\PostTypeEnum;
+use App\Events\ItemPurchased;
+use App\Enums\PaymentTypeEnum;
+use App\Events\PurchaseFailed;
+use App\Enums\MediafileTypeEnum;
+use Illuminate\Http\UploadedFile;
+use App\Models\Financial\SegpayCard;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Storage;
+use App\Enums\Financial\AccountTypeEnum;
+use App\Models\Tip;
+use Database\Seeders\TestDatabaseSeeder;
+use Illuminate\Foundation\Testing\WithFaker;
+//use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class RestPostsTest extends TestCase
 {
-    use RefreshDatabase, WithFaker;
+    use WithFaker;
 
     /**
      *  @group posts
      *  @group regression
+     *  @group regression-base
      */
     // %TODO: filters, timelines (see posts I follow), etc
     public function test_can_list_posts()
@@ -60,7 +74,7 @@ class RestPostsTest extends TestCase
 
     /**
      *  @group posts
-     *  @group regression
+     *  @group regression-base
      */
     public function test_owner_can_view_own_post()
     {
@@ -94,7 +108,7 @@ class RestPostsTest extends TestCase
 
     /**
      *  @group posts
-     *  @group regression
+     *  @group regression-base
      */
     public function test_can_view_followed_timelines_post()
     {
@@ -120,6 +134,7 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_store_text_only_post_on_my_timeline()
     {
@@ -144,6 +159,7 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_create_a_post_on_my_timeline_of_type_purchaseable_and_set_a_price()
     {
@@ -169,6 +185,7 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group regression-base
      */
     public function test_nonowner_can_not_store_post_on_my_timeline()
     {
@@ -187,6 +204,7 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_store_post_with_single_image_on_my_timeline()
     {
@@ -236,6 +254,7 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_store_post_with_multiple_images_on_my_timeline()
     {
@@ -307,6 +326,7 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group regression-base
      *  [ ] can not delete a PRICED post that others have purchased
      *  [ ] can edit/delete any post if no one has purchased (ie ledger balance of 0)
      */
@@ -336,6 +356,7 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group regression-base
      */
     public function test_nonowner_can_non_edit_free_post()
     {
@@ -359,23 +380,63 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group regression-base
      */
     public function test_owner_can_delete_free_post()
     {
         $timeline = Timeline::has('followers', '>=', 1)
             ->whereHas('posts', function($q1) {
                 $q1->where('type', PostTypeEnum::FREE);
-            })->first();
+            })->firstOrFail();
         $creator = $timeline->user;
-        $post = $timeline->posts->where('type', PostTypeEnum::FREE)->first();
+        $this->assertNotNull($creator);
+
+        $post = Post::where('postable_type', 'timelines')
+            ->where('postable_id', $timeline->id)
+            ->has('likes','>',0)
+            ->has('comments','>',0)
+            ->has('mediafiles','>',0)
+            ->doesntHave('sharees')
+            ->firstorFail();
+        $numLikes = Likeable::where('likeable_type', 'posts')->where('likeable_id', $post->id)->count();
+        $this->assertGreaterThan(0, $numLikes);
+        $numComments = Comment::where('commentable_type', 'posts')->where('commentable_id', $post->id)->count();
+        $this->assertGreaterThan(0, $numComments);
+        $numMediafiles = Mediafile::where('resource_type', 'posts')->where('resource_id', $post->id)->count();
+        $this->assertGreaterThan(0, $numMediafiles);
 
         $response = $this->actingAs($creator)->ajaxJSON('DELETE', route('posts.destroy', $post->id));
         $response->assertStatus(200);
+
+        $exists = Post::find($post->id);
+        $this->assertNull($exists); // deleted
+
+        // Test relation cleanup
+        $numLikes = Likeable::where('likeable_type', 'posts')->where('likeable_id', $post->id)->count();
+        $this->assertEquals(0, $numLikes);
+        $numComments = Comment::where('commentable_type', 'posts')->where('commentable_id', $post->id)->count();
+        $this->assertEquals(0, $numComments);
+        $numMediafiles = Mediafile::where('resource_type', 'posts')->where('resource_id', $post->id)->count();
+        $this->assertEquals(0, $numMediafiles);
+
+        // ---
+
+        $timeline2 = Timeline::find($timeline->id);
+        $this->assertNotNull($timeline);
+        $this->assertNotNull($timeline->user);
+
+        // %TODO: test
+        //  ~ related likes cleaned up
+        //  ~ commments cleaned up
+        //  ~  etc
+        $bad = Timeline::doesntHave('user')->get(); // make sure no users got deleted (ie no timelines w/o corresponding user)
+        $this->assertEquals(0, $bad->count());
     }
 
     /**
      *  @group posts
      *  @group regression
+     *  @group regression-base
      */
     public function test_follower_can_view_free_post_on_my_timeline()
     {
@@ -383,7 +444,10 @@ class RestPostsTest extends TestCase
             ->whereHas('posts', function($q1) {
                 $q1->where('type', PostTypeEnum::FREE);
             })->firstOrFail();
+        $this->assertNotNull($timeline);
+        //dd($timeline);
         $creator = $timeline->user;
+        $this->assertNotNull($creator);
         $post = $timeline->posts->where('type', PostTypeEnum::FREE)->first();
         $fan = $timeline->followers[0];
         $response = $this->actingAs($fan)->ajaxJSON('GET', route('posts.show', $post->id));
@@ -393,6 +457,7 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group regression-base
      */
     public function test_nonfollower_can_view_free_post_on_my_timeline()
     {
@@ -401,6 +466,8 @@ class RestPostsTest extends TestCase
                 $q1->where('type', PostTypeEnum::FREE);
             })->firstOrFail();
         $creator = $timeline->user;
+        $this->assertNotNull($creator);
+
         $post = $timeline->posts->where('type', PostTypeEnum::FREE)->first();
         $nonfan = User::whereDoesntHave('followedtimelines', function($q1) use(&$timeline) {
             $q1->where('timelines.id', $timeline->id);
@@ -413,6 +480,7 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group regression-base
      */
     public function test_subscriber_can_view_subcribe_only_post_on_my_timeline()
     {
@@ -423,6 +491,7 @@ class RestPostsTest extends TestCase
                 $q1->where('type', PostTypeEnum::SUBSCRIBER);
             })->firstOrFail();
         $creator = $timeline->user;
+        $this->assertNotNull($creator);
         $fan = $timeline->subscribers[0];
 
         // --
@@ -482,6 +551,7 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group regression-base
      */
     public function test_nonsubscribed_follower_can_not_view_subcribe_only_post_content_on_my_timeline()
     {
@@ -553,6 +623,7 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group regression-base
      */
     public function test_follower_can_view_image_of_free_post_on_my_timeline()
     {
@@ -605,6 +676,7 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group regression-base
      */
     public function test_nonfollower_can_view_image_of_free_post_on_my_timeline()
     {
@@ -663,12 +735,13 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_update_my_post()
     {
-        $timeline = Timeline::has('posts','>=',1)->first(); 
+        $timeline = Timeline::whereHas('posts')->first();
         $creator = $timeline->user;
-        $post = $timeline->posts[0];
+        $post = $timeline->posts()->where('price', 0)->first();
 
         $payload = [
             'description' => 'updated text',
@@ -708,6 +781,7 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_destroy_my_post()
     {
@@ -737,6 +811,7 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group regression-base
      */
     public function test_timeline_follower_can_like_then_unlike_post()
     {
@@ -750,7 +825,7 @@ class RestPostsTest extends TestCase
 
         // remove any existing likes by fan...
         DB::table('likeables')
-            ->where('likee_id', $fan->id)
+            ->where('liker_id', $fan->id)
             ->where('likeable_type', 'posts')
             ->where('likeable_id', $post->id)
             ->delete();
@@ -760,7 +835,7 @@ class RestPostsTest extends TestCase
             'likeable_type' => 'posts',
             'likeable_id' => $post->id,
         ];
-        $response = $this->actingAs($fan)->ajaxJSON('PUT', route('likeables.update', $fan->id), $payload); // fan->likee
+        $response = $this->actingAs($fan)->ajaxJSON('PUT', route('likeables.update', $fan->id), $payload);
         $response->assertStatus(200);
 
         $content = json_decode($response->content());
@@ -770,12 +845,12 @@ class RestPostsTest extends TestCase
         $this->assertEquals($post->id, $postR->id);
 
         $likeable = DB::table('likeables')
-            ->where('likee_id', $fan->id)
+            ->where('liker_id', $fan->id)
             ->where('likeable_type', 'posts')
             ->where('likeable_id', $postR->id)
             ->first();
         $this->assertNotNull($likeable);
-        $this->assertEquals($fan->id, $likeable->likee_id);
+        $this->assertEquals($fan->id, $likeable->liker_id);
         $this->assertEquals('posts', $likeable->likeable_type);
         $this->assertEquals($postR->id, $likeable->likeable_id);
 
@@ -784,11 +859,11 @@ class RestPostsTest extends TestCase
             'likeable_type' => 'posts',
             'likeable_id' => $post->id,
         ];
-        $response = $this->actingAs($fan)->ajaxJSON('DELETE', route('likeables.destroy', $fan->id), $payload); // fan->likee
+        $response = $this->actingAs($fan)->ajaxJSON('DELETE', route('likeables.destroy', $fan->id), $payload);
         $response->assertStatus(200);
 
         $likeable = DB::table('likeables')
-            ->where('likee_id', $fan->id)
+            ->where('liker_id', $fan->id)
             ->where('likeable_type', 'posts')
             ->where('likeable_id', $postR->id)
             ->first();
@@ -798,6 +873,7 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group regression-base
      */
     public function test_timeline_nonfollower_can_like_post()
     {
@@ -817,13 +893,14 @@ class RestPostsTest extends TestCase
             'likeable_type' => 'posts',
             'likeable_id' => $post->id,
         ];
-        $response = $this->actingAs($nonfan)->ajaxJSON('PUT', route('likeables.update', $nonfan->id), $payload); // fan->likee
+        $response = $this->actingAs($nonfan)->ajaxJSON('PUT', route('likeables.update', $nonfan->id), $payload);
         $response->assertStatus(200);
     }
 
     /**
      *  @group posts
      *  @group regression
+     *  @group regression-base
      */
     public function test_timeline_owner_can_like_own_post()
     {
@@ -839,7 +916,7 @@ class RestPostsTest extends TestCase
             'likeable_type' => 'posts',
             'likeable_id' => $post->id,
         ];
-        $response = $this->actingAs($creator)->ajaxJSON('PUT', route('likeables.update', $creator->id), $payload); // fan->likee
+        $response = $this->actingAs($creator)->ajaxJSON('PUT', route('likeables.update', $creator->id), $payload); 
         $response->assertStatus(200);
 
         // LIKE the post (priced)
@@ -848,7 +925,7 @@ class RestPostsTest extends TestCase
             'likeable_type' => 'posts',
             'likeable_id' => $post->id,
         ];
-        $response = $this->actingAs($creator)->ajaxJSON('PUT', route('likeables.update', $creator->id), $payload); // fan->likee
+        $response = $this->actingAs($creator)->ajaxJSON('PUT', route('likeables.update', $creator->id), $payload); 
         $response->assertStatus(200);
 
         // LIKE the post (subcribe-only)
@@ -857,7 +934,7 @@ class RestPostsTest extends TestCase
             'likeable_type' => 'posts',
             'likeable_id' => $post->id,
         ];
-        $response = $this->actingAs($creator)->ajaxJSON('PUT', route('likeables.update', $creator->id), $payload); // fan->likee
+        $response = $this->actingAs($creator)->ajaxJSON('PUT', route('likeables.update', $creator->id), $payload); 
         $response->assertStatus(200);
 
     }
@@ -865,45 +942,232 @@ class RestPostsTest extends TestCase
     /**
      *  @group posts
      *  @group regression
+     *  @group regression-base
+     *  @group erik
      */
     public function test_can_send_tip_on_post()
     {
-        $timeline = Timeline::has('posts','>=',1)->has('followers','>=',1)->first(); // assume non-admin (%FIXME)
+        $this->assertTrue(Config::get('segpay.fake'), 'Your SEGPAY_FAKE .env variable is not set to true.');
+
+        $timeline = Timeline::has('posts', '>=', 1)->has('followers', '>=', 1)->first(); // assume non-admin (%FIXME)
         $creator = $timeline->user;
         $post = $timeline->posts[0];
         $fan = $timeline->followers[0];
 
+        $events = Event::fake([
+            ItemTipped::class,
+            TipFailed::class,
+        ]);
+
+        $account = $fan->financialAccounts()->where('type', AccountTypeEnum::IN)->with('resource')->first();
         $payload = [
-            'base_unit_cost_in_cents' => $this->faker->randomNumber(3),
+            'amount' => $this->faker->numberBetween(1, 20) * 500,
+            'currency' => 'USD',
+            'account_id' => $account->getKey(),
+            'message' => $this->faker->text(),
         ];
         $response = $this->actingAs($fan)->ajaxJSON('PUT', route('posts.tip', $post->id), $payload);
-
         $response->assertStatus(200);
 
-        $content = json_decode($response->content());
-        $postR = $content->post;
+        // ItemPurchased will update client with websocket event
+        Event::assertDispatched(ItemTipped::class);
+        Event::assertNotDispatched(TipFailed::class);
 
-        $fanledger = Fanledger::where('fltype', PaymentTypeEnum::TIP)->latest()->first();
-        $this->assertNotNull($fanledger);
-        $this->assertEquals(1, $fanledger->qty);
-        $this->assertEquals($payload['base_unit_cost_in_cents'], $fanledger->base_unit_cost_in_cents);
-        $this->assertEquals(PaymentTypeEnum::TIP, $fanledger->fltype);
-        $this->assertEquals($fan->id, $fanledger->purchaser_id);
-        $this->assertEquals($creator->id, $fanledger->seller_id);
-        $this->assertEquals('posts', $fanledger->purchaseable_type);
-        $this->assertEquals($post->id, $fanledger->purchaseable_id);
-        $this->assertTrue( $post->ledgersales->contains( $fanledger->id ) );
-        $this->assertTrue( $fan->ledgerpurchases->contains( $fanledger->id ) );
+        $content = json_decode($response->content());
+
+        // Tip was added to the database
+        $this->assertDatabaseHas(Tip::getTableName(), [
+            'sender_id'   => $fan->getKey(),
+            'receiver_id' => $creator->getKey(),
+            'tippable_id' => $post->getKey(),
+            'account_id'  => $account->getKey(),
+            'message'     => $payload['message'],
+            'amount'      => $payload['amount'],
+        ]);
+
+        // Amount from Card
+        $this->assertDatabaseHas('transactions', [
+            'account_id'   => $account->getKey(),
+            'debit_amount' => $payload['amount'],
+        ], 'financial');
+
+        // Amount from fan to creator
+        $this->assertDatabaseHas('transactions', [
+            'account_id'   => $fan->getInternalAccount('segpay', 'USD')->getKey(),
+            'debit_amount' => $payload['amount'],
+        ], 'financial');
+
+        // Amount to creator from fan
+        $this->assertDatabaseHas('transactions', [
+            'account_id'    => $creator->getInternalAccount('segpay', 'USD')->getKey(),
+            'credit_amount' => $payload['amount'],
+        ], 'financial');
+
     }
 
     /**
      *  @group posts
      *  @group regression
+     *  @group regression-base
      *  @group erik
      */
     // tests purchase itself, plus before and after access
     public function test_can_purchase_post()
     {
+        $this->assertTrue(Config::get('segpay.fake'), 'Your SEGPAY_FAKE .env variable is not set to true.');
+
+        $timeline = Timeline::has('followers', '>=', 1)
+            ->whereHas('posts', function($q1) {
+                $q1->where('type', PostTypeEnum::PRICED);
+            })->first();
+        $creator = $timeline->user;
+        $fan = $timeline->followers[0];
+
+        // Store a new post just to ensure it's not already shared with the fan...
+        $payload = [
+            'timeline_id' => $timeline->id,
+            'description' => $this->faker->realText,
+            'type' => PostTypeEnum::PRICED,
+            'price' => 1000, // $10
+            'currency' => 'USD'
+        ];
+        $response = $this->actingAs($creator)->ajaxJSON('POST', route('posts.store'), $payload);
+        $response->assertStatus(201);
+        $content = json_decode($response->content());
+        $post = Post::find($content->post->id);
+        $this->assertNotNull($post);
+        //$this->assertFalse( $fan->sharedposts->contains($post->id) ); // not yet shared w/ fan
+
+        // Check access (before: should be denied)
+        $response = $this->actingAs($fan)->ajaxJSON('GET', route('posts.show', $post->id));
+        $response->assertStatus(200); // can see post (locked icon, etc)...
+        $content = json_decode($response->content());
+        $this->assertObjectNotHasAttribute('description', $content->data); // ...can't see contents
+        $this->assertObjectNotHasAttribute('mediafiles', $content->data);
+
+        $events = Event::fake([
+            ItemPurchased::class,
+            PurchaseFailed::class
+        ]);
+        $account = $fan->financialAccounts()->where('type', AccountTypeEnum::IN)->with('resource')->first();
+        $payload = [
+            'account_id' => $account->getKey(),
+            'amount'     => $post->price->getAmount(),
+            'currency'   => $post->currency,
+        ];
+        $response = $this->actingAs($fan)->ajaxJSON('PUT', route('posts.purchase', ['post' => $post->id]), $payload);
+        $response->assertStatus(200);
+
+        // ItemPurchased will update client with websocket event
+        Event::assertDispatched(ItemPurchased::class);
+        Event::assertNotDispatched(PurchaseFailed::class);
+
+        $content = json_decode($response->content());
+
+        // Check transactions ledger
+
+        // Amount from Card
+        $this->assertDatabaseHas('transactions', [
+            'account_id' => $account->getKey(),
+            'debit_amount' => $post->price->getAmount(),
+        ], 'financial');
+
+        // Amount from fan to creator
+        $this->assertDatabaseHas('transactions', [
+            'account_id' => $fan->getInternalAccount('segpay', 'USD')->getKey(),
+            'debit_amount' => $post->price->getAmount(),
+            'resource_id' => $post->getKey(),
+        ], 'financial');
+
+        // Amount to creator from fan
+        $this->assertDatabaseHas('transactions', [
+            'account_id' => $creator->getInternalAccount('segpay', 'USD')->getKey(),
+            'credit_amount' => $post->price->getAmount(),
+            'resource_id' => $post->getKey(),
+        ], 'financial');
+
+        // Fan has access
+        $post->refresh();
+        $this->assertTrue($post->sharees->contains($fan->id));
+
+        // Check access (after: should be allowed)
+        $response = $this->actingAs($fan)->ajaxJSON('GET', route('posts.show', $post->id));
+        $response->assertStatus(200);
+        $content = json_decode($response->content());
+        $this->assertObjectHasAttribute('description', $content->data); // can see contents
+        $this->assertObjectHasAttribute('mediafiles', $content->data);
+    }
+
+
+    /**
+     * Refers to editing the content of a post that other have purchased. To avoid bait and switch by creators
+     *
+     *  @group posts
+     *  @group regression
+     *  @group regression-base
+     *  @group erik
+     */
+    public function test_owner_can_not_edit_content_of_a_priced_post_that_others_have_purchased()
+    {
+        $this->assertTrue(Config::get('segpay.fake'), 'Your SEGPAY_FAKE .env variable is not set to true.');
+
+        $timeline = Timeline::has('followers', '>=', 1)
+            ->whereHas('posts', function($q1) {
+                $q1->where('type', PostTypeEnum::PRICED);
+            })->first();
+        $creator = $timeline->user;
+        $fan = $timeline->followers[0];
+
+        // Store a new post just to ensure it's not already shared with the fan...
+        $payload = [
+            'timeline_id' => $timeline->id,
+            'description' => $this->faker->realText,
+            'type' => PostTypeEnum::PRICED,
+            'price' => $this->faker->randomNumber(3),
+        ];
+        $response = $this->actingAs($creator)->ajaxJSON('POST', route('posts.store'), $payload);
+        $response->assertStatus(201);
+        $content = json_decode($response->content());
+
+        $post = Post::find($content->post->id);
+        $this->assertNotNull($post);
+
+        $events = Event::fake([
+            ItemPurchased::class,
+            PurchaseFailed::class
+        ]);
+        $account = $fan->financialAccounts()->where('type', AccountTypeEnum::IN)->with('resource')->first();
+        $payload = [
+            'account_id' => $account->getKey(),
+            'amount'     => $post->price->getAmount(),
+            'currency'   => $post->currency,
+        ];
+        $response = $this->actingAs($fan)->ajaxJSON('PUT', route('posts.purchase', ['post' => $post->id]), $payload);
+        $response->assertStatus(200);
+
+        // ItemPurchased will update client with websocket event
+        Event::assertDispatched(ItemPurchased::class);
+        Event::assertNotDispatched(PurchaseFailed::class);
+
+        // Owner attempts update
+        $payload = [
+            'description' => $this->faker->realText,
+        ];
+        $response = $this->actingAs($creator)->ajaxJSON('PATCH', route('posts.update', $content->post->id), $payload);
+        $response->assertStatus(403);
+    }
+
+    /**
+     *  @group posts
+     *  @group regression
+     *  @group regression-base
+     *  @group erik
+     */
+    // priced: one-time-purchaseable, as opposed to subscribeable
+    public function test_owner_can_not_delete_a_priced_post_that_others_have_purchased()
+    {
+        $this->assertTrue(Config::get('segpay.fake'), 'Your SEGPAY_FAKE .env variable is not set to true.');
+
         $timeline = Timeline::has('followers', '>=', 1)
             ->whereHas('posts', function($q1) {
                 $q1->where('type', PostTypeEnum::PRICED);
@@ -923,124 +1187,23 @@ class RestPostsTest extends TestCase
         $content = json_decode($response->content());
         $post = Post::find($content->post->id);
         $this->assertNotNull($post);
-        //$this->assertFalse( $fan->sharedposts->contains($post->id) ); // not yet shared w/ fan
 
-        // Check access (before: should be denied)
-        $response = $this->actingAs($fan)->ajaxJSON('GET', route('posts.show', $post->id));
-        $response->assertStatus(200); // can see post (locked icon, etc)...
-        $content = json_decode($response->content());
-        $this->assertObjectNotHasAttribute('description', $content->data); // ...can't see contents
-        $this->assertObjectNotHasAttribute('mediafiles', $content->data);
-
+        $events = Event::fake([
+            ItemPurchased::class,
+            PurchaseFailed::class
+        ]);
+        $account = $fan->financialAccounts()->where('type', AccountTypeEnum::IN)->with('resource')->first();
         $payload = [
-            'sharee_id' => $fan->id,
+            'account_id' => $account->getKey(),
+            'amount'     => $post->price->getAmount(),
+            'currency'   => $post->currency,
         ];
-        $response = $this->actingAs($fan)->ajaxJSON('PUT', route('posts.purchase', $post->id), $payload);
+        $response = $this->actingAs($fan)->ajaxJSON('PUT', route('posts.purchase', [ 'post' => $post->id ]), $payload);
         $response->assertStatus(200);
 
-        $content = json_decode($response->content());
-
-        // Check ledger
-        //$fanledger = Fanledger::where('fltype', PaymentTypeEnum::PURCHASE)->latest()->first();
-        $fanledger = Fanledger::where('fltype', PaymentTypeEnum::PURCHASE)
-            ->where('purchaseable_type', 'posts')
-            ->where('purchaseable_id', $content->post->id)
-            ->where('seller_id', $creator->id)
-            ->where('purchaser_id', $fan->id)
-            ->first();
-        $this->assertNotNull($fanledger);
-        $this->assertEquals(1, $fanledger->qty);
-        $this->assertEquals($post->price, $fanledger->base_unit_cost_in_cents);
-        $this->assertEquals(PaymentTypeEnum::PURCHASE, $fanledger->fltype);
-        $this->assertEquals($fan->id, $fanledger->purchaser_id);
-        $this->assertEquals($creator->id, $fanledger->seller_id);
-        $this->assertEquals('posts', $fanledger->purchaseable_type);
-        $this->assertEquals($post->id, $fanledger->purchaseable_id);
-        $this->assertTrue( $post->sharees->contains( $fan->id ) );
-        $this->assertTrue( $post->ledgersales->contains( $fanledger->id ) );
-        $this->assertTrue( $fan->ledgerpurchases->contains( $fanledger->id ) );
-
-        // Check access (after: should be allowed)
-        $response = $this->actingAs($fan)->ajaxJSON('GET', route('posts.show', $post->id));
-        $response->assertStatus(200);
-        $content = json_decode($response->content());
-        $this->assertObjectHasAttribute('description', $content->data); // can see contents
-        $this->assertObjectHasAttribute('mediafiles', $content->data);
-    }
-
-
-    /**
-     *  @group posts
-     *  @group regression
-     *  @group erik
-     */
-    public function test_owner_can_not_edit_a_priced_post_that_others_have_purchased()
-    {
-        $timeline = Timeline::has('followers', '>=', 1)
-            ->whereHas('posts', function($q1) {
-                $q1->where('type', PostTypeEnum::PRICED);
-            })->first();
-        $creator = $timeline->user;
-        $fan = $timeline->followers[0];
-
-        // Store a new post just to ensure it's not already shared with the fan...
-        $payload = [
-            'timeline_id' => $timeline->id,
-            'description' => $this->faker->realText,
-            'type' => PostTypeEnum::PRICED,
-            'price' => $this->faker->randomNumber(3),
-        ];
-        $response = $this->actingAs($creator)->ajaxJSON('POST', route('posts.store'), $payload);
-        $response->assertStatus(201);
-        $content = json_decode($response->content());
-
-        // Fan purchases post resulting in a share...
-        $payload = [
-            'sharee_id' => $fan->id,
-        ];
-        $response = $this->actingAs($fan)->ajaxJSON('PUT', route('posts.purchase', $content->post->id), $payload);
-        $response->assertStatus(200);
-
-        // Owner attempts update
-        $payload = [
-            'description' => $this->faker->realText,
-        ];
-        $response = $this->actingAs($creator)->ajaxJSON('PATCH', route('posts.update', $content->post->id), $payload);
-        $response->assertStatus(403);
-    }
-
-    /**
-     *  @group posts
-     *  @group regression
-     *  @group erik
-     */
-    // priced: one-time-purchaseable, as opposed to subscribeable
-    public function test_owner_can_not_delete_a_priced_post_that_others_have_purchased()
-    {
-        $timeline = Timeline::has('followers', '>=', 1)
-            ->whereHas('posts', function($q1) {
-                $q1->where('type', PostTypeEnum::PRICED);
-            })->first();
-        $creator = $timeline->user;
-        $fan = $timeline->followers[0];
-
-        // Store a new post just to ensure it's not already shared with the fan...
-        $payload = [
-            'timeline_id' => $timeline->id,
-            'description' => $this->faker->realText,
-            'type' => PostTypeEnum::PRICED,
-            'price' => $this->faker->randomNumber(3),
-        ];
-        $response = $this->actingAs($creator)->ajaxJSON('POST', route('posts.store'), $payload);
-        $response->assertStatus(201);
-        $content = json_decode($response->content());
-
-        // Fan purchases post resulting in a share...
-        $payload = [
-            'sharee_id' => $fan->id,
-        ];
-        $response = $this->actingAs($fan)->ajaxJSON('PUT', route('posts.purchase', $content->post->id), $payload);
-        $response->assertStatus(200);
+        // ItemPurchased will update client with websocket event
+        Event::assertDispatched(ItemPurchased::class);
+        Event::assertNotDispatched(PurchaseFailed::class);
 
         // Owner attempts delete
         $response = $this->actingAs($creator)->ajaxJSON('DELETE', route('posts.destroy', $content->post->id));
@@ -1066,7 +1229,7 @@ class RestPostsTest extends TestCase
     protected function setUp() : void
     {
         parent::setUp();
-        $this->seed(TestDatabaseSeeder::class);
+        //$this->seed(TestDatabaseSeeder::class);
     }
 
     protected function tearDown() : void {

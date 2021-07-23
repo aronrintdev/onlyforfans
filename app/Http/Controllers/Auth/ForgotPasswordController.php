@@ -47,22 +47,21 @@ class ForgotPasswordController extends Controller
 
         $user = User::where('email', $email)->first();
 
-        if (!isset($user)) {
-            return response()->json(['status' => 400, 'message' => 'User does not exist.']);
+        if (isset($user)) {
+            $token = str_random(30);
+            $user->remember_token = $token;
+            $user->save();
+
+            $verify_link = config('base_url') . 'reset-password/' . $token . '?email=' . urlencode($user->email);
+
+            Mail::send('emails.reset_password', ['user' => $user, 'link' => $verify_link], function ($m) use ($user) {
+                
+                $m->to($user->email)->subject('Forgot Password');
+            });
         }
 
-        $token = str_random(30);
-        $user->remember_token = $token;
-        $user->save();
-
-        $verify_link = config('base_url') . 'reset-password/' . $token . '?email=' . urlencode($user->email);
-
-        Mail::send('emails.reset_password', ['user' => $user, 'link' => $verify_link], function ($m) use ($user) {
-            
-            $m->to($user->email)->subject('Forgot Password');
-        });
-        
-        return response()->json(['message' => 'A reset link has been sent to your email address.']);
+        // return response()->json(['message' => 'User does not exist.'], 400);
+        return response()->json(['message' => 'If we found a match in our database, an email has been dispatched with instructions to reset your password.']);
     }
 
     public function checkResetToken (Request $request, $token) {

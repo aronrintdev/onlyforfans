@@ -1,0 +1,18 @@
+{
+  "include": [
+    "./resources/assets/**/*"
+  ],
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@": [ "./resources/assets/js/*" ],
+      "~": [ "./resources/assets/sass/*" ],
+      "@components": [ "./resources/assets/js/components/*" ],
+      "@views": [ "./resources/assets/js/views/*" ],
+      "@plugins": [ "./resources/assets/js/plugins/*" ],
+      "@routes": [ "./resources/assets/js/routes/*" ],
+      "@helpers": [ "./resources/assets/js/helpers/*" ],
+      "@mixins": [ "./resources/assets/js/mixins/*" ]
+    }
+  }
+}

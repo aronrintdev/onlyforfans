@@ -28,9 +28,11 @@ use App\Events\AccessRevoked;
 use App\Events\ItemPurchased;
 use App\Jobs\Financial\UpdateAccountBalance;
 use App\Models\Financial\Account;
+use App\Models\Tip;
 use App\Notifications\TimelineFollowed;
 use App\Notifications\TimelineSubscribed;
 use App\Notifications\TipReceived;
+use App\Payments\PaymentGateway;
 use Symfony\Component\Console\Output\ConsoleOutput;
 
 class TipsTableSeeder extends Seeder
@@ -57,10 +59,10 @@ class TipsTableSeeder extends Seeder
         })->has('followers','>=',1)->get();
 
         if ( $this->appEnv !== 'testing' ) {
-            $this->output->writeln("  - Tips seeder: loaded ".$timelines->count()." timelines...");
+            $this->output->writeln("  - Tips seeder: loaded " . $timelines->count() . " timelines...");
         }
 
-        $timelines->take(25)->each( function($t) { // do max 25
+        $timelines->take(17)->each( function($t) {
 
             static $iter = 1;
 
@@ -68,7 +70,7 @@ class TipsTableSeeder extends Seeder
             //$ts = $this->faker->dateTimeBetween($startDate = '-5 years', $endDate = 'now');
             $t->followers->each( function(User $follower) use(&$t) {
                 if ( $this->faker->numberBetween(0,10) < 5 ) {
-                    return; // skip: only N/10 processed
+                    return false; // skip: only N/10 processed
                 }
 
                 $paymentAccount = $follower->financialAccounts()->firstOrCreate([
@@ -82,22 +84,24 @@ class TipsTableSeeder extends Seeder
                 // Tip a timeline...
                 Event::fakeFor(function() use (&$paymentAccount, &$t, &$follower ) {
                     if ( $this->appEnv !== 'testing' ) {
-                        $this->output->writeln("  - Tips seeder: tipping timeline ".$t->slug);
+                        $this->output->writeln("  - Tips seeder: tipping timeline " . $t->slug);
                     }
                     try {
-                        $tipAmountInCents = $this->faker->numberBetween(500,10000);
-                        //$paymentAccount->purchase($t, $tipAmountInCents, ShareableAccessLevelEnum::DEFAULT, []);
-                        // % @Erik workaround code 20210414
-                        $paymentAccount->moveToInternal($tipAmountInCents, [ 'type' => TransactionTypeEnum::TIP ]);
-                        $internalAccount = $paymentAccount->getInternalAccount();
-                        $internalAccount->moveTo($t->getOwner()->first()->getInternalAccount('segpay', 'USD'), $tipAmountInCents, [
-                            'type' => TransactionTypeEnum::TIP,
-                            'ignoreBalance' => true,
-                            'purchasable_id' => $t->getKey(),
-                            'purchasable_type' => $t->getMorphString(),
-                            'metadata' => [ 'notes' => 'TipsTableSeeder.tip_a_timeline' ],
+                        $tipAmount = $this->faker->numberBetween(1, 20) * 500;
+                        $tip = Tip::create([
+                            'sender_id'       => $follower->getKey(),
+                            'receiver_id'     => $t->getOwner()->first()->getKey(),
+                            'tippable_type'   => $t->getMorphString(),
+                            'tippable_id'     => $t->getKey(),
+                            'account_id'      => $paymentAccount->getKey(),
+                            'currency'        => 'USD',
+                            'amount'          => $tipAmount,
+                            'period'          => 'single',
+                            'period_interval' => 1,
+                            'message'         => null,
                         ]);
-                        $t->user->notify(new TipReceived($t, $follower, ['amount'=>$tipAmountInCents]));
+                        $paymentGateway = new PaymentGateway();
+                        $paymentGateway->tip($paymentAccount, $tip, $tip->amount);
                     } catch (RuntimeException $e) {
                         $exceptionClass = class_basename($e);
                         if ($this->appEnv !== 'testing') {
@@ -107,26 +111,28 @@ class TipsTableSeeder extends Seeder
                 }, $this->eventsToDelayOnPurchase);
 
                 // Tip some posts...
-                $posts = $t->posts->take( $this->faker->numberBetween(0,5) );
+                $posts = $t->posts->take( $this->faker->numberBetween(0,3) );
                 $posts->each( function($p) use(&$paymentAccount, &$follower) {
                     Event::fakeFor(function() use (&$paymentAccount, &$p, &$follower ) {
                         if ( $this->appEnv !== 'testing' ) {
-                            $this->output->writeln("  - Tips seeder: tipping post ".$p->slug);
+                            $this->output->writeln("  - Tips seeder: tipping post " . $p->slug);
                         }
                         try {
-                            $tipAmountInCents = $this->faker->numberBetween(500,7000);
-                            //$paymentAccount->purchase($p, $tipAmountInCents, ShareableAccessLevelEnum::DEFAULT, []);
-                            // % @Erik workaround code 20210414
-                            $paymentAccount->moveToInternal($tipAmountInCents, [ 'type' => TransactionTypeEnum::TIP ]);
-                            $internalAccount = $paymentAccount->getInternalAccount();
-                            $internalAccount->moveTo($p->getOwner()->first()->getInternalAccount('segpay', 'USD'), $tipAmountInCents, [
-                                'type' => TransactionTypeEnum::TIP,
-                                'ignoreBalance' => true,
-                                'purchasable_id' => $p->getKey(),
-                                'purchasable_type' => $p->getMorphString(),
-                                'metadata' => [ 'notes' => 'TipsTableSeeder.tip_a_post' ],
+                            $tipAmount = $this->faker->numberBetween(1, 20) * 500;
+                            $tip = Tip::create([
+                                'sender_id'       => $follower->getKey(),
+                                'receiver_id'     => $p->getOwner()->first()->getKey(),
+                                'tippable_type'   => $p->getMorphString(),
+                                'tippable_id'     => $p->getKey(),
+                                'account_id'      => $paymentAccount->getKey(),
+                                'currency'        => 'USD',
+                                'amount'          => $tipAmount,
+                                'period'          => 'single',
+                                'period_interval' => 1,
+                                'message'         => null,
                             ]);
-                            $p->user->notify(new TipReceived($p, $follower, ['amount'=>$tipAmountInCents]));
+                            $paymentGateway = new PaymentGateway();
+                            $paymentGateway->tip($paymentAccount, $tip, $tip->amount);
                         } catch (RuntimeException $e) {
                             $exceptionClass = class_basename($e);
                             if ($this->appEnv !== 'testing') {
@@ -144,9 +150,20 @@ class TipsTableSeeder extends Seeder
 
         // Run update Balance on accounts now.
         if ($this->appEnv !== 'testing') {
+            $this->output->writeln("-------------------------");
             $this->output->writeln("Updating Account Balances");
+            $this->output->writeln("-------------------------");
         }
-        Account::cursor()->each(function($account) {
+        $count = Account::where('owner_type', '!=', 'financial_system_owner')->count();
+        Account::where('owner_type', '!=', 'financial_system_owner')->get()->each(function ($account) use ($count) {
+            static $iter = 1;
+            if ($this->appEnv !== 'testing') {
+                $this->output->writeln("({$iter} of {$count}): Updating Balance for {$account->name}");
+            }
+            $account->settleBalance();
+            $iter++;
+        });
+        Account::where('owner_type', 'financial_system_owner')->each(function ($account) {
             if ($this->appEnv !== 'testing') {
                 $this->output->writeln("Updating Balance for {$account->name}");
             }

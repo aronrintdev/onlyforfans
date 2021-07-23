@@ -14,7 +14,7 @@
   </div>
             <article class="tag-wrap mb-3">
               <div v-if="!p.access" @click="renderPost(p)" :style="backgroundImg(p)" class="locked-content tag-thumb"></div>
-              <b-icon v-if="!p.access" @click="renderPost(p)" class="tag-icon" icon="lock-fill" font-scale="2" variant="light" />
+              <fa-icon v-if="!p.access" @click="renderPost(p)" class="tag-icon text-light" icon="lock" size="2x" />
               <div v-if="p.access" @click="renderPost(p)" :style="backgroundImg(p)" class="tag-thumb"></div>
             </article>
           </b-col>
@@ -123,19 +123,16 @@ export default {
 .locked-content {
 }
 .tag-thumb {
-  width: 90px;
+  width: 100%;
   height: 90px;
   background-image: var(--background-image);
-  /*
-  background-position: center;
-  background-repeat: no-repeat;
-   */
-  background-size: cover !important;
+  background-size: cover;
 }
 .tag-icon {
   position: absolute;
-  top: 30px;
-  left: 30px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 .tag-thumb, .tag-icon {
   cursor: pointer;

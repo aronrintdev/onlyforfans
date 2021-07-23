@@ -3,22 +3,24 @@ namespace Tests\Unit;
 
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+//use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use DB;
 use Database\Seeders\TestDatabaseSeeder;
 use App\Models\Fanledger;
 
+/**
+ * @deprecated
+ */
 class FanledgerModelTest extends TestCase
 {
 
-    use RefreshDatabase, WithFaker;
+    use WithFaker;
 
     /**
+     * @deprecated
      * @group fanledger-model
-     * @group OFF-regression
-     * @group erik
      */
     public function test_ledger_should_have_from_and_to_account_relations()
     {
@@ -34,7 +36,7 @@ class FanledgerModelTest extends TestCase
     protected function setUp() : void
     {
         parent::setUp();
-        $this->seed(TestDatabaseSeeder::class);
+        //$this->seed(TestDatabaseSeeder::class);
     }
 
     protected function tearDown() : void {

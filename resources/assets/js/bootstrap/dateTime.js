@@ -5,4 +5,9 @@
 import Vue from 'vue'
 import { DateTime } from 'luxon'
 
-Vue.mixin({ methods: { $DateTime: (options = {}) => ( new DateTime(options)) }})
+Vue.mixin({
+  methods: {
+    $DateTime: (options = {}) => (new DateTime(options)),
+    DateTime: () => (DateTime)
+  }
+})

@@ -5,17 +5,23 @@ import VueRouter from 'vue-router'
 import ErrorViews from '@views/errors'
 import StaticPageRoutes from './staticPages.routes'
 
+import banking from '@views/banking'
 import settings from '@views/settings'
 import lists from '@views/lists'
 import notifications from '@views/notifications'
 import stories from '@views/stories'
+import statements from '@views/statements'
 import timelines from '@views/timelines'
 import users from '@views/users'
 import vaults from '@views/vaults'
 import search from '@views/search'
 import posts from '@views/posts'
 import payments from '@views/payments'
-import liveChat from '@views/live-chat'
+//import livechat from '@views/live-chat/components'
+
+import LivechatDashboard from '@views/live-chat/Dashboard'
+import LivechatCreateThread from '@views/live-chat/CreateThread'
+import livechatRoutes from './livechat.routes'
 
 import settingsRoutes from './settings.routes'
 import listRoutes from './list.routes'
@@ -23,9 +29,16 @@ import listRoutes from './list.routes'
 
 export const routes = [
   {
-    name: 'index',
+    name: 'index', // %TODO: should be named 'home' or 'feed.home'
     path: '/',
     component: timelines.Home,
+    props: true,
+  },
+  {
+    name: 'timelines.explore',
+    path: '/explore',
+    component: timelines.Explore,
+    props: true,
   },
   {
     name: 'search.home',
@@ -33,31 +46,20 @@ export const routes = [
     component: search.Home,
     props: true,
   },
+
+  // Live Chat
   {
-    name: 'messages.home',
-    path: '/messages',
-    component: liveChat.Home,
-  },
-  {
-    name: 'messages.new',
+    component: LivechatCreateThread,
+    name: 'chatthreads.create',
     path: '/messages/new',
-    component: liveChat.New,
   },
   {
-    name: 'messages.scheduled',
-    path: '/messages/schedule_message',
-    component: liveChat.Scheduled,
+    component: LivechatDashboard,
+    name: 'chatthreads.dashboard',
+    path: '/messages',
+    children: livechatRoutes,
   },
-  {
-    name: 'messages.details',
-    path: '/messages/:id',
-    component: liveChat.Details,
-  },
-  {
-    name: 'messages.gallery',
-    path: '/messages/:id/gallery',
-    component: liveChat.Gallery,
-  },
+
   // Timelines
   {
     name: 'timelines.home',
@@ -86,10 +88,23 @@ export const routes = [
     children:  settingsRoutes,
   },
 
+  // Statements
+  {
+    name: 'statements.dashboard',
+    path: '/statements',
+    component: statements.Dashboard,
+  },
+
+  {
+    name: 'banking.accounts.new',
+    path: '/banking/accounts/new',
+    component: banking.New,
+  },
+
   // Lists
   {
     name: 'lists.dashboard',
-    path: '/lists/dashboard',
+    path: '/lists',
     component: lists.Dashboard,
     children:  listRoutes,
   },
@@ -148,7 +163,7 @@ export const routes = [
   // Posts
   {
     name: 'posts.show',
-    path: '/posts/:slug',
+    path: '/posts/:slug/details',
     component: posts.Show,
     props: true,
   },

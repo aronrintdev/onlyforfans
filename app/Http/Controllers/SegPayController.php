@@ -2,34 +2,23 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\Financial\AccountTypeEnum;
 use Carbon\Carbon;
+use App\Models\Tip;
+use App\Rules\InEnum;
 use GuzzleHttp\Client;
+use Illuminate\Support\Str;
+use App\Interfaces\Tippable;
 use Illuminate\Http\Request;
 use App\Enums\PaymentTypeEnum;
+use App\Interfaces\Purchaseable;
+use App\Interfaces\Subscribable;
+use App\Models\Financial\Account;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
+use App\Models\Casts\Money as MoneyCast;
 use App\Helpers\Tippable as TippableHelpers;
 use App\Helpers\Purchasable as PurchasableHelpers;
 use App\Helpers\Subscribable as SubscribableHelpers;
-use App\Interfaces\Purchaseable;
-use App\Interfaces\Subscribable;
-use App\Interfaces\Tippable;
-use App\Jobs\FakeSegpayPayment;
-use App\Models\Financial\Account;
-use App\Models\Financial\SegpayCard;
-use App\Rules\InEnum;
-use Symfony\Component\HttpKernel\Exception\HttpException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use App\Models\Casts\Money as MoneyCast;
-use App\Models\Financial\SegpayCall;
-use App\Models\Subscription;
-use Illuminate\Contracts\Container\BindingResolutionException;
-use InvalidArgumentException;
-use Carbon\Exceptions\InvalidCastException;
-use Carbon\Exceptions\InvalidIntervalException;
-use GuzzleHttp\Exception\GuzzleException;
-use Symfony\Component\Finder\Exception\DirectoryNotFoundException;
 
 class SegPayController extends Controller
 {
@@ -143,6 +132,70 @@ class SegPayController extends Controller
         return $url;
     }
 
+
+    public function generateOneClickSubscriptionPageUrl(Request $request)
+    {
+        $request->validate([
+            'item' => 'required|uuid',
+            'price' => 'required',
+            'currency' => 'required',
+            'method' => 'required|uuid',
+        ]);
+
+        $item = SubscribableHelpers::getSubscribableItem($request->item);
+        if (!isset($item)) {
+            abort(400, 'Bad type or item');
+        }
+
+        $price = MoneyCast::toMoney($request->price, $request->currency);
+        if (!$item->verifyPrice($price)) {
+            abort(400, 'Invalid Price');
+        }
+
+        $account = Account::with('resource')->find($request->method);
+        if (!isset($account) || !isset($account->resource)) {
+            abort('400', 'Bad account');
+        }
+
+        $price = $item->formatMoneyDecimal($item->price);
+        $period = 30;
+
+        $client = new Client();
+        $response = $client->request('GET', Config::get('segpay.dynamicTransUrl'), [
+            'query' => ['value' => $price,],
+        ]);
+
+        $priceEncode = simplexml_load_string($response->getBody(), 'SimpleXMLElement', LIBXML_NOCDATA)->__toString();
+
+        $client = new Client();
+        $response = $client->request('GET', Config::get('segpay.dynamicRecurringUrl'), [
+            'query' => [
+                'MerchantID' => Config::get('segpay.merchantId'),
+                'InitialAmount' => $price,
+                'InitialLength' => $period,
+                'RecurringAmount' => $price,
+                'RecurringLength' => $period,
+            ],
+            'auth' => [Config::get('segpay.userId'), Config::get('segpay.accessKey') ],
+        ]);
+
+        $dynamicPricingId = Str::replace('"', '', $response->getBody()->__toString());
+
+        $baseUrl = Config::get('segpay.secure') ? 'https://' : 'http://';
+        $baseUrl .= Config::get('segpay.baseOneClickUrl');
+        $packageId = Config::get('segpay.dynamicPackageId');
+        $pricePointId = Config::get('segpay.dynamicPricePointId');
+        $xEticketid = "{$packageId}:{$pricePointId}";
+
+        $userId = Auth::user()->getKey();
+        $description = urlencode(Config::get('segpay.description.subscription', 'All Fans Subscription'));
+        $token = $account->resource->token;
+
+        $url = "{$baseUrl}?x-eticketId={$xEticketid}&amount={$price}&dynamictrans={$priceEncode}&dynamicdesc={$description}&DynamicPricingID={$dynamicPricingId}&OCToken={$token}&user_id={$userId}&item_type=subscription&item_id={$item->id}";
+
+        return $url;
+    }
+
     #endregion PayPageUrl Generation
 
 
@@ -227,191 +280,6 @@ class SegPayController extends Controller
     }
 
     /**
-     * Confirms a payment with saved card
-     *
-     * @param Request $request
-     * @return void
-     */
-    public function paymentConfirmation(Request $request)
-    {
-        $request->validate([
-            'item'     => 'required|uuid',
-            'type'     => ['required', new InEnum(new PaymentTypeEnum())],
-            'price'    => 'required',
-            'currency' => 'required',
-            'method'   => 'required|uuid',
-        ]);
-
-        // Get payment item
-        $item = $this->getItem($request);
-        if (!isset($item)) {
-            abort(400, 'Bad type or item');
-        }
-
-        $price = MoneyCast::toMoney($request->price, $request->currency);
-        if ($request->type !== PaymentTypeEnum::TIP) {
-            if (!$item->verifyPrice($price)) {
-                abort(400, 'Invalid Price');
-            }
-        }
-
-        $account = Account::with('resource')->find($request->method);
-
-        if ($account->resource->token === 'fake') {
-            return $this->fakeConfirmation($request);
-        }
-
-        if ($request->type === PaymentTypeEnum::PURCHASE) {
-            $segpayCall = SegpayCall::confirmPurchase($account, $price, $item);
-        }
-
-        if ($request->type === PaymentTypeEnum::TIP) {
-            $segpayCall = SegpayCall::confirmTip($account, $price, $item);
-        }
-
-        if ($request->type === PaymentTypeEnum::SUBSCRIPTION) {
-            // TODO: Reminder to refactor this, much can be moved to models
-
-            // Verify subscription has not already been created
-            if (
-                Subscription::where('user_id', Auth::user()->getKey())
-                    ->where('subscribable_id', $item->getKey())
-                    ->whereNotNull('canceled_at')
-                    ->count() > 0
-            ) {
-                abort(400, 'Already have subscription');
-            }
-
-            // Verify not resubscribing within waiting period
-            if (
-                Subscription::where('user_id', Auth::user()->getKey())
-                    ->where('subscribable_id', $item->getKey())
-                    ->canceled()->where(
-                        'canceled_at',
-                        '>=',
-                        Carbon::now()->subtract(
-                            Config::get('subscriptions.resubscribeWaitPeriod.unit'),
-                            Config::get('subscriptions.resubscribeWaitPeriod.interval')
-                        )
-                    )->count() > 0
-            ) {
-                abort(400, 'Too soon to resubscribe');
-            }
-
-            // Create subscription
-            $subscription = $account->createSubscription($item, $price, [
-                'manual_charge' => false,
-            ]);
-
-            // Send Segpay One click call
-            $segpayCall = SegpayCall::confirmSubscription($account, $price, $subscription);
-        }
-
-        if (isset($segpayCall->failed_at)) {
-            abort(500, 'Error Processing Payment');
-        }
-        return;
-    }
-
-    /**
-     * Fake a segpay purchase if system allows segpay fakes
-     *
-     * @param Request $request
-     * @return void
-     */
-    public function fake(Request $request)
-    {
-        $this->checkFaking();
-
-        $request->validate([
-            'item'     => 'required|uuid',
-            'type'     => [ 'required', new InEnum(new PaymentTypeEnum()) ],
-            'price'    => 'required',
-            'currency' => 'required',
-            'last_4'   => 'required',
-        ]);
-
-        // Get payment item
-        $item = $this->getItem($request);
-
-        if (!isset($item)) {
-            abort(400, 'Bad type or item');
-        }
-
-        // Validate Price
-        if ($request->type !== PaymentTypeEnum::TIP) {
-            if (!$item->verifyPrice($request->price)) {
-                abort(400, 'Invalid Price');
-            }
-        }
-
-        // Create Card
-        $user = Auth::user();
-        $card = SegpayCard::create([
-            'owner_type' => $user->getMorphString(),
-            'owner_id'   => $user->getKey(),
-            'token'      => 'fake',
-            'nickname'   => $request->nickname ?? 'Fake Card',
-            'card_type'  => $request->brand ?? '',
-            'last_4'     => $request->last_4 ?? '0000',
-        ]);
-
-        // Create account for card
-        $account = Account::create([
-            'system' => 'segpay',
-            'owner_type' => $user->getMorphString(),
-            'owner_id' => $user->getKey(),
-            'name' => $request->nickname ?? 'Fake Card',
-            'type' => AccountTypeEnum::IN,
-            'currency' => $request->currency,
-            'resource_type' => $card->getMorphString(),
-            'resource_id' => $card->getKey(),
-        ]);
-        $account->verified = true;
-        $account->can_make_transactions = true;
-        $account->save();
-
-        // Dispatch Event
-        FakeSegpayPayment::dispatch($item, $account, $request->type, $request->price);
-    }
-
-    /**
-     *
-     * @param Request $request
-     * @return void
-     */
-    public function fakeConfirmation(Request $request)
-    {
-        $this->checkFaking();
-
-        $request->validate([
-            'item'     => 'required|uuid',
-            'type'     => ['required', new InEnum(new PaymentTypeEnum())],
-            'price'    => 'required',
-            'currency' => 'required',
-            'method'   => 'required|uuid',
-        ]);
-
-        // Get payment item
-        $item = $this->getItem($request);
-        if (!isset($item)) {
-            abort(400, 'Bad type or item');
-        }
-
-        // Validate Price
-        if ($request->type !== PaymentTypeEnum::TIP) {
-            if (!$item->verifyPrice($request->price)) {
-                abort(400, 'Invalid Price');
-            }
-        }
-
-        $account = Account::find($request->method);
-
-        // Dispatch Event
-        FakeSegpayPayment::dispatch($item, $account, $request->type, $request->price);
-    }
-
-    /**
      * Helper, gets the item associated with payment.
      *
      * @param mixed $request
@@ -424,7 +292,8 @@ class SegPayController extends Controller
             return PurchasableHelpers::getPurchasableItem($request->item);
         }
         if ($request->type === PaymentTypeEnum::TIP) {
-            return TippableHelpers::getTippableItem($request->item);
+            return Tip::find($request->item);
+            // return TippableHelpers::getTippableItem($request->item);
         }
         if ($request->type === PaymentTypeEnum::SUBSCRIPTION) {
             return SubscribableHelpers::getSubscribableItem($request->item);
@@ -432,18 +301,4 @@ class SegPayController extends Controller
 
         abort(400, 'Bad type or item');
     }
-
-    /**
-     * Checks if system is in fake mode and aborts if not.
-     *
-     * @return void
-     * @throws HttpException
-     * @throws NotFoundHttpException
-     */
-    private function checkFaking() {
-        if (Config::get('app.env') === 'production' || Config::get('segpay.fake') === false) {
-            abort(403);
-        }
-    }
-
 }

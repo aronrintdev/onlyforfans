@@ -9,22 +9,29 @@ Vue.use(Vuex)
 const route = window.route
 
 // Modules
-import earningsModule from './store/earnings'
 import searchModule from './store/search'
 import paymentModule from './store/payments'
+import bankingModule from './store/banking'
 import postsModule from './store/posts'
+import statementsModule from './store/statements'
 import subscriptionsModule from './store/subscriptions'
+import messagingModule from './store/messaging'
+import vaultModule from './store/vault'
 
 export default new Vuex.Store({
   modules: {
-    earnings: earningsModule,
     search: searchModule,
     payments: paymentModule,
+    banking: bankingModule,
     posts: postsModule,
+    statements: statementsModule,
     subscriptions: subscriptionsModule,
+    messaging: messagingModule,
+    vault: vaultModule,
   },
 
   state: {
+    iconStyle: 'fas',
     mobile: false,
     screenSize: 'xs',
     vault: {},
@@ -50,9 +57,14 @@ export default new Vuex.Store({
     uiFlags: [],
     unshifted_timeline_post: null,
     unread_messages_count: 0,
+    queue_metadata: {},
   },
 
   mutations: {
+    UPDATE_ICON_STYLE(state, payload) {
+      state.iconStyle = payload
+    },
+
     UPDATE_MOBILE(state, payload) {
       state.mobile = payload
     },
@@ -84,6 +96,9 @@ export default new Vuex.Store({
     },
     UPDATE_FEEDDATA(state, payload) {
       state.feeddata = payload.hasOwnProperty('data') ? payload.data : {}
+    },
+    UPDATE_QUEUE_METADATA(state, payload) {
+      state.queue_metadata = payload.hasOwnProperty('data') ? payload.data.meta : {}
     },
     UPDATE_PREVIEWPOSTS(state, payload) {
       state.previewposts = payload.hasOwnProperty('data') ? payload.data : {}
@@ -129,7 +144,7 @@ export default new Vuex.Store({
       state.unshifted_timeline_post = propSelect(payload, 'post')
     },
     UPDATE_UNREAD_MESSAGES_COUNT(state, payload) {
-      state.unread_messages_count = propSelect(payload, 'unread_messages_count')
+      state.unread_messages_count = propSelect(payload, 'total_unread_count')
     },
   },
 
@@ -197,6 +212,9 @@ export default new Vuex.Store({
           url = isHomefeed ? `/timelines/home/feed` : `/timelines/${timelineId}/feed`
       }
       axios.get(url, { params }).then( (response) => {
+        if (feedType === 'schedule') {
+          commit('UPDATE_QUEUE_METADATA', response);
+        }
         commit('UPDATE_FEEDDATA', response);
       })
     },
@@ -284,6 +302,12 @@ export default new Vuex.Store({
       })
     },
 
+    getUnreadMessagesCount({ commit }) {
+      axios.get(route('chatthreads.totalUnreadCount')).then((response) => {
+        commit('UPDATE_UNREAD_MESSAGES_COUNT', response.data)
+      })
+    },
+
     getUserSettings({ commit }, { userId }) {
       axios.get(route('users.showSettings', { id: userId })).then((response) => {
         commit('UPDATE_USER_SETTINGS', response.data)
@@ -293,6 +317,19 @@ export default new Vuex.Store({
     getLoginSessions({ commit }, { params }) {
       axios.get(route('sessions.index', { params })).then((response) => {
         commit('UPDATE_LOGIN_SESSIONS', response)
+      })
+    },
+    
+    getQueueMetadata( { commit } ) {
+      const params = {
+        page: 1,
+        take: 5,
+        sortBy: 'latest',
+        hideLocked: false,
+        hidePromotions: false,
+      }
+      axios.get(`/timelines/home/scheduled-feed`, { params }).then( (response) => {
+        commit('UPDATE_QUEUE_METADATA', response);
       })
     },
   },
@@ -320,6 +357,7 @@ export default new Vuex.Store({
     login_sessions:          state => state.login_sessions,
     uiFlags:                 state => state.uiFlags,
     unread_messages_count:   state => state.unread_messages_count,
+    queue_metadata:          state => state.queue_metadata,
     //children: state => state.vault.children, // Flat list
     //mediafiles: state => state.vault.mediafiles, // Flat list
   },

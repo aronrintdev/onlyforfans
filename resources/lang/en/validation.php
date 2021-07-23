@@ -83,6 +83,7 @@ return [
     'unique'               => 'The :attribute has already been taken.',
     'uploaded'             => 'The :attribute failed to upload.',
     'url'                  => 'The :attribute format is invalid.',
+    'no_admin'             => 'The name admin is restricted for :attribute.',
 
     /*
     |--------------------------------------------------------------------------
@@ -98,6 +99,10 @@ return [
     'custom' => [
         'attribute-name' => [
             'rule-name' => 'custom-message',
+        ],
+        'g-recaptcha-response' => [
+            'required' => 'The captcha field is required',
+            'recaptchav3' => 'Invalid captcha token',
         ],
     ],
 

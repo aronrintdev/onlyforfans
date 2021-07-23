@@ -10,6 +10,7 @@ use App\Interfaces\Ownable;
 use App\Interfaces\Likeable;
 use App\Interfaces\Deletable;
 use App\Enums\PaymentTypeEnum;
+use App\Enums\ShareableAccessLevelEnum;
 use App\Interfaces\Reportable;
 use App\Interfaces\Commentable;
 use App\Interfaces\HasPricePoints;
@@ -34,7 +35,10 @@ use App\Models\Financial\Traits\HasCurrency;
 use App\Models\Financial\Traits\HasSystem;
 use App\Models\Traits\FormatMoney;
 use App\Models\Traits\ShareableTraits;
+use Laravel\Scout\Searchable;
 use Money\Money as Money;
+
+use App\Models\Likeable as LikeableModel;
 
 class Post extends Model
     implements
@@ -56,7 +60,8 @@ class Post extends Model
     SluggableTraits,
     ShareableTraits,
     FormatMoney,
-    HasCurrency;
+    HasCurrency,
+    Searchable;
 
     //--------------------------------------------
     // Boot
@@ -73,26 +78,26 @@ class Post extends Model
             // %TODO: should ref count these (?), or N/A as we are cloning (ie ref count always 1)?
             foreach ($model->mediafiles as $o) {
                 //Storage::disk('s3')->delete($o->filename); // Remove from S3  -> moved to Mediafile model
-                $o->delete();
+                //$o->delete();
+                $o->diskmediafile->deleteReference($o->id);
             }
             foreach ($model->comments as $o) {
                 $o->delete();
             }
-            foreach ($model->likes as $o) {
-                $o->delete();
-            }
+            // delete the Likeables, not the 'likes' relation, which is actually the liker (user) !!
+            $likeables = LikeableModel::where('likeable_type', 'posts')->where('likeable_id', $model->id)->delete();
         });
     }
 
     protected $guarded = [ 'id', 'created_at', 'updated_at' ];
-    protected $appends = [ 'isLikedByMe', 'isFavoritedByMe', ];
-    protected $fillable = [ 'schedule_datetime', 'description', 'price', 'currency', 'user_id', 'active', 'type' ];
+    protected $appends = [ 'isLikedByMe', 'isFavoritedByMe', 'customSlug' ];
+    protected $fillable = [ 'schedule_datetime', 'description', 'price', 'price_for_subscribers', 'currency', 'user_id', 'active', 'type', 'expire_at' ];
 
     public function sluggable(): array
     {
         return [
             'slug' => [
-                'source' => [ 'description' ]
+                'source' => ['description', 'customSlug']
             ]
         ];
     }
@@ -123,8 +128,14 @@ class Post extends Model
         return $exists ? true : false;
     }
 
+    public function getCustomSlugAttribute()
+    {
+        return date('Y-m-d-H-i-s');
+    }
+
     protected $casts = [
         'price' => CastsMoney::class,
+        'price_for_subscribers' => CastsMoney::class,
         // 'price' => CastsPricePoint::class, // Uses current price point or 0
         'cattrs' => 'array',
         'meta' => 'array',
@@ -228,6 +239,55 @@ class Post extends Model
         return $query;
     }
 
+    /* ---------------------------------------------------------------------- */
+    /*                               Searchable                               */
+    /* ---------------------------------------------------------------------- */
+    #region Searchable
+
+    /**
+     * Name of the search index associated with this model
+     * @return string
+     */
+    public function searchableAs()
+    {
+        return "posts_index";
+    }
+
+    /**
+     * Get value used to index the model
+     * @return mixed
+     */
+    public function getScoutKey()
+    {
+        return $this->getKey();
+    }
+
+    /**
+     * Get key name used to index the model
+     * @return string
+     */
+    public function getScoutKeyName()
+    {
+        return 'id';
+    }
+
+    /**
+     * What model information gets stored in the search index
+     * @return array
+     */
+    public function toSearchableArray()
+    {
+        return [
+            'name'        => $this->timeline->name,
+            'slug'        => $this->slug,
+            'description' => $this->description,
+            'id'          => $this->getKey(),
+        ];
+    }
+
+    #endregion Searchable
+    /* ---------------------------------------------------------------------- */
+
     //--------------------------------------------
     // %%% Methods
     //--------------------------------------------
@@ -299,9 +359,18 @@ class Post extends Model
         return $result ?? null;
     }
 
-    public function verifyPrice($amount): bool
+    /**
+     * Required by Purchaseable, Checks if price if valid
+     *
+     * @param int|Money $amount
+     * @param string $currency
+     * @return bool
+     */
+    public function verifyPrice($amount, $currency = 'USD'): bool
     {
-        $amount = $this->asMoney($amount);
+        if (!$amount instanceof Money) {
+            $amount = CastsMoney::toMoney($amount, $currency);
+        }
         return $this->price->equals($amount);
     }
 

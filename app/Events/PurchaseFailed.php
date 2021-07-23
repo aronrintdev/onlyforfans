@@ -32,14 +32,22 @@ class PurchaseFailed implements ShouldBroadcast
     public $account;
 
     /**
+     * Optional additional message. Transaction voided for example
+     *
+     * @var string
+     */
+    public $message;
+
+    /**
      * Create a new event instance.
      *
      * @return void
      */
-    public function __construct(Purchaseable $item, Account $account)
+    public function __construct(Purchaseable $item, Account $account, string $message = '')
     {
-        $this->item = $item->withoutRelations();
+        $this->item    = $item->withoutRelations();
         $this->account = $account->withoutRelations();
+        $this->message = $message;
     }
 
     /**
@@ -63,9 +71,10 @@ class PurchaseFailed implements ShouldBroadcast
     public function broadcastWith()
     {
         return [
-            'item_type' => $this->item->getMorphString(),
-            'item_id' => $this->item->getKey(),
+            'item_type'  => $this->item->getMorphString(),
+            'item_id'    => $this->item->getKey(),
             'account_id' => $this->account->getKey(),
+            'message'    => $this->message,
         ];
     }
 }

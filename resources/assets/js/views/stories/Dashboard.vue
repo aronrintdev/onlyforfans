@@ -1,5 +1,5 @@
 <template>
-  <div id="view-stories_create" class="row">
+  <div id="view-stories_create" class="row w-100">
       <div class="col-sm-12" v-if="!loading">
         <Wizard :dto-user="dtoUser" :stories="stories" />
       </div>
@@ -7,9 +7,6 @@
 </template>
 
 <script>
-/**
- * Stories Dashboard View
- */
 import Wizard from '@components/stories/Wizard'
 
 export default {

@@ -4,7 +4,7 @@ namespace Tests\Feature;
 use DB;
 use Illuminate\Foundation\Testing\WithFaker;
 //use Illuminate\Foundation\Testing\DatabaseTransactions;
-use Illuminate\Foundation\Testing\RefreshDatabase; 
+//use Illuminate\Foundation\Testing\RefreshDatabase; 
 use Illuminate\Http\UploadedFile;
 use Illuminate\Http\File;
 use Illuminate\Support\Facades\Mail;
@@ -27,11 +27,12 @@ use App\Enums\StoryTypeEnum;
 
 class RestVaultTest extends TestCase
 {
-    use RefreshDatabase, WithFaker;
+    use WithFaker;
 
     /**
      *  @group vault
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_list_all_of_my_vault_folders()
     {
@@ -67,6 +68,7 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_not_list_other_non_shared_vault_folders()
     {
@@ -87,6 +89,7 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_list_my_root_level_vault_folders()
     {
@@ -125,6 +128,7 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_create_a_new_vault_folder()
     {
@@ -153,6 +157,28 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
+     *  @group regression-base
+     */
+    public function test_can_create_a_new_vault_folder_with_space_in_name()
+    {
+        $creator = User::first();
+        $primaryVault = Vault::primary($creator)->first();
+        $rootFolder = Vaultfolder::isRoot()->where('vault_id', $primaryVault->id)->first();
+        $origNumChildren = $rootFolder->vfchildren->count();
+
+        $payload = [
+            'vault_id' => $primaryVault->id,
+            'parent_id' => $rootFolder->id,
+            'vfname' => $this->faker->slug.' '.$this->faker->slug,
+        ];
+        $response = $this->actingAs($creator)->ajaxJSON('POST', route('vaultfolders.store'), $payload);
+        $response->assertStatus(201);
+    }
+
+    /**
+     *  @group vault
+     *  @group regression
+     *  @group regression-base
      */
     public function test_can_not_create_a_new_vault_folder_bad_param_422()
     {
@@ -168,11 +194,24 @@ class RestVaultTest extends TestCase
         ];
         $response = $this->actingAs($creator)->ajaxJSON('POST', route('vaultfolders.store'), $payload);
         $response->assertStatus(422);
+
+        $payload['vfname']= $this->faker->slug.'_';
+        $response = $this->actingAs($creator)->ajaxJSON('POST', route('vaultfolders.store'), $payload);
+        $response->assertStatus(422);
+
+        //$payload['vfname']= $this->faker->slug.' ';
+        //$response = $this->actingAs($creator)->ajaxJSON('POST', route('vaultfolders.store'), $payload);
+        //$response->assertStatus(422);
+
+        $payload['vfname']= $this->faker->slug.'@';
+        $response = $this->actingAs($creator)->ajaxJSON('POST', route('vaultfolders.store'), $payload);
+        $response->assertStatus(422);
     }
 
     /**
      *  @group vault
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_not_create_a_new_vault_folder_with_same_name_422()
     {
@@ -196,6 +235,7 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_not_create_a_new_vault_folder_403()
     {
@@ -216,14 +256,16 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_navigate_my_vault_folders()
     {
         $creator = User::first();
         $primaryVault = Vault::primary($creator)->first();
         $rootFolder = Vaultfolder::isRoot()->where('vault_id', $primaryVault->id)->first();
+        $this->assertNotNull($rootFolder);
 
-        $this->assertEquals(0, $rootFolder->vfchildren->count(), 'Root should not have any subfolders');
+        $this->assertGreaterThan(0, $rootFolder->vfchildren->count(), 'Root should have at last one subfolder post-creation (boot code)');
         $this->assertNull($rootFolder->vfparent, 'Root should have null parent');
 
         // set cwf via api call
@@ -235,11 +277,11 @@ class RestVaultTest extends TestCase
         $this->assertEquals($rootFolder->id, $cwf->id, 'Current working folder (root) pkid should match root');
         $this->assertNull($cwf->vfparent, 'Current working folder (root) should not have null parent');
         $this->assertNotNull($cwf->vfchildren, 'Current working folder (root) should not have children (subfolders) attribute');
-        $this->assertEquals(0, count($cwf->vfchildren), 'Current working folder should not have any subfolders');
 
         // ---
 
-        // make a subfolder
+        // create a new subfolder
+        $preSubFolderCount = $rootFolder->vfchildren->count();
         $payload = [
             'vault_id' => $cwf->vault_id, // $primaryVault->id,
             'parent_id' => $cwf->id, // $rootFolder->id,
@@ -254,8 +296,8 @@ class RestVaultTest extends TestCase
         $rootFolder->load('vfchildren');
 
         // test cwf children, expect subfolder
-        $this->assertEquals(1, $rootFolder->vfchildren->count(), 'Root should have 1 subfolder');
-        $this->assertTrue($rootFolder->vfchildren->contains($childVaultfolderR->id), 'Root subfolders should include the one just created');
+        $this->assertEquals($preSubFolderCount+1, $rootFolder->vfchildren->count(), 'Root should have 1 additional subfolder');
+        $this->assertTrue($rootFolder->vfchildren->contains($childVaultfolderR->id), "Root's subfolders should include the one just created");
 
         // refresh 'cwf' via api call
         $response = $this->actingAs($creator)->ajaxJSON('GET', route('vaultfolders.show', $cwf->id));
@@ -264,7 +306,7 @@ class RestVaultTest extends TestCase
         $this->assertNotNull($content->vaultfolder);
         $cwf = $content->vaultfolder;
         $this->assertEquals($rootFolder->id, $cwf->id, 'Current working folder should still be root');
-        $this->assertEquals(1, count($cwf->vfchildren), 'Current working folder should have 1 subfolder');
+        $this->assertEquals($preSubFolderCount+1, count($cwf->vfchildren), 'Current working folder should have 1 additional subfolder');
 
         // cd to subfolder
         $response = $this->actingAs($creator)->ajaxJSON('GET', route('vaultfolders.show', $cwf->vfchildren[0]->id));
@@ -272,6 +314,7 @@ class RestVaultTest extends TestCase
         $content = json_decode($response->content());
         $this->assertNotNull($content->vaultfolder);
         $cwf = $content->vaultfolder;
+        $this->assertEquals(0, count($cwf->vfchildren), 'Newly created current working folder should not have any subfolders');
 
         // test cwf parent, expect root
         $this->assertEquals($rootFolder->id, $cwf->parent_id, 'Current working folder parent should be root');
@@ -281,6 +324,7 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_update_my_vault_folder()
     {
@@ -339,9 +383,13 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
+     *  @group regression-base
+     *  @group here0713
      */
     public function test_can_delete_my_non_root_vault_folder()
     {
+        Storage::fake('s3');
+
         $creator = User::first();
         $primaryVault = Vault::primary($creator)->first();
         $rootFolder = Vaultfolder::isRoot()->where('vault_id', $primaryVault->id)->first();
@@ -356,24 +404,81 @@ class RestVaultTest extends TestCase
         $response->assertStatus(201);
         $content = json_decode($response->content());
         $this->assertNotNull($content->vaultfolder);
-        $subfolderR = $content->vaultfolder;
-        $rootFolder->refresh();
-        $exists = Vaultfolder::find($subfolderR->id);
+        $sf1 = $content->vaultfolder;
+        $exists = Vaultfolder::find($sf1->id);
         $this->assertNotNull($exists);
-        $this->assertTrue($rootFolder->vfchildren->contains($subfolderR->id), 'Root should now contain newly created subfolder');
+        $sf1 = $exists;
+        $sf2 = $exists; // assign object to sf1
+        $rootFolder->refresh();
+        $this->assertTrue($rootFolder->vfchildren->contains($sf1->id), 'Root should now contain newly created subfolder');
 
-        // delete the subfolder
-        $response = $this->actingAs($creator)->ajaxJSON('DELETE', route('vaultfolders.destroy', $subfolderR->id));
+        // make a 2nd subfolder under first
+        $payload = [
+            'vault_id' => $rootFolder->vault_id,
+            'parent_id' => $sf1->id,
+            'vfname' => $this->faker->slug,
+        ];
+        $response = $this->actingAs($creator)->ajaxJSON('POST', route('vaultfolders.store'), $payload);
+        $response->assertStatus(201);
+        $content = json_decode($response->content());
+        $this->assertNotNull($content->vaultfolder);
+        $sf2 = $content->vaultfolder;
+        $exists = Vaultfolder::find($sf2->id);
+        $this->assertNotNull($exists);
+        $sf2 = $exists; // assign object to sf2
+        $rootFolder->refresh();
+        $this->assertFalse($rootFolder->vfchildren->contains($sf2->id), 'Root should NOT contain newly-created 2nd subfolder');
+        $this->assertTrue($sf1->vfchildren->contains($sf2->id), '1st subfolder should contain newly-created 2nd subfolder');
+
+        // Upload a file to 1st subfolder
+        $file = UploadedFile::fake()->image($this->faker->slug, 200, 200);
+        $payload = [
+            'mftype' => MediafileTypeEnum::VAULT,
+            'mediafile' => $file,
+            'resource_type' => 'vaultfolders',
+            'resource_id' => $sf1->id,
+        ];
+        $response = $this->actingAs($creator)->ajaxJSON('POST', route('mediafiles.store'), $payload);
+        $response->assertStatus(201);
+        $content = json_decode($response->content());
+        $this->assertNotNull($content->mediafile);
+        $mf1 = $content->mediafile;
+
+        // Upload a file to 2nd subfolder
+        $file = UploadedFile::fake()->image($this->faker->slug, 200, 200);
+        $payload = [
+            'mftype' => MediafileTypeEnum::VAULT,
+            'mediafile' => $file,
+            'resource_type' => 'vaultfolders',
+            'resource_id' => $sf2->id,
+        ];
+        $response = $this->actingAs($creator)->ajaxJSON('POST', route('mediafiles.store'), $payload);
+        $response->assertStatus(201);
+        $content = json_decode($response->content());
+        $this->assertNotNull($content->mediafile);
+        $mf2 = $content->mediafile;
+
+        // delete the first subfolder
+        $response = $this->actingAs($creator)->ajaxJSON('DELETE', route('vaultfolders.destroy', $sf1->id));
         $response->assertStatus(200);
         $rootFolder->refresh();
-        $exists = Vaultfolder::find($subfolderR->id);
+        $this->assertFalse($rootFolder->vfchildren->contains($sf1->id), 'Root should not contain deleted subfolder');
+
+        $exists = Vaultfolder::find($sf1->id);
         $this->assertNull($exists);
-        $this->assertFalse($rootFolder->vfchildren->contains($subfolderR->id), 'Root should not contain deleted subfolder');
+        $exists = Vaultfolder::find($sf2->id);
+        $this->assertNull($exists);
+
+        $exists = Mediafile::find($mf1->id);
+        $this->assertNull($exists);
+        $exists = Mediafile::find($mf2->id);
+        $this->assertNull($exists);
     }
 
     /**
      *  @group vault
      *  @group regression
+     *  @group regression-base
      */
     public function test_nonowner_can_not_delete_my_vault_folder()
     {
@@ -406,6 +511,7 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_not_delete_my_root_vault_folder()
     {
@@ -421,6 +527,7 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_upload_single_image_file_to_my_vault_folder()
     {
@@ -463,6 +570,7 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_upload_multiple_image_files_to_my_vault_folder()
     {
@@ -476,6 +584,9 @@ class RestVaultTest extends TestCase
 
         $primaryVault = Vault::primary($owner)->first();
         $vaultfolder = Vaultfolder::isRoot()->where('vault_id', $primaryVault->id)->first(); // root
+        $this->assertEquals($owner->id, $vaultfolder->user_id);
+
+        $preCount = Mediafile::where('resource_type', 'vaultfolders')->where('resource_id', $vaultfolder->id)->count();
 
         $payload = [
             'mftype' => MediafileTypeEnum::VAULT,
@@ -484,6 +595,9 @@ class RestVaultTest extends TestCase
             'resource_id' => $vaultfolder->id,
         ];
         $response = $this->actingAs($owner)->ajaxJSON('POST', route('mediafiles.store'), $payload);
+        $content = json_decode($response->content());
+        $uploadedMfIds = [];
+        $uploadedMfIds[] = $content->mediafile->id;
         $response->assertStatus(201);
 
         $payload = [
@@ -493,14 +607,24 @@ class RestVaultTest extends TestCase
             'resource_id' => $vaultfolder->id,
         ];
         $response = $this->actingAs($owner)->ajaxJSON('POST', route('mediafiles.store'), $payload);
+        $content = json_decode($response->content());
+        //$mfId2 = $content->mediafile->id;
+        $uploadedMfIds[] = $content->mediafile->id;
         $response->assertStatus(201);
 
-        $mediafiles = Mediafile::where('resource_type', 'vaultfolders')->get();
+        //$mediafiles = Mediafile::where('resource_type', 'vaultfolders')->where('resource_id', $vaultfolder->id)->get();
+        $mediafiles = Mediafile::where('resource_type', 'vaultfolders')
+            ->where('resource_id', $vaultfolder->id)
+            ->whereIn('id', $uploadedMfIds)
+            ->get();
         $this->assertNotNull($mediafiles);
         $this->assertEquals(2, $mediafiles->count());
+        //$this->assertEquals($preCount+2, $mediafiles->count());
 
         $mf1 = $mediafiles->shift();
         Storage::disk('s3')->assertExists($mf1->filename);
+//dd($filename1, $filename2, $mediafiles->toArray());
+//dd($filename1, $filename2, $mf1->toArray(), $mf2->toArray());
         $this->assertSame($filename1, $mf1->mfname);
         $this->assertSame(MediafileTypeEnum::VAULT, $mf1->mftype);
 
@@ -521,6 +645,7 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
+     *  @group regression-base
      */
     public function test_nonowner_can_not_upload_image_to_my_vault_folder()
     {
@@ -547,8 +672,9 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
+     *  @group regression-base
      */
-    // Creates post in first API call, then attaches selected mediafile in a second API call
+    // Creates post in first API call, then attaches selected mediafile in a second API call (associates as a reference)
     public function test_can_select_mediafile_from_vault_folder_to_attach_to_post_by_attach()
     {
         Storage::fake('s3');
@@ -594,8 +720,15 @@ class RestVaultTest extends TestCase
         $postR = $content->post;
         $post = Post::findOrFail($postR->id);
 
-        $response = $this->actingAs($owner)->ajaxJSON('PATCH', route('posts.attachMediafile', [$post->id, $mediafile->id]));
-        $response->assertStatus(200);
+        $payload = [
+            //'mftype' => MediafileTypeEnum::VAULT,
+            'mftype' => MediafileTypeEnum::POST,
+            'mediafile_id' => $mediafile->id, // the presence of this field is what tells controller method to create a reference, not upload content
+            'resource_type' => 'posts',
+            'resource_id' => $post->id,
+        ];
+        $response = $this->actingAs($owner)->ajaxJSON('POST', route('mediafiles.store'), $payload);
+        $response->assertStatus(201);
 
         // --
 
@@ -615,6 +748,7 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
+     *  @group regression-base
      */
     // Given one user who owns a vault + mediafile, and a different user who owns a timeline/post, 
     // neither user should be able to attach the mediafile to the post
@@ -657,17 +791,127 @@ class RestVaultTest extends TestCase
         $post = Post::findOrFail($content->post->id);
 
         // --- Try to attach image to post as post owner (but not mediafile owner) ---
-        $response = $this->actingAs($postOwner)->ajaxJSON('PATCH', route('posts.attachMediafile', [$post->id, $mediafile->id]));
+        //$response = $this->actingAs($postOwner)->ajaxJSON('PATCH', route('posts.attachMediafile', [$post->id, $mediafile->id]));
+        $payload = [
+            'mftype' => MediafileTypeEnum::POST,
+            'mediafile_id' => $mediafile->id,
+            'resource_type' => 'posts',
+            'resource_id' => $post->id,
+        ];
+        $response = $this->actingAs($postOwner)->ajaxJSON('POST', route('mediafiles.store'), $payload);
         $response->assertStatus(403);
 
         // --- Try to attach image to post as mediafile owner (but not post owner) ---
-        $response = $this->actingAs($mediafileowner)->ajaxJSON('PATCH', route('posts.attachMediafile', [$post->id, $mediafile->id]));
+        //$response = $this->actingAs($mediafileowner)->ajaxJSON('PATCH', route('posts.attachMediafile', [$post->id, $mediafile->id]));
+        $payload = [
+            'mftype' => MediafileTypeEnum::POST,
+            'mediafile_id' => $mediafile->id,
+            'resource_type' => 'posts',
+            'resource_id' => $post->id,
+        ];
+        $response = $this->actingAs($postOwner)->ajaxJSON('POST', route('mediafiles.store'), $payload);
         $response->assertStatus(403);
     }
 
     /**
      *  @group vault
      *  @group regression
+     *  @group regression-base
+     */
+    // Creates story in first API call, then attaches selected mediafile in a second API call (associates as a reference)
+    public function test_can_select_mediafile_from_vault_folder_to_attach_to_story_by_attach()
+    {
+        Storage::fake('s3');
+
+        $timeline = Timeline::has('stories', '>=', 1)->has('followers', '>=', 1)->first();
+        $owner = $timeline->user;
+        $fan = $timeline->followers[0];
+
+        // --- Upload image to vault ---
+        $filename = $this->faker->slug;
+        $file = UploadedFile::fake()->image($filename, 200, 200);
+
+        $primaryVault = Vault::primary($owner)->first();
+        $vaultfolder = Vaultfolder::isRoot()->where('vault_id', $primaryVault->id)->first(); // root
+
+        $payload = [
+            'mftype' => MediafileTypeEnum::VAULT,
+            'mediafile' => $file,
+            'resource_type' => 'vaultfolders',
+            'resource_id' => $vaultfolder->id,
+        ];
+        $response = $this->actingAs($owner)->ajaxJSON('POST', route('mediafiles.store'), $payload);
+        $response->assertStatus(201);
+        $content = json_decode($response->content());
+        $this->assertNotNull($content->mediafile);
+        $mediafile = Mediafile::find($content->mediafile->id);
+        $this->assertNotNull($mediafile);
+        $this->assertTrue( $vaultfolder->mediafiles->contains($mediafile->id) );
+
+        // --- Create a new story with image from vault ---
+
+        $stype = StoryTypeEnum::PHOTO;
+        $bgcolor = 'blue';
+        $content = $this->faker->realText;
+
+        $payload = [
+            'stype' => $stype,
+            'bgcolor' => $bgcolor,
+            'content' => $content,
+        ];
+        $response = $this->actingAs($owner)->ajaxJSON('POST', route('stories.store'), $payload);
+        $response->assertStatus(201);
+        $content = json_decode($response->content());
+        $this->assertNotNull($content->story);
+        $storyR = $content->story;
+        $story = Story::findOrFail($storyR->id);
+
+        // --- Create a free post with image from vault ---
+
+        //$filename = $this->faker->slug;
+        //$file = UploadedFile::fake()->image($filename, 200, 200);
+        $payload = [
+            'type' => PostTypeEnum::FREE,
+            'timeline_id' => $timeline->id,
+            'description' => $this->faker->realText,
+        ];
+        $response = $this->actingAs($owner)->ajaxJSON('POST', route('posts.store'), $payload);
+        $response->assertStatus(201);
+        $content = json_decode($response->content());
+        $this->assertNotNull($content->post);
+        $postR = $content->post;
+        $post = Post::findOrFail($postR->id);
+
+        $payload = [
+            'mftype' => MediafileTypeEnum::STORY,
+            'mediafile_id' => $mediafile->id, // the presence of this field is what tells controller method to create a reference, not upload content
+            'resource_type' => 'stories',
+            'resource_id' => $story->id,
+        ];
+        $response = $this->actingAs($owner)->ajaxJSON('POST', route('mediafiles.store'), $payload);
+        $response->assertStatus(201);
+
+        // --
+
+        $timeline->refresh();
+        $owner->refresh();
+        $story->refresh();
+        $mediafile = $story->mediafiles->shift();
+        $this->assertNotNull($mediafile, 'No mediafiles attached to story');
+
+        $response = $this->actingAs($fan)->ajaxJSON('GET', route('stories.show', $story->id));
+        $response->assertStatus(200);
+
+        $response = $this->actingAs($fan)->ajaxJSON('GET', route('mediafiles.show', $mediafile->id));
+        $response->assertStatus(200);
+    }
+
+    // -----
+
+    /**
+     *  @group vault
+     *  @group regression
+     *  @group regression-base
      */
     // Creates post and attaches selected mediafile in a single API call
     public function test_can_select_mediafile_from_vault_folder_to_attach_to_post_single_op()
@@ -707,7 +951,7 @@ class RestVaultTest extends TestCase
             'type' => PostTypeEnum::FREE,
             'timeline_id' => $timeline->id,
             'description' => $this->faker->realText,
-            'mediafiles' => [$mediafile->id],
+            'mediafiles' => [$mediafile->id], // %NOTE: sends array
         ];
         $response = $this->actingAs($owner)->ajaxJSON('POST', route('posts.store'), $payload);
         $response->assertStatus(201);
@@ -730,10 +974,11 @@ class RestVaultTest extends TestCase
         $response = $this->actingAs($fan)->ajaxJSON('GET', route('mediafiles.show', $mediafile->id));
         $response->assertStatus(200);
     }
-
     /**
      *  @group vault
      *  @group regression
+     *  @group regression-base
+     *  @group july05
      */
     public function test_can_select_mediafile_from_vault_folder_to_attach_to_story_single_op()
     {
@@ -743,7 +988,7 @@ class RestVaultTest extends TestCase
         $owner = $timeline->user;
         $fan = $timeline->followers[0];
 
-        // --- Upload image to vault ---
+        // --- Upload image file to vault ---
         $filename = $this->faker->slug;
         $file = UploadedFile::fake()->image($filename, 200, 200);
 
@@ -766,26 +1011,25 @@ class RestVaultTest extends TestCase
 
         // --- Create a free story with image from vault ---
 
-        $attrs = [
+        $payload = [
             'stype' => StoryTypeEnum::PHOTO,
             'content' => $this->faker->realText,
-        ];
-        $payload = [
-            'attrs' => json_encode($attrs),
-            'mediafile' => $mediafile->id,
+            'mediafile_id' => $mediafile->id,
         ];
         $response = $this->actingAs($owner)->ajaxJSON('POST', route('stories.store'), $payload);
         $response->assertStatus(201);
         $content = json_decode($response->content());
         $this->assertNotNull($content->story);
         $storyR = $content->story;
-        $story = Story::findOrFail($storyR->id);
+
+        $story = Story::find($storyR->id);
+        $this->assertNotNull($story);
 
         // --
 
         $timeline->refresh();
         $owner->refresh();
-        $story->refresh();
+
         $mediafile = $story->mediafiles->shift();
         $this->assertNotNull($mediafile, 'No mediafiles attached to story');
 
@@ -846,6 +1090,7 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
+     *  @group regression-base
      */
     public function test_select_vault_folder_to_share_via_signup_invite_to_non_registered_user_via_email()
     {
@@ -916,6 +1161,7 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
+     *  @group regression-base
      */
     public function test_select_subset_of_mediafiles_in_vaultfolder_to_share_via_signup_invite_to_non_registered_user_via_email()
     {
@@ -981,6 +1227,7 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
+     *  @group regression-base
      */
     public function test_select_vaultfolder_to_share_with_registered_user()
     {
@@ -1044,7 +1291,7 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
-     *  @group OFF-here
+     *  @group regression-base
      */
     public function test_select_mediafiles_in_vaultfolder_to_share_with_registered_user()
     {
@@ -1116,7 +1363,7 @@ class RestVaultTest extends TestCase
     protected function setUp() : void
     {
         parent::setUp();
-        $this->seed(TestDatabaseSeeder::class);
+        //$this->seed(TestDatabaseSeeder::class);
     }
 
     protected function tearDown() : void {
@@ -1127,6 +1374,7 @@ class RestVaultTest extends TestCase
     /**
      *  @group vault
      *  @group regression
+     *  @group regression-base
      *  @group todo (?)
      */
     /*

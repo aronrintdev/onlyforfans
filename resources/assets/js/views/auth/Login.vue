@@ -1,5 +1,5 @@
 <template>
-  <div class="container w-100 d-flex flex-column mt-5">
+  <div class="container w-100 d-flex flex-column mt-5 px-0">
     <b-card class="login-card mx-auto" no-body>
       <template #header>
         <div class="h2 text-center" v-text="$t('signInHeader')" />
@@ -9,52 +9,64 @@
           <router-link :to="{ name: 'register' }" v-text="$t('signUpLink')" />
         </div>
       </template>
-      <!-- Login Form -->
-      <div class="login-form p-3">
-        <div v-if="verrors && verrors.message">
-          <b-alert variant="danger" v-text="verrors.message" show />
+      <b-form @submit.prevent="login">
+        <!-- Login Form -->
+        <div class="login-form p-3">
+          <div v-if="verrors && verrors.message">
+            <b-alert variant="danger" v-text="verrors.message" show />
+          </div>
+          <b-form-group :invalid-feedback="verrors.email ? verrors.email[0] : null" :state="verrors.email ? false : null">
+            <b-form-input
+              id="input-email"
+              v-model="form.email"
+              :placeholder="$t('email')"
+              :state="verrors.email ? false : null"
+              @focus="clearVerrors"
+            />
+          </b-form-group>
+          <b-form-group :invalid-feedback="verrors.password ? verrors.password[0] : null" :state="verrors.password ? false : null">
+            <b-form-input
+              id="input-password"
+              type="password"
+              v-model="form.password"
+              :placeholder="$t('password')"
+              :state="verrors.password ? false : null"
+              @focus="clearVerrors"
+            />
+          </b-form-group>
+          <div class="text-right">
+            <!-- TODO: Link to forgot password page -->
+            <router-link :to="{ name: 'forgot-password' }" v-text="$t('forgotPasswordLink')" />
+          </div>
         </div>
-        <b-form-group :invalid-feedback="verrors.email ? verrors.email[0] : null" :state="verrors.email ? false : null">
-          <b-form-input
-            id="input-email"
-            v-model="form.email"
-            :placeholder="$t('email')"
-            :state="verrors.email ? false : null"
-            @focus="clearVerrors"
-          />
-        </b-form-group>
-        <b-form-group :invalid-feedback="verrors.password ? verrors.password[0] : null" :state="verrors.password ? false : null">
-          <b-form-input
-            id="input-password"
-            type="password"
-            v-model="form.password"
-            :placeholder="$t('password')"
-            :state="verrors.password ? false : null"
-            @focus="clearVerrors"
-          />
-        </b-form-group>
-        <div class="text-right">
-          <!-- TODO: Link to forgot password page -->
-          <router-link :to="{ name: 'forgot-password' }" v-text="$t('forgotPasswordLink')" />
-        </div>
-      </div>
 
-      <div class="p-3">
-        <b-btn variant="primary" class="cta-btn" block @click="login" :disabled="state === 'loading'">
-          <span v-if="state === 'form'">{{ $t('signInButton') }}</span>
-          <fa-icon v-else icon="spinner" spin />
-        </b-btn>
-      </div>
+        <div class="p-3">
+          <b-btn type="submit" variant="primary" class="cta-btn" block :disabled="state === 'loading'">
+            <span v-if="state === 'form'">{{ $t('signInButton') }}</span>
+            <fa-icon v-else icon="spinner" spin />
+          </b-btn>
+        </div>
+      </b-form>
 
       <div class="divider d-flex">
         <hr class="h-line flex-grow-1" />
         <div class="mx-3" v-text="$t('or')" />
         <hr class="h-line flex-grow-1" />
       </div>
-      <div class="third-party-sign-in p-3 text-center">
-        <img src="/images/facebook-login.png" alt="Facebook signin" @click="socialLogin('facebook')" class="social-icon facebook" />
-        <img src="/images/g-login-btn.png" alt="Google signin" @click="socialLogin('google')" class="social-icon" />
-        <img src="/images/twitter-login.png" alt="Twitter signin" @click="socialLogin('twitter')" class="social-icon" />
+
+      <div class="p-3 mb-3">
+        <b-btn class="cta-btn social-btn facebook" block @click="socialLogin('facebook')">
+          <fa-icon :icon="['fab', 'facebook-f']" class="mr-2" />
+          <span>{{ $t('continueWithFacebook') }}</span>
+        </b-btn>
+        <b-btn class="cta-btn social-btn google" block @click="socialLogin('google')">
+          <fa-icon :icon="['fab', 'google']" class="mr-2" />
+          <span>{{ $t('continueWithGoogle') }}</span>
+        </b-btn>
+        <b-btn class="cta-btn social-btn twitter" block @click="socialLogin('twitter')">
+          <fa-icon :icon="['fab', 'twitter']" class="mr-2" />
+          <span>{{ $t('continueWithTwitter') }}</span>
+        </b-btn>
       </div>
     </b-card>
 
@@ -93,24 +105,31 @@ export default {
       this.verrors = {}
     },
 
-    login() {
-      this.state = 'loading'
-      this.axios.post('/login', this.form).then((response) => {
+    async login() {
+      await this.$recaptchaLoaded();
+
+      // Execute reCAPTCHA with action "login".
+      const token = await this.$recaptcha('login');
+
+      console.log('recaptcha token: ', token);
+
+      this.state = 'loading';
+      this.axios.post('/login', { ...this.form, 'g-recaptcha-response': token }).then((response) => {
         if (response.data.redirect) {
           console.log('success', { 
             redirect: response.data 
           });
-          window.location = response.data.redirect
+          window.location = response.data.redirect;
         } else {
           // %TODO
         }
-        this.state = 'form'
+        this.state = 'form';
       }).catch( e => {
-        const response = e.response
+        const response = e.response;
         if (response.data && response.data.errors) {
-          this.verrors = response.data.errors // L8 convention is 'errors'
+          this.verrors = response.data.errors; // L8 convention is 'errors'
         }
-        this.state = 'form'
+        this.state = 'form';
       });
     },
     socialLogin: function(path) {
@@ -122,7 +141,8 @@ export default {
 
 <style lang="scss" scoped>
 .login-card {
-  width: 500px;
+  width: 100%;
+  max-width: 500px;
 }
 .h-line {
   color: var('--gray');
@@ -134,26 +154,10 @@ export default {
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-}
-.third-party-sign-in {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding-bottom: 2em !important;
 
-  img {
-    cursor: pointer; 
-    margin: 0 1em;
-  }
-  .social-icon {
-    width: 50px;
-    height: 50px;
-
-    &.facebook {
-      width: 52px;
-      height: 52px;
-    }
-  }
+  &.facebook { background-color: #3B5998; }
+  &.google { background-color: #dd4b39; }
+  &.twitter { background-color: #55ACEE; }
 }
 </style>
 
@@ -168,6 +172,9 @@ export default {
     "signInButton": "Sign In",
     "forgotPasswordLink": "Forgot Password?",
     "or": "or",
+    "continueWithFacebook": "Continue With Facebook",
+    "continueWithGoogle": "Continue With Google",
+    "continueWithTwitter": "Continue With Twitter"
   },
 }
 </i18n>

@@ -1,24 +1,22 @@
 <?php
 namespace App\Http\Controllers;
 
-use DB;
-use Auth;
-use Exception;
-use Throwable;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Http\Request;
-use App\Http\Resources\Post as PostResource;
-use App\Http\Resources\PostCollection;
-use App\Notifications\TipReceived;
-use App\Notifications\ResourcePurchased;
-use App\Models\Favorite;
 use App\Models\Post;
 use App\Rules\InEnum;
 use App\Models\Comment;
+use App\Models\Favorite;
 use App\Models\Timeline;
 use App\Models\Mediafile;
 use App\Enums\PostTypeEnum;
-use App\Enums\PaymentTypeEnum;
+use Illuminate\Http\Request;
+use App\Enums\MediafileTypeEnum;
+use App\Payments\PaymentGateway;
+use App\Models\Financial\Account;
+use App\Http\Resources\PostCollection;
+use App\Models\Casts\Money as CastsMoney;
+use App\Http\Resources\Post as PostResource;
+use App\Models\Tip;
+use Carbon\Carbon;
 
 class PostsController extends AppBaseController
 {
@@ -65,14 +63,22 @@ class PostsController extends AppBaseController
 
     public function store(Request $request)
     {
-        $request->validate([
+        $vrules = [
             'timeline_id' => 'required|uuid|exists:timelines,id',
-            'description' => 'required',
             'type' => [ 'sometimes', 'required', new InEnum(new PostTypeEnum()) ],
             'price' => 'sometimes|required|integer',
+            'price_for_subscribers' => 'sometimes|required|integer',
             'mediafiles' => 'array',
             'mediafiles.*.*' => 'integer|uuid|exists:mediafiles',
-        ]);
+            'expiration_period' => 'nullable|integer',
+            'schedule_datetime' => 'sometimes|date',
+        ];
+
+        if ( !$request->has('mediafiles') ) {
+            $vrules['description'] = 'string'; // %FIXME: can't make this required in this case as mediafiles may be attached in subsequent call
+        }
+
+        $request->validate($vrules);
 
         $timeline = Timeline::find($request->timeline_id); // timeline being posted on
 
@@ -86,13 +92,26 @@ class PostsController extends AppBaseController
         if ($request->input('schedule_datetime')) {
             $attrs['schedule_datetime'] = $request->input('schedule_datetime');
         }
+           
+        if ($request->input('expiration_period')) {
+            $attrs['expire_at'] = Carbon::now('UTC')->addDays($request->input('expiration_period'));
+        }
 
         $post = $timeline->posts()->create($attrs);
 
         if ( $request->has('mediafiles') ) {
+            // %FIXME: if this is indeed used by the Vue client code, we should change/refactor it to 
+            // instead upload using POST mediafiles.store calls that follow this posts.store
             foreach ( $request->mediafiles as $mfID ) {
-                $cloned = Mediafile::find($mfID)->doClone('posts', $post->id);
-                $post->mediafiles()->save($cloned);
+                $refMF = Mediafile::where('resource_type', 'vaultfolders')
+                    ->where('is_primary', true)
+                    ->findOrFail($mfID) // fail => 404
+                    ->diskmediafile->createReference(
+                        'posts',    // $resourceType
+                        $post->id,  // $resourceID
+                        'New Post', // $mfname - could be optionally passed as a query param %TODO
+                        MediafileTypeEnum::POST // $mftype
+                    );
             }
         }
         $post->refresh();
@@ -106,15 +125,19 @@ class PostsController extends AppBaseController
     {
         $this->authorize('update', $post);
 
+        if ($post->price->isPositive() && $post->sharees()->count() > 0) {
+            abort(403, 'Post has sharees');
+        }
+
         $request->validate([
             'description' => 'required',
             'type' => [ 'sometimes', 'required', new InEnum(new PostTypeEnum()) ],
             'price' => 'sometimes|required|integer',
+            'price_for_subscribers' => 'sometimes|required|integer',
             'mediafiles' => 'array',
             'mediafiles.*.*' => 'integer|uuid|exists:mediafiles',
-            'schedule_datetime' => 'integer',
+            'schedule_datetime' => 'nullable|date',
         ]);
-
 
         $post->fill($request->only([
             'description',
@@ -130,10 +153,25 @@ class PostsController extends AppBaseController
             }
         }
 
+        if ($request->has('price_for_subscribers')) {
+            if ($request->price_for_subscribers !== $post->price_for_subscribers) {
+                $post->price_for_subscribers = $request->price_for_subscribers;
+            }
+        }
+
         if ($request->has('mediafiles')) {
             foreach ($request->mediafiles as $mfID) {
-                $cloned = Mediafile::find($mfID)->doClone('posts', $post->id);
-                $post->mediafiles()->save($cloned);
+                // %NOTE: require src mediafile to be in vault
+                $refMF = Mediafile::where('resource_type', 'vaultfolders')
+                    ->where('is_primary', true)
+                    ->findOrFail($mfID)
+                    ->diskmediafile->createReference(
+                        'posts',    // $resourceType
+                        $post->id,  // $resourceID
+                        'New Post', // $mfname - could be optionally passed as a query param %TODO
+                        MediafileTypeEnum::POST // $mftype
+                    );
+                $post->refresh();
             }
         }
 
@@ -150,30 +188,12 @@ class PostsController extends AppBaseController
         ]);
     }
 
-    public function attachMediafile(Request $request, Post $post, Mediafile $mediafile)
-    {
-        // require mediafile to be in vault (?)
-        if ( empty($mediafile->resource) ) {
-            abort(400, 'source file must have associated resource');
-        }
-        if ( $mediafile->resource_type !== 'vaultfolders' ) {
-            abort(400, 'source file associated resource type must be vaultfolder');
-        }
-        $this->authorize('update', $post);
-        $this->authorize('update', $mediafile);
-        $this->authorize('update', $mediafile->resource);
-
-        $mediafile->doClone('posts', $post->id);
-        $post->refresh();
-
-        return response()->json([
-            'post' => $post,
-        ]);
-    }
-
     public function destroy(Request $request, Post $post)
     {
         $this->authorize('delete', $post);
+        if ($post->sharees()->count() > 0 ) {
+            abort(403, 'Post has sharees');
+        }
         $post->delete();
         return response()->json([]);
     }
@@ -190,63 +210,71 @@ class PostsController extends AppBaseController
         return new PostResource($post);
     }
 
-    public function tip(Request $request, Post $post)
+    /**
+     * Tips a post
+     *
+     * @param Request $request
+     * @param Post $post
+     * @return void
+     */
+    public function tip(Request $request, Post $post, PaymentGateway $paymentGateway)
     {
         $this->authorize('tip', $post);
 
         $request->validate([
-            'base_unit_cost_in_cents' => 'required|numeric',
+            'account_id' => 'required|uuid',
+            'amount' => 'required|numeric',
+            'currency' => 'required',
         ]);
 
-        $cattrs = [];
-        if ( $request->has('notes') ) {
-            $cattrs['notes'] = $request->notes;
-        }
+        $price = CastsMoney::toMoney($request->amount, $request->currency);
 
-        try {
-            $post->receivePayment(
-                PaymentTypeEnum::TIP,
-                $request->user(), // sender of tip
-                $request->base_unit_cost_in_cents,
-                $cattrs,
-            );
-        } catch(Exception | Throwable $e){
-            return response()->json(['message'=>$e->getMessage()], 400);
-        }
+        $account = Account::with('resource')->find($request->account_id);
+        $this->authorize('purchase', $account);
 
-        $post->user->notify(new TipReceived($post, $request->user(), ['amount'=>$request->base_unit_cost_in_cents]));
-
-        return response()->json([
-            'post' => $post,
+        $tip = Tip::create([
+            'sender_id'       => $request->user()->getKey(),
+            'receiver_id'     => $post->getOwner()->first()->getKey(),
+            'tippable_type'   => $post->getMorphString(),
+            'tippable_id'     => $post->getKey(),
+            'account_id'      => $account->getKey(),
+            'currency'        => $request->currency,
+            'amount'          => $request->amount,
+            'period'          => $request->period ?? 'single',
+            'period_interval' => $request->period_interval ?? 1,
+            'message'         => $request->message ?? null,
         ]);
+
+        return $paymentGateway->tip($account, $tip, $price);
     }
 
-    // %TODO: check if already purchased? -> return error
-    public function purchase(Request $request, Post $post)
+    /**
+     * Purchase a post
+     *
+     * @param Request $request
+     * @param Post $post
+     * @param PaymentGateway $paymentGateway
+     * @return array
+     */
+    public function purchase(Request $request, Post $post, PaymentGateway $paymentGateway)
     {
         $this->authorize('purchase', $post);
-        $purchaser = $request->user();
-        $cattrs = [ 'notes' => $request->note ?? '' ];
-        try {
-            $post->receivePayment(
-                PaymentTypeEnum::PURCHASE,
-                $purchaser, // payment *sender*
-                $post->price,
-                $cattrs
-            );
-            $purchaser->sharedposts()->attach($post->id, [
-                'cattrs' => json_encode($cattrs ?? []),
-            ]);
-        } catch(Exception | Throwable $e) {
-            throw $e;
-            return response()->json(['message'=>$e->getMessage()], 400);
+
+        $request->validate([
+            'account_id' => 'required|uuid',
+            'amount' => 'required|numeric',
+            'currency' => 'required',
+        ]);
+
+        $price = CastsMoney::toMoney($request->amount, $request->currency);
+        if ($post->verifyPrice($price) === false) {
+            abort(400, 'Invalid Price');
         }
 
-        $post->user->notify(new ResourcePurchased($post, $purchaser, ['amount'=>$post->price]));
+        $account = Account::with('resource')->find($request->account_id);
+        $this->authorize('purchase', $account);
 
-        return response()->json([
-            'post' => $post ?? null,
-        ]);
+        return $paymentGateway->purchase($account, $post, $price);
     }
 
     public function indexComments(Request $request, Post $post)

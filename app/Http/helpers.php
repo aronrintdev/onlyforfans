@@ -92,23 +92,6 @@ function suggestedGroups()
     return $suggested_groups;
 }
 
-function suggestedPages()
-{
-    $suggested_pages = '';
-    $suggested_pages = App\Page::whereNotIn('id', Auth::user()->pageLikes()->pluck('page_id'))->whereNotIn('id', Auth::user()->pages()->pluck('page_id'))->get();
-
-    if (count($suggested_pages) > 0) {
-        $min_item_page = Setting::get('min_items_page', 3);
-        if (count($suggested_pages) > (int) $min_item_page) {
-            $suggested_pages = $suggested_pages->random((int) $min_item_page);
-        }
-    } else {
-        $suggested_pages = '';
-    }
-
-    return $suggested_pages;
-}
-
 function verifiedBadge($timeline)
 {
     $code = '<svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-patch-check-fll" fill="#298ad3" xmlns="http://www.w3.org/2000/svg">

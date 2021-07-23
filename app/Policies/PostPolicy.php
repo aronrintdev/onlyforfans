@@ -16,7 +16,8 @@ class PostPolicy extends BasePolicy
         'contentView' => 'isOwner:pass isBlockedByOwner:fail',
         'like'        => 'isOwner:pass isBlockedByOwner:fail',
         'comment'     => 'isOwner:pass isBlockedByOwner:fail',
-        'indexComments' => 'isOwner:pass isBlockedByOwner:fail',
+        //'indexComments' => 'isOwner:pass isBlockedByOwner:fail',
+        'indexComments' => '',
         'purchase'    => 'isOwner:fail isBlockedByOwner:fail',
         'tip'         => 'isOwner:fail isBlockedByOwner:fail',
         'favorite'    => 'isOwner:pass isBlockedByOwner:fail',
@@ -59,6 +60,8 @@ class PostPolicy extends BasePolicy
         // content view (eg, images attached to the post) is checked granularly: dep on post type and user's 'status'
         switch ($post->type) {
         case PostTypeEnum::FREE:
+            $is = $post->timeline->followers->count()
+                && $post->timeline->followers->contains($user->id);
             return $post->timeline->followers->count()
                 && $post->timeline->followers->contains($user->id);
         case PostTypeEnum::SUBSCRIBER:

@@ -50,7 +50,10 @@ Vue.use(WhenAvailable);
 
 //import BootstrapVue from 'bootstrap-vue' //Importing
 import { BootstrapVue, BootstrapVueIcons } from 'bootstrap-vue';
-Vue.use(BootstrapVue); // Telling Vue to use this in whole application
+ // Telling Vue to use this in whole application
+Vue.use(BootstrapVue, {
+  BToast: { toaster: 'b-toaster-top-center'},
+});
 Vue.use(BootstrapVueIcons);
 
 import VueAnime from 'vue-animejs';
@@ -100,15 +103,54 @@ import VueCroppie from 'vue-croppie';
 import 'croppie/croppie.css' // import the croppie css manually
 Vue.use(VueCroppie);
 
-import 'swiper/swiper.min.css';
+/**
+ * vue2-touch-events
+ */
+import Vue2TouchEvents from 'vue2-touch-events';
+Vue.use(Vue2TouchEvents);
+
+import VueAwesomeSwiper from 'vue-awesome-swiper';
+import 'swiper/css/swiper.css';
+Vue.use(VueAwesomeSwiper);
+
 import 'photoswipe/dist/photoswipe.css';
 import 'photoswipe/dist/default-skin/default-skin.css';
+import Photoswipe from 'vue-pswipe';
+Vue.use(Photoswipe);
 
 /**
  * v-mask: https://github.com/probil/v-mask#readme
  */
 import { VueMaskDirective } from 'v-mask';
 Vue.directive('mask', VueMaskDirective);
+
+/**
+ * v-clipboard
+ */
+import VueClipboard from 'vue-clipboard2'
+VueClipboard.config.autoSetContainer = true // add this line
+Vue.use(VueClipboard)
+
+/**
+ * vue-social-sharing
+ */
+import VueSocialSharing from 'vue-social-sharing'
+Vue.use(VueSocialSharing);
+
+/**
+ * vue-plyr
+ */
+import VuePlyr from 'vue-plyr'
+import 'vue-plyr/dist/vue-plyr.css'
+Vue.use(VuePlyr, {
+  plyr: {}
+});
+
+/**
+ * vue-masonry
+ */
+import { VueMasonryPlugin } from 'vue-masonry'
+Vue.use(VueMasonryPlugin)
 
 /**
  * Next, we will create a fresh Vue application instance and attach it to
@@ -120,32 +162,7 @@ Vue.directive('mask', VueMaskDirective);
 //Vue.component('my-vault', require('./components/vault/Dashboard.vue').default);
 //Vue.component('my-saved', require('./components/saved/Dashboard.vue').default);
 
-// converts from cents to dollars, and formats
-Vue.filter('niceCurrency', function (valueInCents) {
-  let value = valueInCents ? (valueInCents/100) : 0;
-  return value.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
-});
-
-Vue.filter('niceGuid', function (v) {
-  return v.slice(-12);
-});
-Vue.filter('enumPostType', function (k) {
-  switch (k) {
-    case 'free':
-      return 'Free'
-    case 'price':
-      return 'Purchase-Only'
-    case 'paid':
-      return 'Subscriber-Only'
-  }
-});
-// Assumes post as input
-Vue.filter('isSubscriberOnly', function (p) {
-  return p.type === 'paid';
-});
-Vue.filter('isPurchaseable', function (p) {
-  return p.type === 'price';
-});
+require('./bootstrap/filters')
 
 export const eventBus = new Vue({ });
 

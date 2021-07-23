@@ -1,7 +1,7 @@
 <?php
 namespace Tests\Feature;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
+//use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 
 use Tests\TestCase;
@@ -14,11 +14,12 @@ use App\Models\Session;
 
 class RestSettingTest extends TestCase
 {
-    use RefreshDatabase, WithFaker;
+    use WithFaker;
 
     /**
      *  @group settings
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_update_single_notifications_setting_income_new_tip()
     {
@@ -53,6 +54,7 @@ class RestSettingTest extends TestCase
     /**
      *  @group settings
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_update_single_notifications_setting_post_new_comment()
     {
@@ -80,6 +82,7 @@ class RestSettingTest extends TestCase
     /**
      *  @group settings
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_toggle_global_email_notifications_setting()
     {
@@ -116,6 +119,7 @@ class RestSettingTest extends TestCase
     /**
      *  @group settings
      *  @group regression
+     *  @group regression-base
      */
     // This actually updates [users]
     public function test_can_batch_edit_settings_general()
@@ -142,6 +146,7 @@ class RestSettingTest extends TestCase
     /**
      *  @group settings
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_batch_validate_settings_general()
     {
@@ -188,6 +193,7 @@ class RestSettingTest extends TestCase
     /**
      *  @group settings
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_batch_edit_settings_profile()
     {
@@ -237,6 +243,7 @@ class RestSettingTest extends TestCase
     /**
      *  @group settings
      *  @group regression
+     *  @group regression-base
      */
     public function test_can_batch_validate_settings_profile()
     {
@@ -256,7 +263,6 @@ class RestSettingTest extends TestCase
     /**
      *  @group OFF-settings
      *  @group OFF-regression
-     *  @group OFF-here0513
      */
     // %TODO %ERIK has moved out of settings...
     public function test_can_batch_edit_settings_subscriptions()
@@ -286,7 +292,7 @@ class RestSettingTest extends TestCase
 
 
     /**
-     *  @group settings
+     *  @group OFF-settings
      *  @group OFF-regression
      */
     public function test_can_edit_email()
@@ -307,7 +313,7 @@ class RestSettingTest extends TestCase
 
 
     /**
-     *  @group settings
+     *  @group OFF-settings
      *  @group OFF-regression
      */
     public function test_can_set_localization()
@@ -329,7 +335,7 @@ class RestSettingTest extends TestCase
     }
 
     /**
-     *  @group settings
+     *  @group OFF-settings
      *  @group OFF-regression
      */
     public function test_can_set_subscription_price()
@@ -365,7 +371,7 @@ class RestSettingTest extends TestCase
     }
 
     /**
-     *  @group settings
+     *  @group OFF-settings
      *  @group OFF-regression
      */
     public function test_can_enable_referral_rewards()
@@ -389,7 +395,7 @@ class RestSettingTest extends TestCase
     }
 
     /**
-     *  @group settings
+     *  @group OFF-settings
      *  @group OFF-regression
      */
     public function test_can_enable_or_disable_follow_for_free()
@@ -428,7 +434,7 @@ class RestSettingTest extends TestCase
 
 
     /**
-     *  @group settings
+     *  @group OFF-settings
      *  @group OFF-regression
      */
     public function test_can_creator_edit_privacy() {
@@ -511,7 +517,7 @@ class RestSettingTest extends TestCase
     }
 
     /**
-     *  @group settings
+     *  @group OFF-settings
      *  @group OFF-regression
      */
     public function test_can_add_blocked_user() {
@@ -529,7 +535,7 @@ class RestSettingTest extends TestCase
 
 
     /**
-     *  @group settings
+     *  @group OFF-settings
      *  @group OFF-regression
      */
     public function test_can_add_watermark() {
@@ -560,7 +566,7 @@ class RestSettingTest extends TestCase
     }
 
     /**
-     *  @group settings
+     *  @group OFF-settings
      *  @group OFF-regression
      */
     public function test_can_view_creator_earnings_overview()
@@ -572,7 +578,7 @@ class RestSettingTest extends TestCase
     }
 
     /**
-     *  @group settings
+     *  @group OFF-settings
      *  @group OFF-regression
      */
     public function test_can_view_creator_login_sessions()
@@ -585,7 +591,7 @@ class RestSettingTest extends TestCase
 
 
     /**
-     *  @group settings
+     *  @group OFF-settings
      *  @group OFF-regression
      */
     public function test_can_view_creator_referrals()
@@ -603,7 +609,7 @@ class RestSettingTest extends TestCase
     protected function setUp() : void
     {
         parent::setUp();
-        $this->seed(TestDatabaseSeeder::class);
+        //$this->seed(TestDatabaseSeeder::class);
     }
 
     protected function tearDown() : void {

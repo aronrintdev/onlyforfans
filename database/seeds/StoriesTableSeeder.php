@@ -23,7 +23,7 @@ class StoriesTableSeeder extends Seeder
         $users = User::get();
 
         if ( $this->appEnv !== 'testing' ) {
-            $this->output->writeln("  - Users seeder: loaded ".$users->count()." users...");
+            $this->output->writeln("  - Stories seeder: loaded ".$users->count()." users...");
         }
 
         $this->doS3Upload = ( $this->appEnv !== 'testing' );
@@ -65,12 +65,29 @@ class StoriesTableSeeder extends Seeder
                     'stype'       => $stype,
                     'timeline_id' => $u->timeline->id,
                 ];
-                $story = Story::factory()->create($attrs);
+                $story = Story::create($attrs);
+
+                // update to 'realistic' timestamps...
+                $ts = $this->faker->dateTimeBetween($startDate='-3 months', $endDate='now');
+                $story->created_at = $ts;
+                $story->updated_at = $ts;
+                $story->save();
+                $story->storyqueues->each( function($sq) use($ts) {
+                    $sq->created_at = $ts;
+                    $sq->updated_at = $ts;
+                    $sq->save();
+                });
+
                 switch ($stype) {
                 case 'text':
                     break;
                 case 'image':
-                    $mf = FactoryHelpers::createImage(MediafileTypeEnum::STORY, $story->id, $this->doS3Upload);
+                    $mf = FactoryHelpers::createImage(
+                        $story->getPrimaryOwner(),
+                        MediafileTypeEnum::STORY, 
+                        $story->id, 
+                        $this->doS3Upload
+                    );
                     break;
                 }
             });

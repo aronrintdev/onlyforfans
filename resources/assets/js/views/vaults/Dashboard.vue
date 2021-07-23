@@ -1,16 +1,17 @@
 <template>
-  <div v-if="!isLoading" id="view-vault_dashboard" class="row">
+  <div v-if="!isLoading" id="view-vault_dashboard" class="row w-100">
     <div class="col-sm-12">
       <VaultDashboardComponent
         :vault_pkid="myVault.id"
         :vaultfolder_pkid="vaultRootFolder.id"
+        :session_user="session_user"
       />
     </div>
   </div>
 </template>
 
 <script>
-// Vaults Dashboard View
+import Vuex from 'vuex'
 import VaultDashboardComponent from '@components/vault/Dashboard'
 
 export default {
@@ -20,8 +21,10 @@ export default {
   },
 
   computed: {
+    ...Vuex.mapGetters(['session_user']),
+
     isLoading() {
-      return !this.myVault || !this.vaultRootFolder
+      return !this.myVault || !this.vaultRootFolder || !this.session_user
     },
   },
 

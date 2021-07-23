@@ -1,9 +1,8 @@
 <template>
   <div @click="$emit('toggled')" class="tag-clickable">
-    <b-icon
-      :icon="filled ? 'heart-fill' : 'heart'"
-      :variant="filled ? 'danger' : 'default'"
-      font-scale="1"
+    <fa-icon
+      :class="filled ? 'text-danger' : ''"
+      :icon="filled ? 'heart' : ['far', 'heart']"
     />
     <span v-if="showCount">
       ({{ count }})

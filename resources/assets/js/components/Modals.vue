@@ -47,7 +47,21 @@
       hide-footer
       body-class="p-0"
     >
+      <div
+        class="post-nav-arrows left"
+        v-if="showPostArrows"
+        @click="postModalAction('prev')"
+      >
+        <fa-icon :icon="['far', 'chevron-left']" size="lg" class="text-white" />
+      </div>
       <PostDisplay ref="postDisplay" :session_user="session_user" :post="selectedResource" :is_feed="false" />
+      <div
+        class="post-nav-arrows right"
+        v-if="showPostArrows"
+        @click="postModalAction('next')"
+      >
+        <fa-icon :icon="['far', 'chevron-right']" size="lg" class="text-white" />
+      </div>
     </b-modal>
 
     <b-modal
@@ -59,16 +73,47 @@
     >
       <ImageDisplay ref="ImageDisplay" :session_user="session_user" :mediafile="selectedResource" :is_feed="false" />
     </b-modal>
+
     <b-modal
-      modal-class="schedule-message-modal"
-      hide-header
-      centered
-      hide-footer
+      title="Scheduled Post"
       id="modal-schedule-datetime"
+      size="md"
+      hide-footer
+      body-class="p-0"
     >
-      <ScheduleDateTime ref="schedule_picker_modal" @apply="applySchedule" />
+      <ScheduleDateTime ref="schedule_picker_modal" :scheduled_at="scheduled_at" :for_edit="is_for_edit" />
     </b-modal>
 
+    <b-modal
+      id="edit-post"
+      size="lg"
+      hide-header
+      hide-footer
+      body-class="p-0"
+      no-close-on-backdrop
+    >
+      <EditPost ref="editPost" :post="selectedResource" />
+    </b-modal>
+
+    <b-modal
+      title="Expiration Period"
+      id="expiration-period"
+      hide-footer
+      size="md"
+      body-class="p-0"
+    >
+      <ExpirationPeriod ref="expirationPeriod" />
+    </b-modal>
+
+    <b-modal
+      title="Start Promotion Campaign"
+      id="modal-promotion-campaign"
+      hide-footer
+      size="lg"
+      body-class="p-0"
+    >
+      <PromotionCampaign ref="promotionCampaign" />
+    </b-modal>
   </div>
 </template>
 
@@ -85,6 +130,9 @@ import SendTip from '@components/modals/SendTip.vue'
 import PostDisplay from '@components/posts/Display'
 import ImageDisplay from '@components/timelines/elements/ImageDisplay'
 import ScheduleDateTime from '@components/modals/ScheduleDateTime.vue'
+import EditPost from '@components/modals/EditPost.vue'
+import ExpirationPeriod from '@components/modals/ExpirationPeriod.vue'
+import PromotionCampaign from '@components/modals/PromotionCampaign.vue'
 
 export default {
   name: 'Modals',
@@ -96,7 +144,10 @@ export default {
     SendTip,
     PostDisplay,
     ImageDisplay,
-    ScheduleDateTime
+    ScheduleDateTime,
+    EditPost,
+    ExpirationPeriod,
+    PromotionCampaign,
   },
 
   computed: {
@@ -112,6 +163,9 @@ export default {
       'modal-post': 'postDisplay',
       'modal-photo': 'ImageDisplay',
       'modal-schedule-datetime': 'ScheduleDateTime',
+      'edit-post': 'editPost',
+      'expiration-period': 'expirationPeriod',
+      'modal-promotion-campaign': 'promotionCampaign',
     },
     selectedTimeline: null,
     selectedUrl: null,
@@ -120,6 +174,9 @@ export default {
     selectedResourceId: null,
     subscribeOnly: false,
     modalPayload: null,
+    scheduled_at: null,
+    is_for_edit: null,
+    showPostArrows: false,
   }),
 
   methods: {
@@ -153,6 +210,7 @@ export default {
             break
           case 'show-post':
             this.selectedResource = data.post
+            this.showPostArrows = data.showArrows
             this.$bvModal.show('modal-post')
             break
           case 'show-photo':
@@ -160,7 +218,19 @@ export default {
             this.$bvModal.show('modal-photo')
             break
           case 'show-schedule-datetime':
+            this.scheduled_at = data.scheduled_at;
+            this.is_for_edit = data.is_for_edit;
             this.$bvModal.show('modal-schedule-datetime')
+            break
+          case 'edit-post':
+            this.selectedResource = data.post
+            this.$bvModal.show('edit-post')
+            break
+          case 'expiration-period':
+            this.$bvModal.show('expiration-period')
+            break
+          case 'modal-promotion-campaign':
+            this.$bvModal.show('modal-promotion-campaign')
             break
         }
       })
@@ -174,8 +244,8 @@ export default {
       })
 
     },
-    applySchedule: function(data) {
-      eventBus.$emit('apply-schedule', data)
+    postModalAction(action) {
+      eventBus.$emit('post-modal-actions', action);
     }
   },
 
@@ -186,6 +256,31 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.post-nav-arrows {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  top: calc(50vh - 90px);
+  transform: translateY(-50%);
+  border-radius: 50%;
+  cursor: pointer;
 
+  &:active {
+    svg {
+      color: rgba(255, 255, 255, 0.3) !important;
+    }
+  }
+
+  &.left {
+    left: -100px;
+  }
+  &.right {
+    right: -100px;
+  }
+  svg {
+    width: 100%;
+    height: 100%;
+  }
+}
 </style>
 

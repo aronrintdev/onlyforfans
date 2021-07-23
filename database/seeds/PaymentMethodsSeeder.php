@@ -17,7 +17,7 @@ class PaymentMethodsSeeder extends Seeder
         $this->initSeederTraits('PaymentMethodsSeeder');
 
         $iter = 1;
-        User::cursor()->each(function($user) use (&$iter) {
+        User::get()->each(function($user) use (&$iter) {
 
             $count = $this->faker->numberBetween(self::$MIN, self::$MAX);
 

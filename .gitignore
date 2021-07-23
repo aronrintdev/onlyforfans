@@ -50,10 +50,17 @@ Thumbs.db
 *.flv
 *.mov
 *.wmv
+
+# Env files
 .env
 .env.testing
+.env.production
+
+# Composer Files / Folder
 composer.lock
 vendor/
+
+# Laravel Storeage Folder
 storage/app/s3
 storage/framework/views
 storage/framework/*
@@ -65,8 +72,16 @@ storage/app/public
 storage/logs
 storage/debugbar
 
+# Meilisearch
+meilisearch
+data.ms/
+
+# Cache Files
 bootstrap/cache/services.php
 bootstrap/cache/*
+
+# Scripts
+dev-server-deploy.sh
 
 # IDE Helper
 _ide_helper.php
@@ -117,3 +132,8 @@ public/bar.jpg
 public/themes
 public/themes/*
 public/stats.json
+
+dot-npmrc--hide
+
+database/template.sqlite--bak
+dot-npmrc-save--0607

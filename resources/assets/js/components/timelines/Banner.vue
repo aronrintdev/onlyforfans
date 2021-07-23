@@ -4,16 +4,16 @@
       @mouseenter="toggleUploadCover(true)"
       @mouseleave="toggleUploadCover(false)"
       class="masthead text-white text-center"
-      v-bind:style="{ backgroundImage: 'url(' + timeline.cover.filepath + ')' }"
+      v-bind:style="{ backgroundImage: 'url(' + coverImage + ')' }"
     >
       <input type="file" id="cover-upload-btn" class="file-input" @change="onCoverChange" />
       <label v-if="uploadCoverVisible" for="cover-upload-btn" class="btn photo-btn">
-        <b-icon icon="camera-fill" scale="1.5" variant="light"></b-icon>
+        <fa-icon :icon="['far', 'camera']" size="2x" class="text-white" />
       </label>
       <div class="overlay" />
       <b-dropdown no-caret variant="transparent" id="profile-ctrl-dropdown" class="tag-ctrl">
         <template #button-content>
-          <b-icon icon="filter-left" font-scale="2" variant="light"></b-icon>
+          <fa-icon :icon="['far', 'bars']" size="2x" class="text-white" />
         </template>
         <b-dropdown-item>First Action</b-dropdown-item>
         <b-dropdown-item>Second Action</b-dropdown-item>
@@ -30,13 +30,13 @@
         thumbnail
         rounded="circle"
         class="w-100 h-100"
-        :src="timeline.avatar.filepath"
+        :src="avatarImage"
         :alt="timeline.name"
         :title="timeline.name"
       />
       <input type="file" id="avatar-upload-btn" class="file-input" @change="onAvatarChange" />
       <label v-if="uploadAvatarVisible" for="avatar-upload-btn" class="btn photo-btn">
-        <b-icon icon="camera-fill" scale="1.5" variant="light"></b-icon>
+        <fa-icon :icon="['far', 'camera']" size="2x" class="text-white" />
       </label>
     </section>
 
@@ -48,7 +48,7 @@
               {{ timeline.name }}
             </router-link>
             <span v-if="timeline.verified" class="verified-badge">
-              <b-icon icon="check-circle-fill" variant="primary" font-scale="1"></b-icon>
+              <fa-icon icon="check-circle" class="text-primary" />
             </span>
           </h2>
           <p class="avatar-mail my-0">
@@ -90,6 +90,16 @@ export default {
     isLoading() {
       return !this.session_user || !this.timeline
     },
+
+    coverImage() {
+      const { cover } = this.timeline
+      return cover ? cover.filepath : '/images/locked_post.png'
+    },
+
+    avatarImage() {
+      const { avatar } = this.timeline
+      return avatar ? avatar.filepath : '/images/default_avatar.svg'
+    }
   },
 
   data: () => ({
@@ -158,6 +168,7 @@ header.masthead {
   padding-bottom: 12rem;
   position: relative;
   background-color: #343a40;
+  background-position: center;
   background-size: cover;
   padding-top: 8rem;
   padding-bottom: 8rem;

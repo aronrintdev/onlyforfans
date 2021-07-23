@@ -2,7 +2,7 @@
 namespace Tests\Feature;
 
 use DB;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+//use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\Notification as NotificationFacade;
 //use Illuminate\Support\Facades\Mail;
@@ -21,11 +21,13 @@ use App\Enums\PostTypeEnum;
 
 class RestNotificationsTest extends TestCase
 {
-    use RefreshDatabase, WithFaker;
+    //use RefreshDatabase;
+    use WithFaker;
 
     /**
      *  @group notifications
      *  @group regression
+     *  @group regression-base
      */
     public function test_owner_can_list_notifications()
     {
@@ -70,6 +72,7 @@ class RestNotificationsTest extends TestCase
     /**
      *  @group notifications
      *  @group regression
+     *  @group regression-base
      */
     public function test_sends_email_on_like_when_enabled_in_settings()
     {
@@ -101,7 +104,7 @@ class RestNotificationsTest extends TestCase
 
         // remove any existing likes by fan...
         DB::table('likeables')
-            ->where('likee_id', $fan->id)
+            ->where('liker_id', $fan->id)
             ->where('likeable_type', 'posts')
             ->where('likeable_id', $post->id)
             ->delete();
@@ -111,7 +114,7 @@ class RestNotificationsTest extends TestCase
             'likeable_type' => 'posts',
             'likeable_id' => $post->id,
         ];
-        $response = $this->actingAs($fan)->ajaxJSON('PUT', route('likeables.update', $fan->id), $payload); // fan->likee
+        $response = $this->actingAs($fan)->ajaxJSON('PUT', route('likeables.update', $fan->id), $payload); 
         $response->assertStatus(200);
         $creator->refresh();
 
@@ -123,6 +126,7 @@ class RestNotificationsTest extends TestCase
     /**
      *  @group notifications
      *  @group regression
+     *  @group regression-base
      */
     public function test_sends_email_on_comment_when_enabled_in_settings()
     {
@@ -170,6 +174,7 @@ class RestNotificationsTest extends TestCase
     /**
      *  @group notifications
      *  @group regression
+     *  @group regression-base
      */
     public function test_does_not_send_email_on_like_when_disabled_in_settings()
     {
@@ -200,7 +205,7 @@ class RestNotificationsTest extends TestCase
 
         // remove any existing likes by fan...
         DB::table('likeables')
-            ->where('likee_id', $fan->id)
+            ->where('liker_id', $fan->id)
             ->where('likeable_type', 'posts')
             ->where('likeable_id', $post->id)
             ->delete();
@@ -210,7 +215,7 @@ class RestNotificationsTest extends TestCase
             'likeable_type' => 'posts',
             'likeable_id' => $post->id,
         ];
-        $response = $this->actingAs($fan)->ajaxJSON('PUT', route('likeables.update', $fan->id), $payload); // fan->likee
+        $response = $this->actingAs($fan)->ajaxJSON('PUT', route('likeables.update', $fan->id), $payload); 
         $response->assertStatus(200);
         $creator->refresh();
 
@@ -279,7 +284,7 @@ class RestNotificationsTest extends TestCase
     protected function setUp() : void
     {
         parent::setUp();
-        $this->seed(TestDatabaseSeeder::class);
+        //$this->seed(TestDatabaseSeeder::class);
     }
 
     protected function tearDown() : void {

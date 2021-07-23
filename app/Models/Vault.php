@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Models;
 
 use DB;
@@ -14,11 +13,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Vault extends BaseModel implements Guidable, Ownable
 {
-    use UsesUuid;
-    use HasFactory;
-    use OwnableFunctions;
-    use Sluggable;
-    use SluggableTraits;
+    use UsesUuid, HasFactory, OwnableFunctions, Sluggable, SluggableTraits;
 
     protected $guarded = ['id', 'created_at', 'updated_at'];
     public static $vrules = [];
@@ -63,11 +58,6 @@ class Vault extends BaseModel implements Guidable, Ownable
     public function vaultfolders()
     {
         return $this->hasMany(Vaultfolder::class);
-    }
-
-    public function getRootFolder()
-    {
-        return $this->vaultfolders()->whereNull('parent_id')->first();
     }
 
     public function getOwner(): ?Collection
@@ -171,6 +161,11 @@ class Vault extends BaseModel implements Guidable, Ownable
     public function isRoot() : bool
     {
         return is_null($this->parent_id);
+    }
+
+    public function getRootFolder() : ?Vaultfolder
+    {
+        return $this->vaultfolders()->whereNull('parent_id')->first();
     }
 
 }

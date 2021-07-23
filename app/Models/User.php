@@ -2,6 +2,7 @@
 namespace App\Models;
 
 use App\Enums\Financial\AccountTypeEnum;
+use App\Enums\ShareableAccessLevelEnum;
 use DB;
 use Auth;
 
@@ -10,6 +11,7 @@ use App\Interfaces\Blockable;
 use App\Interfaces\HasFinancialAccounts;
 use App\Interfaces\ShortUuid;
 use App\Models\Traits\UsesUuid;
+use App\Notifications\PasswordReset as PasswordResetNotification;
 
 use App\Interfaces\PaymentSendable;
 use App\Models\Financial\Account;
@@ -23,21 +25,89 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use InvalidArgumentException;
+use Laravel\Scout\Searchable;
 
+use App\Enums\VerifyStatusTypeEnum;
+
+/**
+ * @property string      $id              `uuid` | `unique`
+ * @property string      $email           email address | `unique`
+ * @property string      $username        `unique`
+ * @property string      $firstname       User defined First Name
+ * @property string      $lastname        User defined Last Name
+ * @property string      $password        Password Hash
+ * @property string      $remember_token  Laravel remember token
+ * @property bool        $email_verified  If email has been verified
+ * @property bool        $is_online       If user is currently online
+ * @property Carbon|null $last_logged     Last login time of user
+ * @property Carbon      $created_at
+ * @property Carbon      $updated_at
+ * @property Carbon|null $deleted_at
+ *
+ * @package App\Models
+ */
 class User extends Authenticatable implements Blockable, HasFinancialAccounts
 {
-    use HasRoles, HasFactory, Messagable, SoftDeletes, UsesUuid, MorphFunctions, Notifiable;
+    use HasRoles,
+        HasFactory,
+        Messagable,
+        SoftDeletes,
+        UsesUuid,
+        MorphFunctions,
+        Notifiable,
+        Searchable;
 
+    /* ---------------------------------------------------------------------- */
+    /*                            Model Properties                            */
+    /* ---------------------------------------------------------------------- */
+    #region Model Properties
     protected $connection = 'primary';
 
-    protected $appends = [ 'name', 'avatar', 'cover', 'about', ];
-    protected $guarded = [ 'id', 'created_at', 'updated_at' ];
-    protected $hidden = [ 'email', 'password', 'remember_token', 'verification_code', 'timeline'];
-    protected $dates = [ 'last_logged', ];
+    protected $appends = [
+        'name',
+        'avatar',
+        'cover',
+        'about',
+        'is_verified',
+        'verified_status',
+    ];
 
-    //--------------------------------------------
-    // Boot
-    //--------------------------------------------
+    protected $guarded = [
+        'id',
+        // 'password',
+        'remember_token',
+        'verification_code',
+        // 'email_verified',
+        'created_at',
+        'updated_at',
+    ];
+
+    protected $hidden = [
+        'email',
+        'password',
+        'remember_token',
+        'verification_code',
+        'timeline',
+        'real_firstname',
+        'real_lastname',
+    ];
+
+    protected $dates = [
+        'last_logged',
+    ];
+
+    #endregion Model Properties
+    /* ---------------------------------------------------------------------- */
+
+    /* ---------------------------------------------------------------------- */
+    /*                                  Boot                                  */
+    /* ---------------------------------------------------------------------- */
+    #region Boot
+    /**
+     * Laravel Boot function
+     * @return void
+     */
     public static function boot()
     {
         parent::boot();
@@ -45,6 +115,12 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
             $model->checkUsername();
             $model->remember_token = str_random(10);
             $model->verification_code = str_random(10);
+            if ( empty($model->firstname) ) {
+                $model->firstname = $model->real_firstname;
+            }
+            if ( empty($model->lastname) ) {
+                $model->lastname = $model->real_lastname;
+            }
         });
         self::created(function ($model) {
             UserSetting::create([
@@ -72,6 +148,9 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
         });
     }
 
+    #endregion Boot
+    /* ---------------------------------------------------------------------- */
+
 
     // Makes username a valid random username if it is null or empty.
     public function checkUsername()
@@ -81,9 +160,11 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
         }
     }
 
-    //--------------------------------------------
-    // %%% Relationships
-    //--------------------------------------------
+
+    /* ---------------------------------------------------------------------- */
+    /*                              Relationships                             */
+    /* ---------------------------------------------------------------------- */
+    #region Relationships
 
     public function settings() {
         return $this->hasOne(UserSetting::class);
@@ -107,18 +188,8 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
     }
 
     public function favorites()
-    { 
+    {
         return $this->hasMany(Favorite::class, 'user_id');
-    }
-
-    public function ledgersales()
-    {
-        return $this->hasMany(Fanledger::class, 'seller_id');
-    }
-
-    public function ledgerpurchases()
-    {
-        return $this->hasMany(Fanledger::class, 'purchaser_id');
     }
 
     public function timeline()
@@ -131,6 +202,11 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
         return $this->hasMany(Post::class, 'user_id');
     }
 
+    public function mycontacts()
+    {
+        return $this->belongsToMany(User::class, 'mycontacts', 'owner_id', 'contact_id');
+    }
+
     // timelines (users) I follow: premium *and* default subscribe (follow)
     public function followedtimelines()
     {
@@ -138,16 +214,33 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
             ->withPivot('access_level', 'shareable_type', 'sharee_id')->withTimestamps();
     }
 
+    public function followedForFreeTimelines()
+    {
+        return $this->morphedByMany(Timeline::class, 'shareable', 'shareables', 'sharee_id')
+            ->where('access_level', ShareableAccessLevelEnum::DEFAULT)
+            ->withPivot('access_level', 'shareable_type', 'sharee_id')->withTimestamps();
+    }
+
+    /**
+     * Posts user has purchased premium access to
+     */
+    public function purchasedPosts()
+    {
+        return $this->morphedByMany(Post::class, 'shareable', 'shareables', 'sharee_id')
+            ->where('access_level', ShareableAccessLevelEnum::PREMIUM)
+            ->withPivot('access_level', 'shareable_type', 'sharee_id')->withTimestamps();
+    }
+
     public function subscribedtimelines()
     {
         return $this->morphedByMany(Timeline::class, 'shareable', 'shareables', 'sharee_id')
-            ->where('access_level', 'premium')
+            ->where('access_level', ShareableAccessLevelEnum::PREMIUM)
             ->withPivot('access_level', 'shareable_type', 'sharee_id')->withTimestamps();
     }
 
     public function likedposts()
     {
-        return $this->morphedByMany(Post::class, 'likeable', 'likeables', 'likee_id')
+        return $this->morphedByMany(Post::class, 'likeable', 'likeables', 'liker_id')
             ->withTimestamps();
     }
 
@@ -167,37 +260,6 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
         return $this->belongsToMany('App\UserListType', 'user_lists', 'user_id', 'list_type_id');
     }
 
-    public function own_pages()
-    {
-        $admin_role_id = Role::where('name', 'admin')->first();
-        $own_pages = $this->pages()->where('role_id', $admin_role_id->id)->where('page_user.active', 1)->get();
-        $result = $own_pages ? $own_pages : false;
-        return $result;
-    }
-
-    public function own_groups()
-    {
-        $admin_role_id = Role::where('name', '=', 'admin')->first();
-        $own_groups = $this->groups()->where('role_id', $admin_role_id->id)->where('status', 'approved')->get();
-        $result = $own_groups ? $own_groups : false;
-        return $result;
-    }
-
-    public function payment()
-    {
-        return $this->hasOne('App\Payment');
-    }
-
-    public function groups()
-    {
-        return $this->belongsToMany('App\Group', 'group_user', 'user_id', 'group_id')->withPivot('role_id', 'status');
-    }
-
-    public function pageLikes()
-    {
-        return $this->belongsToMany('App\Page', 'page_likes', 'user_id', 'page_id');
-    }
-    
     public function vaults()
     {
         return $this->hasMany(Vault::class);
@@ -218,9 +280,67 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
         return $this->hasMany(Subscription::class);
     }
 
-    //--------------------------------------------
-    // %%% Accessors/Mutators | Casts
-    //--------------------------------------------
+    public function chatthreads() // ie threads this user 'participates' in
+    {
+        return $this->belongsToMany(Chatthread::class, 'chatthread_user', 'user_id', 'chatthread_id');
+    }
+
+    public function sentmessages()
+    {
+        return $this->hasMany(Chatmessage::class, 'sender_id');
+    }
+
+    public function commentLikes()
+    {
+        return $this->morphedByMany(Comment::class, 'likeable', 'likeables', 'liker_id')
+            ->withTimestamps();
+    }
+
+    public function comments()
+    {
+        return $this->hasMany(Comment::class);
+    }
+
+    public function mediafilesharesSent() { // logs
+        return $this->hasMany(Mediafilesharelog::class, 'sharer_id');
+    }
+
+    public function mediafilesharesReceived() { // logs
+        return $this->hasMany(Mediafilesharelog::class, 'sharee_id');
+    }
+
+    public function storyqueues() {
+        return $this->hasMany(Storyqueue::class, 'viewer_id');
+    }
+
+    // https://laravel.com/docs/8.x/eloquent-relationships#has-one-of-many
+    public function verifyrequest() 
+    {
+        return $this->hasOne(Verifyrequest::class, 'requester_id')->latestOfMany();
+    }
+
+    public function campaign()
+    {
+        return $this->hasOne(Campaign::class);
+    }
+
+//    public function lists()
+//    {
+//        return $this->belongsToMany(Lists::class, 'list_user', 'user_id', 'list_id')->withTimestamps();
+//    }
+
+//    public function userlists()
+//    {
+//        return $this->hasMany(Lists::class, 'creator_id');
+//    }
+
+    #endregion Relationships
+    /* ---------------------------------------------------------------------- */
+
+    /* ---------------------------------------------------------------------- */
+    /*                       Accessors/Mutators | Casts                       */
+    /* ---------------------------------------------------------------------- */
+    #region Accessors/Mutators | Casts
 
     // https://stackoverflow.com/questions/30226496/how-to-cast-eloquent-pivot-parameters
     /* %PSG: could not get this to work, just do 'manually' in controller or other calling code
@@ -230,30 +350,104 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
     ];
      */
 
+    public function getIsVerifiedAttribute($value) {
+        return $this->verifyrequest && ($this->verifyrequest->vstatus===VerifyStatusTypeEnum::VERIFIED);
+    }
+
+    public function getVerifiedStatusAttribute($value) {
+        if ( !$this->verifyrequest ) {
+            return VerifyStatusTypeEnum::NONE;
+        } 
+        return $this->verifyrequest->vstatus;
+    }
+
+    // %NOTE: Use this as the 'display name'. 'Real name' fields will hold the real name
     public function getNameAttribute($value)
     {
-        return $this->firstname;
+        if ( $this->firstname && $this->lastname ) {
+            return $this->firstname.' '.$this->lastname;
+        } else if ( $this->timeline->name ) {
+            return $this->timeline->name;
+        } else if ( $this->firstname ) {
+            return $this->firstname;
+        } else { 
+            return $this->username;
+        }
     }
 
     public function getAvatarAttribute($value)
     {
-        return $this->timeline->avatar
+        return ($this->timeline && $this->timeline->avatar)
             ? $this->timeline->avatar
-            : (object) ['filepath' => url('user/avatar/default-' . $this->gender . '-avatar.png')];
+            : (object) ['filepath' => url('/images/default_avatar.svg')];
+            // : (object) ['filepath' => url('user/avatar/default-' . $this->gender . '-avatar.png')];
     }
 
     public function getCoverAttribute($value)
     {
-        return $this->timeline->cover
+        return ($this->timeline && $this->timeline->cover)
             ? $this->timeline->cover
-            : (object) ['filepath' => url('user/avatar/default-' . $this->gender . '-cover.png')];
+            : (object) ['filepath' => url('/images/locked_post.png')];
             //: (object) ['filepath' => url('user/cover/default-' . $this->gender . '-cover.png')]; // %TODO %FIXME
     }
 
     public function getAboutAttribute($value)
     {
-        return $this->timeline->about ? $this->timeline->about : null;
+        return ($this->timeline && $this->timeline->about) ? $this->timeline->about : null;
     }
+
+    #endregion Accessors/Mutators | Casts
+    /* ---------------------------------------------------------------------- */
+
+    /* ---------------------------------------------------------------------- */
+    /*                               Searchable                               */
+    /* ---------------------------------------------------------------------- */
+    #region Searchable
+
+    /**
+     * Name of the search index associated with this model
+     * @return string
+     */
+    public function searchableAs()
+    {
+        return "users_index";
+    }
+
+    /**
+     * Get value used to index the model
+     * @return mixed
+     */
+    public function getScoutKey()
+    {
+        return $this->getKey();
+    }
+
+    /**
+     * Get key name used to index the model
+     * @return string
+     */
+    public function getScoutKeyName()
+    {
+        return 'id';
+    }
+
+    /**
+     * What model information gets stored in the search index
+     * @return array
+     */
+    public function toSearchableArray()
+    {
+        return [
+            'name'     => isset($this->timeline) ? $this->timeline->name : '',
+            'slug'     => isset($this->timeline) ? $this->timeline->slug : '',
+            'username' => $this->username,
+            'email'    => $this->email,
+            'id'       => $this->getKey(),
+        ];
+    }
+
+    #endregion Searchable
+    /* ---------------------------------------------------------------------- */
 
     // ---
 
@@ -270,17 +464,6 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
     public function deleteUserSettings($user_id)
     {
         return DB::table('user_settings')->where('user_id', $user_id)->delete();
-    }
-
-    public function commentLikes()
-    {
-        return $this->morphedByMany(Comment::class, 'likeable', 'likeables', 'likee_id')
-            ->withTimestamps();
-    }
-
-    public function comments()
-    {
-        return $this->hasMany(Comment::class);
     }
 
     public function deleteOthers()
@@ -306,7 +489,10 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
         }
     }
 
-    // --- Blockable ---
+    /* ---------------------------------------------------------------------- */
+    /*                                Blockable                               */
+    /* ---------------------------------------------------------------------- */
+    #region Blockable
 
     public function blockedUsers()
     {
@@ -329,7 +515,13 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
         $resource->blockedBy()->save($this);
     }
 
-    // --- %%Can Own ---
+    #endregion Blockable
+    /* ---------------------------------------------------------------------- */
+
+    /* ---------------------------------------------------------------------- */
+    /*                                 Can Own                                */
+    /* ---------------------------------------------------------------------- */
+    #region Can Own
 
     // Check if user owns an ownable resource
     public function isOwner(Ownable $resource): bool
@@ -339,61 +531,21 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
         });
     }
 
-    public function events()
-    {
-        return $this->belongsToMany('App\Event', 'event_user', 'user_id', 'event_id');
-    }
+    #endregion Can Own
+    /* ---------------------------------------------------------------------- */
 
-    public function get_eventuser($id)
-    {
-        return $this->events()->where('events.id', $id)->first();
-    }
 
     public function isAdmin() : bool
     {
         return $this->roles()->pluck('name')->contains('super-admin');
     }
 
-    public function is_eventadmin($user_id, $event_id) {
-        $chk_isadmin = Event::where('id', $event_id)->where('user_id', $user_id)->first();
-
-        $result = $chk_isadmin ? true : false;
-
-        return $result;
-    }
-
-    public function getEvents()
-    {
-        $result = [];
-        $guestevents =  $this->events()->get();
-        if ($guestevents) {
-            foreach ($guestevents as $guestevent) {
-                if (!$this->is_eventadmin(Auth::user()->id, $guestevent->id)) {
-                    array_push($result, $guestevent);
-                }
-            }
-        }
-        return $result;
-    }
-
-    public function is_groupAdmin($user_id, $group_id)
-    {
-        $admin_role_id = Role::where('name', 'admin')->first();
-        $groupUser = $this->groups()->where('group_id', $group_id)->where('user_id', $user_id)->where('role_id', $admin_role_id->id)->where('status', 'approved')->first();
-        return $groupUser ? true : false;
-    }
-
-    public function is_groupMember($user_id, $group_id)
-    {
-        $admin_role_id = Role::where('name', 'admin')->first();
-        $groupMember = $this->groups()->where('group_id', $group_id)->where('user_id', $user_id)->where('role_id', '!=', $admin_role_id->id)->where('status', 'approved')->first();
-        return $groupMember ? true : false;
-    }
 
     // total sales in cents
     public function getSales() : int
     {
-        return Fanledger::where('seller_id', $this->id)->sum('total_amount');
+        // TODO: Hook up to earnings controller
+        return 0;
     }
 
 
@@ -409,7 +561,7 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
             'follower_count'   => $timeline->followers->count(),
             'following_count'  => $timeline->user->followedtimelines->count(),
             'subscribed_count' => 0, // %TODO $sessionUser->timeline->subscribed->count()
-            'earnings'         => $this->getSales(),
+            'earnings'         => '', // TODO: Hook up to earnings controller
             'website'          => '', // %TODO
             'instagram'        => '', // %TODO
             'city'             => (isset($this->settings)) ? $this->settings->city : null,
@@ -423,7 +575,9 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
         return $sales > 0;
     }
 
-    /* ------------------------ HasFinancialAccounts ------------------------ */
+    /* ---------------------------------------------------------------------- */
+    /*                          HasFinancialAccounts                          */
+    /* ---------------------------------------------------------------------- */
     #region HasFinancialAccounts
     public function getInternalAccount(string $system, string $currency): Account
     {
@@ -458,79 +612,70 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
     }
 
     #endregion HasFinancialAccounts
+    /* ---------------------------------------------------------------------- */
 
-    /**
-     * A user can have many chatthreads
-     */
-    public function chatthreads()
-    {
-        return $this->hasMany(ChatThread::class, 'sender_id');
+    // %%% --- Misc. ---
+
+    // https://laravel.com/docs/8.x/passwords#reset-email-customization
+    public function sendPasswordResetNotification($token) {
+        $this->notify( new PasswordResetNotification($user, ['token'=>$token]) );
     }
 
-    public function lists()
-    {
-        return $this->belongsToMany(Lists::class, 'list_user', 'user_id', 'list_id')->withTimestamps();
-    }
-
-    public function userlists()
-    {
-        return $this->hasMany(Lists::class, 'creator_id');
-    }
 }
 
     /*
-    public function getOthersSettings($username)
-    {
-        $timeline = Timeline::where('username', $username)->first();
-        $user = self::where('timeline_id', $timeline->id)->first();
-        $result = DB::table('user_settings')->where('user_id', $user->id)->first();
-
-        return $result;
-    }
-    public function getUserPrivacySettings($loginId, $others_id)
-    {
-        $timeline_post_privacy = '';
-        $timeline_post = '';
-        $user_post = '';
-        $result = '';
-
-        $live_user_settings = $this->getUserSettings($others_id);
-
-        if ($live_user_settings) {
-            $timeline_post_privacy = $live_user_settings->timeline_post_privacy;
-            $user_post_privacy = $live_user_settings->post_privacy;
-        }
-
-        //start $this if block is for timeline post privacy settings
-        if ($loginId != $others_id) {
-            if ($timeline_post_privacy != null && $timeline_post_privacy == 'only_follow') {
-                $isFollower = $this->chkMyFollower($others_id, $loginId);
-                if ($isFollower) {
-                    $timeline_post = true;
-                }
-            } elseif ($timeline_post_privacy != null && $timeline_post_privacy == 'everyone') {
-                $timeline_post = true;
-            } elseif ($timeline_post_privacy != null && $timeline_post_privacy == 'nobody') {
-                $timeline_post = false;
-            }
-
-            //start $this if block is for user post privacy settings
-            if ($user_post_privacy != null && $user_post_privacy == 'only_follow') {
-                $isFollower = $this->chkMyFollower($others_id, $loginId);
-                if ($isFollower) {
-                    $user_post = 'user';
-                }
-            } elseif ($user_post_privacy != null && $user_post_privacy == 'everyone') {
-                $user_post = 'user';
-            }
-        } else {
-            $timeline_post = true;
-            $user_post = 'user';
-        }
-        //End
-        $result = $timeline_post . '-' . $user_post;
-
-        return $result;
-    }
+//    public function getOthersSettings($username)
+//    {
+//        $timeline = Timeline::where('username', $username)->first();
+//        $user = self::where('timeline_id', $timeline->id)->first();
+//        $result = DB::table('user_settings')->where('user_id', $user->id)->first();
+//
+//        return $result;
+//    }
+//    public function getUserPrivacySettings($loginId, $others_id)
+//    {
+//        $timeline_post_privacy = '';
+//        $timeline_post = '';
+//        $user_post = '';
+//        $result = '';
+//
+//        $live_user_settings = $this->getUserSettings($others_id);
+//
+//        if ($live_user_settings) {
+//            $timeline_post_privacy = $live_user_settings->timeline_post_privacy;
+//            $user_post_privacy = $live_user_settings->post_privacy;
+//        }
+//
+//        //start $this if block is for timeline post privacy settings
+//        if ($loginId != $others_id) {
+//            if ($timeline_post_privacy != null && $timeline_post_privacy == 'only_follow') {
+//                $isFollower = $this->chkMyFollower($others_id, $loginId);
+//                if ($isFollower) {
+//                    $timeline_post = true;
+//                }
+//            } elseif ($timeline_post_privacy != null && $timeline_post_privacy == 'everyone') {
+//                $timeline_post = true;
+//            } elseif ($timeline_post_privacy != null && $timeline_post_privacy == 'nobody') {
+//                $timeline_post = false;
+//            }
+//
+//            //start $this if block is for user post privacy settings
+//            if ($user_post_privacy != null && $user_post_privacy == 'only_follow') {
+//                $isFollower = $this->chkMyFollower($others_id, $loginId);
+//                if ($isFollower) {
+//                    $user_post = 'user';
+//                }
+//            } elseif ($user_post_privacy != null && $user_post_privacy == 'everyone') {
+//                $user_post = 'user';
+//            }
+//        } else {
+//            $timeline_post = true;
+//            $user_post = 'user';
+//        }
+//        //End
+//        $result = $timeline_post . '-' . $user_post;
+//
+//        return $result;
+//    }
      */
 

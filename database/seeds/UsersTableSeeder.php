@@ -26,11 +26,15 @@ class UsersTableSeeder extends Seeder
 
         if ( $this->appEnv !== 'testing' ) { // if tests have pre-existing admins we'll need to make sure a random user chose is *not* an admin
 
+            $this->output->writeln("  - Creating admin users...");
+
             // +++ Create admin users +++
             $manualUsers = [
                 [
                     'name' => 'Peter G',
                     'username' => 'peter',
+                    'real_firstname' => 'Peter',
+                    'real_lastname' => 'G',
                     'email' => 'peter@peltronic.com',
                     'gender' => 'male',
                     'city' => 'Las Vegas',
@@ -41,6 +45,8 @@ class UsersTableSeeder extends Seeder
                 ],
                 [
                     'name' => 'Erik H',
+                    'real_firstname' => 'Erik',
+                    'real_lastname' => 'H',
                     'username' => 'erikh',
                     'email' => 'erik@hattervigsoftwaresolutions.com',
                     'gender' => 'male',
@@ -51,18 +57,22 @@ class UsersTableSeeder extends Seeder
                     'email_verified' => 1,
                 ],
                 [
-                    'name' => 'Jeremy F',
-                    'username' => 'jeremeyf',
-                    'email' => 'jeremy.fall@contentmarketingleads.com',
+                    'name' => 'Niko A',
+                    'real_firstname' => 'Niko',
+                    'real_lastname' => 'A',
+                    'username' => 'nikoa',
+                    'email' => 'nikoanzai@gmail.com',
                     'gender' => 'male',
-                    'city' => 'Las Vegas',
-                    'country' => 'US',
+                    'city' => 'Tokyo',
+                    'country' => 'Japan',
                     'is_follow_for_free' => 1, // if not free need to set price as well
                     'password' => bcrypt('foo-123'), // secret
                     'email_verified' => 1,
                 ],
                 [
                     'name' => 'Matt M',
+                    'real_firstname' => 'Matt',
+                    'real_lastname' => 'M',
                     'username' => 'mattm',
                     'email' => 'matt@mjmwebdesign.com',
                     'gender' => 'male',
@@ -74,12 +84,27 @@ class UsersTableSeeder extends Seeder
                 ],
                 [
                     'name' => 'Chad J',
+                    'real_firstname' => 'Chad',
+                    'real_lastname' => 'J',
                     'username' => 'chadj',
                     'email' => 'realchadjohnson@gmail.com',
                     'gender' => 'male',
                     'city' => 'Las Vegas',
                     'country' => 'US',
                     'is_follow_for_free' => 1, // if not free need to set price as well
+                ],
+                [
+                    'name' => 'Fujio H',
+                    'real_firstname' => 'Fujio',
+                    'real_lastname' => 'H',
+                    'username' => 'fujioh',
+                    'email' => 'harouf@outlook.com',
+                    'gender' => 'male',
+                    'city' => 'Tokyo',
+                    'country' => 'Japan',
+                    'is_follow_for_free' => 1, // if not free need to set price as well
+                    'password' => bcrypt('foo-123'), // secret
+                    'email_verified' => 1,
                 ],
             ];
 
@@ -109,8 +134,18 @@ class UsersTableSeeder extends Seeder
 
             if ( $this->appEnv !== 'testing' ) {
                 $this->output->writeln("Creating new user with avatar & cover: " . $u->name." (iter: $iter)");
-                $avatar = FactoryHelpers::createImage(MediafileTypeEnum::AVATAR, $u->id, $this->doS3Upload);
-                $cover = FactoryHelpers::createImage(MediafileTypeEnum::COVER, $u->id, $this->doS3Upload);
+                $avatar = FactoryHelpers::createImage(
+                    $u,
+                    MediafileTypeEnum::AVATAR, 
+                    $u->id, 
+                    $this->doS3Upload
+                );
+                $cover = FactoryHelpers::createImage(
+                    $u,
+                    MediafileTypeEnum::COVER, 
+                    $u->id, 
+                    $this->doS3Upload
+                );
             } else {
                 //$this->output->writeln("Creating new user without avatar & cover: " . $u->name." (iter: $iter)");
                 $avatar = null;
@@ -123,7 +158,7 @@ class UsersTableSeeder extends Seeder
             $timeline->avatar_id = $avatar->id ?? null;
             $timeline->cover_id = $cover->id ?? null;
             $timeline->is_follow_for_free = $isFollowForFree;
-            $timeline->price = $isFollowForFree ? 0 : $this->faker->randomFloat(2, 1, 300);
+            $timeline->price = $isFollowForFree ? 0 : $this->faker->numberBetween(300, 4000);
             $timeline->save();
             $isFollowForFree = !$isFollowForFree; // toggle so we get at least one of each
 
@@ -149,7 +184,7 @@ class UsersTableSeeder extends Seeder
     {
         static $max = [
             'testing' => [
-                'users' => 7,
+                'users' => 18,
             ],
             'local' => [
                 'users' => 50,

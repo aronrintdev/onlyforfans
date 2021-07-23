@@ -4,21 +4,27 @@ namespace App\Models;
 
 use Money\Money;
 use Carbon\Carbon;
+use LogicException;
+use App\Apis\Segpay\Api;
+use App\Interfaces\Ownable;
 use InvalidArgumentException;
 use App\Models\Traits\UsesUuid;
 use App\Interfaces\Subscribable;
 use App\Models\Financial\Account;
 use Illuminate\Support\Collection;
+use App\Models\Traits\OwnableTraits;
+use Illuminate\Support\Facades\Config;
 use App\Enums\Financial\AccountTypeEnum;
 use App\Models\Casts\Money as CastsMoney;
 use Illuminate\Database\Eloquent\Builder;
 use Carbon\Exceptions\InvalidCastException;
 use App\Enums\Financial\TransactionTypeEnum;
-use App\Interfaces\Ownable;
 use App\Models\Financial\Traits\HasCurrency;
-use App\Models\Traits\OwnableTraits;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Carbon\Exceptions\InvalidIntervalException;
+use Illuminate\Database\Eloquent\InvalidCastException as EloquentInvalidCastException;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 /**
  * Subscription model
@@ -78,18 +84,57 @@ class Subscription extends Model implements Ownable
         'price' => CastsMoney::class,
     ];
 
+    //--------------------------------------------
+    // Boot
+    //--------------------------------------------
+
+    public static function boot()
+    {
+        parent::boot();
+
+        static::created(function ($model) {
+            if ( $model->subscribable_type === Timeline::getMorphStringStatic() ) {
+                // Add Contacts for subscribee and subscriber
+                // Note: addContacts function prevents duplicates in Mycontacts
+                Mycontact::addContacts(new Collection([
+                    $model->user,
+                    $model->subscribable->getOwner()->first(),
+                ]));
+            }
+        });
+    }
+
     /* --------------------------- Relationships ---------------------------- */
     #region Relationships
-    public function subscribable()
+
+    /**
+     * The item being subscribed to. e.i. Timeline
+     * @return MorphTo
+     *
+     * %PSG -> %ERIK : is this the person (timeline) who 'owns' (receiveds) the subscripton? (subscribEE)?
+     * %Erik : No, this is the item being subscribed to.
+     */
+    public function subscribable() 
     {
         return $this->morphTo();
     }
 
+    /**
+     * The user who is subscribing to the subscribable item
+     * @return BelongsTo
+     *
+     * %PSG -> %ERIK : is this the person doing the subscribing (subscribER)?
+     * %Erik : Yes, this is the subscriber.
+     */
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * The financial account that is being used for subscription payments
+     * @return BelongsTo
+     */
     public function account()
     {
         return $this->belongsTo(Account::class);
@@ -122,6 +167,17 @@ class Subscription extends Model implements Ownable
     }
 
     /**
+     * Only return not canceled subscriptions
+     *
+     * @param  Builder  $query
+     * @return Builder
+     */
+    public function scopeNotCanceled($query)
+    {
+        return $query->whereNull('canceled_at');
+    }
+
+    /**
      * Return only due subscriptions
      *
      * @param  Builder  $query
@@ -143,6 +199,17 @@ class Subscription extends Model implements Ownable
         return $query->where('active', false);
     }
 
+    /**
+     * Items that are not canceled that are due for payment by a day or more
+     *
+     * @param  Builder  $query
+     * @return Builder
+     */
+    public function scopeExpired($query)
+    {
+        return $query->notCanceled()->where('next_payment_at', '<=', Carbon::now()->addDay());
+    }
+
     #endregion Scopes
 
 
@@ -160,6 +227,10 @@ class Subscription extends Model implements Ownable
         // if ( is segpay subscription ) {
         //     Call SRS cancel account
         // }
+        if (isset($this->custom_attributes['segpay_purchase_id'])) {
+            $response = Api::cancelSubscription($this->custom_attributes['segpay_purchase_id']);
+            // TODO: Check response message from cancel
+        }
 
         // Check if passed next bill date
         $this->canceled_at = Carbon::now();
@@ -171,6 +242,16 @@ class Subscription extends Model implements Ownable
         }
         $this->save();
         return;
+    }
+
+    public function reactivate()
+    {
+        $transactions = $this->process();
+        if (isset($transactions)) {
+            $this->canceled_at = null;
+            $this->save();
+        }
+        return $transactions;
     }
 
     /**
@@ -190,15 +271,15 @@ class Subscription extends Model implements Ownable
         }
 
         if ($this->account->type === AccountTypeEnum::IN) {
-            $this->account->moveToInternal($this->price);
+            $inTransactions = $this->account->moveToInternal($this->price);
             $transactions = $this->account->getInternalAccount()->moveTo(
                 $this->subscribable->getOwnerAccount($this->account->system, $this->account->currency),
                 $this->price,
                 [
                     'ignoreBalance'    => true,
                     'type'             => TransactionTypeEnum::SUBSCRIPTION,
-                    'purchasable_type' => $this->subscribable->getMorphString(),
-                    'purchasable_id'   => $this->subscribable->getKey(),
+                    'resource_type' => $this->subscribable->getMorphString(),
+                    'resource_id'   => $this->subscribable->getKey(),
                     'metadata'         => ['subscription' => $this->getKey()],
                 ]
             );
@@ -216,6 +297,10 @@ class Subscription extends Model implements Ownable
                 $options['access_meta'] ?? [],
             );
 
+            if (isset($inTransactions)) {
+                $transactions['inTransactions'] = $inTransactions;
+            }
+
             return $transactions;
         } else if ($this->account->type === AccountTypeEnum::INTERNAL) {
             $transactions = $this->account->moveTo(
@@ -223,8 +308,8 @@ class Subscription extends Model implements Ownable
                 $this->price,
                 [
                     'type'             => TransactionTypeEnum::SUBSCRIPTION,
-                    'purchasable_type' => $this->subscribable->getMorphString(),
-                    'purchasable_id'   => $this->subscribable->getKey(),
+                    'resource_type' => $this->subscribable->getMorphString(),
+                    'resource_id'   => $this->subscribable->getKey(),
                     'metadata'         => ['subscription' => $this->getKey()],
                 ]
             );
@@ -245,8 +330,6 @@ class Subscription extends Model implements Ownable
             return $transactions;
         }
         return false;
-
-
     }
 
     /**
@@ -290,6 +373,37 @@ class Subscription extends Model implements Ownable
     #region Verifications
 
     /**
+     * Checks if user is currently subscribed to a subscribable item
+     *
+     * @param User $user
+     * @param Subscribable $subscribable
+     * @return bool
+     */
+    public static function isSubscribed(User $user, Subscribable $subscribable): bool
+    {
+        return Subscription::where('user_id', $user->getKey())
+            ->where('subscribable_type', $subscribable->getMorphString())
+            ->where('subscribable_id', $subscribable->getKey())
+            ->whereNotNull('canceled_at')
+            ->count() > 0;
+    }
+
+    public static function canResubscribe(User $user, Subscribable $subscribable): bool
+    {
+        return Subscription::where('user_id', $user->getKey())
+            ->where('subscribable_type', $subscribable->getMorphString())
+            ->where('subscribable_id', $subscribable->getKey())
+            ->canceled()->where(
+                'canceled_at',
+                '<=',
+                Carbon::now()->subtract(
+                    Config::get('subscriptions.resubscribeWaitPeriod.unit'),
+                    Config::get('subscriptions.resubscribeWaitPeriod.interval')
+                )
+            )->count() > 0;
+    }
+
+    /**
      * Checks if the subscription is due to be renewed
      * @return bool
      */
@@ -298,7 +412,17 @@ class Subscription extends Model implements Ownable
         if (isset($this->next_payment_at) === false) {
             return true;
         }
-        return $this->next_payment_at->greaterThanOrEqualTo(Carbon::now());
+        return $this->next_payment_at->lessThanOrEqualTo(Carbon::now());
+    }
+
+    public function isActive(): bool
+    {
+        return (bool)$this->active;
+    }
+
+    public function isCanceled(): bool
+    {
+        return !isset($this->canceled_at);
     }
 
     #endregion Verification

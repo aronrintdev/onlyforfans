@@ -6,7 +6,7 @@
 
 const isProduction = process.env.NODE_ENV === 'production';
 
-import store from './store';
+import store from './store/guest';
 
 require('./bootstrap');
 require('./bootstrap/fontAwesome');
@@ -39,6 +39,9 @@ Vue.use(VueAxios, window.axios);
 
 import VueI18n from 'vue-i18n';
 Vue.use(VueI18n);
+
+import { VueReCaptcha } from 'vue-recaptcha-v3';
+Vue.use(VueReCaptcha, { siteKey: process.env.MIX_RECAPTCHAV3_SITEKEY });
 
 import ForceCompute from './plugins/forceCompute';
 Vue.use(ForceCompute);
@@ -84,6 +87,12 @@ Vue.component('VueSlider', VueSlider)
 import VueCroppie from 'vue-croppie';
 import 'croppie/croppie.css' // import the croppie css manually
 Vue.use(VueCroppie);
+
+/**
+ * vue2-touch-events
+ */
+import Vue2TouchEvents from 'vue2-touch-events';
+Vue.use(Vue2TouchEvents);
 
 // ---
 

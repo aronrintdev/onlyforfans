@@ -5,32 +5,41 @@ use DB;
 use Auth;
 use Exception;
 use Throwable;
-use Carbon\Carbon;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\UnauthorizedException;
 
-use App\Http\Resources\MediafileCollection;
-use App\Http\Resources\PostCollection;
-use App\Http\Resources\TimelineCollection;
-use App\Http\Resources\Timeline as TimelineResource;
-use App\Libs\FeedMgr;
-use App\Libs\UserMgr;
+use Carbon\Carbon;
+
+use App\Payments\PaymentGateway;
 
 use App\Notifications\TimelineFollowed;
-use App\Notifications\TimelineSubscribed;
 use App\Notifications\TipReceived;
+//use App\Notifications\TimelineSubscribed;
 
-use App\Models\Setting;
-use App\Models\Timeline;
-use App\Models\Fanledger;
+use App\Http\Resources\PostCollection;
+use App\Http\Resources\TimelineCollection;
+use App\Http\Resources\MediafileCollection;
+use App\Http\Resources\Timeline as TimelineResource;
+
+use App\Models\Financial\Account;
+use App\Models\Casts\Money as CastsMoney;
+use App\Models\Financial\SegpayCall;
 use App\Models\Mediafile;
+use App\Models\Mycontact;
 use App\Models\Post;
+use App\Models\Setting;
+use App\Models\Storyqueue;
+use App\Models\Subscription;
+use App\Models\Timeline;
+use App\Models\Tip;
 use App\Models\User;
 
+use App\Enums\PostTypeEnum;
 use App\Enums\PaymentTypeEnum;
 use App\Enums\MediafileTypeEnum;
-use App\Enums\PostTypeEnum;
 
 class TimelinesController extends AppBaseController
 {
@@ -81,7 +90,14 @@ class TimelinesController extends AppBaseController
     public function homefeed(Request $request)
     {
         $sessionUser = request()->user();
-        $query = Post::with('mediafiles', 'user')->withCount(['comments', 'likes'])->where('active', 1)->where('schedule_datetime', null);
+        $query = Post::with('mediafiles', 'user')
+                    ->withCount(['comments', 'likes'])
+                    ->where('active', 1)
+                    ->where('schedule_datetime', null)
+                    ->where(function ($query) {
+                        $query->where('expire_at', '>', Carbon::now('UTC'))
+                              ->orWhere('expire_at', null);
+                    });
         $query->homeTimeline()->sort( $request->input('sortBy', 'default') );
         // %NOTE: we could also just remove post-query, as the feed will auto-update to fill length of page (?)
         if ( $request->boolean('hideLocked') ) {
@@ -115,7 +131,14 @@ class TimelinesController extends AppBaseController
     {
         //$this->authorize('view', $timeline); // must be follower or subscriber
         //$filters = [];
-        $query = Post::with('mediafiles', 'user')->withCount(['comments', 'likes'])->where('active', 1)->where('schedule_datetime', null);
+        $query = Post::with('mediafiles', 'user')
+                    ->withCount(['comments', 'likes'])
+                    ->where('active', 1)
+                    ->where('schedule_datetime', null)
+                    ->where(function ($query) {
+                        $query->where('expire_at', '>', Carbon::now('UTC'))
+                              ->orWhere('expire_at', null);
+                    });
         $query->byTimeline($timeline->id)->sort( $request->input('sortBy', 'default') );
         $data = $query->paginate( $request->input('take', env('MAX_POSTS_PER_REQUEST', 10)) );
         return new PostCollection($data);
@@ -182,7 +205,11 @@ class TimelinesController extends AppBaseController
             ->has('mediafiles')
             ->withCount('comments')->orderBy('comments_count', 'desc')
             //->withCount('likes')->orderBy('likes_count', 'desc')
-            ->where('active', 1);
+            ->where('active', 1)
+            ->where(function ($query) {
+                $query->where('expire_at', '>', Carbon::now('UTC'))
+                      ->orWhere('expire_at', null);
+            });
         $query->where('postable_type', 'timelines')->where('postable_id', $timeline->id);
         $data = $query->take($TAKE)->latest()->get();
         return new PostCollection($data);
@@ -223,6 +250,12 @@ class TimelinesController extends AppBaseController
                 'cattrs' => json_encode($cattrs),
             ]); //
             $isFollowing = true;
+
+            // Add message contacts if they don't already exist
+            Mycontact::addContacts(new Collection([
+                $follower,
+                $timeline->getOwner()->first(),
+            ]));
         }
 
         $timeline->user->notify(new TimelineFollowed($timeline, $follower));
@@ -235,94 +268,113 @@ class TimelinesController extends AppBaseController
         ]);
     }
 
-    public function subscribe(Request $request, Timeline $timeline)
+    public function subscribe(Request $request, Timeline $timeline, PaymentGateway $paymentGateway)
     {
         $this->authorize('follow', $timeline);
 
         $request->validate([
-            'sharee_id' => 'required|uuid|exists:users,id',
+            'account_id' => 'required|uuid',
+            'amount' => 'required|numeric',
+            'currency' => 'required',
         ]);
 
-        $sessionUser = $request->user();
-        $subscriber = $sessionUser;
-        if ( $request->sharee_id != $subscriber->id ) {
-            abort(403);
+        $price = CastsMoney::toMoney($request->amount, $request->currency);
+
+        $account = Account::with('resource')->find($request->account_id);
+        $this->authorize('subscribe', $account);
+
+        // Verify subscription has not already been created
+        if (Subscription::isSubscribed($request->user(), $timeline)) {
+            abort(400, 'Already have subscription');
         }
 
-        list($timeline, $isSubscribed) = DB::transaction( function() use(&$timeline, &$subscriber, &$request) {
-            $cattrs = [];
-            if ( $request->has('notes') ) {
-                $cattrs['notes'] = $request->notes;
-            }
+        // Verify not resubscribing within waiting period
+        if (Subscription::canResubscribe($request->user(), $timeline)) {
+            abort(400, 'Too soon to resubscribe');
+        }
 
-            $existingFollowing = $timeline->followers->contains($subscriber->id); // currently following?
-            $existingSubscribed = $timeline->subscribers->contains($subscriber->id); // currently subscribed?
-
-            if ( $existingSubscribed ) {
-                // unsubscribe & unfollow
-                $timeline->followers()->detach($subscriber->id);
-                $isSubscribed = false;
-            } else {
-                if ( $existingFollowing ) {
-                    // upgrade from follow to subscribe => remove existing (covers 'upgrade') case
-                    $timeline->followers()->detach($subscriber->id); 
-                } // otherwise, just a direct subscription...
-                $timeline->followers()->attach($subscriber->id, [
-                    'shareable_type' => 'timelines',
-                    'shareable_id' => $timeline->id,
-                    'is_approved' => 1, // %FIXME
-                    'access_level' => 'premium',
-                    'cattrs' => json_encode($cattrs), // %FIXME: add a observer function?
-                ]); //
-                $timeline->receivePayment(
-                    PaymentTypeEnum::SUBSCRIPTION,
-                    $request->user(),
-                    $timeline->price,
-                    $cattrs,
-                );
-                $isSubscribed = true;
-            }
-            return [$timeline, $isSubscribed];
-        });
-
-        $timeline->user->notify(new TimelineSubscribed($timeline, $subscriber));
-
-        $timeline->refresh();
-        return response()->json([
-            'is_subscribed' => $isSubscribed,
-            'timeline' => $timeline,
-            'subscriber_count' => $timeline->subscribers->count(),
-        ]);
+        return $paymentGateway->subscribe($account, $timeline, $price);
     }
 
-    public function tip(Request $request, Timeline $timeline)
+    /**
+     * Unsubscribes user from a timeline.
+     * @param Request $request
+     * @param Timeline $timeline
+     * @return Response
+     */
+    public function unsubscribe(Request $request, Timeline $timeline)
     {
+        $this->authorize('follow', $timeline);
+
+        $user = Auth::user();
+
+        if ($request->has('subscription_id')) {
+            $subscription = Subscription::find($request->subscription_id);
+            if ($subscription->user_id !== $user->getKey()) {
+                throw new UnauthorizedException('User is not authorized to cancel subscription');
+            }
+
+        } else {
+            $subscription = Subscription::where('user_id', $user->getKey())
+                ->where('subscribable_id', $timeline->getKey())
+                ->active()->first();
+        }
+
+        if (!isset($subscription)) {
+            return [
+                'message' => 'No subscriptions to cancel',
+            ];
+        }
+
+        if (isset($subscription->canceled_at)) {
+            return [
+                'message' => 'Subscription has already been canceled',
+                'endsAt' => $subscription->next_payment_at,
+                'daysRemaining' => $subscription->next_payment_at->diffInDays(Carbon::now()),
+                'timeline' => new TimelineResource($timeline),
+            ];
+        }
+
+        $subscription->cancel();
+
+        return [
+            'message' => 'Unsubscribed',
+            'endsAt' => $subscription->next_payment_at,
+            'daysRemaining' => $subscription->next_payment_at->diffInDays(Carbon::now()),
+            'timeline' => new TimelineResource($timeline),
+        ];
+    }
+
+    public function tip(Request $request, Timeline $timeline, PaymentGateway $paymentGateway)
+    {
+        $this->authorize('tip', $timeline);
+
         $request->validate([
-            'base_unit_cost_in_cents' => 'required|numeric',
+            'account_id' => 'required|uuid',
+            'amount' => 'required|numeric',
+            'currency' => 'required',
         ]);
 
-        $cattrs = [];
-        if ( $request->has('notes') ) {
-            $cattrs['notes'] = $request->notes;
-        }
+        $price = CastsMoney::toMoney($request->amount, $request->currency);
 
-        try {
-            $timeline->receivePayment(
-                PaymentTypeEnum::TIP,
-                $request->user(), // sender
-                $request->base_unit_cost_in_cents,
-                $cattrs,
-            );
-        } catch(Exception | Throwable $e) {
-            return response()->json([ 'message'=>$e->getMessage() ], 400);
-        }
+        $account = Account::with('resource')->find($request->account_id);
+        $this->authorize('purchase', $account);
 
-        $timeline->user->notify(new TipReceived($timeline, $request->user(), ['amount'=>$request->base_user_cost_in_cents]));
+        $tip = Tip::create([
+            'sender_id'       => $request->user()->getKey(),
+            'receiver_id'     => $timeline->getOwner()->first()->getKey(),
+            'tippable_type'   => $timeline->getMorphString(),
+            'tippable_id'     => $timeline->getKey(),
+            'account_id'      => $account->getKey(),
+            'currency'        => $request->currency,
+            'amount'          => $request->amount,
+            'period'          => $request->period ?? 'single',
+            'period_interval' => $request->period_interval ?? 1,
+            'message'         => $request->message ?? null,
 
-        $timeline->refresh();
-        return response()->json([
-            'timeline' => $timeline,
         ]);
+
+        return $paymentGateway->tip($account, $tip, $price);
     }
 
     // Display my home scheduled timeline
@@ -331,10 +383,46 @@ class TimelinesController extends AppBaseController
         $query = Post::with('mediafiles', 'user')
             ->withCount(['comments', 'likes'])
             ->where('active', 1)
-            ->where('schedule_datetime', '>', Carbon::now('UTC')->timestamp)
+            ->where('schedule_datetime', '>', Carbon::now('UTC'))
+            ->where(function ($query) {
+                $query->where('expire_at', '>', Carbon::now('UTC'))
+                      ->orWhere('expire_at', null);
+            })
             ->orderBy('created_at', 'desc');
         // %NOTE: we could also just remove post-query, as the feed will auto-update to fill length of page (?)
         $data = $query->paginate( $request->input('take', env('MAX_POSTS_PER_REQUEST', 10)) );
+        return new PostCollection($data);
+    }
+
+    // returns a list of followed timelines with associated story groupings (ignores timeline if it has no active stories)
+    // %TODO DEPRECATE (?)
+    public function myFollowedStories(Request $request)
+    {
+        $data = Storyqueue::viewableTimelines($request->user());
+        return response()->json([
+            'data' => $data,
+        ]);
+        //return new TimelineCollection($data);
+    }
+
+    // returns Photos & Videos from free posts in a randomized way.
+    public function publicFeed(Request $request)
+    {
+        $user = Auth::user();
+
+        $query = Post::with('mediafiles')
+            ->where('active', 1)
+            ->where('type', 'free')
+            ->where('user_id', '!=', $user->id)
+            ->where('schedule_datetime', null)
+            ->where(function ($query) {
+                $query->where('expire_at', '>', Carbon::now('UTC'))
+                      ->orWhere('expire_at', null);
+            })
+            ->has('mediafiles', '>' , 0)
+            ->orderBy('created_at', 'desc');
+        // %NOTE: we could also just remove post-query, as the feed will auto-update to fill length of page (?)
+        $data = $query->paginate( $request->input('take', 18) );
         return new PostCollection($data);
     }
 }

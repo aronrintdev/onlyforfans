@@ -6,6 +6,7 @@ use App\Interfaces\Ownable;
 use App\Interfaces\ShortUuid;
 use App\Enums\PaymentTypeEnum;
 use App\Interfaces\Reportable;
+use Illuminate\Support\Facades\Log;
 
 use App\Models\Traits\UsesUuid;
 use App\Interfaces\Purchaseable;
@@ -25,7 +26,10 @@ use App\Models\Traits\ShareableTraits;
 use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use Laravel\Scout\Searchable;
 use Money\Currencies\ISOCurrencies;
+use Carbon\Carbon;
 
 /**
  * Timeline Model
@@ -58,7 +62,8 @@ class Timeline extends Model implements Subscribable, Tippable, Reportable
         SluggableTraits,
         ShareableTraits,
         FormatMoney,
-        HasCurrency;
+        HasCurrency,
+        Searchable;
 
     //protected $appends = [ ];
     protected $keyType = 'string';
@@ -77,23 +82,19 @@ class Timeline extends Model implements Subscribable, Tippable, Reportable
     // %%% Accessors/Mutators | Casts
     //--------------------------------------------
 
-    /*
-    public function getAvatarAttribute($value)
-    {
-        return $this->avatar
-            ? $this->avatar
-            : (object) ['filepath' => url('user/avatar/default-' . $this->gender . '-avatar.png')];
-    }
+    // public function getAvatarAttribute($value)
+    // {
+    //     $isNull = is_null($value);
+    //     Log::info("avatar attribute: {$value} {$isNull}");
+    //     return is_null($value) ? (object)['filepath' => url('/images/default_avatar.svg')] : $value;
+    //         // : (object) ['filepath' => url('user/avatar/default-' . $this->gender . '-avatar.png')];
+    // }
 
-    public function getCoverAttribute($value)
-    {
-        return $this->cover
-            ? $this->cover
-            : (object) ['filepath' => url('user/avatar/default-' . $this->gender . '-cover.png')];
-            //: (object) ['filepath' => url('user/cover/default-' . $this->gender . '-cover.png')]; // %TODO %FIXME
-    }
-     */
-
+    // public function getCoverAttribute($value)
+    // {
+    //     return is_null($value) ? (object)['filepath' => url('/images/locked_post.png')] : $value;
+    //         //: (object) ['filepath' => url('user/cover/default-' . $this->gender . '-cover.png')]; // %TODO %FIXME
+    // }
 
     public function toArray()
     {
@@ -116,48 +117,61 @@ class Timeline extends Model implements Subscribable, Tippable, Reportable
     //--------------------------------------------
 
     // includes subscribers (ie premium + default followers)
-    public function followers()
-    {
+    public function followers() {
         return $this->morphToMany(User::class, 'shareable', 'shareables', 'shareable_id', 'sharee_id')
             ->withPivot('access_level', 'shareable_type', 'sharee_id', 'is_approved', 'cattrs')
             ->withTimestamps();
     }
 
-    public function subscribers()
-    {
+    /**
+     * Active subscribers to this timeline
+     * @return MorphToMany
+     */
+    public function subscribers() {
         return $this->morphToMany(User::class, 'shareable', 'shareables', 'shareable_id', 'sharee_id')
             ->withPivot('access_level', 'shareable_type', 'sharee_id', 'is_approved', 'cattrs')
             ->where('access_level', 'premium')
             ->withTimestamps();
     }
 
-    public function ledgersales()
-    {
+    public function favorites() {
+        return $this->hasMany(Favorite::class, 'favoritable_id');
+    }
+
+    /**
+     * The subscriptions for this timeline. This includes failed and canceled subscriptions
+     *
+     * @return MorphToMany
+     */
+    public function subscriptions() {
+        return $this->morphMany(Subscription::class, 'subscribable');
+    }
+
+    public function ledgersales() {
         return $this->morphMany(Fanledger::class, 'purchaseable');
     }
 
-    public function posts()
-    {
+    public function posts() {
         return $this->morphMany(Post::class, 'postable');
     }
 
-    public function stories()
-    {
+    public function stories() {
         return $this->hasMany(Story::class);
     }
 
-    public function user()
-    { // timeline owner
+    public function storyqueues() {
+        return $this->hasMany(Storyqueue::class);
+    }
+
+    public function user() { // timeline owner
         return $this->belongsTo(User::class);
     }
 
-    public function avatar()
-    {
+    public function avatar() {
         return $this->belongsTo(Mediafile::class, 'avatar_id');
     }
 
-    public function cover()
-    {
+    public function cover() {
         return $this->belongsTo(Mediafile::class, 'cover_id');
     }
 
@@ -226,6 +240,55 @@ class Timeline extends Model implements Subscribable, Tippable, Reportable
 
     #endregion Purchasable
 
+    /* ---------------------------------------------------------------------- */
+    /*                               Searchable                               */
+    /* ---------------------------------------------------------------------- */
+    #region Searchable
+
+    /**
+     * Name of the search index associated with this model
+     * @return string
+     */
+    public function searchableAs()
+    {
+        return "timelines_index";
+    }
+
+    /**
+     * Get value used to index the model
+     * @return mixed
+     */
+    public function getScoutKey()
+    {
+        return $this->getKey();
+    }
+
+    /**
+     * Get key name used to index the model
+     * @return string
+     */
+    public function getScoutKeyName()
+    {
+        return 'id';
+    }
+
+    /**
+     * What model information gets stored in the search index
+     * @return array
+     */
+    public function toSearchableArray()
+    {
+        return [
+            'name'     => $this->name,
+            'slug'     => $this->slug,
+            'username' => $this->user->username,
+            'id'       => $this->getKey(),
+        ];
+    }
+
+    #endregion Searchable
+    /* ---------------------------------------------------------------------- */
+
     /* ---------------------------- Subscribable ---------------------------- */
     #region Subscribable
 
@@ -276,6 +339,39 @@ class Timeline extends Model implements Subscribable, Tippable, Reportable
     public function getPrimaryOwner(): User
     {
         return $this->user;
+    }
+
+    public function getLatestStory(User $viewer) : ?Storyqueue
+    {
+        //$stories = Story::select(['id','slug','created_at'])->where('timeline_id', $this->id)->orderBy('created_at', 'desc')->get();
+        //$daysWindow = env('STORY_WINDOW_DAYS', 10000);
+        $stories = Storyqueue::select(['id','created_at'])
+            ->where('timeline_id', $this->id)
+            //->where('viewer_id', $viewer->id)
+            ->orderBy('created_at', 'desc')->get();
+        return ($stories->count()>0) ? $stories[0] : null;
+    }
+
+    // Has the viewer seen all 'active' slides in this timeline's story (?)
+    public function isEntireStoryViewedByUser($viewerId) : bool
+    {
+        $daysWindow = env('STORY_WINDOW_DAYS', 10000);
+        $notViewedCount = Storyqueue::where('timeline_id', $this->id)
+            ->where('viewer_id', $viewerId)
+            ->whereNull('viewed_at')
+            ->where('created_at','>=',Carbon::now()->subDays($daysWindow))
+            ->count();
+        return ( $notViewedCount === 0 );
+    }
+
+    // No viewable stories within last time period 'window'
+    public function isStoryqueueEmpty() : bool
+    {
+        $daysWindow = env('STORY_WINDOW_DAYS', 10000);
+        $activeCount = Story::where('timeline_id', $this->id)
+            ->where('created_at','>=',Carbon::now()->subDays($daysWindow))
+            ->count();
+        return ( !$activeCount );
     }
 
 }
