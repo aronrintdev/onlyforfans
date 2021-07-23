@@ -5,15 +5,15 @@ import admin from '@views/admin'
 
 export const adminRoutes = [
   {
+    name: 'user-management', // %TODO: should be named 'home' or 'feed.home'
+    path: '/admin/user-management',
+    component: admin.UserManagement,
+  },
+  {
     name: 'home', // %TODO: should be named 'home' or 'feed.home'
     path: '/admin',
     component: admin.Home,
     //props: true,
-  },
-  {
-    name: 'user-management', // %TODO: should be named 'home' or 'feed.home'
-    path: '/admin/user-management',
-    component: admin.UserManagement,
   },
 
   /**

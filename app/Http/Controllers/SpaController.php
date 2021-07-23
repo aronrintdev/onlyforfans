@@ -30,6 +30,19 @@ class SpaController extends Controller
      */
     public function admin(Request $request)
     {
+        $sessionUser = $request->user();
+
         // Verify admin. Then return admin spa
+        // If the request want JSON, then it's a 404 when reaching here
+        if ($request->wantsJson()) {
+            abort(404, 'Route wanted JSON response');
+        }
+
+        // Send to app spa if logged in.
+        if ( Auth::user() && $sessionUser->isAdmin() ) {
+            return view('admin/dashboard');
+        }
+        // Send to guest spa if not logged in.
+        return view('guest');
     }
 }
