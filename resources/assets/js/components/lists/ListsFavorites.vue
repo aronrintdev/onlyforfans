@@ -24,9 +24,9 @@
             <b-tab title="Photos">
               <TabFavoritesPhotos :session_user="session_user" />
             </b-tab>
-            <b-tab title="Videos">
+            <!-- <b-tab title="Videos">
               <TabFavoritesVideos :session_user="session_user" />
-            </b-tab>
+            </b-tab> -->
           </b-tabs>
         </div>
       </b-card-text>

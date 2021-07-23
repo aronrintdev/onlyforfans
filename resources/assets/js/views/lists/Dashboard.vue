@@ -3,7 +3,7 @@
 
     <section class="row">
       <article class="col-sm-12">
-        <h1>Lists</h1>
+        <h1>Fans</h1>
       </article>
     </section>
 
@@ -54,17 +54,17 @@ export default {
   data: () => ({
     routes: [
       {
-        name: 'Favorites',
-        to: { name: 'lists.favorites', params: {} },
-      }, 
+        name: 'Fans',
+        to: { name: 'lists.followers', params: {} },
+      },
       {
         name: 'Following',
         to: { name: 'lists.following', params: {} },
-      }, 
+      },
       {
-        name: 'Followers',
-        to: { name: 'lists.followers', params: {} },
-      }, 
+        name: 'Favorites',
+        to: { name: 'lists.favorites', params: {} },
+      },
     ]
   }),
 
