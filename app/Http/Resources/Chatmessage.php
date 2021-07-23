@@ -13,6 +13,7 @@ class Chatmessage extends JsonResource
         $sessionUser = $request->user();
         $model = ChatmessageModel::find($this->id);
         $hasAccess = $sessionUser->can('view', $model);
+        $isSender = $this->sender_id === $sessionUser->id;
 
         $attachments = new Collection();
         if (isset($this->cattrs)) {
@@ -33,8 +34,13 @@ class Chatmessage extends JsonResource
             'id' => $this->id,
             'chatthread_id' => $this->chatthread_id,
             'sender_id' => $this->sender_id,
+            'is_sender' => $isSender,
             'mcontent' => $this->mcontent,
             'deliver_at' => $this->deliver_at,
+            'purchase_only' => $this->purchase_only,
+            'has_access' => $hasAccess,
+            'purchased_by' => $this->sharees,
+            'price' => $this->price,
             'is_delivered' => $this->is_delivered,
             'is_read' => $this->is_read,
             'is_flagged' => $this->is_flagged,

@@ -292,8 +292,10 @@ class ChatthreadsController extends AppBaseController
             'participants'   => 'required|array', // %FIXME: rename to 'recipients' for clairty
             'participants.*' => 'uuid|exists:users,id',
             'mcontent'       => 'string',  // optional first message content
-            'attachments'    => 'array',   // optional first message attachments
             'deliver_at'     => 'numeric', // optional to pre-schedule delivery of message if present
+            'price'          => 'numeric',
+            'currency'       => 'required_with:price|size:3',
+            'attachments'    => 'required_with:price|array',   // optional first message attachments
         ]);
         $originator = User::find($request->originator_id);
 
@@ -324,7 +326,6 @@ class ChatthreadsController extends AppBaseController
                 } else {
                     $message = $ct->sendMessage($request->user(), $request->mcontent ?? '', new Collection());
                 }
-                \Log::debug('ChatthreadsController store new message loop', [ 'has attachments' => $request->has('attachments') ]);
                 $this->addAttachments($request, $message);
             }
             $ct->refresh();
@@ -345,12 +346,17 @@ class ChatthreadsController extends AppBaseController
     public function sendMessage(Request $request, Chatthread $chatthread)
     {
         $request->validate([
-            'mcontent' => 'required_without:attachments',
-            'attachments' => 'array',
-            'files' => 'array',
+            'mcontent'    => 'required_without:attachments',
+            'price'       => 'numeric',
+            'currency'    => 'required_with:price|size:3',
+            'attachments' => 'required_with:price|array',
         ]);
         // Create new chat message
         $chatmessage = $chatthread->sendMessage($request->user(), $request->mcontent ?? '', new Collection());
+
+        if ($request->has('price')) {
+            $chatmessage->setPurchaseOnly($request->price, $request->currency);
+        }
 
         $this->addAttachments($request, $chatmessage);
 

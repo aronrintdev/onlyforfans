@@ -21,6 +21,16 @@
     </b-modal>
 
     <b-modal
+      id="modal-purchase-message"
+      size="lg"
+      title="Purchase Message"
+      hide-footer
+      body-class="p-0"
+    >
+      <PurchaseMessage ref="purchaseMessage" :message="selectedResource" />
+    </b-modal>
+
+    <b-modal
       id="modal-follow"
       size="lg"
       title="Follow"
@@ -133,6 +143,7 @@ import ScheduleDateTime from '@components/modals/ScheduleDateTime.vue'
 import EditPost from '@components/modals/EditPost.vue'
 import ExpirationPeriod from '@components/modals/ExpirationPeriod.vue'
 import PromotionCampaign from '@components/modals/PromotionCampaign.vue'
+import PurchaseMessage from '@components/modals/PurchaseMessage'
 
 export default {
   name: 'Modals',
@@ -141,6 +152,7 @@ export default {
     FollowTimeline,
     CropImage,
     PurchasePost,
+    PurchaseMessage,
     SendTip,
     PostDisplay,
     ImageDisplay,
@@ -189,6 +201,11 @@ export default {
             this.selectedResourceId = data.post.id
             this.$bvModal.show('modal-purchase-post')
             break
+          case 'render-purchase-message':
+            this.selectedResource = data.message
+            this.$bvModal.show('modal-purchase-message')
+            break
+
           case 'render-follow':
             this.selectedTimeline = data.timeline
             this.subscribeOnly = false

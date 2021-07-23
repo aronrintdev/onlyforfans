@@ -18,7 +18,7 @@
           :class="item.selected ? 'text-primary' : 'text-secondary'"
         />
       </b-btn>
-      <b-btn type="submit" variant="primary" class="submit ml-auto" :disabled="false">
+      <b-btn variant="primary" class="submit ml-auto" :disabled="false" @click="$emit('submit')">
         {{ $t('send') }}
       </b-btn>
     </div>
