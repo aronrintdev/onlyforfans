@@ -49,10 +49,10 @@
         Add to favorites
       </b-card-text>
 
-      <b-button variant="primary"><fa-icon fixed-width :icon="['far', 'envelope']" /> Message</b-button>
-      <b-button disabled variant="primary"><fa-icon fixed-width :icon="['far', 'badge-percent']" /> Discount</b-button>
-      <b-button disabled variant="primary"><fa-icon fixed-width :icon="['far', 'ban']" /> Restrict</b-button>
-      <b-button variant="primary" @click="showNotesModal"><fa-icon fixed-width :icon="['far', 'pencil']" /> {{ notesButtonCaption }}</b-button>
+      <b-button variant="primary">Message</b-button>
+      <b-button disabled variant="primary">Discount</b-button>
+      <b-button disabled variant="primary">Restrict</b-button>
+      <b-button variant="primary" @click="showNotesModal">{{ notesButtonCaption }}</b-button>
       <div class="mt-2 mb-2">
         <small v-if="access_level==='premium'" class="text-muted">Subscribed since {{ moment(created_at).format('MMM DD, YYYY') }}</small>
         <small v-else class="text-muted">Following for free since {{ moment(created_at).format('MMM DD, YYYY') }}</small>
