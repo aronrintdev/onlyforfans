@@ -125,7 +125,7 @@ export default {
 
       routes.push({
         name: 'Managers',
-        to: { name: 'settings.staffmembers', params: {} },
+        to: { name: 'settings.managers', params: {} },
       })
 
       routes = routes.map(route => ({

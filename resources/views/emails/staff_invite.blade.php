@@ -92,7 +92,7 @@
 
     .free-text {
       width: 100% !important;
-      text-align: left;
+      text-align: center;
     }
 
     .block-rounded {
@@ -132,6 +132,10 @@
 
     .button-width {
       width: 228px;
+    }
+
+    .m-auto {
+      margin: auto;
     }
 
   </style>
@@ -220,7 +224,7 @@
 </head>
 
 <body bgcolor="#f7f7f7">
-<table align="center" cellpadding="0" cellspacing="0" class="container-for-gmail-android" width="100%">
+<table align="center" cellpadding="0" cellspacing="0" class="container-for-gmail-android m-auto" width="100%">
   <tr>
     <td align="left" valign="top" width="100%" style="background:repeat-x url(http://s3.amazonaws.com/swu-filepicker/4E687TRe69Ld95IDWyEg_bg_top_02.jpg) #ffffff;">
       <center>
@@ -244,7 +248,7 @@
           </tr>
           <tr>
             <td class="free-text">
-              <a href="{{ $accept_link }}" target="_blank">Accept Invitation</a>
+              <a href="{{ $accept_link }}" target="_blank" class="button">Accept Invitation</a>
             </td>
           </tr>
         </table>
