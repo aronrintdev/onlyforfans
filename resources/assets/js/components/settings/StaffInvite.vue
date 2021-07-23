@@ -73,8 +73,12 @@
           role: this.forManager ? 'manager' : 'staff',
           name: `${this.formData.first_name} ${this.formData.last_name}`,
         }
-        this.axios.post(this.$apiRoute('users.sendStaffInvite'), formData).then(response => {
-          this.$emit('send', formData);
+        this.axios.post(this.$apiRoute('users.sendStaffInvite'), formData).then(() => {
+          this.$emit('send');
+          this.isSubmitting = false;
+        })
+        .catch(error => {
+          console.error(error.message);
           this.isSubmitting = false;
         })
       }

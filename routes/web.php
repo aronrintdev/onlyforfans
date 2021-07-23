@@ -368,7 +368,7 @@ Route::delete('/lists/{id}/pin', 'ListsController@removeFromPin')->name('lists.r
  */
 Route::get('/staff-members/managers', ['as'=>'staff.indexManagers', 'uses' => 'StaffController@indexManagers']);
 Route::get('/staff-members/staff', ['as'=>'staff.indexStaff', 'uses' => 'StaffController@indexStaffMembers']);
-
+Route::delete('/staff-members/{id}', ['as'=>'staff.remove', 'uses' => 'StaffController@remove']);
 
 /**
  * Single Page application catch all undefined routes

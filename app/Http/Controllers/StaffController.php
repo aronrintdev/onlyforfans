@@ -45,4 +45,16 @@ class StaffController extends Controller
         return new StaffCollection($accounts);
     }
 
+    /**
+     * Remove staff account
+     *
+     * @param Request $request
+     * @return void
+     */
+    public function remove(Request $request, $id)
+    {
+        $staff = Staff::find($id);
+        $staff->delete();
+    }
+
 }

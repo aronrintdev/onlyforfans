@@ -1,6 +1,6 @@
 <template>
   <div>
-    <b-table hover class="staff-members-table" :items="members" :fields="fields" show-empty :current-page="currentPage">
+    <b-table hover class="staff-members-table" :items="members" :fields="fields" show-empty :current-page="metadata.current_page">
       <template #empty="scope">
         <div class="p-5 text-center"><i>There is no active or invited accounts yet</i></div>
       </template>
@@ -28,6 +28,26 @@
       aria-controls="staff-members-table"
       v-on:page-click="pageClickHandler">
     </b-pagination>
+    <b-modal
+      v-model="showDeleteConfirmation"
+      size="md"
+      title="Delete Post"
+    >
+      <template #modal-title>
+        {{ $t('delete.confirmation.title') }}
+      </template>
+      <div class="my-2 text-left" v-text="$t('delete.confirmation.message')" />
+      <template #modal-footer>
+        <div class="text-right">
+          <b-btn class="px-3 mr-1" variant="secondary" @click="showDeleteConfirmation=false">
+            {{ $t('delete.confirmation.cancel') }}
+          </b-btn>
+          <b-btn class="px-3" variant="danger" @click="removeStaff">
+            {{ $t('delete.confirmation.ok') }}
+          </b-btn>
+        </div>
+      </template>
+    </b-modal>
   </div>
 </template>
 
@@ -39,13 +59,7 @@
       items: { type: Array, default: () => ([])},
       metadata: { type: Object, default: {} },
     },
-
-    computed: {
-      totalRows() {
-        return 1;
-      },
-    },
-
+  
     watch: {
       items(newV) {
         this.members = newV;
@@ -58,8 +72,6 @@
 
     data: () => ({
       members: [],
-      perPage: 10,
-      currentPage: 1,
       fields: [{
           key: 'name',
           label: 'Name',
@@ -88,17 +100,26 @@
         }
       ],
       isMain: true,
-      isSubmitting: false,
+      showDeleteConfirmation: false,
+      removingStaffIndex: null,
     }),
 
     methods: {
       pageClickHandler(e, page) {
-        console.log('-------- page at', page);
+        this.$emit('load', page);
       },
       removeMember(index) {
-        const temp = [...this.members];
-        temp.splice(index, 1);
-        this.members = temp;
+        this.showDeleteConfirmation = true;
+        this.removingStaffIndex = index;
+      },
+      removeStaff() {
+        const staff = this.members[this.removingStaffIndex];
+        axios.delete(this.$apiRoute('staff.remove', staff.id))
+          .then(() => {
+            this.removingStaffIndex = null;
+            this.showDeleteConfirmation = false;
+            this.$emit('load');
+          })
       },
       changeActive(index) {
         const temp = [...this.members];
@@ -132,10 +153,6 @@
     margin: 0;
   }
 
-  .link-btn {
-    cursor: pointer;
-  }
-
   .role-select {
     width: 100px;
     padding: 5px;
@@ -143,3 +160,18 @@
     cursor: pointer;
   }
 </style>
+
+<i18n lang="json5">
+{
+  "en": {
+    "delete": {
+      "confirmation": {
+        "title": "Confirm remove",
+        "message": "Are you sure you want to remove this staff?",
+        "ok": "Confirm",
+        "cancel": "Cancel"
+      }
+    },
+  }
+}
+</i18n>

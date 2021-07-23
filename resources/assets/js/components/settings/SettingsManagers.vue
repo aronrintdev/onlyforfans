@@ -7,7 +7,7 @@
             <div class="h3 text-center">Managers</div>
             <b-button variant="primary" class="px-4" @click="isNewManager=true">Invite Manager</b-button>
           </div>
-          <staff-member-table :items="managers" :metadata="metadata" />
+          <staff-member-table :items="managers" :metadata="metadata" @load="loadPage" />
         </b-card-text>
       </b-card>
     </div>
@@ -37,19 +37,24 @@ export default {
 
   mounted() {
     // Get managers list of current login user
-    axios.get(this.$apiRoute('staff.indexManagers'))
-      .then(response => {
-        this.managers = response.data.data;
-        this.metadata = response.data.meta;
-      })
+    this.loadPage(1);
   },
 
   methods: {
-    inviteSent(data) {
-      if (this.isNewManager) {
-        this.managers.push(data);
-        this.isNewManager = false;
-      }
+    inviteSent() {
+      this.isNewManager = false;
+      this.loadPage(1);
+    },
+    loadPage(page) {
+      axios.get(this.$apiRoute('staff.indexManagers'), {
+        params: {
+          page: page ? page : this.metadata.current_page,
+        }
+      })
+        .then(response => {
+          this.managers = response.data.data;
+          this.metadata = response.data.meta;
+        })
     }
   },
 
