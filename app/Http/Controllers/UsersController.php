@@ -409,8 +409,9 @@ class UsersController extends AppBaseController
         ]);
 
         // Add new staff user
-        $token = str_random(30);
+        $token = str_random(60);
         $email = $request->input('email');
+        $users = User::where('email', $email)->get();
 
         Staff::create([
             'first_name' => $request->input('first_name'),
@@ -422,13 +423,13 @@ class UsersController extends AppBaseController
         ]);
 
         // Send Inviation email
-        $accept_link = 'http://localhost:8000/accept-staff-invite?token='.$token;
+        $accept_link = 'http://localhost:8000/staff/invitations/accept?token='.$token.'&email='.$email.'&inviter='.$sessionUser->name.(count($users) == 0 ? '&is_new=true' : '');
 
         Mail::send('emails.staff_invite', ['user' => $sessionUser, 'accept_link' => $accept_link], function ($message) use(&$email)
         {
             $message->from('info@allfans.com', 'AllFans');
 
-            $message->to($email);
+            $message->to($email)->subject('AllFans Staff Invitation');
         });
 
         return response()->json( ['status' => 200] );

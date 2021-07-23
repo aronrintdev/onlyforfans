@@ -16,7 +16,7 @@
     .backgroundTable { margin: 0 auto; padding: 0; width: 100% !important; }
     table td { border-collapse: collapse; }
     .ExternalClass * { line-height: 115%; }
-    .container-for-gmail-android { min-width: 600px; }
+    .container-for-gmail-android { max-width: 600px; }
 
 
     /* General styling */
@@ -107,6 +107,7 @@
         color: #fff;
         border-radius: 40px;
         display: inline-block;
+        margin-top: 1.5em;
     }
 
     .info-block {
@@ -243,12 +244,13 @@
           </tr>
           <tr>
             <td class="free-text">
-              <p>{{ $user->name }} has invited you to work on their Model dashboard.</p>
+              <p>{{ $user->name }} has invited you to work on their Shopify Partners dashboard.</p>
+              <p>Create a Shopify account or log in to your existing one to accept the invitation.</p>
             </td>
           </tr>
           <tr>
             <td class="free-text">
-              <a href="{{ $accept_link }}" target="_blank" class="button">Accept Invitation</a>
+              <a href="{{ $accept_link }}" target="_blank" class="button">See invitation</a>
             </td>
           </tr>
         </table>

@@ -175,11 +175,11 @@ export const routes = [
   },
 
   /**
-   * Invitation Success Page
+   * Invitation Accept Page
    */
-   {
+  {
     name: 'users.acceptstaffinvite',
-    path: '/accept-staff-invite',
+    path: '/staff/invitations/accept',
     component: users.AcceptInvite,
     props: false,
   },

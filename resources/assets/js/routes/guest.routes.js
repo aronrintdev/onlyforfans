@@ -5,6 +5,7 @@ import VueRouter from 'vue-router'
 import AuthViews from '@views/auth'
 import ErrorViews from '@views/errors'
 import StaticPageRoutes from './staticPages.routes'
+import UserViews from '@views/users'
 
 export const routes = [
   {
@@ -33,6 +34,15 @@ export const routes = [
     name: 'reset-password',
     path: '/reset-password/:token',
     component: AuthViews.ResetPassword,
+  },
+
+  /**
+   * Invitation Accept Page
+   */
+   {
+    name: 'users.acceptstaffinvite',
+    path: '/staff/invitations/accept',
+    component: UserViews.AcceptInvite,
   },
   ...StaticPageRoutes,
 

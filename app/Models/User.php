@@ -377,7 +377,7 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
     {
         if ( $this->firstname && $this->lastname ) {
             return $this->firstname.' '.$this->lastname;
-        } else if ( $this->timeline->name ) {
+        } else if ( $this->timeline && $this->timeline->name ) {
             return $this->timeline->name;
         } else if ( $this->firstname ) {
             return $this->firstname;
