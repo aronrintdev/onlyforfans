@@ -82,10 +82,18 @@ Vue.use(Vue2TouchEvents);
 import i18n from './i18n'
 
 // Admin Components
-require('./components/admin');
+//require('./components/admin');
 // Vue.component('main-navbar', require('./components/common/MainNavbar.vue').default);
 
+import VueRouter from 'vue-router';
+Vue.use(VueRouter);
+import adminRouter from './routes/admin.routes';
+
+import AdminApp from './views/templates/Admin.vue';
+
 const app = new Vue({
+    adminRouter,
     i18n,
-    el: '#app',
-});
+    //store,
+    render: h => h(AdminApp),
+}).$mount('#app');
