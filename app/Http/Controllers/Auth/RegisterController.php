@@ -135,6 +135,13 @@ class RegisterController extends Controller
         } else {
             $mail_verification = 0;
         }
+
+        // Generate referral_code for new user
+        do {
+            $referral_code = mt_rand( 00000000, 99999999 );
+        } while (User::where('referral_code', '=', str_pad($referral_code, 8 , '0' , STR_PAD_LEFT))->exists());
+        $referral_code = str_pad($referral_code, 8 , '0' , STR_PAD_LEFT);
+
         //Create user record
         $user = User::create([
             'email'             => $request->email,
@@ -142,7 +149,8 @@ class RegisterController extends Controller
             'verification_code' => str_random(30),
             'username'          => $request->username,
             'remember_token'    => str_random(10),
-            'email_verified'    => $mail_verification
+            'email_verified'    => $mail_verification,
+            'referral_code'     => $referral_code
         ]);
 
         if (Setting::get('birthday') == 'on' && $request->birthday != '') {
@@ -190,8 +198,9 @@ class RegisterController extends Controller
             }
 
             if ($request->has('ref')) {
+                $referral_user = User::where('referral_code', '=', $request->ref)->first();
                 Referral::create([
-                    'user_id' => $request->ref,
+                    'user_id' => $referral_user->id,
                     'referral_id' => $user->timeline->id,
                     'referral_type' => 'timelines',
                 ]);

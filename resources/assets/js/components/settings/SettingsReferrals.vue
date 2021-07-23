@@ -77,7 +77,7 @@ export default {
   }),
 
   created() {
-    this.referralUrl = `${window.location.origin}/register?ref=${this.session_user.id}`
+    this.referralUrl = `${window.location.origin}/register?ref=${this.session_user.referral_code}`
     this.getPagedData()
   },
 
