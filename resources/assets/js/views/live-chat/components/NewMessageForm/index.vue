@@ -419,6 +419,7 @@ export default {
     },
 
     clearPrice() {
+      this.setPriceActive = false
       this.newMessageForm.price = 0
       this.newMessageForm.currency = 'USD'
     },
