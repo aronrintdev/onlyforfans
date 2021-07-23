@@ -13,6 +13,7 @@
           :state="valid"
           @focus="onFocus"
           @blur="onBlur"
+          @wheel.prevent="onMousewheel"
         />
       </b-input-group>
     </b-form-group>
@@ -132,6 +133,7 @@ export default {
     },
     onSliderChange(value) {
       this.price = this.numberFormatter.format(value / this.currencyModifier)
+      this.validate()
       this.$emit('input', value)
     },
     onFocus(e) {
@@ -145,6 +147,23 @@ export default {
       this.price = this.numberFormatter.format(this.price)
       this.validate()
       this.$emit('input', this.$parseNumber(this.price) * this.currencyModifier)
+    },
+
+    onMousewheel(e) {
+      var value = this.price * this.currencyModifier
+      var interval = this.interval
+      if (e.shiftKey) {
+        interval = interval * 10
+      } else if (e.altKey) {
+        interval = interval / 4
+      }
+      if (e.wheelDelta > 0) {
+        value += interval
+      } else if (e.wheelDelta < 0) {
+         value -= interval
+      }
+      value = _.clamp(value, this.min, this.max)
+      this.onSliderChange(value)
     },
 
     parse(value) {

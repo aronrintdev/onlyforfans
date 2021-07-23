@@ -18,7 +18,7 @@
           :class="item.selected ? 'text-primary' : 'text-secondary'"
         />
       </b-btn>
-      <b-btn type="submit" variant="primary" class="submit ml-auto" :disabled="false">
+      <b-btn variant="primary" class="submit ml-auto" :disabled="false" @click="$emit('submit')">
         {{ $t('send') }}
       </b-btn>
     </div>
@@ -51,7 +51,7 @@ export default {
           key: 'uploadFiles',
           class: 'upload-files',
           onClick: (e) => this.$emit('attachFiles', e),
-          icon: this.isSelected('uploadFiles') ? ['fas', 'file-alt'] : ['far', 'file-alt'],
+          icon: this.isSelected('uploadFiles') ? ['fas', 'image'] : ['far', 'image'],
           selected: this.isSelected('uploadFiles'),
           tooltip: this.$t('tooltips.uploadFiles'),
         }, {
@@ -87,7 +87,7 @@ export default {
           key: 'setPrice',
           class: 'set-price',
           onClick: (e) => this.$emit('setPrice', e),
-          icon: this.isSelected('setPrice') ? ['fas', 'dollar-sign'] : ['far', 'dollar-sign'],
+          icon: this.isSelected('setPrice') ? ['fas', 'tag'] : ['far', 'tag'],
           selected: this.isSelected('setPrice'),
           tooltip: this.$t('tooltips.setPrice'),
         },
@@ -129,10 +129,10 @@ export default {
   "en": {
     "send": "SEND",
     "tooltips": {
-      "uploadFiles": "Attach Files",
+      "uploadFiles": "Add Photo",
       "recordVideo": "Record Video",
       "recordAudio": "Record Audio",
-      "vaultSelect": "Attach Files From Your Vault",
+      "vaultSelect": "Add Photo From Your Vault",
       "openScheduleMessage": "Schedule Message To Be Sent At",
       "setPrice": "Set Message Unlock Price",
     },

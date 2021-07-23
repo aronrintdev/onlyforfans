@@ -24,6 +24,7 @@
         "http-interop/http-factory-guzzle": "^1.0",
         "infyomlabs/laravel-generator": "8.0.x-dev",
         "intervention/image": "^2.5",
+        "james-heinrich/getid3": "^1.9",
         "jeremeamia/superclosure": "^2.4",
         "josiasmontag/laravel-recaptchav3": "^0.6.0",
         "laracasts/flash": "^3.2",

@@ -25,8 +25,8 @@
           :payment-method="selectedPaymentMethod"
           :value="value"
           :item-type="itemType"
-          :price="price"
-          :currency="currency"
+          :price="typeof price === 'object' ? parseInt(price.amount) : price"
+          :currency="typeof price === 'object' ? price.currency : currency"
           :price-display="displayPrice"
           @processing="onProcessing"
           @stopProcessing="onStopProcessing"
@@ -70,7 +70,7 @@ export default {
     /** What type of item is being purchased, ( post, timeline ) */
     itemType: { type: String, default: ''},
     /** Price as integer */
-    price: { type: Number, default: 0 },
+    price: { type: [Number, Object], default: 0 },
     /** Price currency */
     currency: { type: String, default: 'USD' },
     /** Localized String of how to display currency to user */

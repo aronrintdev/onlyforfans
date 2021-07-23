@@ -18,12 +18,15 @@ use App\Models\Chatthread;
 use App\Models\Chatmessage;
 use App\Models\Mycontact;
 
+/**
+ * @group chatmessages
+ * @package Tests\Feature
+ */
 class RestChatmessagesTest extends TestCase
 {
     use WithFaker;
 
     /**
-     *  @group chatmessages
      *  @group regression
      *  @group regression-base
      */
@@ -77,7 +80,6 @@ class RestChatmessagesTest extends TestCase
 
 
     /**
-     *  @group chatmessages
      *  @group regression
      *  @group regression-base
      */
@@ -110,7 +112,47 @@ class RestChatmessagesTest extends TestCase
     }
 
     /**
-     *  @group chatmessages
+     * @group todo
+     */
+    public function test_can_send_chatmessage_text_only_in_thread()
+    {
+        $this->markTestIncomplete();
+    }
+
+    /**
+     * @group todo
+     */
+    public function test_can_send_chatmessage_with_one_attachment()
+    {
+        $this->markTestIncomplete();
+    }
+
+    /**
+     * @group todo
+     */
+    public function test_can_send_chatmessage_with_multiple_attachments()
+    {
+        $this->markTestIncomplete();
+    }
+
+    /**
+     * @group todo
+     */
+    public function test_can_create_purchase_only_chatmessage()
+    {
+        $this->markTestIncomplete();
+    }
+
+    /**
+     * @group todo
+     */
+    public function test_create_purchase_only_chatmessage_must_have_attachments()
+    {
+        $this->markTestIncomplete();
+    }
+
+
+    /**
      *  @group mycontacts
      *  @group regression
      *  @group regression-base
