@@ -3,7 +3,7 @@
     <b-card-text>
       <a class="text-primary text-decoration-none link-btn" @click="goBack">
         <fa-icon :icon="['far', 'arrow-left']" />
-        <span class="px-1">{{ forManager ? 'Managers' : 'Staff Members' }}</span>
+        <span class="px-1">{{ forManager ? 'Managers' : 'Staff members' }}</span>
       </a>
       <div class="d-flex align-items-center my-4">
         <div class="h3 text-center" v-if="forManager">Invite Manager</div>
@@ -36,7 +36,7 @@
             <div class="w-100 d-flex justify-content-end">
               <b-button :disabled="isSubmitting" class="w-25 ml-3" type="submit" variant="primary">
                 <b-spinner v-if="isSubmitting" small />&nbsp;
-                Send Invite
+                Send invite
               </b-button>
             </div>
           </b-col>

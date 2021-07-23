@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div v-if="!isNewStaff && !isNewManager">
+    <div v-if="!isNewManager">
       <b-card class="mb-3">
         <b-card-text>
           <div class="d-flex align-items-center justify-content-between mb-4">
@@ -16,7 +16,6 @@
 </template>
 
 <script>
-import moment from 'moment'
 import StaffMemberTable from './StaffMemberTable';
 import StaffInvite from './StaffInvite';
 
@@ -60,34 +59,6 @@ const MockData = [
   }
 ]
 
-const StaffMockData = [
-  {
-    id: 1, 
-    name: 'James Wolf',
-    email: 'jaems.wolf@email.com',
-    active: 1,
-    last_login_at: '2021-07-05T18:03:02.000000Z',
-    actions: null,
-  },
-  {
-    id: 3, 
-    name: 'Winter Prince',
-    email: 'winter.prince@email.com',
-    active: 0,
-    last_login_at: '2021-07-21T18:03:02.000000Z',
-    actions: null,
-  },
-  {
-    id: 2, 
-    name: 'Peter Tim',
-    email: 'peter.tim@email.com',
-    pending: 1,
-    last_login_at: '2021-06-15T18:03:02.000000Z',
-    actions: null,
-  },
-]
-
-
 export default {
   props: {
     session_user: null,
@@ -100,9 +71,7 @@ export default {
 
   data: () => ({
     managers: MockData,
-    staffs: StaffMockData,
     isNewManager: false,
-    isNewStaff: false,
   }),
 
   methods: {
@@ -110,9 +79,6 @@ export default {
       if (this.isNewManager) {
         this.managers.push(data);
         this.isNewManager = false;
-      } else {
-        this.staffs.push(data);
-        this.isNewStaff = false;
       }
     }
   },
