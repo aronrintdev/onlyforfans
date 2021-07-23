@@ -1,13 +1,13 @@
 <template>
   <section v-if="!isLoading" class="conversation-footer d-flex flex-column">
 
-    <div class="scheduled-message-head" v-if="isScheduled">
+    <div v-if="isScheduled" class="scheduled-message-head d-flex justify-content-start align-items-center">
       <div>
-        <fa-icon :icon="['fas', 'schedule']" class="fa-lg" fixed-width />
+        <fa-icon :icon="['fas', 'calendar-alt']" class="fa-lg" fixed-width />
         <span> Scheduled for </span>
         <strong>{{ moment(deliverAtTimestamp).local().format('MMM DD, h:mm a') }}</strong>
       </div>
-      <b-button variant="link" class="clickme_to-cancel" @click="clearScheduled">
+      <b-button variant="link" @click="clearScheduled">
         <fa-icon :icon="['fas', 'times']" class="clickable fa-lg" fixed-width />
       </b-button>
     </div>
@@ -531,6 +531,7 @@ textarea,
 }
 .dropzone {
   padding: 0;
+  min-height: 0 !important;
 }
 
 .dropzone .dz-message {

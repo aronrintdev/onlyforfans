@@ -28,23 +28,31 @@
         <p class="my-0 mx-2 text-nowrap">Last Seen</p>
         <div>|</div>
         <b-button variant="link" class="" @click="doSomething">
-          <fa-icon :icon="['far', 'star']" class="fa-lg" />
+          <fa-icon :icon="['far', 'star']" size="lg" /><span>Favorite</span>
         </b-button>
         <div>|</div>
         <b-button variant="link" class="" @click="toggleMute">
-          <fa-icon v-if="!isMuted" :icon="['far', 'bell']" fixed-width class="fa-lg" title="Notifications ON" />
-          <fa-icon v-if="isMuted" :icon="['far', 'bell-slash']" fixed-width class="fa-lg muted" title="Notifications OFF" />
+          <fa-icon v-if="!isMuted" :icon="['far', 'bell']" fixed-width size="lg" title="Notifications ON" />
+          <fa-icon
+            v-if="isMuted"
+            :icon="['far', 'bell-slash']"
+            fixed-width
+            size="lg"
+            class="muted"
+            title="Notifications OFF"
+          />
+          <span>Notifications</span>
         </b-button>
         <div>|</div>
         <b-button variant="link" class="" @click="toggleGallery" v-b-tooltip:hover :title="$t('tooltips.gallery')">
-          <fa-icon :icon="showGallery ? ['fas', 'image'] : ['far', 'image']" class="fa-lg" />
+          <fa-icon :icon="showGallery ? ['fas', 'image'] : ['far', 'image']" size="lg" /><span>Gallery</span>
         </b-button>
         <div>|</div>
         <b-btn variant="link" @click="tip" v-b-tooltip:hover :title="$t('tooltips.tip')">
-          <fa-icon icon="dollar-sign" fixed-width />
+          <fa-icon icon="dollar-sign" fixed-width size="lg" /><span>Tip</span>
         </b-btn>
         <div>|</div>
-        <SearchInput v-model="searchQuery" />
+        <SearchInput v-model="searchQuery" size="lg" />
       </div>
     </section>
 

@@ -87,7 +87,7 @@ export default {
           key: 'setPrice',
           class: 'set-price',
           onClick: (e) => this.$emit('setPrice', e),
-          icon: this.isSelected('setPrice') ? ['fas', 'dollar-sign'] : ['far', 'dollar-sign'],
+          icon: this.isSelected('setPrice') ? ['fas', 'tag'] : ['far', 'tag'],
           selected: this.isSelected('setPrice'),
           tooltip: this.$t('tooltips.setPrice'),
         },
