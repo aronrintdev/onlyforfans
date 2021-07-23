@@ -232,6 +232,7 @@ Route::group(['middleware' => ['auth']], function () {
     ]);
     Route::post('/users/avatar', ['as' => 'users.updateAvatar', 'uses' => 'UsersController@updateAvatar']);
     Route::post('/users/cover', ['as' => 'users.updateCover', 'uses' => 'UsersController@updateCover']);
+    Route::post('/users/send-staff-invite', ['as'=>'users.sendStaffInvite', 'uses' => 'UsersController@sendStaffInvite']);
     Route::resource('users', 'UsersController', [ 'except' => [ 'create', 'edit', 'store' ] ]);
 
     // -- vaults:  --

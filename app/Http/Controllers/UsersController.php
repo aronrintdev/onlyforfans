@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\Mail;
 
 use App\Notifications\IdentityVerificationRequestSent;
 use App\Notifications\IdentityVerificationVerified;
@@ -28,6 +29,7 @@ use App\Models\Verifyrequest;
 use App\Enums\MediafileTypeEnum;
 use App\Enums\PaymentTypeEnum;
 use App\Enums\VerifyStatusTypeEnum;
+use App\Models\Staff;
 
 class UsersController extends AppBaseController
 {
@@ -393,5 +395,42 @@ class UsersController extends AppBaseController
             $user->notify( new IdentityVerificationRejected($vr, $user) );
         }
         return response()->json( $vr );
+    }
+
+    // Add new staff account and send invitation email
+    public function sendStaffInvite(Request $request)
+    {
+        $sessionUser = $request->user();
+        $request->validate([
+            'first_name' => 'required|string',
+            'last_name' => 'required|string',
+            'email' => 'required|string',
+            'role' => 'required|string',
+        ]);
+
+        // Add new staff user
+        $token = str_random(30);
+        $email = $request->input('email');
+
+        Staff::create([
+            'first_name' => $request->input('first_name'),
+            'last_name' => $request->input('last_name'),
+            'email' => $email,
+            'role' => $request->input('role'),
+            'owner_id' => $sessionUser->id,
+            'token' => $token,
+        ]);
+
+        // Send Inviation email
+        $accept_link = 'http://localhost:8000/accept-staff-invite?token='.$token;
+
+        Mail::send('emails.staff_invite', ['user' => $sessionUser, 'accept_link' => $accept_link], function ($message) use(&$email)
+        {
+            $message->from('info@allfans.com', 'AllFans');
+
+            $message->to($email);
+        });
+
+        return response()->json( ['status' => 200] );
     }
 }

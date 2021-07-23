@@ -1,7 +1,10 @@
 <template>
   <b-card class="mb-3">
     <b-card-text>
-      <a class="text-primary text-decoration-none link-btn" @click="goBack">Back</a>
+      <a class="text-primary text-decoration-none link-btn" @click="goBack">
+        <fa-icon :icon="['far', 'arrow-left']" />
+        <span class="px-1">{{ forManager ? 'Managers' : 'Staff Members' }}</span>
+      </a>
       <div class="d-flex align-items-center my-4">
         <div class="h3 text-center" v-if="forManager">Invite Manager</div>
         <div class="h3 text-center" v-else>Invite Staff Member</div>
@@ -49,6 +52,7 @@
     props: {
       items: { type: Array, default: () => ([])},
       forManager: { type: Boolean, default: true },
+      session_user: null,
     },
 
     data: () => ({
@@ -61,17 +65,18 @@
         this.$emit('exit');
       },
       submitForm() {
+        this.isSubmitting = true;
         // Call Invite REST API
-        const formdata = {
-          email: this.formData.email,
-          role: this.forManager ? 'manager' : 'staff',
+        const formData = {
+          ...this.formData,
           pending: 1,
-          active: 0,
-          name: `${this.formData.first_name} ${this.formData.last_name}`
+          role: this.forManager ? 'manager' : 'staff',
+          name: `${this.formData.first_name} ${this.formData.last_name}`,
         }
-        console.log('----- form options', formdata);
-        ///
-        this.$emit('send', formdata);
+        this.axios.post(this.$apiRoute('users.sendStaffInvite'), formData).then(response => {
+          this.$emit('send', formData);
+          this.isSubmitting = false;
+        })
       }
     },
 
@@ -79,5 +84,7 @@
 </script>
 
 <style lang="scss" scoped>
-
+.link-btn {
+  cursor: pointer;
+}
 </style>

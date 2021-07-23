@@ -16,7 +16,7 @@ import Security from './SettingsSecurity.vue'
 import Sessions from './SettingsSessions.vue'
 import Subscriptions from './SettingsSubscriptions.vue'
 import Verify from './SettingsVerify.vue'
-import StaffMembers from './SettingsStaffMembers.vue'
+import Managers from './SettingsManagers.vue'
 
 export default {
   //Bookmarks,
@@ -33,5 +33,5 @@ export default {
   Sessions,
   Subscriptions,
   Verify,
-  StaffMembers,
+  Managers,
 }

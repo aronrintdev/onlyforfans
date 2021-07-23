@@ -174,6 +174,15 @@ export const routes = [
     props: true,
   },
 
+  /**
+   * Invitation Success Page
+   */
+   {
+    name: 'users.acceptstaffinvite',
+    path: '/accept-staff-invite',
+    component: users.AcceptInvite,
+    props: false,
+  },
 
   /**
    * timeline.show must be declared after other routes due to it only being a slug

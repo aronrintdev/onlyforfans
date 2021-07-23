@@ -324,6 +324,17 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
         return $this->hasOne(Campaign::class);
     }
 
+    public function staffMembers()
+    {
+        return $this->hasMany(Staff::class, 'owner_id');
+    }
+
+    public function staff()
+    { 
+        return $this->belongsTo(Staff::class, 'staff_id');
+    }
+
+
 //    public function lists()
 //    {
 //        return $this->belongsToMany(Lists::class, 'list_user', 'user_id', 'list_id')->withTimestamps();
