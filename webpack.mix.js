@@ -136,6 +136,7 @@ mix.js('resources/assets/js/app.guest.js', 'public/js/app.guest.js')
  * Admin App
  */
 mix.js('resources/assets/js/admin.app.js', 'public/js/admin.app.js')
+  .sass('resources/assets/sass/admin/admin.scss', 'public/css/admin.css')
   .vue({
     options: {
       loaders: {

@@ -3,6 +3,7 @@
  */
 import Vue from 'vue'
 import currencyCodes from 'currency-codes'
+import moment from 'moment'
 
 /**
  * Converts raw currency value to localized currency display.
@@ -48,3 +49,6 @@ Vue.filter('ucfirst', function(str) {
   return str.charAt(0).toUpperCase() + str.slice(1)
 })
 
+Vue.filter('niceDate', function(value) {
+  return moment(value).format('MMMM Do, YYYY')
+})
