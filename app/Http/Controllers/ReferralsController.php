@@ -23,6 +23,7 @@ class ReferralsController extends AppBaseController
         $request->only( ['user_id']) ?? [];
 
         $query = Referral::with(['referral']);
+        $query->where('user_id', $request->user()->id);
 
         $query->with(['referral.cover', 'referral.avatar']);
 
