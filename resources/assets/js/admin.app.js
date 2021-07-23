@@ -3,6 +3,8 @@
  */
 const isProduction = process.env.NODE_ENV === 'production';
 
+import store from './store';
+
 import Vue from 'vue';
 
 require('./bootstrap');
@@ -98,6 +100,6 @@ import AdminApp from './views/templates/Admin.vue';
 const app = new Vue({
   router,
   i18n,
-  //store,
+  store,
   render: h => h(AdminApp),
 }).$mount('#app');
