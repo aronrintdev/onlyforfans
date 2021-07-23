@@ -7,30 +7,34 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 use App\Channels\SendgridChannel;
-use App\Models\Comment;
 use App\Models\User;
-use App\Interfaces\Commentable;
 
-class CommentReceived extends Notification
+// %TODO: currently using stub code - this needs to be completed once we build out the referral functionality
+class NewReferralReceived extends Notification
 {
     use NotifyTraits, Queueable;
 
-    public $resource;
-    public $actor; // commenter;
+    public $referral;
+    public $actor; // subscriber
     protected $settings;
 
-    public function __construct(Commentable $resource, User $actor, array $attrs=[])
+    protected $recipientName; // person being referred
+    protected $earningPercent; 
+
+    public function __construct($referral, User $actor, array $attrs=[])
     {
-        $this->resource = $resource;
+        $this->referral = $referral;
         $this->actor = $actor;
-        $this->settings = $resource->getPrimaryOwner()->settings; // resource ~= commentable
+        $this->settings = $referral->getPrimaryOwner()->settings; // actor = User
+
+        $this->recipientName = $this->referral->recipient->name;
+        $this->earningPercent = $this->referral->amount->getAmount();
     }
 
-    // see: https://medium.com/@sirajul.anik/laravel-notifications-part-2-creating-a-custom-notification-channel-6b0eb0d81294
     public function via($notifiable)
     {
         $channels =  ['database'];
-        if ( $this->isMailChannelEnabled('tip-received', $this->settings) ) {
+        if ( $this->isMailChannelEnabled('new-referral-received', $this->settings) ) {
             $channels[] = $this->getMailChannel();
         }
         return $channels;
@@ -39,42 +43,39 @@ class CommentReceived extends Notification
     public function toMail($notifiable)
     {
         return (new MailMessage)
-            ->line('You received a comment from '.$this->actor->name)
-            ->action('Read Comment', url('/'));
+            ->line("Congrats! You just received a new referral.")
+            ->line("You just referred user: ".$this->recipientName)
+            ->line("You'll continue to earn ".$this->earningPercent."% of ".$this->recipientName."'s sales as long as they are an active member.")
+            ->line("Keep up the great work!");
     }
 
     public function toSendgrid($notifiable)
     {
-
-        $data = [
-            'template_id' => 'new-comment-received',
+        return [
+            'template_id' => 'new-referral-received',
             'to' => [
                 'email' => $notifiable->email,
                 'name' => $notifiable->name, // 'display name'
             ],
             'dtdata' => [
-                'sender_name' => $this->actor->name,
-                'receiver_name' => $notifiable->name,
-                'preview' => $this->resource->slug,
+                'referred_name' => $this->recipientName,
+                'percentage_earned' => $this->earningAmount().'%',
 
+                'referral_url' => $this->getUrl('referrals'),
                 'home_url' => $this->getUrl('home'),
-                'login_url' => $this->getUrl('login'),
                 'privacy_url' => $this->getUrl('privacy'),
                 'manage_preferences_url' => $this->getUrl('manage_preferences', ['username' => $notifiable->username]),
                 'unsubscribe_url' => $this->getUrl('unsubscribe', ['username' => $notifiable->username]),
-                'referral_url' => $this->getUrl('referrals'),
             ],
         ];
-        return $data;
     }
 
     public function toArray($notifiable)
     {
         return [
-            'resource_type' => $this->resource->getTable(),
-            'resource_id' => $this->resource->id,
-            'resource_slug' => $this->resource->slug,
-            'actor' => [ // commenter
+            'referral_id' => $this->referral->id,
+            'earning_mount' => $this->earningAmount,
+            'actor' => [
                 'username' => $this->actor->username,
                 'name' => $this->actor->name,
                 'avatar' => $this->actor->avatar->filepath ?? null,
@@ -82,3 +83,5 @@ class CommentReceived extends Notification
         ];
     }
 }
+
+

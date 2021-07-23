@@ -98,7 +98,8 @@ class ShareablesTableSeeder extends Seeder
                     //'created_at' => $ts,
                     //'updated_at' => $ts,
                 ]);
-                $timeline->user->notify(new TimelineFollowedNotify($timeline, $follower));
+                // %PSG: Disable as this will trigger SendGrid emails
+                //$timeline->user->notify(new TimelineFollowedNotify($timeline, $follower));
 
                 // --- purchase some posts ---
 
@@ -125,7 +126,8 @@ class ShareablesTableSeeder extends Seeder
                         Event::fakeFor(function() use (&$paymentAccount, &$post, &$follower, $customAttributes) {
                             try {
                                 $paymentAccount->purchase($post, $post->price, ShareableAccessLevelEnum::PREMIUM, $customAttributes);
-                                $post->user->notify(new ResourcePurchased($post, $follower, ['amount'=>\App\Models\Casts\Money::doSerialize($post->price)]));
+                                // %PSG: Disable as this will trigger SendGrid emails
+                                //$post->user->notify(new ResourcePurchased($post, $follower, ['amount'=>\App\Models\Casts\Money::doSerialize($post->price)]));
                             } catch (RuntimeException $e) {
                                 //throw $e;
                                 $exceptionClass = class_basename($e);
@@ -166,7 +168,8 @@ class ShareablesTableSeeder extends Seeder
                     try {
                         $subscription = $paymentAccount->createSubscription($timeline, $timeline->price, ShareableAccessLevelEnum::PREMIUM, $customAttributes);
                         $subscription->process();
-                        $timeline->user->notify(new TimelineSubscribedNotify($timeline, $follower, ['amount' => \App\Models\Casts\Money::doSerialize($timeline->price)]));
+                        // %PSG: Disable as this will trigger SendGrid emails
+                        //$timeline->user->notify(new TimelineSubscribedNotify($timeline, $follower, ['amount' => \App\Models\Casts\Money::doSerialize($timeline->price)]));
                     } catch (RuntimeException $e) {
                         //throw $e;
                         $exceptionClass = class_basename($e);

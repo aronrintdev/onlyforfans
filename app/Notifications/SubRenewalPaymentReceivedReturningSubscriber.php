@@ -7,56 +7,60 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 use App\Channels\SendgridChannel;
-use App\Models\Timeline;
-use App\Models\Post;
+use App\Interfaces\Subscribable;
+use App\Models\Subscription;
 use App\Models\User;
-use App\Models\UserSetting;
-use App\Interfaces\Tippable;
 
-class TipReceived extends Notification
+class SubRenewalPaymentReceivedReturningSubscriber extends Notification
 {
     use NotifyTraits, Queueable;
 
-    public $resource;
-    public $actor; // the sender (user who purchased the tip)
+    public $resource; // thing subscribed to (timeline), from which we can deduce the subcribee
+    public $actor; // subscriber
     public $amount;
     protected $settings;
 
-    public function __construct(Tippable $resource, User $actor, array $attrs=[]) {
+    public function __construct(Subscribable $resource, User $actor, array $attrs=[])
+    {
         $this->resource = $resource;
-        $this->actor = $actor; 
+        $this->actor = $actor;
         if ( array_key_exists('amount', $attrs) ) {
-            $this->amount = $attrs['amount'];
+            $this->amount = $attrs['amount']; // %FIXME
         }
-        $this->settings = $resource->getPrimaryOwner()->settings;
+        $this->settings = $resource->getPrimaryOwner()->settings; // actor = User
     }
 
-    public function via($notifiable) {
+    public function via($notifiable)
+    {
         $channels =  ['database'];
-        if ( $this->isMailChannelEnabled('tip-received', $this->settings) ) {
+        if ( $this->isMailChannelEnabled('new-sub-payment-received', $this->settings) ) {
             $channels[] = $this->getMailChannel();
         }
         return $channels;
     }
 
-    public function toMail($notifiable) {
+    public function toMail($notifiable)
+    {
         return (new MailMessage)
-                    ->line($this->actor->name.' sent you a tip!');
+            ->line("You received a subscription renewal payment from a returning subscriber in the amount of ".$this->amount->getAmount())
+            ->line("From user: ".$this->actor->name)
+            ->line("If you haven't already: Don't forget to go to the referral section to copy and share your code with others. You'll earn up to 5% of their total sales!")
+            ->action("Share Referral!", $this->getUrl('referrals'));
     }
 
-    public function toSendgrid($notifiable) {
+    public function toSendgrid($notifiable)
+    {
         return [
-            'template_id' => 'new-tip-received',
+            'template_id' => 'subscription-payment-received-from-returning-subscriber',
             'to' => [
                 'email' => $notifiable->email,
                 'name' => $notifiable->name, // 'display name'
             ],
             'dtdata' => [
-                'sender_name' => $this->actor->name,
+                'subscriber_name' => $this->actor->name,
                 'amount' => nice_currency($this->amount->getAmount()),
 
                 'referral_url' => $this->getUrl('referrals'),
-                'login_url' => $this->getUrl('login'),
                 'home_url' => $this->getUrl('home'),
                 'privacy_url' => $this->getUrl('privacy'),
                 'manage_preferences_url' => $this->getUrl('manage_preferences', ['username' => $notifiable->username]),
@@ -65,12 +69,13 @@ class TipReceived extends Notification
         ];
     }
 
-    public function toArray($notifiable) {
+    public function toArray($notifiable)
+    {
         return [
             'resource_type' => $this->resource->getTable(),
             'resource_id' => $this->resource->id,
             'resource_slug' => $this->resource->slug,
-            'amount' => $this->amount ?? null,
+            'amount' => $this->amount->getAmount(),
             'actor' => [
                 'username' => $this->actor->username,
                 'name' => $this->actor->name,

@@ -11,6 +11,7 @@ use App\Interfaces\Blockable;
 use App\Interfaces\HasFinancialAccounts;
 use App\Interfaces\ShortUuid;
 use App\Models\Traits\UsesUuid;
+use App\Notifications\PasswordReset as PasswordResetNotification;
 
 use App\Interfaces\PaymentSendable;
 use App\Models\Financial\Account;
@@ -360,6 +361,7 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
         return $this->verifyrequest->vstatus;
     }
 
+    // %NOTE: Use this as the 'display name'. 'Real name' fields will hold the real name
     public function getNameAttribute($value)
     {
         if ( $this->firstname && $this->lastname ) {
@@ -614,6 +616,10 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
 
     // %%% --- Misc. ---
 
+    // https://laravel.com/docs/8.x/passwords#reset-email-customization
+    public function sendPasswordResetNotification($token) {
+        $this->notify( new PasswordResetNotification($user, ['token'=>$token]) );
+    }
 
 }
 

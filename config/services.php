@@ -57,4 +57,8 @@ return [
         'redirect'      => env('APP_URL').'/account/linkedin',
     ],
 
+    'sendgrid' => [
+        'api_key' => env('SENDGRID_API_KEY'),
+    ],
+
 ];
