@@ -77,13 +77,7 @@ export default {
   },
 
 
-  created() {
-    // Dynamically load the full post so we ensure we have the related timeline data
-    // (not guaranteed to be attached as a relation as this is ref'd from multiple components)
-    axios.get( route('posts.show', this.post_id) ).then( response => {
-      this.post = response.data.data
-    })
-  },
+  created() {},
 
   mounted() {
     this.init()
