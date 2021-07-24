@@ -2,7 +2,7 @@
 /**
  * Listens for websocket events and issues event bus events
  */
-import { eventBus } from '@/app'
+import { eventBus } from '@/eventBus'
 import Vuex from 'vuex'
 export default {
   name: 'EventUpdater',

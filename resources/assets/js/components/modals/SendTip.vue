@@ -72,7 +72,7 @@
 /**
  * Send Tip Modal Content
  */
-import { eventBus } from '@/app'
+import { eventBus } from '@/eventBus'
 import LEDGER_CONFIG from "@/components/constants"
 import PurchaseForm from '@components/payments/PurchaseForm'
 

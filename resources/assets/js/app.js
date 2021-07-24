@@ -164,7 +164,7 @@ Vue.use(VueMasonryPlugin)
 
 require('./bootstrap/filters')
 
-export const eventBus = new Vue({ });
+//export const eventBus = new Vue({ });
 
 // Localization translations
 import i18n from './i18n';

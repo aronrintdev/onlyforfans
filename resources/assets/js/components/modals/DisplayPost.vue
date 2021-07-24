@@ -16,7 +16,7 @@
 /**
  * resources/assets/js/components/modals/DisplayPost.vue
  */
-import { eventBus } from '@/app'
+import { eventBus } from '@/eventBus'
 import Vuex from 'vuex'
 import Display from '@components/posts/Display'
 import LoadingOverlay from '@components/common/LoadingOverlay'

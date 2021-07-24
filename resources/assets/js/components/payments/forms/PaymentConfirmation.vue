@@ -24,7 +24,7 @@
  * Confirms payment with a known payment method
  */
 import Vuex from 'vuex'
-import { eventBus } from '@/app'
+import { eventBus } from '@/eventBus'
 import LoadingOverlay from '@components/common/LoadingOverlay'
 import SavedPaymentMethod from '@components/payments/SavedPaymentMethod'
 

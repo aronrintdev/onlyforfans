@@ -51,7 +51,7 @@
 
 <script>
 import Vuex from 'vuex';
-import { eventBus } from '@/app'
+import { eventBus } from '@/eventBus'
 import PostFeed from '@components/timelines/PostFeed.vue';
 import StoryBar from '@components/timelines/StoryBar.vue';
 import CreatePost from '@components/timelines/CreatePost.vue';

@@ -176,7 +176,7 @@
  */
 import Vuex from 'vuex'
 import _ from 'lodash'
-import { eventBus } from '@/app'
+import { eventBus } from '@/eventBus'
 
 import CreateThreadForm from '@views/live-chat/components/CreateThreadForm'
 import FilterSelect from './components/FilterSelect.vue'

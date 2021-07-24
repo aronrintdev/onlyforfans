@@ -36,7 +36,7 @@
 // event: @apply
 
 import moment from 'moment';
-import { eventBus } from '@/app';
+import { eventBus } from '@/eventBus'
 
 export default {
   props: {

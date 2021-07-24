@@ -98,7 +98,7 @@
 import Vuex from 'vuex'
 import moment from 'moment'
 import _ from 'lodash'
-import { eventBus } from '@/app'
+import { eventBus } from '@/eventBus'
 import PreviewThread from '@views/live-chat/components/PreviewThread'
 import SearchInput from '@components/common/search/HorizontalOpenInput'
 import Search from '@views/live-chat/components/Search'

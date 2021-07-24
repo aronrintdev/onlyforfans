@@ -35,7 +35,7 @@
  */
 import Vue from 'vue'
 import Vuex from 'vuex'
-import { eventBus } from '@/app'
+import { eventBus } from '@/eventBus'
 import Dashboard from '@components/vault/Dashboard'
 import Breadcrumb from '@components/vault/Breadcrumb'
 import MediaList from '@components/vault/MediaList'

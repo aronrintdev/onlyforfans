@@ -96,7 +96,7 @@
 /**
  * resources/assets/js/views/live-chat/components/ShowThread.vue
  */
-import { eventBus } from '@/app'
+import { eventBus } from '@/eventBus'
 import Vue from 'vue'
 import Vuex from 'vuex'
 import _ from 'lodash'
