@@ -66,7 +66,7 @@
 import PhotoSwipe from 'photoswipe/dist/photoswipe'
 import PhotoSwipeUI from 'photoswipe/dist/photoswipe-ui-default'
 import createPreviewDirective from 'vue-photoswipe-directive'
-import { eventBus } from '@/app'
+import { eventBus } from '@/eventBus'
 
 export default {
   props: {

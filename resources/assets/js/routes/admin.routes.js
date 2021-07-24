@@ -5,22 +5,22 @@ import admin from '@views/admin'
 
 export const adminRoutes = [
   {
-    name: 'user-management', // %TODO: should be named 'home' or 'feed.home'
+    name: 'user-management',
     path: '/admin/user-management',
     component: admin.UserManagement,
   },
   {
-    name: 'home', // %TODO: should be named 'home' or 'feed.home'
+    name: 'txn-management',
+    path: '/admin/txn-management',
+    component: admin.TxnManagement,
+  },
+  {
+    name: 'home',
     path: '/admin',
     component: admin.Home,
     //props: true,
   },
-
-  /**
-   * 404, catch all unknowns
-   * This should always be registered last
-   */
-  {
+  { // catch all unknowns (404), always register last
     name: 'error-not-found',
     path: '*',
     component: ErrorViews.NotFound,

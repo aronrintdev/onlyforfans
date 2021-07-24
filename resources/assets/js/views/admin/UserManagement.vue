@@ -5,12 +5,12 @@
       v-model="currentPage"
       :total-rows="rows"
       :per-page="perPage"
-      aria-controls="my-table"
+      aria-controls="users-table"
     ></b-pagination>
 
     <b-table hover 
-      id="my-table"
-      :items="myProvider"
+      id="users-table"
+      :items="getUsers"
       :per-page="perPage"
       :current-page="currentPage"
       :fields="fields"
@@ -36,8 +36,6 @@ import Vuex from 'vuex'
 export default {
   name: 'UserManagement',
 
-  components: {},
-
   props: {},
 
   computed: {
@@ -61,13 +59,7 @@ export default {
   }),
 
   methods: {
-    /*
-    shortUuid(uuid) {
-      const s = uuid.split('-')
-      return s.length ? s[0] : uuid
-    },
-     */
-    async myProvider(ctx) {
+    async getUsers(ctx) {
       const params = `?page=${ctx.currentPage}&take=${ctx.perPage}`
       try {
         const response = await axios.get( this.$apiRoute('users.index')+params )
@@ -84,6 +76,8 @@ export default {
 
   created() {
   },
+
+  components: {},
 }
 </script>
 

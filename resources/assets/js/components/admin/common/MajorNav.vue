@@ -18,6 +18,15 @@
       <b-nav-item>Ranking (weights for suggested, explore, etc)</b-nav-item>
     </b-nav>
 
+    <h6>
+      <router-link :to="{ name: 'txn-management', params: {} }">Financial</router-link>
+    </h6>
+    <b-nav vertical class="">
+      <b-nav-item><router-link :to="{ name: 'txn-management', params: {} }">Txn</router-link></b-nav-item>
+      <b-nav-item>tbd</b-nav-item>
+    </b-nav>
+
+
     <h6>Messages</h6>
     <b-nav vertical class="">
       <b-nav-item>Chat Messages</b-nav-item>
@@ -69,12 +78,6 @@
       <b-nav-item>Database (migrations, etc)</b-nav-item>
     </b-nav>
 
-    <h6>Financial</h6>
-    <b-nav vertical class="">
-      <b-nav-item>tbd</b-nav-item>
-      <b-nav-item>tbd</b-nav-item>
-    </b-nav>
-
     <h6>Support</h6>
     <b-nav vertical class="">
       <b-nav-item>tbd</b-nav-item>
@@ -122,6 +125,13 @@ export default {
       font-size: 0.8rem;
       padding: 0.3rem 1rem;
       color: #a5a5a5;
+    }
+    .nav-link > a {
+      color: #a5a5a5;
+      text-decoration: none;
+    }
+    .nav-link > a.router-link-active {
+      color: var(--primary); // #0056b3;
     }
   }
 </style>

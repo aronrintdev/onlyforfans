@@ -93,7 +93,7 @@ import videojs from 'video.js';
 // Required libraries for video record
 import RecordRTC from 'recordrtc';
 import Record from 'videojs-record/dist/videojs.record.js';
-import { eventBus } from '@/app';
+import { eventBus } from '@/eventBus'
 
 export default {
   data: () => ({

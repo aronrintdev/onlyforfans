@@ -52,7 +52,7 @@
 </template>
 
 <script>
-import { eventBus } from '@/app'
+import { eventBus } from '@/eventBus'
 import moment from 'moment';
 
 export default {

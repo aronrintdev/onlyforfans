@@ -122,7 +122,7 @@
 // %PSG: %NOTE %FIXME - not sure if refactoring all modals into a single component was the best idea, as it's possible
 // one or more of the indiviudal modals could be used elsewhere in the app outside of timelines (eg, following list)
 import Vuex from 'vuex';
-import { eventBus } from '@/app'
+import { eventBus } from '@/eventBus'
 import FollowTimeline from '@components/modals/FollowTimeline.vue'
 import CropImage from '@components/modals/CropImage.vue'
 import PurchasePost from '@components/modals/PurchasePost.vue'

@@ -116,7 +116,7 @@
 
 <script>
 import Vuex from 'vuex'
-import { eventBus } from '@/app';
+import { eventBus } from '@/eventBus'
 import TextStoryForm from '@components/stories/TextStoryForm.vue';
 import TextStoryPreview from '@components/stories/TextStoryPreview.vue';
 import PhotoStoryForm from '@components/stories/PhotoStoryForm.vue';

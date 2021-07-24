@@ -17,7 +17,7 @@
 /**
  * resources/assets/js/views/live-chat/components/Gallery.vue
  */
-import { eventBus } from '@/app'
+import { eventBus } from '@/eventBus'
 import Vuex from 'vuex'
 
 import Gallery from '@components/media/Gallery'

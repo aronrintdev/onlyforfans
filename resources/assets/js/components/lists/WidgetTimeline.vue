@@ -50,7 +50,7 @@
 </template>
 
 <script>
-import { eventBus } from '@/app'
+import { eventBus } from '@/eventBus'
 //import { DateTime } from 'luxon'
 import moment from 'moment'
 

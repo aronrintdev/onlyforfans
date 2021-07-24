@@ -42,7 +42,7 @@
 /**
  * Base purchase form, for when something is being purchased
  */
-import { eventBus } from '@/app'
+import { eventBus } from '@/eventBus'
 import _ from 'lodash'
 import Vuex from 'vuex'
 import FormNew from './forms/New'

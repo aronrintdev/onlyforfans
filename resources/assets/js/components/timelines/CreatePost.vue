@@ -137,7 +137,7 @@
 import moment from 'moment';
 import { isAndroid, isIOS, osVersion } from 'mobile-device-detect';
 
-import { eventBus } from '@/app';
+import { eventBus } from '@/eventBus'
 import vue2Dropzone from 'vue2-dropzone';
 import 'vue2-dropzone/dist/vue2Dropzone.min.css';
 import EmojiIcon from '@components/common/icons/EmojiIcon.vue';
