@@ -180,7 +180,7 @@ export const routes = [
   {
     name: 'users.acceptstaffinvite',
     path: '/staff/invitations/accept',
-    component: users.AcceptInvite,
+    component: users.AcceptInviteSessionUser,
     props: false,
   },
 

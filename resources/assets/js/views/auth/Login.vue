@@ -143,7 +143,9 @@ export default {
     }
   },
   mounted() {
-    const { email } = this.$route.params;
+    const { email: emailFromParams } = this.$route.params;
+    const { email: emailFromQuery } = this.$route.query;
+    const email = emailFromParams || emailFromQuery;
     if (email) {
       this.form = {
         ...this.form,
