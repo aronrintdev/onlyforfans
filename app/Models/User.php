@@ -329,10 +329,6 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
         return $this->hasMany(Staff::class, 'owner_id');
     }
 
-    public function staff()
-    { 
-        return $this->belongsTo(Staff::class, 'staff_id');
-    }
 
 
 //    public function lists()

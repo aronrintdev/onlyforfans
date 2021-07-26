@@ -8,7 +8,7 @@ class Staff extends JsonResource
     public function toArray($request)
     {
         $sessionUser = $request->user();
-        
+
         return [
             'id' => $this->id,
             'name' => $this->first_name.' '.$this->last_name,
@@ -17,6 +17,7 @@ class Staff extends JsonResource
             'pending' => $this->pending,
             'email' => $this->email,
             'last_login_at' => null,
+            'last_login_at' => $this->user ? $this->user->last_logged : null,
         ];
     }
 }

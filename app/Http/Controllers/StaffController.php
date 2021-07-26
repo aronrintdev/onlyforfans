@@ -22,8 +22,10 @@ class StaffController extends Controller
         $sessionUser = $request->user();
 
         $accounts = $sessionUser->staffMembers()
+            ->with('user')
             ->where('role', 'manager')
-            ->paginate($request->input('take', 10));
+            ->paginate($request->input('take', 10))
+            ->makeVisible(['user']);
 
         return new StaffCollection($accounts);
     }
@@ -65,6 +67,8 @@ class StaffController extends Controller
      */
     public function acceptInvite(Request $request)
     {
+        $sessionUser = $request->user();
+
         $request->validate([
             'email' => 'required|string',
             'token' => 'required|string',
@@ -77,6 +81,7 @@ class StaffController extends Controller
         if ($staff) {
             $staff->active = true;
             $staff->pending = false;
+            $staff->user_id = $sessionUser->id;
             $staff->save();
 
             return response()->json([
