@@ -133,6 +133,20 @@ class UsersController extends AppBaseController
             'birthdate' => 'date|nullable',
             'weblinks' => 'array|nullable',
             'weblinks.*' => 'url|nullable',
+            'body_type' => 'string|nullable',
+            'chest' => 'string|nullable',
+            'waist' => 'string|nullable',
+            'hips' => 'string|nullable',
+            'arms' => 'string|nullable',
+            'hair_color' => 'string|nullable',
+            'eye_color' => 'string|nullable',
+            'age' => 'string|nullable',
+            'height' => 'string|nullable',
+            'weight' => 'string|nullable',
+            'education' => 'string|nullable',
+            'language' => 'string|nullable',
+            'ethnicity' => 'string|nullable',
+            'profession' => 'string|nullable',
         ]);
         $request->request->remove('username'); // disallow username updates for now
 
