@@ -61,6 +61,7 @@
               :rows="mobile ? 2 : 3"
               max-rows="6"
               spellcheck="false"
+              @keypress.enter="onEnterPress"
             ></b-form-textarea>
           </b-form-group>
         </div>
@@ -409,6 +410,15 @@ export default {
         this.finalizeMessageSend()
       }
 
+    },
+
+    /**
+     * Send message on ctrl+enter
+     */
+    onEnterPress(e) {
+      if (e.ctrlKey) {
+        this.sendMessage()
+      }
     },
 
     clearForm() {
