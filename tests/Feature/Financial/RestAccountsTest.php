@@ -6,11 +6,6 @@ use DB;
 
 use Tests\TestCase;
 use Database\Seeders\TestDatabaseSeeder;
-use App\Models\Comment;
-use App\Models\Post;
-use App\Models\Timeline;
-use App\Models\User;
-use App\Enums\PostTypeEnum;
 
 class RestAccountsTest extends TestCase
 {

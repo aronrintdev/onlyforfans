@@ -39,7 +39,7 @@ class Transaction extends JsonResource
         $data['purchaser'] = [
             'id' => $purchaser->id,
             'username' => $purchaser->username,
-            'slug' => $purchaser->timeline->slug,
+            'slug' => $purchaser->timeline->slug ?? '',
             'name' => $purchaser->name,
             'avatar' => $purchaser->avatar,
         ];

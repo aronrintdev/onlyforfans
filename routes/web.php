@@ -270,6 +270,9 @@ Route::group(['middleware' => ['auth'], 'as'=>'financial.', 'prefix'=>'financial
     Route::resource('accounts', 'AccountsController', [ 
         'only' => [ 'index', 'show' ],
     ]);
+    Route::resource('transactions', 'TransactionsController', [ 
+        'only' => [ 'index', 'show' ],
+    ]);
 });
 
 /*
