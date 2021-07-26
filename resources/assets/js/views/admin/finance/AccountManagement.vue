@@ -68,8 +68,9 @@ export default {
     //items: [],
     currentPage: 1,
     rows: null,
-    perPage: 10,
+    perPage: 20,
     fields: [
+      { key: 'id', label: 'ID' },
       { key: 'system', label: 'System' },
       { key: 'owner_type', label: 'Owner Type' },
       { key: 'owner_id', label: 'Owner ID' },
