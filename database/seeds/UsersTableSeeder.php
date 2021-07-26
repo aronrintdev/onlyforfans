@@ -117,6 +117,7 @@ class UsersTableSeeder extends Seeder
                 }
                 $user = FactoryHelpers::createUser($u);
                 $user->assignRole('super-admin');
+                $user->assignRole('admin');
                 unset($user);
             }
         } // testing
