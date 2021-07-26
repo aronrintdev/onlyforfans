@@ -22,4 +22,9 @@ class ChatthreadPolicy extends BasePolicy
     {
         return $chatthread->participants->contains($user->id);
     }
+
+    protected function favorite(User $user, Chatthread $chatthread)
+    {
+        return $chatthread->participants->contains($user->id);
+    }
 }

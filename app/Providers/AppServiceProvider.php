@@ -61,6 +61,7 @@ class AppServiceProvider extends ServiceProvider
 
         Relation::morphMap([
             'chatmessages'           => 'App\Models\Chatmessage',
+            'chatthreads'            => 'App\Models\Chatthread',
             'comments'               => 'App\Models\Comment',
             'conversations'          => 'App\Models\Conversation',
             //'favorites'              => 'App\Models\Favorite',

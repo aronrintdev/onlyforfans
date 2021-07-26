@@ -1,11 +1,11 @@
 <template>
-  <div v-if="!isLoading" class="h-100 d-flex flex-column">
+  <div v-if="!isLoading" class="h-100 d-flex flex-column pl-3" :key="this.id">
 
     <section class="chatthread-header">
       <div class="d-flex align-items-center">
-        <b-button variant="link" class="" @click="onBackClicked">
+        <b-btn variant="link" class="" @click="onBackClicked">
           <fa-icon :icon="['fas', 'arrow-left']" class="fa-lg" />
-        </b-button>
+        </b-btn>
         <p class="m-0"><strong>{{ participant.username }}</strong></p>
         <b-dropdown id="ctrls-participants" variant="link" size="sm" class="ml-auto" right no-caret>
           <template #button-content>
@@ -26,32 +26,60 @@
       </div>
       <div class="d-flex align-items-center">
         <p class="my-0 mx-2 text-nowrap">Last Seen</p>
-        <div>|</div>
-        <b-button variant="link" class="" @click="doSomething">
-          <fa-icon :icon="['far', 'star']" size="lg" /><span>Favorite</span>
-        </b-button>
-        <div>|</div>
-        <b-button variant="link" class="" @click="toggleMute">
-          <fa-icon v-if="!isMuted" :icon="['far', 'bell']" fixed-width size="lg" title="Notifications ON" />
+        <div class="text-muted">|</div>
+        <b-btn variant="link" class="text-nowrap" @click="toggleFavorite">
+          <fa-icon :icon="isFavorite ? [ 'fas', 'star' ] : ['far', 'star']" size="lg" class="mr-1" />
+          <span v-text="$t('buttons.favorite')" />
+        </b-btn>
+        <div class="text-muted">|</div>
+        <b-btn
+          variant="link"
+          class="text-nowrap"
+          v-b-tooltip:hover
+          :title="$t('tooltip.notifications')"
+          @click="toggleMute"
+        >
+          <fa-icon
+            v-if="!isMuted"
+            :icon="['far', 'bell']"
+            fixed-width
+            size="lg"
+            title="Notifications ON"
+            class="mr-1"
+          />
           <fa-icon
             v-if="isMuted"
             :icon="['far', 'bell-slash']"
             fixed-width
             size="lg"
-            class="muted"
             title="Notifications OFF"
+            class="muted mr-1"
           />
-          <span>Notifications</span>
-        </b-button>
-        <div>|</div>
-        <b-button variant="link" class="" @click="toggleGallery" v-b-tooltip:hover :title="$t('tooltips.gallery')">
-          <fa-icon :icon="showGallery ? ['fas', 'image'] : ['far', 'image']" size="lg" /><span>Gallery</span>
-        </b-button>
-        <div>|</div>
-        <b-btn variant="link" @click="tip" v-b-tooltip:hover :title="$t('tooltips.tip')">
-          <fa-icon icon="dollar-sign" fixed-width size="lg" /><span>Tip</span>
+          <span v-text="$t('buttons.notifications')" />
         </b-btn>
-        <div>|</div>
+        <div class="text-muted">|</div>
+        <b-btn
+          variant="link"
+          class="text-nowrap"
+          v-b-tooltip:hover
+          :title="$t('tooltip.gallery')"
+          @click="toggleGallery"
+        >
+          <fa-icon :icon="showGallery ? ['fas', 'image'] : ['far', 'image']" size="lg" class="mr-1" />
+          <span v-text="$t('buttons.gallery')" />
+        </b-btn>
+        <div class="text-muted">|</div>
+        <b-btn
+          variant="link"
+          class="text-nowrap"
+          v-b-tooltip:hover
+          :title="$t('tooltip.tip')"
+          @click="tip"
+        >
+          <fa-icon icon="dollar-sign" fixed-width size="lg" class="mr-1" />
+          <span v-text="$t('buttons.tip')" />
+        </b-btn>
+        <div class="text-muted">|</div>
         <SearchInput v-model="searchQuery" size="lg" />
       </div>
     </section>
@@ -130,13 +158,22 @@ export default {
   },
 
   computed: {
+    ...Vuex.mapState('messaging', [ 'threads' ]),
 
     isLoading() {
       return !this.session_user || !this.participant || !this.id || !this.chatmessages
     },
 
+    isFavorite() {
+      return this.thread ? this.thread.is_favorite : false
+    },
+
     channelName() {
       return `chatthreads.${this.id}`
+    },
+
+    thread() {
+      return this.threads[this.id]
     }
 
   },
@@ -191,6 +228,7 @@ export default {
 
   methods: {
     ...Vuex.mapActions(['getUnreadMessagesCount']),
+    ...Vuex.mapMutations('messaging', [ 'UPDATE_THREAD' ]),
 
     /**
      * Add official message from db, overwrite temp message if necessary
@@ -338,6 +376,26 @@ export default {
           resource_type: 'timelines',
         },
       })
+    },
+
+    toggleFavorite() {
+      const isFavorite = this.thread.is_favorite
+      this.UPDATE_THREAD({ ...this.thread, is_favorite: isFavorite ? false : true })
+      this.$nextTick(() => {
+        this.$forceCompute('thread')
+        this.$forceCompute('isFavorite')
+      })
+      if (isFavorite) {
+        this.axios.post(this.$apiRoute('favorites.remove'), {
+          favoritable_id: this.id,
+          favoritable_type: 'chatthreads',
+        })
+      } else {
+        this.axios.post(this.$apiRoute('favorites.store'), {
+          favoritable_id: this.id,
+          favoritable_type: 'chatthreads',
+        })
+      }
     },
 
     /**
@@ -615,7 +673,14 @@ export default {
 <i18n lang="json5" scoped>
 {
   "en": {
-    "tooltips": {
+    "buttons": {
+      "favorite": "Favorite",
+      "notifications": "Notifications",
+      "gallery": "Gallery",
+      "tip": "Tip",
+    },
+    "tooltip": {
+      "notifications": "Activate or Deactivate Notifications for this Chat Thread",
       "gallery": "View Gallery of Media",
       "tip": "Send Tip"
     }

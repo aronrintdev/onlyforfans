@@ -8,6 +8,7 @@ use Laravel\Scout\Searchable;
 
 use App\Models\Traits\UsesUuid;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Model;
 //use App\Models\Traits\UsesShortUuid;
 
@@ -43,6 +44,21 @@ class Chatthread extends Model implements UuidId
     // %%% Accessors/Mutators | Casts
     //------------------------------------------------------------------------//
 
+    protected $appends = ['isFavoritedByMe'];
+
+    public function getIsFavoritedByMeAttribute($value)
+    {
+        $sessionUser = Auth::user();
+        if (!$sessionUser) {
+            return false;
+        }
+        $exists = Favorite::where('user_id', $sessionUser->id)
+        ->where('favoritable_id', $this->id)
+        ->where('favoritable_type', 'posts')
+            ->first();
+        return $exists ? true : false;
+    }
+
     //------------------------------------------------------------------------//
     // %%% Relationships
     //------------------------------------------------------------------------//
@@ -62,6 +78,11 @@ class Chatthread extends Model implements UuidId
     public function participants() // ie receivers, readers, etc; should include originator
     {
         return $this->belongsToMany(User::class, 'chatthread_user', 'chatthread_id', 'user_id')->withPivot('is_muted');
+    }
+
+    public function favorites()
+    {
+        return $this->morphMany(Favorite::class, 'favoritable');
     }
 
     #endregion Relationships

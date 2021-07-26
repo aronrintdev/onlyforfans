@@ -55,6 +55,7 @@
         <div class="mt-3">
           <b-form-group>
             <b-form-textarea
+              class="message"
               v-model="newMessageForm.mcontent"
               placeholder="Type a message..."
               :rows="mobile ? 2 : 3"
@@ -526,6 +527,10 @@ textarea,
   }
 }
 
+textarea {
+  overflow-y: auto !important;
+}
+
 .dropzone.dz-started .dz-message {
   display: block;
 }
@@ -544,12 +549,9 @@ textarea,
 </style>
 
 <style lang="scss">
-body {
-  .store-chatmessage {
-    textarea.form-control {
-      border: none;
-    }
-  }
+textarea.form-control {
+  border: none;
+  overflow-y: auto;
 }
 </style>
 

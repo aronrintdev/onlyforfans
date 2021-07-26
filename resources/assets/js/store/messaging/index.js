@@ -96,6 +96,10 @@ export const messaging = {
       state.threadMeta = payload.meta
     },
 
+    UPDATE_THREAD(state, payload) {
+      Vue.set(state.threads, payload.id, payload)
+    },
+
     UPDATE_GALLERY(state, { threadId, payload }) {
       console.log('UPDATE_GALLERY', { threadId, payload })
       prepThread(state, threadId)
