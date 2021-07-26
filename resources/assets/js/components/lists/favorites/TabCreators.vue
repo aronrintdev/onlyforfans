@@ -14,8 +14,8 @@
       <b-row class="mt-3">
         <b-col lg="4" v-for="(f,idx) in favorites" :key="f.id" > 
           <WidgetTimeline :timeline="f.favoritable" :access_level="() => 'todo'" :created_at="f.created_at">
-            <b-button variant="outline-primary">Message</b-button>
-            <b-button @click="renderTip(f.favoritable, 'timelines')" variant="outline-success">Send Tip</b-button>
+            <b-button variant="primary">Message</b-button>
+            <b-button @click="renderTip(f.favoritable, 'timelines')" variant="primary">Tip</b-button>
           </WidgetTimeline>
         </b-col>
       </b-row>
