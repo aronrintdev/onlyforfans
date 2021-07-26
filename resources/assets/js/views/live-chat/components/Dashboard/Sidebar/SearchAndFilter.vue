@@ -1,25 +1,26 @@
 <template>
-  <div class="search-filter">
-    <div class="search d-flex align-items-center mb-2 w-100">
-      <label for="create-thread-search" v-text="$t('search.label')" class="text-nowrap mr-2 mb-0" />
-      <b-input
-        ref="searchInput"
-        id="create-thread-search"
-        :value="search"
-        class="flex-grow-1"
-        @input="value => $emit('searchInput', value)"
-      />
-      <b-btn variant="link" @click="onSearchIconClick">
-        <fa-icon :icon="search === '' ? 'search' : 'times'" size="lg" />
-      </b-btn>
-    </div>
-    <article class="chatthread-filters py-3 d-flex align-items-center">
-      <!-- Filters/View -->
-      <span class="mr-2" v-text="$t('filters.label')" />
-      <b-form-select :value="selectedFilter" :options="filters" @input="value => $emit('filterInput', value)" />
+  <div class="search-filter py-3">
+    <label for="thread-search" v-text="$t('search.label')" class="text-nowrap mb-0" />
+    <b-input
+      ref="searchInput"
+      id="thread-search"
+      :value="search"
+      class="flex-grow-1"
+      @input="value => $emit('searchInput', value)"
+    />
+    <b-btn variant="link" @click="onSearchIconClick">
+      <fa-icon :icon="search === '' ? 'search' : 'times'" size="lg" />
+    </b-btn>
 
-      <SortControl :value="sortBy" @input="value => $emit('sortByInput', value)" />
-    </article>
+    <!-- Filters/View -->
+    <label for="thread-filter-select" class="mb-0" v-text="$t('filters.label')" />
+    <b-form-select
+      id="thread-filter-select"
+      :value="selectedFilter"
+      :options="filters"
+      @input="value => $emit('filterInput', value)"
+    />
+    <SortControl :value="sortBy" @input="value => $emit('sortByInput', value)" />
   </div>
 </template>
 
@@ -66,7 +67,14 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.search-filter {
+  display: grid;
+  grid-gap: 0.5rem;
+  grid-template-columns: auto auto auto;
+  align-items: center;
+}
+</style>
 
 <i18n lang="json5" scoped>
 {
@@ -75,7 +83,7 @@ export default {
       "label": "View:",
     },
     "search": {
-      "label": "Search",
+      "label": "Search:",
     }
   }
 }
