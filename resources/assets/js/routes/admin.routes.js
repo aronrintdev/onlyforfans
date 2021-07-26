@@ -10,6 +10,11 @@ export const adminRoutes = [
     component: admin.UserManagement,
   },
   {
+    name: 'account-management',
+    path: '/admin/account-management',
+    component: admin.AccountManagement,
+  },
+  {
     name: 'txn-management',
     path: '/admin/txn-management',
     component: admin.TxnManagement,

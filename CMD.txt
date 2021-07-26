@@ -119,3 +119,40 @@ $ php artisan test --group regression
 $ DEBUG_FORCE_ENABLE_MAIL_NOTIFY=true DEBUG_BYPASS_SENDGRID_MAIL_NOTIFY=false DEBUG_ENABLE_SENDGRID_SANDBOX_MODE=false DEBUG_OVERRIDE_TO_EMAIL_FOR_SENDGRID="peter@peltronic.com" php artisan test --group="notify-via-sendgrid-unit"
 
 $ DEBUG_FORCE_ENABLE_MAIL_NOTIFY=true DEBUG_BYPASS_SENDGRID_MAIL_NOTIFY=false DEBUG_ENABLE_SENDGRID_SANDBOX_MODE=true DEBUG_OVERRIDE_TO_EMAIL_FOR_SENDGRID="peter@peltronic.com" php artisan test --group="notify-via-sendgrid-unit"
+
+
+---
+% Manual repair of financial DB [accounts] table:
+
+CREATE TABLE `accounts` (
+  `id` char(36) COLLATE utf8_unicode_ci NOT NULL,
+  `system` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `owner_type` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `owner_id` char(36) COLLATE utf8_unicode_ci NOT NULL,
+  `name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `type` varchar(255) COLLATE utf8_unicode_ci NOT NULL COMMENT 'What type of account this is',
+  `currency` varchar(3) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `balance` bigint(20) DEFAULT NULL,
+  `balance_last_updated_at` timestamp NULL DEFAULT NULL,
+  `pending` bigint(20) DEFAULT NULL,
+  `pending_last_updated_at` timestamp NULL DEFAULT NULL,
+  `resource_type` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `resource_id` char(36) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `verified` tinyint(1) NOT NULL DEFAULT '0',
+  `can_make_transactions` tinyint(1) NOT NULL DEFAULT '0',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `deleted_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `accounts_owner_type_owner_id_index` (`owner_type`,`owner_id`),
+  KEY `accounts_resource_type_resource_id_index` (`resource_type`,`resource_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+
+% backup DB local
+mysqldump -u {username} -p fansplat_dev > ~/fansplat_dev-bak--2021MMDD.sql
+mysqldump -u {username} -p fansplat_financial_dev > ~/fansplat_financial_dev-bak--2021MMDD.sql
+
+% Postgres override
+
+DB_DRIVER=pgsql DB_PORT=5432 DB_FINANCIAL_DRIVER=pgsql DB_FINANCIAL_PORT=5432 php artisan migrate 
