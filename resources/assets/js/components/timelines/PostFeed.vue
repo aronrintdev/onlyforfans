@@ -94,7 +94,7 @@
 
 <script>
 import Vuex from 'vuex'
-import { eventBus } from '@/app'
+import { eventBus } from '@/eventBus'
 import PostDisplay from '@components/posts/Display'
 import ImageDisplay from '@components/timelines/elements/ImageDisplay'
 

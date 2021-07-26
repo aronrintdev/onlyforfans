@@ -51,7 +51,7 @@
 </template>
 
 <script>
-import { eventBus } from '@/app'
+import { eventBus } from '@/eventBus'
 import CommentList from '@components/comments/List'
 import CommentDisplay from '@components/comments/Display'
 import NewComment from '@components/comments/New'

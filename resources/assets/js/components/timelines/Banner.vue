@@ -71,7 +71,7 @@
 
 <script>
 import Vuex from 'vuex'
-import { eventBus } from '@/app'
+import { eventBus } from '@/eventBus'
 import OnlineStatus from '@components/user/OnlineStatus'
 import Stats from './banner/Stats'
 

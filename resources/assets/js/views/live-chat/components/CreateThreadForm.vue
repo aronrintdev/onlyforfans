@@ -4,9 +4,6 @@
 
     <section class="chatthread-header">
       <div class="d-flex align-items-center">
-        <b-button to="/messages" variant="link" class="" @click="doSomething">
-          <fa-icon :icon="['fas', 'arrow-left']" class="fa-lg" />
-        </b-button>
         <p class="m-0"><strong>Select one or more recipients from contacts</strong></p>
       </div>
     </section>

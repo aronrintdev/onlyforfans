@@ -17,7 +17,7 @@
 /**
  * js/components/banking/accounts/List
  */
-import { eventBus } from '@/app'
+import { eventBus } from '@/eventBus'
 import Vuex from 'vuex'
 import ListItem from './ListItem'
 

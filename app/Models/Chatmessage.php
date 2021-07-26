@@ -1,28 +1,67 @@
 <?php
 namespace App\Models;
 
-use Illuminate\Support\Collection;
+use Money\Money;
 
 use Carbon\Carbon;
-use App\Interfaces\Ownable;
 use App\Interfaces\UuidId;
-use App\Models\Traits\OwnableTraits;
-use App\Models\Traits\UsesUuid;
+use App\Interfaces\Ownable;
 use Laravel\Scout\Searchable;
+use App\Models\Traits\UsesUuid;
+use App\Interfaces\Purchaseable;
+use App\Models\Financial\Account;
+use App\Models\Traits\FormatMoney;
+use Illuminate\Support\Collection;
+use App\Models\Traits\OwnableTraits;
+use App\Models\Traits\ShareableTraits;
+use App\Models\Casts\Money as CastsMoney;
+use App\Models\Financial\Traits\HasCurrency;
 
-class Chatmessage extends Model implements UuidId, Ownable
+/**
+ * @property string     $id
+ * @property string     $chatthread_id
+ * @property string     $sender_id
+ * @property string     $mcontent
+ * @property bool       $purchase_only
+ * @property Money      $price
+ * @property string     $currency
+ * @property Carbon     $deliver_at
+ * @property bool       $is_delivered
+ * @property bool       $is_read
+ * @property bool       $is_flagged
+ * @property Collection $cattrs
+ * @property Carbon     $created_at
+ * @property Carbon     $updated_at
+ *
+ * @property Chatthread $chatthread
+ * @property User       $sender
+ * @property Mediafile  $mediafile
+ * @property Collection $mediafiles
+ *
+ * @package App\Models
+ */
+class Chatmessage extends Model implements UuidId, Ownable, Purchaseable
 {
-    use UsesUuid, OwnableTraits, Searchable;
+    use UsesUuid,
+        OwnableTraits,
+        Searchable,
+        OwnableTraits,
+        ShareableTraits,
+        HasCurrency,
+        FormatMoney;
 
     protected $guarded = [ 'id', 'created_at', 'updated_at' ];
 
     //--------------------------------------------
     // %%% Accessors/Mutators | Casts
     //--------------------------------------------
+    #region Model Properties
 
     protected $casts = [
-        'cattrs'       => 'collection',
-        'is_delivered' => 'boolean',
+        'price'         => CastsMoney::class,
+        'purchase_only' => 'boolean',
+        'cattrs'        => 'collection',
+        'is_delivered'  => 'boolean',
     ];
 
     //--------------------------------------------
@@ -39,10 +78,12 @@ class Chatmessage extends Model implements UuidId, Ownable
         });
     }
 
+    #endregion Model Properties
+
     //--------------------------------------------
     // %%% Relationships
     //--------------------------------------------
-
+    #region Relationships
     public function chatthread()
     {
         return $this->belongsTo(Chatthread::class);
@@ -51,6 +92,11 @@ class Chatmessage extends Model implements UuidId, Ownable
     public function sender()
     {
         return $this->belongsTo(User::class, 'sender_id');
+    }
+
+    public function sharees()
+    {
+        return $this->morphToMany(User::class, 'shareable', 'shareables', 'shareable_id', 'sharee_id')->withTimestamps();
     }
 
     public function mediafile()
@@ -62,6 +108,8 @@ class Chatmessage extends Model implements UuidId, Ownable
     {
         return $this->morphMany(Mediafile::class, 'resource');
     }
+
+    #endregion Relationships
 
     /* ---------------------------------------------------------------------- */
     /*                               Searchable                               */
@@ -101,9 +149,43 @@ class Chatmessage extends Model implements UuidId, Ownable
     /* ---------------------------------------------------------------------- */
 
 
+    /* -------------------------------------------------------------------------- */
+    /*                                Purchaseable                                */
+    /* -------------------------------------------------------------------------- */
+    #region Purchaseable
+
+    public function verifyPrice($amount, $currency = 'USD'): bool
+    {
+        if (!$amount instanceof Money) {
+            $amount = CastsMoney::toMoney($amount, $currency);
+        }
+        return $this->price->equals($amount);
+    }
+
+    public function getOwnerAccount(string $system, string $currency): Account
+    {
+        return $this->getOwner()->first()->getInternalAccount($system, $currency);
+    }
+
+    public function getDescriptionNameString(): string
+    {
+        return 'Comment';
+    }
+
+    #endregion Purchaseable
+    /* ---------------------------------------------------------------------- */
+
     //--------------------------------------------
     // %%% Methods
     //--------------------------------------------
+
+    public function setPurchaseOnly($price, $currency) {
+        $this->purchase_only = true;
+        $this->price = CastsMoney::toMoney($price, $currency);
+        $this->currency = $currency;
+        $this->save();
+    }
+
 
     public function deliver()
     {

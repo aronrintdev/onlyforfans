@@ -36,7 +36,7 @@
 </template>
 
 <script>
-import { eventBus } from '@/app'
+import { eventBus } from '@/eventBus'
 //import TabFavoritesAll from '@components/lists/favorites/TabAll'
 import TabFavoritesPosts from '@components/lists/favorites/TabPosts'
 import TabFavoritesCreators from '@components/lists/favorites/TabCreators'

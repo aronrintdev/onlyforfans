@@ -66,7 +66,7 @@
  * Edit Post View
  */
 import moment from 'moment'
-import { eventBus } from '@/app'
+import { eventBus } from '@/eventBus'
 import PriceSelector from '@components/common/PriceSelector'
 import LoadingOverlay from '@components/common/LoadingOverlay'
 import CalendarIcon from '@components/common/icons/CalendarIcon.vue'

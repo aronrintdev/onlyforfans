@@ -65,9 +65,15 @@ class MediafilePolicy extends BasePolicy
             $message = Chatmessage::find($mediafile->resource_id);
             $isInThread = $message->chatthread->participants->contains($user->id);
             if ( $isInThread ) {
-                return true;
+                if (!$message->purchase_only) {
+                    return true;
+                }
+                // purchase only
+                if ($message->checkAccess($user)) {
+                    return true;
+                }
             }
-            // TODO: Add switch for paid vs free messages.
+            return false;
 
         default:
             return false;

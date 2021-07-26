@@ -27,7 +27,10 @@
 
           <VueMarkdown
             class="msg-snippet mb-0"
-            inline :breaks="false"
+            inline
+            :breaks="false"
+            :html="false"
+            :linkify="false"
             :source="chatthread.chatmessages[0].mcontent || ''"
           />
         </div>

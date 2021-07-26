@@ -132,7 +132,7 @@
 <script>
 import Vuex from 'vuex'
 import moment from 'moment'
-import { eventBus } from '@/app'
+import { eventBus } from '@/eventBus'
 import PostHeader from './PostHeader'
 import PostFooter from './PostFooter'
 import PostCta from './PostCta'

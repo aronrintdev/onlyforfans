@@ -49,7 +49,7 @@
 
 <script>
 //import Vuex from 'vuex';
-import { eventBus } from '@/app'
+import { eventBus } from '@/eventBus'
 //import { DateTime } from 'luxon'
 import moment from 'moment'
 import mixinModal from '@mixins/modal'

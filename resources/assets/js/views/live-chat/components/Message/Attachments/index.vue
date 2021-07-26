@@ -6,7 +6,7 @@
         <fa-icon icon="images" />
         {{ media.length }}
       </b-badge>
-      <MediaSlider  :mediafiles="media" />
+      <MediaSlider :mediafiles="media" />
     </div>
   </div>
 </template>

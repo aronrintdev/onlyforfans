@@ -3,12 +3,12 @@
 
     <section class="row flex-nowrap h-100 w-100" style="max-height: 100%;">
 
-      <aside class="col-md-5 col-lg-4 col-xl-2" :class="mobile ? '' : 'panel'">
+      <aside class="col-md-5 col-lg-4 col-xl-3" :class="mobile ? '' : 'panel'">
 
         <article class="top-bar d-flex justify-content-between align-items-center mb-3">
           <div class="h4" v-text="$t('header')" />
           <div class="d-flex">
-            <b-button variant="link" class="clickme_to-schedule_message" @click="doSomething">
+            <b-button variant="link" disabled class="clickme_to-schedule_message" @click="doSomething">
               <fa-icon :icon="['far', 'calendar-alt']" class="fa-lg" />
             </b-button>
             <b-button variant="link" class="clickme_to-send_message" :to="linkCreateThread()">
@@ -30,7 +30,7 @@
           <b-btn variant="link" class="ml-auto" @click="markAllRead">Mark All as Read</b-btn>
         </article>
 
-        <article class="chatthread-list">
+        <article class="chatthread-list position-relative">
           <b-list-group>
             <PreviewThread
               v-for="ct in renderedThreads"
@@ -55,13 +55,16 @@
             v-on:page-click="pageClickHandler"
             class="mt-3"
           ></b-pagination>
+
+          <LoadingOverlay :loading="renderedThreads.length === 0" />
         </article>
 
       </aside>
 
-      <main class="col-md-7 col-lg-8 col-xl-10 h-100" style="max-height: 100%;">
+      <main class="flex-fill h-100" style="max-height: 100%;">
         <transition mode="out-in" name="quick-fade" :key="activeThreadId">
           <router-view
+            class="w-100"
             :key="activeThreadId"
             :session_user="session_user"
             :participant="participants(activeThread)"
@@ -95,16 +98,19 @@
 import Vuex from 'vuex'
 import moment from 'moment'
 import _ from 'lodash'
-import { eventBus } from '@/app'
+import { eventBus } from '@/eventBus'
 import PreviewThread from '@views/live-chat/components/PreviewThread'
 import SearchInput from '@components/common/search/HorizontalOpenInput'
 import Search from '@views/live-chat/components/Search'
 import SortControl from '@views/live-chat/components/SortControl'
 
+import LoadingOverlay from '@components/common/LoadingOverlay'
+
 export default {
   name: 'LiveChatDashboard',
 
   components: {
+    LoadingOverlay,
     PreviewThread,
     SearchInput,
     Search,
