@@ -266,10 +266,14 @@ Route::group(['middleware' => ['auth']], function () {
 });
 
 /* ------------------------------ Financial Namespace ------------------------------ */
-Route::group(['middleware' => ['auth'], 'as'=>'financial.', 'prefix'=>'financial', 'namespace'=>'Financial'], function () {
+// %NOTE: currently these are limited to super-admin roles
+Route::group(['middleware' => ['auth', 'role:super-admin'], 'as'=>'financial.', 'prefix'=>'financial', 'namespace'=>'Financial'], function () {
+
     Route::resource('accounts', 'AccountsController', [ 
         'only' => [ 'index', 'show' ],
     ]);
+
+    Route::get('/summary/transactions', 'TransactionsController@summary')->name('transactions.summary');
     Route::resource('transactions', 'TransactionsController', [ 
         'only' => [ 'index', 'show' ],
     ]);

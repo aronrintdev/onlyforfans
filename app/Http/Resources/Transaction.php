@@ -37,11 +37,11 @@ class Transaction extends JsonResource
 
         $purchaser = $this->reference->account->owner;
         $data['purchaser'] = [
-            'id' => $purchaser->id,
-            'username' => $purchaser->username,
-            'slug' => $purchaser->timeline->slug ?? '',
-            'name' => $purchaser->name,
-            'avatar' => $purchaser->avatar,
+            'id' => $purchaser->id ?? null,
+            'username' => $purchaser->username ?? null,
+            'slug' => $purchaser->timeline->slug ?? null,
+            'name' => $purchaser->name ?? null,
+            'avatar' => $purchaser->avatar ?? null,
         ];
 
         return $data;
