@@ -389,6 +389,9 @@ class UsersController extends AppBaseController
         $user->real_lastname = $request->lastname;
         $user->save();
 
+        $updateSettings['has_allowed_nsfw'] = $request->hasAllowedNSFW;
+        $user->settings->update($updateSettings);
+
         $user->notify( new IdentityVerificationRequestSent($vr, $user) );
 
         return response()->json( $vr );
