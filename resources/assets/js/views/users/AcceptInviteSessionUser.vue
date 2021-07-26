@@ -5,7 +5,10 @@
         <b-card-text v-if="email == session_user.email">
           <h3>Invitation from {{ inviter }}</h3>
           <p class="mt-4 mb-3"><strong>{{ inviter }}</strong> has invited you to work on their team.</p>
-          <b-btn variant="primary" @click="acceptInvite">Accept invitation</b-btn>
+          <b-btn variant="primary" @click="acceptInvite" :disabled="isProcessing">
+            <b-spinner v-if="isProcessing" small></b-spinner>&nbsp;
+            Accept invitation
+          </b-btn>
         </b-card-text>
         <b-card-text v-else>
           <h3>Invitation from {{ inviter }}</h3>
@@ -24,6 +27,7 @@ export default {
   data: () => ({
     inviter: '',
     email: '',
+    isProcessing: false,
   }),
 
   computed: {
@@ -59,7 +63,25 @@ export default {
     ]),
 
     acceptInvite() {
-
+      this.isProcessing = true;
+      const { token, email } = this.$route.query;
+      const formData = {
+        email: email,
+        token: token, 
+      };
+      this.axios.post(this.$apiRoute('staff.acceptInvite'), formData)
+        .then(response => {
+          this.isProcessing = false;
+          this.$router.push('/');
+        })
+        .catch(error => {
+          this.isProcessing = false;
+          this.$root.$bvToast.toast('Invalid token or email', {
+            toaster: 'b-toaster-top-center',
+            title: 'Failed!',
+            variant: 'danger',
+          })
+        })
     },
     
     switchAccount() {

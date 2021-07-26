@@ -57,4 +57,35 @@ class StaffController extends Controller
         $staff->delete();
     }
 
+    /**
+     * Accept staff invitation
+     *
+     * @param Request $request
+     * @return success
+     */
+    public function acceptInvite(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|string',
+            'token' => 'required|string',
+        ]);
+
+        $staff = Staff::where('email', $request->email)
+            ->where('token', $request->token)
+            ->first();
+        
+        if ($staff) {
+            $staff->active = true;
+            $staff->pending = false;
+            $staff->save();
+
+            return response()->json([
+                'status' => 200,
+            ], 200);
+        }
+
+        return response()->json([
+            'error' => 'Invalid email or token'
+        ], 400);
+    }
 }
