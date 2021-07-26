@@ -1,52 +1,52 @@
 <template>
   <div>
     <b-card title="Account Management">
-    <b-pagination
-      v-model="currentPage"
-      :total-rows="rows"
-      :per-page="perPage"
-      aria-controls="accounts-table"
-    ></b-pagination>
+      <b-pagination
+        v-model="currentPage"
+        :total-rows="rows"
+        :per-page="perPage"
+        aria-controls="accounts-table"
+      ></b-pagination>
 
-    <b-table hover 
-      id="accounts-table"
-      :items="getData"
-      :per-page="perPage"
-      :current-page="currentPage"
-      :fields="fields"
-      small
-    >
-      <template #cell(id)="data">
-        <span class="">{{ data.item.id | niceGuid }}</span>
-      </template>
-      <template #cell(owner_id)="data">
-        <span class="">{{ data.item.owner_id | niceGuid }}</span>
-      </template>
-      <template #cell(balance)="data">
-        <span class="">{{ data.item.balance.amount | niceCurrency }}</span> <!-- assumes US %FIXME -->
-      </template>
-      <template #cell(pending)="data">
-        <span class="">{{ data.item.pending.amount | niceCurrency }}</span> <!-- assumes US %FIXME -->
-      </template>
-      <template #cell(resource_id)="data">
-        <span class="">{{ data.item.resource_id | niceGuid }}</span>
-      </template>
-      <template #cell(verified)="data">
-        <span class="">{{ data.item.verified | niceBool }}</span>
-      </template>
-      <template #cell(can_make_transactions)="data">
-        <span class="">{{ data.item.can_make_transactions | niceBool }}</span>
-      </template>
-      <template #cell(created_at)="data">
-        <span class="">{{ data.item.created_at | niceDate }}</span>
-      </template>
-      <template #cell(balance_last_updated_at)="data">
-        <span class="">{{ data.item.balance_last_updated_at | niceDate }}</span>
-      </template>
-      <template #cell(pending_last_updated_at)="data">
-        <span class="">{{ data.item.pending_last_updated_at | niceDate }}</span>
-      </template>
-    </b-table>
+      <b-table hover 
+        id="accounts-table"
+        :items="getData"
+        :per-page="perPage"
+        :current-page="currentPage"
+        :fields="fields"
+        small
+      >
+        <template #cell(id)="data">
+          <span class="">{{ data.item.id | niceGuid }}</span>
+        </template>
+        <template #cell(owner_id)="data">
+          <span class="">{{ data.item.owner_id | niceGuid }}</span>
+        </template>
+        <template #cell(balance)="data">
+          <span class="">{{ data.item.balance.amount | niceCurrency }}</span> <!-- assumes US %FIXME -->
+        </template>
+        <template #cell(pending)="data">
+          <span class="">{{ data.item.pending.amount | niceCurrency }}</span> <!-- assumes US %FIXME -->
+        </template>
+        <template #cell(resource_id)="data">
+          <span class="">{{ data.item.resource_id | niceGuid }}</span>
+        </template>
+        <template #cell(verified)="data">
+          <span class="">{{ data.item.verified | niceBool }}</span>
+        </template>
+        <template #cell(can_make_transactions)="data">
+          <span class="">{{ data.item.can_make_transactions | niceBool }}</span>
+        </template>
+        <template #cell(created_at)="data">
+          <span class="">{{ data.item.created_at | niceDate }}</span>
+        </template>
+        <template #cell(balance_last_updated_at)="data">
+          <span class="">{{ data.item.balance_last_updated_at | niceDate }}</span>
+        </template>
+        <template #cell(pending_last_updated_at)="data">
+          <span class="">{{ data.item.pending_last_updated_at | niceDate }}</span>
+        </template>
+      </b-table>
     </b-card>
   </div>
 </template>
