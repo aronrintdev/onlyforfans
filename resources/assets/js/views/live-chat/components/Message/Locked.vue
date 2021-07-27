@@ -65,7 +65,7 @@
 /**
  * resources/assets/js/views/live-chat/components/Message/Locked
  */
-import { eventBus } from '@/app'
+import { eventBus } from '@/eventBus'
 import Vuex from 'vuex'
 import moment from 'moment'
 import Attachments from './Attachments'

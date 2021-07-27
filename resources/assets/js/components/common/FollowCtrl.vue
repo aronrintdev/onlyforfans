@@ -39,7 +39,7 @@
 
 <script>
 import Vuex from 'vuex';
-import { eventBus } from '@/app'
+import { eventBus } from '@/eventBus'
 
 /** https://github.com/adapttive/vue-markdown/ */
 import VueMarkdown from '@adapttive/vue-markdown'

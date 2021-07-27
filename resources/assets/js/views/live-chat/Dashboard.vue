@@ -36,8 +36,7 @@
 import Vuex from 'vuex'
 import moment from 'moment'
 import _ from 'lodash'
-import { eventBus } from '@/app'
-
+import { eventBus } from '@/eventBus'
 import SearchInput from '@components/common/search/HorizontalOpenInput'
 
 import Sidebar from './components/Dashboard/Sidebar'

@@ -1,4 +1,4 @@
-import { eventBus } from '@/app'
+import { eventBus } from '@/eventBus'
 
 export const mixinModal = {
   methods: {

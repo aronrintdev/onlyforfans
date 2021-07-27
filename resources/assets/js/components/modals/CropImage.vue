@@ -24,7 +24,7 @@
 
 <script>
 import Vuex from 'vuex'
-import { eventBus } from '@/app'
+import { eventBus } from '@/eventBus'
 import base64ToBlob from '@helpers/base64ToBlob'
 
 export default {

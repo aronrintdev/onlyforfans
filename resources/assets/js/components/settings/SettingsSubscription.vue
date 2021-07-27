@@ -70,7 +70,7 @@
 <script>
 import moment from 'moment'
 import Vuex from 'vuex'
-import { eventBus } from '@/app'
+import { eventBus } from '@/eventBus'
 import FormTextInput from '@components/forms/elements/FormTextInput'
 
 export default {

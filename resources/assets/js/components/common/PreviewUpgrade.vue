@@ -26,7 +26,7 @@
 
 <script>
 import Vuex from 'vuex';
-import { eventBus } from '@/app'
+import { eventBus } from '@/eventBus'
 
 export default {
 

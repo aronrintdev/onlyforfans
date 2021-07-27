@@ -60,7 +60,7 @@
 
 <script>
 import moment from 'moment'
-import { eventBus } from '@/app'
+import { eventBus } from '@/eventBus'
 import PurchaseForm from '@components/payments/PurchaseForm'
 
 export default {

@@ -167,7 +167,7 @@
  */
 import Vuex from 'vuex'
 import _ from 'lodash'
-import { eventBus } from '@/app'
+import { eventBus } from '@/eventBus'
 
 import WithSidebar from '@views/layouts/WithSidebar'
 

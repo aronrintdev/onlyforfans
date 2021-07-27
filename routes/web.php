@@ -130,6 +130,11 @@ Route::group(['middleware' => ['auth']], function () {
         'except' => [ 'create', 'edit', 'update', ],
     ]);
 
+    // -- referrals:  --
+    Route::resource('referrals', 'ReferralsController', [
+        'only' => ['index'],
+    ]);
+
     // -- mediafiles: likeable | shareable | commentable (?) | tippable | purchaseable --
     //Route::post('/mediafiles/{mediafile}/doClone', ['as'=>'mediafiles.doClone', 'uses' => 'MediafilesController@doClone']);
     Route::get('/mediafiles/match', ['as'=>'mediafiles.match', 'uses' => 'MediafilesController@match']);
@@ -232,6 +237,7 @@ Route::group(['middleware' => ['auth']], function () {
     ]);
     Route::post('/users/avatar', ['as' => 'users.updateAvatar', 'uses' => 'UsersController@updateAvatar']);
     Route::post('/users/cover', ['as' => 'users.updateCover', 'uses' => 'UsersController@updateCover']);
+    Route::post('/users/send-staff-invite', ['as'=>'users.sendStaffInvite', 'uses' => 'UsersController@sendStaffInvite']);
     Route::resource('users', 'UsersController', [ 'except' => [ 'create', 'edit', 'store' ] ]);
 
     // -- vaults:  --
@@ -362,8 +368,18 @@ Route::delete('/lists/{id}/users/{userId}', 'ListsController@removeUserFromList'
 Route::post('/lists/{id}/pin', 'ListsController@addToPin')->name('lists.addtopin');
 Route::delete('/lists/{id}/pin', 'ListsController@removeFromPin')->name('lists.removefrompin');
 
+/*
+  Staff
+ */
+Route::get('/staff-members/managers', ['as'=>'staff.indexManagers', 'uses' => 'StaffController@indexManagers']);
+Route::get('/staff-members/staff', ['as'=>'staff.indexStaffMembers', 'uses' => 'StaffController@indexStaffMembers']);
+Route::delete('/staff-members/{id}', ['as'=>'staff.remove', 'uses' => 'StaffController@remove']);
+Route::post('/staff-members/invitations/accept', ['as'=>'staff.acceptInvite', 'uses' => 'StaffController@acceptInvite']);
+Route::patch('/staff-members/{id}/status', ['as'=>'staff.changestatus', 'uses' => 'StaffController@changeStatus']);
+
 /**
  * Single Page application catch all undefined routes
  * Laravel router will first try to match static resources, then specific routes, then finally this.
  */
+Route::get('/admin/{any}', 'SpaController@admin')->name('spa.admin')->where('any', '.*');
 Route::get('/{any}', 'SpaController@index')->name('spa.index')->where('any', '.*');

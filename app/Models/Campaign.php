@@ -1,13 +1,15 @@
 <?php
 namespace App\Models;
 
+use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\Model;
+
 use App\Interfaces\UuidId;
 use App\Interfaces\Ownable;
 
 use App\Models\Traits\OwnableTraits;
 
 use App\Models\Traits\UsesUuid;
-use Illuminate\Database\Eloquent\Model;
 
 class Campaign extends Model implements UuidId, Ownable
 {

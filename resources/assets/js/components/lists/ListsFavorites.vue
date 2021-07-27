@@ -24,9 +24,9 @@
             <b-tab title="Photos">
               <TabFavoritesPhotos :session_user="session_user" />
             </b-tab>
-            <b-tab title="Videos">
+            <!-- <b-tab title="Videos">
               <TabFavoritesVideos :session_user="session_user" />
-            </b-tab>
+            </b-tab> -->
           </b-tabs>
         </div>
       </b-card-text>
@@ -36,7 +36,7 @@
 </template>
 
 <script>
-import { eventBus } from '@/app'
+import { eventBus } from '@/eventBus'
 //import TabFavoritesAll from '@components/lists/favorites/TabAll'
 import TabFavoritesPosts from '@components/lists/favorites/TabPosts'
 import TabFavoritesCreators from '@components/lists/favorites/TabCreators'
