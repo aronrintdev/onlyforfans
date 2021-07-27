@@ -97,7 +97,7 @@ export const messaging = {
     },
 
     UPDATE_THREAD(state, payload) {
-      Vue.set(state.threads, payload.id, payload)
+      Vue.set(state.threads, payload.id, { ...state.threads[payload.id], ...payload })
     },
 
     UPDATE_GALLERY(state, { threadId, payload }) {

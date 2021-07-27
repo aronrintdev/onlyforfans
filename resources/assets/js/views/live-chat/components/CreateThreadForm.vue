@@ -31,7 +31,7 @@
 <script>
 import moment from 'moment'
 import MessageForm from '@views/live-chat/components/NewMessageForm'
-import VaultSelector from './VaultSelector'
+import VaultSelector from './ShowThread/VaultSelector'
 
 export default {
 

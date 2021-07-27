@@ -29,7 +29,7 @@
 
 <script>
 /**
- * resources/assets/js/views/live-chat/components/VaultSelector.vue
+ * resources/assets/js/views/live-chat/components/ShowThread/VaultSelector.vue
  *
  * Wrapper Class for vault selection
  */
