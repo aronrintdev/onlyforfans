@@ -59,6 +59,10 @@ export const messaging = {
   /*                                  GETTERS                                 */
   /* ------------------------------------------------------------------------ */
   getters: {
+    thread: state => threadId => {
+      return state.threads[threadId]
+    },
+
     galleryItems: state => threadId => {
       if (!state.threads[threadId] || !state.threads[threadId].gallery) {
         return []
@@ -181,6 +185,18 @@ export const messaging = {
   /*                                  ACTIONS                                 */
   /* ------------------------------------------------------------------------ */
   actions: {
+    getThread({ commit }, threadId) {
+      return new Promise((resolve, reject) => {
+        axios.get(route('chatthreads.show', { chatthread: threadId }))
+          .then(response => {
+            commit('UPDATE_THREAD', response.data)
+            resolve(response)
+          })
+          .catch(error => reject(error))
+      })
+    },
+
+
     /**
      * Gets a page of chatthreads from the server
      */
