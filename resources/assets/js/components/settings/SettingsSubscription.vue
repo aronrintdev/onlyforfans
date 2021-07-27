@@ -12,7 +12,7 @@
                 <FormTextInput itype="currency" ikey="subscriptions.price_per_12_months" v-model="formSubscriptions.subscriptions.price_per_12_months" label="Price per Year" :verrors="verrors" disabled />
               </b-col>
               <b-col>
-                <b-form-group id="group-is_follow_for_free" label="Allow Follow for Free?" label-for="is_follow_for_free">
+                <b-form-group id="group-is_follow_for_free" label="Allow Follow for Free" label-for="is_follow_for_free">
                   <b-form-checkbox
                     id="is_follow_for_free"
                     v-model="formSubscriptions.is_follow_for_free"

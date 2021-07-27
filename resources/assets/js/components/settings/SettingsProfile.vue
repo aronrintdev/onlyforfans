@@ -54,12 +54,12 @@
 
             <b-row>
               <b-col>
-                <b-form-group id="group-weblinks_amazon" label="Weblinks_amazon" label-for="weblinks_amazon">
+                <b-form-group id="group-weblinks_amazon" label="Amzaon URL" label-for="weblinks_amazon">
                   <b-form-input id="weblinks_amazon" v-model="formProfile.weblinks.amazon" placeholder="https://www.amazon.com" ></b-form-input>
                 </b-form-group>
               </b-col>
               <b-col>
-                <b-form-group id="group-weblinks_website" label="Weblinks_website" label-for="weblinks_website">
+                <b-form-group id="group-weblinks_website" label="Website URL" label-for="weblinks_website">
                   <b-form-input id="weblinks_website" v-model="formProfile.weblinks.website" placeholder="https://" ></b-form-input>
                 </b-form-group>
               </b-col>
@@ -67,7 +67,7 @@
 
             <b-row>
               <b-col>
-                <b-form-group id="group-weblinks_instagram" label="Weblinks_instagram" label-for="weblinks_instagram">
+                <b-form-group id="group-weblinks_instagram" label="Instagram URL" label-for="weblinks_instagram">
                   <b-form-input id="weblinks_instagram" v-model="formProfile.weblinks.instagram" placeholder="https://www.instagram.com" ></b-form-input>
                 </b-form-group>
               </b-col>
