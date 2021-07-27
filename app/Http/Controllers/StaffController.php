@@ -97,4 +97,19 @@ class StaffController extends Controller
             'error' => 'Invalid email or token'
         ], 400);
     }
+
+    /**
+     * Update account active/inactive status
+     *
+     * @param Request $request
+     * @return success
+     */
+    public function changeStatus(Request $request, $id)
+    {
+        $staff = Staff::find($id);
+        $staff->active = !$staff->active;
+        $staff->save();
+
+        return response()->json([ 'data' => $staff ]);
+    }
 }

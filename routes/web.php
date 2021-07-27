@@ -375,6 +375,7 @@ Route::get('/staff-members/managers', ['as'=>'staff.indexManagers', 'uses' => 'S
 Route::get('/staff-members/staff', ['as'=>'staff.indexStaffMembers', 'uses' => 'StaffController@indexStaffMembers']);
 Route::delete('/staff-members/{id}', ['as'=>'staff.remove', 'uses' => 'StaffController@remove']);
 Route::post('/staff-members/invitations/accept', ['as'=>'staff.acceptInvite', 'uses' => 'StaffController@acceptInvite']);
+Route::patch('/staff-members/{id}/status', ['as'=>'staff.changestatus', 'uses' => 'StaffController@changeStatus']);
 
 /**
  * Single Page application catch all undefined routes

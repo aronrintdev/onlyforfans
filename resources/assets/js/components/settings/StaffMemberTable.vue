@@ -125,8 +125,12 @@
       },
       changeActive(index) {
         const temp = [...this.members];
-        temp[index].active = !temp[index].active;
-        this.members = temp;
+
+        axios.patch(this.$apiRoute('staff.changestatus', temp[index].id))
+          .then(() => {
+            temp[index].active = !temp[index].active;
+            this.members = temp;
+          })
       }
     },
 
