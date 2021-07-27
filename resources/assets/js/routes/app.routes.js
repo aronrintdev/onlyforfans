@@ -104,7 +104,7 @@ export const routes = [
   // Lists
   {
     name: 'lists.dashboard',
-    path: '/lists',
+    path: '/fans',
     component: lists.Dashboard,
     children:  listRoutes,
   },

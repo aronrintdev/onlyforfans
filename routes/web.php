@@ -130,6 +130,11 @@ Route::group(['middleware' => ['auth']], function () {
         'except' => [ 'create', 'edit', 'update', ],
     ]);
 
+    // -- referrals:  --
+    Route::resource('referrals', 'ReferralsController', [
+        'only' => ['index'],
+    ]);
+
     // -- mediafiles: likeable | shareable | commentable (?) | tippable | purchaseable --
     //Route::post('/mediafiles/{mediafile}/doClone', ['as'=>'mediafiles.doClone', 'uses' => 'MediafilesController@doClone']);
     Route::get('/mediafiles/match', ['as'=>'mediafiles.match', 'uses' => 'MediafilesController@match']);

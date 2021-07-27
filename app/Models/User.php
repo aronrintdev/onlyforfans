@@ -192,6 +192,11 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
         return $this->hasMany(Favorite::class, 'user_id');
     }
 
+    public function referrals()
+    {
+        return $this->hasMany(Referral::class, 'user_id');
+    }
+
     public function timeline()
     {
         return $this->hasOne(Timeline::class);
