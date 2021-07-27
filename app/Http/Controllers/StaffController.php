@@ -44,7 +44,7 @@ class StaffController extends Controller
 
         foreach( $teams as $team) {
             $team->owner = User::where('id', $team->owner_id)->first();
-            $members = Staff::where('manager_id', $team->id)->where('role', 'staff')->get();
+            $members = Staff::with(['user'])->where('creator_id', $team->owner_id)->where('role', 'staff')->get()->makeVisible(['user']);
             $team->members = new StaffCollection($members);
         }
 

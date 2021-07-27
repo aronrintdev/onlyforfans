@@ -2,16 +2,22 @@
   <div>
     <div v-if="!isNewStaff">
       <b-card class="mb-3" v-for="(team, index) in teams" :key="index">
-        <b-card-text>
+        <b-card-text v-if="team">
           <div class="d-flex align-items-center justify-content-between mb-4">
             <div class="h3 text-center">{{ team.owner.name }} team</div>
-            <b-button variant="primary" class="px-4" @click="isNewStaff=true">Invite Staff Member</b-button>
+            <b-button variant="primary" class="px-4" @click="isNewStaff=true;creator_id=team.owner.id">Invite Staff Member</b-button>
           </div>
-          <staff-member-table :items="team.members" />
+          <staff-member-table :items="team.members" :has_pagination="false" />
         </b-card-text>
       </b-card>
     </div>
-    <staff-invite v-if="isNewStaff" :forManager="false" :session_user="session_user" @exit="isNewStaff=false" @send="inviteSent"></staff-invite>
+    <staff-invite
+      v-if="isNewStaff"
+      :creator_id="creator_id"
+      :session_user="session_user"
+      @exit="isNewStaff=false"
+      @send="inviteSent">
+    </staff-invite>
   </div>
 </template>
 
@@ -33,21 +39,23 @@ export default {
   data: () => ({
     teams: [],
     isNewStaff: false,
+    creator_id: null,
   }),
 
   created() {
-    this.axios.get(this.$apiRoute('staff.indexStaffMembers'))
-      .then(response => {
-        this.teams = response.data;
-      })
+    this.loadPage();
   },
 
   methods: {
-    inviteSent(data) {
-      if (this.isNewStaff) {
-        this.staffs.push(data);
-        this.isNewStaff = false;
-      }
+    inviteSent() {
+      this.isNewStaff = false;
+      this.loadPage();
+    },
+    loadPage() {
+      this.axios.get(this.$apiRoute('staff.indexStaffMembers'))
+        .then(response => {
+          this.teams = response.data;
+        })
     }
   },
 

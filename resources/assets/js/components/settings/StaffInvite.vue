@@ -3,10 +3,10 @@
     <b-card-text>
       <a class="text-primary text-decoration-none link-btn" @click="goBack">
         <fa-icon :icon="['far', 'arrow-left']" />
-        <span class="px-1">{{ forManager ? 'Managers' : 'Staff members' }}</span>
+        <span class="px-1">{{ creator_id == null ? 'Managers' : 'Staff members' }}</span>
       </a>
       <div class="d-flex align-items-center my-4">
-        <div class="h3 text-center" v-if="forManager">Invite Manager</div>
+        <div class="h3 text-center" v-if="creator_id == null">Invite Manager</div>
         <div class="h3 text-center" v-else>Invite Staff Member</div>
       </div>
       <b-form @submit.prevent="submitForm">
@@ -51,8 +51,8 @@
   export default {
     props: {
       items: { type: Array, default: () => ([])},
-      forManager: { type: Boolean, default: true },
       session_user: null,
+      creator_id: { type: String, default: null }
     },
 
     data: () => ({
@@ -70,8 +70,9 @@
         const formData = {
           ...this.formData,
           pending: 1,
-          role: this.forManager ? 'manager' : 'staff',
+          role: this.creator_id ? 'staff' : 'manager',
           name: `${this.formData.first_name} ${this.formData.last_name}`,
+          creator_id: this.creator_id,
         }
         this.axios.post(this.$apiRoute('users.sendStaffInvite'), formData).then(() => {
           this.$emit('send');

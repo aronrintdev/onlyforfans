@@ -1,6 +1,6 @@
 <template>
   <div>
-    <b-table hover class="staff-members-table" :items="members" :fields="fields" show-empty :current-page="metadata.current_page">
+    <b-table hover class="staff-members-table" :items="members" :fields="fields" show-empty >
       <template #empty="scope">
         <div class="p-5 text-center"><i>There is no active or invited accounts yet</i></div>
       </template>
@@ -22,6 +22,7 @@
       </template>
     </b-table>
     <b-pagination
+      v-if="has_pagination && metadata"
       v-model="metadata.current_page"
       :total-rows="metadata.total"
       :per-page="metadata.per_page"
@@ -56,8 +57,9 @@
 
   export default {
     props: {
-      items: { type: Array, default: () => ([])},
-      metadata: { type: Object, default: {} },
+      items: { type: Array, default: []},
+      metadata: { type: Object },
+      has_pagination: { type: Boolean, default: true },
     },
   
     watch: {

@@ -422,6 +422,7 @@ class UsersController extends AppBaseController
             'role' => $request->input('role'),
             'owner_id' => $sessionUser->id,
             'token' => $token,
+            'creator_id' => $request->input('creator_id'),
         ]);
 
         // Send Inviation email
