@@ -145,13 +145,13 @@ export default {
   },
 
   props: {
-    session_user: null,
     participant: null,
     timeline: null,
     id: null, // the chatthread PKID
   },
 
   computed: {
+    ...Vuex.mapState(['session_user']),
     ...Vuex.mapState('messaging', [ 'threads' ]),
 
     isLoading() {
