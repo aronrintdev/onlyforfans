@@ -420,4 +420,23 @@ class UsersController extends AppBaseController
         }
         return response()->json( $vr );
     }
+
+    // Check user's referral code and generate code if user has no it
+    public function checkReferralCode(Request $request) {
+        $sessionUser = $request->user();
+        if (empty($sessionUser->referral_code)) {
+            // Generate referral_code for new user
+            do {
+                $referral_code = mt_rand( 00000000, 99999999 );
+            } while (User::where('referral_code', '=', str_pad($referral_code, 8 , '0' , STR_PAD_LEFT))->exists());
+            $referral_code = str_pad($referral_code, 8 , '0' , STR_PAD_LEFT);
+            $updateUser['referral_code'] = $referral_code;
+            $sessionUser->update($updateUser);
+        } else {
+            $referral_code = $sessionUser->referral_code;
+        }
+        return response()->json(
+            ['referralCode' => $referral_code]
+        );
+    }
 }

@@ -80,7 +80,6 @@ export default {
   }),
 
   created() {
-    this.referralUrl = `${window.location.origin}/register?ref=${this.session_user.referral_code}`
     this.getPagedData()
   },
 
@@ -127,11 +126,21 @@ export default {
 
       document.body.removeChild(textArea);
     },
+
+    async checkReferralCode() {
+      await axios.get(route('users.checkReferralCode')).then(res => {
+        this.referralUrl = `${window.location.origin}/register?ref=${res.data.referralCode}`
+      })
+    },
   },
 
   components: {
     WigdetReferral,
-  }
+  },
+
+  mounted() {
+    this.checkReferralCode()
+  },
 
 }
 </script>

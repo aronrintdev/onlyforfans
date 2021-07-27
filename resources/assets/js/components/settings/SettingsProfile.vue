@@ -55,7 +55,7 @@
             <b-row>
               <b-col>
                 <b-form-group id="group-weblinks_amazon" label="Weblinks_amazon" label-for="weblinks_amazon">
-                  <b-form-input id="weblinks_amazon" v-model="formProfile.weblinks.amazon" placeholder="https://amazon.com" ></b-form-input>
+                  <b-form-input id="weblinks_amazon" v-model="formProfile.weblinks.amazon" placeholder="https://www.amazon.com" ></b-form-input>
                 </b-form-group>
               </b-col>
               <b-col>
