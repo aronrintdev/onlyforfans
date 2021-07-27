@@ -329,6 +329,13 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
         return $this->hasOne(Campaign::class);
     }
 
+    public function staffMembers()
+    {
+        return $this->hasMany(Staff::class, 'owner_id');
+    }
+
+
+
 //    public function lists()
 //    {
 //        return $this->belongsToMany(Lists::class, 'list_user', 'user_id', 'list_id')->withTimestamps();
@@ -371,7 +378,7 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
     {
         if ( $this->firstname && $this->lastname ) {
             return $this->firstname.' '.$this->lastname;
-        } else if ( $this->timeline->name ) {
+        } else if ( $this->timeline && $this->timeline->name ) {
             return $this->timeline->name;
         } else if ( $this->firstname ) {
             return $this->firstname;
