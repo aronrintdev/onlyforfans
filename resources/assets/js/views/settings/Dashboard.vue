@@ -123,12 +123,12 @@ export default {
         to: { name: 'settings.subscriptions', params: {} },
       })
 
-      if (this.user_settings.is_creator) {
+      // if (this.user_settings.is_creator) {
         routes.push({
           name: 'Managers',
           to: { name: 'settings.managers', params: {} },
         })
-      }
+      // }
 
       if (this.user_settings.is_manager) {
         routes.push({
