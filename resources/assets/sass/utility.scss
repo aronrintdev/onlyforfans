@@ -64,9 +64,11 @@ $cursors: map-merge(
 $font-size-utilities: () !default;
 $font-size-utilities: map-merge(( // General
     "tiny":    50%,
-    "smaller": 90%,
+    "smaller": 75%,
+    "small":   90%,
     "normal":  100%,
-    "larger":  110%,
+    "large":   110%,
+    "larger":  125%,
     "huge":    150%,
   ),
   $font-size-utilities

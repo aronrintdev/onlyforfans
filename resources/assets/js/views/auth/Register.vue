@@ -20,6 +20,7 @@
               id="input-email"
               v-model="form.email"
               :placeholder="$t('email')"
+              :disabled="isEmailDisabled"
               :state="verrors.email ? false : null"
               @focus="clearVerrors"
             />
@@ -135,6 +136,7 @@ export default {
       username: '',
       tos: null,
     },
+    isEmailDisabled: false,
   }),
   methods: {
     clearVerrors() {
@@ -151,7 +153,11 @@ export default {
         if (response.data.err_result) {
           this.verrors = response.data.err_result;
         } else {
-          window.location.href = '/';
+          if (this.$route.params.redirect) {
+            window.location.href = `${this.$route.params.redirect}&logged_in=true`;
+          } else {
+            window.location.href = '/';
+          }
         }
         this.state = 'form'
       }).catch( e => {
@@ -166,6 +172,16 @@ export default {
       window.location.href = `/${path}`;
     }
   },
+  mounted() {
+    const { email } = this.$route.params;
+    if (email) {
+      this.form = {
+        ...this.form,
+        email,
+      }
+      this.isEmailDisabled = true;
+    }
+  }
 }
 </script>
 

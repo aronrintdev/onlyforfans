@@ -123,6 +123,20 @@ export default {
         to: { name: 'settings.subscriptions', params: {} },
       })
 
+      // if (this.user_settings.is_creator) {
+        routes.push({
+          name: 'Managers',
+          to: { name: 'settings.managers', params: {} },
+        })
+      // }
+
+      if (this.user_settings.is_manager) {
+        routes.push({
+          name: 'Staff Members',
+          to: { name: 'settings.staffmembers', params: {} },
+        })
+      }
+
       routes = routes.map(route => ({
         ...route,
         active: this.checkActive(route)

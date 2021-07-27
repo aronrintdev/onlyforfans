@@ -15,7 +15,7 @@
 
 <script>
 /**
- * resources/assets/js/views/live-chat/components/Gallery.vue
+ * resources/assets/js/views/live-chat/components/ShowThread/Gallery.vue
  */
 import { eventBus } from '@/eventBus'
 import Vuex from 'vuex'

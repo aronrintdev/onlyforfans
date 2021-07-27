@@ -9,7 +9,7 @@
 
 <script>
 /**
- * resources/assets/js/views/live-chat/components/TypingIndicator.vue
+ * resources/assets/js/views/live-chat/components/ShowThread/TypingIndicator.vue
  */
 import Vuex from 'vuex'
 import _ from 'lodash'
