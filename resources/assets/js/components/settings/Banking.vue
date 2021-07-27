@@ -4,12 +4,11 @@
 
     <b-row>
       <b-col lg="6">
-
+        <div class="h4" v-text="$t('accounts')" />
+        <AccountList />
       </b-col>
 
       <b-col lg="6">
-        <div class="h4" v-text="$t('accounts')" />
-        <AccountList />
       </b-col>
     </b-row>
   </b-card>

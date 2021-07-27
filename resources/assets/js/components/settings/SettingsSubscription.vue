@@ -7,12 +7,12 @@
             <b-row>
               <b-col>
                 <FormTextInput itype="currency" ikey="subscriptions.price_per_1_months"  v-model="formSubscriptions.subscriptions.price_per_1_months"  label="Price per Month" :verrors="verrors" />
-                <FormTextInput itype="currency" ikey="subscriptions.price_per_3_months"  v-model="formSubscriptions.subscriptions.price_per_3_months"  label="Price per 3 Months" :verrors="verrors" />
-                <FormTextInput itype="currency" ikey="subscriptions.price_per_6_months"  v-model="formSubscriptions.subscriptions.price_per_6_months"  label="Price per 6 Months" :verrors="verrors" />
-                <FormTextInput itype="currency" ikey="subscriptions.price_per_12_months" v-model="formSubscriptions.subscriptions.price_per_12_months" label="Price per Year" :verrors="verrors" />
+                <FormTextInput itype="currency" ikey="subscriptions.price_per_3_months"  v-model="formSubscriptions.subscriptions.price_per_3_months"  label="Price per 3 Months" :verrors="verrors" disabled />
+                <FormTextInput itype="currency" ikey="subscriptions.price_per_6_months"  v-model="formSubscriptions.subscriptions.price_per_6_months"  label="Price per 6 Months" :verrors="verrors" disabled />
+                <FormTextInput itype="currency" ikey="subscriptions.price_per_12_months" v-model="formSubscriptions.subscriptions.price_per_12_months" label="Price per Year" :verrors="verrors" disabled />
               </b-col>
               <b-col>
-                <b-form-group id="group-is_follow_for_free" label="Follow for Free?" label-for="is_follow_for_free">
+                <b-form-group id="group-is_follow_for_free" label="Allow Follow for Free?" label-for="is_follow_for_free">
                   <b-form-checkbox
                     id="is_follow_for_free"
                     v-model="formSubscriptions.is_follow_for_free"
@@ -37,11 +37,11 @@
       </b-card-text>
     </b-card>
 
-    <b-card title="Profile promotion campaign" class="mt-5">
+    <b-card title="Profile Promotion Campaign" class="mt-5">
       <b-row class="mt-3">
         <b-col>
           <p><small class="text-muted">Offer a free trial or a discounted subscription on your profile for a limited number of new or already expired subscribers.</small></p>
-          <div class="w-100 d-flex justify-content-center">
+          <div class="w-100 d-flex justify-content-start">
             <b-button @click="startCampaign" class="w-25 ml-3" variant="primary">Start Promotion Campaign</b-button>
           </div>
         </b-col>

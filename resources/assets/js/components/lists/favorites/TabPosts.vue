@@ -2,14 +2,14 @@
   <div v-if="!isLoading" class="list-component tab-posts tag-grid-layout">
     <b-card>
 
-      <b-row>
+      <!-- <b-row>
         <b-col>
           <h2 class="card-title mb-1"><span class="tag-title">Posts</span> ({{ totalRows }})</h2>
           <small class="text-muted">Favorite posts</small>
         </b-col>
       </b-row>
 
-      <hr />
+      <hr /> -->
 
       <b-row class="mt-3">
         <b-col lg="4" v-for="(f,idx) in favorites" :key="f.id" > 
@@ -40,6 +40,7 @@ export default {
 
   props: {
     session_user: null,
+    setTabInfo: { type: Function },
   },
 
   computed: {
@@ -72,6 +73,7 @@ export default {
       axios.get( route('favorites.index'), { params } ).then( response => {
         this.favorites = response.data.data
         this.meta = response.data.meta
+        this.setTabInfo('posts', this.meta.total)
       })
     },
 

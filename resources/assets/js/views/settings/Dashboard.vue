@@ -56,12 +56,12 @@ export default {
     routes() {
       var routes = [
         {
-          name: 'General',
-          to: { name: 'settings.general', params: {} },
-        }, 
-        {
           name: 'Profile',
           to: { name: 'settings.profile', params: {} },
+        }, 
+        {
+          name: 'Account',
+          to: { name: 'settings.general', params: {} },
         }, 
         {
           name: 'Notifications',
@@ -87,7 +87,7 @@ export default {
       })
 
       routes.push({
-        name: 'Subscription and promotions',
+        name: 'Subscription and Promotions',
         to: { name: 'settings.subscription', params: {} },
       })
 
@@ -103,23 +103,23 @@ export default {
         to: { name: 'settings.banking', params: {} },
       })
 
-      routes.push({
-        name: 'Login Sessions',
-        to: { name: 'settings.sessions', params: {} },
-      })
+      // routes.push({
+      //   name: 'Login Sessions',
+      //   to: { name: 'settings.sessions', params: {} },
+      // })
 
       routes.push({
         name: 'Referrals',
         to: { name: 'settings.referrals', params: {} },
       })
 
-      routes.push({
-        name: 'Bookmarks',
-        to: { name: 'settings.bookmarks', params: {} },
-      })
+      // routes.push({
+      //   name: 'Bookmarks',
+      //   to: { name: 'settings.bookmarks', params: {} },
+      // })
 
       routes.push({
-        name: 'Message with Tip Only',
+        name: 'Messages',
         to: { name: 'settings.subscriptions', params: {} },
       })
 
