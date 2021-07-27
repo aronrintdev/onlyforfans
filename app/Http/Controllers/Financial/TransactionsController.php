@@ -36,10 +36,10 @@ class TransactionsController extends Controller
     {
         $counts = DB::connection('financial')->table('transactions')
             ->selectRaw('count(*) as total')
-            ->selectRaw("count(case when type = 'sale' then 1 end) as num_sales")
-            ->selectRaw("count(case when type = 'payment' then 1 end) as num_payments")
-            ->selectRaw("count(case when type = 'chargeback' then 1 end) as num_chargebacks")
-            ->selectRaw("count(case when type = 'fee' then 1 end) as num_fees")
+            ->selectRaw("count(case when type = 'sale' then 1 end) as sales")
+            ->selectRaw("count(case when type = 'payment' then 1 end) as payments")
+            ->selectRaw("count(case when type = 'chargeback' then 1 end) as chargebacks")
+            ->selectRaw("count(case when type = 'fee' then 1 end) as fees")
             ->first();
         /*
         $sums = DB::connection('financial')->table('transactions')
@@ -48,6 +48,11 @@ class TransactionsController extends Controller
             ->first();
          */
         $sums = Report::summary();
-        dd($counts, $sums);
+        //dd($counts, $sums);
+
+        return response()->json([
+            'counts' => $counts,
+            'sums' => $sums,
+        ]);
     }
 }

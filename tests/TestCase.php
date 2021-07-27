@@ -74,7 +74,8 @@ abstract class TestCase extends BaseTestCase
     protected function getAdmin() : User
     {
         $admin = User::first();
-        $admin->assignRole('super-admin'); // upgrade to admin!
+        //$admin->assignRole('super-admin'); // upgrade to admin!
+        $admin->assignRole('admin'); // upgrade to admin!
         $admin->refresh();
         return $admin;
     }

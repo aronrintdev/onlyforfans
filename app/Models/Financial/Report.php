@@ -54,12 +54,12 @@ class Report {
 
         return [
             'credits' => [
-                TransactionTypeEnum::SALE => $credits->firstWhere('type', TransactionTypeEnum::SALE)->toArray() ?? [ 'total' => 0, 'count' => 0 ],
-                TransactionTypeEnum::TIP => $credits->firstWhere('type', TransactionTypeEnum::TIP)->toArray() ?? ['total' => 0, 'count' => 0],
-                TransactionTypeEnum::SUBSCRIPTION => $credits->firstWhere('type', TransactionTypeEnum::SUBSCRIPTION)->toArray() ?? ['total' => 0, 'count' => 0],
+                TransactionTypeEnum::SALE => $credits->firstWhere('type', TransactionTypeEnum::SALE) ?? [ 'total' => 0, 'count' => 0 ],
+                TransactionTypeEnum::TIP => $credits->firstWhere('type', TransactionTypeEnum::TIP) ?? ['total' => 0, 'count' => 0],
+                TransactionTypeEnum::SUBSCRIPTION => $credits->firstWhere('type', TransactionTypeEnum::SUBSCRIPTION) ?? ['total' => 0, 'count' => 0],
             ],
             'debits' => [
-                TransactionTypeEnum::FEE => $debits->firstWhere('type', TransactionTypeEnum::FEE)->toArray() ?? ['total' => 0, 'count' => 0],
+                TransactionTypeEnum::FEE => $debits->firstWhere('type', TransactionTypeEnum::FEE) ?? ['total' => 0, 'count' => 0],
                 TransactionTypeEnum::CHARGEBACK => $chargeback,
                 TransactionTypeEnum::CREDIT => $debits->firstWhere('type', TransactionTypeEnum::CREDIT) ?? ['total' => 0, 'count' => 0],
             ],
