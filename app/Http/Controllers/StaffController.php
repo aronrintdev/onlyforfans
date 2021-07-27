@@ -40,11 +40,15 @@ class StaffController extends Controller
     {
         $sessionUser = $request->user();
 
-        $accounts = $sessionUser->staffMembers()
-            ->where('role', 'staff')
-            ->paginate($request->input('take', 10));
+        $teams = Staff::where('user_id', $sessionUser->id)->where('role', 'manager')->get();
 
-        return new StaffCollection($accounts);
+        foreach( $teams as $team) {
+            $team->owner = User::where('id', $team->owner_id)->first();
+            $members = Staff::where('manager_id', $team->id)->where('role', 'staff')->get();
+            $team->members = new StaffCollection($members);
+        }
+
+        return response()->json($teams);
     }
 
     /**

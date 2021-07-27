@@ -65,6 +65,8 @@ class UsersController extends AppBaseController
     public function showSettings(Request $request, User $user)
     {
         $this->authorize('view', $user);
+        $staff = Staff::where('user_id', $user->id)->where('role', 'manager')->get();
+        $user->settings['is_manager'] = count($staff) > 0;
         return new UserSettingResource($user->settings);
     }
 

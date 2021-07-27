@@ -1,13 +1,13 @@
 <template>
   <div>
     <div v-if="!isNewStaff">
-      <b-card class="mb-3">
+      <b-card class="mb-3" v-for="(team, index) in teams" :key="index">
         <b-card-text>
           <div class="d-flex align-items-center justify-content-between mb-4">
-            <div class="h3 text-center">Staff Members</div>
+            <div class="h3 text-center">{{ team.owner.name }} team</div>
             <b-button variant="primary" class="px-4" @click="isNewStaff=true">Invite Staff Member</b-button>
           </div>
-          <staff-member-table :items="staffs" />
+          <staff-member-table :items="team.members" />
         </b-card-text>
       </b-card>
     </div>
@@ -19,37 +19,10 @@
 import StaffMemberTable from './StaffMemberTable';
 import StaffInvite from './StaffInvite';
 
-const StaffMockData = [
-  {
-    id: 1, 
-    name: 'James Wolf',
-    email: 'jaems.wolf@email.com',
-    active: 1,
-    last_login_at: '2021-07-05T18:03:02.000000Z',
-    actions: null,
-  },
-  {
-    id: 3, 
-    name: 'Winter Prince',
-    email: 'winter.prince@email.com',
-    active: 0,
-    last_login_at: '2021-07-21T18:03:02.000000Z',
-    actions: null,
-  },
-  {
-    id: 2, 
-    name: 'Peter Tim',
-    email: 'peter.tim@email.com',
-    pending: 1,
-    last_login_at: '2021-06-15T18:03:02.000000Z',
-    actions: null,
-  },
-]
-
-
 export default {
   props: {
     session_user: null,
+    user_settings: null,
   },
 
   components: {
@@ -58,9 +31,16 @@ export default {
   },
 
   data: () => ({
-    staffs: StaffMockData,
+    teams: [],
     isNewStaff: false,
   }),
+
+  created() {
+    this.axios.get(this.$apiRoute('staff.indexStaffMembers'))
+      .then(response => {
+        this.teams = response.data;
+      })
+  },
 
   methods: {
     inviteSent(data) {
