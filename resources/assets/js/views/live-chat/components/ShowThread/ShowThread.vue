@@ -1,57 +1,77 @@
 <template>
-  <div v-if="!isLoading" class="h-100 d-flex flex-column">
+  <div v-if="!isLoading" class="h-100 d-flex flex-column pl-3" :key="this.id">
 
     <section class="chatthread-header">
       <div class="d-flex align-items-center">
-        <b-button variant="link" class="" @click="onBackClicked">
+        <b-btn variant="link" class="" @click="onBackClicked">
           <fa-icon :icon="['fas', 'arrow-left']" class="fa-lg" />
-        </b-button>
+        </b-btn>
         <p class="m-0"><strong>{{ participant.username }}</strong></p>
-        <b-dropdown id="ctrls-participants" variant="link" size="sm" class="ml-auto" right no-caret>
-          <template #button-content>
-            <fa-icon :icon="['fas', 'ellipsis-h']" class="fa-sm" />
-          </template>
-          <b-dropdown-item>Add to / remove from list</b-dropdown-item>
-          <b-dropdown-item>Give user a discount</b-dropdown-item>
-          <b-dropdown-item>Delete conversation</b-dropdown-item>
-          <b-dropdown-item>Rename @{{ participant.username }}</b-dropdown-item>
-          <b-dropdown-divider></b-dropdown-divider>
-          <b-dropdown-item>Hide chat</b-dropdown-item>
-          <b-dropdown-item>Mute notifications</b-dropdown-item>
-          <b-dropdown-divider></b-dropdown-divider>
-          <b-dropdown-item>Restrict @{{ participant.username }}</b-dropdown-item>
-          <b-dropdown-item>Block @{{ participant.username }}</b-dropdown-item>
-          <b-dropdown-item>Report @{{ participant.username }}</b-dropdown-item>
-        </b-dropdown>
+        <OptionsDropdown
+          :participant="participant"
+          :favorited="isFavorite"
+          :muted="!!isMuted"
+          @tip="tip"
+          @toggleMute="toggleMute"
+          @toggleFavorite="toggleFavorite"
+        />
       </div>
       <div class="d-flex align-items-center">
         <p class="my-0 mx-2 text-nowrap">Last Seen</p>
-        <div>|</div>
-        <b-button variant="link" class="" @click="doSomething">
-          <fa-icon :icon="['far', 'star']" size="lg" /><span>Favorite</span>
-        </b-button>
-        <div>|</div>
-        <b-button variant="link" class="" @click="toggleMute">
-          <fa-icon v-if="!isMuted" :icon="['far', 'bell']" fixed-width size="lg" title="Notifications ON" />
+        <div class="text-muted">|</div>
+        <b-btn variant="link" class="text-nowrap" @click="toggleFavorite">
+          <fa-icon :icon="isFavorite ? [ 'fas', 'star' ] : ['far', 'star']" size="lg" class="mr-1" />
+          <span v-text="$t('buttons.favorite')" />
+        </b-btn>
+        <div class="text-muted">|</div>
+        <b-btn
+          variant="link"
+          class="text-nowrap"
+          v-b-tooltip:hover
+          :title="$t('tooltip.notifications')"
+          @click="toggleMute"
+        >
+          <fa-icon
+            v-if="!isMuted"
+            :icon="['far', 'bell']"
+            fixed-width
+            size="lg"
+            title="Notifications ON"
+            class="mr-1"
+          />
           <fa-icon
             v-if="isMuted"
             :icon="['far', 'bell-slash']"
             fixed-width
             size="lg"
-            class="muted"
             title="Notifications OFF"
+            class="muted mr-1"
           />
-          <span>Notifications</span>
-        </b-button>
-        <div>|</div>
-        <b-button variant="link" class="" @click="toggleGallery" v-b-tooltip:hover :title="$t('tooltips.gallery')">
-          <fa-icon :icon="showGallery ? ['fas', 'image'] : ['far', 'image']" size="lg" /><span>Gallery</span>
-        </b-button>
-        <div>|</div>
-        <b-btn variant="link" @click="tip" v-b-tooltip:hover :title="$t('tooltips.tip')">
-          <fa-icon icon="dollar-sign" fixed-width size="lg" /><span>Tip</span>
+          <span v-text="$t('buttons.notifications')" />
         </b-btn>
-        <div>|</div>
+        <div class="text-muted">|</div>
+        <b-btn
+          variant="link"
+          class="text-nowrap"
+          v-b-tooltip:hover
+          :title="$t('tooltip.gallery')"
+          @click="toggleGallery"
+        >
+          <fa-icon :icon="showGallery ? ['fas', 'image'] : ['far', 'image']" size="lg" class="mr-1" />
+          <span v-text="$t('buttons.gallery')" />
+        </b-btn>
+        <div class="text-muted">|</div>
+        <b-btn
+          variant="link"
+          class="text-nowrap"
+          v-b-tooltip:hover
+          :title="$t('tooltip.tip')"
+          @click="tip"
+        >
+          <fa-icon icon="dollar-sign" fixed-width size="lg" class="mr-1" />
+          <span v-text="$t('buttons.tip')" />
+        </b-btn>
+        <div class="text-muted">|</div>
         <SearchInput v-model="searchQuery" size="lg" />
       </div>
     </section>
@@ -94,7 +114,7 @@
 
 <script>
 /**
- * resources/assets/js/views/live-chat/components/ShowThread.vue
+ * resources/assets/js/views/live-chat/components/ShowThread/ShowThread.vue
  */
 import { eventBus } from '@/eventBus'
 import Vue from 'vue'
@@ -103,12 +123,13 @@ import _ from 'lodash'
 import moment from 'moment'
 
 
+import Gallery from './Gallery'
+import MessageDisplay from '@views/live-chat/components/MessageDisplay'
 import MessageForm from '@views/live-chat/components/NewMessageForm'
+import OptionsDropdown from './OptionsDropdown'
 import SearchInput from '@components/common/search/HorizontalOpenInput'
 import TypingIndicator from './TypingIndicator'
 import VaultSelector from './VaultSelector'
-import MessageDisplay from './MessageDisplay'
-import Gallery from './Gallery'
 
 export default {
   name: 'ShowThread',
@@ -117,27 +138,44 @@ export default {
     Gallery,
     MessageDisplay,
     MessageForm,
+    OptionsDropdown,
     SearchInput,
     TypingIndicator,
     VaultSelector,
   },
 
   props: {
-    session_user: null,
-    participant: null,
     timeline: null,
     id: null, // the chatthread PKID
   },
 
   computed: {
+    ...Vuex.mapState(['session_user']),
+    ...Vuex.mapState('messaging', [ 'threads' ]),
 
     isLoading() {
       return !this.session_user || !this.participant || !this.id || !this.chatmessages
     },
 
+    isFavorite() {
+      return this.thread ? this.thread.is_favorite : false
+    },
+
     channelName() {
       return `chatthreads.${this.id}`
-    }
+    },
+
+    participant() {
+      if (!this.thread) {
+        return null
+      }
+      // Find first participant that is not the session user
+      return _.find(this.thread.participants, participant => participant.id !== this.session_user.id)
+    },
+
+    thread() {
+      return this._thread()(this.id)
+    },
 
   },
 
@@ -176,6 +214,13 @@ export default {
   mounted() {
     this.getMuteStatus(this.id)
     this.getChatmessages(this.id)
+
+    this.getThread(this.id).then(response => {
+      this.$nextTick(() => {
+        this.computeThread()
+      })
+    }).catch(error => eventBus.$emit('error', { error, message: this.$t('error')}))
+
     this.markRead(this.id)
     this.$log.debug('ShowThread Mounted', { channelName: this.channelName })
     this.$echo.join(this.channelName)
@@ -191,6 +236,15 @@ export default {
 
   methods: {
     ...Vuex.mapActions(['getUnreadMessagesCount']),
+    ...Vuex.mapActions('messaging', ['getThread']),
+    ...Vuex.mapMutations('messaging', [ 'UPDATE_THREAD' ]),
+    ...Vuex.mapGetters('messaging', { _thread: 'thread' }),
+
+    computeThread() {
+      this.$forceCompute('thread')
+      this.$forceCompute('participant')
+      this.$forceCompute('isFavorite')
+    },
 
     /**
      * Add official message from db, overwrite temp message if necessary
@@ -340,6 +394,25 @@ export default {
       })
     },
 
+    toggleFavorite() {
+      const isFavorite = this.thread.is_favorite
+      this.UPDATE_THREAD({ ...this.thread, is_favorite: isFavorite ? false : true })
+      this.$nextTick(() => {
+        this.computeThread()
+      })
+      if (isFavorite) {
+        this.axios.post(this.$apiRoute('favorites.remove'), {
+          favoritable_id: this.id,
+          favoritable_type: 'chatthreads',
+        })
+      } else {
+        this.axios.post(this.$apiRoute('favorites.store'), {
+          favoritable_id: this.id,
+          favoritable_type: 'chatthreads',
+        })
+      }
+    },
+
     /**
      * Do search request on server
      */
@@ -388,208 +461,18 @@ export default {
       }
       this.search(value)
     },
-
   }, // watch
 
 }
-
-  //    setFollowForFree: function(userId) {
-  //      this.axios.patch(`/users/${userId}/settings`, {
-  //        is_follow_for_free: true,
-  //      }).then(() => {
-  //        this.selectedUser = {
-  //          ...this.selectedUser,
-  //          profile: {
-  //            ...this.selectedUser.profile,
-  //            is_follow_for_free: true,
-  //          }
-  //        };
-  //      });
-  //    },
-  //    openMessagePriceModal: function() {
-  //      this.tempMessagePrice = undefined;
-  //      this.$refs['message-price-modal'].show();
-  //    },
-  //    closeMessagePriceModal: function() {
-  //      this.tempMessagePrice = undefined;
-  //      this.$refs['message-price-modal'].hide();
-  //    },
-  //    saveMessagePrice: function() {
-  //      this.messagePrice = this.tempMessagePrice;
-  //      this.$refs['message-price-modal'].hide();
-  //      console.log('messagePrice:', this.messagePrice);
-  //    },
-  //    onMessagePriceChange: function(val) {
-  //      if (val < 5) {
-  //        this.tempMessagePrice = 5;
-  //      } else {
-  //        this.tempMessagePrice = val;
-  //      }
-  //    },
-  //    clearMessagePrice: function() {
-  //      this.messagePrice = undefined;
-  //    },
-  //    openUnsendMessageModal: function(messageId) {
-  //      this.$refs['unsend-message-modal'].show();
-  //      this.unsendTipMessageId = messageId;
-  //    },
-  //    closeUnsendMessageModal: function() {
-  //      this.unsendTipMessageId = undefined;
-  //      this.$refs['unsend-message-modal'].hide();
-  //    },
-  //    unsendTipMessage: function() {
-  //      const self = this;
-  //      if (this.unsendTipMessageId) {
-  //        this.axios.delete(`/chat-messages/${this.$route.params.id}/threads/${this.unsendTipMessageId}`)
-  //          .then(() => {
-  //            const idx = self.originMessages.findIndex(message => message.id === self.unsendTipMessageId);
-  //            self.originMessages.splice(idx, 1);
-  //            self.originMessages = _.cloneDeep(self.originMessages);
-  //            self.groupMessages();
-  //            self.closeUnsendMessageModal();
-  //          });
-  //      }
-  //    },
-  //    openMessagePriceConfirmModal: function(value) {
-  //      this.confirm_message_price = value;
-  //      this.$refs['confirm-message-price-modal'].show();
-  //    },
-  //    closeMessagePriceConfirmModal: function() {
-  //      this.$refs['confirm-message-price-modal'].hide();
-  //    },
-  //    onCheckReturnKey: function(e) {
-  //      if (e.ctrlKey && e.keyCode === 13) {
-  //        this.sendMessage();
-  //      }
-  //    },
-  //    clearMessages: function (receiver) {
-  //      this.axios.delete(`/chat-messages/${receiver.id}`)
-  //        .then(() => {
-  //          const idx = this.users.findIndex(user => user.profile.id === receiver.id);
-  //          this.users.splice(idx, 1);
-  //          this.$router.push('/messages');
-  //        })
-  //    },
-  //    setLikeMessage: function(message) {
-  //      this.axios.post(`/chat-messages/${this.$route.params.id}/threads/${message.id}/like`)
-  //        .then(() => {
-  //          const newMessages = [...this.messages];
-  //          newMessages.forEach(thread => {
-  //            const idx = thread.messages.findIndex(m => m.id === message.id);
-  //            if (idx > -1) {
-  //              thread.messages[idx].is_like = 1;
-  //            }
-  //          });
-  //          this.messages = newMessages;
-  //        })
-  //    },
-  //    setUnlikeMessage: function(message) {
-  //      this.axios.post(`/chat-messages/${this.$route.params.id}/threads/${message.id}/unlike`)
-  //        .then(() => {
-  //          const newMessages = [...this.messages];
-  //          newMessages.forEach(thread => {
-  //            const idx = thread.messages.findIndex(m => m.id === message.id);
-  //            if (idx > -1) {
-  //              thread.messages[idx].is_like = 0;
-  //            }
-  //          });
-  //          this.messages = newMessages;
-  //        })
-  //    },
-  //    openVideoRec: function() {
-  //      this.showVideoRec = true;
-  //      const options = {
-  //        controls: true,
-  //        fluid: true,
-  //        bigPlayButton: true,
-  //        controlBar: {
-  //          volumePanel: true
-  //        },
-  //        plugins: {
-  //          record: {
-  //            audio: true,
-  //            video: true,
-  //            maxLength: 10,
-  //            displayMilliseconds: true,
-  //            debug: true,
-  //            convertEngine: 'ts-ebml'
-  //          }
-  //        }
-  //      };
-  //      const player = videojs('myVideo', options, function() {
-  //      });
-  //      const self = this;
-  //      player.on('finishRecord', function() {
-  //        console.log('finished recording: ', player.recordedData);
-  //        self.sortableMedias.push({
-  //          src: URL.createObjectURL(player.recordedData),
-  //          file: player.recordedData,
-  //          type: 'video/mp4',
-  //        });
-  //      });
-  //    },
-  //    hideVideoRec: function() {
-  //      this.showVideoRec = false;
-  //    },
-  //    onGetAudioRec: function(data) {
-  //      const self = this;
-  //      this.sortableMedias.push({
-  //        src: URL.createObjectURL(data),
-  //        file: data,
-  //        type: 'audio/mp3',
-  //      });
-  //      setTimeout(() => {
-  //        self.hideAudioRec();
-  //      }, 1000);
-  //    },
-  //    hideAudioRec: function() {
-  //      this.showAudioRec = false;
-  //      this.audioRecDuration = 0;
-  //      clearInterval(this.audioRecInterval);
-  //      this.audioRecInterval = undefined;
-  //    },
-  //    toggleAudioRec: function() {
-  //      const self = this;
-  //      if (!this.audioRecInterval) {
-  //        this.audioRecInterval = setInterval(function() {
-  //          self.audioRecDuration += 1;
-  //        }, 1000);
-  //      } else {
-  //        setTimeout(() => {
-  //          self.hideAudioRec();
-  //        }, 1000);
-  //      }
-  //    },
-  //    showMediaPopup: function(media) {
-  //      this.popupMedia = media;
-  //      this.$refs['media-modal'].show();
-  //    },
-  //    closeMediaPopup: function() {
-  //      this.popupMedia = undefined;
-  //      this.$refs['media-modal'].hide();
-  //    },
-  //    onChangeScheduledMessageTime: function(event) {
-  //      this.scheduledMessage.timeState = true;
-  //      if (moment().format('YYYY-MM-DD') === this.$refs.schedule_date.value) {
-  //        if (moment().format('HH:mm:ss') > event) {
-  //          this.scheduledMessage.timeState = false;
-  //        }
-  //      }
-  //      this.scheduledMessage = { ...this.scheduledMessage };
-  //    },
-  //    onCheckReturnKey: function(e) {
-  //      if (e.ctrlKey && e.keyCode === 13) {
-  //        this.sendMessage();
-  //      }
-  //    },
 </script>
 
 <style lang="scss" scoped>
-.btn-link:hover {
+::v-deep.btn-link:hover {
   text-decoration: none;
 }
-.btn:focus, .btn.focus {
+::v-deep.btn:focus, ::v-deep.btn.focus, ::v-deep.btn:active {
   box-shadow: none;
+  text-decoration: none;
 }
 
 .scroll-wrapper {
@@ -615,7 +498,15 @@ export default {
 <i18n lang="json5" scoped>
 {
   "en": {
-    "tooltips": {
+    "error": "An error has occurred while loading this chat thread. Please try again later",
+    "buttons": {
+      "favorite": "Favorite",
+      "notifications": "Notifications",
+      "gallery": "Gallery",
+      "tip": "Tip",
+    },
+    "tooltip": {
+      "notifications": "Activate or Deactivate Notifications for this Chat Thread",
       "gallery": "View Gallery of Media",
       "tip": "Send Tip"
     }

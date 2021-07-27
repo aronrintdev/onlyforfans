@@ -26,6 +26,9 @@ export const messaging = {
     contacts: ContactsModule,
   },
 
+  /* ------------------------------------------------------------------------ */
+  /*                                   STATE                                  */
+  /* ------------------------------------------------------------------------ */
   state: () => ({
     // Threads Structure
     // threads: {
@@ -40,6 +43,10 @@ export const messaging = {
     // }
     threads: {},
 
+    threadMeta: {},
+
+    searchQuery: '',
+
     /**
      * Selected Media files for the message form
      */
@@ -48,7 +55,14 @@ export const messaging = {
     uploadsVaultFolder: null,
   }),
 
+  /* ------------------------------------------------------------------------ */
+  /*                                  GETTERS                                 */
+  /* ------------------------------------------------------------------------ */
   getters: {
+    thread: state => threadId => {
+      return state.threads[threadId]
+    },
+
     galleryItems: state => threadId => {
       if (!state.threads[threadId] || !state.threads[threadId].gallery) {
         return []
@@ -69,7 +83,26 @@ export const messaging = {
     },
   },
 
+  /* ------------------------------------------------------------------------ */
+  /*                                 MUTATIONS                                */
+  /* ------------------------------------------------------------------------ */
   mutations: {
+
+    UPDATE_THREADS(state, payload) {
+      console.log('UPDATE_THREADS', { payload })
+      for (var thread of payload.data) {
+        prepThread(state, thread.id)
+        state.threads[thread.id] = {
+          ...state.threads[thread.id],
+          ...thread,
+        }
+      }
+      state.threadMeta = payload.meta
+    },
+
+    UPDATE_THREAD(state, payload) {
+      Vue.set(state.threads, payload.id, { ...state.threads[payload.id], ...payload })
+    },
 
     UPDATE_GALLERY(state, { threadId, payload }) {
       console.log('UPDATE_GALLERY', { threadId, payload })
@@ -148,7 +181,54 @@ export const messaging = {
     },
   },
 
+  /* ------------------------------------------------------------------------ */
+  /*                                  ACTIONS                                 */
+  /* ------------------------------------------------------------------------ */
   actions: {
+    getThread({ commit }, threadId) {
+      return new Promise((resolve, reject) => {
+        axios.get(route('chatthreads.show', { chatthread: threadId }))
+          .then(response => {
+            commit('UPDATE_THREAD', response.data)
+            resolve(response)
+          })
+          .catch(error => reject(error))
+      })
+    },
+
+
+    /**
+     * Gets a page of chatthreads from the server
+     */
+    getThreads({ commit }, { page, take, filters, sortBy }) {
+      return new Promise((resolve, reject) => {
+        console.log('getThreads', { page, take, filters, sortBy })
+        let params = { page, take }
+        params = { ...params, ...filters }
+        if ( this.sortBy ) {
+          params.sortBy = this.sortBy
+        }
+        axios.get(route('chatthreads.index'), { params })
+          .then(response => {
+            commit('UPDATE_THREADS', response.data)
+            resolve(response)
+          })
+          .catch(error => reject(error))
+      })
+    },
+
+    searchThreads({ commit }, { q }) {
+      return new Promise((resolve, reject) => {
+        console.log('searchThreads', { q })
+        axios.get(route('chatthreads.index'), { params: { q } })
+          .then(response => {
+            commit('UPDATE_THREADS', response.data)
+            resolve(response)
+          })
+          .catch(error => reject(error))
+      })
+    },
+
     getGallery({ commit }, { chatthread, page, take }) {
       console.log('getMessages', {chatthread, page, take})
       return new Promise((resolve, reject) => {
@@ -160,7 +240,7 @@ export const messaging = {
         }).catch(error => reject(error))
       })
     },
-    getMessages({ commit }, threadId, { page, take }) {
+    getMessages({ commit }, {threadId, page, take }) {
       console.log('getMessages', {threadId, page, take})
       return new Promise((resolve, reject) => {
         axios.get(route('chatmessages.index'), { params: {} })

@@ -55,11 +55,13 @@
         <div class="mt-3">
           <b-form-group>
             <b-form-textarea
+              class="message"
               v-model="newMessageForm.mcontent"
               placeholder="Type a message..."
               :rows="mobile ? 2 : 3"
               max-rows="6"
               spellcheck="false"
+              @keypress.enter="onEnterPress"
             ></b-form-textarea>
           </b-form-group>
         </div>
@@ -410,6 +412,15 @@ export default {
 
     },
 
+    /**
+     * Send message on ctrl+enter
+     */
+    onEnterPress(e) {
+      if (e.ctrlKey) {
+        this.sendMessage()
+      }
+    },
+
     clearForm() {
       this.newMessageForm.mcontent = null
       this.clearPrice()
@@ -526,6 +537,10 @@ textarea,
   }
 }
 
+textarea {
+  overflow-y: auto !important;
+}
+
 .dropzone.dz-started .dz-message {
   display: block;
 }
@@ -544,12 +559,9 @@ textarea,
 </style>
 
 <style lang="scss">
-body {
-  .store-chatmessage {
-    textarea.form-control {
-      border: none;
-    }
-  }
+textarea.form-control {
+  border: none;
+  overflow-y: auto;
 }
 </style>
 
