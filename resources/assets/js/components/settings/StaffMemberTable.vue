@@ -7,7 +7,7 @@
       <template #cell(active)="data">
         <b-badge variant="info" v-if="data.item.pending">Invited</b-badge>
         <b-badge variant="success" v-else-if="data.item.active">Active</b-badge>
-        <b-badge variant="secondary" v-else class="text-white">Deactive</b-badge>
+        <b-badge variant="secondary" v-else class="text-white">Inactive</b-badge>
       </template>
       <template #cell(actions)="data">
         <div class="text-right">
@@ -86,7 +86,7 @@
           key: 'active',
           label: 'Status',
           formatter: (value, key, item) => {
-            return value ? 'Active' : 'Deactive';
+            return value ? 'Active' : 'Inactive';
           }
         },
         {
