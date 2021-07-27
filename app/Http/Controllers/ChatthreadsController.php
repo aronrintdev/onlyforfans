@@ -3,11 +3,12 @@ namespace App\Http\Controllers;
 
 use Exception;
 use App\Models\User;
+use App\Models\Favorite;
 use App\Models\Mediafile;
 use App\Models\Mycontact;
 use App\Models\Chatthread;
-use App\Models\Chatmessage;
 //use App\Http\Resources\ChatmessageCollection;
+use App\Models\Chatmessage;
 use Illuminate\Http\Request;
 use App\Events\MessageSentEvent;
 use Illuminate\Support\Collection;
@@ -266,14 +267,6 @@ class ChatthreadsController extends AppBaseController
      */
     public function show(Request $request, Chatthread $chatthread)
     {
-        /*
-        $sessionUser = $request->user();
-        dd( 'ctrl', 
-            $chatthread->participants->pluck('username'), 
-            $sessionUser->username, 
-            $chatthread->participants->contains($sessionUser->id) ? 'yes' : 'no'
-        );
-         */
         $this->authorize('view', $chatthread);
         return new ChatthreadResource($chatthread);
     }
@@ -412,6 +405,20 @@ class ChatthreadsController extends AppBaseController
     public function draft(Request $request, Chatthread $chatthread)
     {
         //
+    }
+
+    public function favorite(Request $request, Chatthread $chatthread)
+    {
+        $this->authorize('favorite', $chatthread);
+
+        $favorite = Favorite::create([
+            'user_id' => $request->user()->id,
+            'favoritable_type' => $chatthread->getMorphString(),
+            'favoritable_id' => $chatthread->id,
+        ]);
+
+        $chatthread->refresh();
+        return new ChatthreadResource($chatthread);
     }
 
     private function addAttachments(Request $request, Chatmessage $chatmessage)
