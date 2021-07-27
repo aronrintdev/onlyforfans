@@ -7,7 +7,7 @@
             <div class="h3 text-center">{{ team.owner.name }} team</div>
             <b-button variant="primary" class="px-4" @click="isNewStaff=true;creator_id=team.owner.id">Invite Staff Member</b-button>
           </div>
-          <staff-member-table :items="team.members" :has_pagination="false" />
+          <staff-member-table :items="team.members" :has_pagination="false" @load="loadPage" />
         </b-card-text>
       </b-card>
     </div>
