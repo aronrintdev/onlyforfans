@@ -20,10 +20,6 @@
 
     <b-dropdown-divider />
 
-    <b-dropdown-item @click="$emit('hideThread')">
-      <fa-icon icon="eye-slash" fixed-width />
-      {{ $t('hideThread') }}
-    </b-dropdown-item>
     <b-dropdown-item @click="$emit('toggleFavorite')">
       <fa-icon :icon="favorited ? ['fas', 'star'] : ['far', 'star']" fixed-width />
       {{ favorited ? $t('unfavorite') : $t('favorite') }}
@@ -94,7 +90,6 @@ export default {
     "tip": "Send @{name} a tip",
     "deleteThread": "Delete conversation",
     "rename": "Rename alias for @{name}",
-    "hideThread": "Hide Chat Thread",
     "favorite": "Favorite Chat Thread",
     "unfavorite": "Unfavorite Chat Thread",
     "notificationsMute": "Mute Notifications",

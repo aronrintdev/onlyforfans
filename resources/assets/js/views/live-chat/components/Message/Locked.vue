@@ -36,7 +36,7 @@
         </b-btn>
       </b-card>
 
-      <VueMarkdown v-if="value.mcontent" class="content" :source="value.mcontent || ''" />
+      <VueMarkdown :html="false" v-if="value.mcontent" class="content" :source="value.mcontent || ''" />
       <!-- Message Footer -->
       <div
         class="timestamp d-flex align-items-center"
