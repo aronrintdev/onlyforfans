@@ -93,6 +93,11 @@
         :items="tobj.data"
         :fields="fields"
         :current-page="tobj.currentPage"
+        :sort-by="tobj.sortBy"
+        :sort-desc="tobj.sortDesc"
+        :no-local-sorting="true"
+        @sort-changed="sortHandler"
+        sort-icon-left
         small
       >
         <template #cell(id)="data">
@@ -165,27 +170,40 @@ export default {
       perPage: 20,
       totalRows: null,
       isBusy: false, // to prevent multiple api calls per page event, etc
+      sortBy: 'created_at',
+      sortDesc: false,
     },
 
     fields: [ // table fields
-      { key: 'id', label: 'ID' },
-      { key: 'account_id', label: 'Account' },
-      { key: 'credit_amount', label: 'Credit' },
-      { key: 'debit_amount', label: 'Debit' },
-      { key: 'currency', label: 'Currency' },
-      { key: 'type', label: 'Type' },
-      //{ key: 'description', label: 'Description' },
-      { key: 'resource_type', label: 'Resource Type' },
-      { key: 'resource_id', label: 'Resource ID' },
-      { key: 'settled_at', label: 'Settled' },
-      { key: 'purchaser.username', label: 'Purchaser' },
-      { key: 'created_at', label: 'Created' },
+      { key: 'id', label: 'ID', sortable: false, },
+      { key: 'account_id', label: 'Account', sortable: false, },
+      { key: 'credit_amount', label: 'Credit', sortable: true, },
+      { key: 'debit_amount', label: 'Debit', sortable: true, },
+      { key: 'currency', label: 'Currency', sortable: true, },
+      { key: 'type', label: 'Type', sortable: true, },
+      //{ key: 'description', label: 'Description', sortable: true, },
+      { key: 'resource_type', label: 'Resource Type', sortable: true, },
+      { key: 'resource_id', label: 'Resource ID', sortable: false, },
+      { key: 'settled_at', label: 'Settled', sortable: true, },
+      { key: 'purchaser.username', label: 'Purchaser', sortable: false, },
+      { key: 'created_at', label: 'Created', sortable: true, },
     ],
   }),
 
   methods: {
     pageClickHandler(e, page) {
       this.tobj.currentPage = page
+      this.getTransactions()
+    },
+
+    sortHandler(context) {
+      console.log('sortHandler', {
+        sortBy: context.sortBy,
+        sortDesc: context.sortDesc,
+      })
+      this.tobj.sortBy = context.sortBy
+      this.tobj.sortDesc = context.sortDesc
+      this.tobj.currentPage = 1
       this.getTransactions()
     },
 
@@ -213,6 +231,8 @@ export default {
       let params = {
         page: this.tobj.currentPage,
         take: this.tobj.perPage,
+        sortBy: this.tobj.sortBy,
+        sortDir: this.tobj.sortDesc ? 'desc' : 'asc',
         ...this.encodeQueryFilters(),
       }
       console.log('getTransactions', { params })
@@ -244,7 +264,7 @@ export default {
       console.log('toggleFilter()', {
         filterType, fObj
       })
-      if ( !this.txnFilters[filterType].isArray() ) {
+      if ( !Array.isArray(this.txnFilters[filterType]) ) {
         return
       }
       // %TODO: clean up this line
@@ -282,11 +302,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-::v-deep button.btn-link:focus, 
-::v-deep button.btn-link:active {
-  outline: none !important;
-  box-shadow: none !important;
-}
 .crate-filters {
   .box-filter {
     border: solid 1px #353535;

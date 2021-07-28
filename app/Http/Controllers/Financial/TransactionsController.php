@@ -38,6 +38,25 @@ class TransactionsController extends Controller
             // 'none' %TODO...need to do an orWhere with 'null' values
         }
 
+        // Sorting
+        switch ($request->sortBy) {
+        case 'credit_amount':
+        case 'debit_amount':
+        case 'balance':
+        case 'currency':
+        case 'type':
+        case 'resource_type':
+        case 'settled_at':
+        case 'failed_at':
+        case 'created_at':
+        case 'updated_at':
+            $sortDir = $request->sortDir==='asc' ? 'asc' : 'desc';
+            $query->orderBy($request->sortBy, $sortDir);
+            break;
+        default:
+            $query->orderBy('updated_at', 'desc');
+        }
+
         $data = $query->paginate($request->input('take', Config::get('collections.max.transactions')));
         return new TransactionCollection($data);
     }
