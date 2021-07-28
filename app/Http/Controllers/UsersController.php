@@ -443,7 +443,7 @@ class UsersController extends AppBaseController
         ]);
 
         // Send Inviation email
-        $accept_link = 'http://localhost:8000/staff/invitations/accept?token='.$token.'&email='.$email.'&inviter='.$sessionUser->name.(count($users) == 0 ? '&is_new=true' : '');
+        $accept_link = url('/staff/invitations/accept?token='.$token.'&email='.$email.'&inviter='.$sessionUser->name.(count($users) == 0 ? '&is_new=true' : ''));
 
         Mail::send('emails.staff_invite', ['user' => $sessionUser, 'accept_link' => $accept_link], function ($message) use(&$email)
         {
