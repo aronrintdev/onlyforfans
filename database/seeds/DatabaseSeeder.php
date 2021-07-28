@@ -34,6 +34,7 @@ class DatabaseSeeder extends Seeder
             RandomTimestampSeeder::class,
             ChatmessagesTableSeeder::class,
             MediafilesTableSeeder::class,
+            PermissionsTableSeeder::class,
         ]);
     }
 
