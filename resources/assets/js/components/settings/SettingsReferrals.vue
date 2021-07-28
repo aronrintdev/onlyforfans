@@ -7,11 +7,11 @@
             <h6 class="text-secondary font-weight-bold">
               Your Personal Referral URL
             </h6>
-            <p class="font-weight-normal mt-2">{{ referralUrl }}</p>
+            <p class="font-weight-normal mt-2 text-primary">{{ referralUrl }}</p>
           </b-col>
           <b-col>
             <h6 class="text-info text-right font-weight-bold mt-2 mr-2 clickable" @click="copyTextToClipboard">
-              COPY
+              Copy Link
             </h6>
             <p class="text-info text-right font-weight-normal mt-5 mr-2 clickable" @click="enableViewReferrals = !enableViewReferrals">
               {{!enableViewReferrals ? 'View Referred Users' : 'Hide Referred Users'}}
@@ -21,8 +21,11 @@
       </div>
       <div v-if="enableViewReferrals" class="mt-4">
         <h5 class="text-secondary font-weight-bold">
-          YOUR REFERRALS
+          YOUR REFERRALS ({{ totalRows }})
         </h5>
+
+        <hr />
+
         <b-row class="mt-2">
           <b-col lg="4" v-for="(r, idx) in referrals" :key="r.id">
             <WigdetReferral :referral="r.creator" :slug="r.referral.slug" />
@@ -71,13 +74,12 @@ export default {
     referralUrl: null,
     referrals: null,
     meta: null,
-    enableViewReferrals: false,
+    enableViewReferrals: true,
     perPage: 9,
     currentPage: 1,
   }),
 
   created() {
-    this.referralUrl = `${window.location.origin}/register?ref=${this.session_user.referral_code}`
     this.getPagedData()
   },
 
@@ -124,11 +126,21 @@ export default {
 
       document.body.removeChild(textArea);
     },
+
+    async checkReferralCode() {
+      await axios.get(route('users.checkReferralCode')).then(res => {
+        this.referralUrl = `${window.location.origin}/register?ref=${res.data.referralCode}`
+      })
+    },
   },
 
   components: {
     WigdetReferral,
-  }
+  },
+
+  mounted() {
+    this.checkReferralCode()
+  },
 
 }
 </script>
