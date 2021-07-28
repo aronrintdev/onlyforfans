@@ -2,7 +2,7 @@
   <section class="crate" :class="value.sender_id === session_user.id ? 'session_user' : 'other_user'">
     <article class="box">
       <Attachments :attachments="value.attachments" />
-      <VueMarkdown v-if="value.mcontent" class="content" :source="value.mcontent || ''" />
+      <VueMarkdown :html="false" v-if="value.mcontent" class="content" :source="value.mcontent || ''" />
       <div
         class="timestamp d-flex align-items-center"
         :class="value.sender_id === session_user.id ? 'flex-row-reverse' : 'flex-row'"

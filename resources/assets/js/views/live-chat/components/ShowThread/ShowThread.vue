@@ -6,7 +6,10 @@
         <b-btn variant="link" class="" @click="onBackClicked">
           <fa-icon :icon="['fas', 'arrow-left']" class="fa-lg" />
         </b-btn>
-        <p class="m-0"><strong>{{ participant.username }}</strong></p>
+        <p class="m-0">
+          <strong>{{ participant.username }}</strong>
+          <OnlineStatus :user="participant" />
+        </p>
         <OptionsDropdown
           :participant="participant"
           :favorited="isFavorite"
@@ -122,10 +125,10 @@ import Vuex from 'vuex'
 import _ from 'lodash'
 import moment from 'moment'
 
-
 import Gallery from './Gallery'
 import MessageDisplay from '@views/live-chat/components/MessageDisplay'
 import MessageForm from '@views/live-chat/components/NewMessageForm'
+import OnlineStatus from '@components/user/OnlineStatus'
 import OptionsDropdown from './OptionsDropdown'
 import SearchInput from '@components/common/search/HorizontalOpenInput'
 import TypingIndicator from './TypingIndicator'
@@ -138,6 +141,7 @@ export default {
     Gallery,
     MessageDisplay,
     MessageForm,
+    OnlineStatus,
     OptionsDropdown,
     SearchInput,
     TypingIndicator,
