@@ -22,4 +22,9 @@ class Staff extends Model
     public function user() {
         return $this->belongsTo(User::class, 'user_id');
     }
+
+    public function permissions()
+    {
+        return $this->morphToMany(Permission::class, 'permissionable');
+    }
 }

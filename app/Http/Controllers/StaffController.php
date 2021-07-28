@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Staff;
 use App\Http\Resources\StaffCollection;
+use App\Models\Permission;
 
 
 class StaffController extends Controller
@@ -110,5 +111,18 @@ class StaffController extends Controller
         $staff->save();
 
         return response()->json([ 'data' => $staff ]);
+    }
+
+    /**
+     * Return a list of staff permissions
+     *
+     * @param Request $request
+     * @return array
+     */
+    public function listPermissions(Request $request)
+    {
+        $permissions = Permission::where('guard_name', 'staff')->get();
+
+        return response()->json($permissions);
     }
 }
