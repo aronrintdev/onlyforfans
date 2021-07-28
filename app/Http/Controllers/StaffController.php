@@ -24,8 +24,7 @@ class StaffController extends Controller
         $accounts = $sessionUser->staffMembers()
             ->with('user')
             ->where('role', 'manager')
-            ->paginate($request->input('take', 10))
-            ->makeVisible(['user']);
+            ->paginate($request->input('take', 10));
 
         return new StaffCollection($accounts);
     }

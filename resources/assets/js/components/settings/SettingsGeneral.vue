@@ -1,18 +1,9 @@
 <template>
   <div v-if="!isLoading">
-    <b-card title="General">
+    <b-card title="Account">
       <b-card-text>
         <b-form @submit.prevent="submitGeneral($event)" @reset="onReset">
           <fieldset :disabled="isSubmitting.formGeneral">
-            <b-row>
-              <b-col>
-                <FormTextInput ikey="firstname" v-model="formGeneral.firstname" label="First Name" :verrors="verrors" />
-              </b-col>
-              <b-col>
-                <FormTextInput ikey="lastname" v-model="formGeneral.lastname" label="Last Name" :verrors="verrors" />
-              </b-col>
-            </b-row>
-
             <b-row>
               <b-col>
                 <FormTextInput ikey="username" v-model="formGeneral.username" label="Username" :verrors="verrors" :disabled="true"/>
@@ -44,10 +35,22 @@
           <fieldset :disabled="isSubmitting.formLocalization">
             <b-row>
               <b-col>
-                <FormTextInput ikey="localization.language"  v-model="formLocalization.localization.language"  label="Enter Language" :verrors="verrors" />
+                <FormSelectInput
+                  ikey="localization.language"
+                  v-model="formLocalization.localization.language"
+                  label="Language"
+                  :verrors="verrors"
+                  :options="options.languages"
+                />
               </b-col>
               <b-col>
-                <FormTextInput ikey="localization.timezone"  v-model="formLocalization.localization.timezone"  label="Time Zone" :verrors="verrors" />
+                <FormSelectInput
+                  ikey="localization.timezone"
+                  v-model="formLocalization.localization.timezone"
+                  label="Time Zone"
+                  :verrors="verrors"
+                  :options="options.timezones"
+                />
               </b-col>
             </b-row>
 
@@ -135,10 +138,23 @@ export default {
         { value: 'gbp', text: 'British Pound' },
         { value: 'cad', text: 'Canadian Dollar' },
       ],
+      languages: [ 
+        { value: null, text: 'Please select an option' },
+        { value: 'en', text: 'English' },
+        { value: 'de', text: 'German' },
+        { value: 'es', text: 'Spanish' },
+        { value: 'fr', text: 'French' },
+        { value: 'el', text: 'Greek' },
+        { value: 'ru', text: 'Russian' },
+        { value: 'ja', text: 'Japanese' },
+      ],
       countries: [ 
         { value: null, text: 'Please select an option' },
         { value: 'us', text: 'USA' },
         { value: 'canada', text: 'Canada' },
+        { value: 'russia', text: 'Russian' },
+        { value: 'france', text: 'France' },
+        { value: 'japan', text: 'Japan' },
       ],
       timezones: [ 
         { value: null, text: 'Please select an option' },

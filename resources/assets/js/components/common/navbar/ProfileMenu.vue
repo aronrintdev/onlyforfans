@@ -62,7 +62,7 @@ export default {
         {
           label: 'Settings',
           icon: 'cog',
-          linkTo: { name: 'settings.general' }
+          linkTo: { name: 'settings.profile' }
         },
         {
           label: 'Lists',

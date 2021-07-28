@@ -2,14 +2,14 @@
   <div v-if="!isLoading" class="list-component tab-timelines tag-grid-layout">
     <b-card>
 
-      <b-row>
+      <!-- <b-row>
         <b-col>
           <h2 class="card-title mb-1"><span class="tag-title">Creators</span> ({{ totalRows }})</h2>
           <small class="text-muted">Favorite creators</small>
         </b-col>
       </b-row>
 
-      <hr />
+      <hr /> -->
 
       <b-row class="mt-3">
         <b-col lg="4" v-for="(f,idx) in favorites" :key="f.id" > 
@@ -46,6 +46,7 @@ export default {
   mixins: [mixinModal],
 
   props: {
+    setTabInfo: { type: Function },
   },
 
   computed: {
@@ -79,6 +80,7 @@ export default {
       axios.get( route('favorites.index'), { params } ).then( response => {
         this.favorites = response.data.data
         this.meta = response.data.meta
+        this.setTabInfo('creators', this.meta.total)
       })
     },
 

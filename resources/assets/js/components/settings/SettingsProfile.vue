@@ -5,10 +5,22 @@
       <b-card-text>
         <b-form @submit.prevent="submitProfile($event)" @reset="onReset">
           <fieldset :disabled="isSubmitting.formProfile">
+            <b-row>
+              <b-col>
+                <b-form-group id="group-firstname" label="First Name" label-for="firstname">
+                  <b-form-input id="firstname" v-model="formProfile.firstname" placeholder="Enter first name..." ></b-form-input>
+                </b-form-group>
+              </b-col>
+              <b-col>
+                <b-form-group id="group-lastname" label="Last Name" label-for="lastname">
+                  <b-form-input id="lastname" v-model="formProfile.lastname" placeholder="Enter last name..." ></b-form-input>
+                </b-form-group>
+              </b-col>
+            </b-row>
 
             <b-row>
               <b-col>
-                <b-form-group id="group-about" label="About" label-for="about">
+                <b-form-group id="group-about" label="Bio" label-for="about">
                   <b-form-textarea id="about" v-model="formProfile.about" placeholder="Talk about yourself.." rows="8"></b-form-textarea>
                 </b-form-group>
               </b-col>
@@ -29,12 +41,12 @@
 
             <b-row>
               <b-col>
-                <b-form-group id="group-gender" label="gender" label-for="gender">
+                <b-form-group id="group-gender" label="Gender" label-for="gender">
                   <b-form-select id="gender" v-model="formProfile.gender" :options="options.genders"></b-form-select>
                 </b-form-group>
               </b-col>
               <b-col>
-                <b-form-group id="group-birthdate" label="birthdate" label-for="birthdate">
+                <b-form-group id="group-birthdate" label="Birthdate" label-for="birthdate">
                   <b-form-datepicker id="birthdate" v-model="formProfile.birthdate"></b-form-datepicker>
                 </b-form-group>
               </b-col>
@@ -42,21 +54,21 @@
 
             <b-row>
               <b-col>
-                <b-form-group id="group-weblinks_amazon" label="weblinks_amazon" label-for="weblinks_amazon">
-                  <b-form-input id="weblinks_amazon" v-model="formProfile.weblinks.amazon" placeholder="Amazon URL" ></b-form-input>
+                <b-form-group id="group-weblinks_amazon" label="Amzaon URL" label-for="weblinks_amazon">
+                  <b-form-input id="weblinks_amazon" v-model="formProfile.weblinks.amazon" placeholder="https://www.amazon.com" ></b-form-input>
                 </b-form-group>
               </b-col>
               <b-col>
-                <b-form-group id="group-weblinks_website" label="weblinks_website" label-for="weblinks_website">
-                  <b-form-input id="weblinks_website" v-model="formProfile.weblinks.website" placeholder="Website URL" ></b-form-input>
+                <b-form-group id="group-weblinks_website" label="Website URL" label-for="weblinks_website">
+                  <b-form-input id="weblinks_website" v-model="formProfile.weblinks.website" placeholder="https://" ></b-form-input>
                 </b-form-group>
               </b-col>
             </b-row>
 
             <b-row>
               <b-col>
-                <b-form-group id="group-weblinks_instagram" label="weblinks_instagram" label-for="weblinks_instagram">
-                  <b-form-input id="weblinks_instagram" v-model="formProfile.weblinks.instagram" placeholder="Instagram URL" ></b-form-input>
+                <b-form-group id="group-weblinks_instagram" label="Instagram URL" label-for="weblinks_instagram">
+                  <b-form-input id="weblinks_instagram" v-model="formProfile.weblinks.instagram" placeholder="https://www.instagram.com" ></b-form-input>
                 </b-form-group>
               </b-col>
             </b-row>
@@ -191,6 +203,8 @@ export default {
     },
 
     formProfile: {
+      firstname: '',
+      lastname: '',
       about: '',
       country: '',
       city: '',
@@ -276,6 +290,8 @@ export default {
   },
 
   created() {
+    this.formProfile.firstname = this.session_user.firstname || ''
+    this.formProfile.lastname = this.session_user.lastname || ''
     this.formProfile.about = this.user_settings.about
     this.formProfile.country = this.user_settings.country
     this.formProfile.city = this.user_settings.city
