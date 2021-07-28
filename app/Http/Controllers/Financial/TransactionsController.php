@@ -5,6 +5,7 @@ use DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Validation\Rule;
 
 use App\Http\Controllers\Controller;
 use App\Rules\InEnum;
@@ -20,7 +21,21 @@ class TransactionsController extends Controller
 {
     public function index(Request $request)
     {
+        $request->validate([
+            'from' => 'date',
+            'to' => 'date',
+            'type' => 'array|in:'.TransactionTypeEnum::getKeysCsv(),
+            'resource_type' => [ 'array', Rule::in(['posts', 'timelines', 'mediafiles']) ],
+        ]);
+
         $query = Transaction::query();
+
+        if ( $request->has('type') ) {
+            $query->whereIn('type', $request->type);
+        }
+        if ( $request->has('resource_type') ) {
+            $query->whereIn('resource_type', $request->resource_type);
+        }
 
         $data = $query->paginate($request->input('take', Config::get('collections.max.transactions')));
         return new TransactionCollection($data);

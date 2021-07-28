@@ -59,7 +59,7 @@
     <section>
       <!-- Filters Dropdown -->
       <b-dropdown ref="filterControls" class="filter-controls" variant="link" size="sm" no-caret >
-        <template #button-content>
+        <template #button-content shadow-none>
           <b-badge show class="alert-primary" :style="{ fontSize: '100%' }">
             <span class="mr-2">Filters</span> <fa-icon icon="filter" />
           </b-badge>
@@ -91,20 +91,21 @@
       </div>
     </section>
 
-    <b-card title="Transactions">
+    <b-card>
+      <b-card-title :title="`Transactions (${tobj.totalRows})`" />
       <b-pagination
-        v-model="currentPage"
-        :total-rows="totalRows"
-        :per-page="perPage"
+        v-model="tobj.currentPage"
+        :total-rows="tobj.totalRows"
+        :per-page="tobj.perPage"
+        v-on:page-click="pageClickHandler"
         aria-controls="txns-table"
       ></b-pagination>
 
       <b-table hover 
         id="txns-table"
-        :items="getTransactions"
-        :per-page="perPage"
-        :current-page="currentPage"
+        :items="tobj.data"
         :fields="fields"
+        :current-page="tobj.currentPage"
         small
       >
         <template #cell(id)="data">
@@ -145,10 +146,29 @@ export default {
 
   computed: {
     typeFilterOptions() {
-      return this.filters.filter( f => f.field==='type' )
+      return this.txnFilters.filter( f => f.field==='type' )
     },
     resourceTypeFilterOptions() {
-      return this.filters.filter( f => f.field ==='resource_type' )
+      return this.txnFilters.filter( f => f.field ==='resource_type' )
+    },
+    encodedQueryFilters() {
+      let params = {
+        type: [],
+        resource_type: [],
+      }
+      for ( let s of this.selectedFilters ) {
+        const o = this.txnFilters.find( i => i.key === s )
+        switch (o.field) {
+          case 'resource_type':
+            params.resource_type.push(s)
+            break
+          case 'type':
+            params.['type'].push(s)
+            break
+        }
+      }
+      console.log('encodeQueryFilters', { params, })
+      return params
     },
   },
 
@@ -158,9 +178,9 @@ export default {
     summary: null,
 
     selectedFilter: null,
-    selectedFilters: [],
+    selectedFilters: [], // %FIXME: needs to distinguish field
 
-    filters: [
+    txnFilters: [
           { field: 'type', key: 'payment', label: 'Payment', is_active: false, }, // txn type
           { field: 'type', key: 'sale', label: 'Sale', is_active: false, },
           { field: 'type', key: 'subscription', label: 'Subscription', is_active: false, },
@@ -173,9 +193,14 @@ export default {
           { field: 'resource_type', key: 'none', label: 'None', is_active: false, },
     ],
 
-    currentPage: 1,
-    totalRows: null,
-    perPage: 20,
+    tobj: {
+      data: [],
+      currentPage: 1,
+      perPage: 20,
+      totalRows: null,
+      isBusy: false, // to prevent multiple api calls per page event, etc
+    },
+
     fields: [
       { key: 'id', label: 'ID' },
       { key: 'account_id', label: 'Account' },
@@ -193,20 +218,33 @@ export default {
   }),
 
   methods: {
-    async getTransactions(ctx) {
-      const params = `?page=${ctx.currentPage}&take=${ctx.perPage}`
+    pageClickHandler(e, page) {
+      this.tobj.currentPage = page
+      this.getTransactions()
+    },
+    async getTransactions() {
+      //let params = `?page=${this.tobj.currentPage}&take=${this.tobj.perPage}`
+      let params = {
+        page: this.tobj.currentPage,
+        take: this.tobj.perPage,
+        ...this.encodedQueryFilters,
+      }
+      console.log('getTransactions', { params })
       try {
-        const response = await axios.get( this.$apiRoute('financial.transactions.index')+params )
-        this.totalRows = response.data.meta.total // %NOTE: coupled to table
-        return response.data.data // %NOTE: coupled to table
+        this.tobj.isBusy = true
+        const response = await axios.get( this.$apiRoute('financial.transactions.index'), { params } )
+        this.tobj.totalRows = response.data.meta.total // %NOTE: coupled to table
+        this.tobj.data = response.data.data
+        this.tobj.isBusy = false
+        //return response.data.data // %NOTE: coupled to table
       } catch (e) {
-        throw e
+        this.tobj.isBusy = false
+        //throw e
         return []
       }
     },
 
     async getSummary() {
-      //const params = `?page=${ctx.currentPage}&take=${ctx.perPage}`
       try {
         const response = await axios.get( this.$apiRoute('financial.transactions.summary'))
         this.summary = response.data
@@ -223,13 +261,36 @@ export default {
 
   },
 
-  watchers: {},
+  watch: {
+    /*
+    'tobj.currentPage': function(newVal, oldVal) {
+      console.log('watch - currentPage()', {
+        newVal, oldVal,
+      })
+      if ( newVal !== oldVal ) {
+        this.getTransactions()
+      }
+    },
+     */
+    selectedFilters(newVal, oldVal) {
+      console.log('watch - txnFilters()')
+      if ( newVal !== oldVal ) {
+        this.tobj.currentPage = 1
+        this.getTransactions()
+      }
+    },
+  },
 
   created() {
+    this.getTransactions()
     this.getSummary()
     //this.$nextTick(() => {
     //this.selectedFilter = 'all'
     //})
+  },
+
+  mounted() {
+    //this.tobj.isBusy = false
   },
 
   components: {
@@ -240,4 +301,9 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+::v-deep button.btn-link:focus, 
+::v-deep button.btn-link:active {
+   outline: none !important;
+   box-shadow: none !important;
+}
 </style>

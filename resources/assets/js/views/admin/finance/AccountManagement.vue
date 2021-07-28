@@ -103,8 +103,6 @@ export default {
     }
   },
 
-  watchers: {},
-
   created() { },
 
   components: {
