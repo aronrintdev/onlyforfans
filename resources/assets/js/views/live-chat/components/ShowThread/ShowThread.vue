@@ -7,8 +7,7 @@
           <fa-icon :icon="['fas', 'arrow-left']" class="fa-lg" />
         </b-btn>
         <p class="m-0">
-          <strong>{{ participant.username }}</strong>
-          <OnlineStatus :user="participant" />
+          <AvatarWithStatus :user="participant" :thumbnail="false" noLink />
         </p>
         <OptionsDropdown
           :participant="participant"
@@ -20,8 +19,6 @@
         />
       </div>
       <div class="d-flex align-items-center">
-        <p class="my-0 mx-2 text-nowrap">Last Seen</p>
-        <div class="text-muted">|</div>
         <b-btn variant="link" class="text-nowrap" @click="toggleFavorite">
           <fa-icon :icon="isFavorite ? [ 'fas', 'star' ] : ['far', 'star']" size="lg" class="mr-1" />
           <span v-text="$t('buttons.favorite')" />
@@ -125,10 +122,10 @@ import Vuex from 'vuex'
 import _ from 'lodash'
 import moment from 'moment'
 
+import AvatarWithStatus from '@components/user/AvatarWithStatus'
 import Gallery from './Gallery'
 import MessageDisplay from '@views/live-chat/components/MessageDisplay'
 import MessageForm from '@views/live-chat/components/NewMessageForm'
-import OnlineStatus from '@components/user/OnlineStatus'
 import OptionsDropdown from './OptionsDropdown'
 import SearchInput from '@components/common/search/HorizontalOpenInput'
 import TypingIndicator from './TypingIndicator'
@@ -138,10 +135,10 @@ export default {
   name: 'ShowThread',
 
   components: {
+    AvatarWithStatus,
     Gallery,
     MessageDisplay,
     MessageForm,
-    OnlineStatus,
     OptionsDropdown,
     SearchInput,
     TypingIndicator,
