@@ -58,12 +58,15 @@ $ php artisan config:cache --env=local
 
 %%%
 $ php artisan truncate:data
-$ php artisan db:seed --class=UsernameRulesTableSeeder
-$ php artisan db:seed --class=RolesTableSeeder
-$ php artisan db:seed --class=UsersTableSeeder
-$ php artisan db:seed --class=StoriesTableSeeder
-$ php artisan db:seed --class=PostsTableSeeder
-$ php artisan db:seed --class=ShareablesTableSeeder
+$ SCOUT_DRIVER=null php artisan db:seed --class=UsernameRulesTableSeeder
+$ SCOUT_DRIVER=null php artisan db:seed --class=RolesTableSeeder
+$ SCOUT_DRIVER=null php artisan db:seed --class=UsersTableSeeder
+$ SCOUT_DRIVER=null php artisan db:seed --class=StoriesTableSeeder
+$ SCOUT_DRIVER=null php artisan db:seed --class=PostsTableSeeder
+$ SCOUT_DRIVER=null php artisan db:seed --class=ShareablesTableSeeder
+
+# Production seed test
+$ SCOUT_DRIVER=null DB_DATABASE=fansplat_dev_test php artisan db:seed --class="\Database\Seeders\Production\DatabaseSeeder"
 
 # Run all seeds in test env (.env.testing)
 $ php artisan db:seed --class=TestDatabaseSeeder
