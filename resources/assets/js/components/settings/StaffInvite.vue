@@ -31,6 +31,24 @@
           </b-col>
         </b-row>
 
+        <b-row>
+          <b-col>
+            <b-form-group label="Permissions">
+              <b-form-checkbox-group
+                v-model="formData.permissions"
+              >
+                <b-row>
+                  <b-col sm="12" lg="6" v-for="option in permissionOptions" :key="option.id">
+                    <b-form-checkbox class="mb-3" :value="option.name">
+                      {{ option.display_name }}
+                    </b-form-checkbox>
+                  </b-col>
+                </b-row>
+              </b-form-checkbox-group>
+            </b-form-group>
+          </b-col>
+        </b-row>
+
         <b-row class="mt-3">
           <b-col>
             <div class="w-100 d-flex justify-content-end">
@@ -55,9 +73,19 @@
       creator_id: { type: String, default: null }
     },
 
+    created() {
+      axios.get(this.$apiRoute('staff.permissions'))
+        .then(response => {
+          this.permissionOptions = response.data;
+        })
+    },
+
     data: () => ({
       isSubmitting: false,
-      formData: {},
+      formData: {
+        permissions: [],
+      },
+      permissionOptions: [],
     }),
 
     methods: {
