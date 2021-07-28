@@ -56,38 +56,15 @@
       </div>
     </section>
 
-    <section>
-      <!-- Filters Dropdown -->
-      <b-dropdown ref="filterControls" class="filter-controls" variant="link" size="sm" no-caret >
-        <template #button-content shadow-none>
-          <b-badge show class="alert-primary" :style="{ fontSize: '100%' }">
-            <span class="mr-2">Filters</span> <fa-icon icon="filter" />
-          </b-badge>
-        </template>
-
-        <b-dropdown-header>Txn Type </b-dropdown-header>
-
-        <b-dropdown-item v-for="f in typeFilterOptions" :key="f.key" :active="f.key===selectedFilter" @click="toggleFilter(f.key)" >
-          <!-- <fa-icon icon="thumbtack" class="mx-2" size="lg" fixed-width /> -->
-          {{ f.label }}
-        </b-dropdown-item>
-
-        <b-dropdown-divider />
-
-        <b-dropdown-header>Resource Type </b-dropdown-header>
-
-        <b-dropdown-item v-for="f in resourceTypeFilterOptions" :key="f.key" :active="f.key===selectedFilter" @click="toggleFilter(f.key)" >
-          <!-- <fa-icon icon="thumbtack" class="mx-2" size="lg" fixed-width /> -->
-          {{ f.label }}
-        </b-dropdown-item>
-
-      </b-dropdown>
-
-      <div>
-        Active
-        <ul>
-          <li v-for="(f,idx) in selectedFilters" :key="idx">{{ f }}</li>
-        </ul>
+    <section class="crate-filters mb-3 d-flex">
+      <!-- filters -->
+      <div class="box-filter p-3">
+        <h6>Txn Type</h6>
+        <b-button v-for="(f,idx) in txnFilters.txn_type" :key="idx" @click="toggleFilter('txn_type', f)" :variant="f.is_active ? 'primary' : 'outline-primary'" class="mr-3">{{ f.label }}</b-button>
+      </div>
+      <div class="box-filter p-3 ml-5">
+        <h6>Resource Type</h6>
+        <b-button v-for="(f,idx) in txnFilters.resource_type" :key="idx" @click="toggleFilter('resource_type', f)" :variant="f.is_active ? 'primary' : 'outline-primary'" class="mr-3">{{ f.label }}</b-button>
       </div>
     </section>
 
@@ -145,31 +122,6 @@ export default {
   props: {},
 
   computed: {
-    typeFilterOptions() {
-      return this.txnFilters.filter( f => f.field==='type' )
-    },
-    resourceTypeFilterOptions() {
-      return this.txnFilters.filter( f => f.field ==='resource_type' )
-    },
-    encodedQueryFilters() {
-      let params = {
-        type: [],
-        resource_type: [],
-      }
-      for ( let s of this.selectedFilters ) {
-        const o = this.txnFilters.find( i => i.key === s )
-        switch (o.field) {
-          case 'resource_type':
-            params.resource_type.push(s)
-            break
-          case 'type':
-            params.['type'].push(s)
-            break
-        }
-      }
-      console.log('encodeQueryFilters', { params, })
-      return params
-    },
   },
 
   data: () => ({
@@ -177,23 +129,25 @@ export default {
 
     summary: null,
 
-    selectedFilter: null,
-    selectedFilters: [], // %FIXME: needs to distinguish field
+    txnFilters: {
+      txn_type: [
+        { key: 'payment', label: 'Payment', is_active: false, }, 
+        { key: 'sale', label: 'Sale', is_active: false, },
+        { key: 'payout', label: 'Payout', is_active: false, },
+        { key: 'subscription', label: 'Subscription', is_active: false, },
+        { key: 'fee', label: 'Fee', is_active: false, },
+        { key: 'chargeback', label: 'Chargeback', is_active: false, },
+        { key: 'refund', label: 'Refund', is_active: false, },
+      ],
+      resource_type: [
+        { key: 'timelines', label: 'Timeline', is_active: false, },
+        { key: 'posts', label: 'Post', is_active: false, },
+        { key: 'none', label: 'None', is_active: false, },
+      ],
 
-    txnFilters: [
-          { field: 'type', key: 'payment', label: 'Payment', is_active: false, }, // txn type
-          { field: 'type', key: 'sale', label: 'Sale', is_active: false, },
-          { field: 'type', key: 'subscription', label: 'Subscription', is_active: false, },
-          { field: 'type', key: 'fee', label: 'Fee', is_active: false, },
-          { field: 'type', key: 'chargeback', label: 'Chargeback', is_active: false, },
-          { field: 'type', key: 'refund', label: 'Refund', is_active: false, },
+    },
 
-          { field: 'resource_type', key: 'timelines', label: 'Timeline', is_active: false, },
-          { field: 'resource_type', key: 'post', label: 'Post', is_active: false, },
-          { field: 'resource_type', key: 'none', label: 'None', is_active: false, },
-    ],
-
-    tobj: {
+    tobj: { // table object
       data: [],
       currentPage: 1,
       perPage: 20,
@@ -201,7 +155,7 @@ export default {
       isBusy: false, // to prevent multiple api calls per page event, etc
     },
 
-    fields: [
+    fields: [ // table fields
       { key: 'id', label: 'ID' },
       { key: 'account_id', label: 'Account' },
       { key: 'credit_amount', label: 'Credit' },
@@ -222,12 +176,32 @@ export default {
       this.tobj.currentPage = page
       this.getTransactions()
     },
+
+    encodeQueryFilters() {
+      let params = {
+        type: [], // txn_type
+        resource_type: [],
+      }
+      for ( let s of this.txnFilters.txn_type ) {
+        if ( s.is_active ) {
+          params.type.push(s.key)
+        }
+      }
+      for ( let s of this.txnFilters.resource_type ) {
+        if ( s.is_active ) {
+          params.resource_type.push(s.key)
+        }
+      }
+      console.log('encodeQueryFilters', { params, })
+      return params
+    },
+
     async getTransactions() {
       //let params = `?page=${this.tobj.currentPage}&take=${this.tobj.perPage}`
       let params = {
         page: this.tobj.currentPage,
         take: this.tobj.perPage,
-        ...this.encodedQueryFilters,
+        ...this.encodeQueryFilters(),
       }
       console.log('getTransactions', { params })
       try {
@@ -254,9 +228,18 @@ export default {
       }
     },
 
-    toggleFilter(f) {
-      const tmp = this.selectedFilters.includes(f) ? this.selectedFilters.filter(i => i !== f) : [ ...this.selectedFilters, f ]
-      this.selectedFilters = tmp
+    toggleFilter(filterType, fObj) {
+      console.log('toggleFilter()', {
+        filterType, fObj
+      })
+      //const tmp = this.selectedFilters.includes(f) ? this.selectedFilters.filter(i => i !== f) : [ ...this.selectedFilters, f ]
+      //this.selectedFilters = tmp
+      //this.txnFilters[filterType][fObj.key].is_active = !fObj.is_active
+      // %TODO: clean up this line
+      this.txnFilters[ filterType ][ this.txnFilters[filterType].findIndex(iter => iter.key===fObj.key) ] = { ...fObj, is_active: !fObj.is_active }
+
+      this.tobj.currentPage = 1
+      this.getTransactions()
     },
 
   },
@@ -264,21 +247,23 @@ export default {
   watch: {
     /*
     'tobj.currentPage': function(newVal, oldVal) {
-      console.log('watch - currentPage()', {
-        newVal, oldVal,
-      })
-      if ( newVal !== oldVal ) {
-        this.getTransactions()
-      }
+    console.log('watch - currentPage()', {
+    newVal, oldVal,
+    })
+    if ( newVal !== oldVal ) {
+    this.getTransactions()
+    }
     },
      */
+    /*
     selectedFilters(newVal, oldVal) {
-      console.log('watch - txnFilters()')
-      if ( newVal !== oldVal ) {
-        this.tobj.currentPage = 1
-        this.getTransactions()
-      }
+    console.log('watch - txnFilters()')
+    if ( newVal !== oldVal ) {
+    this.tobj.currentPage = 1
+    this.getTransactions()
+    }
     },
+     */
   },
 
   created() {
@@ -303,7 +288,12 @@ export default {
 <style lang="scss" scoped>
 ::v-deep button.btn-link:focus, 
 ::v-deep button.btn-link:active {
-   outline: none !important;
-   box-shadow: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+.crate-filters {
+  .box-filter {
+    border: solid 1px #353535;
+  }
 }
 </style>

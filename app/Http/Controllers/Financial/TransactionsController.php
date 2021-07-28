@@ -25,7 +25,7 @@ class TransactionsController extends Controller
             'from' => 'date',
             'to' => 'date',
             'type' => 'array|in:'.TransactionTypeEnum::getKeysCsv(),
-            'resource_type' => [ 'array', Rule::in(['posts', 'timelines', 'mediafiles']) ],
+            'resource_type' => [ 'array', Rule::in(['posts', 'timelines', 'mediafiles','none']) ],
         ]);
 
         $query = Transaction::query();
@@ -35,6 +35,7 @@ class TransactionsController extends Controller
         }
         if ( $request->has('resource_type') ) {
             $query->whereIn('resource_type', $request->resource_type);
+            // 'none' %TODO...need to do an orWhere with 'null' values
         }
 
         $data = $query->paginate($request->input('take', Config::get('collections.max.transactions')));
