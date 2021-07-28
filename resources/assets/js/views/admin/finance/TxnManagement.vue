@@ -66,6 +66,16 @@
         <h6>Resource Type</h6>
         <b-button v-for="(f,idx) in txnFilters.resource_type" :key="idx" @click="toggleFilter('resource_type', f)" :variant="f.is_active ? 'primary' : 'outline-primary'" class="mr-3">{{ f.label }}</b-button>
       </div>
+      <div class="box-filter p-3 ml-5">
+        <h6>Date Range</h6>
+        <div class="d-flex align-items-center">
+          <b-form-datepicker v-model="txnFilters.start_date" :date-format-options="{ year:'numeric', month:'numeric', day:'numeric' }" class="mr-2"></b-form-datepicker>
+          <div>
+            ->
+          </div>
+          <b-form-datepicker v-model="txnFilters.end_date" :date-format-options="{ year:'numeric', month:'numeric', day:'numeric' }" class="ml-2"></b-form-datepicker>
+        </div>
+      </div>
     </section>
 
     <b-card>
@@ -114,6 +124,7 @@
 <script>
 import Vue from 'vue'
 import Vuex from 'vuex'
+import moment from 'moment'
 //import TransactionsTable from '@components/statements/transactions/Table'
 
 export default {
@@ -144,7 +155,8 @@ export default {
         { key: 'posts', label: 'Post', is_active: false, },
         { key: 'none', label: 'None', is_active: false, },
       ],
-
+      start_date: null,
+      end_date: null,
     },
 
     tobj: { // table object
@@ -232,9 +244,9 @@ export default {
       console.log('toggleFilter()', {
         filterType, fObj
       })
-      //const tmp = this.selectedFilters.includes(f) ? this.selectedFilters.filter(i => i !== f) : [ ...this.selectedFilters, f ]
-      //this.selectedFilters = tmp
-      //this.txnFilters[filterType][fObj.key].is_active = !fObj.is_active
+      if ( !this.txnFilters[filterType].isArray() ) {
+        return
+      }
       // %TODO: clean up this line
       this.txnFilters[ filterType ][ this.txnFilters[filterType].findIndex(iter => iter.key===fObj.key) ] = { ...fObj, is_active: !fObj.is_active }
 
@@ -245,25 +257,6 @@ export default {
   },
 
   watch: {
-    /*
-    'tobj.currentPage': function(newVal, oldVal) {
-    console.log('watch - currentPage()', {
-    newVal, oldVal,
-    })
-    if ( newVal !== oldVal ) {
-    this.getTransactions()
-    }
-    },
-     */
-    /*
-    selectedFilters(newVal, oldVal) {
-    console.log('watch - txnFilters()')
-    if ( newVal !== oldVal ) {
-    this.tobj.currentPage = 1
-    this.getTransactions()
-    }
-    },
-     */
   },
 
   created() {
@@ -272,6 +265,9 @@ export default {
     //this.$nextTick(() => {
     //this.selectedFilter = 'all'
     //})
+    const now = moment()
+    this.txnFilters.end_date = moment().format('YYYY-MM-DD')
+    this.txnFilters.start_date = moment().subtract(30, 'days').format('YYYY-MM-DD')
   },
 
   mounted() {
