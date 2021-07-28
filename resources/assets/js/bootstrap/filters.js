@@ -22,7 +22,17 @@ Vue.filter('niceCurrency', function (value, currency = 'USD') {
 })
 
 Vue.filter('niceGuid', function (v) {
-  return v.slice(-12)
+  return v ? v.slice(-12) : ''
+})
+
+Vue.filter('niceBool', function (v) {
+  if ( v === 0 ) {
+    return 'N'
+  }  else if ( v === 1 ) {
+    return 'Y'
+  } else {
+    return '?'
+  }
 })
 
 Vue.filter('enumPostType', function (k) {

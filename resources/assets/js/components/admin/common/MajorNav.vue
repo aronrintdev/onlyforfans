@@ -22,6 +22,7 @@
       <router-link :to="{ name: 'txn-management', params: {} }">Financial</router-link>
     </h6>
     <b-nav vertical class="">
+      <b-nav-item><router-link :to="{ name: 'account-management', params: {} }">Accounts</router-link></b-nav-item>
       <b-nav-item><router-link :to="{ name: 'txn-management', params: {} }">Txn</router-link></b-nav-item>
       <b-nav-item>tbd</b-nav-item>
     </b-nav>

@@ -8,6 +8,7 @@ use Symfony\Component\Console\Output\ConsoleOutput;
 
 use Tests\Asserts\CustomAsserts;
 use Database\Seeders\TestDatabaseSeeder;
+use App\Models\User;
 
 abstract class TestCase extends BaseTestCase
 {
@@ -68,4 +69,15 @@ abstract class TestCase extends BaseTestCase
             $this->seed(TestDatabaseSeeder::class);
         }
     }
+
+    // makes an admin user since seeder DB doesn't have any by default
+    protected function getAdmin() : User
+    {
+        $admin = User::first();
+        //$admin->assignRole('super-admin'); // upgrade to admin!
+        $admin->assignRole('admin'); // upgrade to admin!
+        $admin->refresh();
+        return $admin;
+    }
+
 }

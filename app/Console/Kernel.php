@@ -6,9 +6,10 @@ use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
+
 use App\Jobs\StartTransactionSummaryCreation;
 use App\Enums\Financial\TransactionSummaryTypeEnum;
-use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
 class Kernel extends ConsoleKernel
 {
@@ -37,6 +38,8 @@ class Kernel extends ConsoleKernel
         \App\Console\Commands\SetTimestamps::class,
         \App\Console\Commands\SettleFinancialAccounts::class,
         \App\Console\Commands\UpdateStoryqueues::class,
+
+        \App\Console\Commands\Dev\PopulateChargebacks::class,
     ];
 
     /**
