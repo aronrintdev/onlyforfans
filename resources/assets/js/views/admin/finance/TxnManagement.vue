@@ -158,6 +158,8 @@ export default {
       resource_type: [
         { key: 'timelines', label: 'Timeline', is_active: false, },
         { key: 'posts', label: 'Post', is_active: false, },
+        { key: 'tips', label: 'Tip', is_active: false, },
+        { key: 'messages', label: 'Messages', is_active: false, },
         { key: 'none', label: 'None', is_active: false, },
       ],
       start_date: null,

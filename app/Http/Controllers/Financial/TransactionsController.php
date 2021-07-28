@@ -25,7 +25,7 @@ class TransactionsController extends Controller
             'from' => 'date',
             'to' => 'date',
             'type' => 'array|in:'.TransactionTypeEnum::getKeysCsv(),
-            'resource_type' => [ 'array', Rule::in(['posts', 'timelines', 'mediafiles','none']) ],
+            'resource_type' => [ 'array', Rule::in(['posts', 'timelines', 'mediafiles', 'tips', 'messages', 'none']) ],
         ]);
 
         $query = Transaction::query();
