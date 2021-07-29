@@ -142,6 +142,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::post('/mediafiles/batch-destroy', ['as'=>'mediafiles.batchDestroy', 'uses' => 'MediafilesController@batchDestroy']);
     Route::resource('mediafiles', 'MediafilesController', [ 'except' => [ 'create', 'edit', ] ]);
 
+
     Route::resource('notifications', 'NotificationsController', [ 'only' => [ 'index', ] ]);
 
     /* -------------------------------- Posts ------------------------------- */
@@ -284,6 +285,8 @@ Route::group(['middleware' => ['auth', 'role:super-admin'], 'as'=>'financial.', 
     Route::resource('transactions', 'TransactionsController', [ 
         'only' => [ 'index', 'show' ],
     ]);
+
+    Route::resource('diskmediafiles', 'DiskmediafilesController', [ 'only' => [ 'index', 'show', 'destroy'] ]);
 });
 
 /*
