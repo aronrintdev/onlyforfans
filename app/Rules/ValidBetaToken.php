@@ -31,7 +31,7 @@ class ValidBetaToken implements Rule
     public function passes($attribute, $value)
     {
         $this->value = $value;
-        if (Token::check($value, Config::get('auth.beta.token_name'))) {
+        if (Token::check($value, Config::get('auth.beta.tokenName'))) {
             return true;
         }
         return false;

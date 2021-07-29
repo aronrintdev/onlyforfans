@@ -106,6 +106,9 @@ return [
     ],
 
 
+    // Email verification
+    'emailVerificationTemplate' => env('AUTH_EMAIL_VERIFICATION_TEMPLATE', 'd-4081805e42434ccc80a659e85f5f17d6'),
+
     /*
     |--------------------------------------------------------------------------
     | Beta Program
@@ -115,7 +118,8 @@ return [
 
     'beta' => [
         'active' => env('AUTH_BETA_ACTIVE', true),
-        'token_name' => env('AUTH_BETA_TOKEN_NAME', 'beta'),
+        'tokenName' => env('AUTH_BETA_TOKEN_NAME', 'beta'),
+        'tokenLength' => env('AUTH_BETA_TOKEN_LENGTH', 10),
     ],
 
 
