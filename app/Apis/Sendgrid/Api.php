@@ -84,7 +84,7 @@ class Api
             'id-verification-pending'                                  => 'd-ea0736e507534c8e8986947b1c2ddbb6', 
             'id-verification-approved'                                 => 'd-22e9d23524af4edca5e88050c3c89cce', 
             'id-verification-rejected'                                 => 'd-3e62c94809be4b299065b7936c903826', 
-            'verify-email'                                             => 'd-4081805e42434ccc80a659e85f5f17d6',  // sent to user immediatly after they register, with link to verify email
+            'verify-email'                                             => 'd-4081805e42434ccc80a659e85f5f17d6',  // sent to user immediatley after they register, with link to verify email
             'email-verified'                                           => 'd-02356e4d3fd64beaa85c859368736a98',  // sent after they confirm/verify their email
 
             
