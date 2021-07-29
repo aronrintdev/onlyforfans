@@ -8,25 +8,25 @@
         </li>
         <li class="mr-3">
           <span @click="toggleComments()" class="tag-clickable">
-            <fa-icon :icon="['far', 'comments']" />
+            <fa-icon size="lg" :icon="['far', 'comments']" class="text-secondary" />
           </span>
         </li>
         <li class="mr-3">
           <span @click="share()" class="tag-clickable">
-            <fa-icon :icon="['far', 'share-square']" />
+            <fa-icon size="lg" :icon="['far', 'share-square']" class="text-secondary" />
           </span>
         </li>
         <li class="mr-3">
           <span @click="renderTip" class="tag-clickable">
-            <fa-icon icon="dollar-sign" />
+            <fa-icon size="lg" icon="dollar-sign" class="text-secondary" />
           </span>
         </li>
       </ul>
       <ul class="d-flex list-inline footer-ctrl mb-0">
         <li class="mr-3">
           <span @click="toggleFavorite()" class="tag-clickable">
-            <fa-icon v-if="isFavoritedByMe" fixed-width :icon="['fas', 'star']" class="clickable" style="font-size:1.2rem; color:#007bff" />
-            <fa-icon v-else fixed-width :icon="['far', 'star']" class="clickable" style="font-size:1.2rem; color:#007bff" />
+            <fa-icon size="lg" v-if="isFavoritedByMe" fixed-width :icon="['fas', 'star']" class="clickable text-primary" style="font-size:1.2rem" />
+            <fa-icon size="lg" v-else fixed-width :icon="['far', 'star']" class="clickable text-primary" style="font-size:1.2rem" />
           </span>
         </li>
       </ul>
@@ -197,6 +197,10 @@ export default {
 <style scoped>
 ul {
   margin: 0;
+}
+
+li {
+  font-size: 14px;
 }
 
 .like-count {

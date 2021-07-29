@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!isLoading" class="crate-story_bar mx-0">
+  <div v-if="!isLoading" class="crate-story_bar mx-0 mb-3">
     <section class="d-flex OFF-flex-wrap justify-content-start w-100">
 
       <!-- Add to story icon form -->
@@ -14,14 +14,13 @@
       <swiper ref="mySwiper" :options="swiperOptions" class="">
         <swiper-slide v-for="tl in timelines" :key="tl.id" class="story slide tag-followed_timeline">
           <router-link :to="{ name: 'stories.player', params: { timeline_id: tl.id } }" class="box-story">
-            <b-img 
-              v-b-popover.hover.top="{variant: 'info', content: tl.slug}" 
-              rounded="circle" 
-              :src="tl.avatar.filepath" 
-              :class="{ 'my-story-avatar': isMyTimeline(tl), 'all-viewed': tl.allViewed }"
-              class="p-0" 
-              alt="Story owner's avatar" 
-            />
+            <div class="avatar-container" :class="{ 'my-story-avatar': isMyTimeline(tl), 'all-viewed': tl.allViewed }">
+              <b-img
+                rounded="circle" 
+                :src="tl.avatar.filepath"
+                alt="Story owner's avatar" 
+              />
+            </div>
           </router-link>
         </swiper-slide>
       </swiper>
@@ -50,11 +49,11 @@
     </section>
 
     <!-- Modal for selecting file from disk vs vault -->
-    <b-modal v-model="isSelectFileModalVisible" id="modal-select-file" size="lg" title="Select Story Type" hide-footer >
+    <b-modal v-model="isSelectFileModalVisible" id="modal-select-file" size="md" title="Select a Story Type" hide-footer >
       <div>
-        <b-button block variant="primary" class="" @click="selectFromFiles">Select File From disk</b-button>
-        <b-button block variant="primary" class="" :to="{ name: 'vault.dashboard', params: { context: 'storybar' } }">Select File From Vault</b-button>
-        <b-button block variant="primary" class="" @click="selectTextOnly">Text-Only Story</b-button>
+        <b-button block variant="primary" class="" @click="selectFromFiles">Add from Device</b-button>
+        <b-button block variant="primary" class="" :to="{ name: 'vault.dashboard', params: { context: 'storybar' } }">Add from Vault</b-button>
+        <b-button block variant="primary" class="" @click="selectTextOnly">Add Text Only</b-button>
       </div>
     </b-modal>
 
@@ -278,21 +277,38 @@ export default {
 body .crate-story_bar {
 
   .story.slide {
-    width: 50px !important;
+    position:relative;
+    width: 42px !important;
+    height: 42px !important;
+  }
+
+  .avatar-container::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 100%;
+    padding: 2px;
+    background: linear-gradient(45deg,pink,blue);
+    -webkit-mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: destination-out;
+    mask-composite: exclude;
   }
 
   .box-story img {
+    margin: 1px;
     width: 40px;
     height: 40px;
   }
-  .box-story img {
-    border: solid orange 2px;
+  .avatar-container.all-viewed::before {
+    background: #D3D3D3;
   }
-  .box-story img.all-viewed {
-    border: solid green 2px;
-  }
-  .box-story img.my-story-avatar {
-    border: solid cyan 2px;
+  .avatar-container.my-story-avatar::before {
+    background: cyan;
   }
 
 

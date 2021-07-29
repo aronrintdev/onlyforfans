@@ -1,7 +1,8 @@
 <template>
   <div @click="$emit('toggled')" class="tag-clickable">
     <fa-icon
-      :class="filled ? 'text-danger' : ''"
+      size="lg"
+      :class="filled ? 'text-danger' : 'text-secondary'"
       :icon="filled ? 'heart' : ['far', 'heart']"
     />
     <span v-if="showCount">
