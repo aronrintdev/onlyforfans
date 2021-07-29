@@ -65,20 +65,21 @@ class Token extends Model
         return $tokens;
     }
 
-    public static function check($token)
+    public static function check($token, $for = '')
     {
         $token = Token::where('token', $token)
+            ->where('for', $for)
             ->whereNull('used_at')
             ->where(function ($query) {
                 $query->where('expires_at', '>', Carbon::now())
                     ->orWhereNull('expires_at');
-            });
+            })->first();
         return $token ?? false;
     }
 
     public static function useToken($token, User $user)
     {
-        $token = static::check($token);
+        $token = Token::check($token);
         if ($token) {
             return $token->use($user);
         }

@@ -26,6 +26,11 @@ export const routes = [
     component: AuthViews.Register,
   },
   {
+    name: 'confirm-email',
+    path: '/register/confirm-email',
+    component: AuthViews.ConfirmEmail,
+  },
+  {
     name: 'forgot-password',
     path: '/forgot-password',
     component: AuthViews.ForgotPassword,
