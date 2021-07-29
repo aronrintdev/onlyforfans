@@ -32,7 +32,11 @@ class BetaProgramController extends Controller
         foreach ($request->emails as $email ) {
             // Send beta program email here
             $token = $tokens->pop();
-            $registerUrl = URL::to('/') . "/register?beta=1&email=$email&token=$token->token";
+            $registerUrl = url(route('register', [
+                'beta' => 1,
+                'token' => $token->token,
+                'email' => $email,
+            ]));
 
             // TODO: Send beta invitation email here
 

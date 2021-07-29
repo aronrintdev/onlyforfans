@@ -56,6 +56,7 @@
             />
           </b-form-group>
           <b-form-group
+            v-if="usernameShown"
             :invalid-feedback="verrors.username ? verrors.username[0] : null"
             :state="verrors.username ? false : null"
           >
@@ -144,6 +145,7 @@ export default {
       tos: null,
     },
     isEmailDisabled: false,
+    usernameShown: false,
   }),
 
   methods: {

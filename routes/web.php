@@ -27,7 +27,7 @@ Route::group(['middleware' => ['web']], function () {
 
     // Skip these to spa controller
     Route::get('/login', 'SpaController@index');
-    Route::get('/register', 'SpaController@index');
+    Route::get('/register', 'SpaController@index')->name('register');
     Route::get('/forgot-password', 'SpaController@index');
 
 });
