@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
             UsernameRulesSeeder::class,
             RolesTableSeeder::class,
             UsersTableSeeder::class,
+
             PostsTableSeeder::class,
             PaymentMethodsSeeder::class,
             AchAccountSeeder::class,

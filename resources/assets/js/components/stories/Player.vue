@@ -63,7 +63,7 @@
 
               <div v-touch:swipe.top="handleSwipeUp" class="crate-content">
                 <article v-if="s.stype==='text'" class="h-100 v-wrap">
-                  <VueMarkdown class="h4 text-center v-box text-white w-75" :source="s.content || ''" />
+                  <VueMarkdown :html="false" class="h4 text-center v-box text-white w-75" :source="s.content || ''" />
                 </article>
                 <article v-else-if="s.stype==='image' && s.mediafiles" class="h-100">
                   <img v-if="s.mediafiles[0].is_image" :src="s.mediafiles[0].filepath" />

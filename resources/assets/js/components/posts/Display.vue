@@ -65,7 +65,7 @@
       <template v-if="post.access">
         <div :class="{ 'tag-has-mediafiles': hasMediafiles }" class="py-3 text-wrap">
           <b-card-text class="px-3 mb-0 tag-post_desc">
-            <VueMarkdown :source="post.description || ''" />
+            <VueMarkdown :html="false" :source="post.description || ''" />
           </b-card-text>
         </div>
         <article v-if="hasMediafiles">

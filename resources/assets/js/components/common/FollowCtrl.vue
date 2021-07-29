@@ -23,7 +23,7 @@
             </b-button>
           </li>
         </ul>
-        <VueMarkdown :source="timeline.about || ''" />
+        <VueMarkdown :html="false" :source="timeline.about || ''" />
         <ul class="list-unstyled">
           <li>Website: <a :href="timeline.userstats.website" class="tag-website">{{ timeline.userstats.website }}</a></li>
           <li>Instagram: <a :href="timeline.userstats.instagram" class="tag-instagram">{{ timeline.userstats.instagram }}</a></li>

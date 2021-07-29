@@ -15,7 +15,7 @@
       <div v-if="value.message">
         <div class="text-muted" v-text="$t(`message.${userIs}`, tInfo)" />
         <hr class="my-1" />
-        <VueMarkdown :source="value.message || ''" />
+        <VueMarkdown :html="false" :source="value.message || ''" />
       </div>
     </b-media>
   </b-alert>

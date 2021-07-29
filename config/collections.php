@@ -20,6 +20,7 @@ return [
         'large'   => $large,
     ],
     'max' => [
+        'accounts'      => env('MAX_ACCOUNTS_PER_REQUEST' , $mid  ),
         'ach_accounts'  => env('MAX_ACH_ACCOUNTS_PER_REQUEST' , $mid  ),
         'posts'         => env('MAX_POSTS_PER_REQUEST'        , $small),
         'subscriptions' => env('MAX_SUBSCRIPTIONS_PER_REQUEST', $large),
