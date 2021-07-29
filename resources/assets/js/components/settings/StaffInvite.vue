@@ -39,7 +39,7 @@
               >
                 <b-row>
                   <b-col sm="12" lg="6" v-for="option in permissionOptions" :key="option.id">
-                    <b-form-checkbox class="mb-3" :value="option.name">
+                    <b-form-checkbox class="mb-3" :value="option.id">
                       {{ option.display_name }}
                     </b-form-checkbox>
                   </b-col>

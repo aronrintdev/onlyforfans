@@ -3,6 +3,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\Model;
 
 use App\Models\Traits\UsesUuid;
 
@@ -25,6 +26,6 @@ class Staff extends Model
 
     public function permissions()
     {
-        return $this->morphToMany(Permission::class, 'permissionable');
+        return $this->morphToMany(Permission::class, 'permissibles');
     }
 }
