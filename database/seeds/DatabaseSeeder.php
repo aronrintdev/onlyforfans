@@ -36,6 +36,7 @@ class DatabaseSeeder extends Seeder
             ChatmessagesTableSeeder::class,
             MediafilesTableSeeder::class,
             PermissionsTableSeeder::class,
+            StaffTableSeeder::class,
         ]);
     }
 
