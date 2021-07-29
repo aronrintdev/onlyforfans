@@ -173,7 +173,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::post('/campaigns/stop', ['as'=>'campaigns.stop', 'uses' => 'CampaignsController@stop']);
     Route::resource('campaigns', 'CampaignsController', [ 'only' => [ 'store' ] ]);
 
-    // -- stories:  --
+    /* ------------------------------ Stories ------------------------------ */
     Route::get('/stories/player', ['as' => 'stories.player', 'uses' => 'SpaController@index']);
     Route::get('/stories/match', ['as'=>'stories.match', 'uses' => 'StoriesController@match']);
     Route::get('/stories/getSlides', ['as'=>'stories.getSlides', 'uses' => 'StoriesController@getSlides']);
@@ -185,7 +185,7 @@ Route::group(['middleware' => ['auth']], function () {
     ]);
     Route::resource('stories', 'StoriesController', [ 'except' => [ 'create', 'edit', ] ]);
 
-    // -- shareables:  --
+    /* ------------------------------ Shareables ------------------------------ */
     Route::get('/shareables/indexFollowers', ['as' => 'shareables.indexFollowers', 'uses' => 'ShareablesController@indexFollowers']);
     Route::get('/shareables/indexFollowing', ['as' => 'shareables.indexFollowing', 'uses' => 'ShareablesController@indexFollowing']);
     Route::put('/shareables/{shareable}/clearnotes', ['as' => 'shareables.clearnotes', 'uses' => 'ShareablesController@clearnotes']);
@@ -193,6 +193,7 @@ Route::group(['middleware' => ['auth']], function () {
         'only' => [ 'index', 'update'],
     ]);
 
+    /* ------------------------------ Timelines ------------------------------ */
     // -- timelines: tippable | subscribeable | followable --
     #region Timelines
     Route::get('/timelines-suggested', ['as'=>'timelines.suggested', 'uses' => 'TimelinesController@suggested']); // %FIXME: refactor: use index(?)
@@ -220,6 +221,7 @@ Route::group(['middleware' => ['auth']], function () {
 
     #endregion Timelines
 
+    /* ------------------------------ Users ------------------------------ */
     // -- users: messageable --
     //Route::get('/users-suggested', ['as'=>'users.suggested', 'uses' => 'UsersController@suggested']);
     Route::get('/users/me', ['as' => 'users.me', 'uses' => 'UsersController@me']);
@@ -241,6 +243,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::post('/users/send-staff-invite', ['as'=>'users.sendStaffInvite', 'uses' => 'UsersController@sendStaffInvite']);
     Route::resource('users', 'UsersController', [ 'except' => [ 'create', 'edit', 'store' ] ]);
 
+    /* ------------------------------ Vault ------------------------------ */
     // -- vaults:  --
     Route::get('/my-vault', [
         'middleware' => 'spaMixedRoute',
@@ -266,39 +269,22 @@ Route::group(['middleware' => ['auth']], function () {
 
     // -- misc --
     Route::post('update-last-seen', 'UsersController@updateLastSeen')->name('update-user-status');
-    /*
-    Route::get('/saved/dashboard', ['as'=>'saved.dashboard', 'uses' => 'SaveditemsController@dashboard']);
-    Route::resource('saved', 'SaveditemsController', [
-        'only' => ['index', 'show', 'store'],
-    ]);
-     */
 
 });
 
-// DEPRECATED
-//  -- messages --
-//Route::get('/chat-messages/users', ['as'=>'messages.fetchusers', 'uses' => 'MessageController@fetchUsers']);
-//Route::get('/chat-messages/contacts', ['as'=>'messages.fetchcontacts', 'uses' => 'MessageController@fetchContacts']);
-//Route::get('/chat-messages/scheduled', ['as'=>'messages.fetchscheduled', 'uses' => 'MessageController@fetchScheduled']);
-//Route::delete('/chat-messages/scheduled/{threadId}', ['as'=>'messages.removeschedule', 'uses' => 'MessageController@removeScheduleThread']);
-//Route::patch('/chat-messages/scheduled/{threadId}', ['as'=>'messages.editschedule', 'uses' => 'MessageController@editScheduleThread']);
-//Route::get('/chat-messages/{id}', ['as'=>'messages.fetchcontact', 'uses' => 'MessageController@fetchcontact']);
-//Route::delete('/chat-messages/{id}', ['as'=>'messages.clearcontact', 'uses' => 'MessageController@clearUser']);
-//Route::post('/chat-messages/{id}/mark-as-read', ['as'=>'messages.markasread', 'uses' => 'MessageController@markAsRead']);
-//Route::post('/chat-messages/mark-all-as-read', ['as'=>'messages.markallasread', 'uses' => 'MessageController@markAllAsRead']);
-//Route::get('/chat-messages/{id}/search', ['as'=>'messages.filtermessages', 'uses' => 'MessageController@filterMessages']);
-//Route::patch('/chat-messages/{id}/mute', ['as'=>'messages.mute', 'uses' => 'MessageController@mute']);
-//Route::patch('/chat-messages/{id}/unmute', ['as'=>'messages.unmute', 'uses' => 'MessageController@unmute']);
-//Route::post('/chat-messages/{id}/custom-name', ['as'=>'messages.customname', 'uses' => 'MessageController@setCustomName']);
-//Route::get('/chat-messages/{id}/mediafiles', ['as'=>'messages.mediafiles', 'uses' => 'MessageController@listMediafiles']);
-//Route::delete('/chat-messages/{id}/threads/{threadId}', ['as'=>'messages.removethread', 'uses' => 'MessageController@removeThread']);
-//Route::post('/chat-messages/{id}/threads/{threadId}/like', ['as'=>'messages.setlike', 'uses' => 'MessageController@setLike']);
-//Route::post('/chat-messages/{id}/threads/{threadId}/unlike', ['as'=>'messages.setunlike', 'uses' => 'MessageController@setUnlike']);
-//
-//Route::resource('chat-messages', 'MessageController')->only([
-//    'index',
-//    'store'
-//]);
+/* ------------------------------ Financial Namespace ------------------------------ */
+// %NOTE: currently these are limited to super-admin roles
+Route::group(['middleware' => ['auth', 'role:super-admin'], 'as'=>'financial.', 'prefix'=>'financial', 'namespace'=>'Financial'], function () {
+
+    Route::resource('accounts', 'AccountsController', [ 
+        'only' => [ 'index', 'show' ],
+    ]);
+
+    Route::get('/summary/transactions', 'TransactionsController@summary')->name('transactions.summary');
+    Route::resource('transactions', 'TransactionsController', [ 
+        'only' => [ 'index', 'show' ],
+    ]);
+});
 
 /*
 |--------------------------------------------------------------------------

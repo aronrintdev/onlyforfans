@@ -1,10 +1,14 @@
 <?php
-namespace Database\Seeders;
+namespace Database\Seeders\Production;
 
 use Exception;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Database\Seeder;
+
+use Database\Seeders\SeederTraits;
+
 use App\Libs\FactoryHelpers;
 use App\Enums\MediafileTypeEnum;
 use App\Models\Role;
@@ -22,9 +26,7 @@ class UsersTableSeeder extends Seeder
 
         // $adminRole = Role::where('name','admin')->firstOrFail();
 
-        $this->doS3Upload = ( $this->appEnv !== 'testing' );
-
-        if ( $this->appEnv !== 'testing' ) { // if tests have pre-existing admins we'll need to make sure a random user chose is *not* an admin
+        $this->doS3Upload = false; // ( $this->appEnv !== 'testing' );
 
             $this->output->writeln("  - Creating admin users...");
 
@@ -108,7 +110,7 @@ class UsersTableSeeder extends Seeder
                 ],
             ];
 
-            $this->output->writeln("  - Creating admin users...");
+            $this->output->writeln("  - Creating PRODUCTION admin users...");
 
             foreach ($manualUsers as $u) {
                 $user = User::where('email', $u['email'])->first();
@@ -122,75 +124,5 @@ class UsersTableSeeder extends Seeder
             }
         } // testing
 
-        // +++ Create non-admin users +++
-
-        if ( $this->appEnv !== 'testing' ) {
-            $this->output->writeln("  - Creating non-admin users...");
-        }
-
-        $isFollowForFree = true;
-        User::factory()->count($this->getMax('users'))->create()->each( function($u) use(&$isFollowForFree) {
-
-            static $iter = 1;
-
-            if ( $this->appEnv !== 'testing' ) {
-                $this->output->writeln("Creating new user with avatar & cover: " . $u->name." (iter: $iter)");
-                $avatar = FactoryHelpers::createImage(
-                    $u,
-                    MediafileTypeEnum::AVATAR, 
-                    $u->id, 
-                    $this->doS3Upload
-                );
-                $cover = FactoryHelpers::createImage(
-                    $u,
-                    MediafileTypeEnum::COVER, 
-                    $u->id, 
-                    $this->doS3Upload
-                );
-            } else {
-                //$this->output->writeln("Creating new user without avatar & cover: " . $u->name." (iter: $iter)");
-                $avatar = null;
-                $cover = null;
-            }
-
-            $u->save();
-
-            $timeline = $u->timeline;
-            $timeline->avatar_id = $avatar->id ?? null;
-            $timeline->cover_id = $cover->id ?? null;
-            $timeline->is_follow_for_free = $isFollowForFree;
-            $timeline->price = $isFollowForFree ? 0 : $this->faker->numberBetween(300, 4000);
-            $timeline->save();
-            $isFollowForFree = !$isFollowForFree; // toggle so we get at least one of each
-
-            $iter++;
-        });
-
-        // +++ Update default user settings +++
-
-        // User::get()->each( function($u) {
-        //     DB::table('user_settings')->insert([
-        //         'user_id'               => $u->id,
-        //         'confirm_follow'        => 'no',
-        //         'follow_privacy'        => 'everyone',
-        //         'comment_privacy'       => 'everyone',
-        //         'timeline_post_privacy' => 'everyone',
-        //         'post_privacy'          => 'everyone',
-        //         'message_privacy'       => 'everyone',
-        //     ]);
-        // });
     }
 
-    private function getMax($param) : int
-    {
-        static $max = [
-            'testing' => [
-                'users' => 18,
-            ],
-            'local' => [
-                'users' => 50,
-            ],
-        ];
-        return $max[$this->appEnv][$param];
-    }
-}
