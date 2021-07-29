@@ -1,6 +1,6 @@
 <template>
   <b-card class="mb-3">
-    <b-card-text>
+    <b-card-text v-if="!isLoading">
       <a class="text-primary text-decoration-none link-btn" @click="goBack">
         <fa-icon :icon="['far', 'arrow-left']" />
         <span class="px-1">{{ creator_id == null ? 'Managers' : 'Staff members' }}</span>
@@ -10,7 +10,7 @@
         <div class="h3 text-center" v-else>Invite Staff Member</div>
       </div>
       <b-form @submit.prevent="submitForm">
-        <b-row>
+        <b-row class="mb-3">
           <b-col>
             <b-form-group label="First name" label-for="first_name">
               <b-form-input id="first_name" v-model="formData.first_name" placeholder="First name" ></b-form-input>
@@ -23,7 +23,7 @@
           </b-col>
         </b-row>
 
-        <b-row>
+        <b-row class="mb-3">
           <b-col>
             <b-form-group label="Email" label-for="email">
               <b-form-input id="email" v-model="formData.email" type="email" placeholder="Email" ></b-form-input>
@@ -31,19 +31,20 @@
           </b-col>
         </b-row>
 
-        <b-row>
+        <b-row class="mb-3" v-if="creator_id">
           <b-col>
             <b-form-group label="Permissions">
               <b-form-checkbox-group
                 v-model="formData.permissions"
               >
-                <b-row>
-                  <b-col sm="12" lg="6" v-for="option in permissionOptions" :key="option.id">
-                    <b-form-checkbox class="mb-3" :value="option.id">
-                      {{ option.display_name }}
+                <div class="permission-group" v-for="(vaules, group) in permissionGroups" :key="group">
+                  <div class="group-name">- {{ group }}</div>
+                  <div class="permission" v-for="permission in vaules" :key="permission.id">
+                    <b-form-checkbox class="mb-3 checkbox" :value="permission.id">
+                      {{ permission.display_name }}
                     </b-form-checkbox>
-                  </b-col>
-                </b-row>
+                  </div>
+                </div>
               </b-form-checkbox-group>
             </b-form-group>
           </b-col>
@@ -66,6 +67,8 @@
 </template>
 
 <script>
+  import { groupBy } from 'lodash';
+
   export default {
     props: {
       items: { type: Array, default: () => ([])},
@@ -76,7 +79,12 @@
     created() {
       axios.get(this.$apiRoute('staff.permissions'))
         .then(response => {
-          this.permissionOptions = response.data;
+          const permissions = response.data.map(p => {
+            p.category = p.name.split('.')[0];
+            return p;
+          });
+          this.permissionGroups = groupBy(permissions, 'category');
+          this.isLoading = false;
         })
     },
 
@@ -85,7 +93,8 @@
       formData: {
         permissions: [],
       },
-      permissionOptions: [],
+      permissionGroups: [],
+      isLoading: true,
     }),
 
     methods: {
@@ -119,5 +128,30 @@
 <style lang="scss" scoped>
 .link-btn {
   cursor: pointer;
+}
+.permission-group {
+  padding: 0 0.5em 1em 0.5em;
+  
+  .group-name {
+    font-size: 15px;
+    color: #666;
+    margin-bottom: 0.5em;
+  }
+  .permission {
+    display: inline-block;
+    margin: 0 2em -0.5em 0;
+  }
+}
+</style>
+
+<style lang="scss">
+.permission-group {
+  .permission {
+    .checkbox label {
+      font-size: 15px;
+      display: flex;
+      align-items: center;
+    }
+  }
 }
 </style>
