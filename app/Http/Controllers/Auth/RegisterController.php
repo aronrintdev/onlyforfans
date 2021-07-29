@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Redirect;
@@ -75,7 +76,7 @@ class RegisterController extends Controller
         $rules = [
             'email'        => 'required|email|max:255|unique:users,email',
             // 'name'         => 'max:255',
-            // 'name'         => 'required|max:25|min:2|unique:timelines|no_admin',
+            'name'         => [ 'required', 'max:25', 'min:2', 'no_admin', new \App\Rules\ValidUsername ],
             'username'     => [ 'max:25', 'min:5', 'unique:users', 'no_admin', new \App\Rules\ValidUsername ],
             'password'     => 'required|min:6',
             // 'affiliate'    => 'exists:timelines,username',
@@ -196,6 +197,9 @@ class RegisterController extends Controller
             }
 
             if (Setting::get('mail_verification') == 'on') {
+
+                event(new Registered($user));
+
                 Mail::send('emails.welcome', ['user' => $user], function ($m) use ($user) {
                     $m->from(Setting::get('noreply_email'), Setting::get('site_name'));
 
