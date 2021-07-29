@@ -200,7 +200,7 @@ class TimelinesController extends AppBaseController
     // %FIXME: better way to do this is to pull down a set of mediafiles associated with posts on this timeline (?)
     public function previewPosts(Request $request, Timeline $timeline)
     {
-        $TAKE = $request->input('take', 6);
+        $TAKE = $request->input('take', $request->limit);
         $query = Post::with('mediafiles', 'user')
             ->has('mediafiles')
             ->withCount('comments')->orderBy('comments_count', 'desc')

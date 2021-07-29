@@ -391,7 +391,7 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
     {
         return ($this->timeline && $this->timeline->avatar)
             ? $this->timeline->avatar
-            : (object) ['filepath' => url('/images/default_avatar.svg')];
+            : (object) ['filepath' => url('/images/default_avatar.png')];
             // : (object) ['filepath' => url('user/avatar/default-' . $this->gender . '-avatar.png')];
     }
 
@@ -564,6 +564,7 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
     public function getStats() : array
     {
         $timeline = $this->timeline;
+        $weblinks = json_decode($this->settings->weblinks, true);
         if ( !$timeline ) {
             return [];
         }
@@ -574,8 +575,8 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
             'following_count'  => $timeline->user->followedtimelines->count(),
             'subscribed_count' => 0, // %TODO $sessionUser->timeline->subscribed->count()
             'earnings'         => '', // TODO: Hook up to earnings controller
-            'website'          => '', // %TODO
-            'instagram'        => '', // %TODO
+            'website'          => array_key_exists('website', $weblinks??[]) ? $weblinks['website'] : '', // %TODO
+            'instagram'        => array_key_exists('instagram', $weblinks??[]) ? $weblinks['instagram'] : '', // %TODO
             'city'             => (isset($this->settings)) ? $this->settings->city : null,
             'country'          => (isset($this->settings)) ? $this->settings->country : null,
         ];

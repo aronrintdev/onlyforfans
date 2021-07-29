@@ -3,6 +3,10 @@
     <b-card tag="article">
       <b-card-text>
         <b-row>
+          <h3 class="card-title mt-1 mb-2 ml-1">Photos</h3>
+        </b-row>
+
+        <b-row>
           <b-col cols="4" v-for="(p,idx) in previewposts" :key="p.id" class="px-1">
   <div class="tag-debug">
             <ul class="pl-0">
@@ -19,6 +23,7 @@
             </article>
           </b-col>
         </b-row>
+        <div v-if="!allViewed" class="view-more-photos text-primary text-right" @click="viewMorePhotos">View more photos</div>
       </b-card-text>
     </b-card>
   </div>
@@ -47,6 +52,7 @@ export default {
 
   data: () => ({
     limit: 6,
+    allViewed: false,
   }),
 
   created() { 
@@ -104,13 +110,28 @@ export default {
         return { '--background-image': `url(/images/locked_post.png)` }
       }
     },
+
+    viewMorePhotos() {
+      this.limit = this.limit + 6
+      this.$store.dispatch('getPreviewposts', { timelineId: this.timeline.id, limit: this.limit })
+    }
   },
 
   components: { },
+
+  watch: {
+    previewposts(value, oldVal) {
+      if (value.length < 6) this.allViewed = true
+      else if (oldVal && value.length - oldVal.length >= 0 && value.length - oldVal.length < 6 && value[0].id === oldVal[0].id) this.allViewed = true
+    },
+  },
 }
 </script>
 
 <style scoped>
+.view-more-photos {
+  cursor: pointer;
+}
 .tag-wrap {
   border: solid 4px #a5a5a5;
   position: relative;

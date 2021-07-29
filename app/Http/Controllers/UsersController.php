@@ -176,7 +176,7 @@ class UsersController extends AppBaseController
                 $request->request->remove('is_follow_for_free');
             }
     
-            $cattrsFields = [ 'subscriptions', 'localization', 'weblinks', 'privacy', 'blocked', 'watermark', 'message_with_tip_only', 'enable_message_with_tip_only_pay' ];
+            $cattrsFields = [ 'subscriptions', 'localization', 'privacy', 'blocked', 'watermark', 'message_with_tip_only', 'enable_message_with_tip_only_pay' ];
             $attrs = $request->except($cattrsFields);
 
             $userSetting = $user->settings;
