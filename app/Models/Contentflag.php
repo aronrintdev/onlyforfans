@@ -14,7 +14,7 @@ use App\Enums\CfstatusTypeEnum;
 
 class Contentflag extends Model
 {
-    use SoftDeletes;
+    use UsesUuid, SoftDeletes,
 
     protected $guarded = [ 'id', 'created_at', 'updated_at', ];
 
