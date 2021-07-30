@@ -13,7 +13,7 @@
       <!-- Followed creators' stories avatar -->
       <swiper ref="mySwiper" :options="swiperOptions" class="">
         <swiper-slide v-for="tl in timelines" :key="tl.id" class="story slide tag-followed_timeline">
-          <router-link :to="{ name: 'stories.player', params: { timeline_id: tl.id } }" class="box-story">
+          <router-link :to="isMyTimeline(tl) ? '' : { name: 'stories.player', params: { timeline_id: tl.id } }" class="box-story" @click.native="isSelectFileModalVisible=true">
             <div class="avatar-container" :class="{ 'my-story-avatar': isMyTimeline(tl), 'all-viewed': tl.allViewed }">
               <b-img
                 rounded="circle" 
@@ -287,6 +287,7 @@ body .crate-story_bar {
     top: 22px;
     z-index: 10;
     text-align: center;
+    cursor: pointer;
     .add-story-icon {
       vertical-align: 2px;
     }
