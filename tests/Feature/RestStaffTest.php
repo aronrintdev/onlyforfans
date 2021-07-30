@@ -8,6 +8,7 @@ use Tests\TestCase;
 
 use App\Models\User;
 use App\Models\Staff;
+use App\Models\Permission;
 
 /**
  * @group chatmessages
@@ -239,6 +240,44 @@ class RestStaffTest extends TestCase
                 $this->assertEquals('staff', $member->role);
             }
         }
+    }
+
+      
+    /**
+     *  @group regression
+     *  @group regression-base
+     *  @group staff
+     */
+    public function test_can_send_staff_member_invitation()
+    {
+        Mail::fake();
+
+        // Find a staff manager
+        $manager = Staff::where('role', 'manager')->where('active', true)->firstOrFail();
+        $sessionUser = User::where('id', $manager->user_id)->firstOrFail();
+
+        $permissions = Permission::where('guard_name', 'staff')->get()->toArray();
+
+        $payload = [
+            'first_name' => $this->faker->firstName,
+            'last_name' => $this->faker->lastName,
+            'email' => $this->faker->email,
+            'pending' => true,
+            'role' => 'staff',
+            'permissions' => array_slice($permissions, 0, 2),
+            'creator_id' => null,
+        ];
+
+        $response = $this->actingAs($sessionUser)->ajaxJSON( 'POST', route('users.sendStaffInvite', $payload) );
+
+        $response->assertStatus(200);
+        $content = json_decode($response->content());
+
+        $response->assertJsonStructure([
+            'status',
+        ]);
+
+        $this->assertEquals(200, $content->status);
     }
 
     /**
