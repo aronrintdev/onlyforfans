@@ -39,7 +39,7 @@
     <h6>Feeds</h6>
     <b-nav vertical class="">
       <b-nav-item>Timelines</b-nav-item>
-      <b-nav-item>Posts</b-nav-item>
+      <b-nav-item><router-link :to="{ name: 'post-management', params: {} }">Posts</router-link></b-nav-item>
       <b-nav-item>Comments</b-nav-item>
     </b-nav>
 
