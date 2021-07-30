@@ -93,6 +93,60 @@ class RestStaffTest extends TestCase
         $this->assertEquals(200, $content->status);
     }
 
+      
+    /**
+     *  @group regression
+     *  @group regression-base
+     *  @group staff
+     */
+    public function test_can_accept_manager_invitation()
+    {
+        $pendingManager = Staff::where('role', 'manager')->where('pending', true)->firstOrFail(); // Find the creator account with managers
+        $sessionUser = User::where('email', $pendingManager->email)->firstOrFail();
+
+        // Try with invalid token:
+        $payload = [
+            'email' => $pendingManager->email,
+            'token' => str_random(50),
+        ];
+
+        $response = $this->actingAs($sessionUser)->ajaxJSON( 'POST', route('staff.acceptInvite', $payload) );
+        $response->assertStatus(400);
+        $response->assertJsonStructure([
+            'error',
+        ]);
+        $content = json_decode($response->content());
+        $this->assertEquals('Invalid email or token', $content->error);
+
+        // Try with invalid email:
+        $payload = [
+            'email' => $this->faker->email,
+            'token' => $pendingManager->token,
+        ];
+
+        $response = $this->actingAs($sessionUser)->ajaxJSON( 'POST', route('staff.acceptInvite', $payload) );
+        $response->assertStatus(400);
+        $response->assertJsonStructure([
+            'error',
+        ]);
+        $content = json_decode($response->content());
+        $this->assertEquals('Invalid email or token', $content->error);
+
+        // Try with correct email & token: 
+        $payload = [
+            'email' => $pendingManager->email,
+            'token' => $pendingManager->token,
+        ];
+
+        $response = $this->actingAs($sessionUser)->ajaxJSON( 'POST', route('staff.acceptInvite', $payload) );
+        $response->assertStatus(200);
+        $response->assertJsonStructure([
+            'status',
+        ]);
+        $content = json_decode($response->content());
+        $this->assertEquals(200, $content->status);
+    }
+
     // ------------------------------
 
     protected function setUp() : void
