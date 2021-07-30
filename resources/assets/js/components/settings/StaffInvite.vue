@@ -33,9 +33,15 @@
 
         <b-row class="mb-3" v-if="creator_id">
           <b-col>
+            
             <b-form-group label="Permissions">
+              <div class="select-deselect-all-btn">
+                <b-form-checkbox class="checkbox" @change="selectDeselectAll">
+                  {{ !isAllSelected ? 'Select all' : 'Deselect all' }} 
+                </b-form-checkbox>
+              </div>
               <b-form-checkbox-group
-                v-model="formData.permissions"
+                v-model="selectedPermissions"
               >
                 <div class="permission-group" v-for="(vaules, group) in permissionGroups" :key="group">
                   <div class="group-name">- {{ group }}</div>
@@ -67,7 +73,7 @@
 </template>
 
 <script>
-  import { groupBy } from 'lodash';
+  import { groupBy, map } from 'lodash';
 
   export default {
     props: {
@@ -91,10 +97,11 @@
     data: () => ({
       isSubmitting: false,
       formData: {
-        permissions: [],
       },
       permissionGroups: [],
       isLoading: true,
+      isAllSelected: false,
+      selectedPermissions: [],
     }),
 
     methods: {
@@ -106,6 +113,7 @@
         // Call Invite REST API
         const formData = {
           ...this.formData,
+          permissions: this.selectedPermissions,
           pending: 1,
           role: this.creator_id ? 'staff' : 'manager',
           name: `${this.formData.first_name} ${this.formData.last_name}`,
@@ -119,6 +127,20 @@
           console.error(error.message);
           this.isSubmitting = false;
         })
+      },
+      selectDeselectAll() {
+        this.isAllSelected = !this.isAllSelected;
+        if (this.isAllSelected) {
+          let permissions = [];
+          Object.keys(this.permissionGroups).map((key) => {
+            const group = this.permissionGroups[key];
+            const options = group.map(option => option.id);
+            permissions = permissions.concat(options);
+          })
+          this.selectedPermissions = permissions;
+        } else {
+          this.selectedPermissions = [];
+        }
       }
     },
 
@@ -153,5 +175,10 @@
       align-items: center;
     }
   }
+}
+.select-deselect-all-btn {
+  position: absolute;
+  top: 2px;
+  right: 20px;
 }
 </style>
