@@ -188,6 +188,64 @@ class RestStaffTest extends TestCase
      *  @group regression-base
      *  @group staff
      */
+    public function test_can_fetch_staff_member_list()
+    {
+        $staff = Staff::where('role', 'staff')->firstOrFail(); // Find the manager account with some staff
+        $sessionUser = User::where('id', $staff->owner_id)->firstOrFail();
+
+        $response = $this->actingAs($sessionUser)->ajaxJSON( 'GET', route('staff.indexStaffMembers') );
+
+        $response->assertStatus(200);
+        $content = json_decode($response->content());
+
+        $response->assertJsonStructure([
+            0 => [
+                'id',
+                'first_name',
+                'last_name',
+                'email',
+                'role',
+                'active',
+                'pending',
+                'owner_id',
+                'creator_id',
+                'user_id',
+                'owner',
+                'members' => [
+                    0 => [
+                        'id',
+                        'first_name',
+                        'last_name',
+                        'email',
+                        'role',
+                        'active',
+                        'pending',
+                        'owner_id',
+                        'creator_id',
+                        'user_id',
+                        'permissions',
+                        'user',
+                    ]
+                ]
+            ],
+        ]);
+
+        foreach($content as $team) {
+            $data = collect($team->members);
+            foreach($data as $member) {
+                $member = Staff::find($staff->id);
+                $this->assertNotNull($member->owner_id);
+                $this->assertEquals($member->owner_id, $sessionUser->id);
+                $this->assertEquals('staff', $member->role);
+            }
+        }
+    }
+
+    /**
+     *  @group regression
+     *  @group regression-base
+     *  @group staff
+     */
     public function test_can_remove_staff_manager()
     {
         $staff = Staff::where('role', 'manager')->where('active', true)->firstOrFail(); // Find the creator account with managers
