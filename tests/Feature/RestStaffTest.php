@@ -25,8 +25,9 @@ class RestStaffTest extends TestCase
      */
     public function test_can_fetch_manager_list()
     {
-        $staff = Staff::where('role', 'manager')->firstOrFail(); // Find the creator account with managers
-        $sessionUser = User::where('id', $staff->owner_id)->firstOrFail();
+        // Find a creator account with managers
+        $manager = Staff::where('role', 'manager')->firstOrFail();
+        $sessionUser = User::where('id', $manager->owner_id)->firstOrFail();
 
         $payload = [ 
             'page' => 1,
@@ -70,8 +71,9 @@ class RestStaffTest extends TestCase
     {
         Mail::fake();
 
-        $staff = Staff::where('role', 'manager')->firstOrFail(); // Find the creator account with managers
-        $sessionUser = User::where('id', $staff->owner_id)->firstOrFail();
+        // Find a creator account with managers
+        $manager = Staff::where('role', 'manager')->firstOrFail();
+        $sessionUser = User::where('id', $manager->owner_id)->firstOrFail();
 
         $payload = [
             'first_name' => $this->faker->firstName,
@@ -102,7 +104,7 @@ class RestStaffTest extends TestCase
      */
     public function test_can_accept_manager_invitation()
     {
-        $pendingManager = Staff::where('role', 'manager')->where('pending', true)->firstOrFail(); // Find the creator account with managers
+        $pendingManager = Staff::where('role', 'manager')->where('pending', true)->firstOrFail(); // Find a pending manager
         $sessionUser = User::where('email', $pendingManager->email)->firstOrFail();
 
         // Try with invalid token:
@@ -155,7 +157,7 @@ class RestStaffTest extends TestCase
      */
     public function test_can_change_staff_manager_account_status()
     {
-        $staff = Staff::where('role', 'manager')->where('active', true)->firstOrFail(); // Find the creator account with managers
+        $staff = Staff::where('role', 'manager')->where('active', true)->firstOrFail(); // Find an active manager
         $sessionUser = User::where('id', $staff->owner_id)->firstOrFail();
 
         $response = $this->actingAs($sessionUser)->ajaxJSON( 'PATCH', route('staff.changestatus', $staff->id) );
@@ -184,7 +186,7 @@ class RestStaffTest extends TestCase
         $this->assertEquals($staff->email, $data->email);
     }
 
-    
+
     /**
      *  @group regression
      *  @group regression-base
@@ -192,7 +194,8 @@ class RestStaffTest extends TestCase
      */
     public function test_can_fetch_staff_member_list()
     {
-        $staff = Staff::where('role', 'staff')->firstOrFail(); // Find the manager account with some staff
+        // Find a manager with some staff
+        $staff = Staff::where('role', 'staff')->firstOrFail();
         $sessionUser = User::where('id', $staff->owner_id)->firstOrFail();
 
         $response = $this->actingAs($sessionUser)->ajaxJSON( 'GET', route('staff.indexStaffMembers') );
@@ -395,7 +398,23 @@ class RestStaffTest extends TestCase
         $this->assertEquals($staff->email, $data->email);
     }
 
-    
+        
+    /**
+     *  @group regression
+     *  @group regression-base
+     *  @group staff
+     */
+    public function test_can_remove_staff_member()
+    {
+        // Find a manager account with staff-members
+        $staff = Staff::where('role', 'staff')->firstOrFail();
+        $sessionUser = User::where('id', $staff->owner_id)->firstOrFail();
+
+        $response = $this->actingAs($sessionUser)->ajaxJSON( 'DELETE', route('staff.remove', $staff->id) );
+
+        $response->assertStatus(200);
+    }
+
     /**
      *  @group regression
      *  @group regression-base
@@ -403,7 +422,8 @@ class RestStaffTest extends TestCase
      */
     public function test_can_remove_staff_manager()
     {
-        $staff = Staff::where('role', 'manager')->where('active', true)->firstOrFail(); // Find the creator account with managers
+        // Find the creator account with managers
+        $staff = Staff::where('role', 'manager')->where('active', true)->firstOrFail();
         $sessionUser = User::where('id', $staff->owner_id)->firstOrFail();
 
         $response = $this->actingAs($sessionUser)->ajaxJSON( 'DELETE', route('staff.remove', $staff->id) );
