@@ -460,7 +460,7 @@ class UsersController extends AppBaseController
         $email = $request->input('email');
         $users = User::where('email', $email)->get();
 
-        Staff::create([
+        $staff = Staff::create([
             'first_name' => $request->input('first_name'),
             'last_name' => $request->input('last_name'),
             'email' => $email,
@@ -469,6 +469,11 @@ class UsersController extends AppBaseController
             'token' => $token,
             'creator_id' => $request->input('creator_id'),
         ]);
+
+        if ($request->has('permissions')) {
+            $permissions = $request->input('permissions');
+            $staff->permissions()->attach($permissions);
+        }
 
         // Send Inviation email
         $accept_link = url('/staff/invitations/accept?token='.$token.'&email='.$email.'&inviter='.$sessionUser->name.(count($users) == 0 ? '&is_new=true' : ''));

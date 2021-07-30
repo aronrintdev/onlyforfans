@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\Model;
 use Spatie\Permission\Models\Permission as SpatiePermission;
 
 /**

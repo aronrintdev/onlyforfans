@@ -3,6 +3,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\Model;
 
 use App\Models\Traits\UsesUuid;
 
@@ -21,5 +22,10 @@ class Staff extends Model
 
     public function user() {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function permissions()
+    {
+        return $this->morphToMany(Permission::class, 'permissibles');
     }
 }
