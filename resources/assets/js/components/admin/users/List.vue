@@ -45,9 +45,6 @@
 </template>
 
 <script>
-/**
- * Quick way to list out users
- */
 import { clamp } from 'lodash'
 
 export default {
@@ -65,9 +62,6 @@ export default {
     state: 'loading', // loading | loaded | error
   }),
   methods: {
-    /**
-     * Load from endpoint
-     */
     load() {
       if (this.endpoint) {
         this.state = 'loading'
