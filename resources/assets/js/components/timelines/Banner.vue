@@ -17,7 +17,7 @@
         </template>
         <b-dropdown-item @click="renderTip">Send a Tip</b-dropdown-item>
         <b-dropdown-item @click="toggleFavorite">{{ isFavoritedByMe ? 'Unfavorite' : 'Favorite'}}</b-dropdown-item>
-        <b-dropdown-item>Copy link to profile</b-dropdown-item>
+        <b-dropdown-item @click="copyTextToClipboard">Copy link to profile</b-dropdown-item>
         <b-dropdown-item v-if="timeline.is_owner">
           <router-link :to="{ name: 'settings.profile', params: {} }">
             Edit Profile
@@ -187,6 +187,32 @@ export default {
           resource_type: 'timelines', 
         },
       })
+    },
+
+    copyTextToClipboard() {
+      let textArea = document.createElement('textarea');
+      textArea.style.position = 'fixed';
+      textArea.style.top = 0;
+      textArea.style.left = 0;
+      textArea.style.width = '2em';
+      textArea.style.height = '2em';
+      textArea.style.border = 'none';
+      textArea.style.outline = 'none';
+      textArea.style.boxShadow = 'none';
+      textArea.style.background = 'transparent';
+      textArea.value = window.location.href;
+
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+
+      try {
+        document.execCommand('copy');
+      } catch (err) {
+        console.log(err);
+      }
+
+      document.body.removeChild(textArea);
     },
   },
 
