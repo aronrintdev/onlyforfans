@@ -128,9 +128,6 @@ export default {
     fields: fields,
   }),
   methods: {
-    /**
-     * Load a page of roles
-     */
     load() {
       if (this.state !== 'loading') {
         this.state = 'busy'
