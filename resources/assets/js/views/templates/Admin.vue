@@ -1,20 +1,9 @@
 <template>
   <b-container fluid v-if="!isLoading" class="admin-container">
 
+    <AdminDashboard />
+
     <MainNavbar class="header" />
-
-    <b-row>
-
-      <aside class="bg-dark col-sm-2">
-        <MajorNav />
-      </aside>
-
-      <main class="col-sm-10">
-        <router-view />
-        <!-- HERE -->
-      </main>
-
-    </b-row>
 
   </b-container>
 </template>
@@ -22,17 +11,16 @@
 <script>
 import Vuex from 'vuex';
 
-import MainNavbar from '@components/admin/common/MainNavbar'
-import MajorNav from '@components/admin/common/MajorNav'
-//import EventUpdater from '@components/EventUpdater'
-//import SiteFooter from '@views/templates/SiteFooter'
-//import Toaster from '@components/Toaster'
+import AdminDashboard from '@views/admin/Dashboard'
+//import MajorNav from '@views/admin/components/common/MajorNav'
+import MainNavbar from '@views/admin/components/common/MainNavbar'
 
 export default {
-  name: 'AdminApp',
+  name: 'AdminTemplate',
   components: {
+    AdminDashboard,
     MainNavbar,
-    MajorNav,
+    //MajorNav,
     //EventUpdater,
     //SiteFooter,
     //Toaster,
