@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h1>User Management</h1>
+    <h1>User List</h1>
     <b-pagination
       v-model="currentPage"
       :total-rows="rows"

@@ -6,8 +6,5 @@
 </template>
 
 <script>
-/**
- * New Role Form
- */
 export default {}
 </script>
