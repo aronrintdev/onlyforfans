@@ -10,11 +10,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Carbon\Carbon;
 use Ramsey\Uuid\Uuid;
 
+use App\Models\Traits\UsesUuid;
 use App\Enums\CfstatusTypeEnum;
 
 class Contentflag extends Model
 {
-    use UsesUuid, SoftDeletes,
+    use UsesUuid, SoftDeletes;
 
     protected $guarded = [ 'id', 'created_at', 'updated_at', ];
 

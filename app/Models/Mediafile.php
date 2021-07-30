@@ -111,7 +111,7 @@ class Mediafile extends BaseModel implements Guidable, Ownable, Messagable
 
     public function getMidFilenameAttribute($value) {
         $subfolder = $this->diskmediafile->owner_id;
-        return $subfolder.'/mid/'.$this->basename.'.jpg';
+        return $subfolder.'/mid/'.$this->basename.'.jpg'; // %NOTE: these will always be generated as jpg (JPEG)!
     }
 
     public function getThumbFilenameAttribute($value) {

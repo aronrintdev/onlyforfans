@@ -209,25 +209,6 @@ export default {
       this.getTransactions()
     },
 
-    encodeQueryFilters() {
-      let params = {
-        type: [], // txn_type
-        resource_type: [],
-      }
-      for ( let s of this.txnFilters.txn_type ) {
-        if ( s.is_active ) {
-          params.type.push(s.key)
-        }
-      }
-      for ( let s of this.txnFilters.resource_type ) {
-        if ( s.is_active ) {
-          params.resource_type.push(s.key)
-        }
-      }
-      console.log('encodeQueryFilters', { params, })
-      return params
-    },
-
     async getTransactions() {
       //let params = `?page=${this.tobj.currentPage}&take=${this.tobj.perPage}`
       let params = {
@@ -274,6 +255,24 @@ export default {
 
       this.tobj.currentPage = 1
       this.getTransactions()
+    },
+
+    encodeQueryFilters() {
+      let params = {
+        type: [], // txn_type
+        resource_type: [],
+      }
+      for ( let s of this.txnFilters.txn_type ) {
+        if ( s.is_active ) {
+          params.type.push(s.key)
+        }
+      }
+      for ( let s of this.txnFilters.resource_type ) {
+        if ( s.is_active ) {
+          params.resource_type.push(s.key)
+        }
+      }
+      return params
     },
 
   },

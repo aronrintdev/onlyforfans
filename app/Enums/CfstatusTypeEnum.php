@@ -14,7 +14,7 @@ class CfstatusTypeEnum extends SmartEnum implements Selectable {
         self::PENDING    => 'Pending',
         self::REVIEW     => 'Under Review',
         self::DISCARDED  => 'Discarded',
-        self::CONFIRMED  => 'Donfirmed',
+        self::CONFIRMED  => 'Confirmed',
     ];
 
 }

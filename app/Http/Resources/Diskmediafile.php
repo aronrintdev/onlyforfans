@@ -26,11 +26,21 @@ class Diskmediafile extends JsonResource
             'has_blur' => $this->has_blur,
             'has_mid' => $this->has_mid,
             'has_thumb' => $this->has_thumb,
+
+            'render_urls' => [
+                'full' => $this->renderUrl(),
+                'mid' => $this->renderUrlMid(),
+                'thumb' => $this->renderUrlThumb(),
+                'blur' => $this->renderUrlBlur(),
+            ],
+
             //'cattrs' => $this->cattrs,
             //'meta' => $this->meta,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
             'deleted_at' => $this->deleted_at,
+
+            'flag_count' => $this->contentflags->count(),
         ];
     }
 }
