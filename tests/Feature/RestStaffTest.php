@@ -184,6 +184,7 @@ class RestStaffTest extends TestCase
         $this->assertEquals($staff->email, $data->email);
     }
 
+    
     /**
      *  @group regression
      *  @group regression-base
@@ -280,6 +281,7 @@ class RestStaffTest extends TestCase
         $this->assertEquals(200, $content->status);
     }
 
+
     /**
      *  @group regression
      *  @group regression-base
@@ -300,22 +302,7 @@ class RestStaffTest extends TestCase
         $this->assertEquals(count($permissions), count($content));
     }
 
-    /**
-     *  @group regression
-     *  @group regression-base
-     *  @group staff
-     */
-    public function test_can_remove_staff_manager()
-    {
-        $staff = Staff::where('role', 'manager')->where('active', true)->firstOrFail(); // Find the creator account with managers
-        $sessionUser = User::where('id', $staff->owner_id)->firstOrFail();
 
-        $response = $this->actingAs($sessionUser)->ajaxJSON( 'DELETE', route('staff.remove', $staff->id) );
-
-        $response->assertStatus(200);
-    }
-
-          
     /**
      *  @group regression
      *  @group regression-base
@@ -368,6 +355,60 @@ class RestStaffTest extends TestCase
         ]);
         $content = json_decode($response->content());
         $this->assertEquals(200, $content->status);
+    }
+
+
+    /**
+     *  @group regression
+     *  @group regression-base
+     *  @group staff
+     */
+    public function test_can_change_staff_member_account_status()
+    {
+        
+        $staff = Staff::where('role', 'staff')->where('active', true)->firstOrFail(); // Find an active staff-member
+        $sessionUser = User::where('id', $staff->owner_id)->firstOrFail();
+
+        $response = $this->actingAs($sessionUser)->ajaxJSON( 'PATCH', route('staff.changestatus', $staff->id) );
+
+        $response->assertStatus(200);
+        $content = json_decode($response->content());
+
+        $response->assertJsonStructure([
+            'data' => [
+                'id',
+                'first_name',
+                'last_name',
+                'email',
+                'active',
+                'role',
+                'pending',
+                'owner_id',
+                'user_id',
+            ],
+        ]);
+
+        $data = $content->data;
+        $this->assertEquals(false, $data->active);
+        $this->assertEquals('staff', $data->role);
+        $this->assertEquals($sessionUser->id, $data->owner_id);
+        $this->assertEquals($staff->email, $data->email);
+    }
+
+    
+    /**
+     *  @group regression
+     *  @group regression-base
+     *  @group staff
+     */
+    public function test_can_remove_staff_manager()
+    {
+        $staff = Staff::where('role', 'manager')->where('active', true)->firstOrFail(); // Find the creator account with managers
+        $sessionUser = User::where('id', $staff->owner_id)->firstOrFail();
+
+        $response = $this->actingAs($sessionUser)->ajaxJSON( 'DELETE', route('staff.remove', $staff->id) );
+
+        $response->assertStatus(200);
     }
 
 
