@@ -4,7 +4,6 @@ namespace App\Notifications;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
-use Illuminate\Notifications\Notification;
 
 use App\Channels\SendgridChannel;
 use App\Models\User;
@@ -40,10 +39,10 @@ class MessageReceived extends Notification
     public function toMail($notifiable)
     {
         return (new MailMessage)
-            ->line("Hi ".$notifible->name)
+            ->line("Hi " . $notifiable->name)
             ->line("You have 1 new unread message from ".$this->sender->name)
             ->line($this->message->mcontent)
-            ->action("Reply", $this->getUrl('reply_to_message', ['chatthread_id' => $message->chatthread_id]));
+            ->action("Reply", $this->getUrl('reply_to_message', ['chatthread_id' => $this->message->chatthread_id]));
     }
 
     public function toSendgrid($notifiable)

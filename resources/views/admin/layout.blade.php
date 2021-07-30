@@ -14,7 +14,7 @@
     <link href="{{ mix('css/admin.css') }}" rel="stylesheet">
 
     <!-- Routing -->
-    @routes()
+    @routes(['admin'])
 </head>
 <body>
     <div id="app">

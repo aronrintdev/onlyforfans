@@ -5,7 +5,7 @@ use App\Channels\SendgridChannel;
 
 trait NotifyTraits {
 
-    protected function getUrl($slug, $attrs=null) 
+    protected function getUrl($slug, $attrs=null)
     {
         switch ($slug) {
         case 'login':
@@ -17,9 +17,9 @@ trait NotifyTraits {
         case 'unsubscribe':
             return url( route('users.showSettings', $attrs['username']) );
         case 'referrals':
-            return url('/referrals'); 
+            return url('/referrals');
         case 'verify':
-            return url('/settings/verify'); 
+            return url('/settings/verify');
         case 'password_reset':
             return url( route('password.reset', $attrs['token']) );
         case 'reply_to_message':
@@ -30,9 +30,9 @@ trait NotifyTraits {
         }
     }
 
-    protected function getMailChannel() 
+    protected function getMailChannel()
     {
-        if ( env('DEBUG_BYPASS_SENDGRID_MAIL_NOTIFY', false) ) { 
+        if ( env('DEBUG_BYPASS_SENDGRID_MAIL_NOTIFY', false) ) {
             // uses MAIL_DRIVER instead of SendGrid API for notify emails
             return 'mail';
         } else {
@@ -42,7 +42,7 @@ trait NotifyTraits {
 
     protected function isMailChannelEnabled(string $notifySlug, $settings) : bool
     {
-        if ( env('DEBUG_FORCE_ENABLE_MAIL_NOTIFY', false) ) { 
+        if ( env('DEBUG_FORCE_ENABLE_MAIL_NOTIFY', false) ) {
             // overrides any user settings to always send email
             return true; // DEBUG ONLY!
         }

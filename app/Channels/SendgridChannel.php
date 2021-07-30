@@ -2,7 +2,7 @@
 namespace App\Channels;
 
 use Exception;
-use Illuminate\Notifications\Notification;
+use App\Notifications\Notification;
 use Illuminate\Support\Facades\Log;
 
 use App\Apis\Sendgrid\Api as SendgridApi;
