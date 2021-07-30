@@ -1,15 +1,17 @@
 <template>
   <div>
     <div v-if="!isNewStaff">
-      <b-card class="mb-3" v-for="(team, index) in teams" :key="index">
-        <b-card-text v-if="team">
-          <div class="d-flex align-items-center justify-content-between mb-4">
-            <div class="h3 text-center">{{ team.owner.name }} team</div>
-            <b-button variant="primary" class="px-4" @click="isNewStaff=true;creator_id=team.owner.id">Invite Staff Member</b-button>
-          </div>
-          <staff-member-table :items="team.members" :has_pagination="false" @load="loadPage" />
-        </b-card-text>
-      </b-card>
+      <div v-for="(team, index) in teams" :key="index">
+        <b-card class="mb-3" v-if="team.active">
+          <b-card-text>
+            <div class="d-flex align-items-center justify-content-between mb-4">
+              <div class="h3 text-center">{{ team.owner.name }} team</div>
+              <b-button variant="primary" class="px-4" @click="isNewStaff=true;creator_id=team.owner.id">Invite Staff Member</b-button>
+            </div>
+            <staff-member-table :items="team.members" :has_pagination="false" @load="loadPage" />
+          </b-card-text>
+        </b-card>
+      </div>
     </div>
     <staff-invite
       v-if="isNewStaff"
