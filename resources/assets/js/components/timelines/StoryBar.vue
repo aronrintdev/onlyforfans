@@ -1,12 +1,12 @@
 <template>
   <div v-if="!isLoading" class="crate-story_bar mx-0 mb-3">
-    <section class="d-flex OFF-flex-wrap justify-content-start w-100">
+    <section class="d-flex OFF-flex-wrap justify-content-start w-100 position-relative">
 
       <!-- Add to story icon form -->
       <div class="story tag-ctrls mr-3">
         <b-form-file @change="handleDiskSelect" ref="fileInput" v-model="fileInput" class="d-none"></b-form-file>
         <div @click="isSelectFileModalVisible=true">
-          <fa-icon class="mt-1" :icon="['far', 'plus-circle']" size="2x" />
+          <fa-icon size="sm" :icon="['far', 'plus']" class="add-story-icon text-white" />
         </div>
       </div>
 
@@ -275,6 +275,22 @@ export default {
 
 <style lang="scss" scoped>
 body .crate-story_bar {
+
+  .story.tag-ctrls {
+    position: absolute;
+    background: #0195f7;
+    width: 20px;
+    height: 20px;
+    border: solid 2px white;
+    border-radius: 100%;
+    left: 27px;
+    top: 22px;
+    z-index: 10;
+    text-align: center;
+    .add-story-icon {
+      vertical-align: 2px;
+    }
+  }
 
   .story.slide {
     position:relative;

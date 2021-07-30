@@ -61,7 +61,7 @@
             </router-link>
           </li>
           <li class="list-group-item">
-            <router-link :to="{ name: 'timeline.earnings', params: { slug: timeline.slug } }">
+            <router-link :to="{ name: 'statements.dashboard', params: { slug: timeline.slug } }">
               <div class="activity-name">Earnings</div>
               <div class="activity-count">${{ (stats.earnings / 100).toFixed(2) }}</div>
             </router-link>

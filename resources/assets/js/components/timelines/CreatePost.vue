@@ -80,16 +80,16 @@
               <b-col cols="12" md="8" class="post-create-footer-ctrl d-flex">
                 <ul class="list-inline d-flex mb-0 OFF-border-right pt-1">
                   <li id="clickme_to-select" class="selectable select-pic">
-                    <fa-icon :icon="['fas', 'image']" size="lg" :class="selectedMedia==='pic' ? 'text-primary' : 'text-secondary'" />
+                    <fa-icon :icon="selectedMedia==='pic' ? ['fas', 'image'] : ['far', 'image']" size="lg" :class="selectedMedia==='pic' ? 'text-primary' : 'text-secondary'" />
                   </li>
                   <li v-if="!isIOS9PlusAndAndroid" @click="recordVideo()" class="selectable select-video">
-                    <fa-icon :icon="['fas', 'video']" size="lg" :class="selectedMedia==='video' ? 'text-primary' : 'text-secondary'" />
+                    <fa-icon :icon="selectedMedia==='video' ? ['fas', 'video'] : ['far', 'video']" size="lg" :class="selectedMedia==='video' ? 'text-primary' : 'text-secondary'" />
                   </li>
                   <li @click="recordAudio()" class="selectable select-audio">
-                    <fa-icon :icon="['fas', 'microphone']" size="lg" :class="selectedMedia==='audio' ? 'text-primary' : 'text-secondary'" />
+                    <fa-icon :icon="selectedMedia==='audio' ? ['fas', 'microphone'] : ['far', 'microphone']" size="lg" :class="selectedMedia==='audio' ? 'text-primary' : 'text-secondary'" />
                   </li>
                   <li @click="uploadFromVault()" class="selectable select-audio">
-                    <fa-icon :icon="['fas', 'archive']" size="lg" :class="selectedMedia==='vault' ? 'text-primary' : 'text-secondary'" />
+                    <fa-icon :icon="selectedMedia==='vault' ? ['fas', 'archive'] : ['far', 'archive']" size="lg" :class="selectedMedia==='vault' ? 'text-primary' : 'text-secondary'" />
                   </li>
                 </ul>
                 <div class="border-right"></div>
@@ -101,16 +101,16 @@
                   <li class="selectable select-calendar" @click="showSchedulePicker()"><span><CalendarIcon /></span></li>
                   -->
                   <li class="selectable select-expire-date" :disabled="expirationPeriod" @click="showExpirationPicker()">
-                    <fa-icon :icon="['fas', 'hourglass-half']" size="lg" class="text-secondary" />
+                    <fa-icon :icon="showedModal === 'expiration' ? ['fas', 'hourglass-half'] : ['far', 'hourglass-half']" size="lg" :class="showedModal === 'expiration' ? 'text-primary' : 'text-secondary'" />
                   </li>
                   <li class="selectable select-calendar" :disabled="scheduled_at" @click="showSchedulePicker()">
-                    <fa-icon :icon="['fas', 'calendar-check']" size="lg" class="text-secondary" />
+                    <fa-icon :icon="showedModal === 'schedule' ? ['fas', 'calendar-alt'] : ['far', 'calendar-alt']" size="lg" :class="showedModal === 'schedule' ? 'text-primary' : 'text-secondary'" />
                   </li>
                 </ul>
                 <div class="border-right"></div>
                 <ul class="list-inline d-flex mb-0 pt-1">
                   <li @click="showCampaignModal()" class="selectable select-pic" title="Start Promotional Campaign">
-                    <fa-icon :icon="['fas', 'hand-holding-usd']" size="lg" class="text-secondary" />
+                    <fa-icon :icon="showedModal === 'campaign' ? ['fas', 'hand-holding-usd'] : ['far', 'hand-holding-usd']" size="lg" :class="showedModal === 'campaign' ? 'text-primary' : 'text-secondary'" />
                   </li>
                 </ul>
               </b-col>
@@ -168,6 +168,7 @@ export default {
     description: '',
     newPostId: null,
     selectedMedia: null, // 'pic',
+    showedModal: null,
     postType: 'free',
     ptypes: [
       { text: 'Free for Followers', value: 'free' },
@@ -361,6 +362,7 @@ export default {
     },
 
     showSchedulePicker() {
+      this.showedModal = 'schedule'
       eventBus.$emit('open-modal', {
         key: 'show-schedule-datetime',
         data: {
@@ -383,6 +385,7 @@ export default {
       this.$refs.myVueDropzone.dropzone.hiddenFileInput.click();
     },
     showExpirationPicker() {
+      this.showedModal = 'expiration'
       eventBus.$emit('open-modal', {
         key: 'expiration-period',
       })
@@ -398,6 +401,7 @@ export default {
     },
 
     showCampaignModal() {
+      this.showedModal = 'campaign'
       eventBus.$emit('open-modal', {
         key: 'modal-promotion-campaign',
       })
@@ -461,6 +465,9 @@ export default {
       },
     }
     this.dropzoneOptions.maxFiles = this.dropzoneConfigs.pic.maxFiles
+    eventBus.$on('close-modal', () => {
+      this.showedModal = null
+    })
   },
 
 
