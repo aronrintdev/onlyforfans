@@ -147,6 +147,42 @@ class RestStaffTest extends TestCase
         $this->assertEquals(200, $content->status);
     }
 
+    /**
+     *  @group regression
+     *  @group regression-base
+     *  @group staff
+     */
+    public function test_can_change_staff_manager_account_status()
+    {
+        $staff = Staff::where('role', 'manager')->where('active', true)->firstOrFail(); // Find the creator account with managers
+        $sessionUser = User::where('id', $staff->owner_id)->firstOrFail();
+
+        $response = $this->actingAs($sessionUser)->ajaxJSON( 'PATCH', route('staff.changestatus', $staff->id) );
+
+        $response->assertStatus(200);
+        $content = json_decode($response->content());
+
+        $response->assertJsonStructure([
+            'data' => [
+                'id',
+                'first_name',
+                'last_name',
+                'email',
+                'active',
+                'role',
+                'pending',
+                'owner_id',
+                'user_id',
+            ],
+        ]);
+
+        $data = $content->data;
+        $this->assertEquals(false, $data->active);
+        $this->assertEquals('manager', $data->role);
+        $this->assertEquals($sessionUser->id, $data->owner_id);
+        $this->assertEquals($staff->email, $data->email);
+    }
+
     // ------------------------------
 
     protected function setUp() : void
