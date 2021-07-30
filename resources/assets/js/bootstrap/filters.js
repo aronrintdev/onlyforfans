@@ -26,9 +26,9 @@ Vue.filter('niceGuid', function (v) {
 })
 
 Vue.filter('niceBool', function (v) {
-  if ( v === 0 ) {
+  if ( v === 0 || v===false) {
     return 'N'
-  }  else if ( v === 1 ) {
+  }  else if ( v === 1 || v===true) {
     return 'Y'
   } else {
     return '?'
