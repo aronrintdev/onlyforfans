@@ -14,6 +14,7 @@ return [
         'webhook.*',
     ],
     'groups' => [
-        'admin' => [ 'admin.*' ],
+        //'admin' => [ '*' ],
+        'admin' => [ '*', 'admin.*' ],
     ],
 ];

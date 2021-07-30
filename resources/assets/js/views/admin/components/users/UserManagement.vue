@@ -20,10 +20,10 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 
 import ListUsers from './ListUsers'
-//import Permissions from './security/Permissions.vue'
-//import Roles from './security/Roles.vue'
-import Permissions from '@components/admin/security/Permissions'
-import Roles from '@components/admin/security/Roles'
+import Permissions from './Permissions.vue'
+import Roles from './Roles.vue'
+//import Permissions from '@components/admin/security/Permissions'
+//import Roles from '@components/admin/security/Roles'
 
 export default {
   name: 'UserManagement',

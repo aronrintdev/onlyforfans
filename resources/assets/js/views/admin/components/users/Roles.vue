@@ -44,20 +44,20 @@
     </div>
 
     <b-modal v-model="showView" size="xl" :title="`Role ${selected.display_name || selected.name}`" @shown="$forceUpdate()">
-      <ViewRole ref="viewRole" :role-id="selected.id" v-model="showView" />
+      <RoleView ref="viewRole" :role-id="selected.id" v-model="showView" />
     </b-modal>
 
     <b-modal v-model="showNew" size="lg">
-      <NewRole :role-id="selected.id" />
+      <RoleCreate :role-id="selected.id" />
     </b-modal>
 
     <b-modal
       v-model="showUsers"
       size="xl"
       :title="`Users with the Role ${selected.display_name || selected.name}`"
-      @shown="$refs.userList.load()"
+      @shown="$refs.rbacUsers.load()"
     >
-      <UserList ref="userList" :endpoint="getUserEndpoint()" />
+      <RbacUsers ref="rbacUsers" :endpoint="getUserEndpoint()" />
     </b-modal>
   </b-card>
 </template>
@@ -65,8 +65,9 @@
 <script>
 import { clamp } from 'lodash'
 import { DateTime } from 'luxon'
-import { NewRole, ViewRole } from './role'
-import UserList from '../users/List.vue'
+import RoleCreate from './RoleCreate'
+import RoleView from './RoleView'
+import RbacUsers from './RbacUsers.vue'
 
 const fields = [
   {
@@ -101,9 +102,9 @@ const fields = [
 
 export default {
   components: {
-    NewRole,
-    ViewRole,
-    UserList,
+    RoleCreate,
+    RoleView,
+    RbacUsers,
   },
   data: () => ({
     currentPage: 1,
