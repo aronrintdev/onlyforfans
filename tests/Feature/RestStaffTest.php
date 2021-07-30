@@ -285,6 +285,26 @@ class RestStaffTest extends TestCase
      *  @group regression-base
      *  @group staff
      */
+    public function test_can_list_permissions()
+    {
+        // Find a staff-manager
+        $staff = Staff::where('role', 'manager')->where('active', true)->firstOrFail();
+        $sessionUser = User::where('id', $staff->user_id)->firstOrFail();
+
+        $permissions = Permission::where('guard_name', 'staff')->get()->toArray();
+
+        $response = $this->actingAs($sessionUser)->ajaxJSON( 'GET', route('staff.permissions') );
+
+        $response->assertStatus(200);
+        $content = json_decode($response->content());
+        $this->assertEquals(count($permissions), count($content));
+    }
+
+    /**
+     *  @group regression
+     *  @group regression-base
+     *  @group staff
+     */
     public function test_can_remove_staff_manager()
     {
         $staff = Staff::where('role', 'manager')->where('active', true)->firstOrFail(); // Find the creator account with managers
