@@ -260,7 +260,7 @@ class RestStaffTest extends TestCase
         $manager = Staff::where('role', 'manager')->where('active', true)->firstOrFail();
         $sessionUser = User::where('id', $manager->user_id)->firstOrFail();
 
-        $permissions = Permission::where('guard_name', 'staff')->get()->toArray();
+        $permissions = Permission::where('guard_name', 'staff')->pluck('id')->toArray();
 
         $payload = [
             'first_name' => $this->faker->firstName,
