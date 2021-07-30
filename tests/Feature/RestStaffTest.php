@@ -183,6 +183,21 @@ class RestStaffTest extends TestCase
         $this->assertEquals($staff->email, $data->email);
     }
 
+    /**
+     *  @group regression
+     *  @group regression-base
+     *  @group staff
+     */
+    public function test_can_remove_staff_manager()
+    {
+        $staff = Staff::where('role', 'manager')->where('active', true)->firstOrFail(); // Find the creator account with managers
+        $sessionUser = User::where('id', $staff->owner_id)->firstOrFail();
+
+        $response = $this->actingAs($sessionUser)->ajaxJSON( 'DELETE', route('staff.remove', $staff->id) );
+
+        $response->assertStatus(200);
+    }
+
     // ------------------------------
 
     protected function setUp() : void
