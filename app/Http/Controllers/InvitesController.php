@@ -55,34 +55,6 @@ class InvitesController extends AppBaseController
             $invites->push($_invite);
         }
 
-        /*
-        // Should this even be considered an invite (?) -> NO
-        $shareeIDs = $request->input('sharees', []);
-        foreach ( $shareeIDs as $_a ) {
-            $sharee = User::find($_a['id']);
-            if ($sharee) {
-                $_invite = Invite::create([
-                    'inviter_id' => $request->user()->id,
-                    'email' => $sharee->email,
-                    'itype' => InviteTypeEnum::VAULT,
-                    'cattrs' => [
-                        'shareables' => $request->shareables ?? [],
-                        'sharee' => $sharee->only('id', 'email', 'name'),
-                        'vaultfolder_id' => $vaultfolder->id,
-                    ],
-                ]);
-                $mediafile //$request->user()->sharedvaultfolders()->syncWithoutDetaching($vaultfolder->id); // do share %TODO: need to do when they register (!)
-                Mail::to($_invite->email)->queue( new ShareableInvited($_invite) );
-                //$_invite->send();
-                $invites->push($_invite);
-            } else {
-                Log::warning('Could not find user with id '.$_a['id'].' to send share invite');
-            }
-        }
-
-        //$request->user()->sharedvaultfolders()->syncWithoutDetaching($vaultfolder->id); // do share %TODO: need to do when they register (!)
-         */
-
         return response()->json([
             'invites' => $invites,
         ]);

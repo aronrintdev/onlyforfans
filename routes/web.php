@@ -27,7 +27,7 @@ Route::group(['middleware' => ['web']], function () {
 
     // Skip these to spa controller
     Route::get('/login', 'SpaController@index');
-    Route::get('/register', 'SpaController@index');
+    Route::get('/register', 'SpaController@index')->name('register');
     Route::get('/forgot-password', 'SpaController@index');
 
 });
@@ -141,6 +141,9 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('/mediafiles/disk-stats/{mediafile}', ['as'=>'mediafiles.diskStats', 'uses' => 'MediafilesController@diskStats']);
     Route::post('/mediafiles/batch-destroy', ['as'=>'mediafiles.batchDestroy', 'uses' => 'MediafilesController@batchDestroy']);
     Route::resource('mediafiles', 'MediafilesController', [ 'except' => [ 'create', 'edit', ] ]);
+
+    Route::resource('diskmediafiles', 'DiskmediafilesController', [ 'only' => [ 'index', 'show', 'destroy'] ])->middleware(['role:admin|super-admin']);
+    //Route::resource('diskmediafiles', 'DiskmediafilesController', [ 'only' => [ 'index', 'show', 'destroy'] ]);
 
     Route::resource('notifications', 'NotificationsController', [ 'only' => [ 'index', ] ]);
 
@@ -274,7 +277,7 @@ Route::group(['middleware' => ['auth']], function () {
 
 /* ------------------------------ Financial Namespace ------------------------------ */
 // %NOTE: currently these are limited to super-admin roles
-Route::group(['middleware' => ['auth', 'role:super-admin'], 'as'=>'financial.', 'prefix'=>'financial', 'namespace'=>'Financial'], function () {
+Route::group(['middleware' => ['auth', 'role:admin|super-admin'], 'as'=>'financial.', 'prefix'=>'financial', 'namespace'=>'Financial'], function () {
 
     Route::resource('accounts', 'AccountsController', [ 
         'only' => [ 'index', 'show' ],
@@ -295,7 +298,7 @@ Route::group(['prefix' => '/username'], function() {
     Route::match(['get', 'post'], '/check/{username?}', 'UsernameRulesController@checkUsername')->name('usernameRules.check');
 
     // Admin Crud API //
-    Route::group(['middleware' => ['auth', 'role:admin']], function() {
+    Route::group(['middleware' => ['auth', 'role:admin|super-admin']], function() {
         Route::get('/rules', 'UsernameRulesController@index')->name('usernameRules.index');
         Route::get('/rules/{page}', 'UsernameRulesController@list')->name('usernameRules.list');
         Route::get('/rule/new', 'UsernameRulesController@create')->name('usernameRules.create');
