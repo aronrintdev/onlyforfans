@@ -315,6 +315,62 @@ class RestStaffTest extends TestCase
         $response->assertStatus(200);
     }
 
+          
+    /**
+     *  @group regression
+     *  @group regression-base
+     *  @group staff
+     */
+    public function test_can_accept_staff_member_invitation()
+    {
+        // Find a pending staff-member
+        $pendingStaff = Staff::where('role', 'staff')->where('pending', true)->firstOrFail();
+        $sessionUser = User::where('email', $pendingStaff->email)->firstOrFail();
+
+        // Try with invalid token:
+        $payload = [
+            'email' => $pendingStaff->email,
+            'token' => str_random(50),
+        ];
+
+        $response = $this->actingAs($sessionUser)->ajaxJSON( 'POST', route('staff.acceptInvite', $payload) );
+        $response->assertStatus(400);
+        $response->assertJsonStructure([
+            'error',
+        ]);
+        $content = json_decode($response->content());
+        $this->assertEquals('Invalid email or token', $content->error);
+
+        // Try with invalid email:
+        $payload = [
+            'email' => $this->faker->email,
+            'token' => $pendingStaff->token,
+        ];
+
+        $response = $this->actingAs($sessionUser)->ajaxJSON( 'POST', route('staff.acceptInvite', $payload) );
+        $response->assertStatus(400);
+        $response->assertJsonStructure([
+            'error',
+        ]);
+        $content = json_decode($response->content());
+        $this->assertEquals('Invalid email or token', $content->error);
+
+        // Try with correct email & token: 
+        $payload = [
+            'email' => $pendingStaff->email,
+            'token' => $pendingStaff->token,
+        ];
+
+        $response = $this->actingAs($sessionUser)->ajaxJSON( 'POST', route('staff.acceptInvite', $payload) );
+        $response->assertStatus(200);
+        $response->assertJsonStructure([
+            'status',
+        ]);
+        $content = json_decode($response->content());
+        $this->assertEquals(200, $content->status);
+    }
+
+
     // ------------------------------
 
     protected function setUp() : void
