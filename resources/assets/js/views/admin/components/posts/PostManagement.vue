@@ -1,15 +1,9 @@
 <template>
   <div>
-    <h1>User Management</h1>
+    <h1>Post Management</h1>
     <b-tabs>
       <b-tab title="List" active>
-        <ListUsers />
-      </b-tab>
-      <b-tab title="Roles">
-        <Roles />
-      </b-tab>
-      <b-tab title="Permissions">
-        <Permissions />
+        <ListPosts />
       </b-tab>
     </b-tabs>
   </div>
@@ -19,12 +13,10 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 
-import ListUsers from './ListUsers'
-import Permissions from './Permissions.vue'
-import Roles from './Roles.vue'
+import ListPosts from './ListPosts'
 
 export default {
-  name: 'UserManagement',
+  name: 'PostManagement',
 
   props: {},
 
@@ -39,9 +31,7 @@ export default {
   created() {},
 
   components: {
-    ListUsers,
-    Permissions,
-    Roles,
+    ListPosts,
   },
 }
 </script>

@@ -16,10 +16,6 @@
 <script>
 import Vuex from 'vuex'
 import MajorNav from '@views/admin/components/common/MajorNav'
-//import MainNavbar from '@views/admin/components/common/MainNavbar'
-//import EventUpdater from '@components/EventUpdater'
-//import SiteFooter from '@views/templates/SiteFooter'
-//import Toaster from '@components/Toaster'
 
 export default {
   name: 'Dashboard',
@@ -40,10 +36,6 @@ export default {
 
   components: {
     MajorNav,
-    //MainNavbar,
-    //EventUpdater,
-    //SiteFooter,
-    //Toaster,
   },
 }
 </script>
