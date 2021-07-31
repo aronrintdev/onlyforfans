@@ -3,11 +3,9 @@
 
     <hr />
 
-    <h6>
-      <router-link :to="{ name: 'user-management', params: {} }">User Management</router-link>
-    </h6>
+    <h6>User Management</h6>
     <b-nav vertical class="">
-      <b-nav-item>Users</b-nav-item>
+      <b-nav-item><router-link :to="{ name: 'user-management', params: {} }">Users</router-link></b-nav-item>
       <b-nav-item>User Settings</b-nav-item>
       <b-nav-item>User Moderation (Blocks, Restrictions, Reports)</b-nav-item>
       <b-nav-item>Identity Verification</b-nav-item>
@@ -18,9 +16,7 @@
       <b-nav-item>Ranking (weights for suggested, explore, etc)</b-nav-item>
     </b-nav>
 
-    <h6>
-      <router-link :to="{ name: 'txn-management', params: {} }">Financial</router-link>
-    </h6>
+    <h6>Financial</h6>
     <b-nav vertical class="">
       <b-nav-item><router-link :to="{ name: 'account-management', params: {} }">Accounts</router-link></b-nav-item>
       <b-nav-item><router-link :to="{ name: 'txn-management', params: {} }">Txn</router-link></b-nav-item>
@@ -43,7 +39,7 @@
     <h6>Feeds</h6>
     <b-nav vertical class="">
       <b-nav-item>Timelines</b-nav-item>
-      <b-nav-item>Posts</b-nav-item>
+      <b-nav-item><router-link :to="{ name: 'post-management', params: {} }">Posts</router-link></b-nav-item>
       <b-nav-item>Comments</b-nav-item>
     </b-nav>
 

@@ -1,15 +1,21 @@
 <template>
   <div>
-    <h1>Admin Dashboard</h1>
+    <b-row>
+      <aside class="bg-dark col-sm-2">
+        <MajorNav />
+      </aside>
+
+      <main class="col-sm-10">
+        <router-view />
+      </main>
+
+    </b-row>
   </div>
 </template>
 
 <script>
-/**
- * resources/assets/js/views/admin/Dashboard.vue
- * Admin Main Dashboard
- */
 import Vuex from 'vuex'
+import MajorNav from '@views/admin/components/common/MajorNav'
 
 export default {
   name: 'Dashboard',
@@ -27,6 +33,10 @@ export default {
   watchers: {},
 
   created() {},
+
+  components: {
+    MajorNav,
+  },
 }
 </script>
 

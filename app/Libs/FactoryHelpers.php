@@ -136,7 +136,7 @@ if ($doS3Upload) {
         switch ($mftype) {
             case MediafileTypeEnum::COVER:
             case MediafileTypeEnum::AVATAR:
-                $mf_attrs['resource_id'] =  $resourceID;
+                $mf_attrs['resource_id'] =  $owner->id;
                 $mf_attrs['resource_type'] = 'users';
                 break;
             case MediafileTypeEnum::POST:
