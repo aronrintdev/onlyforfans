@@ -459,7 +459,12 @@ class UsersController extends AppBaseController
         // Add new staff user
         $token = str_random(60);
         $email = $request->input('email');
-        $users = User::where('email', $email)->get();
+
+        // Check if the same invite exists
+        $existingStaff = Staff::where('role', $request->input('role'))->where('email', $email)->where('owner_id', $sessionUser->id)->get();
+        if (count($existingStaff) > 0) {
+            return response()->json( [ 'message' => 'This user was already invited as a '.$request->input('role') ], 400);
+        }
 
         $staff = Staff::create([
             'first_name' => $request->input('first_name'),
@@ -477,6 +482,7 @@ class UsersController extends AppBaseController
         }
 
         // Send Inviation email
+        $users = User::where('email', $email)->get();
         $accept_link = url('/staff/invitations/accept?token='.$token.'&email='.$email.'&inviter='.$sessionUser->name.(count($users) == 0 ? '&is_new=true' : ''));
 
         if ($request->input('role') == 'manager') {

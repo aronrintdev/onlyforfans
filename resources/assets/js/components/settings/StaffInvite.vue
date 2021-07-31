@@ -124,7 +124,12 @@
           this.isSubmitting = false;
         })
         .catch(error => {
-          console.error(error.message);
+          const { message } = error.response.data;
+          this.$root.$bvToast.toast(message, {
+            toaster: 'b-toaster-top-center',
+            title: 'Error',
+            variant: 'danger',
+          })
           this.isSubmitting = false;
         })
       },
