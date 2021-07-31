@@ -6,6 +6,7 @@
       title="Send a Tip"
       hide-footer
       body-class="p-0"
+      @hide="closeModal"
     >
       <SendTip ref="sendTip" :session_user="session_user" :payload="modalPayload" />
     </b-modal>
@@ -16,6 +17,7 @@
       title="Purchase Post"
       hide-footer
       body-class="p-0"
+      @hide="closeModal"
     >
       <PurchasePost ref="purchasePost" :session_user="session_user" :post_id="selectedResourceId" />
     </b-modal>
@@ -26,6 +28,7 @@
       title="Purchase Message"
       hide-footer
       body-class="p-0"
+      @hide="closeModal"
     >
       <PurchaseMessage ref="purchaseMessage" :message="selectedResource" />
     </b-modal>
@@ -36,6 +39,7 @@
       title="Follow"
       hide-footer
       body-class="p-0"
+      @hide="closeModal"
     >
       <FollowTimeline ref="followTimeline" :session_user="session_user" :timeline="selectedTimeline" :subscribe_only="subscribeOnly" />
     </b-modal>
@@ -46,6 +50,7 @@
       title="Upload Avatar"
       hide-footer
       body-class="p-0"
+      @hide="closeModal"
     >
       <CropImage ref="cropImage" :session_user="session_user" :url="selectedUrl" :timelineId="selectedTimelineId" />
     </b-modal>
@@ -56,6 +61,7 @@
       title="Post"
       hide-footer
       body-class="p-0"
+      @hide="closeModal"
     >
       <div
         class="post-nav-arrows left"
@@ -80,6 +86,7 @@
       title="Photo"
       hide-footer
       body-class="p-0"
+      @hide="closeModal"
     >
       <ImageDisplay ref="ImageDisplay" :session_user="session_user" :mediafile="selectedResource" :is_feed="false" />
     </b-modal>
@@ -90,6 +97,7 @@
       size="md"
       hide-footer
       body-class="p-0"
+      @hide="closeModal"
     >
       <ScheduleDateTime ref="schedule_picker_modal" :scheduled_at="scheduled_at" :for_edit="is_for_edit" />
     </b-modal>
@@ -101,6 +109,7 @@
       hide-footer
       body-class="p-0"
       no-close-on-backdrop
+      @hide="closeModal"
     >
       <EditPost ref="editPost" :post="selectedResource" />
     </b-modal>
@@ -111,6 +120,7 @@
       hide-footer
       size="md"
       body-class="p-0"
+      @hide="closeModal"
     >
       <ExpirationPeriod ref="expirationPeriod" />
     </b-modal>
@@ -121,6 +131,7 @@
       hide-footer
       size="lg"
       body-class="p-0"
+      @hide="closeModal"
     >
       <PromotionCampaign ref="promotionCampaign" />
     </b-modal>
@@ -263,6 +274,9 @@ export default {
     },
     postModalAction(action) {
       eventBus.$emit('post-modal-actions', action);
+    },
+    closeModal() {
+      eventBus.$emit('close-modal');
     }
   },
 
