@@ -30,6 +30,7 @@ use App\Enums\MediafileTypeEnum;
 use App\Enums\PaymentTypeEnum;
 use App\Enums\VerifyStatusTypeEnum;
 use App\Models\Staff;
+use App\Apis\Sendgrid\Api as SendgridApi;
 
 class UsersController extends AppBaseController
 {
@@ -478,12 +479,41 @@ class UsersController extends AppBaseController
         // Send Inviation email
         $accept_link = url('/staff/invitations/accept?token='.$token.'&email='.$email.'&inviter='.$sessionUser->name.(count($users) == 0 ? '&is_new=true' : ''));
 
-        Mail::send('emails.staff_invite', ['user' => $sessionUser, 'accept_link' => $accept_link], function ($message) use(&$email)
-        {
-            $message->from('info@allfans.com', 'AllFans');
-
-            $message->to($email)->subject('AllFans Staff Invitation');
-        });
+        if ($request->input('role') == 'manager') {
+            $user = User::where('email', $email)->first();
+            SendgridApi::send('invite-staff-manager', [
+                'to' => [
+                    'email' => $email,
+                ],
+                'dtdata' => [
+                    'manager_name' => $request->input('first_name').' '.$request->input('last_name'),
+                    'username' => $sessionUser->name,
+                    'login_url' => $accept_link,
+                    'home_url' => url('/'),
+                    'referral_url' => url('/referrals'),
+                    'privacy_url' => url('/privacy'),
+                    'manage_preferences_url' => $user ? url( route('users.showSettings', $user->username)) : url('/'),
+                    'unsubscribe_url' => $user ? url( route('users.showSettings', $user->username)) : url('/'),
+                ],
+            ]);
+        } else {
+            $user = User::where('email', $email)->first();
+            SendgridApi::send('invite-staff-member', [
+                'to' => [
+                    'email' => $email,
+                ],
+                'dtdata' => [
+                    'staff_name' => $request->input('first_name').' '.$request->input('last_name'),
+                    'username' => $sessionUser->name,
+                    'login_url' => $accept_link,
+                    'home_url' => url('/'),
+                    'referral_url' => url('/referrals'),
+                    'privacy_url' => url('/privacy'),
+                    'manage_preferences_url' => $user ? url( route('users.showSettings', $user->username)) : url('/'),
+                    'unsubscribe_url' => $user ? url( route('users.showSettings', $user->username)) : url('/'),
+                ],
+            ]);
+        }
 
         return response()->json( ['status' => 200] );
     }
