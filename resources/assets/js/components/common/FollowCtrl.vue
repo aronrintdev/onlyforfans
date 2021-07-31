@@ -3,7 +3,7 @@
     <b-card tag="article" class="OFF-mb-2">
       <b-card-text>
         <ul class="list-unstyled">
-          <li><b-button :disabled="timeline.is_owner" variant="primary" class="w-100">Message</b-button></li>
+          <li><b-button :disabled="timeline.is_owner" @click="renderMessage" variant="primary" class="w-100">Message</b-button></li>
           <li v-if="timeline.is_following">
             <b-button v-if="timeline.is_subscribed" @click="renderSubscribe" :disabled="timeline.is_owner" variant="warning" class="w-100 mt-3">
               <span>Unsubscribe</span>
@@ -92,6 +92,11 @@ export default {
           resource: this.timeline,
           resource_type: 'timelines', 
         },
+      })
+    },
+    renderMessage() {
+      this.$router.push({
+        name: 'chatthreads.dashboard',
       })
     },
   },

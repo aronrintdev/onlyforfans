@@ -17,7 +17,11 @@
         </template>
         <b-dropdown-item @click="renderTip">Send a Tip</b-dropdown-item>
         <b-dropdown-item @click="toggleFavorite">{{ isFavoritedByMe ? 'Unfavorite' : 'Favorite'}}</b-dropdown-item>
-        <b-dropdown-item @click="copyTextToClipboard">Copy link to profile</b-dropdown-item>
+        <b-dropdown-item
+          v-clipboard:copy="profileLink"
+          v-clipboard:success="onCopySuccess"
+          v-clipboard:error="onCopyError"
+        >Copy link to profile</b-dropdown-item>
         <b-dropdown-item v-if="timeline.is_owner">
           <router-link :to="{ name: 'settings.profile', params: {} }">
             Edit Profile
@@ -107,6 +111,10 @@ export default {
     avatarImage() {
       const { avatar } = this.timeline
       return avatar ? avatar.filepath : '/images/default_avatar.png'
+    },
+
+    profileLink() {
+      return window.location.href
     }
   },
 
@@ -189,30 +197,14 @@ export default {
       })
     },
 
-    copyTextToClipboard() {
-      let textArea = document.createElement('textarea');
-      textArea.style.position = 'fixed';
-      textArea.style.top = 0;
-      textArea.style.left = 0;
-      textArea.style.width = '2em';
-      textArea.style.height = '2em';
-      textArea.style.border = 'none';
-      textArea.style.outline = 'none';
-      textArea.style.boxShadow = 'none';
-      textArea.style.background = 'transparent';
-      textArea.value = window.location.href;
+    onCopySuccess() {
+      alert("Copy to Clipboard has been succeed");
+      this.showCopyToClipboardModal = false;
+    },
 
-      document.body.appendChild(textArea);
-      textArea.focus();
-      textArea.select();
-
-      try {
-        document.execCommand('copy');
-      } catch (err) {
-        console.log(err);
-      }
-
-      document.body.removeChild(textArea);
+    onCopyError() {
+      this.showCopyToClipboardModal = false;
+      alert("Copy to Clipboard has been failed. Please try again later.");
     },
   },
 

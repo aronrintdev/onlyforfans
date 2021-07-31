@@ -23,7 +23,7 @@
             </article>
           </b-col>
         </b-row>
-        <div v-if="!allViewed" class="view-more-photos text-primary text-right" @click="viewMorePhotos">View more photos</div>
+        <div class="view-more-photos text-primary text-right" @click="viewMorePhotos('photos')">View more photos</div>
       </b-card-text>
     </b-card>
   </div>
@@ -38,6 +38,7 @@ export default {
   props: {
     session_user: null,
     timeline: null,
+    viewMorePhotos: { type: Function },
   },
 
   computed: {
@@ -110,11 +111,6 @@ export default {
         return { '--background-image': `url(/images/locked_post.png)` }
       }
     },
-
-    viewMorePhotos() {
-      this.limit = this.limit + 6
-      this.$store.dispatch('getPreviewposts', { timelineId: this.timeline.id, limit: this.limit })
-    }
   },
 
   components: { },
