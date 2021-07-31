@@ -229,7 +229,7 @@ class UsersController extends AppBaseController
             'mfname'           => $file->getClientOriginalName(),
             'mftype'           => MediafileTypeEnum::AVATAR,
             'resource_id'      => $sessionUser->id,
-            'resource_type'    => 'avatar',
+            'resource_type'    => 'users',
         ]);
 
         $sessionUser->timeline->avatar_id = $mediafile->id;
@@ -262,7 +262,7 @@ class UsersController extends AppBaseController
             'mfname'           => $file->getClientOriginalName(),
             'mftype'           => MediafileTypeEnum::COVER,
             'resource_id'      => $sessionUser->id,
-            'resource_type'    => 'cover',
+            'resource_type'    => 'users',
         ]);
 
         $sessionUser->timeline->cover_id = $mediafile->id;
