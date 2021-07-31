@@ -48,6 +48,19 @@ class PostsController extends AppBaseController
             }
         }
 
+        // Sorting
+        switch ($request->sortBy) {
+        case 'created_at':
+        case 'updated_at':
+        case 'type':
+        case 'price':
+            $sortDir = $request->sortDir==='asc' ? 'asc' : 'desc';
+            $query->orderBy($request->sortBy, $sortDir);
+            break;
+        default:
+            $query->orderBy('updated_at', 'desc');
+        }
+
         $data = $query->paginate( $request->input('take', env('MAX_POSTS_PER_REQUEST', 10)) );
         return new PostCollection($data);
     }

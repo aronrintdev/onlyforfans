@@ -19,7 +19,16 @@
       @sort-changed="sortHandler"
       sort-icon-left
       small
-    ></b-table>
+    >
+      <template #cell(id)="data">
+        <span @click="doEmit('render-show', data.item)" class="clickable">{{ data.item.id | niceGuid }}</span>
+      </template>
+      <template #cell(ctrls)="data">
+        <span class="">
+          <fa-icon :icon="['fas', 'ellipsis-h']" class="clickable fa-sm" />
+        </span>
+      </template>
+    </b-table>
 
   </div>
 </template>
@@ -54,6 +63,10 @@ export default {
   }),
 
   methods: {
+
+    doEmit(action, data) {
+      this.$emit('table-event', { action, data } )
+    },
 
     async getData() {
       let params = {
