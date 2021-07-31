@@ -311,6 +311,9 @@ export default {
     this.formProfile.language = this.user_settings.language || null
     this.formProfile.ethnicity = this.user_settings.ethnicity || null
     this.formProfile.profession = this.user_settings.profession
+    this.formProfile.weblinks.amazon = this.user_settings.weblinks && JSON.parse(this.user_settings.weblinks)['amazon']
+    this.formProfile.weblinks.website = this.user_settings.weblinks && JSON.parse(this.user_settings.weblinks)['website']
+    this.formProfile.weblinks.instagram = this.user_settings.weblinks && JSON.parse(this.user_settings.weblinks)['instagram']
   },
 
   methods: {
@@ -342,5 +345,8 @@ export default {
 </script>
 
 <style scoped>
+textarea#about {
+  border: 1px solid #ced4da;
+}
 </style>
 

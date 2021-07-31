@@ -10,10 +10,16 @@
     <section class="row">
       <aside v-if="!isGridLayout" class="col-md-5 col-lg-4">
         <FollowCtrl :session_user="session_user" :timeline="timeline" />
-        <PreviewUpgrade :session_user="session_user" :timeline="timeline" />
+        <PreviewUpgrade :session_user="session_user" :timeline="timeline" :viewMorePhotos="setCurrentFeedType" />
       </aside>
       <main :class="mainClass">
-        <PostFeed :session_user="session_user" :timeline="timeline" :is_homefeed="false" />
+        <PostFeed
+          :session_user="session_user"
+          :timeline="timeline"
+          :is_homefeed="false"
+          :currentFeedType="currentFeedType"
+          :setCurrentFeedType="setCurrentFeedType"
+        />
       </main>
     </section>
 
@@ -61,6 +67,7 @@ export default {
   data: () => ({
     timeline: null,
     isGridLayout: false, // %FIXME: can this be set in created() so we have 1 source of truth ? (see PostFeed)
+    currentFeedType: null,
   }),
 
   created() {
@@ -89,6 +96,9 @@ export default {
       }
     },
 
+    setCurrentFeedType(feedType) {
+      this.currentFeedType = feedType
+    }
   },
 
   watch: {

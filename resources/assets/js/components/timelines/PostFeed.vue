@@ -109,6 +109,8 @@ export default {
     is_schedulefeed: null,
     session_user: null,
     timeline: null,
+    currentFeedType: null,
+    setCurrentFeedType: { type: Function },
   },
 
   computed: {
@@ -227,6 +229,7 @@ export default {
       }
       eventBus.$emit('set-feed-layout', this.isGridLayout )
       this.reloadFromFirstPage()
+      this.setCurrentFeedType(feedType)
     },
 
     renderTip() {
@@ -408,6 +411,10 @@ export default {
         this.moreLoading = false
       }
     },
+
+    currentFeedType(newVal) {
+      if (newVal === 'photos') this.setFeedType('photos')
+    }
   },
 }
 </script>

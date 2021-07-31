@@ -63,7 +63,7 @@
       </template>
 
       <template v-if="post.access">
-        <div :class="{ 'tag-has-mediafiles': hasMediafiles }" class="py-3 text-wrap">
+        <div v-if="post.description" :class="{ 'tag-has-mediafiles': hasMediafiles }" class="py-3 text-wrap">
           <b-card-text class="px-3 mb-0 tag-post_desc">
             <VueMarkdown :html="false" :source="post.description || ''" />
           </b-card-text>

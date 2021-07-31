@@ -4,7 +4,7 @@
 
       <b-row>
         <b-col>
-          <h2 class="card-title mt-3 mb-1"><span class="tag-title">Following</span> ({{ totalRows }})</h2>
+          <h4 class="card-title mt-3 mb-1"><span class="tag-title">Following</span> ({{ totalRows }})</h4>
           <small class="text-muted">Creators who I am following or subscribed to</small>
         </b-col>
       </b-row>
