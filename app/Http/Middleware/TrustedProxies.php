@@ -13,7 +13,7 @@ use Illuminate\Http\Request;
  *
  * @package App\Http\Middleware
  */
-class TrustProxies extends Middleware
+class TrustedProxies extends Middleware
 {
     /**
      * The trusted proxies for this application.
