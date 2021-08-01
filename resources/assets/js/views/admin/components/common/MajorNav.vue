@@ -14,6 +14,7 @@
       <b-nav-item>Invites</b-nav-item>
       <b-nav-item>Notifications</b-nav-item>
       <b-nav-item>Ranking (weights for suggested, explore, etc)</b-nav-item>
+      <b-nav-item :to="{ name: 'beta-program' }">Beta Program</b-nav-item>
     </b-nav>
 
     <h6>Financial</h6>

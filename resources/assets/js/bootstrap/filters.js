@@ -59,6 +59,23 @@ Vue.filter('ucfirst', function(str) {
   return str.charAt(0).toUpperCase() + str.slice(1)
 })
 
-Vue.filter('niceDate', function(value) {
+Vue.filter('niceDate', function (value) {
+  if (typeof value === 'undefined' || value === null || value === '') {
+    return ''
+  }
   return moment(value).format('MMMM Do, YYYY')
+})
+
+Vue.filter('niceDateTime', function (value) {
+  if (typeof value === 'undefined' || value === null || value === '') {
+    return ''
+  }
+  return moment(value).format('MMMM Do, YYYY HH:mm:ss')
+})
+
+Vue.filter('niceDateTimeShort', function (value) {
+  if (typeof value === 'undefined' || value === null || value === '') {
+    return ''
+  }
+  return moment(value).format('MMM Do, YYYY HH:mm:ss')
 })

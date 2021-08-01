@@ -77,9 +77,9 @@ class Token extends Model
         return $token ?? false;
     }
 
-    public static function useToken($token, User $user)
+    public static function useToken($token, User $user, $for = '')
     {
-        $token = Token::check($token);
+        $token = Token::check($token, $for);
         if ($token) {
             return $token->use($user);
         }

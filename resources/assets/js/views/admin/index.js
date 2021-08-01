@@ -4,6 +4,7 @@ import PostManagement from './components/posts/PostManagement.vue'
 import MediafileManagement from './MediafileManagement.vue'
 import AccountManagement from './finance/AccountManagement.vue'
 import TxnManagement from './finance/TxnManagement.vue'
+import BetaProgram from './components/users/BetaProgram.vue'
 
 export default {
   Home,
@@ -12,4 +13,5 @@ export default {
   MediafileManagement,
   AccountManagement,
   TxnManagement,
+  BetaProgram,
 }
