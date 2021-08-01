@@ -63,7 +63,11 @@ class BetaProgramController extends Controller
                 ],
             ]);
 
-            $token->custom_attributes = new Collection([ 'sentTo' => $tester->email ]);
+            $token->custom_attributes = new Collection([
+                'sentTo' => $tester->email,
+                'sentToName' => $tester->name,
+                'url' => $registerUrl,
+            ]);
             $token->save();
 
             $usedTokens->push($token);

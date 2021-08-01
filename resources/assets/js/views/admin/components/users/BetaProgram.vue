@@ -58,7 +58,18 @@
         <span class="text-monospace">{{ data.item.token }}</span>
       </template>
       <template #cell(sent_to)="data">
-        <span class="text-monospace">{{ data.item.custom_attributes ? data.item.custom_attributes.sentTo : '' }}</span>
+        <span class="text-monospace">{{
+          data.item.custom_attributes
+          ? `${data.item.custom_attributes.sentTo} (${data.item.custom_attributes.sentToName})`
+          : ''
+        }}</span>
+      </template>
+      <template #cell(registration_url)="data">
+        <span class="text-monospace">{{
+          data.item.custom_attributes
+          ? data.item.custom_attributes.url
+          : ''
+        }}</span>
       </template>
       <template #cell(created_at)="data">
         <span class="">{{ data.item.created_at | niceDateTimeShort }}</span>
@@ -89,7 +100,8 @@ export default {
         { key: 'id', label: 'Id', },
         { key: 'used', label: 'Used?', },
         { key: 'token', label: 'Token', },
-        { key: 'sent_to', label: 'Email Sent To',  },
+        { key: 'sent_to', label: 'Email Sent To', },
+        { key: 'registration_url', label: 'Registration Url', },
         { key: 'used_by_id', label: 'Used By', },
         { key: 'used_at', label: 'Used At', },
         { key: 'created_at', label: 'Created At', },
