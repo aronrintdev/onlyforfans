@@ -1,7 +1,7 @@
 <template>
   <div class="app d-flex flex-column">
     <!-- Header -->
-    <div class="header">
+    <div v-if="isVisible" class="header">
       <b-navbar variant="light" >
         <b-navbar-brand :to="{ name: 'index' }" class="navbar-brand mr-5">
           <img src="/images/logos/allfans-logo-154x33.png" alt="All Fans Logo">
@@ -9,10 +9,10 @@
         <b-btn variant="dark" @click="$router.push({ name: 'login' })" class="ml-auto">{{ $t('login') }}</b-btn>
       </b-navbar>
     </div>
-    <div class="content d-flex p-3 flex-grow-1" :class="{ 'px-0': mobile }">
+    <div class="content d-flex flex-grow-1" :class="{ 'px-0': mobile, 'p-3': isVisible }">
       <router-view />
     </div>
-    <div class="footer">
+    <div v-if="isVisible" class="footer">
       <b-navbar variant="dark">
         <b-nav-text class="text-light mx-auto">
           &copy; {{ $DateTime().year }} All Fans. All rights reserved.
@@ -39,6 +39,10 @@ export default {
     screenSizesTypes: { type: Object, default: () => ({ xs: 0, sm: 0, md: 0, lg: 0, xl: 0 }) }
   },
 
+  data:() => ({
+    isVisible: true,
+  }),
+
   computed: {
     ...Vuex.mapState([ 'mobile', 'screenSize' ]),
     mobileWidth() {
@@ -54,6 +58,12 @@ export default {
           .getPropertyValue(`--breakpoint-${key}`).replace('px', ''))
           || value
       })
+    }
+  },
+
+  mounted() {
+    if(this.$route && (this.$route.name === 'login' || this.$route.name === "register")) {
+      this.isVisible = false
     }
   },
 
