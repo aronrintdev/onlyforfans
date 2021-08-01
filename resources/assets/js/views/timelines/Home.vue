@@ -111,8 +111,17 @@ export default {
   mounted() { },
 
   methods: {
+    ...Vuex.mapActions(['getStories']),
     changeActiveTab(event) {
       this.activeTab = event;
+    }
+  },
+
+  watch: {
+    timeline(newVal) {
+      if (newVal) {
+        this.getStories({ timeline_id: this.timeline.id })
+      }
     }
   }
 }
