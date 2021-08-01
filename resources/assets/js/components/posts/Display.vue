@@ -15,13 +15,13 @@
             <span class="text-secondary">{{ expireFromNow }}</span>
             <fa-icon :icon="['far', 'hourglass-half']" class="text-secondary ml-1 mr-2" />
           </div>
-          <div v-if="session_user.id === post.user.id" class="post-ctrl mr-2">
+          <div class="post-ctrl mr-2">
             <b-dropdown right text="" class="m-md-2 post-header-menu" variant="outline-dark">
-              <b-dropdown-item @click="showEditPost">
+              <b-dropdown-item v-if="session_user.id === post.user.id" @click="showEditPost">
                 <fa-icon icon="edit" fixed-width class="mr-2" />
                 Edit
               </b-dropdown-item>
-              <b-dropdown-item @click="showDeleteConfirmation = true">
+              <b-dropdown-item v-if="session_user.id === post.user.id" @click="showDeleteConfirmation = true">
                 <fa-icon icon="trash" fixed-width class="mr-2" />
                 Delete
               </b-dropdown-item>
@@ -53,9 +53,9 @@
               </b-dropdown-item>
             </b-dropdown>
           </div>
-          <div @click="renderFull" v-if="is_feed" class="p-2 btn">
+          <!-- <div @click="renderFull" v-if="is_feed" class="p-2 btn">
             <fa-icon icon="expand-alt" class="text-primary" size="2x" />
-          </div>
+          </div> -->
           <b-btn v-if="displayClose" variant="link" class="text-secondary" @click="$emit('close')">
             <fa-icon icon="times" />
           </b-btn>
@@ -63,7 +63,7 @@
       </template>
 
       <template v-if="post.access">
-        <div :class="{ 'tag-has-mediafiles': hasMediafiles }" class="py-3 text-wrap">
+        <div v-if="post.description" :class="{ 'tag-has-mediafiles': hasMediafiles }" class="py-3 text-wrap">
           <b-card-text class="px-3 mb-0 tag-post_desc">
             <VueMarkdown :html="false" :source="post.description || ''" />
           </b-card-text>

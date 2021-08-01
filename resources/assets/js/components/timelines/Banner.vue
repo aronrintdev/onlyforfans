@@ -15,9 +15,21 @@
         <template #button-content>
           <fa-icon :icon="['far', 'bars']" size="2x" class="text-white" />
         </template>
-        <b-dropdown-item>First Action</b-dropdown-item>
-        <b-dropdown-item>Second Action</b-dropdown-item>
-        <b-dropdown-item>Third Action</b-dropdown-item>
+        <b-dropdown-item @click="renderTip">Send a Tip</b-dropdown-item>
+        <b-dropdown-item @click="toggleFavorite">{{ isFavoritedByMe ? 'Unfavorite' : 'Favorite'}}</b-dropdown-item>
+        <b-dropdown-item
+          v-clipboard:copy="profileLink"
+          v-clipboard:success="onCopySuccess"
+          v-clipboard:error="onCopyError"
+        >Copy link to profile</b-dropdown-item>
+        <b-dropdown-item v-if="timeline.is_owner">
+          <router-link :to="{ name: 'settings.profile', params: {} }">
+            Edit Profile
+          </router-link>
+        </b-dropdown-item>
+        <b-dropdown-item disabled>Restrict</b-dropdown-item>
+        <b-dropdown-item disabled>Block</b-dropdown-item>
+        <b-dropdown-item disabled>Report</b-dropdown-item>
       </b-dropdown>
     </header>
 
@@ -42,7 +54,7 @@
 
     <b-container fluid>
       <b-row class="avatar-profile py-3">
-        <b-col cols="12" md="4" offset-md="2" class="avatar-details text-right text-md-left">
+        <b-col cols="12" md="4" offset-md="1" class="pl-5 avatar-details text-right text-md-left">
           <h2 class="avatar-name my-0">
             <router-link :to="{ name: 'timeline.show', params: { slug: timeline.slug } }">
               {{ timeline.name }}
@@ -51,17 +63,17 @@
               <fa-icon icon="check-circle" class="text-primary" />
             </span>
           </h2>
-          <p class="avatar-mail my-0">
-            <router-link :to="{ name: 'timeline.show', params: { slug: timeline.slug } }">
-              @{{ timeline.slug || 'TODO' }}
-            </router-link>
-          </p>
-          <div>
+          <div class="avatar-username-status">
+            <p class="avatar-mail my-0 mr-3 text-secondary">
+              <router-link :to="{ name: 'timeline.show', params: { slug: timeline.slug } }">
+                @{{ timeline.slug || 'TODO' }}
+              </router-link>
+            </p>
             <OnlineStatus :user="timeline.user" />
           </div>
         </b-col>
 
-        <b-col cols="12" md="4" offset-md="2" class="tag-stats my-0">
+        <b-col cols="12" md="4" offset-md="3" class="tag-stats my-0">
           <Stats :stats="timeline.userstats" />
         </b-col>
       </b-row>
@@ -98,13 +110,19 @@ export default {
 
     avatarImage() {
       const { avatar } = this.timeline
-      return avatar ? avatar.filepath : '/images/default_avatar.svg'
+      return avatar ? avatar.filepath : '/images/default_avatar.png'
+    },
+
+    profileLink() {
+      return window.location.href
     }
   },
 
   data: () => ({
     uploadCoverVisible: false,
     uploadAvatarVisible: false,
+
+    isFavoritedByMe: false, // is timeline/feed a favorite
   }),
 
   methods: {
@@ -151,9 +169,48 @@ export default {
         },
       })
     },
+
+    async toggleFavorite() {
+      let response
+      if (this.isFavoritedByMe) { // remove
+        response = await axios.post(`/favorites/remove`, {
+          favoritable_type: 'timelines',
+          favoritable_id: this.timeline.id,
+        })
+        this.isFavoritedByMe = false
+      } else { // add
+        response = await axios.post(`/favorites`, {
+          favoritable_type: 'timelines',
+          favoritable_id: this.timeline.id,
+        })
+        this.isFavoritedByMe = true
+      }
+    },
+
+    renderTip() {
+      eventBus.$emit('open-modal', {
+        key: 'render-tip',
+        data: { 
+          resource: this.timeline,
+          resource_type: 'timelines', 
+        },
+      })
+    },
+
+    onCopySuccess() {
+      alert("Copy to Clipboard has been succeed");
+      this.showCopyToClipboardModal = false;
+    },
+
+    onCopyError() {
+      this.showCopyToClipboardModal = false;
+      alert("Copy to Clipboard has been failed. Please try again later.");
+    },
   },
 
-  created() {},
+  created() {
+    this.isFavoritedByMe = this.timeline.is_favorited;
+  },
 }
 </script>
 
@@ -187,6 +244,10 @@ header.masthead .profile-ctrl.dropdown button {
   background: transparent;
 }
 
+.avatar-username-status {
+  display: flex;
+}
+
 .avatar-img {
   position: absolute;
   left: 32px;
@@ -206,6 +267,13 @@ header.masthead .profile-ctrl.dropdown button {
   transform: translate(-50%, -50%);
 }
 
+.tag-ctrl {
+  a {
+    color: #212529;
+    text-decoration: none;
+  }
+}
+
 .avatar-details {
   /*
   margin-left: 172px;
@@ -219,7 +287,6 @@ header.masthead .profile-ctrl.dropdown button {
     */
     color: #555;
     text-decoration: none;
-    text-transform: capitalize;
   }
 
   h2 {

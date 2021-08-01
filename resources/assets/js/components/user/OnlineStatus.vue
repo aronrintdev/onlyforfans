@@ -1,6 +1,7 @@
 <template>
   <div class="onlineStatus">
     <slot :loading="loading" :status="status" :textVariant="textVariant" :message="message" :lastSeen="lastSeen">
+      <div class="status-indicator" :class="{'online-status': status === 'online'}" />
       <span v-if="!loading" class="status" :class="[`status-holder-${user.id}`, textVariant]">
       {{ message }}
       </span>
@@ -149,3 +150,20 @@ export default {
   }
 }
 </i18n>
+
+<style scoped>
+.onlineStatus {
+  display: flex;
+}
+.status-indicator {
+  width: 10px;
+  height: 10px;
+  margin-top: 6px;
+  margin-right: 5px;
+  border-radius: 100%;
+  background: gray;
+}
+.status-indicator .online-status {
+  background: green;
+}
+</style>

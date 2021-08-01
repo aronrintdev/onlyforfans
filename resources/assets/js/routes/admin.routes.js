@@ -10,6 +10,16 @@ export const adminRoutes = [
     component: admin.UserManagement,
   },
   {
+    name: 'post-management',
+    path: '/admin/post-management',
+    component: admin.PostManagement,
+  },
+  {
+    name: 'mediafile-management',
+    path: '/admin/mediafile-management',
+    component: admin.MediafileManagement,
+  },
+  {
     name: 'account-management',
     path: '/admin/account-management',
     component: admin.AccountManagement,

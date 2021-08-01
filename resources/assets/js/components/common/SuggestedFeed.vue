@@ -45,6 +45,7 @@
 
 <script>
 import Vuex from 'vuex';
+import { eventBus } from '@/eventBus'
 import MiniProfile from '@components/user/MiniProfile'
 
 export default {
@@ -81,6 +82,17 @@ export default {
 
   created() {
     this.getDataset()
+
+    eventBus.$on('update-timelines', (timelineId) => {
+      const timeline = this.timelines.find(t => t.id === timelineId)
+      if (timeline) {
+        this.getDataset()
+      }
+    })
+
+    eventBus.$on('set-feed-layout',  isGridLayout  => {
+      this.isGridLayout = isGridLayout
+    })
   },
 
   methods: {
@@ -120,6 +132,8 @@ export default {
 body .suggested_feed-crate {
 
   background-color: #fff;
+  border: solid #dfdfdf 1px;
+  border-radius: 0.25rem;
   //padding: 0.5rem 0.5rem;
 
   .ctrl-top > * {

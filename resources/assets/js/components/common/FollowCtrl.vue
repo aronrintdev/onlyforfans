@@ -1,9 +1,9 @@
 <template>
-  <div v-if="!isLoading" class="follow_ctrl-crate tag-crate">
+  <div v-if="!isLoading" class="follow_ctrl-crate tag-crate my-3">
     <b-card tag="article" class="OFF-mb-2">
       <b-card-text>
         <ul class="list-unstyled">
-          <li><b-button :disabled="timeline.is_owner" variant="primary" class="w-100">Message</b-button></li>
+          <li><b-button :disabled="timeline.is_owner" @click="renderMessage" variant="primary" class="w-100">Message</b-button></li>
           <li v-if="timeline.is_following">
             <b-button v-if="timeline.is_subscribed" @click="renderSubscribe" :disabled="timeline.is_owner" variant="warning" class="w-100 mt-3">
               <span>Unsubscribe</span>
@@ -23,13 +23,16 @@
             </b-button>
           </li>
         </ul>
-        <VueMarkdown :html="false" :source="timeline.about || ''" />
+        <div :class="{ 'normal-view': !isFullVisiable }">
+          <VueMarkdown :html="false" :source="timeline.about || ''" />
+        </div>
+        <div v-if="!isFullVisiable" class="toggle-read-more text-primary text-right mr-3 mt-1" @click="isFullVisiable = !isFullVisiable">Read more</div>
         <ul class="list-unstyled">
           <li>Website: <a :href="timeline.userstats.website" class="tag-website">{{ timeline.userstats.website }}</a></li>
           <li>Instagram: <a :href="timeline.userstats.instagram" class="tag-instagram">{{ timeline.userstats.instagram }}</a></li>
         </ul>
         <ul class="list-unstyled list-details">
-          <li><span><fa-icon icon="map-pin" /> {{ timeline.userstats.city }}</span></li>
+          <li><span><fa-icon icon="map-pin" class="map-pin-icon" /> {{ timeline.userstats.city }}</span></li>
           <li><span><fa-icon icon="globe" /> {{ timeline.userstats.country }}</span></li>
         </ul>
       </b-card-text>
@@ -58,6 +61,7 @@ export default {
   },
 
   data: () => ({
+    isFullVisiable: false,
   }),
 
   created() { },
@@ -90,6 +94,11 @@ export default {
         },
       })
     },
+    renderMessage() {
+      this.$router.push({
+        name: 'chatthreads.dashboard',
+      })
+    },
   },
 
   components: {
@@ -102,6 +111,31 @@ export default {
 
 body #modal-send_tip .modal-body {
   padding: 0;
+}
+
+.normal-view {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+li a.tag-website {
+  margin-left: 20px;
+}
+
+li a.tag-instagram {
+  margin-left: 5px;
+}
+
+
+.toggle-read-more {
+  cursor: pointer;
+}
+
+.map-pin-icon {
+  margin-left: 3px;
+  margin-right: 4px;
 }
 
 </style>

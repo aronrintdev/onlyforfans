@@ -10,7 +10,12 @@
             <p class="font-weight-normal mt-2 text-primary">{{ referralUrl }}</p>
           </b-col>
           <b-col>
-            <h6 class="text-info text-right font-weight-bold mt-2 mr-2 clickable" @click="copyTextToClipboard">
+            <h6
+              class="text-info text-right font-weight-bold mt-2 mr-2 clickable"
+              v-clipboard:copy="referralUrl"
+              v-clipboard:success="onCopySuccess"
+              v-clipboard:error="onCopyError"
+            >
               Copy Link
             </h6>
             <p class="text-info text-right font-weight-normal mt-5 mr-2 clickable" @click="enableViewReferrals = !enableViewReferrals">
@@ -101,30 +106,14 @@ export default {
       this.getPagedData()
     },
 
-    copyTextToClipboard() {
-      let textArea = document.createElement('textarea');
-      textArea.style.position = 'fixed';
-      textArea.style.top = 0;
-      textArea.style.left = 0;
-      textArea.style.width = '2em';
-      textArea.style.height = '2em';
-      textArea.style.border = 'none';
-      textArea.style.outline = 'none';
-      textArea.style.boxShadow = 'none';
-      textArea.style.background = 'transparent';
-      textArea.value = this.referralUrl;
+    onCopySuccess() {
+      alert("Copy to Clipboard has been succeed");
+      this.showCopyToClipboardModal = false;
+    },
 
-      document.body.appendChild(textArea);
-      textArea.focus();
-      textArea.select();
-
-      try {
-        document.execCommand('copy');
-      } catch (err) {
-        console.log(err);
-      }
-
-      document.body.removeChild(textArea);
+    onCopyError() {
+      this.showCopyToClipboardModal = false;
+      alert("Copy to Clipboard has been failed. Please try again later.");
     },
 
     async checkReferralCode() {

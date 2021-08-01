@@ -88,11 +88,7 @@
 </template>
 
 <script>
-/**
- * View / Edit specific role
- */
-
-import ResourceEditor from '../../common/ResourceEditor'
+import ResourceEditor from '@views/admin/components/common/ResourceEditor'
 
 const blankPermission = {
   name: '',

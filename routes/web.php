@@ -157,6 +157,9 @@ Route::group(['middleware' => ['auth']], function () {
     Route::post('/mediafiles/batch-destroy', ['as'=>'mediafiles.batchDestroy', 'uses' => 'MediafilesController@batchDestroy']);
     Route::resource('mediafiles', 'MediafilesController', [ 'except' => [ 'create', 'edit', ] ]);
 
+    Route::resource('diskmediafiles', 'DiskmediafilesController', [ 'only' => [ 'index', 'show', 'destroy'] ])->middleware(['role:admin|super-admin']);
+    //Route::resource('diskmediafiles', 'DiskmediafilesController', [ 'only' => [ 'index', 'show', 'destroy'] ]);
+
     Route::resource('notifications', 'NotificationsController', [ 'only' => [ 'index', ] ]);
 
     /* -------------------------------- Posts ------------------------------- */
@@ -289,7 +292,7 @@ Route::group(['middleware' => ['auth']], function () {
 
 /* ------------------------------ Financial Namespace ------------------------------ */
 // %NOTE: currently these are limited to super-admin roles
-Route::group(['middleware' => ['auth', 'role:super-admin'], 'as'=>'financial.', 'prefix'=>'financial', 'namespace'=>'Financial'], function () {
+Route::group(['middleware' => ['auth', 'role:admin|super-admin'], 'as'=>'financial.', 'prefix'=>'financial', 'namespace'=>'Financial'], function () {
 
     Route::resource('accounts', 'AccountsController', [ 
         'only' => [ 'index', 'show' ],
@@ -310,7 +313,7 @@ Route::group(['prefix' => '/username'], function() {
     Route::match(['get', 'post'], '/check/{username?}', 'UsernameRulesController@checkUsername')->name('usernameRules.check');
 
     // Admin Crud API //
-    Route::group(['middleware' => ['auth', 'role:admin']], function() {
+    Route::group(['middleware' => ['auth', 'role:admin|super-admin']], function() {
         Route::get('/rules', 'UsernameRulesController@index')->name('usernameRules.index');
         Route::get('/rules/{page}', 'UsernameRulesController@list')->name('usernameRules.list');
         Route::get('/rule/new', 'UsernameRulesController@create')->name('usernameRules.create');
@@ -378,6 +381,7 @@ Route::get('/staff-members/staff', ['as'=>'staff.indexStaffMembers', 'uses' => '
 Route::delete('/staff-members/{id}', ['as'=>'staff.remove', 'uses' => 'StaffController@remove']);
 Route::post('/staff-members/invitations/accept', ['as'=>'staff.acceptInvite', 'uses' => 'StaffController@acceptInvite']);
 Route::patch('/staff-members/{id}/status', ['as'=>'staff.changestatus', 'uses' => 'StaffController@changeStatus']);
+Route::get('/staff-members/permissions', ['as'=>'staff.permissions', 'uses' => 'StaffController@listPermissions']);
 
 /**
  * Single Page application catch all undefined routes

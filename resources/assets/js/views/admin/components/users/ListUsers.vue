@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h1>User Management</h1>
+    <h1>User List</h1>
     <b-pagination
       v-model="currentPage"
       :total-rows="rows"
@@ -17,13 +17,13 @@
       small
     >
       <template #cell(id)="data">
-        <span class="OFF-text-info">{{ data.item.id | niceGuid }}</span>
+        <span class="">{{ data.item.id | niceGuid }}</span>
       </template>
       <template #cell(timeline)="data">
-        <span class="OFF-text-info">{{ data.item.timeline.id | niceGuid }}</span>
+        <span class="">{{ data.item.timeline.id | niceGuid }}</span>
       </template>
       <template #cell(created_at)="data">
-        <span class="OFF-text-info">{{ data.item.created_at | niceDate }}</span>
+        <span class="">{{ data.item.created_at | niceDate }}</span>
       </template>
     </b-table>
   </div>
@@ -74,8 +74,7 @@ export default {
 
   watchers: {},
 
-  created() {
-  },
+  created() { },
 
   components: {},
 }

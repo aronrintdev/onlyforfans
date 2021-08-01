@@ -10,10 +10,11 @@ return [
     'except' => [
         '_debugbar.*',
         'debugbar.*',
-        'admin.*',
+        //'admin.*',
         'webhook.*',
     ],
     'groups' => [
-        'admin' => [ 'admin.*' ],
+        //'admin' => [ '*' ],
+        'admin' => [ '*', 'admin.*' ],
     ],
 ];

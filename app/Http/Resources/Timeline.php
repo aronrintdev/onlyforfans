@@ -31,7 +31,7 @@ class Timeline extends JsonResource
             'user' => [
                 'id' => $this->user_id,
             ],
-            'userstats' => $sessionUser->getStats(),
+            'userstats' => $this->user->getStats(),
             'is_owner' => $sessionUser->id === $this->user->id,
             'is_following' => $this->followers->contains($sessionUser->id),
             'is_subscribed' => $this->subscribers->contains($sessionUser->id),
