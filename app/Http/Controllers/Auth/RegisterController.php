@@ -486,7 +486,7 @@ class RegisterController extends Controller
      */
     private function betaCheck($request, $user) {
         if (Config::get('auth.beta.active')) {
-            if (Token::useToken($request->token, $user)) {
+            if (Token::useToken($request->token, $user, Config::get('auth.beta.tokenName'))) {
                 $user->timeline->cattrs = ['beta_program' => true];
                 $user->timeline->save();
             } else {

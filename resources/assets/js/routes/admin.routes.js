@@ -30,6 +30,11 @@ export const adminRoutes = [
     component: admin.TxnManagement,
   },
   {
+    name: 'beta-program',
+    path: '/admin/beta-program',
+    component: admin.BetaProgram,
+  },
+  {
     name: 'home',
     path: '/admin',
     component: admin.Home,
