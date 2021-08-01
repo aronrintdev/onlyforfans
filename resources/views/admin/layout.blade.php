@@ -14,9 +14,9 @@
     <link href="{{ mix('css/admin.css') }}" rel="stylesheet">
 
     <!-- Routing -->
-    @routes() 
+    @routes()
     <!--
-    @routes('admin') 
+    @routes('admin')
     -->
     <!-- specifically add admin routes as well as site routes, as ziggy is set up by default to filter out any named routes starting with with 'admin' (to avoid listing admin routes in the main site's page header) --> 
 

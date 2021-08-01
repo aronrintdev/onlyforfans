@@ -1,11 +1,14 @@
 <template>
   <div class="container w-100 d-flex flex-column mt-5">
-    <b-card class="login-card mx-auto">
+    <b-card class="login-card mx-auto" no-body>
       <template #header>
-        <div class="h2 text-center mb-0" v-text="$t('header')" />
+        <div class="h2 text-center" v-text="$t('header')" />
+        <div class="text-center">
+          <router-link :to="{ name: 'login' }" v-text="$t('returnToLogin')" />
+        </div>
       </template>
       <b-alert variant="success" v-text="$t('message')" show />
-      <b-btn variant="primary" block :to="{ name: 'login' }">
+      <b-btn variant="primary">
         {{ $t('returnToLogin') }}
       </b-btn>
     </b-card>
@@ -23,7 +26,7 @@
 import LinkBar from '../../components/staticPages/LinkBar'
 
 export default {
-  name: 'ConfirmEmail',
+  name: 'EmailVerified',
   components: {
     LinkBar,
   },
@@ -46,7 +49,8 @@ export default {
   "en": {
     "header": "Thank You For Registering",
     "returnToLogin": "Return to Login",
-    "message": "Thank you for registering your account. Please visit you email and use the email verification link to verify your email before logging in for the first time."
+    "button": "Login Now",
+    "message": "Your email has been successfully verified. You may now log in."
   },
 }
 </i18n>

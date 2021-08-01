@@ -29,25 +29,27 @@ use InvalidArgumentException;
 use Laravel\Scout\Searchable;
 
 use App\Enums\VerifyStatusTypeEnum;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 
 /**
- * @property string      $id              `uuid` | `unique`
- * @property string      $email           email address | `unique`
- * @property string      $username        `unique`
- * @property string      $firstname       User defined First Name
- * @property string      $lastname        User defined Last Name
- * @property string      $password        Password Hash
- * @property string      $remember_token  Laravel remember token
- * @property bool        $email_verified  If email has been verified
- * @property bool        $is_online       If user is currently online
- * @property Carbon|null $last_logged     Last login time of user
+ * @property string      $id                 `uuid` | `unique`
+ * @property string      $email              email address | `unique`
+ * @property string      $username           `unique`
+ * @property string      $firstname          User defined First Name
+ * @property string      $lastname           User defined Last Name
+ * @property string      $password           Password Hash
+ * @property string      $remember_token     Laravel remember token
+ * @property bool        $email_verified     If email has been verified
+ * @property Carbon|null $email_verified_at  When the user's email was verified
+ * @property bool        $is_online          If user is currently online
+ * @property Carbon|null $last_logged        Last login time of user
  * @property Carbon      $created_at
  * @property Carbon      $updated_at
  * @property Carbon|null $deleted_at
  *
  * @package App\Models
  */
-class User extends Authenticatable implements Blockable, HasFinancialAccounts
+class User extends Authenticatable implements Blockable, HasFinancialAccounts, MustVerifyEmail
 {
     use HasRoles,
         HasFactory,

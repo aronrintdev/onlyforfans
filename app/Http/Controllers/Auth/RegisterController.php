@@ -15,6 +15,7 @@ use App\Models\Diskmediafile;
 use App\Enums\MediafileTypeEnum;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+use App\Notifications\VerifyEmail;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Auth\Events\Registered;
@@ -196,16 +197,11 @@ class RegisterController extends Controller
                 ]);
             }
 
-            if (Setting::get('mail_verification') == 'on') {
-
-                event(new Registered($user));
-
-                Mail::send('emails.welcome', ['user' => $user], function ($m) use ($user) {
-                    $m->from(Setting::get('noreply_email'), Setting::get('site_name'));
-
-                    $m->to($user->email, $user->timeline->name)->subject('Welcome to '.Setting::get('site_name'));
-                });
-            }
+            \Log::debug('User Registered', [ 'email' => $user->email ]);
+            $user->notify(new VerifyEmail(
+                $user, url(route('verification.verify', ['id' => $user->id, 'hash' => $user->verification_code]))
+            ));
+            // event(new Registered($user));
 
             return response()->json(['user' => $user], 201);
         } else {
