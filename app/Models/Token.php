@@ -50,7 +50,7 @@ class Token extends Model
     public static function add($for, $amount = 1, $options = []): Collection
     {
         $tokens = new Collection([]);
-        for ($i = 0; $i <= $amount; $i++) {
+        for ($i = 0; $i < $amount; $i++) {
             $token = Token::create([
                 'token' => Token::generateToken($options['length'] ?? 32, $options['removeSimilarCharacters'] ?? true),
                 'for' => $for,
