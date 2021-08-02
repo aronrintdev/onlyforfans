@@ -1,6 +1,8 @@
 <template>
   <div>
-    <b-skeleton-wrapper :loading="loading">
+    <PaymentsDisabled v-if="paymentsDisabled" />
+
+    <b-skeleton-wrapper v-if="!paymentsDisabled" :loading="loading">
       <template #loading>
         <div class="w-100 my-5 d-flex align-items-center justify-content-center">
           <fa-icon icon="spinner" size="3x" spin />
@@ -47,11 +49,13 @@ import _ from 'lodash'
 import Vuex from 'vuex'
 import FormNew from './forms/New'
 import PaymentConfirmation from './forms/PaymentConfirmation'
-import PayWithForm from './PayWithForm'
+// import PayWithForm from './PayWithForm'
 import SavedPaymentMethodList from './SavedPaymentMethodsList'
 import LoadingOverlay from '@components/common/LoadingOverlay'
 import SubscriptionIFrame from './forms/SegpaySubscriptionIFrame'
 import LongRunningTransactionToast from './LongRunningTransactionToast'
+
+import PaymentsDisabled from './PaymentsDisabled'
 
 export default {
   name: 'PurchaseForm',
@@ -59,7 +63,8 @@ export default {
     FormNew,
     LongRunningTransactionToast,
     PaymentConfirmation,
-    PayWithForm,
+    PaymentsDisabled,
+    // PayWithForm,
     SavedPaymentMethodList,
     LoadingOverlay,
   },
@@ -98,6 +103,7 @@ export default {
     processing: false,
     maxProcessingWaitTime: 20 * 1000, // 20s
     waiting: null,
+    paymentsDisabled: true,
   }),
 
   methods: {
@@ -239,6 +245,9 @@ export default {
   mounted() {
     this.init()
     this.loadPaymentMethods()
+    if ( paymentsDisabled ) {
+      this.paymentsDisabled = true
+    }
   },
 
 }
