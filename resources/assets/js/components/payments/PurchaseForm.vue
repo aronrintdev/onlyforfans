@@ -103,7 +103,7 @@ export default {
     processing: false,
     maxProcessingWaitTime: 20 * 1000, // 20s
     waiting: null,
-    paymentsDisabled: true,
+    paymentsDisabled: false,
   }),
 
   methods: {

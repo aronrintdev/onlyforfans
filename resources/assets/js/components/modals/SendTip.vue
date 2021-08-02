@@ -124,7 +124,7 @@ export default {
   },
 
   data: () => ({
-    paymentsDisabled: true,
+    paymentsDisabled: false,
 
     /** 'initial' | 'payment' */
     step: 'initial',
