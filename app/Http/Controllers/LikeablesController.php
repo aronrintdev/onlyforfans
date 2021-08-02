@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Config;
 use App\Models\Likeable as LikeableModel;
 use App\Models\User;
 use App\Models\Comment;
@@ -65,7 +66,7 @@ class LikeablesController extends AppBaseController
             }
         }
 
-        $data = $query->paginate( $request->input('take', env('MAX_DEFAULT_PER_REQUEST', 10)) );
+        $data = $query->paginate( $request->input('take', Config::get('collections.defaultMax', 10)) );
         return new LikeableCollection($data);
     }
 

@@ -31,8 +31,8 @@ class Api
         $email->setTemplateId($templateID);
         $email->setFrom(self::$fromEmail, self::$fromName);
 
-        if ( env('DEBUG_OVERRIDE_TO_EMAIL_FOR_SENDGRID', false) ) {
-            $attrs['to']['email'] = env('DEBUG_OVERRIDE_TO_EMAIL_FOR_SENDGRID');
+        if ( Config::get('sendgrid.debug.override_to_email', false) ) {
+            $attrs['to']['email'] = Config::get('sendgrid.debug.override_to_email');
             $attrs['to']['name'] = 'TEST Recepient';
             //$email->addTo( 'peter+receiver@peltronic.com', 'Example Receiver');
         }
@@ -47,14 +47,14 @@ class Api
             $email->addDynamicTemplateDatas( $attrs['dtdata'] );
         }
 
-        $isSandbox = env('DEBUG_ENABLE_SENDGRID_SANDBOX_MODE', false);
+        $isSandbox = Config::get('sendgrid.debug.enable_sandbox_mode', false);
         if ($isSandbox) {
             dump('SendGrid - WARNING SANDBOX ENABLED!');
             $email->enableSandBoxMode();
         }
         //$email->disableSandBoxMode();
 
-        $sendgrid = new \SendGrid( env('SENDGRID_API_KEY') );
+        $sendgrid = new \SendGrid( Config::get('sendgrid.api_key') );
         try {
             $response = $sendgrid->send($email);
             $rdata = [

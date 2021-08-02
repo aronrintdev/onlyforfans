@@ -13,6 +13,7 @@ use App\Enums\MediafileTypeEnum;
 use App\Payments\PaymentGateway;
 use App\Models\Financial\Account;
 use App\Http\Resources\PostCollection;
+use Illuminate\Support\Facades\Config;
 use App\Models\Casts\Money as CastsMoney;
 use App\Http\Resources\Post as PostResource;
 use App\Models\Tip;
@@ -61,7 +62,7 @@ class PostsController extends AppBaseController
             $query->orderBy('updated_at', 'desc');
         }
 
-        $data = $query->paginate( $request->input('take', env('MAX_POSTS_PER_REQUEST', 10)) );
+        $data = $query->paginate( $request->input('take', Config::get('collections.max.posts', 10)) );
         return new PostCollection($data);
     }
 

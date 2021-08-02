@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use App;
 use Exception;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
@@ -19,8 +20,7 @@ class SessionsController extends AppBaseController
         $this->authorize('view', $request->user());
         $query = Session::query()->with('user');
         $query->where('user_id', $request->user()->id);
-        $data = $query->paginate( $request->input('take', env('MAX_DEFAULT_PER_REQUEST', 10)) );
-        //dd( new SessionCollection($data) );
+        $data = $query->paginate( $request->input('take', Config::get('collections.defaultMax', 10)) );
         return new SessionCollection($data);
     }
 

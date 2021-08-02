@@ -5,6 +5,7 @@ use DB;
 use Auth;
 use Exception;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use App\Http\Resources\FavoriteCollection;
@@ -61,7 +62,7 @@ class FavoritesController extends AppBaseController
         }
          */
 
-        $data = $query->paginate( $request->input('take', env('MAX_DEFAULT_PER_REQUEST', 10)) );
+        $data = $query->paginate( $request->input('take', Config::get('collections.defaultMax', 10)) );
         return new FavoriteCollection($data);
     }
 

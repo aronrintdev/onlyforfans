@@ -19,7 +19,7 @@ class Api
     protected $token = null;
 
     private function __construct(string $token=null) {
-        if (App::environment(['local', 'testing', 'staging'])) {
+        if ( Config::get('idmerit.is_sandbox', false) ) {
             $base = 'https://sandbox.idmvalidate.com';
         } else {
             // production!
@@ -54,12 +54,14 @@ class Api
 
     public function issueToken() 
     {
+        $clientId = Config::get('idmerit.client_id');
+        $clientSecret = Config::get('idmerit.client_secret');
         $url = $this->endpoints['token']['url'];
-        $clientId = env('IDMERIT_CLIENT_ID', null);
-        $clientSecret = env('IDMERIT_CLIENT_SECRET', null);
+
         if ( !$clientId || !$clientSecret ) {
             throw new Exception('Missing ID or secret');
         }
+
         $response = Http::asForm()->withBasicAuth($clientId, $clientSecret)
           ->post($url, [
               'grant_type' => 'client_credentials',

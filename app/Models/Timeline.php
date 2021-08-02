@@ -7,6 +7,7 @@ use App\Interfaces\ShortUuid;
 use App\Enums\PaymentTypeEnum;
 use App\Interfaces\Reportable;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Config;
 
 use App\Models\Traits\UsesUuid;
 use App\Interfaces\Purchaseable;
@@ -348,7 +349,6 @@ class Timeline extends Model implements Subscribable, Tippable, Reportable
     public function getLatestStory(User $viewer) : ?Storyqueue
     {
         //$stories = Story::select(['id','slug','created_at'])->where('timeline_id', $this->id)->orderBy('created_at', 'desc')->get();
-        //$daysWindow = env('STORY_WINDOW_DAYS', 10000);
         $stories = Storyqueue::select(['id','created_at'])
             ->where('timeline_id', $this->id)
             //->where('viewer_id', $viewer->id)
@@ -359,7 +359,7 @@ class Timeline extends Model implements Subscribable, Tippable, Reportable
     // Has the viewer seen all 'active' slides in this timeline's story (?)
     public function isEntireStoryViewedByUser($viewerId) : bool
     {
-        $daysWindow = env('STORY_WINDOW_DAYS', 10000);
+        $daysWindow = Config::get('stories.window_days');
         $notViewedCount = Storyqueue::where('timeline_id', $this->id)
             ->where('viewer_id', $viewerId)
             ->whereNull('viewed_at')
@@ -371,7 +371,7 @@ class Timeline extends Model implements Subscribable, Tippable, Reportable
     // No viewable stories within last time period 'window'
     public function isStoryqueueEmpty() : bool
     {
-        $daysWindow = env('STORY_WINDOW_DAYS', 10000);
+        $daysWindow = Config::get('stories.window_days');
         $activeCount = Story::where('timeline_id', $this->id)
             ->where('created_at','>=',Carbon::now()->subDays($daysWindow))
             ->count();
