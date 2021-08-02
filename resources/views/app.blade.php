@@ -23,7 +23,7 @@
         const myUserId = '{{ Auth::user()->id }}';
     </script>
     <script>
-        const paymentsDisabled = {{ Config::get('transactions.disableAll', false) }};
+        const paymentsDisabled = {{ Config::get('transactions.disableAll', 0) }};
     </script>
 
     {{-- Routing --}}
