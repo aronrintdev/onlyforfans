@@ -46,7 +46,7 @@ class VerifyEmail extends Notification
             ],
             'dtdata' => [
                 'user_name' => $this->actor->name,
-                'url' => $this->url,
+                'verify_url' => $this->url,
             ],
         ];
     }
