@@ -1,17 +1,17 @@
 <template>
-  <div>
+  <div class="w-100">
     <h2>{{ $t('title') }}</h2>
     <b-row>
       <b-col lg="4">
-        <Balance />
+        <Balance class="mb-3" />
+        <Statistics class="mb-3" />
       </b-col>
-      <b-col lg="4">
-        <Statistics />
+      <b-col lg="8">
+        <b-card class="w-100" title="Transactions">
+          <TransactionsTable class="w-100" />
+        </b-card>
       </b-col>
     </b-row>
-    <b-card title="Transactions">
-      <TransactionsTable />
-    </b-card>
   </div>
 </template>
 

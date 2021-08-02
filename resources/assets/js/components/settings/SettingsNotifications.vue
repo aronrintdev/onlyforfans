@@ -1,151 +1,141 @@
 <template>
   <div v-if="!isLoading" class="component-settings_notification">
+    <b-card no-body>
+      <b-tabs card>
+        <b-tab title="Email" active>
+          <b-card-text>
+            <b-form>
+              <fieldset>
 
-    <b-row>
-      <b-col xl="9">
+                <b-form-group id="group-email-global">
+                  <section class="d-flex justify-content-between align-items-start">
+                    <div>
+                      <label for="is_email_enabled" class="ml-auto mb-0">Email Notifications</label>
+                      <p><small class="text-muted">Receive email notifications...</small></p>
+                    </div>
+                    <div>
+                      <b-form-checkbox id="is_email_enabled" v-model="thisForm.by_email.enabled" name="is_email_enabled" switch size="lg"></b-form-checkbox>
+                    </div>
+                  </section>
+                </b-form-group>
 
-        <b-card no-body>
-
-          <b-tabs card>
-            <b-tab title="Email" active>
-              <b-card-text>
-                <b-form>
-                  <fieldset>
-
-                    <b-form-group id="group-email-global">
-                      <section class="d-flex justify-content-between align-items-start">
-                        <div>
-                          <label for="is_email_enabled" class="ml-auto mb-0">Email Notifications</label>
-                          <p><small class="text-muted">Receive email notifications...</small></p>
-                        </div>
-                        <div>
-                          <b-form-checkbox id="is_email_enabled" v-model="thisForm.by_email.enabled" name="is_email_enabled" switch size="lg"></b-form-checkbox>
-                        </div>
-                      </section>
-                    </b-form-group>
-
-                    <template v-if="thisForm.by_email.enabled">
-                      <b-form-group id="group-email-show_full_text">
-                        <section class="d-flex justify-content-between align-items-start">
-                          <div>
-                            <label for="show_full_text" class="ml-auto mb-0">Show full text</label>
-                            <p><small class="text-muted">Show the full text of the email</small></p>
-                          </div>
-                          <div>
-                            <b-form-checkbox id="show_full_text" v-model="thisForm.by_email.show_full_text" name="show_full_text" switch size="lg"></b-form-checkbox>
-                          </div>
-                        </section>
-                      </b-form-group>
-
-                      <hr />
-
-                      <b-form-group id="group-email-income">
-                        <h5>Income</h5>
-                        <div>
-                          <b-form-checkbox id="email_new_tip" v-model="thisForm.by_email.income.new_tip" name="email_new_tip" size="lg">New Tip</b-form-checkbox>
-                          <p><small class="text-muted">Email whenever a new tip is received</small></p>
-                        </div>
-                        <div>
-                          <b-form-checkbox id="email_new_subscription" v-model="thisForm.by_email.income.new_subscription" name="email_new_subscription" size="lg">New Subscription</b-form-checkbox>
-                          <p><small class="text-muted">Email on new subscriptions</small></p>
-                        </div>
-                      </b-form-group>
-
-                      <hr />
-
-                      <b-form-group id="group-email-post">
-                        <h5>Posts</h5>
-                        <!--
-                        <div>
-                          <b-form-checkbox id="new_post_summary" v-model="thisForm.by_email.posts.new_post_summary" name="new_post_summary" size="lg">New Post Summary</b-form-checkbox>
-                          <p><small class="text-muted">Email a summary of new posts.</small></p>
-                        </div>
-                        -->
-                        <div>
-                          <b-form-checkbox id="new_like" v-model="thisForm.by_email.posts.new_like" name="new_like" size="lg">New Like</b-form-checkbox>
-                        </div>
-                        <div>
-                          <b-form-checkbox id="new_comment" v-model="thisForm.by_email.posts.new_comment" name="new_comment" size="lg">New Comment</b-form-checkbox>
-                        </div>
-                      </b-form-group>
-
-                      <hr />
-
-                      <b-form-group id="group-email-other">
-                        <h5>Other</h5>
-                        <div>
-                          <b-form-checkbox id="new_stream" v-model="thisForm.by_email.other.new_stream" name="new_stream" size="lg">New Stream</b-form-checkbox>
-                        </div>
-                        <div>
-                          <b-form-checkbox id="upcoming_stream_reminders" v-model="thisForm.by_email.other.upcoming_stream_reminders" name="upcoming_stream_reminders" size="lg">Upcoming Stream Reminders</b-form-checkbox>
-                        </div>
-                      </b-form-group>
-                    </template>
-
-                  </fieldset>
-
-                </b-form>
-              </b-card-text>
-            </b-tab>
-
-            <b-tab title="Site">
-              <b-card-text>
-                <b-form>
-                  <fieldset>
-
-                    <b-form-group id="group-site-global">
-                      <section class="d-flex justify-content-between align-items-start">
-                        <div>
-                          <label for="is_site_enabled" class="ml-auto mb-0">Site Notifications</label>
-                          <p><small class="text-muted">Receive site notifications...</small></p>
-                        </div>
-                        <div>
-                          <b-form-checkbox id="is_site_enabled" v-model="thisForm.by_site.enabled" name="is_site_enabled" switch size="lg"></b-form-checkbox>
-                        </div>
-                      </section>
-                    </b-form-group>
-
-                    <template v-if="thisForm.by_site.enabled">
-
-                    <b-form-group id="group-site-income">
-                      <h5>Income</h5>
+                <template v-if="thisForm.by_email.enabled">
+                  <b-form-group id="group-email-show_full_text">
+                    <section class="d-flex justify-content-between align-items-start">
                       <div>
-                        <b-form-checkbox id="new_tip" v-model="thisForm.by_site.income.new_tip" name="new_tip" size="lg">New Tip</b-form-checkbox>
-                        <p><small class="text-muted">Whenever a new tip is received</small></p>
-                      </div>
-                    </b-form-group>
-
-                    <hr />
-
-                    <b-form-group id="group-site-post">
-                      <h5>Posts</h5>
-                      <div>
-                        <b-form-checkbox id="new_comment" v-model="thisForm.by_site.posts.new_comment" name="new_comment" size="lg">New Comment</b-form-checkbox>
+                        <label for="show_full_text" class="ml-auto mb-0">Show full text</label>
+                        <p><small class="text-muted">Show the full text of the email</small></p>
                       </div>
                       <div>
-                        <b-form-checkbox id="new_like" v-model="thisForm.by_site.posts.new_like" name="new_like" size="lg">New Like</b-form-checkbox>
+                        <b-form-checkbox id="show_full_text" v-model="thisForm.by_email.show_full_text" name="show_full_text" switch size="lg"></b-form-checkbox>
                       </div>
-                    </b-form-group>
+                    </section>
+                  </b-form-group>
 
-                    </template>
+                  <hr />
 
-                  </fieldset>
+                  <b-form-group id="group-email-income">
+                    <h5>Income</h5>
+                    <div>
+                      <b-form-checkbox id="email_new_tip" v-model="thisForm.by_email.income.new_tip" name="email_new_tip" size="lg">New Tip</b-form-checkbox>
+                      <p><small class="text-muted">Email whenever a new tip is received</small></p>
+                    </div>
+                    <div>
+                      <b-form-checkbox id="email_new_subscription" v-model="thisForm.by_email.income.new_subscription" name="email_new_subscription" size="lg">New Subscription</b-form-checkbox>
+                      <p><small class="text-muted">Email on new subscriptions</small></p>
+                    </div>
+                  </b-form-group>
 
-                </b-form>
-              </b-card-text>
-            </b-tab>
+                  <hr />
 
-            <b-tab title="Push">
-              <b-card-text>
-              </b-card-text>
-            </b-tab>
-          </b-tabs>
+                  <b-form-group id="group-email-post">
+                    <h5>Posts</h5>
+                    <!--
+                    <div>
+                      <b-form-checkbox id="new_post_summary" v-model="thisForm.by_email.posts.new_post_summary" name="new_post_summary" size="lg">New Post Summary</b-form-checkbox>
+                      <p><small class="text-muted">Email a summary of new posts.</small></p>
+                    </div>
+                    -->
+                    <div>
+                      <b-form-checkbox id="new_like" v-model="thisForm.by_email.posts.new_like" name="new_like" size="lg">New Like</b-form-checkbox>
+                    </div>
+                    <div>
+                      <b-form-checkbox id="new_comment" v-model="thisForm.by_email.posts.new_comment" name="new_comment" size="lg">New Comment</b-form-checkbox>
+                    </div>
+                  </b-form-group>
 
-        </b-card>
+                  <hr />
 
-      </b-col>
-    </b-row>
+                  <b-form-group id="group-email-other">
+                    <h5>Other</h5>
+                    <div>
+                      <b-form-checkbox id="new_stream" v-model="thisForm.by_email.other.new_stream" name="new_stream" size="lg">New Stream</b-form-checkbox>
+                    </div>
+                    <div>
+                      <b-form-checkbox id="upcoming_stream_reminders" v-model="thisForm.by_email.other.upcoming_stream_reminders" name="upcoming_stream_reminders" size="lg">Upcoming Stream Reminders</b-form-checkbox>
+                    </div>
+                  </b-form-group>
+                </template>
 
+              </fieldset>
+
+            </b-form>
+          </b-card-text>
+        </b-tab>
+
+        <b-tab title="Site">
+          <b-card-text>
+            <b-form>
+              <fieldset>
+
+                <b-form-group id="group-site-global">
+                  <section class="d-flex justify-content-between align-items-start">
+                    <div>
+                      <label for="is_site_enabled" class="ml-auto mb-0">Site Notifications</label>
+                      <p><small class="text-muted">Receive site notifications...</small></p>
+                    </div>
+                    <div>
+                      <b-form-checkbox id="is_site_enabled" v-model="thisForm.by_site.enabled" name="is_site_enabled" switch size="lg"></b-form-checkbox>
+                    </div>
+                  </section>
+                </b-form-group>
+
+                <template v-if="thisForm.by_site.enabled">
+
+                <b-form-group id="group-site-income">
+                  <h5>Income</h5>
+                  <div>
+                    <b-form-checkbox id="new_tip" v-model="thisForm.by_site.income.new_tip" name="new_tip" size="lg">New Tip</b-form-checkbox>
+                    <p><small class="text-muted">Whenever a new tip is received</small></p>
+                  </div>
+                </b-form-group>
+
+                <hr />
+
+                <b-form-group id="group-site-post">
+                  <h5>Posts</h5>
+                  <div>
+                    <b-form-checkbox id="new_comment" v-model="thisForm.by_site.posts.new_comment" name="new_comment" size="lg">New Comment</b-form-checkbox>
+                  </div>
+                  <div>
+                    <b-form-checkbox id="new_like" v-model="thisForm.by_site.posts.new_like" name="new_like" size="lg">New Like</b-form-checkbox>
+                  </div>
+                </b-form-group>
+
+                </template>
+
+              </fieldset>
+
+            </b-form>
+          </b-card-text>
+        </b-tab>
+
+        <b-tab title="Push">
+          <b-card-text>
+          </b-card-text>
+        </b-tab>
+      </b-tabs>
+    </b-card>
   </div>
 </template>
 

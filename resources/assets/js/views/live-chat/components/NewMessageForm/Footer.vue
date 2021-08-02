@@ -1,27 +1,39 @@
 <template>
-  <div>
-    <div class="form-ctrl d-flex">
-      <b-btn
-        v-for="item in buttons"
-        :key="item.key"
-        variant="link"
-        :disabled="item.disabled"
-        :class="item.class"
-        v-b-tooltip.hover
-        :title="item.tooltip"
-        @click="item.onClick"
-      >
-        <fa-icon
-          :icon="item.icon"
-          :size="iconSize"
-          fixed-width
-          :class="item.selected ? 'text-primary' : 'text-secondary'"
-        />
-      </b-btn>
-      <b-btn type="submit" variant="primary" class="submit ml-auto" :disabled="false">
+  <div class="toolbar d-flex">
+    <b-btn
+      v-for="item in buttons"
+      :key="item.key"
+      variant="link"
+      :disabled="item.disabled"
+      :class="item.class"
+      v-b-tooltip.hover
+      :title="item.tooltip"
+      @click="item.onClick"
+    >
+      <fa-icon
+        :icon="item.icon"
+        :size="iconSize"
+        fixed-width
+        :class="item.selected ? 'text-primary' : 'text-secondary'"
+      />
+    </b-btn>
+    <b-btn
+      variant="success"
+      class="ml-auto mr-3"
+      v-b-tooltip.hover
+      :title="$t('tooltips.sendWithTip')"
+    >
+      <fa-icon icon="dollar-sign" class="mr-2" />
+      {{ $t('sendWithTip') }}
+    </b-btn>
+    <div class="d-flex flex-column">
+      <div class="font-size-smaller text-muted text-right mr-2" v-text="$t('sendHint')" />
+      <b-btn variant="primary" class="submit" :disabled="false" @click="$emit('submit')">
         {{ $t('send') }}
+        <fa-icon icon="arrow-right" class="ml-2" />
       </b-btn>
     </div>
+
   </div>
 </template>
 
@@ -51,7 +63,7 @@ export default {
           key: 'uploadFiles',
           class: 'upload-files',
           onClick: (e) => this.$emit('attachFiles', e),
-          icon: this.isSelected('uploadFiles') ? ['fas', 'file-alt'] : ['far', 'file-alt'],
+          icon: this.isSelected('uploadFiles') ? ['fas', 'image'] : ['far', 'image'],
           selected: this.isSelected('uploadFiles'),
           tooltip: this.$t('tooltips.uploadFiles'),
         }, {
@@ -87,7 +99,7 @@ export default {
           key: 'setPrice',
           class: 'set-price',
           onClick: (e) => this.$emit('setPrice', e),
-          icon: this.isSelected('setPrice') ? ['fas', 'dollar-sign'] : ['far', 'dollar-sign'],
+          icon: this.isSelected('setPrice') ? ['fas', 'tag'] : ['far', 'tag'],
           selected: this.isSelected('setPrice'),
           tooltip: this.$t('tooltips.setPrice'),
         },
@@ -96,10 +108,10 @@ export default {
 
     iconSize() {
       switch (this.screenSize) {
-        case 'xs': case 'sm': case 'md':
+        case 'xs': case 'sm': case 'md': case 'lg':
           return 'lg'
-        case 'lg': case 'xl': default:
-          return '2x'
+        case 'xl': default:
+          return 'lg'
       }
     },
 
@@ -122,20 +134,27 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.toolbar {
+  align-items: end
+}
+</style>
 
 <i18n lang="json5" scoped>
 {
   "en": {
-    "send": "SEND",
+    "sendHint": "Ctrl + Enter",
+    "send": "Send",
     "tooltips": {
-      "uploadFiles": "Attach Files",
+      "uploadFiles": "Add Photo",
       "recordVideo": "Record Video",
       "recordAudio": "Record Audio",
-      "vaultSelect": "Attach Files From Your Vault",
+      "vaultSelect": "Add Photo From Your Vault",
       "openScheduleMessage": "Schedule Message To Be Sent At",
       "setPrice": "Set Message Unlock Price",
+      "sendWithTip": "Include a tip with your message",
     },
+    "sendWithTip": "Send with Tip",
   }
 }
 </i18n>

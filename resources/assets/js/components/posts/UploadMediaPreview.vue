@@ -82,7 +82,7 @@ export default {
   name: "UploadMediaPreview",
 
   props: {
-    mediafiles: Array,
+    mediafiles: { type: Array, default: () => ([]) },
   },
 
   components: {
@@ -116,19 +116,21 @@ export default {
   },
 
   mounted() {
-    if (this.mediafiles) {
-      this.files = this.mediafiles.filter(file => file.type && file.type.indexOf('audio/') < -1);
+    if (this.mediafiles.length > 0) {
+      this.files = this.mediafiles.filter(file => file.type && file.type.indexOf('audio/') < 0);
       this.audioFiles = this.mediafiles.filter(file => file.type && file.type.indexOf('audio/') > -1);
       this.$nextTick(() => {
-        this.swiper?.update()
+        $('.swiper-lazy').on('load', () => {
+          this.$refs.mySwiper.updateSwiper();
+        })
       })
     }
   },
 
   watch: {
-    mediafiles() {
-      this.files = this.mediafiles.filter(file => file.type && file.type.indexOf('audio/') < 0);
-      this.audioFiles = this.mediafiles.filter(file => file.type && file.type.indexOf('audio/') > -1);
+    mediafiles(value) {
+      this.files = value.filter(file => file.type && file.type.indexOf('audio/') < 0);
+      this.audioFiles = value.filter(file => file.type && file.type.indexOf('audio/') > -1);
       this.$nextTick(() => {
         $('.swiper-lazy').on('load', () => {
           this.$refs.mySwiper.updateSwiper();
@@ -144,7 +146,7 @@ export default {
       const sortedTemp = _.orderBy(temp, ['order'], ['asc']);
       let order = 0;
       sortedTemp.forEach(item => {
-        if (item.selected) { 
+        if (item.selected) {
           order++;
           const idx = temp.findIndex(it => it.filepath === item.filepath);
           temp[idx].order = order;

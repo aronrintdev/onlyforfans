@@ -129,6 +129,12 @@ class CreateTransactionSummary implements ShouldQueue, ShouldBeUnique
             PHP_ROUND_HALF_EVEN
         );
 
+        if ($summary->transactions_count === 0) {
+            $summary->finalized = true;
+            $summary->save();
+            return;
+        }
+
         $firstTrans = (clone $query)->orderBy('created_at', 'asc')->first();
         $summary->from_transaction_id = $firstTrans->getKey();
 

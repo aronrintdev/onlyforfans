@@ -1,18 +1,20 @@
 <template>
   <section v-if="!isLoading" class="conversation-footer d-flex flex-column">
 
-    <div class="scheduled-message-head" v-if="isScheduled">
+    <div v-if="isScheduled" class="scheduled-message-head d-flex justify-content-start align-items-center">
       <div>
-        <fa-icon :icon="['fas', 'schedule']" class="fa-lg" fixed-width />
+        <fa-icon :icon="['fas', 'calendar-alt']" class="fa-lg" fixed-width />
         <span> Scheduled for </span>
         <strong>{{ moment(deliverAtTimestamp).local().format('MMM DD, h:mm a') }}</strong>
       </div>
-      <b-button variant="link" class="clickme_to-cancel" @click="clearScheduled">
-        <fa-icon :icon="['fas', 'close']" class="clickable fa-lg" fixed-width />
+      <b-button variant="link" @click="clearScheduled">
+        <fa-icon :icon="['fas', 'times']" class="clickable fa-lg" fixed-width />
       </b-button>
     </div>
 
-    <b-form class="store-chatmessage mt-auto" @submit.prevent="sendMessage($event)">
+    <div class="store-chatmessage mt-auto">
+      <SetPrice v-if="setPriceActive" v-model="newMessageForm.price" class="mt-3" />
+
       <AudioRecorder
         v-if="showAudioRec"
         class="mb-3"
@@ -35,7 +37,7 @@
         class="dropzone"
       >
         <!-- Photo Store display -->
-        <div class="d-block w-100" v-if="selectedMediafiles.length > 0">
+        <div class="d-block w-100" v-if="selectedMediafiles && selectedMediafiles.length > 0">
           <div class="d-flex">
             <b-btn variant="link" size="sm" class="ml-auto" @click="onClearFiles">
               {{ $t('clearFiles') }}
@@ -45,18 +47,21 @@
             :mediafiles="selectedMediafiles"
             @change="changeMediafiles"
             @openFileUpload="openDropzone"
+            @remove="removeMediafile"
           />
         </div>
 
         <!-- Text area -->
-        <div>
+        <div class="mt-3">
           <b-form-group>
             <b-form-textarea
+              class="message"
               v-model="newMessageForm.mcontent"
               placeholder="Type a message..."
               :rows="mobile ? 2 : 3"
               max-rows="6"
               spellcheck="false"
+              @keypress.enter="onEnterPress"
             ></b-form-textarea>
           </b-form-group>
         </div>
@@ -69,8 +74,10 @@
         @openScheduleMessage="openScheduleMessageModal"
         @recordAudio="recordAudio"
         @recordVideo="recordVideo"
+        @setPrice="setPrice"
+        @submit="sendMessage($event)"
       />
-    </b-form>
+    </div>
 
     <VideoRecorder
       v-if="showVideoRec"
@@ -90,7 +97,7 @@
 </template>
 
 <script>
-import { eventBus } from '@/app'
+import { eventBus } from '@/eventBus'
 import Vuex from 'vuex'
 import _ from 'lodash'
 import moment from 'moment'
@@ -99,9 +106,11 @@ import VueDropzone from 'vue2-dropzone'
 
 import ScheduleDateTime from '@components/modals/ScheduleDateTime'
 import UploadMediaPreview from '@components/posts/UploadMediaPreview'
-import Footer from './Footer'
 import VideoRecorder from '@components/videoRecorder';
 import AudioRecorder from '@components/audioRecorder';
+
+import SetPrice from './SetPrice.vue'
+import Footer from './Footer'
 
 export default {
   name: 'NewMessageForm',
@@ -110,6 +119,7 @@ export default {
     AudioRecorder,
     Footer,
     ScheduleDateTime,
+    SetPrice,
     UploadMediaPreview,
     VideoRecorder,
     VueDropzone,
@@ -179,6 +189,9 @@ export default {
       if (this.showAudioRec) {
         selected.push('recordAudio')
       }
+      if (this.setPriceActive) {
+        selected.push('setPrice')
+      }
 
       return selected
     }
@@ -192,11 +205,15 @@ export default {
     newMessageForm: {
       mcontent: '',
       deliver_at: null,
+      price: 0,
+      currency: 'USD',
     },
 
     scheduleMessageOpen: false,
     showVideoRec: false,
     showAudioRec: false,
+
+    setPriceActive: false,
 
     // If client is sending message
     sending: false,
@@ -253,8 +270,17 @@ export default {
       this.$nextTick(() => this.$forceUpdate())
     },
 
-    onDropzoneRemoved() {
-      //
+    onDropzoneRemoved(file) {
+      const index = _.findIndex(this.selectedMediafiles, mf => (mf.filepath === file.filepath))
+      if (index > -1)  {
+        this.REMOVE_SELECTED_MEDIAFILE_BY_INDEX(index)
+      }
+    },
+
+    removeMediafile(index) {
+      if (index > -1)  {
+        this.REMOVE_SELECTED_MEDIAFILE_BY_INDEX(index)
+      }
     },
 
     /** Add to Dropzone formData */
@@ -309,6 +335,11 @@ export default {
       var params = {
         mcontent: this.newMessageForm.mcontent,
       }
+      if (this.setPriceActive) {
+        params.price    = this.newMessageForm.price
+        params.currency = this.newMessageForm.currency
+      }
+
       if (this.selectedMediafiles.length > 0) {
         params.attachments = this.selectedMediafiles
       }
@@ -354,11 +385,18 @@ export default {
       this.sending = false
     },
 
-    async sendMessage(e) {
+    async sendMessage() {
       this.sending = true
       // Validation check
-      if (this.newMessageForm.mcontent === '' && this.selectedMediafiles.length === 0) {
+      const mediafileCount = this.selectedMediafiles ? this.selectedMediafiles.length : 0
+      console.log('sendMessage', mediafileCount)
+      if (this.newMessageForm.mcontent === '' && mediafileCount === 0) {
         eventBus.$emit('validation', { message: this.$t('validation') })
+        return
+      }
+      console.log(mediafileCount)
+      if (this.newMessageForm.price > 0 && mediafileCount === 0) {
+        eventBus.$emit('validation', { message: this.$t('pricedValidation')})
         return
       }
 
@@ -374,11 +412,27 @@ export default {
 
     },
 
+    /**
+     * Send message on ctrl+enter
+     */
+    onEnterPress(e) {
+      if (e.ctrlKey) {
+        this.sendMessage()
+      }
+    },
+
     clearForm() {
       this.newMessageForm.mcontent = null
+      this.clearPrice()
       this.CLEAR_SELECTED_MEDIAFILES()
       this.$refs.myVueDropzone.removeAllFiles()
       this.clearScheduled()
+    },
+
+    clearPrice() {
+      this.setPriceActive = false
+      this.newMessageForm.price = 0
+      this.newMessageForm.currency = 'USD'
     },
 
     setScheduled: function() {
@@ -424,6 +478,11 @@ export default {
       }
     },
 
+    setPrice() {
+      // Toggle on click
+      this.setPriceActive = !this.setPriceActive
+    },
+
     _isTyping() {
       this.$echo.join(this.channelName)
         .whisper('typing', {
@@ -440,6 +499,10 @@ export default {
           this.isTyping()
         }
       }
+    },
+
+    selectedMediafiles(value) {
+      this.$log.debug('watch selectedMediafile', { value })
     },
 
   }, // watch
@@ -474,11 +537,16 @@ textarea,
   }
 }
 
+textarea {
+  overflow-y: auto !important;
+}
+
 .dropzone.dz-started .dz-message {
   display: block;
 }
 .dropzone {
   padding: 0;
+  min-height: 0 !important;
 }
 
 .dropzone .dz-message {
@@ -491,12 +559,9 @@ textarea,
 </style>
 
 <style lang="scss">
-body {
-  form.store-chatmessage {
-    textarea.form-control {
-      border: none;
-    }
-  }
+textarea.form-control {
+  border: none;
+  overflow-y: auto;
 }
 </style>
 
@@ -504,11 +569,12 @@ body {
 {
   "en": {
     "clearFiles": "Clear Images",
+    "pricedValidation": "Priced images must contain media, please provide for this message",
     "scheduled": {
       "title": "Scheduled",
       "message": "Messages has successfully been schedule to send at {time}"
     },
-    "validation": "Please enter a message or select files to send"
+    "validation": "Please enter a message or select files to send",
   }
 }
 </i18n>

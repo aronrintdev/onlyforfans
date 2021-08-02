@@ -9,7 +9,18 @@
             v-for="(media, index) in files"
             :key="index"
           >
-            <img v-if="media.is_image" class="swiper-lazy" :src="media.filepath || media.src" @click="openPhotoSwipe(index)" />
+            <img
+              v-if="media.is_image && media.access"
+              class="swiper-lazy"
+              :src="media.filepath || media.src"
+              @click="openPhotoSwipe(index)"
+            />
+            <img
+              v-if="media.is_image && !media.access"
+              class="swiper-lazy"
+              :src="media.blurFilepath"
+              @click="openPhotoSwipe(index)"
+            />
             <div v-if="media.is_video" class="swiper-lazy video" @click="openPhotoSwipe(index)">
               <video>
                 <source :src="media.filepath" :type=" media.mimetype || media.type" />

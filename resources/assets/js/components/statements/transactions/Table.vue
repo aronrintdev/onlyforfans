@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="w-100">
     <b-pagination
       v-if="mobile"
       v-model="page"
@@ -62,7 +62,8 @@
 import _ from 'lodash'
 import Vue from 'vue'
 import Vuex from 'vuex'
-import { eventBus } from '@/app'
+//import { eventBus } from '@/app'
+import { eventBus } from '@/eventBus'
 import moment from 'moment'
 
 import LoadingOverlay from '@components/common/LoadingOverlay'

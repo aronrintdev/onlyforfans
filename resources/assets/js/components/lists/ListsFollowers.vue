@@ -4,7 +4,7 @@
 
       <b-row>
         <b-col>
-          <h2 class="card-title mt-3 mb-1"><span class="tag-title">Followers</span> ({{ totalRows }})</h2>
+          <h4 class="card-title mt-3 mb-1"><span class="tag-title">Fans</span> ({{ totalRows }})</h4>
           <small class="text-muted">Fans who are following or subscribed to my feed</small>
         </b-col>
       </b-row>
@@ -35,7 +35,7 @@
 
 <script>
 //import Vuex from 'vuex';
-import { eventBus } from '@/app'
+import { eventBus } from '@/eventBus'
   //import { DateTime } from 'luxon'
 import moment from 'moment'
 import CtrlBar from '@components/lists/CtrlBar'

@@ -75,14 +75,17 @@ class Diskmediafile extends BaseModel implements Guidable, Ownable
     //--------------------------------------------
 
     // The primary owner of the mediafile/content
-    public function owner()
-    {
+    public function owner() {
         return $this->belongsTo(User::class, 'owner_id');
     }
 
-    public function mediafiles()
-    {
+    public function mediafiles() {
         return $this->hasMany(Mediafile::class);
+    }
+
+    // %NOTE: this is applied to the diskmediafile, not the mediafile (!)
+    public function contentflags() {
+        return $this->morphMany(Contentflag::class, 'flaggable');
     }
 
     //--------------------------------------------
@@ -196,8 +199,30 @@ class Diskmediafile extends BaseModel implements Guidable, Ownable
 
     // %%% --- Other ---
 
+    public function flagCount() {
+        return !empty($this->filepath) ? Storage::disk('s3')->url($this->filepath) : null;
+    }
+
     public function renderUrl() {
         return !empty($this->filepath) ? Storage::disk('s3')->url($this->filepath) : null;
+    }
+
+    public function renderUrlBlur() {
+        $subfolder = $this->owner_id;
+        $path = $subfolder.'/blur/'.$this->basename.'.jpg';
+        return !empty($path) ? Storage::disk('s3')->url($path) : null;
+    }
+
+    public function renderUrlMid() {
+        $subfolder = $this->owner_id;
+        $path = $subfolder.'/mid/'.$this->basename.'.jpg';
+        return !empty($path) ? Storage::disk('s3')->url($path) : null;
+    }
+
+    public function renderUrlThumb() {
+        $subfolder = $this->owner_id;
+        $path = $subfolder.'/thumb/'.$this->basename.'.jpg';
+        return !empty($path) ? Storage::disk('s3')->url($path) : null;
     }
 
     // creates diskmediafile and associated mediafile reference

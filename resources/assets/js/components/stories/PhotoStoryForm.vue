@@ -14,7 +14,7 @@
 </template>
 
 <script>
-import { eventBus } from '@/app';
+import { eventBus } from '@/eventBus'
 import validateUrl from '@helpers/validateUrl';
 
 export default {

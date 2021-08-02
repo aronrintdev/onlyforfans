@@ -4,7 +4,6 @@ namespace App\Notifications;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
-use Illuminate\Notifications\Notification;
 
 use App\Channels\SendgridChannel;
 use App\Models\Campaign;
@@ -57,7 +56,7 @@ class NewCampaignContributionReceived extends Notification
             ],
             'dtdata' => [
                 'contributor_name' => $this->actor->name,
-                'amount' => nice_currency($this->amount)
+                'amount' => nice_currency($this->amount),
 
                 'referral_url' => $this->getUrl('referrals'),
                 'home_url' => $this->getUrl('home'),

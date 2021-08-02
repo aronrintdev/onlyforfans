@@ -7,14 +7,6 @@
             <table class="w-100 table">
               <tr>
                 <td class="align-middle">
-                  <label id="group-who_can_post_on_timeline" label-for="who_can_post_on_timeline" class="">Who can post on my timeline</label>
-                </td>
-                <td class="">
-                  <b-form-select v-model="formPrivacy.privacy.who_can_post_on_timeline" :options="options.privacy" class=""></b-form-select>
-                </td>
-              </tr>
-              <tr>
-                <td class="align-middle">
                   <label id="group-who_can_comment_on_post" label-for="who_can_comment_on_post" class="">Who can comment on my post</label>
                 </td>
                 <td class="">
@@ -69,7 +61,7 @@
 
                 <div v-else class="accordion" role="tablist">
                   <section class="mb-3">
-                    <b-button block v-b-toggle.accordion-ips variant="light">IPs</b-button>
+                    <b-button block v-b-toggle.accordion-ips variant="light" disabled>IPs</b-button>
                     <b-collapse id="accordion-ips" accordion="my-accordion" role="tabpanel">
                       <ul class="list-blocked list-unstyled">
                         <li v-for="(b,idx) in blocked.ips || []" :key="idx"> {{ b }}
@@ -79,7 +71,7 @@
                     </b-collapse>
                   </section>
                   <section class="mb-3">
-                    <b-button block v-b-toggle.accordion-countries variant="light">Countries</b-button>
+                    <b-button block v-b-toggle.accordion-countries variant="light" disabled>Countries</b-button>
                     <b-collapse id="accordion-countries" accordion="my-accordion" role="tabpanel">
                       <ul class="list-blocked list-unstyled">
                         <li v-for="(b,idx) in blocked.countries || []"> {{ b }}
@@ -130,7 +122,8 @@
                     name="is_watermark_enabled"
                     value=1
                     unchecked-value=0
-                    switch size="lg"></b-form-checkbox>
+                    switch size="lg"
+                    disabled></b-form-checkbox>
                 </b-form-group>
               </b-col>
             </b-row>
@@ -180,7 +173,6 @@ export default {
 
     formPrivacy: {
       privacy: {
-        who_can_post_on_timeline: null,
         who_can_comment_on_post: null,
         who_can_see_post: null,
         who_can_message: null,

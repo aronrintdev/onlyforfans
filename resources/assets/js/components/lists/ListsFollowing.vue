@@ -4,7 +4,7 @@
 
       <b-row>
         <b-col>
-          <h2 class="card-title mt-3 mb-1"><span class="tag-title">Following</span> ({{ totalRows }})</h2>
+          <h4 class="card-title mt-3 mb-1"><span class="tag-title">Following</span> ({{ totalRows }})</h4>
           <small class="text-muted">Creators who I am following or subscribed to</small>
         </b-col>
       </b-row>
@@ -24,10 +24,10 @@
               Add to favorites
             </b-card-text>
 
-            <b-button variant="primary"><fa-icon fixed-width :icon="['far', 'envelope']" /> Message</b-button>
-            <b-button @click="renderTip(s.shareable, 'timelines')" variant="primary"><fa-icon fixed-width :icon="['far', 'dollar-sign']" /> Send Tip</b-button>
-            <b-button v-if="s.access_level==='default'" @click="renderSubscribe(s.shareable)" variant="primary"><fa-icon fixed-width :icon="['far', 'box-full']" /> Premium</b-button>
-            <b-button @click="renderCancel(s.shareable, s.access_level)" variant="primary"><fa-icon fixed-width :icon="['far', 'power-off']" /> Cancel</b-button>
+            <b-button variant="primary">Message</b-button>
+            <b-button @click="renderTip(s.shareable, 'timelines')" variant="primary">Tip</b-button>
+            <b-button v-if="s.access_level==='default'" @click="renderSubscribe(s.shareable)" variant="primary">Subscribe</b-button>
+            <b-button @click="renderCancel(s.shareable, s.access_level)" variant="primary">Unfollow</b-button>
           </WidgetTimeline>
           <!-- <pre> Access Level: {{ s.access_level }} {{ JSON.stringify(s, null, "\t") }} </pre> -->
         </b-col>
@@ -49,7 +49,7 @@
 
 <script>
 //import Vuex from 'vuex';
-import { eventBus } from '@/app'
+import { eventBus } from '@/eventBus'
 //import { DateTime } from 'luxon'
 import moment from 'moment'
 import mixinModal from '@mixins/modal'

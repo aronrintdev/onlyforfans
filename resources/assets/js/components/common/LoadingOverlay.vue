@@ -28,8 +28,8 @@ export default {
   bottom: 0;
   left: 0;
   right: 0;
-  color: var(--light, #ffffff);
-  background-color: rgba(0, 0, 0, 0.5);
+  color: var(--dark, #000000);
+  background-color: rgba(255, 255, 255, 0.5);
   z-index: 100;
   cursor: wait;
 }

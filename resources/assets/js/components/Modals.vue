@@ -6,6 +6,7 @@
       title="Send a Tip"
       hide-footer
       body-class="p-0"
+      @hide="closeModal"
     >
       <SendTip ref="sendTip" :session_user="session_user" :payload="modalPayload" />
     </b-modal>
@@ -16,8 +17,20 @@
       title="Purchase Post"
       hide-footer
       body-class="p-0"
+      @hide="closeModal"
     >
       <PurchasePost ref="purchasePost" :session_user="session_user" :post_id="selectedResourceId" />
+    </b-modal>
+
+    <b-modal
+      id="modal-purchase-message"
+      size="lg"
+      title="Purchase Message"
+      hide-footer
+      body-class="p-0"
+      @hide="closeModal"
+    >
+      <PurchaseMessage ref="purchaseMessage" :message="selectedResource" />
     </b-modal>
 
     <b-modal
@@ -26,6 +39,7 @@
       title="Follow"
       hide-footer
       body-class="p-0"
+      @hide="closeModal"
     >
       <FollowTimeline ref="followTimeline" :session_user="session_user" :timeline="selectedTimeline" :subscribe_only="subscribeOnly" />
     </b-modal>
@@ -36,6 +50,7 @@
       title="Upload Avatar"
       hide-footer
       body-class="p-0"
+      @hide="closeModal"
     >
       <CropImage ref="cropImage" :session_user="session_user" :url="selectedUrl" :timelineId="selectedTimelineId" />
     </b-modal>
@@ -46,6 +61,7 @@
       title="Post"
       hide-footer
       body-class="p-0"
+      @hide="closeModal"
     >
       <div
         class="post-nav-arrows left"
@@ -70,6 +86,7 @@
       title="Photo"
       hide-footer
       body-class="p-0"
+      @hide="closeModal"
     >
       <ImageDisplay ref="ImageDisplay" :session_user="session_user" :mediafile="selectedResource" :is_feed="false" />
     </b-modal>
@@ -80,6 +97,7 @@
       size="md"
       hide-footer
       body-class="p-0"
+      @hide="closeModal"
     >
       <ScheduleDateTime ref="schedule_picker_modal" :scheduled_at="scheduled_at" :for_edit="is_for_edit" />
     </b-modal>
@@ -91,6 +109,7 @@
       hide-footer
       body-class="p-0"
       no-close-on-backdrop
+      @hide="closeModal"
     >
       <EditPost ref="editPost" :post="selectedResource" />
     </b-modal>
@@ -101,6 +120,7 @@
       hide-footer
       size="md"
       body-class="p-0"
+      @hide="closeModal"
     >
       <ExpirationPeriod ref="expirationPeriod" />
     </b-modal>
@@ -111,6 +131,7 @@
       hide-footer
       size="lg"
       body-class="p-0"
+      @hide="closeModal"
     >
       <PromotionCampaign ref="promotionCampaign" />
     </b-modal>
@@ -122,7 +143,7 @@
 // %PSG: %NOTE %FIXME - not sure if refactoring all modals into a single component was the best idea, as it's possible
 // one or more of the indiviudal modals could be used elsewhere in the app outside of timelines (eg, following list)
 import Vuex from 'vuex';
-import { eventBus } from '@/app'
+import { eventBus } from '@/eventBus'
 import FollowTimeline from '@components/modals/FollowTimeline.vue'
 import CropImage from '@components/modals/CropImage.vue'
 import PurchasePost from '@components/modals/PurchasePost.vue'
@@ -133,6 +154,7 @@ import ScheduleDateTime from '@components/modals/ScheduleDateTime.vue'
 import EditPost from '@components/modals/EditPost.vue'
 import ExpirationPeriod from '@components/modals/ExpirationPeriod.vue'
 import PromotionCampaign from '@components/modals/PromotionCampaign.vue'
+import PurchaseMessage from '@components/modals/PurchaseMessage'
 
 export default {
   name: 'Modals',
@@ -141,6 +163,7 @@ export default {
     FollowTimeline,
     CropImage,
     PurchasePost,
+    PurchaseMessage,
     SendTip,
     PostDisplay,
     ImageDisplay,
@@ -189,6 +212,11 @@ export default {
             this.selectedResourceId = data.post.id
             this.$bvModal.show('modal-purchase-post')
             break
+          case 'render-purchase-message':
+            this.selectedResource = data.message
+            this.$bvModal.show('modal-purchase-message')
+            break
+
           case 'render-follow':
             this.selectedTimeline = data.timeline
             this.subscribeOnly = false
@@ -246,6 +274,9 @@ export default {
     },
     postModalAction(action) {
       eventBus.$emit('post-modal-actions', action);
+    },
+    closeModal() {
+      eventBus.$emit('close-modal');
     }
   },
 

@@ -104,7 +104,7 @@ export const routes = [
   // Lists
   {
     name: 'lists.dashboard',
-    path: '/lists',
+    path: '/fans',
     component: lists.Dashboard,
     children:  listRoutes,
   },
@@ -174,6 +174,15 @@ export const routes = [
     props: true,
   },
 
+  /**
+   * Invitation Accept Page
+   */
+  {
+    name: 'users.acceptstaffinvite',
+    path: '/staff/invitations/accept',
+    component: users.AcceptInviteSessionUser,
+    props: false,
+  },
 
   /**
    * timeline.show must be declared after other routes due to it only being a slug

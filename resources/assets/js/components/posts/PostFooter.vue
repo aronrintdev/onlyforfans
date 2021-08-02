@@ -8,25 +8,25 @@
         </li>
         <li class="mr-3">
           <span @click="toggleComments()" class="tag-clickable">
-            <fa-icon :icon="['far', 'comments']" />
+            <fa-icon size="lg" :icon="['far', 'comments']" class="text-secondary" />
           </span>
         </li>
         <li class="mr-3">
           <span @click="share()" class="tag-clickable">
-            <fa-icon :icon="['far', 'share-square']" />
+            <fa-icon size="lg" :icon="['far', 'share-square']" class="text-secondary" />
           </span>
         </li>
         <li class="mr-3">
           <span @click="renderTip" class="tag-clickable">
-            <fa-icon icon="dollar-sign" />
+            <fa-icon size="lg" icon="dollar-sign" class="text-secondary" />
           </span>
         </li>
       </ul>
       <ul class="d-flex list-inline footer-ctrl mb-0">
         <li class="mr-3">
           <span @click="toggleFavorite()" class="tag-clickable">
-            <fa-icon v-if="isFavoritedByMe" fixed-width :icon="['fas', 'star']" class="clickable" style="font-size:1.2rem; color:#007bff" />
-            <fa-icon v-else fixed-width :icon="['far', 'star']" class="clickable" style="font-size:1.2rem; color:#007bff" />
+            <fa-icon size="lg" v-if="isFavoritedByMe" fixed-width :icon="['fas', 'star']" class="clickable text-primary" style="font-size:1.2rem" />
+            <fa-icon size="lg" v-else fixed-width :icon="['far', 'star']" class="clickable text-primary" style="font-size:1.2rem" />
           </span>
         </li>
       </ul>
@@ -35,14 +35,15 @@
     <div class="like-count">
       <template v-if="likeCount===1"><span class="mr-2">{{ likeCount }} like</span></template>
       <template v-if="likeCount > 1"><span class="mr-2">{{ likeCount }} likes</span></template>
-      <template v-if="post.stats.commentCount===1"><span class="mr-2">{{ post.stats.commentCount }} comment</span></template>
-      <template v-if="post.stats.commentCount > 1"><span class="mr-2">{{ post.stats.commentCount }} comments</span></template>
+      <template v-if="commentCount===1"><span class="mr-2">{{ commentCount }} comment</span></template>
+      <template v-if="commentCount > 1"><span class="mr-2">{{ commentCount }} comments</span></template>
     </div>
 
     <b-collapse v-model="renderComments">
       <CommentList
         :post-id="post.id"
         :loading="loadingComments"
+        @input="addComment"
         v-model="comments"
       />
     </b-collapse>
@@ -51,7 +52,8 @@
 </template>
 
 <script>
-import { eventBus } from '@/app'
+import Vuex from 'vuex'
+import { eventBus } from '@/eventBus'
 import CommentList from '@components/comments/List'
 import CommentDisplay from '@components/comments/Display'
 import NewComment from '@components/comments/New'
@@ -83,6 +85,7 @@ export default {
     likeCount: 0, // %FIXME INIT
     isFavoritedByMe: false,
     loadingComments: false,
+    commentCount: 0,
     // whereas comment count is computed from the comments relation on the post itself (%FIXME?)
   }),
 
@@ -90,11 +93,13 @@ export default {
     this.isLikedByMe = this.post.stats?.isLikedByMe || false
     this.likeCount = this.post.stats?.likeCount  || 0
     this.isFavoritedByMe = this.post.stats?.isFavoritedByMe || false
+    this.commentCount = this.post.stats.commentCount || 0
   },
 
   created() {},
 
   methods: {
+    ...Vuex.mapMutations('posts', [ 'UPDATE_PUBLIC_POST' ]),
     async toggleLike() { // for Post
       let response
       if (this.isLikedByMe) {
@@ -114,6 +119,15 @@ export default {
         this.isLikedByMe = true
       }
       this.likeCount = response.data.like_count
+      const updatedPost = {
+        ...this.post,
+        stats: {
+          ...this.post.stats,
+          isLikedByMe: this.isLikedByMe,
+          likeCount: this.likeCount,
+        }
+      }
+      this.UPDATE_PUBLIC_POST({ post: updatedPost })
     },
 
     share() {},
@@ -128,9 +142,17 @@ export default {
       })
     },
 
-    addComment(comment) {
-      this.comments = [ ...this.comments, comment ]
-      this.post.comments_count = this.post.comments_count + 1
+    addComment(comments) {
+      this.comments = [ ...comments ]
+      this.commentCount = this.commentCount + 1
+      const updatedPost = {
+        ...this.post,
+        stats: {
+          ...this.post.stats,
+          commentCount: this.commentCount,
+        }
+      }
+      this.UPDATE_PUBLIC_POST({ post: updatedPost })
     },
 
     async toggleFavorite() { // was toggleBookmark
@@ -148,6 +170,14 @@ export default {
         })
         this.isFavoritedByMe = true
       }
+      const updatedPost = {
+        ...this.post,
+        stats: {
+          ...this.post.stats,
+          isFavoritedByMe: this.isFavoritedByMe,
+        }
+      }
+      this.UPDATE_PUBLIC_POST({ post: updatedPost })
     },
 
     updateCommentsCount(value, index) {
@@ -186,7 +216,7 @@ export default {
         return
       }
       if (value.length > 0 && value.length !== oldValue.length) {
-        this.post.comments_count = value.length
+        this.commentCount = value.length
       }
     }
   },
@@ -197,6 +227,10 @@ export default {
 <style scoped>
 ul {
   margin: 0;
+}
+
+li {
+  font-size: 14px;
 }
 
 .like-count {

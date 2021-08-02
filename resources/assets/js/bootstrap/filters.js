@@ -22,7 +22,17 @@ Vue.filter('niceCurrency', function (value, currency = 'USD') {
 })
 
 Vue.filter('niceGuid', function (v) {
-  return v.slice(-12)
+  return v ? v.slice(-12) : ''
+})
+
+Vue.filter('niceBool', function (v) {
+  if ( v === 0 || v===false) {
+    return 'N'
+  }  else if ( v === 1 || v===true) {
+    return 'Y'
+  } else {
+    return '?'
+  }
 })
 
 Vue.filter('enumPostType', function (k) {
@@ -49,6 +59,23 @@ Vue.filter('ucfirst', function(str) {
   return str.charAt(0).toUpperCase() + str.slice(1)
 })
 
-Vue.filter('niceDate', function(value) {
+Vue.filter('niceDate', function (value) {
+  if (typeof value === 'undefined' || value === null || value === '') {
+    return ''
+  }
   return moment(value).format('MMMM Do, YYYY')
+})
+
+Vue.filter('niceDateTime', function (value) {
+  if (typeof value === 'undefined' || value === null || value === '') {
+    return ''
+  }
+  return moment(value).format('MMMM Do, YYYY HH:mm:ss')
+})
+
+Vue.filter('niceDateTimeShort', function (value) {
+  if (typeof value === 'undefined' || value === null || value === '') {
+    return ''
+  }
+  return moment(value).format('MMM Do, YYYY HH:mm:ss')
 })

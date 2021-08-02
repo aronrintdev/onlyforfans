@@ -3,7 +3,16 @@
     <b-card class="form-card mx-auto" no-body>
       <template #header>
         <div class="h2 text-center mb-0" v-text="`Forgot Password`" />
+        <div class="d-flex mt-2">
+          <router-link class="ml-auto" :to="{ name: 'login' }">Return to Sign In</router-link>
+        </div>
       </template>
+
+      <b-alert variant="info" show>
+        If you did not receive an email verification request after signing up, please use the
+        <router-link :to="{ name: 'resend-email' }">resend email verification</router-link> page.
+      </b-alert>
+
       <!-- Forgot Password Form -->
       <b-form @submit.prevent="sendForgotPassRequest">
         <div class="login-form p-3">

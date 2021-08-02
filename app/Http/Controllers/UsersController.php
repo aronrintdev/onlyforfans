@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\Mail;
 
 use App\Notifications\IdentityVerificationRequestSent;
 use App\Notifications\IdentityVerificationVerified;
@@ -28,6 +29,8 @@ use App\Models\Verifyrequest;
 use App\Enums\MediafileTypeEnum;
 use App\Enums\PaymentTypeEnum;
 use App\Enums\VerifyStatusTypeEnum;
+use App\Models\Staff;
+use App\Apis\Sendgrid\Api as SendgridApi;
 
 class UsersController extends AppBaseController
 {
@@ -63,6 +66,8 @@ class UsersController extends AppBaseController
     public function showSettings(Request $request, User $user)
     {
         $this->authorize('view', $user);
+        $staff = Staff::where('user_id', $user->id)->where('role', 'manager')->get();
+        $user->settings['is_manager'] = count($staff) > 0;
         return new UserSettingResource($user->settings);
     }
 
@@ -117,6 +122,8 @@ class UsersController extends AppBaseController
     {
         $this->authorize('update', $user);
         $request->validate([
+            'firstname' => 'string|nullable',
+            'lastname' => 'string|nullable',
             'subscriptions.price_per_1_months' => 'numeric',
             'subscriptions.price_per_3_months' => 'numeric|nullable',
             'subscriptions.price_per_6_months' => 'numeric|nullable',
@@ -133,8 +140,29 @@ class UsersController extends AppBaseController
             'birthdate' => 'date|nullable',
             'weblinks' => 'array|nullable',
             'weblinks.*' => 'url|nullable',
+            'body_type' => 'string|nullable',
+            'chest' => 'string|nullable',
+            'waist' => 'string|nullable',
+            'hips' => 'string|nullable',
+            'arms' => 'string|nullable',
+            'hair_color' => 'string|nullable',
+            'eye_color' => 'string|nullable',
+            'age' => 'string|nullable',
+            'height' => 'string|nullable',
+            'weight' => 'string|nullable',
+            'education' => 'string|nullable',
+            'language' => 'string|nullable',
+            'ethnicity' => 'string|nullable',
+            'profession' => 'string|nullable',
         ]);
         $request->request->remove('username'); // disallow username updates for now
+
+        $user->fill($request->only([
+            'firstname',
+            'lastname',
+        ]));
+
+        $user->save();
 
         $userSetting = DB::transaction(function () use(&$user, &$request) {
 
@@ -149,7 +177,7 @@ class UsersController extends AppBaseController
                 $request->request->remove('is_follow_for_free');
             }
     
-            $cattrsFields = [ 'subscriptions', 'localization', 'weblinks', 'privacy', 'blocked', 'watermark', 'message_with_tip_only', 'enable_message_with_tip_only_pay' ];
+            $cattrsFields = [ 'subscriptions', 'localization', 'privacy', 'blocked', 'watermark', 'message_with_tip_only', 'enable_message_with_tip_only_pay' ];
             $attrs = $request->except($cattrsFields);
 
             $userSetting = $user->settings;
@@ -201,7 +229,7 @@ class UsersController extends AppBaseController
             'mfname'           => $file->getClientOriginalName(),
             'mftype'           => MediafileTypeEnum::AVATAR,
             'resource_id'      => $sessionUser->id,
-            'resource_type'    => 'avatar',
+            'resource_type'    => 'users',
         ]);
 
         $sessionUser->timeline->avatar_id = $mediafile->id;
@@ -234,7 +262,7 @@ class UsersController extends AppBaseController
             'mfname'           => $file->getClientOriginalName(),
             'mftype'           => MediafileTypeEnum::COVER,
             'resource_id'      => $sessionUser->id,
-            'resource_type'    => 'cover',
+            'resource_type'    => 'users',
         ]);
 
         $sessionUser->timeline->cover_id = $mediafile->id;
@@ -375,6 +403,9 @@ class UsersController extends AppBaseController
         $user->real_lastname = $request->lastname;
         $user->save();
 
+        $updateSettings['has_allowed_nsfw'] = $request->hasAllowedNSFW;
+        $user->settings->update($updateSettings);
+
         $user->notify( new IdentityVerificationRequestSent($vr, $user) );
 
         return response()->json( $vr );
@@ -393,5 +424,103 @@ class UsersController extends AppBaseController
             $user->notify( new IdentityVerificationRejected($vr, $user) );
         }
         return response()->json( $vr );
+    }
+
+    // Check user's referral code and generate code if user has no it
+    public function checkReferralCode(Request $request) {
+        $sessionUser = $request->user();
+        if (empty($sessionUser->referral_code)) {
+            // Generate referral_code for new user
+            do {
+                $referral_code = mt_rand( 00000000, 99999999 );
+            } while (User::where('referral_code', '=', str_pad($referral_code, 8 , '0' , STR_PAD_LEFT))->exists());
+            $referral_code = str_pad($referral_code, 8 , '0' , STR_PAD_LEFT);
+            $updateUser['referral_code'] = $referral_code;
+            $sessionUser->update($updateUser);
+        } else {
+            $referral_code = $sessionUser->referral_code;
+        }
+        return response()->json(
+            ['referralCode' => $referral_code]
+        );
+    }
+
+    // Add new staff account and send invitation email
+    public function sendStaffInvite(Request $request)
+    {
+        $sessionUser = $request->user();
+        $request->validate([
+            'first_name' => 'required|string',
+            'last_name' => 'required|string',
+            'email' => 'required|string',
+            'role' => 'required|string',
+        ]);
+
+        // Add new staff user
+        $token = str_random(60);
+        $email = $request->input('email');
+
+        // Check if the same invite exists
+        $existingStaff = Staff::where('role', $request->input('role'))->where('email', $email)->where('owner_id', $sessionUser->id)->get();
+        if (count($existingStaff) > 0) {
+            return response()->json( [ 'message' => 'This user was already invited as a '.$request->input('role') ], 400);
+        }
+
+        $staff = Staff::create([
+            'first_name' => $request->input('first_name'),
+            'last_name' => $request->input('last_name'),
+            'email' => $email,
+            'role' => $request->input('role'),
+            'owner_id' => $sessionUser->id,
+            'token' => $token,
+            'creator_id' => $request->input('creator_id'),
+        ]);
+
+        if ($request->has('permissions')) {
+            $permissions = $request->input('permissions');
+            $staff->permissions()->attach($permissions);
+        }
+
+        // Send Inviation email
+        $users = User::where('email', $email)->get();
+        $accept_link = url('/staff/invitations/accept?token='.$token.'&email='.$email.'&inviter='.$sessionUser->name.(count($users) == 0 ? '&is_new=true' : ''));
+
+        if ($request->input('role') == 'manager') {
+            $user = User::where('email', $email)->first();
+            SendgridApi::send('invite-staff-manager', [
+                'to' => [
+                    'email' => $email,
+                ],
+                'dtdata' => [
+                    'manager_name' => $request->input('first_name').' '.$request->input('last_name'),
+                    'username' => $sessionUser->name,
+                    'login_url' => $accept_link,
+                    'home_url' => url('/'),
+                    'referral_url' => url('/referrals'),
+                    'privacy_url' => url('/privacy'),
+                    'manage_preferences_url' => $user ? url( route('users.showSettings', $user->username)) : url('/'),
+                    'unsubscribe_url' => $user ? url( route('users.showSettings', $user->username)) : url('/'),
+                ],
+            ]);
+        } else {
+            $user = User::where('email', $email)->first();
+            SendgridApi::send('invite-staff-member', [
+                'to' => [
+                    'email' => $email,
+                ],
+                'dtdata' => [
+                    'staff_name' => $request->input('first_name').' '.$request->input('last_name'),
+                    'username' => $sessionUser->name,
+                    'login_url' => $accept_link,
+                    'home_url' => url('/'),
+                    'referral_url' => url('/referrals'),
+                    'privacy_url' => url('/privacy'),
+                    'manage_preferences_url' => $user ? url( route('users.showSettings', $user->username)) : url('/'),
+                    'unsubscribe_url' => $user ? url( route('users.showSettings', $user->username)) : url('/'),
+                ],
+            ]);
+        }
+
+        return response()->json( ['status' => 200] );
     }
 }

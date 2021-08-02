@@ -57,7 +57,7 @@
 
 <script>
 import Vuex from 'vuex'
-import { eventBus } from '@/app'
+import { eventBus } from '@/eventBus'
 import PostCta from '@components/posts/PostCta'
 
 export default {
