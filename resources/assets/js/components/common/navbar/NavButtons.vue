@@ -4,7 +4,7 @@
       v-for="button in buttons"
       :key="button.name"
       :to="button.to"
-      v-b-tooltip
+      v-b-tooltip.hover.bottom
       :title="$t(button.name)"
       class="pt-2"
     >
