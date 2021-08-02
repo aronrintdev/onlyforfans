@@ -12,7 +12,7 @@
         <div class="media-wrapper" v-if="mf.is_image" >
           <img
             :src="mf.filepath"
-            :alt="mf.name"
+            alt=""
           />
           <div class="icon-images" v-if="mf.mediaCount > 1">
             <fa-icon :icon="['fas', 'images']" class="text-white icon" />
@@ -264,10 +264,6 @@ export default {
       width: 100%;
       height: 100%;
     }
-  }
-
-  .icon-images .icon {
-    transform: scaleX(-1);
   }
 
   @media (max-width: 767px) {
