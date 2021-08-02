@@ -4,45 +4,62 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Config;
 
+use App\Enums\CfstatusTypeEnum;
 use App\Models\User;
 use App\Models\Contentflag;
-use App\Http\Resources\ContactflagCollection;
-use App\Http\Resources\Contactflag as ContactflagResource;
+use App\Http\Resources\ContentflagCollection;
+use App\Http\Resources\Contentflag as ContentflagResource;
 
 class ContentflagsController extends AppBaseController
 {
     public function index(Request $request)
     {
+        // Check permissions
+        if ( !$request->user()->isAdmin() ) {
+            abort(403); // %TODO: eventually non admin should be able to view own flagged?
+        }
+
         $request->validate([
             // filters
-            //'owner_id'                => 'uuid|exists:users,id',
+            'cfstatus' => 'array|in:'.CfstatusTypeEnum::getKeysCsv(),
+            'flaggable_type' => 'string|in:posts,timelines,users,comments,diskmediafiles,mediafiles,stories',
+            'flaggable_id' => 'uuid',
+            'flagger_id' => 'uuid|exists:users,id',
         ]);
         $filters = $request->only([
-            //'owner_id',
+            'cfstatus',
+            'flaggable_type',
+            'flaggable_id',
+            'flagger_id',
         ]) ?? [];
 
         $sessionUser = $request->user();
 
         $query = Contentflag::query(); // Init query
 
-        // Check permissions
-        if ( !($request->user()->isAdmin() && $request->has('owner_id')) ) {
-            $query->where('owner_id', $request->user()->id); // limit to my own
-            unset($filters['owner_id']);
-        }
-
         // Apply filters
         foreach ($filters as $key => $v) {
             switch ($key) {
-                case 'owner_id':
+                case 'cfstatus':
+                case 'flaggable_id':
+                case 'flaggable_type':
+                case 'flagger_id':
+                    $query->where($key, $v);
                     break;
                 default:
             }
         }
 
-        if ($request->has('sortBy')) {
-            //switch($request->input('sortBy')) {
-            //}
+        switch ($request->sortBy) {
+        case 'cfstatus':
+        case 'flaggable_type':
+        case 'created_at':
+        case 'updated_at':
+            $sortDir = $request->sortDir==='asc' ? 'asc' : 'desc';
+            $query->orderBy($request->sortBy, $sortDir);
+            break;
+        default:
+            $query->orderBy('updated_at', 'desc');
         }
 
 
@@ -50,57 +67,32 @@ class ContentflagsController extends AppBaseController
         return new ContentflagCollection($data);
     }
 
-    /**
-     * Simple search
-     *
-     * @param Request $request
-     * @return MycontactCollection
-     */
-    public function search(Request $request)
-    {
-        $searchQuery = $request->input('query') ?? $request->input('q');
-
-        $data = Mycontact::search($searchQuery)->where('owner_id', $request->user()->getKey())
-            ->paginate($request->input('take', env('MAX_DEFAULT_PER_REQUEST', 10)));
-
-        return new MycontactCollection($data);
-    }
-
-    /**
-     * Store new Mycontact
-     *
-     * @param Request $request
-     * @return MycontactResource
-     */
     public function store(Request $request)
     {
-        $this->authorize('store', Mycontact::class);
+        $this->authorize('store', Contentflag::class);
 
         $request->validate([
-            'contact_id' => 'required|uuid|exists:users,id',
-            'alias'      => 'nullable|string|max:255',
+            //'cfstatus' => 'required|in:'.CfstatusTypeEnum::getKeysCsv(),
+            'flaggable_type' => 'string|in:posts,timelines,users,comments,diskmediafiles,mediafiles,stories',
+            'flaggable_id' => 'uuid',
             'cattrs'     => 'nullable|json',
             'meta'       => 'nullable|json',
         ]);
 
-        $mycontact = Mycontact::create(array_merge(
-            [ 'owner_id' => $request->user()->getKey() ],
+        $obj = Contentflag::create(array_merge(
+            [ 
+                'flagger_id' => $request->user()->getKey(),
+                'cfstatus' => CfstatusTypeEnum::PENDING,
+            ],
             $request->all(),
         ));
 
-        return new MycontactResource($mycontact);
+        return new ContentflagResource($obj);
     }
 
-    /**
-     * Update existing Mycontact
-     *
-     * @param Request   $request
-     * @param Mycontact $mycontact
-     * @return MycontactResource
-     */
-    public function update(Request $request, Mycontact $mycontact)
+    public function update(Request $request, Contentflag $obj)
     {
-        $this->authorize('update', $mycontact);
+        $this->authorize('update', $obj);
 
         $request->validate([
             'alias'  => 'nullable|string|max:255',
@@ -112,35 +104,25 @@ class ContentflagsController extends AppBaseController
 
         foreach($fields as $field) {
             if ($request->has($field)) {
-                $mycontact->{$field} = $request->input($field);
+                $obj->{$field} = $request->input($field);
             }
         }
 
-        $mycontact->save();
+        $obj->save();
 
-        return new MycontactResource($mycontact);
+        return new ContentflagResource($obj);
     }
 
-    /**
-     * Show existing Mycontact
-     *
-     * @param Mycontact $mycontact
-     */
-    public function show(Mycontact $mycontact)
+    public function show(Contentflag $obj)
     {
-        $this->authorize('view', $mycontact);
-        return new MycontactResource($mycontact);
+        $this->authorize('view', $obj);
+        return new ContentflagResource($obj);
     }
 
-    /**
-     * Delete existing Mycontact
-     *
-     * @param Mycontact $mycontact
-     */
-    public function destroy(Mycontact $mycontact)
+    public function destroy(Contentflag $obj)
     {
-        $this->authorize('delete', $mycontact);
-        $mycontact->delete();
+        $this->authorize('delete', $obj);
+        $obj->delete();
         return;
     }
 

@@ -3,7 +3,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\ResourceCollection;
 
-class ContactflagCollection extends ResourceCollection
+class ContentflagCollection extends ResourceCollection
 {
     public function toArray($request)
     {
