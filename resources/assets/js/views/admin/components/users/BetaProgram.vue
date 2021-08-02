@@ -24,6 +24,10 @@
       </b-btn>
     </div>
 
+    <pre v-if="response">
+      {{ response }}
+    </pre>
+
     <div class="h2 mt-5">Beta Tokens</div>
     <b-pagination
       v-model="page"
@@ -116,14 +120,15 @@ export default {
     page: 1,
     take: 20,
     total: 0,
+    response: '',
   }),
 
   methods: {
     send() {
       this.working = true,
       this.axios.post(this.$apiRoute('admin.beta-program.add-tokens'), { testers: this.testers })
-        .then()
-        .catch(error => {})
+        .then(response => this.response = JSON.stringify(response.data, null, 2))
+        .catch(error => {console.error(error)})
         .finally(() => {
           this.working = false
           this.testers = ''
