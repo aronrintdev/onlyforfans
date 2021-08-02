@@ -5,7 +5,8 @@
         <b-form @submit.prevent="login">
           <!-- Login Form -->
           <div class="login-form">
-            <h1 class="card-title mb-5">Sign in</h1>
+            <img src="/images/logos/allfans-logo-154x33.png" alt="All Fans Logo" class="signin-logo">
+            <div class="h1 mb-5" v-text="$t('signInHeader')"></div>
             <div v-if="verrors && verrors.message">
               <b-alert variant="danger" v-text="verrors.message" show />
             </div>
@@ -181,6 +182,13 @@ export default {
   &.facebook { background-color: #3B5998; }
   &.google { background-color: #dd4b39; }
   &.twitter { background-color: #55ACEE; }
+}
+.signin-logo {
+  display: none;
+  @media (max-width: 576px) {
+    display: block;
+    margin: 0 auto 25px;
+  }
 }
 </style>
 

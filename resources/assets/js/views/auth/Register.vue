@@ -4,6 +4,7 @@
       <div class="login-card p-5">
         <!-- SignUp Form -->
         <b-form @submit.prevent="signup">
+          <img src="/images/logos/allfans-logo-154x33.png" alt="All Fans Logo" class="register-logo">
           <div class="h1 mb-5" v-text="$t('signUpLink')" />
           <div class="signup-form">
             <div v-if="$route.query.beta">
@@ -243,6 +244,13 @@ export default {
   &.google { background-color: #dd4b39; }
   &.twitter { background-color: #55ACEE; }
 }
+.register-logo {
+  display: none;
+  @media (max-width: 576px) {
+    display: block;
+    margin: 0 auto 25px;
+  }
+}
 </style>
 
 <i18n lang="json5">
@@ -250,7 +258,7 @@ export default {
   "en": {
     "signInHeader": "Sign In",
     "accountQuestion": "Already have an account?",
-    "signUpLink": "Sign up",
+    "signUpLink": "Sign Up",
     "email": "Email",
     "password": "Password",
     "signInButton": "Sign In",

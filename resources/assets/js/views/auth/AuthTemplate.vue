@@ -164,10 +164,11 @@ export default {
   overflow: auto;
 }
 .auth-description {
-    margin-top: 120px;
-    height: 100vh;
+    display: none;
   @media (min-width: 576px) {
+    display: block;
     float: right;
+    margin-top: 120px;
     margin-right: 150px;
     width: 350px;
   }
