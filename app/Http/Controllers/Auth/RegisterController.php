@@ -12,18 +12,19 @@ use App\Models\Referral;
 
 use Illuminate\Http\Request;
 use App\Models\Diskmediafile;
+use Illuminate\Support\Carbon;
 use App\Enums\MediafileTypeEnum;
+use App\Notifications\VerifyEmail;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
-use App\Notifications\VerifyEmail;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Redirect;
 use Laravel\Socialite\Facades\Socialite;
 use Illuminate\Foundation\Auth\RegistersUsers;
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
 
 class RegisterController extends Controller
 {
@@ -197,7 +198,6 @@ class RegisterController extends Controller
                 ]);
             }
 
-            \Log::debug('User Registered', [ 'email' => $user->email ]);
             $user->notify(new VerifyEmail(
                 $user, url(route('verification.verify', ['id' => $user->id, 'hash' => $user->verification_code]))
             ));
@@ -243,21 +243,44 @@ class RegisterController extends Controller
         return $user;
     }
 
-
-    public function verifyEmail(Request $request)
+    /**
+     * Resend the verification notification
+     * @param Request $request
+     */
+    public function resendVerifyEmail(Request $request)
     {
-        $user = User::where('email', '=', $request->email)->where('verification_code', '=', $request->code)->first();
+        $user = User::where('email', '=', $request->email)->first();
+        if ($user) {
+            if ($user->email_verified) {
+                return [ 'already_verified' => true ];
+            }
+            $user->notify(new VerifyEmail(
+                $user,
+                url(route('verification.verify', ['id' => $user->id, 'hash' => $user->verification_code]))
+            ));
+        }
+        return;
+    }
+
+    /**
+     * Verify Email Endpoint
+     * @param Request $request
+     */
+    public function verifyEmail(EmailVerificationRequest $request)
+    {
+        // $request->fulfill();
+
+        $user = User::find($request->id);
 
         if ($user->email_verified) {
-            return Redirect::to('login')
-            ->with('login_notice', trans('messages.verified_mail'));
-        } elseif ($user) {
+            return redirect('/email/verified');
+        } else if ($user->verification_code === $request->hash) {
             $user->email_verified = 1;
+            $user->email_verified_at = Carbon::now();
             $user->update();
-            return Redirect::to('login')
-            ->with('login_notice', trans('messages.verified_mail_success'));
+            return redirect('/email/verified');
         } else {
-            echo trans('messages.invalid_verification');
+            return redirect('/login');
         }
     }
 

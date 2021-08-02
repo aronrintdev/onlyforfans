@@ -31,6 +31,11 @@ export const routes = [
     component: AuthViews.ConfirmEmail,
   },
   {
+    name: 'resend-email',
+    path: '/register/resend-verification-email',
+    component: AuthViews.ResendEmailVerification,
+  },
+  {
     name: 'email.verified',
     path: '/email/verified',
     component: AuthViews.EmailVerified,

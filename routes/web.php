@@ -32,11 +32,8 @@ Route::group(['middleware' => ['web']], function () {
         return back()->with('message', 'Verification link sent!');
     })->middleware(['auth', 'throttle:6,1'])->name('verification.send');
 
-    Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
-        $request->fulfill();
-
-        return redirect('/email/verified');
-    })->middleware(['auth', 'signed'])->name('verification.verify');
+    Route::get('/email/verify/{id}/{hash}', 'Auth\RegisterController@verifyEmail')->middleware(['auth', 'signed'])->name('verification.verify');
+    Route::post('/email/verify/resend', 'Auth\RegisterController@resendVerifyEmail')->name('verification.resend');
 
     // Skip these to spa controller
     Route::get('/login', 'SpaController@index');
