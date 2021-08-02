@@ -36,7 +36,7 @@ export default {
       });
       const posts = response.data.data.filter(dt => dt.mediafile_count > 0);
       const mediafiles = posts.map(post => ({
-        ...post.mediafiles[0],
+        ...post.mediafiles.filter(file => file.is_image || file.is_video)[0],
         mediaCount: post.mediafile_count,
         post,
       }));

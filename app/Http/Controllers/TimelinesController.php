@@ -419,6 +419,11 @@ class TimelinesController extends AppBaseController
                 $query->where('expire_at', '>', Carbon::now('UTC'))
                       ->orWhere('expire_at', null);
             })
+            ->whereHas('mediafiles', function($q) {
+                $q->with('diskmediafile')->whereHas('diskmediafile', function($q1) {
+                    $q1->where('mimetype', 'like', '%video/%')->orWhere('mimetype', 'like', '%image/%');
+                });
+            })
             ->has('mediafiles', '>' , 0)
             ->orderBy('created_at', 'desc');
         // %NOTE: we could also just remove post-query, as the feed will auto-update to fill length of page (?)
