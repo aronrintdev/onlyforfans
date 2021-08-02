@@ -89,13 +89,14 @@ import validateUrl from '@helpers/validateUrl';
 export default {
   props: {
     session_user: null,
+    timeline: null,
   },
 
   computed: {
     ...Vuex.mapState(['stories']),
 
     isLoading() {
-      return !this.session_user || !this.timelines
+      return !this.session_user || !this.timeline || !this.timelines
     },
 
     urlState() {
@@ -197,6 +198,7 @@ export default {
       // update story bar
       const response = await axios.get( this.$apiRoute('timelines.myFollowedStories') )
       this.timelines = response.data.data
+      this.arrangeTimelines(this.timelines)
 
       this.$root.$bvToast.toast('Story successfully uploaded!', {
         toaster: 'b-toaster-top-center',
@@ -210,14 +212,27 @@ export default {
     },
 
     isMyTimeline(tl) {
-      return this.session_user.id === tl.user.id
+      return this.timeline.id === tl.id
     },
+
+    arrangeTimelines(timelines) {
+      const index = timelines.findIndex(tl => tl.id === this.timeline.id)
+      if (index > -1) {
+        timelines.splice(index, 1)
+        timelines.unshift(this.timeline)
+        this.timelines = timelines
+      } else {
+        timelines.unshift(this.timeline)
+        this.timelines = timelines
+      }
+    }
   },
 
   created() {
     // %NOTE: we don't really need the stories here, just the timelines that have stories 
     axios.get( this.$apiRoute('timelines.myFollowedStories')).then ( response => {
       this.timelines = response.data.data
+      this.arrangeTimelines(this.timelines)
     })
     if ( this.$route.params.toast ) {
       this.$root.$bvToast.toast(this.$route.params.toast.title || 'Success', {
