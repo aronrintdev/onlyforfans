@@ -8,7 +8,7 @@
         </div>
       </template>
       <b-alert variant="success" v-text="$t('message')" show />
-      <b-btn variant="primary"  :to="{ name: 'login' }">
+      <b-btn variant="primary" block :to="{ name: 'login' }">
         {{ $t('returnToLogin') }}
       </b-btn>
     </b-card>
