@@ -2,10 +2,7 @@
   <div class="container" id="view-explore">
     <section class="row">
       <main class="col-12">
-        <PublicPostFeed :mediafiles="mediafiles" @loadMore="loadMore" />
-        <div class="text-center">
-          <fa-icon icon="spinner" spin class="loading" />
-        </div>
+        <PublicPostFeed :mediafiles="mediafiles" @loadMore="loadMore" :loading="loading" />
       </main>
     </section>
   </div>
