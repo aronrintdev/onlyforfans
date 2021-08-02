@@ -230,6 +230,9 @@ export default {
     },
 
     extraFilters() {
+      if (!this.filters[this.selectedFilter]) {
+        return []
+      }
       return this.filters[this.selectedFilter].extraFilters
     },
 

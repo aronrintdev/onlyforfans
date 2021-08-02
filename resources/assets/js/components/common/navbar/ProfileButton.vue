@@ -8,7 +8,7 @@
       </template>
       <b-avatar v-if="session_user && session_user.avatar.filepath" :src="session_user.avatar.filepath" class="mr-2" size="2rem" />
       <b-avatar v-else class="mr-2" size="2rem" />
-      <span v-if="session_user" class="mr-2" v-text="session_user.name || session_user.username" />
+      <span v-if="session_user && !mobile" class="mr-2" v-text="session_user.name || session_user.username" />
       <fa-icon icon="caret-down" />
     </b-skeleton-wrapper>
   </div>
@@ -18,7 +18,9 @@
 import Vuex from 'vuex'
 
 export default {
+  name: 'ProfileButton',
   computed: {
+    ...Vuex.mapState(['mobile']),
     ...Vuex.mapGetters(['session_user', 'uiFlags']),
   }
 }

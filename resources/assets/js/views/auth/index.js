@@ -6,6 +6,7 @@ import EmailVerified from './EmailVerified.vue'
 import ForgotPassword from './ForgotPassword.vue'
 import Login from './Login.vue'
 import Register from './Register.vue'
+import ResendEmailVerification from './ResendEmailVerification.vue'
 import ResetPassword from './ResetPassword.vue'
 
 export default {
@@ -14,5 +15,6 @@ export default {
   ForgotPassword,
   Login,
   Register,
+  ResendEmailVerification,
   ResetPassword,
 }

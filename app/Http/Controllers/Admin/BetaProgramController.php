@@ -47,7 +47,7 @@ class BetaProgramController extends Controller
                 'email' => $tester->email,
             ]));
 
-            SendgridApi::send(Config::get('auth.beta.sendGridTemplateId'), [
+            $response = SendgridApi::send(Config::get('auth.beta.sendGridTemplateId'), [
                 'to' => [
                     'email' => $tester->email,
                     'name' => $tester->name,
@@ -70,7 +70,13 @@ class BetaProgramController extends Controller
             ]);
             $token->save();
 
-            $usedTokens->push($token);
+            $usedTokens->push([
+                'token' => $token,
+                'sendGridResponse' => [
+                    'code' => $response->statusCode(),
+                    'body' => $response->body(),
+                ],
+            ]);
         }
 
         return $usedTokens;

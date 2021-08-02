@@ -15,9 +15,10 @@
     <ScrollCollapse v-if="mobile" ref="scrollCollapse" class="w-100" :full-open="searchOpen" :full-open-height="openHeight">
       <div class="d-flex flex-column justify-content-between h-100">
         <SearchBar class="w-100 mt-3" :mobile="true" @opening="searchOpen = true" @closing="searchOpen = false" @scroll="onScroll" />
-        <NavButtons :mobile-style="mobile" :unread-messages-count="unread_messages_count" class="w-100 mt-3" />
       </div>
     </ScrollCollapse>
+
+    <NavButtons v-if="mobile" :mobile-style="mobile" :unread-messages-count="unread_messages_count" class="w-100 mt-3" />
 
     <b-navbar-nav v-if="!mobile" class="search-nav">
       <SearchBar />
