@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="w-100">
     <b-pagination
       v-if="mobile"
       v-model="page"
