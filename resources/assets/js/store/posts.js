@@ -29,8 +29,13 @@ export const posts = {
       const post = propSelect(payload, 'post')
       const temp = state.publicPosts;
       const idx = temp.findIndex(p => p.post.id == post.id);
-      temp[idx].post = post;
-      state.publicPosts = [...temp];
+      if (idx > -1) {
+        temp[idx] = {
+          ...temp[idx],
+          post: post,
+        };
+        state.publicPosts = [...temp];
+      }
     },
     SET_PUBLIC_POSTS(state, payload) {
       state.publicPosts = payload

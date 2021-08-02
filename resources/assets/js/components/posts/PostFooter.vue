@@ -35,14 +35,15 @@
     <div class="like-count">
       <template v-if="likeCount===1"><span class="mr-2">{{ likeCount }} like</span></template>
       <template v-if="likeCount > 1"><span class="mr-2">{{ likeCount }} likes</span></template>
-      <template v-if="post.stats.commentCount===1"><span class="mr-2">{{ post.stats.commentCount }} comment</span></template>
-      <template v-if="post.stats.commentCount > 1"><span class="mr-2">{{ post.stats.commentCount }} comments</span></template>
+      <template v-if="commentCount===1"><span class="mr-2">{{ commentCount }} comment</span></template>
+      <template v-if="commentCount > 1"><span class="mr-2">{{ commentCount }} comments</span></template>
     </div>
 
     <b-collapse v-model="renderComments">
       <CommentList
         :post-id="post.id"
         :loading="loadingComments"
+        @input="addComment"
         v-model="comments"
       />
     </b-collapse>
@@ -84,6 +85,7 @@ export default {
     likeCount: 0, // %FIXME INIT
     isFavoritedByMe: false,
     loadingComments: false,
+    commentCount: 0,
     // whereas comment count is computed from the comments relation on the post itself (%FIXME?)
   }),
 
@@ -91,6 +93,7 @@ export default {
     this.isLikedByMe = this.post.stats?.isLikedByMe || false
     this.likeCount = this.post.stats?.likeCount  || 0
     this.isFavoritedByMe = this.post.stats?.isFavoritedByMe || false
+    this.commentCount = this.post.stats.commentCount || 0
   },
 
   created() {},
@@ -139,14 +142,14 @@ export default {
       })
     },
 
-    addComment(comment) {
-      this.comments = [ ...this.comments, comment ]
-      this.post.comments_count = this.post.comments_count + 1
+    addComment(comments) {
+      this.comments = [ ...comments ]
+      this.commentCount = this.commentCount + 1
       const updatedPost = {
         ...this.post,
         stats: {
           ...this.post.stats,
-          commentCount: this.post.comments_count,
+          commentCount: this.commentCount,
         }
       }
       this.UPDATE_PUBLIC_POST({ post: updatedPost })
@@ -213,7 +216,7 @@ export default {
         return
       }
       if (value.length > 0 && value.length !== oldValue.length) {
-        this.post.comments_count = value.length
+        this.commentCount = value.length
       }
     }
   },
