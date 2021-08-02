@@ -22,6 +22,8 @@
       </section>
     </b-card-header>
 
+    <PaymentsDisabled v-if="paymentsDisabled" />
+
     <transition name="quick-fade" mode="out-in">
       <b-form v-if="step === 'initial'" @submit="sendTip">
         <b-card-body>
@@ -48,7 +50,7 @@
         </b-card-body>
 
         <b-card-footer>
-          <b-button type="submit" variant="primary" class="w-100">Send Tip</b-button>
+          <b-btn type="submit" :disabled="paymentsDisabled" variant="primary" class="w-100">Send Tip</b-btn>
         </b-card-footer>
       </b-form>
 
@@ -76,6 +78,8 @@ import { eventBus } from '@/eventBus'
 import LEDGER_CONFIG from "@/components/constants"
 import PurchaseForm from '@components/payments/PurchaseForm'
 
+import PaymentsDisabled from '@components/payments/PaymentsDisabled'
+
 // Tip timeline on another user's timeline page / feed
 // Tip post on another user's timeline page / feed
 // Tip post on one's own home page / feed
@@ -83,6 +87,7 @@ export default {
   name: 'SendTip',
 
   components: {
+    PaymentsDisabled,
     PurchaseForm,
   },
 
@@ -119,6 +124,8 @@ export default {
   },
 
   data: () => ({
+    paymentsDisabled: true,
+
     /** 'initial' | 'payment' */
     step: 'initial',
     LEDGER_CONFIG,
@@ -129,7 +136,11 @@ export default {
     },
   }),
 
-  created() { },
+  created() {
+    if ( paymentsDisabled ) {
+      this.paymentsDisabled = true
+    }
+  },
 
   methods: {
 

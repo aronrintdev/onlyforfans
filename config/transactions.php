@@ -17,6 +17,8 @@ return [
     'default' => env('TRANSACTIONS_DEFAULT_SYSTEM', 'segpay'),
     'defaultCurrency' => env('TRANSACTIONS_DEFAULT_CURRENCY', 'USD'),
 
+    'disableAll' => env('TRANSACTIONS_DISABLE_ALL', false),
+
     /**
      * All transactions live within a system, all background money in a system must live in same location, e.i. bank
      * account, crypto account, ect.
