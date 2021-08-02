@@ -57,25 +57,25 @@ trait NotifyTraits {
         $is = false; // default to false, possibly set to true below
         switch ($notifySlug) {
         case 'tip-received':
-            $is = $settings->cattrs['notifications']['income']['new_tip'] ?? false;
+            $is = $settings->cattrs['notifications']['income']['new_tip'] ? true : false;
             break;
         case 'comment-received':
-            $is = $settings->cattrs['notifications']['posts']['new_comment'] ?? false;
+            $is = $settings->cattrs['notifications']['posts']['new_comment'] ? true : false;
             break;
         case 'new-campaign-contribution-received':
-            $is = $settings->cattrs['notifications']['campaigns']['new_contribution'] ?? false;
+            $is = $settings->cattrs['notifications']['campaigns']['new_contribution'] ? true : false;
             break;
         case 'campaign-goal-reached':
-            $is = $settings->cattrs['notifications']['campaigns']['goal_reached'] ?? false;
+            $is = $settings->cattrs['notifications']['campaigns']['goal_reached'] ? true : false;
             break;
         case 'new-message-received':
-            $is = $settings->cattrs['notifications']['messages']['new_message'] ?? false;
+            $is = $settings->cattrs['notifications']['messages']['new_message'] ? true : false;
             break;
         case 'new-sub-payment-received':
-            $is = $settings->cattrs['notifications']['subscriptions']['new_payment'] ?? false;
+            $is = $settings->cattrs['notifications']['subscriptions']['new_payment'] ? true : false;
             break;
         case 'new-referral-received':
-            $is = $settings->cattrs['notifications']['referrals']['new_referral'] ?? false;
+            $is = $settings->cattrs['notifications']['referrals']['new_referral'] ? true : false;
             break;
         default:
         }

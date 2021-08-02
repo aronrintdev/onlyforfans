@@ -68,7 +68,7 @@ export default {
             to: { name: 'lists.followers' },
           },
           {
-            name: 'Discover',
+            name: 'Explore',
             icon: 'compass',
             to: { name: 'timelines.explore' },
           },
@@ -172,7 +172,7 @@ export default {
   "en": {
     "Home": "Home",
     "Fans": "Fans",
-    "Discover": "Discover",
+    "Explore": "Explore",
     "Notifications": "Notifications",
     "Messages": "Messages",
     "999+": "999+",

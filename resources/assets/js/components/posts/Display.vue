@@ -77,7 +77,7 @@
       </template>
     
       <template #footer>
-        <PostFooter :post="post" :session_user="session_user" />
+        <PostFooter :key="post.id" :post="post" :session_user="session_user" />
       </template>
 
     </b-card>

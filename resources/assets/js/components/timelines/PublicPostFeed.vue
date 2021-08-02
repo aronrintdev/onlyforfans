@@ -12,7 +12,7 @@
         <div class="media-wrapper" v-if="mf.is_image" >
           <img
             :src="mf.filepath"
-            :alt="mf.name"
+            alt=""
           />
           <div class="icon-images" v-if="mf.mediaCount > 1">
             <fa-icon :icon="['fas', 'images']" class="text-white icon" />
@@ -28,6 +28,11 @@
         </div>
       </div>
     </div>
+    <div class="masonry-container skeleton" v-if="loading">
+      <div class="item" v-for="idx in 9" :key="idx">
+        <b-skeleton-img animation="fade" aspect="5:5"></b-skeleton-img>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -39,6 +44,10 @@ export default {
     mediafiles: {
       type: Array,
       default: [],
+    },
+    loading: {
+      type: Boolean,
+      default: true,
     }
   },
 
@@ -184,6 +193,12 @@ export default {
     display: inline-block;
   }
 
+  &.skeleton {
+    .item {
+      opacity: 0.3;
+    }
+  }
+
   .item {
     width: calc(33.3% - 16px);
     margin: 8px;
@@ -204,7 +219,6 @@ export default {
       background-color: rgba(0, 0, 0, 0.3);
       z-index: 3;
     }
-
 
     .media-wrapper {
       width: 100%;
@@ -250,10 +264,6 @@ export default {
       width: 100%;
       height: 100%;
     }
-  }
-
-  .icon-images .icon {
-    transform: scaleX(-1);
   }
 
   @media (max-width: 767px) {
