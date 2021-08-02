@@ -72,7 +72,10 @@ class BetaProgramController extends Controller
 
             $usedTokens->push([
                 'token' => $token,
-                'sendGridResponse' => $response,
+                'sendGridResponse' => [
+                    'code' => $response->statusCode(),
+                    'body' => $response->body(),
+                ],
             ]);
         }
 
