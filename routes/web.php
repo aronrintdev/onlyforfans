@@ -3,6 +3,7 @@ use Pusher\Pusher;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\Finder\Finder;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
 
 // Require all files in routes/web
 $files = Finder::create()
@@ -25,10 +26,21 @@ foreach ($files as $file) {
 Route::group(['middleware' => ['web']], function () {
     Auth::routes();
 
+    Route::post('/email/verification-notification', function (Request $request) {
+        $request->user()->sendEmailVerificationNotification();
+
+        return back()->with('message', 'Verification link sent!');
+    })->middleware(['auth', 'throttle:6,1'])->name('verification.send');
+
+    Route::get('/email/verify/{id}/{hash}', 'Auth\RegisterController@verifyEmail')->name('verification.verify');
+    Route::post('/email/verify/resend', 'Auth\RegisterController@resendVerifyEmail')->name('verification.resend');
+
     // Skip these to spa controller
     Route::get('/login', 'SpaController@index');
-    Route::get('/register', 'SpaController@index');
+    Route::get('/register', 'SpaController@index')->name('register');
+    Route::get('/register/confirm-email', 'SpaController@index');
     Route::get('/forgot-password', 'SpaController@index');
+    Route::get('/email/verified', 'SpaController@index');
 
 });
 
@@ -366,6 +378,7 @@ Route::get('/staff-members/staff', ['as'=>'staff.indexStaffMembers', 'uses' => '
 Route::delete('/staff-members/{id}', ['as'=>'staff.remove', 'uses' => 'StaffController@remove']);
 Route::post('/staff-members/invitations/accept', ['as'=>'staff.acceptInvite', 'uses' => 'StaffController@acceptInvite']);
 Route::patch('/staff-members/{id}/status', ['as'=>'staff.changestatus', 'uses' => 'StaffController@changeStatus']);
+Route::get('/staff-members/permissions', ['as'=>'staff.permissions', 'uses' => 'StaffController@listPermissions']);
 
 /**
  * Single Page application catch all undefined routes

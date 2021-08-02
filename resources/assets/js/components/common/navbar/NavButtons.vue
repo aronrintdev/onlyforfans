@@ -4,8 +4,9 @@
       v-for="button in buttons"
       :key="button.name"
       :to="button.to"
-      v-b-tooltip
+      v-b-tooltip.hover.bottom
       :title="$t(button.name)"
+      class="pt-2"
     >
       <fa-layers fixed-width class="fa-lg">
         <fa-icon :icon="button.icon" class="mx-auto" />
@@ -17,6 +18,9 @@
           class="alert-number"
         />
       </fa-layers>
+      <div v-if="mobileStyle" class="font-size-smaller">
+        {{ $t(button.name) }}
+      </div>
       <b-badge
         v-if="button.name == 'Messages'"
         variant="danger"
@@ -64,7 +68,7 @@ export default {
             to: { name: 'lists.followers' },
           },
           {
-            name: 'Discover',
+            name: 'Explore',
             icon: 'compass',
             to: { name: 'timelines.explore' },
           },
@@ -125,17 +129,30 @@ export default {
 }
 
 .mobile {
+  position: fixed;
+  bottom: 0px;
+  left: 0px;
+  width: 100vw;
+  background-color: var(--light);
+  .nav-item {
+    width: 20%;
+    flex-grow: 1;
+    margin-left: 0;
+    margin-right: 0;
+  }
   .nav-link {
+    flex-grow: 1;
     display: flex;
     flex-direction: column;
     align-content: center;
     justify-content: center;
     width: 100%;
-    padding-left: 1rem;
-    padding-right: 1rem;
-    border: 1px var(--gray) solid;
-    border-bottom: 0;
-    border-radius: 0.5rem 0.5rem 0 0;
+    // padding-left: 1rem;
+    // padding-right: 1rem;
+    // border: 1px var(--gray) solid;
+    // border-bottom: 0;
+    // border-top: 0;
+    // border-radius: 0.5rem 0.5rem 0 0;
 
     svg {
       margin-left:  auto;
@@ -155,7 +172,7 @@ export default {
   "en": {
     "Home": "Home",
     "Fans": "Fans",
-    "Discover": "Discover",
+    "Explore": "Explore",
     "Notifications": "Notifications",
     "Messages": "Messages",
     "999+": "999+",

@@ -30,6 +30,7 @@ use App\Enums\MediafileTypeEnum;
 use App\Enums\PaymentTypeEnum;
 use App\Enums\VerifyStatusTypeEnum;
 use App\Models\Staff;
+use App\Apis\Sendgrid\Api as SendgridApi;
 
 class UsersController extends AppBaseController
 {
@@ -176,7 +177,7 @@ class UsersController extends AppBaseController
                 $request->request->remove('is_follow_for_free');
             }
     
-            $cattrsFields = [ 'subscriptions', 'localization', 'weblinks', 'privacy', 'blocked', 'watermark', 'message_with_tip_only', 'enable_message_with_tip_only_pay' ];
+            $cattrsFields = [ 'subscriptions', 'localization', 'privacy', 'blocked', 'watermark', 'message_with_tip_only', 'enable_message_with_tip_only_pay' ];
             $attrs = $request->except($cattrsFields);
 
             $userSetting = $user->settings;
@@ -228,7 +229,7 @@ class UsersController extends AppBaseController
             'mfname'           => $file->getClientOriginalName(),
             'mftype'           => MediafileTypeEnum::AVATAR,
             'resource_id'      => $sessionUser->id,
-            'resource_type'    => 'avatar',
+            'resource_type'    => 'users',
         ]);
 
         $sessionUser->timeline->avatar_id = $mediafile->id;
@@ -261,7 +262,7 @@ class UsersController extends AppBaseController
             'mfname'           => $file->getClientOriginalName(),
             'mftype'           => MediafileTypeEnum::COVER,
             'resource_id'      => $sessionUser->id,
-            'resource_type'    => 'cover',
+            'resource_type'    => 'users',
         ]);
 
         $sessionUser->timeline->cover_id = $mediafile->id;
@@ -458,9 +459,14 @@ class UsersController extends AppBaseController
         // Add new staff user
         $token = str_random(60);
         $email = $request->input('email');
-        $users = User::where('email', $email)->get();
 
-        Staff::create([
+        // Check if the same invite exists
+        $existingStaff = Staff::where('role', $request->input('role'))->where('email', $email)->where('owner_id', $sessionUser->id)->get();
+        if (count($existingStaff) > 0) {
+            return response()->json( [ 'message' => 'This user was already invited as a '.$request->input('role') ], 400);
+        }
+
+        $staff = Staff::create([
             'first_name' => $request->input('first_name'),
             'last_name' => $request->input('last_name'),
             'email' => $email,
@@ -470,15 +476,50 @@ class UsersController extends AppBaseController
             'creator_id' => $request->input('creator_id'),
         ]);
 
+        if ($request->has('permissions')) {
+            $permissions = $request->input('permissions');
+            $staff->permissions()->attach($permissions);
+        }
+
         // Send Inviation email
+        $users = User::where('email', $email)->get();
         $accept_link = url('/staff/invitations/accept?token='.$token.'&email='.$email.'&inviter='.$sessionUser->name.(count($users) == 0 ? '&is_new=true' : ''));
 
-        Mail::send('emails.staff_invite', ['user' => $sessionUser, 'accept_link' => $accept_link], function ($message) use(&$email)
-        {
-            $message->from('info@allfans.com', 'AllFans');
-
-            $message->to($email)->subject('AllFans Staff Invitation');
-        });
+        if ($request->input('role') == 'manager') {
+            $user = User::where('email', $email)->first();
+            SendgridApi::send('invite-staff-manager', [
+                'to' => [
+                    'email' => $email,
+                ],
+                'dtdata' => [
+                    'manager_name' => $request->input('first_name').' '.$request->input('last_name'),
+                    'username' => $sessionUser->name,
+                    'login_url' => $accept_link,
+                    'home_url' => url('/'),
+                    'referral_url' => url('/referrals'),
+                    'privacy_url' => url('/privacy'),
+                    'manage_preferences_url' => $user ? url( route('users.showSettings', $user->username)) : url('/'),
+                    'unsubscribe_url' => $user ? url( route('users.showSettings', $user->username)) : url('/'),
+                ],
+            ]);
+        } else {
+            $user = User::where('email', $email)->first();
+            SendgridApi::send('invite-staff-member', [
+                'to' => [
+                    'email' => $email,
+                ],
+                'dtdata' => [
+                    'staff_name' => $request->input('first_name').' '.$request->input('last_name'),
+                    'username' => $sessionUser->name,
+                    'login_url' => $accept_link,
+                    'home_url' => url('/'),
+                    'referral_url' => url('/referrals'),
+                    'privacy_url' => url('/privacy'),
+                    'manage_preferences_url' => $user ? url( route('users.showSettings', $user->username)) : url('/'),
+                    'unsubscribe_url' => $user ? url( route('users.showSettings', $user->username)) : url('/'),
+                ],
+            ]);
+        }
 
         return response()->json( ['status' => 200] );
     }

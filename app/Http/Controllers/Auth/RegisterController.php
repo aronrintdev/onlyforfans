@@ -2,29 +2,29 @@
 namespace App\Http\Controllers\Auth;
 
 //use DB;
-use Illuminate\Support\Facades\DB;
 
-use App\Http\Controllers\Controller;
-use App\Models\Diskmediafile;
-use App\Models\Setting;
-use App\Models\Timeline;
-use App\Models\User;
-use App\Models\Invite;
-use App\Models\Referral;
-use App\EnumsInviteTypeEnum;
-use App\Enums\MediafileTypeEnum;
-
-use File;
-use Illuminate\Foundation\Auth\RegistersUsers;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Redirect;
-use Intervention\Image\Facades\Image;
-use Laravel\Socialite\Facades\Socialite;
-use Illuminate\Support\Facades\Storage;
-use Theme;
 use Validator;
+use App\Models\User;
+use App\Models\Token;
+use App\Models\Invite;
+use App\Models\Setting;
+use App\Models\Referral;
+
+use Illuminate\Http\Request;
+use App\Models\Diskmediafile;
+use Illuminate\Support\Carbon;
+use App\Enums\MediafileTypeEnum;
+use App\Notifications\VerifyEmail;
+use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
+use Illuminate\Contracts\Container\BindingResolutionException;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Redirect;
+use Laravel\Socialite\Facades\Socialite;
+use Illuminate\Foundation\Auth\RegistersUsers;
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
 
 class RegisterController extends Controller
 {
@@ -66,28 +66,27 @@ class RegisterController extends Controller
      *
      * @param null $captcha
      * @param bool $socialLogin
-     * 
+     *
      * @return \Illuminate\Contracts\Validation\Validator
      */
     protected function validator(array $data, $captcha = null, $socialLogin = false)
     {
         $messages = [
-            'no_admin' => trans('validation.no_admin'),
-            'tos.required' => trans('messages.tos_required')
+            'no_admin'     => trans('validation.no_admin'),
+            'tos.required' => trans('messages.tos_required'),
         ];
         $rules = [
-            'email'     => 'required|email|max:255|unique:users',
-            // 'name'      => 'max:255',
-            // 'gender'    => 'required',
-            'name'  => 'required|max:25|min:2|unique:timelines|no_admin',
-            'username'  => [ 'max:25', 'min:5', 'unique:users', 'no_admin', new \App\Rules\ValidUsername ],
-            'password'  => 'required|min:6',
-            // 'affiliate' => 'exists:timelines,username',
+            'email'        => 'required|email|max:255|unique:users,email',
+            // 'name'         => 'max:255',
+            'name'         => [ 'required', 'max:25', 'min:2', 'no_admin', new \App\Rules\ValidUsername ],
+            'username'     => [ 'max:25', 'min:5', 'unique:users', 'no_admin', new \App\Rules\ValidUsername ],
+            'password'     => 'required|min:6',
+            // 'affiliate'    => 'exists:timelines,username',
         ];
-        
+
         if (!$socialLogin) {
             $rules = array_merge($rules, [
-                'tos'       => 'required',
+                'tos' => 'required',
             ]);
         }
 
@@ -95,19 +94,16 @@ class RegisterController extends Controller
             $rules['g-recaptcha-response'] = 'required|recaptchav3:register,0.5';
         }
 
+        if (Config::get('auth.beta.active')) {
+            $rules['token'] = [ 'required', new \App\Rules\ValidBetaToken ];
+        }
+
         return Validator::make($data, $rules, $messages);
     }
 
     public function register(Request $request)
     {
-        if (Auth::user()) {
-            return Redirect::to('/');
-        }
-
-        $theme = Theme::uses(Setting::get('current_theme', 'default'))->layout('guest');
-        return $theme->scope('register', [
-            'invite_token' => $request->token ?? null,
-        ])->render();
+        return $this->registerUser($request);
     }
 
     protected function registerUser(Request $request)
@@ -115,22 +111,16 @@ class RegisterController extends Controller
 
         // %FIXME %TODO: use transaction
 
-        // if (Setting::get('captcha') == 'on') {
-        //     $validator = $this->validator($request->all(), true, false);
-        // } else {
-        //     $validator = $this->validator($request->all(), null, false);
-        // }
-
         $validator = $this->validator($request->all(), true, false);
 
-        if ($validator->fails()) {    
+        if ($validator->fails()) {
             if ($request->ajax()) {
                 return response()->json(['err_result' => $validator->errors()->toArray()]);
             }
             return false;
         }
 
-        if(Setting::get('mail_verification') == 'off') {
+        if(Setting::get('mail_verification') === 'off') {
             $mail_verification = 1;
         } else {
             $mail_verification = 0;
@@ -172,6 +162,8 @@ class RegisterController extends Controller
 
         if ($user) {
 
+            $this->betaCheck($request, $user);
+
             // Process invite token if present
             if ( $request->has('invite_token') ) {
                 $now = \Carbon\Carbon::now();
@@ -206,19 +198,12 @@ class RegisterController extends Controller
                 ]);
             }
 
-            if (Setting::get('mail_verification') == 'on') {
-                Mail::send('emails.welcome', ['user' => $user], function ($m) use ($user) {
-                    $m->from(Setting::get('noreply_email'), Setting::get('site_name'));
+            $user->notify(new VerifyEmail(
+                $user, url(route('verification.verify', ['id' => $user->id, 'hash' => $user->verification_code]))
+            ));
+            // event(new Registered($user));
 
-                    $m->to($user->email, $user->timeline->name)->subject('Welcome to '.Setting::get('site_name'));
-                });
-            }
-
-            if (Auth::loginUsingId($user->id)) {
-                return response()->json(['user' => $user], 201);
-            } else {
-                abort(500);
-            }
+            return response()->json(['user' => $user], 201);
         } else {
             abort(400);
         }
@@ -254,26 +239,46 @@ class RegisterController extends Controller
             'name' => $request['name'],
             'about' => '',
         ]);
-  
+
         return $user;
-           
     }
 
+    /**
+     * Resend the verification notification
+     * @param Request $request
+     */
+    public function resendVerifyEmail(Request $request)
+    {
+        $user = User::where('email', '=', $request->email)->first();
+        if ($user) {
+            if ($user->email_verified) {
+                return [ 'already_verified' => true ];
+            }
+            $user->notify(new VerifyEmail(
+                $user,
+                url(route('verification.verify', ['id' => $user->id, 'hash' => $user->verification_code]))
+            ));
+        }
+        return;
+    }
 
+    /**
+     * Verify Email Endpoint
+     * @param Request $request
+     */
     public function verifyEmail(Request $request)
     {
-        $user = User::where('email', '=', $request->email)->where('verification_code', '=', $request->code)->first();
+        $user = User::find($request->id);
 
         if ($user->email_verified) {
-            return Redirect::to('login')
-            ->with('login_notice', trans('messages.verified_mail'));
-        } elseif ($user) {
+            return redirect('/email/verified');
+        } else if ($user->verification_code === $request->hash) {
             $user->email_verified = 1;
+            $user->email_verified_at = Carbon::now();
             $user->update();
-            return Redirect::to('login')
-            ->with('login_notice', trans('messages.verified_mail_success'));
+            return redirect('/email/verified');
         } else {
-            echo trans('messages.invalid_verification');
+            return redirect('/login');
         }
     }
 
@@ -285,11 +290,17 @@ class RegisterController extends Controller
     // to get authenticate user data
     public function facebook(Request $request)
     {
-//        $accessToken = $request->get('code');
+        if (Config::get('auth.beta.active')) {
+            $request->validate([
+                'token' => [ 'required', new \App\Rules\ValidBetaToken ],
+            ]);
+        }
+
+        // $accessToken = $request->get('code');
         $facebook_user = Socialite::driver('facebook')->user();
-//        $token = $driver->getAccessTokenResponse($accessToken);
-//
-//        $facebook_user = $driver->getUserByToken($token['access_token']);
+        // $token = $driver->getAccessTokenResponse($accessToken);
+        //
+        // $facebook_user = $driver->getUserByToken($token['access_token']);
         $email = $facebook_user->email;
 
         if ($email == null) {
@@ -342,6 +353,8 @@ class RegisterController extends Controller
             }
         }
 
+        $this->betaCheck($request, $user);
+
         if (Auth::loginUsingId($user->id)) {
             return redirect('/')->with(['message' => trans('messages.change_username_facebook'), 'status' => 'warning']);
         } else {
@@ -357,6 +370,13 @@ class RegisterController extends Controller
     // to get authenticate user data
     public function google(Request $request)
     {
+
+        if (Config::get('auth.beta.active')) {
+            $request->validate([
+                'token' => ['required', new \App\Rules\ValidBetaToken],
+            ]);
+        }
+
         $google_user = Socialite::driver('google')->user();
         if (isset($google_user->user['gender'])) {
             $user_gender = $google_user->user['gender'];
@@ -364,6 +384,7 @@ class RegisterController extends Controller
             $user_gender = 'other';
         }
         $user = User::firstOrNew(['email' => $google_user->user['email']]);
+
         if (!$user->id) {
             $request = [
                 'username' => $google_user->user['id'],
@@ -401,6 +422,8 @@ class RegisterController extends Controller
             $user->timeline()->update([ 'avatar_id' => $media->id ]);
         }
 
+        $this->betaCheck($request, $user);
+
         if (Auth::loginUsingId($user->id)) {
             return redirect('/')->with(['message' => trans('messages.change_username_google'), 'status' => 'warning']);
         } else {
@@ -414,8 +437,15 @@ class RegisterController extends Controller
     }
 
     // to get authenticate user data
-    public function twitter()
+    public function twitter(Request $request)
     {
+
+        if (Config::get('auth.beta.active')) {
+            $request->validate([
+                'token' => ['required', new \App\Rules\ValidBetaToken],
+            ]);
+        }
+
         $twitter_user = Socialite::with('twitter')->user();
 
         if (isset($twitter_user->email)) {
@@ -460,10 +490,35 @@ class RegisterController extends Controller
             $user->timeline()->update([ 'avatar_id' => $media->id ]);
         }
 
+        $this->betaCheck($request, $user);
+
         if (Auth::loginUsingId($user->id)) {
             return redirect('/')->with(['message' => trans('messages.change_username_twitter').' <b>'.$user->email.'</b>', 'status' => 'warning']);
         } else {
             return redirect('login')->withInput()->withErrors(['message' => trans('messages.user_login_failed'), 'status' => 'error']);
         }
     }
+
+    /**
+     * Checks and uses token if beta program check is required
+     * @param mixed $request
+     * @param mixed $user
+     * @return void
+     */
+    private function betaCheck($request, $user) {
+        if (Config::get('auth.beta.active')) {
+            if (Token::useToken($request->token, $user, Config::get('auth.beta.tokenName'))) {
+                $user->timeline->cattrs = ['beta_program' => true];
+                $user->timeline->save();
+            } else {
+                // Failed useToken remove user timeline and record
+                $user->settings->delete();
+                $user->timeline->forceDelete();
+                $user->forceDelete();
+                abort(400);
+            }
+        }
+    }
+
+
 }

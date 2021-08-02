@@ -200,7 +200,7 @@ class TimelinesController extends AppBaseController
     // %FIXME: better way to do this is to pull down a set of mediafiles associated with posts on this timeline (?)
     public function previewPosts(Request $request, Timeline $timeline)
     {
-        $TAKE = $request->input('take', 6);
+        $TAKE = $request->input('take', $request->limit);
         $query = Post::with('mediafiles', 'user')
             ->has('mediafiles')
             ->withCount('comments')->orderBy('comments_count', 'desc')
@@ -411,6 +411,7 @@ class TimelinesController extends AppBaseController
         $user = Auth::user();
 
         $query = Post::with('mediafiles')
+            ->withCount(['comments', 'likes'])
             ->where('active', 1)
             ->where('type', 'free')
             ->where('user_id', '!=', $user->id)
@@ -418,6 +419,11 @@ class TimelinesController extends AppBaseController
             ->where(function ($query) {
                 $query->where('expire_at', '>', Carbon::now('UTC'))
                       ->orWhere('expire_at', null);
+            })
+            ->whereHas('mediafiles', function($q) {
+                $q->with('diskmediafile')->whereHas('diskmediafile', function($q1) {
+                    $q1->where('mimetype', 'like', '%video/%')->orWhere('mimetype', 'like', '%image/%');
+                });
             })
             ->has('mediafiles', '>' , 0)
             ->orderBy('created_at', 'desc');

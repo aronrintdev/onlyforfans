@@ -14,7 +14,7 @@ class AddStaffIdToUsers extends Migration
     public function up()
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->uuid('staff_id');
+            $table->uuid('staff_id')->nullable();
         });
     }
 

@@ -87,7 +87,11 @@ class Api
             'verify-email'                                             => 'd-4081805e42434ccc80a659e85f5f17d6',  // sent to user immediatley after they register, with link to verify email
             'email-verified'                                           => 'd-02356e4d3fd64beaa85c859368736a98',  // sent after they confirm/verify their email
 
-            
+            'invite-staff-member'                                      => 'd-d8b8bf0a5b174cf5b1190514b381a15b', // for staff management, invite 'member'
+            'invite-staff-manager'                                     => 'd-5c3d0fa1296c47e5aa812b8edf065209', // for staff management, invite 'manager'
+
+            'invite-beta-tester'                                       => 'd-f70c0e1dfa9d48b5b6c1841f4dfe9514', // invite user for beta testing purposes
+
             'new-subscription-payment-received'                        => 'd-57056459a9644d579284f149bc1862b5', 
             'subscription-renewal-payment-received'                    => 'd-bf035ec8004c404ba4c8234eef7604a1', 
             'subscription-payment-received-from-returning-subscriber'  => 'd-016e550f714d418ea3f75df590734664', 

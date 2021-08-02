@@ -9,6 +9,8 @@ use App\Models\Financial\AchAccount;
 use App\Models\Subscription;
 use App\Models\Timeline;
 use App\Models\Vaultfolder;
+use App\Notifications\VerifyEmail;
+use Illuminate\Auth\Notifications\VerifyEmail as IlluminateVerifyEmail;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -49,6 +51,11 @@ class AuthServiceProvider extends ServiceProvider
         // Access to `/laravel-websockets`
         Gate::define('viewWebSocketsDashboard', function ($user = null) {
             return $user->can('admin.websockets.dashboard.view');
+        });
+
+        IlluminateVerifyEmail::toMailUsing(function ($notifiable, $url) {
+            \Log::debug('Verify Email', ['notifiable->email' => $notifiable->email, 'url' => $url ]);
+            return $notifiable->notify(new VerifyEmail($notifiable, $url));
         });
 
         //

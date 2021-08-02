@@ -14,7 +14,7 @@
     </b-dropdown-item>
     <b-dropdown-item :active="value === 'oldest'" @click="onSelect('oldest')" >
       <fa-icon icon="sort-down" fixed-width class="mx-2" size="lg" />
-      {{ $t('recent') }}
+      {{ $t('oldest') }}
     </b-dropdown-item>
   </b-dropdown>
 </template>
@@ -52,7 +52,7 @@ export default {
   "en": {
     "header": "Sort By",
     "recent": "Most Recent First",
-    "oldest": "Oldest First"
+    "oldest": "Most Recent Last"
   }
 }
 </i18n>

@@ -4,7 +4,6 @@ namespace App\Notifications;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
-use Illuminate\Notifications\Notification;
 
 use App\Channels\SendgridChannel;
 use App\Models\User;
@@ -19,7 +18,7 @@ class NewReferralReceived extends Notification
     protected $settings;
 
     protected $recipientName; // person being referred
-    protected $earningPercent; 
+    protected $earningPercent;
 
     public function __construct($referral, User $actor, array $attrs=[])
     {
@@ -59,7 +58,7 @@ class NewReferralReceived extends Notification
             ],
             'dtdata' => [
                 'referred_name' => $this->recipientName,
-                'percentage_earned' => $this->earningAmount().'%',
+                'percentage_earned' => $this->earningAmount . '%',
 
                 'referral_url' => $this->getUrl('referrals'),
                 'home_url' => $this->getUrl('home'),

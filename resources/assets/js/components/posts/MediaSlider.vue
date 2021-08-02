@@ -48,7 +48,7 @@
         {{ visualMediafiles.length }}
       </div>
     </div>
-    <div class="audio-preview" v-if="hasMultipleImages">
+    <div class="audio-preview" v-if="hasMultipleImages && hasAudioFiles">
       <template v-for="(audiofile, index) in mediafiles">
         <vue-plyr class="mx-2" v-if="audiofile.is_audio" :key="index">
           <audio controls playsinline>
@@ -98,6 +98,9 @@ export default {
     },
     imageScope() {
       return this.mediafiles[0].resource_id
+    },
+    hasAudioFiles() {
+      return this.mediafiles.filter(file => file.is_audio).length > 1
     }
   },
 

@@ -63,6 +63,14 @@ Route::group(['prefix' => '/admin', 'middleware' => ['auth', 'role:admin|super-a
     });
 
 
+    /* ---------------------------- Beta Program ---------------------------- */
+
+    Route::group(['prefix' => 'beta-program'], function() {
+        Route::get('/', 'SpaController@admin')->name('admin.beta-program.index');
+        Route::get('/tokens', 'Admin\BetaProgramController@tokens')->name('admin.beta-program.tokens');
+        Route::post('/add-tokens', 'Admin\BetaProgramController@addTokens')->name('admin.beta-program.add-tokens');
+    });
+
     Route::get('/analyzer-report', 'Admin\DashboardController@analyzerReport')
         ->name('admin.analyzer-report');
     Route::get('/', 'Admin\DashboardController@index')
