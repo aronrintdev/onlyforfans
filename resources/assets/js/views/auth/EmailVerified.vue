@@ -1,6 +1,6 @@
 <template>
   <div class="container w-100 d-flex flex-column mt-5">
-    <b-card class="login-card mx-auto" no-body>
+    <b-card class="login-card mx-auto">
       <template #header>
         <div class="h2 text-center" v-text="$t('header')" />
         <div class="text-center">
@@ -8,7 +8,7 @@
         </div>
       </template>
       <b-alert variant="success" v-text="$t('message')" show />
-      <b-btn variant="primary">
+      <b-btn variant="primary"  :to="{ name: 'login' }">
         {{ $t('returnToLogin') }}
       </b-btn>
     </b-card>
