@@ -266,10 +266,8 @@ class RegisterController extends Controller
      * Verify Email Endpoint
      * @param Request $request
      */
-    public function verifyEmail(EmailVerificationRequest $request)
+    public function verifyEmail(Request $request)
     {
-        // $request->fulfill();
-
         $user = User::find($request->id);
 
         if ($user->email_verified) {
