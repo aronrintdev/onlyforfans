@@ -411,6 +411,7 @@ class TimelinesController extends AppBaseController
         $user = Auth::user();
 
         $query = Post::with('mediafiles')
+            ->withCount(['comments', 'likes'])
             ->where('active', 1)
             ->where('type', 'free')
             ->where('user_id', '!=', $user->id)

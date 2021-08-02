@@ -15,6 +15,7 @@ export const posts = {
   state: () => ({
     /** Post cache */
     posts: {},
+    publicPosts: [],
   }),
 
   getters: {},
@@ -24,6 +25,16 @@ export const posts = {
       const post = propSelect(payload, 'post')
       Vue.set(state.posts, post.id, post)
     },
+    UPDATE_PUBLIC_POST(state, payload) {
+      const post = propSelect(payload, 'post')
+      const temp = state.publicPosts;
+      const idx = temp.findIndex(p => p.post.id == post.id);
+      temp[idx].post = post;
+      state.publicPosts = [...temp];
+    },
+    SET_PUBLIC_POSTS(state, payload) {
+      state.publicPosts = payload
+    }
   },
 
   actions: {

@@ -51,6 +51,7 @@
 </template>
 
 <script>
+import Vuex from 'vuex'
 import { eventBus } from '@/eventBus'
 import CommentList from '@components/comments/List'
 import CommentDisplay from '@components/comments/Display'
@@ -95,6 +96,7 @@ export default {
   created() {},
 
   methods: {
+    ...Vuex.mapMutations('posts', [ 'UPDATE_PUBLIC_POST' ]),
     async toggleLike() { // for Post
       let response
       if (this.isLikedByMe) {
@@ -114,6 +116,15 @@ export default {
         this.isLikedByMe = true
       }
       this.likeCount = response.data.like_count
+      const updatedPost = {
+        ...this.post,
+        stats: {
+          ...this.post.stats,
+          isLikedByMe: this.isLikedByMe,
+          likeCount: this.likeCount,
+        }
+      }
+      this.UPDATE_PUBLIC_POST({ post: updatedPost })
     },
 
     share() {},
@@ -131,6 +142,14 @@ export default {
     addComment(comment) {
       this.comments = [ ...this.comments, comment ]
       this.post.comments_count = this.post.comments_count + 1
+      const updatedPost = {
+        ...this.post,
+        stats: {
+          ...this.post.stats,
+          commentCount: this.post.comments_count,
+        }
+      }
+      this.UPDATE_PUBLIC_POST({ post: updatedPost })
     },
 
     async toggleFavorite() { // was toggleBookmark
@@ -148,6 +167,14 @@ export default {
         })
         this.isFavoritedByMe = true
       }
+      const updatedPost = {
+        ...this.post,
+        stats: {
+          ...this.post.stats,
+          isFavoritedByMe: this.isFavoritedByMe,
+        }
+      }
+      this.UPDATE_PUBLIC_POST({ post: updatedPost })
     },
 
     updateCommentsCount(value, index) {
