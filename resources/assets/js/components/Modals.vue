@@ -115,6 +115,18 @@
     </b-modal>
 
     <b-modal
+      id="report-post"
+      size="lg"
+      hide-header
+      hide-footer
+      body-class="p-0"
+      no-close-on-backdrop
+      @hide="closeModal"
+    >
+      <ReportPost ref="reportPost" :post="selectedResource" />
+    </b-modal>
+
+    <b-modal
       title="Expiration Period"
       id="expiration-period"
       hide-footer
@@ -152,6 +164,7 @@ import PostDisplay from '@components/posts/Display'
 import ImageDisplay from '@components/timelines/elements/ImageDisplay'
 import ScheduleDateTime from '@components/modals/ScheduleDateTime.vue'
 import EditPost from '@components/modals/EditPost.vue'
+import ReportPost from '@components/modals/ReportPost.vue'
 import ExpirationPeriod from '@components/modals/ExpirationPeriod.vue'
 import PromotionCampaign from '@components/modals/PromotionCampaign.vue'
 import PurchaseMessage from '@components/modals/PurchaseMessage'
@@ -169,6 +182,7 @@ export default {
     ImageDisplay,
     ScheduleDateTime,
     EditPost,
+    ReportPost,
     ExpirationPeriod,
     PromotionCampaign,
   },
@@ -253,6 +267,10 @@ export default {
           case 'edit-post':
             this.selectedResource = data.post
             this.$bvModal.show('edit-post')
+            break
+          case 'report-post':
+            this.selectedResource = data.post
+            this.$bvModal.show('report-post')
             break
           case 'expiration-period':
             this.$bvModal.show('expiration-period')
