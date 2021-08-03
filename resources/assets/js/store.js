@@ -275,7 +275,7 @@ export default new Vuex.Store({
       // %FIXME
       const params = {}
       if (Object.keys(payload).includes('timeline_id')) {
-        params.user_id = payload.timeline_id
+        params.timeline_id = payload.timeline_id
       } else if (Object.keys(payload).includes('following')) {
         params.following = 1
       } else {

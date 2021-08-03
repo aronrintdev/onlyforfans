@@ -94,6 +94,9 @@ Vue.use(VueCroppie);
 import Vue2TouchEvents from 'vue2-touch-events';
 Vue.use(Vue2TouchEvents);
 
+import VueAwesomeSwiper from 'vue-awesome-swiper';
+import 'swiper/css/swiper.css';
+Vue.use(VueAwesomeSwiper);
 // ---
 
 /**

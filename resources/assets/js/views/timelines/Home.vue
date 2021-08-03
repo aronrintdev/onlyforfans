@@ -9,7 +9,7 @@
       <b-tab title="Home" active>
         <section class="row mb-2">
           <article class="col-sm-12">
-            <StoryBar :session_user="session_user"></StoryBar>
+            <StoryBar :session_user="session_user" :timeline="timeline"></StoryBar>
           </article>
         </section>
 
@@ -111,8 +111,17 @@ export default {
   mounted() { },
 
   methods: {
+    ...Vuex.mapActions(['getStories']),
     changeActiveTab(event) {
       this.activeTab = event;
+    }
+  },
+
+  watch: {
+    timeline(newVal) {
+      if (newVal) {
+        this.getStories({ timeline_id: this.timeline.id })
+      }
     }
   }
 }

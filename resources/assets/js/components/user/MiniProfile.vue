@@ -75,14 +75,11 @@
             </div>
             <ul class="list-unstyled">
               <li v-if="timeline.is_following">
-                <b-button v-if="timeline.is_subscribed" @click="renderSubscribe" :disabled="timeline.is_owner" variant="warning" class="w-100 mt-3">
-                  <span>Unsubscribe</span>
-                </b-button>
-                <b-button v-else @click="renderFollow" :disabled="timeline.is_owner" variant="warning" class="w-100 mt-3">
-                  <span>Unfollow</span>
-                </b-button>
+                <span class="text-secondary">
+                  <fa-icon icon="check" /> Following
+                </span>
               </li>
-              <li v-else >
+              <li v-else>
                 <b-button @click="renderFollow" :disabled="timeline.is_owner" variant="primary" class="w-100 mt-3">
                   <span>Follow</span>
                 </b-button>
@@ -118,15 +115,6 @@ export default {
       this.$log.debug('FollowCtrl.renderFollow() - emit');
       eventBus.$emit('open-modal', {
         key: 'render-follow',
-        data: {
-          timeline: this.timeline,
-        }
-      })
-    },
-    renderSubscribe() {
-      this.$log.debug('FollowCtrl.renderSubscribe() - emit');
-      eventBus.$emit('open-modal', {
-        key: 'render-subscribe',
         data: {
           timeline: this.timeline,
         }
