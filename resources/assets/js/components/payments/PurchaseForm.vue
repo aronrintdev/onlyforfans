@@ -245,7 +245,7 @@ export default {
   mounted() {
     this.init()
     this.loadPaymentMethods()
-    if ( paymentsDisabled ) {
+    if ( paymentsDisabled || window.paymentsDisabled ) {
       this.paymentsDisabled = true
     }
   },
