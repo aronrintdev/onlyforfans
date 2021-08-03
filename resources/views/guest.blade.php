@@ -22,7 +22,7 @@
         <link rel="icon" type="image/x-icon" href="{{asset('images/favicon.ico')}}">
 
         {{-- Title --}}
-        <title>{{ 'All Fans' }}</title>
+        <title>{{ config('app.name', 'Laravel') }}</title>
 
         {{-- Additional Resources --}}
         <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&display=swap"
