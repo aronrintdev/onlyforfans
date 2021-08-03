@@ -219,10 +219,10 @@ export default {
       const index = timelines.findIndex(tl => tl.id === this.timeline.id)
       if (index > -1) {
         timelines.splice(index, 1)
-        timelines.unshift(this.timeline)
+        timelines.unshift({...this.timeline, avatar: this.session_user.avatar })
         this.timelines = timelines
       } else {
-        timelines.unshift(this.timeline)
+        timelines.unshift({...this.timeline, avatar: this.session_user.avatar })
         this.timelines = timelines
       }
     }
