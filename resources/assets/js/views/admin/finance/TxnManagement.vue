@@ -1,16 +1,6 @@
 <template>
   <div>
     <h1>Transaction Management</h1>
-    <!--
-    <b-row>
-      <b-col lg="4">
-        <Balance />
-      </b-col>
-      <b-col lg="4">
-        <Statistics />
-      </b-col>
-    </b-row>
-    -->
     <section v-if="summary">
       <div class="mt-3 px-5">
         <b-card-group deck class="mb-3">

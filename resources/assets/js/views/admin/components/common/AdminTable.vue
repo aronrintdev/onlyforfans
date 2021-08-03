@@ -25,7 +25,11 @@
       </template>
       <template #cell(ctrls)="data">
         <span class="">
-          <fa-icon :icon="['fas', 'ellipsis-h']" class="clickable fa-sm" />
+          <fa-icon @click="doEmit('render-ellipsis', data.item)" :icon="['fas', 'ellipsis-h']" class="clickable fa-sm" />
+        </span>
+        <span @click="doEmit('render-flag', data.item)" class="">
+          <fa-icon v-if="data.item.flag_count>0" :icon="['fas', 'flag']" class="clickable fa-sm text-danger" />
+          <fa-icon v-else :icon="['far', 'flag']" class="clickable fa-sm" />
         </span>
       </template>
     </b-table>
@@ -42,6 +46,7 @@ export default {
 
   props: {
     fields: { type: Array, default: [] },
+    tblFilters: null,
     indexRouteName: { type: String, default: null },
   },
 
@@ -67,6 +72,13 @@ export default {
     doEmit(action, data) {
       this.$emit('table-event', { action, data } )
     },
+
+    /*
+    async renderFlag(s) {
+      this.modalSelection = s // %TODO : clear on modal hide event
+      this.isFlagModalVisible = true
+    },
+     */
 
     async getData() {
       let params = {
