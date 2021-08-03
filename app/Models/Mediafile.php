@@ -49,6 +49,10 @@ class Mediafile extends BaseModel implements Guidable, Ownable, Messagable
         return $this->hasMany(Mediafilesharelog::class, 'dstmediafile_id');
     }
 
+    public function contentflags() {
+        return $this->morphMany(Contentflag::class, 'flaggable');
+    }
+
     //--------------------------------------------
     // %%% Accessors/Mutators | Casts
     //--------------------------------------------

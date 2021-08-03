@@ -45,6 +45,7 @@ class Post extends JsonResource
                 'isFavoritedByMe' => $this->isFavoritedByMe,
                 'likeCount' => $this->likes_count,
                 'commentCount' => $this->comments_count,
+                'flagCount' => $this->contentflags->count(),
             ],
             'schedule_datetime' => $this->schedule_datetime,
             'expire_at' => $this->expire_at,
