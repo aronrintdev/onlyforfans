@@ -1,122 +1,125 @@
 <template>
-  <div class="container w-100 d-flex flex-column mt-5">
-    <b-card class="login-card mx-auto" no-body>
-      <template #header>
-        <div class="h2 text-center" v-text="$t('signUpLink')" />
-        <div class="text-center">
-          <div class="d-inline" v-text="$t('accountQuestion')" />
-          <!-- TODO: Link to Login page -->
-          <router-link :to="{ name: 'login' }" v-text="$t('signInHeader')" />
-        </div>
-      </template>
-      <!-- SignUp Form -->
-      <b-form @submit.prevent="signup">
-        <div class="signup-form p-3">
-          <div v-if="$route.query.beta">
-            <b-alert variant="primary" v-text="$t('betaMessage')" show />
-          </div>
+  <AuthTemplate>
+    <div class="d-flex flex-column h-100 bg-white">
+      <div class="login-card p-5">
+        <!-- SignUp Form -->
+        <b-form @submit.prevent="signup">
+          <img src="/images/logos/allfans-logo-154x33.png" alt="All Fans Logo" class="register-logo">
+          <div class="h1 mb-5" v-text="$t('signUpLink')" />
+          <div class="signup-form">
+            <div v-if="$route.query.beta">
+              <b-alert variant="primary" v-text="$t('betaMessage')" show />
+            </div>
 
-          <div v-if="verrors && verrors.message">
-            <b-alert variant="danger" v-text="verrors.message" show />
-          </div>
-          <div v-if="verrors && verrors.token">
-            <b-alert variant="danger" v-text="$t('betaFailedMessage')" show />
-          </div>
-          <b-form-group :invalid-feedback="verrors.email ? verrors.email[0] : null" :state="verrors.email ? false : null">
-            <b-form-input
-              id="input-email"
-              v-model="form.email"
-              :placeholder="$t('email')"
-              :disabled="isEmailDisabled"
-              :state="verrors.email ? false : null"
-              @focus="clearVerrors"
-            />
-          </b-form-group>
-          <b-form-group :invalid-feedback="verrors.password ? verrors.password[0] : null" :state="verrors.password ? false : null">
-            <b-form-input
-              id="input-password"
-              type="password"
-              v-model="form.password"
-              :placeholder="$t('password')"
-              :state="verrors.password ? false : null"
-              @focus="clearVerrors"
-            />
-          </b-form-group>
-          <b-form-group
-            :invalid-feedback="verrors.name ? verrors.name[0] : null"
-            :state="verrors.name ? false : null"
-          >
-            <b-form-input
-              id="input-name"
-              type="text"
-              v-model="form.name"
-              placeholder="Name"
-              :state="verrors.name ? false : null"
-              @focus="clearVerrors"
-            />
-          </b-form-group>
-          <b-form-group
-            v-if="usernameShown"
-            :invalid-feedback="verrors.username ? verrors.username[0] : null"
-            :state="verrors.username ? false : null"
-          >
-            <b-input-group prepend="@">
+            <div v-if="verrors && verrors.message">
+              <b-alert variant="danger" v-text="verrors.message" show />
+            </div>
+            <div v-if="verrors && verrors.token">
+              <b-alert variant="danger" v-text="$t('betaFailedMessage')" show />
+            </div>
+            <b-form-group :invalid-feedback="verrors.email ? verrors.email[0] : null" :state="verrors.email ? false : null">
               <b-form-input
-                id="input-username"
-                type="text"
-                v-model="form.username"
-                placeholder="Username (optional)"
-                :state="verrors.username ? false : null"
+                id="input-email"
+                v-model="form.email"
+                :placeholder="$t('email')"
+                :disabled="isEmailDisabled"
+                :state="verrors.email ? false : null"
                 @focus="clearVerrors"
               />
-            </b-input-group>
-          </b-form-group>
-          <b-form-group :invalid-feedback="verrors.tos ? verrors.tos[0] : null" :state="verrors.tos ? false : null">
-            <b-form-checkbox
-              id="checkbox-tos"
-              v-model="form.tos"
-              name="checkbox-tos"
-              @focus="clearVerrors"
+            </b-form-group>
+            <b-form-group :invalid-feedback="verrors.password ? verrors.password[0] : null" :state="verrors.password ? false : null">
+              <b-form-input
+                id="input-password"
+                type="password"
+                v-model="form.password"
+                :placeholder="$t('password')"
+                :state="verrors.password ? false : null"
+                @focus="clearVerrors"
+              />
+            </b-form-group>
+            <b-form-group
+              :invalid-feedback="verrors.name ? verrors.name[0] : null"
+              :state="verrors.name ? false : null"
             >
-              I agree to the Terms of Service and Privacy Policy and confirm that I am at least 18 years old.
-            </b-form-checkbox>
-          </b-form-group>
-        </div>
+              <b-form-input
+                id="input-name"
+                type="text"
+                v-model="form.name"
+                placeholder="Name"
+                :state="verrors.name ? false : null"
+                @focus="clearVerrors"
+              />
+            </b-form-group>
+            <b-form-group
+              v-if="usernameShown"
+              :invalid-feedback="verrors.username ? verrors.username[0] : null"
+              :state="verrors.username ? false : null"
+            >
+              <b-input-group prepend="@">
+                <b-form-input
+                  id="input-username"
+                  type="text"
+                  v-model="form.username"
+                  placeholder="Username (optional)"
+                  :state="verrors.username ? false : null"
+                  @focus="clearVerrors"
+                />
+              </b-input-group>
+            </b-form-group>
+            <b-form-group :invalid-feedback="verrors.tos ? verrors.tos[0] : null" :state="verrors.tos ? false : null">
+              <b-form-checkbox
+                id="checkbox-tos"
+                v-model="form.tos"
+                name="checkbox-tos"
+                @focus="clearVerrors"
+              >
+                I agree to the Terms of Service and Privacy Policy and confirm that I am at least 18 years old.
+              </b-form-checkbox>
+            </b-form-group>
+          </div>
 
-        <div class="p-3">
-          <b-btn type="submit" class="cta-btn" variant="primary" block :disabled="state === 'loading' || !form.tos">
-            <span v-if="state === 'form'">{{ $t('signUpLink') }}</span>
-            <fa-icon v-else icon="spinner" spin />
+          <div>
+            <b-btn type="submit" class="cta-btn" variant="primary" block :disabled="state === 'loading' || !form.tos">
+              <span v-if="state === 'form'">{{ $t('signUpLink') }}</span>
+              <fa-icon v-else icon="spinner" spin />
+            </b-btn>
+          </div>
+        </b-form>
+
+        <div class="divider d-flex">
+          <hr class="h-line flex-grow-1" />
+          <div class="mx-3" v-text="$t('or')" />
+          <hr class="h-line flex-grow-1" />
+        </div>
+        
+        <div class="mb-3">
+          <b-btn class="cta-btn social-btn facebook" block @click="socialLogin('facebook')">
+            <fa-icon :icon="['fab', 'facebook-f']" class="mr-2" />
+            <span>{{ $t('continueWithFacebook') }}</span>
+          </b-btn>
+          <b-btn class="cta-btn social-btn google" block @click="socialLogin('google')">
+            <fa-icon :icon="['fab', 'google']" class="mr-2" />
+            <span>{{ $t('continueWithGoogle') }}</span>
+          </b-btn>
+          <b-btn class="cta-btn social-btn twitter" block @click="socialLogin('twitter')">
+            <fa-icon :icon="['fab', 'twitter']" class="mr-2" />
+            <span>{{ $t('continueWithTwitter') }}</span>
           </b-btn>
         </div>
-      </b-form>
 
-      <div class="divider d-flex">
-        <hr class="h-line flex-grow-1" />
-        <div class="mx-3" v-text="$t('or')" />
-        <hr class="h-line flex-grow-1" />
-      </div>
-      
-      <div class="p-3 mb-3">
-        <b-btn class="cta-btn social-btn facebook" block @click="socialLogin('facebook')">
-          <fa-icon :icon="['fab', 'facebook-f']" class="mr-2" />
-          <span>{{ $t('continueWithFacebook') }}</span>
-        </b-btn>
-        <b-btn class="cta-btn social-btn google" block @click="socialLogin('google')">
-          <fa-icon :icon="['fab', 'google']" class="mr-2" />
-          <span>{{ $t('continueWithGoogle') }}</span>
-        </b-btn>
-        <b-btn class="cta-btn social-btn twitter" block @click="socialLogin('twitter')">
-          <fa-icon :icon="['fab', 'twitter']" class="mr-2" />
-          <span>{{ $t('continueWithTwitter') }}</span>
-        </b-btn>
-      </div>
-    </b-card>
+        <div class="divider d-flex">
+          <hr class="h-line flex-grow-1" />
+          <!-- <div class="mx-3" v-text="$t('or')" /> -->
+          <hr class="h-line flex-grow-1" />
+        </div>
 
-    <div class="mt-auto mb-3">
-      <LinkBar />
+        <div class="d-flex text-center auth-bottom">
+          <p class="text-secondary mt-0 mr-3">Do you already have an account?</p>
+          <router-link :to="{ name: 'login' }" v-text="$t('signInHeader')" />
+        </div>
+      </div>
     </div>
-  </div>
+  </AuthTemplate>
 </template>
 
 <script>
@@ -124,6 +127,7 @@
  * Register Page
  */
 import LinkBar from '../../components/staticPages/LinkBar'
+import AuthTemplate from './AuthTemplate'
 
 import '../../../static/images/g-login-btn.png'
 import '../../../static/images/facebook-login.png'
@@ -133,6 +137,7 @@ export default {
   name: 'register',
   components: {
     LinkBar,
+    AuthTemplate,
   },
   data: () => ({
     state: 'form', // form | loading
@@ -208,10 +213,16 @@ export default {
 
 <style lang="scss" scoped>
 .login-card {
-  width: 500px;
+  max-width: 600px;
 }
 .h-line {
   color: var('--gray');
+}
+
+.auth-bottom {
+  @media (max-width: 576px) {
+    flex-direction: column;
+  }
 }
 
 .cta-btn {
@@ -232,6 +243,13 @@ export default {
   &.facebook { background-color: #3B5998; }
   &.google { background-color: #dd4b39; }
   &.twitter { background-color: #55ACEE; }
+}
+.register-logo {
+  display: none;
+  @media (max-width: 576px) {
+    display: block;
+    margin: 0 auto 25px;
+  }
 }
 </style>
 

@@ -25,7 +25,7 @@
 
       <main class="col-md-9 col-lg-10">
         <transition mode="out-in" name="quick-fade">
-          <router-view :session_user="session_user" :user_settings="user_settings" />
+          <router-view :session_user="session_user" :user_settings="user_settings" :timeline="timeline" />
         </transition>
       </main>
 
@@ -44,13 +44,13 @@ export default {
   },
 
   computed: {
-    ...Vuex.mapGetters(['session_user', 'user_settings']),
+    ...Vuex.mapGetters(['session_user', 'user_settings', 'timeline']),
     ...Vuex.mapState({
       subscriptionCount: state => state.subscriptions.count
     }),
 
     isLoading() {
-      return !this.session_user || !this.user_settings
+      return !this.session_user || !this.user_settings || !this.timeline
     },
 
     routes() {

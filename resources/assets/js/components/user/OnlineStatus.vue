@@ -1,7 +1,7 @@
 <template>
   <div class="onlineStatus">
     <slot :loading="loading" :status="status" :textVariant="textVariant" :message="message" :lastSeen="lastSeen">
-      <div class="status-indicator" :class="{'online-status': status === 'online'}" />
+      <div v-if="indicatorVisible" class="status-indicator" :class="{'online-status': status === 'online'}" />
       <span v-if="!loading" class="status" :class="[`status-holder-${user.id}`, textVariant]">
       {{ message }}
       </span>
@@ -22,6 +22,7 @@ export default {
       doNotDisturb: 'danger',
     })},
     user: { type: Object, default: () => ({ id: '' }) },
+    indicatorVisible: { default: true, type: Boolean },
   },
   data: () => ({
     channel: null,

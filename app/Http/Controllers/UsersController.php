@@ -167,16 +167,17 @@ class UsersController extends AppBaseController
         $userSetting = DB::transaction(function () use(&$user, &$request) {
 
             $timeline = $user->timeline;
+            $timeline->about = $request->about;
 
             // %TODO %FIXME: subscriptions should be in [timelines].cattrs, not user settings
 
             // handle fields that reside in [timelines]
             if ( $request->has('is_follow_for_free') ) {
                 $timeline->is_follow_for_free = $request->boolean('is_follow_for_free');
-                $timeline->save();
                 $request->request->remove('is_follow_for_free');
             }
-    
+            $timeline->save();
+
             $cattrsFields = [ 'subscriptions', 'localization', 'privacy', 'blocked', 'watermark', 'message_with_tip_only', 'enable_message_with_tip_only_pay' ];
             $attrs = $request->except($cattrsFields);
 

@@ -82,6 +82,12 @@
         <span class="">{{ data.item.updated_at | niceDateTimeShort }}</span>
       </template>
     </b-table>
+    <b-pagination
+      v-model="page"
+      :total-rows="total"
+      :per-page="take"
+      aria-controls="users-table"
+    ></b-pagination>
   </div>
 </template>
 
@@ -118,7 +124,7 @@ export default {
     testers: '',
     working: false,
     page: 1,
-    take: 20,
+    take: 50,
     total: 0,
     response: '',
   }),

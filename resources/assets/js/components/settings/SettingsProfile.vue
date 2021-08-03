@@ -189,11 +189,12 @@ export default {
   props: {
     session_user: null,
     user_settings: null,
+    timeline: null,
   },
 
   computed: {
     isLoading() {
-      return !this.session_user || !this.user_settings
+      return !this.session_user || !this.user_settings || !this.timeline
     },
   },
 
@@ -292,7 +293,7 @@ export default {
   created() {
     this.formProfile.firstname = this.session_user.firstname || ''
     this.formProfile.lastname = this.session_user.lastname || ''
-    this.formProfile.about = this.user_settings.about
+    this.formProfile.about = this.timeline.about
     this.formProfile.country = this.user_settings.country
     this.formProfile.city = this.user_settings.city
     this.formProfile.gender = this.user_settings.gender
@@ -317,7 +318,7 @@ export default {
   },
 
   methods: {
-    ...Vuex.mapActions(['getUserSettings']),
+    ...Vuex.mapActions(['getUserSettings', 'getMe']),
 
     async submitProfile(e) {
       this.isSubmitting.formProfile = true
@@ -325,6 +326,7 @@ export default {
 
       // re-load user settings
       this.getUserSettings({ userId: this.session_user.id })
+      this.getMe()
 
       this.$root.$bvToast.toast('Profile settings have been updated successfully!', {
         toaster: 'b-toaster-top-center',

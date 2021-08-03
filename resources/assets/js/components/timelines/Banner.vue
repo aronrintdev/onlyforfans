@@ -69,7 +69,7 @@
                 @{{ timeline.slug || 'TODO' }}
               </router-link>
             </p>
-            <OnlineStatus :user="timeline.user" />
+            <OnlineStatus :user="timeline.user" :indicatorVisible="false" />
           </div>
         </b-col>
 

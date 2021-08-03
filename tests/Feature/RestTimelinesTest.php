@@ -15,6 +15,7 @@ use App\Enums\PostTypeEnum;
 use App\Models\Diskmediafile;
 use App\Enums\PaymentTypeEnum;
 use App\Events\ItemSubscribed;
+use Illuminate\Support\Carbon;
 use App\Enums\MediafileTypeEnum;
 use App\Events\SubscriptionFailed;
 use App\Models\Financial\SegpayCard;
@@ -150,6 +151,65 @@ class RestTimelinesTest extends TestCase
             return !$p->access ? ($acc+1) : $acc;
         }, 0);
         $this->assertEquals(0, $num, 'Feed should not contain any non-accessible posts');
+    }
+
+    /**
+     *  @group regression
+     *  @group regression-base
+     */
+    public function test_owner_can_view_queued_feed()
+    {
+        $timeline = Timeline::has('posts', '>=', 1)->has('followers', '>=', 1)->first();
+        $creator = $timeline->user;
+
+        // Shows no scheduled posts
+        $payload = [];
+        $response = $this->actingAs($creator)->ajaxJSON('GET', route('timelines.homescheduledfeed'), $payload);
+        $response->assertStatus(200);
+        $response->assertJson([ 'meta' => [ 'total' => 0 ] ]);
+
+        // Schedule a post
+        $post = $timeline->posts()->create([
+            'user_id' => $creator->id,
+            'active' => true,
+            'type' => PostTypeEnum::FREE,
+            'description' => $this->faker->realText(),
+            'schedule_datetime' => Carbon::now()->addHours(4),
+        ]);
+
+        $payload = [];
+        $response = $this->actingAs($creator)->ajaxJSON('GET', route('timelines.homescheduledfeed'), $payload);
+        $response->assertStatus(200);
+        $response->assertJson([ 'meta' => ['total' => 1]]);
+
+        $post->delete();
+    }
+
+    /**
+     *  @group regression
+     *  @group regression-base
+     */
+    public function test_non_admin_can_not_view_all_queued_feed_items()
+    {
+        $timeline = Timeline::has('posts', '>=', 1)->has('followers', '>=', 1)->first();
+        $otherTimeline = Timeline::has('posts', '>=', 1)->has('followers', '>=', 1)->where('id', '!=', $timeline->id)->first();
+        $creator = $timeline->user;
+
+        // Can't see other user's scheduled posts
+        $post = $otherTimeline->posts()->create([
+            'user_id' => $otherTimeline->user->id,
+            'active' => true,
+            'type' => PostTypeEnum::FREE,
+            'description' => $this->faker->realText(),
+            'schedule_datetime' => Carbon::now()->addHours(4),
+        ]);
+
+        $payload = [];
+        $response = $this->actingAs($creator)->ajaxJSON('GET', route('timelines.homescheduledfeed'), $payload);
+        $response->assertStatus(200);
+        $response->assertJson([ 'meta' => ['total' => 0]]);
+
+        $post->delete();
     }
 
     /**

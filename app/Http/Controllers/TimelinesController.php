@@ -389,6 +389,18 @@ class TimelinesController extends AppBaseController
                       ->orWhere('expire_at', null);
             })
             ->orderBy('created_at', 'desc');
+
+        // Admin override to view all scheduled posts
+        if ($request->user()->isAdmin()) {
+            // Filter by user_id
+            if ($request->has('user_id')) {
+                $query->where('user_id', $request->user_id);
+            }
+        } else {
+            // Limiting Query to only posts that the user owns
+            $query->where('user_id', $request->user()->id);
+        }
+
         // %NOTE: we could also just remove post-query, as the feed will auto-update to fill length of page (?)
         $data = $query->paginate( $request->input('take', env('MAX_POSTS_PER_REQUEST', 10)) );
         return new PostCollection($data);
