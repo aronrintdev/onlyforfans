@@ -104,18 +104,12 @@ export default {
         return
       }
       // %TODO: clean up this line
-      const _pop = { ...this.postFilters }
+      const _pop = { ...this.postFilters } // make a copy
       const _idx = _pop[filterGroup].findIndex(iter => iter.key===fObj.key)
-      _pop[ filterGroup ][_idx] = { ...fObj, is_active: !fObj.is_active }
-      this.postFilters = _pop
-      //this.postFilters[ filterGroup ][_idx] = tmp
-
-      //this.postFilters[ filterGroup ][ this.postFilters[filterGroup].findIndex(iter => iter.key===fObj.key) ] = { ...fObj, is_active: !fObj.is_active }
-      console.log('toggleFilter().2', { filterGroup, fObj, _idx })
-      console.log('toggleFilter().3', { 
-        zero: this.postFilters.booleans[ 0 ],
-      })
-
+      if ( _idx >= 0 ) {
+        _pop[ filterGroup ][_idx] = { ...fObj, is_active: !fObj.is_active }
+        this.postFilters = _pop
+      }
       //this.tobj.currentPage = 1
       //this.getTransactions()
     },

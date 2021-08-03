@@ -34,6 +34,14 @@
       </template>
     </b-table>
 
+    <b-pagination
+      v-model="tobj.currentPage"
+      :total-rows="tobj.totalRows"
+      :per-page="tobj.perPage"
+      v-on:page-click="pageClickHandler"
+      aria-controls="admin-index-table"
+    ></b-pagination>
+
   </div>
 </template>
 
@@ -60,7 +68,7 @@ export default {
     tobj: { // table object
       data: [],
       currentPage: 1,
-      perPage: 20,
+      perPage: 50,
       totalRows: 0,
       sortBy: 'created_at',
       sortDesc: false,
