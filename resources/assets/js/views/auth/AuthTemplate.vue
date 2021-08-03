@@ -11,27 +11,21 @@
       <div class="col-md-6 text-center">
         <div class="auth-description">
           <img src="/images/logos/allfans-logo-154x33.png" alt="All Fans Logo" class="logo-image">
-          <carousel
-            :autoplay="true"
-            :loop="true"
-            :items="1"
-            :dots="true"
-            :nav="false"
-            class="text-white mt-4"
-          >
-            <div>
+          <swiper class="auth-slider-swiper" :options="swiperOptions">
+            <swiper-slide>
               <h3 class="card-title">Create new events</h3>
               <p>It is a long established fact that a reader will be distracted by the readable content.</p>
-            </div>
-            <div>
+            </swiper-slide>
+            <swiper-slide>
               <h3 class="card-title">Create new events</h3>
               <p>It is a long established fact that a reader will be distracted by the readable content.</p>
-            </div>
-            <div>
+            </swiper-slide>
+            <swiper-slide>
               <h3 class="card-title">Create new events</h3>
               <p>It is a long established fact that a reader will be distracted by the readable content.</p>
-            </div>
-          </carousel>
+            </swiper-slide>
+            <div class="swiper-pagination" slot="pagination"></div>
+          </swiper>
         </div>
       </div>
       <div class="col-md-6 px-0 mr-0">
@@ -42,13 +36,23 @@
 </template>
 
 <script>
-import carousel from 'vue-owl-carousel'
-
 export default {
   name: 'AuthTemplate',
-  components: {
-    carousel
-  }
+
+  data:() => ({
+    swiperOptions: {
+      spaceBetween: 30,
+      centeredSlides: true,
+      autoplay: {
+        delay: 2500,
+        disableOnInteraction: false
+      },
+      pagination: {
+        el: '.swiper-pagination',
+        clickable: true
+      }
+    },
+  })
 }
 </script>
 
