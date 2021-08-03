@@ -40,7 +40,7 @@ class SpaController extends Controller
 
         // Send to app spa if logged in.
         if ( Auth::user() && $sessionUser->isAdmin() ) {
-            return view('admin/dashboard');
+            return view('n0g1cg9sbx/dashboard');
         }
         // Send to guest spa if not logged in.
         return view('guest');

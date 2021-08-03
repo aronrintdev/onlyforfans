@@ -4,7 +4,7 @@
     <component
       v-if="uiFlags.isAdmin"
       :is="dropdown ? 'b-dropdown-item' : 'b-nav-item'"
-      href="/admin"
+      href="/n0g1cg9sbx"
     >
       <fa-icon icon="user-shield" fixed-width class="mr-3" />
       <span v-text="$t('Admin Dashboard')" />

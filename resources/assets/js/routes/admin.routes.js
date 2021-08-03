@@ -6,42 +6,42 @@ import admin from '@views/admin'
 export const adminRoutes = [
   {
     name: 'user-management',
-    path: '/admin/user-management',
+    path: '/n0g1cg9sbx/user-management',
     component: admin.UserManagement,
   },
   {
     name: 'post-management',
-    path: '/admin/post-management',
+    path: '/n0g1cg9sbx/post-management',
     component: admin.PostManagement,
   },
   {
     name: 'content-management',
-    path: '/admin/content-management',
+    path: '/n0g1cg9sbx/content-management',
     component: admin.ContentManagement,
   },
   {
     name: 'mediafile-management',
-    path: '/admin/mediafile-management',
+    path: '/n0g1cg9sbx/mediafile-management',
     component: admin.MediafileManagement,
   },
   {
     name: 'account-management',
-    path: '/admin/account-management',
+    path: '/n0g1cg9sbx/account-management',
     component: admin.AccountManagement,
   },
   {
     name: 'txn-management',
-    path: '/admin/txn-management',
+    path: '/n0g1cg9sbx/txn-management',
     component: admin.TxnManagement,
   },
   {
     name: 'beta-program',
-    path: '/admin/beta-program',
+    path: '/n0g1cg9sbx/beta-program',
     component: admin.BetaProgram,
   },
   {
     name: 'home',
-    path: '/admin',
+    path: '/n0g1cg9sbx',
     component: admin.Home,
     //props: true,
   },
