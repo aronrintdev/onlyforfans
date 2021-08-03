@@ -75,10 +75,10 @@
             </div>
             <ul class="list-unstyled">
               <li v-if="timeline.is_following">
-                <b-button v-if="timeline.is_subscribed" @click="renderSubscribe" :disabled="timeline.is_owner" variant="warning" class="w-100 mt-3">
+                <b-button v-if="timeline.is_subscribed" @click="renderSubscribe" :disabled="timeline.is_owner" variant="secondary" class="w-100 mt-3">
                   <span>Unsubscribe</span>
                 </b-button>
-                <b-button v-else @click="renderFollow" :disabled="timeline.is_owner" variant="warning" class="w-100 mt-3">
+                <b-button v-else @click="renderFollow" :disabled="timeline.is_owner" variant="secondary" class="w-100 mt-3">
                   <span>Unfollow</span>
                 </b-button>
               </li>

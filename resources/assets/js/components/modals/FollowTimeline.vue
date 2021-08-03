@@ -135,7 +135,7 @@ export default {
         notes: '',
       })
       this.$bvModal.hide('modal-follow')
-      const msg = response.is_following
+      const msg = response.data.is_following
         ? `You are now following ${this.timeline.name}!`
         : `You are no longer following ${this.timeline.name}!`
       this.$root.$bvToast.toast(msg, {
