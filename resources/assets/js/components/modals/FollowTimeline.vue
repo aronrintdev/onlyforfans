@@ -141,6 +141,7 @@ export default {
       this.$root.$bvToast.toast(msg, {
         toaster: 'b-toaster-top-center',
         title: 'Success!',
+        variant: 'success',
       })
       // %FIXME: this emit should be more general, as this modal may be used elsewhere
        eventBus.$emit('update-timelines', this.timeline.id)
