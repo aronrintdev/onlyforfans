@@ -305,6 +305,7 @@ class PostsController extends AppBaseController
             ->withCount('replies')
             ->where('commentable_id', $post->id)
             ->where('parent_id', null)
+            ->orderBy('created_at', 'desc')
             ->get();
 
         foreach ( $comments as &$comment ) {
